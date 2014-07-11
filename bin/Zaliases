@@ -1,0 +1,19 @@
+set top_src=`pwd`
+alias Zautoreconf "(cd $top_src ; autoreconf --install)"
+
+set opts=' \
+--enable-debug \
+--enable-warnings \
+--enable-printflike \
+--prefix /Users/phil/work/root \
+'
+set opts=`echo $opts`
+
+setenv CONFIGURE_OPTS "$opts"
+
+alias Zconfigure "(cd $top_src/build; ../configure $opts)"
+alias Zbuild "(cd $top_src/build; make \!* )"
+alias mi "(cd $top_src/build; make && make install); ."
+
+mkdir -p build
+cd build
