@@ -36,4 +36,4 @@ Makefile.in
 configure
 .DS_Store
 
-slaxconfig.h.in
+xoconfig.h.in
