@@ -1,0 +1,1069 @@
+#
+# Copyright (c) 2014, Juniper Networks, Inc.
+# All rights reserved.
+# This SOFTWARE is licensed under the LICENSE provided in the
+# ../Copyright file. By downloading, installing, copying, or 
+# using the SOFTWARE, you agree to be bound by the terms of that
+# LICENSE.
+# Phil Shafer, July 2014
+#
+
+* libxo - A output library for XML, JSON, HTML, and Text
+
+libxo allows an application to generate XML, JSON, HTML, and text
+output using the same set of function calls.  The application decides
+at run time which output style should be produced.
+
+* Overview
+
+Many unix commands emit text output aimed at humans.  Programmers use
+tools like grep, awk, and regular expressions to ferret out the pieces
+of information they need.
+
+Modern tool developers favors encoding schemes like XML and JSON,
+which allow trivial parsing and extraction of data.
+
+In addition, modern reality means that more output ends up in web
+browsers than in terminals.
+
+libxo allows a single set of function calls in source code to generate
+traditional text output, as well as XML and JSON formatted data.  HTML
+can also be generated; "<div>" elements surround the traditional text
+output, with attributes that detail how to render the data.
+
+* Concepts
+
+** Encoding Styles
+
+Let's look at the encoding rules for the various output styles
+supported by libxo.
+
+*** Text Output
+
+Most traditional programs generate text output on standard output,
+with contents like:
+
+    36      ./src
+    40      ./bin
+    90      .
+
+In this example (taken from du source code), the code to generate this
+data might look like:
+
+    printf("%d\t%s\n", num_blocks, path);
+
+Simple, direct, obvious.
+
+*** XML Output
+
+XML output consists of a hierarchical set of elements, each encoded
+with a start tag and an end tag.  The element should be named for data
+value that it is encoding:
+
+    <item>
+      <blocks>36</blocks>
+      <path>./src</path>
+    </item>
+    <item>
+      <blocks>40</blocks>
+      <path>./bin</path>
+    </item>
+    <item>
+      <blocks>90</blocks>
+      <path>.</path>
+    </item>
+
+XML is a W3C standard for encoding data.  See w3c.org/TR/xml for
+additional information.
+
+*** JSON Output
+
+JSON output consists of a hierarchical set of objects and lists, each
+encoded with a quoted name, a colon, and a value.  If the value is a
+string, it must be quoted, but numbers are not quoted.  Objects are
+encoded using braces; lists are encoded using square brackets.
+Data inside objects and lists is separated using commas:
+
+    items: [
+        { "blocks": 36, "path" : "./src" },
+        { "blocks": 40, "path" : "./bin" },
+        { "blocks": 90, "path" : "./" }
+    ]
+
+*** HTML Output
+
+HTML output is designed to allow the output to be rendered in a web
+browser with minimal effort.  Each piece of output data is rendered
+inside a <div> element, with a class name related to the role of the
+data.  By using a small set of class attribute values, a CSS
+stylesheet can render the HTML into rich text that mirrors the
+traditional text content.
+
+Additional attributes can be enabled to provide more details about the
+data, including data type, description, and an XPath location.
+
+    <div class="line">
+      <div class="data" data-name="blocks">36</div>
+      <div class="padding">      </div>
+      <div class="data data-name="path">./src</div>
+    </div>
+    <div class="line">
+      <div class="data" data-name="blocks">40</div>
+      <div class="padding">      </div>
+      <div class="data data-name="path">./bin</div>
+    </div>
+    <div class="line">
+      <div class="data" data-name="blocks">90</div>
+      <div class="padding">      </div>
+      <div class="data data-name="path">./</div>
+    </div>
+
+** Format Strings
+
+libxo format strings contain enough information to render data into
+each of the above formats.  The format string contains zero or more
+formatting instructions, which are contained inside braces:
+
+        xo_emit("{P:   }{LWC:In stock}{:in-stock/%u}\n",
+                ip->i_instock);
+
+The format instruction is given as follows:
+
+     '{' [ modifiers ] ':' content [ '/' format ] '}'
+
+Modifiers are options, and indicate the role and formatting of the
+content:
+
+|---+------------+-------------------------------------------------|
+| M | Name       | Description                                     |
+|---+------------+-------------------------------------------------|
+| L | label      | Content is a label that prefixes the value      |
+| V | value      | Content is the name of field                    |
+| D | decoration | Content is non-text (e.g. colon, comma)         |
+| P | padding    | Content is spaces needed for vertical alignment |
+| C | colon      | A colon (":") is appended to the label          |
+| W | whitespace | A blank (" ") is appended to the label          |
+| H | hidden     | The field is hidden from text and HTML output   |
+|---+------------+-------------------------------------------------|
+
+The "format" value is a string suitable for printf(3).
+
+For example:
+
+        xo_emit("{P:   }{LWC:In stock}{:in-stock/%u}\n",
+                ip->i_instock);
+
+will generate:
+
+  TEXT: 
+       In stock: 144
+  XML:
+      <in-stock>144</in-stock>
+  JSON:
+      "in-stock": 144,
+  HTML:
+      <div class="line">
+        <div class="padding">   </div>
+        <div class="label">In stock</div>
+        <div class="decoration">:</div>
+        <div class="padding"> </div>
+        <div class="data" data-name="in-stock">144</div>
+      </div>
+
+Clearly HTML wins the verbosity award, and this output does
+not include XOF_XPATH or XOF_INFO data, which would expand the
+penultimate line to:
+
+       <div class="data" data-name="in-stock"
+          data-xpath="/top/data/item/in-stock"
+          data-type="number" 
+          data-help="Number of items in stock">144</div>
+
+** Representing Hierarchy
+
+For XML and JSON, individual fields appear inside hierarchies which
+provide context and meaning to the fields.  Unfortunately, these
+encoding have a basic disconnect between how lists is similar objects
+are represented.
+
+XML encodes lists as set of sequential elements:
+
+    <user>phil</user>
+    <user>rob</user>
+    <user>simon</user>
+
+JSON encodes lists using a single name and square brackets:
+
+    "user": [ "phil", "rob", "simon" ]
+
+This means libxo needs three distinct indications hierarchy: one for
+containers of hierarchy that are not related to lists, one for lists, and
+one for each item in a list.
+
+*** Containers
+
+A "container" is an element of a hierarchy that appears only once per
+parent.  The container has no value, but serves to contain other nodes.
+
+To open a container, call xo_open_container() or
+xo_open_container_h().  The former uses the default handle and
+the latter accepts a specific handle.
+
+    int xo_open_container_h (xo_handle_t *xop, const char *name);
+    int xo_open_container (const char *name);
+
+To close a level, use the xo_close_container() or
+xo_close_container_h() functions:
+
+    int xo_close_container_h (xo_handle_t *xop, const char *name);
+    int xo_close_container (const char *name);
+
+Each open call must have a matching close call.  If the XOF_WARN flag
+is set and the name given does not match the name of the currently open
+container, a warning will be generated.
+
+    Example:
+
+        xo_open_container("top");
+        xo_open_container("system");
+        xo_emit("{:host-name/%s%s%s", hostname,
+                domainname ? "." : "", domainname ?: "");
+        xo_close_container("system");
+        xo_close_container("top");
+
+    Sample Output:
+      Text:
+        my-host.example.org
+      XML:
+        <top>
+          <system>
+              <host-name>my-host.example.org</host-name>
+          </system>
+        </top>
+      JSON:
+        "top" : {
+          "system" : {
+              "host-name": "my-host.example.org"
+          }
+        }
+      HTML:
+        <div class="data" data-name="host-name">my-host.example.org</div>
+
+*** Lists and Instances
+
+A list is set of one or more instances that appear under the same
+parent.  The instances contains details about a specific object.  One
+can think of instances as objects or records.  A call is needed to
+open and close the list, while a distinct call is needed to open and
+close each instance of the list:
+
+    xo_open_list("item");
+
+    for (ip = list; ip->i_title; ip++) {
+        xo_open_instance("item");
+        xo_emit("{L:Item} '{:name/%s}':\n", ip->i_title);
+        xo_close_instance("item");
+    }
+
+    xo_close_list("item");
+
+Getting the list and instance calls correct is critical to the proper
+generation of XML and JSON data.
+
+* Functions
+
+** Handles
+
+libxo uses zero or more 'handles' to turn its rendering
+functionality.  A default handle is used when a NULL is passed to
+functions accepting a handle.
+
+A handle can be allocated using the xo_create() function:
+
+    xo_handle_t *xo_create (unsigned style, unsigned flags);
+
+By default, output is written to standard output.  A convenience
+function is provided for situations when output should be written to
+different file:
+
+    xo_handle_t *xo_create_to_file (FILE *fp, unsigned style,
+                                    unsigned flags);
+
+The xo_destroy function releases a handle and any resources it is
+using.  Calling xo_destroy with a NULL handle will release any
+resources associated with the default handle.
+
+The xo_set_writer function allows custom 'write' functions
+which can tailor how libxo writes data.  An opaque argument is
+recorded and passed back to the write function, allowing the function
+to acquire context information. The 'close' function can
+release this opaque data.
+
+    void xo_set_writer (xo_handle_t *xop, void *opaque,
+                        xo_write_func_t write_func,
+                        xo_close_func_t close_func);
+
+** Styles and Flags
+
+The create functions accept a set of output styles:
+
+|---------------+-------------------------|
+| XO_STYLE_TEXT | Traditional text output |
+| XO_STYLE_XML  | XML encoded data        |
+| XO_STYLE_JSON | JSON encoded data       |
+| XO_STYLE_HTML | HTML encoded data       |
+|---------------+-------------------------|
+
+The set of valid flags include:
+
+|---------------+-----------------------------------------|
+| XOF_CLOSE_FP  | Close file pointer on xo_destroy()      |
+| XOF_PRETTY    | Make 'pretty printed' output            |
+| XOF_WARN      | Generate warnings for broken calls      |
+|---------------+-----------------------------------------|
+
+XOF_CLOSE_FP will trigger the call of the close_func (provided via
+xo_set_writer()) when the handle is destroyed.
+
+Requesting 'pretty printing' will trigger the addition of indentation
+and newlines to enhance the readability of XML, JSON, and HTML output.
+Text output is not affected.
+
+Requesting warnings will trigger diagnostic output (on standard error)
+when the library notices errors during operations, or with arguments
+to functions.  Without warning enabled, such conditions are ignored.
+
+If the style is XO_STYLE_HTML, the following additional flags can be
+used:
+
+|---------------+-----------------------------------------|
+| XOF_XPATH     | Emit "data-xpath" attributes            |
+| XOF_INFO      | Emit additional info fields             |
+|---------------+-----------------------------------------|
+
+The XOF_XPATH flag enables the emission of XPath expressions detailing
+the hierarchy of XML elements used to encode the data field, if the
+XPATH style of output were requested.
+
+*** Information
+
+HTML data can include additional information in attributes that
+begin with "data-".  To enable this, three things must occur:
+
+First the application must build an array of xo_info_t structures,
+one per tag.  The array must be sorted by name, since libxo uses a
+binary search to find the entry that matches names from format
+instructions.
+
+Second, the application must inform libxo about this information using
+the xo_set_info() call:
+
+    typedef struct xo_info_s {
+        const char *xi_name;    /* Name of the element */
+        const char *xi_type;    /* Type of field */
+        const char *xi_help;    /* Description of field */
+    } xo_info_t;
+
+    void xo_set_info (xo_handle_t *xop, xo_info_t *infop, int count);
+
+Like other libxo calls, passing NULL for the handle tells libxo to use
+the default handle.
+
+If the count is -1, libxo will count the elements of infop, but there
+must be an empty element at the end.  More typically, the number is
+known to the application:
+
+    xo_info_t info[] = {
+        { "in-stock", "number", "Number of items in stock" },
+        { "name", "string", "Name of the item" },
+        { "on-order", "number", "Number of items on order" },
+        { "sku", "string", "Stock Keeping Unit" },
+        { "sold", "number", "Number of items sold" },
+    };
+    int info_count = (sizeof(info) / sizeof(info[0]));
+    ...
+    xo_set_info(NULL, info, info_count);
+
+The type and help values, if present, are emitted as the "data-type"
+and "data-help" attributes:
+
+  <div class="data" data-name="sku" data-type="string" 
+       data-help="Stock Keeping Unit">GRO-000-533</div>
+
+** Memory Allocation
+
+The xo_set_allocator function allows libxo to be used in environments
+where the standard realloc() and free() functions are not available.
+
+    void xo_set_allocator (xo_realloc_func_t realloc_func,
+                           xo_free_func_t free_func);
+
+realloc_func should expect the same arguments as realloc(3) and
+return a pointer to memory following the same convention.
+free_func will receive the same argument as free(3) and should release
+it, as appropriate for the environment.
+
+* Additional Features
+
+** XOF_WARN
+
+The XOF_WARN flag enables warnings for incorrect format strings,
+unmatched open and close functions, or other failures.  In most
+cases, these conditions are simply silently ignored.  The XOF_WARN
+flag allowed developers to debug their interaction with libxo.
+
+The function "xo_warn" can used as a breakpoint for a debugger.
+
+** LIBXO_OPTIONS
+
+Another debugging tool is the environment variable "LIBXO_OPTIONS",
+which can be set to a string of options.
+
+|--------+-------------------------------------------|
+| Option | Action                                    |
+|--------+-------------------------------------------|
+| H      | Enable HTML output (XO_STYLE_HTML)        |
+| I      | Enable info output (XOF_INFO)             |
+| i<num> | Indent by <number>                        |
+| J      | Enable JSON output (XO_STYLE_JSON)        |
+| P      | Enable pretty-printed output (XOF_PRETTY) |
+| T      | Enable text output (XO_STYLE_TEXT)        |
+| W      | Enable warnings (XOF_WARN)                |
+| X      | Enable XML output (XO_STYLE_XML)          |
+| x      | Enable XPath data (XOF_XPATH)             |
+|--------+-------------------------------------------|
+
+For example, warnings can be enabled by:
+
+    % env LIBXO_OPTIONS=W my-app
+
+Complete HTML output can be generated with:
+
+    % env LIBXO_OPTIONS=HXI my-app
+
+* Examples
+
+** Unit Test
+
+Here is the unit test example:
+
+int
+main (int argc, char **argv)
+{
+    static char base_grocery[] = "GRO";
+    static char base_hardware[] = "HRD";
+    struct item {
+	const char *i_title;
+	int i_sold;
+	int i_instock;
+	int i_onorder;
+	const char *i_sku_base;
+	int i_sku_num;
+    };
+    struct item list[] = {
+	{ "gum", 1412, 54, 10, base_grocery, 415 },
+	{ "rope", 85, 4, 2, base_hardware, 212 },
+	{ "ladder", 0, 2, 1, base_hardware, 517 },
+	{ "bolt", 4123, 144, 42, base_hardware, 632 },
+	{ "water", 17, 14, 2, base_grocery, 2331 },
+	{ NULL, 0, 0, 0, NULL, 0 }
+    };
+    struct item list2[] = {
+	{ "fish", 1321, 45, 1, base_grocery, 533 },
+    };
+    struct item *ip;
+    xo_info_t info[] = {
+	{ "in-stock", "number", "Number of items in stock" },
+	{ "name", "string", "Name of the item" },
+	{ "on-order", "number", "Number of items on order" },
+	{ "sku", "string", "Stock Keeping Unit" },
+	{ "sold", "number", "Number of items sold" },
+	{ NULL, NULL, NULL },
+    };
+    int info_count = (sizeof(info) / sizeof(info[0])) - 1;
+    
+    for (argc = 1; argv[argc]; argc++) {
+	if (strcmp(argv[argc], "xml") == 0)
+	    xo_set_style(NULL, XO_STYLE_XML);
+	else if (strcmp(argv[argc], "json") == 0)
+	    xo_set_style(NULL, XO_STYLE_JSON);
+	else if (strcmp(argv[argc], "text") == 0)
+	    xo_set_style(NULL, XO_STYLE_TEXT);
+	else if (strcmp(argv[argc], "html") == 0)
+	    xo_set_style(NULL, XO_STYLE_HTML);
+	else if (strcmp(argv[argc], "pretty") == 0)
+	    xo_set_flags(NULL, XOF_PRETTY);
+	else if (strcmp(argv[argc], "xpath") == 0)
+	    xo_set_flags(NULL, XOF_XPATH);
+	else if (strcmp(argv[argc], "info") == 0)
+	    xo_set_flags(NULL, XOF_INFO);
+    }
+
+    xo_set_info(NULL, info, info_count);
+
+    xo_open_container_h(NULL, "top");
+
+    xo_open_container("data");
+    xo_open_list("item");
+
+    for (ip = list; ip->i_title; ip++) {
+	xo_open_instance("item");
+
+	xo_emit("{L:Item} '{:name/%s}':\n", ip->i_title);
+	xo_emit("{P:   }{L:Total sold}: {N:sold/%u%s}\n",
+		ip->i_sold, ip->i_sold ? ".0" : "");
+	xo_emit("{P:   }{LWC:In stock}{:in-stock/%u}\n", ip->i_instock);
+	xo_emit("{P:   }{LWC:On order}{:on-order/%u}\n", ip->i_onorder);
+	xo_emit("{P:   }{L:SKU}: {Q:sku/%s-000-%u}\n",
+		ip->i_sku_base, ip->i_sku_num);
+
+	xo_close_instance("item");
+    }
+
+    xo_close_list("item");
+    xo_close_container("data");
+
+    xo_open_container("data");
+    xo_open_list("item");
+
+    for (ip = list2; ip->i_title; ip++) {
+	xo_open_instance("item");
+
+	xo_emit("{L:Item} '{:name/%s}':\n", ip->i_title);
+	xo_emit("{P:   }{L:Total sold}: {N:sold/%u%s}\n",
+		ip->i_sold, ip->i_sold ? ".0" : "");
+	xo_emit("{P:   }{LWC:In stock}{:in-stock/%u}\n", ip->i_instock);
+	xo_emit("{P:   }{LWC:On order}{:on-order/%u}\n", ip->i_onorder);
+	xo_emit("{P:   }{L:SKU}: {Q:sku/%s-000-%u}\n",
+		ip->i_sku_base, ip->i_sku_num);
+
+	xo_close_instance("item");
+    }
+
+    xo_close_list("item");
+    xo_close_container("data");
+
+    xo_close_container_h(NULL, "top");
+
+    return 0;
+}
+
+% ./testxo text
+Item 'gum':
+   Total sold: 1412.0
+   In stock: 54
+   On order: 10
+   SKU: GRO-000-415
+Item 'rope':
+   Total sold: 85.0
+   In stock: 4
+   On order: 2
+   SKU: HRD-000-212
+Item 'ladder':
+   Total sold: 0
+   In stock: 2
+   On order: 1
+   SKU: HRD-000-517
+Item 'bolt':
+   Total sold: 4123.0
+   In stock: 144
+   On order: 42
+   SKU: HRD-000-632
+Item 'water':
+   Total sold: 17.0
+   In stock: 14
+   On order: 2
+   SKU: GRO-000-2331
+Item 'fish':
+   Total sold: 1321.0
+   In stock: 45
+   On order: 1
+   SKU: GRO-000-533
+% ./testxo json pretty
+"top": {
+  "data": {
+    "item": [
+      {
+        "name": "gum",
+        "sold": 1412.0,
+        "in-stock": 54,
+        "on-order": 10,
+        "sku": "GRO-000-415"
+      },
+      {
+        "name": "rope",
+        "sold": 85.0,
+        "in-stock": 4,
+        "on-order": 2,
+        "sku": "HRD-000-212"
+      },
+      {
+        "name": "ladder",
+        "sold": 0,
+        "in-stock": 2,
+        "on-order": 1,
+        "sku": "HRD-000-517"
+      },
+      {
+        "name": "bolt",
+        "sold": 4123.0,
+        "in-stock": 144,
+        "on-order": 42,
+        "sku": "HRD-000-632"
+      },
+      {
+        "name": "water",
+        "sold": 17.0,
+        "in-stock": 14,
+        "on-order": 2,
+        "sku": "GRO-000-2331"
+      }
+    ]
+  },
+  "data": {
+    "item": [
+      {
+        "name": "fish",
+        "sold": 1321.0,
+        "in-stock": 45,
+        "on-order": 1,
+        "sku": "GRO-000-533"
+      }
+    ]
+  }
+}
+% ./testxo pretty xml
+<top>
+  <data>
+    <item>
+      <name>gum</name>
+      <sold>1412.0</sold>
+      <in-stock>54</in-stock>
+      <on-order>10</on-order>
+      <sku>GRO-000-415</sku>
+    </item>
+    <item>
+      <name>rope</name>
+      <sold>85.0</sold>
+      <in-stock>4</in-stock>
+      <on-order>2</on-order>
+      <sku>HRD-000-212</sku>
+    </item>
+    <item>
+      <name>ladder</name>
+      <sold>0</sold>
+      <in-stock>2</in-stock>
+      <on-order>1</on-order>
+      <sku>HRD-000-517</sku>
+    </item>
+    <item>
+      <name>bolt</name>
+      <sold>4123.0</sold>
+      <in-stock>144</in-stock>
+      <on-order>42</on-order>
+      <sku>HRD-000-632</sku>
+    </item>
+    <item>
+      <name>water</name>
+      <sold>17.0</sold>
+      <in-stock>14</in-stock>
+      <on-order>2</on-order>
+      <sku>GRO-000-2331</sku>
+    </item>
+  </data>
+  <data>
+    <item>
+      <name>fish</name>
+      <sold>1321.0</sold>
+      <in-stock>45</in-stock>
+      <on-order>1</on-order>
+      <sku>GRO-000-533</sku>
+    </item>
+  </data>
+</top>
+% ./testxo pretty html
+<div class="line">
+  <div class="label">Item</div>
+  <div class="text"> '</div>
+  <div class="data" data-tag="name">gum</div>
+  <div class="text">':</div>
+</div>
+<div class="line">
+  <div class="padding">   </div>
+  <div class="label">Total sold</div>
+  <div class="text">: </div>
+  <div class="data" data-tag="sold">1412.0</div>
+</div>
+<div class="line">
+  <div class="padding">   </div>
+  <div class="label">In stock</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="in-stock">54</div>
+</div>
+<div class="line">
+  <div class="padding">   </div>
+  <div class="label">On order</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="on-order">10</div>
+</div>
+<div class="line">
+  <div class="padding">   </div>
+  <div class="label">SKU</div>
+  <div class="text">: </div>
+  <div class="data" data-tag="sku">GRO-000-415</div>
+</div>
+<div class="line">
+  <div class="label">Item</div>
+  <div class="text"> '</div>
+  <div class="data" data-tag="name">rope</div>
+  <div class="text">':</div>
+</div>
+<div class="line">
+  <div class="padding">   </div>
+  <div class="label">Total sold</div>
+  <div class="text">: </div>
+  <div class="data" data-tag="sold">85.0</div>
+</div>
+<div class="line">
+  <div class="padding">   </div>
+  <div class="label">In stock</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="in-stock">4</div>
+</div>
+<div class="line">
+  <div class="padding">   </div>
+  <div class="label">On order</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="on-order">2</div>
+</div>
+<div class="line">
+  <div class="padding">   </div>
+  <div class="label">SKU</div>
+  <div class="text">: </div>
+  <div class="data" data-tag="sku">HRD-000-212</div>
+</div>
+<div class="line">
+  <div class="label">Item</div>
+  <div class="text"> '</div>
+  <div class="data" data-tag="name">ladder</div>
+  <div class="text">':</div>
+</div>
+<div class="line">
+  <div class="padding">   </div>
+  <div class="label">Total sold</div>
+  <div class="text">: </div>
+  <div class="data" data-tag="sold">0</div>
+</div>
+<div class="line">
+  <div class="padding">   </div>
+  <div class="label">In stock</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="in-stock">2</div>
+</div>
+<div class="line">
+  <div class="padding">   </div>
+  <div class="label">On order</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="on-order">1</div>
+</div>
+<div class="line">
+  <div class="padding">   </div>
+  <div class="label">SKU</div>
+  <div class="text">: </div>
+  <div class="data" data-tag="sku">HRD-000-517</div>
+</div>
+<div class="line">
+  <div class="label">Item</div>
+  <div class="text"> '</div>
+  <div class="data" data-tag="name">bolt</div>
+  <div class="text">':</div>
+</div>
+<div class="line">
+  <div class="padding">   </div>
+  <div class="label">Total sold</div>
+  <div class="text">: </div>
+  <div class="data" data-tag="sold">4123.0</div>
+</div>
+<div class="line">
+  <div class="padding">   </div>
+  <div class="label">In stock</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="in-stock">144</div>
+</div>
+<div class="line">
+  <div class="padding">   </div>
+  <div class="label">On order</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="on-order">42</div>
+</div>
+<div class="line">
+  <div class="padding">   </div>
+  <div class="label">SKU</div>
+  <div class="text">: </div>
+  <div class="data" data-tag="sku">HRD-000-632</div>
+</div>
+<div class="line">
+  <div class="label">Item</div>
+  <div class="text"> '</div>
+  <div class="data" data-tag="name">water</div>
+  <div class="text">':</div>
+</div>
+<div class="line">
+  <div class="padding">   </div>
+  <div class="label">Total sold</div>
+  <div class="text">: </div>
+  <div class="data" data-tag="sold">17.0</div>
+</div>
+<div class="line">
+  <div class="padding">   </div>
+  <div class="label">In stock</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="in-stock">14</div>
+</div>
+<div class="line">
+  <div class="padding">   </div>
+  <div class="label">On order</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="on-order">2</div>
+</div>
+<div class="line">
+  <div class="padding">   </div>
+  <div class="label">SKU</div>
+  <div class="text">: </div>
+  <div class="data" data-tag="sku">GRO-000-2331</div>
+</div>
+<div class="line">
+  <div class="label">Item</div>
+  <div class="text"> '</div>
+  <div class="data" data-tag="name">fish</div>
+  <div class="text">':</div>
+</div>
+<div class="line">
+  <div class="padding">   </div>
+  <div class="label">Total sold</div>
+  <div class="text">: </div>
+  <div class="data" data-tag="sold">1321.0</div>
+</div>
+<div class="line">
+  <div class="padding">   </div>
+  <div class="label">In stock</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="in-stock">45</div>
+</div>
+<div class="line">
+  <div class="padding">   </div>
+  <div class="label">On order</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="on-order">1</div>
+</div>
+<div class="line">
+  <div class="padding">   </div>
+  <div class="label">SKU</div>
+  <div class="text">: </div>
+  <div class="data" data-tag="sku">GRO-000-533</div>
+</div>
+% ./testxo pretty html xpath info
+<div class="line">
+  <div class="label">Item</div>
+  <div class="text"> '</div>
+  <div class="data" data-tag="name" data-xpath="/top/data/item/name" data-type="string" data-help="Name of the item">gum</div>
+  <div class="text">':</div>
+</div>
+<div class="line">
+  <div class="padding">   </div>
+  <div class="label">Total sold</div>
+  <div class="text">: </div>
+  <div class="data" data-tag="sold" data-xpath="/top/data/item/sold" data-type="number" data-help="Number of items sold">1412.0</div>
+</div>
+<div class="line">
+  <div class="padding">   </div>
+  <div class="label">In stock</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="in-stock" data-xpath="/top/data/item/in-stock" data-type="number" data-help="Number of items in stock">54</div>
+</div>
+<div class="line">
+  <div class="padding">   </div>
+  <div class="label">On order</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="on-order" data-xpath="/top/data/item/on-order" data-type="number" data-help="Number of items on order">10</div>
+</div>
+<div class="line">
+  <div class="padding">   </div>
+  <div class="label">SKU</div>
+  <div class="text">: </div>
+  <div class="data" data-tag="sku" data-xpath="/top/data/item/sku" data-type="string" data-help="Stock Keeping Unit">GRO-000-415</div>
+</div>
+<div class="line">
+  <div class="label">Item</div>
+  <div class="text"> '</div>
+  <div class="data" data-tag="name" data-xpath="/top/data/item/name" data-type="string" data-help="Name of the item">rope</div>
+  <div class="text">':</div>
+</div>
+<div class="line">
+  <div class="padding">   </div>
+  <div class="label">Total sold</div>
+  <div class="text">: </div>
+  <div class="data" data-tag="sold" data-xpath="/top/data/item/sold" data-type="number" data-help="Number of items sold">85.0</div>
+</div>
+<div class="line">
+  <div class="padding">   </div>
+  <div class="label">In stock</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="in-stock" data-xpath="/top/data/item/in-stock" data-type="number" data-help="Number of items in stock">4</div>
+</div>
+<div class="line">
+  <div class="padding">   </div>
+  <div class="label">On order</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="on-order" data-xpath="/top/data/item/on-order" data-type="number" data-help="Number of items on order">2</div>
+</div>
+<div class="line">
+  <div class="padding">   </div>
+  <div class="label">SKU</div>
+  <div class="text">: </div>
+  <div class="data" data-tag="sku" data-xpath="/top/data/item/sku" data-type="string" data-help="Stock Keeping Unit">HRD-000-212</div>
+</div>
+<div class="line">
+  <div class="label">Item</div>
+  <div class="text"> '</div>
+  <div class="data" data-tag="name" data-xpath="/top/data/item/name" data-type="string" data-help="Name of the item">ladder</div>
+  <div class="text">':</div>
+</div>
+<div class="line">
+  <div class="padding">   </div>
+  <div class="label">Total sold</div>
+  <div class="text">: </div>
+  <div class="data" data-tag="sold" data-xpath="/top/data/item/sold" data-type="number" data-help="Number of items sold">0</div>
+</div>
+<div class="line">
+  <div class="padding">   </div>
+  <div class="label">In stock</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="in-stock" data-xpath="/top/data/item/in-stock" data-type="number" data-help="Number of items in stock">2</div>
+</div>
+<div class="line">
+  <div class="padding">   </div>
+  <div class="label">On order</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="on-order" data-xpath="/top/data/item/on-order" data-type="number" data-help="Number of items on order">1</div>
+</div>
+<div class="line">
+  <div class="padding">   </div>
+  <div class="label">SKU</div>
+  <div class="text">: </div>
+  <div class="data" data-tag="sku" data-xpath="/top/data/item/sku" data-type="string" data-help="Stock Keeping Unit">HRD-000-517</div>
+</div>
+<div class="line">
+  <div class="label">Item</div>
+  <div class="text"> '</div>
+  <div class="data" data-tag="name" data-xpath="/top/data/item/name" data-type="string" data-help="Name of the item">bolt</div>
+  <div class="text">':</div>
+</div>
+<div class="line">
+  <div class="padding">   </div>
+  <div class="label">Total sold</div>
+  <div class="text">: </div>
+  <div class="data" data-tag="sold" data-xpath="/top/data/item/sold" data-type="number" data-help="Number of items sold">4123.0</div>
+</div>
+<div class="line">
+  <div class="padding">   </div>
+  <div class="label">In stock</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="in-stock" data-xpath="/top/data/item/in-stock" data-type="number" data-help="Number of items in stock">144</div>
+</div>
+<div class="line">
+  <div class="padding">   </div>
+  <div class="label">On order</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="on-order" data-xpath="/top/data/item/on-order" data-type="number" data-help="Number of items on order">42</div>
+</div>
+<div class="line">
+  <div class="padding">   </div>
+  <div class="label">SKU</div>
+  <div class="text">: </div>
+  <div class="data" data-tag="sku" data-xpath="/top/data/item/sku" data-type="string" data-help="Stock Keeping Unit">HRD-000-632</div>
+</div>
+<div class="line">
+  <div class="label">Item</div>
+  <div class="text"> '</div>
+  <div class="data" data-tag="name" data-xpath="/top/data/item/name" data-type="string" data-help="Name of the item">water</div>
+  <div class="text">':</div>
+</div>
+<div class="line">
+  <div class="padding">   </div>
+  <div class="label">Total sold</div>
+  <div class="text">: </div>
+  <div class="data" data-tag="sold" data-xpath="/top/data/item/sold" data-type="number" data-help="Number of items sold">17.0</div>
+</div>
+<div class="line">
+  <div class="padding">   </div>
+  <div class="label">In stock</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="in-stock" data-xpath="/top/data/item/in-stock" data-type="number" data-help="Number of items in stock">14</div>
+</div>
+<div class="line">
+  <div class="padding">   </div>
+  <div class="label">On order</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="on-order" data-xpath="/top/data/item/on-order" data-type="number" data-help="Number of items on order">2</div>
+</div>
+<div class="line">
+  <div class="padding">   </div>
+  <div class="label">SKU</div>
+  <div class="text">: </div>
+  <div class="data" data-tag="sku" data-xpath="/top/data/item/sku" data-type="string" data-help="Stock Keeping Unit">GRO-000-2331</div>
+</div>
+<div class="line">
+  <div class="label">Item</div>
+  <div class="text"> '</div>
+  <div class="data" data-tag="name" data-xpath="/top/data/item/name" data-type="string" data-help="Name of the item">fish</div>
+  <div class="text">':</div>
+</div>
+<div class="line">
+  <div class="padding">   </div>
+  <div class="label">Total sold</div>
+  <div class="text">: </div>
+  <div class="data" data-tag="sold" data-xpath="/top/data/item/sold" data-type="number" data-help="Number of items sold">1321.0</div>
+</div>
+<div class="line">
+  <div class="padding">   </div>
+  <div class="label">In stock</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="in-stock" data-xpath="/top/data/item/in-stock" data-type="number" data-help="Number of items in stock">45</div>
+</div>
+<div class="line">
+  <div class="padding">   </div>
+  <div class="label">On order</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="on-order" data-xpath="/top/data/item/on-order" data-type="number" data-help="Number of items on order">1</div>
+</div>
+<div class="line">
+  <div class="padding">   </div>
+  <div class="label">SKU</div>
+  <div class="text">: </div>
+  <div class="data" data-tag="sku" data-xpath="/top/data/item/sku" data-type="string" data-help="Stock Keeping Unit">GRO-000-533</div>
+</div>
