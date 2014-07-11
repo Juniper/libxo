@@ -8,16 +8,12 @@
 # using the SOFTWARE, you agree to be bound by the terms of that
 # LICENSE.
 
-if LIBXO_WARNINGS_HIGH
-LIBXO_WARNINGS = HIGH
-endif
-include ${top_srcdir}/warnings.mk
-
-AM_CFLAGS = -I${top_srcdir} -I${top_srcdir}/libxo ${WARNINGS}
+AM_CFLAGS = -I${top_srcdir} -I${top_srcdir}/libxo
 
 TEST_CASES = \
 test_01.c \
-test_02.c
+test_02.c \
+test_03.c
 
 # TEST_CASES := $(shell cd ${srcdir} ; echo *.c )
 
@@ -25,6 +21,7 @@ bin_PROGRAMS = ${TEST_CASES:.c=.bin}
 
 test_01_bin_SOURCES = test-01.c
 test_02_bin_SOURCES = test-02.c
+test_03_bin_SOURCES = test-03.c
 
 LDADD = \
     ${top_builddir}/libxo/libxo.la
