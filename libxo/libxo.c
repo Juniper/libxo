@@ -975,7 +975,7 @@ xo_emit_hv (xo_handle_t *xop, const char *fmt, va_list vap)
 
 	if (format == NULL) {
 	    format = "%s";
-	    flen = 1;
+	    flen = 2;
 	}
 
 	if (style == 'T')
