@@ -2,7 +2,7 @@
 #
 # $Id$
 #
-# Copyright 2014, Juniper Networks, Inc.
+# Copyright 2011-2014, Juniper Networks, Inc.
 # All rights reserved.
 # This SOFTWARE is licensed under the LICENSE provided in the
 # ../Copyright file. By downloading, installing, copying, or otherwise
@@ -25,11 +25,8 @@ Known values for OPTION are:
   --exec-prefix=DIR	change libxo exec prefix [default $exec_prefix]
   --libs		print library linking information
   --bindir              print the bin directory
-  --extdir              print the extension directory
   --cflags		print pre-processor and compiler flags
   --share		print share directory
-  --oxtradoc		print oxtradoc directory
-  --modules		module support enabled
   --help		display this help and exit
   --version		output version information
 EOF
@@ -80,39 +77,34 @@ while test $# -gt 0; do
 	;;
 
     --cflags)
-       	echo -I@XO_INCLUDEDIR@ @XO_CFLAGS@
+       	echo -I@LIBXO_INCLUDEDIR@ @LIBXO_CFLAGS@
+       	;;
+
+
+    --share)
+       	echo @LIBXO_SHAREDIR@
        	;;
 
     --bindir)
-       	echo @XO_BINDIR@
+       	echo @LIBXO_BINDIR@
        	;;
 
     --libdir)
-       	echo @XO_LIBDIR@
+       	echo @LIBXO_LIBDIR@
        	;;
 
-    --libtool-libs)
-	if [ -r ${libdir}/@XO_LIBTOOLLIBS@ ]
-	then
-	    echo ${libdir}/@XO_LIBTOOLLIBS@
-	fi
-        ;;
-
-    --modules)
-       	echo @WITH_MODULES@
-       	;;
 
     --libs)
         if [ "`uname`" = "Linux" ]
 	then
-	    if [ "@XO_LIBDIR@" = "-L/usr/lib" -o "@XO_LIBDIR@" = "-L/usr/lib64" ]
+	    if [ "@LIBXO_LIBDIR@" = "-L/usr/lib" -o "@LIBXO_LIBDIR@" = "-L/usr/lib64" ]
 	    then
-		echo @XO_LIBS@ 
+		echo @LIBXO_LIBS@ 
 	    else
-		echo -L@XO_LIBDIR@ @XO_LIBS@ 
+		echo -L@LIBXO_LIBDIR@ @LIBXO_LIBS@ 
 	    fi
 	else
-	    echo -L@XO_LIBDIR@ @XO_LIBS@ @WIN32_EXTRA_LIBADD@
+	    echo -L@LIBXO_LIBDIR@ @LIBXO_LIBS@ @WIN32_EXTRA_LIBADD@
 	fi
        	;;
 
