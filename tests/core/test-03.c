@@ -15,11 +15,10 @@
 #include "libxo.h"
 
 xo_info_t info[] = {
-    { "in-stock", "number", "Number of items in stock" },
-    { "name", "string", "Name of the item" },
-    { "on-order", "number", "Number of items on order" },
-    { "sku", "string", "Stock Keeping Unit" },
-    { "sold", "number", "Number of items sold" },
+    { "employee", "object", "Employee data" },
+    { "first-name", "string", "First name of employee" },
+    { "last-name", "string", "Last name of employee" },
+    { "department", "number", "Department number" },
 };
 int info_count = (sizeof(info) / sizeof(info[0]));
 
@@ -29,19 +28,23 @@ main (int argc, char **argv)
     struct employee {
 	const char *e_first;
 	const char *e_last;
+	unsigned e_dept;
     } employees[] = {
-	{ "Terry", "Jones" },
-	{ "Leslie", "Patterson" },
-	{ "Ashley", "Smith" },
+	{ "Terry", "Jones", 660 },
+	{ "Leslie", "Patterson", 341 },
+	{ "Ashley", "Smith", 1440 },
 	{ NULL, NULL }
     }, *ep = employees;
+
+    xo_set_info(NULL, info, info_count);
 
     xo_open_container("employees");
     xo_open_list("employee");
 
     for ( ; ep->e_first; ep++) {
 	xo_open_instance("employee");
-	xo_emit("{:first-name} {:last-name}\n", ep->e_first, ep->e_last);
+	xo_emit("{:first-name} {:last-name} works in dept #{:department/%u}\n",
+		ep->e_first, ep->e_last, ep->e_dept);
 	xo_close_instance("employee");
     }
 
@@ -50,5 +53,3 @@ main (int argc, char **argv)
 
     return 0;
 }
-
-	
