@@ -32,6 +32,7 @@
 #define XOF_XPATH	(1<<5)	/** Emit XPath attributes in HTML  */
 #define XOF_INFO	(1<<6)	/** Emit additional info fields (HTML) */
 #define XOF_WARN_XML	(1<<7)	/** Emit warnings in XML (on stdout) */
+#define XOF_NO_ENV	(1<<8)	/** Don't look at the LIBXO_OPTIONS env var */
 
 /*
  * The xo_info_t structure provides a mapping between names and
