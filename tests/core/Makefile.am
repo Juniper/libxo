@@ -10,18 +10,23 @@
 
 AM_CFLAGS = -I${top_srcdir} -I${top_srcdir}/libxo
 
+# Ick: maintained by hand!
 TEST_CASES = \
 test_01.c \
 test_02.c \
-test_03.c
+test_03.c \
+test_04.c \
+test_05.c
+
+test_01_test_SOURCES = test-01.c
+test_02_test_SOURCES = test-02.c
+test_03_test_SOURCES = test-03.c
+test_04_test_SOURCES = test-04.c
+test_05_test_SOURCES = test-05.c
 
 # TEST_CASES := $(shell cd ${srcdir} ; echo *.c )
 
-bin_PROGRAMS = ${TEST_CASES:.c=.bin}
-
-test_01_bin_SOURCES = test-01.c
-test_02_bin_SOURCES = test-02.c
-test_03_bin_SOURCES = test-03.c
+bin_PROGRAMS = ${TEST_CASES:.c=.test}
 
 LDADD = \
     ${top_builddir}/libxo/libxo.la
@@ -42,17 +47,23 @@ valgrind:
 #TEST_TRACE = set -x ; 
 
 TEST_ONE = \
- ${CHECKER} $$base.bin ${TEST_OPTS} > out/$$base.out 2> out/$$base.err ; \
- ${DIFF} -Nu ${srcdir}/saved/$$base.out out/$$base.out ${S2O} ; \
- ${DIFF} -Nu ${srcdir}/saved/$$base.err out/$$base.err ${S2O}
+  LIBXO_OPTIONS=$$fmt \
+      ${CHECKER} $$base.test ${TEST_OPTS} \
+      > out/$$base.$$fmt.out 2> out/$$base.$$fmt.err ; \
+ ${DIFF} -Nu ${srcdir}/saved/$$base.$$fmt.out out/$$base.$$fmt.out ${S2O} ; \
+ ${DIFF} -Nu ${srcdir}/saved/$$base.$$fmt.err out/$$base.$$fmt.err ${S2O}
+
+TEST_FORMATS = T XP JP HP X J H HIPx
 
 test tests: ${bin_PROGRAMS}
 	@${MKDIR} -p out
 	-@ ${TEST_TRACE} (for test in ${TEST_CASES} ; do \
 	    base=`${BASENAME} $$test .c` ; \
-	    echo "... $$test ..."; \
-	    ${TEST_ONE}; \
-            true; \
+            (for fmt in ${TEST_FORMATS}; do \
+	        echo "... $$test ... $$fmt ..."; \
+	        ${TEST_ONE}; \
+                true; \
+            done) \
 	done)
 
 one:
@@ -61,15 +72,17 @@ one:
 accept:
 	-@(for test in ${TEST_CASES} ; do \
 	    base=`${BASENAME} $$test .c` ; \
-	    echo "... $$test ..."; \
-	    ${CP} out/$$base.out ${srcdir}/saved/$$base.out ; \
-	    ${CP} out/$$base.err ${srcdir}/saved/$$base.err ; \
+            (for fmt in ${TEST_FORMATS}; do \
+	        echo "... $$test ... $$fmt ..."; \
+	        ${CP} out/$$base.$$fmt.out ${srcdir}/saved/$$base.$$fmt.out ; \
+	        ${CP} out/$$base.$$fmt.err ${srcdir}/saved/$$base.$$fmt.err ; \
+	    done) \
 	done)
 
-.c.bin:
+.c.test:
 	$(AM_V_CC)$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -o $@ $<
 
-CLEANFILES = ${TEST_CASES:.c=.bin}
+CLEANFILES = ${TEST_CASES:.c=.test}
 CLEANDIRS = out
 
 clean-local:
