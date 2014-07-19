@@ -17,3 +17,6 @@ alias mi "(cd $top_src/build; make && make install); ."
 
 mkdir -p build
 cd build
+
+
+alias xx 'cc -I.. -W -Wall -Wstrict-prototypes -Wmissing-prototypes -Wpointer-arith -Werror -Waggregate-return -Wcast-align -Wcast-qual -Wchar-subscripts -Wcomment -Wformat -Wimplicit -Wmissing-declarations -Wnested-externs -Wparentheses -Wreturn-type -Wshadow -Wswitch -Wtrigraphs -Wuninitialized -Wunused -Wwrite-strings -fno-inline-functions-called-once -g -O2 -o xtest -DUNIT_TEST libxo.c'
