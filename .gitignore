@@ -37,3 +37,8 @@ configure
 .DS_Store
 
 xoconfig.h.in
+
+.gdbinit
+.gdbinit.local
+xtest
+xtest.dSYM
