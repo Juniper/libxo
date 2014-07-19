@@ -1672,28 +1672,6 @@ xo_set_allocator (xo_realloc_func_t realloc_func, xo_free_func_t free_func)
 }
 
 #ifdef UNIT_TEST
-void
-xo_vap (xo_handle_t *xop);
-void
-xo_vap (xo_handle_t *xop)
-{
-    xop = xo_default(xop);
-
-    void *p = va_arg(xop->xo_vap, void *);
-    fprintf(stderr, "ptr %p\n", p);
-}
-
-void
-xo_vap_int (xo_handle_t *xop);
-void
-xo_vap_int (xo_handle_t *xop)
-{
-    xop = xo_default(xop);
-
-    int i = va_arg(xop->xo_vap, int);
-    fprintf(stderr, "int %d\n", i);
-}
-
 int
 main (int argc, char **argv)
 {
