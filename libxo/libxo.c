@@ -769,15 +769,14 @@ xo_format_data (xo_handle_t *xop, const char *fmt, int flen, unsigned flags)
 		    cp += 1;
 		    break;
 		}
-#if 0
-
-		if (*cp == 'X')
-		    skip = (xop->xo_style == XO_STYLE_XML);
-#endif
 	    }
 	}
-	if ((flags & XFF_HIDE) && (xop->xo_style != XO_STYLE_XML))
-	    skip = 1;
+
+	/* Hidden fields are only visible to JSON and XML */
+	if (flags & XFF_HIDE)
+	    if (xop->xo_style != XO_STYLE_XML
+		    && xop->xo_style != XO_STYLE_JSON)
+		skip = 1;
 
 	/*
 	 * Looking at one piece of a format; find the end and
@@ -1731,13 +1730,13 @@ main (int argc, char **argv)
     xo_open_container("data");
     xo_open_list("item");
 
-    xo_emit("{T:Item/%-10s}{T:Total Sold/%12s}{T:In Stock/%12s}"
+    xo_emit("{T:Item/%-15s}{T:Total Sold/%12s}{T:In Stock/%12s}"
 	    "{T:On Order/%12s}{T:SKU/%5s}\n");
 
     for (ip = list; ip->i_title; ip++) {
 	xo_open_instance("item");
 
-	xo_emit("{:item/%-10s/%s}{:sold/%12u/%u}{:in-stock/%12u/%u}"
+	xo_emit("{:item/%-15s/%s}{:sold/%12u/%u}{:in-stock/%12u/%u}"
 		"{:on-order/%12u/%u}{:sku/%5s-000-%u/%s-000-%u}\n",
 		ip->i_title, ip->i_sold, ip->i_instock, ip->i_onorder,
 		ip->i_sku_base, ip->i_sku_num);
@@ -1757,8 +1756,8 @@ main (int argc, char **argv)
 	xo_open_instance("item");
 
 	xo_emit("{L:Item} '{:name/%s}':\n", ip->i_title);
-	xo_emit("{P:   }{L:Total sold}: {N:sold/%u%s}\n",
-		ip->i_sold, ip->i_sold ? ".0" : "");
+	xo_emit("{P:   }{L:Total sold}: {N:sold/%u%s}{H:percent/%u}\n",
+		ip->i_sold, ip->i_sold ? ".0" : "", 44);
 	xo_emit("{P:   }{LWC:In stock}{:in-stock/%u}\n", ip->i_instock);
 	xo_emit("{P:   }{LWC:On order}{:on-order/%u}\n", ip->i_onorder);
 	xo_emit("{P:   }{L:SKU}: {Q:sku/%s-000-%u}\n",
