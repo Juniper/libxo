@@ -69,6 +69,7 @@ struct xo_handle_s {
     FILE *xo_fp;		/* XXX File pointer */
     xo_buffer_t xo_data;	/* Output data */
     xo_buffer_t xo_fmt;		/* Work area for building format strings */
+    xo_buffer_t xo_attrs;	/* Work area for building XML attributes */
     xo_stack_t *xo_stack;	/* Stack pointer */
     int xo_depth;		/* Depth of stack */
     int xo_stack_size;		/* Size of the stack */
@@ -81,9 +82,10 @@ struct xo_handle_s {
 #define XFF_COLON	(1<<0)	/* Append a ":" */
 #define XFF_COMMA	(1<<1)	/* Append a "," iff there's more output */
 #define XFF_WS		(1<<2)	/* Append a blank */
-#define XFF_HIDE	(1<<3)	/* Hide this from text output */
+#define XFF_HIDE_TEXT	(1<<3)	/* Hide this from text output (text, html) */
 #define XFF_QUOTE	(1<<4)	/* Force quotes */
 #define XFF_NOQUOTE	(1<<5)	/* Force no quotes */
+#define XFF_HIDE_DATA	(1<<6)	/* Hide this from data output (xml, json) */
 
 /*
  * We keep a default handle to allow callers to avoid having to
@@ -144,6 +146,8 @@ xo_init_handle (xo_handle_t *xop)
 
     xo_buf_init(&xop->xo_data);
     xo_buf_init(&xop->xo_fmt);
+    if (xop->xo_style == XO_STYLE_XML)
+	xo_buf_init(&xop->xo_attrs);
 
     xop->xo_indent_by = XO_INDENT_BY;
     xop->xo_stack_size = XO_DEPTH;
@@ -254,6 +258,7 @@ xo_printf (xo_handle_t *xop, const char *fmt, ...)
     if (rc > xbp->xb_size) {
 	if (!xo_buf_has_room(xbp, rc))
 	    return -1;
+	left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
 	rc = vsnprintf(xbp->xb_curp, left, fmt, vap);
     }
 
@@ -263,6 +268,105 @@ xo_printf (xo_handle_t *xop, const char *fmt, ...)
     va_end(vap);
 
     return rc;
+}
+
+static int
+xo_escape_xml (xo_buffer_t *xbp, int len, int attr)
+{
+    static char amp[] = "&amp;";
+    static char lt[] = "&lt;";
+    static char gt[] = "&gt;";
+    static char quot[] = "&quot;";
+
+    int slen;
+    unsigned delta = 0;
+    char *cp, *ep, *ip;
+    const char *sp;
+
+    for (cp = xbp->xb_curp, ep = cp + len; cp < ep; cp++) {
+	/* We're subtracting 2: 1 for the NUL, 1 for the char we replace */
+	if (*cp == '<')
+	    delta += sizeof(lt) - 2;
+	else if (*cp == '>')
+	    delta += sizeof(gt) - 2;
+	else if (*cp == '&')
+	    delta += sizeof(amp) - 2;
+	else if (attr && *cp == '"')
+	    delta += sizeof(quot) - 2;
+    }
+
+    if (delta == 0)		/* Nothing to escape; bail */
+	return len;
+
+    if (!xo_buf_has_room(xbp, delta)) /* No room; bail, but don't append */
+	return 0;
+
+    ep = xbp->xb_curp;
+    cp = ep + len;
+    ip = cp + delta;
+    do {
+	cp -= 1;
+	ip -= 1;
+
+	if (*cp == '<')
+	    sp = lt;
+	else if (*cp == '>')
+	    sp = gt;
+	else if (*cp == '&')
+	    sp = amp;
+	else if (attr && *cp == '"')
+	    sp = quot;
+	else {
+	    *ip = *cp;
+	    continue;
+	}
+
+	slen = strlen(sp);
+	ip -= slen - 1;
+	memcpy(ip, sp, slen);
+	
+    } while (cp > ep && cp != ip);
+
+    return len + delta;
+}
+
+static int
+xo_escape_json (xo_buffer_t *xbp, int len)
+{
+    unsigned delta = 0;
+    char *cp, *ep, *ip;
+
+    for (cp = xbp->xb_curp, ep = cp + len; cp < ep; cp++) {
+	if (*cp == '\\')
+	    delta += 1;
+	else if (*cp == '"')
+	    delta += 1;
+    }
+
+    if (delta == 0)		/* Nothing to escape; bail */
+	return len;
+
+    if (!xo_buf_has_room(xbp, delta)) /* No room; bail, but don't append */
+	return 0;
+
+    ep = xbp->xb_curp;
+    cp = ep + len;
+    ip = cp + delta;
+    do {
+	cp -= 1;
+	ip -= 1;
+
+	if (*cp != '\\' && *cp != '"') {
+	    *ip = *cp;
+	    continue;
+	}
+
+	*ip-- = *cp;
+	*ip = '\\';
+	
+    } while (cp > ep && cp != ip);
+
+    return len + delta;
 }
 
 /*
@@ -278,16 +382,27 @@ xo_buf_append (xo_buffer_t *xbp, const char *str, int len)
     xbp->xb_curp += len;
 }
 
-#if 0
-/*
- * Append the given string to the given buffer
- */
 static void
-xo_fmt_append (xo_handle_t *xop, const char *str, int len)
+xo_buf_escape (xo_handle_t *xop, xo_buffer_t *xbp, const char *str, int len)
 {
-    xo_buf_append(&xop->xo_fmt, str, len);
+    if (!xo_buf_has_room(xbp, len))
+	return;
+
+    memcpy(xbp->xb_curp, str, len);
+
+    switch (xop->xo_style) {
+    case XO_STYLE_XML:
+    case XO_STYLE_HTML:
+	len = xo_escape_xml(xbp, len, 0);
+	break;
+
+    case XO_STYLE_JSON:
+	len = xo_escape_json(xbp, len);
+	break;
+    }
+
+    xbp->xb_curp += len;
 }
-#endif
 
 /*
  * Append the given string to the given buffer
@@ -304,8 +419,7 @@ xo_data_append (xo_handle_t *xop, const char *str, int len)
 static void
 xo_data_escape (xo_handle_t *xop, const char *str, int len)
 {
-    /* XXX Underimplemented */
-    xo_buf_append(&xop->xo_data, str, len);
+    xo_buf_escape(xop, &xop->xo_data, str, len);
 }
 
 /*
@@ -382,6 +496,8 @@ xo_create (unsigned style, unsigned flags)
     xo_handle_t *xop = xo_realloc(NULL, sizeof(*xop));
 
     if (xop) {
+	bzero(xop, sizeof(*xop));
+
 	xop->xo_style  = style;
 	xop->xo_flags = flags;
 	xo_init_handle(xop);
@@ -426,6 +542,8 @@ xo_destroy (xo_handle_t *xop)
     xo_free(xop->xo_stack);
     xo_free(xop->xo_data.xb_bufp);
     xo_free(xop->xo_fmt.xb_bufp);
+    if (xop->xo_style == XO_STYLE_XML)
+	xo_free(xop->xo_attrs.xb_bufp);
 
     if (xop == &xo_default_handle) {
 	bzero(&xo_default_handle, sizeof(&xo_default_handle));
@@ -643,100 +761,6 @@ xo_info_find (xo_handle_t *xop, const char *name, int nlen)
 }
 
 static int
-xo_escape_xml (xo_handle_t *xop UNUSED, xo_buffer_t *xbp, int len)
-{
-    static char amp[] = "&amp;";
-    static char lt[] = "&lt;";
-    static char gt[] = "&gt;";
-
-    int slen;
-    unsigned delta = 0;
-    char *cp, *ep, *ip;
-    const char *sp;
-
-    for (cp = xbp->xb_curp, ep = cp + len; cp < ep; cp++) {
-	/* We're subtracting 2: 1 for the NUL, 1 for the char we replace */
-	if (*cp == '<')
-	    delta += sizeof(lt) - 2;
-	else if (*cp == '>')
-	    delta += sizeof(gt) - 2;
-	else if (*cp == '&')
-	    delta += sizeof(amp) - 2;
-    }
-
-    if (delta == 0)		/* Nothing to escape; bail */
-	return len;
-
-    if (!xo_buf_has_room(xbp, delta)) /* No room; bail, but don't append */
-	return 0;
-
-    ep = xbp->xb_curp;
-    cp = ep + len;
-    ip = cp + delta;
-    do {
-	cp -= 1;
-	ip -= 1;
-
-	if (*cp == '<')
-	    sp = lt;
-	else if (*cp == '>')
-	    sp = gt;
-	else if (*cp == '&')
-	    sp = amp;
-	else {
-	    *ip = *cp;
-	    continue;
-	}
-
-	slen = strlen(sp);
-	ip -= slen - 1;
-	memcpy(ip, sp, slen);
-	
-    } while (cp > ep && cp != ip);
-
-    return len + delta;
-}
-
-static int
-xo_escape_json (xo_handle_t *xop UNUSED, xo_buffer_t *xbp UNUSED, int len)
-{
-    unsigned delta = 0;
-    char *cp, *ep, *ip;
-
-    for (cp = xbp->xb_curp, ep = cp + len; cp < ep; cp++) {
-	if (*cp == '\\')
-	    delta += 1;
-	else if (*cp == '"')
-	    delta += 1;
-    }
-
-    if (delta == 0)		/* Nothing to escape; bail */
-	return len;
-
-    if (!xo_buf_has_room(xbp, delta)) /* No room; bail, but don't append */
-	return 0;
-
-    ep = xbp->xb_curp;
-    cp = ep + len;
-    ip = cp + delta;
-    do {
-	cp -= 1;
-	ip -= 1;
-
-	if (*cp != '\\' && *cp != '"') {
-	    *ip = *cp;
-	    continue;
-	}
-
-	*ip-- = *cp;
-	*ip = '\\';
-	
-    } while (cp > ep && cp != ip);
-
-    return len + delta;
-}
-
-static int
 xo_format_data (xo_handle_t *xop, const char *fmt, int flen, unsigned flags)
 {
     const char *cp, *ep, *sp;
@@ -769,14 +793,26 @@ xo_format_data (xo_handle_t *xop, const char *fmt, int flen, unsigned flags)
 		    cp += 1;
 		    break;
 		}
+		if (*cp == '*') {
+		    /*
+		     * '*' means there's a "%*.*s" value in vap that
+		     * we want to ignore
+		     */
+		    va_arg(xop->xo_vap, int);
+		}
 	    }
 	}
 
 	/* Hidden fields are only visible to JSON and XML */
-	if (flags & XFF_HIDE)
+	if (flags & XFF_HIDE_TEXT) {
 	    if (xop->xo_style != XO_STYLE_XML
 		    && xop->xo_style != XO_STYLE_JSON)
 		skip = 1;
+	} else if (flags & XFF_HIDE_DATA) {
+	    if (xop->xo_style != XO_STYLE_TEXT
+		    && xop->xo_style != XO_STYLE_HTML)
+		skip = 1;
+	}
 
 	/*
 	 * Looking at one piece of a format; find the end and
@@ -823,23 +859,23 @@ xo_format_data (xo_handle_t *xop, const char *fmt, int flen, unsigned flags)
 	if (rc > left) {
 	    if (!xo_buf_has_room(xbp, rc))
 		return -1;
+	    left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
 	    rc = vsnprintf(xbp->xb_curp, rc, newfmt, xop->xo_vap);
 	}
 
 	if (!skip) {
 	    /*
-	     * Time to put the "escape" in xo_buf_append_escaped.
-	     * for XML and HTML, we need "&<>" processing; for JSON,
+	     * For XML and HTML, we need "&<>" processing; for JSON,
 	     * it's quotes.  Text gets nothing.
 	     */
 	    switch (xop->xo_style) {
 	    case XO_STYLE_XML:
 	    case XO_STYLE_HTML:
-		rc = xo_escape_xml(xop, xbp, rc);
+		rc = xo_escape_xml(xbp, rc, 0);
 		break;
 
 	    case XO_STYLE_JSON:
-		rc = xo_escape_json(xop, xbp, rc);
+		rc = xo_escape_json(xbp, rc);
 		break;
 	    }
 
@@ -959,10 +995,6 @@ xo_format_title (xo_handle_t *xop, const char *str, int len,
     int left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
     int rc;
 
-    char *newstr = alloca(len + 1);
-    memcpy(newstr, str, len);
-    newstr[len] = '\0';
-
     char *newfmt = alloca(flen + 1);
     memcpy(newfmt, fmt, flen);
     newfmt[flen] = '\0';
@@ -974,12 +1006,36 @@ xo_format_title (xo_handle_t *xop, const char *str, int len,
 	xo_buf_append(&xop->xo_data, div_open, sizeof(div_open) - 1);
     }
 
-    rc = snprintf(xbp->xb_curp, left, newfmt, newstr);
-    if (rc > left) {
-	if (!xo_buf_has_room(xbp, rc))
-	    return;
+    if (len) {
+	/* If len is non-zero, the format string apply to the name */
+	char *newstr = alloca(len + 1);
+	memcpy(newstr, str, len);
+	newstr[len] = '\0';
+
 	rc = snprintf(xbp->xb_curp, left, newfmt, newstr);
+	if (rc > left) {
+	    if (!xo_buf_has_room(xbp, rc))
+		return;
+	    left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
+	    rc = snprintf(xbp->xb_curp, left, newfmt, newstr);
+	}
+
+    } else {
+	/* If len is zero, then we get our arguments from the vap */
+	rc = vsnprintf(xbp->xb_curp, left, newfmt, xop->xo_vap);
+	if (rc > left) {
+	    if (!xo_buf_has_room(xbp, rc))
+		return;
+	    left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
+	    rc = vsnprintf(xbp->xb_curp, rc, newfmt, xop->xo_vap);
+	}
+
     }
+
+    /* If we're styling HTML, then we need to escape it */
+    if (xop->xo_style == XO_STYLE_HTML)
+	rc = xo_escape_xml(xbp, rc, 0);
+
     xbp->xb_curp += rc;
 
     if (xop->xo_style == XO_STYLE_HTML) {
@@ -1028,6 +1084,13 @@ xo_format_value (xo_handle_t *xop, const char *name, int nlen,
 	    xo_buf_indent(xop, -1);
 	xo_data_append(xop, "<", 1);
 	xo_data_escape(xop, name, nlen);
+
+	if (xop->xo_attrs.xb_curp != xop->xo_attrs.xb_bufp) {
+	    xo_data_append(xop, xop->xo_attrs.xb_bufp,
+			   xop->xo_attrs.xb_curp - xop->xo_attrs.xb_bufp);
+	    xop->xo_attrs.xb_curp = xop->xo_attrs.xb_bufp;
+	}
+
 	xo_data_append(xop, ">", 1);
 	xo_format_data(xop, format, flen, flags);
 	xo_data_append(xop, "</", 2);
@@ -1078,7 +1141,7 @@ xo_format_decoration (xo_handle_t *xop, const char *str, int len)
 {
     switch (xop->xo_style) {
     case XO_STYLE_TEXT:
-	xo_data_escape(xop, str, len);
+	xo_data_append(xop, str, len);
 	break;
 
     case XO_STYLE_HTML:
@@ -1092,7 +1155,7 @@ xo_format_padding (xo_handle_t *xop, const char *str, int len)
 {
     switch (xop->xo_style) {
     case XO_STYLE_TEXT:
-	xo_data_escape(xop, str, len);
+	xo_data_append(xop, str, len);
 	break;
 
     case XO_STYLE_HTML:
@@ -1215,7 +1278,11 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 		break;
 
 	    case 'H':
-		flags |= XFF_HIDE;
+		flags |= XFF_HIDE_TEXT;
+		break;
+
+	    case 'h':
+		flags |= XFF_HIDE_DATA;
 		break;
 
 	    case 'N':
@@ -1364,6 +1431,74 @@ xo_emit (const char *fmt, ...)
     rc = xo_do_emit(xop, fmt);
     va_end(xop->xo_vap);
     bzero(&xop->xo_vap, sizeof(xop->xo_vap));
+
+    return rc;
+}
+
+int
+xo_attr_hv (xo_handle_t *xop, const char *name, const char *fmt, va_list vap)
+{
+    const int extra = 5; 	/* space, equals, quote, quote, and nul */
+    xop = xo_default(xop);
+
+    if (xop->xo_style != XO_STYLE_XML)
+	return 0;
+
+    int nlen = strlen(name);
+    xo_buffer_t *xbp = &xop->xo_attrs;
+
+    if (!xo_buf_has_room(xbp, nlen + extra))
+	return -1;
+
+    *xbp->xb_curp++ = ' ';
+    memcpy(xbp->xb_curp, name, nlen);
+    xbp->xb_curp += nlen;
+    *xbp->xb_curp++ = '=';
+    *xbp->xb_curp++ = '"';
+
+    int left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
+    int rc = vsnprintf(xbp->xb_curp, left, fmt, vap);
+    if (rc > xbp->xb_size) {
+	if (!xo_buf_has_room(xbp, rc))
+	    return -1;
+	left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
+	rc = vsnprintf(xbp->xb_curp, left, fmt, vap);
+    }
+
+    rc = xo_escape_xml(xbp, rc, 1);
+    xbp->xb_curp += rc;
+
+    if (!xo_buf_has_room(xbp, 2))
+	return -1;
+
+    *xbp->xb_curp++ = '"';
+    *xbp->xb_curp = '\0';
+
+    return rc + nlen + extra;
+}
+
+int
+xo_attr_h (xo_handle_t *xop, const char *name, const char *fmt, ...)
+{
+    int rc;
+    va_list vap;
+
+    va_start(vap, fmt);
+    rc = xo_attr_hv(xop, name, fmt, vap);
+    va_end(vap);
+
+    return rc;
+}
+
+int
+xo_attr (const char *name, const char *fmt, ...)
+{
+    int rc;
+    va_list vap;
+
+    va_start(vap, fmt);
+    rc = xo_attr_hv(NULL, name, fmt, vap);
+    va_end(vap);
 
     return rc;
 }
@@ -1755,6 +1890,7 @@ main (int argc, char **argv)
     for (ip = list; ip->i_title; ip++) {
 	xo_open_instance("item");
 
+	xo_attr("fancy", "%s%d", "item", ip - list);
 	xo_emit("{L:Item} '{:name/%s}':\n", ip->i_title);
 	xo_emit("{P:   }{L:Total sold}: {N:sold/%u%s}{H:percent/%u}\n",
 		ip->i_sold, ip->i_sold ? ".0" : "", 44);
