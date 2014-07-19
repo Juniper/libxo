@@ -10,6 +10,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
+#include <stddef.h>
+#include <wchar.h>
+#include <sys/types.h>
 #include <stdarg.h>
 #include <string.h>
 #include <alloca.h>
@@ -70,6 +74,7 @@ struct xo_handle_s {
     int xo_stack_size;		/* Size of the stack */
     xo_info_t *xo_info;		/* Info fields for all elements */
     int xo_info_count;		/* Number of info entries */
+    va_list xo_vap;		/* Variable arguments (stdargs) */
 };
 
 /* Flags for formatting functions */
@@ -225,6 +230,7 @@ xo_buf_has_room (xo_buffer_t *xbp, int len)
 	char *bp = xo_realloc(xbp->xb_bufp, sz);
 	if (bp == NULL)
 	    return 0;
+	xbp->xb_curp = bp + (xbp->xb_curp - xbp->xb_bufp);
 	xbp->xb_bufp = bp;
 	xbp->xb_size = sz;
     }
@@ -262,7 +268,6 @@ xo_printf (xo_handle_t *xop, const char *fmt, ...)
 /*
  * Append the given string to the given buffer
  */
-#if 0
 static void
 xo_buf_append (xo_buffer_t *xbp, const char *str, int len)
 {
@@ -272,21 +277,35 @@ xo_buf_append (xo_buffer_t *xbp, const char *str, int len)
     memcpy(xbp->xb_curp, str, len);
     xbp->xb_curp += len;
 }
-#endif
 
+#if 0
 /*
  * Append the given string to the given buffer
  */
 static void
 xo_fmt_append (xo_handle_t *xop, const char *str, int len)
 {
-    xo_buffer_t *xbp = &xop->xo_fmt;
+    xo_buf_append(&xop->xo_fmt, str, len);
+}
+#endif
 
-    if (!xo_buf_has_room(xbp, len))
-	return;
+/*
+ * Append the given string to the given buffer
+ */
+static void
+xo_data_append (xo_handle_t *xop, const char *str, int len)
+{
+    xo_buf_append(&xop->xo_data, str, len);
+}
 
-    memcpy(xbp->xb_curp, str, len);
-    xbp->xb_curp += len;
+/*
+ * Append the given string to the given buffer
+ */
+static void
+xo_data_escape (xo_handle_t *xop, const char *str, int len)
+{
+    /* XXX Underimplemented */
+    xo_buf_append(&xop->xo_data, str, len);
 }
 
 /*
@@ -498,7 +517,7 @@ xo_clear_flags (xo_handle_t *xop, unsigned flags)
 static void
 xo_buf_indent (xo_handle_t *xop, int indent)
 {
-    xo_buffer_t *xbp = &xop->xo_fmt;
+    xo_buffer_t *xbp = &xop->xo_data;
 
     if (indent <= 0)
 	indent = xo_indent(xop);
@@ -522,10 +541,10 @@ xo_line_ensure_open (xo_handle_t *xop, unsigned flags UNUSED)
 	return;
 
     xop->xo_flags |= XOF_DIV_OPEN;
-    xo_fmt_append(xop, div_open, sizeof(div_open) - 1);
+    xo_data_append(xop, div_open, sizeof(div_open) - 1);
 
     if (xop->xo_flags & XOF_PRETTY)
-	xo_fmt_append(xop, "\n", 1);
+	xo_data_append(xop, "\n", 1);
 }
 
 static void
@@ -539,14 +558,14 @@ xo_line_close (xo_handle_t *xop)
 	    xo_line_ensure_open(xop, 0);
 
 	xop->xo_flags &= ~XOF_DIV_OPEN;
-	xo_fmt_append(xop, div_close, sizeof(div_close) - 1);
+	xo_data_append(xop, div_close, sizeof(div_close) - 1);
 
 	if (xop->xo_flags & XOF_PRETTY)
-	    xo_fmt_append(xop, "\n", 1);
+	    xo_data_append(xop, "\n", 1);
 	break;
 
     case XO_STYLE_TEXT:
-	xo_fmt_append(xop, "\n", 1);
+	xo_data_append(xop, "\n", 1);
 	break;
     }
 }
@@ -576,6 +595,7 @@ if (xml && *cp == '<') {
 	} else 
 #endif
 
+#if 0
 static void
 xo_fmt_escaped (xo_handle_t *xop, const char *str, int len, int isfmt UNUSED)
 {
@@ -597,6 +617,7 @@ xo_fmt_escaped (xo_handle_t *xop, const char *str, int len, int isfmt UNUSED)
 
     xbp->xb_curp = bp;
 }
+#endif
 
 static int
 xo_info_compare (const void *key, const void *data)
@@ -621,6 +642,215 @@ xo_info_find (xo_handle_t *xop, const char *name, int nlen)
     return xip;
 }
 
+static int
+xo_escape_xml (xo_handle_t *xop UNUSED, xo_buffer_t *xbp, int len)
+{
+    static char amp[] = "&amp;";
+    static char lt[] = "&lt;";
+    static char gt[] = "&gt;";
+
+    int slen;
+    unsigned delta = 0;
+    char *cp, *ep, *ip;
+    const char *sp;
+
+    for (cp = xbp->xb_curp, ep = cp + len; cp < ep; cp++) {
+	/* We're subtracting 2: 1 for the NUL, 1 for the char we replace */
+	if (*cp == '<')
+	    delta += sizeof(lt) - 2;
+	else if (*cp == '>')
+	    delta += sizeof(gt) - 2;
+	else if (*cp == '&')
+	    delta += sizeof(amp) - 2;
+    }
+
+    if (delta == 0)		/* Nothing to escape; bail */
+	return len;
+
+    if (!xo_buf_has_room(xbp, delta)) /* No room; bail, but don't append */
+	return 0;
+
+    ep = xbp->xb_curp;
+    cp = ep + len;
+    ip = cp + delta;
+    do {
+	cp -= 1;
+	ip -= 1;
+
+	if (*cp == '<')
+	    sp = lt;
+	else if (*cp == '>')
+	    sp = gt;
+	else if (*cp == '&')
+	    sp = amp;
+	else {
+	    *ip = *cp;
+	    continue;
+	}
+
+	slen = strlen(sp);
+	ip -= slen - 1;
+	memcpy(ip, sp, slen);
+	
+    } while (cp > ep && cp != ip);
+
+    return len + delta;
+}
+
+static int
+xo_escape_json (xo_handle_t *xop UNUSED, xo_buffer_t *xbp UNUSED, int len)
+{
+    unsigned delta = 0;
+    char *cp, *ep, *ip;
+
+    for (cp = xbp->xb_curp, ep = cp + len; cp < ep; cp++) {
+	if (*cp == '\\')
+	    delta += 1;
+	else if (*cp == '"')
+	    delta += 1;
+    }
+
+    if (delta == 0)		/* Nothing to escape; bail */
+	return len;
+
+    if (!xo_buf_has_room(xbp, delta)) /* No room; bail, but don't append */
+	return 0;
+
+    ep = xbp->xb_curp;
+    cp = ep + len;
+    ip = cp + delta;
+    do {
+	cp -= 1;
+	ip -= 1;
+
+	if (*cp != '\\' && *cp != '"') {
+	    *ip = *cp;
+	    continue;
+	}
+
+	*ip-- = *cp;
+	*ip = '\\';
+	
+    } while (cp > ep && cp != ip);
+
+    return len + delta;
+}
+
+static int
+xo_format_data (xo_handle_t *xop, const char *fmt, int flen, unsigned flags)
+{
+    const char *cp, *ep, *sp;
+    xo_buffer_t *xbp = &xop->xo_data;
+    unsigned skip, lflag, hflag, jflag, tflag, zflag, qflag, stars;
+    int rc;
+    
+    for (cp = fmt, ep = fmt + flen; cp < ep; cp++) {
+	if (*cp != '%') {
+	add_one:
+	    if (!xo_buf_has_room(xbp, 1))
+		return -1;
+	    *xbp->xb_curp++ = *cp;
+	    continue;
+
+	} if (cp + 1 < ep && cp[1] == '%') {
+	    cp += 1;
+	    goto add_one;
+	}
+
+	skip = lflag = hflag = jflag = tflag = zflag = qflag = stars = 0;
+
+	/*
+	 * "%@" starts an XO-specific set of flags:
+	 *   @X@ - XML-only field; ignored if style isn't XML
+	 */
+	if (cp[1] == '@') {
+	    for (cp += 2; cp < ep; cp++) {
+		if (*cp == '@') {
+		    cp += 1;
+		    break;
+		}
+#if 0
+
+		if (*cp == 'X')
+		    skip = (xop->xo_style == XO_STYLE_XML);
+#endif
+	    }
+	}
+	if ((flags & XFF_HIDE) && (xop->xo_style != XO_STYLE_XML))
+	    skip = 1;
+
+	/*
+	 * Looking at one piece of a format; find the end and
+	 * call snprintf.  Then advance xo_vap on our own.
+	 *
+	 * Note that 'n', 'v', and '$' are not supported.
+	 */
+	sp = cp;		/* Save start pointer */
+	for (cp += 1; cp < ep; cp++) {
+	    if (*cp == 'l')
+		lflag += 1;
+	    else if (*cp == 'h')
+		hflag += 1;
+	    else if (*cp == 'j')
+		jflag += 1;
+	    else if (*cp == 't')
+		tflag += 1;
+	    else if (*cp == 'z')
+		zflag += 1;
+	    else if (*cp == 'q')
+		qflag += 1;
+	    else if (*cp == '*')
+		stars += 1;
+	    else if (strchr("diouxXDOUeEfFgGaAcCsSp", *cp) != NULL)
+		break;
+	    else if (*cp == 'n' || *cp == 'v') {
+		if (xop->xo_flags & XOF_WARN)
+		    xo_warn(xop, "unsupported format: '%s'", fmt);
+		return -1;
+	    }
+	}
+
+	xo_buffer_t *fbp = &xop->xo_fmt;
+	int len = cp - sp + 1;
+	if (!xo_buf_has_room(fbp, len + 1))
+	    return -1;
+
+	char *newfmt = fbp->xb_curp;
+	memcpy(newfmt, sp, len);
+	newfmt[len] = '\0';
+
+	int left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
+	rc = vsnprintf(xbp->xb_curp, left, newfmt, xop->xo_vap);
+	if (rc > left) {
+	    if (!xo_buf_has_room(xbp, rc))
+		return -1;
+	    rc = vsnprintf(xbp->xb_curp, rc, newfmt, xop->xo_vap);
+	}
+
+	if (!skip) {
+	    /*
+	     * Time to put the "escape" in xo_buf_append_escaped.
+	     * for XML and HTML, we need "&<>" processing; for JSON,
+	     * it's quotes.  Text gets nothing.
+	     */
+	    switch (xop->xo_style) {
+	    case XO_STYLE_XML:
+	    case XO_STYLE_HTML:
+		rc = xo_escape_xml(xop, xbp, rc);
+		break;
+
+	    case XO_STYLE_JSON:
+		rc = xo_escape_json(xop, xbp, rc);
+		break;
+	    }
+
+	    xbp->xb_curp += rc;
+	}
+    }
+
+    return 0;
+}
+
 static void
 xo_buf_append_div (xo_handle_t *xop, const char *class,
 		   const char *name, int nlen,
@@ -637,30 +867,30 @@ xo_buf_append_div (xo_handle_t *xop, const char *class,
     if (xop->xo_flags & XOF_PRETTY)
 	xo_buf_indent(xop, xop->xo_indent_by);
 
-    xo_fmt_append(xop, div1, sizeof(div1) - 1);
-    xo_fmt_append(xop, class, strlen(class));
+    xo_data_append(xop, div1, sizeof(div1) - 1);
+    xo_data_append(xop, class, strlen(class));
 
     if (name) {
-	xo_fmt_append(xop, div2, sizeof(div2) - 1);
-	xo_fmt_escaped(xop, name, nlen, 0);
+	xo_data_append(xop, div2, sizeof(div2) - 1);
+	xo_data_escape(xop, name, nlen);
     }
 
     if (name && (xop->xo_flags & XOF_XPATH)) {
 	int i;
 	xo_stack_t *xsp;
 
-	xo_fmt_append(xop, div3, sizeof(div3) - 1);
+	xo_data_append(xop, div3, sizeof(div3) - 1);
 	for (i = 0; i <= xop->xo_depth; i++) {
 	    xsp = &xop->xo_stack[i];
 	    if (xsp->xs_name == NULL)
 		continue;
 
-	    xo_fmt_append(xop, "/", 1);
-	    xo_fmt_escaped(xop, xsp->xs_name, strlen(xsp->xs_name), 0);
+	    xo_data_append(xop, "/", 1);
+	    xo_data_escape(xop, xsp->xs_name, strlen(xsp->xs_name));
 	}
 
-	xo_fmt_append(xop, "/", 1);
-	xo_fmt_escaped(xop, name, nlen, 0);
+	xo_data_append(xop, "/", 1);
+	xo_data_escape(xop, name, nlen);
     }
 
     if (name && (xop->xo_flags & XOF_INFO) && xop->xo_info) {
@@ -670,22 +900,22 @@ xo_buf_append_div (xo_handle_t *xop, const char *class,
 	xo_info_t *xip = xo_info_find(xop, name, nlen);
 	if (xip) {
 	    if (xip->xi_type) {
-		xo_fmt_append(xop, in_type, sizeof(in_type) - 1);
-		xo_fmt_escaped(xop, xip->xi_type, strlen(xip->xi_type), 0);
+		xo_data_append(xop, in_type, sizeof(in_type) - 1);
+		xo_data_escape(xop, xip->xi_type, strlen(xip->xi_type));
 	    }
 	    if (xip->xi_help) {
-		xo_fmt_append(xop, in_help, sizeof(in_help) - 1);
-		xo_fmt_escaped(xop, xip->xi_help, strlen(xip->xi_help), 0);
+		xo_data_append(xop, in_help, sizeof(in_help) - 1);
+		xo_data_escape(xop, xip->xi_help, strlen(xip->xi_help));
 	    }
 	}
     }
 
-    xo_fmt_append(xop, div4, sizeof(div4) - 1);
-    xo_fmt_escaped(xop, value, vlen, 1);
-    xo_fmt_append(xop, div5, sizeof(div5) - 1);
+    xo_data_append(xop, div4, sizeof(div4) - 1);
+    xo_format_data(xop, value, vlen, 0);
+    xo_data_append(xop, div5, sizeof(div5) - 1);
 
     if (xop->xo_flags & XOF_PRETTY)
-	xo_fmt_append(xop, "\n", 1);
+	xo_data_append(xop, "\n", 1);
 }
 
 static void
@@ -693,7 +923,7 @@ xo_format_text (xo_handle_t *xop, const char *str, int len)
 {
     switch (xop->xo_style) {
     case XO_STYLE_TEXT:
-	xo_fmt_escaped(xop, str, len, 0);
+	xo_buf_append(&xop->xo_data, str, len);
 	break;
 
     case XO_STYLE_HTML:
@@ -707,7 +937,7 @@ xo_format_label (xo_handle_t *xop, const char *str, int len)
 {
     switch (xop->xo_style) {
     case XO_STYLE_TEXT:
-	xo_fmt_escaped(xop, str, len, 0);
+	xo_buf_append(&xop->xo_data, str, len);
 	break;
 
     case XO_STYLE_HTML:
@@ -726,7 +956,7 @@ xo_format_title (xo_handle_t *xop, const char *str, int len,
     if (xop->xo_style != XO_STYLE_TEXT && xop->xo_style != XO_STYLE_HTML)
 	return;
 
-    xo_buffer_t *xbp = &xop->xo_fmt;
+    xo_buffer_t *xbp = &xop->xo_data;
     int left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
     int rc;
 
@@ -742,9 +972,9 @@ xo_format_title (xo_handle_t *xop, const char *str, int len,
 	xo_line_ensure_open(xop, 0);
 	if (xop->xo_flags & XOF_PRETTY)
 	    xo_buf_indent(xop, xop->xo_indent_by);
-	xo_fmt_append(xop, div_open, sizeof(div_open) - 1);
+	xo_buf_append(&xop->xo_data, div_open, sizeof(div_open) - 1);
     }
-	
+
     rc = snprintf(xbp->xb_curp, left, newfmt, newstr);
     if (rc > left) {
 	if (!xo_buf_has_room(xbp, rc))
@@ -754,9 +984,9 @@ xo_format_title (xo_handle_t *xop, const char *str, int len,
     xbp->xb_curp += rc;
 
     if (xop->xo_style == XO_STYLE_HTML) {
-	xo_fmt_append(xop, div_close, sizeof(div_close) - 1);
+	xo_data_append(xop, div_close, sizeof(div_close) - 1);
 	if (xop->xo_flags & XOF_PRETTY)
-	    xo_fmt_append(xop, "\n", 1);
+	    xo_data_append(xop, "\n", 1);
     }
 }
 
@@ -764,9 +994,9 @@ static void
 xo_format_prep (xo_handle_t *xop)
 {
     if (xop->xo_stack[xop->xo_depth].xs_flags & XSF_NOT_FIRST) {
-	xo_fmt_append(xop, ",", 1);
+	xo_data_append(xop, ",", 1);
 	if (xop->xo_flags & XOF_PRETTY)
-	    xo_fmt_append(xop, "\n", 1);
+	    xo_data_append(xop, "\n", 1);
     } else
 	xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
 }
@@ -781,11 +1011,12 @@ xo_format_value (xo_handle_t *xop, const char *name, int nlen,
 
     switch (xop->xo_style) {
     case XO_STYLE_TEXT:
-	xo_fmt_append(xop, format, flen);
+	xo_format_data(xop, format, flen, flags);
 	break;
 
     case XO_STYLE_HTML:
-	xo_buf_append_div(xop, "data", name, nlen, format, flen);
+	xo_buf_append_div(xop, "data", name, nlen,
+			  format, flen);
 	break;
 
     case XO_STYLE_XML:
@@ -796,15 +1027,15 @@ xo_format_value (xo_handle_t *xop, const char *name, int nlen,
 
 	if (pretty)
 	    xo_buf_indent(xop, -1);
-	xo_fmt_append(xop, "<", 1);
-	xo_fmt_escaped(xop, name, nlen, 0);
-	xo_fmt_append(xop, ">", 1);
-	xo_fmt_escaped(xop, format, flen, 1);
-	xo_fmt_append(xop, "</", 2);
-	xo_fmt_escaped(xop, name, nlen, 0);
-	xo_fmt_append(xop, ">", 1);
+	xo_data_append(xop, "<", 1);
+	xo_data_escape(xop, name, nlen);
+	xo_data_append(xop, ">", 1);
+	xo_format_data(xop, format, flen, flags);
+	xo_data_append(xop, "</", 2);
+	xo_data_escape(xop, name, nlen);
+	xo_data_append(xop, ">", 1);
 	if (pretty)
-	    xo_fmt_append(xop, "\n", 1);
+	    xo_data_append(xop, "\n", 1);
 	break;
 
     case XO_STYLE_JSON:
@@ -826,19 +1057,19 @@ xo_format_value (xo_handle_t *xop, const char *name, int nlen,
 
 	if (pretty)
 	    xo_buf_indent(xop, -1);
-	xo_fmt_append(xop, "\"", 1);
-	xo_fmt_escaped(xop, name, nlen, 0);
-	xo_fmt_append(xop, "\":", 2);
+	xo_data_append(xop, "\"", 1);
+	xo_data_escape(xop, name, nlen);
+	xo_data_append(xop, "\":", 2);
 
 	if (pretty)
-	    xo_fmt_append(xop, " ", 1);
+	    xo_data_append(xop, " ", 1);
 	if (quote)
-	    xo_fmt_append(xop, "\"", 1);
+	    xo_data_append(xop, "\"", 1);
 
-	xo_fmt_escaped(xop, format, flen, 1);
+	xo_format_data(xop, format, flen, flags);
 
 	if (quote)
-	    xo_fmt_append(xop, "\"", 1);
+	    xo_data_append(xop, "\"", 1);
 	break;
     }
 }
@@ -848,7 +1079,7 @@ xo_format_decoration (xo_handle_t *xop, const char *str, int len)
 {
     switch (xop->xo_style) {
     case XO_STYLE_TEXT:
-	xo_fmt_escaped(xop, str, len, 0);
+	xo_data_escape(xop, str, len);
 	break;
 
     case XO_STYLE_HTML:
@@ -862,7 +1093,7 @@ xo_format_padding (xo_handle_t *xop, const char *str, int len)
 {
     switch (xop->xo_style) {
     case XO_STYLE_TEXT:
-	xo_fmt_escaped(xop, str, len, 0);
+	xo_data_escape(xop, str, len);
 	break;
 
     case XO_STYLE_HTML:
@@ -871,11 +1102,10 @@ xo_format_padding (xo_handle_t *xop, const char *str, int len)
     }
 }
 
-int
-xo_emit_hv (xo_handle_t *xop, const char *fmt, va_list vap)
+static int
+xo_do_emit (xo_handle_t *xop, const char *fmt)
 {
-    xop = xo_default(xop);
-
+    xo_buffer_t *xbp = &xop->xo_data;
     int rc = 0;
     const char *cp, *sp, *ep, *basep;
     char *newp = NULL;
@@ -1077,19 +1307,36 @@ xo_emit_hv (xo_handle_t *xop, const char *fmt, va_list vap)
 	}
     }
 
-    xo_fmt_append(xop, "", 1); /* Append ending NUL */
+    xo_buf_append(xbp, "", 1); /* Append ending NUL */
 
-    rc = vsnprintf(xop->xo_data.xb_bufp, xop->xo_data.xb_size,
+#if 0
+    rc = vsnprintf(xbp->xb_bufp, xbp->xb_size,
 		   xop->xo_fmt.xb_bufp, vap);
     xop->xo_fmt.xb_curp = xop->xo_fmt.xb_bufp;
-    if (rc > xop->xo_data.xb_size) {
+    if (rc > xbp->xb_size) {
 	if (!xo_buf_has_room(&xop->xo_data, rc))
 	    return -1;
-	rc = vsnprintf(xop->xo_data.xb_bufp, xop->xo_data.xb_size,
+	rc = vsnprintf(xbp->xb_bufp, xbp->xb_size,
 		       xop->xo_fmt.xb_bufp, vap);
     }
+#endif
 
-    xop->xo_write(xop->xo_opaque, xop->xo_data.xb_bufp);
+    xop->xo_write(xop->xo_opaque, xbp->xb_bufp);
+    xbp->xb_curp = xbp->xb_bufp;
+
+    return rc;
+}
+
+int
+xo_emit_hv (xo_handle_t *xop, const char *fmt, va_list vap)
+{
+    int rc;
+
+    xop = xo_default(xop);
+    va_copy(xop->xo_vap, vap);
+    rc = xo_do_emit(xop, fmt);
+    va_end(xop->xo_vap);
+    bzero(&xop->xo_vap, sizeof(xop->xo_vap));
 
     return rc;
 }
@@ -1097,12 +1344,13 @@ xo_emit_hv (xo_handle_t *xop, const char *fmt, va_list vap)
 int
 xo_emit_h (xo_handle_t *xop, const char *fmt, ...)
 {
-    va_list vap;
     int rc;
 
-    va_start(vap, fmt);
-    rc = xo_emit_hv(xop, fmt, vap);
-    va_end(vap);
+    xop = xo_default(xop);
+    va_start(xop->xo_vap, fmt);
+    rc = xo_do_emit(xop, fmt);
+    va_end(xop->xo_vap);
+    bzero(&xop->xo_vap, sizeof(xop->xo_vap));
 
     return rc;
 }
@@ -1110,12 +1358,13 @@ xo_emit_h (xo_handle_t *xop, const char *fmt, ...)
 int
 xo_emit (const char *fmt, ...)
 {
-    va_list vap;
+    xo_handle_t *xop = xo_default(NULL);
     int rc;
 
-    va_start(vap, fmt);
-    rc = xo_emit_hv(NULL, fmt, vap);
-    va_end(vap);
+    va_start(xop->xo_vap, fmt);
+    rc = xo_do_emit(xop, fmt);
+    va_end(xop->xo_vap);
+    bzero(&xop->xo_vap, sizeof(xop->xo_vap));
 
     return rc;
 }
@@ -1423,6 +1672,28 @@ xo_set_allocator (xo_realloc_func_t realloc_func, xo_free_func_t free_func)
 }
 
 #ifdef UNIT_TEST
+void
+xo_vap (xo_handle_t *xop);
+void
+xo_vap (xo_handle_t *xop)
+{
+    xop = xo_default(xop);
+
+    void *p = va_arg(xop->xo_vap, void *);
+    fprintf(stderr, "ptr %p\n", p);
+}
+
+void
+xo_vap_int (xo_handle_t *xop);
+void
+xo_vap_int (xo_handle_t *xop)
+{
+    xop = xo_default(xop);
+
+    int i = va_arg(xop->xo_vap, int);
+    fprintf(stderr, "int %d\n", i);
+}
+
 int
 main (int argc, char **argv)
 {
@@ -1437,11 +1708,11 @@ main (int argc, char **argv)
 	int i_sku_num;
     };
     struct item list[] = {
-	{ "gum", 1412, 54, 10, base_grocery, 415 },
-	{ "rope", 85, 4, 2, base_hardware, 212 },
+	{ "gum&this&that", 1412, 54, 10, base_grocery, 415 },
+	{ "<rope>", 85, 4, 2, base_hardware, 212 },
 	{ "ladder", 0, 2, 1, base_hardware, 517 },
-	{ "bolt", 4123, 144, 42, base_hardware, 632 },
-	{ "water", 17, 14, 2, base_grocery, 2331 },
+	{ "\"bolt\"", 4123, 144, 42, base_hardware, 632 },
+	{ "water\\blue", 17, 14, 2, base_grocery, 2331 },
 	{ NULL, 0, 0, 0, NULL, 0 }
     };
     struct item list2[] = {
