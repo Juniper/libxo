@@ -32,9 +32,9 @@ main (int argc, char **argv)
 	unsigned e_dept;
 	unsigned e_percent;
     } employees[] = {
-	{ "Terry", "Jones", 660, 90 },
-	{ "Leslie", "Patterson", 341,60 },
-	{ "Ashley", "Meter & Smith", 1440, 40 },
+	{ "Terry (\"<one\")", "Jones", 660, 90 },
+	{ "Leslie (\"Les\")", "Patterson", 341,60 },
+	{ "Ashley (\"Ash\")", "Meter & Smith", 1440, 40 },
 	{ NULL, NULL }
     }, *ep = employees;
 
@@ -43,11 +43,11 @@ main (int argc, char **argv)
     xo_open_container("employees");
     xo_open_list("employee");
 
-    xo_emit("{T:Last Name/%-12s}{T:First Name/%-14s}"
+    xo_emit("{T:First Name/%-20s}{T:First Name/%-14s}"
 	    "{T:Department/%12s}{T:Time (%)\n");
     for ( ; ep->e_first; ep++) {
 	xo_open_instance("employee");
-	xo_emit("{:first-name/%-12s/%s}{:last-name/%-14s/%s}"
+	xo_emit("{:first-name/%-20s/%s}{:last-name/%-14s/%s}"
 		"{:department/%8u/%u}{:percent-time/%8u/%u}\n",
 		ep->e_first, ep->e_last, ep->e_dept, ep->e_percent);
 	xo_close_instance("employee");
