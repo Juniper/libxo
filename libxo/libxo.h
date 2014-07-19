@@ -130,4 +130,13 @@ xo_close_instance_h (xo_handle_t *xop, const char *name);
 int
 xo_close_instance (const char *name);
 
+int
+xo_attr_h (xo_handle_t *xop, const char *name, const char *fmt, ...);
+
+int
+xo_attr_hv (xo_handle_t *xop, const char *name, const char *fmt, va_list vap);
+
+int
+xo_attr (const char *name, const char *fmt, ...);
+
 #endif /* INCLUDE_XO_H */
