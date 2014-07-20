@@ -12,7 +12,6 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
-#include <alloca.h>
 
 #include "libxo.h"
 #include "xoversion.h"
