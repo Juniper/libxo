@@ -41,3 +41,4 @@ xoconfig.h.in
 .gdbinit.local
 xtest
 xtest.dSYM
+tests/w
