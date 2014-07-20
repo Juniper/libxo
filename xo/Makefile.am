@@ -16,14 +16,10 @@ AM_CFLAGS = \
     -I${top_builddir} \
     -I${top_srcdir} \
     -I${top_srcdir}/libxo \
-    ${LIBXML_CFLAGS} \
-    ${LIBXSLT_CFLAGS} \
     ${WARNINGS}
 
 LIBS = \
-    ${LIBXSLT_LIBS} \
-    -lexslt \
-    ${LIBXML_LIBS}
+    ${LIBXO_LIBS}
 
 bin_PROGRAMS = xo
 
