@@ -37,6 +37,7 @@ main (int argc, char **argv)
     };
     struct item list2[] = {
 	{ "fish", 1321, 45, 1, base_grocery, 533 },
+	{ NULL, 0, 0, 0, NULL, 0 }
     };
     struct item *ip;
     xo_info_t info[] = {
