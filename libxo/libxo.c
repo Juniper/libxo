@@ -16,7 +16,6 @@
 #include <sys/types.h>
 #include <stdarg.h>
 #include <string.h>
-#include <alloca.h>
 
 #include "libxo.h"
 
@@ -258,6 +257,8 @@ xo_printf (xo_handle_t *xop, const char *fmt, ...)
     if (rc > xbp->xb_size) {
 	if (!xo_buf_has_room(xbp, rc))
 	    return -1;
+	va_end(vap);
+	va_start(vap, fmt);
 	left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
 	rc = vsnprintf(xbp->xb_curp, left, fmt, vap);
     }
@@ -767,6 +768,7 @@ xo_format_data (xo_handle_t *xop, const char *fmt, int flen, unsigned flags)
     xo_buffer_t *xbp = &xop->xo_data;
     unsigned skip, lflag, hflag, jflag, tflag, zflag, qflag, stars;
     int rc;
+    va_list va_local;
     
     for (cp = fmt, ep = fmt + flen; cp < ep; cp++) {
 	if (*cp != '%') {
@@ -854,14 +856,30 @@ xo_format_data (xo_handle_t *xop, const char *fmt, int flen, unsigned flags)
 	memcpy(newfmt, sp, len);
 	newfmt[len] = '\0';
 
+	/*
+	 * After we call vsnprintf(), the stage of vap is not defined.
+	 * We need to copy it before we pass.  Then we have to do our
+	 * own logic below to move it along.  This is because the
+	 * implementation can have va_list be a point (bsd) or a
+	 * structure (macosx) or anything in between.
+	 */
+	va_copy(va_local, xop->xo_vap);
+
 	int left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
-	rc = vsnprintf(xbp->xb_curp, left, newfmt, xop->xo_vap);
+	rc = vsnprintf(xbp->xb_curp, left, newfmt, va_local);
 	if (rc > left) {
 	    if (!xo_buf_has_room(xbp, rc))
 		return -1;
+
+	    /* Need a fresh copy */
+	    va_end(va_local);
+	    va_copy(va_local, xop->xo_vap);
+
 	    left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
-	    rc = vsnprintf(xbp->xb_curp, rc, newfmt, xop->xo_vap);
+	    rc = vsnprintf(xbp->xb_curp, rc, newfmt, va_local);
 	}
+
+	va_end(va_local);
 
 	if (!skip) {
 	    /*
@@ -881,6 +899,70 @@ xo_format_data (xo_handle_t *xop, const char *fmt, int flen, unsigned flags)
 
 	    xbp->xb_curp += rc;
 	}
+
+	/*
+	 * Now for the tricky part: we need to move the argument pointer
+	 * along by the amount needed.
+	 */
+	char fc = *cp;
+	/* Handle "%*s" */
+	if (stars > 0) {
+	    va_arg(xop->xo_vap, int);
+	    if (stars > 1)
+		va_arg(xop->xo_vap, int);
+	}
+
+	if (fc == 'D' || fc == 'O' || fc == 'U')
+	    lflag = 1;
+
+	if (strchr("diouxXDOU", fc) != NULL) {
+	    if (hflag > 1) {
+		va_arg(xop->xo_vap, int);
+
+	    } else if (hflag > 0) {
+		va_arg(xop->xo_vap, int);
+
+	    } else if (lflag > 1) {
+		va_arg(xop->xo_vap, unsigned long long);
+
+	    } else if (lflag > 0) {
+		va_arg(xop->xo_vap, unsigned long);
+
+	    } else if (jflag > 0) {
+		va_arg(xop->xo_vap, intmax_t);
+
+	    } else if (tflag > 0) {
+		va_arg(xop->xo_vap, ptrdiff_t);
+
+	    } else if (zflag > 0) {
+		va_arg(xop->xo_vap, size_t);
+
+	    } else if (qflag > 0) {
+		va_arg(xop->xo_vap, quad_t);
+
+	    } else {
+		va_arg(xop->xo_vap, int);
+	    }
+	} else if (strchr("eEfFgGaA", fc) != NULL)
+	    if (lflag)
+		va_arg(xop->xo_vap, long double);
+	    else
+		va_arg(xop->xo_vap, double);
+
+	else if (fc == 'C' || (fc == 'c' && lflag))
+	    va_arg(xop->xo_vap, wint_t);
+
+	else if (fc == 'c')
+	    va_arg(xop->xo_vap, int);
+
+	else if (fc == 'S' || (fc == 's' && lflag))
+	    va_arg(xop->xo_vap, wchar_t *);
+
+	else if (fc == 's')
+	    va_arg(xop->xo_vap, char *);
+
+	else if (fc == 'p')
+	    va_arg(xop->xo_vap, void *);
     }
 
     return 0;
@@ -1021,15 +1103,21 @@ xo_format_title (xo_handle_t *xop, const char *str, int len,
 	}
 
     } else {
+	va_list va_local;
+
 	/* If len is zero, then we get our arguments from the vap */
-	rc = vsnprintf(xbp->xb_curp, left, newfmt, xop->xo_vap);
+	va_copy(va_local, xop->xo_vap);
+	rc = vsnprintf(xbp->xb_curp, left, newfmt, va_local);
 	if (rc > left) {
 	    if (!xo_buf_has_room(xbp, rc))
 		return;
+	    va_end(va_local);
+	    va_copy(va_local, xop->xo_vap);
 	    left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
-	    rc = vsnprintf(xbp->xb_curp, rc, newfmt, xop->xo_vap);
+	    rc = vsnprintf(xbp->xb_curp, rc, newfmt, va_local);
 	}
 
+	va_end(va_local);
     }
 
     /* If we're styling HTML, then we need to escape it */
@@ -1375,18 +1463,6 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 
     xo_buf_append(xbp, "", 1); /* Append ending NUL */
 
-#if 0
-    rc = vsnprintf(xbp->xb_bufp, xbp->xb_size,
-		   xop->xo_fmt.xb_bufp, vap);
-    xop->xo_fmt.xb_curp = xop->xo_fmt.xb_bufp;
-    if (rc > xbp->xb_size) {
-	if (!xo_buf_has_room(&xop->xo_data, rc))
-	    return -1;
-	rc = vsnprintf(xbp->xb_bufp, xbp->xb_size,
-		       xop->xo_fmt.xb_bufp, vap);
-    }
-#endif
-
     xop->xo_write(xop->xo_opaque, xbp->xb_bufp);
     xbp->xb_curp = xbp->xb_bufp;
 
@@ -1457,13 +1533,19 @@ xo_attr_hv (xo_handle_t *xop, const char *name, const char *fmt, va_list vap)
     *xbp->xb_curp++ = '"';
 
     int left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
-    int rc = vsnprintf(xbp->xb_curp, left, fmt, vap);
+    va_list va_local;
+
+    va_copy(va_local, vap);
+    int rc = vsnprintf(xbp->xb_curp, left, fmt, va_local);
     if (rc > xbp->xb_size) {
 	if (!xo_buf_has_room(xbp, rc))
 	    return -1;
+	va_end(va_local);
+	va_copy(va_local, vap);
 	left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
-	rc = vsnprintf(xbp->xb_curp, left, fmt, vap);
+	rc = vsnprintf(xbp->xb_curp, left, fmt, va_local);
     }
+    va_end(va_local);
 
     rc = xo_escape_xml(xbp, rc, 1);
     xbp->xb_curp += rc;
