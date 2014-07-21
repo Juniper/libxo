@@ -769,6 +769,7 @@ xo_format_data (xo_handle_t *xop, const char *fmt, int flen, unsigned flags)
     unsigned skip, lflag, hflag, jflag, tflag, zflag, qflag, stars;
     int rc;
     va_list va_local;
+    int delta = 0;
     
     for (cp = fmt, ep = fmt + flen; cp < ep; cp++) {
 	if (*cp != '%') {
@@ -784,6 +785,7 @@ xo_format_data (xo_handle_t *xop, const char *fmt, int flen, unsigned flags)
 	}
 
 	skip = lflag = hflag = jflag = tflag = zflag = qflag = stars = 0;
+	rc = 0;
 
 	/*
 	 * "%@" starts an XO-specific set of flags:
@@ -847,41 +849,41 @@ xo_format_data (xo_handle_t *xop, const char *fmt, int flen, unsigned flags)
 	    }
 	}
 
-	xo_buffer_t *fbp = &xop->xo_fmt;
-	int len = cp - sp + 1;
-	if (!xo_buf_has_room(fbp, len + 1))
-	    return -1;
-
-	char *newfmt = fbp->xb_curp;
-	memcpy(newfmt, sp, len);
-	newfmt[len] = '\0';
-
-	/*
-	 * After we call vsnprintf(), the stage of vap is not defined.
-	 * We need to copy it before we pass.  Then we have to do our
-	 * own logic below to move it along.  This is because the
-	 * implementation can have va_list be a point (bsd) or a
-	 * structure (macosx) or anything in between.
-	 */
-	va_copy(va_local, xop->xo_vap);
-
-	int left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
-	rc = vsnprintf(xbp->xb_curp, left, newfmt, va_local);
-	if (rc > left) {
-	    if (!xo_buf_has_room(xbp, rc))
+	if (!skip) {
+	    xo_buffer_t *fbp = &xop->xo_fmt;
+	    int len = cp - sp + 1;
+	    if (!xo_buf_has_room(fbp, len + 1))
 		return -1;
 
-	    /* Need a fresh copy */
-	    va_end(va_local);
+	    char *newfmt = fbp->xb_curp;
+	    memcpy(newfmt, sp, len);
+	    newfmt[len] = '\0';
+
+	    /*
+	     * After we call vsnprintf(), the stage of vap is not defined.
+	     * We need to copy it before we pass.  Then we have to do our
+	     * own logic below to move it along.  This is because the
+	     * implementation can have va_list be a point (bsd) or a
+	     * structure (macosx) or anything in between.
+	     */
 	    va_copy(va_local, xop->xo_vap);
 
-	    left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
-	    rc = vsnprintf(xbp->xb_curp, rc, newfmt, va_local);
-	}
+	    int left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
+	    rc = vsnprintf(xbp->xb_curp, left, newfmt, va_local);
+	    if (rc > left) {
+		if (!xo_buf_has_room(xbp, rc))
+		    return -1;
 
-	va_end(va_local);
+		/* Need a fresh copy */
+		va_end(va_local);
+		va_copy(va_local, xop->xo_vap);
 
-	if (!skip) {
+		left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
+		rc = vsnprintf(xbp->xb_curp, rc, newfmt, va_local);
+	    }
+
+	    va_end(va_local);
+
 	    /*
 	     * For XML and HTML, we need "&<>" processing; for JSON,
 	     * it's quotes.  Text gets nothing.
@@ -898,6 +900,7 @@ xo_format_data (xo_handle_t *xop, const char *fmt, int flen, unsigned flags)
 	    }
 
 	    xbp->xb_curp += rc;
+	    delta += rc;
 	}
 
 	/*
@@ -905,7 +908,7 @@ xo_format_data (xo_handle_t *xop, const char *fmt, int flen, unsigned flags)
 	 * along by the amount needed.
 	 */
 	char fc = *cp;
-	/* Handle "%*s" */
+	/* Handle "%*.*s" */
 	if (stars > 0) {
 	    va_arg(xop->xo_vap, int);
 	    if (stars > 1)
@@ -965,7 +968,7 @@ xo_format_data (xo_handle_t *xop, const char *fmt, int flen, unsigned flags)
 	    va_arg(xop->xo_vap, void *);
     }
 
-    return 0;
+    return delta;
 }
 
 static void
@@ -1074,12 +1077,9 @@ xo_format_title (xo_handle_t *xop, const char *str, int len,
 	return;
 
     xo_buffer_t *xbp = &xop->xo_data;
-    int left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
+    int start = xbp->xb_curp - xbp->xb_bufp;
+    int left = xbp->xb_size - start;
     int rc;
-
-    char *newfmt = alloca(flen + 1);
-    memcpy(newfmt, fmt, flen);
-    newfmt[flen] = '\0';
 
     if (xop->xo_style == XO_STYLE_HTML) {
 	xo_line_ensure_open(xop, 0);
@@ -1088,7 +1088,12 @@ xo_format_title (xo_handle_t *xop, const char *str, int len,
 	xo_buf_append(&xop->xo_data, div_open, sizeof(div_open) - 1);
     }
 
+    start = xbp->xb_curp - xbp->xb_bufp; /* Reset start */
     if (len) {
+	char *newfmt = alloca(flen + 1);
+	memcpy(newfmt, fmt, flen);
+	newfmt[flen] = '\0';
+
 	/* If len is non-zero, the format string apply to the name */
 	char *newstr = alloca(len + 1);
 	memcpy(newstr, str, len);
@@ -1103,6 +1108,7 @@ xo_format_title (xo_handle_t *xop, const char *str, int len,
 	}
 
     } else {
+#if 0
 	va_list va_local;
 
 	/* If len is zero, then we get our arguments from the vap */
@@ -1118,11 +1124,17 @@ xo_format_title (xo_handle_t *xop, const char *str, int len,
 	}
 
 	va_end(va_local);
+#endif
+
+	rc = xo_format_data(xop, fmt, flen, 0);
     }
 
     /* If we're styling HTML, then we need to escape it */
-    if (xop->xo_style == XO_STYLE_HTML)
+    if (xop->xo_style == XO_STYLE_HTML) {
+	/* xo_format_data moved curp, so we need to reset it */
+	xbp->xb_curp = xbp->xb_bufp + start;
 	rc = xo_escape_xml(xbp, rc, 0);
+    }
 
     xbp->xb_curp += rc;
 
