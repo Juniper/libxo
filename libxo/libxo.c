@@ -27,13 +27,28 @@
 #define XO_BUFSIZ	(8*1024) /* Initial buffer size */
 #define XO_DEPTH	512	 /* Default stack depth */
 
+#ifdef LIBXO_WIDE
+typedef wchar_t xchar_t;
+#define W L
+
+#define fprintf fwprintf
+#define vfprintf vfwprintf
+#define vsnprintf vswnprintf
+#define snprintf swnprintf
+#define strchr wcschr
+
+#else /* LIBXO_WIDE */
+typedef char xchar_t;
+#define W /* nothing */
+#endif /* LIBXO_WIDE */
+
 /*
  * xo_buffer_t: a memory buffer that can be grown as needed.  We
  * use them for building format strings and output data.
  */
 typedef struct xo_buffer_s {
-    char *xb_bufp;		/* Buffer memory */
-    char *xb_curp;		/* Current insertion point */
+    xchar_t *xb_bufp;		/* Buffer memory */
+    xchar_t *xb_curp;		/* Current insertion point */
     int xb_size;		/* Size of buffer */
 } xo_buffer_t;
 
@@ -44,7 +59,7 @@ typedef struct xo_buffer_s {
  */
 typedef struct xo_stack_s {
     unsigned xs_flags;		/* Flags for this frame */
-    char *xs_name;		/* Name (for XPath value) */
+    xchar_t *xs_name;		/* Name (for XPath value) */
 } xo_stack_t;
 
 /* Flags for xs_flags: */
@@ -62,12 +77,12 @@ struct xo_handle_s {
     unsigned short xo_indent;	/* Indent level (if pretty) */
     unsigned short xo_indent_by; /* Indent amount (tab stop) */
     xo_write_func_t xo_write;	/* Write callback */
-    xo_close_func_t xo_close;	/* Close callback */
+    xo_close_func_t xo_close;	/* Clo;se callback */
     xo_formatter_t xo_formatter; /* Custom formating function */
     void *xo_opaque;		/* Opaque data for write function */
     FILE *xo_fp;		/* XXX File pointer */
     xo_buffer_t xo_data;	/* Output data */
-    xo_buffer_t xo_fmt;		/* Work area for building format strings */
+    xo_buffer_t xo_fmt;	   	/* Work area for building format strings */
     xo_buffer_t xo_attrs;	/* Work area for building XML attributes */
     xo_stack_t *xo_stack;	/* Stack pointer */
     int xo_depth;		/* Depth of stack */
@@ -105,7 +120,7 @@ static xo_free_func_t xo_free = free;
  * Callback to write data to a FILE pointer
  */
 static int
-xo_write_to_file (void *opaque, const char *data)
+xo_write_to_file (void *opaque, const xchar_t *data)
 {
     FILE *fp = (FILE *) opaque;
     return fprintf(fp, "%s", data);
@@ -230,7 +245,7 @@ xo_buf_has_room (xo_buffer_t *xbp, int len)
 {
     if (xbp->xb_curp + len >= xbp->xb_bufp + xbp->xb_size) {
 	int sz = xbp->xb_size + XO_BUFSIZ;
-	char *bp = xo_realloc(xbp->xb_bufp, sz);
+	xchar_t *bp = xo_realloc(xbp->xb_bufp, sz);
 	if (bp == NULL)
 	    return 0;
 	xbp->xb_curp = bp + (xbp->xb_curp - xbp->xb_bufp);
@@ -245,7 +260,7 @@ xo_buf_has_room (xo_buffer_t *xbp, int len)
  * Print some data thru the handle.
  */
 static int
-xo_printf (xo_handle_t *xop, const char *fmt, ...)
+xo_printf (xo_handle_t *xop, const xchar_t *fmt, ...)
 {
     xo_buffer_t *xbp = &xop->xo_data;
     int left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
@@ -257,8 +272,10 @@ xo_printf (xo_handle_t *xop, const char *fmt, ...)
     if (rc > xbp->xb_size) {
 	if (!xo_buf_has_room(xbp, rc))
 	    return -1;
-	va_end(vap);
+
+	va_end(vap);		/* Reset vap to the start */
 	va_start(vap, fmt);
+
 	left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
 	rc = vsnprintf(xbp->xb_curp, left, fmt, vap);
     }
@@ -274,15 +291,15 @@ xo_printf (xo_handle_t *xop, const char *fmt, ...)
 static int
 xo_escape_xml (xo_buffer_t *xbp, int len, int attr)
 {
-    static char amp[] = "&amp;";
-    static char lt[] = "&lt;";
-    static char gt[] = "&gt;";
-    static char quot[] = "&quot;";
+    static xchar_t amp[] = W "&amp;";
+    static xchar_t lt[] = W "&lt;";
+    static xchar_t gt[] = W "&gt;";
+    static xchar_t quot[] = W "&quot;";
 
     int slen;
     unsigned delta = 0;
-    char *cp, *ep, *ip;
-    const char *sp;
+    xchar_t *cp, *ep, *ip;
+    const xchar_t *sp;
 
     for (cp = xbp->xb_curp, ep = cp + len; cp < ep; cp++) {
 	/* We're subtracting 2: 1 for the NUL, 1 for the char we replace */
@@ -335,7 +352,7 @@ static int
 xo_escape_json (xo_buffer_t *xbp, int len)
 {
     unsigned delta = 0;
-    char *cp, *ep, *ip;
+    xchar_t *cp, *ep, *ip;
 
     for (cp = xbp->xb_curp, ep = cp + len; cp < ep; cp++) {
 	if (*cp == '\\')
@@ -374,7 +391,7 @@ xo_escape_json (xo_buffer_t *xbp, int len)
  * Append the given string to the given buffer
  */
 static void
-xo_buf_append (xo_buffer_t *xbp, const char *str, int len)
+xo_buf_append (xo_buffer_t *xbp, const xchar_t *str, int len)
 {
     if (!xo_buf_has_room(xbp, len))
 	return;
@@ -384,7 +401,7 @@ xo_buf_append (xo_buffer_t *xbp, const char *str, int len)
 }
 
 static void
-xo_buf_escape (xo_handle_t *xop, xo_buffer_t *xbp, const char *str, int len)
+xo_buf_escape (xo_handle_t *xop, xo_buffer_t *xbp, const xchar_t *str, int len)
 {
     if (!xo_buf_has_room(xbp, len))
 	return;
@@ -409,7 +426,7 @@ xo_buf_escape (xo_handle_t *xop, xo_buffer_t *xbp, const char *str, int len)
  * Append the given string to the given buffer
  */
 static void
-xo_data_append (xo_handle_t *xop, const char *str, int len)
+xo_data_append (xo_handle_t *xop, const xchar_t *str, int len)
 {
     xo_buf_append(&xop->xo_data, str, len);
 }
@@ -418,7 +435,7 @@ xo_data_append (xo_handle_t *xop, const char *str, int len)
  * Append the given string to the given buffer
  */
 static void
-xo_data_escape (xo_handle_t *xop, const char *str, int len)
+xo_data_escape (xo_handle_t *xop, const xchar_t *str, int len)
 {
     xo_buf_escape(xop, &xop->xo_data, str, len);
 }
@@ -462,11 +479,11 @@ xo_indent (xo_handle_t *xop)
  * XMLified content on standard output.
  */
 static void
-xo_warn (xo_handle_t *xop, const char *fmt, ...)
+xo_warn (xo_handle_t *xop, const xchar_t *fmt, ...)
 {
     va_list vap;
     int len = strlen(fmt);
-    char *newfmt = alloca(len + 2);
+    xchar_t *newfmt = alloca(len + 2);
 
     memcpy(newfmt, fmt, len);	/* Add a newline to the fmt string */
     newfmt[len] = '\n';
@@ -651,7 +668,7 @@ xo_buf_indent (xo_handle_t *xop, int indent)
 static void
 xo_line_ensure_open (xo_handle_t *xop, unsigned flags UNUSED)
 {
-    static char div_open[] = "<div class=\"line\">";
+    static xchar_t div_open[] = W "<div class=\"line\">";
 
     if (xop->xo_flags & XOF_DIV_OPEN)
 	return;
@@ -669,7 +686,7 @@ xo_line_ensure_open (xo_handle_t *xop, unsigned flags UNUSED)
 static void
 xo_line_close (xo_handle_t *xop)
 {
-    static char div_close[] = "</div>";
+    static xchar_t div_close[] = W "</div>";
 
     switch (xop->xo_style) {
     case XO_STYLE_HTML:
@@ -689,69 +706,20 @@ xo_line_close (xo_handle_t *xop)
     }
 }
 
-#if 0
-    int xml = (xop->xo_style == XO_STYLE_XML
-	       || xop->xo_style == XO_STYLE_HTML);
-    int json = (xop->xo_style == XO_STYLE_JSON);
-
-	if (xml) {
-	    if (*cp == '<' || *cp == '&')
-		size += 4;
-	} else if (json) {
-	    if (*cp == '"')
-		size += 1;
-	}
-
-if (xml && *cp == '<') {
-	    memcpy(bp, "&lt;", 4);
-	    bp += 4;
-	} else if (xml && *cp == '&') {
-	    memcpy(bp, "&amp;", 5);
-	    bp += 5;
-	} else if (json && *cp == '"') {
-	    *bp++ = '\\';
-	    *bp++ = *cp;
-	} else 
-#endif
-
-#if 0
-static void
-xo_fmt_escaped (xo_handle_t *xop, const char *str, int len, int isfmt UNUSED)
-{
-    xo_buffer_t *xbp = &xop->xo_fmt;
-    const char *cp, *ep;
-    int size = 0;
-
-    for (cp = str, ep = str + len; cp < ep; cp++) {
-	size += 1;
-    }
-
-    if (!xo_buf_has_room(xbp, size))
-	return;
-
-    char *bp = xbp->xb_curp;
-    for (cp = str, ep = str + len; cp < ep; cp++) {
-	*bp++ = *cp;
-    }
-
-    xbp->xb_curp = bp;
-}
-#endif
-
 static int
 xo_info_compare (const void *key, const void *data)
 {
-    const char *name = key;
+    const xchar_t *name = key;
     const xo_info_t *xip = data;
 
     return strcmp(name, xip->xi_name);
 }
 
 static xo_info_t *
-xo_info_find (xo_handle_t *xop, const char *name, int nlen)
+xo_info_find (xo_handle_t *xop, const xchar_t *name, int nlen)
 {
     xo_info_t *xip;
-    char *cp = alloca(nlen + 1); /* Need local copy for NUL termination */
+    xchar_t *cp = alloca(nlen + 1); /* Need local copy for NUL termination */
 
     memcpy(cp, name, nlen);
     cp[nlen] = '\0';
@@ -762,9 +730,9 @@ xo_info_find (xo_handle_t *xop, const char *name, int nlen)
 }
 
 static int
-xo_format_data (xo_handle_t *xop, const char *fmt, int flen, unsigned flags)
+xo_format_data (xo_handle_t *xop, const xchar_t *fmt, int flen, unsigned flags)
 {
-    const char *cp, *ep, *sp;
+    const xchar_t *cp, *ep, *sp;
     xo_buffer_t *xbp = &xop->xo_data;
     unsigned skip, lflag, hflag, jflag, tflag, zflag, qflag, stars;
     int rc;
@@ -774,9 +742,7 @@ xo_format_data (xo_handle_t *xop, const char *fmt, int flen, unsigned flags)
     for (cp = fmt, ep = fmt + flen; cp < ep; cp++) {
 	if (*cp != '%') {
 	add_one:
-	    if (!xo_buf_has_room(xbp, 1))
-		return -1;
-	    *xbp->xb_curp++ = *cp;
+	    xo_buf_escape(xop, xbp, cp, 1);
 	    continue;
 
 	} if (cp + 1 < ep && cp[1] == '%') {
@@ -839,7 +805,7 @@ xo_format_data (xo_handle_t *xop, const char *fmt, int flen, unsigned flags)
 		qflag += 1;
 	    else if (*cp == '*')
 		stars += 1;
-	    else if (strchr("diouxXDOUeEfFgGaAcCsSp", *cp) != NULL)
+	    else if (strchr(W "diouxXDOUeEfFgGaAcCsSp", *cp) != NULL)
 		break;
 	    else if (*cp == 'n' || *cp == 'v') {
 		if (xop->xo_flags & XOF_WARN)
@@ -854,7 +820,7 @@ xo_format_data (xo_handle_t *xop, const char *fmt, int flen, unsigned flags)
 	    if (!xo_buf_has_room(fbp, len + 1))
 		return -1;
 
-	    char *newfmt = fbp->xb_curp;
+	    xchar_t *newfmt = fbp->xb_curp;
 	    memcpy(newfmt, sp, len);
 	    newfmt[0] = '%';	/* If we skipped over a "%@...@s" format */
 	    newfmt[len] = '\0';
@@ -907,7 +873,7 @@ xo_format_data (xo_handle_t *xop, const char *fmt, int flen, unsigned flags)
 	 * Now for the tricky part: we need to move the argument pointer
 	 * along by the amount needed.
 	 */
-	char fc = *cp;
+	xchar_t fc = *cp;
 	/* Handle "%*.*s" */
 	if (stars > 0) {
 	    va_arg(xop->xo_vap, int);
@@ -918,7 +884,7 @@ xo_format_data (xo_handle_t *xop, const char *fmt, int flen, unsigned flags)
 	if (fc == 'D' || fc == 'O' || fc == 'U')
 	    lflag = 1;
 
-	if (strchr("diouxXDOU", fc) != NULL) {
+	if (strchr(W "diouxXDOU", fc) != NULL) {
 	    if (hflag > 1) {
 		va_arg(xop->xo_vap, int);
 
@@ -946,7 +912,7 @@ xo_format_data (xo_handle_t *xop, const char *fmt, int flen, unsigned flags)
 	    } else {
 		va_arg(xop->xo_vap, int);
 	    }
-	} else if (strchr("eEfFgGaA", fc) != NULL)
+	} else if (strchr(W "eEfFgGaA", fc) != NULL)
 	    if (lflag)
 		va_arg(xop->xo_vap, long double);
 	    else
@@ -972,15 +938,15 @@ xo_format_data (xo_handle_t *xop, const char *fmt, int flen, unsigned flags)
 }
 
 static void
-xo_buf_append_div (xo_handle_t *xop, const char *class,
-		   const char *name, int nlen,
-		   const char *value, int vlen)
+xo_buf_append_div (xo_handle_t *xop, const xchar_t *class,
+		   const xchar_t *name, int nlen,
+		   const xchar_t *value, int vlen)
 {
-    static char div1[] = "<div class=\"";
-    static char div2[] = "\" data-tag=\"";
-    static char div3[] = "\" data-xpath=\"";
-    static char div4[] = "\">";
-    static char div5[] = "</div>";
+    static xchar_t div1[] = W "<div class=\"";
+    static xchar_t div2[] = W "\" data-tag=\"";
+    static xchar_t div3[] = W "\" data-xpath=\"";
+    static xchar_t div4[] = W "\">";
+    static xchar_t div5[] = W "</div>";
 
     xo_line_ensure_open(xop, 0);
 
@@ -1014,8 +980,8 @@ xo_buf_append_div (xo_handle_t *xop, const char *class,
     }
 
     if (name && (xop->xo_flags & XOF_INFO) && xop->xo_info) {
-	static char in_type[] = "\" data-type=\"";
-	static char in_help[] = "\" data-help=\"";
+	static xchar_t in_type[] = W "\" data-type=\"";
+	static xchar_t in_help[] = W "\" data-help=\"";
 
 	xo_info_t *xip = xo_info_find(xop, name, nlen);
 	if (xip) {
@@ -1039,7 +1005,7 @@ xo_buf_append_div (xo_handle_t *xop, const char *class,
 }
 
 static void
-xo_format_text (xo_handle_t *xop, const char *str, int len)
+xo_format_text (xo_handle_t *xop, const xchar_t *str, int len)
 {
     switch (xop->xo_style) {
     case XO_STYLE_TEXT:
@@ -1053,7 +1019,7 @@ xo_format_text (xo_handle_t *xop, const char *str, int len)
 }
 
 static void
-xo_format_label (xo_handle_t *xop, const char *str, int len)
+xo_format_label (xo_handle_t *xop, const xchar_t *str, int len)
 {
     switch (xop->xo_style) {
     case XO_STYLE_TEXT:
@@ -1067,11 +1033,11 @@ xo_format_label (xo_handle_t *xop, const char *str, int len)
 }
 
 static void
-xo_format_title (xo_handle_t *xop, const char *str, int len,
-		 const char *fmt, int flen)
+xo_format_title (xo_handle_t *xop, const xchar_t *str, int len,
+		 const xchar_t *fmt, int flen)
 {
-    static char div_open[] = "<div class=\"title\">";
-    static char div_close[] = "</div>";
+    static xchar_t div_open[] = W "<div class=\"title\">";
+    static xchar_t div_close[] = W "</div>";
 
     if (xop->xo_style != XO_STYLE_TEXT && xop->xo_style != XO_STYLE_HTML)
 	return;
@@ -1090,12 +1056,12 @@ xo_format_title (xo_handle_t *xop, const char *str, int len,
 
     start = xbp->xb_curp - xbp->xb_bufp; /* Reset start */
     if (len) {
-	char *newfmt = alloca(flen + 1);
+	xchar_t *newfmt = alloca(flen + 1);
 	memcpy(newfmt, fmt, flen);
 	newfmt[flen] = '\0';
 
 	/* If len is non-zero, the format string apply to the name */
-	char *newstr = alloca(len + 1);
+	xchar_t *newstr = alloca(len + 1);
 	memcpy(newstr, str, len);
 	newstr[len] = '\0';
 
@@ -1108,24 +1074,6 @@ xo_format_title (xo_handle_t *xop, const char *str, int len,
 	}
 
     } else {
-#if 0
-	va_list va_local;
-
-	/* If len is zero, then we get our arguments from the vap */
-	va_copy(va_local, xop->xo_vap);
-	rc = vsnprintf(xbp->xb_curp, left, newfmt, va_local);
-	if (rc > left) {
-	    if (!xo_buf_has_room(xbp, rc))
-		return;
-	    va_end(va_local);
-	    va_copy(va_local, xop->xo_vap);
-	    left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
-	    rc = vsnprintf(xbp->xb_curp, rc, newfmt, va_local);
-	}
-
-	va_end(va_local);
-#endif
-
 	rc = xo_format_data(xop, fmt, flen, 0);
 	/* xo_format_data moved curp, so we need to reset it */
 	xbp->xb_curp = xbp->xb_bufp + start;
@@ -1157,9 +1105,9 @@ xo_format_prep (xo_handle_t *xop)
 }
 
 static void
-xo_format_value (xo_handle_t *xop, const char *name, int nlen, 
-		 const char *format, int flen,
-		 const char *encoding, int elen, unsigned flags)
+xo_format_value (xo_handle_t *xop, const xchar_t *name, int nlen,
+		 const xchar_t *format, int flen,
+		 const xchar_t *encoding, int elen, unsigned flags)
 {
     int pretty = (xop->xo_flags & XOF_PRETTY);
     int quote;
@@ -1237,7 +1185,7 @@ xo_format_value (xo_handle_t *xop, const char *name, int nlen,
 }
 
 static void
-xo_format_decoration (xo_handle_t *xop, const char *str, int len)
+xo_format_decoration (xo_handle_t *xop, const xchar_t *str, int len)
 {
     switch (xop->xo_style) {
     case XO_STYLE_TEXT:
@@ -1251,7 +1199,7 @@ xo_format_decoration (xo_handle_t *xop, const char *str, int len)
 }
 
 static void
-xo_format_padding (xo_handle_t *xop, const char *str, int len)
+xo_format_padding (xo_handle_t *xop, const xchar_t *str, int len)
 {
     switch (xop->xo_style) {
     case XO_STYLE_TEXT:
@@ -1265,12 +1213,12 @@ xo_format_padding (xo_handle_t *xop, const char *str, int len)
 }
 
 static int
-xo_do_emit (xo_handle_t *xop, const char *fmt)
+xo_do_emit (xo_handle_t *xop, const xchar_t *fmt)
 {
     xo_buffer_t *xbp = &xop->xo_data;
     int rc = 0;
-    const char *cp, *sp, *ep, *basep;
-    char *newp = NULL;
+    const xchar_t *cp, *sp, *ep, *basep;
+    xchar_t *newp = NULL;
 
     for (cp = fmt; *cp; ) {
 	if (*cp == '\n') {
@@ -1326,7 +1274,7 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 		xo_warn(xop, "missing closing '}': %s", fmt);
 
 	    int tlen = ep - cp;
-	    char *tmp = alloca(tlen + 1);
+	    xchar_t *tmp = alloca(tlen + 1);
 	    memcpy(tmp, cp + 1, tlen);
 	    tmp[tlen] = '\0';
 
@@ -1354,7 +1302,7 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 	 * If the print-fmt is not provided, it defaults to 's'.
 	 */
 	unsigned style = 0, flags = 0;
-	const char *content = NULL, *format = NULL, *encoding = NULL;
+	const xchar_t *content = NULL, *format = NULL, *encoding = NULL;
 	int clen = 0, flen = 0, elen = 0;
 
 	for (sp = basep; sp; sp++) {
@@ -1445,7 +1393,7 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 	    xo_warn(xop, "missing closing '}': %s", fmt);
 
 	if (format == NULL) {
-	    format = "%s";
+	    format = W "%s";
 	    flen = 2;
 	}
 
@@ -1482,7 +1430,7 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 }
 
 int
-xo_emit_hv (xo_handle_t *xop, const char *fmt, va_list vap)
+xo_emit_hv (xo_handle_t *xop, const xchar_t *fmt, va_list vap)
 {
     int rc;
 
@@ -1496,7 +1444,7 @@ xo_emit_hv (xo_handle_t *xop, const char *fmt, va_list vap)
 }
 
 int
-xo_emit_h (xo_handle_t *xop, const char *fmt, ...)
+xo_emit_h (xo_handle_t *xop, const xchar_t *fmt, ...)
 {
     int rc;
 
@@ -1510,7 +1458,7 @@ xo_emit_h (xo_handle_t *xop, const char *fmt, ...)
 }
 
 int
-xo_emit (const char *fmt, ...)
+xo_emit (const xchar_t *fmt, ...)
 {
     xo_handle_t *xop = xo_default(NULL);
     int rc;
@@ -1524,7 +1472,7 @@ xo_emit (const char *fmt, ...)
 }
 
 int
-xo_attr_hv (xo_handle_t *xop, const char *name, const char *fmt, va_list vap)
+xo_attr_hv (xo_handle_t *xop, const xchar_t *name, const xchar_t *fmt, va_list vap)
 {
     const int extra = 5; 	/* space, equals, quote, quote, and nul */
     xop = xo_default(xop);
@@ -1552,8 +1500,10 @@ xo_attr_hv (xo_handle_t *xop, const char *name, const char *fmt, va_list vap)
     if (rc > xbp->xb_size) {
 	if (!xo_buf_has_room(xbp, rc))
 	    return -1;
-	va_end(va_local);
+
+	va_end(va_local);	/* Reset vap to the start */
 	va_copy(va_local, vap);
+
 	left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
 	rc = vsnprintf(xbp->xb_curp, left, fmt, va_local);
     }
@@ -1572,7 +1522,7 @@ xo_attr_hv (xo_handle_t *xop, const char *name, const char *fmt, va_list vap)
 }
 
 int
-xo_attr_h (xo_handle_t *xop, const char *name, const char *fmt, ...)
+xo_attr_h (xo_handle_t *xop, const xchar_t *name, const xchar_t *fmt, ...)
 {
     int rc;
     va_list vap;
@@ -1585,7 +1535,7 @@ xo_attr_h (xo_handle_t *xop, const char *name, const char *fmt, ...)
 }
 
 int
-xo_attr (const char *name, const char *fmt, ...)
+xo_attr (const xchar_t *name, const xchar_t *fmt, ...)
 {
     int rc;
     va_list vap;
@@ -1598,7 +1548,7 @@ xo_attr (const char *name, const char *fmt, ...)
 }
 
 static void
-xo_depth_change (xo_handle_t *xop, const char *name,
+xo_depth_change (xo_handle_t *xop, const xchar_t *name,
 		 int delta, int indent, unsigned flags)
 {
     xo_stack_t *xsp = &xop->xo_stack[xop->xo_depth];
@@ -1609,7 +1559,7 @@ xo_depth_change (xo_handle_t *xop, const char *name,
 
 	if (name && (xop->xo_flags & (XOF_XPATH | XOF_WARN))) {
 	    int len = strlen(name) + 1;
-	    char *cp = xo_realloc(NULL, len);
+	    xchar_t *cp = xo_realloc(NULL, len);
 	    if (cp) {
 		memcpy(cp, name, len);
 		xsp->xs_name = cp;
@@ -1624,7 +1574,7 @@ xo_depth_change (xo_handle_t *xop, const char *name,
 	}
 
 	if (xop->xo_flags & XOF_WARN) {
-	    const char *top = xsp->xs_name;
+	    const xchar_t *top = xsp->xs_name;
 	    if (top && strcmp(name, top) != 0)
 		xo_warn(xop, "xo: incorrect close: '%s' .vs. '%s'", name, top);
 	    if ((xsp->xs_flags & XSF_LIST) != (flags & XSF_LIST))
@@ -1646,13 +1596,13 @@ xo_depth_change (xo_handle_t *xop, const char *name,
 }
 
 int
-xo_open_container_h (xo_handle_t *xop, const char *name)
+xo_open_container_h (xo_handle_t *xop, const xchar_t *name)
 {
     xop = xo_default(xop);
 
     int rc = 0;
-    const char *ppn = (xop->xo_flags & XOF_PRETTY) ? "\n" : "";
-    const char *pre_nl = "";
+    const xchar_t *ppn = (xop->xo_flags & XOF_PRETTY) ? W "\n" : W "";
+    const xchar_t *pre_nl = W "";
 
     switch (xop->xo_style) {
     case XO_STYLE_XML:
@@ -1681,19 +1631,19 @@ xo_open_container_h (xo_handle_t *xop, const char *name)
 }
 
 int
-xo_open_container (const char *name)
+xo_open_container (const xchar_t *name)
 {
     return xo_open_container_h(NULL, name);
 }
 
 int
-xo_close_container_h (xo_handle_t *xop, const char *name)
+xo_close_container_h (xo_handle_t *xop, const xchar_t *name)
 {
     xop = xo_default(xop);
 
     int rc = 0;
-    const char *ppn = (xop->xo_flags & XOF_PRETTY) ? "\n" : "";
-    const char *pre_nl = "";
+    const xchar_t *ppn = (xop->xo_flags & XOF_PRETTY) ? "\n" : "";
+    const xchar_t *pre_nl = W "";
 
     switch (xop->xo_style) {
     case XO_STYLE_XML:
@@ -1720,19 +1670,19 @@ xo_close_container_h (xo_handle_t *xop, const char *name)
 }
 
 int
-xo_close_container (const char *name)
+xo_close_container (const xchar_t *name)
 {
     return xo_close_container_h(NULL, name);
 }
 
 int
-xo_open_list_h (xo_handle_t *xop, const char *name UNUSED)
+xo_open_list_h (xo_handle_t *xop, const xchar_t *name UNUSED)
 {
     xop = xo_default(xop);
 
     int rc = 0;
-    const char *ppn = (xop->xo_flags & XOF_PRETTY) ? "\n" : "";
-    const char *pre_nl = "";
+    const xchar_t *ppn = (xop->xo_flags & XOF_PRETTY) ? "\n" : "";
+    const xchar_t *pre_nl = W "";
 
     switch (xop->xo_style) {
     case XO_STYLE_JSON:
@@ -1750,16 +1700,16 @@ xo_open_list_h (xo_handle_t *xop, const char *name UNUSED)
 }
 
 int
-xo_open_list (const char *name)
+xo_open_list (const xchar_t *name)
 {
     return xo_open_list_h(NULL, name);
 }
 
 int
-xo_close_list_h (xo_handle_t *xop, const char *name UNUSED)
+xo_close_list_h (xo_handle_t *xop, const xchar_t *name UNUSED)
 {
     int rc = 0;
-    const char *pre_nl = "";
+    const xchar_t *pre_nl = W "";
 
     xop = xo_default(xop);
 
@@ -1779,19 +1729,19 @@ xo_close_list_h (xo_handle_t *xop, const char *name UNUSED)
 }
 
 int
-xo_close_list (const char *name)
+xo_close_list (const xchar_t *name)
 {
     return xo_close_list_h(NULL, name);
 }
 
 int
-xo_open_instance_h (xo_handle_t *xop, const char *name)
+xo_open_instance_h (xo_handle_t *xop, const xchar_t *name)
 {
     xop = xo_default(xop);
 
     int rc = 0;
-    const char *ppn = (xop->xo_flags & XOF_PRETTY) ? "\n" : "";
-    const char *pre_nl = "";
+    const xchar_t *ppn = (xop->xo_flags & XOF_PRETTY) ? "\n" : "";
+    const xchar_t *pre_nl = W "";
 
     switch (xop->xo_style) {
     case XO_STYLE_XML:
@@ -1819,19 +1769,19 @@ xo_open_instance_h (xo_handle_t *xop, const char *name)
 }
 
 int
-xo_open_instance (const char *name)
+xo_open_instance (const xchar_t *name)
 {
     return xo_open_instance_h(NULL, name);
 }
 
 int
-xo_close_instance_h (xo_handle_t *xop, const char *name)
+xo_close_instance_h (xo_handle_t *xop, const xchar_t *name)
 {
     xop = xo_default(xop);
 
     int rc = 0;
-    const char *ppn = (xop->xo_flags & XOF_PRETTY) ? "\n" : "";
-    const char *pre_nl = "";
+    const xchar_t *ppn = (xop->xo_flags & XOF_PRETTY) ? "\n" : "";
+    const xchar_t *pre_nl = W "";
 
     switch (xop->xo_style) {
     case XO_STYLE_XML:
@@ -1857,30 +1807,10 @@ xo_close_instance_h (xo_handle_t *xop, const char *name)
 }
 
 int
-xo_close_instance (const char *name)
+xo_close_instance (const xchar_t *name)
 {
     return xo_close_instance_h(NULL, name);
 }
-
-#if 0
-int
-xo_header_line_h (xo_handle_t *xop, const char *fmt, ...)
-{
-    static char div_start[] =
-        "%*s<div class=\"line\">%s%*s%<div class=\"header-line\">";
-    static char div_end[] = "%s%*s</div>%s%*s</div>%s";
-
-    xop = xo_default(xop);
-    const char *ppn = (xop->xo_flags & XOF_PRETTY) ? "\n" : "";
-    int rc = 0;
-
-    switch (xop->xo_style) {
-    }
-
-    return rc;
-}
-#endif
-
 void
 xo_set_writer (xo_handle_t *xop, void *opaque, xo_write_func_t write_func,
 	       xo_close_func_t close_func)
@@ -1899,39 +1829,104 @@ xo_set_allocator (xo_realloc_func_t realloc_func, xo_free_func_t free_func)
     xo_free = free_func;
 }
 
+/*
+ * Generate an error message, such as would be displayed on stderr
+ */
+void
+xo_error_hv (xo_handle_t *xop, const char *fmt, va_list vap)
+{
+    xop = xo_default(xop);
+
+    switch (xop->xo_style) {
+    case XO_STYLE_TEXT:
+	vfprintf(stderr, fmt, vap);
+	break;
+
+    case XO_STYLE_HTML:
+	va_copy(xop->xo_vap, vap);
+	
+	xo_buf_append_div(xop, "error", NULL, 0, fmt, strlen(fmt));
+
+	if (xop->xo_flags & XOF_DIV_OPEN)
+	    xo_line_close(xop);
+
+	xo_buffer_t *xbp = &xop->xo_data;
+	xbp->xb_curp = xbp->xb_bufp;
+	xop->xo_write(xop->xo_opaque, xbp->xb_bufp);
+
+	va_end(xop->xo_vap);
+	bzero(&xop->xo_vap, sizeof(xop->xo_vap));
+	break;
+
+    case XO_STYLE_XML:
+	va_copy(xop->xo_vap, vap);
+
+	xo_open_container_h(xop, "error");
+	xo_format_value(xop, "message", 7, fmt, strlen(fmt), NULL, 0, 0);
+	xo_close_container_h(xop, "error");
+
+	va_end(xop->xo_vap);
+	bzero(&xop->xo_vap, sizeof(xop->xo_vap));
+	break;
+    }
+}
+
+void
+xo_error_h (xo_handle_t *xop, const char *fmt, ...)
+{
+    va_list vap;
+
+    va_start(vap, fmt);
+    xo_error_hv(xop, fmt, vap);
+    va_end(vap);
+}
+
+/*
+ * Generate an error message, such as would be displayed on stderr
+ */
+void
+xo_error (const char *fmt, ...)
+{
+    va_list vap;
+
+    va_start(vap, fmt);
+    xo_error_hv(NULL, fmt, vap);
+    va_end(vap);
+}
+
 #ifdef UNIT_TEST
 int
 main (int argc, char **argv)
 {
-    static char base_grocery[] = "GRO";
-    static char base_hardware[] = "HRD";
+    static xchar_t base_grocery[] = W "GRO";
+    static xchar_t base_hardware[] = W "HRD";
     struct item {
-	const char *i_title;
+	const xchar_t *i_title;
 	int i_sold;
 	int i_instock;
 	int i_onorder;
-	const char *i_sku_base;
+	const xchar_t *i_sku_base;
 	int i_sku_num;
     };
     struct item list[] = {
-	{ "gum&this&that", 1412, 54, 10, base_grocery, 415 },
-	{ "<rope>", 85, 4, 2, base_hardware, 212 },
-	{ "ladder", 0, 2, 1, base_hardware, 517 },
-	{ "\"bolt\"", 4123, 144, 42, base_hardware, 632 },
-	{ "water\\blue", 17, 14, 2, base_grocery, 2331 },
+	{ W "gum&this&that", 1412, 54, 10, base_grocery, 415 },
+	{ W "<rope>", 85, 4, 2, base_hardware, 212 },
+	{ W "ladder", 0, 2, 1, base_hardware, 517 },
+	{ W "\"bolt\"", 4123, 144, 42, base_hardware, 632 },
+	{ W "water\\blue", 17, 14, 2, base_grocery, 2331 },
 	{ NULL, 0, 0, 0, NULL, 0 }
     };
     struct item list2[] = {
-	{ "fish", 1321, 45, 1, base_grocery, 533 },
+	{ W "fish", 1321, 45, 1, base_grocery, 533 },
 	{ NULL, 0, 0, 0, NULL, 0 }
     };
     struct item *ip;
     xo_info_t info[] = {
-	{ "in-stock", "number", "Number of items in stock" },
-	{ "name", "string", "Name of the item" },
-	{ "on-order", "number", "Number of items on order" },
-	{ "sku", "string", "Stock Keeping Unit" },
-	{ "sold", "number", "Number of items sold" },
+	{ W "in-stock", W "number", W "Number of items in stock" },
+	{ W "name", W "string", W "Name of the item" },
+	{ W "on-order", W "number", W "Number of items on order" },
+	{ W "sku", W "string", W "Stock Keeping Unit" },
+	{ W "sold", W "number", W "Number of items sold" },
 	{ NULL, NULL, NULL },
     };
     int info_count = (sizeof(info) / sizeof(info[0])) - 1;
@@ -1955,72 +1950,72 @@ main (int argc, char **argv)
 
     xo_set_info(NULL, info, info_count);
 
-    xo_open_container_h(NULL, "top");
+    xo_open_container_h(NULL, W "top");
 
-    xo_open_container("data");
-    xo_open_list("item");
+    xo_open_container(W "data");
+    xo_open_list(W "item");
 
-    xo_emit("{T:Item/%-15s}{T:Total Sold/%12s}{T:In Stock/%12s}"
+    xo_emit(W "{T:Item/%-15s}{T:Total Sold/%12s}{T:In Stock/%12s}"
 	    "{T:On Order/%12s}{T:SKU/%5s}\n");
 
     for (ip = list; ip->i_title; ip++) {
-	xo_open_instance("item");
+	xo_open_instance(W "item");
 
-	xo_emit("{:item/%-15s/%s}{:sold/%12u/%u}{:in-stock/%12u/%u}"
+	xo_emit(W "{:item/%-15s/%s}{:sold/%12u/%u}{:in-stock/%12u/%u}"
 		"{:on-order/%12u/%u}{:sku/%5s-000-%u/%s-000-%u}\n",
 		ip->i_title, ip->i_sold, ip->i_instock, ip->i_onorder,
 		ip->i_sku_base, ip->i_sku_num);
 
-	xo_close_instance("item");
+	xo_close_instance(W "item");
     }
 
-    xo_close_list("item");
-    xo_close_container("data");
+    xo_close_list(W "item");
+    xo_close_container(W "data");
 
-    xo_emit("\n\n");
+    xo_emit(W "\n\n");
 
-    xo_open_container("data");
-    xo_open_list("item");
+    xo_open_container(W "data");
+    xo_open_list(W "item");
 
     for (ip = list; ip->i_title; ip++) {
-	xo_open_instance("item");
+	xo_open_instance(W "item");
 
-	xo_attr("fancy", "%s%d", "item", ip - list);
-	xo_emit("{L:Item} '{:name/%s}':\n", ip->i_title);
-	xo_emit("{P:   }{L:Total sold}: {N:sold/%u%s}{H:percent/%u}\n",
+	xo_attr(W "fancy", W "%s%d", W "item", ip - list);
+	xo_emit(W "{L:Item} '{:name/%s}':\n", ip->i_title);
+	xo_emit(W "{P:   }{L:Total sold}: {N:sold/%u%s}{H:percent/%u}\n",
 		ip->i_sold, ip->i_sold ? ".0" : "", 44);
-	xo_emit("{P:   }{LWC:In stock}{:in-stock/%u}\n", ip->i_instock);
-	xo_emit("{P:   }{LWC:On order}{:on-order/%u}\n", ip->i_onorder);
-	xo_emit("{P:   }{L:SKU}: {Q:sku/%s-000-%u}\n",
+	xo_emit(W "{P:   }{LWC:In stock}{:in-stock/%u}\n", ip->i_instock);
+	xo_emit(W "{P:   }{LWC:On order}{:on-order/%u}\n", ip->i_onorder);
+	xo_emit(W "{P:   }{L:SKU}: {Q:sku/%s-000-%u}\n",
 		ip->i_sku_base, ip->i_sku_num);
 
-	xo_close_instance("item");
+	xo_close_instance(W "item");
     }
 
-    xo_close_list("item");
-    xo_close_container("data");
+    xo_close_list(W "item");
+    xo_close_container(W "data");
 
-    xo_open_container("data");
-    xo_open_list("item");
+    xo_open_container(W "data");
+    xo_open_list(W "item");
 
     for (ip = list2; ip->i_title; ip++) {
-	xo_open_instance("item");
+	xo_open_instance(W "item");
 
-	xo_emit("{L:Item} '{:name/%s}':\n", ip->i_title);
-	xo_emit("{P:   }{L:Total sold}: {N:sold/%u%s}\n",
+	xo_emit(W "{L:Item} '{:name/%s}':\n", ip->i_title);
+	xo_emit(W "{P:   }{L:Total sold}: {N:sold/%u%s}\n",
 		ip->i_sold, ip->i_sold ? ".0" : "");
-	xo_emit("{P:   }{LWC:In stock}{:in-stock/%u}\n", ip->i_instock);
-	xo_emit("{P:   }{LWC:On order}{:on-order/%u}\n", ip->i_onorder);
-	xo_emit("{P:   }{L:SKU}: {Q:sku/%s-000-%u}\n",
+	xo_emit(W "{P:   }{LWC:In stock}{:in-stock/%u}\n", ip->i_instock);
+	xo_emit(W "{P:   }{LWC:On order}{:on-order/%u}\n", ip->i_onorder);
+	xo_emit(W "{P:   }{L:SKU}: {Q:sku/%s-000-%u}\n",
 		ip->i_sku_base, ip->i_sku_num);
 
-	xo_close_instance("item");
+	xo_close_instance(W "item");
     }
 
-    xo_close_list("item");
-    xo_close_container("data");
+    xo_close_list(W "item");
+    xo_close_container(W "data");
 
-    xo_close_container_h(NULL, "top");
+    xo_close_container_h(NULL, W "top");
 
     return 0;
 }
