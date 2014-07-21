@@ -43,8 +43,8 @@ main (int argc, char **argv)
     xo_open_container("employees");
     xo_open_list("employee");
 
-    xo_emit("{T:First Name/%-20s}{T:First Name/%-14s}"
-	    "{T:/%12s}{T:Time (%)\n", "Department");
+    xo_emit("{T:First Name/%-20s}{T:Last Name/%-14s}"
+	    "{T:/%-12s}{T:Time (%)\n", "Department");
     for ( ; ep->e_first; ep++) {
 	xo_open_instance("employee");
 	xo_emit("{:first-name/%-20s/%s}{:last-name/%-14s/%s}"
