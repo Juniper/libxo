@@ -1,7 +1,7 @@
 <div class="line">
   <div class="title">First Name          </div>
-  <div class="title">First Name    </div>
-  <div class="title">  Department</div>
+  <div class="title">Last Name     </div>
+  <div class="title">Department  </div>
   <div class="title">Time (%)
 </div>
   <div class="data" data-tag="first-name">Terry ("&lt;one")      </div>
