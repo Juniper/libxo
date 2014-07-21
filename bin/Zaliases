@@ -5,7 +5,7 @@ set opts=' \
 --enable-debug \
 --enable-warnings \
 --enable-printflike \
---prefix /Users/phil/work/root \
+--prefix ${HOME}/work/root \
 '
 set opts=`echo $opts`
 
