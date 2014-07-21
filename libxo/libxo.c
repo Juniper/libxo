@@ -794,7 +794,6 @@ xo_format_data (xo_handle_t *xop, const char *fmt, int flen, unsigned flags)
 	if (cp[1] == '@') {
 	    for (cp += 2; cp < ep; cp++) {
 		if (*cp == '@') {
-		    cp += 1;
 		    break;
 		}
 		if (*cp == '*') {
@@ -857,6 +856,7 @@ xo_format_data (xo_handle_t *xop, const char *fmt, int flen, unsigned flags)
 
 	    char *newfmt = fbp->xb_curp;
 	    memcpy(newfmt, sp, len);
+	    newfmt[0] = '%';	/* If we skipped over a "%@...@s" format */
 	    newfmt[len] = '\0';
 
 	    /*
