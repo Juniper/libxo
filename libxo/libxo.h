@@ -139,4 +139,13 @@ xo_attr_hv (xo_handle_t *xop, const char *name, const char *fmt, va_list vap);
 int
 xo_attr (const char *name, const char *fmt, ...);
 
+void
+xo_error_hv (xo_handle_t *xop, const char *fmt, va_list vap);
+
+void
+xo_error_h (xo_handle_t *xop, const char *fmt, ...);
+
+void
+xo_error (const char *fmt, ...);
+
 #endif /* INCLUDE_XO_H */
