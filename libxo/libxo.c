@@ -1127,12 +1127,12 @@ xo_format_title (xo_handle_t *xop, const char *str, int len,
 #endif
 
 	rc = xo_format_data(xop, fmt, flen, 0);
+	/* xo_format_data moved curp, so we need to reset it */
+	xbp->xb_curp = xbp->xb_bufp + start;
     }
 
     /* If we're styling HTML, then we need to escape it */
     if (xop->xo_style == XO_STYLE_HTML) {
-	/* xo_format_data moved curp, so we need to reset it */
-	xbp->xb_curp = xbp->xb_bufp + start;
 	rc = xo_escape_xml(xbp, rc, 0);
     }
 
