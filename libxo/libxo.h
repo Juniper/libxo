@@ -33,6 +33,13 @@
 #define XOF_INFO	(1<<6)	/** Emit additional info fields (HTML) */
 #define XOF_WARN_XML	(1<<7)	/** Emit warnings in XML (on stdout) */
 #define XOF_NO_ENV	(1<<8)	/** Don't look at the LIBXO_OPTIONS env var */
+#define XOF_NO_VA_ARG	(1<<9)	/** Don't advance va_list w/ va_arg() */
+
+#ifdef LIBXO_WIDE
+typedef wchar_t xchar_t;
+#else /* LIBXO_WIDE */
+typedef char xchar_t;
+#endif /* LIBXO_WIDE */
 
 /*
  * The xo_info_t structure provides a mapping between names and
@@ -49,10 +56,16 @@ typedef struct xo_handle_s xo_handle_t; /* Handle for XO output */
 
 typedef int (*xo_write_func_t)(void *, const char *);
 typedef void (*xo_close_func_t)(void *);
-typedef void *(*xo_realloc_func_t)(void *, size_t size);
+typedef void *(*xo_realloc_func_t)(void *, size_t);
 typedef void (*xo_free_func_t)(void *);
 
-typedef char *(*xo_formatter_t)(xo_handle_t *, const char *);
+/*
+ * The formatter function mirrors "vsnprintf", with an additional argument
+ * of the xo handle.  The caller should return the number of bytes _needed_
+ * to fit the data, even if this exceeds 'len'.
+ */
+typedef int (*xo_formatter_t)(xo_handle_t *, xchar_t *, int,
+				const xchar_t *, va_list);
 
 xo_handle_t *
 xo_create (unsigned type, unsigned flags);
@@ -147,5 +160,11 @@ xo_error_h (xo_handle_t *xop, const char *fmt, ...);
 
 void
 xo_error (const char *fmt, ...);
+
+void
+xo_flush_h (xo_handle_t *xop);
+
+void
+xo_flush (void);
 
 #endif /* INCLUDE_XO_H */
