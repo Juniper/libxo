@@ -28,7 +28,6 @@
 #define XO_DEPTH	512	 /* Default stack depth */
 
 #ifdef LIBXO_WIDE
-typedef wchar_t xchar_t;
 #define W L
 
 #define fprintf fwprintf
@@ -38,7 +37,6 @@ typedef wchar_t xchar_t;
 #define strchr wcschr
 
 #else /* LIBXO_WIDE */
-typedef char xchar_t;
 #define W /* nothing */
 #endif /* LIBXO_WIDE */
 
@@ -257,6 +255,50 @@ xo_buf_has_room (xo_buffer_t *xbp, int len)
 }
 
 /*
+ * Format arguments into our buffer.  If a custom formatter has been set,
+ * we use that to do the work; otherwise we vsnprintf().
+ */
+static int
+xo_vsnprintf (xo_handle_t *xop, xo_buffer_t *xbp, const char *fmt, va_list vap)
+{
+    va_list va_local;
+    int rc;
+    int left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
+
+    va_copy(va_local, vap);
+
+    if (xop->xo_formatter)
+	rc = xop->xo_formatter(xop, xbp->xb_curp, left, fmt, va_local);
+    else
+	rc = vsnprintf(xbp->xb_curp, left, fmt, va_local);
+
+    if (rc > xbp->xb_size) {
+	if (!xo_buf_has_room(xbp, rc))
+	    return -1;
+
+	/*
+	 * After we call vsnprintf(), the stage of vap is not defined.
+	 * We need to copy it before we pass.  Then we have to do our
+	 * own logic below to move it along.  This is because the
+	 * implementation can have va_list be a point (bsd) or a
+	 * structure (macosx) or anything in between.
+	 */
+
+	va_end(va_local);	/* Reset vap to the start */
+	va_copy(va_local, vap);
+
+	left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
+	if (xop->xo_formatter)
+	    xop->xo_formatter(xop, xbp->xb_curp, left, fmt, va_local);
+	else
+	    rc = vsnprintf(xbp->xb_curp, left, fmt, va_local);
+    }
+    va_end(va_local);
+
+    return rc;
+}
+
+/*
  * Print some data thru the handle.
  */
 static int
@@ -268,22 +310,25 @@ xo_printf (xo_handle_t *xop, const xchar_t *fmt, ...)
     va_list vap;
 
     va_start(vap, fmt);
+
     rc = vsnprintf(xbp->xb_curp, left, fmt, vap);
+
     if (rc > xbp->xb_size) {
 	if (!xo_buf_has_room(xbp, rc))
 	    return -1;
 
-	va_end(vap);		/* Reset vap to the start */
+	va_end(vap);	/* Reset vap to the start */
 	va_start(vap, fmt);
 
 	left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
 	rc = vsnprintf(xbp->xb_curp, left, fmt, vap);
     }
-
-    xbp->xb_curp = xbp->xb_bufp;
-    rc = xop->xo_write(xop->xo_opaque, xbp->xb_bufp);
-
     va_end(vap);
+
+    if (rc > 0) {
+	xbp->xb_curp = xbp->xb_bufp;
+	rc = xop->xo_write(xop->xo_opaque, xbp->xb_bufp);
+    }
 
     return rc;
 }
@@ -736,7 +781,6 @@ xo_format_data (xo_handle_t *xop, const xchar_t *fmt, int flen, unsigned flags)
     xo_buffer_t *xbp = &xop->xo_data;
     unsigned skip, lflag, hflag, jflag, tflag, zflag, qflag, stars;
     int rc;
-    va_list va_local;
     int delta = 0;
     
     for (cp = fmt, ep = fmt + flen; cp < ep; cp++) {
@@ -767,7 +811,8 @@ xo_format_data (xo_handle_t *xop, const xchar_t *fmt, int flen, unsigned flags)
 		     * '*' means there's a "%*.*s" value in vap that
 		     * we want to ignore
 		     */
-		    va_arg(xop->xo_vap, int);
+		    if (!(xop->xo_flags & XOF_NO_VA_ARG))
+			va_arg(xop->xo_vap, int);
 		}
 	    }
 	}
@@ -825,30 +870,7 @@ xo_format_data (xo_handle_t *xop, const xchar_t *fmt, int flen, unsigned flags)
 	    newfmt[0] = '%';	/* If we skipped over a "%@...@s" format */
 	    newfmt[len] = '\0';
 
-	    /*
-	     * After we call vsnprintf(), the stage of vap is not defined.
-	     * We need to copy it before we pass.  Then we have to do our
-	     * own logic below to move it along.  This is because the
-	     * implementation can have va_list be a point (bsd) or a
-	     * structure (macosx) or anything in between.
-	     */
-	    va_copy(va_local, xop->xo_vap);
-
-	    int left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
-	    rc = vsnprintf(xbp->xb_curp, left, newfmt, va_local);
-	    if (rc > left) {
-		if (!xo_buf_has_room(xbp, rc))
-		    return -1;
-
-		/* Need a fresh copy */
-		va_end(va_local);
-		va_copy(va_local, xop->xo_vap);
-
-		left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
-		rc = vsnprintf(xbp->xb_curp, rc, newfmt, va_local);
-	    }
-
-	    va_end(va_local);
+	    rc = xo_vsnprintf(xop, xbp, newfmt, xop->xo_vap);
 
 	    /*
 	     * For XML and HTML, we need "&<>" processing; for JSON,
@@ -873,65 +895,67 @@ xo_format_data (xo_handle_t *xop, const xchar_t *fmt, int flen, unsigned flags)
 	 * Now for the tricky part: we need to move the argument pointer
 	 * along by the amount needed.
 	 */
-	xchar_t fc = *cp;
-	/* Handle "%*.*s" */
-	if (stars > 0) {
-	    va_arg(xop->xo_vap, int);
-	    if (stars > 1)
+	if (!(xop->xo_flags & XOF_NO_VA_ARG)) {
+	    xchar_t fc = *cp;
+	    /* Handle "%*.*s" */
+	    if (stars > 0) {
 		va_arg(xop->xo_vap, int);
-	}
-
-	if (fc == 'D' || fc == 'O' || fc == 'U')
-	    lflag = 1;
-
-	if (strchr(W "diouxXDOU", fc) != NULL) {
-	    if (hflag > 1) {
-		va_arg(xop->xo_vap, int);
-
-	    } else if (hflag > 0) {
-		va_arg(xop->xo_vap, int);
-
-	    } else if (lflag > 1) {
-		va_arg(xop->xo_vap, unsigned long long);
-
-	    } else if (lflag > 0) {
-		va_arg(xop->xo_vap, unsigned long);
-
-	    } else if (jflag > 0) {
-		va_arg(xop->xo_vap, intmax_t);
-
-	    } else if (tflag > 0) {
-		va_arg(xop->xo_vap, ptrdiff_t);
-
-	    } else if (zflag > 0) {
-		va_arg(xop->xo_vap, size_t);
-
-	    } else if (qflag > 0) {
-		va_arg(xop->xo_vap, quad_t);
-
-	    } else {
-		va_arg(xop->xo_vap, int);
+		if (stars > 1)
+		    va_arg(xop->xo_vap, int);
 	    }
-	} else if (strchr(W "eEfFgGaA", fc) != NULL)
-	    if (lflag)
-		va_arg(xop->xo_vap, long double);
-	    else
-		va_arg(xop->xo_vap, double);
 
-	else if (fc == 'C' || (fc == 'c' && lflag))
-	    va_arg(xop->xo_vap, wint_t);
+	    if (fc == 'D' || fc == 'O' || fc == 'U')
+		lflag = 1;
 
-	else if (fc == 'c')
-	    va_arg(xop->xo_vap, int);
+	    if (strchr(W "diouxXDOU", fc) != NULL) {
+		if (hflag > 1) {
+		    va_arg(xop->xo_vap, int);
 
-	else if (fc == 'S' || (fc == 's' && lflag))
-	    va_arg(xop->xo_vap, wchar_t *);
+		} else if (hflag > 0) {
+		    va_arg(xop->xo_vap, int);
 
-	else if (fc == 's')
-	    va_arg(xop->xo_vap, char *);
+		} else if (lflag > 1) {
+		    va_arg(xop->xo_vap, unsigned long long);
 
-	else if (fc == 'p')
-	    va_arg(xop->xo_vap, void *);
+		} else if (lflag > 0) {
+		    va_arg(xop->xo_vap, unsigned long);
+
+		} else if (jflag > 0) {
+		    va_arg(xop->xo_vap, intmax_t);
+
+		} else if (tflag > 0) {
+		    va_arg(xop->xo_vap, ptrdiff_t);
+
+		} else if (zflag > 0) {
+		    va_arg(xop->xo_vap, size_t);
+
+		} else if (qflag > 0) {
+		    va_arg(xop->xo_vap, quad_t);
+
+		} else {
+		    va_arg(xop->xo_vap, int);
+		}
+	    } else if (strchr(W "eEfFgGaA", fc) != NULL)
+		if (lflag)
+		    va_arg(xop->xo_vap, long double);
+		else
+		    va_arg(xop->xo_vap, double);
+
+	    else if (fc == 'C' || (fc == 'c' && lflag))
+		va_arg(xop->xo_vap, wint_t);
+
+	    else if (fc == 'c')
+		va_arg(xop->xo_vap, int);
+
+	    else if (fc == 'S' || (fc == 's' && lflag))
+		va_arg(xop->xo_vap, wchar_t *);
+
+	    else if (fc == 's')
+		va_arg(xop->xo_vap, char *);
+
+	    else if (fc == 'p')
+		va_arg(xop->xo_vap, void *);
+	}
     }
 
     return delta;
@@ -1259,30 +1283,7 @@ xo_do_emit (xo_handle_t *xop, const xchar_t *fmt)
 	    continue;
 	}
 
-	/*
-	 * A customer formatter gives the caller a pre-format
-	 * hook for changing data before it gets processed.
-	 */
 	basep = cp + 1;
-	if (xop->xo_formatter) {
-	    for (ep = basep; *ep; ep++) {
-		if (*ep == '}')
-		    break;
-	    }
-
-	    if (*ep == '\0' && (xop->xo_flags & XOF_WARN))
-		xo_warn(xop, "missing closing '}': %s", fmt);
-
-	    int tlen = ep - cp;
-	    xchar_t *tmp = alloca(tlen + 1);
-	    memcpy(tmp, cp + 1, tlen);
-	    tmp[tlen] = '\0';
-
-	    newp = xop->xo_formatter(xop, tmp);
-	    if (newp) {
-		basep = newp;
-	    }
-	}
 
 	/*
 	 * We are looking at the start of a braces pattern.  The format is:
@@ -1492,25 +1493,12 @@ xo_attr_hv (xo_handle_t *xop, const xchar_t *name, const xchar_t *fmt, va_list v
     *xbp->xb_curp++ = '=';
     *xbp->xb_curp++ = '"';
 
-    int left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
-    va_list va_local;
+    int rc = xo_vsnprintf(xop, xbp, fmt, vap);
 
-    va_copy(va_local, vap);
-    int rc = vsnprintf(xbp->xb_curp, left, fmt, va_local);
-    if (rc > xbp->xb_size) {
-	if (!xo_buf_has_room(xbp, rc))
-	    return -1;
-
-	va_end(va_local);	/* Reset vap to the start */
-	va_copy(va_local, vap);
-
-	left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
-	rc = vsnprintf(xbp->xb_curp, left, fmt, va_local);
+    if (rc > 0) {
+	rc = xo_escape_xml(xbp, rc, 1);
+	xbp->xb_curp += rc;
     }
-    va_end(va_local);
-
-    rc = xo_escape_xml(xbp, rc, 1);
-    xbp->xb_curp += rc;
 
     if (!xo_buf_has_room(xbp, 2))
 	return -1;
@@ -1827,6 +1815,37 @@ xo_set_allocator (xo_realloc_func_t realloc_func, xo_free_func_t free_func)
 {
     xo_realloc = realloc_func;
     xo_free = free_func;
+}
+
+void
+xo_flush_h (xo_handle_t *xop)
+{
+    static xchar_t div_close[] = W "</div>";
+
+    xop = xo_default(xop);
+
+    switch (xop->xo_style) {
+    case XO_STYLE_HTML:
+	xop->xo_flags &= ~XOF_DIV_OPEN;
+	xo_data_append(xop, div_close, sizeof(div_close) - 1);
+
+	if (xop->xo_flags & XOF_PRETTY)
+	    xo_data_append(xop, "\n", 1);
+	break;
+    }
+
+    xo_buffer_t *xbp = &xop->xo_data;
+    if (xbp->xb_curp != xbp->xb_bufp) {
+	xo_buf_append(xbp, "", 1); /* Append ending NUL */
+	xop->xo_write(xop->xo_opaque, xbp->xb_bufp);
+	xbp->xb_curp = xbp->xb_bufp;
+    }
+}
+
+void
+xo_flush (void)
+{
+    xo_flush_h(NULL);
 }
 
 /*
