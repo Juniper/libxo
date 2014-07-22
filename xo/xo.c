@@ -82,6 +82,43 @@ next_arg (void)
     return cp;
 }
 
+static void
+prep_arg (char *fmt)
+{
+    char *cp, *fp;
+
+    for (cp = fp = fmt; *cp; cp++, fp++) {
+	if (*cp != '\\') {
+	    if (cp != fp)
+		*fp = *cp;
+	    continue;
+	}
+
+	switch (*++cp) {
+	case 'n':
+	    *fp = '\n';
+	    break;
+
+	case 'r':
+	    *fp = '\r';
+	    break;
+
+	case 'b':
+	    *fp = '\b';
+	    break;
+
+	case 'e':
+	    *fp = '\e';
+	    break;
+
+	default:
+	    *fp = *cp;
+	}
+    }
+
+    *fp = '\0';
+}
+
 /*
  * Our custom formatter is responsible for combining format string pieces
  * with our command line arguments to build strings.  This involves faking
@@ -154,7 +191,7 @@ formatter (xo_handle_t *xop, xchar_t *buf, int bufsiz,
 	    rc = snprintf(buf, bufsiz, fmt, value);
 
     } else if (strchr("eEfFgGaA", fc) != NULL) {
-	long double value = strtold(next_arg(), NULL);
+	double value = strtold(next_arg(), NULL);
 	if (star1 && star2)
 	    rc = snprintf(buf, bufsiz, fmt, w1, w2, value);
 	else if (star1)
@@ -185,6 +222,9 @@ main (int argc UNUSED, char **argv)
 	cp = *argv;
 
 	if (*cp != '-')
+	    break;
+
+	if (streq(cp, "--"))
 	    break;
 
 	if (streq(cp, "--help")) {
@@ -242,6 +282,7 @@ main (int argc UNUSED, char **argv)
     if (fmt == NULL || *fmt == '\0')
 	return 0;
 
+    prep_arg(fmt);
     xo_set_formatter(NULL, formatter);
     xo_set_flags(NULL, XOF_NO_VA_ARG);
 
