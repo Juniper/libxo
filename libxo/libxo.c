@@ -530,7 +530,9 @@ xo_warn (xo_handle_t *xop, const xchar_t *fmt, ...)
     int len = strlen(fmt);
     xchar_t *newfmt = alloca(len + 2);
 
-    memcpy(newfmt, fmt, len);	/* Add a newline to the fmt string */
+    memcpy(newfmt, fmt, len);
+
+    /* Add a newline to the fmt string */
     newfmt[len] = '\n';
     newfmt[len + 1] = '\0';
 
