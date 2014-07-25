@@ -94,10 +94,10 @@ struct xo_handle_s {
 #define XFF_COLON	(1<<0)	/* Append a ":" */
 #define XFF_COMMA	(1<<1)	/* Append a "," iff there's more output */
 #define XFF_WS		(1<<2)	/* Append a blank */
-#define XFF_HIDE_TEXT	(1<<3)	/* Hide this from text output (text, html) */
+#define XFF_DATA_ONLY	(1<<3)	/* Only emit for data formats (xml and json) */
 #define XFF_QUOTE	(1<<4)	/* Force quotes */
 #define XFF_NOQUOTE	(1<<5)	/* Force no quotes */
-#define XFF_HIDE_DATA	(1<<6)	/* Hide this from data output (xml, json) */
+#define XFF_TEXT_ONLY	(1<<6)	/* Only emit for text formats (text and html) */
 
 /*
  * We keep a default handle to allow callers to avoid having to
@@ -820,11 +820,11 @@ xo_format_data (xo_handle_t *xop, const xchar_t *fmt, int flen, unsigned flags)
 	}
 
 	/* Hidden fields are only visible to JSON and XML */
-	if (flags & XFF_HIDE_TEXT) {
+	if (flags & XFF_DATA_ONLY) {
 	    if (xop->xo_style != XO_STYLE_XML
 		    && xop->xo_style != XO_STYLE_JSON)
 		skip = 1;
-	} else if (flags & XFF_HIDE_DATA) {
+	} else if (flags & XFF_TEXT_ONLY) {
 	    if (xop->xo_style != XO_STYLE_TEXT
 		    && xop->xo_style != XO_STYLE_HTML)
 		skip = 1;
@@ -1288,17 +1288,21 @@ xo_do_emit (xo_handle_t *xop, const xchar_t *fmt)
 	basep = cp + 1;
 
 	/*
-	 * We are looking at the start of a braces pattern.  The format is:
+	 * We are looking at the start of a field definition.  The format is:
 	 *  '{' modifiers ':' content [ '/' print-fmt [ '/' encode-fmt ]] '}'
-	 * Modifiers are optional, but are:
+	 * Modifiers are optional and include the following field types:
 	 *   'D': decoration; something non-text and non-data (colons, commmas)
 	 *   'L': label; text surrounding data
 	 *   'P': padding; whitespace
 	 *   'T': Title, where 'content' is a column title
-	 *   'V': value, where 'content' is the name of the field
-	 *   'C': flag: emit a colon after the label
-	 *   'W': emit a blank after the label
-	 *   'H': field is hidden from text output
+	 *   'V': value, where 'content' is the name of the field (the default)
+         * The following flags are also supported:
+	 *   'c': flag: emit a colon after the label
+	 *   'd': field is only emitted for data formats (xml and json)
+	 *   'n': no quotes avoid this field
+	 *   'q': add quotes around this field
+	 *   't': field is only emitted for text formats (text and html)
+	 *   'w': emit a blank after the label
 	 * The print-fmt and encode-fmt strings is the printf-style formating
 	 * for this data.  JSON and XML will use the encoding-fmt, if present.
 	 * If the encode-fmt is not provided, it defaults to the print-fmt.
@@ -1324,27 +1328,27 @@ xo_do_emit (xo_handle_t *xop, const xchar_t *fmt)
 		style = *sp;
 		break;
 
-	    case 'C':
+	    case 'c':
 		flags |= XFF_COLON;
 		break;
 
-	    case 'H':
-		flags |= XFF_HIDE_TEXT;
+	    case 't':
+		flags |= XFF_TEXT_ONLY;
 		break;
 
-	    case 'h':
-		flags |= XFF_HIDE_DATA;
+	    case 'd':
+		flags |= XFF_DATA_ONLY;
 		break;
 
-	    case 'N':
+	    case 'n':
 		flags |= XFF_NOQUOTE;
 		break;
 
-	    case 'Q':
+	    case 'q':
 		flags |= XFF_QUOTE;
 		break;
 
-	    case 'W':
+	    case 'w':
 		flags |= XFF_WS;
 		break;
 
@@ -1982,8 +1986,8 @@ main (int argc, char **argv)
     for (ip = list; ip->i_title; ip++) {
 	xo_open_instance(W "item");
 
-	xo_emit(W "{:item/%-15s/%s}{:sold/%12u/%u}{:in-stock/%12u/%u}"
-		"{:on-order/%12u/%u}{:sku/%5s-000-%u/%s-000-%u}\n",
+	xo_emit(W "{:name/%-15s/%s}{n:sold/%12u/%u}{:in-stock/%12u/%u}"
+		"{:on-order/%12u/%u}{q:sku/%5s-000-%u/%s-000-%u}\n",
 		ip->i_title, ip->i_sold, ip->i_instock, ip->i_onorder,
 		ip->i_sku_base, ip->i_sku_num);
 
@@ -2003,10 +2007,10 @@ main (int argc, char **argv)
 
 	xo_attr(W "fancy", W "%s%d", W "item", ip - list);
 	xo_emit(W "{L:Item} '{:name/%s}':\n", ip->i_title);
-	xo_emit(W "{P:   }{L:Total sold}: {N:sold/%u%s}{H:percent/%u}\n",
+	xo_emit(W "{P:   }{L:Total sold}: {n:sold/%u%s}{d:percent/%u}\n",
 		ip->i_sold, ip->i_sold ? ".0" : "", 44);
-	xo_emit(W "{P:   }{LWC:In stock}{:in-stock/%u}\n", ip->i_instock);
-	xo_emit(W "{P:   }{LWC:On order}{:on-order/%u}\n", ip->i_onorder);
+	xo_emit(W "{P:   }{Lcw:In stock}{:in-stock/%u}\n", ip->i_instock);
+	xo_emit(W "{P:   }{Lcw:On order}{:on-order/%u}\n", ip->i_onorder);
 	xo_emit(W "{P:   }{L:SKU}: {Q:sku/%s-000-%u}\n",
 		ip->i_sku_base, ip->i_sku_num);
 
@@ -2023,11 +2027,11 @@ main (int argc, char **argv)
 	xo_open_instance(W "item");
 
 	xo_emit(W "{L:Item} '{:name/%s}':\n", ip->i_title);
-	xo_emit(W "{P:   }{L:Total sold}: {N:sold/%u%s}\n",
+	xo_emit(W "{P:   }{L:Total sold}: {n:sold/%u%s}\n",
 		ip->i_sold, ip->i_sold ? ".0" : "");
-	xo_emit(W "{P:   }{LWC:In stock}{:in-stock/%u}\n", ip->i_instock);
-	xo_emit(W "{P:   }{LWC:On order}{:on-order/%u}\n", ip->i_onorder);
-	xo_emit(W "{P:   }{L:SKU}: {Q:sku/%s-000-%u}\n",
+	xo_emit(W "{P:   }{Lcw:In stock}{:in-stock/%u}\n", ip->i_instock);
+	xo_emit(W "{P:   }{Lcw:On order}{:on-order/%u}\n", ip->i_onorder);
+	xo_emit(W "{P:   }{L:SKU}: {q:sku/%s-000-%u}\n",
 		ip->i_sku_base, ip->i_sku_num);
 
 	xo_close_instance(W "item");
