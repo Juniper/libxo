@@ -11,8 +11,8 @@
 * libxo - A output library for XML, JSON, HTML, and Text
 
 libxo allows an application to generate XML, JSON, HTML, and text
-output using the same set of function calls.  The application decides
-at run time which output style should be produced.
+output using a set of function calls.  The application decides at run
+time which output style should be produced.
 
 * Overview
 
@@ -320,6 +320,8 @@ The set of valid flags include:
 | XOF_CLOSE_FP  | Close file pointer on xo_destroy()      |
 | XOF_PRETTY    | Make 'pretty printed' output            |
 | XOF_WARN      | Generate warnings for broken calls      |
+| XOF_WARN_XML  | Generate warnings in XML on stdout      |
+| XOF_NO_ENV    | Do not use the LIBXO_OPTIONS env var    |
 |---------------+-----------------------------------------|
 
 XOF_CLOSE_FP will trigger the call of the close_func (provided via
@@ -440,6 +442,8 @@ For example, warnings can be enabled by:
 Complete HTML output can be generated with:
 
     % env LIBXO_OPTIONS=HXI my-app
+
+* The "xo" Utility
 
 * Examples
 
