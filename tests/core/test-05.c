@@ -44,7 +44,7 @@ main (int argc, char **argv)
     xo_open_list("employee");
 
     xo_emit("{T:First Name/%-20s}{T:Last Name/%-14s}"
-	    "{T:/%-12s}{T:Time (%)\n", "Department");
+	    "{T:/%-12s}{T:Time (%)}\n", "Department");
     for ( ; ep->e_first; ep++) {
 	xo_open_instance("employee");
 	xo_emit("{:first-name/%-20s/%s}{:last-name/%-14s/%s}"
@@ -52,7 +52,7 @@ main (int argc, char **argv)
 		ep->e_first, ep->e_last, ep->e_dept, ep->e_percent);
 	if (ep->e_percent > 50) {
 	    xo_attr("full-time", "%s", "honest & for true");
-	    xo_emit("{H:benefits/%s}", "full");
+	    xo_emit("{d:benefits/%s}", "full");
 	}
 	xo_close_instance("employee");
     }
