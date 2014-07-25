@@ -52,7 +52,7 @@ main (int argc, char **argv)
 		ep->e_first, ep->e_last, ep->e_dept, ep->e_percent);
 	if (ep->e_percent > 50) {
 	    xo_attr("full-time", "%s", "honest & for true");
-	    xo_emit("{d:benefits/%s}", "full");
+	    xo_emit("{e:benefits/%s}", "full");
 	}
 	xo_close_instance("employee");
     }
