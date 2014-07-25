@@ -2,8 +2,9 @@
   <div class="title">First Name          </div>
   <div class="title">Last Name     </div>
   <div class="title">Department  </div>
-  <div class="title">Time (%)
+  <div class="title">Time (%)</div>
 </div>
+<div class="line">
   <div class="data" data-tag="first-name" data-xpath="/employees/employee/first-name" data-type="string" data-help="First name of employee">Terry ("&lt;one")      </div>
   <div class="data" data-tag="last-name" data-xpath="/employees/employee/last-name" data-type="string" data-help="Last name of employee">Jones         </div>
   <div class="data" data-tag="department" data-xpath="/employees/employee/department">     660</div>
