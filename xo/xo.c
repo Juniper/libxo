@@ -33,33 +33,40 @@ static int opt_warn;		/* Enable warnings */
 static void
 print_help (void)
 {
-    fprintf(stderr, "Usage: xo [options] formt [fields]\n");
+    fprintf(stderr,
+"Usage: xo [options] format [fields]\n"
+"\t--container <path>    Wrap output in a set of containers\n"
+"\t--help      Display this help text\n"
+"\t--html OR -H          Generate HTML output\n"
+"\t--json OR -J          Generate JSON output\n"
+"\t--pretty OR -p        Make 'pretty' output (add indent, newlines)\n"
+"\t--style <style> OR -s <style>  Generate given style (xml, json, text, html)\n"
+"\t--text OR -T          Generate text output (the default style)\n"
+"\t--version             Display version information\n"
+"\t--warn OR -W          Display warnings in text on stderr\n"
+"\t--warn-xml            Display warnings in xml on stdout\n"
+"\t--xml OR -X           Generate XML output\n"
+"\t--xpath               Add XPath data to HTML output\n");
 }
 
 static void
 print_version (void)
 {
-    printf("libxo version %s%s\n", LIBXO_VERSION, LIBXO_VERSION_EXTRA);
+    fprintf(stderr, "libxo version %s%s\n",
+	    LIBXO_VERSION, LIBXO_VERSION_EXTRA);
 }
 
 static char *
-check_arg (const char *name, char ***argvp, int has_opt)
+check_arg (const char *name, char ***argvp)
 {
     char *opt = NULL, *arg;
 
-    if (has_opt) {
-	opt = **argvp;
-	*argvp += 1;
-    }
+    opt = **argvp;
+    *argvp += 1;
     arg = **argvp;
-    if (!has_opt)
-	*argvp += 1;
 
     if (arg == NULL) {
-	if (has_opt)
-	    xo_error("missing %s argument for '%s' option", name, opt);
-	else
-	    xo_error("missing argument for '%s'", name);
+	xo_error("missing %s argument for '%s' option", name, opt);
 	exit(1);
     }
 
@@ -232,7 +239,7 @@ main (int argc UNUSED, char **argv)
 	    return 1;
 
 	} else if (streq(cp, "--container") || streq(cp, "-c")) {
-	    container = check_arg("container", &argv, 1);
+	    container = check_arg("container", &argv);
 
 	} else if (streq(cp, "--html") || streq(cp, "-H")) {
 	    xo_set_style(NULL, XO_STYLE_HTML);
@@ -244,7 +251,7 @@ main (int argc UNUSED, char **argv)
 	    xo_set_flags(NULL, XOF_PRETTY);
 
 	} else if (streq(cp, "--style") || streq(cp, "-s")) {
-	    np = check_arg("style", &argv, 1);
+	    np = check_arg("style", &argv);
 
 	    if (streq(cp, "xml"))
 		xo_set_style(NULL, XO_STYLE_XML);
@@ -275,12 +282,17 @@ main (int argc UNUSED, char **argv)
 	} else if (streq(cp, "--warn") || streq(cp, "-W")) {
 	    opt_warn = 1;
 	    xo_set_flags(NULL, XOF_WARN);
+
+	} else if (streq(cp, "--warn-xml")) {
+	    opt_warn = 1;
+	    xo_set_flags(NULL, XOF_WARN_XML);
 	}
     }
 
-    fmt = check_arg("format string", &argv, 0);
-    if (fmt == NULL || *fmt == '\0')
+    fmt = *argv++;
+    if (fmt == NULL || *fmt == '\0') {
 	return 0;
+    }
 
     prep_arg(fmt);
     xo_set_formatter(NULL, formatter);
