@@ -94,10 +94,10 @@ struct xo_handle_s {
 #define XFF_COLON	(1<<0)	/* Append a ":" */
 #define XFF_COMMA	(1<<1)	/* Append a "," iff there's more output */
 #define XFF_WS		(1<<2)	/* Append a blank */
-#define XFF_DATA_ONLY	(1<<3)	/* Only emit for data formats (xml and json) */
+#define XFF_ENCODE_ONLY	(1<<3)	/* Only emit for encoding formats (xml and json) */
 #define XFF_QUOTE	(1<<4)	/* Force quotes */
 #define XFF_NOQUOTE	(1<<5)	/* Force no quotes */
-#define XFF_TEXT_ONLY	(1<<6)	/* Only emit for text formats (text and html) */
+#define XFF_DISPLAY_ONLY (1<<6)	/* Only emit for display formats (text and html) */
 
 /*
  * We keep a default handle to allow callers to avoid having to
@@ -820,11 +820,11 @@ xo_format_data (xo_handle_t *xop, const xchar_t *fmt, int flen, unsigned flags)
 	}
 
 	/* Hidden fields are only visible to JSON and XML */
-	if (flags & XFF_DATA_ONLY) {
+	if (flags & XFF_ENCODE_ONLY) {
 	    if (xop->xo_style != XO_STYLE_XML
 		    && xop->xo_style != XO_STYLE_JSON)
 		skip = 1;
-	} else if (flags & XFF_TEXT_ONLY) {
+	} else if (flags & XFF_DISPLAY_ONLY) {
 	    if (xop->xo_style != XO_STYLE_TEXT
 		    && xop->xo_style != XO_STYLE_HTML)
 		skip = 1;
@@ -1298,10 +1298,10 @@ xo_do_emit (xo_handle_t *xop, const xchar_t *fmt)
 	 *   'V': value, where 'content' is the name of the field (the default)
          * The following flags are also supported:
 	 *   'c': flag: emit a colon after the label
-	 *   'd': field is only emitted for data formats (xml and json)
+	 *   'd': field is only emitted for display formats (text and html)
+	 *   'e': field is only emitted for encoding formats (xml and json)
 	 *   'n': no quotes avoid this field
 	 *   'q': add quotes around this field
-	 *   't': field is only emitted for text formats (text and html)
 	 *   'w': emit a blank after the label
 	 * The print-fmt and encode-fmt strings is the printf-style formating
 	 * for this data.  JSON and XML will use the encoding-fmt, if present.
@@ -1332,12 +1332,12 @@ xo_do_emit (xo_handle_t *xop, const xchar_t *fmt)
 		flags |= XFF_COLON;
 		break;
 
-	    case 't':
-		flags |= XFF_TEXT_ONLY;
+	    case 'd':
+		flags |= XFF_DISPLAY_ONLY;
 		break;
 
-	    case 'd':
-		flags |= XFF_DATA_ONLY;
+	    case 'e':
+		flags |= XFF_ENCODE_ONLY;
 		break;
 
 	    case 'n':
@@ -2007,7 +2007,7 @@ main (int argc, char **argv)
 
 	xo_attr(W "fancy", W "%s%d", W "item", ip - list);
 	xo_emit(W "{L:Item} '{:name/%s}':\n", ip->i_title);
-	xo_emit(W "{P:   }{L:Total sold}: {n:sold/%u%s}{d:percent/%u}\n",
+	xo_emit(W "{P:   }{L:Total sold}: {n:sold/%u%s}{e:percent/%u}\n",
 		ip->i_sold, ip->i_sold ? ".0" : "", 44);
 	xo_emit(W "{P:   }{Lcw:In stock}{:in-stock/%u}\n", ip->i_instock);
 	xo_emit(W "{P:   }{Lcw:On order}{:on-order/%u}\n", ip->i_onorder);
