@@ -28,12 +28,16 @@
 #define XOF_PRETTY	(1<<1)	/** Make 'pretty printed' output */
 #define XOF_DIV_OPEN	(1<<2)	/** Internal use only: a <div> is open */
 #define XOF_LINE_OPEN	(1<<3)	/** Internal use only: a <div class="line"> */
+
 #define XOF_WARN	(1<<4)	/** Generate warnings for broken calls */
 #define XOF_XPATH	(1<<5)	/** Emit XPath attributes in HTML  */
 #define XOF_INFO	(1<<6)	/** Emit additional info fields (HTML) */
 #define XOF_WARN_XML	(1<<7)	/** Emit warnings in XML (on stdout) */
+
 #define XOF_NO_ENV	(1<<8)	/** Don't look at the LIBXO_OPTIONS env var */
 #define XOF_NO_VA_ARG	(1<<9)	/** Don't advance va_list w/ va_arg() */
+#define XOF_DTRT	(1<<10)	/** Enable "do the right thing" mode */
+#define XOF_KEYS	(1<<11)	/** Flag 'key' fields for xml and json */
 
 #ifdef LIBXO_WIDE
 typedef wchar_t xchar_t;
@@ -114,10 +118,22 @@ int
 xo_open_container (const char *name);
 
 int
+xo_open_container_hd (xo_handle_t *xop, const char *name);
+
+int
+xo_open_container_d (const char *name);
+
+int
 xo_close_container_h (xo_handle_t *xop, const char *name);
 
 int
 xo_close_container (const char *name);
+
+int
+xo_close_container_hd (xo_handle_t *xop);
+
+int
+xo_close_container_d (void);
 
 int
 xo_open_list_h (xo_handle_t *xop, const char *name);
@@ -126,10 +142,22 @@ int
 xo_open_list (const char *name);
 
 int
+xo_open_list_hd (xo_handle_t *xop, const char *name);
+
+int
+xo_open_list_d (const char *name);
+
+int
 xo_close_list_h (xo_handle_t *xop, const char *name);
 
 int
 xo_close_list (const char *name);
+
+int
+xo_close_list_hd (xo_handle_t *xop);
+
+int
+xo_close_list_d (void);
 
 int
 xo_open_instance_h (xo_handle_t *xop, const char *name);
@@ -138,10 +166,22 @@ int
 xo_open_instance (const char *name);
 
 int
+xo_open_instance_hd (xo_handle_t *xop, const char *name);
+
+int
+xo_open_instance_d (const char *name);
+
+int
 xo_close_instance_h (xo_handle_t *xop, const char *name);
 
 int
 xo_close_instance (const char *name);
+
+int
+xo_close_instance_hd (xo_handle_t *xop);
+
+int
+xo_close_instance_d (void);
 
 int
 xo_attr_h (xo_handle_t *xop, const char *name, const char *fmt, ...);
