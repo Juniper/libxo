@@ -2324,12 +2324,13 @@ main (int argc, char **argv)
 	xo_open_list(W "month");
 
 	const char *months[] = { W "Jan", W "Feb", W "Mar", NULL };
+	int discounts[] = { 10, 20, 25, 0 };
 	int i;
 	for (i = 0; months[i]; i++) {
 	    xo_open_instance(W "month");
 	    xo_emit(W "{P:       }"
 		    "{Lwc:Month}{k:month}, {Lwc:Special}{:discount/%d}\n",
-		    months[i], 0);
+		    months[i], discounts[i]);
 	    xo_close_instance(W "month");
 	}
 	
