@@ -131,26 +131,38 @@ The format instruction is given as follows:
 
      '{' [ modifiers ] ':' content [ '/' format ] '}'
 
-Modifiers are options, and indicate the role and formatting of the
-content:
+Modifiers are optional, and indicate the role and formatting of the
+content.  The roles are listed below; only one role is permitted:
 
 |---+------------+-------------------------------------------------|
 | M | Name       | Description                                     |
 |---+------------+-------------------------------------------------|
-| L | label      | Content is a label that prefixes the value      |
-| V | value      | Content is the name of field                    |
 | D | decoration | Content is non-text (e.g. colon, comma)         |
+| L | label      | Content is a label that prefixes the value      |
 | P | padding    | Content is spaces needed for vertical alignment |
-| C | colon      | A colon (":") is appended to the label          |
-| W | whitespace | A blank (" ") is appended to the label          |
-| H | hidden     | The field is hidden from text and HTML output   |
+| T | title      | Content is a title value for headings           |
+| V | value      | Content is the name of field                    |
+|---+------------+-------------------------------------------------|
+
+The modifiers can also include the following flags, which modify the
+content emitted for some output styles:
+
+|---+------------+-------------------------------------------------|
+| M | Name       | Description                                     |
+|---+------------+-------------------------------------------------|
+| c | colon      | A colon (":") is appended to the label          |
+| d | data       | Only emit field for data styles (text and HTML) |
+| e | encoding   | Only emit for encoding styles (xml and JSON)    |
+| n | no-quotes  | Do not quote the field when using JSON style    |
+| q | quotes     | Quote the field when using JSON style           |
+| w | whitespace | A blank (" ") is appended to the label          |
 |---+------------+-------------------------------------------------|
 
 The "format" value is a string suitable for printf(3).
 
 For example:
 
-        xo_emit("{P:   }{LWC:In stock}{:in-stock/%u}\n",
+        xo_emit("{P:   }{Lwc:In stock}{:in-stock/%u}\n",
                 ip->i_instock);
 
 will generate:
@@ -534,11 +546,11 @@ main (int argc, char **argv)
 	xo_open_instance("item");
 
 	xo_emit("{L:Item} '{:name/%s}':\n", ip->i_title);
-	xo_emit("{P:   }{L:Total sold}: {N:sold/%u%s}\n",
+	xo_emit("{P:   }{L:Total sold}: {n:sold/%u%s}\n",
 		ip->i_sold, ip->i_sold ? ".0" : "");
-	xo_emit("{P:   }{LWC:In stock}{:in-stock/%u}\n", ip->i_instock);
-	xo_emit("{P:   }{LWC:On order}{:on-order/%u}\n", ip->i_onorder);
-	xo_emit("{P:   }{L:SKU}: {Q:sku/%s-000-%u}\n",
+	xo_emit("{P:   }{Lwc:In stock}{:in-stock/%u}\n", ip->i_instock);
+	xo_emit("{P:   }{Lwc:On order}{:on-order/%u}\n", ip->i_onorder);
+	xo_emit("{P:   }{L:SKU}: {q:sku/%s-000-%u}\n",
 		ip->i_sku_base, ip->i_sku_num);
 
 	xo_close_instance("item");
