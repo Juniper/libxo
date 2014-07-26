@@ -40,6 +40,8 @@
 #define W /* nothing */
 #endif /* LIBXO_WIDE */
 
+#define XO_FAILURE_NAME	"failure"
+
 /*
  * xo_buffer_t: a memory buffer that can be grown as needed.  We
  * use them for building format strings and output data.
@@ -58,12 +60,14 @@ typedef struct xo_buffer_s {
 typedef struct xo_stack_s {
     unsigned xs_flags;		/* Flags for this frame */
     xchar_t *xs_name;		/* Name (for XPath value) */
+    xchar_t *xs_keys;		/* XPath predicate for any key fields */
 } xo_stack_t;
 
 /* Flags for xs_flags: */
 #define XSF_NOT_FIRST	(1<<0)	/* Not the first element */
 #define XSF_LIST	(1<<1)	/* Frame is a list */
 #define XSF_INSTANCE	(1<<2)	/* Frame is an instance */
+#define XSF_DTRT	(1<<3)	/* Save the name for DTRT mode */
 
 /*
  * xo_handle_t: this is the principle data structure for libxo.
@@ -82,6 +86,7 @@ struct xo_handle_s {
     xo_buffer_t xo_data;	/* Output data */
     xo_buffer_t xo_fmt;	   	/* Work area for building format strings */
     xo_buffer_t xo_attrs;	/* Work area for building XML attributes */
+    xo_buffer_t xo_predicate;	/* Work area for building XPath predicates */
     xo_stack_t *xo_stack;	/* Stack pointer */
     int xo_depth;		/* Depth of stack */
     int xo_stack_size;		/* Size of the stack */
@@ -95,9 +100,14 @@ struct xo_handle_s {
 #define XFF_COMMA	(1<<1)	/* Append a "," iff there's more output */
 #define XFF_WS		(1<<2)	/* Append a blank */
 #define XFF_ENCODE_ONLY	(1<<3)	/* Only emit for encoding formats (xml and json) */
+
 #define XFF_QUOTE	(1<<4)	/* Force quotes */
 #define XFF_NOQUOTE	(1<<5)	/* Force no quotes */
 #define XFF_DISPLAY_ONLY (1<<6)	/* Only emit for display formats (text and html) */
+#define XFF_KEY		(1<<7)	/* Field is a key (for XPath) */
+
+#define XFF_XML		(1<<8)	/* Force XML encoding style (for XPath) */
+#define XFF_ATTR	(1<<9)	/* Escape value using attribute rules (XML) */
 
 /*
  * We keep a default handle to allow callers to avoid having to
@@ -146,6 +156,17 @@ xo_buf_init (xo_buffer_t *xbp)
 }
 
 /*
+ * Initialize the contents of an xo_buffer_t.
+ */
+static void
+xo_buf_cleanup (xo_buffer_t *xbp)
+{
+    if (xbp->xb_bufp)
+	xo_free(xbp->xb_bufp);
+    bzero(xbp, sizeof(*xbp));
+}
+
+/*
  * Initialize an xo_handle_t, using both static defaults and
  * the global settings from the LIBXO_OPTIONS environment
  * variable.
@@ -156,10 +177,12 @@ xo_init_handle (xo_handle_t *xop)
     xop->xo_opaque = stdout;
     xop->xo_write = xo_write_to_file;
 
+    /*
+     * Initialize only the xo_buffers we know we'll need; the others
+     * can be allocated as needed.
+     */
     xo_buf_init(&xop->xo_data);
     xo_buf_init(&xop->xo_fmt);
-    if (xop->xo_style == XO_STYLE_XML)
-	xo_buf_init(&xop->xo_attrs);
 
     xop->xo_indent_by = XO_INDENT_BY;
     xop->xo_stack_size = XO_DEPTH;
@@ -188,6 +211,10 @@ xo_init_handle (xo_handle_t *xop)
 			xop->xo_indent_by = atoi(env + 1);
 			env += sz - 1;	/* Skip value */
 		    }
+		    break;
+
+		case 'k':
+		    xop->xo_flags |= XOF_KEYS;
 		    break;
 
 		case 'J':
@@ -526,6 +553,9 @@ xo_indent (xo_handle_t *xop)
 static void
 xo_warn (xo_handle_t *xop, const xchar_t *fmt, ...)
 {
+    if (!(xop->xo_flags & XOF_WARN))
+	return;
+
     va_list vap;
     int len = strlen(fmt);
     xchar_t *newfmt = alloca(len + 2);
@@ -605,10 +635,10 @@ xo_destroy (xo_handle_t *xop)
 	xop->xo_close(xop->xo_opaque);
 
     xo_free(xop->xo_stack);
-    xo_free(xop->xo_data.xb_bufp);
-    xo_free(xop->xo_fmt.xb_bufp);
-    if (xop->xo_style == XO_STYLE_XML)
-	xo_free(xop->xo_attrs.xb_bufp);
+    xo_buf_cleanup(&xop->xo_data);
+    xo_buf_cleanup(&xop->xo_fmt);
+    xo_buf_cleanup(&xop->xo_predicate);
+    xo_buf_cleanup(&xop->xo_attrs);
 
     if (xop == &xo_default_handle) {
 	bzero(&xo_default_handle, sizeof(&xo_default_handle));
@@ -777,14 +807,18 @@ xo_info_find (xo_handle_t *xop, const xchar_t *name, int nlen)
 }
 
 static int
-xo_format_data (xo_handle_t *xop, const xchar_t *fmt, int flen, unsigned flags)
+xo_format_data (xo_handle_t *xop, xo_buffer_t *xbp,
+		const xchar_t *fmt, int flen, unsigned flags)
 {
     const xchar_t *cp, *ep, *sp;
-    xo_buffer_t *xbp = &xop->xo_data;
     unsigned skip, lflag, hflag, jflag, tflag, zflag, qflag, stars;
     int rc;
     int delta = 0;
+    int style = (flags & XFF_XML) ? XO_STYLE_XML : xop->xo_style;
     
+    if (xbp == NULL)
+	xbp = &xop->xo_data;
+
     for (cp = fmt, ep = fmt + flen; cp < ep; cp++) {
 	if (*cp != '%') {
 	add_one:
@@ -820,12 +854,12 @@ xo_format_data (xo_handle_t *xop, const xchar_t *fmt, int flen, unsigned flags)
 	}
 
 	/* Hidden fields are only visible to JSON and XML */
-	if (flags & XFF_ENCODE_ONLY) {
-	    if (xop->xo_style != XO_STYLE_XML
+	if (xop->xo_flags & XFF_ENCODE_ONLY) {
+	    if (style != XO_STYLE_XML
 		    && xop->xo_style != XO_STYLE_JSON)
 		skip = 1;
-	} else if (flags & XFF_DISPLAY_ONLY) {
-	    if (xop->xo_style != XO_STYLE_TEXT
+	} else if (xop->xo_flags & XFF_DISPLAY_ONLY) {
+	    if (style != XO_STYLE_TEXT
 		    && xop->xo_style != XO_STYLE_HTML)
 		skip = 1;
 	}
@@ -855,11 +889,13 @@ xo_format_data (xo_handle_t *xop, const xchar_t *fmt, int flen, unsigned flags)
 	    else if (strchr(W "diouxXDOUeEfFgGaAcCsSp", *cp) != NULL)
 		break;
 	    else if (*cp == 'n' || *cp == 'v') {
-		if (xop->xo_flags & XOF_WARN)
-		    xo_warn(xop, "unsupported format: '%s'", fmt);
+		xo_warn(xop, "unsupported format: '%s'", fmt);
 		return -1;
 	    }
 	}
+
+	if (cp == ep)
+	    xo_warn(xop, "field format missing format character: %s", fmt);
 
 	if (!skip) {
 	    xo_buffer_t *fbp = &xop->xo_fmt;
@@ -878,10 +914,10 @@ xo_format_data (xo_handle_t *xop, const xchar_t *fmt, int flen, unsigned flags)
 	     * For XML and HTML, we need "&<>" processing; for JSON,
 	     * it's quotes.  Text gets nothing.
 	     */
-	    switch (xop->xo_style) {
+	    switch (style) {
 	    case XO_STYLE_XML:
 	    case XO_STYLE_HTML:
-		rc = xo_escape_xml(xbp, rc, 0);
+		rc = xo_escape_xml(xbp, rc, (flags & XFF_ATTR));
 		break;
 
 	    case XO_STYLE_JSON:
@@ -964,15 +1000,19 @@ xo_format_data (xo_handle_t *xop, const xchar_t *fmt, int flen, unsigned flags)
 }
 
 static void
-xo_buf_append_div (xo_handle_t *xop, const xchar_t *class,
+xo_buf_append_div (xo_handle_t *xop, const xchar_t *class, unsigned flags,
 		   const xchar_t *name, int nlen,
-		   const xchar_t *value, int vlen)
+		   const xchar_t *value, int vlen,
+		   const xchar_t *encoding, int elen)
 {
     static xchar_t div1[] = W "<div class=\"";
     static xchar_t div2[] = W "\" data-tag=\"";
     static xchar_t div3[] = W "\" data-xpath=\"";
     static xchar_t div4[] = W "\">";
     static xchar_t div5[] = W "</div>";
+
+    if (flags & XFF_ENCODE_ONLY)
+	return;
 
     xo_line_ensure_open(xop, 0);
 
@@ -987,43 +1027,103 @@ xo_buf_append_div (xo_handle_t *xop, const xchar_t *class,
 	xo_data_escape(xop, name, nlen);
     }
 
-    if (name && (xop->xo_flags & XOF_XPATH)) {
-	int i;
-	xo_stack_t *xsp;
+    if (name) {
+	if (xop->xo_flags & XOF_XPATH) {
+	    int i;
+	    xo_stack_t *xsp;
 
-	xo_data_append(xop, div3, sizeof(div3) - 1);
-	for (i = 0; i <= xop->xo_depth; i++) {
-	    xsp = &xop->xo_stack[i];
-	    if (xsp->xs_name == NULL)
-		continue;
+	    xo_data_append(xop, div3, sizeof(div3) - 1);
+	    for (i = 0; i <= xop->xo_depth; i++) {
+		xsp = &xop->xo_stack[i];
+		if (xsp->xs_name == NULL)
+		    continue;
+
+		xo_data_append(xop, "/", 1);
+		xo_data_escape(xop, xsp->xs_name, strlen(xsp->xs_name));
+		if (xsp->xs_keys)
+		    xo_data_append(xop, xsp->xs_keys, strlen(xsp->xs_keys));
+	    }
 
 	    xo_data_append(xop, "/", 1);
-	    xo_data_escape(xop, xsp->xs_name, strlen(xsp->xs_name));
+	    xo_data_escape(xop, name, nlen);
 	}
 
-	xo_data_append(xop, "/", 1);
-	xo_data_escape(xop, name, nlen);
-    }
+	if ((xop->xo_flags & XOF_INFO) && xop->xo_info) {
+	    static xchar_t in_type[] = W "\" data-type=\"";
+	    static xchar_t in_help[] = W "\" data-help=\"";
 
-    if (name && (xop->xo_flags & XOF_INFO) && xop->xo_info) {
-	static xchar_t in_type[] = W "\" data-type=\"";
-	static xchar_t in_help[] = W "\" data-help=\"";
-
-	xo_info_t *xip = xo_info_find(xop, name, nlen);
-	if (xip) {
-	    if (xip->xi_type) {
-		xo_data_append(xop, in_type, sizeof(in_type) - 1);
-		xo_data_escape(xop, xip->xi_type, strlen(xip->xi_type));
-	    }
-	    if (xip->xi_help) {
-		xo_data_append(xop, in_help, sizeof(in_help) - 1);
-		xo_data_escape(xop, xip->xi_help, strlen(xip->xi_help));
+	    xo_info_t *xip = xo_info_find(xop, name, nlen);
+	    if (xip) {
+		if (xip->xi_type) {
+		    xo_data_append(xop, in_type, sizeof(in_type) - 1);
+		    xo_data_escape(xop, xip->xi_type, strlen(xip->xi_type));
+		}
+		if (xip->xi_help) {
+		    xo_data_append(xop, in_help, sizeof(in_help) - 1);
+		    xo_data_escape(xop, xip->xi_help, strlen(xip->xi_help));
+		}
 	    }
 	}
     }
 
     xo_data_append(xop, div4, sizeof(div4) - 1);
-    xo_format_data(xop, value, vlen, 0);
+
+    /*
+     * To build our XPath predicate, we need to save the va_list before
+     * we format our data, and then restore it before we format the
+     * xpath expression.
+     */
+    va_list va_local;
+    int need_predidate = 
+	(name && (flags & XFF_KEY) && (xop->xo_flags & XOF_XPATH));
+
+    if (need_predidate)
+	va_copy(va_local, xop->xo_vap);
+
+    xo_format_data(xop, NULL, value, vlen, 0);
+
+    if (need_predidate) {
+	va_end(xop->xo_vap);
+	va_copy(xop->xo_vap, va_local);
+	va_end(va_local);
+
+	/*
+	 * Build an XPath predicate expression to match this key.
+	 * We use the format buffer.
+	 */
+	xo_buffer_t *pbp = &xop->xo_predicate;
+	pbp->xb_curp = pbp->xb_bufp; /* Restart buffer */
+
+	xo_buf_append(pbp, "[", 1);
+	xo_buf_escape(xop, pbp, name, nlen);
+	if (xop->xo_flags & XOF_PRETTY)
+	    xo_buf_append(pbp, " = '", 4);
+	else
+	    xo_buf_append(pbp, "='", 2);
+
+	/* The encoding format defaults to the normal format */
+	if (encoding == NULL) {
+	    encoding = value;
+	    elen = vlen;
+	}
+
+	xo_format_data(xop, pbp, encoding, elen, XFF_XML | XFF_ATTR);
+
+	xo_buf_append(pbp, "']", 2);
+
+	/* Now we record this predicate expression in the stack */
+	xo_stack_t *xsp = &xop->xo_stack[xop->xo_depth];
+	int olen = xsp->xs_keys ? strlen(xsp->xs_keys) : 0;
+	int dlen = pbp->xb_curp - pbp->xb_bufp;
+
+	char *cp = xo_realloc(xsp->xs_keys, olen + dlen + 1);
+	if (cp) {
+	    memcpy(cp + olen, pbp->xb_bufp, dlen);
+	    cp[olen + dlen] = '\0';
+	    xsp->xs_keys = cp;
+	}
+    }
+
     xo_data_append(xop, div5, sizeof(div5) - 1);
 
     if (xop->xo_flags & XOF_PRETTY)
@@ -1039,7 +1139,7 @@ xo_format_text (xo_handle_t *xop, const xchar_t *str, int len)
 	break;
 
     case XO_STYLE_HTML:
-	xo_buf_append_div(xop, "text", NULL, 0, str, len);
+	xo_buf_append_div(xop, "text", 0, NULL, 0, str, len, NULL, 0);
 	break;
     }
 }
@@ -1053,7 +1153,7 @@ xo_format_label (xo_handle_t *xop, const xchar_t *str, int len)
 	break;
 
     case XO_STYLE_HTML:
-	xo_buf_append_div(xop, "label", NULL, 0, str, len);
+	xo_buf_append_div(xop, "label", 0, NULL, 0, str, len, NULL, 0);
 	break;
     }
 }
@@ -1100,7 +1200,7 @@ xo_format_title (xo_handle_t *xop, const xchar_t *str, int len,
 	}
 
     } else {
-	rc = xo_format_data(xop, fmt, flen, 0);
+	rc = xo_format_data(xop, NULL, fmt, flen, 0);
 	/* xo_format_data moved curp, so we need to reset it */
 	xbp->xb_curp = xbp->xb_bufp + start;
     }
@@ -1140,15 +1240,20 @@ xo_format_value (xo_handle_t *xop, const xchar_t *name, int nlen,
 
     switch (xop->xo_style) {
     case XO_STYLE_TEXT:
-	xo_format_data(xop, format, flen, flags);
+	if (!(flags & XFF_ENCODE_ONLY))
+	    xo_format_data(xop, NULL, format, flen, flags);
 	break;
 
     case XO_STYLE_HTML:
-	xo_buf_append_div(xop, "data", name, nlen,
-			  format, flen);
+	if (!(flags & XFF_ENCODE_ONLY))
+	    xo_buf_append_div(xop, "data", flags, name, nlen,
+			      format, flen, encoding, elen);
 	break;
 
     case XO_STYLE_XML:
+	if (flags & XFF_DISPLAY_ONLY)
+	    break;
+
 	if (encoding) {
 	    format = encoding;
 	    flen = elen;
@@ -1165,8 +1270,19 @@ xo_format_value (xo_handle_t *xop, const xchar_t *name, int nlen,
 	    xop->xo_attrs.xb_curp = xop->xo_attrs.xb_bufp;
 	}
 
+	/*
+	 * We indicate 'key' fields using the 'key' attribute.  While
+	 * this is really committing the crime of mixing meta-data with
+	 * data, it's often useful.  Especially when format meta-data is
+	 * difficult to come by.
+	 */
+	if ((flags & XFF_KEY) && (xop->xo_flags & XOF_KEYS)) {
+	    static xchar_t attr[] = W " key=\"key\"";
+	    xo_data_append(xop, attr, sizeof(attr) - 1);
+	}
+
 	xo_data_append(xop, ">", 1);
-	xo_format_data(xop, format, flen, flags);
+	xo_format_data(xop, NULL, format, flen, flags);
 	xo_data_append(xop, "</", 2);
 	xo_data_escape(xop, name, nlen);
 	xo_data_append(xop, ">", 1);
@@ -1175,6 +1291,9 @@ xo_format_value (xo_handle_t *xop, const xchar_t *name, int nlen,
 	break;
 
     case XO_STYLE_JSON:
+	if (flags & XFF_DISPLAY_ONLY)
+	    break;
+
 	if (encoding) {
 	    format = encoding;
 	    flen = elen;
@@ -1202,7 +1321,7 @@ xo_format_value (xo_handle_t *xop, const xchar_t *name, int nlen,
 	if (quote)
 	    xo_data_append(xop, "\"", 1);
 
-	xo_format_data(xop, format, flen, flags);
+	xo_format_data(xop, NULL, format, flen, flags);
 
 	if (quote)
 	    xo_data_append(xop, "\"", 1);
@@ -1219,7 +1338,7 @@ xo_format_decoration (xo_handle_t *xop, const xchar_t *str, int len)
 	break;
 
     case XO_STYLE_HTML:
-	xo_buf_append_div(xop, "decoration", NULL, 0, str, len);
+	xo_buf_append_div(xop, "decoration", 0, NULL, 0, str, len, NULL, 0);
 	break;
     }
 }
@@ -1233,7 +1352,7 @@ xo_format_padding (xo_handle_t *xop, const xchar_t *str, int len)
 	break;
 
     case XO_STYLE_HTML:
-	xo_buf_append_div(xop, "padding", NULL, 0, str, len);
+	xo_buf_append_div(xop, "padding", 0, NULL, 0, str, len, NULL, 0);
 	break;
     }
 }
@@ -1260,7 +1379,7 @@ xo_do_emit (xo_handle_t *xop, const xchar_t *fmt)
 		    if (*sp == '}' && sp[1] == '}')
 			break;
 		}
-		if (*sp == '\0' && (xop->xo_flags & XOF_WARN))
+		if (*sp == '\0')
 		    xo_warn(xop, "missing closing '}}': %s", fmt);
 
 		xo_format_text(xop, cp, sp - cp);
@@ -1300,6 +1419,7 @@ xo_do_emit (xo_handle_t *xop, const xchar_t *fmt)
 	 *   'c': flag: emit a colon after the label
 	 *   'd': field is only emitted for display formats (text and html)
 	 *   'e': field is only emitted for encoding formats (xml and json)
+	 *   'k': this field is a key, suitable for XPath predicates
 	 *   'n': no quotes avoid this field
 	 *   'q': add quotes around this field
 	 *   'w': emit a blank after the label
@@ -1322,7 +1442,7 @@ xo_do_emit (xo_handle_t *xop, const xchar_t *fmt)
 	    case 'P':
 	    case 'T':
 	    case 'V':
-		if ((xop->xo_flags & XOF_WARN) && style != 0)
+		if (style != 0)
 		    xo_warn(xop, "format string uses multiple styles: %s",
 			    fmt);
 		style = *sp;
@@ -1340,6 +1460,10 @@ xo_do_emit (xo_handle_t *xop, const xchar_t *fmt)
 		flags |= XFF_ENCODE_ONLY;
 		break;
 
+	    case 'k':
+		flags |= XFF_KEY;
+		break;
+
 	    case 'n':
 		flags |= XFF_NOQUOTE;
 		break;
@@ -1353,10 +1477,17 @@ xo_do_emit (xo_handle_t *xop, const xchar_t *fmt)
 		break;
 
 	    default:
-		if (xop->xo_flags & XOF_WARN)
-		    xo_warn(xop, "format string uses unknown modifier: %s",
-			    fmt);
+		xo_warn(xop, "format string uses unknown modifier: %s", fmt);
 	    }
+	}
+
+	/*
+	 * If a field is display only, then if can't be a key for an XPath
+	 * expression, since it doesn't appear in XML.
+	 */
+	if ((flags & XFF_KEY) && (flags & XFF_DISPLAY_ONLY)) {
+	    flags &= ~XFF_KEY;
+	    xo_warn(xop, "ignoring 'key' for 'display-only' field: %s", fmt);
 	}
 
 	if (*sp == ':') {
@@ -1368,8 +1499,7 @@ xo_do_emit (xo_handle_t *xop, const xchar_t *fmt)
 		clen = sp - ep;
 		content = ep;
 	    }
-	} else if (xop->xo_flags & XOF_WARN)
-	    xo_warn(xop, "missing content (':'): %s", fmt);
+	} else xo_warn(xop, "missing content (':'): %s", fmt);
 
 	if (*sp == '/') {
 	    for (ep = ++sp; *sp; sp++) {
@@ -1396,7 +1526,7 @@ xo_do_emit (xo_handle_t *xop, const xchar_t *fmt)
 
 	if (*sp == '}') {
 	    sp += 1;
-	} else if (xop->xo_flags & XOF_WARN)
+	} else
 	    xo_warn(xop, "missing closing '}': %s", fmt);
 
 	if (format == NULL) {
@@ -1551,7 +1681,10 @@ xo_depth_change (xo_handle_t *xop, const xchar_t *name,
 	xsp += delta;
 	xsp->xs_flags = flags;
 
-	if (name && (xop->xo_flags & (XOF_XPATH | XOF_WARN))) {
+	unsigned save = (xop->xo_flags & (XOF_XPATH | XOF_WARN | XOF_DTRT));
+	save |= (flags & XSF_DTRT);
+
+	if (name && save) {
 	    int len = strlen(name) + 1;
 	    xchar_t *cp = xo_realloc(NULL, len);
 	    if (cp) {
@@ -1562,8 +1695,7 @@ xo_depth_change (xo_handle_t *xop, const xchar_t *name,
 
     } else {			/* Pop operation */
 	if (xop->xo_depth == 0) {
-	    if (xop->xo_flags & XOF_WARN)
-		xo_warn(xop, "xo: close with empty stack: '%s'", name);
+	    xo_warn(xop, "xo: close with empty stack: '%s'", name);
 	    return;
 	}
 
@@ -1582,6 +1714,10 @@ xo_depth_change (xo_handle_t *xop, const xchar_t *name,
 		xo_free(xsp->xs_name);
 		xsp->xs_name = NULL;
 	    }
+	    if (xsp->xs_keys) {
+		xo_free(xsp->xs_keys);
+		xsp->xs_keys = NULL;
+	    }
 	}
     }
 
@@ -1589,8 +1725,16 @@ xo_depth_change (xo_handle_t *xop, const xchar_t *name,
     xop->xo_indent += indent;
 }
 
-int
-xo_open_container_h (xo_handle_t *xop, const xchar_t *name)
+static unsigned
+xo_stack_flags (unsigned xflags)
+{
+    if (xflags & XOF_DTRT)
+	return XSF_DTRT;
+    return 0;
+}
+
+static int
+xo_open_container_hf (xo_handle_t *xop, unsigned flags, const xchar_t *name)
 {
     xop = xo_default(xop);
 
@@ -1598,11 +1742,18 @@ xo_open_container_h (xo_handle_t *xop, const xchar_t *name)
     const xchar_t *ppn = (xop->xo_flags & XOF_PRETTY) ? W "\n" : W "";
     const xchar_t *pre_nl = W "";
 
+    if (name == NULL) {
+	xo_warn(xop, "NULL passed for container name");
+	name = XO_FAILURE_NAME;
+    }
+
+    flags |= xop->xo_flags;	/* Pick up handle flags */
+
     switch (xop->xo_style) {
     case XO_STYLE_XML:
 	rc = xo_printf(xop, "%*s<%s>%s", xo_indent(xop), "",
 		     name, ppn);
-	xo_depth_change(xop, name, 1, 1, 0);
+	xo_depth_change(xop, name, 1, 1, xo_stack_flags(flags));
 	break;
 
     case XO_STYLE_JSON:
@@ -1612,12 +1763,12 @@ xo_open_container_h (xo_handle_t *xop, const xchar_t *name)
 
 	rc = xo_printf(xop, "%s%*s\"%s\": {%s",
 		       pre_nl, xo_indent(xop), "", name, ppn);
-	xo_depth_change(xop, name, 1, 1, 0);
+	xo_depth_change(xop, name, 1, 1, xo_stack_flags(flags));
 	break;
 
     case XO_STYLE_HTML:
     case XO_STYLE_TEXT:
-	xo_depth_change(xop, name, 1, 0, 0);
+	xo_depth_change(xop, name, 1, 0, xo_stack_flags(flags));
 	break;
     }
 
@@ -1625,9 +1776,27 @@ xo_open_container_h (xo_handle_t *xop, const xchar_t *name)
 }
 
 int
+xo_open_container_h (xo_handle_t *xop, const xchar_t *name)
+{
+    return xo_open_container_hf(xop, 0, name);
+}
+
+int
 xo_open_container (const xchar_t *name)
 {
-    return xo_open_container_h(NULL, name);
+    return xo_open_container_hf(NULL, 0, name);
+}
+
+int
+xo_open_container_hd (xo_handle_t *xop, const xchar_t *name)
+{
+    return xo_open_container_hf(xop, XOF_DTRT, name);
+}
+
+int
+xo_open_container_d (const xchar_t *name)
+{
+    return xo_open_container_hf(NULL, XOF_DTRT, name);
 }
 
 int
@@ -1638,6 +1807,21 @@ xo_close_container_h (xo_handle_t *xop, const xchar_t *name)
     int rc = 0;
     const xchar_t *ppn = (xop->xo_flags & XOF_PRETTY) ? "\n" : "";
     const xchar_t *pre_nl = W "";
+
+    if (name == NULL) {
+	xo_stack_t *xsp = &xop->xo_stack[xop->xo_depth];
+	if (!(xsp->xs_flags & XSF_DTRT))
+	    xo_warn(xop, "missing name without 'dtrt' mode");
+	name = xsp->xs_name;
+	if (name) {
+	    int len = strlen(name) + 1;
+	    /* We need to make a local copy; xo_depth_change will free it */
+	    char *cp = alloca(len);
+	    memcpy(cp, name, len);
+	    name = cp;
+	} else
+	    name = XO_FAILURE_NAME;
+    }
 
     switch (xop->xo_style) {
     case XO_STYLE_XML:
@@ -1670,37 +1854,71 @@ xo_close_container (const xchar_t *name)
 }
 
 int
-xo_open_list_h (xo_handle_t *xop, const xchar_t *name UNUSED)
+xo_close_container_hd (xo_handle_t *xop)
+{
+    return xo_close_container_h(xop, NULL);
+}
+
+int
+xo_close_container_d (void)
+{
+    return xo_close_container_h(NULL, NULL);
+}
+
+static int
+xo_open_list_hf (xo_handle_t *xop, unsigned flags, const xchar_t *name)
 {
     xop = xo_default(xop);
+
+    if (xop->xo_style != XO_STYLE_JSON)
+	return 0;
 
     int rc = 0;
     const xchar_t *ppn = (xop->xo_flags & XOF_PRETTY) ? "\n" : "";
     const xchar_t *pre_nl = W "";
 
-    switch (xop->xo_style) {
-    case XO_STYLE_JSON:
-	if (xop->xo_stack[xop->xo_depth].xs_flags & XSF_NOT_FIRST)
-	    pre_nl = (xop->xo_flags & XOF_PRETTY) ? ",\n" : ", ";
-	xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
-
-	rc = xo_printf(xop, "%s%*s\"%s\": [%s",
-		       pre_nl, xo_indent(xop), "", name, ppn);
-	xo_depth_change(xop, name, 1, 1, XSF_LIST);
-	break;
+    if (name == NULL) {
+	xo_warn(xop, "NULL passed for list name");
+	name = XO_FAILURE_NAME;
     }
+
+    if (xop->xo_stack[xop->xo_depth].xs_flags & XSF_NOT_FIRST)
+	pre_nl = (xop->xo_flags & XOF_PRETTY) ? ",\n" : ", ";
+    xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
+
+    rc = xo_printf(xop, "%s%*s\"%s\": [%s",
+		   pre_nl, xo_indent(xop), "", name, ppn);
+    xo_depth_change(xop, name, 1, 1, XSF_LIST | xo_stack_flags(flags));
 
     return rc;
 }
 
 int
-xo_open_list (const xchar_t *name)
+xo_open_list_h (xo_handle_t *xop, const xchar_t *name UNUSED)
 {
-    return xo_open_list_h(NULL, name);
+    return xo_open_list_hf(xop, 0, name);
 }
 
 int
-xo_close_list_h (xo_handle_t *xop, const xchar_t *name UNUSED)
+xo_open_list (const xchar_t *name)
+{
+    return xo_open_list_hf(NULL, 0, name);
+}
+
+int
+xo_open_list_hd (xo_handle_t *xop, const xchar_t *name UNUSED)
+{
+    return xo_open_list_hf(xop, XOF_DTRT, name);
+}
+
+int
+xo_open_list_d (const xchar_t *name)
+{
+    return xo_open_list_hf(NULL, XOF_DTRT, name);
+}
+
+int
+xo_close_list_h (xo_handle_t *xop, const xchar_t *name)
 {
     int rc = 0;
     const xchar_t *pre_nl = W "";
@@ -1729,7 +1947,19 @@ xo_close_list (const xchar_t *name)
 }
 
 int
-xo_open_instance_h (xo_handle_t *xop, const xchar_t *name)
+xo_close_list_hd (xo_handle_t *xop)
+{
+    return xo_close_list_h(xop, NULL);
+}
+
+int
+xo_close_list_d (void)
+{
+    return xo_close_list_h(NULL, NULL);
+}
+
+static int
+xo_open_instance_hf (xo_handle_t *xop, unsigned flags, const xchar_t *name)
 {
     xop = xo_default(xop);
 
@@ -1737,10 +1967,17 @@ xo_open_instance_h (xo_handle_t *xop, const xchar_t *name)
     const xchar_t *ppn = (xop->xo_flags & XOF_PRETTY) ? "\n" : "";
     const xchar_t *pre_nl = W "";
 
+    flags |= xop->xo_flags;
+
+    if (name == NULL) {
+	xo_warn(xop, "NULL passed for instance name");
+	name = XO_FAILURE_NAME;
+    }
+
     switch (xop->xo_style) {
     case XO_STYLE_XML:
 	rc = xo_printf(xop, "%*s<%s>%s", xo_indent(xop), "", name, ppn);
-	xo_depth_change(xop, name, 1, 1, 0);
+	xo_depth_change(xop, name, 1, 1, xo_stack_flags(flags));
 	break;
 
     case XO_STYLE_JSON:
@@ -1750,12 +1987,12 @@ xo_open_instance_h (xo_handle_t *xop, const xchar_t *name)
 
 	rc = xo_printf(xop, "%s%*s{%s",
 		       pre_nl, xo_indent(xop), "", ppn);
-	xo_depth_change(xop, name, 1, 1, 0);
+	xo_depth_change(xop, name, 1, 1, xo_stack_flags(flags));
 	break;
 
     case XO_STYLE_HTML:
     case XO_STYLE_TEXT:
-	xo_depth_change(xop, name, 1, 0, 0);
+	xo_depth_change(xop, name, 1, 0, xo_stack_flags(flags));
 	break;
     }
 
@@ -1763,9 +2000,27 @@ xo_open_instance_h (xo_handle_t *xop, const xchar_t *name)
 }
 
 int
+xo_open_instance_h (xo_handle_t *xop, const xchar_t *name)
+{
+    return xo_open_instance_hf(xop, 0, name);
+}
+
+int
 xo_open_instance (const xchar_t *name)
 {
-    return xo_open_instance_h(NULL, name);
+    return xo_open_instance_hf(NULL, 0, name);
+}
+
+int
+xo_open_instance_hd (xo_handle_t *xop, const xchar_t *name)
+{
+    return xo_open_instance_hf(xop, XOF_DTRT, name);
+}
+
+int
+xo_open_instance_d (const xchar_t *name)
+{
+    return xo_open_instance_hf(NULL, XOF_DTRT, name);
 }
 
 int
@@ -1776,6 +2031,21 @@ xo_close_instance_h (xo_handle_t *xop, const xchar_t *name)
     int rc = 0;
     const xchar_t *ppn = (xop->xo_flags & XOF_PRETTY) ? "\n" : "";
     const xchar_t *pre_nl = W "";
+
+    if (name == NULL) {
+	xo_stack_t *xsp = &xop->xo_stack[xop->xo_depth];
+	if (!(xsp->xs_flags & XSF_DTRT))
+	    xo_warn(xop, "missing name without 'dtrt' mode");
+	name = xsp->xs_name;
+	if (name) {
+	    int len = strlen(name) + 1;
+	    /* We need to make a local copy; xo_depth_change will free it */
+	    char *cp = alloca(len);
+	    memcpy(cp, name, len);
+	    name = cp;
+	} else
+	    name = XO_FAILURE_NAME;
+    }
 
     switch (xop->xo_style) {
     case XO_STYLE_XML:
@@ -1805,6 +2075,19 @@ xo_close_instance (const xchar_t *name)
 {
     return xo_close_instance_h(NULL, name);
 }
+
+int
+xo_close_instance_hd (xo_handle_t *xop)
+{
+    return xo_close_instance_h(xop, NULL);
+}
+
+int
+xo_close_instance_d (void)
+{
+    return xo_close_instance_h(NULL, NULL);
+}
+
 void
 xo_set_writer (xo_handle_t *xop, void *opaque, xo_write_func_t write_func,
 	       xo_close_func_t close_func)
@@ -1870,7 +2153,7 @@ xo_error_hv (xo_handle_t *xop, const char *fmt, va_list vap)
     case XO_STYLE_HTML:
 	va_copy(xop->xo_vap, vap);
 	
-	xo_buf_append_div(xop, "error", NULL, 0, fmt, strlen(fmt));
+	xo_buf_append_div(xop, "error", 0, NULL, 0, fmt, strlen(fmt), NULL, 0);
 
 	if (xop->xo_flags & XOF_DIV_OPEN)
 	    xo_line_close(xop);
@@ -1971,6 +2254,10 @@ main (int argc, char **argv)
 	    xo_set_flags(NULL, XOF_XPATH);
 	else if (strcmp(argv[argc], "info") == 0)
 	    xo_set_flags(NULL, XOF_INFO);
+	else if (strcmp(argv[argc], "keys") == 0)
+	    xo_set_flags(NULL, XOF_KEYS);
+	else if (strcmp(argv[argc], "warn") == 0)
+	    xo_set_flags(NULL, XOF_WARN);
     }
 
     xo_set_info(NULL, info, info_count);
@@ -1986,7 +2273,7 @@ main (int argc, char **argv)
     for (ip = list; ip->i_title; ip++) {
 	xo_open_instance(W "item");
 
-	xo_emit(W "{:name/%-15s/%s}{n:sold/%12u/%u}{:in-stock/%12u/%u}"
+	xo_emit(W "{k:name/%-15s/%s}{n:sold/%12u/%u}{:in-stock/%12u/%u}"
 		"{:on-order/%12u/%u}{q:sku/%5s-000-%u/%s-000-%u}\n",
 		ip->i_title, ip->i_sold, ip->i_instock, ip->i_onorder,
 		ip->i_sku_base, ip->i_sku_num);
@@ -2006,12 +2293,12 @@ main (int argc, char **argv)
 	xo_open_instance(W "item");
 
 	xo_attr(W "fancy", W "%s%d", W "item", ip - list);
-	xo_emit(W "{L:Item} '{:name/%s}':\n", ip->i_title);
+	xo_emit(W "{L:Item} '{k:name/%s}':\n", ip->i_title);
 	xo_emit(W "{P:   }{L:Total sold}: {n:sold/%u%s}{e:percent/%u}\n",
 		ip->i_sold, ip->i_sold ? ".0" : "", 44);
 	xo_emit(W "{P:   }{Lcw:In stock}{:in-stock/%u}\n", ip->i_instock);
 	xo_emit(W "{P:   }{Lcw:On order}{:on-order/%u}\n", ip->i_onorder);
-	xo_emit(W "{P:   }{L:SKU}: {Q:sku/%s-000-%u}\n",
+	xo_emit(W "{P:   }{L:SKU}: {q:sku/%s-000-%u}\n",
 		ip->i_sku_base, ip->i_sku_num);
 
 	xo_close_instance(W "item");
@@ -2026,13 +2313,27 @@ main (int argc, char **argv)
     for (ip = list2; ip->i_title; ip++) {
 	xo_open_instance(W "item");
 
-	xo_emit(W "{L:Item} '{:name/%s}':\n", ip->i_title);
+	xo_emit(W "{L:Item} '{k:name/%s}':\n", ip->i_title);
 	xo_emit(W "{P:   }{L:Total sold}: {n:sold/%u%s}\n",
 		ip->i_sold, ip->i_sold ? ".0" : "");
 	xo_emit(W "{P:   }{Lcw:In stock}{:in-stock/%u}\n", ip->i_instock);
 	xo_emit(W "{P:   }{Lcw:On order}{:on-order/%u}\n", ip->i_onorder);
 	xo_emit(W "{P:   }{L:SKU}: {q:sku/%s-000-%u}\n",
 		ip->i_sku_base, ip->i_sku_num);
+
+	xo_open_list(W "month");
+
+	const char *months[] = { W "Jan", W "Feb", W "Mar", NULL };
+	int i;
+	for (i = 0; months[i]; i++) {
+	    xo_open_instance(W "month");
+	    xo_emit(W "{P:       }"
+		    "{Lwc:Month}{k:month}, {Lwc:Special}{:discount/%d}\n",
+		    months[i], 0);
+	    xo_close_instance(W "month");
+	}
+	
+	xo_close_list(W "month");
 
 	xo_close_instance(W "item");
     }
