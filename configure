@@ -13080,7 +13080,7 @@ LIBXO_VERSION_NUMBER=`echo $PACKAGE_VERSION | sed -e 's/lib.* //' | awk 'BEGIN {
 
 ac_config_headers="$ac_config_headers libxo/libxo-config.h"
 
-ac_config_files="$ac_config_files Makefile libxo-config libxo/Makefile libxo/xoversion.h xo/Makefile packaging/libxo.pc tests/Makefile tests/core/Makefile"
+ac_config_files="$ac_config_files Makefile libxo-config libxo/Makefile libxo/xoversion.h xo/Makefile packaging/libxo.pc tests/Makefile tests/core/Makefile tests/xo/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -14119,6 +14119,7 @@ do
     "packaging/libxo.pc") CONFIG_FILES="$CONFIG_FILES packaging/libxo.pc" ;;
     "tests/Makefile") CONFIG_FILES="$CONFIG_FILES tests/Makefile" ;;
     "tests/core/Makefile") CONFIG_FILES="$CONFIG_FILES tests/core/Makefile" ;;
+    "tests/xo/Makefile") CONFIG_FILES="$CONFIG_FILES tests/xo/Makefile" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac
