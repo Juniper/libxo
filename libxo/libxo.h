@@ -39,6 +39,8 @@
 #define XOF_DTRT	(1<<10)	/** Enable "do the right thing" mode */
 #define XOF_KEYS	(1<<11)	/** Flag 'key' fields for xml and json */
 
+#define XOF_IGNORE_CLOSE (1<<12) /** Ignore errors on close tags */
+
 #ifdef LIBXO_WIDE
 typedef wchar_t xchar_t;
 #else /* LIBXO_WIDE */
@@ -101,6 +103,9 @@ xo_set_info (xo_handle_t *xop, xo_info_t *infop, int count);
 
 void
 xo_set_formatter (xo_handle_t *xop, xo_formatter_t func);
+
+void
+xo_set_depth (xo_handle_t *xop, int depth);
 
 int
 xo_emit_hv (xo_handle_t *xop, const char *fmt, va_list vap);
