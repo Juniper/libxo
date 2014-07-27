@@ -15,10 +15,10 @@ XOP="${XO} --depth 1"
 
 ${XO} --open top
 
-${XOP} -w item 'The {:food} is {:rating}\n' fish good
-
+NF=
 for i in one two three four; do
-    ${XOP} --wrap item 'Item {k:name} is {:value}\n' $i $i
+    ${XOP} ${NF} --wrap item 'Item {k:name} is {:value}\n' $i $i
+    NF=--not-first
 done
 
 ${XO} --close top
