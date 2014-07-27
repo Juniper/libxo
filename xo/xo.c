@@ -35,7 +35,6 @@ print_help (void)
 {
     fprintf(stderr,
 "Usage: xo [options] format [fields]\n"
-"\t--container <path>    Wrap output in a set of containers\n"
 "\t--help      Display this help text\n"
 "\t--html OR -H          Generate HTML output\n"
 "\t--json OR -J          Generate JSON output\n"
@@ -45,6 +44,7 @@ print_help (void)
 "\t--version             Display version information\n"
 "\t--warn OR -W          Display warnings in text on stderr\n"
 "\t--warn-xml            Display warnings in xml on stdout\n"
+"\t--wrap <path>         Wrap output in a set of containers\n"
 "\t--xml OR -X           Generate XML output\n"
 "\t--xpath               Add XPath data to HTML output\n");
 }
@@ -222,8 +222,8 @@ formatter (xo_handle_t *xop, xchar_t *buf, int bufsiz,
 int
 main (int argc UNUSED, char **argv)
 {
-    char *fmt = NULL, *cp, *np, *container = NULL;
-    int clen = 0;
+    char *fmt = NULL, *cp, *np, *wrapper = NULL;
+    char *opener = NULL, *closer = NULL;
 
     for (argv++; *argv; argv++) {
 	cp = *argv;
@@ -234,18 +234,27 @@ main (int argc UNUSED, char **argv)
 	if (streq(cp, "--"))
 	    break;
 
-	if (streq(cp, "--help")) {
+	if (streq(cp, "--close") || streq(cp, "-c")) {
+	    opener = check_arg("open", &argv);
+	    xo_set_flags(NULL, XOF_IGNORE_CLOSE);
+
+	} else if (streq(cp, "--depth")) {
+	    int depth = atoi(check_arg("open", &argv));
+	    if (depth > 0)
+		xo_set_depth(NULL, depth);
+
+	} else if (streq(cp, "--help")) {
 	    print_help();
 	    return 1;
-
-	} else if (streq(cp, "--container") || streq(cp, "-c")) {
-	    container = check_arg("container", &argv);
 
 	} else if (streq(cp, "--html") || streq(cp, "-H")) {
 	    xo_set_style(NULL, XO_STYLE_HTML);
 
 	} else if (streq(cp, "--json") || streq(cp, "-J")) {
 	    xo_set_style(NULL, XO_STYLE_JSON);
+
+	} else if (streq(cp, "--open") || streq(cp, "-o")) {
+	    closer = check_arg("close", &argv);
 
         } else if (streq(cp, "--pretty") || streq(cp, "-p")) {
 	    xo_set_flags(NULL, XOF_PRETTY);
@@ -286,6 +295,9 @@ main (int argc UNUSED, char **argv)
 	} else if (streq(cp, "--warn-xml")) {
 	    opt_warn = 1;
 	    xo_set_flags(NULL, XOF_WARN_XML);
+
+	} else if (streq(cp, "--wrap") || streq(cp, "-w")) {
+	    wrapper = check_arg("wrapper", &argv);
 	}
     }
 
@@ -300,9 +312,19 @@ main (int argc UNUSED, char **argv)
 
     save_argv = argv;
 
-    if (container) {
-	clen = strlen(container);
-	for (cp = container; cp && *cp; cp = np) {
+    if (opener) {
+	for (cp = opener; cp && *cp; cp = np) {
+	    np = strchr(cp, '/');
+	    if (np)
+		*np = '\0';
+	    xo_open_container(cp);
+	    if (np)
+		*np++ = '/';
+	}
+    }
+
+    if (wrapper) {
+	for (cp = wrapper; cp && *cp; cp = np) {
 	    np = strchr(cp, '/');
 	    if (np)
 		*np = '\0';
@@ -314,13 +336,22 @@ main (int argc UNUSED, char **argv)
 
     xo_emit(fmt);
 
-    while (container) {
-	np = strrchr(container, '/');
-	xo_close_container(np ? np + 1 : container);
+    while (wrapper) {
+	np = strrchr(wrapper, '/');
+	xo_close_container(np ? np + 1 : wrapper);
 	if (np)
 	    *np = '\0';
 	else
-	    container = NULL;
+	    wrapper = NULL;
+    }
+
+    while (closer) {
+	np = strrchr(closer, '/');
+	xo_close_container(np ? np + 1 : closer);
+	if (np)
+	    *np = '\0';
+	else
+	    closer = NULL;
     }
 
     xo_flush();
