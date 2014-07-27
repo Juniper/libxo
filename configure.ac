@@ -176,6 +176,7 @@ AC_CONFIG_FILES([
   packaging/libxo.pc
   tests/Makefile
   tests/core/Makefile
+  tests/xo/Makefile
 ])
 AC_OUTPUT
 
