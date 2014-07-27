@@ -40,6 +40,7 @@
 #define XOF_KEYS	(1<<11)	/** Flag 'key' fields for xml and json */
 
 #define XOF_IGNORE_CLOSE (1<<12) /** Ignore errors on close tags */
+#define XOF_NOT_FIRST	(1<<13)	 /** Not the first item (json)  */
 
 #ifdef LIBXO_WIDE
 typedef wchar_t xchar_t;
