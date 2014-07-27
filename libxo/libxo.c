@@ -1713,7 +1713,8 @@ xo_depth_change (xo_handle_t *xop, const xchar_t *name,
 
     } else {			/* Pop operation */
 	if (xop->xo_depth == 0) {
-	    xo_warn(xop, "xo: close with empty stack: '%s'", name);
+	    if (!(xop->xo_flags & XOF_IGNORE_CLOSE))
+		xo_warn(xop, "xo: close with empty stack: '%s'", name);
 	    return;
 	}
 
