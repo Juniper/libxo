@@ -81,6 +81,7 @@ struct xo_handle_s {
     xo_write_func_t xo_write;	/* Write callback */
     xo_close_func_t xo_close;	/* Clo;se callback */
     xo_formatter_t xo_formatter; /* Custom formating function */
+    xo_checkpointer_t xo_checkpointer; /* Custom formating support function */
     void *xo_opaque;		/* Opaque data for write function */
     FILE *xo_fp;		/* XXX File pointer */
     xo_buffer_t xo_data;	/* Output data */
@@ -714,11 +715,13 @@ xo_set_info (xo_handle_t *xop, xo_info_t *infop, int count)
  * meaning the bits inside the braces.
  */
 void
-xo_set_formatter (xo_handle_t *xop, xo_formatter_t func)
+xo_set_formatter (xo_handle_t *xop, xo_formatter_t func,
+		  xo_checkpointer_t cfunc)
 {
     xop = xo_default(xop);
 
     xop->xo_formatter = func;
+    xop->xo_checkpointer = cfunc;
 }
 
 /**
@@ -1090,8 +1093,11 @@ xo_buf_append_div (xo_handle_t *xop, const xchar_t *class, unsigned flags,
     int need_predidate = 
 	(name && (flags & XFF_KEY) && (xop->xo_flags & XOF_XPATH));
 
-    if (need_predidate)
+    if (need_predidate) {
 	va_copy(va_local, xop->xo_vap);
+	if (xop->xo_checkpointer)
+	    xop->xo_checkpointer(xop, xop->xo_vap, 0);
+    }
 
     xo_format_data(xop, NULL, value, vlen, 0);
 
@@ -1099,6 +1105,8 @@ xo_buf_append_div (xo_handle_t *xop, const xchar_t *class, unsigned flags,
 	va_end(xop->xo_vap);
 	va_copy(xop->xo_vap, va_local);
 	va_end(va_local);
+	if (xop->xo_checkpointer)
+	    xop->xo_checkpointer(xop, xop->xo_vap, 1);
 
 	/*
 	 * Build an XPath predicate expression to match this key.
