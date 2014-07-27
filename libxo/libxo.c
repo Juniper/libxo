@@ -108,6 +108,7 @@ struct xo_handle_s {
 
 #define XFF_XML		(1<<8)	/* Force XML encoding style (for XPath) */
 #define XFF_ATTR	(1<<9)	/* Escape value using attribute rules (XML) */
+#define XFF_BLANK_LINE	(1<<10)	/* Emit a blank line */
 
 /*
  * We keep a default handle to allow callers to avoid having to
@@ -166,6 +167,16 @@ xo_buf_cleanup (xo_buffer_t *xbp)
     bzero(xbp, sizeof(*xbp));
 }
 
+static void
+xo_depth_check (xo_handle_t *xop, int depth)
+{
+    if (depth > xop->xo_stack_size) {
+	xop->xo_stack_size = depth;
+	xop->xo_stack = xo_realloc(xop->xo_stack,
+			   sizeof(xop->xo_stack[0]) * xop->xo_stack_size);
+    }
+}
+
 /*
  * Initialize an xo_handle_t, using both static defaults and
  * the global settings from the LIBXO_OPTIONS environment
@@ -185,9 +196,7 @@ xo_init_handle (xo_handle_t *xop)
     xo_buf_init(&xop->xo_fmt);
 
     xop->xo_indent_by = XO_INDENT_BY;
-    xop->xo_stack_size = XO_DEPTH;
-    xop->xo_stack = xo_realloc(NULL,
-			 sizeof(xop->xo_stack[0]) * xop->xo_stack_size);
+    xo_depth_check(xop, XO_DEPTH);
 
 #if !defined(NO_LIBXO_OPTIONS)
     if (!(xop->xo_flags & XOF_NO_ENV)) {
@@ -746,6 +755,7 @@ static void
 xo_line_ensure_open (xo_handle_t *xop, unsigned flags UNUSED)
 {
     static xchar_t div_open[] = W "<div class=\"line\">";
+    static xchar_t div_open_blank[] = W "<div class=\"blank-line\">";
 
     if (xop->xo_flags & XOF_DIV_OPEN)
 	return;
@@ -754,7 +764,10 @@ xo_line_ensure_open (xo_handle_t *xop, unsigned flags UNUSED)
 	return;
 
     xop->xo_flags |= XOF_DIV_OPEN;
-    xo_data_append(xop, div_open, sizeof(div_open) - 1);
+    if (flags & XFF_BLANK_LINE)
+	xo_data_append(xop, div_open_blank, sizeof(div_open_blank) - 1);
+    else
+	xo_data_append(xop, div_open, sizeof(div_open) - 1);
 
     if (xop->xo_flags & XOF_PRETTY)
 	xo_data_append(xop, "\n", 1);
@@ -1677,7 +1690,12 @@ xo_depth_change (xo_handle_t *xop, const xchar_t *name,
 {
     xo_stack_t *xsp = &xop->xo_stack[xop->xo_depth];
 
+    if (xop->xo_flags & XOF_DTRT)
+	flags |= XSF_DTRT;
+
     if (delta >= 0) {			/* Push operation */
+	xo_depth_check(xop, xop->xo_depth + delta);
+
 	xsp += delta;
 	xsp->xs_flags = flags;
 
@@ -1709,20 +1727,29 @@ xo_depth_change (xo_handle_t *xop, const xchar_t *name,
 		xo_warn(xop, "xo: list close on instance confict: '%s'", name);
 	}
 
-	if (xop->xo_flags & XOF_XPATH) {
-	    if (xsp->xs_name) {
-		xo_free(xsp->xs_name);
-		xsp->xs_name = NULL;
-	    }
-	    if (xsp->xs_keys) {
-		xo_free(xsp->xs_keys);
-		xsp->xs_keys = NULL;
-	    }
+	if (xsp->xs_name) {
+	    xo_free(xsp->xs_name);
+	    xsp->xs_name = NULL;
+	}
+	if (xsp->xs_keys) {
+	    xo_free(xsp->xs_keys);
+	    xsp->xs_keys = NULL;
 	}
     }
 
     xop->xo_depth += delta;	/* Record new depth */
     xop->xo_indent += indent;
+}
+
+void
+xo_set_depth (xo_handle_t *xop, int depth)
+{
+    xop = xo_default(xop);
+
+    xo_depth_check(xop, depth);
+
+    xop->xo_depth += depth;
+    xop->xo_indent += depth;
 }
 
 static unsigned
@@ -1812,6 +1839,7 @@ xo_close_container_h (xo_handle_t *xop, const xchar_t *name)
 	xo_stack_t *xsp = &xop->xo_stack[xop->xo_depth];
 	if (!(xsp->xs_flags & XSF_DTRT))
 	    xo_warn(xop, "missing name without 'dtrt' mode");
+
 	name = xsp->xs_name;
 	if (name) {
 	    int len = strlen(name) + 1;
@@ -1925,17 +1953,32 @@ xo_close_list_h (xo_handle_t *xop, const xchar_t *name)
 
     xop = xo_default(xop);
 
-    switch (xop->xo_style) {
-    case XO_STYLE_JSON:
-	if (xop->xo_stack[xop->xo_depth].xs_flags & XSF_NOT_FIRST)
-	    pre_nl = (xop->xo_flags & XOF_PRETTY) ? "\n" : "";
-	xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
+    if (xop->xo_style != XO_STYLE_JSON)
+	return 0;
 
-	xo_depth_change(xop, name, -1, -1, XSF_LIST);
-	rc = xo_printf(xop, "%s%*s]", pre_nl, xo_indent(xop), "");
-	xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
-	break;
+    if (name == NULL) {
+	xo_stack_t *xsp = &xop->xo_stack[xop->xo_depth];
+	if (!(xsp->xs_flags & XSF_DTRT))
+	    xo_warn(xop, "missing name without 'dtrt' mode");
+
+	name = xsp->xs_name;
+	if (name) {
+	    int len = strlen(name) + 1;
+	    /* We need to make a local copy; xo_depth_change will free it */
+	    char *cp = alloca(len);
+	    memcpy(cp, name, len);
+	    name = cp;
+	} else
+	    name = XO_FAILURE_NAME;
     }
+
+    if (xop->xo_stack[xop->xo_depth].xs_flags & XSF_NOT_FIRST)
+	pre_nl = (xop->xo_flags & XOF_PRETTY) ? "\n" : "";
+    xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
+
+    xo_depth_change(xop, name, -1, -1, XSF_LIST);
+    rc = xo_printf(xop, "%s%*s]", pre_nl, xo_indent(xop), "");
+    xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
 
     return 0;
 }
@@ -2036,6 +2079,7 @@ xo_close_instance_h (xo_handle_t *xop, const xchar_t *name)
 	xo_stack_t *xsp = &xop->xo_stack[xop->xo_depth];
 	if (!(xsp->xs_flags & XSF_DTRT))
 	    xo_warn(xop, "missing name without 'dtrt' mode");
+
 	name = xsp->xs_name;
 	if (name) {
 	    int len = strlen(name) + 1;
