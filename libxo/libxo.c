@@ -1693,6 +1693,17 @@ xo_attr (const xchar_t *name, const xchar_t *fmt, ...)
 }
 
 static void
+xo_stack_set_flags (xo_handle_t *xop)
+{
+    if (xop->xo_flags & XOF_NOT_FIRST) {
+	xo_stack_t *xsp = &xop->xo_stack[xop->xo_depth];
+
+	xsp->xs_flags |= XSF_NOT_FIRST;
+	xop->xo_flags &= ~XOF_NOT_FIRST;
+    }
+}
+
+static void
 xo_depth_change (xo_handle_t *xop, const xchar_t *name,
 		 int delta, int indent, unsigned flags)
 {
@@ -1706,6 +1717,7 @@ xo_depth_change (xo_handle_t *xop, const xchar_t *name,
 
 	xsp += delta;
 	xsp->xs_flags = flags;
+	xo_stack_set_flags(xop);
 
 	unsigned save = (xop->xo_flags & (XOF_XPATH | XOF_WARN | XOF_DTRT));
 	save |= (flags & XSF_DTRT);
@@ -1793,6 +1805,8 @@ xo_open_container_hf (xo_handle_t *xop, unsigned flags, const xchar_t *name)
 	break;
 
     case XO_STYLE_JSON:
+	xo_stack_set_flags(xop);
+
 	if (xop->xo_stack[xop->xo_depth].xs_flags & XSF_NOT_FIRST)
 	    pre_nl = (xop->xo_flags & XOF_PRETTY) ? ",\n" : ", ";
 	xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
@@ -1919,6 +1933,8 @@ xo_open_list_hf (xo_handle_t *xop, unsigned flags, const xchar_t *name)
 	name = XO_FAILURE_NAME;
     }
 
+    xo_stack_set_flags(xop);
+
     if (xop->xo_stack[xop->xo_depth].xs_flags & XSF_NOT_FIRST)
 	pre_nl = (xop->xo_flags & XOF_PRETTY) ? ",\n" : ", ";
     xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
@@ -2033,6 +2049,8 @@ xo_open_instance_hf (xo_handle_t *xop, unsigned flags, const xchar_t *name)
 	break;
 
     case XO_STYLE_JSON:
+	xo_stack_set_flags(xop);
+
 	if (xop->xo_stack[xop->xo_depth].xs_flags & XSF_NOT_FIRST)
 	    pre_nl = (xop->xo_flags & XOF_PRETTY) ? ",\n" : ", ";
 	xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
