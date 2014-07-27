@@ -214,4 +214,7 @@ xo_flush_h (xo_handle_t *xop);
 void
 xo_flush (void);
 
+void
+xo_set_leading_xpath (xo_handle_t *xop, const xchar_t *path);
+
 #endif /* INCLUDE_XO_H */
