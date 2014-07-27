@@ -72,6 +72,7 @@ typedef void (*xo_free_func_t)(void *);
  */
 typedef int (*xo_formatter_t)(xo_handle_t *, xchar_t *, int,
 				const xchar_t *, va_list);
+typedef void (*xo_checkpointer_t)(xo_handle_t *, va_list, int);
 
 xo_handle_t *
 xo_create (unsigned type, unsigned flags);
@@ -102,7 +103,7 @@ void
 xo_set_info (xo_handle_t *xop, xo_info_t *infop, int count);
 
 void
-xo_set_formatter (xo_handle_t *xop, xo_formatter_t func);
+xo_set_formatter (xo_handle_t *xop, xo_formatter_t func, xo_checkpointer_t);
 
 void
 xo_set_depth (xo_handle_t *xop, int depth);
