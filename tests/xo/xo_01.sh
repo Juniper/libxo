@@ -11,13 +11,16 @@
 XO=$1
 shift
 
-XOP="${XO} --depth 1"
+XOP="${XO} --warn --depth 1 --leading-xpath /top"
 
 ${XO} --open top
 
 NF=
-for i in one two three four; do
-    ${XOP} ${NF} --wrap item 'Item {k:name} is {:value}\n' $i $i
+for i in one:1:red two:2:blue three:3:green four:4:yellow ; do
+    set `echo $i | sed 's/:/ /g'`
+    ${XOP} ${NF} --wrap item \
+        'Item {k:name} is {Lw:number}{:value/%03d/%d}, {Lwc:color}{:color}\n' \
+         $1 $2 $3
     NF=--not-first
 done
 
