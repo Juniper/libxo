@@ -1,18 +1,22 @@
 "top": {
   "item": {
     "name": "one",
-    "value": "one"
+    "value": 1,
+    "color": "red"
   },
   "item": {
     "name": "two",
-    "value": "two"
+    "value": 2,
+    "color": "blue"
   },
   "item": {
     "name": "three",
-    "value": "three"
+    "value": 3,
+    "color": "green"
   },
   "item": {
     "name": "four",
-    "value": "four"
+    "value": 4,
+    "color": "yellow"
   }
 }
