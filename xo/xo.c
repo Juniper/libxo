@@ -224,6 +224,7 @@ main (int argc UNUSED, char **argv)
 {
     char *fmt = NULL, *cp, *np, *wrapper = NULL;
     char *opener = NULL, *closer = NULL;
+    int depth = 0;
 
     for (argv++; *argv; argv++) {
 	cp = *argv;
@@ -235,13 +236,11 @@ main (int argc UNUSED, char **argv)
 	    break;
 
 	if (streq(cp, "--close") || streq(cp, "-c")) {
-	    opener = check_arg("open", &argv);
+	    closer = check_arg("open", &argv);
 	    xo_set_flags(NULL, XOF_IGNORE_CLOSE);
 
 	} else if (streq(cp, "--depth")) {
-	    int depth = atoi(check_arg("open", &argv));
-	    if (depth > 0)
-		xo_set_depth(NULL, depth);
+	    depth = atoi(check_arg("open", &argv));
 
 	} else if (streq(cp, "--help")) {
 	    print_help();
@@ -254,7 +253,7 @@ main (int argc UNUSED, char **argv)
 	    xo_set_style(NULL, XO_STYLE_JSON);
 
 	} else if (streq(cp, "--open") || streq(cp, "-o")) {
-	    closer = check_arg("close", &argv);
+	    opener = check_arg("close", &argv);
 
         } else if (streq(cp, "--pretty") || streq(cp, "-p")) {
 	    xo_set_flags(NULL, XOF_PRETTY);
@@ -301,16 +300,22 @@ main (int argc UNUSED, char **argv)
 	}
     }
 
-    fmt = *argv++;
-    if (fmt == NULL || *fmt == '\0') {
-	return 0;
-    }
-
-    prep_arg(fmt);
     xo_set_formatter(NULL, formatter);
     xo_set_flags(NULL, XOF_NO_VA_ARG);
 
-    save_argv = argv;
+    if (closer) {
+	depth += 1;
+	for (cp = closer; cp && *cp; cp = np) {
+	    np = strchr(cp, '/');
+	    if (np == NULL)
+		break;
+	    np += 1;
+	    depth += 1;
+	}
+    }
+
+    if (depth > 0)
+	xo_set_depth(NULL, depth);
 
     if (opener) {
 	for (cp = opener; cp && *cp; cp = np) {
@@ -334,7 +339,12 @@ main (int argc UNUSED, char **argv)
 	}
     }
 
-    xo_emit(fmt);
+    fmt = *argv++;
+    if (fmt && *fmt) {
+	save_argv = argv;
+	prep_arg(fmt);
+	xo_emit(fmt);
+    }
 
     while (wrapper) {
 	np = strrchr(wrapper, '/');
