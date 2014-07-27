@@ -1,0 +1,30 @@
+</div>
+<div class="line">
+  <div class="text">Item </div>
+  <div class="data" data-tag="name" data-xpath="/item/name">one</div>
+  <div class="text"> is </div>
+  <div class="data" data-tag="value" data-xpath="/item[name = 'one']/value">one</div>
+</div>
+</div>
+<div class="line">
+  <div class="text">Item </div>
+  <div class="data" data-tag="name" data-xpath="/item/name">two</div>
+  <div class="text"> is </div>
+  <div class="data" data-tag="value" data-xpath="/item[name = 'two']/value">two</div>
+</div>
+</div>
+<div class="line">
+  <div class="text">Item </div>
+  <div class="data" data-tag="name" data-xpath="/item/name">three</div>
+  <div class="text"> is </div>
+  <div class="data" data-tag="value" data-xpath="/item[name = 'three']/value">three</div>
+</div>
+</div>
+<div class="line">
+  <div class="text">Item </div>
+  <div class="data" data-tag="name" data-xpath="/item/name">four</div>
+  <div class="text"> is </div>
+  <div class="data" data-tag="value" data-xpath="/item[name = 'four']/value">four</div>
+</div>
+</div>
+</div>
