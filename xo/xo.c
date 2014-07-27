@@ -35,9 +35,12 @@ print_help (void)
 {
     fprintf(stderr,
 "Usage: xo [options] format [fields]\n"
-"\t--help      Display this help text\n"
+"\t--close <path>        Close tags for the given path\n"
+"\t--depth <num>         Set the depth for pretty printing\n"
+"\t--help                Display this help text\n"
 "\t--html OR -H          Generate HTML output\n"
 "\t--json OR -J          Generate JSON output\n"
+"\t--open <path>         Open tags for the given path\n"
 "\t--pretty OR -p        Make 'pretty' output (add indent, newlines)\n"
 "\t--style <style> OR -s <style>  Generate given style (xml, json, text, html)\n"
 "\t--text OR -T          Generate text output (the default style)\n"
