@@ -30,35 +30,6 @@ streq (const char *red, const char *blue)
 
 static int opt_warn;		/* Enable warnings */
 
-static void
-print_help (void)
-{
-    fprintf(stderr,
-"Usage: xo [options] format [fields]\n"
-"\t--close <path>        Close tags for the given path\n"
-"\t--depth <num>         Set the depth for pretty printing\n"
-"\t--help                Display this help text\n"
-"\t--html OR -H          Generate HTML output\n"
-"\t--json OR -J          Generate JSON output\n"
-"\t--open <path>         Open tags for the given path\n"
-"\t--pretty OR -p        Make 'pretty' output (add indent, newlines)\n"
-"\t--style <style> OR -s <style>  Generate given style (xml, json, text, html)\n"
-"\t--text OR -T          Generate text output (the default style)\n"
-"\t--version             Display version information\n"
-"\t--warn OR -W          Display warnings in text on stderr\n"
-"\t--warn-xml            Display warnings in xml on stdout\n"
-"\t--wrap <path>         Wrap output in a set of containers\n"
-"\t--xml OR -X           Generate XML output\n"
-"\t--xpath               Add XPath data to HTML output\n");
-}
-
-static void
-print_version (void)
-{
-    fprintf(stderr, "libxo version %s%s\n",
-	    LIBXO_VERSION, LIBXO_VERSION_EXTRA);
-}
-
 static char *
 check_arg (const char *name, char ***argvp)
 {
@@ -232,6 +203,36 @@ formatter (xo_handle_t *xop, xchar_t *buf, int bufsiz,
     return rc;
 }
 
+static void
+print_version (void)
+{
+    fprintf(stderr, "libxo version %s%s\n",
+	    LIBXO_VERSION, LIBXO_VERSION_EXTRA);
+}
+
+static void
+print_help (void)
+{
+    fprintf(stderr,
+"Usage: xo [options] format [fields]\n"
+"\t--close <path>        Close tags for the given path\n"
+"\t--depth <num>         Set the depth for pretty printing\n"
+"\t--help                Display this help text\n"
+"\t--html OR -H          Generate HTML output\n"
+"\t--json OR -J          Generate JSON output\n"
+"\t--leading-xpath <path> OR -l <path> Add a prefix to generated XPaths (HTML)\n"
+"\t--open <path>         Open tags for the given path\n"
+"\t--pretty OR -p        Make 'pretty' output (add indent, newlines)\n"
+"\t--style <style> OR -s <style>  Generate given style (xml, json, text, html)\n"
+"\t--text OR -T          Generate text output (the default style)\n"
+"\t--version             Display version information\n"
+"\t--warn OR -W          Display warnings in text on stderr\n"
+"\t--warn-xml            Display warnings in xml on stdout\n"
+"\t--wrap <path>         Wrap output in a set of containers\n"
+"\t--xml OR -X           Generate XML output\n"
+"\t--xpath               Add XPath data to HTML output\n");
+}
+
 int
 main (int argc UNUSED, char **argv)
 {
@@ -265,6 +266,9 @@ main (int argc UNUSED, char **argv)
 
 	} else if (streq(cp, "--json") || streq(cp, "-J")) {
 	    xo_set_style(NULL, XO_STYLE_JSON);
+
+	} else if (streq(cp, "--leading-xpath") || streq(cp, "-l")) {
+	    xo_set_leading_xpath(NULL, check_arg("leading xpath", &argv));
 
 	} else if (streq(cp, "--not-first") || streq(cp, "-N")) {
 	    opt_not_first = 1;
