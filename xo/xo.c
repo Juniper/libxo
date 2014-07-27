@@ -239,7 +239,6 @@ main (int argc UNUSED, char **argv)
     char *opt_opener = NULL, *opt_closer = NULL, *opt_wrapper = NULL;
     int opt_depth = 0;
     int opt_not_first = 0;
-    int opt_pretty = 0;
 
     for (argv++; *argv; argv++) {
 	cp = *argv;
@@ -322,7 +321,7 @@ main (int argc UNUSED, char **argv)
     xo_set_flags(NULL, XOF_NO_VA_ARG);
 
     if (opt_not_first)
-	puts(opt_pretty ? ",\n" : ",");
+	xo_set_flags(NULL, XOF_NOT_FIRST);
 
     if (opt_closer) {
 	opt_depth += 1;
