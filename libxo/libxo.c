@@ -94,6 +94,7 @@ struct xo_handle_s {
     xo_info_t *xo_info;		/* Info fields for all elements */
     int xo_info_count;		/* Number of info entries */
     va_list xo_vap;		/* Variable arguments (stdargs) */
+    xchar_t *xo_leading_xpath;	/* A leading XPath expression */
 };
 
 /* Flags for formatting functions */
@@ -687,6 +688,34 @@ xo_set_flags (xo_handle_t *xop, unsigned flags)
 }
 
 /**
+ * Record a leading prefix for the XPath we generate.  This allows the
+ * generated data to be placed within an XML hierarchy but still have
+ * accurate XPath expressions.
+ *
+ * @xop XO handle to alter (or NULL for default handle)
+ * @path The XPath expression
+ */
+void
+xo_set_leading_xpath (xo_handle_t *xop, const xchar_t *path)
+{
+    xop = xo_default(xop);
+
+    if (xop->xo_leading_xpath) {
+	xo_free(xop->xo_leading_xpath);
+	xop->xo_leading_xpath = NULL;
+    }
+
+    if (path == NULL)
+	return;
+
+    int len = strlen(path);
+    xop->xo_leading_xpath = xo_realloc(NULL, len + 1);
+    if (xop->xo_leading_xpath) {
+	memcpy(xop->xo_leading_xpath, path, len + 1);
+    }
+}
+
+/**
  * Record the info data for a set of tags
  *
  * @xop XO handle to alter (or NULL for default handle)
@@ -1049,6 +1078,10 @@ xo_buf_append_div (xo_handle_t *xop, const xchar_t *class, unsigned flags,
 	    xo_stack_t *xsp;
 
 	    xo_data_append(xop, div3, sizeof(div3) - 1);
+	    if (xop->xo_leading_xpath)
+		xo_data_append(xop, xop->xo_leading_xpath,
+			       strlen(xop->xo_leading_xpath));
+
 	    for (i = 0; i <= xop->xo_depth; i++) {
 		xsp = &xop->xo_stack[i];
 		if (xsp->xs_name == NULL)
