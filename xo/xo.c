@@ -77,6 +77,7 @@ check_arg (const char *name, char ***argvp)
 }
 
 static char **save_argv;
+static char **checkpoint_argv;
 
 static char *
 next_arg (void)
@@ -84,7 +85,7 @@ next_arg (void)
     char *cp = *save_argv;
 
     if (cp == NULL) {
-	xo_error(NULL, "missing argument\n");
+	xo_error("missing argument\n");
 	exit(1);
     }
 
@@ -127,6 +128,15 @@ prep_arg (char *fmt)
     }
 
     *fp = '\0';
+}
+
+static void
+checkpoint (xo_handle_t *xop UNUSED, va_list vap UNUSED, int restore)
+{
+    if (restore)
+	save_argv = checkpoint_argv;
+    else
+	checkpoint_argv = save_argv;
 }
 
 /*
@@ -225,9 +235,11 @@ formatter (xo_handle_t *xop, xchar_t *buf, int bufsiz,
 int
 main (int argc UNUSED, char **argv)
 {
-    char *fmt = NULL, *cp, *np, *wrapper = NULL;
-    char *opener = NULL, *closer = NULL;
-    int depth = 0;
+    char *fmt = NULL, *cp, *np;
+    char *opt_opener = NULL, *opt_closer = NULL, *opt_wrapper = NULL;
+    int opt_depth = 0;
+    int opt_not_first = 0;
+    int opt_pretty = 0;
 
     for (argv++; *argv; argv++) {
 	cp = *argv;
@@ -239,11 +251,11 @@ main (int argc UNUSED, char **argv)
 	    break;
 
 	if (streq(cp, "--close") || streq(cp, "-c")) {
-	    closer = check_arg("open", &argv);
+	    opt_closer = check_arg("open", &argv);
 	    xo_set_flags(NULL, XOF_IGNORE_CLOSE);
 
 	} else if (streq(cp, "--depth")) {
-	    depth = atoi(check_arg("open", &argv));
+	    opt_depth = atoi(check_arg("open", &argv));
 
 	} else if (streq(cp, "--help")) {
 	    print_help();
@@ -255,8 +267,11 @@ main (int argc UNUSED, char **argv)
 	} else if (streq(cp, "--json") || streq(cp, "-J")) {
 	    xo_set_style(NULL, XO_STYLE_JSON);
 
+	} else if (streq(cp, "--not-first") || streq(cp, "-N")) {
+	    opt_not_first = 1;
+
 	} else if (streq(cp, "--open") || streq(cp, "-o")) {
-	    opener = check_arg("close", &argv);
+	    opt_opener = check_arg("close", &argv);
 
         } else if (streq(cp, "--pretty") || streq(cp, "-p")) {
 	    xo_set_flags(NULL, XOF_PRETTY);
@@ -299,29 +314,32 @@ main (int argc UNUSED, char **argv)
 	    xo_set_flags(NULL, XOF_WARN_XML);
 
 	} else if (streq(cp, "--wrap") || streq(cp, "-w")) {
-	    wrapper = check_arg("wrapper", &argv);
+	    opt_wrapper = check_arg("wrapper", &argv);
 	}
     }
 
-    xo_set_formatter(NULL, formatter);
+    xo_set_formatter(NULL, formatter, checkpoint);
     xo_set_flags(NULL, XOF_NO_VA_ARG);
 
-    if (closer) {
-	depth += 1;
-	for (cp = closer; cp && *cp; cp = np) {
+    if (opt_not_first)
+	puts(opt_pretty ? ",\n" : ",");
+
+    if (opt_closer) {
+	opt_depth += 1;
+	for (cp = opt_closer; cp && *cp; cp = np) {
 	    np = strchr(cp, '/');
 	    if (np == NULL)
 		break;
 	    np += 1;
-	    depth += 1;
+	    opt_depth += 1;
 	}
     }
 
-    if (depth > 0)
-	xo_set_depth(NULL, depth);
+    if (opt_depth > 0)
+	xo_set_depth(NULL, opt_depth);
 
-    if (opener) {
-	for (cp = opener; cp && *cp; cp = np) {
+    if (opt_opener) {
+	for (cp = opt_opener; cp && *cp; cp = np) {
 	    np = strchr(cp, '/');
 	    if (np)
 		*np = '\0';
@@ -331,8 +349,8 @@ main (int argc UNUSED, char **argv)
 	}
     }
 
-    if (wrapper) {
-	for (cp = wrapper; cp && *cp; cp = np) {
+    if (opt_wrapper) {
+	for (cp = opt_wrapper; cp && *cp; cp = np) {
 	    np = strchr(cp, '/');
 	    if (np)
 		*np = '\0';
@@ -349,22 +367,22 @@ main (int argc UNUSED, char **argv)
 	xo_emit(fmt);
     }
 
-    while (wrapper) {
-	np = strrchr(wrapper, '/');
-	xo_close_container(np ? np + 1 : wrapper);
+    while (opt_wrapper) {
+	np = strrchr(opt_wrapper, '/');
+	xo_close_container(np ? np + 1 : opt_wrapper);
 	if (np)
 	    *np = '\0';
 	else
-	    wrapper = NULL;
+	    opt_wrapper = NULL;
     }
 
-    while (closer) {
-	np = strrchr(closer, '/');
-	xo_close_container(np ? np + 1 : closer);
+    while (opt_closer) {
+	np = strrchr(opt_closer, '/');
+	xo_close_container(np ? np + 1 : opt_closer);
 	if (np)
 	    *np = '\0';
 	else
-	    closer = NULL;
+	    opt_closer = NULL;
     }
 
     xo_flush();
