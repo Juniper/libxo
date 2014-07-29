@@ -8,7 +8,7 @@
 # Phil Shafer, July 2014
 #
 
-* libxo - A output library for XML, JSON, HTML, and Text
+libxo - A output library for XML, JSON, HTML, and Text
 
 libxo allows an application to generate XML, JSON, HTML, and text
 output using a set of function calls.  The application decides at run
@@ -35,8 +35,13 @@ output, with attributes that detail how to render the data.
 
 ** Encoding Styles
 
-Let's look at the encoding rules for the various output styles
-supported by libxo.
+There are four encoding styles supported by libxo: TEXT, HTML, JSON,
+and XML.  JSON and XML are suitable for encoding data, while TEXT and
+HTML are suited for display to the user.  TEXT output can be display
+on a terminal session, allowing compatibility with traditional usage.
+HTML can be matched with a small CSS file to permit rendering in any
+HTML5 browser.  XML output is suitable for tools like XPath and
+protocols like NETCONF.  JSON output can be used for RESTful APIs.
 
 *** Text Output
 
@@ -103,33 +108,36 @@ Additional attributes can be enabled to provide more details about the
 data, including data type, description, and an XPath location.
 
     <div class="line">
-      <div class="data" data-name="blocks">36</div>
+      <div class="data" data-tag="blocks">36</div>
       <div class="padding">      </div>
-      <div class="data data-name="path">./src</div>
+      <div class="data data-tag="path">./src</div>
     </div>
     <div class="line">
-      <div class="data" data-name="blocks">40</div>
+      <div class="data" data-tag="blocks">40</div>
       <div class="padding">      </div>
-      <div class="data data-name="path">./bin</div>
+      <div class="data data-tag="path">./bin</div>
     </div>
     <div class="line">
-      <div class="data" data-name="blocks">90</div>
+      <div class="data" data-tag="blocks">90</div>
       <div class="padding">      </div>
-      <div class="data data-name="path">./</div>
+      <div class="data data-tag="path">./</div>
     </div>
 
 ** Format Strings
 
-libxo format strings contain enough information to render data into
-each of the above formats.  The format string contains zero or more
-formatting instructions, which are contained inside braces:
+libxo uses format strings to control the rendering of data into the
+various output styles.  Each format string contains a set of field
+descriptions, and each field description contain enough information
+to render data into each of the above formats.  The field description
+is placed into a set of braces and can be intermixed with text in the
+format string:
 
-        xo_emit("{P:   }{LWC:In stock}{:in-stock/%u}\n",
-                ip->i_instock);
+        xo_emit("{P:   }{Lwc:In stock}{:in-stock/%u}\n",
+                instock);
 
-The format instruction is given as follows:
+The field description is given as follows:
 
-     '{' [ modifiers ] ':' content [ '/' format ] '}'
+  '{' [ modifiers ] ':' content [ '/' format [ '/' eformat ]] '}'
 
 Modifiers are optional, and indicate the role and formatting of the
 content.  The roles are listed below; only one role is permitted:
@@ -153,19 +161,53 @@ content emitted for some output styles:
 | c | colon      | A colon (":") is appended to the label          |
 | d | data       | Only emit field for data styles (text and HTML) |
 | e | encoding   | Only emit for encoding styles (xml and JSON)    |
+| k | key        | Field is a key, suitable for XPath predicates   |
 | n | no-quotes  | Do not quote the field when using JSON style    |
 | q | quotes     | Quote the field when using JSON style           |
 | w | whitespace | A blank (" ") is appended to the label          |
 |---+------------+-------------------------------------------------|
 
-The "format" value is a string suitable for printf(3).
+The "format" string is similar to the format string for printf(3).
+If not provided, the format string defaults to "%s".
 
-For example:
+Note a field definition can contain zero or more printf-style
+'directives', which are sequences that start with a '%' and end
+with a one of following characters: "diouxXDOUeEfFgGaAcCsSp".
+
+For example, the format string "{:size/%s%s}" could be used
+to turn two strings into the item "size":
+
+    xo_emit("The hat is {:size/%s%s}.\n", extra ? "extra " : "", base);
+
+Characters in the format string are not part of a field definition are
+copied to the output for the TEXT style, and are ignored for the JSON
+and XML styles.  For HTML, these characters are placed in a <div> with
+class "text".
+
+  TEXT:
+      The hat is extra small.
+  XML:
+      <size>extra small</size>
+  JSON:
+      "size": "extra small"
+  TEXT:
+      <div class="text">The hat is </div>
+      <div class="data" data-tag="size">extra small</div>
+      <div class="text">.</div>
+
+libxo does not support the '%n' directive.  It's a bad idea and we
+just don't do it.
+
+The "eformat" string is the format string used when encoding the field
+for JSON and XML.  If not provided, it defaults to the primary
+format.  If the primary is not given, it defaults to "%s".
+
+In this example, the value for the number of items in stock is emitted:
 
         xo_emit("{P:   }{Lwc:In stock}{:in-stock/%u}\n",
-                ip->i_instock);
+                instock);
 
-will generate:
+This call will generate the following output:
 
   TEXT: 
        In stock: 144
@@ -179,16 +221,16 @@ will generate:
         <div class="label">In stock</div>
         <div class="decoration">:</div>
         <div class="padding"> </div>
-        <div class="data" data-name="in-stock">144</div>
+        <div class="data" data-tag="in-stock">144</div>
       </div>
 
 Clearly HTML wins the verbosity award, and this output does
 not include XOF_XPATH or XOF_INFO data, which would expand the
 penultimate line to:
 
-       <div class="data" data-name="in-stock"
+       <div class="data" data-tag="in-stock"
           data-xpath="/top/data/item/in-stock"
-          data-type="number" 
+          data-type="number"
           data-help="Number of items in stock">144</div>
 
 ** Representing Hierarchy
@@ -259,7 +301,7 @@ container, a warning will be generated.
           }
         }
       HTML:
-        <div class="data" data-name="host-name">my-host.example.org</div>
+        <div class="data" data-tag="host-name">my-host.example.org</div>
 
 *** Lists and Instances
 
@@ -315,10 +357,12 @@ release this opaque data.
                         xo_write_func_t write_func,
                         xo_close_func_t close_func);
 
-** Styles and Flags
+** Output Styles
 
 The create functions accept a set of output styles:
 
+|---------------+-------------------------|
+| Flag          | Description             |
 |---------------+-------------------------|
 | XO_STYLE_TEXT | Traditional text output |
 | XO_STYLE_XML  | XML encoded data        |
@@ -326,30 +370,49 @@ The create functions accept a set of output styles:
 | XO_STYLE_HTML | HTML encoded data       |
 |---------------+-------------------------|
 
+To set the style, use the xo_set_style() function:
+
+    xo_set_style(handle, style);
+
+To use the default name, pass NULL for the handle:
+
+    xo_set_style(NULL, XO_STYLE_XML);
+
+** Flags (XOF_*)
+
 The set of valid flags include:
 
+|---------------+-----------------------------------------|
+| Flag          | Description                             |
 |---------------+-----------------------------------------|
 | XOF_CLOSE_FP  | Close file pointer on xo_destroy()      |
 | XOF_PRETTY    | Make 'pretty printed' output            |
 | XOF_WARN      | Generate warnings for broken calls      |
 | XOF_WARN_XML  | Generate warnings in XML on stdout      |
 | XOF_NO_ENV    | Do not use the LIBXO_OPTIONS env var    |
+| XOF_DTRT      | Enable "do the right thing" mode        |
 |---------------+-----------------------------------------|
 
-XOF_CLOSE_FP will trigger the call of the close_func (provided via
-xo_set_writer()) when the handle is destroyed.
+The XOF_CLOSE_FP flag will trigger the call of the close_func
+(provided via xo_set_writer()) when the handle is destroyed.
 
-Requesting 'pretty printing' will trigger the addition of indentation
-and newlines to enhance the readability of XML, JSON, and HTML output.
-Text output is not affected.
+The XOF_PRETTY flag requests 'pretty printing', which will trigger the
+addition of indentation and newlines to enhance the readability of
+XML, JSON, and HTML output.  Text output is not affected.
 
-Requesting warnings will trigger diagnostic output (on standard error)
-when the library notices errors during operations, or with arguments
-to functions.  Without warning enabled, such conditions are ignored.
+The XOF_WARN flag requests that warnings will trigger diagnostic
+output (on standard error) when the library notices errors during
+operations, or with arguments to functions.  Without warning enabled,
+such conditions are ignored.
+
+Warnings allow developers to debug their interaction with libxo.
+The function "xo_warn" can used as a breakpoint for a debugger.
 
 If the style is XO_STYLE_HTML, the following additional flags can be
 used:
 
+|---------------+-----------------------------------------|
+| Flag          | Description                             |
 |---------------+-----------------------------------------|
 | XOF_XPATH     | Emit "data-xpath" attributes            |
 | XOF_INFO      | Emit additional info fields             |
@@ -359,7 +422,28 @@ The XOF_XPATH flag enables the emission of XPath expressions detailing
 the hierarchy of XML elements used to encode the data field, if the
 XPATH style of output were requested.
 
-*** Information
+The XOF_INFO flag encodes additional informational fields for HTML
+output.  See ^info^ for details.
+
+If the style is XO_STYLE_XML, the following additional flags can be
+used:
+
+|---------------+-----------------------------------------|
+| Flag          | Description                             |
+|---------------+-----------------------------------------|
+| XOF_KEYS      | Flag 'key' fields for xml               |
+|---------------+-----------------------------------------|
+
+The XOF_KEYS flag adds 'key' attribute to the XML encoding for
+field definitions that use the 'k' modifier.  The key attribute has
+the value "key":
+
+    xo_emit("{k:name}", item);
+
+  XML:
+      <name key="key">truck</name>
+
+*** Information @info@
 
 HTML data can include additional information in attributes that
 begin with "data-".  To enable this, three things must occur:
@@ -401,7 +485,7 @@ known to the application:
 The type and help values, if present, are emitted as the "data-type"
 and "data-help" attributes:
 
-  <div class="data" data-name="sku" data-type="string" 
+  <div class="data" data-tag="sku" data-type="string" 
        data-help="Stock Keeping Unit">GRO-000-533</div>
 
 ** Memory Allocation
@@ -412,21 +496,12 @@ where the standard realloc() and free() functions are not available.
     void xo_set_allocator (xo_realloc_func_t realloc_func,
                            xo_free_func_t free_func);
 
-realloc_func should expect the same arguments as realloc(3) and
-return a pointer to memory following the same convention.
-free_func will receive the same argument as free(3) and should release
-it, as appropriate for the environment.
+realloc_func should expect the same arguments as realloc(3) and return
+a pointer to memory following the same convention.  free_func will
+receive the same argument as free(3) and should release it, as
+appropriate for the environment.
 
 * Additional Features
-
-** XOF_WARN
-
-The XOF_WARN flag enables warnings for incorrect format strings,
-unmatched open and close functions, or other failures.  In most
-cases, these conditions are simply silently ignored.  The XOF_WARN
-flag allowed developers to debug their interaction with libxo.
-
-The function "xo_warn" can used as a breakpoint for a debugger.
 
 ** LIBXO_OPTIONS
 
@@ -457,6 +532,117 @@ Complete HTML output can be generated with:
 
 * The "xo" Utility
 
+The "xo" utility allows command line access to the functionality of
+the libxo library.  Using "xo", shell scripts can emit XML, JSON, and
+HTML using the same commands that emit text output.
+
+The style of output can be selected using a specific option: "-X" for
+XML, "-J" for JSON, "-H" for HTML, or "-T" for TEXT, which is the
+default.  The "--style <style>" option can also be used.  The
+LIBXO_OPTIONS environment variable can also be used to set the style,
+as well as other flags.
+
+The "xo" utility accepts a format string suitable for xo_emit() and a
+set of zero or more arguments used to supply data for that string.
+
+    xo "The {k:name} weighs {:weight/%d} pounds.\n" fish 6
+
+  TEXT:
+    The fish weighs 6 pounds.
+  XML:
+    <name>fish</name>
+    <weight>6</weight>
+  JSON:
+    "name": "fish",
+    "weight": 6
+  HTML:
+    <div class="line">
+      <div class="text">The </div>
+      <div class="data" data-tag="name">fish</div>
+      <div class="text"> weighs </div>
+      <div class="data" data-tag="weight">6</div>
+      <div class="text"> pounds.</div>
+    </div>
+
+The "--wrap <path>" option can be used to wrap emitted content in a
+specific hierarchy.  The path is a set of hierarchical names separated
+by the '/' character.
+
+    xo --wrap top/a/b/c '{:tag}' value
+
+  XML:
+    <top>
+      <a>
+        <b>
+          <c>
+            <tag>value</tag>
+          </c>
+        </b>
+      </a>
+    </top>
+  JSON:
+    "top": {
+      "a": {
+        "b": {
+          "c": {
+            "tag": "value"
+          }
+        }
+      }
+    }
+
+The "--open <path>" and "--close <path>" can be used to emit
+hierarchical information without the matching close and open
+tag.  This allows a shell script to emit open tags, data, and
+then close tags.  The "--depth" option may be used to set the
+depth for indentation.  The "--leading-xpath" may be used to
+prepend data to the XPath values used for HTML output style.
+
+    #!/bin/sh
+    xo --open top/data
+    xo --depth 2 '{tag}' value
+    xo --close top/data
+  XML:
+    <top>
+      <data>
+        <tag>value</tag>
+      </data>
+    </top>
+  JSON:
+    "top": {
+      "data": {
+        "tag": "value"
+      }
+    }
+
+** Command Line Options
+
+Usage: xo [options] format [fields]
+    --close <path>        Close tags for the given path
+    --depth <num>         Set the depth for pretty printing
+    --help                Display this help text
+    --html OR -H          Generate HTML output
+    --json OR -J          Generate JSON output
+    --leading-xpath <path> OR -l <path> Add a prefix to generated XPaths (HTML)
+    --open <path>         Open tags for the given path
+    --pretty OR -p        Make 'pretty' output (add indent, newlines)
+    --style <style> OR -s <style>  Generate given style (xml, json, text, html)
+    --text OR -T          Generate text output (the default style)
+    --version             Display version information
+    --warn OR -W          Display warnings in text on stderr
+    --warn-xml            Display warnings in xml on stdout
+    --wrap <path>         Wrap output in a set of containers
+    --xml OR -X           Generate XML output
+    --xpath               Add XPath data to HTML output);
+
+** Example
+
+  % xo 'The {:product} is {:status}\n' stereo "in route"
+  The stereo is in route
+  % ./xo/xo -p -X 'The {:product} is {:status}\n' stereo "in route"
+  <product>stereo</product>
+  <status>in route</status>
+
 * Examples
 
 ** Unit Test
@@ -469,50 +655,50 @@ main (int argc, char **argv)
     static char base_grocery[] = "GRO";
     static char base_hardware[] = "HRD";
     struct item {
-	const char *i_title;
-	int i_sold;
-	int i_instock;
-	int i_onorder;
-	const char *i_sku_base;
-	int i_sku_num;
+        const char *i_title;
+        int i_sold;
+        int i_instock;
+        int i_onorder;
+        const char *i_sku_base;
+        int i_sku_num;
     };
     struct item list[] = {
-	{ "gum", 1412, 54, 10, base_grocery, 415 },
-	{ "rope", 85, 4, 2, base_hardware, 212 },
-	{ "ladder", 0, 2, 1, base_hardware, 517 },
-	{ "bolt", 4123, 144, 42, base_hardware, 632 },
-	{ "water", 17, 14, 2, base_grocery, 2331 },
-	{ NULL, 0, 0, 0, NULL, 0 }
+        { "gum", 1412, 54, 10, base_grocery, 415 },
+        { "rope", 85, 4, 2, base_hardware, 212 },
+        { "ladder", 0, 2, 1, base_hardware, 517 },
+        { "bolt", 4123, 144, 42, base_hardware, 632 },
+        { "water", 17, 14, 2, base_grocery, 2331 },
+        { NULL, 0, 0, 0, NULL, 0 }
     };
     struct item list2[] = {
-	{ "fish", 1321, 45, 1, base_grocery, 533 },
+        { "fish", 1321, 45, 1, base_grocery, 533 },
     };
     struct item *ip;
     xo_info_t info[] = {
-	{ "in-stock", "number", "Number of items in stock" },
-	{ "name", "string", "Name of the item" },
-	{ "on-order", "number", "Number of items on order" },
-	{ "sku", "string", "Stock Keeping Unit" },
-	{ "sold", "number", "Number of items sold" },
-	{ NULL, NULL, NULL },
+        { "in-stock", "number", "Number of items in stock" },
+        { "name", "string", "Name of the item" },
+        { "on-order", "number", "Number of items on order" },
+        { "sku", "string", "Stock Keeping Unit" },
+        { "sold", "number", "Number of items sold" },
+        { NULL, NULL, NULL },
     };
     int info_count = (sizeof(info) / sizeof(info[0])) - 1;
     
     for (argc = 1; argv[argc]; argc++) {
-	if (strcmp(argv[argc], "xml") == 0)
-	    xo_set_style(NULL, XO_STYLE_XML);
-	else if (strcmp(argv[argc], "json") == 0)
-	    xo_set_style(NULL, XO_STYLE_JSON);
-	else if (strcmp(argv[argc], "text") == 0)
-	    xo_set_style(NULL, XO_STYLE_TEXT);
-	else if (strcmp(argv[argc], "html") == 0)
-	    xo_set_style(NULL, XO_STYLE_HTML);
-	else if (strcmp(argv[argc], "pretty") == 0)
-	    xo_set_flags(NULL, XOF_PRETTY);
-	else if (strcmp(argv[argc], "xpath") == 0)
-	    xo_set_flags(NULL, XOF_XPATH);
-	else if (strcmp(argv[argc], "info") == 0)
-	    xo_set_flags(NULL, XOF_INFO);
+        if (strcmp(argv[argc], "xml") == 0)
+            xo_set_style(NULL, XO_STYLE_XML);
+        else if (strcmp(argv[argc], "json") == 0)
+            xo_set_style(NULL, XO_STYLE_JSON);
+        else if (strcmp(argv[argc], "text") == 0)
+            xo_set_style(NULL, XO_STYLE_TEXT);
+        else if (strcmp(argv[argc], "html") == 0)
+            xo_set_style(NULL, XO_STYLE_HTML);
+        else if (strcmp(argv[argc], "pretty") == 0)
+            xo_set_flags(NULL, XOF_PRETTY);
+        else if (strcmp(argv[argc], "xpath") == 0)
+            xo_set_flags(NULL, XOF_XPATH);
+        else if (strcmp(argv[argc], "info") == 0)
+            xo_set_flags(NULL, XOF_INFO);
     }
 
     xo_set_info(NULL, info, info_count);
@@ -523,17 +709,17 @@ main (int argc, char **argv)
     xo_open_list("item");
 
     for (ip = list; ip->i_title; ip++) {
-	xo_open_instance("item");
+        xo_open_instance("item");
 
-	xo_emit("{L:Item} '{:name/%s}':\n", ip->i_title);
-	xo_emit("{P:   }{L:Total sold}: {N:sold/%u%s}\n",
-		ip->i_sold, ip->i_sold ? ".0" : "");
-	xo_emit("{P:   }{LWC:In stock}{:in-stock/%u}\n", ip->i_instock);
-	xo_emit("{P:   }{LWC:On order}{:on-order/%u}\n", ip->i_onorder);
-	xo_emit("{P:   }{L:SKU}: {Q:sku/%s-000-%u}\n",
-		ip->i_sku_base, ip->i_sku_num);
+        xo_emit("{L:Item} '{k:name/%s}':\n", ip->i_title);
+        xo_emit("{P:   }{L:Total sold}: {n:sold/%u%s}\n",
+                ip->i_sold, ip->i_sold ? ".0" : "");
+        xo_emit("{P:   }{Lwc:In stock}{:in-stock/%u}\n", ip->i_instock);
+        xo_emit("{P:   }{Lwc:On order}{:on-order/%u}\n", ip->i_onorder);
+        xo_emit("{P:   }{L:SKU}: {q:sku/%s-000-%u}\n",
+                ip->i_sku_base, ip->i_sku_num);
 
-	xo_close_instance("item");
+        xo_close_instance("item");
     }
 
     xo_close_list("item");
@@ -543,17 +729,17 @@ main (int argc, char **argv)
     xo_open_list("item");
 
     for (ip = list2; ip->i_title; ip++) {
-	xo_open_instance("item");
+        xo_open_instance("item");
 
-	xo_emit("{L:Item} '{:name/%s}':\n", ip->i_title);
-	xo_emit("{P:   }{L:Total sold}: {n:sold/%u%s}\n",
-		ip->i_sold, ip->i_sold ? ".0" : "");
-	xo_emit("{P:   }{Lwc:In stock}{:in-stock/%u}\n", ip->i_instock);
-	xo_emit("{P:   }{Lwc:On order}{:on-order/%u}\n", ip->i_onorder);
-	xo_emit("{P:   }{L:SKU}: {q:sku/%s-000-%u}\n",
-		ip->i_sku_base, ip->i_sku_num);
+        xo_emit("{L:Item} '{:name/%s}':\n", ip->i_title);
+        xo_emit("{P:   }{L:Total sold}: {n:sold/%u%s}\n",
+                ip->i_sold, ip->i_sold ? ".0" : "");
+        xo_emit("{P:   }{Lwc:In stock}{:in-stock/%u}\n", ip->i_instock);
+        xo_emit("{P:   }{Lwc:On order}{:on-order/%u}\n", ip->i_onorder);
+        xo_emit("{P:   }{L:SKU}: {q:sku/%s-000-%u}\n",
+                ip->i_sku_base, ip->i_sku_num);
 
-	xo_close_instance("item");
+        xo_close_instance("item");
     }
 
     xo_close_list("item");
@@ -1083,3 +1269,13 @@ Item 'fish':
   <div class="text">: </div>
   <div class="data" data-tag="sku" data-xpath="/top/data/item/sku" data-type="string" data-help="Stock Keeping Unit">GRO-000-533</div>
 </div>
+
+{{document:
+    name libxo-manual;
+    private "The libxo Project";
+    ipr none;
+    category exp;
+    abbreviation LIBXO-MANUAL;
+    title "The libxo library: Reducing the Agony of making XML";
+    contributor "author:Phil Shafer:Juniper Networks:phil@juniper.net";
+}}
