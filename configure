@@ -652,6 +652,13 @@ LIBXO_DEBUG_FALSE
 LIBXO_DEBUG_TRUE
 LIBXO_WARNINGS_HIGH_FALSE
 LIBXO_WARNINGS_HIGH_TRUE
+SLAX_OXTRADOCDIR
+SLAX_LIBDIR
+SLAX_EXTDIR
+SLAX_BINDIR
+LIBSLAX_LIBS
+LIBSLAX_CFLAGS
+SLAX_CONFIG
 HAVE_LIBCRYPTO_FALSE
 HAVE_LIBCRYPTO_TRUE
 LIBOBJS
@@ -789,6 +796,7 @@ enable_fast_install
 with_gnu_ld
 with_sysroot
 enable_libtool_lock
+with_libslax_prefix
 enable_warnings
 enable_debug
 enable_printflike
@@ -1445,6 +1453,7 @@ Optional Packages:
   --with-gnu-ld           assume the C compiler uses GNU ld [default=no]
   --with-sysroot=DIR Search for dependent libraries within DIR
                         (or the compiler's sysroot if not specified).
+  --with-libslax-prefix=PFX           Specify location of libslax config
 
 Some influential environment variables:
   CC          C compiler command
@@ -12886,6 +12895,58 @@ fi
 
 
 
+LIBSLAX_CONFIG_PREFIX=""
+LIBSLAX_SRC=""
+
+
+# Check whether --with-libslax-prefix was given.
+if test "${with_libslax_prefix+set}" = set; then :
+  withval=$with_libslax_prefix; LIBSLAX_CONFIG_PREFIX=$withval
+
+fi
+
+
+LIBSLAX_REQUIRED_VERSION=0.16.0
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for libslax" >&5
+$as_echo_n "checking for libslax... " >&6; }
+if test "x$LIBSLAX_CONFIG_PREFIX" != "x"
+then
+        SLAX_CONFIG=${LIBSLAX_CONFIG_PREFIX}/bin/slax-config
+else
+        SLAX_CONFIG=slax-config
+fi
+
+
+if ${SLAX_CONFIG} --libs > /dev/null 2>&1
+then
+	LIBSLAX_VERSION=`$SLAX_CONFIG --version`
+	if test `echo $LIBSLAX_VERSION | sed -e 's/lib.* //' | awk 'BEGIN { FS = "."; } { printf "%d", ($1 * 1000 + $2) * 1000 + $3;}'` -ge `echo $LIBSLAX_REQUIRED_VERSION | sed -e 's/lib.* //' | awk 'BEGIN { FS = "."; } { printf "%d", ($1 * 1000 + $2) * 1000 + $3;}'`
+	then
+		LIBSLAX_VERSION=`$SLAX_CONFIG --version`
+		LIBSLAX_LIBS="$LIBSLAX_LIBS `$SLAX_CONFIG --libs`"
+		LIBSLAX_CFLAGS="$LIBSLAX_CFLAGS `$SLAX_CONFIG --cflags`"
+		SLAX_EXTDIR="`$SLAX_CONFIG --extdir | head -1`"
+		SLAX_LIBDIR="`$SLAX_CONFIG --libdir | head -1`"
+		SLAX_BINDIR="`$SLAX_CONFIG --bindir | head -1`"
+		SLAX_OXTRADOCDIR="`$SLAX_CONFIG --oxtradoc | head -1`"
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $LIBSLAX_VERSION found" >&5
+$as_echo "$LIBSLAX_VERSION found" >&6; }
+	else
+		as_fn_error $? "Version $LIBSLAX_VERSION found. You need at least libslax $LIBSLAX_REQUIRED_VERSION for this version of juise" "$LINENO" 5
+	fi
+else
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: Could not find libslax; see https://github.com/Juniper/libslax." >&5
+$as_echo "$as_me: Could not find libslax; see https://github.com/Juniper/libslax." >&6;}
+fi
+
+
+
+
+
+
+
+
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to build with warnings" >&5
 $as_echo_n "checking whether to build with warnings... " >&6; }
 # Check whether --enable-warnings was given.
@@ -13080,7 +13141,7 @@ LIBXO_VERSION_NUMBER=`echo $PACKAGE_VERSION | sed -e 's/lib.* //' | awk 'BEGIN {
 
 ac_config_headers="$ac_config_headers libxo/libxo-config.h"
 
-ac_config_files="$ac_config_files Makefile libxo-config libxo/Makefile libxo/xoversion.h xo/Makefile packaging/libxo.pc tests/Makefile tests/core/Makefile tests/xo/Makefile"
+ac_config_files="$ac_config_files Makefile libxo-config libxo/Makefile libxo/xoversion.h xo/Makefile packaging/libxo.pc doc/Makefile tests/Makefile tests/core/Makefile tests/xo/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -14117,6 +14178,7 @@ do
     "libxo/xoversion.h") CONFIG_FILES="$CONFIG_FILES libxo/xoversion.h" ;;
     "xo/Makefile") CONFIG_FILES="$CONFIG_FILES xo/Makefile" ;;
     "packaging/libxo.pc") CONFIG_FILES="$CONFIG_FILES packaging/libxo.pc" ;;
+    "doc/Makefile") CONFIG_FILES="$CONFIG_FILES doc/Makefile" ;;
     "tests/Makefile") CONFIG_FILES="$CONFIG_FILES tests/Makefile" ;;
     "tests/core/Makefile") CONFIG_FILES="$CONFIG_FILES tests/core/Makefile" ;;
     "tests/xo/Makefile") CONFIG_FILES="$CONFIG_FILES tests/xo/Makefile" ;;
