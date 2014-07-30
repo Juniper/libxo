@@ -94,6 +94,9 @@ xo_set_allocator (xo_realloc_func_t realloc_func, xo_free_func_t free_func);
 void
 xo_set_style (xo_handle_t *xop, unsigned style);
 
+int
+xo_set_style_name (xo_handle_t *xop, const char *style);
+
 void
 xo_set_flags (xo_handle_t *xop, unsigned flags);
 
