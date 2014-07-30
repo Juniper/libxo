@@ -672,6 +672,30 @@ xo_set_style (xo_handle_t *xop, unsigned style)
     xop->xo_style = style;
 }
 
+int
+xo_set_style_name (xo_handle_t *xop, const char *name)
+{
+    int style = -1;
+
+    if (name == NULL)
+	return -1;
+
+    if (strcmp(name, "xml") == 0)
+	style = XO_STYLE_XML;
+    else if (strcmp(name, "json") == 0)
+	style = XO_STYLE_JSON;
+    else if (strcmp(name, "text") == 0)
+	style = XO_STYLE_TEXT;
+    else if (strcmp(name, "html") == 0)
+	style = XO_STYLE_HTML;
+
+    if (style < 0)
+	return -1;
+
+    xo_set_style(xop, style);
+    return 0;
+}
+
 /**
  * Set one or more flags for a given handle (or default if handle is NULL).
  * These flags will affect future output.
