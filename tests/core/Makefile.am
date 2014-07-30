@@ -19,12 +19,12 @@ test_04.c \
 test_05.c \
 test_06.c
 
-test_01_test_SOURCES = test-01.c
-test_02_test_SOURCES = test-02.c
-test_03_test_SOURCES = test-03.c
-test_04_test_SOURCES = test-04.c
-test_05_test_SOURCES = test-05.c
-test_06_test_SOURCES = test-06.c
+test_01_test_SOURCES = test_01.c
+test_02_test_SOURCES = test_02.c
+test_03_test_SOURCES = test_03.c
+test_04_test_SOURCES = test_04.c
+test_05_test_SOURCES = test_05.c
+test_06_test_SOURCES = test_06.c
 
 # TEST_CASES := $(shell cd ${srcdir} ; echo *.c )
 
@@ -35,8 +35,22 @@ LDADD = \
 
 EXTRA_DIST = \
     ${TEST_CASES} \
-    ${addprefix saved/, ${TEST_CASES:.c=.err}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.out}}
+    ${addprefix saved/, ${TEST_CASES:.c=.T.err}} \
+    ${addprefix saved/, ${TEST_CASES:.c=.T.out}} \
+    ${addprefix saved/, ${TEST_CASES:.c=.XP.err}} \
+    ${addprefix saved/, ${TEST_CASES:.c=.XP.out}} \
+    ${addprefix saved/, ${TEST_CASES:.c=.JP.err}} \
+    ${addprefix saved/, ${TEST_CASES:.c=.JP.out}} \
+    ${addprefix saved/, ${TEST_CASES:.c=.HP.err}} \
+    ${addprefix saved/, ${TEST_CASES:.c=.HP.out}} \
+    ${addprefix saved/, ${TEST_CASES:.c=.X.err}} \
+    ${addprefix saved/, ${TEST_CASES:.c=.X.out}} \
+    ${addprefix saved/, ${TEST_CASES:.c=.J.err}} \
+    ${addprefix saved/, ${TEST_CASES:.c=.J.out}} \
+    ${addprefix saved/, ${TEST_CASES:.c=.H.err}} \
+    ${addprefix saved/, ${TEST_CASES:.c=.H.out}} \
+    ${addprefix saved/, ${TEST_CASES:.c=.HIPx.err}} \
+    ${addprefix saved/, ${TEST_CASES:.c=.HIPx.out}}
 
 S2O = | ${SED} '1,/@@/d'
 

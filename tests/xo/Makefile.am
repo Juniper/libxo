@@ -25,8 +25,22 @@ xo_06.sh
 
 EXTRA_DIST = \
     ${TEST_CASES} \
-    ${addprefix saved/, ${TEST_CASES:.sh=.err}} \
-    ${addprefix saved/, ${TEST_CASES:.sh=.out}}
+    ${addprefix saved/, ${TEST_CASES:.sh=.T.err}} \
+    ${addprefix saved/, ${TEST_CASES:.sh=.T.out}} \
+    ${addprefix saved/, ${TEST_CASES:.sh=.XP.err}} \
+    ${addprefix saved/, ${TEST_CASES:.sh=.XP.out}} \
+    ${addprefix saved/, ${TEST_CASES:.sh=.JP.err}} \
+    ${addprefix saved/, ${TEST_CASES:.sh=.JP.out}} \
+    ${addprefix saved/, ${TEST_CASES:.sh=.HP.err}} \
+    ${addprefix saved/, ${TEST_CASES:.sh=.HP.out}} \
+    ${addprefix saved/, ${TEST_CASES:.sh=.X.err}} \
+    ${addprefix saved/, ${TEST_CASES:.sh=.X.out}} \
+    ${addprefix saved/, ${TEST_CASES:.sh=.J.err}} \
+    ${addprefix saved/, ${TEST_CASES:.sh=.J.out}} \
+    ${addprefix saved/, ${TEST_CASES:.sh=.H.err}} \
+    ${addprefix saved/, ${TEST_CASES:.sh=.H.out}} \
+    ${addprefix saved/, ${TEST_CASES:.sh=.HIPx.err}} \
+    ${addprefix saved/, ${TEST_CASES:.sh=.HIPx.out}}
 
 S2O = | ${SED} '1,/@@/d'
 
