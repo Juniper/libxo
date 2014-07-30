@@ -10,9 +10,9 @@
 
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = libxo xo tests
+SUBDIRS = libxo xo tests doc
 bin_SCRIPTS=libxo-config
-dist_doc_DATA = Copyright doc/libxo.txt
+dist_doc_DATA = Copyright
 
 EXTRA_DIST = \
     libxo-config.in \
