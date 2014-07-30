@@ -284,16 +284,8 @@ main (int argc UNUSED, char **argv)
 	} else if (streq(cp, "--style") || streq(cp, "-s")) {
 	    np = check_arg("style", &argv);
 
-	    if (streq(cp, "xml"))
-		xo_set_style(NULL, XO_STYLE_XML);
-	    else if (streq(cp, "json"))
-		xo_set_style(NULL, XO_STYLE_JSON);
-	    else if (streq(cp, "text"))
-		xo_set_style(NULL, XO_STYLE_TEXT);
-	    else if (streq(cp, "html"))
-		xo_set_style(NULL, XO_STYLE_HTML);
-	    else {
-		xo_error("unknown style: %s", cp);
+	    if (xo_set_style_name(NULL, np) < 0) {
+		xo_error("unknown style: %s", np);
 		exit(1);
 	    }
 
