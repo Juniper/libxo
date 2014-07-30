@@ -1,0 +1,24 @@
+<div class="line">
+  <div class="title">First Name          </div>
+  <div class="title">Last Name     </div>
+  <div class="title">Department  </div>
+  <div class="title">Time (%)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="first-name" data-xpath="/employees/employee/first-name" data-type="string" data-help="First name of employee">Terry ("&lt;one")      </div>
+  <div class="data" data-tag="last-name" data-xpath="/employees/employee/last-name" data-type="string" data-help="Last name of employee">Jones         </div>
+  <div class="data" data-tag="department" data-xpath="/employees/employee/department">     660</div>
+  <div class="data" data-tag="percent-time" data-xpath="/employees/employee/percent-time" data-type="number" data-help="Percentage of full &amp; part time (%)">      90</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="first-name" data-xpath="/employees/employee/first-name" data-type="string" data-help="First name of employee">Leslie ("Les")      </div>
+  <div class="data" data-tag="last-name" data-xpath="/employees/employee/last-name" data-type="string" data-help="Last name of employee">Patterson     </div>
+  <div class="data" data-tag="department" data-xpath="/employees/employee/department">     341</div>
+  <div class="data" data-tag="percent-time" data-xpath="/employees/employee/percent-time" data-type="number" data-help="Percentage of full &amp; part time (%)">      60</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="first-name" data-xpath="/employees/employee/first-name" data-type="string" data-help="First name of employee">Ashley ("Ash")      </div>
+  <div class="data" data-tag="last-name" data-xpath="/employees/employee/last-name" data-type="string" data-help="Last name of employee">Meter &amp; Smith </div>
+  <div class="data" data-tag="department" data-xpath="/employees/employee/department">    1440</div>
+  <div class="data" data-tag="percent-time" data-xpath="/employees/employee/percent-time" data-type="number" data-help="Percentage of full &amp; part time (%)">      40</div>
+</div>

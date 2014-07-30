@@ -2,10 +2,11 @@ set top_src=`pwd`
 alias Zautoreconf "(cd $top_src ; autoreconf --install)"
 
 set opts=' \
+--with-libslax-prefix=/Users/phil/work/root \
 --enable-debug \
 --enable-warnings \
 --enable-printflike \
---prefix /Users/phil/work/root \
+--prefix ${HOME}/work/root \
 '
 set opts=`echo $opts`
 

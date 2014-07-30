@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# Copyright 2011, Juniper Networks, Inc.
+# Copyright 2014, Juniper Networks, Inc.
 # All rights reserved.
 # This SOFTWARE is licensed under the LICENSE provided in the
 # ../Copyright file. By downloading, installing, copying, or otherwise
@@ -16,13 +16,15 @@ test_01.c \
 test_02.c \
 test_03.c \
 test_04.c \
-test_05.c
+test_05.c \
+test_06.c
 
 test_01_test_SOURCES = test-01.c
 test_02_test_SOURCES = test-02.c
 test_03_test_SOURCES = test-03.c
 test_04_test_SOURCES = test-04.c
 test_05_test_SOURCES = test-05.c
+test_06_test_SOURCES = test-06.c
 
 # TEST_CASES := $(shell cd ${srcdir} ; echo *.c )
 
@@ -47,7 +49,7 @@ valgrind:
 #TEST_TRACE = set -x ; 
 
 TEST_ONE = \
-  LIBXO_OPTIONS=$$fmt \
+  LIBXO_OPTIONS=W$$fmt \
       ${CHECKER} $$base.test ${TEST_OPTS} \
       > out/$$base.$$fmt.out 2> out/$$base.$$fmt.err ; \
  ${DIFF} -Nu ${srcdir}/saved/$$base.$$fmt.out out/$$base.$$fmt.out ${S2O} ; \

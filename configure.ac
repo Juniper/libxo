@@ -78,6 +78,56 @@ dnl
 AC_DEFUN([VERSION_TO_NUMBER],
 [`$1 | sed -e 's/lib.* //' | awk 'BEGIN { FS = "."; } { printf "%d", ([$]1 * 1000 + [$]2) * 1000 + [$]3;}'`])
 
+LIBSLAX_CONFIG_PREFIX=""
+LIBSLAX_SRC=""
+
+AC_ARG_WITH(libslax-prefix,
+        [  --with-libslax-prefix=[PFX]           Specify location of libslax config],
+        LIBSLAX_CONFIG_PREFIX=$withval
+)
+
+LIBSLAX_REQUIRED_VERSION=0.16.0
+AC_MSG_CHECKING(for libslax) 
+if test "x$LIBSLAX_CONFIG_PREFIX" != "x"
+then
+        SLAX_CONFIG=${LIBSLAX_CONFIG_PREFIX}/bin/slax-config
+else
+        SLAX_CONFIG=slax-config
+fi
+
+dnl
+dnl make sure slax-config is executable,
+dnl test version and init our variables
+dnl
+
+if ${SLAX_CONFIG} --libs > /dev/null 2>&1
+then
+	LIBSLAX_VERSION=`$SLAX_CONFIG --version`
+	if test VERSION_TO_NUMBER(echo $LIBSLAX_VERSION) -ge VERSION_TO_NUMBER(echo $LIBSLAX_REQUIRED_VERSION)
+	then
+		LIBSLAX_VERSION=`$SLAX_CONFIG --version`
+		LIBSLAX_LIBS="$LIBSLAX_LIBS `$SLAX_CONFIG --libs`"
+		LIBSLAX_CFLAGS="$LIBSLAX_CFLAGS `$SLAX_CONFIG --cflags`"
+		SLAX_EXTDIR="`$SLAX_CONFIG --extdir | head -1`"
+		SLAX_LIBDIR="`$SLAX_CONFIG --libdir | head -1`"
+		SLAX_BINDIR="`$SLAX_CONFIG --bindir | head -1`"
+		SLAX_OXTRADOCDIR="`$SLAX_CONFIG --oxtradoc | head -1`"
+		AC_MSG_RESULT($LIBSLAX_VERSION found)
+	else
+		AC_MSG_ERROR(Version $LIBSLAX_VERSION found. You need at least libslax $LIBSLAX_REQUIRED_VERSION for this version of juise)
+	fi
+else
+	AC_MSG_NOTICE([Could not find libslax; see https://github.com/Juniper/libslax.])
+fi
+
+AC_SUBST(SLAX_CONFIG)
+AC_SUBST(LIBSLAX_CFLAGS)
+AC_SUBST(LIBSLAX_LIBS)
+AC_SUBST(SLAX_BINDIR)
+AC_SUBST(SLAX_EXTDIR)
+AC_SUBST(SLAX_LIBDIR)
+AC_SUBST(SLAX_OXTRADOCDIR)
+
 AC_MSG_CHECKING([whether to build with warnings])
 AC_ARG_ENABLE([warnings],
     [  --enable-warnings    Turn on compiler warnings],
@@ -174,8 +224,10 @@ AC_CONFIG_FILES([
   libxo/xoversion.h
   xo/Makefile
   packaging/libxo.pc
+  doc/Makefile
   tests/Makefile
   tests/core/Makefile
+  tests/xo/Makefile
 ])
 AC_OUTPUT
 

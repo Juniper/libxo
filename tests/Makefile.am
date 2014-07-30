@@ -6,7 +6,7 @@
 # using the SOFTWARE, you agree to be bound by the terms of that
 # LICENSE.
 
-SUBDIRS=core
+SUBDIRS=core xo
 
 test tests:
 	@(cur=`pwd` ; for dir in $(SUBDIRS) ; do \
