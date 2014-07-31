@@ -16,6 +16,7 @@
 #include <sys/types.h>
 #include <stdarg.h>
 #include <string.h>
+#include <errno.h>
 
 #include "libxo.h"
 
@@ -561,29 +562,163 @@ xo_indent (xo_handle_t *xop)
  * standard error.  If the XOF_WARN_XML flag is set, then we generate
  * XMLified content on standard output.
  */
-static void
-xo_warn (xo_handle_t *xop, const xchar_t *fmt, ...)
+void
+xo_warn_hcv (xo_handle_t *xop, int code, const xchar_t *fmt, va_list vap)
 {
+    xop = xo_default(xop);
     if (!(xop->xo_flags & XOF_WARN))
 	return;
 
-    va_list vap;
+    if (fmt == NULL)
+	return;
+
     int len = strlen(fmt);
     xchar_t *newfmt = alloca(len + 2);
 
     memcpy(newfmt, fmt, len);
 
     /* Add a newline to the fmt string */
-    newfmt[len] = '\n';
-    newfmt[len + 1] = '\0';
+    if (!(xop->xo_flags & XOF_WARN_XML))
+	newfmt[len++] = '\n';
+    newfmt[len] = '\0';
 
-    va_start(vap, fmt);
     if (xop->xo_flags & XOF_WARN_XML) {
-	vfprintf(stderr, newfmt, vap);
+	static char err_open[] = "<error>";
+	static char err_close[] = "</error>";
+	static char msg_open[] = "<message>";
+	static char msg_close[] = "</message>";
+
+	xo_buffer_t *xbp = &xop->xo_data;
+
+	xo_buf_append(xbp, err_open, sizeof(err_open) - 1);
+	xo_buf_append(xbp, msg_open, sizeof(msg_open) - 1);
+
+	va_list va_local;
+	va_copy(va_local, vap);
+
+	int left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
+	int rc = vsnprintf(xbp->xb_curp, left, newfmt, vap);
+	if (rc > xbp->xb_size) {
+	    if (!xo_buf_has_room(xbp, rc))
+		return;
+
+	    va_end(vap);	/* Reset vap to the start */
+	    va_copy(vap, va_local);
+
+	    left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
+	    rc = vsnprintf(xbp->xb_curp, left, fmt, vap);
+	}
+	va_end(va_local);
+
+	rc = xo_escape_xml(xbp, rc, 1);
+	xbp->xb_curp += rc;
+
+	xo_buf_append(xbp, msg_close, sizeof(msg_close) - 1);
+	xo_buf_append(xbp, err_close, sizeof(err_close) - 1);
+
+	if (code >= 0) {
+	    const char *msg = strerror(code);
+	    if (msg) {
+		xo_buf_append(xbp, ": ", 2);
+		xo_buf_append(xbp, msg, strlen(msg));
+	    }
+	}
+
+	xo_buf_append(xbp, "", 1); /* Append NUL to string */
+
+	xbp->xb_curp = xbp->xb_bufp;
+	xop->xo_write(xop->xo_opaque, xbp->xb_bufp);
+
     } else {
 	vfprintf(stderr, newfmt, vap);
     }
+}
 
+void
+xo_warn_hc (xo_handle_t *xop, int code, const xchar_t *fmt, ...)
+{
+    va_list vap;
+
+    va_start(vap, fmt);
+    xo_warn_hcv(xop, code, fmt, vap);
+    va_end(vap);
+}
+
+void
+xo_warn_c (int code, const xchar_t *fmt, ...)
+{
+    va_list vap;
+
+    va_start(vap, fmt);
+    xo_warn_hcv(NULL, code, fmt, vap);
+    va_end(vap);
+}
+
+void
+xo_warn (const xchar_t *fmt, ...)
+{
+    int code = errno;
+    va_list vap;
+
+    va_start(vap, fmt);
+    xo_warn_hcv(NULL, code, fmt, vap);
+    va_end(vap);
+}
+
+void
+xo_warnx (const xchar_t *fmt, ...)
+{
+    va_list vap;
+
+    va_start(vap, fmt);
+    xo_warn_hcv(NULL, -1, fmt, vap);
+    va_end(vap);
+}
+
+void
+xo_err (int eval, const xchar_t *fmt, ...)
+{
+    int code = errno;
+    va_list vap;
+
+    va_start(vap, fmt);
+    xo_warn_hcv(NULL, code, fmt, vap);
+    va_end(vap);
+    exit(eval);
+}
+
+void
+xo_errx (int eval, const xchar_t *fmt, ...)
+{
+    va_list vap;
+
+    va_start(vap, fmt);
+    xo_warn_hcv(NULL, -1, fmt, vap);
+    va_end(vap);
+    exit(eval);
+}
+
+void
+xo_errc (int eval, int code, const xchar_t *fmt, ...)
+{
+    va_list vap;
+
+    va_start(vap, fmt);
+    xo_warn_hcv(NULL, code, fmt, vap);
+    va_end(vap);
+    exit(eval);
+}
+
+static void
+xo_warn_coder (xo_handle_t *xop, const xchar_t *fmt, ...)
+{
+    if (!(xop->xo_flags & XOF_WARN))
+	return;
+
+    va_list vap;
+
+    va_start(vap, fmt);
+    xo_warn_hcv(xop, -1, fmt, vap);
     va_end(vap);
 }
 
@@ -958,13 +1093,14 @@ xo_format_data (xo_handle_t *xop, xo_buffer_t *xbp,
 	    else if (strchr(W "diouxXDOUeEfFgGaAcCsSp", *cp) != NULL)
 		break;
 	    else if (*cp == 'n' || *cp == 'v') {
-		xo_warn(xop, "unsupported format: '%s'", fmt);
+		xo_warn_coder(xop, "unsupported format: '%s'", fmt);
 		return -1;
 	    }
 	}
 
 	if (cp == ep)
-	    xo_warn(xop, "field format missing format character: %s", fmt);
+	    xo_warn_coder(xop, "field format missing format character: %s",
+			  fmt);
 
 	if (!skip) {
 	    xo_buffer_t *fbp = &xop->xo_fmt;
@@ -1458,7 +1594,7 @@ xo_do_emit (xo_handle_t *xop, const xchar_t *fmt)
 			break;
 		}
 		if (*sp == '\0')
-		    xo_warn(xop, "missing closing '}}': %s", fmt);
+		    xo_warn_coder(xop, "missing closing '}}': %s", fmt);
 
 		xo_format_text(xop, cp, sp - cp);
 
@@ -1521,8 +1657,9 @@ xo_do_emit (xo_handle_t *xop, const xchar_t *fmt)
 	    case 'T':
 	    case 'V':
 		if (style != 0)
-		    xo_warn(xop, "format string uses multiple styles: %s",
-			    fmt);
+		    xo_warn_coder(xop,
+				  "format string uses multiple styles: %s",
+				  fmt);
 		style = *sp;
 		break;
 
@@ -1555,7 +1692,8 @@ xo_do_emit (xo_handle_t *xop, const xchar_t *fmt)
 		break;
 
 	    default:
-		xo_warn(xop, "format string uses unknown modifier: %s", fmt);
+		xo_warn_coder(xop, "format string uses unknown modifier: %s",
+			      fmt);
 	    }
 	}
 
@@ -1565,7 +1703,8 @@ xo_do_emit (xo_handle_t *xop, const xchar_t *fmt)
 	 */
 	if ((flags & XFF_KEY) && (flags & XFF_DISPLAY_ONLY)) {
 	    flags &= ~XFF_KEY;
-	    xo_warn(xop, "ignoring 'key' for 'display-only' field: %s", fmt);
+	    xo_warn_coder(xop, "ignoring 'key' for 'display-only' field: %s",
+			  fmt);
 	}
 
 	if (*sp == ':') {
@@ -1577,7 +1716,7 @@ xo_do_emit (xo_handle_t *xop, const xchar_t *fmt)
 		clen = sp - ep;
 		content = ep;
 	    }
-	} else xo_warn(xop, "missing content (':'): %s", fmt);
+	} else xo_warn_coder(xop, "missing content (':'): %s", fmt);
 
 	if (*sp == '/') {
 	    for (ep = ++sp; *sp; sp++) {
@@ -1605,7 +1744,7 @@ xo_do_emit (xo_handle_t *xop, const xchar_t *fmt)
 	if (*sp == '}') {
 	    sp += 1;
 	} else
-	    xo_warn(xop, "missing closing '}': %s", fmt);
+	    xo_warn_coder(xop, "missing closing '}': %s", fmt);
 
 	if (format == NULL) {
 	    format = W "%s";
@@ -1791,18 +1930,21 @@ xo_depth_change (xo_handle_t *xop, const xchar_t *name,
     } else {			/* Pop operation */
 	if (xop->xo_depth == 0) {
 	    if (!(xop->xo_flags & XOF_IGNORE_CLOSE))
-		xo_warn(xop, "xo: close with empty stack: '%s'", name);
+		xo_warn_coder(xop, "xo: close with empty stack: '%s'", name);
 	    return;
 	}
 
 	if (xop->xo_flags & XOF_WARN) {
 	    const xchar_t *top = xsp->xs_name;
 	    if (top && strcmp(name, top) != 0)
-		xo_warn(xop, "xo: incorrect close: '%s' .vs. '%s'", name, top);
+		xo_warn_coder(xop, "xo: incorrect close: '%s' .vs. '%s'",
+			      name, top);
 	    if ((xsp->xs_flags & XSF_LIST) != (flags & XSF_LIST))
-		xo_warn(xop, "xo: list close on list confict: '%s'", name);
+		xo_warn_coder(xop, "xo: list close on list confict: '%s'",
+			      name);
 	    if ((xsp->xs_flags & XSF_INSTANCE) != (flags & XSF_INSTANCE))
-		xo_warn(xop, "xo: list close on instance confict: '%s'", name);
+		xo_warn_coder(xop, "xo: list close on instance confict: '%s'",
+			      name);
 	}
 
 	if (xsp->xs_name) {
@@ -1848,7 +1990,7 @@ xo_open_container_hf (xo_handle_t *xop, unsigned flags, const xchar_t *name)
     const xchar_t *pre_nl = W "";
 
     if (name == NULL) {
-	xo_warn(xop, "NULL passed for container name");
+	xo_warn_coder(xop, "NULL passed for container name");
 	name = XO_FAILURE_NAME;
     }
 
@@ -1918,7 +2060,7 @@ xo_close_container_h (xo_handle_t *xop, const xchar_t *name)
     if (name == NULL) {
 	xo_stack_t *xsp = &xop->xo_stack[xop->xo_depth];
 	if (!(xsp->xs_flags & XSF_DTRT))
-	    xo_warn(xop, "missing name without 'dtrt' mode");
+	    xo_warn_coder(xop, "missing name without 'dtrt' mode");
 
 	name = xsp->xs_name;
 	if (name) {
@@ -1986,7 +2128,7 @@ xo_open_list_hf (xo_handle_t *xop, unsigned flags, const xchar_t *name)
     const xchar_t *pre_nl = W "";
 
     if (name == NULL) {
-	xo_warn(xop, "NULL passed for list name");
+	xo_warn_coder(xop, "NULL passed for list name");
 	name = XO_FAILURE_NAME;
     }
 
@@ -2041,7 +2183,7 @@ xo_close_list_h (xo_handle_t *xop, const xchar_t *name)
     if (name == NULL) {
 	xo_stack_t *xsp = &xop->xo_stack[xop->xo_depth];
 	if (!(xsp->xs_flags & XSF_DTRT))
-	    xo_warn(xop, "missing name without 'dtrt' mode");
+	    xo_warn_coder(xop, "missing name without 'dtrt' mode");
 
 	name = xsp->xs_name;
 	if (name) {
@@ -2095,7 +2237,7 @@ xo_open_instance_hf (xo_handle_t *xop, unsigned flags, const xchar_t *name)
     flags |= xop->xo_flags;
 
     if (name == NULL) {
-	xo_warn(xop, "NULL passed for instance name");
+	xo_warn_coder(xop, "NULL passed for instance name");
 	name = XO_FAILURE_NAME;
     }
 
@@ -2162,7 +2304,7 @@ xo_close_instance_h (xo_handle_t *xop, const xchar_t *name)
     if (name == NULL) {
 	xo_stack_t *xsp = &xop->xo_stack[xop->xo_depth];
 	if (!(xsp->xs_flags & XSF_DTRT))
-	    xo_warn(xop, "missing name without 'dtrt' mode");
+	    xo_warn_coder(xop, "missing name without 'dtrt' mode");
 
 	name = xsp->xs_name;
 	if (name) {
