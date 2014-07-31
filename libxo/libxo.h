@@ -220,4 +220,28 @@ xo_flush (void);
 void
 xo_set_leading_xpath (xo_handle_t *xop, const xchar_t *path);
 
+void
+xo_warn_hc (xo_handle_t *xop, int code, const xchar_t *fmt, ...);
+
+void
+xo_warn_c (int code, const xchar_t *fmt, ...);
+
+void
+xo_warn (const xchar_t *fmt, ...);
+
+void
+xo_warnx (const xchar_t *fmt, ...);
+
+void
+xo_err (int eval, const xchar_t *fmt, ...);
+
+void
+xo_errx (int eval, const xchar_t *fmt, ...);
+
+void
+xo_errc (int eval, int code, const xchar_t *fmt, ...);
+
+void
+xo_warn_hcv (xo_handle_t *xop, int code, const xchar_t *fmt, va_list vap);
+
 #endif /* INCLUDE_XO_H */
