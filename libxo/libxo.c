@@ -624,7 +624,7 @@ xo_warn_hcv (xo_handle_t *xop, int code, const xchar_t *fmt, va_list vap)
 	    }
 	}
 
-	xo_buf_append(xbp, "", 1); /* Append NUL to string */
+	xo_buf_append(xbp, "\n", 2); /* Append newline and NUL to string */
 
 	xbp->xb_curp = xbp->xb_bufp;
 	xop->xo_write(xop->xo_opaque, xbp->xb_bufp);
