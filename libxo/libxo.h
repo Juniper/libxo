@@ -42,12 +42,6 @@
 #define XOF_IGNORE_CLOSE (1<<12) /** Ignore errors on close tags */
 #define XOF_NOT_FIRST	(1<<13)	 /** Not the first item (json)  */
 
-#ifdef LIBXO_WIDE
-typedef wchar_t xchar_t;
-#else /* LIBXO_WIDE */
-typedef char xchar_t;
-#endif /* LIBXO_WIDE */
-
 /*
  * The xo_info_t structure provides a mapping between names and
  * additional data emitted via HTML.
@@ -71,8 +65,8 @@ typedef void (*xo_free_func_t)(void *);
  * of the xo handle.  The caller should return the number of bytes _needed_
  * to fit the data, even if this exceeds 'len'.
  */
-typedef int (*xo_formatter_t)(xo_handle_t *, xchar_t *, int,
-				const xchar_t *, va_list);
+typedef int (*xo_formatter_t)(xo_handle_t *, char *, int,
+				const char *, va_list);
 typedef void (*xo_checkpointer_t)(xo_handle_t *, va_list, int);
 
 xo_handle_t *
@@ -218,30 +212,30 @@ void
 xo_flush (void);
 
 void
-xo_set_leading_xpath (xo_handle_t *xop, const xchar_t *path);
+xo_set_leading_xpath (xo_handle_t *xop, const char *path);
 
 void
-xo_warn_hc (xo_handle_t *xop, int code, const xchar_t *fmt, ...);
+xo_warn_hc (xo_handle_t *xop, int code, const char *fmt, ...);
 
 void
-xo_warn_c (int code, const xchar_t *fmt, ...);
+xo_warn_c (int code, const char *fmt, ...);
 
 void
-xo_warn (const xchar_t *fmt, ...);
+xo_warn (const char *fmt, ...);
 
 void
-xo_warnx (const xchar_t *fmt, ...);
+xo_warnx (const char *fmt, ...);
 
 void
-xo_err (int eval, const xchar_t *fmt, ...);
+xo_err (int eval, const char *fmt, ...);
 
 void
-xo_errx (int eval, const xchar_t *fmt, ...);
+xo_errx (int eval, const char *fmt, ...);
 
 void
-xo_errc (int eval, int code, const xchar_t *fmt, ...);
+xo_errc (int eval, int code, const char *fmt, ...);
 
 void
-xo_warn_hcv (xo_handle_t *xop, int code, const xchar_t *fmt, va_list vap);
+xo_warn_hcv (xo_handle_t *xop, int code, const char *fmt, va_list vap);
 
 #endif /* INCLUDE_XO_H */
