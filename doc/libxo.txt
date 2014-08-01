@@ -8,11 +8,11 @@
 # Phil Shafer, July 2014
 #
 
-libxo - A output library for XML, JSON, HTML, and Text
+libxo - A Library for Generating Text, XML, JSON, and HTML Output
 
-libxo allows an application to generate XML, JSON, HTML, and text
-output using a set of function calls.  The application decides at run
-time which output style should be produced.
+The libxo library allows an application to generate text, XML, JSON,
+and HTML output using a common set of function calls.  The application
+decides at run time which output style should be produced.
 
 * Overview
 
@@ -30,8 +30,6 @@ libxo allows a single set of function calls in source code to generate
 traditional text output, as well as XML and JSON formatted data.  HTML
 can also be generated; "<div>" elements surround the traditional text
 output, with attributes that detail how to render the data.
-
-* Concepts
 
 ** Encoding Styles
 
@@ -57,7 +55,19 @@ data might look like:
 
     printf("%d\t%s\n", num_blocks, path);
 
-Simple, direct, obvious.
+Simple, direct, obvious.  But it's only making text output.  Imagine
+using a single code path to make text, XML, JSON or HTML, deciding at
+run time which to generate.
+
+libxo expands on the idea of printf format strings to make a single
+format containing instructions for creating multiple output styles:
+
+    xo_emit("{:blocks/%d}\t{:path/%s}\n", num_blocks, path);
+
+This line will generate the same text output as the earlier printf
+call, but also has enough information to generate XML, JSON, and HTML.
+
+The following sections introduce the other formats.
 
 *** XML Output
 
@@ -126,18 +136,34 @@ data, including data type, description, and an XPath location.
 ** Format Strings
 
 libxo uses format strings to control the rendering of data into the
-various output styles.  Each format string contains a set of field
-descriptions, and each field description contain enough information
-to render data into each of the above formats.  The field description
-is placed into a set of braces and can be intermixed with text in the
-format string:
-
-        xo_emit("{P:   }{Lwc:In stock}{:in-stock/%u}\n",
-                instock);
+various output styles.  Each format string contains a set of zero or
+more field descriptions, which describe independent data fields.  Each
+field description contains a set of modifiers, a content string, and
+zero, one, or two format descriptors.  The modifiers tell libxo what
+the field is and how to treat it, while the format descriptors are
+formatting instructions using printf-style format strings, telling
+libxo how to format the field.  The field description is placed inside
+a set of braces, with a colon (":") after the modifiers and a slash
+("/") before each format descriptors.  Text may be intermixed with
+field descriptions within the format string.
 
 The field description is given as follows:
 
   '{' [ modifiers ] ':' content [ '/' format [ '/' eformat ]] '}'
+
+In this example, three format descriptions appear.  The first is a
+padding field containing three spaces of padding, the second is a
+label ("In stock"), and the third is a value field ("in-stock").  The
+in-stock field has a "%u" format that will parse the next argument
+passed to xo_emit as an unsigned integer.
+
+        xo_emit("{P:   }{Lwc:In stock}{:in-stock/%u}\n", 65);
+
+This single line of code can generate text ("   In stock: 65\n"),
+XML ("<in-stock>65</in-stock>"), JSON ('"in-stock": 6'), or HTML (too
+lengthy to be listed here).
+
+*** Modifier Roles
 
 Modifiers are optional, and indicate the role and formatting of the
 content.  The roles are listed below; only one role is permitted:
@@ -149,8 +175,10 @@ content.  The roles are listed below; only one role is permitted:
 | L | label      | Content is a label that prefixes the value      |
 | P | padding    | Content is spaces needed for vertical alignment |
 | T | title      | Content is a title value for headings           |
-| V | value      | Content is the name of field                    |
+| V | value      | Content is the name of field (the default)      |
 |---+------------+-------------------------------------------------|
+
+*** Modifier Flags
 
 The modifiers can also include the following flags, which modify the
 content emitted for some output styles:
@@ -158,14 +186,20 @@ content emitted for some output styles:
 |---+------------+-------------------------------------------------|
 | M | Name       | Description                                     |
 |---+------------+-------------------------------------------------|
-| c | colon      | A colon (":") is appended to the label          |
+| c | colon      | A colon (":") is appended after the label       |
 | d | data       | Only emit field for data styles (text and HTML) |
 | e | encoding   | Only emit for encoding styles (xml and JSON)    |
 | k | key        | Field is a key, suitable for XPath predicates   |
 | n | no-quotes  | Do not quote the field when using JSON style    |
 | q | quotes     | Quote the field when using JSON style           |
-| w | whitespace | A blank (" ") is appended to the label          |
+| w | whitespace | A blank (" ") is appended after the label       |
 |---+------------+-------------------------------------------------|
+
+For example, the modifier string "Lwc" means the field is a label
+(text that describes the next field) and should be followed by a colon
+('c') and a space ('w').  The modifier string "Vkq" means the field is
+a value field, that it is a key for the current instance, and that the
+value should be quoted when encoded for JSON.
 
 The "format" string is similar to the format string for printf(3).
 If not provided, the format string defaults to "%s".
@@ -179,6 +213,8 @@ to turn two strings into the item "size":
 
     xo_emit("The hat is {:size/%s%s}.\n", 
             extra ? "extra " : "", base);
+
+*** Characters Outside of Field Definitions
 
 Characters in the format string are not part of a field definition are
 copied to the output for the TEXT style, and are ignored for the JSON
@@ -196,12 +232,23 @@ class "text".
       <div class="data" data-tag="size">extra small</div>
       <div class="text">.</div>
 
+*** "%n" is Not Supported
+
 libxo does not support the '%n' directive.  It's a bad idea and we
 just don't do it.
+
+*** The Encoding Format (eformat)
 
 The "eformat" string is the format string used when encoding the field
 for JSON and XML.  If not provided, it defaults to the primary
 format.  If the primary is not given, it defaults to "%s".
+
+*** Content Strings
+
+For padding and labels, the content string is considered the one and
+only argument to the formatting string.  
+
+*** Example
 
 In this example, the value for the number of items in stock is emitted:
 
@@ -326,42 +373,142 @@ close each instance of the list:
 Getting the list and instance calls correct is critical to the proper
 generation of XML and JSON data.
 
-* Functions
+** Handles
+
+libxo uses "handles" to control its rendering functionality.  The
+handle contains state and buffered data, as well as callback functions
+to process data.
+
+A default handle is used when a NULL is passed to functions accepting
+a handle.  This handle is initialized to write its data to stdout
+using the default style of text (XO_STYLE_TEXT).
+
+For the convenience of callers, the libxo library includes handle-less
+functions that implicitly use the default handle.  Any function that
+takes a handle will use the default handle is a value of NULL is
+passed in place of a valid handle.
+
+For example, the following are equivalent:
+
+    xo_emit("test");
+    xo_emit_h(NULL, "test");
+
+Handles are created using xo_create() and destroy using xo_destroy().
+
+** UTF-8
+
+All strings for libxo must be UTF-8.  libxo will handle turning them
+into locale-based strings for display to the user.
+
+The only exception is argument formatted using the "%ls" format, which
+require a wide character string (wchar_t *) as input.  libxo will
+convert these arguments as needed to either UTF-8 (for XML, JSON, and
+HTML styles) or locale-based strings for display in text style.
+
+   xo_emit("Alll strings are utf-8 content {:tag/%ls}",
+           L"except for wide strings");
+
+"%S" is equivalent to "%ls".
+
+* The libxo API
+
+This section gives details about the functions in libxo, how to call
+them, and the actions they perform.
 
 ** Handles
 
-libxo uses zero or more 'handles' to turn its rendering
-functionality.  A default handle is used when a NULL is passed to
-functions accepting a handle.
+Handles give an abstraction for libxo that encapsulates the state of a
+stream of output.  Handles have the data type "xo_handle_t" and are
+opaque to the caller.
+
+The library has a default handle that is automatically initialized.
+By default, this handle will send text style output to standard output.
+The xo_set_style and xo_set_flags functions can be used to change this
+behavior.
+
+Many libxo functions take a handle as their first parameter; most that
+do not use the default handle.  Any function taking a handle can
+be passed NULL to access the default handle.
+
+For the typical command that is generating output on standard output,
+there is no need to create an explicit handle, but they are available
+when needed, e.g. for daemons that generate multiple streams of
+output.
+
+*** xo_create
 
 A handle can be allocated using the xo_create() function:
 
     xo_handle_t *xo_create (unsigned style, unsigned flags);
 
-By default, output is written to standard output.  A convenience
+  Example:
+    xo_handle_t *xop = xo_create(XO_STYLE_JSON, XOF_WARN);
+    ....
+    xo_emit(xop, "testing\n");
+
+See also ^styles^ and ^flags^.
+
+*** xo_create_to_file
+
+By default, libxo writes output to standard output.  A convenience
 function is provided for situations when output should be written to
 different file:
 
     xo_handle_t *xo_create_to_file (FILE *fp, unsigned style,
                                     unsigned flags);
 
-The xo_destroy function releases a handle and any resources it is
-using.  Calling xo_destroy with a NULL handle will release any
-resources associated with the default handle.
+Use the XOF_CLOSE_FP flag to trigger a call to fclose() for
+the FILE pointer when the handle is destroyed.
+
+*** xo_set_writer
 
 The xo_set_writer function allows custom 'write' functions
 which can tailor how libxo writes data.  An opaque argument is
 recorded and passed back to the write function, allowing the function
 to acquire context information. The 'close' function can
-release this opaque data.
+release this opaque data and any other resources as needed.
 
     void xo_set_writer (xo_handle_t *xop, void *opaque,
                         xo_write_func_t write_func,
                         xo_close_func_t close_func);
 
-** Output Styles
+*** xo_set_style
 
-The create functions accept a set of output styles:
+To set the style, use the xo_set_style() function:
+
+    void xo_set_style(xo_handle_t *xop, unsigned style);
+
+To use the default handle, pass a NULL handle:
+
+    xo_set_style(NULL, XO_STYLE_XML);
+
+*** xo_set_flags
+
+To set the flags, use the xo_set_flags() function:
+
+    void xo_set_flags(xo_handle_t *xop, unsigned flags);
+
+To use the default handle, pass a NULL handle:
+
+    xo_set_style(NULL, XO_STYLE_XML);
+
+*** xo_destroy
+
+The xo_destroy function releases a handle and any resources it is
+using.  Calling xo_destroy with a NULL handle will release any
+resources associated with the default handle.
+
+    void xo_destroy(xo_handle_t *xop);
+
+** Emitting Content
+
+** Emitting Hierarchy
+
+** Additional Functionality
+
+*** Output Styles (XO_STYLE_*) @styles@
+
+The libxo functions accept a set of output styles:
 
 |---------------+-------------------------|
 | Flag          | Description             |
@@ -372,15 +519,7 @@ The create functions accept a set of output styles:
 | XO_STYLE_HTML | HTML encoded data       |
 |---------------+-------------------------|
 
-To set the style, use the xo_set_style() function:
-
-    xo_set_style(handle, style);
-
-To use the default name, pass NULL for the handle:
-
-    xo_set_style(NULL, XO_STYLE_XML);
-
-** Flags (XOF_*)
+** Flags (XOF_*) @flags@
 
 The set of valid flags include:
 
@@ -490,7 +629,7 @@ and "data-help" attributes:
   <div class="data" data-tag="sku" data-type="string" 
        data-help="Stock Keeping Unit">GRO-000-533</div>
 
-** Memory Allocation
+*** Memory Allocation
 
 The xo_set_allocator function allows libxo to be used in environments
 where the standard realloc() and free() functions are not available.
@@ -503,9 +642,7 @@ a pointer to memory following the same convention.  free_func will
 receive the same argument as free(3) and should release it, as
 appropriate for the environment.
 
-* Additional Features
-
-** LIBXO_OPTIONS
+*** LIBXO_OPTIONS
 
 Another debugging tool is the environment variable "LIBXO_OPTIONS",
 which can be set to a string of options.
