@@ -116,14 +116,14 @@ checkpoint (xo_handle_t *xop UNUSED, va_list vap UNUSED, int restore)
  * some printf-style logic.
  */
 static int
-formatter (xo_handle_t *xop, xchar_t *buf, int bufsiz,
-	   const xchar_t *fmt, va_list vap UNUSED)
+formatter (xo_handle_t *xop, char *buf, int bufsiz,
+	   const char *fmt, va_list vap UNUSED)
 {
     int lflag = 0, hflag = 0, jflag = 0, tflag = 0,
 	zflag = 0, qflag = 0, star1 = 0, star2 = 0;
     int rc = 0;
     int w1 = 0, w2 = 0;
-    const xchar_t *cp;
+    const char *cp;
 
     for (cp = fmt + 1; *cp; cp++) {
 	if (*cp == 'l')
@@ -152,7 +152,7 @@ formatter (xo_handle_t *xop, xchar_t *buf, int bufsiz,
 	}
     }
 
-    xchar_t fc = *cp;
+    char fc = *cp;
 
     /* Handle "%*.*s" */
     if (star1)
