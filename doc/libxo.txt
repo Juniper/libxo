@@ -24,12 +24,27 @@ Modern tool developers favors encoding schemes like XML and JSON,
 which allow trivial parsing and extraction of data.
 
 In addition, modern reality means that more output ends up in web
-browsers than in terminals.
+browsers than in terminals, making HTML output valuable.
 
 libxo allows a single set of function calls in source code to generate
 traditional text output, as well as XML and JSON formatted data.  HTML
 can also be generated; "<div>" elements surround the traditional text
 output, with attributes that detail how to render the data.
+
+A single libxo function call in source code is all that's required:
+
+    xo_emit("Connecting to {:host}.{:domain}...\n", host, domain);
+
+    Text:
+      Connection to my-box.example.com...
+    XML:
+      <host>my-box</host>
+      <domain>example.com</domain>
+    JSON:
+      "host": my-box",
+      "domain": "example.com"
+      
+The HTML output if really quite huge, so we'll emit it here.
 
 ** Encoding Styles
 
@@ -547,7 +562,8 @@ operations, or with arguments to functions.  Without warning enabled,
 such conditions are ignored.
 
 Warnings allow developers to debug their interaction with libxo.
-The function "xo_warn" can used as a breakpoint for a debugger.
+The function "xo_failure" can used as a breakpoint for a debugger,
+regardless of whether warnings are enabled.
 
 If the style is XO_STYLE_HTML, the following additional flags can be
 used:
