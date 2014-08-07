@@ -41,6 +41,7 @@
 
 #define XOF_IGNORE_CLOSE (1<<12) /** Ignore errors on close tags */
 #define XOF_NOT_FIRST	(1<<13)	 /** Not the first item (json)  */
+#define XOF_NO_LOCALE	(1<<14)	 /* Don't bother with locale */
 
 /*
  * The xo_info_t structure provides a mapping between names and
@@ -237,5 +238,8 @@ xo_errc (int eval, int code, const char *fmt, ...);
 
 void
 xo_warn_hcv (xo_handle_t *xop, int code, const char *fmt, va_list vap);
+
+void
+xo_no_setlocale (void);
 
 #endif /* INCLUDE_XO_H */
