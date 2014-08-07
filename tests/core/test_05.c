@@ -32,6 +32,7 @@ main (int argc, char **argv)
 	unsigned e_dept;
 	unsigned e_percent;
     } employees[] = {
+	{ "Jim (\"რეგტ\")", "გთხოვთ ახლავე", 431, 90 },
 	{ "Terry (\"<one\")", "Jones", 660, 90 },
 	{ "Leslie (\"Les\")", "Patterson", 341,60 },
 	{ "Ashley (\"Ash\")", "Meter & Smith", 1440, 40 },
@@ -42,6 +43,13 @@ main (int argc, char **argv)
 
     xo_open_container("employees");
     xo_open_list("employee");
+
+    xo_emit("Οὐχὶ ταὐτὰ παρίσταταί μοι {:v1/%s}, {:v2/%s}\n",
+	    "γιγνώσκειν", "ὦ ἄνδρες ᾿Αθηναῖοι");
+
+    xo_emit("გთხოვთ {:v1/%s} {:v2/%s}\n",
+	    "ახლავე გაიაროთ რეგისტრაცია",
+	    "Unicode-ის მეათე საერთაშორისო");
 
     xo_emit("{T:First Name/%-20s}{T:Last Name/%-14s}"
 	    "{T:/%-12s}{T:Time (%)}\n", "Department");
