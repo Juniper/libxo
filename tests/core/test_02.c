@@ -44,5 +44,7 @@ main (int argc, char **argv)
 
     xo_close_container_h(NULL, "top");
 
+    xo_finish();
+
     return 0;
 }
