@@ -755,23 +755,6 @@ xo_buf_append_locale_from_utf8 (xo_handle_t *xop, xo_buffer_t *xbp,
     bzero(&xop->xo_mbstate, sizeof(xop->xo_mbstate));
     len = wcrtomb(xbp->xb_curp, wc, &xop->xo_mbstate);
 
-#if 0
-    if (len > 0) {
-	char buf[1024];
-	snprintf(buf, sizeof(buf), "%02hhx.%02hhx.%02hhx.%02hhx.%02hhx.%02hhx",
-		 (ilen > 0) ? cp[0] : 0,
-		 (ilen > 1) ? cp[1] : 0,
-		 (ilen > 2) ? cp[2] : 0,
-		 (ilen > 3) ? cp[3] : 0,
-		 (ilen > 4) ? cp[4] : 0,
-		 (ilen > 5) ? cp[5] : 0);
-
-	xbp->xb_curp[len] = '\0';
-	xo_failure(xop, "wcrtomb: %x -> %d [%s] [%s]\n",
-		      (unsigned long) wc, len, buf, xbp->xb_curp);
-    }
-#endif
-
     if (len > 0)
 	xbp->xb_curp += len;
     else
@@ -1336,100 +1319,6 @@ xo_info_find (xo_handle_t *xop, const char *name, int nlen)
     return xip;
 }
 
-#if 0
-static int
-xo_strnlen (const char *cp, int len)
-{
-    int i;
-
-    if (len < 0)
-	len = INT_MAX;
-
-    for (i = 0; i < len && *cp; i++, cp++)
-	continue;
-
-    return i;
-}
-
-static int
-wcsnlen (const wchar_t *wcp, int len)
-{
-    int i;
-
-    if (len < 0)
-	len = INT_MAX;
-
-    for (i = 0; i < len && *wcp; i++, wcp++)
-	continue;
-
-    return i;
-}
-
-static void
-xo_buf_append_wide (xo_handle_t *xop UNUSED, xo_buffer_t *xbp,
-		    const wchar_t *wcp, int len, unsigned flags UNUSED)
-{
-    wchar_t wc;
-    int i, wlen, off;
-
-    if (!xo_buf_has_room(xbp, len))
-	return;
-
-    for (i = 0, off = xbp->xb_curp - xbp->xb_bufp; i < len; i++) {
-	wc = wcp[i];
-	wlen = xo_utf8_emit_len(wc);
-
-	if (!xo_buf_has_room(xbp, len - i + wlen))
-	    return;
-
-	xo_utf8_emit_char(xbp->xb_bufp + off, wlen, wc);
-	off += wlen;
-    }
-
-    xbp->xb_curp += off;
-}
-
-/**
- * Return the number of columns consumed by a multi-byte string.
- * As a technology, this stinks, but since we're lacking a standard
- * mbswidth or mbsnwidth, there's nothing left but to turn it back
- * into a wide string and work from there.
- */
-static int
-xo_mbswidth (const char *buf, int blen)
-{
-    mbstate_t mb;
-    int width = 0;
-    const char *cp, *ep;
-    wchar_t wc;
-    int mlen, wlen;
-
-    for (cp = buf, ep = buf + blen; cp < ep; cp++) {
-	if ((*cp & 0xff) == 0xff) {
-	    width += 1;
-	    continue;
-	}
-
-	/* Non-ascii data; convert to wide char and find width */
-	bzero(&mb, sizeof(mb));
-	mlen = mbrtowc(&wc, cp, ep - cp, &mb);
-	if (mlen < 0)		/* Invalid data; skip */
-	    continue;
-	if (mlen == 0)		/* Hit a wide NUL character */
-	    break;
-	cp += mlen - 1;
-
-	wlen = wcwidth(wc);
-	if (wlen >= 0)
-	    width += wlen;
-	else
-	    width += iswcntrl(wc) ? 0 : 1;
-    }
-
-    return width;
-}
-#endif
-
 #define CONVERT(_have, _need) (((_have) << 8) | (_need))
 
 static int
@@ -1582,11 +1471,6 @@ xo_format_string (xo_handle_t *xop, xo_buffer_t *xbp, unsigned flags,
 	if (width < 0)
 	    width = iswcntrl(wc) ? 0 : 1;
 
-#if 0
-	fprintf(stdout, "width of %04x is %d L[%ls][%s]\n", wc, width,
-		wcp ?: L"", cp ?: "");
-#endif
-
 	if (xfp->xf_width[XF_WIDTH_MAX] > 0
 	    && cols + width > xfp->xf_width[XF_WIDTH_MAX])
 		break;
@@ -1668,11 +1552,6 @@ xo_format_string (xo_handle_t *xop, xo_buffer_t *xbp, unsigned flags,
     off2 = xbp->xb_curp - xbp->xb_bufp;
     rc = off2 - off;
     xbp->xb_curp = xbp->xb_bufp + off;
-
-#if 0
-    if (xfp->xf_width[XF_WIDTH_MAX] > 0 && rc > xfp->xf_width[XF_WIDTH_MAX])
-	rc = xfp->xf_width[XF_WIDTH_MAX];
-#endif
 
     if (cols < xfp->xf_width[XF_WIDTH_MIN]) {
 	/*
@@ -1826,15 +1705,19 @@ xo_format_data (xo_handle_t *xop, xo_buffer_t *xbp,
 	    /* Handle "%*.*.*s" */
 	    int s;
 	    for (s = 0; s < XF_WIDTH_NUM; s++) {
-		if (xf.xf_star[s])
+		if (xf.xf_star[s]) {
 		    xf.xf_width[s] = va_arg(xop->xo_vap, int);
-	    }
-	}
 
-	/* Normalize a negative width value */
-	if (xf.xf_width[0] < 0) {
-	    xf.xf_width[0] = -xf.xf_width[0];
-	    xf.xf_seen_minus = 1;
+		    /* Normalize a negative width value */
+		    if (xf.xf_width[s] < 0) {
+			if (s == 0) {
+			    xf.xf_width[0] = -xf.xf_width[0];
+			    xf.xf_seen_minus = 1;
+			} else
+			    xf.xf_width[s] = -1; /* Ignore negative values */
+		    }
+		}
+	    }
 	}
 
 	/* If no max is given, it defaults to size */
