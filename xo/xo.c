@@ -317,6 +317,7 @@ main (int argc UNUSED, char **argv)
 
     xo_set_formatter(NULL, formatter, checkpoint);
     xo_set_flags(NULL, XOF_NO_VA_ARG);
+    xo_set_flags(NULL, XOF_NO_TOP);
 
     if (opt_not_first)
 	xo_set_flags(NULL, XOF_NOT_FIRST);
@@ -382,7 +383,7 @@ main (int argc UNUSED, char **argv)
 	    opt_closer = NULL;
     }
 
-    xo_flush();
+    xo_finish();
 
     return 0;
 }
