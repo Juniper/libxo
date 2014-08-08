@@ -120,7 +120,7 @@ struct xo_handle_s {
  * MBS/WCS/UTF-8 world, and while it will be annoying, it will never
  * be evil.
  *
- * For example, xo_emit("{:tag/%-14.14s}", buf) will look make 14
+ * For example, xo_emit("{:tag/%-14.14s}", buf) will make 14
  * columns of output, but will never look at more than 14 bytes of the
  * input buffer.  This is mostly compatible with printf and caller's
  * expectations.
@@ -133,7 +133,7 @@ struct xo_handle_s {
  *
  * It's fairly amazing how a good idea (handle all languages of the
  * world) blows such a big hole in the bottom of the fairly weak boat
- * that it C string handling.  The simplicity and completenesss are
+ * that is C string handling.  The simplicity and completenesss are
  * sunk in ways we haven't even begun to understand.
  */
 
@@ -142,12 +142,17 @@ struct xo_handle_s {
 #define XF_WIDTH_MAX	2	/* Maximum width */
 #define XF_WIDTH_NUM	3	/* Numeric fields in printf (min.size.max) */
 
+/* Input and output string encodings */
+#define XF_ENC_WIDE	1	/* Wide characters (wchar_t) */
+#define XF_ENC_UTF8	2	/* UTF-8 */
+#define XF_ENC_LOCALE	3	/* Current locale */
+
 /*
  * A place to parse printf-style format flags for each field
  */
 typedef struct xo_format_s {
     unsigned char xf_fc;	/* Format character */
-    unsigned char xf_enc;	/* Encoding of the string ('w', 'n', or 'u') */
+    unsigned char xf_enc;	/* Encoding of the string (XF_ENC_*) */
     unsigned char xf_skip;	/* Skip this field */
     unsigned char xf_lflag;	/* 'l' (long) */
     unsigned char xf_hflag;;	/* 'h' (half) */
@@ -459,14 +464,14 @@ xo_printf (xo_handle_t *xop, const char *fmt, ...)
     return rc;
 }
 
+static char xo_xml_amp[] = "&amp;";
+static char xo_xml_lt[] = "&lt;";
+static char xo_xml_gt[] = "&gt;";
+static char xo_xml_quot[] = "&quot;";
+
 static int
 xo_escape_xml (xo_buffer_t *xbp, int len, int attr)
 {
-    static char amp[] = "&amp;";
-    static char lt[] = "&lt;";
-    static char gt[] = "&gt;";
-    static char quot[] = "&quot;";
-
     int slen;
     unsigned delta = 0;
     char *cp, *ep, *ip;
@@ -475,13 +480,13 @@ xo_escape_xml (xo_buffer_t *xbp, int len, int attr)
     for (cp = xbp->xb_curp, ep = cp + len; cp < ep; cp++) {
 	/* We're subtracting 2: 1 for the NUL, 1 for the char we replace */
 	if (*cp == '<')
-	    delta += sizeof(lt) - 2;
+	    delta += sizeof(xo_xml_lt) - 2;
 	else if (*cp == '>')
-	    delta += sizeof(gt) - 2;
+	    delta += sizeof(xo_xml_gt) - 2;
 	else if (*cp == '&')
-	    delta += sizeof(amp) - 2;
+	    delta += sizeof(xo_xml_amp) - 2;
 	else if (attr && *cp == '"')
-	    delta += sizeof(quot) - 2;
+	    delta += sizeof(xo_xml_quot) - 2;
     }
 
     if (delta == 0)		/* Nothing to escape; bail */
@@ -498,13 +503,13 @@ xo_escape_xml (xo_buffer_t *xbp, int len, int attr)
 	ip -= 1;
 
 	if (*cp == '<')
-	    sp = lt;
+	    sp = xo_xml_lt;
 	else if (*cp == '>')
-	    sp = gt;
+	    sp = xo_xml_gt;
 	else if (*cp == '&')
-	    sp = amp;
+	    sp = xo_xml_amp;
 	else if (attr && *cp == '"')
-	    sp = quot;
+	    sp = xo_xml_quot;
 	else {
 	    *ip = *cp;
 	    continue;
@@ -594,13 +599,27 @@ xo_buf_escape (xo_handle_t *xop, xo_buffer_t *xbp,
     xbp->xb_curp += len;
 }
 
+/*
+ * These next few function are make The Essential UTF-8 Ginsu Knife.
+ * Identify an input and output character, and convert it.
+ */
+static int xo_utf8_bits[7] = { 0, 0x7f, 0x1f, 0x0f, 0x07, 0x03, 0x01 };
+
 static int
-xo_utf_len (xo_handle_t *xop, const char *buf, int bufsiz)
+xo_is_utf8 (char ch)
+{
+    return (ch & 0x80);
+}
+
+static int
+xo_utf8_to_wc_len (const char *buf)
 {
     unsigned b = (unsigned char) *buf;
-    int len, i;
+    int len;
 
-    if ((b & 0xe0) == 0xc0)
+    if ((b & 0x80) == 0x0)
+	len = 1;
+    else if ((b & 0xe0) == 0xc0)
 	len = 2;
     else if ((b & 0xf0) == 0xe0)
 	len = 3;
@@ -610,14 +629,28 @@ xo_utf_len (xo_handle_t *xop, const char *buf, int bufsiz)
 	len = 5;
     else if ((b & 0xfe) == 0xfc)
 	len = 6;
-    else {
-        xo_failure(xop, "invalid UTF-8 data: %x", b);
+    else
+	len = -1;
+
+    return len;
+}
+
+static int
+xo_buf_utf8_len (xo_handle_t *xop, const char *buf, int bufsiz)
+{
+
+    unsigned b = (unsigned char) *buf;
+    int len, i;
+
+    len = xo_utf8_to_wc_len(buf);
+    if (len == (wchar_t) -1) {
+        xo_failure(xop, "invalid UTF-8 data: %02hhx", b);
 	return -1;
     }
 
     if (len > bufsiz) {
-        xo_failure(xop, "invalid UTF-8 data (short): %x (%d/%d)",
-		      b, len, bufsiz);
+        xo_failure(xop, "invalid UTF-8 data (short): %02hhx (%d/%d)",
+		   b, len, bufsiz);
 	return -1;
     }
 
@@ -632,36 +665,88 @@ xo_utf_len (xo_handle_t *xop, const char *buf, int bufsiz)
     return len;
 }
 
-static int
-xo_is_utf8 (char ch)
+/*
+ * Build a wide character from the input buffer; the number of
+ * bits we pull off the first character is dependent on the length,
+ * but we put 6 bits off all other bytes.
+ */
+static wchar_t
+xo_utf8_char (const char *buf, int len)
 {
-    return (ch & 0x80);
+    int i;
+    wchar_t wc;
+    const unsigned char *cp = (const unsigned char *) buf;
+
+    wc = *cp & xo_utf8_bits[len];
+    for (i = 1; i < len; i++) {
+	wc <<= 6;
+	wc |= cp[i] & 0x3f;
+	if ((cp[i] & 0xc0) != 0x80)
+	    return (wchar_t) -1;
+    }
+
+    return wc;
 }
 
-static int xo_utf8_bits[7] = { 0, 0x7f, 0x1f, 0x0f, 0x07, 0x03, 0x01 };
+/*
+ * Determine the number of bytes needed to encode a wide character.
+ */
+static int
+xo_utf8_emit_len (wchar_t wc)
+{
+    int len;
 
+    if ((wc & ((1<<7) - 1)) == wc) /* Simple case */
+	len = 1;
+    else if ((wc & ((1<<11) - 1)) == wc)
+	len = 2;
+    else if ((wc & ((1<<16) - 1)) == wc)
+	len = 3;
+    else if ((wc & ((1<<21) - 1)) == wc)
+	len = 4;
+    else if ((wc & ((1<<26) - 1)) == wc)
+	len = 5;
+    else
+	len = 6;
+
+    return len;
+}
+
+static void
+xo_utf8_emit_char (char *buf, int len, wchar_t wc)
+{
+    int i;
+
+    if (len == 1) { /* Simple case */
+	buf[0] = wc & 0x7f;
+	return;
+    }
+
+    for (i = len - 1; i >= 0; i--) {
+	buf[i] = 0x80 | (wc & 0x3f);
+	wc >>= 6;
+    }
+
+    buf[0] &= xo_utf8_bits[len];
+    buf[0] |= ~xo_utf8_bits[len] << 1;
+}
 
 static void
 xo_buf_append_locale_from_utf8 (xo_handle_t *xop, xo_buffer_t *xbp,
 				const char *ibuf, int ilen)
 {
     wchar_t wc;
-    int len, i;
-    const unsigned char *cp = (const unsigned char *) ibuf;
+    int len;
 
     /*
      * Build our wide character from the input buffer; the number of
      * bits we pull off the first character is dependent on the length,
      * but we put 6 bits off all other bytes.
      */
-    wc = *cp & xo_utf8_bits[ilen];
-    for (i = 1; i < ilen; i++) {
-	wc <<= 6;
-	wc |= cp[i] & 0x3f;
-	if ((cp[i] & 0xc0) != 0x80) {
-	    xo_failure(xop, "invalid utf-8 byte: %02x", cp[i]);
-	    return;
-	}
+    wc = xo_utf8_char(ibuf, ilen);
+    if (wc == (wchar_t) -1) {
+	xo_failure(xop, "invalid utf-8 byte sequence");
+	return;
     }
 
     if (!xo_buf_has_room(xbp, MB_LEN_MAX + 1))
@@ -673,7 +758,7 @@ xo_buf_append_locale_from_utf8 (xo_handle_t *xop, xo_buffer_t *xbp,
 #if 0
     if (len > 0) {
 	char buf[1024];
-	snprintf(buf, sizeof(buf), "%02x.%02x.%02x.%02x.%02x.%02x",
+	snprintf(buf, sizeof(buf), "%02hhx.%02hhx.%02hhx.%02hhx.%02hhx.%02hhx",
 		 (ilen > 0) ? cp[0] : 0,
 		 (ilen > 1) ? cp[1] : 0,
 		 (ilen > 2) ? cp[2] : 0,
@@ -717,7 +802,7 @@ xo_buf_append_locale (xo_handle_t *xop, xo_buffer_t *xbp,
 	    if (sp != cp)
 		xo_buf_append(xbp, sp, cp - sp); /* Append previous data */
 
-	    slen = xo_utf_len(xop, cp, ep - cp);
+	    slen = xo_buf_utf8_len(xop, cp, ep - cp);
 	    if (slen <= 0) {
 		/* Bad data; back it all out */
 		xbp->xb_curp = xbp->xb_bufp + save_off;
@@ -784,12 +869,17 @@ xo_default (xo_handle_t *xop)
 static int
 xo_indent (xo_handle_t *xop)
 {
+    int rc = 0;
+
     xop = xo_default(xop);
 
-    if (xop->xo_flags & XOF_PRETTY)
-	return xop->xo_indent * xop->xo_indent_by;
+    if (xop->xo_flags & XOF_PRETTY) {
+	rc = xop->xo_indent * xop->xo_indent_by;
+	if (xop->xo_flags & XOF_TOP_EMITTED)
+	    rc += xop->xo_indent_by;
+    }
 
-    return 0;
+    return rc;
 }
 
 /*
@@ -1246,6 +1336,7 @@ xo_info_find (xo_handle_t *xop, const char *name, int nlen)
     return xip;
 }
 
+#if 0
 static int
 xo_strnlen (const char *cp, int len)
 {
@@ -1279,39 +1370,19 @@ xo_buf_append_wide (xo_handle_t *xop UNUSED, xo_buffer_t *xbp,
 		    const wchar_t *wcp, int len, unsigned flags UNUSED)
 {
     wchar_t wc;
-    int i, j, wlen, off;
+    int i, wlen, off;
 
     if (!xo_buf_has_room(xbp, len))
 	return;
 
     for (i = 0, off = xbp->xb_curp - xbp->xb_bufp; i < len; i++) {
 	wc = wcp[i];
-	if ((wc & 0xff) == wc) { /* Simple case */
-	    xbp->xb_bufp[off++] = wc & 0xff;
-	    continue;
-	}
-
-	wlen = 2;
-	if ((wc & ((1<<12) - 1)) == wc) {
-	    wlen = 3;
-	} else if ((wc & ((1<<18) - 1)) == wc) {
-	    wlen = 4;
-	} else if ((wc & ((1<<24) - 1)) == wc) {
-	    wlen = 5;
-	} else {
-	    wlen = 6;
-	}
+	wlen = xo_utf8_emit_len(wc);
 
 	if (!xo_buf_has_room(xbp, len - i + wlen))
 	    return;
 
-	for (j = wlen - 1; j >= 0; j--) {
-	    xbp->xb_bufp[off + j] = 0x80 | (wc & 0x3f);
-	    wc >>= 6;
-	}
-
-	xbp->xb_bufp[wlen] &= xo_utf8_bits[wlen];
-	xbp->xb_bufp[wlen] |= ~xo_utf8_bits[wlen] << 1;
+	xo_utf8_emit_char(xbp->xb_bufp + off, wlen, wc);
 	off += wlen;
     }
 
@@ -1348,7 +1419,7 @@ xo_mbswidth (const char *buf, int blen)
 	    break;
 	cp += mlen - 1;
 
-	wlen = wcwidth (wc);
+	wlen = wcwidth(wc);
 	if (wlen >= 0)
 	    width += wlen;
 	else
@@ -1356,6 +1427,27 @@ xo_mbswidth (const char *buf, int blen)
     }
 
     return width;
+}
+#endif
+
+#define CONVERT(_have, _need) (((_have) << 8) | (_need))
+
+static int
+xo_check_conversion (xo_handle_t *xop, int have_enc, int need_enc)
+{
+    switch (CONVERT(have_enc, need_enc)) {
+    case CONVERT(XF_ENC_UTF8, XF_ENC_UTF8):
+    case CONVERT(XF_ENC_UTF8, XF_ENC_LOCALE):
+    case CONVERT(XF_ENC_WIDE, XF_ENC_UTF8):
+    case CONVERT(XF_ENC_WIDE, XF_ENC_LOCALE):
+    case CONVERT(XF_ENC_LOCALE, XF_ENC_LOCALE):
+    case CONVERT(XF_ENC_LOCALE, XF_ENC_UTF8):
+	return 0;
+
+    default:
+	xo_failure(xop, "invalid conversion (%c:%c)", have_enc, need_enc);
+	return 1;
+    }
 }
 
 static int
@@ -1365,17 +1457,47 @@ xo_format_string (xo_handle_t *xop, xo_buffer_t *xbp, unsigned flags,
     static char null[] = "(null)";
     char *cp = NULL;
     wchar_t *wcp = NULL;
-    int need_enc = (xop->xo_style == XO_STYLE_TEXT) ? 'n' : 'u';
-    int len, cols, rc = 0;
-    int off = xbp->xb_curp - xbp->xb_bufp;
+    wchar_t wc;
+    const char *sp;
+    int attr = (flags & XFF_ATTR);
+    int len, cols = 0, rc = 0, ilen, width, olen;
+    int off = xbp->xb_curp - xbp->xb_bufp, off2;
+    int need_enc = (xop->xo_style == XO_STYLE_TEXT)
+	? XF_ENC_LOCALE : XF_ENC_UTF8;
 
-    if (xfp->xf_enc == 'w') {
+    if (xo_check_conversion(xop, xfp->xf_enc, need_enc))
+	return 0;
+
+    if (xfp->xf_enc == XF_ENC_WIDE) {
 	wcp = va_arg(xop->xo_vap, wchar_t *);
-	len = wcsnlen(wcp, xfp->xf_width[XF_WIDTH_SIZE]);
     } else {
 	cp = va_arg(xop->xo_vap, char *); /* UTF-8 or native */
-	len = xo_strnlen(cp, xfp->xf_width[XF_WIDTH_SIZE]);
+
+	/*
+	 * Optimize the most common case, which is "%s".  We just
+	 * need to copy the complete string to the output buffer.
+	 */
+	if (xfp->xf_enc == need_enc
+		&& xfp->xf_width[XF_WIDTH_MIN] < 0
+		&& xfp->xf_width[XF_WIDTH_SIZE] < 0
+		&& xfp->xf_width[XF_WIDTH_MAX] < 0) {
+	    len = strlen(cp);
+	    xo_buf_escape(xop, xbp, cp, len, flags);
+
+	    /*
+	     * Our caller expects xb_curp left untouched, so we have
+	     * to reset it and return the number of bytes written to
+	     * the buffer.
+	     */
+	    off2 = xbp->xb_curp - xbp->xb_bufp;
+	    rc = off2 - off;
+	    xbp->xb_curp = xbp->xb_bufp + off;
+
+	    return rc;
+	}
     }
+
+    len = xfp->xf_width[XF_WIDTH_SIZE];
 
     /*
      * Dont' deref NULL; use the traditional "(null)" instead
@@ -1386,34 +1508,172 @@ xo_format_string (xo_handle_t *xop, xo_buffer_t *xbp, unsigned flags,
 	len = sizeof(null) - 1;
     }
 
-#define CONVERT(_have, _need) (((_have) << 8) | (_need))
+    if (len > 0 && !xo_buf_has_room(xbp, len))
+	return 0;
 
-    switch (CONVERT(xfp->xf_enc, need_enc)) {
-    case CONVERT('u', 'u'):
-    case CONVERT('n', 'n'):
-	xo_buf_escape(xop, xbp, cp, len, (flags & XFF_ATTR));
-	break;
+    for (;;) {
+	if (len == 0)
+	    break;
 
-    case CONVERT('w', 'u'):
-	xo_buf_append_wide(xop, xbp, wcp, len, flags);
-	break;
+	if (cp && *cp == '\0')
+	    break;
 
-    case CONVERT('u', 'n'):
-	xo_buf_append_locale(xop, xbp, cp, len);
-	break;
+	if (wcp && *wcp == L'\0')
+	    break;
+
+	ilen = 0;
+
+	switch (xfp->xf_enc) {
+	case XF_ENC_WIDE:		/* Wide character */
+	    wc = *wcp++;
+	    ilen = 1;
+	    break;
+
+	case XF_ENC_UTF8:		/* UTF-8 */
+	    ilen = xo_utf8_to_wc_len(cp);
+	    if (ilen < 0) {
+		xo_failure(xop, "invalid UTF-8 character: %02hhx", *cp);
+		goto bail;
+	    }
+
+	    if (len > 0 && len < ilen) {
+		len = 0;	/* Break out of the loop */
+		continue;
+	    }
+
+	    wc = xo_utf8_char(cp, ilen);
+	    if (wc == (wchar_t) -1) {
+		xo_failure(xop, "invalid UTF-8 character: %02hhx/%d",
+			   *cp, ilen);
+		goto bail;
+	    }
+	    cp += ilen;
+	    break;
+
+	case XF_ENC_LOCALE:		/* Native locale */
+	    ilen = (len > 0) ? len : MB_LEN_MAX;
+	    ilen = mbrtowc(&wc, cp, ilen, &xop->xo_mbstate);
+	    if (ilen < 0) {		/* Invalid data; skip */
+		xo_failure(xop, "invalid mbs char: %02hhx", *cp);
+		continue;
+	    }
+	    if (ilen == 0) {		/* Hit a wide NUL character */
+		len = 0;
+		continue;
+	    }
+
+	    cp += ilen;
+	    break;
+	}
+
+	/* Reduce len, but not below zero */
+	if (len > 0) {
+	    len -= ilen;
+	    if (len < 0)
+		len = 0;
+	}
+
+	/*
+	 * Find the width-in-columns of this character, which must be done
+	 * in wide characters, since we lack a mbswidth() function.  If
+	 * it doesn't fit
+	 */
+	width = wcwidth(wc);
+	if (width < 0)
+	    width = iswcntrl(wc) ? 0 : 1;
+
+#if 0
+	fprintf(stdout, "width of %04x is %d L[%ls][%s]\n", wc, width,
+		wcp ?: L"", cp ?: "");
+#endif
+
+	if (xfp->xf_width[XF_WIDTH_MAX] > 0
+	    && cols + width > xfp->xf_width[XF_WIDTH_MAX])
+		break;
+
+	switch (need_enc) {
+	case XF_ENC_UTF8:
+
+	    /* Output in UTF-8 needs to be escaped, based on the style */
+	    switch (xop->xo_style) {
+	    case XO_STYLE_XML:
+	    case XO_STYLE_HTML:
+		if (wc == '<')
+		    sp = xo_xml_lt;
+		else if (wc == '>')
+		    sp = xo_xml_gt;
+		else if (wc == '&')
+		    sp = xo_xml_amp;
+		else if (attr && wc == '"')
+		    sp = xo_xml_quot;
+		else
+		    break;
+
+		int slen = strlen(sp);
+		if (!xo_buf_has_room(xbp, slen - 1))
+		    goto bail;
+
+		memcpy(xbp->xb_curp, sp, slen);
+		xbp->xb_curp += slen;
+		goto done_with_encoding; /* Need multi-level 'break' */
+
+	    case XO_STYLE_JSON:
+		if (wc != '\\' && wc != '"')
+		    break;
+
+		if (!xo_buf_has_room(xbp, 2))
+		    goto bail;
+
+		*xbp->xb_curp++ = '\\';
+		*xbp->xb_curp++ = wc & 0x7f;
+		goto done_with_encoding;
+	    }
+
+	    olen = xo_utf8_emit_len(wc);
+	    if (olen < 0) {
+		xo_failure(xop, "ignoring bad length");
+		continue;
+	    }
+
+	    if (!xo_buf_has_room(xbp, olen))
+		goto bail;
+
+	    xo_utf8_emit_char(xbp->xb_curp, olen, wc);
+	    xbp->xb_curp += olen;
+	    break;
+
+	case XF_ENC_LOCALE:
+	    if (!xo_buf_has_room(xbp, MB_LEN_MAX + 1))
+		goto bail;
+
+	    olen = wcrtomb(xbp->xb_curp, wc, &xop->xo_mbstate);
+	    if (olen <= 0) {
+		xo_failure(xop, "could not convert wide char: %lx",
+			   (unsigned long) wc);
+		olen = 1;
+		width = 1;
+		*xbp->xb_curp++ = '?';
+	    } else
+		xbp->xb_curp += olen;
+	    break;
+	}
+
+    done_with_encoding:
+	cols += width;
     }
 
     /*
      * xo_buf_append* will move xb_curp, so we save/restore it.
      */
-    int off2 = xbp->xb_curp - xbp->xb_bufp;
+    off2 = xbp->xb_curp - xbp->xb_bufp;
     rc = off2 - off;
     xbp->xb_curp = xbp->xb_bufp + off;
 
+#if 0
     if (xfp->xf_width[XF_WIDTH_MAX] > 0 && rc > xfp->xf_width[XF_WIDTH_MAX])
 	rc = xfp->xf_width[XF_WIDTH_MAX];
+#endif
 
-    cols = wcp ? wcswidth(wcp, len) : xo_mbswidth(xbp->xb_curp, rc);
     if (cols < xfp->xf_width[XF_WIDTH_MIN]) {
 	/*
 	 * Find the number of columns needed to display the string.
@@ -1422,7 +1682,7 @@ xo_format_string (xo_handle_t *xop, xo_buffer_t *xbp, unsigned flags,
 	 */
 	int delta = xfp->xf_width[XF_WIDTH_MIN] - cols;
 	if (!xo_buf_has_room(xbp, delta))
-	    return 0;
+	    goto bail;
 
 	/*
 	 * If seen_minus, then pad on the right; otherwise move it so
@@ -1441,6 +1701,10 @@ xo_format_string (xo_handle_t *xop, xo_buffer_t *xbp, unsigned flags,
     }
 
     return rc;
+
+ bail:
+    xbp->xb_curp = xbp->xb_bufp + off;
+    return 0;
 }
 
 static void
@@ -1598,7 +1862,7 @@ xo_format_data (xo_handle_t *xop, xo_buffer_t *xbp,
 	     */
 	    if (xf.xf_fc == 's' || xf.xf_fc == 'S') {
 		xf.xf_enc = (xf.xf_lflag || (xf.xf_fc == 'S'))
-		    ? 'w' : xf.xf_hflag ? 'n' : 'u';
+		    ? XF_ENC_WIDE : xf.xf_hflag ? XF_ENC_LOCALE : XF_ENC_UTF8;
 		rc = xo_format_string(xop, xbp, flags, &xf);
 
 	    } else {
@@ -2482,6 +2746,11 @@ xo_open_container_hf (xo_handle_t *xop, unsigned flags, const char *name)
     case XO_STYLE_JSON:
 	xo_stack_set_flags(xop);
 
+	if (!(xop->xo_flags & XOF_TOP_EMITTED)) {
+	    xo_printf(xop, "%*s{%s", xo_indent(xop), "", ppn);
+	    xop->xo_flags |= XOF_TOP_EMITTED;
+	}
+
 	if (xop->xo_stack[xop->xo_depth].xs_flags & XSF_NOT_FIRST)
 	    pre_nl = (xop->xo_flags & XOF_PRETTY) ? ",\n" : ", ";
 	xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
@@ -2655,6 +2924,12 @@ xo_close_list_h (xo_handle_t *xop, const char *name)
 
     if (xop->xo_style != XO_STYLE_JSON)
 	return 0;
+
+    if (!(xop->xo_flags & XOF_TOP_EMITTED)) {
+	xo_printf(xop, "%*s{%s", xo_indent(xop), "",
+		  (xop->xo_flags & XOF_PRETTY) ? "\n" : "");
+	xop->xo_flags |= XOF_TOP_EMITTED;
+    }
 
     if (name == NULL) {
 	xo_stack_t *xsp = &xop->xo_stack[xop->xo_depth];
@@ -2861,11 +3136,13 @@ xo_flush_h (xo_handle_t *xop)
 
     switch (xop->xo_style) {
     case XO_STYLE_HTML:
-	xop->xo_flags &= ~XOF_DIV_OPEN;
-	xo_data_append(xop, div_close, sizeof(div_close) - 1);
+	if (xop->xo_flags & XOF_DIV_OPEN) {
+	    xop->xo_flags &= ~XOF_DIV_OPEN;
+	    xo_data_append(xop, div_close, sizeof(div_close) - 1);
 
-	if (xop->xo_flags & XOF_PRETTY)
-	    xo_data_append(xop, "\n", 1);
+	    if (xop->xo_flags & XOF_PRETTY)
+		xo_data_append(xop, "\n", 1);
+	}
 	break;
     }
 
@@ -2881,6 +3158,30 @@ void
 xo_flush (void)
 {
     xo_flush_h(NULL);
+}
+
+void
+xo_finish_h (xo_handle_t *xop)
+{
+    const char *cp = "";
+    xop = xo_default(xop);
+    xo_flush_h(xop);
+
+    switch (xop->xo_style) {
+    case XO_STYLE_JSON:
+	if (xop->xo_flags & XOF_TOP_EMITTED)
+	    xop->xo_flags &= ~XOF_TOP_EMITTED; /* Turn off before output */
+	else
+	    cp = "{ ";
+	xo_printf(xop, "%*s%s}\n",xo_indent(xop), "", cp);
+	break;
+    }
+}
+
+void
+xo_finish (void)
+{
+    xo_finish_h(NULL);
 }
 
 /*
@@ -3089,6 +3390,8 @@ main (int argc, char **argv)
     xo_close_container("data");
 
     xo_close_container_h(NULL, "top");
+
+    xo_finish();
 
     return 0;
 }
