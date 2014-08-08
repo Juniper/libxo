@@ -32,17 +32,17 @@ main (int argc, char **argv)
 	unsigned e_dept;
 	unsigned e_percent;
     } employees[] = {
-	{ "Jim (\"რეგტ\")", "გთხოვთ ახლავე", 431, 90 },
+	{ "Jim (\"რეგტ\")", "გთხოვთ ახ", 431, 90 },
 	{ "Terry (\"<one\")", "Οὐχὶ ταὐτὰ παρίσταταί μοι Jones", 660, 90 },
 	{ "Leslie (\"Les\")", "Patterson", 341,60 },
 	{ "Ashley (\"Ash\")", "Meter & Smith", 1440, 40 },
+	{ "012345678901234567890", "012345678901234567890", 1440, 40 },
 	{ NULL, NULL }
     }, *ep = employees;
 
     xo_set_info(NULL, info, info_count);
 
     xo_open_container("employees");
-    xo_open_list("employee");
 
     xo_emit("Οὐχὶ ταὐτὰ παρίσταταί μοι {:v1/%s}, {:v2/%s}\n",
 	    "γιγνώσκειν", "ὦ ἄνδρες ᾿Αθηναῖοι");
@@ -51,11 +51,13 @@ main (int argc, char **argv)
 	    "ახლავე გაიაროთ რეგისტრაცია",
 	    "Unicode-ის მეათე საერთაშორისო");
 
+    xo_open_list("employee");
+
     xo_emit("{T:First Name/%-20s}{T:Last Name/%-14s}"
 	    "{T:/%-12s}{T:Time (%)}\n", "Department");
     for ( ; ep->e_first; ep++) {
 	xo_open_instance("employee");
-	xo_emit("{:first-name/%-20s/%s}{:last-name/%-14.14s/%s}"
+	xo_emit("{:first-name/%-20..20s/%s}{:last-name/%-14..14s/%s}"
 		"{:department/%8u/%u}{:percent-time/%8u/%u}\n",
 		ep->e_first, ep->e_last, ep->e_dept, ep->e_percent);
 	if (ep->e_percent > 50) {
@@ -67,6 +69,8 @@ main (int argc, char **argv)
 
     xo_close_list("employee");
     xo_close_container("employees");
+
+    xo_finish();
 
     return 0;
 }
