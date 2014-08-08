@@ -40,9 +40,11 @@
 #define XOF_KEYS	(1<<11)	/** Flag 'key' fields for xml and json */
 
 #define XOF_IGNORE_CLOSE (1<<12) /** Ignore errors on close tags */
-#define XOF_NOT_FIRST	(1<<13)	 /** Not the first item (json)  */
+#define XOF_NOT_FIRST	(1<<13)	 /* Not the first item (json)  */
 #define XOF_NO_LOCALE	(1<<14)	 /** Don't bother with locale */
-#define XOF_TOP_EMITTED	(1<<15)	 /** The top JSON braces have been emitted  */
+#define XOF_TOP_EMITTED	(1<<15)	 /* The top JSON braces have been emitted  */
+
+#define XOF_NO_TOP	(1<<16)	/** Don't emit the top braces in JSON */
 
 /*
  * The xo_info_t structure provides a mapping between names and
