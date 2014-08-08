@@ -64,8 +64,8 @@ typedef struct xo_stack_s {
  * It's used as a store for state, options, and content.
  */
 struct xo_handle_s {
+    unsigned long xo_flags;	/* Flags */
     unsigned short xo_style;	/* XO_STYLE_* value */
-    unsigned short xo_flags;	/* Flags */
     unsigned short xo_indent;	/* Indent level (if pretty) */
     unsigned short xo_indent_by; /* Indent amount (tab stop) */
     xo_write_func_t xo_write;	/* Write callback */
@@ -1743,7 +1743,8 @@ xo_format_data (xo_handle_t *xop, xo_buffer_t *xbp,
 	     * functions won't handle field widths for wide characters
 	     * correctly.  So we have to handle this ourselves.
 	     */
-	    if (xf.xf_fc == 's' || xf.xf_fc == 'S') {
+	    if (xop->xo_formatter == NULL
+		    && (xf.xf_fc == 's' || xf.xf_fc == 'S')) {
 		xf.xf_enc = (xf.xf_lflag || (xf.xf_fc == 'S'))
 		    ? XF_ENC_WIDE : xf.xf_hflag ? XF_ENC_LOCALE : XF_ENC_UTF8;
 		rc = xo_format_string(xop, xbp, flags, &xf);
@@ -2629,9 +2630,11 @@ xo_open_container_hf (xo_handle_t *xop, unsigned flags, const char *name)
     case XO_STYLE_JSON:
 	xo_stack_set_flags(xop);
 
-	if (!(xop->xo_flags & XOF_TOP_EMITTED)) {
-	    xo_printf(xop, "%*s{%s", xo_indent(xop), "", ppn);
-	    xop->xo_flags |= XOF_TOP_EMITTED;
+	if (!(xop->xo_flags & XOF_NO_TOP)) {
+	    if (!(xop->xo_flags & XOF_TOP_EMITTED)) {
+		xo_printf(xop, "%*s{%s", xo_indent(xop), "", ppn);
+		xop->xo_flags |= XOF_TOP_EMITTED;
+	    }
 	}
 
 	if (xop->xo_stack[xop->xo_depth].xs_flags & XSF_NOT_FIRST)
@@ -2755,6 +2758,13 @@ xo_open_list_hf (xo_handle_t *xop, unsigned flags, const char *name)
     const char *ppn = (xop->xo_flags & XOF_PRETTY) ? "\n" : "";
     const char *pre_nl = "";
 
+    if (!(xop->xo_flags & XOF_NO_TOP)) {
+	if (!(xop->xo_flags & XOF_TOP_EMITTED)) {
+	    xo_printf(xop, "%*s{%s", xo_indent(xop), "", ppn);
+	    xop->xo_flags |= XOF_TOP_EMITTED;
+	}
+    }
+
     if (name == NULL) {
 	xo_failure(xop, "NULL passed for list name");
 	name = XO_FAILURE_NAME;
@@ -2807,12 +2817,6 @@ xo_close_list_h (xo_handle_t *xop, const char *name)
 
     if (xop->xo_style != XO_STYLE_JSON)
 	return 0;
-
-    if (!(xop->xo_flags & XOF_TOP_EMITTED)) {
-	xo_printf(xop, "%*s{%s", xo_indent(xop), "",
-		  (xop->xo_flags & XOF_PRETTY) ? "\n" : "");
-	xop->xo_flags |= XOF_TOP_EMITTED;
-    }
 
     if (name == NULL) {
 	xo_stack_t *xsp = &xop->xo_stack[xop->xo_depth];
@@ -3052,11 +3056,13 @@ xo_finish_h (xo_handle_t *xop)
 
     switch (xop->xo_style) {
     case XO_STYLE_JSON:
-	if (xop->xo_flags & XOF_TOP_EMITTED)
-	    xop->xo_flags &= ~XOF_TOP_EMITTED; /* Turn off before output */
-	else
-	    cp = "{ ";
-	xo_printf(xop, "%*s%s}\n",xo_indent(xop), "", cp);
+	if (!(xop->xo_flags & XOF_NO_TOP)) {
+	    if (xop->xo_flags & XOF_TOP_EMITTED)
+		xop->xo_flags &= ~XOF_TOP_EMITTED; /* Turn off before output */
+	    else
+		cp = "{ ";
+	    xo_printf(xop, "%*s%s}\n",xo_indent(xop), "", cp);
+	}
 	break;
     }
 }
