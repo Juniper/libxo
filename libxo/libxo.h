@@ -40,13 +40,11 @@
 #define XOF_KEYS	(1<<11)	/** Flag 'key' fields for xml and json */
 
 #define XOF_IGNORE_CLOSE (1<<12) /** Ignore errors on close tags */
-#define XOF_NOT_FIRST	(1<<13)	 /** Not the first item (json)  */
+#define XOF_NOT_FIRST	(1<<13)	 /* Not the first item (json)  */
+#define XOF_NO_LOCALE	(1<<14)	 /** Don't bother with locale */
+#define XOF_TOP_EMITTED	(1<<15)	 /* The top JSON braces have been emitted  */
 
-#ifdef LIBXO_WIDE
-typedef wchar_t xchar_t;
-#else /* LIBXO_WIDE */
-typedef char xchar_t;
-#endif /* LIBXO_WIDE */
+#define XOF_NO_TOP	(1<<16)	/** Don't emit the top braces in JSON */
 
 /*
  * The xo_info_t structure provides a mapping between names and
@@ -71,8 +69,8 @@ typedef void (*xo_free_func_t)(void *);
  * of the xo handle.  The caller should return the number of bytes _needed_
  * to fit the data, even if this exceeds 'len'.
  */
-typedef int (*xo_formatter_t)(xo_handle_t *, xchar_t *, int,
-				const xchar_t *, va_list);
+typedef int (*xo_formatter_t)(xo_handle_t *, char *, int,
+				const char *, va_list);
 typedef void (*xo_checkpointer_t)(xo_handle_t *, va_list, int);
 
 xo_handle_t *
@@ -93,6 +91,9 @@ xo_set_allocator (xo_realloc_func_t realloc_func, xo_free_func_t free_func);
 
 void
 xo_set_style (xo_handle_t *xop, unsigned style);
+
+int
+xo_set_style_name (xo_handle_t *xop, const char *style);
 
 void
 xo_set_flags (xo_handle_t *xop, unsigned flags);
@@ -215,6 +216,39 @@ void
 xo_flush (void);
 
 void
-xo_set_leading_xpath (xo_handle_t *xop, const xchar_t *path);
+xo_finish_h (xo_handle_t *xop);
+
+void
+xo_finish (void);
+
+void
+xo_set_leading_xpath (xo_handle_t *xop, const char *path);
+
+void
+xo_warn_hc (xo_handle_t *xop, int code, const char *fmt, ...);
+
+void
+xo_warn_c (int code, const char *fmt, ...);
+
+void
+xo_warn (const char *fmt, ...);
+
+void
+xo_warnx (const char *fmt, ...);
+
+void
+xo_err (int eval, const char *fmt, ...);
+
+void
+xo_errx (int eval, const char *fmt, ...);
+
+void
+xo_errc (int eval, int code, const char *fmt, ...);
+
+void
+xo_warn_hcv (xo_handle_t *xop, int code, const char *fmt, va_list vap);
+
+void
+xo_no_setlocale (void);
 
 #endif /* INCLUDE_XO_H */

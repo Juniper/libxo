@@ -53,5 +53,7 @@ main (int argc, char **argv)
     xo_close_list_d();
     xo_close_container_d();
 
+    xo_finish();
+
     return 0;
 }
