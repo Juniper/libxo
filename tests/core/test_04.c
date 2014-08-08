@@ -53,5 +53,7 @@ main (int argc, char **argv)
     xo_close_list("employee");
     xo_close_container("employees");
 
+    xo_finish();
+
     return 0;
 }
