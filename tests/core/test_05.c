@@ -33,7 +33,7 @@ main (int argc, char **argv)
 	unsigned e_percent;
     } employees[] = {
 	{ "Jim (\"რეგტ\")", "გთხოვთ ახლავე", 431, 90 },
-	{ "Terry (\"<one\")", "Jones", 660, 90 },
+	{ "Terry (\"<one\")", "Οὐχὶ ταὐτὰ παρίσταταί μοι Jones", 660, 90 },
 	{ "Leslie (\"Les\")", "Patterson", 341,60 },
 	{ "Ashley (\"Ash\")", "Meter & Smith", 1440, 40 },
 	{ NULL, NULL }
@@ -55,7 +55,7 @@ main (int argc, char **argv)
 	    "{T:/%-12s}{T:Time (%)}\n", "Department");
     for ( ; ep->e_first; ep++) {
 	xo_open_instance("employee");
-	xo_emit("{:first-name/%-20s/%s}{:last-name/%-14s/%s}"
+	xo_emit("{:first-name/%-20s/%s}{:last-name/%-14.14s/%s}"
 		"{:department/%8u/%u}{:percent-time/%8u/%u}\n",
 		ep->e_first, ep->e_last, ep->e_dept, ep->e_percent);
 	if (ep->e_percent > 50) {
