@@ -103,10 +103,44 @@ struct xo_handle_s {
 #define XFF_ATTR	(1<<9)	/* Escape value using attribute rules (XML) */
 #define XFF_BLANK_LINE	(1<<10)	/* Emit a blank line */
 
+/*
+ * Normal printf has width and precision, which for strings operate as
+ * min and max number of columns.  But this depends on the idea that
+ * one byte means one column, which UTF-8 and multi-byte characters
+ * pitches on its ear.  It may take 40 bytes of data to populate 14
+ * columns, but we can't go off looking at 40 bytes of data without the
+ * caller's permission for fear/knowledge that we'll generate core files.
+ * 
+ * So we make three values, distinguishing between "max column" and
+ * "number of bytes that we will inspect inspect safely" We call the
+ * later "size", and make the format "%[[<min>].[[<size>].<max>]]s".
+ *
+ * Under the "first do no harm" theory, we default "max" to "size".
+ * This is a reasonable assumption for folks that don't grok the
+ * MBS/WCS/UTF-8 world, and while it will be annoying, it will never
+ * be evil.
+ *
+ * For example, xo_emit("{:tag/%-14.14s}", buf) will look make 14
+ * columns of output, but will never look at more than 14 bytes of the
+ * input buffer.  This is mostly compatible with printf and caller's
+ * expectations.
+ *
+ * In contrast xo_emit("{:tag/%-14..14s}", buf) will look at however
+ * many bytes (or until a NUL is seen) are needed to fill 14 columns
+ * of output.  xo_emit("{:tag/%-14.*.14s}", xx, buf) will look at up
+ * to xx bytes (or until a NUL is seen) in order to fill 14 columns
+ * of output.
+ *
+ * It's fairly amazing how a good idea (handle all languages of the
+ * world) blows such a big hole in the bottom of the fairly weak boat
+ * that it C string handling.  The simplicity and completenesss are
+ * sunk in ways we haven't even begun to understand.
+ */
+
 #define XF_WIDTH_MIN	0	/* Minimal width */
-#define XF_WIDTH_MAX	1	/* Maximum width */
-#define XF_WIDTH_SIZE	2	/* Maximum number of bytes to examine */
-#define XF_WIDTH_NUM	3	/* Numeric fields in printf (min.max.size) */
+#define XF_WIDTH_SIZE	1	/* Maximum number of bytes to examine */
+#define XF_WIDTH_MAX	2	/* Maximum width */
+#define XF_WIDTH_NUM	3	/* Numeric fields in printf (min.size.max) */
 
 /*
  * A place to parse printf-style format flags for each field
@@ -1531,13 +1565,17 @@ xo_format_data (xo_handle_t *xop, xo_buffer_t *xbp,
 		if (xf.xf_star[s])
 		    xf.xf_width[s] = va_arg(xop->xo_vap, int);
 	    }
-
-	    /* Normalize a negative width value */
-	    if (xf.xf_width[0] < 0) {
-		xf.xf_width[0] = -xf.xf_width[0];
-		xf.xf_seen_minus = 1;
-	    }
 	}
+
+	/* Normalize a negative width value */
+	if (xf.xf_width[0] < 0) {
+	    xf.xf_width[0] = -xf.xf_width[0];
+	    xf.xf_seen_minus = 1;
+	}
+
+	/* If no max is given, it defaults to size */
+	if (xf.xf_width[XF_WIDTH_MAX] < 0 && xf.xf_width[XF_WIDTH_SIZE] >= 0)
+	    xf.xf_width[XF_WIDTH_MAX] = xf.xf_width[XF_WIDTH_SIZE];
 
 	if (xf.xf_fc == 'D' || xf.xf_fc == 'O' || xf.xf_fc == 'U')
 	    xf.xf_lflag = 1;
