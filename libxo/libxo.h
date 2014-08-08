@@ -41,7 +41,8 @@
 
 #define XOF_IGNORE_CLOSE (1<<12) /** Ignore errors on close tags */
 #define XOF_NOT_FIRST	(1<<13)	 /** Not the first item (json)  */
-#define XOF_NO_LOCALE	(1<<14)	 /* Don't bother with locale */
+#define XOF_NO_LOCALE	(1<<14)	 /** Don't bother with locale */
+#define XOF_TOP_EMITTED	(1<<15)	 /** The top JSON braces have been emitted  */
 
 /*
  * The xo_info_t structure provides a mapping between names and
@@ -211,6 +212,12 @@ xo_flush_h (xo_handle_t *xop);
 
 void
 xo_flush (void);
+
+void
+xo_finish_h (xo_handle_t *xop);
+
+void
+xo_finish (void);
 
 void
 xo_set_leading_xpath (xo_handle_t *xop, const char *path);
