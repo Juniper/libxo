@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "libxo.h"
+#include "xo.h"
 
 int
 main (int argc, char **argv)
