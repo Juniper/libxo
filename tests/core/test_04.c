@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "libxo.h"
+#include "xo.h"
 
 xo_info_t info[] = {
     { "employee", "object", "Employee data" },
