@@ -18,7 +18,7 @@ AM_CFLAGS = -I${top_srcdir} ${WARNINGS}
 lib_LTLIBRARIES = libxo.la
 
 libxoinc_HEADERS = \
-     libxo.h
+     xo.h
 
 libxo_la_SOURCES = \
     libxo.c
