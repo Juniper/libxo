@@ -20,7 +20,7 @@
 #include <errno.h>
 #include <limits.h>
 
-#include "libxo.h"
+#include "xo.h"
 
 #ifndef UNUSED
 #define UNUSED __attribute__ ((__unused__))
