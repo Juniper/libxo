@@ -13,7 +13,7 @@
 #include <stdarg.h>
 #include <string.h>
 
-#include "libxo.h"
+#include "xo.h"
 #include "xoversion.h"
 
 #ifndef UNUSED
