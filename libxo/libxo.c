@@ -2160,15 +2160,24 @@ xo_format_text (xo_handle_t *xop, const char *str, int len)
 }
 
 static void
-xo_format_label (xo_handle_t *xop, const char *str, int len)
+xo_format_label (xo_handle_t *xop, const char *str, int len,
+		 const char *fmt, int flen)
 {
     switch (xop->xo_style) {
     case XO_STYLE_TEXT:
-	xo_buf_append(&xop->xo_data, str, len);
+	if (len)
+	    xo_buf_append(&xop->xo_data, str, len);
+	else
+	    xo_format_data(xop, NULL, fmt, flen, 0);
 	break;
 
     case XO_STYLE_HTML:
-	xo_buf_append_div(xop, "label", 0, NULL, 0, str, len, NULL, 0);
+	if (len == 0) {
+	    str = fmt;
+	    len = flen;
+	}
+
+	xo_buf_append_div(xop, "label", 0, NULL, 0, str, len, 0, 0);
 	break;
     }
 }
@@ -2345,28 +2354,46 @@ xo_format_value (xo_handle_t *xop, const char *name, int nlen,
 }
 
 static void
-xo_format_decoration (xo_handle_t *xop, const char *str, int len)
+xo_format_decoration (xo_handle_t *xop, const char *str, int len,
+		 const char *fmt, int flen)
 {
     switch (xop->xo_style) {
     case XO_STYLE_TEXT:
-	xo_data_append(xop, str, len);
+	if (len)
+	    xo_data_append(xop, str, len);
+	else
+	    xo_format_data(xop, NULL, fmt, flen, 0);
 	break;
 
     case XO_STYLE_HTML:
+	if (len == 0) {
+	    str = fmt;
+	    len = flen;
+	}
+
 	xo_buf_append_div(xop, "decoration", 0, NULL, 0, str, len, NULL, 0);
 	break;
     }
 }
 
 static void
-xo_format_padding (xo_handle_t *xop, const char *str, int len)
+xo_format_padding (xo_handle_t *xop, const char *str, int len,
+		 const char *fmt UNUSED, int flen UNUSED)
 {
     switch (xop->xo_style) {
     case XO_STYLE_TEXT:
-	xo_data_append(xop, str, len);
+	if (len)
+	    xo_data_append(xop, str, len);
+	else
+	    xo_format_data(xop, NULL, fmt, flen, 0);
 	break;
 
     case XO_STYLE_HTML:
+	if (len == 0) {
+	    str = fmt;
+	    len = flen;
+	}
+
 	xo_buf_append_div(xop, "padding", 0, NULL, 0, str, len, NULL, 0);
 	break;
     }
@@ -2555,19 +2582,19 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 	if (style == 'T')
 	    xo_format_title(xop, content, clen, format, flen);
 	else if (style == 'L')
-	    xo_format_label(xop, content, clen);
+	    xo_format_label(xop, content, clen, format, flen);
 	else if (style == 0 || style == 'V')
 	    xo_format_value(xop, content, clen, format, flen,
 			    encoding, elen, flags);
 	else if (style == 'D')
-	    xo_format_decoration(xop, content, clen);
+	    xo_format_decoration(xop, content, clen, format, flen);
 	else if (style == 'P')
- 	    xo_format_padding(xop, content, clen);
+ 	    xo_format_padding(xop, content, clen, format, flen);
 
 	if (flags & XFF_COLON)
-	    xo_format_decoration(xop, ":", 1);
+	    xo_format_decoration(xop, ":", 1, NULL, 0);
 	if (flags & XFF_WS)
-	    xo_format_padding(xop, " ", 1);
+	    xo_format_padding(xop, " ", 1, NULL, 0);
 
 	cp += sp - basep + 1;
 	if (newp) {
