@@ -38,6 +38,9 @@ main (int argc, char **argv)
 
     xo_open_container("data");
 
+    xo_message("improper use of profanity; %s; %s",
+	       "ten yard penalty", "first down");
+
     xo_error("Shut 'er down, Clancey!  She's a-pumpin' mud!  <>!,\"!<>\n");
 
     xo_close_container("data");
