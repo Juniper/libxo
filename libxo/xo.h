@@ -249,6 +249,18 @@ void
 xo_warn_hcv (xo_handle_t *xop, int code, const char *fmt, va_list vap);
 
 void
+xo_message_hcv (xo_handle_t *xop, int code, const char *fmt, va_list vap);
+
+void
+xo_message_hc (xo_handle_t *xop, int code, const char *fmt, ...);
+
+void
+xo_message_c (int code, const char *fmt, ...);
+
+void
+xo_message (const char *fmt, ...);
+
+void
 xo_no_setlocale (void);
 
 #endif /* INCLUDE_XO_H */
