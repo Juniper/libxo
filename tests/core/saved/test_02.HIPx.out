@@ -1,4 +1,9 @@
 <div class="line">
+  <div class="data" data-tag="test" data-xpath="/top/data/test">4</div>
+  <div class="text"> </div>
+  <div class="label">tries</div>
+</div>
+<div class="line">
   <div class="message">improper use of profanity; ten yard penalty; first down
 </div>
   <div class="error">Shut 'er down, Clancey!  She's a-pumpin' mud!  &lt;&gt;!,"!&lt;&gt;
