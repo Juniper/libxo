@@ -19,6 +19,8 @@
 #include <string.h>
 #include <errno.h>
 #include <limits.h>
+#include <ctype.h>
+#include <wctype.h>
 
 #include "xo.h"
 
@@ -184,9 +186,15 @@ static int xo_locale_inited;
 static xo_realloc_func_t xo_realloc = realloc;
 static xo_free_func_t xo_free = free;
 
-/* Forward declaration */
+/* Forward declarations */
 static void
 xo_failure (xo_handle_t *xop, const char *fmt, ...);
+
+static void
+xo_buf_append_div (xo_handle_t *xop, const char *class, unsigned flags,
+		   const char *name, int nlen,
+		   const char *value, int vlen,
+		   const char *encoding, int elen);
 
 /*
  * Callback to write data to a FILE pointer
@@ -230,14 +238,27 @@ xo_buf_cleanup (xo_buffer_t *xbp)
     bzero(xbp, sizeof(*xbp));
 }
 
-static void
+static int
 xo_depth_check (xo_handle_t *xop, int depth)
 {
-    if (depth > xop->xo_stack_size) {
+    xo_stack_t *xsp;
+
+    if (depth >= xop->xo_stack_size) {
+	depth += 16;
+	xsp = xo_realloc(xop->xo_stack, sizeof(xop->xo_stack[0]) * depth);
+	if (xsp == NULL) {
+	    xo_failure(xop, "xo_depth_check: out of memory (%d)", depth);
+	    return 0;
+	}
+
+	int count = depth - xop->xo_stack_size;
+
+	bzero(xsp + xop->xo_stack_size, count * sizeof(*xsp));
 	xop->xo_stack_size = depth;
-	xop->xo_stack = xo_realloc(xop->xo_stack,
-			   sizeof(xop->xo_stack[0]) * xop->xo_stack_size);
+	xop->xo_stack = xsp;
     }
+
+    return 0;
 }
 
 void
@@ -386,82 +407,56 @@ xo_buf_has_room (xo_buffer_t *xbp, int len)
 }
 
 /*
- * Format arguments into our buffer.  If a custom formatter has been set,
- * we use that to do the work; otherwise we vsnprintf().
+ * Cheap convenience function to return either the argument, or
+ * the internal handle, after it has been initialized.  The usage
+ * is:
+ *    xop = xo_default(xop);
+ */
+static xo_handle_t *
+xo_default (xo_handle_t *xop)
+{
+    if (xop == NULL) {
+	if (xo_default_inited == 0)
+	    xo_default_init();
+	xop = &xo_default_handle;
+    }
+
+    return xop;
+}
+
+/*
+ * Return the number of spaces we should be indenting.  If
+ * we are pretty-printing, theis is indent * indent_by.
  */
 static int
-xo_vsnprintf (xo_handle_t *xop, xo_buffer_t *xbp, const char *fmt, va_list vap)
+xo_indent (xo_handle_t *xop)
 {
-    va_list va_local;
-    int rc;
-    int left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
+    int rc = 0;
 
-    va_copy(va_local, vap);
+    xop = xo_default(xop);
 
-    if (xop->xo_formatter)
-	rc = xop->xo_formatter(xop, xbp->xb_curp, left, fmt, va_local);
-    else
-	rc = vsnprintf(xbp->xb_curp, left, fmt, va_local);
-
-    if (rc > xbp->xb_size) {
-	if (!xo_buf_has_room(xbp, rc))
-	    return -1;
-
-	/*
-	 * After we call vsnprintf(), the stage of vap is not defined.
-	 * We need to copy it before we pass.  Then we have to do our
-	 * own logic below to move it along.  This is because the
-	 * implementation can have va_list be a point (bsd) or a
-	 * structure (macosx) or anything in between.
-	 */
-
-	va_end(va_local);	/* Reset vap to the start */
-	va_copy(va_local, vap);
-
-	left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
-	if (xop->xo_formatter)
-	    xop->xo_formatter(xop, xbp->xb_curp, left, fmt, va_local);
-	else
-	    rc = vsnprintf(xbp->xb_curp, left, fmt, va_local);
+    if (xop->xo_flags & XOF_PRETTY) {
+	rc = xop->xo_indent * xop->xo_indent_by;
+	if (xop->xo_flags & XOF_TOP_EMITTED)
+	    rc += xop->xo_indent_by;
     }
-    va_end(va_local);
 
     return rc;
 }
 
-/*
- * Print some data thru the handle.
- */
-static int
-xo_printf (xo_handle_t *xop, const char *fmt, ...)
+static void
+xo_buf_indent (xo_handle_t *xop, int indent)
 {
     xo_buffer_t *xbp = &xop->xo_data;
-    int left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
-    int rc;
-    va_list vap;
 
-    va_start(vap, fmt);
+    if (indent <= 0)
+	indent = xo_indent(xop);
 
-    rc = vsnprintf(xbp->xb_curp, left, fmt, vap);
+    if (!xo_buf_has_room(xbp, indent))
+	return;
 
-    if (rc > xbp->xb_size) {
-	if (!xo_buf_has_room(xbp, rc))
-	    return -1;
-
-	va_end(vap);	/* Reset vap to the start */
-	va_start(vap, fmt);
-
-	left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
-	rc = vsnprintf(xbp->xb_curp, left, fmt, vap);
-    }
-    va_end(vap);
-
-    if (rc > 0) {
-	xbp->xb_curp = xbp->xb_bufp;
-	rc = xop->xo_write(xop->xo_opaque, xbp->xb_bufp);
-    }
-
-    return rc;
+    memset(xbp->xb_curp, ' ', indent);
+    xbp->xb_curp += indent;
 }
 
 static char xo_xml_amp[] = "&amp;";
@@ -597,6 +592,100 @@ xo_buf_escape (xo_handle_t *xop, xo_buffer_t *xbp,
     }
 
     xbp->xb_curp += len;
+}
+
+/*
+ * Format arguments into our buffer.  If a custom formatter has been set,
+ * we use that to do the work; otherwise we vsnprintf().
+ */
+static int
+xo_vsnprintf (xo_handle_t *xop, xo_buffer_t *xbp, const char *fmt, va_list vap)
+{
+    va_list va_local;
+    int rc;
+    int left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
+
+    va_copy(va_local, vap);
+
+    if (xop->xo_formatter)
+	rc = xop->xo_formatter(xop, xbp->xb_curp, left, fmt, va_local);
+    else
+	rc = vsnprintf(xbp->xb_curp, left, fmt, va_local);
+
+    if (rc > xbp->xb_size) {
+	if (!xo_buf_has_room(xbp, rc))
+	    return -1;
+
+	/*
+	 * After we call vsnprintf(), the stage of vap is not defined.
+	 * We need to copy it before we pass.  Then we have to do our
+	 * own logic below to move it along.  This is because the
+	 * implementation can have va_list be a point (bsd) or a
+	 * structure (macosx) or anything in between.
+	 */
+
+	va_end(va_local);	/* Reset vap to the start */
+	va_copy(va_local, vap);
+
+	left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
+	if (xop->xo_formatter)
+	    xop->xo_formatter(xop, xbp->xb_curp, left, fmt, va_local);
+	else
+	    rc = vsnprintf(xbp->xb_curp, left, fmt, va_local);
+    }
+    va_end(va_local);
+
+    return rc;
+}
+
+/*
+ * Print some data thru the handle.
+ */
+static int
+xo_printf_v (xo_handle_t *xop, const char *fmt, va_list vap)
+{
+    xo_buffer_t *xbp = &xop->xo_data;
+    int left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
+    int rc;
+    va_list va_local;
+
+    va_copy(va_local, vap);
+
+    rc = vsnprintf(xbp->xb_curp, left, fmt, va_local);
+
+    if (rc > xbp->xb_size) {
+	if (!xo_buf_has_room(xbp, rc))
+	    return -1;
+
+	va_end(va_local);	/* Reset vap to the start */
+	va_copy(va_local, vap);
+
+	left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
+	rc = vsnprintf(xbp->xb_curp, left, fmt, va_local);
+    }
+
+    va_end(va_local);
+
+    if (rc > 0) {
+	xbp->xb_curp = xbp->xb_bufp;
+	rc = xop->xo_write(xop->xo_opaque, xbp->xb_bufp);
+    }
+
+    return rc;
+}
+
+static int
+xo_printf (xo_handle_t *xop, const char *fmt, ...)
+{
+    int rc;
+    va_list vap;
+
+    va_start(vap, fmt);
+
+    rc = xo_printf_v(xop, fmt, vap);
+
+    va_end(vap);
+    return rc;
 }
 
 /*
@@ -828,44 +917,6 @@ xo_data_escape (xo_handle_t *xop, const char *str, int len)
 }
 
 /*
- * Cheap convenience function to return either the argument, or
- * the internal handle, after it has been initialized.  The usage
- * is:
- *    xop = xo_default(xop);
- */
-static xo_handle_t *
-xo_default (xo_handle_t *xop)
-{
-    if (xop == NULL) {
-	if (xo_default_inited == 0)
-	    xo_default_init();
-	xop = &xo_default_handle;
-    }
-
-    return xop;
-}
-
-/*
- * Return the number of spaces we should be indenting.  If
- * we are pretty-printing, theis is indent * indent_by.
- */
-static int
-xo_indent (xo_handle_t *xop)
-{
-    int rc = 0;
-
-    xop = xo_default(xop);
-
-    if (xop->xo_flags & XOF_PRETTY) {
-	rc = xop->xo_indent * xop->xo_indent_by;
-	if (xop->xo_flags & XOF_TOP_EMITTED)
-	    rc += xop->xo_indent_by;
-    }
-
-    return rc;
-}
-
-/*
  * Generate a warning.  Normally, this is a text message written to
  * standard error.  If the XOF_WARN_XML flag is set, then we generate
  * XMLified content on standard output.
@@ -924,7 +975,7 @@ xo_warn_hcv (xo_handle_t *xop, int code, const char *fmt, va_list vap)
 	xo_buf_append(xbp, msg_close, sizeof(msg_close) - 1);
 	xo_buf_append(xbp, err_close, sizeof(err_close) - 1);
 
-	if (code >= 0) {
+	if (code > 0) {
 	    const char *msg = strerror(code);
 	    if (msg) {
 		xo_buf_append(xbp, ": ", 2);
@@ -933,7 +984,6 @@ xo_warn_hcv (xo_handle_t *xop, int code, const char *fmt, va_list vap)
 	}
 
 	xo_buf_append(xbp, "\n", 2); /* Append newline and NUL to string */
-
 	xbp->xb_curp = xbp->xb_bufp;
 	xop->xo_write(xop->xo_opaque, xbp->xb_bufp);
 
@@ -1015,6 +1065,148 @@ xo_errc (int eval, int code, const char *fmt, ...)
     xo_warn_hcv(NULL, code, fmt, vap);
     va_end(vap);
     exit(eval);
+}
+
+/*
+ * Generate a warning.  Normally, this is a text message written to
+ * standard error.  If the XOF_WARN_XML flag is set, then we generate
+ * XMLified content on standard output.
+ */
+void
+xo_message_hcv (xo_handle_t *xop, int code, const char *fmt, va_list vap)
+{
+    static char msg_open[] = "<message>";
+    static char msg_close[] = "</message>";
+    xo_buffer_t *xbp;
+    int rc;
+    va_list va_local;
+
+    xop = xo_default(xop);
+
+    if (fmt == NULL || *fmt == '\0')
+	return;
+
+    int need_nl = (fmt[strlen(fmt) - 1] != '\n');
+
+    switch (xop->xo_style) {
+    case XO_STYLE_XML:
+	xbp = &xop->xo_data;
+	if (xop->xo_flags & XOF_PRETTY)
+	    xo_buf_indent(xop, xop->xo_indent_by);
+	xo_buf_append(xbp, msg_open, sizeof(msg_open) - 1);
+
+	va_copy(va_local, vap);
+
+	int left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
+	rc = vsnprintf(xbp->xb_curp, left, fmt, vap);
+	if (rc > xbp->xb_size) {
+	    if (!xo_buf_has_room(xbp, rc))
+		return;
+
+	    va_end(vap);	/* Reset vap to the start */
+	    va_copy(vap, va_local);
+
+	    left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
+	    rc = vsnprintf(xbp->xb_curp, left, fmt, vap);
+	}
+	va_end(va_local);
+
+	rc = xo_escape_xml(xbp, rc, 1);
+	xbp->xb_curp += rc;
+
+	if (need_nl && code > 0) {
+	    const char *msg = strerror(code);
+	    if (msg) {
+		xo_buf_append(xbp, ": ", 2);
+		xo_buf_append(xbp, msg, strlen(msg));
+	    }
+	}
+
+	xo_buf_append(xbp, msg_close, sizeof(msg_close) - 1);
+	if (need_nl)
+	    xo_buf_append(xbp, "\n", 2); /* Append newline and NUL to string */
+	xbp->xb_curp = xbp->xb_bufp;
+	xop->xo_write(xop->xo_opaque, xbp->xb_bufp);
+	break;
+
+    case XO_STYLE_HTML:
+	{
+	    char buf[BUFSIZ], *bp = buf, *cp;
+	    int bufsiz = sizeof(buf);
+	    int rc2;
+
+	    va_copy(va_local, vap);
+
+	    rc = vsnprintf(buf, bufsiz, fmt, va_local);
+	    if (rc > bufsiz) {
+		bufsiz = rc + BUFSIZ;
+		bp = alloca(bufsiz);
+		va_end(va_local);
+		va_copy(va_local, vap);
+		rc = vsnprintf(buf, bufsiz, fmt, va_local);
+	    }
+	    cp = bp + rc;
+
+	    if (need_nl) {
+		rc2 = snprintf(cp, bufsiz - rc, "%s%s\n",
+			       (code > 0) ? ": " : "",
+			       (code > 0) ? strerror(code) : "");
+		if (rc2 > 0)
+		    rc += rc2;
+	    }
+
+	    xo_buf_append_div(xop, "message", 0, NULL, 0, bp, rc, NULL, 0);
+	}
+	break;
+
+    case XO_STYLE_JSON:
+	/* No meanings of representing messages in JSON */
+	break;
+
+    case XO_STYLE_TEXT:
+	xo_printf_v(xop, fmt, vap);
+
+	if (need_nl && code > 0) {
+	    const char *msg = strerror(code);
+	    if (msg) {
+		xo_printf(xop, ": %s", msg);
+	    }
+	}
+	if (need_nl)
+	    xo_printf(xop, "\n");
+	break;
+    }
+}
+
+void
+xo_message_hc (xo_handle_t *xop, int code, const char *fmt, ...)
+{
+    va_list vap;
+
+    va_start(vap, fmt);
+    xo_message_hcv(xop, code, fmt, vap);
+    va_end(vap);
+}
+
+void
+xo_message_c (int code, const char *fmt, ...)
+{
+    va_list vap;
+
+    va_start(vap, fmt);
+    xo_message_hcv(NULL, code, fmt, vap);
+    va_end(vap);
+}
+
+void
+xo_message (const char *fmt, ...)
+{
+    int code = errno;
+    va_list vap;
+
+    va_start(vap, fmt);
+    xo_message_hcv(NULL, code, fmt, vap);
+    va_end(vap);
 }
 
 static void
@@ -1233,21 +1425,6 @@ xo_clear_flags (xo_handle_t *xop, unsigned flags)
     xop = xo_default(xop);
 
     xop->xo_flags &= ~flags;
-}
-
-static void
-xo_buf_indent (xo_handle_t *xop, int indent)
-{
-    xo_buffer_t *xbp = &xop->xo_data;
-
-    if (indent <= 0)
-	indent = xo_indent(xop);
-
-    if (!xo_buf_has_room(xbp, indent))
-	return;
-
-    memset(xbp->xb_curp, ' ', indent);
-    xbp->xb_curp += indent;
 }
 
 static void
@@ -2527,15 +2704,14 @@ static void
 xo_depth_change (xo_handle_t *xop, const char *name,
 		 int delta, int indent, unsigned flags)
 {
-    xo_stack_t *xsp = &xop->xo_stack[xop->xo_depth];
-
     if (xop->xo_flags & XOF_DTRT)
 	flags |= XSF_DTRT;
 
     if (delta >= 0) {			/* Push operation */
-	xo_depth_check(xop, xop->xo_depth + delta);
+	if (xo_depth_check(xop, xop->xo_depth + delta))
+	    return;
 
-	xsp += delta;
+	xo_stack_t *xsp = &xop->xo_stack[xop->xo_depth + delta];
 	xsp->xs_flags = flags;
 	xo_stack_set_flags(xop);
 
@@ -2558,6 +2734,7 @@ xo_depth_change (xo_handle_t *xop, const char *name,
 	    return;
 	}
 
+	xo_stack_t *xsp = &xop->xo_stack[xop->xo_depth];
 	if (xop->xo_flags & XOF_WARN) {
 	    const char *top = xsp->xs_name;
 	    if (top && strcmp(name, top) != 0)
@@ -2590,7 +2767,8 @@ xo_set_depth (xo_handle_t *xop, int depth)
 {
     xop = xo_default(xop);
 
-    xo_depth_check(xop, depth);
+    if (xo_depth_check(xop, depth))
+	return;
 
     xop->xo_depth += depth;
     xop->xo_indent += depth;
@@ -3095,6 +3273,7 @@ xo_error_hv (xo_handle_t *xop, const char *fmt, va_list vap)
 	    xo_line_close(xop);
 
 	xo_buffer_t *xbp = &xop->xo_data;
+	xo_buf_append(xbp, "", 1); /* Append ending NUL */
 	xbp->xb_curp = xbp->xb_bufp;
 	xop->xo_write(xop->xo_opaque, xbp->xb_bufp);
 
