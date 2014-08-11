@@ -147,6 +147,19 @@ AM_CONDITIONAL([LIBXO_DEBUG], [test "$LIBXO_DEBUG" != "no"])
 AC_CHECK_LIB([m], [lrint])
 AM_CONDITIONAL([HAVE_LIBM], [test "$HAVE_LIBM" != "no"])
 
+AC_MSG_CHECKING([compiler for gcc])
+HAVE_GCC=no
+if test "${CC}" != ""; then
+    HAVE_GCC=`${CC} --version 2>&1 | grep GCC`
+    if test "${HAVE_GCC}" != ""; then
+        HAVE_GCC=yes
+    else
+        HAVE_GCC=no
+    fi
+fi
+AC_MSG_RESULT([$HAVE_GCC])
+AM_CONDITIONAL([HAVE_GCC], [test "$HAVE_GCC" = "yes"])
+
 AC_MSG_CHECKING([whether to build with printflike])
 AC_ARG_ENABLE([printflike],
     [  --enable-printflike    Enable use of GCC __printflike attribute],
@@ -243,7 +256,7 @@ AC_MSG_NOTICE([summary of build options:
   includedir:       ${XO_INCLUDEDIR}
   extensions dir:   ${XO_EXTDIR}
 
-  compiler:         ${CC}
+  compiler:         ${CC} (${HAVE_GCC:-no})
   compiler flags:   ${CFLAGS}
   library types:    Shared=${enable_shared}, Static=${enable_static}
 
