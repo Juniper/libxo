@@ -104,6 +104,7 @@ struct xo_handle_s {
 #define XFF_XML		(1<<8)	/* Force XML encoding style (for XPath) */
 #define XFF_ATTR	(1<<9)	/* Escape value using attribute rules (XML) */
 #define XFF_BLANK_LINE	(1<<10)	/* Emit a blank line */
+#define XFF_NO_OUTPUT	(1<<11)	/* Do not make any output */
 
 /*
  * Normal printf has width and precision, which for strings operate as
@@ -1536,8 +1537,12 @@ xo_format_string (xo_handle_t *xop, xo_buffer_t *xbp, unsigned flags,
 
     if (xfp->xf_enc == XF_ENC_WIDE) {
 	wcp = va_arg(xop->xo_vap, wchar_t *);
+	if (xfp->xf_skip)
+	    return 0;
     } else {
 	cp = va_arg(xop->xo_vap, char *); /* UTF-8 or native */
+	if (xfp->xf_skip)
+	    return 0;
 
 	/*
 	 * Optimize the most common case, which is "%s".  We just
@@ -1780,6 +1785,7 @@ xo_format_data (xo_handle_t *xop, xo_buffer_t *xbp,
     int rc;
     int delta = 0;
     int style = (flags & XFF_XML) ? XO_STYLE_XML : xop->xo_style;
+    unsigned make_output = !(flags & XFF_NO_OUTPUT);
     
     if (xbp == NULL)
 	xbp = &xop->xo_data;
@@ -1787,8 +1793,13 @@ xo_format_data (xo_handle_t *xop, xo_buffer_t *xbp,
     for (cp = fmt, ep = fmt + flen; cp < ep; cp++) {
 	if (*cp != '%') {
 	add_one:
-	    xo_buf_escape(xop, xbp, cp, 1, 0);
-	    delta += 1;
+	    if (*cp == '\\' && cp[1] != '\0')
+		cp += 1;
+
+	    if (make_output) {
+		xo_buf_escape(xop, xbp, cp, 1, 0);
+		delta += 1;
+	    }
 	    continue;
 
 	} if (cp + 1 < ep && cp[1] == '%') {
@@ -1830,6 +1841,9 @@ xo_format_data (xo_handle_t *xop, xo_buffer_t *xbp,
 		    && xop->xo_style != XO_STYLE_HTML)
 		xf.xf_skip = 1;
 	}
+
+	if (!make_output)
+	    xf.xf_skip = 1;
 
 	/*
 	 * Looking at one piece of a format; find the end and
@@ -1956,9 +1970,16 @@ xo_format_data (xo_handle_t *xop, xo_buffer_t *xbp,
 	 */
 	if (!(xop->xo_flags & XOF_NO_VA_ARG)) {
 
-	    /* 'S' and 's' are already handled in xo_format_string */
+	    if (xf.xf_fc == 's' ||xf.xf_fc == 'S') {
+		/*
+		 * The 'S' and 's' formats are normally handled in
+		 * xo_format_string, but if we skipped it, then we
+		 * need to pop it.
+		 */
+		if (xf.xf_skip)
+		    va_arg(xop->xo_vap, char *);
 
-	    if (strchr("diouxXDOU", xf.xf_fc) != NULL) {
+	    } else 	    if (strchr("diouxXDOU", xf.xf_fc) != NULL) {
 		if (xf.xf_hflag > 1) {
 		    va_arg(xop->xo_vap, int);
 
@@ -2202,6 +2223,16 @@ xo_format_label (xo_handle_t *xop, const char *str, int len,
 
 	xo_buf_append_div(xop, "label", 0, NULL, 0, str, len, 0, 0);
 	break;
+
+    case XO_STYLE_XML:
+    case XO_STYLE_JSON:
+	/*
+	 * Even though we don't care about labels, we need to do
+	 * enough parsing work to skip over the right bits of xo_vap.
+	 */
+	if (len == 0)
+	    xo_format_data(xop, NULL, fmt, flen, XFF_NO_OUTPUT);
+	break;
     }
 }
 
@@ -2212,8 +2243,17 @@ xo_format_title (xo_handle_t *xop, const char *str, int len,
     static char div_open[] = "<div class=\"title\">";
     static char div_close[] = "</div>";
 
-    if (xop->xo_style != XO_STYLE_TEXT && xop->xo_style != XO_STYLE_HTML)
+    switch (xop->xo_style) {
+    case XO_STYLE_XML:
+    case XO_STYLE_JSON:
+	/*
+	 * Even though we don't care about text, we need to do
+	 * enough parsing work to skip over the right bits of xo_vap.
+	 */
+	if (len == 0)
+	    xo_format_data(xop, NULL, fmt, flen, XFF_NO_OUTPUT);
 	return;
+    }
 
     xo_buffer_t *xbp = &xop->xo_data;
     int start = xbp->xb_curp - xbp->xb_bufp;
@@ -2515,6 +2555,15 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 	    if (*sp == ':' || *sp == '/' || *sp == '}')
 		break;
 
+	    if (*sp == '\\') {
+		if (sp[1] == '\0') {
+		    xo_failure(xop, "backslash at the end of string");
+		    return -1;
+		}
+		sp += 1;
+		continue;
+	    }
+
 	    switch (*sp) {
 	    case 'D':
 	    case 'L':
@@ -2522,8 +2571,7 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 	    case 'T':
 	    case 'V':
 		if (style != 0) {
-		    xo_failure(xop,
-				  "format string uses multiple styles: %s",
+		    xo_failure(xop, "format string uses multiple styles: %s",
 				  fmt);
 		    return -1;
 		}
@@ -2585,6 +2633,14 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 	    for (ep = ++sp; *sp; sp++) {
 		if (*sp == '}' || *sp == '/')
 		    break;
+		if (*sp == '\\') {
+		    if (sp[1] == '\0') {
+			xo_failure(xop, "backslash at the end of string");
+			return -1;
+		    }
+		    sp += 1;
+		    continue;
+		}
 	    }
 	    if (ep != sp) {
 		clen = sp - ep;
@@ -2599,6 +2655,14 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 	    for (ep = ++sp; *sp; sp++) {
 		if (*sp == '}' || *sp == '/')
 		    break;
+		if (*sp == '\\') {
+		    if (sp[1] == '\0') {
+			xo_failure(xop, "backslash at the end of string");
+			return -1;
+		    }
+		    sp += 1;
+		    continue;
+		}
 	    }
 	    if (ep != sp) {
 		flen = sp - ep;
