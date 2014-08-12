@@ -38,8 +38,10 @@ main (int argc, char **argv)
 
     xo_open_container("data");
 
+    xo_emit("{T:/before%safter:}\n", "working");
+
     int test = 4;
-    xo_emit("{:test/%d} {L:/tr%s}\n", test, (test == 1) ? "y" : "ies");
+    xo_emit("{:test/%04d} {L:/tr%s}\n", test, (test == 1) ? "y" : "ies");
 
     xo_message("improper use of profanity; %s; %s",
 	       "ten yard penalty", "first down");
