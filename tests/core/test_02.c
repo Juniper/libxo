@@ -39,6 +39,7 @@ main (int argc, char **argv)
     xo_open_container("data");
 
     xo_emit("{T:/before%safter:}\n", "working");
+    xo_emit("{L:/V1\\/V2 packet%s}: {:count/%u}\n", "s", 10);
 
     int test = 4;
     xo_emit("{:test/%04d} {L:/tr%s}\n", test, (test == 1) ? "y" : "ies");
