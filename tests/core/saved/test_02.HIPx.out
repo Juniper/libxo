@@ -2,6 +2,11 @@
   <div class="title">beforeworkingafter:</div>
 </div>
 <div class="line">
+  <div class="label">V1/V2 packets</div>
+  <div class="text">: </div>
+  <div class="data" data-tag="count" data-xpath="/top/data/count">10</div>
+</div>
+<div class="line">
   <div class="data" data-tag="test" data-xpath="/top/data/test">0004</div>
   <div class="text"> </div>
   <div class="label">tries</div>
