@@ -1788,6 +1788,7 @@ xo_format_data (xo_handle_t *xop, xo_buffer_t *xbp,
 	if (*cp != '%') {
 	add_one:
 	    xo_buf_escape(xop, xbp, cp, 1, 0);
+	    delta += 1;
 	    continue;
 
 	} if (cp + 1 < ep && cp[1] == '%') {
@@ -2005,6 +2006,25 @@ xo_format_data (xo_handle_t *xop, xo_buffer_t *xbp,
     return delta;
 }
 
+static char *
+xo_fix_encoding (xo_handle_t *xop UNUSED, char *encoding)
+{
+    char *cp = encoding;
+
+    if (cp[0] != '%' || !isdigit((int) cp[1]))
+	return encoding;
+
+    for (cp += 2; *cp; cp++) {
+	if (!isdigit((int) *cp))
+	    break;
+    }
+
+    cp -= 1;
+    *cp = '%';
+
+    return cp;
+}
+
 static void
 xo_buf_append_div (xo_handle_t *xop, const char *class, unsigned flags,
 		   const char *name, int nlen,
@@ -2118,8 +2138,11 @@ xo_buf_append_div (xo_handle_t *xop, const char *class, unsigned flags,
 
 	/* The encoding format defaults to the normal format */
 	if (encoding == NULL) {
-	    encoding = value;
-	    elen = vlen;
+	    char *enc  = alloca(vlen + 1);
+	    memcpy(enc, value, vlen);
+	    enc[vlen] = '\0';
+	    encoding = xo_fix_encoding(xop, enc);
+	    elen = strlen(encoding);
 	}
 
 	xo_format_data(xop, pbp, encoding, elen, XFF_XML | XFF_ATTR);
@@ -2279,8 +2302,14 @@ xo_format_value (xo_handle_t *xop, const char *name, int nlen,
 	    break;
 
 	if (encoding) {
-	    format = encoding;
+   	    format = encoding;
 	    flen = elen;
+	} else {
+	    char *enc  = alloca(flen + 1);
+	    memcpy(enc, format, flen);
+	    enc[flen] = '\0';
+	    format = xo_fix_encoding(xop, enc);
+	    flen = strlen(format);
 	}
 
 	if (pretty)
@@ -2321,6 +2350,12 @@ xo_format_value (xo_handle_t *xop, const char *name, int nlen,
 	if (encoding) {
 	    format = encoding;
 	    flen = elen;
+	} else {
+	    char *enc  = alloca(flen + 1);
+	    memcpy(enc, format, flen);
+	    enc[flen] = '\0';
+	    format = xo_fix_encoding(xop, enc);
+	    flen = strlen(format);
 	}
 
 	xo_format_prep(xop);
@@ -2421,8 +2456,10 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 		    if (*sp == '}' && sp[1] == '}')
 			break;
 		}
-		if (*sp == '\0')
+		if (*sp == '\0') {
 		    xo_failure(xop, "missing closing '}}': %s", fmt);
+		    return -1;
+		}
 
 		xo_format_text(xop, cp, sp - cp);
 
@@ -2484,10 +2521,12 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 	    case 'P':
 	    case 'T':
 	    case 'V':
-		if (style != 0)
+		if (style != 0) {
 		    xo_failure(xop,
 				  "format string uses multiple styles: %s",
 				  fmt);
+		    return -1;
+		}
 		style = *sp;
 		break;
 
@@ -2522,6 +2561,13 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 	    default:
 		xo_failure(xop, "format string uses unknown modifier: %s",
 			      fmt);
+		/*
+		 * No good answer here; a bad format will likely
+		 * mean a core file.  We just return and hope
+		 * the caller notices there's no output, and while
+		 * that seems, well, bad.  There's nothing better.
+		 */
+		return -1;
 	    }
 	}
 
@@ -2544,7 +2590,10 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 		clen = sp - ep;
 		content = ep;
 	    }
-	} else xo_failure(xop, "missing content (':'): %s", fmt);
+	} else {
+	    xo_failure(xop, "missing content (':'): %s", fmt);
+	    return -1;
+	}
 
 	if (*sp == '/') {
 	    for (ep = ++sp; *sp; sp++) {
@@ -2571,8 +2620,10 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 
 	if (*sp == '}') {
 	    sp += 1;
-	} else
+	} else {
 	    xo_failure(xop, "missing closing '}': %s", fmt);
+	    return -1;
+	}
 
 	if (format == NULL) {
 	    format = "%s";
