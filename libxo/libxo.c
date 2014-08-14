@@ -23,6 +23,10 @@
 #include <wctype.h>
 
 #include "xo.h"
+#include "xoversion.h"
+
+const char xo_version[] = LIBXO_VERSION;
+const char xo_version_extra[] = LIBXO_VERSION_EXTRA;
 
 #ifndef UNUSED
 #define UNUSED __attribute__ ((__unused__))
