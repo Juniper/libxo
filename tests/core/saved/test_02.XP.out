@@ -1,6 +1,18 @@
 <top>
   <data>
     <empty-tag></empty-tag>
+    <error>
+      <message>this is an error</message>
+    </error>
+    <error>
+      <message>two more errors</message>
+    </error>
+    <error>
+      <message>this is an warning</message>
+    </error>
+    <error>
+      <message>two more warnings</message>
+    </error>
     <count>10</count>
     <test>4</test>
   <message>improper use of profanity; ten yard penalty; first down</message>
