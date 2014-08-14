@@ -311,57 +311,8 @@ xo_init_handle (xo_handle_t *xop)
 #if !defined(NO_LIBXO_OPTIONS)
     if (!(xop->xo_flags & XOF_NO_ENV)) {
 	char *env = getenv("LIBXO_OPTIONS");
-	if (env) {
-	    int sz;
-
-	    for ( ; *env; env++) {
-		switch (*env) {
-		case 'H':
-		    xop->xo_style = XO_STYLE_HTML;
-		    break;
-
-		case 'I':
-		    xop->xo_flags |= XOF_INFO;
-		    break;
-
-		case 'i':
-		    sz = strspn(env + 1, "0123456789");
-		    if (sz > 0) {
-			xop->xo_indent_by = atoi(env + 1);
-			env += sz - 1;	/* Skip value */
-		    }
-		    break;
-
-		case 'k':
-		    xop->xo_flags |= XOF_KEYS;
-		    break;
-
-		case 'J':
-		    xop->xo_style = XO_STYLE_JSON;
-		    break;
-
-		case 'P':
-		    xop->xo_flags |= XOF_PRETTY;
-		    break;
-
-		case 'T':
-		    xop->xo_style = XO_STYLE_TEXT;
-		    break;
-
-		case 'W':
-		    xop->xo_flags |= XOF_WARN;
-		    break;
-
-		case 'X':
-		    xop->xo_style = XO_STYLE_XML;
-		    break;
-
-		case 'x':
-		    xop->xo_flags |= XOF_XPATH;
-		    break;
-		}
-	    }
-	}
+	if (env)
+	    xo_set_options(xop, env);
     }
 #endif /* NO_GETENV */
 }
@@ -1043,6 +994,7 @@ xo_err (int eval, const char *fmt, ...)
     va_start(vap, fmt);
     xo_warn_hcv(NULL, code, fmt, vap);
     va_end(vap);
+    xo_finish();
     exit(eval);
 }
 
@@ -1054,6 +1006,7 @@ xo_errx (int eval, const char *fmt, ...)
     va_start(vap, fmt);
     xo_warn_hcv(NULL, -1, fmt, vap);
     va_end(vap);
+    xo_finish();
     exit(eval);
 }
 
@@ -1065,6 +1018,7 @@ xo_errc (int eval, int code, const char *fmt, ...)
     va_start(vap, fmt);
     xo_warn_hcv(NULL, code, fmt, vap);
     va_end(vap);
+    xo_finish();
     exit(eval);
 }
 
@@ -1308,28 +1262,182 @@ xo_set_style (xo_handle_t *xop, unsigned style)
     xop->xo_style = style;
 }
 
+static int
+xo_name_to_style (const char *name)
+{
+    if (strcmp(name, "xml") == 0)
+	return XO_STYLE_XML;
+    else if (strcmp(name, "json") == 0)
+	return XO_STYLE_JSON;
+    else if (strcmp(name, "text") == 0)
+	return XO_STYLE_TEXT;
+    else if (strcmp(name, "html") == 0)
+	return XO_STYLE_HTML;
+
+    return -1;
+}
+
+/*
+ * Convert string name to XOF_* flag value.
+ * Not all are useful.  Or safe.  Or sane.
+ */
+static unsigned
+xo_name_to_flag (const char *name)
+{
+    if (strcmp(name, "pretty") == 0)
+	return XOF_PRETTY;
+    if (strcmp(name, "warn") == 0)
+	return XOF_WARN;
+    if (strcmp(name, "xpath") == 0)
+	return XOF_XPATH;
+    if (strcmp(name, "info") == 0)
+	return XOF_INFO;
+    if (strcmp(name, "warn-xml") == 0)
+	return XOF_WARN_XML;
+    if (strcmp(name, "dtrt") == 0)
+	return XOF_DTRT;
+    if (strcmp(name, "keys") == 0)
+	return XOF_KEYS;
+    if (strcmp(name, "ignore-close") == 0)
+	return XOF_IGNORE_CLOSE;
+    if (strcmp(name, "not-first") == 0)
+	return XOF_NOT_FIRST;
+    if (strcmp(name, "no-locale") == 0)
+	return XOF_NO_LOCALE;
+    if (strcmp(name, "no-top") == 0)
+	return XOF_NO_TOP;
+
+    return 0;
+}
+
 int
 xo_set_style_name (xo_handle_t *xop, const char *name)
 {
-    int style = -1;
-
     if (name == NULL)
 	return -1;
 
-    if (strcmp(name, "xml") == 0)
-	style = XO_STYLE_XML;
-    else if (strcmp(name, "json") == 0)
-	style = XO_STYLE_JSON;
-    else if (strcmp(name, "text") == 0)
-	style = XO_STYLE_TEXT;
-    else if (strcmp(name, "html") == 0)
-	style = XO_STYLE_HTML;
-
+    int style = xo_name_to_style(name);
     if (style < 0)
 	return -1;
 
     xo_set_style(xop, style);
     return 0;
+}
+
+/*
+ * Set the options for a handle using a string of options
+ * passed in.  The input is a comma-separated set of names
+ * and optional values: "xml,pretty,indent=4"
+ */
+int
+xo_set_options (xo_handle_t *xop, const char *input)
+{
+    char *cp, *ep, *vp, *np, *bp;
+    int style = -1, new_style, len, rc = 0;
+    unsigned flags = 0, new_flag;
+
+    if (input == NULL)
+	return 0;
+
+    xop = xo_default(xop);
+
+    /*
+     * We support a simpler, old-school style of giving option
+     * also, using a single character for each option.  It's
+     * ideal for lazy people, such as myself.
+     */
+    if (*input == ':') {
+	int sz;
+
+	for (input++ ; *input; input++) {
+	    switch (*input) {
+	    case 'H':
+		xop->xo_style = XO_STYLE_HTML;
+		break;
+
+	    case 'I':
+		xop->xo_flags |= XOF_INFO;
+		break;
+
+	    case 'i':
+		sz = strspn(input + 1, "0123456789");
+		if (sz > 0) {
+		    xop->xo_indent_by = atoi(input + 1);
+		    input += sz - 1;	/* Skip value */
+		}
+		break;
+
+	    case 'k':
+		xop->xo_flags |= XOF_KEYS;
+		break;
+
+	    case 'J':
+		xop->xo_style = XO_STYLE_JSON;
+		break;
+
+	    case 'P':
+		xop->xo_flags |= XOF_PRETTY;
+		break;
+
+	    case 'T':
+		xop->xo_style = XO_STYLE_TEXT;
+		break;
+
+	    case 'W':
+		xop->xo_flags |= XOF_WARN;
+		break;
+
+	    case 'X':
+		xop->xo_style = XO_STYLE_XML;
+		break;
+
+	    case 'x':
+		xop->xo_flags |= XOF_XPATH;
+		break;
+	    }
+	}
+	return 0;
+    }
+
+    len = strlen(input) + 1;
+    bp = alloca(len);
+    memcpy(bp, input, len);
+
+    for (cp = bp, ep = cp + len - 1; cp && cp < ep; cp = np) {
+	np = strchr(cp, ',');
+	if (np)
+	    *np++ = '\0';
+
+	vp = strchr(cp, '=');
+	if (vp)
+	    *vp++ = '\0';
+
+	new_style = xo_name_to_style(cp);
+	if (new_style >= 0) {
+	    if (style >= 0)
+		xo_failure(xop, "ignoring multiple style value: %s", cp);
+	    else
+		style = new_style;
+	} else {
+	    new_flag = xo_name_to_flag(cp);
+	    if (new_flag != 0)
+		flags |= new_flag;
+	    else {
+		if (strcmp(cp, "indent") == 0) {
+		    xop->xo_indent_by = atoi(vp);
+		} else {
+		    xo_failure(xop, "unknown option: %s", cp);
+		    rc = -1;
+		}
+	    }
+	}
+    }
+
+    xop->xo_flags |= flags;
+    if (style > 0)
+	xop->xo_style= style;
+
+    return rc;
 }
 
 /**
@@ -2879,15 +2987,21 @@ xo_depth_change (xo_handle_t *xop, const char *name,
 	xo_stack_t *xsp = &xop->xo_stack[xop->xo_depth];
 	if (xop->xo_flags & XOF_WARN) {
 	    const char *top = xsp->xs_name;
-	    if (top && strcmp(name, top) != 0)
+	    if (top && strcmp(name, top) != 0) {
 		xo_failure(xop, "incorrect close: '%s' .vs. '%s'",
 			      name, top);
-	    if ((xsp->xs_flags & XSF_LIST) != (flags & XSF_LIST))
+		return;
+	    } 
+	    if ((xsp->xs_flags & XSF_LIST) != (flags & XSF_LIST)) {
 		xo_failure(xop, "list close on list confict: '%s'",
 			      name);
-	    if ((xsp->xs_flags & XSF_INSTANCE) != (flags & XSF_INSTANCE))
+		return;
+	    }
+	    if ((xsp->xs_flags & XSF_INSTANCE) != (flags & XSF_INSTANCE)) {
 		xo_failure(xop, "list close on instance confict: '%s'",
 			      name);
+		return;
+	    }
 	}
 
 	if (xsp->xs_name) {
@@ -3400,6 +3514,19 @@ void
 xo_error_hv (xo_handle_t *xop, const char *fmt, va_list vap)
 {
     xop = xo_default(xop);
+
+    /*
+     * If the format string doesn't end with a newline, we pop
+     * one on ourselves.
+     */
+    int len = strlen(fmt);
+    if (len > 0 && fmt[len - 1] != '\n') {
+	char *newfmt = alloca(len + 2);
+	memcpy(newfmt, fmt, len);
+	newfmt[len] = '\n';
+	newfmt[len] = '\0';
+	fmt = newfmt;
+    }
 
     switch (xop->xo_style) {
     case XO_STYLE_TEXT:
