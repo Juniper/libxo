@@ -266,4 +266,10 @@ xo_message (const char *fmt, ...);
 void
 xo_no_setlocale (void);
 
+/*
+ * externs for our version number strings
+ */
+extern const char xo_version[];
+extern const char xo_version_extra[];
+
 #endif /* INCLUDE_XO_H */
