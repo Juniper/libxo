@@ -95,6 +95,9 @@ xo_set_style (xo_handle_t *xop, unsigned style);
 int
 xo_set_style_name (xo_handle_t *xop, const char *style);
 
+int
+xo_set_options (xo_handle_t *xop, const char *input);
+
 void
 xo_set_flags (xo_handle_t *xop, unsigned flags);
 
