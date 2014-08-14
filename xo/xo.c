@@ -203,6 +203,8 @@ static void
 print_version (void)
 {
     fprintf(stderr, "libxo version %s%s\n",
+	    xo_version, xo_version_extra);
+    fprintf(stderr, "xo version %s%s\n",
 	    LIBXO_VERSION, LIBXO_VERSION_EXTRA);
 }
 
