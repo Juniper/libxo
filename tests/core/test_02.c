@@ -40,6 +40,10 @@ main (int argc, char **argv)
 
     xo_emit("{T:/before%safter:}\n", "working");
     xo_emit("{e:empty-tag/}");
+    xo_emit("{E:this is an error}\n");
+    xo_emit("{E:/%s more error%s}\n", "two", "s" );
+    xo_emit("{W:this is an warning}\n");
+    xo_emit("{W:/%s more warning%s}\n", "two", "s" );
     xo_emit("{L:/V1\\/V2 packet%s}: {:count/%u}\n", "s", 10);
 
     int test = 4;
