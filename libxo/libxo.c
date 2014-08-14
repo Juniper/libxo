@@ -2541,8 +2541,8 @@ xo_format_value (xo_handle_t *xop, const char *name, int nlen,
 }
 
 static void
-xo_format_decoration (xo_handle_t *xop, const char *str, int len,
-		 const char *fmt, int flen)
+xo_format_content (xo_handle_t *xop, const char *class_name, int display_only,
+		   const char *str, int len, const char *fmt, int flen)
 {
     switch (xop->xo_style) {
     case XO_STYLE_TEXT:
@@ -2558,30 +2558,27 @@ xo_format_decoration (xo_handle_t *xop, const char *str, int len,
 	    len = flen;
 	}
 
-	xo_buf_append_div(xop, "decoration", 0, NULL, 0, str, len, NULL, 0);
-	break;
-    }
-}
-
-static void
-xo_format_padding (xo_handle_t *xop, const char *str, int len,
-		 const char *fmt, int flen)
-{
-    switch (xop->xo_style) {
-    case XO_STYLE_TEXT:
-	if (len)
-	    xo_data_append(xop, str, len);
-	else
-	    xo_format_data(xop, NULL, fmt, flen, 0);
+	xo_buf_append_div(xop, class_name, 0, NULL, 0, str, len, NULL, 0);
 	break;
 
-    case XO_STYLE_HTML:
+    case XO_STYLE_XML:
+	if (display_only)
+	    break;
+
 	if (len == 0) {
 	    str = fmt;
 	    len = flen;
 	}
 
-	xo_buf_append_div(xop, "padding", 0, NULL, 0, str, len, NULL, 0);
+	xo_open_container_h(xop, "error");
+	xo_format_value(xop, "message", 7, str, len, NULL, 0, 0);
+	xo_close_container_h(xop, "error");
+	break;
+
+    case XO_STYLE_JSON:
+	if (display_only)
+	    break;
+	/* XXX need schem for representing errors in JSON */
 	break;
     }
 }
@@ -2642,10 +2639,12 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 	 *  '{' modifiers ':' content [ '/' print-fmt [ '/' encode-fmt ]] '}'
 	 * Modifiers are optional and include the following field types:
 	 *   'D': decoration; something non-text and non-data (colons, commmas)
+	 *   'E': error message
 	 *   'L': label; text surrounding data
 	 *   'P': padding; whitespace
 	 *   'T': Title, where 'content' is a column title
 	 *   'V': value, where 'content' is the name of the field (the default)
+	 *   'W': warning message
          * The following flags are also supported:
 	 *   'c': flag: emit a colon after the label
 	 *   'd': field is only emitted for display formats (text and html)
@@ -2678,10 +2677,12 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 
 	    switch (*sp) {
 	    case 'D':
+	    case 'E':
 	    case 'L':
 	    case 'P':
 	    case 'T':
 	    case 'V':
+	    case 'W':
 		if (style != 0) {
 		    xo_failure(xop, "format string uses multiple styles: %s",
 				  fmt);
@@ -2809,14 +2810,18 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 	    xo_format_value(xop, content, clen, format, flen,
 			    encoding, elen, flags);
 	else if (style == 'D')
-	    xo_format_decoration(xop, content, clen, format, flen);
+	    xo_format_content(xop, "decoration", 1, content, clen, format, flen);
+	else if (style == 'E')
+	    xo_format_content(xop, "error", 0, content, clen, format, flen);
+	else if (style == 'W')
+	    xo_format_content(xop, "warning", 0, content, clen, format, flen);
 	else if (style == 'P')
- 	    xo_format_padding(xop, content, clen, format, flen);
+ 	    xo_format_content(xop, "padding", 1, content, clen, format, flen);
 
 	if (flags & XFF_COLON)
-	    xo_format_decoration(xop, ":", 1, NULL, 0);
+	    xo_format_content(xop, "decoration", 1, ":", 1, NULL, 0);
 	if (flags & XFF_WS)
-	    xo_format_padding(xop, " ", 1, NULL, 0);
+	    xo_format_content(xop, "padding", 1, " ", 1, NULL, 0);
 
 	cp += sp - basep + 1;
 	if (newp) {
