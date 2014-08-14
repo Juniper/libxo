@@ -13,6 +13,7 @@
 #include <stdarg.h>
 #include <string.h>
 
+#include "xoconfig.h"
 #include "xo.h"
 #include "xoversion.h"
 
