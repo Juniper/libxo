@@ -63,7 +63,7 @@ valgrind:
 #TEST_TRACE = set -x ; 
 
 TEST_ONE = \
-  LIBXO_OPTIONS=W$$fmt \
+  LIBXO_OPTIONS=:W$$fmt \
       ${CHECKER} $$base.test ${TEST_OPTS} \
       > out/$$base.$$fmt.out 2> out/$$base.$$fmt.err ; \
  ${DIFF} -Nu ${srcdir}/saved/$$base.$$fmt.out out/$$base.$$fmt.out ${S2O} ; \
