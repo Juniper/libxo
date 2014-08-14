@@ -2512,7 +2512,11 @@ xo_format_value (xo_handle_t *xop, const char *name, int nlen,
 	    quote = 1;
 	else if (flags & XFF_NOQUOTE)
 	    quote = 0;
-	else if (format[flen - 1] == 's')
+	else if (flen == 0) {
+	    quote = 0;
+	    format = "true";	/* JSON encodes empty tags as a boolean true */
+	    flen = 4;
+	} else if (format[flen - 1] == 's')
 	    quote = 1;
 	else
 	    quote = 0;
@@ -2561,7 +2565,7 @@ xo_format_decoration (xo_handle_t *xop, const char *str, int len,
 
 static void
 xo_format_padding (xo_handle_t *xop, const char *str, int len,
-		 const char *fmt UNUSED, int flen UNUSED)
+		 const char *fmt, int flen)
 {
     switch (xop->xo_style) {
     case XO_STYLE_TEXT:
@@ -2772,22 +2776,17 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 		    continue;
 		}
 	    }
-	    if (ep != sp) {
-		flen = sp - ep;
-		format = ep;
-	    }
+	    flen = sp - ep;
+	    format = ep;
 	}
-
 
 	if (*sp == '/') {
 	    for (ep = ++sp; *sp; sp++) {
 		if (*sp == '}')
 		    break;
 	    }
-	    if (ep != sp) {
-		elen = sp - ep;
-		encoding = ep;
-	    }
+	    elen = sp - ep;
+	    encoding = ep;
 	}
 
 	if (*sp == '}') {
