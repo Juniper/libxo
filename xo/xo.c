@@ -39,10 +39,8 @@ check_arg (const char *name, char ***argvp)
     *argvp += 1;
     arg = **argvp;
 
-    if (arg == NULL) {
-	xo_error("missing %s argument for '%s' option", name, opt);
-	exit(1);
-    }
+    if (arg == NULL)
+	xo_errx(1, "missing %s argument for '%s' option", name, opt);
 
     return arg;
 }
@@ -55,10 +53,8 @@ next_arg (void)
 {
     char *cp = *save_argv;
 
-    if (cp == NULL) {
-	xo_error("missing argument\n");
-	exit(1);
-    }
+    if (cp == NULL)
+	xo_errx(1, "missing argument");
 
     save_argv += 1;
     return cp;
@@ -240,8 +236,10 @@ main (int argc UNUSED, char **argv)
 {
     char *fmt = NULL, *cp, *np;
     char *opt_opener = NULL, *opt_closer = NULL, *opt_wrapper = NULL;
+    char *opt_options = NULL;
     int opt_depth = 0;
     int opt_not_first = 0;
+    int rc;
 
     for (argv++; *argv; argv++) {
 	cp = *argv;
@@ -253,7 +251,7 @@ main (int argc UNUSED, char **argv)
 	    break;
 
 	if (streq(cp, "--close") || streq(cp, "-c")) {
-	    opt_closer = check_arg("open", &argv);
+	    opt_closer = check_arg("close path", &argv);
 	    xo_set_flags(NULL, XOF_IGNORE_CLOSE);
 
 	} else if (streq(cp, "--depth")) {
@@ -275,8 +273,11 @@ main (int argc UNUSED, char **argv)
 	} else if (streq(cp, "--not-first") || streq(cp, "-N")) {
 	    opt_not_first = 1;
 
+	} else if (streq(cp, "--options") || streq(cp, "-O")) {
+	    opt_options = check_arg("libxo options", &argv);
+
 	} else if (streq(cp, "--open") || streq(cp, "-o")) {
-	    opt_opener = check_arg("close", &argv);
+	    opt_opener = check_arg("open path", &argv);
 
         } else if (streq(cp, "--pretty") || streq(cp, "-p")) {
 	    xo_set_flags(NULL, XOF_PRETTY);
@@ -284,10 +285,8 @@ main (int argc UNUSED, char **argv)
 	} else if (streq(cp, "--style") || streq(cp, "-s")) {
 	    np = check_arg("style", &argv);
 
-	    if (xo_set_style_name(NULL, np) < 0) {
-		xo_error("unknown style: %s", np);
-		exit(1);
-	    }
+	    if (xo_set_style_name(NULL, np) < 0)
+		xo_errx(1, "unknown style: %s", np);
 
 	} else if (streq(cp, "--text") || streq(cp, "-T")) {
 	    xo_set_style(NULL, XO_STYLE_TEXT);
@@ -312,12 +311,26 @@ main (int argc UNUSED, char **argv)
 
 	} else if (streq(cp, "--wrap") || streq(cp, "-w")) {
 	    opt_wrapper = check_arg("wrapper", &argv);
+	} else {
+	    xo_errx(1, "unknown option: %s", cp);
 	}
+    }
+
+    if (opt_options) {
+	rc = xo_set_options(NULL, opt_options);
+	if (rc < 0)
+	    xo_errx(1, "invalid options: %s", opt_options);
     }
 
     xo_set_formatter(NULL, formatter, checkpoint);
     xo_set_flags(NULL, XOF_NO_VA_ARG);
     xo_set_flags(NULL, XOF_NO_TOP);
+
+    fmt = *argv++;
+    if (opt_opener == NULL && opt_closer == NULL && fmt == NULL) {
+	print_help();
+	return 1;
+    }
 
     if (opt_not_first)
 	xo_set_flags(NULL, XOF_NOT_FIRST);
@@ -358,7 +371,6 @@ main (int argc UNUSED, char **argv)
 	}
     }
 
-    fmt = *argv++;
     if (fmt && *fmt) {
 	save_argv = argv;
 	prep_arg(fmt);
