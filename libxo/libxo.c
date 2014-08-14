@@ -22,6 +22,7 @@
 #include <ctype.h>
 #include <wctype.h>
 
+#include "xoconfig.h"
 #include "xo.h"
 #include "xoversion.h"
 
