@@ -39,7 +39,14 @@ main (int argc, char **argv)
     xo_open_container("data");
 
     xo_emit("{T:/before%safter:}\n", "working");
+
+    xo_open_list("flag");
+    xo_emit("{lq:flag/one} {lq:flag/two} {lq:flag/three}\n");
+    xo_close_list("flag");
+
     xo_emit("{e:empty-tag/}");
+    xo_emit("1:{qt:t1/%*d} 2:{qt:t2/test%-*u} 3:{qt:t3/%10sx} 4:{qt:t4/x%-*.*s}\n",
+	    6, 1000, 8, 5000, "ten-long", 10, 10, "test");
     xo_emit("{E:this is an error}\n");
     xo_emit("{E:/%s more error%s}\n", "two", "s" );
     xo_emit("{W:this is an warning}\n");
