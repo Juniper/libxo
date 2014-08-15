@@ -18,12 +18,14 @@
 #define INCLUDE_XO_H
 
 /** Formatting types */
+typedef unsigned xo_style_t;
 #define XO_STYLE_TEXT	0	/** Generate text output */
 #define XO_STYLE_XML	1	/** Generate XML output */
 #define XO_STYLE_JSON	2	/** Generate JSON output */
 #define XO_STYLE_HTML	3	/** Generate HTML output */
 
 /** Flags for libxo */
+typedef unsigned long xo_xof_flags_t;
 #define XOF_CLOSE_FP	(1<<0)	/** Close file pointer on xo_close() */
 #define XOF_PRETTY	(1<<1)	/** Make 'pretty printed' output */
 #define XOF_DIV_OPEN	(1<<2)	/** Internal use only: a <div> is open */
@@ -74,10 +76,10 @@ typedef int (*xo_formatter_t)(xo_handle_t *, char *, int,
 typedef void (*xo_checkpointer_t)(xo_handle_t *, va_list, int);
 
 xo_handle_t *
-xo_create (unsigned type, unsigned flags);
+xo_create (xo_style_t style, xo_xof_flags_t flags);
 
 xo_handle_t *
-xo_create_to_file (FILE *fp, unsigned type, unsigned flags);
+xo_create_to_file (FILE *fp, xo_style_t style, xo_xof_flags_t flags);
 
 void
 xo_destroy (xo_handle_t *xop);
@@ -90,7 +92,7 @@ void
 xo_set_allocator (xo_realloc_func_t realloc_func, xo_free_func_t free_func);
 
 void
-xo_set_style (xo_handle_t *xop, unsigned style);
+xo_set_style (xo_handle_t *xop, xo_style_t style);
 
 int
 xo_set_style_name (xo_handle_t *xop, const char *style);
@@ -99,10 +101,10 @@ int
 xo_set_options (xo_handle_t *xop, const char *input);
 
 void
-xo_set_flags (xo_handle_t *xop, unsigned flags);
+xo_set_flags (xo_handle_t *xop, xo_xof_flags_t flags);
 
 void
-xo_clear_flags (xo_handle_t *xop, unsigned flags);
+xo_clear_flags (xo_handle_t *xop, xo_xof_flags_t flags);
 
 void
 xo_set_info (xo_handle_t *xop, xo_info_t *infop, int count);
