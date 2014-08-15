@@ -1,6 +1,13 @@
 <top>
   <data>
+    <flag>one</flag>
+    <flag>two</flag>
+    <flag>three</flag>
     <empty-tag></empty-tag>
+    <t1>1000</t1>
+    <t2>test5000</t2>
+    <t3>ten-longx</t3>
+    <t4>xtest</t4>
     <error>
       <message>this is an error</message>
     </error>
