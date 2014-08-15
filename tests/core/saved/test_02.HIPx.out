@@ -2,6 +2,23 @@
   <div class="title">beforeworkingafter:</div>
 </div>
 <div class="line">
+  <div class="data" data-tag="flag" data-xpath="/top/data/flag">one</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="flag" data-xpath="/top/data/flag">two</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="flag" data-xpath="/top/data/flag">three</div>
+</div>
+<div class="line">
+  <div class="text">1:</div>
+  <div class="data" data-tag="t1" data-xpath="/top/data/t1">  1000</div>
+  <div class="text"> 2:</div>
+  <div class="data" data-tag="t2" data-xpath="/top/data/t2">test5000    </div>
+  <div class="text"> 3:</div>
+  <div class="data" data-tag="t3" data-xpath="/top/data/t3">  ten-longx</div>
+  <div class="text"> 4:</div>
+  <div class="data" data-tag="t4" data-xpath="/top/data/t4">xtest      </div>
+</div>
+<div class="line">
   <div class="error">this is an error</div>
 </div>
 <div class="line">
