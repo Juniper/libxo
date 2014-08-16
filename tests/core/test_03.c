@@ -36,6 +36,10 @@ main (int argc, char **argv)
 	{ NULL, NULL }
     }, *ep = employees;
 
+    argc = xo_parse_args(argc, argv);
+    if (argc < 0)
+	return 1;
+
     xo_set_info(NULL, info, info_count);
 
     xo_open_container("employees");
