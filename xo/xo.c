@@ -17,6 +17,8 @@
 #include "xo.h"
 #include "xoversion.h"
 
+#include <getopt.h>		/* Include after xo.h for testing */
+
 #ifndef UNUSED
 #define UNUSED __attribute__ ((__unused__))
 #endif /* UNUSED */
@@ -30,21 +32,6 @@ streq (const char *red, const char *blue)
 #endif /* HAVE_STREQ */
 
 static int opt_warn;		/* Enable warnings */
-
-static char *
-check_arg (const char *name, char ***argvp)
-{
-    char *opt = NULL, *arg;
-
-    opt = **argvp;
-    *argvp += 1;
-    arg = **argvp;
-
-    if (arg == NULL)
-	xo_errx(1, "missing %s argument for '%s' option", name, opt);
-
-    return arg;
-}
 
 static char **save_argv;
 static char **checkpoint_argv;
@@ -234,6 +221,38 @@ print_help (void)
 "    --xpath               Add XPath data to HTML output\n");
 }
 
+struct opts {
+    int o_depth;
+    int o_help;
+    int o_not_first;
+    int o_xpath;
+    int o_version;
+    int o_warn_xml;
+    int o_wrap;
+} opts;
+
+static struct option long_opts[] = {
+    { "close", required_argument, NULL, 'c' },
+    { "depth", required_argument, &opts.o_depth, 1 },
+    { "help", no_argument, &opts.o_help, 1 },
+    { "html", no_argument, NULL, 'H' },
+    { "json", no_argument, NULL, 'J' },
+    { "leading-xpath", required_argument, NULL, 'l' },
+    { "not-first", no_argument, &opts.o_not_first, 1 },
+    { "open", required_argument, NULL, 'o' },
+    { "option", required_argument, NULL, 'O' },
+    { "pretty", no_argument, NULL, 'p' },
+    { "style", required_argument, NULL, 's' },
+    { "text", no_argument, NULL, 'T' },
+    { "xml", no_argument, NULL, 'X' },
+    { "xpath", no_argument, &opts.o_xpath, 1 },
+    { "version", no_argument, &opts.o_version, 1 },
+    { "warn", no_argument, NULL, 'W' },
+    { "warn-xml", no_argument, &opts.o_warn_xml, 1 },
+    { "wrap", required_argument, &opts.o_wrap, 1 },
+    { NULL, 0, NULL, 0 }
+};
+
 int
 main (int argc UNUSED, char **argv)
 {
@@ -244,80 +263,101 @@ main (int argc UNUSED, char **argv)
     int opt_not_first = 0;
     int rc;
 
-    for (argv++; *argv; argv++) {
-	cp = *argv;
-
-	if (*cp != '-')
-	    break;
-
-	if (streq(cp, "--"))
-	    break;
-
-	if (streq(cp, "--close") || streq(cp, "-c")) {
-	    opt_closer = check_arg("close path", &argv);
+    while ((rc = getopt_long(argc, argv, "c:HJl:ps:TXW",
+				long_opts, NULL)) != -1) {
+	switch (rc) {
+	case 'c':
+	    opt_closer = optarg;
 	    xo_set_flags(NULL, XOF_IGNORE_CLOSE);
+	    break;
 
-	} else if (streq(cp, "--depth")) {
-	    opt_depth = atoi(check_arg("open", &argv));
-
-	} else if (streq(cp, "--help")) {
-	    print_help();
-	    return 1;
-
-	} else if (streq(cp, "--html") || streq(cp, "-H")) {
+	case 'H':
 	    xo_set_style(NULL, XO_STYLE_HTML);
+	    break;
 
-	} else if (streq(cp, "--json") || streq(cp, "-J")) {
+	case 'J':
 	    xo_set_style(NULL, XO_STYLE_JSON);
+	    break;
 
-	} else if (streq(cp, "--leading-xpath") || streq(cp, "-l")) {
-	    xo_set_leading_xpath(NULL, check_arg("leading xpath", &argv));
+	case 'l':
+	    xo_set_leading_xpath(NULL, optarg);
+	    break;
 
-	} else if (streq(cp, "--not-first") || streq(cp, "-N")) {
-	    opt_not_first = 1;
+	case 'O':
+	    opt_options = optarg;
+	    break;
 
-	} else if (streq(cp, "--options") || streq(cp, "-O")) {
-	    opt_options = check_arg("libxo options", &argv);
+	case 'o':
+	    opt_opener = optarg;
+	    break;
 
-	} else if (streq(cp, "--open") || streq(cp, "-o")) {
-	    opt_opener = check_arg("open path", &argv);
-
-        } else if (streq(cp, "--pretty") || streq(cp, "-p")) {
+	case 'p':
 	    xo_set_flags(NULL, XOF_PRETTY);
+	    break;
 
-	} else if (streq(cp, "--style") || streq(cp, "-s")) {
-	    np = check_arg("style", &argv);
+	case 's':
+	    if (xo_set_style_name(NULL, optarg) < 0)
+		xo_errx(1, "unknown style: %s", optarg);
+	    break;
 
-	    if (xo_set_style_name(NULL, np) < 0)
-		xo_errx(1, "unknown style: %s", np);
-
-	} else if (streq(cp, "--text") || streq(cp, "-T")) {
+	case 'T':
 	    xo_set_style(NULL, XO_STYLE_TEXT);
+	    break;
 
-	} else if (streq(cp, "--xml") || streq(cp, "-X")) {
+	case 'X':
 	    xo_set_style(NULL, XO_STYLE_XML);
+	    break;
 
-	} else if (streq(cp, "--xpath")) {
-	    xo_set_flags(NULL, XOF_XPATH);
-
-	} else if (streq(cp, "--version")) {
-	    print_version();
-	    return 0;
-
-	} else if (streq(cp, "--warn") || streq(cp, "-W")) {
+	case 'W':
 	    opt_warn = 1;
 	    xo_set_flags(NULL, XOF_WARN);
+	    break;
 
-	} else if (streq(cp, "--warn-xml")) {
-	    opt_warn = 1;
-	    xo_set_flags(NULL, XOF_WARN_XML);
+	case ':':
+	    xo_errx(1, "missing argument");
+	    break;
 
-	} else if (streq(cp, "--wrap") || streq(cp, "-w")) {
-	    opt_wrapper = check_arg("wrapper", &argv);
-	} else {
-	    xo_errx(1, "unknown option: %s", cp);
+	case 0:
+	    if (opts.o_depth) {
+		opt_depth = atoi(optarg);
+		
+	    } else if (opts.o_help) {
+		print_help();
+		return 1;
+
+	    } else if (opts.o_not_first) {
+		opt_not_first = 1;
+
+	    } else if (opts.o_xpath) {
+		xo_set_flags(NULL, XOF_XPATH);
+
+	    } else if (opts.o_version) {
+		print_version();
+		return 0;
+
+	    } else if (opts.o_warn_xml) {
+		opt_warn = 1;
+		xo_set_flags(NULL, XOF_WARN | XOF_WARN_XML);
+
+	    } else if (opts.o_wrap) {
+		opt_wrapper = optarg;
+
+	    } else {
+		print_help();
+		return 1;
+	    }
+
+	    bzero(&opts, sizeof(opts)); /* Reset all the options */
+	    break;
+
+	default:
+	    print_help();
+	    return 1;
 	}
     }
+
+    argc -= optind;
+    argv += optind;
 
     if (opt_options) {
 	rc = xo_set_options(NULL, opt_options);
