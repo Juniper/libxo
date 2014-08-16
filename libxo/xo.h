@@ -268,6 +268,29 @@ xo_message (const char *fmt, ...);
 void
 xo_no_setlocale (void);
 
+int
+xo_getopt(int argc, char * const *argv, const char *optstring);
+
+struct option;			/* Forward declaration for <getopt.h> */
+
+int
+xo_getopt_long(int argc, char * const *argv, const char *optstring,
+	    const struct option *longopts, int *longindex);
+
+int
+xo_getopt_long_only(int argc, char * const *argv, const char *optstring,
+		    const struct option *longopts, int *longindex);
+
+/*
+ * This is the "magic" number returned by libxo-supporting commands
+ * when passed the equally magic "--libxo-check" option.  If you
+ * return this, we can assume that since you know the magic handshake,
+ * you'll happily handle future --libxo options and not do something
+ * violent like reboot the box or create another hole in the ozone
+ * layer.
+ */
+#define XO_HAS_LIBXO	121
+
 /*
  * externs for our version number strings
  */
