@@ -263,6 +263,10 @@ main (int argc UNUSED, char **argv)
     int opt_not_first = 0;
     int rc;
 
+    argc = xo_parse_args(argc, argv);
+    if (argc < 0)
+	return 1;
+
     while ((rc = getopt_long(argc, argv, "c:HJl:ps:TXW",
 				long_opts, NULL)) != -1) {
 	switch (rc) {
