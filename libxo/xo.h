@@ -251,9 +251,6 @@ void
 xo_errc (int eval, int code, const char *fmt, ...);
 
 void
-xo_warn_hcv (xo_handle_t *xop, int code, const char *fmt, va_list vap);
-
-void
 xo_message_hcv (xo_handle_t *xop, int code, const char *fmt, va_list vap);
 
 void
@@ -269,17 +266,7 @@ void
 xo_no_setlocale (void);
 
 int
-xo_getopt(int argc, char * const *argv, const char *optstring);
-
-struct option;			/* Forward declaration for <getopt.h> */
-
-int
-xo_getopt_long(int argc, char * const *argv, const char *optstring,
-	    const struct option *longopts, int *longindex);
-
-int
-xo_getopt_long_only(int argc, char * const *argv, const char *optstring,
-		    const struct option *longopts, int *longindex);
+xo_parse_args (int argc, char **argv);
 
 /*
  * This is the "magic" number returned by libxo-supporting commands
