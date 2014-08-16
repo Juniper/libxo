@@ -17,6 +17,10 @@
 int
 main (int argc, char **argv)
 {
+    argc = xo_parse_args(argc, argv);
+    if (argc < 0)
+	return 1;
+
     for (argc = 1; argv[argc]; argc++) {
 	if (strcmp(argv[argc], "xml") == 0)
 	    xo_set_style(NULL, XO_STYLE_XML);
