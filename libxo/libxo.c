@@ -21,6 +21,7 @@
 #include <limits.h>
 #include <ctype.h>
 #include <wctype.h>
+#include <getopt.h>
 
 #include "xoconfig.h"
 #include "xo.h"
@@ -3668,6 +3669,77 @@ xo_error (const char *fmt, ...)
     va_start(vap, fmt);
     xo_error_hv(NULL, fmt, vap);
     va_end(vap);
+}
+
+static int
+xo_handle_getopt (int argc, char * const *argv)
+{
+    static char libxo_opt[] = "--libxo";
+    int handled = 0;
+    const char *cp;
+
+    while (optind < argc && argv[optind]
+	    && strncmp(argv[optind], libxo_opt, sizeof(libxo_opt) - 1) == 0) {
+	cp = argv[optind] + sizeof(libxo_opt) - 1;
+	if (*cp == 0) {
+	    cp = argv[++optind];
+	    if (cp == 0)
+		return ':';
+		
+	    handled += 1;
+	    xo_set_options(NULL, cp);
+	} else if (*cp == ':') {
+	    xo_set_options(NULL, cp);
+
+	} else if (*cp == '=') {
+	    xo_set_options(NULL, ++cp);
+
+	} else if (*cp == '-') {
+	    cp += 1;
+	    if (strcmp(cp, "check") == 0) {
+		exit(XO_HAS_LIBXO);
+	    } else {
+		break;		/* Failure; let getopt() report it */
+	    }
+	} else {
+	    break;		/* Failure; let getopt() report it */
+	}
+	optind += 1;
+    }
+
+    return 0;
+}
+
+int
+xo_getopt(int argc, char * const *argv, const char *optstring)
+{
+    int rc = xo_handle_getopt(argc, argv);
+    if (rc)
+	return rc;
+
+    return getopt(argc, argv, optstring);
+}
+
+int
+xo_getopt_long(int argc, char * const *argv, const char *optstring,
+	    const struct option *longopts, int *longindex)
+{
+    int rc = xo_handle_getopt(argc, argv);
+    if (rc)
+	return rc;
+
+    return getopt_long(argc, argv, optstring, longopts, longindex);
+}
+
+int
+xo_getopt_long_only(int argc, char * const *argv, const char *optstring,
+		    const struct option *longopts, int *longindex)
+{
+    int rc = xo_handle_getopt(argc, argv);
+    if (rc)
+	return rc;
+
+    return getopt_long_only(argc, argv, optstring, longopts, longindex);
 }
 
 #ifdef UNIT_TEST
