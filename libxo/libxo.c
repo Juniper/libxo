@@ -190,6 +190,7 @@ typedef struct xo_format_s {
 static xo_handle_t xo_default_handle;
 static int xo_default_inited;
 static int xo_locale_inited;
+static char *xo_program;
 
 /*
  * To allow libxo to be used in diverse environment, we allow the
@@ -884,25 +885,32 @@ xo_data_escape (xo_handle_t *xop, const char *str, int len)
  * standard error.  If the XOF_WARN_XML flag is set, then we generate
  * XMLified content on standard output.
  */
-void
-xo_warn_hcv (xo_handle_t *xop, int code, const char *fmt, va_list vap)
+static void
+xo_warn_hcv (xo_handle_t *xop, int code, int check_warn,
+	     const char *fmt, va_list vap)
 {
     xop = xo_default(xop);
-    if (!(xop->xo_flags & XOF_WARN))
+    if (check_warn && !(xop->xo_flags & XOF_WARN))
 	return;
 
     if (fmt == NULL)
 	return;
 
     int len = strlen(fmt);
-    char *newfmt = alloca(len + 2);
+    int plen = xo_program ? strlen(xo_program) : 0;
+    char *newfmt = alloca(len + 2 + plen + 2); /* newline, NUL, and ": " */
 
-    memcpy(newfmt, fmt, len);
+    if (plen) {
+	memcpy(newfmt, xo_program, plen);
+	newfmt[plen++] = ':';
+	newfmt[plen++] = ' ';
+    }
+    memcpy(newfmt + plen, fmt, len);
 
     /* Add a newline to the fmt string */
     if (!(xop->xo_flags & XOF_WARN_XML))
-	newfmt[len++] = '\n';
-    newfmt[len] = '\0';
+	newfmt[len++ + plen] = '\n';
+    newfmt[len + plen] = '\0';
 
     if (xop->xo_flags & XOF_WARN_XML) {
 	static char err_open[] = "<error>";
@@ -961,7 +969,7 @@ xo_warn_hc (xo_handle_t *xop, int code, const char *fmt, ...)
     va_list vap;
 
     va_start(vap, fmt);
-    xo_warn_hcv(xop, code, fmt, vap);
+    xo_warn_hcv(xop, code, 0, fmt, vap);
     va_end(vap);
 }
 
@@ -971,7 +979,7 @@ xo_warn_c (int code, const char *fmt, ...)
     va_list vap;
 
     va_start(vap, fmt);
-    xo_warn_hcv(NULL, code, fmt, vap);
+    xo_warn_hcv(NULL, 0, code, fmt, vap);
     va_end(vap);
 }
 
@@ -982,7 +990,7 @@ xo_warn (const char *fmt, ...)
     va_list vap;
 
     va_start(vap, fmt);
-    xo_warn_hcv(NULL, code, fmt, vap);
+    xo_warn_hcv(NULL, code, 0, fmt, vap);
     va_end(vap);
 }
 
@@ -992,7 +1000,7 @@ xo_warnx (const char *fmt, ...)
     va_list vap;
 
     va_start(vap, fmt);
-    xo_warn_hcv(NULL, -1, fmt, vap);
+    xo_warn_hcv(NULL, -1, 0, fmt, vap);
     va_end(vap);
 }
 
@@ -1003,7 +1011,7 @@ xo_err (int eval, const char *fmt, ...)
     va_list vap;
 
     va_start(vap, fmt);
-    xo_warn_hcv(NULL, code, fmt, vap);
+    xo_warn_hcv(NULL, code, 0, fmt, vap);
     va_end(vap);
     xo_finish();
     exit(eval);
@@ -1015,7 +1023,7 @@ xo_errx (int eval, const char *fmt, ...)
     va_list vap;
 
     va_start(vap, fmt);
-    xo_warn_hcv(NULL, -1, fmt, vap);
+    xo_warn_hcv(NULL, -1, 0, fmt, vap);
     va_end(vap);
     xo_finish();
     exit(eval);
@@ -1027,7 +1035,7 @@ xo_errc (int eval, int code, const char *fmt, ...)
     va_list vap;
 
     va_start(vap, fmt);
-    xo_warn_hcv(NULL, code, fmt, vap);
+    xo_warn_hcv(NULL, code, 0, fmt, vap);
     va_end(vap);
     xo_finish();
     exit(eval);
@@ -1184,7 +1192,7 @@ xo_failure (xo_handle_t *xop, const char *fmt, ...)
     va_list vap;
 
     va_start(vap, fmt);
-    xo_warn_hcv(xop, -1, fmt, vap);
+    xo_warn_hcv(xop, -1, 1, fmt, vap);
     va_end(vap);
 }
 
@@ -1345,7 +1353,7 @@ xo_set_options (xo_handle_t *xop, const char *input)
 {
     char *cp, *ep, *vp, *np, *bp;
     int style = -1, new_style, len, rc = 0;
-    xo_xof_flags_t flags = 0, new_flag;
+    xo_xof_flags_t new_flag;
 
     if (input == NULL)
 	return 0;
@@ -1426,25 +1434,24 @@ xo_set_options (xo_handle_t *xop, const char *input)
 	new_style = xo_name_to_style(cp);
 	if (new_style >= 0) {
 	    if (style >= 0)
-		xo_failure(xop, "ignoring multiple style value: %s", cp);
+		xo_warnx("ignoring multiple styles: '%s'", cp);
 	    else
 		style = new_style;
 	} else {
 	    new_flag = xo_name_to_flag(cp);
 	    if (new_flag != 0)
-		flags |= new_flag;
+		xop->xo_flags |= new_flag;
 	    else {
 		if (strcmp(cp, "indent") == 0) {
 		    xop->xo_indent_by = atoi(vp);
 		} else {
-		    xo_failure(xop, "unknown option: %s", cp);
+		    xo_warnx("unknown option: '%s'", cp);
 		    rc = -1;
 		}
 	    }
 	}
     }
 
-    xop->xo_flags |= flags;
     if (style > 0)
 	xop->xo_style= style;
 
@@ -3671,75 +3678,64 @@ xo_error (const char *fmt, ...)
     va_end(vap);
 }
 
-static int
-xo_handle_getopt (int argc, char * const *argv)
+int
+xo_parse_args (int argc, char **argv)
 {
     static char libxo_opt[] = "--libxo";
-    int handled = 0;
-    const char *cp;
+    char *cp;
+    int i, save;
 
-    while (optind < argc && argv[optind]
-	    && strncmp(argv[optind], libxo_opt, sizeof(libxo_opt) - 1) == 0) {
-	cp = argv[optind] + sizeof(libxo_opt) - 1;
+    /* Save our program name for xo_err and friends */
+    xo_program = argv[0];
+    cp = strrchr(xo_program, '/');
+    if (cp)
+	xo_program = cp + 1;
+
+    for (save = i = 1; i < argc; i++) {
+	if (argv[i] == NULL
+	    || strncmp(argv[i], libxo_opt, sizeof(libxo_opt) - 1) != 0) {
+	    if (save != i)
+		argv[save] = argv[i];
+	    save += 1;
+	    continue;
+	}
+
+	cp = argv[i] + sizeof(libxo_opt) - 1;
 	if (*cp == 0) {
-	    cp = argv[++optind];
-	    if (cp == 0)
-		return ':';
+	    cp = argv[++i];
+	    if (cp == 0) {
+		xo_warnx("missing libxo option: '%s'", cp);
+		return -1;
+	    }
 		
-	    handled += 1;
-	    xo_set_options(NULL, cp);
+	    if (xo_set_options(NULL, cp) < 0)
+		return -1;
 	} else if (*cp == ':') {
-	    xo_set_options(NULL, cp);
+	    if (xo_set_options(NULL, cp) < 0)
+		return -1;
 
 	} else if (*cp == '=') {
-	    xo_set_options(NULL, ++cp);
+	    if (xo_set_options(NULL, ++cp) < 0)
+		return -1;
 
 	} else if (*cp == '-') {
 	    cp += 1;
 	    if (strcmp(cp, "check") == 0) {
 		exit(XO_HAS_LIBXO);
+
 	    } else {
-		break;		/* Failure; let getopt() report it */
+		xo_warnx("unknown libxo option: '%s'", argv[i]);
+		return -1;
 	    }
 	} else {
-	    break;		/* Failure; let getopt() report it */
+		xo_warnx("unknown libxo option: '%s'", argv[i]);
+	    return -1;
 	}
 	optind += 1;
     }
 
-    return 0;
-}
-
-int
-xo_getopt(int argc, char * const *argv, const char *optstring)
-{
-    int rc = xo_handle_getopt(argc, argv);
-    if (rc)
-	return rc;
-
-    return getopt(argc, argv, optstring);
-}
-
-int
-xo_getopt_long(int argc, char * const *argv, const char *optstring,
-	    const struct option *longopts, int *longindex)
-{
-    int rc = xo_handle_getopt(argc, argv);
-    if (rc)
-	return rc;
-
-    return getopt_long(argc, argv, optstring, longopts, longindex);
-}
-
-int
-xo_getopt_long_only(int argc, char * const *argv, const char *optstring,
-		    const struct option *longopts, int *longindex)
-{
-    int rc = xo_handle_getopt(argc, argv);
-    if (rc)
-	return rc;
-
-    return getopt_long_only(argc, argv, optstring, longopts, longindex);
+    argv[save] = NULL;
+    return save;
 }
 
 #ifdef UNIT_TEST
