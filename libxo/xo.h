@@ -47,6 +47,7 @@ typedef unsigned long xo_xof_flags_t;
 #define XOF_TOP_EMITTED	(1<<15)	 /* The top JSON braces have been emitted  */
 
 #define XOF_NO_TOP	(1<<16)	/** Don't emit the top braces in JSON */
+#define XOF_ANCHOR	(1<<17)	/** An anchor is in place  */
 
 /*
  * The xo_info_t structure provides a mapping between names and
