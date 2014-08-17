@@ -95,6 +95,9 @@ struct xo_handle_s {
     va_list xo_vap;		/* Variable arguments (stdargs) */
     char *xo_leading_xpath;	/* A leading XPath expression */
     mbstate_t xo_mbstate;	/* Multi-byte character conversion state */
+    unsigned xo_anchor_offset;	/* Start of anchored text */
+    unsigned xo_anchor_columns;	/* Number of columns since the start anchor */
+    int xo_anchor_width;	/* Desired width of anchored text */
 };
 
 /* Flags for formatting functions */
@@ -116,6 +119,7 @@ typedef unsigned long xo_xff_flags_t;
 
 #define XFF_TRIM_WS	(1<<12)	/* Trim whitespace off encoded values */
 #define XFF_LEAF_LIST	(1<<13)	/* A leaf-list (list of values) */
+#define XFF_UNESCAPE	(1<<14)	/* Need to printf-style unescape the value */
 
 /*
  * Normal printf has width and precision, which for strings operate as
@@ -208,6 +212,9 @@ xo_buf_append_div (xo_handle_t *xop, const char *class, xo_xff_flags_t flags,
 		   const char *name, int nlen,
 		   const char *value, int vlen,
 		   const char *encoding, int elen);
+
+static void
+xo_anchor_clear (xo_handle_t *xop);
 
 /*
  * Callback to write data to a FILE pointer
@@ -630,10 +637,8 @@ xo_printf_v (xo_handle_t *xop, const char *fmt, va_list vap)
 
     va_end(va_local);
 
-    if (rc > 0) {
-	xbp->xb_curp = xbp->xb_bufp;
-	rc = xop->xo_write(xop->xo_opaque, xbp->xb_bufp);
-    }
+    if (rc > 0)
+	xbp->xb_curp += rc;
 
     return rc;
 }
@@ -784,7 +789,7 @@ xo_utf8_emit_char (char *buf, int len, wchar_t wc)
     buf[0] |= ~xo_utf8_bits[len] << 1;
 }
 
-static void
+static int
 xo_buf_append_locale_from_utf8 (xo_handle_t *xop, xo_buffer_t *xbp,
 				const char *ibuf, int ilen)
 {
@@ -799,20 +804,32 @@ xo_buf_append_locale_from_utf8 (xo_handle_t *xop, xo_buffer_t *xbp,
     wc = xo_utf8_char(ibuf, ilen);
     if (wc == (wchar_t) -1) {
 	xo_failure(xop, "invalid utf-8 byte sequence");
-	return;
+	return 0;
     }
 
-    if (!xo_buf_has_room(xbp, MB_LEN_MAX + 1))
-	return;
+    if (xop->xo_flags & XOF_NO_LOCALE) {
+	if (!xo_buf_has_room(xbp, ilen))
+	    return 0;
 
-    bzero(&xop->xo_mbstate, sizeof(xop->xo_mbstate));
-    len = wcrtomb(xbp->xb_curp, wc, &xop->xo_mbstate);
+	memcpy(xbp->xb_curp, ibuf, ilen);
+	xbp->xb_curp += ilen;
 
-    if (len > 0)
+    } else {
+	if (!xo_buf_has_room(xbp, MB_LEN_MAX + 1))
+	    return 0;
+
+	bzero(&xop->xo_mbstate, sizeof(xop->xo_mbstate));
+	len = wcrtomb(xbp->xb_curp, wc, &xop->xo_mbstate);
+
+	if (len <= 0) {
+	    xo_failure(xop, "could not convert wide char: %lx",
+		       (unsigned long) wc);
+	    return 0;
+	}
 	xbp->xb_curp += len;
-    else
-	xo_failure(xop, "could not convert wide char: %lx",
-		      (unsigned long) wc);
+    }
+
+    return wcwidth(wc);
 }
 
 static void
@@ -822,44 +839,46 @@ xo_buf_append_locale (xo_handle_t *xop, xo_buffer_t *xbp,
     const char *sp = cp, *ep = cp + len;
     unsigned save_off = xbp->xb_bufp - xbp->xb_curp;
     int slen;
+    int cols = 0;
 
-    if (!(xop->xo_flags & XOF_NO_LOCALE)) {
-	for ( ; cp < ep; cp++) {
-	    if (!xo_is_utf8(*cp))
-		continue;
-	    /*
-	     * We're looking at a non-ascii UTF-8 character.
-	     * First we copy the previous data.
-	     * Then we need find the length and validate it.
-	     * Then we turn it into a wide string.
-	     * Then we turn it into a localized string.
-	     * Then we repeat.  Isn't i18n fun?
-	     */
-	    if (sp != cp)
-		xo_buf_append(xbp, sp, cp - sp); /* Append previous data */
-
-	    slen = xo_buf_utf8_len(xop, cp, ep - cp);
-	    if (slen <= 0) {
-		/* Bad data; back it all out */
-		xbp->xb_curp = xbp->xb_bufp + save_off;
-		return;
-	    }
-
-	    xo_buf_append_locale_from_utf8(xop, xbp, cp, slen);
-
-	    /* Next time thru, we'll start at the next character */
-	    cp += slen - 1;
-	    sp = cp + 1;
+    for ( ; cp < ep; cp++) {
+	if (!xo_is_utf8(*cp)) {
+	    cols += 1;
+	    continue;
 	}
 
-	/* Before we fall into the basic logic below, we need reset len */
-	len = ep - sp;
-	if (len == 0)
+	/*
+	 * We're looking at a non-ascii UTF-8 character.
+	 * First we copy the previous data.
+	 * Then we need find the length and validate it.
+	 * Then we turn it into a wide string.
+	 * Then we turn it into a localized string.
+	 * Then we repeat.  Isn't i18n fun?
+	 */
+	if (sp != cp)
+	    xo_buf_append(xbp, sp, cp - sp); /* Append previous data */
+
+	slen = xo_buf_utf8_len(xop, cp, ep - cp);
+	if (slen <= 0) {
+	    /* Bad data; back it all out */
+	    xbp->xb_curp = xbp->xb_bufp + save_off;
 	    return;
+	}
+
+	cols += xo_buf_append_locale_from_utf8(xop, xbp, cp, slen);
+
+	/* Next time thru, we'll start at the next character */
+	cp += slen - 1;
+	sp = cp + 1;
     }
 
-    /* Append trailing data */
-    xo_buf_append(xbp, sp, len);
+    if (xop->xo_flags & XOF_ANCHOR)
+	xop->xo_anchor_columns += cols;
+
+    /* Before we fall into the basic logic below, we need reset len */
+    len = ep - sp;
+    if (len != 0) /* Append trailing data */
+	xo_buf_append(xbp, sp, len);
 }
 
 /*
@@ -956,6 +975,7 @@ xo_warn_hcv (xo_handle_t *xop, int code, int check_warn,
 
 	xo_buf_append(xbp, "\n", 2); /* Append newline and NUL to string */
 	xbp->xb_curp = xbp->xb_bufp;
+	xo_anchor_clear(xop);
 	xop->xo_write(xop->xo_opaque, xbp->xb_bufp);
 
     } else {
@@ -1138,7 +1158,12 @@ xo_message_hcv (xo_handle_t *xop, int code, const char *fmt, va_list vap)
 	break;
 
     case XO_STYLE_TEXT:
-	xo_printf_v(xop, fmt, vap);
+	rc = xo_printf_v(xop, fmt, vap);
+	/*
+	 * XXX need to handle UTF-8 widths
+	 */
+	if (rc > 0 && (xop->xo_flags & XOF_ANCHOR))
+	    xop->xo_anchor_columns += rc;
 
 	if (need_nl && code > 0) {
 	    const char *msg = strerror(code);
@@ -1148,8 +1173,11 @@ xo_message_hcv (xo_handle_t *xop, int code, const char *fmt, va_list vap)
 	}
 	if (need_nl)
 	    xo_printf(xop, "\n");
+
 	break;
     }
+
+    xo_flush_h(xop);
 }
 
 void
@@ -1625,6 +1653,9 @@ xo_info_find (xo_handle_t *xop, const char *name, int nlen)
 
 #define CONVERT(_have, _need) (((_have) << 8) | (_need))
 
+/*
+ * Check to see that the conversion is safe and sane.
+ */
 static int
 xo_check_conversion (xo_handle_t *xop, int have_enc, int need_enc)
 {
@@ -1644,66 +1675,16 @@ xo_check_conversion (xo_handle_t *xop, int have_enc, int need_enc)
 }
 
 static int
-xo_format_string (xo_handle_t *xop, xo_buffer_t *xbp, xo_xff_flags_t flags,
-		  xo_format_t *xfp)
+xo_format_string_direct (xo_handle_t *xop, xo_buffer_t *xbp,
+			 xo_xff_flags_t flags,
+			 const wchar_t *wcp, const char *cp, int len, int max,
+			 int need_enc, int have_enc)
 {
-    static char null[] = "(null)";
-    char *cp = NULL;
-    wchar_t *wcp = NULL;
+    int cols = 0;
     wchar_t wc;
-    const char *sp;
+    int ilen, olen, width;
     int attr = (flags & XFF_ATTR);
-    int len, cols = 0, rc = 0, ilen, width, olen;
-    int off = xbp->xb_curp - xbp->xb_bufp, off2;
-    int need_enc = (xop->xo_style == XO_STYLE_TEXT)
-	? XF_ENC_LOCALE : XF_ENC_UTF8;
-
-    if (xo_check_conversion(xop, xfp->xf_enc, need_enc))
-	return 0;
-
-    if (xfp->xf_enc == XF_ENC_WIDE) {
-	wcp = va_arg(xop->xo_vap, wchar_t *);
-	if (xfp->xf_skip)
-	    return 0;
-    } else {
-	cp = va_arg(xop->xo_vap, char *); /* UTF-8 or native */
-	if (xfp->xf_skip)
-	    return 0;
-
-	/*
-	 * Optimize the most common case, which is "%s".  We just
-	 * need to copy the complete string to the output buffer.
-	 */
-	if (xfp->xf_enc == need_enc
-		&& xfp->xf_width[XF_WIDTH_MIN] < 0
-		&& xfp->xf_width[XF_WIDTH_SIZE] < 0
-		&& xfp->xf_width[XF_WIDTH_MAX] < 0) {
-	    len = strlen(cp);
-	    xo_buf_escape(xop, xbp, cp, len, flags);
-
-	    /*
-	     * Our caller expects xb_curp left untouched, so we have
-	     * to reset it and return the number of bytes written to
-	     * the buffer.
-	     */
-	    off2 = xbp->xb_curp - xbp->xb_bufp;
-	    rc = off2 - off;
-	    xbp->xb_curp = xbp->xb_bufp + off;
-
-	    return rc;
-	}
-    }
-
-    len = xfp->xf_width[XF_WIDTH_SIZE];
-
-    /*
-     * Dont' deref NULL; use the traditional "(null)" instead
-     * of the more accurate "who's been a naughty boy, then?".
-     */
-    if (cp == NULL && wcp == NULL) {
-	cp = null;
-	len = sizeof(null) - 1;
-    }
+    const char *sp;
 
     if (len > 0 && !xo_buf_has_room(xbp, len))
 	return 0;
@@ -1712,15 +1693,21 @@ xo_format_string (xo_handle_t *xop, xo_buffer_t *xbp, xo_xff_flags_t flags,
 	if (len == 0)
 	    break;
 
-	if (cp && *cp == '\0')
-	    break;
+	if (cp) {
+	    if (*cp == '\0')
+		break;
+	    if ((flags & XFF_UNESCAPE) && (*cp == '\\' || *cp == '%')) {
+		cp += 1;
+		len -= 1;
+	    }
+	}
 
 	if (wcp && *wcp == L'\0')
 	    break;
 
 	ilen = 0;
 
-	switch (xfp->xf_enc) {
+	switch (have_enc) {
 	case XF_ENC_WIDE:		/* Wide character */
 	    wc = *wcp++;
 	    ilen = 1;
@@ -1730,7 +1717,7 @@ xo_format_string (xo_handle_t *xop, xo_buffer_t *xbp, xo_xff_flags_t flags,
 	    ilen = xo_utf8_to_wc_len(cp);
 	    if (ilen < 0) {
 		xo_failure(xop, "invalid UTF-8 character: %02hhx", *cp);
-		goto bail;
+		return -1;
 	    }
 
 	    if (len > 0 && len < ilen) {
@@ -1742,7 +1729,7 @@ xo_format_string (xo_handle_t *xop, xo_buffer_t *xbp, xo_xff_flags_t flags,
 	    if (wc == (wchar_t) -1) {
 		xo_failure(xop, "invalid UTF-8 character: %02hhx/%d",
 			   *cp, ilen);
-		goto bail;
+		return -1;
 	    }
 	    cp += ilen;
 	    break;
@@ -1779,8 +1766,7 @@ xo_format_string (xo_handle_t *xop, xo_buffer_t *xbp, xo_xff_flags_t flags,
 	if (width < 0)
 	    width = iswcntrl(wc) ? 0 : 1;
 
-	if (xfp->xf_width[XF_WIDTH_MAX] > 0
-	    && cols + width > xfp->xf_width[XF_WIDTH_MAX])
+	if (max > 0 && cols + width > max)
 		break;
 
 	switch (need_enc) {
@@ -1803,7 +1789,7 @@ xo_format_string (xo_handle_t *xop, xo_buffer_t *xbp, xo_xff_flags_t flags,
 
 		int slen = strlen(sp);
 		if (!xo_buf_has_room(xbp, slen - 1))
-		    goto bail;
+		    return -1;
 
 		memcpy(xbp->xb_curp, sp, slen);
 		xbp->xb_curp += slen;
@@ -1814,7 +1800,7 @@ xo_format_string (xo_handle_t *xop, xo_buffer_t *xbp, xo_xff_flags_t flags,
 		    break;
 
 		if (!xo_buf_has_room(xbp, 2))
-		    goto bail;
+		    return -1;
 
 		*xbp->xb_curp++ = '\\';
 		*xbp->xb_curp++ = wc & 0x7f;
@@ -1828,7 +1814,7 @@ xo_format_string (xo_handle_t *xop, xo_buffer_t *xbp, xo_xff_flags_t flags,
 	    }
 
 	    if (!xo_buf_has_room(xbp, olen))
-		goto bail;
+		return -1;
 
 	    xo_utf8_emit_char(xbp->xb_curp, olen, wc);
 	    xbp->xb_curp += olen;
@@ -1836,7 +1822,7 @@ xo_format_string (xo_handle_t *xop, xo_buffer_t *xbp, xo_xff_flags_t flags,
 
 	case XF_ENC_LOCALE:
 	    if (!xo_buf_has_room(xbp, MB_LEN_MAX + 1))
-		goto bail;
+		return -1;
 
 	    olen = wcrtomb(xbp->xb_curp, wc, &xop->xo_mbstate);
 	    if (olen <= 0) {
@@ -1853,6 +1839,76 @@ xo_format_string (xo_handle_t *xop, xo_buffer_t *xbp, xo_xff_flags_t flags,
     done_with_encoding:
 	cols += width;
     }
+
+    return cols;
+}
+
+static int
+xo_format_string (xo_handle_t *xop, xo_buffer_t *xbp, xo_xff_flags_t flags,
+		  xo_format_t *xfp)
+{
+    static char null[] = "(null)";
+    char *cp = NULL;
+    wchar_t *wcp = NULL;
+    int len, cols = 0, rc = 0;
+    int off = xbp->xb_curp - xbp->xb_bufp, off2;
+    int need_enc = (xop->xo_style == XO_STYLE_TEXT)
+	? XF_ENC_LOCALE : XF_ENC_UTF8;
+
+    if (xo_check_conversion(xop, xfp->xf_enc, need_enc))
+	return 0;
+
+    if (xfp->xf_enc == XF_ENC_WIDE) {
+	wcp = va_arg(xop->xo_vap, wchar_t *);
+	if (xfp->xf_skip)
+	    return 0;
+
+    } else {
+	cp = va_arg(xop->xo_vap, char *); /* UTF-8 or native */
+	if (xfp->xf_skip)
+	    return 0;
+
+	/*
+	 * Optimize the most common case, which is "%s".  We just
+	 * need to copy the complete string to the output buffer.
+	 */
+	if (xfp->xf_enc == need_enc
+		&& xfp->xf_width[XF_WIDTH_MIN] < 0
+		&& xfp->xf_width[XF_WIDTH_SIZE] < 0
+		&& xfp->xf_width[XF_WIDTH_MAX] < 0
+		&& !(xop->xo_flags & XOF_ANCHOR)) {
+	    len = strlen(cp);
+	    xo_buf_escape(xop, xbp, cp, len, flags);
+
+	    /*
+	     * Our caller expects xb_curp left untouched, so we have
+	     * to reset it and return the number of bytes written to
+	     * the buffer.
+	     */
+	    off2 = xbp->xb_curp - xbp->xb_bufp;
+	    rc = off2 - off;
+	    xbp->xb_curp = xbp->xb_bufp + off;
+
+	    return rc;
+	}
+    }
+
+    len = xfp->xf_width[XF_WIDTH_SIZE];
+
+    /*
+     * Dont' deref NULL; use the traditional "(null)" instead
+     * of the more accurate "who's been a naughty boy, then?".
+     */
+    if (cp == NULL && wcp == NULL) {
+	cp = null;
+	len = sizeof(null) - 1;
+    }
+
+    cols = xo_format_string_direct(xop, xbp, flags, wcp, cp, len,
+				   xfp->xf_width[XF_WIDTH_MAX],
+				   need_enc, xfp->xf_enc);
+    if (cols < 0)
+	goto bail;
 
     /*
      * xo_buf_append* will move xb_curp, so we save/restore it.
@@ -1885,7 +1941,11 @@ xo_format_string (xo_handle_t *xop, xo_buffer_t *xbp, xo_xff_flags_t flags,
 	/* Set the padding */
 	memset(cp, (xfp->xf_leading_zero > 0) ? '0' : ' ', delta);
 	rc += delta;
+	cols += delta;
     }
+
+    if (xop->xo_flags & XOF_ANCHOR)
+	xop->xo_anchor_columns += cols;
 
     return rc;
 
@@ -1940,11 +2000,12 @@ xo_format_data (xo_handle_t *xop, xo_buffer_t *xbp,
 		const char *fmt, int flen, xo_xff_flags_t flags)
 {
     xo_format_t xf;
-    const char *cp, *ep, *sp;
-    int rc;
-    int delta = 0;
+    const char *cp, *ep, *sp, *xp = NULL;
+    int rc, cols;
     int style = (flags & XFF_XML) ? XO_STYLE_XML : xop->xo_style;
     unsigned make_output = !(flags & XFF_NO_OUTPUT);
+    int need_enc = (xop->xo_style == XO_STYLE_TEXT)
+	? XF_ENC_LOCALE : XF_ENC_UTF8;
     
     if (xbp == NULL)
 	xbp = &xop->xo_data;
@@ -1952,18 +2013,28 @@ xo_format_data (xo_handle_t *xop, xo_buffer_t *xbp,
     for (cp = fmt, ep = fmt + flen; cp < ep; cp++) {
 	if (*cp != '%') {
 	add_one:
+	    if (xp == NULL)
+		xp = cp;
+
 	    if (*cp == '\\' && cp[1] != '\0')
 		cp += 1;
-
-	    if (make_output) {
-		xo_buf_escape(xop, xbp, cp, 1, 0);
-		delta += 1;
-	    }
 	    continue;
 
 	} if (cp + 1 < ep && cp[1] == '%') {
 	    cp += 1;
 	    goto add_one;
+	}
+
+	if (xp) {
+	    if (make_output) {
+		cols = xo_format_string_direct(xop, xbp, flags | XFF_UNESCAPE,
+					       NULL, xp, cp - xp, -1,
+					       need_enc, XF_ENC_UTF8);
+		if (xop->xo_flags & XOF_ANCHOR)
+		    xop->xo_anchor_columns += cols;
+	    }
+
+	    xp = NULL;
 	}
 
 	bzero(&xf, sizeof(xf));
@@ -2108,7 +2179,7 @@ xo_format_data (xo_handle_t *xop, xo_buffer_t *xbp,
 		    rc = xo_trim_ws(xbp, rc);
 
 	    } else {
-		rc = xo_vsnprintf(xop, xbp, newfmt, xop->xo_vap);
+		int columns = rc = xo_vsnprintf(xop, xbp, newfmt, xop->xo_vap);
 
 		/*
 		 * For XML and HTML, we need "&<>" processing; for JSON,
@@ -2117,7 +2188,7 @@ xo_format_data (xo_handle_t *xop, xo_buffer_t *xbp,
 		switch (style) {
 		case XO_STYLE_XML:
 		    if (flags & XFF_TRIM_WS)
-			rc = xo_trim_ws(xbp, rc);
+			columns = rc = xo_trim_ws(xbp, rc);
 		    /* fall thru */
 		case XO_STYLE_HTML:
 		    rc = xo_escape_xml(xbp, rc, (flags & XFF_ATTR));
@@ -2125,14 +2196,22 @@ xo_format_data (xo_handle_t *xop, xo_buffer_t *xbp,
 
 		case XO_STYLE_JSON:
 		    if (flags & XFF_TRIM_WS)
-			rc = xo_trim_ws(xbp, rc);
+			columns = rc = xo_trim_ws(xbp, rc);
 		    rc = xo_escape_json(xbp, rc);
 		    break;
 		}
+
+		/*
+		 * We can assume all the data we've added is ASCII, so
+		 * the columns and bytes are the same.  xo_format_string
+		 * handles all the fancy string conversions and updates
+		 * xo_anchor_columns accordingly.
+		 */
+		if (xop->xo_flags & XOF_ANCHOR)
+		    xop->xo_anchor_columns += columns;
 	    }
 
 	    xbp->xb_curp += rc;
-	    delta += rc;
 	}
 
 	/*
@@ -2203,7 +2282,19 @@ xo_format_data (xo_handle_t *xop, xo_buffer_t *xbp,
 	}
     }
 
-    return delta;
+    if (xp) {
+	if (make_output) {
+	    cols = xo_format_string_direct(xop, xbp, flags, NULL,
+					   xp, cp - xp, -1,
+					   need_enc, XF_ENC_UTF8);
+	    if (xop->xo_flags & XOF_ANCHOR)
+		xop->xo_anchor_columns += cols;
+	}
+
+	xp = NULL;
+    }
+
+    return 0;
 }
 
 static char *
@@ -2466,8 +2557,10 @@ xo_format_title (xo_handle_t *xop, const char *str, int len,
 	}
 
     } else {
-	rc = xo_format_data(xop, NULL, fmt, flen, 0);
+	xo_format_data(xop, NULL, fmt, flen, 0);
+
 	/* xo_format_data moved curp, so we need to reset it */
+	rc = xbp->xb_curp - (xbp->xb_bufp + start);
 	xbp->xb_curp = xbp->xb_bufp + start;
     }
 
@@ -2589,7 +2682,7 @@ xo_format_value (xo_handle_t *xop, const char *name, int nlen,
 	    quote = 0;
 	    format = "true";	/* JSON encodes empty tags as a boolean true */
 	    flen = 4;
-	} else if (format[flen - 1] == 's')
+	} else if (strchr("diouxXDOUeEfFgGaAcCp", format[flen - 1]) == NULL)
 	    quote = 1;
 	else
 	    quote = 0;
@@ -2624,9 +2717,11 @@ xo_format_content (xo_handle_t *xop, const char *class_name, int display_only,
 {
     switch (xop->xo_style) {
     case XO_STYLE_TEXT:
-	if (len)
+	if (len) {
+	    if (xop->xo_flags & XOF_ANCHOR)
+		xop->xo_anchor_columns += len;
 	    xo_data_append(xop, str, len);
-	else
+	} else
 	    xo_format_data(xop, NULL, fmt, flen, 0);
 	break;
 
@@ -2659,6 +2754,133 @@ xo_format_content (xo_handle_t *xop, const char *class_name, int display_only,
 	/* XXX need schem for representing errors in JSON */
 	break;
     }
+}
+
+static int
+xo_find_width (xo_handle_t *xop, const char *str, int len,
+		 const char *fmt, int flen)
+{
+    long width = 0;
+    char *bp;
+    char *cp;
+
+    if (len) {
+	bp = alloca(len + 1);	/* Make local NUL-terminated copy of str */
+	memcpy(bp, str, len);
+	bp[len] = '\0';
+
+	width = strtol(bp, &cp, 0);
+	if (width == LONG_MIN || width == LONG_MAX
+	    || bp == cp || *cp != '\0' ) {
+	    width = 0;
+	    xo_failure(xop, "invalid width for anchor: '%s'", bp);
+	}
+    } else if (flen) {
+	if (flen != 2 || strncmp("%d", fmt, flen) != 0)
+	    xo_failure(xop, "invalid width format: '%*.*s'", flen, flen, fmt);
+	if (!(xop->xo_flags & XOF_NO_VA_ARG))
+	    width = va_arg(xop->xo_vap, int);
+    }
+
+    return width;
+}
+
+static void
+xo_anchor_clear (xo_handle_t *xop)
+{
+    xop->xo_flags &= ~XOF_ANCHOR;
+    xop->xo_anchor_offset = 0;
+    xop->xo_anchor_columns = 0;
+    xop->xo_anchor_width = 0;
+}
+
+/*
+ * An anchor is a marker used to delay field width implications.
+ * Imagine the format string "{[:10}{min:%d}/{cur:%d}/{max:%d}{:]}".
+ * We are looking for output like "     1/4/5"
+ *
+ * To make this work, we record the anchor and then return to
+ * format it when the end anchor tag is seen.
+ */
+static void
+xo_anchor_start (xo_handle_t *xop, const char *str, int len,
+		 const char *fmt, int flen)
+{
+    if (xop->xo_style != XO_STYLE_TEXT && xop->xo_style != XO_STYLE_HTML)
+	return;
+
+    if (xop->xo_flags & XOF_ANCHOR)
+	xo_failure(xop, "the anchor already recording is discarded");
+
+    xop->xo_flags |= XOF_ANCHOR;
+    xo_buffer_t *xbp = &xop->xo_data;
+    xop->xo_anchor_offset = xbp->xb_curp - xbp->xb_bufp;
+    xop->xo_anchor_columns = 0;
+
+    /*
+     * Now we find the width, if possible.  If it's not there,
+     * we'll get it on the end anchor.
+     */
+    xop->xo_anchor_width = xo_find_width(xop, str, len, fmt, flen);
+}
+
+static void
+xo_anchor_stop (xo_handle_t *xop, const char *str, int len,
+		 const char *fmt, int flen)
+{
+    if (xop->xo_style != XO_STYLE_TEXT && xop->xo_style != XO_STYLE_HTML)
+	return;
+
+    if (!(xop->xo_flags & XOF_ANCHOR)) {
+	xo_failure(xop, "no start anchor");
+	return;
+    }
+
+    int width = xo_find_width(xop, str, len, fmt, flen);
+    if (width == 0)
+	width = xop->xo_anchor_width;
+
+    if (width == 0)		/* No width given; nothing to do */
+	goto done;
+
+    xo_buffer_t *xbp = &xop->xo_data;
+    int start = xop->xo_anchor_offset;
+    int stop = xbp->xb_curp - xbp->xb_bufp;
+    int abswidth = (width > 0) ? width : -width;
+    int blen = abswidth - xop->xo_anchor_columns;
+
+    if (blen <= 0)		/* Already over width */
+	goto done;
+
+    /* Make a suitable padding field and emit it */
+    char *buf = alloca(blen);
+    memset(buf, ' ', blen);
+    xo_format_content(xop, "padding", 1, buf, blen, NULL, 0);
+
+    if (width < 0)		/* Already left justified */
+	goto done;
+
+    int now = xbp->xb_curp - xbp->xb_bufp;
+    int delta = now - stop;
+    if (delta < 0)		/* Strange; no output to move */
+	goto done;
+
+    /*
+     * Now we're in it alright.  We've need to insert the padding data
+     * we just created (which might be an HTML <div> or text) before
+     * the formatted data.  We make a local copy, move it and then
+     * insert our copy.  We know there's room in the buffer, since
+     * we're just moving this around.
+     */
+    if (delta > blen)
+	buf = alloca(delta);	/* Expand buffer if needed */
+
+    memcpy(buf, xbp->xb_bufp + stop, delta);
+    memmove(xbp->xb_bufp + start + delta, xbp->xb_bufp + start, delta);
+    memmove(xbp->xb_bufp + start, buf, delta);
+
+ done:
+    xo_anchor_clear(xop);
 }
 
 static int
@@ -2723,6 +2945,8 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 	 *   'T': Title, where 'content' is a column title
 	 *   'V': value, where 'content' is the name of the field (the default)
 	 *   'W': warning message
+	 *   '[': start a section of anchored text
+	 *   ']': end a section of anchored text
          * The following flags are also supported:
 	 *   'c': flag: emit a colon after the label
 	 *   'd': field is only emitted for display formats (text and html)
@@ -2738,7 +2962,7 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 	 * If the encode-fmt is not provided, it defaults to the print-fmt.
 	 * If the print-fmt is not provided, it defaults to 's'.
 	 */
-	unsigned style = 0, flags = 0;
+	unsigned ftype = 0, flags = 0;
 	const char *content = NULL, *format = NULL, *encoding = NULL;
 	int clen = 0, flen = 0, elen = 0;
 
@@ -2763,12 +2987,14 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 	    case 'T':
 	    case 'V':
 	    case 'W':
-		if (style != 0) {
-		    xo_failure(xop, "format string uses multiple styles: %s",
+	    case '[':
+	    case ']':
+		if (ftype != 0) {
+		    xo_failure(xop, "field descriptor uses multiple types: %s",
 				  fmt);
 		    return -1;
 		}
-		style = *sp;
+		ftype = *sp;
 		break;
 
 	    case 'c':
@@ -2808,7 +3034,7 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 		break;
 
 	    default:
-		xo_failure(xop, "format string uses unknown modifier: %s",
+		xo_failure(xop, "field descriptor uses unknown modifier: %s",
 			      fmt);
 		/*
 		 * No good answer here; a bad format will likely
@@ -2885,26 +3111,30 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 	    return -1;
 	}
 
-	if (format == NULL) {
+	if (format == NULL && ftype != '[' && ftype != ']' ) {
 	    format = "%s";
 	    flen = 2;
 	}
 
-	if (style == 'T')
+	if (ftype == 'T')
 	    xo_format_title(xop, content, clen, format, flen);
-	else if (style == 'L')
+	else if (ftype == 'L')
 	    xo_format_label(xop, content, clen, format, flen);
-	else if (style == 0 || style == 'V')
+	else if (ftype == 0 || ftype == 'V')
 	    xo_format_value(xop, content, clen, format, flen,
 			    encoding, elen, flags);
-	else if (style == 'D')
+	else if (ftype == 'D')
 	    xo_format_content(xop, "decoration", 1, content, clen, format, flen);
-	else if (style == 'E')
+	else if (ftype == 'E')
 	    xo_format_content(xop, "error", 0, content, clen, format, flen);
-	else if (style == 'W')
+	else if (ftype == 'W')
 	    xo_format_content(xop, "warning", 0, content, clen, format, flen);
-	else if (style == 'P')
+	else if (ftype == 'P')
  	    xo_format_content(xop, "padding", 1, content, clen, format, flen);
+	else if (ftype == '[')
+	    xo_anchor_start(xop, content, clen, format, flen);
+	else if (ftype == ']')
+	    xo_anchor_stop(xop, content, clen, format, flen);
 
 	if (flags & XFF_COLON)
 	    xo_format_content(xop, "decoration", 1, ":", 1, NULL, 0);
@@ -2918,10 +3148,12 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 	}
     }
 
-    xo_buf_append(xbp, "", 1); /* Append ending NUL */
-
-    xop->xo_write(xop->xo_opaque, xbp->xb_bufp);
-    xbp->xb_curp = xbp->xb_bufp;
+    /* If we don't have an anchor, write the text out */
+    if (!(xop->xo_flags & XOF_ANCHOR)) {
+	xo_buf_append(xbp, "", 1); /* Append ending NUL */
+	xop->xo_write(xop->xo_opaque, xbp->xb_bufp);
+	xbp->xb_curp = xbp->xb_bufp;
+    }
 
     return rc;
 }
@@ -3562,6 +3794,7 @@ xo_flush_h (xo_handle_t *xop)
     xo_buffer_t *xbp = &xop->xo_data;
     if (xbp->xb_curp != xbp->xb_bufp) {
 	xo_buf_append(xbp, "", 1); /* Append ending NUL */
+	xo_anchor_clear(xop);
 	xop->xo_write(xop->xo_opaque, xbp->xb_bufp);
 	xbp->xb_curp = xbp->xb_bufp;
     }
@@ -3578,7 +3811,6 @@ xo_finish_h (xo_handle_t *xop)
 {
     const char *cp = "";
     xop = xo_default(xop);
-    xo_flush_h(xop);
 
     switch (xop->xo_style) {
     case XO_STYLE_JSON:
@@ -3591,6 +3823,8 @@ xo_finish_h (xo_handle_t *xop)
 	}
 	break;
     }
+
+    xo_flush_h(xop);
 }
 
 void
@@ -3636,6 +3870,7 @@ xo_error_hv (xo_handle_t *xop, const char *fmt, va_list vap)
 	xo_buffer_t *xbp = &xop->xo_data;
 	xo_buf_append(xbp, "", 1); /* Append ending NUL */
 	xbp->xb_curp = xbp->xb_bufp;
+	xo_anchor_clear(xop);
 	xop->xo_write(xop->xo_opaque, xbp->xb_bufp);
 
 	va_end(xop->xo_vap);
