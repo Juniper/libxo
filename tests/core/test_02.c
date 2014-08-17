@@ -44,6 +44,11 @@ main (int argc, char **argv)
 
     xo_emit("{T:/before%safter:}\n", "working");
 
+    xo_emit("({[:/%d}{n:min/15}/{n:cur/20}/{:max/%d}{]:})\n", 30, 125);
+    xo_emit("({[:30}{:min/%u}/{:cur/%u}/{:max/%u}{]:})\n", 15, 20, 125);
+    xo_emit("({[:-30}{n:min/15}/{n:cur/20}/{n:max/125}{]:})\n");
+    xo_emit("({[:}{:min/%u}/{:cur/%u}/{:max/%u}{]:/%d})\n", 15, 20, 125, -30);
+
     xo_open_list("flag");
     xo_emit("{lq:flag/one} {lq:flag/two} {lq:flag/three}\n");
     xo_close_list("flag");
