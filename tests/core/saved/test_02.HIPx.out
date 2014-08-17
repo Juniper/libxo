@@ -2,6 +2,44 @@
   <div class="title">beforeworkingafter:</div>
 </div>
 <div class="line">
+  <div class="text">(</div>
+  <div class="padding">                     </div>
+  <div class="data" data-tag="min" data-xpath="/topdiv class="data" data-tag="cur" data-xpath="/top/data/cur">20</div>
+  <div class="text">/</div>
+  <div class="data" data-tag="max" data-xpath="/top/data/max">125</div>
+  <div class="padding">                     </div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="text">(</div>
+  <div class="padding">                     </div>
+  <div class="data" data-tag="min" data-xpath="/topdiv class="data" data-tag="cur" data-xpath="/top/data/cur">20</div>
+  <div class="text">/</div>
+  <div class="data" data-tag="max" data-xpath="/top/data/max">125</div>
+  <div class="padding">                     </div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="text">(</div>
+  <div class="data" data-tag="min" data-xpath="/top/data/min">15</div>
+  <div class="text">/</div>
+  <div class="data" data-tag="cur" data-xpath="/top/data/cur">20</div>
+  <div class="text">/</div>
+  <div class="data" data-tag="max" data-xpath="/top/data/max">125</div>
+  <div class="padding">                     </div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="text">(</div>
+  <div class="data" data-tag="min" data-xpath="/top/data/min">15</div>
+  <div class="text">/</div>
+  <div class="data" data-tag="cur" data-xpath="/top/data/cur">20</div>
+  <div class="text">/</div>
+  <div class="data" data-tag="max" data-xpath="/top/data/max">125</div>
+  <div class="padding">                     </div>
+  <div class="text">)</div>
+</div>
+<div class="line">
   <div class="data" data-tag="flag" data-xpath="/top/data/flag">one</div>
   <div class="text"> </div>
   <div class="data" data-tag="flag" data-xpath="/top/data/flag">two</div>
@@ -43,6 +81,8 @@
 <div class="line">
   <div class="message">improper use of profanity; ten yard penalty; first down
 </div>
+</div>
+<div class="line">
   <div class="error">Shut 'er down, Clancey!  She's a-pumpin' mud!  &lt;&gt;!,"!&lt;&gt;
 </div>
 </div>
