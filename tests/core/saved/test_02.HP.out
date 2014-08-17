@@ -2,6 +2,46 @@
   <div class="title">beforeworkingafter:</div>
 </div>
 <div class="line">
+  <div class="text">(</div>
+  <div class="padding">                     </div>
+  <div class="data" data-tag="min">15</div>
+  <div cur">20</div>
+  <div class="text">/</div>
+  <div class="data" data-tag="max">125</div>
+  <div class="padding">                     </div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="text">(</div>
+  <div class="padding">                     </div>
+  <div class="data" data-tag="min">15</div>
+  <div cur">20</div>
+  <div class="text">/</div>
+  <div class="data" data-tag="max">125</div>
+  <div class="padding">                     </div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="text">(</div>
+  <div class="data" data-tag="min">15</div>
+  <div class="text">/</div>
+  <div class="data" data-tag="cur">20</div>
+  <div class="text">/</div>
+  <div class="data" data-tag="max">125</div>
+  <div class="padding">                     </div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="text">(</div>
+  <div class="data" data-tag="min">15</div>
+  <div class="text">/</div>
+  <div class="data" data-tag="cur">20</div>
+  <div class="text">/</div>
+  <div class="data" data-tag="max">125</div>
+  <div class="padding">                     </div>
+  <div class="text">)</div>
+</div>
+<div class="line">
   <div class="data" data-tag="flag">one</div>
   <div class="text"> </div>
   <div class="data" data-tag="flag">two</div>
@@ -43,6 +83,8 @@
 <div class="line">
   <div class="message">improper use of profanity; ten yard penalty; first down
 </div>
+</div>
+<div class="line">
   <div class="error">Shut 'er down, Clancey!  She's a-pumpin' mud!  &lt;&gt;!,"!&lt;&gt;
 </div>
 </div>
