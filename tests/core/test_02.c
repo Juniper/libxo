@@ -44,6 +44,10 @@ main (int argc, char **argv)
 
     xo_emit("{T:/before%safter:}\n", "working");
 
+    xo_emit("{:unknown/%u} "
+	    "{N:/packet%s here\\/there\\/everywhere}\n",
+	    1010, "s");
+
     xo_emit("({[:/%d}{n:min/15}/{n:cur/20}/{:max/%d}{]:})\n", 30, 125);
     xo_emit("({[:30}{:min/%u}/{:cur/%u}/{:max/%u}{]:})\n", 15, 20, 125);
     xo_emit("({[:-30}{n:min/15}/{n:cur/20}/{n:max/125}{]:})\n");
