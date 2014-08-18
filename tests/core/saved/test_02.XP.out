@@ -26,12 +26,12 @@
     <error>
       <message>two more errors</message>
     </error>
-    <error>
+    <warning>
       <message>this is an warning</message>
-    </error>
-    <error>
+    </warning>
+    <warning>
       <message>two more warnings</message>
-    </error>
+    </warning>
     <count>10</count>
     <test>4</test>
   <message>improper use of profanity; ten yard penalty; first down</message>
