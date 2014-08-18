@@ -2284,8 +2284,8 @@ xo_format_data (xo_handle_t *xop, xo_buffer_t *xbp,
 
     if (xp) {
 	if (make_output) {
-	    cols = xo_format_string_direct(xop, xbp, flags, NULL,
-					   xp, cp - xp, -1,
+	    cols = xo_format_string_direct(xop, xbp, flags | XFF_UNESCAPE,
+					   NULL, xp, cp - xp, -1,
 					   need_enc, XF_ENC_UTF8);
 	    if (xop->xo_flags & XOF_ANCHOR)
 		xop->xo_anchor_columns += cols;
