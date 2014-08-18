@@ -209,6 +209,14 @@ AC_SUBST(XO_LIBDIR)
 AC_SUBST(XO_BINDIR)
 AC_SUBST(XO_INCLUDEDIR)
 
+AC_ARG_WITH(share-dir,
+        [  --with-share-dir=[DIR]           Specify location of shared files],
+        [XO_SHAREDIR=$withval],
+        [XO_SHAREDIR=$datarootdir/libxo]
+)
+XO_SHAREDIR=`echo $XO_SHAREDIR | sed "s;\\${prefix};$prefix;"`
+AC_SUBST(XO_SHAREDIR)
+
 dnl for the spec file
 RELDATE=`date +'%Y-%m-%d%n'`
 AC_SUBST(RELDATE)
@@ -233,6 +241,7 @@ AC_CONFIG_HEADERS([libxo/xoconfig.h])
 AC_CONFIG_FILES([
   Makefile
   libxo-config
+  xo-html/xo-html.sh
   libxo/Makefile
   libxo/xoversion.h
   xo/Makefile
@@ -254,7 +263,7 @@ AC_MSG_NOTICE([summary of build options:
   libdir:           ${XO_LIBDIR}
   bindir:           ${XO_BINDIR}
   includedir:       ${XO_INCLUDEDIR}
-  extensions dir:   ${XO_EXTDIR}
+  share dir:        ${XO_SHAREDIR}
 
   compiler:         ${CC} (${HAVE_GCC:-no})
   compiler flags:   ${CFLAGS}
