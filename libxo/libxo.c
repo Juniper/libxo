@@ -2474,39 +2474,6 @@ xo_format_text (xo_handle_t *xop, const char *str, int len)
 }
 
 static void
-xo_format_label (xo_handle_t *xop, const char *str, int len,
-		 const char *fmt, int flen)
-{
-    switch (xop->xo_style) {
-    case XO_STYLE_TEXT:
-	if (len)
-	    xo_buf_append(&xop->xo_data, str, len);
-	else
-	    xo_format_data(xop, NULL, fmt, flen, 0);
-	break;
-
-    case XO_STYLE_HTML:
-	if (len == 0) {
-	    str = fmt;
-	    len = flen;
-	}
-
-	xo_buf_append_div(xop, "label", 0, NULL, 0, str, len, 0, 0);
-	break;
-
-    case XO_STYLE_XML:
-    case XO_STYLE_JSON:
-	/*
-	 * Even though we don't care about labels, we need to do
-	 * enough parsing work to skip over the right bits of xo_vap.
-	 */
-	if (len == 0)
-	    xo_format_data(xop, NULL, fmt, flen, XFF_NO_OUTPUT);
-	break;
-    }
-}
-
-static void
 xo_format_title (xo_handle_t *xop, const char *str, int len,
 		 const char *fmt, int flen)
 {
@@ -2712,7 +2679,8 @@ xo_format_value (xo_handle_t *xop, const char *name, int nlen,
 }
 
 static void
-xo_format_content (xo_handle_t *xop, const char *class_name, int display_only,
+xo_format_content (xo_handle_t *xop, const char *class_name,
+		   const char *xml_tag, int display_only,
 		   const char *str, int len, const char *fmt, int flen)
 {
     switch (xop->xo_style) {
@@ -2735,22 +2703,36 @@ xo_format_content (xo_handle_t *xop, const char *class_name, int display_only,
 	break;
 
     case XO_STYLE_XML:
-	if (display_only)
-	    break;
+	if (xml_tag) {
+	    if (len == 0) {
+		str = fmt;
+		len = flen;
+	    }
 
-	if (len == 0) {
-	    str = fmt;
-	    len = flen;
+	    xo_open_container_h(xop, xml_tag);
+	    xo_format_value(xop, "message", 7, str, len, NULL, 0, 0);
+	    xo_close_container_h(xop, xml_tag);
+
+	} else {
+	    /*
+	     * Even though we don't care about labels, we need to do
+	     * enough parsing work to skip over the right bits of xo_vap.
+	     */
+	    if (len == 0)
+		xo_format_data(xop, NULL, fmt, flen, XFF_NO_OUTPUT);
 	}
-
-	xo_open_container_h(xop, "error");
-	xo_format_value(xop, "message", 7, str, len, NULL, 0, 0);
-	xo_close_container_h(xop, "error");
 	break;
 
     case XO_STYLE_JSON:
-	if (display_only)
+	/*
+	 * Even though we don't care about labels, we need to do
+	 * enough parsing work to skip over the right bits of xo_vap.
+	 */
+	if (display_only) {
+	    if (len == 0)
+		xo_format_data(xop, NULL, fmt, flen, XFF_NO_OUTPUT);
 	    break;
+	}
 	/* XXX need schem for representing errors in JSON */
 	break;
     }
@@ -2855,7 +2837,7 @@ xo_anchor_stop (xo_handle_t *xop, const char *str, int len,
     /* Make a suitable padding field and emit it */
     char *buf = alloca(blen);
     memset(buf, ' ', blen);
-    xo_format_content(xop, "padding", 1, buf, blen, NULL, 0);
+    xo_format_content(xop, "padding", NULL, 1, buf, blen, NULL, 0);
 
     if (width < 0)		/* Already left justified */
 	goto done;
@@ -2940,7 +2922,8 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 	 * Modifiers are optional and include the following field types:
 	 *   'D': decoration; something non-text and non-data (colons, commmas)
 	 *   'E': error message
-	 *   'L': label; text surrounding data
+	 *   'L': label; text preceding data
+	 *   'N': note; text following data
 	 *   'P': padding; whitespace
 	 *   'T': Title, where 'content' is a column title
 	 *   'V': value, where 'content' is the name of the field (the default)
@@ -2983,6 +2966,7 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 	    case 'D':
 	    case 'E':
 	    case 'L':
+	    case 'N':
 	    case 'P':
 	    case 'T':
 	    case 'V':
@@ -3119,27 +3103,35 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 	if (ftype == 'T')
 	    xo_format_title(xop, content, clen, format, flen);
 	else if (ftype == 'L')
-	    xo_format_label(xop, content, clen, format, flen);
+	    xo_format_content(xop, "label", NULL, 1,
+			      content, clen, format, flen);
 	else if (ftype == 0 || ftype == 'V')
 	    xo_format_value(xop, content, clen, format, flen,
 			    encoding, elen, flags);
 	else if (ftype == 'D')
-	    xo_format_content(xop, "decoration", 1, content, clen, format, flen);
+	    xo_format_content(xop, "decoration", NULL, 1,
+			      content, clen, format, flen);
+	else if (ftype == 'N')
+	    xo_format_content(xop, "note", NULL, 1,
+			      content, clen, format, flen);
 	else if (ftype == 'E')
-	    xo_format_content(xop, "error", 0, content, clen, format, flen);
+	    xo_format_content(xop, "error", "error", 0,
+			      content, clen, format, flen);
 	else if (ftype == 'W')
-	    xo_format_content(xop, "warning", 0, content, clen, format, flen);
+	    xo_format_content(xop, "warning", "warning", 0,
+			      content, clen, format, flen);
 	else if (ftype == 'P')
- 	    xo_format_content(xop, "padding", 1, content, clen, format, flen);
+ 	    xo_format_content(xop, "padding", NULL, 1,
+			      content, clen, format, flen);
 	else if (ftype == '[')
 	    xo_anchor_start(xop, content, clen, format, flen);
 	else if (ftype == ']')
 	    xo_anchor_stop(xop, content, clen, format, flen);
 
 	if (flags & XFF_COLON)
-	    xo_format_content(xop, "decoration", 1, ":", 1, NULL, 0);
+	    xo_format_content(xop, "decoration", NULL, 1, ":", 1, NULL, 0);
 	if (flags & XFF_WS)
-	    xo_format_content(xop, "padding", 1, " ", 1, NULL, 0);
+	    xo_format_content(xop, "padding", NULL, 1, " ", 1, NULL, 0);
 
 	cp += sp - basep + 1;
 	if (newp) {
@@ -3966,7 +3958,6 @@ xo_parse_args (int argc, char **argv)
 		xo_warnx("unknown libxo option: '%s'", argv[i]);
 	    return -1;
 	}
-	optind += 1;
     }
 
     argv[save] = NULL;
