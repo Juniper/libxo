@@ -244,7 +244,7 @@ content.  The roles are listed below; only one role is permitted:
 | D | decoration   | Field is non-text (e.g. colon, comma)           |
 | E | error        | Field is an error message                       |
 | L | label        | Field is text that prefixes a value             |
-| N | node         | Field is text that follows a value              |
+| N | note         | Field is text that follows a value              |
 | P | padding      | Field is spaces needed for vertical alignment   |
 | T | title        | Field is a title value for headings             |
 | V | value        | Field is the name of field (the default)        |
@@ -262,11 +262,17 @@ can use CSS to direct their display parameters.
 
     xo_emit("{D:((}{:name}{D:))}\n", name);
 
-**** The Label Role ({D:})
+**** The Label Role ({L:})
 
 Labels are text that appears before a value.
 
     xo_emit("{Lwc:Cost}{:cost/%u}\n", cost);
+
+**** The Note Role ({L:})
+
+Notes are text that appears after a value.
+
+    xo_emit("{:cost/%u} {N:per year}\n", cost);
 
 **** The Padding Role ({P:})
 
