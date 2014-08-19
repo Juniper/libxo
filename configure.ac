@@ -241,7 +241,7 @@ AC_CONFIG_HEADERS([libxo/xoconfig.h])
 AC_CONFIG_FILES([
   Makefile
   libxo-config
-  xo-html/xo-html.sh
+  xohtml/xohtml.sh
   libxo/Makefile
   libxo/xoversion.h
   xo/Makefile
