@@ -4104,26 +4104,9 @@ main (int argc, char **argv)
     };
     int info_count = (sizeof(info) / sizeof(info[0])) - 1;
     
-    for (argc = 1; argv[argc]; argc++) {
-	if (strcmp(argv[argc], "xml") == 0)
-	    xo_set_style(NULL, XO_STYLE_XML);
-	else if (strcmp(argv[argc], "json") == 0)
-	    xo_set_style(NULL, XO_STYLE_JSON);
-	else if (strcmp(argv[argc], "text") == 0)
-	    xo_set_style(NULL, XO_STYLE_TEXT);
-	else if (strcmp(argv[argc], "html") == 0)
-	    xo_set_style(NULL, XO_STYLE_HTML);
-	else if (strcmp(argv[argc], "pretty") == 0)
-	    xo_set_flags(NULL, XOF_PRETTY);
-	else if (strcmp(argv[argc], "xpath") == 0)
-	    xo_set_flags(NULL, XOF_XPATH);
-	else if (strcmp(argv[argc], "info") == 0)
-	    xo_set_flags(NULL, XOF_INFO);
-	else if (strcmp(argv[argc], "keys") == 0)
-	    xo_set_flags(NULL, XOF_KEYS);
-	else if (strcmp(argv[argc], "warn") == 0)
-	    xo_set_flags(NULL, XOF_WARN);
-    }
+    argc = xo_parse_args(argc, argv);
+    if (argc < 0)
+	exit(1);
 
     xo_set_info(NULL, info, info_count);
 
