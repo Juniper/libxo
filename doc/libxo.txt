@@ -219,18 +219,24 @@ field descriptions within the format string.
 
 The field description is given as follows:
 
-  '{' [ modifiers ] ':' content [ '/' format [ '/' eformat ]] '}'
+    '{' [ role | modifier ]* ':' [ content ]
+            [ '/' field-format [ '/' encoding-format ]] '}'
 
-In this example, three format descriptions appear.  The first is a
-padding field containing three spaces of padding, the second is a
+The role describes the function of the field, while the modifiers
+enable optional behaviors.  The contents, field-format, and
+encoding-format are used in varying ways, based on the role.  These
+are described in the following sections.
+
+In the following example, three field descriptors appear.  The first
+is a padding field containing three spaces of padding, the second is a
 label ("In stock"), and the third is a value field ("in-stock").  The
 in-stock field has a "%u" format that will parse the next argument
-passed to xo_emit as an unsigned integer.
+passed to the xo_emit function as an unsigned integer.
 
         xo_emit("{P:   }{Lwc:In stock}{:in-stock/%u}\n", 65);
 
-This single line of code can generate text ("   In stock: 65\n"),
-XML ("<in-stock>65</in-stock>"), JSON ('"in-stock": 6'), or HTML (too
+This single line of code can generate text (" In stock: 65\n"), XML
+("<in-stock>65</in-stock>"), JSON ('"in-stock": 6'), or HTML (too
 lengthy to be listed here).
 
 *** Modifier Roles
@@ -247,6 +253,7 @@ content.  The roles are listed below; only one role is permitted:
 | N | note         | Field is text that follows a value              |
 | P | padding      | Field is spaces needed for vertical alignment   |
 | T | title        | Field is a title value for headings             |
+| U | units        | Field is the units for the previous value field |
 | V | value        | Field is the name of field (the default)        |
 | W | warning      | Field is a warning message                      |
 | [ | start anchor | Begin a section of anchored variable-width text |
@@ -268,7 +275,7 @@ Labels are text that appears before a value.
 
     xo_emit("{Lwc:Cost}{:cost/%u}\n", cost);
 
-**** The Note Role ({L:})
+**** The Note Role ({N:})
 
 Notes are text that appears after a value.
 
@@ -294,6 +301,27 @@ if preceded by a slash ("/"):
 
     xo_emit("{T:Interface Statistics}\n");
     xo_emit("{T:/%20.20s}{T:/%6.6s}\n", "Item Name", "Cost");
+
+**** The Units Role ({U:})
+
+Units are the dimension by which values are measured, such as degrees,
+miles, bytes, and decibels.  The units field carries this information
+for the previous value field.
+
+    xo_emit("{Lwc:Distance}{:distance/%u}{Uw:miles}\n", miles);
+
+Note that the sense of the 'w' modifier is reversed for units;
+a blank is added before the contents, rather than after it.
+
+When the XOF_UNITS flag is set, units are rendered in XML as the
+"units" attribute:
+
+    <distance units="miles">50</distance>
+
+Units can also be rendered in HTML as the "data-units" attribute:
+
+    <div class="data" data-tag="distance" data-units="miles"
+         data-xpath="/top/data/distance">50</div>
 
 **** The Value Role ({V:} and {:})
 
@@ -463,20 +491,25 @@ The white space modifier is only used for the TEXT and HTML output
 styles. It is commonly combined with the colon modifier ('{c:').
 It is purely a convenience feature.
 
-*** Format String
+Note that the sense of the 'w' modifier is reversed for the units role
+({Uw:}); a blank is added before the contents, rather than after it.
 
-The "format" string is similar to the format string for printf(3).
+*** Field Format
+
+The field format is similar to the format string for printf(3).  It's
+used varies based on the role of the field, but generally is used to
+format the field's contents.
+
 If not provided, the format string defaults to "%s".
 
 Note a field definition can contain zero or more printf-style
-'directives', which are sequences that start with a '%' and end
-with a one of following characters: "diouxXDOUeEfFgGaAcCsSp".  Each
-directive is matched by one of more arguments to the xo_emit
-function.
+'directives', which are sequences that start with a '%' and end with a
+one of following characters: "diouxXDOUeEfFgGaAcCsSp".  Each directive
+is matched by one of more arguments to the xo_emit function.
 
 The format string has the form:
 
-  '%' format- modifier * format-character
+  '%' format-modifier * format-character
 
 The format- modifier can be:
 - a '#' character, indicating the output value should be prefixed with
@@ -553,6 +586,8 @@ argument:
 | q   | quad_t      | u_quad_t           |
 |-----+-------------+--------------------|
 
+*** UTF-* and Locale Strings
+
 For strings, the 'h' and 'l' modifiers affect the interpretation of
 the bytes pointed to argument.  The default '%s' string is a 'char *'
 pointer to a string encoded as UTF-8.  Since UTF-8 is compatible with
@@ -592,6 +627,19 @@ required to make appropriate output.  Text style output uses the
 current locale (as described above), while XML, JSON, and HTML use
 UTF-8.
 
+UTF-8 and locale-encoded strings can use multiple bytes to encode one
+column of data.  The traditional "precision'" (aka "max-width") value
+for "%s" printf formatting becomes overloaded since it specifies both
+the number of bytes that can be safely referenced and the maximum
+number of columns to emit.  xo_emit uses the precision as the former,
+and adds a third value for specifying the maximum number of columns.
+
+In this example, the name field is printed with a minimum of 3 columns
+and a maximum of 6.  Up to ten bytes are in used in filling those
+columns. 
+
+    xo_emit("{:name/%3.10.6s}", name);
+
 *** Characters Outside of Field Definitions
 
 Characters in the format string are not part of a field definition are
@@ -599,13 +647,15 @@ copied to the output for the TEXT style, and are ignored for the JSON
 and XML styles.  For HTML, these characters are placed in a <div> with
 class "text".
 
+  EXAMPLE:
+      xo_emit("The hat is {:size/%s}.\n", size_val);
   TEXT:
       The hat is extra small.
   XML:
       <size>extra small</size>
   JSON:
       "size": "extra small"
-  TEXT:
+  HTML:
       <div class="text">The hat is </div>
       <div class="data" data-tag="size">extra small</div>
       <div class="text">.</div>
@@ -619,8 +669,8 @@ just don't do it.
 
 The "eformat" string is the format string used when encoding the field
 for JSON and XML.  If not provided, it defaults to the primary format
-with any minimum width removed.  If the primary is not given, it
-defaults to "%s".
+with any minimum width removed.  If the primary is not given, both
+default to "%s".
 
 *** Content Strings
 
@@ -670,21 +720,22 @@ are represented.
 XML encodes lists as set of sequential elements:
 
     <user>phil</user>
-    <user>rob</user>
-    <user>simon</user>
+    <user>pallavi</user>
+    <user>sjg</user>
 
 JSON encodes lists using a single name and square brackets:
 
-    "user": [ "phil", "rob", "simon" ]
+    "user": [ "phil", "pallavi", "sjg" ]
 
-This means libxo needs three distinct indications hierarchy: one for
-containers of hierarchy that are not related to lists, one for lists, and
-one for each item in a list.
+This means libxo needs three distinct indications of hierarchy: one
+for containers of hierarchy appear only once for any specific parent,
+one for lists, and one for each item in a list.
 
 *** Containers
 
-A "container" is an element of a hierarchy that appears only once per
-parent.  The container has no value, but serves to contain other nodes.
+A "container" is an element of a hierarchy that appears only once
+under any specific parent.  The container has no value, but serves to
+contain other nodes.
 
 To open a container, call xo_open_container() or
 xo_open_container_h().  The former uses the default handle and
