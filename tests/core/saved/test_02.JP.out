@@ -1,6 +1,12 @@
 {
   "top": {
     "data": {
+      "distance": 50,
+      "location": "Boston",
+      "memory": 64,
+      "total": 640,
+      "memory": 64,
+      "total": 640,
       "unknown": 1010,
       "min": 15,
       "cur": 20,
