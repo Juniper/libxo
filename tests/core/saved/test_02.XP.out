@@ -1,5 +1,8 @@
 <top>
   <data>
+    <mbuf-current>10</mbuf-current>
+    <mbuf-cache>20</mbuf-cache>
+    <mbuf-total>30</mbuf-total>
     <distance units="miles">50</distance>
     <location>Boston</location>
     <memory units="k">64</memory>
