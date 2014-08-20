@@ -1,4 +1,13 @@
 <div class="line">
+  <div class="data" data-tag="mbuf-current">10</div>
+  <div class="text">/</div>
+  <div class="data" data-tag="mbuf-cache">20</div>
+  <div class="text">/</div>
+  <div class="data" data-tag="mbuf-total">30</div>
+  <div class="text"> </div>
+  <div class="note">mbufs &lt;&amp;&gt; in use (current/cache/total)</div>
+</div>
+<div class="line">
   <div class="data" data-tag="distance" data-units="miles">50</div>
   <div class="padding"> </div>
   <div class="text"> from </div>
