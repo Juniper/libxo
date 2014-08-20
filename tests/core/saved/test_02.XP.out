@@ -1,5 +1,11 @@
 <top>
   <data>
+    <distance units="miles">50</distance>
+    <location>Boston</location>
+    <memory units="k">64</memory>
+    <total units="kb">640</total>
+    <memory units="k">64</memory>
+    <total units="kilobytes">640</total>
     <unknown>1010</unknown>
     <min>15</min>
     <cur>20</cur>
