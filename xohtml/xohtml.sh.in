@@ -39,11 +39,11 @@ done
 
 echo "<html>\n<head>\n"
 echo '<meta http-equiv="content-type" content="text/html; charset=utf-8"/>'
-echo '<link rel="stylesheet" href="'$BASE'/xo-html.css">'
-echo '<link rel="stylesheet" href="'$BASE'/jquery.qtip.css"/>'
-echo '<script type="text/javascript" src="'$BASE'/jquery.js"></script>'
-echo '<script type="text/javascript" src="'$BASE'/jquery.qtip.js"></script>'
-echo '<script type="text/javascript" src="'$BASE'/xo-html.js"></script>'
+echo '<link rel="stylesheet" href="'$BASE'/xohtml.css">'
+echo '<link rel="stylesheet" href="'$BASE'/external/jquery.qtip.css"/>'
+echo '<script type="text/javascript" src="'$BASE'/external/jquery.js"></script>'
+echo '<script type="text/javascript" src="'$BASE'/external/jquery.qtip.js"></script>'
+echo '<script type="text/javascript" src="'$BASE'/xohtml.js"></script>'
 echo '<script>'
 echo '</script>'
 echo "</head>\n<body>\n"
