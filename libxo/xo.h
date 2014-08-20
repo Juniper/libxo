@@ -42,12 +42,14 @@ typedef unsigned long xo_xof_flags_t;
 #define XOF_KEYS	(1<<11)	/** Flag 'key' fields for xml and json */
 
 #define XOF_IGNORE_CLOSE (1<<12) /** Ignore errors on close tags */
-#define XOF_NOT_FIRST	(1<<13)	 /* Not the first item (json)  */
+#define XOF_NOT_FIRST	(1<<13)	 /* Not the first item (JSON)  */
 #define XOF_NO_LOCALE	(1<<14)	 /** Don't bother with locale */
 #define XOF_TOP_EMITTED	(1<<15)	 /* The top JSON braces have been emitted  */
 
 #define XOF_NO_TOP	(1<<16)	/** Don't emit the top braces in JSON */
 #define XOF_ANCHOR	(1<<17)	/** An anchor is in place  */
+#define XOF_UNITS	(1<<18)	/** Encode units in XML */
+#define XOF_UNITS_PENDING (1<<19) /** We have a units-insertion pending */
 
 /*
  * The xo_info_t structure provides a mapping between names and
