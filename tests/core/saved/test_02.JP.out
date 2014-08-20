@@ -1,6 +1,9 @@
 {
   "top": {
     "data": {
+      "mbuf-current": 10,
+      "mbuf-cache": 20,
+      "mbuf-total": 30,
       "distance": 50,
       "location": "Boston",
       "memory": 64,
