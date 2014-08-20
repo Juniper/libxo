@@ -1979,6 +1979,21 @@ xo_format_string (xo_handle_t *xop, xo_buffer_t *xbp, xo_xff_flags_t flags,
 }
 
 static void
+xo_data_append_content (xo_handle_t *xop, const char *str, int len)
+{
+    int cols;
+    int need_enc = (xop->xo_style == XO_STYLE_TEXT)
+	? XF_ENC_LOCALE : XF_ENC_UTF8;
+
+    cols = xo_format_string_direct(xop, &xop->xo_data, XFF_UNESCAPE,
+				   NULL, str, len, -1,
+				   need_enc, XF_ENC_UTF8);
+
+    if (xop->xo_flags & XOF_ANCHOR)
+	xop->xo_anchor_columns += cols;
+}
+
+static void
 xo_bump_width (xo_format_t *xfp, int digit)
 {
     int *ip = &xfp->xf_width[xfp->xf_dots];
@@ -2732,9 +2747,7 @@ xo_format_content (xo_handle_t *xop, const char *class_name,
     switch (xop->xo_style) {
     case XO_STYLE_TEXT:
 	if (len) {
-	    if (xop->xo_flags & XOF_ANCHOR)
-		xop->xo_anchor_columns += len;
-	    xo_data_append(xop, str, len);
+	    xo_data_append_content(xop, str, len);
 	} else
 	    xo_format_data(xop, NULL, fmt, flen, 0);
 	break;
