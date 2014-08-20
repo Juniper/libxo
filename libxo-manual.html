@@ -22155,33 +22155,33 @@ jQuery(function ($) {
 <a href="#handles-2">Handles</a><ul class="toc">
 <li class="tocline1">
 <div class="section-number" id="toc_doc_section_3_1_1">3.1.1   </div>
-<a href="#xocreate">xo_create</a>
+<a href="#xo_create">xo_create</a>
 </li>
 <li class="tocline1">
 <div class="section-number" id="toc_doc_section_3_1_2">3.1.2   </div>
-<a href="#xocreatetofile">xo_create_to_file</a>
+<a href="#xo_create_to_file">xo_create_to_file</a>
 </li>
 <li class="tocline1">
 <div class="section-number" id="toc_doc_section_3_1_3">3.1.3   </div>
-<a href="#xosetwriter">xo_set_writer</a>
+<a href="#xo_set_writer">xo_set_writer</a>
 </li>
 <li class="tocline1">
 <div class="section-number" id="toc_doc_section_3_1_4">3.1.4   </div>
-<a href="#xosetstyle">xo_set_style</a><ul class="toc"><li class="tocline1">
+<a href="#xo_set_style">xo_set_style</a><ul class="toc"><li class="tocline1">
 <div class="section-number" id="toc_doc_section_3_1_4_1">3.1.4.1   </div>
 <a href="#styles">Output Styles (XO_STYLE_*)</a>
 </li></ul>
 </li>
 <li class="tocline1">
 <div class="section-number" id="toc_doc_section_3_1_5">3.1.5   </div>
-<a href="#xosetflags">xo_set_flags</a><ul class="toc"><li class="tocline1">
+<a href="#xo_set_flags">xo_set_flags</a><ul class="toc"><li class="tocline1">
 <div class="section-number" id="toc_doc_section_3_1_5_1">3.1.5.1   </div>
 <a href="#flags">Flags (XOF_*)</a>
 </li></ul>
 </li>
 <li class="tocline1">
 <div class="section-number" id="toc_doc_section_3_1_6">3.1.6   </div>
-<a href="#xodestroy">xo_destroy</a>
+<a href="#xo_destroy">xo_destroy</a>
 </li>
 </ul>
 </li>
@@ -22198,7 +22198,7 @@ jQuery(function ($) {
 <a href="#additional-functionality">Additional Functionality</a><ul class="toc">
 <li class="tocline1">
 <div class="section-number" id="toc_doc_section_3_4_1">3.4.1   </div>
-<a href="#parsing-command-line-arguments-xoparseargs">Parsing Command-line Arguments (xo_parse_args)</a>
+<a href="#parsing-command-line-arguments-xo_parse_args">Parsing Command-line Arguments (xo_parse_args)</a>
 </li>
 <li class="tocline1">
 <div class="section-number" id="toc_doc_section_3_4_2">3.4.2   </div>
@@ -23299,7 +23299,7 @@ jQuery(function ($) {
 <h3 id="doc_section_3_1_1">
 <div class="self-section-number">
 <a href="#doc_section_3_1_1">3.1.1</a> </div>
-<a id="xocreate" href="#xocreate">xo_create</a>
+<a id="xo_create" href="#xo_create">xo_create</a>
 </h3>
 <p id="doc_section_3_1_1_p_1">A handle can be allocated using the xo_create() function:</p>
 <div id="doc_figure_u.47"></div> <pre>
@@ -23315,7 +23315,7 @@ jQuery(function ($) {
 <h3 id="doc_section_3_1_2">
 <div class="self-section-number">
 <a href="#doc_section_3_1_2">3.1.2</a> </div>
-<a id="xocreatetofile" href="#xocreatetofile">xo_create_to_file</a>
+<a id="xo_create_to_file" href="#xo_create_to_file">xo_create_to_file</a>
 </h3>
 <p id="doc_section_3_1_2_p_1">By default, libxo writes output to standard output. A convenience function is provided for situations when output should be written to different file:</p>
 <div id="doc_figure_u.48"></div> <pre>
@@ -23327,7 +23327,7 @@ jQuery(function ($) {
 <h3 id="doc_section_3_1_3">
 <div class="self-section-number">
 <a href="#doc_section_3_1_3">3.1.3</a> </div>
-<a id="xosetwriter" href="#xosetwriter">xo_set_writer</a>
+<a id="xo_set_writer" href="#xo_set_writer">xo_set_writer</a>
 </h3>
 <p id="doc_section_3_1_3_p_1">The xo_set_writer function allows custom 'write' functions which can tailor how libxo writes data. An opaque argument is recorded and passed back to the write function, allowing the function to acquire context information. The 'close' function can release this opaque data and any other resources as needed.</p>
 <div id="doc_figure_u.49"></div> <pre>
@@ -23339,7 +23339,7 @@ jQuery(function ($) {
 <h3 id="doc_section_3_1_4">
 <div class="self-section-number">
 <a href="#doc_section_3_1_4">3.1.4</a> </div>
-<a id="xosetstyle" href="#xosetstyle">xo_set_style</a>
+<a id="xo_set_style" href="#xo_set_style">xo_set_style</a>
 </h3>
 <p id="doc_section_3_1_4_p_1">To set the style, use the xo_set_style() function:</p>
 <div id="doc_figure_u.50"></div> <pre>
@@ -23384,7 +23384,7 @@ jQuery(function ($) {
 <h3 id="doc_section_3_1_5">
 <div class="self-section-number">
 <a href="#doc_section_3_1_5">3.1.5</a> </div>
-<a id="xosetflags" href="#xosetflags">xo_set_flags</a>
+<a id="xo_set_flags" href="#xo_set_flags">xo_set_flags</a>
 </h3>
 <p id="doc_section_3_1_5_p_1">To set the flags, use the xo_set_flags() function:</p>
 <div id="doc_figure_u.52"></div> <pre>
@@ -23477,7 +23477,7 @@ jQuery(function ($) {
 <h3 id="doc_section_3_1_6">
 <div class="self-section-number">
 <a href="#doc_section_3_1_6">3.1.6</a> </div>
-<a id="xodestroy" href="#xodestroy">xo_destroy</a>
+<a id="xo_destroy" href="#xo_destroy">xo_destroy</a>
 </h3>
 <p id="doc_section_3_1_6_p_1">The xo_destroy function releases a handle and any resources it is using. Calling xo_destroy with a NULL handle will release any resources associated with the default handle.</p>
 <div id="doc_figure_u.55"></div> <pre>
@@ -23512,7 +23512,7 @@ jQuery(function ($) {
 <h3 id="doc_section_3_4_1">
 <div class="self-section-number">
 <a href="#doc_section_3_4_1">3.4.1</a> </div>
-<a id="parsing-command-line-arguments-xoparseargs" href="#parsing-command-line-arguments-xoparseargs">Parsing Command-line Arguments (xo_parse_args)</a>
+<a id="parsing-command-line-arguments-xo_parse_args" href="#parsing-command-line-arguments-xo_parse_args">Parsing Command-line Arguments (xo_parse_args)</a>
 </h3>
 <p id="doc_section_3_4_1_p_1">The xo_parse_args() function is used to process a program's arguments. libxo-specific options are processed and removed from the argument list so the calling application does not need to process them. If successful, a new value for argc is returned. On failure, a message it emitted and -1 is returned.</p>
 <div id="doc_figure_u.57"></div> <pre>
