@@ -38,9 +38,16 @@ main (int argc, char **argv)
 	    xo_set_flags(NULL, XOF_INFO);
     }
 
+    xo_set_flags(NULL, XOF_UNITS); /* Always test w/ this */
+
     xo_open_container_h(NULL, "top");
 
     xo_open_container("data");
+
+    xo_emit("{:distance/%u}{Uw:miles} from {:location}\n", 50, "Boston");
+    xo_emit("{:memory/%u}{U:k} left out of {:total/%u}{U:kb}\n", 64, 640);
+    xo_emit("{:memory/%u}{U:/%s} left out of {:total/%u}{U:/%s}\n",
+	    64, "k", 640, "kilobytes");
 
     xo_emit("{T:/before%safter:}\n", "working");
 
