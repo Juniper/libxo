@@ -44,6 +44,10 @@ main (int argc, char **argv)
 
     xo_open_container("data");
 
+    xo_emit("{:mbuf-current/%u}/{:mbuf-cache/%u}/{:mbuf-total/%u} "
+	    "{N:mbufs <&> in use (current\\/cache\\/total)}\n",
+	    10, 20, 30);
+
     xo_emit("{:distance/%u}{Uw:miles} from {:location}\n", 50, "Boston");
     xo_emit("{:memory/%u}{U:k} left out of {:total/%u}{U:kb}\n", 64, 640);
     xo_emit("{:memory/%u}{U:/%s} left out of {:total/%u}{U:/%s}\n",
