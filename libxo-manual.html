@@ -22015,7 +22015,7 @@ jQuery(function ($) {
 </li>
 <li class="tocline1">
 <div class="section-number" id="toc_doc_section_2_2">2.2   </div>
-<a href="#doc_section_2_2">Format Strings</a><ul class="toc">
+<a href="#format-strings">Format Strings</a><ul class="toc">
 <li class="tocline1">
 <div class="section-number" id="toc_doc_section_2_2_1">2.2.1   </div>
 <a href="#doc_section_2_2_1">Modifier Roles</a><ul class="toc">
@@ -22167,11 +22167,17 @@ jQuery(function ($) {
 </li>
 <li class="tocline1">
 <div class="section-number" id="toc_doc_section_3_1_4">3.1.4   </div>
-<a href="#doc_section_3_1_4">xo_set_style</a>
+<a href="#doc_section_3_1_4">xo_set_style</a><ul class="toc"><li class="tocline1">
+<div class="section-number" id="toc_doc_section_3_1_4_1">3.1.4.1   </div>
+<a href="#styles">Output Styles (XO_STYLE_*)</a>
+</li></ul>
 </li>
 <li class="tocline1">
 <div class="section-number" id="toc_doc_section_3_1_5">3.1.5   </div>
-<a href="#doc_section_3_1_5">xo_set_flags</a>
+<a href="#doc_section_3_1_5">xo_set_flags</a><ul class="toc"><li class="tocline1">
+<div class="section-number" id="toc_doc_section_3_1_5_1">3.1.5.1   </div>
+<a href="#flags">Flags (XOF_*)</a>
+</li></ul>
 </li>
 <li class="tocline1">
 <div class="section-number" id="toc_doc_section_3_1_6">3.1.6   </div>
@@ -22196,23 +22202,14 @@ jQuery(function ($) {
 </li>
 <li class="tocline1">
 <div class="section-number" id="toc_doc_section_3_4_2">3.4.2   </div>
-<a href="#styles">Output Styles (XO_STYLE_*)</a>
-</li>
-</ul>
-</li>
-<li class="tocline1">
-<div class="section-number" id="toc_doc_section_3_5">3.5   </div>
-<a href="#flags">Flags (XOF_*)</a><ul class="toc">
-<li class="tocline1">
-<div class="section-number" id="toc_doc_section_3_5_1">3.5.1   </div>
 <a href="#info">Information</a>
 </li>
 <li class="tocline1">
-<div class="section-number" id="toc_doc_section_3_5_2">3.5.2   </div>
-<a href="#doc_section_3_5_2">Memory Allocation</a>
+<div class="section-number" id="toc_doc_section_3_4_3">3.4.3   </div>
+<a href="#doc_section_3_4_3">Memory Allocation</a>
 </li>
 <li class="tocline1">
-<div class="section-number" id="toc_doc_section_3_5_3">3.5.3   </div>
+<div class="section-number" id="toc_doc_section_3_4_4">3.4.4   </div>
 <a href="#LIBXO_OPTIONS">LIBXO_OPTIONS</a>
 </li>
 </ul>
@@ -22396,7 +22393,9 @@ jQuery(function ($) {
 <div class="content">
 <h2 id="doc_section_2_2">
 <div class="self-section-number">
-<a href="#doc_section_2_2">2.2</a> </div>Format Strings</h2>
+<a href="#doc_section_2_2">2.2</a> </div>
+<a id="format-strings" href="#format-strings">Format Strings</a>
+</h2>
 <p id="doc_section_2_2_p_1">libxo uses format strings to control the rendering of data into the various output styles. Each format string contains a set of zero or more field descriptions, which describe independent data fields. Each field description contains a set of modifiers, a content string, and zero, one, or two format descriptors. The modifiers tell libxo what the field is and how to treat it, while the format descriptors are formatting instructions using printf-style format strings, telling libxo how to format the field. The field description is placed inside a set of braces, with a colon (":") after the modifiers and a slash ("/") before each format descriptors. Text may be intermixed with field descriptions within the format string.</p>
 <p id="doc_section_2_2_p_2">The field description is given as follows:</p>
 <div id="doc_figure_u.10"></div> <pre>
@@ -23086,7 +23085,7 @@ jQuery(function ($) {
 </tr>
 </tbody>
 </table></div>
-<p id="doc_section_2_3_p_4">The brief options are details in <a href="#LIBXO_OPTIONS" title="LIBXO_OPTIONS">Section 3.5.3</a>.</p>
+<p id="doc_section_2_3_p_4">The brief options are details in <a href="#LIBXO_OPTIONS" title="LIBXO_OPTIONS">Section 3.4.4</a>.</p>
 </div>
 <div class="content">
 <h2 id="doc_section_2_4">
@@ -23228,7 +23227,7 @@ jQuery(function ($) {
     xo_handle_t *xop = xo_create(XO_STYLE_JSON, XOF_WARN);
     ....
     xo_emit(xop, "testing\n");
-	    </pre> <p id="doc_section_3_1_1_p_3">See also <a href="#styles" title="Output Styles (XO_STYLE_*)">Section 3.4.2</a> and <a href="#flags" title="Flags (XOF_*)">Section 3.5</a>.</p>
+	    </pre> <p id="doc_section_3_1_1_p_3">See also <a href="#styles" title="Output Styles (XO_STYLE_*)">Section 3.1.4.1</a> and <a href="#flags" title="Flags (XOF_*)">Section 3.1.5.1</a>.</p>
 </div>
 <div class="content">
 <h3 id="doc_section_3_1_2">
@@ -23260,55 +23259,13 @@ jQuery(function ($) {
 	    </pre> <p id="doc_section_3_1_4_p_3">To use the default handle, pass a NULL handle:</p>
 <div id="doc_figure_u.51"></div> <pre>
     xo_set_style(NULL, XO_STYLE_XML);
-	    </pre> </div>
-<div class="content">
-<h3 id="doc_section_3_1_5">
+	    </pre> <div class="content">
+<h4 id="doc_section_3_1_4_1">
 <div class="self-section-number">
-<a href="#doc_section_3_1_5">3.1.5</a> </div>xo_set_flags</h3>
-<p id="doc_section_3_1_5_p_1">To set the flags, use the xo_set_flags() function:</p>
-<div id="doc_figure_u.52"></div> <pre>
-    void xo_set_flags(xo_handle_t *xop, unsigned flags);
-	    </pre> <p id="doc_section_3_1_5_p_3">To use the default handle, pass a NULL handle:</p>
-<div id="doc_figure_u.53"></div> <pre>
-    xo_set_style(NULL, XO_STYLE_XML);
-	    </pre> </div>
-<div class="content">
-<h3 id="doc_section_3_1_6">
-<div class="self-section-number">
-<a href="#doc_section_3_1_6">3.1.6</a> </div>xo_destroy</h3>
-<p id="doc_section_3_1_6_p_1">The xo_destroy function releases a handle and any resources it is using. Calling xo_destroy with a NULL handle will release any resources associated with the default handle.</p>
-<div id="doc_figure_u.54"></div> <pre>
-    void xo_destroy(xo_handle_t *xop);
-	    </pre> </div>
-</div>
-<div class="content"><h2 id="doc_section_3_2">
-<div class="self-section-number">
-<a href="#doc_section_3_2">3.2</a> </div>Emitting Content</h2></div>
-<div class="content"><h2 id="doc_section_3_3">
-<div class="self-section-number">
-<a href="#doc_section_3_3">3.3</a> </div>Emitting Hierarchy</h2></div>
-<div class="content">
-<h2 id="doc_section_3_4">
-<div class="self-section-number">
-<a href="#doc_section_3_4">3.4</a> </div>Additional Functionality</h2>
-<div class="content">
-<h3 id="doc_section_3_4_1">
-<div class="self-section-number">
-<a href="#doc_section_3_4_1">3.4.1</a> </div>Parsing Command-line Arguments (xo_parse_args)</h3>
-<p id="doc_section_3_4_1_p_1">The xo_parse_args() function is used to process a program's arguments. libxo-specific options are processed and removed from the argument list so the calling application does not need to process them. If successful, a new value for argc is returned. On failure, a message it emitted and -1 is returned.</p>
-<div id="doc_figure_u.55"></div> <pre>
-    argc = xo_parse_args(argc, argv);
-    if (argc &lt; 0)
-        exit(1);
-	    </pre> <p id="doc_section_3_4_1_p_3">Following the call to xo_parse_args, the application can process the remaining argument in a normal manner.</p>
-</div>
-<div class="content">
-<h3 id="doc_section_3_4_2">
-<div class="self-section-number">
-<a href="#doc_section_3_4_2">3.4.2</a> </div>
+<a href="#doc_section_3_1_4_1">3.1.4.1</a> </div>
 <a id="styles" href="#styles">Output Styles (XO_STYLE_*)</a>
-</h3>
-<p id="doc_section_3_4_2_p_1">The libxo functions accept a set of output styles:</p>
+</h4>
+<p id="doc_section_3_1_4_1_p_1">The libxo functions accept a set of output styles:</p>
 <div id="doc_table_u.6"><table summary="" class="tt full" cellpadding="3" cellspacing="0">
 <thead><tr>
 <th class="left">Flag</th>
@@ -23336,12 +23293,22 @@ jQuery(function ($) {
 </div>
 </div>
 <div class="content">
-<h2 id="doc_section_3_5">
+<h3 id="doc_section_3_1_5">
 <div class="self-section-number">
-<a href="#doc_section_3_5">3.5</a> </div>
+<a href="#doc_section_3_1_5">3.1.5</a> </div>xo_set_flags</h3>
+<p id="doc_section_3_1_5_p_1">To set the flags, use the xo_set_flags() function:</p>
+<div id="doc_figure_u.52"></div> <pre>
+    void xo_set_flags(xo_handle_t *xop, unsigned flags);
+	    </pre> <p id="doc_section_3_1_5_p_3">To use the default handle, pass a NULL handle:</p>
+<div id="doc_figure_u.53"></div> <pre>
+    xo_set_style(NULL, XO_STYLE_XML);
+	    </pre> <div class="content">
+<h4 id="doc_section_3_1_5_1">
+<div class="self-section-number">
+<a href="#doc_section_3_1_5_1">3.1.5.1</a> </div>
 <a id="flags" href="#flags">Flags (XOF_*)</a>
-</h2>
-<p id="doc_section_3_5_p_1">The set of valid flags include:</p>
+</h4>
+<p id="doc_section_3_1_5_1_p_1">The set of valid flags include:</p>
 <div id="doc_table_u.7"><table summary="" class="tt full" cellpadding="3" cellspacing="0">
 <thead><tr>
 <th class="left">Flag</th>
@@ -23374,11 +23341,11 @@ jQuery(function ($) {
 </tr>
 </tbody>
 </table></div>
-<p id="doc_section_3_5_p_2">The XOF_CLOSE_FP flag will trigger the call of the close_func (provided via xo_set_writer()) when the handle is destroyed.</p>
-<p id="doc_section_3_5_p_3">The XOF_PRETTY flag requests 'pretty printing', which will trigger the addition of indentation and newlines to enhance the readability of XML, JSON, and HTML output. Text output is not affected.</p>
-<p id="doc_section_3_5_p_4">The XOF_WARN flag requests that warnings will trigger diagnostic output (on standard error) when the library notices errors during operations, or with arguments to functions. Without warning enabled, such conditions are ignored.</p>
-<p id="doc_section_3_5_p_5">Warnings allow developers to debug their interaction with libxo. The function "xo_failure" can used as a breakpoint for a debugger, regardless of whether warnings are enabled.</p>
-<p id="doc_section_3_5_p_6">If the style is XO_STYLE_HTML, the following additional flags can be used:</p>
+<p id="doc_section_3_1_5_1_p_2">The XOF_CLOSE_FP flag will trigger the call of the close_func (provided via xo_set_writer()) when the handle is destroyed.</p>
+<p id="doc_section_3_1_5_1_p_3">The XOF_PRETTY flag requests 'pretty printing', which will trigger the addition of indentation and newlines to enhance the readability of XML, JSON, and HTML output. Text output is not affected.</p>
+<p id="doc_section_3_1_5_1_p_4">The XOF_WARN flag requests that warnings will trigger diagnostic output (on standard error) when the library notices errors during operations, or with arguments to functions. Without warning enabled, such conditions are ignored.</p>
+<p id="doc_section_3_1_5_1_p_5">Warnings allow developers to debug their interaction with libxo. The function "xo_failure" can used as a breakpoint for a debugger, regardless of whether warnings are enabled.</p>
+<p id="doc_section_3_1_5_1_p_6">If the style is XO_STYLE_HTML, the following additional flags can be used:</p>
 <div id="doc_table_u.8"><table summary="" class="tt full" cellpadding="3" cellspacing="0">
 <thead><tr>
 <th class="left">Flag</th>
@@ -23395,9 +23362,9 @@ jQuery(function ($) {
 </tr>
 </tbody>
 </table></div>
-<p id="doc_section_3_5_p_7">The XOF_XPATH flag enables the emission of XPath expressions detailing the hierarchy of XML elements used to encode the data field, if the XPATH style of output were requested.</p>
-<p id="doc_section_3_5_p_8">The XOF_INFO flag encodes additional informational fields for HTML output. See <a href="#info" title="Information">Section 3.5.1</a> for details.</p>
-<p id="doc_section_3_5_p_9">If the style is XO_STYLE_XML, the following additional flags can be used:</p>
+<p id="doc_section_3_1_5_1_p_7">The XOF_XPATH flag enables the emission of XPath expressions detailing the hierarchy of XML elements used to encode the data field, if the XPATH style of output were requested.</p>
+<p id="doc_section_3_1_5_1_p_8">The XOF_INFO flag encodes additional informational fields for HTML output. See <a href="#info" title="Information">Section 3.4.2</a> for details.</p>
+<p id="doc_section_3_1_5_1_p_9">If the style is XO_STYLE_XML, the following additional flags can be used:</p>
 <div id="doc_table_u.9"><table summary="" class="tt full" cellpadding="3" cellspacing="0">
 <thead><tr>
 <th class="left">Flag</th>
@@ -23408,22 +23375,62 @@ jQuery(function ($) {
 <td>Flag 'key' fields for xml</td>
 </tr></tbody>
 </table></div>
-<p id="doc_section_3_5_p_10">The XOF_KEYS flag adds 'key' attribute to the XML encoding for field definitions that use the 'k' modifier. The key attribute has the value "key":</p>
-<div id="doc_figure_u.56"></div> <pre>
+<p id="doc_section_3_1_5_1_p_10">The XOF_KEYS flag adds 'key' attribute to the XML encoding for field definitions that use the 'k' modifier. The key attribute has the value "key":</p>
+<div id="doc_figure_u.54"></div> <pre>
     xo_emit("{k:name}", item);
 
   XML:
       &lt;name key="key"&gt;truck&lt;/name&gt;
-	    </pre> <div class="content">
-<h3 id="doc_section_3_5_1">
+	    </pre> </div>
+</div>
+<div class="content">
+<h3 id="doc_section_3_1_6">
 <div class="self-section-number">
-<a href="#doc_section_3_5_1">3.5.1</a> </div>
+<a href="#doc_section_3_1_6">3.1.6</a> </div>xo_destroy</h3>
+<p id="doc_section_3_1_6_p_1">The xo_destroy function releases a handle and any resources it is using. Calling xo_destroy with a NULL handle will release any resources associated with the default handle.</p>
+<div id="doc_figure_u.55"></div> <pre>
+    void xo_destroy(xo_handle_t *xop);
+	    </pre> </div>
+</div>
+<div class="content">
+<h2 id="doc_section_3_2">
+<div class="self-section-number">
+<a href="#doc_section_3_2">3.2</a> </div>Emitting Content</h2>
+<p id="doc_section_3_2_p_1">The following functions are used to emit output:</p>
+<div id="doc_figure_u.56"></div> <pre>
+    int xo_emit (const char *fmt, ...);
+    int xo_emit_h (xo_handle_t *xop, const char *fmt, ...);
+    int xo_emit_hv (xo_handle_t *xop, const char *fmt, va_list vap);
+	    </pre> <p id="doc_section_3_2_p_3">The "fmt" argument is a string containing field descriptors as specified in <a href="#format-strings" title="Format Strings">Section 2.2</a>. The use of a handle is optional and NULL can be passed</p>
+</div>
+<div class="content"><h2 id="doc_section_3_3">
+<div class="self-section-number">
+<a href="#doc_section_3_3">3.3</a> </div>Emitting Hierarchy</h2></div>
+<div class="content">
+<h2 id="doc_section_3_4">
+<div class="self-section-number">
+<a href="#doc_section_3_4">3.4</a> </div>Additional Functionality</h2>
+<div class="content">
+<h3 id="doc_section_3_4_1">
+<div class="self-section-number">
+<a href="#doc_section_3_4_1">3.4.1</a> </div>Parsing Command-line Arguments (xo_parse_args)</h3>
+<p id="doc_section_3_4_1_p_1">The xo_parse_args() function is used to process a program's arguments. libxo-specific options are processed and removed from the argument list so the calling application does not need to process them. If successful, a new value for argc is returned. On failure, a message it emitted and -1 is returned.</p>
+<div id="doc_figure_u.57"></div> <pre>
+    argc = xo_parse_args(argc, argv);
+    if (argc &lt; 0)
+        exit(1);
+	    </pre> <p id="doc_section_3_4_1_p_3">Following the call to xo_parse_args, the application can process the remaining argument in a normal manner.</p>
+</div>
+<div class="content">
+<h3 id="doc_section_3_4_2">
+<div class="self-section-number">
+<a href="#doc_section_3_4_2">3.4.2</a> </div>
 <a id="info" href="#info">Information</a>
 </h3>
-<p id="doc_section_3_5_1_p_1">HTML data can include additional information in attributes that begin with "data&#8209;". To enable this, three things must occur:</p>
-<p id="doc_section_3_5_1_p_2">First the application must build an array of xo_info_t structures, one per tag. The array must be sorted by name, since libxo uses a binary search to find the entry that matches names from format instructions.</p>
-<p id="doc_section_3_5_1_p_3">Second, the application must inform libxo about this information using the xo_set_info() call:</p>
-<div id="doc_figure_u.57"></div> <pre>
+<p id="doc_section_3_4_2_p_1">HTML data can include additional information in attributes that begin with "data&#8209;". To enable this, three things must occur:</p>
+<p id="doc_section_3_4_2_p_2">First the application must build an array of xo_info_t structures, one per tag. The array must be sorted by name, since libxo uses a binary search to find the entry that matches names from format instructions.</p>
+<p id="doc_section_3_4_2_p_3">Second, the application must inform libxo about this information using the xo_set_info() call:</p>
+<div id="doc_figure_u.58"></div> <pre>
     typedef struct xo_info_s {
         const char *xi_name;    /* Name of the element */
         const char *xi_type;    /* Type of field */
@@ -23431,9 +23438,9 @@ jQuery(function ($) {
     } xo_info_t;
 
     void xo_set_info (xo_handle_t *xop, xo_info_t *infop, int count);
-	    </pre> <p id="doc_section_3_5_1_p_5">Like other libxo calls, passing NULL for the handle tells libxo to use the default handle.</p>
-<p id="doc_section_3_5_1_p_6">If the count is -1, libxo will count the elements of infop, but there must be an empty element at the end. More typically, the number is known to the application:</p>
-<div id="doc_figure_u.58"></div> <pre>
+	    </pre> <p id="doc_section_3_4_2_p_5">Like other libxo calls, passing NULL for the handle tells libxo to use the default handle.</p>
+<p id="doc_section_3_4_2_p_6">If the count is -1, libxo will count the elements of infop, but there must be an empty element at the end. More typically, the number is known to the application:</p>
+<div id="doc_figure_u.59"></div> <pre>
     xo_info_t info[] = {
         { "in-stock", "number", "Number of items in stock" },
         { "name", "string", "Name of the item" },
@@ -23444,28 +23451,28 @@ jQuery(function ($) {
     int info_count = (sizeof(info) / sizeof(info[0]));
     ...
     xo_set_info(NULL, info, info_count);
-	    </pre> <p id="doc_section_3_5_1_p_8">The type and help values, if present, are emitted as the "data&#8209;type" and "data&#8209;help" attributes:</p>
-<div id="doc_figure_u.59"></div> <pre>
+	    </pre> <p id="doc_section_3_4_2_p_8">The type and help values, if present, are emitted as the "data&#8209;type" and "data&#8209;help" attributes:</p>
+<div id="doc_figure_u.60"></div> <pre>
   &lt;div class="data" data-tag="sku" data-type="string" 
        data-help="Stock Keeping Unit"&gt;GRO-000-533&lt;/div&gt;
 	    </pre> </div>
 <div class="content">
-<h3 id="doc_section_3_5_2">
+<h3 id="doc_section_3_4_3">
 <div class="self-section-number">
-<a href="#doc_section_3_5_2">3.5.2</a> </div>Memory Allocation</h3>
-<p id="doc_section_3_5_2_p_1">The xo_set_allocator function allows libxo to be used in environments where the standard realloc() and free() functions are not available.</p>
-<div id="doc_figure_u.60"></div> <pre>
+<a href="#doc_section_3_4_3">3.4.3</a> </div>Memory Allocation</h3>
+<p id="doc_section_3_4_3_p_1">The xo_set_allocator function allows libxo to be used in environments where the standard realloc() and free() functions are not available.</p>
+<div id="doc_figure_u.61"></div> <pre>
     void xo_set_allocator (xo_realloc_func_t realloc_func,
                            xo_free_func_t free_func);
-	    </pre> <p id="doc_section_3_5_2_p_3">realloc_func should expect the same arguments as realloc(3) and return a pointer to memory following the same convention. free_func will receive the same argument as free(3) and should release it, as appropriate for the environment.</p>
+	    </pre> <p id="doc_section_3_4_3_p_3">realloc_func should expect the same arguments as realloc(3) and return a pointer to memory following the same convention. free_func will receive the same argument as free(3) and should release it, as appropriate for the environment.</p>
 </div>
 <div class="content">
-<h3 id="doc_section_3_5_3">
+<h3 id="doc_section_3_4_4">
 <div class="self-section-number">
-<a href="#doc_section_3_5_3">3.5.3</a> </div>
+<a href="#doc_section_3_4_4">3.4.4</a> </div>
 <a id="LIBXO_OPTIONS" href="#LIBXO_OPTIONS">LIBXO_OPTIONS</a>
 </h3>
-<p id="doc_section_3_5_3_p_1">Another debugging tool is the environment variable "LIBXO_OPTIONS", which can be set to a string of options.</p>
+<p id="doc_section_3_4_4_p_1">The environment variable "LIBXO_OPTIONS" can be set to a string of options:</p>
 <div id="doc_table_u.10"><table summary="" class="tt full" cellpadding="3" cellspacing="0">
 <thead><tr>
 <th class="left">Option</th>
@@ -23510,11 +23517,11 @@ jQuery(function ($) {
 </tr>
 </tbody>
 </table></div>
-<p id="doc_section_3_5_3_p_2">For example, warnings can be enabled by:</p>
-<div id="doc_figure_u.61"></div> <pre>
-    % env LIBXO_OPTIONS=W my-app
-	    </pre> <p id="doc_section_3_5_3_p_4">Complete HTML output can be generated with:</p>
+<p id="doc_section_3_4_4_p_2">For example, warnings can be enabled by:</p>
 <div id="doc_figure_u.62"></div> <pre>
+    % env LIBXO_OPTIONS=W my-app
+	    </pre> <p id="doc_section_3_4_4_p_4">Complete HTML output can be generated with:</p>
+<div id="doc_figure_u.63"></div> <pre>
     % env LIBXO_OPTIONS=HXI my-app
 	    </pre> </div>
 </div>
@@ -23527,7 +23534,7 @@ jQuery(function ($) {
 <p id="doc_section_4_p_1">The "xo" utility allows command line access to the functionality of the libxo library. Using "xo", shell scripts can emit XML, JSON, and HTML using the same commands that emit text output.</p>
 <p id="doc_section_4_p_2">The style of output can be selected using a specific option: "&#8209;X" for XML, "&#8209;J" for JSON, "&#8209;H" for HTML, or "&#8209;T" for TEXT, which is the default. The "--style &lt;style&gt;" option can also be used. The LIBXO_OPTIONS environment variable can also be used to set the style, as well as other flags.</p>
 <p id="doc_section_4_p_3">The "xo" utility accepts a format string suitable for xo_emit() and a set of zero or more arguments used to supply data for that string.</p>
-<div id="doc_figure_u.63"></div> <pre>
+<div id="doc_figure_u.64"></div> <pre>
     xo "The {k:name} weighs {:weight/%d} pounds.\n" fish 6
 
   TEXT:
@@ -23547,7 +23554,7 @@ jQuery(function ($) {
       &lt;div class="text"&gt; pounds.&lt;/div&gt;
     &lt;/div&gt;
 	    </pre> <p id="doc_section_4_p_5">The "--wrap &lt;path&gt;" option can be used to wrap emitted content in a specific hierarchy. The path is a set of hierarchical names separated by the '/' character.</p>
-<div id="doc_figure_u.64"></div> <pre>
+<div id="doc_figure_u.65"></div> <pre>
     xo --wrap top/a/b/c '{:tag}' value
 
   XML:
@@ -23571,7 +23578,7 @@ jQuery(function ($) {
       }
     }
 	    </pre> <p id="doc_section_4_p_7">The "--open &lt;path&gt;" and "--close &lt;path&gt;" can be used to emit hierarchical information without the matching close and open tag. This allows a shell script to emit open tags, data, and then close tags. The "&#8209;&#8209;depth" option may be used to set the depth for indentation. The "&#8209;&#8209;leading&#8209;xpath" may be used to prepend data to the XPath values used for HTML output style.</p>
-<div id="doc_figure_u.65"></div> <pre>
+<div id="doc_figure_u.66"></div> <pre>
     #!/bin/sh
     xo --open top/data
     xo --depth 2 '{tag}' value
@@ -23593,7 +23600,7 @@ jQuery(function ($) {
 <div class="self-section-number">
 <a href="#doc_section_4_1">4.1</a> </div>Command Line Options</h2>
 <p id="doc_section_4_1_p_1">Usage: xo [options] format [fields]</p>
-<div id="doc_figure_u.66"></div> <pre>
+<div id="doc_figure_u.67"></div> <pre>
   --close &lt;path&gt;        Close tags for the given path
   --depth &lt;num&gt;         Set the depth for pretty printing
   --help                Display this help text
@@ -23615,7 +23622,7 @@ jQuery(function ($) {
 <h2 id="doc_section_4_2">
 <div class="self-section-number">
 <a href="#doc_section_4_2">4.2</a> </div>Example</h2>
-<div id="doc_figure_u.67"></div> <pre>
+<div id="doc_figure_u.68"></div> <pre>
   % xo 'The {:product} is {:status}\n' stereo "in route"
   The stereo is in route
   % ./xo/xo -p -X 'The {:product} is {:status}\n' stereo "in route"
@@ -23633,7 +23640,7 @@ jQuery(function ($) {
 <div class="self-section-number">
 <a href="#doc_section_5_1">5.1</a> </div>Unit Test</h2>
 <p id="doc_section_5_1_p_1">Here is the unit test example:</p>
-<div id="doc_figure_u.68"></div> <pre>
+<div id="doc_figure_u.69"></div> <pre>
     int
     main (int argc, char **argv)
     {
@@ -23726,7 +23733,7 @@ jQuery(function ($) {
         return 0;
     }
 	    </pre> <p id="doc_section_5_1_p_3">Text output:</p>
-<div id="doc_figure_u.69"></div> <pre>
+<div id="doc_figure_u.70"></div> <pre>
     % ./testxo --libxo text
     Item 'gum':
        Total sold: 1412.0
@@ -23759,7 +23766,7 @@ jQuery(function ($) {
        On order: 1
        SKU: GRO-000-533
 	    </pre> <p id="doc_section_5_1_p_5">JSON output:</p>
-<div id="doc_figure_u.70"></div> <pre>
+<div id="doc_figure_u.71"></div> <pre>
     % ./testxo --libxo json,pretty
     "top": {
       "data": {
@@ -23814,7 +23821,7 @@ jQuery(function ($) {
       }
     }
 	    </pre> <p id="doc_section_5_1_p_7">XML output:</p>
-<div id="doc_figure_u.71"></div> <pre>
+<div id="doc_figure_u.72"></div> <pre>
     % ./testxo --libxo pretty,xml
     &lt;top&gt;
       &lt;data&gt;
@@ -23865,7 +23872,7 @@ jQuery(function ($) {
       &lt;/data&gt;
     &lt;/top&gt;
 	    </pre> <p id="doc_section_5_1_p_9">HMTL output:</p>
-<div id="doc_figure_u.72"></div> <pre>
+<div id="doc_figure_u.73"></div> <pre>
     % ./testxo --libxo pretty,html
     &lt;div class="line"&gt;
       &lt;div class="label"&gt;Item&lt;/div&gt;
@@ -24060,7 +24067,7 @@ jQuery(function ($) {
       &lt;div class="data" data-tag="sku"&gt;GRO-000-533&lt;/div&gt;
     &lt;/div&gt;
 	    </pre> <p id="doc_section_5_1_p_11">HTML output with xpath and info flags:</p>
-<div id="doc_figure_u.73"></div> <pre>
+<div id="doc_figure_u.74"></div> <pre>
     % ./testxo --libxo pretty,html,xpath,info
     &lt;div class="line"&gt;
       &lt;div class="label"&gt;Item&lt;/div&gt;
