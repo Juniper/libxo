@@ -97,7 +97,8 @@ struct xo_handle_s {
     mbstate_t xo_mbstate;	/* Multi-byte character conversion state */
     unsigned xo_anchor_offset;	/* Start of anchored text */
     unsigned xo_anchor_columns;	/* Number of columns since the start anchor */
-    int xo_anchor_width;	/* Desired width of anchored text */
+    int xo_anchor_min_width;	/* Desired width of anchored text */
+    unsigned xo_units_offset;	/* Start of units insertion point */
 };
 
 /* Flags for formatting functions */
@@ -566,6 +567,26 @@ xo_buf_escape (xo_handle_t *xop, xo_buffer_t *xbp,
 }
 
 /*
+ * Write the current contents of the data buffer using the handle's
+ * xo_write function.
+ */
+static void
+xo_write (xo_handle_t *xop)
+{
+    xo_buffer_t *xbp = &xop->xo_data;
+
+    if (xbp->xb_curp != xbp->xb_bufp) {
+	xo_buf_append(xbp, "", 1); /* Append ending NUL */
+	xo_anchor_clear(xop);
+	xop->xo_write(xop->xo_opaque, xbp->xb_bufp);
+	xbp->xb_curp = xbp->xb_bufp;
+    }
+
+    /* Turn off the flags that don't survive across writes */
+    xop->xo_flags &= ~(XOF_UNITS_PENDING);
+}
+
+/*
  * Format arguments into our buffer.  If a custom formatter has been set,
  * we use that to do the work; otherwise we vsnprintf().
  */
@@ -974,9 +995,7 @@ xo_warn_hcv (xo_handle_t *xop, int code, int check_warn,
 	}
 
 	xo_buf_append(xbp, "\n", 2); /* Append newline and NUL to string */
-	xbp->xb_curp = xbp->xb_bufp;
-	xo_anchor_clear(xop);
-	xop->xo_write(xop->xo_opaque, xbp->xb_bufp);
+	xo_write(xop);
 
     } else {
 	vfprintf(stderr, newfmt, vap);
@@ -1119,8 +1138,7 @@ xo_message_hcv (xo_handle_t *xop, int code, const char *fmt, va_list vap)
 	xo_buf_append(xbp, msg_close, sizeof(msg_close) - 1);
 	if (need_nl)
 	    xo_buf_append(xbp, "\n", 2); /* Append newline and NUL to string */
-	xbp->xb_curp = xbp->xb_bufp;
-	xop->xo_write(xop->xo_opaque, xbp->xb_bufp);
+	xo_write(xop);
 	break;
 
     case XO_STYLE_HTML:
@@ -1353,6 +1371,8 @@ xo_name_to_flag (const char *name)
 	return XOF_NO_LOCALE;
     if (strcmp(name, "no-top") == 0)
 	return XOF_NO_TOP;
+    if (strcmp(name, "units") == 0)
+	return XOF_UNITS;
 
     return 0;
 }
@@ -1428,6 +1448,10 @@ xo_set_options (xo_handle_t *xop, const char *input)
 
 	    case 'T':
 		xop->xo_style = XO_STYLE_TEXT;
+		break;
+
+	    case 'U':
+		xop->xo_flags |= XOF_UNITS;
 		break;
 
 	    case 'W':
@@ -2342,6 +2366,20 @@ xo_buf_append_div (xo_handle_t *xop, const char *class, xo_xff_flags_t flags,
     if (name) {
 	xo_data_append(xop, div2, sizeof(div2) - 1);
 	xo_data_escape(xop, name, nlen);
+
+	/*
+	 * Save the offset at which we'd place units.  See xo_format_units.
+	 */
+	if (xop->xo_flags & XOF_UNITS) {
+	    xop->xo_flags |= XOF_UNITS_PENDING;
+	    /*
+	     * Note: We need the '+1' here because we know we've not
+	     * added the closing quote.  We add one, knowing the quote
+	     * will be added shortly.
+	     */
+	    xop->xo_units_offset =
+		xop->xo_data.xb_curp -xop->xo_data.xb_bufp + 1;
+	}
     }
 
     if (name) {
@@ -2613,6 +2651,14 @@ xo_format_value (xo_handle_t *xop, const char *name, int nlen,
 	    xo_data_append(xop, attr, sizeof(attr) - 1);
 	}
 
+	/*
+	 * Save the offset at which we'd place units.  See xo_format_units.
+	 */
+	if (xop->xo_flags & XOF_UNITS) {
+	    xop->xo_flags |= XOF_UNITS_PENDING;
+	    xop->xo_units_offset = xop->xo_data.xb_curp -xop->xo_data.xb_bufp;
+	}
+
 	xo_data_append(xop, ">", 1);
 	xo_format_data(xop, NULL, format, flen, flags);
 	xo_data_append(xop, "</", 2);
@@ -2738,6 +2784,56 @@ xo_format_content (xo_handle_t *xop, const char *class_name,
     }
 }
 
+static void
+xo_format_units (xo_handle_t *xop, const char *str, int len,
+		 const char *fmt, int flen)
+{
+    static char units_start_xml[] = " units=\"";
+    static char units_start_html[] = " data-units=\"";
+
+    if (!(xop->xo_flags & XOF_UNITS_PENDING)) {
+	xo_format_content(xop, "units", NULL, 1, str, len, fmt, flen);
+	return;
+    }
+
+    xo_buffer_t *xbp = &xop->xo_data;
+    int start = xop->xo_units_offset;
+    int stop = xbp->xb_curp - xbp->xb_bufp;
+
+    if (xop->xo_style == XO_STYLE_XML)
+	xo_buf_append(xbp, units_start_xml, sizeof(units_start_xml) - 1);
+    else if (xop->xo_style == XO_STYLE_HTML)
+	xo_buf_append(xbp, units_start_html, sizeof(units_start_html) - 1);
+    else
+	return;
+
+    if (len)
+	xo_data_append(xop, str, len);
+    else
+	xo_format_data(xop, NULL, fmt, flen, 0);
+
+    xo_buf_append(xbp, "\"", 1);
+
+    int now = xbp->xb_curp - xbp->xb_bufp;
+    int delta = now - stop;
+    if (delta < 0) {		/* Strange; no output to move */
+	xbp->xb_curp = xbp->xb_bufp + stop; /* Reset buffer to prior state */
+	return;
+    }
+
+    /*
+     * Now we're in it alright.  We've need to insert the unit value
+     * we just created into the right spot.  We make a local copy,
+     * move it and then insert our copy.  We know there's room in the
+     * buffer, since we're just moving this around.
+     */
+    char *buf = alloca(delta);
+
+    memcpy(buf, xbp->xb_bufp + stop, delta);
+    memmove(xbp->xb_bufp + start + delta, xbp->xb_bufp + start, stop - start);
+    memmove(xbp->xb_bufp + start, buf, delta);
+}
+
 static int
 xo_find_width (xo_handle_t *xop, const char *str, int len,
 		 const char *fmt, int flen)
@@ -2773,7 +2869,7 @@ xo_anchor_clear (xo_handle_t *xop)
     xop->xo_flags &= ~XOF_ANCHOR;
     xop->xo_anchor_offset = 0;
     xop->xo_anchor_columns = 0;
-    xop->xo_anchor_width = 0;
+    xop->xo_anchor_min_width = 0;
 }
 
 /*
@@ -2803,7 +2899,7 @@ xo_anchor_start (xo_handle_t *xop, const char *str, int len,
      * Now we find the width, if possible.  If it's not there,
      * we'll get it on the end anchor.
      */
-    xop->xo_anchor_width = xo_find_width(xop, str, len, fmt, flen);
+    xop->xo_anchor_min_width = xo_find_width(xop, str, len, fmt, flen);
 }
 
 static void
@@ -2818,9 +2914,11 @@ xo_anchor_stop (xo_handle_t *xop, const char *str, int len,
 	return;
     }
 
+    xop->xo_flags &= ~XOF_UNITS_PENDING;
+
     int width = xo_find_width(xop, str, len, fmt, flen);
     if (width == 0)
-	width = xop->xo_anchor_width;
+	width = xop->xo_anchor_min_width;
 
     if (width == 0)		/* No width given; nothing to do */
 	goto done;
@@ -2858,7 +2956,7 @@ xo_anchor_stop (xo_handle_t *xop, const char *str, int len,
 	buf = alloca(delta);	/* Expand buffer if needed */
 
     memcpy(buf, xbp->xb_bufp + stop, delta);
-    memmove(xbp->xb_bufp + start + delta, xbp->xb_bufp + start, delta);
+    memmove(xbp->xb_bufp + start + delta, xbp->xb_bufp + start, stop - start);
     memmove(xbp->xb_bufp + start, buf, delta);
 
  done:
@@ -2868,7 +2966,6 @@ xo_anchor_stop (xo_handle_t *xop, const char *str, int len,
 static int
 xo_do_emit (xo_handle_t *xop, const char *fmt)
 {
-    xo_buffer_t *xbp = &xop->xo_data;
     int rc = 0;
     const char *cp, *sp, *ep, *basep;
     char *newp = NULL;
@@ -2926,6 +3023,7 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 	 *   'N': note; text following data
 	 *   'P': padding; whitespace
 	 *   'T': Title, where 'content' is a column title
+	 *   'U': Units, where 'content' is the unit label
 	 *   'V': value, where 'content' is the name of the field (the default)
 	 *   'W': warning message
 	 *   '[': start a section of anchored text
@@ -2969,6 +3067,7 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 	    case 'N':
 	    case 'P':
 	    case 'T':
+	    case 'U':
 	    case 'V':
 	    case 'W':
 	    case '[':
@@ -3100,28 +3199,32 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 	    flen = 2;
 	}
 
-	if (ftype == 'T')
-	    xo_format_title(xop, content, clen, format, flen);
-	else if (ftype == 'L')
-	    xo_format_content(xop, "label", NULL, 1,
-			      content, clen, format, flen);
-	else if (ftype == 0 || ftype == 'V')
+	if (ftype == 0 || ftype == 'V')
 	    xo_format_value(xop, content, clen, format, flen,
 			    encoding, elen, flags);
 	else if (ftype == 'D')
 	    xo_format_content(xop, "decoration", NULL, 1,
 			      content, clen, format, flen);
-	else if (ftype == 'N')
-	    xo_format_content(xop, "note", NULL, 1,
-			      content, clen, format, flen);
 	else if (ftype == 'E')
 	    xo_format_content(xop, "error", "error", 0,
 			      content, clen, format, flen);
-	else if (ftype == 'W')
-	    xo_format_content(xop, "warning", "warning", 0,
+	else if (ftype == 'L')
+	    xo_format_content(xop, "label", NULL, 1,
+			      content, clen, format, flen);
+	else if (ftype == 'N')
+	    xo_format_content(xop, "note", NULL, 1,
 			      content, clen, format, flen);
 	else if (ftype == 'P')
  	    xo_format_content(xop, "padding", NULL, 1,
+			      content, clen, format, flen);
+	else if (ftype == 'T')
+	    xo_format_title(xop, content, clen, format, flen);
+	else if (ftype == 'U') {
+	    if (flags & XFF_WS)
+		xo_format_content(xop, "padding", NULL, 1, " ", 1, NULL, 0);
+ 	    xo_format_units(xop, content, clen, format, flen);
+	} else if (ftype == 'W')
+	    xo_format_content(xop, "warning", "warning", 0,
 			      content, clen, format, flen);
 	else if (ftype == '[')
 	    xo_anchor_start(xop, content, clen, format, flen);
@@ -3130,7 +3233,7 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 
 	if (flags & XFF_COLON)
 	    xo_format_content(xop, "decoration", NULL, 1, ":", 1, NULL, 0);
-	if (flags & XFF_WS)
+	if (ftype != 'U' && (flags & XFF_WS))
 	    xo_format_content(xop, "padding", NULL, 1, " ", 1, NULL, 0);
 
 	cp += sp - basep + 1;
@@ -3141,11 +3244,8 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
     }
 
     /* If we don't have an anchor, write the text out */
-    if (!(xop->xo_flags & XOF_ANCHOR)) {
-	xo_buf_append(xbp, "", 1); /* Append ending NUL */
-	xop->xo_write(xop->xo_opaque, xbp->xb_bufp);
-	xbp->xb_curp = xbp->xb_bufp;
-    }
+    if (!(xop->xo_flags & XOF_ANCHOR))
+	xo_write(xop);
 
     return rc;
 }
@@ -3783,13 +3883,7 @@ xo_flush_h (xo_handle_t *xop)
 	break;
     }
 
-    xo_buffer_t *xbp = &xop->xo_data;
-    if (xbp->xb_curp != xbp->xb_bufp) {
-	xo_buf_append(xbp, "", 1); /* Append ending NUL */
-	xo_anchor_clear(xop);
-	xop->xo_write(xop->xo_opaque, xbp->xb_bufp);
-	xbp->xb_curp = xbp->xb_bufp;
-    }
+    xo_write(xop);
 }
 
 void
@@ -3859,11 +3953,7 @@ xo_error_hv (xo_handle_t *xop, const char *fmt, va_list vap)
 	if (xop->xo_flags & XOF_DIV_OPEN)
 	    xo_line_close(xop);
 
-	xo_buffer_t *xbp = &xop->xo_data;
-	xo_buf_append(xbp, "", 1); /* Append ending NUL */
-	xbp->xb_curp = xbp->xb_bufp;
-	xo_anchor_clear(xop);
-	xop->xo_write(xop->xo_opaque, xbp->xb_bufp);
+	xo_write(xop);
 
 	va_end(xop->xo_vap);
 	bzero(&xop->xo_vap, sizeof(xop->xo_vap));
