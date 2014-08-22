@@ -27,6 +27,11 @@
   <div class="title">beforeworkingafter:</div>
 </div>
 <div class="line">
+  <div class="data" data-tag="some" data-xpath="/top/data/some">string</div>
+  <div class="data" data-tag="ten" data-xpath="/top/data/ten">10</div>
+  <div class="data" data-tag="eleven" data-xpath="/top/data/eleven">11</div>
+</div>
+<div class="line">
   <div class="data" data-tag="unknown" data-xpath="/top/data/unknown">1010</div>
   <div class="text"> </div>
   <div class="note">packets here/there/everywhere</div>
