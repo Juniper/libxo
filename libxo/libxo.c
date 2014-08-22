@@ -2652,6 +2652,13 @@ xo_format_value (xo_handle_t *xop, const char *name, int nlen,
 	    flen = strlen(format);
 	}
 
+	if (nlen == 0) {
+	    static char missing[] = "missing-field-name";
+	    xo_failure(xop, "missing field name: %s", format);
+	    name = missing;
+	    nlen = sizeof(missing) - 1;
+	}
+
 	if (pretty)
 	    xo_buf_indent(xop, -1);
 	xo_data_append(xop, "<", 1);
@@ -2725,6 +2732,13 @@ xo_format_value (xo_handle_t *xop, const char *name, int nlen,
 	    quote = 1;
 	else
 	    quote = 0;
+
+	if (nlen == 0) {
+	    static char missing[] = "missing-field-name";
+	    xo_failure(xop, "missing field name: %s", format);
+	    name = missing;
+	    nlen = sizeof(missing) - 1;
+	}
 
 	if (flags & XFF_LEAF_LIST) {
 	    if (first && pretty)
