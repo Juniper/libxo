@@ -10,6 +10,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 
 #include "xo.h"
@@ -54,6 +55,9 @@ main (int argc, char **argv)
 	    64, "k", 640, "kilobytes");
 
     xo_emit("{T:/before%safter:}\n", "working");
+
+    xo_emit("{d:some/%s}{:ten/%ju}{:eleven/%ju}\n",
+	    "string", (uintmax_t) 10, (uintmax_t) 11);
 
     xo_emit("{:unknown/%u} "
 	    "{N:/packet%s here\\/there\\/everywhere}\n",
