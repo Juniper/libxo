@@ -377,6 +377,9 @@ right justification.  If the width is zero, nothing happens.  If the
 number of columns of output between the start and stop anchors is less
 than the absolute value of the given width, nothing happens.
 
+Widths over 8k are considered probable errors and not supported.  If
+XOF_WARN is set, a warning will be generated.
+
 *** Modifier Flags
 
 The modifiers can also include the following flags, which modify the
