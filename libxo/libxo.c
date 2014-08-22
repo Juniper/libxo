@@ -37,6 +37,7 @@ const char xo_version_extra[] = LIBXO_VERSION_EXTRA;
 #define XO_INDENT_BY 2	/* Amount to indent when pretty printing */
 #define XO_BUFSIZ	(8*1024) /* Initial buffer size */
 #define XO_DEPTH	512	 /* Default stack depth */
+#define XO_MAX_ANCHOR_WIDTH (8*1024) /* Anything wider is just sillyb */
 
 #define XO_FAILURE_NAME	"failure"
 
@@ -2630,8 +2631,15 @@ xo_format_value (xo_handle_t *xop, const char *name, int nlen,
 	break;
 
     case XO_STYLE_XML:
-	if (flags & XFF_DISPLAY_ONLY)
+	/*
+	 * Even though we're not making output, we still need to
+	 * let the formatting code handle the va_arg popping.
+	 */
+	if (flags & XFF_DISPLAY_ONLY) {
+	    flags |= XFF_NO_OUTPUT;
+	    xo_format_data(xop, NULL, format, flen, flags);
 	    break;
+	}
 
 	if (encoding) {
    	    format = encoding;
@@ -2684,8 +2692,11 @@ xo_format_value (xo_handle_t *xop, const char *name, int nlen,
 	break;
 
     case XO_STYLE_JSON:
-	if (flags & XFF_DISPLAY_ONLY)
+	if (flags & XFF_DISPLAY_ONLY) {
+	    flags |= XFF_NO_OUTPUT;
+	    xo_format_data(xop, NULL, format, flen, flags);
 	    break;
+	}
 
 	if (encoding) {
 	    format = encoding;
@@ -2945,6 +2956,12 @@ xo_anchor_stop (xo_handle_t *xop, const char *str, int len,
     if (blen <= 0)		/* Already over width */
 	goto done;
 
+    if (abswidth > XO_MAX_ANCHOR_WIDTH) {
+	xo_failure(xop, "width over %u are not supported",
+		   XO_MAX_ANCHOR_WIDTH);
+	goto done;
+    }
+
     /* Make a suitable padding field and emit it */
     char *buf = alloca(blen);
     memset(buf, ' ', blen);
@@ -2986,6 +3003,7 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
     for (cp = fmt; *cp; ) {
 	if (*cp == '\n') {
 	    xo_line_close(xop);
+	    xo_flush_h(xop);
 	    cp += 1;
 	    continue;
 
