@@ -9,6 +9,8 @@
     <total units="kb">640</total>
     <memory units="k">64</memory>
     <total units="kilobytes">640</total>
+    <ten>10</ten>
+    <eleven>11</eleven>
     <unknown>1010</unknown>
     <min>15</min>
     <cur>20</cur>
