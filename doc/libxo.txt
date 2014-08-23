@@ -1021,16 +1021,21 @@ To use the default handle, pass a NULL handle:
 
 The set of valid flags include:
 
-|---------------+-----------------------------------------|
-| Flag          | Description                             |
-|---------------+-----------------------------------------|
-| XOF_CLOSE_FP  | Close file pointer on xo_destroy()      |
-| XOF_PRETTY    | Make 'pretty printed' output            |
-| XOF_WARN      | Generate warnings for broken calls      |
-| XOF_WARN_XML  | Generate warnings in XML on stdout      |
-| XOF_NO_ENV    | Do not use the LIBXO_OPTIONS env var    |
-| XOF_DTRT      | Enable "do the right thing" mode        |
-|---------------+-----------------------------------------|
+|-----------------+---------------------------------------|
+| Flag            | Description                           |
+|-----------------+---------------------------------------|
+| XOF_CLOSE_FP    | Close file pointer on xo_destroy()    |
+| XOF_DTRT        | Enable "do the right thing" mode      |
+| XOF_INFO        | Display info data attributes (HTML)   |
+| XOF_KEYS        | Emit the key attribute (XML)          |
+| XOF_NO_ENV      | Do not use the LIBXO_OPTIONS env var  |
+| XOF_PRETTY      | Make 'pretty printed' output          |
+| XOF_UNDERSCORES | Replaces dashes with underscores      |
+| XOF_UNITS       | Display units (XML and HMTL)          |
+| XOF_WARN        | Generate warnings for broken calls    |
+| XOF_WARN_XML    | Generate warnings in XML on stdout    |
+| XOF_XPATH       | Emit XPath expressions (HTML)         |
+|-----------------+---------------------------------------|
 
 The XOF_CLOSE_FP flag will trigger the call of the close_func
 (provided via xo_set_writer()) when the handle is destroyed.
