@@ -16,6 +16,7 @@ sub main {
     while ($ARGV[0] =~ /^-/) {
 	$_ = shift @ARGV;
 	$opt_cpp = 1 if /^-c/;
+	$opt_cflags .= shift @ARGV if /^-C/;
 	$opt_debug = 1 if /^-d/;
 	$opt_text = 1 if /^-t/;
 	extract_samples() if /^-X/;
@@ -36,8 +37,14 @@ sub extract_samples {
 sub parse_file {
     local($file) = @_;
     local($errors, $warnings, $info) = (0, 0, 0);
+    local $curfile = $file;
+    local $curln = 0;
 
-    open INPUT, $file || die;
+    if ($opt_cpp) {
+	open INPUT, "cpp $opt_cflags $file |";
+    } else {
+	open INPUT, $file || die "cannot open input file '$file'";
+    }
     local @input = <INPUT>;
     close INPUT;
 
@@ -45,10 +52,12 @@ sub parse_file {
 
     for ($ln = 0; $ln < $#input; $ln++) {
 	$line = $input[$ln];
+	$curln += 1;
 
 	if ($line =~ /^\#/) {
 	    my($num, $fn) = ($line =~ /\#\s*(\d+)\s+"(.+)"/);
-	    
+	    ($curfile, $curln) = ($fn, $num) if $num;
+	    next;
 	}
 
 	next unless $line =~ /xo_emit\(/;
@@ -74,7 +83,7 @@ sub parse_tokens {
     local $off = 0;
     my $ch;
 
-    $replay = ($ln + 1) . "     " . $line;
+    $replay = $curln . "     " . $line;
     $rln = $ln + 1;
 
     for (;;) {
@@ -106,6 +115,7 @@ sub parse_tokens {
 	}
 	if ($quotes{$ch}) {
 	    $quote = $quotes{$ch};
+	    $current = substr($current, 0, -2) if $current =~ /""$/;
 	    next;
 	}
 
@@ -127,7 +137,8 @@ sub parse_tokens {
 sub get_tokens {
     if ($ln + 1 < $#input) {
 	$line = $input[++$ln];
-	$replay .= ($ln + 1) . "     " . $line;
+	$curln += 1;
+	$replay .= $curln . "     " . $line;
 	@data = split(//, $line);
 	$off = 0;
     }
@@ -146,7 +157,7 @@ sub check_format {
     my $off;
     my $phase = 0;
     my @build = ();
-    local $last;
+    local $last, $prev = "";
 
     # Nukes quotes
     pop @data;
@@ -157,7 +168,8 @@ sub check_format {
 	$ch = $data[$off++];
 
 	if ($ch eq "\\") {
-	    $off += 1;
+	    $ch = $data[$off++];
+	    $off += 1 if $ch eq "\\"; # double backslash: "\\/"
 	    next;
 	}
 
@@ -168,7 +180,10 @@ sub check_format {
 		@build = ();
 		$phase = 0;
 		next;
-	    } elsif ($ch =~ m@[/:]@) {
+	    } elsif ($phase == 0 && $ch eq ":") {
+		$phase += 1;
+		next;
+	    } elsif ($ch eq "/") {
 		$phase += 1;
 		next;
 	    }
@@ -305,7 +320,7 @@ sub check_field {
 	#@     xo_emit("{:cost-in-$$/%u}", 15);
 	#@ Should be:
 	#@     xo_emit("{:cost-in-dollars/%u}", 15);
-	error("value field name contains invalid character")
+	error("value field name contains invalid character (" . $field[1] . ")")
 	    unless $field[1] =~ /^[0-9a-z-]*$/;
     }
 
@@ -327,7 +342,7 @@ sub check_field {
 	#@ Should be:
 	#@     xo_emit("{[:32}");
 	error("anchor content should be decimal width")
-	    if $field[1] && $field[1] !~ /^\d+$/ ;
+	    if $field[1] && $field[1] !~ /^-?\d+$/ ;
 
 	#@ Anchor format should be "%d"
 	#@     xo_emit("{[:/%s}");
@@ -383,19 +398,19 @@ sub check_field_format {
 }
 
 sub error {
-    print STDERR $file . ": " .$rln . ": error: " . join(" ", @_) . "\n";
+    print STDERR $curfile . ": " .$curln . ": error: " . join(" ", @_) . "\n";
     print STDERR $replay . "\n" if $opt_text;
     $errors += 1;
 }
 
 sub warn {
-    print STDERR $file . ": " .$rln . ": warning: " . join(" ", @_) . "\n";
+    print STDERR $curfile . ": " .$curln . ": warning: " . join(" ", @_) . "\n";
     print STDERR $replay . "\n" if $opt_text;
     $warnings += 1;
 }
 
 sub info {
-    print STDERR $file . ": " .$rln . ": info: " . join(" ", @_) . "\n";
+    print STDERR $curfile . ": " .$curln . ": info: " . join(" ", @_) . "\n";
     print STDERR $replay . "\n" if $opt_text;
     $info += 1;
 }
