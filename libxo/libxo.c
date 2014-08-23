@@ -1374,6 +1374,8 @@ xo_name_to_flag (const char *name)
 	return XOF_NO_TOP;
     if (strcmp(name, "units") == 0)
 	return XOF_UNITS;
+    if (strcmp(name, "underscores") == 0)
+	return XOF_UNDERSCORES;
 
     return 0;
 }
@@ -1453,6 +1455,10 @@ xo_set_options (xo_handle_t *xop, const char *input)
 
 	    case 'U':
 		xop->xo_flags |= XOF_UNITS;
+		break;
+
+	    case 'u':
+		xop->xo_flags |= XOF_UNDERSCORES;
 		break;
 
 	    case 'W':
@@ -2617,6 +2623,7 @@ xo_format_value (xo_handle_t *xop, const char *name, int nlen,
 {
     int pretty = (xop->xo_flags & XOF_PRETTY);
     int quote;
+    xo_buffer_t *xbp;
 
     switch (xop->xo_style) {
     case XO_STYLE_TEXT:
@@ -2747,7 +2754,18 @@ xo_format_value (xo_handle_t *xop, const char *name, int nlen,
 	    if (pretty)
 		xo_buf_indent(xop, -1);
 	    xo_data_append(xop, "\"", 1);
+
+	    xbp = &xop->xo_data;
+	    int off = xbp->xb_curp - xbp->xb_bufp;
+
 	    xo_data_escape(xop, name, nlen);
+
+	    if (xop->xo_flags & XOF_UNDERSCORES) {
+		int now = xbp->xb_curp - xbp->xb_bufp;
+		for ( ; off < now; off++)
+		    if (xbp->xb_bufp[off] == '-')
+			xbp->xb_bufp[off] = '_';
+	    }
 	    xo_data_append(xop, "\":", 2);
 	}
 
