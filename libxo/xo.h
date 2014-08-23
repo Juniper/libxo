@@ -51,6 +51,8 @@ typedef unsigned long xo_xof_flags_t;
 #define XOF_UNITS	(1<<18)	/** Encode units in XML */
 #define XOF_UNITS_PENDING (1<<19) /** We have a units-insertion pending */
 
+#define XOF_UNDERSCORES	(1<<20)	/** Replace dashes with underscores (JSON)  */
+
 /*
  * The xo_info_t structure provides a mapping between names and
  * additional data emitted via HTML.
