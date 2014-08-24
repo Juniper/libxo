@@ -21960,7 +21960,9 @@ jQuery(function ($) {
 <link rel="Chapter" title="2 Overview" href="#doc_section_2">
 <link rel="Chapter" title="3 The libxo API" href="#doc_section_3">
 <link rel="Chapter" title='4 The "xo" Utility' href="#doc_section_4">
-<link rel="Chapter" title="5 Examples" href="#doc_section_5">
+<link rel="Chapter" title="5 xolint" href="#doc_section_5">
+<link rel="Chapter" title="6 FAQs" href="#doc_section_6">
+<link rel="Chapter" title="7 Examples" href="#doc_section_7">
 <meta name="generator" content="http://greenbytes.de/tech/webdav/rfc2629.xslt, Revision 1.389, 2008-08-20 14:21:35, XSLT vendor: libxslt http://xmlsoft.org/XSLT/">
 <link rel="schema.DC" href="http://purl.org/dc/elements/1.1/">
 <meta name="DC.Creator" content="Shafer, P.">
@@ -21978,7 +21980,7 @@ jQuery(function ($) {
 </tr>
 <tr>
 <td class="header left"></td>
-<td class="header right">August 20, 2014</td>
+<td class="header right">August 24, 2014</td>
 </tr>
 </table></div>
 <p id="title" class="title">libxo: The Easy Way to Generate text, XML, JSON, and HTML output<br><span class="filename">libxo-manual</span></p>
@@ -22271,8 +22273,97 @@ jQuery(function ($) {
 </li>
 <li class="tocline0">
 <div class="section-number" id="toc_doc_section_5">5   </div>
+<a href="#xolint">xolint</a>
+</li>
+<li class="tocline0">
+<div class="section-number" id="toc_doc_section_6">6   </div>
+<a href="#faqs">FAQs</a><ul class="toc top-toc">
+<li class="tocline1">
+<div class="section-number" id="toc_doc_section_6_1">6.1   </div>
+<a href="#general">General</a><ul class="toc"><li class="tocline1">
+<div class="section-number" id="toc_doc_section_6_1_1">6.1.1   </div>
+<a href="#can-you-share-the-history-of-libxo">Can you share the history of libxo?</a>
+</li></ul>
+</li>
+<li class="tocline1">
+<div class="section-number" id="toc_doc_section_6_2">6.2   </div>
+<a href="#what-does-this-message-mean">What does this message mean?</a><ul class="toc">
+<li class="tocline1">
+<div class="section-number" id="toc_doc_section_6_2_1">6.2.1   </div>
+<a href="#a-percent-sign-in-text-is-a-literal">'A percent sign in text is a literal'</a>
+</li>
+<li class="tocline1">
+<div class="section-number" id="toc_doc_section_6_2_2">6.2.2   </div>
+<a href="#last-character-before-field-definition-is-a-field-type">'Last character before field definition is a field type'</a>
+</li>
+<li class="tocline1">
+<div class="section-number" id="toc_doc_section_6_2_3">6.2.3   </div>
+<a href="#encoding-format-uses-different-number-of-arguments">'Encoding format uses different number of arguments'</a>
+</li>
+<li class="tocline1">
+<div class="section-number" id="toc_doc_section_6_2_4">6.2.4   </div>
+<a href="#only-one-field-role-can-be-used">'Only one field role can be used'</a>
+</li>
+<li class="tocline1">
+<div class="section-number" id="toc_doc_section_6_2_5">6.2.5   </div>
+<a href="#potential-missing-slash-after-n-l-or-t-with-format">'Potential missing slash after N, L, or T with format'</a>
+</li>
+<li class="tocline1">
+<div class="section-number" id="toc_doc_section_6_2_6">6.2.6   </div>
+<a href="#format-cannot-be-given-when-content-is-present-roles-dnlt">'Format cannot be given when content is present (roles: DNLT)'</a>
+</li>
+<li class="tocline1">
+<div class="section-number" id="toc_doc_section_6_2_7">6.2.7   </div>
+<a href="#an-encoding-format-cannot-be-given-roles-dnlt">'An encoding format cannot be given (roles: DNLT)'</a>
+</li>
+<li class="tocline1">
+<div class="section-number" id="toc_doc_section_6_2_8">6.2.8   </div>
+<a href="#value-field-must-have-a-name-as-content">'Value field must have a name (as content)")'</a>
+</li>
+<li class="tocline1">
+<div class="section-number" id="toc_doc_section_6_2_9">6.2.9   </div>
+<a href="#use-dashes-not-underscores-for-value-field-name">'Use dashes, not underscores, for value field name'</a>
+</li>
+<li class="tocline1">
+<div class="section-number" id="toc_doc_section_6_2_10">6.2.10   </div>
+<a href="#value-field-name-cannot-start-with-digit">'Value field name cannot start with digit'</a>
+</li>
+<li class="tocline1">
+<div class="section-number" id="toc_doc_section_6_2_11">6.2.11   </div>
+<a href="#value-field-name-should-be-lower-case">'Value field name should be lower case'</a>
+</li>
+<li class="tocline1">
+<div class="section-number" id="toc_doc_section_6_2_12">6.2.12   </div>
+<a href="#value-field-name-contains-invalid-character">'Value field name contains invalid character'</a>
+</li>
+<li class="tocline1">
+<div class="section-number" id="toc_doc_section_6_2_13">6.2.13   </div>
+<a href="#decoration-field-contains-invalid-character">'decoration field contains invalid character'</a>
+</li>
+<li class="tocline1">
+<div class="section-number" id="toc_doc_section_6_2_14">6.2.14   </div>
+<a href="#anchor-content-should-be-decimal-width">'Anchor content should be decimal width'</a>
+</li>
+<li class="tocline1">
+<div class="section-number" id="toc_doc_section_6_2_15">6.2.15   </div>
+<a href="#anchor-format-should-be-d">'Anchor format should be "%d"'</a>
+</li>
+<li class="tocline1">
+<div class="section-number" id="toc_doc_section_6_2_16">6.2.16   </div>
+<a href="#anchor-cannot-have-both-format-and-encoding-format">'Anchor cannot have both format and encoding format")'</a>
+</li>
+<li class="tocline1">
+<div class="section-number" id="toc_doc_section_6_2_17">6.2.17   </div>
+<a href="#max-width-only-valid-for-strings">'Max width only valid for strings'</a>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="tocline0">
+<div class="section-number" id="toc_doc_section_7">7   </div>
 <a href="#examples">Examples</a><ul class="toc top-toc"><li class="tocline1">
-<div class="section-number" id="toc_doc_section_5_1">5.1   </div>
+<div class="section-number" id="toc_doc_section_7_1">7.1   </div>
 <a href="#unit-test">Unit Test</a>
 </li></ul>
 </li>
@@ -22630,6 +22721,7 @@ jQuery(function ($) {
 <div id="doc_figure_u.22"></div> <pre>
     xo_emit("({[:/%d}{:min/%d}/{:max/%d}{]:})\n", width, min, max);
 	    </pre> <p id="doc_section_2_2_1_8_p_6">If the width is negative, padding will be added on the right, suitable for left justification. Otherwise the padding will be added to the left of the fields between the start and stop anchors, suitable for right justification. If the width is zero, nothing happens. If the number of columns of output between the start and stop anchors is less than the absolute value of the given width, nothing happens.</p>
+<p id="doc_section_2_2_1_8_p_7">Widths over 8k are considered probable errors and not supported. If XOF_WARN is set, a warning will be generated.</p>
 </div>
 </div>
 <div class="content">
@@ -23465,8 +23557,32 @@ jQuery(function ($) {
 <td>Close file pointer on xo_destroy()</td>
 </tr>
 <tr>
+<td>XOF_DTRT</td>
+<td>Enable "do the right thing" mode</td>
+</tr>
+<tr>
+<td>XOF_INFO</td>
+<td>Display info data attributes (HTML)</td>
+</tr>
+<tr>
+<td>XOF_KEYS</td>
+<td>Emit the key attribute (XML)</td>
+</tr>
+<tr>
+<td>XOF_NO_ENV</td>
+<td>Do not use the LIBXO_OPTIONS env var</td>
+</tr>
+<tr>
 <td>XOF_PRETTY</td>
 <td>Make 'pretty printed' output</td>
+</tr>
+<tr>
+<td>XOF_UNDERSCORES</td>
+<td>Replaces dashes with underscores</td>
+</tr>
+<tr>
+<td>XOF_UNITS</td>
+<td>Display units (XML and HMTL)</td>
 </tr>
 <tr>
 <td>XOF_WARN</td>
@@ -23477,12 +23593,8 @@ jQuery(function ($) {
 <td>Generate warnings in XML on stdout</td>
 </tr>
 <tr>
-<td>XOF_NO_ENV</td>
-<td>Do not use the LIBXO_OPTIONS env var</td>
-</tr>
-<tr>
-<td>XOF_DTRT</td>
-<td>Enable "do the right thing" mode</td>
+<td>XOF_XPATH</td>
+<td>Emit XPath expressions (HTML)</td>
 </tr>
 </tbody>
 </table></div>
@@ -23707,6 +23819,15 @@ jQuery(function ($) {
 <a href="#doc_section_3_4">3.4</a> </div>
 <a id="additional-functionality" href="#additional-functionality">Additional Functionality</a>
 </h2>
+<p id="doc_section_3_4_p_1">Section Contents: </p>
+<ul>
+<li><a href="#parsing-command-line-arguments-xo_parse_args" title="Parsing Command-line Arguments (xo_parse_args)">Section 3.4.1</a></li>
+<li><a href="#info" title="Information">Section 3.4.2</a></li>
+<li><a href="#memory-allocation" title="Memory Allocation">Section 3.4.3</a></li>
+<li><a href="#LIBXO_OPTIONS" title="LIBXO_OPTIONS">Section 3.4.4</a></li>
+<li><a href="#errors-warnings-and-messages" title="Errors, Warnings, and Messages">Section 3.4.5</a></li>
+<li><a href="#xo_no_setlocale" title="xo_no_setlocale">Section 3.4.6</a></li>
+</ul>
 <div class="content">
 <h3 id="doc_section_3_4_1">
 <div class="self-section-number">
@@ -23981,16 +24102,353 @@ jQuery(function ($) {
 <h1 id="doc_section_5" class="np">
 <div class="self-section-number">
 <a href="#doc_section_5">5_</a> </div>
+<a id="xolint" href="#xolint">xolint</a>
+</h1>
+<p id="doc_section_5_p_1">xolint is a tool for reporting common mistakes in format strings in source code that invokes xo_emit(). It allows these errors to be diagnosed at build time, rather than waiting until runtime.</p>
+<p id="doc_section_5_p_2">xolint takes the one or more C files as arguments, and reports and errors, warning, or informational messages as needed.</p>
+<div id="doc_table_u.11"><table summary="" class="tt full" cellpadding="3" cellspacing="0">
+<thead><tr>
+<th class="left">Option</th>
+<th class="left">Meaning</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>-c</td>
+<td>Invoke 'cpp' against the input file</td>
+</tr>
+<tr>
+<td>-C &lt;flags&gt;</td>
+<td>Flags that are passed to 'cpp</td>
+</tr>
+<tr>
+<td>-d</td>
+<td>Enable debug output</td>
+</tr>
+<tr>
+<td>-p</td>
+<td>Print the offending lines after the message</td>
+</tr>
+<tr>
+<td>-X</td>
+<td>Extract samples from xolint, suitable for testing</td>
+</tr>
+</tbody>
+</table></div>
+<p id="doc_section_5_p_3">Output message contain the source filename and line number, the class of the message, the message, and, if -p is given, the line that contains the error:</p>
+<div id="doc_figure_u.83"></div> <pre>
+    % xolint.pl -t xolint.c
+    xolint.c: 16: error: anchor format should be "%d"
+    16         xo_emit("{[:/%s}");
+	    </pre> </div>
+<hr class="noprint">
+<div class="content">
+<h1 id="doc_section_6" class="np">
+<div class="self-section-number">
+<a href="#doc_section_6">6_</a> </div>
+<a id="faqs" href="#faqs">FAQs</a>
+</h1>
+<p id="doc_section_6_p_1">This section contains the set of questions that users typically ask, along with answers that might be helpful.</p>
+<p id="doc_section_6_p_2">Section Contents: </p>
+<ul>
+<li><a href="#general" title="General">Section 6.1</a></li>
+<li><a href="#what-does-this-message-mean" title="What does this message mean?">Section 6.2</a></li>
+</ul>
+<div class="content">
+<h2 id="doc_section_6_1">
+<div class="self-section-number">
+<a href="#doc_section_6_1">6.1</a> </div>
+<a id="general" href="#general">General</a>
+</h2>
+<p id="doc_section_6_1_p_1">Section Contents: </p>
+<ul><li><a href="#can-you-share-the-history-of-libxo" title="Can you share the history of libxo?">Section 6.1.1</a></li></ul>
+<div class="content">
+<h3 id="doc_section_6_1_1">
+<div class="self-section-number">
+<a href="#doc_section_6_1_1">6.1.1</a> </div>
+<a id="can-you-share-the-history-of-libxo" href="#can-you-share-the-history-of-libxo">Can you share the history of libxo?</a>
+</h3>
+<p id="doc_section_6_1_1_p_1">In 2001, we added an XML API to the JUNOS operating system, which is built on top of FreeBSD. Eventually this API became standardized as the NETCONF API (RFC 6241). As part of this effort, we modified many FreeBSD utilities to emit XML, typically via a "&#8209;X" switch. The results were mixed. The cost of maintaining this code, updating it and carrying it were non-trivial, and contributed to our expense (and the associated delay) with upgrading the version of FreeBSD on which each release of JUNOS is based.</p>
+<p id="doc_section_6_1_1_p_2">A recent (2014) effort within JUNOS aims at removing our modifications to the underlying FreeBSD code as a means of reducing the expense and delay. JUNOS is structured to have system components generate XML that is rendered by the CLI (think: login shell) into human-readable text. This allows the API to use the same plumbing as the CLI, and ensures that all components emit XML, and that it is emitted with knowledge of the consumer of that XML, yielding an API that have no incremental cost or feature delay.</p>
+<p id="doc_section_6_1_1_p_3">libxo is an effort to mix the best aspects of the JUNOS strategy into FreeBSD in a seemless way, allowing commands to make printf-like output calls without needing to care how the output is rendered.</p>
+</div>
+</div>
+<div class="content">
+<h2 id="doc_section_6_2">
+<div class="self-section-number">
+<a href="#doc_section_6_2">6.2</a> </div>
+<a id="what-does-this-message-mean" href="#what-does-this-message-mean">What does this message mean?</a>
+</h2>
+<p id="doc_section_6_2_p_1">Section Contents: </p>
+<ul>
+<li><a href="#a-percent-sign-in-text-is-a-literal" title="'A percent sign in text is a literal'">Section 6.2.1</a></li>
+<li><a href="#last-character-before-field-definition-is-a-field-type" title="'Last character before field definition is a field type'">Section 6.2.2</a></li>
+<li><a href="#encoding-format-uses-different-number-of-arguments" title="'Encoding format uses different number of arguments'">Section 6.2.3</a></li>
+<li><a href="#only-one-field-role-can-be-used" title="'Only one field role can be used'">Section 6.2.4</a></li>
+<li><a href="#potential-missing-slash-after-n-l-or-t-with-format" title="'Potential missing slash after N, L, or T with format'">Section 6.2.5</a></li>
+<li><a href="#format-cannot-be-given-when-content-is-present-roles-dnlt" title="'Format cannot be given when content is present (roles: DNLT)'">Section 6.2.6</a></li>
+<li><a href="#an-encoding-format-cannot-be-given-roles-dnlt" title="'An encoding format cannot be given (roles: DNLT)'">Section 6.2.7</a></li>
+<li><a href="#value-field-must-have-a-name-as-content" title="'Value field must have a name (as content)&quot;)'">Section 6.2.8</a></li>
+<li><a href="#use-dashes-not-underscores-for-value-field-name" title="'Use dashes, not underscores, for value field name'">Section 6.2.9</a></li>
+<li><a href="#value-field-name-cannot-start-with-digit" title="'Value field name cannot start with digit'">Section 6.2.10</a></li>
+<li><a href="#value-field-name-should-be-lower-case" title="'Value field name should be lower case'">Section 6.2.11</a></li>
+<li><a href="#value-field-name-contains-invalid-character" title="'Value field name contains invalid character'">Section 6.2.12</a></li>
+<li><a href="#decoration-field-contains-invalid-character" title="'decoration field contains invalid character'">Section 6.2.13</a></li>
+<li><a href="#anchor-content-should-be-decimal-width" title="'Anchor content should be decimal width'">Section 6.2.14</a></li>
+<li><a href="#anchor-format-should-be-d" title="'Anchor format should be &quot;%d&quot;'">Section 6.2.15</a></li>
+<li><a href="#anchor-cannot-have-both-format-and-encoding-format" title="'Anchor cannot have both format and encoding format&quot;)'">Section 6.2.16</a></li>
+<li><a href="#max-width-only-valid-for-strings" title="'Max width only valid for strings'">Section 6.2.17</a></li>
+</ul>
+<div class="content">
+<h3 id="doc_section_6_2_1">
+<div class="self-section-number">
+<a href="#doc_section_6_2_1">6.2.1</a> </div>
+<a id="a-percent-sign-in-text-is-a-literal" href="#a-percent-sign-in-text-is-a-literal">'A percent sign in text is a literal'</a>
+</h3>
+<p id="doc_section_6_2_1_p_1">The message "A percent sign in text is a literal" can be caused by code like:</p>
+<div id="doc_figure_u.84"></div> <pre>
+    xo_emit("cost: %d", cost);
+	    </pre> <p id="doc_section_6_2_1_p_3">This code should be replaced with code like:</p>
+<div id="doc_figure_u.85"></div> <pre>
+    xo_emit("{L:cost}: {:cost/%d}", cost);
+	    </pre> <p id="doc_section_6_2_1_p_5">This can be a bit surprising and could be a field that was not properly converted to a libxo-style format string.</p>
+</div>
+<div class="content">
+<h3 id="doc_section_6_2_2">
+<div class="self-section-number">
+<a href="#doc_section_6_2_2">6.2.2</a> </div>
+<a id="last-character-before-field-definition-is-a-field-type" href="#last-character-before-field-definition-is-a-field-type">'Last character before field definition is a field type'</a>
+</h3>
+<p id="doc_section_6_2_2_p_1">The message "Last character before field definition is a field type" can be caused by code like:</p>
+<p id="doc_section_6_2_2_p_2">A common typo:</p>
+<div id="doc_figure_u.86"></div> <pre>
+    xo_emit("{T:Min} T{:Max}");
+	    </pre> <p id="doc_section_6_2_2_p_4">This code should be replaced with code like:</p>
+<div id="doc_figure_u.87"></div> <pre>
+    xo_emit("{T:Min} {T:Max}");
+	    </pre> <p id="doc_section_6_2_2_p_6">Twiddling the "{" and the field role is a common typo.</p>
+</div>
+<div class="content">
+<h3 id="doc_section_6_2_3">
+<div class="self-section-number">
+<a href="#doc_section_6_2_3">6.2.3</a> </div>
+<a id="encoding-format-uses-different-number-of-arguments" href="#encoding-format-uses-different-number-of-arguments">'Encoding format uses different number of arguments'</a>
+</h3>
+<p id="doc_section_6_2_3_p_1">The message "Encoding format uses different number of arguments" can be caused by code like:</p>
+<div id="doc_figure_u.88"></div> <pre>
+    xo_emit("{:name/%6.6s %%04d/%s}", name, number);
+	    </pre> <p id="doc_section_6_2_3_p_3">This code should be replaced with code like:</p>
+<div id="doc_figure_u.89"></div> <pre>
+    xo_emit("{:name/%6.6s %04d/%s-%d}", name, number);
+	    </pre> <p id="doc_section_6_2_3_p_5">Both format should consume the same number of arguments off the stack</p>
+</div>
+<div class="content">
+<h3 id="doc_section_6_2_4">
+<div class="self-section-number">
+<a href="#doc_section_6_2_4">6.2.4</a> </div>
+<a id="only-one-field-role-can-be-used" href="#only-one-field-role-can-be-used">'Only one field role can be used'</a>
+</h3>
+<p id="doc_section_6_2_4_p_1">The message "Only one field role can be used" can be caused by code like:</p>
+<div id="doc_figure_u.90"></div> <pre>
+    xo_emit("{LT:Max}");
+	    </pre> <p id="doc_section_6_2_4_p_3">This code should be replaced with code like:</p>
+<div id="doc_figure_u.91"></div> <pre>
+    xo_emit("{T:Max}");
+	    </pre> </div>
+<div class="content">
+<h3 id="doc_section_6_2_5">
+<div class="self-section-number">
+<a href="#doc_section_6_2_5">6.2.5</a> </div>
+<a id="potential-missing-slash-after-n-l-or-t-with-format" href="#potential-missing-slash-after-n-l-or-t-with-format">'Potential missing slash after N, L, or T with format'</a>
+</h3>
+<p id="doc_section_6_2_5_p_1">The message "Potential missing slash after N, L, or T with format" can be caused by code like:</p>
+<div id="doc_figure_u.92"></div> <pre>
+    xo_emit("{T:%6.6s}\n", "Max");
+	    </pre> <p id="doc_section_6_2_5_p_3">This code should be replaced with code like:</p>
+<div id="doc_figure_u.93"></div> <pre>
+    xo_emit("{T:/%6.6s}\n", "Max");
+	    </pre> <p id="doc_section_6_2_5_p_5">The "%6.6s" will be a literal, not a field format. While it's possibly valid, it's likely a missing "/".</p>
+</div>
+<div class="content">
+<h3 id="doc_section_6_2_6">
+<div class="self-section-number">
+<a href="#doc_section_6_2_6">6.2.6</a> </div>
+<a id="format-cannot-be-given-when-content-is-present-roles-dnlt" href="#format-cannot-be-given-when-content-is-present-roles-dnlt">'Format cannot be given when content is present (roles: DNLT)'</a>
+</h3>
+<p id="doc_section_6_2_6_p_1">The message "Format cannot be given when content is present (roles: DNLT)" can be caused by code like:</p>
+<div id="doc_figure_u.94"></div> <pre>
+    xo_emit("{T:Max/%6.6s}", "Max");
+	    </pre> <p id="doc_section_6_2_6_p_3">Fields with the D, N, L, or T roles can't have both static literal content ("{T:Title}") and a format ("{T:/%s}").</p>
+</div>
+<div class="content">
+<h3 id="doc_section_6_2_7">
+<div class="self-section-number">
+<a href="#doc_section_6_2_7">6.2.7</a> </div>
+<a id="an-encoding-format-cannot-be-given-roles-dnlt" href="#an-encoding-format-cannot-be-given-roles-dnlt">'An encoding format cannot be given (roles: DNLT)'</a>
+</h3>
+<p id="doc_section_6_2_7_p_1">The message "An encoding format cannot be given (roles: DNLT)" can be caused by code like:</p>
+<div id="doc_figure_u.95"></div> <pre>
+    xo_emit("{T:Max//%s}", "Max");
+	    </pre> <p id="doc_section_6_2_7_p_3">Fields with the D, N, L, and T roles are not emitted in the 'encoding' style (JSON, XML), so an encoding format would make no sense.</p>
+</div>
+<div class="content">
+<h3 id="doc_section_6_2_8">
+<div class="self-section-number">
+<a href="#doc_section_6_2_8">6.2.8</a> </div>
+<a id="value-field-must-have-a-name-as-content" href="#value-field-must-have-a-name-as-content">'Value field must have a name (as content)")'</a>
+</h3>
+<p id="doc_section_6_2_8_p_1">The message "Value field must have a name (as content)")" can be caused by code like:</p>
+<div id="doc_figure_u.96"></div> <pre>
+    xo_emit("{:/%s}", "value");
+	    </pre> <p id="doc_section_6_2_8_p_3">This code should be replaced with code like:</p>
+<div id="doc_figure_u.97"></div> <pre>
+    xo_emit("{:tag-name/%s}", "value");
+	    </pre> <p id="doc_section_6_2_8_p_5">The field name is used for XML and JSON encodings. These tags names are static and must appear directly in the field descriptor.</p>
+</div>
+<div class="content">
+<h3 id="doc_section_6_2_9">
+<div class="self-section-number">
+<a href="#doc_section_6_2_9">6.2.9</a> </div>
+<a id="use-dashes-not-underscores-for-value-field-name" href="#use-dashes-not-underscores-for-value-field-name">'Use dashes, not underscores, for value field name'</a>
+</h3>
+<p id="doc_section_6_2_9_p_1">The message "Use dashes, not underscores, for value field name" can be caused by code like:</p>
+<div id="doc_figure_u.98"></div> <pre>
+    xo_emit("{:no_under_scores}", "bad");
+	    </pre> <p id="doc_section_6_2_9_p_3">This code should be replaced with code like:</p>
+<div id="doc_figure_u.99"></div> <pre>
+    xo_emit("{:no-under-scores}", "bad");
+	    </pre> <p id="doc_section_6_2_9_p_5">Use of dashes is traditional in XML, and the XOF_UNDERSCORES flag can be used to generate underscores in JSON, if desired. But the raw field name should use dashes.</p>
+</div>
+<div class="content">
+<h3 id="doc_section_6_2_10">
+<div class="self-section-number">
+<a href="#doc_section_6_2_10">6.2.10</a> </div>
+<a id="value-field-name-cannot-start-with-digit" href="#value-field-name-cannot-start-with-digit">'Value field name cannot start with digit'</a>
+</h3>
+<p id="doc_section_6_2_10_p_1">The message "Value field name cannot start with digit" can be caused by code like:</p>
+<div id="doc_figure_u.100"></div> <pre>
+    xo_emit("{:10-gig/}");
+	    </pre> <p id="doc_section_6_2_10_p_3">This code should be replaced with code like:</p>
+<div id="doc_figure_u.101"></div> <pre>
+    xo_emit("{:ten-gig/}");
+	    </pre> <p id="doc_section_6_2_10_p_5">XML element names cannot start with a digit.</p>
+</div>
+<div class="content">
+<h3 id="doc_section_6_2_11">
+<div class="self-section-number">
+<a href="#doc_section_6_2_11">6.2.11</a> </div>
+<a id="value-field-name-should-be-lower-case" href="#value-field-name-should-be-lower-case">'Value field name should be lower case'</a>
+</h3>
+<p id="doc_section_6_2_11_p_1">The message "Value field name should be lower case" can be caused by code like:</p>
+<div id="doc_figure_u.102"></div> <pre>
+    xo_emit("{:WHY-ARE-YOU-SHOUTING}", "NO REASON");
+	    </pre> <p id="doc_section_6_2_11_p_3">This code should be replaced with code like:</p>
+<div id="doc_figure_u.103"></div> <pre>
+    xo_emit("{:why-are-you-shouting}", "no reason");
+	    </pre> <p id="doc_section_6_2_11_p_5">Lower case is more civilized. Even TLAs should be lower case to avoid scenarios where the differences between "XPath" and "Xpath" drive your users crazy. Lower case rules the seas.</p>
+</div>
+<div class="content">
+<h3 id="doc_section_6_2_12">
+<div class="self-section-number">
+<a href="#doc_section_6_2_12">6.2.12</a> </div>
+<a id="value-field-name-contains-invalid-character" href="#value-field-name-contains-invalid-character">'Value field name contains invalid character'</a>
+</h3>
+<p id="doc_section_6_2_12_p_1">The message "Value field name contains invalid character" can be caused by code like:</p>
+<div id="doc_figure_u.104"></div> <pre>
+    xo_emit("{:cost-in-$$/%u}", 15);
+	    </pre> <p id="doc_section_6_2_12_p_3">This code should be replaced with code like:</p>
+<div id="doc_figure_u.105"></div> <pre>
+    xo_emit("{:cost-in-dollars/%u}", 15);
+	    </pre> <p id="doc_section_6_2_12_p_5">An invalid character is often a sign of a typo, like "{:]}" instead of "{]:}". Field names are restricted to lower-case characters, digits, and dashes.</p>
+</div>
+<div class="content">
+<h3 id="doc_section_6_2_13">
+<div class="self-section-number">
+<a href="#doc_section_6_2_13">6.2.13</a> </div>
+<a id="decoration-field-contains-invalid-character" href="#decoration-field-contains-invalid-character">'decoration field contains invalid character'</a>
+</h3>
+<p id="doc_section_6_2_13_p_1">The message "decoration field contains invalid character" can be caused by code like:</p>
+<div id="doc_figure_u.106"></div> <pre>
+    xo_emit("{D:not good}");
+	    </pre> <p id="doc_section_6_2_13_p_3">This code should be replaced with code like:</p>
+<div id="doc_figure_u.107"></div> <pre>
+    xo_emit("{D:((}{:good}{D:))}", "yes");
+	    </pre> <p id="doc_section_6_2_13_p_5">This is minor, but fields should use proper roles. Decoration fields are meant to hold puncuation and other characters used to decorate the content, typically to make it more readable to human readers.</p>
+</div>
+<div class="content">
+<h3 id="doc_section_6_2_14">
+<div class="self-section-number">
+<a href="#doc_section_6_2_14">6.2.14</a> </div>
+<a id="anchor-content-should-be-decimal-width" href="#anchor-content-should-be-decimal-width">'Anchor content should be decimal width'</a>
+</h3>
+<p id="doc_section_6_2_14_p_1">The message "Anchor content should be decimal width" can be caused by code like:</p>
+<div id="doc_figure_u.108"></div> <pre>
+    xo_emit("{[:mumble}");
+	    </pre> <p id="doc_section_6_2_14_p_3">This code should be replaced with code like:</p>
+<div id="doc_figure_u.109"></div> <pre>
+    xo_emit("{[:32}");
+	    </pre> <p id="doc_section_6_2_14_p_5">Anchors need an integer value to specify the width of the set of anchored fields. The value can be positive (for left padding/right justification) or negative (for right padding/left justification) and can appear in either the start or stop anchor field descriptor.</p>
+</div>
+<div class="content">
+<h3 id="doc_section_6_2_15">
+<div class="self-section-number">
+<a href="#doc_section_6_2_15">6.2.15</a> </div>
+<a id="anchor-format-should-be-d" href="#anchor-format-should-be-d">'Anchor format should be "%d"'</a>
+</h3>
+<p id="doc_section_6_2_15_p_1">The message "Anchor format should be "%d"" can be caused by code like:</p>
+<div id="doc_figure_u.110"></div> <pre>
+    xo_emit("{[:/%s}");
+	    </pre> <p id="doc_section_6_2_15_p_3">This code should be replaced with code like:</p>
+<div id="doc_figure_u.111"></div> <pre>
+    xo_emit("{[:/%d}");
+	    </pre> <p id="doc_section_6_2_15_p_5">Anchors only grok integer values, and if the value is not static, if must be in an 'int' argument, represented by the "%d" format. Anything else is an error.</p>
+</div>
+<div class="content">
+<h3 id="doc_section_6_2_16">
+<div class="self-section-number">
+<a href="#doc_section_6_2_16">6.2.16</a> </div>
+<a id="anchor-cannot-have-both-format-and-encoding-format" href="#anchor-cannot-have-both-format-and-encoding-format">'Anchor cannot have both format and encoding format")'</a>
+</h3>
+<p id="doc_section_6_2_16_p_1">The message "Anchor cannot have both format and encoding format")" can be caused by code like:</p>
+<div id="doc_figure_u.112"></div> <pre>
+    xo_emit("{[:32/%d}");
+	    </pre> <p id="doc_section_6_2_16_p_3">This code should be replaced with code like:</p>
+<div id="doc_figure_u.113"></div> <pre>
+    xo_emit("{[:32}");
+	    </pre> <p id="doc_section_6_2_16_p_5">Anchors can have a static value or argument for the width, but cannot have both.</p>
+</div>
+<div class="content">
+<h3 id="doc_section_6_2_17">
+<div class="self-section-number">
+<a href="#doc_section_6_2_17">6.2.17</a> </div>
+<a id="max-width-only-valid-for-strings" href="#max-width-only-valid-for-strings">'Max width only valid for strings'</a>
+</h3>
+<p id="doc_section_6_2_17_p_1">The message "Max width only valid for strings" can be caused by code like:</p>
+<div id="doc_figure_u.114"></div> <pre>
+    xo_emit("{:tag/%2.4.6d}", 55);
+	    </pre> <p id="doc_section_6_2_17_p_3">This code should be replaced with code like:</p>
+<div id="doc_figure_u.115"></div> <pre>
+    xo_emit("{:tag/%2.6d}", 55);
+	    </pre> <p id="doc_section_6_2_17_p_5">libxo allows a true 'max width' in addition to the traditional printf-style 'max number of bytes to use for input'. But this is supported only for string values, since it makes no sense for non-strings. This error may occur from a typo, like "{:tag/%6..6d}" where only one period should be used.</p>
+</div>
+</div>
+</div>
+<hr class="noprint">
+<div class="content">
+<h1 id="doc_section_7" class="np">
+<div class="self-section-number">
+<a href="#doc_section_7">7_</a> </div>
 <a id="examples" href="#examples">Examples</a>
 </h1>
+<p id="doc_section_7_p_1">Section Contents: </p>
+<ul><li><a href="#unit-test" title="Unit Test">Section 7.1</a></li></ul>
 <div class="content">
-<h2 id="doc_section_5_1">
+<h2 id="doc_section_7_1">
 <div class="self-section-number">
-<a href="#doc_section_5_1">5.1</a> </div>
+<a href="#doc_section_7_1">7.1</a> </div>
 <a id="unit-test" href="#unit-test">Unit Test</a>
 </h2>
-<p id="doc_section_5_1_p_1">Here is the unit test example:</p>
-<div id="doc_figure_u.83"></div> <pre>
+<p id="doc_section_7_1_p_1">Here is the unit test example:</p>
+<div id="doc_figure_u.116"></div> <pre>
     int
     main (int argc, char **argv)
     {
@@ -24082,8 +24540,8 @@ jQuery(function ($) {
 
         return 0;
     }
-	    </pre> <p id="doc_section_5_1_p_3">Text output:</p>
-<div id="doc_figure_u.84"></div> <pre>
+	    </pre> <p id="doc_section_7_1_p_3">Text output:</p>
+<div id="doc_figure_u.117"></div> <pre>
     % ./testxo --libxo text
     Item 'gum':
        Total sold: 1412.0
@@ -24115,8 +24573,8 @@ jQuery(function ($) {
        In stock: 45
        On order: 1
        SKU: GRO-000-533
-	    </pre> <p id="doc_section_5_1_p_5">JSON output:</p>
-<div id="doc_figure_u.85"></div> <pre>
+	    </pre> <p id="doc_section_7_1_p_5">JSON output:</p>
+<div id="doc_figure_u.118"></div> <pre>
     % ./testxo --libxo json,pretty
     "top": {
       "data": {
@@ -24170,8 +24628,8 @@ jQuery(function ($) {
         ]
       }
     }
-	    </pre> <p id="doc_section_5_1_p_7">XML output:</p>
-<div id="doc_figure_u.86"></div> <pre>
+	    </pre> <p id="doc_section_7_1_p_7">XML output:</p>
+<div id="doc_figure_u.119"></div> <pre>
     % ./testxo --libxo pretty,xml
     &lt;top&gt;
       &lt;data&gt;
@@ -24221,8 +24679,8 @@ jQuery(function ($) {
         &lt;/item&gt;
       &lt;/data&gt;
     &lt;/top&gt;
-	    </pre> <p id="doc_section_5_1_p_9">HMTL output:</p>
-<div id="doc_figure_u.87"></div> <pre>
+	    </pre> <p id="doc_section_7_1_p_9">HMTL output:</p>
+<div id="doc_figure_u.120"></div> <pre>
     % ./testxo --libxo pretty,html
     &lt;div class="line"&gt;
       &lt;div class="label"&gt;Item&lt;/div&gt;
@@ -24416,8 +24874,8 @@ jQuery(function ($) {
       &lt;div class="text"&gt;: &lt;/div&gt;
       &lt;div class="data" data-tag="sku"&gt;GRO-000-533&lt;/div&gt;
     &lt;/div&gt;
-	    </pre> <p id="doc_section_5_1_p_11">HTML output with xpath and info flags:</p>
-<div id="doc_figure_u.88"></div> <pre>
+	    </pre> <p id="doc_section_7_1_p_11">HTML output with xpath and info flags:</p>
+<div id="doc_figure_u.121"></div> <pre>
     % ./testxo --libxo pretty,html,xpath,info
     &lt;div class="line"&gt;
       &lt;div class="label"&gt;Item&lt;/div&gt;
