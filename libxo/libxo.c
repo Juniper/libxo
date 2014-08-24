@@ -1328,6 +1328,13 @@ xo_set_style (xo_handle_t *xop, xo_style_t style)
     xop->xo_style = style;
 }
 
+xo_style_t
+xo_get_style (xo_handle_t *xop)
+{
+    xop = xo_default(xop);
+    return xop->xo_style;
+}
+
 static int
 xo_name_to_style (const char *name)
 {
@@ -1530,6 +1537,14 @@ xo_set_flags (xo_handle_t *xop, xo_xof_flags_t flags)
     xop = xo_default(xop);
 
     xop->xo_flags |= flags;
+}
+
+xo_xof_flags_t
+xo_get_flags (xo_handle_t *xop)
+{
+    xop = xo_default(xop);
+
+    return xop->xo_flags;
 }
 
 /**
