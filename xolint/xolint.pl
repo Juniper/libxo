@@ -30,7 +30,7 @@ sub main {
 
 sub extract_samples {
     my $x = "\#" . "\@";
-    my $cmd = "grep -B1 '$x Should be' $0 | grep xo_emit | sed 's/.\#*\@//'";
+    my $cmd = "grep -B1 -i '$x Should be' $0 | grep xo_emit | sed 's/.*\#*\@//'";
     system($cmd);
     exit(0);
 }
