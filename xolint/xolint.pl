@@ -18,6 +18,7 @@ sub main {
 	$opt_cpp = 1 if /^-c/;
 	$opt_cflags .= shift @ARGV if /^-C/;
 	$opt_debug = 1 if /^-d/;
+	extract_docs() if /^-D/;
 	$opt_text = 1 if /^-t/;
 	extract_samples() if /^-X/;
     }
@@ -28,9 +29,58 @@ sub main {
 }
 
 sub extract_samples {
-    my $x = "#@";
+    my $x = "\#" . "\@";
     my $cmd = "grep -B1 '$x Should be' $0 | grep xo_emit | sed 's/.\#*\@//'";
     system($cmd);
+    exit(0);
+}
+
+sub extract_docs {
+    my $x = "\#" . "\@";
+    my $cmd = "grep -B1 '$x' $0";
+    open INPUT, "$cmd |";
+    local @input = <INPUT>;
+    close INPUT;
+    my $ln, $new = 0, $first = 1, $need_nl;
+
+    for ($ln = 0; $ln <= $#input; $ln++) {
+	chomp($_ = $input[$ln]);
+	if (/^--/) {
+	    $ln += 1;
+	    $new = 1;
+	    next;
+	}
+	if ($first) {
+	    $new = 1;
+	    $first = 0;
+	    next;
+	}
+
+	s/\s*\#\@\s*//;
+
+	if ($new) {
+	    if ($need_nl) {
+		print "\n\n";
+		$need_nl = 0;
+	    }
+
+	    print "*** '$_'\n\n";
+	    print "The message \"$_\" can be caused by code like:\n\n";
+	    $new = 0;
+
+	} elsif (/xo_emit\s*\(/) {
+	    s/^\s+//;
+	    print "    $_\n\n";
+
+	} elsif (/^Should be/i) {
+	    print "This code should be replaced with code like:\n\n";
+
+	} else {
+	    print "$_\n";
+	    $need_nl = 1;
+	}
+    }
+
     exit(0);
 }
 
@@ -41,6 +91,7 @@ sub parse_file {
     local $curln = 0;
 
     if ($opt_cpp) {
+	die "no such file" unless -f $file;
 	open INPUT, "cpp $opt_cflags $file |";
     } else {
 	open INPUT, $file || die "cannot open input file '$file'";
@@ -219,7 +270,8 @@ sub check_text {
     #@     xo_emit("cost: %d", cost);
     #@ Should be:
     #@     xo_emit("{L:cost}: {:cost/%d}", cost);
-    #@ This can be a bit surprising and could be a missed field.
+    #@ This can be a bit surprising and could be a field that was not
+    #@ properly converted to a libxo-style format string.
     info("a percent sign in text is a literal") if $text =~ /%/;
 }
 
@@ -232,7 +284,7 @@ sub check_field {
     #@     xo_emit("{T:Min} T{:Max}");
     #@ Should be:
     #@     xo_emit("{T:Min} {T:Max}");
-    #@
+    #@ Twiddling the "{" and the field role is a common typo.
     info("last character before field definition is a field type ($last)")
 	if $last =~ /[DELNPTUVW\[\]]/ && $field[0] !~ /[DELNPTUVW\[\]]/;
 
@@ -260,26 +312,25 @@ sub check_field {
 	#@ Potential missing slash after N, L, or T with format
 	#@     xo_emit("{T:%6.6s}\n", "Max");
 	#@ should be:
-	#@     xo_emit("{T/:%6.6s}\n", "Max");
-	#@ The "%6.6s" will be a literal, not a field format
+	#@     xo_emit("{T:/%6.6s}\n", "Max");
+	#@ The "%6.6s" will be a literal, not a field format.  While
+	#@ it's possibly valid, it's likely a missing "/".
 	info("potential missing slash after N, L, or T with format")
 	    if $field[1] =~ /%/;
 
 	#@ Format cannot be given when content is present (roles: DNLT)
 	#@    xo_emit("{T:Max/%6.6s}", "Max");
-	#@ Can't have both literal content and a format
+	#@ Fields with the D, N, L, or T roles can't have both
+	#@ static literal content ("{T:Title}") and a
+	#@ format ("{T:/%s}").
 	error("format cannot be given when content is present")
 	    if $field[1] && $field[2];
 
 	#@ An encoding format cannot be given (roles: DNLT)
 	#@    xo_emit("{T:Max//%s}", "Max");
-	#@ These fields are not emitted in the 'encoding' style (JSON, XML)
-	error("encoding format cannot be given when content is present")
-	    if $field[3];
-
-	#@ An encoding format cannot be given (roles: DNLT)
-	#@    xo_emit("{T:Max//%s}", "Max");
-	#@ These fields are not emitted in the 'encoding' style (JSON, XML)
+	#@ Fields with the D, N, L, and T roles are not emitted in
+	#@ the 'encoding' style (JSON, XML), so an encoding format
+	#@ would make no sense.
 	error("encoding format cannot be given when content is present")
 	    if $field[3];
     }
@@ -291,7 +342,9 @@ sub check_field {
 	#@     xo_emit("{:/%s}", "value");
 	#@ Should be:
 	#@     xo_emit("{:tag-name/%s}", "value");
-	#@ The field name is used for XML and JSON encodings
+	#@ The field name is used for XML and JSON encodings.  These
+	#@ tags names are static and must appear directly in the
+	#@ field descriptor.
 	error("value field must have a name (as content)")
 	    unless $field[1];
 
@@ -299,20 +352,27 @@ sub check_field {
 	#@     xo_emit("{:no_under_scores}", "bad");
 	#@ Should be:
 	#@     xo_emit("{:no-under-scores}", "bad");
+	#@ Use of dashes is traditional in XML, and the XOF_UNDERSCORES
+	#@ flag can be used to generate underscores in JSON, if desired.
+	#@ But the raw field name should use dashes.
 	error("use dashes, not underscores, for value field name")
 	    if $field[1] =~ /_/;
 
 	#@ Value field name cannot start with digit
-	#@     xo_emit("{:3com/}");
+	#@     xo_emit("{:10-gig/}");
 	#@ Should be:
-	#@     xo_emit("{:x3com/}");
+	#@     xo_emit("{:ten-gig/}");
+	#@ XML element names cannot start with a digit.
 	error("value field name cannot start with digit")
 	    if $field[1] =~ /^[0-9]/;
 
 	#@ Value field name should be lower case
 	#@     xo_emit("{:WHY-ARE-YOU-SHOUTING}", "NO REASON");
 	#@ Should be:
-	#@     xo_emit("{:why-are-you-shouting}", "NO REASON");
+	#@     xo_emit("{:why-are-you-shouting}", "no reason");
+	#@ Lower case is more civilized.  Even TLAs should be lower case
+	#@ to avoid scenarios where the differences between "XPath" and
+	#@ "Xpath" drive your users crazy.  Lower case rules the seas.
 	error("value field name should be lower case")
 	    if $field[1] =~ /[A-Z]/;
 
@@ -320,6 +380,9 @@ sub check_field {
 	#@     xo_emit("{:cost-in-$$/%u}", 15);
 	#@ Should be:
 	#@     xo_emit("{:cost-in-dollars/%u}", 15);
+	#@ An invalid character is often a sign of a typo, like "{:]}"
+	#@ instead of "{]:}".  Field names are restricted to lower-case
+	#@ characters, digits, and dashes.
 	error("value field name contains invalid character (" . $field[1] . ")")
 	    unless $field[1] =~ /^[0-9a-z-]*$/;
     }
@@ -331,7 +394,10 @@ sub check_field {
 	#@     xo_emit("{D:not good}");
 	#@ Should be:
 	#@     xo_emit("{D:((}{:good}{D:))}", "yes");
-	#@ This is minor, but fields should use proper roles.
+	#@ This is minor, but fields should use proper roles.  Decoration
+	#@ fields are meant to hold puncuation and other characters used
+	#@ to decorate the content, typically to make it more readable
+	#@ to human readers.
 	warn("decoration field contains invalid character")
 	    unless $field[1] =~ m:^[~!\@\#\$%^&\*\(\);\:\[\]\{\} ]+$:;
     }
@@ -341,6 +407,11 @@ sub check_field {
 	#@     xo_emit("{[:mumble}");
 	#@ Should be:
 	#@     xo_emit("{[:32}");
+	#@ Anchors need an integer value to specify the width of
+	#@ the set of anchored fields.  The value can be positive
+	#@ (for left padding/right justification) or negative (for
+	#@ right padding/left justification) and can appear in
+	#@ either the start or stop anchor field descriptor.
 	error("anchor content should be decimal width")
 	    if $field[1] && $field[1] !~ /^-?\d+$/ ;
 
@@ -348,8 +419,20 @@ sub check_field {
 	#@     xo_emit("{[:/%s}");
 	#@ Should be:
 	#@     xo_emit("{[:/%d}");
+	#@ Anchors only grok integer values, and if the value is not static,
+	#@ if must be in an 'int' argument, represented by the "%d" format.
+	#@ Anything else is an error.
 	error("anchor format should be \"%d\"")
 	    if $field[2] && $field[2] ne "%d";
+
+	#@ Anchor cannot have both format and encoding format")
+	#@     xo_emit("{[:32/%d}");
+	#@ Should be:
+	#@     xo_emit("{[:32}");
+	#@ Anchors can have a static value or argument for the width,
+	#@ but cannot have both.
+	error("anchor cannot have both format and encoding format")
+	    if $field[1] && $field[2];
     }
 }
 
@@ -393,6 +476,11 @@ sub check_field_format {
     #@     xo_emit("{:tag/%2.4.6d}", 55);
     #@ Should be:
     #@     xo_emit("{:tag/%2.6d}", 55);
+    #@ libxo allows a true 'max width' in addition to the traditional
+    #@ printf-style 'max number of bytes to use for input'.  But this
+    #@ is supported only for string values, since it makes no sense
+    #@ for non-strings.  This error may occur from a typo,
+    #@ like "{:tag/%6..6d}" where only one period should be used.
     error("max width only valid for strings")
 	if $#chunks >= 2 && $fc =~ /[sS]/;
 }
