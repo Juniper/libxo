@@ -19,7 +19,7 @@ sub main {
 	$opt_cflags .= shift @ARGV if /^-C/;
 	$opt_debug = 1 if /^-d/;
 	extract_docs() if /^-D/;
-	$opt_text = 1 if /^-t/;
+	$opt_print = 1 if /^-p/;
 	extract_samples() if /^-X/;
     }
 
@@ -487,19 +487,19 @@ sub check_field_format {
 
 sub error {
     print STDERR $curfile . ": " .$curln . ": error: " . join(" ", @_) . "\n";
-    print STDERR $replay . "\n" if $opt_text;
+    print STDERR $replay . "\n" if $opt_print;
     $errors += 1;
 }
 
 sub warn {
     print STDERR $curfile . ": " .$curln . ": warning: " . join(" ", @_) . "\n";
-    print STDERR $replay . "\n" if $opt_text;
+    print STDERR $replay . "\n" if $opt_print;
     $warnings += 1;
 }
 
 sub info {
     print STDERR $curfile . ": " .$curln . ": info: " . join(" ", @_) . "\n";
-    print STDERR $replay . "\n" if $opt_text;
+    print STDERR $replay . "\n" if $opt_print;
     $info += 1;
 }
 
