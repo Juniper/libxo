@@ -11,6 +11,7 @@
 #
 # xolint -- a lint for inspecting xo_emit format strings
 #
+# Yes, that's a long way to go for a pun.
 
 sub main {
     while ($ARGV[0] =~ /^-/) {
