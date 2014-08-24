@@ -1533,7 +1533,37 @@ Usage: xo [options] format [fields]
 
 * xolint
 
+xolint is a tool for reporting common mistakes in format strings
+in source code that invokes xo_emit().  It allows these errors
+to be diagnosed at build time, rather than waiting until runtime.
+
+xolint takes the one or more C files as arguments, and reports
+and errors, warning, or informational messages as needed.
+
+|------------+---------------------------------------------------|
+| Option     | Meaning                                           |
+|------------+---------------------------------------------------|
+| -c         | Invoke 'cpp' against the input file               |
+| -C <flags> | Flags that are passed to 'cpp                     |
+| -d         | Enable debug output                               |
+| -p         | Print the offending lines after the message       |
+| -X         | Extract samples from xolint, suitable for testing |
+|------------+---------------------------------------------------|
+
+Output message contain the source filename and line number, the
+class of the message, the message, and, if -p is given, the
+line that contains the error:
+
+    % xolint.pl -t xolint.c
+    xolint.c: 16: error: anchor format should be "%d"
+    16         xo_emit("{[:/%s}");
+
 * FAQs
+
+This section contains the set of questions that users typically ask,
+along with answers that might be helpful.
+
+!! list-sections
 
 ** General
 
