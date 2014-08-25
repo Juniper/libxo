@@ -1812,8 +1812,10 @@ xo_format_string_direct (xo_handle_t *xop, xo_buffer_t *xbp,
 	if (width < 0)
 	    width = iswcntrl(wc) ? 0 : 1;
 
-	if (max > 0 && cols + width > max)
+	if (xop->xo_style == XO_STYLE_TEXT || xop->xo_style == XO_STYLE_HTML) {
+	    if (max > 0 && cols + width > max)
 		break;
+	}
 
 	switch (need_enc) {
 	case XF_ENC_UTF8:
