@@ -431,7 +431,7 @@ the display output styles, TEXT and HTML.
 The display modifier is the opposite of the encoding modifier, and
 they are often used to give to distinct views of the underlying data.
 
-**** The Encoding Modifier ({e:}) (^e-modifier^)
+**** The Encoding Modifier ({e:}) @e-modifier@
 
 The display modifier indicated the field should only be generated for
 the display output styles, TEXT and HTML.
@@ -1132,7 +1132,7 @@ string, since an inappropriate cast can ruin your day.  The vap
 argument to xo_emit_hv() points to a variable argument list that can
 be used to retrieve arguments via va_arg().
 
-*** Attributes (xo_attr)
+*** Attributes (xo_attr) @xo_attr@
 
 The xo_attr() function emits attributes for the XML output style.
 
