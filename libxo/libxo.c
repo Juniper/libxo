@@ -4099,7 +4099,7 @@ xo_parse_args (int argc, char **argv)
 	if (*cp == 0) {
 	    cp = argv[++i];
 	    if (cp == 0) {
-		xo_warnx("missing libxo option: '%s'", cp);
+		xo_warnx("missing libxo option");
 		return -1;
 	    }
 		
