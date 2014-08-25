@@ -1547,6 +1547,7 @@ and errors, warning, or informational messages as needed.
 | -C <flags> | Flags that are passed to 'cpp                     |
 | -d         | Enable debug output                               |
 | -p         | Print the offending lines after the message       |
+| -V         | Print vocabulary of all field names               |
 | -X         | Extract samples from xolint, suitable for testing |
 |------------+---------------------------------------------------|
 
@@ -1557,6 +1558,10 @@ line that contains the error:
     % xolint.pl -t xolint.c
     xolint.c: 16: error: anchor format should be "%d"
     16         xo_emit("{[:/%s}");
+
+The "-V" option does not report errors, but prints a complete list of
+all field names, sorted alphabetically.  The output can help spot
+inconsistencies and spelling errors.
 
 * FAQs
 
@@ -1648,6 +1653,14 @@ see the system as a single cohesive whole, not a sack of cats.
 Field names constitute the means by which client programmers interact
 with our system.  By choosing wise names now, you are making their
 lives better.
+
+After using "xolint" to find errors in your field descriptors, use
+"xolint -V" to spell check your field names and to detect different
+names for the same data.  "dropped-short" and "dropped-too-short" are
+both reasonable names, but using them both will lead users to ask the
+difference between the two fields.  If there isn't a difference,
+use only one of the field names.  If there is a difference, change the
+names to make that difference more obvious.
 
 ** What does this message mean?
 
