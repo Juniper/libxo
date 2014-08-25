@@ -21980,7 +21980,7 @@ jQuery(function ($) {
 </tr>
 <tr>
 <td class="header left"></td>
-<td class="header right">August 24, 2014</td>
+<td class="header right">August 25, 2014</td>
 </tr>
 </table></div>
 <p id="title" class="title">libxo: The Easy Way to Generate text, XML, JSON, and HTML output<br><span class="filename">libxo-manual</span></p>
@@ -22068,7 +22068,7 @@ jQuery(function ($) {
 </li>
 <li class="tocline1">
 <div class="section-number" id="toc_doc_section_2_2_2_3">2.2.2.3   </div>
-<a href="#the-encoding-modifier-e">The Encoding Modifier ({e:})</a>
+<a href="#e-modifier">The Encoding Modifier ({e:})</a>
 </li>
 <li class="tocline1">
 <div class="section-number" id="toc_doc_section_2_2_2_4">2.2.2.4   </div>
@@ -22208,7 +22208,7 @@ jQuery(function ($) {
 <a href="#emitting-content-xo_emit">Emitting Content (xo_emit)</a><ul class="toc">
 <li class="tocline1">
 <div class="section-number" id="toc_doc_section_3_2_1">3.2.1   </div>
-<a href="#attributes-xo_attr">Attributes (xo_attr)</a>
+<a href="#xo_attr">Attributes (xo_attr)</a>
 </li>
 <li class="tocline1">
 <div class="section-number" id="toc_doc_section_3_2_2">3.2.2   </div>
@@ -22280,10 +22280,16 @@ jQuery(function ($) {
 <a href="#faqs">FAQs</a><ul class="toc top-toc">
 <li class="tocline1">
 <div class="section-number" id="toc_doc_section_6_1">6.1   </div>
-<a href="#general">General</a><ul class="toc"><li class="tocline1">
+<a href="#general">General</a><ul class="toc">
+<li class="tocline1">
 <div class="section-number" id="toc_doc_section_6_1_1">6.1.1   </div>
 <a href="#can-you-share-the-history-of-libxo">Can you share the history of libxo?</a>
-</li></ul>
+</li>
+<li class="tocline1">
+<div class="section-number" id="toc_doc_section_6_1_2">6.1.2   </div>
+<a href="#what-makes-a-good-field-name">What makes a good field name?</a>
+</li>
+</ul>
 </li>
 <li class="tocline1">
 <div class="section-number" id="toc_doc_section_6_2">6.2   </div>
@@ -22322,7 +22328,7 @@ jQuery(function ($) {
 </li>
 <li class="tocline1">
 <div class="section-number" id="toc_doc_section_6_2_9">6.2.9   </div>
-<a href="#use-dashes-not-underscores-for-value-field-name">'Use dashes, not underscores, for value field name'</a>
+<a href="#use-hyphens-not-underscores-for-value-field-name">'Use hyphens, not underscores, for value field name'</a>
 </li>
 <li class="tocline1">
 <div class="section-number" id="toc_doc_section_6_2_10">6.2.10   </div>
@@ -22810,7 +22816,7 @@ jQuery(function ($) {
 <h4 id="doc_section_2_2_2_3">
 <div class="self-section-number">
 <a href="#doc_section_2_2_2_3">2.2.2.3</a> </div>
-<a id="the-encoding-modifier-e" href="#the-encoding-modifier-e">The Encoding Modifier ({e:})</a>
+<a id="e-modifier" href="#e-modifier">The Encoding Modifier ({e:})</a>
 </h4>
 <p id="doc_section_2_2_2_3_p_1">The display modifier indicated the field should only be generated for the display output styles, TEXT and HTML.</p>
 <div id="doc_figure_u.25"></div> <pre>
@@ -23578,7 +23584,7 @@ jQuery(function ($) {
 </tr>
 <tr>
 <td>XOF_UNDERSCORES</td>
-<td>Replaces dashes with underscores</td>
+<td>Replaces hyphens with underscores</td>
 </tr>
 <tr>
 <td>XOF_UNITS</td>
@@ -23689,7 +23695,7 @@ jQuery(function ($) {
 <h3 id="doc_section_3_2_1">
 <div class="self-section-number">
 <a href="#doc_section_3_2_1">3.2.1</a> </div>
-<a id="attributes-xo_attr" href="#attributes-xo_attr">Attributes (xo_attr)</a>
+<a id="xo_attr" href="#xo_attr">Attributes (xo_attr)</a>
 </h3>
 <p id="doc_section_3_2_1_p_1">The xo_attr() function emits attributes for the XML output style.</p>
 <div id="doc_figure_u.61"></div> <pre>
@@ -24129,6 +24135,10 @@ jQuery(function ($) {
 <td>Print the offending lines after the message</td>
 </tr>
 <tr>
+<td>-V</td>
+<td>Print vocabulary of all field names</td>
+</tr>
+<tr>
 <td>-X</td>
 <td>Extract samples from xolint, suitable for testing</td>
 </tr>
@@ -24139,7 +24149,8 @@ jQuery(function ($) {
     % xolint.pl -t xolint.c
     xolint.c: 16: error: anchor format should be "%d"
     16         xo_emit("{[:/%s}");
-	    </pre> </div>
+	    </pre> <p id="doc_section_5_p_5">The "&#8209;V" option does not report errors, but prints a complete list of all field names, sorted alphabetically. The output can help spot inconsistencies and spelling errors.</p>
+</div>
 <hr class="noprint">
 <div class="content">
 <h1 id="doc_section_6" class="np">
@@ -24160,7 +24171,10 @@ jQuery(function ($) {
 <a id="general" href="#general">General</a>
 </h2>
 <p id="doc_section_6_1_p_1">Section Contents: </p>
-<ul><li><a href="#can-you-share-the-history-of-libxo" title="Can you share the history of libxo?">Section 6.1.1</a></li></ul>
+<ul>
+<li><a href="#can-you-share-the-history-of-libxo" title="Can you share the history of libxo?">Section 6.1.1</a></li>
+<li><a href="#what-makes-a-good-field-name" title="What makes a good field name?">Section 6.1.2</a></li>
+</ul>
 <div class="content">
 <h3 id="doc_section_6_1_1">
 <div class="self-section-number">
@@ -24170,6 +24184,44 @@ jQuery(function ($) {
 <p id="doc_section_6_1_1_p_1">In 2001, we added an XML API to the JUNOS operating system, which is built on top of FreeBSD. Eventually this API became standardized as the NETCONF API (RFC 6241). As part of this effort, we modified many FreeBSD utilities to emit XML, typically via a "&#8209;X" switch. The results were mixed. The cost of maintaining this code, updating it and carrying it were non-trivial, and contributed to our expense (and the associated delay) with upgrading the version of FreeBSD on which each release of JUNOS is based.</p>
 <p id="doc_section_6_1_1_p_2">A recent (2014) effort within JUNOS aims at removing our modifications to the underlying FreeBSD code as a means of reducing the expense and delay. JUNOS is structured to have system components generate XML that is rendered by the CLI (think: login shell) into human-readable text. This allows the API to use the same plumbing as the CLI, and ensures that all components emit XML, and that it is emitted with knowledge of the consumer of that XML, yielding an API that have no incremental cost or feature delay.</p>
 <p id="doc_section_6_1_1_p_3">libxo is an effort to mix the best aspects of the JUNOS strategy into FreeBSD in a seemless way, allowing commands to make printf-like output calls without needing to care how the output is rendered.</p>
+</div>
+<div class="content">
+<h3 id="doc_section_6_1_2">
+<div class="self-section-number">
+<a href="#doc_section_6_1_2">6.1.2</a> </div>
+<a id="what-makes-a-good-field-name" href="#what-makes-a-good-field-name">What makes a good field name?</a>
+</h3>
+<p id="doc_section_6_1_2_p_1">To make useful, consistent field names, follow these guidelines:</p>
+<p id="doc_section_6_1_2_p_2"> </p>
+<dl>
+<dt>Use lower case, even for TLAs</dt>
+<dd>Lower case is more civilized. Even TLAs should be lower case to avoid scenarios where the differences between "XPath" and "Xpath" drive your users crazy. Using "xpath" is simpler and better.</dd>
+<dt>Use hyphens, not underscores</dt>
+<dd>Use of hyphens is traditional in XML, and the XOF_UNDERSCORES flag can be used to generate underscores in JSON, if desired. But the raw field name should use hyphens.</dd>
+<dt>Use full words</dt>
+<dd>Don't abbreviate especially when the abbreviation is not obvious or not widely used. Use "data&#8209;size", not "dsz" or "dsize". Use "interface" instead of "ifname", "if&#8209;name", "iface", "if", or "intf".</dd>
+<dt>Use &lt;verb&gt;-&lt;units&gt;</dt>
+<dd>Using the form &lt;verb&gt;-&lt;units&gt; or &lt;verb&gt;-&lt;classifier&gt;-&lt;units&gt; helps in making consistent, useful names, avoiding the situation where one app uses "sent&#8209;packet" and another "packets&#8209;sent" and another "packets&#8209;we&#8209;have&#8209;sent". The &lt;units&gt; can be dropped when it is obvious, as can obvious words in the classification. Use "receive&#8209;after&#8209;window&#8209;packets" instead of "received&#8209;packets&#8209;of&#8209;data&#8209;after&#8209;window".</dd>
+<dt>Reuse existing field names</dt>
+<dd>Nothing's worse than writing expressions like:</dd>
+</dl>
+<div id="doc_figure_u.84"></div> <pre>
+    if ($src1/process[pid == $pid]/name == 
+        $src2/proc-table/proc/p[process-id == $pid]/proc-name) {
+        ...
+    }
+	    </pre> <p id="doc_section_6_1_2_p_4">Find someone else who is expressing similar data and follow their field's and hierarchy. Remember the quote is not "Consistency is the hobgoblin of little minds", but "A foolish consistency is the hobgoblin of little minds".</p>
+<p id="doc_section_6_1_2_p_5"> </p>
+<dl>
+<dt>Think about your users</dt>
+<dd>Have empathy for your users, choosing clear and useful fields that contain clear and useful data. You may need to augment the display content with xo_attr() calls (<a href="#xo_attr" title="Attributes (xo_attr)">Section 3.2.1</a>) or "{e:}" fields (<a href="#e-modifier" title="The Encoding Modifier ({e:})">Section 2.2.2.3</a>) to make the data useful.</dd>
+<dt>Don't use an arbitrary number postfix</dt>
+<dd>What does "errors2" mean? No one will know. "errors&#8209;after&#8209;restart" would be a better choice. Think of you users, and think of the future. If you make "errors2", the next guy will happily make "errors3" and before you know it, someone will be asking what's the difference between errors37 and errors63.</dd>
+<dt>Be consistent, uniform, unsurprising, and predictable</dt>
+<dd>Think of your field vocabulary as an API. You want it useful, expressive, meaningful, direct, and obvious. You want the client application's programmer to move between without the need to understand a variety of opinions on how fields are named. They should see the system as a single cohesive whole, not a sack of cats.</dd>
+</dl>
+<p id="doc_section_6_1_2_p_6">Field names constitute the means by which client programmers interact with our system. By choosing wise names now, you are making their lives better.</p>
+<p id="doc_section_6_1_2_p_7">After using "xolint" to find errors in your field descriptors, use "xolint -V" to spell check your field names and to detect different names for the same data. "dropped&#8209;short" and "dropped&#8209;too&#8209;short" are both reasonable names, but using them both will lead users to ask the difference between the two fields. If there isn't a difference, use only one of the field names. If there is a difference, change the names to make that difference more obvious.</p>
 </div>
 </div>
 <div class="content">
@@ -24188,7 +24240,7 @@ jQuery(function ($) {
 <li><a href="#format-cannot-be-given-when-content-is-present-roles-dnlt" title="'Format cannot be given when content is present (roles: DNLT)'">Section 6.2.6</a></li>
 <li><a href="#an-encoding-format-cannot-be-given-roles-dnlt" title="'An encoding format cannot be given (roles: DNLT)'">Section 6.2.7</a></li>
 <li><a href="#value-field-must-have-a-name-as-content" title="'Value field must have a name (as content)&quot;)'">Section 6.2.8</a></li>
-<li><a href="#use-dashes-not-underscores-for-value-field-name" title="'Use dashes, not underscores, for value field name'">Section 6.2.9</a></li>
+<li><a href="#use-hyphens-not-underscores-for-value-field-name" title="'Use hyphens, not underscores, for value field name'">Section 6.2.9</a></li>
 <li><a href="#value-field-name-cannot-start-with-digit" title="'Value field name cannot start with digit'">Section 6.2.10</a></li>
 <li><a href="#value-field-name-should-be-lower-case" title="'Value field name should be lower case'">Section 6.2.11</a></li>
 <li><a href="#value-field-name-contains-invalid-character" title="'Value field name contains invalid character'">Section 6.2.12</a></li>
@@ -24205,10 +24257,10 @@ jQuery(function ($) {
 <a id="a-percent-sign-in-text-is-a-literal" href="#a-percent-sign-in-text-is-a-literal">'A percent sign in text is a literal'</a>
 </h3>
 <p id="doc_section_6_2_1_p_1">The message "A percent sign in text is a literal" can be caused by code like:</p>
-<div id="doc_figure_u.84"></div> <pre>
+<div id="doc_figure_u.85"></div> <pre>
     xo_emit("cost: %d", cost);
 	    </pre> <p id="doc_section_6_2_1_p_3">This code should be replaced with code like:</p>
-<div id="doc_figure_u.85"></div> <pre>
+<div id="doc_figure_u.86"></div> <pre>
     xo_emit("{L:cost}: {:cost/%d}", cost);
 	    </pre> <p id="doc_section_6_2_1_p_5">This can be a bit surprising and could be a field that was not properly converted to a libxo-style format string.</p>
 </div>
@@ -24220,10 +24272,10 @@ jQuery(function ($) {
 </h3>
 <p id="doc_section_6_2_2_p_1">The message "Last character before field definition is a field type" can be caused by code like:</p>
 <p id="doc_section_6_2_2_p_2">A common typo:</p>
-<div id="doc_figure_u.86"></div> <pre>
+<div id="doc_figure_u.87"></div> <pre>
     xo_emit("{T:Min} T{:Max}");
 	    </pre> <p id="doc_section_6_2_2_p_4">This code should be replaced with code like:</p>
-<div id="doc_figure_u.87"></div> <pre>
+<div id="doc_figure_u.88"></div> <pre>
     xo_emit("{T:Min} {T:Max}");
 	    </pre> <p id="doc_section_6_2_2_p_6">Twiddling the "{" and the field role is a common typo.</p>
 </div>
@@ -24234,10 +24286,10 @@ jQuery(function ($) {
 <a id="encoding-format-uses-different-number-of-arguments" href="#encoding-format-uses-different-number-of-arguments">'Encoding format uses different number of arguments'</a>
 </h3>
 <p id="doc_section_6_2_3_p_1">The message "Encoding format uses different number of arguments" can be caused by code like:</p>
-<div id="doc_figure_u.88"></div> <pre>
+<div id="doc_figure_u.89"></div> <pre>
     xo_emit("{:name/%6.6s %%04d/%s}", name, number);
 	    </pre> <p id="doc_section_6_2_3_p_3">This code should be replaced with code like:</p>
-<div id="doc_figure_u.89"></div> <pre>
+<div id="doc_figure_u.90"></div> <pre>
     xo_emit("{:name/%6.6s %04d/%s-%d}", name, number);
 	    </pre> <p id="doc_section_6_2_3_p_5">Both format should consume the same number of arguments off the stack</p>
 </div>
@@ -24248,10 +24300,10 @@ jQuery(function ($) {
 <a id="only-one-field-role-can-be-used" href="#only-one-field-role-can-be-used">'Only one field role can be used'</a>
 </h3>
 <p id="doc_section_6_2_4_p_1">The message "Only one field role can be used" can be caused by code like:</p>
-<div id="doc_figure_u.90"></div> <pre>
+<div id="doc_figure_u.91"></div> <pre>
     xo_emit("{LT:Max}");
 	    </pre> <p id="doc_section_6_2_4_p_3">This code should be replaced with code like:</p>
-<div id="doc_figure_u.91"></div> <pre>
+<div id="doc_figure_u.92"></div> <pre>
     xo_emit("{T:Max}");
 	    </pre> </div>
 <div class="content">
@@ -24261,10 +24313,10 @@ jQuery(function ($) {
 <a id="potential-missing-slash-after-n-l-or-t-with-format" href="#potential-missing-slash-after-n-l-or-t-with-format">'Potential missing slash after N, L, or T with format'</a>
 </h3>
 <p id="doc_section_6_2_5_p_1">The message "Potential missing slash after N, L, or T with format" can be caused by code like:</p>
-<div id="doc_figure_u.92"></div> <pre>
+<div id="doc_figure_u.93"></div> <pre>
     xo_emit("{T:%6.6s}\n", "Max");
 	    </pre> <p id="doc_section_6_2_5_p_3">This code should be replaced with code like:</p>
-<div id="doc_figure_u.93"></div> <pre>
+<div id="doc_figure_u.94"></div> <pre>
     xo_emit("{T:/%6.6s}\n", "Max");
 	    </pre> <p id="doc_section_6_2_5_p_5">The "%6.6s" will be a literal, not a field format. While it's possibly valid, it's likely a missing "/".</p>
 </div>
@@ -24275,7 +24327,7 @@ jQuery(function ($) {
 <a id="format-cannot-be-given-when-content-is-present-roles-dnlt" href="#format-cannot-be-given-when-content-is-present-roles-dnlt">'Format cannot be given when content is present (roles: DNLT)'</a>
 </h3>
 <p id="doc_section_6_2_6_p_1">The message "Format cannot be given when content is present (roles: DNLT)" can be caused by code like:</p>
-<div id="doc_figure_u.94"></div> <pre>
+<div id="doc_figure_u.95"></div> <pre>
     xo_emit("{T:Max/%6.6s}", "Max");
 	    </pre> <p id="doc_section_6_2_6_p_3">Fields with the D, N, L, or T roles can't have both static literal content ("{T:Title}") and a format ("{T:/%s}").</p>
 </div>
@@ -24286,7 +24338,7 @@ jQuery(function ($) {
 <a id="an-encoding-format-cannot-be-given-roles-dnlt" href="#an-encoding-format-cannot-be-given-roles-dnlt">'An encoding format cannot be given (roles: DNLT)'</a>
 </h3>
 <p id="doc_section_6_2_7_p_1">The message "An encoding format cannot be given (roles: DNLT)" can be caused by code like:</p>
-<div id="doc_figure_u.95"></div> <pre>
+<div id="doc_figure_u.96"></div> <pre>
     xo_emit("{T:Max//%s}", "Max");
 	    </pre> <p id="doc_section_6_2_7_p_3">Fields with the D, N, L, and T roles are not emitted in the 'encoding' style (JSON, XML), so an encoding format would make no sense.</p>
 </div>
@@ -24297,10 +24349,10 @@ jQuery(function ($) {
 <a id="value-field-must-have-a-name-as-content" href="#value-field-must-have-a-name-as-content">'Value field must have a name (as content)")'</a>
 </h3>
 <p id="doc_section_6_2_8_p_1">The message "Value field must have a name (as content)")" can be caused by code like:</p>
-<div id="doc_figure_u.96"></div> <pre>
+<div id="doc_figure_u.97"></div> <pre>
     xo_emit("{:/%s}", "value");
 	    </pre> <p id="doc_section_6_2_8_p_3">This code should be replaced with code like:</p>
-<div id="doc_figure_u.97"></div> <pre>
+<div id="doc_figure_u.98"></div> <pre>
     xo_emit("{:tag-name/%s}", "value");
 	    </pre> <p id="doc_section_6_2_8_p_5">The field name is used for XML and JSON encodings. These tags names are static and must appear directly in the field descriptor.</p>
 </div>
@@ -24308,15 +24360,15 @@ jQuery(function ($) {
 <h3 id="doc_section_6_2_9">
 <div class="self-section-number">
 <a href="#doc_section_6_2_9">6.2.9</a> </div>
-<a id="use-dashes-not-underscores-for-value-field-name" href="#use-dashes-not-underscores-for-value-field-name">'Use dashes, not underscores, for value field name'</a>
+<a id="use-hyphens-not-underscores-for-value-field-name" href="#use-hyphens-not-underscores-for-value-field-name">'Use hyphens, not underscores, for value field name'</a>
 </h3>
-<p id="doc_section_6_2_9_p_1">The message "Use dashes, not underscores, for value field name" can be caused by code like:</p>
-<div id="doc_figure_u.98"></div> <pre>
+<p id="doc_section_6_2_9_p_1">The message "Use hyphens, not underscores, for value field name" can be caused by code like:</p>
+<div id="doc_figure_u.99"></div> <pre>
     xo_emit("{:no_under_scores}", "bad");
 	    </pre> <p id="doc_section_6_2_9_p_3">This code should be replaced with code like:</p>
-<div id="doc_figure_u.99"></div> <pre>
+<div id="doc_figure_u.100"></div> <pre>
     xo_emit("{:no-under-scores}", "bad");
-	    </pre> <p id="doc_section_6_2_9_p_5">Use of dashes is traditional in XML, and the XOF_UNDERSCORES flag can be used to generate underscores in JSON, if desired. But the raw field name should use dashes.</p>
+	    </pre> <p id="doc_section_6_2_9_p_5">Use of hyphens is traditional in XML, and the XOF_UNDERSCORES flag can be used to generate underscores in JSON, if desired. But the raw field name should use hyphens.</p>
 </div>
 <div class="content">
 <h3 id="doc_section_6_2_10">
@@ -24325,10 +24377,10 @@ jQuery(function ($) {
 <a id="value-field-name-cannot-start-with-digit" href="#value-field-name-cannot-start-with-digit">'Value field name cannot start with digit'</a>
 </h3>
 <p id="doc_section_6_2_10_p_1">The message "Value field name cannot start with digit" can be caused by code like:</p>
-<div id="doc_figure_u.100"></div> <pre>
+<div id="doc_figure_u.101"></div> <pre>
     xo_emit("{:10-gig/}");
 	    </pre> <p id="doc_section_6_2_10_p_3">This code should be replaced with code like:</p>
-<div id="doc_figure_u.101"></div> <pre>
+<div id="doc_figure_u.102"></div> <pre>
     xo_emit("{:ten-gig/}");
 	    </pre> <p id="doc_section_6_2_10_p_5">XML element names cannot start with a digit.</p>
 </div>
@@ -24339,10 +24391,10 @@ jQuery(function ($) {
 <a id="value-field-name-should-be-lower-case" href="#value-field-name-should-be-lower-case">'Value field name should be lower case'</a>
 </h3>
 <p id="doc_section_6_2_11_p_1">The message "Value field name should be lower case" can be caused by code like:</p>
-<div id="doc_figure_u.102"></div> <pre>
+<div id="doc_figure_u.103"></div> <pre>
     xo_emit("{:WHY-ARE-YOU-SHOUTING}", "NO REASON");
 	    </pre> <p id="doc_section_6_2_11_p_3">This code should be replaced with code like:</p>
-<div id="doc_figure_u.103"></div> <pre>
+<div id="doc_figure_u.104"></div> <pre>
     xo_emit("{:why-are-you-shouting}", "no reason");
 	    </pre> <p id="doc_section_6_2_11_p_5">Lower case is more civilized. Even TLAs should be lower case to avoid scenarios where the differences between "XPath" and "Xpath" drive your users crazy. Lower case rules the seas.</p>
 </div>
@@ -24353,12 +24405,12 @@ jQuery(function ($) {
 <a id="value-field-name-contains-invalid-character" href="#value-field-name-contains-invalid-character">'Value field name contains invalid character'</a>
 </h3>
 <p id="doc_section_6_2_12_p_1">The message "Value field name contains invalid character" can be caused by code like:</p>
-<div id="doc_figure_u.104"></div> <pre>
+<div id="doc_figure_u.105"></div> <pre>
     xo_emit("{:cost-in-$$/%u}", 15);
 	    </pre> <p id="doc_section_6_2_12_p_3">This code should be replaced with code like:</p>
-<div id="doc_figure_u.105"></div> <pre>
+<div id="doc_figure_u.106"></div> <pre>
     xo_emit("{:cost-in-dollars/%u}", 15);
-	    </pre> <p id="doc_section_6_2_12_p_5">An invalid character is often a sign of a typo, like "{:]}" instead of "{]:}". Field names are restricted to lower-case characters, digits, and dashes.</p>
+	    </pre> <p id="doc_section_6_2_12_p_5">An invalid character is often a sign of a typo, like "{:]}" instead of "{]:}". Field names are restricted to lower-case characters, digits, and hyphens.</p>
 </div>
 <div class="content">
 <h3 id="doc_section_6_2_13">
@@ -24367,10 +24419,10 @@ jQuery(function ($) {
 <a id="decoration-field-contains-invalid-character" href="#decoration-field-contains-invalid-character">'decoration field contains invalid character'</a>
 </h3>
 <p id="doc_section_6_2_13_p_1">The message "decoration field contains invalid character" can be caused by code like:</p>
-<div id="doc_figure_u.106"></div> <pre>
+<div id="doc_figure_u.107"></div> <pre>
     xo_emit("{D:not good}");
 	    </pre> <p id="doc_section_6_2_13_p_3">This code should be replaced with code like:</p>
-<div id="doc_figure_u.107"></div> <pre>
+<div id="doc_figure_u.108"></div> <pre>
     xo_emit("{D:((}{:good}{D:))}", "yes");
 	    </pre> <p id="doc_section_6_2_13_p_5">This is minor, but fields should use proper roles. Decoration fields are meant to hold puncuation and other characters used to decorate the content, typically to make it more readable to human readers.</p>
 </div>
@@ -24381,10 +24433,10 @@ jQuery(function ($) {
 <a id="anchor-content-should-be-decimal-width" href="#anchor-content-should-be-decimal-width">'Anchor content should be decimal width'</a>
 </h3>
 <p id="doc_section_6_2_14_p_1">The message "Anchor content should be decimal width" can be caused by code like:</p>
-<div id="doc_figure_u.108"></div> <pre>
+<div id="doc_figure_u.109"></div> <pre>
     xo_emit("{[:mumble}");
 	    </pre> <p id="doc_section_6_2_14_p_3">This code should be replaced with code like:</p>
-<div id="doc_figure_u.109"></div> <pre>
+<div id="doc_figure_u.110"></div> <pre>
     xo_emit("{[:32}");
 	    </pre> <p id="doc_section_6_2_14_p_5">Anchors need an integer value to specify the width of the set of anchored fields. The value can be positive (for left padding/right justification) or negative (for right padding/left justification) and can appear in either the start or stop anchor field descriptor.</p>
 </div>
@@ -24395,10 +24447,10 @@ jQuery(function ($) {
 <a id="anchor-format-should-be-d" href="#anchor-format-should-be-d">'Anchor format should be "%d"'</a>
 </h3>
 <p id="doc_section_6_2_15_p_1">The message "Anchor format should be "%d"" can be caused by code like:</p>
-<div id="doc_figure_u.110"></div> <pre>
+<div id="doc_figure_u.111"></div> <pre>
     xo_emit("{[:/%s}");
 	    </pre> <p id="doc_section_6_2_15_p_3">This code should be replaced with code like:</p>
-<div id="doc_figure_u.111"></div> <pre>
+<div id="doc_figure_u.112"></div> <pre>
     xo_emit("{[:/%d}");
 	    </pre> <p id="doc_section_6_2_15_p_5">Anchors only grok integer values, and if the value is not static, if must be in an 'int' argument, represented by the "%d" format. Anything else is an error.</p>
 </div>
@@ -24409,10 +24461,10 @@ jQuery(function ($) {
 <a id="anchor-cannot-have-both-format-and-encoding-format" href="#anchor-cannot-have-both-format-and-encoding-format">'Anchor cannot have both format and encoding format")'</a>
 </h3>
 <p id="doc_section_6_2_16_p_1">The message "Anchor cannot have both format and encoding format")" can be caused by code like:</p>
-<div id="doc_figure_u.112"></div> <pre>
+<div id="doc_figure_u.113"></div> <pre>
     xo_emit("{[:32/%d}");
 	    </pre> <p id="doc_section_6_2_16_p_3">This code should be replaced with code like:</p>
-<div id="doc_figure_u.113"></div> <pre>
+<div id="doc_figure_u.114"></div> <pre>
     xo_emit("{[:32}");
 	    </pre> <p id="doc_section_6_2_16_p_5">Anchors can have a static value or argument for the width, but cannot have both.</p>
 </div>
@@ -24423,10 +24475,10 @@ jQuery(function ($) {
 <a id="max-width-only-valid-for-strings" href="#max-width-only-valid-for-strings">'Max width only valid for strings'</a>
 </h3>
 <p id="doc_section_6_2_17_p_1">The message "Max width only valid for strings" can be caused by code like:</p>
-<div id="doc_figure_u.114"></div> <pre>
+<div id="doc_figure_u.115"></div> <pre>
     xo_emit("{:tag/%2.4.6d}", 55);
 	    </pre> <p id="doc_section_6_2_17_p_3">This code should be replaced with code like:</p>
-<div id="doc_figure_u.115"></div> <pre>
+<div id="doc_figure_u.116"></div> <pre>
     xo_emit("{:tag/%2.6d}", 55);
 	    </pre> <p id="doc_section_6_2_17_p_5">libxo allows a true 'max width' in addition to the traditional printf-style 'max number of bytes to use for input'. But this is supported only for string values, since it makes no sense for non-strings. This error may occur from a typo, like "{:tag/%6..6d}" where only one period should be used.</p>
 </div>
@@ -24448,7 +24500,7 @@ jQuery(function ($) {
 <a id="unit-test" href="#unit-test">Unit Test</a>
 </h2>
 <p id="doc_section_7_1_p_1">Here is the unit test example:</p>
-<div id="doc_figure_u.116"></div> <pre>
+<div id="doc_figure_u.117"></div> <pre>
     int
     main (int argc, char **argv)
     {
@@ -24541,7 +24593,7 @@ jQuery(function ($) {
         return 0;
     }
 	    </pre> <p id="doc_section_7_1_p_3">Text output:</p>
-<div id="doc_figure_u.117"></div> <pre>
+<div id="doc_figure_u.118"></div> <pre>
     % ./testxo --libxo text
     Item 'gum':
        Total sold: 1412.0
@@ -24574,7 +24626,7 @@ jQuery(function ($) {
        On order: 1
        SKU: GRO-000-533
 	    </pre> <p id="doc_section_7_1_p_5">JSON output:</p>
-<div id="doc_figure_u.118"></div> <pre>
+<div id="doc_figure_u.119"></div> <pre>
     % ./testxo --libxo json,pretty
     "top": {
       "data": {
@@ -24629,7 +24681,7 @@ jQuery(function ($) {
       }
     }
 	    </pre> <p id="doc_section_7_1_p_7">XML output:</p>
-<div id="doc_figure_u.119"></div> <pre>
+<div id="doc_figure_u.120"></div> <pre>
     % ./testxo --libxo pretty,xml
     &lt;top&gt;
       &lt;data&gt;
@@ -24680,7 +24732,7 @@ jQuery(function ($) {
       &lt;/data&gt;
     &lt;/top&gt;
 	    </pre> <p id="doc_section_7_1_p_9">HMTL output:</p>
-<div id="doc_figure_u.120"></div> <pre>
+<div id="doc_figure_u.121"></div> <pre>
     % ./testxo --libxo pretty,html
     &lt;div class="line"&gt;
       &lt;div class="label"&gt;Item&lt;/div&gt;
@@ -24875,7 +24927,7 @@ jQuery(function ($) {
       &lt;div class="data" data-tag="sku"&gt;GRO-000-533&lt;/div&gt;
     &lt;/div&gt;
 	    </pre> <p id="doc_section_7_1_p_11">HTML output with xpath and info flags:</p>
-<div id="doc_figure_u.121"></div> <pre>
+<div id="doc_figure_u.122"></div> <pre>
     % ./testxo --libxo pretty,html,xpath,info
     &lt;div class="line"&gt;
       &lt;div class="label"&gt;Item&lt;/div&gt;
