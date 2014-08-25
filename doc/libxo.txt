@@ -431,7 +431,7 @@ the display output styles, TEXT and HTML.
 The display modifier is the opposite of the encoding modifier, and
 they are often used to give to distinct views of the underlying data.
 
-**** The Encoding Modifier ({e:})
+**** The Encoding Modifier ({e:}) (^e-modifier^)
 
 The display modifier indicated the field should only be generated for
 the display output styles, TEXT and HTML.
@@ -1030,7 +1030,7 @@ The set of valid flags include:
 | XOF_KEYS        | Emit the key attribute (XML)          |
 | XOF_NO_ENV      | Do not use the LIBXO_OPTIONS env var  |
 | XOF_PRETTY      | Make 'pretty printed' output          |
-| XOF_UNDERSCORES | Replaces dashes with underscores      |
+| XOF_UNDERSCORES | Replaces hyphens with underscores     |
 | XOF_UNITS       | Display units (XML and HMTL)          |
 | XOF_WARN        | Generate warnings for broken calls    |
 | XOF_WARN_XML    | Generate warnings in XML on stdout    |
@@ -1590,6 +1590,64 @@ incremental cost or feature delay.
 libxo is an effort to mix the best aspects of the JUNOS strategy into
 FreeBSD in a seemless way, allowing commands to make printf-like
 output calls without needing to care how the output is rendered.
+
+*** What makes a good field name?
+
+To make useful, consistent field names, follow these guidelines:
+
+= Use lower case, even for TLAs
+Lower case is more civilized.  Even TLAs should be lower case
+to avoid scenarios where the differences between "XPath" and
+"Xpath" drive your users crazy.  Using "xpath" is simpler and better.
+= Use hyphens, not underscores
+Use of hyphens is traditional in XML, and the XOF_UNDERSCORES
+flag can be used to generate underscores in JSON, if desired.
+But the raw field name should use hyphens.
+= Use full words
+Don't abbreviate especially when the abbreviation is not obvious or
+not widely used.  Use "data-size", not "dsz" or "dsize".  Use
+"interface" instead of "ifname", "if-name", "iface", "if", or "intf".
+= Use <verb>-<units>
+Using the form <verb>-<units> or <verb>-<classifier>-<units> helps in
+making consistent, useful names, avoiding the situation where one app
+uses "sent-packet" and another "packets-sent" and another
+"packets-we-have-sent".  The <units> can be dropped when it is
+obvious, as can obvious words in the classification.
+Use "receive-after-window-packets" instead of
+"received-packets-of-data-after-window".
+= Reuse existing field names
+Nothing's worse than writing expressions like:
+
+    if ($src1/process[pid == $pid]/name == 
+        $src2/proc-table/proc/p[process-id == $pid]/proc-name) {
+        ...
+    }
+
+Find someone else who is expressing similar data and follow their
+field's and hierarchy.  Remember the quote is not "Consistency is the
+hobgoblin of little minds", but "A foolish consistency is the
+hobgoblin of little minds".
+= Think about your users
+Have empathy for your users, choosing clear and useful fields that
+contain clear and useful data.  You may need to augment the display
+content with xo_attr() calls (^xo_attr^) or "{e:}" fields
+(^e-modifier^) to make the data useful.
+= Don't use an arbitrary number postfix
+What does "errors2" mean?  No one will know.  "errors-after-restart"
+would be a better choice.  Think of you users, and think of the
+future.  If you make "errors2", the next guy will happily make
+"errors3" and before you know it, someone will be asking what's the
+difference between errors37 and errors63.
+= Be consistent, uniform, unsurprising, and predictable
+Think of your field vocabulary as an API.  You want it useful,
+expressive, meaningful, direct, and obvious.  You want the client
+application's programmer to move between without the need to
+understand a variety of opinions on how fields are named.  They should
+see the system as a single cohesive whole, not a sack of cats.
+
+Field names constitute the means by which client programmers interact
+with our system.  By choosing wise names now, you are making their
+lives better.
 
 ** What does this message mean?
 
