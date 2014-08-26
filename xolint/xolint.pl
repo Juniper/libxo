@@ -13,6 +13,8 @@
 #
 # Yes, that's a long way to go for a pun.
 
+%vocabulary = ();
+
 sub main {
     while ($ARGV[0] =~ /^-/) {
 	$_ = shift @ARGV;
@@ -21,11 +23,18 @@ sub main {
 	$opt_debug = 1 if /^-d/;
 	extract_docs() if /^-D/;
 	$opt_print = 1 if /^-p/;
+	$opt_vocabulary = 1 if /^-V/;
 	extract_samples() if /^-X/;
     }
 
     for $file (@ARGV) {
 	parse_file($file);
+    }
+
+    if ($opt_vocabulary) {
+	for $name (sort(keys(%vocabulary))) {
+	    print $name, "\n";
+	}
     }
 }
 
@@ -120,7 +129,8 @@ sub parse_file {
 	check_format($tokens[0]);
     }
 
-    print $file . ": $errors errors, $warnings warnings, $info info\n";
+    print $file . ": $errors errors, $warnings warnings, $info info\n"
+	unless $opt_vocabulary;
 }
 
 sub parse_tokens {
@@ -280,6 +290,12 @@ sub check_field {
     my(@field) = @_;
     print "checking field: [" . join("][", @field) . "]\n" if $opt_debug;
 
+    if ($opt_vocabulary) {
+	$vocabulary{$field[1]} = 1
+	    if $field[1] && $field[0] !~ /[DELNPTUW\[\]]/;
+	return;
+    }
+
     #@ Last character before field definition is a field type
     #@ A common typo:
     #@     xo_emit("{T:Min} T{:Max}");
@@ -349,14 +365,14 @@ sub check_field {
 	error("value field must have a name (as content)")
 	    unless $field[1];
 
-	#@ Use dashes, not underscores, for value field name
+	#@ Use hyphens, not underscores, for value field name
 	#@     xo_emit("{:no_under_scores}", "bad");
 	#@ Should be:
 	#@     xo_emit("{:no-under-scores}", "bad");
-	#@ Use of dashes is traditional in XML, and the XOF_UNDERSCORES
+	#@ Use of hyphens is traditional in XML, and the XOF_UNDERSCORES
 	#@ flag can be used to generate underscores in JSON, if desired.
-	#@ But the raw field name should use dashes.
-	error("use dashes, not underscores, for value field name")
+	#@ But the raw field name should use hyphens.
+	error("use hyphens, not underscores, for value field name")
 	    if $field[1] =~ /_/;
 
 	#@ Value field name cannot start with digit
@@ -383,7 +399,7 @@ sub check_field {
 	#@     xo_emit("{:cost-in-dollars/%u}", 15);
 	#@ An invalid character is often a sign of a typo, like "{:]}"
 	#@ instead of "{]:}".  Field names are restricted to lower-case
-	#@ characters, digits, and dashes.
+	#@ characters, digits, and hyphens.
 	error("value field name contains invalid character (" . $field[1] . ")")
 	    unless $field[1] =~ /^[0-9a-z-]*$/;
     }
@@ -487,18 +503,21 @@ sub check_field_format {
 }
 
 sub error {
+    return if $opt_vocabulary;
     print STDERR $curfile . ": " .$curln . ": error: " . join(" ", @_) . "\n";
     print STDERR $replay . "\n" if $opt_print;
     $errors += 1;
 }
 
 sub warn {
+    return if $opt_vocabulary;
     print STDERR $curfile . ": " .$curln . ": warning: " . join(" ", @_) . "\n";
     print STDERR $replay . "\n" if $opt_print;
     $warnings += 1;
 }
 
 sub info {
+    return if $opt_vocabulary;
     print STDERR $curfile . ": " .$curln . ": info: " . join(" ", @_) . "\n";
     print STDERR $replay . "\n" if $opt_print;
     $info += 1;
