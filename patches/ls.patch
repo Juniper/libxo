@@ -45,7 +45,7 @@ Only in .: ls
 Only in .: ls.1.gz
 diff -ru /usr/src/bin/ls/ls.c ./ls.c
 --- /usr/src/bin/ls/ls.c	2014-01-16 15:32:13.000000000 -0500
-+++ ./ls.c	2014-08-29 03:18:19.000000000 -0400
++++ ./ls.c	2014-08-29 03:30:09.000000000 -0400
 @@ -66,6 +66,7 @@
  #include <termcap.h>
  #include <signal.h>
@@ -90,7 +90,11 @@ diff -ru /usr/src/bin/ls/ls.c ./ls.c
  	exit(rval);
  }
  
-@@ -498,7 +508,7 @@
+@@ -495,10 +505,11 @@
+ 	FTS *ftsp;
+ 	FTSENT *p, *chp;
+ 	int ch_options;
++	int first = 1;
  
  	if ((ftsp =
  	    fts_open(argv, options, f_nosort ? NULL : mastercmp)) == NULL)
@@ -99,7 +103,7 @@ diff -ru /usr/src/bin/ls/ls.c ./ls.c
  
  	/*
  	 * We ignore errors from fts_children here since they will be
-@@ -520,11 +530,11 @@
+@@ -520,11 +531,11 @@
  	while ((p = fts_read(ftsp)) != NULL)
  		switch (p->fts_info) {
  		case FTS_DC:
@@ -113,7 +117,19 @@ diff -ru /usr/src/bin/ls/ls.c ./ls.c
  			rval = 1;
  			break;
  		case FTS_D:
-@@ -538,12 +548,12 @@
+@@ -532,31 +543,40 @@
+ 			    p->fts_name[0] == '.' && !f_listdot)
+ 				break;
+ 
++			if (first) {
++				first = 0;
++				xo_open_list("directory");
++			}
++			xo_open_instance("directory");
++
+ 			/*
+ 			 * If already output something, put out a newline as
+ 			 * a separator.  If multiple arguments, precede each
  			 * directory with its name.
  			 */
  			if (output) {
@@ -131,16 +147,24 @@ diff -ru /usr/src/bin/ls/ls.c ./ls.c
  				output = 1;
  			}
  			chp = fts_children(ftsp, ch_options);
-@@ -556,7 +566,7 @@
+ 			display(p, chp, options);
+ 
++			xo_close_instance("directory");
+ 			if (!f_recursive && chp != NULL)
+ 				(void)fts_set(ftsp, p, FTS_SKIP);
+ 			break;
+ 		default:
  			break;
  		}
++	if (!first)
++		xo_close_list("directory");
  	if (errno)
 -		err(1, "fts_read");
 +		xo_err(1, "fts_read");
  }
  
  /*
-@@ -603,7 +613,7 @@
+@@ -603,7 +623,7 @@
  		/* Fill-in "::" as "0:0:0" for the sake of scanf. */
  		jinitmax = malloc(strlen(initmax) * 2 + 2);
  		if (jinitmax == NULL)
@@ -149,7 +173,7 @@ diff -ru /usr/src/bin/ls/ls.c ./ls.c
  		initmax2 = jinitmax;
  		if (*initmax == ':')
  			strcpy(initmax2, "0:"), initmax2 += 2;
-@@ -674,7 +684,7 @@
+@@ -674,7 +694,7 @@
  	flags = NULL;
  	for (cur = list, entries = 0; cur; cur = cur->fts_link) {
  		if (cur->fts_info == FTS_ERR || cur->fts_info == FTS_NS) {
@@ -158,7 +182,7 @@ diff -ru /usr/src/bin/ls/ls.c ./ls.c
  			    cur->fts_name, strerror(cur->fts_errno));
  			cur->fts_number = NO_PRINT;
  			rval = 1;
-@@ -740,7 +750,7 @@
+@@ -740,7 +760,7 @@
  						flags = strdup("-");
  					}
  					if (flags == NULL)
@@ -167,7 +191,7 @@ diff -ru /usr/src/bin/ls/ls.c ./ls.c
  					flen = strlen(flags);
  					if (flen > (size_t)maxflags)
  						maxflags = flen;
-@@ -754,7 +764,7 @@
+@@ -754,7 +774,7 @@
  
  					error = mac_prepare_file_label(&label);
  					if (error == -1) {
@@ -176,7 +200,7 @@ diff -ru /usr/src/bin/ls/ls.c ./ls.c
  						    cur->fts_parent->fts_path,
  						    cur->fts_name);
  						goto label_out;
-@@ -775,7 +785,7 @@
+@@ -775,7 +795,7 @@
  						error = mac_get_link(name,
  						    label);
  					if (error == -1) {
@@ -185,7 +209,7 @@ diff -ru /usr/src/bin/ls/ls.c ./ls.c
  						    cur->fts_parent->fts_path,
  						    cur->fts_name);
  						mac_free(label);
-@@ -785,7 +795,7 @@
+@@ -785,7 +805,7 @@
  					error = mac_to_text(label,
  					    &labelstr);
  					if (error == -1) {
@@ -194,7 +218,7 @@ diff -ru /usr/src/bin/ls/ls.c ./ls.c
  						    cur->fts_parent->fts_path,
  						    cur->fts_name);
  						mac_free(label);
-@@ -803,7 +813,7 @@
+@@ -803,7 +823,7 @@
  
  				if ((np = malloc(sizeof(NAMES) + labelstrlen +
  				    ulen + glen + flen + 4)) == NULL)
