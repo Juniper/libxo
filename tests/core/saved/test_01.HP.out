@@ -6,39 +6,39 @@
   <div class="title">  SKU</div>
 </div>
 <div class="line">
-  <div class="data" data-tag="name">gum       </div>
+  <div class="data" data-tag="name" data-key="key">gum       </div>
   <div class="data" data-tag="sold">        1412</div>
   <div class="data" data-tag="in-stock">          54</div>
   <div class="data" data-tag="on-order">          10</div>
-  <div class="data" data-tag="sku">  GRO-000-415</div>
+  <div class="data" data-tag="sku" data-key="key">  GRO-000-415</div>
 </div>
 <div class="line">
-  <div class="data" data-tag="name">rope      </div>
+  <div class="data" data-tag="name" data-key="key">rope      </div>
   <div class="data" data-tag="sold">          85</div>
   <div class="data" data-tag="in-stock">           4</div>
   <div class="data" data-tag="on-order">           2</div>
-  <div class="data" data-tag="sku">  HRD-000-212</div>
+  <div class="data" data-tag="sku" data-key="key">  HRD-000-212</div>
 </div>
 <div class="line">
-  <div class="data" data-tag="name">ladder    </div>
+  <div class="data" data-tag="name" data-key="key">ladder    </div>
   <div class="data" data-tag="sold">           0</div>
   <div class="data" data-tag="in-stock">           2</div>
   <div class="data" data-tag="on-order">           1</div>
-  <div class="data" data-tag="sku">  HRD-000-517</div>
+  <div class="data" data-tag="sku" data-key="key">  HRD-000-517</div>
 </div>
 <div class="line">
-  <div class="data" data-tag="name">bolt      </div>
+  <div class="data" data-tag="name" data-key="key">bolt      </div>
   <div class="data" data-tag="sold">        4123</div>
   <div class="data" data-tag="in-stock">         144</div>
   <div class="data" data-tag="on-order">          42</div>
-  <div class="data" data-tag="sku">  HRD-000-632</div>
+  <div class="data" data-tag="sku" data-key="key">  HRD-000-632</div>
 </div>
 <div class="line">
-  <div class="data" data-tag="name">water     </div>
+  <div class="data" data-tag="name" data-key="key">water     </div>
   <div class="data" data-tag="sold">          17</div>
   <div class="data" data-tag="in-stock">          14</div>
   <div class="data" data-tag="on-order">           2</div>
-  <div class="data" data-tag="sku">  GRO-000-2331</div>
+  <div class="data" data-tag="sku" data-key="key">  GRO-000-2331</div>
 </div>
 <div class="line">
 </div>
@@ -47,7 +47,7 @@
 <div class="line">
   <div class="label">Item</div>
   <div class="text"> '</div>
-  <div class="data" data-tag="name">gum</div>
+  <div class="data" data-tag="name" data-key="key">gum</div>
   <div class="text">':</div>
 </div>
 <div class="line">
@@ -74,12 +74,12 @@
   <div class="padding">   </div>
   <div class="label">SKU</div>
   <div class="text">: </div>
-  <div class="data" data-tag="sku">GRO-000-415</div>
+  <div class="data" data-tag="sku" data-key="key">GRO-000-415</div>
 </div>
 <div class="line">
   <div class="label">Item</div>
   <div class="text"> '</div>
-  <div class="data" data-tag="name">rope</div>
+  <div class="data" data-tag="name" data-key="key">rope</div>
   <div class="text">':</div>
 </div>
 <div class="line">
@@ -106,12 +106,12 @@
   <div class="padding">   </div>
   <div class="label">SKU</div>
   <div class="text">: </div>
-  <div class="data" data-tag="sku">HRD-000-212</div>
+  <div class="data" data-tag="sku" data-key="key">HRD-000-212</div>
 </div>
 <div class="line">
   <div class="label">Item</div>
   <div class="text"> '</div>
-  <div class="data" data-tag="name">ladder</div>
+  <div class="data" data-tag="name" data-key="key">ladder</div>
   <div class="text">':</div>
 </div>
 <div class="line">
@@ -138,12 +138,12 @@
   <div class="padding">   </div>
   <div class="label">SKU</div>
   <div class="text">: </div>
-  <div class="data" data-tag="sku">HRD-000-517</div>
+  <div class="data" data-tag="sku" data-key="key">HRD-000-517</div>
 </div>
 <div class="line">
   <div class="label">Item</div>
   <div class="text"> '</div>
-  <div class="data" data-tag="name">bolt</div>
+  <div class="data" data-tag="name" data-key="key">bolt</div>
   <div class="text">':</div>
 </div>
 <div class="line">
@@ -170,12 +170,12 @@
   <div class="padding">   </div>
   <div class="label">SKU</div>
   <div class="text">: </div>
-  <div class="data" data-tag="sku">HRD-000-632</div>
+  <div class="data" data-tag="sku" data-key="key">HRD-000-632</div>
 </div>
 <div class="line">
   <div class="label">Item</div>
   <div class="text"> '</div>
-  <div class="data" data-tag="name">water</div>
+  <div class="data" data-tag="name" data-key="key">water</div>
   <div class="text">':</div>
 </div>
 <div class="line">
@@ -202,12 +202,12 @@
   <div class="padding">   </div>
   <div class="label">SKU</div>
   <div class="text">: </div>
-  <div class="data" data-tag="sku">GRO-000-2331</div>
+  <div class="data" data-tag="sku" data-key="key">GRO-000-2331</div>
 </div>
 <div class="line">
   <div class="label">Item</div>
   <div class="text"> '</div>
-  <div class="data" data-tag="name">fish</div>
+  <div class="data" data-tag="name" data-key="key">fish</div>
   <div class="text">':</div>
 </div>
 <div class="line">
@@ -234,5 +234,5 @@
   <div class="padding">   </div>
   <div class="label">SKU</div>
   <div class="text">: </div>
-  <div class="data" data-tag="sku">GRO-000-533</div>
+  <div class="data" data-tag="sku" data-key="key">GRO-000-533</div>
 </div>
