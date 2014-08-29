@@ -17,7 +17,8 @@ test_02.c \
 test_03.c \
 test_04.c \
 test_05.c \
-test_06.c
+test_06.c \
+test_07.c
 
 test_01_test_SOURCES = test_01.c
 test_02_test_SOURCES = test_02.c
@@ -25,6 +26,7 @@ test_03_test_SOURCES = test_03.c
 test_04_test_SOURCES = test_04.c
 test_05_test_SOURCES = test_05.c
 test_06_test_SOURCES = test_06.c
+test_07_test_SOURCES = test_07.c
 
 # TEST_CASES := $(shell cd ${srcdir} ; echo *.c )
 
