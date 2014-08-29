@@ -2411,110 +2411,30 @@ xo_buf_append_div (xo_handle_t *xop, const char *class, xo_xff_flags_t flags,
 		   const char *value, int vlen,
 		   const char *encoding, int elen)
 {
-    static char div1[] = "<div class=\"";
-    static char div2[] = "\" data-tag=\"";
-    static char div3[] = "\" data-xpath=\"";
-    static char div4[] = "\">";
-    static char div5[] = "</div>";
-
-    if (flags & XFF_ENCODE_ONLY)
-	return;
-
-    xo_line_ensure_open(xop, 0);
-
-    if (xop->xo_flags & XOF_PRETTY)
-	xo_buf_indent(xop, xop->xo_indent_by);
-
-    xo_data_append(xop, div1, sizeof(div1) - 1);
-    xo_data_append(xop, class, strlen(class));
-
-    if (name) {
-	xo_data_append(xop, div2, sizeof(div2) - 1);
-	xo_data_escape(xop, name, nlen);
-
-	/*
-	 * Save the offset at which we'd place units.  See xo_format_units.
-	 */
-	if (xop->xo_flags & XOF_UNITS) {
-	    xop->xo_flags |= XOF_UNITS_PENDING;
-	    /*
-	     * Note: We need the '+1' here because we know we've not
-	     * added the closing quote.  We add one, knowing the quote
-	     * will be added shortly.
-	     */
-	    xop->xo_units_offset =
-		xop->xo_data.xb_curp -xop->xo_data.xb_bufp + 1;
-	}
-    }
-
-    if (name) {
-	if (xop->xo_flags & XOF_XPATH) {
-	    int i;
-	    xo_stack_t *xsp;
-
-	    xo_data_append(xop, div3, sizeof(div3) - 1);
-	    if (xop->xo_leading_xpath)
-		xo_data_append(xop, xop->xo_leading_xpath,
-			       strlen(xop->xo_leading_xpath));
-
-	    for (i = 0; i <= xop->xo_depth; i++) {
-		xsp = &xop->xo_stack[i];
-		if (xsp->xs_name == NULL)
-		    continue;
-
-		xo_data_append(xop, "/", 1);
-		xo_data_escape(xop, xsp->xs_name, strlen(xsp->xs_name));
-		if (xsp->xs_keys)
-		    xo_data_append(xop, xsp->xs_keys, strlen(xsp->xs_keys));
-	    }
-
-	    xo_data_append(xop, "/", 1);
-	    xo_data_escape(xop, name, nlen);
-	}
-
-	if ((xop->xo_flags & XOF_INFO) && xop->xo_info) {
-	    static char in_type[] = "\" data-type=\"";
-	    static char in_help[] = "\" data-help=\"";
-
-	    xo_info_t *xip = xo_info_find(xop, name, nlen);
-	    if (xip) {
-		if (xip->xi_type) {
-		    xo_data_append(xop, in_type, sizeof(in_type) - 1);
-		    xo_data_escape(xop, xip->xi_type, strlen(xip->xi_type));
-		}
-		if (xip->xi_help) {
-		    xo_data_append(xop, in_help, sizeof(in_help) - 1);
-		    xo_data_escape(xop, xip->xi_help, strlen(xip->xi_help));
-		}
-	    }
-	}
-    }
-
-    xo_data_append(xop, div4, sizeof(div4) - 1);
+    static char div_start[] = "<div class=\"";
+    static char div_tag[] = "\" data-tag=\"";
+    static char div_xpath[] = "\" data-xpath=\"";
+    static char div_key[] = "\" data-key=\"key";
+    static char div_end[] = "\">";
+    static char div_close[] = "</div>";
 
     /*
      * To build our XPath predicate, we need to save the va_list before
      * we format our data, and then restore it before we format the
      * xpath expression.
+     * Display-only keys implies that we've got an encode-only key
+     * elsewhere, so we don't use them from making predicates.
      */
-    va_list va_local;
     int need_predidate = 
-	(name && (flags & XFF_KEY) && (xop->xo_flags & XOF_XPATH));
+	(name && (flags & XFF_KEY) && !(flags & XFF_DISPLAY_ONLY)
+	 && (xop->xo_flags & XOF_XPATH));
 
     if (need_predidate) {
+	va_list va_local;
+
 	va_copy(va_local, xop->xo_vap);
 	if (xop->xo_checkpointer)
 	    xop->xo_checkpointer(xop, xop->xo_vap, 0);
-    }
-
-    xo_format_data(xop, NULL, value, vlen, 0);
-
-    if (need_predidate) {
-	va_end(xop->xo_vap);
-	va_copy(xop->xo_vap, va_local);
-	va_end(va_local);
-	if (xop->xo_checkpointer)
-	    xop->xo_checkpointer(xop, xop->xo_vap, 1);
 
 	/*
 	 * Build an XPath predicate expression to match this key.
@@ -2554,9 +2474,107 @@ xo_buf_append_div (xo_handle_t *xop, const char *class, xo_xff_flags_t flags,
 	    cp[olen + dlen] = '\0';
 	    xsp->xs_keys = cp;
 	}
+
+	/* Now we reset the xo_vap as if we were never here */
+	va_end(xop->xo_vap);
+	va_copy(xop->xo_vap, va_local);
+	va_end(va_local);
+	if (xop->xo_checkpointer)
+	    xop->xo_checkpointer(xop, xop->xo_vap, 1);
     }
 
-    xo_data_append(xop, div5, sizeof(div5) - 1);
+    if (flags & XFF_ENCODE_ONLY) {
+	/*
+	 * Even if this is encode-only, we need to go thru the
+	 * work of formatting it to make sure the args are cleared
+	 * from xo_vap.
+	 */
+	xo_format_data(xop, &xop->xo_data, encoding, elen,
+		       flags | XFF_NO_OUTPUT);
+	return;
+    }
+
+    xo_line_ensure_open(xop, 0);
+
+    if (xop->xo_flags & XOF_PRETTY)
+	xo_buf_indent(xop, xop->xo_indent_by);
+
+    xo_data_append(xop, div_start, sizeof(div_start) - 1);
+    xo_data_append(xop, class, strlen(class));
+
+    if (name) {
+	xo_data_append(xop, div_tag, sizeof(div_tag) - 1);
+	xo_data_escape(xop, name, nlen);
+
+	/*
+	 * Save the offset at which we'd place units.  See xo_format_units.
+	 */
+	if (xop->xo_flags & XOF_UNITS) {
+	    xop->xo_flags |= XOF_UNITS_PENDING;
+	    /*
+	     * Note: We need the '+1' here because we know we've not
+	     * added the closing quote.  We add one, knowing the quote
+	     * will be added shortly.
+	     */
+	    xop->xo_units_offset =
+		xop->xo_data.xb_curp -xop->xo_data.xb_bufp + 1;
+	}
+    }
+
+    if (name) {
+	if (xop->xo_flags & XOF_XPATH) {
+	    int i;
+	    xo_stack_t *xsp;
+
+	    xo_data_append(xop, div_xpath, sizeof(div_xpath) - 1);
+	    if (xop->xo_leading_xpath)
+		xo_data_append(xop, xop->xo_leading_xpath,
+			       strlen(xop->xo_leading_xpath));
+
+	    for (i = 0; i <= xop->xo_depth; i++) {
+		xsp = &xop->xo_stack[i];
+		if (xsp->xs_name == NULL)
+		    continue;
+
+		xo_data_append(xop, "/", 1);
+		xo_data_escape(xop, xsp->xs_name, strlen(xsp->xs_name));
+		if (xsp->xs_keys) {
+		    /* Don't show keys for the key field */
+		    if (i != xop->xo_depth || !(flags & XFF_KEY))
+			xo_data_append(xop, xsp->xs_keys, strlen(xsp->xs_keys));
+		}
+	    }
+
+	    xo_data_append(xop, "/", 1);
+	    xo_data_escape(xop, name, nlen);
+	}
+
+	if ((xop->xo_flags & XOF_INFO) && xop->xo_info) {
+	    static char in_type[] = "\" data-type=\"";
+	    static char in_help[] = "\" data-help=\"";
+
+	    xo_info_t *xip = xo_info_find(xop, name, nlen);
+	    if (xip) {
+		if (xip->xi_type) {
+		    xo_data_append(xop, in_type, sizeof(in_type) - 1);
+		    xo_data_escape(xop, xip->xi_type, strlen(xip->xi_type));
+		}
+		if (xip->xi_help) {
+		    xo_data_append(xop, in_help, sizeof(in_help) - 1);
+		    xo_data_escape(xop, xip->xi_help, strlen(xip->xi_help));
+		}
+	    }
+	}
+
+	if (xop->xo_flags & XOF_KEYS)
+	    xo_data_append(xop, div_key, sizeof(div_key) - 1);
+    }
+
+    xo_data_append(xop, div_end, sizeof(div_end) - 1);
+
+    xo_format_data(xop, NULL, value, vlen, 0);
+
+    xo_data_append(xop, div_close, sizeof(div_close) - 1);
 
     if (xop->xo_flags & XOF_PRETTY)
 	xo_data_append(xop, "\n", 1);
@@ -2695,6 +2713,18 @@ xo_format_prep (xo_handle_t *xop, xo_xff_flags_t flags)
 	xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
 }
 
+#if 0
+/* Useful debugging function */
+void
+xo_arg (xo_handle_t *xop);
+void
+xo_arg (xo_handle_t *xop)
+{
+    xop = xo_default(xop);
+    fprintf(stderr, "0x%x", va_arg(xop->xo_vap, unsigned));
+}
+#endif /* 0 */
+
 static void
 xo_format_value (xo_handle_t *xop, const char *name, int nlen,
 		 const char *format, int flen,
@@ -2711,9 +2741,8 @@ xo_format_value (xo_handle_t *xop, const char *name, int nlen,
 	break;
 
     case XO_STYLE_HTML:
-	if (!(flags & XFF_ENCODE_ONLY))
-	    xo_buf_append_div(xop, "data", flags, name, nlen,
-			      format, flen, encoding, elen);
+	xo_buf_append_div(xop, "data", flags, name, nlen,
+			  format, flen, encoding, elen);
 	break;
 
     case XO_STYLE_XML:
@@ -3272,16 +3301,6 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 		 */
 		return -1;
 	    }
-	}
-
-	/*
-	 * If a field is display only, then if can't be a key for an XPath
-	 * expression, since it doesn't appear in XML.
-	 */
-	if ((flags & XFF_KEY) && (flags & XFF_DISPLAY_ONLY)) {
-	    flags &= ~XFF_KEY;
-	    xo_failure(xop, "ignoring 'key' for 'display-only' field: %s",
-			  fmt);
 	}
 
 	if (*sp == ':') {
