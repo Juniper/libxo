@@ -100,6 +100,7 @@ struct xo_handle_s {
     unsigned xo_anchor_columns;	/* Number of columns since the start anchor */
     int xo_anchor_min_width;	/* Desired width of anchored text */
     unsigned xo_units_offset;	/* Start of units insertion point */
+    unsigned xo_columns;	/* Columns emitted during this xo_emit call */
 };
 
 /* Flags for formatting functions */
@@ -894,6 +895,9 @@ xo_buf_append_locale (xo_handle_t *xop, xo_buffer_t *xbp,
 	sp = cp + 1;
     }
 
+    /* Update column values */
+    if (xop->xo_flags & XOF_COLUMNS)
+	xop->xo_columns += cols;
     if (xop->xo_flags & XOF_ANCHOR)
 	xop->xo_anchor_columns += cols;
 
@@ -1181,8 +1185,12 @@ xo_message_hcv (xo_handle_t *xop, int code, const char *fmt, va_list vap)
 	/*
 	 * XXX need to handle UTF-8 widths
 	 */
-	if (rc > 0 && (xop->xo_flags & XOF_ANCHOR))
-	    xop->xo_anchor_columns += rc;
+	if (rc > 0) {
+	    if (xop->xo_flags & XOF_COLUMNS)
+		xop->xo_columns += rc;
+	    if (xop->xo_flags & XOF_ANCHOR)
+		xop->xo_anchor_columns += rc;
+	}
 
 	if (need_nl && code > 0) {
 	    const char *msg = strerror(code);
@@ -1367,8 +1375,12 @@ xo_name_to_flag (const char *name)
 	return XOF_INFO;
     if (strcmp(name, "warn-xml") == 0)
 	return XOF_WARN_XML;
+    if (strcmp(name, "columns") == 0)
+	return XOF_COLUMNS;
     if (strcmp(name, "dtrt") == 0)
 	return XOF_DTRT;
+    if (strcmp(name, "flush") == 0)
+	return XOF_FLUSH;
     if (strcmp(name, "keys") == 0)
 	return XOF_KEYS;
     if (strcmp(name, "ignore-close") == 0)
@@ -1428,6 +1440,10 @@ xo_set_options (xo_handle_t *xop, const char *input)
 
 	for (input++ ; *input; input++) {
 	    switch (*input) {
+	    case 'f':
+		xop->xo_flags |= XOF_FLUSH;
+		break;
+
 	    case 'H':
 		xop->xo_style = XO_STYLE_HTML;
 		break;
@@ -1924,7 +1940,7 @@ xo_format_string (xo_handle_t *xop, xo_buffer_t *xbp, xo_xff_flags_t flags,
 		&& xfp->xf_width[XF_WIDTH_MIN] < 0
 		&& xfp->xf_width[XF_WIDTH_SIZE] < 0
 		&& xfp->xf_width[XF_WIDTH_MAX] < 0
-		&& !(xop->xo_flags & XOF_ANCHOR)) {
+		&& !(xop->xo_flags & (XOF_ANCHOR | XOF_COLUMNS))) {
 	    len = strlen(cp);
 	    xo_buf_escape(xop, xbp, cp, len, flags);
 
@@ -1992,6 +2008,8 @@ xo_format_string (xo_handle_t *xop, xo_buffer_t *xbp, xo_xff_flags_t flags,
 	cols += delta;
     }
 
+    if (xop->xo_flags & XOF_COLUMNS)
+	xop->xo_columns += cols;
     if (xop->xo_flags & XOF_ANCHOR)
 	xop->xo_anchor_columns += cols;
 
@@ -2013,6 +2031,8 @@ xo_data_append_content (xo_handle_t *xop, const char *str, int len)
 				   NULL, str, len, -1,
 				   need_enc, XF_ENC_UTF8);
 
+    if (xop->xo_flags & XOF_COLUMNS)
+	xop->xo_columns += cols;
     if (xop->xo_flags & XOF_ANCHOR)
 	xop->xo_anchor_columns += cols;
 }
@@ -2093,6 +2113,8 @@ xo_format_data (xo_handle_t *xop, xo_buffer_t *xbp,
 		cols = xo_format_string_direct(xop, xbp, flags | XFF_UNESCAPE,
 					       NULL, xp, cp - xp, -1,
 					       need_enc, XF_ENC_UTF8);
+		if (xop->xo_flags & XOF_COLUMNS)
+		    xop->xo_columns += cols;
 		if (xop->xo_flags & XOF_ANCHOR)
 		    xop->xo_anchor_columns += cols;
 	    }
@@ -2270,6 +2292,8 @@ xo_format_data (xo_handle_t *xop, xo_buffer_t *xbp,
 		 * handles all the fancy string conversions and updates
 		 * xo_anchor_columns accordingly.
 		 */
+		if (xop->xo_flags & XOF_COLUMNS)
+		    xop->xo_columns += columns;
 		if (xop->xo_flags & XOF_ANCHOR)
 		    xop->xo_anchor_columns += columns;
 	    }
@@ -2350,6 +2374,8 @@ xo_format_data (xo_handle_t *xop, xo_buffer_t *xbp,
 	    cols = xo_format_string_direct(xop, xbp, flags | XFF_UNESCAPE,
 					   NULL, xp, cp - xp, -1,
 					   need_enc, XF_ENC_UTF8);
+	    if (xop->xo_flags & XOF_COLUMNS)
+		xop->xo_columns += cols;
 	    if (xop->xo_flags & XOF_ANCHOR)
 		xop->xo_anchor_columns += cols;
 	}
@@ -2573,8 +2599,10 @@ xo_format_title (xo_handle_t *xop, const char *str, int len,
     int start = xbp->xb_curp - xbp->xb_bufp;
     int left = xbp->xb_size - start;
     int rc;
+    int need_enc = XF_ENC_LOCALE;
 
     if (xop->xo_style == XO_STYLE_HTML) {
+	need_enc = XF_ENC_UTF8;
 	xo_line_ensure_open(xop, 0);
 	if (xop->xo_flags & XOF_PRETTY)
 	    xo_buf_indent(xop, xop->xo_indent_by);
@@ -2592,12 +2620,44 @@ xo_format_title (xo_handle_t *xop, const char *str, int len,
 	memcpy(newstr, str, len);
 	newstr[len] = '\0';
 
-	rc = snprintf(xbp->xb_curp, left, newfmt, newstr);
-	if (rc > left) {
-	    if (!xo_buf_has_room(xbp, rc))
-		return;
-	    left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
+	if (newstr[len - 1] == 's') {
+	    int cols;
+	    char *bp;
+
+	    rc = snprintf(NULL, 0, newfmt, newstr);
+	    if (rc > 0) {
+		/*
+		 * We have to do this the hard way, since we might need
+		 * the columns.
+		 */
+		bp = alloca(rc + 1);
+		rc = snprintf(bp, rc + 1, newfmt, newstr);
+		cols = xo_format_string_direct(xop, xbp, 0, NULL, bp, rc, -1,
+					       need_enc, XF_ENC_UTF8);
+		if (cols > 0) {
+		    if (xop->xo_flags & XOF_COLUMNS)
+			xop->xo_columns += cols;
+		    if (xop->xo_flags & XOF_ANCHOR)
+			xop->xo_anchor_columns += cols;
+		}
+	    }
+	    goto move_along;
+
+	} else {
 	    rc = snprintf(xbp->xb_curp, left, newfmt, newstr);
+	    if (rc > left) {
+		if (!xo_buf_has_room(xbp, rc))
+		    return;
+		left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
+		rc = snprintf(xbp->xb_curp, left, newfmt, newstr);
+	    }
+
+	    if (rc > 0) {
+		if (xop->xo_flags & XOF_COLUMNS)
+		    xop->xo_columns += rc;
+		if (xop->xo_flags & XOF_ANCHOR)
+		    xop->xo_anchor_columns += rc;
+	    }
 	}
 
     } else {
@@ -2613,8 +2673,10 @@ xo_format_title (xo_handle_t *xop, const char *str, int len,
 	rc = xo_escape_xml(xbp, rc, 0);
     }
 
-    xbp->xb_curp += rc;
+    if (rc > 0)
+	xbp->xb_curp += rc;
 
+ move_along:
     if (xop->xo_style == XO_STYLE_HTML) {
 	xo_data_append(xop, div_close, sizeof(div_close) - 1);
 	if (xop->xo_flags & XOF_PRETTY)
@@ -3048,6 +3110,9 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
     int rc = 0;
     const char *cp, *sp, *ep, *basep;
     char *newp = NULL;
+    int flush = (xop->xo_flags & XOF_FLUSH) ? 1 : 0;
+
+    xop->xo_columns = 0;	/* Always reset it */
 
     for (cp = fmt; *cp; ) {
 	if (*cp == '\n') {
@@ -3324,10 +3389,10 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
     }
 
     /* If we don't have an anchor, write the text out */
-    if (!(xop->xo_flags & XOF_ANCHOR))
+    if (flush && !(xop->xo_flags & XOF_ANCHOR))
 	xo_write(xop);
 
-    return rc;
+    return (rc < 0) ? rc : (int) xop->xo_columns;
 }
 
 int
