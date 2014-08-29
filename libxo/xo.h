@@ -52,6 +52,8 @@ typedef unsigned long xo_xof_flags_t;
 #define XOF_UNITS_PENDING (1<<19) /** We have a units-insertion pending */
 
 #define XOF_UNDERSCORES	(1<<20)	/** Replace dashes with underscores (JSON)  */
+#define XOF_COLUMNS	(1<<21)	/** xo_emit should return a column count */
+#define XOF_FLUSH	(1<<22)	/** Flush after each xo_emit call */
 
 /*
  * The xo_info_t structure provides a mapping between names and
