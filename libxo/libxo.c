@@ -2566,7 +2566,7 @@ xo_buf_append_div (xo_handle_t *xop, const char *class, xo_xff_flags_t flags,
 	    }
 	}
 
-	if (xop->xo_flags & XOF_KEYS)
+	if ((flags & XFF_KEY) && (xop->xo_flags & XOF_KEYS))
 	    xo_data_append(xop, div_key, sizeof(div_key) - 1);
     }
 
@@ -2736,11 +2736,14 @@ xo_format_value (xo_handle_t *xop, const char *name, int nlen,
 
     switch (xop->xo_style) {
     case XO_STYLE_TEXT:
-	if (!(flags & XFF_ENCODE_ONLY))
-	    xo_format_data(xop, NULL, format, flen, flags);
+	if (flags & XFF_ENCODE_ONLY)
+	    flags |= XFF_NO_OUTPUT;
+	xo_format_data(xop, NULL, format, flen, flags);
 	break;
 
     case XO_STYLE_HTML:
+	if (flags & XFF_ENCODE_ONLY)
+	    flags |= XFF_NO_OUTPUT;
 	xo_buf_append_div(xop, "data", flags, name, nlen,
 			  format, flen, encoding, elen);
 	break;
