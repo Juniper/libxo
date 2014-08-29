@@ -23,6 +23,10 @@
     font-size: 70%;
 }
 
+div[data-key] {
+    color: red;
+}
+
 div.decoration, div.default, div.header-line {
     color: #505050;
     font-family: monospace;
