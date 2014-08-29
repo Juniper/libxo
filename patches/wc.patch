@@ -1,0 +1,189 @@
+Only in wc: .gdbinit
+diff -ru /usr/src/usr.bin/wc/Makefile wc/Makefile
+--- /usr/src/usr.bin/wc/Makefile	2014-01-16 15:36:31.000000000 -0500
++++ wc/Makefile	2014-08-11 02:23:01.091409174 -0400
+@@ -2,4 +2,7 @@
+ # $FreeBSD: release/10.0.0/usr.bin/wc/Makefile 201386 2010-01-02 10:27:05Z ed $
+ 
+ PROG=	wc
++DPADD=  ${LIBXO}
++LDADD=  -lxo
++
+ .include <bsd.prog.mk>
+Only in wc: wc
+Only in wc: wc.1.gz
+diff -ru /usr/src/usr.bin/wc/wc.c wc/wc.c
+--- /usr/src/usr.bin/wc/wc.c	2014-01-16 15:36:31.000000000 -0500
++++ wc/wc.c	2014-08-17 19:17:46.000000000 -0400
+@@ -57,10 +57,12 @@
+ #include <unistd.h>
+ #include <wchar.h>
+ #include <wctype.h>
++#include <libxo/xo.h>
+ 
+ static uintmax_t tlinect, twordct, tcharct, tlongline;
+ static int doline, doword, dochar, domulti, dolongline;
+ static volatile sig_atomic_t siginfo;
++static xo_handle_t *stderr_handle;
+ 
+ static void	show_cnt(const char *file, uintmax_t linect, uintmax_t wordct,
+ 		    uintmax_t charct, uintmax_t llct);
+@@ -81,6 +83,10 @@
+ 
+ 	(void) setlocale(LC_CTYPE, "");
+ 
++	argc = xo_parse_args(argc, argv);
++	if (argc < 0)
++	    return argc;
++
+ 	while ((ch = getopt(argc, argv, "clmwL")) != -1)
+ 		switch((char)ch) {
+ 		case 'l':
+@@ -113,21 +119,35 @@
+ 	if (doline + doword + dochar + domulti + dolongline == 0)
+ 		doline = doword = dochar = 1;
+ 
++	stderr_handle = xo_create_to_file(stderr, XO_STYLE_TEXT, 0);
++
++	xo_open_container("wc");
++	xo_open_list("file");
+ 	errors = 0;
+ 	total = 0;
+ 	if (!*argv) {
++	 	xo_open_instance("file");
+ 		if (cnt((char *)NULL) != 0)
+ 			++errors;
++	 	xo_close_instance("file");
+ 	} else {
+ 		do {
++	 		xo_open_instance("file");
+ 			if (cnt(*argv) != 0)
+ 				++errors;
++	 		xo_close_instance("file");
+ 			++total;
+ 		} while(*++argv);
+ 	}
+ 
+-	if (total > 1)
++	if (total > 1) {
++		xo_open_container("total");
+ 		show_cnt("total", tlinect, twordct, tcharct, tlongline);
++		xo_close_container("total");
++	}
++	xo_close_list("file");
++	xo_close_container("wc");
++	xo_finish();
+ 	exit(errors == 0 ? 0 : 1);
+ }
+ 
+@@ -135,27 +155,29 @@
+ show_cnt(const char *file, uintmax_t linect, uintmax_t wordct,
+     uintmax_t charct, uintmax_t llct)
+ {
+-	FILE *out;
++	xo_handle_t *xop;
+ 
+ 	if (!siginfo)
+-		out = stdout;
++		xop = NULL;
+ 	else {
+-		out = stderr;
++		xop = stderr_handle;
+ 		siginfo = 0;
+ 	}
+ 
++	xo_emit("{ek:filename/%s}", file);
++
+ 	if (doline)
+-		(void)fprintf(out, " %7ju", linect);
++		xo_emit_h(xop, " {:lines/%7ju/%ju}", linect);
+ 	if (doword)
+-		(void)fprintf(out, " %7ju", wordct);
++		xo_emit_h(xop, " {:words/%7ju/%ju}", wordct);
+ 	if (dochar || domulti)
+-		(void)fprintf(out, " %7ju", charct);
++		xo_emit_h(xop, " {:characters/%7ju/%ju}", charct);
+ 	if (dolongline)
+-		(void)fprintf(out, " %7ju", llct);
++		xo_emit_h(xop, " {:long-lines/%7ju/%ju}", llct);
+ 	if (file != NULL)
+-		(void)fprintf(out, " %s\n", file);
++		xo_emit_h(xop, " {d:filename/%s}\n", file);
+ 	else
+-		(void)fprintf(out, "\n");
++		xo_emit_h(xop, "\n");
+ }
+ 
+ static int
+@@ -176,7 +198,7 @@
+ 		fd = STDIN_FILENO;
+ 	else {
+ 		if ((fd = open(file, O_RDONLY, 0)) < 0) {
+-			warn("%s: open", file);
++			xo_warn("%s: open", file);
+ 			return (1);
+ 		}
+ 		if (doword || (domulti && MB_CUR_MAX != 1))
+@@ -189,7 +211,7 @@
+ 		if (doline) {
+ 			while ((len = read(fd, buf, MAXBSIZE))) {
+ 				if (len == -1) {
+-					warn("%s: read", file);
++					xo_warn("%s: read", file);
+ 					(void)close(fd);
+ 					return (1);
+ 				}
+@@ -224,7 +246,7 @@
+ 		 */
+ 		if (dochar || domulti) {
+ 			if (fstat(fd, &sb)) {
+-				warn("%s: fstat", file);
++				xo_warn("%s: fstat", file);
+ 				(void)close(fd);
+ 				return (1);
+ 			}
+@@ -244,7 +266,7 @@
+ 	memset(&mbs, 0, sizeof(mbs));
+ 	while ((len = read(fd, buf, MAXBSIZE)) != 0) {
+ 		if (len == -1) {
+-			warn("%s: read", file != NULL ? file : "stdin");
++			xo_warn("%s: read", file != NULL ? file : "stdin");
+ 			(void)close(fd);
+ 			return (1);
+ 		}
+@@ -255,11 +277,11 @@
+ 			if (!domulti || MB_CUR_MAX == 1) {
+ 				clen = 1;
+ 				wch = (unsigned char)*p;
+-			} else if ((clen = mbrtowc(&wch, p, len, &mbs)) ==
++			} else if ((clen = mbrtowc(&wch, (const char *) p, len, &mbs)) ==
+ 			    (size_t)-1) {
+ 				if (!warned) {
+ 					errno = EILSEQ;
+-					warn("%s",
++					xo_warn("%s",
+ 					    file != NULL ? file : "stdin");
+ 					warned = 1;
+ 				}
+@@ -291,7 +313,7 @@
+ 	}
+ 	if (domulti && MB_CUR_MAX > 1)
+ 		if (mbrtowc(NULL, NULL, 0, &mbs) == (size_t)-1 && !warned)
+-			warn("%s", file != NULL ? file : "stdin");
++			xo_warn("%s", file != NULL ? file : "stdin");
+ 	if (doline)
+ 		tlinect += linect;
+ 	if (doword)
+@@ -310,6 +332,6 @@
+ static void
+ usage(void)
+ {
+-	(void)fprintf(stderr, "usage: wc [-Lclmw] [file ...]\n");
++	xo_error("usage: wc [-Lclmw] [file ...]\n");
+ 	exit(1);
+ }
+Only in wc: wc.c.orig
+Only in wc: wc.c.rej
+Only in wc: wc.core
+Only in wc: wc.c~
+Only in wc: wc.o

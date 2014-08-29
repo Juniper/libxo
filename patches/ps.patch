@@ -1,0 +1,793 @@
+Only in ps: .gdbinit
+diff -ru /usr/src/bin/ps/Makefile ps/Makefile
+--- /usr/src/bin/ps/Makefile	2014-01-16 15:32:13.000000000 -0500
++++ ps/Makefile	2014-08-25 12:55:56.000000000 -0400
+@@ -10,8 +10,8 @@
+ # keep ps from being an unnecessary load
+ # on large systems.
+ #
+-CFLAGS+=-DLAZY_PS
+-DPADD=	${LIBM} ${LIBKVM}
+-LDADD=	-lm -lkvm
++CFLAGS+=-DLAZY_PS ${CARGS}
++DPADD=	${LIBM} ${LIBKVM} ${LIBXO}
++LDADD=	-lm -lkvm -lxo
+ 
+ .include <bsd.prog.mk>
+Only in ps: Makefile~
+Only in ps: fmt.o
+Only in ps: gdb.core
+diff -ru /usr/src/bin/ps/keyword.c ps/keyword.c
+--- /usr/src/bin/ps/keyword.c	2014-01-16 15:32:13.000000000 -0500
++++ ps/keyword.c	2014-08-25 12:02:17.000000000 -0400
+@@ -47,6 +47,7 @@
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
++#include <libxo/xo.h>
+ 
+ #include "ps.h"
+ 
+@@ -64,113 +65,167 @@
+ 
+ /* PLEASE KEEP THE TABLE BELOW SORTED ALPHABETICALLY!!! */
+ static VAR var[] = {
+-	{"%cpu", "%CPU", NULL, 0, pcpu, 0, CHAR, NULL, 0},
+-	{"%mem", "%MEM", NULL, 0, pmem, 0, CHAR, NULL, 0},
+-	{"acflag", "ACFLG", NULL, 0, kvar, KOFF(ki_acflag), USHORT, "x", 0},
+-	{"acflg", "", "acflag", 0, NULL, 0, CHAR, NULL, 0},
+-	{"args", "COMMAND", NULL, COMM|LJUST|USER, arguments, 0,
++	{"%cpu", "%CPU", NULL, "percent-cpu", 0, pcpu, 0, CHAR, NULL, 0},
++	{"%mem", "%MEM", NULL, "percent-memory", 0, pmem, 0, CHAR, NULL, 0},
++	{"acflag", "ACFLG", NULL, "accounting-flag",
++	 0, kvar, KOFF(ki_acflag), USHORT, "x", 0},
++	{"acflg", "", "acflag", "accounting-flag", 0, NULL, 0, CHAR, NULL, 0},
++	{"args", "COMMAND", NULL, "arguments",
++	 COMM|LJUST|USER, arguments, 0, CHAR, NULL, 0},
++	{"blocked", "", "sigmask", "signals-blocked",
++	 0, NULL, 0, CHAR, NULL, 0},
++	{"caught", "", "sigcatch", "signals-caught",
++	 0, NULL, 0, CHAR, NULL, 0},
++	{"class", "CLASS", NULL, "login-class",
++	 LJUST, loginclass, 0, CHAR, NULL, 0},
++	{"comm", "COMMAND", NULL, "command", LJUST, ucomm, 0, CHAR, NULL, 0},
++	{"command", "COMMAND", NULL, "command", COMM|LJUST|USER, command, 0,
+ 		CHAR, NULL, 0},
+-	{"blocked", "", "sigmask", 0, NULL, 0, CHAR, NULL, 0},
+-	{"caught", "", "sigcatch", 0, NULL, 0, CHAR, NULL, 0},
+-	{"class", "CLASS", NULL, LJUST, loginclass, 0, CHAR, NULL, 0},
+-	{"comm", "COMMAND", NULL, LJUST, ucomm, 0, CHAR, NULL, 0},
+-	{"command", "COMMAND", NULL, COMM|LJUST|USER, command, 0,
+-		CHAR, NULL, 0},
+-	{"cow", "COW", NULL, 0, kvar, KOFF(ki_cow), UINT, "u", 0},
+-	{"cpu", "CPU", NULL, 0, kvar, KOFF(ki_estcpu), UINT, "d", 0},
+-	{"cputime", "", "time", 0, NULL, 0, CHAR, NULL, 0},
+-	{"dsiz", "DSIZ", NULL, 0, kvar, KOFF(ki_dsize), PGTOK, "ld", 0},
+-	{"egid", "", "gid", 0, NULL, 0, CHAR, NULL, 0},
+-	{"egroup", "", "group", 0, NULL, 0, CHAR, NULL, 0},
+-	{"emul", "EMUL", NULL, LJUST, emulname, 0, CHAR, NULL, 0},
+-	{"etime", "ELAPSED", NULL, USER, elapsed, 0, CHAR, NULL, 0},
+-	{"etimes", "ELAPSED", NULL, USER, elapseds, 0, CHAR, NULL, 0},
+-	{"euid", "", "uid", 0, NULL, 0, CHAR, NULL, 0},
+-	{"f", "F", NULL, 0, kvar, KOFF(ki_flag), INT, "x", 0},
+-	{"fib", "FIB", NULL, 0, kvar, KOFF(ki_fibnum), INT, "d", 0},
+-	{"flags", "", "f", 0, NULL, 0, CHAR, NULL, 0},
+-	{"gid", "GID", NULL, 0, kvar, KOFF(ki_groups), UINT, UIDFMT, 0},
+-	{"group", "GROUP", NULL, LJUST, egroupname, 0, CHAR, NULL, 0},
+-	{"ignored", "", "sigignore", 0, NULL, 0, CHAR, NULL, 0},
+-	{"inblk", "INBLK", NULL, USER, rvar, ROFF(ru_inblock), LONG, "ld", 0},
+-	{"inblock", "", "inblk", 0, NULL, 0, CHAR, NULL, 0},
+-	{"jid", "JID", NULL, 0, kvar, KOFF(ki_jid), INT, "d", 0},
+-	{"jobc", "JOBC", NULL, 0, kvar, KOFF(ki_jobc), SHORT, "d", 0},
+-	{"ktrace", "KTRACE", NULL, 0, kvar, KOFF(ki_traceflag), INT, "x", 0},
+-	{"label", "LABEL", NULL, LJUST, label, 0, CHAR, NULL, 0},
+-	{"lim", "LIM", NULL, 0, maxrss, 0, CHAR, NULL, 0},
+-	{"lockname", "LOCK", NULL, LJUST, lockname, 0, CHAR, NULL, 0},
+-	{"login", "LOGIN", NULL, LJUST, logname, 0, CHAR, NULL, 0},
+-	{"logname", "", "login", 0, NULL, 0, CHAR, NULL, 0},
+-	{"lstart", "STARTED", NULL, LJUST|USER, lstarted, 0, CHAR, NULL, 0},
+-	{"lwp", "LWP", NULL, 0, kvar, KOFF(ki_tid), UINT, LWPFMT, 0},
+-	{"majflt", "MAJFLT", NULL, USER, rvar, ROFF(ru_majflt), LONG, "ld", 0},
+-	{"minflt", "MINFLT", NULL, USER, rvar, ROFF(ru_minflt), LONG, "ld", 0},
+-	{"msgrcv", "MSGRCV", NULL, USER, rvar, ROFF(ru_msgrcv), LONG, "ld", 0},
+-	{"msgsnd", "MSGSND", NULL, USER, rvar, ROFF(ru_msgsnd), LONG, "ld", 0},
+-	{"mwchan", "MWCHAN", NULL, LJUST, mwchan, 0, CHAR, NULL, 0},
+-	{"ni", "", "nice", 0, NULL, 0, CHAR, NULL, 0},
+-	{"nice", "NI", NULL, 0, kvar, KOFF(ki_nice), CHAR, "d", 0},
+-	{"nivcsw", "NIVCSW", NULL, USER, rvar, ROFF(ru_nivcsw), LONG, "ld", 0},
+-	{"nlwp", "NLWP", NULL, 0, kvar, KOFF(ki_numthreads), UINT, NLWPFMT, 0},
+-	{"nsignals", "", "nsigs", 0, NULL, 0, CHAR, NULL, 0},
+-	{"nsigs", "NSIGS", NULL, USER, rvar, ROFF(ru_nsignals), LONG, "ld", 0},
+-	{"nswap", "NSWAP", NULL, USER, rvar, ROFF(ru_nswap), LONG, "ld", 0},
+-	{"nvcsw", "NVCSW", NULL, USER, rvar, ROFF(ru_nvcsw), LONG, "ld", 0},
+-	{"nwchan", "NWCHAN", NULL, LJUST, nwchan, 0, CHAR, NULL, 0},
+-	{"oublk", "OUBLK", NULL, USER, rvar, ROFF(ru_oublock), LONG, "ld", 0},
+-	{"oublock", "", "oublk", 0, NULL, 0, CHAR, NULL, 0},
+-	{"paddr", "PADDR", NULL, 0, kvar, KOFF(ki_paddr), KPTR, "lx", 0},
+-	{"pagein", "PAGEIN", NULL, USER, pagein, 0, CHAR, NULL, 0},
+-	{"pcpu", "", "%cpu", 0, NULL, 0, CHAR, NULL, 0},
+-	{"pending", "", "sig", 0, NULL, 0, CHAR, NULL, 0},
+-	{"pgid", "PGID", NULL, 0, kvar, KOFF(ki_pgid), UINT, PIDFMT, 0},
+-	{"pid", "PID", NULL, 0, kvar, KOFF(ki_pid), UINT, PIDFMT, 0},
+-	{"pmem", "", "%mem", 0, NULL, 0, CHAR, NULL, 0},
+-	{"ppid", "PPID", NULL, 0, kvar, KOFF(ki_ppid), UINT, PIDFMT, 0},
+-	{"pri", "PRI", NULL, 0, pri, 0, CHAR, NULL, 0},
+-	{"re", "RE", NULL, INF127, kvar, KOFF(ki_swtime), UINT, "d", 0},
+-	{"rgid", "RGID", NULL, 0, kvar, KOFF(ki_rgid), UINT, UIDFMT, 0},
+-	{"rgroup", "RGROUP", NULL, LJUST, rgroupname, 0, CHAR, NULL, 0},
+-	{"rss", "RSS", NULL, 0, kvar, KOFF(ki_rssize), PGTOK, "ld", 0},
+-	{"rtprio", "RTPRIO", NULL, 0, priorityr, KOFF(ki_pri), CHAR, NULL, 0},
+-	{"ruid", "RUID", NULL, 0, kvar, KOFF(ki_ruid), UINT, UIDFMT, 0},
+-	{"ruser", "RUSER", NULL, LJUST, runame, 0, CHAR, NULL, 0},
+-	{"sid", "SID", NULL, 0, kvar, KOFF(ki_sid), UINT, PIDFMT, 0},
+-	{"sig", "PENDING", NULL, 0, kvar, KOFF(ki_siglist), INT, "x", 0},
+-	{"sigcatch", "CAUGHT", NULL, 0, kvar, KOFF(ki_sigcatch), UINT, "x", 0},
+-	{"sigignore", "IGNORED", NULL, 0, kvar, KOFF(ki_sigignore),
+-		UINT, "x", 0},
+-	{"sigmask", "BLOCKED", NULL, 0, kvar, KOFF(ki_sigmask), UINT, "x", 0},
+-	{"sl", "SL", NULL, INF127, kvar, KOFF(ki_slptime), UINT, "d", 0},
+-	{"ssiz", "SSIZ", NULL, 0, kvar, KOFF(ki_ssize), PGTOK, "ld", 0},
+-	{"start", "STARTED", NULL, LJUST|USER, started, 0, CHAR, NULL, 0},
+-	{"stat", "", "state", 0, NULL, 0, CHAR, NULL, 0},
+-	{"state", "STAT", NULL, LJUST, state, 0, CHAR, NULL, 0},
+-	{"svgid", "SVGID", NULL, 0, kvar, KOFF(ki_svgid), UINT, UIDFMT, 0},
+-	{"svuid", "SVUID", NULL, 0, kvar, KOFF(ki_svuid), UINT, UIDFMT, 0},
+-	{"systime", "SYSTIME", NULL, USER, systime, 0, CHAR, NULL, 0},
+-	{"tdaddr", "TDADDR", NULL, 0, kvar, KOFF(ki_tdaddr), KPTR, "lx", 0},
+-	{"tdev", "TDEV", NULL, 0, tdev, 0, CHAR, NULL, 0},
+-	{"tdnam", "TDNAM", NULL, LJUST, tdnam, 0, CHAR, NULL, 0},
+-	{"time", "TIME", NULL, USER, cputime, 0, CHAR, NULL, 0},
+-	{"tpgid", "TPGID", NULL, 0, kvar, KOFF(ki_tpgid), UINT, PIDFMT, 0},
+-	{"tsid", "TSID", NULL, 0, kvar, KOFF(ki_tsid), UINT, PIDFMT, 0},
+-	{"tsiz", "TSIZ", NULL, 0, kvar, KOFF(ki_tsize), PGTOK, "ld", 0},
+-	{"tt", "TT ", NULL, 0, tname, 0, CHAR, NULL, 0},
+-	{"tty", "TTY", NULL, LJUST, longtname, 0, CHAR, NULL, 0},
+-	{"ucomm", "UCOMM", NULL, LJUST, ucomm, 0, CHAR, NULL, 0},
+-	{"uid", "UID", NULL, 0, kvar, KOFF(ki_uid), UINT, UIDFMT, 0},
+-	{"upr", "UPR", NULL, 0, upr, 0, CHAR, NULL, 0},
+-	{"uprocp", "UPROCP", NULL, 0, kvar, KOFF(ki_paddr), KPTR, "lx", 0},
+-	{"user", "USER", NULL, LJUST, uname, 0, CHAR, NULL, 0},
+-	{"usertime", "USERTIME", NULL, USER, usertime, 0, CHAR, NULL, 0},
+-	{"usrpri", "", "upr", 0, NULL, 0, CHAR, NULL, 0},
+-	{"vsize", "", "vsz", 0, NULL, 0, CHAR, NULL, 0},
+-	{"vsz", "VSZ", NULL, 0, vsize, 0, CHAR, NULL, 0},
+-	{"wchan", "WCHAN", NULL, LJUST, wchan, 0, CHAR, NULL, 0},
+-	{"xstat", "XSTAT", NULL, 0, kvar, KOFF(ki_xstat), USHORT, "x", 0},
+-	{"", NULL, NULL, 0, NULL, 0, CHAR, NULL, 0},
++	{"cow", "COW", NULL, "copy-on-write-faults",
++	 0, kvar, KOFF(ki_cow), UINT, "u", 0},
++	{"cpu", "CPU", NULL, "cpu-usage",
++	 0, kvar, KOFF(ki_estcpu), UINT, "d", 0},
++	{"cputime", "", "time", "cpu-time", 0, NULL, 0, CHAR, NULL, 0},
++	{"dsiz", "DSIZ", NULL, "data-size",
++	 0, kvar, KOFF(ki_dsize), PGTOK, "ld", 0},
++	{"egid", "", "gid", "effective-gid", 0, NULL, 0, CHAR, NULL, 0},
++	{"egroup", "", "group", "effective-group", 0, NULL, 0, CHAR, NULL, 0},
++	{"emul", "EMUL", NULL, "emulation-envirnment",
++	 LJUST, emulname, 0, CHAR, NULL, 0},
++	{"etime", "ELAPSED", NULL, "elapsed-time",
++	 USER, elapsed, 0, CHAR, NULL, 0},
++	{"etimes", "ELAPSED", NULL, "elapsed-times",
++	 USER, elapseds, 0, CHAR, NULL, 0},
++	{"euid", "", "uid", "effective-uid", 0, NULL, 0, CHAR, NULL, 0},
++	{"f", "F", NULL, "f-XXX", 0, kvar, KOFF(ki_flag), INT, "x", 0},
++	{"fib", "FIB", NULL, "fib", 0, kvar, KOFF(ki_fibnum), INT, "d", 0},
++	{"flags", "", "f", "flags", 0, NULL, 0, CHAR, NULL, 0},
++	{"gid", "GID", NULL, "gid", 0, kvar, KOFF(ki_groups), UINT, UIDFMT, 0},
++	{"group", "GROUP", NULL, "group", LJUST, egroupname, 0, CHAR, NULL, 0},
++	{"ignored", "", "sigignore", "signals-ignored",
++	 0, NULL, 0, CHAR, NULL, 0},
++	{"inblk", "INBLK", NULL, "read-blocks",
++	 USER, rvar, ROFF(ru_inblock), LONG, "ld", 0},
++	{"inblock", "", "inblk", "read-blocks", 0, NULL, 0, CHAR, NULL, 0},
++	{"jid", "JID", NULL, "jail-id", 0, kvar, KOFF(ki_jid), INT, "d", 0},
++	{"jobc", "JOBC", NULL, "job-control-count",
++	 0, kvar, KOFF(ki_jobc), SHORT, "d", 0},
++	{"ktrace", "KTRACE", NULL, "ktrace",
++	 0, kvar, KOFF(ki_traceflag), INT, "x", 0},
++	{"label", "LABEL", NULL, "label", LJUST, label, 0, CHAR, NULL, 0},
++	{"lim", "LIM", NULL, "memory-limit", 0, maxrss, 0, CHAR, NULL, 0},
++	{"lockname", "LOCK", NULL, "lock-name",
++	 LJUST, lockname, 0, CHAR, NULL, 0},
++	{"login", "LOGIN", NULL, "login-name",
++	 LJUST, logname, 0, CHAR, NULL, 0},
++	{"logname", "", "login", "login-name", 0, NULL, 0, CHAR, NULL, 0},
++	{"lstart", "STARTED", NULL, "start-time",
++	 LJUST|USER, lstarted, 0, CHAR, NULL, 0},
++	{"lwp", "LWP", NULL, "process-thread-id",
++	 0, kvar, KOFF(ki_tid), UINT, LWPFMT, 0},
++	{"majflt", "MAJFLT", NULL, "major-faults",
++	 USER, rvar, ROFF(ru_majflt), LONG, "ld", 0},
++	{"minflt", "MINFLT", NULL, "minor-faults",
++	 USER, rvar, ROFF(ru_minflt), LONG, "ld", 0},
++	{"msgrcv", "MSGRCV", NULL, "received-messages", USER, rvar, ROFF(ru_msgrcv), LONG, "ld", 0},
++	{"msgsnd", "MSGSND", NULL, "sent-messages", USER, rvar, ROFF(ru_msgsnd), LONG, "ld", 0},
++	{"mwchan", "MWCHAN", NULL, "wait-channel",
++	 LJUST, mwchan, 0, CHAR, NULL, 0},
++	{"ni", "", "nice", "nice", 0, NULL, 0, CHAR, NULL, 0},
++	{"nice", "NI", NULL, "nice", 0, kvar, KOFF(ki_nice), CHAR, "d", 0},
++	{"nivcsw", "NIVCSW", NULL, "involuntary-context-switches",
++	 USER, rvar, ROFF(ru_nivcsw), LONG, "ld", 0},
++	{"nlwp", "NLWP", NULL, "threads",
++	 0, kvar, KOFF(ki_numthreads), UINT, NLWPFMT, 0},
++	{"nsignals", "", "nsigs", "signals-taken", 0, NULL, 0, CHAR, NULL, 0},
++	{"nsigs", "NSIGS", NULL, "signals-taken",
++	 USER, rvar, ROFF(ru_nsignals), LONG, "ld", 0},
++	{"nswap", "NSWAP", NULL, "swaps",
++	 USER, rvar, ROFF(ru_nswap), LONG, "ld", 0},
++	{"nvcsw", "NVCSW", NULL, "voluntary-context-switches",
++	 USER, rvar, ROFF(ru_nvcsw), LONG, "ld", 0},
++	{"nwchan", "NWCHAN", NULL, "wait-channel-address",
++	 LJUST, nwchan, 0, CHAR, NULL, 0},
++	{"oublk", "OUBLK", NULL, "written-blocks",
++	 USER, rvar, ROFF(ru_oublock), LONG, "ld", 0},
++	{"oublock", "", "oublk", "written-blocks", 0, NULL, 0, CHAR, NULL, 0},
++	{"paddr", "PADDR", NULL, "process-address",
++	 0, kvar, KOFF(ki_paddr), KPTR, "lx", 0},
++	{"pagein", "PAGEIN", NULL, "pageins", USER, pagein, 0, CHAR, NULL, 0},
++	{"pcpu", "", "%cpu", "percent-cpu", 0, NULL, 0, CHAR, NULL, 0},
++	{"pending", "", "sig", "signals-pending", 0, NULL, 0, CHAR, NULL, 0},
++	{"pgid", "PGID", NULL, "process-group",
++	 0, kvar, KOFF(ki_pgid), UINT, PIDFMT, 0},
++	{"pid", "PID", NULL, "pid", 0, kvar, KOFF(ki_pid), UINT, PIDFMT, 0},
++	{"pmem", "", "%mem", "percent-memory", 0, NULL, 0, CHAR, NULL, 0},
++	{"ppid", "PPID", NULL, "ppid",
++	 0, kvar, KOFF(ki_ppid), UINT, PIDFMT, 0},
++	{"pri", "PRI", NULL, "priority", 0, pri, 0, CHAR, NULL, 0},
++	{"re", "RE", NULL, "residency-time",
++	 INF127, kvar, KOFF(ki_swtime), UINT, "d", 0},
++	{"rgid", "RGID", NULL, "real-gid",
++	 0, kvar, KOFF(ki_rgid), UINT, UIDFMT, 0},
++	{"rgroup", "RGROUP", NULL, "real-group", LJUST, rgroupname, 0, CHAR, NULL, 0},
++	{"rss", "RSS", NULL, "rss", 0, kvar, KOFF(ki_rssize), PGTOK, "ld", 0},
++	{"rtprio", "RTPRIO", NULL, "realtime-priority",
++	 0, priorityr, KOFF(ki_pri), CHAR, NULL, 0},
++	{"ruid", "RUID", NULL, "real-uid",
++	 0, kvar, KOFF(ki_ruid), UINT, UIDFMT, 0},
++	{"ruser", "RUSER", NULL, "real-user", LJUST, runame, 0, CHAR, NULL, 0},
++	{"sid", "SID", NULL, "sid", 0, kvar, KOFF(ki_sid), UINT, PIDFMT, 0},
++	{"sig", "PENDING", NULL, "signals-pending",
++	 0, kvar, KOFF(ki_siglist), INT, "x", 0},
++	{"sigcatch", "CAUGHT", NULL, "signals-caught",
++	 0, kvar, KOFF(ki_sigcatch), UINT, "x", 0},
++	{"sigignore", "IGNORED", NULL, "signals-ignored",
++	 0, kvar, KOFF(ki_sigignore), UINT, "x", 0},
++	{"sigmask", "BLOCKED", NULL, "signal-mask",
++	 0, kvar, KOFF(ki_sigmask), UINT, "x", 0},
++	{"sl", "SL", NULL, "sleep-time",
++	 INF127, kvar, KOFF(ki_slptime), UINT, "d", 0},
++	{"ssiz", "SSIZ", NULL, "stack-size",
++	 0, kvar, KOFF(ki_ssize), PGTOK, "ld", 0},
++	{"start", "STARTED", NULL, "start-time",
++	 LJUST|USER, started, 0, CHAR, NULL, 0},
++	{"stat", "", "state", "state", 0, NULL, 0, CHAR, NULL, 0},
++	{"state", "STAT", NULL, "state", LJUST, state, 0, CHAR, NULL, 0},
++	{"svgid", "SVGID", NULL, "saved-gid",
++	 0, kvar, KOFF(ki_svgid), UINT, UIDFMT, 0},
++	{"svuid", "SVUID", NULL, "saved-uid",
++	 0, kvar, KOFF(ki_svuid), UINT, UIDFMT, 0},
++	{"systime", "SYSTIME", NULL, "system-time",
++	 USER, systime, 0, CHAR, NULL, 0},
++	{"tdaddr", "TDADDR", NULL, "thread-address",
++	 0, kvar, KOFF(ki_tdaddr), KPTR, "lx", 0},
++	{"tdev", "TDEV", NULL, "terminal-device", 0, tdev, 0, CHAR, NULL, 0},
++	{"tdnam", "TDNAM", NULL, "terminal-device-name",
++	 LJUST, tdnam, 0, CHAR, NULL, 0},
++	{"time", "TIME", NULL, "cpu-time", USER, cputime, 0, CHAR, NULL, 0},
++	{"tpgid", "TPGID", NULL, "terminal-process-gid",
++	 0, kvar, KOFF(ki_tpgid), UINT, PIDFMT, 0},
++	{"tsid", "TSID", NULL, "terminal-sid",
++	 0, kvar, KOFF(ki_tsid), UINT, PIDFMT, 0},
++	{"tsiz", "TSIZ", NULL, "text-size",
++	 0, kvar, KOFF(ki_tsize), PGTOK, "ld", 0},
++	{"tt", "TT ", NULL, "terminal-name", 0, tname, 0, CHAR, NULL, 0},
++	{"tty", "TTY", NULL, "tty", LJUST, longtname, 0, CHAR, NULL, 0},
++	{"ucomm", "UCOMM", NULL, "accounting-name",
++	 LJUST, ucomm, 0, CHAR, NULL, 0},
++	{"uid", "UID", NULL, "uid", 0, kvar, KOFF(ki_uid), UINT, UIDFMT, 0},
++	{"upr", "UPR", NULL, "user-priority", 0, upr, 0, CHAR, NULL, 0},
++	{"uprocp", "UPROCP", NULL, "process-address",
++	 0, kvar, KOFF(ki_paddr), KPTR, "lx", 0},
++	{"user", "USER", NULL, "user", LJUST, uname, 0, CHAR, NULL, 0},
++	{"usertime", "USERTIME", NULL, "user-time",
++	 USER, usertime, 0, CHAR, NULL, 0},
++	{"usrpri", "", "upr", "user-priority", 0, NULL, 0, CHAR, NULL, 0},
++	{"vsize", "", "vsz", "virtual-size", 0, NULL, 0, CHAR, NULL, 0},
++	{"vsz", "VSZ", NULL, "virtual-size", 0, vsize, 0, CHAR, NULL, 0},
++	{"wchan", "WCHAN", NULL, "wait-channel",
++	 LJUST, wchan, 0, CHAR, NULL, 0},
++	{"xstat", "XSTAT", NULL, "exit-status",
++	 0, kvar, KOFF(ki_xstat), USHORT, "x", 0},
++	{"", NULL, NULL, NULL, 0, NULL, 0, CHAR, NULL, 0},
+ };
+ 
+ void
+@@ -182,16 +237,19 @@
+ 
+ 	i = 0;
+ 	sep = "";
++	xo_open_list("key");
+ 	for (v = var; *(p = v->name); ++v) {
+ 		int len = strlen(p);
+ 		if (termwidth && (i += len + 1) > termwidth) {
+ 			i = len;
+ 			sep = "\n";
+ 		}
+-		(void) printf("%s%s", sep, p);
++		xo_emit("{P:/%s}{l:key/%s}", sep, p);
+ 		sep = " ";
+ 	}
+-	(void) printf("\n");
++	xo_emit("\n");
++	xo_close_list("key");
++	xo_finish();
+ }
+ 
+ void
+Only in ps: keyword.c~
+Only in ps: keyword.o
+Only in ps: nlist.o
+diff -ru /usr/src/bin/ps/print.c ps/print.c
+--- /usr/src/bin/ps/print.c	2014-01-16 15:32:13.000000000 -0500
++++ ps/print.c	2014-08-25 19:38:32.000000000 -0400
+@@ -61,6 +61,7 @@
+ #include <string.h>
+ #include <unistd.h>
+ #include <vis.h>
++#include <libxo/xo.h>
+ 
+ #include "ps.h"
+ 
+@@ -85,15 +86,15 @@
+ 		v = vent->var;
+ 		if (v->flag & LJUST) {
+ 			if (STAILQ_NEXT(vent, next_ve) == NULL)	/* last one */
+-				(void)printf("%s", vent->header);
++				xo_emit("{T:/%s}", vent->header);
+ 			else
+-				(void)printf("%-*s", v->width, vent->header);
++				xo_emit("{T:/%-*s}", v->width, vent->header);
+ 		} else
+-			(void)printf("%*s", v->width, vent->header);
++			xo_emit("{T:/%*s}", v->width, vent->header);
+ 		if (STAILQ_NEXT(vent, next_ve) != NULL)
+-			(void)putchar(' ');
++			xo_emit("{P: }");
+ 	}
+-	(void)putchar('\n');
++	xo_emit("\n");
+ }
+ 
+ char *
+@@ -102,7 +103,7 @@
+ 	char *vis_args;
+ 
+ 	if ((vis_args = malloc(strlen(k->ki_args) * 4 + 1)) == NULL)
+-		errx(1, "malloc failed");
++		xo_errx(1, "malloc failed");
+ 	strvis(vis_args, k->ki_args, VIS_TAB | VIS_NL | VIS_NOSLASH);
+ 
+ 	if (STAILQ_NEXT(ve, next_ve) != NULL && strlen(vis_args) > ARGUMENTS_WIDTH)
+@@ -130,7 +131,7 @@
+ 		return (str);
+ 	}
+ 	if ((vis_args = malloc(strlen(k->ki_args) * 4 + 1)) == NULL)
+-		errx(1, "malloc failed");
++		xo_errx(1, "malloc failed");
+ 	strvis(vis_args, k->ki_args, VIS_TAB | VIS_NL | VIS_NOSLASH);
+ 
+ 	if (STAILQ_NEXT(ve, next_ve) == NULL) {
+@@ -139,7 +140,7 @@
+ 		if (k->ki_env) {
+ 			if ((vis_env = malloc(strlen(k->ki_env) * 4 + 1))
+ 			    == NULL)
+-				errx(1, "malloc failed");
++				xo_errx(1, "malloc failed");
+ 			strvis(vis_env, k->ki_env,
+ 			    VIS_TAB | VIS_NL | VIS_NOSLASH);
+ 		} else
+@@ -215,7 +216,7 @@
+ 
+ 	buf = malloc(16);
+ 	if (buf == NULL)
+-		errx(1, "malloc failed");
++		xo_errx(1, "malloc failed");
+ 
+ 	flag = k->ki_p->ki_flag;
+ 	tdflags = k->ki_p->ki_tdflags;	/* XXXKSE */
+@@ -392,7 +393,7 @@
+ 
+ 	buf = malloc(buflen);
+ 	if (buf == NULL)
+-		errx(1, "malloc failed");
++		xo_errx(1, "malloc failed");
+ 
+ 	if (use_ampm < 0)
+ 		use_ampm = (*nl_langinfo(T_FMT_AMPM) != '\0');
+@@ -421,7 +422,7 @@
+ 
+ 	buf = malloc(buflen);
+ 	if (buf == NULL)
+-		errx(1, "malloc failed");
++		xo_errx(1, "malloc failed");
+ 
+ 	then = k->ki_p->ki_start.tv_sec;
+ 	(void)strftime(buf, buflen, "%c", localtime(&then));
+@@ -767,7 +768,7 @@
+ 		(void)asprintf(&str, ofmt, ps_pgtok(*(u_long *)bp));
+ 		break;
+ 	default:
+-		errx(1, "unknown type %d", v->type);
++		xo_errx(1, "unknown type %d", v->type);
+ 	}
+ 
+ 	return (str);
+@@ -811,7 +812,7 @@
+ 
+ 	string = NULL;
+ 	if (mac_prepare_process_label(&proclabel) == -1) {
+-		warn("mac_prepare_process_label");
++		xo_warn("mac_prepare_process_label");
+ 		goto out;
+ 	}
+ 	error = mac_get_pid(k->ki_p->ki_pid, proclabel);
+Only in ps: print.c~
+Only in ps: print.o
+Only in ps: ps
+Only in ps: ps.1.gz
+diff -ru /usr/src/bin/ps/ps.c ps/ps.c
+--- /usr/src/bin/ps/ps.c	2014-01-16 15:32:13.000000000 -0500
++++ ps/ps.c	2014-08-25 19:33:21.000000000 -0400
+@@ -71,6 +71,7 @@
+ #include <stdlib.h>
+ #include <string.h>
+ #include <unistd.h>
++#include <libxo/xo.h>
+ 
+ #include "ps.h"
+ 
+@@ -180,7 +181,9 @@
+ 	int all, ch, elem, flag, _fmt, i, lineno, linelen, left;
+ 	int descendancy, nentries, nkept, nselectors;
+ 	int prtheader, wflag, what, xkeep, xkeep_implied;
++	int fwidthmin, fwidthmax;
+ 	char errbuf[_POSIX2_LINE_MAX];
++	char fmtbuf[_POSIX2_LINE_MAX];
+ 
+ 	(void) setlocale(LC_ALL, "");
+ 	time(&now);			/* Used by routines in print.c. */
+@@ -216,6 +219,11 @@
+ 	init_list(&uidlist, addelem_uid, sizeof(uid_t), "user");
+ 	memf = _PATH_DEVNULL;
+ 	nlistf = NULL;
++
++	argc = xo_parse_args(argc, argv);
++	if (argc < 0)
++	    return argc;
++
+ 	while ((ch = getopt(argc, argv, PS_ARGS)) != -1)
+ 		switch (ch) {
+ 		case 'A':
+@@ -353,7 +361,7 @@
+ #endif
+ 		case 'T':
+ 			if ((optarg = ttyname(STDIN_FILENO)) == NULL)
+-				errx(1, "stdin: not a terminal");
++				xo_errx(1, "stdin: not a terminal");
+ 			/* FALLTHROUGH */
+ 		case 't':
+ 			add_list(&ttylist, optarg);
+@@ -424,8 +432,7 @@
+ 		argv++;
+ 	}
+ 	if (*argv) {
+-		fprintf(stderr, "%s: illegal argument: %s\n",
+-		    getprogname(), *argv);
++		xo_warnx("illegal argument: %s\n", *argv);
+ 		usage();
+ 	}
+ 	if (optfatal)
+@@ -435,7 +442,7 @@
+ 
+ 	kd = kvm_openfiles(nlistf, memf, NULL, O_RDONLY, errbuf);
+ 	if (kd == 0)
+-		errx(1, "%s", errbuf);
++		xo_errx(1, "%s", errbuf);
+ 
+ 	if (!_fmt)
+ 		parsefmt(dfmt, 0);
+@@ -443,7 +450,7 @@
+ 	if (nselectors == 0) {
+ 		uidlist.l.ptr = malloc(sizeof(uid_t));
+ 		if (uidlist.l.ptr == NULL)
+-			errx(1, "malloc failed");
++			xo_errx(1, "malloc failed");
+ 		nselectors = 1;
+ 		uidlist.count = uidlist.maxcount = 1;
+ 		*uidlist.l.uids = getuid();
+@@ -505,11 +512,11 @@
+ 	nentries = -1;
+ 	kp = kvm_getprocs(kd, what, flag, &nentries);
+ 	if ((kp == NULL && nentries > 0) || (kp != NULL && nentries < 0))
+-		errx(1, "%s", kvm_geterr(kd));
++		xo_errx(1, "%s", kvm_geterr(kd));
+ 	nkept = 0;
+ 	if (nentries > 0) {
+ 		if ((kinfo = malloc(nentries * sizeof(*kinfo))) == NULL)
+-			errx(1, "malloc failed");
++			xo_errx(1, "malloc failed");
+ 		for (i = nentries; --i >= 0; ++kp) {
+ 			/*
+ 			 * If the user specified multiple selection-criteria,
+@@ -614,13 +621,18 @@
+ 	/*
+ 	 * Print header.
+ 	 */
++	xo_open_container("process-information");
+ 	printheader();
++	if (xo_get_style(NULL) != XO_STYLE_TEXT)
++	    termwidth = UNLIMITED;
+ 
+ 	/*
+ 	 * Output formatted lines.
+ 	 */
++	xo_open_list("process");
+ 	for (i = lineno = 0; i < nkept; i++) {
+ 		linelen = 0;
++		xo_open_instance("process");
+ 		STAILQ_FOREACH(vent, &varlist, next_ve) {
+ 	        	if (vent->var->flag & LJUST)
+ 				fmtstr = "%-*s";
+@@ -630,21 +642,30 @@
+ 			ks = STAILQ_FIRST(&kinfo[i].ki_ks);
+ 			STAILQ_REMOVE_HEAD(&kinfo[i].ki_ks, ks_next);
+ 			/* Truncate rightmost column if necessary.  */
++			fwidthmax = _POSIX2_LINE_MAX;
+ 			if (STAILQ_NEXT(vent, next_ve) == NULL &&
+ 			   termwidth != UNLIMITED && ks->ks_str != NULL) {
+ 				left = termwidth - linelen;
+ 				if (left > 0 && left < (int)strlen(ks->ks_str))
+-					ks->ks_str[left] = '\0';
++					fwidthmax = left;
+ 			}
++
+ 			str = ks->ks_str;
+ 			if (str == NULL)
+ 				str = "-";
+ 			/* No padding for the last column, if it's LJUST. */
+-			if (STAILQ_NEXT(vent, next_ve) == NULL &&
+-			    vent->var->flag & LJUST)
+-				linelen += printf(fmtstr, 0, str);
+-			else
+-				linelen += printf(fmtstr, vent->var->width, str);
++			fwidthmin = (STAILQ_NEXT(vent, next_ve) == NULL
++				     && vent->var->flag & LJUST)
++			    ? 0 : vent->var->width;
++
++			snprintf(fmtbuf, sizeof(fmtbuf),
++				 "{:%s/%%%s%d..%ds}",
++				 vent->var->field ?: vent->var->name,
++				 (vent->var->flag & LJUST) ? "-" : "",
++				 fwidthmin, fwidthmax);
++
++			xo_emit(fmtbuf, str);
++			linelen += fwidthmin;
+ 
+ 			if (ks->ks_str != NULL) {
+ 				free(ks->ks_str);
+@@ -654,17 +675,22 @@
+ 			ks = NULL;
+ 
+ 			if (STAILQ_NEXT(vent, next_ve) != NULL) {
+-				(void)putchar(' ');
++				xo_emit("{P: }");
+ 				linelen++;
+ 			}
+ 		}
+-		(void)putchar('\n');
++	        xo_emit("\n");
++		xo_close_instance("process");
+ 		if (prtheader && lineno++ == prtheader - 4) {
+-			(void)putchar('\n');
++			xo_emit("\n");
+ 			printheader();
+ 			lineno = 0;
+ 		}
+ 	}
++	xo_close_list("process");
++	xo_close_container("process-information");
++	xo_finish();
++
+ 	free_list(&gidlist);
+ 	free_list(&pidlist);
+ 	free_list(&pgrplist);
+@@ -689,9 +715,9 @@
+ 
+ 	if (*elem == '\0' || strlen(elem) >= MAXLOGNAME) {
+ 		if (*elem == '\0')
+-			warnx("Invalid (zero-length) %s name", inf->lname);
++			xo_warnx("Invalid (zero-length) %s name", inf->lname);
+ 		else
+-			warnx("%s name too long: %s", inf->lname, elem);
++			xo_warnx("%s name too long: %s", inf->lname, elem);
+ 		optfatal = 1;
+ 		return (0);		/* Do not add this value. */
+ 	}
+@@ -716,7 +742,7 @@
+ 	if (grp == NULL)
+ 		grp = getgrnam(elem);
+ 	if (grp == NULL) {
+-		warnx("No %s %s '%s'", inf->lname, nameorID, elem);
++		xo_warnx("No %s %s '%s'", inf->lname, nameorID, elem);
+ 		optfatal = 1;
+ 		return (0);
+ 	}
+@@ -733,7 +759,7 @@
+ 	long tempid;
+ 
+ 	if (*elem == '\0') {
+-		warnx("Invalid (zero-length) process id");
++		xo_warnx("Invalid (zero-length) process id");
+ 		optfatal = 1;
+ 		return (0);		/* Do not add this value. */
+ 	}
+@@ -741,10 +767,10 @@
+ 	errno = 0;
+ 	tempid = strtol(elem, &endp, 10);
+ 	if (*endp != '\0' || tempid < 0 || elem == endp) {
+-		warnx("Invalid %s: %s", inf->lname, elem);
++		xo_warnx("Invalid %s: %s", inf->lname, elem);
+ 		errno = ERANGE;
+ 	} else if (errno != 0 || tempid > pid_max) {
+-		warnx("%s too large: %s", inf->lname, elem);
++		xo_warnx("%s too large: %s", inf->lname, elem);
+ 		errno = ERANGE;
+ 	}
+ 	if (errno == ERANGE) {
+@@ -815,19 +841,19 @@
+ 	if (ttypath) {
+ 		if (stat(ttypath, &sb) == -1) {
+ 			if (pathbuf3[0] != '\0')
+-				warn("%s, %s, and %s", pathbuf3, pathbuf2,
++				xo_warn("%s, %s, and %s", pathbuf3, pathbuf2,
+ 				    ttypath);
+ 			else
+-				warn("%s", ttypath);
++				xo_warn("%s", ttypath);
+ 			optfatal = 1;
+ 			return (0);
+ 		}
+ 		if (!S_ISCHR(sb.st_mode)) {
+ 			if (pathbuf3[0] != '\0')
+-				warnx("%s, %s, and %s: Not a terminal",
++				xo_warnx("%s, %s, and %s: Not a terminal",
+ 				    pathbuf3, pathbuf2, ttypath);
+ 			else
+-				warnx("%s: Not a terminal", ttypath);
++				xo_warnx("%s: Not a terminal", ttypath);
+ 			optfatal = 1;
+ 			return (0);
+ 		}
+@@ -847,9 +873,9 @@
+ 
+ 	if (*elem == '\0' || strlen(elem) >= MAXLOGNAME) {
+ 		if (*elem == '\0')
+-			warnx("Invalid (zero-length) %s name", inf->lname);
++			xo_warnx("Invalid (zero-length) %s name", inf->lname);
+ 		else
+-			warnx("%s name too long: %s", inf->lname, elem);
++			xo_warnx("%s name too long: %s", inf->lname, elem);
+ 		optfatal = 1;
+ 		return (0);		/* Do not add this value. */
+ 	}
+@@ -859,12 +885,12 @@
+ 		errno = 0;
+ 		bigtemp = strtoul(elem, &endp, 10);
+ 		if (errno != 0 || *endp != '\0' || bigtemp > UID_MAX)
+-			warnx("No %s named '%s'", inf->lname, elem);
++			xo_warnx("No %s named '%s'", inf->lname, elem);
+ 		else {
+ 			/* The string is all digits, so it might be a userID. */
+ 			pwd = getpwuid((uid_t)bigtemp);
+ 			if (pwd == NULL)
+-				warnx("No %s name or ID matches '%s'",
++				xo_warnx("No %s name or ID matches '%s'",
+ 				    inf->lname, elem);
+ 		}
+ 	}
+@@ -921,7 +947,7 @@
+ 			while (*argp != '\0' && strchr(W_SEP T_SEP,
+ 			    *argp) == NULL)
+ 				argp++;
+-			warnx("Value too long: %.*s", (int)(argp - savep),
++			xo_warnx("Value too long: %.*s", (int)(argp - savep),
+ 			    savep);
+ 			optfatal = 1;
+ 		}
+@@ -1022,7 +1048,7 @@
+ 			continue;
+ 		}
+ 		if ((ki[src].ki_d.prefix = malloc(lvl * 2 + 1)) == NULL)
+-			errx(1, "malloc failed");
++			xo_errx(1, "malloc failed");
+ 		for (n = 0; n < lvl - 2; n++) {
+ 			ki[src].ki_d.prefix[n * 2] =
+ 			    path[n / 8] & 1 << (n % 8) ? '|' : ' ';
+@@ -1060,7 +1086,7 @@
+ 	newlist = realloc(inf->l.ptr, newmax * inf->elemsize);
+ 	if (newlist == NULL) {
+ 		free(inf->l.ptr);
+-		errx(1, "realloc to %d %ss failed", newmax, inf->lname);
++		xo_errx(1, "realloc to %d %ss failed", newmax, inf->lname);
+ 	}
+ 	inf->maxcount = newmax;
+ 	inf->l.ptr = newlist;
+@@ -1134,7 +1160,7 @@
+ 		str = (v->oproc)(ki, vent);
+ 		ks = malloc(sizeof(*ks));
+ 		if (ks == NULL)
+-			errx(1, "malloc failed");
++			xo_errx(1, "malloc failed");
+ 		ks->ks_str = str;
+ 		STAILQ_INSERT_TAIL(&ki->ki_ks, ks, ks_next);
+ 		if (str != NULL) {
+@@ -1200,7 +1226,7 @@
+ 		else
+ 			asprintf(&ki->ki_args, "(%s)", ki->ki_p->ki_comm);
+ 		if (ki->ki_args == NULL)
+-			errx(1, "malloc failed");
++			xo_errx(1, "malloc failed");
+ 	} else {
+ 		ki->ki_args = NULL;
+ 	}
+@@ -1211,7 +1237,7 @@
+ 		else
+ 			ki->ki_env = strdup("()");
+ 		if (ki->ki_env == NULL)
+-			errx(1, "malloc failed");
++			xo_errx(1, "malloc failed");
+ 	} else {
+ 		ki->ki_env = NULL;
+ 	}
+@@ -1332,7 +1358,7 @@
+ 	 * original value.
+ 	 */
+ 	if ((newopts = ns = malloc(len + 3)) == NULL)
+-		errx(1, "malloc failed");
++		xo_errx(1, "malloc failed");
+ 
+ 	if (*origval != '-')
+ 		*ns++ = '-';	/* add option flag */
+@@ -1361,7 +1387,7 @@
+ 
+ 	intsize = sizeof(pid_max);
+ 	if (sysctlbyname("kern.pid_max", &pid_max, &intsize, NULL, 0) < 0) {
+-		warn("unable to read kern.pid_max");
++		xo_warn("unable to read kern.pid_max");
+ 		pid_max = 99999;
+ 	}
+ }
+@@ -1371,7 +1397,7 @@
+ {
+ #define	SINGLE_OPTS	"[-aCcde" OPT_LAZY_f "HhjlmrSTuvwXxZ]"
+ 
+-	(void)fprintf(stderr, "%s\n%s\n%s\n%s\n",
++	(void)xo_error("%s\n%s\n%s\n%s\n",
+ 	    "usage: ps " SINGLE_OPTS " [-O fmt | -o fmt] [-G gid[,gid...]]",
+ 	    "          [-M core] [-N system]",
+ 	    "          [-p pid[,pid...]] [-t tty[,tty...]] [-U user[,user...]]",
+Only in ps: ps.core
+Only in ps: ps.c~
+diff -ru /usr/src/bin/ps/ps.h ps/ps.h
+--- /usr/src/bin/ps/ps.h	2014-01-16 15:32:13.000000000 -0500
++++ ps/ps.h	2014-08-25 00:47:07.000000000 -0400
+@@ -65,6 +65,7 @@
+ 	const char *name;	/* name(s) of variable */
+ 	const char *header;	/* default header */
+ 	const char *alias;	/* aliases */
++	const char *field;	/* xo field name */
+ #define	COMM	0x01		/* needs exec arguments and environment (XXX) */
+ #define	LJUST	0x02		/* left adjust on output (trailing blanks) */
+ #define	USER	0x04		/* needs user structure */
+Only in ps: ps.h~
+Only in ps: ps.o
