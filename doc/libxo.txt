@@ -1035,6 +1035,8 @@ The set of valid flags include:
 | XOF_WARN        | Generate warnings for broken calls    |
 | XOF_WARN_XML    | Generate warnings in XML on stdout    |
 | XOF_XPATH       | Emit XPath expressions (HTML)         |
+| XOF_COLUMNS     | Force xo_emit to return columns used  |
+| XOF_FLUSH       | Flush output after each xo_emit call  |
 |-----------------+---------------------------------------|
 
 The XOF_CLOSE_FP flag will trigger the call of the close_func
