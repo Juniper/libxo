@@ -22,6 +22,7 @@ sub main {
 	$opt_cflags .= shift @ARGV if /^-C/;
 	$opt_debug = 1 if /^-d/;
 	extract_docs() if /^-D/;
+	$opt_info = $opt_vocabulary = 1 if /^-I/;
 	$opt_print = 1 if /^-p/;
 	$opt_vocabulary = 1 if /^-V/;
 	extract_samples() if /^-X/;
@@ -31,7 +32,16 @@ sub main {
 	parse_file($file);
     }
 
-    if ($opt_vocabulary) {
+    if ($opt_info) {
+	print "static xo_info_t info[] = {\n";
+	for $name (sort(keys(%vocabulary))) {
+	    print "    { \"", $name, "\", \"type\", \"desc\" },\n";
+	}
+	print "};\n";
+	print "static int info_count = (sizeof(info) / sizeof(info[0]));\n";
+	print "...\n";
+	print "    xo_set_info(NULL, info, info_count);\n";
+    } elsif ($opt_vocabulary) {
 	for $name (sort(keys(%vocabulary))) {
 	    print $name, "\n";
 	}
