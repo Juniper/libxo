@@ -73,6 +73,26 @@ can then be generated in various style, using the "--libxo" option:
       <div class="data" data-tag="filename">/etc/motd</div>
     </div>
 
+** Getting libxo
+
+libxo lives on github as:
+
+  https://github.com/Juniper/libxo
+
+The latest release of libxo is available at:
+
+  https://github.com/Juniper/libxo/releases
+
+We are following the branching scheme from 
+^http://nvie.com/posts/a-successful-git-branching-model/^
+which means we will do development under the "develop" branch, and
+release from the master.  To clone a developer tree, run the following
+command:
+
+  git clone https://github.com/Juniper/libxo.git -b develop
+
+We're using semantic release numbering.
+
 * Overview
 
 Most unix commands emit text output aimed at humans.  It is designed
@@ -1291,9 +1311,10 @@ is returned.  On failure, a message it emitted and -1 is returned.
         exit(1);
 
 Following the call to xo_parse_args, the application can process the
-remaining argument in a normal manner.
+remaining argument in a normal manner.  See ^command-line-arguments^
+for a description of valid arguments.
 
-*** Information @info@
+*** Field Information (xo_info_t) @info@
 
 HTML data can include additional information in attributes that
 begin with "data-".  To enable this, three things must occur:
