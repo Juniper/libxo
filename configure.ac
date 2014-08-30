@@ -147,6 +147,19 @@ AM_CONDITIONAL([LIBXO_DEBUG], [test "$LIBXO_DEBUG" != "no"])
 AC_CHECK_LIB([m], [lrint])
 AM_CONDITIONAL([HAVE_LIBM], [test "$HAVE_LIBM" != "no"])
 
+AC_MSG_CHECKING([compiler for gcc])
+HAVE_GCC=no
+if test "${CC}" != ""; then
+    HAVE_GCC=`${CC} --version 2>&1 | grep GCC`
+    if test "${HAVE_GCC}" != ""; then
+        HAVE_GCC=yes
+    else
+        HAVE_GCC=no
+    fi
+fi
+AC_MSG_RESULT([$HAVE_GCC])
+AM_CONDITIONAL([HAVE_GCC], [test "$HAVE_GCC" = "yes"])
+
 AC_MSG_CHECKING([whether to build with printflike])
 AC_ARG_ENABLE([printflike],
     [  --enable-printflike    Enable use of GCC __printflike attribute],
@@ -196,6 +209,14 @@ AC_SUBST(XO_LIBDIR)
 AC_SUBST(XO_BINDIR)
 AC_SUBST(XO_INCLUDEDIR)
 
+AC_ARG_WITH(share-dir,
+        [  --with-share-dir=[DIR]           Specify location of shared files],
+        [XO_SHAREDIR=$withval],
+        [XO_SHAREDIR=$datarootdir/libxo]
+)
+XO_SHAREDIR=`echo $XO_SHAREDIR | sed "s;\\${prefix};$prefix;"`
+AC_SUBST(XO_SHAREDIR)
+
 dnl for the spec file
 RELDATE=`date +'%Y-%m-%d%n'`
 AC_SUBST(RELDATE)
@@ -216,10 +237,11 @@ AC_SUBST(LIBXO_VERSION)
 AC_SUBST(LIBXO_VERSION_NUMBER)
 AC_SUBST(LIBXO_VERSION_EXTRA)
 
-AC_CONFIG_HEADERS([libxo/libxo-config.h])
+AC_CONFIG_HEADERS([libxo/xoconfig.h])
 AC_CONFIG_FILES([
   Makefile
   libxo-config
+  xohtml/xohtml.sh
   libxo/Makefile
   libxo/xoversion.h
   xo/Makefile
@@ -241,9 +263,9 @@ AC_MSG_NOTICE([summary of build options:
   libdir:           ${XO_LIBDIR}
   bindir:           ${XO_BINDIR}
   includedir:       ${XO_INCLUDEDIR}
-  extensions dir:   ${XO_EXTDIR}
+  share dir:        ${XO_SHAREDIR}
 
-  compiler:         ${CC}
+  compiler:         ${CC} (${HAVE_GCC:-no})
   compiler flags:   ${CFLAGS}
   library types:    Shared=${enable_shared}, Static=${enable_static}
 

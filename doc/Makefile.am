@@ -49,11 +49,14 @@ EXTRA_DIST = \
 
 doc docs: ${OUTPUT}.txt ${OUTPUT}.html
 
-${OUTPUT}.txt: ${INPUT} ${OXTRADOC}
+${OUTPUT}.txt: ${INPUT} ${OXTRADOC} xolint.txt
 	${OXTRADOC_CMD} -m text -o $@ $<
 
-${OUTPUT}.html: ${INPUT} ${OXTRADOC} ${XML2HTMLBIN}
+${OUTPUT}.html: ${INPUT} ${OXTRADOC} ${XML2HTMLBIN} xolint.txt
 	${OXTRADOC_CMD} -m html -o $@ $<
+
+xolint.txt: ${top_srcdir}/xolint/xolint.pl
+	perl ${top_srcdir}/xolint/xolint.pl -D > xolint.txt
 
 CLEANFILES = \
 ${OUTPUT}.xml \

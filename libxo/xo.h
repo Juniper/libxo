@@ -18,12 +18,14 @@
 #define INCLUDE_XO_H
 
 /** Formatting types */
+typedef unsigned xo_style_t;
 #define XO_STYLE_TEXT	0	/** Generate text output */
 #define XO_STYLE_XML	1	/** Generate XML output */
 #define XO_STYLE_JSON	2	/** Generate JSON output */
 #define XO_STYLE_HTML	3	/** Generate HTML output */
 
 /** Flags for libxo */
+typedef unsigned long xo_xof_flags_t;
 #define XOF_CLOSE_FP	(1<<0)	/** Close file pointer on xo_close() */
 #define XOF_PRETTY	(1<<1)	/** Make 'pretty printed' output */
 #define XOF_DIV_OPEN	(1<<2)	/** Internal use only: a <div> is open */
@@ -40,11 +42,18 @@
 #define XOF_KEYS	(1<<11)	/** Flag 'key' fields for xml and json */
 
 #define XOF_IGNORE_CLOSE (1<<12) /** Ignore errors on close tags */
-#define XOF_NOT_FIRST	(1<<13)	 /* Not the first item (json)  */
+#define XOF_NOT_FIRST	(1<<13)	 /* Not the first item (JSON)  */
 #define XOF_NO_LOCALE	(1<<14)	 /** Don't bother with locale */
 #define XOF_TOP_EMITTED	(1<<15)	 /* The top JSON braces have been emitted  */
 
 #define XOF_NO_TOP	(1<<16)	/** Don't emit the top braces in JSON */
+#define XOF_ANCHOR	(1<<17)	/** An anchor is in place  */
+#define XOF_UNITS	(1<<18)	/** Encode units in XML */
+#define XOF_UNITS_PENDING (1<<19) /** We have a units-insertion pending */
+
+#define XOF_UNDERSCORES	(1<<20)	/** Replace dashes with underscores (JSON)  */
+#define XOF_COLUMNS	(1<<21)	/** xo_emit should return a column count */
+#define XOF_FLUSH	(1<<22)	/** Flush after each xo_emit call */
 
 /*
  * The xo_info_t structure provides a mapping between names and
@@ -74,10 +83,10 @@ typedef int (*xo_formatter_t)(xo_handle_t *, char *, int,
 typedef void (*xo_checkpointer_t)(xo_handle_t *, va_list, int);
 
 xo_handle_t *
-xo_create (unsigned type, unsigned flags);
+xo_create (xo_style_t style, xo_xof_flags_t flags);
 
 xo_handle_t *
-xo_create_to_file (FILE *fp, unsigned type, unsigned flags);
+xo_create_to_file (FILE *fp, xo_style_t style, xo_xof_flags_t flags);
 
 void
 xo_destroy (xo_handle_t *xop);
@@ -90,16 +99,25 @@ void
 xo_set_allocator (xo_realloc_func_t realloc_func, xo_free_func_t free_func);
 
 void
-xo_set_style (xo_handle_t *xop, unsigned style);
+xo_set_style (xo_handle_t *xop, xo_style_t style);
+
+xo_style_t
+xo_get_style (xo_handle_t *xop);
 
 int
 xo_set_style_name (xo_handle_t *xop, const char *style);
 
-void
-xo_set_flags (xo_handle_t *xop, unsigned flags);
+int
+xo_set_options (xo_handle_t *xop, const char *input);
+
+xo_xof_flags_t
+xo_get_flags (xo_handle_t *xop);
 
 void
-xo_clear_flags (xo_handle_t *xop, unsigned flags);
+xo_set_flags (xo_handle_t *xop, xo_xof_flags_t flags);
+
+void
+xo_clear_flags (xo_handle_t *xop, xo_xof_flags_t flags);
 
 void
 xo_set_info (xo_handle_t *xop, xo_info_t *infop, int count);
@@ -246,9 +264,37 @@ void
 xo_errc (int eval, int code, const char *fmt, ...);
 
 void
-xo_warn_hcv (xo_handle_t *xop, int code, const char *fmt, va_list vap);
+xo_message_hcv (xo_handle_t *xop, int code, const char *fmt, va_list vap);
+
+void
+xo_message_hc (xo_handle_t *xop, int code, const char *fmt, ...);
+
+void
+xo_message_c (int code, const char *fmt, ...);
+
+void
+xo_message (const char *fmt, ...);
 
 void
 xo_no_setlocale (void);
+
+int
+xo_parse_args (int argc, char **argv);
+
+/*
+ * This is the "magic" number returned by libxo-supporting commands
+ * when passed the equally magic "--libxo-check" option.  If you
+ * return this, we can assume that since you know the magic handshake,
+ * you'll happily handle future --libxo options and not do something
+ * violent like reboot the box or create another hole in the ozone
+ * layer.
+ */
+#define XO_HAS_LIBXO	121
+
+/*
+ * externs for our version number strings
+ */
+extern const char xo_version[];
+extern const char xo_version_extra[];
 
 #endif /* INCLUDE_XO_H */

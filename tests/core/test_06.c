@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "libxo.h"
+#include "xo.h"
 
 xo_info_t info[] = {
     { "employee", "object", "Employee data" },
@@ -35,6 +35,10 @@ main (int argc, char **argv)
 	{ "Ashley", "Smith", 1440 },
 	{ NULL, NULL }
     }, *ep = employees;
+
+    argc = xo_parse_args(argc, argv);
+    if (argc < 0)
+	return 1;
 
     xo_set_info(NULL, info, info_count);
 

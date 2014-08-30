@@ -11,6 +11,7 @@ set opts=' \
 set opts=`echo $opts`
 
 setenv CONFIGURE_OPTS "$opts"
+setenv ADB_PATH $top_src/build/libxo/.libs
 
 alias Zconfigure "(cd $top_src/build; ../configure $opts)"
 alias Zbuild "(cd $top_src/build; make \!* )"

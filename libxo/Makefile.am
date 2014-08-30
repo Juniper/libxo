@@ -9,6 +9,9 @@
 if LIBXO_WARNINGS_HIGH
 LIBXO_WARNINGS = HIGH
 endif
+if HAVE_GCC
+GCC_WARNINGS = yes
+endif
 include ${top_srcdir}/warnings.mk
 
 libxoincdir = ${includedir}/libxo
@@ -18,7 +21,7 @@ AM_CFLAGS = -I${top_srcdir} ${WARNINGS}
 lib_LTLIBRARIES = libxo.la
 
 libxoinc_HEADERS = \
-     libxo.h
+     xo.h
 
 libxo_la_SOURCES = \
     libxo.c

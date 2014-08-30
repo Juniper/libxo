@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "libxo.h"
+#include "xo.h"
 
 xo_info_t info[] = {
     { "employee", "object", "Employee data" },
@@ -28,17 +28,23 @@ main (int argc, char **argv)
 {
     struct employee {
 	const char *e_first;
+	const char *e_nic;
 	const char *e_last;
 	unsigned e_dept;
 	unsigned e_percent;
     } employees[] = {
-	{ "Jim (\"რეგტ\")", "გთხოვთ ახ", 431, 90 },
-	{ "Terry (\"<one\")", "Οὐχὶ ταὐτὰ παρίσταταί μοι Jones", 660, 90 },
-	{ "Leslie (\"Les\")", "Patterson", 341,60 },
-	{ "Ashley (\"Ash\")", "Meter & Smith", 1440, 40 },
-	{ "012345678901234567890", "012345678901234567890", 1440, 40 },
+	{ "Jim", "რეგტ", "გთხოვთ ახ", 431, 90 },
+	{ "Terry", "<one", "Οὐχὶ ταὐτὰ παρίσταταί μοι Jones", 660, 90 },
+	{ "Leslie", "Les", "Patterson", 341,60 },
+	{ "Ashley", "Ash", "Meter & Smith", 1440, 40 },
+	{ "0123456789", "0123456789", "012345678901234567890", 1440, 40 },
+	{ "ახლა", "გაიარო", "საერთაშორისო", 123, 90 },
 	{ NULL, NULL }
     }, *ep = employees;
+
+    argc = xo_parse_args(argc, argv);
+    if (argc < 0)
+	return 1;
 
     xo_set_info(NULL, info, info_count);
 
@@ -53,13 +59,14 @@ main (int argc, char **argv)
 
     xo_open_list("employee");
 
-    xo_emit("{T:First Name/%-20s}{T:Last Name/%-14s}"
+    xo_emit("{T:First Name/%-25s}{T:Last Name/%-14s}"
 	    "{T:/%-12s}{T:Time (%)}\n", "Department");
     for ( ; ep->e_first; ep++) {
 	xo_open_instance("employee");
-	xo_emit("{:first-name/%-20..20s/%s}{:last-name/%-14..14s/%s}"
+	xo_emit("{[:-25}{:first-name/%s} ({:nic-name/\"%s\"}){]:}"
+		"{:last-name/%-14..14s/%s}"
 		"{:department/%8u/%u}{:percent-time/%8u/%u}\n",
-		ep->e_first, ep->e_last, ep->e_dept, ep->e_percent);
+		ep->e_first, ep->e_nic, ep->e_last, ep->e_dept, ep->e_percent);
 	if (ep->e_percent > 50) {
 	    xo_attr("full-time", "%s", "honest & for true");
 	    xo_emit("{e:benefits/%s}", "full");

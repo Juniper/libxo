@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "libxo.h"
+#include "xo.h"
 
 int
 main (int argc, char **argv)
@@ -50,6 +50,10 @@ main (int argc, char **argv)
     };
     int info_count = (sizeof(info) / sizeof(info[0])) - 1;
     
+    argc = xo_parse_args(argc, argv);
+    if (argc < 0)
+	return 1;
+
     for (argc = 1; argv[argc]; argc++) {
 	if (strcmp(argv[argc], "xml") == 0)
 	    xo_set_style(NULL, XO_STYLE_XML);
@@ -68,6 +72,7 @@ main (int argc, char **argv)
     }
 
     xo_set_info(NULL, info, info_count);
+    xo_set_flags(NULL, XOF_KEYS);
 
     xo_open_container_h(NULL, "top");
 
@@ -80,8 +85,10 @@ main (int argc, char **argv)
     for (ip = list; ip->i_title; ip++) {
 	xo_open_instance("item");
 
-	xo_emit("{:name/%-10s/%s}{n:sold/%12u/%u}{:in-stock/%12u/%u}"
-		"{:on-order/%12u/%u}{q:sku/%5s-000-%u/%s-000-%u}\n",
+	xo_emit("{keq:sku/%s-%u/%s-000-%u}"
+		"{k:name/%-10s/%s}{n:sold/%12u/%u}{:in-stock/%12u/%u}"
+		"{:on-order/%12u/%u}{qkd:sku/%5s-000-%u/%s-000-%u}\n",
+		ip->i_sku_base, ip->i_sku_num,
 		ip->i_title, ip->i_sold, ip->i_instock, ip->i_onorder,
 		ip->i_sku_base, ip->i_sku_num);
 
@@ -99,12 +106,13 @@ main (int argc, char **argv)
     for (ip = list; ip->i_title; ip++) {
 	xo_open_instance("item");
 
-	xo_emit("{L:Item} '{:name/%s}':\n", ip->i_title);
+	xo_emit("{keq:sku/%s-%u/%s-000-%u}", ip->i_sku_base, ip->i_sku_num);
+	xo_emit("{L:Item} '{k:name/%s}':\n", ip->i_title);
 	xo_emit("{P:   }{L:Total sold}: {n:sold/%u%s}\n",
 		ip->i_sold, ip->i_sold ? ".0" : "");
 	xo_emit("{P:   }{Lcw:In stock}{:in-stock/%u}\n", ip->i_instock);
 	xo_emit("{P:   }{Lcw:On order}{:on-order/%u}\n", ip->i_onorder);
-	xo_emit("{P:   }{L:SKU}: {q:sku/%s-000-%u}\n",
+	xo_emit("{P:   }{L:SKU}: {qkd:sku/%s-000-%u}\n",
 		ip->i_sku_base, ip->i_sku_num);
 
 	xo_close_instance("item");
@@ -119,12 +127,13 @@ main (int argc, char **argv)
     for (ip = list2; ip->i_title; ip++) {
 	xo_open_instance("item");
 
-	xo_emit("{L:Item} '{:name/%s}':\n", ip->i_title);
+	xo_emit("{keq:sku/%s-%u/%s-000-%u}", ip->i_sku_base, ip->i_sku_num);
+	xo_emit("{L:Item} '{k:name/%s}':\n", ip->i_title);
 	xo_emit("{P:   }{L:Total sold}: {n:sold/%u%s}\n",
 		ip->i_sold, ip->i_sold ? ".0" : "");
 	xo_emit("{P:   }{Lcw:In stock}{:in-stock/%u}\n", ip->i_instock);
 	xo_emit("{P:   }{Lcw:On order}{:on-order/%u}\n", ip->i_onorder);
-	xo_emit("{P:   }{L:SKU}: {q:sku/%s-000-%u}\n",
+	xo_emit("{P:   }{L:SKU}: {qkd:sku/%s-000-%u}\n",
 		ip->i_sku_base, ip->i_sku_num);
 
 	xo_close_instance("item");

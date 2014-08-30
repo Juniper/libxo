@@ -52,4 +52,6 @@ else
 WARNINGS += ${LOW_WARNINGS}
 endif
 
+ifeq "${GCC_WARNINGS}" "yes"
 WARNINGS += -fno-inline-functions-called-once
+endif
