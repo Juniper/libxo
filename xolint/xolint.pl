@@ -287,13 +287,13 @@ sub check_text {
 
     print "checking text: [$text]\n" if $opt_debug;
 
-    #@ A percent sign in text is a literal
+    #@ A percent sign appearing in text is a literal
     #@     xo_emit("cost: %d", cost);
     #@ Should be:
     #@     xo_emit("{L:cost}: {:cost/%d}", cost);
     #@ This can be a bit surprising and could be a field that was not
     #@ properly converted to a libxo-style format string.
-    info("a percent sign in text is a literal") if $text =~ /%/;
+    info("a percent sign appearing in text is a literal") if $text =~ /%/;
 }
 
 sub check_field {
@@ -350,6 +350,10 @@ sub check_field {
 	#@ Fields with the D, N, L, or T roles can't have both
 	#@ static literal content ("{T:Title}") and a
 	#@ format ("{T:/%s}").
+	#@ This error will also occur when the content has a backslash
+	#@ in it, like "{N:Type of I/O}"; backslashes should be escaped,
+	#@ like "{N:Type of I\\/O}".  Note the double backslash, one for
+	#@ handling 'C' strings, and one for libxo.
 	error("format cannot be given when content is present")
 	    if $field[1] && $field[2];
 
@@ -401,6 +405,19 @@ sub check_field {
 	#@ to avoid scenarios where the differences between "XPath" and
 	#@ "Xpath" drive your users crazy.  Lower case rules the seas.
 	error("value field name should be lower case")
+	    if $field[1] =~ /[A-Z]/;
+
+	#@ Value field name should be longer than two characters
+	#@     xo_emit("{:x}", "mumble");
+	#@ Should be:
+	#@     xo_emit("{:something-meaningful}", "mumble");
+	#@ Field names should be descriptive, and it's hard to
+	#@ be descriptive in less than two characters.  Consider
+	#@ your users and try to make something more useful.
+	#@ Note that this error often occurs when the field type
+	#@ is placed after the colon ("{:T/%20s}"), instead of before
+	#@ it ("{T:/20s}").
+	error("value field name should be longer than two characters")
 	    if $field[1] =~ /[A-Z]/;
 
 	#@ Value field name contains invalid character
