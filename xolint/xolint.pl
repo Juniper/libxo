@@ -33,14 +33,15 @@ sub main {
     }
 
     if ($opt_info) {
-	print "static xo_info_t info[] = {\n";
+	print "static xo_info_t xo_info_table[] = {\n";
 	for $name (sort(keys(%vocabulary))) {
 	    print "    { \"", $name, "\", \"type\", \"desc\" },\n";
 	}
 	print "};\n";
-	print "static int info_count = (sizeof(info) / sizeof(info[0]));\n";
-	print "...\n";
-	print "    xo_set_info(NULL, info, info_count);\n";
+	print "static int xo_info_count = "
+	    . "(sizeof(xo_info_table) / sizeof(xo_info_table[0]));\n\n";
+	print "#define XO_SET_INFO() \\\n";
+	print "    xo_set_info(NULL, xo_info_table, xo_info_count)\n";
     } elsif ($opt_vocabulary) {
 	for $name (sort(keys(%vocabulary))) {
 	    print $name, "\n";
