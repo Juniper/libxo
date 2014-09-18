@@ -15,7 +15,14 @@
 .Nd detect errors in programs using xo_emit
 .Sh SYNOPSIS
 .Nm xolint
-.Op Fl options
+.Op Fl c
+.Op Fl "C <flags>"
+.Op Fl "d"
+.Op Fl "D"
+.Op Fl "I"
+.Op Fl "p"
+.Op Fl "V"
+.Op Fl "X"
 .Op Ar files...
 .Sh DESCRIPTION
 xolint is a tool for reporting common mistakes in format strings
@@ -24,32 +31,26 @@ to be diagnosed at build time, rather than waiting until runtime.
 .Pp
 xolint takes the one or more C files as arguments, and reports
 and errors, warning, or informational messages as needed.
-.TP
-.Fl c
+.Bl -tag -width "C <flags>"
+.It Fl c
 Invoke 'cpp' against the input file
-.TP
-.Fl "C <flags>"
+.It Fl "C <flags>"
 Flags that are passed to 'cpp
-.TP
-.Fl "d"
+.It Fl "d"
 Enable debug output
-.TP
-.Fl "D"
+.It Fl "D"
 Generate documentation for all xolint messages
-.TP
-.Fl "I"
+.It Fl "I"
 Generate a table of xo_info_t structures.
-.TP
-.Fl "p"
+.It Fl "p"
 Print the offending lines after the error message is displayed
-.TP
-.Fl "V"
+.It Fl "V"
 Do not report errors, but instead print a complete list of
 all field names, sorted alphabetically.  The output can help spot
 inconsistencies and spelling errors.
-.TP
-.Fl "X"
+.It Fl "X"
 Extract samples from xolint, suitable for internal testing.
+.El
 .Pp
 Output message contain the source filename and line number, the
 class of the message, the message, and, if
