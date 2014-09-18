@@ -6,9 +6,9 @@
 # using the SOFTWARE, you agree to be bound by the terms of that
 # LICENSE.
 
-man_MANS = xolint.1x
+man_MANS = xolint.1
 
-EXTRA_DIST = xolint.1x xolint.pl
+EXTRA_DIST = xolint.1 xolint.pl
 
 install-exec-hook:
 	install ${srcdir}/xolint.pl ${bindir}/xolint
