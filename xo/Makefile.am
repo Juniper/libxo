@@ -30,6 +30,6 @@ xo_SOURCES = xo.c
 LDADD = \
     ${top_builddir}/libxo/libxo.la
 
-man_MANS = xo.1x
+man_MANS = xo.1
 
-EXTRA_DIST = xo.1x
+EXTRA_DIST = xo.1

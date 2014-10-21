@@ -245,6 +245,7 @@ AC_CONFIG_FILES([
   libxo/Makefile
   libxo/xoversion.h
   xo/Makefile
+  xolint/Makefile
   packaging/libxo.pc
   doc/Makefile
   tests/Makefile

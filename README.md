@@ -56,3 +56,7 @@ option:
       <div class="data" data-tag="filename">/etc/motd</div>
     </div>
 ```
+
+View the beautiful documentation at:
+
+http://juniper.github.io/libxo/libxo-manual.html

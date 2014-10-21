@@ -73,6 +73,26 @@ can then be generated in various style, using the "--libxo" option:
       <div class="data" data-tag="filename">/etc/motd</div>
     </div>
 
+** Getting libxo
+
+libxo lives on github as:
+
+  https://github.com/Juniper/libxo
+
+The latest release of libxo is available at:
+
+  https://github.com/Juniper/libxo/releases
+
+We are following the branching scheme from 
+^http://nvie.com/posts/a-successful-git-branching-model/^
+which means we will do development under the "develop" branch, and
+release from the master.  To clone a developer tree, run the following
+command:
+
+  git clone https://github.com/Juniper/libxo.git -b develop
+
+We're using semantic release numbering.
+
 * Overview
 
 Most unix commands emit text output aimed at humans.  It is designed
@@ -397,11 +417,11 @@ content emitted for some output styles:
 | w | white space  | A blank (" ") is appended after the label       |
 |---+--------------+-------------------------------------------------|
 
-For example, the modifier string "Lwc" means the field is a label
-(text that describes the next field) and should be followed by a colon
-('c') and a space ('w').  The modifier string "Vkq" means the field is
-a value field, that it is a key for the current instance, and that the
-value should be quoted when encoded for JSON.
+For example, the modifier string "Lwc" means the field has a label
+role (text that describes the next field) and should be followed by a
+colon ('c') and a space ('w').  The modifier string "Vkq" means the
+field has a value role, that it is a key for the current instance, and
+that the value should be quoted when encoded for JSON.
 
 **** The Colon Modifier ({c:})
 
@@ -560,28 +580,28 @@ The format character is described in the following table:
 |-----+-----------------+----------------------|
 | Ltr | Argument Type   | Format               |
 |-----+-----------------+----------------------|
-| d   | 'int'           | base 10 (decimal)    |
-| i   | 'int'           | base 10 (decimal)    |
-| o   | 'int'           | base 8 (octal)       |
-| u   | 'unsigned'      | base 10 (decimal)    |
-| x   | 'unsigned'      | base 16 (hex)        |
-| X   | 'unsigned long' | base 16 (hex)        |
-| D   | long'           | base 10 (decimal)    |
-| O   | 'unsigned long' | base 8 (octal)       |
-| U   | 'unsigned long' | base 10 (decimal)    |
-| e   | 'double'        | [-]d.ddde+-dd        |
-| E   | 'double'        | [-]d.dddE+-dd        |
-| f   | 'double'        | [-]ddd.ddd           |
-| F   | 'double'        | [-]ddd.ddd           |
-| g   | 'double'        | as 'e' or 'f'        |
-| G   | 'double'        | as 'E' or 'F'        |
-| a   | 'double'        | [-]0xh.hhhp[+-]d     |
-| A   | 'double'        | [-]0Xh.hhhp[+-]d     |
-| c   | 'unsigned char' | a character          |
-| C   | 'wint_t'        | a character          |
-| s   | 'char *'        | a UTF-8 string       |
-| S   | 'wchar_t *      | a unicode/WCS string |
-| p   | 'void *'        | '%#lx'               |
+| d   | int             | base 10 (decimal)    |
+| i   | int             | base 10 (decimal)    |
+| o   | int             | base 8 (octal)       |
+| u   | unsigned        | base 10 (decimal)    |
+| x   | unsigned        | base 16 (hex)        |
+| X   | unsigned long   | base 16 (hex)        |
+| D   | long            | base 10 (decimal)    |
+| O   | unsigned long   | base 8 (octal)       |
+| U   | unsigned long   | base 10 (decimal)    |
+| e   | double          | [-]d.ddde+-dd        |
+| E   | double          | [-]d.dddE+-dd        |
+| f   | double          | [-]ddd.ddd           |
+| F   | double          | [-]ddd.ddd           |
+| g   | double          | as 'e' or 'f'        |
+| G   | double          | as 'E' or 'F'        |
+| a   | double          | [-]0xh.hhhp[+-]d     |
+| A   | double          | [-]0Xh.hhhp[+-]d     |
+| c   | unsigned char   | a character          |
+| C   | wint_t          | a character          |
+| s   | char *          | a UTF-8 string       |
+| S   | wchar_t *       | a unicode/WCS string |
+| p   | void *          | '%#lx'               |
 |-----+-----------------+----------------------|
 
 The 'h' and 'l' modifiers affect the size and treatment of the
@@ -688,8 +708,8 @@ default to "%s".
 
 *** Content Strings
 
-For padding and labels, the content string is considered the one and
-only argument to the formatting string.  
+For padding and labels, the content string is considered the content,
+unless a format is given.
 
 *** Example
 
@@ -757,7 +777,7 @@ styles, flags, or features:
 | xpath     | Add XPath expressions (HTML)                          |
 |-----------+-------------------------------------------------------|
 
-The brief options are details in ^LIBXO_OPTIONS^.
+The brief options are detailed in ^LIBXO_OPTIONS^.
 
 ** Representing Hierarchy
 
@@ -944,7 +964,7 @@ A handle can be allocated using the xo_create() function:
   Example:
     xo_handle_t *xop = xo_create(XO_STYLE_JSON, XOF_WARN);
     ....
-    xo_emit(xop, "testing\n");
+    xo_emit_h(xop, "testing\n");
 
 See also ^styles^ and ^flags^.
 
@@ -1183,7 +1203,7 @@ especially for the non-TEXT output styles.
 ** Emitting Hierarchy
 
 libxo represents to types of hierarchy: containers and lists.  A
-container appears one under a given parent where a list contains
+container appears once under a given parent where a list contains
 instances that can appear multiple times.  A container is used to hold
 related fields and to give the data organization and scope.
 
@@ -1291,9 +1311,10 @@ is returned.  On failure, a message it emitted and -1 is returned.
         exit(1);
 
 Following the call to xo_parse_args, the application can process the
-remaining argument in a normal manner.
+remaining arguments in a normal manner.  See ^command-line-arguments^
+for a description of valid arguments.
 
-*** Information @info@
+*** Field Information (xo_info_t) @info@
 
 HTML data can include additional information in attributes that
 begin with "data-".  To enable this, three things must occur:
@@ -1331,6 +1352,10 @@ known to the application:
     int info_count = (sizeof(info) / sizeof(info[0]));
     ...
     xo_set_info(NULL, info, info_count);
+
+Third, the emitting of info must be triggered with the XOF_INFO flag
+using either the xo_set_flags() function or the "--libxo=info" command
+line argument.
 
 The type and help values, if present, are emitted as the "data-type"
 and "data-help" attributes:
@@ -1548,6 +1573,8 @@ and errors, warning, or informational messages as needed.
 | -c         | Invoke 'cpp' against the input file               |
 | -C <flags> | Flags that are passed to 'cpp                     |
 | -d         | Enable debug output                               |
+| -D         | Generate documentation for all xolint messages    |
+| -I         | Generate info table code                          |
 | -p         | Print the offending lines after the message       |
 | -V         | Print vocabulary of all field names               |
 | -X         | Extract samples from xolint, suitable for testing |
@@ -1560,6 +1587,8 @@ line that contains the error:
     % xolint.pl -t xolint.c
     xolint.c: 16: error: anchor format should be "%d"
     16         xo_emit("{[:/%s}");
+
+The "-I" option will generate a table of xo_info_t structures , 
 
 The "-V" option does not report errors, but prints a complete list of
 all field names, sorted alphabetically.  The output can help spot

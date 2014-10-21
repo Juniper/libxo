@@ -19,8 +19,8 @@ Only in .: Makefile~
 Only in .: cmp.o
 diff -ru /usr/src/bin/ls/extern.h ./extern.h
 --- /usr/src/bin/ls/extern.h	2014-01-16 15:32:13.000000000 -0500
-+++ ./extern.h	2014-08-28 18:00:28.000000000 -0400
-@@ -45,14 +45,14 @@
++++ ./extern.h	2014-08-29 11:16:17.000000000 -0400
+@@ -45,14 +45,17 @@
  
  void	 printcol(const DISPLAY *);
  void	 printlong(const DISPLAY *);
@@ -31,11 +31,14 @@ diff -ru /usr/src/bin/ls/extern.h ./extern.h
  void	 usage(void);
 -int	 prn_normal(const char *);
 +int	 prn_normal(const char *, const char *);
++char *	 getname(const char *);
  size_t	 len_octal(const char *, int);
 -int	 prn_octal(const char *);
 -int	 prn_printable(const char *);
 +int	 prn_octal(const char *, const char *);
++char *	 get_octal(const char *);
 +int	 prn_printable(const char *, const char *);
++char *	 get_printable(const char *);
  #ifdef COLORLS
  void	 parsecolors(const char *cs);
  void	 colorquit(int);
@@ -231,7 +234,7 @@ Only in .: ls.c~
 Only in .: ls.o
 diff -ru /usr/src/bin/ls/print.c ./print.c
 --- /usr/src/bin/ls/print.c	2014-01-16 15:32:13.000000000 -0500
-+++ ./print.c	2014-08-29 03:08:34.000000000 -0400
++++ ./print.c	2014-08-30 00:25:10.000000000 -0400
 @@ -58,6 +58,7 @@
  #include <termcap.h>
  #include <signal.h>
@@ -252,7 +255,7 @@ diff -ru /usr/src/bin/ls/print.c ./print.c
  #ifdef COLORLS
  static void	endcolor(int);
  static int	colortype(mode_t);
-@@ -109,26 +110,30 @@
+@@ -109,26 +110,46 @@
  {
  	FTSENT *p;
  
@@ -275,20 +278,36 @@ diff -ru /usr/src/bin/ls/print.c ./print.c
  int
 -printname(const char *name)
 +printname(const char *field, const char *name)
++{
++	char fmt[BUFSIZ];
++	char *s = getname(name);
++	int rc;
++	
++	snprintf(fmt, sizeof(fmt), "{:%s/%%hs}", field);
++	rc = xo_emit(fmt, s);
++	free(s);
++	return rc;
++}
++
++/*
++ * print name in current style
++ */
++char *
++getname(const char *name)
  {
  	if (f_octal || f_octal_escape)
 -		return prn_octal(name);
-+		return prn_octal(field, name);
++		return get_octal(name);
  	else if (f_nonprint)
 -		return prn_printable(name);
-+		return prn_printable(field, name);
++		return get_printable(name);
  	else
 -		return prn_normal(name);
-+		return prn_normal(field, name);
++		return strdup(name);
  }
  
  void
-@@ -144,46 +149,50 @@
+@@ -144,46 +165,59 @@
  
  	if ((dp->list == NULL || dp->list->fts_level != FTS_ROOTLEVEL) &&
  	    (f_longform || f_size)) {
@@ -299,10 +318,14 @@ diff -ru /usr/src/bin/ls/print.c ./print.c
  
 +	xo_open_list("entry");
  	for (p = dp->list; p; p = p->fts_link) {
++		char *name;
  		if (IS_NOPRINT(p))
  			continue;
 +		xo_open_instance("entry");
  		sp = p->fts_statp;
++		name = getname(p->fts_name);
++		if (name)
++		    xo_emit("{ke:name}", name);
  		if (f_inode)
 -			(void)printf("%*ju ",
 +			xo_emit("{:inode/%*ju} ",
@@ -318,7 +341,7 @@ diff -ru /usr/src/bin/ls/print.c ./print.c
 -		    sp->st_nlink, dp->s_user, np->user, dp->s_group,
 -		    np->group);
 +		xo_attr("value", "%03o", (int) sp->st_mode & ALLPERMS);
-+		xo_emit("{:mode/%s} {:links/%*u} {:user/%-*s}  {:group/%-*s}  ",
++		xo_emit("{t:mode/%s} {:links/%*u} {:user/%-*s}  {:group/%-*s}  ",
 +			buf, dp->s_nlink, sp->st_nlink,
 +			dp->s_user, np->user, dp->s_group, np->group);
  		if (f_flags)
@@ -349,11 +372,16 @@ diff -ru /usr/src/bin/ls/print.c ./print.c
  			color_printed = colortype(sp->st_mode);
  #endif
 -		(void)printname(p->fts_name);
-+		(void)printname("name", p->fts_name);
++
++		if (name) {
++		    xo_emit("{dk:name}", name);
++		    free(name);
++		}
++		
  #ifdef COLORLS
  		if (f_color && color_printed)
  			endcolor(0);
-@@ -192,8 +201,10 @@
+@@ -192,8 +226,10 @@
  			(void)printtype(sp->st_mode);
  		if (S_ISLNK(sp->st_mode))
  			printlink(p);
@@ -365,7 +393,7 @@ diff -ru /usr/src/bin/ls/print.c ./print.c
  }
  
  void
-@@ -208,17 +219,17 @@
+@@ -208,17 +244,17 @@
  		/* XXX strlen does not take octal escapes into account. */
  		if (strlen(p->fts_name) + chcnt +
  		    (p->fts_link ? 2 : 0) >= (unsigned)termwidth) {
@@ -386,7 +414,7 @@ diff -ru /usr/src/bin/ls/print.c ./print.c
  }
  
  void
-@@ -252,7 +263,7 @@
+@@ -252,7 +288,7 @@
  	if (dp->entries > lastentries) {
  		if ((narray =
  		    realloc(array, dp->entries * sizeof(FTSENT *))) == NULL) {
@@ -395,7 +423,7 @@ diff -ru /usr/src/bin/ls/print.c ./print.c
  			printscol(dp);
  			return;
  		}
-@@ -283,17 +294,21 @@
+@@ -283,17 +319,21 @@
  
  	if ((dp->list == NULL || dp->list->fts_level != FTS_ROOTLEVEL) &&
  	    (f_longform || f_size)) {
@@ -418,7 +446,7 @@ diff -ru /usr/src/bin/ls/print.c ./print.c
  			if (f_sortacross)
  				base++;
  			else
-@@ -304,13 +319,14 @@
+@@ -304,13 +344,14 @@
  			    <= endcol) {
  				if (f_sortacross && col + 1 >= numcols)
  					break;
@@ -435,7 +463,7 @@ diff -ru /usr/src/bin/ls/print.c ./print.c
  }
  
  /*
-@@ -329,16 +345,16 @@
+@@ -329,16 +370,16 @@
  	sp = p->fts_statp;
  	chcnt = 0;
  	if (f_inode)
@@ -455,7 +483,7 @@ diff -ru /usr/src/bin/ls/print.c ./print.c
  #ifdef COLORLS
  	if (f_color && color_printed)
  		endcolor(0);
-@@ -354,14 +370,14 @@
+@@ -354,14 +395,14 @@
  static void
  printdev(size_t width, dev_t dev)
  {
@@ -473,7 +501,7 @@ diff -ru /usr/src/bin/ls/print.c ./print.c
  	static time_t now = 0;
  	const char *format;
  	static int d_first = -1;
-@@ -384,8 +400,10 @@
+@@ -384,8 +425,10 @@
  		/* mmm dd  yyyy || dd mmm  yyyy */
  		format = d_first ? "%e %b  %Y" : "%b %e  %Y";
  	strftime(longstring, sizeof(longstring), format, localtime(&ftime));
@@ -486,7 +514,7 @@ diff -ru /usr/src/bin/ls/print.c ./print.c
  }
  
  static int
-@@ -394,7 +412,7 @@
+@@ -394,7 +437,7 @@
  
  	if (f_slash) {
  		if ((mode & S_IFMT) == S_IFDIR) {
@@ -495,7 +523,7 @@ diff -ru /usr/src/bin/ls/print.c ./print.c
  			return (1);
  		}
  		return (0);
-@@ -402,25 +420,25 @@
+@@ -402,25 +445,25 @@
  
  	switch (mode & S_IFMT) {
  	case S_IFDIR:
@@ -527,7 +555,7 @@ diff -ru /usr/src/bin/ls/print.c ./print.c
  		return (1);
  	}
  	return (0);
-@@ -430,7 +448,7 @@
+@@ -430,7 +473,7 @@
  static int
  putch(int c)
  {
@@ -536,7 +564,7 @@ diff -ru /usr/src/bin/ls/print.c ./print.c
  	return 0;
  }
  
-@@ -539,7 +557,7 @@
+@@ -539,7 +582,7 @@
  			if (c[j] >= '0' && c[j] <= '7') {
  				colors[i].num[j] = c[j] - '0';
  				if (!legacy_warn) {
@@ -545,7 +573,7 @@ diff -ru /usr/src/bin/ls/print.c ./print.c
  					    "characters a-h instead of 0-9 ("
  					    "see the manual page)");
  				}
-@@ -552,7 +570,7 @@
+@@ -552,7 +595,7 @@
  			} else if (tolower((unsigned char)c[j]) == 'x')
  				colors[i].num[j] = -1;
  			else {
@@ -554,7 +582,7 @@ diff -ru /usr/src/bin/ls/print.c ./print.c
  				    " env var", c[j]);
  				colors[i].num[j] = -1;
  			}
-@@ -584,18 +602,19 @@
+@@ -584,18 +627,19 @@
  		(void)snprintf(name, sizeof(name),
  		    "%s/%s", p->fts_parent->fts_accpath, p->fts_name);
  	if ((lnklen = readlink(name, path, sizeof(path) - 1)) == -1) {
@@ -579,7 +607,7 @@ diff -ru /usr/src/bin/ls/print.c ./print.c
  	if (f_humanval) {
  		/*
  		 * Reserve one space before the size and allocate room for
-@@ -605,13 +624,15 @@
+@@ -605,13 +649,15 @@
  
  		humanize_number(buf, sizeof(buf), (int64_t)bytes, "",
  		    HN_AUTOSCALE, HN_B | HN_NOSPACE | HN_DECIMAL);
@@ -601,7 +629,7 @@ diff -ru /usr/src/bin/ls/print.c ./print.c
  }
  
  /*
-@@ -654,7 +675,7 @@
+@@ -654,7 +700,7 @@
  			type = ACL_TYPE_NFS4;
  			supports_acls = 1;
  		} else if (ret < 0 && errno != EINVAL) {
@@ -610,7 +638,7 @@ diff -ru /usr/src/bin/ls/print.c ./print.c
  			return;
  		}
  		if (supports_acls == 0) {
-@@ -663,7 +684,7 @@
+@@ -663,7 +709,7 @@
  				type = ACL_TYPE_ACCESS;
  				supports_acls = 1;
  			} else if (ret < 0 && errno != EINVAL) {
@@ -619,7 +647,7 @@ diff -ru /usr/src/bin/ls/print.c ./print.c
  				return;
  			}
  		}
-@@ -672,12 +693,12 @@
+@@ -672,12 +718,12 @@
  		return;
  	facl = acl_get_link_np(name, type);
  	if (facl == NULL) {
@@ -638,7 +666,7 @@ Only in .: print.c~
 Only in .: print.o
 diff -ru /usr/src/bin/ls/util.c ./util.c
 --- /usr/src/bin/ls/util.c	2014-01-16 15:32:13.000000000 -0500
-+++ ./util.c	2014-08-28 17:57:17.000000000 -0400
++++ ./util.c	2014-08-29 11:15:13.000000000 -0400
 @@ -50,13 +50,19 @@
  #include <string.h>
  #include <wchar.h>
@@ -667,9 +695,10 @@ diff -ru /usr/src/bin/ls/util.c ./util.c
 +#endif
  }
  
- int
+-int
 -prn_printable(const char *s)
-+prn_printable(const char *field, const char *s)
++char *
++get_printable(const char *s)
  {
  	mbstate_t mbs;
  	wchar_t wc;
@@ -710,16 +739,18 @@ diff -ru /usr/src/bin/ls/util.c ./util.c
  	}
 -	return (n);
 +	*bp = '\0';
-+	return prn_normal(field, buf);
++	return strdup(buf);
  }
  
  /*
-@@ -166,7 +176,7 @@
+@@ -165,8 +175,8 @@
+ 	return (r);
  }
  
- int
+-int
 -prn_octal(const char *s)
-+prn_octal(const char *field, const char *s)
++char *
++get_octal(const char *s)
  {
  	static const char esc[] = "\\\\\"\"\aa\bb\ff\nn\rr\tt\vv";
  	const char *p;
@@ -774,7 +805,7 @@ diff -ru /usr/src/bin/ls/util.c ./util.c
 -	return (len);
 +
 +	*bp = '\0';
-+	return prn_normal(field, buf);
++	return strdup(buf);
  }
  
  void
