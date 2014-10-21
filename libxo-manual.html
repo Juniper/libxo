@@ -497,7 +497,7 @@ li.indline1 {
  
   } 
   @top-right {
-       content: "September 2014";
+       content: "October 2014";
  
   } 
   @top-center {
@@ -21980,7 +21980,7 @@ jQuery(function ($) {
 </tr>
 <tr>
 <td class="header left"></td>
-<td class="header right">September 6, 2014</td>
+<td class="header right">October 20, 2014</td>
 </tr>
 </table></div>
 <p id="title" class="title">libxo: The Easy Way to Generate text, XML, JSON, and HTML output<br><span class="filename">libxo-manual</span></p>
@@ -22803,7 +22803,7 @@ jQuery(function ($) {
 </tr>
 </tbody>
 </table></div>
-<p id="doc_section_2_2_2_p_2">For example, the modifier string "Lwc" means the field is a label (text that describes the next field) and should be followed by a colon ('c') and a space ('w'). The modifier string "Vkq" means the field is a value field, that it is a key for the current instance, and that the value should be quoted when encoded for JSON.</p>
+<p id="doc_section_2_2_2_p_2">For example, the modifier string "Lwc" means the field has a label role (text that describes the next field) and should be followed by a colon ('c') and a space ('w'). The modifier string "Vkq" means the field has a value role, that it is a key for the current instance, and that the value should be quoted when encoded for JSON.</p>
 <div class="content">
 <h4 id="doc_section_2_2_2_1">
 <div class="self-section-number">
@@ -22951,112 +22951,112 @@ jQuery(function ($) {
 <tbody>
 <tr>
 <td>d</td>
-<td>'int'</td>
+<td>int</td>
 <td>base 10 (decimal)</td>
 </tr>
 <tr>
 <td>i</td>
-<td>'int'</td>
+<td>int</td>
 <td>base 10 (decimal)</td>
 </tr>
 <tr>
 <td>o</td>
-<td>'int'</td>
+<td>int</td>
 <td>base 8 (octal)</td>
 </tr>
 <tr>
 <td>u</td>
-<td>'unsigned'</td>
+<td>unsigned</td>
 <td>base 10 (decimal)</td>
 </tr>
 <tr>
 <td>x</td>
-<td>'unsigned'</td>
+<td>unsigned</td>
 <td>base 16 (hex)</td>
 </tr>
 <tr>
 <td>X</td>
-<td>'unsigned long'</td>
+<td>unsigned long</td>
 <td>base 16 (hex)</td>
 </tr>
 <tr>
 <td>D</td>
-<td>long'</td>
+<td>long</td>
 <td>base 10 (decimal)</td>
 </tr>
 <tr>
 <td>O</td>
-<td>'unsigned long'</td>
+<td>unsigned long</td>
 <td>base 8 (octal)</td>
 </tr>
 <tr>
 <td>U</td>
-<td>'unsigned long'</td>
+<td>unsigned long</td>
 <td>base 10 (decimal)</td>
 </tr>
 <tr>
 <td>e</td>
-<td>'double'</td>
+<td>double</td>
 <td>[-]d.ddde+-dd</td>
 </tr>
 <tr>
 <td>E</td>
-<td>'double'</td>
+<td>double</td>
 <td>[-]d.dddE+-dd</td>
 </tr>
 <tr>
 <td>f</td>
-<td>'double'</td>
+<td>double</td>
 <td>[-]ddd.ddd</td>
 </tr>
 <tr>
 <td>F</td>
-<td>'double'</td>
+<td>double</td>
 <td>[-]ddd.ddd</td>
 </tr>
 <tr>
 <td>g</td>
-<td>'double'</td>
+<td>double</td>
 <td>as 'e' or 'f'</td>
 </tr>
 <tr>
 <td>G</td>
-<td>'double'</td>
+<td>double</td>
 <td>as 'E' or 'F'</td>
 </tr>
 <tr>
 <td>a</td>
-<td>'double'</td>
+<td>double</td>
 <td>[-]0xh.hhhp[+-]d</td>
 </tr>
 <tr>
 <td>A</td>
-<td>'double'</td>
+<td>double</td>
 <td>[-]0Xh.hhhp[+-]d</td>
 </tr>
 <tr>
 <td>c</td>
-<td>'unsigned char'</td>
+<td>unsigned char</td>
 <td>a character</td>
 </tr>
 <tr>
 <td>C</td>
-<td>'wint_t'</td>
+<td>wint_t</td>
 <td>a character</td>
 </tr>
 <tr>
 <td>s</td>
-<td>'char *'</td>
+<td>char *</td>
 <td>a UTF-8 string</td>
 </tr>
 <tr>
 <td>S</td>
-<td>'wchar_t *</td>
+<td>wchar_t *</td>
 <td>a unicode/WCS string</td>
 </tr>
 <tr>
 <td>p</td>
-<td>'void *'</td>
+<td>void *</td>
 <td>'%#lx'</td>
 </tr>
 </tbody>
@@ -23188,7 +23188,7 @@ jQuery(function ($) {
 <a href="#doc_section_2_2_8">2.2.8</a> </div>
 <a id="content-strings" href="#content-strings">Content Strings</a>
 </h3>
-<p id="doc_section_2_2_8_p_1">For padding and labels, the content string is considered the one and only argument to the formatting string.</p>
+<p id="doc_section_2_2_8_p_1">For padding and labels, the content string is considered the content, unless a format is given.</p>
 </div>
 <div class="content">
 <h3 id="doc_section_2_2_9">
@@ -23310,7 +23310,7 @@ jQuery(function ($) {
 </tr>
 </tbody>
 </table></div>
-<p id="doc_section_2_3_p_4">The brief options are details in <a href="#LIBXO_OPTIONS" title="LIBXO_OPTIONS">Section 3.4.4</a>.</p>
+<p id="doc_section_2_3_p_4">The brief options are detailed in <a href="#LIBXO_OPTIONS" title="LIBXO_OPTIONS">Section 3.4.4</a>.</p>
 </div>
 <div class="content">
 <h2 id="doc_section_2_4">
@@ -23469,7 +23469,7 @@ jQuery(function ($) {
   Example:
     xo_handle_t *xop = xo_create(XO_STYLE_JSON, XOF_WARN);
     ....
-    xo_emit(xop, "testing\n");
+    xo_emit_h(xop, "testing\n");
 	    </pre> <p id="doc_section_3_1_1_p_3">See also <a href="#styles" title="Output Styles (XO_STYLE_*)">Section 3.1.4.1</a> and <a href="#flags" title="Flags (XOF_*)">Section 3.1.5.1</a>.</p>
 </div>
 <div class="content">
@@ -23774,7 +23774,7 @@ jQuery(function ($) {
 <a href="#doc_section_3_3">3.3</a> </div>
 <a id="emitting-hierarchy" href="#emitting-hierarchy">Emitting Hierarchy</a>
 </h2>
-<p id="doc_section_3_3_p_1">libxo represents to types of hierarchy: containers and lists. A container appears one under a given parent where a list contains instances that can appear multiple times. A container is used to hold related fields and to give the data organization and scope.</p>
+<p id="doc_section_3_3_p_1">libxo represents to types of hierarchy: containers and lists. A container appears once under a given parent where a list contains instances that can appear multiple times. A container is used to hold related fields and to give the data organization and scope.</p>
 <p id="doc_section_3_3_p_2">To create a container, use the xo_open_container and xo_close_container functions:</p>
 <div id="doc_figure_u.66"></div> <pre>
     int xo_open_container (const char *name);
@@ -23875,7 +23875,7 @@ jQuery(function ($) {
     argc = xo_parse_args(argc, argv);
     if (argc &lt; 0)
         exit(1);
-	    </pre> <p id="doc_section_3_4_1_p_3">Following the call to xo_parse_args, the application can process the remaining argument in a normal manner. See <a href="#command-line-arguments" title="Command-line Arguments">Section 2.3</a> for a description of valid arguments.</p>
+	    </pre> <p id="doc_section_3_4_1_p_3">Following the call to xo_parse_args, the application can process the remaining arguments in a normal manner. See <a href="#command-line-arguments" title="Command-line Arguments">Section 2.3</a> for a description of valid arguments.</p>
 </div>
 <div class="content">
 <h3 id="doc_section_3_4_2">
@@ -23907,7 +23907,8 @@ jQuery(function ($) {
     int info_count = (sizeof(info) / sizeof(info[0]));
     ...
     xo_set_info(NULL, info, info_count);
-	    </pre> <p id="doc_section_3_4_2_p_8">The type and help values, if present, are emitted as the "data&#8209;type" and "data&#8209;help" attributes:</p>
+	    </pre> <p id="doc_section_3_4_2_p_8">Third, the emitting of info must be triggered with the XOF_INFO flag using either the xo_set_flags() function or the "&#8209;&#8209;libxo=info" command line argument.</p>
+<p id="doc_section_3_4_2_p_9">The type and help values, if present, are emitted as the "data&#8209;type" and "data&#8209;help" attributes:</p>
 <div id="doc_figure_u.72"></div> <pre>
   &lt;div class="data" data-tag="sku" data-type="string" 
        data-help="Stock Keeping Unit"&gt;GRO-000-533&lt;/div&gt;
