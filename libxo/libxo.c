@@ -724,7 +724,7 @@ xo_buf_utf8_len (xo_handle_t *xop, const char *buf, int bufsiz)
     int len, i;
 
     len = xo_utf8_to_wc_len(buf);
-    if (len == (wchar_t) -1) {
+    if (len == -1) {
         xo_failure(xop, "invalid UTF-8 data: %02hhx", b);
 	return -1;
     }

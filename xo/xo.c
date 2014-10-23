@@ -23,14 +23,6 @@
 #define UNUSED __attribute__ ((__unused__))
 #endif /* UNUSED */
 
-#ifndef HAVE_STREQ
-static inline int
-streq (const char *red, const char *blue)
-{
-    return (red && blue && *red == *blue && strcmp(red + 1, blue + 1) == 0);
-}
-#endif /* HAVE_STREQ */
-
 static int opt_warn;		/* Enable warnings */
 
 static char **save_argv;
@@ -221,7 +213,7 @@ print_help (void)
 "    --xpath               Add XPath data to HTML output\n");
 }
 
-struct opts {
+static struct opts {
     int o_depth;
     int o_help;
     int o_not_first;

@@ -86,7 +86,6 @@ AC_ARG_WITH(libslax-prefix,
         LIBSLAX_CONFIG_PREFIX=$withval
 )
 
-LIBSLAX_REQUIRED_VERSION=0.16.0
 AC_MSG_CHECKING(for libslax) 
 if test "x$LIBSLAX_CONFIG_PREFIX" != "x"
 then
@@ -103,29 +102,17 @@ dnl
 if ${SLAX_CONFIG} --libs > /dev/null 2>&1
 then
 	LIBSLAX_VERSION=`$SLAX_CONFIG --version`
-	if test VERSION_TO_NUMBER(echo $LIBSLAX_VERSION) -ge VERSION_TO_NUMBER(echo $LIBSLAX_REQUIRED_VERSION)
-	then
-		LIBSLAX_VERSION=`$SLAX_CONFIG --version`
-		LIBSLAX_LIBS="$LIBSLAX_LIBS `$SLAX_CONFIG --libs`"
-		LIBSLAX_CFLAGS="$LIBSLAX_CFLAGS `$SLAX_CONFIG --cflags`"
-		SLAX_EXTDIR="`$SLAX_CONFIG --extdir | head -1`"
-		SLAX_LIBDIR="`$SLAX_CONFIG --libdir | head -1`"
-		SLAX_BINDIR="`$SLAX_CONFIG --bindir | head -1`"
-		SLAX_OXTRADOCDIR="`$SLAX_CONFIG --oxtradoc | head -1`"
-		AC_MSG_RESULT($LIBSLAX_VERSION found)
-	else
-		AC_MSG_ERROR(Version $LIBSLAX_VERSION found. You need at least libslax $LIBSLAX_REQUIRED_VERSION for this version of juise)
-	fi
+	SLAX_BINDIR="`$SLAX_CONFIG --bindir | head -1`"
+	SLAX_OXTRADOCDIR="`$SLAX_CONFIG --oxtradoc | head -1`"
+	AC_MSG_RESULT($LIBSLAX_VERSION found)
 else
-	AC_MSG_NOTICE([Could not find libslax; see https://github.com/Juniper/libslax.])
+	LIBSLAX_VERSION=
+	SLAX_BINDIR=
+	SLAX_OXTRADOCDIR=
+	AC_MSG_RESULT([no])
 fi
 
-AC_SUBST(SLAX_CONFIG)
-AC_SUBST(LIBSLAX_CFLAGS)
-AC_SUBST(LIBSLAX_LIBS)
 AC_SUBST(SLAX_BINDIR)
-AC_SUBST(SLAX_EXTDIR)
-AC_SUBST(SLAX_LIBDIR)
 AC_SUBST(SLAX_OXTRADOCDIR)
 
 AC_MSG_CHECKING([whether to build with warnings])
@@ -174,7 +161,6 @@ AC_ARG_ENABLE([libxo-options],
     [  --disable-libxo-options  Turn off support for LIBXO_OPTIONS],
     [LIBXO_OPTS=$enableval],
     [LIBXO_OPTS=yes])
-AC_MSG_RESULT([$LIBXO_OPTS])
 AC_MSG_RESULT([$LIBXO_OPTS])
 AM_CONDITIONAL([NO_LIBXO_OPTIONS], [test "$LIBXO_OPTS" != "yes"])
 
