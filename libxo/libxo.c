@@ -3859,7 +3859,7 @@ xo_close_list_h (xo_handle_t *xop, const char *name)
     rc = xo_printf(xop, "%s%*s]", pre_nl, xo_indent(xop), "");
     xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
 
-    return 0;
+    return rc;
 }
 
 int
