@@ -79,7 +79,7 @@ struct xo_handle_s {
     unsigned short xo_indent;	/* Indent level (if pretty) */
     unsigned short xo_indent_by; /* Indent amount (tab stop) */
     xo_write_func_t xo_write;	/* Write callback */
-    xo_close_func_t xo_close;	/* Clo;se callback */
+    xo_close_func_t xo_close;	/* Close callback */
     xo_formatter_t xo_formatter; /* Custom formating function */
     xo_checkpointer_t xo_checkpointer; /* Custom formating support function */
     void *xo_opaque;		/* Opaque data for write function */
