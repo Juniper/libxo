@@ -1912,6 +1912,7 @@ xo_format_string (xo_handle_t *xop, xo_buffer_t *xbp, xo_xff_flags_t flags,
 		  xo_format_t *xfp)
 {
     static char null[] = "(null)";
+
     char *cp = NULL;
     wchar_t *wcp = NULL;
     int len, cols = 0, rc = 0;
@@ -1922,15 +1923,32 @@ xo_format_string (xo_handle_t *xop, xo_buffer_t *xbp, xo_xff_flags_t flags,
     if (xo_check_conversion(xop, xfp->xf_enc, need_enc))
 	return 0;
 
+    len = xfp->xf_width[XF_WIDTH_SIZE];
+
     if (xfp->xf_enc == XF_ENC_WIDE) {
 	wcp = va_arg(xop->xo_vap, wchar_t *);
 	if (xfp->xf_skip)
 	    return 0;
 
+	/*
+	 * Dont' deref NULL; use the traditional "(null)" instead
+	 * of the more accurate "who's been a naughty boy, then?".
+	 */
+	if (wcp == NULL) {
+	    cp = null;
+	    len = sizeof(null) - 1;
+	}
+
     } else {
 	cp = va_arg(xop->xo_vap, char *); /* UTF-8 or native */
 	if (xfp->xf_skip)
 	    return 0;
+
+	/* Echo "Dont' deref NULL" logic */
+	if (cp == NULL) {
+	    cp = null;
+	    len = sizeof(null) - 1;
+	}
 
 	/*
 	 * Optimize the most common case, which is "%s".  We just
@@ -1955,17 +1973,6 @@ xo_format_string (xo_handle_t *xop, xo_buffer_t *xbp, xo_xff_flags_t flags,
 
 	    return rc;
 	}
-    }
-
-    len = xfp->xf_width[XF_WIDTH_SIZE];
-
-    /*
-     * Dont' deref NULL; use the traditional "(null)" instead
-     * of the more accurate "who's been a naughty boy, then?".
-     */
-    if (cp == NULL && wcp == NULL) {
-	cp = null;
-	len = sizeof(null) - 1;
     }
 
     cols = xo_format_string_direct(xop, xbp, flags, wcp, cp, len,
