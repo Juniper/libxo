@@ -1,6 +1,6 @@
-diff -ru /usr/src/usr.bin/w/Makefile w/Makefile
+diff -rbu /usr/src/usr.bin/w/Makefile ./Makefile
 --- /usr/src/usr.bin/w/Makefile	2014-01-16 15:36:18.000000000 -0500
-+++ w/Makefile	2014-08-11 02:22:47.155675163 -0400
++++ ./Makefile	2014-11-16 20:20:26.768360792 -0500
 @@ -4,8 +4,8 @@
  PROG=	w
  SRCS=	fmt.c pr_time.c proc_compare.c w.c
@@ -12,10 +12,11 @@ diff -ru /usr/src/usr.bin/w/Makefile w/Makefile
  #BINGRP= kmem
  #BINMODE=2555
  LINKS=	${BINDIR}/w ${BINDIR}/uptime
-Only in w: fmt.o
-diff -ru /usr/src/usr.bin/w/pr_time.c w/pr_time.c
+Only in .: Makefile.orig
+Only in .: fmt.o
+diff -rbu /usr/src/usr.bin/w/pr_time.c ./pr_time.c
 --- /usr/src/usr.bin/w/pr_time.c	2014-01-16 15:36:18.000000000 -0500
-+++ w/pr_time.c	2014-08-18 17:08:11.000000000 -0400
++++ ./pr_time.c	2014-11-16 20:21:38.452456886 -0500
 @@ -41,6 +41,7 @@
  #include <stdio.h>
  #include <string.h>
@@ -35,7 +36,7 @@ diff -ru /usr/src/usr.bin/w/pr_time.c w/pr_time.c
 +		xo_emit("{:login-time/%-7.7ls/%ls}", buf);
  	else if (width < 7)
 -		(void)wprintf(L"%ls%.*s", buf, 7 - width, "      ");
-+	        xo_emit("{:login-time/%ls}%.*s", buf, 7 - width, "      ");
++	        xo_emit("{:login-time/%ls}{P:/%.*s}", buf, 7 - width, "      ");
  	else {
 -		(void)wprintf(L"%ls", buf);
 +		xo_emit("{:login-time/%ls}", buf);
@@ -70,16 +71,15 @@ diff -ru /usr/src/usr.bin/w/pr_time.c w/pr_time.c
  
  	return (0); /* not idle longer than 9 days */
  }
-Only in w: pr_time.c.orig
-Only in w: pr_time.c~
-Only in w: pr_time.o
-Only in w: proc_compare.o
-Only in w: uptime.1.gz
-Only in w: w
-Only in w: w.1.gz
-diff -ru /usr/src/usr.bin/w/w.c w/w.c
+Only in .: pr_time.c.orig
+Only in .: pr_time.o
+Only in .: proc_compare.o
+Only in .: uptime.1.gz
+Only in .: w
+Only in .: w.1.gz
+diff -rbu /usr/src/usr.bin/w/w.c ./w.c
 --- /usr/src/usr.bin/w/w.c	2014-01-16 15:36:18.000000000 -0500
-+++ w/w.c	2014-08-18 17:16:14.000000000 -0400
++++ ./w.c	2014-11-16 20:21:57.896351120 -0500
 @@ -82,6 +82,7 @@
  #include <unistd.h>
  #include <utmpx.h>
@@ -173,18 +173,13 @@ diff -ru /usr/src/usr.bin/w/w.c w/w.c
 +		        xo_close_container("process-table");
  		}
 -		(void)printf("%-*.*s %-*.*s %-*.*s ",
--		    W_DISPUSERSIZE, W_DISPUSERSIZE, ep->utmp.ut_user,
--		    W_DISPLINESIZE, W_DISPLINESIZE,
--		    *ep->utmp.ut_line ?
--		    (strncmp(ep->utmp.ut_line, "tty", 3) &&
--		    strncmp(ep->utmp.ut_line, "cua", 3) ?
--		    ep->utmp.ut_line : ep->utmp.ut_line + 3) : "-",
 +		xo_emit("{:user/%-*.*s/%@**@s} {:tty/%-*.*s/%@**@s} ",
-+			W_DISPUSERSIZE, W_DISPUSERSIZE, ep->utmp.ut_user,
-+			W_DISPLINESIZE, W_DISPLINESIZE,
-+			*ep->utmp.ut_line ?
-+			(strncmp(ep->utmp.ut_line, "tty", 3) &&
-+			 strncmp(ep->utmp.ut_line, "cua", 3) ?
+ 		    W_DISPUSERSIZE, W_DISPUSERSIZE, ep->utmp.ut_user,
+ 		    W_DISPLINESIZE, W_DISPLINESIZE,
+ 		    *ep->utmp.ut_line ?
+ 		    (strncmp(ep->utmp.ut_line, "tty", 3) &&
+ 		    strncmp(ep->utmp.ut_line, "cua", 3) ?
+-		    ep->utmp.ut_line : ep->utmp.ut_line + 3) : "-",
 +			 ep->utmp.ut_line : ep->utmp.ut_line + 3) : "-");
 +
 +		if (save_p && save_p != p)
@@ -249,7 +244,7 @@ diff -ru /usr/src/usr.bin/w/w.c w/w.c
  
  	/* Print number of users logged in to system */
 -	(void)printf(" %d user%s", nusers, nusers == 1 ? "" : "s");
-+	xo_emit(" {:users/%d} user%s", nusers, nusers == 1 ? "" : "s");
++	xo_emit(" {:users/%d} {L:/user%s}", nusers, nusers == 1 ? "" : "s");
  
  	/*
  	 * Print 1, 5, and 15 minute load averages.
@@ -290,7 +285,5 @@ diff -ru /usr/src/usr.bin/w/w.c w/w.c
  	exit(1);
  }
  
-Only in w: w.c.orig
-Only in w: w.c.rej
-Only in w: w.c~
-Only in w: w.o
+Only in .: w.c.orig
+Only in .: w.o
