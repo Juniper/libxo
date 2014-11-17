@@ -1325,7 +1325,7 @@ xo_destroy (xo_handle_t *xop_arg)
     xo_buf_cleanup(&xop->xo_attrs);
 
     if (xop_arg == NULL) {
-	bzero(&xo_default_handle, sizeof(&xo_default_handle));
+	bzero(&xo_default_handle, sizeof(xo_default_handle));
 	xo_default_inited = 0;
     } else
 	xo_free(xop);
