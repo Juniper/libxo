@@ -21980,7 +21980,7 @@ jQuery(function ($) {
 </tr>
 <tr>
 <td class="header left"></td>
-<td class="header right">November 7, 2014</td>
+<td class="header right">November 18, 2014</td>
 </tr>
 </table></div>
 <p id="title" class="title">libxo: The Easy Way to Generate text, XML, JSON, and HTML output<br><span class="filename">libxo-manual</span></p>
@@ -22319,11 +22319,11 @@ jQuery(function ($) {
 </li>
 <li class="tocline1">
 <div class="section-number" id="toc_doc_section_6_2_6">6.2.6   </div>
-<a href="#format-cannot-be-given-when-content-is-present-roles-dnlt">'Format cannot be given when content is present (roles: DNLT)'</a>
+<a href="#an-encoding-format-cannot-be-given-roles-dnlt">'An encoding format cannot be given (roles: DNLT)'</a>
 </li>
 <li class="tocline1">
 <div class="section-number" id="toc_doc_section_6_2_7">6.2.7   </div>
-<a href="#an-encoding-format-cannot-be-given-roles-dnlt">'An encoding format cannot be given (roles: DNLT)'</a>
+<a href="#format-cannot-be-given-when-content-is-present-roles-dln">'Format cannot be given when content is present (roles: DLN)'</a>
 </li>
 <li class="tocline1">
 <div class="section-number" id="toc_doc_section_6_2_8">6.2.8   </div>
@@ -24277,8 +24277,8 @@ jQuery(function ($) {
 <li><a href="#encoding-format-uses-different-number-of-arguments" title="'Encoding format uses different number of arguments'">Section 6.2.3</a></li>
 <li><a href="#only-one-field-role-can-be-used" title="'Only one field role can be used'">Section 6.2.4</a></li>
 <li><a href="#potential-missing-slash-after-n-l-or-t-with-format" title="'Potential missing slash after N, L, or T with format'">Section 6.2.5</a></li>
-<li><a href="#format-cannot-be-given-when-content-is-present-roles-dnlt" title="'Format cannot be given when content is present (roles: DNLT)'">Section 6.2.6</a></li>
-<li><a href="#an-encoding-format-cannot-be-given-roles-dnlt" title="'An encoding format cannot be given (roles: DNLT)'">Section 6.2.7</a></li>
+<li><a href="#an-encoding-format-cannot-be-given-roles-dnlt" title="'An encoding format cannot be given (roles: DNLT)'">Section 6.2.6</a></li>
+<li><a href="#format-cannot-be-given-when-content-is-present-roles-dln" title="'Format cannot be given when content is present (roles: DLN)'">Section 6.2.7</a></li>
 <li><a href="#value-field-must-have-a-name-as-content" title="'Value field must have a name (as content)&quot;)'">Section 6.2.8</a></li>
 <li><a href="#use-hyphens-not-underscores-for-value-field-name" title="'Use hyphens, not underscores, for value field name'">Section 6.2.9</a></li>
 <li><a href="#value-field-name-cannot-start-with-digit" title="'Value field name cannot start with digit'">Section 6.2.10</a></li>
@@ -24365,23 +24365,23 @@ jQuery(function ($) {
 <h3 id="doc_section_6_2_6">
 <div class="self-section-number">
 <a href="#doc_section_6_2_6">6.2.6</a> </div>
-<a id="format-cannot-be-given-when-content-is-present-roles-dnlt" href="#format-cannot-be-given-when-content-is-present-roles-dnlt">'Format cannot be given when content is present (roles: DNLT)'</a>
+<a id="an-encoding-format-cannot-be-given-roles-dnlt" href="#an-encoding-format-cannot-be-given-roles-dnlt">'An encoding format cannot be given (roles: DNLT)'</a>
 </h3>
-<p id="doc_section_6_2_6_p_1">The message "Format cannot be given when content is present (roles: DNLT)" can be caused by code like:</p>
+<p id="doc_section_6_2_6_p_1">The message "An encoding format cannot be given (roles: DNLT)" can be caused by code like:</p>
 <div id="doc_figure_u.96"></div> <pre>
-    xo_emit("{T:Max/%6.6s}", "Max");
-	    </pre> <p id="doc_section_6_2_6_p_3">Fields with the D, N, L, or T roles can't have both static literal content ("{T:Title}") and a format ("{T:/%s}"). This error will also occur when the content has a backslash in it, like "{N:Type of I/O}"; backslashes should be escaped, like "{N:Type of I\\/O}". Note the double backslash, one for handling 'C' strings, and one for libxo.</p>
+    xo_emit("{T:Max//%s}", "Max");
+	    </pre> <p id="doc_section_6_2_6_p_3">Fields with the D, N, L, and T roles are not emitted in the 'encoding' style (JSON, XML), so an encoding format would make no sense.</p>
 </div>
 <div class="content">
 <h3 id="doc_section_6_2_7">
 <div class="self-section-number">
 <a href="#doc_section_6_2_7">6.2.7</a> </div>
-<a id="an-encoding-format-cannot-be-given-roles-dnlt" href="#an-encoding-format-cannot-be-given-roles-dnlt">'An encoding format cannot be given (roles: DNLT)'</a>
+<a id="format-cannot-be-given-when-content-is-present-roles-dln" href="#format-cannot-be-given-when-content-is-present-roles-dln">'Format cannot be given when content is present (roles: DLN)'</a>
 </h3>
-<p id="doc_section_6_2_7_p_1">The message "An encoding format cannot be given (roles: DNLT)" can be caused by code like:</p>
+<p id="doc_section_6_2_7_p_1">The message "Format cannot be given when content is present (roles: DLN)" can be caused by code like:</p>
 <div id="doc_figure_u.97"></div> <pre>
-    xo_emit("{T:Max//%s}", "Max");
-	    </pre> <p id="doc_section_6_2_7_p_3">Fields with the D, N, L, and T roles are not emitted in the 'encoding' style (JSON, XML), so an encoding format would make no sense.</p>
+    xo_emit("{N:Max/%6.6s}", "Max");
+	    </pre> <p id="doc_section_6_2_7_p_3">Fields with the D, L, or N roles can't have both static literal content ("{L:Label}") and a format ("{L:/%s}"). This error will also occur when the content has a backslash in it, like "{N:Type of I/O}"; backslashes should be escaped, like "{N:Type of I\\/O}". Note the double backslash, one for handling 'C' strings, and one for libxo.</p>
 </div>
 <div class="content">
 <h3 id="doc_section_6_2_8">
