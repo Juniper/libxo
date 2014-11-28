@@ -26,21 +26,28 @@ are used to generate a choice of
 .Em JSON ,
 or
 .Em HTML
-output.  A common set of functions are used, with
+output.
+A common set of functions are used, with
 command line switches passed to the library to control the details of
 the output.
 .Pp
-Most commands emit text output aimed at humans.  It is designed
-to be parsed and understood by a user.  Humans are gifted at extracted
-details and pattern matching.  Often programmers need to extract
-information from this human-oriented output.  Programmers use tools
+Most commands emit text output aimed at humans.
+It is designed
+to be parsed and understood by a user.
+Humans are gifted at extracted
+details and pattern matching.
+Often programmers need to extract
+information from this human-oriented output.
+Programmers use tools
 like grep, awk, and regular expressions to ferret out the pieces of
-information they need.  Such solutions are fragile and require
+information they need.
+Such solutions are fragile and require
 updates when output contents change or evolve, requiring testing and
 validation.
 .Pp
 Modern tool developers favors encoding schemes like XML and JSON,
-which allow trivial parsing and extraction of data.  Such formats are
+which allow trivial parsing and extraction of data.
+Such formats are
 simple, well understood, hierarchical, easily parsed, and often
 integrate easier with common tools and environments.
 .Pp
@@ -49,28 +56,37 @@ browsers than in terminals, making HTML output valuable.
 .Pp
 .Em libxo
 allows a single set of function calls in source code to generate
-traditional text output, as well as XML and JSON formatted data.  HTML
+traditional text output, as well as XML and JSON formatted data.
+HTML
 can also be generated; "<div>" elements surround the traditional text
 output, with attributes that detail how to render the data.
 .Pp
 There are four encoding styles supported by libxo: TEXT, HTML, JSON,
-and XML.  JSON and XML are suitable for encoding data, while TEXT and
-HTML are suited for display to the user.  TEXT output can be display
+and XML.
+JSON and XML are suitable for encoding data, while TEXT and
+HTML are suited for display to the user.
+TEXT output can be display
 on a terminal session, allowing compatibility with traditional usage.
 HTML can be matched with a small CSS file to permit rendering in any
-HTML5 browser.  XML output is suitable for tools like XPath and
-protocols like NETCONF.  JSON output can be used for RESTful APIs.
+HTML5 browser.
+XML output is suitable for tools like XPath and
+protocols like NETCONF.
+JSON output can be used for RESTful APIs.
 .Pp
 The
 .Em libxo
 library allows an application to generate text, XML, JSON,
-and HTML output using a common set of function calls.  The application
-decides at run time which output style should be produced.  The
+and HTML output using a common set of function calls.
+The application
+decides at run time which output style should be produced.
+The
 application calls a function
 .Fn xo_emit
 to product output that is
-described in a format string.  A "field descriptor" tells libxo what
-the field is and what it means.  Each field descriptor is placed in
+described in a format string.
+A "field descriptor" tells libxo what
+the field is and what it means.
+Each field descriptor is placed in
 braces with a printf-like format string:
 .Bd -literal -offset indent
     xo_emit(" {:lines/%7ju} {:words/%7ju} "
@@ -88,7 +104,8 @@ Output
 can then be generated in various style, using the "--libxo" option.
 .Sh DEFAULT HANDLE
 Handles give an abstraction for libxo that encapsulates the state of a
-stream of output.  Handles have the data type "xo_handle_t" and are
+stream of output.
+Handles have the data type "xo_handle_t" and are
 opaque to the caller.
 
 The library has a default handle that is automatically initialized.
@@ -97,7 +114,8 @@ The xo_set_style and xo_set_flags functions can be used to change this
 behavior.
 
 Many libxo functions take a handle as their first parameter; most that
-do not use the default handle.  Any function taking a handle can
+do not use the default handle.
+Any function taking a handle can
 be passed NULL to access the default handle.
 
 For the typical command that is generating output on standard output,
