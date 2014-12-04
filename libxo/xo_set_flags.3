@@ -26,14 +26,15 @@ Use the
 .Fn xo_set_flags
 function to set the flags for a
 .Em libxo
-handle. To use the default handle, pass a NULL handle.
+handle.
+To use the default handle, pass a NULL handle.
 .Pp
 The set of valid flags include:
 .Bl -tag -width "XOF_UNDERSCORES"
 .It Sy "Flag            Description"
 .It XOF_CLOSE_FP
-Close file pointer on xo_destroy().  This
-flag will trigger the call of the close_func
+Close file pointer on xo_destroy().
+This flag will trigger the call of the close_func
 (provided via
 .Fn xo_set_writer 3 )
 when the handle is destroyed.
@@ -48,7 +49,8 @@ Do not use the LIBXO_OPTIONS env var
 .It XOF_PRETTY
 Make 'pretty printed' output, with the
 addition of indentation and newlines to enhance the readability of
-XML, JSON, and HTML output.  Text output is not affected.
+XML, JSON, and HTML output.
+Text output is not affected.
 .It XOF_UNDERSCORES
 Replaces hyphens with underscores
 .It XOF_UNITS
@@ -56,8 +58,8 @@ Display units (XML and HMTL)
 .It XOF_WARN
 Generate warnings for broken calls, triggering diagnostic
 output (on standard error) when the library notices errors during
-operations, or with arguments to functions.  Without warning enabled,
-such conditions are ignored.
+operations, or with arguments to functions.
+Without warning enabled, such conditions are ignored.
 Warnings allow developers to debug their interaction with libxo.
 The function "xo_failure" can used as a breakpoint for a debugger,
 regardless of whether warnings are enabled.
@@ -79,7 +81,8 @@ used:
 Emit "data-xpath" attributes
 .It XOF_INFO
 Emit additional informational fields for HTML
-output.  See
+output.
+See
 .Xr xo_set_info 3
 for details.
 .El
@@ -96,7 +99,8 @@ used:
 .It Sy "Flag            Description"
 .It XOF_KEYS
 Add 'key' attribute to the XML encoding for
-field definitions that use the 'k' modifier.  The key attribute has
+field definitions that use the 'k' modifier.
+The key attribute has
 the value "key".
 .El
 .Pp

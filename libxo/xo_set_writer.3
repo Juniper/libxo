@@ -32,13 +32,15 @@ function allows custom
 functions
 which can tailor how
 .Em libxo
-writes data.  An
+writes data.
+An
 .Fa opaque
 argument is
 recorded and passed back to the
 .Fa write_func
 function, allowing the function
-to acquire context information. The
+to acquire context information.
+The
 .Fa close_func
 function can
 release this opaque data and any other resources as needed.

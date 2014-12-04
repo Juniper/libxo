@@ -71,9 +71,11 @@
 .Ft int
 .Fn xo_close_list_d "void"
 .Sh DESCRIPTION
-Lists are sequences of instances of homogeneous data objects.  Two
+Lists are sequences of instances of homogeneous data objects.
+Two
 distinct levels of calls are needed to represent them in our output
-styles.  Calls must be made to open and close a list, and for each
+styles.
+Calls must be made to open and close a list, and for each
 instance of data in that list, calls must be make to open and close
 that instance.
 .Pp
@@ -82,8 +84,10 @@ suggested that the name be singular, not plural, as a matter of
 style and usage expectations.
 .Pp
 A list is set of one or more instances that appear under the same
-parent.  The instances contains details about a specific object.  One
-can think of instances as objects or records.  A call is needed to
+parent.
+The instances contains details about a specific object.
+One can think of instances as objects or records.
+A call is needed to
 open and close the list, while a distinct call is needed to open and
 close each instance of the list:
 .Bd -literal -offset indent -compact

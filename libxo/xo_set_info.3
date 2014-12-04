@@ -21,10 +21,12 @@
 .Fn xo_set_info "xo_handle_t *handle" "xo_info_t *info" "int count"
 .Sh DESCRIPTION
 HTML data can include additional information in attributes that
-begin with "data-".  To enable this, three things must occur:
+begin with "data-".
+To enable this, three things must occur:
 .Pp
 First the application must build an array of xo_info_t structures,
-one per tag.  The array must be sorted by name, since
+one per tag.
+The array must be sorted by name, since
 .Em libxo
 uses a
 binary search to find the entry that matches names from format
@@ -46,7 +48,8 @@ Second, the application must inform
 .Em libxo
 about this information using the
 .Fn xo_set_info
-call.  Like other libxo calls, passing NULL for the handle tells
+call.
+Like other libxo calls, passing NULL for the handle tells
 .Em libxo
 to use the default handle.
 .Pp
@@ -57,7 +60,8 @@ is -1,
 will count the elements of
 .Fa info ,
 but there
-must be an empty element at the end.  More typically, the number is
+must be an empty element at the end.
+More typically, the number is
 known to the application:
 .Bd -literal -offset indent
     xo_info_t info[] = {

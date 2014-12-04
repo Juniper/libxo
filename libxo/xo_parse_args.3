@@ -26,8 +26,9 @@ function is used to process command-line arguments.
 .Em libxo -specific
 options are processed and removed
 from the argument list so the calling application does not
-need to process them.  If successful, a new value for argc
-is returned.  On failure, a message it emitted and -1 is returned.
+need to process them.
+If successful, a new value for argc is returned.
+On failure, a message it emitted and -1 is returned.
 .Bd -literal -offset indent
     argc = xo_parse_args(argc, argv);
     if (argc < 0)
@@ -39,8 +40,8 @@ Following the call to
 the application can process the remaining arguments in a normal manner.
 .Pp
 .Em libxo
-uses command line options to trigger rendering behavior.  The
-following options are recognised:
+uses command line options to trigger rendering behavior.
+The following options are recognised:
 .Pp
 .Bl -tag -width "--libxo"
 .It
@@ -93,7 +94,8 @@ Add XPath expressions (HTML)
 The
 .Dq brief-options
 are single letter commands, designed for those with
-too little patience to use real tokens.  No comma separator is used.
+too little patience to use real tokens.
+No comma separator is used.
 .Bl -column "i<num>"
 .It Sy "Token   Action"
 .It "H      " "Enable HTML output (XO_STYLE_HTML)"
