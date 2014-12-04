@@ -96,7 +96,7 @@ We're using semantic release numbering.
 * Overview
 
 Most unix commands emit text output aimed at humans.  It is designed
-to be parsed and understood by a user.  Humans are gifted at extracted
+to be parsed and understood by a user.  Humans are gifted at extracting
 details and pattern matching.  Often programmers need to extract
 information from this human-oriented output.  Programmers use tools
 like grep, awk, and regular expressions to ferret out the pieces of
@@ -104,7 +104,7 @@ information they need.  Such solutions are fragile and require
 updates when output contents change or evolve, requiring testing and
 validation.
 
-Modern tool developers favors encoding schemes like XML and JSON,
+Modern tool developers favor encoding schemes like XML and JSON,
 which allow trivial parsing and extraction of data.  Such formats are
 simple, well understood, hierarchical, easily parsed, and often
 integrate easier with common tools and environments.
@@ -278,7 +278,7 @@ content.  The roles are listed below; only one role is permitted:
 |---+--------------+-------------------------------------------------|
 | M | Name         | Description                                     |
 |---+--------------+-------------------------------------------------|
-| D | decoration   | Field is non-text (e.g. colon, comma)           |
+| D | decoration   | Field is non-text (e.g., colon, comma)          |
 | E | error        | Field is an error message                       |
 | L | label        | Field is text that prefixes a value             |
 | N | note         | Field is text that follows a value              |
@@ -433,7 +433,7 @@ The colon modifier appends a single colon to the data value:
       Name:phil
 
 The colon modifier is only used for the TEXT and HTML output
-styles. It is commonly combined with the space modifier ('{w:').
+styles. It is commonly combined with the space modifier ('{w:}').
 It is purely a convenience feature.
 
 **** The Display Modifier ({d:})
@@ -522,7 +522,7 @@ The white space modifier appends a single space to the data value:
       Name phil
 
 The white space modifier is only used for the TEXT and HTML output
-styles. It is commonly combined with the colon modifier ('{c:').
+styles. It is commonly combined with the colon modifier ('{c:}').
 It is purely a convenience feature.
 
 Note that the sense of the 'w' modifier is reversed for the units role
@@ -530,14 +530,14 @@ Note that the sense of the 'w' modifier is reversed for the units role
 
 *** Field Formatting
 
-The field format is similar to the format string for printf(3).  It's
-used varies based on the role of the field, but generally is used to
+The field format is similar to the format string for printf(3).  Its
+use varies based on the role of the field, but generally is used to
 format the field's contents.
 
 If not provided, the format string defaults to "%s".
 
 Note a field definition can contain zero or more printf-style
-'directives', which are sequences that start with a '%' and end with a
+'directives', which are sequences that start with a '%' and end with
 one of following characters: "diouxXDOUeEfFgGaAcCsSp".  Each directive
 is matched by one of more arguments to the xo_emit function.
 
@@ -557,7 +557,7 @@ argument.  If the width in columns of the output value is less that
 the minumum width, the value will be padded to reach the minimum.
 - a period followed by one or more digits indicating the maximum
 number of bytes which will be examined for a string argument, or the maximum
-width for a non-string argument.  When handling ASCII strings this is
+width for a non-string argument.  When handling ASCII strings this
 functions as the field width but for multi-byte characters, a single
 character may be composed of multiple bytes.
 xo_emit will never dereference memory beyond the given number of bytes.
@@ -630,8 +630,8 @@ ASCII data, a normal 7-bit ASCII string can be used.  '%ls' expects a
 Unicode values.  '%hs' expects a 'char *' pointer to a multi-byte
 string encoded with the current locale, as given by the LC_CTYPE,
 LANG, or LC_ALL environment varibles.  The first of this list of
-variables is used and if none of the variables, the locale defaults to
-"UTF-8".
+variables is used and if none of the variables are set, the locale
+defaults to "UTF-8".
 
 For example, a function is passed a locale-base name, a hat size,
 and a time value.  The hat size is formatted in a UTF-8 (ASCII)
@@ -676,10 +676,10 @@ columns.
 
 *** Characters Outside of Field Definitions
 
-Characters in the format string are not part of a field definition are
-copied to the output for the TEXT style, and are ignored for the JSON
-and XML styles.  For HTML, these characters are placed in a <div> with
-class "text".
+Characters in the format string that are not part of a field
+definition are copied to the output for the TEXT style, and are
+ignored for the JSON and XML styles.  For HTML, these characters are
+placed in a <div> with class "text".
 
   EXAMPLE:
       xo_emit("The hat is {:size/%s}.\n", size_val);
@@ -854,7 +854,7 @@ container, a warning will be generated.
 *** Lists and Instances
 
 A list is set of one or more instances that appear under the same
-parent.  The instances contains details about a specific object.  One
+parent.  The instances contain details about a specific object.  One
 can think of instances as objects or records.  A call is needed to
 open and close the list, while a distinct call is needed to open and
 close each instance of the list:
@@ -874,8 +874,8 @@ generation of XML and JSON data.
 
 *** DTRT Mode
 
-Some user may find tracking the names of open containers, lists, and
-instances inconvenient.  libxo offers "Do The Right Thing" mode, where
+Some users may find tracking the names of open containers, lists, and
+instances inconvenient.  libxo offers a "Do The Right Thing" mode, where
 libxo will track the names of open containers, lists, and instances so
 the close function can be called without a name.  To enable DTRT mode,
 turn on the XOF_DTRT flag prior to making any other libxo output.
@@ -890,7 +890,7 @@ will close the open container, list, or instance:
     xo_close_container_d();
 
 Note that the XOF_WARN flag will also cause libxo to track open
-containers, lists, and instances.  A warning is generated with the
+containers, lists, and instances.  A warning is generated when the
 name given to the close function and the name recorded do not match.
 
 ** Handles
@@ -952,7 +952,7 @@ be passed NULL to access the default handle.
 
 For the typical command that is generating output on standard output,
 there is no need to create an explicit handle, but they are available
-when needed, e.g. for daemons that generate multiple streams of
+when needed, e.g., for daemons that generate multiple streams of
 output.
 
 *** xo_create
@@ -972,7 +972,7 @@ See also ^styles^ and ^flags^.
 
 By default, libxo writes output to standard output.  A convenience
 function is provided for situations when output should be written to
-different file:
+a different file:
 
     xo_handle_t *xo_create_to_file (FILE *fp, unsigned style,
                                     unsigned flags);
@@ -1068,7 +1068,7 @@ XML, JSON, and HTML output.  Text output is not affected.
 
 The XOF_WARN flag requests that warnings will trigger diagnostic
 output (on standard error) when the library notices errors during
-operations, or with arguments to functions.  Without warning enabled,
+operations, or with arguments to functions.  Without warnings enabled,
 such conditions are ignored.
 
 Warnings allow developers to debug their interaction with libxo.
@@ -1250,7 +1250,7 @@ styles.  Calls must be made to open and close a list, and for each
 instance of data in that list, calls must be make to open and close
 that instance.
 
-The name given to all calls must be identical, and it is strong
+The name given to all calls must be identical, and it is strongly
 suggested that the name be singular, not plural, as a matter of
 style and usage expectations.
 
@@ -1353,7 +1353,7 @@ known to the application:
     ...
     xo_set_info(NULL, info, info_count);
 
-Third, the emitting of info must be triggered with the XOF_INFO flag
+Third, the emission of info must be triggered with the XOF_INFO flag
 using either the xo_set_flags() function or the "--libxo=info" command
 line argument.
 
@@ -1580,7 +1580,7 @@ and errors, warning, or informational messages as needed.
 | -X         | Extract samples from xolint, suitable for testing |
 |------------+---------------------------------------------------|
 
-Output message contain the source filename and line number, the
+The output message will contain the source filename and line number, the
 class of the message, the message, and, if -p is given, the
 line that contains the error:
 
@@ -1660,7 +1660,7 @@ Nothing's worse than writing expressions like:
     }
 
 Find someone else who is expressing similar data and follow their
-field's and hierarchy.  Remember the quote is not "Consistency is the
+fields and hierarchy.  Remember the quote is not "Consistency is the
 hobgoblin of little minds", but "A foolish consistency is the
 hobgoblin of little minds".
 = Think about your users
@@ -1670,7 +1670,7 @@ content with xo_attr() calls (^xo_attr^) or "{e:}" fields
 (^e-modifier^) to make the data useful.
 = Don't use an arbitrary number postfix
 What does "errors2" mean?  No one will know.  "errors-after-restart"
-would be a better choice.  Think of you users, and think of the
+would be a better choice.  Think of your users, and think of the
 future.  If you make "errors2", the next guy will happily make
 "errors3" and before you know it, someone will be asking what's the
 difference between errors37 and errors63.
@@ -1689,7 +1689,7 @@ After using "xolint" to find errors in your field descriptors, use
 "xolint -V" to spell check your field names and to detect different
 names for the same data.  "dropped-short" and "dropped-too-short" are
 both reasonable names, but using them both will lead users to ask the
-difference between the two fields.  If there isn't a difference,
+difference between the two fields.  If there is no difference,
 use only one of the field names.  If there is a difference, change the
 names to make that difference more obvious.
 
