@@ -139,6 +139,130 @@ For the typical command that is generating output on standard output,
 there is no need to create an explicit handle, but they are available
 when needed, e.g., for daemons that generate multiple streams of
 output.
+.Sh FUNCTION OVERVIEW
+The
+.Nm libxo
+library includes the following functions:
+.Bl -tag -width "XOF_UNDERSCORES"
+.It Sy "Function      Description"
+.It Dv xo_attr
+.It Dv xo_attr_h
+.It Dv xo_attr_hv
+Allows the caller to emit XML attributes with the next open element.
+.It Dv xo_create
+.It Dv xo_create_to_file
+Allow the caller to create a new handle.
+Note that
+.Nm libxo
+has a default handle that allows the caller to avoid use of an
+explicitly created handle.
+Only callers writing to files other than
+stdout would need to call
+.Fn xo_create .
+.It Dv xo_destroy
+Frees any resources associated with the handle, including the handle
+itself.
+.It Dv xo_emit
+.It Dv xo_emit_h
+.It Dv xo_emit_hv
+Emit formatted output.
+The
+.Fa fmt
+string controls the conversion of the remaining arguments into
+formatted output.  See
+.Xr xo_format 5
+for details.
+.It Dv xo_warn
+.It Dv xo_warnx
+.It Dv xo_warn_c
+.It Dv xo_warn_hc
+.It Dv xo_err
+.It Dv xo_errc
+.It Dv xo_errx
+.It Dv xo_message
+.It Dv xo_message_c
+.It Dv xo_message_hc
+.It Dv xo_message_hcv
+These functions are meant to be compatible with their standard libc namesakes.
+.It Dv xo_finish
+.It Dv xo_finish_h
+Flush output, close open construct, and complete any pending
+operations.
+.It Dv xo_flush
+.It Dv xo_flush_h
+Allow the caller to flush any pending output for a handle.
+.It Dv xo_no_setlocale
+Direct
+.Nm libxo
+to avoid initializing the locale.
+This function should be called before any other
+.Nm libxo
+function is called.
+.It Dv xo_open_container
+.It Dv xo_open_container_h
+.It Dv xo_open_container_hd
+.It Dv xo_open_container_d
+.It Dv xo_close_container
+.It Dv 
+.It Dv xo_close_container_hd
+.It Dv xo_close_container_d
+Containers a singleton levels of hierarchy, typically used to organize
+related content.
+.It Dv xo_open_list_h
+.It Dv xo_open_list
+.It Dv xo_open_list_hd
+.It Dv xo_open_list_d
+.It Dv xo_open_instance_h
+.It Dv xo_open_instance
+.It Dv xo_open_instance_hd
+.It Dv xo_open_instance_d
+.It Dv xo_close_instance_h
+.It Dv xo_close_instance
+.It Dv xo_close_instance_hd
+.It Dv xo_close_instance_d
+.It Dv xo_close_list_h
+.It Dv xo_close_list
+.It Dv xo_close_list_hd
+.It Dv xo_close_list_d
+Lists are levels of hierarchy that can appear multiple times within
+the same parent.
+Two calls are needed to encapsulate them, one for
+the list and one for each instance of that list.
+Typically
+.Fn xo_open_list
+and
+.Fn xo_close_list
+are called outside a
+.Ev for
+loop, where
+.Fn xo_open_instance
+it called at the top of the loop, and
+.Fn xo_close_instance
+is called at the bottom of the loop.
+.It Dv xo_parse_args
+Inspects command line arguments for directions to libxo.
+This function should be called before argv is inspected
+by the application.
+.It Dv xo_set_allocator
+Instructs
+.Nm libxo
+to use an alternative memory allocator and deallocator.
+.It Dv xo_set_flags
+.It Dv xo_clear_flags
+Change the flags set for a handle.
+.It Dv xo_set_info
+Provides additional information about elements for use with HTML
+rendering.
+.It Dv xo_set_options
+Changes formatting options used by handle.
+.It Dv xo_set_style
+.It Dv xo_set_style_name
+Changes the output style used by a handle.
+.It Dv xo_set_writer
+Instructs
+.Nm libxo
+to use an alternative set of low-level output functions.
+.El
 .Sh ADDITIONAL DOCUMENTATION
 Complete documentation can be found on github:
 .Bd -literal -offset indent
