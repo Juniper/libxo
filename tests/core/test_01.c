@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 
 #include "xo.h"
 
@@ -69,6 +70,10 @@ main (int argc, char **argv)
 	    xo_set_flags(NULL, XOF_XPATH);
 	else if (strcmp(argv[argc], "info") == 0)
 	    xo_set_flags(NULL, XOF_INFO);
+        else if (strcmp(argv[argc], "error") == 0) {
+            errno = EBADF;
+            xo_err(1, "error detected");
+        }
     }
 
     xo_set_info(NULL, info, info_count);
