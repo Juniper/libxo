@@ -947,7 +947,7 @@ xo_warn_hcv (xo_handle_t *xop, int code, int check_warn,
 
     int len = strlen(fmt);
     int plen = xo_program ? strlen(xo_program) : 0;
-    char *newfmt = alloca(len + 2 + plen + 2); /* newline, NUL, and ": " */
+    char *newfmt = alloca(len + 1 + plen + 2); /* NUL, and ": " */
 
     if (plen) {
 	memcpy(newfmt, xo_program, plen);
@@ -955,10 +955,6 @@ xo_warn_hcv (xo_handle_t *xop, int code, int check_warn,
 	newfmt[plen++] = ' ';
     }
     memcpy(newfmt + plen, fmt, len);
-
-    /* Add a newline to the fmt string */
-    if (!(xop->xo_flags & XOF_WARN_XML))
-	newfmt[len++ + plen] = '\n';
     newfmt[len + plen] = '\0';
 
     if (xop->xo_flags & XOF_WARN_XML) {
@@ -997,7 +993,7 @@ xo_warn_hcv (xo_handle_t *xop, int code, int check_warn,
 	xo_buf_append(xbp, msg_close, sizeof(msg_close) - 1);
 	xo_buf_append(xbp, err_close, sizeof(err_close) - 1);
 
-	if (code > 0) {
+	if (code >= 0) {
 	    const char *msg = strerror(code);
 	    if (msg) {
 		xo_buf_append(xbp, ": ", 2);
@@ -1010,6 +1006,12 @@ xo_warn_hcv (xo_handle_t *xop, int code, int check_warn,
 
     } else {
 	vfprintf(stderr, newfmt, vap);
+	if (code >= 0) {
+	    const char *msg = strerror(code);
+	    if (msg)
+		fprintf(stderr, ": %s", msg);
+	}
+	fprintf(stderr, "\n");
     }
 }
 
@@ -1029,7 +1031,7 @@ xo_warn_c (int code, const char *fmt, ...)
     va_list vap;
 
     va_start(vap, fmt);
-    xo_warn_hcv(NULL, 0, code, fmt, vap);
+    xo_warn_hcv(NULL, code, 0, fmt, vap);
     va_end(vap);
 }
 
