@@ -71,7 +71,7 @@ main (int argc, char **argv)
 	else if (strcmp(argv[argc], "info") == 0)
 	    xo_set_flags(NULL, XOF_INFO);
         else if (strcmp(argv[argc], "error") == 0) {
-            errno = EBADF;
+            close(-1);
             xo_err(1, "error detected");
         }
     }
