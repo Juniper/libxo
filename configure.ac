@@ -238,6 +238,7 @@ AC_CONFIG_FILES([
   tests/core/Makefile
   tests/xo/Makefile
   packaging/libxo.spec
+  packaging/libxo.rb.base
 ])
 AC_OUTPUT
 
