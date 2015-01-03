@@ -889,6 +889,16 @@ will close the open container, list, or instance:
     ...
     xo_close_container_d();
 
+This also works for lists and instances:
+
+    xo_open_list("item");
+    for (...) {
+        xo_open_instance("item");
+        xo_emit(...);
+        xo_close_instance_d();
+    }
+    xo_close_list_d();
+
 Note that the XOF_WARN flag will also cause libxo to track open
 containers, lists, and instances.  A warning is generated when the
 name given to the close function and the name recorded do not match.
