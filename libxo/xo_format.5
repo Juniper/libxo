@@ -301,6 +301,23 @@ Currently the key modifier is only used when generating XPath values
 for the HTML output style when
 .Dv XOF_XPATH
 is set, but other uses are likely in the near future.
+.Ss The Leaf-List Modifier ({l:})
+The leaf-list modifier is used to distinguish lists where each
+instance consists of only a single value.  In XML, these are
+rendered as single elements, where JSON renders them as arrays.
+.Bd -literal -offset indent
+    EXAMPLE:
+        xo_open_list("user");
+        for (i = 0; i < num_users; i++) {
+            xo_emit("Member {l:name}\n", user[i].u_name);
+        }
+        xo_close_list("user");
+    XML:
+        <user>phil</user>
+        <user>pallavi</user>
+    JSON:
+        "user": [ "phil", "pallavi" ]
+.Ed
 .Ss The No-Quotes Modifier ({n:})
 The no-quotes modifier (and its twin, the 'quotes' modifier) affect
 the quoting of values in the JSON output style.
