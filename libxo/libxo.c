@@ -80,6 +80,7 @@ struct xo_handle_s {
     unsigned short xo_indent_by; /* Indent amount (tab stop) */
     xo_write_func_t xo_write;	/* Write callback */
     xo_close_func_t xo_close;	/* Close callback */
+    xo_flush_func_t xo_flush;	/* Flush callback */
     xo_formatter_t xo_formatter; /* Custom formating function */
     xo_checkpointer_t xo_checkpointer; /* Custom formating support function */
     void *xo_opaque;		/* Opaque data for write function */
@@ -226,6 +227,7 @@ static int
 xo_write_to_file (void *opaque, const char *data)
 {
     FILE *fp = (FILE *) opaque;
+
     return fprintf(fp, "%s", data);
 }
 
@@ -236,7 +238,19 @@ static void
 xo_close_file (void *opaque)
 {
     FILE *fp = (FILE *) opaque;
+
     fclose(fp);
+}
+
+/*
+ * Callback to flush a FILE pointer
+ */
+static int
+xo_flush_file (void *opaque)
+{
+    FILE *fp = (FILE *) opaque;
+
+    return fflush(fp);
 }
 
 /*
@@ -572,20 +586,23 @@ xo_buf_escape (xo_handle_t *xop, xo_buffer_t *xbp,
  * Write the current contents of the data buffer using the handle's
  * xo_write function.
  */
-static void
+static int
 xo_write (xo_handle_t *xop)
 {
+    int rc = 0;
     xo_buffer_t *xbp = &xop->xo_data;
 
     if (xbp->xb_curp != xbp->xb_bufp) {
 	xo_buf_append(xbp, "", 1); /* Append ending NUL */
 	xo_anchor_clear(xop);
-	xop->xo_write(xop->xo_opaque, xbp->xb_bufp);
+	rc = xop->xo_write(xop->xo_opaque, xbp->xb_bufp);
 	xbp->xb_curp = xbp->xb_bufp;
     }
 
     /* Turn off the flags that don't survive across writes */
     xop->xo_flags &= ~(XOF_UNITS_PENDING);
+
+    return rc;
 }
 
 /*
@@ -1002,7 +1019,7 @@ xo_warn_hcv (xo_handle_t *xop, int code, int check_warn,
 	}
 
 	xo_buf_append(xbp, "\n", 2); /* Append newline and NUL to string */
-	xo_write(xop);
+	(void) xo_write(xop);
 
     } else {
 	vfprintf(stderr, newfmt, vap);
@@ -1153,7 +1170,7 @@ xo_message_hcv (xo_handle_t *xop, int code, const char *fmt, va_list vap)
 	xo_buf_append(xbp, msg_close, sizeof(msg_close) - 1);
 	if (need_nl)
 	    xo_buf_append(xbp, "\n", 2); /* Append newline and NUL to string */
-	xo_write(xop);
+	(void) xo_write(xop);
 	break;
 
     case XO_STYLE_HTML:
@@ -1215,7 +1232,7 @@ xo_message_hcv (xo_handle_t *xop, int code, const char *fmt, va_list vap)
 	break;
     }
 
-    xo_flush_h(xop);
+    (void) xo_flush_h(xop);
 }
 
 void
@@ -1303,6 +1320,7 @@ xo_create_to_file (FILE *fp, xo_style_t style, xo_xof_flags_t flags)
 	xop->xo_opaque = fp;
 	xop->xo_write = xo_write_to_file;
 	xop->xo_close = xo_close_file;
+	xop->xo_flush = xo_flush_file;
     }
 
     return xop;
@@ -3167,7 +3185,8 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
     for (cp = fmt; *cp; ) {
 	if (*cp == '\n') {
 	    xo_line_close(xop);
-	    xo_flush_h(xop);
+	    if (xo_flush_h(xop) < 0)
+		return -1;
 	    cp += 1;
 	    continue;
 
@@ -3430,7 +3449,8 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 
     /* If we don't have an anchor, write the text out */
     if (flush && !(xop->xo_flags & XOF_ANCHOR))
-	xo_write(xop);
+	if (xo_write(xop) < 0)
+	    rc = -1;		/* Report failure */
 
     return (rc < 0) ? rc : (int) xop->xo_columns;
 }
@@ -4033,13 +4053,14 @@ xo_close_instance_d (void)
 
 void
 xo_set_writer (xo_handle_t *xop, void *opaque, xo_write_func_t write_func,
-	       xo_close_func_t close_func)
+	       xo_close_func_t close_func, xo_flush_func_t flush_func)
 {
     xop = xo_default(xop);
 
     xop->xo_opaque = opaque;
     xop->xo_write = write_func;
     xop->xo_close = close_func;
+    xop->xo_flush = flush_func;
 }
 
 void
@@ -4049,10 +4070,11 @@ xo_set_allocator (xo_realloc_func_t realloc_func, xo_free_func_t free_func)
     xo_free = free_func;
 }
 
-void
+int
 xo_flush_h (xo_handle_t *xop)
 {
     static char div_close[] = "</div>";
+    int rc;
 
     xop = xo_default(xop);
 
@@ -4068,16 +4090,21 @@ xo_flush_h (xo_handle_t *xop)
 	break;
     }
 
-    xo_write(xop);
+    rc = xo_write(xop);
+    if (rc >= 0 && xop->xo_flush)
+	if (xop->xo_flush(xop->xo_opaque) < 0)
+	    return -1;
+
+    return rc;
 }
 
-void
+int
 xo_flush (void)
 {
-    xo_flush_h(NULL);
+    return xo_flush_h(NULL);
 }
 
-void
+int
 xo_finish_h (xo_handle_t *xop)
 {
     const char *cp = "";
@@ -4095,13 +4122,13 @@ xo_finish_h (xo_handle_t *xop)
 	break;
     }
 
-    xo_flush_h(xop);
+    return xo_flush_h(xop);
 }
 
-void
+int
 xo_finish (void)
 {
-    xo_finish_h(NULL);
+    return xo_finish_h(NULL);
 }
 
 /*
