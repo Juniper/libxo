@@ -412,6 +412,7 @@ content emitted for some output styles:
 | d | display      | Only emit field for display styles (text/HTML)  |
 | e | encoding     | Only emit for encoding styles (XML/JSON)        |
 | k | key          | Field is a key, suitable for XPath predicates   |
+| l | leaf-list    | Field is a leaf-list
 | n | no-quotes    | Do not quote the field when using JSON style    |
 | q | quotes       | Quote the field when using JSON style           |
 | w | white space  | A blank (" ") is appended after the label       |
@@ -484,6 +485,24 @@ uniquely identify an instance of list data.
 Currently the key modifier is only used when generating XPath value
 for the HTML output style when XOF_XPATH is set, but other uses are
 likely in the near future.
+
+**** The Leaf-List Modifier ({l:})
+
+The leaf-list modifier is used to distinguish lists where each
+instance consists of only a single value.  In XML, these are
+rendered as single elements, where JSON renders them as arrays.
+
+    EXAMPLE:
+        xo_open_list("user");
+        for (i = 0; i < num_users; i++) {
+            xo_emit("Member {l:name}\n", user[i].u_name);
+        }
+        xo_close_list("user");
+    XML:
+        <user>phil</user>
+        <user>pallavi</user>
+    JSON:
+        "user": [ "phil", "pallavi" ]
 
 **** The No-Quotes Modifier ({n:})
 
