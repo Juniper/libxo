@@ -148,6 +148,16 @@ main (int argc, char **argv)
     xo_close_list("item");
     xo_close_container("data");
 
+    xo_open_container("data");
+    xo_open_list("item");
+
+    for (ip = list; ip->i_title; ip++) {
+	xo_emit("{Lwc:Item}{l:item}\n", ip->i_title);
+    }
+
+    xo_close_list("item");
+    xo_close_container("data");
+
     xo_close_container_h(NULL, "top");
 
     xo_finish();
