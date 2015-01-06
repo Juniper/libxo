@@ -70,6 +70,7 @@ typedef struct xo_handle_s xo_handle_t; /* Handle for XO output */
 
 typedef int (*xo_write_func_t)(void *, const char *);
 typedef void (*xo_close_func_t)(void *);
+typedef int (*xo_flush_func_t)(void *);
 typedef void *(*xo_realloc_func_t)(void *, size_t);
 typedef void (*xo_free_func_t)(void *);
 
@@ -93,7 +94,7 @@ xo_destroy (xo_handle_t *xop);
 
 void
 xo_set_writer (xo_handle_t *xop, void *opaque, xo_write_func_t write_func,
-	       xo_close_func_t close_func);
+	       xo_close_func_t close_func, xo_flush_func_t flush_func);
 
 void
 xo_set_allocator (xo_realloc_func_t realloc_func, xo_free_func_t free_func);
@@ -227,16 +228,16 @@ xo_error_h (xo_handle_t *xop, const char *fmt, ...);
 void
 xo_error (const char *fmt, ...);
 
-void
+int
 xo_flush_h (xo_handle_t *xop);
 
-void
+int
 xo_flush (void);
 
-void
+int
 xo_finish_h (xo_handle_t *xop);
 
-void
+int
 xo_finish (void);
 
 void
