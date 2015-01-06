@@ -21,9 +21,12 @@
 .Sy typedef int (*xo_write_func_t)(void *, const char *);
 .Pp
 .Sy typedef void (*xo_close_func_t)(void *);
+.Pp
+.Sy typedef int (*xo_flush_func_t)(void *);
 .Fn xo_set_writer "xo_handle_t *handle" "void *opaque"
                         "xo_write_func_t write_func"
                         "xo_close_func_t close_func"
+                        "xo_flush_func_t flush_func"
 .Sh DESCRIPTION
 The
 .Fn xo_set_writer
@@ -44,6 +47,10 @@ The
 .Fa close_func
 function can
 release this opaque data and any other resources as needed.
+The
+.Fa flush_func
+function should
+flush any pending data associated with the opaque pointer.
 .Sh ADDITIONAL DOCUMENTATION
 Complete documentation can be found on github:
 .Bd -literal -offset indent
