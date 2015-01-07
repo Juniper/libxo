@@ -514,9 +514,9 @@ xo_escape_json (xo_buffer_t *xbp, int len)
     char *cp, *ep, *ip;
 
     for (cp = xbp->xb_curp, ep = cp + len; cp < ep; cp++) {
-	if (*cp == '\\')
+	if (*cp == '\\' || *cp == '"')
 	    delta += 1;
-	else if (*cp == '"')
+	else if (*cp == '\n' || *cp == '\r')
 	    delta += 1;
     }
 
@@ -533,13 +533,18 @@ xo_escape_json (xo_buffer_t *xbp, int len)
 	cp -= 1;
 	ip -= 1;
 
-	if (*cp != '\\' && *cp != '"') {
+	if (*cp == '\\' || *cp == '"') {
+	    *ip-- = *cp;
+	    *ip = '\\';
+	} else if (*cp == '\n') {
+	    *ip-- = 'n';
+	    *ip = '\\';
+	} else if (*cp == '\r') {
+	    *ip-- = 'r';
+	    *ip = '\\';
+	} else {
 	    *ip = *cp;
-	    continue;
 	}
-
-	*ip-- = *cp;
-	*ip = '\\';
 	
     } while (cp > ep && cp != ip);
 
@@ -1889,14 +1894,20 @@ xo_format_string_direct (xo_handle_t *xop, xo_buffer_t *xbp,
 		goto done_with_encoding; /* Need multi-level 'break' */
 
 	    case XO_STYLE_JSON:
-		if (wc != '\\' && wc != '"')
+		if (wc != '\\' && wc != '"' && wc != '\n' && wc != '\r')
 		    break;
 
 		if (!xo_buf_has_room(xbp, 2))
 		    return -1;
 
 		*xbp->xb_curp++ = '\\';
-		*xbp->xb_curp++ = wc & 0x7f;
+		if (wc == '\n')
+		    wc = 'n';
+		else if (wc == '\r')
+		    wc = 'r';
+		else wc = wc & 0x7f;
+
+		*xbp->xb_curp++ = wc;
 		goto done_with_encoding;
 	    }
 
@@ -4175,6 +4186,7 @@ xo_error_hv (xo_handle_t *xop, const char *fmt, va_list vap)
 	break;
 
     case XO_STYLE_XML:
+    case XO_STYLE_JSON:
 	va_copy(xop->xo_vap, vap);
 
 	xo_open_container_h(xop, "error");
