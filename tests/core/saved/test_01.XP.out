@@ -82,4 +82,11 @@
       <on-order>1</on-order>
     </item>
   </data>
+  <data>
+    <item>gum</item>
+    <item>rope</item>
+    <item>ladder</item>
+    <item>bolt</item>
+    <item>water</item>
+  </data>
 </top>
