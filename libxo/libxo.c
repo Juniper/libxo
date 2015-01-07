@@ -3448,9 +3448,12 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
     }
 
     /* If we don't have an anchor, write the text out */
-    if (flush && !(xop->xo_flags & XOF_ANCHOR))
-	if (xo_write(xop) < 0)
+    if (flush && !(xop->xo_flags & XOF_ANCHOR)) {
+	if (xo_write(xop) < 0) 
 	    rc = -1;		/* Report failure */
+	else if (xop->xo_flush && xop->xo_flush(xop->xo_opaque) < 0)
+	    rc = -1;
+    }
 
     return (rc < 0) ? rc : (int) xop->xo_columns;
 }
