@@ -88,6 +88,11 @@
           "on-order": 1
         }
       ]
+    },
+    "data": {
+      "item": [
+         "gum", "rope", "ladder", "bolt", "water"
+      ]
     }
   }
 }
