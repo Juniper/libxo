@@ -1207,6 +1207,10 @@ parameter passed to xo_attr_hv().
     XML:
         <login-time seconds="1408336270">00:14</login-time>
 
+Since attributes are only emitted in XML, their use should be limited
+to meta-data and additional or redundant representations of data
+already emitted in other form.
+
 *** Flushing Output (xo_flush)
 
 libxo buffers data, both for performance and consistency, but also to
@@ -1655,6 +1659,88 @@ incremental cost or feature delay.
 libxo is an effort to mix the best aspects of the JUNOS strategy into
 FreeBSD in a seemless way, allowing commands to make printf-like
 output calls without needing to care how the output is rendered.
+
+*** Did the complex semantics of format strings evolve over time?
+
+The history is both long and short: libxo's functionality is based
+on what JUNOS does in a data modeling language called ODL (output
+definition language).  In JUNOS, all subcomponents generate XML,
+which is feed to the CLI, where data from the ODL files tell is
+how to render that XML into text.  ODL might had a set of tags
+like:
+
+     tag docsis-state {
+         help "State of the DOCSIS interface";
+         type string;
+     }
+
+     tag docsis-mode {
+         help "DOCSIS mode (2.0/3.0) of the DOCSIS interface";
+         type string;
+     }
+
+     tag docsis-upstream-speed {
+         help "Operational upstream speed of the interface";
+         type string;
+     }
+
+     tag downstream-scanning {
+         help "Result of scanning in downstream direction";
+         type string;
+     }
+
+     tag ranging {
+         help "Result of ranging action";
+         type string;
+     }
+
+     tag signal-to-noise-ratio {
+         help "Signal to noise ratio for all channels";
+         type string;
+     }
+
+     tag power {
+         help "Operational power of the signal on all channels";
+         type string;
+     }
+
+     format docsis-status-format {
+         picture "
+   State   : @, Mode: @, Upstream speed: @
+   Downstream scanning: @, Ranging: @
+   Signal to noise ratio: @
+   Power: @
+";
+         line {
+             field docsis-state;
+             field docsis-mode;
+             field docsis-upstream-speed;
+             field downstream-scanning;
+             field ranging;
+             field signal-to-noise-ratio;
+             field power;
+         }
+     }
+
+These tag definitions are compiled into field definitions
+that are triggered when matching XML elements are seen.  ODL
+also supports other means of defining output.
+
+The roles and modifiers describe these details.
+
+In moving these ideas to bsd, two things had to happen: the
+formatting had to happen at the source since BSD won't have
+a JUNOS-like CLI to do the rendering, and we can't depend on
+external data models like ODL, which was seen as too hard a
+sell to the BSD community.
+
+The results were that the xo_emit strings are used to encode the
+roles, modifiers, names, and formats.  They are dense and a bit
+cryptic, but not so unlike printf format strings that developers will
+be lost.
+
+libxo is a new implementation of these ideas and is distinct from
+the previous implementation in JUNOS.
 
 *** What makes a good field name?
 
