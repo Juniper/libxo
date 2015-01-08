@@ -211,6 +211,30 @@ int
 xo_close_instance_d (void);
 
 int
+xo_open_leaf_list_h (xo_handle_t *xop, const char *name);
+
+int
+xo_open_leaf_list (const char *name);
+
+int
+xo_open_leaf_list_hd (xo_handle_t *xop, const char *name);
+
+int
+xo_open_leaf_list_d (const char *name);
+
+int
+xo_close_leaf_list_h (xo_handle_t *xop, const char *name);
+
+int
+xo_close_leaf_list (const char *name);
+
+int
+xo_close_leaf_list_hd (xo_handle_t *xop);
+
+int
+xo_close_leaf_list_d (void);
+
+int
 xo_attr_h (xo_handle_t *xop, const char *name, const char *fmt, ...);
 
 int
