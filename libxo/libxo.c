@@ -59,12 +59,58 @@ typedef unsigned xo_xsf_flags_t; /* XSF_* flags */
 #define XSF_DTRT	(1<<3)	/* Save the name for DTRT mode */
 
 /*
+ * A word about states:  We're moving to a finite state machine (FMS)
+ * approach to help remove fragility from the caller's code.  Instead
+ * of requiring a specific order of calls, we'll allow the caller more
+ * flexibility and make the library responsible for recovering from
+ * missed steps.  The goal is that the library should not be capable of
+ * emitting invalid xml or json, but the developer shouldn't need
+ * to know or understand all the details about these encodings.
+ *
+ *    -- XSS_INIT
+ *    xo_open_container("foo");
+ *    -- XSS_CONTAINER
+ *    xo_open_list("item");
+ *    -- XSS_LIST
+ *    for (...) {
+ *        xo_open_instance("item");
+ *        -- XSS_INSTANCE
+ *        ...
+ *        xo_close_instance("item");
+ *        -- XSS_LIST
+ *    }
+ *    xo_close_list("item");
+ *    -- XSS_CONTAINER
+ *    xo_open_leaf_list("name");
+ *    -- XSS_LEAF_LIST
+ *    for (...) {
+ *        xo_emit("{l:name}", ...);
+ *    }
+ *    xo_open_leaf_list("name");
+ *    -- XSS_CONTAINER
+ *    xo_close_container("foo");
+ *    -- XSS_INIT
+ */
+
+/* Stack frame states */
+typedef unsigned xo_state_t;
+#define XSS_INIT	0      	/* Initial stack state */
+#define XSS_CONTAINER	1	/* Container is open */
+#define XSS_LIST	2	/* List is open */
+#define XSS_INSTANCE	3	/* Instance is open */
+#define XSS_LEAF_LIST	4	/* Leaf list is open */
+#define XSS_DISCARDING	5	/* Discarding data until recovery seen */
+
+#define XSS_TRANSITION(_old, _new) ((_old) << 8 | (_new))
+
+/*
  * xo_stack_t: As we open and close containers and levels, we
  * create a stack of frames to track them.  This is needed for
  * XOF_WARN and XOF_XPATH.
  */
 typedef struct xo_stack_s {
     xo_xsf_flags_t xs_flags;	/* Flags for this frame */
+    xo_state_t xs_state;	/* State for this stack frame */
     char *xs_name;		/* Name (for XPath value) */
     char *xs_keys;		/* XPath predicate for any key fields */
 } xo_stack_t;
@@ -3674,10 +3720,8 @@ xo_stack_flags (unsigned xflags)
 }
 
 static int
-xo_open_container_hf (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
+xo_do_open_container (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
 {
-    xop = xo_default(xop);
-
     int rc = 0;
     const char *ppn = (xop->xo_flags & XOF_PRETTY) ? "\n" : "";
     const char *pre_nl = "";
@@ -3724,6 +3768,14 @@ xo_open_container_hf (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
     return rc;
 }
 
+static int
+xo_open_container_hf (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
+{
+    xop = xo_default(xop);
+
+    return xo_do_open_container(xop, flags, name);
+}
+
 int
 xo_open_container_h (xo_handle_t *xop, const char *name)
 {
@@ -3748,8 +3800,8 @@ xo_open_container_d (const char *name)
     return xo_open_container_hf(NULL, XOF_DTRT, name);
 }
 
-int
-xo_close_container_h (xo_handle_t *xop, const char *name)
+static int
+xo_do_close_container (xo_handle_t *xop, const char *name)
 {
     xop = xo_default(xop);
 
@@ -3798,6 +3850,14 @@ xo_close_container_h (xo_handle_t *xop, const char *name)
 }
 
 int
+xo_close_container_h (xo_handle_t *xop, const char *name)
+{
+    xop = xo_default(xop);
+
+    return xo_do_close_container(xop, name);
+}
+
+int
 xo_close_container (const char *name)
 {
     return xo_close_container_h(NULL, name);
@@ -3816,7 +3876,7 @@ xo_close_container_d (void)
 }
 
 static int
-xo_open_list_hf (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name)
+xo_do_open_list (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name)
 {
     xop = xo_default(xop);
 
@@ -3852,6 +3912,14 @@ xo_open_list_hf (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name)
     return rc;
 }
 
+static int
+xo_open_list_hf (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name)
+{
+    xop = xo_default(xop);
+
+    return xo_do_open_list(xop, flags, name);
+}
+
 int
 xo_open_list_h (xo_handle_t *xop, const char *name UNUSED)
 {
@@ -3876,13 +3944,11 @@ xo_open_list_d (const char *name)
     return xo_open_list_hf(NULL, XOF_DTRT, name);
 }
 
-int
-xo_close_list_h (xo_handle_t *xop, const char *name)
+static int
+xo_do_close_list (xo_handle_t *xop, const char *name)
 {
     int rc = 0;
     const char *pre_nl = "";
-
-    xop = xo_default(xop);
 
     if (xop->xo_style != XO_STYLE_JSON)
 	return 0;
@@ -3915,6 +3981,14 @@ xo_close_list_h (xo_handle_t *xop, const char *name)
 }
 
 int
+xo_close_list_h (xo_handle_t *xop, const char *name)
+{
+    xop = xo_default(xop);
+
+    return xo_do_close_list(xop, name);
+}
+
+int
 xo_close_list (const char *name)
 {
     return xo_close_list_h(NULL, name);
@@ -3933,7 +4007,138 @@ xo_close_list_d (void)
 }
 
 static int
-xo_open_instance_hf (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name)
+xo_do_open_leaf_list (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name)
+{
+    xop = xo_default(xop);
+
+    if (xop->xo_style != XO_STYLE_JSON)
+	return 0;
+
+    int rc = 0;
+    const char *ppn = (xop->xo_flags & XOF_PRETTY) ? "\n" : "";
+    const char *pre_nl = "";
+
+    if (!(xop->xo_flags & XOF_NO_TOP)) {
+	if (!(xop->xo_flags & XOF_TOP_EMITTED)) {
+	    xo_printf(xop, "%*s{%s", xo_indent(xop), "", ppn);
+	    xop->xo_flags |= XOF_TOP_EMITTED;
+	}
+    }
+
+    if (name == NULL) {
+	xo_failure(xop, "NULL passed for list name");
+	name = XO_FAILURE_NAME;
+    }
+
+    xo_stack_set_flags(xop);
+
+    if (xop->xo_stack[xop->xo_depth].xs_flags & XSF_NOT_FIRST)
+	pre_nl = (xop->xo_flags & XOF_PRETTY) ? ",\n" : ", ";
+    xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
+
+    rc = xo_printf(xop, "%s%*s\"%s\": [%s",
+		   pre_nl, xo_indent(xop), "", name, ppn);
+    xo_depth_change(xop, name, 1, 1, XSF_LIST | xo_stack_flags(flags));
+
+    return rc;
+}
+
+static int
+xo_open_leaf_list_hf (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name)
+{
+    xop = xo_default(xop);
+
+    return xo_do_open_leaf_list(xop, flags, name);
+}
+
+int
+xo_open_leaf_list_h (xo_handle_t *xop, const char *name UNUSED)
+{
+    return xo_open_leaf_list_hf(xop, 0, name);
+}
+
+int
+xo_open_leaf_list (const char *name)
+{
+    return xo_open_leaf_list_hf(NULL, 0, name);
+}
+
+int
+xo_open_leaf_list_hd (xo_handle_t *xop, const char *name UNUSED)
+{
+    return xo_open_leaf_list_hf(xop, XOF_DTRT, name);
+}
+
+int
+xo_open_leaf_list_d (const char *name)
+{
+    return xo_open_leaf_list_hf(NULL, XOF_DTRT, name);
+}
+
+static int
+xo_do_close_leaf_list (xo_handle_t *xop, const char *name)
+{
+    int rc = 0;
+    const char *pre_nl = "";
+
+    if (xop->xo_style != XO_STYLE_JSON)
+	return 0;
+
+    if (name == NULL) {
+	xo_stack_t *xsp = &xop->xo_stack[xop->xo_depth];
+	if (!(xsp->xs_flags & XSF_DTRT))
+	    xo_failure(xop, "missing name without 'dtrt' mode");
+
+	name = xsp->xs_name;
+	if (name) {
+	    int len = strlen(name) + 1;
+	    /* We need to make a local copy; xo_depth_change will free it */
+	    char *cp = alloca(len);
+	    memcpy(cp, name, len);
+	    name = cp;
+	} else
+	    name = XO_FAILURE_NAME;
+    }
+
+    if (xop->xo_stack[xop->xo_depth].xs_flags & XSF_NOT_FIRST)
+	pre_nl = (xop->xo_flags & XOF_PRETTY) ? "\n" : "";
+    xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
+
+    xo_depth_change(xop, name, -1, -1, XSF_LIST);
+    rc = xo_printf(xop, "%s%*s]", pre_nl, xo_indent(xop), "");
+    xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
+
+    return rc;
+}
+
+int
+xo_close_leaf_list_h (xo_handle_t *xop, const char *name)
+{
+    xop = xo_default(xop);
+
+    return xo_do_close_leaf_list(xop, name);
+}
+
+int
+xo_close_leaf_list (const char *name)
+{
+    return xo_close_leaf_list_h(NULL, name);
+}
+
+int
+xo_close_leaf_list_hd (xo_handle_t *xop)
+{
+    return xo_close_leaf_list_h(xop, NULL);
+}
+
+int
+xo_close_leaf_list_d (void)
+{
+    return xo_close_leaf_list_h(NULL, NULL);
+}
+
+static int
+xo_do_open_instance (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name)
 {
     xop = xo_default(xop);
 
@@ -3975,6 +4180,14 @@ xo_open_instance_hf (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name)
     return rc;
 }
 
+static int
+xo_open_instance_hf (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name)
+{
+    xop = xo_default(xop);
+
+    return xo_do_open_instance(xop, flags, name);
+}
+
 int
 xo_open_instance_h (xo_handle_t *xop, const char *name)
 {
@@ -3999,8 +4212,8 @@ xo_open_instance_d (const char *name)
     return xo_open_instance_hf(NULL, XOF_DTRT, name);
 }
 
-int
-xo_close_instance_h (xo_handle_t *xop, const char *name)
+static int
+xo_do_close_instance (xo_handle_t *xop, const char *name)
 {
     xop = xo_default(xop);
 
@@ -4045,6 +4258,14 @@ xo_close_instance_h (xo_handle_t *xop, const char *name)
     }
 
     return rc;
+}
+
+int
+xo_close_instance_h (xo_handle_t *xop, const char *name)
+{
+    xop = xo_default(xop);
+
+    return xo_do_close_instance(xop, name);
 }
 
 int
