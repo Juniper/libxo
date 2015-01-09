@@ -95,6 +95,7 @@ typedef unsigned xo_xsf_flags_t; /* XSF_* flags */
 /* Stack frame states */
 typedef unsigned xo_state_t;
 #define XSS_INIT	0      	/* Initial stack state */
+#define XSS_NOOP	XSS_INIT /* Don't care */
 #define XSS_CONTAINER	1	/* Container is open */
 #define XSS_LIST	2	/* List is open */
 #define XSS_INSTANCE	3	/* Instance is open */
@@ -256,6 +257,10 @@ static xo_free_func_t xo_free = free;
 /* Forward declarations */
 static void
 xo_failure (xo_handle_t *xop, const char *fmt, ...);
+
+static int
+xo_transition (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name,
+	       xo_state_t new_state);
 
 static void
 xo_buf_append_div (xo_handle_t *xop, const char *class, xo_xff_flags_t flags,
@@ -2629,6 +2634,9 @@ xo_buf_append_div (xo_handle_t *xop, const char *class, xo_xff_flags_t flags,
 		if (xsp->xs_name == NULL)
 		    continue;
 
+		if (xsp->xs_state == XSS_LIST)
+		    continue;
+
 		xo_data_append(xop, "/", 1);
 		xo_data_escape(xop, xsp->xs_name, strlen(xsp->xs_name));
 		if (xsp->xs_keys) {
@@ -3633,8 +3641,11 @@ xo_stack_set_flags (xo_handle_t *xop)
 
 static void
 xo_depth_change (xo_handle_t *xop, const char *name,
-		 int delta, int indent, xo_xsf_flags_t flags)
+		 int delta, int indent, xo_state_t state, xo_xsf_flags_t flags)
 {
+    if (xop->xo_style == XO_STYLE_HTML || xop->xo_style == XO_STYLE_TEXT)
+	indent = 0;
+
     if (xop->xo_flags & XOF_DTRT)
 	flags |= XSF_DTRT;
 
@@ -3644,6 +3655,7 @@ xo_depth_change (xo_handle_t *xop, const char *name,
 
 	xo_stack_t *xsp = &xop->xo_stack[xop->xo_depth + delta];
 	xsp->xs_flags = flags;
+	xsp->xs_state = state;
 	xo_stack_set_flags(xop);
 
 	unsigned save = (xop->xo_flags & (XOF_XPATH | XOF_WARN | XOF_DTRT));
@@ -3737,7 +3749,6 @@ xo_do_open_container (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
     case XO_STYLE_XML:
 	rc = xo_printf(xop, "%*s<%s>%s", xo_indent(xop), "",
 		     name, ppn);
-	xo_depth_change(xop, name, 1, 1, xo_stack_flags(flags));
 	break;
 
     case XO_STYLE_JSON:
@@ -3756,14 +3767,10 @@ xo_do_open_container (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
 
 	rc = xo_printf(xop, "%s%*s\"%s\": {%s",
 		       pre_nl, xo_indent(xop), "", name, ppn);
-	xo_depth_change(xop, name, 1, 1, xo_stack_flags(flags));
-	break;
-
-    case XO_STYLE_HTML:
-    case XO_STYLE_TEXT:
-	xo_depth_change(xop, name, 1, 0, xo_stack_flags(flags));
 	break;
     }
+
+    xo_depth_change(xop, name, 1, 1, XSS_CONTAINER, xo_stack_flags(flags));
 
     return rc;
 }
@@ -3771,9 +3778,7 @@ xo_do_open_container (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
 static int
 xo_open_container_hf (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
 {
-    xop = xo_default(xop);
-
-    return xo_do_open_container(xop, flags, name);
+    return xo_transition(xop, flags, name, XSS_CONTAINER);
 }
 
 int
@@ -3827,7 +3832,7 @@ xo_do_close_container (xo_handle_t *xop, const char *name)
 
     switch (xop->xo_style) {
     case XO_STYLE_XML:
-	xo_depth_change(xop, name, -1, -1, 0);
+	xo_depth_change(xop, name, -1, -1, XSS_NOOP, 0);
 	rc = xo_printf(xop, "%*s</%s>%s", xo_indent(xop), "", name, ppn);
 	break;
 
@@ -3835,14 +3840,14 @@ xo_do_close_container (xo_handle_t *xop, const char *name)
 	pre_nl = (xop->xo_flags & XOF_PRETTY) ? "\n" : "";
 	ppn = (xop->xo_depth <= 1) ? "\n" : "";
 
-	xo_depth_change(xop, name, -1, -1, 0);
+	xo_depth_change(xop, name, -1, -1, XSS_NOOP, 0);
 	rc = xo_printf(xop, "%s%*s}%s", pre_nl, xo_indent(xop), "", ppn);
 	xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
 	break;
 
     case XO_STYLE_HTML:
     case XO_STYLE_TEXT:
-	xo_depth_change(xop, name, -1, 0, 0);
+	xo_depth_change(xop, name, -1, 0, XSS_NOOP, 0);
 	break;
     }
 
@@ -3852,9 +3857,7 @@ xo_do_close_container (xo_handle_t *xop, const char *name)
 int
 xo_close_container_h (xo_handle_t *xop, const char *name)
 {
-    xop = xo_default(xop);
-
-    return xo_do_close_container(xop, name);
+    return xo_transition(xop, 0, name, XSS_INIT);
 }
 
 int
@@ -3878,36 +3881,40 @@ xo_close_container_d (void)
 static int
 xo_do_open_list (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name)
 {
+    int rc = 0;
+    int indent = 0;
+
     xop = xo_default(xop);
 
-    if (xop->xo_style != XO_STYLE_JSON)
-	return 0;
+    if (xop->xo_style == XO_STYLE_JSON) {
+	const char *ppn = (xop->xo_flags & XOF_PRETTY) ? "\n" : "";
+	const char *pre_nl = "";
 
-    int rc = 0;
-    const char *ppn = (xop->xo_flags & XOF_PRETTY) ? "\n" : "";
-    const char *pre_nl = "";
-
-    if (!(xop->xo_flags & XOF_NO_TOP)) {
-	if (!(xop->xo_flags & XOF_TOP_EMITTED)) {
-	    xo_printf(xop, "%*s{%s", xo_indent(xop), "", ppn);
-	    xop->xo_flags |= XOF_TOP_EMITTED;
+	indent = 1;
+	if (!(xop->xo_flags & XOF_NO_TOP)) {
+	    if (!(xop->xo_flags & XOF_TOP_EMITTED)) {
+		xo_printf(xop, "%*s{%s", xo_indent(xop), "", ppn);
+		xop->xo_flags |= XOF_TOP_EMITTED;
+	    }
 	}
+
+	if (name == NULL) {
+	    xo_failure(xop, "NULL passed for list name");
+	    name = XO_FAILURE_NAME;
+	}
+
+	xo_stack_set_flags(xop);
+
+	if (xop->xo_stack[xop->xo_depth].xs_flags & XSF_NOT_FIRST)
+	    pre_nl = (xop->xo_flags & XOF_PRETTY) ? ",\n" : ", ";
+	xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
+
+	rc = xo_printf(xop, "%s%*s\"%s\": [%s",
+		       pre_nl, xo_indent(xop), "", name, ppn);
     }
 
-    if (name == NULL) {
-	xo_failure(xop, "NULL passed for list name");
-	name = XO_FAILURE_NAME;
-    }
-
-    xo_stack_set_flags(xop);
-
-    if (xop->xo_stack[xop->xo_depth].xs_flags & XSF_NOT_FIRST)
-	pre_nl = (xop->xo_flags & XOF_PRETTY) ? ",\n" : ", ";
-    xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
-
-    rc = xo_printf(xop, "%s%*s\"%s\": [%s",
-		   pre_nl, xo_indent(xop), "", name, ppn);
-    xo_depth_change(xop, name, 1, 1, XSF_LIST | xo_stack_flags(flags));
+    xo_depth_change(xop, name, 1, indent, XSS_LIST,
+		    XSF_LIST | xo_stack_flags(flags));
 
     return rc;
 }
@@ -3950,9 +3957,6 @@ xo_do_close_list (xo_handle_t *xop, const char *name)
     int rc = 0;
     const char *pre_nl = "";
 
-    if (xop->xo_style != XO_STYLE_JSON)
-	return 0;
-
     if (name == NULL) {
 	xo_stack_t *xsp = &xop->xo_stack[xop->xo_depth];
 	if (!(xsp->xs_flags & XSF_DTRT))
@@ -3969,13 +3973,19 @@ xo_do_close_list (xo_handle_t *xop, const char *name)
 	    name = XO_FAILURE_NAME;
     }
 
-    if (xop->xo_stack[xop->xo_depth].xs_flags & XSF_NOT_FIRST)
-	pre_nl = (xop->xo_flags & XOF_PRETTY) ? "\n" : "";
-    xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
+    if (xop->xo_style == XO_STYLE_JSON) {
+	if (xop->xo_stack[xop->xo_depth].xs_flags & XSF_NOT_FIRST)
+	    pre_nl = (xop->xo_flags & XOF_PRETTY) ? "\n" : "";
+	xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
 
-    xo_depth_change(xop, name, -1, -1, XSF_LIST);
-    rc = xo_printf(xop, "%s%*s]", pre_nl, xo_indent(xop), "");
-    xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
+	xo_depth_change(xop, name, -1, -1, XSS_NOOP, XSF_LIST);
+	rc = xo_printf(xop, "%s%*s]", pre_nl, xo_indent(xop), "");
+	xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
+
+    } else {
+	xo_depth_change(xop, name, -1, 0, XSS_NOOP, XSF_LIST);
+	xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
+    }
 
     return rc;
 }
@@ -4009,36 +4019,41 @@ xo_close_list_d (void)
 static int
 xo_do_open_leaf_list (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name)
 {
+    int rc = 0;
+    int indent = 0;
+
     xop = xo_default(xop);
 
-    if (xop->xo_style != XO_STYLE_JSON)
-	return 0;
+    if (xop->xo_style == XO_STYLE_JSON) {
+	const char *ppn = (xop->xo_flags & XOF_PRETTY) ? "\n" : "";
+	const char *pre_nl = "";
 
-    int rc = 0;
-    const char *ppn = (xop->xo_flags & XOF_PRETTY) ? "\n" : "";
-    const char *pre_nl = "";
+	indent = 1;
 
-    if (!(xop->xo_flags & XOF_NO_TOP)) {
-	if (!(xop->xo_flags & XOF_TOP_EMITTED)) {
-	    xo_printf(xop, "%*s{%s", xo_indent(xop), "", ppn);
-	    xop->xo_flags |= XOF_TOP_EMITTED;
+	if (!(xop->xo_flags & XOF_NO_TOP)) {
+	    if (!(xop->xo_flags & XOF_TOP_EMITTED)) {
+		xo_printf(xop, "%*s{%s", xo_indent(xop), "", ppn);
+		xop->xo_flags |= XOF_TOP_EMITTED;
+	    }
 	}
+
+	if (name == NULL) {
+	    xo_failure(xop, "NULL passed for list name");
+	    name = XO_FAILURE_NAME;
+	}
+
+	xo_stack_set_flags(xop);
+
+	if (xop->xo_stack[xop->xo_depth].xs_flags & XSF_NOT_FIRST)
+	    pre_nl = (xop->xo_flags & XOF_PRETTY) ? ",\n" : ", ";
+	xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
+
+	rc = xo_printf(xop, "%s%*s\"%s\": [%s",
+		       pre_nl, xo_indent(xop), "", name, ppn);
     }
 
-    if (name == NULL) {
-	xo_failure(xop, "NULL passed for list name");
-	name = XO_FAILURE_NAME;
-    }
-
-    xo_stack_set_flags(xop);
-
-    if (xop->xo_stack[xop->xo_depth].xs_flags & XSF_NOT_FIRST)
-	pre_nl = (xop->xo_flags & XOF_PRETTY) ? ",\n" : ", ";
-    xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
-
-    rc = xo_printf(xop, "%s%*s\"%s\": [%s",
-		   pre_nl, xo_indent(xop), "", name, ppn);
-    xo_depth_change(xop, name, 1, 1, XSF_LIST | xo_stack_flags(flags));
+    xo_depth_change(xop, name, 1, indent, XSS_LEAF_LIST,
+		    XSF_LIST | xo_stack_flags(flags));
 
     return rc;
 }
@@ -4081,9 +4096,6 @@ xo_do_close_leaf_list (xo_handle_t *xop, const char *name)
     int rc = 0;
     const char *pre_nl = "";
 
-    if (xop->xo_style != XO_STYLE_JSON)
-	return 0;
-
     if (name == NULL) {
 	xo_stack_t *xsp = &xop->xo_stack[xop->xo_depth];
 	if (!(xsp->xs_flags & XSF_DTRT))
@@ -4100,13 +4112,19 @@ xo_do_close_leaf_list (xo_handle_t *xop, const char *name)
 	    name = XO_FAILURE_NAME;
     }
 
-    if (xop->xo_stack[xop->xo_depth].xs_flags & XSF_NOT_FIRST)
-	pre_nl = (xop->xo_flags & XOF_PRETTY) ? "\n" : "";
-    xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
+    if (xop->xo_style == XO_STYLE_JSON) {
+	if (xop->xo_stack[xop->xo_depth].xs_flags & XSF_NOT_FIRST)
+	    pre_nl = (xop->xo_flags & XOF_PRETTY) ? "\n" : "";
+	xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
 
-    xo_depth_change(xop, name, -1, -1, XSF_LIST);
-    rc = xo_printf(xop, "%s%*s]", pre_nl, xo_indent(xop), "");
-    xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
+	xo_depth_change(xop, name, -1, -1, XSS_LIST, XSF_LIST);
+	rc = xo_printf(xop, "%s%*s]", pre_nl, xo_indent(xop), "");
+	xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
+
+    } else {
+	xo_depth_change(xop, name, -1, 0, XSS_LIST, XSF_LIST);
+	xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
+    }
 
     return rc;
 }
@@ -4156,7 +4174,6 @@ xo_do_open_instance (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name)
     switch (xop->xo_style) {
     case XO_STYLE_XML:
 	rc = xo_printf(xop, "%*s<%s>%s", xo_indent(xop), "", name, ppn);
-	xo_depth_change(xop, name, 1, 1, xo_stack_flags(flags));
 	break;
 
     case XO_STYLE_JSON:
@@ -4168,14 +4185,10 @@ xo_do_open_instance (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name)
 
 	rc = xo_printf(xop, "%s%*s{%s",
 		       pre_nl, xo_indent(xop), "", ppn);
-	xo_depth_change(xop, name, 1, 1, xo_stack_flags(flags));
-	break;
-
-    case XO_STYLE_HTML:
-    case XO_STYLE_TEXT:
-	xo_depth_change(xop, name, 1, 0, xo_stack_flags(flags));
 	break;
     }
+
+    xo_depth_change(xop, name, 1, 1, XSS_INSTANCE, xo_stack_flags(flags));
 
     return rc;
 }
@@ -4239,21 +4252,21 @@ xo_do_close_instance (xo_handle_t *xop, const char *name)
 
     switch (xop->xo_style) {
     case XO_STYLE_XML:
-	xo_depth_change(xop, name, -1, -1, 0);
+	xo_depth_change(xop, name, -1, -1, XSS_NOOP, 0);
 	rc = xo_printf(xop, "%*s</%s>%s", xo_indent(xop), "", name, ppn);
 	break;
 
     case XO_STYLE_JSON:
 	pre_nl = (xop->xo_flags & XOF_PRETTY) ? "\n" : "";
 
-	xo_depth_change(xop, name, -1, -1, 0);
+	xo_depth_change(xop, name, -1, -1, XSS_NOOP, 0);
 	rc = xo_printf(xop, "%s%*s}", pre_nl, xo_indent(xop), "");
 	xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
 	break;
 
     case XO_STYLE_HTML:
     case XO_STYLE_TEXT:
-	xo_depth_change(xop, name, -1, 0, 0);
+	xo_depth_change(xop, name, -1, 0, XSS_NOOP, 0);
 	break;
     }
 
@@ -4284,6 +4297,39 @@ int
 xo_close_instance_d (void)
 {
     return xo_close_instance_h(NULL, NULL);
+}
+
+/*
+ * We are in a given state and need to transition to the new state.
+ */
+static int
+xo_transition (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name,
+	       xo_state_t new_state)
+{
+    xop = xo_default(xop);
+
+    xo_stack_t *xsp = &xop->xo_stack[xop->xo_depth];
+    int rc = 0;
+
+    switch (XSS_TRANSITION(xsp->xs_state, new_state)) {
+
+    case XSS_TRANSITION(XSS_INIT, XSS_CONTAINER):
+    case XSS_TRANSITION(XSS_INSTANCE, XSS_CONTAINER):
+    case XSS_TRANSITION(XSS_CONTAINER, XSS_CONTAINER):
+       rc = xo_do_open_container(xop, flags, name);
+       break;
+
+    case XSS_TRANSITION(XSS_CONTAINER, XSS_INIT):
+    case XSS_TRANSITION(XSS_INIT, XSS_INIT):
+       rc = xo_do_close_container(xop, name);
+       break;
+
+    default:
+	xo_failure(xop, "unknown transition: (%u -> %u)",
+		   xsp->xs_state, new_state);
+    }
+
+    return rc;
 }
 
 void
