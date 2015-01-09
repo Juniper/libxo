@@ -80,6 +80,8 @@ typedef unsigned xo_state_t;
 #define XSS_OPEN_LEAF_LIST	7
 #define XSS_CLOSE_LEAF_LIST	8
 #define XSS_DISCARDING		9	/* Discarding data until recovered */
+#define XSS_MARKER		10	/* xo_push_marker's marker */
+#define XSS_EMIT		11	/* Call to xo_emit() */
 
 #define XSS_TRANSITION(_old, _new) ((_old) << 8 | (_new))
 
@@ -4304,14 +4306,21 @@ xo_transition (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name,
 	rc = xo_do_close_list(xop, name);
 	break;
 
+    case XSS_TRANSITION(XSS_OPEN_CONTAINER, XSS_OPEN_INSTANCE):
+	rc = xo_do_open_list(xop, flags, name);
+	if (rc)
+	    break;
+	/*fallthru*/
+
     case XSS_TRANSITION(XSS_OPEN_LIST, XSS_OPEN_INSTANCE):
 	rc = xo_do_open_instance(xop, flags, name);
 	break;
 
+    case XSS_TRANSITION(XSS_OPEN_LIST, XSS_EMIT):
     case XSS_TRANSITION(XSS_OPEN_INSTANCE, XSS_CLOSE_INSTANCE):
 	rc = xo_do_close_instance(xop, name);
 	break;
-	
+
     case XSS_TRANSITION(XSS_OPEN_CONTAINER, XSS_OPEN_LEAF_LIST):
     case XSS_TRANSITION(XSS_OPEN_INSTANCE, XSS_OPEN_LEAF_LIST):
 	rc = xo_do_open_leaf_list(xop, flags, name);
@@ -4319,6 +4328,11 @@ xo_transition (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name,
 
     case XSS_TRANSITION(XSS_OPEN_LEAF_LIST, XSS_CLOSE_LEAF_LIST):
 	rc = xo_do_close_leaf_list(xop, name);
+	break;
+
+    case XSS_TRANSITION(XSS_OPEN_CONTAINER, XSS_EMIT):
+    case XSS_TRANSITION(XSS_OPEN_INSTANCE, XSS_EMIT):
+    case XSS_TRANSITION(XSS_OPEN_LEAF_LIST, XSS_EMIT):
 	break;
 
     default:
