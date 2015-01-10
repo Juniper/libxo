@@ -134,7 +134,6 @@ main (int argc, char **argv)
 		ip->i_title, ip->i_count);
 	
 	xo_push_marker("m2");
-	xo_open_list("sub");
 	for (i = 0; i < 3; i++) {
 	    xo_open_instance("sub");
 	    xo_emit("{Lwc:/Name}{:name/%d} + 1 = {:next/%d}\n", i, i + 1);
