@@ -4332,6 +4332,7 @@ xo_do_close_all (xo_handle_t *xop, xo_stack_t *limit)
 	switch (xsp->xs_state) {
 	case XSS_INIT:
 	    /* Nothing */
+	    rc = 0;
 	    break;
 
 	case XSS_OPEN_CONTAINER:
