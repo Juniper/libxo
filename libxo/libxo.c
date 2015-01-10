@@ -4560,9 +4560,11 @@ xo_transition (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name,
 	break;
 
     case XSS_TRANSITION(XSS_OPEN_INSTANCE, XSS_OPEN_INSTANCE):
-	if (on_marker)
-	    goto marker_prevents_close;
-	rc = xo_do_close_instance(xop, NULL);
+	if (on_marker) {
+	    rc = xo_do_open_list(xop, flags, name);
+	} else {
+	    rc = xo_do_close_instance(xop, NULL);
+	}
 	if (rc >= 0)
 	    goto open_instance;
 	break;
