@@ -8,6 +8,14 @@
  * Phil Shafer, July 2014
  */
 
+/*
+  TODO:
+  - finish markers
+  - xss_emit and xss_emit_leaf_list
+  - handle xo_open_list xss_emit_leaf_list stack rewriting
+  - document it
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -58,6 +66,15 @@ typedef unsigned xo_xsf_flags_t; /* XSF_* flags */
 #define XSF_INSTANCE	(1<<2)	/* Frame is an instance */
 #define XSF_DTRT	(1<<3)	/* Save the name for DTRT mode */
 
+#define XSF_CONTENT	(1<<4)	/* Some content has been emitted */
+#define XSF_EMIT	(1<<5)	/* Some field has been emitted */
+#define XSF_EMIT_KEY	(1<<6)	/* A key has been emitted */
+#define XSF_EMIT_LEAF_LIST (1<<7) /* A leaf-list field has been emitted */
+
+/* These are the flags we propagate between markers and their parents */
+#define XSF_MARKER_FLAGS \
+ (XSF_NOT_FIRST | XSF_CONTENT | XSF_EMIT | XSF_EMIT_KEY | XSF_EMIT_LEAF_LIST )
+
 /*
  * A word about states:  We're moving to a finite state machine (FMS)
  * approach to help remove fragility from the caller's code.  Instead
@@ -88,7 +105,10 @@ typedef unsigned xo_state_t;
 #define XSS_DISCARDING		9	/* Discarding data until recovered */
 #define XSS_MARKER		10	/* xo_push_marker's marker */
 #define XSS_EMIT		11	/* xo_emit has a leaf field */
-#define XSS_EMIT_LEAF_LIST	12	/* xo_emit has a leaf-list ({l:name}) */
+#define XSS_EMIT_LEAF_LIST	12	/* xo_emit has a leaf-list ({l:}) */
+#define XSS_FINISH		13	/* xo_finish was called */
+
+#define XSS_MAX			13
 
 #define XSS_TRANSITION(_old, _new) ((_old) << 8 | (_new))
 
@@ -109,7 +129,7 @@ typedef struct xo_stack_s {
  * It's used as a store for state, options, and content.
  */
 struct xo_handle_s {
-    unsigned long xo_flags;	/* Flags */
+    xo_xof_flags_t xo_flags;	/* Flags */
     unsigned short xo_style;	/* XO_STYLE_* value */
     unsigned short xo_indent;	/* Indent level (if pretty) */
     unsigned short xo_indent_by; /* Indent amount (tab stop) */
@@ -468,7 +488,7 @@ xo_indent (xo_handle_t *xop)
 	    rc += xop->xo_indent_by;
     }
 
-    return rc;
+    return (rc > 0) ? rc : 0;
 }
 
 static void
@@ -1715,6 +1735,33 @@ xo_clear_flags (xo_handle_t *xop, xo_xof_flags_t flags)
     xop = xo_default(xop);
 
     xop->xo_flags &= ~flags;
+}
+
+static const char *
+xo_state_name (xo_state_t state)
+{
+    static const char *names[] = {
+	"init",
+	"open_container",
+	"close_container",
+	"open_list",
+	"close_list",
+	"open_instance",
+	"close_instance",
+	"open_leaf_list",
+	"close_leaf_list",
+	"discarding",
+	"marker",
+	"emit",
+	"emit_leaf_list",
+	"finish",
+	NULL
+    };
+
+    if (state < (sizeof(names) / sizeof(names[0])))
+	return names[state];
+
+    return "unknown";
 }
 
 static void
@@ -3646,17 +3693,14 @@ xo_depth_change (xo_handle_t *xop, const char *name,
 	xsp->xs_state = state;
 	xo_stack_set_flags(xop);
 
-	unsigned save = (xop->xo_flags & (XOF_XPATH | XOF_WARN | XOF_DTRT));
-	save |= (flags & XSF_DTRT);
-	save = 1;
+	if (name == NULL)
+	    name = XO_FAILURE_NAME;
 
-	if (name && save) {
-	    int len = strlen(name) + 1;
-	    char *cp = xo_realloc(NULL, len);
-	    if (cp) {
-		memcpy(cp, name, len);
-		xsp->xs_name = cp;
-	    }
+	int len = strlen(name) + 1;
+	char *cp = xo_realloc(NULL, len);
+	if (cp) {
+	    memcpy(cp, name, len);
+	    xsp->xs_name = cp;
 	}
 
     } else {			/* Pop operation */
@@ -4282,6 +4326,7 @@ xo_do_close_all (xo_handle_t *xop, xo_stack_t *limit)
 {
     xo_stack_t *xsp;
     int rc;
+    xo_xsf_flags_t flags;
 
     for (xsp = &xop->xo_stack[xop->xo_depth]; xsp >= limit; xsp--) {
 	switch (xsp->xs_state) {
@@ -4303,6 +4348,12 @@ xo_do_close_all (xo_handle_t *xop, xo_stack_t *limit)
 
 	case XSS_OPEN_LEAF_LIST:
 	    rc = xo_do_close_leaf_list(xop, NULL);
+	    break;
+
+	case XSS_MARKER:
+	    flags = xsp->xs_flags & XSF_MARKER_FLAGS;
+	    xo_depth_change(xop, xsp->xs_name, -1, 0, XSS_MARKER, 0);
+	    xop->xo_stack[xop->xo_depth].xs_flags |= flags;
 	    break;
 	}
 
@@ -4332,12 +4383,28 @@ xo_do_close (xo_handle_t *xop, const char *name, xo_state_t new_state)
 	need_state = XSS_OPEN_INSTANCE;
     else if (new_state == XSS_CLOSE_LEAF_LIST)
 	need_state = XSS_OPEN_LEAF_LIST;
+    else if (new_state == XSS_MARKER)
+	need_state = XSS_MARKER;
     else
-	return 0;
+	return 0; /* Unknown or useless new states are ignored */
 
     for (xsp = &xop->xo_stack[xop->xo_depth]; xsp > xop->xo_stack; xsp--) {
-	if (xsp->xs_state == XSS_MARKER) {
-	    limit = xsp;
+	/*
+	 * Marker's normally stop us from going any further, unless
+	 * we are popping a marker (new_state == XSS_MARKER).
+	 */
+	if (xsp->xs_state == XSS_MARKER && need_state != XSS_MARKER) {
+	    if (name) {
+		xo_failure(xop, "close (xo_%s) fails at marker '%s'; "
+			   "not found '%s'",
+			   xo_state_name(new_state),
+			   xsp->xs_name, name);
+		return 0;
+
+	    } else {
+		limit = xsp;
+		xo_failure(xop, "close stops at marker '%s'", xsp->xs_name);
+	    }
 	    break;
 	}
 	
@@ -4371,19 +4438,14 @@ xo_transition (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name,
 {
     xo_stack_t *xsp;
     int rc;
-    int old_state;
+    int old_state, on_marker;
 
     xop = xo_default(xop);
-
-    if (new_state == XSS_CLOSE_CONTAINER
-	|| new_state == XSS_CLOSE_LIST
-	|| new_state == XSS_CLOSE_INSTANCE
-	|| new_state == XSS_CLOSE_LEAF_LIST) {
-    }
 
     rc = 0;
     xsp = &xop->xo_stack[xop->xo_depth];
     old_state = xsp->xs_state;
+    on_marker = (old_state == XSS_MARKER);
 
     /* If there's a marker on top of the stack, we need to find a real state */
     while (old_state == XSS_MARKER) {
@@ -4408,12 +4470,16 @@ xo_transition (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name,
        break;
 
     case XSS_TRANSITION(XSS_OPEN_LIST, XSS_OPEN_CONTAINER):
+	if (on_marker)
+	    goto marker_prevents_close;
 	rc = xo_do_close_list(xop, NULL);
 	if (rc >= 0)
 	    goto open_container;
 	break;
 
     case XSS_TRANSITION(XSS_OPEN_LEAF_LIST, XSS_OPEN_CONTAINER):
+	if (on_marker)
+	    goto marker_prevents_close;
 	rc = xo_do_close_leaf_list(xop, NULL);
 	if (rc >= 0)
 	    goto open_container;
@@ -4421,8 +4487,10 @@ xo_transition (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name,
 
     close_container:
     case XSS_TRANSITION(XSS_OPEN_CONTAINER, XSS_CLOSE_CONTAINER):
-       rc = xo_do_close_container(xop, name);
-       break;
+	if (on_marker)
+	    goto marker_prevents_close;
+	rc = xo_do_close_container(xop, name);
+	break;
 
     case XSS_TRANSITION(XSS_INIT, XSS_CLOSE_CONTAINER):
 	/* This is an exception for "xo --close" */
@@ -4430,10 +4498,14 @@ xo_transition (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name,
 
     case XSS_TRANSITION(XSS_OPEN_LIST, XSS_CLOSE_CONTAINER):
     case XSS_TRANSITION(XSS_OPEN_INSTANCE, XSS_CLOSE_CONTAINER):
+	if (on_marker)
+	    goto marker_prevents_close;
 	rc = xo_do_close(xop, name, new_state);
 	break;
 
     case XSS_TRANSITION(XSS_OPEN_LEAF_LIST, XSS_CLOSE_CONTAINER):
+	if (on_marker)
+	    goto marker_prevents_close;
 	rc = xo_do_close_leaf_list(xop, NULL);
 	if (rc >= 0)
 	    rc = xo_do_close(xop, name, new_state);
@@ -4447,12 +4519,16 @@ xo_transition (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name,
 	break;
 
     case XSS_TRANSITION(XSS_OPEN_LIST, XSS_OPEN_LIST):
+	if (on_marker)
+	    goto marker_prevents_close;
 	rc = xo_do_close_list(xop, NULL);
 	if (rc >= 0)
 	    goto open_list;
 	break;
 
     case XSS_TRANSITION(XSS_OPEN_LEAF_LIST, XSS_OPEN_LIST):
+	if (on_marker)
+	    goto marker_prevents_close;
 	rc = xo_do_close_leaf_list(xop, NULL);
 	if (rc >= 0)
 	    goto open_list;
@@ -4460,6 +4536,8 @@ xo_transition (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name,
 
     close_list:
     case XSS_TRANSITION(XSS_OPEN_LIST, XSS_CLOSE_LIST):
+	if (on_marker)
+	    goto marker_prevents_close;
 	rc = xo_do_close_list(xop, name);
 	break;
 
@@ -4482,12 +4560,16 @@ xo_transition (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name,
 	break;
 
     case XSS_TRANSITION(XSS_OPEN_INSTANCE, XSS_OPEN_INSTANCE):
+	if (on_marker)
+	    goto marker_prevents_close;
 	rc = xo_do_close_instance(xop, NULL);
 	if (rc >= 0)
 	    goto open_instance;
 	break;
 
     case XSS_TRANSITION(XSS_OPEN_LEAF_LIST, XSS_OPEN_INSTANCE):
+	if (on_marker)
+	    goto marker_prevents_close;
 	rc = xo_do_close_leaf_list(xop, NULL);
 	if (rc >= 0)
 	    goto open_instance;
@@ -4495,6 +4577,8 @@ xo_transition (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name,
 
     /*close_instance:*/
     case XSS_TRANSITION(XSS_OPEN_INSTANCE, XSS_CLOSE_INSTANCE):
+	if (on_marker)
+	    goto marker_prevents_close;
 	rc = xo_do_close_instance(xop, name);
 	break;
 
@@ -4504,10 +4588,14 @@ xo_transition (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name,
 
     case XSS_TRANSITION(XSS_OPEN_CONTAINER, XSS_CLOSE_INSTANCE):
     case XSS_TRANSITION(XSS_OPEN_LIST, XSS_CLOSE_INSTANCE):
+	if (on_marker)
+	    goto marker_prevents_close;
 	rc = xo_do_close(xop, name, new_state);
 	break;
 
     case XSS_TRANSITION(XSS_OPEN_LEAF_LIST, XSS_CLOSE_INSTANCE):
+	if (on_marker)
+	    goto marker_prevents_close;
 	rc = xo_do_close_leaf_list(xop, NULL);
 	if (rc >= 0)
 	    rc = xo_do_close(xop, name, new_state);
@@ -4522,6 +4610,8 @@ xo_transition (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name,
 
     case XSS_TRANSITION(XSS_OPEN_LIST, XSS_OPEN_LEAF_LIST):
     case XSS_TRANSITION(XSS_OPEN_LEAF_LIST, XSS_OPEN_LEAF_LIST):
+	if (on_marker)
+	    goto marker_prevents_close;
 	rc = xo_do_close_list(xop, NULL);
 	if (rc >= 0)
 	    goto open_leaf_list;
@@ -4529,6 +4619,8 @@ xo_transition (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name,
 
     close_leaf_list:
     case XSS_TRANSITION(XSS_OPEN_LEAF_LIST, XSS_CLOSE_LEAF_LIST):
+	if (on_marker)
+	    goto marker_prevents_close;
 	rc = xo_do_close_leaf_list(xop, name);
 	break;
 
@@ -4539,6 +4631,8 @@ xo_transition (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name,
     case XSS_TRANSITION(XSS_OPEN_CONTAINER, XSS_CLOSE_LEAF_LIST):
     case XSS_TRANSITION(XSS_OPEN_LIST, XSS_CLOSE_LEAF_LIST):
     case XSS_TRANSITION(XSS_OPEN_INSTANCE, XSS_CLOSE_LEAF_LIST):
+	if (on_marker)
+	    goto marker_prevents_close;
 	rc = xo_do_close(xop, name, new_state);
 	break;
 
@@ -4571,6 +4665,43 @@ xo_transition (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name,
     }
 
     return rc;
+
+ marker_prevents_close:
+    xo_failure(xop, "marker '%s' prevents transition from %s to %s",
+	       xop->xo_stack[xop->xo_depth].xs_name,
+	       xo_state_name(old_state), xo_state_name(new_state));
+    return -1;
+}
+
+int
+xo_push_marker_h (xo_handle_t *xop, const char *name)
+{
+    xop = xo_default(xop);
+
+    xo_depth_change(xop, name, 1, 0, XSS_MARKER,
+		    xop->xo_stack[xop->xo_depth].xs_flags & XSF_MARKER_FLAGS);
+
+    return 0;
+}
+
+int
+xo_push_marker (const char *name)
+{
+    return xo_push_marker_h(NULL, name);
+}
+
+int
+xo_pop_marker_h (xo_handle_t *xop, const char *name)
+{
+    xop = xo_default(xop);
+
+    return xo_do_close(xop, name, XSS_MARKER);
+}
+
+int
+xo_pop_marker (const char *name)
+{
+    return xo_pop_marker_h(NULL, name);
 }
 
 void
@@ -4632,7 +4763,8 @@ xo_finish_h (xo_handle_t *xop)
     const char *cp = "";
     xop = xo_default(xop);
 
-    xo_do_close_all(xop, xop->xo_stack);
+    if (!(xop->xo_flags & XOF_NO_CLOSE))
+	xo_do_close_all(xop, xop->xo_stack);
 
     switch (xop->xo_style) {
     case XO_STYLE_JSON:
@@ -4789,6 +4921,24 @@ xo_parse_args (int argc, char **argv)
 
     argv[save] = NULL;
     return save;
+}
+
+void
+xo_dump_stack (xo_handle_t *xop)
+{
+    int i;
+    xo_stack_t *xsp;
+
+    xop = xo_default(xop);
+
+    fprintf(stderr, "Stack dump:\n");
+
+    xsp = xop->xo_stack;
+    for (i = 1, xsp++; i <= xop->xo_depth; i++, xsp++) {
+	fprintf(stderr, "   [%d] %s '%s' [%x]\n",
+		i, xo_state_name(xsp->xs_state),
+		xsp->xs_name ?: "--", xsp->xs_flags);
+    }
 }
 
 #ifdef UNIT_TEST
