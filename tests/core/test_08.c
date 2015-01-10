@@ -32,6 +32,7 @@ main (int argc, char **argv)
 	{ NULL, 0 }
     };
     struct item *ip;
+    int i;
     
     argc = xo_parse_args(argc, argv);
     if (argc < 0)
@@ -63,6 +64,7 @@ main (int argc, char **argv)
     xo_open_container_h(NULL, "top");
 
     xo_open_container("data");
+    xo_open_container("contents");
     xo_open_list("item");
 
     xo_emit("{T:Item/%-10s}{T:Count/%12s}\n");
@@ -77,11 +79,13 @@ main (int argc, char **argv)
     }
 
     xo_close_list("item");
+    xo_close_container("contents");
     xo_close_container("data");
 
     xo_emit("\n\n");
 
     xo_open_container("data");
+    xo_open_container("contents");
 
     xo_emit("{T:Item/%-10s}{T:Count/%12s}\n");
 
@@ -93,6 +97,55 @@ main (int argc, char **argv)
     }
 
     xo_close_container("data");
+
+    xo_emit("\n\n");
+
+    xo_open_container("data");
+    xo_push_marker("m1");
+    xo_open_container("contents");
+
+    xo_emit("{T:Item/%-10s}{T:Count/%12s}\n");
+
+    for (ip = list; ip->i_title; ip++) {
+	xo_open_instance("item");
+
+	xo_emit("{k:name/%-10s/%s}{n:count/%12u/%u}\n",
+		ip->i_title, ip->i_count);
+    }
+
+    xo_close_container("data");	/* Should be a noop */
+    xo_emit("{:test}", "one");
+
+    xo_pop_marker("m1");
+    xo_close_container("data");	/* Should be a noop */
+
+    xo_emit("\n\n");
+
+    xo_open_container("data");
+    xo_push_marker("m1");
+    xo_open_container("contents");
+
+    xo_emit("{T:Item/%-10s}{T:Count/%12s}\n");
+
+    for (ip = list; ip->i_title; ip++) {
+	xo_open_instance("item");
+
+	xo_emit("{k:name/%-10s/%s}{n:count/%12u/%u}\n",
+		ip->i_title, ip->i_count);
+	
+	xo_push_marker("m2");
+	xo_open_list("sub");
+	for (i = 0; i < 3; i++) {
+	    xo_open_instance("sub");
+	    xo_emit("{Lwc:/Name}{:name/%d} + 1 = {:next/%d}\n", i, i + 1);
+	    xo_close_container("data");
+	}
+	xo_pop_marker("m2");
+	xo_emit("{Lwc:/Last}{:last/%d}\n", i);
+    }
+
+    xo_close_container("data");	/* Should be a noop */
+    xo_emit("{:test}", "one");
 
     xo_emit("\n\n");
 
