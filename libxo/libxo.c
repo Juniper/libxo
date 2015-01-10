@@ -4325,7 +4325,7 @@ static int
 xo_do_close_all (xo_handle_t *xop, xo_stack_t *limit)
 {
     xo_stack_t *xsp;
-    int rc;
+    int rc = 0;
     xo_xsf_flags_t flags;
 
     for (xsp = &xop->xo_stack[xop->xo_depth]; xsp >= limit; xsp--) {
