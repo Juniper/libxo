@@ -10,7 +10,6 @@
 
 /*
   TODO:
-  - finish markers
   - xss_emit and xss_emit_leaf_list
   - handle xo_open_list xss_emit_leaf_list stack rewriting
   - document it
@@ -2669,7 +2668,13 @@ xo_buf_append_div (xo_handle_t *xop, const char *class, xo_xff_flags_t flags,
 		if (xsp->xs_name == NULL)
 		    continue;
 
-		if (xsp->xs_state == XSS_OPEN_LIST)
+		/*
+		 * XSS_OPEN_LIST and XSS_OPEN_LEAF_LIST stack frames
+		 * are directly under XSS_OPEN_INSTANCE frames so we
+		 * don't need to put these in our XPath expressions.
+		 */
+		if (xsp->xs_state == XSS_OPEN_LIST
+			|| xsp->xs_state == XSS_OPEN_LEAF_LIST)
 		    continue;
 
 		xo_data_append(xop, "/", 1);
@@ -2869,6 +2874,75 @@ xo_format_value (xo_handle_t *xop, const char *name, int nlen,
     int pretty = (xop->xo_flags & XOF_PRETTY);
     int quote;
     xo_buffer_t *xbp;
+
+    /*
+     * Before we emit a value, we need to know that the frame is ready.
+     */
+    xo_stack_t *xsp = &xop->xo_stack[xop->xo_depth];
+
+    if (flags & XFF_LEAF_LIST) {
+	/*
+	 * Check if we've already started to emit normal leafs
+	 * or if we're not in a leaf list.
+	 */
+	if ((xsp->xs_flags & (XSF_EMIT | XSF_EMIT_KEY))
+	    || !(xsp->xs_flags & XSF_EMIT_LEAF_LIST)) {
+	    char nbuf[nlen + 1];
+	    memcpy(nbuf, name, nlen);
+	    nbuf[nlen] = '\0';
+
+	    int rc = xo_transition(xop, 0, nbuf, XSS_EMIT_LEAF_LIST);
+	    if (rc < 0)
+		flags |= XFF_DISPLAY_ONLY | XFF_ENCODE_ONLY;
+	    else
+		xop->xo_stack[xop->xo_depth].xs_flags |= XSF_EMIT_LEAF_LIST;
+	}
+
+	xsp = &xop->xo_stack[xop->xo_depth];
+	if (xsp->xs_name) {
+	    name = xsp->xs_name;
+	    nlen = strlen(name);
+	}
+
+    } else if (flags & XFF_KEY) {
+	/* Emitting a 'k' (key) field */
+	if ((xsp->xs_flags & XSF_EMIT) && !(flags & XFF_DISPLAY_ONLY)) {
+	    xo_failure(xop, "key field emitted after normal value field: '%.*s'",
+		       nlen, name);
+
+	} else if (!(xsp->xs_flags & XSF_EMIT_KEY)) {
+	    char nbuf[nlen + 1];
+	    memcpy(nbuf, name, nlen);
+	    nbuf[nlen] = '\0';
+
+	    int rc = xo_transition(xop, 0, nbuf, XSS_EMIT);
+	    if (rc < 0)
+		flags |= XFF_DISPLAY_ONLY | XFF_ENCODE_ONLY;
+	    else
+		xop->xo_stack[xop->xo_depth].xs_flags |= XSF_EMIT_KEY;
+
+	    xsp = &xop->xo_stack[xop->xo_depth];
+	    xsp->xs_flags |= XSF_EMIT_KEY;
+	}
+
+    } else {
+	/* Emitting a normal value field */
+	if ((xsp->xs_flags & XSF_EMIT_LEAF_LIST)
+	    || !(xsp->xs_flags & XSF_EMIT)) {
+	    char nbuf[nlen + 1];
+	    memcpy(nbuf, name, nlen);
+	    nbuf[nlen] = '\0';
+
+	    int rc = xo_transition(xop, 0, nbuf, XSS_EMIT);
+	    if (rc < 0)
+		flags |= XFF_DISPLAY_ONLY | XFF_ENCODE_ONLY;
+	    else
+		xop->xo_stack[xop->xo_depth].xs_flags |= XSF_EMIT;
+
+	    xsp = &xop->xo_stack[xop->xo_depth];
+	    xsp->xs_flags |= XSF_EMIT;
+	}
+    }
 
     switch (xop->xo_style) {
     case XO_STYLE_TEXT:
@@ -4487,16 +4561,17 @@ xo_transition (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name,
 	    goto open_container;
 	break;
 
-    close_container:
+    /*close_container:*/
     case XSS_TRANSITION(XSS_OPEN_CONTAINER, XSS_CLOSE_CONTAINER):
 	if (on_marker)
 	    goto marker_prevents_close;
-	rc = xo_do_close_container(xop, name);
+	rc = xo_do_close(xop, name, new_state);
 	break;
 
     case XSS_TRANSITION(XSS_INIT, XSS_CLOSE_CONTAINER):
 	/* This is an exception for "xo --close" */
-	goto close_container;
+	rc = xo_do_close_container(xop, name);
+	break;
 
     case XSS_TRANSITION(XSS_OPEN_LIST, XSS_CLOSE_CONTAINER):
     case XSS_TRANSITION(XSS_OPEN_INSTANCE, XSS_CLOSE_CONTAINER):
@@ -4540,13 +4615,14 @@ xo_transition (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name,
     case XSS_TRANSITION(XSS_OPEN_LIST, XSS_CLOSE_LIST):
 	if (on_marker)
 	    goto marker_prevents_close;
-	rc = xo_do_close_list(xop, name);
+	rc = xo_do_close(xop, name, new_state);
 	break;
 
     case XSS_TRANSITION(XSS_INIT, XSS_CLOSE_LIST):
     case XSS_TRANSITION(XSS_OPEN_CONTAINER, XSS_CLOSE_LIST):
     case XSS_TRANSITION(XSS_OPEN_INSTANCE, XSS_CLOSE_LIST):
     case XSS_TRANSITION(XSS_OPEN_LEAF_LIST, XSS_CLOSE_LIST):
+	rc = xo_do_close(xop, name, new_state);
 	break;
 
     open_instance:
@@ -4658,9 +4734,12 @@ xo_transition (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name,
     /*emit_leaf_list:*/
     case XSS_TRANSITION(XSS_INIT, XSS_EMIT_LEAF_LIST):
     case XSS_TRANSITION(XSS_OPEN_CONTAINER, XSS_EMIT_LEAF_LIST):
-    case XSS_TRANSITION(XSS_OPEN_LIST, XSS_EMIT_LEAF_LIST):
     case XSS_TRANSITION(XSS_OPEN_INSTANCE, XSS_EMIT_LEAF_LIST):
+	rc = xo_do_open_leaf_list(xop, flags, name);
+	break;
+
     case XSS_TRANSITION(XSS_OPEN_LEAF_LIST, XSS_EMIT_LEAF_LIST):
+    case XSS_TRANSITION(XSS_OPEN_LIST, XSS_EMIT_LEAF_LIST):
 	break;
 
     default:
