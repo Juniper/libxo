@@ -54,3 +54,37 @@
 </div>
 <div class="line">
 </div>
+<div class="line">
+  <div class="title">Test      </div>
+  <div class="title">       Three</div>
+</div>
+<div class="line">
+  <div class="text">Name: </div>
+  <div class="data" data-tag="item" data-xpath="/top/data/contents/item">gum       </div>
+</div>
+<div class="line">
+  <div class="text">Name: </div>
+  <div class="data" data-tag="item" data-xpath="/top/data/contents/item">rope      </div>
+</div>
+<div class="line">
+  <div class="text">Name: </div>
+  <div class="data" data-tag="item" data-xpath="/top/data/contents/item">ladder    </div>
+</div>
+<div class="line">
+  <div class="text">Name: </div>
+  <div class="data" data-tag="item" data-xpath="/top/data/contents/item">bolt      </div>
+</div>
+<div class="line">
+  <div class="text">Name: </div>
+  <div class="data" data-tag="item" data-xpath="/top/data/contents/item">water     </div>
+</div>
+<div class="line">
+  <div class="label">Total:</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="total" data-xpath="/top/data/contents/total">six</div>
+</div>
+<div class="line">
+</div>
+<div class="line">
+</div>
