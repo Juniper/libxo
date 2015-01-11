@@ -339,4 +339,7 @@ extern const char xo_version_extra[];
 void
 xo_dump_stack (xo_handle_t *xop);
 
+void
+xo_set_program (const char *name);
+
 #endif /* INCLUDE_XO_H */
