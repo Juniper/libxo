@@ -19,6 +19,8 @@
 .In libxo/xo.h
 .Ft int
 .Fn xo_parse_args "int argc" "char **argv"
+.Ft int
+.Fn xo_set_program "const char *name"
 .Sh DESCRIPTION
 The
 .Fn xo_parse_args
@@ -109,6 +111,27 @@ No comma separator is used.
 .It "X      " "Enable XML output (XO_STYLE_XML)"
 .It "x      " "Enable XPath data (XOF_XPATH)"
 .El
+.Pp
+The
+.Fn xo_set_program
+function sets name of the program as reported by
+functions like
+.Fn xo_failure ,
+.Fn xo_warn ,
+.Fn xo_err ,
+etc.
+The program name is initialized by
+.Fn xo_parse_args ,
+but subsequent calls to
+.Fn xo_set_program
+can override this value.
+.Pp
+Note that the value is not copied, so the memory passed to
+.Fn xo_set_program
+(and
+.Fn xo_parse_args )
+must be maintained by the caller.
+.Pp
 .Sh ADDITIONAL DOCUMENTATION
 Complete documentation can be found on github:
 .Bd -literal -offset indent
