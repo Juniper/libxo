@@ -89,6 +89,21 @@ main (int argc, char **argv)
 
     xo_emit("\n\n");
 
+    xo_open_container("contents");
+    xo_emit("{T:Test/%-10s}{T:Three/%12s}\n");
+
+    xo_open_list("item");
+    for (ip = list; ip->i_title; ip++) {
+	xo_emit("Name: {l:item/%-10s/%s}\n", ip->i_title);
+    }
+    xo_emit("{Lwc:/Total:}{:total}\n", "six");
+
+    xo_close_container("contents");
+
+    xo_emit("\n\n");
+
+
+
     xo_close_container_h(NULL, "top");
 
     xo_finish();
