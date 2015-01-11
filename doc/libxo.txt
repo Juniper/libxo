@@ -1349,6 +1349,16 @@ Following the call to xo_parse_args, the application can process the
 remaining arguments in a normal manner.  See ^command-line-arguments^
 for a description of valid arguments.
 
+*** xo_set_program
+
+The xo_set_program function sets name of the program as reported by
+functions like xo_failure, xo_warn, xo_err, etc.  The program name is
+initialized by xo_parse_args, but subsequent calls to xo_set_program
+can override this value.
+
+Note that the value is not copied, so the memory passed to
+xo_set_program (and xo_parse_args) must be maintained by the caller.
+
 *** Field Information (xo_info_t) @info@
 
 HTML data can include additional information in attributes that
