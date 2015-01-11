@@ -14,5 +14,13 @@
       <item>bolt</item>
       <item>water</item>
     </contents>
+    <contents>
+      <item>gum</item>
+      <item>rope</item>
+      <item>ladder</item>
+      <item>bolt</item>
+      <item>water</item>
+      <total>six</total>
+    </contents>
   </data>
 </top>
