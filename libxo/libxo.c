@@ -8,13 +8,6 @@
  * Phil Shafer, July 2014
  */
 
-/*
-  TODO:
-  - xss_emit and xss_emit_leaf_list
-  - handle xo_open_list xss_emit_leaf_list stack rewriting
-  - document it
-*/
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
