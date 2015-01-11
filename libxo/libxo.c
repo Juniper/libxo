@@ -365,6 +365,7 @@ xo_init_handle (xo_handle_t *xop)
 {
     xop->xo_opaque = stdout;
     xop->xo_write = xo_write_to_file;
+    xop->xo_flush = xo_flush_file;
 
     /*
      * We need to initialize the locale, which isn't really pretty.
@@ -3352,7 +3353,7 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
     for (cp = fmt; *cp; ) {
 	if (*cp == '\n') {
 	    xo_line_close(xop);
-	    if (xo_flush_h(xop) < 0)
+	    if (flush && xo_flush_h(xop) < 0)
 		return -1;
 	    cp += 1;
 	    continue;
@@ -4488,8 +4489,8 @@ xo_do_close (xo_handle_t *xop, const char *name, xo_state_t new_state)
     }
 
     if (limit == NULL) {
-	xo_failure(xop, "xo_close_%d can't find match for '%s'",
-		   new_state, name);
+	xo_failure(xop, "xo_%s can't find match for '%s'",
+		   xo_state_name(new_state), name);
 	return 0;
     }
 
@@ -4604,7 +4605,7 @@ xo_transition (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name,
 	    goto open_list;
 	break;
 
-    close_list:
+    /*close_list:*/
     case XSS_TRANSITION(XSS_OPEN_LIST, XSS_CLOSE_LIST):
 	if (on_marker)
 	    goto marker_prevents_close;
@@ -4690,7 +4691,7 @@ xo_transition (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name,
 	    goto open_leaf_list;
 	break;
 
-    close_leaf_list:
+    /*close_leaf_list:*/
     case XSS_TRANSITION(XSS_OPEN_LEAF_LIST, XSS_CLOSE_LEAF_LIST):
 	if (on_marker)
 	    goto marker_prevents_close;
@@ -4715,13 +4716,18 @@ xo_transition (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name,
 	break;
 
     case XSS_TRANSITION(XSS_OPEN_LIST, XSS_EMIT):
-	goto close_list;
+	if (on_marker)
+	    goto marker_prevents_close;
+	rc = xo_do_close(xop, NULL, XSS_CLOSE_LIST);
+	break;
 
     case XSS_TRANSITION(XSS_INIT, XSS_EMIT):
 	break;
 
     case XSS_TRANSITION(XSS_OPEN_LEAF_LIST, XSS_EMIT):
-	goto close_leaf_list;
+	if (on_marker)
+	    goto marker_prevents_close;
+	rc = xo_do_close_leaf_list(xop, NULL);
 	break;
 
     /*emit_leaf_list:*/
@@ -4732,7 +4738,15 @@ xo_transition (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name,
 	break;
 
     case XSS_TRANSITION(XSS_OPEN_LEAF_LIST, XSS_EMIT_LEAF_LIST):
+	break;
+
     case XSS_TRANSITION(XSS_OPEN_LIST, XSS_EMIT_LEAF_LIST):
+	/*
+	 * We need to be backward compatible with the pre-xo_open_leaf_list
+	 * API, where both lists and leaf-lists were opened as lists.  So
+	 * if we find an open list that hasn't had anything written to it,
+	 * we'll accept it.
+	 */
 	break;
 
     default:
