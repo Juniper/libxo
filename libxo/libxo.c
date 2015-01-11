@@ -253,7 +253,7 @@ typedef struct xo_format_s {
 static xo_handle_t xo_default_handle;
 static int xo_default_inited;
 static int xo_locale_inited;
-static char *xo_program;
+static const char *xo_program;
 
 /*
  * To allow libxo to be used in diverse environment, we allow the
@@ -4943,6 +4943,12 @@ xo_dump_stack (xo_handle_t *xop)
 		i, xo_state_name(xsp->xs_state),
 		xsp->xs_name ?: "--", xsp->xs_flags);
     }
+}
+
+void
+xo_set_program (const char *name)
+{
+    xo_program = name;
 }
 
 #ifdef UNIT_TEST
