@@ -10,6 +10,12 @@
         "item": [
            "gum", "rope", "ladder", "bolt", "water"
         ]
+      },
+      "contents": {
+        "item": [
+           "gum", "rope", "ladder", "bolt", "water"
+        ],
+        "total": "six"
       }
     }
   }
