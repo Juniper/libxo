@@ -60,6 +60,7 @@ main (int argc, char **argv)
     }
 
     xo_set_flags(NULL, XOF_KEYS);
+    xo_set_program("test");
 
     xo_open_container_h(NULL, "top");
 
