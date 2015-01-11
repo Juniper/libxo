@@ -4355,6 +4355,7 @@ xo_do_close_all (xo_handle_t *xop, xo_stack_t *limit)
 	    flags = xsp->xs_flags & XSF_MARKER_FLAGS;
 	    xo_depth_change(xop, xsp->xs_name, -1, 0, XSS_MARKER, 0);
 	    xop->xo_stack[xop->xo_depth].xs_flags |= flags;
+	    rc = 0;
 	    break;
 	}
 
