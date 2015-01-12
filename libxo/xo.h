@@ -237,16 +237,16 @@ int
 xo_close_leaf_list_d (void);
 
 int
-xo_push_marker_h (xo_handle_t *xop, const char *name);
+xo_open_marker_h (xo_handle_t *xop, const char *name);
 
 int
-xo_push_marker (const char *name);
+xo_open_marker (const char *name);
 
 int
-xo_pop_marker_h (xo_handle_t *xop, const char *name);
+xo_close_marker_h (xo_handle_t *xop, const char *name);
 
 int
-xo_pop_marker (const char *name);
+xo_close_marker (const char *name);
 
 int
 xo_attr_h (xo_handle_t *xop, const char *name, const char *fmt, ...);
