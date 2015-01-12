@@ -98,11 +98,14 @@ main (int argc, char **argv)
     }
     xo_emit("{Lwc:/Total:}{:total}\n", "six");
 
+    xo_emit("{:one}", "one");
+    xo_emit("{l:two}", "two");
+    xo_emit("{:three}", "three");
+
+
     xo_close_container("contents");
 
     xo_emit("\n\n");
-
-
 
     xo_close_container_h(NULL, "top");
 
