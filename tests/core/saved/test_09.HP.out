@@ -85,6 +85,9 @@
   <div class="data" data-tag="total">six</div>
 </div>
 <div class="line">
+  <div class="data" data-tag="one">one</div>
+  <div class="data" data-tag="two">two</div>
+  <div class="data" data-tag="three">three</div>
 </div>
 <div class="line">
 </div>
