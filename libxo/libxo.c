@@ -2736,6 +2736,11 @@ xo_format_title (xo_handle_t *xop, const char *str, int len,
     static char div_open[] = "<div class=\"title\">";
     static char div_close[] = "</div>";
 
+    if (flen == 0) {
+	fmt = "%s";
+	flen = 2;
+    }
+
     switch (xop->xo_style) {
     case XO_STYLE_XML:
     case XO_STYLE_JSON:
@@ -3566,42 +3571,53 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 	    return -1;
 	}
 
-	if (format == NULL && ftype != '[' && ftype != ']' ) {
-	    format = "%s";
-	    flen = 2;
-	}
+	if (ftype == 0 || ftype == 'V') {
+	    if (format == NULL) {
+		/* Default format for value fields is '%s' */
+		format = "%s";
+		flen = 2;
+	    }
 
-	if (ftype == 0 || ftype == 'V')
 	    xo_format_value(xop, content, clen, format, flen,
 			    encoding, elen, flags);
-	else if (ftype == 'D')
-	    xo_format_content(xop, "decoration", NULL, 1,
-			      content, clen, format, flen);
-	else if (ftype == 'E')
-	    xo_format_content(xop, "error", "error", 0,
-			      content, clen, format, flen);
-	else if (ftype == 'L')
-	    xo_format_content(xop, "label", NULL, 1,
-			      content, clen, format, flen);
-	else if (ftype == 'N')
-	    xo_format_content(xop, "note", NULL, 1,
-			      content, clen, format, flen);
-	else if (ftype == 'P')
- 	    xo_format_content(xop, "padding", NULL, 1,
-			      content, clen, format, flen);
-	else if (ftype == 'T')
-	    xo_format_title(xop, content, clen, format, flen);
-	else if (ftype == 'U') {
-	    if (flags & XFF_WS)
-		xo_format_content(xop, "padding", NULL, 1, " ", 1, NULL, 0);
- 	    xo_format_units(xop, content, clen, format, flen);
-	} else if (ftype == 'W')
-	    xo_format_content(xop, "warning", "warning", 0,
-			      content, clen, format, flen);
-	else if (ftype == '[')
-	    xo_anchor_start(xop, content, clen, format, flen);
+
+	} else if (ftype == '[')
+		xo_anchor_start(xop, content, clen, format, flen);
 	else if (ftype == ']')
-	    xo_anchor_stop(xop, content, clen, format, flen);
+		xo_anchor_stop(xop, content, clen, format, flen);
+
+	else  if (clen || format) { /* Need either content or format */
+	    if (format == NULL) {
+		/* Default format for value fields is '%s' */
+		format = "%s";
+		flen = 2;
+	    }
+
+	    if (ftype == 'D')
+		xo_format_content(xop, "decoration", NULL, 1,
+				  content, clen, format, flen);
+	    else if (ftype == 'E')
+		xo_format_content(xop, "error", "error", 0,
+				  content, clen, format, flen);
+	    else if (ftype == 'L')
+		xo_format_content(xop, "label", NULL, 1,
+				  content, clen, format, flen);
+	    else if (ftype == 'N')
+		xo_format_content(xop, "note", NULL, 1,
+				  content, clen, format, flen);
+	    else if (ftype == 'P')
+		xo_format_content(xop, "padding", NULL, 1,
+				  content, clen, format, flen);
+	    else if (ftype == 'T')
+		xo_format_title(xop, content, clen, format, flen);
+	    else if (ftype == 'U') {
+		if (flags & XFF_WS)
+		    xo_format_content(xop, "padding", NULL, 1, " ", 1, NULL, 0);
+		xo_format_units(xop, content, clen, format, flen);
+	    } else if (ftype == 'W')
+		xo_format_content(xop, "warning", "warning", 0,
+				  content, clen, format, flen);
+	}
 
 	if (flags & XFF_COLON)
 	    xo_format_content(xop, "decoration", NULL, 1, ":", 1, NULL, 0);
@@ -3848,8 +3864,16 @@ xo_do_open_container (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
 
     switch (xop->xo_style) {
     case XO_STYLE_XML:
-	rc = xo_printf(xop, "%*s<%s>%s", xo_indent(xop), "",
-		     name, ppn);
+	rc = xo_printf(xop, "%*s<%s", xo_indent(xop), "", name);
+
+	if (xop->xo_attrs.xb_curp != xop->xo_attrs.xb_bufp) {
+	    rc += xop->xo_attrs.xb_curp - xop->xo_attrs.xb_bufp;
+	    xo_data_append(xop, xop->xo_attrs.xb_bufp,
+			   xop->xo_attrs.xb_curp - xop->xo_attrs.xb_bufp);
+	    xop->xo_attrs.xb_curp = xop->xo_attrs.xb_bufp;
+	}
+
+	rc += xo_printf(xop, ">%s", ppn);
 	break;
 
     case XO_STYLE_JSON:
@@ -4267,7 +4291,16 @@ xo_do_open_instance (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name)
 
     switch (xop->xo_style) {
     case XO_STYLE_XML:
-	rc = xo_printf(xop, "%*s<%s>%s", xo_indent(xop), "", name, ppn);
+	rc = xo_printf(xop, "%*s<%s", xo_indent(xop), "", name);
+
+	if (xop->xo_attrs.xb_curp != xop->xo_attrs.xb_bufp) {
+	    rc += xop->xo_attrs.xb_curp - xop->xo_attrs.xb_bufp;
+	    xo_data_append(xop, xop->xo_attrs.xb_bufp,
+			   xop->xo_attrs.xb_curp - xop->xo_attrs.xb_bufp);
+	    xop->xo_attrs.xb_curp = xop->xo_attrs.xb_bufp;
+	}
+
+	rc += xo_printf(xop, ">%s", ppn);
 	break;
 
     case XO_STYLE_JSON:
