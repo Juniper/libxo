@@ -41,3 +41,5 @@ Item: rope
 Item: ladder
 Item: bolt
 Item: water
+X        XCost: 425
+X                              XCost: 455
