@@ -12,14 +12,15 @@
 
 libxo - A Library for Generating Text, XML, JSON, and HTML Output
 
-You live in the present, but you want to live in the future.  You'd
-love a flying car, but need to get to work today.  You want to support
-features like XML, JSON, and HTML rendering to allow integration with
-NETCONF, REST, and web browsers, but you need to make text output for
-command line users.  And you don't want multiple code paths that can't
-help but get out of sync.  None of this "if (xml) {... } else {...}"
-logic.  And ifdefs are right out.  But you'd really, really like all
-the fancy features that modern encoding formats can provide.
+You want to prepare for the future, but you need to live in the
+present.  You'd love a flying car, but need to get to work today.  You
+want to support features like XML, JSON, and HTML rendering to allow
+integration with NETCONF, REST, and web browsers, but you need to make
+text output for command line users.  And you don't want multiple code
+paths that can't help but get out of sync.  None of this "if (xml)
+{... } else {...}"  logic.  And ifdefs are right out.  But you'd
+really, really like all the fancy features that modern encoding
+formats can provide.  libxo can help.
 
 The libxo library allows an application to generate text, XML, JSON,
 and HTML output using a common set of function calls.  The application
@@ -83,31 +84,37 @@ The latest release of libxo is available at:
 
   https://github.com/Juniper/libxo/releases
 
-We are following the branching scheme from 
-^http://nvie.com/posts/a-successful-git-branching-model/^
-which means we will do development under the "develop" branch, and
-release from the master.  To clone a developer tree, run the following
+We are following the branching scheme from
+^http://nvie.com/posts/a-successful-git-branching-model/^ which means
+we will do development under the "develop" branch, and release from
+the "master" branch.  To clone a developer tree, run the following
 command:
 
   git clone https://github.com/Juniper/libxo.git -b develop
 
-We're using semantic release numbering.
+We're using semantic release numbering, as defined in
+^http://semver.org/spec/v2.0.0.html^.
+
+libxo is open source, distributed under the BSD license.  It
+is shipped as part of FreeBSD 11.0.
 
 * Overview
 
 Most unix commands emit text output aimed at humans.  It is designed
-to be parsed and understood by a user.  Humans are gifted at extracting
-details and pattern matching.  Often programmers need to extract
-information from this human-oriented output.  Programmers use tools
-like grep, awk, and regular expressions to ferret out the pieces of
-information they need.  Such solutions are fragile and require
-updates when output contents change or evolve, requiring testing and
-validation.
+to be parsed and understood by a user.  Humans are gifted at
+extracting details and pattern matching in such output.  Often
+programmers need to extract information from this human-oriented
+output.  Programmers use tools like grep, awk, and regular expressions
+to ferret out the pieces of information they need.  Such solutions are
+fragile and require maintenance when output contents change or evolve,
+along with testing and validation.
 
 Modern tool developers favor encoding schemes like XML and JSON,
 which allow trivial parsing and extraction of data.  Such formats are
 simple, well understood, hierarchical, easily parsed, and often
-integrate easier with common tools and environments.
+integrate easier with common tools and environments.  Changes to
+content can be done in ways that do not break existing users of the
+data, which can reduce maintenance costs and increase feature velocity.
 
 In addition, modern reality means that more output ends up in web
 browsers than in terminals, making HTML output valuable.
@@ -321,7 +328,7 @@ the field descriptor, or a printf-style format descriptor can be used,
 if preceded by a slash ("/"):
 
     xo_emit("{P:        }{Lwc:Cost}{:cost/%u}\n", cost);
-    xo_emit("{P:/30s}{Lwc:Cost}{:cost/%u}\n", "", cost);
+    xo_emit("{P:/%30s}{Lwc:Cost}{:cost/%u}\n", "", cost);
 
 **** The Title Role ({T:})
 
@@ -555,7 +562,8 @@ The field format is similar to the format string for printf(3).  Its
 use varies based on the role of the field, but generally is used to
 format the field's contents.
 
-If not provided, the format string defaults to "%s".
+If the format string is not provided for a value field, it defaults to
+"%s".
 
 Note a field definition can contain zero or more printf-style
 'directives', which are sequences that start with a '%' and end with
@@ -924,6 +932,28 @@ Note that the XOF_WARN flag will also cause libxo to track open
 containers, lists, and instances.  A warning is generated when the
 name given to the close function and the name recorded do not match.
 
+*** Markers
+
+Markers are used to protect and restore the state of open constructs.
+While a marker is open, no other open constructs can be closed.  When
+a marker is closed, all constructs open since the marker was opened
+will be closed.
+
+Markers use names which are not user-visible, allowing the caller to
+choose appropriate internal names.
+
+In this example, the code whiffles through a list of fish, calling a
+function to emit details about each fish.  The marker "fish-guts" is
+used to ensure that any constructs opened by the function are closed
+properly.
+
+    for (i = 0; fish[i]; i++) {
+        xo_open_instance("fish");
+        xo_open_marker("fish-guts");
+        dump_fish_details(i);
+        xo_close_marker("fish-guts");
+    }
+
 ** Handles
 
 libxo uses "handles" to control its rendering functionality.  The
@@ -1018,10 +1048,13 @@ which can tailor how libxo writes data.  An opaque argument is
 recorded and passed back to the write function, allowing the function
 to acquire context information. The 'close' function can
 release this opaque data and any other resources as needed.
+The flush function can flush buffered data associated with the opaque
+object.
 
     void xo_set_writer (xo_handle_t *xop, void *opaque,
                         xo_write_func_t write_func,
                         xo_close_func_t close_func);
+                        xo_flush_func_t flush_func);
 
 *** xo_set_style
 
@@ -1209,6 +1242,9 @@ parameter passed to xo_attr_hv().
     XML:
         <login-time seconds="1408336270">00:14</login-time>
 
+xo_attr is placed on the next container, instance, leaf, or leaf list
+that is emitted.
+
 Since attributes are only emitted in XML, their use should be limited
 to meta-data and additional or redundant representations of data
 already emitted in other form.
@@ -1222,6 +1258,10 @@ xo_flush() call is used for this:
 
     void xo_flush (void);
     void xo_flush_h (xo_handle_t *xop);
+
+Calling xo_flush also triggers the flush function associated with the
+handle.  For the default handle, this is equivalent to
+"fflush(stdio);". 
 
 *** Finishing Output (xo_finish)
 
@@ -1450,6 +1490,10 @@ Complete HTML output can be generated with:
 
     % env LIBXO_OPTIONS=HXI my-app
 
+Since environment variables are inherited, child processes will have
+the same options, which may be undesirable, making the use of the
+"--libxo" option is preferable in most situations.
+
 *** Errors, Warnings, and Messages
 
 Many programs make use of the standard library functions err() and
@@ -1479,6 +1523,20 @@ message associated with either "errno" or the "code" parameter.
     EXAMPLE:
         if (open(filename, O_RDONLY) < 0)
             xo_err(1, "cannot open file '%s'", filename);
+
+*** xo_error
+
+The xo_error function can be used for generic errors that should be
+reported over the handle, rather than to stderr.  The xo_error
+function behaves like xo_err for TEXT and HTML output styles, but puts
+the error into XML or JSON elements:
+
+    EXAMPLE::
+        xo_error("Does not %s", "compute");
+    XML::
+        <error><message>Does not compute</message></error>
+    JSON::
+        "error": { "message": "Does not compute" }
 
 *** xo_no_setlocale
 
