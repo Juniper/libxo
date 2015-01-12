@@ -266,3 +266,21 @@
   <div class="padding"> </div>
   <div class="data" data-tag="item">water</div>
 </div>
+<div class="line">
+  <div class="text">X</div>
+  <div class="padding">        </div>
+  <div class="text">X</div>
+  <div class="label">Cost</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="cost">425</div>
+</div>
+<div class="line">
+  <div class="text">X</div>
+  <div class="padding">                              </div>
+  <div class="text">X</div>
+  <div class="label">Cost</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="cost">455</div>
+</div>
