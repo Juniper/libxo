@@ -85,6 +85,9 @@
   <div class="data" data-tag="total" data-xpath="/top/data/contents/total">six</div>
 </div>
 <div class="line">
+  <div class="data" data-tag="one" data-xpath="/top/data/contents/one">one</div>
+  <div class="data" data-tag="two" data-xpath="/top/data/contents/two">two</div>
+  <div class="data" data-tag="three" data-xpath="/top/data/contents/three">three</div>
 </div>
 <div class="line">
 </div>
