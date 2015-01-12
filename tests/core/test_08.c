@@ -102,7 +102,7 @@ main (int argc, char **argv)
     xo_emit("\n\n");
 
     xo_open_container("data");
-    xo_push_marker("m1");
+    xo_open_marker("m1");
     xo_open_container("contents");
 
     xo_emit("{T:Item/%-10s}{T:Count/%12s}\n");
@@ -117,13 +117,13 @@ main (int argc, char **argv)
     xo_close_container("data");	/* Should be a noop */
     xo_emit("{:test}", "one");
 
-    xo_pop_marker("m1");
+    xo_close_marker("m1");
     xo_close_container("data");	/* Should be a noop */
 
     xo_emit("\n\n");
 
     xo_open_container("data");
-    xo_push_marker("m1");
+    xo_open_marker("m1");
     xo_open_container("contents");
 
     xo_emit("{T:Item/%-10s}{T:Count/%12s}\n");
@@ -134,13 +134,13 @@ main (int argc, char **argv)
 	xo_emit("{k:name/%-10s/%s}{n:count/%12u/%u}\n",
 		ip->i_title, ip->i_count);
 	
-	xo_push_marker("m2");
+	xo_open_marker("m2");
 	for (i = 0; i < 3; i++) {
 	    xo_open_instance("sub");
 	    xo_emit("{Lwc:/Name}{:name/%d} + 1 = {:next/%d}\n", i, i + 1);
 	    xo_close_container("data");
 	}
-	xo_pop_marker("m2");
+	xo_close_marker("m2");
 	xo_emit("{Lwc:/Last}{:last/%d}\n", i);
     }
 
