@@ -15,7 +15,12 @@
         "item": [
            "gum", "rope", "ladder", "bolt", "water"
         ],
-        "total": "six"
+        "total": "six",
+        "one": "one",
+        "two": [
+           "two"
+        ],
+        "three": "three"
       }
     }
   }
