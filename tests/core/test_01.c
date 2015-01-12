@@ -82,14 +82,17 @@ main (int argc, char **argv)
 
     xo_open_container_h(NULL, "top");
 
+    xo_attr("test", "value");
     xo_open_container("data");
     xo_open_list("item");
+    xo_attr("test2", "value2");
 
     xo_emit("{T:Item/%-10s}{T:Total Sold/%12s}{T:In Stock/%12s}"
 	    "{T:On Order/%12s}{T:SKU/%5s}\n");
 
     for (ip = list; ip->i_title; ip++) {
 	xo_open_instance("item");
+	xo_attr("test3", "value3");
 
 	xo_emit("{keq:sku/%s-%u/%s-000-%u}"
 		"{k:name/%-10s/%s}{n:sold/%12u/%u}{:in-stock/%12u/%u}"
@@ -152,11 +155,20 @@ main (int argc, char **argv)
     xo_open_list("item");
 
     for (ip = list; ip->i_title; ip++) {
+	xo_attr("test4", "value4");
 	xo_emit("{Lwc:Item}{l:item}\n", ip->i_title);
     }
 
     xo_close_list("item");
     xo_close_container("data");
+
+    xo_emit("X{P:}X", "epic fail");
+    xo_emit("X{T:}X", "epic fail");
+    xo_emit("X{N:}X", "epic fail");
+    xo_emit("X{L:}X\n", "epic fail");
+
+    xo_emit("X{P:        }X{Lwc:Cost}{:cost/%u}\n", 425);
+    xo_emit("X{P:/%30s}X{Lwc:Cost}{:cost/%u}\n", "", 455);
 
     xo_close_container_h(NULL, "top");
 
