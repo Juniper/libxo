@@ -95,7 +95,7 @@ typedef unsigned xo_state_t;
 #define XSS_OPEN_LEAF_LIST	7
 #define XSS_CLOSE_LEAF_LIST	8
 #define XSS_DISCARDING		9	/* Discarding data until recovered */
-#define XSS_MARKER		10	/* xo_push_marker's marker */
+#define XSS_MARKER		10	/* xo_open_marker's marker */
 #define XSS_EMIT		11	/* xo_emit has a leaf field */
 #define XSS_EMIT_LEAF_LIST	12	/* xo_emit has a leaf-list ({l:}) */
 #define XSS_FINISH		13	/* xo_finish was called */
@@ -4764,7 +4764,7 @@ xo_transition (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name,
 }
 
 int
-xo_push_marker_h (xo_handle_t *xop, const char *name)
+xo_open_marker_h (xo_handle_t *xop, const char *name)
 {
     xop = xo_default(xop);
 
@@ -4775,13 +4775,13 @@ xo_push_marker_h (xo_handle_t *xop, const char *name)
 }
 
 int
-xo_push_marker (const char *name)
+xo_open_marker (const char *name)
 {
-    return xo_push_marker_h(NULL, name);
+    return xo_open_marker_h(NULL, name);
 }
 
 int
-xo_pop_marker_h (xo_handle_t *xop, const char *name)
+xo_close_marker_h (xo_handle_t *xop, const char *name)
 {
     xop = xo_default(xop);
 
@@ -4789,9 +4789,9 @@ xo_pop_marker_h (xo_handle_t *xop, const char *name)
 }
 
 int
-xo_pop_marker (const char *name)
+xo_close_marker (const char *name)
 {
-    return xo_pop_marker_h(NULL, name);
+    return xo_close_marker_h(NULL, name);
 }
 
 void
