@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <unistd.h>
 #include <stddef.h>
 #include <wchar.h>
 #include <locale.h>
@@ -356,6 +357,29 @@ xo_no_setlocale (void)
 }
 
 /*
+ * We need to decide if stdout is line buffered (_IOLBF).  Lacking a
+ * standard way to decide this (e.g. getlinebuf()), we have configure
+ * look to find __flbf, which glibc supported.  If not, we'll rely
+ * on isatty, with the assumption that terminals are the only thing
+ * that's line buffered.  We _could_ test for "steam._flags & _IOLBF",
+ * which is all __flbf does, but that's even tackier.  Like a
+ * bedazzled Elvis outfit on an ugly lap dog sort of tacky.  Not
+ * something we're willing to do.
+ */
+static int
+xo_is_line_buffered (FILE *stream)
+{
+#if HAVE___FLBF
+    if (__flbf(stream))
+	return 1;
+#else /* HAVE___FLBF */
+    if (isatty(fileno(stream)))
+	return 1;
+#endif /* HAVE___FLBF */
+    return 0;
+}
+
+/*
  * Initialize an xo_handle_t, using both static defaults and
  * the global settings from the LIBXO_OPTIONS environment
  * variable.
@@ -366,6 +390,9 @@ xo_init_handle (xo_handle_t *xop)
     xop->xo_opaque = stdout;
     xop->xo_write = xo_write_to_file;
     xop->xo_flush = xo_flush_file;
+
+    if (xo_is_line_buffered(stdout))
+	xop->xo_flags |= XOF_FLUSH_LINE;
 
     /*
      * We need to initialize the locale, which isn't really pretty.
@@ -1528,6 +1555,10 @@ xo_set_options (xo_handle_t *xop, const char *input)
 	    switch (*input) {
 	    case 'f':
 		xop->xo_flags |= XOF_FLUSH;
+		break;
+
+	    case 'F':
+		xop->xo_flags |= XOF_FLUSH_LINE;
 		break;
 
 	    case 'H':
@@ -3352,13 +3383,14 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
     const char *cp, *sp, *ep, *basep;
     char *newp = NULL;
     int flush = (xop->xo_flags & XOF_FLUSH) ? 1 : 0;
+    int flush_line = (xop->xo_flags & XOF_FLUSH_LINE) ? 1 : 0;
 
     xop->xo_columns = 0;	/* Always reset it */
 
     for (cp = fmt; *cp; ) {
 	if (*cp == '\n') {
 	    xo_line_close(xop);
-	    if (flush && xo_flush_h(xop) < 0)
+	    if (flush_line && xo_flush_h(xop) < 0)
 		return -1;
 	    cp += 1;
 	    continue;
