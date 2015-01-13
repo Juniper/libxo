@@ -55,7 +55,9 @@ typedef unsigned long long xo_xof_flags_t;
 #define XOF_UNDERSCORES	XOF_BIT(20) /** Replace dashes with underscores (JSON)*/
 #define XOF_COLUMNS	XOF_BIT(21) /** xo_emit should return a column count */
 #define XOF_FLUSH	XOF_BIT(22) /** Flush after each xo_emit call */
-#define XOF_NO_CLOSE	XOF_BIT(23) /* Don't close open elements on xo_finish */
+#define XOF_FLUSH_LINE	XOF_BIT(23) /** Flush after each newline */
+
+#define XOF_NO_CLOSE	XOF_BIT(24) /** xo_finish won't close open elements */
 
 /*
  * The xo_info_t structure provides a mapping between names and
