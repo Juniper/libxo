@@ -57,6 +57,7 @@ AC_CHECK_FUNCS([getpass])
 AC_CHECK_FUNCS([sysctlbyname])
 AC_CHECK_FUNCS([flock])
 AC_CHECK_FUNCS([asprintf])
+AC_CHECK_FUNCS([__flbf])
 
 AC_CHECK_HEADERS([dlfcn.h])
 AC_CHECK_HEADERS([tzfile.h])
@@ -163,7 +164,6 @@ AC_ARG_ENABLE([libxo-options],
     [LIBXO_OPTS=yes])
 AC_MSG_RESULT([$LIBXO_OPTS])
 AM_CONDITIONAL([NO_LIBXO_OPTIONS], [test "$LIBXO_OPTS" != "yes"])
-
 
 case $host_os in
      darwin*)
