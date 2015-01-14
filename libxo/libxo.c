@@ -9,9 +9,6 @@
  */
 
 #include <stdio.h>
-#ifdef HAVE_STDIO_EXT_H
-#include <stdio_ext.h>
-#endif /* HAVE_STDIO_EXT_H */
 #include <stdlib.h>
 #include <stdint.h>
 #include <unistd.h>
@@ -30,6 +27,10 @@
 #include "xoconfig.h"
 #include "xo.h"
 #include "xoversion.h"
+
+#ifdef HAVE_STDIO_EXT_H
+#include <stdio_ext.h>
+#endif /* HAVE_STDIO_EXT_H */
 
 const char xo_version[] = LIBXO_VERSION;
 const char xo_version_extra[] = LIBXO_VERSION_EXTRA;
