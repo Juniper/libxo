@@ -34,14 +34,6 @@
 .Nm xo_close_list_h
 .Nm xo_close_list_hd
 .Nm xo_close_list_d
-.Nm xo_open_leaf_list
-.Nm xo_open_leaf_list_h
-.Nm xo_open_leaf_list_hd
-.Nm xo_open_leaf_list_d
-.Nm xo_close_leaf_list
-.Nm xo_close_leaf_list_h
-.Nm xo_close_leaf_list_hd
-.Nm xo_close_leaf_list_d
 .Nd open and close lists and instances
 .Sh LIBRARY
 .Lb libxo
@@ -78,23 +70,6 @@
 .Fn xo_close_list_hd "xo_handle_t *xop"
 .Ft int
 .Fn xo_close_list_d "void"
-.Ft int
-.Fn xo_open_leaf_list_h "xo_handle_t *xop" "const char *name"
-.Ft int
-.Fn xo_open_leaf_list "const char *name"
-.Ft int
-.Fn xo_open_leaf_list_hd "xo_handle_t *xop" "const char *name"
-.Ft int
-.Fn xo_open_leaf_list_d "const char *name"
-.Ft int
-.Ft int
-.Fn xo_close_leaf_list_h "xo_handle_t *xop" "const char *name"
-.Ft int
-.Fn xo_close_leaf_list "const char *name"
-.Ft int
-.Fn xo_close_leaf_list_hd "xo_handle_t *xop"
-.Ft int
-.Fn xo_close_leaf_list_d "void"
 .Sh DESCRIPTION
 Lists are sequences of instances of homogeneous data objects.
 Two
@@ -177,20 +152,12 @@ generation of XML and JSON data.
 In contrast to a list of instances, a "leaf list" is list of simple
 values.
 To emit a leaf list, call the
-.Fn xo_open_leaf_list
-and
-.Fn xo_close_leaf_list
-functions around
 .Fn xo_emit
-calls that use the ""l"" modifier:
+function using the ""l"" modifier:
 .Bd -literal -offset indent -compact
-    xo_open_list("item");
-
     for (ip = list; ip->i_title; ip++) {
 	xo_emit("{Lwc:Item}{l:item}\n", ip->i_title);
     }
-
-    xo_close_list("item");
 .Ed
 .Pp
 The name of the field must match the name of the leaf list.
