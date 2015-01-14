@@ -1,6 +1,6 @@
 language: c
 
-script: printenv && uname -a && /bin/sh ./bin/setup.sh && cd build && ../configure --enable-warnings && (cd libxo ; gcc -DHAVE_CONFIG_H -I. -I../../libxo    -I../.. -W -Wall -Wstrict-prototypes -Wmissing-prototypes -Wpointer-arith -Werror -Waggregate-return -Wcast-align -Wcast-qual -Wchar-subscripts -Wcomment -Wformat -Wimplicit -Wmissing-declarations -Wnested-externs -Wparentheses -Wreturn-type -Wshadow -Wswitch -Wtrigraphs -Wuninitialized -Wunused -Wwrite-strings -D_GNU_SOURCE -g -O2 -MT libxo.lo -MD -MP -MF .deps/libxo.Tpo -E ../../libxo/libxo.c ) && make && sudo make install && make test
+script: printenv && uname -a && /bin/sh ./bin/setup.sh && cd build && ../configure --enable-warnings && make && sudo make install && make test
 
 notifications:
   recipients:
