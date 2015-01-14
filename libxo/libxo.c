@@ -373,7 +373,6 @@ static int
 xo_is_line_buffered (FILE *stream)
 {
 #if HAVE___FLBF
-    ding dong;
     extern int __flbf(FILE *);
     if (__flbf(stream))
 	return 1;
