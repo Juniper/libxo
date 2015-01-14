@@ -80,9 +80,8 @@ main (int argc, char **argv)
 
     xo_emit("{T:Item/%-10s}{T:Count/%12s}\n");
 
-    xo_open_leaf_list("item");
     for (ip = list; ip->i_title; ip++) {
-	xo_emit("Name: {l:name/%-10s/%s}\n", ip->i_title);
+	xo_emit("Name: {l:item/%-10s/%s}\n", ip->i_title);
     }
 
     xo_close_container("contents");
