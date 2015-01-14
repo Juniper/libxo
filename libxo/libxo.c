@@ -4213,36 +4213,6 @@ xo_do_open_leaf_list (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name)
 }
 
 static int
-xo_open_leaf_list_hf (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name)
-{
-    return xo_transition(xop, flags, name, XSS_OPEN_LEAF_LIST);
-}
-
-int
-xo_open_leaf_list_h (xo_handle_t *xop, const char *name UNUSED)
-{
-    return xo_open_leaf_list_hf(xop, 0, name);
-}
-
-int
-xo_open_leaf_list (const char *name)
-{
-    return xo_open_leaf_list_hf(NULL, 0, name);
-}
-
-int
-xo_open_leaf_list_hd (xo_handle_t *xop, const char *name UNUSED)
-{
-    return xo_open_leaf_list_hf(xop, XOF_DTRT, name);
-}
-
-int
-xo_open_leaf_list_d (const char *name)
-{
-    return xo_open_leaf_list_hf(NULL, XOF_DTRT, name);
-}
-
-static int
 xo_do_close_leaf_list (xo_handle_t *xop, const char *name)
 {
     int rc = 0;
@@ -4279,30 +4249,6 @@ xo_do_close_leaf_list (xo_handle_t *xop, const char *name)
     }
 
     return rc;
-}
-
-int
-xo_close_leaf_list_h (xo_handle_t *xop, const char *name)
-{
-    return xo_transition(xop, 0, name, XSS_CLOSE_LEAF_LIST);
-}
-
-int
-xo_close_leaf_list (const char *name)
-{
-    return xo_close_leaf_list_h(NULL, name);
-}
-
-int
-xo_close_leaf_list_hd (xo_handle_t *xop)
-{
-    return xo_close_leaf_list_h(xop, NULL);
-}
-
-int
-xo_close_leaf_list_d (void)
-{
-    return xo_close_leaf_list_h(NULL, NULL);
 }
 
 static int
