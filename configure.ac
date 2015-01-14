@@ -60,6 +60,7 @@ AC_CHECK_FUNCS([asprintf])
 AC_CHECK_FUNCS([__flbf])
 
 AC_CHECK_HEADERS([dlfcn.h])
+AC_CHECK_HEADERS([stdio_ext.h])
 AC_CHECK_HEADERS([tzfile.h])
 AC_CHECK_HEADERS([stdtime/tzfile.h])
 AC_CHECK_FUNCS([dlfunc])
