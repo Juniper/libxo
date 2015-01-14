@@ -510,9 +510,11 @@ instance consists of only a single value.  In XML, these are
 rendered as single elements, where JSON renders them as arrays.
 
     EXAMPLE:
+        xo_open_leaf_list("user");
         for (i = 0; i < num_users; i++) {
             xo_emit("Member {l:user}\n", user[i].u_name);
         }
+        xo_close_leaf_list("user");
     XML:
         <user>phil</user>
         <user>pallavi</user>
