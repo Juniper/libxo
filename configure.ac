@@ -133,6 +133,14 @@ AC_ARG_ENABLE([debug],
 AC_MSG_RESULT([$LIBXO_DEBUG])
 AM_CONDITIONAL([LIBXO_DEBUG], [test "$LIBXO_DEBUG" != "no"])
 
+AC_MSG_CHECKING([whether to build with text-only rendering])
+AC_ARG_ENABLE([text-only],
+    [  --enable-text-only    Turn on text-only rendering],
+    [LIBXO_TEXT_ONLY=yes; AC_DEFINE([LIBXO_TEXT_ONLY], [1], [Enable text-only rendering])],
+    [LIBXO_TEXT_ONLY=no])
+AC_MSG_RESULT([$LIBXO_TEXT_ONLY])
+AM_CONDITIONAL([LIBXO_TEXT_ONLY], [test "$LIBXO_TEXT_ONLY" != "no"])
+
 AC_CHECK_LIB([m], [lrint])
 AM_CONDITIONAL([HAVE_LIBM], [test "$HAVE_LIBM" != "no"])
 
@@ -262,4 +270,5 @@ AC_MSG_NOTICE([summary of build options:
   debug:            ${LIBXO_DEBUG:-no}
   printf-like:      ${HAVE_PRINTFLIKE:-no}
   libxo-options:    ${LIBXO_OPTS:-no}
+  text-only:        ${LIBXO_TEXT_ONLY:-no}
 ])
