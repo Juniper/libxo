@@ -276,6 +276,16 @@ xo_buf_append_div (xo_handle_t *xop, const char *class, xo_xff_flags_t flags,
 static void
 xo_anchor_clear (xo_handle_t *xop);
 
+static inline unsigned short
+xo_style (xo_handle_t *xop UNUSED)
+{
+#ifdef LIBXO_TEXT_ONLY
+    return XO_STYLE_TEXT;
+#else /* LIBXO_TEXT_ONLY */
+    return xop->xo_style;
+#endif /* LIBXO_TEXT_ONLY */
+}
+
 /*
  * Callback to write data to a FILE pointer
  */
@@ -656,7 +666,7 @@ xo_buf_escape (xo_handle_t *xop, xo_buffer_t *xbp,
 
     memcpy(xbp->xb_curp, str, len);
 
-    switch (xop->xo_style) {
+    switch (xo_style(xop)) {
     case XO_STYLE_XML:
     case XO_STYLE_HTML:
 	len = xo_escape_xml(xbp, len, (flags & XFF_ATTR));
@@ -1219,7 +1229,7 @@ xo_message_hcv (xo_handle_t *xop, int code, const char *fmt, va_list vap)
 
     int need_nl = (fmt[strlen(fmt) - 1] != '\n');
 
-    switch (xop->xo_style) {
+    switch (xo_style(xop)) {
     case XO_STYLE_XML:
 	xbp = &xop->xo_data;
 	if (xop->xo_flags & XOF_PRETTY)
@@ -1457,7 +1467,7 @@ xo_style_t
 xo_get_style (xo_handle_t *xop)
 {
     xop = xo_default(xop);
-    return xop->xo_style;
+    return xo_style(xop);
 }
 
 static int
@@ -1801,7 +1811,7 @@ xo_line_ensure_open (xo_handle_t *xop, xo_xff_flags_t flags UNUSED)
     if (xop->xo_flags & XOF_DIV_OPEN)
 	return;
 
-    if (xop->xo_style != XO_STYLE_HTML)
+    if (xo_style(xop) != XO_STYLE_HTML)
 	return;
 
     xop->xo_flags |= XOF_DIV_OPEN;
@@ -1819,7 +1829,7 @@ xo_line_close (xo_handle_t *xop)
 {
     static char div_close[] = "</div>";
 
-    switch (xop->xo_style) {
+    switch (xo_style(xop)) {
     case XO_STYLE_HTML:
 	if (!(xop->xo_flags & XOF_DIV_OPEN))
 	    xo_line_ensure_open(xop, 0);
@@ -1976,7 +1986,7 @@ xo_format_string_direct (xo_handle_t *xop, xo_buffer_t *xbp,
 	if (width < 0)
 	    width = iswcntrl(wc) ? 0 : 1;
 
-	if (xop->xo_style == XO_STYLE_TEXT || xop->xo_style == XO_STYLE_HTML) {
+	if (xo_style(xop) == XO_STYLE_TEXT || xo_style(xop) == XO_STYLE_HTML) {
 	    if (max > 0 && cols + width > max)
 		break;
 	}
@@ -1985,7 +1995,7 @@ xo_format_string_direct (xo_handle_t *xop, xo_buffer_t *xbp,
 	case XF_ENC_UTF8:
 
 	    /* Output in UTF-8 needs to be escaped, based on the style */
-	    switch (xop->xo_style) {
+	    switch (xo_style(xop)) {
 	    case XO_STYLE_XML:
 	    case XO_STYLE_HTML:
 		if (wc == '<')
@@ -2071,7 +2081,7 @@ xo_format_string (xo_handle_t *xop, xo_buffer_t *xbp, xo_xff_flags_t flags,
     wchar_t *wcp = NULL;
     int len, cols = 0, rc = 0;
     int off = xbp->xb_curp - xbp->xb_bufp, off2;
-    int need_enc = (xop->xo_style == XO_STYLE_TEXT)
+    int need_enc = (xo_style(xop) == XO_STYLE_TEXT)
 	? XF_ENC_LOCALE : XF_ENC_UTF8;
 
     if (xo_check_conversion(xop, xfp->xf_enc, need_enc))
@@ -2185,7 +2195,7 @@ static void
 xo_data_append_content (xo_handle_t *xop, const char *str, int len)
 {
     int cols;
-    int need_enc = (xop->xo_style == XO_STYLE_TEXT)
+    int need_enc = (xo_style(xop) == XO_STYLE_TEXT)
 	? XF_ENC_LOCALE : XF_ENC_UTF8;
 
     cols = xo_format_string_direct(xop, &xop->xo_data, XFF_UNESCAPE,
@@ -2246,9 +2256,9 @@ xo_format_data (xo_handle_t *xop, xo_buffer_t *xbp,
     xo_format_t xf;
     const char *cp, *ep, *sp, *xp = NULL;
     int rc, cols;
-    int style = (flags & XFF_XML) ? XO_STYLE_XML : xop->xo_style;
+    int style = (flags & XFF_XML) ? XO_STYLE_XML : xo_style(xop);
     unsigned make_output = !(flags & XFF_NO_OUTPUT);
-    int need_enc = (xop->xo_style == XO_STYLE_TEXT)
+    int need_enc = (xo_style(xop) == XO_STYLE_TEXT)
 	? XF_ENC_LOCALE : XF_ENC_UTF8;
     
     if (xbp == NULL)
@@ -2310,11 +2320,11 @@ xo_format_data (xo_handle_t *xop, xo_buffer_t *xbp,
 	/* Hidden fields are only visible to JSON and XML */
 	if (xop->xo_flags & XFF_ENCODE_ONLY) {
 	    if (style != XO_STYLE_XML
-		    && xop->xo_style != XO_STYLE_JSON)
+		    && xo_style(xop) != XO_STYLE_JSON)
 		xf.xf_skip = 1;
 	} else if (xop->xo_flags & XFF_DISPLAY_ONLY) {
 	    if (style != XO_STYLE_TEXT
-		    && xop->xo_style != XO_STYLE_HTML)
+		    && xo_style(xop) != XO_STYLE_HTML)
 		xf.xf_skip = 1;
 	}
 
@@ -2420,8 +2430,8 @@ xo_format_data (xo_handle_t *xop, xo_buffer_t *xbp,
 		rc = xo_format_string(xop, xbp, flags, &xf);
 
 		if ((flags & XFF_TRIM_WS)
-			&& (xop->xo_style == XO_STYLE_XML
-				|| xop->xo_style == XO_STYLE_JSON))
+			&& (xo_style(xop) == XO_STYLE_XML
+				|| xo_style(xop) == XO_STYLE_JSON))
 		    rc = xo_trim_ws(xbp, rc);
 
 	    } else {
@@ -2753,7 +2763,7 @@ xo_buf_append_div (xo_handle_t *xop, const char *class, xo_xff_flags_t flags,
 static void
 xo_format_text (xo_handle_t *xop, const char *str, int len)
 {
-    switch (xop->xo_style) {
+    switch (xo_style(xop)) {
     case XO_STYLE_TEXT:
 	xo_buf_append_locale(xop, &xop->xo_data, str, len);
 	break;
@@ -2776,7 +2786,7 @@ xo_format_title (xo_handle_t *xop, const char *str, int len,
 	flen = 2;
     }
 
-    switch (xop->xo_style) {
+    switch (xo_style(xop)) {
     case XO_STYLE_XML:
     case XO_STYLE_JSON:
 	/*
@@ -2794,7 +2804,7 @@ xo_format_title (xo_handle_t *xop, const char *str, int len,
     int rc;
     int need_enc = XF_ENC_LOCALE;
 
-    if (xop->xo_style == XO_STYLE_HTML) {
+    if (xo_style(xop) == XO_STYLE_HTML) {
 	need_enc = XF_ENC_UTF8;
 	xo_line_ensure_open(xop, 0);
 	if (xop->xo_flags & XOF_PRETTY)
@@ -2862,7 +2872,7 @@ xo_format_title (xo_handle_t *xop, const char *str, int len,
     }
 
     /* If we're styling HTML, then we need to escape it */
-    if (xop->xo_style == XO_STYLE_HTML) {
+    if (xo_style(xop) == XO_STYLE_HTML) {
 	rc = xo_escape_xml(xbp, rc, 0);
     }
 
@@ -2870,7 +2880,7 @@ xo_format_title (xo_handle_t *xop, const char *str, int len,
 	xbp->xb_curp += rc;
 
  move_along:
-    if (xop->xo_style == XO_STYLE_HTML) {
+    if (xo_style(xop) == XO_STYLE_HTML) {
 	xo_data_append(xop, div_close, sizeof(div_close) - 1);
 	if (xop->xo_flags & XOF_PRETTY)
 	    xo_data_append(xop, "\n", 1);
@@ -2978,7 +2988,7 @@ xo_format_value (xo_handle_t *xop, const char *name, int nlen,
 	}
     }
 
-    switch (xop->xo_style) {
+    switch (xo_style(xop)) {
     case XO_STYLE_TEXT:
 	if (flags & XFF_ENCODE_ONLY)
 	    flags |= XFF_NO_OUTPUT;
@@ -3142,7 +3152,7 @@ xo_format_content (xo_handle_t *xop, const char *class_name,
 		   const char *xml_tag, int display_only,
 		   const char *str, int len, const char *fmt, int flen)
 {
-    switch (xop->xo_style) {
+    switch (xo_style(xop)) {
     case XO_STYLE_TEXT:
 	if (len) {
 	    xo_data_append_content(xop, str, len);
@@ -3211,9 +3221,9 @@ xo_format_units (xo_handle_t *xop, const char *str, int len,
     int start = xop->xo_units_offset;
     int stop = xbp->xb_curp - xbp->xb_bufp;
 
-    if (xop->xo_style == XO_STYLE_XML)
+    if (xo_style(xop) == XO_STYLE_XML)
 	xo_buf_append(xbp, units_start_xml, sizeof(units_start_xml) - 1);
-    else if (xop->xo_style == XO_STYLE_HTML)
+    else if (xo_style(xop) == XO_STYLE_HTML)
 	xo_buf_append(xbp, units_start_html, sizeof(units_start_html) - 1);
     else
 	return;
@@ -3295,7 +3305,7 @@ static void
 xo_anchor_start (xo_handle_t *xop, const char *str, int len,
 		 const char *fmt, int flen)
 {
-    if (xop->xo_style != XO_STYLE_TEXT && xop->xo_style != XO_STYLE_HTML)
+    if (xo_style(xop) != XO_STYLE_TEXT && xo_style(xop) != XO_STYLE_HTML)
 	return;
 
     if (xop->xo_flags & XOF_ANCHOR)
@@ -3317,7 +3327,7 @@ static void
 xo_anchor_stop (xo_handle_t *xop, const char *str, int len,
 		 const char *fmt, int flen)
 {
-    if (xop->xo_style != XO_STYLE_TEXT && xop->xo_style != XO_STYLE_HTML)
+    if (xo_style(xop) != XO_STYLE_TEXT && xo_style(xop) != XO_STYLE_HTML)
 	return;
 
     if (!(xop->xo_flags & XOF_ANCHOR)) {
@@ -3726,7 +3736,7 @@ xo_attr_hv (xo_handle_t *xop, const char *name, const char *fmt, va_list vap)
     const int extra = 5; 	/* space, equals, quote, quote, and nul */
     xop = xo_default(xop);
 
-    if (xop->xo_style != XO_STYLE_XML)
+    if (xo_style(xop) != XO_STYLE_XML)
 	return 0;
 
     int nlen = strlen(name);
@@ -3798,7 +3808,7 @@ static void
 xo_depth_change (xo_handle_t *xop, const char *name,
 		 int delta, int indent, xo_state_t state, xo_xsf_flags_t flags)
 {
-    if (xop->xo_style == XO_STYLE_HTML || xop->xo_style == XO_STYLE_TEXT)
+    if (xo_style(xop) == XO_STYLE_HTML || xo_style(xop) == XO_STYLE_TEXT)
 	indent = 0;
 
     if (xop->xo_flags & XOF_DTRT)
@@ -3898,7 +3908,7 @@ xo_do_open_container (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
 
     flags |= xop->xo_flags;	/* Pick up handle flags */
 
-    switch (xop->xo_style) {
+    switch (xo_style(xop)) {
     case XO_STYLE_XML:
 	rc = xo_printf(xop, "%*s<%s", xo_indent(xop), "", name);
 
@@ -3992,7 +4002,7 @@ xo_do_close_container (xo_handle_t *xop, const char *name)
 	}
     }
 
-    switch (xop->xo_style) {
+    switch (xo_style(xop)) {
     case XO_STYLE_XML:
 	xo_depth_change(xop, name, -1, -1, XSS_CLOSE_CONTAINER, 0);
 	rc = xo_printf(xop, "%*s</%s>%s", xo_indent(xop), "", name, ppn);
@@ -4048,7 +4058,7 @@ xo_do_open_list (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name)
 
     xop = xo_default(xop);
 
-    if (xop->xo_style == XO_STYLE_JSON) {
+    if (xo_style(xop) == XO_STYLE_JSON) {
 	const char *ppn = (xop->xo_flags & XOF_PRETTY) ? "\n" : "";
 	const char *pre_nl = "";
 
@@ -4133,7 +4143,7 @@ xo_do_close_list (xo_handle_t *xop, const char *name)
 	}
     }
 
-    if (xop->xo_style == XO_STYLE_JSON) {
+    if (xo_style(xop) == XO_STYLE_JSON) {
 	if (xop->xo_stack[xop->xo_depth].xs_flags & XSF_NOT_FIRST)
 	    pre_nl = (xop->xo_flags & XOF_PRETTY) ? "\n" : "";
 	xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
@@ -4182,7 +4192,7 @@ xo_do_open_leaf_list (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name)
 
     xop = xo_default(xop);
 
-    if (xop->xo_style == XO_STYLE_JSON) {
+    if (xo_style(xop) == XO_STYLE_JSON) {
 	const char *ppn = (xop->xo_flags & XOF_PRETTY) ? "\n" : "";
 	const char *pre_nl = "";
 
@@ -4238,7 +4248,7 @@ xo_do_close_leaf_list (xo_handle_t *xop, const char *name)
 	}
     }
 
-    if (xop->xo_style == XO_STYLE_JSON) {
+    if (xo_style(xop) == XO_STYLE_JSON) {
 	if (xop->xo_stack[xop->xo_depth].xs_flags & XSF_NOT_FIRST)
 	    pre_nl = (xop->xo_flags & XOF_PRETTY) ? "\n" : "";
 	xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
@@ -4271,7 +4281,7 @@ xo_do_open_instance (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name)
 	name = XO_FAILURE_NAME;
     }
 
-    switch (xop->xo_style) {
+    switch (xo_style(xop)) {
     case XO_STYLE_XML:
 	rc = xo_printf(xop, "%*s<%s", xo_indent(xop), "", name);
 
@@ -4357,7 +4367,7 @@ xo_do_close_instance (xo_handle_t *xop, const char *name)
 	}
     }
 
-    switch (xop->xo_style) {
+    switch (xo_style(xop)) {
     case XO_STYLE_XML:
 	xo_depth_change(xop, name, -1, -1, XSS_CLOSE_INSTANCE, 0);
 	rc = xo_printf(xop, "%*s</%s>%s", xo_indent(xop), "", name, ppn);
@@ -4836,7 +4846,7 @@ xo_flush_h (xo_handle_t *xop)
 
     xop = xo_default(xop);
 
-    switch (xop->xo_style) {
+    switch (xo_style(xop)) {
     case XO_STYLE_HTML:
 	if (xop->xo_flags & XOF_DIV_OPEN) {
 	    xop->xo_flags &= ~XOF_DIV_OPEN;
@@ -4871,7 +4881,7 @@ xo_finish_h (xo_handle_t *xop)
     if (!(xop->xo_flags & XOF_NO_CLOSE))
 	xo_do_close_all(xop, xop->xo_stack);
 
-    switch (xop->xo_style) {
+    switch (xo_style(xop)) {
     case XO_STYLE_JSON:
 	if (!(xop->xo_flags & XOF_NO_TOP)) {
 	    if (xop->xo_flags & XOF_TOP_EMITTED)
@@ -4913,7 +4923,7 @@ xo_error_hv (xo_handle_t *xop, const char *fmt, va_list vap)
 	fmt = newfmt;
     }
 
-    switch (xop->xo_style) {
+    switch (xo_style(xop)) {
     case XO_STYLE_TEXT:
 	vfprintf(stderr, fmt, vap);
 	break;
