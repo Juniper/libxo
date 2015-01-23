@@ -38,6 +38,7 @@ man_MANS = \
     xo_no_setlocale.3 \
     xo_open_container.3 \
     xo_open_list.3 \
+    xo_open_marker.3 \
     xo_parse_args.3 \
     xo_set_allocator.3 \
     xo_set_flags.3 \
