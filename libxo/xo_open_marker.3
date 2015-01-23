@@ -36,14 +36,18 @@
 .Fn  xo_close_marker_h "xo_handle_t *handle" "const char *name"
 .Sh DESCRIPTION
 .Nm libxo
-represents hierarchy using two consstructs:
-.Dq markers
+represents hierarchy using two constructs:
+.Dq containers
 and
 .Dq lists .
 A marker can be used to affect how open constructs are closed, either
 by preventing their (implicit or explicit) closure or by forcing their
 closure.
-A marker is used to "freeze" any open constructs.  Calls to
+While a marker is open, no other open constructs can be closed. 
+When a marker is closed, all constructs open since the marker was opened
+will be closed.
+A marker is used to "freeze" any open constructs.
+Calls to
 .Fn xo_close_*
 functions that would normally close them will be ignored, effectively
 blocking their closure.
@@ -53,6 +57,8 @@ is called, any containers, lists, or leaf-lists open since the
 matching
 .Fn xo_open_marker
 call will be close and the marker discarded.
+Markers use names which are not user-visible, allowing the caller to
+choose appropriate internal names.
 The marker has no value and is not emitted in any form.
 .Pp
 To open a marker, call
@@ -62,13 +68,22 @@ or
 The former uses the default handle and
 the latter accepts a specific handle.
 .Pp
-To close a level, use the
+To close a marker, use the
 .Fn xo_close_marker
 or
 .Fn xo_close_marker_h
 functions.
 .Pp
 Each open call must have a matching close call.
+.Pp
+In this example, the
+.Fn xo_close_container
+call on line [1] will be ignored, since the open marker "outer"
+will prevent close of any open constructs that precede it.
+The
+.Fn xo_close_marker
+call on line [2] will close the "system" container, since it was
+opened after the "outer" marker.
 .Bd -literal -offset indent -compact
     Example:
 
@@ -81,14 +96,19 @@ Each open call must have a matching close call.
 	xo_close_marker("outer");    /* [2] */
         xo_close_container("top");
 .Ed
-The
-.Fn xo_close_container
-call on line [1] will be ignored, since the open marker "outer"
-will prevent close of any open constructs that precede it.
-The
-.Fn xo_close_marker
-call on line [2] will close the "system" container, since it was
-opened after the "outer" marker.
+.Pp
+In this example, the code whiffles through a list of fish, calling a
+function to emit details about each fish.  The marker "fish-guts" is
+used to ensure that any constructs opened by the function are closed
+properly.
+.Bd -literal -offset indent
+    for (i = 0; fish[i]; i++) {
+        xo_open_instance("fish");
+        xo_open_marker("fish-guts");
+        dump_fish_details(i);
+        xo_close_marker("fish-guts");
+    }
+.Ed
 .Sh ADDITIONAL DOCUMENTATION
 Complete documentation can be found on github:
 .Bd -literal -offset indent
