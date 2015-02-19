@@ -47,4 +47,5 @@ man_MANS = \
     xo_set_style.3 \
     xo_set_writer.3
 
-EXTRA_DIST =
+EXTRA_DIST = ${man_MANS}
+
