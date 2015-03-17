@@ -17,6 +17,14 @@
 #ifndef INCLUDE_XO_H
 #define INCLUDE_XO_H
 
+#include <sys/types.h>
+
+#ifdef __dead2
+#define NORETURN __dead2
+#else
+#define NORETURN
+#endif /* __dead2 */
+
 /** Formatting types */
 typedef unsigned xo_style_t;
 #define XO_STYLE_TEXT	0	/** Generate text output */
@@ -272,13 +280,13 @@ void
 xo_warnx (const char *fmt, ...);
 
 void
-xo_err (int eval, const char *fmt, ...);
+xo_err (int eval, const char *fmt, ...) NORETURN;
 
 void
-xo_errx (int eval, const char *fmt, ...);
+xo_errx (int eval, const char *fmt, ...) NORETURN;
 
 void
-xo_errc (int eval, int code, const char *fmt, ...);
+xo_errc (int eval, int code, const char *fmt, ...) NORETURN;
 
 void
 xo_message_hcv (xo_handle_t *xop, int code, const char *fmt, va_list vap);
