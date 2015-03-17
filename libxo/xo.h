@@ -260,37 +260,37 @@ void
 xo_set_leading_xpath (xo_handle_t *xop, const char *path);
 
 void
-xo_warn_hc (xo_handle_t *xop, int code, const char *fmt, ...);
+xo_warn_hc (xo_handle_t *xop, int code, const char *fmt, ...) __printflike(3, 4);
 
 void
-xo_warn_c (int code, const char *fmt, ...);
+xo_warn_c (int code, const char *fmt, ...) __printflike(2, 3);
 
 void
-xo_warn (const char *fmt, ...);
+xo_warn (const char *fmt, ...) __printflike(1, 2);
 
 void
-xo_warnx (const char *fmt, ...);
+xo_warnx (const char *fmt, ...) __printflike(1, 2);
 
 void
-xo_err (int eval, const char *fmt, ...);
+xo_err (int eval, const char *fmt, ...) __dead2 __printflike(2, 3);
 
 void
-xo_errx (int eval, const char *fmt, ...);
+xo_errx (int eval, const char *fmt, ...) __dead2 __printflike(2, 3);
 
 void
-xo_errc (int eval, int code, const char *fmt, ...);
+xo_errc (int eval, int code, const char *fmt, ...) __dead2 __printflike(3, 4);
 
 void
 xo_message_hcv (xo_handle_t *xop, int code, const char *fmt, va_list vap);
 
 void
-xo_message_hc (xo_handle_t *xop, int code, const char *fmt, ...);
+xo_message_hc (xo_handle_t *xop, int code, const char *fmt, ...) __printflike(3, 4);
 
 void
-xo_message_c (int code, const char *fmt, ...);
+xo_message_c (int code, const char *fmt, ...) __printflike(2, 3);
 
 void
-xo_message (const char *fmt, ...);
+xo_message (const char *fmt, ...) __printflike(1, 2);
 
 void
 xo_no_setlocale (void);
