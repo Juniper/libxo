@@ -3103,7 +3103,9 @@ xo_format_value (xo_handle_t *xop, const char *name, int nlen,
 	}
 
 	if (flags & XFF_LEAF_LIST) {
-	    if (first && pretty)
+	    if (!first && pretty)
+		xo_data_append(xop, "\n", 1);
+	    if (pretty)
 		xo_buf_indent(xop, -1);
 	} else {
 	    if (pretty)
@@ -3122,10 +3124,10 @@ xo_format_value (xo_handle_t *xop, const char *name, int nlen,
 			xbp->xb_bufp[off] = '_';
 	    }
 	    xo_data_append(xop, "\":", 2);
+	    if (pretty)
+	        xo_data_append(xop, " ", 1);
 	}
 
-	if (pretty)
-	    xo_data_append(xop, " ", 1);
 	if (quote)
 	    xo_data_append(xop, "\"", 1);
 
