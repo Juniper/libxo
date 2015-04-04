@@ -228,17 +228,17 @@ data, including data type, description, and an XPath location.
     <div class="line">
       <div class="data" data-tag="blocks">36</div>
       <div class="padding">      </div>
-      <div class="data data-tag="path">./src</div>
+      <div class="data" data-tag="path">./src</div>
     </div>
     <div class="line">
       <div class="data" data-tag="blocks">40</div>
       <div class="padding">      </div>
-      <div class="data data-tag="path">./bin</div>
+      <div class="data" data-tag="path">./bin</div>
     </div>
     <div class="line">
       <div class="data" data-tag="blocks">90</div>
       <div class="padding">      </div>
-      <div class="data data-tag="path">./</div>
+      <div class="data" data-tag="path">./</div>
     </div>
 
 ** Format Strings @format-strings@
