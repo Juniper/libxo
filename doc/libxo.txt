@@ -134,7 +134,7 @@ A single libxo function call in source code is all that's required:
       <host>my-box</host>
       <domain>example.com</domain>
     JSON:
-      "host": my-box",
+      "host": "my-box",
       "domain": "example.com"
       
 For brevity, the HTML output is emitted.
