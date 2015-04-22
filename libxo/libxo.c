@@ -3521,6 +3521,7 @@ xo_colors_emit_text (xo_handle_t *xop UNUSED, xo_colors_t *xocp)
 static void
 xo_colors_emit_html (xo_handle_t *xop UNUSED, xo_colors_t *xocp UNUSED)
 {
+    /* Shockingly underimplemented */
 }
 
 static void
