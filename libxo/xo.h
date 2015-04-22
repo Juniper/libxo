@@ -66,6 +66,8 @@ typedef unsigned long long xo_xof_flags_t;
 #define XOF_FLUSH_LINE	XOF_BIT(23) /** Flush after each newline */
 
 #define XOF_NO_CLOSE	XOF_BIT(24) /** xo_finish won't close open elements */
+#define XOF_COLOR_ALLOWED XOF_BIT(25) /** Allow color/effects to be enabled */
+#define XOF_COLOR	XOF_BIT(26) /** Enable color and effects */
 
 /*
  * The xo_info_t structure provides a mapping between names and
