@@ -121,6 +121,54 @@ typedef struct xo_stack_s {
     char *xs_keys;		/* XPath predicate for any key fields */
 } xo_stack_t;
 
+/* "colors" refers to fancy ansi codes */
+#define XO_COL_BLACK		0
+#define XO_COL_RED		1
+#define XO_COL_GREEN		2
+#define XO_COL_YELLOW		3
+#define XO_COL_BLUE		4
+#define XO_COL_MAGENTA		5
+#define XO_COL_CYAN		6
+#define XO_COL_WHITE		7
+#define XO_COL_DEFAULT		8
+
+#define XO_NUM_COLORS		9
+
+/* "effects" refers to fancy ansi codes */
+/*
+ * Yes, there's no blink.  We're civilized.  We like users.  Blink
+ * isn't something one does to someone you like.  Friends don't let
+ * friends use blink.  On friends.  You know what I mean.  Blink is
+ * like, well, it's like bursting into show tunes at a funeral.  It's
+ * just not done.  Not something anyone wants.  And on those rare
+ * instances where it might actually be appropriate, it's still wrong.
+ * It's likely done my the wrong person for the wrong reason.  Just
+ * like blink.  And if I implemented blink, I'd be like a funeral
+ * director who adds "Would you like us to burst into show tunes?" on
+ * the list of questions asking while making funeral arrangements.
+ * It's formalizing wrongness in the wrong way.  And we're just too
+ * civilized to do that.   Hhhmph!
+ */
+#define XO_EFF_RESET		(1<<0)
+#define XO_EFF_NORMAL		(1<<1)
+#define XO_EFF_FOREGROUND	(1<<2) /* "Special" effects bit: fg color */
+#define XO_EFF_BACKGROUND	(1<<3) /* "Special" effects bit: bg color */
+#define XO_EFF_BOLD		(1<<4)
+#define XO_EFF_UNDERLINE	(1<<5)
+#define XO_EFF_INVERSE		(1<<6)
+
+#define XO_EFF_CLEAR_BITS \
+    (XO_EFF_RESET | XO_EFF_NORMAL | XO_EFF_FOREGROUND | XO_EFF_BACKGROUND)
+
+typedef uint8_t xo_effect_t;
+typedef uint8_t xo_color_t;
+typedef struct xo_colors_s {
+    xo_effect_t xoc_eff_on;	/* Bits to turn on */
+    xo_effect_t xoc_eff_off;	/* Bits to turn off */
+    xo_color_t xoc_col_fg;	/* Foreground color */
+    xo_color_t xoc_col_bg;	/* Background color */
+} xo_colors_t;
+
 /*
  * xo_handle_t: this is the principle data structure for libxo.
  * It's used as a store for state, options, and content.
@@ -136,7 +184,6 @@ struct xo_handle_s {
     xo_formatter_t xo_formatter; /* Custom formating function */
     xo_checkpointer_t xo_checkpointer; /* Custom formating support function */
     void *xo_opaque;		/* Opaque data for write function */
-    FILE *xo_fp;		/* XXX File pointer */
     xo_buffer_t xo_data;	/* Output data */
     xo_buffer_t xo_fmt;	   	/* Work area for building format strings */
     xo_buffer_t xo_attrs;	/* Work area for building XML attributes */
@@ -154,6 +201,9 @@ struct xo_handle_s {
     int xo_anchor_min_width;	/* Desired width of anchored text */
     unsigned xo_units_offset;	/* Start of units insertion point */
     unsigned xo_columns;	/* Columns emitted during this xo_emit call */
+    uint8_t xo_color_map_fg[XO_NUM_COLORS]; /* Foreground color mappings */
+    uint8_t xo_color_map_bg[XO_NUM_COLORS]; /* Background color mappings */
+    xo_colors_t xo_colors;	/* Current color and effect values */
 };
 
 /* Flags for formatting functions */
@@ -161,7 +211,7 @@ typedef unsigned long xo_xff_flags_t;
 #define XFF_COLON	(1<<0)	/* Append a ":" */
 #define XFF_COMMA	(1<<1)	/* Append a "," iff there's more output */
 #define XFF_WS		(1<<2)	/* Append a blank */
-#define XFF_ENCODE_ONLY	(1<<3)	/* Only emit for encoding formats (xml and json) */
+#define XFF_ENCODE_ONLY	(1<<3)	/* Only emit for encoding formats (xml, json) */
 
 #define XFF_QUOTE	(1<<4)	/* Force quotes */
 #define XFF_NOQUOTE	(1<<5)	/* Force no quotes */
@@ -276,6 +326,14 @@ xo_buf_append_div (xo_handle_t *xop, const char *class, xo_xff_flags_t flags,
 static void
 xo_anchor_clear (xo_handle_t *xop);
 
+/*
+ * xo_style is used to retrieve the current style.  When we're built
+ * for "text only" mode, we use this function to drive the removal
+ * of most of the code in libxo.  We return a constant and the compiler
+ * happily removes the non-text code that is not longer executed.  This
+ * trims our code nicely without needing to trampel perfectly readable
+ * code with ifdefs.
+ */
 static inline unsigned short
 xo_style (xo_handle_t *xop UNUSED)
 {
@@ -373,8 +431,8 @@ xo_no_setlocale (void)
 /*
  * We need to decide if stdout is line buffered (_IOLBF).  Lacking a
  * standard way to decide this (e.g. getlinebuf()), we have configure
- * look to find __flbf, which glibc supported.  If not, we'll rely
- * on isatty, with the assumption that terminals are the only thing
+ * look to find __flbf, which glibc supported.  If not, we'll rely on
+ * isatty, with the assumption that terminals are the only thing
  * that's line buffered.  We _could_ test for "steam._flags & _IOLBF",
  * which is all __flbf does, but that's even tackier.  Like a
  * bedazzled Elvis outfit on an ugly lap dog sort of tacky.  Not
@@ -407,6 +465,13 @@ xo_init_handle (xo_handle_t *xop)
 
     if (xo_is_line_buffered(stdout))
 	xop->xo_flags |= XOF_FLUSH_LINE;
+
+    /*
+     * We only want to do color output on terminals, but we only want
+     * to do this if the user has asked for color.
+     */
+    if ((xop->xo_flags & XOF_COLOR_ALLOWED) && isatty(1))
+	xop->xo_flags |= XOF_COLOR;
 
     /*
      * We need to initialize the locale, which isn't really pretty.
@@ -507,7 +572,7 @@ xo_default (xo_handle_t *xop)
 
 /*
  * Return the number of spaces we should be indenting.  If
- * we are pretty-printing, theis is indent * indent_by.
+ * we are pretty-printing, this is indent * indent_by.
  */
 static int
 xo_indent (xo_handle_t *xop)
@@ -1502,6 +1567,8 @@ xo_name_to_flag (const char *name)
 	return XOF_INFO;
     if (strcmp(name, "warn-xml") == 0)
 	return XOF_WARN_XML;
+    if (strcmp(name, "color") == 0)
+	return XOF_COLOR_ALLOWED;
     if (strcmp(name, "columns") == 0)
 	return XOF_COLUMNS;
     if (strcmp(name, "dtrt") == 0)
@@ -1557,6 +1624,11 @@ xo_set_options (xo_handle_t *xop, const char *input)
 
     xop = xo_default(xop);
 
+#ifdef LIBXO_COLOR_ON_BY_DEFAULT
+    /* If the installer used --enable-color-on-by-default, then we allow it */
+    xop->xo_flags |= XOF_COLOR_ALLOWED;
+#endif /* LIBXO_COLOR_ON_BY_DEFAULT */
+
     /*
      * We support a simpler, old-school style of giving option
      * also, using a single character for each option.  It's
@@ -1567,6 +1639,10 @@ xo_set_options (xo_handle_t *xop, const char *input)
 
 	for (input++ ; *input; input++) {
 	    switch (*input) {
+	    case 'c':
+		xop->xo_flags |= XOF_COLOR_ALLOWED;
+		break;
+
 	    case 'f':
 		xop->xo_flags |= XOF_FLUSH;
 		break;
@@ -1644,6 +1720,11 @@ xo_set_options (xo_handle_t *xop, const char *input)
 	if (vp)
 	    *vp++ = '\0';
 
+	if (strcmp("colors", cp) == 0) {
+	    /* XXX Look for colors=red-blue+green-yellow */
+	    continue;
+	}
+
 	new_style = xo_name_to_style(cp);
 	if (new_style >= 0) {
 	    if (style >= 0)
@@ -1655,7 +1736,9 @@ xo_set_options (xo_handle_t *xop, const char *input)
 	    if (new_flag != 0)
 		xop->xo_flags |= new_flag;
 	    else {
-		if (strcmp(cp, "indent") == 0) {
+		if (strcmp(cp, "no-color") == 0) {
+		    xop->xo_flags &= ~XOF_COLOR_ALLOWED;
+		} else if (strcmp(cp, "indent") == 0) {
 		    xop->xo_indent_by = atoi(vp);
 		} else {
 		    xo_warnx("unknown option: '%s'", cp);
@@ -3207,6 +3290,307 @@ xo_format_content (xo_handle_t *xop, const char *class_name,
     }
 }
 
+static const char *xo_color_names[] = {
+    "black",	/* XO_COL_BLACK */
+    "red",	/* XO_CLOR_RED */
+    "green",	/* XO_COL_GREEN */
+    "yellow",	/* XO_COL_YELLOW */
+    "blue",	/* XO_COL_BLUE */
+    "magenta",	/* XO_COL_MAGENTA */
+    "cyan",	/* XO_COL_CYAN */
+    "white",	/* XO_COL_WHITE */
+    "custom-color", /* nonsense; space savere */
+    "default",	/* XO_COL_DEFAULT */
+    NULL
+};
+
+static int
+xo_color_find (const char *str)
+{
+    int i;
+
+    for (i = 0; xo_color_names[i]; i++) {
+	if (strcmp(xo_color_names[i], str) == 0)
+	    return i;
+    }
+
+    return -1;
+}
+
+static const char *xo_effect_names[] = {
+    "reset",			/* XO_EFF_RESET */
+    "normal",			/* XO_EFF_NORMAL */
+    "fg-",			/* XO_EFF_FOREGROUND */
+    "bg-",			/* XO_EFF_BACKGROUND */
+    "bold",			/* XO_EFF_BOLD */
+    "underline",		/* XO_EFF_UNDERLINE */
+    "inverse",			/* XO_EFF_INVERSE */
+    NULL
+};
+
+static const char *xo_effect_on_codes[] = {
+    "0",			/* XO_EFF_RESET */
+    "0",			/* XO_EFF_NORMAL */
+    "3", /* 30-37 */		/* XO_EFF_FOREGROUND */
+    "4", /* 40-47 */		/* XO_EFF_BACKGROUND */
+    "1",			/* XO_EFF_BOLD */
+    "4",			/* XO_EFF_UNDERLINE */
+    "7",			/* XO_EFF_INVERSE */
+    NULL
+};
+
+#if 0
+static const char *xo_effect_off_codes[] = {
+    "0",			/* XO_EFF_RESET */
+    "0",			/* XO_EFF_NORMAL */
+    "39",			/* XO_EFF_FOREGROUND */
+    "49",			/* XO_EFF_BACKGROUND */
+    "21",			/* XO_EFF_BOLD */
+    "24",			/* XO_EFF_UNDERLINE */
+    "27",			/* XO_EFF_INVERSE */
+    NULL
+};
+#endif
+
+static int
+xo_effect_find (const char *str)
+{
+    int i;
+
+    for (i = 0; xo_effect_names[i]; i++) {
+	if (strcmp(xo_effect_names[i], str) == 0)
+	    return i;
+    }
+
+    return -1;
+}
+
+static void
+xo_colors_parse (xo_handle_t *xop, xo_colors_t *xocp UNUSED, char *str)
+{
+#ifdef LIBXO_TEXT_ONLY
+    return;
+#endif /* LIBXO_TEXT_ONLY */
+
+    char *cp, *ep, *np;
+    int len = strlen(str);
+    int rc;
+
+    /*
+     * Possible tokens: colors, bg-colors, effects, no-effects, "reset".
+     */
+    for (cp = str, ep = cp + len - 1; cp && cp < ep; cp = np) {
+	np = strchr(cp, ',');
+	if (np)
+	    *np++ = '\0';
+
+	if (cp[0] == 'f' && cp[1] == 'g' && cp[2] == '-') {
+	    rc = xo_color_find(cp + 3);
+	    if (rc < 0)
+		goto unknown;
+	    xocp->xoc_col_fg = rc;
+	    xocp->xoc_eff_on |= XO_EFF_FOREGROUND;
+
+	} else if (cp[0] == 'b' && cp[1] == 'g' && cp[2] == '-') {
+	    rc = xo_color_find(cp + 3);
+	    if (rc < 0)
+		goto unknown;
+	    xocp->xoc_col_bg = rc;
+	    xocp->xoc_eff_on |= XO_EFF_BACKGROUND;
+
+	} else if (cp[0] == 'n' && cp[1] == 'o' && cp[2] == '-') {
+	    rc = xo_effect_find(cp + 3);
+	    if (rc < 0)
+		goto unknown;
+	    xocp->xoc_eff_off |= 1 << rc;
+
+	} else {
+	    rc = xo_effect_find(cp);
+	    if (rc < 0)
+		goto unknown;
+	    xocp->xoc_eff_on |= 1 << rc;
+
+	    switch (1 << rc) {
+	    case XO_EFF_RESET:
+		xocp->xoc_col_fg = xocp->xoc_col_bg = 0;
+		xocp->xoc_eff_on = xocp->xoc_eff_off = 0;
+		break;
+
+	    case XO_EFF_NORMAL:
+		xocp->xoc_eff_on &= ~(XO_EFF_BOLD | XO_EFF_UNDERLINE
+				      | XO_EFF_INVERSE);
+		break;
+	    }
+	}
+	continue;
+
+    unknown:
+	if (xop->xo_flags & XOF_WARN)
+	    xo_failure(xop, "color/effect string detected: '%s'", cp);
+    }
+}
+
+static inline int
+xo_colors_isset (xo_colors_t *xocp)
+{
+#ifdef LIBXO_TEXT_ONLY
+    return 0;
+#else /* LIBXO_TEXT_ONLY */
+    return ((xocp->xoc_eff_on || xocp->xoc_eff_off
+	     || xocp->xoc_col_fg || xocp->xoc_col_bg) ? 1 : 0);
+#endif /* LIBXO_TEXT_ONLY */
+}
+
+static void
+xo_colors_emit_text (xo_handle_t *xop UNUSED, xo_colors_t *xocp)
+{
+    char buf[BUFSIZ];
+    char *cp = buf, *ep = buf + sizeof(buf);
+    unsigned i, bit;
+
+    /*
+     * Start the buffer with an escape.  We don't want to add the '['
+     * now, since we let xo_effect_text_add unconditionally add the ';'.
+     * We'll replace the first ';' with a '[' when we're done.
+     */
+    *cp++ = 0x1b;		/* Escape */
+
+    /*
+     * Terminals were designed back in the age before "certainty" was
+     * invented, when standards were more what you'd call "guidelines"
+     * than actual rules.  Anyway we can't depend on them to operate
+     * correctly.  So when display attributes are changed, we punt,
+     * reseting them all and turning back on the ones we want to keep.
+     * Longer, but should be completely reliable.  Savvy?
+     */
+    if (xocp->xoc_eff_off) {
+	xo_effect_t val = xocp->xoc_eff_off;
+	val &= ~(XO_EFF_BACKGROUND | XO_EFF_FOREGROUND); /* Should not occur */
+	val = ~val & xocp->xoc_eff_on;	/* Only turn off what was on*/
+	val |= XO_EFF_RESET;		/* Add the reset */
+	xocp->xoc_eff_on = val;
+	xocp->xoc_eff_off = 0;
+	xop->xo_colors.xoc_eff_on = 0; /* Reset previous settings */
+    }
+
+    for (i = 0, bit = 1; xo_effect_names[i]; i++, bit <<= 1) {
+	if (!(xocp->xoc_eff_on & bit))
+	    continue;
+
+	if (xop->xo_colors.xoc_eff_on & bit) {
+	    if (bit == XO_EFF_FOREGROUND
+		&& xocp->xoc_col_fg == xop->xo_colors.xoc_col_fg)
+		continue;
+	    else if (bit == XO_EFF_BACKGROUND
+		&& xocp->xoc_col_bg == xop->xo_colors.xoc_col_bg)
+		continue;
+	    else
+		continue;
+	}
+
+	cp += snprintf(cp, ep - cp, ";%s", xo_effect_on_codes[i]);
+	if (cp >= ep)
+	    return;		/* Should not occur */
+
+	if (bit == XO_EFF_FOREGROUND)
+	    *cp++ = '0' + xocp->xoc_col_fg;
+	else if (bit == XO_EFF_BACKGROUND)
+	    *cp++ = '0' + xocp->xoc_col_bg;
+    }
+
+    if ((xocp->xoc_eff_on & XO_EFF_FOREGROUND)
+	    && (xocp->xoc_col_fg == XO_COL_DEFAULT)) {
+	xocp->xoc_eff_on &= ~XO_EFF_FOREGROUND;
+	xocp->xoc_col_fg = 0;
+    }
+
+    if ((xocp->xoc_eff_on & XO_EFF_BACKGROUND)
+	    && (xocp->xoc_col_bg == XO_COL_DEFAULT)) {
+	xocp->xoc_eff_on &= ~XO_EFF_BACKGROUND;
+	xocp->xoc_col_bg = 0;
+    }
+
+    if (cp - buf != 1 && cp < ep - 3) {
+	buf[1] = '[';		/* Overwrite leading ';' */
+	*cp++ = 'm';
+	*cp = '\0';
+	xo_buf_append(&xop->xo_data, buf, cp - buf);
+    }
+}
+
+static void
+xo_colors_emit_html (xo_handle_t *xop UNUSED, xo_colors_t *xocp UNUSED)
+{
+}
+
+static void
+xo_format_colors (xo_handle_t *xop, const char *str, int len,
+		  const char *fmt, int flen)
+{
+    xo_buffer_t xb;
+
+    /* If the string is static and we've in an encoding style, bail */
+    if (len != 0
+	&& (xo_style(xop) == XO_STYLE_XML || xo_style(xop) == XO_STYLE_JSON))
+	return;
+
+    xo_buf_init(&xb);
+
+    if (len)
+	xo_buf_append(&xb, str, len);
+    else if (flen == 0)
+	xo_format_data(xop, &xb, fmt, flen, 0);
+    else
+	xo_buf_append(&xb, "reset", 6); /* Default if empty */
+
+    switch (xo_style(xop)) {
+    case XO_STYLE_TEXT:
+    case XO_STYLE_HTML:
+	xo_buf_append(&xb, "", 1);
+
+	xo_colors_t xoc = xop->xo_colors;
+
+	xo_colors_parse(xop, &xoc, xb.xb_bufp);
+	if (xo_colors_isset(&xoc)) {
+	    if (xo_style(xop) == XO_STYLE_TEXT) {
+		/*
+		 * Text mode means emitting the colors as ANSI character
+		 * codes.  This will allow people who like colors to have
+		 * colors.  The issue is, of course conflicting with the
+		 * user's perfectly reasonable color scheme.  Which leads
+		 * to the hell of LSCOLORS, where even app need to have
+		 * customization hooks for adjusting colors.  Instead we
+		 * provide a simpler-but-still-annoying answer where one
+		 * can map colors to other colors.
+		 */
+		xo_colors_emit_text(xop, &xoc);
+	    } else {
+		/*
+		 * HTML output is wrapped in divs, so the color information
+		 * must appear in every div until cleared.  Most pathetic.
+		 * Mostly unavoidable.
+		 */
+		xo_colors_emit_html(xop, &xoc);
+	    }
+
+	    xoc.xoc_eff_off = 0;
+	    xoc.xoc_eff_on &= ~XO_EFF_CLEAR_BITS;
+	    xop->xo_colors = xoc;
+	}
+	break;
+
+    case XO_STYLE_XML:
+    case XO_STYLE_JSON:
+	/*
+	 * Nothing to do; we did all that work just to clear the stack of
+	 * formatting arguments.
+	 */
+	break;
+    }
+
+    xo_buf_cleanup(&xb);
+}
+
 static void
 xo_format_units (xo_handle_t *xop, const char *str, int len,
 		 const char *fmt, int flen)
@@ -3496,6 +3880,7 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 	    }
 
 	    switch (*sp) {
+	    case 'C':
 	    case 'D':
 	    case 'E':
 	    case 'L':
@@ -3641,7 +4026,9 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 		flen = 2;
 	    }
 
-	    if (ftype == 'D')
+	    if (ftype == 'C')
+		xo_format_colors(xop, content, clen, format, flen);
+	    else if (ftype == 'D')
 		xo_format_content(xop, "decoration", NULL, 1,
 				  content, clen, format, flen);
 	    else if (ftype == 'E')
