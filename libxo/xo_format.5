@@ -103,7 +103,6 @@ The color content can be
 either static, when placed directly within the field descriptor, or a
 printf-style format descriptor can be used, if preceded by a slash ("/"):
 .Bd -literal -offset indent
-  EXAMPLES:
     xo_emit("{C:bold}{Lwc:Cost}{:cost/%u}{C:reset}\n", cost);
     xo_emit("{C:/fg-%s,bg-%s}{Lwc:Cost}{:cost/%u}{C:reset}\n",
             fg_color, bg_color, cost);
@@ -111,15 +110,16 @@ printf-style format descriptor can be used, if preceded by a slash ("/"):
 .Pp
 The content should be a comma-separated list of zero or more colors or
 display effects.
-These colors and effects remain in affect until modified by other "C"
-roles.
+.Pp
+Colors and effects remain in effect until modified by other "C" roles.
+.Pp
 If the content is empty, the "reset" action is performed.
 .Pp
-.Bl -column "Name12345678901"
-.It Sy "Name         q Description"
-.It "bg-XXXXX     " "Change background color"
+.Bl -column "no-underline"
+.It Sy "Name          Description"
+.It "bg-xxxxx     " "Change background color"
 .It "bold         " "Start bold text effect"
-.It "fg-XXXXX     " "Change foreground color"
+.It "fg-xxxxx     " "Change foreground color"
 .It "inverse      " "Start inverse (aka reverse) text effect"
 .It "no-bold      " "Stop bold text effect"
 .It "no-inverse   " "Stop inverse (aka reverse) text effect"
@@ -130,17 +130,17 @@ If the content is empty, the "reset" action is performed.
 .El
 .Pp
 The following color names are supported:
-.Bl -column M "Name"
+.Bl -column "no-underline"
 .It Sy "Name"
-.It "black"
-.It "blue"
-.It "cyan"
-.It "default"
-.It "green"
-.It "magenta"
-.It "red"
-.It "white"
-.It "yellow"
+.It black
+.It blue
+.It cyan
+.It default
+.It green
+.It magenta
+.It red
+.It white
+.It yellow
 .El
 .Pp
 Color names are prefixed with either "fg-" or "bg-" to change the
