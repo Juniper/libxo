@@ -122,15 +122,15 @@ typedef struct xo_stack_s {
 } xo_stack_t;
 
 /* "colors" refers to fancy ansi codes */
-#define XO_COL_BLACK		0
-#define XO_COL_RED		1
-#define XO_COL_GREEN		2
-#define XO_COL_YELLOW		3
-#define XO_COL_BLUE		4
-#define XO_COL_MAGENTA		5
-#define XO_COL_CYAN		6
-#define XO_COL_WHITE		7
-#define XO_COL_DEFAULT		8
+#define XO_COL_DEFAULT		0
+#define XO_COL_BLACK		1
+#define XO_COL_RED		2
+#define XO_COL_GREEN		3
+#define XO_COL_YELLOW		4
+#define XO_COL_BLUE		5
+#define XO_COL_MAGENTA		6
+#define XO_COL_CYAN		7
+#define XO_COL_WHITE		8
 
 #define XO_NUM_COLORS		9
 
@@ -151,20 +151,16 @@ typedef struct xo_stack_s {
  */
 #define XO_EFF_RESET		(1<<0)
 #define XO_EFF_NORMAL		(1<<1)
-#define XO_EFF_FOREGROUND	(1<<2) /* "Special" effects bit: fg color */
-#define XO_EFF_BACKGROUND	(1<<3) /* "Special" effects bit: bg color */
-#define XO_EFF_BOLD		(1<<4)
-#define XO_EFF_UNDERLINE	(1<<5)
-#define XO_EFF_INVERSE		(1<<6)
+#define XO_EFF_BOLD		(1<<2)
+#define XO_EFF_UNDERLINE	(1<<3)
+#define XO_EFF_INVERSE		(1<<4)
 
-#define XO_EFF_CLEAR_BITS \
-    (XO_EFF_RESET | XO_EFF_NORMAL | XO_EFF_FOREGROUND | XO_EFF_BACKGROUND)
+#define XO_EFF_CLEAR_BITS 	XO_EFF_RESET
 
 typedef uint8_t xo_effect_t;
 typedef uint8_t xo_color_t;
 typedef struct xo_colors_s {
-    xo_effect_t xoc_eff_on;	/* Bits to turn on */
-    xo_effect_t xoc_eff_off;	/* Bits to turn off */
+    xo_effect_t xoc_effects;	/* Current effect set */
     xo_color_t xoc_col_fg;	/* Foreground color */
     xo_color_t xoc_col_bg;	/* Background color */
 } xo_colors_t;
@@ -734,6 +730,21 @@ xo_escape_json (xo_buffer_t *xbp, int len)
 static void
 xo_buf_append (xo_buffer_t *xbp, const char *str, int len)
 {
+    if (!xo_buf_has_room(xbp, len))
+	return;
+
+    memcpy(xbp->xb_curp, str, len);
+    xbp->xb_curp += len;
+}
+
+/*
+ * Append the given NUL-terminated string to the given buffer
+ */
+static void
+xo_buf_append_str (xo_buffer_t *xbp, const char *str)
+{
+    int len = strlen(str);
+
     if (!xo_buf_has_room(xbp, len))
 	return;
 
@@ -3338,6 +3349,7 @@ xo_format_content (xo_handle_t *xop, const char *class_name,
 }
 
 static const char *xo_color_names[] = {
+    "default",	/* XO_COL_DEFAULT */
     "black",	/* XO_COL_BLACK */
     "red",	/* XO_CLOR_RED */
     "green",	/* XO_COL_GREEN */
@@ -3346,8 +3358,6 @@ static const char *xo_color_names[] = {
     "magenta",	/* XO_COL_MAGENTA */
     "cyan",	/* XO_COL_CYAN */
     "white",	/* XO_COL_WHITE */
-    "custom-color", /* nonsense; space savere */
-    "default",	/* XO_COL_DEFAULT */
     NULL
 };
 
@@ -3367,8 +3377,6 @@ xo_color_find (const char *str)
 static const char *xo_effect_names[] = {
     "reset",			/* XO_EFF_RESET */
     "normal",			/* XO_EFF_NORMAL */
-    "fg-",			/* XO_EFF_FOREGROUND */
-    "bg-",			/* XO_EFF_BACKGROUND */
     "bold",			/* XO_EFF_BOLD */
     "underline",		/* XO_EFF_UNDERLINE */
     "inverse",			/* XO_EFF_INVERSE */
@@ -3378,8 +3386,6 @@ static const char *xo_effect_names[] = {
 static const char *xo_effect_on_codes[] = {
     "0",			/* XO_EFF_RESET */
     "0",			/* XO_EFF_NORMAL */
-    "3", /* 30-37 */		/* XO_EFF_FOREGROUND */
-    "4", /* 40-47 */		/* XO_EFF_BACKGROUND */
     "1",			/* XO_EFF_BOLD */
     "4",			/* XO_EFF_UNDERLINE */
     "7",			/* XO_EFF_INVERSE */
@@ -3387,17 +3393,24 @@ static const char *xo_effect_on_codes[] = {
 };
 
 #if 0
+/*
+ * See comment below re: joy of terminal standards.  These can
+ * be use by just adding:
+ *	if (newp->xoc_effects & bit)
+ *	    code = xo_effect_on_codes[i];
+ * +	else
+ * +	    code = xo_effect_off_codes[i];
+ * in xo_color_handle_text.
+ */
 static const char *xo_effect_off_codes[] = {
     "0",			/* XO_EFF_RESET */
     "0",			/* XO_EFF_NORMAL */
-    "39",			/* XO_EFF_FOREGROUND */
-    "49",			/* XO_EFF_BACKGROUND */
     "21",			/* XO_EFF_BOLD */
     "24",			/* XO_EFF_UNDERLINE */
     "27",			/* XO_EFF_INVERSE */
     NULL
 };
-#endif
+#endif /* 0 */
 
 static int
 xo_effect_find (const char *str)
@@ -3413,7 +3426,7 @@ xo_effect_find (const char *str)
 }
 
 static void
-xo_colors_parse (xo_handle_t *xop, xo_colors_t *xocp UNUSED, char *str)
+xo_colors_parse (xo_handle_t *xop, xo_colors_t *xocp, char *str)
 {
 #ifdef LIBXO_TEXT_ONLY
     return;
@@ -3435,38 +3448,37 @@ xo_colors_parse (xo_handle_t *xop, xo_colors_t *xocp UNUSED, char *str)
 	    rc = xo_color_find(cp + 3);
 	    if (rc < 0)
 		goto unknown;
+
 	    xocp->xoc_col_fg = rc;
-	    xocp->xoc_eff_on |= XO_EFF_FOREGROUND;
 
 	} else if (cp[0] == 'b' && cp[1] == 'g' && cp[2] == '-') {
 	    rc = xo_color_find(cp + 3);
 	    if (rc < 0)
 		goto unknown;
 	    xocp->xoc_col_bg = rc;
-	    xocp->xoc_eff_on |= XO_EFF_BACKGROUND;
 
 	} else if (cp[0] == 'n' && cp[1] == 'o' && cp[2] == '-') {
 	    rc = xo_effect_find(cp + 3);
 	    if (rc < 0)
 		goto unknown;
-	    xocp->xoc_eff_off |= 1 << rc;
+	    xocp->xoc_effects &= ~(1 << rc);
 
 	} else {
 	    rc = xo_effect_find(cp);
 	    if (rc < 0)
 		goto unknown;
-	    xocp->xoc_eff_on |= 1 << rc;
+	    xocp->xoc_effects |= 1 << rc;
 
 	    switch (1 << rc) {
 	    case XO_EFF_RESET:
 		xocp->xoc_col_fg = xocp->xoc_col_bg = 0;
-		xocp->xoc_eff_off = 0;
-		xocp->xoc_eff_on &= XO_EFF_RESET;
+		/* Note: not "|=" since we want to wipe out the old value */
+		xocp->xoc_effects = XO_EFF_RESET;
 		break;
 
 	    case XO_EFF_NORMAL:
-		xocp->xoc_eff_on &= ~(XO_EFF_BOLD | XO_EFF_UNDERLINE
-				      | XO_EFF_INVERSE);
+		xocp->xoc_effects &= ~(XO_EFF_BOLD | XO_EFF_UNDERLINE
+				      | XO_EFF_INVERSE | XO_EFF_NORMAL);
 		break;
 	    }
 	}
@@ -3474,27 +3486,28 @@ xo_colors_parse (xo_handle_t *xop, xo_colors_t *xocp UNUSED, char *str)
 
     unknown:
 	if (xop->xo_flags & XOF_WARN)
-	    xo_failure(xop, "color/effect string detected: '%s'", cp);
+	    xo_failure(xop, "unknown color/effect string detected: '%s'", cp);
     }
 }
 
 static inline int
-xo_colors_isset (xo_colors_t *xocp)
+xo_colors_enabled (xo_handle_t *xop UNUSED)
 {
 #ifdef LIBXO_TEXT_ONLY
     return 0;
 #else /* LIBXO_TEXT_ONLY */
-    return ((xocp->xoc_eff_on || xocp->xoc_eff_off
-	     || xocp->xoc_col_fg || xocp->xoc_col_bg) ? 1 : 0);
+    return ((xop->xo_flags & XOF_COLOR) ? 1 : 0);
 #endif /* LIBXO_TEXT_ONLY */
 }
 
 static void
-xo_colors_emit_text (xo_handle_t *xop UNUSED, xo_colors_t *xocp)
+xo_colors_handle_text (xo_handle_t *xop UNUSED, xo_colors_t *newp)
 {
     char buf[BUFSIZ];
     char *cp = buf, *ep = buf + sizeof(buf);
     unsigned i, bit;
+    xo_colors_t *oldp = &xop->xo_colors;
+    const char *code;
 
     /*
      * Start the buffer with an escape.  We don't want to add the '['
@@ -3511,51 +3524,39 @@ xo_colors_emit_text (xo_handle_t *xop UNUSED, xo_colors_t *xocp)
      * reseting them all and turning back on the ones we want to keep.
      * Longer, but should be completely reliable.  Savvy?
      */
-    if (xocp->xoc_eff_off) {
-	xo_effect_t val = xocp->xoc_eff_off;
-	val &= ~(XO_EFF_BACKGROUND | XO_EFF_FOREGROUND); /* Should not occur */
-	val = ~val & xocp->xoc_eff_on;	/* Only turn off what was on*/
-	val |= XO_EFF_RESET;		/* Add the reset */
-	xocp->xoc_eff_on = val;
-	xocp->xoc_eff_off = 0;
-	xop->xo_colors.xoc_eff_on = 0; /* Reset previous settings */
+    if (oldp->xoc_effects != (newp->xoc_effects & oldp->xoc_effects)) {
+	newp->xoc_effects |= XO_EFF_RESET;
+	oldp->xoc_effects = 0;
     }
 
     for (i = 0, bit = 1; xo_effect_names[i]; i++, bit <<= 1) {
-	if (!(xocp->xoc_eff_on & bit))
+	if ((newp->xoc_effects & bit) == (oldp->xoc_effects & bit))
 	    continue;
 
-	if (xop->xo_colors.xoc_eff_on & bit) {
-	    if (bit == XO_EFF_FOREGROUND
-		&& xocp->xoc_col_fg == xop->xo_colors.xoc_col_fg)
-		continue;
-	    else if (bit == XO_EFF_BACKGROUND
-		&& xocp->xoc_col_bg == xop->xo_colors.xoc_col_bg)
-		continue;
-	    else
-		continue;
-	}
+	if (newp->xoc_effects & bit)
+	    code = xo_effect_on_codes[i];
 
-	cp += snprintf(cp, ep - cp, ";%s", xo_effect_on_codes[i]);
+	cp += snprintf(cp, ep - cp, ";%s", code);
 	if (cp >= ep)
 	    return;		/* Should not occur */
 
-	if (bit == XO_EFF_FOREGROUND)
-	    *cp++ = '0' + xocp->xoc_col_fg;
-	else if (bit == XO_EFF_BACKGROUND)
-	    *cp++ = '0' + xocp->xoc_col_bg;
+	if (bit == XO_EFF_RESET) {
+	    /* Mark up the old value so we can detect current values as new */
+	    oldp->xoc_effects = 0;
+	    oldp->xoc_col_fg = oldp->xoc_col_bg = XO_COL_DEFAULT;
+	}
     }
 
-    if ((xocp->xoc_eff_on & XO_EFF_FOREGROUND)
-	    && (xocp->xoc_col_fg == XO_COL_DEFAULT)) {
-	xocp->xoc_eff_on &= ~XO_EFF_FOREGROUND;
-	xocp->xoc_col_fg = 0;
+    if (newp->xoc_col_fg != oldp->xoc_col_fg) {
+	cp += snprintf(cp, ep - cp, ";3%u",
+		       (newp->xoc_col_fg != XO_COL_DEFAULT)
+		       ? newp->xoc_col_fg - 1 : 9);
     }
 
-    if ((xocp->xoc_eff_on & XO_EFF_BACKGROUND)
-	    && (xocp->xoc_col_bg == XO_COL_DEFAULT)) {
-	xocp->xoc_eff_on &= ~XO_EFF_BACKGROUND;
-	xocp->xoc_col_bg = 0;
+    if (newp->xoc_col_bg != oldp->xoc_col_bg) {
+	cp += snprintf(cp, ep - cp, ";4%u",
+		       (newp->xoc_col_bg != XO_COL_DEFAULT)
+		       ? newp->xoc_col_bg - 1 : 9);
     }
 
     if (cp - buf != 1 && cp < ep - 3) {
@@ -3564,94 +3565,64 @@ xo_colors_emit_text (xo_handle_t *xop UNUSED, xo_colors_t *xocp)
 	*cp = '\0';
 	xo_buf_append(&xop->xo_data, buf, cp - buf);
     }
-
-    xocp->xoc_eff_off = 0;
-    xocp->xoc_eff_on &= ~XO_EFF_CLEAR_BITS;
 }
 
 static void
-xo_colors_emit_html (xo_handle_t *xop, xo_colors_t *xocp)
+xo_colors_handle_html (xo_handle_t *xop, xo_colors_t *newp)
 {
+    xo_colors_t *oldp = &xop->xo_colors;
+
     /*
      * HTML colors are mostly trivial: fill in xo_color_buf with
      * a set of class tags representing the colors and effects.
      */
-    if (xocp->xoc_eff_off) {
-	xo_effect_t val = xocp->xoc_eff_off;
-	val &= ~(XO_EFF_BACKGROUND | XO_EFF_FOREGROUND); /* Should not occur */
-	val = ~val & xocp->xoc_eff_on;	/* Only turn off what was on*/
-	xocp->xoc_eff_on = val;
-	xocp->xoc_eff_off = 0;
-    }
-
-    if (xocp->xoc_eff_on & XO_EFF_RESET) {
-	xocp->xoc_col_fg = xocp->xoc_col_bg = 0;
-	xocp->xoc_eff_on = xocp->xoc_eff_off = 0;
-    }
-
-    if (xocp->xoc_eff_on & XO_EFF_NORMAL) {
-	xocp->xoc_eff_on &= (XO_EFF_FOREGROUND | XO_EFF_BACKGROUND);
-	xocp->xoc_eff_off = 0;
-    }
-
-    if ((xocp->xoc_eff_on & XO_EFF_FOREGROUND)
-	    && (xocp->xoc_col_fg == XO_COL_DEFAULT)) {
-	xocp->xoc_eff_on &= ~XO_EFF_FOREGROUND;
-	xocp->xoc_col_fg = 0;
-    }
-
-    if ((xocp->xoc_eff_on & XO_EFF_BACKGROUND)
-	    && (xocp->xoc_col_bg == XO_COL_DEFAULT)) {
-	xocp->xoc_eff_on &= ~XO_EFF_BACKGROUND;
-	xocp->xoc_col_bg = 0;
-    }
 
     /* If nothing changed, then do nothing */
-    if (xop->xo_colors.xoc_eff_on == xocp->xoc_eff_on
-	&& xop->xo_colors.xoc_col_fg == xocp->xoc_col_fg
-	&& xop->xo_colors.xoc_col_bg == xocp->xoc_col_bg)
+    if (oldp->xoc_effects == newp->xoc_effects
+	&& oldp->xoc_col_fg == newp->xoc_col_fg
+	&& oldp->xoc_col_bg == newp->xoc_col_bg)
 	return;
 
     unsigned i, bit;
     xo_buffer_t *xbp = &xop->xo_color_buf;
-    const char *value;
-    const char *name;
-    int inverse = (xocp->xoc_eff_on & XO_EFF_INVERSE) ? 1 : 0;
 
     xo_buf_reset(xbp);		/* We rebuild content after each change */
 
     for (i = 0, bit = 1; xo_effect_names[i]; i++, bit <<= 1) {
-	if (!(xocp->xoc_eff_on & bit))
+	if (!(newp->xoc_effects & bit))
 	    continue;
 
-	/* No "inverse" in CSS, so we do this by hand */
-	if (bit == XO_EFF_INVERSE)
-	    continue;
-
-	xo_buf_append(xbp, " ", 1);
-
-	if (bit == XO_EFF_FOREGROUND) {
-	    name = "color-fg-";
-	    value = xo_color_names[inverse ? xocp->xoc_col_bg
-				   : xocp->xoc_col_fg];
-	} else if (bit == XO_EFF_BACKGROUND) {
-	    name = "color-bg-";
-	    value = xo_color_names[inverse ? xocp->xoc_col_fg
-				   : xocp->xoc_col_bg];
-	} else {
-	    name = "effect-";
-	    value = xo_effect_names[i];
-	}
-
-	xo_buf_append(xbp, name, strlen(name));
-	xo_buf_append(xbp, value, strlen(value));
+	xo_buf_append_str(xbp, " effect-");
+	xo_buf_append_str(xbp, xo_effect_names[i]);
     }
 
-    if (inverse) {
-	if (!(xocp->xoc_eff_on & XO_EFF_FOREGROUND))
-	    xo_buf_append(xbp, " color-bg-inverse", 17);
-	if (!(xocp->xoc_eff_on & XO_EFF_BACKGROUND))
-	    xo_buf_append(xbp, " color-fg-inverse", 17);
+    const char *fg = NULL;
+    const char *bg = NULL;
+
+    if (newp->xoc_col_fg != XO_COL_DEFAULT)
+	fg = xo_color_names[newp->xoc_col_fg];
+    if (newp->xoc_col_bg != XO_COL_DEFAULT)
+	bg = xo_color_names[newp->xoc_col_bg];
+
+    if (newp->xoc_effects & XO_EFF_INVERSE) {
+	const char *tmp = fg;
+	fg = bg;
+	bg = tmp;
+	if (fg == NULL)
+	    fg = "inverse";
+	if (bg == NULL)
+	    bg = "inverse";
+
+    }
+
+    if (fg) {
+	xo_buf_append_str(xbp, " color-fg-");
+	xo_buf_append_str(xbp, fg);
+    }
+
+    if (bg) {
+	xo_buf_append_str(xbp, " color-bg-");
+	xo_buf_append_str(xbp, bg);
     }
 }
 
@@ -3675,15 +3646,15 @@ xo_format_colors (xo_handle_t *xop, const char *str, int len,
     else
 	xo_buf_append(&xb, "reset", 6); /* Default if empty */
 
-    switch (xo_style(xop)) {
-    case XO_STYLE_TEXT:
-    case XO_STYLE_HTML:
-	xo_buf_append(&xb, "", 1);
+    if (xo_colors_enabled(xop)) {
+	switch (xo_style(xop)) {
+	case XO_STYLE_TEXT:
+	case XO_STYLE_HTML:
+	    xo_buf_append(&xb, "", 1);
 
-	xo_colors_t xoc = xop->xo_colors;
+	    xo_colors_t xoc = xop->xo_colors;
+	    xo_colors_parse(xop, &xoc, xb.xb_bufp);
 
-	xo_colors_parse(xop, &xoc, xb.xb_bufp);
-	if (xo_colors_isset(&xoc)) {
 	    if (xo_style(xop) == XO_STYLE_TEXT) {
 		/*
 		 * Text mode means emitting the colors as ANSI character
@@ -3695,27 +3666,30 @@ xo_format_colors (xo_handle_t *xop, const char *str, int len,
 		 * provide a simpler-but-still-annoying answer where one
 		 * can map colors to other colors.
 		 */
-		xo_colors_emit_text(xop, &xoc);
+		xo_colors_handle_text(xop, &xoc);
+		xoc.xoc_effects &= ~XO_EFF_RESET; /* After handling it */
+
 	    } else {
 		/*
 		 * HTML output is wrapped in divs, so the color information
 		 * must appear in every div until cleared.  Most pathetic.
-		 * Mostly unavoidable.
+		 * Most unavoidable.
 		 */
-		xo_colors_emit_html(xop, &xoc);
+		xoc.xoc_effects &= ~XO_EFF_RESET; /* Before handling effects */
+		xo_colors_handle_html(xop, &xoc);
 	    }
 
 	    xop->xo_colors = xoc;
-	}
-	break;
+	    break;
 
-    case XO_STYLE_XML:
-    case XO_STYLE_JSON:
-	/*
-	 * Nothing to do; we did all that work just to clear the stack of
-	 * formatting arguments.
-	 */
-	break;
+	case XO_STYLE_XML:
+	case XO_STYLE_JSON:
+	    /*
+	     * Nothing to do; we did all that work just to clear the stack of
+	     * formatting arguments.
+	     */
+	    break;
+	}
     }
 
     xo_buf_cleanup(&xb);
@@ -4148,6 +4122,8 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 		xo_anchor_start(xop, content, clen, format, flen);
 	else if (ftype == ']')
 		xo_anchor_stop(xop, content, clen, format, flen);
+	else if (ftype == 'C')
+		xo_format_colors(xop, content, clen, format, flen);
 
 	else  if (clen || format) { /* Need either content or format */
 	    if (format == NULL) {
@@ -4156,9 +4132,7 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 		flen = 2;
 	    }
 
-	    if (ftype == 'C')
-		xo_format_colors(xop, content, clen, format, flen);
-	    else if (ftype == 'D')
+	    if (ftype == 'D')
 		xo_format_content(xop, "decoration", NULL, 1,
 				  content, clen, format, flen);
 	    else if (ftype == 'E')
