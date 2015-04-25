@@ -204,6 +204,7 @@ struct xo_handle_s {
     uint8_t xo_color_map_fg[XO_NUM_COLORS]; /* Foreground color mappings */
     uint8_t xo_color_map_bg[XO_NUM_COLORS]; /* Background color mappings */
     xo_colors_t xo_colors;	/* Current color and effect values */
+    xo_buffer_t xo_color_buf;	/* HTML: buffer of colors and effects */
 };
 
 /* Flags for formatting functions */
@@ -386,6 +387,24 @@ xo_buf_init (xo_buffer_t *xbp)
     xbp->xb_size = XO_BUFSIZ;
     xbp->xb_bufp = xo_realloc(NULL, xbp->xb_size);
     xbp->xb_curp = xbp->xb_bufp;
+}
+
+/*
+ * Reset the buffer to empty
+ */
+static void
+xo_buf_reset (xo_buffer_t *xbp)
+{
+    xbp->xb_curp = xbp->xb_bufp;
+}
+
+/*
+ * Reset the buffer to empty
+ */
+static int
+xo_buf_is_empty (xo_buffer_t *xbp)
+{
+    return (xbp->xb_curp == xbp->xb_bufp);
 }
 
 /*
@@ -1506,6 +1525,7 @@ xo_destroy (xo_handle_t *xop_arg)
     xo_buf_cleanup(&xop->xo_fmt);
     xo_buf_cleanup(&xop->xo_predicate);
     xo_buf_cleanup(&xop->xo_attrs);
+    xo_buf_cleanup(&xop->xo_color_buf);
 
     if (xop_arg == NULL) {
 	bzero(&xo_default_handle, sizeof(xo_default_handle));
@@ -2660,6 +2680,20 @@ xo_fix_encoding (xo_handle_t *xop UNUSED, char *encoding)
 }
 
 static void
+xo_color_append_html (xo_handle_t *xop)
+{
+    /*
+     * If the color buffer has content, we add it now.  It's already
+     * prebuilt and ready, since we want to add it to every <div>.
+     */
+    if (!xo_buf_is_empty(&xop->xo_color_buf)) {
+	xo_buffer_t *xbp = &xop->xo_color_buf;
+
+	xo_data_append(xop, xbp->xb_bufp, xbp->xb_curp - xbp->xb_bufp);
+    }
+}
+
+static void
 xo_buf_append_div (xo_handle_t *xop, const char *class, xo_xff_flags_t flags,
 		   const char *name, int nlen,
 		   const char *value, int vlen,
@@ -2755,6 +2789,16 @@ xo_buf_append_div (xo_handle_t *xop, const char *class, xo_xff_flags_t flags,
 
     xo_data_append(xop, div_start, sizeof(div_start) - 1);
     xo_data_append(xop, class, strlen(class));
+
+    /*
+     * If the color buffer has content, we add it now.  It's already
+     * prebuilt and ready, since we want to add it to every <div>.
+     */
+    if (!xo_buf_is_empty(&xop->xo_color_buf)) {
+	xo_buffer_t *xbp = &xop->xo_color_buf;
+
+	xo_data_append(xop, xbp->xb_bufp, xbp->xb_curp - xbp->xb_bufp);
+    }
 
     if (name) {
 	xo_data_append(xop, div_tag, sizeof(div_tag) - 1);
@@ -2861,7 +2905,8 @@ static void
 xo_format_title (xo_handle_t *xop, const char *str, int len,
 		 const char *fmt, int flen)
 {
-    static char div_open[] = "<div class=\"title\">";
+    static char div_open[] = "<div class=\"title";
+    static char div_middle[] = "\">";
     static char div_close[] = "</div>";
 
     if (flen == 0) {
@@ -2893,6 +2938,8 @@ xo_format_title (xo_handle_t *xop, const char *str, int len,
 	if (xop->xo_flags & XOF_PRETTY)
 	    xo_buf_indent(xop, xop->xo_indent_by);
 	xo_buf_append(&xop->xo_data, div_open, sizeof(div_open) - 1);
+	xo_color_append_html(xop);
+	xo_buf_append(&xop->xo_data, div_middle, sizeof(div_middle) - 1);
     }
 
     start = xbp->xb_curp - xbp->xb_bufp; /* Reset start */
@@ -3413,7 +3460,8 @@ xo_colors_parse (xo_handle_t *xop, xo_colors_t *xocp UNUSED, char *str)
 	    switch (1 << rc) {
 	    case XO_EFF_RESET:
 		xocp->xoc_col_fg = xocp->xoc_col_bg = 0;
-		xocp->xoc_eff_on = xocp->xoc_eff_off = 0;
+		xocp->xoc_eff_off = 0;
+		xocp->xoc_eff_on &= XO_EFF_RESET;
 		break;
 
 	    case XO_EFF_NORMAL:
@@ -3516,12 +3564,95 @@ xo_colors_emit_text (xo_handle_t *xop UNUSED, xo_colors_t *xocp)
 	*cp = '\0';
 	xo_buf_append(&xop->xo_data, buf, cp - buf);
     }
+
+    xocp->xoc_eff_off = 0;
+    xocp->xoc_eff_on &= ~XO_EFF_CLEAR_BITS;
 }
 
 static void
-xo_colors_emit_html (xo_handle_t *xop UNUSED, xo_colors_t *xocp UNUSED)
+xo_colors_emit_html (xo_handle_t *xop, xo_colors_t *xocp)
 {
-    /* Shockingly underimplemented */
+    /*
+     * HTML colors are mostly trivial: fill in xo_color_buf with
+     * a set of class tags representing the colors and effects.
+     */
+    if (xocp->xoc_eff_off) {
+	xo_effect_t val = xocp->xoc_eff_off;
+	val &= ~(XO_EFF_BACKGROUND | XO_EFF_FOREGROUND); /* Should not occur */
+	val = ~val & xocp->xoc_eff_on;	/* Only turn off what was on*/
+	xocp->xoc_eff_on = val;
+	xocp->xoc_eff_off = 0;
+    }
+
+    if (xocp->xoc_eff_on & XO_EFF_RESET) {
+	xocp->xoc_col_fg = xocp->xoc_col_bg = 0;
+	xocp->xoc_eff_on = xocp->xoc_eff_off = 0;
+    }
+
+    if (xocp->xoc_eff_on & XO_EFF_NORMAL) {
+	xocp->xoc_eff_on &= (XO_EFF_FOREGROUND | XO_EFF_BACKGROUND);
+	xocp->xoc_eff_off = 0;
+    }
+
+    if ((xocp->xoc_eff_on & XO_EFF_FOREGROUND)
+	    && (xocp->xoc_col_fg == XO_COL_DEFAULT)) {
+	xocp->xoc_eff_on &= ~XO_EFF_FOREGROUND;
+	xocp->xoc_col_fg = 0;
+    }
+
+    if ((xocp->xoc_eff_on & XO_EFF_BACKGROUND)
+	    && (xocp->xoc_col_bg == XO_COL_DEFAULT)) {
+	xocp->xoc_eff_on &= ~XO_EFF_BACKGROUND;
+	xocp->xoc_col_bg = 0;
+    }
+
+    /* If nothing changed, then do nothing */
+    if (xop->xo_colors.xoc_eff_on == xocp->xoc_eff_on
+	&& xop->xo_colors.xoc_col_fg == xocp->xoc_col_fg
+	&& xop->xo_colors.xoc_col_bg == xocp->xoc_col_bg)
+	return;
+
+    unsigned i, bit;
+    xo_buffer_t *xbp = &xop->xo_color_buf;
+    const char *value;
+    const char *name;
+    int inverse = (xocp->xoc_eff_on & XO_EFF_INVERSE) ? 1 : 0;
+
+    xo_buf_reset(xbp);		/* We rebuild content after each change */
+
+    for (i = 0, bit = 1; xo_effect_names[i]; i++, bit <<= 1) {
+	if (!(xocp->xoc_eff_on & bit))
+	    continue;
+
+	/* No "inverse" in CSS, so we do this by hand */
+	if (bit == XO_EFF_INVERSE)
+	    continue;
+
+	xo_buf_append(xbp, " ", 1);
+
+	if (bit == XO_EFF_FOREGROUND) {
+	    name = "color-fg-";
+	    value = xo_color_names[inverse ? xocp->xoc_col_bg
+				   : xocp->xoc_col_fg];
+	} else if (bit == XO_EFF_BACKGROUND) {
+	    name = "color-bg-";
+	    value = xo_color_names[inverse ? xocp->xoc_col_fg
+				   : xocp->xoc_col_bg];
+	} else {
+	    name = "effect-";
+	    value = xo_effect_names[i];
+	}
+
+	xo_buf_append(xbp, name, strlen(name));
+	xo_buf_append(xbp, value, strlen(value));
+    }
+
+    if (inverse) {
+	if (!(xocp->xoc_eff_on & XO_EFF_FOREGROUND))
+	    xo_buf_append(xbp, " color-bg-inverse", 17);
+	if (!(xocp->xoc_eff_on & XO_EFF_BACKGROUND))
+	    xo_buf_append(xbp, " color-fg-inverse", 17);
+    }
 }
 
 static void
@@ -3539,7 +3670,7 @@ xo_format_colors (xo_handle_t *xop, const char *str, int len,
 
     if (len)
 	xo_buf_append(&xb, str, len);
-    else if (flen == 0)
+    else if (flen)
 	xo_format_data(xop, &xb, fmt, flen, 0);
     else
 	xo_buf_append(&xb, "reset", 6); /* Default if empty */
@@ -3574,8 +3705,6 @@ xo_format_colors (xo_handle_t *xop, const char *str, int len,
 		xo_colors_emit_html(xop, &xoc);
 	    }
 
-	    xoc.xoc_eff_off = 0;
-	    xoc.xoc_eff_on &= ~XO_EFF_CLEAR_BITS;
 	    xop->xo_colors = xoc;
 	}
 	break;
