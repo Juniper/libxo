@@ -105,15 +105,24 @@ main (int argc, char **argv)
 	    "{T:In Stock/%12s}{C:/%s}"
 	    "{T:On Order/%12s}{C:normal}{T:SKU/%5s}\n", "inverse");
 
+#if 0
+    xo_finish();
+    return 0;
+#endif
+
     for (ip = list; ip->i_title; ip++) {
 	xo_open_instance("item");
 	xo_attr("test3", "value3");
 
 	xo_emit("{keq:sku/%s-%u/%s-000-%u}"
-		"{k:name/%-10s/%s}{n:sold/%12u/%u}{:in-stock/%12u/%u}"
-		"{:on-order/%12u/%u}{qkd:sku/%5s-000-%u/%s-000-%u}\n",
+		"{k:name/%-10s/%s}{n:sold/%12u/%u}"
+		"{C:/%s}{:in-stock/%12u/%u}{C:normal}"
+		"{C:/fg-%s}{:on-order/%12u/%u}{C:/fg-default}"
+		"{qkd:sku/%5s-000-%u/%s-000-%u}\n",
 		ip->i_sku_base, ip->i_sku_num,
-		ip->i_title, ip->i_sold, ip->i_instock, ip->i_onorder,
+		ip->i_title, ip->i_sold,
+		(ip->i_instock < 5) ? "inverse" : "normal", ip->i_instock,
+		(ip->i_onorder > 5) ? "yellow" : "default", ip->i_onorder,
 		ip->i_sku_base, ip->i_sku_num);
 
 	xo_close_instance("item");
@@ -134,7 +143,8 @@ main (int argc, char **argv)
 	xo_emit("{L:Item} '{k:name/%s}':\n", ip->i_title);
 	xo_emit("{P:   }{L:Total sold}: {n:sold/%u%s}\n",
 		ip->i_sold, ip->i_sold ? ".0" : "");
-	xo_emit("{P:   }{Lcw:In stock}{:in-stock/%u}\n", ip->i_instock);
+	xo_emit("{P:   }{Lcw:In stock}{C:inverse}{:in-stock/%u}{C:}\n",
+		ip->i_instock);
 	xo_emit("{P:   }{Lcw:On order}{:on-order/%u}\n", ip->i_onorder);
 	xo_emit("{P:   }{L:SKU}: {qkd:sku/%s-000-%u}\n",
 		ip->i_sku_base, ip->i_sku_num);
@@ -153,7 +163,8 @@ main (int argc, char **argv)
 
 	xo_emit("{keq:sku/%s-%u/%s-000-%u}", ip->i_sku_base, ip->i_sku_num);
 	xo_emit("{L:Item} '{k:name/%s}':\n", ip->i_title);
-	xo_emit("{P:   }{L:Total sold}: {n:sold/%u%s}\n",
+	xo_emit("{P:   }{C:bg-blue,fg-white}{L:Total sold}: "
+		"{n:sold/%u%s}{C:}\n",
 		ip->i_sold, ip->i_sold ? ".0" : "");
 	xo_emit("{P:   }{Lcw:In stock}{:in-stock/%u}\n", ip->i_instock);
 	xo_emit("{P:   }{Lcw:On order}{:on-order/%u}\n", ip->i_onorder);
