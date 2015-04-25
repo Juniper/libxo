@@ -13,6 +13,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
+#include <ctype.h>
 
 #include "xo.h"
 
@@ -101,6 +102,11 @@ main (int argc, char **argv)
     }
     xo_emit("{C:reset}\n");
 
+    xo_emit("{C:bold}{:data} {C:underline}{:data} {C:inverse}{:data} "
+	    "{C:no-bold}{:data} {C:no-inverse}{:data} "
+	    "{C:no-underline}{:data}\n",
+	    "bold", "bold-ul", "triple", "inv-ul", "underline", "plain");
+
     xo_emit("{T:Item/%-10s}{C:bold,underline}{T:Total Sold/%12s}{C:no-bold}"
 	    "{T:In Stock/%12s}{C:/%s}"
 	    "{T:On Order/%12s}{C:normal}{T:SKU/%5s}\n", "inverse");
@@ -163,7 +169,7 @@ main (int argc, char **argv)
 
 	xo_emit("{keq:sku/%s-%u/%s-000-%u}", ip->i_sku_base, ip->i_sku_num);
 	xo_emit("{L:Item} '{k:name/%s}':\n", ip->i_title);
-	xo_emit("{P:   }{C:bg-blue,fg-white}{L:Total sold}: "
+	xo_emit("{P:   }{C:bg-blue   , fg-white, bold   }{L:Total sold}: "
 		"{n:sold/%u%s}{C:}\n",
 		ip->i_sold, ip->i_sold ? ".0" : "");
 	xo_emit("{P:   }{Lcw:In stock}{:in-stock/%u}\n", ip->i_instock);
