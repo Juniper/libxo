@@ -3432,7 +3432,7 @@ xo_colors_parse (xo_handle_t *xop, xo_colors_t *xocp, char *str)
     return;
 #endif /* LIBXO_TEXT_ONLY */
 
-    char *cp, *ep, *np;
+    char *cp, *ep, *np, *xp;
     int len = strlen(str);
     int rc;
 
@@ -3440,9 +3440,18 @@ xo_colors_parse (xo_handle_t *xop, xo_colors_t *xocp, char *str)
      * Possible tokens: colors, bg-colors, effects, no-effects, "reset".
      */
     for (cp = str, ep = cp + len - 1; cp && cp < ep; cp = np) {
+	/* Trim leading whitespace */
+	while (isspace((int) *cp))
+	    cp += 1;
+
 	np = strchr(cp, ',');
 	if (np)
 	    *np++ = '\0';
+
+	/* Trim trailing whitespace */
+	xp = cp + strlen(cp) - 1;
+	while (isspace(*xp) && xp > cp)
+	    *xp-- = '\0';
 
 	if (cp[0] == 'f' && cp[1] == 'g' && cp[2] == '-') {
 	    rc = xo_color_find(cp + 3);
