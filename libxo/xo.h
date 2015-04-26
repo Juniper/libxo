@@ -32,7 +32,7 @@
  * coward's path, we'll turn it on inside a #if that allows
  * others to turn it off where needed.  Not ideal, but functional.
  */
-#ifndef NO_PRINTFLIKE
+#if !defined(NO_PRINTFLIKE) && !defined(__linux__)
 #define PRINTFLIKE(_x, _y) __printflike(_x, _y)
 #else
 #define PRINTFLIKE(_x, _y)
