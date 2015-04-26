@@ -35,3 +35,4 @@ uninstall-hook:
 	for file in ${INTERNAL_FILES} ${EXTERNAL_FILES}; do \
 	    rm ${DESTDIR}${XO_SHAREDIR}/$$file ; done
 	rmdir ${DESTDIR}${XO_SHAREDIR}/external
+	rm -f ${DESTDIR}${bindir}/xohtml
