@@ -1,6 +1,12 @@
-<top>
+<top __version="3.1.4">
   <data test="value">
-    <item test2="value2">
+    <data test2="value2">bold</data>
+    <data>bold-ul</data>
+    <data>triple</data>
+    <data>inv-ul</data>
+    <data>underline</data>
+    <data>plain</data>
+    <item>
       <sku test3="value3" key="key">GRO-000-415</sku>
       <name key="key">gum</name>
       <sold>1412</sold>
