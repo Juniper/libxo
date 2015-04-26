@@ -9,7 +9,7 @@
  */
 
 /**
- * libxo provides a means of generating text, XML, and JSON output
+ * libxo provides a means of generating text, XML, JSON, and HTML output
  * using a single set of function calls, maximizing the value of output
  * while minimizing the cost/impact on the code.
  */
@@ -305,29 +305,81 @@ xo_message (const char *fmt, ...);
 void
 xo_no_setlocale (void);
 
+/**
+ * @brief Lift libxo-specific arguments from a set of arguments
+ *
+ * libxo-enable programs typically use command line options to enable
+ * all the nifty-cool libxo features.  xo_parse_args() makes this simple
+ * by pre-processing the command line arguments given to main(), handling
+ * and removing the libxo-specific ones, meaning anything starting with
+ * "--libxo".  A full description of these arguments is in the base
+ * documentation.
+ * @param[in] argc Number of arguments (ala #main())
+ * @param[in] argc Array of argument strings (ala #main())
+ * @return New number of arguments, or -1 for failure.
+ */
 int
 xo_parse_args (int argc, char **argv);
 
-/*
+/**
  * This is the "magic" number returned by libxo-supporting commands
  * when passed the equally magic "--libxo-check" option.  If you
- * return this, we can assume that since you know the magic handshake,
- * you'll happily handle future --libxo options and not do something
- * violent like reboot the box or create another hole in the ozone
- * layer.
+ * return this, we can (unsafely) assume that since you know the magic
+ * handshake, you'll happily handle future --libxo options and not do
+ * something violent like reboot the box or create another hole in the
+ * ozone layer.
  */
 #define XO_HAS_LIBXO	121
 
-/*
- * externs for our version number strings
+/**
+ * externs for libxo's version number strings
  */
-extern const char xo_version[];
-extern const char xo_version_extra[];
+extern const char xo_version[];	      /** Base version triple string */
+extern const char xo_version_extra[]; /** Extra version magic content */
 
+/**
+ * @brief Dump the internal stack of a libxo handle.
+ *
+ * This diagnostic function is something I will ask you to call from
+ * your program when you write to tell me libxo has gone bat-stink
+ * crazy and has discarded your list or container or content.  Output
+ * content will be what we lovingly call "developer entertainment".
+ * @param[in] xop A valid libxo handle, or NULL for the default handle
+ */
 void
 xo_dump_stack (xo_handle_t *xop);
 
+/**
+ * @brief Recode the name of the program, suitable for error output.
+ *
+ * libxo will record the given name for use while generating error
+ * messages.  The contents are not copied, so the value must continue
+ * to point to a valid memory location.  This allows the caller to change
+ * the value, but requires the caller to manage the memory.  Typically
+ * this is called with argv[0] from main().
+ * @param[in] name The name of the current application program
+ */
 void
 xo_set_program (const char *name);
+
+/**
+ * @brief Add a version string to the output, where possible.
+ *
+ * Adds a version number to the output, suitable for tracking
+ * changes in the content.  This is only important for the "encoding"
+ * format styles (XML and JSON) and allows a user of the data to
+ * discern which version of the data model is in use.
+ * @param[in] version The version number, encoded as a string
+ */
+void
+xo_set_version (const char *version);
+
+/**
+ * #xo_set_version with a handle.
+ * @param[in] xop A valid libxo handle, or NULL for the default handle
+ * @param[in] version The version number, encoded as a string
+ */
+void
+xo_set_version_h (xo_handle_t *xop, const char *version);
 
 #endif /* INCLUDE_XO_H */
