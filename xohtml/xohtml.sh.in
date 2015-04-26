@@ -33,6 +33,9 @@ while [ -z "$DONE" -a ! -z "$1" ]; do
             ;;
 	*)
 	    DONE=1;
+	    XX=$1;
+	    shift;
+	    CMD="$XX --libxo=html $@"
 	    ;;
     esac
 done

@@ -149,6 +149,9 @@
 /* Enable debugging */
 #undef LIBXO_DEBUG
 
+/* Enable text-only rendering */
+#undef LIBXO_TEXT_ONLY
+
 /* Define to the sub-directory in which libtool stores uninstalled libraries.
    */
 #undef LT_OBJDIR
