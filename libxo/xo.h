@@ -25,6 +25,19 @@
 #define NORETURN
 #endif /* __dead2 */
 
+/*
+ * Normally we'd use the HAVE_PRINTFLIKE define triggered by the
+ * --enable-printflike option to configure, but we don't install
+ * our internal "xoconfig.h", and I'd rather not.  Taking the
+ * coward's path, we'll turn it on inside a #if that allows
+ * others to turn it off where needed.  Not ideal, but functional.
+ */
+#ifndef NO_PRINTFLIKE
+#define PRINTFLIKE(_x, _y) __printflike(_x, _y)
+#else
+#define PRINTFLIKE(_x, _y)
+#endif /* NO_PRINTFLIKE */
+
 /** Formatting types */
 typedef unsigned xo_style_t;
 #define XO_STYLE_TEXT	0	/** Generate text output */
@@ -270,37 +283,37 @@ void
 xo_set_leading_xpath (xo_handle_t *xop, const char *path);
 
 void
-xo_warn_hc (xo_handle_t *xop, int code, const char *fmt, ...);
+xo_warn_hc (xo_handle_t *xop, int code, const char *fmt, ...) PRINTFLIKE(3, 4);
 
 void
-xo_warn_c (int code, const char *fmt, ...);
+xo_warn_c (int code, const char *fmt, ...) PRINTFLIKE(2, 3);
 
 void
-xo_warn (const char *fmt, ...);
+xo_warn (const char *fmt, ...) PRINTFLIKE(1, 2);
 
 void
-xo_warnx (const char *fmt, ...);
+xo_warnx (const char *fmt, ...) PRINTFLIKE(1, 2);
 
 void
-xo_err (int eval, const char *fmt, ...) NORETURN;
+xo_err (int eval, const char *fmt, ...) NORETURN PRINTFLIKE(2, 3);
 
 void
-xo_errx (int eval, const char *fmt, ...) NORETURN;
+xo_errx (int eval, const char *fmt, ...) NORETURN PRINTFLIKE(2, 3);
 
 void
-xo_errc (int eval, int code, const char *fmt, ...) NORETURN;
+xo_errc (int eval, int code, const char *fmt, ...) NORETURN PRINTFLIKE(3, 4);
 
 void
 xo_message_hcv (xo_handle_t *xop, int code, const char *fmt, va_list vap);
 
 void
-xo_message_hc (xo_handle_t *xop, int code, const char *fmt, ...);
+xo_message_hc (xo_handle_t *xop, int code, const char *fmt, ...) PRINTFLIKE(3, 4);
 
 void
-xo_message_c (int code, const char *fmt, ...);
+xo_message_c (int code, const char *fmt, ...) PRINTFLIKE(2, 3);
 
 void
-xo_message (const char *fmt, ...);
+xo_message (const char *fmt, ...) PRINTFLIKE(1, 2);
 
 void
 xo_no_setlocale (void);
