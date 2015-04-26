@@ -201,6 +201,7 @@ struct xo_handle_s {
     uint8_t xo_color_map_bg[XO_NUM_COLORS]; /* Background color mappings */
     xo_colors_t xo_colors;	/* Current color and effect values */
     xo_buffer_t xo_color_buf;	/* HTML: buffer of colors and effects */
+    char *xo_version;		/* Version string */
 };
 
 /* Flags for formatting functions */
@@ -816,7 +817,7 @@ xo_vsnprintf (xo_handle_t *xop, xo_buffer_t *xbp, const char *fmt, va_list vap)
     else
 	rc = vsnprintf(xbp->xb_curp, left, fmt, va_local);
 
-    if (rc > xbp->xb_size) {
+    if (rc >= left) {
 	if (!xo_buf_has_room(xbp, rc)) {
 	    va_end(va_local);
 	    return -1;
@@ -826,7 +827,7 @@ xo_vsnprintf (xo_handle_t *xop, xo_buffer_t *xbp, const char *fmt, va_list vap)
 	 * After we call vsnprintf(), the stage of vap is not defined.
 	 * We need to copy it before we pass.  Then we have to do our
 	 * own logic below to move it along.  This is because the
-	 * implementation can have va_list be a point (bsd) or a
+	 * implementation can have va_list be a pointer (bsd) or a
 	 * structure (macosx) or anything in between.
 	 */
 
@@ -835,7 +836,7 @@ xo_vsnprintf (xo_handle_t *xop, xo_buffer_t *xbp, const char *fmt, va_list vap)
 
 	left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
 	if (xop->xo_formatter)
-	    xop->xo_formatter(xop, xbp->xb_curp, left, fmt, va_local);
+	    rc = xop->xo_formatter(xop, xbp->xb_curp, left, fmt, va_local);
 	else
 	    rc = vsnprintf(xbp->xb_curp, left, fmt, va_local);
     }
@@ -1537,6 +1538,9 @@ xo_destroy (xo_handle_t *xop_arg)
     xo_buf_cleanup(&xop->xo_predicate);
     xo_buf_cleanup(&xop->xo_attrs);
     xo_buf_cleanup(&xop->xo_color_buf);
+
+    if (xop->xo_version)
+	xo_free(xop->xo_version);
 
     if (xop_arg == NULL) {
 	bzero(&xo_default_handle, sizeof(xo_default_handle));
@@ -4396,6 +4400,20 @@ xo_stack_flags (unsigned xflags)
     return 0;
 }
 
+static void
+xo_emit_top (xo_handle_t *xop, const char *ppn)
+{
+    xo_printf(xop, "%*s{%s", xo_indent(xop), "", ppn);
+    xop->xo_flags |= XOF_TOP_EMITTED;
+
+    if (xop->xo_version) {
+	xo_printf(xop, "%*s\"__version\": \"%s\", %s",
+		  xo_indent(xop), "", xop->xo_version, ppn);
+	xo_free(xop->xo_version);
+	xop->xo_version = NULL;
+    }
+}
+
 static int
 xo_do_open_container (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
 {
@@ -4427,12 +4445,9 @@ xo_do_open_container (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
     case XO_STYLE_JSON:
 	xo_stack_set_flags(xop);
 
-	if (!(xop->xo_flags & XOF_NO_TOP)) {
-	    if (!(xop->xo_flags & XOF_TOP_EMITTED)) {
-		xo_printf(xop, "%*s{%s", xo_indent(xop), "", ppn);
-		xop->xo_flags |= XOF_TOP_EMITTED;
-	    }
-	}
+	if (!(xop->xo_flags & XOF_NO_TOP)
+		&& !(xop->xo_flags & XOF_TOP_EMITTED))
+	    xo_emit_top(xop, ppn);
 
 	if (xop->xo_stack[xop->xo_depth].xs_flags & XSF_NOT_FIRST)
 	    pre_nl = (xop->xo_flags & XOF_PRETTY) ? ",\n" : ", ";
@@ -4565,12 +4580,9 @@ xo_do_open_list (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name)
 	const char *pre_nl = "";
 
 	indent = 1;
-	if (!(xop->xo_flags & XOF_NO_TOP)) {
-	    if (!(xop->xo_flags & XOF_TOP_EMITTED)) {
-		xo_printf(xop, "%*s{%s", xo_indent(xop), "", ppn);
-		xop->xo_flags |= XOF_TOP_EMITTED;
-	    }
-	}
+	if (!(xop->xo_flags & XOF_NO_TOP)
+		&& !(xop->xo_flags & XOF_TOP_EMITTED))
+	    xo_emit_top(xop, ppn);
 
 	if (name == NULL) {
 	    xo_failure(xop, "NULL passed for list name");
@@ -5151,8 +5163,8 @@ xo_transition (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name,
 	rc = xo_do_open_instance(xop, flags, name);
 	break;
 
-    case XSS_TRANSITION(XSS_OPEN_CONTAINER, XSS_OPEN_INSTANCE):
     case XSS_TRANSITION(XSS_INIT, XSS_OPEN_INSTANCE):
+    case XSS_TRANSITION(XSS_OPEN_CONTAINER, XSS_OPEN_INSTANCE):
 	rc = xo_do_open_list(xop, flags, name);
 	if (rc >= 0)
 	    goto open_instance;
@@ -5185,6 +5197,8 @@ xo_transition (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name,
 
     case XSS_TRANSITION(XSS_INIT, XSS_CLOSE_INSTANCE):
 	/* This one makes no sense; ignore it */
+	xo_failure(xop, "xo_close_instance ignored when called from "
+		   "initial state ('%s')", name ?: "(unknown)");
 	break;
 
     case XSS_TRANSITION(XSS_OPEN_CONTAINER, XSS_CLOSE_INSTANCE):
@@ -5227,6 +5241,8 @@ xo_transition (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name,
 
     case XSS_TRANSITION(XSS_INIT, XSS_CLOSE_LEAF_LIST):
 	/* Makes no sense; ignore */
+	xo_failure(xop, "xo_close_leaf_list ignored when called from "
+		   "initial state ('%s')", name ?: "(unknown)");
 	break;
 
     case XSS_TRANSITION(XSS_OPEN_CONTAINER, XSS_CLOSE_LEAF_LIST):
@@ -5562,6 +5578,41 @@ void
 xo_set_program (const char *name)
 {
     xo_program = name;
+}
+
+void
+xo_set_version_h (xo_handle_t *xop, const char *version UNUSED)
+{
+    xop = xo_default(xop);
+
+    if (version == NULL || strchr(version, '"') != NULL)
+	return;
+
+    switch (xo_style(xop)) {
+    case XO_STYLE_XML:
+	/* For XML, we record this as an attribute for the first tag */
+	xo_attr_h(xop, "__version", "%s", version);
+	break;
+
+    case XO_STYLE_JSON:
+	{
+	    /*
+	     * For XML, we record the version string in our handle, and emit
+	     * it in xo_emit_top.
+	     */
+	    int len = strlen(version) + 1;
+	    xop->xo_version = xo_realloc(NULL, len);
+	    if (xop->xo_version)
+		memcpy(xop->xo_version, version, len);
+	}
+	break;
+    }
+}
+
+void
+xo_set_version (const char *version)
+{
+    xo_set_version_h(NULL, version);
 }
 
 #ifdef UNIT_TEST
