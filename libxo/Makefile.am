@@ -45,6 +45,7 @@ man_MANS = \
     xo_set_info.3 \
     xo_set_options.3 \
     xo_set_style.3 \
+    xo_set_version.3 \
     xo_set_writer.3
 
 EXTRA_DIST = ${man_MANS}
