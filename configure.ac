@@ -262,6 +262,7 @@ AC_MSG_NOTICE([summary of build options:
   bindir:           ${XO_BINDIR}
   includedir:       ${XO_INCLUDEDIR}
   share dir:        ${XO_SHAREDIR}
+  oxtradoc dir:     ${SLAX_OXTRADOCDIR}
 
   compiler:         ${CC} (${HAVE_GCC:-no})
   compiler flags:   ${CFLAGS}
