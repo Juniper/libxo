@@ -1455,8 +1455,20 @@ functions like xo_failure, xo_warn, xo_err, etc.  The program name is
 initialized by xo_parse_args, but subsequent calls to xo_set_program
 can override this value.
 
+    xo_set_program(argv[0]);
+
 Note that the value is not copied, so the memory passed to
 xo_set_program (and xo_parse_args) must be maintained by the caller.
+
+*** xo_set_version
+
+The xo_set_version function records a version number to be emitted as
+part of the data for encoding styles (XML and JSON).  This version
+number is suitable for tracking changes in the content, allowing a
+user of the data to discern which version of the data model is in use.
+
+     void xo_set_version (const char *version);
+     void xo_set_version_h (xo_handle_t *xop, const char *version);
 
 *** Field Information (xo_info_t) @info@
 
