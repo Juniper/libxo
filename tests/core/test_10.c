@@ -84,6 +84,8 @@ main (int argc, char **argv)
     /*  Normally one would use "XOF_COLOR_ALLOWED", but we want to force it */
     xo_set_flags(NULL, XOF_COLOR);
 
+    xo_set_version("3.1.4");
+
     xo_open_container_h(NULL, "top");
 
     xo_attr("test", "value");
