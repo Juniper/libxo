@@ -65,10 +65,15 @@ main (int argc, char **argv)
     /* Okay, Sinhala is uber cool ... */
     rc = xo_emit("[{:sinhala}]\n", "෴ණ්ණ෴");
     xo_emit("{Twc:Width}{:width/%d}\n", rc);
+
     rc = xo_emit("[{:sinhala}]\n", "෴");
     xo_emit("{Twc:Width}{:width/%d}\n", rc);
+
     rc = xo_emit("[{:sinhala/%-4..4s/%s}]\n", "෴ණ්ණ෴෴ණ්ණ෴");
+    xo_emit("{Twc:Width}{:width/%d}\n", rc);
+
     xo_emit("[{:not-sinhala/%-4..4s/%s}]\n", "123456");
+
     rc = xo_emit("[{:tag/%s}]\n", "ර්‍ඝ");
     xo_emit("{Twc:Width}{:width/%d}\n", rc);
 
