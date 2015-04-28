@@ -1,4 +1,6 @@
 <top>
+  <host>my-box</host>
+  <domain>example.com</domain>
   <data test="value">
     <item test2="value2">
       <sku test3="value3" key="key">GRO-000-415</sku>
