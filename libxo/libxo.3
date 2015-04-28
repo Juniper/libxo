@@ -66,17 +66,25 @@ output, with attributes that detail how to render the data.
 .Pp
 There are four encoding styles supported by
 .Nm :
-TEXT, HTML, JSON,
-and XML.
-JSON and XML are suitable for encoding data, while TEXT and
-HTML are suited for display to the user.
-TEXT output can be display
-on a terminal session, allowing compatibility with traditional usage.
+.Bl -bullet
+.It
+TEXT output can be display on a terminal session, allowing
+compatibility with traditional command line usage.
+.It
+XML output is suitable for tools like XPath and protocols like
+NETCONF.
+.It
+JSON output can be used for RESTful APIs and integration with
+languages like Javascript and Python.
+.It
 HTML can be matched with a small CSS file to permit rendering in any
 HTML5 browser.
-XML output is suitable for tools like XPath and
-protocols like NETCONF.
-JSON output can be used for RESTful APIs.
+.El
+.Pp
+In general, XML and JSON are suitable for encoding data, while TEXT is
+suited for terminal output and HTML is suited for display in a web
+browser (see
+.Xr xohtml 1 ).
 .Pp
 The
 .Nm
