@@ -76,13 +76,14 @@ function as an unsigned integer.
 This single line of code can generate text ("In stock: 65\\n"), XML
 ("<in-stock>65</in-stock>"), JSON ('"in-stock": 65'), or HTML (too
 lengthy to be listed here).
-.Ss Modifier Roles
-Modifiers are optional, and indicate the role and formatting of the
+.Ss Field Roles
+Field roles are optional, and indicate the role and formatting of the
 content.
 The roles are listed below; only one role is permitted:
 .Pp
 .Bl -column "M" "Name12341234"
 .It Sy "M  Name           Description"
+.It C "color       " "Field is a color or effect"
 .It D "decoration  " "Field is non-text (e.g. colon, comma)"
 .It E "error       " "Field is an error message"
 .It L "label       " "Field is text that prefixes a value"
@@ -99,21 +100,43 @@ The roles are listed below; only one role is permitted:
 .Ss The Color Role ({C:})
 Colors and effects control how text values are displayed; they are
 used for display styles (TEXT and HTML).
-The color content can be
-either static, when placed directly within the field descriptor, or a
-printf-style format descriptor can be used, if preceded by a slash ("/"):
 .Bd -literal -offset indent
-    xo_emit("{C:bold}{Lwc:Cost}{:cost/%u}{C:reset}\n", cost);
-    xo_emit("{C:/fg-%s,bg-%s}{Lwc:Cost}{:cost/%u}{C:reset}\n",
-            fg_color, bg_color, cost);
+    xo_emit("{C:bold}{:value}{C:no-bold}\n", value);
+.Ed
+.Pp
+Colors and effects remain in effect until modified by other "C"-role
+fields.
+.Bd -literal -offset indent
+    xo_emit("{C:bold}{C:inverse}both{C:no-bold}only inverse\n");
+.Ed
+.Pp
+If the content is empty, the "reset" action is performed.
+.Bd -literal -offset indent
+    xo_emit("{C:both,underline}{:value}{C:}\n", value);
 .Ed
 .Pp
 The content should be a comma-separated list of zero or more colors or
 display effects.
+.Bd -literal -offset indent
+    xo_emit("{C:bold,underline,inverse}All three{C:no-bold,no-inverse}\n");
+.Ed
 .Pp
-Colors and effects remain in effect until modified by other "C" roles.
+The color content can be either static, when placed directly within
+the field descriptor, or a printf-style format descriptor can be used,
+if preceded by a slash ("/"):
+.Bd -literal -offset indent
+   xo_emit("{C:/%s%s}{:value}{C:}", need_bold ? "bold" : "",
+           need_underline ? "underline" : "", value);
+.Ed
 .Pp
-If the content is empty, the "reset" action is performed.
+Color names are prefixed with either "fg-" or "bg-" to change the
+foreground and background colors, respectively.
+.Bd -literal -offset indent
+    xo_emit("{C:/fg-%s,bg-%s}{Lwc:Cost}{:cost/%u}{C:reset}\n",
+            fg_color, bg_color, cost);
+.Ed
+.Pp
+The following table lists the supported effects:
 .Pp
 .Bl -column "no-underline"
 .It Sy "Name          Description"
@@ -143,8 +166,6 @@ The following color names are supported:
 .It yellow
 .El
 .Pp
-Color names are prefixed with either "fg-" or "bg-" to change the
-foreground and background colors, respectively.
 .Ss The Decoration Role ({D:})
 Decorations are typically punctuation marks such as colons,
 semi-colons, and commas used to decorate the text and make it simpler
@@ -231,7 +252,7 @@ format descriptors default to "%s".
     xo_emit("{:author} wrote \"{:poem}\" in {:year/%4d}\\n,
             author, poem, year);
 .Ed
-.Ss The Anchor Modifiers ({[:} and {]:})
+.Ss The Anchor Roles ({[:} and {]:})
 The anchor roles allow a set of strings by be padded as a group,
 but still be visible to
 .Xr xo_emit 3
@@ -269,9 +290,9 @@ Widths over 8k are considered probable errors and not supported.
 If
 .Dv XOF_WARN
 is set, a warning will be generated.
-.Ss Modifier Flags
-The modifiers can also include the following flags, which modify the
-content emitted for some output styles:
+.Ss Field Modifiers
+Field modifiers are flags which modify the way content emitted for
+particular output styles:
 .Pp
 .Bl -column M "Name12341234"
 .It Sy M "Name        Description"

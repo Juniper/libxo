@@ -95,8 +95,11 @@ command:
 We're using semantic release numbering, as defined in
 ^http://semver.org/spec/v2.0.0.html^.
 
-libxo is open source, distributed under the BSD license.  It
-is shipped as part of FreeBSD 11.0.
+libxo is open source, distributed under the BSD license.  It shipped
+as part of the FreeBSD operating system starting with release 11.0.
+
+Issues, problems, and bugs should be directly to the issues page on
+our github site.
 
 * Overview
 
@@ -128,7 +131,7 @@ A single libxo function call in source code is all that's required:
 
     xo_emit("Connecting to {:host}.{:domain}...\n", host, domain);
 
-    Text:
+    TEXT:
       Connection to my-box.example.com...
     XML:
       <host>my-box</host>
@@ -136,18 +139,33 @@ A single libxo function call in source code is all that's required:
     JSON:
       "host": "my-box",
       "domain": "example.com"
-      
-For brevity, the HTML output is emitted.
+    HTML:
+       <div class="line">
+         <div class="text">Connecting to </div>
+         <div class="data" data-tag="host" 
+              data-xpath="/top/host">my-box</div>
+         <div class="text">.</div>
+         <div class="data" data-tag="domain"
+              data-xpath="/top/domain">example.com</div>
+         <div class="text">...</div>
+       </div>
 
 ** Encoding Styles
 
-There are four encoding styles supported by libxo: TEXT, HTML, JSON,
-and XML.  JSON and XML are suitable for encoding data, while TEXT and
-HTML are suited for display to the user.  TEXT output can be display
-on a terminal session, allowing compatibility with traditional usage.
-HTML can be matched with a small CSS file to permit rendering in any
-HTML5 browser.  XML output is suitable for tools like XPath and
-protocols like NETCONF.  JSON output can be used for RESTful APIs.
+There are four encoding styles supported by libxo:
+
+- TEXT output can be display on a terminal session, allowing
+compatibility with traditional command line usage.
+- XML output is suitable for tools like XPath and protocols like
+NETCONF.
+- JSON output can be used for RESTful APIs and integration with
+languages like Javascript and Python.
+- HTML can be matched with a small CSS file to permit rendering in any
+HTML5 browser.
+
+In general, XML and JSON are suitable for encoding data, while TEXT is
+suited for terminal output and HTML is suited for display in a web
+browser (see ^xohtml^).
 
 *** Text Output
 
@@ -164,7 +182,7 @@ data might look like:
     printf("%d\t%s\n", num_blocks, path);
 
 Simple, direct, obvious.  But it's only making text output.  Imagine
-using a single code path to make text, XML, JSON or HTML, deciding at
+using a single code path to make TEXT, XML, JSON or HTML, deciding at
 run time which to generate.
 
 libxo expands on the idea of printf format strings to make a single
@@ -277,13 +295,13 @@ This single line of code can generate text (" In stock: 65\n"), XML
 ("<in-stock>65</in-stock>"), JSON ('"in-stock": 6'), or HTML (too
 lengthy to be listed here).
 
-*** Modifier Roles
+*** Field Roles
 
-Modifiers are optional, and indicate the role and formatting of the
+Field roles are optional, and indicate the role and formatting of the
 content.  The roles are listed below; only one role is permitted:
 
 |---+--------------+-------------------------------------------------|
-| M | Name         | Description                                     |
+| R | Name         | Description                                     |
 |---+--------------+-------------------------------------------------|
 | C | color/effect | Field has color and effect controls             |
 | D | decoration   | Field is non-text (e.g., colon, comma)          |
@@ -302,18 +320,38 @@ content.  The roles are listed below; only one role is permitted:
 **** The Color Role ({C:})
 
 Colors and effects control how text values are displayed; they are
-used for display styles (TEXT and HTML).  The color content can be
-either static, when placed directly within the field descriptor, or a
-printf-style format descriptor can be used, if preceded by a slash ("/"):
+used for display styles (TEXT and HTML).
 
-    xo_emit("{C:bold}{Lwc:Cost}{:cost/%u}{C:reset}\n", cost);
+    xo_emit("{C:bold}{:value}{C:no-bold}\n", value);
+
+Colors and effects remain in effect until modified by other "C"-role
+fields.
+
+    xo_emit("{C:bold}{C:inverse}both{C:no-bold}only inverse\n");
+
+If the content is empty, the "reset" action is performed.
+
+    xo_emit("{C:both,underline}{:value}{C:}\n", value);
+
+The content should be a comma-separated list of zero or more colors or
+display effects.
+
+    xo_emit("{C:bold,underline,inverse}All three{C:no-bold,no-inverse}\n");
+
+The color content can be either static, when placed directly within
+the field descriptor, or a printf-style format descriptor can be used,
+if preceded by a slash ("/"):
+
+   xo_emit("{C:/%s%s}{:value}{C:}", need_bold ? "bold" : "",
+           need_underline ? "underline" : "", value);
+
+Color names are prefixed with either "fg-" or "bg-" to change the
+foreground and background colors, respectively.
+
     xo_emit("{C:/fg-%s,bg-%s}{Lwc:Cost}{:cost/%u}{C:reset}\n",
             fg_color, bg_color, cost);
 
-The content should be a comma-separated list of zero or more colors or
-display effects.  Colors and effects remain in effect until
-modified by other "C" roles.  If the content is empty, the "reset"
-action is performed.
+The following table lists the supported effects:
 
 |---------------+-------------------------------------------------|
 |  Name         | Description                                     |
@@ -345,9 +383,6 @@ The following color names are supported:
 | white         |
 | yellow        |
 |---------------|
-
-Color names are prefixed with either "fg-" or "bg-" to change the
-foreground and background colors, respectively.
 
 **** The Decoration Role ({D:})
 
@@ -440,7 +475,7 @@ format descriptors default to "%s".
     xo_emit("{:author} wrote \"{:poem}\" in {:year/%4d}\n,
             author, poem, year);
 
-**** The Anchor Modifiers ({[:} and {]:})
+**** The Anchor Roles ({[:} and {]:})
 
 The anchor roles allow a set of strings by be padded as a group,
 but still be visible to xo_emit as distinct fields.  Either the start
@@ -468,10 +503,10 @@ than the absolute value of the given width, nothing happens.
 Widths over 8k are considered probable errors and not supported.  If
 XOF_WARN is set, a warning will be generated.
 
-*** Modifier Flags
+*** Field Modifiers
 
-The modifiers can also include the following flags, which modify the
-content emitted for some output styles:
+Field modifiers are flags which modify the way content emitted for
+particular output styles:
 
 |---+--------------+-------------------------------------------------|
 | M | Name         | Description                                     |
@@ -1164,26 +1199,32 @@ To use the default handle, pass a NULL handle:
 
 The set of valid flags include:
 
-|-----------------+---------------------------------------|
-| Flag            | Description                           |
-|-----------------+---------------------------------------|
-| XOF_CLOSE_FP    | Close file pointer on xo_destroy()    |
-| XOF_DTRT        | Enable "do the right thing" mode      |
-| XOF_INFO        | Display info data attributes (HTML)   |
-| XOF_KEYS        | Emit the key attribute (XML)          |
-| XOF_NO_ENV      | Do not use the LIBXO_OPTIONS env var  |
-| XOF_PRETTY      | Make 'pretty printed' output          |
-| XOF_UNDERSCORES | Replaces hyphens with underscores     |
-| XOF_UNITS       | Display units (XML and HMTL)          |
-| XOF_WARN        | Generate warnings for broken calls    |
-| XOF_WARN_XML    | Generate warnings in XML on stdout    |
-| XOF_XPATH       | Emit XPath expressions (HTML)         |
-| XOF_COLUMNS     | Force xo_emit to return columns used  |
-| XOF_FLUSH       | Flush output after each xo_emit call  |
-|-----------------+---------------------------------------|
+|-------------------+----------------------------------------|
+| Flag              | Description                            |
+|-------------------+----------------------------------------|
+| XOF_CLOSE_FP      | Close file pointer on xo_destroy()     |
+| XOF_COLOR         | Enable color and effects in output     |
+| XOF_COLOR_ALLOWED | Allow color/effect for terminal output |
+| XOF_DTRT          | Enable "do the right thing" mode       |
+| XOF_INFO          | Display info data attributes (HTML)    |
+| XOF_KEYS          | Emit the key attribute (XML)           |
+| XOF_NO_ENV        | Do not use the LIBXO_OPTIONS env var   |
+| XOF_PRETTY        | Make 'pretty printed' output           |
+| XOF_UNDERSCORES   | Replaces hyphens with underscores      |
+| XOF_UNITS         | Display units (XML and HMTL)           |
+| XOF_WARN          | Generate warnings for broken calls     |
+| XOF_WARN_XML      | Generate warnings in XML on stdout     |
+| XOF_XPATH         | Emit XPath expressions (HTML)          |
+| XOF_COLUMNS       | Force xo_emit to return columns used   |
+| XOF_FLUSH         | Flush output after each xo_emit call   |
+|-------------------+----------------------------------------|
 
 The XOF_CLOSE_FP flag will trigger the call of the close_func
 (provided via xo_set_writer()) when the handle is destroyed.
+
+The XOF_COLOR flag enables color and effects in output regardless of
+output device, while the XOF_COLOR_ALLOWED flag allows color and
+effects only if the output device is a terminal.
 
 The XOF_PRETTY flag requests 'pretty printing', which will trigger the
 addition of indentation and newlines to enhance the readability of
@@ -1768,7 +1809,7 @@ The "-V" option does not report errors, but prints a complete list of
 all field names, sorted alphabetically.  The output can help spot
 inconsistencies and spelling errors.
 
-* xohtml
+* xohtml @xohtml@
 
 xohtml is a tool for turning the output of libxo-enabled commands into
 html files suitable for display in modern HTML web browsers.  It can

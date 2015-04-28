@@ -82,6 +82,8 @@ main (int argc, char **argv)
 
     xo_open_container_h(NULL, "top");
 
+    xo_emit("Connecting to {:host}.{:domain}...\n", "my-box", "example.com");
+
     xo_attr("test", "value");
     xo_open_container("data");
     xo_open_list("item");

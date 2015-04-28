@@ -1774,7 +1774,10 @@ xo_set_options (xo_handle_t *xop, const char *input)
 		if (strcmp(cp, "no-color") == 0) {
 		    xop->xo_flags &= ~XOF_COLOR_ALLOWED;
 		} else if (strcmp(cp, "indent") == 0) {
-		    xop->xo_indent_by = atoi(vp);
+		    if (vp)
+			xop->xo_indent_by = atoi(vp);
+		    else
+			xo_failure(xop, "missing value for indent option");
 		} else {
 		    xo_warnx("unknown option: '%s'", cp);
 		    rc = -1;
@@ -2174,7 +2177,6 @@ xo_format_string_direct (xo_handle_t *xop, xo_buffer_t *xbp,
 	    if (olen <= 0) {
 		xo_failure(xop, "could not convert wide char: %lx",
 			   (unsigned long) wc);
-		olen = 1;
 		width = 1;
 		*xbp->xb_curp++ = '?';
 	    } else
@@ -3400,7 +3402,7 @@ static const char *xo_effect_on_codes[] = {
 /*
  * See comment below re: joy of terminal standards.  These can
  * be use by just adding:
- *	if (newp->xoc_effects & bit)
+ * +	if (newp->xoc_effects & bit)
  *	    code = xo_effect_on_codes[i];
  * +	else
  * +	    code = xo_effect_off_codes[i];
@@ -3546,8 +3548,7 @@ xo_colors_handle_text (xo_handle_t *xop UNUSED, xo_colors_t *newp)
 	if ((newp->xoc_effects & bit) == (oldp->xoc_effects & bit))
 	    continue;
 
-	if (newp->xoc_effects & bit)
-	    code = xo_effect_on_codes[i];
+	code = xo_effect_on_codes[i];
 
 	cp += snprintf(cp, ep - cp, ";%s", code);
 	if (cp >= ep)
@@ -3740,7 +3741,7 @@ xo_format_units (xo_handle_t *xop, const char *str, int len,
 
     int now = xbp->xb_curp - xbp->xb_bufp;
     int delta = now - stop;
-    if (delta < 0) {		/* Strange; no output to move */
+    if (delta <= 0) {		/* Strange; no output to move */
 	xbp->xb_curp = xbp->xb_bufp + stop; /* Reset buffer to prior state */
 	return;
     }
@@ -3872,7 +3873,7 @@ xo_anchor_stop (xo_handle_t *xop, const char *str, int len,
 
     int now = xbp->xb_curp - xbp->xb_bufp;
     int delta = now - stop;
-    if (delta < 0)		/* Strange; no output to move */
+    if (delta <= 0)		/* Strange; no output to move */
 	goto done;
 
     /*

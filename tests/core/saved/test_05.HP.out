@@ -44,6 +44,12 @@
   <div class="text">]</div>
 </div>
 <div class="line">
+  <div class="title">Width</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="width">6</div>
+</div>
+<div class="line">
   <div class="text">[</div>
   <div class="data" data-tag="not-sinhala">1234</div>
   <div class="text">]</div>
