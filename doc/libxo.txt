@@ -336,7 +336,7 @@ If the content is empty, the "reset" action is performed.
 The content should be a comma-separated list of zero or more colors or
 display effects.
 
-    xo_emit("{C:bold,underline,inverse}All three{C:no-bold,no-inverse}\n");
+    xo_emit("{C:bold,inverse}Ugly{C:no-bold,no-inverse}\n");
 
 The color content can be either static, when placed directly within
 the field descriptor, or a printf-style format descriptor can be used,
