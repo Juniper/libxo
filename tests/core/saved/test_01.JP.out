@@ -1,5 +1,7 @@
 {
   "top": {
+    "host": "my-box",
+    "domain": "example.com",
     "data": {
       "item": [
         {
