@@ -2995,7 +2995,7 @@ xo_format_title (xo_handle_t *xop, const char *str, int len,
 
 	} else {
 	    rc = snprintf(xbp->xb_curp, left, newfmt, newstr);
-	    if (rc > left) {
+	    if (rc >= left) {
 		if (!xo_buf_has_room(xbp, rc))
 		    return;
 		left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
