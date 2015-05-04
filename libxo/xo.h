@@ -17,6 +17,8 @@
 #ifndef INCLUDE_XO_H
 #define INCLUDE_XO_H
 
+#include <stdarg.h>
+
 /** Formatting types */
 typedef unsigned xo_style_t;
 #define XO_STYLE_TEXT	0	/** Generate text output */
