@@ -18,6 +18,7 @@
 #define INCLUDE_XO_H
 
 #include <sys/types.h>
+#include <stdarg.h>
 
 #ifdef __dead2
 #define NORETURN __dead2
