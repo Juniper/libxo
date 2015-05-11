@@ -29,6 +29,7 @@ config.sub
 depcomp
 ltmain.sh
 missing
+m4
 
 Makefile.in
 configure
