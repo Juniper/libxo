@@ -54,13 +54,18 @@ main (int argc, char **argv)
     xo_emit("{:memory/%u}{U:/%s} left out of {:total/%u}{U:/%s}\n",
 	    64, "k", 640, "kilobytes");
 
-    xo_emit("{T:/before%safter:}\n", "working");
+    xo_emit("{,title:/before%safter:}\n", "working");
 
-    xo_emit("{d:some/%s}{:ten/%ju}{:eleven/%ju}\n",
+    xo_emit("{,display,white,colon:some/%s}"
+	    "{,value:ten/%ju}{,value:eleven/%ju}\n",
 	    "string", (uintmax_t) 10, (uintmax_t) 11);
 
     xo_emit("{:unknown/%u} "
 	    "{N:/packet%s here\\/there\\/everywhere}\n",
+	    1010, "s");
+
+    xo_emit("{:unknown/%u} "
+	    "{,note:/packet%s here\\/there\\/everywhere}\n",
 	    1010, "s");
 
     xo_emit("({[:/%d}{n:min/15}/{n:cur/20}/{:max/%d}{]:})\n", 30, 125);
