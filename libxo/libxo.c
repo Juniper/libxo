@@ -3997,6 +3997,57 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 		continue;
 	    }
 
+	    if (*sp == ',') {
+		const char *np;
+		for (np = ++sp; *np; np++)
+		    if (*np == ':' || *np == '/' || *np == '}' || *np == ',')
+			break;
+
+		int slen = np - sp;
+		if (slen > 0) {
+		    if (strncmp(sp, "color", slen) == 0
+			|| strncmp(sp, "decoration", slen) == 0
+			|| strncmp(sp, "error", slen) == 0
+			|| strncmp(sp, "label", slen) == 0
+			|| strncmp(sp, "note", slen) == 0
+			|| strncmp(sp, "padding", slen) == 0
+			|| strncmp(sp, "title", slen) == 0
+			|| strncmp(sp, "units", slen) == 0
+			|| strncmp(sp, "value", slen) == 0
+			|| strncmp(sp, "warning", slen) == 0) {
+			ftype = toupper((int) *sp);
+		    } else if (strncmp(sp, "start-anchor", slen) == 0) {
+			ftype = '[';
+		    } else if (strncmp(sp, "stop-anchor", slen) == 0) {
+			ftype = ']';
+		    } else if (strncmp(sp, "colon", slen) == 0) {
+			flags |= XFF_COLON;
+		    } else if (strncmp(sp, "display-only", slen) == 0) {
+			flags |= XFF_DISPLAY_ONLY;
+		    } else if (strncmp(sp, "encode-only", slen) == 0) {
+			flags |= XFF_ENCODE_ONLY;
+		    } else if (strncmp(sp, "key", slen) == 0) {
+			flags |= XFF_KEY;
+		    } else if (strncmp(sp, "list", slen) == 0) {
+			flags |= XFF_LEAF_LIST;
+		    } else if (strncmp(sp, "no-quote", slen) == 0) {
+			flags |= XFF_NOQUOTE;
+		    } else if (strncmp(sp, "nquote", slen) == 0) {
+			flags |= XFF_QUOTE;
+		    } else if (strncmp(sp, "trim", slen) == 0) {
+			flags |= XFF_TRIM_WS;
+		    } else if (strncmp(sp, "white", slen) == 0) {
+			flags |= XFF_WS;
+		    } else {
+			xo_failure(xop, "unknown keyword ignored: '%.*s'",
+				   slen, sp);
+		    }
+		}
+
+		sp = np - 1;
+		continue;
+	    }
+
 	    switch (*sp) {
 	    case 'C':
 	    case 'D':
