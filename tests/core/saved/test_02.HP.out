@@ -28,8 +28,15 @@
 </div>
 <div class="line">
   <div class="data" data-tag="some">string</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
   <div class="data" data-tag="ten">10</div>
   <div class="data" data-tag="eleven">11</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="unknown">1010</div>
+  <div class="text"> </div>
+  <div class="note">packets here/there/everywhere</div>
 </div>
 <div class="line">
   <div class="data" data-tag="unknown">1010</div>
