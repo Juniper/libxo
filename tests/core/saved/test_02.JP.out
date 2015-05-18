@@ -13,6 +13,7 @@
       "ten": 10,
       "eleven": 11,
       "unknown": 1010,
+      "unknown": 1010,
       "min": 15,
       "cur": 20,
       "max": 30,
