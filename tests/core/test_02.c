@@ -15,6 +15,8 @@
 
 #include "xo.h"
 
+#include "xo_humanize.h"
+
 int
 main (int argc, char **argv)
 {
@@ -73,12 +75,22 @@ main (int argc, char **argv)
     xo_emit("({[:-30}{n:min/15}/{n:cur/20}/{n:max/125}{]:})\n");
     xo_emit("({[:}{:min/%u}/{:cur/%u}/{:max/%u}{]:/%d})\n", 15, 20, 125, -30);
 
+    xo_emit("Humanize: {h:val1/%u}, {h,hn-space:val2/%u}, "
+	    "{h,hn-decimal:val3/%u}, {h,hn-1000:val4/%u}, "
+	    "{h,hn-decimal:val5/%u}\n",
+            21,
+	    57 * 1024,
+	    96 * 1024 * 1024,
+	    (42 * 1024 + 420) * 1024,
+	    1342172800);
+
     xo_open_list("flag");
     xo_emit("{lq:flag/one} {lq:flag/two} {lq:flag/three}\n");
     xo_close_list("flag");
 
     xo_emit("{e:empty-tag/}");
-    xo_emit("1:{qt:t1/%*d} 2:{qt:t2/test%-*u} 3:{qt:t3/%10sx} 4:{qt:t4/x%-*.*s}\n",
+    xo_emit("1:{qt:t1/%*d} 2:{qt:t2/test%-*u} "
+	    "3:{qt:t3/%10sx} 4:{qt:t4/x%-*.*s}\n",
 	    6, 1000, 8, 5000, "ten-long", 10, 10, "test");
     xo_emit("{E:this is an error}\n");
     xo_emit("{E:/%s more error%s}\n", "two", "s" );
