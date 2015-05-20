@@ -41,6 +41,10 @@ noinst_PROGRAMS = ${TEST_CASES:.c=.test}
 LDADD = \
     ${top_builddir}/libxo/libxo.la
 
+if HAVE_HUMANIZE_NUMBER
+LDADD += -lutil
+endif
+
 EXTRA_DIST = \
     ${TEST_CASES} \
     ${addprefix saved/, ${TEST_CASES:.c=.T.err}} \
