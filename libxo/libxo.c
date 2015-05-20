@@ -32,6 +32,13 @@
 #include <stdio_ext.h>
 #endif /* HAVE_STDIO_EXT_H */
 
+#ifdef HAVE_HUMANIZE_NUMBER
+#include <libutil.h>
+#define xo_humanize_number humanize_number 
+#else /* HAVE_HUMANIZE_NUMBER */
+#include "xo_humanize.h"
+#endif /* HAVE_HUMANIZE_NUMBER */
+
 const char xo_version[] = LIBXO_VERSION;
 const char xo_version_extra[] = LIBXO_VERSION_EXTRA;
 
@@ -209,11 +216,11 @@ typedef unsigned long xo_xff_flags_t;
 #define XFF_COLON	(1<<0)	/* Append a ":" */
 #define XFF_COMMA	(1<<1)	/* Append a "," iff there's more output */
 #define XFF_WS		(1<<2)	/* Append a blank */
-#define XFF_ENCODE_ONLY	(1<<3)	/* Only emit for encoding formats (xml, json) */
+#define XFF_ENCODE_ONLY	(1<<3)	/* Only emit for encoding styles (XML, JSON) */
 
 #define XFF_QUOTE	(1<<4)	/* Force quotes */
 #define XFF_NOQUOTE	(1<<5)	/* Force no quotes */
-#define XFF_DISPLAY_ONLY (1<<6)	/* Only emit for display formats (text and html) */
+#define XFF_DISPLAY_ONLY (1<<6)	/* Only emit for display styles (text, html) */
 #define XFF_KEY		(1<<7)	/* Field is a key (for XPath) */
 
 #define XFF_XML		(1<<8)	/* Force XML encoding style (for XPath) */
@@ -224,6 +231,11 @@ typedef unsigned long xo_xff_flags_t;
 #define XFF_TRIM_WS	(1<<12)	/* Trim whitespace off encoded values */
 #define XFF_LEAF_LIST	(1<<13)	/* A leaf-list (list of values) */
 #define XFF_UNESCAPE	(1<<14)	/* Need to printf-style unescape the value */
+#define XFF_HUMANIZE	(1<<15)	/* Humanize the value (for display styles) */
+
+#define XFF_HN_SPACE	(1<<16)	/* Humanize: put space before suffix */
+#define XFF_HN_DECIMAL	(1<<17)	/* Humanize: add one decimal place if <10 */
+#define XFF_HN_1000	(1<<18)	/* Humanize: use 1000, not 1024 */
 
 /*
  * Normal printf has width and precision, which for strings operate as
@@ -3057,6 +3069,35 @@ xo_arg (xo_handle_t *xop)
 }
 #endif /* 0 */
 
+/*
+ * A wrapper for humanize_number that autoscales, since the
+ * HN_AUTOSCALE flag scales as needed based on the size of
+ * the output buffer, not the size of the value.  I also
+ * wish HN_DECIMAL was more imperative, without the <10
+ * test.  But the boat only goes where we want when we hold
+ * the rudder, so xo_humanize fixes part of the problem.
+ */
+static int
+xo_humanize (char *buf, int len, uint64_t value, int flags)
+{
+    int scale = 0;
+
+    if (value) {
+	uint64_t left = value;
+
+	if (flags & HN_DIVISOR_1000) {
+	    for ( ; left; scale++)
+		left /= 1000;
+	} else {
+	    for ( ; left; scale++)
+		left /= 1024;
+	}
+	scale -= 1;
+    }
+    
+    return xo_humanize_number(buf, len, value, "", scale, flags);
+}
+
 static void
 xo_format_value (xo_handle_t *xop, const char *name, int nlen,
 		 const char *format, int flen,
@@ -3064,7 +3105,6 @@ xo_format_value (xo_handle_t *xop, const char *name, int nlen,
 {
     int pretty = (xop->xo_flags & XOF_PRETTY);
     int quote;
-    xo_buffer_t *xbp;
 
     /*
      * Before we emit a value, we need to know that the frame is ready.
@@ -3135,11 +3175,65 @@ xo_format_value (xo_handle_t *xop, const char *name, int nlen,
 	}
     }
 
+    xo_buffer_t *xbp = &xop->xo_data;
+    int save_offset = xbp->xb_curp - xbp->xb_bufp;
+    unsigned save_columns = xop->xo_columns;
+    unsigned save_anchor_columns = xop->xo_anchor_columns;
+
     switch (xo_style(xop)) {
     case XO_STYLE_TEXT:
 	if (flags & XFF_ENCODE_ONLY)
 	    flags |= XFF_NO_OUTPUT;
 	xo_format_data(xop, NULL, format, flen, flags);
+
+	if (flags & XFF_HUMANIZE) {
+	    int end_offset = xbp->xb_curp - xbp->xb_bufp;
+	    if (end_offset != save_offset) {
+		/*
+		 * We have a string that's allegedly a number. We want to
+		 * humanize it, which means turning it back into a number
+		 * and calling xo_humanize_number on it.
+		 */
+		uint64_t value;
+		char *ep;
+
+		xo_buf_append(xbp, "", 1); /* NUL-terminate it */
+
+		value = strtoull(xbp->xb_bufp + save_offset, &ep, 0);
+		if (!(value == ULLONG_MAX && errno == ERANGE)
+		    && (ep != xbp->xb_bufp + save_offset)) {
+		    /*
+		     * There are few values where humanize_number needs
+		     * more bytes than the original value.  I've used
+		     * 10 as a rectal number to cover those scenarios.
+		     */
+		    if (xo_buf_has_room(xbp, 10)) {
+			xbp->xb_curp = xbp->xb_bufp + save_offset;
+
+			int rc;
+			int left = (xbp->xb_bufp + xbp->xb_size) - xbp->xb_curp;
+			int hn_flags = HN_NOSPACE; /* On by default */
+
+			if (flags & XFF_HN_SPACE)
+			    hn_flags &= ~HN_NOSPACE;
+
+			if (flags & XFF_HN_DECIMAL)
+			    hn_flags |= HN_DECIMAL;
+
+			if (flags & XFF_HN_1000)
+			    hn_flags |= HN_DIVISOR_1000;
+
+			rc = xo_humanize(xbp->xb_curp,
+					     left, value, hn_flags);
+			if (rc > 0) {
+			    xbp->xb_curp += rc;
+			    xop->xo_columns = save_columns + rc;
+			    xop->xo_anchor_columns = save_anchor_columns + rc;
+			}
+		    }
+		}
+	    }
+	}
 	break;
 
     case XO_STYLE_HTML:
@@ -3894,6 +3988,67 @@ xo_anchor_stop (xo_handle_t *xop, const char *str, int len,
     xo_anchor_clear(xop);
 }
 
+typedef struct xo_mapping_s {
+    xo_xff_flags_t xm_value;
+    const char *xm_name;
+} xo_mapping_t;
+
+xo_mapping_t xo_role_names[] = {
+    { 'C', "color" },
+    { 'D', "decoration" },
+    { 'E', "error" },
+    { 'L', "label" },
+    { 'N', "note" },
+    { 'P', "padding" },
+    { 'T', "title" },
+    { 'U', "units" },
+    { 'V', "value" },
+    { 'W', "warning" },
+    { '[', "start-anchor" },
+    { ']', "stop-anchor" },
+    { 0, NULL }
+};
+
+xo_mapping_t xo_modifier_names[] = {
+    { XFF_COLON, "colon" },
+    { XFF_COMMA, "comma" },
+    { XFF_DISPLAY_ONLY, "display-only" },
+    { XFF_ENCODE_ONLY, "encode-only" },
+    { XFF_HUMANIZE, "humanize" },
+    { XFF_HUMANIZE, "hn" },
+    { XFF_HN_SPACE, "hn-space" },
+    { XFF_HN_DECIMAL, "hn-decimal" },
+    { XFF_HN_1000, "hn-1000" },
+    { XFF_KEY, "key" },
+    { XFF_LEAF_LIST, "list" },
+    { XFF_NOQUOTE, "no-quote" },
+    { XFF_QUOTE, "nquote" },
+    { XFF_TRIM_WS, "trim" },
+    { XFF_WS, "white" },
+    { 0, NULL }
+};
+
+static xo_xff_flags_t
+xo_name_lookup (xo_mapping_t *map, const char *value, int len)
+{
+    while (isspace((int) *value)) {
+	value += 1;
+	len -= 1;
+    }
+
+    while (isspace((int) value[len]))
+	len -= 1;
+
+    if (*value == '\0')
+	return 0;
+
+    for ( ; map->xm_name; map++)
+	if (strncmp(map->xm_name, value, len) == 0)
+	    return map->xm_value;
+
+    return 0;
+}
+
 static int
 xo_do_emit (xo_handle_t *xop, const char *fmt)
 {
@@ -3967,8 +4122,9 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 	 *   ']': end a section of anchored text
          * The following flags are also supported:
 	 *   'c': flag: emit a colon after the label
-	 *   'd': field is only emitted for display formats (text and html)
-	 *   'e': field is only emitted for encoding formats (xml and json)
+	 *   'd': field is only emitted for display styles (text and html)
+	 *   'e': field is only emitted for encoding styles (xml and json)
+	 *   'h': humanize a numeric value (only for display styles)
 	 *   'k': this field is a key, suitable for XPath predicates
 	 *   'l': a leaf-list, a simple list of values
 	 *   'n': no quotes around this field
@@ -4005,42 +4161,18 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 
 		int slen = np - sp;
 		if (slen > 0) {
-		    if (strncmp(sp, "color", slen) == 0
-			|| strncmp(sp, "decoration", slen) == 0
-			|| strncmp(sp, "error", slen) == 0
-			|| strncmp(sp, "label", slen) == 0
-			|| strncmp(sp, "note", slen) == 0
-			|| strncmp(sp, "padding", slen) == 0
-			|| strncmp(sp, "title", slen) == 0
-			|| strncmp(sp, "units", slen) == 0
-			|| strncmp(sp, "value", slen) == 0
-			|| strncmp(sp, "warning", slen) == 0) {
-			ftype = toupper((int) *sp);
-		    } else if (strncmp(sp, "start-anchor", slen) == 0) {
-			ftype = '[';
-		    } else if (strncmp(sp, "stop-anchor", slen) == 0) {
-			ftype = ']';
-		    } else if (strncmp(sp, "colon", slen) == 0) {
-			flags |= XFF_COLON;
-		    } else if (strncmp(sp, "display-only", slen) == 0) {
-			flags |= XFF_DISPLAY_ONLY;
-		    } else if (strncmp(sp, "encode-only", slen) == 0) {
-			flags |= XFF_ENCODE_ONLY;
-		    } else if (strncmp(sp, "key", slen) == 0) {
-			flags |= XFF_KEY;
-		    } else if (strncmp(sp, "list", slen) == 0) {
-			flags |= XFF_LEAF_LIST;
-		    } else if (strncmp(sp, "no-quote", slen) == 0) {
-			flags |= XFF_NOQUOTE;
-		    } else if (strncmp(sp, "nquote", slen) == 0) {
-			flags |= XFF_QUOTE;
-		    } else if (strncmp(sp, "trim", slen) == 0) {
-			flags |= XFF_TRIM_WS;
-		    } else if (strncmp(sp, "white", slen) == 0) {
-			flags |= XFF_WS;
-		    } else {
-			xo_failure(xop, "unknown keyword ignored: '%.*s'",
-				   slen, sp);
+		    xo_xff_flags_t value;
+
+		    value = xo_name_lookup(xo_role_names, sp, slen);
+		    if (value)
+			ftype = value;
+		    else {
+			value = xo_name_lookup(xo_modifier_names, sp, slen);
+			if (value)
+			    flags |= value;
+			else
+			    xo_failure(xop, "unknown keyword ignored: '%.*s'",
+				       slen, sp);
 		    }
 		}
 
@@ -4079,6 +4211,10 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 
 	    case 'e':
 		flags |= XFF_ENCODE_ONLY;
+		break;
+
+	    case 'h':
+		flags |= XFF_HUMANIZE;
 		break;
 
 	    case 'k':
