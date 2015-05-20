@@ -84,6 +84,18 @@
   <div class="text">)</div>
 </div>
 <div class="line">
+  <div class="text">Humanize: </div>
+  <div class="data" data-tag="val1">21</div>
+  <div class="text">, </div>
+  <div class="data" data-tag="val2">58368</div>
+  <div class="text">, </div>
+  <div class="data" data-tag="val3">100663296</div>
+  <div class="text">, </div>
+  <div class="data" data-tag="val4">44470272</div>
+  <div class="text">, </div>
+  <div class="data" data-tag="val5">1342172800</div>
+</div>
+<div class="line">
   <div class="data" data-tag="flag">one</div>
   <div class="text"> </div>
   <div class="data" data-tag="flag">two</div>
