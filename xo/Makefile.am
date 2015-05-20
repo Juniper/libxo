@@ -21,10 +21,6 @@ AM_CFLAGS = \
 LIBS = \
     ${LIBXO_LIBS}
 
-if HAVE_HUMANIZE_NUMBER
-LDADD += -lutil
-endif
-
 bin_PROGRAMS = xo
 
 xo_SOURCES = xo.c
@@ -33,6 +29,10 @@ xo_SOURCES = xo.c
 
 LDADD = \
     ${top_builddir}/libxo/libxo.la
+
+if HAVE_HUMANIZE_NUMBER
+LDADD += -lutil
+endif
 
 man_MANS = xo.1
 
