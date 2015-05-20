@@ -21,6 +21,10 @@ AM_CFLAGS = \
 LIBS = \
     ${LIBXO_LIBS}
 
+if HAVE_HUMANIZE_NUMBER
+LDADD += -lutil
+endif
+
 bin_PROGRAMS = xo
 
 xo_SOURCES = xo.c
