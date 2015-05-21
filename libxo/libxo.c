@@ -1597,6 +1597,60 @@ xo_name_to_style (const char *name)
     return -1;
 }
 
+/* Simple name-value mapping */
+typedef struct xo_mapping_s {
+    xo_xff_flags_t xm_value;
+    const char *xm_name;
+} xo_mapping_t;
+
+static xo_xff_flags_t
+xo_name_lookup (xo_mapping_t *map, const char *value, int len)
+{
+    if (len == 0)
+	return 0;
+
+    if (len < 0)
+	len = strlen(value);
+
+    while (isspace((int) *value)) {
+	value += 1;
+	len -= 1;
+    }
+
+    while (isspace((int) value[len]))
+	len -= 1;
+
+    if (*value == '\0')
+	return 0;
+
+    for ( ; map->xm_name; map++)
+	if (strncmp(map->xm_name, value, len) == 0)
+	    return map->xm_value;
+
+    return 0;
+}
+
+static xo_mapping_t xo_xof_names[] = {
+    { XOF_COLOR_ALLOWED, "color" },
+    { XOF_COLUMNS, "columns" },
+    { XOF_DTRT, "dtrt" },
+    { XOF_FLUSH, "flush" },
+    { XOF_IGNORE_CLOSE, "ignore-close" },
+    { XOF_INFO, "info" },
+    { XOF_KEYS, "keys" },
+    { XOF_NO_HUMANIZE, "no-humanize" },
+    { XOF_NO_LOCALE, "no-locale" },
+    { XOF_NO_TOP, "no-top" },
+    { XOF_NOT_FIRST, "not-first" },
+    { XOF_PRETTY, "pretty" },
+    { XOF_UNDERSCORES, "underscores" },
+    { XOF_UNITS, "units" },
+    { XOF_WARN, "warn" },
+    { XOF_WARN_XML, "warn-xml" },
+    { XOF_XPATH, "xpath" },
+    { 0, NULL }
+};
+
 /*
  * Convert string name to XOF_* flag value.
  * Not all are useful.  Or safe.  Or sane.
@@ -1604,40 +1658,7 @@ xo_name_to_style (const char *name)
 static unsigned
 xo_name_to_flag (const char *name)
 {
-    if (strcmp(name, "pretty") == 0)
-	return XOF_PRETTY;
-    if (strcmp(name, "warn") == 0)
-	return XOF_WARN;
-    if (strcmp(name, "xpath") == 0)
-	return XOF_XPATH;
-    if (strcmp(name, "info") == 0)
-	return XOF_INFO;
-    if (strcmp(name, "warn-xml") == 0)
-	return XOF_WARN_XML;
-    if (strcmp(name, "color") == 0)
-	return XOF_COLOR_ALLOWED;
-    if (strcmp(name, "columns") == 0)
-	return XOF_COLUMNS;
-    if (strcmp(name, "dtrt") == 0)
-	return XOF_DTRT;
-    if (strcmp(name, "flush") == 0)
-	return XOF_FLUSH;
-    if (strcmp(name, "keys") == 0)
-	return XOF_KEYS;
-    if (strcmp(name, "ignore-close") == 0)
-	return XOF_IGNORE_CLOSE;
-    if (strcmp(name, "not-first") == 0)
-	return XOF_NOT_FIRST;
-    if (strcmp(name, "no-locale") == 0)
-	return XOF_NO_LOCALE;
-    if (strcmp(name, "no-top") == 0)
-	return XOF_NO_TOP;
-    if (strcmp(name, "units") == 0)
-	return XOF_UNITS;
-    if (strcmp(name, "underscores") == 0)
-	return XOF_UNDERSCORES;
-
-    return 0;
+    return (unsigned) xo_name_lookup(xo_xof_names, name, -1);
 }
 
 int
@@ -1714,12 +1735,16 @@ xo_set_options (xo_handle_t *xop, const char *input)
 		}
 		break;
 
+	    case 'J':
+		xop->xo_style = XO_STYLE_JSON;
+		break;
+
 	    case 'k':
 		xop->xo_flags |= XOF_KEYS;
 		break;
 
-	    case 'J':
-		xop->xo_style = XO_STYLE_JSON;
+	    case 'n':
+		xop->xo_flags |= XOF_NO_HUMANIZE;
 		break;
 
 	    case 'P':
@@ -2771,6 +2796,9 @@ static void
 xo_format_humanize (xo_handle_t *xop, xo_buffer_t *xbp,
 		    xo_humanize_save_t *savep, xo_xff_flags_t flags)
 {
+    if (xop->xo_flags & XOF_NO_HUMANIZE)
+	return;
+
     unsigned end_offset = xbp->xb_curp - xbp->xb_bufp;
     if (end_offset == savep->xhs_offset) /* Huh? Nothing to render */
 	return;
@@ -4057,12 +4085,7 @@ xo_anchor_stop (xo_handle_t *xop, const char *str, int len,
     xo_anchor_clear(xop);
 }
 
-typedef struct xo_mapping_s {
-    xo_xff_flags_t xm_value;
-    const char *xm_name;
-} xo_mapping_t;
-
-xo_mapping_t xo_role_names[] = {
+static xo_mapping_t xo_role_names[] = {
     { 'C', "color" },
     { 'D', "decoration" },
     { 'E', "error" },
@@ -4078,45 +4101,25 @@ xo_mapping_t xo_role_names[] = {
     { 0, NULL }
 };
 
-xo_mapping_t xo_modifier_names[] = {
+static xo_mapping_t xo_modifier_names[] = {
     { XFF_COLON, "colon" },
     { XFF_COMMA, "comma" },
-    { XFF_DISPLAY_ONLY, "display-only" },
-    { XFF_ENCODE_ONLY, "encode-only" },
+    { XFF_DISPLAY_ONLY, "display" },
+    { XFF_ENCODE_ONLY, "encoding" },
     { XFF_HUMANIZE, "humanize" },
     { XFF_HUMANIZE, "hn" },
     { XFF_HN_SPACE, "hn-space" },
     { XFF_HN_DECIMAL, "hn-decimal" },
     { XFF_HN_1000, "hn-1000" },
     { XFF_KEY, "key" },
+    { XFF_LEAF_LIST, "leaf-list" },
     { XFF_LEAF_LIST, "list" },
-    { XFF_NOQUOTE, "no-quote" },
-    { XFF_QUOTE, "nquote" },
+    { XFF_NOQUOTE, "no-quotes" },
+    { XFF_QUOTE, "quotes" },
     { XFF_TRIM_WS, "trim" },
     { XFF_WS, "white" },
     { 0, NULL }
 };
-
-static xo_xff_flags_t
-xo_name_lookup (xo_mapping_t *map, const char *value, int len)
-{
-    while (isspace((int) *value)) {
-	value += 1;
-	len -= 1;
-    }
-
-    while (isspace((int) value[len]))
-	len -= 1;
-
-    if (*value == '\0')
-	return 0;
-
-    for ( ; map->xm_name; map++)
-	if (strncmp(map->xm_name, value, len) == 0)
-	    return map->xm_value;
-
-    return 0;
-}
 
 static int
 xo_do_emit (xo_handle_t *xop, const char *fmt)
