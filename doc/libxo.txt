@@ -2052,7 +2052,8 @@ Use "receive-after-window-packets" instead of
 Nothing's worse than writing expressions like:
 
     if ($src1/process[pid == $pid]/name == 
-        $src2/proc-table/proc-list/proc-entry[process-id == $pid]/proc-name) {
+        $src2/proc-table/proc-list
+                   /proc-entry[process-id == $pid]/proc-name) {
         ...
     }
 
