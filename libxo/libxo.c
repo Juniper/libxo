@@ -2722,6 +2722,104 @@ xo_color_append_html (xo_handle_t *xop)
     }
 }
 
+/*
+ * A wrapper for humanize_number that autoscales, since the
+ * HN_AUTOSCALE flag scales as needed based on the size of
+ * the output buffer, not the size of the value.  I also
+ * wish HN_DECIMAL was more imperative, without the <10
+ * test.  But the boat only goes where we want when we hold
+ * the rudder, so xo_humanize fixes part of the problem.
+ */
+static int
+xo_humanize (char *buf, int len, uint64_t value, int flags)
+{
+    int scale = 0;
+
+    if (value) {
+	uint64_t left = value;
+
+	if (flags & HN_DIVISOR_1000) {
+	    for ( ; left; scale++)
+		left /= 1000;
+	} else {
+	    for ( ; left; scale++)
+		left /= 1024;
+	}
+	scale -= 1;
+    }
+    
+    return xo_humanize_number(buf, len, value, "", scale, flags);
+}
+
+/*
+ * This is an area where we can save information from the handle for
+ * later restoration.  We need to know what data was rendered to know
+ * what needs cleaned up.
+ */
+typedef struct xo_humanize_save_s {
+    unsigned xhs_offset;	/* Saved xo_offset */
+    unsigned xhs_columns;	/* Saved xo_columns */
+    unsigned xhs_anchor_columns; /* Saved xo_anchor_columns */
+} xo_humanize_save_t;
+
+/*
+ * Format a "humanized" value for a numeric, meaning something nice
+ * like "44M" instead of "44470272".  We autoscale, choosing the
+ * most appropriate value for K/M/G/T/P/E based on the value given.
+ */
+static void
+xo_format_humanize (xo_handle_t *xop, xo_buffer_t *xbp,
+		    xo_humanize_save_t *savep, xo_xff_flags_t flags)
+{
+    unsigned end_offset = xbp->xb_curp - xbp->xb_bufp;
+    if (end_offset == savep->xhs_offset) /* Huh? Nothing to render */
+	return;
+
+    /*
+     * We have a string that's allegedly a number. We want to
+     * humanize it, which means turning it back into a number
+     * and calling xo_humanize_number on it.
+     */
+    uint64_t value;
+    char *ep;
+
+    xo_buf_append(xbp, "", 1); /* NUL-terminate it */
+
+    value = strtoull(xbp->xb_bufp + savep->xhs_offset, &ep, 0);
+    if (!(value == ULLONG_MAX && errno == ERANGE)
+	&& (ep != xbp->xb_bufp + savep->xhs_offset)) {
+	/*
+	 * There are few values where humanize_number needs
+	 * more bytes than the original value.  I've used
+	 * 10 as a rectal number to cover those scenarios.
+	 */
+	if (xo_buf_has_room(xbp, 10)) {
+	    xbp->xb_curp = xbp->xb_bufp + savep->xhs_offset;
+
+	    int rc;
+	    int left = (xbp->xb_bufp + xbp->xb_size) - xbp->xb_curp;
+	    int hn_flags = HN_NOSPACE; /* On by default */
+
+	    if (flags & XFF_HN_SPACE)
+		hn_flags &= ~HN_NOSPACE;
+
+	    if (flags & XFF_HN_DECIMAL)
+		hn_flags |= HN_DECIMAL;
+
+	    if (flags & XFF_HN_1000)
+		hn_flags |= HN_DIVISOR_1000;
+
+	    rc = xo_humanize(xbp->xb_curp,
+			     left, value, hn_flags);
+	    if (rc > 0) {
+		xbp->xb_curp += rc;
+		xop->xo_columns = savep->xhs_columns + rc;
+		xop->xo_anchor_columns = savep->xhs_anchor_columns + rc;
+	    }
+	}
+    }
+}
+
 static void
 xo_buf_append_div (xo_handle_t *xop, const char *class, xo_xff_flags_t flags,
 		   const char *name, int nlen,
@@ -2906,9 +3004,51 @@ xo_buf_append_div (xo_handle_t *xop, const char *class, xo_xff_flags_t flags,
 	    xo_data_append(xop, div_key, sizeof(div_key) - 1);
     }
 
+    xo_buffer_t *xbp = &xop->xo_data;
+    unsigned base_offset = xbp->xb_curp - xbp->xb_bufp;
+
     xo_data_append(xop, div_end, sizeof(div_end) - 1);
 
+    xo_humanize_save_t save;	/* Save values for humanizing logic */
+
+    save.xhs_offset = xbp->xb_curp - xbp->xb_bufp;
+    save.xhs_columns = xop->xo_columns;
+    save.xhs_anchor_columns = xop->xo_anchor_columns;
+
     xo_format_data(xop, NULL, value, vlen, 0);
+
+    if (flags & XFF_HUMANIZE) {
+	/*
+	 * Unlike text style, we want to retain the original value and
+	 * stuff it into the "data-number" attribute.
+	 */
+	static const char div_number[] = "\" data-number=\"";
+	int div_len = sizeof(div_number) - 1;
+
+	unsigned end_offset = xbp->xb_curp - xbp->xb_bufp;
+	int olen = end_offset - save.xhs_offset;
+
+	char *cp = alloca(olen + 1);
+	memcpy(cp, xbp->xb_bufp + save.xhs_offset, olen);
+	cp[olen] = '\0';
+
+	xo_format_humanize(xop, xbp, &save, flags);
+
+	if (xo_buf_has_room(xbp, div_len + olen)) {
+	    unsigned new_offset = xbp->xb_curp - xbp->xb_bufp;
+
+	    /* Move the humanized string off to the left */
+	    memmove(xbp->xb_bufp + base_offset + div_len + olen,
+		    xbp->xb_bufp + base_offset, new_offset - base_offset);
+
+	    /* Copy the data_number attribute name */
+	    memcpy(xbp->xb_bufp + base_offset, div_number, div_len);
+
+	    /* Copy the original long value */
+	    memcpy(xbp->xb_bufp + base_offset + div_len, cp, olen);
+	    xbp->xb_curp += div_len + olen;
+	}
+    }
 
     xo_data_append(xop, div_close, sizeof(div_close) - 1);
 
@@ -3069,35 +3209,6 @@ xo_arg (xo_handle_t *xop)
 }
 #endif /* 0 */
 
-/*
- * A wrapper for humanize_number that autoscales, since the
- * HN_AUTOSCALE flag scales as needed based on the size of
- * the output buffer, not the size of the value.  I also
- * wish HN_DECIMAL was more imperative, without the <10
- * test.  But the boat only goes where we want when we hold
- * the rudder, so xo_humanize fixes part of the problem.
- */
-static int
-xo_humanize (char *buf, int len, uint64_t value, int flags)
-{
-    int scale = 0;
-
-    if (value) {
-	uint64_t left = value;
-
-	if (flags & HN_DIVISOR_1000) {
-	    for ( ; left; scale++)
-		left /= 1000;
-	} else {
-	    for ( ; left; scale++)
-		left /= 1024;
-	}
-	scale -= 1;
-    }
-    
-    return xo_humanize_number(buf, len, value, "", scale, flags);
-}
-
 static void
 xo_format_value (xo_handle_t *xop, const char *name, int nlen,
 		 const char *format, int flen,
@@ -3176,69 +3287,27 @@ xo_format_value (xo_handle_t *xop, const char *name, int nlen,
     }
 
     xo_buffer_t *xbp = &xop->xo_data;
-    int save_offset = xbp->xb_curp - xbp->xb_bufp;
-    unsigned save_columns = xop->xo_columns;
-    unsigned save_anchor_columns = xop->xo_anchor_columns;
+    xo_humanize_save_t save;	/* Save values for humanizing logic */
 
     switch (xo_style(xop)) {
     case XO_STYLE_TEXT:
 	if (flags & XFF_ENCODE_ONLY)
 	    flags |= XFF_NO_OUTPUT;
+
+	save.xhs_offset = xbp->xb_curp - xbp->xb_bufp;
+	save.xhs_columns = xop->xo_columns;
+	save.xhs_anchor_columns = xop->xo_anchor_columns;
+
 	xo_format_data(xop, NULL, format, flen, flags);
 
-	if (flags & XFF_HUMANIZE) {
-	    int end_offset = xbp->xb_curp - xbp->xb_bufp;
-	    if (end_offset != save_offset) {
-		/*
-		 * We have a string that's allegedly a number. We want to
-		 * humanize it, which means turning it back into a number
-		 * and calling xo_humanize_number on it.
-		 */
-		uint64_t value;
-		char *ep;
-
-		xo_buf_append(xbp, "", 1); /* NUL-terminate it */
-
-		value = strtoull(xbp->xb_bufp + save_offset, &ep, 0);
-		if (!(value == ULLONG_MAX && errno == ERANGE)
-		    && (ep != xbp->xb_bufp + save_offset)) {
-		    /*
-		     * There are few values where humanize_number needs
-		     * more bytes than the original value.  I've used
-		     * 10 as a rectal number to cover those scenarios.
-		     */
-		    if (xo_buf_has_room(xbp, 10)) {
-			xbp->xb_curp = xbp->xb_bufp + save_offset;
-
-			int rc;
-			int left = (xbp->xb_bufp + xbp->xb_size) - xbp->xb_curp;
-			int hn_flags = HN_NOSPACE; /* On by default */
-
-			if (flags & XFF_HN_SPACE)
-			    hn_flags &= ~HN_NOSPACE;
-
-			if (flags & XFF_HN_DECIMAL)
-			    hn_flags |= HN_DECIMAL;
-
-			if (flags & XFF_HN_1000)
-			    hn_flags |= HN_DIVISOR_1000;
-
-			rc = xo_humanize(xbp->xb_curp,
-					     left, value, hn_flags);
-			if (rc > 0) {
-			    xbp->xb_curp += rc;
-			    xop->xo_columns = save_columns + rc;
-			    xop->xo_anchor_columns = save_anchor_columns + rc;
-			}
-		    }
-		}
-	    }
-	}
+	if (flags & XFF_HUMANIZE)
+	    xo_format_humanize(xop, xbp, &save, flags);
 	break;
 
     case XO_STYLE_HTML:
 	if (flags & XFF_ENCODE_ONLY)
 	    flags |= XFF_NO_OUTPUT;
+
 	xo_buf_append_div(xop, "data", flags, name, nlen,
 			  format, flen, encoding, elen);
 	break;
