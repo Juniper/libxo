@@ -82,6 +82,7 @@ typedef unsigned long long xo_xof_flags_t;
 #define XOF_NO_CLOSE	XOF_BIT(24) /** xo_finish won't close open elements */
 #define XOF_COLOR_ALLOWED XOF_BIT(25) /** Allow color/effects to be enabled */
 #define XOF_COLOR	XOF_BIT(26) /** Enable color and effects */
+#define XOF_NO_HUMANIZE	XOF_BIT(27) /** Block the {h:} modifier */
 
 /*
  * The xo_info_t structure provides a mapping between names and
