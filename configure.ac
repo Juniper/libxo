@@ -60,6 +60,7 @@ AC_CHECK_FUNCS([asprintf])
 AC_CHECK_FUNCS([__flbf])
 
 AC_CHECK_HEADERS([dlfcn.h])
+AC_CHECK_HEADERS([dlfcn.h])
 AC_CHECK_HEADERS([stdio_ext.h])
 AC_CHECK_HEADERS([tzfile.h])
 AC_CHECK_HEADERS([stdtime/tzfile.h])
@@ -69,6 +70,23 @@ AC_CHECK_HEADERS([sys/time.h])
 AC_CHECK_HEADERS([ctype.h errno.h stdio.h stdlib.h])
 AC_CHECK_HEADERS([string.h sys/param.h unistd.h ])
 AC_CHECK_HEADERS([sys/sysctl.h])
+
+dnl humanize_number(3) is a great function, but it's not standard.
+dnl Note Macosx has the function in libutil.a but doesn't ship the
+dnl header file, so I'll need to carry my own implementation.  See:
+dnl    https://devforums.apple.com/thread/271121
+AC_CHECK_HEADERS([libutil.h])
+AC_CHECK_LIB([util], [humanize_number],
+     [HAVE_HUMANIZE_NUMBER=$ac_cv_header_libutil_h],
+     [HAVE_HUMANIZE_NUMBER=no])
+
+AC_MSG_RESULT(Humanize is :${HAVE_HUMANIZE_NUMBER}:${ac_cv_header_libutil_h}:)
+
+if test "$HAVE_HUMANIZE_NUMBER" = "yes"; then
+    AC_DEFINE([HAVE_HUMANIZE_NUMBER], [1], [humanize_number(3)])
+fi
+
+AM_CONDITIONAL([HAVE_HUMANIZE_NUMBER], [test "$HAVE_HUMANIZE_NUMBER" = "yes"])
 
 AC_CHECK_LIB([crypto], [MD5_Init])
 AM_CONDITIONAL([HAVE_LIBCRYPTO], [test "$HAVE_LIBCRYPTO" != "no"])

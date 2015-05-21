@@ -28,8 +28,15 @@
 </div>
 <div class="line">
   <div class="data" data-tag="some">string</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
   <div class="data" data-tag="ten">10</div>
   <div class="data" data-tag="eleven">11</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="unknown">1010</div>
+  <div class="text"> </div>
+  <div class="note">packets here/there/everywhere</div>
 </div>
 <div class="line">
   <div class="data" data-tag="unknown">1010</div>
@@ -75,6 +82,18 @@
   <div class="data" data-tag="max">125</div>
   <div class="padding">                     </div>
   <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="text">Humanize: </div>
+  <div class="data" data-tag="val1" data-number="21">21</div>
+  <div class="text">, </div>
+  <div class="data" data-tag="val2" data-number="58368">57 K</div>
+  <div class="text">, </div>
+  <div class="data" data-tag="val3" data-number="100663296">96M</div>
+  <div class="text">, </div>
+  <div class="data" data-tag="val4" data-number="44470272">44M</div>
+  <div class="text">, </div>
+  <div class="data" data-tag="val5" data-number="1342172800">1.2G</div>
 </div>
 <div class="line">
   <div class="data" data-tag="flag">one</div>

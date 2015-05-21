@@ -12,6 +12,7 @@
     <ten>10</ten>
     <eleven>11</eleven>
     <unknown>1010</unknown>
+    <unknown>1010</unknown>
     <min>15</min>
     <cur>20</cur>
     <max>30</max>
@@ -24,6 +25,11 @@
     <min>15</min>
     <cur>20</cur>
     <max>125</max>
+    <val1>21</val1>
+    <val2>58368</val2>
+    <val3>100663296</val3>
+    <val4>44470272</val4>
+    <val5>1342172800</val5>
     <flag>one</flag>
     <flag>two</flag>
     <flag>three</flag>

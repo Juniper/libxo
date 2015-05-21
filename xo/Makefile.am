@@ -30,6 +30,10 @@ xo_SOURCES = xo.c
 LDADD = \
     ${top_builddir}/libxo/libxo.la
 
+if HAVE_HUMANIZE_NUMBER
+LDADD += -lutil
+endif
+
 man_MANS = xo.1
 
 EXTRA_DIST = xo.1

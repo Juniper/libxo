@@ -51,7 +51,7 @@ field descriptions within the format string.
 .Pp
 The field description is given as follows:
 .Bd -literal -offset indent
-    '{' [ role | modifier ]* ':' [ content ]
+    '{' [ role | modifier ]* [',' long-names ]* ':' [ content ]
             [ '/' field-format [ '/' encoding-format ]] '}'
 .Ed
 .Pp
@@ -70,12 +70,21 @@ passed to the
 .Xr xo_emit 3 ,
 function as an unsigned integer.
 .Bd -literal -offset indent
-        xo_emit("{P:   }{Lwc:In stock}{:in-stock/%u}\\n", 65);
+    xo_emit("{P:   }{Lwc:In stock}{:in-stock/%u}\\n", 65);
 .Ed
 .Pp
 This single line of code can generate text ("In stock: 65\\n"), XML
 ("<in-stock>65</in-stock>"), JSON ('"in-stock": 65'), or HTML (too
 lengthy to be listed here).
+.Pp
+While roles and modifiers typically use single character for brevity,
+there are alternative names for each which allow more verbose
+formatting strings.
+These names must be preceded by a comma, and may follow any
+single-character values:
+.Bd -literal -offset indent
+    xo_emit("{L,white,colon:In stock}{,key:in-stock/%u}\n", 65);
+.Ed
 .Ss Field Roles
 Field roles are optional, and indicate the role and formatting of the
 content.
@@ -93,10 +102,26 @@ The roles are listed below; only one role is permitted:
 .It U "units       " "Field is the units for the previous value field"
 .It V "value       " "Field is the name of field (the default)"
 .It W "warning     " "Field is a warning message"
-.It \&[ "start anchor" "Begin a section of anchored variable-width text"
-.It \&] "stop anchor " "End a section of anchored variable-width text"
+.It \&[ "start-anchor" "Begin a section of anchored variable-width text"
+.It \&] "stop-anchor " "End a section of anchored variable-width text"
 .El
 .Pp
+.Bd -literal -offset indent
+   EXAMPLE:
+       xo_emit("{L:Free}{D::}{P:   }{:free/%u} {U:Blocks}\n",
+               free_blocks);
+.Ed
+.Pp
+When a role is not provided, the "value" role is used as the default.
+.Pp
+Roles and modifiers can also use more verbose names, when preceeded by
+a comma:
+.Bd -literal -offset indent
+   EXAMPLE:
+        xo_emit("{,label:Free}{,decoration::}{,padding:   }"
+               "{,value:free/%u} {,units:Blocks}\n",
+               free_blocks);
+.Ed
 .Ss The Color Role ({C:})
 Colors and effects control how text values are displayed; they are
 used for display styles (TEXT and HTML).
@@ -294,16 +319,21 @@ is set, a warning will be generated.
 Field modifiers are flags which modify the way content emitted for
 particular output styles:
 .Pp
-.Bl -column M "Name12341234"
+.Bl -column M "Name123456789"
 .It Sy M "Name        Description"
-.It c "colon       " "A colon ("":"") is appended after the label"
-.It d "display     " "Only emit field for display styles (text/HTML)"
-.It e "encoding    " "Only emit for encoding styles (XML/JSON)"
-.It k "key         " "Field is a key, suitable for XPath predicates"
-.It l "leaf        " "Field is a leaf-list, a list of leaf values"
-.It n "no-quotes   " "Do not quote the field when using JSON style"
-.It q "quotes      " "Quote the field when using JSON style"
-.It w "white space " "A blank ("" "") is appended after the label"
+.It c "colon        " "A colon ("":"") is appended after the label"
+.It d "display      " "Only emit field for display styles (text/HTML)"
+.It e "encoding     " "Only emit for encoding styles (XML/JSON)"
+.It h "humanize (hn)"  "Format large numbers in human-readable style"
+.It " " "hn-space     " "Humanize: Place space between numeric and unit"
+.It " " "hn-decimal   " "Humanize: Add a decimal digit, if number < 10"
+.It " " "hn-1000      " "Humanize: Use 1000 as divisor instead of 1024"
+.It k "key          " "Field is a key, suitable for XPath predicates"
+.It l "leaf-list    " "Field is a leaf-list, a list of leaf values"
+.It n "no-quotes    " "Do not quote the field when using JSON style"
+.It q "quotes       " "Quote the field when using JSON style"
+.It q "trim         " "Trim leading and trailing whitespace"
+.It w "white space  " "A blank ("" "") is appended after the label"
 .El
 .Pp
 For example, the modifier string "Lwc" means the field has a label
@@ -312,6 +342,15 @@ colon ('c') and a space ('w').
 The modifier string "Vkq" means the
 field has a value role, that it is a key for the current instance, and
 that the value should be quoted when encoded for JSON.
+.Pp
+Roles and modifiers can also use more verbose names, when preceeded by
+a comma.
+For example, the modifier string "Lwc" (or "L,white,colon")
+means the field has a label role (text that describes the next field)
+and should be followed by a colon ('c') and a space ('w').
+The modifier string "Vkq" (or ":key,quote") means the field has a value
+role (the default role), that it is a key for the current instance,
+and that the value should be quoted when encoded for JSON.
 .Ss The Colon Modifier ({c:})
 The colon modifier appends a single colon to the data value:
 .Bd -literal -offset indent
@@ -353,6 +392,42 @@ the encoding output styles, such as JSON and XML.
 .Pp
 The encoding modifier is the opposite of the display modifier, and
 they are often used to give to distinct views of the underlying data.
+.Ss The Humanize Modifier ({h:})
+The humanize modifier is used to render large numbers as in a
+human-readable format.
+While numbers like "44470272" are completely readable to computers and
+savants, humans will generally find "44M" more meaningful.
+.Pp
+"hn" can be used as an alias for "humanize".
+.Pp
+The humanize modifier only affects display styles (TEXT and HMTL).
+The "no-humanize" option will block the function of the humanize modifier.
+.Pp
+There are a number of modifiers that affect details of humanization.
+These are only available in as full names, not single characters.
+The "hn-space" modifier places a space between the number and any
+multiplier symbol, such as "M" or "K" (ex: "44 K").  
+The "hn-decimal" modifier will add a decimal point and a single tenths digit
+when the number is less than 10 (ex: "4.4K").
+The "hn-1000" modifier will use 1000 as divisor instead of 1024, following the
+JEDEC-standard instead of the more natural binary powers-of-two
+tradition.
+.Bd -literal -offset indent
+    EXAMPLE:
+        xo_emit("{h:input/%u}, {h,hn-space:output/%u}, "
+           "{h,hn-decimal:errors/%u}, {h,hn-1000:capacity/%u}, "
+           "{h,hn-decimal:remaining/%u}\n",
+            input, output, errors, capacity, remaining);
+    TEXT:
+        21, 57 K, 96M, 44M, 1.2G
+.Ed
+.Pp
+In the HTML style, the original numeric value is rendered in the
+"data-number" attribute on the <div> element:
+.Bd -literal -offset indent
+    <div class="data" data-tag="errors"
+         data-number="100663296">96M</div>
+.Ed
 .Ss The Key Modifier ({k:})
 The key modifier is used to indicate that a particular field helps
 uniquely identify an instance of list data.

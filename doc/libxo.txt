@@ -275,7 +275,7 @@ field descriptions within the format string.
 
 The field description is given as follows:
 
-    '{' [ role | modifier ]* ':' [ content ]
+    '{' [ role | modifier ]* [',' long-names ]* ':' [ content ]
             [ '/' field-format [ '/' encoding-format ]] '}'
 
 The role describes the function of the field, while the modifiers
@@ -289,11 +289,18 @@ label ("In stock"), and the third is a value field ("in-stock").  The
 in-stock field has a "%u" format that will parse the next argument
 passed to the xo_emit function as an unsigned integer.
 
-        xo_emit("{P:   }{Lwc:In stock}{:in-stock/%u}\n", 65);
+    xo_emit("{P:   }{Lwc:In stock}{:in-stock/%u}\n", 65);
 
 This single line of code can generate text (" In stock: 65\n"), XML
 ("<in-stock>65</in-stock>"), JSON ('"in-stock": 6'), or HTML (too
 lengthy to be listed here).
+
+While roles and modifiers typically use single character for brevity,
+there are alternative names for each which allow more verbose
+formatting strings.  These names must be preceded by a comma, and may
+follow any single-character values:
+
+    xo_emit("{L,white,colon:In stock}{,key:in-stock/%u}\n", 65);
 
 *** Field Roles
 
@@ -303,7 +310,7 @@ content.  The roles are listed below; only one role is permitted:
 |---+--------------+-------------------------------------------------|
 | R | Name         | Description                                     |
 |---+--------------+-------------------------------------------------|
-| C | color/effect | Field has color and effect controls             |
+| C | color        | Field has color and effect controls             |
 | D | decoration   | Field is non-text (e.g., colon, comma)          |
 | E | error        | Field is an error message                       |
 | L | label        | Field is text that prefixes a value             |
@@ -313,9 +320,23 @@ content.  The roles are listed below; only one role is permitted:
 | U | units        | Field is the units for the previous value field |
 | V | value        | Field is the name of field (the default)        |
 | W | warning      | Field is a warning message                      |
-| [ | start anchor | Begin a section of anchored variable-width text |
-| ] | stop anchor  | End a section of anchored variable-width text   |
+| [ | start-anchor | Begin a section of anchored variable-width text |
+| ] | stop-anchor  | End a section of anchored variable-width text   |
 |---+--------------+-------------------------------------------------|
+
+    EXAMPLE:
+        xo_emit("{L:Free}{D::}{P:   }{:free/%u} {U:Blocks}\n",
+                free_blocks);
+
+When a role is not provided, the "value" role is used as the default.
+
+Roles and modifiers can also use more verbose names, when preceeded by
+a comma:
+
+    EXAMPLE:
+        xo_emit("{,label:Free}{,decoration::}{,padding:   }"
+                "{,value:free/%u} {,units:Blocks}\n",
+                free_blocks);
 
 **** The Color Role ({C:})
 
@@ -508,24 +529,31 @@ XOF_WARN is set, a warning will be generated.
 Field modifiers are flags which modify the way content emitted for
 particular output styles:
 
-|---+--------------+-------------------------------------------------|
-| M | Name         | Description                                     |
-|---+--------------+-------------------------------------------------|
-| c | colon        | A colon (":") is appended after the label       |
-| d | display      | Only emit field for display styles (text/HTML)  |
-| e | encoding     | Only emit for encoding styles (XML/JSON)        |
-| k | key          | Field is a key, suitable for XPath predicates   |
-| l | leaf-list    | Field is a leaf-list
-| n | no-quotes    | Do not quote the field when using JSON style    |
-| q | quotes       | Quote the field when using JSON style           |
-| w | white space  | A blank (" ") is appended after the label       |
-|---+--------------+-------------------------------------------------|
+|---+---------------+-------------------------------------------------|
+| M | Name          | Description                                     |
+|---+---------------+-------------------------------------------------|
+| c | colon         | A colon (":") is appended after the label       |
+| d | display       | Only emit field for display styles (text/HTML)  |
+| e | encoding      | Only emit for encoding styles (XML/JSON)        |
+| h | humanize (hn) | Format large numbers in human-readable style    |
+|   | hn-space      | Humanize: Place space between numeric and unit  |
+|   | hn-decimal    | Humanize: Add a decimal digit, if number < 10   |
+|   | hn-1000       | Humanize: Use 1000 as divisor instead of 1024   |
+| k | key           | Field is a key, suitable for XPath predicates   |
+| l | leaf-list     | Field is a leaf-list                            |
+| n | no-quotes     | Do not quote the field when using JSON style    |
+| q | quotes        | Quote the field when using JSON style           |
+| t | trim          | Trim leading and trailing whitespace            |
+| w | white         | A blank (" ") is appended after the label       |
+|---+---------------+-------------------------------------------------|
 
-For example, the modifier string "Lwc" means the field has a label
-role (text that describes the next field) and should be followed by a
-colon ('c') and a space ('w').  The modifier string "Vkq" means the
-field has a value role, that it is a key for the current instance, and
-that the value should be quoted when encoded for JSON.
+Roles and modifiers can also use more verbose names, when preceeded by
+a comma.  For example, the modifier string "Lwc" (or "L,white,colon")
+means the field has a label role (text that describes the next field)
+and should be followed by a colon ('c') and a space ('w').  The
+modifier string "Vkq" (or ":key,quote") means the field has a value
+role (the default role), that it is a key for the current instance,
+and that the value should be quoted when encoded for JSON.
 
 **** The Colon Modifier ({c:})
 
@@ -569,6 +597,42 @@ the display output styles, TEXT and HTML.
 
 The encoding modifier is the opposite of the display modifier, and
 they are often used to give to distinct views of the underlying data.
+
+**** The Humanize ({h:})
+
+The humanize modifier is used to render large numbers as in a
+human-readable format.  While numbers like "44470272" are completely
+readable to computers and savants, humans will generally find "44M"
+more meaningful.
+
+"hn" can be used as an alias for "humanize".
+
+The humanize modifier only affects display styles (TEXT and HMTL).
+The "no-humanize" option (^LIBXO_OPTIONS^) will block the function of
+the humanize modifier.
+
+There are a number of modifiers that affect details of humanization.
+These are only available in as full names, not single characters.  The
+"hn-space" modifier places a space between the number and any
+multiplier symbol, such as "M" or "K" (ex: "44 K").  The "hn-decimal"
+modifier will add a decimal point and a single tenths digit when the number is
+less than 10 (ex: "4.4K").  The "hn-1000" modifier will use 1000 as divisor
+instead of 1024, following the JEDEC-standard instead of the more
+natural binary powers-of-two tradition.
+
+    EXAMPLE:
+        xo_emit("{h:input/%u}, {h,hn-space:output/%u}, "
+	    "{h,hn-decimal:errors/%u}, {h,hn-1000:capacity/%u}, "
+	    "{h,hn-decimal:remaining/%u}\n",
+            input, output, errors, capacity, remaining);
+    TEXT:
+        21, 57 K, 96M, 44M, 1.2G
+
+In the HTML style, the original numeric value is rendered in the
+"data-number" attribute on the <div> element:
+
+    <div class="data" data-tag="errors"
+         data-number="100663296">96M</div>
 
 **** The Key Modifier ({k:})
 
@@ -879,26 +943,29 @@ following options are recognised:
 Options is a comma-separated list of tokens that correspond to output
 styles, flags, or features:
 
-|-----------+-------------------------------------------------------|
-| Token     | Action                                                |
-|-----------+-------------------------------------------------------|
-| dtrt      | Enable "Do The Right Thing" mode                      |
-| html      | Emit HTML output                                      |
-| indent=xx | Set the indentation level                             |
-| info      | Add info attributes (HTML)                            |
-| json      | Emit JSON output                                      |
-| keys      | Emit the key attribute for keys (XML)                 |
-| no-locale | Do not initialize the locale setting                  |
-| no-top    | Do not emit a top set of braces (JSON)                |
-| not-first | Pretend the 1st output item was not 1st (JSON)        |
-| pretty    | Emit pretty-printed output                            |
-| text      | Emit TEXT output                                      |
-| units     | Add the 'units' (XML) or 'data-units (HTML) attribute |
-| warn      | Emit warnings when libxo detects bad calls            |
-| warn-xml  | Emit warnings in XML                                  |
-| xml       | Emit XML output                                       |
-| xpath     | Add XPath expressions (HTML)                          |
-|-----------+-------------------------------------------------------|
+|-------------+-------------------------------------------------------|
+| Token       | Action                                                |
+|-------------+-------------------------------------------------------|
+| color       | Enable colors/effects for display styles (TEXT, HTML) |
+| dtrt        | Enable "Do The Right Thing" mode                      |
+| html        | Emit HTML output                                      |
+| indent=xx   | Set the indentation level                             |
+| info        | Add info attributes (HTML)                            |
+| json        | Emit JSON output                                      |
+| keys        | Emit the key attribute for keys (XML)                 |
+| no-humanize | Ignore the {h:} modifier (TEXT, HTML)                 |
+| no-locale   | Do not initialize the locale setting                  |
+| no-top      | Do not emit a top set of braces (JSON)                |
+| not-first   | Pretend the 1st output item was not 1st (JSON)        |
+| pretty      | Emit pretty-printed output                            |
+| text        | Emit TEXT output                                      |
+| underscores | Replace XML-friendly "-"s with JSON friendly "_"s e    |
+| units       | Add the 'units' (XML) or 'data-units (HTML) attribute |
+| warn        | Emit warnings when libxo detects bad calls            |
+| warn-xml    | Emit warnings in XML                                  |
+| xml         | Emit XML output                                       |
+| xpath       | Add XPath expressions (HTML)                          |
+|-------------+-------------------------------------------------------|
 
 The brief options are detailed in ^LIBXO_OPTIONS^.
 
@@ -1209,9 +1276,10 @@ The set of valid flags include:
 | XOF_INFO          | Display info data attributes (HTML)    |
 | XOF_KEYS          | Emit the key attribute (XML)           |
 | XOF_NO_ENV        | Do not use the LIBXO_OPTIONS env var   |
+| XOF_NO_HUMANIZE   | Display humanization (TEXT, HTML)      |
 | XOF_PRETTY        | Make 'pretty printed' output           |
 | XOF_UNDERSCORES   | Replaces hyphens with underscores      |
-| XOF_UNITS         | Display units (XML and HMTL)           |
+| XOF_UNITS         | Display units (XML, HMTL)              |
 | XOF_WARN          | Generate warnings for broken calls     |
 | XOF_WARN_XML      | Generate warnings in XML on stdout     |
 | XOF_XPATH         | Emit XPath expressions (HTML)          |
@@ -1580,19 +1648,25 @@ By default, the standard realloc() and free() functions are used.
 The environment variable "LIBXO_OPTIONS" can be set to a string of
 options:
 
-|--------+-------------------------------------------|
-| Option | Action                                    |
-|--------+-------------------------------------------|
-| H      | Enable HTML output (XO_STYLE_HTML)        |
-| I      | Enable info output (XOF_INFO)             |
-| i<num> | Indent by <number>                        |
-| J      | Enable JSON output (XO_STYLE_JSON)        |
-| P      | Enable pretty-printed output (XOF_PRETTY) |
-| T      | Enable text output (XO_STYLE_TEXT)        |
-| W      | Enable warnings (XOF_WARN)                |
-| X      | Enable XML output (XO_STYLE_XML)          |
-| x      | Enable XPath data (XOF_XPATH)             |
-|--------+-------------------------------------------|
+|--------+---------------------------------------------|
+| Option | Action                                      |
+|--------+---------------------------------------------|
+| c      | Enable color/effects for TEXT/HTML          |
+| F      | Force line-buffered flushing                |
+| H      | Enable HTML output (XO_STYLE_HTML)          |
+| I      | Enable info output (XOF_INFO)               |
+| i<num> | Indent by <number>                          |
+| J      | Enable JSON output (XO_STYLE_JSON)          |
+| k      | Add keys to XPATH expressions in HTML       |
+| n      | Disable humanization (TEXT, HTML)           |
+| P      | Enable pretty-printed output (XOF_PRETTY)   |
+| T      | Enable text output (XO_STYLE_TEXT)          |
+| U      | Add units to HTML output                    |
+| u      | Change "-"s to "_"s in element names (JSON) |
+| W      | Enable warnings (XOF_WARN)                  |
+| X      | Enable XML output (XO_STYLE_XML)            |
+| x      | Enable XPath data (XOF_XPATH)               |
+|--------+---------------------------------------------|
 
 For example, warnings can be enabled by:
 
@@ -1978,7 +2052,7 @@ Use "receive-after-window-packets" instead of
 Nothing's worse than writing expressions like:
 
     if ($src1/process[pid == $pid]/name == 
-        $src2/proc-table/proc/p[process-id == $pid]/proc-name) {
+        $src2/proc-table/proc-list/proc-entry[process-id == $pid]/proc-name) {
         ...
     }
 
@@ -1986,6 +2060,9 @@ Find someone else who is expressing similar data and follow their
 fields and hierarchy.  Remember the quote is not "Consistency is the
 hobgoblin of little minds", but "A foolish consistency is the
 hobgoblin of little minds".
+= Use containment as scoping
+In the previous example, all the names are prefixed with "proc-",
+which is redundant given that they are nested under the process table.
 = Think about your users
 Have empathy for your users, choosing clear and useful fields that
 contain clear and useful data.  You may need to augment the display

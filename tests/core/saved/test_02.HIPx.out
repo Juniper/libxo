@@ -28,8 +28,15 @@
 </div>
 <div class="line">
   <div class="data" data-tag="some" data-xpath="/top/data/some">string</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
   <div class="data" data-tag="ten" data-xpath="/top/data/ten">10</div>
   <div class="data" data-tag="eleven" data-xpath="/top/data/eleven">11</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="unknown" data-xpath="/top/data/unknown">1010</div>
+  <div class="text"> </div>
+  <div class="note">packets here/there/everywhere</div>
 </div>
 <div class="line">
   <div class="data" data-tag="unknown" data-xpath="/top/data/unknown">1010</div>
@@ -75,6 +82,18 @@
   <div class="data" data-tag="max" data-xpath="/top/data/max">125</div>
   <div class="padding">                     </div>
   <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="text">Humanize: </div>
+  <div class="data" data-tag="val1" data-xpath="/top/data/val1" data-number="21">21</div>
+  <div class="text">, </div>
+  <div class="data" data-tag="val2" data-xpath="/top/data/val2" data-number="58368">57 K</div>
+  <div class="text">, </div>
+  <div class="data" data-tag="val3" data-xpath="/top/data/val3" data-number="100663296">96M</div>
+  <div class="text">, </div>
+  <div class="data" data-tag="val4" data-xpath="/top/data/val4" data-number="44470272">44M</div>
+  <div class="text">, </div>
+  <div class="data" data-tag="val5" data-xpath="/top/data/val5" data-number="1342172800">1.2G</div>
 </div>
 <div class="line">
   <div class="data" data-tag="flag" data-xpath="/top/data/flag">one</div>
