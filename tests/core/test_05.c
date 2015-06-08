@@ -85,7 +85,7 @@ main (int argc, char **argv)
 	xo_open_instance("employee");
 	xo_emit("{[:-25}{:first-name/%s} ({:nic-name/\"%s\"}){]:}"
 		"{:last-name/%-14..14s/%s}"
-		"{:department/%8u/%u}{:percent-time/%8u/%u}\n",
+		"{:department/%8u}{:percent-time/%8u}\n",
 		ep->e_first, ep->e_nic, ep->e_last, ep->e_dept, ep->e_percent);
 	if (ep->e_percent > 50) {
 	    xo_attr("full-time", "%s", "honest & for true");
