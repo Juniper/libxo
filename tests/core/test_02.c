@@ -47,6 +47,10 @@ main (int argc, char **argv)
 
     xo_open_container("data");
 
+    xo_emit(" {:lines/%7ju} {:words/%7ju} "
+            "{:characters/%7ju} {d:filename/%s}\n",
+            20, 30, 40, "file");
+
     xo_emit("{:mbuf-current/%u}/{:mbuf-cache/%u}/{:mbuf-total/%u} "
 	    "{N:mbufs <&> in use (current\\/cache\\/total)}\n",
 	    10, 20, 30);
