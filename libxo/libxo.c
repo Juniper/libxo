@@ -1541,6 +1541,8 @@ xo_destroy (xo_handle_t *xop_arg)
 {
     xo_handle_t *xop = xo_default(xop_arg);
 
+    xo_flush_h(xop);
+
     if (xop->xo_close && (xop->xo_flags & XOF_CLOSE_FP))
 	xop->xo_close(xop->xo_opaque);
 
