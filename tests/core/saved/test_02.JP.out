@@ -1,6 +1,9 @@
 {
   "top": {
     "data": {
+      "lines": 20,
+      "words": 30,
+      "characters": 40,
       "mbuf-current": 10,
       "mbuf-cache": 20,
       "mbuf-total": 30,
