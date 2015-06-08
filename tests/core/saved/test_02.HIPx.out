@@ -1,4 +1,14 @@
 <div class="line">
+  <div class="text"> </div>
+  <div class="data" data-tag="lines" data-xpath="/top/data/lines">     20</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="words" data-xpath="/top/data/words">     30</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="characters" data-xpath="/top/data/characters">     40</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="filename" data-xpath="/top/data/filename">file</div>
+</div>
+<div class="line">
   <div class="data" data-tag="mbuf-current" data-xpath="/top/data/mbuf-current">10</div>
   <div class="text">/</div>
   <div class="data" data-tag="mbuf-cache" data-xpath="/top/data/mbuf-cache">20</div>
