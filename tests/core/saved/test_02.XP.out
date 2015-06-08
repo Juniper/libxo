@@ -1,5 +1,8 @@
 <top>
   <data>
+    <lines>20</lines>
+    <words>30</words>
+    <characters>40</characters>
     <mbuf-current>10</mbuf-current>
     <mbuf-cache>20</mbuf-cache>
     <mbuf-total>30</mbuf-total>
