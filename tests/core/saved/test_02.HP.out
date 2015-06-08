@@ -1,4 +1,14 @@
 <div class="line">
+  <div class="text"> </div>
+  <div class="data" data-tag="lines">     20</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="words">     30</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="characters">     40</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="filename">file</div>
+</div>
+<div class="line">
   <div class="data" data-tag="mbuf-current">10</div>
   <div class="text">/</div>
   <div class="data" data-tag="mbuf-cache">20</div>
