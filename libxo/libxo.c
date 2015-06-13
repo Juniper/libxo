@@ -1463,13 +1463,23 @@ xo_message_c (int code, const char *fmt, ...)
 }
 
 void
-xo_message (const char *fmt, ...)
+xo_message_e (const char *fmt, ...)
 {
     int code = errno;
     va_list vap;
 
     va_start(vap, fmt);
     xo_message_hcv(NULL, code, fmt, vap);
+    va_end(vap);
+}
+
+void
+xo_message (const char *fmt, ...)
+{
+    va_list vap;
+
+    va_start(vap, fmt);
+    xo_message_hcv(NULL, 0, fmt, vap);
     va_end(vap);
 }
 
