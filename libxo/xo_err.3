@@ -13,7 +13,6 @@
 .Sh NAME
 .Nm xo_err , xo_errc , xo_errx
 .Nm xo_warn , xo_warnx , xo_warn_c , xo_warn_hc
-.Nm xo_message , xo_message_c , xo_message_hc , xo_message_hcv
 .Nd emit errors and warnings in multiple formats
 .Sh LIBRARY
 .Lb libxo
@@ -33,14 +32,6 @@
 .Fn xo_errc "int eval" "int code" "const char *fmt" "..."
 .Ft void
 .Fn xo_errx "int eval" "const char *fmt" "..."
-.Ft void
-.Fn xo_message "const char *fmt" "..."
-.Ft void
-.Fn xo_message_c "int code" "const char *fmt" "..."
-.Ft void
-.Fn xo_message_hc "xo_handle_t *xop" "int code, const char *fmt" "..."
-.Ft void
-.Fn xo_message_hcv "xo_handle_t *xop" "int code" "const char *fmt" "va_list vap"
 .Sh DESCRIPTION
 Many programs make use of the standard library functions
 .Xr err 3
