@@ -1,4 +1,24 @@
 <div class="line">
+  <div class="text">length </div>
+  <div class="data" data-tag="length" data-xpath="/top/data/length">abcdef</div>
+</div>
+<div class="line">
+  <div class="text">close </div>
+  <div class="data" data-tag="fd" data-xpath="/top/data/fd">-1</div>
+  <div class="text"> returned </div>
+  <div class="data" data-tag="error" data-xpath="/top/data/error">Bad file descriptor</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="test" data-xpath="/top/data/test">good</div>
+</div>
+<div class="line">
+  <div class="text">close </div>
+  <div class="data" data-tag="fd" data-xpath="/top/data/fd">-1</div>
+  <div class="text"> returned </div>
+  <div class="data" data-tag="error" data-xpath="/top/data/error">Bad fi</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="test" data-xpath="/top/data/test">good</div>
+</div>
+<div class="line">
   <div class="text"> </div>
   <div class="data" data-tag="lines" data-xpath="/top/data/lines">     20</div>
   <div class="text"> </div>
@@ -113,6 +133,9 @@
   <div class="data" data-tag="flag" data-xpath="/top/data/flag">three</div>
 </div>
 <div class="line">
+  <div class="data" data-tag="works" data-xpath="/top/data/works">(null)</div>
+</div>
+<div class="line">
   <div class="text">1:</div>
   <div class="data" data-tag="t1" data-xpath="/top/data/t1">  1000</div>
   <div class="text"> 2:</div>
@@ -145,7 +168,7 @@
   <div class="label">tries</div>
 </div>
 <div class="line">
-  <div class="message">improper use of profanity; ten yard penalty; first down
+  <div class="message">improper use of profanity; ten yard penalty; first down: Bad file descriptor
 </div>
 </div>
 <div class="line">
