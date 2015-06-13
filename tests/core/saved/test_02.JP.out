@@ -1,6 +1,13 @@
 {
   "top": {
     "data": {
+      "length": "abcdef",
+      "fd": -1,
+      "error": "Bad file descriptor",
+      "test": "good",
+      "fd": -1,
+      "error": "Bad fi",
+      "test": "good",
       "lines": 20,
       "words": 30,
       "characters": 40,
@@ -39,6 +46,7 @@
         "two",
         "three"
       ],
+      "works": null,
       "empty-tag": true,
       "t1": "1000",
       "t2": "test5000",
