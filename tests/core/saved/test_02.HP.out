@@ -1,4 +1,8 @@
 <div class="line">
+  <div class="message">improper use of profanity; ten yard penalty; first down
+</div>
+</div>
+<div class="line">
   <div class="text">length </div>
   <div class="data" data-tag="length">abcdef</div>
 </div>
@@ -17,6 +21,10 @@
   <div class="data" data-tag="error">Bad fi</div>
   <div class="text"> </div>
   <div class="data" data-tag="test">good</div>
+</div>
+<div class="line">
+  <div class="message">improper use of profanity; ten yard penalty; first down
+</div>
 </div>
 <div class="line">
   <div class="text"> </div>
@@ -168,7 +176,7 @@
   <div class="label">tries</div>
 </div>
 <div class="line">
-  <div class="message">improper use of profanity; ten yard penalty; first down: Bad file descriptor
+  <div class="message">improper use of profanity; ten yard penalty; first down
 </div>
 </div>
 <div class="line">
