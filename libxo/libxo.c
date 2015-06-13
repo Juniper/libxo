@@ -209,6 +209,7 @@ struct xo_handle_s {
     xo_colors_t xo_colors;	/* Current color and effect values */
     xo_buffer_t xo_color_buf;	/* HTML: buffer of colors and effects */
     char *xo_version;		/* Version string */
+    int xo_errno;		/* Saved errno for "%m" */
 };
 
 /* Flags for formatting functions */
@@ -2097,7 +2098,7 @@ xo_format_string_direct (xo_handle_t *xop, xo_buffer_t *xbp,
 	    ilen = xo_utf8_to_wc_len(cp);
 	    if (ilen < 0) {
 		xo_failure(xop, "invalid UTF-8 character: %02hhx", *cp);
-		return -1;
+		return -1;	/* Can't continue; we can't find the end */
 	    }
 
 	    if (len > 0 && len < ilen) {
@@ -2109,7 +2110,7 @@ xo_format_string_direct (xo_handle_t *xop, xo_buffer_t *xbp,
 	    if (wc == (wchar_t) -1) {
 		xo_failure(xop, "invalid UTF-8 character: %02hhx/%d",
 			   *cp, ilen);
-		return -1;
+		return -1;	/* Can't continue; we can't find the end */
 	    }
 	    cp += ilen;
 	    break;
@@ -2119,8 +2120,10 @@ xo_format_string_direct (xo_handle_t *xop, xo_buffer_t *xbp,
 	    ilen = mbrtowc(&wc, cp, ilen, &xop->xo_mbstate);
 	    if (ilen < 0) {		/* Invalid data; skip */
 		xo_failure(xop, "invalid mbs char: %02hhx", *cp);
-		continue;
+		wc = L'?';
+		ilen = 1;
 	    }
+
 	    if (ilen == 0) {		/* Hit a wide NUL character */
 		len = 0;
 		continue;
@@ -2235,6 +2238,7 @@ xo_format_string (xo_handle_t *xop, xo_buffer_t *xbp, xo_xff_flags_t flags,
 		  xo_format_t *xfp)
 {
     static char null[] = "(null)";
+    static char null_no_quotes[] = "null";
 
     char *cp = NULL;
     wchar_t *wcp = NULL;
@@ -2248,7 +2252,13 @@ xo_format_string (xo_handle_t *xop, xo_buffer_t *xbp, xo_xff_flags_t flags,
 
     len = xfp->xf_width[XF_WIDTH_SIZE];
 
-    if (xfp->xf_enc == XF_ENC_WIDE) {
+    if (xfp->xf_fc == 'm') {
+	cp = strerror(xop->xo_errno);
+	if (len < 0)
+	    len = cp ? strlen(cp) : 0;
+	goto normal_string;
+
+    } else if (xfp->xf_enc == XF_ENC_WIDE) {
 	wcp = va_arg(xop->xo_vap, wchar_t *);
 	if (xfp->xf_skip)
 	    return 0;
@@ -2264,13 +2274,21 @@ xo_format_string (xo_handle_t *xop, xo_buffer_t *xbp, xo_xff_flags_t flags,
 
     } else {
 	cp = va_arg(xop->xo_vap, char *); /* UTF-8 or native */
+
+    normal_string:
 	if (xfp->xf_skip)
 	    return 0;
 
 	/* Echo "Dont' deref NULL" logic */
 	if (cp == NULL) {
-	    cp = null;
-	    len = sizeof(null) - 1;
+	    if ((flags & XFF_NOQUOTE) && (xo_style(xop) == XO_STYLE_JSON
+					  || xo_style(xop) == XO_STYLE_XML)) {
+		cp = null_no_quotes;
+		len = sizeof(null_no_quotes) - 1;
+	    } else {
+		cp = null;
+		len = sizeof(null) - 1;
+	    }
 	}
 
 	/*
@@ -2524,7 +2542,7 @@ xo_format_data (xo_handle_t *xop, xo_buffer_t *xbp,
 	    } else if (*cp == '*') {
 		xf.xf_stars += 1;
 		xf.xf_star[xf.xf_dots] = 1;
-	    } else if (strchr("diouxXDOUeEfFgGaAcCsSp", *cp) != NULL)
+	    } else if (strchr("diouxXDOUeEfFgGaAcCsSpm", *cp) != NULL)
 		break;
 	    else if (*cp == 'n' || *cp == 'v') {
 		xo_failure(xop, "unsupported format: '%s'", fmt);
@@ -2583,9 +2601,13 @@ xo_format_data (xo_handle_t *xop, xo_buffer_t *xbp,
 	     * correctly.  So we have to handle this ourselves.
 	     */
 	    if (xop->xo_formatter == NULL
-		    && (xf.xf_fc == 's' || xf.xf_fc == 'S')) {
-		xf.xf_enc = (xf.xf_lflag || (xf.xf_fc == 'S'))
-		    ? XF_ENC_WIDE : xf.xf_hflag ? XF_ENC_LOCALE : XF_ENC_UTF8;
+		    && (xf.xf_fc == 's' || xf.xf_fc == 'S'
+			|| xf.xf_fc == 'm')) {
+
+		xf.xf_enc = (xf.xf_fc == 'm') ? XF_ENC_UTF8
+		    : (xf.xf_lflag || (xf.xf_fc == 'S')) ? XF_ENC_WIDE
+		    : xf.xf_hflag ? XF_ENC_LOCALE : XF_ENC_UTF8;
+
 		rc = xo_format_string(xop, xbp, flags, &xf);
 
 		if ((flags & XFF_TRIM_WS)
@@ -2645,6 +2667,9 @@ xo_format_data (xo_handle_t *xop, xo_buffer_t *xbp,
 		 */
 		if (xf.xf_skip)
 		    va_arg(xop->xo_vap, char *);
+
+	    } else if (xf.xf_fc == 'm') {
+		/* Nothing on the stack for "%m" */
 
 	    } else {
 		int s;
@@ -4133,6 +4158,7 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
     int flush_line = (xop->xo_flags & XOF_FLUSH_LINE) ? 1 : 0;
 
     xop->xo_columns = 0;	/* Always reset it */
+    xop->xo_errno = errno;	/* Save for "%m" */
 
     for (cp = fmt; *cp; ) {
 	if (*cp == '\n') {
