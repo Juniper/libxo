@@ -315,6 +315,9 @@ void
 xo_message_c (int code, const char *fmt, ...) PRINTFLIKE(2, 3);
 
 void
+xo_message_e (const char *fmt, ...) PRINTFLIKE(1, 2);
+
+void
 xo_message (const char *fmt, ...) PRINTFLIKE(1, 2);
 
 void
