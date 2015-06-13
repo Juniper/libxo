@@ -47,6 +47,13 @@ main (int argc, char **argv)
 
     xo_open_container("data");
 
+    xo_emit("length {:length/%6.6s}\n", "abcdefghijklmnopqrstuvwxyz");
+
+    close(-1);
+    xo_emit("close {:fd/%d} returned {:error/%m} {:test}\n", -1, "good");
+    close(-1);
+    xo_emit("close {:fd/%d} returned {:error/%6.6m} {:test}\n", -1, "good");
+
     xo_emit(" {:lines/%7ju} {:words/%7ju} "
             "{:characters/%7ju} {d:filename/%s}\n",
             20, 30, 40, "file");
@@ -91,6 +98,8 @@ main (int argc, char **argv)
     xo_open_list("flag");
     xo_emit("{lq:flag/one} {lq:flag/two} {lq:flag/three}\n");
     xo_close_list("flag");
+
+    xo_emit("{n:works/%s}\n", NULL);
 
     xo_emit("{e:empty-tag/}");
     xo_emit("1:{qt:t1/%*d} 2:{qt:t2/test%-*u} "
