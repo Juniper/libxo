@@ -1,5 +1,12 @@
 <top>
   <data>
+    <length>abcdef</length>
+    <fd>-1</fd>
+    <error>Bad file descriptor</error>
+    <test>good</test>
+    <fd>-1</fd>
+    <error>Bad fi</error>
+    <test>good</test>
     <lines>20</lines>
     <words>30</words>
     <characters>40</characters>
@@ -36,6 +43,7 @@
     <flag>one</flag>
     <flag>two</flag>
     <flag>three</flag>
+    <works>null</works>
     <empty-tag></empty-tag>
     <t1>1000</t1>
     <t2>test5000</t2>
@@ -55,7 +63,7 @@
     </warning>
     <count>10</count>
     <test>4</test>
-  <message>improper use of profanity; ten yard penalty; first down</message>
+  <message>improper use of profanity; ten yard penalty; first down: Bad file descriptor</message>
     <error>
       <message>Shut 'er down, Clancey!  She's a-pumpin' mud!  &lt;&gt;!,"!&lt;&gt;
 </message>
