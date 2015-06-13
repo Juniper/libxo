@@ -47,12 +47,20 @@ main (int argc, char **argv)
 
     xo_open_container("data");
 
+
+    xo_message("improper use of profanity; %s; %s",
+	       "ten yard penalty", "first down");
+
     xo_emit("length {:length/%6.6s}\n", "abcdefghijklmnopqrstuvwxyz");
 
     close(-1);
     xo_emit("close {:fd/%d} returned {:error/%m} {:test}\n", -1, "good");
     close(-1);
     xo_emit("close {:fd/%d} returned {:error/%6.6m} {:test}\n", -1, "good");
+
+
+    xo_message("improper use of profanity; %s; %s",
+	       "ten yard penalty", "first down");
 
     xo_emit(" {:lines/%7ju} {:words/%7ju} "
             "{:characters/%7ju} {d:filename/%s}\n",
