@@ -1,3 +1,6 @@
+length abcdef
+close -1 returned Bad file descriptor good
+close -1 returned Bad fi good
       20      30      40 file
 10/20/30 mbufs <&> in use (current/cache/total)
 50 miles from Boston
@@ -13,6 +16,7 @@ string: 1011
 (15/20/125                     )
 Humanize: 21, 57 K, 96M, 44M, 1.2G
 one two three
+(null)
 1:  1000 2:test5000     3:  ten-longx 4:xtest      
 this is an error
 two more errors
@@ -20,4 +24,4 @@ this is an warning
 two more warnings
 V1/V2 packets: 10
 0004 tries
-improper use of profanity; ten yard penalty; first down
+improper use of profanity; ten yard penalty; first down: Bad file descriptor
