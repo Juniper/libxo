@@ -1,6 +1,11 @@
 <top>
   <data>
-  <message>improper use of profanity; ten yard penalty; first down</message>
+  <message>abcdef
+</message>
+  <message>abcdef: Bad file descriptor
+</message>
+  <message>improper use of profanity; ten yard penalty; first down
+</message>
     <length>abcdef</length>
     <fd>-1</fd>
     <error>Bad file descriptor</error>
@@ -8,7 +13,8 @@
     <fd>-1</fd>
     <error>Bad fi</error>
     <test>good</test>
-  <message>improper use of profanity; ten yard penalty; first down</message>
+  <message>improper use of profanity; ten yard penalty; first down
+</message>
     <lines>20</lines>
     <words>30</words>
     <characters>40</characters>
@@ -65,10 +71,10 @@
     </warning>
     <count>10</count>
     <test>4</test>
-  <message>improper use of profanity; ten yard penalty; first down</message>
-    <error>
-      <message>Shut 'er down, Clancey!  She's a-pumpin' mud!  &lt;&gt;!,"!&lt;&gt;
+  <message>improper use of profanity; ten yard penalty; first down
 </message>
+    <error>
+      <message>Shut 'er down, Clancey!  She's a-pumpin' mud!  &lt;&gt;!,"!&lt;&gt;</message>
     </error>
   </data>
 </top>
