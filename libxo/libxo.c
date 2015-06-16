@@ -1225,7 +1225,7 @@ xo_warn_hcv (xo_handle_t *xop, int code, int check_warn,
 	    }
 	}
 
-	xo_buf_append(xbp, "\n", 2); /* Append newline and NUL to string */
+	xo_buf_append(xbp, "\n", 1); /* Append newline and NUL to string */
 	(void) xo_write(xop);
 
     } else {
