@@ -47,6 +47,9 @@ main (int argc, char **argv)
 
     xo_open_container("data");
 
+    xo_message("abcdef");
+    close(-1);
+    xo_message_e("abcdef");
 
     xo_message("improper use of profanity; %s; %s",
 	       "ten yard penalty", "first down");
