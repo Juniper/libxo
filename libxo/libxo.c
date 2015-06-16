@@ -1363,7 +1363,7 @@ xo_message_hcv (xo_handle_t *xop, int code, const char *fmt, va_list vap)
 	}
 	va_end(va_local);
 
-	rc = xo_escape_xml(xbp, rc, 1);
+	rc = xo_escape_xml(xbp, rc, 0);
 	xbp->xb_curp += rc;
 
 	if (need_nl && code > 0) {
@@ -1374,9 +1374,14 @@ xo_message_hcv (xo_handle_t *xop, int code, const char *fmt, va_list vap)
 	    }
 	}
 
-	xo_buf_append(xbp, msg_close, sizeof(msg_close) - 1);
 	if (need_nl)
-	    xo_buf_append(xbp, "\n", 2); /* Append newline and NUL to string */
+	    xo_buf_append(xbp, "\n", 1); /* Append newline and NUL to string */
+
+	xo_buf_append(xbp, msg_close, sizeof(msg_close) - 1);
+
+	if (xop->xo_flags & XOF_PRETTY)
+	    xo_buf_append(xbp, "\n", 1); /* Append newline and NUL to string */
+
 	(void) xo_write(xop);
 	break;
 
@@ -1412,7 +1417,7 @@ xo_message_hcv (xo_handle_t *xop, int code, const char *fmt, va_list vap)
 	break;
 
     case XO_STYLE_JSON:
-	/* No meanings of representing messages in JSON */
+	/* No means of representing messages in JSON */
 	break;
 
     case XO_STYLE_TEXT:
@@ -2149,6 +2154,10 @@ xo_format_string_direct (xo_handle_t *xop, xo_buffer_t *xbp,
 	    if (len < 0)
 		len = 0;
 	}
+
+	/* We only print printable characters */
+	if (!iswprint((wint_t) wc))
+	    continue;
 
 	/*
 	 * Find the width-in-columns of this character, which must be done
