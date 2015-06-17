@@ -400,4 +400,10 @@ xo_set_version (const char *version);
 void
 xo_set_version_h (xo_handle_t *xop, const char *version);
 
+void xo_closelog(void);
+void xo_openlog(const char *ident, int logopt, int facility);
+int xo_setlogmask(int maskpri);
+void xo_syslog(int priority, const char *message, ...);
+void xo_vsyslog(int priority, const char *message, va_list args);
+
 #endif /* INCLUDE_XO_H */
