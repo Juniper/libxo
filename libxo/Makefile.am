@@ -24,7 +24,8 @@ libxoinc_HEADERS = \
      xo.h
 
 libxo_la_SOURCES = \
-    libxo.c
+    libxo.c \
+    xo_syslog.c
 
 man_MANS = \
     libxo.3 \
