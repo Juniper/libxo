@@ -33,7 +33,6 @@ static char sccsid[] = "@(#)syslog.c	8.5 (Berkeley) 4/29/95";
 #include <sys/cdefs.h>
 __FBSDID("$FreeBSD$");
 
-#include "namespace.h"
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/syslog.h>
@@ -50,33 +49,40 @@ __FBSDID("$FreeBSD$");
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
-
 #include <stdarg.h>
-#include "un-namespace.h"
 
-#include "libc_private.h"
+#include "xo.h"
 
-static int	LogFile = -1;		/* fd for log */
-static int	status;			/* connection status */
-static int	opened;			/* have done openlog() */
-static int	LogStat = 0;		/* status bits, set by openlog() */
-static const char *LogTag = NULL;	/* string to tag the entry with */
-static int	LogFacility = LOG_USER;	/* default facility code */
-static int	LogMask = 0xff;		/* mask of priorities to be logged */
-static pthread_mutex_t	syslog_mutex = PTHREAD_MUTEX_INITIALIZER;
+#ifndef UNUSED
+#define UNUSED __attribute__ ((__unused__))
+#endif /* UNUSED */
 
+static int xo_logfile = -1;		/* fd for log */
+static int xo_status;			/* connection xo_status */
+static int xo_opened;			/* have done openlog() */
+static int xo_logstat = 0;		/* xo_status bits, set by openlog() */
+static const char *xo_logtag = NULL;	/* string to tag the entry with */
+static int xo_logfacility = LOG_USER;	/* default facility code */
+static int xo_logmask = 0xff;		/* mask of priorities to be logged */
+static pthread_mutex_t xo_syslog_mutex UNUSED = PTHREAD_MUTEX_INITIALIZER;
+
+#if 0
 #define	THREAD_LOCK()							\
 	do { 								\
-		if (__isthreaded) _pthread_mutex_lock(&syslog_mutex);	\
+		if (__isthreaded) _pthread_mutex_lock(&xo_syslog_mutex);	\
 	} while(0)
 #define	THREAD_UNLOCK()							\
 	do {								\
-		if (__isthreaded) _pthread_mutex_unlock(&syslog_mutex);	\
+		if (__isthreaded) _pthread_mutex_unlock(&xo_syslog_mutex);	\
 	} while(0)
+#else
+#define	THREAD_LOCK()
+#define	THREAD_UNLOCK()
+#endif
 
-static void	disconnectlog(void); /* disconnect from syslogd */
-static void	connectlog(void);	/* (re)connect to syslogd */
-static void	openlog_unlocked(const char *, int, int);
+static void xo_disconnectlog(void); /* disconnect from syslogd */
+static void xo_connectlog(void);	/* (re)connect to syslogd */
+static void xo_openlog_unlocked(const char *, int, int);
 
 enum {
 	NOCONN = 0,
@@ -98,17 +104,17 @@ struct bufcookie {
  *      is `unlimited'.
  */
 static int
-writehook(void *cookie, const char *buf, int len)
+xo_writehook (void *cookie, const char *buf, int len)
 {
 	struct bufcookie *h;	/* private `handle' */
 
-	h = (struct bufcookie *)cookie;
+	h = (struct bufcookie *) cookie;
 	if (len > h->left) {
 		/* clip in case of wraparound */
 		len = h->left;
 	}
 	if (len > 0) {
-		(void)memcpy(h->base, buf, len); /* `write' it. */
+		(void) memcpy(h->base, buf, len); /* `write' it. */
 		h->base += len;
 		h->left -= len;
 	}
@@ -120,7 +126,7 @@ writehook(void *cookie, const char *buf, int len)
  *	print message on log file; output is intended for syslogd(8).
  */
 void
-syslog(int pri, const char *fmt, ...)
+xo_syslog (int pri, const char *fmt, ...)
 {
 	va_list ap;
 
@@ -130,7 +136,7 @@ syslog(int pri, const char *fmt, ...)
 }
 
 void
-vsyslog(int pri, const char *fmt, va_list ap)
+xo_vsyslog (int pri, const char *fmt, va_list ap)
 {
 	int cnt;
 	char ch, *p;
@@ -154,41 +160,41 @@ vsyslog(int pri, const char *fmt, va_list ap)
 	THREAD_LOCK();
 
 	/* Check priority against setlogmask values. */
-	if (!(LOG_MASK(LOG_PRI(pri)) & LogMask)) {
+	if (!(LOG_MASK(LOG_PRI(pri)) & xo_logmask)) {
 		THREAD_UNLOCK();
 		return;
 	}
 
 	/* Set default facility if none specified. */
 	if ((pri & LOG_FACMASK) == 0)
-		pri |= LogFacility;
+		pri |= xo_logfacility;
 
 	/* Create the primary stdio hook */
 	tbuf_cookie.base = tbuf;
 	tbuf_cookie.left = sizeof(tbuf);
-	fp = fwopen(&tbuf_cookie, writehook);
+	fp = fwopen(&tbuf_cookie, xo_writehook);
 	if (fp == NULL) {
 		THREAD_UNLOCK();
 		return;
 	}
 
 	/* Build the message. */
-	(void)time(&now);
-	(void)fprintf(fp, "<%d>", pri);
-	(void)fprintf(fp, "%.15s ", ctime_r(&now, timbuf) + 4);
-	if (LogStat & LOG_PERROR) {
+	(void) time(&now);
+	(void) fprintf(fp, "<%d>", pri);
+	(void) fprintf(fp, "%.15s ", ctime_r(&now, timbuf) + 4);
+	if (xo_logstat & LOG_PERROR) {
 		/* Transfer to string buffer */
-		(void)fflush(fp);
+		(void) fflush(fp);
 		stdp = tbuf + (sizeof(tbuf) - tbuf_cookie.left);
 	}
-	if (LogTag == NULL)
-		LogTag = _getprogname();
-	if (LogTag != NULL)
-		(void)fprintf(fp, "%s", LogTag);
-	if (LogStat & LOG_PID)
-		(void)fprintf(fp, "[%d]", getpid());
-	if (LogTag != NULL) {
-		(void)fprintf(fp, ": ");
+	if (xo_logtag == NULL)
+		xo_logtag = getprogname();
+	if (xo_logtag != NULL)
+		(void) fprintf(fp, "%s", xo_logtag);
+	if (xo_logstat & LOG_PID)
+		(void) fprintf(fp, "[%d]", getpid());
+	if (xo_logtag != NULL) {
+		(void) fprintf(fp, ": ");
 	}
 
 	/* Check to see if we can skip expanding the %m */
@@ -197,7 +203,7 @@ vsyslog(int pri, const char *fmt, va_list ap)
 		/* Create the second stdio hook */
 		fmt_cookie.base = fmt_cpy;
 		fmt_cookie.left = sizeof(fmt_cpy) - 1;
-		fmt_fp = fwopen(&fmt_cookie, writehook);
+		fmt_fp = fwopen(&fmt_cookie, xo_writehook);
 		if (fmt_fp == NULL) {
 			fclose(fp);
 			THREAD_UNLOCK();
@@ -233,8 +239,8 @@ vsyslog(int pri, const char *fmt, va_list ap)
 		fmt = fmt_cpy;
 	}
 
-	(void)vfprintf(fp, fmt, ap);
-	(void)fclose(fp);
+	(void) vfprintf(fp, fmt, ap);
+	(void) fclose(fp);
 
 	cnt = sizeof(tbuf) - tbuf_cookie.left;
 
@@ -243,22 +249,23 @@ vsyslog(int pri, const char *fmt, va_list ap)
 		cnt--;
 
 	/* Output to stderr if requested. */
-	if (LogStat & LOG_PERROR) {
+	if (xo_logstat & LOG_PERROR) {
 		struct iovec iov[2];
 		struct iovec *v = iov;
+		char newline[] = "\n";
 
 		v->iov_base = stdp;
 		v->iov_len = cnt - (stdp - tbuf);
 		++v;
-		v->iov_base = "\n";
+		v->iov_base = newline;
 		v->iov_len = 1;
-		(void)_writev(STDERR_FILENO, iov, 2);
+		(void) writev(STDERR_FILENO, iov, 2);
 	}
 
 	/* Get connected, output the message to the local logger. */
-	if (!opened)
-		openlog_unlocked(LogTag, LogStat | LOG_NDELAY, 0);
-	connectlog();
+	if (!xo_opened)
+		xo_openlog_unlocked(xo_logtag, xo_logstat | LOG_NDELAY, 0);
+	xo_connectlog();
 
 	/*
 	 * If the send() fails, there are two likely scenarios: 
@@ -277,15 +284,15 @@ vsyslog(int pri, const char *fmt, va_list ap)
 	 * send() to give syslogd a chance to empty its socket buffer.
 	 */
 
-	if (send(LogFile, tbuf, cnt, 0) < 0) {
+	if (send(xo_logfile, tbuf, cnt, 0) < 0) {
 		if (errno != ENOBUFS) {
 			/*
 			 * Scenario 1: syslogd was restarted
 			 * reconnect and resend once
 			 */
-			disconnectlog();
-			connectlog();
-			if (send(LogFile, tbuf, cnt, 0) >= 0) {
+			xo_disconnectlog();
+			xo_connectlog();
+			if (send(xo_logfile, tbuf, cnt, 0) >= 0) {
 				THREAD_UNLOCK();
 				return;
 			}
@@ -300,10 +307,10 @@ vsyslog(int pri, const char *fmt, va_list ap)
 			 * possible DoS, fail fast on a privileged
 			 * socket
 			 */
-			if (status == CONNPRIV)
+			if (xo_status == CONNPRIV)
 				break;
-			_usleep(1);
-			if (send(LogFile, tbuf, cnt, 0) >= 0) {
+			usleep(1);
+			if (send(xo_logfile, tbuf, cnt, 0) >= 0) {
 				THREAD_UNLOCK();
 				return;
 			}
@@ -318,20 +325,25 @@ vsyslog(int pri, const char *fmt, va_list ap)
 	 * as a blocking console should not stop other processes.
 	 * Make sure the error reported is the one from the syslogd failure.
 	 */
-	if (LogStat & LOG_CONS &&
-	    (fd = _open(_PATH_CONSOLE, O_WRONLY|O_NONBLOCK|O_CLOEXEC, 0)) >=
-	    0) {
+	int flags = O_WRONLY | O_NONBLOCK;
+#ifdef O_CLOEXEC
+	flags |= O_CLOEXEC;
+#endif /* O_CLOEXEC */
+
+	if (xo_logstat & LOG_CONS
+	    && (fd = open(_PATH_CONSOLE, flags, 0)) >= 0) {
 		struct iovec iov[2];
 		struct iovec *v = iov;
+		char crnl[] = "\r\n";
 
 		p = strchr(tbuf, '>') + 1;
 		v->iov_base = p;
 		v->iov_len = cnt - (p - tbuf);
 		++v;
-		v->iov_base = "\r\n";
+		v->iov_base = crnl;
 		v->iov_len = 2;
-		(void)_writev(fd, iov, 2);
-		(void)_close(fd);
+		(void) writev(fd, iov, 2);
+		(void) close(fd);
 	}
 
 	THREAD_UNLOCK();
@@ -339,32 +351,35 @@ vsyslog(int pri, const char *fmt, va_list ap)
 
 /* Should be called with mutex acquired */
 static void
-disconnectlog(void)
+xo_disconnectlog (void)
 {
 	/*
 	 * If the user closed the FD and opened another in the same slot,
 	 * that's their problem.  They should close it before calling on
 	 * system services.
 	 */
-	if (LogFile != -1) {
-		_close(LogFile);
-		LogFile = -1;
+	if (xo_logfile != -1) {
+		close(xo_logfile);
+		xo_logfile = -1;
 	}
-	status = NOCONN;			/* retry connect */
+	xo_status = NOCONN;			/* retry connect */
 }
 
 /* Should be called with mutex acquired */
 static void
-connectlog(void)
+xo_connectlog (void)
 {
 	struct sockaddr_un SyslogAddr;	/* AF_UNIX address of local logger */
 
-	if (LogFile == -1) {
-		if ((LogFile = _socket(AF_UNIX, SOCK_DGRAM | SOCK_CLOEXEC,
-		    0)) == -1)
+	if (xo_logfile == -1) {
+	    int flags = SOCK_DGRAM;
+#ifdef SOCK_CLOEXEC
+	    flags |= SOCK_CLOEXEC;
+#endif /* SOCK_CLOEXEC */
+		if ((xo_logfile = socket(AF_UNIX, flags, 0)) == -1)
 			return;
 	}
-	if (LogFile != -1 && status == NOCONN) {
+	if (xo_logfile != -1 && xo_status == NOCONN) {
 		SyslogAddr.sun_len = sizeof(SyslogAddr);
 		SyslogAddr.sun_family = AF_UNIX;
 
@@ -372,86 +387,93 @@ connectlog(void)
 		 * First try privileged socket. If no success,
 		 * then try default socket.
 		 */
-		(void)strncpy(SyslogAddr.sun_path, _PATH_LOG_PRIV,
+
+#ifdef _PATH_LOG_PRIV
+		(void) strncpy(SyslogAddr.sun_path, _PATH_LOG_PRIV,
 		    sizeof SyslogAddr.sun_path);
-		if (_connect(LogFile, (struct sockaddr *)&SyslogAddr,
+		if (connect(xo_logfile, (struct sockaddr *) &SyslogAddr,
 		    sizeof(SyslogAddr)) != -1)
-			status = CONNPRIV;
+			xo_status = CONNPRIV;
+#endif /* _PATH_LOG_PRIV */
 
-		if (status == NOCONN) {
-			(void)strncpy(SyslogAddr.sun_path, _PATH_LOG,
+#ifdef _PATH_LOG
+		if (xo_status == NOCONN) {
+			(void) strncpy(SyslogAddr.sun_path, _PATH_LOG,
 			    sizeof SyslogAddr.sun_path);
-			if (_connect(LogFile, (struct sockaddr *)&SyslogAddr,
+			if (connect(xo_logfile, (struct sockaddr *)&SyslogAddr,
 			    sizeof(SyslogAddr)) != -1)
-				status = CONNDEF;
+				xo_status = CONNDEF;
 		}
+#endif /* _PATH_LOG */
 
-		if (status == NOCONN) {
+#ifdef _PATH_OLDLOG
+		if (xo_status == NOCONN) {
 			/*
 			 * Try the old "/dev/log" path, for backward
 			 * compatibility.
 			 */
-			(void)strncpy(SyslogAddr.sun_path, _PATH_OLDLOG,
+			(void) strncpy(SyslogAddr.sun_path, _PATH_OLDLOG,
 			    sizeof SyslogAddr.sun_path);
-			if (_connect(LogFile, (struct sockaddr *)&SyslogAddr,
+			if (connect(xo_logfile, (struct sockaddr *)&SyslogAddr,
 			    sizeof(SyslogAddr)) != -1)
-				status = CONNDEF;
+				xo_status = CONNDEF;
 		}
+#endif /* _PATH_OLDLOG */
 
-		if (status == NOCONN) {
-			(void)_close(LogFile);
-			LogFile = -1;
+		if (xo_status == NOCONN) {
+			(void) close(xo_logfile);
+			xo_logfile = -1;
 		}
 	}
 }
 
 static void
-openlog_unlocked(const char *ident, int logstat, int logfac)
+xo_openlog_unlocked (const char *ident, int logstat, int logfac)
 {
 	if (ident != NULL)
-		LogTag = ident;
-	LogStat = logstat;
+		xo_logtag = ident;
+	xo_logstat = logstat;
 	if (logfac != 0 && (logfac &~ LOG_FACMASK) == 0)
-		LogFacility = logfac;
+		xo_logfacility = logfac;
 
-	if (LogStat & LOG_NDELAY)	/* open immediately */
-		connectlog();
+	if (xo_logstat & LOG_NDELAY)	/* open immediately */
+		xo_connectlog();
 
-	opened = 1;	/* ident and facility has been set */
+	xo_opened = 1;	/* ident and facility has been set */
 }
 
 void
-openlog(const char *ident, int logstat, int logfac)
+xo_openlog (const char *ident, int logstat, int logfac)
 {
 	THREAD_LOCK();
-	openlog_unlocked(ident, logstat, logfac);
+	xo_openlog_unlocked(ident, logstat, logfac);
 	THREAD_UNLOCK();
 }
 
 
 void
-closelog(void)
+xo_closelog (void) 
 {
 	THREAD_LOCK();
-	if (LogFile != -1) {
-		(void)_close(LogFile);
-		LogFile = -1;
+	if (xo_logfile != -1) {
+		(void) close(xo_logfile);
+		xo_logfile = -1;
 	}
-	LogTag = NULL;
-	status = NOCONN;
+	xo_logtag = NULL;
+	xo_status = NOCONN;
 	THREAD_UNLOCK();
 }
 
 /* setlogmask -- set the log mask level */
 int
-setlogmask(int pmask)
+xo_setlogmask (int pmask)
 {
 	int omask;
 
 	THREAD_LOCK();
-	omask = LogMask;
+	omask = xo_logmask;
 	if (pmask != 0)
-		LogMask = pmask;
+		xo_logmask = pmask;
 	THREAD_UNLOCK();
 	return (omask);
 }
