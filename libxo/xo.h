@@ -411,6 +411,9 @@ int
 xo_set_logmask (int maskpri);
 
 void
+xo_set_unit_test_mode (int value);
+
+void
 xo_syslog (int priority, const char *id, const char *message, ...);
 
 void
