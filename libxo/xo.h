@@ -414,10 +414,10 @@ void
 xo_set_unit_test_mode (int value);
 
 void
-xo_syslog (int priority, const char *id, const char *message, ...);
+xo_syslog (int priority, const char *name, const char *message, ...);
 
 void
-xo_vsyslog (int priority, const char *id, const char *message, va_list args);
+xo_vsyslog (int priority, const char *name, const char *message, va_list args);
 
 typedef void (*xo_syslog_open_t)(void);
 typedef void (*xo_syslog_send_t)(const char *full_msg,
