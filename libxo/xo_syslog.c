@@ -515,6 +515,11 @@ xo_vsyslog (int pri, const char *id, const char *fmt, va_list vap)
 	return;
     }
 
+#ifdef HAVE_GETPROGNAME
+    if (xo_logtag == NULL)
+        xo_logtag = getprogname();
+#endif /* HAVE_GETPROGNAME */
+
     xo_set_writer(xop, &xb, xo_syslog_handle_write, xo_syslog_handle_close,
 		  xo_syslog_handle_flush);
 
@@ -539,11 +544,6 @@ xo_vsyslog (int pri, const char *id, const char *fmt, va_list vap)
 	v0_hdr = alloca(2048);
 	tp = v0_hdr;
 	ep = v0_hdr + 2048;
-
-#if HAVE_GETPROGNAME		/* Linux lacks this */
-	if (xo_logtag == NULL)
-	    xo_logtag = getprogname();
-#endif
 
 	if (xo_logtag != NULL)
 	    tp += xo_snprintf(tp, ep - tp, "%s", xo_logtag);
@@ -573,8 +573,6 @@ xo_vsyslog (int pri, const char *id, const char *fmt, va_list vap)
 			      hostname[0] ? hostname : "-");
 
     /* Add APP-NAME */
-    if (xo_logtag == NULL)
-        xo_logtag = getprogname();
     xb.xb_curp += xo_snprintf(xb.xb_curp, xo_sleft(&xb), "%s ",
 			      xo_logtag ?: "-");
 
