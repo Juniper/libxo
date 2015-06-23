@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 1983, 1988, 1993
+ * Portions of this file are:
+ *   Copyright (c) 1983, 1988, 1993
  *	The Regents of the University of California.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,12 +28,7 @@
  * SUCH DAMAGE.
  */
 
-#if defined(LIBC_SCCS) && !defined(lint)
-static char sccsid[] = "@(#)syslog.c	8.5 (Berkeley) 4/29/95";
-#endif /* LIBC_SCCS and not lint */
 #include <sys/cdefs.h>
-__FBSDID("$FreeBSD$");
-
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/syslog.h>
@@ -89,6 +85,7 @@ static const char *xo_logtag = NULL;	/* string to tag the entry with */
 static int xo_logfacility = LOG_USER;	/* default facility code */
 static int xo_logmask = 0xff;		/* mask of priorities to be logged */
 static pthread_mutex_t xo_syslog_mutex UNUSED = PTHREAD_MUTEX_INITIALIZER;
+static int xo_unit_test;		/* Fake data for unit test */
 
 #define REAL_VOID(_x) \
     do { int really_ignored = _x; if (really_ignored) { }} while (0)
@@ -467,6 +464,12 @@ xo_syslog_handle_flush (void *opaque UNUSED)
 }
 
 void
+xo_set_unit_test_mode (int value)
+{
+    xo_unit_test = value;
+}
+
+void
 xo_vsyslog (int pri, const char *id, const char *fmt, va_list vap)
 {
     int saved_errno = errno;
@@ -474,6 +477,10 @@ xo_vsyslog (int pri, const char *id, const char *fmt, va_list vap)
     char *tp = NULL, *ep = NULL;
     char *start_of_msg = NULL, *v0_hdr = NULL;
     xo_sbuffer_t xb;
+    static pid_t my_pid;
+
+    if (my_pid == 0)
+	my_pid = xo_unit_test ? 222 : getpid();
 
     /* Check for invalid bits */
     if (pri & ~(LOG_PRIMASK|LOG_FACMASK)) {
@@ -513,7 +520,13 @@ xo_vsyslog (int pri, const char *id, const char *fmt, va_list vap)
     struct tm tm;
     struct timeval tv;
 
-    gettimeofday(&tv, NULL);
+    /* Unit test hack: fake a fixed time */
+    if (xo_unit_test) {
+	tv.tv_sec = 1435085229;
+	tv.tv_usec = 123;
+    } else
+	gettimeofday(&tv, NULL);
+
     (void) gmtime_r(&tv.tv_sec, &tm);
 
     if (xo_logstat & LOG_PERROR) {
@@ -525,12 +538,15 @@ xo_vsyslog (int pri, const char *id, const char *fmt, va_list vap)
 	tp = v0_hdr;
 	ep = v0_hdr + 2048;
 
+#if HAVE_GETPROGNAME		/* Linux lacks this */
 	if (xo_logtag == NULL)
 	    xo_logtag = getprogname();
+#endif
+
 	if (xo_logtag != NULL)
 	    tp += xo_snprintf(tp, ep - tp, "%s", xo_logtag);
 	if (xo_logstat & LOG_PID)
-	    tp += xo_snprintf(tp, ep - tp, "[%d]", getpid());
+	    tp += xo_snprintf(tp, ep - tp, "[%d]", my_pid);
 	if (xo_logtag)
 	    tp += xo_snprintf(tp, ep - tp, ": ");
     }
@@ -561,14 +577,14 @@ xo_vsyslog (int pri, const char *id, const char *fmt, va_list vap)
 			      xo_logtag ?: "-");
 
     /* Add PROCID */
-    xb.xb_curp += xo_snprintf(xb.xb_curp, xo_sleft(&xb), "%d ", getpid());
+    xb.xb_curp += xo_snprintf(xb.xb_curp, xo_sleft(&xb), "%d ", my_pid);
 
     /*
      * Add MSGID.  The user should provide us with a name, which we
      * prefix with the current enterprise ID, as learned from the kernel.
      * If the kernel won't tell us, we use the stock/builtin number.
      */
-    char *buf = NULL;
+    char *buf UNUSED = NULL;
     const char *eid = xo_syslog_enterprise_id;
     const char *at_sign = "@";
 
@@ -585,6 +601,7 @@ xo_vsyslog (int pri, const char *id, const char *fmt, va_list vap)
 	/*
 	 * See if the kernel knows the sysctl for the enterprise ID
 	 */
+#ifdef HAVE_SYSCYLBYNAME
 	size_t size = 0;
 	if (sysctlbyname(XO_SYSLOG_ENTERPRISE_ID, NULL, &size, NULL, 0) == 0
 	    	&& size > 0) {
@@ -593,6 +610,7 @@ xo_vsyslog (int pri, const char *id, const char *fmt, va_list vap)
 			&& size > 0)
 		eid = buf;
 	}
+#endif /* HAVE_SYSCYLBYNAME */
     }
 
     xb.xb_curp += xo_snprintf(xb.xb_curp, xo_sleft(&xb), "[%s%s%s ",
