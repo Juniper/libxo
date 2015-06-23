@@ -54,10 +54,13 @@ AC_CHECK_FUNCS([sranddev srand strlcpy])
 AC_CHECK_FUNCS([fdopen getrusage])
 AC_CHECK_FUNCS([gettimeofday ctime])
 AC_CHECK_FUNCS([getpass])
+AC_CHECK_FUNCS([getprogname])
 AC_CHECK_FUNCS([sysctlbyname])
 AC_CHECK_FUNCS([flock])
 AC_CHECK_FUNCS([asprintf])
 AC_CHECK_FUNCS([__flbf])
+AC_CHECK_FUNCS([sysctlbyname])
+
 
 AC_CHECK_HEADERS([dlfcn.h])
 AC_CHECK_HEADERS([dlfcn.h])
@@ -90,6 +93,11 @@ AM_CONDITIONAL([HAVE_HUMANIZE_NUMBER], [test "$HAVE_HUMANIZE_NUMBER" = "yes"])
 
 AC_CHECK_LIB([crypto], [MD5_Init])
 AM_CONDITIONAL([HAVE_LIBCRYPTO], [test "$HAVE_LIBCRYPTO" != "no"])
+
+AC_CHECK_MEMBER([struct sockaddr_un.sun_len],
+    [HAVE_SUN_LEN=yes ;
+        AC_DEFINE([HAVE_SUN_LEN], [1], [Have struct sockaddr_un.sun_len])],
+    [HAS_SUN_LEN=no], [[#include <sys/un.h>]])
 
 dnl
 dnl Some packages need to be checked against version numbers so we
