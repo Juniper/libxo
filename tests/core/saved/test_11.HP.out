@@ -1,0 +1,31 @@
+{{<30>1 2015-06-23T18:29:58.903-0500 bock.juniper.net test-program 90994 [42@animal-status <div class="line">
+  <div class="text">The </div>
+  <div class="data" data-tag="animal">snake</div>
+  <div class="text"> is </div>
+  <div class="data" data-tag="state">loose</div>
+</div>
+] The snake is loose}}
+{{test-program: }}
+{{The snake is loose}}
+
+{{<30>1 2015-06-23T18:29:58.904-0500 bock.juniper.net test-program 90994 [42@animal-consumed <div class="line">
+  <div class="text">My </div>
+  <div class="data" data-tag="animal">snake</div>
+  <div class="text"> ate your </div>
+  <div class="data" data-tag="pet">hamster</div>
+</div>
+] My snake ate your hamster}}
+{{test-program: }}
+{{My snake ate your hamster}}
+
+{{<29>1 2015-06-23T18:29:58.904-0500 bock.juniper.net test-program 90994 [42@animal-talk <div class="line">
+  <div class="data" data-tag="count">1</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="animal">owl</div>
+  <div class="text"> said </div>
+  <div class="data" data-tag="quote">"e=m\c[2]"</div>
+</div>
+] 1 owl said "e=m\c[2]"}}
+{{test-program: }}
+{{1 owl said "e=m\c[2]"}}
+
