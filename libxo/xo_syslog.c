@@ -306,7 +306,9 @@ xo_connect_log (void)
             return;
     }
     if (xo_logfile != -1 && xo_status == NOCONN) {
+#ifdef HAVE_SUN_LEN
         SyslogAddr.sun_len = sizeof(SyslogAddr);
+#endif /* HAVE_SUN_LEN */
         SyslogAddr.sun_family = AF_UNIX;
 
         /*
