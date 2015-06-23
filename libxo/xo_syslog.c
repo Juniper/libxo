@@ -90,6 +90,9 @@ static int xo_logfacility = LOG_USER;	/* default facility code */
 static int xo_logmask = 0xff;		/* mask of priorities to be logged */
 static pthread_mutex_t xo_syslog_mutex UNUSED = PTHREAD_MUTEX_INITIALIZER;
 
+#define REAL_VOID(_x) \
+    do { int really_ignored = _x; if (really_ignored) { }} while (0)
+
 #if 0
 #define    THREAD_LOCK()                 \
     do {                                 \
@@ -178,7 +181,7 @@ xo_send_syslog (char *full_msg, char *v0_hdr,
         v->iov_base = newline;
         v->iov_len = 1;
         v += 1;
-        (void) writev(STDERR_FILENO, iov, 3);
+        REAL_VOID(writev(STDERR_FILENO, iov, 3));
     }
 
     /* Get connected, output the message to the local logger. */
@@ -260,7 +263,7 @@ xo_send_syslog (char *full_msg, char *v0_hdr,
         ++v;
         v->iov_base = crnl;
         v->iov_len = 2;
-        (void) writev(fd, iov, 2);
+        REAL_VOID(writev(fd, iov, 2));
         (void) close(fd);
     }
 }
