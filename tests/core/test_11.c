@@ -48,18 +48,19 @@ main (int argc, char **argv)
     xo_set_syslog_handler(test_syslog_open, test_syslog_send,
 			  test_syslog_close);
 
-    xo_open_log("test-program", LOG_PERROR, LOG_DAEMON);
+    xo_set_unit_test_mode(1);
+    xo_open_log("test-program", LOG_PERROR, 0);
 
     xo_set_version("3.1.4");
     xo_set_syslog_enterprise_id(42); /* SunOs */
 
     xo_open_container_h(NULL, "top");
 
-    xo_syslog(LOG_INFO, "animal-status",
+    xo_syslog(LOG_INFO | LOG_KERN, "animal-status",
 	      "The {:animal} is {:state}", "snake", "loose");
-    xo_syslog(LOG_INFO, "animal-consumed",
+    xo_syslog(LOG_INFO | LOG_MAIL, "animal-consumed",
 	      "My {:animal} ate your {:pet}", "snake", "hamster");
-    xo_syslog(LOG_NOTICE, "animal-talk",
+    xo_syslog(LOG_NOTICE | LOG_DAEMON, "animal-talk",
 	      "{:count/%d} {:animal} said {:quote}", 1, "owl", "\"e=m\\c[2]\"");
 
     xo_close_container_h(NULL, "top");
