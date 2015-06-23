@@ -40,26 +40,27 @@ OXTRADOC_CMD = ${OX_CMD}
 
 
 OUTPUT = libxo-manual
-INPUT = libxo.txt
+INPUT = libxo
 
 EXTRA_DIST = \
-    ${INPUT} \
+    ${INPUT}.txt \
     ${OUTPUT}.html \
     ${OUTPUT}.txt
 
 doc docs: ${OUTPUT}.txt ${OUTPUT}.html
 
-${OUTPUT}.txt: ${INPUT} ${OXTRADOC} xolint.txt
+${OUTPUT}.txt: ${INPUT}.txt ${OXTRADOC} xolint.txt
 	${OXTRADOC_CMD} -m text -o $@ $<
 
-${OUTPUT}.html: ${INPUT} ${OXTRADOC} ${XML2HTMLBIN} xolint.txt
+${OUTPUT}.html: ${INPUT}.txt ${OXTRADOC} ${XML2HTMLBIN} xolint.txt
 	${OXTRADOC_CMD} -m html -o $@ $<
 
 xolint.txt: ${top_srcdir}/xolint/xolint.pl
 	perl ${top_srcdir}/xolint/xolint.pl -D > xolint.txt
 
 CLEANFILES = \
-${OUTPUT}.xml \
-${OUTPUT}.txt \
-${OUTPUT}.fxml \
-${OUTPUT}.html
+xolint.txt \
+${INPUT}.xml \
+${INPUT}.txt \
+${INPUT}.fxml \
+${INPUT}.html
