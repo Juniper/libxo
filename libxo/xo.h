@@ -45,6 +45,7 @@ typedef unsigned xo_style_t;
 #define XO_STYLE_XML	1	/** Generate XML output */
 #define XO_STYLE_JSON	2	/** Generate JSON output */
 #define XO_STYLE_HTML	3	/** Generate HTML output */
+#define XO_STYLE_SDPARAMS 4	/** Generate syslog structured data params */
 
 /** Flags for libxo */
 typedef unsigned long long xo_xof_flags_t;
@@ -400,10 +401,31 @@ xo_set_version (const char *version);
 void
 xo_set_version_h (xo_handle_t *xop, const char *version);
 
-void xo_closelog(void);
-void xo_openlog(const char *ident, int logopt, int facility);
-int xo_setlogmask(int maskpri);
-void xo_syslog(int priority, const char *message, ...);
-void xo_vsyslog(int priority, const char *message, va_list args);
+void
+xo_open_log (const char *ident, int logopt, int facility);
+
+void
+xo_close_log (void);
+
+int
+xo_set_logmask (int maskpri);
+
+void
+xo_syslog (int priority, const char *id, const char *message, ...);
+
+void
+xo_vsyslog (int priority, const char *id, const char *message, va_list args);
+
+typedef void (*xo_syslog_open_t)(void);
+typedef void (*xo_syslog_send_t)(const char *full_msg,
+				 const char *v0_hdr, const char *text_only);
+typedef void (*xo_syslog_close_t)(void);
+
+void
+xo_set_syslog_handler (xo_syslog_open_t open_func, xo_syslog_send_t send_func,
+		       xo_syslog_close_t close_func);
+
+void
+xo_set_syslog_enterprise_id (unsigned short eid);
 
 #endif /* INCLUDE_XO_H */
