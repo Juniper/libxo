@@ -50,8 +50,32 @@ __FBSDID("$FreeBSD$");
 #include <time.h>
 #include <unistd.h>
 #include <stdarg.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/sysctl.h>
 
 #include "xo.h"
+
+/*
+ * SYSLOG (RFC 5424) requires an enterprise identifier.  The kernel should
+ * support a sysctl to assign a custom enterprise-id.  We default to the
+ * stock IANA assigned Enterprise ID value for FreeBSD.  See
+ * https://www.iana.org/assignments/enterprise-numbers/enterprise-numbers
+ */
+#define XO_SYSLOG_ENTERPRISE_ID	"kern.syslog.enterprise_id"
+#if defined(__FreeBSD__)
+#define XO_DEFAULT_EID	"2238"
+#elseif defined(__macosx__)
+#define XO_DEFAULT_EID	"63"
+#else
+#define XO_DEFAULT_EID	"32473"	/* Bail; use "example" number */
+#endif
+
+#ifdef _SC_HOST_NAME_MAX
+#define HOST_NAME_MAX _SC_HOST_NAME_MAX
+#else
+#define HOST_NAME_MAX 255
+#endif /* _SC_HOST_NAME_MAX */
 
 #ifndef UNUSED
 #define UNUSED __attribute__ ((__unused__))
@@ -80,9 +104,9 @@ static pthread_mutex_t xo_syslog_mutex UNUSED = PTHREAD_MUTEX_INITIALIZER;
 #define    THREAD_UNLOCK()
 #endif
 
-static void xo_disconnectlog(void); /* disconnect from syslogd */
-static void xo_connectlog(void);    /* (re)connect to syslogd */
-static void xo_openlog_unlocked(const char *, int, int);
+static void xo_disconnect_log(void); /* disconnect from syslogd */
+static void xo_connect_log(void);    /* (re)connect to syslogd */
+static void xo_open_log_unlocked(const char *, int, int);
 
 enum {
     NOCONN = 0,
@@ -91,181 +115,76 @@ enum {
 };
 
 /*
- * Format of the magic cookie passed through the stdio hook
+ * We can't see the real xo_buffer_t (for now), so we cons up a compatible
+ * version of it.
  */
-struct bufcookie {
-    char *base;    /* start of buffer */
-    int left;
-};
+typedef struct xo_sbuffer_s {
+    char *xb_basep;		/* start of buffer */
+    char *xb_curp;    /* start of buffer */
+    int xb_size;
+} xo_sbuffer_t;
+
+static xo_syslog_open_t xo_syslog_open;
+static xo_syslog_send_t xo_syslog_send;
+static xo_syslog_close_t xo_syslog_close;
+
+static char xo_syslog_enterprise_id[12];
 
 /*
- * stdio write hook for writing to a static string buffer
- * XXX: Maybe one day, dynamically allocate it so that the line length
- *      is `unlimited'.
+ * Record an enterprise ID, which functions as a namespace for syslog
+ * messages.  The value is pre-formatted into a string.  This allows
+ * applications to customize their syslog message set, when needed. 
  */
+void
+xo_set_syslog_enterprise_id (unsigned short eid)
+{
+    snprintf(xo_syslog_enterprise_id, sizeof(xo_syslog_enterprise_id),
+	     "%u", eid);
+}
+
 static int
-xo_writehook (void *cookie, const char *buf, int len)
+xo_sleft (xo_sbuffer_t *xbp)
 {
-    struct bufcookie *h;    /* private `handle' */
-
-    h = (struct bufcookie *) cookie;
-    if (len > h->left) {
-        /* clip in case of wraparound */
-        len = h->left;
-    }
-    if (len > 0) {
-        (void) memcpy(h->base, buf, len); /* `write' it. */
-        h->base += len;
-        h->left -= len;
-    }
-    return len;
+    return xbp->xb_size - (xbp->xb_curp - xbp->xb_basep);
 }
 
 /*
- * syslog, vsyslog --
- *    print message on log file; output is intended for syslogd(8).
+ * Handle the work of transmitting the syslog message
  */
-void
-xo_syslog (int pri, const char *fmt, ...)
+static void
+xo_send_syslog (char *full_msg, char *v0_hdr,
+		char *text_only)
 {
-    va_list ap;
-
-    va_start(ap, fmt);
-    vsyslog(pri, fmt, ap);
-    va_end(ap);
-}
-
-void
-xo_vsyslog (int pri, const char *fmt, va_list ap)
-{
-    int cnt;
-    char ch, *p;
-    time_t now;
-    int fd, saved_errno;
-    char *stdp, tbuf[2048], fmt_cpy[1024], timbuf[26], errstr[64];
-    FILE *fp, *fmt_fp;
-    struct bufcookie tbuf_cookie;
-    struct bufcookie fmt_cookie;
-
-#define    INTERNALLOG    LOG_ERR|LOG_CONS|LOG_PERROR|LOG_PID
-    /* Check for invalid bits. */
-    if (pri & ~(LOG_PRIMASK|LOG_FACMASK)) {
-        syslog(INTERNALLOG,
-            "syslog: unknown facility/priority: %x", pri);
-        pri &= LOG_PRIMASK|LOG_FACMASK;
+    if (xo_syslog_send) {
+	xo_syslog_send(full_msg, v0_hdr, text_only);
+	return;
     }
 
-    saved_errno = errno;
-
-    THREAD_LOCK();
-
-    /* Check priority against setlogmask values. */
-    if (!(LOG_MASK(LOG_PRI(pri)) & xo_logmask)) {
-        THREAD_UNLOCK();
-        return;
-    }
-
-    /* Set default facility if none specified. */
-    if ((pri & LOG_FACMASK) == 0)
-        pri |= xo_logfacility;
-
-    /* Create the primary stdio hook */
-    tbuf_cookie.base = tbuf;
-    tbuf_cookie.left = sizeof(tbuf);
-    fp = fwopen(&tbuf_cookie, xo_writehook);
-    if (fp == NULL) {
-        THREAD_UNLOCK();
-        return;
-    }
-
-    /* Build the message. */
-    (void) time(&now);
-    (void) fprintf(fp, "<%d>", pri);
-    (void) fprintf(fp, "%.15s ", ctime_r(&now, timbuf) + 4);
-    if (xo_logstat & LOG_PERROR) {
-        /* Transfer to string buffer */
-        (void) fflush(fp);
-        stdp = tbuf + (sizeof(tbuf) - tbuf_cookie.left);
-    }
-    if (xo_logtag == NULL)
-        xo_logtag = getprogname();
-    if (xo_logtag != NULL)
-        (void) fprintf(fp, "%s", xo_logtag);
-    if (xo_logstat & LOG_PID)
-        (void) fprintf(fp, "[%d]", getpid());
-    if (xo_logtag != NULL) {
-        (void) fprintf(fp, ": ");
-    }
-
-    /* Check to see if we can skip expanding the %m */
-    if (strstr(fmt, "%m")) {
-
-        /* Create the second stdio hook */
-        fmt_cookie.base = fmt_cpy;
-        fmt_cookie.left = sizeof(fmt_cpy) - 1;
-        fmt_fp = fwopen(&fmt_cookie, xo_writehook);
-        if (fmt_fp == NULL) {
-            fclose(fp);
-            THREAD_UNLOCK();
-            return;
-        }
-
-        /*
-         * Substitute error message for %m.  Be careful not to
-         * molest an escaped percent "%%m".  We want to pass it
-         * on untouched as the format is later parsed by vfprintf.
-         */
-        for ( ; (ch = *fmt); ++fmt) {
-            if (ch == '%' && fmt[1] == 'm') {
-                ++fmt;
-                strerror_r(saved_errno, errstr, sizeof(errstr));
-                fputs(errstr, fmt_fp);
-            } else if (ch == '%' && fmt[1] == '%') {
-                ++fmt;
-                fputc(ch, fmt_fp);
-                fputc(ch, fmt_fp);
-            } else {
-                fputc(ch, fmt_fp);
-            }
-        }
-
-        /* Null terminate if room */
-        fputc(0, fmt_fp);
-        fclose(fmt_fp);
-
-        /* Guarantee null termination */
-        fmt_cpy[sizeof(fmt_cpy) - 1] = '\0';
-
-        fmt = fmt_cpy;
-    }
-
-    (void) vfprintf(fp, fmt, ap);
-    (void) fclose(fp);
-
-    cnt = sizeof(tbuf) - tbuf_cookie.left;
-
-    /* Remove a trailing newline */
-    if (tbuf[cnt - 1] == '\n')
-        cnt--;
+    int fd;
+    int full_len = strlen(full_msg);
 
     /* Output to stderr if requested. */
     if (xo_logstat & LOG_PERROR) {
-        struct iovec iov[2];
+        struct iovec iov[3];
         struct iovec *v = iov;
         char newline[] = "\n";
 
-        v->iov_base = stdp;
-        v->iov_len = cnt - (stdp - tbuf);
-        ++v;
+        v->iov_base = v0_hdr;
+        v->iov_len = strlen(v0_hdr);
+        v += 1;
+        v->iov_base = text_only;
+        v->iov_len = strlen(text_only);
+        v += 1;
         v->iov_base = newline;
         v->iov_len = 1;
-        (void) writev(STDERR_FILENO, iov, 2);
+        v += 1;
+        (void) writev(STDERR_FILENO, iov, 3);
     }
 
     /* Get connected, output the message to the local logger. */
     if (!xo_opened)
-        xo_openlog_unlocked(xo_logtag, xo_logstat | LOG_NDELAY, 0);
-    xo_connectlog();
+        xo_open_log_unlocked(xo_logtag, xo_logstat | LOG_NDELAY, 0);
+    xo_connect_log();
 
     /*
      * If the send() fails, there are two likely scenarios: 
@@ -284,16 +203,15 @@ xo_vsyslog (int pri, const char *fmt, va_list ap)
      * send() to give syslogd a chance to empty its socket buffer.
      */
 
-    if (send(xo_logfile, tbuf, cnt, 0) < 0) {
+    if (send(xo_logfile, full_msg, full_len, 0) < 0) {
         if (errno != ENOBUFS) {
             /*
              * Scenario 1: syslogd was restarted
              * reconnect and resend once
              */
-            xo_disconnectlog();
-            xo_connectlog();
-            if (send(xo_logfile, tbuf, cnt, 0) >= 0) {
-                THREAD_UNLOCK();
+            xo_disconnect_log();
+            xo_connect_log();
+            if (send(xo_logfile, full_msg, full_len, 0) >= 0) {
                 return;
             }
             /*
@@ -310,8 +228,7 @@ xo_vsyslog (int pri, const char *fmt, va_list ap)
             if (xo_status == CONNPRIV)
                 break;
             usleep(1);
-            if (send(xo_logfile, tbuf, cnt, 0) >= 0) {
-                THREAD_UNLOCK();
+            if (send(xo_logfile, full_msg, full_len, 0) >= 0) {
                 return;
             }
         }
@@ -335,24 +252,28 @@ xo_vsyslog (int pri, const char *fmt, va_list ap)
         struct iovec iov[2];
         struct iovec *v = iov;
         char crnl[] = "\r\n";
+	char *p;
 
-        p = strchr(tbuf, '>') + 1;
+        p = strchr(full_msg, '>') + 1;
         v->iov_base = p;
-        v->iov_len = cnt - (p - tbuf);
+        v->iov_len = full_len - (p - full_msg);
         ++v;
         v->iov_base = crnl;
         v->iov_len = 2;
         (void) writev(fd, iov, 2);
         (void) close(fd);
     }
-
-    THREAD_UNLOCK();
 }
 
 /* Should be called with mutex acquired */
 static void
-xo_disconnectlog (void)
+xo_disconnect_log (void)
 {
+    if (xo_syslog_close) {
+	xo_syslog_close();
+	return;
+    }
+
     /*
      * If the user closed the FD and opened another in the same slot,
      * that's their problem.  They should close it before calling on
@@ -367,8 +288,13 @@ xo_disconnectlog (void)
 
 /* Should be called with mutex acquired */
 static void
-xo_connectlog (void)
+xo_connect_log (void)
 {
+    if (xo_syslog_open) {
+	xo_syslog_open();
+	return;
+    }
+
     struct sockaddr_un SyslogAddr;    /* AF_UNIX address of local logger */
 
     if (xo_logfile == -1) {
@@ -428,7 +354,7 @@ xo_connectlog (void)
 }
 
 static void
-xo_openlog_unlocked (const char *ident, int logstat, int logfac)
+xo_open_log_unlocked (const char *ident, int logstat, int logfac)
 {
     if (ident != NULL)
         xo_logtag = ident;
@@ -437,22 +363,22 @@ xo_openlog_unlocked (const char *ident, int logstat, int logfac)
         xo_logfacility = logfac;
 
     if (xo_logstat & LOG_NDELAY)    /* open immediately */
-        xo_connectlog();
+        xo_connect_log();
 
     xo_opened = 1;    /* ident and facility has been set */
 }
 
 void
-xo_openlog (const char *ident, int logstat, int logfac)
+xo_open_log (const char *ident, int logstat, int logfac)
 {
     THREAD_LOCK();
-    xo_openlog_unlocked(ident, logstat, logfac);
+    xo_open_log_unlocked(ident, logstat, logfac);
     THREAD_UNLOCK();
 }
 
 
 void
-xo_closelog (void) 
+xo_close_log (void) 
 {
     THREAD_LOCK();
     if (xo_logfile != -1) {
@@ -464,9 +390,9 @@ xo_closelog (void)
     THREAD_UNLOCK();
 }
 
-/* setlogmask -- set the log mask level */
+/* xo_set_logmask -- set the log mask level */
 int
-xo_setlogmask (int pmask)
+xo_set_logmask (int pmask)
 {
     int omask;
 
@@ -476,4 +402,250 @@ xo_setlogmask (int pmask)
         xo_logmask = pmask;
     THREAD_UNLOCK();
     return (omask);
+}
+
+void
+xo_set_syslog_handler (xo_syslog_open_t open_func,
+		       xo_syslog_send_t send_func,
+		       xo_syslog_close_t close_func)
+{
+    xo_syslog_open = open_func;
+    xo_syslog_send = send_func;
+    xo_syslog_close = close_func;
+}
+
+static size_t
+xo_snprintf (char *out, size_t outsize, const char *fmt, ...)
+{
+    int status;
+    size_t retval = 0;
+    va_list ap;
+    if (out && outsize) {
+        va_start(ap, fmt);
+        status = vsnprintf(out, outsize, fmt, ap);
+        if (status < 0) { /* this should never happen, */
+            *out = 0;     /* handle it in the safest way possible if it does */
+            retval = 0;
+        } else {
+            retval = status;
+            retval = retval > outsize ? outsize : retval;
+        }
+        va_end(ap);
+    }
+    return retval;
+}
+
+static int
+xo_syslog_handle_write (void *opaque, const char *data)
+{
+    xo_sbuffer_t *xbp = opaque;
+    int len = strlen(data);
+    int left = xo_sleft(xbp);
+
+    if (len > left - 1)
+	len = left - 1;
+
+    memcpy(xbp->xb_curp, data, len);
+    xbp->xb_curp += len;
+    *xbp->xb_curp = '\0';
+
+    return len;
+}
+
+static void
+xo_syslog_handle_close (void *opaque UNUSED)
+{
+}
+
+static int
+xo_syslog_handle_flush (void *opaque UNUSED)
+{
+    return 0;
+}
+
+void
+xo_vsyslog (int pri, const char *id, const char *fmt, va_list vap)
+{
+    int saved_errno = errno;
+    char tbuf[2048];
+    char *tp = NULL, *ep = NULL;
+    char *start_of_msg = NULL, *v0_hdr = NULL;
+    xo_sbuffer_t xb;
+
+    /* Check for invalid bits */
+    if (pri & ~(LOG_PRIMASK|LOG_FACMASK)) {
+        xo_syslog(LOG_ERR | LOG_CONS | LOG_PERROR | LOG_PID,
+		  "syslog-unknown-priority",
+		  "syslog: unknown facility/priority: %#x", pri);
+        pri &= LOG_PRIMASK|LOG_FACMASK;
+    }
+
+    THREAD_LOCK();
+
+    /* Check priority against setlogmask values. */
+    if (!(LOG_MASK(LOG_PRI(pri)) & xo_logmask)) {
+        THREAD_UNLOCK();
+        return;
+    }
+
+    /* Set default facility if none specified. */
+    if ((pri & LOG_FACMASK) == 0)
+        pri |= xo_logfacility;
+
+    /* Create the primary stdio hook */
+    xb.xb_basep = tbuf;
+    xb.xb_curp = tbuf;
+    xb.xb_size = sizeof(tbuf);
+
+    xo_handle_t *xop = xo_create(XO_STYLE_SDPARAMS, 0);
+    if (xop == NULL) {
+        THREAD_UNLOCK();
+	return;
+    }
+
+    xo_set_writer(xop, &xb, xo_syslog_handle_write, xo_syslog_handle_close,
+		  xo_syslog_handle_flush);
+
+    /* Build the message; start by getting the time */
+    struct tm tm;
+    struct timeval tv;
+
+    gettimeofday(&tv, NULL);
+    (void) gmtime_r(&tv.tv_sec, &tm);
+
+    if (xo_logstat & LOG_PERROR) {
+	/*
+	 * For backwards compatibility, we need to make the old-style
+	 * message.  This message can be emitted to the console/tty.
+	 */
+	v0_hdr = alloca(2048);
+	tp = v0_hdr;
+	ep = v0_hdr + 2048;
+
+	if (xo_logtag == NULL)
+	    xo_logtag = getprogname();
+	if (xo_logtag != NULL)
+	    tp += xo_snprintf(tp, ep - tp, "%s", xo_logtag);
+	if (xo_logstat & LOG_PID)
+	    tp += xo_snprintf(tp, ep - tp, "[%d]", getpid());
+	if (xo_logtag)
+	    tp += xo_snprintf(tp, ep - tp, ": ");
+    }
+
+    /* Add PRI, PRIVAL, and VERSION */
+    xb.xb_curp += xo_snprintf(xb.xb_curp, xo_sleft(&xb), "<%d>1 ", pri);
+
+    /* Add TIMESTAMP with milliseconds and TZOFFSET */
+    xb.xb_curp += strftime(xb.xb_curp, xo_sleft(&xb), "%FT%T", &tm);
+    xb.xb_curp += xo_snprintf(xb.xb_curp, xo_sleft(&xb),
+			      ".%03.3u", tv.tv_usec / 1000);
+    xb.xb_curp += strftime(xb.xb_curp, xo_sleft(&xb), "%z ", &tm);
+
+    /*
+     * Add HOSTNAME; we rely on gethostname and don't fluff with
+     * ip addresses.  Might need to revisit.....
+     */
+    char hostname[HOST_NAME_MAX];
+    hostname[0] = '\0';
+    (void) gethostname(hostname, sizeof(hostname));
+    xb.xb_curp += xo_snprintf(xb.xb_curp, xo_sleft(&xb), "%s ",
+			      hostname[0] ? hostname : "-");
+
+    /* Add APP-NAME */
+    if (xo_logtag == NULL)
+        xo_logtag = getprogname();
+    xb.xb_curp += xo_snprintf(xb.xb_curp, xo_sleft(&xb), "%s ",
+			      xo_logtag ?: "-");
+
+    /* Add PROCID */
+    xb.xb_curp += xo_snprintf(xb.xb_curp, xo_sleft(&xb), "%d ", getpid());
+
+    /*
+     * Add MSGID.  The user should provide us with a name, which we
+     * prefix with the current enterprise ID, as learned from the kernel.
+     * If the kernel won't tell us, we use the stock/builtin number.
+     */
+    char *buf = NULL;
+    const char *eid = xo_syslog_enterprise_id;
+    const char *at_sign = "@";
+
+    if (id == NULL) {
+	id = "-";
+	eid = at_sign = "";
+
+    } else if (*id == '@') {
+	/* Our convention is to prefix IANA-defined names with an "@" */
+	id += 1;
+	eid = at_sign = "";
+
+    } else if (eid[0] == '\0') {
+	/*
+	 * See if the kernel knows the sysctl for the enterprise ID
+	 */
+	size_t size = 0;
+	if (sysctlbyname(XO_SYSLOG_ENTERPRISE_ID, NULL, &size, NULL, 0) == 0
+	    	&& size > 0) {
+	    buf = alloca(size);
+	    if (sysctlbyname(XO_SYSLOG_ENTERPRISE_ID, buf, &size, NULL, 0) == 0
+			&& size > 0)
+		eid = buf;
+	}
+    }
+
+    xb.xb_curp += xo_snprintf(xb.xb_curp, xo_sleft(&xb), "[%s%s%s ",
+			      eid, at_sign, id);
+
+    /*
+     * Now for the real content.  We make two distinct passes thru the
+     * xo_emit engine, first for the SD-PARAMS and then for the text
+     * message.
+     */
+    va_list ap;
+    va_copy(ap, vap);
+
+    errno = saved_errno;	/* Restore saved error value */
+    xo_emit_hv(xop, fmt, ap);
+    xo_flush_h(xop);
+
+    va_end(ap);
+
+    /* Trim trailing space */
+    if (xb.xb_curp[-1] == ' ')
+	xb.xb_curp[-1] -= 1;
+
+    /* Close the structured data (SD-ELEMENT) */
+    xb.xb_curp += xo_snprintf(xb.xb_curp, xo_sleft(&xb), "] ");
+
+    /* Save the start of the message */
+    if (xo_logstat & LOG_PERROR)
+	start_of_msg = xb.xb_curp;
+
+    xo_set_style(xop, XO_STYLE_TEXT);
+
+    errno = saved_errno;	/* Restore saved error value */
+    xo_emit_hv(xop, fmt, ap);
+    xo_flush_h(xop);
+
+    /* Remove a trailing newline */
+    if (xb.xb_curp[-1] == '\n')
+        *--xb.xb_curp = '\0';
+
+    xo_send_syslog(xb.xb_basep, v0_hdr, start_of_msg);
+
+    xo_destroy(xop);
+
+    THREAD_UNLOCK();
+}
+
+/*
+ * syslog - print message on log file; output is intended for syslogd(8).
+ */
+void
+xo_syslog (int pri, const char *id, const char *fmt, ...)
+{
+    va_list ap;
+
+    va_start(ap, fmt);
+    xo_vsyslog(pri, id, fmt, ap);
+    va_end(ap);
 }
