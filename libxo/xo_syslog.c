@@ -472,7 +472,7 @@ xo_set_unit_test_mode (int value)
 }
 
 void
-xo_vsyslog (int pri, const char *id, const char *fmt, va_list vap)
+xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
 {
     int saved_errno = errno;
     char tbuf[2048];
@@ -588,13 +588,13 @@ xo_vsyslog (int pri, const char *id, const char *fmt, va_list vap)
     const char *eid = xo_syslog_enterprise_id;
     const char *at_sign = "@";
 
-    if (id == NULL) {
-	id = "-";
+    if (name == NULL) {
+	name = "-";
 	eid = at_sign = "";
 
-    } else if (*id == '@') {
+    } else if (*name == '@') {
 	/* Our convention is to prefix IANA-defined names with an "@" */
-	id += 1;
+	name += 1;
 	eid = at_sign = "";
 
     } else if (eid[0] == '\0') {
@@ -614,7 +614,7 @@ xo_vsyslog (int pri, const char *id, const char *fmt, va_list vap)
     }
 
     xb.xb_curp += xo_snprintf(xb.xb_curp, xo_sleft(&xb), "[%s%s%s ",
-			      eid, at_sign, id);
+			      name, at_sign, eid);
 
     /*
      * Now for the real content.  We make two distinct passes thru the
@@ -662,11 +662,11 @@ xo_vsyslog (int pri, const char *id, const char *fmt, va_list vap)
  * syslog - print message on log file; output is intended for syslogd(8).
  */
 void
-xo_syslog (int pri, const char *id, const char *fmt, ...)
+xo_syslog (int pri, const char *name, const char *fmt, ...)
 {
     va_list ap;
 
     va_start(ap, fmt);
-    xo_vsyslog(pri, id, fmt, ap);
+    xo_vsyslog(pri, name, fmt, ap);
     va_end(ap);
 }
