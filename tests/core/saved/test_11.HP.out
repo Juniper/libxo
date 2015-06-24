@@ -1,4 +1,4 @@
-{{<14>1 2015-06-23T18:47:09.000-0500 bock.juniper.net test-program 222 [42@animal-status <div class="line">
+{{<14>1 2015-06-23T13:47:09.123-0500 worker-host test-program 222 [animal-status@42 <div class="line">
   <div class="text">The </div>
   <div class="data" data-tag="animal">snake</div>
   <div class="text"> is </div>
@@ -8,7 +8,7 @@
 {{test-program: }}
 {{The snake is loose}}
 
-{{<22>1 2015-06-23T18:47:09.000-0500 bock.juniper.net test-program 222 [42@animal-consumed <div class="line">
+{{<22>1 2015-06-23T13:47:09.123-0500 worker-host test-program 222 [animal-consumed@42 <div class="line">
   <div class="text">My </div>
   <div class="data" data-tag="animal">snake</div>
   <div class="text"> ate your </div>
@@ -18,7 +18,7 @@
 {{test-program: }}
 {{My snake ate your hamster}}
 
-{{<29>1 2015-06-23T18:47:09.000-0500 bock.juniper.net test-program 222 [42@animal-talk <div class="line">
+{{<29>1 2015-06-23T13:47:09.123-0500 worker-host test-program 222 [animal-talk@42 <div class="line">
   <div class="data" data-tag="count">1</div>
   <div class="text"> </div>
   <div class="data" data-tag="animal">owl</div>
