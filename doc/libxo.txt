@@ -8,7 +8,7 @@
 # Phil Shafer, July 2014
 #
 
-* libxo
+* Overview
 
 libxo - A Library for Generating Text, XML, JSON, and HTML Output
 
@@ -101,7 +101,7 @@ as part of the FreeBSD operating system starting with release 11.0.
 Issues, problems, and bugs should be directly to the issues page on
 our github site.
 
-* Overview
+* Formatting with libxo
 
 Most unix commands emit text output aimed at humans.  It is designed
 to be parsed and understood by a user.  Humans are gifted at
@@ -1548,6 +1548,8 @@ style and usage expectations.
                 "home": "/home/pallavi",
             }
         ]
+
+** Support Functions
 
 *** Parsing Command-line Arguments (xo_parse_args)
 
