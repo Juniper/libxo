@@ -881,7 +881,17 @@ placed in a <div> with class "text".
       <div class="data" data-tag="size">extra small</div>
       <div class="text">.</div>
 
-*** "%n" is Not Supported
+*** "%m" Is Supported
+
+libxo supports the '%m' directive, which formats the error message
+associated with the current value of "errno".  It is the equivalent
+of "%s" with the argument strerror(errno).
+
+    xo_emit("{:filename} cannot be opened: {:error/%m}", filename);
+    xo_emit("{:filename} cannot be opened: {:error/%s}",
+            filename, strerror(errno));
+
+*** "%n" Is Not Supported
 
 libxo does not support the '%n' directive.  It's a bad idea and we
 just don't do it.
@@ -1734,18 +1744,18 @@ can do so by calling the xo_no_setlocale() function.
 
 ** Emitting syslog Messages
 
-syslog is the system logging facility used in the unix world.
-Messages are send from commands, applications, and daemons to a
-central server, where they are filtered, saved, and forwarded based on
-configuration behaviors.
+syslog is the system logging facility used throughout the unix world.
+Messages are sent from commands, applications, and daemons to a
+hierarchy of servers, where they are filtered, saved, and forwarded
+based on configuration behaviors.
 
-syslog is an older protocol, originally documented only in unix source
-code.  By the time RFC 3164 published, variation and mutation left
-the leading "<pri>" string as only common content.  RFC 5424 defines a
-new version (version 1) of syslog and introduces structured data into
-the messages.  Structured data is a set of name/value pairs
-transmitted distinctly from the text message, allowing filtering on
-precise values instead of regular expressions.
+syslog is an older protocol, originally documented only in source
+code.  By the time RFC 3164 published, variation and mutation left the
+leading "<pri>" string as only common content.  RFC 5424 defines a new
+version (version 1) of syslog and introduces structured data into the
+messages.  Structured data is a set of name/value pairs transmitted
+distinctly alongside the traditional text message, allowing filtering
+on precise values instead of regular expressions.
 
 These name/value pairs are scoped by a two-part identifier; an
 enterprise identifier names the party responsible for the message
