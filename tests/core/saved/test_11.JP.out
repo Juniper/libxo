@@ -1,14 +1,14 @@
-{{<14>1 2015-06-23T18:47:09.000-0500 bock.juniper.net test-program 222 [42@animal-status "animal": "snake",
+{{<14>1 2015-06-23T13:47:09.123-0500 worker-host test-program 222 [animal-status@42 "animal": "snake",
 "state": "loose"] The snake is loose}}
 {{test-program: }}
 {{The snake is loose}}
 
-{{<22>1 2015-06-23T18:47:09.000-0500 bock.juniper.net test-program 222 [42@animal-consumed "animal": "snake",
+{{<22>1 2015-06-23T13:47:09.123-0500 worker-host test-program 222 [animal-consumed@42 "animal": "snake",
 "pet": "hamster"] My snake ate your hamster}}
 {{test-program: }}
 {{My snake ate your hamster}}
 
-{{<29>1 2015-06-23T18:47:09.000-0500 bock.juniper.net test-program 222 [42@animal-talk "count": 1,
+{{<29>1 2015-06-23T13:47:09.123-0500 worker-host test-program 222 [animal-talk@42 "count": 1,
 "animal": "owl",
 "quote": "\"e=m\\c[2]\""] 1 owl said "e=m\c[2]"}}
 {{test-program: }}
