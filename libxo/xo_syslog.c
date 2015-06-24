@@ -530,11 +530,11 @@ xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
     /* Unit test hack: fake a fixed time */
     if (xo_unit_test) {
 	tv.tv_sec = 1435085229;
-	tv.tv_usec = 123;
+	tv.tv_usec = 123456;
     } else
 	gettimeofday(&tv, NULL);
 
-    (void) gmtime_r(&tv.tv_sec, &tm);
+    (void) localtime_r(&tv.tv_sec, &tm);
 
     if (xo_logstat & LOG_PERROR) {
 	/*
@@ -568,7 +568,11 @@ xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
      */
     char hostname[HOST_NAME_MAX];
     hostname[0] = '\0';
-    (void) gethostname(hostname, sizeof(hostname));
+    if (xo_unit_test)
+	strcpy(hostname, "worker-host");
+    else
+	(void) gethostname(hostname, sizeof(hostname));
+
     xb.xb_curp += xo_snprintf(xb.xb_curp, xo_sleft(&xb), "%s ",
 			      hostname[0] ? hostname : "-");
 
