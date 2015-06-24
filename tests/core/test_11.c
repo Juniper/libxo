@@ -13,6 +13,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
+#include <time.h>
 #include <ctype.h>
 #include <syslog.h>
 
@@ -40,16 +41,35 @@ test_syslog_send (const char *full_msg, const char *v0_hdr,
 int
 main (int argc, char **argv)
 {
-    
+    int unit_test = 1;
+    int fire = 0;
+    const char *tzone = "EST";
+
     argc = xo_parse_args(argc, argv);
     if (argc < 0)
 	return 1;
 
-    xo_set_syslog_handler(test_syslog_open, test_syslog_send,
-			  test_syslog_close);
+    for (argc = 1; argv[argc]; argc++) {
+	if (strcmp(argv[argc], "full") == 0)
+	    unit_test = 0;
+	else if (strcmp(argv[argc], "fire") == 0)
+	    fire = 1;
+	else if (strcmp(argv[argc], "tz") == 0)
+	    tzone = argv[++argc];
+    }
 
-    xo_set_unit_test_mode(1);
-    xo_open_log("test-program", LOG_PERROR, 0);
+    setenv("TZ", tzone, 1);
+    tzset();
+
+    if (!fire) {
+	xo_set_syslog_handler(test_syslog_open, test_syslog_send,
+			      test_syslog_close);
+    }
+
+    if (unit_test) {
+	xo_set_unit_test_mode(1);
+	xo_open_log("test-program", LOG_PERROR, 0);
+    }
 
     xo_set_version("3.1.4");
     xo_set_syslog_enterprise_id(42); /* SunOs */
