@@ -1,4 +1,14 @@
 /*
+ * Copyright (c) 2015, Juniper Networks, Inc.
+ * All rights reserved.
+ * This SOFTWARE is licensed under the LICENSE provided in the
+ * ../Copyright file. By downloading, installing, copying, or otherwise
+ * using the SOFTWARE, you agree to be bound by the terms of that
+ * LICENSE.
+ * Phil Shafer, June 2015
+ */
+
+/*
  * Portions of this file are:
  *   Copyright (c) 1983, 1988, 1993
  *	The Regents of the University of California.  All rights reserved.
@@ -35,7 +45,6 @@
 #include <sys/uio.h>
 #include <sys/un.h>
 #include <netdb.h>
-
 #include <errno.h>
 #include <fcntl.h>
 #include <paths.h>
@@ -53,18 +62,33 @@
 #include "xo.h"
 
 /*
- * SYSLOG (RFC 5424) requires an enterprise identifier.  The kernel should
- * support a sysctl to assign a custom enterprise-id.  We default to the
- * stock IANA assigned Enterprise ID value for FreeBSD.  See
+ * SYSLOG (RFC 5424) requires an enterprise identifier.  This turns
+ * out to be a fickle little issue.  For a single-vendor box, the
+ * system should have a single EID that all software can use.  When
+ * VendorX turns FreeBSD into a product, all software (kernel and
+ * utilities) should report VendorX's EID.  But when software is
+ * installed on top of an external operating system, the application
+ * should report it's own EID, distinct from the base OS.
+ *
+ * To make this happen, the kernel should support a sysctl to assign a
+ * custom enterprise-id ("kern.syslog.enterprise_id").  libxo then
+ * allows an application to set a custom EID to override that system
+ * wide value, if needed.
+ *
+ * We try to set the stock IANA assigned Enterprise ID value for the
+ * vendors we know about (FreeBSD, macosx), but fallback to the
+ * "example" EID defined by IANA.  See:
  * https://www.iana.org/assignments/enterprise-numbers/enterprise-numbers
  */
+
 #define XO_SYSLOG_ENTERPRISE_ID	"kern.syslog.enterprise_id"
+
 #if defined(__FreeBSD__)
-#define XO_DEFAULT_EID	"2238"
+#define XO_DEFAULT_EID	2238
 #elseif defined(__macosx__)
-#define XO_DEFAULT_EID	"63"
+#define XO_DEFAULT_EID	63
 #else
-#define XO_DEFAULT_EID	"32473"	/* Bail; use "example" number */
+#define XO_DEFAULT_EID	32473	/* Bail; use "example" number */
 #endif
 
 #ifdef _SC_HOST_NAME_MAX
@@ -90,19 +114,18 @@ static int xo_unit_test;		/* Fake data for unit test */
 #define REAL_VOID(_x) \
     do { int really_ignored = _x; if (really_ignored) { }} while (0)
 
-#if 0
-#define    THREAD_LOCK()                 \
-    do {                                 \
-        if (__isthreaded) _pthread_mutex_lock(&xo_syslog_mutex);    \
-    } while(0)
-#define    THREAD_UNLOCK()               \
-    do {                                 \
-        if (__isthreaded) _pthread_mutex_unlock(&xo_syslog_mutex);    \
-    } while(0)
-#else
-#define    THREAD_LOCK()
-#define    THREAD_UNLOCK()
+#if !defined(HAVE_DECL___ISTHREADED) || !HAVE_DECL___ISTHREADED
+#define __isthreaded 1
 #endif
+
+#define    THREAD_LOCK()						\
+    do {								\
+        if (__isthreaded) pthread_mutex_lock(&xo_syslog_mutex);		\
+    } while(0)
+#define    THREAD_UNLOCK()						\
+    do {								\
+        if (__isthreaded) pthread_mutex_unlock(&xo_syslog_mutex);       \
+    } while(0)
 
 static void xo_disconnect_log(void); /* disconnect from syslogd */
 static void xo_connect_log(void);    /* (re)connect to syslogd */
@@ -602,10 +625,10 @@ xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
 	eid = at_sign = "";
 
     } else if (eid[0] == '\0') {
+#ifdef HAVE_SYSCTLBYNAME
 	/*
 	 * See if the kernel knows the sysctl for the enterprise ID
 	 */
-#ifdef HAVE_SYSCYLBYNAME
 	size_t size = 0;
 	if (sysctlbyname(XO_SYSLOG_ENTERPRISE_ID, NULL, &size, NULL, 0) == 0
 	    	&& size > 0) {
@@ -614,7 +637,13 @@ xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
 			&& size > 0)
 		eid = buf;
 	}
-#endif /* HAVE_SYSCYLBYNAME */
+#endif /* HAVE_SYSCTLBYNAME */
+
+	if (eid[0] == '\0') {
+	    /* Fallback to our base default */
+	    xo_set_syslog_enterprise_id(XO_DEFAULT_EID);
+	    eid = xo_syslog_enterprise_id;
+	}
     }
 
     xb.xb_curp += xo_snprintf(xb.xb_curp, xo_sleft(&xb), "[%s%s%s ",
