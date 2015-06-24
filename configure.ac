@@ -99,6 +99,8 @@ AC_CHECK_MEMBER([struct sockaddr_un.sun_len],
         AC_DEFINE([HAVE_SUN_LEN], [1], [Have struct sockaddr_un.sun_len])],
     [HAS_SUN_LEN=no], [[#include <sys/un.h>]])
 
+AC_CHECK_DECLS([__isthreaded], [], [], [#include <stdio.h>])
+
 dnl
 dnl Some packages need to be checked against version numbers so we
 dnl define a function here for later use
