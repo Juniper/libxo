@@ -39,6 +39,10 @@
 #include "xo_humanize.h"
 #endif /* HAVE_HUMANIZE_NUMBER */
 
+#ifdef HAVE_GETTEXT
+#include <libintl.h>
+#endif /* HAVE_GETTEXT */
+
 const char xo_version[] = LIBXO_VERSION;
 const char xo_version_extra[] = LIBXO_VERSION_EXTRA;
 
@@ -60,7 +64,7 @@ const char xo_version_extra[] = LIBXO_VERSION_EXTRA;
 typedef struct xo_buffer_s {
     char *xb_bufp;		/* Buffer memory */
     char *xb_curp;		/* Current insertion point */
-    int xb_size;		/* Size of buffer */
+    unsigned xb_size;		/* Size of buffer */
 } xo_buffer_t;
 
 /* Flags for the stack frame */
@@ -80,17 +84,17 @@ typedef unsigned xo_xsf_flags_t; /* XSF_* flags */
  (XSF_NOT_FIRST | XSF_CONTENT | XSF_EMIT | XSF_EMIT_KEY | XSF_EMIT_LEAF_LIST )
 
 /*
- * A word about states:  We're moving to a finite state machine (FMS)
- * approach to help remove fragility from the caller's code.  Instead
- * of requiring a specific order of calls, we'll allow the caller more
+ * A word about states: We use a finite state machine (FMS) approach
+ * to help remove fragility from the caller's code.  Instead of
+ * requiring a specific order of calls, we'll allow the caller more
  * flexibility and make the library responsible for recovering from
- * missed steps.  The goal is that the library should not be capable of
- * emitting invalid xml or json, but the developer shouldn't need
+ * missed steps.  The goal is that the library should not be capable
+ * of emitting invalid xml or json, but the developer shouldn't need
  * to know or understand all the details about these encodings.
  *
- * You can think of states as either states or event, since they
+ * You can think of states as either states or events, since they
  * function rather like both.  None of the XO_CLOSE_* events will
- * persist as states, since their stack frame will be popped.
+ * persist as states, since the matching stack frame will be popped.
  * Same is true of XSS_EMIT, which is an event that asks us to
  * prep for emitting output fields.
  */
@@ -128,7 +132,11 @@ typedef struct xo_stack_s {
     char *xs_keys;		/* XPath predicate for any key fields */
 } xo_stack_t;
 
-/* "colors" refers to fancy ansi codes */
+/*
+ * libxo supports colors and effects, for those who like them.
+ * XO_COL_* ("colors") refers to fancy ansi codes, while X__EFF_*
+ * ("effects") are bits since we need to maintain state.
+ */
 #define XO_COL_DEFAULT		0
 #define XO_COL_BLACK		1
 #define XO_COL_RED		2
@@ -141,20 +149,19 @@ typedef struct xo_stack_s {
 
 #define XO_NUM_COLORS		9
 
-/* "effects" refers to fancy ansi codes */
 /*
  * Yes, there's no blink.  We're civilized.  We like users.  Blink
  * isn't something one does to someone you like.  Friends don't let
  * friends use blink.  On friends.  You know what I mean.  Blink is
  * like, well, it's like bursting into show tunes at a funeral.  It's
  * just not done.  Not something anyone wants.  And on those rare
- * instances where it might actually be appropriate, it's still wrong.
- * It's likely done my the wrong person for the wrong reason.  Just
- * like blink.  And if I implemented blink, I'd be like a funeral
+ * instances where it might actually be appropriate, it's still wrong,
+ * since it's likely done by the wrong person for the wrong reason.
+ * Just like blink.  And if I implemented blink, I'd be like a funeral
  * director who adds "Would you like us to burst into show tunes?" on
- * the list of questions asking while making funeral arrangements.
+ * the list of questions asked while making funeral arrangements.
  * It's formalizing wrongness in the wrong way.  And we're just too
- * civilized to do that.   Hhhmph!
+ * civilized to do that.  Hhhmph!
  */
 #define XO_EFF_RESET		(1<<0)
 #define XO_EFF_NORMAL		(1<<1)
@@ -174,11 +181,12 @@ typedef struct xo_colors_s {
 
 /*
  * xo_handle_t: this is the principle data structure for libxo.
- * It's used as a store for state, options, and content.
+ * It's used as a store for state, options, content, and all manor
+ * of other information.
  */
 struct xo_handle_s {
     xo_xof_flags_t xo_flags;	/* Flags */
-    unsigned short xo_style;	/* XO_STYLE_* value */
+    xo_style_t xo_style;	/* XO_STYLE_* value */
     unsigned short xo_indent;	/* Indent level (if pretty) */
     unsigned short xo_indent_by; /* Indent amount (tab stop) */
     xo_write_func_t xo_write;	/* Write callback */
@@ -210,6 +218,7 @@ struct xo_handle_s {
     xo_buffer_t xo_color_buf;	/* HTML: buffer of colors and effects */
     char *xo_version;		/* Version string */
     int xo_errno;		/* Saved errno for "%m" */
+    char *xo_gt_domain;		/* Gettext domain, suitable for dgettext(3) */
 };
 
 /* Flags for formatting functions */
@@ -237,6 +246,12 @@ typedef unsigned long xo_xff_flags_t;
 #define XFF_HN_SPACE	(1<<16)	/* Humanize: put space before suffix */
 #define XFF_HN_DECIMAL	(1<<17)	/* Humanize: add one decimal place if <10 */
 #define XFF_HN_1000	(1<<18)	/* Humanize: use 1000, not 1024 */
+#define XFF_GT_FIELD	(1<<19) /* Call gettext() on a field */
+
+#define XFF_GT_PLURAL	(1<<20)	/* Call dngettext to find plural form */
+
+/* Flags to turn off when we don't want i18n processing */
+#define XFF_GT_FLAGS (XFF_GT_FIELD | XFF_GT_PLURAL)
 
 /*
  * Normal printf has width and precision, which for strings operate as
@@ -304,9 +319,11 @@ typedef struct xo_format_s {
 } xo_format_t;
 
 /*
- * We keep a default handle to allow callers to avoid having to
+ * We keep a 'default' handle to allow callers to avoid having to
  * allocate one.  Passing NULL to any of our functions will use
- * this default handle.
+ * this default handle.  Most functions have a variant that doesn't
+ * require a handle at all, since most output is to stdout, which
+ * the default handle handles handily.
  */
 static xo_handle_t xo_default_handle;
 static int xo_default_inited;
@@ -345,7 +362,7 @@ xo_anchor_clear (xo_handle_t *xop);
  * trims our code nicely without needing to trampel perfectly readable
  * code with ifdefs.
  */
-static inline unsigned short
+static inline xo_style_t
 xo_style (xo_handle_t *xop UNUSED)
 {
 #ifdef LIBXO_TEXT_ONLY
@@ -409,12 +426,21 @@ xo_buf_reset (xo_buffer_t *xbp)
 }
 
 /*
- * Reset the buffer to empty
+ * See if the buffer to empty
  */
 static int
 xo_buf_is_empty (xo_buffer_t *xbp)
 {
     return (xbp->xb_curp == xbp->xb_bufp);
+}
+
+/*
+ * Return the current offset
+ */
+static unsigned
+xo_buf_offset (xo_buffer_t *xbp)
+{
+    return xbp ? (xbp->xb_curp - xbp->xb_bufp) : 0;
 }
 
 /*
@@ -427,6 +453,34 @@ xo_buf_cleanup (xo_buffer_t *xbp)
 	xo_free(xbp->xb_bufp);
     bzero(xbp, sizeof(*xbp));
 }
+
+#ifdef HAVE_GETTEXT
+static inline const char *
+xo_dgettext (const char *domainname, const char *str)
+{
+    return dgettext(domainname, str);
+}
+
+static inline const char *
+xo_dngettext (const char *domainname, const char *sing, const char *plural,
+	      int n)
+{
+    return dngettext(domainname, sing, plural, n);
+}
+#else /* HAVE_GETTEXT */
+static inline const char *
+xo_dgettext (const char *domainname UNUSED, const char *str)
+{
+    return str;
+}
+
+static inline const char *
+xo_dngettext (const char *domainname, const char *singular, const char *plural,
+	      int n)
+{
+    return (n == 1) ? singular : plural;
+}
+#endif /* HAVE_GETTEXT */
 
 static int
 xo_depth_check (xo_handle_t *xop, int depth)
@@ -847,7 +901,8 @@ xo_write (xo_handle_t *xop)
     if (xbp->xb_curp != xbp->xb_bufp) {
 	xo_buf_append(xbp, "", 1); /* Append ending NUL */
 	xo_anchor_clear(xop);
-	rc = xop->xo_write(xop->xo_opaque, xbp->xb_bufp);
+	if (xop->xo_write)
+	    rc = xop->xo_write(xop->xo_opaque, xbp->xb_bufp);
 	xbp->xb_curp = xbp->xb_bufp;
     }
 
@@ -1181,7 +1236,9 @@ xo_buf_append_locale (xo_handle_t *xop, xo_buffer_t *xbp,
 }
 
 /*
- * Append the given string to the given buffer
+ * Append the given string to the given buffer, without escaping or
+ * character set conversion.  This is the straight copy to the data
+ * buffer with no fanciness.
  */
 static void
 xo_data_append (xo_handle_t *xop, const char *str, int len)
@@ -1931,6 +1988,24 @@ xo_get_flags (xo_handle_t *xop)
     return xop->xo_flags;
 }
 
+/*
+ * strndup with a twist: len < 0 means strlen
+ */
+static char *
+xo_strndup (const char *str, int len)
+{
+    if (len < 0)
+	len = strlen(str);
+
+    char *cp = xo_realloc(NULL, len + 1);
+    if (cp) {
+	memcpy(cp, str, len);
+	cp[len] = '\0';
+    }
+
+    return cp;
+}
+
 /**
  * Record a leading prefix for the XPath we generate.  This allows the
  * generated data to be placed within an XML hierarchy but still have
@@ -1952,11 +2027,7 @@ xo_set_leading_xpath (xo_handle_t *xop, const char *path)
     if (path == NULL)
 	return;
 
-    int len = strlen(path);
-    xop->xo_leading_xpath = xo_realloc(NULL, len + 1);
-    if (xop->xo_leading_xpath) {
-	memcpy(xop->xo_leading_xpath, path, len + 1);
-    }
+    xop->xo_leading_xpath = xo_strndup(path, -1);
 }
 
 /**
@@ -2459,16 +2530,165 @@ xo_format_string (xo_handle_t *xop, xo_buffer_t *xbp, xo_xff_flags_t flags,
     return 0;
 }
 
+/*
+ * Look backwards in a buffer to find a numeric value
+ */
+static int
+xo_buf_find_last_number (xo_buffer_t *xbp, int start_offset)
+{
+    int rc = 0;			/* Fail with zero */
+    int digit = 1;
+    char *sp = xbp->xb_bufp;
+    char *cp = sp + start_offset;
+
+    while (--cp >= sp)
+	if (isdigit((int) *cp))
+	    break;
+
+    for ( ; cp >= sp; cp--) {
+	if (!isdigit((int) *cp))
+	    break;
+	rc += (*cp - '0') * digit;
+	digit *= 10;
+    }
+
+    return rc;
+}
+
+static int
+xo_count_utf8_cols (const char *str, int len)
+{
+    int tlen;
+    wchar_t wc;
+    int cols = 0;
+    const char *ep = str + len;
+
+    while (str < ep) {
+	tlen = xo_utf8_to_wc_len(str);
+	if (tlen < 0)		/* Broken input is very bad */
+	    return cols;
+
+	wc = xo_utf8_char(str, tlen);
+	if (wc == (wchar_t) -1)
+	    return cols;
+
+	/* We only print printable characters */
+	if (iswprint((wint_t) wc)) {
+	    /*
+	     * Find the width-in-columns of this character, which must be done
+	     * in wide characters, since we lack a mbswidth() function.
+	     */
+	    int width = wcwidth(wc);
+	    if (width < 0)
+		width = iswcntrl(wc) ? 0 : 1;
+
+	    cols += width;
+	}
+
+	str += tlen;
+    }
+
+    return cols;
+}
+
+/*
+ * This is really _re_formatting, since the normal format code has
+ * generated a beautiful string into xo_data, starting at
+ * start_offset.  We need to see if it's plural, which means
+ * comma-separated options, or singular.  Then we make the appropriate
+ * call to d[n]gettext() to get the locale-based version.  Note that
+ * both input and output of gettext() this should be UTF-8.
+ */
+static int
+xo_format_gettext (xo_handle_t *xop, xo_xff_flags_t flags,
+		   int start_offset, int cols, int need_enc)
+{
+    xo_buffer_t *xbp = &xop->xo_data;
+    xo_buf_append(xbp, "", 1); /* NUL-terminate it */
+    
+    char *cp = xbp->xb_bufp + start_offset;
+    int len = xbp->xb_curp - cp;
+    const char *newstr = NULL;
+
+    /*
+     * The plural flag asks us to look backwards at the last numeric
+     * value rendered and disect the string into two pieces.
+     */
+    if (flags & XFF_GT_PLURAL) {
+	int n = xo_buf_find_last_number(xbp, start_offset);
+	char *two = memchr(cp, (int) ',', len);
+	if (two == NULL) {
+	    xo_failure(xop, "no comma in plural gettext field: '%s'", cp);
+	    return cols;
+	}
+
+	if (two == cp) {
+	    xo_failure(xop, "nothing before comma in plural gettext "
+		       "field: '%s'", cp);
+	    return cols;
+	}
+
+	if (two == xbp->xb_curp) {
+	    xo_failure(xop, "nothing after comma in plural gettext "
+		       "field: '%s'", cp);
+	    return cols;
+	}
+
+	*two++ = '\0';
+	newstr = xo_dngettext(xop->xo_gt_domain, cp, two, n);
+
+	/*
+	 * If we returned the first string, optimize a bit by
+	 * backing up over comma
+	 */
+	if (newstr == cp) {
+	    xbp->xb_curp = two - 2; /* One for comma */
+	    /*
+	     * If the caller wanted UTF8, we're done; nothing changed,
+	     * but we need to count the columns used.
+	     */
+	    if (need_enc == XF_ENC_UTF8)
+		return xo_count_utf8_cols(cp, xbp->xb_curp - cp);
+	}
+
+    } else {
+	/* The simple case (singular) */
+	newstr = xo_dgettext(xop->xo_gt_domain, cp);
+
+	if (newstr == cp) {
+	    /* If the caller wanted UTF8, we're done; nothing changed */
+	    if (need_enc == XF_ENC_UTF8)
+		return cols;
+	}
+    }
+
+    /*
+     * Since the new string string might be in gettext's buffer or
+     * in the buffer (as the plural form), we make a copy.
+     */
+    int nlen = strlen(newstr);
+    char *newcopy = alloca(nlen + 1);
+    memcpy(newcopy, newstr, nlen + 1);
+
+    xbp->xb_curp = xbp->xb_bufp + start_offset; /* Reset the buffer */
+    return xo_format_string_direct(xop, xbp, flags, NULL, newcopy, nlen, 0,
+				   need_enc, XF_ENC_UTF8);
+}
+
 static void
-xo_data_append_content (xo_handle_t *xop, const char *str, int len)
+xo_data_append_content (xo_handle_t *xop, const char *str, int len,
+			xo_xff_flags_t flags)
 {
     int cols;
     int need_enc = (xo_style(xop) == XO_STYLE_TEXT)
 	? XF_ENC_LOCALE : XF_ENC_UTF8;
+    int start_offset = xo_buf_offset(&xop->xo_data);
 
-    cols = xo_format_string_direct(xop, &xop->xo_data, XFF_UNESCAPE,
+    cols = xo_format_string_direct(xop, &xop->xo_data, XFF_UNESCAPE | flags,
 				   NULL, str, len, -1,
 				   need_enc, XF_ENC_UTF8);
+    if (flags & XFF_GT_FIELD)
+	cols = xo_format_gettext(xop, flags, start_offset, cols, need_enc);
 
     if (xop->xo_flags & XOF_COLUMNS)
 	xop->xo_columns += cols;
@@ -2517,8 +2737,13 @@ xo_trim_ws (xo_buffer_t *xbp, int len)
     return len;
 }
 
+/*
+ * Interface to format a single field.  The arguments are in xo_vap,
+ * and the format is in 'fmt'.  If 'xbp' is null, we use xop->xo_data;
+ * this is the most common case.
+ */
 static int
-xo_format_data (xo_handle_t *xop, xo_buffer_t *xbp,
+xo_do_format_field (xo_handle_t *xop, xo_buffer_t *xbp,
 		const char *fmt, int flen, xo_xff_flags_t flags)
 {
     xo_format_t xf;
@@ -2528,11 +2753,24 @@ xo_format_data (xo_handle_t *xop, xo_buffer_t *xbp,
     unsigned make_output = !(flags & XFF_NO_OUTPUT);
     int need_enc = (xo_style(xop) == XO_STYLE_TEXT)
 	? XF_ENC_LOCALE : XF_ENC_UTF8;
-    
+    int real_need_enc = need_enc;
+    int old_cols = xop->xo_columns;
+
+    /* The gettext interface is UTF-8, so we'll need that for now */
+    if (flags & XFF_GT_FIELD)
+	need_enc = XF_ENC_UTF8;
+
     if (xbp == NULL)
 	xbp = &xop->xo_data;
 
+    unsigned start_offset = xo_buf_offset(xbp);
+
     for (cp = fmt, ep = fmt + flen; cp < ep; cp++) {
+	/*
+	 * Since we're starting a new field, save the starting offset.
+	 * We'll need this later for field-related operations.
+	 */
+
 	if (*cp != '%') {
 	add_one:
 	    if (xp == NULL)
@@ -2734,10 +2972,11 @@ xo_format_data (xo_handle_t *xop, xo_buffer_t *xbp,
 		}
 
 		/*
-		 * We can assume all the data we've added is ASCII, so
-		 * the columns and bytes are the same.  xo_format_string
-		 * handles all the fancy string conversions and updates
-		 * xo_anchor_columns accordingly.
+		 * We can assume all the non-%s data we've
+		 * added is ASCII, so the columns and bytes are the
+		 * same.  xo_format_string handles all the fancy
+		 * string conversions and updates xo_anchor_columns
+		 * accordingly.
 		 */
 		if (xop->xo_flags & XOF_COLUMNS)
 		    xop->xo_columns += columns;
@@ -2824,6 +3063,7 @@ xo_format_data (xo_handle_t *xop, xo_buffer_t *xbp,
 	    cols = xo_format_string_direct(xop, xbp, flags | XFF_UNESCAPE,
 					   NULL, xp, cp - xp, -1,
 					   need_enc, XF_ENC_UTF8);
+
 	    if (xop->xo_flags & XOF_COLUMNS)
 		xop->xo_columns += cols;
 	    if (xop->xo_flags & XOF_ANCHOR)
@@ -2831,6 +3071,21 @@ xo_format_data (xo_handle_t *xop, xo_buffer_t *xbp,
 	}
 
 	xp = NULL;
+    }
+
+    if (flags & XFF_GT_FIELD) {
+	/*
+	 * Handle gettext()ing the field by looking up the value
+	 * and then copying it in, while converting to locale, if
+	 * needed.
+	 */
+	int new_cols = xo_format_gettext(xop, flags, start_offset,
+					 old_cols, real_need_enc);
+	
+	if (xop->xo_flags & XOF_COLUMNS)
+	    xop->xo_columns += new_cols - old_cols;
+	if (xop->xo_flags & XOF_ANCHOR)
+	    xop->xo_anchor_columns += new_cols - old_cols;
     }
 
     return 0;
@@ -3024,7 +3279,9 @@ xo_buf_append_div (xo_handle_t *xop, const char *class, xo_xff_flags_t flags,
 	    elen = strlen(encoding);
 	}
 
-	xo_format_data(xop, pbp, encoding, elen, XFF_XML | XFF_ATTR);
+	xo_xff_flags_t pflags = flags | XFF_XML | XFF_ATTR;
+	pflags &= ~(XFF_NO_OUTPUT | XFF_ENCODE_ONLY);
+	xo_do_format_field(xop, pbp, encoding, elen, pflags);
 
 	xo_buf_append(pbp, "']", 2);
 
@@ -3054,7 +3311,7 @@ xo_buf_append_div (xo_handle_t *xop, const char *class, xo_xff_flags_t flags,
 	 * work of formatting it to make sure the args are cleared
 	 * from xo_vap.
 	 */
-	xo_format_data(xop, &xop->xo_data, encoding, elen,
+	xo_do_format_field(xop, NULL, encoding, elen,
 		       flags | XFF_NO_OUTPUT);
 	return;
     }
@@ -3094,9 +3351,7 @@ xo_buf_append_div (xo_handle_t *xop, const char *class, xo_xff_flags_t flags,
 	    xop->xo_units_offset =
 		xop->xo_data.xb_curp -xop->xo_data.xb_bufp + 1;
 	}
-    }
 
-    if (name) {
 	if (xop->xo_flags & XOF_XPATH) {
 	    int i;
 	    xo_stack_t *xsp;
@@ -3165,7 +3420,7 @@ xo_buf_append_div (xo_handle_t *xop, const char *class, xo_xff_flags_t flags,
     save.xhs_columns = xop->xo_columns;
     save.xhs_anchor_columns = xop->xo_anchor_columns;
 
-    xo_format_data(xop, NULL, value, vlen, 0);
+    xo_do_format_field(xop, NULL, value, vlen, flags);
 
     if (flags & XFF_HUMANIZE) {
 	/*
@@ -3186,6 +3441,7 @@ xo_buf_append_div (xo_handle_t *xop, const char *class, xo_xff_flags_t flags,
 
 	if (xo_buf_has_room(xbp, div_len + olen)) {
 	    unsigned new_offset = xbp->xb_curp - xbp->xb_bufp;
+
 
 	    /* Move the humanized string off to the left */
 	    memmove(xbp->xb_bufp + base_offset + div_len + olen,
@@ -3222,7 +3478,7 @@ xo_format_text (xo_handle_t *xop, const char *str, int len)
 
 static void
 xo_format_title (xo_handle_t *xop, const char *str, int len,
-		 const char *fmt, int flen)
+		 const char *fmt, int flen, xo_xff_flags_t flags)
 {
     static char div_open[] = "<div class=\"title";
     static char div_middle[] = "\">";
@@ -3242,7 +3498,7 @@ xo_format_title (xo_handle_t *xop, const char *str, int len,
 	 * enough parsing work to skip over the right bits of xo_vap.
 	 */
 	if (len == 0)
-	    xo_format_data(xop, NULL, fmt, flen, XFF_NO_OUTPUT);
+	    xo_do_format_field(xop, NULL, fmt, flen, flags | XFF_NO_OUTPUT);
 	return;
     }
 
@@ -3250,10 +3506,8 @@ xo_format_title (xo_handle_t *xop, const char *str, int len,
     int start = xbp->xb_curp - xbp->xb_bufp;
     int left = xbp->xb_size - start;
     int rc;
-    int need_enc = XF_ENC_LOCALE;
 
     if (xo_style(xop) == XO_STYLE_HTML) {
-	need_enc = XF_ENC_UTF8;
 	xo_line_ensure_open(xop, 0);
 	if (xop->xo_flags & XOF_PRETTY)
 	    xo_buf_indent(xop, xop->xo_indent_by);
@@ -3274,7 +3528,6 @@ xo_format_title (xo_handle_t *xop, const char *str, int len,
 	newstr[len] = '\0';
 
 	if (newstr[len - 1] == 's') {
-	    int cols;
 	    char *bp;
 
 	    rc = snprintf(NULL, 0, newfmt, newstr);
@@ -3285,14 +3538,8 @@ xo_format_title (xo_handle_t *xop, const char *str, int len,
 		 */
 		bp = alloca(rc + 1);
 		rc = snprintf(bp, rc + 1, newfmt, newstr);
-		cols = xo_format_string_direct(xop, xbp, 0, NULL, bp, rc, -1,
-					       need_enc, XF_ENC_UTF8);
-		if (cols > 0) {
-		    if (xop->xo_flags & XOF_COLUMNS)
-			xop->xo_columns += cols;
-		    if (xop->xo_flags & XOF_ANCHOR)
-			xop->xo_anchor_columns += cols;
-		}
+
+		xo_data_append_content(xop, bp, rc, flags);
 	    }
 	    goto move_along;
 
@@ -3314,9 +3561,9 @@ xo_format_title (xo_handle_t *xop, const char *str, int len,
 	}
 
     } else {
-	xo_format_data(xop, NULL, fmt, flen, 0);
+	xo_do_format_field(xop, NULL, fmt, flen, flags);
 
-	/* xo_format_data moved curp, so we need to reset it */
+	/* xo_do_format_field moved curp, so we need to reset it */
 	rc = xbp->xb_curp - (xbp->xb_bufp + start);
 	xbp->xb_curp = xbp->xb_bufp + start;
     }
@@ -3449,7 +3696,7 @@ xo_format_value (xo_handle_t *xop, const char *name, int nlen,
 	save.xhs_columns = xop->xo_columns;
 	save.xhs_anchor_columns = xop->xo_anchor_columns;
 
-	xo_format_data(xop, NULL, format, flen, flags);
+	xo_do_format_field(xop, NULL, format, flen, flags);
 
 	if (flags & XFF_HUMANIZE)
 	    xo_format_humanize(xop, xbp, &save, flags);
@@ -3470,7 +3717,7 @@ xo_format_value (xo_handle_t *xop, const char *name, int nlen,
 	 */
 	if (flags & XFF_DISPLAY_ONLY) {
 	    flags |= XFF_NO_OUTPUT;
-	    xo_format_data(xop, NULL, format, flen, flags);
+	    xo_do_format_field(xop, NULL, format, flen, flags);
 	    break;
 	}
 
@@ -3523,7 +3770,7 @@ xo_format_value (xo_handle_t *xop, const char *name, int nlen,
 	}
 
 	xo_data_append(xop, ">", 1);
-	xo_format_data(xop, NULL, format, flen, flags);
+	xo_do_format_field(xop, NULL, format, flen, flags);
 	xo_data_append(xop, "</", 2);
 	xo_data_escape(xop, name, nlen);
 	xo_data_append(xop, ">", 1);
@@ -3534,7 +3781,7 @@ xo_format_value (xo_handle_t *xop, const char *name, int nlen,
     case XO_STYLE_JSON:
 	if (flags & XFF_DISPLAY_ONLY) {
 	    flags |= XFF_NO_OUTPUT;
-	    xo_format_data(xop, NULL, format, flen, flags);
+	    xo_do_format_field(xop, NULL, format, flen, flags);
 	    break;
 	}
 
@@ -3602,7 +3849,7 @@ xo_format_value (xo_handle_t *xop, const char *name, int nlen,
 	if (quote)
 	    xo_data_append(xop, "\"", 1);
 
-	xo_format_data(xop, NULL, format, flen, flags);
+	xo_do_format_field(xop, NULL, format, flen, flags);
 
 	if (quote)
 	    xo_data_append(xop, "\"", 1);
@@ -3611,7 +3858,7 @@ xo_format_value (xo_handle_t *xop, const char *name, int nlen,
     case XO_STYLE_SDPARAMS:
 	if (flags & XFF_DISPLAY_ONLY) {
 	    flags |= XFF_NO_OUTPUT;
-	    xo_format_data(xop, NULL, format, flen, flags);
+	    xo_do_format_field(xop, NULL, format, flen, flags);
 	    break;
 	}
 
@@ -3635,23 +3882,56 @@ xo_format_value (xo_handle_t *xop, const char *name, int nlen,
 
 	xo_data_escape(xop, name, nlen);
 	xo_data_append(xop, "=\"", 2);
-	xo_format_data(xop, NULL, format, flen, flags);
+	xo_do_format_field(xop, NULL, format, flen, flags);
 	xo_data_append(xop, "\" ", 2);
 	break;
     }
 }
 
 static void
+xo_set_gettext_domain (xo_handle_t *xop,
+		       const char *str, int len, const char *fmt, int flen)
+{
+    /* Start by discarding previous domain */
+    if (xop->xo_gt_domain) {
+	xo_free(xop->xo_gt_domain);
+	xop->xo_gt_domain = NULL;
+    }
+
+    /* An empty {G:} means no domainname */
+    if (len == 0 && flen == 0)
+	return;
+
+    int start_offset = -1;
+    if (len == 0 && flen != 0) {
+	/* Need to do format the data to get the domainname from args */
+	start_offset = xop->xo_data.xb_curp - xop->xo_data.xb_bufp;
+	xo_do_format_field(xop, NULL, fmt, flen, 0);
+
+	int end_offset = xop->xo_data.xb_curp - xop->xo_data.xb_bufp;
+	len = end_offset - start_offset;
+	str = xop->xo_data.xb_bufp + start_offset;
+    }
+
+    xop->xo_gt_domain = xo_strndup(str, len);
+
+    /* Reset the current buffer point to avoid emitting the name as output */
+    if (start_offset >= 0)
+	xop->xo_data.xb_curp = xop->xo_data.xb_bufp + start_offset;
+}
+
+static void
 xo_format_content (xo_handle_t *xop, const char *class_name,
-		   const char *xml_tag, int display_only,
-		   const char *str, int len, const char *fmt, int flen)
+		   const char *tag_name,
+		   const char *str, int len, const char *fmt, int flen,
+		   xo_xff_flags_t flags)
 {
     switch (xo_style(xop)) {
     case XO_STYLE_TEXT:
-	if (len) {
-	    xo_data_append_content(xop, str, len);
-	} else
-	    xo_format_data(xop, NULL, fmt, flen, 0);
+	if (len)
+	    xo_data_append_content(xop, str, len, flags);
+	else
+	    xo_do_format_field(xop, NULL, fmt, flen, flags);
 	break;
 
     case XO_STYLE_HTML:
@@ -3660,19 +3940,21 @@ xo_format_content (xo_handle_t *xop, const char *class_name,
 	    len = flen;
 	}
 
-	xo_buf_append_div(xop, class_name, 0, NULL, 0, str, len, NULL, 0);
+	xo_buf_append_div(xop, class_name, flags, NULL, 0, str, len, NULL, 0);
 	break;
 
     case XO_STYLE_XML:
-	if (xml_tag) {
+    case XO_STYLE_JSON:
+    case XO_STYLE_SDPARAMS:
+	if (tag_name) {
 	    if (len == 0) {
 		str = fmt;
 		len = flen;
 	    }
 
-	    xo_open_container_h(xop, xml_tag);
-	    xo_format_value(xop, "message", 7, str, len, NULL, 0, 0);
-	    xo_close_container_h(xop, xml_tag);
+	    xo_open_container_h(xop, tag_name);
+	    xo_format_value(xop, "message", 7, str, len, NULL, 0, flags);
+	    xo_close_container_h(xop, tag_name);
 
 	} else {
 	    /*
@@ -3680,22 +3962,9 @@ xo_format_content (xo_handle_t *xop, const char *class_name,
 	     * enough parsing work to skip over the right bits of xo_vap.
 	     */
 	    if (len == 0)
-		xo_format_data(xop, NULL, fmt, flen, XFF_NO_OUTPUT);
+		xo_do_format_field(xop, NULL, fmt, flen,
+				   flags | XFF_NO_OUTPUT);
 	}
-	break;
-
-    case XO_STYLE_JSON:
-    case XO_STYLE_SDPARAMS:
-	/*
-	 * Even though we don't care about labels, we need to do
-	 * enough parsing work to skip over the right bits of xo_vap.
-	 */
-	if (display_only) {
-	    if (len == 0)
-		xo_format_data(xop, NULL, fmt, flen, XFF_NO_OUTPUT);
-	    break;
-	}
-	/* XXX need schem for representing errors in JSON */
 	break;
     }
 }
@@ -4001,7 +4270,7 @@ xo_format_colors (xo_handle_t *xop, const char *str, int len,
     if (len)
 	xo_buf_append(&xb, str, len);
     else if (flen)
-	xo_format_data(xop, &xb, fmt, flen, 0);
+	xo_do_format_field(xop, &xb, fmt, flen, 0);
     else
 	xo_buf_append(&xb, "reset", 6); /* Default if empty */
 
@@ -4057,13 +4326,13 @@ xo_format_colors (xo_handle_t *xop, const char *str, int len,
 
 static void
 xo_format_units (xo_handle_t *xop, const char *str, int len,
-		 const char *fmt, int flen)
+		 const char *fmt, int flen, xo_xff_flags_t flags)
 {
     static char units_start_xml[] = " units=\"";
     static char units_start_html[] = " data-units=\"";
 
     if (!(xop->xo_flags & XOF_UNITS_PENDING)) {
-	xo_format_content(xop, "units", NULL, 1, str, len, fmt, flen);
+	xo_format_content(xop, "units", NULL, str, len, fmt, flen, flags);
 	return;
     }
 
@@ -4079,9 +4348,9 @@ xo_format_units (xo_handle_t *xop, const char *str, int len,
 	return;
 
     if (len)
-	xo_data_append(xop, str, len);
+	xo_data_escape(xop, str, len);
     else
-	xo_format_data(xop, NULL, fmt, flen, 0);
+	xo_do_format_field(xop, NULL, fmt, flen, flags);
 
     xo_buf_append(xbp, "\"", 1);
 
@@ -4212,7 +4481,7 @@ xo_anchor_stop (xo_handle_t *xop, const char *str, int len,
     /* Make a suitable padding field and emit it */
     char *buf = alloca(blen);
     memset(buf, ' ', blen);
-    xo_format_content(xop, "padding", NULL, 1, buf, blen, NULL, 0);
+    xo_format_content(xop, "padding", NULL, buf, blen, NULL, 0, 0);
 
     if (width < 0)		/* Already left justified */
 	goto done;
@@ -4238,6 +4507,32 @@ xo_anchor_stop (xo_handle_t *xop, const char *str, int len,
 
  done:
     xo_anchor_clear(xop);
+}
+
+static const char *
+xo_class_name (int ftype)
+{
+    switch (ftype) {
+    case 'D': return "decoration";
+    case 'E': return "error";
+    case 'L': return "label";
+    case 'N': return "note";
+    case 'P': return "padding";
+    case 'W': return "warning";
+    }
+
+    return NULL;
+}
+
+static const char *
+xo_tag_name (int ftype)
+{
+    switch (ftype) {
+    case 'E': return "__error";
+    case 'W': return "__warning";
+    }
+
+    return NULL;
 }
 
 static xo_mapping_t xo_role_names[] = {
@@ -4284,6 +4579,9 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
     char *newp = NULL;
     int flush = (xop->xo_flags & XOF_FLUSH) ? 1 : 0;
     int flush_line = (xop->xo_flags & XOF_FLUSH_LINE) ? 1 : 0;
+    int gettext_inuse = 0;
+    int gettext_changed = 0;
+    char *newfmt = NULL;
 
     xop->xo_columns = 0;	/* Always reset it */
     xop->xo_errno = errno;	/* Save for "%m" */
@@ -4339,6 +4637,7 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 	 * Modifiers are optional and include the following field types:
 	 *   'D': decoration; something non-text and non-data (colons, commmas)
 	 *   'E': error message
+	 *   'G': gettext() the entire string; optional domainname as content
 	 *   'L': label; text preceding data
 	 *   'N': note; text following data
 	 *   'P': padding; whitespace
@@ -4352,10 +4651,12 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 	 *   'c': flag: emit a colon after the label
 	 *   'd': field is only emitted for display styles (text and html)
 	 *   'e': field is only emitted for encoding styles (xml and json)
+	 *   'g': gettext() the field
 	 *   'h': humanize a numeric value (only for display styles)
 	 *   'k': this field is a key, suitable for XPath predicates
 	 *   'l': a leaf-list, a simple list of values
 	 *   'n': no quotes around this field
+	 *   'p': the field has plural gettext semantics (ngettext)
 	 *   'q': add quotes around this field
 	 *   't': trim whitespace around the value
 	 *   'w': emit a blank after the label
@@ -4364,7 +4665,8 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 	 * If the encode-fmt is not provided, it defaults to the print-fmt.
 	 * If the print-fmt is not provided, it defaults to 's'.
 	 */
-	unsigned ftype = 0, flags = 0;
+	unsigned ftype = 0;
+	xo_xff_flags_t flags = 0;
 	const char *content = NULL, *format = NULL, *encoding = NULL;
 	int clen = 0, flen = 0, elen = 0;
 
@@ -4412,6 +4714,7 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 	    case 'C':
 	    case 'D':
 	    case 'E':
+	    case 'G':
 	    case 'L':
 	    case 'N':
 	    case 'P':
@@ -4441,6 +4744,10 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 		flags |= XFF_ENCODE_ONLY;
 		break;
 
+	    case 'g':
+		flags |= XFF_GT_FIELD;
+		break;
+
 	    case 'h':
 		flags |= XFF_HUMANIZE;
 		break;
@@ -4455,6 +4762,10 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 
 	    case 'n':
 		flags |= XFF_NOQUOTE;
+		break;
+
+	    case 'p':
+		flags |= XFF_GT_PLURAL;
 		break;
 
 	    case 'q':
@@ -4537,6 +4848,22 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 	    return -1;
 	}
 
+	/*
+	 * Notes and units need the 'w' flag handled before the content.
+	 */
+	if (ftype == 'N' || ftype == 'U') {
+	    if (flags & XFF_WS) {
+		xo_format_content(xop, "padding", NULL, " ", 1,
+				  NULL, 0, flags);
+		flags &= ~XFF_WS;
+	    }
+	    if (flags & XFF_COLON) {
+		xo_failure(xop, "colon modifier on 'N' or 'U' field ignored: "
+			   "%s", fmt);
+		flags &= ~XFF_COLON;
+	    }
+	}
+
 	if (ftype == 0 || ftype == 'V') {
 	    if (format == NULL) {
 		/* Default format for value fields is '%s' */
@@ -4548,49 +4875,67 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 			    encoding, elen, flags);
 
 	} else if (ftype == '[')
-		xo_anchor_start(xop, content, clen, format, flen);
+	    xo_anchor_start(xop, content, clen, format, flen);
 	else if (ftype == ']')
-		xo_anchor_stop(xop, content, clen, format, flen);
+	    xo_anchor_stop(xop, content, clen, format, flen);
 	else if (ftype == 'C')
-		xo_format_colors(xop, content, clen, format, flen);
+	    xo_format_colors(xop, content, clen, format, flen);
 
-	else  if (clen || format) { /* Need either content or format */
+	else if (ftype == 'G') {
+	    /*
+	     * A {G:domain} field; disect the domain name and translate
+	     * the remaining portion of the input string.  If the user
+	     * didn't put the {G:} at the start of the format string, then
+	     * assumably they just want us to translate the rest of it.
+	     * Since gettext returns strings in a static buffer, we make
+	     * a copy in newfmt.
+	     */
+	    xo_set_gettext_domain(xop, content, clen, format, flen);
+
+	    if (!gettext_inuse) { /* Only translate once */
+		gettext_inuse = 1;
+		if (newfmt) {
+		    xo_free(newfmt);
+		    newfmt = NULL;
+		}
+
+		const char *tempfmt = xo_dgettext(xop->xo_gt_domain, sp);
+		if (tempfmt != sp) {
+		    gettext_changed = 1;
+		    newfmt = xo_strndup(tempfmt, -1);
+
+		    cp = newfmt;
+
+		    /* XXX Need to support field reordering here */
+		}
+
+		continue;
+	    }
+
+	} else  if (clen || format) { /* Need either content or format */
 	    if (format == NULL) {
 		/* Default format for value fields is '%s' */
 		format = "%s";
 		flen = 2;
 	    }
 
-	    if (ftype == 'D')
-		xo_format_content(xop, "decoration", NULL, 1,
-				  content, clen, format, flen);
-	    else if (ftype == 'E')
-		xo_format_content(xop, "error", "error", 0,
-				  content, clen, format, flen);
-	    else if (ftype == 'L')
-		xo_format_content(xop, "label", NULL, 1,
-				  content, clen, format, flen);
-	    else if (ftype == 'N')
-		xo_format_content(xop, "note", NULL, 1,
-				  content, clen, format, flen);
-	    else if (ftype == 'P')
-		xo_format_content(xop, "padding", NULL, 1,
-				  content, clen, format, flen);
+	    const char *class_name = xo_class_name(ftype);
+	    if (class_name)
+		xo_format_content(xop, class_name, xo_tag_name(ftype),
+				  content, clen, format, flen, flags);
 	    else if (ftype == 'T')
-		xo_format_title(xop, content, clen, format, flen);
-	    else if (ftype == 'U') {
-		if (flags & XFF_WS)
-		    xo_format_content(xop, "padding", NULL, 1, " ", 1, NULL, 0);
-		xo_format_units(xop, content, clen, format, flen);
-	    } else if (ftype == 'W')
-		xo_format_content(xop, "warning", "warning", 0,
-				  content, clen, format, flen);
+		xo_format_title(xop, content, clen, format, flen, flags);
+	    else if (ftype == 'U')
+		xo_format_units(xop, content, clen, format, flen, flags);
+	    else
+		xo_failure(xop, "unknown field type: '%c'", ftype);
 	}
 
 	if (flags & XFF_COLON)
-	    xo_format_content(xop, "decoration", NULL, 1, ":", 1, NULL, 0);
-	if (ftype != 'U' && (flags & XFF_WS))
-	    xo_format_content(xop, "padding", NULL, 1, " ", 1, NULL, 0);
+	    xo_format_content(xop, "decoration", NULL, ":", 1, NULL, 0, 0);
+
+	if (flags & XFF_WS)
+	    xo_format_content(xop, "padding", NULL, " ", 1, NULL, 0, 0);
 
 	cp += sp - basep + 1;
 	if (newp) {
@@ -4605,6 +4950,19 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 	    rc = -1;		/* Report failure */
 	else if (xop->xo_flush && xop->xo_flush(xop->xo_opaque) < 0)
 	    rc = -1;
+    }
+
+    if (newfmt)
+	xo_free(newfmt);
+
+    /*
+     * We've carried the gettext domainname inside our handle just for
+     * convenience, but we need to ensure it doesn't survive across
+     * xo_emit calls.
+     */
+    if (xop->xo_gt_domain) {
+	xo_free(xop->xo_gt_domain);
+	xop->xo_gt_domain = NULL;
     }
 
     return (rc < 0) ? rc : (int) xop->xo_columns;
@@ -4748,12 +5106,7 @@ xo_depth_change (xo_handle_t *xop, const char *name,
 	if (name == NULL)
 	    name = XO_FAILURE_NAME;
 
-	int len = strlen(name) + 1;
-	char *cp = xo_realloc(NULL, len);
-	if (cp) {
-	    memcpy(cp, name, len);
-	    xsp->xs_name = cp;
-	}
+	xsp->xs_name = xo_strndup(name, -1);
 
     } else {			/* Pop operation */
 	if (xop->xo_depth == 0) {
@@ -6029,16 +6382,11 @@ xo_set_version_h (xo_handle_t *xop, const char *version UNUSED)
 	break;
 
     case XO_STYLE_JSON:
-	{
-	    /*
-	     * For XML, we record the version string in our handle, and emit
-	     * it in xo_emit_top.
-	     */
-	    int len = strlen(version) + 1;
-	    xop->xo_version = xo_realloc(NULL, len);
-	    if (xop->xo_version)
-		memcpy(xop->xo_version, version, len);
-	}
+	/*
+	 * For JSON, we record the version string in our handle, and emit
+	 * it in xo_emit_top.
+	 */
+	xop->xo_version = xo_strndup(version, -1);
 	break;
     }
 }
@@ -6047,4 +6395,141 @@ void
 xo_set_version (const char *version)
 {
     xo_set_version_h(NULL, version);
+}
+
+/*
+ * Generate a warning.  Normally, this is a text message written to
+ * standard error.  If the XOF_WARN_XML flag is set, then we generate
+ * XMLified content on standard output.
+ */
+static void
+xo_emit_warn_hcv (xo_handle_t *xop, int as_warning, int code, int check_warn,
+	     const char *fmt, va_list vap)
+{
+    xop = xo_default(xop);
+    if (check_warn && !(xop->xo_flags & XOF_WARN))
+	return;
+
+    if (fmt == NULL)
+	return;
+
+    xo_open_marker_h(xop, "xo_emit_warn_hcv");
+    xo_open_container_h(xop, as_warning ? "__warn" : "__error");
+
+    if (xo_program)
+	xo_emit("{wc:program}", xo_program);
+
+    if (xo_style(xop) == XO_STYLE_XML || xo_style(xop) == XO_STYLE_JSON) {
+	va_list ap;
+	xo_handle_t temp;
+
+	bzero(&temp, sizeof(temp));
+	temp.xo_style = XO_STYLE_TEXT;
+	xo_buf_init(&temp.xo_data);
+	xo_depth_check(&temp, XO_DEPTH);
+
+	va_copy(ap, vap);
+	(void) xo_emit_hv(&temp, fmt, ap);
+	va_end(ap);
+
+	xo_buffer_t *src = &temp.xo_data;
+	xo_format_value(xop, "message", 7, src->xb_bufp,
+			src->xb_curp - src->xb_bufp, NULL, 0, 0);
+
+	xo_free(temp.xo_stack);
+	xo_buf_cleanup(src);
+    }
+
+    (void) xo_emit_hv(xop, fmt, vap);
+
+    int len = strlen(fmt);
+    if (len > 0 && fmt[len - 1] != '\n') {
+	if (code > 0) {
+	    const char *msg = strerror(code);
+	    if (msg)
+		xo_emit_h(xop, ": {G:strerror}{g:error/%s}", msg);
+	}
+	xo_emit("\n");
+    }
+
+    xo_close_marker_h(xop, "xo_emit_warn_hcv");
+    xo_flush_h(xop);
+}
+
+void
+xo_emit_warn_hc (xo_handle_t *xop, int code, const char *fmt, ...)
+{
+    va_list vap;
+
+    va_start(vap, fmt);
+    xo_emit_warn_hcv(xop, 1, code, 0, fmt, vap);
+    va_end(vap);
+}
+
+void
+xo_emit_warn_c (int code, const char *fmt, ...)
+{
+    va_list vap;
+
+    va_start(vap, fmt);
+    xo_emit_warn_hcv(NULL, 1, code, 0, fmt, vap);
+    va_end(vap);
+}
+
+void
+xo_emit_warn (const char *fmt, ...)
+{
+    int code = errno;
+    va_list vap;
+
+    va_start(vap, fmt);
+    xo_emit_warn_hcv(NULL, 1, code, 0, fmt, vap);
+    va_end(vap);
+}
+
+void
+xo_emit_warnx (const char *fmt, ...)
+{
+    va_list vap;
+
+    va_start(vap, fmt);
+    xo_emit_warn_hcv(NULL, 1, -1, 0, fmt, vap);
+    va_end(vap);
+}
+
+void
+xo_emit_err (int eval, const char *fmt, ...)
+{
+    int code = errno;
+    va_list vap;
+
+    va_start(vap, fmt);
+    xo_emit_warn_hcv(NULL, 0, code, 0, fmt, vap);
+    va_end(vap);
+    xo_finish();
+    exit(eval);
+}
+
+void
+xo_emit_errx (int eval, const char *fmt, ...)
+{
+    va_list vap;
+
+    va_start(vap, fmt);
+    xo_emit_warn_hcv(NULL, 0, -1, 0, fmt, vap);
+    va_end(vap);
+    xo_finish();
+    exit(eval);
+}
+
+void
+xo_emit_errc (int eval, int code, const char *fmt, ...)
+{
+    va_list vap;
+
+    va_start(vap, fmt);
+    xo_emit_warn_hcv(NULL, 0, code, 0, fmt, vap);
+    va_end(vap);
+    xo_finish();
+    exit(eval);
 }
