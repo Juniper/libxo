@@ -83,7 +83,7 @@ AC_CHECK_LIB([util], [humanize_number],
      [HAVE_HUMANIZE_NUMBER=$ac_cv_header_libutil_h],
      [HAVE_HUMANIZE_NUMBER=no])
 
-AC_MSG_RESULT(Humanize is :${HAVE_HUMANIZE_NUMBER}:${ac_cv_header_libutil_h}:)
+AC_MSG_RESULT(humanize_number results: :${HAVE_HUMANIZE_NUMBER}:${ac_cv_header_libutil_h}:)
 
 if test "$HAVE_HUMANIZE_NUMBER" = "yes"; then
     AC_DEFINE([HAVE_HUMANIZE_NUMBER], [1], [humanize_number(3)])
@@ -91,6 +91,43 @@ fi
 
 AM_CONDITIONAL([HAVE_HUMANIZE_NUMBER], [test "$HAVE_HUMANIZE_NUMBER" = "yes"])
 
+dnl Looking for gettext(), assumably in libintl
+AC_ARG_WITH(gettext,
+        [  --with-gettext=[PFX]           Specify location of gettext config],
+        [GETTEXT_PREFIX=$withval],
+	[GETTEXT_PREFIX=/usr],
+)
+
+AC_MSG_CHECKING([gettext in ${GETTEXT_PREFIX}])
+
+_save_cflags="$CFLAGS"
+CFLAGS="$CFLAGS -I${GETTEXT_PREFIX}/include -L${GETTEXT_PREFIX}/lib -Werror -lintl"
+AC_LINK_IFELSE([AC_LANG_SOURCE([[#include <libintl.h>]
+           [int main() {char *cp = dgettext(NULL, "xx"); return 0; }]])],
+           [HAVE_GETTEXT=yes],
+           [HAVE_GETTEXT=no])
+CFLAGS="$_save_cflags"
+AC_MSG_RESULT([$HAVE_GETTEXT])
+
+if test "$HAVE_GETTEXT" = "yes"; then
+    AC_DEFINE([HAVE_GETTEXT], [1], [gettext(3)])
+    GETTEXT_CFLAGS="-I${GETTEXT_PREFIX}/include"
+    GETTEXT_LIBS="-L${GETTEXT_PREFIX}/lib -lintl"
+else
+    GETTEXT_CFLAGS=
+    GETTEXT_LIBS=
+fi
+AC_SUBST(GETTEXT_CFLAGS)
+AC_SUBST(GETTEXT_LIBS)
+
+GETTEXT_BINDIR=${GETTEXT_PREFIX}/bin
+AC_SUBST(GETTEXT_BINDIR)
+GETTEXT_LIBDIR=${GETTEXT_PREFIX}/lib
+AC_SUBST(GETTEXT_LIBDIR)
+
+AM_CONDITIONAL([HAVE_GETTEXT], [test "$HAVE_GETTEXT" = "yes"])
+
+dnl Looking for libcrypto....
 AC_CHECK_LIB([crypto], [MD5_Init])
 AM_CONDITIONAL([HAVE_LIBCRYPTO], [test "$HAVE_LIBCRYPTO" != "no"])
 
@@ -100,6 +137,7 @@ AC_CHECK_MEMBER([struct sockaddr_un.sun_len],
     [HAS_SUN_LEN=no], [[#include <sys/un.h>]])
 
 AC_CHECK_DECLS([__isthreaded], [], [], [#include <stdio.h>])
+HAVE_ISTHREADED=${ac_cv_have_decl___isthreaded}
 
 dnl
 dnl Some packages need to be checked against version numbers so we
@@ -274,6 +312,7 @@ AC_CONFIG_FILES([
   doc/Makefile
   tests/Makefile
   tests/core/Makefile
+  tests/gettext/Makefile
   tests/xo/Makefile
   packaging/libxo.spec
   packaging/libxo.rb.base
@@ -301,4 +340,6 @@ AC_MSG_NOTICE([summary of build options:
   printf-like:      ${HAVE_PRINTFLIKE:-no}
   libxo-options:    ${LIBXO_OPTS:-no}
   text-only:        ${LIBXO_TEXT_ONLY:-no}
+  gettext:          ${HAVE_GETTEXT:-no}
+  isthreaded:       ${HAVE_ISTHREADED:-no}
 ])
