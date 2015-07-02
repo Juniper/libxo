@@ -6,6 +6,7 @@ set opts=' \
 --enable-debug \
 --enable-warnings \
 --enable-printflike \
+--with-gettext=/opt/local \
 --prefix ${HOME}/work/root \
 '
 set opts=`echo $opts`
