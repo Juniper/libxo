@@ -57,18 +57,18 @@
     <t2>test5000</t2>
     <t3>ten-longx</t3>
     <t4>xtest</t4>
-    <error>
+    <__error>
       <message>this is an error</message>
-    </error>
-    <error>
+    </__error>
+    <__error>
       <message>two more errors</message>
-    </error>
-    <warning>
+    </__error>
+    <__warning>
       <message>this is an warning</message>
-    </warning>
-    <warning>
+    </__warning>
+    <__warning>
       <message>two more warnings</message>
-    </warning>
+    </__warning>
     <count>10</count>
     <test>4</test>
   <message>improper use of profanity; ten yard penalty; first down
