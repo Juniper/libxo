@@ -49,6 +49,18 @@ EXTRA_DIST = \
     ${addprefix saved/, ${TEST_CASES:.c=.HIPx.err}} \
     ${addprefix saved/, ${TEST_CASES:.c=.HIPx.out}}
 
+POT_FILES = \
+    gt_01.pot \
+    ldns.pot \
+    strerror.pot
+
+PO_FILES = \
+    po/pig_latin/gt_01.po \
+    po/pig_latin/ldns.po \
+    po/pig_latin/strerror.po
+
+EXTRA_DIST += ${POT_FILES} ${PO_FILES}
+
 S2O = | ${SED} '1,/@@/d'
 
 all:
