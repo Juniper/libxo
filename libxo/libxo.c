@@ -2604,7 +2604,11 @@ xo_format_gettext (xo_handle_t *xop, xo_xff_flags_t flags,
 		   int start_offset, int cols, int need_enc)
 {
     xo_buffer_t *xbp = &xop->xo_data;
-    xo_buf_append(xbp, "", 1); /* NUL-terminate it */
+
+    if (!xo_buf_has_room(xbp, 1))
+	return cols;
+
+    xbp->xb_curp[0] = '\0'; /* NUL-terminate the input string */
     
     char *cp = xbp->xb_bufp + start_offset;
     int len = xbp->xb_curp - cp;
@@ -6414,7 +6418,7 @@ xo_emit_warn_hcv (xo_handle_t *xop, int as_warning, int code, int check_warn,
 	return;
 
     xo_open_marker_h(xop, "xo_emit_warn_hcv");
-    xo_open_container_h(xop, as_warning ? "__warn" : "__error");
+    xo_open_container_h(xop, as_warning ? "__warning" : "__error");
 
     if (xo_program)
 	xo_emit("{wc:program}", xo_program);
