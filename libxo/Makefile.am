@@ -16,9 +16,15 @@ include ${top_srcdir}/warnings.mk
 
 libxoincdir = ${includedir}/libxo
 
-AM_CFLAGS = -I${top_srcdir} ${WARNINGS}
+AM_CFLAGS = \
+    -I${top_srcdir} \
+    ${WARNINGS} \
+    ${GETTEXT_CFLAGS}
 
 lib_LTLIBRARIES = libxo.la
+
+LIBS = \
+    ${GETTEXT_LIBS}
 
 libxoinc_HEADERS = \
      xo.h
@@ -51,3 +57,7 @@ man_MANS = \
 
 EXTRA_DIST = ${man_MANS}
 
+call-graph:
+	${RM} libxo.o
+	${MAKE} CC="clang -Xclang -analyze -Xclang \
+            -analyzer-checker=debug.ViewCallGraph" libxo.o
