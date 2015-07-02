@@ -475,8 +475,8 @@ xo_dgettext (const char *domainname UNUSED, const char *str)
 }
 
 static inline const char *
-xo_dngettext (const char *domainname, const char *singular, const char *plural,
-	      int n)
+xo_dngettext (const char *domainname UNUSED, const char *singular,
+	      const char *plural, int n)
 {
     return (n == 1) ? singular : plural;
 }
