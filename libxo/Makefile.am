@@ -55,7 +55,9 @@ man_MANS = \
     xo_set_version.3 \
     xo_set_writer.3
 
-EXTRA_DIST = ${man_MANS}
+EXTRA_DIST = \
+    ${man_MANS} \
+    xo_humanize.h
 
 call-graph:
 	${RM} libxo.o
