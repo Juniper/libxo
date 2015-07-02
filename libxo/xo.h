@@ -40,7 +40,7 @@
 #endif /* NO_PRINTFLIKE */
 
 /** Formatting types */
-typedef unsigned xo_style_t;
+typedef unsigned short xo_style_t;
 #define XO_STYLE_TEXT	0	/** Generate text output */
 #define XO_STYLE_XML	1	/** Generate XML output */
 #define XO_STYLE_JSON	2	/** Generate JSON output */
@@ -320,6 +320,27 @@ xo_message_e (const char *fmt, ...) PRINTFLIKE(1, 2);
 
 void
 xo_message (const char *fmt, ...) PRINTFLIKE(1, 2);
+
+void
+xo_emit_warn_hc (xo_handle_t *xop, int code, const char *fmt, ...);
+
+void
+xo_emit_warn_c (int code, const char *fmt, ...);
+
+void
+xo_emit_warn (const char *fmt, ...);
+
+void
+xo_emit_warnx (const char *fmt, ...);
+
+void
+xo_emit_err (int eval, const char *fmt, ...);
+
+void
+xo_emit_errx (int eval, const char *fmt, ...);
+
+void
+xo_emit_errc (int eval, int code, const char *fmt, ...);
 
 void
 xo_no_setlocale (void);
