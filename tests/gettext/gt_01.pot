@@ -18,17 +18,17 @@ msgstr ""
 
 #: gt_01.c:42
 #, c-format
-msgid "{w:bytes/%d}{Ngp:byte,bytes}\n"
+msgid "{:bytes}{N:byte,bytes}\n"
 msgstr ""
 
 #: gt_01.c:44
 #, c-format
-msgid "{L:total} {:total/%u}\n"
+msgid "{L:total} {:total}\n"
 msgstr ""
 
 #: gt_01.c:60
 #, c-format
-msgid "Only {:marzlevanes/%d} {Ngp:marzlevane,marzlevanes} are functioning correctly\n"
+msgid "Only {:marzlevanes} {N:marzlevane,marzlevanes} are functioning correctly\n"
 msgstr ""
 
 #: gt_01.c:63
@@ -36,20 +36,20 @@ msgid "Version {:version} {:date}\n"
 msgstr ""
 
 #: gt_01.c:66
-msgid "Unable to {g:verb/objectulate} forward velociping"
+msgid "Unable to {:verb} forward velociping"
 msgstr ""
 
 #: gt_01.c:67
-msgid "{g:style/automatic} synchronization of {g:type/cardinal} {g:target/grammeters} failed"
+msgid "{:style} synchronization of {:type} {:target} failed"
 msgstr ""
 
 #: gt_01.c:69
 #, c-format
-msgid "{Lwcg:hydrocoptic marzlevanes}{:marzlevanes/%d}\n"
+msgid "{L:hydrocoptic marzlevanes}{:marzlevanes}\n"
 msgstr ""
 
 #: gt_01.c:71
-msgid "{Lwcg:Windings}{g:windings}\n"
+msgid "{L:Windings}{:windings}\n"
 msgstr ""
 
 msgid "byte"
@@ -76,3 +76,10 @@ msgstr ""
 
 msgid "objectulate"
 msgstr ""
+
+msgid "hydrocoptic marzlevanes"
+msgstr ""
+
+msgid "Windings"
+msgstr ""
+
