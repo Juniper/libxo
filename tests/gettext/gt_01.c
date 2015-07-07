@@ -39,13 +39,17 @@ main (int argc, char **argv)
 	    tzone = argv[++argc];
 	else if (strcmp(argv[argc], "lang") == 0)
 	    lang = argv[++argc];
+	else if (strcmp(argv[argc], "po") == 0)
+	    strlcpy(path, argv[++argc], sizeof(path));
     }
 
     setenv("LANG", lang, 1);
     setenv("TZ", tzone, 1);
 
-    getcwd(path, sizeof(path));
-    strncat(path, "/po", 4);
+    if (path[0] == 0) {
+	getcwd(path, sizeof(path));
+	strlcat(path, "/po", sizeof(path));
+    }
 
     setlocale(LC_ALL, "");
     bindtextdomain(domainname,  path);
