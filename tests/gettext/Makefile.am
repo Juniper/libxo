@@ -114,7 +114,7 @@ clean-local:
 	rm -rf ${CLEANDIRS}
 
 XGETTEXT = xgettext
-MSGFMT = msgfmt
+MSGFMT = msgfmt -v
 MSGMERGE = msgmerge
 ECHO = echo
 DB=set -x;
