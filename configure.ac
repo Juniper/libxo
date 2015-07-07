@@ -308,6 +308,7 @@ AC_CONFIG_FILES([
   xo/Makefile
   xolint/Makefile
   xohtml/Makefile
+  xopo/Makefile
   packaging/libxo.pc
   doc/Makefile
   tests/Makefile
