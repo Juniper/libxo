@@ -20,38 +20,38 @@ msgstr ""
 
 #: gt_01.c:42
 #, c-format
-msgid "{w:bytes/%d}{Ngp:byte,bytes}\n"
-msgstr "{w:bytes/%d}{Ngp:ytebay,ytesbay,}\n"
+msgid "{:bytes}{N:byte,bytes}\n"
+msgstr "{:bytes}{N:ytebay,ytesbay}\n"
 
 #: gt_01.c:44
 #, c-format
-msgid "{L:total} {:total/%u}\n"
-msgstr "{L:otaltay} {:total/%u}\n"
+msgid "{L:total} {:total}\n"
+msgstr "{L:otaltay} {:total}\n"
 
 #: gt_01.c:60
 #, c-format
-msgid "Only {:marzlevanes/%d} {Ngp:marzlevane,marzlevanes} are functioning correctly\n"
-msgstr "Onlyay {:marzlevanes/%d} {Ngp:arzlevanemay,arzlevanesmay} areyay unctioningfay orrectlycay\n"
+msgid "Only {:marzlevanes} {N:marzlevane,marzlevanes} are functioning correctly\n"
+msgstr "Onlyay {:marzlevanes} {N:arzlevanemay,arzlevanesmay} areyay unctioningfay orrectlycay\n"
 
 #: gt_01.c:63
 msgid "Version {:version} {:date}\n"
 msgstr "Ersionvay {:version} {:date}\n"
 
 #: gt_01.c:66
-msgid "Unable to {g:verb/objectulate} forward velociping"
-msgstr "Nableuay otay {g:verb/objectulate} orwardfay elocipingvay"
+msgid "Unable to {:verb} forward velociping"
+msgstr "Nableuay otay {g:verb} orwardfay elocipingvay"
 
 #: gt_01.c:67
-msgid "{g:style/automatic} synchronization of {g:type/cardinal} {g:target/grammeters} failed"
-msgstr "{g:style/automatic} ynchronizationsay ofyay {g:type/cardinal} {g:target/grammeters} ailedfay"
+msgid "{:style} synchronization of {:type} {:target} failed"
+msgstr "{g:style} ynchronizationsay ofyay {g:type} {g:target} ailedfay"
 
 #: gt_01.c:69
 #, c-format
-msgid "{Lwcg:hydrocoptic marzlevanes}{:marzlevanes/%d}\n"
-msgstr "{Lwcg:ydrocoptichay arzlevanesmay}{:marzlevanes/%d}\n"
+msgid "{L:hydrocoptic marzlevanes}{:marzlevanes}\n"
+msgstr "{L:ydrocoptichay arzlevanesmay}{:marzlevanes}\n"
 
 #: gt_01.c:71
-msgid "{Lwcg:Windings}{g:windings}\n"
+msgid "{L:Windings}{:windings}\n"
 msgstr "{Lwcg:Indingsway}{g:windings}\n"
 
 #, c-format
@@ -82,3 +82,20 @@ msgstr "ammetersgray"
 
 msgid "objectulate"
 msgstr "ectulatobjay"
+
+msgid "byte"
+msgid_plural "bytes"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "marzlevane"
+msgid_plural "marzlevanes"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "hydrocoptic marzlevanes"
+msgstr ""
+
+msgid "Windings"
+msgstr ""
+
