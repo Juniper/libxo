@@ -18,11 +18,11 @@ msgstr ""
 
 #: gt_01.c:46
 #, c-format
-msgid "Received {:received/%zu} {Ngp:byte,bytes} from {:from/%s}#{:port/%d} in {:time/%d} ms\n"
+msgid "Received {:received} {N:byte,bytes} from {:from}#{:port} in {:time} ms\n"
 msgstr ""
 
 msgid "byte"
-msgstr ""
+msgid_plural "bytes"
+msgstr[0] ""
+msgstr[1] ""
 
-msgid "bytes"
-msgstr ""
