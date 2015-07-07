@@ -45,7 +45,7 @@ msgstr ""
 "X-Generator: Poedit 1.8.1\n"
 "X-Poedit-SourceCharset: iso-8859-1\n"
 
-msgid "Received {:received/%zu} {Ngp:byte,bytes} from {:from/%s}#{:port/%d} in {:time/%d} ms\n"
+msgid "Received {:received} {N:byte,bytes} from {:from}#{:port} in {:time} ms\n"
 msgstr ""
 
 # 0 - ENOERROR
@@ -460,3 +460,9 @@ msgstr ""
 # 96 - EOWNERDEAD
 msgid "Previous owner died"
 msgstr ""
+
+msgid "byte"
+msgid_plural "bytes"
+msgstr[0] ""
+msgstr[1] ""
+
