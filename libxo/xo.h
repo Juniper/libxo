@@ -85,6 +85,8 @@ typedef unsigned long long xo_xof_flags_t;
 #define XOF_COLOR	XOF_BIT(26) /** Enable color and effects */
 #define XOF_NO_HUMANIZE	XOF_BIT(27) /** Block the {h:} modifier */
 
+#define XOF_LOG_GETTEXT	XOF_BIT(28) /** Log gettext lookup strings (stderr) */
+
 /*
  * The xo_info_t structure provides a mapping between names and
  * additional data emitted via HTML.
@@ -451,5 +453,11 @@ xo_set_syslog_handler (xo_syslog_open_t open_func, xo_syslog_send_t send_func,
 
 void
 xo_set_syslog_enterprise_id (unsigned short eid);
+
+typedef void (*xo_simplify_field_func_t)(const char *, unsigned, int);
+
+char *
+xo_simplify_format (xo_handle_t *xop, const char *fmt,
+		    xo_simplify_field_func_t field_cb);
 
 #endif /* INCLUDE_XO_H */
