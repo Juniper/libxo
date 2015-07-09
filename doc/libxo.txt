@@ -743,6 +743,15 @@ and plural English values, separated by a comma:
 The plural modifier is meant to work with the gettext modifier ({g:})
 but can work independently.  See ^gettext-modifier^.
 
+When used without the gettext modifier or when the message does not
+appear in the message catalog, the first token is chosen when the last
+numeric value is equal to 1; otherwise the second value is used,
+mimicking the simple pluralization rules of English.
+
+When used with the gettext modifier, the ngettext(3) function is
+called to handle the heavy lifting, using the message catalog to
+convert the singular and plural forms into the native language.
+
 **** The Quotes Modifier ({q:})
 
 The quotes modifier (and its twin, the 'no-quotes' modifier) affect
@@ -2202,6 +2211,9 @@ stdout.
 	    --keyword=xo_emit_warn -C -E -n --foreign-user \
 	    -o foo.pot.raw foo.c
         % xopo -f foo.pot.raw -o foo.pot
+
+Use of the "--no-wrap" option for xgettext is required to ensure that
+incoming msgid strings are not wrapped across multiple lines.
 
 * FAQs
 
