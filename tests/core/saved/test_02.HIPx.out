@@ -41,6 +41,31 @@
   <div class="data" data-tag="filename" data-xpath="/top/data/filename">file</div>
 </div>
 <div class="line">
+  <div class="data" data-tag="bytes" data-xpath="/top/data/bytes">0</div>
+  <div class="padding"> </div>
+  <div class="note">bytes</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="bytes" data-xpath="/top/data/bytes">1</div>
+  <div class="padding"> </div>
+  <div class="note">byte</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="bytes" data-xpath="/top/data/bytes">2</div>
+  <div class="padding"> </div>
+  <div class="note">bytes</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="bytes" data-xpath="/top/data/bytes">3</div>
+  <div class="padding"> </div>
+  <div class="note">bytes</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="bytes" data-xpath="/top/data/bytes">4</div>
+  <div class="padding"> </div>
+  <div class="note">bytes</div>
+</div>
+<div class="line">
   <div class="data" data-tag="mbuf-current" data-xpath="/top/data/mbuf-current">10</div>
   <div class="text">/</div>
   <div class="data" data-tag="mbuf-cache" data-xpath="/top/data/mbuf-cache">20</div>
