@@ -119,6 +119,7 @@ MSGMERGE = ${GETTEXT_BINDIR}/msgmerge
 ECHO = echo
 DB=set -x;
 XOMSGMERGE = ${MSGMERGE} --no-wrap
+XODIFF = ${DIFF} -bu
 
 LANGUAGES = \
 	es \
@@ -194,19 +195,19 @@ new-po-file:
 		    (${DB} ${CP} $$base.pot po/$$lang/$$base.po ); \
                 fi ; \
 	    done ; \
-	done
+	done)
 
-delta-files:
-	for base in ${MO_BASE_FILES} ; do set -x ;\
-	    ${DIFF} ${srcdir}/$$base.pot $$base.pot ; \
+diff:
+	@(for base in ${MO_BASE_FILES} ; do \
+	    ${XODIFF} ${srcdir}/$$base.pot $$base.pot ; \
 	    for lang in ${LANGUAGES} ; do \
 		if [ -f po/$$lang/$$base.po ] ; then \
-		    ${DIFF} ${srcdir}/po/$$lang/$$base.po po/$$lang/$$base.po ; \
+		    ${XODIFF} ${srcdir}/po/$$lang/$$base.po po/$$lang/$$base.po ; \
                 fi ; \
 	    done ; \
-	done
+	done)
 
-build-mo-files:
+mo build-mo-files:
 	@(for base in ${MO_BASE_FILES} ; do \
 	    for lang in ${LANGUAGES} ; do \
 		${MKDIR} -p po/$$lang/LC_MESSAGES ; \
@@ -218,4 +219,4 @@ build-mo-files:
 			${srcdir}/po/$$lang/$$base.po ;) \
                 fi ; \
 	    done ; \
-	done )
+	done)
