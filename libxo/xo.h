@@ -285,6 +285,9 @@ int
 xo_finish (void);
 
 void
+xo_finish_atexit (void);
+
+void
 xo_set_leading_xpath (xo_handle_t *xop, const char *path);
 
 void
