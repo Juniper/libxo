@@ -2726,14 +2726,19 @@ xo_format_gettext (xo_handle_t *xop, xo_xff_flags_t flags,
 	}
 
 	*two++ = '\0';
-	newstr = xo_dngettext(xop, cp, two, n);
+	if (flags & XFF_GT_FIELD) {
+	    newstr = xo_dngettext(xop, cp, two, n);
+	} else {
+	    /* Don't do a gettext() look up, just get the plural form */
+	    newstr = (n == 1) ? cp : two;
+	}
 
 	/*
 	 * If we returned the first string, optimize a bit by
 	 * backing up over comma
 	 */
 	if (newstr == cp) {
-	    xbp->xb_curp = two - 2; /* One for comma */
+	    xbp->xb_curp = two - 1; /* One for comma */
 	    /*
 	     * If the caller wanted UTF8, we're done; nothing changed,
 	     * but we need to count the columns used.
@@ -2778,7 +2783,7 @@ xo_data_append_content (xo_handle_t *xop, const char *str, int len,
     cols = xo_format_string_direct(xop, &xop->xo_data, XFF_UNESCAPE | flags,
 				   NULL, str, len, -1,
 				   need_enc, XF_ENC_UTF8);
-    if (flags & XFF_GT_FIELD)
+    if (flags & XFF_GT_FLAGS)
 	cols = xo_format_gettext(xop, flags, start_offset, cols, need_enc);
 
     if (xop->xo_flags & XOF_COLUMNS)
@@ -3164,7 +3169,7 @@ xo_do_format_field (xo_handle_t *xop, xo_buffer_t *xbp,
 	xp = NULL;
     }
 
-    if (flags & XFF_GT_FIELD) {
+    if (flags & XFF_GT_FLAGS) {
 	/*
 	 * Handle gettext()ing the field by looking up the value
 	 * and then copying it in, while converting to locale, if
@@ -6708,6 +6713,12 @@ int
 xo_finish (void)
 {
     return xo_finish_h(NULL);
+}
+
+void
+xo_finish_atexit (void)
+{
+    (void) xo_finish_h(NULL);
 }
 
 /*
