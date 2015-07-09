@@ -113,9 +113,9 @@ CLEANDIRS = out
 clean-local:
 	rm -rf ${CLEANDIRS}
 
-XGETTEXT = xgettext
-MSGFMT = msgfmt -v
-MSGMERGE = msgmerge
+XGETTEXT = ${GETTEXT_BINDIR}/xgettext
+MSGFMT = ${GETTEXT_BINDIR}/msgfmt -v
+MSGMERGE = ${GETTEXT_BINDIR}/msgmerge
 ECHO = echo
 DB=set -x;
 XOMSGMERGE = ${MSGMERGE} --no-wrap
