@@ -1,10 +1,12 @@
 {
   "top": {
-    "bytes": 0,
-    "bytes": 1,
-    "bytes": 2,
-    "bytes": 3,
-    "bytes": 4,
+    "bytes": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
     "total": 1234,
     "received": 1234,
     "from": "foop",
