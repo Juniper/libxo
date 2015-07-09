@@ -93,7 +93,7 @@ AM_CONDITIONAL([HAVE_HUMANIZE_NUMBER], [test "$HAVE_HUMANIZE_NUMBER" = "yes"])
 
 dnl Looking for gettext(), assumably in libintl
 AC_ARG_WITH(gettext,
-        [  --with-gettext=[PFX]           Specify location of gettext config],
+        [  --with-gettext=[PFX]           Specify location of gettext installation],
         [GETTEXT_PREFIX=$withval],
 	[GETTEXT_PREFIX=/usr],
 )
@@ -107,13 +107,30 @@ AC_LINK_IFELSE([AC_LANG_SOURCE([[#include <libintl.h>]
            [HAVE_GETTEXT=yes],
            [HAVE_GETTEXT=no])
 CFLAGS="$_save_cflags"
+
 AC_MSG_RESULT([$HAVE_GETTEXT])
+
+if test "$HAVE_GETTEXT" != "yes"; then
+    GETTEXT_PREFIX=/opt/local
+    AC_MSG_CHECKING([gettext in ${GETTEXT_PREFIX}])
+
+    _save_cflags="$CFLAGS"
+    CFLAGS="$CFLAGS -I${GETTEXT_PREFIX}/include -L${GETTEXT_PREFIX}/lib -Werror -lintl"
+    AC_LINK_IFELSE([AC_LANG_SOURCE([[#include <libintl.h>]
+               [int main() {char *cp = dgettext(NULL, "xx"); return 0; }]])],
+               [HAVE_GETTEXT=yes],
+               [HAVE_GETTEXT=no])
+    CFLAGS="$_save_cflags"
+
+    AC_MSG_RESULT([$HAVE_GETTEXT])
+fi
 
 if test "$HAVE_GETTEXT" = "yes"; then
     AC_DEFINE([HAVE_GETTEXT], [1], [gettext(3)])
     GETTEXT_CFLAGS="-I${GETTEXT_PREFIX}/include"
     GETTEXT_LIBS="-L${GETTEXT_PREFIX}/lib -lintl"
 else
+    GETTEXT_PREFIX=none
     GETTEXT_CFLAGS=
     GETTEXT_LIBS=
 fi
@@ -341,6 +358,6 @@ AC_MSG_NOTICE([summary of build options:
   printf-like:      ${HAVE_PRINTFLIKE:-no}
   libxo-options:    ${LIBXO_OPTS:-no}
   text-only:        ${LIBXO_TEXT_ONLY:-no}
-  gettext:          ${HAVE_GETTEXT:-no}
+  gettext:          ${HAVE_GETTEXT:-no} (${GETTEXT_PREFIX})
   isthreaded:       ${HAVE_ISTHREADED:-no}
 ])
