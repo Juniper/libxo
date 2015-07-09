@@ -18,6 +18,11 @@
     <lines>20</lines>
     <words>30</words>
     <characters>40</characters>
+    <bytes>0</bytes>
+    <bytes>1</bytes>
+    <bytes>2</bytes>
+    <bytes>3</bytes>
+    <bytes>4</bytes>
     <mbuf-current>10</mbuf-current>
     <mbuf-cache>20</mbuf-cache>
     <mbuf-total>30</mbuf-total>
