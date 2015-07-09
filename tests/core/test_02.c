@@ -69,6 +69,10 @@ main (int argc, char **argv)
             "{:characters/%7ju} {d:filename/%s}\n",
             20, 30, 40, "file");
 
+    for (int i = 0; i < 5; i++)
+	xo_emit("{lw:bytes/%d}{Np:byte,bytes}\n", i);
+
+
     xo_emit("{:mbuf-current/%u}/{:mbuf-cache/%u}/{:mbuf-total/%u} "
 	    "{N:mbufs <&> in use (current\\/cache\\/total)}\n",
 	    10, 20, 30);
