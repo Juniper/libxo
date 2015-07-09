@@ -6,6 +6,11 @@ close -1 returned Bad file descriptor good
 close -1 returned Bad fi good
 improper use of profanity; ten yard penalty; first down
       20      30      40 file
+0 bytes
+1 byte
+2 bytes
+3 bytes
+4 bytes
 10/20/30 mbufs <&> in use (current/cache/total)
 50 miles from Boston
 64k left out of 640kb
