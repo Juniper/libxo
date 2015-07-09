@@ -41,6 +41,31 @@
   <div class="data" data-tag="filename">file</div>
 </div>
 <div class="line">
+  <div class="data" data-tag="bytes">0</div>
+  <div class="padding"> </div>
+  <div class="note">bytes</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="bytes">1</div>
+  <div class="padding"> </div>
+  <div class="note">byte</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="bytes">2</div>
+  <div class="padding"> </div>
+  <div class="note">bytes</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="bytes">3</div>
+  <div class="padding"> </div>
+  <div class="note">bytes</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="bytes">4</div>
+  <div class="padding"> </div>
+  <div class="note">bytes</div>
+</div>
+<div class="line">
   <div class="data" data-tag="mbuf-current">10</div>
   <div class="text">/</div>
   <div class="data" data-tag="mbuf-cache">20</div>
