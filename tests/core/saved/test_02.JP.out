@@ -11,6 +11,13 @@
       "lines": 20,
       "words": 30,
       "characters": 40,
+      "bytes": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
       "mbuf-current": 10,
       "mbuf-cache": 20,
       "mbuf-total": 30,
