@@ -199,7 +199,9 @@ new-po-file:
 
 diff:
 	@(for base in ${MO_BASE_FILES} ; do \
-	    ${XODIFF} ${srcdir}/$$base.pot $$base.pot ; \
+	    if [ -f $$base.pot.new ] ; then \
+	        ${XODIFF} ${srcdir}/$$base.pot $$base.pot.new ; \
+            fi ; \
 	    for lang in ${LANGUAGES} ; do \
 		if [ -f po/$$lang/$$base.po ] ; then \
 		    ${XODIFF} ${srcdir}/po/$$lang/$$base.po po/$$lang/$$base.po ; \
