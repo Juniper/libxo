@@ -21,16 +21,10 @@ msgstr ""
 #: gt_01.c:46
 #, c-format
 msgid "Received {:received} {N:byte,bytes} from {:from}#{:port} in {:time} ms\n"
-msgstr "Eceivedray {:received} {N:ytebay,ytesbay} omfray {:from}#{:port} inyay {:time} msyay\n"
-
-msgid "byte"
-msgstr ""
-
-msgid "bytes"
-msgstr ""
+msgstr "Eceivedray {:received} {N:byte,bytes} omfray {:from}#{:port} inyay {:time} msyay\n"
 
 msgid "byte"
 msgid_plural "bytes"
-msgstr[0] ""
-msgstr[1] ""
-
+msgstr[0] "ldb0"
+msgstr[1] "ldb1"
+msgstr[2] "ldb2"
