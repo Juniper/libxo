@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: libxo unit test\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-07-01 16:15-0400\n"
-"PO-Revision-Date: 2015-07-01 18:47-0500\n"
+"PO-Revision-Date: 2015-07-09 13:43-0400\n"
 "Last-Translator: P.S. <ps@example.com>\n"
 "Language-Team: Self-inflicted <test@example.com>\n"
 "Language: teo\n"
@@ -31,7 +31,7 @@ msgstr "{L:otaltay} {:total}\n"
 #: gt_01.c:60
 #, c-format
 msgid "Only {:marzlevanes} {N:marzlevane,marzlevanes} are functioning correctly\n"
-msgstr "Onlyay {:marzlevanes} {N:arzlevanemay,arzlevanesmay} areyay unctioningfay orrectlycay\n"
+msgstr "Onlyay {:marzlevanes} {N:marzlevane,marzlevanes} areyay unctioningfay orrectlycay\n"
 
 #: gt_01.c:63
 msgid "Version {:version} {:date}\n"
@@ -39,11 +39,11 @@ msgstr "Ersionvay {:version} {:date}\n"
 
 #: gt_01.c:66
 msgid "Unable to {:verb} forward velociping"
-msgstr "Nableuay otay {g:verb} orwardfay elocipingvay"
+msgstr "Nableuay otay {:verb} orwardfay elocipingvay"
 
 #: gt_01.c:67
 msgid "{:style} synchronization of {:type} {:target} failed"
-msgstr "{g:style} ynchronizationsay ofyay {g:type} {g:target} ailedfay"
+msgstr "{:style} ynchronizationsay ofyay {:type} {:target} ailedfay"
 
 #: gt_01.c:69
 #, c-format
@@ -52,16 +52,14 @@ msgstr "{L:ydrocoptichay arzlevanesmay}{:marzlevanes}\n"
 
 #: gt_01.c:71
 msgid "{L:Windings}{:windings}\n"
-msgstr "{Lwcg:Indingsway}{g:windings}\n"
+msgstr "Dude, {L:Windings}{:windings}\n"
 
-#, c-format
 msgid "byte"
 msgid_plural "bytes"
 msgstr[0] "yebay"
 msgstr[1] "yesbay"
 msgstr[2] "yezbay"
 
-#, c-format
 msgid "marzlevane"
 msgid_plural "marzlevanes"
 msgstr[0] "arzlevanemay"
@@ -83,19 +81,8 @@ msgstr "ammetersgray"
 msgid "objectulate"
 msgstr "ectulatobjay"
 
-msgid "byte"
-msgid_plural "bytes"
-msgstr[0] ""
-msgstr[1] ""
-
-msgid "marzlevane"
-msgid_plural "marzlevanes"
-msgstr[0] ""
-msgstr[1] ""
-
 msgid "hydrocoptic marzlevanes"
-msgstr ""
+msgstr "ydrocoptichay arzlevanesmay"
 
 msgid "Windings"
-msgstr ""
-
+msgstr "Indingsway"
