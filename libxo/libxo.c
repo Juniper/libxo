@@ -5293,8 +5293,9 @@ xo_gettext_combine_formats (xo_handle_t *xop, const char *fmt UNUSED,
  * Summary: i18n aighn't cheap.
  */
 static const char *
-xo_build_gettext_format (xo_handle_t *xop UNUSED, xo_field_info_t *fields,
-			 int this_field,
+xo_build_gettext_format (xo_handle_t *xop UNUSED,
+			 xo_field_info_t *fields UNUSED,
+			 int this_field UNUSED,
 			 const char *fmt, char **new_fmtp)
 {
 #ifdef HAVE_GETTEXT
