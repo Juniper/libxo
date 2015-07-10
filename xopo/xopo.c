@@ -217,9 +217,9 @@ main (int argc UNUSED, char **argv)
     } else
 	outfile = stdout;
 
-    int blank = 0;
+    int blank = 0, line;
 
-    for (int line = 1;; line++) {
+    for (line = 1;; line++) {
 	if (fgets(buf, sizeof(buf), infile) == NULL)
 	    break;
 
