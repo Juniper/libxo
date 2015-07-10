@@ -480,23 +480,24 @@ xo_buf_cleanup (xo_buffer_t *xbp)
 /*
  * Use a rotating stock of buffers to make a printable string
  */
+#define XO_NUMBUFS 8
+#define XO_SMBUFSZ 128
+
 static const char *
 xo_printable (const char *str)
 {
-    const int NUMBUFS = 8;
-    const int SMBUFSZ = 128;
-    static char bufset[NUMBUFS][SMBUFSZ];
+    static char bufset[XO_NUMBUFS][XO_SMBUFSZ];
     static int bufnum = 0;
 
     if (str == NULL)
 	return "";
 
-    if (++bufnum == NUMBUFS)	/* Not thread safe */
+    if (++bufnum == XO_NUMBUFS)	/* Not thread safe */
 	bufnum = 0;
 
     char *res = bufset[bufnum], *cp, *ep;
 
-    for (cp = res, ep = res + SMBUFSZ - 1; *str && cp < ep; cp++, str++) {
+    for (cp = res, ep = res + XO_SMBUFSZ - 1; *str && cp < ep; cp++, str++) {
 	if (*str == '\n') {
 	    *cp++ = '\\';
 	    *cp = 'n';
@@ -1847,6 +1848,21 @@ xo_name_lookup (xo_mapping_t *map, const char *value, int len)
 
     return 0;
 }
+
+#ifdef NOT_NEEDED_YET
+static const char *
+xo_value_lookup (xo_mapping_t *map, xo_xff_flags_t value)
+{
+    if (value == 0)
+	return NULL;
+
+    for ( ; map->xm_name; map++)
+	if (map->xm_value == value)
+	    return map->xm_name;
+
+    return NULL;
+}
+#endif /* NOT_NEEDED_YET */
 
 static xo_mapping_t xo_xof_names[] = {
     { XOF_COLOR_ALLOWED, "color" },
@@ -4691,6 +4707,7 @@ static xo_mapping_t xo_modifier_names[] = {
     { XFF_COMMA, "comma" },
     { XFF_DISPLAY_ONLY, "display" },
     { XFF_ENCODE_ONLY, "encoding" },
+    { XFF_GT_FIELD, "gettext" },
     { XFF_HUMANIZE, "humanize" },
     { XFF_HUMANIZE, "hn" },
     { XFF_HN_SPACE, "hn-space" },
@@ -4700,11 +4717,32 @@ static xo_mapping_t xo_modifier_names[] = {
     { XFF_LEAF_LIST, "leaf-list" },
     { XFF_LEAF_LIST, "list" },
     { XFF_NOQUOTE, "no-quotes" },
+    { XFF_NOQUOTE, "no-quote" },
+    { XFF_GT_PLURAL, "plural" },
     { XFF_QUOTE, "quotes" },
+    { XFF_QUOTE, "quote" },
     { XFF_TRIM_WS, "trim" },
     { XFF_WS, "white" },
     { 0, NULL }
 };
+
+#ifdef NOT_NEEDED_YET
+static xo_mapping_t xo_modifier_short_names[] = {
+    { XFF_COLON, "c" },
+    { XFF_DISPLAY_ONLY, "d" },
+    { XFF_ENCODE_ONLY, "e" },
+    { XFF_GT_FIELD, "g" },
+    { XFF_HUMANIZE, "h" },
+    { XFF_KEY, "k" },
+    { XFF_LEAF_LIST, "l" },
+    { XFF_NOQUOTE, "n" },
+    { XFF_GT_PLURAL, "p" },
+    { XFF_QUOTE, "q" },
+    { XFF_TRIM_WS, "t" },
+    { XFF_WS, "w" },
+    { 0, NULL }
+};
+#endif /* NOT_NEEDED_YET */
 
 static int
 xo_count_fields (xo_handle_t *xop UNUSED, const char *fmt)
@@ -5157,48 +5195,69 @@ xo_gettext_combine_formats (xo_handle_t *xop, const char *fmt UNUSED,
     xo_field_info_t *newp, *oldp, *startp = old_fields;
 
     for (newp = new_fields; newp->xfi_ftype; newp++) {
-	if (newp->xfi_ftype != 'V')
+	switch (newp->xfi_ftype) {
+	case XO_ROLE_NEWLINE:
+	case XO_ROLE_TEXT:
+	case XO_ROLE_EBRACE:
 	    continue;
 
-	for (oldp = startp; oldp->xfi_ftype; oldp++) {
-	    if (oldp->xfi_ftype != 'V')
-		continue;
-	    if (newp->xfi_clen != oldp->xfi_clen
-		|| strncmp(newp->xfi_content, oldp->xfi_content,
-			   oldp->xfi_clen) != 0) {
-		reordered = 1;
-		continue;
-	    }
-	    startp = oldp + 1;
-	    break;
-	}
-
-	/* Didn't find it on the first pass (starting from last position) */
-	if (oldp->xfi_ftype == 0) {
-	    for (oldp = old_fields; oldp < startp; oldp++) {
+	case 'V':
+	    for (oldp = startp; oldp->xfi_ftype; oldp++) {
 		if (oldp->xfi_ftype != 'V')
 		    continue;
-		if (newp->xfi_clen != oldp->xfi_clen)
+		if (newp->xfi_clen != oldp->xfi_clen
+		    || strncmp(newp->xfi_content, oldp->xfi_content,
+			       oldp->xfi_clen) != 0) {
+		    reordered = 1;
 		    continue;
-		if (strncmp(newp->xfi_content, oldp->xfi_content,
-			    oldp->xfi_clen) != 0)
-		    continue;
-		reordered = 1;
+		}
+		startp = oldp + 1;
 		break;
 	    }
-	    if (oldp == startp) {
-		/* Field not found */
-		xo_failure(xop, "post-gettext format can't find field '%.*s' "
-			   "in format '%s'",
-			   newp->xfi_clen, newp->xfi_content,
-			   xo_printable(gtfmt));
-		return -1;
+
+	    /* Didn't find it on the first pass (starting from start) */
+	    if (oldp->xfi_ftype == 0) {
+		for (oldp = old_fields; oldp < startp; oldp++) {
+		    if (oldp->xfi_ftype != 'V')
+			continue;
+		    if (newp->xfi_clen != oldp->xfi_clen)
+			continue;
+		    if (strncmp(newp->xfi_content, oldp->xfi_content,
+				oldp->xfi_clen) != 0)
+			continue;
+		    reordered = 1;
+		    break;
+		}
+		if (oldp == startp) {
+		    /* Field not found */
+		    xo_failure(xop, "post-gettext format can't find field "
+			       "'%.*s' in format '%s'",
+			       newp->xfi_clen, newp->xfi_content,
+			       xo_printable(gtfmt));
+		    return -1;
+		}
 	    }
+	    break;
+
+	default:
+	    /*
+	     * Other fields don't have names for us to use, so if
+	     * the types aren't the same, then we'll have to assume
+	     * the original field is a match.
+	     */
+	    for (oldp = startp; oldp->xfi_ftype; oldp++) {
+		if (oldp->xfi_ftype == 'V') /* Can't go past these */
+		    break;
+		if (oldp->xfi_ftype == newp->xfi_ftype)
+		    goto copy_it; /* Assumably we have a match */
+	    }
+	    continue;
 	}
 
 	/*
 	 * Found a match; copy over appropriate fields
 	 */
+    copy_it:
 	newp->xfi_flags = oldp->xfi_flags;
 	newp->xfi_format = oldp->xfi_format;
 	newp->xfi_flen = oldp->xfi_flen;
