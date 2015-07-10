@@ -5003,8 +5003,6 @@ xo_parse_fields (xo_handle_t *xop, xo_field_info_t *fields,
 	/* We are looking at the start of a field definition */
 	xfip->xfi_start = basep = cp + 1;
 
-	unsigned ftype = 0;
-	xo_xff_flags_t flags = 0;
 	const char *format = NULL;
 	int flen = 0;
 
@@ -5014,9 +5012,6 @@ xo_parse_fields (xo_handle_t *xop, xo_field_info_t *fields,
 	    /* xo_failure has already been called */
 	    return -1;
 	}
-
-	ftype = xfip->xfi_ftype;
-	flags = xfip->xfi_flags;
 
 	/* Looking at content */
 	if (*sp == ':') {
@@ -5083,7 +5078,7 @@ xo_parse_fields (xo_handle_t *xop, xo_field_info_t *fields,
 	    if (format) {
 		xfip->xfi_format = format;
 		xfip->xfi_flen = flen;
-	    } else if (xo_role_wants_default_format(ftype)) {
+	    } else if (xo_role_wants_default_format(xfip->xfi_ftype)) {
 		xfip->xfi_format = default_format;
 		xfip->xfi_flen = 2;
 	    }
