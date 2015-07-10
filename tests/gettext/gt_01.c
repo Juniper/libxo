@@ -60,7 +60,8 @@ main (int argc, char **argv)
 
     xo_open_container("top");
 
-    for (int i = 0; i < 5; i++)
+    int i;
+    for (i = 0; i < 5; i++)
 	xo_emit("{lw:bytes/%d}{Ngp:byte,bytes}\n", i);
 
     xo_emit("{G:}{L:total} {:total/%u}\n", 1234);
