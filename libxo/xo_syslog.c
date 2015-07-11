@@ -318,7 +318,7 @@ xo_connect_log (void)
 	return;
     }
 
-    struct sockaddr_un SyslogAddr;    /* AF_UNIX address of local logger */
+    struct sockaddr_un saddr;    /* AF_UNIX address of local logger */
 
     if (xo_logfile == -1) {
         int flags = SOCK_DGRAM;
@@ -330,9 +330,9 @@ xo_connect_log (void)
     }
     if (xo_logfile != -1 && xo_status == NOCONN) {
 #ifdef HAVE_SUN_LEN
-        SyslogAddr.sun_len = sizeof(SyslogAddr);
+        saddr.sun_len = sizeof(saddr);
 #endif /* HAVE_SUN_LEN */
-        SyslogAddr.sun_family = AF_UNIX;
+        saddr.sun_family = AF_UNIX;
 
         /*
          * First try privileged socket. If no success,
@@ -340,19 +340,19 @@ xo_connect_log (void)
          */
 
 #ifdef _PATH_LOG_PRIV
-        (void) strncpy(SyslogAddr.sun_path, _PATH_LOG_PRIV,
-            sizeof SyslogAddr.sun_path);
-        if (connect(xo_logfile, (struct sockaddr *) &SyslogAddr,
-            sizeof(SyslogAddr)) != -1)
+        (void) strncpy(saddr.sun_path, _PATH_LOG_PRIV,
+            sizeof saddr.sun_path);
+        if (connect(xo_logfile, (struct sockaddr *) &saddr,
+            sizeof(saddr)) != -1)
             xo_status = CONNPRIV;
 #endif /* _PATH_LOG_PRIV */
 
 #ifdef _PATH_LOG
         if (xo_status == NOCONN) {
-            (void) strncpy(SyslogAddr.sun_path, _PATH_LOG,
-                sizeof SyslogAddr.sun_path);
-            if (connect(xo_logfile, (struct sockaddr *)&SyslogAddr,
-                sizeof(SyslogAddr)) != -1)
+            (void) strncpy(saddr.sun_path, _PATH_LOG,
+                sizeof saddr.sun_path);
+            if (connect(xo_logfile, (struct sockaddr *)&saddr,
+                sizeof(saddr)) != -1)
                 xo_status = CONNDEF;
         }
 #endif /* _PATH_LOG */
@@ -363,10 +363,10 @@ xo_connect_log (void)
              * Try the old "/dev/log" path, for backward
              * compatibility.
              */
-            (void) strncpy(SyslogAddr.sun_path, _PATH_OLDLOG,
-                sizeof SyslogAddr.sun_path);
-            if (connect(xo_logfile, (struct sockaddr *)&SyslogAddr,
-                sizeof(SyslogAddr)) != -1)
+            (void) strncpy(saddr.sun_path, _PATH_OLDLOG,
+                sizeof saddr.sun_path);
+            if (connect(xo_logfile, (struct sockaddr *)&saddr,
+                sizeof(saddr)) != -1)
                 xo_status = CONNDEF;
         }
 #endif /* _PATH_OLDLOG */
