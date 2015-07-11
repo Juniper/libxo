@@ -2009,6 +2009,11 @@ New EIDs can be requested from IANA using the following page:
 
     http://pen.iana.org/pen/PenApplication.page
 
+Each software development organization that defines a set of syslog
+messages should register their own EID and use that value in their
+software to ensure that messages can be uniquely identified by the
+combination of EID + message name.
+
 * The "xo" Utility
 
 The "xo" utility allows command line access to the functionality of
