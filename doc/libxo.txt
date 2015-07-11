@@ -2000,6 +2000,15 @@ application should provide a suitable value.
     void
     xo_set_syslog_enterprise_id (unsigned short eid);
 
+Enterprise IDs are administered by IANA, the Internet Assigned Number
+Authority.  The complete list is EIDs on their web site:
+
+    https://www.iana.org/assignments/enterprise-numbers/enterprise-numbers
+
+New EIDs can be requested from IANA using the following page:
+
+    http://pen.iana.org/pen/PenApplication.page
+
 * The "xo" Utility
 
 The "xo" utility allows command line access to the functionality of
