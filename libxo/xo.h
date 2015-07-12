@@ -19,6 +19,7 @@
 
 #include <sys/types.h>
 #include <stdarg.h>
+#include <stdio.h>
 
 #ifdef __dead2
 #define NORETURN __dead2
