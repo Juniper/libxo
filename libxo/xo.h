@@ -17,6 +17,7 @@
 #ifndef INCLUDE_XO_H
 #define INCLUDE_XO_H
 
+#include <stdio.h>
 #include <sys/types.h>
 #include <stdarg.h>
 
