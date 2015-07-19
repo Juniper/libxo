@@ -8,6 +8,7 @@
 # using the SOFTWARE, you agree to be bound by the terms of that
 # LICENSE.
 
+if HAVE_OXTRADOC
 OXTRADOC_DIR = ${SLAX_OXTRADOCDIR}
 OXTRADOC_PREFIX = ${OXTRADOC_DIR}
 OXTRADOC = ${OXTRADOC_DIR}/oxtradoc
@@ -38,7 +39,6 @@ OX_ARGS += -S ${SLAXPROC} -p doc
 OX_CMD = ${PERL} ${PERLOPTS} ${OXTRADOC} ${OX_ARGS}
 OXTRADOC_CMD = ${OX_CMD}
 
-
 OUTPUT = libxo-manual
 INPUT = libxo
 
@@ -64,3 +64,7 @@ ${INPUT}.xml \
 ${INPUT}.txt \
 ${INPUT}.fxml \
 ${INPUT}.html
+else
+doc docs:
+	@${ECHO} "The 'oxtradoc' tool is not installed; see libslax.org"
+endif
