@@ -11,7 +11,7 @@
 .Dt LIBXO 3
 .Os
 .Sh NAME
-.Nm xo_syslog , xo_vsyslog
+.Nm xo_syslog , xo_vsyslog , xo_open_log , xo_close_log , xo_set_logmask
 .Nd create SYSLOG (RFC5424) log records using libxo formatting
 .Sh LIBRARY
 .Lb libxo
@@ -21,6 +21,12 @@
 .Fn xo_syslog "int pri" "const char *name" "const char *fmt" "..."
 .Ft void
 .Fn xo_vsyslog "int pri" "const char *name" "const char *fmt" "va_list vap"
+.Ft void
+.Fn xo_close_log "void"
+.Ft void
+.Fn xo_open_log "const char *ident" "int logstat" "int logfac"
+.Ft int
+.Fn xo_set_logmask "int pmask"
 .Sh DESCRIPTION
 The
 .Fn xo_syslog
@@ -48,6 +54,18 @@ appear as SD-PARAMS, but not in the message text.
 accepts a
 .Fa va_list
 for additional flexibility.
+.Pp
+.Fn xo_open_log ,
+.Fn xo_close_log , and
+.Fn xo_set_logmask
+are all analogous to their libs counterparts,
+.Xr openlog 3 ,
+.Xr closelog 3 , and
+.Xr setlogmask 3 .
+The extra underscores in the names are unfortunate, but keep
+consistency in
+.Nm libxo
+function names.
 .Sh EXAMPLES
 .Bd -literal -offset indent
     xo_syslog(LOG_LOCAL4 | LOG_NOTICE, "ID47",
@@ -72,8 +90,6 @@ https://github.com/Juniper/libxo/releases
 .Ed
 .Sh SEE ALSO
 .Xr xo_syslog 3 ,
-.Xr xo_open_log 3 ,
-.Xr xo_set_logmask 3 ,
 .Xr xo_set_syslog_enterprise_id 3 ,
 .Xr xo_set_syslog_handler 3 , and
 .Xr xo_format 5
