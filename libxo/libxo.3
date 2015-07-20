@@ -185,6 +185,19 @@ formatted output.
 See
 .Xr xo_format 5
 for details.
+.It Fn xo_emit_warn
+.It Fn xo_emit_warnx
+.It Fn xo_emit_warn_c
+.It Fn xo_emit_warn_hc
+.It Fn xo_emit_err
+.It Fn xo_emit_errc
+.It Fn xo_emit_errx
+These functions are mildly compatible with their standard libc
+namesakes, but use the format string defined in
+.Xr xo_format 5 .
+While there is an increased cost for converting the strings, the
+output provided can be richer and more useful.   See also
+.Xr xo_err 3
 .It Fn xo_warn
 .It Fn xo_warnx
 .It Fn xo_warn_c
@@ -301,6 +314,7 @@ https://github.com/Juniper/libxo/releases
 .Xr xo_attr 3 ,
 .Xr xo_create 3 ,
 .Xr xo_emit 3 ,
+.Xr xo_emit_err 3 ,
 .Xr xo_err 3 ,
 .Xr xo_finish 3 ,
 .Xr xo_flush 3 ,
