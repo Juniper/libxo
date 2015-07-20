@@ -1707,9 +1707,10 @@ xo_create (xo_style_t style, xo_xof_flags_t flags)
     if (xop) {
 	bzero(xop, sizeof(*xop));
 
-	xop->xo_style  = style;
-	xop->xo_flags = flags;
+	xop->xo_style = style;
+	xop->xo_flags |= flags;
 	xo_init_handle(xop);
+	xop->xo_style = style;	/* Reset style (see LIBXO_OPTIONS) */
     }
 
     return xop;
