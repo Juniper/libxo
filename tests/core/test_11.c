@@ -83,6 +83,24 @@ main (int argc, char **argv)
     xo_syslog(LOG_NOTICE | LOG_DAEMON, "animal-talk",
 	      "{:count/%d} {:animal} said {:quote}", 1, "owl", "\"e=m\\c[2]\"");
 
+    /*
+      <165>1 2003-10-11T22:14:15.003Z mymachine.example.com
+           evntslog - ID47 [exampleSDID@32473 iut="3" eventSource=
+           "Application" eventID="1011"] BOMAn application
+           event log entry...
+
+   This example is modeled after Example 1.  However, this time it
+   contains STRUCTURED-DATA, a single element with the value
+   "[exampleSDID@32473 iut="3" eventSource="Application"
+   eventID="1011"]".  The MSG itself is "An application event log
+   entry..."  The BOM at the beginning of MSG indicates UTF-8 encoding.
+    */
+
+    xo_set_syslog_enterprise_id(32473);
+    xo_syslog(LOG_LOCAL4 | LOG_NOTICE, "ID47",
+	      "{e:iut/%u}An {:event-source} {:event-id/%u} log entry",
+	      3, "application", 1011);
+
     xo_close_container_h(NULL, "top");
 
     xo_finish();
