@@ -646,8 +646,8 @@ xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
 	}
     }
 
-    xb.xb_curp += xo_snprintf(xb.xb_curp, xo_sleft(&xb), "[%s%s%s ",
-			      name, at_sign, eid);
+    xb.xb_curp += xo_snprintf(xb.xb_curp, xo_sleft(&xb), "%s [%s%s%s ",
+			      name, name, at_sign, eid);
 
     /*
      * Now for the real content.  We make two distinct passes thru the
