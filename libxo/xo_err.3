@@ -43,6 +43,19 @@ wants to
 pass that information via the current output style, and provides
 compatible functions to allow this.
 .Pp
+The
+.Fa fmt
+argument is one compatible with
+.Xr printf 3
+rather than
+.Xf xo_emit 3
+to aid in simple conversion.  This means
+these functions make unstructured data.
+To generate structured data,
+use the
+.Xr xo_emit_err 3
+functions.
+.Pp
 These functions display the program name, a colon, a formatted message
 based on the arguments, and then optionally a colon and an error
 message associated with either
@@ -74,7 +87,8 @@ is available at:
 https://github.com/Juniper/libxo/releases
 .Ed
 .Sh SEE ALSO
-.Xr xo_emit 3
+.Xr xo_emit 3 and
+.Xr xo_emit_err 3
 .Sh HISTORY
 The
 .Nm libxo
