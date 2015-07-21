@@ -73,6 +73,7 @@ AC_CHECK_HEADERS([sys/time.h])
 AC_CHECK_HEADERS([ctype.h errno.h stdio.h stdlib.h])
 AC_CHECK_HEADERS([string.h sys/param.h unistd.h ])
 AC_CHECK_HEADERS([sys/sysctl.h])
+AC_CHECK_HEADERS([threads.h])
 
 dnl humanize_number(3) is a great function, but it's not standard.
 dnl Note Macosx has the function in libutil.a but doesn't ship the
@@ -143,6 +144,45 @@ GETTEXT_LIBDIR=${GETTEXT_PREFIX}/lib
 AC_SUBST(GETTEXT_LIBDIR)
 
 AM_CONDITIONAL([HAVE_GETTEXT], [test "$HAVE_GETTEXT" = "yes"])
+
+dnl Looking for how to do thread-local variables
+AC_ARG_WITH(threads,
+        [  --with-threads=[STYLE]           Specify style of thread-local support (none)],
+        [THREAD_LOCAL=$withval],
+	[THREAD_LOCAL=unknown],
+)
+
+AC_MSG_CHECKING([thread-locals are ${THREAD_LOCAL}])
+
+if test "$THREAD_LOCAL" = "unknown"; then
+     AC_LINK_IFELSE([AC_LANG_SOURCE([[]
+           [__thread int foo; int main() { foo++; return foo; }]])],
+           [THREAD_LOCAL=before],
+           [THREAD_LOCAL=unknown])
+
+    AC_MSG_RESULT([$THREAD_LOCAL])
+fi
+
+if test "$THREAD_LOCAL" = "unknown"; then
+    AC_LINK_IFELSE([AC_LANG_SOURCE([[]
+           [int __thread foo; int main() { foo++; return foo; }]])],
+           [THREAD_LOCAL=after],
+           [THREAD_LOCAL=unknown])
+    AC_MSG_RESULT([$THREAD_LOCAL])
+fi
+
+if test "$THREAD_LOCAL" = "unknown"; then
+    AC_LINK_IFELSE([AC_LANG_SOURCE([[]
+           [__declspec(int) foo; int main() { foo++; return foo; }]])],
+           [THREAD_LOCAL=declspec],
+           [THREAD_LOCAL=unknown])
+    AC_MSG_RESULT([$THREAD_LOCAL])
+fi
+
+if test "$THREAD_LOCAL" != "unknown"; then
+    AC_DEFINE_UNQUOTED([HAVE_THREAD_LOCAL], 
+              THREAD_LOCAL_${THREAD_LOCAL}, [thread-local setting])
+fi
 
 dnl Looking for libcrypto....
 AC_CHECK_LIB([crypto], [MD5_Init])
@@ -363,4 +403,5 @@ AC_MSG_NOTICE([summary of build options:
   text-only:        ${LIBXO_TEXT_ONLY:-no}
   gettext:          ${HAVE_GETTEXT:-no} (${GETTEXT_PREFIX})
   isthreaded:       ${HAVE_ISTHREADED:-no}
+  thread-local:     ${THREAD_LOCAL:-no}
 ])
