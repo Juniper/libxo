@@ -43,6 +43,30 @@
 #include <libintl.h>
 #endif /* HAVE_GETTEXT */
 
+/*
+ * Three styles of specifying thread-local variables are supported.
+ * configure.ac has the brains to run each possibility thru the
+ * compiler and see what works; we are left to define the THREAD_LOCAL
+ * macro to the right value.  Most toolchains (clang, gcc) use
+ * "before", but some (borland) use "after" and I've heard of some
+ * (ms) that use __declspec.  Any others out there?
+ */
+#define THREAD_LOCAL_before 1
+#define THREAD_LOCAL_after 2
+#define THREAD_LOCAL_declspec 3
+
+#ifndef HAVE_THREAD_LOCAL
+#define THREAD_LOCAL(_x) _x
+#elif HAVE_THREAD_LOCAL == THREAD_LOCAL_before
+#define THREAD_LOCAL(_x) __thread _x
+#elif HAVE_THREAD_LOCAL == THREAD_LOCAL_after
+#define THREAD_LOCAL(_x) _x __thread
+#elif HAVE_THREAD_LOCAL == THREAD_LOCAL_declspec
+#define THREAD_LOCAL(_x) __declspec(_x)
+#else
+#error unknown thread-local setting
+#endif /* HAVE_THREADS_H */
+
 const char xo_version[] = LIBXO_VERSION;
 const char xo_version_extra[] = LIBXO_VERSION_EXTRA;
 
@@ -348,8 +372,8 @@ typedef struct xo_field_info_s {
  * require a handle at all, since most output is to stdout, which
  * the default handle handles handily.
  */
-static xo_handle_t xo_default_handle;
-static int xo_default_inited;
+static THREAD_LOCAL(xo_handle_t) xo_default_handle;
+static THREAD_LOCAL(int) xo_default_inited;
 static int xo_locale_inited;
 static const char *xo_program;
 
