@@ -2525,6 +2525,18 @@ xo_format_string_direct (xo_handle_t *xop, xo_buffer_t *xbp,
 }
 
 static int
+xo_needed_encoding (xo_handle_t *xop)
+{
+    if (xop->xo_flags & XOF_UTF8) /* Check the override flag */
+	return XF_ENC_UTF8;
+
+    if (xo_style(xop) == XO_STYLE_TEXT) /* Text means locale */
+	return XF_ENC_LOCALE;
+
+    return XF_ENC_UTF8;		/* Otherwise, we love UTF-8 */
+}
+
+static int
 xo_format_string (xo_handle_t *xop, xo_buffer_t *xbp, xo_xff_flags_t flags,
 		  xo_format_t *xfp)
 {
@@ -2535,8 +2547,7 @@ xo_format_string (xo_handle_t *xop, xo_buffer_t *xbp, xo_xff_flags_t flags,
     wchar_t *wcp = NULL;
     int len, cols = 0, rc = 0;
     int off = xbp->xb_curp - xbp->xb_bufp, off2;
-    int need_enc = (xo_style(xop) == XO_STYLE_TEXT)
-	? XF_ENC_LOCALE : XF_ENC_UTF8;
+    int need_enc = xo_needed_encoding(xop);
 
     if (xo_check_conversion(xop, xfp->xf_enc, need_enc))
 	return 0;
@@ -2817,8 +2828,7 @@ xo_data_append_content (xo_handle_t *xop, const char *str, int len,
 			xo_xff_flags_t flags)
 {
     int cols;
-    int need_enc = (xo_style(xop) == XO_STYLE_TEXT)
-	? XF_ENC_LOCALE : XF_ENC_UTF8;
+    int need_enc = xo_needed_encoding(xop);
     int start_offset = xo_buf_offset(&xop->xo_data);
 
     cols = xo_format_string_direct(xop, &xop->xo_data, XFF_UNESCAPE | flags,
@@ -2888,8 +2898,7 @@ xo_do_format_field (xo_handle_t *xop, xo_buffer_t *xbp,
     int rc, cols;
     int style = (flags & XFF_XML) ? XO_STYLE_XML : xo_style(xop);
     unsigned make_output = !(flags & XFF_NO_OUTPUT);
-    int need_enc = (xo_style(xop) == XO_STYLE_TEXT)
-	? XF_ENC_LOCALE : XF_ENC_UTF8;
+    int need_enc = xo_needed_encoding(xop);
     int real_need_enc = need_enc;
     int old_cols = xop->xo_columns;
 
