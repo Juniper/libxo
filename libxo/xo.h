@@ -87,6 +87,7 @@ typedef unsigned long long xo_xof_flags_t;
 #define XOF_NO_HUMANIZE	XOF_BIT(27) /** Block the {h:} modifier */
 
 #define XOF_LOG_GETTEXT	XOF_BIT(28) /** Log gettext lookup strings (stderr) */
+#define XOF_UTF8	XOF_BIT(29) /** Force text output to be UTF8 */
 
 /*
  * The xo_info_t structure provides a mapping between names and
