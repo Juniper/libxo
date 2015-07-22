@@ -665,16 +665,24 @@ xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
 
     /* Trim trailing space */
     if (xb.xb_curp[-1] == ' ')
-	xb.xb_curp[-1] -= 1;
+	xb.xb_curp -= 1;
 
     /* Close the structured data (SD-ELEMENT) */
     xb.xb_curp += xo_snprintf(xb.xb_curp, xo_sleft(&xb), "] ");
+
+    /*
+     * Since our MSG is known to be UTF-8, we MUST prefix it with
+     * that most-annoying-of-all-UTF-8 features, the BOM (0xEF.BB.BF).
+     */
+    xb.xb_curp += xo_snprintf(xb.xb_curp, xo_sleft(&xb),
+			      "%c%c%c", 0xEF, 0xBB, 0xBF);
 
     /* Save the start of the message */
     if (xo_logstat & LOG_PERROR)
 	start_of_msg = xb.xb_curp;
 
     xo_set_style(xop, XO_STYLE_TEXT);
+    xo_set_flags(xop, XOF_UTF8);
 
     errno = saved_errno;	/* Restore saved error value */
     xo_emit_hv(xop, fmt, ap);
