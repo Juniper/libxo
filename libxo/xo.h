@@ -164,13 +164,13 @@ void
 xo_set_depth (xo_handle_t *xop, int depth);
 
 int
-xo_emit_hv (xo_handle_t *xop, const char *fmt, va_list vap);
+xo_emit_hv (xo_handle_t *xop, const char *fmt, va_list vap) __printflike(2, 0);
 
 int
-xo_emit_h (xo_handle_t *xop, const char *fmt, ...);
+xo_emit_h (xo_handle_t *xop, const char *fmt, ...) __printflike(2, 3);
 
 int
-xo_emit (const char *fmt, ...);
+xo_emit (const char *fmt, ...) __printflike(1, 2);
 
 int
 xo_open_container_h (xo_handle_t *xop, const char *name);
