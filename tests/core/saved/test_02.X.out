@@ -1,4 +1,4 @@
-<top><data><message>abcdef
+<top><data><what>braces</what><message>abcdef
 </message><message>abcdef: Bad file descriptor
 </message><message>improper use of profanity; ten yard penalty; first down
 </message><length>abcdef</length><fd>-1</fd><error>Bad file descriptor</error><test>good</test><fd>-1</fd><error>Bad fi</error><test>good</test><message>improper use of profanity; ten yard penalty; first down
