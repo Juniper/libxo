@@ -83,3 +83,20 @@ msgstr ""
 msgid "Windings"
 msgstr ""
 
+msgid "Your {:adjective} {:noun} is {:verb} {:owner} {:target}\n"
+msgstr ""
+
+msgid "flaming"
+msgstr ""
+
+msgid "sword"
+msgstr ""
+
+msgid "burning"
+msgstr ""
+
+msgid "my"
+msgstr ""
+
+msgid "couch"
+msgstr ""
