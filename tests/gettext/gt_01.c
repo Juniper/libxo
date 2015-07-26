@@ -60,6 +60,9 @@ main (int argc, char **argv)
 
     xo_open_container("top");
 
+    xo_emit("{G:}Your {qg:adjective} {g:noun} is {g:verb} {qg:owner} {g:target}\n",
+	    "flaming", "sword", "burning", "my", "couch");
+
     int i;
     for (i = 0; i < 5; i++)
 	xo_emit("{lw:bytes/%d}{Ngp:byte,bytes}\n", i);
@@ -69,6 +72,14 @@ main (int argc, char **argv)
     xo_emit("{G:ldns}Received {:received/%zu} {Ngp:byte,bytes} "
 	    "from {:from/%s}#{:port/%d} in {:time/%d} ms\n",
 	    (size_t) 1234, "foop", 4321, 32);
+
+    xo_emit("{G:}Received {:received/%zu} {Ngp:byte,bytes} "
+	    "from {:from/%s}#{:port/%d} in {:time/%d} ms\n",
+	    (size_t) 1234, "foop", 4321, 32);
+
+    xo_emit("{G:/%s}Received {:received/%zu} {Ngp:byte,bytes} "
+	    "from {:from/%s}#{:port/%d} in {:time/%d} ms\n",
+	    "ldns", (size_t) 1234, "foop", 4321, 32);
 
     struct timeval tv;
     tv.tv_sec = 1435085229;
