@@ -1,6 +1,7 @@
 {
   "top": {
     "data": {
+      "what": "braces",
       "length": "abcdef",
       "fd": -1,
       "error": "Bad file descriptor",
