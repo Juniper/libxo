@@ -1,4 +1,11 @@
 <div class="line">
+  <div class="text">We are </div>
+  <div class="text">{emit}</div>
+  <div class="text">{ting}</div>
+  <div class="text"> some </div>
+  <div class="data" data-tag="what">braces</div>
+</div>
+<div class="line">
   <div class="message">abcdef</div>
 </div>
 <div class="line">
