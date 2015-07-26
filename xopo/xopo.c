@@ -27,48 +27,49 @@
 #endif /* UNUSED */
 
 static int opt_warn;		/* Enable warnings */
+static int opt_numbers;		/* Number our fields */
 
-typedef struct xopo_field_s {
-    TAILQ_ENTRY(xopo_field_s) xf_link;
-    char *xf_plural;
-    char xf_field[0];
-} xopo_field_t;
+typedef struct xopo_msg_s {
+    TAILQ_ENTRY(xopo_msg_s) xm_link;
+    char *xm_plural;		/* If plural, points to the second part */
+    char xm_data[0];		/* Start of data */
+} xopo_msg_t;
 
-typedef TAILQ_HEAD(xopo_field_list_s, xopo_field_s) xopo_field_list_t;
+typedef TAILQ_HEAD(xopo_msg_list_s, xopo_msg_s) xopo_msg_list_t;
 
-xopo_field_list_t field_list;
+static xopo_msg_list_t field_list;
 
 static void
-xopo_field_cb (const char *str, unsigned len, int plural)
+xopo_msg_cb (const char *str, unsigned len, int plural)
 {
-    int sz = sizeof(xopo_field_t) + len + 1;
-    xopo_field_t *xfp = malloc(sz);
-    if (xfp == NULL)
+    int sz = sizeof(xopo_msg_t) + len + 1;
+    xopo_msg_t *xmp = malloc(sz);
+    if (xmp == NULL)
 	return;
 
-    bzero(xfp, sz);
-    memcpy(xfp->xf_field, str, len);
-    xfp->xf_field[len] = '\0';
+    bzero(xmp, sz);
+    memcpy(xmp->xm_data, str, len);
+    xmp->xm_data[len] = '\0';
 
     if (plural) {
-	char *cp = strchr(xfp->xf_field, ',');
+	char *cp = strchr(xmp->xm_data, ',');
 	if (cp) {
 	    *cp++ = '\0';
-	    xfp->xf_plural = cp;
+	    xmp->xm_plural = cp;
 	}
     }
 
-    xopo_field_t *xfp2;
+    xopo_msg_t *xmp2;
 
-    TAILQ_FOREACH(xfp2, &field_list, xf_link) {
-	if (strcmp(xfp->xf_field, xfp2->xf_field) == 0) {
+    TAILQ_FOREACH(xmp2, &field_list, xm_link) {
+	if (strcmp(xmp->xm_data, xmp2->xm_data) == 0) {
 	    /* Houston, we have a negative on that trajectory */
-	    free(xfp);
+	    free(xmp);
 	    return;
 	}
     }
 
-    TAILQ_INSERT_TAIL(&field_list, xfp, xf_link);
+    TAILQ_INSERT_TAIL(&field_list, xmp, xm_link);
 }
 
 static void
@@ -102,6 +103,7 @@ static struct opts {
 
 static struct option long_opts[] = {
     { "help", no_argument, &opts.o_help, 1 },
+    { "number", no_argument, NULL, 'n' },
     { "option", required_argument, NULL, 'O' },
     { "output", required_argument, NULL, 'o' },
     { "po", required_argument, NULL, 'f' },
@@ -124,11 +126,15 @@ main (int argc UNUSED, char **argv)
     if (argc < 0)
 	return 1;
 
-    while ((rc = getopt_long(argc, argv, "f:o:O:s:W",
+    while ((rc = getopt_long(argc, argv, "f:no:O:s:W",
 				long_opts, NULL)) != -1) {
 	switch (rc) {
 	case 'f':
 	    opt_input = optarg;
+	    break;
+
+	case 'n':
+	    opt_numbers = 1;
 	    break;
 
 	case 'o':
@@ -253,7 +259,7 @@ main (int argc UNUSED, char **argv)
 
 	*ep = '\0';
 
-	cp = xo_simplify_format(NULL, cp, xopo_field_cb);
+	cp = xo_simplify_format(NULL, cp, xopo_msg_cb);
 	if (cp) {
 	    fprintf(outfile, "msgid \"%s\"\n", cp);
 	    free(cp);
@@ -263,16 +269,16 @@ main (int argc UNUSED, char **argv)
     if (!blank)
 	fprintf(outfile, "\n");
 
-    xopo_field_t *xfp;
-    TAILQ_FOREACH(xfp, &field_list, xf_link) {
-	if (xfp->xf_plural) {
+    xopo_msg_t *xmp;
+    TAILQ_FOREACH(xmp, &field_list, xm_link) {
+	if (xmp->xm_plural) {
 	    fprintf(outfile, "msgid \"%s\"\n"
 		    "msgid_plural \"%s\"\n"
 		    "msgstr[0] \"\"\n"
 		    "msgstr[1] \"\"\n\n",
-		    xfp->xf_field, xfp->xf_plural);
+		    xmp->xm_data, xmp->xm_plural);
 	} else {
-	    fprintf(outfile, "msgid \"%s\"\nmsgstr \"\"\n\n", xfp->xf_field);
+	    fprintf(outfile, "msgid \"%s\"\nmsgstr \"\"\n\n", xmp->xm_data);
 	}
     }
 
