@@ -1,5 +1,6 @@
 <top>
   <data>
+    <what>braces</what>
   <message>abcdef
 </message>
   <message>abcdef: Bad file descriptor
