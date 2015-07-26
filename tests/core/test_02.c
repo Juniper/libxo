@@ -47,6 +47,8 @@ main (int argc, char **argv)
 
     xo_open_container("data");
 
+    xo_emit("We are {{emit}}{{ting}} some {:what}\n", "braces");
+
     xo_message("abcdef");
     close(-1);
     xo_message_e("abcdef");
