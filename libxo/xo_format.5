@@ -61,6 +61,10 @@ The contents, field-format, and
 encoding-format are used in varying ways, based on the role.
 These are described in the following sections.
 .Pp
+Braces can be escaped by using double braces, similar to "%%" in
+.Xr printf 3 .
+The format string "{{braces}}" would emit "{braces}".
+.Pp
 In the following example, three field descriptors appear.
 The first
 is a padding field containing three spaces of padding, the second is a
