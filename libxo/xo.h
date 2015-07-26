@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Juniper Networks, Inc.
+ * Copyright (c) 2014-2015, Juniper Networks, Inc.
  * All rights reserved.
  * This SOFTWARE is licensed under the LICENSE provided in the
  * ../Copyright file. By downloading, installing, copying, or otherwise
@@ -46,15 +46,15 @@ typedef unsigned short xo_style_t;
 #define XO_STYLE_XML	1	/** Generate XML output */
 #define XO_STYLE_JSON	2	/** Generate JSON output */
 #define XO_STYLE_HTML	3	/** Generate HTML output */
-#define XO_STYLE_SDPARAMS 4	/** Generate syslog structured data params */
+#define XO_STYLE_SDPARAMS 4	/* Generate syslog structured data params */
 
 /** Flags for libxo */
 typedef unsigned long long xo_xof_flags_t;
 #define XOF_BIT(_n) ((xo_xof_flags_t) 1 << (_n))
 #define XOF_CLOSE_FP	XOF_BIT(0) /** Close file pointer on xo_close() */
 #define XOF_PRETTY	XOF_BIT(1) /** Make 'pretty printed' output */
-#define XOF_DIV_OPEN	XOF_BIT(2) /** Internal use only: a <div> is open */
-#define XOF_LINE_OPEN	XOF_BIT(3) /** Internal use only: <div class="line"> */
+#define XOF_RESV2	XOF_BIT(2) /* Unused */
+#define XOF_RESV3	XOF_BIT(3) /* Unused */
 
 #define XOF_WARN	XOF_BIT(4) /** Generate warnings for broken calls */
 #define XOF_XPATH	XOF_BIT(5) /** Emit XPath attributes in HTML  */
@@ -69,12 +69,12 @@ typedef unsigned long long xo_xof_flags_t;
 #define XOF_IGNORE_CLOSE XOF_BIT(12) /** Ignore errors on close tags */
 #define XOF_NOT_FIRST	XOF_BIT(13) /* Not the first item (JSON)  */
 #define XOF_NO_LOCALE	XOF_BIT(14) /** Don't bother with locale */
-#define XOF_TOP_EMITTED	XOF_BIT(15) /* The top JSON braces have been emitted  */
+#define XOF_RESV15	XOF_BIT(15) /* Unused */
 
 #define XOF_NO_TOP	XOF_BIT(16) /** Don't emit the top braces in JSON */
-#define XOF_ANCHOR	XOF_BIT(17) /** An anchor is in place  */
+#define XOF_RESV17	XOF_BIT(17) /* Unused  */
 #define XOF_UNITS	XOF_BIT(18) /** Encode units in XML */
-#define XOF_UNITS_PENDING XOF_BIT(19) /** We have a units-insertion pending */
+#define XOF_RESV19	XOF_BIT(19) /* Unused */
 
 #define XOF_UNDERSCORES	XOF_BIT(20) /** Replace dashes with underscores (JSON)*/
 #define XOF_COLUMNS	XOF_BIT(21) /** xo_emit should return a column count */
