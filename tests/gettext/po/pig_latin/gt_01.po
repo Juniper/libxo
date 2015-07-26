@@ -86,3 +86,21 @@ msgstr "ydrocoptichay arzlevanesmay"
 
 msgid "Windings"
 msgstr "Indingsway"
+
+msgid "Your {:adjective} {:noun} is {:verb} {:owner} {:target}\n"
+msgstr "Ouryay {:adjective} {:noun} isyay {:verb} {:owner} {:target}\n"
+
+msgid "flaming"
+msgstr "amingflay"
+
+msgid "sword"
+msgstr "ordsway"
+
+msgid "burning"
+msgstr "urningbay"
+
+msgid "my"
+msgstr "ymay"
+
+msgid "couch"
+msgstr "ouchmay"
