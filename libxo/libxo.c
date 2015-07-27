@@ -258,6 +258,8 @@ struct xo_handle_s {
     char *xo_version;		/* Version string */
     int xo_errno;		/* Saved errno for "%m" */
     char *xo_gt_domain;		/* Gettext domain, suitable for dgettext(3) */
+    xo_render_t *xo_render;	/* Rendered field information */
+    unsigned xo_num_render;	/* Length of xo_render array */
 };
 
 /* Flag operations */
@@ -1820,6 +1822,9 @@ xo_destroy (xo_handle_t *xop_arg)
     xo_buf_cleanup(&xop->xo_predicate);
     xo_buf_cleanup(&xop->xo_attrs);
     xo_buf_cleanup(&xop->xo_color_buf);
+
+    if (xop->xo_render)
+	xo_free(xop->xo_render);
 
     if (xop->xo_version)
 	xo_free(xop->xo_version);
@@ -5646,7 +5651,7 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 	xop->xo_gt_domain = NULL;
     }
 
-    if (reordered) {
+    if (gettext_changed && reordered) {
 	/* XXX Do something amazing here */
     }
 
