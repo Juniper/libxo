@@ -773,11 +773,15 @@ they are often used to give to distinct views of the underlying data.
 **** The Gettext Modifier ({g:}) @gettext-modifier@
 
 The gettext modifier is used to translate individual fields using the
-current domain and language settings.  Once libxo renders the field
-value, it is passed to gettext(3), where it is used as a key to find
-the native language translation.
+gettext domain (typically set using the "{G:}" role) and current
+language settings.  Once libxo renders the field value, it is passed
+to gettext(3), where it is used as a key to find the native language
+translation.
 
-    xo_emit("{Lgwc:State}{g:state}\n", state);
+In the following example, the strings "State" and "full" are passed
+to gettext() to find locale-based translated strings.
+
+    xo_emit("{Lgwc:State}{g:state}\n", "full");
 
 See ^gettext-role^, ^plural-modifier^, and ^howto-i18n^ for additional
 details.
@@ -1168,13 +1172,15 @@ styles, flags, or features:
 | info        | Add info attributes (HTML)                            |
 | json        | Emit JSON output                                      |
 | keys        | Emit the key attribute for keys (XML)                 |
+| log-gettext | Log (via stderr) each gettext(3) string lookup        |
+| log-syslog  | Log (via stderr) each syslog message (via xo_syslog)  |
 | no-humanize | Ignore the {h:} modifier (TEXT, HTML)                 |
 | no-locale   | Do not initialize the locale setting                  |
 | no-top      | Do not emit a top set of braces (JSON)                |
 | not-first   | Pretend the 1st output item was not 1st (JSON)        |
 | pretty      | Emit pretty-printed output                            |
 | text        | Emit TEXT output                                      |
-| underscores | Replace XML-friendly "-"s with JSON friendly "_"s e    |
+| underscores | Replace XML-friendly "-"s with JSON friendly "_"s e   |
 | units       | Add the 'units' (XML) or 'data-units (HTML) attribute |
 | warn        | Emit warnings when libxo detects bad calls            |
 | warn-xml    | Emit warnings in XML                                  |
@@ -1769,7 +1775,7 @@ is returned.  On failure, a message it emitted and -1 is returned.
 
     argc = xo_parse_args(argc, argv);
     if (argc < 0)
-        exit(1);
+        exit(EXIT_FAILURE);
 
 Following the call to xo_parse_args, the application can process the
 remaining arguments in a normal manner.  See ^command-line-arguments^
@@ -2924,7 +2930,7 @@ Here is the unit test example:
         
         argc = xo_parse_args(argc, argv);
         if (argc < 0)
-            exit(1);
+            exit(EXIT_FAILURE);
     
         xo_set_info(NULL, info, info_count);
     
