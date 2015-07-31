@@ -204,20 +204,6 @@ typedef struct xo_colors_s {
 } xo_colors_t;
 
 /*
- * Reordering fields is required for gettext-based translation, where
- * the target language might use words in a different order.  Due to
- * the way we render our fields, we need to allow rendering in normal
- * (old) order, and then when rendering is complete, we reorder the
- * fields into the proper (new) order.  To facilitate this, we reorder
- * the start and end of each field as we render them.
- */
-typedef struct xo_render_s {	/* Rendered field information */
-    unsigned xr_fnum;		/* Field number (1 origin) */
-    unsigned xr_start;		/* Offset of field start */
-    unsigned xr_end;		/* Offset of field end */
-} xo_render_t;
-
-/*
  * xo_handle_t: this is the principle data structure for libxo.
  * It's used as a store for state, options, content, and all manor
  * of other information.
@@ -258,8 +244,6 @@ struct xo_handle_s {
     char *xo_version;		/* Version string */
     int xo_errno;		/* Saved errno for "%m" */
     char *xo_gt_domain;		/* Gettext domain, suitable for dgettext(3) */
-    xo_render_t *xo_render;	/* Rendered field information */
-    unsigned xo_num_render;	/* Length of xo_render array */
 };
 
 /* Flag operations */
@@ -276,7 +260,7 @@ struct xo_handle_s {
 #define XOIF_CLEAR(_xop, _bit) XOF_BIT_CLEAR(_xop->xo_iflags, _bit)
 
 /* Internal flags */
-#define XOIF_REORDERING	XOF_BIT(0) /* Reordering fields; record xo_render[] */
+#define XOIF_REORDER	XOF_BIT(0) /* Reordering fields; record field info */
 #define XOIF_DIV_OPEN	XOF_BIT(1) /* A <div> is open */
 #define XOIF_TOP_EMITTED XOF_BIT(2) /* The top JSON braces have been emitted */
 #define XOIF_ANCHOR	XOF_BIT(3) /* An anchor is in place  */
@@ -402,7 +386,7 @@ typedef struct xo_field_info_s {
     unsigned xfi_flen;		/* Format length */
     unsigned xfi_elen;		/* Encoding length */
     unsigned xfi_fnum;		/* Field number (if used; 0 otherwise) */
-    unsigned xfi_renum;		/* Reordered number */
+    unsigned xfi_renum;		/* Reordered number (0 == no renumbering) */
 } xo_field_info_t;
 
 /*
@@ -578,56 +562,6 @@ xo_printable (const char *str)
     *cp = '\0';
     return res;
 }
-
-#ifdef HAVE_GETTEXT
-static inline const char *
-xo_dgettext (xo_handle_t *xop, const char *str)
-{
-    const char *domainname = xop->xo_gt_domain;
-    const char *res;
-
-    res = dgettext(domainname, str);
-
-    if (XOF_ISSET(xop, XOF_LOG_GETTEXT))
-	fprintf(stderr, "xo: gettext: %s%s%smsgid \"%s\" returns \"%s\"\n",
-		domainname ? "domain \"" : "", xo_printable(domainname),
-		domainname ? "\", " : "", xo_printable(str), xo_printable(res));
-
-    return res;
-}
-
-static inline const char *
-xo_dngettext (xo_handle_t *xop, const char *sing, const char *plural,
-	      unsigned long int n)
-{
-    const char *domainname = xop->xo_gt_domain;
-    const char *res;
-
-    res = dngettext(domainname, sing, plural, n);
-    if (XOF_ISSET(xop, XOF_LOG_GETTEXT))
-	fprintf(stderr, "xo: gettext: %s%s%s"
-		"msgid \"%s\", msgid_plural \"%s\" (%lu) returns \"%s\"\n",
-		domainname ? "domain \"" : "", 
-		xo_printable(domainname), domainname ? "\", " : "",
-		xo_printable(sing),
-		xo_printable(plural), n, xo_printable(res));
-
-    return res;
-}
-#else /* HAVE_GETTEXT */
-static inline const char *
-xo_dgettext (xo_handle_t *xop UNUSED, const char *str)
-{
-    return str;
-}
-
-static inline const char *
-xo_dngettext (xo_handle_t *xop UNUSED, const char *singular,
-	      const char *plural, unsigned long int n)
-{
-    return (n == 1) ? singular : plural;
-}
-#endif /* HAVE_GETTEXT */
 
 static int
 xo_depth_check (xo_handle_t *xop, int depth)
@@ -1823,9 +1757,6 @@ xo_destroy (xo_handle_t *xop_arg)
     xo_buf_cleanup(&xop->xo_attrs);
     xo_buf_cleanup(&xop->xo_color_buf);
 
-    if (xop->xo_render)
-	xo_free(xop->xo_render);
-
     if (xop->xo_version)
 	xo_free(xop->xo_version);
 
@@ -1941,6 +1872,7 @@ static xo_mapping_t xo_xof_names[] = {
     { XOF_INFO, "info" },
     { XOF_KEYS, "keys" },
     { XOF_LOG_GETTEXT, "log-gettext" },
+    { XOF_LOG_SYSLOG, "log-syslog" },
     { XOF_NO_HUMANIZE, "no-humanize" },
     { XOF_NO_LOCALE, "no-locale" },
     { XOF_NO_TOP, "no-top" },
@@ -2773,6 +2705,56 @@ xo_count_utf8_cols (const char *str, int len)
 
     return cols;
 }
+
+#ifdef HAVE_GETTEXT
+static inline const char *
+xo_dgettext (xo_handle_t *xop, const char *str)
+{
+    const char *domainname = xop->xo_gt_domain;
+    const char *res;
+
+    res = dgettext(domainname, str);
+
+    if (XOF_ISSET(xop, XOF_LOG_GETTEXT))
+	fprintf(stderr, "xo: gettext: %s%s%smsgid \"%s\" returns \"%s\"\n",
+		domainname ? "domain \"" : "", xo_printable(domainname),
+		domainname ? "\", " : "", xo_printable(str), xo_printable(res));
+
+    return res;
+}
+
+static inline const char *
+xo_dngettext (xo_handle_t *xop, const char *sing, const char *plural,
+	      unsigned long int n)
+{
+    const char *domainname = xop->xo_gt_domain;
+    const char *res;
+
+    res = dngettext(domainname, sing, plural, n);
+    if (XOF_ISSET(xop, XOF_LOG_GETTEXT))
+	fprintf(stderr, "xo: gettext: %s%s%s"
+		"msgid \"%s\", msgid_plural \"%s\" (%lu) returns \"%s\"\n",
+		domainname ? "domain \"" : "", 
+		xo_printable(domainname), domainname ? "\", " : "",
+		xo_printable(sing),
+		xo_printable(plural), n, xo_printable(res));
+
+    return res;
+}
+#else /* HAVE_GETTEXT */
+static inline const char *
+xo_dgettext (xo_handle_t *xop UNUSED, const char *str)
+{
+    return str;
+}
+
+static inline const char *
+xo_dngettext (xo_handle_t *xop UNUSED, const char *singular,
+	      const char *plural, unsigned long int n)
+{
+    return (n == 1) ? singular : plural;
+}
+#endif /* HAVE_GETTEXT */
 
 /*
  * This is really _re_formatting, since the normal format code has
@@ -5032,6 +5014,63 @@ xo_parse_roles (xo_handle_t *xop, const char *fmt,
 }
 
 /*
+ * Number any remaining fields that need numbers.  Note that some
+ * field types (text, newline, escaped braces) never get numbers.
+ */
+static void
+xo_gettext_finish_numbering_fields (xo_handle_t *xop UNUSED,
+				    const char *fmt UNUSED,
+				    xo_field_info_t *fields)
+{
+    xo_field_info_t *xfip;
+    unsigned fnum, max_fields;
+    uint64_t bits = 0;
+
+    /* First make a list of add the explicitly used bits */
+    for (xfip = fields, fnum = 0; xfip->xfi_ftype; xfip++) {
+	switch (xfip->xfi_ftype) {
+	case XO_ROLE_NEWLINE:	/* Don't get numbered */
+	case XO_ROLE_TEXT:
+	case XO_ROLE_EBRACE:
+	case 'G':
+	    continue;
+	}
+
+	fnum += 1;
+	if (fnum >= 63)
+	    break;
+
+	if (xfip->xfi_fnum)
+	    bits |= 1 << xfip->xfi_fnum;
+    }
+
+    max_fields = fnum;
+
+    for (xfip = fields, fnum = 0; xfip->xfi_ftype; xfip++) {
+	switch (xfip->xfi_ftype) {
+	case XO_ROLE_NEWLINE:	/* Don't get numbered */
+	case XO_ROLE_TEXT:
+	case XO_ROLE_EBRACE:
+	case 'G':
+	    continue;
+	}
+
+	if (xfip->xfi_fnum != 0)
+	    continue;
+
+	/* Find the next unassigned field */
+	for (fnum++; bits & (1 << fnum); fnum++)
+	    continue;
+
+	if (fnum > max_fields)
+	    break;
+
+	xfip->xfi_fnum = fnum;	/* Mark the field number */
+	bits |= 1 << fnum;	/* Mark it used */
+    }
+}
+
+/*
  * The format string uses field numbers, so we need to whiffle thru it
  * and make sure everything's sane and lovely.
  */
@@ -5234,7 +5273,7 @@ xo_parse_fields (xo_handle_t *xop, xo_field_info_t *fields,
  * field.  We build a simplified version of the format string.
  */
 static int
-xo_do_simplify_format (xo_handle_t *xop UNUSED,
+xo_gettext_simplify_format (xo_handle_t *xop UNUSED,
 		       xo_buffer_t *xbp,
 		       xo_field_info_t *fields,
 		       int this_field,
@@ -5319,6 +5358,67 @@ xo_dump_fields (xo_field_info_t *fields)
     }
 }
 
+#ifdef HAVE_GETTEXT
+/*
+ * Find the field that matches the given field number
+ */
+static xo_field_info_t *
+xo_gettext_find_field (xo_field_info_t *fields, unsigned fnum)
+{
+    xo_field_info_t *xfip;
+
+    for (xfip = fields; xfip->xfi_ftype; xfip++)
+	if (xfip->xfi_fnum == fnum)
+	    return xfip;
+
+    return NULL;
+}
+
+/*
+ * At this point, we need to consider if the fields have been reordered,
+ * such as "The {:adjective} {:noun}" to "La {:noun} {:adjective}".
+ *
+ * We need to rewrite the new_fields using the old fields order,
+ * so that we can render the message using the arguments as they
+ * appear on the stack.  It's a lot of work, but we don't really
+ * want to (eventually) fall into the standard printf code which
+ * means using the arguments straight (and in order) from the
+ * varargs we were originally passed.
+ */
+static void
+xo_gettext_rewrite_fields (xo_handle_t *xop UNUSED,
+			   xo_field_info_t *fields, unsigned max_fields)
+{
+    xo_field_info_t tmp[max_fields];
+    bzero(tmp, max_fields * sizeof(tmp[0]));
+
+    unsigned fnum = 0;
+    xo_field_info_t *newp, *outp, *zp;
+    for (newp = fields, outp = tmp; newp->xfi_ftype; newp++, outp++) {
+	switch (newp->xfi_ftype) {
+	case XO_ROLE_NEWLINE:	/* Don't get numbered */
+	case XO_ROLE_TEXT:
+	case XO_ROLE_EBRACE:
+	case 'G':
+	    *outp = *newp;
+	    outp->xfi_renum = 0;
+	    continue;
+	}
+
+	zp = xo_gettext_find_field(fields, ++fnum);
+	if (zp == NULL) { 	/* Should not occur */
+	    *outp = *newp;
+	    outp->xfi_renum = 0;
+	    continue;
+	}
+
+	*outp = *zp;
+	outp->xfi_renum = newp->xfi_fnum;
+    }
+
+    memcpy(fields, tmp, max_fields * sizeof(tmp[0]));
+}
+
 /*
  * We've got two lists of fields, the old list from the original
  * format string and the new one from the parsed gettext reply.  The
@@ -5331,11 +5431,14 @@ xo_dump_fields (xo_field_info_t *fields)
  */
 static int
 xo_gettext_combine_formats (xo_handle_t *xop, const char *fmt UNUSED,
-			    const char *gtfmt, xo_field_info_t *old_fields,
-			    xo_field_info_t *new_fields, int *reorderedp)
+		    const char *gtfmt, xo_field_info_t *old_fields,
+		    xo_field_info_t *new_fields, unsigned new_max_fields,
+		    int *reorderedp)
 {
     int reordered = 0;
     xo_field_info_t *newp, *oldp, *startp = old_fields;
+
+    xo_gettext_finish_numbering_fields(xop, fmt, old_fields);
 
     for (newp = new_fields; newp->xfi_ftype; newp++) {
 	switch (newp->xfi_ftype) {
@@ -5402,6 +5505,7 @@ xo_gettext_combine_formats (xo_handle_t *xop, const char *fmt UNUSED,
 	 */
     copy_it:
 	newp->xfi_flags = oldp->xfi_flags;
+	newp->xfi_fnum = oldp->xfi_fnum;
 	newp->xfi_format = oldp->xfi_format;
 	newp->xfi_flen = oldp->xfi_flen;
 	newp->xfi_encoding = oldp->xfi_encoding;
@@ -5409,6 +5513,11 @@ xo_gettext_combine_formats (xo_handle_t *xop, const char *fmt UNUSED,
     }
 
     *reorderedp = reordered;
+    if (reordered) {
+	xo_gettext_finish_numbering_fields(xop, fmt, new_fields);
+	xo_gettext_rewrite_fields(xop, new_fields, new_max_fields);
+    }
+
     return 0;
 }
 
@@ -5429,14 +5538,12 @@ xo_gettext_combine_formats (xo_handle_t *xop, const char *fmt UNUSED,
  * format string:
  *   "cluse-a {:fd} retoorned {:test}.  Bork {:error} Bork. Bork.\n"
  * If we have to reorder fields within the message, then things get
- * complicated.  We have to change styles to XO_STYLE_GTPARAMS, and
- * build name/value pairs.  Then we reformat the entire content to
- * match the new format.
+ * complicated.  See xo_gettext_rewrite_fields.
  *
  * Summary: i18n aighn't cheap.
  */
 static const char *
-xo_build_gettext_format (xo_handle_t *xop UNUSED,
+xo_gettext_build_format (xo_handle_t *xop UNUSED,
 			 xo_field_info_t *fields UNUSED,
 			 int this_field UNUSED,
 			 const char *fmt, char **new_fmtp)
@@ -5448,8 +5555,8 @@ xo_build_gettext_format (xo_handle_t *xop UNUSED,
     xo_buffer_t xb;
     xo_buf_init(&xb);
 
-    if (xo_do_simplify_format(xop, &xb, fields,
-			      this_field, fmt, NULL))
+    if (xo_gettext_simplify_format(xop, &xb, fields,
+				   this_field, fmt, NULL))
 	goto bail2;
 
     const char *gtfmt = xo_dgettext(xop, xb.xb_bufp);
@@ -5473,18 +5580,77 @@ xo_build_gettext_format (xo_handle_t *xop UNUSED,
     return fmt;
 }
 
+static void
+xo_gettext_rebuild_content (xo_handle_t *xop, xo_field_info_t *fields,
+			    unsigned *fstart, unsigned min_fstart,
+			    unsigned *fend, unsigned max_fend)
+{
+    xo_field_info_t *xfip;
+    char *buf;
+    unsigned base = fstart[min_fstart];
+    unsigned blen = fend[max_fend] - base;
+    xo_buffer_t *xbp = &xop->xo_data;
+
+    if (blen == 0)
+	return;
+
+    buf = xo_realloc(NULL, blen);
+    if (buf == NULL)
+	return;
+
+    memcpy(buf, xbp->xb_bufp + fstart[min_fstart], blen); /* Copy our data */
+
+    unsigned field = min_fstart, soff, doff = base, len, fnum;
+    xo_field_info_t *zp;
+
+    /*
+     * Be aware there are two competing views of "field number": we
+     * want the user to thing in terms of "The {1:size}" where {G:},
+     * newlines, escaped braces, and text don't have numbers.  But is
+     * also the internal view, where we have an array of
+     * xo_field_info_t and every field have an index.  fnum, fstart[]
+     * and fend[] are the latter, but xfi_renum is the former.
+     */
+    for (xfip = fields + field; xfip->xfi_ftype; xfip++, field++) {
+	fnum = field;
+	if (xfip->xfi_renum) {
+	    zp = xo_gettext_find_field(fields, xfip->xfi_renum);
+	    fnum = zp ? zp - fields : field;
+	}
+
+	soff = fstart[fnum];
+	len = fend[fnum] - soff;
+
+	if (len > 0) {
+	    soff -= base;
+	    memcpy(xbp->xb_bufp + doff, buf + soff, len);
+	    doff += len;
+	}
+    }
+
+    xo_free(buf);
+}
+#endif /* HAVE_GETTEXT */
+
 static int
 xo_do_emit (xo_handle_t *xop, const char *fmt)
 {
+#ifdef HAVE_GETTEXT
+    int gettext_inuse = 0;
+    int gettext_changed = 0;
+    int gettext_reordered = 0;
+    xo_field_info_t *new_fields = NULL;
+#else /* HAVE_GETTEXT */
+    const int gettext_reordered = 0;
+#endif /* HAVE_GETTEXT */
+
     int rc = 0;
     int flush = XOF_ISSET(xop, XOF_FLUSH);
     int flush_line = XOF_ISSET(xop, XOF_FLUSH_LINE);
-    int gettext_inuse = 0;
-    int gettext_changed = 0;
-    int reordered = 0;
     char *new_fmt = NULL;
-    xo_field_info_t *new_fields = NULL;
-    unsigned new_max_fields = 0;
+
+    if (XOIF_ISSET(xop, XOIF_REORDER))
+	flush_line = 0;
 
     xop->xo_columns = 0;	/* Always reset it */
     xop->xo_errno = errno;	/* Save for "%m" */
@@ -5500,25 +5666,47 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
     unsigned ftype;
     xo_xff_flags_t flags;
 
+    /*
+     * Some overhead for gettext; if the fields in the msgstr returned
+     * by gettext are reordered, then we need to record start and end
+     * for each field.  We'll go ahead and render the fields in the
+     * normal order, but later we can then reconstruct the reordered
+     * fields using these fstart/fend values.
+     */
+    unsigned flimit = max_fields * 2; /* Pessimistic limit */
+    unsigned min_fstart = flimit - 1;
+    unsigned max_fend = 0;	      /* Highest recorded fend[] entry */
+    unsigned fstart[flimit];
+    bzero(fstart, flimit * sizeof(fstart[0]));
+    unsigned fend[flimit];
+    bzero(fend, flimit * sizeof(fend[0]));
+
     for (xfip = fields, field = 0; xfip->xfi_ftype && field < max_fields;
 	 xfip++, field++) {
 	ftype = xfip->xfi_ftype;
 	flags = xfip->xfi_flags;
 
+	/* Record field start offset */
+	if (gettext_reordered) {
+	    fstart[field] = xo_buf_offset(&xop->xo_data);
+	    if (min_fstart > field)
+		min_fstart = field;
+	}
+
 	if (ftype == XO_ROLE_NEWLINE) {
 	    xo_line_close(xop);
 	    if (flush_line && xo_flush_h(xop) < 0)
 		return -1;
-	    continue;
+	    goto bottom;
 
 	} else if (ftype == XO_ROLE_EBRACE) {
 	    xo_format_text(xop, xfip->xfi_start, xfip->xfi_len);
-	    continue;
+	    goto bottom;
 
 	} else if (ftype == XO_ROLE_TEXT) {
 	    /* Normal text */
 	    xo_format_text(xop, xfip->xfi_content, xfip->xfi_clen);
-	    continue;
+	    goto bottom;
 	}
 
 	/*
@@ -5554,6 +5742,7 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 	     */
 	    xo_set_gettext_domain(xop, xfip);
 
+#ifdef HAVE_GETTEXT
 	    if (!gettext_inuse) { /* Only translate once */
 		gettext_inuse = 1;
 		if (new_fmt) {
@@ -5561,13 +5750,12 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 		    new_fmt = NULL;
 		}
 
-		xo_build_gettext_format(xop, fields, field,
+		xo_gettext_build_format(xop, fields, field,
 					xfip->xfi_next, &new_fmt);
 		if (new_fmt) {
 		    gettext_changed = 1;
-		    /* XXX Need to support field reordering here */
 
-		    new_max_fields = xo_count_fields(xop, new_fmt);
+		    unsigned new_max_fields = xo_count_fields(xop, new_fmt);
 
 		    if (++new_max_fields < max_fields)
 			new_max_fields = max_fields;
@@ -5579,28 +5767,30 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 
 		    if (!xo_parse_fields(xop, new_fields + 1,
 					 new_max_fields, new_fmt)) {
-			reordered = 0;
+			gettext_reordered = 0;
 
 			if (!xo_gettext_combine_formats(xop, fmt, new_fmt,
-			       fields, new_fields + 1, &reordered)) {
+					fields, new_fields + 1,
+					new_max_fields, &gettext_reordered)) {
 
-			    if (reordered) {
-				/* XXX Underimplemented */
-				xo_failure(xop, "gettext finds reordered "
-					   "fields in '%s' and '%s'",
-					   xo_printable(fmt),
-					   xo_printable(new_fmt));
-				flush_line = 0;
-				goto bail2;
+			    if (gettext_reordered) {
+				if (XOF_ISSET(xop, XOF_LOG_GETTEXT))
+				    xo_failure(xop, "gettext finds reordered "
+					       "fields in '%s' and '%s'",
+					       xo_printable(fmt),
+					       xo_printable(new_fmt));
+				flush_line = 0; /* Must keep at content */
+				XOIF_SET(xop, XOIF_REORDER);
 			    }
 
-			    field = 0; /* Will be incremented at top of loop */
+			    field = -1; /* Will be incremented at top of loop */
 			    xfip = new_fields;
 			    max_fields = new_max_fields;
 			}
 		    }
 		}
 	    }
+#endif /* HAVE_GETTEXT */
 	    continue;
 
 	} else  if (xfip->xfi_clen || xfip->xfi_format) {
@@ -5623,7 +5813,24 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 
 	if (flags & XFF_WS)
 	    xo_format_content(xop, "padding", NULL, " ", 1, NULL, 0, 0);
+
+    bottom:
+	/* Record the end-of-field offset */
+	if (gettext_reordered) {
+	    fend[field] = xo_buf_offset(&xop->xo_data);
+	    max_fend = field;
+	}
     }
+
+#ifdef HAVE_GETTEXT
+    if (gettext_changed && gettext_reordered) {
+	/* Final step: rebuild the content using the rendered fields */
+	xo_gettext_rebuild_content(xop, new_fields + 1, fstart, min_fstart,
+				   fend, max_fend);
+    }
+#endif /* HAVE_GETTEXT */
+
+    XOIF_CLEAR(xop, XOIF_REORDER);
 
     /* If we don't have an anchor, write the text out */
     if (flush && !XOIF_ISSET(xop, XOIF_ANCHOR)) {
@@ -5631,11 +5838,6 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 	    rc = -1;		/* Report failure */
 	else if (xop->xo_flush && xop->xo_flush(xop->xo_opaque) < 0)
 	    rc = -1;
-    }
-
-    if (0) {
-    bail2:
-	rc = -1;
     }
 
     if (new_fmt)
@@ -5651,10 +5853,6 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 	xop->xo_gt_domain = NULL;
     }
 
-    if (gettext_changed && reordered) {
-	/* XXX Do something amazing here */
-    }
-
     return (rc < 0) ? rc : (int) xop->xo_columns;
 }
 
@@ -5663,7 +5861,7 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
  * is exposed to tools can perform this function.  See xo(1).
  */
 char *
-xo_simplify_format (xo_handle_t *xop, const char *fmt, 
+xo_simplify_format (xo_handle_t *xop, const char *fmt, int with_numbers,
 		    xo_simplify_field_func_t field_cb)
 {
     xop = xo_default(xop);
@@ -5682,7 +5880,10 @@ xo_simplify_format (xo_handle_t *xop, const char *fmt,
     xo_buffer_t xb;
     xo_buf_init(&xb);
 
-    if (xo_do_simplify_format(xop, &xb, fields, -1, fmt, field_cb))
+    if (with_numbers)
+	xo_gettext_finish_numbering_fields(xop, fmt, fields);
+
+    if (xo_gettext_simplify_format(xop, &xb, fields, -1, fmt, field_cb))
 	return NULL;
 
     return xb.xb_bufp;
