@@ -1,4 +1,28 @@
 <div class="line">
+  <div class="text">Wide char: </div>
+  <div class="data" data-tag="wc">෴ - 0xdf4 - 1</div>
+</div>
+<div class="line">
+  <div class="text">Wide char: </div>
+  <div class="data" data-tag="wc">ණ - 0xdab - 1</div>
+</div>
+<div class="line">
+  <div class="text">Wide char: </div>
+  <div class="data" data-tag="wc">් - 0xdca - 1</div>
+</div>
+<div class="line">
+  <div class="text">Wide char: </div>
+  <div class="data" data-tag="wc">ණ - 0xdab - 1</div>
+</div>
+<div class="line">
+  <div class="text">Wide char: </div>
+  <div class="data" data-tag="wc">្ - 0x17d2 - 1</div>
+</div>
+<div class="line">
+  <div class="text">Wide char: </div>
+  <div class="data" data-tag="wc">෴ - 0xdf4 - 1</div>
+</div>
+<div class="line">
   <div class="text">Οὐχὶ ταὐτὰ παρίσταταί μοι </div>
   <div class="data" data-tag="v1">γιγνώσκειν</div>
   <div class="text">, </div>
