@@ -5548,7 +5548,6 @@ xo_gettext_build_format (xo_handle_t *xop UNUSED,
 			 int this_field UNUSED,
 			 const char *fmt, char **new_fmtp)
 {
-#ifdef HAVE_GETTEXT
     if (xo_style_is_encoding(xop))
 	goto bail;
 
@@ -5575,7 +5574,6 @@ xo_gettext_build_format (xo_handle_t *xop UNUSED,
  bail2:
 	xo_buf_cleanup(&xb);
  bail:
-#endif /* HAVE_GETTEXT */
     *new_fmtp = NULL;
     return fmt;
 }
@@ -5630,19 +5628,48 @@ xo_gettext_rebuild_content (xo_handle_t *xop, xo_field_info_t *fields,
 
     xo_free(buf);
 }
+#else  /* HAVE_GETTEXT */
+static const char *
+xo_gettext_build_format (xo_handle_t *xop UNUSED,
+			 xo_field_info_t *fields UNUSED,
+			 int this_field UNUSED,
+			 const char *fmt UNUSED, char **new_fmtp)
+{
+    *new_fmtp = NULL;
+    return fmt;
+}
+
+static int
+xo_gettext_combine_formats (xo_handle_t *xop UNUSED, const char *fmt UNUSED,
+		    const char *gtfmt UNUSED,
+		    xo_field_info_t *old_fields UNUSED,
+		    xo_field_info_t *new_fields UNUSED,
+		    unsigned new_max_fields UNUSED,
+		    int *reorderedp UNUSED)
+{
+    return -1;
+}
+
+static void
+xo_gettext_rebuild_content (xo_handle_t *xop UNUSED,
+		    xo_field_info_t *fields UNUSED,
+		    unsigned *fstart UNUSED, unsigned min_fstart UNUSED,
+		    unsigned *fend UNUSED, unsigned max_fend UNUSED)
+{
+    return;
+}
 #endif /* HAVE_GETTEXT */
 
+/*
+ * The central function for emitting libxo output.
+ */
 static int
 xo_do_emit (xo_handle_t *xop, const char *fmt)
 {
-#ifdef HAVE_GETTEXT
     int gettext_inuse = 0;
     int gettext_changed = 0;
     int gettext_reordered = 0;
     xo_field_info_t *new_fields = NULL;
-#else /* HAVE_GETTEXT */
-    const int gettext_reordered = 0;
-#endif /* HAVE_GETTEXT */
 
     int rc = 0;
     int flush = XOF_ISSET(xop, XOF_FLUSH);
@@ -5742,7 +5769,6 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 	     */
 	    xo_set_gettext_domain(xop, xfip);
 
-#ifdef HAVE_GETTEXT
 	    if (!gettext_inuse) { /* Only translate once */
 		gettext_inuse = 1;
 		if (new_fmt) {
@@ -5790,7 +5816,6 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 		    }
 		}
 	    }
-#endif /* HAVE_GETTEXT */
 	    continue;
 
 	} else  if (xfip->xfi_clen || xfip->xfi_format) {
@@ -5822,13 +5847,11 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 	}
     }
 
-#ifdef HAVE_GETTEXT
     if (gettext_changed && gettext_reordered) {
 	/* Final step: rebuild the content using the rendered fields */
 	xo_gettext_rebuild_content(xop, new_fields + 1, fstart, min_fstart,
 				   fend, max_fend);
     }
-#endif /* HAVE_GETTEXT */
 
     XOIF_CLEAR(xop, XOIF_REORDER);
 
