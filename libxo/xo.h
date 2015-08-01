@@ -53,7 +53,7 @@ typedef unsigned long long xo_xof_flags_t;
 #define XOF_BIT(_n) ((xo_xof_flags_t) 1 << (_n))
 #define XOF_CLOSE_FP	XOF_BIT(0) /** Close file pointer on xo_close() */
 #define XOF_PRETTY	XOF_BIT(1) /** Make 'pretty printed' output */
-#define XOF_RESV2	XOF_BIT(2) /* Unused */
+#define XOF_LOG_SYSLOG	XOF_BIT(2) /** Log (on stderr) our syslog content */
 #define XOF_RESV3	XOF_BIT(3) /* Unused */
 
 #define XOF_WARN	XOF_BIT(4) /** Generate warnings for broken calls */
@@ -86,7 +86,7 @@ typedef unsigned long long xo_xof_flags_t;
 #define XOF_COLOR	XOF_BIT(26) /** Enable color and effects */
 #define XOF_NO_HUMANIZE	XOF_BIT(27) /** Block the {h:} modifier */
 
-#define XOF_LOG_GETTEXT	XOF_BIT(28) /** Log gettext lookup strings (stderr) */
+#define XOF_LOG_GETTEXT	XOF_BIT(28) /** Log (stderr) gettext lookup strings */
 #define XOF_UTF8	XOF_BIT(29) /** Force text output to be UTF8 */
 
 /*
@@ -462,7 +462,7 @@ xo_set_syslog_enterprise_id (unsigned short eid);
 typedef void (*xo_simplify_field_func_t)(const char *, unsigned, int);
 
 char *
-xo_simplify_format (xo_handle_t *xop, const char *fmt,
+xo_simplify_format (xo_handle_t *xop, const char *fmt, int with_numbers,
 		    xo_simplify_field_func_t field_cb);
 
 #endif /* INCLUDE_XO_H */
