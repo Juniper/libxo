@@ -63,6 +63,10 @@ main (int argc, char **argv)
     xo_emit("{G:}Your {qg:adjective} {g:noun} is {g:verb} {qg:owner} {g:target}\n",
 	    "flaming", "sword", "burning", "my", "couch");
 
+    xo_emit("{G:}The {qg:adjective} {g:noun} was {g:verb} {qg:owner} {g:target}\n",
+	    "flaming", "sword", "burning", "my", "couch");
+
+
     int i;
     for (i = 0; i < 5; i++)
 	xo_emit("{lw:bytes/%d}{Ngp:byte,bytes}\n", i);
