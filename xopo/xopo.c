@@ -193,7 +193,7 @@ main (int argc UNUSED, char **argv)
     fmt = *argv++;
 
     if (opt_simplify) {
-	fmt = xo_simplify_format(NULL, opt_simplify, NULL);
+	fmt = xo_simplify_format(NULL, opt_simplify, opt_numbers, NULL);
 	if (fmt) {
 	    xo_emit("{:format}\n", fmt);
 	    free(fmt);
@@ -259,7 +259,7 @@ main (int argc UNUSED, char **argv)
 
 	*ep = '\0';
 
-	cp = xo_simplify_format(NULL, cp, xopo_msg_cb);
+	cp = xo_simplify_format(NULL, cp, opt_numbers, xopo_msg_cb);
 	if (cp) {
 	    fprintf(outfile, "msgid \"%s\"\n", cp);
 	    free(cp);
