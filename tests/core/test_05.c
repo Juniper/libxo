@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <wchar.h>
 
 #include "xo.h"
 
@@ -43,7 +44,7 @@ main (int argc, char **argv)
 	  "෴ණ්ණ෴෴ණ්ණ෴෴ණ්ණ෴෴෴", 110, 20 },
 	{ NULL, NULL }
     }, *ep = employees;
-    int rc;
+    int rc, i;
 
     argc = xo_parse_args(argc, argv);
     if (argc < 0)
@@ -53,6 +54,11 @@ main (int argc, char **argv)
     xo_set_flags(NULL, XOF_COLUMNS);
 
     xo_open_container("employees");
+
+    wchar_t wc[] = { L'෴', L'ණ', L'්', L'ණ', L'\u17D2', L'෴', 0 };
+    for (i = 0; wc[i]; i++)
+	xo_emit("Wide char: {lq:wc/%lc - %#lx - %d}\n",
+		wc[i], (unsigned long) wc[i], wcwidth(wc[i]));
 
     xo_emit("Οὐχὶ ταὐτὰ παρίσταταί μοι {:v1/%s}, {:v2/%s}\n",
 	    "γιγνώσκειν", "ὦ ἄνδρες ᾿Αθηναῖοι");
