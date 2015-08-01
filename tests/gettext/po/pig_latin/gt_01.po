@@ -35,7 +35,7 @@ msgstr "Onlyay {:marzlevanes} {N:marzlevane,marzlevanes} areyay unctioningfay or
 
 #: gt_01.c:63
 msgid "Version {:version} {:date}\n"
-msgstr "Ersionvay {:version} {:date}\n"
+msgstr "Ersionvay {:date} {:version}\n"
 
 #: gt_01.c:66
 msgid "Unable to {:verb} forward velociping"
@@ -88,7 +88,10 @@ msgid "Windings"
 msgstr "Indingsway"
 
 msgid "Your {:adjective} {:noun} is {:verb} {:owner} {:target}\n"
-msgstr "Ouryay {:adjective} {:noun} isyay {:verb} {:owner} {:target}\n"
+msgstr "Ouryay {:noun} {:adjective} isyay {:owner}{:target} bubbly-bubbly {:verb}\n"
+
+msgid "The {:adjective} {:noun} was {:verb} {:owner} {:target}\n"
+msgstr "Ethay {:noun} asway '{:owner}{:adjective}{:target}' {:verb}\n"
 
 msgid "flaming"
 msgstr "amingflay"
@@ -103,4 +106,4 @@ msgid "my"
 msgstr "ymay"
 
 msgid "couch"
-msgstr "ouchmay"
+msgstr "ouchcay"
