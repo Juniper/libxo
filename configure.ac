@@ -92,6 +92,11 @@ fi
 
 AM_CONDITIONAL([HAVE_HUMANIZE_NUMBER], [test "$HAVE_HUMANIZE_NUMBER" = "yes"])
 
+AC_ARG_ENABLE([gettext],
+    [  --disable-gettext  Turn off support for gettext],
+    [GETTEXT_ENABLE=$enableval],
+    [GETTEXT_ENABLE=yes])
+
 dnl Looking for gettext(), assumably in libintl
 AC_ARG_WITH(gettext,
         [  --with-gettext=[PFX]           Specify location of gettext installation],
@@ -99,31 +104,36 @@ AC_ARG_WITH(gettext,
 	[GETTEXT_PREFIX=/usr],
 )
 
-AC_MSG_CHECKING([gettext in ${GETTEXT_PREFIX}])
+HAVE_GETTEXT=no
 
-_save_cflags="$CFLAGS"
-CFLAGS="$CFLAGS -I${GETTEXT_PREFIX}/include -L${GETTEXT_PREFIX}/lib -Werror -lintl"
-AC_LINK_IFELSE([AC_LANG_SOURCE([[#include <libintl.h>]
-           [int main() {char *cp = dgettext(NULL, "xx"); return 0; }]])],
-           [HAVE_GETTEXT=yes],
-           [HAVE_GETTEXT=no])
-CFLAGS="$_save_cflags"
+if test "$GETTEXT_ENABLE" != "no"; then
 
-AC_MSG_RESULT([$HAVE_GETTEXT])
+  AC_MSG_CHECKING([gettext in ${GETTEXT_PREFIX}])
 
-if test "$HAVE_GETTEXT" != "yes"; then
-    GETTEXT_PREFIX=/opt/local
-    AC_MSG_CHECKING([gettext in ${GETTEXT_PREFIX}])
+  _save_cflags="$CFLAGS"
+  CFLAGS="$CFLAGS -I${GETTEXT_PREFIX}/include -L${GETTEXT_PREFIX}/lib -Werror -lintl"
+  AC_LINK_IFELSE([AC_LANG_SOURCE([[#include <libintl.h>]
+             [int main() {char *cp = dgettext(NULL, "xx"); return 0; }]])],
+             [HAVE_GETTEXT=yes],
+             [HAVE_GETTEXT=no])
+  CFLAGS="$_save_cflags"
 
-    _save_cflags="$CFLAGS"
-    CFLAGS="$CFLAGS -I${GETTEXT_PREFIX}/include -L${GETTEXT_PREFIX}/lib -Werror -lintl"
-    AC_LINK_IFELSE([AC_LANG_SOURCE([[#include <libintl.h>]
-               [int main() {char *cp = dgettext(NULL, "xx"); return 0; }]])],
-               [HAVE_GETTEXT=yes],
-               [HAVE_GETTEXT=no])
-    CFLAGS="$_save_cflags"
+  AC_MSG_RESULT([$HAVE_GETTEXT])
 
-    AC_MSG_RESULT([$HAVE_GETTEXT])
+  if test "$HAVE_GETTEXT" != "yes"; then
+      GETTEXT_PREFIX=/opt/local
+      AC_MSG_CHECKING([gettext in ${GETTEXT_PREFIX}])
+
+      _save_cflags="$CFLAGS"
+      CFLAGS="$CFLAGS -I${GETTEXT_PREFIX}/include -L${GETTEXT_PREFIX}/lib -Werror -lintl"
+      AC_LINK_IFELSE([AC_LANG_SOURCE([[#include <libintl.h>]
+                 [int main() {char *cp = dgettext(NULL, "xx"); return 0; }]])],
+                 [HAVE_GETTEXT=yes],
+                 [HAVE_GETTEXT=no])
+      CFLAGS="$_save_cflags"
+
+      AC_MSG_RESULT([$HAVE_GETTEXT])
+  fi
 fi
 
 if test "$HAVE_GETTEXT" = "yes"; then
