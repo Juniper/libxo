@@ -86,6 +86,9 @@ msgstr ""
 msgid "Your {:adjective} {:noun} is {:verb} {:owner} {:target}\n"
 msgstr ""
 
+msgid "The {:adjective} {:noun} was {:verb} {:owner} {:target}\n"
+msgstr ""
+
 msgid "flaming"
 msgstr ""
 
