@@ -500,9 +500,11 @@ xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
     int saved_errno = errno;
     char tbuf[2048];
     char *tp = NULL, *ep = NULL;
-    char *start_of_msg = NULL, *v0_hdr = NULL;
+    unsigned start_of_msg = 0;
+    char *v0_hdr = NULL;
     xo_sbuffer_t xb;
     static pid_t my_pid;
+    unsigned log_offset;
 
     if (my_pid == 0)
 	my_pid = xo_unit_test ? 222 : getpid();
@@ -575,6 +577,8 @@ xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
 	if (xo_logtag)
 	    tp += xo_snprintf(tp, ep - tp, ": ");
     }
+
+    log_offset = xb.xb_curp - xb.xb_basep;
 
     /* Add PRI, PRIVAL, and VERSION */
     xb.xb_curp += xo_snprintf(xb.xb_curp, xo_sleft(&xb), "<%d>1 ", pri);
@@ -679,7 +683,7 @@ xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
 
     /* Save the start of the message */
     if (xo_logstat & LOG_PERROR)
-	start_of_msg = xb.xb_curp;
+	start_of_msg = xb.xb_curp - xb.xb_basep;
 
     xo_set_style(xop, XO_STYLE_TEXT);
     xo_set_flags(xop, XOF_UTF8);
@@ -692,7 +696,10 @@ xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
     if (xb.xb_curp[-1] == '\n')
         *--xb.xb_curp = '\0';
 
-    xo_send_syslog(xb.xb_basep, v0_hdr, start_of_msg);
+    if (xo_get_flags(xop) & XOF_LOG_SYSLOG)
+	fprintf(stderr, "xo: syslog: %s\n", xb.xb_basep + log_offset);
+
+    xo_send_syslog(xb.xb_basep, v0_hdr, xb.xb_basep + start_of_msg);
 
     xo_destroy(xop);
 
