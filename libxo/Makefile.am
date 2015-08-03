@@ -31,6 +31,7 @@ libxoinc_HEADERS = \
 
 libxo_la_SOURCES = \
     libxo.c \
+    xo_encoder.c \
     xo_syslog.c
 
 man_MANS = \
