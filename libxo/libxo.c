@@ -26,6 +26,7 @@
 
 #include "xoconfig.h"
 #include "xo.h"
+#include "xo_encoder.h"
 #include "xoversion.h"
 
 #ifdef HAVE_STDIO_EXT_H
@@ -244,6 +245,8 @@ struct xo_handle_s {
     char *xo_version;		/* Version string */
     int xo_errno;		/* Saved errno for "%m" */
     char *xo_gt_domain;		/* Gettext domain, suitable for dgettext(3) */
+    xo_encoder_func_t xo_encoder; /* Encoding function */
+    void *xo_private;		/* Private data for external encoders */
 };
 
 /* Flag operations */
@@ -405,8 +408,8 @@ static const char *xo_program;
  * To allow libxo to be used in diverse environment, we allow the
  * caller to give callbacks for memory allocation.
  */
-static xo_realloc_func_t xo_realloc = realloc;
-static xo_free_func_t xo_free = free;
+xo_realloc_func_t xo_realloc = realloc;
+xo_free_func_t xo_free = free;
 
 /* Forward declarations */
 static void
@@ -7482,4 +7485,34 @@ xo_emit_errc (int eval, int code, const char *fmt, ...)
     va_end(vap);
     xo_finish();
     exit(eval);
+}
+
+void *
+xo_get_private (xo_handle_t *xop)
+{
+    xop = xo_default(xop);
+    return xop->xo_private;
+}
+
+void
+xo_set_private (xo_handle_t *xop, void *opaque)
+{
+    xop = xo_default(xop);
+    xop->xo_private = opaque;
+}
+
+xo_encoder_func_t
+xo_get_encoder (xo_handle_t *xop)
+{
+    xop = xo_default(xop);
+    return xop->xo_encoder;
+}
+
+void
+xo_set_encoder (xo_handle_t *xop, xo_encoder_func_t encoder)
+{
+    xop = xo_default(xop);
+
+    xop->xo_style = XO_STYLE_ENCODER;
+    xop->xo_encoder = encoder;
 }
