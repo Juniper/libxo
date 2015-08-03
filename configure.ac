@@ -313,13 +313,16 @@ AM_CONDITIONAL([NO_LIBXO_OPTIONS], [test "$LIBXO_OPTS" != "yes"])
 case $host_os in
      darwin*)
         LIBTOOL=glibtool
+	XO_LIBEXT=dylib
 	;;
      Linux*|linux*)
         CFLAGS="-D_GNU_SOURCE $CFLAGS"
 	LDFLAGS=-ldl
+	XO_LIBEXT=so
 	;;
      cygwin*|CYGWIN*)
 	LDFLAGS=-no-undefined
+	XO_LIBEXT=ddl
 	;;
 esac
 
@@ -339,6 +342,14 @@ AC_SUBST(XO_SRCDIR)
 AC_SUBST(XO_LIBDIR)
 AC_SUBST(XO_BINDIR)
 AC_SUBST(XO_INCLUDEDIR)
+AC_SUBST(XO_LIBEXT)
+
+AC_ARG_WITH(extensions-dir,
+        [  --with-extensions-dir=[DIR]           Specify location of extension libraries],
+        [XO_EXTDIR=$withval],
+        [XO_EXTDIR=$libdir/libxo/extensions]
+)
+AC_SUBST(XO_EXTDIR)
 
 AC_ARG_WITH(share-dir,
         [  --with-share-dir=[DIR]           Specify location of shared files],
@@ -375,6 +386,8 @@ AC_CONFIG_FILES([
   xohtml/xohtml.sh
   libxo/Makefile
   libxo/xoversion.h
+  encoder/Makefile
+  encoder/cbr/Makefile
   xo/Makefile
   xolint/Makefile
   xohtml/Makefile
@@ -400,6 +413,7 @@ AC_MSG_NOTICE([summary of build options:
   bindir:           ${XO_BINDIR}
   includedir:       ${XO_INCLUDEDIR}
   share dir:        ${XO_SHAREDIR}
+  extensions dir:   ${XO_EXTDIR}
   oxtradoc dir:     ${SLAX_OXTRADOCDIR}
 
   compiler:         ${CC} (${HAVE_GCC:-no})
