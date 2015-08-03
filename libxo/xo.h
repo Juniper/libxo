@@ -47,6 +47,7 @@ typedef unsigned short xo_style_t;
 #define XO_STYLE_JSON	2	/** Generate JSON output */
 #define XO_STYLE_HTML	3	/** Generate HTML output */
 #define XO_STYLE_SDPARAMS 4	/* Generate syslog structured data params */
+#define XO_STYLE_ENCODER 5	/* Generate calls to external encoder */
 
 /** Flags for libxo */
 typedef unsigned long long xo_xof_flags_t;
