@@ -269,6 +269,7 @@ struct xo_handle_s {
 #define XOIF_ANCHOR	XOF_BIT(3) /* An anchor is in place  */
 
 #define XOIF_UNITS_PENDING XOF_BIT(4) /* We have a units-insertion pending */
+#define XOIF_INIT_IN_PROGRESS XOF_BIT(5) /* Init of handle is in progress */
 
 /* Flags for formatting functions */
 typedef unsigned long xo_xff_flags_t;
@@ -517,6 +518,14 @@ xo_buf_offset (xo_buffer_t *xbp)
     return xbp ? (xbp->xb_curp - xbp->xb_bufp) : 0;
 }
 
+static char *
+xo_buf_data (xo_buffer_t *xbp, unsigned offset)
+{
+    if (xbp == NULL)
+	return NULL;
+    return xbp->xb_bufp + offset;
+}
+
 /*
  * Initialize the contents of an xo_buffer_t.
  */
@@ -666,6 +675,10 @@ xo_init_handle (xo_handle_t *xop)
     xo_buf_init(&xop->xo_data);
     xo_buf_init(&xop->xo_fmt);
 
+    if (XOIF_ISSET(xop, XOIF_INIT_IN_PROGRESS))
+	return;
+    XOIF_SET(xop, XOIF_INIT_IN_PROGRESS);
+
     xop->xo_indent_by = XO_INDENT_BY;
     xo_depth_check(xop, XO_DEPTH);
 
@@ -674,8 +687,11 @@ xo_init_handle (xo_handle_t *xop)
 	char *env = getenv("LIBXO_OPTIONS");
 	if (env)
 	    xo_set_options(xop, env);
+	    
     }
 #endif /* NO_GETENV */
+
+    XOIF_CLEAR(xop, XOIF_INIT_IN_PROGRESS);
 }
 
 /*
@@ -1603,12 +1619,10 @@ xo_message_hcv (xo_handle_t *xop, int code, const char *fmt, va_list vap)
 	break;
 
     case XO_STYLE_JSON:
-	/* No means of representing messages in JSON */
-	break;
-
     case XO_STYLE_SDPARAMS:
-	/* No means of representing messages in SDPARAMS */
-	break;
+    case XO_STYLE_ENCODER:
+	/* No means of representing messages */
+	return;
 
     case XO_STYLE_TEXT:
 	rc = xo_printf_v(xop, fmt, vap);
@@ -1798,6 +1812,8 @@ xo_name_to_style (const char *name)
 	return XO_STYLE_XML;
     else if (strcmp(name, "json") == 0)
 	return XO_STYLE_JSON;
+    else if (strcmp(name, "encoder") == 0)
+	return XO_STYLE_ENCODER;
     else if (strcmp(name, "text") == 0)
 	return XO_STYLE_TEXT;
     else if (strcmp(name, "html") == 0)
@@ -1813,7 +1829,8 @@ xo_style_is_encoding (xo_handle_t *xop)
 {
     if (xo_style(xop) == XO_STYLE_JSON
 	|| xo_style(xop) == XO_STYLE_XML
-	|| xo_style(xop) == XO_STYLE_SDPARAMS)
+	|| xo_style(xop) == XO_STYLE_SDPARAMS
+	|| xo_style(xop) == XO_STYLE_ENCODER)
 	return 1;
     return 0;
 }
@@ -2039,8 +2056,12 @@ xo_set_options (xo_handle_t *xop, const char *input)
 	    continue;
 	}
 
+	/*
+	 * For options, we don't allow "encoder" since we want to
+	 * handle it explicitly below as "encoder=xxx".
+	 */
 	new_style = xo_name_to_style(cp);
-	if (new_style >= 0) {
+	if (new_style >= 0 && new_style != XO_STYLE_ENCODER) {
 	    if (style >= 0)
 		xo_warnx("ignoring multiple styles: '%s'", cp);
 	    else
@@ -2057,6 +2078,16 @@ xo_set_options (xo_handle_t *xop, const char *input)
 			xop->xo_indent_by = atoi(vp);
 		    else
 			xo_failure(xop, "missing value for indent option");
+		} else if (strcmp(cp, "encoder") == 0) {
+		    if (vp == NULL)
+			xo_failure(xop, "missing value for encoder option");
+		    else {
+			if (xo_encoder_init(xop, vp)) {
+			    xo_failure(xop, "encoder not found: %s", vp);
+			    rc = -1;
+			}
+		    }
+
 		} else {
 		    xo_warnx("unknown libxo option value: '%s'", cp);
 		    rc = -1;
@@ -3144,6 +3175,11 @@ xo_do_format_field (xo_handle_t *xop, xo_buffer_t *xbp,
 			columns = rc = xo_trim_ws(xbp, rc);
 		    rc = xo_escape_sdparams(xbp, rc, 0);
 		    break;
+
+		case XO_STYLE_ENCODER:
+		    if (flags & XFF_TRIM_WS)
+			columns = rc = xo_trim_ws(xbp, rc);
+		    break;
 		}
 
 		/*
@@ -3673,6 +3709,7 @@ xo_format_title (xo_handle_t *xop, xo_field_info_t *xfip)
     case XO_STYLE_XML:
     case XO_STYLE_JSON:
     case XO_STYLE_SDPARAMS:
+    case XO_STYLE_ENCODER:
 	/*
 	 * Even though we don't care about text, we need to do
 	 * enough parsing work to skip over the right bits of xo_vap.
@@ -4064,6 +4101,58 @@ xo_format_value (xo_handle_t *xop, const char *name, int nlen,
 	xo_data_append(xop, "=\"", 2);
 	xo_do_format_field(xop, NULL, format, flen, flags);
 	xo_data_append(xop, "\" ", 2);
+	break;
+
+    case XO_STYLE_ENCODER:
+	if (flags & XFF_DISPLAY_ONLY) {
+	    flags |= XFF_NO_OUTPUT;
+	    xo_do_format_field(xop, NULL, format, flen, flags);
+	    break;
+	}
+
+	if (flags & XFF_QUOTE)
+	    quote = 1;
+	else if (flags & XFF_NOQUOTE)
+	    quote = 0;
+	else if (flen == 0) {
+	    quote = 0;
+	    format = "true";	/* JSON encodes empty tags as a boolean true */
+	    flen = 4;
+	} else if (strchr("diouxXDOUeEfFgGaAcCp", format[flen - 1]) == NULL)
+	    quote = 1;
+	else
+	    quote = 0;
+
+	if (encoding) {
+	    format = encoding;
+	    flen = elen;
+	} else {
+	    char *enc  = alloca(flen + 1);
+	    memcpy(enc, format, flen);
+	    enc[flen] = '\0';
+	    format = xo_fix_encoding(xop, enc);
+	    flen = strlen(format);
+	}
+
+	if (nlen == 0) {
+	    static char missing[] = "missing-field-name";
+	    xo_failure(xop, "missing field name: %s", format);
+	    name = missing;
+	    nlen = sizeof(missing) - 1;
+	}
+
+	unsigned name_offset = xo_buf_offset(&xop->xo_data);
+	xo_data_append(xop, name, nlen);
+	xo_data_append(xop, "", 1);
+
+	unsigned value_offset = xo_buf_offset(&xop->xo_data);
+	xo_do_format_field(xop, NULL, format, flen, flags);
+	xo_data_append(xop, "", 1);
+
+	xo_encoder_handle(xop, quote ? XO_OP_STRING : XO_OP_CONTENT,
+			  xo_buf_data(&xop->xo_data, name_offset),
+			  xo_buf_data(&xop->xo_data, value_offset));
+	xo_buf_reset(&xop->xo_data);
 	break;
     }
 }
@@ -4501,6 +4590,7 @@ xo_format_colors (xo_handle_t *xop, xo_field_info_t *xfip)
 	case XO_STYLE_XML:
 	case XO_STYLE_JSON:
 	case XO_STYLE_SDPARAMS:
+	case XO_STYLE_ENCODER:
 	    /*
 	     * Nothing to do; we did all that work just to clear the stack of
 	     * formatting arguments.
@@ -5679,7 +5769,7 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
     int flush_line = XOF_ISSET(xop, XOF_FLUSH_LINE);
     char *new_fmt = NULL;
 
-    if (XOIF_ISSET(xop, XOIF_REORDER))
+    if (XOIF_ISSET(xop, XOIF_REORDER) || xo_style(xop) == XO_STYLE_ENCODER)
 	flush_line = 0;
 
     xop->xo_columns = 0;	/* Always reset it */
@@ -5963,35 +6053,55 @@ xo_attr_hv (xo_handle_t *xop, const char *name, const char *fmt, va_list vap)
     const int extra = 5; 	/* space, equals, quote, quote, and nul */
     xop = xo_default(xop);
 
-    if (xo_style(xop) != XO_STYLE_XML)
-	return 0;
-
+    int rc = 0;
     int nlen = strlen(name);
     xo_buffer_t *xbp = &xop->xo_attrs;
+    unsigned name_offset, value_offset;
 
-    if (!xo_buf_has_room(xbp, nlen + extra))
-	return -1;
+    switch (xo_style(xop)) {
+    case XO_STYLE_XML:
+	if (!xo_buf_has_room(xbp, nlen + extra))
+	    return -1;
 
-    *xbp->xb_curp++ = ' ';
-    memcpy(xbp->xb_curp, name, nlen);
-    xbp->xb_curp += nlen;
-    *xbp->xb_curp++ = '=';
-    *xbp->xb_curp++ = '"';
+	*xbp->xb_curp++ = ' ';
+	memcpy(xbp->xb_curp, name, nlen);
+	xbp->xb_curp += nlen;
+	*xbp->xb_curp++ = '=';
+	*xbp->xb_curp++ = '"';
 
-    int rc = xo_vsnprintf(xop, xbp, fmt, vap);
+	rc = xo_vsnprintf(xop, xbp, fmt, vap);
 
-    if (rc > 0) {
-	rc = xo_escape_xml(xbp, rc, 1);
-	xbp->xb_curp += rc;
+	if (rc >= 0) {
+	    rc = xo_escape_xml(xbp, rc, 1);
+	    xbp->xb_curp += rc;
+	}
+
+	if (!xo_buf_has_room(xbp, 2))
+	    return -1;
+
+	*xbp->xb_curp++ = '"';
+	*xbp->xb_curp = '\0';
+
+	rc += nlen + extra;
+	break;
+
+    case XO_STYLE_ENCODER:
+	name_offset = xo_buf_offset(xbp);
+	xo_buf_append(xbp, name, nlen);
+	xo_buf_append(xbp, "", 1);
+
+	value_offset = xo_buf_offset(xbp);
+	rc = xo_vsnprintf(xop, xbp, fmt, vap);
+	if (rc >= 0) {
+	    xbp->xb_curp += rc;
+	    *xbp->xb_curp = '\0';
+	    rc = xo_encoder_handle(xop, XO_OP_ATTR,
+				   xo_buf_data(xbp, name_offset),
+				   xo_buf_data(xbp, value_offset));
+	}
     }
 
-    if (!xo_buf_has_room(xbp, 2))
-	return -1;
-
-    *xbp->xb_curp++ = '"';
-    *xbp->xb_curp = '\0';
-
-    return rc + nlen + extra;
+    return rc;
 }
 
 int
@@ -6175,6 +6285,10 @@ xo_do_open_container (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
 
     case XO_STYLE_SDPARAMS:
 	break;
+
+    case XO_STYLE_ENCODER:
+	rc = xo_encoder_handle(xop, XO_OP_OPEN_CONTAINER, name, NULL);
+	break;
     }
 
     xo_depth_change(xop, name, 1, 1, XSS_OPEN_CONTAINER,
@@ -6260,6 +6374,11 @@ xo_do_close_container (xo_handle_t *xop, const char *name)
 
     case XO_STYLE_SDPARAMS:
 	break;
+
+    case XO_STYLE_ENCODER:
+	xo_depth_change(xop, name, -1, 0, XSS_CLOSE_CONTAINER, 0);
+	rc = xo_encoder_handle(xop, XO_OP_CLOSE_CONTAINER, name, NULL);
+	break;
     }
 
     return rc;
@@ -6297,9 +6416,11 @@ xo_do_open_list (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name)
 
     xop = xo_default(xop);
 
-    if (xo_style(xop) == XO_STYLE_JSON) {
-	const char *ppn = XOF_ISSET(xop, XOF_PRETTY) ? "\n" : "";
-	const char *pre_nl = "";
+    const char *ppn = XOF_ISSET(xop, XOF_PRETTY) ? "\n" : "";
+    const char *pre_nl = "";
+
+    switch (xo_style(xop)) {
+    case XO_STYLE_JSON:
 
 	indent = 1;
 	if (!XOF_ISSET(xop, XOF_NO_TOP)
@@ -6319,6 +6440,11 @@ xo_do_open_list (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name)
 
 	rc = xo_printf(xop, "%s%*s\"%s\": [%s",
 		       pre_nl, xo_indent(xop), "", name, ppn);
+	break;
+
+    case XO_STYLE_ENCODER:
+	rc = xo_encoder_handle(xop, XO_OP_OPEN_LIST, name, NULL);
+	break;
     }
 
     xo_depth_change(xop, name, 1, indent, XSS_OPEN_LIST,
@@ -6379,7 +6505,8 @@ xo_do_close_list (xo_handle_t *xop, const char *name)
 	}
     }
 
-    if (xo_style(xop) == XO_STYLE_JSON) {
+    switch (xo_style(xop)) {
+    case XO_STYLE_JSON:
 	if (xop->xo_stack[xop->xo_depth].xs_flags & XSF_NOT_FIRST)
 	    pre_nl = XOF_ISSET(xop, XOF_PRETTY) ? "\n" : "";
 	xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
@@ -6387,10 +6514,17 @@ xo_do_close_list (xo_handle_t *xop, const char *name)
 	xo_depth_change(xop, name, -1, -1, XSS_CLOSE_LIST, XSF_LIST);
 	rc = xo_printf(xop, "%s%*s]", pre_nl, xo_indent(xop), "");
 	xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
+	break;
 
-    } else {
+    case XO_STYLE_ENCODER:
+	xo_depth_change(xop, name, -1, 0, XSS_CLOSE_LIST, XSF_LIST);
+	rc = xo_encoder_handle(xop, XO_OP_CLOSE_LIST, name, NULL);
+	break;
+
+    default:
 	xo_depth_change(xop, name, -1, 0, XSS_CLOSE_LIST, XSF_LIST);
 	xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
+	break;
     }
 
     return rc;
@@ -6428,10 +6562,11 @@ xo_do_open_leaf_list (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name)
 
     xop = xo_default(xop);
 
-    if (xo_style(xop) == XO_STYLE_JSON) {
-	const char *ppn = XOF_ISSET(xop, XOF_PRETTY) ? "\n" : "";
-	const char *pre_nl = "";
+    const char *ppn = XOF_ISSET(xop, XOF_PRETTY) ? "\n" : "";
+    const char *pre_nl = "";
 
+    switch (xo_style(xop)) {
+    case XO_STYLE_JSON:
 	indent = 1;
 
 	if (!XOF_ISSET(xop, XOF_NO_TOP)) {
@@ -6454,6 +6589,11 @@ xo_do_open_leaf_list (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name)
 
 	rc = xo_printf(xop, "%s%*s\"%s\": [%s",
 		       pre_nl, xo_indent(xop), "", name, ppn);
+	break;
+
+    case XO_STYLE_ENCODER:
+	rc = xo_encoder_handle(xop, XO_OP_OPEN_LEAF_LIST, name, NULL);
+	break;
     }
 
     xo_depth_change(xop, name, 1, indent, XSS_OPEN_LEAF_LIST,
@@ -6484,7 +6624,8 @@ xo_do_close_leaf_list (xo_handle_t *xop, const char *name)
 	}
     }
 
-    if (xo_style(xop) == XO_STYLE_JSON) {
+    switch (xo_style(xop)) {
+    case XO_STYLE_JSON:
 	if (xop->xo_stack[xop->xo_depth].xs_flags & XSF_NOT_FIRST)
 	    pre_nl = XOF_ISSET(xop, XOF_PRETTY) ? "\n" : "";
 	xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
@@ -6492,10 +6633,16 @@ xo_do_close_leaf_list (xo_handle_t *xop, const char *name)
 	xo_depth_change(xop, name, -1, -1, XSS_CLOSE_LEAF_LIST, XSF_LIST);
 	rc = xo_printf(xop, "%s%*s]", pre_nl, xo_indent(xop), "");
 	xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
+	break;
 
-    } else {
+    case XO_STYLE_ENCODER:
+	rc = xo_encoder_handle(xop, XO_OP_CLOSE_LEAF_LIST, name, NULL);
+	/*fallthru*/
+
+    default:
 	xo_depth_change(xop, name, -1, 0, XSS_CLOSE_LEAF_LIST, XSF_LIST);
 	xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
+	break;
     }
 
     return rc;
@@ -6543,6 +6690,10 @@ xo_do_open_instance (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name)
 	break;
 
     case XO_STYLE_SDPARAMS:
+	break;
+
+    case XO_STYLE_ENCODER:
+	rc = xo_encoder_handle(xop, XO_OP_OPEN_INSTANCE, name, NULL);
 	break;
     }
 
@@ -6626,6 +6777,11 @@ xo_do_close_instance (xo_handle_t *xop, const char *name)
 	break;
 
     case XO_STYLE_SDPARAMS:
+	break;
+
+    case XO_STYLE_ENCODER:
+	xo_depth_change(xop, name, -1, 0, XSS_CLOSE_INSTANCE, 0);
+	rc = xo_encoder_handle(xop, XO_OP_CLOSE_INSTANCE, name, NULL);
 	break;
     }
 
@@ -7102,6 +7258,9 @@ xo_flush_h (xo_handle_t *xop)
 		xo_data_append(xop, "\n", 1);
 	}
 	break;
+
+    case XO_STYLE_ENCODER:
+	xo_encoder_handle(xop, XO_OP_FLUSH, NULL, NULL);
     }
 
     rc = xo_write(xop);
@@ -7136,6 +7295,10 @@ xo_finish_h (xo_handle_t *xop)
 		cp = "{ ";
 	    xo_printf(xop, "%*s%s}\n",xo_indent(xop), "", cp);
 	}
+	break;
+
+    case XO_STYLE_ENCODER:
+	xo_encoder_handle(xop, XO_OP_FINISH, NULL, NULL);
 	break;
     }
 
@@ -7207,6 +7370,7 @@ xo_error_hv (xo_handle_t *xop, const char *fmt, va_list vap)
 	break;
 
     case XO_STYLE_SDPARAMS:
+    case XO_STYLE_ENCODER:
 	break;
     }
 }
@@ -7340,6 +7504,10 @@ xo_set_version_h (xo_handle_t *xop, const char *version UNUSED)
 	 * it in xo_emit_top.
 	 */
 	xop->xo_version = xo_strndup(version, -1);
+	break;
+
+    case XO_STYLE_ENCODER:
+	xo_encoder_handle(xop, XO_OP_VERSION, NULL, version);
 	break;
     }
 }
