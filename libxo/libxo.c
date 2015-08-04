@@ -4239,6 +4239,12 @@ xo_format_content (xo_handle_t *xop, const char *class_name,
 				   flags | XFF_NO_OUTPUT);
 	}
 	break;
+
+    case XO_STYLE_ENCODER:
+	if (len == 0)
+	    xo_do_format_field(xop, NULL, fmt, flen,
+			       flags | XFF_NO_OUTPUT);
+	break;
     }
 }
 
