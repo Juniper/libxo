@@ -21,6 +21,9 @@ AM_CFLAGS = \
     ${WARNINGS} \
     ${GETTEXT_CFLAGS}
 
+AM_CFLAGS += \
+    -DXO_EXTDIR=\"${XO_EXTDIR}\"
+
 lib_LTLIBRARIES = libxo.la
 
 LIBS = \
