@@ -22,6 +22,7 @@
 #include <sys/param.h>
 #include <dlfcn.h>
 
+#include "xoconfig.h"
 #include "xo.h"
 #include "xo_encoder.h"
 
@@ -35,6 +36,8 @@
 #define dlsym(_p, _n)		NULL /* Fail */
 #define dlfunc(_p, _n)		NULL /* Fail */
 #endif /* HAVE_DLFCN_H */
+
+static void xo_encoder_setup (void); /* Forward decl */
 
 /*
  * Need a simple string collection
@@ -98,6 +101,8 @@ static xo_string_list_t xo_encoder_path;
 void
 xo_encoder_path_add (const char *path)
 {
+    xo_encoder_setup();
+
     if (path)
 	xo_string_add(&xo_encoder_path, path);
 }
@@ -154,7 +159,7 @@ xo_encoders_clean (void)
 {
     xo_encoder_node_t *xep;
 
-    xo_encoder_list_init(&xo_encoders);
+    xo_encoder_setup();
 
     for (;;) {
 	xep = TAILQ_FIRST(&xo_encoders);
@@ -170,6 +175,20 @@ xo_encoders_clean (void)
     }
 
     xo_string_list_clean(&xo_encoder_path);
+}
+
+static void
+xo_encoder_setup (void)
+{
+    static int initted;
+    if (!initted) {
+	initted = 1;
+
+	xo_string_list_init(&xo_encoder_path);
+	xo_encoder_list_init(&xo_encoders);
+
+	xo_encoder_path_add(XO_EXTDIR);
+    }
 }
 
 static xo_encoder_node_t *
@@ -231,7 +250,9 @@ xo_encoder_discover (const char *name)
 		}
 	    }
 	}
-	dlclose(dlp);
+
+	if (xep == NULL)
+	    dlclose(dlp);
     }
 
     return xep;
@@ -240,6 +261,8 @@ xo_encoder_discover (const char *name)
 void
 xo_encoder_register (const char *name, xo_encoder_func_t func)
 {
+    xo_encoder_setup();
+
     xo_encoder_node_t *xep = xo_encoder_find(name);
 
     if (xep)			/* "We alla-ready got one" */
@@ -253,6 +276,8 @@ xo_encoder_register (const char *name, xo_encoder_func_t func)
 void
 xo_encoder_unregister (const char *name)
 {
+    xo_encoder_setup();
+
     xo_encoder_node_t *xep = xo_encoder_find(name);
     if (xep) {
 	TAILQ_REMOVE(&xo_encoders, xep, xe_link);
@@ -263,7 +288,9 @@ xo_encoder_unregister (const char *name)
 int
 xo_encoder_init (xo_handle_t *xop, const char *name)
 {
-    /*
+    xo_encoder_setup();
+
+   /*
      * First we look on the list of known (registered) encoders.
      * If we don't find it, we follow the set of paths to find
      * the encoding library.
@@ -276,7 +303,8 @@ xo_encoder_init (xo_handle_t *xop, const char *name)
     }
 
     xo_set_encoder(xop, xep->xe_handler);
-    return 0;
+
+    return xo_encoder_handle(xop, XO_OP_CREATE, NULL, NULL);
 }
 
 /*
@@ -311,4 +339,33 @@ xo_encoder_handle (xo_handle_t *xop, xo_encoder_op_t op,
 	return -1;
 
     return func(xop, op, name, value, private);
+}
+
+const char *
+xo_encoder_op_name (xo_encoder_op_t op)
+{
+    static const char *names[] = {
+	/*  0 */ "unknown",
+	/*  1 */ "create",
+	/*  2 */ "open_container",
+	/*  3 */ "close_container",
+	/*  4 */ "open_list",
+	/*  5 */ "close_list",
+	/*  6 */ "open_leaf_list",
+	/*  7 */ "close_leaf_list",
+	/*  8 */ "open_instance",
+	/*  9 */ "close_instance",
+	/* 10 */ "string",
+	/* 11 */ "content",
+	/* 12 */ "flush",
+	/* 13 */ "finish",
+	/* 14 */ "destroy",
+	/* 15 */ "attr",
+	/* 16 */ "version",
+    };
+
+    if (op > sizeof(names) / sizeof(names[0]))
+	return "unknown";
+
+    return names[op];
 }
