@@ -76,12 +76,17 @@ valgrind:
 
 #TEST_TRACE = set -x ; 
 
-TEST_ONE = \
-  LIBXO_OPTIONS=:W$$fmt \
+TEST_JIG = \
       ${CHECKER} ./$$base.test ${TEST_OPTS} \
       > out/$$base.$$fmt.out 2> out/$$base.$$fmt.err ; \
  ${DIFF} -Nu ${srcdir}/saved/$$base.$$fmt.out out/$$base.$$fmt.out ${S2O} ; \
  ${DIFF} -Nu ${srcdir}/saved/$$base.$$fmt.err out/$$base.$$fmt.err ${S2O}
+
+TEST_ONE = \
+  LIBXO_OPTIONS=:W$$fmt ${TEST_JIG}
+
+TEST_TWO = \
+  LIBXO_OPTIONS=warn,encoder=test ${TEST_JIG}
 
 TEST_FORMATS = T XP JP HP X J H HIPx
 
@@ -93,6 +98,11 @@ test tests: ${bin_PROGRAMS}
 	        echo "... $$test ... $$fmt ..."; \
 	        ${TEST_ONE}; \
                 true; \
+            done) ; \
+            (for fmt in E; do \
+	        echo "... $$test ... $$fmt ..."; \
+	        ${TEST_TWO}; \
+                true; \
             done) \
 	done)
 
@@ -102,7 +112,7 @@ one:
 accept:
 	-@(for test in ${TEST_CASES} ; do \
 	    base=`${BASENAME} $$test .c` ; \
-            (for fmt in ${TEST_FORMATS}; do \
+            (for fmt in ${TEST_FORMATS} E; do \
 	        echo "... $$test ... $$fmt ..."; \
 	        ${CP} out/$$base.$$fmt.out ${srcdir}/saved/$$base.$$fmt.out ; \
 	        ${CP} out/$$base.$$fmt.err ${srcdir}/saved/$$base.$$fmt.err ; \
