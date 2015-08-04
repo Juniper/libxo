@@ -388,6 +388,7 @@ AC_CONFIG_FILES([
   libxo/xoversion.h
   encoder/Makefile
   encoder/cbr/Makefile
+  encoder/test/Makefile
   xo/Makefile
   xolint/Makefile
   xohtml/Makefile
