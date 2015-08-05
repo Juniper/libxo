@@ -16,9 +16,9 @@
 #include <ctype.h>
 #include <sys/queue.h>
 
-#include "xoconfig.h"
+#include "xo_config.h"
 #include "xo.h"
-#include "xoversion.h"
+#include "xo_version.h"
 
 #include <getopt.h>		/* Include after xo.h for testing */
 
