@@ -34,7 +34,9 @@ libxoinc_HEADERS = \
      xo_encoder.h
 
 noinst_HEADERS = \
-     xo_buf.h
+     xo_buf.h \
+     xo_humanize.h \
+     xo_wcwidth.h
 
 libxo_la_SOURCES = \
     libxo.c \
@@ -65,8 +67,7 @@ man_MANS = \
     xo_set_writer.3
 
 EXTRA_DIST = \
-    ${man_MANS} \
-    xo_humanize.h
+    ${man_MANS}
 
 call-graph:
 	${RM} libxo.o
