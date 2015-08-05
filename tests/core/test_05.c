@@ -14,6 +14,13 @@
 #include <wchar.h>
 
 #include "xo.h"
+#include "xo_config.h"
+
+#ifdef LIBXO_WCWIDTH
+#include "xo_wcwidth.h"
+#else /* LIBXO_WCWIDTH */
+#define xo_wcwidth(_x) wcwidth(_x)
+#endif /* LIBXO_WCWIDTH */
 
 xo_info_t info[] = {
     { "employee", "object", "Employee data" },
@@ -58,7 +65,7 @@ main (int argc, char **argv)
     wchar_t wc[] = { L'෴', L'ණ', L'්', L'ණ', L'\u17D2', L'෴', 0 };
     for (i = 0; wc[i]; i++)
 	xo_emit("Wide char: {lq:wc/%lc - %#lx - %d}\n",
-		wc[i], (unsigned long) wc[i], wcwidth(wc[i]));
+		wc[i], (unsigned long) wc[i], xo_wcwidth(wc[i]));
 
     xo_emit("Οὐχὶ ταὐτὰ παρίσταταί μοι {:v1/%s}, {:v2/%s}\n",
 	    "γιγνώσκειν", "ὦ ἄνδρες ᾿Αθηναῖοι");
