@@ -109,7 +109,7 @@ main (int argc, char **argv)
 
     xo_emit("\n\n");
 
-    xo_open_container("data");
+    xo_open_container("data2");
     xo_open_list("item");
 
     for (ip = list; ip->i_title; ip++) {
@@ -128,9 +128,9 @@ main (int argc, char **argv)
     }
 
     xo_close_list("item");
-    xo_close_container("data");
+    xo_close_container("data2");
 
-    xo_open_container("data");
+    xo_open_container("data3");
     xo_open_list("item");
 
     for (ip = list2; ip->i_title; ip++) {
@@ -149,9 +149,9 @@ main (int argc, char **argv)
     }
 
     xo_close_list("item");
-    xo_close_container("data");
+    xo_close_container("data3");
 
-    xo_open_container("data");
+    xo_open_container("data4");
     xo_open_list("item");
 
     for (ip = list; ip->i_title; ip++) {
@@ -160,7 +160,7 @@ main (int argc, char **argv)
     }
 
     xo_close_list("item");
-    xo_close_container("data");
+    xo_close_container("data4");
 
     xo_emit("X{P:}X", "epic fail");
     xo_emit("X{T:}X", "epic fail");
