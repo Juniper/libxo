@@ -30,7 +30,11 @@ LIBS = \
     ${GETTEXT_LIBS}
 
 libxoinc_HEADERS = \
-     xo.h
+     xo.h \
+     xo_encoder.h
+
+noinst_HEADERS = \
+     xo_buf.h
 
 libxo_la_SOURCES = \
     libxo.c \
