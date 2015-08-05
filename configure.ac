@@ -379,15 +379,15 @@ AC_SUBST(LIBXO_VERSION)
 AC_SUBST(LIBXO_VERSION_NUMBER)
 AC_SUBST(LIBXO_VERSION_EXTRA)
 
-AC_CONFIG_HEADERS([libxo/xoconfig.h])
+AC_CONFIG_HEADERS([libxo/xo_config.h])
 AC_CONFIG_FILES([
   Makefile
   libxo-config
   xohtml/xohtml.sh
   libxo/Makefile
-  libxo/xoversion.h
+  libxo/xo_version.h
   encoder/Makefile
-  encoder/cbr/Makefile
+  encoder/cbor/Makefile
   encoder/test/Makefile
   xo/Makefile
   xolint/Makefile
