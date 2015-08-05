@@ -12,6 +12,9 @@
  * CBOR (RFC 7049) mades a suitable test case for libxo's external
  * encoder API.  It's simple, streaming, well documented, and an
  * IETF standard.
+ *
+ * This encoder uses the "pretty" flag for diagnostics, which isn't
+ * really kosher, but it's example code.
  */
 
 #include <string.h>
@@ -19,6 +22,8 @@
 #include <unistd.h>
 #include <stdint.h>
 #include <ctype.h>
+#include <stdlib.h>
+#include <limits.h>
 
 #include "xo.h"
 #include "xo_encoder.h"
@@ -101,8 +106,16 @@ cbor_memdump (FILE *fp, const char *title, const char *data,
 #define CBOR_SEMANTIC	CBOR_MAJOR_VAL(6) /* 0xc0 */
 #define CBOR_SPECIAL	CBOR_MAJOR_VAL(7) /* 0xe0 */
 
+#define CBOR_ULIMIT	24	/* Largest unsigned value */
+#define CBOR_NLIMIT	23	/* Largest negative value */
+
 #define CBOR_BREAK	0xFF
 #define CBOR_INDEF	0x1F
+
+#define CBOR_FALSE	0xF4
+#define CBOR_TRUE	0xF5
+#define CBOR_NULL	0xF6
+#define CBOR_UNDEF	0xF7
 
 #define CBOR_LEN8	0x18	/* 24 - 8-bit value */
 #define CBOR_LEN16	0x19	/* 25 - 16-bit value */
@@ -117,7 +130,7 @@ typedef struct cbor_private_s {
 } cbor_private_t;
 
 static void
-cbor_encode_uint (xo_buffer_t *xbp, uint64_t minor)
+cbor_encode_uint (xo_buffer_t *xbp, uint64_t minor, unsigned limit)
 {
     char *bp = xbp->xb_curp;
     int i, m;
@@ -134,7 +147,7 @@ cbor_encode_uint (xo_buffer_t *xbp, uint64_t minor)
 	*bp++ |= CBOR_LEN16;
 	m = 16;
 
-    } else if (minor > 24) {
+    } else if (minor > limit) {
 	*bp++ |= CBOR_LEN8;
 	m = 8;
     } else {
@@ -151,7 +164,7 @@ cbor_encode_uint (xo_buffer_t *xbp, uint64_t minor)
 }
 
 static void
-cbor_append (xo_handle_t *xop, cbor_private_t *cbr, xo_buffer_t *xbp,
+cbor_append (xo_handle_t *xop, cbor_private_t *cbor, xo_buffer_t *xbp,
 	     unsigned major, unsigned minor, const char *data)
 {
     if (!xo_buf_has_room(xbp, minor + 2))
@@ -160,14 +173,14 @@ cbor_append (xo_handle_t *xop, cbor_private_t *cbr, xo_buffer_t *xbp,
     unsigned offset = xo_buf_offset(xbp);
 
     *xbp->xb_curp = major;
-    cbor_encode_uint(xbp, minor);
+    cbor_encode_uint(xbp, minor, CBOR_ULIMIT);
     if (data)
 	xo_buf_append(xbp, data, minor);
 
     if (xo_get_flags(xop) & XOF_PRETTY)
 	cbor_memdump(stdout, "append", xo_buf_data(xbp, offset),
 		     xbp->xb_curp - xbp->xb_bufp - offset, "",
-		     cbr->c_indent * 2);
+		     cbor->c_indent * 2);
 }
 
 static int
@@ -185,6 +198,46 @@ cbor_create (xo_handle_t *xop)
     cbor_append(xop, cbor, &cbor->c_data, CBOR_MAP | CBOR_INDEF, 0, NULL);
 
     return 0;
+}
+
+static int
+cbor_content (xo_handle_t *xop, cbor_private_t *cbor, xo_buffer_t *xbp,
+	      const char *value)
+{
+    int rc = 0;
+
+    unsigned offset = xo_buf_offset(xbp);
+
+    if (value == NULL || *value == '\0' || strcmp(value, "true") == 0)
+	cbor_append(xop, cbor, &cbor->c_data, CBOR_TRUE, 0, NULL);
+    else if (strcmp(value, "false") == 0)
+	cbor_append(xop, cbor, &cbor->c_data, CBOR_FALSE, 0, NULL);
+    else {
+	int negative = 0;
+	if (*value == '-') {
+	    value += 1;
+	    negative = 1;
+	}
+
+	char *ep;
+	unsigned long long ival;
+	ival = strtoull(value, &ep, 0);
+	if (ival == ULLONG_MAX)	/* Sometimes a string is just a string */
+	    cbor_append(xop, cbor, xbp, CBOR_STRING, strlen(value), value);
+	else {
+	    *xbp->xb_curp = negative ? CBOR_NEGATIVE : CBOR_UNSIGNED;
+	    if (negative)
+		ival -= 1;	/* Don't waste a negative zero */
+	    cbor_encode_uint(xbp, ival, negative ? CBOR_NLIMIT : CBOR_ULIMIT);
+	}
+    }
+
+    if (xo_get_flags(xop) & XOF_PRETTY)
+	cbor_memdump(stdout, "content", xo_buf_data(xbp, offset),
+		     xbp->xb_curp - xbp->xb_bufp - offset, "",
+		     cbor->c_indent * 2);
+
+    return rc;
 }
 
 static int
@@ -263,7 +316,13 @@ cbor_handler (XO_ENCODER_HANDLER_ARGS)
     case XO_OP_CONTENT:		   /* Other content */
 	if (!cbor->c_open_leaf_list)
 	    cbor_append(xop, cbor, xbp, CBOR_STRING, strlen(name), name);
-	cbor_append(xop, cbor, xbp, CBOR_STRING, strlen(value), value);
+
+	/*
+	 * It's content, not string, so we need to look at the
+	 * string and build some content.  Turns out we only
+	 * care about true, false, null, and numbers.
+	 */
+	cbor_content(xop, cbor, xbp, value);
 	break;
 
     case XO_OP_FLUSH:		   /* Clean up function */
@@ -271,8 +330,11 @@ cbor_handler (XO_ENCODER_HANDLER_ARGS)
 	    cbor_memdump(stdout, "cbor",
 			xbp->xb_bufp, xbp->xb_curp - xbp->xb_bufp,
 			">", 0);
-	else
-	    write(1, xbp->xb_bufp, xbp->xb_curp - xbp->xb_bufp);
+	else {
+	    rc = write(1, xbp->xb_bufp, xbp->xb_curp - xbp->xb_bufp);
+	    if (rc > 0)
+		rc = 0;
+	}
 	break;
 
     case XO_OP_FINISH:		   /* Clean up function */
