@@ -24,10 +24,11 @@
 #include <wctype.h>
 #include <getopt.h>
 
-#include "xoconfig.h"
+#include "xo_config.h"
 #include "xo.h"
 #include "xo_encoder.h"
-#include "xoversion.h"
+#include "xo_buf.h"
+#include "xo_version.h"
 
 #ifdef HAVE_STDIO_EXT_H
 #include <stdio_ext.h>
@@ -76,21 +77,10 @@ const char xo_version_extra[] = LIBXO_VERSION_EXTRA;
 #endif /* UNUSED */
 
 #define XO_INDENT_BY 2	/* Amount to indent when pretty printing */
-#define XO_BUFSIZ	(8*1024) /* Initial buffer size */
 #define XO_DEPTH	512	 /* Default stack depth */
 #define XO_MAX_ANCHOR_WIDTH (8*1024) /* Anything wider is just sillyb */
 
 #define XO_FAILURE_NAME	"failure"
-
-/*
- * xo_buffer_t: a memory buffer that can be grown as needed.  We
- * use them for building format strings and output data.
- */
-typedef struct xo_buffer_s {
-    char *xb_bufp;		/* Buffer memory */
-    char *xb_curp;		/* Current insertion point */
-    unsigned xb_size;		/* Size of buffer */
-} xo_buffer_t;
 
 /* Flags for the stack frame */
 typedef unsigned xo_xsf_flags_t; /* XSF_* flags */
@@ -481,63 +471,6 @@ xo_flush_file (void *opaque)
 }
 
 /*
- * Initialize the contents of an xo_buffer_t.
- */
-static void
-xo_buf_init (xo_buffer_t *xbp)
-{
-    xbp->xb_size = XO_BUFSIZ;
-    xbp->xb_bufp = xo_realloc(NULL, xbp->xb_size);
-    xbp->xb_curp = xbp->xb_bufp;
-}
-
-/*
- * Reset the buffer to empty
- */
-static void
-xo_buf_reset (xo_buffer_t *xbp)
-{
-    xbp->xb_curp = xbp->xb_bufp;
-}
-
-/*
- * See if the buffer to empty
- */
-static int
-xo_buf_is_empty (xo_buffer_t *xbp)
-{
-    return (xbp->xb_curp == xbp->xb_bufp);
-}
-
-/*
- * Return the current offset
- */
-static unsigned
-xo_buf_offset (xo_buffer_t *xbp)
-{
-    return xbp ? (xbp->xb_curp - xbp->xb_bufp) : 0;
-}
-
-static char *
-xo_buf_data (xo_buffer_t *xbp, unsigned offset)
-{
-    if (xbp == NULL)
-	return NULL;
-    return xbp->xb_bufp + offset;
-}
-
-/*
- * Initialize the contents of an xo_buffer_t.
- */
-static void
-xo_buf_cleanup (xo_buffer_t *xbp)
-{
-    if (xbp->xb_bufp)
-	xo_free(xbp->xb_bufp);
-    bzero(xbp, sizeof(*xbp));
-}
-
-/*
  * Use a rotating stock of buffers to make a printable string
  */
 #define XO_NUMBUFS 8
@@ -705,34 +638,6 @@ xo_default_init (void)
     xo_init_handle(xop);
 
     xo_default_inited = 1;
-}
-
-/*
- * Does the buffer have room for the given number of bytes of data?
- * If not, realloc the buffer to make room.  If that fails, we
- * return 0 to tell the caller they are in trouble.
- */
-static int
-xo_buf_has_room (xo_buffer_t *xbp, int len)
-{
-    if (xbp->xb_curp + len >= xbp->xb_bufp + xbp->xb_size) {
-	int sz = xbp->xb_size + XO_BUFSIZ;
-	char *bp = xo_realloc(xbp->xb_bufp, sz);
-	if (bp == NULL) {
-	    /*
-	     * XXX If we wanted to put a stick XOF_ENOMEM on xop,
-	     * this would be the place to do it.  But we'd need
-	     * to churn the code to pass xop in here....
-	     */
-	    return 0;
-	}
-
-	xbp->xb_curp = bp + (xbp->xb_curp - xbp->xb_bufp);
-	xbp->xb_bufp = bp;
-	xbp->xb_size = sz;
-    }
-
-    return 1;
 }
 
 /*
@@ -931,34 +836,6 @@ xo_escape_sdparams (xo_buffer_t *xbp, int len, xo_xff_flags_t flags UNUSED)
     } while (cp > ep && cp != ip);
 
     return len + delta;
-}
-
-/*
- * Append the given string to the given buffer
- */
-static void
-xo_buf_append (xo_buffer_t *xbp, const char *str, int len)
-{
-    if (!xo_buf_has_room(xbp, len))
-	return;
-
-    memcpy(xbp->xb_curp, str, len);
-    xbp->xb_curp += len;
-}
-
-/*
- * Append the given NUL-terminated string to the given buffer
- */
-static void
-xo_buf_append_str (xo_buffer_t *xbp, const char *str)
-{
-    int len = strlen(str);
-
-    if (!xo_buf_has_room(xbp, len))
-	return;
-
-    memcpy(xbp->xb_curp, str, len);
-    xbp->xb_curp += len;
 }
 
 static void
