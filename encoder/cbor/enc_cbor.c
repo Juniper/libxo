@@ -11,9 +11,7 @@
 /*
  * CBOR (RFC 7049) mades a suitable test case for libxo's external
  * encoder API.  It's simple, streaming, well documented, and an
- * IETF standard.  Yes, I know being an IETF standard is no where
- * near as valuable a claim, especially in the post-BEEP era, but
- * it's a hope that this code won't be a complete waste.
+ * IETF standard.
  */
 
 #include <string.h>
