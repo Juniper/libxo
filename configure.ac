@@ -277,6 +277,16 @@ AC_ARG_ENABLE([text-only],
 AC_MSG_RESULT([$LIBXO_TEXT_ONLY])
 AM_CONDITIONAL([LIBXO_TEXT_ONLY], [test "$LIBXO_TEXT_ONLY" != "no"])
 
+AC_MSG_CHECKING([whether to build with local wcwidth implementation])
+AC_ARG_ENABLE([wcwidth],
+    [  --disable-wcwidth        Disable local wcwidth implementation],
+    [LIBXO_WCWIDTH=$enableval],
+    [LIBXO_WCWIDTH=yes])
+AC_MSG_RESULT([$LIBXO_WCWIDTH])
+if test "${LIBXO_WCWIDTH}" != "no"; then
+  AC_DEFINE([LIBXO_WCWIDTH], [1], [Enable local wcwidth implementation])
+fi
+
 AC_CHECK_LIB([m], [lrint])
 AM_CONDITIONAL([HAVE_LIBM], [test "$HAVE_LIBM" != "no"])
 
@@ -429,4 +439,5 @@ AC_MSG_NOTICE([summary of build options:
   gettext:          ${HAVE_GETTEXT:-no} (${GETTEXT_PREFIX})
   isthreaded:       ${HAVE_ISTHREADED:-no}
   thread-local:     ${THREAD_LOCAL:-no}
+  local wcwidth:    ${LIBXO_WCWIDTH:-no}
 ])
