@@ -30,6 +30,12 @@
 #include "xo_buf.h"
 #include "xo_version.h"
 
+#ifdef LIBXO_WCWIDTH
+#include "xo_wcwidth.h"
+#else /* LIBXO_WCWIDTH */
+#define xo_wcwidth(_x) wcwidth(_x)
+#endif /* LIBXO_WCWIDTH */
+
 #ifdef HAVE_STDIO_EXT_H
 #include <stdio_ext.h>
 #endif /* HAVE_STDIO_EXT_H */
@@ -1157,7 +1163,7 @@ xo_buf_append_locale_from_utf8 (xo_handle_t *xop, xo_buffer_t *xbp,
 	xbp->xb_curp += len;
     }
 
-    return wcwidth(wc);
+    return xo_wcwidth(wc);
 }
 
 static void
@@ -2310,7 +2316,7 @@ xo_format_string_direct (xo_handle_t *xop, xo_buffer_t *xbp,
 	 * in wide characters, since we lack a mbswidth() function.  If
 	 * it doesn't fit
 	 */
-	width = wcwidth(wc);
+	width = xo_wcwidth(wc);
 	if (width < 0)
 	    width = iswcntrl(wc) ? 0 : 1;
 
@@ -2604,7 +2610,7 @@ xo_count_utf8_cols (const char *str, int len)
 	     * Find the width-in-columns of this character, which must be done
 	     * in wide characters, since we lack a mbswidth() function.
 	     */
-	    int width = wcwidth(wc);
+	    int width = xo_wcwidth(wc);
 	    if (width < 0)
 		width = iswcntrl(wc) ? 0 : 1;
 
