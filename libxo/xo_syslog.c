@@ -59,7 +59,10 @@
 #include <sys/types.h>
 #include <sys/sysctl.h>
 
+#include "xo_config.h"
 #include "xo.h"
+#include "xo_encoder.h"		/* For xo_realloc */
+#include "xo_buf.h"
 
 /*
  * SYSLOG (RFC 5424) requires an enterprise identifier.  This turns
@@ -137,16 +140,6 @@ enum {
     CONNPRIV,
 };
 
-/*
- * We can't see the real xo_buffer_t (for now), so we cons up a compatible
- * version of it.
- */
-typedef struct xo_sbuffer_s {
-    char *xb_basep;		/* start of buffer */
-    char *xb_curp;    /* start of buffer */
-    int xb_size;
-} xo_sbuffer_t;
-
 static xo_syslog_open_t xo_syslog_open;
 static xo_syslog_send_t xo_syslog_send;
 static xo_syslog_close_t xo_syslog_close;
@@ -163,12 +156,6 @@ xo_set_syslog_enterprise_id (unsigned short eid)
 {
     snprintf(xo_syslog_enterprise_id, sizeof(xo_syslog_enterprise_id),
 	     "%u", eid);
-}
-
-static int
-xo_sleft (xo_sbuffer_t *xbp)
-{
-    return xbp->xb_size - (xbp->xb_curp - xbp->xb_basep);
 }
 
 /*
@@ -463,9 +450,9 @@ xo_snprintf (char *out, size_t outsize, const char *fmt, ...)
 static int
 xo_syslog_handle_write (void *opaque, const char *data)
 {
-    xo_sbuffer_t *xbp = opaque;
+    xo_buffer_t *xbp = opaque;
     int len = strlen(data);
-    int left = xo_sleft(xbp);
+    int left = xo_buf_left(xbp);
 
     if (len > left - 1)
 	len = left - 1;
@@ -502,7 +489,7 @@ xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
     char *tp = NULL, *ep = NULL;
     unsigned start_of_msg = 0;
     char *v0_hdr = NULL;
-    xo_sbuffer_t xb;
+    xo_buffer_t xb;
     static pid_t my_pid;
     unsigned log_offset;
 
@@ -530,7 +517,7 @@ xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
         pri |= xo_logfacility;
 
     /* Create the primary stdio hook */
-    xb.xb_basep = tbuf;
+    xb.xb_bufp = tbuf;
     xb.xb_curp = tbuf;
     xb.xb_size = sizeof(tbuf);
 
@@ -578,16 +565,16 @@ xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
 	    tp += xo_snprintf(tp, ep - tp, ": ");
     }
 
-    log_offset = xb.xb_curp - xb.xb_basep;
+    log_offset = xb.xb_curp - xb.xb_bufp;
 
     /* Add PRI, PRIVAL, and VERSION */
-    xb.xb_curp += xo_snprintf(xb.xb_curp, xo_sleft(&xb), "<%d>1 ", pri);
+    xb.xb_curp += xo_snprintf(xb.xb_curp, xo_buf_left(&xb), "<%d>1 ", pri);
 
     /* Add TIMESTAMP with milliseconds and TZOFFSET */
-    xb.xb_curp += strftime(xb.xb_curp, xo_sleft(&xb), "%FT%T", &tm);
-    xb.xb_curp += xo_snprintf(xb.xb_curp, xo_sleft(&xb),
+    xb.xb_curp += strftime(xb.xb_curp, xo_buf_left(&xb), "%FT%T", &tm);
+    xb.xb_curp += xo_snprintf(xb.xb_curp, xo_buf_left(&xb),
 			      ".%03.3u", tv.tv_usec / 1000);
-    xb.xb_curp += strftime(xb.xb_curp, xo_sleft(&xb), "%z ", &tm);
+    xb.xb_curp += strftime(xb.xb_curp, xo_buf_left(&xb), "%z ", &tm);
 
     /*
      * Add HOSTNAME; we rely on gethostname and don't fluff with
@@ -600,15 +587,15 @@ xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
     else
 	(void) gethostname(hostname, sizeof(hostname));
 
-    xb.xb_curp += xo_snprintf(xb.xb_curp, xo_sleft(&xb), "%s ",
+    xb.xb_curp += xo_snprintf(xb.xb_curp, xo_buf_left(&xb), "%s ",
 			      hostname[0] ? hostname : "-");
 
     /* Add APP-NAME */
-    xb.xb_curp += xo_snprintf(xb.xb_curp, xo_sleft(&xb), "%s ",
+    xb.xb_curp += xo_snprintf(xb.xb_curp, xo_buf_left(&xb), "%s ",
 			      xo_logtag ?: "-");
 
     /* Add PROCID */
-    xb.xb_curp += xo_snprintf(xb.xb_curp, xo_sleft(&xb), "%d ", my_pid);
+    xb.xb_curp += xo_snprintf(xb.xb_curp, xo_buf_left(&xb), "%d ", my_pid);
 
     /*
      * Add MSGID.  The user should provide us with a name, which we
@@ -650,7 +637,7 @@ xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
 	}
     }
 
-    xb.xb_curp += xo_snprintf(xb.xb_curp, xo_sleft(&xb), "%s [%s%s%s ",
+    xb.xb_curp += xo_snprintf(xb.xb_curp, xo_buf_left(&xb), "%s [%s%s%s ",
 			      name, name, at_sign, eid);
 
     /*
@@ -672,18 +659,18 @@ xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
 	xb.xb_curp -= 1;
 
     /* Close the structured data (SD-ELEMENT) */
-    xb.xb_curp += xo_snprintf(xb.xb_curp, xo_sleft(&xb), "] ");
+    xb.xb_curp += xo_snprintf(xb.xb_curp, xo_buf_left(&xb), "] ");
 
     /*
      * Since our MSG is known to be UTF-8, we MUST prefix it with
      * that most-annoying-of-all-UTF-8 features, the BOM (0xEF.BB.BF).
      */
-    xb.xb_curp += xo_snprintf(xb.xb_curp, xo_sleft(&xb),
+    xb.xb_curp += xo_snprintf(xb.xb_curp, xo_buf_left(&xb),
 			      "%c%c%c", 0xEF, 0xBB, 0xBF);
 
     /* Save the start of the message */
     if (xo_logstat & LOG_PERROR)
-	start_of_msg = xb.xb_curp - xb.xb_basep;
+	start_of_msg = xb.xb_curp - xb.xb_bufp;
 
     xo_set_style(xop, XO_STYLE_TEXT);
     xo_set_flags(xop, XOF_UTF8);
@@ -697,9 +684,9 @@ xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
         *--xb.xb_curp = '\0';
 
     if (xo_get_flags(xop) & XOF_LOG_SYSLOG)
-	fprintf(stderr, "xo: syslog: %s\n", xb.xb_basep + log_offset);
+	fprintf(stderr, "xo: syslog: %s\n", xb.xb_bufp + log_offset);
 
-    xo_send_syslog(xb.xb_basep, v0_hdr, xb.xb_basep + start_of_msg);
+    xo_send_syslog(xb.xb_bufp, v0_hdr, xb.xb_bufp + start_of_msg);
 
     xo_destroy(xop);
 
