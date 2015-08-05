@@ -37,6 +37,7 @@ configure
 .DS_Store
 
 xoconfig.h.in
+xo_config.h.in
 
 .gdbinit
 .gdbinit.local
