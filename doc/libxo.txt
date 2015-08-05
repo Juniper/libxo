@@ -1065,8 +1065,8 @@ number of columns to emit.  xo_emit uses the precision as the former,
 and adds a third value for specifying the maximum number of columns.
 
 In this example, the name field is printed with a minimum of 3 columns
-and a maximum of 6.  Up to ten bytes are in used in filling those
-columns. 
+and a maximum of 6.  Up to ten bytes of data at the location given by
+'name' are in used in filling those columns.
 
     xo_emit("{:name/%3.10.6s}", name);
 
