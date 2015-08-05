@@ -22,7 +22,7 @@
 #include <sys/param.h>
 #include <dlfcn.h>
 
-#include "xoconfig.h"
+#include "xo_config.h"
 #include "xo.h"
 #include "xo_encoder.h"
 
