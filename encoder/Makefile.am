@@ -6,4 +6,4 @@
 # using the SOFTWARE, you agree to be bound by the terms of that
 # LICENSE.
 
-SUBDIRS = cbr test
+SUBDIRS = cbor test
