@@ -62,7 +62,7 @@ main (int argc, char **argv)
 
     xo_open_container("employees");
 
-    wchar_t wc[] = { L'෴', L'ණ', L'්', L'ණ', L'\u17D2', L'෴', 0 };
+    wchar_t wc[] = { L'෴', L'ණ', L'්', L'ණ', 0x17D2, L'෴', 0 };
     for (i = 0; wc[i]; i++)
 	xo_emit("Wide char: {lq:wc/%lc - %#lx - %d}\n",
 		wc[i], (unsigned long) wc[i], xo_wcwidth(wc[i]));
