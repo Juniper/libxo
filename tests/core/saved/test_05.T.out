@@ -1,21 +1,21 @@
 Wide char: ෴ - 0xdf4 - 1
 Wide char: ණ - 0xdab - 1
-Wide char: ් - 0xdca - 1
+Wide char: ් - 0xdca - 0
 Wide char: ණ - 0xdab - 1
-Wide char: ្ - 0x17d2 - 1
+Wide char: ្ - 0x17d2 - 0
 Wide char: ෴ - 0xdf4 - 1
 Οὐχὶ ταὐτὰ παρίσταταί μοι γιγνώσκειν, ὦ ἄνδρες ᾿Αθηναῖοι
 გთხოვთ ახლავე გაიაროთ რეგისტრაცია Unicode-ის მეათე საერთაშორისო
 Width: 63
 [෴ණ්ණ෴]
-Width: 7
+Width: 6
 [෴]
 Width: 3
-[෴ණ්ණ]
+[෴ණ්ණ෴]
 Width: 6
 [1234]
 [ර්ඝ]
-Width: 5
+Width: 4
 First Name               Last Name     Department  Time (%)
 Jim ("რეგტ")             გთხოვთ ახ          431      90
 Terry ("<one")           Οὐχὶ ταὐτὰ παρ     660      90
@@ -23,4 +23,4 @@ Leslie ("Les")           Patterson          341      60
 Ashley ("Ash")           Meter & Smith     1440      40
 0123456789 ("0123456789")01234567890123    1440      40
 ახლა ("გაიარო")          საერთაშორისო       123      90
-෴ණ්ණ෴෴ණ්ණ෴ ("Mick")      ෴ණ්ණ෴෴ණ්ණ෴෴ණ්ණ     110      20
+෴ණ්ණ෴෴ණ්ණ෴ ("Mick")        ෴ණ්ණ෴෴ණ්ණ෴෴ණ්ණ෴෴෴     110      20
