@@ -8,7 +8,7 @@
 </div>
 <div class="line">
   <div class="text">Wide char: </div>
-  <div class="data" data-tag="wc">් - 0xdca - 1</div>
+  <div class="data" data-tag="wc">් - 0xdca - 0</div>
 </div>
 <div class="line">
   <div class="text">Wide char: </div>
@@ -16,7 +16,7 @@
 </div>
 <div class="line">
   <div class="text">Wide char: </div>
-  <div class="data" data-tag="wc">្ - 0x17d2 - 1</div>
+  <div class="data" data-tag="wc">្ - 0x17d2 - 0</div>
 </div>
 <div class="line">
   <div class="text">Wide char: </div>
@@ -49,7 +49,7 @@
   <div class="title">Width</div>
   <div class="decoration">:</div>
   <div class="padding"> </div>
-  <div class="data" data-tag="width">7</div>
+  <div class="data" data-tag="width">6</div>
 </div>
 <div class="line">
   <div class="text">[</div>
@@ -64,7 +64,7 @@
 </div>
 <div class="line">
   <div class="text">[</div>
-  <div class="data" data-tag="sinhala">෴ණ්ණ</div>
+  <div class="data" data-tag="sinhala">෴ණ්ණ෴</div>
   <div class="text">]</div>
 </div>
 <div class="line">
@@ -87,7 +87,7 @@
   <div class="title">Width</div>
   <div class="decoration">:</div>
   <div class="padding"> </div>
-  <div class="data" data-tag="width">5</div>
+  <div class="data" data-tag="width">4</div>
 </div>
 <div class="line">
   <div class="title">First Name               </div>
@@ -159,8 +159,8 @@
   <div class="text"> (</div>
   <div class="data" data-tag="nic-name">"Mick"</div>
   <div class="text">)</div>
-  <div class="padding">      </div>
-  <div class="data" data-tag="last-name">෴ණ්ණ෴෴ණ්ණ෴෴ණ්ණ</div>
+  <div class="padding">        </div>
+  <div class="data" data-tag="last-name">෴ණ්ණ෴෴ණ්ණ෴෴ණ්ණ෴෴෴</div>
   <div class="data" data-tag="department">     110</div>
   <div class="data" data-tag="percent-time">      20</div>
 </div>
