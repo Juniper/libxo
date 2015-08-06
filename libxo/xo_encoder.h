@@ -26,7 +26,7 @@ extern xo_free_func_t xo_free;
 
 typedef unsigned xo_encoder_op_t;
 
-/* Encoder operations */
+/* Encoder operations; names are in xo_encoder.c:xo_encoder_op_name() */
 #define XO_OP_UNKNOWN		0
 #define XO_OP_CREATE		1 /* Called when the handle is init'd */
 #define XO_OP_OPEN_CONTAINER	2
@@ -39,10 +39,10 @@ typedef unsigned xo_encoder_op_t;
 #define XO_OP_CLOSE_INSTANCE	9
 #define XO_OP_STRING		10 /* Quoted UTF-8 string */
 #define XO_OP_CONTENT		11 /* Other content */
-#define XO_OP_FLUSH		12 /* Clean up function */
-#define XO_OP_FINISH		13 /* Clean up function */
+#define XO_OP_FINISH		12 /* Finish any pending output */
+#define XO_OP_FLUSH		13 /* Flush any buffered output */
 #define XO_OP_DESTROY		14 /* Clean up function */
-#define XO_OP_ATTR		15 /* Attribute name/value */
+#define XO_OP_ATTRIBUTE		15 /* Attribute name/value */
 #define XO_OP_VERSION		16 /* Version string */
 
 #define XO_ENCODER_HANDLER_ARGS					\
