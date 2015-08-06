@@ -2158,6 +2158,127 @@ messages should register their own EID and use that value in their
 software to ensure that messages can be uniquely identified by the
 combination of EID + message name.
 
+** Creating Custom Encoders
+
+The number of encoding schemes in current use is staggering, with new
+and distinct schemes appearing daily.  While libxo provide XML, JSON,
+HMTL, and text natively, there are requirements for other encodings.
+
+Rather than bake support for all possible encoders into libxo, the API
+allows them to be defined externally.  libxo can then interfaces with
+these encoding modules using a simplistic API.  libxo processes all
+functions calls, handles state transitions, performs all formatting,
+and then passes the results as operations to a customized encoding
+function, which implements specific encoding logic as required.  This
+means your encoder doesn't need to detect errors with unbalanced
+open/close operations but can rely on libxo to pass correct data.
+
+By making a simple API, libxo internals are not exposed, insulating the
+encoder and the library from future or internal changes.
+
+The three elements of the API are:
+- loading
+- initialization
+- operations
+
+The following sections provide details about these topics.
+
+libxo source contain an encoder for Concise Binary Object
+Representation, aka CBOR (RFC 7049) which can be used as used as an
+example for the API.
+
+*** Loading Encoders
+
+Encoders can be registered statically or discovered dynamically.
+Applications can choose to call the xo_encoder_register()
+function to explicitly register encoders, but more typically they are
+built as shared libraries, placed in the libxo/extensions directory,
+and loaded based on name.  libxo looks for a file with the name of the encoder
+and an extension of ".enc".  This can be a file or a symlink to the
+shared library file that supports the encoder.
+
+    % ls -1 lib/libxo/extensions/*.enc
+    lib/libxo/extensions/cbor.enc
+    lib/libxo/extensions/test.enc
+
+*** Encoder Initialization
+
+Each encoder must export a symbol used to access the library, which
+must have the following signature:
+
+    int xo_encoder_library_init (XO_ENCODER_INIT_ARGS);
+
+XO_ENCODER_INIT_ARGS is a macro defined in xo_encoder.h that defines
+an argument called "arg", a pointer of the type
+xo_encoder_init_args_t.  This structure contains two fields:
+
+- xei_version is the version number of the API as implemented within
+libxo.  This version is currently as 1 using XO_ENCODER_VERSION.  This
+number can be checked to ensure compatibility.  The working assumption
+is that all versions should be backward compatible, but each side may
+need to accurately know the version supported by the other side.  
+xo_encoder_library_init can optionally check this value, and must then
+set it to the version number used by the encoder, allowing libxo to
+detect version differences and react accordingly.  For example, if
+version 2 adds new operations, then libxo will know that an encoding
+library that set xei_version to 1 cannot be expected to handle those
+new operations.
+
+- xei_handler must be set to a pointer to a function of type
+xo_encoder_func_t, as defined in xo_encoder.h.  This function
+takes a set of parameters:
+-- xop is a pointer to the opaque xo_handle_t structure
+-- op is an integer representing the current operation
+-- name is a string whose meaning differs by operation
+-- value is a string whose meaning differs by operation
+-- private is an opaque structure provided by the encoder
+
+Additional arguments may be added in the future, so handler functions
+should use the XO_ENCODER_HANDLER_ARGS macro.  An appropriate
+"extern" declaration is provided to help catch errors.
+
+Once the encoder initialization function has completed processing, it
+should return zero to indicate that no error has occurred.  A non-zero
+return code will cause the handle initialization to fail.
+
+*** Operations
+
+The encoder API defines a set of operations representing the
+processing model of libxo.  Content is formatted within libxo, and
+callbacks are made to the encoder's handler function when data is
+ready to be processed.
+
+|-----------------------+---------------------------------------|
+| Operation             | Meaning  (Base function)              |
+|-----------------------+---------------------------------------|
+| XO_OP_CREATE          | Called when the handle is created     |
+| XO_OP_OPEN_CONTAINER  | Container opened (xo_open_container)  |
+| XO_OP_CLOSE_CONTAINER | Container closed (xo_close_container) |
+| XO_OP_OPEN_LIST       | List opened (xo_open_list)            |
+| XO_OP_CLOSE_LIST      | List closed (xo_close_list)           |
+| XO_OP_OPEN_LEAF_LIST  | Leaf list opened (xo_open_leaf_list)  |
+| XO_OP_CLOSE_LEAF_LIST | Leaf list closed (xo_close_leaf_list) |
+| XO_OP_OPEN_INSTANCE   | Instance opened (xo_open_instance)    |
+| XO_OP_CLOSE_INSTANCE  | Instance closed (xo_close_instance)   |
+| XO_OP_STRING          | Field with Quoted UTF-8 string        |
+| XO_OP_CONTENT         | Field with content                    |
+| XO_OP_FINISH          | Finish any pending output             |
+| XO_OP_FLUSH           | Flush any buffered output             |
+| XO_OP_DESTROY         | Clean up resources                    |
+| XO_OP_ATTRIBUTE       | An attribute name/value pair          |
+| XO_OP_VERSION         | A version string                      |
+|-----------------------+---------------------------------------|
+
+For all the open and close operations, the name parameter holds the
+name of the construct.  For string, content, and attribute operations,
+the name parameter is the name of the field and the value parameter is
+the value.  "string" are differentiated from "content" to allow differing
+treatment of true, false, null, and numbers from real strings, though
+content values are formatted as strings before the handler is called.
+For version operations, the value parameter contains the version.
+
+All strings are encoded in UTF-8.
+
 * The "xo" Utility
 
 The "xo" utility allows command line access to the functionality of
