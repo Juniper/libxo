@@ -6,13 +6,16 @@
   <div class="data" data-tag="what">braces</div>
 </div>
 <div class="line">
-  <div class="message">abcdef</div>
+  <div class="message">abcdef
+</div>
 </div>
 <div class="line">
-  <div class="message">abcdef: Bad file descriptor</div>
+  <div class="message">abcdef: Bad file descriptor
+</div>
 </div>
 <div class="line">
-  <div class="message">improper use of profanity; ten yard penalty; first down</div>
+  <div class="message">improper use of profanity; ten yard penalty; first down
+</div>
 </div>
 <div class="line">
   <div class="text">length </div>
@@ -35,7 +38,8 @@
   <div class="data" data-tag="test">good</div>
 </div>
 <div class="line">
-  <div class="message">improper use of profanity; ten yard penalty; first down</div>
+  <div class="message">improper use of profanity; ten yard penalty; first down
+</div>
 </div>
 <div class="line">
   <div class="text"> </div>
@@ -212,8 +216,10 @@
   <div class="label">tries</div>
 </div>
 <div class="line">
-  <div class="message">improper use of profanity; ten yard penalty; first down</div>
+  <div class="message">improper use of profanity; ten yard penalty; first down
+</div>
 </div>
 <div class="line">
-  <div class="error">Shut 'er down, Clancey!  She's a-pumpin' mud!  &lt;&gt;!,"!&lt;&gt;</div>
+  <div class="error">Shut 'er down, Clancey!  She's a-pumpin' mud!  &lt;&gt;!,"!&lt;&gt;
+</div>
 </div>
