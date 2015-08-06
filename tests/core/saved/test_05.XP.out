@@ -1,9 +1,9 @@
 <employees>
   <wc>෴ - 0xdf4 - 1</wc>
   <wc>ණ - 0xdab - 1</wc>
-  <wc>් - 0xdca - 1</wc>
+  <wc>් - 0xdca - 0</wc>
   <wc>ණ - 0xdab - 1</wc>
-  <wc>្ - 0x17d2 - 1</wc>
+  <wc>្ - 0x17d2 - 0</wc>
   <wc>෴ - 0xdf4 - 1</wc>
   <v1>γιγνώσκειν</v1>
   <v2>ὦ ἄνδρες ᾿Αθηναῖοι</v2>
@@ -11,14 +11,14 @@
   <v2>Unicode-ის მეათე საერთაშორისო</v2>
   <width>55</width>
   <sinhala>෴ණ්ණ෴</sinhala>
-  <width>5</width>
+  <width>4</width>
   <sinhala>෴</sinhala>
   <width>1</width>
   <sinhala>෴ණ්ණ෴෴ණ්ණ෴</sinhala>
-  <width>10</width>
+  <width>8</width>
   <not-sinhala>123456</not-sinhala>
   <tag>ර්ඝ</tag>
-  <width>3</width>
+  <width>2</width>
   <employee>
     <first-name>Jim</first-name>
     <nic-name>"რეგტ"</nic-name>
