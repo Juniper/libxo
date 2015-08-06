@@ -325,6 +325,11 @@ cbor_handler (XO_ENCODER_HANDLER_ARGS)
 	cbor_content(xop, cbor, xbp, value);
 	break;
 
+    case XO_OP_FINISH:		   /* Clean up function */
+	cbor_append(xop, cbor, xbp, CBOR_BREAK, 0, NULL);
+	cbor->c_indent -= 1;
+	break;
+
     case XO_OP_FLUSH:		   /* Clean up function */
 	if (xo_get_flags(xop) & XOF_PRETTY)
 	    cbor_memdump(stdout, "cbor",
@@ -337,15 +342,10 @@ cbor_handler (XO_ENCODER_HANDLER_ARGS)
 	}
 	break;
 
-    case XO_OP_FINISH:		   /* Clean up function */
-	cbor_append(xop, cbor, xbp, CBOR_BREAK, 0, NULL);
-	cbor->c_indent -= 1;
-	break;
-
     case XO_OP_DESTROY:		   /* Clean up function */
 	break;
 
-    case XO_OP_ATTR:		   /* Attribute name/value */
+    case XO_OP_ATTRIBUTE:	   /* Attribute name/value */
 	break;
 
     case XO_OP_VERSION:		/* Version string */
