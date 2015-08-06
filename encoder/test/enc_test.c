@@ -23,6 +23,7 @@ test_handler (XO_ENCODER_HANDLER_ARGS)
 int
 xo_encoder_library_init (XO_ENCODER_INIT_ARGS)
 {
+    arg->xei_version = XO_ENCODER_VERSION;
     arg->xei_handler = test_handler;
 
     return 0;
