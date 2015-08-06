@@ -8,7 +8,7 @@
 </div>
 <div class="line">
   <div class="text">Wide char: </div>
-  <div class="data" data-tag="wc" data-xpath="/employees/wc">් - 0xdca - 1</div>
+  <div class="data" data-tag="wc" data-xpath="/employees/wc">් - 0xdca - 0</div>
 </div>
 <div class="line">
   <div class="text">Wide char: </div>
@@ -16,7 +16,7 @@
 </div>
 <div class="line">
   <div class="text">Wide char: </div>
-  <div class="data" data-tag="wc" data-xpath="/employees/wc">្ - 0x17d2 - 1</div>
+  <div class="data" data-tag="wc" data-xpath="/employees/wc">្ - 0x17d2 - 0</div>
 </div>
 <div class="line">
   <div class="text">Wide char: </div>
@@ -49,7 +49,7 @@
   <div class="title">Width</div>
   <div class="decoration">:</div>
   <div class="padding"> </div>
-  <div class="data" data-tag="width" data-xpath="/employees/width">7</div>
+  <div class="data" data-tag="width" data-xpath="/employees/width">6</div>
 </div>
 <div class="line">
   <div class="text">[</div>
@@ -64,7 +64,7 @@
 </div>
 <div class="line">
   <div class="text">[</div>
-  <div class="data" data-tag="sinhala" data-xpath="/employees/sinhala">෴ණ්ණ</div>
+  <div class="data" data-tag="sinhala" data-xpath="/employees/sinhala">෴ණ්ණ෴</div>
   <div class="text">]</div>
 </div>
 <div class="line">
@@ -87,7 +87,7 @@
   <div class="title">Width</div>
   <div class="decoration">:</div>
   <div class="padding"> </div>
-  <div class="data" data-tag="width" data-xpath="/employees/width">5</div>
+  <div class="data" data-tag="width" data-xpath="/employees/width">4</div>
 </div>
 <div class="line">
   <div class="title">First Name               </div>
@@ -159,8 +159,8 @@
   <div class="text"> (</div>
   <div class="data" data-tag="nic-name" data-xpath="/employees/employee/nic-name">"Mick"</div>
   <div class="text">)</div>
-  <div class="padding">      </div>
-  <div class="data" data-tag="last-name" data-xpath="/employees/employee/last-name" data-type="string" data-help="Last name of employee">෴ණ්ණ෴෴ණ්ණ෴෴ණ්ණ</div>
+  <div class="padding">        </div>
+  <div class="data" data-tag="last-name" data-xpath="/employees/employee/last-name" data-type="string" data-help="Last name of employee">෴ණ්ණ෴෴ණ්ණ෴෴ණ්ණ෴෴෴</div>
   <div class="data" data-tag="department" data-xpath="/employees/employee/department">     110</div>
   <div class="data" data-tag="percent-time" data-xpath="/employees/employee/percent-time" data-type="number" data-help="Percentage of full &amp; part time (%)">      20</div>
 </div>
