@@ -5984,7 +5984,7 @@ xo_attr_hv (xo_handle_t *xop, const char *name, const char *fmt, va_list vap)
 	if (rc >= 0) {
 	    xbp->xb_curp += rc;
 	    *xbp->xb_curp = '\0';
-	    rc = xo_encoder_handle(xop, XO_OP_ATTR,
+	    rc = xo_encoder_handle(xop, XO_OP_ATTRIBUTE,
 				   xo_buf_data(xbp, name_offset),
 				   xo_buf_data(xbp, value_offset));
 	}
