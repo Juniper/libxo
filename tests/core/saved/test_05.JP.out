@@ -3,9 +3,9 @@
     "wc": [
       "෴ - 0xdf4 - 1",
       "ණ - 0xdab - 1",
-      "් - 0xdca - 1",
+      "් - 0xdca - 0",
       "ණ - 0xdab - 1",
-      "្ - 0x17d2 - 1",
+      "្ - 0x17d2 - 0",
       "෴ - 0xdf4 - 1"
     ],
     "v1": "γιγνώσκειν",
@@ -14,14 +14,14 @@
     "v2": "Unicode-ის მეათე საერთაშორისო",
     "width": 55,
     "sinhala": "෴ණ්ණ෴",
-    "width": 5,
+    "width": 4,
     "sinhala": "෴",
     "width": 1,
     "sinhala": "෴ණ්ණ෴෴ණ්ණ෴",
-    "width": 10,
+    "width": 8,
     "not-sinhala": "123456",
     "tag": "ර්ඝ",
-    "width": 3,
+    "width": 2,
     "employee": [
       {
         "first-name": "Jim",
