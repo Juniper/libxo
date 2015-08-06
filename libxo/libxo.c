@@ -2307,10 +2307,6 @@ xo_format_string_direct (xo_handle_t *xop, xo_buffer_t *xbp,
 		len = 0;
 	}
 
-	/* We only print printable characters */
-	if (!iswprint((wint_t) wc))
-	    continue;
-
 	/*
 	 * Find the width-in-columns of this character, which must be done
 	 * in wide characters, since we lack a mbswidth() function.  If
