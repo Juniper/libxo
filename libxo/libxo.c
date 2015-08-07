@@ -28,7 +28,6 @@
 #include "xo.h"
 #include "xo_encoder.h"
 #include "xo_buf.h"
-#include "xo_version.h"
 
 #ifdef LIBXO_WCWIDTH
 #include "xo_wcwidth.h"
