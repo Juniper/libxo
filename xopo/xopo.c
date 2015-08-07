@@ -18,7 +18,6 @@
 
 #include "xo_config.h"
 #include "xo.h"
-#include "xo_version.h"
 
 #include <getopt.h>		/* Include after xo.h for testing */
 
