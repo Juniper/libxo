@@ -389,13 +389,21 @@ AC_SUBST(LIBXO_VERSION)
 AC_SUBST(LIBXO_VERSION_NUMBER)
 AC_SUBST(LIBXO_VERSION_EXTRA)
 
+AC_DEFINE_UNQUOTED(LIBXO_VERSION, ["$LIBXO_VERSION"],
+    [Version number as dotted value])
+AC_DEFINE_UNQUOTED(LIBXO_VERSION_NUMBER, [$LIBXO_VERSION_NUMBER],
+    [Version number as a number])
+AC_DEFINE_UNQUOTED(LIBXO_VERSION_STRING, ["$LIBXO_VERSION_NUMBER"],
+    [Version number as string])
+AC_DEFINE_UNQUOTED(LIBXO_VERSION_EXTRA, ["$LIBXO_VERSION_EXTRA"],
+    [Version number extra information])
+
 AC_CONFIG_HEADERS([libxo/xo_config.h])
 AC_CONFIG_FILES([
   Makefile
   libxo-config
   xohtml/xohtml.sh
   libxo/Makefile
-  libxo/xo_version.h
   encoder/Makefile
   encoder/cbor/Makefile
   encoder/test/Makefile
