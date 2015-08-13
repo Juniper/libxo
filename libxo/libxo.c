@@ -29,6 +29,28 @@
 #include "xo_encoder.h"
 #include "xo_buf.h"
 
+/*
+ * We ask wcwidth() to do an impossible job, really.  It's supposed to
+ * need to tell us the number of columns consumed to display a unicode
+ * character.  It returns that number without any sort of context, but
+ * we know they are characters whose glyph differs based on placement
+ * (end of word, middle of word, etc) and many that affect characters
+ * previously emitted.  Without content, it can't hope to tell us.
+ * But it's the only standard tool we've got, so we use it.  We would
+ * use wcswidth() but it typically just loops thru adding the results
+ * of wcwidth() calls in an entirely unhelpful way.
+ *
+ * Even then, there are many poor implementations (macosx), so we have
+ * to carry our own.  We could have configure.ac test this (with
+ * something like 'assert(wcwidth(0x200d) == 0)'), but it would have
+ * to run a binary, which breaks cross-compilation.  Hmm... I could
+ * run this test at init time and make a warning for our dear user.
+ *
+ * Anyhow, it remains a best-effort sort of thing.  And it's all made
+ * more hopeless because we assume the terminal doing the rendering is
+ * playing by the same rules we are.  If it display 0x200d as a square
+ * box or a funky question mark, the output will be hosed.
+ */
 #ifdef LIBXO_WCWIDTH
 #include "xo_wcwidth.h"
 #else /* LIBXO_WCWIDTH */
@@ -39,6 +61,10 @@
 #include <stdio_ext.h>
 #endif /* HAVE_STDIO_EXT_H */
 
+/*
+ * humanize_number is a great function, unless you don't have it.  So
+ * we carry one in our pocket.
+ */
 #ifdef HAVE_HUMANIZE_NUMBER
 #include <libutil.h>
 #define xo_humanize_number humanize_number 
@@ -82,7 +108,7 @@ const char xo_version_extra[] = LIBXO_VERSION_EXTRA;
 #endif /* UNUSED */
 
 #define XO_INDENT_BY 2	/* Amount to indent when pretty printing */
-#define XO_DEPTH	512	 /* Default stack depth */
+#define XO_DEPTH	128	 /* Default stack depth */
 #define XO_MAX_ANCHOR_WIDTH (8*1024) /* Anything wider is just sillyb */
 
 #define XO_FAILURE_NAME	"failure"
@@ -189,7 +215,7 @@ typedef struct xo_stack_s {
 #define XO_EFF_UNDERLINE	(1<<3)
 #define XO_EFF_INVERSE		(1<<4)
 
-#define XO_EFF_CLEAR_BITS 	XO_EFF_RESET
+#define XO_EFF_CLEAR_BITS XO_EFF_RESET /* Reset gets reset, surprisingly */
 
 typedef uint8_t xo_effect_t;
 typedef uint8_t xo_color_t;
@@ -331,7 +357,6 @@ typedef unsigned long xo_xff_flags_t;
  * that is C string handling.  The simplicity and completenesss are
  * sunk in ways we haven't even begun to understand.
  */
-
 #define XF_WIDTH_MIN	0	/* Minimal width */
 #define XF_WIDTH_SIZE	1	/* Maximum number of bytes to examine */
 #define XF_WIDTH_MAX	2	/* Maximum width */
@@ -484,13 +509,13 @@ xo_flush_file (void *opaque)
 static const char *
 xo_printable (const char *str)
 {
-    static char bufset[XO_NUMBUFS][XO_SMBUFSZ];
-    static int bufnum = 0;
+    static THREAD_LOCAL(char) bufset[XO_NUMBUFS][XO_SMBUFSZ];
+    static THREAD_LOCAL(int) bufnum = 0;
 
     if (str == NULL)
 	return "";
 
-    if (++bufnum == XO_NUMBUFS)	/* Not thread safe */
+    if (++bufnum == XO_NUMBUFS)
 	bufnum = 0;
 
     char *res = bufset[bufnum], *cp, *ep;
@@ -519,11 +544,12 @@ xo_depth_check (xo_handle_t *xop, int depth)
     xo_stack_t *xsp;
 
     if (depth >= xop->xo_stack_size) {
-	depth += 16;
+	depth += XO_DEPTH;	/* Extra room */
+
 	xsp = xo_realloc(xop->xo_stack, sizeof(xop->xo_stack[0]) * depth);
 	if (xsp == NULL) {
 	    xo_failure(xop, "xo_depth_check: out of memory (%d)", depth);
-	    return 0;
+	    return -1;
 	}
 
 	int count = depth - xop->xo_stack_size;
