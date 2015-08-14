@@ -165,13 +165,13 @@ void
 xo_set_depth (xo_handle_t *xop, int depth);
 
 int
-xo_emit_hv (xo_handle_t *xop, const char *fmt, va_list vap);
+xo_emit_hv (xo_handle_t *xop, const char *fmt, va_list vap) PRINTFLIKE(2, 0);
 
 int
-xo_emit_h (xo_handle_t *xop, const char *fmt, ...);
+xo_emit_h (xo_handle_t *xop, const char *fmt, ...) PRINTFLIKE(2, 3);
 
 int
-xo_emit (const char *fmt, ...);
+xo_emit (const char *fmt, ...) PRINTFLIKE(1, 2);
 
 int
 xo_open_container_h (xo_handle_t *xop, const char *name);
@@ -315,7 +315,7 @@ void
 xo_errc (int eval, int code, const char *fmt, ...) NORETURN PRINTFLIKE(3, 4);
 
 void
-xo_message_hcv (xo_handle_t *xop, int code, const char *fmt, va_list vap);
+xo_message_hcv (xo_handle_t *xop, int code, const char *fmt, va_list vap) PRINTFLIKE(3, 0);
 
 void
 xo_message_hc (xo_handle_t *xop, int code, const char *fmt, ...) PRINTFLIKE(3, 4);
@@ -330,25 +330,25 @@ void
 xo_message (const char *fmt, ...) PRINTFLIKE(1, 2);
 
 void
-xo_emit_warn_hc (xo_handle_t *xop, int code, const char *fmt, ...);
+xo_emit_warn_hc (xo_handle_t *xop, int code, const char *fmt, ...) PRINTFLIKE(3, 4);
 
 void
-xo_emit_warn_c (int code, const char *fmt, ...);
+xo_emit_warn_c (int code, const char *fmt, ...) PRINTFLIKE(2, 3);
 
 void
-xo_emit_warn (const char *fmt, ...);
+xo_emit_warn (const char *fmt, ...) PRINTFLIKE(1, 2);
 
 void
-xo_emit_warnx (const char *fmt, ...);
+xo_emit_warnx (const char *fmt, ...) PRINTFLIKE(1, 2);
 
 void
-xo_emit_err (int eval, const char *fmt, ...);
+xo_emit_err (int eval, const char *fmt, ...) PRINTFLIKE(2, 3);
 
 void
-xo_emit_errx (int eval, const char *fmt, ...);
+xo_emit_errx (int eval, const char *fmt, ...) PRINTFLIKE(2, 3);
 
 void
-xo_emit_errc (int eval, int code, const char *fmt, ...);
+xo_emit_errc (int eval, int code, const char *fmt, ...)  PRINTFLIKE(3, 4);
 
 void
 xo_no_setlocale (void);
