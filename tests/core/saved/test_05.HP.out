@@ -48,6 +48,27 @@
   <div class="data" data-tag="wc">෴ - 0xdf4 - 1</div>
 </div>
 <div class="line">
+  <div class="text">Wide char: </div>
+  <div class="data" data-tag="wc">1 - 0x31 - 1</div>
+</div>
+<div class="line">
+  <div class="text">Wide char: </div>
+  <div class="data" data-tag="wc">͏ - 0x34f - 0</div>
+</div>
+<div class="line">
+  <div class="text">Wide char: </div>
+  <div class="data" data-tag="wc">2 - 0x32 - 1</div>
+</div>
+<div class="line">
+  <div class="text">Wide char: </div>
+  <div class="data" data-tag="wc">⃝ - 0x20dd - 0</div>
+</div>
+<div class="line">
+  <div class="text">Cool: [</div>
+  <div class="data" data-tag="fancy">1͏2⃝</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
   <div class="text">Οὐχὶ ταὐτὰ παρίσταταί μοι </div>
   <div class="data" data-tag="v1">γιγνώσκειν</div>
   <div class="text">, </div>
