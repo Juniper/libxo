@@ -88,6 +88,12 @@ main (int argc, char **argv)
 	xo_emit("Wide char: {lq:wc/%lc - %#lx - %d}\n",
 		wc[i], (unsigned long) wc[i], xo_wcwidth(wc[i]));
 
+    wchar_t msg[] = { L'1', 0x034f, L'2', 0x20dd, 0 };
+    for (i = 0; msg[i]; i++)
+	xo_emit("Wide char: {lq:wc/%lc - %#lx - %d}\n",
+		msg[i], (unsigned long) msg[i], xo_wcwidth((int) msg[i]));
+    xo_emit("Cool: [{:fancy/%ls}]\n", msg);
+
     xo_emit("Οὐχὶ ταὐτὰ παρίσταταί μοι {:v1/%s}, {:v2/%s}\n",
 	    "γιγνώσκειν", "ὦ ἄνδρες ᾿Αθηναῖοι");
 
