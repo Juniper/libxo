@@ -46,9 +46,8 @@ main (int argc, char **argv)
 	{ "on-order", "number", "Number of items on order" },
 	{ "sku", "string", "Stock Keeping Unit" },
 	{ "sold", "number", "Number of items sold" },
-	{ NULL, NULL, NULL },
+	{ XO_INFO_NULL },
     };
-    int info_count = (sizeof(info) / sizeof(info[0])) - 1;
     
     argc = xo_parse_args(argc, argv);
     if (argc < 0)
@@ -75,7 +74,7 @@ main (int argc, char **argv)
         }
     }
 
-    xo_set_info(NULL, info, info_count);
+    xo_set_info(NULL, info, -1);
     xo_set_flags(NULL, XOF_KEYS);
 
     xo_open_container_h(NULL, "top");
