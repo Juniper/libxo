@@ -12,6 +12,11 @@ Wide char: ් - 0xdca - 0
 Wide char: ණ - 0xdab - 1
 Wide char: ្ - 0x17d2 - 0
 Wide char: ෴ - 0xdf4 - 1
+Wide char: 1 - 0x31 - 1
+Wide char: ͏ - 0x34f - 0
+Wide char: 2 - 0x32 - 1
+Wide char: ⃝ - 0x20dd - 0
+Cool: [1͏2⃝]
 Οὐχὶ ταὐτὰ παρίσταταί μοι γιγνώσκειν, ὦ ἄνδρες ᾿Αθηναῖοι
 გთხოვთ ახლავე გაიაროთ რეგისტრაცია Unicode-ის მეათე საერთაშორისო
 Width: 63
