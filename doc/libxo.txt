@@ -1117,6 +1117,52 @@ default to "%s".
 For padding and labels, the content string is considered the content,
 unless a format is given.
 
+*** Argument Validation @printf-like@
+
+Many compilers and tool chains support validation of printf-like
+arguments.  When the format string fails to match the argument list, 
+a warning is generated.  This is a valuable feature and while the
+formatting strings for libxo differ considerably from printf, many of
+these checks can still provide build-time protection against bugs.
+
+libxo provide variants of functions that provide this ability, if the
+"--enable-printflike" option is passed to the "configure" script.
+These functions use the "_p" suffix, like "xo_emit_p()",
+xo_emit_hp()", etc.
+
+The following are features of libxo formatting strings that are
+incompatible with printf-like testing:
+
+- implicit formats, where "{:tag}" has an implicit "%s";
+- the "max" parameter for strings, where "{:tag/%4.10.6s}" means up to
+ten bytes of data can be inspected to fill a minimum of 4 columns and
+a maximum of 6;
+- percent signs in strings, where "{:filled}%" makes a single,
+trailing percent sign;
+- the "l" and "h" modifiers for strings, where "{:tag/%hs}" means
+locale-based string and "{:tag/%ls}" means a wide character string;
+- distinct encoding formats, where "{:tag/#%s/%s}" means the display
+styles (text and HTML) will use "#%s" where other styles use "%s";
+
+If none of these features are in use by your code, then using the "_p"
+variants might be wise.
+
+|------------------+------------------------|
+| Function         | printf-like Equivalent |
+|------------------+------------------------|
+| xo_emit_hv       | xo_emit_hvp            |
+| xo_emit_h        | xo_emit_hp             |
+| xo_emit          | xo_emit_p              |
+| xo_emit_warn_hcv | xo_emit_warn_hcvp      |
+| xo_emit_warn_hc  | xo_emit_warn_hcp       |
+| xo_emit_warn_c   | xo_emit_warn_cp        |
+| xo_emit_warn     | xo_emit_warn_p         |
+| xo_emit_warnx_   | xo_emit_warnx_p        |
+| xo_emit_err      | xo_emit_err_p          |
+| xo_emit_errx     | xo_emit_errx_p         |
+| xo_emit_errc     | xo_emit_errc_p         |
+|------------------+------------------------|
+
 *** Example
 
 In this example, the value for the number of items in stock is emitted:
