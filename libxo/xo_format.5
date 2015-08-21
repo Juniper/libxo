@@ -61,6 +61,10 @@ The contents, field-format, and
 encoding-format are used in varying ways, based on the role.
 These are described in the following sections.
 .Pp
+Braces can be escaped by using double braces, similar to "%%" in
+.Xr printf 3 .
+The format string "{{braces}}" would emit "{braces}".
+.Pp
 In the following example, three field descriptors appear.
 The first
 is a padding field containing three spaces of padding, the second is a
@@ -199,6 +203,42 @@ By marking these distinctly, HTML usage scenarios
 can use CSS to direct their display parameters.
 .Bd -literal -offset indent
     xo_emit("{D:((}{:name}{D:))}\\n", name);
+.Ed
+.Ss The Gettext Role ({G:})
+.Nm libxo
+supports internationalization (i18n) through its use of
+.Xr gettext 3 .
+Use the "{G:}" role to request that the remaining part of
+the format string, following the "{G:}" field, be handled using
+.Fn gettext .
+Since
+.Fn gettext
+uses the string as the key into the message catalog,
+.Nm libxo
+uses a simplified version of the format string that removes
+unimportant field formatting and modifiers, stopping minor formatting
+changes from impacting the expensive translation process.
+A developer
+change such as changing "/%06d" to "/%08d" should not force hand
+inspection of all .po files.
+.Pp
+The simplified version can be generated for a single message using the
+"xopo -s <text>" command, or an entire .pot can be translated using
+the "xopo -f <input> -o <output>" command.
+.Bd -literal -offset indent
+   xo_emit("{G:}Invalid token\n");
+.Ed
+The {G:} role allows a domain name to be set.
+.Fn gettext
+calls will
+continue to use that domain name until the current format string
+processing is complete, enabling a library function to emit strings
+using it's own catalog.
+The domain name can be either static as the
+content of the field, or a format can be used to get the domain name
+from the arguments.
+.Bd -literal -offset indent
+   xo_emit("{G:libc}Service unavailable in restricted mode\n");
 .Ed
 .Ss The Label Role ({L:})
 Labels are text that appears before a value.
@@ -428,6 +468,23 @@ In the HTML style, the original numeric value is rendered in the
     <div class="data" data-tag="errors"
          data-number="100663296">96M</div>
 .Ed
+.Ss The Gettext Modifier ({g:})
+The gettext modifier is used to translate individual fields using the
+gettext domain (typically set using the "{G:}" role) and current
+language settings.
+Once libxo renders the field value, it is passed
+to
+.Xr gettext 3 ,
+where it is used as a key to find the native language
+translation.
+.Pp
+In the following example, the strings "State" and "full" are passed
+to
+.Fn gettext
+to find locale-based translated strings.
+.Bd -literal -offset indent
+    xo_emit("{Lgwc:State}{g:state}\n", "full");
+.Ed
 .Ss The Key Modifier ({k:})
 The key modifier is used to indicate that a particular field helps
 uniquely identify an instance of list data.
@@ -479,6 +536,28 @@ needed, but often this needs to be controlled by the caller.
     JSON:
       "fancy": true
 .Ed
+.Ss The Plural Modifier ({p:})
+The plural modifier selects the appropriate plural form of an
+expression based on the most recent number emitted and the current
+language settings.
+The contents of the field should be the singular
+and plural English values, separated by a comma:
+.Bd -literal -offset indent
+    xo_emit("{:bytes} {Ngp:byte,bytes}\n", bytes);
+.Ed
+The plural modifier is meant to work with the gettext modifier ({g:})
+but can work independently.
+.Pp
+When used without the gettext modifier or when the message does not
+appear in the message catalog, the first token is chosen when the last
+numeric value is equal to 1; otherwise the second value is used,
+mimicking the simple pluralization rules of English.
+.Pp
+When used with the gettext modifier, the
+.Xrngettext 3
+function is
+called to handle the heavy lifting, using the message catalog to
+convert the singular and plural forms into the native language.
 .Ss The Quotes Modifier ({q:})
 The quotes modifier (and its twin, the 'no-quotes' modifier) affect
 the quoting of values in the JSON output style.
@@ -866,31 +945,7 @@ If there is no difference,
 use only one of the field names.
 If there is a difference, change the
 names to make that difference more obvious.
-.Sh ADDITIONAL DOCUMENTATION
-Complete documentation can be found on github:
-.Bd -literal -offset indent
-http://juniper.github.io/libxo/libxo-manual.html
-.Ed
-.Pp
-.Nm libxo
-lives on github as:
-.Bd -literal -offset indent
-https://github.com/Juniper/libxo
-.Ed
-.Pp
-The latest release of
-.Nm libxo
-is available at:
-.Bd -literal -offset indent
-https://github.com/Juniper/libxo/releases
-.Ed
 .Sh SEE ALSO
 .Xr xolint 1 ,
-.Xr xo_emit 3
-.Sh HISTORY
-The
-.Nm libxo
-library was added in
-.Fx 11.0 .
-.Sh AUTHOR
-Phil Shafer
+.Xr xo_emit 3 ,
+.Xr libxo 3
