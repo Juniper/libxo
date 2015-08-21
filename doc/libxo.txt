@@ -43,10 +43,10 @@ can then be generated in various style, using the "--libxo" option:
     % wc --libxo xml,pretty,warn /etc/motd
     <wc>
       <file>
-        <filename>/etc/motd</filename>
         <lines>25</lines>
         <words>165</words>
         <characters>1140</characters>
+        <filename>/etc/motd</filename>
       </file>
     </wc>
     % wc --libxo json,pretty,warn /etc/motd
@@ -54,10 +54,10 @@ can then be generated in various style, using the "--libxo" option:
       "wc": {
         "file": [
           {
-            "filename": "/etc/motd",
             "lines": 25,
             "words": 165,
-            "characters": 1140
+            "characters": 1140,
+            "filename": "/etc/motd"
           }
         ]
       }
