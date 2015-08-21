@@ -404,6 +404,7 @@ AC_CONFIG_FILES([
   libxo-config
   xohtml/xohtml.sh
   libxo/Makefile
+  libxo/add.man
   encoder/Makefile
   encoder/cbor/Makefile
   encoder/test/Makefile
