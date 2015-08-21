@@ -12,6 +12,9 @@
  * libxo provides a means of generating text, XML, JSON, and HTML output
  * using a single set of function calls, maximizing the value of output
  * while minimizing the cost/impact on the code.
+ *
+ * Full documentation is available in ./doc/libxo.txt or online at:
+ *   http://juniper.github.io/libxo/libxo-manual.html
  */
 
 #ifndef INCLUDE_XO_H
@@ -20,6 +23,8 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <stdarg.h>
+#include <stdlib.h>
+#include <errno.h>
 
 #ifdef __dead2
 #define NORETURN __dead2
@@ -100,6 +105,8 @@ typedef struct xo_info_s {
     const char *xi_help;	/* Description of field */
 } xo_info_t;
 
+#define XO_INFO_NULL NULL, NULL, NULL /* Use '{ XO_INFO_NULL }' to end lists */
+
 struct xo_handle_s;		/* Opaque structure forward */
 typedef struct xo_handle_s xo_handle_t; /* Handle for XO output */
 
@@ -172,6 +179,35 @@ xo_emit_h (xo_handle_t *xop, const char *fmt, ...);
 
 int
 xo_emit (const char *fmt, ...);
+
+PRINTFLIKE(2, 0)
+static inline int
+xo_emit_hvp (xo_handle_t *xop, const char *fmt, va_list vap)
+{
+    return xo_emit_hv(xop, fmt, vap);
+}
+
+PRINTFLIKE(2, 3)
+static inline int
+xo_emit_hp (xo_handle_t *xop, const char *fmt, ...)
+{
+    va_list vap;
+    va_start(vap, fmt);
+    int rc = xo_emit_hv(xop, fmt, vap);
+    va_end(vap);
+    return rc;
+}
+
+PRINTFLIKE(1, 2)
+static inline int
+xo_emit_p (const char *fmt, ...)
+{
+    va_list vap;
+    va_start(vap, fmt);
+    int rc = xo_emit_hv(NULL, fmt, vap);
+    va_end(vap);
+    return rc;
+}
 
 int
 xo_open_container_h (xo_handle_t *xop, const char *name);
@@ -315,7 +351,7 @@ void
 xo_errc (int eval, int code, const char *fmt, ...) NORETURN PRINTFLIKE(3, 4);
 
 void
-xo_message_hcv (xo_handle_t *xop, int code, const char *fmt, va_list vap);
+xo_message_hcv (xo_handle_t *xop, int code, const char *fmt, va_list vap) PRINTFLIKE(3, 0);
 
 void
 xo_message_hc (xo_handle_t *xop, int code, const char *fmt, ...) PRINTFLIKE(3, 4);
@@ -330,6 +366,10 @@ void
 xo_message (const char *fmt, ...) PRINTFLIKE(1, 2);
 
 void
+xo_emit_warn_hcv (xo_handle_t *xop, int as_warning, int code,
+		  const char *fmt, va_list vap);
+
+void
 xo_emit_warn_hc (xo_handle_t *xop, int code, const char *fmt, ...);
 
 void
@@ -342,13 +382,100 @@ void
 xo_emit_warnx (const char *fmt, ...);
 
 void
-xo_emit_err (int eval, const char *fmt, ...);
+xo_emit_err (int eval, const char *fmt, ...) NORETURN;
 
 void
-xo_emit_errx (int eval, const char *fmt, ...);
+xo_emit_errx (int eval, const char *fmt, ...) NORETURN;
 
 void
-xo_emit_errc (int eval, int code, const char *fmt, ...);
+xo_emit_errc (int eval, int code, const char *fmt, ...) NORETURN;
+
+PRINTFLIKE(4, 0)
+static inline void
+xo_emit_warn_hcvp (xo_handle_t *xop, int as_warning, int code,
+		  const char *fmt, va_list vap)
+{
+    xo_emit_warn_hcv(xop, as_warning, code, fmt, vap);
+}
+
+PRINTFLIKE(3, 4)
+static inline void
+xo_emit_warn_hcp (xo_handle_t *xop, int code, const char *fmt, ...)
+{
+    va_list vap;
+    va_start(vap, fmt);
+    xo_emit_warn_hcv(xop, 1, code, fmt, vap);
+    va_end(vap);
+}
+
+PRINTFLIKE(2, 3)
+static inline void
+xo_emit_warn_cp (int code, const char *fmt, ...)
+{
+    va_list vap;
+    va_start(vap, fmt);
+    xo_emit_warn_hcv(NULL, 1, code, fmt, vap);
+    va_end(vap);
+}
+
+PRINTFLIKE(1, 2)
+static inline void
+xo_emit_warn_p (const char *fmt, ...)
+{
+    int code = errno;
+    va_list vap;
+    va_start(vap, fmt);
+    xo_emit_warn_hcv(NULL, 1, code, fmt, vap);
+    va_end(vap);
+}
+
+PRINTFLIKE(1, 2)
+static inline void
+xo_emit_warnx_p (const char *fmt, ...)
+{
+    va_list vap;
+    va_start(vap, fmt);
+    xo_emit_warn_hcv(NULL, 1, -1, fmt, vap);
+    va_end(vap);
+}
+
+NORETURN PRINTFLIKE(2, 3)
+static inline void
+xo_emit_err_p (int eval, const char *fmt, ...)
+{
+    int code = errno;
+    va_list vap;
+    va_start(vap, fmt);
+    xo_emit_warn_hcv(NULL, 0, code, fmt, vap);
+    va_end(vap);
+
+    exit(eval);
+}
+
+PRINTFLIKE(2, 3)
+static inline void
+xo_emit_errx_p (int eval, const char *fmt, ...)
+{
+    va_list vap;
+    va_start(vap, fmt);
+    xo_emit_warn_hcv(NULL, 0, -1, fmt, vap);
+    va_end(vap);
+    exit(eval);
+}
+
+PRINTFLIKE(3, 4)
+static inline void
+xo_emit_errc_p (int eval, int code, const char *fmt, ...)
+{
+    va_list vap;
+    va_start(vap, fmt);
+    xo_emit_warn_hcv(NULL, 0, code, fmt, vap);
+    va_end(vap);
+    exit(eval);
+}
+
+void
+xo_emit_err_v (int eval, int code, const char *fmt, va_list vap) NORETURN PRINTFLIKE(3, 0);
 
 void
 xo_no_setlocale (void);
