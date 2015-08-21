@@ -63,6 +63,8 @@ man_MANS = \
     xo_set_info.3 \
     xo_set_options.3 \
     xo_set_style.3 \
+    xo_set_syslog_enterprise_id.3 \
+    xo_syslog.3 \
     xo_set_version.3 \
     xo_set_writer.3
 
@@ -73,3 +75,7 @@ call-graph:
 	${RM} libxo.o
 	${MAKE} CC="clang -Xclang -analyze -Xclang \
             -analyzer-checker=debug.ViewCallGraph" libxo.o
+
+install-data-hook:
+	for file in ${man_MANS}; do \
+	    cat add.man >> ${DESTDIR}${man3dir}/$$file ; done
