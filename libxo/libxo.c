@@ -6,6 +6,24 @@
  * using the SOFTWARE, you agree to be bound by the terms of that
  * LICENSE.
  * Phil Shafer, July 2014
+ *
+ * This is the implementation of libxo, the formatting library that
+ * generates multiple styles of output from a single code path.
+ * Command line utilities can have their normal text output while
+ * automation tools can see XML or JSON output, and web tools can use
+ * HTML output that encodes the text output annotated with additional
+ * information.  Specialized encoders can be built that allow custom
+ * encoding including binary ones like CBOR, thrift, protobufs, etc.
+ *
+ * Full documentation is available in ./doc/libxo.txt or online at:
+ *   http://juniper.github.io/libxo/libxo-manual.html
+ *
+ * For first time readers, the core bits of code to start looking at are:
+ * - xo_do_emit() -- the central function of the library
+ * - xo_do_format_field() -- handles formatting a single field
+ * - xo_transiton() -- the state machine that keeps things sane
+ * and of course the "xo_handle_t" data structure, which carries all
+ * configuration and state.
  */
 
 #include <stdio.h>
@@ -47,7 +65,7 @@
  * run this test at init time and make a warning for our dear user.
  *
  * Anyhow, it remains a best-effort sort of thing.  And it's all made
- * more hopeless because we assume the terminal doing the rendering is
+ * more hopeless because we assume the display code doing the rendering is
  * playing by the same rules we are.  If it display 0x200d as a square
  * box or a funky question mark, the output will be hosed.
  */
@@ -1732,6 +1750,9 @@ xo_name_to_style (const char *name)
     return -1;
 }
 
+/*
+ * Indicate if the style is an "encoding" one as opposed to a "display" one.
+ */
 static int
 xo_style_is_encoding (xo_handle_t *xop)
 {
@@ -7131,6 +7152,10 @@ xo_close_marker (const char *name)
     return xo_close_marker_h(NULL, name);
 }
 
+/*
+ * Record custom output functions into the xo handle, allowing
+ * integration with a variety of output frameworks.
+ */
 void
 xo_set_writer (xo_handle_t *xop, void *opaque, xo_write_func_t write_func,
 	       xo_close_func_t close_func, xo_flush_func_t flush_func)
@@ -7221,6 +7246,10 @@ xo_finish (void)
     return xo_finish_h(NULL);
 }
 
+/*
+ * xo_finish_atexit is suitable for atexit() calls, to force clear up
+ * and finalizing output.
+ */
 void
 xo_finish_atexit (void)
 {
@@ -7308,6 +7337,12 @@ xo_error (const char *fmt, ...)
     va_end(vap);
 }
 
+/*
+ * Parse any libxo-specific options from the command line, removing them
+ * so the main() argument parsing won't see them.  We return the new value
+ * for argc or -1 for error.  If an error occurred, the program should
+ * exit.  A suitable error message has already been displayed.
+ */
 int
 xo_parse_args (int argc, char **argv)
 {
@@ -7367,6 +7402,10 @@ xo_parse_args (int argc, char **argv)
     return save;
 }
 
+/*
+ * Debugging function that dumps the current stack of open libxo constructs,
+ * suitable for calling from the debugger.
+ */
 void
 xo_dump_stack (xo_handle_t *xop)
 {
@@ -7385,6 +7424,9 @@ xo_dump_stack (xo_handle_t *xop)
     }
 }
 
+/*
+ * Record the program name used for error messages
+ */
 void
 xo_set_program (const char *name)
 {
@@ -7422,6 +7464,10 @@ xo_set_version_h (xo_handle_t *xop, const char *version UNUSED)
     }
 }
 
+/*
+ * Set the version number for the API content being carried thru
+ * the xo handle.
+ */
 void
 xo_set_version (const char *version)
 {
@@ -7433,13 +7479,11 @@ xo_set_version (const char *version)
  * standard error.  If the XOF_WARN_XML flag is set, then we generate
  * XMLified content on standard output.
  */
-static void
-xo_emit_warn_hcv (xo_handle_t *xop, int as_warning, int code, int check_warn,
-	     const char *fmt, va_list vap)
+void
+xo_emit_warn_hcv (xo_handle_t *xop, int as_warning, int code,
+		  const char *fmt, va_list vap)
 {
     xop = xo_default(xop);
-    if (check_warn && !XOF_ISSET(xop, XOF_WARN))
-	return;
 
     if (fmt == NULL)
 	return;
@@ -7493,7 +7537,7 @@ xo_emit_warn_hc (xo_handle_t *xop, int code, const char *fmt, ...)
     va_list vap;
 
     va_start(vap, fmt);
-    xo_emit_warn_hcv(xop, 1, code, 0, fmt, vap);
+    xo_emit_warn_hcv(xop, 1, code, fmt, vap);
     va_end(vap);
 }
 
@@ -7503,7 +7547,7 @@ xo_emit_warn_c (int code, const char *fmt, ...)
     va_list vap;
 
     va_start(vap, fmt);
-    xo_emit_warn_hcv(NULL, 1, code, 0, fmt, vap);
+    xo_emit_warn_hcv(NULL, 1, code, fmt, vap);
     va_end(vap);
 }
 
@@ -7514,7 +7558,7 @@ xo_emit_warn (const char *fmt, ...)
     va_list vap;
 
     va_start(vap, fmt);
-    xo_emit_warn_hcv(NULL, 1, code, 0, fmt, vap);
+    xo_emit_warn_hcv(NULL, 1, code, fmt, vap);
     va_end(vap);
 }
 
@@ -7524,8 +7568,16 @@ xo_emit_warnx (const char *fmt, ...)
     va_list vap;
 
     va_start(vap, fmt);
-    xo_emit_warn_hcv(NULL, 1, -1, 0, fmt, vap);
+    xo_emit_warn_hcv(NULL, 1, -1, fmt, vap);
     va_end(vap);
+}
+
+void
+xo_emit_err_v (int eval, int code, const char *fmt, va_list vap)
+{
+    xo_emit_warn_hcv(NULL, 0, code, fmt, vap);
+    xo_finish();
+    exit(eval);
 }
 
 void
@@ -7533,11 +7585,9 @@ xo_emit_err (int eval, const char *fmt, ...)
 {
     int code = errno;
     va_list vap;
-
     va_start(vap, fmt);
-    xo_emit_warn_hcv(NULL, 0, code, 0, fmt, vap);
+    xo_emit_err_v(0, code, fmt, vap);
     va_end(vap);
-    xo_finish();
     exit(eval);
 }
 
@@ -7547,7 +7597,7 @@ xo_emit_errx (int eval, const char *fmt, ...)
     va_list vap;
 
     va_start(vap, fmt);
-    xo_emit_warn_hcv(NULL, 0, -1, 0, fmt, vap);
+    xo_emit_err_v(0, -1, fmt, vap);
     va_end(vap);
     xo_finish();
     exit(eval);
@@ -7559,12 +7609,15 @@ xo_emit_errc (int eval, int code, const char *fmt, ...)
     va_list vap;
 
     va_start(vap, fmt);
-    xo_emit_warn_hcv(NULL, 0, code, 0, fmt, vap);
+    xo_emit_warn_hcv(NULL, 0, code, fmt, vap);
     va_end(vap);
     xo_finish();
     exit(eval);
 }
 
+/*
+ * Get the opaque private pointer for an xo handle
+ */
 void *
 xo_get_private (xo_handle_t *xop)
 {
@@ -7572,6 +7625,9 @@ xo_get_private (xo_handle_t *xop)
     return xop->xo_private;
 }
 
+/*
+ * Set the opaque private pointer for an xo handle.
+ */
 void
 xo_set_private (xo_handle_t *xop, void *opaque)
 {
@@ -7579,6 +7635,9 @@ xo_set_private (xo_handle_t *xop, void *opaque)
     xop->xo_private = opaque;
 }
 
+/*
+ * Get the encoder function
+ */
 xo_encoder_func_t
 xo_get_encoder (xo_handle_t *xop)
 {
@@ -7586,6 +7645,9 @@ xo_get_encoder (xo_handle_t *xop)
     return xop->xo_encoder;
 }
 
+/*
+ * Record an encoder callback function in an xo handle.
+ */
 void
 xo_set_encoder (xo_handle_t *xop, xo_encoder_func_t encoder)
 {
