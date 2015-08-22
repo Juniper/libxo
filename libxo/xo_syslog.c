@@ -243,7 +243,6 @@ xo_send_syslog (char *full_msg, char *v0_hdr,
             }
         }
     } else {
-        THREAD_UNLOCK();
         return;
     }
 
