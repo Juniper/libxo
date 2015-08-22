@@ -88,7 +88,7 @@
 
 #if defined(__FreeBSD__)
 #define XO_DEFAULT_EID	2238
-#elseif defined(__macosx__)
+#elif defined(__macosx__)
 #define XO_DEFAULT_EID	63
 #else
 #define XO_DEFAULT_EID	32473	/* Bail; use "example" number */
