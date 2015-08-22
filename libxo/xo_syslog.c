@@ -88,10 +88,10 @@
 
 #if defined(__FreeBSD__)
 #define XO_DEFAULT_EID	2238
-#elseif defined(__macosx__)
+#elif defined(__macosx__)
 #define XO_DEFAULT_EID	63
 #else
-#define XO_DEFAULT_EID	32473	/* Bail; use "example" number */
+#define XO_DEFAULT_EID	32473	/* Fallback to the "example" number */
 #endif
 
 #ifdef _SC_HOST_NAME_MAX
@@ -165,8 +165,11 @@ static void
 xo_send_syslog (char *full_msg, char *v0_hdr,
 		char *text_only)
 {
+    THREAD_LOCK();
+
     if (xo_syslog_send) {
 	xo_syslog_send(full_msg, v0_hdr, text_only);
+	THREAD_UNLOCK();
 	return;
     }
 
@@ -222,6 +225,7 @@ xo_send_syslog (char *full_msg, char *v0_hdr,
             xo_disconnect_log();
             xo_connect_log();
             if (send(xo_logfile, full_msg, full_len, 0) >= 0) {
+		THREAD_UNLOCK();
                 return;
             }
             /*
@@ -239,11 +243,12 @@ xo_send_syslog (char *full_msg, char *v0_hdr,
                 break;
             usleep(1);
             if (send(xo_logfile, full_msg, full_len, 0) >= 0) {
+		THREAD_UNLOCK();
                 return;
             }
         }
     } else {
-        THREAD_UNLOCK();
+	THREAD_UNLOCK();
         return;
     }
 
@@ -273,6 +278,8 @@ xo_send_syslog (char *full_msg, char *v0_hdr,
         REAL_VOID(writev(fd, iov, 2));
         (void) close(fd);
     }
+
+    THREAD_UNLOCK();
 }
 
 /* Should be called with mutex acquired */
