@@ -37,3 +37,7 @@ endif
 man_MANS = xopo.1
 
 EXTRA_DIST = xopo.1
+
+install-data-hook:
+	for file in ${man_MANS}; do \
+	    cat ../libxo/add.man >> ${DESTDIR}${man1dir}/$$file ; done

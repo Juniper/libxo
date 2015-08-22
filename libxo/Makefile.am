@@ -78,4 +78,4 @@ call-graph:
 
 install-data-hook:
 	for file in ${man_MANS}; do \
-	    cat add.man >> ${DESTDIR}${man3dir}/$$file ; done
+	    cat ../libxo/add.man >> ${DESTDIR}${man3dir}/$$file ; done
