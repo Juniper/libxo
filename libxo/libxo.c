@@ -5373,7 +5373,8 @@ xo_dump_fields (xo_field_info_t *fields)
 
     for (xfip = fields; xfip->xfi_ftype; xfip++) {
 	printf("%lu(%u): %lx [%c/%u] [%.*s] [%.*s] [%.*s]\n",
-	       xfip - fields, xfip->xfi_fnum, (unsigned long) xfip->xfi_flags,
+	       (unsigned long) (xfip - fields), xfip->xfi_fnum,
+	       (unsigned long) xfip->xfi_flags,
 	       isprint((int) xfip->xfi_ftype) ? xfip->xfi_ftype : ' ',
 	       xfip->xfi_ftype,
 	       xfip->xfi_clen, xfip->xfi_content ?: "", 
