@@ -187,7 +187,7 @@ xo_encoder_setup (void)
 	xo_string_list_init(&xo_encoder_path);
 	xo_encoder_list_init(&xo_encoders);
 
-	xo_encoder_path_add(XO_EXTDIR);
+	xo_encoder_path_add(XO_ENCODERDIR);
     }
 }
 
@@ -289,6 +289,10 @@ int
 xo_encoder_init (xo_handle_t *xop, const char *name)
 {
     xo_encoder_setup();
+
+    /* Can't have names containing '/' or ':' */
+    if (strchr(name, '/') != NULL || strchr(name, ':') != NULL)
+	return -1;
 
    /*
      * First we look on the list of known (registered) encoders.
