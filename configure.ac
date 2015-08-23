@@ -354,12 +354,12 @@ AC_SUBST(XO_BINDIR)
 AC_SUBST(XO_INCLUDEDIR)
 AC_SUBST(XO_LIBEXT)
 
-AC_ARG_WITH(extensions-dir,
-        [  --with-extensions-dir=[DIR]           Specify location of extension libraries],
-        [XO_EXTDIR=$withval],
-        [XO_EXTDIR=$libdir/libxo/extensions]
+AC_ARG_WITH(encoder-dir,
+        [  --with-encoder-dir=[DIR]           Specify location of encoder libraries],
+        [XO_ENCODERDIR=$withval],
+        [XO_ENCODERDIR=$libdir/libxo/encoder]
 )
-AC_SUBST(XO_EXTDIR)
+AC_SUBST(XO_ENCODERDIR)
 
 AC_ARG_WITH(share-dir,
         [  --with-share-dir=[DIR]           Specify location of shared files],
@@ -433,7 +433,7 @@ AC_MSG_NOTICE([summary of build options:
   bindir:           ${XO_BINDIR}
   includedir:       ${XO_INCLUDEDIR}
   share dir:        ${XO_SHAREDIR}
-  extensions dir:   ${XO_EXTDIR}
+  extensions dir:   ${XO_ENCODERDIR}
   oxtradoc dir:     ${SLAX_OXTRADOCDIR}
 
   compiler:         ${CC} (${HAVE_GCC:-no})

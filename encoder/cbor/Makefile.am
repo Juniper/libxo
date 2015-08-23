@@ -33,7 +33,7 @@ LDADD = ${top_builddir}/libxo/libxo.la
 libenc_cbor_la_SOURCES = \
     enc_cbor.c
 
-pkglibdir = ${XO_EXTDIR}
+pkglibdir = ${XO_ENCODERDIR}
 
 UGLY_NAME = cbor.enc
 
@@ -44,8 +44,8 @@ install-exec-hook:
 		if [ "$(build_os)" = "cygwin" ]; \
 		    then DLNAME="../bin/$$DLNAME"; fi ; \
 		echo Install link $$DLNAME "->" ${UGLY_NAME} "..." ; \
-		mkdir -p ${DESTDIR}${XO_EXTDIR} ; \
-		cd ${DESTDIR}${XO_EXTDIR} \
+		mkdir -p ${DESTDIR}${XO_ENCODERDIR} ; \
+		cd ${DESTDIR}${XO_ENCODERDIR} \
 		&& chmod +w . \
 		&& rm -f ${UGLY_NAME} \
 		&& ${LN_S} $$DLNAME ${UGLY_NAME}
