@@ -22,7 +22,7 @@ AM_CFLAGS = \
     ${GETTEXT_CFLAGS}
 
 AM_CFLAGS += \
-    -DXO_EXTDIR=\"${XO_EXTDIR}\"
+    -DXO_ENCODERDIR=\"${XO_ENCODERDIR}\"
 
 lib_LTLIBRARIES = libxo.la
 
