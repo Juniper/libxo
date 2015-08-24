@@ -646,7 +646,7 @@ xo_init_handle (xo_handle_t *xop)
 	if (cp == NULL)
 	    cp = getenv("LC_ALL");
 	if (cp == NULL)
-	    cp = "UTF-8";	/* Optimistic? */
+	    cp = "C";		/* Default for C programs */
 	(void) setlocale(LC_CTYPE, cp);
     }
 

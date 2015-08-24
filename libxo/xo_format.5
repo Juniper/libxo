@@ -24,14 +24,14 @@ various output styles, including
 and
 .Em HTML .
 Each format string contains a set of zero or more
-.Dq field descriptions ,
+.Dq "field descriptions" ,
 which describe independent data fields.
 Each field description contains a set of
 .Dq modifiers ,
 a
-.Dq content string ,
+.Dq "content string" ,
 and zero, one, or two
-.Dq format descriptors .
+.Dq "format descriptors" .
 The modifiers tell
 .Nm libxo
 what the field is and how to treat it, while the format descriptors are
@@ -554,7 +554,7 @@ numeric value is equal to 1; otherwise the second value is used,
 mimicking the simple pluralization rules of English.
 .Pp
 When used with the gettext modifier, the
-.Xrngettext 3
+.Xr ngettext 3
 function is
 called to handle the heavy lifting, using the message catalog to
 convert the singular and plural forms into the native language.
@@ -899,9 +899,9 @@ Nothing is worse than writing expressions like:
 Find someone else who is expressing similar data and follow their
 fields and hierarchy.
 Remember the quote is not
-.Dq Consistency is the hobgoblin of little minds
+.Dq "Consistency is the hobgoblin of little minds"
 but
-.Dq A foolish consistency is the hobgoblin of little minds .
+.Dq "A foolish consistency is the hobgoblin of little minds" .
 .Ss Think about your users
 Have empathy for your users, choosing clear and useful fields that
 contain clear and useful data.
