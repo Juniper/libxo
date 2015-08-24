@@ -2,11 +2,11 @@
 .\" # Copyright (c) 2014, Juniper Networks, Inc.
 .\" # All rights reserved.
 .\" # This SOFTWARE is licensed under the LICENSE provided in the
-.\" # ../Copyright file. By downloading, installing, copying, or 
+.\" # ../Copyright file. By downloading, installing, copying, or
 .\" # using the SOFTWARE, you agree to be bound by the terms of that
 .\" # LICENSE.
 .\" # Phil Shafer, July 2014
-.\" 
+.\"
 .Dd December 4, 2014
 .Dt LIBXO 3
 .Os
@@ -20,7 +20,7 @@ uses format strings to control the rendering of data into
 various output styles, including
 .Em text ,
 .Em XML ,
-.EM JSON ,
+.Em JSON ,
 and
 .Em HTML .
 Each format string contains a set of zero or more
@@ -89,13 +89,12 @@ single-character values:
 .Bd -literal -offset indent
     xo_emit("{L,white,colon:In stock}{,key:in-stock/%u}\n", 65);
 .Ed
-.Ss Field Roles
+.Ss "Field Roles"
 Field roles are optional, and indicate the role and formatting of the
 content.
 The roles are listed below; only one role is permitted:
-.Pp
 .Bl -column "M" "Name12341234"
-.It Sy "M  Name           Description"
+.It Sy "M" "Name        " "Description"
 .It C "color       " "Field is a color or effect"
 .It D "decoration  " "Field is non-text (e.g. colon, comma)"
 .It E "error       " "Field is an error message"
@@ -109,7 +108,6 @@ The roles are listed below; only one role is permitted:
 .It \&[ "start-anchor" "Begin a section of anchored variable-width text"
 .It \&] "stop-anchor " "End a section of anchored variable-width text"
 .El
-.Pp
 .Bd -literal -offset indent
    EXAMPLE:
        xo_emit("{L:Free}{D::}{P:   }{:free/%u} {U:Blocks}\n",
@@ -126,7 +124,7 @@ a comma:
                "{,value:free/%u} {,units:Blocks}\n",
                free_blocks);
 .Ed
-.Ss The Color Role ({C:})
+.Ss "The Color Role ({C:})"
 Colors and effects control how text values are displayed; they are
 used for display styles (TEXT and HTML).
 .Bd -literal -offset indent
@@ -166,16 +164,15 @@ foreground and background colors, respectively.
 .Ed
 .Pp
 The following table lists the supported effects:
-.Pp
 .Bl -column "no-underline"
-.It Sy "Name          Description"
-.It "bg-xxxxx     " "Change background color"
+.It Sy "Name         " "Description"
+.It "bg\-xxxxx     " "Change background color"
 .It "bold         " "Start bold text effect"
-.It "fg-xxxxx     " "Change foreground color"
+.It "fg\-xxxxx     " "Change foreground color"
 .It "inverse      " "Start inverse (aka reverse) text effect"
-.It "no-bold      " "Stop bold text effect"
-.It "no-inverse   " "Stop inverse (aka reverse) text effect"
-.It "no-underline " "Stop underline text effect"
+.It "no\-bold      " "Stop bold text effect"
+.It "no\-inverse   " "Stop inverse (aka reverse) text effect"
+.It "no\-underline " "Stop underline text effect"
 .It "normal       " "Reset effects (only)"
 .It "reset        " "Reset colors and effects (restore defaults)"
 .It "underline    " "Start underline text effect"
@@ -194,8 +191,7 @@ The following color names are supported:
 .It white
 .It yellow
 .El
-.Pp
-.Ss The Decoration Role ({D:})
+.Ss "The Decoration Role ({D:})"
 Decorations are typically punctuation marks such as colons,
 semi-colons, and commas used to decorate the text and make it simpler
 for human readers.
@@ -204,7 +200,7 @@ can use CSS to direct their display parameters.
 .Bd -literal -offset indent
     xo_emit("{D:((}{:name}{D:))}\\n", name);
 .Ed
-.Ss The Gettext Role ({G:})
+.Ss "The Gettext Role ({G:})"
 .Nm libxo
 supports internationalization (i18n) through its use of
 .Xr gettext 3 .
@@ -240,17 +236,17 @@ from the arguments.
 .Bd -literal -offset indent
    xo_emit("{G:libc}Service unavailable in restricted mode\n");
 .Ed
-.Ss The Label Role ({L:})
+.Ss "The Label Role ({L:})"
 Labels are text that appears before a value.
 .Bd -literal -offset indent
     xo_emit("{Lwc:Cost}{:cost/%u}\\n", cost);
 .Ed
-.Ss The Note Role ({N:})
+.Ss "The Note Role ({N:})"
 Notes are text that appears after a value.
 .Bd -literal -offset indent
     xo_emit("{:cost/%u} {N:per year}\\n", cost);
 .Ed
-.Ss The Padding Role ({P:})
+.Ss "The Padding Role ({P:})"
 Padding represents whitespace used before and between fields.
 The padding content can be either static, when placed directly within
 the field descriptor, or a printf-style format descriptor can be used,
@@ -259,7 +255,7 @@ if preceded by a slash ("/"):
     xo_emit("{P:        }{Lwc:Cost}{:cost/%u}\\n", cost);
     xo_emit("{P:/30s}{Lwc:Cost}{:cost/%u}\\n", "", cost);
 .Ed
-.Ss The Title Role ({T:})
+.Ss "The Title Role ({T:})"
 Titles are heading or column headers that are meant to be displayed to
 the user.
 The title can be either static, when placed directly within
@@ -269,7 +265,7 @@ if preceded by a slash ("/"):
     xo_emit("{T:Interface Statistics}\\n");
     xo_emit("{T:/%20.20s}{T:/%6.6s}\\n", "Item Name", "Cost");
 .Ed
-.Ss The Units Role ({U:})
+.Ss "The Units Role ({U:})"
 Units are the dimension by which values are measured, such as degrees,
 miles, bytes, and decibels.
 The units field carries this information
@@ -295,7 +291,7 @@ Units can also be rendered in HTML as the "data-units" attribute:
     <div class="data" data-tag="distance" data-units="miles"
          data-xpath="/top/data/distance">50</div>
 .Ed
-.Ss The Value Role ({V:} and {:})
+.Ss "The Value Role ({V:} and {:})"
 The value role is used to represent the a data value that is
 interesting for the non-display output styles (XML and JSON).
 Value
@@ -317,7 +313,7 @@ format descriptors default to "%s".
     xo_emit("{:author} wrote \"{:poem}\" in {:year/%4d}\\n,
             author, poem, year);
 .Ed
-.Ss The Anchor Roles ({[:} and {]:})
+.Ss "The Anchor Roles ({[:} and {]:})"
 The anchor roles allow a set of strings by be padded as a group,
 but still be visible to
 .Xr xo_emit 3
@@ -355,25 +351,24 @@ Widths over 8k are considered probable errors and not supported.
 If
 .Dv XOF_WARN
 is set, a warning will be generated.
-.Ss Field Modifiers
+.Ss "Field Modifiers"
 Field modifiers are flags which modify the way content emitted for
 particular output styles:
-.Pp
 .Bl -column M "Name123456789"
-.It Sy M "Name        Description"
-.It c "colon        " "A colon ("":"") is appended after the label"
-.It d "display      " "Only emit field for display styles (text/HTML)"
-.It e "encoding     " "Only emit for encoding styles (XML/JSON)"
-.It h "humanize (hn)"  "Format large numbers in human-readable style"
+.It Sy M "Name          " "Description"
+.It c "colon         " "A colon ("":"") is appended after the label"
+.It d "display       " "Only emit field for display styles (text/HTML)"
+.It e "encoding      " "Only emit for encoding styles (XML/JSON)"
+.It h "humanize (hn) " "Format large numbers in human-readable style"
 .It " " "hn-space     " "Humanize: Place space between numeric and unit"
 .It " " "hn-decimal   " "Humanize: Add a decimal digit, if number < 10"
 .It " " "hn-1000      " "Humanize: Use 1000 as divisor instead of 1024"
-.It k "key          " "Field is a key, suitable for XPath predicates"
+.It k "key           " "Field is a key, suitable for XPath predicates"
 .It l "leaf-list    " "Field is a leaf-list, a list of leaf values"
 .It n "no-quotes    " "Do not quote the field when using JSON style"
-.It q "quotes       " "Quote the field when using JSON style"
-.It q "trim         " "Trim leading and trailing whitespace"
-.It w "white space  " "A blank ("" "") is appended after the label"
+.It q "quotes        " "Quote the field when using JSON style"
+.It q "trim          " "Trim leading and trailing whitespace"
+.It w "white space   " "A blank ("" "") is appended after the label"
 .El
 .Pp
 For example, the modifier string "Lwc" means the field has a label
@@ -391,7 +386,7 @@ and should be followed by a colon ('c') and a space ('w').
 The modifier string "Vkq" (or ":key,quote") means the field has a value
 role (the default role), that it is a key for the current instance,
 and that the value should be quoted when encoded for JSON.
-.Ss The Colon Modifier ({c:})
+.Ss "The Colon Modifier ({c:})"
 The colon modifier appends a single colon to the data value:
 .Bd -literal -offset indent
     EXAMPLE:
@@ -404,7 +399,7 @@ The colon modifier is only used for the TEXT and HTML output
 styles.
 It is commonly combined with the space modifier ('{w:}').
 It is purely a convenience feature.
-.Ss The Display Modifier ({d:})
+.Ss "The Display Modifier ({d:})"
 The display modifier indicated the field should only be generated for
 the display output styles, TEXT and HTML.
 .Bd -literal -offset indent
@@ -418,7 +413,7 @@ the display output styles, TEXT and HTML.
 .Pp
 The display modifier is the opposite of the encoding modifier, and
 they are often used to give to distinct views of the underlying data.
-.Ss The Encoding Modifier ({e:})
+.Ss "The Encoding Modifier ({e:})"
 The encoding modifier indicated the field should only be generated for
 the encoding output styles, such as JSON and XML.
 .Bd -literal -offset indent
@@ -432,7 +427,7 @@ the encoding output styles, such as JSON and XML.
 .Pp
 The encoding modifier is the opposite of the display modifier, and
 they are often used to give to distinct views of the underlying data.
-.Ss The Humanize Modifier ({h:})
+.Ss "The Humanize Modifier ({h:})"
 The humanize modifier is used to render large numbers as in a
 human-readable format.
 While numbers like "44470272" are completely readable to computers and
@@ -446,7 +441,7 @@ The "no-humanize" option will block the function of the humanize modifier.
 There are a number of modifiers that affect details of humanization.
 These are only available in as full names, not single characters.
 The "hn-space" modifier places a space between the number and any
-multiplier symbol, such as "M" or "K" (ex: "44 K").  
+multiplier symbol, such as "M" or "K" (ex: "44 K").
 The "hn-decimal" modifier will add a decimal point and a single tenths digit
 when the number is less than 10 (ex: "4.4K").
 The "hn-1000" modifier will use 1000 as divisor instead of 1024, following the
@@ -468,7 +463,7 @@ In the HTML style, the original numeric value is rendered in the
     <div class="data" data-tag="errors"
          data-number="100663296">96M</div>
 .Ed
-.Ss The Gettext Modifier ({g:})
+.Ss "The Gettext Modifier ({g:})"
 The gettext modifier is used to translate individual fields using the
 gettext domain (typically set using the "{G:}" role) and current
 language settings.
@@ -485,7 +480,7 @@ to find locale-based translated strings.
 .Bd -literal -offset indent
     xo_emit("{Lgwc:State}{g:state}\n", "full");
 .Ed
-.Ss The Key Modifier ({k:})
+.Ss "The Key Modifier ({k:})"
 The key modifier is used to indicate that a particular field helps
 uniquely identify an instance of list data.
 .Bd -literal -offset indent
@@ -504,7 +499,7 @@ Currently the key modifier is only used when generating XPath values
 for the HTML output style when
 .Dv XOF_XPATH
 is set, but other uses are likely in the near future.
-.Ss The Leaf-List Modifier ({l:})
+.Ss "The Leaf-List Modifier ({l:})"
 The leaf-list modifier is used to distinguish lists where each
 instance consists of only a single value.  In XML, these are
 rendered as single elements, where JSON renders them as arrays.
@@ -521,7 +516,7 @@ rendered as single elements, where JSON renders them as arrays.
     JSON:
         "user": [ "phil", "pallavi" ]
 .Ed
-.Ss The No-Quotes Modifier ({n:})
+.Ss "The No-Quotes Modifier ({n:})"
 The no-quotes modifier (and its twin, the 'quotes' modifier) affect
 the quoting of values in the JSON output style.
 JSON uses quotes for
@@ -536,7 +531,7 @@ needed, but often this needs to be controlled by the caller.
     JSON:
       "fancy": true
 .Ed
-.Ss The Plural Modifier ({p:})
+.Ss "The Plural Modifier ({p:})"
 The plural modifier selects the appropriate plural form of an
 expression based on the most recent number emitted and the current
 language settings.
@@ -558,7 +553,7 @@ When used with the gettext modifier, the
 function is
 called to handle the heavy lifting, using the message catalog to
 convert the singular and plural forms into the native language.
-.Ss The Quotes Modifier ({q:})
+.Ss "The Quotes Modifier ({q:})"
 The quotes modifier (and its twin, the 'no-quotes' modifier) affect
 the quoting of values in the JSON output style.
 JSON uses quotes for
@@ -572,7 +567,7 @@ needed, but often this needs to be controlled by the caller.
     JSON:
       "year": "2014"
 .Ed
-.Ss The White Space Modifier ({w:})
+.Ss "The White Space Modifier ({w:})"
 The white space modifier appends a single space to the data value:
 .Bd -literal -offset indent
     EXAMPLE:
@@ -588,7 +583,7 @@ It is purely a convenience feature.
 .Pp
 Note that the sense of the 'w' modifier is reversed for the units role
 ({Uw:}); a blank is added before the contents, rather than after it.
-.Ss Field Formatting
+.Ss "Field Formatting"
 The field format is similar to the format string for
 .Xr printf 3 .
 Its use varies based on the role of the field, but generally is used to
@@ -615,7 +610,7 @@ The format- modifier can be:
 .Bl -bullet
 .It
 a '#' character, indicating the output value should be prefixed with
-'0x', typically to indicate a base 16 (hex) value.
+"0x", typically to indicate a base 16 (hex) value.
 .It
 a minus sign ('-'), indicating the output value should be padded on
 the right instead of the left.
@@ -639,7 +634,7 @@ will never dereference memory beyond the given number of bytes.
 .It
 a second period followed by one or more digits indicating the maximum
 width for a string argument.
-This modifier cannot be given for non-string arguments. 
+This modifier cannot be given for non-string arguments.
 .It
 one or more 'h' characters, indicating shorter input data.
 .It
@@ -659,9 +654,8 @@ Note that 'q', 'D', 'O', and 'U' are considered deprecated and will be
 removed eventually.
 .Pp
 The format character is described in the following table:
-.Pp
 .Bl -column C "Argument Type12"
-.It Sy "C Argument Type   Format"
+.It Sy "C" "Argument Type  " "Format"
 .It d "int            " "base 10 (decimal)"
 .It i "int            " "base 10 (decimal)"
 .It o "int            " "base 8 (octal)"
@@ -699,8 +693,7 @@ argument:
 .It "z  " "size_t      " "size_t"
 .It "q  " "quad_t      " "u_quad_t"
 .El
-.Pp
-.Ss UTF-8 and Locale Strings
+.Ss "UTF-8 and Locale Strings"
 All strings for
 .Nm libxo
 must be UTF-8.
@@ -717,10 +710,10 @@ Since UTF-8 is compatible with
 data, a normal 7-bit
 .Em ASCII
 string can be used.
-'%ls' expects a
-'wchar_t *' pointer to a wide-character string, encoded as 32-bit
+"%ls" expects a
+"wchar_t *" pointer to a wide-character string, encoded as 32-bit
 Unicode values.
-'%hs' expects a 'char *' pointer to a multi-byte
+"%hs" expects a "char *" pointer to a multi-byte
 string encoded with the current locale, as given by the
 .Ev LC_CTYPE ,
 .Ev LANG ,
@@ -787,11 +780,11 @@ and adds a third value for specifying the maximum number of columns.
 .Pp
 In this example, the name field is printed with a minimum of 3 columns
 and a maximum of 6.
-Up to ten bytes are in used in filling those columns. 
+Up to ten bytes are in used in filling those columns.
 .Bd -literal -offset indent
     xo_emit("{:name/%3.10.6s}", name);
 .Ed
-.Ss Characters Outside of Field Definitions
+.Ss "Characters Outside of Field Definitions"
 Characters in the format string that are not part of a field definition are
 copied to the output for the TEXT style, and are ignored for the JSON
 and XML styles.
@@ -810,12 +803,12 @@ For HTML, these characters are placed in a <div> with class "text".
       <div class="data" data-tag="size">extra small</div>
       <div class="text">.</div>
 .Ed
-.Ss "%n" is Not Supported
+.Ss "'%n' is Not Supported"
 .Nm libxo
 does not support the '%n' directive.
 It is a bad idea and we
 just do not do it.
-.Ss The Encoding Format (eformat)
+.Ss "The Encoding Format (eformat)"
 The "eformat" string is the format string used when encoding the field
 for JSON and XML.
 If not provided, it defaults to the primary format
@@ -830,7 +823,7 @@ In this example, the value for the number of items in stock is emitted:
 .Pp
 This call will generate the following output:
 .Bd -literal -offset indent
-  TEXT: 
+  TEXT:
        In stock: 144
   XML:
       <in-stock>144</in-stock>
@@ -860,25 +853,24 @@ data, which would expand the penultimate line to:
 .Ed
 .Sh WHAT MAKES A GOOD FIELD NAME?
 To make useful, consistent field names, follow these guidelines:
-.Pp
-.Ss Use lower case, even for TLAs
+.Ss "Use lower case, even for TLAs"
 Lower case is more civilized.
 Even TLAs should be lower case
 to avoid scenarios where the differences between "XPath" and
 "Xpath" drive your users crazy.
 Using "xpath" is simpler and better.
-.Ss Use hyphens, not underscores
+.Ss "Use hyphens, not underscores"
 Use of hyphens is traditional in XML, and the
 .Dv XOF_UNDERSCORES
 flag can be used to generate underscores in JSON, if desired.
 But the raw field name should use hyphens.
-.Ss Use full words
+.Ss "Use full words"
 Do not abbreviate especially when the abbreviation is not obvious or
 not widely used.
 Use "data-size", not "dsz" or "dsize".
 Use
 "interface" instead of "ifname", "if-name", "iface", "if", or "intf".
-.Ss Use <verb>-<units>
+.Ss "Use <verb>-<units>"
 Using the form <verb>-<units> or <verb>-<classifier>-<units> helps in
 making consistent, useful names, avoiding the situation where one app
 uses "sent-packet" and another "packets-sent" and another
@@ -887,10 +879,10 @@ The <units> can be dropped when it is
 obvious, as can obvious words in the classification.
 Use "receive-after-window-packets" instead of
 "received-packets-of-data-after-window".
-.Ss Reuse existing field names
+.Ss "Reuse existing field names"
 Nothing is worse than writing expressions like:
 .Bd -literal -offset indent
-    if ($src1/process[pid == $pid]/name == 
+    if ($src1/process[pid == $pid]/name ==
         $src2/proc-table/proc/p[process-id == $pid]/proc-name) {
         ...
     }
@@ -902,13 +894,13 @@ Remember the quote is not
 .Dq "Consistency is the hobgoblin of little minds"
 but
 .Dq "A foolish consistency is the hobgoblin of little minds" .
-.Ss Think about your users
+.Ss "Think about your users"
 Have empathy for your users, choosing clear and useful fields that
 contain clear and useful data.
 You may need to augment the display content with
 .Xr xo_attr 3
 calls or "{e:}" fields to make the data useful.
-.Ss Do not use an arbitrary number postfix
+.Ss "Do not use an arbitrary number postfix"
 What does "errors2" mean?
 No one will know.
 "errors-after-restart" would be a better choice.
@@ -916,7 +908,7 @@ Think of your users, and think of the future.
 If you make "errors2", the next guy will happily make
 "errors3" and before you know it, someone will be asking what is the
 difference between errors37 and errors63.
-.Ss Be consistent, uniform, unsurprising, and predictable
+.Ss "Be consistent, uniform, unsurprising, and predictable"
 Think of your field vocabulary as an API.
 You want it useful,
 expressive, meaningful, direct, and obvious.
@@ -946,6 +938,6 @@ use only one of the field names.
 If there is a difference, change the
 names to make that difference more obvious.
 .Sh SEE ALSO
+.Xr libxo 3 ,
 .Xr xolint 1 ,
-.Xr xo_emit 3 ,
-.Xr libxo 3
+.Xr xo_emit 3
