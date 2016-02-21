@@ -1574,6 +1574,19 @@ xo_message_hcv (xo_handle_t *xop, int code, const char *fmt, va_list vap)
 	break;
     }
 
+    switch (xo_style(xop)) {
+    case XO_STYLE_HTML:
+	if (XOIF_ISSET(xop, XOIF_DIV_OPEN)) {
+	    static char div_close[] = "</div>";
+	    XOIF_CLEAR(xop, XOIF_DIV_OPEN);
+	    xo_data_append(xop, div_close, sizeof(div_close) - 1);
+
+	    if (XOF_ISSET(xop, XOF_PRETTY))
+		xo_data_append(xop, "\n", 1);
+	}
+	break;
+    }
+
     (void) xo_flush_h(xop);
 }
 
@@ -7212,22 +7225,11 @@ xo_set_allocator (xo_realloc_func_t realloc_func, xo_free_func_t free_func)
 int
 xo_flush_h (xo_handle_t *xop)
 {
-    static char div_close[] = "</div>";
     int rc;
 
     xop = xo_default(xop);
 
     switch (xo_style(xop)) {
-    case XO_STYLE_HTML:
-	if (XOIF_ISSET(xop, XOIF_DIV_OPEN)) {
-	    XOIF_CLEAR(xop, XOIF_DIV_OPEN);
-	    xo_data_append(xop, div_close, sizeof(div_close) - 1);
-
-	    if (XOF_ISSET(xop, XOF_PRETTY))
-		xo_data_append(xop, "\n", 1);
-	}
-	break;
-
     case XO_STYLE_ENCODER:
 	xo_encoder_handle(xop, XO_OP_FLUSH, NULL, NULL);
     }
