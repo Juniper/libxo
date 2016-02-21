@@ -5930,7 +5930,7 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
     if (flush && !XOIF_ISSET(xop, XOIF_ANCHOR)) {
 	if (xo_write(xop) < 0) 
 	    rc = -1;		/* Report failure */
-	else if (xop->xo_flush && xop->xo_flush(xop->xo_opaque) < 0)
+	else if (xo_flush_h(xop) < 0)
 	    rc = -1;
     }
 
@@ -7158,6 +7158,11 @@ xo_transition (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name,
 	xo_failure(xop, "unknown transition: (%u -> %u)",
 		   xsp->xs_state, new_state);
     }
+
+    /* Handle the flush flag */
+    if (rc >= 0 && XOF_ISSET(xop, XOF_FLUSH))
+	if (xo_flush_h(xop))
+	    rc = -1;
 
     return rc;
 
