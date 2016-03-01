@@ -6,6 +6,7 @@
 require 'formula'
 
 class Libxo < Formula
+  desc "Library for creating text, xml, json, html, and other formats"
   homepage 'https://github.com/Juniper/libxo'
   url 'https://github.com/Juniper/libxo/releases/0.4.7/libxo-0.4.7.tar.gz'
   sha1 'ffcb87f051e3dd05cbc63b381f733b2fe95e191c'
