@@ -79,6 +79,10 @@ main (int argc, char **argv)
 
     xo_open_container_h(NULL, "top");
 
+    xo_emit_field("Vt", "max-chaos", NULL, NULL, "  very  ");
+    xo_emit_field("V", "min-chaos", "%d", NULL, 42);
+    xo_emit_field("V", "some-chaos", "%d\n", "[%d]", 42);
+
     xo_emit("Connecting to {:host}.{:domain}...\n", "my-box", "example.com");
 
     xo_attr("test", "value");
