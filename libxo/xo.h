@@ -599,4 +599,17 @@ char *
 xo_simplify_format (xo_handle_t *xop, const char *fmt, int with_numbers,
 		    xo_simplify_field_func_t field_cb);
 
+int
+xo_emit_field_hv (xo_handle_t *xop, const char *rolmod, const char *contents,
+		  const char *fmt, const char *efmt,
+		  va_list vap);
+
+int
+xo_emit_field_h (xo_handle_t *xop, const char *rolmod, const char *contents,
+		 const char *fmt, const char *efmt, ...);
+
+int
+xo_emit_field (const char *rolmod, const char *contents,
+	       const char *fmt, const char *efmt, ...);
+
 #endif /* INCLUDE_XO_H */
