@@ -1,5 +1,8 @@
 {
   "top": {
+    "max-chaos": "very",
+    "min-chaos": 42,
+    "some-chaos": "[42]",
     "host": "my-box",
     "domain": "example.com",
     "data": {
