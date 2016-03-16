@@ -907,6 +907,16 @@ needed, but often this needs to be controlled by the caller.
     JSON:
       "year": "2014"
 
+**** The Trim Modifier ({t:})
+
+The trim modifier removes any leading or trailing whitespace from
+the value.
+
+    EXAMPLE:
+      xo_emit("{t:description}", "   some  input   ");
+    JSON:
+      "description": "some input"
+
 **** The White Space Modifier ({w:})
 
 The white space modifier appends a single space to the data value:
@@ -1652,6 +1662,27 @@ be taken to ensure the argument types match the fields in the format
 string, since an inappropriate cast can ruin your day.  The vap
 argument to xo_emit_hv() points to a variable argument list that can
 be used to retrieve arguments via va_arg().
+
+*** Additional Emitting Functions
+
+The following functions can also make output, but only make a single
+field at a time:
+
+    int xo_emit_field_hv (xo_handle_t *xop, const char *rolmod,
+                  const char *contents, const char *fmt, 
+		  const char *efmt, va_list vap);
+
+    int xo_emit_field_h (xo_handle_t *xop, const char *rolmod, 
+                 const char *contents, const char *fmt,
+		 const char *efmt, ...);
+
+    int xo_emit_field (const char *rolmod, const char *contents,
+	         const char *fmt, const char *efmt, ...);
+
+These functions are intended to avoid the scenario where one
+would otherwise need to compose a format descriptors using
+snprintf().  The individual parts of the format descriptor are
+passed in distinctly.
 
 *** Attributes (xo_attr) @xo_attr@
 

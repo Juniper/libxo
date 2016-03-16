@@ -347,12 +347,15 @@ XO_SRCDIR=${srcdir}
 XO_LIBDIR=${libdir}
 XO_BINDIR=${bindir}
 XO_INCLUDEDIR=${includedir}
+XO_CFLAGS="${CFLAGS}"
 
+AC_SUBST(XO_LIBS)
 AC_SUBST(XO_SRCDIR)
 AC_SUBST(XO_LIBDIR)
 AC_SUBST(XO_BINDIR)
 AC_SUBST(XO_INCLUDEDIR)
 AC_SUBST(XO_LIBEXT)
+AC_SUBST(XO_CFLAGS)
 
 AC_ARG_WITH(encoder-dir,
         [  --with-encoder-dir=[DIR]           Specify location of encoder libraries],

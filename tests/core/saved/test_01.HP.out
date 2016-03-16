@@ -1,4 +1,8 @@
 <div class="line">
+  <div class="data" data-tag="max-chaos">  very  </div>
+  <div class="data" data-tag="min-chaos">42</div>
+  <div class="data" data-tag="some-chaos">42
+</div>
   <div class="text">Connecting to </div>
   <div class="data" data-tag="host">my-box</div>
   <div class="text">.</div>

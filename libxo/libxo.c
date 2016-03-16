@@ -19,7 +19,8 @@
  *   http://juniper.github.io/libxo/libxo-manual.html
  *
  * For first time readers, the core bits of code to start looking at are:
- * - xo_do_emit() -- the central function of the library
+ * - xo_do_emit() -- parse and emit a set of fields
+ * - xo_do_emit_fields -- the central function of the library
  * - xo_do_format_field() -- handles formatting a single field
  * - xo_transiton() -- the state machine that keeps things sane
  * and of course the "xo_handle_t" data structure, which carries all
@@ -120,6 +121,7 @@
 
 const char xo_version[] = LIBXO_VERSION;
 const char xo_version_extra[] = LIBXO_VERSION_EXTRA;
+static const char xo_default_format[] = "%s";
 
 #ifndef UNUSED
 #define UNUSED __attribute__ ((__unused__))
@@ -1574,6 +1576,19 @@ xo_message_hcv (xo_handle_t *xop, int code, const char *fmt, va_list vap)
 	break;
     }
 
+    switch (xo_style(xop)) {
+    case XO_STYLE_HTML:
+	if (XOIF_ISSET(xop, XOIF_DIV_OPEN)) {
+	    static char div_close[] = "</div>";
+	    XOIF_CLEAR(xop, XOIF_DIV_OPEN);
+	    xo_data_append(xop, div_close, sizeof(div_close) - 1);
+
+	    if (XOF_ISSET(xop, XOF_PRETTY))
+		xo_data_append(xop, "\n", 1);
+	}
+	break;
+    }
+
     (void) xo_flush_h(xop);
 }
 
@@ -1677,6 +1692,39 @@ xo_create_to_file (FILE *fp, xo_style_t style, xo_xof_flags_t flags)
     }
 
     return xop;
+}
+
+/**
+ * Set the default handler to output to a file.
+ * @xop libxo handle
+ * @fp FILE pointer to use
+ */
+int
+xo_set_file_h (xo_handle_t *xop, FILE *fp)
+{
+    xop = xo_default(xop);
+
+    if (fp == NULL) {
+	xo_failure(xop, "xo_set_file: NULL fp");
+	return -1;
+    }
+
+    xop->xo_opaque = fp;
+    xop->xo_write = xo_write_to_file;
+    xop->xo_close = xo_close_file;
+    xop->xo_flush = xo_flush_file;
+
+    return 0;
+}
+
+/**
+ * Set the default handler to output to a file.
+ * @fp FILE pointer to use
+ */
+int
+xo_set_file (FILE *fp)
+{
+    return xo_set_file_h(NULL, fp);
 }
 
 /**
@@ -4884,7 +4932,7 @@ xo_parse_roles (xo_handle_t *xop, const char *fmt,
     xo_xff_flags_t flags = 0;
     uint8_t fnum = 0;
 
-    for (sp = basep; sp; sp++) {
+    for (sp = basep; sp && *sp; sp++) {
 	if (*sp == ':' || *sp == '/' || *sp == '}')
 	    break;
 
@@ -5133,7 +5181,6 @@ static int
 xo_parse_fields (xo_handle_t *xop, xo_field_info_t *fields,
 		 unsigned num_fields, const char *fmt)
 {
-    static const char default_format[] = "%s";
     const char *cp, *sp, *ep, *basep;
     unsigned field = 0;
     xo_field_info_t *xfip = fields;
@@ -5272,7 +5319,7 @@ xo_parse_fields (xo_handle_t *xop, xo_field_info_t *fields,
 		xfip->xfi_format = format;
 		xfip->xfi_flen = flen;
 	    } else if (xo_role_wants_default_format(xfip->xfi_ftype)) {
-		xfip->xfi_format = default_format;
+		xfip->xfi_format = xo_default_format;
 		xfip->xfi_flen = 2;
 	    }
 	}
@@ -5686,37 +5733,28 @@ xo_gettext_rebuild_content (xo_handle_t *xop UNUSED,
 #endif /* HAVE_GETTEXT */
 
 /*
- * The central function for emitting libxo output.
+ * Emit a set of fields.  This is really the core of libxo.
  */
 static int
-xo_do_emit (xo_handle_t *xop, const char *fmt)
+xo_do_emit_fields (xo_handle_t *xop, xo_field_info_t *fields,
+		   unsigned max_fields, const char *fmt)
 {
     int gettext_inuse = 0;
     int gettext_changed = 0;
     int gettext_reordered = 0;
+    unsigned ftype;
+    xo_xff_flags_t flags;
     xo_field_info_t *new_fields = NULL;
-
+    xo_field_info_t *xfip;
+    unsigned field;
     int rc = 0;
+
     int flush = XOF_ISSET(xop, XOF_FLUSH);
     int flush_line = XOF_ISSET(xop, XOF_FLUSH_LINE);
     char *new_fmt = NULL;
 
     if (XOIF_ISSET(xop, XOIF_REORDER) || xo_style(xop) == XO_STYLE_ENCODER)
 	flush_line = 0;
-
-    xop->xo_columns = 0;	/* Always reset it */
-    xop->xo_errno = errno;	/* Save for "%m" */
-
-    unsigned max_fields = xo_count_fields(xop, fmt), field;
-    xo_field_info_t fields[max_fields], *xfip;
-
-    bzero(fields, max_fields * sizeof(fields[0]));
-
-    if (xo_parse_fields(xop, fields, max_fields, fmt))
-	return -1;		/* Warning already displayed */
-    
-    unsigned ftype;
-    xo_xff_flags_t flags;
 
     /*
      * Some overhead for gettext; if the fields in the msgstr returned
@@ -5884,7 +5922,7 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
     if (flush && !XOIF_ISSET(xop, XOIF_ANCHOR)) {
 	if (xo_write(xop) < 0) 
 	    rc = -1;		/* Report failure */
-	else if (xop->xo_flush && xop->xo_flush(xop->xo_opaque) < 0)
+	else if (xo_flush_h(xop) < 0)
 	    rc = -1;
     }
 
@@ -5902,6 +5940,26 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
     }
 
     return (rc < 0) ? rc : (int) xop->xo_columns;
+}
+
+/*
+ * Parse and emit a set of fields
+ */
+static int
+xo_do_emit (xo_handle_t *xop, const char *fmt)
+{
+    xop->xo_columns = 0;	/* Always reset it */
+    xop->xo_errno = errno;	/* Save for "%m" */
+
+    unsigned max_fields = xo_count_fields(xop, fmt);
+    xo_field_info_t fields[max_fields];
+
+    bzero(fields, max_fields * sizeof(fields[0]));
+
+    if (xo_parse_fields(xop, fields, max_fields, fmt))
+	return -1;		/* Warning already displayed */
+
+    return xo_do_emit_fields(xop, fields, max_fields, fmt);
 }
 
 /*
@@ -5975,6 +6033,87 @@ xo_emit (const char *fmt, ...)
     rc = xo_do_emit(xop, fmt);
     va_end(xop->xo_vap);
     bzero(&xop->xo_vap, sizeof(xop->xo_vap));
+
+    return rc;
+}
+
+/*
+ * Emit a single field by providing the info information typically provided
+ * inside the field description (role, modifiers, and formats).  This is
+ * a convenience function to avoid callers using snprintf to build field
+ * descriptions.
+ */
+int
+xo_emit_field_hv (xo_handle_t *xop, const char *rolmod, const char *contents,
+		  const char *fmt, const char *efmt,
+		  va_list vap)
+{
+    int rc;
+
+    xop = xo_default(xop);
+
+    if (rolmod == NULL)
+	rolmod = "V";
+
+    xo_field_info_t xfi;
+
+    bzero(&xfi, sizeof(xfi));
+
+    const char *cp;
+    cp = xo_parse_roles(xop, rolmod, rolmod, &xfi);
+    if (cp == NULL)
+	return -1;
+
+    xfi.xfi_start = fmt;
+    xfi.xfi_content = contents;
+    xfi.xfi_format = fmt;
+    xfi.xfi_encoding = efmt;
+    xfi.xfi_clen = contents ? strlen(contents) : 0;
+    xfi.xfi_flen = fmt ? strlen(fmt) : 0;
+    xfi.xfi_elen = efmt ? strlen(efmt) : 0;
+
+    /* If we have content, then we have a default format */
+    if (contents && fmt == NULL
+		&& xo_role_wants_default_format(xfi.xfi_ftype)) {
+	xfi.xfi_format = xo_default_format;
+	xfi.xfi_flen = 2;
+    }
+
+
+
+    va_copy(xop->xo_vap, vap);
+
+    rc = xo_do_emit_fields(xop, &xfi, 1, fmt ?: contents ?: "field");
+
+    va_end(xop->xo_vap);
+
+    return rc;
+}
+
+int
+xo_emit_field_h (xo_handle_t *xop, const char *rolmod, const char *contents,
+		 const char *fmt, const char *efmt, ...)
+{
+    int rc;
+    va_list vap;
+
+    va_start(vap, efmt);
+    rc = xo_emit_field_hv(xop, rolmod, contents, fmt, efmt, vap);
+    va_end(vap);
+
+    return rc;
+}
+
+int
+xo_emit_field (const char *rolmod, const char *contents,
+	       const char *fmt, const char *efmt, ...)
+{
+    int rc;
+    va_list vap;
+
+    va_start(vap, efmt);
+    rc = xo_emit_field_hv(NULL, rolmod, contents, fmt, efmt, vap);
+    va_end(vap);
 
     return rc;
 }
@@ -7113,6 +7252,11 @@ xo_transition (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name,
 		   xsp->xs_state, new_state);
     }
 
+    /* Handle the flush flag */
+    if (rc >= 0 && XOF_ISSET(xop, XOF_FLUSH))
+	if (xo_flush_h(xop))
+	    rc = -1;
+
     return rc;
 
  marker_prevents_close:
@@ -7179,22 +7323,11 @@ xo_set_allocator (xo_realloc_func_t realloc_func, xo_free_func_t free_func)
 int
 xo_flush_h (xo_handle_t *xop)
 {
-    static char div_close[] = "</div>";
     int rc;
 
     xop = xo_default(xop);
 
     switch (xo_style(xop)) {
-    case XO_STYLE_HTML:
-	if (XOIF_ISSET(xop, XOIF_DIV_OPEN)) {
-	    XOIF_CLEAR(xop, XOIF_DIV_OPEN);
-	    xo_data_append(xop, div_close, sizeof(div_close) - 1);
-
-	    if (XOF_ISSET(xop, XOF_PRETTY))
-		xo_data_append(xop, "\n", 1);
-	}
-	break;
-
     case XO_STYLE_ENCODER:
 	xo_encoder_handle(xop, XO_OP_FLUSH, NULL, NULL);
     }

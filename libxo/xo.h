@@ -162,6 +162,12 @@ xo_set_flags (xo_handle_t *xop, xo_xof_flags_t flags);
 void
 xo_clear_flags (xo_handle_t *xop, xo_xof_flags_t flags);
 
+int
+xo_set_file_h (xo_handle_t *xop, FILE *fp);
+
+int
+xo_set_file (FILE *fp);
+
 void
 xo_set_info (xo_handle_t *xop, xo_info_t *infop, int count);
 
@@ -592,5 +598,18 @@ typedef void (*xo_simplify_field_func_t)(const char *, unsigned, int);
 char *
 xo_simplify_format (xo_handle_t *xop, const char *fmt, int with_numbers,
 		    xo_simplify_field_func_t field_cb);
+
+int
+xo_emit_field_hv (xo_handle_t *xop, const char *rolmod, const char *contents,
+		  const char *fmt, const char *efmt,
+		  va_list vap);
+
+int
+xo_emit_field_h (xo_handle_t *xop, const char *rolmod, const char *contents,
+		 const char *fmt, const char *efmt, ...);
+
+int
+xo_emit_field (const char *rolmod, const char *contents,
+	       const char *fmt, const char *efmt, ...);
 
 #endif /* INCLUDE_XO_H */
