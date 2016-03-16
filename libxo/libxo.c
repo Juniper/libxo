@@ -19,7 +19,8 @@
  *   http://juniper.github.io/libxo/libxo-manual.html
  *
  * For first time readers, the core bits of code to start looking at are:
- * - xo_do_emit() -- the central function of the library
+ * - xo_do_emit() -- parse and emit a set of fields
+ * - xo_do_emit_fields -- the central function of the library
  * - xo_do_format_field() -- handles formatting a single field
  * - xo_transiton() -- the state machine that keeps things sane
  * and of course the "xo_handle_t" data structure, which carries all
@@ -120,6 +121,7 @@
 
 const char xo_version[] = LIBXO_VERSION;
 const char xo_version_extra[] = LIBXO_VERSION_EXTRA;
+static const char xo_default_format[] = "%s";
 
 #ifndef UNUSED
 #define UNUSED __attribute__ ((__unused__))
@@ -4930,7 +4932,7 @@ xo_parse_roles (xo_handle_t *xop, const char *fmt,
     xo_xff_flags_t flags = 0;
     uint8_t fnum = 0;
 
-    for (sp = basep; sp; sp++) {
+    for (sp = basep; sp && *sp; sp++) {
 	if (*sp == ':' || *sp == '/' || *sp == '}')
 	    break;
 
@@ -5179,7 +5181,6 @@ static int
 xo_parse_fields (xo_handle_t *xop, xo_field_info_t *fields,
 		 unsigned num_fields, const char *fmt)
 {
-    static const char default_format[] = "%s";
     const char *cp, *sp, *ep, *basep;
     unsigned field = 0;
     xo_field_info_t *xfip = fields;
@@ -5318,7 +5319,7 @@ xo_parse_fields (xo_handle_t *xop, xo_field_info_t *fields,
 		xfip->xfi_format = format;
 		xfip->xfi_flen = flen;
 	    } else if (xo_role_wants_default_format(xfip->xfi_ftype)) {
-		xfip->xfi_format = default_format;
+		xfip->xfi_format = xo_default_format;
 		xfip->xfi_flen = 2;
 	    }
 	}
@@ -5732,37 +5733,28 @@ xo_gettext_rebuild_content (xo_handle_t *xop UNUSED,
 #endif /* HAVE_GETTEXT */
 
 /*
- * The central function for emitting libxo output.
+ * Emit a set of fields.  This is really the core of libxo.
  */
 static int
-xo_do_emit (xo_handle_t *xop, const char *fmt)
+xo_do_emit_fields (xo_handle_t *xop, xo_field_info_t *fields,
+		   unsigned max_fields, const char *fmt)
 {
     int gettext_inuse = 0;
     int gettext_changed = 0;
     int gettext_reordered = 0;
+    unsigned ftype;
+    xo_xff_flags_t flags;
     xo_field_info_t *new_fields = NULL;
-
+    xo_field_info_t *xfip;
+    unsigned field;
     int rc = 0;
+
     int flush = XOF_ISSET(xop, XOF_FLUSH);
     int flush_line = XOF_ISSET(xop, XOF_FLUSH_LINE);
     char *new_fmt = NULL;
 
     if (XOIF_ISSET(xop, XOIF_REORDER) || xo_style(xop) == XO_STYLE_ENCODER)
 	flush_line = 0;
-
-    xop->xo_columns = 0;	/* Always reset it */
-    xop->xo_errno = errno;	/* Save for "%m" */
-
-    unsigned max_fields = xo_count_fields(xop, fmt), field;
-    xo_field_info_t fields[max_fields], *xfip;
-
-    bzero(fields, max_fields * sizeof(fields[0]));
-
-    if (xo_parse_fields(xop, fields, max_fields, fmt))
-	return -1;		/* Warning already displayed */
-    
-    unsigned ftype;
-    xo_xff_flags_t flags;
 
     /*
      * Some overhead for gettext; if the fields in the msgstr returned
@@ -5951,6 +5943,26 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 }
 
 /*
+ * Parse and emit a set of fields
+ */
+static int
+xo_do_emit (xo_handle_t *xop, const char *fmt)
+{
+    xop->xo_columns = 0;	/* Always reset it */
+    xop->xo_errno = errno;	/* Save for "%m" */
+
+    unsigned max_fields = xo_count_fields(xop, fmt);
+    xo_field_info_t fields[max_fields];
+
+    bzero(fields, max_fields * sizeof(fields[0]));
+
+    if (xo_parse_fields(xop, fields, max_fields, fmt))
+	return -1;		/* Warning already displayed */
+
+    return xo_do_emit_fields(xop, fields, max_fields, fmt);
+}
+
+/*
  * Rebuild a format string in a gettext-friendly format.  This function
  * is exposed to tools can perform this function.  See xo(1).
  */
@@ -6021,6 +6033,87 @@ xo_emit (const char *fmt, ...)
     rc = xo_do_emit(xop, fmt);
     va_end(xop->xo_vap);
     bzero(&xop->xo_vap, sizeof(xop->xo_vap));
+
+    return rc;
+}
+
+/*
+ * Emit a single field by providing the info information typically provided
+ * inside the field description (role, modifiers, and formats).  This is
+ * a convenience function to avoid callers using snprintf to build field
+ * descriptions.
+ */
+int
+xo_emit_field_hv (xo_handle_t *xop, const char *rolmod, const char *contents,
+		  const char *fmt, const char *efmt,
+		  va_list vap)
+{
+    int rc;
+
+    xop = xo_default(xop);
+
+    if (rolmod == NULL)
+	rolmod = "V";
+
+    xo_field_info_t xfi;
+
+    bzero(&xfi, sizeof(xfi));
+
+    const char *cp;
+    cp = xo_parse_roles(xop, rolmod, rolmod, &xfi);
+    if (cp == NULL)
+	return -1;
+
+    xfi.xfi_start = fmt;
+    xfi.xfi_content = contents;
+    xfi.xfi_format = fmt;
+    xfi.xfi_encoding = efmt;
+    xfi.xfi_clen = contents ? strlen(contents) : 0;
+    xfi.xfi_flen = fmt ? strlen(fmt) : 0;
+    xfi.xfi_elen = efmt ? strlen(efmt) : 0;
+
+    /* If we have content, then we have a default format */
+    if (contents && fmt == NULL
+		&& xo_role_wants_default_format(xfi.xfi_ftype)) {
+	xfi.xfi_format = xo_default_format;
+	xfi.xfi_flen = 2;
+    }
+
+
+
+    va_copy(xop->xo_vap, vap);
+
+    rc = xo_do_emit_fields(xop, &xfi, 1, fmt ?: contents ?: "field");
+
+    va_end(xop->xo_vap);
+
+    return rc;
+}
+
+int
+xo_emit_field_h (xo_handle_t *xop, const char *rolmod, const char *contents,
+		 const char *fmt, const char *efmt, ...)
+{
+    int rc;
+    va_list vap;
+
+    va_start(vap, efmt);
+    rc = xo_emit_field_hv(xop, rolmod, contents, fmt, efmt, vap);
+    va_end(vap);
+
+    return rc;
+}
+
+int
+xo_emit_field (const char *rolmod, const char *contents,
+	       const char *fmt, const char *efmt, ...)
+{
+    int rc;
+    va_list vap;
+
+    va_start(vap, efmt);
+    rc = xo_emit_field_hv(NULL, rolmod, contents, fmt, efmt, vap);
+    va_end(vap);
 
     return rc;
 }
