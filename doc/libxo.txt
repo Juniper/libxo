@@ -699,25 +699,26 @@ XOF_WARN is set, a warning will be generated.
 Field modifiers are flags which modify the way content emitted for
 particular output styles:
 
-|---+---------------+-------------------------------------------------|
-| M | Name          | Description                                     |
-|---+---------------+-------------------------------------------------|
-| c | colon         | A colon (":") is appended after the label       |
-| d | display       | Only emit field for display styles (text/HTML)  |
-| e | encoding      | Only emit for encoding styles (XML/JSON)        |
-| g | gettext       | Call gettext on field's render content          |
-| h | humanize (hn) | Format large numbers in human-readable style    |
-|   | hn-space      | Humanize: Place space between numeric and unit  |
-|   | hn-decimal    | Humanize: Add a decimal digit, if number < 10   |
-|   | hn-1000       | Humanize: Use 1000 as divisor instead of 1024   |
-| k | key           | Field is a key, suitable for XPath predicates   |
-| l | leaf-list     | Field is a leaf-list                            |
-| n | no-quotes     | Do not quote the field when using JSON style    |
-| p | plural        | Gettext: Use comma-separated plural form        |
-| q | quotes        | Quote the field when using JSON style           |
-| t | trim          | Trim leading and trailing whitespace            |
-| w | white         | A blank (" ") is appended after the label       |
-|---+---------------+-------------------------------------------------|
+|---+---------------+--------------------------------------------------|
+| M | Name          | Description                                      |
+|---+---------------+--------------------------------------------------|
+| a | argument      | The content appears as a 'const char *' argument |
+| c | colon         | A colon (":") is appended after the label        |
+| d | display       | Only emit field for display styles (text/HTML)   |
+| e | encoding      | Only emit for encoding styles (XML/JSON)         |
+| g | gettext       | Call gettext on field's render content           |
+| h | humanize (hn) | Format large numbers in human-readable style     |
+|   | hn-space      | Humanize: Place space between numeric and unit   |
+|   | hn-decimal    | Humanize: Add a decimal digit, if number < 10    |
+|   | hn-1000       | Humanize: Use 1000 as divisor instead of 1024    |
+| k | key           | Field is a key, suitable for XPath predicates    |
+| l | leaf-list     | Field is a leaf-list                             |
+| n | no-quotes     | Do not quote the field when using JSON style     |
+| p | plural        | Gettext: Use comma-separated plural form         |
+| q | quotes        | Quote the field when using JSON style            |
+| t | trim          | Trim leading and trailing whitespace             |
+| w | white         | A blank (" ") is appended after the label        |
+|---+---------------+--------------------------------------------------|
 
 Roles and modifiers can also use more verbose names, when preceeded by
 a comma.  For example, the modifier string "Lwc" (or "L,white,colon")
@@ -726,6 +727,27 @@ and should be followed by a colon ('c') and a space ('w').  The
 modifier string "Vkq" (or ":key,quote") means the field has a value
 role (the default role), that it is a key for the current instance,
 and that the value should be quoted when encoded for JSON.
+
+**** The Argument Modifier ({a:})
+
+The argument modifier indicates that the content of the field
+descriptor will be placed as a UTF-8 string (const char *) argument
+within the xo_emit parameters.
+
+    EXAMPLE:
+      xo_emit("{La:} {a:}\n", "Label text", "label", "value");
+    TEXT:
+      Label text value
+    JSON:
+      "label": "value"
+    XML:
+      <label>value</label>
+
+The argument modifier allows field names for value fields to be passed
+on the stack, avoiding the need to build a field descriptor using
+snprintf.  For many field roles, the argument modifier is not needed,
+since those roles have specific mechanisms for arguments, such as
+"{C:fg-%s}".
 
 **** The Colon Modifier ({c:})
 
@@ -1663,7 +1685,7 @@ string, since an inappropriate cast can ruin your day.  The vap
 argument to xo_emit_hv() points to a variable argument list that can
 be used to retrieve arguments via va_arg().
 
-*** Additional Emitting Functions
+*** Single Field Emitting Functions (xo_emit_field) @xo_emit_field@
 
 The following functions can also make output, but only make a single
 field at a time:
@@ -1684,10 +1706,12 @@ would otherwise need to compose a format descriptors using
 snprintf().  The individual parts of the format descriptor are
 passed in distinctly.
 
+    xo_emit("T", "Host name is ", NULL, NULL);
+    xo_emit("V", "host-name", NULL, NULL, host-name);
+
 *** Attributes (xo_attr) @xo_attr@
 
 The xo_attr() function emits attributes for the XML output style.
-
 
     int xo_attr (const char *name, const char *fmt, ...);
     int xo_attr_h (xo_handle_t *xop, const char *name, 
