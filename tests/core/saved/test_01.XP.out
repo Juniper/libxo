@@ -1,4 +1,9 @@
 <top>
+  <host>my-box</host>
+  <domain>example.com</domain>
+  <host>my-box</host>
+  <domain>example.com</domain>
+  <label>value</label>
   <max-chaos>very</max-chaos>
   <min-chaos>42</min-chaos>
   <some-chaos>[42]</some-chaos>
