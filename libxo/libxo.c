@@ -340,6 +340,7 @@ typedef unsigned long xo_xff_flags_t;
 #define XFF_GT_FIELD	(1<<19) /* Call gettext() on a field */
 
 #define XFF_GT_PLURAL	(1<<20)	/* Call dngettext to find plural form */
+#define XFF_ARGUMENT	(1<<21)	/* Content provided via argument */
 
 /* Flags to turn off when we don't want i18n processing */
 #define XFF_GT_FLAGS (XFF_GT_FIELD | XFF_GT_PLURAL)
@@ -3661,10 +3662,9 @@ xo_format_text (xo_handle_t *xop, const char *str, int len)
 }
 
 static void
-xo_format_title (xo_handle_t *xop, xo_field_info_t *xfip)
+xo_format_title (xo_handle_t *xop, xo_field_info_t *xfip,
+		 const char *str, unsigned len)
 {
-    const char *str = xfip->xfi_content;
-    unsigned len = xfip->xfi_clen;
     const char *fmt = xfip->xfi_format;
     unsigned flen = xfip->xfi_flen;
     xo_xff_flags_t flags = xfip->xfi_flags;
@@ -4131,10 +4131,9 @@ xo_format_value (xo_handle_t *xop, const char *name, int nlen,
 }
 
 static void
-xo_set_gettext_domain (xo_handle_t *xop, xo_field_info_t *xfip)
+xo_set_gettext_domain (xo_handle_t *xop, xo_field_info_t *xfip,
+		       const char *str, unsigned len)
 {
-    const char *str = xfip->xfi_content;
-    unsigned len = xfip->xfi_clen;
     const char *fmt = xfip->xfi_format;
     unsigned flen = xfip->xfi_flen;
 
@@ -4389,7 +4388,7 @@ xo_colors_handle_text (xo_handle_t *xop UNUSED, xo_colors_t *newp)
     char *cp = buf, *ep = buf + sizeof(buf);
     unsigned i, bit;
     xo_colors_t *oldp = &xop->xo_colors;
-    const char *code;
+    const char *code = NULL;
 
     /*
      * Start the buffer with an escape.  We don't want to add the '['
@@ -4508,10 +4507,9 @@ xo_colors_handle_html (xo_handle_t *xop, xo_colors_t *newp)
 }
 
 static void
-xo_format_colors (xo_handle_t *xop, xo_field_info_t *xfip)
+xo_format_colors (xo_handle_t *xop, xo_field_info_t *xfip,
+		  const char *str, unsigned len)
 {
-    const char *str = xfip->xfi_content;
-    unsigned len = xfip->xfi_clen;
     const char *fmt = xfip->xfi_format;
     unsigned flen = xfip->xfi_flen;
 
@@ -4582,10 +4580,9 @@ xo_format_colors (xo_handle_t *xop, xo_field_info_t *xfip)
 }
 
 static void
-xo_format_units (xo_handle_t *xop, xo_field_info_t *xfip)
+xo_format_units (xo_handle_t *xop, xo_field_info_t *xfip,
+		 const char *str, unsigned len)
 {
-    const char *str = xfip->xfi_content;
-    unsigned len = xfip->xfi_clen;
     const char *fmt = xfip->xfi_format;
     unsigned flen = xfip->xfi_flen;
     xo_xff_flags_t flags = xfip->xfi_flags;
@@ -4637,10 +4634,9 @@ xo_format_units (xo_handle_t *xop, xo_field_info_t *xfip)
 }
 
 static int
-xo_find_width (xo_handle_t *xop, xo_field_info_t *xfip)
+xo_find_width (xo_handle_t *xop, xo_field_info_t *xfip,
+	       const char *str, unsigned len)
 {
-    const char *str = xfip->xfi_content;
-    unsigned len = xfip->xfi_clen;
     const char *fmt = xfip->xfi_format;
     unsigned flen = xfip->xfi_flen;
 
@@ -4687,7 +4683,8 @@ xo_anchor_clear (xo_handle_t *xop)
  * format it when the end anchor tag is seen.
  */
 static void
-xo_anchor_start (xo_handle_t *xop, xo_field_info_t *xfip)
+xo_anchor_start (xo_handle_t *xop, xo_field_info_t *xfip,
+		 const char *str, unsigned len)
 {
     if (xo_style(xop) != XO_STYLE_TEXT && xo_style(xop) != XO_STYLE_HTML)
 	return;
@@ -4704,11 +4701,12 @@ xo_anchor_start (xo_handle_t *xop, xo_field_info_t *xfip)
      * Now we find the width, if possible.  If it's not there,
      * we'll get it on the end anchor.
      */
-    xop->xo_anchor_min_width = xo_find_width(xop, xfip);
+    xop->xo_anchor_min_width = xo_find_width(xop, xfip, str, len);
 }
 
 static void
-xo_anchor_stop (xo_handle_t *xop, xo_field_info_t *xfip)
+xo_anchor_stop (xo_handle_t *xop, xo_field_info_t *xfip,
+		 const char *str, unsigned len)
 {
     if (xo_style(xop) != XO_STYLE_TEXT && xo_style(xop) != XO_STYLE_HTML)
 	return;
@@ -4720,7 +4718,7 @@ xo_anchor_stop (xo_handle_t *xop, xo_field_info_t *xfip)
 
     XOIF_CLEAR(xop, XOIF_UNITS_PENDING);
 
-    int width = xo_find_width(xop, xfip);
+    int width = xo_find_width(xop, xfip, str, len);
     if (width == 0)
 	width = xop->xo_anchor_min_width;
 
@@ -4835,6 +4833,7 @@ static xo_mapping_t xo_role_names[] = {
 #define XO_ROLE_NEWLINE	'\n'
 
 static xo_mapping_t xo_modifier_names[] = {
+    { XFF_ARGUMENT, "argument" },
     { XFF_COLON, "colon" },
     { XFF_COMMA, "comma" },
     { XFF_DISPLAY_ONLY, "display" },
@@ -4906,6 +4905,7 @@ xo_count_fields (xo_handle_t *xop UNUSED, const char *fmt)
  *   '[': start a section of anchored text
  *   ']': end a section of anchored text
  * The following modifiers are also supported:
+ *   'a': content is provided via argument (const char *), not descriptor
  *   'c': flag: emit a colon after the label
  *   'd': field is only emitted for display styles (text and html)
  *   'e': field is only emitted for encoding styles (xml and json)
@@ -5007,6 +5007,10 @@ xo_parse_roles (xo_handle_t *xop, const char *fmt,
 	case '8':
 	case '9':
 	    fnum = (fnum * 10) + (*sp - '0');
+	    break;
+
+	case 'a':
+	    flags |= XFF_ARGUMENT;
 	    break;
 
 	case 'c':
@@ -5314,7 +5318,7 @@ xo_parse_fields (xo_handle_t *xop, xo_field_info_t *fields,
 	xfip->xfi_next = ++sp;
 
 	/* If we have content, then we have a default format */
-	if (xfip->xfi_clen || format) {
+	if (xfip->xfi_clen || format || (xfip->xfi_flags & XFF_ARGUMENT)) {
 	    if (format) {
 		xfip->xfi_format = format;
 		xfip->xfi_flen = flen;
@@ -5783,6 +5787,18 @@ xo_do_emit_fields (xo_handle_t *xop, xo_field_info_t *fields,
 		min_fstart = field;
 	}
 
+	const char *content = xfip->xfi_content;
+	int clen = xfip->xfi_clen;
+
+	if (flags & XFF_ARGUMENT) {
+	    /*
+	     * Argument flag means the content isn't given in the descriptor,
+	     * but as a UTF-8 string ('const char *') argument in xo_vap.
+	     */
+	    content = va_arg(xop->xo_vap, char *);
+	    clen = content ? strlen(content) : 0;
+	}
+
 	if (ftype == XO_ROLE_NEWLINE) {
 	    xo_line_close(xop);
 	    if (flush_line && xo_flush_h(xop) < 0)
@@ -5811,15 +5827,15 @@ xo_do_emit_fields (xo_handle_t *xop, xo_field_info_t *fields,
 	}
 
 	if (ftype == 'V')
-	    xo_format_value(xop, xfip->xfi_content, xfip->xfi_clen,
+	    xo_format_value(xop, content, clen,
 			    xfip->xfi_format, xfip->xfi_flen,
 			    xfip->xfi_encoding, xfip->xfi_elen, flags);
 	else if (ftype == '[')
-	    xo_anchor_start(xop, xfip);
+	    xo_anchor_start(xop, xfip, content, clen);
 	else if (ftype == ']')
-	    xo_anchor_stop(xop, xfip);
+	    xo_anchor_stop(xop, xfip, content, clen);
 	else if (ftype == 'C')
-	    xo_format_colors(xop, xfip);
+	    xo_format_colors(xop, xfip, content, clen);
 
 	else if (ftype == 'G') {
 	    /*
@@ -5830,7 +5846,7 @@ xo_do_emit_fields (xo_handle_t *xop, xo_field_info_t *fields,
 	     * Since gettext returns strings in a static buffer, we make
 	     * a copy in new_fmt.
 	     */
-	    xo_set_gettext_domain(xop, xfip);
+	    xo_set_gettext_domain(xop, xfip, content, clen);
 
 	    if (!gettext_inuse) { /* Only translate once */
 		gettext_inuse = 1;
@@ -5881,17 +5897,17 @@ xo_do_emit_fields (xo_handle_t *xop, xo_field_info_t *fields,
 	    }
 	    continue;
 
-	} else  if (xfip->xfi_clen || xfip->xfi_format) {
+	} else  if (clen || xfip->xfi_format) {
 
 	    const char *class_name = xo_class_name(ftype);
 	    if (class_name)
 		xo_format_content(xop, class_name, xo_tag_name(ftype),
-				  xfip->xfi_content, xfip->xfi_clen,
+				  content, clen,
 				  xfip->xfi_format, xfip->xfi_flen, flags);
 	    else if (ftype == 'T')
-		xo_format_title(xop, xfip);
+		xo_format_title(xop, xfip, content, clen);
 	    else if (ftype == 'U')
-		xo_format_units(xop, xfip);
+		xo_format_units(xop, xfip, content, clen);
 	    else
 		xo_failure(xop, "unknown field type: '%c'", ftype);
 	}
