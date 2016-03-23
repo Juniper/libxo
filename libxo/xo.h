@@ -612,4 +612,10 @@ int
 xo_emit_field (const char *rolmod, const char *contents,
 	       const char *fmt, const char *efmt, ...);
 
+void
+xo_retain_clear_all (void);
+
+void
+xo_retain_clear (const char *fmt);
+
 #endif /* INCLUDE_XO_H */
