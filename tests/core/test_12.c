@@ -13,13 +13,21 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "xo_config.h"
 #include "xo.h"
+
+#ifdef HAVE_MONITOR_H
+#include <monitor.h>
+#else
+#define moncontrol(x)		/* Nothing */
+#endif /* HAVE_MONITOR_H */
 
 int
 main (int argc, char **argv)
 {
     int i, count = 10;
     int retain = 1;
+    int mon = 0;
 
     argc = xo_parse_args(argc, argv);
     if (argc < 0)
@@ -42,11 +50,16 @@ main (int argc, char **argv)
 	    xo_set_flags(NULL, XOF_INFO);
 	else if (strcmp(argv[argc], "no-retain") == 0)
 	    retain = 0;
+	else if (strcmp(argv[argc], "monitor") == 0)
+	    mon = 1;
 	else if (strcmp(argv[argc], "big") == 0) {
 	    if (argv[argc + 1])
 		count = atoi(argv[++argc]);
 	}
     }
+
+    if (mon)
+	moncontrol(1);
 
     xo_set_flags(NULL, XOF_UNITS); /* Always test w/ this */
     xo_set_file(stdout);
@@ -74,6 +87,9 @@ main (int argc, char **argv)
     xo_close_container_h(NULL, "top");
 
     xo_finish();
+
+    if (mon)
+	moncontrol(0);
 
     return 0;
 }
