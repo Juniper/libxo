@@ -74,6 +74,7 @@ AC_CHECK_HEADERS([ctype.h errno.h stdio.h stdlib.h])
 AC_CHECK_HEADERS([string.h sys/param.h unistd.h ])
 AC_CHECK_HEADERS([sys/sysctl.h])
 AC_CHECK_HEADERS([threads.h])
+AC_CHECK_HEADERS([monitor.h])
 
 dnl humanize_number(3) is a great function, but it's not standard.
 dnl Note Macosx has the function in libutil.a but doesn't ship the
