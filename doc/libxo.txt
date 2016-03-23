@@ -455,6 +455,7 @@ content.  The roles are listed below; only one role is permitted:
 | L | label        | Field is text that prefixes a value             |
 | N | note         | Field is text that follows a value              |
 | P | padding      | Field is spaces needed for vertical alignment   |
+| R | retain       | Retain parsed information on the format string  |
 | T | title        | Field is a title value for headings             |
 | U | units        | Field is the units for the previous value field |
 | V | value        | Field is the name of field (the default)        |
@@ -606,6 +607,36 @@ if preceded by a slash ("/"):
 
     xo_emit("{P:        }{Lwc:Cost}{:cost/%u}\n", cost);
     xo_emit("{P:/%30s}{Lwc:Cost}{:cost/%u}\n", "", cost);
+
+**** The Retain Role ({R:})
+
+The {R:} role requests that xo_emit() retain the parsed internal
+information related to the given format string.  On subsequent xo_emit
+calls, the retained information is used, avoiding repetitive parsing
+of the format string.
+
+If used, the string "{R:}" must be the first four bytes of the format
+string.  This restriction is required to avoid parsing the string only
+to find out that we can avoid parsing it.
+
+The format string be immutable across multiple calls to xo_emit(),
+since the library retains the string.  Typically this is done by using
+static constant strings, such as string literals. If the string is not
+immutable, the {R:} role must not be used.
+
+The functions xo_retain_clear() and xo_retain_clear_all() release
+internal information on either a single format string or all format
+strings, respectively.  Neither is required, but the library will
+retain this information until it is cleared or the process exits.
+
+    const char *fmt = "{R:}{:name}  {:count}\n";
+    for (i = 0; i < 1000; i++) {
+        xo_open_instance("item");
+        xo_emit(fmt, name[i], count[i]);
+    }
+    xo_retain_clear(fmt);
+
+The retained information is kept as thread-specific data.
 
 **** The Title Role ({T:})
 
