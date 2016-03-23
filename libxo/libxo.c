@@ -341,6 +341,7 @@ typedef unsigned long xo_xff_flags_t;
 
 #define XFF_GT_PLURAL	(1<<20)	/* Call dngettext to find plural form */
 #define XFF_ARGUMENT	(1<<21)	/* Content provided via argument */
+#define XFF_RETAIN	(1<<22)	/* Retain parsed format information */
 
 /* Flags to turn off when we don't want i18n processing */
 #define XFF_GT_FLAGS (XFF_GT_FIELD | XFF_GT_PLURAL)
@@ -1283,6 +1284,191 @@ xo_data_escape (xo_handle_t *xop, const char *str, int len)
 {
     xo_buf_escape(xop, &xop->xo_data, str, len, 0);
 }
+
+#ifdef LIBXO_NO_RETAIN
+/*
+ * Empty implementations of the retain logic
+ */
+
+void
+xo_retain_clear_all (void)
+{
+    return;
+}
+
+void
+xo_retain_clear (const char *fmt UNUSED)
+{
+    return;
+}
+static void
+xo_retain_add (const char *fmt UNUSED, xo_field_info_t *fields UNUSED,
+		unsigned num_fields UNUSED)
+{
+    return;
+}
+
+static int
+xo_retain_find (const char *fmt UNUSED, xo_field_info_t **valp UNUSED,
+		 unsigned *nump UNUSED)
+{
+    return -1;
+}
+
+#else /* !LIBXO_NO_RETAIN */
+/*
+ * Retain: We retain parsed field definitions to enhance performance,
+ * especially inside loops.  We depend on the caller treating the format
+ * strings as immutable, so that we can retain pointers into them.  We
+ * hold the pointers in a hash table, so allow quick access.  Retained
+ * information is retained until xo_retain_clear is called.
+ */
+
+/*
+ * xo_retain_entry_t holds information about one retained set of
+ * parsed fields.
+ */
+typedef struct xo_retain_entry_s {
+    struct xo_retain_entry_s *xre_next; /* Pointer to next (older) entry */
+    unsigned long xre_hits;		 /* Number of times we've hit */
+    const char *xre_format;		 /* Pointer to format string */
+    unsigned xre_num_fields;		 /* Number of fields saved */
+    xo_field_info_t *xre_fields;	 /* Pointer to fields */
+} xo_retain_entry_t;
+
+/*
+ * xo_retain_t holds a complete set of parsed fields as a hash table.
+ */
+#define RETAIN_HASH_SIZE 64
+typedef struct xo_retain_s {
+    xo_retain_entry_t *xr_bucket[RETAIN_HASH_SIZE];
+} xo_retain_t;
+
+static THREAD_LOCAL(xo_retain_t) xo_retain;
+static THREAD_LOCAL(unsigned) xo_retain_count;
+
+/*
+ * Simple hash function based on Thomas Wang's paper.  The original is
+ * gone, but an archive is available on the Way Back Machine:
+ *
+ * http://web.archive.org/web/20071223173210/\
+ *     http://www.concentric.net/~Ttwang/tech/inthash.htm
+ *
+ * For our purposes, we can assume the low four bits are uninteresting
+ * since any string less that 16 bytes wouldn't be worthy of
+ * retaining.  We toss the high bits also, since these bits are likely
+ * to be common among constant format strings.  We then run Wang's
+ * algorithm, and cap the result at RETAIN_HASH_SIZE.
+ */
+static unsigned
+xo_retain_hash (const char *fmt UNUSED)
+{
+    volatile uintptr_t iptr = (uintptr_t) (const void *) fmt;
+
+    /* Discard low four bits and high bits; they aren't interesting */
+    uint32_t val = (uint32_t) ((iptr >> 4) & (((1 << 24) - 1)));
+
+    val = (val ^ 61) ^ (val >> 16);
+    val = val + (val << 3);
+    val = val ^ (val >> 4);
+    val = val * 0x3a8f05c5;	/* My large prime number */
+    val = val ^ (val >> 15);
+    val &= RETAIN_HASH_SIZE - 1;
+
+    return val;
+}	
+
+/*
+ * Walk all buckets, clearing all retained entries
+ */
+void
+xo_retain_clear_all (void)
+{
+    int i;
+    xo_retain_entry_t *xrep, *next;
+
+    for (i = 0; i < RETAIN_HASH_SIZE; i++) {
+	for (xrep = xo_retain.xr_bucket[i]; xrep; xrep = next) {
+	    next = xrep->xre_next;
+	    xo_free(xrep);
+	}
+	xo_retain.xr_bucket[i] = NULL;
+    }
+    xo_retain_count = 0;
+}
+
+/*
+ * Walk all buckets, clearing all retained entries
+ */
+void
+xo_retain_clear (const char *fmt)
+{
+    xo_retain_entry_t **xrepp;
+    unsigned hash = xo_retain_hash(fmt);
+
+    for (xrepp = &xo_retain.xr_bucket[hash]; *xrepp;
+	 xrepp = &(*xrepp)->xre_next) {
+	if ((*xrepp)->xre_format == fmt) {
+	    *xrepp = (*xrepp)->xre_next;
+	    xo_retain_count -= 1;
+	    return;
+	}
+    }
+}
+
+/*
+ * Search the hash for an entry matching 'fmt'; return it's fields.
+ */
+static int
+xo_retain_find (const char *fmt, xo_field_info_t **valp, unsigned *nump)
+{
+    if (xo_retain_count == 0)
+	return -1;
+
+    unsigned hash = xo_retain_hash(fmt);
+    xo_retain_entry_t *xrep;
+
+    for (xrep = xo_retain.xr_bucket[hash]; xrep != NULL;
+	 xrep = xrep->xre_next) {
+	if (xrep->xre_format == fmt) {
+	    *valp = xrep->xre_fields;
+	    *nump = xrep->xre_num_fields;
+	    xrep->xre_hits += 1;
+	    return 0;
+	}
+    }
+
+    return -1;
+}
+
+static void
+xo_retain_add (const char *fmt, xo_field_info_t *fields, unsigned num_fields)
+{
+    unsigned hash = xo_retain_hash(fmt);
+    xo_retain_entry_t *xrep;
+    unsigned sz = sizeof(*xrep) + (num_fields + 1) * sizeof(*fields);
+    xo_field_info_t *xfip;
+
+    xrep = xo_realloc(NULL, sz);
+    if (xrep == NULL)
+	return;
+
+    xfip = (xo_field_info_t *) &xrep[1];
+    memcpy(xfip, fields, num_fields * sizeof(*fields));
+
+    bzero(xrep, sizeof(*xrep));
+
+    xrep->xre_format = fmt;
+    xrep->xre_fields = xfip;
+    xrep->xre_num_fields = num_fields;
+
+    /* Record the field info in the retain bucket */
+    xrep->xre_next = xo_retain.xr_bucket[hash];
+    xo_retain.xr_bucket[hash] = xrep;
+    xo_retain_count += 1;
+}
+
+#endif /* !LIBXO_NO_RETAIN */
 
 /*
  * Generate a warning.  Normally, this is a text message written to
@@ -4819,6 +5005,7 @@ static xo_mapping_t xo_role_names[] = {
     { 'L', "label" },
     { 'N', "note" },
     { 'P', "padding" },
+    { 'R', "retain" },
     { 'T', "title" },
     { 'U', "units" },
     { 'V', "value" },
@@ -4898,6 +5085,7 @@ xo_count_fields (xo_handle_t *xop UNUSED, const char *fmt)
  *   'L': label; text preceding data
  *   'N': note; text following data
  *   'P': padding; whitespace
+ *   'R': retain; record the compiled field info
  *   'T': Title, where 'content' is a column title
  *   'U': Units, where 'content' is the unit label
  *   'V': value, where 'content' is the name of the field (the default)
@@ -4982,6 +5170,7 @@ xo_parse_roles (xo_handle_t *xop, const char *fmt,
 	case 'L':
 	case 'N':
 	case 'P':
+	case 'R':
 	case 'T':
 	case 'U':
 	case 'V':
@@ -5339,6 +5528,12 @@ xo_parse_fields (xo_handle_t *xop, xo_field_info_t *fields,
      */
     if (seen_fnum)
 	rc = xo_parse_field_numbers(xop, fmt, fields, field);
+
+    /*
+     * If the first field is a 'retain' role, then we retain the info
+     */
+    if (fields->xfi_ftype == 'R')
+	xo_retain_add(fmt, fields, field);
 
     return rc;
 }
@@ -5837,6 +6032,9 @@ xo_do_emit_fields (xo_handle_t *xop, xo_field_info_t *fields,
 	else if (ftype == 'C')
 	    xo_format_colors(xop, xfip, content, clen);
 
+	else if (ftype == 'R')
+	    /* 'retain'; do nothing */;
+
 	else if (ftype == 'G') {
 	    /*
 	     * A {G:domain} field; disect the domain name and translate
@@ -5967,13 +6165,32 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
     xop->xo_columns = 0;	/* Always reset it */
     xop->xo_errno = errno;	/* Save for "%m" */
 
-    unsigned max_fields = xo_count_fields(xop, fmt);
-    xo_field_info_t fields[max_fields];
+    if (fmt == NULL)
+	return 0;
 
-    bzero(fields, max_fields * sizeof(fields[0]));
+    unsigned max_fields;
+    xo_field_info_t *fields = NULL;
 
-    if (xo_parse_fields(xop, fields, max_fields, fmt))
-	return -1;		/* Warning already displayed */
+    /*
+     * Look for the magic role "{R:}" for retain, telling us to
+     * retain the field information.  If we've already saved it,
+     * then we can avoid re-parsing the format string.
+     *
+     * This check is a bit naive, but will do for now, since only {R:}
+     * needs to be first and can't be combined with others.
+     */
+    if (strncmp(fmt, "{R:}", 4) != 0
+	|| xo_retain_find(fmt, &fields, &max_fields) != 0
+	|| fields == NULL) {
+
+	/* Nothing retained; parse the format string */
+	max_fields = xo_count_fields(xop, fmt);
+	fields = alloca(max_fields * sizeof(fields[0]));
+	bzero(fields, max_fields * sizeof(fields[0]));
+
+	if (xo_parse_fields(xop, fields, max_fields, fmt))
+	    return -1;		/* Warning already displayed */
+    }
 
     return xo_do_emit_fields(xop, fields, max_fields, fmt);
 }
