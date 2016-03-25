@@ -1365,7 +1365,7 @@ static THREAD_LOCAL(unsigned) xo_retain_count;
  * algorithm, and cap the result at RETAIN_HASH_SIZE.
  */
 static unsigned
-xo_retain_hash (const char *fmt UNUSED)
+xo_retain_hash (const char *fmt)
 {
     volatile uintptr_t iptr = (uintptr_t) (const void *) fmt;
 
@@ -4572,7 +4572,7 @@ xo_colors_enabled (xo_handle_t *xop UNUSED)
 }
 
 static void
-xo_colors_handle_text (xo_handle_t *xop UNUSED, xo_colors_t *newp)
+xo_colors_handle_text (xo_handle_t *xop, xo_colors_t *newp)
 {
     char buf[BUFSIZ];
     char *cp = buf, *ep = buf + sizeof(buf);
@@ -5818,9 +5818,8 @@ xo_gettext_combine_formats (xo_handle_t *xop, const char *fmt UNUSED,
  * Summary: i18n aighn't cheap.
  */
 static const char *
-xo_gettext_build_format (xo_handle_t *xop UNUSED,
-			 xo_field_info_t *fields UNUSED,
-			 int this_field UNUSED,
+xo_gettext_build_format (xo_handle_t *xop,
+			 xo_field_info_t *fields, int this_field,
 			 const char *fmt, char **new_fmtp)
 {
     if (xo_style_is_encoding(xop))
@@ -6768,7 +6767,7 @@ xo_open_list_hf (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name)
 }
 
 int
-xo_open_list_h (xo_handle_t *xop, const char *name UNUSED)
+xo_open_list_h (xo_handle_t *xop, const char *name)
 {
     return xo_open_list_hf(xop, 0, name);
 }
@@ -6780,7 +6779,7 @@ xo_open_list (const char *name)
 }
 
 int
-xo_open_list_hd (xo_handle_t *xop, const char *name UNUSED)
+xo_open_list_hd (xo_handle_t *xop, const char *name)
 {
     return xo_open_list_hf(xop, XOF_DTRT, name);
 }
@@ -7805,7 +7804,7 @@ xo_set_program (const char *name)
 }
 
 void
-xo_set_version_h (xo_handle_t *xop, const char *version UNUSED)
+xo_set_version_h (xo_handle_t *xop, const char *version)
 {
     xop = xo_default(xop);
 
