@@ -1050,7 +1050,7 @@ xo_is_utf8 (char ch)
     return (ch & 0x80);
 }
 
-static int
+static inline int
 xo_utf8_to_wc_len (const char *buf)
 {
     unsigned b = (unsigned char) *buf;
@@ -1109,9 +1109,13 @@ xo_buf_utf8_len (xo_handle_t *xop, const char *buf, int bufsiz)
  * bits we pull off the first character is dependent on the length,
  * but we put 6 bits off all other bytes.
  */
-static wchar_t
+static inline wchar_t
 xo_utf8_char (const char *buf, int len)
 {
+    /* Most common case: singleton byte */
+    if (len == 1)
+	return (unsigned char) buf[0];
+
     int i;
     wchar_t wc;
     const unsigned char *cp = (const unsigned char *) buf;
