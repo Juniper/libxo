@@ -455,7 +455,6 @@ content.  The roles are listed below; only one role is permitted:
 | L | label        | Field is text that prefixes a value             |
 | N | note         | Field is text that follows a value              |
 | P | padding      | Field is spaces needed for vertical alignment   |
-| R | retain       | Retain parsed information on the format string  |
 | T | title        | Field is a title value for headings             |
 | U | units        | Field is the units for the previous value field |
 | V | value        | Field is the name of field (the default)        |
@@ -607,36 +606,6 @@ if preceded by a slash ("/"):
 
     xo_emit("{P:        }{Lwc:Cost}{:cost/%u}\n", cost);
     xo_emit("{P:/%30s}{Lwc:Cost}{:cost/%u}\n", "", cost);
-
-**** The Retain Role ({R:})
-
-The {R:} role requests that xo_emit() retain the parsed internal
-information related to the given format string.  On subsequent xo_emit
-calls, the retained information is used, avoiding repetitive parsing
-of the format string.
-
-If used, the string "{R:}" must be the first four bytes of the format
-string.  This restriction is required to avoid parsing the string only
-to find out that we can avoid parsing it.
-
-The format string be immutable across multiple calls to xo_emit(),
-since the library retains the string.  Typically this is done by using
-static constant strings, such as string literals. If the string is not
-immutable, the {R:} role must not be used.
-
-The functions xo_retain_clear() and xo_retain_clear_all() release
-internal information on either a single format string or all format
-strings, respectively.  Neither is required, but the library will
-retain this information until it is cleared or the process exits.
-
-    const char *fmt = "{R:}{:name}  {:count}\n";
-    for (i = 0; i < 1000; i++) {
-        xo_open_instance("item");
-        xo_emit(fmt, name[i], count[i]);
-    }
-    xo_retain_clear(fmt);
-
-The retained information is kept as thread-specific data.
 
 **** The Title Role ({T:})
 
@@ -1092,6 +1061,24 @@ LANG, or LC_ALL environment varibles.  The first of this list of
 variables is used and if none of the variables are set, the locale
 defaults to "UTF-8".
 
+libxo will convert these arguments as needed to either UTF-8 (for XML,
+JSON, and HTML styles) or locale-based strings for display in text
+style.
+
+   xo_emit("Alll strings are utf-8 content {:tag/%ls}",
+           L"except for wide strings");
+
+"%S" is equivalent to "%ls".
+
+|--------+-----------------+-------------------------------|
+| Format | Argument Type   | Argument Contents             |
+|--------+-----------------+-------------------------------|
+| %s     | const char *    | UTF-8 string                  |
+| %S     | const char *    | UTF-8 string (alias for '%s') |
+| %ls    | const wchar_t * | Wide character UNICODE string |
+| %hs    | const char *    | locale-based string           |
+|--------+-----------------+-------------------------------|
+
 For example, a function is passed a locale-base name, a hat size,
 and a time value.  The hat size is formatted in a UTF-8 (ASCII)
 string, and the time value is formatted into a wchar_t string.
@@ -1225,6 +1212,53 @@ variants might be wise.
 | xo_emit_errx     | xo_emit_errx_p         |
 | xo_emit_errc     | xo_emit_errc_p         |
 |------------------+------------------------|
+
+*** Retaining Parsed Format Information @retain@
+
+libxo can retain the parsed internal information related to the given
+format string, allowing subsequent xo_emit calls, the retained
+information is used, avoiding repetitive parsing of the format string.
+
+    SYNTAX:
+      int xo_emit_f(xo_emit_flags_t flags, const char fmt, ...);
+    EXAMPLE:
+      xo_emit_f(XOEF_RETAIN, "{:some/%02d}{:thing/%-6s}{:fancy}\n",
+                     some, thing, fancy);
+
+To retain parsed format information, use the XOEF_RETAIN flag to the
+xo_emit_f() function.  A complete set of xo_emit_f functions exist to
+match all the xo_emit function signatures (with handles, varadic
+argument, and printf-like flags):
+
+|------------------+------------------------|
+| Function         | printf-like Equivalent |
+|------------------+------------------------|
+| xo_emit_hv       | xo_emit_hvf            |
+| xo_emit_h        | xo_emit_hf             |
+| xo_emit          | xo_emit_f              |
+| xo_emit_hvp      | xo_emit_hvfp           |
+| xo_emit_hp       | xo_emit_hfp            |
+| xo_emit_p        | xo_emit_fp             |
+|------------------+------------------------|
+
+The format string be immutable across multiple calls to xo_emit_f(),
+since the library retains the string.  Typically this is done by using
+static constant strings, such as string literals. If the string is not
+immutable, the XOEF_RETAIN flag must not be used.
+
+The functions xo_retain_clear() and xo_retain_clear_all() release
+internal information on either a single format string or all format
+strings, respectively.  Neither is required, but the library will
+retain this information until it is cleared or the process exits.
+
+    const char *fmt = "{:name}  {:count/%d}\n";
+    for (i = 0; i < 1000; i++) {
+        xo_open_instance("item");
+        xo_emit_f(XOEF_RETAIN, fmt, name[i], count[i]);
+    }
+    xo_retain_clear(fmt);
+
+The retained information is kept as thread-specific data.
 
 *** Example
 
@@ -1466,21 +1500,6 @@ For example, the following are equivalent:
     xo_emit_h(NULL, "test");
 
 Handles are created using xo_create() and destroy using xo_destroy().
-
-** UTF-8
-
-All strings for libxo must be UTF-8.  libxo will handle turning them
-into locale-based strings for display to the user.
-
-The only exception is argument formatted using the "%ls" format, which
-require a wide character string (wchar_t *) as input.  libxo will
-convert these arguments as needed to either UTF-8 (for XML, JSON, and
-HTML styles) or locale-based strings for display in text style.
-
-   xo_emit("Alll strings are utf-8 content {:tag/%ls}",
-           L"except for wide strings");
-
-"%S" is equivalent to "%ls".
 
 * The libxo API
 
