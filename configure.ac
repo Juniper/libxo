@@ -288,6 +288,18 @@ if test "${LIBXO_WCWIDTH}" != "no"; then
   AC_DEFINE([LIBXO_WCWIDTH], [1], [Enable local wcwidth implementation])
 fi
 
+AC_MSG_CHECKING([retain hash bucket size])
+AC_ARG_WITH(retain-size,
+        [  --with-retain-size=[DIR]           Specify retain hash bucket size (in bits)],
+        [XO_RETAIN_SIZE=$withval],
+        [XO_RETAIN_SIZE=default]
+)
+
+AC_MSG_RESULT([$XO_RETAIN_SIZE])
+if test "${XO_RETAIN_SIZE}" != "default"; then
+  AC_DEFINE_UNQUOTED([XO_RETAIN_SIZE], ${XO_RETAIN_SIZE}, [Retain hash bucket size])
+fi
+
 AC_CHECK_LIB([m], [lrint])
 AM_CONDITIONAL([HAVE_LIBM], [test "$HAVE_LIBM" != "no"])
 
@@ -453,4 +465,5 @@ AC_MSG_NOTICE([summary of build options:
   isthreaded:       ${HAVE_ISTHREADED:-no}
   thread-local:     ${THREAD_LOCAL:-no}
   local wcwidth:    ${LIBXO_WCWIDTH:-no}
+  retain size:      ${XO_RETAIN_SIZE:-no}
 ])
