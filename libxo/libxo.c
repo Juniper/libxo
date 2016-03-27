@@ -341,7 +341,6 @@ typedef unsigned long xo_xff_flags_t;
 
 #define XFF_GT_PLURAL	(1<<20)	/* Call dngettext to find plural form */
 #define XFF_ARGUMENT	(1<<21)	/* Content provided via argument */
-#define XFF_RETAIN	(1<<22)	/* Retain parsed format information */
 
 /* Flags to turn off when we don't want i18n processing */
 #define XFF_GT_FLAGS (XFF_GT_FIELD | XFF_GT_PLURAL)
@@ -1343,7 +1342,11 @@ typedef struct xo_retain_entry_s {
 /*
  * xo_retain_t holds a complete set of parsed fields as a hash table.
  */
-#define RETAIN_HASH_SIZE 64
+#ifndef XO_RETAIN_SIZE
+#define XO_RETAIN_SIZE 6
+#endif /* XO_RETAIN_SIZE */
+#define RETAIN_HASH_SIZE (1<<XO_RETAIN_SIZE)
+
 typedef struct xo_retain_s {
     xo_retain_entry_t *xr_bucket[RETAIN_HASH_SIZE];
 } xo_retain_t;
@@ -5009,7 +5012,6 @@ static xo_mapping_t xo_role_names[] = {
     { 'L', "label" },
     { 'N', "note" },
     { 'P', "padding" },
-    { 'R', "retain" },
     { 'T', "title" },
     { 'U', "units" },
     { 'V', "value" },
@@ -5089,7 +5091,6 @@ xo_count_fields (xo_handle_t *xop UNUSED, const char *fmt)
  *   'L': label; text preceding data
  *   'N': note; text following data
  *   'P': padding; whitespace
- *   'R': retain; record the compiled field info
  *   'T': Title, where 'content' is a column title
  *   'U': Units, where 'content' is the unit label
  *   'V': value, where 'content' is the name of the field (the default)
@@ -5174,7 +5175,6 @@ xo_parse_roles (xo_handle_t *xop, const char *fmt,
 	case 'L':
 	case 'N':
 	case 'P':
-	case 'R':
 	case 'T':
 	case 'U':
 	case 'V':
@@ -5532,12 +5532,6 @@ xo_parse_fields (xo_handle_t *xop, xo_field_info_t *fields,
      */
     if (seen_fnum)
 	rc = xo_parse_field_numbers(xop, fmt, fields, field);
-
-    /*
-     * If the first field is a 'retain' role, then we retain the info
-     */
-    if (fields->xfi_ftype == 'R')
-	xo_retain_add(fmt, fields, field);
 
     return rc;
 }
@@ -6035,9 +6029,6 @@ xo_do_emit_fields (xo_handle_t *xop, xo_field_info_t *fields,
 	else if (ftype == 'C')
 	    xo_format_colors(xop, xfip, content, clen);
 
-	else if (ftype == 'R')
-	    /* 'retain'; do nothing */;
-
 	else if (ftype == 'G') {
 	    /*
 	     * A {G:domain} field; disect the domain name and translate
@@ -6163,7 +6154,7 @@ xo_do_emit_fields (xo_handle_t *xop, xo_field_info_t *fields,
  * Parse and emit a set of fields
  */
 static int
-xo_do_emit (xo_handle_t *xop, const char *fmt)
+xo_do_emit (xo_handle_t *xop, xo_emit_flags_t flags, const char *fmt)
 {
     xop->xo_columns = 0;	/* Always reset it */
     xop->xo_errno = errno;	/* Save for "%m" */
@@ -6182,7 +6173,7 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
      * This check is a bit naive, but will do for now, since only {R:}
      * needs to be first and can't be combined with others.
      */
-    if (strncmp(fmt, "{R:}", 4) != 0
+    if (!(flags & XOEF_RETAIN)
 	|| xo_retain_find(fmt, &fields, &max_fields) != 0
 	|| fields == NULL) {
 
@@ -6193,6 +6184,11 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 
 	if (xo_parse_fields(xop, fields, max_fields, fmt))
 	    return -1;		/* Warning already displayed */
+
+	if (flags & XOEF_RETAIN) {
+	    /* Retain the info */
+	    xo_retain_add(fmt, fields, max_fields);
+	}
     }
 
     return xo_do_emit_fields(xop, fields, max_fields, fmt);
@@ -6238,7 +6234,7 @@ xo_emit_hv (xo_handle_t *xop, const char *fmt, va_list vap)
 
     xop = xo_default(xop);
     va_copy(xop->xo_vap, vap);
-    rc = xo_do_emit(xop, fmt);
+    rc = xo_do_emit(xop, 0, fmt);
     va_end(xop->xo_vap);
     bzero(&xop->xo_vap, sizeof(xop->xo_vap));
 
@@ -6252,7 +6248,7 @@ xo_emit_h (xo_handle_t *xop, const char *fmt, ...)
 
     xop = xo_default(xop);
     va_start(xop->xo_vap, fmt);
-    rc = xo_do_emit(xop, fmt);
+    rc = xo_do_emit(xop, 0, fmt);
     va_end(xop->xo_vap);
     bzero(&xop->xo_vap, sizeof(xop->xo_vap));
 
@@ -6266,7 +6262,50 @@ xo_emit (const char *fmt, ...)
     int rc;
 
     va_start(xop->xo_vap, fmt);
-    rc = xo_do_emit(xop, fmt);
+    rc = xo_do_emit(xop, 0, fmt);
+    va_end(xop->xo_vap);
+    bzero(&xop->xo_vap, sizeof(xop->xo_vap));
+
+    return rc;
+}
+
+int
+xo_emit_hvf (xo_handle_t *xop, xo_emit_flags_t flags,
+	     const char *fmt, va_list vap)
+{
+    int rc;
+
+    xop = xo_default(xop);
+    va_copy(xop->xo_vap, vap);
+    rc = xo_do_emit(xop, flags, fmt);
+    va_end(xop->xo_vap);
+    bzero(&xop->xo_vap, sizeof(xop->xo_vap));
+
+    return rc;
+}
+
+int
+xo_emit_hf (xo_handle_t *xop, xo_emit_flags_t flags, const char *fmt, ...)
+{
+    int rc;
+
+    xop = xo_default(xop);
+    va_start(xop->xo_vap, fmt);
+    rc = xo_do_emit(xop, flags, fmt);
+    va_end(xop->xo_vap);
+    bzero(&xop->xo_vap, sizeof(xop->xo_vap));
+
+    return rc;
+}
+
+int
+xo_emit_f (xo_emit_flags_t flags, const char *fmt, ...)
+{
+    xo_handle_t *xop = xo_default(NULL);
+    int rc;
+
+    va_start(xop->xo_vap, fmt);
+    rc = xo_do_emit(xop, flags, fmt);
     va_end(xop->xo_vap);
     bzero(&xop->xo_vap, sizeof(xop->xo_vap));
 
