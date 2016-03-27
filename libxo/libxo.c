@@ -6166,12 +6166,9 @@ xo_do_emit (xo_handle_t *xop, xo_emit_flags_t flags, const char *fmt)
     xo_field_info_t *fields = NULL;
 
     /*
-     * Look for the magic role "{R:}" for retain, telling us to
-     * retain the field information.  If we've already saved it,
-     * then we can avoid re-parsing the format string.
-     *
-     * This check is a bit naive, but will do for now, since only {R:}
-     * needs to be first and can't be combined with others.
+     * Check for 'retain' flag, telling us to retain the field
+     * information.  If we've already saved it, then we can avoid
+     * re-parsing the format string.
      */
     if (!(flags & XOEF_RETAIN)
 	|| xo_retain_find(fmt, &fields, &max_fields) != 0
