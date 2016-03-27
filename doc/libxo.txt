@@ -1293,46 +1293,6 @@ penultimate line to:
           data-type="number"
           data-help="Number of items in stock">144</div>
 
-** Command-line Arguments
-
-libxo uses command line options to trigger rendering behavior.  The
-following options are recognised:
-
-- --libxo <options>
-- --libxo=<options>
-- --libxo:<brief-options>
-
-Options is a comma-separated list of tokens that correspond to output
-styles, flags, or features:
-
-|-------------+-------------------------------------------------------|
-| Token       | Action                                                |
-|-------------+-------------------------------------------------------|
-| color       | Enable colors/effects for display styles (TEXT, HTML) |
-| dtrt        | Enable "Do The Right Thing" mode                      |
-| html        | Emit HTML output                                      |
-| indent=xx   | Set the indentation level                             |
-| info        | Add info attributes (HTML)                            |
-| json        | Emit JSON output                                      |
-| keys        | Emit the key attribute for keys (XML)                 |
-| log-gettext | Log (via stderr) each gettext(3) string lookup        |
-| log-syslog  | Log (via stderr) each syslog message (via xo_syslog)  |
-| no-humanize | Ignore the {h:} modifier (TEXT, HTML)                 |
-| no-locale   | Do not initialize the locale setting                  |
-| no-top      | Do not emit a top set of braces (JSON)                |
-| not-first   | Pretend the 1st output item was not 1st (JSON)        |
-| pretty      | Emit pretty-printed output                            |
-| text        | Emit TEXT output                                      |
-| underscores | Replace XML-friendly "-"s with JSON friendly "_"s e   |
-| units       | Add the 'units' (XML) or 'data-units (HTML) attribute |
-| warn        | Emit warnings when libxo detects bad calls            |
-| warn-xml    | Emit warnings in XML                                  |
-| xml         | Emit XML output                                       |
-| xpath       | Add XPath expressions (HTML)                          |
-|-------------+-------------------------------------------------------|
-
-The brief options are detailed in ^LIBXO_OPTIONS^.
-
 ** Representing Hierarchy
 
 For XML and JSON, individual fields appear inside hierarchies which
@@ -1479,20 +1439,79 @@ properly.
         xo_close_marker("fish-guts");
     }
 
+** Command-line Arguments
+
+libxo uses command line options to trigger rendering behavior.  The
+following options are recognised:
+
+- --libxo <options>
+- --libxo=<options>
+- --libxo:<brief-options>
+
+Programs using libxo are expecting to call the xo_parse_args function
+to parse these arguments.  See ^xo_parse_args^ for details.
+
+Options is a comma-separated list of tokens that correspond to output
+styles, flags, or features:
+
+|-------------+-------------------------------------------------------|
+| Token       | Action                                                |
+|-------------+-------------------------------------------------------|
+| color       | Enable colors/effects for display styles (TEXT, HTML) |
+| dtrt        | Enable "Do The Right Thing" mode                      |
+| html        | Emit HTML output                                      |
+| indent=xx   | Set the indentation level                             |
+| info        | Add info attributes (HTML)                            |
+| json        | Emit JSON output                                      |
+| keys        | Emit the key attribute for keys (XML)                 |
+| log-gettext | Log (via stderr) each gettext(3) string lookup        |
+| log-syslog  | Log (via stderr) each syslog message (via xo_syslog)  |
+| no-humanize | Ignore the {h:} modifier (TEXT, HTML)                 |
+| no-locale   | Do not initialize the locale setting                  |
+| no-top      | Do not emit a top set of braces (JSON)                |
+| not-first   | Pretend the 1st output item was not 1st (JSON)        |
+| pretty      | Emit pretty-printed output                            |
+| text        | Emit TEXT output                                      |
+| underscores | Replace XML-friendly "-"s with JSON friendly "_"s e   |
+| units       | Add the 'units' (XML) or 'data-units (HTML) attribute |
+| warn        | Emit warnings when libxo detects bad calls            |
+| warn-xml    | Emit warnings in XML                                  |
+| xml         | Emit XML output                                       |
+| xpath       | Add XPath expressions (HTML)                          |
+|-------------+-------------------------------------------------------|
+
+The brief options are detailed in ^LIBXO_OPTIONS^.
+
+* The libxo API
+
+This section gives details about the functions in libxo, how to call
+them, and the actions they perform.
+
 ** Handles @handles@
 
 libxo uses "handles" to control its rendering functionality.  The
 handle contains state and buffered data, as well as callback functions
 to process data.
 
-A default handle is used when a NULL is passed to functions accepting
-a handle.  This handle is initialized to write its data to stdout
-using the default style of text (XO_STYLE_TEXT).
+Handles give an abstraction for libxo that encapsulates the state of a
+stream of output.  Handles have the data type "xo_handle_t" and are
+opaque to the caller.
 
-For the convenience of callers, the libxo library includes handle-less
-functions that implicitly use the default handle.  Any function that
-takes a handle will use the default handle is a value of NULL is
-passed in place of a valid handle.
+The library has a default handle that is automatically initialized.
+By default, this handle will send text style output (XO_STYLE_TEXT) to
+standard output.  The xo_set_style and xo_set_flags functions can be
+used to change this behavior.
+
+For the typical command that is generating output on standard output,
+there is no need to create an explicit handle, but they are available
+when needed, e.g., for daemons that generate multiple streams of
+output.
+
+Many libxo functions take a handle as their first parameter; most that
+do not use the default handle.  Any function taking a handle can be
+passed NULL to access the default handle.  For the convenience of
+callers, the libxo library includes handle-less functions that
+implicitly use the default handle.
 
 For example, the following are equivalent:
 
@@ -1500,31 +1519,6 @@ For example, the following are equivalent:
     xo_emit_h(NULL, "test");
 
 Handles are created using xo_create() and destroy using xo_destroy().
-
-* The libxo API
-
-This section gives details about the functions in libxo, how to call
-them, and the actions they perform.
-
-** Handles
-
-Handles give an abstraction for libxo that encapsulates the state of a
-stream of output.  Handles have the data type "xo_handle_t" and are
-opaque to the caller.
-
-The library has a default handle that is automatically initialized.
-By default, this handle will send text style output to standard output.
-The xo_set_style and xo_set_flags functions can be used to change this
-behavior.
-
-Many libxo functions take a handle as their first parameter; most that
-do not use the default handle.  Any function taking a handle can
-be passed NULL to access the default handle.
-
-For the typical command that is generating output on standard output,
-there is no need to create an explicit handle, but they are available
-when needed, e.g., for daemons that generate multiple streams of
-output.
 
 *** xo_create
 
