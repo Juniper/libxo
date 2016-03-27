@@ -20,8 +20,8 @@ int
 main (int argc, char **argv)
 {
     int i, count = 10;
-    int retain = 1;
     int mon = 0;
+    xo_emit_flags_t flags = XOEF_RETAIN;
 
     argc = xo_parse_args(argc, argv);
     if (argc < 0)
@@ -43,7 +43,7 @@ main (int argc, char **argv)
 	else if (strcmp(argv[argc], "info") == 0)
 	    xo_set_flags(NULL, XOF_INFO);
 	else if (strcmp(argv[argc], "no-retain") == 0)
-	    retain = 0;
+	    flags &= ~XOEF_RETAIN;
 	else if (strcmp(argv[argc], "big") == 0) {
 	    if (argv[argc + 1])
 		count = atoi(argv[++argc]);
@@ -56,20 +56,15 @@ main (int argc, char **argv)
     xo_open_container("top");
     xo_open_container("data");
 
-    const char *fmt1 = "{R:}The {C:fg-red}{k:name}{C:reset} is "
+    const char *fmt1 = "The {C:fg-red}{k:name}{C:reset} is "
 	"{C:/fg-%s}{:color}{C:reset} til {:time/%02d:%02d}\n";
-    const char *fmt2 = "{R:}My {C:fg-red}{:hand}{C:reset} hand is "
+    const char *fmt2 = "My {C:fg-red}{:hand}{C:reset} hand is "
 	"{C:/fg-%s}{:color}{C:reset} til {:time/%02d:%02d}\n";
-
-    if (!retain) {
-	fmt1 += 4;
-	fmt2 += 4;
-    }
 
     for (i = 0; i < count; i++) {
 	xo_open_instance("thing");
-	xo_emit(fmt1, "thing", "green", "green", 2, 15);
-	xo_emit(fmt2, "left", "blue", "blue", 3, 45);
+	xo_emit_f(flags, fmt1, "thing", "green", "green", 2, 15);
+	xo_emit_f(flags, fmt2, "left", "blue", "blue", 3, 45);
     }
 
     xo_close_container("data");
