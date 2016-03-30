@@ -929,6 +929,11 @@ needed, but often this needs to be controlled by the caller.
     JSON:
       "year": "2014"
 
+The heuristic is based on the format; if the format uses any of the
+following conversion specifiers, then no quotes are used:
+
+    d i o u x X D O U e E f F g G a A c C p
+
 **** The Trim Modifier ({t:})
 
 The trim modifier removes any leading or trailing whitespace from
