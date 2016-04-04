@@ -149,10 +149,18 @@ fi
 AC_SUBST(GETTEXT_CFLAGS)
 AC_SUBST(GETTEXT_LIBS)
 
-GETTEXT_BINDIR=${GETTEXT_PREFIX}/bin
-AC_SUBST(GETTEXT_BINDIR)
 GETTEXT_LIBDIR=${GETTEXT_PREFIX}/lib
 AC_SUBST(GETTEXT_LIBDIR)
+if test -x ${GETTEXT_PREFIX}/bin/msgfmt ; then
+    GETTEXT_BINDIR=${GETTEXT_PREFIX}/bin
+elif test -x ${GETTEXT_PREFIX}/local/bin/msgfmt ; then
+    GETTEXT_BINDIR=${GETTEXT_PREFIX}/local/bin
+else
+    AC_MSG_NOTICE("could not find msgfmt tool")
+    # Use a (bad) fall back value
+    GETTEXT_BINDIR=${GETTEXT_PREFIX}/bin
+fi
+AC_SUBST(GETTEXT_BINDIR)
 
 AM_CONDITIONAL([HAVE_GETTEXT], [test "$HAVE_GETTEXT" = "yes"])
 
