@@ -80,6 +80,7 @@ for either a specific format string or all format strings, respectively.
 These functions are only needed when the calling application wants to
 clear this information; they are not generally needed.
 .Sh EXAMPLES
+.Pp
 .Bd  -literal -offset indent
     for (i = 0; i < 1000; i++) {
         xo_open_instance("item");
@@ -87,6 +88,7 @@ clear this information; they are not generally needed.
                   name[i], count[i]);
     }
 .Ed
+.Pp
 In this example, the caller desires to clear the retained information.
 .Bd  -literal -offset indent
     const char *fmt = "{:name}  {:count/%d}\n";
@@ -97,12 +99,10 @@ In this example, the caller desires to clear the retained information.
     xo_retain_clear(fmt);
 .Ed
 .Sh RETURN CODE
-.Nm
-returns a negative value on error.  If the
-.Nm XOF_COLUMNS
-flag has been turned on for the specific handle using
-.Xr xo_set_flags 3 ,
-then the number of display columns consumed by the output will be returned.
+The return values for these functions is identical to those of their
+traditional counterparts.  See
+.Xr xo_emit 3
+for details.
 .Sh SEE ALSO
 .Xr xo_emit 3 ,
 .Xr xo_open_container 3 ,
