@@ -1236,7 +1236,7 @@ match all the xo_emit function signatures (with handles, varadic
 argument, and printf-like flags):
 
 |------------------+------------------------|
-| Function         | printf-like Equivalent |
+| Function         | Flags Equivalent       |
 |------------------+------------------------|
 | xo_emit_hv       | xo_emit_hvf            |
 | xo_emit_h        | xo_emit_hf             |
@@ -1246,7 +1246,7 @@ argument, and printf-like flags):
 | xo_emit_p        | xo_emit_fp             |
 |------------------+------------------------|
 
-The format string be immutable across multiple calls to xo_emit_f(),
+The format string must be immutable across multiple calls to xo_emit_f(),
 since the library retains the string.  Typically this is done by using
 static constant strings, such as string literals. If the string is not
 immutable, the XOEF_RETAIN flag must not be used.
@@ -1473,9 +1473,11 @@ styles, flags, or features:
 | log-syslog  | Log (via stderr) each syslog message (via xo_syslog)  |
 | no-humanize | Ignore the {h:} modifier (TEXT, HTML)                 |
 | no-locale   | Do not initialize the locale setting                  |
+| no-retain   | Prevent retaining formatting information              |
 | no-top      | Do not emit a top set of braces (JSON)                |
 | not-first   | Pretend the 1st output item was not 1st (JSON)        |
 | pretty      | Emit pretty-printed output                            |
+| retain      | Force retaining formatting information                |
 | text        | Emit TEXT output                                      |
 | underscores | Replace XML-friendly "-"s with JSON friendly "_"s e   |
 | units       | Add the 'units' (XML) or 'data-units (HTML) attribute |
