@@ -74,6 +74,7 @@ AC_CHECK_HEADERS([ctype.h errno.h stdio.h stdlib.h])
 AC_CHECK_HEADERS([string.h sys/param.h unistd.h ])
 AC_CHECK_HEADERS([sys/sysctl.h])
 AC_CHECK_HEADERS([threads.h])
+AC_CHECK_HEADERS([monitor.h])
 
 dnl humanize_number(3) is a great function, but it's not standard.
 dnl Note Macosx has the function in libutil.a but doesn't ship the
@@ -148,10 +149,18 @@ fi
 AC_SUBST(GETTEXT_CFLAGS)
 AC_SUBST(GETTEXT_LIBS)
 
-GETTEXT_BINDIR=${GETTEXT_PREFIX}/bin
-AC_SUBST(GETTEXT_BINDIR)
 GETTEXT_LIBDIR=${GETTEXT_PREFIX}/lib
 AC_SUBST(GETTEXT_LIBDIR)
+if test -x ${GETTEXT_PREFIX}/bin/msgfmt ; then
+    GETTEXT_BINDIR=${GETTEXT_PREFIX}/bin
+elif test -x ${GETTEXT_PREFIX}/local/bin/msgfmt ; then
+    GETTEXT_BINDIR=${GETTEXT_PREFIX}/local/bin
+else
+    AC_MSG_NOTICE("could not find msgfmt tool")
+    # Use a (bad) fall back value
+    GETTEXT_BINDIR=${GETTEXT_PREFIX}/bin
+fi
+AC_SUBST(GETTEXT_BINDIR)
 
 AM_CONDITIONAL([HAVE_GETTEXT], [test "$HAVE_GETTEXT" = "yes"])
 
@@ -285,6 +294,18 @@ AC_ARG_ENABLE([wcwidth],
 AC_MSG_RESULT([$LIBXO_WCWIDTH])
 if test "${LIBXO_WCWIDTH}" != "no"; then
   AC_DEFINE([LIBXO_WCWIDTH], [1], [Enable local wcwidth implementation])
+fi
+
+AC_MSG_CHECKING([retain hash bucket size])
+AC_ARG_WITH(retain-size,
+        [  --with-retain-size=[DIR]           Specify retain hash bucket size (in bits)],
+        [XO_RETAIN_SIZE=$withval],
+        [XO_RETAIN_SIZE=default]
+)
+
+AC_MSG_RESULT([$XO_RETAIN_SIZE])
+if test "${XO_RETAIN_SIZE}" != "default"; then
+  AC_DEFINE_UNQUOTED([XO_RETAIN_SIZE], ${XO_RETAIN_SIZE}, [Retain hash bucket size])
 fi
 
 AC_CHECK_LIB([m], [lrint])
@@ -452,4 +473,5 @@ AC_MSG_NOTICE([summary of build options:
   isthreaded:       ${HAVE_ISTHREADED:-no}
   thread-local:     ${THREAD_LOCAL:-no}
   local wcwidth:    ${LIBXO_WCWIDTH:-no}
+  retain size:      ${XO_RETAIN_SIZE:-no}
 ])

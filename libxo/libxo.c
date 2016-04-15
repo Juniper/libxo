@@ -340,6 +340,7 @@ typedef unsigned long xo_xff_flags_t;
 #define XFF_GT_FIELD	(1<<19) /* Call gettext() on a field */
 
 #define XFF_GT_PLURAL	(1<<20)	/* Call dngettext to find plural form */
+#define XFF_ARGUMENT	(1<<21)	/* Content provided via argument */
 
 /* Flags to turn off when we don't want i18n processing */
 #define XFF_GT_FLAGS (XFF_GT_FIELD | XFF_GT_PLURAL)
@@ -1048,7 +1049,7 @@ xo_is_utf8 (char ch)
     return (ch & 0x80);
 }
 
-static int
+static inline int
 xo_utf8_to_wc_len (const char *buf)
 {
     unsigned b = (unsigned char) *buf;
@@ -1107,9 +1108,13 @@ xo_buf_utf8_len (xo_handle_t *xop, const char *buf, int bufsiz)
  * bits we pull off the first character is dependent on the length,
  * but we put 6 bits off all other bytes.
  */
-static wchar_t
+static inline wchar_t
 xo_utf8_char (const char *buf, int len)
 {
+    /* Most common case: singleton byte */
+    if (len == 1)
+	return (unsigned char) buf[0];
+
     int i;
     wchar_t wc;
     const unsigned char *cp = (const unsigned char *) buf;
@@ -1282,6 +1287,195 @@ xo_data_escape (xo_handle_t *xop, const char *str, int len)
 {
     xo_buf_escape(xop, &xop->xo_data, str, len, 0);
 }
+
+#ifdef LIBXO_NO_RETAIN
+/*
+ * Empty implementations of the retain logic
+ */
+
+void
+xo_retain_clear_all (void)
+{
+    return;
+}
+
+void
+xo_retain_clear (const char *fmt UNUSED)
+{
+    return;
+}
+static void
+xo_retain_add (const char *fmt UNUSED, xo_field_info_t *fields UNUSED,
+		unsigned num_fields UNUSED)
+{
+    return;
+}
+
+static int
+xo_retain_find (const char *fmt UNUSED, xo_field_info_t **valp UNUSED,
+		 unsigned *nump UNUSED)
+{
+    return -1;
+}
+
+#else /* !LIBXO_NO_RETAIN */
+/*
+ * Retain: We retain parsed field definitions to enhance performance,
+ * especially inside loops.  We depend on the caller treating the format
+ * strings as immutable, so that we can retain pointers into them.  We
+ * hold the pointers in a hash table, so allow quick access.  Retained
+ * information is retained until xo_retain_clear is called.
+ */
+
+/*
+ * xo_retain_entry_t holds information about one retained set of
+ * parsed fields.
+ */
+typedef struct xo_retain_entry_s {
+    struct xo_retain_entry_s *xre_next; /* Pointer to next (older) entry */
+    unsigned long xre_hits;		 /* Number of times we've hit */
+    const char *xre_format;		 /* Pointer to format string */
+    unsigned xre_num_fields;		 /* Number of fields saved */
+    xo_field_info_t *xre_fields;	 /* Pointer to fields */
+} xo_retain_entry_t;
+
+/*
+ * xo_retain_t holds a complete set of parsed fields as a hash table.
+ */
+#ifndef XO_RETAIN_SIZE
+#define XO_RETAIN_SIZE 6
+#endif /* XO_RETAIN_SIZE */
+#define RETAIN_HASH_SIZE (1<<XO_RETAIN_SIZE)
+
+typedef struct xo_retain_s {
+    xo_retain_entry_t *xr_bucket[RETAIN_HASH_SIZE];
+} xo_retain_t;
+
+static THREAD_LOCAL(xo_retain_t) xo_retain;
+static THREAD_LOCAL(unsigned) xo_retain_count;
+
+/*
+ * Simple hash function based on Thomas Wang's paper.  The original is
+ * gone, but an archive is available on the Way Back Machine:
+ *
+ * http://web.archive.org/web/20071223173210/\
+ *     http://www.concentric.net/~Ttwang/tech/inthash.htm
+ *
+ * For our purposes, we can assume the low four bits are uninteresting
+ * since any string less that 16 bytes wouldn't be worthy of
+ * retaining.  We toss the high bits also, since these bits are likely
+ * to be common among constant format strings.  We then run Wang's
+ * algorithm, and cap the result at RETAIN_HASH_SIZE.
+ */
+static unsigned
+xo_retain_hash (const char *fmt)
+{
+    volatile uintptr_t iptr = (uintptr_t) (const void *) fmt;
+
+    /* Discard low four bits and high bits; they aren't interesting */
+    uint32_t val = (uint32_t) ((iptr >> 4) & (((1 << 24) - 1)));
+
+    val = (val ^ 61) ^ (val >> 16);
+    val = val + (val << 3);
+    val = val ^ (val >> 4);
+    val = val * 0x3a8f05c5;	/* My large prime number */
+    val = val ^ (val >> 15);
+    val &= RETAIN_HASH_SIZE - 1;
+
+    return val;
+}	
+
+/*
+ * Walk all buckets, clearing all retained entries
+ */
+void
+xo_retain_clear_all (void)
+{
+    int i;
+    xo_retain_entry_t *xrep, *next;
+
+    for (i = 0; i < RETAIN_HASH_SIZE; i++) {
+	for (xrep = xo_retain.xr_bucket[i]; xrep; xrep = next) {
+	    next = xrep->xre_next;
+	    xo_free(xrep);
+	}
+	xo_retain.xr_bucket[i] = NULL;
+    }
+    xo_retain_count = 0;
+}
+
+/*
+ * Walk all buckets, clearing all retained entries
+ */
+void
+xo_retain_clear (const char *fmt)
+{
+    xo_retain_entry_t **xrepp;
+    unsigned hash = xo_retain_hash(fmt);
+
+    for (xrepp = &xo_retain.xr_bucket[hash]; *xrepp;
+	 xrepp = &(*xrepp)->xre_next) {
+	if ((*xrepp)->xre_format == fmt) {
+	    *xrepp = (*xrepp)->xre_next;
+	    xo_retain_count -= 1;
+	    return;
+	}
+    }
+}
+
+/*
+ * Search the hash for an entry matching 'fmt'; return it's fields.
+ */
+static int
+xo_retain_find (const char *fmt, xo_field_info_t **valp, unsigned *nump)
+{
+    if (xo_retain_count == 0)
+	return -1;
+
+    unsigned hash = xo_retain_hash(fmt);
+    xo_retain_entry_t *xrep;
+
+    for (xrep = xo_retain.xr_bucket[hash]; xrep != NULL;
+	 xrep = xrep->xre_next) {
+	if (xrep->xre_format == fmt) {
+	    *valp = xrep->xre_fields;
+	    *nump = xrep->xre_num_fields;
+	    xrep->xre_hits += 1;
+	    return 0;
+	}
+    }
+
+    return -1;
+}
+
+static void
+xo_retain_add (const char *fmt, xo_field_info_t *fields, unsigned num_fields)
+{
+    unsigned hash = xo_retain_hash(fmt);
+    xo_retain_entry_t *xrep;
+    unsigned sz = sizeof(*xrep) + (num_fields + 1) * sizeof(*fields);
+    xo_field_info_t *xfip;
+
+    xrep = xo_realloc(NULL, sz);
+    if (xrep == NULL)
+	return;
+
+    xfip = (xo_field_info_t *) &xrep[1];
+    memcpy(xfip, fields, num_fields * sizeof(*fields));
+
+    bzero(xrep, sizeof(*xrep));
+
+    xrep->xre_format = fmt;
+    xrep->xre_fields = xfip;
+    xrep->xre_num_fields = num_fields;
+
+    /* Record the field info in the retain bucket */
+    xrep->xre_next = xo_retain.xr_bucket[hash];
+    xo_retain.xr_bucket[hash] = xrep;
+    xo_retain_count += 1;
+}
+
+#endif /* !LIBXO_NO_RETAIN */
 
 /*
  * Generate a warning.  Normally, this is a text message written to
@@ -1872,9 +2066,11 @@ static xo_mapping_t xo_xof_names[] = {
     { XOF_LOG_SYSLOG, "log-syslog" },
     { XOF_NO_HUMANIZE, "no-humanize" },
     { XOF_NO_LOCALE, "no-locale" },
+    { XOF_RETAIN_NONE, "no-retain" },
     { XOF_NO_TOP, "no-top" },
     { XOF_NOT_FIRST, "not-first" },
     { XOF_PRETTY, "pretty" },
+    { XOF_RETAIN_ALL, "retain" },
     { XOF_UNDERSCORES, "underscores" },
     { XOF_UNITS, "units" },
     { XOF_WARN, "warn" },
@@ -3661,10 +3857,9 @@ xo_format_text (xo_handle_t *xop, const char *str, int len)
 }
 
 static void
-xo_format_title (xo_handle_t *xop, xo_field_info_t *xfip)
+xo_format_title (xo_handle_t *xop, xo_field_info_t *xfip,
+		 const char *str, unsigned len)
 {
-    const char *str = xfip->xfi_content;
-    unsigned len = xfip->xfi_clen;
     const char *fmt = xfip->xfi_format;
     unsigned flen = xfip->xfi_flen;
     xo_xff_flags_t flags = xfip->xfi_flags;
@@ -4131,10 +4326,9 @@ xo_format_value (xo_handle_t *xop, const char *name, int nlen,
 }
 
 static void
-xo_set_gettext_domain (xo_handle_t *xop, xo_field_info_t *xfip)
+xo_set_gettext_domain (xo_handle_t *xop, xo_field_info_t *xfip,
+		       const char *str, unsigned len)
 {
-    const char *str = xfip->xfi_content;
-    unsigned len = xfip->xfi_clen;
     const char *fmt = xfip->xfi_format;
     unsigned flen = xfip->xfi_flen;
 
@@ -4383,13 +4577,13 @@ xo_colors_enabled (xo_handle_t *xop UNUSED)
 }
 
 static void
-xo_colors_handle_text (xo_handle_t *xop UNUSED, xo_colors_t *newp)
+xo_colors_handle_text (xo_handle_t *xop, xo_colors_t *newp)
 {
     char buf[BUFSIZ];
     char *cp = buf, *ep = buf + sizeof(buf);
     unsigned i, bit;
     xo_colors_t *oldp = &xop->xo_colors;
-    const char *code;
+    const char *code = NULL;
 
     /*
      * Start the buffer with an escape.  We don't want to add the '['
@@ -4508,10 +4702,9 @@ xo_colors_handle_html (xo_handle_t *xop, xo_colors_t *newp)
 }
 
 static void
-xo_format_colors (xo_handle_t *xop, xo_field_info_t *xfip)
+xo_format_colors (xo_handle_t *xop, xo_field_info_t *xfip,
+		  const char *str, unsigned len)
 {
-    const char *str = xfip->xfi_content;
-    unsigned len = xfip->xfi_clen;
     const char *fmt = xfip->xfi_format;
     unsigned flen = xfip->xfi_flen;
 
@@ -4582,10 +4775,9 @@ xo_format_colors (xo_handle_t *xop, xo_field_info_t *xfip)
 }
 
 static void
-xo_format_units (xo_handle_t *xop, xo_field_info_t *xfip)
+xo_format_units (xo_handle_t *xop, xo_field_info_t *xfip,
+		 const char *str, unsigned len)
 {
-    const char *str = xfip->xfi_content;
-    unsigned len = xfip->xfi_clen;
     const char *fmt = xfip->xfi_format;
     unsigned flen = xfip->xfi_flen;
     xo_xff_flags_t flags = xfip->xfi_flags;
@@ -4637,10 +4829,9 @@ xo_format_units (xo_handle_t *xop, xo_field_info_t *xfip)
 }
 
 static int
-xo_find_width (xo_handle_t *xop, xo_field_info_t *xfip)
+xo_find_width (xo_handle_t *xop, xo_field_info_t *xfip,
+	       const char *str, unsigned len)
 {
-    const char *str = xfip->xfi_content;
-    unsigned len = xfip->xfi_clen;
     const char *fmt = xfip->xfi_format;
     unsigned flen = xfip->xfi_flen;
 
@@ -4687,7 +4878,8 @@ xo_anchor_clear (xo_handle_t *xop)
  * format it when the end anchor tag is seen.
  */
 static void
-xo_anchor_start (xo_handle_t *xop, xo_field_info_t *xfip)
+xo_anchor_start (xo_handle_t *xop, xo_field_info_t *xfip,
+		 const char *str, unsigned len)
 {
     if (xo_style(xop) != XO_STYLE_TEXT && xo_style(xop) != XO_STYLE_HTML)
 	return;
@@ -4704,11 +4896,12 @@ xo_anchor_start (xo_handle_t *xop, xo_field_info_t *xfip)
      * Now we find the width, if possible.  If it's not there,
      * we'll get it on the end anchor.
      */
-    xop->xo_anchor_min_width = xo_find_width(xop, xfip);
+    xop->xo_anchor_min_width = xo_find_width(xop, xfip, str, len);
 }
 
 static void
-xo_anchor_stop (xo_handle_t *xop, xo_field_info_t *xfip)
+xo_anchor_stop (xo_handle_t *xop, xo_field_info_t *xfip,
+		 const char *str, unsigned len)
 {
     if (xo_style(xop) != XO_STYLE_TEXT && xo_style(xop) != XO_STYLE_HTML)
 	return;
@@ -4720,7 +4913,7 @@ xo_anchor_stop (xo_handle_t *xop, xo_field_info_t *xfip)
 
     XOIF_CLEAR(xop, XOIF_UNITS_PENDING);
 
-    int width = xo_find_width(xop, xfip);
+    int width = xo_find_width(xop, xfip, str, len);
     if (width == 0)
 	width = xop->xo_anchor_min_width;
 
@@ -4835,6 +5028,7 @@ static xo_mapping_t xo_role_names[] = {
 #define XO_ROLE_NEWLINE	'\n'
 
 static xo_mapping_t xo_modifier_names[] = {
+    { XFF_ARGUMENT, "argument" },
     { XFF_COLON, "colon" },
     { XFF_COMMA, "comma" },
     { XFF_DISPLAY_ONLY, "display" },
@@ -4906,6 +5100,7 @@ xo_count_fields (xo_handle_t *xop UNUSED, const char *fmt)
  *   '[': start a section of anchored text
  *   ']': end a section of anchored text
  * The following modifiers are also supported:
+ *   'a': content is provided via argument (const char *), not descriptor
  *   'c': flag: emit a colon after the label
  *   'd': field is only emitted for display styles (text and html)
  *   'e': field is only emitted for encoding styles (xml and json)
@@ -5007,6 +5202,10 @@ xo_parse_roles (xo_handle_t *xop, const char *fmt,
 	case '8':
 	case '9':
 	    fnum = (fnum * 10) + (*sp - '0');
+	    break;
+
+	case 'a':
+	    flags |= XFF_ARGUMENT;
 	    break;
 
 	case 'c':
@@ -5314,7 +5513,7 @@ xo_parse_fields (xo_handle_t *xop, xo_field_info_t *fields,
 	xfip->xfi_next = ++sp;
 
 	/* If we have content, then we have a default format */
-	if (xfip->xfi_clen || format) {
+	if (xfip->xfi_clen || format || (xfip->xfi_flags & XFF_ARGUMENT)) {
 	    if (format) {
 		xfip->xfi_format = format;
 		xfip->xfi_flen = flen;
@@ -5615,9 +5814,8 @@ xo_gettext_combine_formats (xo_handle_t *xop, const char *fmt UNUSED,
  * Summary: i18n aighn't cheap.
  */
 static const char *
-xo_gettext_build_format (xo_handle_t *xop UNUSED,
-			 xo_field_info_t *fields UNUSED,
-			 int this_field UNUSED,
+xo_gettext_build_format (xo_handle_t *xop,
+			 xo_field_info_t *fields, int this_field,
 			 const char *fmt, char **new_fmtp)
 {
     if (xo_style_is_encoding(xop))
@@ -5783,6 +5981,18 @@ xo_do_emit_fields (xo_handle_t *xop, xo_field_info_t *fields,
 		min_fstart = field;
 	}
 
+	const char *content = xfip->xfi_content;
+	int clen = xfip->xfi_clen;
+
+	if (flags & XFF_ARGUMENT) {
+	    /*
+	     * Argument flag means the content isn't given in the descriptor,
+	     * but as a UTF-8 string ('const char *') argument in xo_vap.
+	     */
+	    content = va_arg(xop->xo_vap, char *);
+	    clen = content ? strlen(content) : 0;
+	}
+
 	if (ftype == XO_ROLE_NEWLINE) {
 	    xo_line_close(xop);
 	    if (flush_line && xo_flush_h(xop) < 0)
@@ -5811,15 +6021,15 @@ xo_do_emit_fields (xo_handle_t *xop, xo_field_info_t *fields,
 	}
 
 	if (ftype == 'V')
-	    xo_format_value(xop, xfip->xfi_content, xfip->xfi_clen,
+	    xo_format_value(xop, content, clen,
 			    xfip->xfi_format, xfip->xfi_flen,
 			    xfip->xfi_encoding, xfip->xfi_elen, flags);
 	else if (ftype == '[')
-	    xo_anchor_start(xop, xfip);
+	    xo_anchor_start(xop, xfip, content, clen);
 	else if (ftype == ']')
-	    xo_anchor_stop(xop, xfip);
+	    xo_anchor_stop(xop, xfip, content, clen);
 	else if (ftype == 'C')
-	    xo_format_colors(xop, xfip);
+	    xo_format_colors(xop, xfip, content, clen);
 
 	else if (ftype == 'G') {
 	    /*
@@ -5830,7 +6040,7 @@ xo_do_emit_fields (xo_handle_t *xop, xo_field_info_t *fields,
 	     * Since gettext returns strings in a static buffer, we make
 	     * a copy in new_fmt.
 	     */
-	    xo_set_gettext_domain(xop, xfip);
+	    xo_set_gettext_domain(xop, xfip, content, clen);
 
 	    if (!gettext_inuse) { /* Only translate once */
 		gettext_inuse = 1;
@@ -5881,17 +6091,17 @@ xo_do_emit_fields (xo_handle_t *xop, xo_field_info_t *fields,
 	    }
 	    continue;
 
-	} else  if (xfip->xfi_clen || xfip->xfi_format) {
+	} else  if (clen || xfip->xfi_format) {
 
 	    const char *class_name = xo_class_name(ftype);
 	    if (class_name)
 		xo_format_content(xop, class_name, xo_tag_name(ftype),
-				  xfip->xfi_content, xfip->xfi_clen,
+				  content, clen,
 				  xfip->xfi_format, xfip->xfi_flen, flags);
 	    else if (ftype == 'T')
-		xo_format_title(xop, xfip);
+		xo_format_title(xop, xfip, content, clen);
 	    else if (ftype == 'U')
-		xo_format_units(xop, xfip);
+		xo_format_units(xop, xfip, content, clen);
 	    else
 		xo_failure(xop, "unknown field type: '%c'", ftype);
 	}
@@ -5946,18 +6156,45 @@ xo_do_emit_fields (xo_handle_t *xop, xo_field_info_t *fields,
  * Parse and emit a set of fields
  */
 static int
-xo_do_emit (xo_handle_t *xop, const char *fmt)
+xo_do_emit (xo_handle_t *xop, xo_emit_flags_t flags, const char *fmt)
 {
     xop->xo_columns = 0;	/* Always reset it */
     xop->xo_errno = errno;	/* Save for "%m" */
 
-    unsigned max_fields = xo_count_fields(xop, fmt);
-    xo_field_info_t fields[max_fields];
+    if (fmt == NULL)
+	return 0;
 
-    bzero(fields, max_fields * sizeof(fields[0]));
+    unsigned max_fields;
+    xo_field_info_t *fields = NULL;
 
-    if (xo_parse_fields(xop, fields, max_fields, fmt))
-	return -1;		/* Warning already displayed */
+    /* Adjust XOEF_RETAIN based on global flags */
+    if (XOF_ISSET(xop, XOF_RETAIN_ALL))
+	flags |= XOEF_RETAIN;
+    if (XOF_ISSET(xop, XOF_RETAIN_NONE))
+	flags &= ~XOEF_RETAIN;
+
+    /*
+     * Check for 'retain' flag, telling us to retain the field
+     * information.  If we've already saved it, then we can avoid
+     * re-parsing the format string.
+     */
+    if (!(flags & XOEF_RETAIN)
+	|| xo_retain_find(fmt, &fields, &max_fields) != 0
+	|| fields == NULL) {
+
+	/* Nothing retained; parse the format string */
+	max_fields = xo_count_fields(xop, fmt);
+	fields = alloca(max_fields * sizeof(fields[0]));
+	bzero(fields, max_fields * sizeof(fields[0]));
+
+	if (xo_parse_fields(xop, fields, max_fields, fmt))
+	    return -1;		/* Warning already displayed */
+
+	if (flags & XOEF_RETAIN) {
+	    /* Retain the info */
+	    xo_retain_add(fmt, fields, max_fields);
+	}
+    }
 
     return xo_do_emit_fields(xop, fields, max_fields, fmt);
 }
@@ -6002,7 +6239,7 @@ xo_emit_hv (xo_handle_t *xop, const char *fmt, va_list vap)
 
     xop = xo_default(xop);
     va_copy(xop->xo_vap, vap);
-    rc = xo_do_emit(xop, fmt);
+    rc = xo_do_emit(xop, 0, fmt);
     va_end(xop->xo_vap);
     bzero(&xop->xo_vap, sizeof(xop->xo_vap));
 
@@ -6016,7 +6253,7 @@ xo_emit_h (xo_handle_t *xop, const char *fmt, ...)
 
     xop = xo_default(xop);
     va_start(xop->xo_vap, fmt);
-    rc = xo_do_emit(xop, fmt);
+    rc = xo_do_emit(xop, 0, fmt);
     va_end(xop->xo_vap);
     bzero(&xop->xo_vap, sizeof(xop->xo_vap));
 
@@ -6030,7 +6267,50 @@ xo_emit (const char *fmt, ...)
     int rc;
 
     va_start(xop->xo_vap, fmt);
-    rc = xo_do_emit(xop, fmt);
+    rc = xo_do_emit(xop, 0, fmt);
+    va_end(xop->xo_vap);
+    bzero(&xop->xo_vap, sizeof(xop->xo_vap));
+
+    return rc;
+}
+
+int
+xo_emit_hvf (xo_handle_t *xop, xo_emit_flags_t flags,
+	     const char *fmt, va_list vap)
+{
+    int rc;
+
+    xop = xo_default(xop);
+    va_copy(xop->xo_vap, vap);
+    rc = xo_do_emit(xop, flags, fmt);
+    va_end(xop->xo_vap);
+    bzero(&xop->xo_vap, sizeof(xop->xo_vap));
+
+    return rc;
+}
+
+int
+xo_emit_hf (xo_handle_t *xop, xo_emit_flags_t flags, const char *fmt, ...)
+{
+    int rc;
+
+    xop = xo_default(xop);
+    va_start(xop->xo_vap, fmt);
+    rc = xo_do_emit(xop, flags, fmt);
+    va_end(xop->xo_vap);
+    bzero(&xop->xo_vap, sizeof(xop->xo_vap));
+
+    return rc;
+}
+
+int
+xo_emit_f (xo_emit_flags_t flags, const char *fmt, ...)
+{
+    xo_handle_t *xop = xo_default(NULL);
+    int rc;
+
+    va_start(xop->xo_vap, fmt);
+    rc = xo_do_emit(xop, flags, fmt);
     va_end(xop->xo_vap);
     bzero(&xop->xo_vap, sizeof(xop->xo_vap));
 
@@ -6531,7 +6811,7 @@ xo_open_list_hf (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name)
 }
 
 int
-xo_open_list_h (xo_handle_t *xop, const char *name UNUSED)
+xo_open_list_h (xo_handle_t *xop, const char *name)
 {
     return xo_open_list_hf(xop, 0, name);
 }
@@ -6543,7 +6823,7 @@ xo_open_list (const char *name)
 }
 
 int
-xo_open_list_hd (xo_handle_t *xop, const char *name UNUSED)
+xo_open_list_hd (xo_handle_t *xop, const char *name)
 {
     return xo_open_list_hf(xop, XOF_DTRT, name);
 }
@@ -7568,7 +7848,7 @@ xo_set_program (const char *name)
 }
 
 void
-xo_set_version_h (xo_handle_t *xop, const char *version UNUSED)
+xo_set_version_h (xo_handle_t *xop, const char *version)
 {
     xop = xo_default(xop);
 
