@@ -2066,9 +2066,11 @@ static xo_mapping_t xo_xof_names[] = {
     { XOF_LOG_SYSLOG, "log-syslog" },
     { XOF_NO_HUMANIZE, "no-humanize" },
     { XOF_NO_LOCALE, "no-locale" },
+    { XOF_RETAIN_NONE, "no-retain" },
     { XOF_NO_TOP, "no-top" },
     { XOF_NOT_FIRST, "not-first" },
     { XOF_PRETTY, "pretty" },
+    { XOF_RETAIN_ALL, "retain" },
     { XOF_UNDERSCORES, "underscores" },
     { XOF_UNITS, "units" },
     { XOF_WARN, "warn" },
@@ -6164,6 +6166,12 @@ xo_do_emit (xo_handle_t *xop, xo_emit_flags_t flags, const char *fmt)
 
     unsigned max_fields;
     xo_field_info_t *fields = NULL;
+
+    /* Adjust XOEF_RETAIN based on global flags */
+    if (XOF_ISSET(xop, XOF_RETAIN_ALL))
+	flags |= XOEF_RETAIN;
+    if (XOF_ISSET(xop, XOF_RETAIN_NONE))
+	flags &= ~XOEF_RETAIN;
 
     /*
      * Check for 'retain' flag, telling us to retain the field
