@@ -2816,7 +2816,7 @@ xo_format_string (xo_handle_t *xop, xo_buffer_t *xbp, xo_xff_flags_t flags,
 	 * but if we did the work ourselves, then we need to do it.
 	 */
 	int delta = xfp->xf_width[XF_WIDTH_MIN] - cols;
-	if (!xo_buf_has_room(xbp, delta))
+	if (!xo_buf_has_room(xbp, xfp->xf_width[XF_WIDTH_MIN]))
 	    goto bail;
 
 	/*
@@ -6127,6 +6127,12 @@ xo_do_emit_fields (xo_handle_t *xop, xo_field_info_t *fields,
     }
 
     XOIF_CLEAR(xop, XOIF_REORDER);
+
+    /*
+     * If we've got enough data, flush it.
+     */
+    if (xo_buf_offset(&xop->xo_data) > XO_BUF_HIGH_WATER)
+	flush = 1;
 
     /* If we don't have an anchor, write the text out */
     if (flush && !XOIF_ISSET(xop, XOIF_ANCHOR)) {
