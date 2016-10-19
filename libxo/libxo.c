@@ -4193,7 +4193,7 @@ xo_format_value (xo_handle_t *xop, const char *name, int nlen,
 	    quote = 0;
 	    format = "true";	/* JSON encodes empty tags as a boolean true */
 	    flen = 4;
-	} else if (strchr("diouxXDOUeEfFgGaAcCp", format[flen - 1]) == NULL)
+	} else if (strchr("diouDOUeEfFgG", format[flen - 1]) == NULL)
 	    quote = 1;
 	else
 	    quote = 0;
@@ -7867,7 +7867,7 @@ xo_set_version_h (xo_handle_t *xop, const char *version)
     switch (xo_style(xop)) {
     case XO_STYLE_XML:
 	/* For XML, we record this as an attribute for the first tag */
-	xo_attr_h(xop, "__version", "%s", version);
+	xo_attr_h(xop, "version", "%s", version);
 	break;
 
     case XO_STYLE_JSON:

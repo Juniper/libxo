@@ -1070,7 +1070,7 @@ libxo will convert these arguments as needed to either UTF-8 (for XML,
 JSON, and HTML styles) or locale-based strings for display in text
 style.
 
-   xo_emit("Alll strings are utf-8 content {:tag/%ls}",
+   xo_emit("All strings are utf-8 content {:tag/%ls}",
            L"except for wide strings");
 
 "%S" is equivalent to "%ls".
@@ -1576,6 +1576,16 @@ To set the style, use the xo_set_style() function:
 To use the default handle, pass a NULL handle:
 
     xo_set_style(NULL, XO_STYLE_XML);
+
+*** xo_get_style
+
+To find the current style, use the xo_get_style() function:
+
+    xo_style_t xo_get_style(xo_handle_t *xop);
+
+To use the default handle, pass a NULL handle:
+
+    style = xo_get_style(NULL);
 
 **** Output Styles (XO_STYLE_*) @styles@
 
