@@ -79,6 +79,9 @@ main (int argc, char **argv)
 
     xo_open_container_h(NULL, "top");
 
+    xo_emit("{e:kve_start/%#jx}", (uintmax_t) 0xdeadbeef);
+    xo_emit("{e:kve_end/%#jx}", (uintmax_t) 0xcabb1e);
+
     xo_emit("testing argument modifier {a:}.{a:}...\n",
 	    "host", "my-box", "domain", "example.com");
 
