@@ -425,12 +425,13 @@ xo_set_syslog_handler (xo_syslog_open_t open_func,
     xo_syslog_close = close_func;
 }
 
-static size_t
-xo_snprintf (char *out, size_t outsize, const char *fmt, ...)
+static ssize_t
+xo_snprintf (char *out, ssize_t outsize, const char *fmt, ...)
 {
-    int status;
-    size_t retval = 0;
+    ssize_t status;
+    ssize_t retval = 0;
     va_list ap;
+
     if (out && outsize) {
         va_start(ap, fmt);
         status = vsnprintf(out, outsize, fmt, ap);
@@ -443,10 +444,11 @@ xo_snprintf (char *out, size_t outsize, const char *fmt, ...)
         }
         va_end(ap);
     }
+
     return retval;
 }
 
-static int
+static xo_ssize_t
 xo_syslog_handle_write (void *opaque, const char *data)
 {
     xo_buffer_t *xbp = opaque;
