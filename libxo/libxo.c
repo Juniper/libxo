@@ -5928,8 +5928,8 @@ xo_gettext_combine_formats (xo_handle_t *xop UNUSED, const char *fmt UNUSED,
 static void
 xo_gettext_rebuild_content (xo_handle_t *xop UNUSED,
 		    xo_field_info_t *fields UNUSED,
-		    unsigned *fstart UNUSED, unsigned min_fstart UNUSED,
-		    unsigned *fend UNUSED, unsigned max_fend UNUSED)
+		    ssize_t *fstart UNUSED, unsigned min_fstart UNUSED,
+		    ssize_t *fend UNUSED, unsigned max_fend UNUSED)
 {
     return;
 }
