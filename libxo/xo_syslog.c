@@ -53,6 +53,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <limits.h>
 #include <unistd.h>
 #include <stdarg.h>
 #include <sys/time.h>
@@ -94,11 +95,13 @@
 #define XO_DEFAULT_EID	32473	/* Fallback to the "example" number */
 #endif
 
+#ifndef HOST_NAME_MAX
 #ifdef _SC_HOST_NAME_MAX
 #define HOST_NAME_MAX _SC_HOST_NAME_MAX
 #else
 #define HOST_NAME_MAX 255
 #endif /* _SC_HOST_NAME_MAX */
+#endif /* HOST_NAME_MAX */
 
 #ifndef UNUSED
 #define UNUSED __attribute__ ((__unused__))
