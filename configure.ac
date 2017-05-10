@@ -292,6 +292,13 @@ AC_ARG_ENABLE([debug],
 AC_MSG_RESULT([$LIBXO_DEBUG])
 AM_CONDITIONAL([LIBXO_DEBUG], [test "$LIBXO_DEBUG" != "no"])
 
+AC_MSG_CHECKING([whether to use int return codes])
+AC_ARG_ENABLE([int-return-codes],
+    [  --enable-int-return-codes    Use int return codes (instead of ssize_t)],
+    [USE_INT_RETURN_CODES=yes; AC_DEFINE([USE_INT_RETURN_CODES], [1], [Use int return codes])],
+    [USE_INT_RETURN_CODES=no])
+AC_MSG_RESULT([$USE_INT_RETURN_CODES])
+
 AC_MSG_CHECKING([whether to build with text-only rendering])
 AC_ARG_ENABLE([text-only],
     [  --enable-text-only    Turn on text-only rendering],
