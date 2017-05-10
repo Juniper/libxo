@@ -2893,9 +2893,9 @@ which include the following:
 Compiler warnings are a very good thing, but recent compiler version
 have added some very pedantic checks.  While every attempt is made to
 keep libxo code warning-free, warnings are now optional.  If you are
-doing development work on libxo, it is required that you use
---enable-warnings to keep the code warning free, but most users need
-not use this option.
+doing development work on libxo, it is required that you
+use --enable-warnings to keep the code warning free, but most users
+need not use this option.
 
 libxo provides the --enable-text-only option to reduce the footprint
 of the library for smaller installations.  XML, JSON, and HTML
