@@ -1479,7 +1479,7 @@ styles, flags, or features:
 | pretty      | Emit pretty-printed output                            |
 | retain      | Force retaining formatting information                |
 | text        | Emit TEXT output                                      |
-| underscores | Replace XML-friendly "-"s with JSON friendly "_"s e   |
+| underscores | Replace XML-friendly "-"s with JSON friendly "_"s     |
 | units       | Add the 'units' (XML) or 'data-units (HTML) attribute |
 | warn        | Emit warnings when libxo detects bad calls            |
 | warn-xml    | Emit warnings in XML                                  |
