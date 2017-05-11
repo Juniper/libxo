@@ -1464,6 +1464,8 @@ styles, flags, or features:
 |-------------+-------------------------------------------------------|
 | color       | Enable colors/effects for display styles (TEXT, HTML) |
 | dtrt        | Enable "Do The Right Thing" mode                      |
+| flush       | Flush after every libxo function call                 |
+| flush-line  | Flush after every line (line-buffered)                |
 | html        | Emit HTML output                                      |
 | indent=xx   | Set the indentation level                             |
 | info        | Add info attributes (HTML)                            |
@@ -1488,6 +1490,29 @@ styles, flags, or features:
 |-------------+-------------------------------------------------------|
 
 The brief options are detailed in ^LIBXO_OPTIONS^.
+
+Most of these option are simple and direct, but some require
+additional details:
+
+- "flush-line" performs line buffering, even when the output is not
+directed to a TTY device.
+- "info" generates additional data for HTML, encoded in attributes
+using names that state with "data-".
+- "keys" adds a "key" attribute for XML output to indicate that a leaf
+is an identifier for the list member.
+- "no-humanize"avoids "humanizing" numeric output (see
+humanize_number(3) for details).
+- "no-locale" instructs libxo to avoid translating output to the
+current locale.
+- "no-retain" disables the ability of libxo to internally retain
+"compiled" information about formatting strings.
+- "underscores" can be used with JSON output to change XML-friendly
+names with dashes into JSON-friendly name with underscores.
+- "warn" allows libxo to emit warnings on stderr when application code
+make incorrect calls.
+- "warn-xml" causes those warnings to be placed in XML inside the
+output.
+
 
 * The libxo API
 
