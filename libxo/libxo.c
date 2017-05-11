@@ -2059,6 +2059,7 @@ static xo_mapping_t xo_xof_names[] = {
     { XOF_COLUMNS, "columns" },
     { XOF_DTRT, "dtrt" },
     { XOF_FLUSH, "flush" },
+    { XOF_FLUSH_LINE, "flush-line" },
     { XOF_IGNORE_CLOSE, "ignore-close" },
     { XOF_INFO, "info" },
     { XOF_KEYS, "keys" },
