@@ -143,7 +143,7 @@ typedef void (*xo_free_func_t)(void *);
  */
 typedef xo_ssize_t (*xo_formatter_t)(xo_handle_t *, char *, xo_ssize_t,
 				const char *, va_list);
-typedef void (*xo_checkpointer_t)(xo_handle_t *, va_list, xo_ssize_t);
+typedef void (*xo_checkpointer_t)(xo_handle_t *, va_list, int);
 
 xo_handle_t *
 xo_create (xo_style_t style, xo_xof_flags_t flags);
