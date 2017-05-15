@@ -77,7 +77,7 @@ prep_arg (char *fmt)
 }
 
 static void
-checkpoint (xo_handle_t *xop UNUSED, va_list vap UNUSED, xo_ssize_t restore)
+checkpoint (xo_handle_t *xop UNUSED, va_list vap UNUSED, int restore)
 {
     if (restore)
 	save_argv = checkpoint_argv;
