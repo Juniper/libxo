@@ -1,4 +1,10 @@
 <div class="line">
+  <div class="text">One </div>
+  <div class="data" data-tag="animal" data-xpath="/top/data/animal">fish</div>
+  <div class="text">, Two </div>
+  <div class="data" data-tag="animal" data-xpath="/top/data/animal">fish</div>
+</div>
+<div class="line">
   <div class="text">The </div>
   <div class="data" data-tag="name" data-xpath="/top/data/thing/name">thing</div>
   <div class="text"> is </div>
