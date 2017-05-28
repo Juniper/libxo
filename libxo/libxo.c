@@ -5837,11 +5837,11 @@ xo_gettext_build_format (xo_handle_t *xop,
     if (gtfmt == NULL || gtfmt == fmt || strcmp(gtfmt, fmt) == 0)
 	goto bail2;
 
-    xo_buf_cleanup(&xb);
-
     char *new_fmt = xo_strndup(gtfmt, -1);
     if (new_fmt == NULL)
 	goto bail2;
+
+    xo_buf_cleanup(&xb);
 
     *new_fmtp = new_fmt;
     return new_fmt;
@@ -5975,7 +5975,7 @@ xo_do_emit_fields (xo_handle_t *xop, xo_field_info_t *fields,
     ssize_t fend[flimit];
     bzero(fend, flimit * sizeof(fend[0]));
 
-    for (xfip = fields, field = 0; xfip->xfi_ftype && field < max_fields;
+    for (xfip = fields, field = 0; field < max_fields && xfip->xfi_ftype;
 	 xfip++, field++) {
 	ftype = xfip->xfi_ftype;
 	flags = xfip->xfi_flags;
