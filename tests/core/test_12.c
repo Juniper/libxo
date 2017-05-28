@@ -61,7 +61,10 @@ main (int argc, char **argv)
     xo_open_container("top");
     xo_open_container("data");
 
-    xo_emit("One {C:fg-yellow}{:animal}{C:/}, Two {C:fg-green}{:animal}{C:/}\n",
+    xo_emit("{C:fg-red,bg-green}Merry XMas!!{C:}\n");
+
+    xo_emit("One {C:fg-yellow,bg-blue}{:animal}{C:}, "
+	    "Two {C:fg-green,bg-yellow}{:animal}{C:}\n",
           "fish", "fish");
 
     const char *fmt1 = "The {C:fg-red}{k:name}{C:reset} is "
