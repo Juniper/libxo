@@ -22,6 +22,7 @@ main (int argc, char **argv)
     int i, count = 10;
     int mon = 0;
     xo_emit_flags_t flags = XOEF_RETAIN;
+    int opt_color = 1;
 
     argc = xo_parse_args(argc, argv);
     if (argc < 0)
@@ -36,6 +37,8 @@ main (int argc, char **argv)
 	    xo_set_style(NULL, XO_STYLE_TEXT);
 	else if (strcmp(argv[argc], "html") == 0)
 	    xo_set_style(NULL, XO_STYLE_HTML);
+	else if (strcmp(argv[argc], "no-color") == 0)
+	    opt_color = 0;
 	else if (strcmp(argv[argc], "pretty") == 0)
 	    xo_set_flags(NULL, XOF_PRETTY);
 	else if (strcmp(argv[argc], "xpath") == 0)
@@ -51,7 +54,8 @@ main (int argc, char **argv)
     }
 
     xo_set_flags(NULL, XOF_UNITS); /* Always test w/ this */
-    xo_set_flags(NULL, XOF_COLOR); /* Force color output */
+    if (opt_color)
+	xo_set_flags(NULL, XOF_COLOR); /* Force color output */
     xo_set_file(stdout);
 
     xo_open_container("top");
