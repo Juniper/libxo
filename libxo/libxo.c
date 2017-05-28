@@ -2127,14 +2127,14 @@ xo_set_style_name (xo_handle_t *xop, const char *name)
  * Look for something like "colors=red/blue+green/yellow" as fg/bg pairs.
  */
 static void
-xo_set_color_map (xo_handle_t *xop UNUSED, char *value UNUSED)
+xo_set_color_map (xo_handle_t *xop, char *value)
 {
 #ifdef LIBXO_TEXT_ONLY
     return;
 #endif /* LIBXO_TEXT_ONLY */
 
     char *cp, *ep, *vp, *np;
-    ssize_t len = strlen(value) + 1;
+    ssize_t len = value ? strlen(value) + 1 : 0;
     int num = 1, fg, bg;
 
     for (cp = value, ep = cp + len - 1; cp && *cp && cp < ep; cp = np) {
@@ -2158,7 +2158,7 @@ xo_set_color_map (xo_handle_t *xop UNUSED, char *value UNUSED)
     /* If no color initialization happened, then we don't need the map */
     if (num > 0)
 	XOF_SET(xop, XOF_COLOR_MAP);
-    else 
+    else
 	XOF_CLEAR(xop, XOF_COLOR_MAP);
 
     /* Fill in the rest of the colors with the defaults */
