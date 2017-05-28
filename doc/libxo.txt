@@ -544,6 +544,15 @@ The following color names are supported:
 | yellow  |                                            |
 |---------+--------------------------------------------|
 
+When using colors, the developer should remember that users will
+change the foreground and background colors of terminal session
+according to their own tastes, so assuming that "blue" looks nice is
+never safe, and is a constant annoyance to your dear author.  In
+addition, a significant percentage of users (1 in 12) will be color
+blind.  Depending on color to convey critical information is not a
+good idea.  Color should enhance output, but should not be used as the
+sole means of encoding information.
+
 **** The Decoration Role ({D:})
 
 Decorations are typically punctuation marks such as colons,
@@ -1463,6 +1472,7 @@ styles, flags, or features:
 | Token       | Action                                                |
 |-------------+-------------------------------------------------------|
 | color       | Enable colors/effects for display styles (TEXT, HTML) |
+| colors=xxxx | Adjust color output values                            |
 | dtrt        | Enable "Do The Right Thing" mode                      |
 | flush       | Flush after every libxo function call                 |
 | flush-line  | Flush after every line (line-buffered)                |
@@ -1538,6 +1548,48 @@ names with dashes into JSON-friendly name with underscores.
 make incorrect calls.
 - "warn-xml" causes those warnings to be placed in XML inside the
 output.
+
+The "colors" option takes a value that is a set of mappings from the
+pre-defined set of colors to new foreground and background colors.
+The value is a series of "fg/bg" values, separated by a "+".  Each
+pair of "fg/bg" values gives the colors to which a basic color is
+mapped when used as a foreground or background color.  The order is
+the mappings is:
+
+- black
+- red
+- green
+- yellow
+- blue
+- magenta
+- cyan
+- white
+
+Pairs may be skipped, leaving them mapped as normal, as are missing
+pairs or single colors.
+
+For example consider the following xo_emit call:
+
+    xo_emit("{C:fg-red,bg-green}Merry XMas!!{C:}\n");
+
+To turn all colored output to red-on-blue, use eight pairs of
+"red/blue" mappings separated by "+"s:
+
+    --libxo colors=red/blue+red/blue+red/blue+red/blue+\
+                   red/blue+red/blue+red/blue+red/blue
+
+To turn the red-on-green text to magenta-on-cyan, give a "magenta"
+foreground value for red (the second mapping) and a "cyan" background
+to green (the third mapping):
+
+    --libxo colors=+magenta+/cyan
+
+Consider the common situation where blue output looks unreadable on a
+terminal session with a black background.  To turn both "blue"
+foreground and background output to "yellow", give only the fifth
+mapping, skipping the first four mappings with bare "+"s:
+
+    --libxo colors=++++yellow/yellow
 
 * The libxo API
 
