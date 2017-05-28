@@ -16,11 +16,28 @@ You want to prepare for the future, but you need to live in the
 present.  You'd love a flying car, but need to get to work today.  You
 want to support features like XML, JSON, and HTML rendering to allow
 integration with NETCONF, REST, and web browsers, but you need to make
-text output for command line users.  And you don't want multiple code
-paths that can't help but get out of sync.  None of this "if (xml)
-{... } else {...}"  logic.  And ifdefs are right out.  But you'd
-really, really like all the fancy features that modern encoding
-formats can provide.  libxo can help.
+text output for command line users.
+
+And you don't want multiple code paths that can't help but get out of
+sync:
+
+    /* None of this "if (xml) {... } else {...}"  logic */
+    if (xml) {
+        /* some code to make xml*/
+    } else {
+        /* other code to make text */
+        /* oops forgot to add something on both clauses! */
+    }
+
+    /* And ifdefs are right out. */
+    #ifdef MAKE_XML
+        /* icky */
+    #else
+        /* pooh */
+    #endif
+
+But you'd really, really like all the fancy features that modern
+encoding formats can provide.  libxo can help.
 
 The libxo library allows an application to generate text, XML, JSON,
 and HTML output using a common set of function calls.  The application
@@ -35,8 +52,11 @@ braces with a printf-like format string (^format-strings^):
             linect, wordct, charct, file);
 
 Each field can have a role, with the 'value' role being the default,
-and the role tells libxo how and when to render that field.  Output
-can then be generated in various style, using the "--libxo" option:
+and the role tells libxo how and when to render that field (see
+^field-roles^ for details).  Modifiers change how the field is
+rendered in different output styles (see ^field-modifiers^ for
+details.  Output can then be generated in various style, using the
+"--libxo" option:
 
     % wc /etc/motd
           25     165    1140 /etc/motd
@@ -74,7 +94,12 @@ can then be generated in various style, using the "--libxo" option:
       <div class="data" data-tag="filename">/etc/motd</div>
     </div>
 
-** Getting libxo
+Same code path, same format strings, same information, but it's
+rendered in distinct styles based on run-time flags.
+
+* Getting libxo
+
+libxo now ships as part of the FreeBSD Operating System (as of -11).
 
 libxo lives on github as:
 
@@ -101,7 +126,7 @@ as part of the FreeBSD operating system starting with release 11.0.
 Issues, problems, and bugs should be directly to the issues page on
 our github site.
 
-*** Downloading libxo Source Code
+** Downloading libxo Source Code
 
 You can retrieve the source for libxo in two ways:
 
@@ -140,7 +165,7 @@ download the source code from svn, then you'll need to run
 "autoreconf" by hand.  This step is done for you by the "setup.sh"
 script, described in the next section.
 
-*** Building libxo
+** Building libxo
 
 To build libxo, you'll need to set up the build, run the "configure"
 script, run the "make" command, and run the regression tests.
@@ -159,7 +184,7 @@ The following sections will walk through each of these steps with
 additional details and options, but the above directions should be all
 that's needed.
 
-**** Setting up the build
+*** Setting up the build
 
 [If you downloaded a distfile, you can skip this step.]
 
@@ -171,7 +196,7 @@ generated files.
 
 Note: We're are currently using autoreconf version 2.69.
 
-**** Running the "configure" Script
+*** Running the "configure" Script
 
 Configure (and autoconf in general) provides a means of building
 software in diverse environments.  Our configure script supports
@@ -221,7 +246,7 @@ machine.  To run the regression tests:
 
     make test
 
-**** Installing libxo
+*** Installing libxo
 
 Once the software is built, you'll need to install libxo using the
 "make install" command.  If you are the root user, or the owner of the
@@ -1453,7 +1478,7 @@ properly.
         xo_close_marker("fish-guts");
     }
 
-** Command-line Arguments @options@
+* Command-line Arguments @options@
 
 libxo uses command line options to trigger rendering behavior.  The
 following options are recognised:
@@ -1462,8 +1487,16 @@ following options are recognised:
 - --libxo=<options>
 - --libxo:<brief-options>
 
+The following invocations are all identical in outcome:
+
+  my-app --libxo warn,pretty arg1
+  my-app --libxo=warn,pretty arg1
+  my-app --libxo:WP arg1
+
 Programs using libxo are expecting to call the xo_parse_args function
 to parse these arguments.  See ^xo_parse_args^ for details.
+
+** Option keywords
 
 Options is a comma-separated list of tokens that correspond to output
 styles, flags, or features:
@@ -1499,7 +1532,33 @@ styles, flags, or features:
 | xpath       | Add XPath expressions (HTML)                          |
 |-------------+-------------------------------------------------------|
 
-The brief options are detailed below:
+Most of these option are simple and direct, but some require
+additional details:
+
+- "colors" is described in ^color-mapping^.
+- "flush-line" performs line buffering, even when the output is not
+directed to a TTY device.
+- "info" generates additional data for HTML, encoded in attributes
+using names that state with "data-".
+- "keys" adds a "key" attribute for XML output to indicate that a leaf
+is an identifier for the list member.
+- "no-humanize"avoids "humanizing" numeric output (see
+humanize_number(3) for details).
+- "no-locale" instructs libxo to avoid translating output to the
+current locale.
+- "no-retain" disables the ability of libxo to internally retain
+"compiled" information about formatting strings.
+- "underscores" can be used with JSON output to change XML-friendly
+names with dashes into JSON-friendly name with underscores.
+- "warn" allows libxo to emit warnings on stderr when application code
+make incorrect calls.
+- "warn-xml" causes those warnings to be placed in XML inside the
+output.
+
+** Brief Options
+
+The brief options are simple single-letter aliases to the normal
+keywords, as detailed below:
 
 |--------+---------------------------------------------|
 | Option | Action                                      |
@@ -1521,34 +1580,7 @@ The brief options are detailed below:
 | x      | Enable XPath data (XOF_XPATH)               |
 |--------+---------------------------------------------|
 
-The following invocations are all identical in outcome:
-
-  my-app --libxo warn,pretty arg1
-  my-app --libxo=warn,pretty arg1
-  my-app --libxo:WP arg1
-
-Most of these option are simple and direct, but some require
-additional details:
-
-- "flush-line" performs line buffering, even when the output is not
-directed to a TTY device.
-- "info" generates additional data for HTML, encoded in attributes
-using names that state with "data-".
-- "keys" adds a "key" attribute for XML output to indicate that a leaf
-is an identifier for the list member.
-- "no-humanize"avoids "humanizing" numeric output (see
-humanize_number(3) for details).
-- "no-locale" instructs libxo to avoid translating output to the
-current locale.
-- "no-retain" disables the ability of libxo to internally retain
-"compiled" information about formatting strings.
-- "underscores" can be used with JSON output to change XML-friendly
-names with dashes into JSON-friendly name with underscores.
-- "warn" allows libxo to emit warnings on stderr when application code
-make incorrect calls.
-- "warn-xml" causes those warnings to be placed in XML inside the
-output.
-
+** Color Mapping
 The "colors" option takes a value that is a set of mappings from the
 pre-defined set of colors to new foreground and background colors.
 The value is a series of "fg/bg" values, separated by a "+".  Each
