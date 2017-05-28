@@ -1,8 +1,11 @@
 <div class="line">
+  <div class="text color-fg-red color-bg-green">Merry XMas!!</div>
+</div>
+<div class="line">
   <div class="text">One </div>
-  <div class="data color-fg-yellow" data-tag="animal" data-xpath="/top/data/animal">fish</div>
+  <div class="data color-fg-yellow color-bg-blue" data-tag="animal" data-xpath="/top/data/animal">fish</div>
   <div class="text">, Two </div>
-  <div class="data color-fg-green" data-tag="animal" data-xpath="/top/data/animal">fish</div>
+  <div class="data color-fg-green color-bg-yellow" data-tag="animal" data-xpath="/top/data/animal">fish</div>
 </div>
 <div class="line">
   <div class="text">The </div>
