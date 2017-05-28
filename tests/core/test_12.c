@@ -56,6 +56,9 @@ main (int argc, char **argv)
     xo_open_container("top");
     xo_open_container("data");
 
+    xo_emit("One {C:fg-yellow}{:animal}{C:/}, Two {C:fg-green}{:animal}{C:/}\n",
+          "fish", "fish");
+
     const char *fmt1 = "The {C:fg-red}{k:name}{C:reset} is "
 	"{C:/fg-%s}{:color}{C:reset} til {:time/%02d:%02d}\n";
     const char *fmt2 = "My {C:fg-red}{:hand}{C:reset} hand is "
