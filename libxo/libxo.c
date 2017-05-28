@@ -203,6 +203,7 @@ typedef struct xo_stack_s {
  * XO_COL_* ("colors") refers to fancy ansi codes, while X__EFF_*
  * ("effects") are bits since we need to maintain state.
  */
+typedef uint8_t xo_color_t;
 #define XO_COL_DEFAULT		0
 #define XO_COL_BLACK		1
 #define XO_COL_RED		2
@@ -279,8 +280,10 @@ struct xo_handle_s {
     ssize_t xo_anchor_min_width; /* Desired width of anchored text */
     ssize_t xo_units_offset;	/* Start of units insertion point */
     ssize_t xo_columns;	/* Columns emitted during this xo_emit call */
+#ifndef LIBXO_TEXT_ONLY
     uint8_t xo_color_map_fg[XO_NUM_COLORS]; /* Foreground color mappings */
     uint8_t xo_color_map_bg[XO_NUM_COLORS]; /* Background color mappings */
+#endif /* LIBXO_TEXT_ONLY */
     xo_colors_t xo_colors;	/* Current color and effect values */
     xo_buffer_t xo_color_buf;	/* HTML: buffer of colors and effects */
     char *xo_version;		/* Version string */
@@ -463,6 +466,9 @@ xo_transition (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name,
 
 static int
 xo_set_options_simple (xo_handle_t *xop, const char *input);
+
+static int
+xo_color_find (const char *str);
 
 static void
 xo_buf_append_div (xo_handle_t *xop, const char *class, xo_xff_flags_t flags,
@@ -2116,6 +2122,50 @@ xo_set_style_name (xo_handle_t *xop, const char *name)
     return 0;
 }
 
+/*
+ * Fill in the color map, based on the input string; currently unimplemented
+ * Look for something like "colors=red/blue+green/yellow" as fg/bg pairs.
+ */
+static void
+xo_set_color_map (xo_handle_t *xop UNUSED, char *value UNUSED)
+{
+#ifdef LIBXO_TEXT_ONLY
+    return;
+#endif /* LIBXO_TEXT_ONLY */
+
+    char *cp, *ep, *vp, *np;
+    ssize_t len = strlen(value) + 1;
+    int num = 1, fg, bg;
+
+    for (cp = value, ep = cp + len - 1; cp && *cp && cp < ep; cp = np) {
+	np = strchr(cp, '+');
+	if (np)
+	    *np++ = '\0';
+
+	vp = strchr(cp, '/');
+	if (vp)
+	    *vp++ = '\0';
+
+	fg = *cp ? xo_color_find(cp) : -1;
+	bg = (vp && *vp) ? xo_color_find(vp) : -1;
+
+	xop->xo_color_map_fg[num] = (fg < 0) ? num : fg;
+	xop->xo_color_map_bg[num] = (bg < 0) ? num : bg;
+	if (++num > XO_NUM_COLORS)
+	    break;
+    }
+
+    /* If no color initialization happened, then we don't need the map */
+    if (num > 0)
+	XOF_SET(xop, XOF_COLOR_MAP);
+    else 
+	XOF_CLEAR(xop, XOF_COLOR_MAP);
+
+    /* Fill in the rest of the colors with the defaults */
+    for ( ; num < XO_NUM_COLORS; num++)
+	xop->xo_color_map_fg[num] = xop->xo_color_map_bg[num] = num;
+}
+
 static int
 xo_set_options_simple (xo_handle_t *xop, const char *input)
 {
@@ -2136,7 +2186,7 @@ xo_set_options_simple (xo_handle_t *xop, const char *input)
 	    *vp++ = '\0';
 
 	if (strcmp("colors", cp) == 0) {
-	    /* XXX Look for colors=red-blue+green-yellow */
+	    xo_set_color_map(xop, vp);
 	    continue;
 	}
 
@@ -2152,14 +2202,6 @@ xo_set_options_simple (xo_handle_t *xop, const char *input)
     }
 
     return 0;
-}
-
-/*
- * Fill in the color map, based on the input string; currently unimplemented
- */
-static void
-xo_set_color_map (xo_handle_t *xop UNUSED, char *value UNUSED)
-{
 }
 
 /*
@@ -2285,7 +2327,6 @@ xo_set_options (xo_handle_t *xop, const char *input)
 	    *vp++ = '\0';
 
 	if (strcmp("colors", cp) == 0) {
-	    /* XXX Look for colors=red-blue+green-yellow */
 	    xo_set_color_map(xop, vp);
 	    continue;
 	}
@@ -4638,6 +4679,28 @@ xo_colors_enabled (xo_handle_t *xop UNUSED)
 #endif /* LIBXO_TEXT_ONLY */
 }
 
+/*
+ * If the color map is in use (--libxo colors=xxxx), then update
+ * the incoming foreground and background colors from the map.
+ */
+static void
+xo_colors_update (xo_handle_t *xop, xo_colors_t *newp)
+{
+#ifdef LIBXO_TEXT_ONLY
+    return;
+#endif /* LIBXO_TEXT_ONLY */
+
+    xo_color_t fg = newp->xoc_col_fg;
+    if (XOF_ISSET(xop, XOF_COLOR_MAP) && fg < XO_NUM_COLORS)
+	fg = xop->xo_color_map_fg[fg]; /* Fetch from color map */
+    newp->xoc_col_fg = fg;
+
+    xo_color_t bg = newp->xoc_col_bg;
+    if (XOF_ISSET(xop, XOF_COLOR_MAP) && bg < XO_NUM_COLORS)
+	bg = xop->xo_color_map_bg[bg]; /* Fetch from color map */
+    newp->xoc_col_bg = bg;
+}
+
 static void
 xo_colors_handle_text (xo_handle_t *xop, xo_colors_t *newp)
 {
@@ -4684,16 +4747,16 @@ xo_colors_handle_text (xo_handle_t *xop, xo_colors_t *newp)
 	}
     }
 
-    if (newp->xoc_col_fg != oldp->xoc_col_fg) {
+    xo_color_t fg = newp->xoc_col_fg;
+    if (fg != oldp->xoc_col_fg) {
 	cp += snprintf(cp, ep - cp, ";3%u",
-		       (newp->xoc_col_fg != XO_COL_DEFAULT)
-		       ? newp->xoc_col_fg - 1 : 9);
+		       (fg != XO_COL_DEFAULT) ? fg - 1 : 9);
     }
 
-    if (newp->xoc_col_bg != oldp->xoc_col_bg) {
+    xo_color_t bg = newp->xoc_col_bg;
+    if (bg != oldp->xoc_col_bg) {
 	cp += snprintf(cp, ep - cp, ";4%u",
-		       (newp->xoc_col_bg != XO_COL_DEFAULT)
-		       ? newp->xoc_col_bg - 1 : 9);
+		       (bg != XO_COL_DEFAULT) ? bg - 1 : 9);
     }
 
     if (cp - buf != 1 && cp < ep - 3) {
@@ -4793,6 +4856,7 @@ xo_format_colors (xo_handle_t *xop, xo_field_info_t *xfip,
 
 	    xo_colors_t xoc = xop->xo_colors;
 	    xo_colors_parse(xop, &xoc, xb.xb_bufp);
+	    xo_colors_update(xop, &xoc);
 
 	    if (xo_style(xop) == XO_STYLE_TEXT) {
 		/*
