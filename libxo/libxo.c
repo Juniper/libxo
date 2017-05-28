@@ -461,6 +461,9 @@ static ssize_t
 xo_transition (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name,
 	       xo_state_t new_state);
 
+static int
+xo_set_options_simple (xo_handle_t *xop, const char *input);
+
 static void
 xo_buf_append_div (xo_handle_t *xop, const char *class, xo_xff_flags_t flags,
 		   const char *name, ssize_t nlen,
@@ -672,6 +675,15 @@ xo_default_init (void)
     xo_handle_t *xop = &xo_default_handle;
 
     xo_init_handle(xop);
+
+#if !defined(NO_LIBXO_OPTIONS)
+    if (!XOF_ISSET(xop, XOF_NO_ENV)) {
+       char *env = getenv("LIBXO_OPTIONS");
+       if (env)
+           xo_set_options_simple(xop, env);
+
+    }
+#endif /* NO_LIBXO_OPTIONS */
 
     xo_default_inited = 1;
 }
@@ -2065,6 +2077,21 @@ static xo_mapping_t xo_xof_names[] = {
     { 0, NULL }
 };
 
+/* Options available via the environment variable ($LIBXO_OPTIONS) */
+static xo_mapping_t xo_xof_simple_names[] = {
+    { XOF_COLOR_ALLOWED, "color" },
+    { XOF_FLUSH, "flush" },
+    { XOF_FLUSH_LINE, "flush-line" },
+    { XOF_NO_HUMANIZE, "no-humanize" },
+    { XOF_NO_LOCALE, "no-locale" },
+    { XOF_RETAIN_NONE, "no-retain" },
+    { XOF_PRETTY, "pretty" },
+    { XOF_RETAIN_ALL, "retain" },
+    { XOF_UNDERSCORES, "underscores" },
+    { XOF_WARN, "warn" },
+    { 0, NULL }
+};
+
 /*
  * Convert string name to XOF_* flag value.
  * Not all are useful.  Or safe.  Or sane.
@@ -2087,6 +2114,52 @@ xo_set_style_name (xo_handle_t *xop, const char *name)
 
     xo_set_style(xop, style);
     return 0;
+}
+
+static int
+xo_set_options_simple (xo_handle_t *xop, const char *input)
+{
+    xo_xof_flags_t new_flag;
+    char *cp, *ep, *vp, *np, *bp;
+    ssize_t len = strlen(input) + 1;
+
+    bp = alloca(len);
+    memcpy(bp, input, len);
+
+    for (cp = bp, ep = cp + len - 1; cp && cp < ep; cp = np) {
+	np = strchr(cp, ',');
+	if (np)
+	    *np++ = '\0';
+
+	vp = strchr(cp, '=');
+	if (vp)
+	    *vp++ = '\0';
+
+	if (strcmp("colors", cp) == 0) {
+	    /* XXX Look for colors=red-blue+green-yellow */
+	    continue;
+	}
+
+	new_flag = xo_name_lookup(xo_xof_simple_names, cp, -1);
+	if (new_flag != 0) {
+	    XOF_SET(xop, new_flag);
+	} else if (strcmp(cp, "no-color") == 0) {
+	    XOF_CLEAR(xop, XOF_COLOR_ALLOWED);
+	} else {
+	    xo_failure(xop, "unknown simple option: %s", cp);
+	    return -1;
+	}
+    }
+
+    return 0;
+}
+
+/*
+ * Fill in the color map, based on the input string; currently unimplemented
+ */
+static void
+xo_set_color_map (xo_handle_t *xop UNUSED, char *value UNUSED)
+{
 }
 
 /*
@@ -2213,6 +2286,7 @@ xo_set_options (xo_handle_t *xop, const char *input)
 
 	if (strcmp("colors", cp) == 0) {
 	    /* XXX Look for colors=red-blue+green-yellow */
+	    xo_set_color_map(xop, vp);
 	    continue;
 	}
 
@@ -2230,28 +2304,26 @@ xo_set_options (xo_handle_t *xop, const char *input)
 	    new_flag = xo_name_to_flag(cp);
 	    if (new_flag != 0)
 		XOF_SET(xop, new_flag);
-	    else {
-		if (strcmp(cp, "no-color") == 0) {
-		    XOF_CLEAR(xop, XOF_COLOR_ALLOWED);
-		} else if (strcmp(cp, "indent") == 0) {
-		    if (vp)
-			xop->xo_indent_by = atoi(vp);
-		    else
-			xo_failure(xop, "missing value for indent option");
-		} else if (strcmp(cp, "encoder") == 0) {
-		    if (vp == NULL)
-			xo_failure(xop, "missing value for encoder option");
-		    else {
-			if (xo_encoder_init(xop, vp)) {
-			    xo_failure(xop, "encoder not found: %s", vp);
-			    rc = -1;
-			}
+	    else if (strcmp(cp, "no-color") == 0)
+		XOF_CLEAR(xop, XOF_COLOR_ALLOWED);
+	    else if (strcmp(cp, "indent") == 0) {
+		if (vp)
+		    xop->xo_indent_by = atoi(vp);
+		else
+		    xo_failure(xop, "missing value for indent option");
+	    } else if (strcmp(cp, "encoder") == 0) {
+		if (vp == NULL)
+		    xo_failure(xop, "missing value for encoder option");
+		else {
+		    if (xo_encoder_init(xop, vp)) {
+			xo_failure(xop, "encoder not found: %s", vp);
+			rc = -1;
 		    }
-
-		} else {
-		    xo_warnx("unknown libxo option value: '%s'", cp);
-		    rc = -1;
 		}
+		
+	    } else {
+		xo_warnx("unknown libxo option value: '%s'", cp);
+		rc = -1;
 	    }
 	}
     }
