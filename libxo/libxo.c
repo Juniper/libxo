@@ -628,13 +628,6 @@ xo_init_handle (xo_handle_t *xop)
 	XOF_SET(xop, XOF_FLUSH_LINE);
 
     /*
-     * We only want to do color output on terminals, but we only want
-     * to do this if the user has asked for color.
-     */
-    if (XOF_ISSET(xop, XOF_COLOR_ALLOWED) && isatty(1))
-	XOF_SET(xop, XOF_COLOR);
-
-    /*
      * We need to initialize the locale, which isn't really pretty.
      * Libraries should depend on their caller to set up the
      * environment.  But we really can't count on the caller to do
@@ -666,15 +659,6 @@ xo_init_handle (xo_handle_t *xop)
 
     xop->xo_indent_by = XO_INDENT_BY;
     xo_depth_check(xop, XO_DEPTH);
-
-#if !defined(NO_LIBXO_OPTIONS)
-    if (!XOF_ISSET(xop, XOF_NO_ENV)) {
-	char *env = getenv("LIBXO_OPTIONS");
-	if (env)
-	    xo_set_options(xop, env);
-	    
-    }
-#endif /* NO_GETENV */
 
     XOIF_CLEAR(xop, XOIF_INIT_IN_PROGRESS);
 }
@@ -2056,6 +2040,7 @@ xo_value_lookup (xo_mapping_t *map, xo_xff_flags_t value)
 
 static xo_mapping_t xo_xof_names[] = {
     { XOF_COLOR_ALLOWED, "color" },
+    { XOF_COLOR, "color-force" },
     { XOF_COLUMNS, "columns" },
     { XOF_DTRT, "dtrt" },
     { XOF_FLUSH, "flush" },
@@ -7779,6 +7764,8 @@ xo_parse_args (int argc, char **argv)
     if (cp)
 	xo_program = cp + 1;
 
+    xo_handle_t *xop = xo_default(NULL);
+
     for (save = i = 1; i < argc; i++) {
 	if (argv[i] == NULL
 	    || strncmp(argv[i], libxo_opt, sizeof(libxo_opt) - 1) != 0) {
@@ -7796,14 +7783,14 @@ xo_parse_args (int argc, char **argv)
 		return -1;
 	    }
 		
-	    if (xo_set_options(NULL, cp) < 0)
+	    if (xo_set_options(xop, cp) < 0)
 		return -1;
 	} else if (*cp == ':') {
-	    if (xo_set_options(NULL, cp) < 0)
+	    if (xo_set_options(xop, cp) < 0)
 		return -1;
 
 	} else if (*cp == '=') {
-	    if (xo_set_options(NULL, ++cp) < 0)
+	    if (xo_set_options(xop, ++cp) < 0)
 		return -1;
 
 	} else if (*cp == '-') {
@@ -7820,6 +7807,13 @@ xo_parse_args (int argc, char **argv)
 	    return -1;
 	}
     }
+
+    /*
+     * We only want to do color output on terminals, but we only want
+     * to do this if the user has asked for color.
+     */
+    if (XOF_ISSET(xop, XOF_COLOR_ALLOWED) && isatty(1))
+	XOF_SET(xop, XOF_COLOR);
 
     argv[save] = NULL;
     return save;
