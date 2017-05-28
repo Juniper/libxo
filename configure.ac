@@ -354,14 +354,6 @@ AC_ARG_ENABLE([printflike],
 AC_MSG_RESULT([$HAVE_PRINTFLIKE])
 AM_CONDITIONAL([HAVE_PRINTFLIKE], [test "$HAVE_PRINTFLIKE" != ""])
 
-AC_MSG_CHECKING([whether to build with LIBXO_OPTIONS])
-AC_ARG_ENABLE([libxo-options],
-    [  --disable-libxo-options  Turn off support for LIBXO_OPTIONS],
-    [LIBXO_OPTS=$enableval],
-    [LIBXO_OPTS=yes])
-AC_MSG_RESULT([$LIBXO_OPTS])
-AM_CONDITIONAL([NO_LIBXO_OPTIONS], [test "$LIBXO_OPTS" != "yes"])
-
 case $host_os in
      darwin*)
         LIBTOOL=glibtool
