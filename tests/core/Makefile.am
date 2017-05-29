@@ -66,7 +66,9 @@ EXTRA_DIST = \
     ${addprefix saved/, ${TEST_CASES:.c=.H.err}} \
     ${addprefix saved/, ${TEST_CASES:.c=.H.out}} \
     ${addprefix saved/, ${TEST_CASES:.c=.HIPx.err}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.HIPx.out}}
+    ${addprefix saved/, ${TEST_CASES:.c=.HIPx.out}} \
+    ${addprefix saved/, ${TEST_CASES:.c=.E.err}} \
+    ${addprefix saved/, ${TEST_CASES:.c=.E.out}}
 
 S2O = | ${SED} '1,/@@/d'
 
