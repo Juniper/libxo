@@ -4422,7 +4422,7 @@ xo_format_value (xo_handle_t *xop, const char *name, ssize_t nlen,
 
 	xo_encoder_handle(xop, quote ? XO_OP_STRING : XO_OP_CONTENT,
 			  xo_buf_data(&xop->xo_data, name_offset),
-			  xo_buf_data(&xop->xo_data, value_offset));
+			  xo_buf_data(&xop->xo_data, value_offset), flags);
 	xo_buf_reset(&xop->xo_data);
 	break;
     }
@@ -6579,7 +6579,7 @@ xo_attr_hv (xo_handle_t *xop, const char *name, const char *fmt, va_list vap)
 	    *xbp->xb_curp = '\0';
 	    rc = xo_encoder_handle(xop, XO_OP_ATTRIBUTE,
 				   xo_buf_data(xbp, name_offset),
-				   xo_buf_data(xbp, value_offset));
+				   xo_buf_data(xbp, value_offset), 0);
 	}
     }
 
@@ -6769,7 +6769,7 @@ xo_do_open_container (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
 	break;
 
     case XO_STYLE_ENCODER:
-	rc = xo_encoder_handle(xop, XO_OP_OPEN_CONTAINER, name, NULL);
+	rc = xo_encoder_handle(xop, XO_OP_OPEN_CONTAINER, name, NULL, flags);
 	break;
     }
 
@@ -6859,7 +6859,7 @@ xo_do_close_container (xo_handle_t *xop, const char *name)
 
     case XO_STYLE_ENCODER:
 	xo_depth_change(xop, name, -1, 0, XSS_CLOSE_CONTAINER, 0);
-	rc = xo_encoder_handle(xop, XO_OP_CLOSE_CONTAINER, name, NULL);
+	rc = xo_encoder_handle(xop, XO_OP_CLOSE_CONTAINER, name, NULL, 0);
 	break;
     }
 
@@ -6925,7 +6925,7 @@ xo_do_open_list (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name)
 	break;
 
     case XO_STYLE_ENCODER:
-	rc = xo_encoder_handle(xop, XO_OP_OPEN_LIST, name, NULL);
+	rc = xo_encoder_handle(xop, XO_OP_OPEN_LIST, name, NULL, flags);
 	break;
     }
 
@@ -7000,7 +7000,7 @@ xo_do_close_list (xo_handle_t *xop, const char *name)
 
     case XO_STYLE_ENCODER:
 	xo_depth_change(xop, name, -1, 0, XSS_CLOSE_LIST, XSF_LIST);
-	rc = xo_encoder_handle(xop, XO_OP_CLOSE_LIST, name, NULL);
+	rc = xo_encoder_handle(xop, XO_OP_CLOSE_LIST, name, NULL, 0);
 	break;
 
     default:
@@ -7074,7 +7074,7 @@ xo_do_open_leaf_list (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name)
 	break;
 
     case XO_STYLE_ENCODER:
-	rc = xo_encoder_handle(xop, XO_OP_OPEN_LEAF_LIST, name, NULL);
+	rc = xo_encoder_handle(xop, XO_OP_OPEN_LEAF_LIST, name, NULL, flags);
 	break;
     }
 
@@ -7118,7 +7118,7 @@ xo_do_close_leaf_list (xo_handle_t *xop, const char *name)
 	break;
 
     case XO_STYLE_ENCODER:
-	rc = xo_encoder_handle(xop, XO_OP_CLOSE_LEAF_LIST, name, NULL);
+	rc = xo_encoder_handle(xop, XO_OP_CLOSE_LEAF_LIST, name, NULL, 0);
 	/* FALLTHRU */
 
     default:
@@ -7175,7 +7175,7 @@ xo_do_open_instance (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name)
 	break;
 
     case XO_STYLE_ENCODER:
-	rc = xo_encoder_handle(xop, XO_OP_OPEN_INSTANCE, name, NULL);
+	rc = xo_encoder_handle(xop, XO_OP_OPEN_INSTANCE, name, NULL, flags);
 	break;
     }
 
@@ -7263,7 +7263,7 @@ xo_do_close_instance (xo_handle_t *xop, const char *name)
 
     case XO_STYLE_ENCODER:
 	xo_depth_change(xop, name, -1, 0, XSS_CLOSE_INSTANCE, 0);
-	rc = xo_encoder_handle(xop, XO_OP_CLOSE_INSTANCE, name, NULL);
+	rc = xo_encoder_handle(xop, XO_OP_CLOSE_INSTANCE, name, NULL, 0);
 	break;
     }
 
@@ -7739,7 +7739,7 @@ xo_flush_h (xo_handle_t *xop)
 
     switch (xo_style(xop)) {
     case XO_STYLE_ENCODER:
-	xo_encoder_handle(xop, XO_OP_FLUSH, NULL, NULL);
+	xo_encoder_handle(xop, XO_OP_FLUSH, NULL, NULL, 0);
     }
 
     rc = xo_write(xop);
@@ -7777,7 +7777,7 @@ xo_finish_h (xo_handle_t *xop)
 	break;
 
     case XO_STYLE_ENCODER:
-	xo_encoder_handle(xop, XO_OP_FINISH, NULL, NULL);
+	xo_encoder_handle(xop, XO_OP_FINISH, NULL, NULL, 0);
 	break;
     }
 
@@ -8012,7 +8012,7 @@ xo_set_version_h (xo_handle_t *xop, const char *version)
 	break;
 
     case XO_STYLE_ENCODER:
-	xo_encoder_handle(xop, XO_OP_VERSION, NULL, version);
+	xo_encoder_handle(xop, XO_OP_VERSION, NULL, version, 0);
 	break;
     }
 }
