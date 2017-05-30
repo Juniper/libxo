@@ -1043,7 +1043,8 @@ xo_printf (xo_handle_t *xop, const char *fmt, ...)
  * These next few function are make The Essential UTF-8 Ginsu Knife.
  * Identify an input and output character, and convert it.
  */
-static uint8_t xo_utf8_bits[7] = { 0, 0x7f, 0x1f, 0x0f, 0x07, 0x03, 0x01 };
+static uint8_t xo_utf8_data_bits[5] = { 0, 0x7f, 0x1f, 0x0f, 0x07 };
+static uint8_t xo_utf8_len_bits[5]  = { 0, 0x00, 0xc0, 0xe0, 0xf0 };
 
 static int
 xo_is_utf8 (char ch)
@@ -1065,10 +1066,6 @@ xo_utf8_to_wc_len (const char *buf)
 	len = 3;
     else if ((b & 0xf8) == 0xf0)
 	len = 4;
-    else if ((b & 0xfc) == 0xf8)
-	len = 5;
-    else if ((b & 0xfe) == 0xfc)
-	len = 6;
     else
 	len = -1;
 
@@ -1078,12 +1075,11 @@ xo_utf8_to_wc_len (const char *buf)
 static ssize_t
 xo_buf_utf8_len (xo_handle_t *xop, const char *buf, ssize_t bufsiz)
 {
-
     unsigned b = (unsigned char) *buf;
     ssize_t len, i;
 
     len = xo_utf8_to_wc_len(buf);
-    if (len == -1) {
+    if (len < 0) {
         xo_failure(xop, "invalid UTF-8 data: %02hhx", b);
 	return -1;
     }
@@ -1121,7 +1117,7 @@ xo_utf8_char (const char *buf, ssize_t len)
     wchar_t wc;
     const unsigned char *cp = (const unsigned char *) buf;
 
-    wc = *cp & xo_utf8_bits[len];
+    wc = *cp & xo_utf8_data_bits[len];
     for (i = 1; i < len; i++) {
 	wc <<= 6;
 	wc |= cp[i] & 0x3f;
@@ -1140,18 +1136,16 @@ xo_utf8_emit_len (wchar_t wc)
 {
     ssize_t len;
 
-    if ((wc & ((1<<7) - 1)) == wc) /* Simple case */
+    if ((wc & ((1 << 7) - 1)) == wc) /* Simple case */
 	len = 1;
-    else if ((wc & ((1<<11) - 1)) == wc)
+    else if ((wc & ((1 << 11) - 1)) == wc)
 	len = 2;
-    else if ((wc & ((1<<16) - 1)) == wc)
+    else if ((wc & ((1 << 16) - 1)) == wc)
 	len = 3;
-    else if ((wc & ((1<<21) - 1)) == wc)
+    else if ((wc & ((1 << 21) - 1)) == wc)
 	len = 4;
-    else if ((wc & ((1<<26) - 1)) == wc)
-	len = 5;
     else
-	len = 6;
+	len = -1;		/* Invalid */
 
     return len;
 }
@@ -1171,8 +1165,8 @@ xo_utf8_emit_char (char *buf, ssize_t len, wchar_t wc)
 	wc >>= 6;
     }
 
-    buf[0] &= xo_utf8_bits[len];
-    buf[0] |= ~xo_utf8_bits[len] << 1;
+    buf[0] &= xo_utf8_data_bits[len]; /* Clear out the length bits */
+    buf[0] |= xo_utf8_len_bits[len]; /* Drop in new length bits  */
 }
 
 static ssize_t
