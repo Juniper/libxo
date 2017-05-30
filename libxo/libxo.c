@@ -1150,6 +1150,9 @@ xo_utf8_emit_len (wchar_t wc)
     return len;
 }
 
+/*
+ * Emit a single wide character into the given buffer
+ */
 static void
 xo_utf8_emit_char (char *buf, ssize_t len, wchar_t wc)
 {
@@ -1160,11 +1163,13 @@ xo_utf8_emit_char (char *buf, ssize_t len, wchar_t wc)
 	return;
     }
 
+    /* Start with the low bits and insert them, six bits as a time */
     for (i = len - 1; i >= 0; i--) {
 	buf[i] = 0x80 | (wc & 0x3f);
 	wc >>= 6;
     }
 
+    /* Finish off the first byte with the length bits */
     buf[0] &= xo_utf8_data_bits[len]; /* Clear out the length bits */
     buf[0] |= xo_utf8_len_bits[len]; /* Drop in new length bits  */
 }
