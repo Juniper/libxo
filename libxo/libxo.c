@@ -1126,7 +1126,7 @@ xo_utf8_char (const char *buf, ssize_t len)
 
     wc = *cp & xo_utf8_data_bits[len];
     for (i = 1; i < len; i++) {
-	wc <<= 6;
+	wc <<= 6;		/* Low six bits have data */
 	wc |= cp[i] & 0x3f;
 	if ((cp[i] & 0xc0) != 0x80)
 	    return (wchar_t) -1;
@@ -1173,7 +1173,7 @@ xo_utf8_emit_char (char *buf, ssize_t len, wchar_t wc)
     /* Start with the low bits and insert them, six bits as a time */
     for (i = len - 1; i >= 0; i--) {
 	buf[i] = 0x80 | (wc & 0x3f);
-	wc >>= 6;
+	wc >>= 6;		/* Drop the low six bits */
     }
 
     /* Finish off the first byte with the length bits */
