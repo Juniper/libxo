@@ -1046,25 +1046,32 @@ xo_printf (xo_handle_t *xop, const char *fmt, ...)
 static uint8_t xo_utf8_data_bits[5] = { 0, 0x7f, 0x1f, 0x0f, 0x07 };
 static uint8_t xo_utf8_len_bits[5]  = { 0, 0x00, 0xc0, 0xe0, 0xf0 };
 
+/*
+ * If the byte has a high-bit set, it's UTF-8, not ASCII.
+ */
 static int
 xo_is_utf8 (char ch)
 {
     return (ch & 0x80);
 }
 
+/*
+ * Look at the high bits of the first byte to determine the length
+ * of the UTF-8 character.
+ */
 static inline ssize_t
 xo_utf8_to_wc_len (const char *buf)
 {
-    unsigned b = (unsigned char) *buf;
+    uint8_t bval = (uint8_t) *buf;
     ssize_t len;
 
-    if ((b & 0x80) == 0x0)
+    if ((bval & 0x80) == 0x0)
 	len = 1;
-    else if ((b & 0xe0) == 0xc0)
+    else if ((bval & 0xe0) == 0xc0)
 	len = 2;
-    else if ((b & 0xf0) == 0xe0)
+    else if ((bval & 0xf0) == 0xe0)
 	len = 3;
-    else if ((b & 0xf8) == 0xf0)
+    else if ((bval & 0xf8) == 0xf0)
 	len = 4;
     else
 	len = -1;
@@ -1188,7 +1195,7 @@ xo_buf_append_locale_from_utf8 (xo_handle_t *xop, xo_buffer_t *xbp,
      */
     wc = xo_utf8_char(ibuf, ilen);
     if (wc == (wchar_t) -1) {
-	xo_failure(xop, "invalid utf-8 byte sequence");
+	xo_failure(xop, "invalid UTF-8 byte sequence");
 	return 0;
     }
 
