@@ -1181,6 +1181,11 @@ xo_utf8_emit_char (char *buf, ssize_t len, wchar_t wc)
     buf[0] |= xo_utf8_len_bits[len]; /* Drop in new length bits  */
 }
 
+/*
+ * Append a single UTF-8 character to a buffer, converting it to locale
+ * encoding.  Returns the number of columns consumed by that character,
+ * as best we can determine it.
+ */
 static ssize_t
 xo_buf_append_locale_from_utf8 (xo_handle_t *xop, xo_buffer_t *xbp,
 				const char *ibuf, ssize_t ilen)
@@ -1224,6 +1229,9 @@ xo_buf_append_locale_from_utf8 (xo_handle_t *xop, xo_buffer_t *xbp,
     return xo_wcwidth(wc);
 }
 
+/*
+ * Append a UTF-8 string to a buffer, converting it into locale encoding
+ */
 static void
 xo_buf_append_locale (xo_handle_t *xop, xo_buffer_t *xbp,
 		      const char *cp, ssize_t len)
@@ -1854,8 +1862,10 @@ xo_failure (xo_handle_t *xop, const char *fmt, ...)
  * Note: normal use of libxo does not require a distinct handle, since
  * the default handle (used when NULL is passed) generates text on stdout.
  *
- * @style Style of output desired (XO_STYLE_* value)
- * @flags Set of XOF_* flags in use with this handle
+ * @param style Style of output desired (XO_STYLE_* value)
+ * @param flags Set of XOF_* flags in use with this handle
+ * @return Newly allocated handle
+ * @see xo_destroy
  */
 xo_handle_t *
 xo_create (xo_style_t style, xo_xof_flags_t flags)
@@ -1877,9 +1887,12 @@ xo_create (xo_style_t style, xo_xof_flags_t flags)
 /**
  * Create a handle that will write to the given file.  Use
  * the XOF_CLOSE_FP flag to have the file closed on xo_destroy().
- * @fp FILE pointer to use
- * @style Style of output desired (XO_STYLE_* value)
- * @flags Set of XOF_* flags to use with this handle
+ *
+ * @param fp FILE pointer to use
+ * @param style Style of output desired (XO_STYLE_* value)
+ * @param flags Set of XOF_* flags to use with this handle
+ * @return Newly allocated handle
+ * @see xo_destroy
  */
 xo_handle_t *
 xo_create_to_file (FILE *fp, xo_style_t style, xo_xof_flags_t flags)
@@ -1898,8 +1911,10 @@ xo_create_to_file (FILE *fp, xo_style_t style, xo_xof_flags_t flags)
 
 /**
  * Set the default handler to output to a file.
- * @xop libxo handle
- * @fp FILE pointer to use
+ *
+ * @param xop libxo handle
+ * @param fp FILE pointer to use
+ * @return 0 on success, non-zero on failure
  */
 int
 xo_set_file_h (xo_handle_t *xop, FILE *fp)
@@ -1921,7 +1936,9 @@ xo_set_file_h (xo_handle_t *xop, FILE *fp)
 
 /**
  * Set the default handler to output to a file.
- * @fp FILE pointer to use
+ *
+ * @param fp FILE pointer to use
+ * @return 0 on success, non-zero on failure
  */
 int
 xo_set_file (FILE *fp)
@@ -1931,7 +1948,8 @@ xo_set_file (FILE *fp)
 
 /**
  * Release any resources held by the handle.
- * @xop XO handle to alter (or NULL for default handle)
+ *
+ * @param xop XO handle to alter (or NULL for default handle)
  */
 void
 xo_destroy (xo_handle_t *xop_arg)
@@ -1964,8 +1982,8 @@ xo_destroy (xo_handle_t *xop_arg)
  * Record a new output style to use for the given handle (or default if
  * handle is NULL).  This output style will be used for any future output.
  *
- * @xop XO handle to alter (or NULL for default handle)
- * @style new output style (XO_STYLE_*)
+ * @param xop XO handle to alter (or NULL for default handle)
+ * @param style new output style (XO_STYLE_*)
  */
 void
 xo_set_style (xo_handle_t *xop, xo_style_t style)
@@ -1974,6 +1992,12 @@ xo_set_style (xo_handle_t *xop, xo_style_t style)
     xop->xo_style = style;
 }
 
+/**
+ * Return the current style of a handle
+ *
+ * @param xop XO handle to access
+ * @return The handle's current style
+ */
 xo_style_t
 xo_get_style (xo_handle_t *xop)
 {
@@ -1981,6 +2005,12 @@ xo_get_style (xo_handle_t *xop)
     return xo_style(xop);
 }
 
+/**
+ * Return the XO_STYLE_* value matching a given name
+ *
+ * @param name String name of a style
+ * @return XO_STYLE_* value
+ */
 static int
 xo_name_to_style (const char *name)
 {
@@ -2016,8 +2046,8 @@ xo_style_is_encoding (xo_handle_t *xop)
 
 /* Simple name-value mapping */
 typedef struct xo_mapping_s {
-    xo_xff_flags_t xm_value;
-    const char *xm_name;
+    xo_xff_flags_t xm_value;	/* Flag value */
+    const char *xm_name;	/* String name */
 } xo_mapping_t;
 
 static xo_xff_flags_t
@@ -2114,6 +2144,13 @@ xo_name_to_flag (const char *name)
     return (unsigned) xo_name_lookup(xo_xof_names, name, -1);
 }
 
+/**
+ * Set the style of an libxo handle based on a string name
+ *
+ * @param xop XO handle
+ * @param name String value of name
+ * @return 0 on success, non-zero on failure
+ */
 int
 xo_set_style_name (xo_handle_t *xop, const char *name)
 {
@@ -2210,10 +2247,14 @@ xo_set_options_simple (xo_handle_t *xop, const char *input)
     return 0;
 }
 
-/*
+/**
  * Set the options for a handle using a string of options
  * passed in.  The input is a comma-separated set of names
  * and optional values: "xml,pretty,indent=4"
+ *
+ * @param xop XO handle
+ * @param input Comma-separated set of option values
+ * @return 0 on success, non-zero on failure
  */
 int
 xo_set_options (xo_handle_t *xop, const char *input)
@@ -2385,8 +2426,8 @@ xo_set_options (xo_handle_t *xop, const char *input)
  * Set one or more flags for a given handle (or default if handle is NULL).
  * These flags will affect future output.
  *
- * @xop XO handle to alter (or NULL for default handle)
- * @flags Flags to be set (XOF_*)
+ * @param xop XO handle to alter (or NULL for default handle)
+ * @param flags Flags to be set (XOF_*)
  */
 void
 xo_set_flags (xo_handle_t *xop, xo_xof_flags_t flags)
@@ -2396,6 +2437,11 @@ xo_set_flags (xo_handle_t *xop, xo_xof_flags_t flags)
     XOF_SET(xop, flags);
 }
 
+/**
+ * Accessor to return the current set of flags for a handle
+ * @param xop XO handle
+ * @return Current set of flags
+ */
 xo_xof_flags_t
 xo_get_flags (xo_handle_t *xop)
 {
@@ -2404,8 +2450,8 @@ xo_get_flags (xo_handle_t *xop)
     return xop->xo_flags;
 }
 
-/*
- * strndup with a twist: len < 0 means strlen
+/**
+ * strndup with a twist: len < 0 means len = strlen(str)
  */
 static char *
 xo_strndup (const char *str, ssize_t len)
@@ -2427,8 +2473,8 @@ xo_strndup (const char *str, ssize_t len)
  * generated data to be placed within an XML hierarchy but still have
  * accurate XPath expressions.
  *
- * @xop XO handle to alter (or NULL for default handle)
- * @path The XPath expression
+ * @param xop XO handle to alter (or NULL for default handle)
+ * @param path The XPath expression
  */
 void
 xo_set_leading_xpath (xo_handle_t *xop, const char *path)
@@ -2449,9 +2495,9 @@ xo_set_leading_xpath (xo_handle_t *xop, const char *path)
 /**
  * Record the info data for a set of tags
  *
- * @xop XO handle to alter (or NULL for default handle)
- * @info Info data (xo_info_t) to be recorded (or NULL) (MUST BE SORTED)
- * @count Number of entries in info (or -1 to count them ourselves)
+ * @param xop XO handle to alter (or NULL for default handle)
+ * @param info Info data (xo_info_t) to be recorded (or NULL) (MUST BE SORTED)
+ * @pararm count Number of entries in info (or -1 to count them ourselves)
  */
 void
 xo_set_info (xo_handle_t *xop, xo_info_t *infop, int count)
@@ -2488,8 +2534,8 @@ xo_set_formatter (xo_handle_t *xop, xo_formatter_t func,
  * Clear one or more flags for a given handle (or default if handle is NULL).
  * These flags will affect future output.
  *
- * @xop XO handle to alter (or NULL for default handle)
- * @flags Flags to be cleared (XOF_*)
+ * @param xop XO handle to alter (or NULL for default handle)
+ * @param flags Flags to be cleared (XOF_*)
  */
 void
 xo_clear_flags (xo_handle_t *xop, xo_xof_flags_t flags)
@@ -3181,6 +3227,11 @@ xo_data_append_content (xo_handle_t *xop, const char *str, ssize_t len,
 	xop->xo_anchor_columns += cols;
 }
 
+/**
+ * Bump one of the 'width' values in a format strings (e.g. "%40.50.60s").
+ * @param xfp Formatting instructions
+ * @param digit Single digit (0-9) of input
+ */
 static void
 xo_bump_width (xo_format_t *xfp, int digit)
 {
@@ -3427,7 +3478,8 @@ xo_do_format_field (xo_handle_t *xop, xo_buffer_t *xbp,
 		    rc = xo_trim_ws(xbp, rc);
 
 	    } else {
-		ssize_t columns = rc = xo_vsnprintf(xop, xbp, newfmt, xop->xo_vap);
+		ssize_t columns = rc = xo_vsnprintf(xop, xbp, newfmt,
+						    xop->xo_vap);
 
 		/*
 		 * For XML and HTML, we need "&<>" processing; for JSON,
