@@ -3644,6 +3644,10 @@ xo_do_format_field (xo_handle_t *xop, xo_buffer_t *xbp,
     return 0;
 }
 
+/*
+ * Remove any numeric precision/width format from the format string by
+ * inserting the "%" after the [0-9]+, returning the substring.
+ */
 static char *
 xo_fix_encoding (xo_handle_t *xop UNUSED, char *encoding)
 {
@@ -3657,8 +3661,7 @@ xo_fix_encoding (xo_handle_t *xop UNUSED, char *encoding)
 	    break;
     }
 
-    cp -= 1;
-    *cp = '%';
+    *--cp = '%';		/* Back off and insert the '%' */
 
     return cp;
 }
@@ -4166,7 +4169,7 @@ xo_arg (xo_handle_t *xop)
 
 static void
 xo_format_value (xo_handle_t *xop, const char *name, ssize_t nlen,
-                const char *format, ssize_t flen,
+                const char *fmt, ssize_t flen,
                 const char *encoding, ssize_t elen, xo_xff_flags_t flags)
 {
     int pretty = XOF_ISSET(xop, XOF_PRETTY);
@@ -4253,7 +4256,7 @@ xo_format_value (xo_handle_t *xop, const char *name, ssize_t nlen,
 	save.xhs_columns = xop->xo_columns;
 	save.xhs_anchor_columns = xop->xo_anchor_columns;
 
-	xo_do_format_field(xop, NULL, format, flen, flags);
+	xo_do_format_field(xop, NULL, fmt, flen, flags);
 
 	if (flags & XFF_HUMANIZE)
 	    xo_format_humanize(xop, xbp, &save, flags);
@@ -4264,7 +4267,7 @@ xo_format_value (xo_handle_t *xop, const char *name, ssize_t nlen,
 	    flags |= XFF_NO_OUTPUT;
 
 	xo_buf_append_div(xop, "data", flags, name, nlen,
-			  format, flen, encoding, elen);
+			  fmt, flen, encoding, elen);
 	break;
 
     case XO_STYLE_XML:
@@ -4274,24 +4277,24 @@ xo_format_value (xo_handle_t *xop, const char *name, ssize_t nlen,
 	 */
 	if (flags & XFF_DISPLAY_ONLY) {
 	    flags |= XFF_NO_OUTPUT;
-	    xo_do_format_field(xop, NULL, format, flen, flags);
+	    xo_do_format_field(xop, NULL, fmt, flen, flags);
 	    break;
 	}
 
 	if (encoding) {
-   	    format = encoding;
+   	    fmt = encoding;
 	    flen = elen;
 	} else {
 	    char *enc  = alloca(flen + 1);
-	    memcpy(enc, format, flen);
+	    memcpy(enc, fmt, flen);
 	    enc[flen] = '\0';
-	    format = xo_fix_encoding(xop, enc);
-	    flen = strlen(format);
+	    fmt = xo_fix_encoding(xop, enc);
+	    flen = strlen(fmt);
 	}
 
 	if (nlen == 0) {
 	    static char missing[] = "missing-field-name";
-	    xo_failure(xop, "missing field name: %s", format);
+	    xo_failure(xop, "missing field name: %s", fmt);
 	    name = missing;
 	    nlen = sizeof(missing) - 1;
 	}
@@ -4327,7 +4330,7 @@ xo_format_value (xo_handle_t *xop, const char *name, ssize_t nlen,
 	}
 
 	xo_data_append(xop, ">", 1);
-	xo_do_format_field(xop, NULL, format, flen, flags);
+	xo_do_format_field(xop, NULL, fmt, flen, flags);
 	xo_data_append(xop, "</", 2);
 	xo_data_escape(xop, name, nlen);
 	xo_data_append(xop, ">", 1);
@@ -4338,19 +4341,19 @@ xo_format_value (xo_handle_t *xop, const char *name, ssize_t nlen,
     case XO_STYLE_JSON:
 	if (flags & XFF_DISPLAY_ONLY) {
 	    flags |= XFF_NO_OUTPUT;
-	    xo_do_format_field(xop, NULL, format, flen, flags);
+	    xo_do_format_field(xop, NULL, fmt, flen, flags);
 	    break;
 	}
 
 	if (encoding) {
-	    format = encoding;
+	    fmt = encoding;
 	    flen = elen;
 	} else {
 	    char *enc  = alloca(flen + 1);
-	    memcpy(enc, format, flen);
+	    memcpy(enc, fmt, flen);
 	    enc[flen] = '\0';
-	    format = xo_fix_encoding(xop, enc);
-	    flen = strlen(format);
+	    fmt = xo_fix_encoding(xop, enc);
+	    flen = strlen(fmt);
 	}
 
 	int first = (xop->xo_stack[xop->xo_depth].xs_flags & XSF_NOT_FIRST)
@@ -4364,16 +4367,16 @@ xo_format_value (xo_handle_t *xop, const char *name, ssize_t nlen,
 	    quote = 0;
 	else if (flen == 0) {
 	    quote = 0;
-	    format = "true";	/* JSON encodes empty tags as a boolean true */
+	    fmt = "true";	/* JSON encodes empty tags as a boolean true */
 	    flen = 4;
-	} else if (strchr("diouDOUeEfFgG", format[flen - 1]) == NULL)
+	} else if (strchr("diouDOUeEfFgG", fmt[flen - 1]) == NULL)
 	    quote = 1;
 	else
 	    quote = 0;
 
 	if (nlen == 0) {
 	    static char missing[] = "missing-field-name";
-	    xo_failure(xop, "missing field name: %s", format);
+	    xo_failure(xop, "missing field name: %s", fmt);
 	    name = missing;
 	    nlen = sizeof(missing) - 1;
 	}
@@ -4407,7 +4410,7 @@ xo_format_value (xo_handle_t *xop, const char *name, ssize_t nlen,
 	if (quote)
 	    xo_data_append(xop, "\"", 1);
 
-	xo_do_format_field(xop, NULL, format, flen, flags);
+	xo_do_format_field(xop, NULL, fmt, flen, flags);
 
 	if (quote)
 	    xo_data_append(xop, "\"", 1);
@@ -4416,38 +4419,38 @@ xo_format_value (xo_handle_t *xop, const char *name, ssize_t nlen,
     case XO_STYLE_SDPARAMS:
 	if (flags & XFF_DISPLAY_ONLY) {
 	    flags |= XFF_NO_OUTPUT;
-	    xo_do_format_field(xop, NULL, format, flen, flags);
+	    xo_do_format_field(xop, NULL, fmt, flen, flags);
 	    break;
 	}
 
 	if (encoding) {
-	    format = encoding;
+	    fmt = encoding;
 	    flen = elen;
 	} else {
 	    char *enc  = alloca(flen + 1);
-	    memcpy(enc, format, flen);
+	    memcpy(enc, fmt, flen);
 	    enc[flen] = '\0';
-	    format = xo_fix_encoding(xop, enc);
-	    flen = strlen(format);
+	    fmt = xo_fix_encoding(xop, enc);
+	    flen = strlen(fmt);
 	}
 
 	if (nlen == 0) {
 	    static char missing[] = "missing-field-name";
-	    xo_failure(xop, "missing field name: %s", format);
+	    xo_failure(xop, "missing field name: %s", fmt);
 	    name = missing;
 	    nlen = sizeof(missing) - 1;
 	}
 
 	xo_data_escape(xop, name, nlen);
 	xo_data_append(xop, "=\"", 2);
-	xo_do_format_field(xop, NULL, format, flen, flags);
+	xo_do_format_field(xop, NULL, fmt, flen, flags);
 	xo_data_append(xop, "\" ", 2);
 	break;
 
     case XO_STYLE_ENCODER:
 	if (flags & XFF_DISPLAY_ONLY) {
 	    flags |= XFF_NO_OUTPUT;
-	    xo_do_format_field(xop, NULL, format, flen, flags);
+	    xo_do_format_field(xop, NULL, fmt, flen, flags);
 	    break;
 	}
 
@@ -4457,27 +4460,27 @@ xo_format_value (xo_handle_t *xop, const char *name, ssize_t nlen,
 	    quote = 0;
 	else if (flen == 0) {
 	    quote = 0;
-	    format = "true";	/* JSON encodes empty tags as a boolean true */
+	    fmt = "true";	/* JSON encodes empty tags as a boolean true */
 	    flen = 4;
-	} else if (strchr("diouxXDOUeEfFgGaAcCp", format[flen - 1]) == NULL)
+	} else if (strchr("diouxXDOUeEfFgGaAcCp", fmt[flen - 1]) == NULL)
 	    quote = 1;
 	else
 	    quote = 0;
 
 	if (encoding) {
-	    format = encoding;
+	    fmt = encoding;
 	    flen = elen;
 	} else {
 	    char *enc  = alloca(flen + 1);
-	    memcpy(enc, format, flen);
+	    memcpy(enc, fmt, flen);
 	    enc[flen] = '\0';
-	    format = xo_fix_encoding(xop, enc);
-	    flen = strlen(format);
+	    fmt = xo_fix_encoding(xop, enc);
+	    flen = strlen(fmt);
 	}
 
 	if (nlen == 0) {
 	    static char missing[] = "missing-field-name";
-	    xo_failure(xop, "missing field name: %s", format);
+	    xo_failure(xop, "missing field name: %s", fmt);
 	    name = missing;
 	    nlen = sizeof(missing) - 1;
 	}
@@ -4487,7 +4490,7 @@ xo_format_value (xo_handle_t *xop, const char *name, ssize_t nlen,
 	xo_data_append(xop, "", 1);
 
 	ssize_t value_offset = xo_buf_offset(&xop->xo_data);
-	xo_do_format_field(xop, NULL, format, flen, flags);
+	xo_do_format_field(xop, NULL, fmt, flen, flags);
 	xo_data_append(xop, "", 1);
 
 	xo_encoder_handle(xop, quote ? XO_OP_STRING : XO_OP_CONTENT,
