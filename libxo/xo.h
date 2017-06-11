@@ -40,7 +40,10 @@
  * coward's path, we'll turn it on inside a #if that allows
  * others to turn it off where needed.  Not ideal, but functional.
  */
-#if !defined(NO_PRINTFLIKE) && !defined(__linux__)
+#if !defined(NO_PRINTFLIKE)
+#if defined(__linux) && !defined(__printflike)
+#define __printflike(_x, _y) __attribute__((__format__ (__printf__, _x, _y)))
+#endif
 #define PRINTFLIKE(_x, _y) __printflike(_x, _y)
 #else
 #define PRINTFLIKE(_x, _y)
@@ -98,6 +101,8 @@ typedef unsigned long long xo_xof_flags_t;
 #define XOF_RETAIN_ALL	XOF_BIT(30) /** Force use of XOEF_RETAIN */
 #define XOF_RETAIN_NONE	XOF_BIT(31) /** Prevent use of XOEF_RETAIN */
 
+#define XOF_COLOR_MAP	XOF_BIT(32) /** Color map has been initialized */
+
 typedef unsigned xo_emit_flags_t; /* Flags to xo_emit() and friends */
 #define XOEF_RETAIN	(1<<0)	  /* Retain parsed formatting information */
 
@@ -140,7 +145,7 @@ typedef void (*xo_free_func_t)(void *);
  */
 typedef xo_ssize_t (*xo_formatter_t)(xo_handle_t *, char *, xo_ssize_t,
 				const char *, va_list);
-typedef void (*xo_checkpointer_t)(xo_handle_t *, va_list, xo_ssize_t);
+typedef void (*xo_checkpointer_t)(xo_handle_t *, va_list, int);
 
 xo_handle_t *
 xo_create (xo_style_t style, xo_xof_flags_t flags);
