@@ -2705,6 +2705,8 @@ xo_format_string_direct (xo_handle_t *xop, xo_buffer_t *xbp,
 	    if ((flags & XFF_UNESCAPE) && (*cp == '\\' || *cp == '%')) {
 		cp += 1;
 		len -= 1;
+		if (len == 0 || *cp == '\0')
+		    break;
 	    }
 	}
 
