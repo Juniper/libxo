@@ -22,7 +22,7 @@ if [ ! -f configure ]; then
 fi
 
 echo "Creating build directory ..."
-mkdir build
+mkdir -p build
 
 echo "Setup is complete.  To build libslax:"
 
