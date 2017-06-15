@@ -45,7 +45,7 @@ XOHTML_FILES = \
     ${top_srcdir}/xohtml/external/jquery.qtip.css \
     ${top_srcdir}/xohtml/external/jquery.qtip.js
 
-upload: dist upload-docs
+upload: dist upload-docs upload-xohtml-files
 	@echo "Remember to run:"
 	@echo "        gt tag ${PACKAGE_VERSION}"
 
