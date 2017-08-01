@@ -24,4 +24,7 @@ for i in one:1:red two:2:blue three:3:green four:4:yellow ; do
     NF=--not-first
 done
 
+${XO} "{[:%d}{:address/%p}..{:foo/%u}{]:}\n" 18 0xdeadbeef 1
+${XO} "{[:/%d}{:address/%p}..{:foo/%u}{]:}\n" 18 0xdeadbeef 1
+
 ${XO} --close top
