@@ -5151,9 +5151,6 @@ static void
 xo_anchor_start (xo_handle_t *xop, xo_field_info_t *xfip,
 		 const char *value, ssize_t vlen)
 {
-    if (xo_style(xop) != XO_STYLE_TEXT && xo_style(xop) != XO_STYLE_HTML)
-	return;
-
     if (XOIF_ISSET(xop, XOIF_ANCHOR))
 	xo_failure(xop, "the anchor already recording is discarded");
 
@@ -5173,9 +5170,6 @@ static void
 xo_anchor_stop (xo_handle_t *xop, xo_field_info_t *xfip,
 		 const char *value, ssize_t vlen)
 {
-    if (xo_style(xop) != XO_STYLE_TEXT && xo_style(xop) != XO_STYLE_HTML)
-	return;
-
     if (!XOIF_ISSET(xop, XOIF_ANCHOR)) {
 	xo_failure(xop, "no start anchor");
 	return;
