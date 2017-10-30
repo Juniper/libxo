@@ -3534,6 +3534,7 @@ allows HTML output to use CSS to make this relationship more obvious::
 The "*color*" roles controls foreground and background colors, as well
 as effects like bold and underline (see `The Color Role ({C:})`_)::
 
+  NEW::
     xo_emit("{C:bold}required{C:}\n");
 
 Finally, the start- and stop-anchor roles allow justification and
@@ -3618,10 +3619,14 @@ Call xo_finish
 One important item: call `xo_finish` at the end of your program so
 ensure that all buffered data is written out.  You can call it
 explicitly call it, or use :manpage:`atexit(3)` to have
-`xo_finish_atexit` called implicitly on exit.
+`xo_finish_atexit` called implicitly on exit::
+
+  OLD::
+    exit(0);
 
   NEW::
     xo_finish();
+    exit(0);
 
 Howto: Use "xo" in Shell Scripts
 --------------------------------
