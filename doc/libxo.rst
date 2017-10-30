@@ -8,36 +8,11 @@
    # Phil Shafer, July 2014
    #
 
+.. default-role:: code
+
 ===================================================================
 libxo - A Library for Generating Text, XML, JSON, and HTML Output
 ===================================================================
-
-You want to prepare for the future, but you need to live in the
-present.  You'd love a flying car, but need to get to work today.  You
-want to support features like XML, JSON, and HTML rendering to allow
-integration with NETCONF, REST, and web browsers, but you need to make
-text output for command line users.
-
-And you don't want multiple code paths that can't help but get out of
-sync::
-
-    /* None of this "if (xml) {... } else {...}"  logic */
-    if (xml) {
-        /* some code to make xml*/
-    } else {
-        /* other code to make text */
-        /* oops forgot to add something on both clauses! */
-    }
-
-    /* And ifdefs are right out. */
-    #ifdef MAKE_XML
-        /* icky */
-    #else
-        /* pooh */
-    #endif
-
-But you'd really, really like all the fancy features that modern
-encoding formats can provide.  libxo can help.
 
 The libxo library allows an application to generate text, XML, JSON,
 and HTML output using a common set of function calls.  The application
@@ -97,17 +72,46 @@ details.  Output can then be generated in various style, using the
 Same code path, same format strings, same information, but it's
 rendered in distinct styles based on run-time flags.
 
+.. admonition:: Tale of Two Code Paths
+
+  You want to prepare for the future, but you need to live in the
+  present.  You'd love a flying car, but need to get work done today.
+  You want to support features like XML, JSON, and HTML rendering to
+  allow integration with NETCONF, REST, and web browsers, but you need
+  to make text output for command line users.
+
+  And you don't want multiple code paths that can't help but get out
+  of sync::
+
+      /* None of this "if (xml) {... } else {...}"  logic */
+      if (xml) {
+          /* some code to make xml */
+      } else {
+          /* other code to make text */
+          /* oops! forgot to add something on both clauses! */
+      }
+
+      /* And ifdefs are right out. */
+      #ifdef MAKE_XML
+          /* icky */
+      #else
+          /* pooh */
+      #endif
+
+  But you'd really, really like all the fancy features that modern
+  encoding formats can provide.  libxo can help.
+
 Getting libxo
 ===============
 
 libxo now ships as part of the FreeBSD Operating System (as of Release
 11).
 
-libxo source code lives on github::
+libxo source code lives on github:
 
   https://github.com/Juniper/libxo
 
-The latest release of libxo is available at::
+The latest release of libxo is available at:
 
   https://github.com/Juniper/libxo/releases
 
@@ -147,8 +151,8 @@ A. Use a "distfile" for a specific release.  We use github to maintain
    .. admonition:: Solaris Users
 
      Note: for Solaris users, your "`tar`" command lacks the "-z" flag,
-     so you'll need to substitute "``gzip -dc $file | tar xf -``" instead
-     of "``tar -zxf $file``".
+     so you'll need to substitute "`gzip -dc $file | tar xf -`" instead
+     of "`tar -zxf $file`".
 
 B. Use the current build from github.  This gives you the most recent
    source code, which might be less stable than a specific release.  To
@@ -211,14 +215,14 @@ Running the "configure" Script
 Configure (and autoconf in general) provides a means of building
 software in diverse environments.  Our configure script supports
 a set of options that can be used to adjust to your operating
-environment. Use "``configure --help``" to view these options.
+environment. Use "`configure --help`" to view these options.
 
 We use the "*build*" directory to keep object files and generated files
 away from the source tree.
 
 To run the configure script, change into the "*build*" directory, and
 run the "*configure*" script.  Add any required options to the
-"``../configure``" command line::
+"`../configure`" command line::
 
     cd build
     ../configure
@@ -244,7 +248,7 @@ Running the "make" Command
 ++++++++++++++++++++++++++
 
 Once the "*configure*" script is run, build the images using the
-"``make``" command::
+"`make`" command::
 
     make
 
@@ -262,7 +266,7 @@ Installing libxo
 ~~~~~~~~~~~~~~~~
 
 Once the software is built, you'll need to install libxo using the
-"``make install``" command.  If you are the root user, or the owner of
+"`make install`" command.  If you are the root user, or the owner of
 the installation directory, simply issue the command::
 
     make install
@@ -271,7 +275,7 @@ If you are not the "*root*" user and are using the "*sudo*" package, use::
 
     sudo make install
 
-Verify the installation by viewing the output of "``xo --version``"::
+Verify the installation by viewing the output of "`xo --version`"::
 
     % xo --version
     libxo version 0.3.5-git-develop
@@ -445,6 +449,8 @@ data, including data type, description, and an XPath location::
 Format Strings
 --------------
 
+.. index:: Format Strings
+
 libxo uses format strings to control the rendering of data into the
 various output styles.  Each format string contains a set of zero or
 more field descriptions, which describe independent data fields.  Each
@@ -489,6 +495,8 @@ follow any single-character values::
 Field Roles
 ~~~~~~~~~~~
 
+.. index:: Field Roles
+
 Field roles are optional, and indicate the role and formatting of the
 content.  The roles are listed below; only one role is permitted:
 
@@ -526,6 +534,8 @@ a comma::
 
 The Color Role ({C:})
 +++++++++++++++++++++
+
+.. index:: Field Roles; Color
 
 Colors and effects control how text values are displayed; they are
 used for display styles (TEXT and HTML)::
@@ -604,6 +614,8 @@ sole means of encoding information.
 The Decoration Role ({D:})
 ++++++++++++++++++++++++++
 
+.. index:: Field Roles; Decoration
+
 Decorations are typically punctuation marks such as colons,
 semi-colons, and commas used to decorate the text and make it simpler
 for human readers.  By marking these distinctly, HTML usage scenarios
@@ -613,6 +625,8 @@ can use CSS to direct their display parameters::
 
 The Gettext Role ({G:})
 +++++++++++++++++++++++
+
+.. index:: Field Roles; Gettext
 
 libxo supports internationalization (i18n) through its use of
 gettext(3).  Use the "{G:}" role to request that the remaining part of
@@ -627,8 +641,8 @@ change such as changing "/%06d" to "/%08d" should not force hand
 inspection of all .po files.
 
 The simplified version can be generated for a single message using the
-"``xopo -s $text``" command, or an entire .pot can be translated using
-the "``xopo -f $input -o $output``" command.
+"`xopo -s $text`" command, or an entire .pot can be translated using
+the "`xopo -f $input -o $output`" command.
 
    xo_emit("{G:}Invalid token\n");
 
@@ -646,6 +660,8 @@ See `Howto: Internationalization (i18n)`_ for additional details.
 The Label Role ({L:})
 +++++++++++++++++++++
 
+.. index:: Field Roles; Label
+
 Labels are text that appears before a value::
 
     xo_emit("{Lwc:Cost}{:cost/%u}\n", cost);
@@ -653,12 +669,16 @@ Labels are text that appears before a value::
 The Note Role ({N:})
 ++++++++++++++++++++
 
+.. index:: Field Roles; Note
+
 Notes are text that appears after a value::
 
     xo_emit("{:cost/%u} {N:per year}\n", cost);
 
 The Padding Role ({P:})
 +++++++++++++++++++++++
+
+.. index:: Field Roles; Padding
 
 Padding represents whitespace used before and between fields.
 
@@ -671,6 +691,8 @@ if preceded by a slash ("/")::
 
 The Title Role ({T:})
 +++++++++++++++++++++
+
+.. index:: Field Roles; Title
 
 Title are heading or column headers that are meant to be displayed to
 the user.  The title can be either static, when placed directly within
@@ -692,6 +714,9 @@ something suitable.
 
 The Units Role ({U:})
 +++++++++++++++++++++
+
+.. index:: Field Roles; Units
+.. index:: XOF_UNITS
 
 Units are the dimension by which values are measured, such as degrees,
 miles, bytes, and decibels.  The units field carries this information
@@ -715,6 +740,8 @@ Units can also be rendered in HTML as the "data-units" attribute::
 The Value Role ({V:} and {:})
 +++++++++++++++++++++++++++++
 
+.. index:: Field Roles; Value
+
 The value role is used to represent the a data value that is
 interesting for the non-display output styles (XML and JSON).  Value
 is the default role; if no other role designation is given, the field
@@ -733,6 +760,8 @@ format descriptors default to "%s"::
 
 The Anchor Roles ({[:} and {]:})
 ++++++++++++++++++++++++++++++++
+
+.. index:: Field Roles; Anchor
 
 The anchor roles allow a set of strings by be padded as a group,
 but still be visible to xo_emit as distinct fields.  Either the start
@@ -757,11 +786,15 @@ right justification.  If the width is zero, nothing happens.  If the
 number of columns of output between the start and stop anchors is less
 than the absolute value of the given width, nothing happens.
 
+.. index:: XOF_WARN
+
 Widths over 8k are considered probable errors and not supported.  If
 XOF_WARN is set, a warning will be generated.
 
 Field Modifiers
 ~~~~~~~~~~~~~~~
+
+.. index:: Field Modifiers
 
 Field modifiers are flags which modify the way content emitted for
 particular output styles:
@@ -798,6 +831,8 @@ and that the value should be quoted when encoded for JSON.
 The Argument Modifier ({a:})
 ++++++++++++++++++++++++++++
 
+.. index:: Field Modifiers; Argument
+
 The argument modifier indicates that the content of the field
 descriptor will be placed as a UTF-8 string (const char \*) argument
 within the xo_emit parameters::
@@ -820,6 +855,8 @@ since those roles have specific mechanisms for arguments, such as
 The Colon Modifier ({c:})
 +++++++++++++++++++++++++
 
+.. index:: Field Modifiers; Colon
+
 The colon modifier appends a single colon to the data value::
 
     EXAMPLE:
@@ -833,6 +870,8 @@ It is purely a convenience feature.
 
 The Display Modifier ({d:})
 +++++++++++++++++++++++++++
+
+.. index:: Field Modifiers; Display
 
 The display modifier indicated the field should only be generated for
 the display output styles, TEXT and HTML::
@@ -850,6 +889,8 @@ they are often used to give to distinct views of the underlying data.
 The Encoding Modifier ({e:})
 ++++++++++++++++++++++++++++
 
+.. index:: Field Modifiers; Encoding
+
 The display modifier indicated the field should only be generated for
 the display output styles, TEXT and HTML::
 
@@ -865,6 +906,9 @@ they are often used to give to distinct views of the underlying data.
 
 The Gettext Modifier ({g:})
 +++++++++++++++++++++++++++
+
+.. index:: Field Modifiers; Gettext
+.. index:: gettext
 
 The gettext modifier is used to translate individual fields using the
 gettext domain (typically set using the "`{G:}`" role) and current
@@ -883,6 +927,8 @@ See `The Gettext Role ({G:})`_, `The Plural Modifier ({p:})`_, and
 The Humanize Modifier ({h:})
 ++++++++++++++++++++++++++++
 
+.. index:: Field Modifiers; Humanize
+
 The humanize modifier is used to render large numbers as in a
 human-readable format.  While numbers like "44470272" are completely
 readable to computers and savants, humans will generally find "44M"
@@ -891,15 +937,15 @@ more meaningful.
 "hn" can be used as an alias for "humanize".
 
 The humanize modifier only affects display styles (TEXT and HMTL).
-The "``no-humanize``" option (See `Command-line Arguments`_) will block
+The "`no-humanize`" option (See `Command-line Arguments`_) will block
 the function of the humanize modifier.
 
 There are a number of modifiers that affect details of humanization.
 These are only available in as full names, not single characters.  The
-"``hn-space``" modifier places a space between the number and any
+"`hn-space`" modifier places a space between the number and any
 multiplier symbol, such as "M" or "K" (ex: "44 K").  The
-"``hn-decimal``" modifier will add a decimal point and a single tenths
-digit when the number is less than 10 (ex: "4.4K").  The "``hn-1000``"
+"`hn-decimal`" modifier will add a decimal point and a single tenths
+digit when the number is less than 10 (ex: "4.4K").  The "`hn-1000`"
 modifier will use 1000 as divisor instead of 1024, following the
 JEDEC-standard instead of the more natural binary powers-of-two
 tradition::
@@ -921,6 +967,8 @@ In the HTML style, the original numeric value is rendered in the
 The Key Modifier ({k:})
 +++++++++++++++++++++++
 
+.. index:: Field Modifiers; Key
+
 The key modifier is used to indicate that a particular field helps
 uniquely identify an instance of list data::
 
@@ -934,12 +982,16 @@ uniquely identify an instance of list data::
         }
         xo_close_list("user");
 
+.. index:: XOF_XPATH
+
 Currently the key modifier is only used when generating XPath value
 for the HTML output style when XOF_XPATH is set, but other uses are
 likely in the near future.
 
 The Leaf-List Modifier ({l:})
 +++++++++++++++++++++++++++++
+
+.. index:: Field Modifiers; Leaf-List
 
 The leaf-list modifier is used to distinguish lists where each
 instance consists of only a single value.  In XML, these are
@@ -960,6 +1012,8 @@ The name of the field must match the name of the leaf list.
 The No-Quotes Modifier ({n:})
 +++++++++++++++++++++++++++++
 
+.. index:: Field Modifiers; No-Quotes
+
 The no-quotes modifier (and its twin, the 'quotes' modifier) affect
 the quoting of values in the JSON output style.  JSON uses quotes for
 string value, but no quotes for numeric, boolean, and null data.
@@ -974,6 +1028,9 @@ needed, but often this needs to be controlled by the caller::
 
 The Plural Modifier ({p:})
 ++++++++++++++++++++++++++
+
+.. index:: Field Modifiers; Plural
+.. index:: gettext
 
 The plural modifier selects the appropriate plural form of an
 expression based on the most recent number emitted and the current
@@ -997,6 +1054,8 @@ convert the singular and plural forms into the native language.
 The Quotes Modifier ({q:})
 ++++++++++++++++++++++++++
 
+.. index:: Field Modifiers; Quotes
+
 The quotes modifier (and its twin, the 'no-quotes' modifier) affect
 the quoting of values in the JSON output style.  JSON uses quotes for
 string value, but no quotes for numeric, boolean, and null data.
@@ -1016,6 +1075,8 @@ following conversion specifiers, then no quotes are used::
 The Trim Modifier ({t:})
 ++++++++++++++++++++++++
 
+.. index:: Field Modifiers; Trim
+
 The trim modifier removes any leading or trailing whitespace from
 the value::
 
@@ -1026,6 +1087,8 @@ the value::
 
 The White Space Modifier ({w:})
 +++++++++++++++++++++++++++++++
+
+.. index:: Field Modifiers; White Space
 
 The white space modifier appends a single space to the data value::
 
@@ -1139,6 +1202,9 @@ argument:
 UTF-8 and Locale Strings
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
+.. index:: UTF-8
+.. index:: Locale
+
 For strings, the 'h' and 'l' modifiers affect the interpretation of
 the bytes pointed to argument.  The default '%s' string is a 'char \*'
 pointer to a string encoded as UTF-8.  Since UTF-8 is compatible with
@@ -1238,6 +1304,8 @@ placed in a <div> with class "text".
 "%m" Is Supported
 ~~~~~~~~~~~~~~~~~
 
+.. index:: errno
+
 libxo supports the '%m' directive, which formats the error message
 associated with the current value of "errno".  It is the equivalent
 of "%s" with the argument strerror(errno)::
@@ -1268,6 +1336,8 @@ unless a format is given.
 
 Argument Validation
 ~~~~~~~~~~~~~~~~~~~
+
+.. index:: printf-like
 
 Many compilers and tool chains support validation of printf-like
 arguments.  When the format string fails to match the argument list,
@@ -1315,6 +1385,9 @@ variants might be wise:
 
 Retaining Parsed Format Information
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. index:: performance
+.. index:: XOEF_RETAIN
 
 libxo can retain the parsed internal information related to the given
 format string, allowing subsequent xo_emit calls, the retained
@@ -1417,12 +1490,19 @@ This means libxo needs three distinct indications of hierarchy: one
 for containers of hierarchy appear only once for any specific parent,
 one for lists, and one for each item in a list.
 
+.. index:: YANG
+
+.. admonition:: YANG Terminology
+
+  libxo uses terminology from YANG (:RFC:`7950`), the data modeling
+  language for NETCONF: container, list, leaf, and leaf-list.
+
 Containers
 ~~~~~~~~~~
 
-A "container" is an element of a hierarchy that appears only once
+A "*container*" is an element of a hierarchy that appears only once
 under any specific parent.  The container has no value, but serves to
-contain other nodes.
+contain and organize other nodes.
 
 To open a container, call xo_open_container() or
 xo_open_container_h().  The former uses the default handle and
@@ -1472,7 +1552,7 @@ container, a warning will be generated::
 Lists and Instances
 ~~~~~~~~~~~~~~~~~~~
 
-A list is set of one or more instances that appear under the same
+A "*list*" is set of one or more instances that appear under the same
 parent.  The instances contain details about a specific object.  One
 can think of instances as objects or records.  A call is needed to
 open and close the list, while a distinct call is needed to open and
@@ -1502,6 +1582,8 @@ turn on the XOF_DTRT flag prior to making any other libxo output::
 
     xo_set_flags(NULL, XOF_DTRT);
 
+.. index:: XOF_DTRT
+
 Each open and close function has a version with the suffix "_d", which
 will close the open container, list, or instance::
 
@@ -1518,6 +1600,8 @@ This also works for lists and instances::
         xo_close_instance_d();
     }
     xo_close_list_d();
+
+.. index:: XOF_WARN
 
 Note that the XOF_WARN flag will also cause libxo to track open
 containers, lists, and instances.  A warning is generated when the
@@ -1549,9 +1633,12 @@ properly::
 Command-line Arguments
 ======================
 
+.. index:: --libxo
+.. index:: Options
+
 libxo uses command line options to trigger rendering behavior.  There
 are multiple conventions for passing options, all using the
-"``--libxo``" option::
+"`--libxo`" option::
 
   --libxo <options>
   --libxo=<options>
@@ -1660,6 +1747,8 @@ keywords, as detailed below:
 Color Mapping
 -------------
 
+.. index:: Colors
+
 The "colors" option takes a value that is a set of mappings from the
 pre-defined set of colors to new foreground and background colors.
 The value is a series of "fg/bg" values, separated by a "+".  Each
@@ -1711,16 +1800,18 @@ them, and the actions they perform.
 Handles
 -------
 
+.. index:: Handles
+
 libxo uses "handles" to control its rendering functionality.  The
 handle contains state and buffered data, as well as callback functions
 to process data.
 
 Handles give an abstraction for libxo that encapsulates the state of a
-stream of output.  Handles have the data type "``xo_handle_t``" and are
+stream of output.  Handles have the data type "`xo_handle_t`" and are
 opaque to the caller.
 
 The library has a default handle that is automatically initialized.
-By default, this handle will send text style output (``XO_STYLE_TEXT``) to
+By default, this handle will send text style output (`XO_STYLE_TEXT`) to
 standard output.  The xo_set_style and xo_set_flags functions can be
 used to change this behavior.
 
@@ -1740,13 +1831,15 @@ For example, the following are equivalent::
     xo_emit("test");
     xo_emit_h(NULL, "test");
 
-Handles are created using ``xo_create`` and destroy using
-``xo_destroy``. 
+Handles are created using `xo_create` and destroy using
+`xo_destroy`. 
 
 xo_create
 ~~~~~~~~~
 
-A handle can be allocated using the ``xo_create`` function::
+.. index:: xo_create
+
+A handle can be allocated using the `xo_create` function::
 
     xo_handle_t *xo_create (unsigned style, unsigned flags);
 
@@ -1760,6 +1853,8 @@ See also `Output Styles (XO_STYLE_\*)`_ and `Flags (XOF_\*)`_.
 xo_create_to_file
 ~~~~~~~~~~~~~~~~~
 
+.. index:: xo_create_to_file
+
 By default, libxo writes output to standard output.  A convenience
 function is provided for situations when output should be written to
 a different file::
@@ -1767,13 +1862,20 @@ a different file::
     xo_handle_t *xo_create_to_file (FILE *fp, unsigned style,
                                     unsigned flags);
 
-The ``XOF_CLOSE_FP`` flag can be set on the returned handle to trigger a
+.. index:: XOF_CLOSE_FP
+
+The `XOF_CLOSE_FP` flag can be set on the returned handle to trigger a
 call to fclose() for the FILE pointer when the handle is destroyed.
 
 xo_set_writer
 ~~~~~~~~~~~~~
 
-The ``xo_set_writer`` function allows custom *write* functions which
+.. index:: xo_set_writer
+.. index:: xo_write_func_t
+.. index:: xo_close_func_t
+.. index:: xo_flush_func_t
+
+The `xo_set_writer` function allows custom *write* functions which
 can tailor how libxo writes data.  An opaque argument is recorded and
 passed back to the write function, allowing the function to acquire
 context information. The *close* function can release this opaque data
@@ -1788,27 +1890,36 @@ flush buffered data associated with the opaque object::
 xo_set_style
 ~~~~~~~~~~~~
 
-To set the style, use the ``xo_set_style`` function::
+.. index:: xo_set_style
+
+To set the style, use the `xo_set_style` function::
 
     void xo_set_style(xo_handle_t *xop, unsigned style);
 
-To use the default handle, pass a ``NULL`` handle::
+To use the default handle, pass a `NULL` handle::
 
     xo_set_style(NULL, XO_STYLE_XML);
 
 xo_get_style
 ~~~~~~~~~~~~
 
-To find the current style, use the ``xo_get_style`` function::
+.. index:: xo_get_style
+
+To find the current style, use the `xo_get_style` function::
 
     xo_style_t xo_get_style(xo_handle_t *xop);
 
-To use the default handle, pass a ``NULL`` handle::
+To use the default handle, pass a `NULL` handle::
 
     style = xo_get_style(NULL);
 
 Output Styles (XO_STYLE\_\*)
 ++++++++++++++++++++++++++++
+
+.. index::  XO_STYLE_TEXT
+.. index::  XO_STYLE_XML
+.. index::  XO_STYLE_JSON
+.. index::  XO_STYLE_HTML
 
 The libxo functions accept a set of output styles:
 
@@ -1824,7 +1935,9 @@ The libxo functions accept a set of output styles:
 xo_set_style_name
 ~~~~~~~~~~~~~~~~~
 
-The ``xo_set_style_name`` can be used to set the style based on a name
+.. index:: xo_set_style_name
+
+The `xo_set_style_name` can be used to set the style based on a name
 encoded as a string::
 
     int xo_set_style_name (xo_handle_t *xop, const char *style);
@@ -1837,23 +1950,43 @@ The name can be any of the styles: "text", "xml", "json", or "html"::
 xo_set_flags
 ~~~~~~~~~~~~
 
-To set the flags, use the ``xo_set_flags`` function::
+.. index:: xo_set_flags
+
+To set the flags, use the `xo_set_flags` function::
 
     void xo_set_flags(xo_handle_t *xop, unsigned flags);
 
-To use the default handle, pass a ``NULL`` handle::
+To use the default handle, pass a `NULL` handle::
 
     xo_set_style(NULL, XO_STYLE_XML);
 
 Flags (XOF\_\*)
 +++++++++++++++
 
+.. index:: Flags; XOF_*
+.. index:: XOF_CLOSE_FP
+.. index:: XOF_COLOR
+.. index:: XOF_COLOR_ALLOWED
+.. index:: XOF_DTRT
+.. index:: XOF_INFO
+.. index:: XOF_KEYS
+.. index:: XOF_NO_ENV
+.. index:: XOF_NO_HUMANIZE
+.. index:: XOF_PRETTY
+.. index:: XOF_UNDERSCORES
+.. index:: XOF_UNITS
+.. index:: XOF_WARN
+.. index:: XOF_WARN_XML
+.. index:: XOF_XPATH
+.. index:: XOF_COLUMNS
+.. index:: XOF_FLUSH
+
 The set of valid flags include:
 
 =================== =========================================
  Flag                Description
 =================== =========================================
- XOF_CLOSE_FP        Close file pointer on ``xo_destroy``
+ XOF_CLOSE_FP        Close file pointer on `xo_destroy`
  XOF_COLOR           Enable color and effects in output
  XOF_COLOR_ALLOWED   Allow color/effect for terminal output
  XOF_DTRT            Enable "do the right thing" mode
@@ -1868,30 +2001,30 @@ The set of valid flags include:
  XOF_WARN_XML        Generate warnings in XML on stdout
  XOF_XPATH           Emit XPath expressions (HTML)
  XOF_COLUMNS         Force xo_emit to return columns used
- XOF_FLUSH           Flush output after each ``xo_emit`` call
+ XOF_FLUSH           Flush output after each `xo_emit` call
 =================== =========================================
 
-The ``XOF_CLOSE_FP`` flag will trigger the call of the *close_func*
-(provided via ``xo_set_writer``) when the handle is destroyed.
+The `XOF_CLOSE_FP` flag will trigger the call of the *close_func*
+(provided via `xo_set_writer`) when the handle is destroyed.
 
-The ``XOF_COLOR`` flag enables color and effects in output regardless
-of output device, while the ``XOF_COLOR_ALLOWED`` flag allows color
+The `XOF_COLOR` flag enables color and effects in output regardless
+of output device, while the `XOF_COLOR_ALLOWED` flag allows color
 and effects only if the output device is a terminal.
 
-The ``XOF_PRETTY`` flag requests "pretty printing", which will trigger
+The `XOF_PRETTY` flag requests "pretty printing", which will trigger
 the addition of indentation and newlines to enhance the readability of
 XML, JSON, and HTML output.  Text output is not affected.
 
-The ``XOF_WARN`` flag requests that warnings will trigger diagnostic
+The `XOF_WARN` flag requests that warnings will trigger diagnostic
 output (on standard error) when the library notices errors during
 operations, or with arguments to functions.  Without warnings enabled,
 such conditions are ignored.
 
 Warnings allow developers to debug their interaction with libxo.
-The function ``xo_failure`` can used as a breakpoint for a debugger,
+The function `xo_failure` can used as a breakpoint for a debugger,
 regardless of whether warnings are enabled.
 
-If the style is ``XO_STYLE_HTML``, the following additional flags can be
+If the style is `XO_STYLE_HTML`, the following additional flags can be
 used:
 
 =============== =========================================
@@ -1901,14 +2034,14 @@ used:
  XOF_INFO        Emit additional info fields
 =============== =========================================
 
-The ``XOF_XPATH`` flag enables the emission of XPath expressions detailing
+The `XOF_XPATH` flag enables the emission of XPath expressions detailing
 the hierarchy of XML elements used to encode the data field, if the
 XPATH style of output were requested.
 
-The ``XOF_INFO`` flag encodes additional informational fields for HTML
+The `XOF_INFO` flag encodes additional informational fields for HTML
 output.  See `Field Information (xo_info_t)`_ for details.
 
-If the style is ``XO_STYLE_XML``, the following additional flags can be
+If the style is `XO_STYLE_XML`, the following additional flags can be
 used:
 
 =============== =========================================
@@ -1917,7 +2050,7 @@ used:
  XOF_KEYS        Flag "key" fields for XML
 =============== =========================================
 
-The ``XOF_KEYS`` flag adds "key" attribute to the XML encoding for
+The `XOF_KEYS` flag adds "key" attribute to the XML encoding for
 field definitions that use the "k" modifier.  The key attribute has
 the value "key"::
 
@@ -1929,7 +2062,9 @@ the value "key"::
 xo_clear_flags
 ++++++++++++++
 
-The ``xo_clear_flags`` function turns off the given flags in a specific
+.. index:: xo_clear_flags
+
+The `xo_clear_flags` function turns off the given flags in a specific
 handle::
 
     void xo_clear_flags (xo_handle_t *xop, xo_xof_flags_t flags);
@@ -1937,7 +2072,9 @@ handle::
 xo_set_options
 ++++++++++++++
 
-The ``xo_set_options`` function accepts a comma-separated list of styles
+.. index:: xo_set_options
+
+The `xo_set_options` function accepts a comma-separated list of styles
 and flags and enables them for a specific handle::
 
     int xo_set_options (xo_handle_t *xop, const char *input);
@@ -1947,14 +2084,18 @@ The options are identical to those listed in `Command-line Arguments`_.
 xo_destroy
 ++++++++++
 
-The ``xo_destroy`` function releases a handle and any resources it is
-using.  Calling ``xo_destroy`` with a ``NULL`` handle will release any
+.. index:: xo_destroy
+
+The `xo_destroy` function releases a handle and any resources it is
+using.  Calling `xo_destroy` with a `NULL` handle will release any
 resources associated with the default handle::
 
     void xo_destroy(xo_handle_t *xop);
 
 Emitting Content (xo_emit)
 --------------------------
+
+.. index:: xo_emit
 
 The following functions are used to emit output::
 
@@ -1964,18 +2105,20 @@ The following functions are used to emit output::
 
 The "fmt" argument is a string containing field descriptors as
 specified in `Format Strings`_.  The use of a handle is optional and
-``NULL`` can be passed to access the internal "default" handle.  See
+`NULL` can be passed to access the internal "default" handle.  See
 `Handles`_.
 
-The remaining arguments to ``xo_emit`` and ``xo_emit_h`` are a set of
+The remaining arguments to `xo_emit` and `xo_emit_h` are a set of
 arguments corresponding to the fields in the format string.  Care must
 be taken to ensure the argument types match the fields in the format
 string, since an inappropriate cast can ruin your day.  The vap
-argument to ``xo_emit_hv`` points to a variable argument list that can
-be used to retrieve arguments via ``va_arg``.
+argument to `xo_emit_hv` points to a variable argument list that can
+be used to retrieve arguments via `va_arg`.
 
 Single Field Emitting Functions (xo_emit_field)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. index:: xo_emit_field
 
 The following functions can also make output, but only make a single
 field at a time::
@@ -1993,7 +2136,7 @@ field at a time::
 
 These functions are intended to avoid the scenario where one
 would otherwise need to compose a format descriptors using
-``snprintf``.  The individual parts of the format descriptor are
+`snprintf`.  The individual parts of the format descriptor are
 passed in distinctly::
 
     xo_emit("T", "Host name is ", NULL, NULL);
@@ -2002,7 +2145,11 @@ passed in distinctly::
 Attributes (xo_attr)
 ~~~~~~~~~~~~~~~~~~~~
 
-The ``xo_attr`` function emits attributes for the XML output style::
+.. index:: xo_attr
+.. index:: xo_attr_h
+.. index:: xo_attr_hv
+
+The `xo_attr` function emits attributes for the XML output style::
 
     int xo_attr (const char *name, const char *fmt, ...);
     int xo_attr_h (xo_handle_t *xop, const char *name,
@@ -2013,7 +2160,7 @@ The ``xo_attr`` function emits attributes for the XML output style::
 The name parameter give the name of the attribute to be encoded.  The
 fmt parameter gives a printf-style format string used to format the
 value of the attribute using any remaining arguments, or the vap
-parameter passed to ``xo_attr_hv``::
+parameter passed to `xo_attr_hv`::
 
     EXAMPLE:
       xo_attr("seconds", "%ld", (unsigned long) login_time);
@@ -2023,7 +2170,7 @@ parameter passed to ``xo_attr_hv``::
     XML:
         <login-time seconds="1408336270">00:14</login-time>
 
-All attributes recorded via ``xo_attr`` are placed on the next
+All attributes recorded via `xo_attr` are placed on the next
 container, instance, leaf, or leaf list that is emitted.
 
 Since attributes are only emitted in XML, their use should be limited
@@ -2033,23 +2180,30 @@ already emitted in other form.
 Flushing Output (xo_flush)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+.. index:: xo_flush
+
 libxo buffers data, both for performance and consistency, but also to
 allow some advanced features to work properly.  At various times, the
 caller may wish to flush any data buffered within the library.  The
-``xo_flush`` call is used for this::
+`xo_flush` call is used for this::
 
     void xo_flush (void);
     void xo_flush_h (xo_handle_t *xop);
 
-Calling ``xo_flush`` also triggers the flush function associated with
+Calling `xo_flush` also triggers the flush function associated with
 the handle.  For the default handle, this is equivalent to
 "fflush(stdio);".
 
 Finishing Output (xo_finish)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+.. index:: xo_finish
+.. index:: xo_finish_h
+.. index:: xo_finish_atexit
+.. index:: atexit
+
 When the program is ready to exit or close a handle, a call to
-``xo_finish`` is required.  This flushes any buffered data, closes
+`xo_finish` is required.  This flushes any buffered data, closes
 open libxo constructs, and completes any pending operations::
 
     int xo_finish (void);
@@ -2059,11 +2213,22 @@ open libxo constructs, and completes any pending operations::
 Calling this function is vital to the proper operation of libxo,
 especially for the non-TEXT output styles.
 
-libxo includes a function named ``xo_finish_atexit`` is suitable for
+libxo includes a function named `xo_finish_atexit` is suitable for
 use with :manpage:`atexit(3)`.
 
 Emitting Hierarchy
 ------------------
+
+.. index:: UTF-8
+
+.. index:: xo_open_container
+.. index:: xo_open_container_h
+.. index:: xo_open_container_hd
+.. index:: xo_open_container_d
+.. index:: xo_close_container
+.. index:: xo_close_container_h
+.. index:: xo_close_container_hd
+.. index:: xo_close_container_d
 
 libxo represents to types of hierarchy: containers and lists.  A
 container appears once under a given parent where a list contains
@@ -2092,6 +2257,8 @@ Thing" mode, where the name of the open containers, lists, and
 instances are maintained internally by libxo to allow the caller to
 avoid keeping track of the open container name.
 
+.. index:: XOF_WARN
+
 Use the XOF_WARN flag to generate a warning if the name given on the
 close does not match the current open container.
 
@@ -2107,6 +2274,9 @@ text, though for HTML they are used when the XOF_XPATH flag is set::
 
 Lists and Instances
 ~~~~~~~~~~~~~~~~~~~
+
+.. index:: xo_open_instance
+.. index:: xo_close_instance
 
 Lists are sequences of instances of homogeneous data objects.  Two
 distinct levels of calls are needed to represent them in our output
@@ -2166,11 +2336,13 @@ Support Functions
 Parsing Command-line Arguments (xo_parse_args)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The ``xo_parse_args`` function is used to process a program's
-arguments.  libxo-specific options are processed and removed
-from the argument list so the calling application does not
-need to process them.  If successful, a new value for argc
-is returned.  On failure, a message it emitted and -1 is returned::
+.. index:: xo_parse_args
+
+The `xo_parse_args` function is used to process a program's arguments.
+libxo-specific options are processed and removed from the argument
+list so the calling application does not need to process them.  If
+successful, a new value for argc is returned.  On failure, a message
+it emitted and -1 is returned::
 
     argc = xo_parse_args(argc, argv);
     if (argc < 0)
@@ -2183,21 +2355,25 @@ for a description of valid arguments.
 xo_set_program
 ~~~~~~~~~~~~~~
 
-The ``xo_set_program`` function sets name of the program as reported
-by functions like ``xo_failure``, ``xo_warn``, ``xo_err``, etc.  The
-program name is initialized by ``xo_parse_args``, but subsequent calls
-to ``xo_set_program`` can override this value::
+.. index:: xo_set_program
+
+The `xo_set_program` function sets name of the program as reported
+by functions like `xo_failure`, `xo_warn`, `xo_err`, etc.  The
+program name is initialized by `xo_parse_args`, but subsequent calls
+to `xo_set_program` can override this value::
 
     xo_set_program(argv[0]);
 
 Note that the value is not copied, so the memory passed to
-``xo_set_program`` (and ``xo_parse_args``) must be maintained by the
+`xo_set_program` (and `xo_parse_args`) must be maintained by the
 caller.
 
 xo_set_version
 ~~~~~~~~~~~~~~
 
-The ``xo_set_version`` function records a version number to be emitted as
+.. index:: xo_set_version
+
+The `xo_set_version` function records a version number to be emitted as
 part of the data for encoding styles (XML and JSON).  This version
 number is suitable for tracking changes in the content, allowing a
 user of the data to discern which version of the data model is in use::
@@ -2208,6 +2384,10 @@ user of the data to discern which version of the data model is in use::
 Field Information (xo_info_t)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+.. index:: --libxo
+.. index:: XOF_INFO
+.. index:: xo_info_t
+
 HTML data can include additional information in attributes that
 begin with "data-".  To enable this, three things must occur:
 
@@ -2217,7 +2397,7 @@ binary search to find the entry that matches names from format
 instructions.
 
 Second, the application must inform libxo about this information using
-the ``xo_set_info`` call::
+the `xo_set_info` call::
 
     typedef struct xo_info_s {
         const char *xi_name;    /* Name of the element */
@@ -2227,7 +2407,7 @@ the ``xo_set_info`` call::
 
     void xo_set_info (xo_handle_t *xop, xo_info_t *infop, int count);
 
-Like other libxo calls, passing ``NULL`` for the handle tells libxo to use
+Like other libxo calls, passing `NULL` for the handle tells libxo to use
 the default handle.
 
 If the count is -1, libxo will count the elements of infop, but there
@@ -2245,8 +2425,8 @@ known to the application::
     ...
     xo_set_info(NULL, info, info_count);
 
-Third, the emission of info must be triggered with the ``XOF_INFO`` flag
-using either the ``xo_set_flags`` function or the "``--libxo=info``"
+Third, the emission of info must be triggered with the `XOF_INFO` flag
+using either the `xo_set_flags` function or the "`--libxo=info`"
 command line argument.
 
 The type and help values, if present, are emitted as the "data-type"
@@ -2258,7 +2438,11 @@ and "data-help" attributes:
 Memory Allocation
 ~~~~~~~~~~~~~~~~~
 
-The ``xo_set_allocator`` function allows libxo to be used in
+.. index:: xo_set_allocator
+.. index:: xo_realloc_func_t
+.. index:: xo_free_func_t
+
+The `xo_set_allocator` function allows libxo to be used in
 environments where the standard :manpage:`realloc(3)` and
 :manpage:`free(3)` functions are not appropriate::
 
@@ -2276,6 +2460,8 @@ functions are used.
 
 LIBXO_OPTIONS
 ~~~~~~~~~~~~~
+
+.. index:: --libxo
 
 The environment variable "LIBXO_OPTIONS" can be set to a subset of
 libxo options, including:
@@ -2298,10 +2484,22 @@ For example, warnings can be enabled by::
 
 Since environment variables are inherited, child processes will have
 the same options, which may be undesirable, making the use of the
-"``--libxo``" command-line option preferable in most situations.
+"`--libxo`" command-line option preferable in most situations.
 
 Errors, Warnings, and Messages
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. index:: xo_warn
+.. index:: xo_warnx
+.. index:: xo_warn_c
+.. index:: xo_warn_hc
+.. index:: xo_err
+.. index:: xo_errc
+.. index:: xo_errx
+.. index:: xo_message
+.. index:: xo_message_c
+.. index:: xo_message_hc
+.. index:: xo_message_hcv
 
 Many programs make use of the standard library functions
 :manpage:`err(3)` and :manpage:`warn(3)` to generate errors and
@@ -2335,9 +2533,11 @@ message associated with either *errno* or the *code* parameter::
 xo_error
 ~~~~~~~~
 
-The ``xo_error`` function can be used for generic errors that should
-be reported over the handle, rather than to stderr.  The ``xo_error``
-function behaves like ``xo_err`` for TEXT and HTML output styles, but
+.. index:: xo_error
+
+The `xo_error` function can be used for generic errors that should
+be reported over the handle, rather than to stderr.  The `xo_error`
+function behaves like `xo_err` for TEXT and HTML output styles, but
 puts the error into XML or JSON elements::
 
     EXAMPLE::
@@ -2350,11 +2550,14 @@ puts the error into XML or JSON elements::
 xo_no_setlocale
 ~~~~~~~~~~~~~~~
 
+.. index:: xo_no_setlocale
+.. index:: Locale
+
 libxo automatically initializes the locale based on setting of the
 environment variables LC_CTYPE, LANG, and LC_ALL.  The first of this
 list of variables is used and if none of the variables, the locale
 defaults to "UTF-8".  The caller may wish to avoid this behavior, and
-can do so by calling the ``xo_no_setlocale`` function::
+can do so by calling the `xo_no_setlocale` function::
 
     void xo_no_setlocale (void);
 
@@ -2381,7 +2584,7 @@ defined by IANA, the Internet Assigned Numbers Authority.
 
 .. _Enterprise IDs: https://www.iana.org/assignments/enterprise-numbers/enterprise-numbers
 
-Use the ``xo_set_syslog_enterprise_id`` function to set the Enterprise
+Use the `xo_set_syslog_enterprise_id` function to set the Enterprise
 ID, as needed.
 
 The message name should follow the conventions in `What makes a good
@@ -2409,7 +2612,7 @@ names.
 Priority, Facility, and Flags
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The ``xo_syslog``, ``xo_vsyslog``, and ``xo_open_log`` functions
+The `xo_syslog`, `xo_vsyslog`, and `xo_open_log` functions
 accept a set of flags which provide the priority of the message, the
 source facility, and some additional features.  These values are OR'd
 together to create a single integer argument::
@@ -2473,12 +2676,14 @@ addition flags requesting specific logging behaviors:
 xo_syslog
 ~~~~~~~~~
 
-Use the ``xo_syslog`` function to generate syslog messages by calling it
+.. index:: xo_syslog
+
+Use the `xo_syslog` function to generate syslog messages by calling it
 with a log priority and facility, a message name, a format string, and
 a set of arguments.  The priority/facility argument are discussed
 above, as is the message name.
 
-The format string follows the same conventions as ``xo_emit``'s format
+The format string follows the same conventions as `xo_emit`'s format
 string, with each field being rendered as an SD-PARAM pair::
 
     xo_syslog(LOG_ERR, "poofd-missing-file",
@@ -2493,6 +2698,8 @@ Support functions
 
 xo_vsyslog
 ++++++++++
+
+.. index:: xo_vsyslog
 
 xo_vsyslog is identical in function to xo_syslog, but takes the set of
 arguments using a va_list::
@@ -2509,6 +2716,8 @@ arguments using a va_list::
 xo_open_log
 +++++++++++
 
+.. index:: xo_open_log
+
 xo_open_log functions similar to :manpage:`openlog(3)`, allowing
 customization of the program name, the log facility number, and the
 additional option flags described in `Priority, Facility, and
@@ -2520,6 +2729,8 @@ Flags`_::
 xo_close_log
 ++++++++++++
 
+.. index:: xo_close_log
+
 xo_close_log functions similar to :manpage:`closelog(3)`, closing the
 log file and releasing any associated resources::
 
@@ -2529,10 +2740,12 @@ log file and releasing any associated resources::
 xo_set_logmask
 ++++++++++++++
 
-``xo_set_logmask`` function similar to :manpage:`setlogmask(3)`,
+.. index:: xo_set_logmask
+
+`xo_set_logmask` function similar to :manpage:`setlogmask(3)`,
 restricting the set of generated log event to those whose associated
-bit is set in maskpri.  Use ``LOG_MASK(pri)`` to find the appropriate bit,
-or ``LOG_UPTO(toppri)`` to create a mask for all priorities up to and
+bit is set in maskpri.  Use `LOG_MASK(pri)` to find the appropriate bit,
+or `LOG_UPTO(toppri)` to create a mask for all priorities up to and
 including toppri::
 
     int
@@ -2544,7 +2757,9 @@ including toppri::
 xo_set_syslog_enterprise_id
 +++++++++++++++++++++++++++
 
-Use the ``xo_set_syslog_enterprise_id`` to supply a platform- or
+.. index:: xo_set_syslog_enterprise_id
+
+Use the `xo_set_syslog_enterprise_id` to supply a platform- or
 application-specific enterprise id.  This value is used in any future
 syslog messages.
 
@@ -2596,6 +2811,8 @@ The three elements of the API are:
 
 The following sections provide details about these topics.
 
+.. index:: CBOR
+
 libxo source contains an encoder for Concise Binary Object
 Representation, aka CBOR (:RFC:`7049`), which can be used as an
 example for the API for other encoders.
@@ -2604,7 +2821,7 @@ Loading Encoders
 ~~~~~~~~~~~~~~~~
 
 Encoders can be registered statically or discovered dynamically.
-Applications can choose to call the ``xo_encoder_register`` function
+Applications can choose to call the `xo_encoder_register` function
 to explicitly register encoders, but more typically they are built as
 shared libraries, placed in the libxo/extensions directory, and loaded
 based on name.  libxo looks for a file with the name of the encoder
@@ -2623,34 +2840,34 @@ must have the following signature::
 
     int xo_encoder_library_init (XO_ENCODER_INIT_ARGS);
 
-``XO_ENCODER_INIT_ARGS`` is a macro defined in "xo_encoder.h" that defines
+`XO_ENCODER_INIT_ARGS` is a macro defined in "xo_encoder.h" that defines
 an argument called "arg", a pointer of the type
-``xo_encoder_init_args_t``.  This structure contains two fields:
+`xo_encoder_init_args_t`.  This structure contains two fields:
 
-- ``xei_version`` is the version number of the API as implemented
+- `xei_version` is the version number of the API as implemented
   within libxo.  This version is currently as 1 using
-  ``XO_ENCODER_VERSION``.  This number can be checked to ensure
+  `XO_ENCODER_VERSION`.  This number can be checked to ensure
   compatibility.  The working assumption is that all versions should
   be backward compatible, but each side may need to accurately know
-  the version supported by the other side.  ``xo_encoder_library_init``
+  the version supported by the other side.  `xo_encoder_library_init`
   can optionally check this value, and must then set it to the version
   number used by the encoder, allowing libxo to detect version
   differences and react accordingly.  For example, if version 2 adds
   new operations, then libxo will know that an encoding library that
-  set ``xei_version`` to 1 cannot be expected to handle those new
+  set `xei_version` to 1 cannot be expected to handle those new
   operations.
 
 - xei_handler must be set to a pointer to a function of type
-  ``xo_encoder_func_t``, as defined in "xo_encoder.h".  This function
+  `xo_encoder_func_t`, as defined in "xo_encoder.h".  This function
   takes a set of parameters:
-  - xop is a pointer to the opaque ``xo_handle_t`` structure
+  - xop is a pointer to the opaque `xo_handle_t` structure
   - op is an integer representing the current operation
   - name is a string whose meaning differs by operation
   - value is a string whose meaning differs by operation
   - private is an opaque structure provided by the encoder
 
 Additional arguments may be added in the future, so handler functions
-should use the ``XO_ENCODER_HANDLER_ARGS`` macro.  An appropriate
+should use the `XO_ENCODER_HANDLER_ARGS` macro.  An appropriate
 "extern" declaration is provided to help catch errors.
 
 Once the encoder initialization function has completed processing, it
@@ -2699,6 +2916,8 @@ All strings are encoded in UTF-8.
 The "xo" Utility
 ================
 
+.. index:: --libxo, xo
+
 The `xo` utility allows command line access to the functionality of
 the libxo library.  Using `xo`, shell scripts can emit XML, JSON, and
 HTML using the same commands that emit text output.
@@ -2709,7 +2928,7 @@ default.  The "--style <style>" option can also be used.  The standard
 set of "--libxo" options are available (see `Command-line
 Arguments`_), as well as the `LIBXO_OPTIONS`_ environment variable.
 
-The `xo` utility accepts a format string suitable for ``xo_emit`` and
+The `xo` utility accepts a format string suitable for `xo_emit` and
 a set of zero or more arguments used to supply data for that string::
 
     xo "The {k:name} weighs {:weight/%d} pounds.\n" fish 6
@@ -2731,7 +2950,7 @@ a set of zero or more arguments used to supply data for that string::
       <div class="text"> pounds.</div>
     </div>
 
-The ``--wrap $path`` option can be used to wrap emitted content in a
+The `--wrap $path` option can be used to wrap emitted content in a
 specific hierarchy.  The path is a set of hierarchical names separated
 by the '/' character::
 
@@ -2758,11 +2977,11 @@ by the '/' character::
       }
     }
 
-The ``--open $path`` and ``--close $path`` can be used to emit
+The `--open $path` and `--close $path` can be used to emit
 hierarchical information without the matching close and open
 tag.  This allows a shell script to emit open tags, data, and
-then close tags.  The ``--depth`` option may be used to set the
-depth for indentation.  The ``--leading-xpath`` may be used to
+then close tags.  The `--depth` option may be used to set the
+depth for indentation.  The `--leading-xpath` may be used to
 prepend data to the XPath values used for HTML output style::
 
   EXAMPLE;
@@ -2821,7 +3040,7 @@ xolint
 ======
 
 `xolint` is a tool for reporting common mistakes in format strings
-in source code that invokes ``xo_emit``.  It allows these errors
+in source code that invokes `xo_emit`.  It allows these errors
 to be diagnosed at build time, rather than waiting until runtime.
 
 `xolint` takes the one or more C files as arguments, and reports
@@ -2848,7 +3067,7 @@ line that contains the error::
     xolint.c: 16: error: anchor format should be "%d"
     16         xo_emit("{[:/%s}");
 
-The "-I" option will generate a table of ``xo_info_t`` structures,
+The "-I" option will generate a table of `xo_info_t` structures,
 suitable for inclusion in source code.
 
 The "-V" option does not report errors, but prints a complete list of
@@ -2879,7 +3098,7 @@ provide an alternative base path for the support files:
 ============== ===================================================
 
 The "-c" option takes a full command with arguments, including
-any libxo options needed to generate html (``--libxo=html``).  This
+any libxo options needed to generate html (`--libxo=html`).  This
 value must be quoted if it consists of multiple tokens.
 
 xopo
@@ -2923,7 +3142,7 @@ stdout:
 	    -o foo.pot.raw foo.c
         % xopo -f foo.pot.raw -o foo.pot
 
-Use of the ``--no-wrap`` option for ``xgettext`` is required to
+Use of the `--no-wrap` option for `xgettext` is required to
 ensure that incoming msgid strings are not wrapped across multiple
 lines.
 
@@ -3049,6 +3268,8 @@ the previous implementation in JUNOS.
 What makes a good field name?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+.. index:: XOF_UNDERSCORES
+
 To make useful, consistent field names, follow these guidelines:
 
 Use lower case, even for TLAs
@@ -3119,17 +3340,18 @@ with our system.  By choosing wise names now, you are making their
 lives better.
 
 After using `xolint` to find errors in your field descriptors, use
-"``xolint -V``" to spell check your field names and to help you detect
+"`xolint -V`" to spell check your field names and to help you detect
 different names for the same data.  "dropped-short" and
 "dropped-too-short" are both reasonable names, but using them both
 will lead users to ask the difference between the two fields.  If
 there is no difference, use only one of the field names.  If there is
 a difference, change the names to make that difference more obvious.
 
-What does this message mean?
-----------------------------
+.. ignore for now, since we want can't have generated content
+  What does this message mean?
+  ----------------------------
 
-!!include-file xolint.txt
+  !!include-file xolint.txt
 
 Howtos: Focused Directions
 ==========================
@@ -3168,7 +3390,9 @@ following steps::
 libxo uses a distinct "*build*" directory to keep generated files
 separated from source files.
 
-Use "``../configure --help``" to display available configuration
+.. index:: configure
+
+Use "`../configure --help`" to display available configuration
 options, which include the following::
 
   --enable-warnings      Turn on compiler warnings
@@ -3186,14 +3410,20 @@ doing development work on libxo, it is required that you
 use --enable-warnings to keep the code warning free, but most users
 need not use this option.
 
-libxo provides the --enable-text-only option to reduce the footprint
-of the library for smaller installations.  XML, JSON, and HTML
-rendering logic is removed.
+.. index:: --enable-text-only
+
+libxo provides the `--enable-text-only` option to reduce the
+footprint of the library for smaller installations.  XML, JSON, and
+HTML rendering logic is removed.
+
+.. index:: --with-gettext
 
 The gettext library does not provide a simple means of learning its
 location, but libxo will look for it in /usr and /opt/local.  If
 installed elsewhere, the installer will need to provide this
-information using the "``--with-gettext=/dir/path``" option.
+information using the "`--with-gettext=/dir/path`" option.
+
+.. index:: libslax
 
 libslax is not required by libxo; it contains the "oxtradoc" program
 used to format documentation.
@@ -3235,6 +3465,9 @@ error::
             return argc;
         ....
     }
+
+.. index:: atexit
+.. index:: xo_finish_atexit
 
 At the bottom of your main(), you'll need to call xo_finish() to
 complete output processing for the default handle (`Handles`_).  This
@@ -3349,10 +3582,12 @@ style::
 Call xo_finish
 ~~~~~~~~~~~~~~
 
-One important item: call ``xo_finish`` at the end of your program so
+.. index:: xo_finish
+
+One important item: call `xo_finish` at the end of your program so
 ensure that all buffered data is written out.  You can call it
 explicitly call it, or use :manpage:`atexit(3)` to have
-``xo_finish_atexit`` called implicitly on exit.
+`xo_finish_atexit` called implicitly on exit.
 
 
 Howto: Use "xo" in Shell Scripts
@@ -3373,10 +3608,10 @@ invoking the standard :manpage:`gettext(3)` functions.
 
 gettext setup is a bit complicated: text strings are extracted from
 source files into "*portable object template*" (.pot) files using the
-``xgettext`` command.  For each language, this template file is used as
+`xgettext` command.  For each language, this template file is used as
 the source for a message catalog in the "*portable object*" (.po)
 format, which are translated by hand and compiled into "*machine
-object*" (.mo) files using the ``msgfmt`` command.  The .mo files are
+object*" (.mo) files using the `msgfmt` command.  The .mo files are
 then typically installed in the /usr/share/locale or
 /opt/local/share/locale directories.  At run time, the user's language
 settings are used to select a .mo file which is searched for matching
@@ -3389,8 +3624,8 @@ the format string before use so that minor formatting changes will not
 impact the expensive translation process.  We don't want a developer
 change such as changing "/%06d" to "/%08d" to force hand inspection of
 all .po files.  The simplified version can be generated for a single
-message using the ``xopo -s $text`` command, or an entire .pot can be
-translated using the ``xopo -f $input -o $output`` command::
+message using the `xopo -s $text` command, or an entire .pot can be
+translated using the `xopo -f $input -o $output` command::
 
     EXAMPLE:
         % xopo -s "There are {:count/%u} {:event/%.6s} events\n"
@@ -3424,13 +3659,15 @@ translated using the ``xopo -f $input -o $output`` command::
         sudo cp po/my_lang/LC_MESSAGES/foo.mo \
                 /opt/local/share/locale/my_lang/LC_MESSAGE/
 
-Once these steps are complete, you can use the ``gettext`` command to
+Once these steps are complete, you can use the `gettext` command to
 test the message catalog::
 
     gettext -d foo -e "some text"
 
 i18n and xo_emit
 ~~~~~~~~~~~~~~~~
+
+.. index:: gettext
 
 There are three features used in libxo used to support i18n:
 
@@ -3492,7 +3729,7 @@ Examples
 Unit Test
 ---------
 
-Here is the unit test example::
+Here is one of the unit tests as an example::
 
     int
     main (int argc, char **argv)
