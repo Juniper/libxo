@@ -10,7 +10,6 @@
 
 .. default-role:: code
 
-===================================================================
 libxo - A Library for Generating Text, XML, JSON, and HTML Output
 ===================================================================
 
@@ -3453,7 +3452,7 @@ Howto: Convert command line applications
 
 Common question: How do I convert an existing command line application?
 
-There are three basic steps for converting command line application to
+There are four basic steps for converting command line application to
 use libxo::
 
 - Setting up the context
@@ -3503,7 +3502,10 @@ replacing them with xo_emit() calls.  The format strings are similar
 in task, but libxo format strings wrap output fields in braces.  The
 following two calls produce identical text output::
 
+  OLD::
     printf("There are %d %s events\n", count, etype);
+
+  NEW::
     xo_emit("There are {:count/%d} {:event} events\n", count, etype);
 
 "count" and "event" are used as names for JSON and XML output.  The
@@ -3523,7 +3525,10 @@ whitespace more clear (`The Padding Role ({P:})`_).
 The "*title*" role indicates the headings of table and sections.  This
 allows HTML output to use CSS to make this relationship more obvious::
 
+  OLD::
     printf("Statistics:\n");
+
+  NEW::
     xo_emit("{T:Statistics}:\n");
 
 The "*color*" roles controls foreground and background colors, as well
@@ -3534,9 +3539,11 @@ as effects like bold and underline (see `The Color Role ({C:})`_)::
 Finally, the start- and stop-anchor roles allow justification and
 padding over multiple fields (see `The Anchor Roles ({[:} and {]:})`_)::
 
+  OLD::
     snprintf(buf, sizeof(buf), "(%u/%u/%u)", min, ave, max);
     printf("%30s", buf);
 
+  NEW::
     xo_emit("{[:30}({:minimum/%u}/{:average/%u}/{:maximum/%u}{]:}",
             min, ave, max);
 
@@ -3547,11 +3554,13 @@ Text output doesn't have any sort of hierarchy, but XML and JSON
 require this.  Typically applications use indentation to represent
 these relationship::
 
+  OLD::
     printf("table %d\n", tnum);
     for (i = 0; i < tmax; i++) {
         printf("    %s %d\n", table[i].name, table[i].size);
     }
 
+  NEW::
     xo_emit("{T:/table %d}\n", tnum);
     xo_open_list("table");
     for (i = 0; i < tmax; i++) {
@@ -3572,11 +3581,13 @@ where to put these calls.
 In addition, the open and close container functions allow for
 organization levels of hierarchy::
 
+  OLD::
     printf("Paging information:\n");
     printf("    Free:      %lu\n", free);
     printf("    Active:    %lu\n", active);
     printf("    Inactive:  %lu\n", inactive);
 
+  NEW::
     xo_open_container("paging-information");
     xo_emit("{P:    }{L:Free:      }{:free/%lu}\n", free);
     xo_emit("{P:    }{L:Active:    }{:active/%lu}\n", active);
@@ -3592,8 +3603,10 @@ for putting the errors on standard error, and the other writes the
 errors and warnings to the handle using the appropriate encoding
 style::
 
+  OLD::
     err(1, "cannot open output file: %s", file);
 
+  NEW::
     xo_err(1, "cannot open output file: %s", file);
     xo_emit_err(1, "cannot open output file: {:filename}", file);
 
@@ -3607,6 +3620,8 @@ ensure that all buffered data is written out.  You can call it
 explicitly call it, or use :manpage:`atexit(3)` to have
 `xo_finish_atexit` called implicitly on exit.
 
+  NEW::
+    xo_finish();
 
 Howto: Use "xo" in Shell Scripts
 --------------------------------
