@@ -348,6 +348,10 @@ table caption span.caption-number {
 table caption span.caption-text {
 }
 
+dl.function table.docutils th.field-name {
+  width: 100px;
+}
+
 table.docutils td, table.docutils th {
     padding: 1px 8px 1px 5px;
     border-top: 1px solid #aaa;
