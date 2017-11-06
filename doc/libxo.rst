@@ -1871,16 +1871,25 @@ Handles are created using `xo_create` and destroy using
 xo_create
 ~~~~~~~~~
 
-A handle can be allocated using the `xo_create` function::
+.. c:function:: xo_handle_t *xo_create (xo_style_t style, xo_xof_flags_t flags)
 
-    xo_handle_t *xo_create (unsigned style, unsigned flags);
+  The `xo_create` function allocates a new handle which can be passed
+  to further libxo function calls.  The `xo_handle_t` structure is
+  opaque.
 
-  Example:
-    xo_handle_t *xop = xo_create(XO_STYLE_JSON, XOF_WARN);
-    ....
-    xo_emit_h(xop, "testing\n");
+  :param xo_style_t style: Output style (XO_STYLE\_*)
+  :param xo_xof_flags_t flags: Flags for this handle (XOF\_*)
+  :return: New libxo handle
+  :rtype: xo_handle_t \*
 
-See also `Output Styles (XO_STYLE_\*)`_ and `Flags (XOF_\*)`_.
+  ::
+
+    EXAMPLE:
+        xo_handle_t *xop = xo_create(XO_STYLE_JSON, XOF_WARN | XOF_PRETTY);
+        ....
+        xo_emit_h(xop, "testing\n");
+
+  See also `Output Styles (XO_STYLE_\*)`_ and `Flags (XOF_\*)`_.
 
 .. index:: xo_create_to_file
 .. index:: XOF_CLOSE_FP
@@ -1888,15 +1897,23 @@ See also `Output Styles (XO_STYLE_\*)`_ and `Flags (XOF_\*)`_.
 xo_create_to_file
 ~~~~~~~~~~~~~~~~~
 
-By default, libxo writes output to standard output.  A convenience
-function is provided for situations when output should be written to
-a different file::
+.. c:function::
+  xo_handle_t *xo_create_to_file (FILE *fp, unsigned style, unsigned flags)
 
-    xo_handle_t *xo_create_to_file (FILE *fp, unsigned style,
-                                    unsigned flags);
+  The `xo_create_to_file` function is aconvenience function is
+  provided for situations when output should be written to a different
+  file, rather than the default of standard output.
 
-The `XOF_CLOSE_FP` flag can be set on the returned handle to trigger a
-call to fclose() for the FILE pointer when the handle is destroyed.
+  The `XOF_CLOSE_FP` flag can be set on the returned handle to trigger a
+  call to fclose() for the FILE pointer when the handle is destroyed,
+  avoiding the need for the caller to perform this task.
+
+  :param fp: FILE to use as base for this handle
+  :type fp: FILE *
+  :param xo_style_t style: Output style (XO_STYLE\_*)
+  :param xo_xof_flags_t flags: Flags for this handle (XOF\_*)
+  :return: New libxo handle
+  :rtype: xo_handle_t \*
 
 .. index:: xo_set_writer
 .. index:: xo_write_func_t
@@ -1906,43 +1923,47 @@ call to fclose() for the FILE pointer when the handle is destroyed.
 xo_set_writer
 ~~~~~~~~~~~~~
 
-The `xo_set_writer` function allows custom *write* functions which
-can tailor how libxo writes data.  An opaque argument is recorded and
-passed back to the write function, allowing the function to acquire
-context information. The *close* function can release this opaque data
-and any other resources as needed.  The *flush* function is called to
-flush buffered data associated with the opaque object::
+.. c:function::
+  void xo_set_writer (xo_handle_t *xop, void *opaque, \
+  xo_write_func_t write_func, xo_close_func_t close_func, \
+  xo_flush_func_t flush_func)
 
-    void xo_set_writer (xo_handle_t *xop, void *opaque,
-                        xo_write_func_t write_func,
-                        xo_close_func_t close_func);
-                        xo_flush_func_t flush_func);
+  The `xo_set_writer` function allows custom functions which can
+  tailor how libxo writes data.  The `opaque` argument is recorded and
+  passed back to the functions, allowing the function to acquire
+  context information. The *write_func* function writes data to the
+  output stream.  The *close_func* function can release this opaque
+  data and any other resources as needed.  The *flush_func* function
+  is called to flush buffered data associated with the opaque object.
 
-.. index:: xo_set_style
-
-xo_set_style
-~~~~~~~~~~~~
-
-To set the style, use the `xo_set_style` function::
-
-    void xo_set_style(xo_handle_t *xop, unsigned style);
-
-To use the default handle, pass a `NULL` handle::
-
-    xo_set_style(NULL, XO_STYLE_XML);
+  :param xop: Handle to modify (or NULL for default handle)
+  :type xop: xo_handle_t *
+  :param opaque: Pointer to opaque data passed to the given functions
+  :type opaque: void *
+  :param xo_write_func_t write_func: New write function
+  :param xo_close_func_t close_func: New close function
+  :param xo_flush_func_t flush_func: New flush function
+  :returns: void
 
 .. index:: xo_get_style
 
 xo_get_style
 ~~~~~~~~~~~~
 
-To find the current style, use the `xo_get_style` function::
+.. c:function:: xo_style_t xo_get_style(xo_handle_t *xop)
 
-    xo_style_t xo_get_style(xo_handle_t *xop);
+  Use the `xo_get_style` function to find the current output style for
+  a given handle.  To use the default handle, pass a `NULL` handle.
 
-To use the default handle, pass a `NULL` handle::
+  :param xop: Handle to interrogate (or NULL for default handle)
+  :type xop: xo_handle_t *
+  :returns: Output style (XO_STYLE\_*)
+  :rtype: xo_style_t
 
-    style = xo_get_style(NULL);
+  ::
+
+    EXAMPLE::
+        style = xo_get_style(NULL);
 
 .. index::  XO_STYLE_TEXT
 .. index::  XO_STYLE_XML
@@ -1963,17 +1984,49 @@ The libxo functions accept a set of output styles:
  XO_STYLE_HTML   HTML encoded data
 =============== =========================
 
+The "XML", "JSON", and "HTML" output styles all use the UTF-8
+character encoding.  "TEXT" using locale-based encoding.
+
+.. index:: xo_set_style
+
+xo_set_style
+~~~~~~~~~~~~
+
+.. c:function:: void xo_set_style(xo_handle_t *xop, xo_style_t style)
+
+  The `xo_set_style` function is used to change the output style
+  setting for a handle.  To use the default handle, pass a `NULL`
+  handle.
+
+  :param xop: Handle to modify
+  :type xop: xo_handle_t *
+  :param xo_style_t style: Output style (XO_STYLE\_*)
+  :returns: void
+
+  ::
+
+    EXAMPLE:
+        xo_set_style(NULL, XO_STYLE_XML);
+
 .. index:: xo_set_style_name
 
 xo_set_style_name
 ~~~~~~~~~~~~~~~~~
 
-The `xo_set_style_name` can be used to set the style based on a name
-encoded as a string::
+.. c:function:: int xo_set_style_name (xo_handle_t *xop, const char *style)
 
-    int xo_set_style_name (xo_handle_t *xop, const char *style);
+  The `xo_set_style_name` function can be used to set the style based
+  on a name encoded as a string: The name can be any of the supported
+  styles: "text", "xml", "json", or "html".
 
-The name can be any of the styles: "text", "xml", "json", or "html"::
+  :param xop: Handle for modify (or NULL for default handle)
+  :type xop: xo_handle_t \*
+  :param style: Text name of the style
+  :type style: const char \*
+  :returns: zero for success, non-zero for error
+  :rtype: int
+
+  ::
 
     EXAMPLE:
         xo_set_style_name(NULL, "html");
@@ -1983,13 +2036,20 @@ The name can be any of the styles: "text", "xml", "json", or "html"::
 xo_set_flags
 ~~~~~~~~~~~~
 
-To set the flags, use the `xo_set_flags` function::
+.. c:function:: void xo_set_flags(xo_handle_t *xop, xo_xof_flags_t flags)
 
-    void xo_set_flags(xo_handle_t *xop, unsigned flags);
+  :param xop: Handle for modify (or NULL for default handle)
+  :type xop: xo_handle_t \*
+  :param xo_xof_flags_t flags: Flags to add for the handle
+  :returns: void
 
-To use the default handle, pass a `NULL` handle::
+  Use the `xo_set_flags` function to turn on flags for a given libxo
+  handle.  To use the default handle, pass a `NULL` handle.
 
-    xo_set_style(NULL, XO_STYLE_XML);
+  ::
+
+    EXAMPLE:
+        xo_set_flags(NULL, XOF_PRETTY | XOF_WARN);
 
 .. index:: Flags; XOF_*
 .. index:: XOF_CLOSE_FP
@@ -2095,44 +2155,56 @@ the value "key"::
 xo_clear_flags
 ++++++++++++++
 
-The `xo_clear_flags` function turns off the given flags in a specific
-handle::
+.. c:function:: void xo_clear_flags (xo_handle_t *xop, xo_xof_flags_t flags)
 
-    void xo_clear_flags (xo_handle_t *xop, xo_xof_flags_t flags);
+  :param xop: Handle for modify (or NULL for default handle)
+  :type xop: xo_handle_t \*
+  :param xo_xof_flags_t flags: Flags to clear for the handle
+  :returns: void
+
+  Use the `xo_clear_flags` function to turn off the given flags in a
+  specific handle.  To use the default handle, pass a `NULL` handle.
 
 .. index:: xo_set_options
 
 xo_set_options
 ++++++++++++++
 
-The `xo_set_options` function accepts a comma-separated list of styles
-and flags and enables them for a specific handle::
+.. c:function:: int xo_set_options (xo_handle_t *xop, const char *input)
 
-    int xo_set_options (xo_handle_t *xop, const char *input);
+  :param xop: Handle for modify (or NULL for default handle)
+  :type xop: xo_handle_t \*
+  :param input: string containing options to set
+  :type input: const char *
+  :returns: zero for success, non-zero for error
+  :rtype: int
 
-The options are identical to those listed in `Command-line Arguments`_.
+  The `xo_set_options` function accepts a comma-separated list of
+  output styles and modifier flags and enables them for a specific
+  handle.  The options are identical to those listed in `Command-line
+  Arguments`_.  To use the default handle, pass a `NULL` handle.
 
 .. index:: xo_destroy
 
 xo_destroy
 ++++++++++
 
-The `xo_destroy` function releases a handle and any resources it is
-using.  Calling `xo_destroy` with a `NULL` handle will release any
-resources associated with the default handle::
+.. c:function:: void xo_destroy(xo_handle_t *xop)
 
-    void xo_destroy(xo_handle_t *xop);
+  :param xop: Handle for modify (or NULL for default handle)
+  :type xop: xo_handle_t \*
+  :returns: void  
+
+  The `xo_destroy` function releases a handle and any resources it is
+  using.  Calling `xo_destroy` with a `NULL` handle will release any
+  resources associated with the default handle.
 
 .. index:: xo_emit
 
 Emitting Content (xo_emit)
 --------------------------
 
-The following functions are used to emit output::
-
-    int xo_emit (const char *fmt, ...);
-    int xo_emit_h (xo_handle_t *xop, const char *fmt, ...);
-    int xo_emit_hv (xo_handle_t *xop, const char *fmt, va_list vap);
+The functions in this section are used to emit output.
 
 The "fmt" argument is a string containing field descriptors as
 specified in `Format Strings`_.  The use of a handle is optional and
@@ -2146,50 +2218,120 @@ string, since an inappropriate cast can ruin your day.  The vap
 argument to `xo_emit_hv` points to a variable argument list that can
 be used to retrieve arguments via `va_arg`.
 
+.. c:function:: int xo_emit (const char *fmt, ...)
+
+  :param fmt: The format string, followed by zero or more arguments
+  :returns: If XOF_COLUMNS is set, the number of columns used; otherwise the number of bytes emitted
+  :rtype: int
+
+.. c:function:: int xo_emit_h (xo_handle_t *xop, const char *fmt, ...)
+
+  :param xop: Handle for modify (or NULL for default handle)
+  :type xop: xo_handle_t \*
+  :param fmt: The format string, followed by zero or more arguments
+  :returns: If XOF_COLUMNS is set, the number of columns used; otherwise the number of bytes emitted
+  :rtype: int
+
+.. c:function:: int xo_emit_hv (xo_handle_t *xop, const char *fmt, va_list vap)
+
+  :param xop: Handle for modify (or NULL for default handle)
+  :type xop: xo_handle_t \*
+  :param fmt: The format string
+  :param va_list vap: A set of variadic arguments
+  :returns: If XOF_COLUMNS is set, the number of columns used; otherwise the number of bytes emitted
+  :rtype: int
+
 .. index:: xo_emit_field
 
 Single Field Emitting Functions (xo_emit_field)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The following functions can also make output, but only make a single
-field at a time::
+The functions in this section can also make output, but only make a
+single field at a time.  These functions are intended to avoid the
+scenario where one would otherwise need to compose a format
+descriptors using `snprintf`.  The individual parts of the format
+descriptor are passed in distinctly.
 
-    int xo_emit_field (const char *rolmod, const char *contents,
-	         const char *fmt, const char *efmt, ...);
+.. c:function:: int xo_emit_field (const char *rolmod, const char *contents, const char *fmt, const char *efmt, ...)
 
-    int xo_emit_field_h (xo_handle_t *xop, const char *rolmod,
-                 const char *contents, const char *fmt,
-		 const char *efmt, ...);
+  :param rolmod: A comma-separated list of field roles and field modifiers
+  :type rolmod: const char *
+  :param contents: The "contents" portion of the field description string
+  :type contents: const char *
+  :param fmt: Content format string
+  :type fmt: const char *
+  :param efmt: Encoding format string, followed by additional arguments
+  :type efmt: const char *
+  :returns: If XOF_COLUMNS is set, the number of columns used; otherwise the number of bytes emitted
+  :rtype: int
 
-    int xo_emit_field_hv (xo_handle_t *xop, const char *rolmod,
-                  const char *contents, const char *fmt,
-		  const char *efmt, va_list vap);
+  ::
 
-These functions are intended to avoid the scenario where one
-would otherwise need to compose a format descriptors using
-`snprintf`.  The individual parts of the format descriptor are
-passed in distinctly::
+    EXAMPLE::
+        xo_emit_field("T", "Host name is ", NULL, NULL);
+        xo_emit_field("V", "host-name", NULL, NULL, host-name);
 
-    xo_emit("T", "Host name is ", NULL, NULL);
-    xo_emit("V", "host-name", NULL, NULL, host-name);
+.. c:function:: int xo_emit_field_h (xo_handle_t *xop, const char *rolmod, const char *contents, const char *fmt, const char *efmt, ...)
+
+  :param xop: Handle for modify (or NULL for default handle)
+  :type xop: xo_handle_t \*
+  :param rolmod: A comma-separated list of field roles and field modifiers
+  :type rolmod: const char *
+  :param contents: The "contents" portion of the field description string
+  :type contents: const char *
+  :param fmt: Content format string
+  :type fmt: const char *
+  :param efmt: Encoding format string, followed by additional arguments
+  :type efmt: const char *
+  :returns: If XOF_COLUMNS is set, the number of columns used; otherwise the number of bytes emitted
+  :rtype: int
+
+.. c:function:: int xo_emit_field_hv (xo_handle_t *xop, const char *rolmod, const char *contents, const char *fmt, const char *efmt, va_list vap)
+
+  :param xop: Handle for modify (or NULL for default handle)
+  :type xop: xo_handle_t \*
+  :param rolmod: A comma-separated list of field roles and field modifiers
+  :type rolmod: const char *
+  :param contents: The "contents" portion of the field description string
+  :type contents: const char *
+  :param fmt: Content format string
+  :type fmt: const char *
+  :param efmt: Encoding format string
+  :type efmt: const char *
+  :param va_list vap: A set of variadic arguments
+  :returns: If XOF_COLUMNS is set, the number of columns used; otherwise the number of bytes emitted
+  :rtype: int
 
 .. index:: xo_attr
 
 Attributes (xo_attr)
 ~~~~~~~~~~~~~~~~~~~~
 
-The `xo_attr` function emits attributes for the XML output style::
+The functions in this section emit an XML attribute with the given name
+and value.  This only affects the XML output style.
 
-    int xo_attr (const char *name, const char *fmt, ...);
-    int xo_attr_h (xo_handle_t *xop, const char *name,
-                   const char *fmt, ...);
-    int xo_attr_hv (xo_handle_t *xop, const char *name,
-                   const char *fmt, va_list vap);
-
-The name parameter give the name of the attribute to be encoded.  The
-fmt parameter gives a printf-style format string used to format the
+The `name` parameter give the name of the attribute to be encoded.  The
+`fmt` parameter gives a printf-style format string used to format the
 value of the attribute using any remaining arguments, or the vap
-parameter passed to `xo_attr_hv`::
+parameter passed to `xo_attr_hv`.
+
+All attributes recorded via `xo_attr` are placed on the next
+container, instance, leaf, or leaf list that is emitted.
+
+Since attributes are only emitted in XML, their use should be limited
+to meta-data and additional or redundant representations of data
+already emitted in other form.
+
+.. c:function:: int xo_attr (const char *name, const char *fmt, ...)
+
+  :param name: Attribute name
+  :type name: const char *
+  :param fmt: Attribute value, as variadic arguments
+  :type fmt: const char *
+  :returns: -1 for error, or the number of bytes in the formatted attribute value
+  :rtype: int
+
+  ::
 
     EXAMPLE:
       xo_attr("seconds", "%ld", (unsigned long) login_time);
@@ -2199,29 +2341,48 @@ parameter passed to `xo_attr_hv`::
     XML:
         <login-time seconds="1408336270">00:14</login-time>
 
-All attributes recorded via `xo_attr` are placed on the next
-container, instance, leaf, or leaf list that is emitted.
 
-Since attributes are only emitted in XML, their use should be limited
-to meta-data and additional or redundant representations of data
-already emitted in other form.
+.. c:function:: int xo_attr_h (xo_handle_t *xop, const char *name, const char *fmt, ...)
+
+  :param xop: Handle for modify (or NULL for default handle)
+  :type xop: xo_handle_t \*
+
+  The `xo_attr_h` function follows the conventions of `xo_attr` but
+  adds an explicit libxo handle.
+
+.. c:function:: int xo_attr_hv (xo_handle_t *xop, const char *name, const char *fmt, va_list vap)
+
+  The `xo_attr_h` function follows the conventions of `xo_attr_h`
+  but replaced the variadic list with a variadic pointer.
 
 .. index:: xo_flush
 
 Flushing Output (xo_flush)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-libxo buffers data, both for performance and consistency, but also to
-allow some advanced features to work properly.  At various times, the
-caller may wish to flush any data buffered within the library.  The
-`xo_flush` call is used for this::
+.. c:function:: xo_ssize_t xo_flush (void)
 
-    void xo_flush (void);
-    void xo_flush_h (xo_handle_t *xop);
+  :returns: -1 for error, or the number of bytes generated
+  :rtype: xo_ssize_t
 
-Calling `xo_flush` also triggers the flush function associated with
-the handle.  For the default handle, this is equivalent to
-"fflush(stdio);".
+  libxo buffers data, both for performance and consistency, but also
+  to allow for the proper function of various advanced features.  At
+  various times, the caller may wish to flush any data buffered within
+  the library.  The `xo_flush` call is used for this.
+
+  Calling `xo_flush` also triggers the flush function associated with
+  the handle.  For the default handle, this is equivalent to
+  "fflush(stdio);".
+
+.. c:function:: xo_ssize_t xo_flush_h (xo_handle_t *xop)
+
+  :param xop: Handle for flush (or NULL for default handle)
+  :type xop: xo_handle_t \*
+  :returns: -1 for error, or the number of bytes generated
+  :rtype: xo_ssize_t
+
+  The `xo_flush_h` function follows the conventions of `xo_flush`,
+  but adds an explicit libxo handle.
 
 .. index:: xo_finish
 .. index:: xo_finish_atexit
@@ -2231,18 +2392,30 @@ Finishing Output (xo_finish)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 When the program is ready to exit or close a handle, a call to
-`xo_finish` is required.  This flushes any buffered data, closes
-open libxo constructs, and completes any pending operations::
-
-    int xo_finish (void);
-    int xo_finish_h (xo_handle_t *xop);
-    void xo_finish_atexit (void);
+`xo_finish` or `xo_finish_h` is required.  This flushes any buffered
+data, closes open libxo constructs, and completes any pending
+operations.
 
 Calling this function is vital to the proper operation of libxo,
 especially for the non-TEXT output styles.
 
-libxo includes a function named `xo_finish_atexit` is suitable for
-use with :manpage:`atexit(3)`.
+.. c:function:: xo_ssize_t xo_finish (void)
+
+  :returns: -1 on error, or the number of bytes flushed
+  :rtype: xo_ssize_t
+
+.. c:function:: xo_ssize_t xo_finish_h (xo_handle_t *xop)
+
+  :param xop: Handle for finish (or NULL for default handle)
+  :type xop: xo_handle_t \*
+  :returns: -1 on error, or the number of bytes flushed
+  :rtype: xo_ssize_t
+
+.. c:function:: void xo_finish_atexit (void)
+
+  The `xo_finish_atexit` function is suitable for use with
+  :manpage:`atexit(3)` to ensure that `xo_finish` is called
+  on the default handle when the application exits.
 
 .. index:: UTF-8
 .. index:: xo_open_container
@@ -2252,39 +2425,48 @@ Emitting Hierarchy
 ------------------
 
 libxo represents to types of hierarchy: containers and lists.  A
-container appears once under a given parent where a list contains
+container appears once under a given parent where a list consists of
 instances that can appear multiple times.  A container is used to hold
 related fields and to give the data organization and scope.
 
-To create a container, use the xo_open_container and
-xo_close_container functions::
+Containers
+~~~~~~~~~~
 
-    int xo_open_container (const char *name);
-    int xo_open_container_h (xo_handle_t *xop, const char *name);
-    int xo_open_container_hd (xo_handle_t *xop, const char *name);
-    int xo_open_container_d (const char *name);
+To create a container, use the `xo_open_container` and
+`xo_close_container` functions.
 
-    int xo_close_container (const char *name);
-    int xo_close_container_h (xo_handle_t *xop, const char *name);
-    int xo_close_container_hd (xo_handle_t *xop);
-    int xo_close_container_d (void);
+.. c:function:: xo_ssize_t xo_open_container (const char *name)
 
-The name parameter gives the name of the container, encoded in UTF-8.
-Since ASCII is a proper subset of UTF-8, traditional C strings can be
-used directly.
+  :param name: Name of the container
+  :type name: const char *
+  :returns: -1 on error, or the number of bytes generated
+  :rtype: xo_ssize_t
 
-The close functions with the "_d" suffix are used in "Do The Right
-Thing" mode, where the name of the open containers, lists, and
-instances are maintained internally by libxo to allow the caller to
-avoid keeping track of the open container name.
+  The `name` parameter gives the name of the container, encoded in
+  UTF-8.  Since ASCII is a proper subset of UTF-8, traditional C
+  strings can be used directly.
 
-.. index:: XOF_WARN
+.. c:function:: int xo_open_container_h (xo_handle_t *xop, const char *name)
+.. c:function:: int xo_open_container_hd (xo_handle_t *xop, const char *name)
 
-Use the XOF_WARN flag to generate a warning if the name given on the
-close does not match the current open container.
+  The functions with the "_d" suffix are used in "Do The Right Thing"
+  mode, where the name of the open containers, lists, and instances
+  are maintained internally by libxo to allow the caller to avoid
+  keeping track of the open container name.
+
+.. c:function:: int xo_open_container_d (const char *name)
+
+.. c:function:: int xo_close_container (const char *name)
+.. c:function:: int xo_close_container_h (xo_handle_t *xop, const char *name)
+.. c:function:: int xo_close_container_hd (xo_handle_t *xop)
+.. c:function:: int xo_close_container_d (void)
+
+Use the :index:`XOF_WARN` flag to generate a warning if the name given
+on the close does not match the current open container.
 
 For TEXT and HTML output, containers are not rendered into output
-text, though for HTML they are used when the XOF_XPATH flag is set::
+text, though for HTML they are used to record an XPath value when the
+:index:`XOF_XPATH` flag is set::
 
     EXAMPLE:
        xo_open_container("system");
@@ -2302,14 +2484,64 @@ Lists and Instances
 ~~~~~~~~~~~~~~~~~~~
 
 Lists are sequences of instances of homogeneous data objects.  Two
-distinct levels of calls are needed to represent them in our output
-styles.  Calls must be made to open and close a list, and for each
-instance of data in that list, calls must be make to open and close
-that instance.
+distinct levels of calls are needed to represent them in the supported
+output styles.  Calls must be made to open and close a list, and for
+each instance of data in that list, calls must be make to open and
+close that instance.
 
 The name given to all calls must be identical, and it is strongly
 suggested that the name be singular, not plural, as a matter of
-style and usage expectations::
+style and usage expectations.
+
+
+xo_ssize_t
+xo_open_list_h (xo_handle_t *xop, const char *name);
+
+xo_ssize_t
+xo_open_list (const char *name);
+
+xo_ssize_t
+xo_open_list_hd (xo_handle_t *xop, const char *name);
+
+xo_ssize_t
+xo_open_list_d (const char *name);
+
+xo_ssize_t
+xo_close_list_h (xo_handle_t *xop, const char *name);
+
+xo_ssize_t
+xo_close_list (const char *name);
+
+xo_ssize_t
+xo_close_list_hd (xo_handle_t *xop);
+
+xo_ssize_t
+xo_close_list_d (void);
+
+xo_ssize_t
+xo_open_instance_h (xo_handle_t *xop, const char *name);
+
+xo_ssize_t
+xo_open_instance (const char *name);
+
+xo_ssize_t
+xo_open_instance_hd (xo_handle_t *xop, const char *name);
+
+xo_ssize_t
+xo_open_instance_d (const char *name);
+
+xo_ssize_t
+xo_close_instance_h (xo_handle_t *xop, const char *name);
+
+xo_ssize_t
+xo_close_instance (const char *name);
+
+xo_ssize_t
+xo_close_instance_hd (xo_handle_t *xop);
+
+xo_ssize_t
+xo_close_instance_d (void);
+
 
     EXAMPLE:
         xo_open_list("user");
