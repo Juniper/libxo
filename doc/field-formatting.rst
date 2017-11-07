@@ -185,7 +185,7 @@ Characters Outside of Field Definitions
 Characters in the format string that are not part of a field
 definition are copied to the output for the TEXT style, and are
 ignored for the JSON and XML styles.  For HTML, these characters are
-placed in a <div> with class "text".
+placed in a <div> with class "text"::
 
   EXAMPLE:
       xo_emit("The hat is {:size/%s}.\n", size_val);
