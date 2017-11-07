@@ -43,12 +43,15 @@ templates_path = ['_templates']
 source_suffix = '.rst'
 
 # The master toctree document.
-master_doc = 'libxo'
+master_doc = 'index'
 
 # General information about the project.
 project = 'libxo'
 copyright = '2017, Juniper Networks'
 author = 'Phil Shafer'
+default_role = 'code'
+primary_domain = 'c'
+smart_quotes = False
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
