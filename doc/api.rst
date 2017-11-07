@@ -517,10 +517,10 @@ already emitted in other form.
   ::
 
     EXAMPLE:
-      xo_attr("seconds", "%ld", (unsigned long) login_time);
-      struct tm *tmp = localtime(login_time);
-      strftime(buf, sizeof(buf), "%R", tmp);
-      xo_emit("Logged in at {:login-time}\n", buf);
+        xo_attr("seconds", "%ld", (unsigned long) login_time);
+        struct tm *tmp = localtime(login_time);
+        strftime(buf, sizeof(buf), "%R", tmp);
+        xo_emit("Logged in at {:login-time}\n", buf);
     XML:
         <login-time seconds="1408336270">00:14</login-time>
 
@@ -741,15 +741,15 @@ suggested that the name be singular, not plural, as a matter of
 style and usage expectations::
 
   EXAMPLE:
-    xo_open_list("item");
+      xo_open_list("item");
 
-    for (ip = list; ip->i_title; ip++) {
-        xo_open_instance("item");
-        xo_emit("{L:Item} '{:name/%s}':\n", ip->i_title);
-        xo_close_instance("item");
-    }
+      for (ip = list; ip->i_title; ip++) {
+          xo_open_instance("item");
+          xo_emit("{L:Item} '{:name/%s}':\n", ip->i_title);
+          xo_close_instance("item");
+      }
 
-    xo_close_list("item");
+      xo_close_list("item");
 
 Getting the list and instance calls correct is critical to the proper
 generation of XML and JSON data.
@@ -889,12 +889,12 @@ used to ensure that any constructs opened by the function are closed
 properly::
 
   EXAMPLE:
-    for (i = 0; fish[i]; i++) {
-        xo_open_instance("fish");
-        xo_open_marker("fish-guts");
-        dump_fish_details(i);
-        xo_close_marker("fish-guts");
-    }
+      for (i = 0; fish[i]; i++) {
+          xo_open_instance("fish");
+          xo_open_marker("fish-guts");
+          dump_fish_details(i);
+          xo_close_marker("fish-guts");
+      }
 
 .. c:function:: xo_ssize_t xo_open_marker(const char *name)
 
@@ -1405,14 +1405,15 @@ xo_vsyslog
   xo_vsyslog is identical in function to xo_syslog, but takes the set of
   arguments using a va_list::
 
-    void
-    my_log (const char *name, const char *fmt, ...)
-    {
-        va_list vap;
-        va_start(vap, fmt);
-        xo_vsyslog(LOG_ERR, name, fmt, vap);
-        va_end(vap);
-    }
+    EXAMPLE:
+        void
+        my_log (const char *name, const char *fmt, ...)
+        {
+            va_list vap;
+            va_start(vap, fmt);
+            xo_vsyslog(LOG_ERR, name, fmt, vap);
+            va_end(vap);
+        }
 
 .. index:: xo_open_log
 
@@ -1457,8 +1458,8 @@ xo_set_logmask
   or `LOG_UPTO(toppri)` to create a mask for all priorities up to and
   including toppri::
 
-    Example:
-      setlogmask(LOG_UPTO(LOG_WARN));
+    EXAMPLE:
+        setlogmask(LOG_UPTO(LOG_WARN));
 
 .. index:: xo_set_syslog_enterprise_id
 
