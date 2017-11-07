@@ -50,13 +50,13 @@ descriptor will be placed as a UTF-8 string (const char \*) argument
 within the xo_emit parameters::
 
     EXAMPLE:
-      xo_emit("{La:} {a:}\n", "Label text", "label", "value");
+        xo_emit("{La:} {a:}\n", "Label text", "label", "value");
     TEXT:
-      Label text value
+        Label text value
     JSON:
-      "label": "value"
+        "label": "value"
     XML:
-      <label>value</label>
+        <label>value</label>
 
 The argument modifier allows field names for value fields to be passed
 on the stack, avoiding the need to build a field descriptor using
@@ -75,9 +75,9 @@ The Colon Modifier ({c:})
 The colon modifier appends a single colon to the data value::
 
     EXAMPLE:
-      xo_emit("{Lc:Name}{:name}\n", "phil");
+        xo_emit("{Lc:Name}{:name}\n", "phil");
     TEXT:
-      Name:phil
+        Name:phil
 
 The colon modifier is only used for the TEXT and HTML output
 styles. It is commonly combined with the space modifier ('{w:}').
@@ -95,11 +95,11 @@ The display modifier indicated the field should only be generated for
 the display output styles, TEXT and HTML::
 
     EXAMPLE:
-      xo_emit("{Lcw:Name}{d:name} {:id/%d}\n", "phil", 1);
+        xo_emit("{Lcw:Name}{d:name} {:id/%d}\n", "phil", 1);
     TEXT:
-      Name: phil 1
+        Name: phil 1
     XML:
-      <id>1</id>
+        <id>1</id>
 
 The display modifier is the opposite of the encoding modifier, and
 they are often used to give to distinct views of the underlying data.
@@ -116,11 +116,11 @@ The display modifier indicated the field should only be generated for
 the display output styles, TEXT and HTML::
 
     EXAMPLE:
-      xo_emit("{Lcw:Name}{:name} {e:id/%d}\n", "phil", 1);
+        xo_emit("{Lcw:Name}{:name} {e:id/%d}\n", "phil", 1);
     TEXT:
-      Name: phil
+        Name: phil
     XML:
-      <name>phil</name><id>1</id>
+        <name>phil</name><id>1</id>
 
 The encoding modifier is the opposite of the display modifier, and
 they are often used to give to distinct views of the underlying data.
@@ -257,10 +257,10 @@ xo_emit applies a simple heuristic to determine whether quotes are
 needed, but often this needs to be controlled by the caller::
 
     EXAMPLE:
-      const char *bool = is_true ? "true" : "false";
-      xo_emit("{n:fancy/%s}", bool);
+        const char *bool = is_true ? "true" : "false";
+        xo_emit("{n:fancy/%s}", bool);
     JSON:
-      "fancy": true
+        "fancy": true
 
 .. index:: Field Modifiers; Plural
 .. _plural-modifier:
@@ -305,9 +305,9 @@ xo_emit applies a simple heuristic to determine whether quotes are
 needed, but often this needs to be controlled by the caller::
 
     EXAMPLE:
-      xo_emit("{q:time/%d}", 2014);
+        xo_emit("{q:time/%d}", 2014);
     JSON:
-      "year": "2014"
+        "year": "2014"
 
 The heuristic is based on the format; if the format uses any of the
 following conversion specifiers, then no quotes are used::
@@ -326,9 +326,9 @@ The trim modifier removes any leading or trailing whitespace from
 the value::
 
     EXAMPLE:
-      xo_emit("{t:description}", "   some  input   ");
+        xo_emit("{t:description}", "   some  input   ");
     JSON:
-      "description": "some input"
+        "description": "some input"
 
 .. index:: Field Modifiers; White Space
 .. _white-space-modifier:
@@ -341,9 +341,9 @@ The White Space Modifier ({w:})
 The white space modifier appends a single space to the data value::
 
     EXAMPLE:
-      xo_emit("{Lw:Name}{:name}\n", "phil");
+        xo_emit("{Lw:Name}{:name}\n", "phil");
     TEXT:
-      Name phil
+        Name phil
 
 The white space modifier is only used for the TEXT and HTML output
 styles. It is commonly combined with the colon modifier ('{c:}').
