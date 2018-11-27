@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Juniper Networks, Inc.
+ * Copyright (c) 2014-2018, Juniper Networks, Inc.
  * All rights reserved.
  * This SOFTWARE is licensed under the LICENSE provided in the
  * ../Copyright file. By downloading, installing, copying, or otherwise
@@ -102,6 +102,7 @@ typedef unsigned long long xo_xof_flags_t;
 #define XOF_RETAIN_NONE	XOF_BIT(31) /** Prevent use of XOEF_RETAIN */
 
 #define XOF_COLOR_MAP	XOF_BIT(32) /** Color map has been initialized */
+#define XOF_CONTINUATION XOF_BIT(33) /** Continuation of previous line */
 
 typedef unsigned xo_emit_flags_t; /* Flags to xo_emit() and friends */
 #define XOEF_RETAIN	(1<<0)	  /* Retain parsed formatting information */
