@@ -36,6 +36,10 @@ using the same commands that emit text output.
 .Bl -tag -width indent
 .It Ic --close Ar path
 Close tags for the given path
+.It Ic -C | Ic --continuation
+Indicates this output is a continuation of the previous output data
+and should appear on the same line.
+This is allows HTML output to be constructed correctly.
 .It Ic --depth Ar num
 Set the depth for pretty printing
 .It Ic --help
