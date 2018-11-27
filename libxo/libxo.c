@@ -2600,6 +2600,12 @@ xo_line_ensure_open (xo_handle_t *xop, xo_xff_flags_t flags UNUSED)
     static char div_open[] = "<div class=\"line\">";
     static char div_open_blank[] = "<div class=\"blank-line\">";
 
+    if (XOF_ISSET(xop, XOF_CONTINUATION)) {
+	XOF_CLEAR(xop, XOF_CONTINUATION);
+	XOIF_SET(xop, XOIF_DIV_OPEN);
+	return;
+    }
+
     if (XOIF_ISSET(xop, XOIF_DIV_OPEN))
 	return;
 
