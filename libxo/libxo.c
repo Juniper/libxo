@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Juniper Networks, Inc.
+ * Copyright (c) 2014-2018, Juniper Networks, Inc.
  * All rights reserved.
  * This SOFTWARE is licensed under the LICENSE provided in the
  * ../Copyright file. By downloading, installing, copying, or otherwise
@@ -7033,7 +7033,7 @@ xo_do_close_container (xo_handle_t *xop, const char *name)
 
     case XO_STYLE_JSON:
 	pre_nl = XOF_ISSET(xop, XOF_PRETTY) ? "\n" : "";
-	ppn = (xop->xo_depth <= 1) ? "\n" : "";
+	ppn = (xop->xo_depth <= 1) ? pre_nl : "";
 
 	xo_depth_change(xop, name, -1, -1, XSS_CLOSE_CONTAINER, 0);
 	rc = xo_printf(xop, "%s%*s}%s", pre_nl, xo_indent(xop), "", ppn);
