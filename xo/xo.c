@@ -194,6 +194,7 @@ print_help (void)
     fprintf(stderr,
 "Usage: xo [options] format [fields]\n"
 "    --close <path>        Close tags for the given path\n"
+"    --continuation OR -C  Output belongs on same line as previous output\n"
 "    --depth <num>         Set the depth for pretty printing\n"
 "    --help                Display this help text\n"
 "    --html OR -H          Generate HTML output\n"
