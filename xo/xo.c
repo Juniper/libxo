@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Juniper Networks, Inc.
+ * Copyright (c) 2014-2018, Juniper Networks, Inc.
  * All rights reserved.
  * This SOFTWARE is licensed under the LICENSE provided in the
  * ../Copyright file. By downloading, installing, copying, or otherwise
@@ -226,6 +226,7 @@ static struct opts {
 
 static struct option long_opts[] = {
     { "close", required_argument, NULL, 'c' },
+    { "continuation", no_argument, NULL, 'C' },
     { "depth", required_argument, &opts.o_depth, 1 },
     { "help", no_argument, &opts.o_help, 1 },
     { "html", no_argument, NULL, 'H' },
@@ -260,9 +261,13 @@ main (int argc UNUSED, char **argv)
     if (argc < 0)
 	return 1;
 
-    while ((rc = getopt_long(argc, argv, "c:HJl:O:o:ps:TXW",
+    while ((rc = getopt_long(argc, argv, "Cc:HJl:O:o:ps:TXW",
 				long_opts, NULL)) != -1) {
 	switch (rc) {
+	case 'C':
+	    xo_set_flags(NULL, XOF_CONTINUATION);
+	    break;
+
 	case 'c':
 	    opt_closer = optarg;
 	    xo_set_flags(NULL, XOF_IGNORE_CLOSE);
