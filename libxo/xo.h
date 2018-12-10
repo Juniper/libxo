@@ -220,36 +220,36 @@ xo_ssize_t
 xo_emit_f (xo_emit_flags_t flags, const char *fmt, ...);
 
 PRINTFLIKE(2, 0)
-static inline int
+static inline xo_ssize_t
 xo_emit_hvp (xo_handle_t *xop, const char *fmt, va_list vap)
 {
     return xo_emit_hv(xop, fmt, vap);
 }
 
 PRINTFLIKE(2, 3)
-static inline int
+static inline xo_ssize_t
 xo_emit_hp (xo_handle_t *xop, const char *fmt, ...)
 {
     va_list vap;
     va_start(vap, fmt);
-    int rc = xo_emit_hv(xop, fmt, vap);
+    xo_ssize_t rc = xo_emit_hv(xop, fmt, vap);
     va_end(vap);
     return rc;
 }
 
 PRINTFLIKE(1, 2)
-static inline int
+static inline xo_ssize_t
 xo_emit_p (const char *fmt, ...)
 {
     va_list vap;
     va_start(vap, fmt);
-    int rc = xo_emit_hv(NULL, fmt, vap);
+    xo_ssize_t rc = xo_emit_hv(NULL, fmt, vap);
     va_end(vap);
     return rc;
 }
 
 PRINTFLIKE(3, 0)
-static inline int
+static inline xo_ssize_t
 xo_emit_hvfp (xo_handle_t *xop, xo_emit_flags_t flags,
 	      const char *fmt, va_list vap)
 {
@@ -257,23 +257,23 @@ xo_emit_hvfp (xo_handle_t *xop, xo_emit_flags_t flags,
 }
 
 PRINTFLIKE(3, 4)
-static inline int
+static inline xo_ssize_t
 xo_emit_hfp (xo_handle_t *xop, xo_emit_flags_t flags, const char *fmt, ...)
 {
     va_list vap;
     va_start(vap, fmt);
-    int rc = xo_emit_hvf(xop, flags, fmt, vap);
+    xo_ssize_t rc = xo_emit_hvf(xop, flags, fmt, vap);
     va_end(vap);
     return rc;
 }
 
 PRINTFLIKE(2, 3)
-static inline int
+static inline xo_ssize_t
 xo_emit_fp (xo_emit_flags_t flags, const char *fmt, ...)
 {
     va_list vap;
     va_start(vap, fmt);
-    int rc = xo_emit_hvf(NULL, flags, fmt, vap);
+    xo_ssize_t rc = xo_emit_hvf(NULL, flags, fmt, vap);
     va_end(vap);
     return rc;
 }
