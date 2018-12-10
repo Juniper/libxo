@@ -18,11 +18,11 @@
 .Sh SYNOPSIS
 .In libxo/xo.h
 .Ft void
-.Sy typedef int (*xo_write_func_t)(void *, const char *);
+.Sy typedef xo_ssize_t (*xo_write_func_t)(void *, const char *);
 .Pp
 .Sy typedef void (*xo_close_func_t)(void *);
 .Pp
-.Sy typedef int (*xo_flush_func_t)(void *);
+.Sy typedef xo_ssize_t (*xo_flush_func_t)(void *);
 .Fn xo_set_writer "xo_handle_t *handle" "void *opaque"
                         "xo_write_func_t write_func"
                         "xo_close_func_t close_func"
