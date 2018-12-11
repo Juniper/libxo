@@ -127,11 +127,11 @@ typedef struct xo_handle_s xo_handle_t; /* Handle for XO output */
  * sizes.  We want to fix this but allow for backwards compatibility
  * where needed.
  */
-#ifdef USE_INT_RETURN_CODES
+#ifdef XO_USE_INT_RETURN_CODES
 typedef int xo_ssize_t;		/* Buffer size */
-#else /* USE_INT_RETURN_CODES */
+#else /* XO_USE_INT_RETURN_CODES */
 typedef ssize_t xo_ssize_t;	/* Buffer size */
-#endif /* USE_INT_RETURN_CODES */
+#endif /* XO_USE_INT_RETURN_CODES */
 
 typedef xo_ssize_t (*xo_write_func_t)(void *, const char *);
 typedef void (*xo_close_func_t)(void *);
