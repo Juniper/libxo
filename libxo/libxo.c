@@ -607,6 +607,28 @@ xo_no_setlocale (void)
 }
 
 /*
+ * For XML, the first character of a tag cannot be numeric, but people
+ * will likely not notice.  So we people-proof them by forcing a leading
+ * underscore if they use invalid tags.  Note that this doesn't cover
+ * all broken tags, just this fairly specific case.
+ */
+static const char *
+xo_xml_leader_len (xo_handle_t *xop, const char *name, xo_ssize_t nlen)
+{
+    if (isalpha(name[0]) || name[0] == '_')
+        return "";
+
+    xo_failure(xop, "invalid XML tag name: '%.*s'", nlen, name);
+    return "_";
+}
+
+static const char *
+xo_xml_leader (xo_handle_t *xop, const char *name)
+{
+    return xo_xml_leader_len(xop, name, strlen(name));
+}
+
+/*
  * We need to decide if stdout is line buffered (_IOLBF).  Lacking a
  * standard way to decide this (e.g. getlinebuf()), we have configure
  * look to find __flbf, which glibc supported.  If not, we'll rely on
@@ -4343,6 +4365,8 @@ xo_format_value (xo_handle_t *xop, const char *name, ssize_t nlen,
     xo_buffer_t *xbp = &xop->xo_data;
     xo_humanize_save_t save;	/* Save values for humanizing logic */
 
+    const char *leader = xo_xml_leader_len(xop, name, nlen);
+
     switch (xo_style(xop)) {
     case XO_STYLE_TEXT:
 	if (flags & XFF_ENCODE_ONLY)
@@ -4397,6 +4421,8 @@ xo_format_value (xo_handle_t *xop, const char *name, ssize_t nlen,
 	if (pretty)
 	    xo_buf_indent(xop, -1);
 	xo_data_append(xop, "<", 1);
+        if (*leader)
+            xo_data_append(xop, leader, 1);
 	xo_data_escape(xop, name, nlen);
 
 	if (xop->xo_attrs.xb_curp != xop->xo_attrs.xb_bufp) {
@@ -4429,6 +4455,8 @@ xo_format_value (xo_handle_t *xop, const char *name, ssize_t nlen,
 	xo_simple_field(xop, FALSE, value, vlen, fmt, flen, flags);
 
 	xo_data_append(xop, "</", 2);
+        if (*leader)
+            xo_data_append(xop, leader, 1);
 	xo_data_escape(xop, name, nlen);
 	xo_data_append(xop, ">", 1);
 	if (pretty)
@@ -6931,11 +6959,12 @@ xo_do_open_container (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
 	name = XO_FAILURE_NAME;
     }
 
+    const char *leader = xo_xml_leader(xop, name);
     flags |= xop->xo_flags;	/* Pick up handle flags */
 
     switch (xo_style(xop)) {
     case XO_STYLE_XML:
-	rc = xo_printf(xop, "%*s<%s", xo_indent(xop), "", name);
+	rc = xo_printf(xop, "%*s<%s%s", xo_indent(xop), "", leader, name);
 
 	if (xop->xo_attrs.xb_curp != xop->xo_attrs.xb_bufp) {
 	    rc += xop->xo_attrs.xb_curp - xop->xo_attrs.xb_bufp;
@@ -7031,10 +7060,12 @@ xo_do_close_container (xo_handle_t *xop, const char *name)
 	}
     }
 
+    const char *leader = xo_xml_leader(xop, name);
+
     switch (xo_style(xop)) {
     case XO_STYLE_XML:
 	xo_depth_change(xop, name, -1, -1, XSS_CLOSE_CONTAINER, 0);
-	rc = xo_printf(xop, "%*s</%s>%s", xo_indent(xop), "", name, ppn);
+	rc = xo_printf(xop, "%*s</%s%s>%s", xo_indent(xop), "", leader, name, ppn);
 	break;
 
     case XO_STYLE_JSON:
@@ -7336,16 +7367,17 @@ xo_do_open_instance (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name)
     const char *ppn = XOF_ISSET(xop, XOF_PRETTY) ? "\n" : "";
     const char *pre_nl = "";
 
-    flags |= xop->xo_flags;
-
     if (name == NULL) {
 	xo_failure(xop, "NULL passed for instance name");
 	name = XO_FAILURE_NAME;
     }
 
+    const char *leader = xo_xml_leader(xop, name);
+    flags |= xop->xo_flags;
+
     switch (xo_style(xop)) {
     case XO_STYLE_XML:
-	rc = xo_printf(xop, "%*s<%s", xo_indent(xop), "", name);
+	rc = xo_printf(xop, "%*s<%s%s", xo_indent(xop), "", leader, name);
 
 	if (xop->xo_attrs.xb_curp != xop->xo_attrs.xb_bufp) {
 	    rc += xop->xo_attrs.xb_curp - xop->xo_attrs.xb_bufp;
@@ -7436,10 +7468,12 @@ xo_do_close_instance (xo_handle_t *xop, const char *name)
 	}
     }
 
+    const char *leader = xo_xml_leader(xop, name);
+
     switch (xo_style(xop)) {
     case XO_STYLE_XML:
 	xo_depth_change(xop, name, -1, -1, XSS_CLOSE_INSTANCE, 0);
-	rc = xo_printf(xop, "%*s</%s>%s", xo_indent(xop), "", name, ppn);
+	rc = xo_printf(xop, "%*s</%s%s>%s", xo_indent(xop), "", leader, name, ppn);
 	break;
 
     case XO_STYLE_JSON:
