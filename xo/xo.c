@@ -208,6 +208,7 @@ print_help (void)
 "    --style <style> OR -s <style>  "
 	    "Generate given style (xml, json, text, html)\n"
 "    --text OR -T          Generate text output (the default style)\n"
+"    --top-wrap            Generate a top-level object wrapper\n"
 "    --version             Display version information\n"
 "    --warn OR -W          Display warnings in text on stderr\n"
 "    --warn-xml            Display warnings in xml on stdout\n"
@@ -224,6 +225,7 @@ static struct opts {
     int o_version;
     int o_warn_xml;
     int o_wrap;
+    int o_top_wrap;
 } opts;
 
 static struct option long_opts[] = {
@@ -240,6 +242,7 @@ static struct option long_opts[] = {
     { "pretty", no_argument, NULL, 'p' },
     { "style", required_argument, NULL, 's' },
     { "text", no_argument, NULL, 'T' },
+    { "top-wrap", no_argument, &opts.o_top_wrap, 1 },
     { "xml", no_argument, NULL, 'X' },
     { "xpath", no_argument, &opts.o_xpath, 1 },
     { "version", no_argument, &opts.o_version, 1 },
@@ -257,6 +260,7 @@ main (int argc UNUSED, char **argv)
     char *opt_options = NULL;
     int opt_depth = 0;
     int opt_not_first = 0;
+    int opt_top_wrap = 0;
     int rc;
 
     argc = xo_parse_args(argc, argv);
@@ -346,6 +350,9 @@ main (int argc UNUSED, char **argv)
 	    } else if (opts.o_wrap) {
 		opt_wrapper = optarg;
 
+	    } else if (opts.o_top_wrap) {
+		opt_top_wrap = 1;
+
 	    } else {
 		print_help();
 		return 1;
@@ -378,8 +385,13 @@ main (int argc UNUSED, char **argv)
 	return 1;
     }
 
-    if (opt_not_first)
-	xo_set_flags(NULL, XOF_NOT_FIRST);
+    if (opt_top_wrap) {
+	/* If we have a closing path, we'll be one extra level deeper */
+	if (opt_closer)
+	    opt_depth += 1;
+	else
+	    xo_clear_flags(NULL, XOF_NO_TOP);
+    }
 
     if (opt_closer) {
 	opt_depth += 1;
@@ -395,6 +407,10 @@ main (int argc UNUSED, char **argv)
     if (opt_depth > 0)
 	xo_set_depth(NULL, opt_depth);
 
+    if (opt_not_first)
+	xo_set_flags(NULL, XOF_NOT_FIRST);
+
+    /* If there's an opening hierarchy, open each element as a container */
     if (opt_opener) {
 	for (cp = opt_opener; cp && *cp; cp = np) {
 	    np = strchr(cp, '/');
@@ -402,10 +418,11 @@ main (int argc UNUSED, char **argv)
 		*np = '\0';
 	    xo_open_container(cp);
 	    if (np)
-		*np++ = '/';
+		np += 1;
 	}
     }
 
+    /* If there's an wrapper hierarchy, open each element as a container */
     if (opt_wrapper) {
 	for (cp = opt_wrapper; cp && *cp; cp = np) {
 	    np = strchr(cp, '/');
@@ -413,16 +430,18 @@ main (int argc UNUSED, char **argv)
 		*np = '\0';
 	    xo_open_container(cp);
 	    if (np)
-		*np++ = '/';
+		*np++ = '/';	/* Put it back */
 	}
     }
 
+    /* If there's a format string, call xo_emit to emit the contents */
     if (fmt && *fmt) {
 	save_argv = argv;
 	prep_arg(fmt);
-	xo_emit(fmt);
+	xo_emit(fmt);		/* This call does the real formatting */
     }
-
+    
+    /* If there's an wrapper hierarchy, close each element's container */
     while (opt_wrapper) {
 	np = strrchr(opt_wrapper, '/');
 	xo_close_container(np ? np + 1 : opt_wrapper);
@@ -432,6 +451,10 @@ main (int argc UNUSED, char **argv)
 	    opt_wrapper = NULL;
     }
 
+    /* Remember to undo the depth before calling xo_finish() */
+    opt_depth = (opt_closer && opt_top_wrap) ? -1 : 0;
+
+    /* If there's an closing hierarchy, close each element's container */
     while (opt_closer) {
 	np = strrchr(opt_closer, '/');
 	xo_close_container(np ? np + 1 : opt_closer);
@@ -440,6 +463,16 @@ main (int argc UNUSED, char **argv)
 	else
 	    opt_closer = NULL;
     }
+
+    /* If there's a closer and a wrapper, we need to clean it up */
+    if (opt_depth) {
+	xo_set_depth(NULL, opt_depth);
+	xo_clear_flags(NULL, XOF_NO_TOP);
+    }
+
+    /* If we're wrapping the entire content, skip the closer */
+    if (opt_top_wrap && opt_opener)
+	xo_set_flags(NULL, XOF_NO_TOP);
 
     xo_finish();
 
