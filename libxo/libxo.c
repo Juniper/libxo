@@ -321,6 +321,7 @@ struct xo_handle_s {
 
 #define XOIF_UNITS_PENDING XOF_BIT(4) /* We have a units-insertion pending */
 #define XOIF_INIT_IN_PROGRESS XOF_BIT(5) /* Init of handle is in progress */
+#define XOIF_MADE_OUTPUT XOF_BIT(6)	 /* Have already made output */
 
 /* Flags for formatting functions */
 typedef unsigned long xo_xff_flags_t;
@@ -4261,6 +4262,21 @@ xo_format_is_numeric (const char *fmt, ssize_t flen)
     return (strchr("diouDOUeEfFgG", *fmt) == NULL) ? FALSE : TRUE;
 }
 
+/*
+ * Update the stack flags using the object flags, allowing callers
+ * to monkey with the stack flags without even knowing they exist.
+ */
+static void
+xo_stack_set_flags (xo_handle_t *xop)
+{
+    if (XOF_ISSET(xop, XOF_NOT_FIRST)) {
+	xo_stack_t *xsp = &xop->xo_stack[xop->xo_depth];
+
+	xsp->xs_flags |= XSF_NOT_FIRST;
+	XOF_CLEAR(xop, XOF_NOT_FIRST);
+    }
+}
+
 static void
 xo_format_prep (xo_handle_t *xop, xo_xff_flags_t flags)
 {
@@ -4479,6 +4495,8 @@ xo_format_value (xo_handle_t *xop, const char *name, ssize_t nlen,
 	    fmt = xo_fix_encoding(xop, enc);
 	    flen = strlen(fmt);
 	}
+
+	xo_stack_set_flags(xop);
 
 	int first = (xop->xo_stack[xop->xo_depth].xs_flags & XSF_NOT_FIRST)
 	    ? 0 : 1;
@@ -6838,17 +6856,6 @@ xo_attr (const char *name, const char *fmt, ...)
 }
 
 static void
-xo_stack_set_flags (xo_handle_t *xop)
-{
-    if (XOF_ISSET(xop, XOF_NOT_FIRST)) {
-	xo_stack_t *xsp = &xop->xo_stack[xop->xo_depth];
-
-	xsp->xs_flags |= XSF_NOT_FIRST;
-	XOF_CLEAR(xop, XOF_NOT_FIRST);
-    }
-}
-
-static void
 xo_depth_change (xo_handle_t *xop, const char *name,
 		 int delta, int indent, xo_state_t state, xo_xsf_flags_t flags)
 {
@@ -7069,6 +7076,8 @@ xo_do_close_container (xo_handle_t *xop, const char *name)
 	break;
 
     case XO_STYLE_JSON:
+	xo_stack_set_flags(xop);
+
 	pre_nl = XOF_ISSET(xop, XOF_PRETTY) ? "\n" : "";
 	ppn = (xop->xo_depth <= 1) ? pre_nl : "";
 
@@ -7898,6 +7907,9 @@ xo_transition (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name,
 	if (xo_flush_h(xop))
 	    rc = -1;
 
+    /* We have now official made output */
+    XOIF_SET(xop, XOIF_MADE_OUTPUT);
+
     return rc;
 
  marker_prevents_close:
@@ -7990,7 +8002,7 @@ xo_flush (void)
 xo_ssize_t
 xo_finish_h (xo_handle_t *xop)
 {
-    const char *cp = "";
+    const char *open_if_empty = "";
     xop = xo_default(xop);
 
     if (!XOF_ISSET(xop, XOF_NO_CLOSE))
@@ -8001,9 +8013,12 @@ xo_finish_h (xo_handle_t *xop)
 	if (!XOF_ISSET(xop, XOF_NO_TOP)) {
 	    if (XOIF_ISSET(xop, XOIF_TOP_EMITTED))
 		XOIF_CLEAR(xop, XOIF_TOP_EMITTED); /* Turn off before output */
-	    else
-		cp = "{ ";
-	    xo_printf(xop, "%*s%s}\n",xo_indent(xop), "", cp);
+	    else if (!XOIF_ISSET(xop, XOIF_MADE_OUTPUT)) {
+		open_if_empty = "{ ";
+	    }
+
+	    xo_printf(xop, "%*s%s}\n",
+		      xo_indent(xop), "", open_if_empty);
 	}
 	break;
 
