@@ -6930,6 +6930,15 @@ xo_set_depth (xo_handle_t *xop, int depth)
 
     xop->xo_depth += depth;
     xop->xo_indent += depth;
+
+    /*
+     * Handling the "top wrapper" for JSON is a bit of a pain.  Here
+     * we need to detect that the depth has been changed to set the
+     * "XOIF_TOP_EMITTED" flag correctly.
+     */
+    if (xop->xo_style == XO_STYLE_JSON
+	&& !XOF_ISSET(xop, XOF_NO_TOP) && xop->xo_depth > 0)
+	XOIF_SET(xop, XOIF_TOP_EMITTED);
 }
 
 static xo_xsf_flags_t
@@ -7080,6 +7089,7 @@ xo_do_close_container (xo_handle_t *xop, const char *name)
 
 	pre_nl = XOF_ISSET(xop, XOF_PRETTY) ? "\n" : "";
 	ppn = (xop->xo_depth <= 1) ? pre_nl : "";
+	ppn = "";
 
 	xo_depth_change(xop, name, -1, -1, XSS_CLOSE_CONTAINER, 0);
 	rc = xo_printf(xop, "%s%*s}%s", pre_nl, xo_indent(xop), "", ppn);
@@ -8011,14 +8021,17 @@ xo_finish_h (xo_handle_t *xop)
     switch (xo_style(xop)) {
     case XO_STYLE_JSON:
 	if (!XOF_ISSET(xop, XOF_NO_TOP)) {
+	    const char *pre_nl = XOF_ISSET(xop, XOF_PRETTY) ? "\n" : "";
+
 	    if (XOIF_ISSET(xop, XOIF_TOP_EMITTED))
 		XOIF_CLEAR(xop, XOIF_TOP_EMITTED); /* Turn off before output */
 	    else if (!XOIF_ISSET(xop, XOIF_MADE_OUTPUT)) {
 		open_if_empty = "{ ";
+		pre_nl = "";
 	    }
 
-	    xo_printf(xop, "%*s%s}\n",
-		      xo_indent(xop), "", open_if_empty);
+	    xo_printf(xop, "%s%*s%s}\n",
+		      pre_nl, xo_indent(xop), "", open_if_empty);
 	}
 	break;
 
