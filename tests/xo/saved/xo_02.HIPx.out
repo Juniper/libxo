@@ -56,3 +56,10 @@
   <div class="text"> is </div>
   <div class="data" data-tag="city" data-xpath="/city">Raleigh</div>
 </div>
+<div class="line">
+  <div class="text">First </div>
+  <div class="data" data-tag="tag" data-xpath="/tag">value1</div>
+  <div class="text"> </div>
+  <div class="text">and then </div>
+  <div class="data" data-tag="tag" data-xpath="/tag">value2</div>
+</div>
