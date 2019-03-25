@@ -208,7 +208,7 @@ print_help (void)
 "    --style <style> OR -s <style>  "
 	    "Generate given style (xml, json, text, html)\n"
 "    --text OR -T          Generate text output (the default style)\n"
-"    --top-wrap            Generate a top-level object wrapper\n"
+"    --top-wrap            Generate a top-level object wrapper (JSON)\n"
 "    --version             Display version information\n"
 "    --warn OR -W          Display warnings in text on stderr\n"
 "    --warn-xml            Display warnings in xml on stdout\n"
@@ -387,7 +387,7 @@ main (int argc UNUSED, char **argv)
 
     if (opt_top_wrap) {
 	/* If we have a closing path, we'll be one extra level deeper */
-	if (opt_closer)
+	if (opt_closer && xo_get_style(NULL) == XO_STYLE_JSON)
 	    opt_depth += 1;
 	else
 	    xo_clear_flags(NULL, XOF_NO_TOP);
