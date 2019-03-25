@@ -38,4 +38,10 @@ ${XOP} "Answer:"
 ${XOP} --continuation "$@"
 ${XOP} --close answer
 
+${XOP} --top-wrap --open top/data
+${XOP} --depth 2 'First {:tag} ' value1
+${XOP} --depth 2 --continuation 'and then {:tag}\n' value2
+${XOP} --top-wrap --close top/data
+
+
 ${XOP} --help
