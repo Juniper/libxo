@@ -3,11 +3,11 @@
     <c>
       <state>North Carolina</state>
       <city>Raleigh</city>
-        <state>North Carolina</state>
-        <city>Raleigh</city>
-      </c>
-    </b>
-  </a>
+      <state>North Carolina</state>
+      <city>Raleigh</city>
+    </c>
+  </b>
+</a>
 <a>
   <b>
     <c>
@@ -29,11 +29,11 @@
             </f>
           </e>
         </d>
-        <state>North Carolina</state>
-        <city>Raleigh</city>
-      </c>
-    </b>
-  </a>
+      <state>North Carolina</state>
+      <city>Raleigh</city>
+    </c>
+  </b>
+</a>
 <a>
   <b>
     <c>
@@ -54,3 +54,9 @@
 <state>North Carolina</state>
 <city>Raleigh</city>
 </answer>
+<top>
+  <data>
+    <tag>value1</tag>
+    <tag>value2</tag>
+  </data>
+</top>
