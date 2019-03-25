@@ -75,7 +75,7 @@ prepend data to the XPath values used for HTML output style::
   EXAMPLE;
     #!/bin/sh
     xo --open top/data
-    xo --depth 2 '{tag}' value
+    xo --depth 2 '{:tag}' value
     xo --close top/data
   XML:
     <top>
@@ -90,6 +90,51 @@ prepend data to the XPath values used for HTML output style::
       }
     }
 
+When making partial lines of output (where the format string does not
+include a newline), use the `--continuation` option to let secondary
+invocations know they are adding data to an existing line.
+
+When emitting a series of objects, use the `--not-first` option to
+ensure that any details from the previous object (e.g. commas in JSON)
+are handled correctly.
+
+Use the `--top-wrap` option to ensure any top-level object details are
+handled correctly, e.g. wrap the entire output in a top-level set of
+braces for JSON output.
+
+  EXAMPLE;
+    #!/bin/sh
+    xo --top-wrap --open top/data
+    xo --depth 2 'First {:tag} ' value1
+    xo --depth 2 --continuation 'and then {:tag}\n' value2
+    xo --top-wrap --close top/data
+  TEXT:
+    First value1 and then value2
+  HTML:
+    <div class="line">
+      <div class="text">First </div>
+      <div class="data" data-tag="tag">value1</div>
+      <div class="text"> </div>
+      <div class="text">and then </div>
+      <div class="data" data-tag="tag">value2</div>
+    </div>
+  XML:
+    <top>
+      <data>
+        <tag>value1</tag>
+        <tag>value2</tag>
+      </data>
+    </top>
+  JSON:
+    {
+      "top": {
+        "data": {
+        "tag": "value1",
+        "tag": "value2"
+        }
+      }
+    } 
+
 Command Line Options
 --------------------
 
@@ -97,15 +142,19 @@ Command Line Options
 
   Usage: xo [options] format [fields]
     --close <path>        Close tags for the given path
+    --continuation OR -C  Output belongs on same line as previous output
     --depth <num>         Set the depth for pretty printing
     --help                Display this help text
     --html OR -H          Generate HTML output
     --json OR -J          Generate JSON output
     --leading-xpath <path> Add a prefix to generated XPaths (HTML)
+    --not-first           Indicate this object is not the first (JSON)
     --open <path>         Open tags for the given path
+    --option <opts> -or -O <opts>  Give formatting options
     --pretty OR -p        Make 'pretty' output (add indent, newlines)
     --style <style>       Generate given style (xml, json, text, html)
     --text OR -T          Generate text output (the default style)
+    --top-wrap            Generate a top-level object wrapper (JSON)
     --version             Display version information
     --warn OR -W          Display warnings in text on stderr
     --warn-xml            Display warnings in xml on stdout
