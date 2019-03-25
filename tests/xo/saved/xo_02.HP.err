@@ -12,7 +12,7 @@ Usage: xo [options] format [fields]
     --pretty OR -p        Make 'pretty' output (add indent, newlines)
     --style <style> OR -s <style>  Generate given style (xml, json, text, html)
     --text OR -T          Generate text output (the default style)
-    --top-wrap            Generate a top-level object wrapper
+    --top-wrap            Generate a top-level object wrapper (JSON)
     --version             Display version information
     --warn OR -W          Display warnings in text on stderr
     --warn-xml            Display warnings in xml on stdout
