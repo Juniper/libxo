@@ -2219,7 +2219,7 @@ xo_set_color_map (xo_handle_t *xop, char *value)
 {
 #ifdef LIBXO_TEXT_ONLY
     return;
-#endif /* LIBXO_TEXT_ONLY */
+#else /* LIBXO_TEXT_ONLY */
 
     char *cp, *ep, *vp, *np;
     ssize_t len = value ? strlen(value) + 1 : 0;
@@ -2252,6 +2252,7 @@ xo_set_color_map (xo_handle_t *xop, char *value)
     /* Fill in the rest of the colors with the defaults */
     for ( ; num < XO_NUM_COLORS; num++)
 	xop->xo_color_map_fg[num] = xop->xo_color_map_bg[num] = num;
+#endif /* LIBXO_TEXT_ONLY */
 }
 
 static int
@@ -4805,7 +4806,7 @@ xo_colors_parse (xo_handle_t *xop, xo_colors_t *xocp, char *str)
 {
 #ifdef LIBXO_TEXT_ONLY
     return;
-#endif /* LIBXO_TEXT_ONLY */
+#else /* LIBXO_TEXT_ONLY */
 
     char *cp, *ep, *np, *xp;
     ssize_t len = strlen(str);
@@ -4872,6 +4873,7 @@ xo_colors_parse (xo_handle_t *xop, xo_colors_t *xocp, char *str)
 	if (XOF_ISSET(xop, XOF_WARN))
 	    xo_failure(xop, "unknown color/effect string detected: '%s'", cp);
     }
+#endif /* LIBXO_TEXT_ONLY */
 }
 
 static inline int
@@ -4893,7 +4895,7 @@ xo_colors_update (xo_handle_t *xop, xo_colors_t *newp)
 {
 #ifdef LIBXO_TEXT_ONLY
     return;
-#endif /* LIBXO_TEXT_ONLY */
+#else /* LIBXO_TEXT_ONLY */
 
     xo_color_t fg = newp->xoc_col_fg;
     if (XOF_ISSET(xop, XOF_COLOR_MAP) && fg < XO_NUM_COLORS)
@@ -4904,6 +4906,7 @@ xo_colors_update (xo_handle_t *xop, xo_colors_t *newp)
     if (XOF_ISSET(xop, XOF_COLOR_MAP) && bg < XO_NUM_COLORS)
 	bg = xop->xo_color_map_bg[bg]; /* Fetch from color map */
     newp->xoc_col_bg = bg;
+#endif /* LIBXO_TEXT_ONLY */
 }
 
 static void
