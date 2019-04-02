@@ -15,6 +15,7 @@
 
 #include "xo_config.h"
 #include "xo.h"
+#include "xo_explicit.h"
 
 #include <getopt.h>		/* Include after xo.h for testing */
 
@@ -194,6 +195,8 @@ print_help (void)
     fprintf(stderr,
 "Usage: xo [options] format [fields]\n"
 "    --close <path>        Close tags for the given path\n"
+"    --close-instance <name> Close an open instance name\n"
+"    --close-list <name>   Close an open list name\n"
 "    --continuation OR -C  Output belongs on same line as previous output\n"
 "    --depth <num>         Set the depth for pretty printing\n"
 "    --help                Display this help text\n"
@@ -203,6 +206,8 @@ print_help (void)
 	    "Add a prefix to generated XPaths (HTML)\n"
 "    --not-first           Indicate this object is not the first (JSON)\n"
 "    --open <path>         Open tags for the given path\n"
+"    --open-instance <name> Open an instance given by name\n"
+"    --open-list <name>   Open a list given by name\n"
 "    --option <opts> -or -O <opts>  Give formatting options\n"
 "    --pretty OR -p        Make 'pretty' output (add indent, newlines)\n"
 "    --style <style> OR -s <style>  "
@@ -218,18 +223,24 @@ print_help (void)
 }
 
 static struct opts {
+    int o_close_instance;
+    int o_close_list;
     int o_depth;
     int o_help;
     int o_not_first;
-    int o_xpath;
+    int o_open_instance;
+    int o_open_list;
+    int o_top_wrap;
     int o_version;
     int o_warn_xml;
     int o_wrap;
-    int o_top_wrap;
+    int o_xpath;
 } opts;
 
 static struct option long_opts[] = {
     { "close", required_argument, NULL, 'c' },
+    { "close-instance", required_argument, &opts.o_close_instance, 1 },
+    { "close-list", required_argument, &opts.o_close_list, 1 },
     { "continuation", no_argument, NULL, 'C' },
     { "depth", required_argument, &opts.o_depth, 1 },
     { "help", no_argument, &opts.o_help, 1 },
@@ -238,6 +249,8 @@ static struct option long_opts[] = {
     { "leading-xpath", required_argument, NULL, 'l' },
     { "not-first", no_argument, &opts.o_not_first, 1 },
     { "open", required_argument, NULL, 'o' },
+    { "open-instance", required_argument, &opts.o_open_instance, 1 },
+    { "open-list", required_argument, &opts.o_open_list, 1 },
     { "option", required_argument, NULL, 'O' },
     { "pretty", no_argument, NULL, 'p' },
     { "style", required_argument, NULL, 's' },
@@ -258,6 +271,8 @@ main (int argc UNUSED, char **argv)
     char *fmt = NULL, *cp, *np;
     char *opt_opener = NULL, *opt_closer = NULL, *opt_wrapper = NULL;
     char *opt_options = NULL;
+    char *opt_name = NULL;
+    xo_state_t new_state = 0;
     int opt_depth = 0;
     int opt_not_first = 0;
     int opt_top_wrap = 0;
@@ -353,6 +368,38 @@ main (int argc UNUSED, char **argv)
 	    } else if (opts.o_top_wrap) {
 		opt_top_wrap = 1;
 
+	    } else if (opts.o_open_list) {
+		if (opt_name)
+		    xo_errx(1, "only one open/close list/instance allowed: %s",
+			    optarg);
+
+		opt_name = optarg;
+		new_state = XSS_OPEN_LIST;
+
+	    } else if (opts.o_open_instance) {
+		if (opt_name)
+		    xo_errx(1, "only one open/close list/instance allowed: %s",
+			    optarg);
+
+		opt_name = optarg;
+		new_state = XSS_OPEN_INSTANCE;
+
+	    } else if (opts.o_close_list) {
+		if (opt_name)
+		    xo_errx(1, "only one open/close list/instance allowed: %s",
+			    optarg);
+
+		opt_name = optarg;
+		new_state = XSS_CLOSE_LIST;
+
+	    } else if (opts.o_close_instance) {
+		if (opt_name)
+		    xo_errx(1, "only one open/close list/instance allowed: %s",
+			    optarg);
+
+		opt_name = optarg;
+		new_state = XSS_CLOSE_INSTANCE;
+
 	    } else {
 		print_help();
 		return 1;
@@ -378,6 +425,21 @@ main (int argc UNUSED, char **argv)
 
     xo_set_formatter(NULL, formatter, checkpoint);
     xo_set_flags(NULL, XOF_NO_VA_ARG | XOF_NO_TOP | XOF_NO_CLOSE);
+
+    /*
+     * If we have some explicit state change, handle it
+     */
+    if (new_state) {
+	if (opt_depth > 0)
+	    xo_set_depth(NULL, opt_depth);
+
+	if (opt_not_first)
+	    xo_set_flags(NULL, XOF_NOT_FIRST);
+
+	xo_explicit_transition(NULL, new_state, opt_name, 0);
+	xo_finish();
+	exit(0);
+    }
 
     fmt = *argv++;
     if (opt_opener == NULL && opt_closer == NULL && fmt == NULL) {
