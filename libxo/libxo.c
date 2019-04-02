@@ -258,8 +258,8 @@ struct xo_handle_s {
     ssize_t xo_units_offset;	/* Start of units insertion point */
     ssize_t xo_columns;	/* Columns emitted during this xo_emit call */
 #ifndef LIBXO_TEXT_ONLY
-    uint8_t xo_color_map_fg[XO_NUM_COLORS]; /* Foreground color mappings */
-    uint8_t xo_color_map_bg[XO_NUM_COLORS]; /* Background color mappings */
+    xo_color_t xo_color_map_fg[XO_NUM_COLORS]; /* Foreground color mappings */
+    xo_color_t xo_color_map_bg[XO_NUM_COLORS]; /* Background color mappings */
 #endif /* LIBXO_TEXT_ONLY */
     xo_colors_t xo_colors;	/* Current color and effect values */
     xo_buffer_t xo_color_buf;	/* HTML: buffer of colors and effects */
@@ -473,6 +473,20 @@ xo_style (xo_handle_t *xop UNUSED)
     return XO_STYLE_TEXT;
 #else /* LIBXO_TEXT_ONLY */
     return xop->xo_style;
+#endif /* LIBXO_TEXT_ONLY */
+}
+
+/*
+ * Allow the compiler to optimize out non-text-only code while
+ * still compiling it.
+ */
+static inline int
+xo_text_only (void)
+{
+#ifdef LIBXO_TEXT_ONLY
+    return TRUE;
+#else /* LIBXO_TEXT_ONLY */
+    return FALSE;
 #endif /* LIBXO_TEXT_ONLY */
 }
 
@@ -2187,9 +2201,8 @@ xo_set_style_name (xo_handle_t *xop, const char *name)
 static void
 xo_set_color_map (xo_handle_t *xop, char *value)
 {
-#ifdef LIBXO_TEXT_ONLY
-    return;
-#else /* LIBXO_TEXT_ONLY */
+    if (xo_text_only())
+	return;
 
     char *cp, *ep, *vp, *np;
     ssize_t len = value ? strlen(value) + 1 : 0;
@@ -2207,8 +2220,11 @@ xo_set_color_map (xo_handle_t *xop, char *value)
 	fg = *cp ? xo_color_find(cp) : -1;
 	bg = (vp && *vp) ? xo_color_find(vp) : -1;
 
+#ifndef LIBXO_TEXT_ONLY
 	xop->xo_color_map_fg[num] = (fg < 0) ? num : fg;
 	xop->xo_color_map_bg[num] = (bg < 0) ? num : bg;
+#endif /* LIBXO_TEXT_ONLY */
+
 	if (++num > XO_NUM_COLORS)
 	    break;
     }
@@ -2219,6 +2235,7 @@ xo_set_color_map (xo_handle_t *xop, char *value)
     else
 	XOF_CLEAR(xop, XOF_COLOR_MAP);
 
+#ifndef LIBXO_TEXT_ONLY
     /* Fill in the rest of the colors with the defaults */
     for ( ; num < XO_NUM_COLORS; num++)
 	xop->xo_color_map_fg[num] = xop->xo_color_map_bg[num] = num;
@@ -4774,9 +4791,8 @@ xo_effect_find (const char *str)
 static void
 xo_colors_parse (xo_handle_t *xop, xo_colors_t *xocp, char *str)
 {
-#ifdef LIBXO_TEXT_ONLY
-    return;
-#else /* LIBXO_TEXT_ONLY */
+    if (xo_text_only())
+	return;
 
     char *cp, *ep, *np, *xp;
     ssize_t len = strlen(str);
@@ -4843,7 +4859,6 @@ xo_colors_parse (xo_handle_t *xop, xo_colors_t *xocp, char *str)
 	if (XOF_ISSET(xop, XOF_WARN))
 	    xo_failure(xop, "unknown color/effect string detected: '%s'", cp);
     }
-#endif /* LIBXO_TEXT_ONLY */
 }
 
 static inline int
@@ -4861,12 +4876,9 @@ xo_colors_enabled (xo_handle_t *xop UNUSED)
  * the incoming foreground and background colors from the map.
  */
 static void
-xo_colors_update (xo_handle_t *xop, xo_colors_t *newp)
+xo_colors_update (xo_handle_t *xop UNUSED, xo_colors_t *newp UNUSED)
 {
-#ifdef LIBXO_TEXT_ONLY
-    return;
-#else /* LIBXO_TEXT_ONLY */
-
+#ifndef LIBXO_TEXT_ONLY
     xo_color_t fg = newp->xoc_col_fg;
     if (XOF_ISSET(xop, XOF_COLOR_MAP) && fg < XO_NUM_COLORS)
 	fg = xop->xo_color_map_fg[fg]; /* Fetch from color map */
