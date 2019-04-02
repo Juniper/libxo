@@ -3522,51 +3522,54 @@ xo_do_format_field (xo_handle_t *xop, xo_buffer_t *xbp,
 		ssize_t columns = rc = xo_vsnprintf(xop, xbp, newfmt,
 						    xop->xo_vap);
 
-		/*
-		 * For XML and HTML, we need "&<>" processing; for JSON,
-		 * it's quotes.  Text gets nothing.
-		 */
-		switch (style) {
-		case XO_STYLE_XML:
-		    if (flags & XFF_TRIM_WS)
-			columns = rc = xo_trim_ws(xbp, rc);
-		    /* FALLTHRU */
-		case XO_STYLE_HTML:
-		    rc = xo_escape_xml(xbp, rc, (flags & XFF_ATTR));
-		    break;
+		if (rc > 0) {
+		    /*
+		     * For XML and HTML, we need "&<>" processing; for JSON,
+		     * it's quotes.  Text gets nothing.
+		     */
+		    switch (style) {
+		    case XO_STYLE_XML:
+			if (flags & XFF_TRIM_WS)
+			    columns = rc = xo_trim_ws(xbp, rc);
+			/* FALLTHRU */
+		    case XO_STYLE_HTML:
+			rc = xo_escape_xml(xbp, rc, (flags & XFF_ATTR));
+			break;
 
-		case XO_STYLE_JSON:
-		    if (flags & XFF_TRIM_WS)
-			columns = rc = xo_trim_ws(xbp, rc);
-		    rc = xo_escape_json(xbp, rc, 0);
-		    break;
+		    case XO_STYLE_JSON:
+			if (flags & XFF_TRIM_WS)
+			    columns = rc = xo_trim_ws(xbp, rc);
+			rc = xo_escape_json(xbp, rc, 0);
+			break;
 
-		case XO_STYLE_SDPARAMS:
-		    if (flags & XFF_TRIM_WS)
-			columns = rc = xo_trim_ws(xbp, rc);
-		    rc = xo_escape_sdparams(xbp, rc, 0);
-		    break;
+		    case XO_STYLE_SDPARAMS:
+			if (flags & XFF_TRIM_WS)
+			    columns = rc = xo_trim_ws(xbp, rc);
+			rc = xo_escape_sdparams(xbp, rc, 0);
+			break;
 
-		case XO_STYLE_ENCODER:
-		    if (flags & XFF_TRIM_WS)
-			columns = rc = xo_trim_ws(xbp, rc);
-		    break;
+		    case XO_STYLE_ENCODER:
+			if (flags & XFF_TRIM_WS)
+			    columns = rc = xo_trim_ws(xbp, rc);
+			break;
+		    }
+
+		    /*
+		     * We can assume all the non-%s data we've
+		     * added is ASCII, so the columns and bytes are the
+		     * same.  xo_format_string handles all the fancy
+		     * string conversions and updates xo_anchor_columns
+		     * accordingly.
+		     */
+		    if (XOF_ISSET(xop, XOF_COLUMNS))
+			xop->xo_columns += columns;
+		    if (XOIF_ISSET(xop, XOIF_ANCHOR))
+			xop->xo_anchor_columns += columns;
 		}
-
-		/*
-		 * We can assume all the non-%s data we've
-		 * added is ASCII, so the columns and bytes are the
-		 * same.  xo_format_string handles all the fancy
-		 * string conversions and updates xo_anchor_columns
-		 * accordingly.
-		 */
-		if (XOF_ISSET(xop, XOF_COLUMNS))
-		    xop->xo_columns += columns;
-		if (XOIF_ISSET(xop, XOIF_ANCHOR))
-		    xop->xo_anchor_columns += columns;
 	    }
 
-	    xbp->xb_curp += rc;
+	    if (rc > 0)
+		xbp->xb_curp += rc;
 	}
 
 	/*
