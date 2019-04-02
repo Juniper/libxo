@@ -135,6 +135,39 @@ braces for JSON output.
       }
     } 
 
+Lists and Instances
+-------------------
+
+A "*list*" is set of one or more instances that appear under the same
+parent.  The instances contain details about a specific object.  One
+can think of instances as objects or records.  A call is needed to
+open and close the list, while a distinct call is needed to open and
+close each instance of the list.
+
+Use the `--open-list` and `--open-instances` to open lists and
+instances.  Use the `--close-list` and `--close-instances` to close
+them.  Each of these options take a `name` parameter, providing the
+name of the list and instance.
+
+In the following example, a list named "machine" is created with three
+instances:
+
+    opts="--json"
+    xo $opts --open-list machine
+    NF=
+    for name in red green blue; do
+        xo $opts --depth 1 $NF --open-instance machine
+        xo $opts --depth 2 "Machine {k:name} has {:memory}\n" $name 55
+        xo $opts --depth 1 --close-instance machine
+        NF=--not-first
+    done
+    xo $opts $NF --close-list machine
+
+The normal `libxo` functions use a state machine to help these
+transitions, but since each `xo` command is invoked independent of the
+previous calls, the state must be passed in explicitly via these
+command line options.
+
 Command Line Options
 --------------------
 
@@ -142,6 +175,8 @@ Command Line Options
 
   Usage: xo [options] format [fields]
     --close <path>        Close tags for the given path
+    --close-instance <name> Close an open instance name
+    --close-list <name>   Close an open list name
     --continuation OR -C  Output belongs on same line as previous output
     --depth <num>         Set the depth for pretty printing
     --help                Display this help text
@@ -150,6 +185,8 @@ Command Line Options
     --leading-xpath <path> Add a prefix to generated XPaths (HTML)
     --not-first           Indicate this object is not the first (JSON)
     --open <path>         Open tags for the given path
+    --open-instance <name> Open an instance given by name
+    --open-list <name>   Open a list given by name
     --option <opts> -or -O <opts>  Give formatting options
     --pretty OR -p        Make 'pretty' output (add indent, newlines)
     --style <style>       Generate given style (xml, json, text, html)
