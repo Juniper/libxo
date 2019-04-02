@@ -63,3 +63,21 @@
   <div class="text">and then </div>
   <div class="data" data-tag="tag">value2</div>
 </div>
+<div class="line">
+  <div class="text">Machine </div>
+  <div class="data" data-tag="name">red</div>
+  <div class="text"> has </div>
+  <div class="data" data-tag="memory">55</div>
+</div>
+<div class="line">
+  <div class="text">Machine </div>
+  <div class="data" data-tag="name">green</div>
+  <div class="text"> has </div>
+  <div class="data" data-tag="memory">55</div>
+</div>
+<div class="line">
+  <div class="text">Machine </div>
+  <div class="data" data-tag="name">blue</div>
+  <div class="text"> has </div>
+  <div class="data" data-tag="memory">55</div>
+</div>
