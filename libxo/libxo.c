@@ -6476,9 +6476,7 @@ xo_do_emit_fields (xo_handle_t *xop, xo_field_info_t *fields,
 
     /* If we don't have an anchor, write the text out */
     if (flush && !XOIF_ISSET(xop, XOIF_ANCHOR)) {
-	if (xo_write(xop) < 0) 
-	    rc = -1;		/* Report failure */
-	else if (xo_flush_h(xop) < 0)
+	if (xo_flush_h(xop) < 0)
 	    rc = -1;
     }
 
@@ -7884,7 +7882,7 @@ xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
 
     /* Handle the flush flag */
     if (rc >= 0 && XOF_ISSET(xop, XOF_FLUSH))
-	if (xo_flush_h(xop))
+	if (xo_flush_h(xop) < 0)
 	    rc = -1;
 
     /* We have now official made output */
