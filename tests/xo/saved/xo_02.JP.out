@@ -68,3 +68,17 @@
     }
   }
 }
+"machine": [
+  {
+    "name": "red",
+    "memory": "55"
+  },
+  {
+    "name": "green",
+    "memory": "55"
+  },
+  {
+    "name": "blue",
+    "memory": "55"
+  }
+]
