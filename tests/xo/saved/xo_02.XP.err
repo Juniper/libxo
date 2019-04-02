@@ -1,5 +1,7 @@
 Usage: xo [options] format [fields]
     --close <path>        Close tags for the given path
+    --close-instance <name> Close an open instance name
+    --close-list <name>   Close an open list name
     --continuation OR -C  Output belongs on same line as previous output
     --depth <num>         Set the depth for pretty printing
     --help                Display this help text
@@ -8,6 +10,8 @@ Usage: xo [options] format [fields]
     --leading-xpath <path> OR -l <path> Add a prefix to generated XPaths (HTML)
     --not-first           Indicate this object is not the first (JSON)
     --open <path>         Open tags for the given path
+    --open-instance <name> Open an instance given by name
+    --open-list <name>   Open a list given by name
     --option <opts> -or -O <opts>  Give formatting options
     --pretty OR -p        Make 'pretty' output (add indent, newlines)
     --style <style> OR -s <style>  Generate given style (xml, json, text, html)
