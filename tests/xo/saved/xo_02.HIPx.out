@@ -63,3 +63,21 @@
   <div class="text">and then </div>
   <div class="data" data-tag="tag" data-xpath="/tag">value2</div>
 </div>
+<div class="line">
+  <div class="text">Machine </div>
+  <div class="data" data-tag="name" data-xpath="/name">red</div>
+  <div class="text"> has </div>
+  <div class="data" data-tag="memory" data-xpath="/memory">55</div>
+</div>
+<div class="line">
+  <div class="text">Machine </div>
+  <div class="data" data-tag="name" data-xpath="/name">green</div>
+  <div class="text"> has </div>
+  <div class="data" data-tag="memory" data-xpath="/memory">55</div>
+</div>
+<div class="line">
+  <div class="text">Machine </div>
+  <div class="data" data-tag="name" data-xpath="/name">blue</div>
+  <div class="text"> has </div>
+  <div class="data" data-tag="memory" data-xpath="/memory">55</div>
+</div>
