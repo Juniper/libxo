@@ -279,6 +279,9 @@ xo_emit_fp (xo_emit_flags_t flags, const char *fmt, ...)
 }
 
 xo_ssize_t
+xo_open_container_hf (xo_handle_t *xop, xo_xof_flags_t flags, const char *name);
+
+xo_ssize_t
 xo_open_container_h (xo_handle_t *xop, const char *name);
 
 xo_ssize_t
@@ -303,6 +306,9 @@ xo_ssize_t
 xo_close_container_d (void);
 
 xo_ssize_t
+xo_open_list_hf (xo_handle_t *xop, xo_xof_flags_t flags, const char *name);
+
+xo_ssize_t
 xo_open_list_h (xo_handle_t *xop, const char *name);
 
 xo_ssize_t
@@ -325,6 +331,9 @@ xo_close_list_hd (xo_handle_t *xop);
 
 xo_ssize_t
 xo_close_list_d (void);
+
+xo_ssize_t
+xo_open_instance_hf (xo_handle_t *xop, xo_xof_flags_t flags, const char *name);
 
 xo_ssize_t
 xo_open_instance_h (xo_handle_t *xop, const char *name);
