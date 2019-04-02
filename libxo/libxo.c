@@ -47,6 +47,7 @@
 #include "xo.h"
 #include "xo_encoder.h"
 #include "xo_buf.h"
+#include "xo_explicit.h"
 
 /*
  * We ask wcwidth() to do an impossible job, really.  It's supposed to
@@ -158,40 +159,9 @@ typedef unsigned xo_xsf_flags_t; /* XSF_* flags */
  (XSF_NOT_FIRST | XSF_CONTENT | XSF_EMIT | XSF_EMIT_KEY | XSF_EMIT_LEAF_LIST )
 
 /*
- * A word about states: We use a finite state machine (FMS) approach
- * to help remove fragility from the caller's code.  Instead of
- * requiring a specific order of calls, we'll allow the caller more
- * flexibility and make the library responsible for recovering from
- * missed steps.  The goal is that the library should not be capable
- * of emitting invalid xml or json, but the developer shouldn't need
- * to know or understand all the details about these encodings.
- *
- * You can think of states as either states or events, since they
- * function rather like both.  None of the XO_CLOSE_* events will
- * persist as states, since the matching stack frame will be popped.
- * Same is true of XSS_EMIT, which is an event that asks us to
- * prep for emitting output fields.
+ * Turn the transition between two states into a number suitable for
+ * a "switch" statement.
  */
-
-/* Stack frame states */
-typedef unsigned xo_state_t;
-#define XSS_INIT		0      	/* Initial stack state */
-#define XSS_OPEN_CONTAINER	1
-#define XSS_CLOSE_CONTAINER	2
-#define XSS_OPEN_LIST		3
-#define XSS_CLOSE_LIST		4
-#define XSS_OPEN_INSTANCE	5
-#define XSS_CLOSE_INSTANCE	6
-#define XSS_OPEN_LEAF_LIST	7
-#define XSS_CLOSE_LEAF_LIST	8
-#define XSS_DISCARDING		9	/* Discarding data until recovered */
-#define XSS_MARKER		10	/* xo_open_marker's marker */
-#define XSS_EMIT		11	/* xo_emit has a leaf field */
-#define XSS_EMIT_LEAF_LIST	12	/* xo_emit has a leaf-list ({l:}) */
-#define XSS_FINISH		13	/* xo_finish was called */
-
-#define XSS_MAX			13
-
 #define XSS_TRANSITION(_old, _new) ((_old) << 8 | (_new))
 
 /*
@@ -469,7 +439,7 @@ static void
 xo_failure (xo_handle_t *xop, const char *fmt, ...);
 
 static ssize_t
-xo_transition (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name,
+xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
 	       xo_state_t new_state);
 
 static int
@@ -7021,7 +6991,7 @@ xo_do_open_container (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
     return rc;
 }
 
-static int
+xo_ssize_t
 xo_open_container_hf (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
 {
     return xo_transition(xop, flags, name, XSS_OPEN_CONTAINER);
@@ -7138,7 +7108,7 @@ xo_close_container_d (void)
 }
 
 static int
-xo_do_open_list (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name)
+xo_do_open_list (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
 {
     ssize_t rc = 0;
     int indent = 0;
@@ -7182,8 +7152,8 @@ xo_do_open_list (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name)
     return rc;
 }
 
-static int
-xo_open_list_hf (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name)
+xo_ssize_t
+xo_open_list_hf (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
 {
     return xo_transition(xop, flags, name, XSS_OPEN_LIST);
 }
@@ -7284,7 +7254,7 @@ xo_close_list_d (void)
 }
 
 static int
-xo_do_open_leaf_list (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name)
+xo_do_open_leaf_list (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
 {
     ssize_t rc = 0;
     int indent = 0;
@@ -7378,7 +7348,7 @@ xo_do_close_leaf_list (xo_handle_t *xop, const char *name)
 }
 
 static int
-xo_do_open_instance (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name)
+xo_do_open_instance (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
 {
     xop = xo_default(xop);
 
@@ -7432,8 +7402,8 @@ xo_do_open_instance (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name)
     return rc;
 }
 
-static int
-xo_open_instance_hf (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name)
+xo_ssize_t
+xo_open_instance_hf (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
 {
     return xo_transition(xop, flags, name, XSS_OPEN_INSTANCE);
 }
@@ -7658,7 +7628,7 @@ xo_do_close (xo_handle_t *xop, const char *name, xo_state_t new_state)
  * We are in a given state and need to transition to the new state.
  */
 static ssize_t
-xo_transition (xo_handle_t *xop, xo_xsf_flags_t flags, const char *name,
+xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
 	       xo_state_t new_state)
 {
     xo_stack_t *xsp;
@@ -8469,4 +8439,47 @@ xo_set_encoder (xo_handle_t *xop, xo_encoder_func_t encoder)
 
     xop->xo_style = XO_STYLE_ENCODER;
     xop->xo_encoder = encoder;
+}
+
+/*
+ * The xo(1) utility needs to be able to open and close lists and
+ * instances, but since it's called without "state", we cannot
+ * rely on the state transitions (in xo_transition) to DTRT, so
+ * we have a mechanism for external parties to "force" transitions
+ * that would otherwise be impossible.  This is not a general
+ * mechanism, and is really tailored only for xo(1).
+ */
+void
+xo_explicit_transition (xo_handle_t *xop, xo_state_t new_state,
+			const char *name, xo_xof_flags_t flags)
+{
+    xo_xsf_flags_t xsf_flags;
+
+    xop = xo_default(xop);
+
+    switch (new_state) {
+
+    case XSS_OPEN_LIST:
+	xo_do_open_list(xop, flags, name);
+	break;
+
+    case XSS_OPEN_INSTANCE:
+	xo_do_open_instance(xop, flags, name);
+	break;
+
+    case XSS_CLOSE_INSTANCE:
+	xo_depth_change(xop, name, 1, 1, XSS_OPEN_INSTANCE,
+			xo_stack_flags(flags));
+	xo_stack_set_flags(xop);
+	xo_do_close_instance(xop, name);
+	break;
+
+    case XSS_CLOSE_LIST:
+	xsf_flags = XOF_ISSET(xop, XOF_NOT_FIRST) ? XSF_NOT_FIRST : 0;
+
+	xo_depth_change(xop, name, 1, 1, XSS_OPEN_LIST,
+			XSF_LIST | xsf_flags | xo_stack_flags(flags));
+	xo_do_close_list(xop, name);
+	break;
+    }
 }
