@@ -45,3 +45,13 @@ ${XOP} --top-wrap --close top/data
 
 
 ${XOP} --help
+
+${XOP} --open-list machine
+NF=
+for name in red green blue; do
+    ${XOP} --depth 1 $NF --open-instance machine
+    ${XOP} --depth 2 "Machine {k:name} has {:memory}\n" $name 55
+    ${XOP} --depth 1 --close-instance machine
+    NF=--not-first
+done
+${XOP} $NF --close-list machine
