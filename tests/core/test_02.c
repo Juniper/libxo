@@ -48,6 +48,12 @@ main (int argc, char **argv)
 
     xo_open_container("data");
 
+    xo_emit("{kt:name/%-*.*s}{eq:flags/0x%x}",
+	    5, 5, "em0", 34883);
+
+    xo_emit("{d:/%-*.*s}{etk:name}{eq:flags/0x%x}",
+	    5, 5, "em0", "em0", 34883);
+
     xo_emit("We are {{emit}}{{ting}} some {:what}\n", "braces");
 
     xo_message("abcdef");
