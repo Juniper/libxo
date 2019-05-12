@@ -1,0 +1,17 @@
+env:
+  CIRRUS_CLONE_DEPTH: 1
+  ARCH: amd64
+
+task:
+  compute_engine_instance:
+    image_project: freebsd-org-cloud-dev
+    platform: freebsd
+  matrix:
+    - name: 13.2-RELEASE
+      compute_engine_instance:
+        image: family/freebsd-13-2
+  install_script:
+    - sed -i.bak -e 's,pkg+http://pkg.FreeBSD.org/\${ABI}/quarterly,pkg+http://pkg.FreeBSD.org/\${ABI}/latest,' /etc/pkg/FreeBSD.conf
+    - pkg install -y autoconf automake gmake libtool
+  script:
+    - printenv && uname -a && ls -l && /bin/sh -x ./bin/setup.sh && cd build && env MAKE=gmake ../configure --enable-warnings && gmake && sudo gmake install && gmake test
