@@ -10,6 +10,7 @@ application calls a function "xo_emit" to product output that is
 described in a format string.  A "field descriptor" tells libxo what
 the field is and what it means.
 
+Imagine you're writing an xo-enabled clone of the unix ``wc`` command, replace the complex login in ``write_counts`` with:
 ```
     xo_emit(" {:lines/%7ju/%ju} {:words/%7ju/%ju} "
             "{:characters/%7ju/%ju}{d:filename/%s}\n",
