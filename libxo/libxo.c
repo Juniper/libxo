@@ -2230,7 +2230,7 @@ xo_set_color_map (xo_handle_t *xop, char *value)
     }
 
     /* If no color initialization happened, then we don't need the map */
-    if (num > 0)
+    if (num > 1)
 	XOF_SET(xop, XOF_COLOR_MAP);
     else
 	XOF_CLEAR(xop, XOF_COLOR_MAP);
@@ -3356,7 +3356,7 @@ xo_do_format_field (xo_handle_t *xop, xo_buffer_t *xbp,
 		cp += 1;
 	    continue;
 
-	} if (cp + 1 < ep && cp[1] == '%') {
+	} else if (cp + 1 < ep && cp[1] == '%') {
 	    cp += 1;
 	    goto add_one;
 	}
@@ -5653,6 +5653,7 @@ xo_gettext_finish_numbering_fields (xo_handle_t *xop UNUSED,
     xo_field_info_t *xfip;
     unsigned fnum, max_fields;
     uint64_t bits = 0;
+    const uint64_t one = 1;	/* Avoid "1ULL" */
 
     /* First make a list of add the explicitly used bits */
     for (xfip = fields, fnum = 0; xfip->xfi_ftype; xfip++) {
@@ -5669,7 +5670,7 @@ xo_gettext_finish_numbering_fields (xo_handle_t *xop UNUSED,
 	    break;
 
 	if (xfip->xfi_fnum)
-	    bits |= 1 << xfip->xfi_fnum;
+	    bits |= one << xfip->xfi_fnum;
     }
 
     max_fields = fnum;
@@ -5687,14 +5688,14 @@ xo_gettext_finish_numbering_fields (xo_handle_t *xop UNUSED,
 	    continue;
 
 	/* Find the next unassigned field */
-	for (fnum++; bits & (1 << fnum); fnum++)
+	for (fnum++; bits & (one << fnum); fnum++)
 	    continue;
 
 	if (fnum > max_fields)
 	    break;
 
 	xfip->xfi_fnum = fnum;	/* Mark the field number */
-	bits |= 1 << fnum;	/* Mark it used */
+	bits |= one << fnum;	/* Mark it used */
     }
 }
 
@@ -5709,6 +5710,7 @@ xo_parse_field_numbers (xo_handle_t *xop, const char *fmt,
     xo_field_info_t *xfip;
     unsigned field, fnum;
     uint64_t bits = 0;
+    const uint64_t one = 1;	/* Avoid 1ULL */
 
     for (xfip = fields, field = 0; field < num_fields; xfip++, field++) {
 	/* Fields default to 1:1 with natural position */
@@ -5721,12 +5723,12 @@ xo_parse_field_numbers (xo_handle_t *xop, const char *fmt,
 
 	fnum = xfip->xfi_fnum - 1; /* Move to zero origin */
 	if (fnum < 64) {	/* Only test what fits */
-	    if (bits & (1 << fnum)) {
+	    if (bits & (one << fnum)) {
 		xo_failure(xop, "field number %u reused: '%s'",
 			   xfip->xfi_fnum, fmt);
 		return -1;
 	    }
-	    bits |= 1 << fnum;
+	    bits |= one << fnum;
 	}
     }
 
@@ -5786,9 +5788,10 @@ xo_parse_fields (xo_handle_t *xop, xo_field_info_t *fields,
 	    xfip->xfi_len = sp - xfip->xfi_start + 1;
 
 	    /* Move along the string, but don't run off the end */
-	    if (*sp == '}' && sp[1] == '}')
+	    if (*sp == '}' && sp[1] == '}') /* Paranoid; must be true */
 		sp += 2;
-	    cp = *sp ? sp : sp;
+
+	    cp = sp;
 	    xfip->xfi_next = cp;
 	    continue;
 	}
@@ -7074,7 +7077,6 @@ xo_do_close_container (xo_handle_t *xop, const char *name)
 	xo_stack_set_flags(xop);
 
 	pre_nl = XOF_ISSET(xop, XOF_PRETTY) ? "\n" : "";
-	ppn = (xop->xo_depth <= 1) ? pre_nl : "";
 	ppn = "";
 
 	xo_depth_change(xop, name, -1, -1, XSS_CLOSE_CONTAINER, 0);
@@ -7680,13 +7682,6 @@ xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
        break;
 
     case XSS_TRANSITION(XSS_OPEN_LIST, XSS_OPEN_CONTAINER):
-	if (on_marker)
-	    goto marker_prevents_close;
-	rc = xo_do_close_list(xop, NULL);
-	if (rc >= 0)
-	    goto open_container;
-	break;
-
     case XSS_TRANSITION(XSS_OPEN_LEAF_LIST, XSS_OPEN_CONTAINER):
 	if (on_marker)
 	    goto marker_prevents_close;
@@ -7695,18 +7690,13 @@ xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
 	    goto open_container;
 	break;
 
-    /*close_container:*/
-    case XSS_TRANSITION(XSS_OPEN_CONTAINER, XSS_CLOSE_CONTAINER):
-	if (on_marker)
-	    goto marker_prevents_close;
-	rc = xo_do_close(xop, name, new_state);
-	break;
-
     case XSS_TRANSITION(XSS_INIT, XSS_CLOSE_CONTAINER):
 	/* This is an exception for "xo --close" */
 	rc = xo_do_close_container(xop, name);
 	break;
 
+    /*close_container:*/
+    case XSS_TRANSITION(XSS_OPEN_CONTAINER, XSS_CLOSE_CONTAINER):
     case XSS_TRANSITION(XSS_OPEN_LIST, XSS_CLOSE_CONTAINER):
     case XSS_TRANSITION(XSS_OPEN_INSTANCE, XSS_CLOSE_CONTAINER):
 	if (on_marker)
@@ -8062,7 +8052,7 @@ xo_error_hv (xo_handle_t *xop, const char *fmt, va_list vap)
 	char *newfmt = alloca(len + 2);
 	memcpy(newfmt, fmt, len);
 	newfmt[len] = '\n';
-	newfmt[len] = '\0';
+	newfmt[len + 1] = '\0';
 	fmt = newfmt;
     }
 
@@ -8386,9 +8376,8 @@ xo_emit_err (int eval, const char *fmt, ...)
     int code = errno;
     va_list vap;
     va_start(vap, fmt);
-    xo_emit_err_v(0, code, fmt, vap);
-    va_end(vap);
-    exit(eval);
+    xo_emit_err_v(eval, code, fmt, vap);
+    /*NOTREACHED*/
 }
 
 void
@@ -8397,10 +8386,8 @@ xo_emit_errx (int eval, const char *fmt, ...)
     va_list vap;
 
     va_start(vap, fmt);
-    xo_emit_err_v(0, -1, fmt, vap);
-    va_end(vap);
-    xo_finish();
-    exit(eval);
+    xo_emit_err_v(eval, -1, fmt, vap); /* This will exit */
+    /*NOTREACHED*/
 }
 
 void
@@ -8409,10 +8396,8 @@ xo_emit_errc (int eval, int code, const char *fmt, ...)
     va_list vap;
 
     va_start(vap, fmt);
-    xo_emit_warn_hcv(NULL, 0, code, fmt, vap);
-    va_end(vap);
-    xo_finish();
-    exit(eval);
+    xo_emit_err_v(eval, code, fmt, vap); /* This will exit */
+    /*NOTREACHED*/
 }
 
 /*
