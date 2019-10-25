@@ -186,6 +186,44 @@ main (int argc, char **argv)
     xo_close_list("item");
     xo_close_container("data4");
 
+    xo_attr("test", "value");
+    xo_open_container("data");
+    xo_open_list("item");
+    xo_attr("test2", "value2");
+
+    xo_emit("{T:Item/%-10s}{T:Total Sold/%12s}{T:In Stock/%12s}"
+	    "{T:On Order/%12s}{T:SKU/%5s}\n");
+
+    for (ip = list; ip->i_title; ip++) {
+	xo_open_instance("item");
+	xo_attr("test3", "value3");
+
+	xo_emit("{keq:sku/%s-%u/%s-000-%u}"
+		"{k:name/%-10s/%s}{n:sold/%12u/%u}",
+		ip->i_sku_base, ip->i_sku_num,
+		ip->i_title, ip->i_sold);
+
+	if (ip->i_onorder < 5)
+	    xo_emit("Extra: {:extra}", "special");
+
+	if (ip->i_instock & 1)
+	    xo_emit("{:in-stock/%12u/%u}", ip->i_instock);
+	xo_emit("{:on-order/%12u/%u}", ip->i_onorder);
+	if (!(ip->i_instock & 1))
+	    xo_emit("{:in-stock/%12u/%u}", ip->i_instock);
+
+	xo_emit("{qkd:sku/%5s-000-%u/%s-000-%u}\n",
+		ip->i_sku_base, ip->i_sku_num);
+
+	xo_close_instance("item");
+    }
+
+    xo_close_list("item");
+    xo_close_container("data");
+
+    xo_emit("\n\n");
+
+
     xo_emit("X{P:}X", "epic fail");
     xo_emit("X{T:}X", "epic fail");
     xo_emit("X{N:}X", "epic fail");
