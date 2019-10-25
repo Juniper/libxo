@@ -148,4 +148,10 @@ xo_encoders_clean (void);
 const char *
 xo_encoder_op_name (xo_encoder_op_t op);
 
+/*
+ * xo_failure is used to announce internal failures, when "warn" is on
+ */
+void
+xo_failure (xo_handle_t *xop, const char *fmt, ...);
+
 #endif /* XO_ENCODER_H */
