@@ -293,39 +293,6 @@ struct xo_handle_s {
 #define XOIF_INIT_IN_PROGRESS XOF_BIT(5) /* Init of handle is in progress */
 #define XOIF_MADE_OUTPUT XOF_BIT(6)	 /* Have already made output */
 
-/* Flags for formatting functions */
-typedef unsigned long xo_xff_flags_t;
-#define XFF_COLON	(1<<0)	/* Append a ":" */
-#define XFF_COMMA	(1<<1)	/* Append a "," iff there's more output */
-#define XFF_WS		(1<<2)	/* Append a blank */
-#define XFF_ENCODE_ONLY	(1<<3)	/* Only emit for encoding styles (XML, JSON) */
-
-#define XFF_QUOTE	(1<<4)	/* Force quotes */
-#define XFF_NOQUOTE	(1<<5)	/* Force no quotes */
-#define XFF_DISPLAY_ONLY (1<<6)	/* Only emit for display styles (text, html) */
-#define XFF_KEY		(1<<7)	/* Field is a key (for XPath) */
-
-#define XFF_XML		(1<<8)	/* Force XML encoding style (for XPath) */
-#define XFF_ATTR	(1<<9)	/* Escape value using attribute rules (XML) */
-#define XFF_BLANK_LINE	(1<<10)	/* Emit a blank line */
-#define XFF_NO_OUTPUT	(1<<11)	/* Do not make any output */
-
-#define XFF_TRIM_WS	(1<<12)	/* Trim whitespace off encoded values */
-#define XFF_LEAF_LIST	(1<<13)	/* A leaf-list (list of values) */
-#define XFF_UNESCAPE	(1<<14)	/* Need to printf-style unescape the value */
-#define XFF_HUMANIZE	(1<<15)	/* Humanize the value (for display styles) */
-
-#define XFF_HN_SPACE	(1<<16)	/* Humanize: put space before suffix */
-#define XFF_HN_DECIMAL	(1<<17)	/* Humanize: add one decimal place if <10 */
-#define XFF_HN_1000	(1<<18)	/* Humanize: use 1000, not 1024 */
-#define XFF_GT_FIELD	(1<<19) /* Call gettext() on a field */
-
-#define XFF_GT_PLURAL	(1<<20)	/* Call dngettext to find plural form */
-#define XFF_ARGUMENT	(1<<21)	/* Content provided via argument */
-
-/* Flags to turn off when we don't want i18n processing */
-#define XFF_GT_FLAGS (XFF_GT_FIELD | XFF_GT_PLURAL)
-
 /*
  * Normal printf has width and precision, which for strings operate as
  * min and max number of columns.  But this depends on the idea that
@@ -435,9 +402,6 @@ xo_realloc_func_t xo_realloc = realloc;
 xo_free_func_t xo_free = free;
 
 /* Forward declarations */
-static void
-xo_failure (xo_handle_t *xop, const char *fmt, ...);
-
 static ssize_t
 xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
 	       xo_state_t new_state);
@@ -1871,7 +1835,7 @@ xo_message (const char *fmt, ...)
     va_end(vap);
 }
 
-static void
+void
 xo_failure (xo_handle_t *xop, const char *fmt, ...)
 {
     if (!XOF_ISSET(xop, XOF_WARN))
@@ -2436,10 +2400,9 @@ xo_set_options (xo_handle_t *xop, const char *input)
 		if (vp == NULL)
 		    xo_failure(xop, "missing value for encoder option");
 		else {
-		    if (xo_encoder_init(xop, vp)) {
-			xo_failure(xop, "encoder not found: %s", vp);
-			rc = -1;
-		    }
+		    rc = xo_encoder_init(xop, vp);
+		    if (rc)
+			xo_warnx("error initializing encoder: %s", vp);
 		}
 		
 	    } else {
