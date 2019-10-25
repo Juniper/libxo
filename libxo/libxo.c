@@ -660,14 +660,7 @@ xo_init_handle (xo_handle_t *xop)
     if (!xo_locale_inited) {
 	xo_locale_inited = 1;	/* Only do this once */
 
-	const char *cp = getenv("LC_CTYPE");
-	if (cp == NULL)
-	    cp = getenv("LANG");
-	if (cp == NULL)
-	    cp = getenv("LC_ALL");
-	if (cp == NULL)
-	    cp = "C";		/* Default for C programs */
-	(void) setlocale(LC_CTYPE, cp);
+	(void) setlocale(LC_CTYPE, "");
     }
 
     /*
@@ -3510,8 +3503,9 @@ xo_do_format_field (xo_handle_t *xop, xo_buffer_t *xbp,
 			|| xf.xf_fc == 'm')) {
 
 		xf.xf_enc = (xf.xf_fc == 'm') ? XF_ENC_UTF8
-		    : (xf.xf_lflag || (xf.xf_fc == 'S')) ? XF_ENC_WIDE
-		    : xf.xf_hflag ? XF_ENC_LOCALE : XF_ENC_UTF8;
+		    : (xf.xf_lflag || xf.xf_fc == 'S') ? XF_ENC_WIDE
+		    : (xf.xf_hflag || xf.xf_fc == 's') ? XF_ENC_LOCALE
+		    : XF_ENC_UTF8;
 
 		rc = xo_format_string(xop, xbp, flags, &xf);
 
