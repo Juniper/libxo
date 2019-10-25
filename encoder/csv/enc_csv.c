@@ -229,20 +229,22 @@ csv_quote_flags (xo_handle_t *xop UNUSED, csv_private_t *csv UNUSED,
 {
     static const char quoted[] = "\n\r\",";
     static const char escaped[] = "\"";
-    static const char white[] = " \t";
 
     size_t len = strlen(value);
     uint32_t rc = 0;
 
-    if (strspn(value, quoted) != len)
+    if (strcspn(value, quoted) != len)
 	rc |= QF_NEEDS_QUOTES;
-    else if (strchr(white, value[0]))	/* Leading whitespace */
+    else if (isspace((int) value[0]))	/* Leading whitespace */
 	rc |= QF_NEEDS_QUOTES;
-    else if (strchr(white, value[len - 1])) /* Trailing whitespace */
+    else if (isspace((int) value[len - 1])) /* Trailing whitespace */
 	rc |= QF_NEEDS_QUOTES;
 
-    if (strspn(value, escaped) != len)
+    if (strcspn(value, escaped) != len)
 	rc |= QF_NEEDS_ESCAPE;
+
+    csv_dbg(xop, csv, "cvs: quote flags [%s] -> %x (%zu/%zu)\n",
+	    value, rc, len, strcspn(value, quoted));
 
     return rc;
 }
