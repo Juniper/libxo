@@ -452,6 +452,7 @@ AC_CONFIG_FILES([
   libxo/add.man
   encoder/Makefile
   encoder/cbor/Makefile
+  encoder/csv/Makefile
   encoder/test/Makefile
   xo/Makefile
   xolint/Makefile
