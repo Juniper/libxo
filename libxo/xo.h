@@ -690,4 +690,11 @@ xo_retain_clear_all (void);
 void
 xo_retain_clear (const char *fmt);
 
+/*
+ * xo_failure is used to announce internal failures, when "warn" is on
+ */
+void
+xo_failure (xo_handle_t *xop, const char *fmt, ...);
+
+
 #endif /* INCLUDE_XO_H */
