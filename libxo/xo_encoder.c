@@ -199,7 +199,7 @@ xo_encoder_find (const char *name)
     xo_encoder_list_init(&xo_encoders);
 
     XO_ENCODER_LIST_FOREACH(xep, &xo_encoders) {
-	if (strcmp(xep->xe_name, name) == 0)
+	if (xo_streq(xep->xe_name, name))
 	    return xep;
     }
 
