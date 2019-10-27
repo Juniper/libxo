@@ -2006,17 +2006,17 @@ xo_get_style (xo_handle_t *xop)
 static int
 xo_name_to_style (const char *name)
 {
-    if (strcmp(name, "xml") == 0)
+    if (xo_streq(name, "xml"))
 	return XO_STYLE_XML;
-    else if (strcmp(name, "json") == 0)
+    else if (xo_streq(name, "json"))
 	return XO_STYLE_JSON;
-    else if (strcmp(name, "encoder") == 0)
+    else if (xo_streq(name, "encoder"))
 	return XO_STYLE_ENCODER;
-    else if (strcmp(name, "text") == 0)
+    else if (xo_streq(name, "text"))
 	return XO_STYLE_TEXT;
-    else if (strcmp(name, "html") == 0)
+    else if (xo_streq(name, "html"))
 	return XO_STYLE_HTML;
-    else if (strcmp(name, "sdparams") == 0)
+    else if (xo_streq(name, "sdparams"))
 	return XO_STYLE_SDPARAMS;
 
     return -1;
@@ -2225,7 +2225,7 @@ xo_set_options_simple (xo_handle_t *xop, const char *input)
 	if (vp)
 	    *vp++ = '\0';
 
-	if (strcmp("colors", cp) == 0) {
+	if (xo_streq("colors", cp)) {
 	    xo_set_color_map(xop, vp);
 	    continue;
 	}
@@ -2233,7 +2233,7 @@ xo_set_options_simple (xo_handle_t *xop, const char *input)
 	new_flag = xo_name_lookup(xo_xof_simple_names, cp, -1);
 	if (new_flag != 0) {
 	    XOF_SET(xop, new_flag);
-	} else if (strcmp(cp, "no-color") == 0) {
+	} else if (xo_streq(cp, "no-color")) {
 	    XOF_CLEAR(xop, XOF_COLOR_ALLOWED);
 	} else {
 	    xo_failure(xop, "unknown simple option: %s", cp);
@@ -2370,7 +2370,7 @@ xo_set_options (xo_handle_t *xop, const char *input)
 	if (vp)
 	    *vp++ = '\0';
 
-	if (strcmp("colors", cp) == 0) {
+	if (xo_streq("colors", cp)) {
 	    xo_set_color_map(xop, vp);
 	    continue;
 	}
@@ -2389,14 +2389,14 @@ xo_set_options (xo_handle_t *xop, const char *input)
 	    new_flag = xo_name_to_flag(cp);
 	    if (new_flag != 0)
 		XOF_SET(xop, new_flag);
-	    else if (strcmp(cp, "no-color") == 0)
+	    else if (xo_streq(cp, "no-color"))
 		XOF_CLEAR(xop, XOF_COLOR_ALLOWED);
-	    else if (strcmp(cp, "indent") == 0) {
+	    else if (xo_streq(cp, "indent")) {
 		if (vp)
 		    xop->xo_indent_by = atoi(vp);
 		else
 		    xo_failure(xop, "missing value for indent option");
-	    } else if (strcmp(cp, "encoder") == 0) {
+	    } else if (xo_streq(cp, "encoder")) {
 		if (vp == NULL)
 		    xo_failure(xop, "missing value for encoder option");
 		else {
@@ -4696,7 +4696,7 @@ xo_color_find (const char *str)
     int i;
 
     for (i = 0; xo_color_names[i]; i++) {
-	if (strcmp(xo_color_names[i], str) == 0)
+	if (xo_streq(xo_color_names[i], str))
 	    return i;
     }
 
@@ -4747,7 +4747,7 @@ xo_effect_find (const char *str)
     int i;
 
     for (i = 0; xo_effect_names[i]; i++) {
-	if (strcmp(xo_effect_names[i], str) == 0)
+	if (xo_streq(xo_effect_names[i], str))
 	    return i;
     }
 
@@ -6152,7 +6152,7 @@ xo_gettext_build_format (xo_handle_t *xop,
 	goto bail2;
 
     const char *gtfmt = xo_dgettext(xop, xb.xb_bufp);
-    if (gtfmt == NULL || gtfmt == fmt || strcmp(gtfmt, fmt) == 0)
+    if (gtfmt == NULL || gtfmt == fmt || xo_streq(gtfmt, fmt))
 	goto bail2;
 
     char *new_fmt = xo_strndup(gtfmt, -1);
@@ -6841,7 +6841,7 @@ xo_depth_change (xo_handle_t *xop, const char *name,
 	xo_stack_t *xsp = &xop->xo_stack[xop->xo_depth];
 	if (XOF_ISSET(xop, XOF_WARN)) {
 	    const char *top = xsp->xs_name;
-	    if (top != NULL && name != NULL && strcmp(name, top) != 0) {
+	    if (top != NULL && name != NULL && !xo_streq(name, top)) {
 		xo_failure(xop, "incorrect close: '%s' .vs. '%s'",
 			      name, top);
 		return;
@@ -7587,7 +7587,7 @@ xo_do_close (xo_handle_t *xop, const char *name, xo_state_t new_state)
 	if (xsp->xs_state != need_state)
 	    continue;
 
-	if (name && xsp->xs_name && strcmp(name, xsp->xs_name) != 0)
+	if (name && xsp->xs_name && !xo_streq(name, xsp->xs_name))
 	    continue;
 
 	limit = xsp;
@@ -8131,7 +8131,7 @@ xo_parse_args (int argc, char **argv)
 
 	} else if (*cp == '-') {
 	    cp += 1;
-	    if (strcmp(cp, "check") == 0) {
+	    if (xo_streq(cp, "check")) {
 		exit(XO_HAS_LIBXO);
 
 	    } else {
