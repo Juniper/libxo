@@ -243,7 +243,7 @@ csv_quote_flags (xo_handle_t *xop UNUSED, csv_private_t *csv UNUSED,
     if (strcspn(value, escaped) != len)
 	rc |= QF_NEEDS_ESCAPE;
 
-    csv_dbg(xop, csv, "cvs: quote flags [%s] -> %x (%zu/%zu)\n",
+    csv_dbg(xop, csv, "csv: quote flags [%s] -> %x (%zu/%zu)\n",
 	    value, rc, len, strcspn(value, quoted));
 
     return rc;
@@ -266,9 +266,18 @@ csv_escape (xo_buffer_t *xbp, const char *value, size_t len)
 }
 
 static void
+csv_append_newline (xo_buffer_t *xbp, csv_private_t *csv)
+{
+    if (csv->c_flags & CF_DOS_NEWLINE)
+	xo_buf_append(xbp, "\r\n", 2);
+    else 
+	xo_buf_append(xbp, "\n", 1);
+}
+
+static void
 csv_emit_record (xo_handle_t *xop, csv_private_t *csv)
 {
-    csv_dbg(xop, csv, "cvs: emit: ...\n");
+    csv_dbg(xop, csv, "csv: emit: ...\n");
 
     ssize_t fnum;
     uint32_t quote_flags;
@@ -291,7 +300,7 @@ csv_emit_record (xo_handle_t *xop, csv_private_t *csv)
 	    xo_buf_append(&csv->c_data, name, strlen(name));
 	}
 
-	xo_buf_append(&csv->c_data, "\n", 1);
+	csv_append_newline(&csv->c_data, csv);
     }
 
     for (fnum = 0; fnum < csv->c_leaf_depth; fnum++) {
@@ -321,7 +330,7 @@ csv_emit_record (xo_handle_t *xop, csv_private_t *csv)
 	    xo_buf_append(&csv->c_data, "\"", 1);
     }
 
-    xo_buf_append(&csv->c_data, "\n", 1);
+    csv_append_newline(&csv->c_data, csv);
     xo_flush_h(xop);
 
     /* Clean out values from leafs */
@@ -357,10 +366,10 @@ csv_open_level (xo_handle_t *xop UNUSED, csv_private_t *csv,
     /* If the top of the stack does not match the name, then ignore */
     if (path_top == NULL) {
 	if (instance && !(csv->c_flags & CF_HAS_PATH)) {
-	    csv_dbg(xop, csv, "cvs: recording (no-path) ...\n");
+	    csv_dbg(xop, csv, "csv: recording (no-path) ...\n");
 	    csv->c_flags |= CF_RECORD_DATA;
 	}
-    } else if (strcmp(path_top, name) == 0) {
+    } else if (xo_streq(path_top, name)) {
 	csv->c_path_cur += 1;		/* Advance to next path member */
 
 	csv_dbg(xop, csv, "csv: match: [%s] (%zd/%zd)\n", name,
@@ -368,7 +377,7 @@ csv_open_level (xo_handle_t *xop UNUSED, csv_private_t *csv,
 
 	/* If we're all the way thru the path members, start recording */
 	if (csv->c_path_cur == csv->c_path_max) {
-	    csv_dbg(xop, csv, "cvs: recording ...\n");
+	    csv_dbg(xop, csv, "csv: recording ...\n");
 	    csv->c_flags |= CF_RECORD_DATA;
 	}
     }
@@ -393,7 +402,7 @@ csv_close_level (xo_handle_t *xop UNUSED, csv_private_t *csv, const char *name)
 	   path_top ?: "", csv->c_path_cur);
 
     /* If the top of the stack does not match the name, then ignore */
-    if (path_top != NULL && strcmp(path_top, name) == 0) {
+    if (path_top != NULL && xo_streq(path_top, name)) {
 	csv->c_path_cur -= 1;
 	return 0;
     }
@@ -416,7 +425,7 @@ csv_leaf_num (xo_handle_t *xop UNUSED, csv_private_t *csv,
 	lp = &csv->c_leaf[fnum];
 
 	const char *fname = xo_buf_data(xbp, lp->f_name);
-	if (strcmp(fname, name) == 0)
+	if (xo_streq(fname, name))
 	    return fnum;
     }
 
@@ -577,29 +586,31 @@ csv_options (xo_handle_t *xop, csv_private_t *csv, const char *raw_opts)
 	if (vp)
 	    *vp++ = '\0';
 
-	if (strcmp(cp, "path") == 0) {
+	if (xo_streq(cp, "path")) {
 	    /* Record the path */
 	    if (vp != NULL && csv_record_path(xop, csv, vp))
   		return -1;
 
 	    csv->c_flags |= CF_HAS_PATH; /* Yup, we have an explicit path now */
 
-	} else if (strcmp(cp, "leafs") == 0) {
+	} else if (xo_streq(cp, "leafs")
+		   || xo_streq(cp, "leaf")
+		   || xo_streq(cp, "leaves")) {
 	    /* Record the leafs */
 	    if (vp != NULL && csv_record_leafs(xop, csv, vp))
   		return -1;
 
-	} else if (strcmp(cp, "no-keys") == 0) {
+	} else if (xo_streq(cp, "no-keys")) {
 	    csv->c_flags |= CF_NO_KEYS;
-	} else if (strcmp(cp, "no-header") == 0) {
+	} else if (xo_streq(cp, "no-header")) {
 	    csv->c_flags |= CF_NO_HEADER;
-	} else if (strcmp(cp, "value-only") == 0) {
+	} else if (xo_streq(cp, "value-only")) {
 	    csv->c_flags |= CF_VALUE_ONLY;
-	} else if (strcmp(cp, "dos") == 0) {
+	} else if (xo_streq(cp, "dos")) {
 	    csv->c_flags |= CF_DOS_NEWLINE;
-	} else if (strcmp(cp, "no-quotes") == 0) {
+	} else if (xo_streq(cp, "no-quotes")) {
 	    csv->c_flags |= CF_NO_QUOTES;
-	} else if (strcmp(cp, "debug") == 0) {
+	} else if (xo_streq(cp, "debug")) {
 	    csv->c_flags |= CF_DEBUG;
 	} else {
 	    xo_warn_hc(xop, -1,
