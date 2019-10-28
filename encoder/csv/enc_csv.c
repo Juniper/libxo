@@ -230,6 +230,9 @@ csv_quote_flags (xo_handle_t *xop UNUSED, csv_private_t *csv UNUSED,
     static const char quoted[] = "\n\r\",";
     static const char escaped[] = "\"";
 
+    if (csv->c_flags & CF_NO_QUOTES)
+	return 0;
+
     size_t len = strlen(value);
     uint32_t rc = 0;
 
@@ -369,6 +372,7 @@ csv_open_level (xo_handle_t *xop UNUSED, csv_private_t *csv,
 	    csv_dbg(xop, csv, "csv: recording (no-path) ...\n");
 	    csv->c_flags |= CF_RECORD_DATA;
 	}
+
     } else if (xo_streq(path_top, name)) {
 	csv->c_path_cur += 1;		/* Advance to next path member */
 
