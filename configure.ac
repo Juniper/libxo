@@ -466,7 +466,6 @@ AC_CONFIG_FILES([
   tests/xo/Makefile
   packaging/libxo.spec
   packaging/libxo.rb.base
-  doc/conf.py
 ])
 AC_OUTPUT
 
