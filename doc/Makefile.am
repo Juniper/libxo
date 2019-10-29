@@ -69,7 +69,7 @@ doc docs:
 	@${ECHO} "The 'oxtradoc' tool is not installed; see libslax.org"
 endif
 
-SPHINX = python3.4 -msphinx
+SPHINX = python3 -msphinx
 
 html sphinx sphinx-html:
-	${SPHINX} -M html ${srcdir} .
+	${SPHINX} -M html ${srcdir} . -c . -N -E
