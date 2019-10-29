@@ -460,6 +460,7 @@ AC_CONFIG_FILES([
   xopo/Makefile
   packaging/libxo.pc
   doc/Makefile
+  doc/top-link.html
   tests/Makefile
   tests/core/Makefile
   tests/gettext/Makefile
