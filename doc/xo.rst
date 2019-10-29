@@ -102,6 +102,8 @@ Use the `--top-wrap` option to ensure any top-level object details are
 handled correctly, e.g. wrap the entire output in a top-level set of
 braces for JSON output.
 
+::
+
   EXAMPLE;
     #!/bin/sh
     xo --top-wrap --open top/data
@@ -150,7 +152,7 @@ them.  Each of these options take a `name` parameter, providing the
 name of the list and instance.
 
 In the following example, a list named "machine" is created with three
-instances:
+instances::
 
     opts="--json"
     xo $opts --open-list machine
