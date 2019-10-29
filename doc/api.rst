@@ -1,4 +1,4 @@
-.. index: API
+.. index:: API
 
 The libxo API
 =============
