@@ -316,7 +316,8 @@ a given handle.  To use the default handle, pass a <code class="code docutils li
 <span class="target" id="index-10"></span><span class="target" id="index-11"></span><span class="target" id="index-12"></span><div class="section" id="output-styles-xo-style">
 <span id="output-styles"></span><span id="index-13"></span><h4>Output Styles (XO_STYLE_*)<a class="headerlink" href="#output-styles-xo-style" title="Permalink to this headline">¶</a></h4>
 <p>The libxo functions accept a set of output styles:</p>
-<table border="1" class="docutils">
+<blockquote>
+<div><table border="1" class="docutils">
 <colgroup>
 <col width="38%" />
 <col width="63%" />
@@ -341,6 +342,7 @@ a given handle.  To use the default handle, pass a <code class="code docutils li
 </tr>
 </tbody>
 </table>
+</div></blockquote>
 <p>The “XML”, “JSON”, and “HTML” output styles all use the UTF-8
 character encoding.  “TEXT” using locale-based encoding.</p>
 </div>
@@ -439,7 +441,8 @@ handle.  To use the default handle, pass a <code class="code docutils literal no
 <span class="target" id="index-17"></span><span class="target" id="index-18"></span><span class="target" id="index-19"></span><span class="target" id="index-20"></span><span class="target" id="index-21"></span><span class="target" id="index-22"></span><span class="target" id="index-23"></span><span class="target" id="index-24"></span><span class="target" id="index-25"></span><span class="target" id="index-26"></span><span class="target" id="index-27"></span><span class="target" id="index-28"></span><span class="target" id="index-29"></span><span class="target" id="index-30"></span><span class="target" id="index-31"></span><span class="target" id="index-32"></span><div class="section" id="flags-xof">
 <span id="flags"></span><span id="index-33"></span><h4>Flags (XOF_*)<a class="headerlink" href="#flags-xof" title="Permalink to this headline">¶</a></h4>
 <p>The set of valid flags include:</p>
-<table border="1" class="docutils">
+<blockquote>
+<div><table border="1" class="docutils">
 <colgroup>
 <col width="30%" />
 <col width="70%" />
@@ -500,6 +503,7 @@ handle.  To use the default handle, pass a <code class="code docutils literal no
 </tr>
 </tbody>
 </table>
+</div></blockquote>
 <p>The <code class="code docutils literal notranslate"><span class="pre">XOF_CLOSE_FP</span></code> flag will trigger the call of the <em>close_func</em>
 (provided via <code class="code docutils literal notranslate"><span class="pre">xo_set_writer</span></code>) when the handle is destroyed.</p>
 <p>The <code class="code docutils literal notranslate"><span class="pre">XOF_COLOR</span></code> flag enables color and effects in output regardless
@@ -517,7 +521,8 @@ The function <code class="code docutils literal notranslate"><span class="pre">x
 regardless of whether warnings are enabled.</p>
 <p>If the style is <code class="code docutils literal notranslate"><span class="pre">XO_STYLE_HTML</span></code>, the following additional flags can be
 used:</p>
-<table border="1" class="docutils">
+<blockquote>
+<div><table border="1" class="docutils">
 <colgroup>
 <col width="27%" />
 <col width="73%" />
@@ -536,6 +541,7 @@ used:</p>
 </tr>
 </tbody>
 </table>
+</div></blockquote>
 <p>The <code class="code docutils literal notranslate"><span class="pre">XOF_XPATH</span></code> flag enables the emission of XPath expressions detailing
 the hierarchy of XML elements used to encode the data field, if the
 XPATH style of output were requested.</p>
@@ -543,7 +549,8 @@ XPATH style of output were requested.</p>
 output.  See <a class="reference internal" href="#field-information"><span class="std std-ref">Field Information (xo_info_t)</span></a> for details.</p>
 <p>If the style is <code class="code docutils literal notranslate"><span class="pre">XO_STYLE_XML</span></code>, the following additional flags can be
 used:</p>
-<table border="1" class="docutils">
+<blockquote>
+<div><table border="1" class="docutils">
 <colgroup>
 <col width="27%" />
 <col width="73%" />
@@ -559,6 +566,7 @@ used:</p>
 </tr>
 </tbody>
 </table>
+</div></blockquote>
 <p>The <code class="code docutils literal notranslate"><span class="pre">XOF_KEYS</span></code> flag adds “key” attribute to the XML encoding for
 field definitions that use the “k” modifier.  The key attribute has
 the value “key”:</p>
@@ -1901,7 +1909,8 @@ together to create a single integer argument:</p>
 <p>These values are defined in &lt;syslog.h&gt;.</p>
 <p>The priority value indicates the importance and potential impact of
 each message:</p>
-<table border="1" class="docutils">
+<blockquote>
+<div><table border="1" class="docutils">
 <colgroup>
 <col width="19%" />
 <col width="81%" />
@@ -1938,9 +1947,11 @@ each message:</p>
 </tr>
 </tbody>
 </table>
+</div></blockquote>
 <p>The facility value indicates the source of message, in fairly generic
 terms:</p>
-<table border="1" class="docutils">
+<blockquote>
+<div><table border="1" class="docutils">
 <colgroup>
 <col width="21%" />
 <col width="79%" />
@@ -1995,9 +2006,11 @@ terms:</p>
 </tr>
 </tbody>
 </table>
+</div></blockquote>
 <p>In addition to the values listed above, xo_open_log accepts a set of
 addition flags requesting specific logging behaviors:</p>
-<table border="1" class="docutils">
+<blockquote>
+<div><table border="1" class="docutils">
 <colgroup>
 <col width="17%" />
 <col width="83%" />
@@ -2022,6 +2035,7 @@ addition flags requesting specific logging behaviors:</p>
 </tr>
 </tbody>
 </table>
+</div></blockquote>
 </div>
 <div class="section" id="xo-syslog">
 <span id="index-77"></span><h3>xo_syslog<a class="headerlink" href="#xo-syslog" title="Permalink to this headline">¶</a></h3>
@@ -2283,7 +2297,8 @@ return code will cause the handle initialization to fail.</p>
 processing model of libxo.  Content is formatted within libxo, and
 callbacks are made to the encoder’s handler function when data is
 ready to be processed:</p>
-<table border="1" class="docutils">
+<blockquote>
+<div><table border="1" class="docutils">
 <colgroup>
 <col width="37%" />
 <col width="63%" />
@@ -2344,6 +2359,7 @@ ready to be processed:</p>
 </tr>
 </tbody>
 </table>
+</div></blockquote>
 <p>For all the open and close operations, the name parameter holds the
 name of the construct.  For string, content, and attribute operations,
 the name parameter is the name of the field and the value parameter is

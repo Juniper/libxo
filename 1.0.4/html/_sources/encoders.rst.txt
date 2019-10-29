@@ -48,10 +48,11 @@ CSV - Comma Separated Values
 ----------------------------
 
 libxo ships with a custom encoder for "CSV" files, a common format for
-comma separated values.  A standard for CSV files is provided in RFC
-4180::
-
-    https://tools.ietf.org/html/rfc4180
+comma separated values.  A standard for CSV files is provided in
+:RFC:`4180`, but since the format predates that standard by decades,
+there are many minor differences in CSV file consumers and their
+expectations.  The CSV encoder has a number of options to tailor
+output to those expectations.
 
 Consider the following XML::
 

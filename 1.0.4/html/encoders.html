@@ -129,11 +129,11 @@ Refer to the intended encoder for documentation on its options.</p>
 <div class="section" id="csv-comma-separated-values">
 <span id="csv-encoder"></span><h2>CSV - Comma Separated Values<a class="headerlink" href="#csv-comma-separated-values" title="Permalink to this headline">¶</a></h2>
 <p>libxo ships with a custom encoder for “CSV” files, a common format for
-comma separated values.  A standard for CSV files is provided in RFC
-4180:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">tools</span><span class="o">.</span><span class="n">ietf</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">rfc4180</span>
-</pre></div>
-</div>
+comma separated values.  A standard for CSV files is provided in
+<span class="target" id="index-1"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4180.html"><strong>RFC 4180</strong></a>, but since the format predates that standard by decades,
+there are many minor differences in CSV file consumers and their
+expectations.  The CSV encoder has a number of options to tailor
+output to those expectations.</p>
 <p>Consider the following XML:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">%</span> <span class="nb">list</span><span class="o">-</span><span class="n">items</span> <span class="o">--</span><span class="n">libxo</span> <span class="n">xml</span><span class="p">,</span><span class="n">pretty</span>
 <span class="o">&lt;</span><span class="n">top</span><span class="o">&gt;</span>
@@ -232,8 +232,8 @@ separated by a period (“.”):</p>
 <span class="mi">1</span><span class="p">,</span><span class="n">HRD</span><span class="o">-</span><span class="mi">000</span><span class="o">-</span><span class="mi">517</span>
 </pre></div>
 </div>
-<p>Note that since libxo uses terminology from YANG (<span class="target" id="index-1"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7950.html"><strong>RFC 7950</strong></a>), the
-data modeling language for NETCONF (<span class="target" id="index-2"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6241.html"><strong>RFC 6241</strong></a>), which uses “leafs”
+<p>Note that since libxo uses terminology from YANG (<span class="target" id="index-2"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7950.html"><strong>RFC 7950</strong></a>), the
+data modeling language for NETCONF (<span class="target" id="index-3"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6241.html"><strong>RFC 6241</strong></a>), which uses “leafs”
 as the plural form of “leaf”.  libxo follows that convention.</p>
 </div>
 <div class="section" id="the-no-header-option">
@@ -253,13 +253,13 @@ line is included, so the consumer must make an assumption.</p>
 </div>
 <div class="section" id="the-no-quotes-option">
 <span id="csv-no-quotes"></span><h3>The <code class="code docutils literal notranslate"><span class="pre">no-quotes</span></code> Option<a class="headerlink" href="#the-no-quotes-option" title="Permalink to this headline">¶</a></h3>
-<p><span class="target" id="index-3"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4180.html"><strong>RFC 4180</strong></a> specifies that fields containing spaces should be quoted, but
+<p><span class="target" id="index-4"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4180.html"><strong>RFC 4180</strong></a> specifies that fields containing spaces should be quoted, but
 many CSV consumers do not handle quotes.  The “no-quotes” option
 instruct the CSV encoder to avoid the use of quotes.</p>
 </div>
 <div class="section" id="the-dos-option">
 <span id="csv-dos"></span><h3>The <code class="code docutils literal notranslate"><span class="pre">dos</span></code> Option<a class="headerlink" href="#the-dos-option" title="Permalink to this headline">¶</a></h3>
-<p><span class="target" id="index-4"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4180.html"><strong>RFC 4180</strong></a> defines the end-of-line marker as a carriage return
+<p><span class="target" id="index-5"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4180.html"><strong>RFC 4180</strong></a> defines the end-of-line marker as a carriage return
 followed by a newline.  This <code class="code docutils literal notranslate"><span class="pre">CRLF</span></code> convention dates from the distant
 past, but its use was anchored in the 1980s by the <code class="code docutils literal notranslate"><span class="pre">DOS</span></code> operating
 system.</p>
