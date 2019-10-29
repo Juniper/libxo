@@ -1,0 +1,362 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Command-line Arguments &#8212; libxo 1.0.4
+ documentation</title>
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Format Strings" href="format-strings.html" />
+    <link rel="prev" title="Formatting with libxo" href="formatting.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="format-strings.html" title="Format Strings"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="formatting.html" title="Formatting with libxo"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">libxo 1.0.4
+ documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">On This Page</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Command-line Arguments</a><ul>
+<li><a class="reference internal" href="#option-keywords">Option Keywords</a></li>
+<li><a class="reference internal" href="#brief-options">Brief Options</a></li>
+<li><a class="reference internal" href="#color-mapping">Color Mapping</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3><a href="index.html">Full Documentation</a></h3>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="formatting.html"
+                        title="previous chapter">Formatting with libxo</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="format-strings.html"
+                        title="next chapter">Format Strings</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/options.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <span class="target" id="index-0"></span><div class="section" id="command-line-arguments">
+<span id="options"></span><span id="index-1"></span><h1>Command-line Arguments<a class="headerlink" href="#command-line-arguments" title="Permalink to this headline">¶</a></h1>
+<p>libxo uses command line options to trigger rendering behavior.  There
+are multiple conventions for passing options, all using the
+“<code class="code docutils literal notranslate"><span class="pre">--libxo</span></code>” option:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">--</span><span class="n">libxo</span> <span class="o">&lt;</span><span class="n">options</span><span class="o">&gt;</span>
+<span class="o">--</span><span class="n">libxo</span><span class="o">=&lt;</span><span class="n">options</span><span class="o">&gt;</span>
+<span class="o">--</span><span class="n">libxo</span><span class="p">:</span><span class="o">&lt;</span><span class="n">brief</span><span class="o">-</span><span class="n">options</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>The <em>brief-options</em> is a series of single letter abbrevations, where
+the <em>options</em> is a comma-separated list of words.  Both provide access
+to identical functionality.  The following invocations are all
+identical in outcome:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">my</span><span class="o">-</span><span class="n">app</span> <span class="o">--</span><span class="n">libxo</span> <span class="n">warn</span><span class="p">,</span><span class="n">pretty</span> <span class="n">arg1</span>
+<span class="n">my</span><span class="o">-</span><span class="n">app</span> <span class="o">--</span><span class="n">libxo</span><span class="o">=</span><span class="n">warn</span><span class="p">,</span><span class="n">pretty</span> <span class="n">arg1</span>
+<span class="n">my</span><span class="o">-</span><span class="n">app</span> <span class="o">--</span><span class="n">libxo</span><span class="p">:</span><span class="n">WP</span> <span class="n">arg1</span>
+</pre></div>
+</div>
+<p>Programs using libxo are expecting to call the xo_parse_args function
+to parse these arguments.  See <a class="reference internal" href="api.html#xo-parse-args"><span class="std std-ref">Parsing Command-line Arguments (xo_parse_args)</span></a> for details.</p>
+<div class="section" id="option-keywords">
+<h2>Option Keywords<a class="headerlink" href="#option-keywords" title="Permalink to this headline">¶</a></h2>
+<p>Options is a comma-separated list of tokens that correspond to output
+styles, flags, or features:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="21%" />
+<col width="79%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Token</th>
+<th class="head">Action</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>color</td>
+<td>Enable colors/effects for display styles (TEXT, HTML)</td>
+</tr>
+<tr class="row-odd"><td>colors=xxxx</td>
+<td>Adjust color output values</td>
+</tr>
+<tr class="row-even"><td>dtrt</td>
+<td>Enable “Do The Right Thing” mode</td>
+</tr>
+<tr class="row-odd"><td>flush</td>
+<td>Flush after every libxo function call</td>
+</tr>
+<tr class="row-even"><td>flush-line</td>
+<td>Flush after every line (line-buffered)</td>
+</tr>
+<tr class="row-odd"><td>html</td>
+<td>Emit HTML output</td>
+</tr>
+<tr class="row-even"><td>indent=xx</td>
+<td>Set the indentation level</td>
+</tr>
+<tr class="row-odd"><td>info</td>
+<td>Add info attributes (HTML)</td>
+</tr>
+<tr class="row-even"><td>json</td>
+<td>Emit JSON output</td>
+</tr>
+<tr class="row-odd"><td>keys</td>
+<td>Emit the key attribute for keys (XML)</td>
+</tr>
+<tr class="row-even"><td>log-gettext</td>
+<td>Log (via stderr) each gettext(3) string lookup</td>
+</tr>
+<tr class="row-odd"><td>log-syslog</td>
+<td>Log (via stderr) each syslog message (via xo_syslog)</td>
+</tr>
+<tr class="row-even"><td>no-humanize</td>
+<td>Ignore the {h:} modifier (TEXT, HTML)</td>
+</tr>
+<tr class="row-odd"><td>no-locale</td>
+<td>Do not initialize the locale setting</td>
+</tr>
+<tr class="row-even"><td>no-retain</td>
+<td>Prevent retaining formatting information</td>
+</tr>
+<tr class="row-odd"><td>no-top</td>
+<td>Do not emit a top set of braces (JSON)</td>
+</tr>
+<tr class="row-even"><td>not-first</td>
+<td>Pretend the 1st output item was not 1st (JSON)</td>
+</tr>
+<tr class="row-odd"><td>pretty</td>
+<td>Emit pretty-printed output</td>
+</tr>
+<tr class="row-even"><td>retain</td>
+<td>Force retaining formatting information</td>
+</tr>
+<tr class="row-odd"><td>text</td>
+<td>Emit TEXT output</td>
+</tr>
+<tr class="row-even"><td>underscores</td>
+<td>Replace XML-friendly “-“s with JSON friendly “_”s</td>
+</tr>
+<tr class="row-odd"><td>units</td>
+<td>Add the ‘units’ (XML) or ‘data-units (HTML) attribute</td>
+</tr>
+<tr class="row-even"><td>warn</td>
+<td>Emit warnings when libxo detects bad calls</td>
+</tr>
+<tr class="row-odd"><td>warn-xml</td>
+<td>Emit warnings in XML</td>
+</tr>
+<tr class="row-even"><td>xml</td>
+<td>Emit XML output</td>
+</tr>
+<tr class="row-odd"><td>xpath</td>
+<td>Add XPath expressions (HTML)</td>
+</tr>
+</tbody>
+</table>
+<p>Most of these option are simple and direct, but some require
+additional details:</p>
+<ul class="simple">
+<li>“colors” is described in <a class="reference internal" href="#color-mapping"><span class="std std-ref">Color Mapping</span></a>.</li>
+<li>“flush-line” performs line buffering, even when the output is not
+directed to a TTY device.</li>
+<li>“info” generates additional data for HTML, encoded in attributes
+using names that state with “data-“.</li>
+<li>“keys” adds a “key” attribute for XML output to indicate that a leaf
+is an identifier for the list member.</li>
+<li>“no-humanize” avoids “humanizing” numeric output (see
+<a class="reference internal" href="field-modifiers.html#humanize-modifier"><span class="std std-ref">The Humanize Modifier ({h:})</span></a> for details).</li>
+<li>“no-locale” instructs libxo to avoid translating output to the
+current locale.</li>
+<li>“no-retain” disables the ability of libxo to internally retain
+“compiled” information about formatting strings (see <a class="reference internal" href="field-formatting.html#retain"><span class="std std-ref">Retaining Parsed Format Information</span></a>
+for details).</li>
+<li>“underscores” can be used with JSON output to change XML-friendly
+names with dashes into JSON-friendly name with underscores.</li>
+<li>“warn” allows libxo to emit warnings on stderr when application code
+make incorrect calls.</li>
+<li>“warn-xml” causes those warnings to be placed in XML inside the
+output.</li>
+</ul>
+</div>
+<div class="section" id="brief-options">
+<h2>Brief Options<a class="headerlink" href="#brief-options" title="Permalink to this headline">¶</a></h2>
+<p>The brief options are simple single-letter aliases to the normal
+keywords, as detailed below:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="15%" />
+<col width="85%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Option</th>
+<th class="head">Action</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>c</td>
+<td>Enable color/effects for TEXT/HTML</td>
+</tr>
+<tr class="row-odd"><td>F</td>
+<td>Force line-buffered flushing</td>
+</tr>
+<tr class="row-even"><td>H</td>
+<td>Enable HTML output (XO_STYLE_HTML)</td>
+</tr>
+<tr class="row-odd"><td>I</td>
+<td>Enable info output (XOF_INFO)</td>
+</tr>
+<tr class="row-even"><td>i&lt;num&gt;</td>
+<td>Indent by &lt;number&gt;</td>
+</tr>
+<tr class="row-odd"><td>J</td>
+<td>Enable JSON output (XO_STYLE_JSON)</td>
+</tr>
+<tr class="row-even"><td>k</td>
+<td>Add keys to XPATH expressions in HTML</td>
+</tr>
+<tr class="row-odd"><td>n</td>
+<td>Disable humanization (TEXT, HTML)</td>
+</tr>
+<tr class="row-even"><td>P</td>
+<td>Enable pretty-printed output (XOF_PRETTY)</td>
+</tr>
+<tr class="row-odd"><td>T</td>
+<td>Enable text output (XO_STYLE_TEXT)</td>
+</tr>
+<tr class="row-even"><td>U</td>
+<td>Add units to HTML output</td>
+</tr>
+<tr class="row-odd"><td>u</td>
+<td>Change “-“s to “_”s in element names (JSON)</td>
+</tr>
+<tr class="row-even"><td>W</td>
+<td>Enable warnings (XOF_WARN)</td>
+</tr>
+<tr class="row-odd"><td>X</td>
+<td>Enable XML output (XO_STYLE_XML)</td>
+</tr>
+<tr class="row-even"><td>x</td>
+<td>Enable XPath data (XOF_XPATH)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="color-mapping">
+<span id="index-2"></span><span id="id1"></span><h2>Color Mapping<a class="headerlink" href="#color-mapping" title="Permalink to this headline">¶</a></h2>
+<p>The “colors” option takes a value that is a set of mappings from the
+pre-defined set of colors to new foreground and background colors.
+The value is a series of “fg/bg” values, separated by a “+”.  Each
+pair of “fg/bg” values gives the colors to which a basic color is
+mapped when used as a foreground or background color.  The order is
+the mappings is:</p>
+<ul class="simple">
+<li>black</li>
+<li>red</li>
+<li>green</li>
+<li>yellow</li>
+<li>blue</li>
+<li>magenta</li>
+<li>cyan</li>
+<li>white</li>
+</ul>
+<p>Pairs may be skipped, leaving them mapped as normal, as are missing
+pairs or single colors.</p>
+<p>For example consider the following xo_emit call:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;{C:fg-red,bg-green}Merry XMas!!</span><span class="si">{C:}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>To turn all colored output to red-on-blue, use eight pairs of
+“red/blue” mappings separated by “+”s:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">--</span><span class="n">libxo</span> <span class="n">colors</span><span class="o">=</span><span class="n">red</span><span class="o">/</span><span class="n">blue</span><span class="o">+</span><span class="n">red</span><span class="o">/</span><span class="n">blue</span><span class="o">+</span><span class="n">red</span><span class="o">/</span><span class="n">blue</span><span class="o">+</span><span class="n">red</span><span class="o">/</span><span class="n">blue</span><span class="o">+</span>\
+               <span class="n">red</span><span class="o">/</span><span class="n">blue</span><span class="o">+</span><span class="n">red</span><span class="o">/</span><span class="n">blue</span><span class="o">+</span><span class="n">red</span><span class="o">/</span><span class="n">blue</span><span class="o">+</span><span class="n">red</span><span class="o">/</span><span class="n">blue</span>
+</pre></div>
+</div>
+<p>To turn the red-on-green text to magenta-on-cyan, give a “magenta”
+foreground value for red (the second mapping) and a “cyan” background
+to green (the third mapping):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">--</span><span class="n">libxo</span> <span class="n">colors</span><span class="o">=+</span><span class="n">magenta</span><span class="o">+/</span><span class="n">cyan</span>
+</pre></div>
+</div>
+<p>Consider the common situation where blue output looks unreadable on a
+terminal session with a black background.  To turn both “blue”
+foreground and background output to “yellow”, give only the fifth
+mapping, skipping the first four mappings with bare “+”s:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">--</span><span class="n">libxo</span> <span class="n">colors</span><span class="o">=++++</span><span class="n">yellow</span><span class="o">/</span><span class="n">yellow</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="format-strings.html" title="Format Strings"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="formatting.html" title="Formatting with libxo"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">libxo 1.0.4
+ documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017-2019, Juniper Networks.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.3.
+    </div>
+  </body>
+</html>
