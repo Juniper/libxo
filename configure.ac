@@ -452,6 +452,7 @@ AC_CONFIG_FILES([
   libxo/add.man
   encoder/Makefile
   encoder/cbor/Makefile
+  encoder/csv/Makefile
   encoder/test/Makefile
   xo/Makefile
   xolint/Makefile
@@ -459,6 +460,7 @@ AC_CONFIG_FILES([
   xopo/Makefile
   packaging/libxo.pc
   doc/Makefile
+  doc/top-link.html
   tests/Makefile
   tests/core/Makefile
   tests/gettext/Makefile

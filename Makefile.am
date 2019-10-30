@@ -32,6 +32,9 @@ errors:
 docs:
 	@(cd doc ; ${MAKE} docs)
 
+docs-html:
+	@(cd doc ; ${MAKE} html)
+
 
 DIST_FILES_DIR = ~/Dropbox/dist-files/
 GH_PAGES_DIR = gh-pages/
@@ -49,7 +52,9 @@ upload: dist upload-docs upload-xohtml-files
 	@echo "Remember to run:"
 	@echo "        gt tag ${PACKAGE_VERSION}"
 
-upload-docs: docs
+upload-docs: upload-manual upload-html
+
+upload-manual: docs
 	@echo "Uploading libxo-manual.html ... "
 	@-[ -d ${GH_PAGES_DIR} ] \
 		&& echo "Updating manual on gh-pages ..." \
@@ -61,6 +66,20 @@ upload-docs: docs
 			&& git add libxo-manual.html \
 			&& git commit -m 'new docs' \
                                libxo-manual.html ${PACKAGE_VERSION} \
+			&& git push origin gh-pages ) ; true
+
+upload-html: docs-html
+	@echo "Uploading html ... "
+	@-[ -d ${GH_PAGES_DIR} -a -d doc/html ] \
+		&& echo "Updating html on gh-pages ..." \
+		&& mkdir -p ${GH_PAGES_DIR_VER}/html \
+		&& cp doc/top-link.html ${GH_PAGES_DIR}/libxo.html \
+		&& cp -r doc/html/* ${GH_PAGES_DIR_VER}/html/ \
+		&& (cd ${GH_PAGES_DIR} \
+			&& git add libxo.html \
+			&& git add ${PACKAGE_VERSION}/html \
+			&& git commit -m 'new docs' \
+                               libxo.html ${PACKAGE_VERSION}/html \
 			&& git push origin gh-pages ) ; true
 
 upload-xohtml-files:
