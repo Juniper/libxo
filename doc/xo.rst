@@ -1,5 +1,5 @@
-
 .. index:: --libxo, xo
+.. _xo:
 
 The "xo" Utility
 ================
@@ -12,9 +12,7 @@ The style of output can be selected using a specific option: "-X" for
 XML, "-J" for JSON, "-H" for HTML, or "-T" for TEXT, which is the
 default.  The "--style <style>" option can also be used.  The standard
 set of "--libxo" options are available (see :ref:`options`), as well
-as the `LIBXO_OPTIONS`_ environment variable.
-
-.. _`LIBXO_OPTIONS`: :ref:`libxo-options`
+as the :ref:`LIBXO_OPTIONS <libxo-options>` environment variable.
 
 The `xo` utility accepts a format string suitable for `xo_emit` and
 a set of zero or more arguments used to supply data for that string::
