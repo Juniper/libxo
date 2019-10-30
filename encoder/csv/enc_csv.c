@@ -71,6 +71,9 @@
  *
  * - The stack holds the current names of the open elements
  *   - The "open" operations push, while the "close" pop
+ *   - Turns out, at this point, the stack is unused, but I've
+ *     left "drippings" in the code because I see this as useful
+ *     for future features (under CSV_STACK_IS_NEEDED).
  *
  * - The leafs record the current set of leaf
  *   - A key from the parent list counts as a leaf (unless CF_NO_KEYS)
@@ -98,7 +101,9 @@ typedef struct leaf_s {
     ssize_t f_name;		/* Name of leaf; offset in c_name_buf */
     ssize_t f_value;		/* Value of leaf; offset in c_value_buf */
     uint32_t f_flags;		/* Flags for this value (FF_*)  */
+#ifdef CSV_STACK_IS_NEEDED
     ssize_t f_depth;		/* Depth of stack when leaf was recorded */
+#endif /* CSV_STACK_IS_NEEDED */
 } leaf_t;
 
 /* Flags for f_flags */
@@ -115,10 +120,12 @@ typedef struct csv_private_s {
     ssize_t c_path_cur;		/* Current depth in c_path[] */
 
     /* A stack of open elements (xo_op_list, xo_op_container) */
+#if CSV_STACK_IS_NEEDED
     xo_buffer_t c_stack_buf;	/* Buffer used for stack content */
     stack_frame_t *c_stack;	/* Stack of open tags */
-    ssize_t c_stack_depth;	/* Current stack depth */
     ssize_t c_stack_max;	/* Maximum stack depth */
+#endif /* CSV_STACK_IS_NEEDED */
+    ssize_t c_stack_depth;	/* Current stack depth */
 
     /* List of leafs we are emitting (to ensure consistency) */
     xo_buffer_t c_name_buf;	/* String buffer for leaf names */
@@ -147,14 +154,16 @@ typedef struct csv_private_s {
 #define CF_DEBUG	(1<<8)	/* Make debug output */
 #define CF_HAS_PATH	(1<<9)	/* A "path" option was provided */
 
+/*
+ * A simple debugging print function, similar to psu_dbg.  Controlled by
+ * the undocumented "debug" option.
+ */
 static void
 csv_dbg (xo_handle_t *xop UNUSED, csv_private_t *csv UNUSED,
 	 const char *fmt, ...)
 {
-#if 1
     if (csv == NULL || !(csv->c_flags & CF_DEBUG))
 	return;
-#endif
 
     va_list vap;
 
@@ -163,6 +172,10 @@ csv_dbg (xo_handle_t *xop UNUSED, csv_private_t *csv UNUSED,
     va_end(vap);
 }
 
+/*
+ * Create the private data for this handle, initialize it, and record
+ * the pointer in the handle.
+ */
 static int
 csv_create (xo_handle_t *xop)
 {
@@ -172,27 +185,41 @@ csv_create (xo_handle_t *xop)
 
     bzero(csv, sizeof(*csv));
     xo_buf_init(&csv->c_data);
-    xo_buf_init(&csv->c_stack_buf);
     xo_buf_init(&csv->c_name_buf);
     xo_buf_init(&csv->c_value_buf);
+#ifdef CSV_STACK_IS_NEEDED
+    xo_buf_init(&csv->c_stack_buf);
+#endif /* CSV_STACK_IS_NEEDED */
 
     xo_set_private(xop, csv);
 
     return 0;
 }
 
+/*
+ * Clean up and release any data in use by this handle
+ */
 static void
 csv_destroy (xo_handle_t *xop UNUSED, csv_private_t *csv)
 {
     /* Clean up */
     xo_buf_cleanup(&csv->c_data);
-    xo_buf_cleanup(&csv->c_stack_buf);
     xo_buf_cleanup(&csv->c_name_buf);
     xo_buf_cleanup(&csv->c_value_buf);
+#ifdef CSV_STACK_IS_NEEDED
+    xo_buf_cleanup(&csv->c_stack_buf);
+#endif /* CSV_STACK_IS_NEEDED */
 
-    xo_free(csv->c_path_buf);
+    if (csv->c_leaf)
+	xo_free(csv->c_leaf);
+    if (csv->c_path_buf)
+	xo_free(csv->c_path_buf);
 }
 
+/*
+ * Return the element name at the top of the path stack.  This is the
+ * item that we are currently trying to match on.
+ */
 static const char *
 csv_path_top (csv_private_t *csv, ssize_t delta)
 {
@@ -207,22 +234,37 @@ csv_path_top (csv_private_t *csv, ssize_t delta)
     return csv->c_path[cur].pf_name;
 }
 
-static void
+/*
+ * Underimplemented stack functionality
+ */
+static inline void
 csv_stack_push (csv_private_t *csv UNUSED, const char *name UNUSED)
 {
+#ifdef CSV_STACK_IS_NEEDED
     csv->c_stack_depth += 1;
+#endif /* CSV_STACK_IS_NEEDED */
 }
 
-static void
+/*
+ * Underimplemented stack functionality
+ */
+static inline void
 csv_stack_pop (csv_private_t *csv UNUSED, const char *name UNUSED)
 {
+#ifdef CSV_STACK_IS_NEEDED
     csv->c_stack_depth -= 1;
+#endif /* CSV_STACK_IS_NEEDED */
 }
 
 /* Flags for csv_quote_flags */
 #define QF_NEEDS_QUOTES	(1<<0)		/* Needs to be quoted */
 #define QF_NEEDS_ESCAPE	(1<<1)		/* Needs to be escaped */
 
+/*
+ * Determine how much quote processing is needed.  The details of the
+ * quoting rules are given at the top of this file.  We return a set
+ * of flags, indicating what's needed.
+ */
 static uint32_t
 csv_quote_flags (xo_handle_t *xop UNUSED, csv_private_t *csv UNUSED,
 		  const char *value)
@@ -230,7 +272,7 @@ csv_quote_flags (xo_handle_t *xop UNUSED, csv_private_t *csv UNUSED,
     static const char quoted[] = "\n\r\",";
     static const char escaped[] = "\"";
 
-    if (csv->c_flags & CF_NO_QUOTES)
+    if (csv->c_flags & CF_NO_QUOTES)	/* User doesn't want quotes */
 	return 0;
 
     size_t len = strlen(value);
@@ -252,6 +294,9 @@ csv_quote_flags (xo_handle_t *xop UNUSED, csv_private_t *csv UNUSED,
     return rc;
 }
 
+/*
+ * Escape the string, following the rules in RFC4180
+ */
 static void
 csv_escape (xo_buffer_t *xbp, const char *value, size_t len)
 {
@@ -268,6 +313,10 @@ csv_escape (xo_buffer_t *xbp, const char *value, size_t len)
     }
 }
 
+/*
+ * Append a newline to the buffer, following the settings of the "dos"
+ * flag.
+ */
 static void
 csv_append_newline (xo_buffer_t *xbp, csv_private_t *csv)
 {
@@ -277,6 +326,11 @@ csv_append_newline (xo_buffer_t *xbp, csv_private_t *csv)
 	xo_buf_append(xbp, "\n", 1);
 }
 
+/*
+ * Create a 'record' of 'fields' from our recorded leaf values.  If
+ * this is the first line and "no-header" isn't given, make a record
+ * containing the leaf names.
+ */
 static void
 csv_emit_record (xo_handle_t *xop, csv_private_t *csv)
 {
@@ -334,7 +388,10 @@ csv_emit_record (xo_handle_t *xop, csv_private_t *csv)
     }
 
     csv_append_newline(&csv->c_data, csv);
-    xo_flush_h(xop);
+
+    /* We flush if either flush flag is set */
+    if (xo_get_flags(xop) & (XOF_FLUSH | XOF_FLUSH_LINE))
+	xo_flush_h(xop);
 
     /* Clean out values from leafs */
     for (fnum = 0; fnum < csv->c_leaf_depth; fnum++) {
@@ -353,6 +410,11 @@ csv_emit_record (xo_handle_t *xop, csv_private_t *csv)
     csv->c_flags |= CF_LEAFS_DONE;
 }
 
+/*
+ * Open a "level" of hierarchy, either a container or an instance.  Look
+ * for a match in the path=x/y/z hierarchy, and ignore if not a match.
+ * If we're at the end of the path, start recording leaf values.
+ */
 static int
 csv_open_level (xo_handle_t *xop UNUSED, csv_private_t *csv,
 		const char *name, int instance)
@@ -392,6 +454,9 @@ csv_open_level (xo_handle_t *xop UNUSED, csv_private_t *csv,
     return 0;
 }
 
+/*
+ * Close a "level", either a container or an instance.
+ */
 static int
 csv_close_level (xo_handle_t *xop UNUSED, csv_private_t *csv, const char *name)
 {
@@ -417,6 +482,11 @@ csv_close_level (xo_handle_t *xop UNUSED, csv_private_t *csv, const char *name)
     return 0;
 }
 
+/*
+ * Return the index of a given leaf in the c_leaf[] array, where we
+ * record leaf values.  If the leaf is new and we haven't stopped recording
+ * leafs, then make a new slot for it and record the name.
+ */
 static int
 csv_leaf_num (xo_handle_t *xop UNUSED, csv_private_t *csv,
 	       const char *name, xo_xff_flags_t flags)
@@ -458,7 +528,9 @@ csv_leaf_num (xo_handle_t *xop UNUSED, csv_private_t *csv,
     }
 
     lp = &csv->c_leaf[csv->c_leaf_depth++];
+#ifdef CSV_STACK_IS_NEEDED
     lp->f_depth = csv->c_stack_depth;
+#endif /* CSV_STACK_IS_NEEDED */
 
     lp->f_name = xo_buf_offset(xbp);
 
@@ -474,6 +546,9 @@ csv_leaf_num (xo_handle_t *xop UNUSED, csv_private_t *csv,
     return fnum;
 }
 
+/*
+ * Record a new value for a leaf
+ */
 static void
 csv_leaf_set (xo_handle_t *xop UNUSED, csv_private_t *csv, leaf_t *lp,
 	       const char *value)
@@ -491,7 +566,8 @@ csv_leaf_set (xo_handle_t *xop UNUSED, csv_private_t *csv, leaf_t *lp,
 }
 
 /*
- * Record the leafs in the private structure
+ * Record the requested set of leaf names.  The input should be a set
+ * of leaf names, separated by periods.
  */
 static int
 csv_record_leafs (xo_handle_t *xop, csv_private_t *csv, const char *leafs_raw)
@@ -507,6 +583,9 @@ csv_record_leafs (xo_handle_t *xop, csv_private_t *csv, const char *leafs_raw)
 	if (np)
 	    *np++ = '\0';
 
+	if (*cp == '\0')		/* Skip empty names */
+	    continue;
+
 	csv_dbg(xop, csv, "adding leaf: [%s]\n", cp);
 	csv_leaf_num(xop, csv, cp, 0);
     }
@@ -520,7 +599,8 @@ csv_record_leafs (xo_handle_t *xop, csv_private_t *csv, const char *leafs_raw)
 }
 
 /*
- * Record the path in the private structure
+ * Record the requested path elements.  The input should be a set of
+ * container or instances names, separated by slashes.
  */
 static int
 csv_record_path (xo_handle_t *xop, csv_private_t *csv, const char *path_raw)
@@ -559,6 +639,11 @@ csv_record_path (xo_handle_t *xop, csv_private_t *csv, const char *path_raw)
     }
 
     path[count].pf_name = NULL;
+
+    if (csv->c_path)		     /* In case two paths are given */
+	xo_free(csv->c_path);
+    if (csv->c_path_buf)	     /* In case two paths are given */
+	xo_free(csv->c_path_buf);
 
     csv->c_path_buf = path_buf;
     csv->c_path = path;
@@ -626,6 +711,10 @@ csv_options (xo_handle_t *xop, csv_private_t *csv, const char *raw_opts)
     return 0;
 }
 
+/*
+ * Handler for incoming data values.  We just record each leaf name and
+ * value.  The values are emittd when the instance is closed.
+ */
 static int
 csv_data (xo_handle_t *xop UNUSED, csv_private_t *csv UNUSED,
 	  const char *name, const char *value,
@@ -647,6 +736,10 @@ csv_data (xo_handle_t *xop UNUSED, csv_private_t *csv UNUSED,
     return 0;
 }
 
+/*
+ * The callback from libxo, passing us operations/events as they
+ * happen.
+ */
 static int
 csv_handler (XO_ENCODER_HANDLER_ARGS)
 {
@@ -720,10 +813,14 @@ csv_handler (XO_ENCODER_HANDLER_ARGS)
     return rc;
 }
 
+/*
+ * Callback when our encoder is loaded.
+ */
 int
 xo_encoder_library_init (XO_ENCODER_INIT_ARGS)
 {
     arg->xei_handler = csv_handler;
+    arg->xei_version = XO_ENCODER_VERSION;
 
     return 0;
 }
