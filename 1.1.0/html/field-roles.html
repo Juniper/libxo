@@ -1,0 +1,490 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Field Roles &#8212; libxo 1.1.0
+ documentation</title>
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Field Modifiers" href="field-modifiers.html" />
+    <link rel="prev" title="Format Strings" href="format-strings.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="field-modifiers.html" title="Field Modifiers"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="format-strings.html" title="Format Strings"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">libxo 1.1.0
+ documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">On This Page</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Field Roles</a><ul>
+<li><a class="reference internal" href="#the-color-role-c">The Color Role ({C:})</a></li>
+<li><a class="reference internal" href="#the-decoration-role-d">The Decoration Role ({D:})</a></li>
+<li><a class="reference internal" href="#the-gettext-role-g">The Gettext Role ({G:})</a></li>
+<li><a class="reference internal" href="#the-label-role-l">The Label Role ({L:})</a></li>
+<li><a class="reference internal" href="#the-note-role-n">The Note Role ({N:})</a></li>
+<li><a class="reference internal" href="#the-padding-role-p">The Padding Role ({P:})</a></li>
+<li><a class="reference internal" href="#the-title-role-t">The Title Role ({T:})</a></li>
+<li><a class="reference internal" href="#the-units-role-u">The Units Role ({U:})</a></li>
+<li><a class="reference internal" href="#the-value-role-v-and">The Value Role ({V:} and {:})</a></li>
+<li><a class="reference internal" href="#the-anchor-roles-and">The Anchor Roles ({[:} and {]:})</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3><a href="index.html">Full Documentation</a></h3>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="format-strings.html"
+                        title="previous chapter">Format Strings</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="field-modifiers.html"
+                        title="next chapter">Field Modifiers</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/field-roles.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="field-roles">
+<span id="index-0"></span><span id="id1"></span><h1>Field Roles<a class="headerlink" href="#field-roles" title="Permalink to this headline">¶</a></h1>
+<p>Field roles are optional, and indicate the role and formatting of the
+content.  The roles are listed below; only one role is permitted:</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="5%" />
+<col width="21%" />
+<col width="74%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">R</th>
+<th class="head">Name</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>C</td>
+<td>color</td>
+<td>Field has color and effect controls</td>
+</tr>
+<tr class="row-odd"><td>D</td>
+<td>decoration</td>
+<td>Field is non-text (e.g., colon, comma)</td>
+</tr>
+<tr class="row-even"><td>E</td>
+<td>error</td>
+<td>Field is an error message</td>
+</tr>
+<tr class="row-odd"><td>G</td>
+<td>gettext</td>
+<td>Call gettext(3) on the format string</td>
+</tr>
+<tr class="row-even"><td>L</td>
+<td>label</td>
+<td>Field is text that prefixes a value</td>
+</tr>
+<tr class="row-odd"><td>N</td>
+<td>note</td>
+<td>Field is text that follows a value</td>
+</tr>
+<tr class="row-even"><td>P</td>
+<td>padding</td>
+<td>Field is spaces needed for vertical alignment</td>
+</tr>
+<tr class="row-odd"><td>T</td>
+<td>title</td>
+<td>Field is a title value for headings</td>
+</tr>
+<tr class="row-even"><td>U</td>
+<td>units</td>
+<td>Field is the units for the previous value field</td>
+</tr>
+<tr class="row-odd"><td>V</td>
+<td>value</td>
+<td>Field is the name of field (the default)</td>
+</tr>
+<tr class="row-even"><td>W</td>
+<td>warning</td>
+<td>Field is a warning message</td>
+</tr>
+<tr class="row-odd"><td>[</td>
+<td>start-anchor</td>
+<td>Begin a section of anchored variable-width text</td>
+</tr>
+<tr class="row-even"><td>]</td>
+<td>stop-anchor</td>
+<td>End a section of anchored variable-width text</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">EXAMPLE</span><span class="p">:</span>
+    <span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;{L:Free}{D::}{P:   }{:free/</span><span class="si">%u</span><span class="s2">} {U:Blocks}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">free_blocks</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>When a role is not provided, the “<em>value</em>” role is used as the default.</p>
+<p>Roles and modifiers can also use more verbose names, when preceded by
+a comma:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">EXAMPLE</span><span class="p">:</span>
+    <span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;{,label:Free}{,decoration::}{,padding:   }&quot;</span>
+            <span class="s2">&quot;{,value:free/</span><span class="si">%u</span><span class="s2">} {,units:Blocks}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">free_blocks</span><span class="p">);</span>
+</pre></div>
+</div>
+<div class="section" id="the-color-role-c">
+<span id="color-role"></span><span id="index-1"></span><h2>The Color Role ({C:})<a class="headerlink" href="#the-color-role-c" title="Permalink to this headline">¶</a></h2>
+<p>Colors and effects control how text values are displayed; they are
+used for display styles (TEXT and HTML):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;{C:bold}{:value}{C:no-bold}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">value</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Colors and effects remain in effect until modified by other “C”-role
+fields:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;{C:bold}{C:inverse}both{C:no-bold}only inverse</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>If the content is empty, the “<em>reset</em>” action is performed:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;{C:both,underline}{:value}</span><span class="si">{C:}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">value</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>The content should be a comma-separated list of zero or more colors or
+display effects:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;{C:bold,inverse}Ugly{C:no-bold,no-inverse}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>The color content can be either static, when placed directly within
+the field descriptor, or a printf-style format descriptor can be used,
+if preceded by a slash (“/”):</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>xo_emit(“{C:/%s%s}{:value}{C:}”, need_bold ? “bold” <span class="classifier-delimiter">:</span> <span class="classifier">“”,</span></dt>
+<dd>need_underline ? “underline” : “”, value);</dd>
+</dl>
+</div></blockquote>
+<p>Color names are prefixed with either “fg-” or “bg-” to change the
+foreground and background colors, respectively:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;{C:/fg-</span><span class="si">%s</span><span class="s2">,bg-</span><span class="si">%s</span><span class="s2">}{Lwc:Cost}{:cost/</span><span class="si">%u</span><span class="s2">}{C:reset}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">fg_color</span><span class="p">,</span> <span class="n">bg_color</span><span class="p">,</span> <span class="n">cost</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>The following table lists the supported effects:</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="23%" />
+<col width="77%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Name</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>bg-XXXXX</td>
+<td>Change background color</td>
+</tr>
+<tr class="row-odd"><td>bold</td>
+<td>Start bold text effect</td>
+</tr>
+<tr class="row-even"><td>fg-XXXXX</td>
+<td>Change foreground color</td>
+</tr>
+<tr class="row-odd"><td>inverse</td>
+<td>Start inverse (aka reverse) text effect</td>
+</tr>
+<tr class="row-even"><td>no-bold</td>
+<td>Stop bold text effect</td>
+</tr>
+<tr class="row-odd"><td>no-inverse</td>
+<td>Stop inverse (aka reverse) text effect</td>
+</tr>
+<tr class="row-even"><td>no-underline</td>
+<td>Stop underline text effect</td>
+</tr>
+<tr class="row-odd"><td>normal</td>
+<td>Reset effects (only)</td>
+</tr>
+<tr class="row-even"><td>reset</td>
+<td>Reset colors and effects (restore defaults)</td>
+</tr>
+<tr class="row-odd"><td>underline</td>
+<td>Start underline text effect</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>The following color names are supported:</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="17%" />
+<col width="83%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Name</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>black</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-odd"><td>blue</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-even"><td>cyan</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-odd"><td>default</td>
+<td>Default color for foreground or background</td>
+</tr>
+<tr class="row-even"><td>green</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-odd"><td>magenta</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-even"><td>red</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-odd"><td>white</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-even"><td>yellow</td>
+<td>&#160;</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>When using colors, the developer should remember that users will
+change the foreground and background colors of terminal session
+according to their own tastes, so assuming that “blue” looks nice is
+never safe, and is a constant annoyance to your dear author.  In
+addition, a significant percentage of users (1 in 12) will be color
+blind.  Depending on color to convey critical information is not a
+good idea.  Color should enhance output, but should not be used as the
+sole means of encoding information.</p>
+</div>
+<div class="section" id="the-decoration-role-d">
+<span id="decoration-role"></span><span id="index-2"></span><h2>The Decoration Role ({D:})<a class="headerlink" href="#the-decoration-role-d" title="Permalink to this headline">¶</a></h2>
+<p>Decorations are typically punctuation marks such as colons,
+semi-colons, and commas used to decorate the text and make it simpler
+for human readers.  By marking these distinctly, HTML usage scenarios
+can use CSS to direct their display parameters:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;{D:((}{:name}{D:))}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="the-gettext-role-g">
+<span id="gettext-role"></span><span id="index-3"></span><h2>The Gettext Role ({G:})<a class="headerlink" href="#the-gettext-role-g" title="Permalink to this headline">¶</a></h2>
+<p>libxo supports internationalization (i18n) through its use of
+gettext(3).  Use the “{G:}” role to request that the remaining part of
+the format string, following the “{G:}” field, be handled using
+gettext().</p>
+<p>Since gettext() uses the string as the key into the message catalog,
+libxo uses a simplified version of the format string that removes
+unimportant field formatting and modifiers, stopping minor formatting
+changes from impacting the expensive translation process.  A developer
+change such as changing “/%06d” to “/%08d” should not force hand
+inspection of all .po files.</p>
+<p>The simplified version can be generated for a single message using the
+“<code class="code docutils literal notranslate"><span class="pre">xopo</span> <span class="pre">-s</span> <span class="pre">$text</span></code>” command, or an entire .pot can be translated using
+the “<code class="code docutils literal notranslate"><span class="pre">xopo</span> <span class="pre">-f</span> <span class="pre">$input</span> <span class="pre">-o</span> <span class="pre">$output</span></code>” command.</p>
+<blockquote>
+<div>xo_emit(“{G:}Invalid tokenn”);</div></blockquote>
+<p>The {G:} role allows a domain name to be set.  gettext calls will
+continue to use that domain name until the current format string
+processing is complete, enabling a library function to emit strings
+using it’s own catalog.  The domain name can be either static as the
+content of the field, or a format can be used to get the domain name
+from the arguments.</p>
+<blockquote>
+<div>xo_emit(“{G:libc}Service unavailable in restricted moden”);</div></blockquote>
+<p>See <a class="reference internal" href="howto.html#i18n"><span class="std std-ref">Howto: Internationalization (i18n)</span></a> for additional details.</p>
+</div>
+<div class="section" id="the-label-role-l">
+<span id="label-role"></span><span id="index-4"></span><h2>The Label Role ({L:})<a class="headerlink" href="#the-label-role-l" title="Permalink to this headline">¶</a></h2>
+<p>Labels are text that appears before a value:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;{Lwc:Cost}{:cost/</span><span class="si">%u</span><span class="s2">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">cost</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="the-note-role-n">
+<span id="note-role"></span><span id="index-5"></span><h2>The Note Role ({N:})<a class="headerlink" href="#the-note-role-n" title="Permalink to this headline">¶</a></h2>
+<p>Notes are text that appears after a value:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;{:cost/</span><span class="si">%u</span><span class="s2">} {N:per year}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">cost</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="the-padding-role-p">
+<span id="padding-role"></span><span id="index-6"></span><h2>The Padding Role ({P:})<a class="headerlink" href="#the-padding-role-p" title="Permalink to this headline">¶</a></h2>
+<p>Padding represents whitespace used before and between fields.</p>
+<p>The padding content can be either static, when placed directly within
+the field descriptor, or a printf-style format descriptor can be used,
+if preceded by a slash (“/”):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;{P:        }{Lwc:Cost}{:cost/</span><span class="si">%u</span><span class="s2">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">cost</span><span class="p">);</span>
+<span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;{P:/</span><span class="si">%30s</span><span class="s2">}{Lwc:Cost}{:cost/</span><span class="si">%u</span><span class="s2">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">cost</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="the-title-role-t">
+<span id="title-role"></span><span id="index-7"></span><h2>The Title Role ({T:})<a class="headerlink" href="#the-title-role-t" title="Permalink to this headline">¶</a></h2>
+<p>Title are heading or column headers that are meant to be displayed to
+the user.  The title can be either static, when placed directly within
+the field descriptor, or a printf-style format descriptor can be used,
+if preceded by a slash (“/”):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;{T:Interface Statistics}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">);</span>
+<span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;{T:/</span><span class="si">%20.20s</span><span class="s2">}{T:/</span><span class="si">%6.6s</span><span class="s2">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;Item Name&quot;</span><span class="p">,</span> <span class="s2">&quot;Cost&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Title fields have an extra convenience feature; if both content and
+format are specified, instead of looking to the argument list for a
+value, the content is used, allowing a mixture of format and content
+within the field descriptor:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;{T:Name/</span><span class="si">%20s</span><span class="s2">}{T:Count/</span><span class="si">%6s</span><span class="s2">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Since the incoming argument is a string, the format must be “%s” or
+something suitable.</p>
+<span class="target" id="index-8"></span></div>
+<div class="section" id="the-units-role-u">
+<span id="units-role"></span><span id="index-9"></span><h2>The Units Role ({U:})<a class="headerlink" href="#the-units-role-u" title="Permalink to this headline">¶</a></h2>
+<p>Units are the dimension by which values are measured, such as degrees,
+miles, bytes, and decibels.  The units field carries this information
+for the previous value field:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;{Lwc:Distance}{:distance/</span><span class="si">%u</span><span class="s2">}{Uw:miles}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">miles</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Note that the sense of the ‘w’ modifier is reversed for units;
+a blank is added before the contents, rather than after it.</p>
+<p>When the XOF_UNITS flag is set, units are rendered in XML as the
+“units” attribute:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">distance</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;miles&quot;</span><span class="o">&gt;</span><span class="mi">50</span><span class="o">&lt;/</span><span class="n">distance</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>Units can also be rendered in HTML as the “data-units” attribute:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;distance&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">units</span><span class="o">=</span><span class="s2">&quot;miles&quot;</span>
+     <span class="n">data</span><span class="o">-</span><span class="n">xpath</span><span class="o">=</span><span class="s2">&quot;/top/data/distance&quot;</span><span class="o">&gt;</span><span class="mi">50</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="the-value-role-v-and">
+<span id="value-role"></span><span id="index-10"></span><h2>The Value Role ({V:} and {:})<a class="headerlink" href="#the-value-role-v-and" title="Permalink to this headline">¶</a></h2>
+<p>The value role is used to represent the a data value that is
+interesting for the non-display output styles (XML and JSON).  Value
+is the default role; if no other role designation is given, the field
+is a value.  The field name must appear within the field descriptor,
+followed by one or two format descriptors.  The first format
+descriptor is used for display styles (TEXT and HTML), while the
+second one is used for encoding styles (XML and JSON).  If no second
+format is given, the encoding format defaults to the first format,
+with any minimum width removed.  If no first format is given, both
+format descriptors default to “%s”:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;{:length/</span><span class="si">%02u</span><span class="s2">}x{:width/</span><span class="si">%02u</span><span class="s2">}x{:height/</span><span class="si">%02u</span><span class="s2">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">length</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">);</span>
+<span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;{:author} wrote </span><span class="se">\&quot;</span><span class="s2">{:poem}</span><span class="se">\&quot;</span><span class="s2"> in {:year/</span><span class="si">%4d</span><span class="s2">}</span><span class="se">\n</span><span class="s2">,</span>
+        <span class="n">author</span><span class="p">,</span> <span class="n">poem</span><span class="p">,</span> <span class="n">year</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="the-anchor-roles-and">
+<span id="anchor-role"></span><span id="index-11"></span><h2>The Anchor Roles ({[:} and {]:})<a class="headerlink" href="#the-anchor-roles-and" title="Permalink to this headline">¶</a></h2>
+<p>The anchor roles allow a set of strings by be padded as a group,
+but still be visible to xo_emit as distinct fields.  Either the start
+or stop anchor can give a field width and it can be either directly in
+the descriptor or passed as an argument.  Any fields between the start
+and stop anchor are padded to meet the minimum width given.</p>
+<p>To give a width directly, encode it as the content of the anchor tag:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;({[:10}{:min/</span><span class="si">%d</span><span class="s2">}/{:max/</span><span class="si">%d</span><span class="s2">}{]:})</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">min</span><span class="p">,</span> <span class="nb">max</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>To pass a width as an argument, use “%d” as the format, which must
+appear after the “/”.  Note that only “%d” is supported for widths.
+Using any other value could ruin your day:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;({[:/</span><span class="si">%d</span><span class="s2">}{:min/</span><span class="si">%d</span><span class="s2">}/{:max/</span><span class="si">%d</span><span class="s2">}{]:})</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="nb">min</span><span class="p">,</span> <span class="nb">max</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>If the width is negative, padding will be added on the right, suitable
+for left justification.  Otherwise the padding will be added to the
+left of the fields between the start and stop anchors, suitable for
+right justification.  If the width is zero, nothing happens.  If the
+number of columns of output between the start and stop anchors is less
+than the absolute value of the given width, nothing happens.</p>
+<p id="index-12">Widths over 8k are considered probable errors and not supported.  If
+XOF_WARN is set, a warning will be generated.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="field-modifiers.html" title="Field Modifiers"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="format-strings.html" title="Format Strings"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">libxo 1.1.0
+ documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017-2019, Juniper Networks.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.3.
+    </div>
+  </body>
+</html>

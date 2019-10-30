@@ -1,0 +1,623 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Field Formatting &#8212; libxo 1.1.0
+ documentation</title>
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="The libxo API" href="api.html" />
+    <link rel="prev" title="Field Modifiers" href="field-modifiers.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="api.html" title="The libxo API"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="field-modifiers.html" title="Field Modifiers"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">libxo 1.1.0
+ documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">On This Page</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Field Formatting</a><ul>
+<li><a class="reference internal" href="#utf-8-and-locale-strings">UTF-8 and Locale Strings</a></li>
+<li><a class="reference internal" href="#characters-outside-of-field-definitions">Characters Outside of Field Definitions</a></li>
+<li><a class="reference internal" href="#m-is-supported">“%m” Is Supported</a></li>
+<li><a class="reference internal" href="#n-is-not-supported">“%n” Is Not Supported</a></li>
+<li><a class="reference internal" href="#the-encoding-format-eformat">The Encoding Format (eformat)</a></li>
+<li><a class="reference internal" href="#content-strings">Content Strings</a></li>
+<li><a class="reference internal" href="#argument-validation">Argument Validation</a></li>
+<li><a class="reference internal" href="#retaining-parsed-format-information">Retaining Parsed Format Information</a></li>
+<li><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3><a href="index.html">Full Documentation</a></h3>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="field-modifiers.html"
+                        title="previous chapter">Field Modifiers</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="api.html"
+                        title="next chapter">The libxo API</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/field-formatting.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="field-formatting">
+<span id="index-0"></span><h1>Field Formatting<a class="headerlink" href="#field-formatting" title="Permalink to this headline">¶</a></h1>
+<p>The field format is similar to the format string for printf(3).  Its
+use varies based on the role of the field, but generally is used to
+format the field’s contents.</p>
+<p>If the format string is not provided for a value field, it defaults to
+“%s”.</p>
+<p>Note a field definition can contain zero or more printf-style
+‘directives’, which are sequences that start with a ‘%’ and end with
+one of following characters: “diouxXDOUeEfFgGaAcCsSp”.  Each directive
+is matched by one of more arguments to the xo_emit function.</p>
+<p>The format string has the form:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;%&#39;</span> <span class="nb">format</span><span class="o">-</span><span class="n">modifier</span> <span class="o">*</span> <span class="nb">format</span><span class="o">-</span><span class="n">character</span>
+</pre></div>
+</div>
+<p>The format-modifier can be:</p>
+<ul class="simple">
+<li>a ‘#’ character, indicating the output value should be prefixed
+with ‘0x’, typically to indicate a base 16 (hex) value.</li>
+<li>a minus sign (‘-‘), indicating the output value should be padded on
+the right instead of the left.</li>
+<li>a leading zero (‘0’) indicating the output value should be padded on the
+left with zeroes instead of spaces (‘ ‘).</li>
+<li>one or more digits (‘0’ - ‘9’) indicating the minimum width of the
+argument.  If the width in columns of the output value is less than
+the minimum width, the value will be padded to reach the minimum.</li>
+<li>a period followed by one or more digits indicating the maximum
+number of bytes which will be examined for a string argument, or the maximum
+width for a non-string argument.  When handling ASCII strings this
+functions as the field width but for multi-byte characters, a single
+character may be composed of multiple bytes.
+xo_emit will never dereference memory beyond the given number of bytes.</li>
+<li>a second period followed by one or more digits indicating the maximum
+width for a string argument.  This modifier cannot be given for non-string
+arguments.</li>
+<li>one or more ‘h’ characters, indicating shorter input data.</li>
+<li>one or more ‘l’ characters, indicating longer input data.</li>
+<li>a ‘z’ character, indicating a ‘size_t’ argument.</li>
+<li>a ‘t’ character, indicating a ‘ptrdiff_t’ argument.</li>
+<li>a ‘ ‘ character, indicating a space should be emitted before
+positive numbers.</li>
+<li>a ‘+’ character, indicating sign should emitted before any number.</li>
+</ul>
+<p>Note that ‘q’, ‘D’, ‘O’, and ‘U’ are considered deprecated and will be
+removed eventually.</p>
+<p>The format character is described in the following table:</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="11%" />
+<col width="39%" />
+<col width="50%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Ltr</th>
+<th class="head">Argument Type</th>
+<th class="head">Format</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>d</td>
+<td>int</td>
+<td>base 10 (decimal)</td>
+</tr>
+<tr class="row-odd"><td>i</td>
+<td>int</td>
+<td>base 10 (decimal)</td>
+</tr>
+<tr class="row-even"><td>o</td>
+<td>int</td>
+<td>base 8 (octal)</td>
+</tr>
+<tr class="row-odd"><td>u</td>
+<td>unsigned</td>
+<td>base 10 (decimal)</td>
+</tr>
+<tr class="row-even"><td>x</td>
+<td>unsigned</td>
+<td>base 16 (hex)</td>
+</tr>
+<tr class="row-odd"><td>X</td>
+<td>unsigned long</td>
+<td>base 16 (hex)</td>
+</tr>
+<tr class="row-even"><td>D</td>
+<td>long</td>
+<td>base 10 (decimal)</td>
+</tr>
+<tr class="row-odd"><td>O</td>
+<td>unsigned long</td>
+<td>base 8 (octal)</td>
+</tr>
+<tr class="row-even"><td>U</td>
+<td>unsigned long</td>
+<td>base 10 (decimal)</td>
+</tr>
+<tr class="row-odd"><td>e</td>
+<td>double</td>
+<td>[-]d.ddde+-dd</td>
+</tr>
+<tr class="row-even"><td>E</td>
+<td>double</td>
+<td>[-]d.dddE+-dd</td>
+</tr>
+<tr class="row-odd"><td>f</td>
+<td>double</td>
+<td>[-]ddd.ddd</td>
+</tr>
+<tr class="row-even"><td>F</td>
+<td>double</td>
+<td>[-]ddd.ddd</td>
+</tr>
+<tr class="row-odd"><td>g</td>
+<td>double</td>
+<td>as ‘e’ or ‘f’</td>
+</tr>
+<tr class="row-even"><td>G</td>
+<td>double</td>
+<td>as ‘E’ or ‘F’</td>
+</tr>
+<tr class="row-odd"><td>a</td>
+<td>double</td>
+<td>[-]0xh.hhhp[+-]d</td>
+</tr>
+<tr class="row-even"><td>A</td>
+<td>double</td>
+<td>[-]0Xh.hhhp[+-]d</td>
+</tr>
+<tr class="row-odd"><td>c</td>
+<td>unsigned char</td>
+<td>a character</td>
+</tr>
+<tr class="row-even"><td>C</td>
+<td>wint_t</td>
+<td>a character</td>
+</tr>
+<tr class="row-odd"><td>s</td>
+<td>char *</td>
+<td>a UTF-8 string</td>
+</tr>
+<tr class="row-even"><td>S</td>
+<td>wchar_t *</td>
+<td>a unicode/WCS string</td>
+</tr>
+<tr class="row-odd"><td>p</td>
+<td>void *</td>
+<td>‘%#lx’</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>The ‘h’ and ‘l’ modifiers affect the size and treatment of the
+argument:</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="13%" />
+<col width="34%" />
+<col width="53%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Mod</th>
+<th class="head">d, i</th>
+<th class="head">o, u, x, X</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>hh</td>
+<td>signed char</td>
+<td>unsigned char</td>
+</tr>
+<tr class="row-odd"><td>h</td>
+<td>short</td>
+<td>unsigned short</td>
+</tr>
+<tr class="row-even"><td>l</td>
+<td>long</td>
+<td>unsigned long</td>
+</tr>
+<tr class="row-odd"><td>ll</td>
+<td>long long</td>
+<td>unsigned long long</td>
+</tr>
+<tr class="row-even"><td>j</td>
+<td>intmax_t</td>
+<td>uintmax_t</td>
+</tr>
+<tr class="row-odd"><td>t</td>
+<td>ptrdiff_t</td>
+<td>ptrdiff_t</td>
+</tr>
+<tr class="row-even"><td>z</td>
+<td>size_t</td>
+<td>size_t</td>
+</tr>
+<tr class="row-odd"><td>q</td>
+<td>quad_t</td>
+<td>u_quad_t</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<span class="target" id="index-1"></span><div class="section" id="utf-8-and-locale-strings">
+<span id="utf-8"></span><span id="index-2"></span><h2>UTF-8 and Locale Strings<a class="headerlink" href="#utf-8-and-locale-strings" title="Permalink to this headline">¶</a></h2>
+<p>For strings, the ‘h’ and ‘l’ modifiers affect the interpretation of
+the bytes pointed to argument.  The default ‘%s’ string is a ‘char *’
+pointer to a string encoded as UTF-8.  Since UTF-8 is compatible with
+ASCII data, a normal 7-bit ASCII string can be used.  ‘%ls’ expects a
+‘wchar_t *’ pointer to a wide-character string, encoded as a 32-bit
+Unicode values.  ‘%hs’ expects a ‘char *’ pointer to a multi-byte
+string encoded with the current locale, as given by the LC_CTYPE,
+LANG, or LC_ALL environment varibles.  The first of this list of
+variables is used and if none of the variables are set, the locale
+defaults to “UTF-8”.</p>
+<p>libxo will convert these arguments as needed to either UTF-8 (for XML,
+JSON, and HTML styles) or locale-based strings for display in text
+style:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span> <span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;All strings are utf-8 content {:tag/</span><span class="si">%ls</span><span class="s2">}&quot;</span><span class="p">,</span>
+         <span class="n">L</span><span class="s2">&quot;except for wide strings&quot;</span><span class="p">);</span>
+
+<span class="o">========</span> <span class="o">==================</span> <span class="o">===============================</span>
+ <span class="n">Format</span>   <span class="n">Argument</span> <span class="n">Type</span>      <span class="n">Argument</span> <span class="n">Contents</span>
+<span class="o">========</span> <span class="o">==================</span> <span class="o">===============================</span>
+ <span class="o">%</span><span class="n">s</span>       <span class="n">const</span> <span class="n">char</span> \<span class="o">*</span>      <span class="n">UTF</span><span class="o">-</span><span class="mi">8</span> <span class="n">string</span>
+ <span class="o">%</span><span class="n">S</span>       <span class="n">const</span> <span class="n">char</span> \<span class="o">*</span>      <span class="n">UTF</span><span class="o">-</span><span class="mi">8</span> <span class="n">string</span> <span class="p">(</span><span class="n">alias</span> <span class="k">for</span> <span class="s1">&#39;</span><span class="si">%ls</span><span class="s1">&#39;</span><span class="p">)</span>
+ <span class="o">%</span><span class="n">ls</span>      <span class="n">const</span> <span class="n">wchar_t</span> \<span class="o">*</span>   <span class="n">Wide</span> <span class="n">character</span> <span class="n">UNICODE</span> <span class="n">string</span>
+ <span class="o">%</span><span class="n">hs</span>      <span class="n">const</span> <span class="n">char</span> <span class="o">*</span>       <span class="n">locale</span><span class="o">-</span><span class="n">based</span> <span class="n">string</span>
+<span class="o">========</span> <span class="o">==================</span> <span class="o">===============================</span>
+</pre></div>
+</div>
+<div class="admonition-long-not-locale admonition">
+<p class="first admonition-title">“Long”, not “locale”</p>
+<p class="last">The “<em>l</em>” in “%ls” is for “<em>long</em>”, following the convention of “%ld”.
+It is not “<em>locale</em>”, a common mis-mnemonic.  “%S” is equivalent to
+“%ls”.</p>
+</div>
+<p>For example, the following function is passed a locale-base name, a
+hat size, and a time value.  The hat size is formatted in a UTF-8
+(ASCII) string, and the time value is formatted into a wchar_t
+string:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">void</span> <span class="n">print_order</span> <span class="p">(</span><span class="n">const</span> <span class="n">char</span> <span class="o">*</span><span class="n">name</span><span class="p">,</span> <span class="nb">int</span> <span class="n">size</span><span class="p">,</span>
+                  <span class="n">struct</span> <span class="n">tm</span> <span class="o">*</span><span class="n">timep</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">char</span> <span class="n">buf</span><span class="p">[</span><span class="mi">32</span><span class="p">];</span>
+    <span class="n">const</span> <span class="n">char</span> <span class="o">*</span><span class="n">size_val</span> <span class="o">=</span> <span class="s2">&quot;unknown&quot;</span><span class="p">;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">snprintf</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span> <span class="n">sizeof</span><span class="p">(</span><span class="n">buf</span><span class="p">),</span> <span class="s2">&quot;</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">size</span><span class="p">);</span>
+        <span class="n">size_val</span> <span class="o">=</span> <span class="n">buf</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="n">wchar_t</span> <span class="n">when</span><span class="p">[</span><span class="mi">32</span><span class="p">];</span>
+    <span class="n">wcsftime</span><span class="p">(</span><span class="n">when</span><span class="p">,</span> <span class="n">sizeof</span><span class="p">(</span><span class="n">when</span><span class="p">),</span> <span class="n">L</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2">%b%y&quot;</span><span class="p">,</span> <span class="n">timep</span><span class="p">);</span>
+
+    <span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;The hat for {:name/</span><span class="si">%hs</span><span class="s2">} is {:size/</span><span class="si">%s</span><span class="s2">}.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">name</span><span class="p">,</span> <span class="n">size_val</span><span class="p">);</span>
+    <span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;It was ordered on {:order-time/</span><span class="si">%ls</span><span class="s2">}.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">when</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>It is important to note that xo_emit will perform the conversion
+required to make appropriate output.  Text style output uses the
+current locale (as described above), while XML, JSON, and HTML use
+UTF-8.</p>
+<p>UTF-8 and locale-encoded strings can use multiple bytes to encode one
+column of data.  The traditional “precision’” (aka “max-width”) value
+for “%s” printf formatting becomes overloaded since it specifies both
+the number of bytes that can be safely referenced and the maximum
+number of columns to emit.  xo_emit uses the precision as the former,
+and adds a third value for specifying the maximum number of columns.</p>
+<p>In this example, the name field is printed with a minimum of 3 columns
+and a maximum of 6.  Up to ten bytes of data at the location given by
+‘name’ are in used in filling those columns:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;{:name/%3.10.6s}&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="characters-outside-of-field-definitions">
+<h2>Characters Outside of Field Definitions<a class="headerlink" href="#characters-outside-of-field-definitions" title="Permalink to this headline">¶</a></h2>
+<p>Characters in the format string that are not part of a field
+definition are copied to the output for the TEXT style, and are
+ignored for the JSON and XML styles.  For HTML, these characters are
+placed in a &lt;div&gt; with class “text”:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">EXAMPLE</span><span class="p">:</span>
+    <span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;The hat is {:size/</span><span class="si">%s</span><span class="s2">}.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">size_val</span><span class="p">);</span>
+<span class="n">TEXT</span><span class="p">:</span>
+    <span class="n">The</span> <span class="n">hat</span> <span class="ow">is</span> <span class="n">extra</span> <span class="n">small</span><span class="o">.</span>
+<span class="n">XML</span><span class="p">:</span>
+    <span class="o">&lt;</span><span class="n">size</span><span class="o">&gt;</span><span class="n">extra</span> <span class="n">small</span><span class="o">&lt;/</span><span class="n">size</span><span class="o">&gt;</span>
+<span class="n">JSON</span><span class="p">:</span>
+    <span class="s2">&quot;size&quot;</span><span class="p">:</span> <span class="s2">&quot;extra small&quot;</span>
+<span class="n">HTML</span><span class="p">:</span>
+    <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span><span class="n">The</span> <span class="n">hat</span> <span class="ow">is</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;size&quot;</span><span class="o">&gt;</span><span class="n">extra</span> <span class="n">small</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;.&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="m-is-supported">
+<span id="index-3"></span><h2>“%m” Is Supported<a class="headerlink" href="#m-is-supported" title="Permalink to this headline">¶</a></h2>
+<p>libxo supports the ‘%m’ directive, which formats the error message
+associated with the current value of “errno”.  It is the equivalent
+of “%s” with the argument strerror(errno):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;{:filename} cannot be opened: {:error/%m}&quot;</span><span class="p">,</span> <span class="n">filename</span><span class="p">);</span>
+<span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;{:filename} cannot be opened: {:error/</span><span class="si">%s</span><span class="s2">}&quot;</span><span class="p">,</span>
+        <span class="n">filename</span><span class="p">,</span> <span class="n">strerror</span><span class="p">(</span><span class="n">errno</span><span class="p">));</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="n-is-not-supported">
+<h2>“%n” Is Not Supported<a class="headerlink" href="#n-is-not-supported" title="Permalink to this headline">¶</a></h2>
+<p>libxo does not support the ‘%n’ directive.  It’s a bad idea and we
+just don’t do it.</p>
+</div>
+<div class="section" id="the-encoding-format-eformat">
+<h2>The Encoding Format (eformat)<a class="headerlink" href="#the-encoding-format-eformat" title="Permalink to this headline">¶</a></h2>
+<p>The “eformat” string is the format string used when encoding the field
+for JSON and XML.  If not provided, it defaults to the primary format
+with any minimum width removed.  If the primary is not given, both
+default to “%s”.</p>
+</div>
+<div class="section" id="content-strings">
+<h2>Content Strings<a class="headerlink" href="#content-strings" title="Permalink to this headline">¶</a></h2>
+<p>For padding and labels, the content string is considered the content,
+unless a format is given.</p>
+</div>
+<div class="section" id="argument-validation">
+<span id="index-4"></span><h2>Argument Validation<a class="headerlink" href="#argument-validation" title="Permalink to this headline">¶</a></h2>
+<p>Many compilers and tool chains support validation of printf-like
+arguments.  When the format string fails to match the argument list,
+a warning is generated.  This is a valuable feature and while the
+formatting strings for libxo differ considerably from printf, many of
+these checks can still provide build-time protection against bugs.</p>
+<p>libxo provide variants of functions that provide this ability, if the
+“–enable-printflike” option is passed to the “configure” script.
+These functions use the “_p” suffix, like “xo_emit_p()”,
+xo_emit_hp()”, etc.</p>
+<p>The following are features of libxo formatting strings that are
+incompatible with printf-like testing:</p>
+<ul class="simple">
+<li>implicit formats, where “{:tag}” has an implicit “%s”;</li>
+<li>the “max” parameter for strings, where “{:tag/%4.10.6s}” means up to
+ten bytes of data can be inspected to fill a minimum of 4 columns and
+a maximum of 6;</li>
+<li>percent signs in strings, where “{:filled}%” makes a single,
+trailing percent sign;</li>
+<li>the “l” and “h” modifiers for strings, where “{:tag/%hs}” means
+locale-based string and “{:tag/%ls}” means a wide character string;</li>
+<li>distinct encoding formats, where “{:tag/#%s/%s}” means the display
+styles (text and HTML) will use “#%s” where other styles use “%s”;</li>
+</ul>
+<p>If none of these features are in use by your code, then using the “_p”
+variants might be wise:</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="43%" />
+<col width="57%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Function</th>
+<th class="head">printf-like Equivalent</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>xo_emit_hv</td>
+<td>xo_emit_hvp</td>
+</tr>
+<tr class="row-odd"><td>xo_emit_h</td>
+<td>xo_emit_hp</td>
+</tr>
+<tr class="row-even"><td>xo_emit</td>
+<td>xo_emit_p</td>
+</tr>
+<tr class="row-odd"><td>xo_emit_warn_hcv</td>
+<td>xo_emit_warn_hcvp</td>
+</tr>
+<tr class="row-even"><td>xo_emit_warn_hc</td>
+<td>xo_emit_warn_hcp</td>
+</tr>
+<tr class="row-odd"><td>xo_emit_warn_c</td>
+<td>xo_emit_warn_cp</td>
+</tr>
+<tr class="row-even"><td>xo_emit_warn</td>
+<td>xo_emit_warn_p</td>
+</tr>
+<tr class="row-odd"><td>xo_emit_warnx</td>
+<td>xo_emit_warnx_p</td>
+</tr>
+<tr class="row-even"><td>xo_emit_err</td>
+<td>xo_emit_err_p</td>
+</tr>
+<tr class="row-odd"><td>xo_emit_errx</td>
+<td>xo_emit_errx_p</td>
+</tr>
+<tr class="row-even"><td>xo_emit_errc</td>
+<td>xo_emit_errc_p</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<span class="target" id="index-5"></span></div>
+<div class="section" id="retaining-parsed-format-information">
+<span id="retain"></span><span id="index-6"></span><h2>Retaining Parsed Format Information<a class="headerlink" href="#retaining-parsed-format-information" title="Permalink to this headline">¶</a></h2>
+<p>libxo can retain the parsed internal information related to the given
+format string, allowing subsequent xo_emit calls, the retained
+information is used, avoiding repetitive parsing of the format string:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">SYNTAX</span><span class="p">:</span>
+  <span class="nb">int</span> <span class="n">xo_emit_f</span><span class="p">(</span><span class="n">xo_emit_flags_t</span> <span class="n">flags</span><span class="p">,</span> <span class="n">const</span> <span class="n">char</span> <span class="n">fmt</span><span class="p">,</span> <span class="o">...</span><span class="p">);</span>
+<span class="n">EXAMPLE</span><span class="p">:</span>
+  <span class="n">xo_emit_f</span><span class="p">(</span><span class="n">XOEF_RETAIN</span><span class="p">,</span> <span class="s2">&quot;{:some/</span><span class="si">%02d</span><span class="s2">}{:thing/</span><span class="si">%-6s</span><span class="s2">}{:fancy}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+                 <span class="n">some</span><span class="p">,</span> <span class="n">thing</span><span class="p">,</span> <span class="n">fancy</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>To retain parsed format information, use the XOEF_RETAIN flag to the
+xo_emit_f() function.  A complete set of xo_emit_f functions exist to
+match all the xo_emit function signatures (with handles, varadic
+argument, and printf-like flags):</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="43%" />
+<col width="57%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Function</th>
+<th class="head">Flags Equivalent</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>xo_emit_hv</td>
+<td>xo_emit_hvf</td>
+</tr>
+<tr class="row-odd"><td>xo_emit_h</td>
+<td>xo_emit_hf</td>
+</tr>
+<tr class="row-even"><td>xo_emit</td>
+<td>xo_emit_f</td>
+</tr>
+<tr class="row-odd"><td>xo_emit_hvp</td>
+<td>xo_emit_hvfp</td>
+</tr>
+<tr class="row-even"><td>xo_emit_hp</td>
+<td>xo_emit_hfp</td>
+</tr>
+<tr class="row-odd"><td>xo_emit_p</td>
+<td>xo_emit_fp</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>The format string must be immutable across multiple calls to xo_emit_f(),
+since the library retains the string.  Typically this is done by using
+static constant strings, such as string literals. If the string is not
+immutable, the XOEF_RETAIN flag must not be used.</p>
+<p>The functions xo_retain_clear() and xo_retain_clear_all() release
+internal information on either a single format string or all format
+strings, respectively.  Neither is required, but the library will
+retain this information until it is cleared or the process exits:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">const</span> <span class="n">char</span> <span class="o">*</span><span class="n">fmt</span> <span class="o">=</span> <span class="s2">&quot;{:name}  {:count/</span><span class="si">%d</span><span class="s2">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">;</span>
+<span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">1000</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">xo_open_instance</span><span class="p">(</span><span class="s2">&quot;item&quot;</span><span class="p">);</span>
+    <span class="n">xo_emit_f</span><span class="p">(</span><span class="n">XOEF_RETAIN</span><span class="p">,</span> <span class="n">fmt</span><span class="p">,</span> <span class="n">name</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">count</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+<span class="p">}</span>
+<span class="n">xo_retain_clear</span><span class="p">(</span><span class="n">fmt</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>The retained information is kept as thread-specific data.</p>
+</div>
+<div class="section" id="example">
+<h2>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h2>
+<p>In this example, the value for the number of items in stock is emitted:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;{P:   }{Lwc:In stock}{:in-stock/</span><span class="si">%u</span><span class="s2">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">instock</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>This call will generate the following output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">TEXT</span><span class="p">:</span>
+     <span class="n">In</span> <span class="n">stock</span><span class="p">:</span> <span class="mi">144</span>
+<span class="n">XML</span><span class="p">:</span>
+    <span class="o">&lt;</span><span class="ow">in</span><span class="o">-</span><span class="n">stock</span><span class="o">&gt;</span><span class="mi">144</span><span class="o">&lt;/</span><span class="ow">in</span><span class="o">-</span><span class="n">stock</span><span class="o">&gt;</span>
+<span class="n">JSON</span><span class="p">:</span>
+    <span class="s2">&quot;in-stock&quot;</span><span class="p">:</span> <span class="mi">144</span><span class="p">,</span>
+<span class="n">HTML</span><span class="p">:</span>
+    <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">In</span> <span class="n">stock</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;decoration&quot;</span><span class="o">&gt;</span><span class="p">:</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;in-stock&quot;</span><span class="o">&gt;</span><span class="mi">144</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+    <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>Clearly HTML wins the verbosity award, and this output does
+not include XOF_XPATH or XOF_INFO data, which would expand the
+penultimate line to:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;in-stock&quot;</span>
+   <span class="n">data</span><span class="o">-</span><span class="n">xpath</span><span class="o">=</span><span class="s2">&quot;/top/data/item/in-stock&quot;</span>
+   <span class="n">data</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;number&quot;</span>
+   <span class="n">data</span><span class="o">-</span><span class="n">help</span><span class="o">=</span><span class="s2">&quot;Number of items in stock&quot;</span><span class="o">&gt;</span><span class="mi">144</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="api.html" title="The libxo API"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="field-modifiers.html" title="Field Modifiers"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">libxo 1.1.0
+ documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017-2019, Juniper Networks.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.3.
+    </div>
+  </body>
+</html>
