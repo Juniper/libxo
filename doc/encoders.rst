@@ -48,11 +48,14 @@ CSV - Comma Separated Values
 ----------------------------
 
 libxo ships with a custom encoder for "CSV" files, a common format for
-comma separated values.  A standard for CSV files is provided in
-:RFC:`4180`, but since the format predates that standard by decades,
-there are many minor differences in CSV file consumers and their
-expectations.  The CSV encoder has a number of options to tailor
-output to those expectations.
+comma separated values.  The output of the CSV encoder can be loaded
+directly into spreadsheets or similar applications.
+
+A standard for CSV files is provided in :RFC:`4180`, but since the
+format predates that standard by decades, there are many minor
+differences in CSV file consumers and their expectations.  The CSV
+encoder has a number of options to tailor output to those
+expectations.
 
 Consider the following XML::
 
@@ -96,8 +99,12 @@ comma-separated values::
   HRD-000-212,rope,85,4,2
   HRD-000-517,ladder,0,2,1
 
-This output can be loaded directly into spreadsheets or similar
-applications.
+Be aware that since the CSV encoder looks for data instances, when
+used with :ref:`xo`, the `--instance` option will be needed::
+
+  % xo --libxo encoder=csv --instance foo 'The {:product} is {:status}\n' stereo "in route"
+  product,status
+  stereo,in route
 
 .. _csv_path:
 
