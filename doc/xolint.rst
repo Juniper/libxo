@@ -9,18 +9,18 @@ to be diagnosed at build time, rather than waiting until runtime.
 `xolint` takes the one or more C files as arguments, and reports
 and errors, warning, or informational messages as needed:
 
-============ ===================================================
- Option       Meaning
-============ ===================================================
- -c           Invoke 'cpp' against the input file
- -C <flags>   Flags that are passed to 'cpp
- -d           Enable debug output
- -D           Generate documentation for all xolint messages
- -I           Generate info table code
- -p           Print the offending lines after the message
- -V           Print vocabulary of all field names
- -X           Extract samples from xolint, suitable for testing
-============ ===================================================
+  ============ ===================================================
+   Option       Meaning
+  ============ ===================================================
+   -c           Invoke 'cpp' against the input file
+   -C <flags>   Flags that are passed to 'cpp
+   -d           Enable debug output
+   -D           Generate documentation for all xolint messages
+   -I           Generate info table code
+   -p           Print the offending lines after the message
+   -V           Print vocabulary of all field names
+   -X           Extract samples from xolint, suitable for testing
+  ============ ===================================================
 
 The output message will contain the source filename and line number, the
 class of the message, the message, and, if -p is given, the
