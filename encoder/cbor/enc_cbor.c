@@ -360,6 +360,7 @@ int
 xo_encoder_library_init (XO_ENCODER_INIT_ARGS)
 {
     arg->xei_handler = cbor_handler;
+    arg->xei_version = XO_ENCODER_VERSION;
 
     return 0;
 }
