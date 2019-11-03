@@ -80,3 +80,6 @@ SPHINX = python3 -msphinx
 
 html sphinx sphinx-html:
 	${SPHINX} -M html ${srcdir} . -N -E
+
+singlehtml:
+	${SPHINX} -M singlehtml ${srcdir} . -N -E
