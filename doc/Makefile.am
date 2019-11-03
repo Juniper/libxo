@@ -49,14 +49,21 @@ EXTRA_DIST = \
 
 doc docs: ${OUTPUT}.txt ${OUTPUT}.html
 
-${OUTPUT}.txt: ${INPUT}.txt ${OXTRADOC} xolint.txt
+${OUTPUT}.txt: ${INPUT}.txt ${OXTRADOC}
 	${OXTRADOC_CMD} -m text -o $@ $<
 
-${OUTPUT}.html: ${INPUT}.txt ${OXTRADOC} ${XML2HTMLBIN} xolint.txt
+${OUTPUT}.html: ${INPUT}.txt ${OXTRADOC} ${XML2HTMLBIN}
 	${OXTRADOC_CMD} -m html -o $@ $<
 
-xolint.txt: ${top_srcdir}/xolint/xolint.pl
-	perl ${top_srcdir}/xolint/xolint.pl -D > xolint.txt
+#
+# The contents of xolint.rst is generated based on xolint.pl, since we
+# really want this to be self-documenting.  But readthedocs.org needs this
+# data to be _in_ repo.  So we generate this file on command only, and
+# the developer needs to commit any changes.
+#
+
+xolint.rst: ${top_srcdir}/xolint/xolint.pl
+	perl ${top_srcdir}/xolint/xolint.pl -D > ${top_srcdir}/doc/xolint.rst
 
 CLEANFILES = \
 xolint.txt \
