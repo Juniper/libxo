@@ -3,14 +3,14 @@
 
 The message "A percent sign appearing in text is a literal" can be caused by code like:
 
-
 ::
+
     xo_emit("cost: %d", cost);
 
 This code should be replaced with code like:
 
-
 ::
+
     xo_emit("{L:cost}: {:cost/%d}", cost);
 
 This can be a bit surprising and could be a field that was not
@@ -22,14 +22,14 @@ properly converted to a libxo-style format string.
 
 The message "Unknown long name for role/modifier" can be caused by code like:
 
-
 ::
+
     xo_emit("{,humanization:value}", value);
 
 This code should be replaced with code like:
 
-
 ::
+
     xo_emit("{,humanize:value}", value);
 
 The hn-* modifiers (hn-decimal, hn-space, hn-1000)
@@ -40,16 +40,16 @@ are only valid for fields with the {h:} modifier.
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 The message "Last character before field definition is a field type" can be caused by code like:
-
 A common typo:
 
 ::
+
     xo_emit("{T:Min} T{:Max}");
 
 This code should be replaced with code like:
 
-
 ::
+
     xo_emit("{T:Min} {T:Max}");
 
 Twiddling the "{" and the field role is a common typo.
@@ -60,14 +60,14 @@ Twiddling the "{" and the field role is a common typo.
 
 The message "Encoding format uses different number of arguments" can be caused by code like:
 
-
 ::
+
     xo_emit("{:name/%6.6s %%04d/%s}", name, number);
 
 This code should be replaced with code like:
 
-
 ::
+
     xo_emit("{:name/%6.6s %04d/%s-%d}", name, number);
 
 Both format should consume the same number of arguments off the stack
@@ -78,14 +78,14 @@ Both format should consume the same number of arguments off the stack
 
 The message "Only one field role can be used" can be caused by code like:
 
-
 ::
+
     xo_emit("{LT:Max}");
 
 This code should be replaced with code like:
 
-
 ::
+
     xo_emit("{T:Max}");
 
 'Potential missing slash after C, D, N, L, or T with format'
@@ -93,14 +93,14 @@ This code should be replaced with code like:
 
 The message "Potential missing slash after C, D, N, L, or T with format" can be caused by code like:
 
-
 ::
+
     xo_emit("{T:%6.6s}\n", "Max");
 
 This code should be replaced with code like:
 
-
 ::
+
     xo_emit("{T:/%6.6s}\n", "Max");
 
 The "%6.6s" will be a literal, not a field format.  While
@@ -112,8 +112,8 @@ it's possibly valid, it's likely a missing "/".
 
 The message "An encoding format cannot be given (roles: DNLT)" can be caused by code like:
 
-
 ::
+
     xo_emit("{T:Max//%s}", "Max");
 
 Fields with the C, D, N, L, and T roles are not emitted in
@@ -126,8 +126,8 @@ would make no sense.
 
 The message "Format cannot be given when content is present (roles: CDLN)" can be caused by code like:
 
-
 ::
+
     xo_emit("{N:Max/%6.6s}", "Max");
 
 Fields with the C, D, L, or N roles can't have both
@@ -144,14 +144,14 @@ handling 'C' strings, and one for libxo.
 
 The message "Field has color without fg- or bg- (role: C)" can be caused by code like:
 
-
 ::
+
     xo_emit("{C:green}{:foo}{C:}", x);
 
 This code should be replaced with code like:
 
-
 ::
+
     xo_emit("{C:fg-green}{:foo}{C:}", x);
 
 Colors must be prefixed by either "fg-" or "bg-".
@@ -162,14 +162,14 @@ Colors must be prefixed by either "fg-" or "bg-".
 
 The message "Field has invalid color or effect (role: C)" can be caused by code like:
 
-
 ::
+
     xo_emit("{C:fg-purple,bold}{:foo}{C:gween}", x);
 
 This code should be replaced with code like:
 
-
 ::
+
     xo_emit("{C:fg-red,bold}{:foo}{C:fg-green}", x);
 
 The list of colors and effects are limited.  The
@@ -186,14 +186,14 @@ be separated by commas.
 
 The message "Field has humanize modifier but no format string" can be caused by code like:
 
-
 ::
+
     xo_emit("{h:value}", value);
 
 This code should be replaced with code like:
 
-
 ::
+
     xo_emit("{h:value/%d}", value);
 
 Humanization is only value for numbers, which are not
@@ -205,14 +205,14 @@ likely to use the default format ("%s").
 
 The message "Field has hn-* modifier but not 'h' modifier" can be caused by code like:
 
-
 ::
+
     xo_emit("{,hn-1000:value}", value);
 
 This code should be replaced with code like:
 
-
 ::
+
     xo_emit("{h,hn-1000:value}", value);
 
 The hn-* modifiers (hn-decimal, hn-space, hn-1000)
@@ -224,14 +224,14 @@ are only valid for fields with the {h:} modifier.
 
 The message "Value field must have a name (as content)")" can be caused by code like:
 
-
 ::
+
     xo_emit("{:/%s}", "value");
 
 This code should be replaced with code like:
 
-
 ::
+
     xo_emit("{:tag-name/%s}", "value");
 
 The field name is used for XML and JSON encodings.  These
@@ -244,14 +244,14 @@ field descriptor.
 
 The message "Use hyphens, not underscores, for value field name" can be caused by code like:
 
-
 ::
+
     xo_emit("{:no_under_scores}", "bad");
 
 This code should be replaced with code like:
 
-
 ::
+
     xo_emit("{:no-under-scores}", "bad");
 
 Use of hyphens is traditional in XML, and the XOF_UNDERSCORES
@@ -264,14 +264,14 @@ But the raw field name should use hyphens.
 
 The message "Value field name cannot start with digit" can be caused by code like:
 
-
 ::
+
     xo_emit("{:10-gig/}");
 
 This code should be replaced with code like:
 
-
 ::
+
     xo_emit("{:ten-gig/}");
 
 XML element names cannot start with a digit.
@@ -282,14 +282,14 @@ XML element names cannot start with a digit.
 
 The message "Value field name should be lower case" can be caused by code like:
 
-
 ::
+
     xo_emit("{:WHY-ARE-YOU-SHOUTING}", "NO REASON");
 
 This code should be replaced with code like:
 
-
 ::
+
     xo_emit("{:why-are-you-shouting}", "no reason");
 
 Lower case is more civilized.  Even TLAs should be lower case
@@ -302,14 +302,14 @@ to avoid scenarios where the differences between "XPath" and
 
 The message "Value field name should be longer than two characters" can be caused by code like:
 
-
 ::
+
     xo_emit("{:x}", "mumble");
 
 This code should be replaced with code like:
 
-
 ::
+
     xo_emit("{:something-meaningful}", "mumble");
 
 Field names should be descriptive, and it's hard to
@@ -325,14 +325,14 @@ it ("{T:/20s}").
 
 The message "Value field name contains invalid character" can be caused by code like:
 
-
 ::
+
     xo_emit("{:cost-in-$$/%u}", 15);
 
 This code should be replaced with code like:
 
-
 ::
+
     xo_emit("{:cost-in-dollars/%u}", 15);
 
 An invalid character is often a sign of a typo, like "{:]}"
@@ -345,14 +345,14 @@ characters, digits, and hyphens.
 
 The message "decoration field contains invalid character" can be caused by code like:
 
-
 ::
+
     xo_emit("{D:not good}");
 
 This code should be replaced with code like:
 
-
 ::
+
     xo_emit("{D:((}{:good}{D:))}", "yes");
 
 This is minor, but fields should use proper roles.  Decoration
@@ -366,14 +366,14 @@ to human readers.
 
 The message "Anchor content should be decimal width" can be caused by code like:
 
-
 ::
+
     xo_emit("{[:mumble}");
 
 This code should be replaced with code like:
 
-
 ::
+
     xo_emit("{[:32}");
 
 Anchors need an integer value to specify the width of
@@ -388,14 +388,14 @@ either the start or stop anchor field descriptor.
 
 The message "Anchor format should be "%d"" can be caused by code like:
 
-
 ::
+
     xo_emit("{[:/%s}");
 
 This code should be replaced with code like:
 
-
 ::
+
     xo_emit("{[:/%d}");
 
 Anchors only grok integer values, and if the value is not static,
@@ -408,14 +408,14 @@ Anything else is an error.
 
 The message "Anchor cannot have both format and encoding format")" can be caused by code like:
 
-
 ::
+
     xo_emit("{[:32/%d}");
 
 This code should be replaced with code like:
 
-
 ::
+
     xo_emit("{[:32}");
 
 Anchors can have a static value or argument for the width,
@@ -427,14 +427,14 @@ but cannot have both.
 
 The message "Max width only valid for strings" can be caused by code like:
 
-
 ::
+
     xo_emit("{:tag/%2.4.6d}", 55);
 
 This code should be replaced with code like:
 
-
 ::
+
     xo_emit("{:tag/%2.6d}", 55);
 
 libxo allows a true 'max width' in addition to the traditional
