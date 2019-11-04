@@ -1,0 +1,334 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>The “xo” Utility &#8212; libxo 1.2.0
+ documentation</title>
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="‘A percent sign appearing in text is a literal’" href="xolint.html" />
+    <link rel="prev" title="Encoders" href="encoders.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="xolint.html" title="‘A percent sign appearing in text is a literal’"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="encoders.html" title="Encoders"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">libxo 1.2.0
+ documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">On This Page</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">The “xo” Utility</a><ul>
+<li><a class="reference internal" href="#lists-and-instances">Lists and Instances</a></li>
+<li><a class="reference internal" href="#command-line-options">Command Line Options</a></li>
+<li><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3><a href="index.html">Full Documentation</a></h3>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="encoders.html"
+                        title="previous chapter">Encoders</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="xolint.html"
+                        title="next chapter">‘A percent sign appearing in text is a literal’</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/xo.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="the-xo-utility">
+<span id="xo"></span><span id="index-0"></span><h1>The “xo” Utility<a class="headerlink" href="#the-xo-utility" title="Permalink to this headline">¶</a></h1>
+<p>The <code class="code docutils literal notranslate"><span class="pre">xo</span></code> utility allows command line access to the functionality of
+the libxo library.  Using <code class="code docutils literal notranslate"><span class="pre">xo</span></code>, shell scripts can emit XML, JSON, and
+HTML using the same commands that emit text output.</p>
+<p>The style of output can be selected using a specific option: “-X” for
+XML, “-J” for JSON, “-H” for HTML, or “-T” for TEXT, which is the
+default.  The “–style &lt;style&gt;” option can also be used.  The standard
+set of “–libxo” options are available (see <a class="reference internal" href="options.html#options"><span class="std std-ref">Command-line Arguments</span></a>), as well
+as the <a class="reference internal" href="api.html#libxo-options"><span class="std std-ref">LIBXO_OPTIONS</span></a> environment variable.</p>
+<p>The <code class="code docutils literal notranslate"><span class="pre">xo</span></code> utility accepts a format string suitable for <code class="code docutils literal notranslate"><span class="pre">xo_emit</span></code> and
+a set of zero or more arguments used to supply data for that string:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>  <span class="n">xo</span> <span class="s2">&quot;The {k:name} weighs {:weight/</span><span class="si">%d</span><span class="s2">} pounds.</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="n">fish</span> <span class="mi">6</span>
+
+<span class="n">TEXT</span><span class="p">:</span>
+  <span class="n">The</span> <span class="n">fish</span> <span class="n">weighs</span> <span class="mi">6</span> <span class="n">pounds</span><span class="o">.</span>
+
+<span class="n">XML</span><span class="p">:</span>
+  <span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span><span class="n">fish</span><span class="o">&lt;/</span><span class="n">name</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">weight</span><span class="o">&gt;</span><span class="mi">6</span><span class="o">&lt;/</span><span class="n">weight</span><span class="o">&gt;</span>
+
+<span class="n">JSON</span><span class="p">:</span>
+  <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;fish&quot;</span><span class="p">,</span>
+  <span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="mi">6</span>
+
+<span class="n">HTML</span><span class="p">:</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span><span class="n">The</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;name&quot;</span><span class="o">&gt;</span><span class="n">fish</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span> <span class="n">weighs</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;weight&quot;</span><span class="o">&gt;</span><span class="mi">6</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span> <span class="n">pounds</span><span class="o">.&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>The <code class="code docutils literal notranslate"><span class="pre">--wrap</span> <span class="pre">$path</span></code> option can be used to wrap emitted content in a
+specific hierarchy.  The path is a set of hierarchical names separated
+by the ‘/’ character:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>  <span class="n">xo</span> <span class="o">--</span><span class="n">wrap</span> <span class="n">top</span><span class="o">/</span><span class="n">a</span><span class="o">/</span><span class="n">b</span><span class="o">/</span><span class="n">c</span> <span class="s1">&#39;{:tag}&#39;</span> <span class="n">value</span>
+
+<span class="n">XML</span><span class="p">:</span>
+  <span class="o">&lt;</span><span class="n">top</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">a</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="n">b</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="n">c</span><span class="o">&gt;</span>
+          <span class="o">&lt;</span><span class="n">tag</span><span class="o">&gt;</span><span class="n">value</span><span class="o">&lt;/</span><span class="n">tag</span><span class="o">&gt;</span>
+        <span class="o">&lt;/</span><span class="n">c</span><span class="o">&gt;</span>
+      <span class="o">&lt;/</span><span class="n">b</span><span class="o">&gt;</span>
+    <span class="o">&lt;/</span><span class="n">a</span><span class="o">&gt;</span>
+  <span class="o">&lt;/</span><span class="n">top</span><span class="o">&gt;</span>
+
+<span class="n">JSON</span><span class="p">:</span>
+  <span class="s2">&quot;top&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="p">{</span>
+      <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="p">{</span>
+          <span class="s2">&quot;tag&quot;</span><span class="p">:</span> <span class="s2">&quot;value&quot;</span>
+        <span class="p">}</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+</pre></div>
+</div>
+<p>The <code class="code docutils literal notranslate"><span class="pre">--open</span> <span class="pre">$path</span></code> and <code class="code docutils literal notranslate"><span class="pre">--close</span> <span class="pre">$path</span></code> can be used to emit
+hierarchical information without the matching close and open
+tag.  This allows a shell script to emit open tags, data, and
+then close tags.  The <code class="code docutils literal notranslate"><span class="pre">--depth</span></code> option may be used to set the
+depth for indentation.  The <code class="code docutils literal notranslate"><span class="pre">--leading-xpath</span></code> may be used to
+prepend data to the XPath values used for HTML output style:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">EXAMPLE</span><span class="p">:</span>
+  <span class="c1">#!/bin/sh</span>
+  <span class="n">xo</span> <span class="o">--</span><span class="nb">open</span> <span class="n">top</span><span class="o">/</span><span class="n">data</span>
+  <span class="n">xo</span> <span class="o">--</span><span class="n">depth</span> <span class="mi">2</span> <span class="s1">&#39;{:tag}&#39;</span> <span class="n">value</span>
+  <span class="n">xo</span> <span class="o">--</span><span class="n">close</span> <span class="n">top</span><span class="o">/</span><span class="n">data</span>
+
+<span class="n">XML</span><span class="p">:</span>
+  <span class="o">&lt;</span><span class="n">top</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">data</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="n">tag</span><span class="o">&gt;</span><span class="n">value</span><span class="o">&lt;/</span><span class="n">tag</span><span class="o">&gt;</span>
+    <span class="o">&lt;/</span><span class="n">data</span><span class="o">&gt;</span>
+  <span class="o">&lt;/</span><span class="n">top</span><span class="o">&gt;</span>
+
+<span class="n">JSON</span><span class="p">:</span>
+  <span class="s2">&quot;top&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+      <span class="s2">&quot;tag&quot;</span><span class="p">:</span> <span class="s2">&quot;value&quot;</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+</pre></div>
+</div>
+<p>When making partial lines of output (where the format string does not
+include a newline), use the <code class="code docutils literal notranslate"><span class="pre">--continuation</span></code> option to let secondary
+invocations know they are adding data to an existing line.</p>
+<p>When emitting a series of objects, use the <code class="code docutils literal notranslate"><span class="pre">--not-first</span></code> option to
+ensure that any details from the previous object (e.g. commas in JSON)
+are handled correctly.</p>
+<p>Use the <code class="code docutils literal notranslate"><span class="pre">--top-wrap</span></code> option to ensure any top-level object details are
+handled correctly, e.g. wrap the entire output in a top-level set of
+braces for JSON output.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">EXAMPLE</span><span class="p">:</span>
+  <span class="c1">#!/bin/sh</span>
+  <span class="n">xo</span> <span class="o">--</span><span class="n">top</span><span class="o">-</span><span class="n">wrap</span> <span class="o">--</span><span class="nb">open</span> <span class="n">top</span><span class="o">/</span><span class="n">data</span>
+  <span class="n">xo</span> <span class="o">--</span><span class="n">depth</span> <span class="mi">2</span> <span class="s1">&#39;First {:tag} &#39;</span> <span class="n">value1</span>
+  <span class="n">xo</span> <span class="o">--</span><span class="n">depth</span> <span class="mi">2</span> <span class="o">--</span><span class="n">continuation</span> <span class="s1">&#39;and then {:tag}</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="n">value2</span>
+  <span class="n">xo</span> <span class="o">--</span><span class="n">top</span><span class="o">-</span><span class="n">wrap</span> <span class="o">--</span><span class="n">close</span> <span class="n">top</span><span class="o">/</span><span class="n">data</span>
+
+<span class="n">TEXT</span><span class="p">:</span>
+  <span class="n">First</span> <span class="n">value1</span> <span class="ow">and</span> <span class="n">then</span> <span class="n">value2</span>
+
+<span class="n">HTML</span><span class="p">:</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span><span class="n">First</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;tag&quot;</span><span class="o">&gt;</span><span class="n">value1</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span><span class="ow">and</span> <span class="n">then</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;tag&quot;</span><span class="o">&gt;</span><span class="n">value2</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+
+<span class="n">XML</span><span class="p">:</span>
+  <span class="o">&lt;</span><span class="n">top</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">data</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="n">tag</span><span class="o">&gt;</span><span class="n">value1</span><span class="o">&lt;/</span><span class="n">tag</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="n">tag</span><span class="o">&gt;</span><span class="n">value2</span><span class="o">&lt;/</span><span class="n">tag</span><span class="o">&gt;</span>
+    <span class="o">&lt;/</span><span class="n">data</span><span class="o">&gt;</span>
+  <span class="o">&lt;/</span><span class="n">top</span><span class="o">&gt;</span>
+
+<span class="n">JSON</span><span class="p">:</span>
+  <span class="p">{</span>
+    <span class="s2">&quot;top&quot;</span><span class="p">:</span> <span class="p">{</span>
+      <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+      <span class="s2">&quot;tag&quot;</span><span class="p">:</span> <span class="s2">&quot;value1&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;tag&quot;</span><span class="p">:</span> <span class="s2">&quot;value2&quot;</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+</pre></div>
+</div>
+<div class="section" id="lists-and-instances">
+<h2>Lists and Instances<a class="headerlink" href="#lists-and-instances" title="Permalink to this headline">¶</a></h2>
+<p>A “<em>list</em>” is set of one or more instances that appear under the same
+parent.  The instances contain details about a specific object.  One
+can think of instances as objects or records.  A call is needed to
+open and close the list, while a distinct call is needed to open and
+close each instance of the list.</p>
+<p>Use the <code class="code docutils literal notranslate"><span class="pre">--open-list</span></code> and <code class="code docutils literal notranslate"><span class="pre">--open-instances</span></code> to open lists and
+instances.  Use the <code class="code docutils literal notranslate"><span class="pre">--close-list</span></code> and <code class="code docutils literal notranslate"><span class="pre">--close-instances</span></code> to close
+them.  Each of these options take a <code class="code docutils literal notranslate"><span class="pre">name</span></code> parameter, providing the
+name of the list and instance.</p>
+<p>In the following example, a list named “machine” is created with three
+instances:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>opts=&quot;--json&quot;
+xo $opts --open-list machine
+NF=
+for name in red green blue; do
+    xo $opts --depth 1 $NF --open-instance machine
+    xo $opts --depth 2 &quot;Machine {k:name} has {:memory}\n&quot; $name 55
+    xo $opts --depth 1 --close-instance machine
+    NF=--not-first
+done
+xo $opts $NF --close-list machine
+</pre></div>
+</div>
+<p>The normal <code class="code docutils literal notranslate"><span class="pre">libxo</span></code> functions use a state machine to help these
+transitions, but since each <code class="code docutils literal notranslate"><span class="pre">xo</span></code> command is invoked independent of the
+previous calls, the state must be passed in explicitly via these
+command line options.</p>
+<p>The <code class="code docutils literal notranslate"><span class="pre">--instance</span></code> option can be used to treat a single <code class="code docutils literal notranslate"><span class="pre">xo</span></code> invocation
+as an instance with the given set of fields:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">%</span> <span class="n">xo</span> <span class="o">--</span><span class="n">libxo</span><span class="p">:</span><span class="n">XP</span> <span class="o">--</span><span class="n">instance</span> <span class="n">foo</span> <span class="s1">&#39;The {:product} is {:status}</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="n">stereo</span> <span class="s2">&quot;in route&quot;</span>
+<span class="o">&lt;</span><span class="n">foo</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">product</span><span class="o">&gt;</span><span class="n">stereo</span><span class="o">&lt;/</span><span class="n">product</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">status</span><span class="o">&gt;</span><span class="ow">in</span> <span class="n">route</span><span class="o">&lt;/</span><span class="n">status</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">foo</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="command-line-options">
+<h2>Command Line Options<a class="headerlink" href="#command-line-options" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Usage</span><span class="p">:</span> <span class="n">xo</span> <span class="p">[</span><span class="n">options</span><span class="p">]</span> <span class="nb">format</span> <span class="p">[</span><span class="n">fields</span><span class="p">]</span>
+  <span class="o">--</span><span class="n">close</span> <span class="o">&lt;</span><span class="n">path</span><span class="o">&gt;</span>        <span class="n">Close</span> <span class="n">tags</span> <span class="k">for</span> <span class="n">the</span> <span class="n">given</span> <span class="n">path</span>
+  <span class="o">--</span><span class="n">close</span><span class="o">-</span><span class="n">instance</span> <span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span> <span class="n">Close</span> <span class="n">an</span> <span class="nb">open</span> <span class="n">instance</span> <span class="n">name</span>
+  <span class="o">--</span><span class="n">close</span><span class="o">-</span><span class="nb">list</span> <span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span>   <span class="n">Close</span> <span class="n">an</span> <span class="nb">open</span> <span class="nb">list</span> <span class="n">name</span>
+  <span class="o">--</span><span class="n">continuation</span> <span class="n">OR</span> <span class="o">-</span><span class="n">C</span>  <span class="n">Output</span> <span class="n">belongs</span> <span class="n">on</span> <span class="n">same</span> <span class="n">line</span> <span class="k">as</span> <span class="n">previous</span> <span class="n">output</span>
+  <span class="o">--</span><span class="n">depth</span> <span class="o">&lt;</span><span class="n">num</span><span class="o">&gt;</span>         <span class="n">Set</span> <span class="n">the</span> <span class="n">depth</span> <span class="k">for</span> <span class="n">pretty</span> <span class="n">printing</span>
+  <span class="o">--</span><span class="n">help</span>                <span class="n">Display</span> <span class="n">this</span> <span class="n">help</span> <span class="n">text</span>
+  <span class="o">--</span><span class="n">html</span> <span class="n">OR</span> <span class="o">-</span><span class="n">H</span>          <span class="n">Generate</span> <span class="n">HTML</span> <span class="n">output</span>
+  <span class="o">--</span><span class="n">instance</span> <span class="n">OR</span> <span class="o">-</span><span class="n">I</span> <span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span> <span class="n">Wrap</span> <span class="ow">in</span> <span class="n">an</span> <span class="n">instance</span> <span class="n">of</span> <span class="n">the</span> <span class="n">given</span> <span class="n">name</span>
+  <span class="o">--</span><span class="n">json</span> <span class="n">OR</span> <span class="o">-</span><span class="n">J</span>          <span class="n">Generate</span> <span class="n">JSON</span> <span class="n">output</span>
+  <span class="o">--</span><span class="n">leading</span><span class="o">-</span><span class="n">xpath</span> <span class="o">&lt;</span><span class="n">path</span><span class="o">&gt;</span> <span class="n">Add</span> <span class="n">a</span> <span class="n">prefix</span> <span class="n">to</span> <span class="n">generated</span> <span class="n">XPaths</span> <span class="p">(</span><span class="n">HTML</span><span class="p">)</span>
+  <span class="o">--</span><span class="ow">not</span><span class="o">-</span><span class="n">first</span>           <span class="n">Indicate</span> <span class="n">this</span> <span class="nb">object</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">the</span> <span class="n">first</span> <span class="p">(</span><span class="n">JSON</span><span class="p">)</span>
+  <span class="o">--</span><span class="nb">open</span> <span class="o">&lt;</span><span class="n">path</span><span class="o">&gt;</span>         <span class="n">Open</span> <span class="n">tags</span> <span class="k">for</span> <span class="n">the</span> <span class="n">given</span> <span class="n">path</span>
+  <span class="o">--</span><span class="nb">open</span><span class="o">-</span><span class="n">instance</span> <span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span> <span class="n">Open</span> <span class="n">an</span> <span class="n">instance</span> <span class="n">given</span> <span class="n">by</span> <span class="n">name</span>
+  <span class="o">--</span><span class="nb">open</span><span class="o">-</span><span class="nb">list</span> <span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span>   <span class="n">Open</span> <span class="n">a</span> <span class="nb">list</span> <span class="n">given</span> <span class="n">by</span> <span class="n">name</span>
+  <span class="o">--</span><span class="n">option</span> <span class="o">&lt;</span><span class="n">opts</span><span class="o">&gt;</span> <span class="o">-</span><span class="ow">or</span> <span class="o">-</span><span class="n">O</span> <span class="o">&lt;</span><span class="n">opts</span><span class="o">&gt;</span>  <span class="n">Give</span> <span class="n">formatting</span> <span class="n">options</span>
+  <span class="o">--</span><span class="n">pretty</span> <span class="n">OR</span> <span class="o">-</span><span class="n">p</span>        <span class="n">Make</span> <span class="s1">&#39;pretty&#39;</span> <span class="n">output</span> <span class="p">(</span><span class="n">add</span> <span class="n">indent</span><span class="p">,</span> <span class="n">newlines</span><span class="p">)</span>
+  <span class="o">--</span><span class="n">style</span> <span class="o">&lt;</span><span class="n">style</span><span class="o">&gt;</span>       <span class="n">Generate</span> <span class="n">given</span> <span class="n">style</span> <span class="p">(</span><span class="n">xml</span><span class="p">,</span> <span class="n">json</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">html</span><span class="p">)</span>
+  <span class="o">--</span><span class="n">text</span> <span class="n">OR</span> <span class="o">-</span><span class="n">T</span>          <span class="n">Generate</span> <span class="n">text</span> <span class="n">output</span> <span class="p">(</span><span class="n">the</span> <span class="n">default</span> <span class="n">style</span><span class="p">)</span>
+  <span class="o">--</span><span class="n">top</span><span class="o">-</span><span class="n">wrap</span>            <span class="n">Generate</span> <span class="n">a</span> <span class="n">top</span><span class="o">-</span><span class="n">level</span> <span class="nb">object</span> <span class="n">wrapper</span> <span class="p">(</span><span class="n">JSON</span><span class="p">)</span>
+  <span class="o">--</span><span class="n">version</span>             <span class="n">Display</span> <span class="n">version</span> <span class="n">information</span>
+  <span class="o">--</span><span class="n">warn</span> <span class="n">OR</span> <span class="o">-</span><span class="n">W</span>          <span class="n">Display</span> <span class="n">warnings</span> <span class="ow">in</span> <span class="n">text</span> <span class="n">on</span> <span class="n">stderr</span>
+  <span class="o">--</span><span class="n">warn</span><span class="o">-</span><span class="n">xml</span>            <span class="n">Display</span> <span class="n">warnings</span> <span class="ow">in</span> <span class="n">xml</span> <span class="n">on</span> <span class="n">stdout</span>
+  <span class="o">--</span><span class="n">wrap</span> <span class="o">&lt;</span><span class="n">path</span><span class="o">&gt;</span>         <span class="n">Wrap</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">a</span> <span class="nb">set</span> <span class="n">of</span> <span class="n">containers</span>
+  <span class="o">--</span><span class="n">xml</span> <span class="n">OR</span> <span class="o">-</span><span class="n">X</span>           <span class="n">Generate</span> <span class="n">XML</span> <span class="n">output</span>
+  <span class="o">--</span><span class="n">xpath</span>               <span class="n">Add</span> <span class="n">XPath</span> <span class="n">data</span> <span class="n">to</span> <span class="n">HTML</span> <span class="n">output</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="example">
+<h2>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">%</span> <span class="n">xo</span> <span class="s1">&#39;The {:product} is {:status}</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="n">stereo</span> <span class="s2">&quot;in route&quot;</span>
+<span class="n">The</span> <span class="n">stereo</span> <span class="ow">is</span> <span class="ow">in</span> <span class="n">route</span>
+<span class="o">%</span> <span class="n">xo</span> <span class="o">-</span><span class="n">p</span> <span class="o">-</span><span class="n">X</span> <span class="s1">&#39;The {:product} is {:status}</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="n">stereo</span> <span class="s2">&quot;in route&quot;</span>
+<span class="o">&lt;</span><span class="n">product</span><span class="o">&gt;</span><span class="n">stereo</span><span class="o">&lt;/</span><span class="n">product</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">status</span><span class="o">&gt;</span><span class="ow">in</span> <span class="n">route</span><span class="o">&lt;/</span><span class="n">status</span><span class="o">&gt;</span>
+<span class="o">%</span> <span class="n">xo</span> <span class="o">--</span><span class="n">libxo</span> <span class="n">xml</span><span class="p">,</span><span class="n">pretty</span> <span class="s1">&#39;The {:product} is {:status}</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="n">stereo</span> <span class="s2">&quot;in route&quot;</span>
+<span class="o">&lt;</span><span class="n">product</span><span class="o">&gt;</span><span class="n">stereo</span><span class="o">&lt;/</span><span class="n">product</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">status</span><span class="o">&gt;</span><span class="ow">in</span> <span class="n">route</span><span class="o">&lt;/</span><span class="n">status</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="xolint.html" title="‘A percent sign appearing in text is a literal’"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="encoders.html" title="Encoders"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">libxo 1.2.0
+ documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017-2019, Juniper Networks Inc.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.3.
+    </div>
+  </body>
+</html>

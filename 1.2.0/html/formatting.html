@@ -1,0 +1,270 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Formatting with libxo &#8212; libxo 1.2.0
+ documentation</title>
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Command-line Arguments" href="options.html" />
+    <link rel="prev" title="Getting libxo" href="getting.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="options.html" title="Command-line Arguments"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="getting.html" title="Getting libxo"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">libxo 1.2.0
+ documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">On This Page</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Formatting with libxo</a><ul>
+<li><a class="reference internal" href="#encoding-styles">Encoding Styles</a><ul>
+<li><a class="reference internal" href="#text-output">Text Output</a></li>
+<li><a class="reference internal" href="#xml-output">XML Output</a></li>
+<li><a class="reference internal" href="#json-output">JSON Output</a></li>
+<li><a class="reference internal" href="#html-output">HTML Output</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h3><a href="index.html">Full Documentation</a></h3>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="getting.html"
+                        title="previous chapter">Getting libxo</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="options.html"
+                        title="next chapter">Command-line Arguments</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/formatting.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="formatting-with-libxo">
+<h1>Formatting with libxo<a class="headerlink" href="#formatting-with-libxo" title="Permalink to this headline">¶</a></h1>
+<p>Most unix commands emit text output aimed at humans.  It is designed
+to be parsed and understood by a user.  Humans are gifted at
+extracting details and pattern matching in such output.  Often
+programmers need to extract information from this human-oriented
+output.  Programmers use tools like grep, awk, and regular expressions
+to ferret out the pieces of information they need.  Such solutions are
+fragile and require maintenance when output contents change or evolve,
+along with testing and validation.</p>
+<p>Modern tool developers favor encoding schemes like XML and JSON,
+which allow trivial parsing and extraction of data.  Such formats are
+simple, well understood, hierarchical, easily parsed, and often
+integrate easier with common tools and environments.  Changes to
+content can be done in ways that do not break existing users of the
+data, which can reduce maintenance costs and increase feature velocity.</p>
+<p>In addition, modern reality means that more output ends up in web
+browsers than in terminals, making HTML output valuable.</p>
+<p>libxo allows a single set of function calls in source code to generate
+traditional text output, as well as XML and JSON formatted data.  HTML
+can also be generated; “&lt;div&gt;” elements surround the traditional text
+output, with attributes that detail how to render the data.</p>
+<p>A single libxo function call in source code is all that’s required:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;Connecting to {:host}.{:domain}...</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span> <span class="n">domain</span><span class="p">);</span>
+
+<span class="n">TEXT</span><span class="p">:</span>
+  <span class="n">Connecting</span> <span class="n">to</span> <span class="n">my</span><span class="o">-</span><span class="n">box</span><span class="o">.</span><span class="n">example</span><span class="o">.</span><span class="n">com</span><span class="o">...</span>
+<span class="n">XML</span><span class="p">:</span>
+  <span class="o">&lt;</span><span class="n">host</span><span class="o">&gt;</span><span class="n">my</span><span class="o">-</span><span class="n">box</span><span class="o">&lt;/</span><span class="n">host</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">domain</span><span class="o">&gt;</span><span class="n">example</span><span class="o">.</span><span class="n">com</span><span class="o">&lt;/</span><span class="n">domain</span><span class="o">&gt;</span>
+<span class="n">JSON</span><span class="p">:</span>
+  <span class="s2">&quot;host&quot;</span><span class="p">:</span> <span class="s2">&quot;my-box&quot;</span><span class="p">,</span>
+  <span class="s2">&quot;domain&quot;</span><span class="p">:</span> <span class="s2">&quot;example.com&quot;</span>
+<span class="n">HTML</span><span class="p">:</span>
+   <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+     <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span><span class="n">Connecting</span> <span class="n">to</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+     <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;host&quot;</span>
+          <span class="n">data</span><span class="o">-</span><span class="n">xpath</span><span class="o">=</span><span class="s2">&quot;/top/host&quot;</span><span class="o">&gt;</span><span class="n">my</span><span class="o">-</span><span class="n">box</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+     <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;.&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+     <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;domain&quot;</span>
+          <span class="n">data</span><span class="o">-</span><span class="n">xpath</span><span class="o">=</span><span class="s2">&quot;/top/domain&quot;</span><span class="o">&gt;</span><span class="n">example</span><span class="o">.</span><span class="n">com</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+     <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;...&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<div class="section" id="encoding-styles">
+<h2>Encoding Styles<a class="headerlink" href="#encoding-styles" title="Permalink to this headline">¶</a></h2>
+<p>There are four encoding styles supported by libxo:</p>
+<ul class="simple">
+<li>TEXT output can be display on a terminal session, allowing
+compatibility with traditional command line usage.</li>
+<li>XML output is suitable for tools like XPath and protocols like
+NETCONF.</li>
+<li>JSON output can be used for RESTful APIs and integration with
+languages like Javascript and Python.</li>
+<li>HTML can be matched with a small CSS file to permit rendering in any
+HTML5 browser.</li>
+</ul>
+<p>In general, XML and JSON are suitable for encoding data, while TEXT is
+suited for terminal output and HTML is suited for display in a web
+browser (see <a class="reference internal" href="xohtml.html#xohtml"><span class="std std-ref">xohtml</span></a>).</p>
+<div class="section" id="text-output">
+<h3>Text Output<a class="headerlink" href="#text-output" title="Permalink to this headline">¶</a></h3>
+<p>Most traditional programs generate text output on standard output,
+with contents like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">36</span>      <span class="o">./</span><span class="n">src</span>
+<span class="mi">40</span>      <span class="o">./</span><span class="nb">bin</span>
+<span class="mi">90</span>      <span class="o">.</span>
+</pre></div>
+</div>
+<p>In this example (taken from <em>du</em> source code), the code to generate this
+data might look like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">printf</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%d</span><span class="se">\t</span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">num_blocks</span><span class="p">,</span> <span class="n">path</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Simple, direct, obvious.  But it’s only making text output.  Imagine
+using a single code path to make TEXT, XML, JSON or HTML, deciding at
+run time which to generate.</p>
+<p>libxo expands on the idea of printf format strings to make a single
+format containing instructions for creating multiple output styles:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;{:blocks/</span><span class="si">%d</span><span class="s2">}</span><span class="se">\t</span><span class="s2">{:path/</span><span class="si">%s</span><span class="s2">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">num_blocks</span><span class="p">,</span> <span class="n">path</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>This line will generate the same text output as the earlier printf
+call, but also has enough information to generate XML, JSON, and HTML.</p>
+<p>The following sections introduce the other formats.</p>
+</div>
+<div class="section" id="xml-output">
+<h3>XML Output<a class="headerlink" href="#xml-output" title="Permalink to this headline">¶</a></h3>
+<p>XML output consists of a hierarchical set of elements, each encoded
+with a start tag and an end tag.  The element should be named for data
+value that it is encoding:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">item</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">blocks</span><span class="o">&gt;</span><span class="mi">36</span><span class="o">&lt;/</span><span class="n">blocks</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">path</span><span class="o">&gt;./</span><span class="n">src</span><span class="o">&lt;/</span><span class="n">path</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">item</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">item</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">blocks</span><span class="o">&gt;</span><span class="mi">40</span><span class="o">&lt;/</span><span class="n">blocks</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">path</span><span class="o">&gt;./</span><span class="nb">bin</span><span class="o">&lt;/</span><span class="n">path</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">item</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">item</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">blocks</span><span class="o">&gt;</span><span class="mi">90</span><span class="o">&lt;/</span><span class="n">blocks</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">path</span><span class="o">&gt;.&lt;/</span><span class="n">path</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">item</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p><a class="reference external" href="https://w3c.org/TR/xml">XML</a> is the W3C standard for encoding data.</p>
+</div>
+<div class="section" id="json-output">
+<h3>JSON Output<a class="headerlink" href="#json-output" title="Permalink to this headline">¶</a></h3>
+<p>JSON output consists of a hierarchical set of objects and lists, each
+encoded with a quoted name, a colon, and a value.  If the value is a
+string, it must be quoted, but numbers are not quoted.  Objects are
+encoded using braces; lists are encoded using square brackets.
+Data inside objects and lists is separated using commas:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">items</span><span class="p">:</span> <span class="p">[</span>
+    <span class="p">{</span> <span class="s2">&quot;blocks&quot;</span><span class="p">:</span> <span class="mi">36</span><span class="p">,</span> <span class="s2">&quot;path&quot;</span> <span class="p">:</span> <span class="s2">&quot;./src&quot;</span> <span class="p">},</span>
+    <span class="p">{</span> <span class="s2">&quot;blocks&quot;</span><span class="p">:</span> <span class="mi">40</span><span class="p">,</span> <span class="s2">&quot;path&quot;</span> <span class="p">:</span> <span class="s2">&quot;./bin&quot;</span> <span class="p">},</span>
+    <span class="p">{</span> <span class="s2">&quot;blocks&quot;</span><span class="p">:</span> <span class="mi">90</span><span class="p">,</span> <span class="s2">&quot;path&quot;</span> <span class="p">:</span> <span class="s2">&quot;./&quot;</span> <span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="html-output">
+<h3>HTML Output<a class="headerlink" href="#html-output" title="Permalink to this headline">¶</a></h3>
+<p>HTML output is designed to allow the output to be rendered in a web
+browser with minimal effort.  Each piece of output data is rendered
+inside a &lt;div&gt; element, with a class name related to the role of the
+data.  By using a small set of class attribute values, a CSS
+stylesheet can render the HTML into rich text that mirrors the
+traditional text content.</p>
+<p>Additional attributes can be enabled to provide more details about the
+data, including data type, description, and an XPath location:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;blocks&quot;</span><span class="o">&gt;</span><span class="mi">36</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>      <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;path&quot;</span><span class="o">&gt;./</span><span class="n">src</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;blocks&quot;</span><span class="o">&gt;</span><span class="mi">40</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>      <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;path&quot;</span><span class="o">&gt;./</span><span class="nb">bin</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;blocks&quot;</span><span class="o">&gt;</span><span class="mi">90</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>      <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;path&quot;</span><span class="o">&gt;./&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="options.html" title="Command-line Arguments"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="getting.html" title="Getting libxo"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">libxo 1.2.0
+ documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017-2019, Juniper Networks Inc.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.3.
+    </div>
+  </body>
+</html>
