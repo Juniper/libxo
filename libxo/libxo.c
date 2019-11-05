@@ -8107,7 +8107,7 @@ xo_parse_args (int argc, char **argv)
 
     /* GNU tools add an annoying ".test" as the program extension; remove it */
     size_t len = strlen(xo_program);
-    const static char gnu_ext[] = ".test";
+    static const char gnu_ext[] = ".test";
     if (len >= sizeof(gnu_ext)) {
 	cp = &cp[len + 1 - sizeof(gnu_ext)];
 	if (xo_streq(cp, gnu_ext))
