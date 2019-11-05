@@ -1,0 +1,320 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>libxo - A Library for Generating Text, XML, JSON, and HTML Output &#8212; libxo 1.3.0
+ documentation</title>
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Introducing libxo" href="intro.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="intro.html" title="Introducing libxo"
+             accesskey="N">next</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">libxo 1.3.0
+ documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">On This Page</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">libxo - A Library for Generating Text, XML, JSON, and HTML Output</a></li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+
+  <h3><a href="#">Full Documentation</a></h3>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="intro.html"
+                        title="next chapter">Introducing libxo</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/index.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="libxo-a-library-for-generating-text-xml-json-and-html-output">
+<h1>libxo - A Library for Generating Text, XML, JSON, and HTML Output<a class="headerlink" href="#libxo-a-library-for-generating-text-xml-json-and-html-output" title="Permalink to this headline">¶</a></h1>
+<p>The libxo library allows an application to generate text, XML, JSON,
+and HTML output, suitable for both command line use and for web
+applications.  The application decides at run time which output style
+should be produced.  By using libxo, a single source code path can
+emit multiple styles of output using command line options to select
+the style, along with optional behaviors.  libxo includes support for
+multiple output streams, pluralization, color, syslog,
+<em class="manpage">humanized(3)</em> output, internationalization, and UTF-8.  The
+library aims to minimize the cost of migrating code to libxo.</p>
+<p>libxo ships as part of FreeBSD.</p>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Documentation Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introducing libxo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting.html">Getting libxo</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="getting.html#downloading-libxo-source-code">Downloading libxo Source Code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting.html#building-libxo">Building libxo</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="getting.html#setting-up-the-build">Setting up the build</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting.html#running-the-configure-script">Running the “configure” Script</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting.html#installing-libxo">Installing libxo</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="formatting.html">Formatting with libxo</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="formatting.html#encoding-styles">Encoding Styles</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="formatting.html#text-output">Text Output</a></li>
+<li class="toctree-l3"><a class="reference internal" href="formatting.html#xml-output">XML Output</a></li>
+<li class="toctree-l3"><a class="reference internal" href="formatting.html#json-output">JSON Output</a></li>
+<li class="toctree-l3"><a class="reference internal" href="formatting.html#html-output">HTML Output</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="options.html">Command-line Arguments</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="options.html#option-keywords">Option Keywords</a></li>
+<li class="toctree-l2"><a class="reference internal" href="options.html#brief-options">Brief Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="options.html#color-mapping">Color Mapping</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="format-strings.html">Format Strings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="field-roles.html">Field Roles</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="field-roles.html#the-color-role-c">The Color Role ({C:})</a></li>
+<li class="toctree-l2"><a class="reference internal" href="field-roles.html#the-decoration-role-d">The Decoration Role ({D:})</a></li>
+<li class="toctree-l2"><a class="reference internal" href="field-roles.html#the-gettext-role-g">The Gettext Role ({G:})</a></li>
+<li class="toctree-l2"><a class="reference internal" href="field-roles.html#the-label-role-l">The Label Role ({L:})</a></li>
+<li class="toctree-l2"><a class="reference internal" href="field-roles.html#the-note-role-n">The Note Role ({N:})</a></li>
+<li class="toctree-l2"><a class="reference internal" href="field-roles.html#the-padding-role-p">The Padding Role ({P:})</a></li>
+<li class="toctree-l2"><a class="reference internal" href="field-roles.html#the-title-role-t">The Title Role ({T:})</a></li>
+<li class="toctree-l2"><a class="reference internal" href="field-roles.html#the-units-role-u">The Units Role ({U:})</a></li>
+<li class="toctree-l2"><a class="reference internal" href="field-roles.html#the-value-role-v-and">The Value Role ({V:} and {:})</a></li>
+<li class="toctree-l2"><a class="reference internal" href="field-roles.html#the-anchor-roles-and">The Anchor Roles ({[:} and {]:})</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="field-modifiers.html">Field Modifiers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="field-modifiers.html#the-argument-modifier-a">The Argument Modifier ({a:})</a></li>
+<li class="toctree-l2"><a class="reference internal" href="field-modifiers.html#the-colon-modifier-c">The Colon Modifier ({c:})</a></li>
+<li class="toctree-l2"><a class="reference internal" href="field-modifiers.html#the-display-modifier-d">The Display Modifier ({d:})</a></li>
+<li class="toctree-l2"><a class="reference internal" href="field-modifiers.html#the-encoding-modifier-e">The Encoding Modifier ({e:})</a></li>
+<li class="toctree-l2"><a class="reference internal" href="field-modifiers.html#the-gettext-modifier-g">The Gettext Modifier ({g:})</a></li>
+<li class="toctree-l2"><a class="reference internal" href="field-modifiers.html#the-humanize-modifier-h">The Humanize Modifier ({h:})</a></li>
+<li class="toctree-l2"><a class="reference internal" href="field-modifiers.html#the-key-modifier-k">The Key Modifier ({k:})</a></li>
+<li class="toctree-l2"><a class="reference internal" href="field-modifiers.html#the-leaf-list-modifier-l">The Leaf-List Modifier ({l:})</a></li>
+<li class="toctree-l2"><a class="reference internal" href="field-modifiers.html#the-no-quotes-modifier-n">The No-Quotes Modifier ({n:})</a></li>
+<li class="toctree-l2"><a class="reference internal" href="field-modifiers.html#the-plural-modifier-p">The Plural Modifier ({p:})</a></li>
+<li class="toctree-l2"><a class="reference internal" href="field-modifiers.html#the-quotes-modifier-q">The Quotes Modifier ({q:})</a></li>
+<li class="toctree-l2"><a class="reference internal" href="field-modifiers.html#the-trim-modifier-t">The Trim Modifier ({t:})</a></li>
+<li class="toctree-l2"><a class="reference internal" href="field-modifiers.html#the-white-space-modifier-w">The White Space Modifier ({w:})</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="field-formatting.html">Field Formatting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="field-formatting.html#utf-8-and-locale-strings">UTF-8 and Locale Strings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="field-formatting.html#characters-outside-of-field-definitions">Characters Outside of Field Definitions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="field-formatting.html#m-is-supported">“%m” Is Supported</a></li>
+<li class="toctree-l2"><a class="reference internal" href="field-formatting.html#n-is-not-supported">“%n” Is Not Supported</a></li>
+<li class="toctree-l2"><a class="reference internal" href="field-formatting.html#the-encoding-format-eformat">The Encoding Format (eformat)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="field-formatting.html#content-strings">Content Strings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="field-formatting.html#argument-validation">Argument Validation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="field-formatting.html#retaining-parsed-format-information">Retaining Parsed Format Information</a></li>
+<li class="toctree-l2"><a class="reference internal" href="field-formatting.html#example">Example</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">The libxo API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api.html#handles">Handles</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api.html#xo-create">xo_create</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#xo-create-to-file">xo_create_to_file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#xo-set-writer">xo_set_writer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#xo-get-style">xo_get_style</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#xo-set-style">xo_set_style</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#xo-set-style-name">xo_set_style_name</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#xo-set-flags">xo_set_flags</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#emitting-content-xo-emit">Emitting Content (xo_emit)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api.html#single-field-emitting-functions-xo-emit-field">Single Field Emitting Functions (xo_emit_field)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#attributes-xo-attr">Attributes (xo_attr)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#flushing-output-xo-flush">Flushing Output (xo_flush)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#finishing-output-xo-finish">Finishing Output (xo_finish)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#emitting-hierarchy">Emitting Hierarchy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api.html#containers">Containers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#lists-and-instances">Lists and Instances</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#markers">Markers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#dtrt-mode">DTRT Mode</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#support-functions">Support Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api.html#parsing-command-line-arguments-xo-parse-args">Parsing Command-line Arguments (xo_parse_args)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#xo-set-program">xo_set_program</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#xo-set-version">xo_set_version</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#field-information-xo-info-t">Field Information (xo_info_t)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#memory-allocation">Memory Allocation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#libxo-options">LIBXO_OPTIONS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#errors-warnings-and-messages">Errors, Warnings, and Messages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#xo-error">xo_error</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#xo-no-setlocale">xo_no_setlocale</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#emitting-syslog-messages">Emitting syslog Messages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api.html#priority-facility-and-flags">Priority, Facility, and Flags</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#xo-syslog">xo_syslog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#id3">Support functions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#creating-custom-encoders">Creating Custom Encoders</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api.html#loading-encoders">Loading Encoders</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#encoder-initialization">Encoder Initialization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#operations">Operations</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="encoders.html">Encoders</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="encoders.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="encoders.html#csv-comma-separated-values">CSV - Comma Separated Values</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="encoders.html#the-path-option">The <code class="code docutils literal notranslate"><span class="pre">path</span></code> Option</a></li>
+<li class="toctree-l3"><a class="reference internal" href="encoders.html#the-leafs-option">The <code class="code docutils literal notranslate"><span class="pre">leafs</span></code> Option</a></li>
+<li class="toctree-l3"><a class="reference internal" href="encoders.html#the-no-header-option">The <code class="code docutils literal notranslate"><span class="pre">no-header</span></code> Option</a></li>
+<li class="toctree-l3"><a class="reference internal" href="encoders.html#the-no-quotes-option">The <code class="code docutils literal notranslate"><span class="pre">no-quotes</span></code> Option</a></li>
+<li class="toctree-l3"><a class="reference internal" href="encoders.html#the-dos-option">The <code class="code docutils literal notranslate"><span class="pre">dos</span></code> Option</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="encoders.html#the-encoder-api">The Encoder API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="xo.html">The “xo” Utility</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="xo.html#lists-and-instances">Lists and Instances</a></li>
+<li class="toctree-l2"><a class="reference internal" href="xo.html#command-line-options">Command Line Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="xo.html#example">Example</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="xolint.html">‘A percent sign appearing in text is a literal’</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xolint.html#unknown-long-name-for-role-modifier">‘Unknown long name for role/modifier’</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xolint.html#last-character-before-field-definition-is-a-field-type">‘Last character before field definition is a field type’</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xolint.html#encoding-format-uses-different-number-of-arguments">‘Encoding format uses different number of arguments’</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xolint.html#only-one-field-role-can-be-used">‘Only one field role can be used’</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xolint.html#potential-missing-slash-after-c-d-n-l-or-t-with-format">‘Potential missing slash after C, D, N, L, or T with format’</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xolint.html#an-encoding-format-cannot-be-given-roles-dnlt">‘An encoding format cannot be given (roles: DNLT)’</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xolint.html#format-cannot-be-given-when-content-is-present-roles-cdln">‘Format cannot be given when content is present (roles: CDLN)’</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xolint.html#field-has-color-without-fg-or-bg-role-c">‘Field has color without fg- or bg- (role: C)’</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xolint.html#field-has-invalid-color-or-effect-role-c">‘Field has invalid color or effect (role: C)’</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xolint.html#field-has-humanize-modifier-but-no-format-string">‘Field has humanize modifier but no format string’</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xolint.html#field-has-hn-modifier-but-not-h-modifier">‘Field has hn-* modifier but not ‘h’ modifier’</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xolint.html#value-field-must-have-a-name-as-content">‘Value field must have a name (as content)”)’</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xolint.html#use-hyphens-not-underscores-for-value-field-name">‘Use hyphens, not underscores, for value field name’</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xolint.html#value-field-name-cannot-start-with-digit">‘Value field name cannot start with digit’</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xolint.html#value-field-name-should-be-lower-case">‘Value field name should be lower case’</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xolint.html#value-field-name-should-be-longer-than-two-characters">‘Value field name should be longer than two characters’</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xolint.html#value-field-name-contains-invalid-character">‘Value field name contains invalid character’</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xolint.html#decoration-field-contains-invalid-character">‘decoration field contains invalid character’</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xolint.html#anchor-content-should-be-decimal-width">‘Anchor content should be decimal width’</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xolint.html#anchor-format-should-be-d">‘Anchor format should be “%d”’</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xolint.html#anchor-cannot-have-both-format-and-encoding-format">‘Anchor cannot have both format and encoding format”)’</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xolint.html#max-width-only-valid-for-strings">‘Max width only valid for strings’</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xohtml.html">xohtml</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xopo.html">xopo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#general">General</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="faq.html#can-you-share-the-history-of-libxo">Can you share the history of libxo?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="faq.html#did-the-complex-semantics-of-format-strings-evolve-over-time">Did the complex semantics of format strings evolve over time?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="faq.html#what-makes-a-good-field-name">What makes a good field name?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="faq.html#what-does-this-message-mean">What does this message mean?</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="howto.html">Howtos: Focused Directions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="howto.html#howto-report-bugs">Howto: Report bugs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="howto.html#howto-install-libxo">Howto: Install libxo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="howto.html#howto-convert-command-line-applications">Howto: Convert command line applications</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="howto.html#setting-up-the-context">Setting up the context</a></li>
+<li class="toctree-l3"><a class="reference internal" href="howto.html#converting-printf-calls">Converting printf Calls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="howto.html#creating-hierarchy">Creating Hierarchy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="howto.html#converting-error-functions">Converting Error Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="howto.html#call-xo-finish">Call xo_finish</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="howto.html#howto-use-xo-in-shell-scripts">Howto: Use “xo” in Shell Scripts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="howto.html#howto-internationalization-i18n">Howto: Internationalization (i18n)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="howto.html#i18n-and-xo-emit">i18n and xo_emit</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="example.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="example.html#unit-test">Unit Test</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
+<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
+</ul>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="intro.html" title="Introducing libxo"
+             >next</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">libxo 1.3.0
+ documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017-2019, Juniper Networks Inc.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.3.
+    </div>
+  </body>
+</html>

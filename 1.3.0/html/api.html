@@ -1,0 +1,2402 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>The libxo API &#8212; libxo 1.3.0
+ documentation</title>
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Encoders" href="encoders.html" />
+    <link rel="prev" title="Field Formatting" href="field-formatting.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="encoders.html" title="Encoders"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="field-formatting.html" title="Field Formatting"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">libxo 1.3.0
+ documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">On This Page</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">The libxo API</a><ul>
+<li><a class="reference internal" href="#handles">Handles</a><ul>
+<li><a class="reference internal" href="#xo-create">xo_create</a></li>
+<li><a class="reference internal" href="#xo-create-to-file">xo_create_to_file</a></li>
+<li><a class="reference internal" href="#xo-set-writer">xo_set_writer</a></li>
+<li><a class="reference internal" href="#xo-get-style">xo_get_style</a><ul>
+<li><a class="reference internal" href="#output-styles-xo-style">Output Styles (XO_STYLE_*)</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#xo-set-style">xo_set_style</a></li>
+<li><a class="reference internal" href="#xo-set-style-name">xo_set_style_name</a></li>
+<li><a class="reference internal" href="#xo-set-flags">xo_set_flags</a><ul>
+<li><a class="reference internal" href="#flags-xof">Flags (XOF_*)</a></li>
+<li><a class="reference internal" href="#xo-clear-flags">xo_clear_flags</a></li>
+<li><a class="reference internal" href="#xo-set-options">xo_set_options</a></li>
+<li><a class="reference internal" href="#xo-destroy">xo_destroy</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#emitting-content-xo-emit">Emitting Content (xo_emit)</a><ul>
+<li><a class="reference internal" href="#single-field-emitting-functions-xo-emit-field">Single Field Emitting Functions (xo_emit_field)</a></li>
+<li><a class="reference internal" href="#attributes-xo-attr">Attributes (xo_attr)</a></li>
+<li><a class="reference internal" href="#flushing-output-xo-flush">Flushing Output (xo_flush)</a></li>
+<li><a class="reference internal" href="#finishing-output-xo-finish">Finishing Output (xo_finish)</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#emitting-hierarchy">Emitting Hierarchy</a><ul>
+<li><a class="reference internal" href="#containers">Containers</a></li>
+<li><a class="reference internal" href="#lists-and-instances">Lists and Instances</a><ul>
+<li><a class="reference internal" href="#opening-lists">Opening Lists</a></li>
+<li><a class="reference internal" href="#closing-lists">Closing Lists</a></li>
+<li><a class="reference internal" href="#opening-instances">Opening Instances</a></li>
+<li><a class="reference internal" href="#closing-instances">Closing Instances</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#markers">Markers</a></li>
+<li><a class="reference internal" href="#dtrt-mode">DTRT Mode</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#support-functions">Support Functions</a><ul>
+<li><a class="reference internal" href="#parsing-command-line-arguments-xo-parse-args">Parsing Command-line Arguments (xo_parse_args)</a></li>
+<li><a class="reference internal" href="#xo-set-program">xo_set_program</a></li>
+<li><a class="reference internal" href="#xo-set-version">xo_set_version</a></li>
+<li><a class="reference internal" href="#field-information-xo-info-t">Field Information (xo_info_t)</a></li>
+<li><a class="reference internal" href="#memory-allocation">Memory Allocation</a></li>
+<li><a class="reference internal" href="#libxo-options">LIBXO_OPTIONS</a></li>
+<li><a class="reference internal" href="#errors-warnings-and-messages">Errors, Warnings, and Messages</a></li>
+<li><a class="reference internal" href="#xo-error">xo_error</a></li>
+<li><a class="reference internal" href="#xo-no-setlocale">xo_no_setlocale</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#emitting-syslog-messages">Emitting syslog Messages</a><ul>
+<li><a class="reference internal" href="#priority-facility-and-flags">Priority, Facility, and Flags</a></li>
+<li><a class="reference internal" href="#xo-syslog">xo_syslog</a></li>
+<li><a class="reference internal" href="#id3">Support functions</a><ul>
+<li><a class="reference internal" href="#xo-vsyslog">xo_vsyslog</a></li>
+<li><a class="reference internal" href="#xo-open-log">xo_open_log</a></li>
+<li><a class="reference internal" href="#xo-close-log">xo_close_log</a></li>
+<li><a class="reference internal" href="#xo-set-logmask">xo_set_logmask</a></li>
+<li><a class="reference internal" href="#xo-set-syslog-enterprise-id">xo_set_syslog_enterprise_id</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#creating-custom-encoders">Creating Custom Encoders</a><ul>
+<li><a class="reference internal" href="#loading-encoders">Loading Encoders</a></li>
+<li><a class="reference internal" href="#encoder-initialization">Encoder Initialization</a></li>
+<li><a class="reference internal" href="#operations">Operations</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h3><a href="index.html">Full Documentation</a></h3>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="field-formatting.html"
+                        title="previous chapter">Field Formatting</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="encoders.html"
+                        title="next chapter">Encoders</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/api.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="the-libxo-api">
+<span id="index-0"></span><h1>The libxo API<a class="headerlink" href="#the-libxo-api" title="Permalink to this headline">¶</a></h1>
+<p>This section gives details about the functions in libxo, how to call
+them, and the actions they perform.</p>
+<div class="section" id="handles">
+<span id="index-1"></span><span id="id1"></span><h2>Handles<a class="headerlink" href="#handles" title="Permalink to this headline">¶</a></h2>
+<p>libxo uses “handles” to control its rendering functionality.  The
+handle contains state and buffered data, as well as callback functions
+to process data.</p>
+<p>Handles give an abstraction for libxo that encapsulates the state of a
+stream of output.  Handles have the data type “<code class="code docutils literal notranslate"><span class="pre">xo_handle_t</span></code>” and are
+opaque to the caller.</p>
+<p>The library has a default handle that is automatically initialized.
+By default, this handle will send text style output (<code class="code docutils literal notranslate"><span class="pre">XO_STYLE_TEXT</span></code>) to
+standard output.  The xo_set_style and xo_set_flags functions can be
+used to change this behavior.</p>
+<p>For the typical command that is generating output on standard output,
+there is no need to create an explicit handle, but they are available
+when needed, e.g., for daemons that generate multiple streams of
+output.</p>
+<p>Many libxo functions take a handle as their first parameter; most that
+do not use the default handle.  Any function taking a handle can be
+passed NULL to access the default handle.  For the convenience of
+callers, the libxo library includes handle-less functions that
+implicitly use the default handle.</p>
+<p>For example, the following are equivalent:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">);</span>
+<span class="n">xo_emit_h</span><span class="p">(</span><span class="n">NULL</span><span class="p">,</span> <span class="s2">&quot;test&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Handles are created using <code class="code docutils literal notranslate"><span class="pre">xo_create</span></code> and destroy using
+<code class="code docutils literal notranslate"><span class="pre">xo_destroy</span></code>.</p>
+<div class="section" id="xo-create">
+<span id="index-2"></span><h3>xo_create<a class="headerlink" href="#xo-create" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="c.xo_create">
+xo_handle_t *<code class="descname">xo_create</code><span class="sig-paren">(</span>xo_style_t<em>&nbsp;style</em>, xo_xof_flags_t<em>&nbsp;flags</em><span class="sig-paren">)</span><a class="headerlink" href="#c.xo_create" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <code class="code docutils literal notranslate"><span class="pre">xo_create</span></code> function allocates a new handle which can be passed
+to further libxo function calls.  The <code class="code docutils literal notranslate"><span class="pre">xo_handle_t</span></code> structure is
+opaque.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>style</strong> (<em>xo_style_t</em>) – Output style (XO_STYLE_*)</li>
+<li><strong>flags</strong> (<em>xo_xof_flags_t</em>) – Flags for this handle (XOF_*)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">New libxo handle</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">xo_handle_t *</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">EXAMPLE</span><span class="p">:</span>
+    <span class="n">xo_handle_t</span> <span class="o">*</span><span class="n">xop</span> <span class="o">=</span> <span class="n">xo_create</span><span class="p">(</span><span class="n">XO_STYLE_JSON</span><span class="p">,</span> <span class="n">XOF_WARN</span> <span class="o">|</span> <span class="n">XOF_PRETTY</span><span class="p">);</span>
+    <span class="o">....</span>
+    <span class="n">xo_emit_h</span><span class="p">(</span><span class="n">xop</span><span class="p">,</span> <span class="s2">&quot;testing</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>See also <a class="reference internal" href="#output-styles"><span class="std std-ref">Output Styles (XO_STYLE_*)</span></a> and <a class="reference internal" href="#flags"><span class="std std-ref">Flags (XOF_*)</span></a>.</p>
+</dd></dl>
+
+<span class="target" id="index-3"></span></div>
+<div class="section" id="xo-create-to-file">
+<span id="index-4"></span><h3>xo_create_to_file<a class="headerlink" href="#xo-create-to-file" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="c.xo_create_to_file">
+xo_handle_t *<code class="descname">xo_create_to_file</code><span class="sig-paren">(</span>FILE<em>&nbsp;*fp</em>, unsigned<em>&nbsp;style</em>, unsigned<em>&nbsp;flags</em><span class="sig-paren">)</span><a class="headerlink" href="#c.xo_create_to_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <code class="code docutils literal notranslate"><span class="pre">xo_create_to_file</span></code> function is aconvenience function is
+provided for situations when output should be written to a different
+file, rather than the default of standard output.</p>
+<p>The <code class="code docutils literal notranslate"><span class="pre">XOF_CLOSE_FP</span></code> flag can be set on the returned handle to trigger a
+call to fclose() for the FILE pointer when the handle is destroyed,
+avoiding the need for the caller to perform this task.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>fp</strong> (<em>FILE *</em>) – FILE to use as base for this handle</li>
+<li><strong>style</strong> (<em>xo_style_t</em>) – Output style (XO_STYLE_*)</li>
+<li><strong>flags</strong> (<em>xo_xof_flags_t</em>) – Flags for this handle (XOF_*)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">New libxo handle</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">xo_handle_t *</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<span class="target" id="index-5"></span><span class="target" id="index-6"></span><span class="target" id="index-7"></span></div>
+<div class="section" id="xo-set-writer">
+<span id="index-8"></span><h3>xo_set_writer<a class="headerlink" href="#xo-set-writer" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="c.xo_set_writer">
+void <code class="descname">xo_set_writer</code><span class="sig-paren">(</span>xo_handle_t<em>&nbsp;*xop</em>, void<em>&nbsp;*opaque</em>, xo_write_func_t<em>&nbsp;write_func</em>, xo_close_func_t<em>&nbsp;close_func</em>, xo_flush_func_t<em>&nbsp;flush_func</em><span class="sig-paren">)</span><a class="headerlink" href="#c.xo_set_writer" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <code class="code docutils literal notranslate"><span class="pre">xo_set_writer</span></code> function allows custom functions which can
+tailor how libxo writes data.  The <code class="code docutils literal notranslate"><span class="pre">opaque</span></code> argument is recorded and
+passed back to the functions, allowing the function to acquire
+context information. The <em>write_func</em> function writes data to the
+output stream.  The <em>close_func</em> function can release this opaque
+data and any other resources as needed.  The <em>flush_func</em> function
+is called to flush buffered data associated with the opaque object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>xop</strong> (<em>xo_handle_t *</em>) – Handle to modify (or NULL for default handle)</li>
+<li><strong>opaque</strong> (<em>void *</em>) – Pointer to opaque data passed to the given functions</li>
+<li><strong>write_func</strong> (<em>xo_write_func_t</em>) – New write function</li>
+<li><strong>close_func</strong> (<em>xo_close_func_t</em>) – New close function</li>
+<li><strong>flush_func</strong> (<em>xo_flush_func_t</em>) – New flush function</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">void</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="xo-get-style">
+<span id="index-9"></span><h3>xo_get_style<a class="headerlink" href="#xo-get-style" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="c.xo_get_style">
+xo_style_t <code class="descname">xo_get_style</code><span class="sig-paren">(</span>xo_handle_t<em>&nbsp;*xop</em><span class="sig-paren">)</span><a class="headerlink" href="#c.xo_get_style" title="Permalink to this definition">¶</a></dt>
+<dd><p>Use the <code class="code docutils literal notranslate"><span class="pre">xo_get_style</span></code> function to find the current output style for
+a given handle.  To use the default handle, pass a <code class="code docutils literal notranslate"><span class="pre">NULL</span></code> handle.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>xop</strong> (<em>xo_handle_t *</em>) – Handle to interrogate (or NULL for default handle)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Output style (XO_STYLE_*)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">xo_style_t</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">EXAMPLE</span><span class="p">::</span>
+    <span class="n">style</span> <span class="o">=</span> <span class="n">xo_get_style</span><span class="p">(</span><span class="n">NULL</span><span class="p">);</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<span class="target" id="index-10"></span><span class="target" id="index-11"></span><span class="target" id="index-12"></span><div class="section" id="output-styles-xo-style">
+<span id="output-styles"></span><span id="index-13"></span><h4>Output Styles (XO_STYLE_*)<a class="headerlink" href="#output-styles-xo-style" title="Permalink to this headline">¶</a></h4>
+<p>The libxo functions accept a set of output styles:</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="38%" />
+<col width="63%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Flag</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>XO_STYLE_TEXT</td>
+<td>Traditional text output</td>
+</tr>
+<tr class="row-odd"><td>XO_STYLE_XML</td>
+<td>XML encoded data</td>
+</tr>
+<tr class="row-even"><td>XO_STYLE_JSON</td>
+<td>JSON encoded data</td>
+</tr>
+<tr class="row-odd"><td>XO_STYLE_HTML</td>
+<td>HTML encoded data</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>The “XML”, “JSON”, and “HTML” output styles all use the UTF-8
+character encoding.  “TEXT” using locale-based encoding.</p>
+</div>
+</div>
+<div class="section" id="xo-set-style">
+<span id="index-14"></span><h3>xo_set_style<a class="headerlink" href="#xo-set-style" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="c.xo_set_style">
+void <code class="descname">xo_set_style</code><span class="sig-paren">(</span>xo_handle_t<em>&nbsp;*xop</em>, xo_style_t<em>&nbsp;style</em><span class="sig-paren">)</span><a class="headerlink" href="#c.xo_set_style" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <code class="code docutils literal notranslate"><span class="pre">xo_set_style</span></code> function is used to change the output style
+setting for a handle.  To use the default handle, pass a <code class="code docutils literal notranslate"><span class="pre">NULL</span></code>
+handle.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>xop</strong> (<em>xo_handle_t *</em>) – Handle to modify</li>
+<li><strong>style</strong> (<em>xo_style_t</em>) – Output style (XO_STYLE_*)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">void</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">EXAMPLE</span><span class="p">:</span>
+    <span class="n">xo_set_style</span><span class="p">(</span><span class="n">NULL</span><span class="p">,</span> <span class="n">XO_STYLE_XML</span><span class="p">);</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="xo-set-style-name">
+<span id="index-15"></span><h3>xo_set_style_name<a class="headerlink" href="#xo-set-style-name" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="c.xo_set_style_name">
+int <code class="descname">xo_set_style_name</code><span class="sig-paren">(</span>xo_handle_t<em>&nbsp;*xop</em>, const char<em>&nbsp;*style</em><span class="sig-paren">)</span><a class="headerlink" href="#c.xo_set_style_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <code class="code docutils literal notranslate"><span class="pre">xo_set_style_name</span></code> function can be used to set the style based
+on a name encoded as a string: The name can be any of the supported
+styles: “text”, “xml”, “json”, or “html”.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>xop</strong> (<em>xo_handle_t *</em>) – Handle for modify (or NULL for default handle)</li>
+<li><strong>style</strong> (<em>const char *</em>) – Text name of the style</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">zero for success, non-zero for error</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">int</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">EXAMPLE</span><span class="p">:</span>
+    <span class="n">xo_set_style_name</span><span class="p">(</span><span class="n">NULL</span><span class="p">,</span> <span class="s2">&quot;html&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="xo-set-flags">
+<span id="index-16"></span><h3>xo_set_flags<a class="headerlink" href="#xo-set-flags" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="c.xo_set_flags">
+void <code class="descname">xo_set_flags</code><span class="sig-paren">(</span>xo_handle_t<em>&nbsp;*xop</em>, xo_xof_flags_t<em>&nbsp;flags</em><span class="sig-paren">)</span><a class="headerlink" href="#c.xo_set_flags" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>xop</strong> (<em>xo_handle_t *</em>) – Handle for modify (or NULL for default handle)</li>
+<li><strong>flags</strong> (<em>xo_xof_flags_t</em>) – Flags to add for the handle</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">void</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Use the <code class="code docutils literal notranslate"><span class="pre">xo_set_flags</span></code> function to turn on flags for a given libxo
+handle.  To use the default handle, pass a <code class="code docutils literal notranslate"><span class="pre">NULL</span></code> handle.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">EXAMPLE</span><span class="p">:</span>
+    <span class="n">xo_set_flags</span><span class="p">(</span><span class="n">NULL</span><span class="p">,</span> <span class="n">XOF_PRETTY</span> <span class="o">|</span> <span class="n">XOF_WARN</span><span class="p">);</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<span class="target" id="index-17"></span><span class="target" id="index-18"></span><span class="target" id="index-19"></span><span class="target" id="index-20"></span><span class="target" id="index-21"></span><span class="target" id="index-22"></span><span class="target" id="index-23"></span><span class="target" id="index-24"></span><span class="target" id="index-25"></span><span class="target" id="index-26"></span><span class="target" id="index-27"></span><span class="target" id="index-28"></span><span class="target" id="index-29"></span><span class="target" id="index-30"></span><span class="target" id="index-31"></span><span class="target" id="index-32"></span><div class="section" id="flags-xof">
+<span id="flags"></span><span id="index-33"></span><h4>Flags (XOF_*)<a class="headerlink" href="#flags-xof" title="Permalink to this headline">¶</a></h4>
+<p>The set of valid flags include:</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="30%" />
+<col width="70%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Flag</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>XOF_CLOSE_FP</td>
+<td>Close file pointer on <code class="code docutils literal notranslate"><span class="pre">xo_destroy</span></code></td>
+</tr>
+<tr class="row-odd"><td>XOF_COLOR</td>
+<td>Enable color and effects in output</td>
+</tr>
+<tr class="row-even"><td>XOF_COLOR_ALLOWED</td>
+<td>Allow color/effect for terminal output</td>
+</tr>
+<tr class="row-odd"><td>XOF_DTRT</td>
+<td>Enable “do the right thing” mode</td>
+</tr>
+<tr class="row-even"><td>XOF_INFO</td>
+<td>Display info data attributes (HTML)</td>
+</tr>
+<tr class="row-odd"><td>XOF_KEYS</td>
+<td>Emit the key attribute (XML)</td>
+</tr>
+<tr class="row-even"><td>XOF_NO_ENV</td>
+<td>Do not use the <a class="reference internal" href="#libxo-options"><span class="std std-ref">LIBXO_OPTIONS</span></a> env var</td>
+</tr>
+<tr class="row-odd"><td>XOF_NO_HUMANIZE</td>
+<td>Display humanization (TEXT, HTML)</td>
+</tr>
+<tr class="row-even"><td>XOF_PRETTY</td>
+<td>Make “pretty printed” output</td>
+</tr>
+<tr class="row-odd"><td>XOF_UNDERSCORES</td>
+<td>Replaces hyphens with underscores</td>
+</tr>
+<tr class="row-even"><td>XOF_UNITS</td>
+<td>Display units (XML, HMTL)</td>
+</tr>
+<tr class="row-odd"><td>XOF_WARN</td>
+<td>Generate warnings for broken calls</td>
+</tr>
+<tr class="row-even"><td>XOF_WARN_XML</td>
+<td>Generate warnings in XML on stdout</td>
+</tr>
+<tr class="row-odd"><td>XOF_XPATH</td>
+<td>Emit XPath expressions (HTML)</td>
+</tr>
+<tr class="row-even"><td>XOF_COLUMNS</td>
+<td>Force xo_emit to return columns used</td>
+</tr>
+<tr class="row-odd"><td>XOF_FLUSH</td>
+<td>Flush output after each <code class="code docutils literal notranslate"><span class="pre">xo_emit</span></code> call</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>The <code class="code docutils literal notranslate"><span class="pre">XOF_CLOSE_FP</span></code> flag will trigger the call of the <em>close_func</em>
+(provided via <code class="code docutils literal notranslate"><span class="pre">xo_set_writer</span></code>) when the handle is destroyed.</p>
+<p>The <code class="code docutils literal notranslate"><span class="pre">XOF_COLOR</span></code> flag enables color and effects in output regardless
+of output device, while the <code class="code docutils literal notranslate"><span class="pre">XOF_COLOR_ALLOWED</span></code> flag allows color
+and effects only if the output device is a terminal.</p>
+<p>The <code class="code docutils literal notranslate"><span class="pre">XOF_PRETTY</span></code> flag requests “pretty printing”, which will trigger
+the addition of indentation and newlines to enhance the readability of
+XML, JSON, and HTML output.  Text output is not affected.</p>
+<p>The <code class="code docutils literal notranslate"><span class="pre">XOF_WARN</span></code> flag requests that warnings will trigger diagnostic
+output (on standard error) when the library notices errors during
+operations, or with arguments to functions.  Without warnings enabled,
+such conditions are ignored.</p>
+<p>Warnings allow developers to debug their interaction with libxo.
+The function <code class="code docutils literal notranslate"><span class="pre">xo_failure</span></code> can used as a breakpoint for a debugger,
+regardless of whether warnings are enabled.</p>
+<p>If the style is <code class="code docutils literal notranslate"><span class="pre">XO_STYLE_HTML</span></code>, the following additional flags can be
+used:</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="27%" />
+<col width="73%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Flag</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>XOF_XPATH</td>
+<td>Emit “data-xpath” attributes</td>
+</tr>
+<tr class="row-odd"><td>XOF_INFO</td>
+<td>Emit additional info fields</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>The <code class="code docutils literal notranslate"><span class="pre">XOF_XPATH</span></code> flag enables the emission of XPath expressions detailing
+the hierarchy of XML elements used to encode the data field, if the
+XPATH style of output were requested.</p>
+<p>The <code class="code docutils literal notranslate"><span class="pre">XOF_INFO</span></code> flag encodes additional informational fields for HTML
+output.  See <a class="reference internal" href="#field-information"><span class="std std-ref">Field Information (xo_info_t)</span></a> for details.</p>
+<p>If the style is <code class="code docutils literal notranslate"><span class="pre">XO_STYLE_XML</span></code>, the following additional flags can be
+used:</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="27%" />
+<col width="73%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Flag</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>XOF_KEYS</td>
+<td>Flag “key” fields for XML</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>The <code class="code docutils literal notranslate"><span class="pre">XOF_KEYS</span></code> flag adds “key” attribute to the XML encoding for
+field definitions that use the “k” modifier.  The key attribute has
+the value “key”:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>  <span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;{k:name}&quot;</span><span class="p">,</span> <span class="n">item</span><span class="p">);</span>
+
+<span class="n">XML</span><span class="p">:</span>
+    <span class="o">&lt;</span><span class="n">name</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;key&quot;</span><span class="o">&gt;</span><span class="n">truck</span><span class="o">&lt;/</span><span class="n">name</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="xo-clear-flags">
+<span id="index-34"></span><h4>xo_clear_flags<a class="headerlink" href="#xo-clear-flags" title="Permalink to this headline">¶</a></h4>
+<dl class="function">
+<dt id="c.xo_clear_flags">
+void <code class="descname">xo_clear_flags</code><span class="sig-paren">(</span>xo_handle_t<em>&nbsp;*xop</em>, xo_xof_flags_t<em>&nbsp;flags</em><span class="sig-paren">)</span><a class="headerlink" href="#c.xo_clear_flags" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>xop</strong> (<em>xo_handle_t *</em>) – Handle for modify (or NULL for default handle)</li>
+<li><strong>flags</strong> (<em>xo_xof_flags_t</em>) – Flags to clear for the handle</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">void</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Use the <code class="code docutils literal notranslate"><span class="pre">xo_clear_flags</span></code> function to turn off the given flags in a
+specific handle.  To use the default handle, pass a <code class="code docutils literal notranslate"><span class="pre">NULL</span></code> handle.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="xo-set-options">
+<span id="index-35"></span><h4>xo_set_options<a class="headerlink" href="#xo-set-options" title="Permalink to this headline">¶</a></h4>
+<dl class="function">
+<dt id="c.xo_set_options">
+int <code class="descname">xo_set_options</code><span class="sig-paren">(</span>xo_handle_t<em>&nbsp;*xop</em>, const char<em>&nbsp;*input</em><span class="sig-paren">)</span><a class="headerlink" href="#c.xo_set_options" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>xop</strong> (<em>xo_handle_t *</em>) – Handle for modify (or NULL for default handle)</li>
+<li><strong>input</strong> (<em>const char *</em>) – string containing options to set</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">zero for success, non-zero for error</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">int</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>The <code class="code docutils literal notranslate"><span class="pre">xo_set_options</span></code> function accepts a comma-separated list of
+output styles and modifier flags and enables them for a specific
+handle.  The options are identical to those listed in
+<a class="reference internal" href="options.html#options"><span class="std std-ref">Command-line Arguments</span></a>.  To use the default handle, pass a <code class="code docutils literal notranslate"><span class="pre">NULL</span></code> handle.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="xo-destroy">
+<span id="index-36"></span><h4>xo_destroy<a class="headerlink" href="#xo-destroy" title="Permalink to this headline">¶</a></h4>
+<dl class="function">
+<dt id="c.xo_destroy">
+void <code class="descname">xo_destroy</code><span class="sig-paren">(</span>xo_handle_t<em>&nbsp;*xop</em><span class="sig-paren">)</span><a class="headerlink" href="#c.xo_destroy" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>xop</strong> (<em>xo_handle_t *</em>) – Handle for modify (or NULL for default handle)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">void</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>The <code class="code docutils literal notranslate"><span class="pre">xo_destroy</span></code> function releases a handle and any resources it is
+using.  Calling <code class="code docutils literal notranslate"><span class="pre">xo_destroy</span></code> with a <code class="code docutils literal notranslate"><span class="pre">NULL</span></code> handle will release any
+resources associated with the default handle.</p>
+</dd></dl>
+
+</div>
+</div>
+</div>
+<div class="section" id="emitting-content-xo-emit">
+<span id="index-37"></span><h2>Emitting Content (xo_emit)<a class="headerlink" href="#emitting-content-xo-emit" title="Permalink to this headline">¶</a></h2>
+<p>The functions in this section are used to emit output.</p>
+<p>The “fmt” argument is a string containing field descriptors as
+specified in <a class="reference internal" href="format-strings.html#format-strings"><span class="std std-ref">Format Strings</span></a>.  The use of a handle is optional and
+<code class="code docutils literal notranslate"><span class="pre">NULL</span></code> can be passed to access the internal “default” handle.  See
+<a class="reference internal" href="#handles"><span class="std std-ref">Handles</span></a>.</p>
+<p>The remaining arguments to <code class="code docutils literal notranslate"><span class="pre">xo_emit</span></code> and <code class="code docutils literal notranslate"><span class="pre">xo_emit_h</span></code> are a set of
+arguments corresponding to the fields in the format string.  Care must
+be taken to ensure the argument types match the fields in the format
+string, since an inappropriate cast can ruin your day.  The vap
+argument to <code class="code docutils literal notranslate"><span class="pre">xo_emit_hv</span></code> points to a variable argument list that can
+be used to retrieve arguments via <code class="code docutils literal notranslate"><span class="pre">va_arg</span></code>.</p>
+<dl class="function">
+<dt id="c.xo_emit">
+xo_ssize_t <code class="descname">xo_emit</code><span class="sig-paren">(</span>const char<em>&nbsp;*fmt</em>, ...<span class="sig-paren">)</span><a class="headerlink" href="#c.xo_emit" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>fmt</strong> – The format string, followed by zero or more arguments</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">If XOF_COLUMNS is set, the number of columns used; otherwise the number of bytes emitted</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">xo_ssize_t</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.xo_emit_h">
+xo_ssize_t <code class="descname">xo_emit_h</code><span class="sig-paren">(</span>xo_handle_t<em>&nbsp;*xop</em>, const char<em>&nbsp;*fmt</em>, ...<span class="sig-paren">)</span><a class="headerlink" href="#c.xo_emit_h" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>xop</strong> (<em>xo_handle_t *</em>) – Handle for modify (or NULL for default handle)</li>
+<li><strong>fmt</strong> – The format string, followed by zero or more arguments</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">If XOF_COLUMNS is set, the number of columns used; otherwise the number of bytes emitted</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">xo_ssize_t</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.xo_emit_hv">
+xo_ssize_t <code class="descname">xo_emit_hv</code><span class="sig-paren">(</span>xo_handle_t<em>&nbsp;*xop</em>, const char<em>&nbsp;*fmt</em>, va_list<em>&nbsp;vap</em><span class="sig-paren">)</span><a class="headerlink" href="#c.xo_emit_hv" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>xop</strong> (<em>xo_handle_t *</em>) – Handle for modify (or NULL for default handle)</li>
+<li><strong>fmt</strong> – The format string</li>
+<li><strong>vap</strong> (<em>va_list</em>) – A set of variadic arguments</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">If XOF_COLUMNS is set, the number of columns used; otherwise the number of bytes emitted</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">xo_ssize_t</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div class="section" id="single-field-emitting-functions-xo-emit-field">
+<span id="index-38"></span><h3>Single Field Emitting Functions (xo_emit_field)<a class="headerlink" href="#single-field-emitting-functions-xo-emit-field" title="Permalink to this headline">¶</a></h3>
+<p>The functions in this section can also make output, but only make a
+single field at a time.  These functions are intended to avoid the
+scenario where one would otherwise need to compose a format
+descriptors using <code class="code docutils literal notranslate"><span class="pre">snprintf</span></code>.  The individual parts of the format
+descriptor are passed in distinctly.</p>
+<dl class="function">
+<dt id="c.xo_emit_field">
+xo_ssize_t <code class="descname">xo_emit_field</code><span class="sig-paren">(</span>const char<em>&nbsp;*rolmod</em>, const char<em>&nbsp;*contents</em>, const char<em>&nbsp;*fmt</em>, const char<em>&nbsp;*efmt</em>, ...<span class="sig-paren">)</span><a class="headerlink" href="#c.xo_emit_field" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>rolmod</strong> (<em>const char *</em>) – A comma-separated list of field roles and field modifiers</li>
+<li><strong>contents</strong> (<em>const char *</em>) – The “contents” portion of the field description string</li>
+<li><strong>fmt</strong> (<em>const char *</em>) – Content format string</li>
+<li><strong>efmt</strong> (<em>const char *</em>) – Encoding format string, followed by additional arguments</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">If XOF_COLUMNS is set, the number of columns used; otherwise the number of bytes emitted</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">xo_ssize_t</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">EXAMPLE</span><span class="p">::</span>
+    <span class="n">xo_emit_field</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">,</span> <span class="s2">&quot;Host name is &quot;</span><span class="p">,</span> <span class="n">NULL</span><span class="p">,</span> <span class="n">NULL</span><span class="p">);</span>
+    <span class="n">xo_emit_field</span><span class="p">(</span><span class="s2">&quot;V&quot;</span><span class="p">,</span> <span class="s2">&quot;host-name&quot;</span><span class="p">,</span> <span class="n">NULL</span><span class="p">,</span> <span class="n">NULL</span><span class="p">,</span> <span class="n">host</span><span class="o">-</span><span class="n">name</span><span class="p">);</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.xo_emit_field_h">
+xo_ssize_t <code class="descname">xo_emit_field_h</code><span class="sig-paren">(</span>xo_handle_t<em>&nbsp;*xop</em>, const char<em>&nbsp;*rolmod</em>, const char<em>&nbsp;*contents</em>, const char<em>&nbsp;*fmt</em>, const char<em>&nbsp;*efmt</em>, ...<span class="sig-paren">)</span><a class="headerlink" href="#c.xo_emit_field_h" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>xop</strong> (<em>xo_handle_t *</em>) – Handle for modify (or NULL for default handle)</li>
+<li><strong>rolmod</strong> (<em>const char *</em>) – A comma-separated list of field roles and field modifiers</li>
+<li><strong>contents</strong> (<em>const char *</em>) – The “contents” portion of the field description string</li>
+<li><strong>fmt</strong> (<em>const char *</em>) – Content format string</li>
+<li><strong>efmt</strong> (<em>const char *</em>) – Encoding format string, followed by additional arguments</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">If XOF_COLUMNS is set, the number of columns used; otherwise the number of bytes emitted</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">xo_ssize_t</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.xo_emit_field_hv">
+xo_ssize_t <code class="descname">xo_emit_field_hv</code><span class="sig-paren">(</span>xo_handle_t<em>&nbsp;*xop</em>, const char<em>&nbsp;*rolmod</em>, const char<em>&nbsp;*contents</em>, const char<em>&nbsp;*fmt</em>, const char<em>&nbsp;*efmt</em>, va_list<em>&nbsp;vap</em><span class="sig-paren">)</span><a class="headerlink" href="#c.xo_emit_field_hv" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>xop</strong> (<em>xo_handle_t *</em>) – Handle for modify (or NULL for default handle)</li>
+<li><strong>rolmod</strong> (<em>const char *</em>) – A comma-separated list of field roles and field modifiers</li>
+<li><strong>contents</strong> (<em>const char *</em>) – The “contents” portion of the field description string</li>
+<li><strong>fmt</strong> (<em>const char *</em>) – Content format string</li>
+<li><strong>efmt</strong> (<em>const char *</em>) – Encoding format string</li>
+<li><strong>vap</strong> (<em>va_list</em>) – A set of variadic arguments</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">If XOF_COLUMNS is set, the number of columns used; otherwise the number of bytes emitted</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">xo_ssize_t</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="attributes-xo-attr">
+<span id="xo-attr"></span><span id="index-39"></span><h3>Attributes (xo_attr)<a class="headerlink" href="#attributes-xo-attr" title="Permalink to this headline">¶</a></h3>
+<p>The functions in this section emit an XML attribute with the given name
+and value.  This only affects the XML output style.</p>
+<p>The <code class="code docutils literal notranslate"><span class="pre">name</span></code> parameter give the name of the attribute to be encoded.  The
+<code class="code docutils literal notranslate"><span class="pre">fmt</span></code> parameter gives a printf-style format string used to format the
+value of the attribute using any remaining arguments, or the vap
+parameter passed to <code class="code docutils literal notranslate"><span class="pre">xo_attr_hv</span></code>.</p>
+<p>All attributes recorded via <code class="code docutils literal notranslate"><span class="pre">xo_attr</span></code> are placed on the next
+container, instance, leaf, or leaf list that is emitted.</p>
+<p>Since attributes are only emitted in XML, their use should be limited
+to meta-data and additional or redundant representations of data
+already emitted in other form.</p>
+<dl class="function">
+<dt id="c.xo_attr">
+xo_ssize_t <code class="descname">xo_attr</code><span class="sig-paren">(</span>const char<em>&nbsp;*name</em>, const char<em>&nbsp;*fmt</em>, ...<span class="sig-paren">)</span><a class="headerlink" href="#c.xo_attr" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<em>const char *</em>) – Attribute name</li>
+<li><strong>fmt</strong> (<em>const char *</em>) – Attribute value, as variadic arguments</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">-1 for error, or the number of bytes in the formatted attribute value</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">xo_ssize_t</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">EXAMPLE</span><span class="p">:</span>
+    <span class="n">xo_attr</span><span class="p">(</span><span class="s2">&quot;seconds&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%ld</span><span class="s2">&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">unsigned</span> <span class="n">long</span><span class="p">)</span> <span class="n">login_time</span><span class="p">);</span>
+    <span class="n">struct</span> <span class="n">tm</span> <span class="o">*</span><span class="n">tmp</span> <span class="o">=</span> <span class="n">localtime</span><span class="p">(</span><span class="n">login_time</span><span class="p">);</span>
+    <span class="n">strftime</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span> <span class="n">sizeof</span><span class="p">(</span><span class="n">buf</span><span class="p">),</span> <span class="s2">&quot;%R&quot;</span><span class="p">,</span> <span class="n">tmp</span><span class="p">);</span>
+    <span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;Logged in at {:login-time}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">buf</span><span class="p">);</span>
+<span class="n">XML</span><span class="p">:</span>
+    <span class="o">&lt;</span><span class="n">login</span><span class="o">-</span><span class="n">time</span> <span class="n">seconds</span><span class="o">=</span><span class="s2">&quot;1408336270&quot;</span><span class="o">&gt;</span><span class="mi">00</span><span class="p">:</span><span class="mi">14</span><span class="o">&lt;/</span><span class="n">login</span><span class="o">-</span><span class="n">time</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.xo_attr_h">
+xo_ssize_t <code class="descname">xo_attr_h</code><span class="sig-paren">(</span>xo_handle_t<em>&nbsp;*xop</em>, const char<em>&nbsp;*name</em>, const char<em>&nbsp;*fmt</em>, ...<span class="sig-paren">)</span><a class="headerlink" href="#c.xo_attr_h" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>xop</strong> (<em>xo_handle_t *</em>) – Handle for modify (or NULL for default handle)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>The <code class="code docutils literal notranslate"><span class="pre">xo_attr_h</span></code> function follows the conventions of <code class="code docutils literal notranslate"><span class="pre">xo_attr</span></code> but
+adds an explicit libxo handle.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.xo_attr_hv">
+xo_ssize_t <code class="descname">xo_attr_hv</code><span class="sig-paren">(</span>xo_handle_t<em>&nbsp;*xop</em>, const char<em>&nbsp;*name</em>, const char<em>&nbsp;*fmt</em>, va_list<em>&nbsp;vap</em><span class="sig-paren">)</span><a class="headerlink" href="#c.xo_attr_hv" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <code class="code docutils literal notranslate"><span class="pre">xo_attr_h</span></code> function follows the conventions of <code class="code docutils literal notranslate"><span class="pre">xo_attr_h</span></code>
+but replaced the variadic list with a variadic pointer.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="flushing-output-xo-flush">
+<span id="index-40"></span><h3>Flushing Output (xo_flush)<a class="headerlink" href="#flushing-output-xo-flush" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="c.xo_flush">
+xo_ssize_t <code class="descname">xo_flush</code><span class="sig-paren">(</span>void<span class="sig-paren">)</span><a class="headerlink" href="#c.xo_flush" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">-1 for error, or the number of bytes generated</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">xo_ssize_t</td>
+</tr>
+</tbody>
+</table>
+<p>libxo buffers data, both for performance and consistency, but also
+to allow for the proper function of various advanced features.  At
+various times, the caller may wish to flush any data buffered within
+the library.  The <code class="code docutils literal notranslate"><span class="pre">xo_flush</span></code> call is used for this.</p>
+<p>Calling <code class="code docutils literal notranslate"><span class="pre">xo_flush</span></code> also triggers the flush function associated with
+the handle.  For the default handle, this is equivalent to
+“fflush(stdio);”.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.xo_flush_h">
+xo_ssize_t <code class="descname">xo_flush_h</code><span class="sig-paren">(</span>xo_handle_t<em>&nbsp;*xop</em><span class="sig-paren">)</span><a class="headerlink" href="#c.xo_flush_h" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>xop</strong> (<em>xo_handle_t *</em>) – Handle for flush (or NULL for default handle)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">-1 for error, or the number of bytes generated</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">xo_ssize_t</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>The <code class="code docutils literal notranslate"><span class="pre">xo_flush_h</span></code> function follows the conventions of <code class="code docutils literal notranslate"><span class="pre">xo_flush</span></code>,
+but adds an explicit libxo handle.</p>
+</dd></dl>
+
+<span class="target" id="index-41"></span><span class="target" id="index-42"></span></div>
+<div class="section" id="finishing-output-xo-finish">
+<span id="index-43"></span><h3>Finishing Output (xo_finish)<a class="headerlink" href="#finishing-output-xo-finish" title="Permalink to this headline">¶</a></h3>
+<p>When the program is ready to exit or close a handle, a call to
+<code class="code docutils literal notranslate"><span class="pre">xo_finish</span></code> or <code class="code docutils literal notranslate"><span class="pre">xo_finish_h</span></code> is required.  This flushes any buffered
+data, closes open libxo constructs, and completes any pending
+operations.</p>
+<p>Calling this function is vital to the proper operation of libxo,
+especially for the non-TEXT output styles.</p>
+<dl class="function">
+<dt id="c.xo_finish">
+xo_ssize_t <code class="descname">xo_finish</code><span class="sig-paren">(</span>void<span class="sig-paren">)</span><a class="headerlink" href="#c.xo_finish" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">-1 on error, or the number of bytes flushed</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">xo_ssize_t</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.xo_finish_h">
+xo_ssize_t <code class="descname">xo_finish_h</code><span class="sig-paren">(</span>xo_handle_t<em>&nbsp;*xop</em><span class="sig-paren">)</span><a class="headerlink" href="#c.xo_finish_h" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>xop</strong> (<em>xo_handle_t *</em>) – Handle for finish (or NULL for default handle)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">-1 on error, or the number of bytes flushed</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">xo_ssize_t</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.xo_finish_atexit">
+void <code class="descname">xo_finish_atexit</code><span class="sig-paren">(</span>void<span class="sig-paren">)</span><a class="headerlink" href="#c.xo_finish_atexit" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <code class="code docutils literal notranslate"><span class="pre">xo_finish_atexit</span></code> function is suitable for use with
+<em class="manpage">atexit(3)</em> to ensure that <code class="code docutils literal notranslate"><span class="pre">xo_finish</span></code> is called
+on the default handle when the application exits.</p>
+</dd></dl>
+
+<span class="target" id="index-44"></span><span class="target" id="index-45"></span></div>
+</div>
+<div class="section" id="emitting-hierarchy">
+<span id="index-46"></span><h2>Emitting Hierarchy<a class="headerlink" href="#emitting-hierarchy" title="Permalink to this headline">¶</a></h2>
+<p>libxo represents two types of hierarchy: containers and lists.  A
+container appears once under a given parent where a list consists of
+instances that can appear multiple times.  A container is used to hold
+related fields and to give the data organization and scope.</p>
+<div class="admonition-yang-terminology admonition" id="index-47">
+<p class="first admonition-title">YANG Terminology</p>
+<p class="last">libxo uses terminology from YANG (<span class="target" id="index-48"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7950.html"><strong>RFC 7950</strong></a>), the data modeling
+language for NETCONF: container, list, leaf, and leaf-list.</p>
+</div>
+<p>For XML and JSON, individual fields appear inside hierarchies which
+provide context and meaning to the fields.  Unfortunately, these
+encoding have a basic disconnect between how lists is similar objects
+are represented.</p>
+<p>XML encodes lists as set of sequential elements:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">user</span><span class="o">&gt;</span><span class="n">phil</span><span class="o">&lt;/</span><span class="n">user</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">user</span><span class="o">&gt;</span><span class="n">pallavi</span><span class="o">&lt;/</span><span class="n">user</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">user</span><span class="o">&gt;</span><span class="n">sjg</span><span class="o">&lt;/</span><span class="n">user</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>JSON encodes lists using a single name and square brackets:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;user&quot;</span><span class="p">:</span> <span class="p">[</span> <span class="s2">&quot;phil&quot;</span><span class="p">,</span> <span class="s2">&quot;pallavi&quot;</span><span class="p">,</span> <span class="s2">&quot;sjg&quot;</span> <span class="p">]</span>
+</pre></div>
+</div>
+<p>This means libxo needs three distinct indications of hierarchy: one
+for containers of hierarchy appear only once for any specific parent,
+one for lists, and one for each item in a list.</p>
+<div class="section" id="containers">
+<span id="index-49"></span><h3>Containers<a class="headerlink" href="#containers" title="Permalink to this headline">¶</a></h3>
+<p>A “<em>container</em>” is an element of a hierarchy that appears only once
+under any specific parent.  The container has no value, but serves to
+contain and organize other nodes.</p>
+<p>To open a container, call xo_open_container() or
+xo_open_container_h().  The former uses the default handle and the
+latter accepts a specific handle.  To close a level, use the
+xo_close_container() or xo_close_container_h() functions.</p>
+<p>Each open call must have a matching close call.  If the XOF_WARN flag
+is set and the name given does not match the name of the currently open
+container, a warning will be generated.</p>
+<dl class="function">
+<dt id="c.xo_open_container">
+xo_ssize_t <code class="descname">xo_open_container</code><span class="sig-paren">(</span>const char<em>&nbsp;*name</em><span class="sig-paren">)</span><a class="headerlink" href="#c.xo_open_container" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<em>const char *</em>) – Name of the container</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">-1 on error, or the number of bytes generated</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">xo_ssize_t</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>The <code class="code docutils literal notranslate"><span class="pre">name</span></code> parameter gives the name of the container, encoded in
+UTF-8.  Since ASCII is a proper subset of UTF-8, traditional C
+strings can be used directly.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.xo_open_container_h">
+xo_ssize_t <code class="descname">xo_open_container_h</code><span class="sig-paren">(</span>xo_handle_t<em>&nbsp;*xop</em>, const char<em>&nbsp;*name</em><span class="sig-paren">)</span><a class="headerlink" href="#c.xo_open_container_h" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>xop</strong> (<em>xo_handle_t *</em>) – Handle to use (or NULL for default handle)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>The <code class="code docutils literal notranslate"><span class="pre">xo_open_container_h</span></code> function adds a <code class="code docutils literal notranslate"><span class="pre">handle</span></code> parameter.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.xo_close_container">
+xo_ssize_t <code class="descname">xo_close_container</code><span class="sig-paren">(</span>const char<em>&nbsp;*name</em><span class="sig-paren">)</span><a class="headerlink" href="#c.xo_close_container" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<em>const char *</em>) – Name of the container</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">-1 on error, or the number of bytes generated</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">xo_ssize_t</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.xo_close_container_h">
+xo_ssize_t <code class="descname">xo_close_container_h</code><span class="sig-paren">(</span>xo_handle_t<em>&nbsp;*xop</em>, const char<em>&nbsp;*name</em><span class="sig-paren">)</span><a class="headerlink" href="#c.xo_close_container_h" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>xop</strong> (<em>xo_handle_t *</em>) – Handle to use (or NULL for default handle)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>The <code class="code docutils literal notranslate"><span class="pre">xo_close_container_h</span></code> function adds a <code class="code docutils literal notranslate"><span class="pre">handle</span></code> parameter.</p>
+</dd></dl>
+
+<p>Use the <span class="target" id="index-50"></span>XOF_WARN flag to generate a warning if the name given
+on the close does not match the current open container.</p>
+<p>For TEXT and HTML output, containers are not rendered into output
+text, though for HTML they are used to record an XPath value when the
+<span class="target" id="index-51"></span>XOF_XPATH flag is set.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>EXAMPLE:
+    xo_open_container(&quot;top&quot;);
+    xo_open_container(&quot;system&quot;);
+    xo_emit(&quot;{:host-name/%s%s%s}&quot;, hostname,
+            domainname ? &quot;.&quot; : &quot;&quot;, domainname ?: &quot;&quot;);
+    xo_close_container(&quot;system&quot;);
+    xo_close_container(&quot;top&quot;);
+TEXT:
+    my-host.example.org
+XML:
+    &lt;top&gt;
+      &lt;system&gt;
+          &lt;host-name&gt;my-host.example.org&lt;/host-name&gt;
+      &lt;/system&gt;
+    &lt;/top&gt;
+JSON:
+    &quot;top&quot; : {
+      &quot;system&quot; : {
+          &quot;host-name&quot;: &quot;my-host.example.org&quot;
+      }
+    }
+HTML:
+    &lt;div class=&quot;data&quot;
+         data-tag=&quot;host-name&quot;&gt;my-host.example.org&lt;/div&gt;
+</pre></div>
+</div>
+<span class="target" id="index-52"></span><span class="target" id="index-53"></span><span class="target" id="index-54"></span></div>
+<div class="section" id="lists-and-instances">
+<span id="index-55"></span><h3>Lists and Instances<a class="headerlink" href="#lists-and-instances" title="Permalink to this headline">¶</a></h3>
+<p>A “<em>list</em>” is set of one or more instances that appear under the same
+parent.  The instances contain details about a specific object.  One
+can think of instances as objects or records.  A call is needed to
+open and close the list, while a distinct call is needed to open and
+close each instance of the list.</p>
+<p>The name given to all calls must be identical, and it is strongly
+suggested that the name be singular, not plural, as a matter of
+style and usage expectations:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">EXAMPLE</span><span class="p">:</span>
+    <span class="n">xo_open_list</span><span class="p">(</span><span class="s2">&quot;item&quot;</span><span class="p">);</span>
+
+    <span class="k">for</span> <span class="p">(</span><span class="n">ip</span> <span class="o">=</span> <span class="nb">list</span><span class="p">;</span> <span class="n">ip</span><span class="o">-&gt;</span><span class="n">i_title</span><span class="p">;</span> <span class="n">ip</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">xo_open_instance</span><span class="p">(</span><span class="s2">&quot;item&quot;</span><span class="p">);</span>
+        <span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;{L:Item} &#39;{:name/</span><span class="si">%s</span><span class="s2">}&#39;:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">ip</span><span class="o">-&gt;</span><span class="n">i_title</span><span class="p">);</span>
+        <span class="n">xo_close_instance</span><span class="p">(</span><span class="s2">&quot;item&quot;</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="n">xo_close_list</span><span class="p">(</span><span class="s2">&quot;item&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Getting the list and instance calls correct is critical to the proper
+generation of XML and JSON data.</p>
+<div class="section" id="opening-lists">
+<h4>Opening Lists<a class="headerlink" href="#opening-lists" title="Permalink to this headline">¶</a></h4>
+<dl class="function">
+<dt id="c.xo_open_list">
+xo_ssize_t <code class="descname">xo_open_list</code><span class="sig-paren">(</span>const char<em>&nbsp;*name</em><span class="sig-paren">)</span><a class="headerlink" href="#c.xo_open_list" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<em>const char *</em>) – Name of the list</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">-1 on error, or the number of bytes generated</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">xo_ssize_t</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>The <code class="code docutils literal notranslate"><span class="pre">xo_open_list</span></code> function open a list of instances.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.xo_open_list_h">
+xo_ssize_t <code class="descname">xo_open_list_h</code><span class="sig-paren">(</span>xo_handle_t<em>&nbsp;*xop</em>, const char<em>&nbsp;*name</em><span class="sig-paren">)</span><a class="headerlink" href="#c.xo_open_list_h" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>xop</strong> (<em>xo_handle_t *</em>) – Handle to use (or NULL for default handle)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="closing-lists">
+<h4>Closing Lists<a class="headerlink" href="#closing-lists" title="Permalink to this headline">¶</a></h4>
+<dl class="function">
+<dt id="c.xo_close_list">
+xo_ssize_t <code class="descname">xo_close_list</code><span class="sig-paren">(</span>const char<em>&nbsp;*name</em><span class="sig-paren">)</span><a class="headerlink" href="#c.xo_close_list" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<em>const char *</em>) – Name of the list</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">-1 on error, or the number of bytes generated</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">xo_ssize_t</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>The <code class="code docutils literal notranslate"><span class="pre">xo_close_list</span></code> function closes a list of instances.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.xo_close_list_h">
+xo_ssize_t <code class="descname">xo_close_list_h</code><span class="sig-paren">(</span>xo_handle_t<em>&nbsp;*xop</em>, const char<em>&nbsp;*name</em><span class="sig-paren">)</span><a class="headerlink" href="#c.xo_close_list_h" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>xop</strong> – Handle to use (or NULL for default handle)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="opening-instances">
+<h4>Opening Instances<a class="headerlink" href="#opening-instances" title="Permalink to this headline">¶</a></h4>
+<dl class="function">
+<dt id="c.xo_open_instance">
+xo_ssize_t <code class="descname">xo_open_instance</code><span class="sig-paren">(</span>const char<em>&nbsp;*name</em><span class="sig-paren">)</span><a class="headerlink" href="#c.xo_open_instance" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<em>const char *</em>) – Name of the instance (same as the list name)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">-1 on error, or the number of bytes generated</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">xo_ssize_t</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>The <code class="code docutils literal notranslate"><span class="pre">xo_open_instance</span></code> function open a single instance.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.xo_open_instance_h">
+xo_ssize_t <code class="descname">xo_open_instance_h</code><span class="sig-paren">(</span>xo_handle_t<em>&nbsp;*xop</em>, const char<em>&nbsp;*name</em><span class="sig-paren">)</span><a class="headerlink" href="#c.xo_open_instance_h" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>xop</strong> – Handle to use (or NULL for default handle)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="closing-instances">
+<h4>Closing Instances<a class="headerlink" href="#closing-instances" title="Permalink to this headline">¶</a></h4>
+<dl class="function">
+<dt id="c.xo_close_instance">
+xo_ssize_t <code class="descname">xo_close_instance</code><span class="sig-paren">(</span>const char<em>&nbsp;*name</em><span class="sig-paren">)</span><a class="headerlink" href="#c.xo_close_instance" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<em>const char *</em>) – Name of the instance</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">-1 on error, or the number of bytes generated</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">xo_ssize_t</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>The <code class="code docutils literal notranslate"><span class="pre">xo_close_instance</span></code> function closes an open instance.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.xo_close_instance_h">
+xo_ssize_t <code class="descname">xo_close_instance_h</code><span class="sig-paren">(</span>xo_handle_t<em>&nbsp;*xop</em>, const char<em>&nbsp;*name</em><span class="sig-paren">)</span><a class="headerlink" href="#c.xo_close_instance_h" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>xop</strong> (<em>xo_handle_t *</em>) – Handle to use (or NULL for default handle)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>The <code class="code docutils literal notranslate"><span class="pre">xo_close_instance_h</span></code> function adds a <code class="code docutils literal notranslate"><span class="pre">handle</span></code> parameter.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">EXAMPLE</span><span class="p">:</span>
+    <span class="n">xo_open_list</span><span class="p">(</span><span class="s2">&quot;user&quot;</span><span class="p">);</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">num_users</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">xo_open_instance</span><span class="p">(</span><span class="s2">&quot;user&quot;</span><span class="p">);</span>
+        <span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;{k:name}:{:uid/</span><span class="si">%u</span><span class="s2">}:{:gid/</span><span class="si">%u</span><span class="s2">}:{:home}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">pw</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">pw_name</span><span class="p">,</span> <span class="n">pw</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">pw_uid</span><span class="p">,</span>
+                <span class="n">pw</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">pw_gid</span><span class="p">,</span> <span class="n">pw</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">pw_dir</span><span class="p">);</span>
+        <span class="n">xo_close_instance</span><span class="p">(</span><span class="s2">&quot;user&quot;</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="n">xo_close_list</span><span class="p">(</span><span class="s2">&quot;user&quot;</span><span class="p">);</span>
+<span class="n">TEXT</span><span class="p">:</span>
+    <span class="n">phil</span><span class="p">:</span><span class="mi">1001</span><span class="p">:</span><span class="mi">1001</span><span class="p">:</span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">phil</span>
+    <span class="n">pallavi</span><span class="p">:</span><span class="mi">1002</span><span class="p">:</span><span class="mi">1002</span><span class="p">:</span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">pallavi</span>
+<span class="n">XML</span><span class="p">:</span>
+    <span class="o">&lt;</span><span class="n">user</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span><span class="n">phil</span><span class="o">&lt;/</span><span class="n">name</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="n">uid</span><span class="o">&gt;</span><span class="mi">1001</span><span class="o">&lt;/</span><span class="n">uid</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="n">gid</span><span class="o">&gt;</span><span class="mi">1001</span><span class="o">&lt;/</span><span class="n">gid</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="n">home</span><span class="o">&gt;/</span><span class="n">home</span><span class="o">/</span><span class="n">phil</span><span class="o">&lt;/</span><span class="n">home</span><span class="o">&gt;</span>
+    <span class="o">&lt;/</span><span class="n">user</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">user</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span><span class="n">pallavi</span><span class="o">&lt;/</span><span class="n">name</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="n">uid</span><span class="o">&gt;</span><span class="mi">1002</span><span class="o">&lt;/</span><span class="n">uid</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="n">gid</span><span class="o">&gt;</span><span class="mi">1002</span><span class="o">&lt;/</span><span class="n">gid</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="n">home</span><span class="o">&gt;/</span><span class="n">home</span><span class="o">/</span><span class="n">pallavi</span><span class="o">&lt;/</span><span class="n">home</span><span class="o">&gt;</span>
+    <span class="o">&lt;/</span><span class="n">user</span><span class="o">&gt;</span>
+<span class="n">JSON</span><span class="p">:</span>
+    <span class="n">user</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;phil&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;uid&quot;</span><span class="p">:</span> <span class="mi">1001</span><span class="p">,</span>
+            <span class="s2">&quot;gid&quot;</span><span class="p">:</span> <span class="mi">1001</span><span class="p">,</span>
+            <span class="s2">&quot;home&quot;</span><span class="p">:</span> <span class="s2">&quot;/home/phil&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;pallavi&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;uid&quot;</span><span class="p">:</span> <span class="mi">1002</span><span class="p">,</span>
+            <span class="s2">&quot;gid&quot;</span><span class="p">:</span> <span class="mi">1002</span><span class="p">,</span>
+            <span class="s2">&quot;home&quot;</span><span class="p">:</span> <span class="s2">&quot;/home/pallavi&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+    <span class="p">]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="markers">
+<h3>Markers<a class="headerlink" href="#markers" title="Permalink to this headline">¶</a></h3>
+<p>Markers are used to protect and restore the state of open hierarchy
+constructs (containers, lists, or instances).  While a marker is open,
+no other open constructs can be closed.  When a marker is closed, all
+constructs open since the marker was opened will be closed.</p>
+<p>Markers use names which are not user-visible, allowing the caller to
+choose appropriate internal names.</p>
+<p>In this example, the code whiffles through a list of fish, calling a
+function to emit details about each fish.  The marker “fish-guts” is
+used to ensure that any constructs opened by the function are closed
+properly:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">EXAMPLE</span><span class="p">:</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">fish</span><span class="p">[</span><span class="n">i</span><span class="p">];</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">xo_open_instance</span><span class="p">(</span><span class="s2">&quot;fish&quot;</span><span class="p">);</span>
+        <span class="n">xo_open_marker</span><span class="p">(</span><span class="s2">&quot;fish-guts&quot;</span><span class="p">);</span>
+        <span class="n">dump_fish_details</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+        <span class="n">xo_close_marker</span><span class="p">(</span><span class="s2">&quot;fish-guts&quot;</span><span class="p">);</span>
+    <span class="p">}</span>
+</pre></div>
+</div>
+<dl class="function">
+<dt id="c.xo_open_marker">
+xo_ssize_t <code class="descname">xo_open_marker</code><span class="sig-paren">(</span>const char<em>&nbsp;*name</em><span class="sig-paren">)</span><a class="headerlink" href="#c.xo_open_marker" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<em>const char *</em>) – Name of the instance</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">-1 on error, or the number of bytes generated</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">xo_ssize_t</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>The <code class="code docutils literal notranslate"><span class="pre">xo_open_marker</span></code> function records the current state of open tags
+in order for <code class="code docutils literal notranslate"><span class="pre">xo_close_marker</span></code> to close them at some later point.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.xo_open_marker_h">
+xo_ssize_t <code class="descname">xo_open_marker_h</code><span class="sig-paren">(</span>const char<em>&nbsp;*name</em><span class="sig-paren">)</span><a class="headerlink" href="#c.xo_open_marker_h" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>xop</strong> (<em>xo_handle_t *</em>) – Handle to use (or NULL for default handle)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>The <code class="code docutils literal notranslate"><span class="pre">xo_open_marker_h</span></code> function adds a <code class="code docutils literal notranslate"><span class="pre">handle</span></code> parameter.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.xo_close_marker">
+xo_ssize_t <code class="descname">xo_close_marker</code><span class="sig-paren">(</span>const char<em>&nbsp;*name</em><span class="sig-paren">)</span><a class="headerlink" href="#c.xo_close_marker" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<em>const char *</em>) – Name of the instance</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">-1 on error, or the number of bytes generated</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">xo_ssize_t</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>The <code class="code docutils literal notranslate"><span class="pre">xo_close_marker</span></code> function closes any open containers, lists, or
+instances as needed to return to the state recorded when
+<code class="code docutils literal notranslate"><span class="pre">xo_open_marker</span></code> was called with the matching name.</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+xo_ssize_t <code class="descname">xo_close_marker</code><span class="sig-paren">(</span>const char<em>&nbsp;*name</em><span class="sig-paren">)</span></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>xop</strong> (<em>xo_handle_t *</em>) – Handle to use (or NULL for default handle)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>The <code class="code docutils literal notranslate"><span class="pre">xo_close_marker_h</span></code> function adds a <code class="code docutils literal notranslate"><span class="pre">handle</span></code> parameter.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="dtrt-mode">
+<h3>DTRT Mode<a class="headerlink" href="#dtrt-mode" title="Permalink to this headline">¶</a></h3>
+<p>Some users may find tracking the names of open containers, lists, and
+instances inconvenient.  libxo offers a “Do The Right Thing” mode, where
+libxo will track the names of open containers, lists, and instances so
+the close function can be called without a name.  To enable DTRT mode,
+turn on the XOF_DTRT flag prior to making any other libxo output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xo_set_flags</span><span class="p">(</span><span class="n">NULL</span><span class="p">,</span> <span class="n">XOF_DTRT</span><span class="p">);</span>
+</pre></div>
+</div>
+<p id="index-56">Each open and close function has a version with the suffix “_d”, which
+will close the open container, list, or instance:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xo_open_container_d</span><span class="p">(</span><span class="s2">&quot;top&quot;</span><span class="p">);</span>
+<span class="o">...</span>
+<span class="n">xo_close_container_d</span><span class="p">();</span>
+</pre></div>
+</div>
+<p>This also works for lists and instances:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xo_open_list_d</span><span class="p">(</span><span class="s2">&quot;item&quot;</span><span class="p">);</span>
+<span class="k">for</span> <span class="p">(</span><span class="o">...</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">xo_open_instance_d</span><span class="p">(</span><span class="s2">&quot;item&quot;</span><span class="p">);</span>
+    <span class="n">xo_emit</span><span class="p">(</span><span class="o">...</span><span class="p">);</span>
+    <span class="n">xo_close_instance_d</span><span class="p">();</span>
+<span class="p">}</span>
+<span class="n">xo_close_list_d</span><span class="p">();</span>
+</pre></div>
+</div>
+<p id="index-57">Note that the XOF_WARN flag will also cause libxo to track open
+containers, lists, and instances.  A warning is generated when the
+name given to the close function and the name recorded do not match.</p>
+</div>
+</div>
+<div class="section" id="support-functions">
+<h2>Support Functions<a class="headerlink" href="#support-functions" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="parsing-command-line-arguments-xo-parse-args">
+<span id="xo-parse-args"></span><span id="index-58"></span><h3>Parsing Command-line Arguments (xo_parse_args)<a class="headerlink" href="#parsing-command-line-arguments-xo-parse-args" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="c.xo_parse_args">
+int <code class="descname">xo_parse_args</code><span class="sig-paren">(</span>int<em>&nbsp;argc</em>, char<em>&nbsp;**argv</em><span class="sig-paren">)</span><a class="headerlink" href="#c.xo_parse_args" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>argc</strong> (<em>int</em>) – Number of arguments</li>
+<li><strong>argv</strong> – Array of argument strings</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">-1 on error, or the number of remaining arguments</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">int</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>The <code class="code docutils literal notranslate"><span class="pre">xo_parse_args</span></code> function is used to process a program’s
+arguments.  libxo-specific options are processed and removed from
+the argument list so the calling application does not need to
+process them.  If successful, a new value for argc is returned.  On
+failure, a message is emitted and -1 is returned:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">argc</span> <span class="o">=</span> <span class="n">xo_parse_args</span><span class="p">(</span><span class="n">argc</span><span class="p">,</span> <span class="n">argv</span><span class="p">);</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">argc</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">exit</span><span class="p">(</span><span class="n">EXIT_FAILURE</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Following the call to xo_parse_args, the application can process the
+remaining arguments in a normal manner.  See <a class="reference internal" href="options.html#options"><span class="std std-ref">Command-line Arguments</span></a> for a
+description of valid arguments.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="xo-set-program">
+<span id="index-59"></span><h3>xo_set_program<a class="headerlink" href="#xo-set-program" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="c.xo_set_program">
+void <code class="descname">xo_set_program</code><span class="sig-paren">(</span>const char<em>&nbsp;*name</em><span class="sig-paren">)</span><a class="headerlink" href="#c.xo_set_program" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<em>const char *</em>) – Name to use as the program name</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">void</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>The <code class="code docutils literal notranslate"><span class="pre">xo_set_program</span></code> function sets the name of the program as
+reported by functions like <code class="code docutils literal notranslate"><span class="pre">xo_failure</span></code>, <code class="code docutils literal notranslate"><span class="pre">xo_warn</span></code>, <code class="code docutils literal notranslate"><span class="pre">xo_err</span></code>, etc.
+The program name is initialized by <code class="code docutils literal notranslate"><span class="pre">xo_parse_args</span></code>, but subsequent
+calls to <code class="code docutils literal notranslate"><span class="pre">xo_set_program</span></code> can override this value:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">EXAMPLE</span><span class="p">:</span>
+    <span class="n">xo_set_program</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+</pre></div>
+</div>
+<p>Note that the value is not copied, so the memory passed to
+<code class="code docutils literal notranslate"><span class="pre">xo_set_program</span></code> (and <code class="code docutils literal notranslate"><span class="pre">xo_parse_args</span></code>) must be maintained by the
+caller.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="xo-set-version">
+<span id="index-60"></span><h3>xo_set_version<a class="headerlink" href="#xo-set-version" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="c.xo_set_version">
+void <code class="descname">xo_set_version</code><span class="sig-paren">(</span>const char<em>&nbsp;*version</em><span class="sig-paren">)</span><a class="headerlink" href="#c.xo_set_version" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<em>const char *</em>) – Value to use as the version string</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">void</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>The <code class="code docutils literal notranslate"><span class="pre">xo_set_version</span></code> function records a version number to be emitted
+as part of the data for encoding styles (XML and JSON).  This
+version number is suitable for tracking changes in the content,
+allowing a user of the data to discern which version of the data
+model is in use.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="c.xo_set_version_h">
+void <code class="descname">xo_set_version_h</code><span class="sig-paren">(</span>xo_handle_t<em>&nbsp;*xop</em>, const char<em>&nbsp;*version</em><span class="sig-paren">)</span><a class="headerlink" href="#c.xo_set_version_h" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>xop</strong> (<em>xo_handle_t *</em>) – Handle to use (or NULL for default handle)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>The <code class="code docutils literal notranslate"><span class="pre">xo_set_version</span></code> function adds a <code class="code docutils literal notranslate"><span class="pre">handle</span></code> parameter.</p>
+</dd></dl>
+
+<span class="target" id="index-61"></span><span class="target" id="index-62"></span></div>
+<div class="section" id="field-information-xo-info-t">
+<span id="field-information"></span><span id="index-63"></span><h3>Field Information (xo_info_t)<a class="headerlink" href="#field-information-xo-info-t" title="Permalink to this headline">¶</a></h3>
+<p>HTML data can include additional information in attributes that
+begin with “data-“.  To enable this, three things must occur:</p>
+<p>First the application must build an array of xo_info_t structures,
+one per tag.  The array must be sorted by name, since libxo uses a
+binary search to find the entry that matches names from format
+instructions.</p>
+<p>Second, the application must inform libxo about this information using
+the <code class="code docutils literal notranslate"><span class="pre">xo_set_info</span></code> call:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">typedef</span> <span class="n">struct</span> <span class="n">xo_info_s</span> <span class="p">{</span>
+    <span class="n">const</span> <span class="n">char</span> <span class="o">*</span><span class="n">xi_name</span><span class="p">;</span>    <span class="o">/*</span> <span class="n">Name</span> <span class="n">of</span> <span class="n">the</span> <span class="n">element</span> <span class="o">*/</span>
+    <span class="n">const</span> <span class="n">char</span> <span class="o">*</span><span class="n">xi_type</span><span class="p">;</span>    <span class="o">/*</span> <span class="n">Type</span> <span class="n">of</span> <span class="n">field</span> <span class="o">*/</span>
+    <span class="n">const</span> <span class="n">char</span> <span class="o">*</span><span class="n">xi_help</span><span class="p">;</span>    <span class="o">/*</span> <span class="n">Description</span> <span class="n">of</span> <span class="n">field</span> <span class="o">*/</span>
+<span class="p">}</span> <span class="n">xo_info_t</span><span class="p">;</span>
+
+<span class="n">void</span> <span class="n">xo_set_info</span> <span class="p">(</span><span class="n">xo_handle_t</span> <span class="o">*</span><span class="n">xop</span><span class="p">,</span> <span class="n">xo_info_t</span> <span class="o">*</span><span class="n">infop</span><span class="p">,</span> <span class="nb">int</span> <span class="n">count</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Like other libxo calls, passing <code class="code docutils literal notranslate"><span class="pre">NULL</span></code> for the handle tells libxo to
+use the default handle.</p>
+<p>If the count is -1, libxo will count the elements of infop, but there
+must be an empty element at the end.  More typically, the number is
+known to the application:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xo_info_t</span> <span class="n">info</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="p">{</span> <span class="s2">&quot;in-stock&quot;</span><span class="p">,</span> <span class="s2">&quot;number&quot;</span><span class="p">,</span> <span class="s2">&quot;Number of items in stock&quot;</span> <span class="p">},</span>
+    <span class="p">{</span> <span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span> <span class="s2">&quot;Name of the item&quot;</span> <span class="p">},</span>
+    <span class="p">{</span> <span class="s2">&quot;on-order&quot;</span><span class="p">,</span> <span class="s2">&quot;number&quot;</span><span class="p">,</span> <span class="s2">&quot;Number of items on order&quot;</span> <span class="p">},</span>
+    <span class="p">{</span> <span class="s2">&quot;sku&quot;</span><span class="p">,</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span> <span class="s2">&quot;Stock Keeping Unit&quot;</span> <span class="p">},</span>
+    <span class="p">{</span> <span class="s2">&quot;sold&quot;</span><span class="p">,</span> <span class="s2">&quot;number&quot;</span><span class="p">,</span> <span class="s2">&quot;Number of items sold&quot;</span> <span class="p">},</span>
+<span class="p">};</span>
+<span class="nb">int</span> <span class="n">info_count</span> <span class="o">=</span> <span class="p">(</span><span class="n">sizeof</span><span class="p">(</span><span class="n">info</span><span class="p">)</span> <span class="o">/</span> <span class="n">sizeof</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="mi">0</span><span class="p">]));</span>
+<span class="o">...</span>
+<span class="n">xo_set_info</span><span class="p">(</span><span class="n">NULL</span><span class="p">,</span> <span class="n">info</span><span class="p">,</span> <span class="n">info_count</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Third, the emission of info must be triggered with the <code class="code docutils literal notranslate"><span class="pre">XOF_INFO</span></code> flag
+using either the <code class="code docutils literal notranslate"><span class="pre">xo_set_flags</span></code> function or the “<code class="code docutils literal notranslate"><span class="pre">--libxo=info</span></code>”
+command line argument.</p>
+<p>The type and help values, if present, are emitted as the “data-type”
+and “data-help” attributes:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;sku&quot;</span> <span class="n">data</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;string&quot;</span>
+     <span class="n">data</span><span class="o">-</span><span class="n">help</span><span class="o">=</span><span class="s2">&quot;Stock Keeping Unit&quot;</span><span class="o">&gt;</span><span class="n">GRO</span><span class="o">-</span><span class="mi">000</span><span class="o">-</span><span class="mi">533</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<dl class="function">
+<dt id="c.xo_set_info">
+void <code class="descname">xo_set_info</code><span class="sig-paren">(</span>xo_handle_t<em>&nbsp;*xop</em>, xo_info_t<em>&nbsp;*infop</em>, int<em>&nbsp;count</em><span class="sig-paren">)</span><a class="headerlink" href="#c.xo_set_info" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>xop</strong> (<em>xo_handle_t *</em>) – Handle to use (or NULL for default handle)</li>
+<li><strong>infop</strong> (<em>xo_info_t *</em>) – Array of information structures</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">void</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<span class="target" id="index-64"></span><span class="target" id="index-65"></span></div>
+<div class="section" id="memory-allocation">
+<span id="index-66"></span><h3>Memory Allocation<a class="headerlink" href="#memory-allocation" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="code docutils literal notranslate"><span class="pre">xo_set_allocator</span></code> function allows libxo to be used in
+environments where the standard <em class="manpage">realloc(3)</em> and
+<em class="manpage">free(3)</em> functions are not appropriate.</p>
+<dl class="function">
+<dt id="c.xo_set_allocator">
+void <code class="descname">xo_set_allocator</code><span class="sig-paren">(</span>xo_realloc_func_t<em>&nbsp;realloc_func</em>, xo_free_func_t<em>&nbsp;free_func</em><span class="sig-paren">)</span><a class="headerlink" href="#c.xo_set_allocator" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>realloc_func</strong> (<em>xo_realloc_func_t</em>) – Allocation function</li>
+<li><strong>free_func</strong> (<em>xo_free_func_t</em>) – Free function</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p><em>realloc_func</em> should expect the same arguments as
+<em class="manpage">realloc(3)</em> and return a pointer to memory following the
+same convention.  <em>free_func</em> will receive the same argument as
+<em class="manpage">free(3)</em> and should release it, as appropriate for the
+environment.</p>
+</dd></dl>
+
+<p>By default, the standard <em class="manpage">realloc(3)</em> and <em class="manpage">free(3)</em>
+functions are used.</p>
+</div>
+<div class="section" id="libxo-options">
+<span id="index-67"></span><span id="id2"></span><h3>LIBXO_OPTIONS<a class="headerlink" href="#libxo-options" title="Permalink to this headline">¶</a></h3>
+<p>The environment variable “LIBXO_OPTIONS” can be set to a subset of
+libxo options, including:</p>
+<ul class="simple">
+<li>color</li>
+<li>flush</li>
+<li>flush-line</li>
+<li>no-color</li>
+<li>no-humanize</li>
+<li>no-locale</li>
+<li>no-retain</li>
+<li>pretty</li>
+<li>retain</li>
+<li>underscores</li>
+<li>warn</li>
+</ul>
+<p>For example, warnings can be enabled by:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">%</span> <span class="n">env</span> <span class="n">LIBXO_OPTIONS</span><span class="o">=</span><span class="n">warn</span> <span class="n">my</span><span class="o">-</span><span class="n">app</span>
+</pre></div>
+</div>
+<p>Since environment variables are inherited, child processes will have
+the same options, which may be undesirable, making the use of the
+“<code class="code docutils literal notranslate"><span class="pre">--libxo</span></code>” command-line option preferable in most situations.</p>
+<span class="target" id="index-68"></span><span class="target" id="index-69"></span><span class="target" id="index-70"></span></div>
+<div class="section" id="errors-warnings-and-messages">
+<span id="index-71"></span><h3>Errors, Warnings, and Messages<a class="headerlink" href="#errors-warnings-and-messages" title="Permalink to this headline">¶</a></h3>
+<p>Many programs make use of the standard library functions
+<em class="manpage">err(3)</em> and <em class="manpage">warn(3)</em> to generate errors and
+warnings for the user.  libxo wants to pass that information via the
+current output style, and provides compatible functions to allow
+this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">void</span> <span class="n">xo_warn</span> <span class="p">(</span><span class="n">const</span> <span class="n">char</span> <span class="o">*</span><span class="n">fmt</span><span class="p">,</span> <span class="o">...</span><span class="p">);</span>
+<span class="n">void</span> <span class="n">xo_warnx</span> <span class="p">(</span><span class="n">const</span> <span class="n">char</span> <span class="o">*</span><span class="n">fmt</span><span class="p">,</span> <span class="o">...</span><span class="p">);</span>
+<span class="n">void</span> <span class="n">xo_warn_c</span> <span class="p">(</span><span class="nb">int</span> <span class="n">code</span><span class="p">,</span> <span class="n">const</span> <span class="n">char</span> <span class="o">*</span><span class="n">fmt</span><span class="p">,</span> <span class="o">...</span><span class="p">);</span>
+<span class="n">void</span> <span class="n">xo_warn_hc</span> <span class="p">(</span><span class="n">xo_handle_t</span> <span class="o">*</span><span class="n">xop</span><span class="p">,</span> <span class="nb">int</span> <span class="n">code</span><span class="p">,</span>
+                 <span class="n">const</span> <span class="n">char</span> <span class="o">*</span><span class="n">fmt</span><span class="p">,</span> <span class="o">...</span><span class="p">);</span>
+<span class="n">void</span> <span class="n">xo_err</span> <span class="p">(</span><span class="nb">int</span> <span class="nb">eval</span><span class="p">,</span> <span class="n">const</span> <span class="n">char</span> <span class="o">*</span><span class="n">fmt</span><span class="p">,</span> <span class="o">...</span><span class="p">);</span>
+<span class="n">void</span> <span class="n">xo_errc</span> <span class="p">(</span><span class="nb">int</span> <span class="nb">eval</span><span class="p">,</span> <span class="nb">int</span> <span class="n">code</span><span class="p">,</span> <span class="n">const</span> <span class="n">char</span> <span class="o">*</span><span class="n">fmt</span><span class="p">,</span> <span class="o">...</span><span class="p">);</span>
+<span class="n">void</span> <span class="n">xo_errx</span> <span class="p">(</span><span class="nb">int</span> <span class="nb">eval</span><span class="p">,</span> <span class="n">const</span> <span class="n">char</span> <span class="o">*</span><span class="n">fmt</span><span class="p">,</span> <span class="o">...</span><span class="p">);</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">void</span> <span class="n">xo_message</span> <span class="p">(</span><span class="n">const</span> <span class="n">char</span> <span class="o">*</span><span class="n">fmt</span><span class="p">,</span> <span class="o">...</span><span class="p">);</span>
+<span class="n">void</span> <span class="n">xo_message_c</span> <span class="p">(</span><span class="nb">int</span> <span class="n">code</span><span class="p">,</span> <span class="n">const</span> <span class="n">char</span> <span class="o">*</span><span class="n">fmt</span><span class="p">,</span> <span class="o">...</span><span class="p">);</span>
+<span class="n">void</span> <span class="n">xo_message_hc</span> <span class="p">(</span><span class="n">xo_handle_t</span> <span class="o">*</span><span class="n">xop</span><span class="p">,</span> <span class="nb">int</span> <span class="n">code</span><span class="p">,</span>
+                    <span class="n">const</span> <span class="n">char</span> <span class="o">*</span><span class="n">fmt</span><span class="p">,</span> <span class="o">...</span><span class="p">);</span>
+<span class="n">void</span> <span class="n">xo_message_hcv</span> <span class="p">(</span><span class="n">xo_handle_t</span> <span class="o">*</span><span class="n">xop</span><span class="p">,</span> <span class="nb">int</span> <span class="n">code</span><span class="p">,</span>
+                     <span class="n">const</span> <span class="n">char</span> <span class="o">*</span><span class="n">fmt</span><span class="p">,</span> <span class="n">va_list</span> <span class="n">vap</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>These functions display the program name, a colon, a formatted message
+based on the arguments, and then optionally a colon and an error
+message associated with either <em>errno</em> or the <em>code</em> parameter:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">EXAMPLE</span><span class="p">:</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">O_RDONLY</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">xo_err</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;cannot open file &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">filename</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="xo-error">
+<span id="index-72"></span><h3>xo_error<a class="headerlink" href="#xo-error" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="c.xo_error">
+void <code class="descname">xo_error</code><span class="sig-paren">(</span>const char<em>&nbsp;*fmt</em>, ...<span class="sig-paren">)</span><a class="headerlink" href="#c.xo_error" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>fmt</strong> (<em>const char *</em>) – Format string</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">void</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>The <code class="code docutils literal notranslate"><span class="pre">xo_error</span></code> function can be used for generic errors that should
+be reported over the handle, rather than to stderr.  The <code class="code docutils literal notranslate"><span class="pre">xo_error</span></code>
+function behaves like <code class="code docutils literal notranslate"><span class="pre">xo_err</span></code> for TEXT and HTML output styles, but
+puts the error into XML or JSON elements:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">EXAMPLE</span><span class="p">::</span>
+    <span class="n">xo_error</span><span class="p">(</span><span class="s2">&quot;Does not </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;compute&quot;</span><span class="p">);</span>
+<span class="n">XML</span><span class="p">::</span>
+    <span class="o">&lt;</span><span class="n">error</span><span class="o">&gt;&lt;</span><span class="n">message</span><span class="o">&gt;</span><span class="n">Does</span> <span class="ow">not</span> <span class="n">compute</span><span class="o">&lt;/</span><span class="n">message</span><span class="o">&gt;&lt;/</span><span class="n">error</span><span class="o">&gt;</span>
+<span class="n">JSON</span><span class="p">::</span>
+    <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="p">{</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Does not compute&quot;</span> <span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<span class="target" id="index-73"></span></div>
+<div class="section" id="xo-no-setlocale">
+<span id="index-74"></span><h3>xo_no_setlocale<a class="headerlink" href="#xo-no-setlocale" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="c.xo_no_setlocale">
+void <code class="descname">xo_no_setlocale</code><span class="sig-paren">(</span>void<span class="sig-paren">)</span><a class="headerlink" href="#c.xo_no_setlocale" title="Permalink to this definition">¶</a></dt>
+<dd><p>libxo automatically initializes the locale based on setting of the
+environment variables LC_CTYPE, LANG, and LC_ALL.  The first of this
+list of variables is used and if none of the variables, the locale
+defaults to “UTF-8”.  The caller may wish to avoid this behavior,
+and can do so by calling the <code class="code docutils literal notranslate"><span class="pre">xo_no_setlocale</span></code> function.</p>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="emitting-syslog-messages">
+<h2>Emitting syslog Messages<a class="headerlink" href="#emitting-syslog-messages" title="Permalink to this headline">¶</a></h2>
+<p>syslog is the system logging facility used throughout the unix world.
+Messages are sent from commands, applications, and daemons to a
+hierarchy of servers, where they are filtered, saved, and forwarded
+based on configuration behaviors.</p>
+<p>syslog is an older protocol, originally documented only in source
+code.  By the time <span class="target" id="index-75"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc3164.html"><strong>RFC 3164</strong></a> published, variation and mutation left the
+leading “&lt;pri&gt;” string as only common content.  <span class="target" id="index-76"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5424.html"><strong>RFC 5424</strong></a> defines a new
+version (version 1) of syslog and introduces structured data into the
+messages.  Structured data is a set of name/value pairs transmitted
+distinctly alongside the traditional text message, allowing filtering
+on precise values instead of regular expressions.</p>
+<p>These name/value pairs are scoped by a two-part identifier; an
+enterprise identifier names the party responsible for the message
+catalog and a name identifying that message.  <a class="reference external" href="https://www.iana.org/assignments/enterprise-numbers/enterprise-numbers">Enterprise IDs</a> are
+defined by IANA, the Internet Assigned Numbers Authority.</p>
+<p>Use the <code class="code docutils literal notranslate"><span class="pre">xo_set_syslog_enterprise_id</span></code> function to set the Enterprise
+ID, as needed.</p>
+<p>The message name should follow the conventions in
+<a class="reference internal" href="faq.html#good-field-names"><span class="std std-ref">What makes a good field name?</span></a>, as should the fields within the message:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/*</span> <span class="n">Both</span> <span class="n">of</span> <span class="n">these</span> <span class="n">calls</span> <span class="n">are</span> <span class="n">optional</span> <span class="o">*/</span>
+<span class="n">xo_set_syslog_enterprise_id</span><span class="p">(</span><span class="mi">32473</span><span class="p">);</span>
+<span class="n">xo_open_log</span><span class="p">(</span><span class="s2">&quot;my-program&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">LOG_DAEMON</span><span class="p">);</span>
+
+<span class="o">/*</span> <span class="n">Generate</span> <span class="n">a</span> <span class="n">syslog</span> <span class="n">message</span> <span class="o">*/</span>
+<span class="n">xo_syslog</span><span class="p">(</span><span class="n">LOG_ERR</span><span class="p">,</span> <span class="s2">&quot;upload-failed&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;error &lt;</span><span class="si">%d</span><span class="s2">&gt; uploading file &#39;{:filename}&#39; &quot;</span>
+          <span class="s2">&quot;as &#39;{:target/</span><span class="si">%s</span><span class="s2">:</span><span class="si">%s</span><span class="s2">}&#39;&quot;</span><span class="p">,</span>
+          <span class="n">code</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">protocol</span><span class="p">,</span> <span class="n">remote</span><span class="p">);</span>
+
+<span class="n">xo_syslog</span><span class="p">(</span><span class="n">LOG_INFO</span><span class="p">,</span> <span class="s2">&quot;poofd-invalid-state&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;state {:current/</span><span class="si">%u</span><span class="s2">} is invalid {:connection/</span><span class="si">%u</span><span class="s2">}&quot;</span><span class="p">,</span>
+          <span class="n">state</span><span class="p">,</span> <span class="n">conn</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>The developer should be aware that the message name may be used in the
+future to allow access to further information, including
+documentation.  Care should be taken to choose quality, descriptive
+names.</p>
+<div class="section" id="priority-facility-and-flags">
+<span id="syslog-details"></span><h3>Priority, Facility, and Flags<a class="headerlink" href="#priority-facility-and-flags" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="code docutils literal notranslate"><span class="pre">xo_syslog</span></code>, <code class="code docutils literal notranslate"><span class="pre">xo_vsyslog</span></code>, and <code class="code docutils literal notranslate"><span class="pre">xo_open_log</span></code> functions
+accept a set of flags which provide the priority of the message, the
+source facility, and some additional features.  These values are OR’d
+together to create a single integer argument:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xo_syslog</span><span class="p">(</span><span class="n">LOG_ERR</span> <span class="o">|</span> <span class="n">LOG_AUTH</span><span class="p">,</span> <span class="s2">&quot;login-failed&quot;</span><span class="p">,</span>
+         <span class="s2">&quot;Login failed; user &#39;{:user}&#39; from host &#39;{:address}&#39;&quot;</span><span class="p">,</span>
+         <span class="n">user</span><span class="p">,</span> <span class="n">addr</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>These values are defined in &lt;syslog.h&gt;.</p>
+<p>The priority value indicates the importance and potential impact of
+each message:</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="19%" />
+<col width="81%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Priority</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>LOG_EMERG</td>
+<td>A panic condition, normally broadcast to all users</td>
+</tr>
+<tr class="row-odd"><td>LOG_ALERT</td>
+<td>A condition that should be corrected immediately</td>
+</tr>
+<tr class="row-even"><td>LOG_CRIT</td>
+<td>Critical conditions</td>
+</tr>
+<tr class="row-odd"><td>LOG_ERR</td>
+<td>Generic errors</td>
+</tr>
+<tr class="row-even"><td>LOG_WARNING</td>
+<td>Warning messages</td>
+</tr>
+<tr class="row-odd"><td>LOG_NOTICE</td>
+<td>Non-error conditions that might need special handling</td>
+</tr>
+<tr class="row-even"><td>LOG_INFO</td>
+<td>Informational messages</td>
+</tr>
+<tr class="row-odd"><td>LOG_DEBUG</td>
+<td>Developer-oriented messages</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>The facility value indicates the source of message, in fairly generic
+terms:</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="21%" />
+<col width="79%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Facility</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>LOG_AUTH</td>
+<td>The authorization system (e.g. <em class="manpage">login(1)</em>)</td>
+</tr>
+<tr class="row-odd"><td>LOG_AUTHPRIV</td>
+<td>As LOG_AUTH, but logged to a privileged file</td>
+</tr>
+<tr class="row-even"><td>LOG_CRON</td>
+<td>The cron daemon: <em class="manpage">cron(8)</em></td>
+</tr>
+<tr class="row-odd"><td>LOG_DAEMON</td>
+<td>System daemons, not otherwise explicitly listed</td>
+</tr>
+<tr class="row-even"><td>LOG_FTP</td>
+<td>The file transfer protocol daemons</td>
+</tr>
+<tr class="row-odd"><td>LOG_KERN</td>
+<td>Messages generated by the kernel</td>
+</tr>
+<tr class="row-even"><td>LOG_LPR</td>
+<td>The line printer spooling system</td>
+</tr>
+<tr class="row-odd"><td>LOG_MAIL</td>
+<td>The mail system</td>
+</tr>
+<tr class="row-even"><td>LOG_NEWS</td>
+<td>The network news system</td>
+</tr>
+<tr class="row-odd"><td>LOG_SECURITY</td>
+<td>Security subsystems, such as <em class="manpage">ipfw(4)</em></td>
+</tr>
+<tr class="row-even"><td>LOG_SYSLOG</td>
+<td>Messages generated internally by <em class="manpage">syslogd(8)</em></td>
+</tr>
+<tr class="row-odd"><td>LOG_USER</td>
+<td>Messages generated by user processes (default)</td>
+</tr>
+<tr class="row-even"><td>LOG_UUCP</td>
+<td>The uucp system</td>
+</tr>
+<tr class="row-odd"><td>LOG_LOCAL0..7</td>
+<td>Reserved for local use</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>In addition to the values listed above, xo_open_log accepts a set of
+addition flags requesting specific logging behaviors:</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="17%" />
+<col width="83%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Flag</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>LOG_CONS</td>
+<td>If syslogd fails, attempt to write to /dev/console</td>
+</tr>
+<tr class="row-odd"><td>LOG_NDELAY</td>
+<td>Open the connection to <em class="manpage">syslogd(8)</em> immediately</td>
+</tr>
+<tr class="row-even"><td>LOG_PERROR</td>
+<td>Write the message also to standard error output</td>
+</tr>
+<tr class="row-odd"><td>LOG_PID</td>
+<td>Log the process id with each message</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+</div>
+<div class="section" id="xo-syslog">
+<span id="index-77"></span><h3>xo_syslog<a class="headerlink" href="#xo-syslog" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="c.xo_syslog">
+void <code class="descname">xo_syslog</code><span class="sig-paren">(</span>int<em>&nbsp;pri</em>, const char<em>&nbsp;*name</em>, const char<em>&nbsp;*fmt</em>, ...<span class="sig-paren">)</span><a class="headerlink" href="#c.xo_syslog" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>pri</strong> (<em>int</em>) – syslog priority</li>
+<li><strong>name</strong> (<em>const char *</em>) – Name of the syslog event</li>
+<li><strong>fmt</strong> (<em>const char *</em>) – Format string, followed by arguments</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">void</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Use the <code class="code docutils literal notranslate"><span class="pre">xo_syslog</span></code> function to generate syslog messages by calling
+it with a log priority and facility, a message name, a format
+string, and a set of arguments.  The priority/facility argument are
+discussed above, as is the message name.</p>
+<p>The format string follows the same conventions as <code class="code docutils literal notranslate"><span class="pre">xo_emit</span></code>’s format
+string, with each field being rendered as an SD-PARAM pair:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xo_syslog</span><span class="p">(</span><span class="n">LOG_ERR</span><span class="p">,</span> <span class="s2">&quot;poofd-missing-file&quot;</span><span class="p">,</span>
+          <span class="s2">&quot;&#39;{:filename}&#39; not found: {:error/%m}&quot;</span><span class="p">,</span> <span class="n">filename</span><span class="p">);</span>
+
+<span class="o">...</span> <span class="p">[</span><span class="n">poofd</span><span class="o">-</span><span class="n">missing</span><span class="o">-</span><span class="n">file</span><span class="nd">@32473</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;/etc/poofd.conf&quot;</span>
+      <span class="n">error</span><span class="o">=</span><span class="s2">&quot;Permission denied&quot;</span><span class="p">]</span> <span class="s1">&#39;/etc/poofd.conf&#39;</span> <span class="ow">not</span>
+      <span class="n">found</span><span class="p">:</span> <span class="n">Permission</span> <span class="n">denied</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="id3">
+<h3>Support functions<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="xo-vsyslog">
+<span id="index-78"></span><h4>xo_vsyslog<a class="headerlink" href="#xo-vsyslog" title="Permalink to this headline">¶</a></h4>
+<dl class="function">
+<dt id="c.xo_vsyslog">
+void <code class="descname">xo_vsyslog</code><span class="sig-paren">(</span>int<em>&nbsp;pri</em>, const char<em>&nbsp;*name</em>, const char<em>&nbsp;*fmt</em>, va_list<em>&nbsp;vap</em><span class="sig-paren">)</span><a class="headerlink" href="#c.xo_vsyslog" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>pri</strong> (<em>int</em>) – syslog priority</li>
+<li><strong>name</strong> (<em>const char *</em>) – Name of the syslog event</li>
+<li><strong>fmt</strong> (<em>const char *</em>) – Format string</li>
+<li><strong>vap</strong> (<em>va_list</em>) – Variadic argument list</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">void</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>xo_vsyslog is identical in function to xo_syslog, but takes the set of
+arguments using a va_list:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">EXAMPLE</span><span class="p">:</span>
+    <span class="n">void</span>
+    <span class="n">my_log</span> <span class="p">(</span><span class="n">const</span> <span class="n">char</span> <span class="o">*</span><span class="n">name</span><span class="p">,</span> <span class="n">const</span> <span class="n">char</span> <span class="o">*</span><span class="n">fmt</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">va_list</span> <span class="n">vap</span><span class="p">;</span>
+        <span class="n">va_start</span><span class="p">(</span><span class="n">vap</span><span class="p">,</span> <span class="n">fmt</span><span class="p">);</span>
+        <span class="n">xo_vsyslog</span><span class="p">(</span><span class="n">LOG_ERR</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">fmt</span><span class="p">,</span> <span class="n">vap</span><span class="p">);</span>
+        <span class="n">va_end</span><span class="p">(</span><span class="n">vap</span><span class="p">);</span>
+    <span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="xo-open-log">
+<span id="index-79"></span><h4>xo_open_log<a class="headerlink" href="#xo-open-log" title="Permalink to this headline">¶</a></h4>
+<dl class="function">
+<dt id="c.xo_open_log">
+void <code class="descname">xo_open_log</code><span class="sig-paren">(</span>const char<em>&nbsp;*ident</em>, int<em>&nbsp;logopt</em>, int<em>&nbsp;facility</em><span class="sig-paren">)</span><a class="headerlink" href="#c.xo_open_log" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>indent</strong> (<em>const char *</em>) – </li>
+<li><strong>logopt</strong> (<em>int</em>) – Bit field containing logging options</li>
+<li><strong>facility</strong> (<em>int</em>) – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">void</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>xo_open_log functions similar to <em class="manpage">openlog(3)</em>, allowing
+customization of the program name, the log facility number, and the
+additional option flags described in <a class="reference internal" href="#syslog-details"><span class="std std-ref">Priority, Facility, and Flags</span></a>.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="xo-close-log">
+<span id="index-80"></span><h4>xo_close_log<a class="headerlink" href="#xo-close-log" title="Permalink to this headline">¶</a></h4>
+<dl class="function">
+<dt id="c.xo_close_log">
+void <code class="descname">xo_close_log</code><span class="sig-paren">(</span>void<span class="sig-paren">)</span><a class="headerlink" href="#c.xo_close_log" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <code class="code docutils literal notranslate"><span class="pre">xo_close_log</span></code> function is similar to <em class="manpage">closelog(3)</em>,
+closing the log file and releasing any associated resources.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="xo-set-logmask">
+<span id="index-81"></span><h4>xo_set_logmask<a class="headerlink" href="#xo-set-logmask" title="Permalink to this headline">¶</a></h4>
+<dl class="function">
+<dt id="c.xo_set_logmask">
+int <code class="descname">xo_set_logmask</code><span class="sig-paren">(</span>int<em>&nbsp;maskpri</em><span class="sig-paren">)</span><a class="headerlink" href="#c.xo_set_logmask" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>maskpri</strong> (<em>int</em>) – the log priority mask</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The previous log priority mask</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>The <code class="code docutils literal notranslate"><span class="pre">xo_set_logmask</span></code> function is similar to <em class="manpage">setlogmask(3)</em>,
+restricting the set of generated log event to those whose associated
+bit is set in maskpri.  Use <code class="code docutils literal notranslate"><span class="pre">LOG_MASK(pri)</span></code> to find the appropriate bit,
+or <code class="code docutils literal notranslate"><span class="pre">LOG_UPTO(toppri)</span></code> to create a mask for all priorities up to and
+including toppri:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">EXAMPLE</span><span class="p">:</span>
+    <span class="n">setlogmask</span><span class="p">(</span><span class="n">LOG_UPTO</span><span class="p">(</span><span class="n">LOG_WARN</span><span class="p">));</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="xo-set-syslog-enterprise-id">
+<span id="index-82"></span><h4>xo_set_syslog_enterprise_id<a class="headerlink" href="#xo-set-syslog-enterprise-id" title="Permalink to this headline">¶</a></h4>
+<dl class="function">
+<dt id="c.xo_set_syslog_enterprise_id">
+void <code class="descname">xo_set_syslog_enterprise_id</code><span class="sig-paren">(</span>unsigned short<em>&nbsp;eid</em><span class="sig-paren">)</span><a class="headerlink" href="#c.xo_set_syslog_enterprise_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Use the <code class="code docutils literal notranslate"><span class="pre">xo_set_syslog_enterprise_id</span></code> to supply a platform- or
+application-specific enterprise id.  This value is used in any future
+syslog messages.</p>
+<p>Ideally, the operating system should supply a default value via the
+“kern.syslog.enterprise_id” sysctl value.  Lacking that, the
+application should provide a suitable value.</p>
+</dd></dl>
+
+<p>Enterprise IDs are administered by IANA, the Internet Assigned Number
+Authority.  The complete list is EIDs on their web site:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">www</span><span class="o">.</span><span class="n">iana</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">assignments</span><span class="o">/</span><span class="n">enterprise</span><span class="o">-</span><span class="n">numbers</span><span class="o">/</span><span class="n">enterprise</span><span class="o">-</span><span class="n">numbers</span>
+</pre></div>
+</div>
+<p>New EIDs can be requested from IANA using the following page:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">pen</span><span class="o">.</span><span class="n">iana</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">pen</span><span class="o">/</span><span class="n">PenApplication</span><span class="o">.</span><span class="n">page</span>
+</pre></div>
+</div>
+<p>Each software development organization that defines a set of syslog
+messages should register their own EID and use that value in their
+software to ensure that messages can be uniquely identified by the
+combination of EID + message name.</p>
+</div>
+</div>
+</div>
+<div class="section" id="creating-custom-encoders">
+<h2>Creating Custom Encoders<a class="headerlink" href="#creating-custom-encoders" title="Permalink to this headline">¶</a></h2>
+<p>The number of encoding schemes in current use is staggering, with new
+and distinct schemes appearing daily.  While libxo provide XML, JSON,
+HMTL, and text natively, there are requirements for other encodings.</p>
+<p>Rather than bake support for all possible encoders into libxo, the API
+allows them to be defined externally.  libxo can then interfaces with
+these encoding modules using a simplistic API.  libxo processes all
+functions calls, handles state transitions, performs all formatting,
+and then passes the results as operations to a customized encoding
+function, which implements specific encoding logic as required.  This
+means your encoder doesn’t need to detect errors with unbalanced
+open/close operations but can rely on libxo to pass correct data.</p>
+<p>By making a simple API, libxo internals are not exposed, insulating the
+encoder and the library from future or internal changes.</p>
+<p>The three elements of the API are:</p>
+<ul class="simple">
+<li>loading</li>
+<li>initialization</li>
+<li>operations</li>
+</ul>
+<p>The following sections provide details about these topics.</p>
+<p id="index-83">libxo source contains an encoder for Concise Binary Object
+Representation, aka CBOR (<span class="target" id="index-84"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7049.html"><strong>RFC 7049</strong></a>), which can be used as an
+example for the API for other encoders.</p>
+<div class="section" id="loading-encoders">
+<h3>Loading Encoders<a class="headerlink" href="#loading-encoders" title="Permalink to this headline">¶</a></h3>
+<p>Encoders can be registered statically or discovered dynamically.
+Applications can choose to call the <code class="code docutils literal notranslate"><span class="pre">xo_encoder_register</span></code> function
+to explicitly register encoders, but more typically they are built as
+shared libraries, placed in the libxo/extensions directory, and loaded
+based on name.  libxo looks for a file with the name of the encoder
+and an extension of “.enc”.  This can be a file or a symlink to the
+shared library file that supports the encoder:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">%</span> <span class="n">ls</span> <span class="o">-</span><span class="mi">1</span> <span class="n">lib</span><span class="o">/</span><span class="n">libxo</span><span class="o">/</span><span class="n">extensions</span><span class="o">/*.</span><span class="n">enc</span>
+<span class="n">lib</span><span class="o">/</span><span class="n">libxo</span><span class="o">/</span><span class="n">extensions</span><span class="o">/</span><span class="n">cbor</span><span class="o">.</span><span class="n">enc</span>
+<span class="n">lib</span><span class="o">/</span><span class="n">libxo</span><span class="o">/</span><span class="n">extensions</span><span class="o">/</span><span class="n">test</span><span class="o">.</span><span class="n">enc</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="encoder-initialization">
+<h3>Encoder Initialization<a class="headerlink" href="#encoder-initialization" title="Permalink to this headline">¶</a></h3>
+<p>Each encoder must export a symbol used to access the library, which
+must have the following signature:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">int</span> <span class="n">xo_encoder_library_init</span> <span class="p">(</span><span class="n">XO_ENCODER_INIT_ARGS</span><span class="p">);</span>
+</pre></div>
+</div>
+<p><code class="code docutils literal notranslate"><span class="pre">XO_ENCODER_INIT_ARGS</span></code> is a macro defined in “xo_encoder.h” that defines
+an argument called “arg”, a pointer of the type
+<code class="code docutils literal notranslate"><span class="pre">xo_encoder_init_args_t</span></code>.  This structure contains two fields:</p>
+<ul class="simple">
+<li><code class="code docutils literal notranslate"><span class="pre">xei_version</span></code> is the version number of the API as implemented
+within libxo.  This version is currently as 1 using
+<code class="code docutils literal notranslate"><span class="pre">XO_ENCODER_VERSION</span></code>.  This number can be checked to ensure
+compatibility.  The working assumption is that all versions should
+be backward compatible, but each side may need to accurately know
+the version supported by the other side.  <code class="code docutils literal notranslate"><span class="pre">xo_encoder_library_init</span></code>
+can optionally check this value, and must then set it to the version
+number used by the encoder, allowing libxo to detect version
+differences and react accordingly.  For example, if version 2 adds
+new operations, then libxo will know that an encoding library that
+set <code class="code docutils literal notranslate"><span class="pre">xei_version</span></code> to 1 cannot be expected to handle those new
+operations.</li>
+<li>xei_handler must be set to a pointer to a function of type
+<code class="code docutils literal notranslate"><span class="pre">xo_encoder_func_t</span></code>, as defined in “xo_encoder.h”.  This function
+takes a set of parameters:
+- xop is a pointer to the opaque <code class="code docutils literal notranslate"><span class="pre">xo_handle_t</span></code> structure
+- op is an integer representing the current operation
+- name is a string whose meaning differs by operation
+- value is a string whose meaning differs by operation
+- private is an opaque structure provided by the encoder</li>
+</ul>
+<p>Additional arguments may be added in the future, so handler functions
+should use the <code class="code docutils literal notranslate"><span class="pre">XO_ENCODER_HANDLER_ARGS</span></code> macro.  An appropriate
+“extern” declaration is provided to help catch errors.</p>
+<p>Once the encoder initialization function has completed processing, it
+should return zero to indicate that no error has occurred.  A non-zero
+return code will cause the handle initialization to fail.</p>
+</div>
+<div class="section" id="operations">
+<h3>Operations<a class="headerlink" href="#operations" title="Permalink to this headline">¶</a></h3>
+<p>The encoder API defines a set of operations representing the
+processing model of libxo.  Content is formatted within libxo, and
+callbacks are made to the encoder’s handler function when data is
+ready to be processed:</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="37%" />
+<col width="63%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Operation</th>
+<th class="head">Meaning  (Base function)</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>XO_OP_CREATE</td>
+<td>Called when the handle is created</td>
+</tr>
+<tr class="row-odd"><td>XO_OP_OPEN_CONTAINER</td>
+<td>Container opened (xo_open_container)</td>
+</tr>
+<tr class="row-even"><td>XO_OP_CLOSE_CONTAINER</td>
+<td>Container closed (xo_close_container)</td>
+</tr>
+<tr class="row-odd"><td>XO_OP_OPEN_LIST</td>
+<td>List opened (xo_open_list)</td>
+</tr>
+<tr class="row-even"><td>XO_OP_CLOSE_LIST</td>
+<td>List closed (xo_close_list)</td>
+</tr>
+<tr class="row-odd"><td>XO_OP_OPEN_LEAF_LIST</td>
+<td>Leaf list opened (xo_open_leaf_list)</td>
+</tr>
+<tr class="row-even"><td>XO_OP_CLOSE_LEAF_LIST</td>
+<td>Leaf list closed (xo_close_leaf_list)</td>
+</tr>
+<tr class="row-odd"><td>XO_OP_OPEN_INSTANCE</td>
+<td>Instance opened (xo_open_instance)</td>
+</tr>
+<tr class="row-even"><td>XO_OP_CLOSE_INSTANCE</td>
+<td>Instance closed (xo_close_instance)</td>
+</tr>
+<tr class="row-odd"><td>XO_OP_STRING</td>
+<td>Field with Quoted UTF-8 string</td>
+</tr>
+<tr class="row-even"><td>XO_OP_CONTENT</td>
+<td>Field with content</td>
+</tr>
+<tr class="row-odd"><td>XO_OP_FINISH</td>
+<td>Finish any pending output</td>
+</tr>
+<tr class="row-even"><td>XO_OP_FLUSH</td>
+<td>Flush any buffered output</td>
+</tr>
+<tr class="row-odd"><td>XO_OP_DESTROY</td>
+<td>Clean up resources</td>
+</tr>
+<tr class="row-even"><td>XO_OP_ATTRIBUTE</td>
+<td>An attribute name/value pair</td>
+</tr>
+<tr class="row-odd"><td>XO_OP_VERSION</td>
+<td>A version string</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>For all the open and close operations, the name parameter holds the
+name of the construct.  For string, content, and attribute operations,
+the name parameter is the name of the field and the value parameter is
+the value.  “string” are differentiated from “content” to allow differing
+treatment of true, false, null, and numbers from real strings, though
+content values are formatted as strings before the handler is called.
+For version operations, the value parameter contains the version.</p>
+<p>All strings are encoded in UTF-8.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="encoders.html" title="Encoders"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="field-formatting.html" title="Field Formatting"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">libxo 1.3.0
+ documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017-2019, Juniper Networks Inc.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.3.
+    </div>
+  </body>
+</html>
