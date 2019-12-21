@@ -8007,7 +8007,7 @@ xo_finish_atexit (void)
  * Generate an error message, such as would be displayed on stderr
  */
 void
-xo_error_hv (xo_handle_t *xop, const char *fmt, va_list vap)
+xo_errorn_hv (xo_handle_t *xop, int need_newline, const char *fmt, va_list vap)
 {
     xop = xo_default(xop);
 
@@ -8015,13 +8015,15 @@ xo_error_hv (xo_handle_t *xop, const char *fmt, va_list vap)
      * If the format string doesn't end with a newline, we pop
      * one on ourselves.
      */
-    ssize_t len = strlen(fmt);
-    if (len > 0 && fmt[len - 1] != '\n') {
-	char *newfmt = alloca(len + 2);
-	memcpy(newfmt, fmt, len);
-	newfmt[len] = '\n';
-	newfmt[len + 1] = '\0';
-	fmt = newfmt;
+    if (need_newline) {
+	ssize_t len = strlen(fmt);
+	if (len > 0 && fmt[len - 1] != '\n') {
+	    char *newfmt = alloca(len + 2);
+	    memcpy(newfmt, fmt, len);
+	    newfmt[len] = '\n';
+	    newfmt[len + 1] = '\0';
+	    fmt = newfmt;
+	}
     }
 
     switch (xo_style(xop)) {
@@ -8069,7 +8071,7 @@ xo_error_h (xo_handle_t *xop, const char *fmt, ...)
     va_list vap;
 
     va_start(vap, fmt);
-    xo_error_hv(xop, fmt, vap);
+    xo_errorn_hv(xop, 0, fmt, vap);
     va_end(vap);
 }
 
@@ -8082,7 +8084,30 @@ xo_error (const char *fmt, ...)
     va_list vap;
 
     va_start(vap, fmt);
-    xo_error_hv(NULL, fmt, vap);
+    xo_errorn_hv(NULL, 0, fmt, vap);
+    va_end(vap);
+}
+
+void
+xo_errorn_h (xo_handle_t *xop, const char *fmt, ...)
+{
+    va_list vap;
+
+    va_start(vap, fmt);
+    xo_errorn_hv(xop, 1, fmt, vap);
+    va_end(vap);
+}
+
+/*
+ * Generate an error message, such as would be displayed on stderr
+ */
+void
+xo_errorn (const char *fmt, ...)
+{
+    va_list vap;
+
+    va_start(vap, fmt);
+    xo_errorn_hv(NULL, 1, fmt, vap);
     va_end(vap);
 }
 
