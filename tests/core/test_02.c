@@ -21,6 +21,8 @@
 int
 main (int argc, char **argv)
 {
+    xo_set_program("test_02");
+
     argc = xo_parse_args(argc, argv);
     if (argc < 0)
 	return 1;
