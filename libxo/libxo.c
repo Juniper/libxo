@@ -2371,6 +2371,25 @@ xo_set_options (xo_handle_t *xop, const char *input)
 	if (np)
 	    *np++ = '\0';
 
+	/*
+	 * "@foo" is a shorthand for "encoder=foo".  This is driven
+	 * chiefly by a desire to make pluggable encoders not appear
+	 * so distinct from built-in encoders.
+	 */
+	if (*cp == '@') {
+	    vp = cp + 1;
+
+	    if (*vp == '\0')
+		xo_failure(xop, "missing value for encoder option");
+	    else {
+		rc = xo_encoder_init(xop, vp);
+		if (rc)
+		    xo_warnx("error initializing encoder: %s", vp);
+	    }
+
+	    continue;
+	}
+
 	vp = strchr(cp, '=');
 	if (vp)
 	    *vp++ = '\0';
