@@ -1,0 +1,442 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Field Modifiers &#8212; libxo 1.4.0
+ documentation</title>
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Field Formatting" href="field-formatting.html" />
+    <link rel="prev" title="Field Roles" href="field-roles.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="field-formatting.html" title="Field Formatting"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="field-roles.html" title="Field Roles"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">libxo 1.4.0
+ documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">On This Page</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Field Modifiers</a><ul>
+<li><a class="reference internal" href="#the-argument-modifier-a">The Argument Modifier ({a:})</a></li>
+<li><a class="reference internal" href="#the-colon-modifier-c">The Colon Modifier ({c:})</a></li>
+<li><a class="reference internal" href="#the-display-modifier-d">The Display Modifier ({d:})</a></li>
+<li><a class="reference internal" href="#the-encoding-modifier-e">The Encoding Modifier ({e:})</a></li>
+<li><a class="reference internal" href="#the-gettext-modifier-g">The Gettext Modifier ({g:})</a></li>
+<li><a class="reference internal" href="#the-humanize-modifier-h">The Humanize Modifier ({h:})</a></li>
+<li><a class="reference internal" href="#the-key-modifier-k">The Key Modifier ({k:})</a></li>
+<li><a class="reference internal" href="#the-leaf-list-modifier-l">The Leaf-List Modifier ({l:})</a></li>
+<li><a class="reference internal" href="#the-no-quotes-modifier-n">The No-Quotes Modifier ({n:})</a></li>
+<li><a class="reference internal" href="#the-plural-modifier-p">The Plural Modifier ({p:})</a></li>
+<li><a class="reference internal" href="#the-quotes-modifier-q">The Quotes Modifier ({q:})</a></li>
+<li><a class="reference internal" href="#the-trim-modifier-t">The Trim Modifier ({t:})</a></li>
+<li><a class="reference internal" href="#the-white-space-modifier-w">The White Space Modifier ({w:})</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3><a href="index.html">Full Documentation</a></h3>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="field-roles.html"
+                        title="previous chapter">Field Roles</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="field-formatting.html"
+                        title="next chapter">Field Formatting</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/field-modifiers.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="field-modifiers">
+<span id="index-0"></span><span id="id1"></span><h1>Field Modifiers<a class="headerlink" href="#field-modifiers" title="Permalink to this headline">¶</a></h1>
+<p>Field modifiers are flags which modify the way content emitted for
+particular output styles:</p>
+<blockquote>
+<div><table class="docutils align-default">
+<colgroup>
+<col style="width: 4%" />
+<col style="width: 22%" />
+<col style="width: 74%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>M</p></th>
+<th class="head"><p>Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>a</p></td>
+<td><p>argument</p></td>
+<td><p>The content appears as a ‘const char *’ argument</p></td>
+</tr>
+<tr class="row-odd"><td><p>c</p></td>
+<td><p>colon</p></td>
+<td><p>A colon (“:”) is appended after the label</p></td>
+</tr>
+<tr class="row-even"><td><p>d</p></td>
+<td><p>display</p></td>
+<td><p>Only emit field for display styles (text/HTML)</p></td>
+</tr>
+<tr class="row-odd"><td><p>e</p></td>
+<td><p>encoding</p></td>
+<td><p>Only emit for encoding styles (XML/JSON)</p></td>
+</tr>
+<tr class="row-even"><td><p>g</p></td>
+<td><p>gettext</p></td>
+<td><p>Call gettext on field’s render content</p></td>
+</tr>
+<tr class="row-odd"><td><p>h</p></td>
+<td><p>humanize (hn)</p></td>
+<td><p>Format large numbers in human-readable style</p></td>
+</tr>
+<tr class="row-even"><td><p></p></td>
+<td><p>hn-space</p></td>
+<td><p>Humanize: Place space between numeric and unit</p></td>
+</tr>
+<tr class="row-odd"><td><p></p></td>
+<td><p>hn-decimal</p></td>
+<td><p>Humanize: Add a decimal digit, if number &lt; 10</p></td>
+</tr>
+<tr class="row-even"><td><p></p></td>
+<td><p>hn-1000</p></td>
+<td><p>Humanize: Use 1000 as divisor instead of 1024</p></td>
+</tr>
+<tr class="row-odd"><td><p>k</p></td>
+<td><p>key</p></td>
+<td><p>Field is a key, suitable for XPath predicates</p></td>
+</tr>
+<tr class="row-even"><td><p>l</p></td>
+<td><p>leaf-list</p></td>
+<td><p>Field is a leaf-list</p></td>
+</tr>
+<tr class="row-odd"><td><p>n</p></td>
+<td><p>no-quotes</p></td>
+<td><p>Do not quote the field when using JSON style</p></td>
+</tr>
+<tr class="row-even"><td><p>p</p></td>
+<td><p>plural</p></td>
+<td><p>Gettext: Use comma-separated plural form</p></td>
+</tr>
+<tr class="row-odd"><td><p>q</p></td>
+<td><p>quotes</p></td>
+<td><p>Quote the field when using JSON style</p></td>
+</tr>
+<tr class="row-even"><td><p>t</p></td>
+<td><p>trim</p></td>
+<td><p>Trim leading and trailing whitespace</p></td>
+</tr>
+<tr class="row-odd"><td><p>w</p></td>
+<td><p>white</p></td>
+<td><p>A blank (” “) is appended after the label</p></td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>Roles and modifiers can also use more verbose names, when preceded by
+a comma.  For example, the modifier string “Lwc” (or “L,white,colon”)
+means the field has a label role (text that describes the next field)
+and should be followed by a colon (‘c’) and a space (‘w’).  The
+modifier string “Vkq” (or “:key,quote”) means the field has a value
+role (the default role), that it is a key for the current instance,
+and that the value should be quoted when encoded for JSON.</p>
+<div class="section" id="the-argument-modifier-a">
+<span id="argument-modifier"></span><span id="index-1"></span><h2>The Argument Modifier ({a:})<a class="headerlink" href="#the-argument-modifier-a" title="Permalink to this headline">¶</a></h2>
+<p id="index-2">The argument modifier indicates that the content of the field
+descriptor will be placed as a UTF-8 string (const char *) argument
+within the xo_emit parameters:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">EXAMPLE</span><span class="p">:</span>
+    <span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{La:}</span><span class="s2"> </span><span class="si">{a:}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;Label text&quot;</span><span class="p">,</span> <span class="s2">&quot;label&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">);</span>
+<span class="n">TEXT</span><span class="p">:</span>
+    <span class="n">Label</span> <span class="n">text</span> <span class="n">value</span>
+<span class="n">JSON</span><span class="p">:</span>
+    <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;value&quot;</span>
+<span class="n">XML</span><span class="p">:</span>
+    <span class="o">&lt;</span><span class="n">label</span><span class="o">&gt;</span><span class="n">value</span><span class="o">&lt;/</span><span class="n">label</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>The argument modifier allows field names for value fields to be passed
+on the stack, avoiding the need to build a field descriptor using
+snprintf.  For many field roles, the argument modifier is not needed,
+since those roles have specific mechanisms for arguments, such as
+“{C:fg-%s}”.</p>
+</div>
+<div class="section" id="the-colon-modifier-c">
+<span id="colon-modifier"></span><span id="index-3"></span><h2>The Colon Modifier ({c:})<a class="headerlink" href="#the-colon-modifier-c" title="Permalink to this headline">¶</a></h2>
+<p id="index-4">The colon modifier appends a single colon to the data value:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">EXAMPLE</span><span class="p">:</span>
+    <span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;{Lc:Name}{:name}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;phil&quot;</span><span class="p">);</span>
+<span class="n">TEXT</span><span class="p">:</span>
+    <span class="n">Name</span><span class="p">:</span><span class="n">phil</span>
+</pre></div>
+</div>
+<p>The colon modifier is only used for the TEXT and HTML output
+styles. It is commonly combined with the space modifier (‘{w:}’).
+It is purely a convenience feature.</p>
+</div>
+<div class="section" id="the-display-modifier-d">
+<span id="display-modifier"></span><span id="index-5"></span><h2>The Display Modifier ({d:})<a class="headerlink" href="#the-display-modifier-d" title="Permalink to this headline">¶</a></h2>
+<p id="index-6">The display modifier indicated the field should only be generated for
+the display output styles, TEXT and HTML:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">EXAMPLE</span><span class="p">:</span>
+    <span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;{Lcw:Name}{d:name} {:id/</span><span class="si">%d</span><span class="s2">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;phil&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+<span class="n">TEXT</span><span class="p">:</span>
+    <span class="n">Name</span><span class="p">:</span> <span class="n">phil</span> <span class="mi">1</span>
+<span class="n">XML</span><span class="p">:</span>
+    <span class="o">&lt;</span><span class="nb">id</span><span class="o">&gt;</span><span class="mi">1</span><span class="o">&lt;/</span><span class="nb">id</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>The display modifier is the opposite of the encoding modifier, and
+they are often used to give to distinct views of the underlying data.</p>
+</div>
+<div class="section" id="the-encoding-modifier-e">
+<span id="encoding-modifier"></span><span id="index-7"></span><h2>The Encoding Modifier ({e:})<a class="headerlink" href="#the-encoding-modifier-e" title="Permalink to this headline">¶</a></h2>
+<p id="index-8">The display modifier indicated the field should only be generated for
+the display output styles, TEXT and HTML:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">EXAMPLE</span><span class="p">:</span>
+    <span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;{Lcw:Name}{:name} {e:id/</span><span class="si">%d</span><span class="s2">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;phil&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+<span class="n">TEXT</span><span class="p">:</span>
+    <span class="n">Name</span><span class="p">:</span> <span class="n">phil</span>
+<span class="n">XML</span><span class="p">:</span>
+    <span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span><span class="n">phil</span><span class="o">&lt;/</span><span class="n">name</span><span class="o">&gt;&lt;</span><span class="nb">id</span><span class="o">&gt;</span><span class="mi">1</span><span class="o">&lt;/</span><span class="nb">id</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>The encoding modifier is the opposite of the display modifier, and
+they are often used to give to distinct views of the underlying data.</p>
+</div>
+<div class="section" id="the-gettext-modifier-g">
+<span id="gettext-modifier"></span><span id="index-9"></span><h2>The Gettext Modifier ({g:})<a class="headerlink" href="#the-gettext-modifier-g" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="index-10"></span><p id="index-11">The gettext modifier is used to translate individual fields using the
+gettext domain (typically set using the “<code class="code docutils literal notranslate"><span class="pre">{G:}</span></code>” role) and current
+language settings.  Once libxo renders the field value, it is passed
+to gettext(3), where it is used as a key to find the native language
+translation.</p>
+<p>In the following example, the strings “State” and “full” are passed
+to gettext() to find locale-based translated strings:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;{Lgwc:State}{g:state}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;full&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>See <a class="reference internal" href="field-roles.html#gettext-role"><span class="std std-ref">The Gettext Role ({G:})</span></a>, <a class="reference internal" href="#plural-modifier"><span class="std std-ref">The Plural Modifier ({p:})</span></a>, and
+<a class="reference internal" href="howto.html#i18n"><span class="std std-ref">Howto: Internationalization (i18n)</span></a> for additional details.</p>
+</div>
+<div class="section" id="the-humanize-modifier-h">
+<span id="humanize-modifier"></span><span id="index-12"></span><h2>The Humanize Modifier ({h:})<a class="headerlink" href="#the-humanize-modifier-h" title="Permalink to this headline">¶</a></h2>
+<p id="index-13">The humanize modifier is used to render large numbers as in a
+human-readable format.  While numbers like “44470272” are completely
+readable to computers and savants, humans will generally find “44M”
+more meaningful.</p>
+<p>“hn” can be used as an alias for “humanize”.</p>
+<p>The humanize modifier only affects display styles (TEXT and HMTL).
+The “<code class="code docutils literal notranslate"><span class="pre">no-humanize</span></code>” option (See <a class="reference internal" href="options.html#options"><span class="std std-ref">Command-line Arguments</span></a>) will block
+the function of the humanize modifier.</p>
+<p>There are a number of modifiers that affect details of humanization.
+These are only available in as full names, not single characters.  The
+“<code class="code docutils literal notranslate"><span class="pre">hn-space</span></code>” modifier places a space between the number and any
+multiplier symbol, such as “M” or “K” (ex: “44 K”).  The
+“<code class="code docutils literal notranslate"><span class="pre">hn-decimal</span></code>” modifier will add a decimal point and a single tenths
+digit when the number is less than 10 (ex: “4.4K”).  The “<code class="code docutils literal notranslate"><span class="pre">hn-1000</span></code>”
+modifier will use 1000 as divisor instead of 1024, following the
+JEDEC-standard instead of the more natural binary powers-of-two
+tradition:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">EXAMPLE</span><span class="p">:</span>
+    <span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;{h:input/</span><span class="si">%u</span><span class="s2">}, {h,hn-space:output/</span><span class="si">%u</span><span class="s2">}, &quot;</span>
+        <span class="s2">&quot;{h,hn-decimal:errors/</span><span class="si">%u</span><span class="s2">}, {h,hn-1000:capacity/</span><span class="si">%u</span><span class="s2">}, &quot;</span>
+        <span class="s2">&quot;{h,hn-decimal:remaining/</span><span class="si">%u</span><span class="s2">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="nb">input</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">errors</span><span class="p">,</span> <span class="n">capacity</span><span class="p">,</span> <span class="n">remaining</span><span class="p">);</span>
+<span class="n">TEXT</span><span class="p">:</span>
+    <span class="mi">21</span><span class="p">,</span> <span class="mi">57</span> <span class="n">K</span><span class="p">,</span> <span class="mi">96</span><span class="n">M</span><span class="p">,</span> <span class="mi">44</span><span class="n">M</span><span class="p">,</span> <span class="mf">1.2</span><span class="n">G</span>
+</pre></div>
+</div>
+<p>In the HTML style, the original numeric value is rendered in the
+“data-number” attribute on the &lt;div&gt; element:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;errors&quot;</span>
+     <span class="n">data</span><span class="o">-</span><span class="n">number</span><span class="o">=</span><span class="s2">&quot;100663296&quot;</span><span class="o">&gt;</span><span class="mi">96</span><span class="n">M</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="the-key-modifier-k">
+<span id="key-modifier"></span><span id="index-14"></span><h2>The Key Modifier ({k:})<a class="headerlink" href="#the-key-modifier-k" title="Permalink to this headline">¶</a></h2>
+<p id="index-15">The key modifier is used to indicate that a particular field helps
+uniquely identify an instance of list data:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">EXAMPLE</span><span class="p">:</span>
+    <span class="n">xo_open_list</span><span class="p">(</span><span class="s2">&quot;user&quot;</span><span class="p">);</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">num_users</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">xo_open_instance</span><span class="p">(</span><span class="s2">&quot;user&quot;</span><span class="p">);</span>
+        <span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;User {k:name} has {:count} tickets</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+           <span class="n">user</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">u_name</span><span class="p">,</span> <span class="n">user</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">u_tickets</span><span class="p">);</span>
+        <span class="n">xo_close_instance</span><span class="p">(</span><span class="s2">&quot;user&quot;</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="n">xo_close_list</span><span class="p">(</span><span class="s2">&quot;user&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+<p id="index-16">Currently the key modifier is only used when generating XPath value
+for the HTML output style when XOF_XPATH is set, but other uses are
+likely in the near future.</p>
+</div>
+<div class="section" id="the-leaf-list-modifier-l">
+<span id="leaf-list"></span><span id="index-17"></span><h2>The Leaf-List Modifier ({l:})<a class="headerlink" href="#the-leaf-list-modifier-l" title="Permalink to this headline">¶</a></h2>
+<p id="index-18">The leaf-list modifier is used to distinguish lists where each
+instance consists of only a single value.  In XML, these are
+rendered as single elements, where JSON renders them as arrays:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">EXAMPLE</span><span class="p">:</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">num_users</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;Member {l:user}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">user</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">u_name</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="n">XML</span><span class="p">:</span>
+    <span class="o">&lt;</span><span class="n">user</span><span class="o">&gt;</span><span class="n">phil</span><span class="o">&lt;/</span><span class="n">user</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">user</span><span class="o">&gt;</span><span class="n">pallavi</span><span class="o">&lt;/</span><span class="n">user</span><span class="o">&gt;</span>
+<span class="n">JSON</span><span class="p">:</span>
+    <span class="s2">&quot;user&quot;</span><span class="p">:</span> <span class="p">[</span> <span class="s2">&quot;phil&quot;</span><span class="p">,</span> <span class="s2">&quot;pallavi&quot;</span> <span class="p">]</span>
+</pre></div>
+</div>
+<p>The name of the field must match the name of the leaf list.</p>
+</div>
+<div class="section" id="the-no-quotes-modifier-n">
+<span id="no-quotes-modifier"></span><span id="index-19"></span><h2>The No-Quotes Modifier ({n:})<a class="headerlink" href="#the-no-quotes-modifier-n" title="Permalink to this headline">¶</a></h2>
+<p id="index-20">The no-quotes modifier (and its twin, the ‘quotes’ modifier) affect
+the quoting of values in the JSON output style.  JSON uses quotes for
+string value, but no quotes for numeric, boolean, and null data.
+xo_emit applies a simple heuristic to determine whether quotes are
+needed, but often this needs to be controlled by the caller:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>EXAMPLE:
+    const char *bool = is_true ? &quot;true&quot; : &quot;false&quot;;
+    xo_emit(&quot;{n:fancy/%s}&quot;, bool);
+JSON:
+    &quot;fancy&quot;: true
+</pre></div>
+</div>
+</div>
+<div class="section" id="the-plural-modifier-p">
+<span id="plural-modifier"></span><span id="index-21"></span><h2>The Plural Modifier ({p:})<a class="headerlink" href="#the-plural-modifier-p" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="index-22"></span><p id="index-23">The plural modifier selects the appropriate plural form of an
+expression based on the most recent number emitted and the current
+language settings.  The contents of the field should be the singular
+and plural English values, separated by a comma:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;{:bytes} {Ngp:byte,bytes}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>The plural modifier is meant to work with the gettext modifier ({g:})
+but can work independently.  See <a class="reference internal" href="#gettext-modifier"><span class="std std-ref">The Gettext Modifier ({g:})</span></a>.</p>
+<p>When used without the gettext modifier or when the message does not
+appear in the message catalog, the first token is chosen when the last
+numeric value is equal to 1; otherwise the second value is used,
+mimicking the simple pluralization rules of English.</p>
+<p>When used with the gettext modifier, the ngettext(3) function is
+called to handle the heavy lifting, using the message catalog to
+convert the singular and plural forms into the native language.</p>
+</div>
+<div class="section" id="the-quotes-modifier-q">
+<span id="quotes-modifier"></span><span id="index-24"></span><h2>The Quotes Modifier ({q:})<a class="headerlink" href="#the-quotes-modifier-q" title="Permalink to this headline">¶</a></h2>
+<p id="index-25">The quotes modifier (and its twin, the ‘no-quotes’ modifier) affect
+the quoting of values in the JSON output style.  JSON uses quotes for
+string value, but no quotes for numeric, boolean, and null data.
+xo_emit applies a simple heuristic to determine whether quotes are
+needed, but often this needs to be controlled by the caller:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">EXAMPLE</span><span class="p">:</span>
+    <span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;{q:time/</span><span class="si">%d</span><span class="s2">}&quot;</span><span class="p">,</span> <span class="mi">2014</span><span class="p">);</span>
+<span class="n">JSON</span><span class="p">:</span>
+    <span class="s2">&quot;year&quot;</span><span class="p">:</span> <span class="s2">&quot;2014&quot;</span>
+</pre></div>
+</div>
+<p>The heuristic is based on the format; if the format uses any of the
+following conversion specifiers, then no quotes are used:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">d</span> <span class="n">i</span> <span class="n">o</span> <span class="n">u</span> <span class="n">x</span> <span class="n">X</span> <span class="n">D</span> <span class="n">O</span> <span class="n">U</span> <span class="n">e</span> <span class="n">E</span> <span class="n">f</span> <span class="n">F</span> <span class="n">g</span> <span class="n">G</span> <span class="n">a</span> <span class="n">A</span> <span class="n">c</span> <span class="n">C</span> <span class="n">p</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="the-trim-modifier-t">
+<span id="trim-modifier"></span><span id="index-26"></span><h2>The Trim Modifier ({t:})<a class="headerlink" href="#the-trim-modifier-t" title="Permalink to this headline">¶</a></h2>
+<p id="index-27">The trim modifier removes any leading or trailing whitespace from
+the value:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">EXAMPLE</span><span class="p">:</span>
+    <span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;{t:description}&quot;</span><span class="p">,</span> <span class="s2">&quot;   some  input   &quot;</span><span class="p">);</span>
+<span class="n">JSON</span><span class="p">:</span>
+    <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;some input&quot;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="the-white-space-modifier-w">
+<span id="white-space-modifier"></span><span id="index-28"></span><h2>The White Space Modifier ({w:})<a class="headerlink" href="#the-white-space-modifier-w" title="Permalink to this headline">¶</a></h2>
+<p id="index-29">The white space modifier appends a single space to the data value:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">EXAMPLE</span><span class="p">:</span>
+    <span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;{Lw:Name}{:name}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;phil&quot;</span><span class="p">);</span>
+<span class="n">TEXT</span><span class="p">:</span>
+    <span class="n">Name</span> <span class="n">phil</span>
+</pre></div>
+</div>
+<p>The white space modifier is only used for the TEXT and HTML output
+styles. It is commonly combined with the colon modifier (‘{c:}’).
+It is purely a convenience feature.</p>
+<p>Note that the sense of the ‘w’ modifier is reversed for the units role
+({Uw:}); a blank is added before the contents, rather than after it.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="field-formatting.html" title="Field Formatting"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="field-roles.html" title="Field Roles"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">libxo 1.4.0
+ documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017-2019, Juniper Networks Inc.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.3.0.
+    </div>
+  </body>
+</html>
