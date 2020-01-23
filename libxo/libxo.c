@@ -8143,21 +8143,30 @@ xo_parse_args (int argc, char **argv)
     char *cp;
     int i, save;
 
-    /* Save our program name for xo_err and friends */
-    xo_program = argv[0];
-    cp = strrchr(xo_program, '/');
-    if (cp)
-	xo_program = ++cp;
-    else
-	cp = argv[0];		/* Reset to front of string */
+    /*
+     * If xo_set_program has always been called, we honor that value
+     */
+    if (xo_program == NULL) {
+	/* Save our program name for xo_err and friends */
+	xo_program = argv[0];
+	cp = strrchr(xo_program, '/');
+	if (cp)
+	    xo_program = ++cp;
+	else
+	    cp = argv[0];		/* Reset to front of string */
 
-    /* GNU tools add an annoying ".test" as the program extension; remove it */
-    size_t len = strlen(xo_program);
-    static const char gnu_ext[] = ".test";
-    if (len >= sizeof(gnu_ext)) {
-	cp += len + 1 - sizeof(gnu_ext);
-	if (xo_streq(cp, gnu_ext))
-	    *cp = '\0';
+	/*
+	 * GNU libtool add an annoying ".test" as the program
+	 * extension; we remove it.  libtool also adds a "lt-" prefix
+	 * that we cannot remove.
+	 */
+	size_t len = strlen(xo_program);
+	static const char gnu_ext[] = ".test";
+	if (len >= sizeof(gnu_ext)) {
+	    cp += len + 1 - sizeof(gnu_ext);
+	    if (xo_streq(cp, gnu_ext))
+		*cp = '\0';
+	}
     }
 
     xo_handle_t *xop = xo_default(NULL);
