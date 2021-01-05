@@ -428,19 +428,40 @@ be used to retrieve arguments via `va_arg`.
 Single Field Emitting Functions (xo_emit_field)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The functions in this section can also make output, but only make a
-single field at a time.  These functions are intended to avoid the
-scenario where one would otherwise need to compose a format
-descriptors using `snprintf`.  The individual parts of the format
-descriptor are passed in distinctly.
+The functions in this section emit formatted output similar to
+`xo_emit` but where `xo_emit` uses a single string argument containing
+the description for multiple fields, `xo_emit_field` emits a single
+field using multiple ar- guments to contain the field description.
+`xo_emit_field_h` adds an ex- plicit handle to use instead of the
+default handle, while `xo_emit_field_hv` accepts a va_list for
+additional flexibility.
 
-.. c:function:: xo_ssize_t xo_emit_field (const char *rolmod, const char *contents, const char *fmt, const char *efmt, ...)
+The arguments `rolmod`, `content`, `fmt`, and `efmt` are detailed in
+:ref:`field-formatting`.  Using distinct arguments allows callers to
+pass the field description in pieces, rather than having to use
+something like `snprintf` to build the format string required by
+`xo_emit`.  The arguments are each NUL-terminated strings. The `rolmod`
+argument contains the `role` and `modifier` portions of the field
+description, the `content` argument contains the `content` portion, and
+the `fmt` and `efmt` contain the `field-format` and `encoding-format` por-
+tions, respectively.
+
+As with `xo_emit`, the `fmt` and `efmt` values are both optional,
+since the `field-format` string defaults to "%s", and the
+`encoding-format`'s default value is derived from the `field-format`
+per :ref:`field-formatting`.  However, care must be taken to avoid
+using a value directly as the format, since characters like '{', '%',
+and '}' will be interpreted as formatting directives, and may cause
+xo_emit_field to dereference arbitrary values off the stack, leading
+to bugs, core files, and gnashing of teeth.
+
+.. c:function:: xo_ssize_t xo_emit_field (const char *rolmod, const char *content, const char *fmt, const char *efmt, ...)
 
   :param rolmod: A comma-separated list of field roles and field modifiers
   :type rolmod: const char *
-  :param contents: The "contents" portion of the field description string
-  :type contents: const char *
-  :param fmt: Content format string
+  :param content: The "content" portion of the field description string
+  :type content: const char *
+  :param fmt: Contents format string
   :type fmt: const char *
   :param efmt: Encoding format string, followed by additional arguments
   :type efmt: const char *
@@ -450,8 +471,11 @@ descriptor are passed in distinctly.
   ::
 
     EXAMPLE::
+        xo_emit_field("T", title, NULL, NULL, NULL);
         xo_emit_field("T", "Host name is ", NULL, NULL);
         xo_emit_field("V", "host-name", NULL, NULL, host-name);
+        xo_emit_field(",leaf-list,quotes", "sku", "%s-%u", "%s-000-%u",
+                        "gum", 1412);
 
 .. c:function:: xo_ssize_t xo_emit_field_h (xo_handle_t *xop, const char *rolmod, const char *contents, const char *fmt, const char *efmt, ...)
 
