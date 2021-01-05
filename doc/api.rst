@@ -395,9 +395,9 @@ be passed to access the internal "default" handle.  See
 The remaining arguments to `xo_emit` and `xo_emit_h` are a set of
 arguments corresponding to the fields in the format string.  Care must
 be taken to ensure the argument types match the fields in the format
-string, since an inappropriate cast can ruin your day.  The vap
-argument to `xo_emit_hv` points to a variable argument list that can
-be used to retrieve arguments via `va_arg`.
+string, since an inappropriate or missing argument can ruin your day.
+The `vap` argument to `xo_emit_hv` points to a variable argument list
+that can be used to retrieve arguments via `va_arg`.
 
 .. c:function:: xo_ssize_t xo_emit (const char *fmt, ...)
 
