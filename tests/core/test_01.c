@@ -104,9 +104,16 @@ main (int argc, char **argv)
 
     xo_emit("{La:} {a:}\n", "Label text", "label", "value");
 
+    const char *title = "My Title";
+    xo_emit_field("T", title, "%s\n", NULL, NULL);
+
     xo_emit_field("Vt", "max-chaos", NULL, NULL, "  very  ");
     xo_emit_field("V", "min-chaos", "%d", NULL, 42);
     xo_emit_field("V", "some-chaos", "%d\n", "[%d]", 42);
+
+    xo_attr("test-attr", "attr-value");
+    xo_emit_field_h(NULL, ",leaf-list,quotes", "sku", "%s-%u", "%s-000-%u",
+		    "gum", 1412);
 
     xo_emit("Connecting to {:host}.{:domain}...\n", "my-box", "example.com");
 
