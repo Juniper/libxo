@@ -386,11 +386,10 @@ xo_destroy
 Emitting Content (xo_emit)
 --------------------------
 
-The functions in this section are used to emit output.
-
-The "fmt" argument is a string containing field descriptors as
-specified in :ref:`format-strings`.  The use of a handle is optional and
-`NULL` can be passed to access the internal "default" handle.  See
+The functions in this section are used to emit output.  They use a
+`format` string containing field descriptors as specified in
+:ref:`format-strings`.  The use of a handle is optional and `NULL` can
+be passed to access the internal "default" handle.  See
 :ref:`handles`.
 
 The remaining arguments to `xo_emit` and `xo_emit_h` are a set of
