@@ -311,7 +311,7 @@ format descriptors default to "%s".
 .Bd -literal -offset indent
     xo_emit("{:length/%02u}x{:width/%02u}x{:height/%02u}\\n",
             length, width, height);
-    xo_emit("{:author} wrote \"{:poem}\" in {:year/%4d}\\n,
+    xo_emit("{:author} wrote \"{:poem}\" in {:year/%4d}\\n",
             author, poem, year);
 .Ed
 .Ss "The Anchor Roles ({[:} and {]:})"
