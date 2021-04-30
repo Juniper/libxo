@@ -96,11 +96,11 @@
 #endif
 
 #ifndef HOST_NAME_MAX
-#ifdef _SC_HOST_NAME_MAX
-#define HOST_NAME_MAX _SC_HOST_NAME_MAX
+#ifdef _POSIX_HOST_NAME_MAX
+#define HOST_NAME_MAX _POSIX_HOST_NAME_MAX
 #else
 #define HOST_NAME_MAX 255
-#endif /* _SC_HOST_NAME_MAX */
+#endif /* _POSIX_HOST_NAME_MAX */
 #endif /* HOST_NAME_MAX */
 
 #ifndef UNUSED
@@ -584,7 +584,7 @@ xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
      * Add HOSTNAME; we rely on gethostname and don't fluff with
      * ip addresses.  Might need to revisit.....
      */
-    char hostname[HOST_NAME_MAX];
+    char hostname[HOST_NAME_MAX + 1];
     hostname[0] = '\0';
     if (xo_unit_test)
 	strcpy(hostname, "worker-host");
