@@ -1,5 +1,5 @@
 {
-  "top": {
+  "top-level": {
     "type": "ethernet",
     "type": "bridge",
     "type": "18u",
