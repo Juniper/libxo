@@ -82,7 +82,7 @@ main (int argc, char **argv)
     xo_set_info(NULL, info, -1);
     xo_set_flags(NULL, XOF_KEYS);
 
-    xo_open_container_h(NULL, "top");
+    xo_open_container_h(NULL, "top-level");
 
     xo_emit("static {:type/ethernet} {:type/bridge} {:type/%4du} {:type/%3d}",
 	    18, 24);
@@ -255,7 +255,7 @@ main (int argc, char **argv)
 	    "/some/file", (int) 0640, 8, 1,
 	    10, "user", 12, "group");
 
-    xo_close_container_h(NULL, "top");
+    xo_close_container_h(NULL, "top-level");
 
     xo_finish();
 
