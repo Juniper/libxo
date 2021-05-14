@@ -7,7 +7,7 @@
 .\" # LICENSE.
 .\" # Phil Shafer, July 2014
 .\" 
-.Dd December 4, 2014
+.Dd November 17, 2020
 .Dt LIBXO 3
 .Os
 .Sh NAME
@@ -79,7 +79,7 @@ string lookup
 .It Dv log-syslog
 Log (via stderr) each syslog message (via
 .Xr xo_syslog 3 )
-.If Dv no-humanize
+.It Dv no-humanize
 Ignore the {h:} modifier (TEXT, HTML)
 .It Dv no-locale
 Do not initialize the locale setting
@@ -95,7 +95,7 @@ Emit pretty-printed output
 Force retaining formatting information
 .It Dv text
 Emit TEXT output
-.If Dv underscores
+.It Dv underscores
 Replace XML-friendly "-"s with JSON friendly "_"s e
 .It Dv units
 Add the 'units' (XML) or 'data-units (HTML) attribute
