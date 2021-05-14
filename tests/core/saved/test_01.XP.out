@@ -1,4 +1,4 @@
-<top>
+<top-level>
   <type>ethernet</type>
   <type>bridge</type>
   <type>18u</type>
@@ -168,4 +168,4 @@
   <links>1</links>
   <user>user</user>
   <group>group</group>
-</top>
+</top-level>
