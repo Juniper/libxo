@@ -1,0 +1,186 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Introducing libxo &#8212; libxo 1.5.0
+ documentation</title>
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Getting libxo" href="getting.html" />
+    <link rel="prev" title="libxo - A Library for Generating Text, XML, JSON, and HTML Output" href="index.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="getting.html" title="Getting libxo"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="libxo - A Library for Generating Text, XML, JSON, and HTML Output"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">libxo 1.5.0
+ documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">libxo - A Library for Generating Text, XML, JSON, and HTML Output</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="getting.html"
+                        title="next chapter">Getting libxo</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/intro.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="introducing-libxo">
+<h1>Introducing libxo<a class="headerlink" href="#introducing-libxo" title="Permalink to this headline">¶</a></h1>
+<p>The libxo library allows an application to generate text, XML, JSON,
+and HTML output using a common set of function calls.  The application
+decides at run time which output style should be produced.  The
+application calls a function “xo_emit” to product output that is
+described in a format string.  A “field descriptor” tells libxo what
+the field is and what it means.  Each field descriptor is placed in
+braces with printf-like <a class="reference internal" href="format-strings.html#format-strings"><span class="std std-ref">Format Strings</span></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot; {:lines/%7ju} {:words/%7ju} &quot;</span>
+        <span class="s2">&quot;{:characters/%7ju} {d:filename/</span><span class="si">%s</span><span class="s2">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">linect</span><span class="p">,</span> <span class="n">wordct</span><span class="p">,</span> <span class="n">charct</span><span class="p">,</span> <span class="n">file</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Each field can have a role, with the ‘value’ role being the default,
+and the role tells libxo how and when to render that field (see
+<a class="reference internal" href="field-roles.html#field-roles"><span class="std std-ref">Field Roles</span></a> for details).  Modifiers change how the field is
+rendered in different output styles (see <a class="reference internal" href="field-modifiers.html#field-modifiers"><span class="std std-ref">Field Modifiers</span></a> for
+details.  Output can then be generated in various style, using the
+“–libxo” option:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">%</span> <span class="n">wc</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">motd</span>
+      <span class="mi">25</span>     <span class="mi">165</span>    <span class="mi">1140</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">motd</span>
+<span class="o">%</span> <span class="n">wc</span> <span class="o">--</span><span class="n">libxo</span> <span class="n">xml</span><span class="p">,</span><span class="n">pretty</span><span class="p">,</span><span class="n">warn</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">motd</span>
+<span class="o">&lt;</span><span class="n">wc</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">file</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">lines</span><span class="o">&gt;</span><span class="mi">25</span><span class="o">&lt;/</span><span class="n">lines</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">words</span><span class="o">&gt;</span><span class="mi">165</span><span class="o">&lt;/</span><span class="n">words</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">characters</span><span class="o">&gt;</span><span class="mi">1140</span><span class="o">&lt;/</span><span class="n">characters</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">filename</span><span class="o">&gt;/</span><span class="n">etc</span><span class="o">/</span><span class="n">motd</span><span class="o">&lt;/</span><span class="n">filename</span><span class="o">&gt;</span>
+  <span class="o">&lt;/</span><span class="n">file</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">wc</span><span class="o">&gt;</span>
+<span class="o">%</span> <span class="n">wc</span> <span class="o">--</span><span class="n">libxo</span> <span class="n">json</span><span class="p">,</span><span class="n">pretty</span><span class="p">,</span><span class="n">warn</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">motd</span>
+<span class="p">{</span>
+  <span class="s2">&quot;wc&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="p">[</span>
+      <span class="p">{</span>
+        <span class="s2">&quot;lines&quot;</span><span class="p">:</span> <span class="mi">25</span><span class="p">,</span>
+        <span class="s2">&quot;words&quot;</span><span class="p">:</span> <span class="mi">165</span><span class="p">,</span>
+        <span class="s2">&quot;characters&quot;</span><span class="p">:</span> <span class="mi">1140</span><span class="p">,</span>
+        <span class="s2">&quot;filename&quot;</span><span class="p">:</span> <span class="s2">&quot;/etc/motd&quot;</span>
+      <span class="p">}</span>
+    <span class="p">]</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+<span class="o">%</span> <span class="n">wc</span> <span class="o">--</span><span class="n">libxo</span> <span class="n">html</span><span class="p">,</span><span class="n">pretty</span><span class="p">,</span><span class="n">warn</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">motd</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;lines&quot;</span><span class="o">&gt;</span>     <span class="mi">25</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;words&quot;</span><span class="o">&gt;</span>    <span class="mi">165</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;characters&quot;</span><span class="o">&gt;</span>   <span class="mi">1140</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;filename&quot;</span><span class="o">&gt;/</span><span class="n">etc</span><span class="o">/</span><span class="n">motd</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>Same code path, same format strings, same information, but it’s
+rendered in distinct styles based on run-time flags.</p>
+<div class="admonition-tale-of-two-code-paths admonition">
+<p class="admonition-title">Tale of Two Code Paths</p>
+<p>You want to prepare for the future, but you need to live in the
+present.  You’d love a flying car, but need to get work done today.
+You want to support features like XML, JSON, and HTML rendering to
+allow integration with NETCONF, REST, and web browsers, but you need
+to make text output for command line users.</p>
+<p>And you don’t want multiple code paths that can’t help but get out
+of sync:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>/* None of this &quot;if (xml) {... } else {...}&quot;  logic */
+if (xml) {
+    /* some code to make xml */
+} else {
+    /* other code to make text */
+    /* oops! forgot to add something on both clauses! */
+}
+
+/* And ifdefs are right out. */
+#ifdef MAKE_XML
+    /* icky */
+#else
+    /* pooh */
+#endif
+</pre></div>
+</div>
+<p>But you’d really, really like all the fancy features that modern
+encoding formats can provide.  libxo can help.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="getting.html" title="Getting libxo"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="libxo - A Library for Generating Text, XML, JSON, and HTML Output"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">libxo 1.5.0
+ documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017-2019, Juniper Networks Inc.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.3.0.
+    </div>
+  </body>
+</html>
