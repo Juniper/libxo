@@ -1,13 +1,21 @@
 set top_src=`pwd`
 alias Zautoreconf "(cd $top_src ; autoreconf --install)"
 
+if [ -x /opt/local/bin/msgfmt ]; then
+    GETTEXT=--with-gettext=/opt/local
+elif [ -x /usr/local/bin/msgfmt ]; then
+    GETTEXT=--with-gettext=/usr/local
+else
+    GETTEXT=
+fi
+
 set opts=' \
 --with-libslax-prefix=/Users/phil/work/root \
 --enable-debug \
 --enable-warnings \
 --enable-printflike \
---with-gettext=/opt/local \
 --prefix ${HOME}/work/root \
+${GETTEXTDIR} \
 '
 set opts=`echo $opts`
 
