@@ -220,7 +220,6 @@ xo_encoder_func (void *dlp)
     xo_encoder_init_func_t func;
 
 #ifdef HAVE_GCC
-    what the heck?
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-function-type"
 #endif /* HAVE_GCC */
