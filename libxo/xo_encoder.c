@@ -219,14 +219,14 @@ xo_encoder_func (void *dlp)
 {
     xo_encoder_init_func_t func;
 
-#ifdef HAVE_GCC
+#if defined(HAVE_GCC) && __GNUC__ > 8
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-function-type"
 #endif /* HAVE_GCC */
 
     func = (xo_encoder_init_func_t) dlfunc(dlp, XO_ENCODER_INIT_NAME);
 
-#ifdef HAVE_GCC
+#if defined(HAVE_GCC) && __GNUC__ > 8
 #pragma GCC diagnostic pop	/* Restore previous setting */
 #endif /* HAVE_GCC */
 
