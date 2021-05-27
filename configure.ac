@@ -335,9 +335,10 @@ AM_CONDITIONAL([HAVE_LIBM], [test "$HAVE_LIBM" != "no"])
 AC_MSG_CHECKING([compiler for gcc])
 HAVE_GCC=no
 if test "${CC}" != ""; then
-    HAVE_GCC=`${CC} --version 2>&1 | grep GCC`
+    HAVE_GCC=`${CC} --version 2>&1 | grep -i GCC`
     if test "${HAVE_GCC}" != ""; then
         HAVE_GCC=yes
+	AC_DEFINE([HAVE_GCC], [1], [Using real gcc])
     else
         HAVE_GCC=no
     fi
