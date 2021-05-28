@@ -1,0 +1,791 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Examples &#8212; libxo 1.5.1
+ documentation</title>
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Howtos: Focused Directions" href="howto.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="howto.html" title="Howtos: Focused Directions"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">libxo 1.5.1
+ documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">On This Page</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Examples</a><ul>
+<li><a class="reference internal" href="#unit-test">Unit Test</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3><a href="index.html">Full Documentation</a></h3>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="howto.html"
+                        title="previous chapter">Howtos: Focused Directions</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/example.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="examples">
+<h1>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="unit-test">
+<h2>Unit Test<a class="headerlink" href="#unit-test" title="Permalink to this headline">¶</a></h2>
+<p>Here is one of the unit tests as an example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>int
+main (int argc, char **argv)
+{
+    static char base_grocery[] = &quot;GRO&quot;;
+    static char base_hardware[] = &quot;HRD&quot;;
+    struct item {
+        const char *i_title;
+        int i_sold;
+        int i_instock;
+        int i_onorder;
+        const char *i_sku_base;
+        int i_sku_num;
+    };
+    struct item list[] = {
+        { &quot;gum&quot;, 1412, 54, 10, base_grocery, 415 },
+        { &quot;rope&quot;, 85, 4, 2, base_hardware, 212 },
+        { &quot;ladder&quot;, 0, 2, 1, base_hardware, 517 },
+        { &quot;bolt&quot;, 4123, 144, 42, base_hardware, 632 },
+        { &quot;water&quot;, 17, 14, 2, base_grocery, 2331 },
+        { NULL, 0, 0, 0, NULL, 0 }
+    };
+    struct item list2[] = {
+        { &quot;fish&quot;, 1321, 45, 1, base_grocery, 533 },
+    };
+    struct item *ip;
+    xo_info_t info[] = {
+        { &quot;in-stock&quot;, &quot;number&quot;, &quot;Number of items in stock&quot; },
+        { &quot;name&quot;, &quot;string&quot;, &quot;Name of the item&quot; },
+        { &quot;on-order&quot;, &quot;number&quot;, &quot;Number of items on order&quot; },
+        { &quot;sku&quot;, &quot;string&quot;, &quot;Stock Keeping Unit&quot; },
+        { &quot;sold&quot;, &quot;number&quot;, &quot;Number of items sold&quot; },
+        { NULL, NULL, NULL },
+    };
+    int info_count = (sizeof(info) / sizeof(info[0])) - 1;
+
+    argc = xo_parse_args(argc, argv);
+    if (argc &lt; 0)
+        exit(EXIT_FAILURE);
+
+    xo_set_info(NULL, info, info_count);
+
+    xo_open_container_h(NULL, &quot;top&quot;);
+
+    xo_open_container(&quot;data&quot;);
+    xo_open_list(&quot;item&quot;);
+
+    for (ip = list; ip-&gt;i_title; ip++) {
+        xo_open_instance(&quot;item&quot;);
+
+        xo_emit(&quot;{L:Item} &#39;{k:name/%s}&#39;:\n&quot;, ip-&gt;i_title);
+        xo_emit(&quot;{P:   }{L:Total sold}: {n:sold/%u%s}\n&quot;,
+                ip-&gt;i_sold, ip-&gt;i_sold ? &quot;.0&quot; : &quot;&quot;);
+        xo_emit(&quot;{P:   }{Lwc:In stock}{:in-stock/%u}\n&quot;,
+                ip-&gt;i_instock);
+        xo_emit(&quot;{P:   }{Lwc:On order}{:on-order/%u}\n&quot;,
+                ip-&gt;i_onorder);
+        xo_emit(&quot;{P:   }{L:SKU}: {q:sku/%s-000-%u}\n&quot;,
+                ip-&gt;i_sku_base, ip-&gt;i_sku_num);
+
+        xo_close_instance(&quot;item&quot;);
+    }
+
+    xo_close_list(&quot;item&quot;);
+    xo_close_container(&quot;data&quot;);
+
+    xo_open_container(&quot;data&quot;);
+    xo_open_list(&quot;item&quot;);
+
+    for (ip = list2; ip-&gt;i_title; ip++) {
+        xo_open_instance(&quot;item&quot;);
+
+        xo_emit(&quot;{L:Item} &#39;{:name/%s}&#39;:\n&quot;, ip-&gt;i_title);
+        xo_emit(&quot;{P:   }{L:Total sold}: {n:sold/%u%s}\n&quot;,
+                ip-&gt;i_sold, ip-&gt;i_sold ? &quot;.0&quot; : &quot;&quot;);
+        xo_emit(&quot;{P:   }{Lwc:In stock}{:in-stock/%u}\n&quot;,
+                ip-&gt;i_instock);
+        xo_emit(&quot;{P:   }{Lwc:On order}{:on-order/%u}\n&quot;,
+                ip-&gt;i_onorder);
+        xo_emit(&quot;{P:   }{L:SKU}: {q:sku/%s-000-%u}\n&quot;,
+                ip-&gt;i_sku_base, ip-&gt;i_sku_num);
+
+        xo_close_instance(&quot;item&quot;);
+    }
+
+    xo_close_list(&quot;item&quot;);
+    xo_close_container(&quot;data&quot;);
+
+    xo_close_container_h(NULL, &quot;top&quot;);
+
+    return 0;
+}
+</pre></div>
+</div>
+<p>Text output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">%</span> <span class="o">./</span><span class="n">testxo</span> <span class="o">--</span><span class="n">libxo</span> <span class="n">text</span>
+<span class="n">Item</span> <span class="s1">&#39;gum&#39;</span><span class="p">:</span>
+   <span class="n">Total</span> <span class="n">sold</span><span class="p">:</span> <span class="mf">1412.0</span>
+   <span class="n">In</span> <span class="n">stock</span><span class="p">:</span> <span class="mi">54</span>
+   <span class="n">On</span> <span class="n">order</span><span class="p">:</span> <span class="mi">10</span>
+   <span class="n">SKU</span><span class="p">:</span> <span class="n">GRO</span><span class="o">-</span><span class="mi">000</span><span class="o">-</span><span class="mi">415</span>
+<span class="n">Item</span> <span class="s1">&#39;rope&#39;</span><span class="p">:</span>
+   <span class="n">Total</span> <span class="n">sold</span><span class="p">:</span> <span class="mf">85.0</span>
+   <span class="n">In</span> <span class="n">stock</span><span class="p">:</span> <span class="mi">4</span>
+   <span class="n">On</span> <span class="n">order</span><span class="p">:</span> <span class="mi">2</span>
+   <span class="n">SKU</span><span class="p">:</span> <span class="n">HRD</span><span class="o">-</span><span class="mi">000</span><span class="o">-</span><span class="mi">212</span>
+<span class="n">Item</span> <span class="s1">&#39;ladder&#39;</span><span class="p">:</span>
+   <span class="n">Total</span> <span class="n">sold</span><span class="p">:</span> <span class="mi">0</span>
+   <span class="n">In</span> <span class="n">stock</span><span class="p">:</span> <span class="mi">2</span>
+   <span class="n">On</span> <span class="n">order</span><span class="p">:</span> <span class="mi">1</span>
+   <span class="n">SKU</span><span class="p">:</span> <span class="n">HRD</span><span class="o">-</span><span class="mi">000</span><span class="o">-</span><span class="mi">517</span>
+<span class="n">Item</span> <span class="s1">&#39;bolt&#39;</span><span class="p">:</span>
+   <span class="n">Total</span> <span class="n">sold</span><span class="p">:</span> <span class="mf">4123.0</span>
+   <span class="n">In</span> <span class="n">stock</span><span class="p">:</span> <span class="mi">144</span>
+   <span class="n">On</span> <span class="n">order</span><span class="p">:</span> <span class="mi">42</span>
+   <span class="n">SKU</span><span class="p">:</span> <span class="n">HRD</span><span class="o">-</span><span class="mi">000</span><span class="o">-</span><span class="mi">632</span>
+<span class="n">Item</span> <span class="s1">&#39;water&#39;</span><span class="p">:</span>
+   <span class="n">Total</span> <span class="n">sold</span><span class="p">:</span> <span class="mf">17.0</span>
+   <span class="n">In</span> <span class="n">stock</span><span class="p">:</span> <span class="mi">14</span>
+   <span class="n">On</span> <span class="n">order</span><span class="p">:</span> <span class="mi">2</span>
+   <span class="n">SKU</span><span class="p">:</span> <span class="n">GRO</span><span class="o">-</span><span class="mi">000</span><span class="o">-</span><span class="mi">2331</span>
+<span class="n">Item</span> <span class="s1">&#39;fish&#39;</span><span class="p">:</span>
+   <span class="n">Total</span> <span class="n">sold</span><span class="p">:</span> <span class="mf">1321.0</span>
+   <span class="n">In</span> <span class="n">stock</span><span class="p">:</span> <span class="mi">45</span>
+   <span class="n">On</span> <span class="n">order</span><span class="p">:</span> <span class="mi">1</span>
+   <span class="n">SKU</span><span class="p">:</span> <span class="n">GRO</span><span class="o">-</span><span class="mi">000</span><span class="o">-</span><span class="mi">533</span>
+</pre></div>
+</div>
+<p>JSON output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">%</span> <span class="o">./</span><span class="n">testxo</span> <span class="o">--</span><span class="n">libxo</span> <span class="n">json</span><span class="p">,</span><span class="n">pretty</span>
+<span class="s2">&quot;top&quot;</span><span class="p">:</span> <span class="p">{</span>
+  <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s2">&quot;item&quot;</span><span class="p">:</span> <span class="p">[</span>
+      <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;gum&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;sold&quot;</span><span class="p">:</span> <span class="mf">1412.0</span><span class="p">,</span>
+        <span class="s2">&quot;in-stock&quot;</span><span class="p">:</span> <span class="mi">54</span><span class="p">,</span>
+        <span class="s2">&quot;on-order&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="s2">&quot;sku&quot;</span><span class="p">:</span> <span class="s2">&quot;GRO-000-415&quot;</span>
+      <span class="p">},</span>
+      <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;rope&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;sold&quot;</span><span class="p">:</span> <span class="mf">85.0</span><span class="p">,</span>
+        <span class="s2">&quot;in-stock&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="s2">&quot;on-order&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="s2">&quot;sku&quot;</span><span class="p">:</span> <span class="s2">&quot;HRD-000-212&quot;</span>
+      <span class="p">},</span>
+      <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;ladder&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;sold&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s2">&quot;in-stock&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="s2">&quot;on-order&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s2">&quot;sku&quot;</span><span class="p">:</span> <span class="s2">&quot;HRD-000-517&quot;</span>
+      <span class="p">},</span>
+      <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;bolt&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;sold&quot;</span><span class="p">:</span> <span class="mf">4123.0</span><span class="p">,</span>
+        <span class="s2">&quot;in-stock&quot;</span><span class="p">:</span> <span class="mi">144</span><span class="p">,</span>
+        <span class="s2">&quot;on-order&quot;</span><span class="p">:</span> <span class="mi">42</span><span class="p">,</span>
+        <span class="s2">&quot;sku&quot;</span><span class="p">:</span> <span class="s2">&quot;HRD-000-632&quot;</span>
+      <span class="p">},</span>
+      <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;water&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;sold&quot;</span><span class="p">:</span> <span class="mf">17.0</span><span class="p">,</span>
+        <span class="s2">&quot;in-stock&quot;</span><span class="p">:</span> <span class="mi">14</span><span class="p">,</span>
+        <span class="s2">&quot;on-order&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="s2">&quot;sku&quot;</span><span class="p">:</span> <span class="s2">&quot;GRO-000-2331&quot;</span>
+      <span class="p">}</span>
+    <span class="p">]</span>
+  <span class="p">},</span>
+  <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s2">&quot;item&quot;</span><span class="p">:</span> <span class="p">[</span>
+      <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;fish&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;sold&quot;</span><span class="p">:</span> <span class="mf">1321.0</span><span class="p">,</span>
+        <span class="s2">&quot;in-stock&quot;</span><span class="p">:</span> <span class="mi">45</span><span class="p">,</span>
+        <span class="s2">&quot;on-order&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s2">&quot;sku&quot;</span><span class="p">:</span> <span class="s2">&quot;GRO-000-533&quot;</span>
+      <span class="p">}</span>
+    <span class="p">]</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>XML output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">%</span> <span class="o">./</span><span class="n">testxo</span> <span class="o">--</span><span class="n">libxo</span> <span class="n">pretty</span><span class="p">,</span><span class="n">xml</span>
+<span class="o">&lt;</span><span class="n">top</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">data</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">item</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span><span class="n">gum</span><span class="o">&lt;/</span><span class="n">name</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="n">sold</span><span class="o">&gt;</span><span class="mf">1412.0</span><span class="o">&lt;/</span><span class="n">sold</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="ow">in</span><span class="o">-</span><span class="n">stock</span><span class="o">&gt;</span><span class="mi">54</span><span class="o">&lt;/</span><span class="ow">in</span><span class="o">-</span><span class="n">stock</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="n">on</span><span class="o">-</span><span class="n">order</span><span class="o">&gt;</span><span class="mi">10</span><span class="o">&lt;/</span><span class="n">on</span><span class="o">-</span><span class="n">order</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="n">sku</span><span class="o">&gt;</span><span class="n">GRO</span><span class="o">-</span><span class="mi">000</span><span class="o">-</span><span class="mi">415</span><span class="o">&lt;/</span><span class="n">sku</span><span class="o">&gt;</span>
+    <span class="o">&lt;/</span><span class="n">item</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">item</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span><span class="n">rope</span><span class="o">&lt;/</span><span class="n">name</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="n">sold</span><span class="o">&gt;</span><span class="mf">85.0</span><span class="o">&lt;/</span><span class="n">sold</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="ow">in</span><span class="o">-</span><span class="n">stock</span><span class="o">&gt;</span><span class="mi">4</span><span class="o">&lt;/</span><span class="ow">in</span><span class="o">-</span><span class="n">stock</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="n">on</span><span class="o">-</span><span class="n">order</span><span class="o">&gt;</span><span class="mi">2</span><span class="o">&lt;/</span><span class="n">on</span><span class="o">-</span><span class="n">order</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="n">sku</span><span class="o">&gt;</span><span class="n">HRD</span><span class="o">-</span><span class="mi">000</span><span class="o">-</span><span class="mi">212</span><span class="o">&lt;/</span><span class="n">sku</span><span class="o">&gt;</span>
+    <span class="o">&lt;/</span><span class="n">item</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">item</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span><span class="n">ladder</span><span class="o">&lt;/</span><span class="n">name</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="n">sold</span><span class="o">&gt;</span><span class="mi">0</span><span class="o">&lt;/</span><span class="n">sold</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="ow">in</span><span class="o">-</span><span class="n">stock</span><span class="o">&gt;</span><span class="mi">2</span><span class="o">&lt;/</span><span class="ow">in</span><span class="o">-</span><span class="n">stock</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="n">on</span><span class="o">-</span><span class="n">order</span><span class="o">&gt;</span><span class="mi">1</span><span class="o">&lt;/</span><span class="n">on</span><span class="o">-</span><span class="n">order</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="n">sku</span><span class="o">&gt;</span><span class="n">HRD</span><span class="o">-</span><span class="mi">000</span><span class="o">-</span><span class="mi">517</span><span class="o">&lt;/</span><span class="n">sku</span><span class="o">&gt;</span>
+    <span class="o">&lt;/</span><span class="n">item</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">item</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span><span class="n">bolt</span><span class="o">&lt;/</span><span class="n">name</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="n">sold</span><span class="o">&gt;</span><span class="mf">4123.0</span><span class="o">&lt;/</span><span class="n">sold</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="ow">in</span><span class="o">-</span><span class="n">stock</span><span class="o">&gt;</span><span class="mi">144</span><span class="o">&lt;/</span><span class="ow">in</span><span class="o">-</span><span class="n">stock</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="n">on</span><span class="o">-</span><span class="n">order</span><span class="o">&gt;</span><span class="mi">42</span><span class="o">&lt;/</span><span class="n">on</span><span class="o">-</span><span class="n">order</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="n">sku</span><span class="o">&gt;</span><span class="n">HRD</span><span class="o">-</span><span class="mi">000</span><span class="o">-</span><span class="mi">632</span><span class="o">&lt;/</span><span class="n">sku</span><span class="o">&gt;</span>
+    <span class="o">&lt;/</span><span class="n">item</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">item</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span><span class="n">water</span><span class="o">&lt;/</span><span class="n">name</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="n">sold</span><span class="o">&gt;</span><span class="mf">17.0</span><span class="o">&lt;/</span><span class="n">sold</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="ow">in</span><span class="o">-</span><span class="n">stock</span><span class="o">&gt;</span><span class="mi">14</span><span class="o">&lt;/</span><span class="ow">in</span><span class="o">-</span><span class="n">stock</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="n">on</span><span class="o">-</span><span class="n">order</span><span class="o">&gt;</span><span class="mi">2</span><span class="o">&lt;/</span><span class="n">on</span><span class="o">-</span><span class="n">order</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="n">sku</span><span class="o">&gt;</span><span class="n">GRO</span><span class="o">-</span><span class="mi">000</span><span class="o">-</span><span class="mi">2331</span><span class="o">&lt;/</span><span class="n">sku</span><span class="o">&gt;</span>
+    <span class="o">&lt;/</span><span class="n">item</span><span class="o">&gt;</span>
+  <span class="o">&lt;/</span><span class="n">data</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">data</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">item</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span><span class="n">fish</span><span class="o">&lt;/</span><span class="n">name</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="n">sold</span><span class="o">&gt;</span><span class="mf">1321.0</span><span class="o">&lt;/</span><span class="n">sold</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="ow">in</span><span class="o">-</span><span class="n">stock</span><span class="o">&gt;</span><span class="mi">45</span><span class="o">&lt;/</span><span class="ow">in</span><span class="o">-</span><span class="n">stock</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="n">on</span><span class="o">-</span><span class="n">order</span><span class="o">&gt;</span><span class="mi">1</span><span class="o">&lt;/</span><span class="n">on</span><span class="o">-</span><span class="n">order</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="n">sku</span><span class="o">&gt;</span><span class="n">GRO</span><span class="o">-</span><span class="mi">000</span><span class="o">-</span><span class="mi">533</span><span class="o">&lt;/</span><span class="n">sku</span><span class="o">&gt;</span>
+    <span class="o">&lt;/</span><span class="n">item</span><span class="o">&gt;</span>
+  <span class="o">&lt;/</span><span class="n">data</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">top</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>HMTL output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">%</span> <span class="o">./</span><span class="n">testxo</span> <span class="o">--</span><span class="n">libxo</span> <span class="n">pretty</span><span class="p">,</span><span class="n">html</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">Item</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span> <span class="s1">&#39;&lt;/div&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;name&quot;</span><span class="o">&gt;</span><span class="n">gum</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span><span class="s1">&#39;:&lt;/div&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">Total</span> <span class="n">sold</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span><span class="p">:</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;sold&quot;</span><span class="o">&gt;</span><span class="mf">1412.0</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">In</span> <span class="n">stock</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;decoration&quot;</span><span class="o">&gt;</span><span class="p">:</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;in-stock&quot;</span><span class="o">&gt;</span><span class="mi">54</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">On</span> <span class="n">order</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;decoration&quot;</span><span class="o">&gt;</span><span class="p">:</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;on-order&quot;</span><span class="o">&gt;</span><span class="mi">10</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">SKU</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span><span class="p">:</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;sku&quot;</span><span class="o">&gt;</span><span class="n">GRO</span><span class="o">-</span><span class="mi">000</span><span class="o">-</span><span class="mi">415</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">Item</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span> <span class="s1">&#39;&lt;/div&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;name&quot;</span><span class="o">&gt;</span><span class="n">rope</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span><span class="s1">&#39;:&lt;/div&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">Total</span> <span class="n">sold</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span><span class="p">:</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;sold&quot;</span><span class="o">&gt;</span><span class="mf">85.0</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">In</span> <span class="n">stock</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;decoration&quot;</span><span class="o">&gt;</span><span class="p">:</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;in-stock&quot;</span><span class="o">&gt;</span><span class="mi">4</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">On</span> <span class="n">order</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;decoration&quot;</span><span class="o">&gt;</span><span class="p">:</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;on-order&quot;</span><span class="o">&gt;</span><span class="mi">2</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">SKU</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span><span class="p">:</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;sku&quot;</span><span class="o">&gt;</span><span class="n">HRD</span><span class="o">-</span><span class="mi">000</span><span class="o">-</span><span class="mi">212</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">Item</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span> <span class="s1">&#39;&lt;/div&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;name&quot;</span><span class="o">&gt;</span><span class="n">ladder</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span><span class="s1">&#39;:&lt;/div&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">Total</span> <span class="n">sold</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span><span class="p">:</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;sold&quot;</span><span class="o">&gt;</span><span class="mi">0</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">In</span> <span class="n">stock</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;decoration&quot;</span><span class="o">&gt;</span><span class="p">:</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;in-stock&quot;</span><span class="o">&gt;</span><span class="mi">2</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">On</span> <span class="n">order</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;decoration&quot;</span><span class="o">&gt;</span><span class="p">:</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;on-order&quot;</span><span class="o">&gt;</span><span class="mi">1</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">SKU</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span><span class="p">:</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;sku&quot;</span><span class="o">&gt;</span><span class="n">HRD</span><span class="o">-</span><span class="mi">000</span><span class="o">-</span><span class="mi">517</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">Item</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span> <span class="s1">&#39;&lt;/div&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;name&quot;</span><span class="o">&gt;</span><span class="n">bolt</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span><span class="s1">&#39;:&lt;/div&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">Total</span> <span class="n">sold</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span><span class="p">:</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;sold&quot;</span><span class="o">&gt;</span><span class="mf">4123.0</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">In</span> <span class="n">stock</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;decoration&quot;</span><span class="o">&gt;</span><span class="p">:</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;in-stock&quot;</span><span class="o">&gt;</span><span class="mi">144</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">On</span> <span class="n">order</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;decoration&quot;</span><span class="o">&gt;</span><span class="p">:</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;on-order&quot;</span><span class="o">&gt;</span><span class="mi">42</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">SKU</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span><span class="p">:</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;sku&quot;</span><span class="o">&gt;</span><span class="n">HRD</span><span class="o">-</span><span class="mi">000</span><span class="o">-</span><span class="mi">632</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">Item</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span> <span class="s1">&#39;&lt;/div&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;name&quot;</span><span class="o">&gt;</span><span class="n">water</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span><span class="s1">&#39;:&lt;/div&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">Total</span> <span class="n">sold</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span><span class="p">:</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;sold&quot;</span><span class="o">&gt;</span><span class="mf">17.0</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">In</span> <span class="n">stock</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;decoration&quot;</span><span class="o">&gt;</span><span class="p">:</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;in-stock&quot;</span><span class="o">&gt;</span><span class="mi">14</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">On</span> <span class="n">order</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;decoration&quot;</span><span class="o">&gt;</span><span class="p">:</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;on-order&quot;</span><span class="o">&gt;</span><span class="mi">2</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">SKU</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span><span class="p">:</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;sku&quot;</span><span class="o">&gt;</span><span class="n">GRO</span><span class="o">-</span><span class="mi">000</span><span class="o">-</span><span class="mi">2331</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">Item</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span> <span class="s1">&#39;&lt;/div&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;name&quot;</span><span class="o">&gt;</span><span class="n">fish</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span><span class="s1">&#39;:&lt;/div&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">Total</span> <span class="n">sold</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span><span class="p">:</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;sold&quot;</span><span class="o">&gt;</span><span class="mf">1321.0</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">In</span> <span class="n">stock</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;decoration&quot;</span><span class="o">&gt;</span><span class="p">:</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;in-stock&quot;</span><span class="o">&gt;</span><span class="mi">45</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">On</span> <span class="n">order</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;decoration&quot;</span><span class="o">&gt;</span><span class="p">:</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;on-order&quot;</span><span class="o">&gt;</span><span class="mi">1</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">SKU</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span><span class="p">:</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;sku&quot;</span><span class="o">&gt;</span><span class="n">GRO</span><span class="o">-</span><span class="mi">000</span><span class="o">-</span><span class="mi">533</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>HTML output with xpath and info flags:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">%</span> <span class="o">./</span><span class="n">testxo</span> <span class="o">--</span><span class="n">libxo</span> <span class="n">pretty</span><span class="p">,</span><span class="n">html</span><span class="p">,</span><span class="n">xpath</span><span class="p">,</span><span class="n">info</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">Item</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span> <span class="s1">&#39;&lt;/div&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;name&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">xpath</span><span class="o">=</span><span class="s2">&quot;/top/data/item/name&quot;</span> <span class="n">data</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;string&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">help</span><span class="o">=</span><span class="s2">&quot;Name of the item&quot;</span><span class="o">&gt;</span><span class="n">gum</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span><span class="s1">&#39;:&lt;/div&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">Total</span> <span class="n">sold</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span><span class="p">:</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;sold&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">xpath</span><span class="o">=</span><span class="s2">&quot;/top/data/item/sold&quot;</span> <span class="n">data</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;number&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">help</span><span class="o">=</span><span class="s2">&quot;Number of items sold&quot;</span><span class="o">&gt;</span><span class="mf">1412.0</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">In</span> <span class="n">stock</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;decoration&quot;</span><span class="o">&gt;</span><span class="p">:</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;in-stock&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">xpath</span><span class="o">=</span><span class="s2">&quot;/top/data/item/in-stock&quot;</span> <span class="n">data</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;number&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">help</span><span class="o">=</span><span class="s2">&quot;Number of items in stock&quot;</span><span class="o">&gt;</span><span class="mi">54</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">On</span> <span class="n">order</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;decoration&quot;</span><span class="o">&gt;</span><span class="p">:</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;on-order&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">xpath</span><span class="o">=</span><span class="s2">&quot;/top/data/item/on-order&quot;</span> <span class="n">data</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;number&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">help</span><span class="o">=</span><span class="s2">&quot;Number of items on order&quot;</span><span class="o">&gt;</span><span class="mi">10</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">SKU</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span><span class="p">:</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;sku&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">xpath</span><span class="o">=</span><span class="s2">&quot;/top/data/item/sku&quot;</span> <span class="n">data</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;string&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">help</span><span class="o">=</span><span class="s2">&quot;Stock Keeping Unit&quot;</span><span class="o">&gt;</span><span class="n">GRO</span><span class="o">-</span><span class="mi">000</span><span class="o">-</span><span class="mi">415</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">Item</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span> <span class="s1">&#39;&lt;/div&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;name&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">xpath</span><span class="o">=</span><span class="s2">&quot;/top/data/item/name&quot;</span> <span class="n">data</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;string&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">help</span><span class="o">=</span><span class="s2">&quot;Name of the item&quot;</span><span class="o">&gt;</span><span class="n">rope</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span><span class="s1">&#39;:&lt;/div&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">Total</span> <span class="n">sold</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span><span class="p">:</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;sold&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">xpath</span><span class="o">=</span><span class="s2">&quot;/top/data/item/sold&quot;</span> <span class="n">data</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;number&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">help</span><span class="o">=</span><span class="s2">&quot;Number of items sold&quot;</span><span class="o">&gt;</span><span class="mf">85.0</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">In</span> <span class="n">stock</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;decoration&quot;</span><span class="o">&gt;</span><span class="p">:</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;in-stock&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">xpath</span><span class="o">=</span><span class="s2">&quot;/top/data/item/in-stock&quot;</span> <span class="n">data</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;number&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">help</span><span class="o">=</span><span class="s2">&quot;Number of items in stock&quot;</span><span class="o">&gt;</span><span class="mi">4</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">On</span> <span class="n">order</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;decoration&quot;</span><span class="o">&gt;</span><span class="p">:</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;on-order&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">xpath</span><span class="o">=</span><span class="s2">&quot;/top/data/item/on-order&quot;</span> <span class="n">data</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;number&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">help</span><span class="o">=</span><span class="s2">&quot;Number of items on order&quot;</span><span class="o">&gt;</span><span class="mi">2</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">SKU</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span><span class="p">:</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;sku&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">xpath</span><span class="o">=</span><span class="s2">&quot;/top/data/item/sku&quot;</span> <span class="n">data</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;string&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">help</span><span class="o">=</span><span class="s2">&quot;Stock Keeping Unit&quot;</span><span class="o">&gt;</span><span class="n">HRD</span><span class="o">-</span><span class="mi">000</span><span class="o">-</span><span class="mi">212</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">Item</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span> <span class="s1">&#39;&lt;/div&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;name&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">xpath</span><span class="o">=</span><span class="s2">&quot;/top/data/item/name&quot;</span> <span class="n">data</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;string&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">help</span><span class="o">=</span><span class="s2">&quot;Name of the item&quot;</span><span class="o">&gt;</span><span class="n">ladder</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span><span class="s1">&#39;:&lt;/div&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">Total</span> <span class="n">sold</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span><span class="p">:</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;sold&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">xpath</span><span class="o">=</span><span class="s2">&quot;/top/data/item/sold&quot;</span> <span class="n">data</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;number&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">help</span><span class="o">=</span><span class="s2">&quot;Number of items sold&quot;</span><span class="o">&gt;</span><span class="mi">0</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">In</span> <span class="n">stock</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;decoration&quot;</span><span class="o">&gt;</span><span class="p">:</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;in-stock&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">xpath</span><span class="o">=</span><span class="s2">&quot;/top/data/item/in-stock&quot;</span> <span class="n">data</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;number&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">help</span><span class="o">=</span><span class="s2">&quot;Number of items in stock&quot;</span><span class="o">&gt;</span><span class="mi">2</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">On</span> <span class="n">order</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;decoration&quot;</span><span class="o">&gt;</span><span class="p">:</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;on-order&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">xpath</span><span class="o">=</span><span class="s2">&quot;/top/data/item/on-order&quot;</span> <span class="n">data</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;number&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">help</span><span class="o">=</span><span class="s2">&quot;Number of items on order&quot;</span><span class="o">&gt;</span><span class="mi">1</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">SKU</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span><span class="p">:</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;sku&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">xpath</span><span class="o">=</span><span class="s2">&quot;/top/data/item/sku&quot;</span> <span class="n">data</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;string&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">help</span><span class="o">=</span><span class="s2">&quot;Stock Keeping Unit&quot;</span><span class="o">&gt;</span><span class="n">HRD</span><span class="o">-</span><span class="mi">000</span><span class="o">-</span><span class="mi">517</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">Item</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span> <span class="s1">&#39;&lt;/div&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;name&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">xpath</span><span class="o">=</span><span class="s2">&quot;/top/data/item/name&quot;</span> <span class="n">data</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;string&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">help</span><span class="o">=</span><span class="s2">&quot;Name of the item&quot;</span><span class="o">&gt;</span><span class="n">bolt</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span><span class="s1">&#39;:&lt;/div&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">Total</span> <span class="n">sold</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span><span class="p">:</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;sold&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">xpath</span><span class="o">=</span><span class="s2">&quot;/top/data/item/sold&quot;</span> <span class="n">data</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;number&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">help</span><span class="o">=</span><span class="s2">&quot;Number of items sold&quot;</span><span class="o">&gt;</span><span class="mf">4123.0</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">In</span> <span class="n">stock</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;decoration&quot;</span><span class="o">&gt;</span><span class="p">:</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;in-stock&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">xpath</span><span class="o">=</span><span class="s2">&quot;/top/data/item/in-stock&quot;</span> <span class="n">data</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;number&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">help</span><span class="o">=</span><span class="s2">&quot;Number of items in stock&quot;</span><span class="o">&gt;</span><span class="mi">144</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">On</span> <span class="n">order</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;decoration&quot;</span><span class="o">&gt;</span><span class="p">:</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;on-order&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">xpath</span><span class="o">=</span><span class="s2">&quot;/top/data/item/on-order&quot;</span> <span class="n">data</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;number&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">help</span><span class="o">=</span><span class="s2">&quot;Number of items on order&quot;</span><span class="o">&gt;</span><span class="mi">42</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">SKU</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span><span class="p">:</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;sku&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">xpath</span><span class="o">=</span><span class="s2">&quot;/top/data/item/sku&quot;</span> <span class="n">data</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;string&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">help</span><span class="o">=</span><span class="s2">&quot;Stock Keeping Unit&quot;</span><span class="o">&gt;</span><span class="n">HRD</span><span class="o">-</span><span class="mi">000</span><span class="o">-</span><span class="mi">632</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">Item</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span> <span class="s1">&#39;&lt;/div&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;name&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">xpath</span><span class="o">=</span><span class="s2">&quot;/top/data/item/name&quot;</span> <span class="n">data</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;string&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">help</span><span class="o">=</span><span class="s2">&quot;Name of the item&quot;</span><span class="o">&gt;</span><span class="n">water</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span><span class="s1">&#39;:&lt;/div&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">Total</span> <span class="n">sold</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span><span class="p">:</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;sold&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">xpath</span><span class="o">=</span><span class="s2">&quot;/top/data/item/sold&quot;</span> <span class="n">data</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;number&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">help</span><span class="o">=</span><span class="s2">&quot;Number of items sold&quot;</span><span class="o">&gt;</span><span class="mf">17.0</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">In</span> <span class="n">stock</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;decoration&quot;</span><span class="o">&gt;</span><span class="p">:</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;in-stock&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">xpath</span><span class="o">=</span><span class="s2">&quot;/top/data/item/in-stock&quot;</span> <span class="n">data</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;number&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">help</span><span class="o">=</span><span class="s2">&quot;Number of items in stock&quot;</span><span class="o">&gt;</span><span class="mi">14</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">On</span> <span class="n">order</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;decoration&quot;</span><span class="o">&gt;</span><span class="p">:</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;on-order&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">xpath</span><span class="o">=</span><span class="s2">&quot;/top/data/item/on-order&quot;</span> <span class="n">data</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;number&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">help</span><span class="o">=</span><span class="s2">&quot;Number of items on order&quot;</span><span class="o">&gt;</span><span class="mi">2</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">SKU</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span><span class="p">:</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;sku&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">xpath</span><span class="o">=</span><span class="s2">&quot;/top/data/item/sku&quot;</span> <span class="n">data</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;string&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">help</span><span class="o">=</span><span class="s2">&quot;Stock Keeping Unit&quot;</span><span class="o">&gt;</span><span class="n">GRO</span><span class="o">-</span><span class="mi">000</span><span class="o">-</span><span class="mi">2331</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">Item</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span> <span class="s1">&#39;&lt;/div&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;name&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">xpath</span><span class="o">=</span><span class="s2">&quot;/top/data/item/name&quot;</span> <span class="n">data</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;string&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">help</span><span class="o">=</span><span class="s2">&quot;Name of the item&quot;</span><span class="o">&gt;</span><span class="n">fish</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span><span class="s1">&#39;:&lt;/div&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">Total</span> <span class="n">sold</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span><span class="p">:</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;sold&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">xpath</span><span class="o">=</span><span class="s2">&quot;/top/data/item/sold&quot;</span> <span class="n">data</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;number&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">help</span><span class="o">=</span><span class="s2">&quot;Number of items sold&quot;</span><span class="o">&gt;</span><span class="mf">1321.0</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">In</span> <span class="n">stock</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;decoration&quot;</span><span class="o">&gt;</span><span class="p">:</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;in-stock&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">xpath</span><span class="o">=</span><span class="s2">&quot;/top/data/item/in-stock&quot;</span> <span class="n">data</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;number&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">help</span><span class="o">=</span><span class="s2">&quot;Number of items in stock&quot;</span><span class="o">&gt;</span><span class="mi">45</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">On</span> <span class="n">order</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;decoration&quot;</span><span class="o">&gt;</span><span class="p">:</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;on-order&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">xpath</span><span class="o">=</span><span class="s2">&quot;/top/data/item/on-order&quot;</span> <span class="n">data</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;number&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">help</span><span class="o">=</span><span class="s2">&quot;Number of items on order&quot;</span><span class="o">&gt;</span><span class="mi">1</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;padding&quot;</span><span class="o">&gt;</span>   <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="o">&gt;</span><span class="n">SKU</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="o">&gt;</span><span class="p">:</span> <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;data&quot;</span> <span class="n">data</span><span class="o">-</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;sku&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">xpath</span><span class="o">=</span><span class="s2">&quot;/top/data/item/sku&quot;</span> <span class="n">data</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;string&quot;</span>
+       <span class="n">data</span><span class="o">-</span><span class="n">help</span><span class="o">=</span><span class="s2">&quot;Stock Keeping Unit&quot;</span><span class="o">&gt;</span><span class="n">GRO</span><span class="o">-</span><span class="mi">000</span><span class="o">-</span><span class="mi">533</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="howto.html" title="Howtos: Focused Directions"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">libxo 1.5.1
+ documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017-2019, Juniper Networks Inc.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.3.0.
+    </div>
+  </body>
+</html>
