@@ -1,20 +1,34 @@
 set top_src=`pwd`
 alias Zautoreconf "(cd $top_src ; autoreconf --install)"
 
+switch ( `uname` )
+    case FreeBSD*:
+       set ZENV="MAKE=gmake "
+       breaksw
+endsw
+
+if ( -x /opt/local/bin/msgfmt ) then
+    set gettext='--with-gettext=/opt/local'
+else if ( -x /usr/local/bin/msgfmt ) then
+     set gettext='--with-gettext=/usr/local'
+else
+     set gettext=''
+endif
+
 set opts=' \
 --with-libslax-prefix=/Users/phil/work/root \
 --enable-debug \
 --enable-warnings \
 --enable-printflike \
---with-gettext=/opt/local \
 --prefix ${HOME}/work/root \
+${gettext} \
 '
 set opts=`echo $opts`
 
 setenv CONFIGURE_OPTS "$opts"
 setenv ADB_PATH $top_src/build/libxo/.libs
 
-alias Zconfigure "(cd $top_src/build; ../configure $opts)"
+alias Zconfigure "(cd $top_src/build; env $ZENV ../configure $opts)"
 alias Zbuild "(cd $top_src/build; make \!* )"
 alias mi "(cd $top_src/build; make && make install); ."
 
