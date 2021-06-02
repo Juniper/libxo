@@ -1,6 +1,8 @@
 set top_src=`pwd`
 alias Zautoreconf "(cd $top_src ; autoreconf --install)"
 
+set ZENV=""
+
 switch ( `uname` )
     case FreeBSD*:
        set ZENV="MAKE=gmake "
