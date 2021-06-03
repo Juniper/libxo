@@ -1,0 +1,326 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>FAQs &#8212; libxo 
+ documentation</title>
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="‘A percent sign appearing in text is a literal’" href="xolint-errors.html" />
+    <link rel="prev" title="xopo" href="xopo.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="xolint-errors.html" title="‘A percent sign appearing in text is a literal’"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="xopo.html" title="xopo"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">libxo 
+ documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">On This Page</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">FAQs</a><ul>
+<li><a class="reference internal" href="#general">General</a><ul>
+<li><a class="reference internal" href="#can-you-share-the-history-of-libxo">Can you share the history of libxo?</a></li>
+<li><a class="reference internal" href="#did-the-complex-semantics-of-format-strings-evolve-over-time">Did the complex semantics of format strings evolve over time?</a></li>
+<li><a class="reference internal" href="#what-makes-a-good-field-name">What makes a good field name?</a></li>
+<li><a class="reference internal" href="#what-does-this-message-mean">What does this message mean?</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h3><a href="index.html">Full Documentation</a></h3>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="xopo.html"
+                        title="previous chapter">xopo</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="xolint-errors.html"
+                        title="next chapter">‘A percent sign appearing in text is a literal’</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/faq.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="faqs">
+<h1>FAQs<a class="headerlink" href="#faqs" title="Permalink to this headline">¶</a></h1>
+<p>This section contains the set of questions that users typically ask,
+along with answers that might be helpful.</p>
+<div class="section" id="general">
+<h2>General<a class="headerlink" href="#general" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="can-you-share-the-history-of-libxo">
+<h3>Can you share the history of libxo?<a class="headerlink" href="#can-you-share-the-history-of-libxo" title="Permalink to this headline">¶</a></h3>
+<p>In 2001, we added an XML API to the JUNOS operating system, which is
+built on top of <a class="reference external" href="https://www.freebsd.org">FreeBSD</a>.  Eventually this API became standardized as
+the NETCONF API (<span class="target" id="index-0"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6241.html"><strong>RFC 6241</strong></a>).  As part of this effort, we modified many
+FreeBSD utilities to emit XML, typically via a “-X” switch.  The
+results were mixed.  The cost of maintaining this code, updating it,
+and carrying it were non-trivial, and contributed to our expense (and
+the associated delay) with upgrading the version of FreeBSD on which
+each release of JUNOS is based.</p>
+<p>A recent (2014) effort within JUNOS aims at removing our modifications
+to the underlying FreeBSD code as a means of reducing the expense and
+delay in tracking HEAD.  JUNOS is structured to have system components
+generate XML that is rendered by the CLI (think: login shell) into
+human-readable text.  This allows the API to use the same plumbing as
+the CLI, and ensures that all components emit XML, and that it is
+emitted with knowledge of the consumer of that XML, yielding an API
+that have no incremental cost or feature delay.</p>
+<p>libxo is an effort to mix the best aspects of the JUNOS strategy into
+FreeBSD in a seemless way, allowing commands to make printf-like
+output calls with a single code path.</p>
+</div>
+<div class="section" id="did-the-complex-semantics-of-format-strings-evolve-over-time">
+<h3>Did the complex semantics of format strings evolve over time?<a class="headerlink" href="#did-the-complex-semantics-of-format-strings-evolve-over-time" title="Permalink to this headline">¶</a></h3>
+<p>The history is both long and short: libxo’s functionality is based
+on what JUNOS does in a data modeling language called ODL (output
+definition language).  In JUNOS, all subcomponents generate XML,
+which is feed to the CLI, where data from the ODL files tell is
+how to render that XML into text.  ODL might had a set of tags
+like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tag</span> <span class="n">docsis</span><span class="o">-</span><span class="n">state</span> <span class="p">{</span>
+    <span class="n">help</span> <span class="s2">&quot;State of the DOCSIS interface&quot;</span><span class="p">;</span>
+    <span class="nb">type</span> <span class="n">string</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">tag</span> <span class="n">docsis</span><span class="o">-</span><span class="n">mode</span> <span class="p">{</span>
+    <span class="n">help</span> <span class="s2">&quot;DOCSIS mode (2.0/3.0) of the DOCSIS interface&quot;</span><span class="p">;</span>
+    <span class="nb">type</span> <span class="n">string</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">tag</span> <span class="n">docsis</span><span class="o">-</span><span class="n">upstream</span><span class="o">-</span><span class="n">speed</span> <span class="p">{</span>
+    <span class="n">help</span> <span class="s2">&quot;Operational upstream speed of the interface&quot;</span><span class="p">;</span>
+    <span class="nb">type</span> <span class="n">string</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">tag</span> <span class="n">downstream</span><span class="o">-</span><span class="n">scanning</span> <span class="p">{</span>
+    <span class="n">help</span> <span class="s2">&quot;Result of scanning in downstream direction&quot;</span><span class="p">;</span>
+    <span class="nb">type</span> <span class="n">string</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">tag</span> <span class="n">ranging</span> <span class="p">{</span>
+    <span class="n">help</span> <span class="s2">&quot;Result of ranging action&quot;</span><span class="p">;</span>
+    <span class="nb">type</span> <span class="n">string</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">tag</span> <span class="n">signal</span><span class="o">-</span><span class="n">to</span><span class="o">-</span><span class="n">noise</span><span class="o">-</span><span class="n">ratio</span> <span class="p">{</span>
+    <span class="n">help</span> <span class="s2">&quot;Signal to noise ratio for all channels&quot;</span><span class="p">;</span>
+    <span class="nb">type</span> <span class="n">string</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">tag</span> <span class="n">power</span> <span class="p">{</span>
+    <span class="n">help</span> <span class="s2">&quot;Operational power of the signal on all channels&quot;</span><span class="p">;</span>
+    <span class="nb">type</span> <span class="n">string</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nb">format</span> <span class="n">docsis</span><span class="o">-</span><span class="n">status</span><span class="o">-</span><span class="nb">format</span> <span class="p">{</span>
+    <span class="n">picture</span> <span class="s2">&quot;</span>
+<span class="n">State</span>   <span class="p">:</span> <span class="o">@</span><span class="p">,</span> <span class="n">Mode</span><span class="p">:</span> <span class="o">@</span><span class="p">,</span> <span class="n">Upstream</span> <span class="n">speed</span><span class="p">:</span> <span class="o">@</span>
+<span class="n">Downstream</span> <span class="n">scanning</span><span class="p">:</span> <span class="o">@</span><span class="p">,</span> <span class="n">Ranging</span><span class="p">:</span> <span class="o">@</span>
+<span class="n">Signal</span> <span class="n">to</span> <span class="n">noise</span> <span class="n">ratio</span><span class="p">:</span> <span class="o">@</span>
+<span class="n">Power</span><span class="p">:</span> <span class="o">@</span>
+<span class="s2">&quot;;</span>
+    <span class="n">line</span> <span class="p">{</span>
+        <span class="n">field</span> <span class="n">docsis</span><span class="o">-</span><span class="n">state</span><span class="p">;</span>
+        <span class="n">field</span> <span class="n">docsis</span><span class="o">-</span><span class="n">mode</span><span class="p">;</span>
+        <span class="n">field</span> <span class="n">docsis</span><span class="o">-</span><span class="n">upstream</span><span class="o">-</span><span class="n">speed</span><span class="p">;</span>
+        <span class="n">field</span> <span class="n">downstream</span><span class="o">-</span><span class="n">scanning</span><span class="p">;</span>
+        <span class="n">field</span> <span class="n">ranging</span><span class="p">;</span>
+        <span class="n">field</span> <span class="n">signal</span><span class="o">-</span><span class="n">to</span><span class="o">-</span><span class="n">noise</span><span class="o">-</span><span class="n">ratio</span><span class="p">;</span>
+        <span class="n">field</span> <span class="n">power</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>These tag definitions are compiled into field definitions
+that are triggered when matching XML elements are seen.  ODL
+also supports other means of defining output.</p>
+<p>The roles and modifiers describe these details.</p>
+<p>In moving these ideas to bsd, two things had to happen: the
+formatting had to happen at the source since BSD won’t have
+a JUNOS-like CLI to do the rendering, and we can’t depend on
+external data models like ODL, which was seen as too hard a
+sell to the BSD community.</p>
+<p>The results were that the xo_emit strings are used to encode the
+roles, modifiers, names, and formats.  They are dense and a bit
+cryptic, but not so unlike printf format strings that developers will
+be lost.</p>
+<p>libxo is a new implementation of these ideas and is distinct from
+the previous implementation in JUNOS.</p>
+</div>
+<div class="section" id="what-makes-a-good-field-name">
+<span id="good-field-names"></span><span id="index-1"></span><h3>What makes a good field name?<a class="headerlink" href="#what-makes-a-good-field-name" title="Permalink to this headline">¶</a></h3>
+<p>To make useful, consistent field names, follow these guidelines:</p>
+<dl class="docutils">
+<dt>Use lower case, even for TLAs</dt>
+<dd>Lower case is more civilized.  Even TLAs should be lower case
+to avoid scenarios where the differences between “XPath” and
+“Xpath” drive your users crazy.  Using “xpath” is simpler and better.</dd>
+<dt>Use hyphens, not underscores</dt>
+<dd>Use of hyphens is traditional in XML, and the XOF_UNDERSCORES
+flag can be used to generate underscores in JSON, if desired.
+But the raw field name should use hyphens.</dd>
+<dt>Use full words</dt>
+<dd>Don’t abbreviate especially when the abbreviation is not obvious or
+not widely used.  Use “data-size”, not “dsz” or “dsize”.  Use
+“interface” instead of “ifname”, “if-name”, “iface”, “if”, or “intf”.</dd>
+<dt>Use &lt;verb&gt;-&lt;units&gt;</dt>
+<dd>Using the form &lt;verb&gt;-&lt;units&gt; or &lt;verb&gt;-&lt;classifier&gt;-&lt;units&gt; helps in
+making consistent, useful names, avoiding the situation where one app
+uses “sent-packet” and another “packets-sent” and another
+“packets-we-have-sent”.  The &lt;units&gt; can be dropped when it is
+obvious, as can obvious words in the classification.
+Use “receive-after-window-packets” instead of
+“received-packets-of-data-after-window”.</dd>
+<dt>Reuse existing field names</dt>
+<dd><p class="first">Nothing’s worse than writing expressions like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>if ($src1/process[pid == $pid]/name ==
+    $src2/proc-table/proc-list
+               /prc-entry[prcss-id == $pid]/proc-name) {
+    ...
+}
+</pre></div>
+</div>
+<p class="last">Find someone else who is expressing similar data and follow their
+fields and hierarchy.  Remember the quote is not “Consistency is the
+hobgoblin of little minds”, but “A <em>foolish</em> consistency is the
+hobgoblin of little minds”.  Consistency rocks!</p>
+</dd>
+<dt>Use containment as scoping</dt>
+<dd>In the previous example, all the names are prefixed with “proc-“,
+which is redundant given that they are nested under the process table.</dd>
+<dt>Think about your users</dt>
+<dd>Have empathy for your users, choosing clear and useful fields that
+contain clear and useful data.  You may need to augment the display
+content with xo_attr() calls (<a class="reference internal" href="api.html#xo-attr"><span class="std std-ref">Attributes (xo_attr)</span></a>) or “{e:}”
+fields (<a class="reference internal" href="field-modifiers.html#encoding-modifier"><span class="std std-ref">The Encoding Modifier ({e:})</span></a>) to make the data useful.</dd>
+<dt>Don’t use an arbitrary number postfix</dt>
+<dd>What does “errors2” mean?  No one will know.  “errors-after-restart”
+would be a better choice.  Think of your users, and think of the
+future.  If you make “errors2”, the next guy will happily make
+“errors3” and before you know it, someone will be asking what’s the
+difference between errors37 and errors63.</dd>
+<dt>Be consistent, uniform, unsurprising, and predictable</dt>
+<dd>Think of your field vocabulary as an API.  You want it useful,
+expressive, meaningful, direct, and obvious.  You want the client
+application’s programmer to move between without the need to
+understand a variety of opinions on how fields are named.  They
+should see the system as a single cohesive whole, not a sack of
+cats.</dd>
+</dl>
+<p>Field names constitute the means by which client programmers interact
+with our system.  By choosing wise names now, you are making their
+lives better.</p>
+<p>After using <code class="code docutils literal notranslate"><span class="pre">xolint</span></code> to find errors in your field descriptors, use
+“<code class="code docutils literal notranslate"><span class="pre">xolint</span> <span class="pre">-V</span></code>” to spell check your field names and to help you detect
+different names for the same data.  “dropped-short” and
+“dropped-too-short” are both reasonable names, but using them both
+will lead users to ask the difference between the two fields.  If
+there is no difference, use only one of the field names.  If there is
+a difference, change the names to make that difference more obvious.</p>
+</div>
+<div class="section" id="what-does-this-message-mean">
+<h3>What does this message mean?<a class="headerlink" href="#what-does-this-message-mean" title="Permalink to this headline">¶</a></h3>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="xolint-errors.html">‘A percent sign appearing in text is a literal’</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xolint-errors.html#unknown-long-name-for-role-modifier">‘Unknown long name for role/modifier’</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xolint-errors.html#last-character-before-field-definition-is-a-field-type">‘Last character before field definition is a field type’</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xolint-errors.html#encoding-format-uses-different-number-of-arguments">‘Encoding format uses different number of arguments’</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xolint-errors.html#only-one-field-role-can-be-used">‘Only one field role can be used’</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xolint-errors.html#potential-missing-slash-after-c-d-n-l-or-t-with-format">‘Potential missing slash after C, D, N, L, or T with format’</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xolint-errors.html#an-encoding-format-cannot-be-given-roles-dnlt">‘An encoding format cannot be given (roles: DNLT)’</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xolint-errors.html#format-cannot-be-given-when-content-is-present-roles-cdln">‘Format cannot be given when content is present (roles: CDLN)’</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xolint-errors.html#field-has-color-without-fg-or-bg-role-c">‘Field has color without fg- or bg- (role: C)’</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xolint-errors.html#field-has-invalid-color-or-effect-role-c">‘Field has invalid color or effect (role: C)’</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xolint-errors.html#field-has-humanize-modifier-but-no-format-string">‘Field has humanize modifier but no format string’</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xolint-errors.html#field-has-hn-modifier-but-not-h-modifier">‘Field has hn-* modifier but not ‘h’ modifier’</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xolint-errors.html#value-field-must-have-a-name-as-content">‘Value field must have a name (as content)”)’</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xolint-errors.html#use-hyphens-not-underscores-for-value-field-name">‘Use hyphens, not underscores, for value field name’</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xolint-errors.html#value-field-name-cannot-start-with-digit">‘Value field name cannot start with digit’</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xolint-errors.html#value-field-name-should-be-lower-case">‘Value field name should be lower case’</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xolint-errors.html#value-field-name-should-be-longer-than-two-characters">‘Value field name should be longer than two characters’</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xolint-errors.html#value-field-name-contains-invalid-character">‘Value field name contains invalid character’</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xolint-errors.html#decoration-field-contains-invalid-character">‘decoration field contains invalid character’</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xolint-errors.html#anchor-content-should-be-decimal-width">‘Anchor content should be decimal width’</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xolint-errors.html#anchor-format-should-be-d">‘Anchor format should be “%d”’</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xolint-errors.html#anchor-cannot-have-both-format-and-encoding-format">‘Anchor cannot have both format and encoding format”)’</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xolint-errors.html#max-width-only-valid-for-strings">‘Max width only valid for strings’</a></li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="xolint-errors.html" title="‘A percent sign appearing in text is a literal’"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="xopo.html" title="xopo"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">libxo 
+ documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017-2019, Juniper Networks Inc.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.3.
+    </div>
+  </body>
+</html>
