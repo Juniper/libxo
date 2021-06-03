@@ -51,24 +51,32 @@ endif
 
 EXTRA_DIST = \
     ${TEST_CASES} \
-    ${addprefix saved/, ${TEST_CASES:.c=.T.err}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.T.out}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.XP.err}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.XP.out}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.JP.err}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.JP.out}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.HP.err}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.HP.out}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.X.err}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.X.out}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.J.err}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.J.out}} \
+    ${addprefix saved/, ${TEST_CASES:.c=.E.err}} \
+    ${addprefix saved/, ${TEST_CASES:.c=.E.out}} \
     ${addprefix saved/, ${TEST_CASES:.c=.H.err}} \
     ${addprefix saved/, ${TEST_CASES:.c=.H.out}} \
     ${addprefix saved/, ${TEST_CASES:.c=.HIPx.err}} \
     ${addprefix saved/, ${TEST_CASES:.c=.HIPx.out}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.E.err}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.E.out}}
+    ${addprefix saved/, ${TEST_CASES:.c=.HP.err}} \
+    ${addprefix saved/, ${TEST_CASES:.c=.HP.out}} \
+    ${addprefix saved/, ${TEST_CASES:.c=.J.err}} \
+    ${addprefix saved/, ${TEST_CASES:.c=.J.out}} \
+    ${addprefix saved/, ${TEST_CASES:.c=.JP.err}} \
+    ${addprefix saved/, ${TEST_CASES:.c=.JP.out}} \
+    ${addprefix saved/, ${TEST_CASES:.c=.JPu.err}} \
+    ${addprefix saved/, ${TEST_CASES:.c=.JPu.out}} \
+    ${addprefix saved/, ${TEST_CASES:.c=.T.err}} \
+    ${addprefix saved/, ${TEST_CASES:.c=.T.out}} \
+    ${addprefix saved/, ${TEST_CASES:.c=.X.err}} \
+    ${addprefix saved/, ${TEST_CASES:.c=.X.out}} \
+    ${addprefix saved/, ${TEST_CASES:.c=.XP.err}} \
+    ${addprefix saved/, ${TEST_CASES:.c=.XP.out}} \
+    ${addprefix saved/, test_01.Ecsv1.out} \
+    ${addprefix saved/, test_01.Ecsv1.err} \
+    ${addprefix saved/, test_01.Ecsv2.out} \
+    ${addprefix saved/, test_01.Ecsv2.err} \
+    ${addprefix saved/, test_01.Ecsv3.out} \
+    ${addprefix saved/, test_01.Ecsv3.err}
 
 S2O = | ${SED} '1,/@@/d'
 
