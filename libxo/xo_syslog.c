@@ -57,11 +57,13 @@
 #include <stdarg.h>
 #include <sys/time.h>
 #include <sys/types.h>
-#ifdef HAVE_SYSCTLBYNAME
-#include <sys/sysctl.h>
-#endif
 
 #include "xo_config.h"
+
+#ifdef HAVE_SYSCTLBYNAME
+#include <sys/sysctl.h>
+#endif /* HAVE_SYSCTLBYNAME */
+
 #include "xo.h"
 #include "xo_encoder.h"		/* For xo_realloc */
 #include "xo_buf.h"
