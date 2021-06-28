@@ -38,7 +38,6 @@
  * SUCH DAMAGE.
  */
 
-#include <sys/cdefs.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/syslog.h>
@@ -58,7 +57,9 @@
 #include <stdarg.h>
 #include <sys/time.h>
 #include <sys/types.h>
+#ifdef HAVE_SYSCTLBYNAME
 #include <sys/sysctl.h>
+#endif
 
 #include "xo_config.h"
 #include "xo.h"
