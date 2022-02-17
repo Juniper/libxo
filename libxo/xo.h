@@ -106,6 +106,7 @@ typedef unsigned long long xo_xof_flags_t;
 
 typedef unsigned xo_emit_flags_t; /* Flags to xo_emit() and friends */
 #define XOEF_RETAIN	(1<<0)	  /* Retain parsed formatting information */
+#define XOEF_NO_RETAIN	(1<<1)	  /* Format must not be retained (dynamic) */
 
 /*
  * The xo_info_t structure provides a mapping between names and
@@ -681,12 +682,23 @@ xo_simplify_format (xo_handle_t *xop, const char *fmt, int with_numbers,
 		    xo_simplify_field_func_t field_cb);
 
 xo_ssize_t
+xo_emit_field_hvf (xo_handle_t *xop, xo_emit_flags_t flags,
+		   const char *rolmod, const char *contents,
+		   const char *fmt, const char *efmt,
+		   va_list vap);
+
+xo_ssize_t
 xo_emit_field_hv (xo_handle_t *xop, const char *rolmod, const char *contents,
 		  const char *fmt, const char *efmt,
 		  va_list vap);
 
 xo_ssize_t
 xo_emit_field_h (xo_handle_t *xop, const char *rolmod, const char *contents,
+		 const char *fmt, const char *efmt, ...);
+
+xo_ssize_t
+xo_emit_field_f (xo_emit_flags_t flags, const char *rolmod,
+		 const char *contents,
 		 const char *fmt, const char *efmt, ...);
 
 xo_ssize_t
