@@ -58,6 +58,7 @@
   <div class="data" data-tag="some-chaos" data-xpath="/top-level/some-chaos">42
 </div>
   <div class="data" data-tag="sku" data-xpath="/top-level/sku" data-type="string" data-help="Stock Keeping Unit">gum-1412</div>
+  <div class="data" data-tag="sku" data-xpath="/top-level/sku" data-type="string" data-help="Stock Keeping Unit">sum-4121</div>
   <div class="text">Connecting to </div>
   <div class="data" data-tag="host" data-xpath="/top-level/host">my-box</div>
   <div class="text">.</div>
