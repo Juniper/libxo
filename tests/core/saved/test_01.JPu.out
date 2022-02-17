@@ -22,7 +22,8 @@
     "min_chaos": 42,
     "some_chaos": "[42]",
     "sku": [
-      "gum-000-1412"
+      "gum-000-1412",
+      "sum-000-4121"
     ],
     "host": "my-box",
     "domain": "example.com",
