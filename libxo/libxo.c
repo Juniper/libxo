@@ -6520,7 +6520,7 @@ xo_do_emit (xo_handle_t *xop, xo_emit_flags_t flags, const char *fmt)
     xo_field_info_t *fields = NULL;
 
     /* Adjust XOEF_RETAIN based on global flags */
-    if (XOF_ISSET(xop, XOF_RETAIN_ALL))
+    if (!(flags & XOEF_NO_RETAIN) && XOF_ISSET(xop, XOF_RETAIN_ALL))
 	flags |= XOEF_RETAIN;
     if (XOF_ISSET(xop, XOF_RETAIN_NONE))
 	flags &= ~XOEF_RETAIN;
@@ -6529,6 +6529,8 @@ xo_do_emit (xo_handle_t *xop, xo_emit_flags_t flags, const char *fmt)
      * Check for 'retain' flag, telling us to retain the field
      * information.  If we've already saved it, then we can avoid
      * re-parsing the format string.
+     * Dynamically build formats must tell us that the format is
+     * dynamic using the XOEF_NO_RETAIN flag.
      */
     if (!(flags & XOEF_RETAIN)
 	|| xo_retain_find(fmt, &fields, &max_fields) != 0
@@ -6676,9 +6678,10 @@ xo_emit_f (xo_emit_flags_t flags, const char *fmt, ...)
  * descriptions.
  */
 xo_ssize_t
-xo_emit_field_hv (xo_handle_t *xop, const char *rolmod, const char *contents,
-		  const char *fmt, const char *efmt,
-		  va_list vap)
+xo_emit_field_hvf (xo_handle_t *xop, xo_emit_flags_t flags UNUSED,
+		   const char *rolmod, const char *contents,
+		   const char *fmt, const char *efmt,
+		   va_list vap)
 {
     ssize_t rc;
 
@@ -6721,6 +6724,14 @@ xo_emit_field_hv (xo_handle_t *xop, const char *rolmod, const char *contents,
 }
 
 xo_ssize_t
+xo_emit_field_hv (xo_handle_t *xop, const char *rolmod, const char *contents,
+		  const char *fmt, const char *efmt,
+		  va_list vap)
+{
+    return xo_emit_field_hvf(xop, 0, rolmod, contents, fmt, efmt, vap);
+}
+
+xo_ssize_t
 xo_emit_field_h (xo_handle_t *xop, const char *rolmod, const char *contents,
 		 const char *fmt, const char *efmt, ...)
 {
@@ -6728,7 +6739,24 @@ xo_emit_field_h (xo_handle_t *xop, const char *rolmod, const char *contents,
     va_list vap;
 
     va_start(vap, efmt);
-    rc = xo_emit_field_hv(xop, rolmod, contents, fmt, efmt, vap);
+    rc = xo_emit_field_hvf(xop, 0, rolmod, contents, fmt, efmt, vap);
+    va_end(vap);
+
+    return rc;
+}
+
+xo_ssize_t
+xo_emit_field_f (xo_emit_flags_t flags, const char *rolmod,
+		 const char *contents,
+		 const char *fmt, const char *efmt, ...)
+{
+    xo_handle_t *xop = xo_default(NULL);
+
+    ssize_t rc;
+    va_list vap;
+
+    va_start(vap, efmt);
+    rc = xo_emit_field_hvf(xop, flags, rolmod, contents, fmt, efmt, vap);
     va_end(vap);
 
     return rc;
@@ -6742,7 +6770,7 @@ xo_emit_field (const char *rolmod, const char *contents,
     va_list vap;
 
     va_start(vap, efmt);
-    rc = xo_emit_field_hv(NULL, rolmod, contents, fmt, efmt, vap);
+    rc = xo_emit_field_hvf(NULL, 0, rolmod, contents, fmt, efmt, vap);
     va_end(vap);
 
     return rc;
