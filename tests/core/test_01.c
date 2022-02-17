@@ -114,6 +114,8 @@ main (int argc, char **argv)
     xo_attr("test-attr", "attr-value");
     xo_emit_field_h(NULL, ",leaf-list,quotes", "sku", "%s-%u", "%s-000-%u",
 		    "gum", 1412);
+    xo_emit_field_h(NULL, ",leaf-list,quotes", "sku", "%s-%u", "%s-000-%u",
+		    "sum", 4121);
 
     xo_emit("Connecting to {:host}.{:domain}...\n", "my-box", "example.com");
 
