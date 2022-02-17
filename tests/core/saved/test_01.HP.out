@@ -58,6 +58,7 @@
   <div class="data" data-tag="some-chaos">42
 </div>
   <div class="data" data-tag="sku">gum-1412</div>
+  <div class="data" data-tag="sku">sum-4121</div>
   <div class="text">Connecting to </div>
   <div class="data" data-tag="host">my-box</div>
   <div class="text">.</div>
