@@ -92,7 +92,7 @@
 
 #if defined(__FreeBSD__)
 #define XO_DEFAULT_EID	2238
-#elif defined(__macosx__)
+#elif defined(__APPLE__)
 #define XO_DEFAULT_EID	63
 #else
 #define XO_DEFAULT_EID	32473	/* Fallback to the "example" number */
