@@ -436,3 +436,27 @@
   <div class="data" data-tag="group" data-xpath="/top-level/group">group       </div>
   <div class="text">  </div>
 </div>
+<div class="line">
+  <div class="text">Testing...</div>
+  <div class="data" data-tag="one" data-xpath="/top-level/one">1</div>
+  <div class="text">...</div>
+  <div class="data" data-tag="two" data-xpath="/top-level/two">2</div>
+  <div class="text">...</div>
+  <div class="data" data-tag="three" data-xpath="/top-level/three">3</div>
+</div>
+<div class="line">
+  <div class="text">Testing...</div>
+  <div class="data" data-tag="one" data-xpath="/top-level/one">1</div>
+  <div class="text">...</div>
+  <div class="data" data-tag="two" data-xpath="/top-level/two">2</div>
+  <div class="text">...</div>
+  <div class="data" data-tag="three" data-xpath="/top-level/three">3</div>
+</div>
+<div class="line">
+  <div class="text">Xesting...</div>
+  <div class="data" data-tag="one" data-xpath="/top-level/one">1</div>
+  <div class="text">...</div>
+  <div class="data" data-tag="two" data-xpath="/top-level/two">2</div>
+  <div class="text">...</div>
+  <div class="data" data-tag="three" data-xpath="/top-level/three">3</div>
+</div>
