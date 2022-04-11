@@ -257,6 +257,14 @@ main (int argc, char **argv)
 	    "/some/file", (int) 0640, 8, 1,
 	    10, "user", 12, "group");
 
+    /* Test retain flag for dynamic data */
+    xo_set_flags(NULL, XOF_RETAIN_ALL);
+    char buf[] = "Testing...{:one/%d}...{:two/%d}...{:three/%d}\n";
+    xo_emit(buf, 1, 2, 3);
+    xo_emit(buf, 1, 2, 3);
+    buf[0] = 'X';
+    xo_emit(buf, 1, 2, 3);
+
     xo_close_container_h(NULL, "top-level");
 
     xo_finish();
