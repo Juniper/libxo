@@ -211,6 +211,9 @@ xo_ssize_t
 xo_emit (const char *fmt, ...);
 
 xo_ssize_t
+xo_emitr (const char *fmt, ...);
+
+xo_ssize_t
 xo_emit_hvf (xo_handle_t *xop, xo_emit_flags_t flags,
 	     const char *fmt, va_list vap);
 
