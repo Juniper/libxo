@@ -42,6 +42,7 @@
 #include <ctype.h>
 #include <wctype.h>
 #include <getopt.h>
+#include <langinfo.h>
 
 #include "xo_config.h"
 #include "xo.h"
@@ -95,6 +96,16 @@
 #ifdef HAVE_GETTEXT
 #include <libintl.h>
 #endif /* HAVE_GETTEXT */
+
+#if HAVE_ETEXT == 1		/* Symbol */
+extern char etext;
+#define GET_ETEXT &etext
+#elif HAVE_ETEXT == 2		/* Function */
+#include <mach-o/getsect.h>
+#define GET_ETEXT get_etext()
+#else				/* None */
+#define GET_ETEXT NULL
+#endif /* HAVE_ETEXT */
 
 /* Rather lame that we can't count on these... */
 #ifndef FALSE
@@ -393,6 +404,8 @@ static THREAD_LOCAL(xo_handle_t) xo_default_handle;
 static THREAD_LOCAL(int) xo_default_inited;
 static int xo_locale_inited;
 static const char *xo_program;
+static int xo_codeset_is_utf8;	/* Is stdout UTF-8? */
+static const char *xo_etext;
 
 /*
  * To allow libxo to be used in diverse environment, we allow the
@@ -526,6 +539,15 @@ xo_printable (const char *str)
 }
 
 static int
+xo_str_is_const (const char *str)
+{
+    if (xo_etext == NULL)
+	xo_etext = (const char *) GET_ETEXT;
+
+    return (xo_etext && str < xo_etext);
+}
+
+static int
 xo_depth_check (xo_handle_t *xop, int depth)
 {
     xo_stack_t *xsp;
@@ -637,6 +659,13 @@ xo_init_handle (xo_handle_t *xop)
 #endif /* __FreeBSD__ */
 
 	(void) setlocale(LC_CTYPE, cp);
+
+#ifdef CODESET
+	/* Now that locale is set, determine if our stdout output is UTF-8 */
+	const char *codeset = nl_langinfo(CODESET);
+	if (codeset && xo_streq(codeset, "UTF-8"))
+	    xo_codeset_is_utf8 = TRUE;
+#endif /* CODESET */
     }
 
     /*
@@ -666,6 +695,9 @@ xo_default_init (void)
 
     xo_init_handle(xop);
 
+    if (xo_codeset_is_utf8)
+	XOF_SET(xop, XOF_UTF8);
+
 #if !defined(NO_LIBXO_OPTIONS)
     if (!XOF_ISSET(xop, XOF_NO_ENV)) {
        char *env = getenv("LIBXO_OPTIONS");
@@ -678,6 +710,20 @@ xo_default_init (void)
 
     xo_default_inited = 1;
 }
+
+#if 0
+/*
+ * Is the output for this handle UTF-8?
+ */
+static int
+xo_is_text_utf8 (xo_handle_t *xop)
+{
+    if (xo_style(xop) == XO_STYLE_TEXT)
+	return XOF_ISSET(xop, XOF_UTF8);
+
+    return FALSE;
+}
+#endif
 
 /*
  * Cheap convenience function to return either the argument, or
@@ -2110,6 +2156,7 @@ static xo_mapping_t xo_xof_names[] = {
     { XOF_RETAIN_ALL, "retain" },
     { XOF_UNDERSCORES, "underscores" },
     { XOF_UNITS, "units" },
+    { XOF_UTF8, "utf8" },
     { XOF_WARN, "warn" },
     { XOF_WARN_XML, "warn-xml" },
     { XOF_XPATH, "xpath" },
@@ -2707,6 +2754,30 @@ xo_format_string_direct (xo_handle_t *xop, xo_buffer_t *xbp,
     if (len > 0 && !xo_buf_has_room(xbp, len))
 	return 0;
 
+#if 0
+    /*
+     * If we have the "right" encoding for text, then our job is
+     * simpler.  We can skim over the string and process it quickly.
+     */
+    if (cp && xo_is_text_utf8(xop) && need_enc == have_enc) {
+	const char *np, *ep;
+	for (np = cp, ep = cp + len; np < ep; np++)
+	    if (xo_is_utf8(*np) || *np == '\\' || *np == '%'
+		|| *np == '{' || *np == '}')
+		break;
+
+	/* If we found no non-ascii characters, we're golden */
+	if (np == ep) {
+	    if (!xo_buf_has_room(xbp, len))
+		return -1;
+
+	    memcpy(xbp->xb_curp, cp, len);
+	    xbp->xb_curp += len;
+	    return len;		/* Len is the number of columns */
+	}
+    }
+#endif
+
     for (;;) {
 	if (len == 0)
 	    break;
@@ -2734,6 +2805,16 @@ xo_format_string_direct (xo_handle_t *xop, xo_buffer_t *xbp,
 	    break;
 
 	case XF_ENC_UTF8:		/* UTF-8 */
+#if 0
+	    /* Simple case: this is a traditional ASCII c */
+	    if (*cp <= 0x7F) {
+		ilen = 1;
+		wc = (wchar_t) *cp;
+		cp += 1;
+		break;
+	    }
+#endif
+
 	    ilen = xo_utf8_to_wc_len(cp);
 	    if (ilen < 0) {
 		xo_failure(xop, "invalid UTF-8 character: %02hhx", *cp);
@@ -2781,8 +2862,7 @@ xo_format_string_direct (xo_handle_t *xop, xo_buffer_t *xbp,
 
 	/*
 	 * Find the width-in-columns of this character, which must be done
-	 * in wide characters, since we lack a mbswidth() function.  If
-	 * it doesn't fit
+	 * in wide characters, since we lack a mbswidth() function.
 	 */
 	width = xo_wcwidth(wc);
 	if (width < 0)
@@ -2890,7 +2970,7 @@ xo_needed_encoding (xo_handle_t *xop)
     if (XOF_ISSET(xop, XOF_UTF8)) /* Check the override flag */
 	return XF_ENC_UTF8;
 
-    if (xo_style(xop) == XO_STYLE_TEXT) /* Text means locale */
+    if (xo_style(xop) == XO_STYLE_TEXT) /* Text defaults to locale */
 	return XF_ENC_LOCALE;
 
     return XF_ENC_UTF8;		/* Otherwise, we love UTF-8 */
@@ -3381,7 +3461,7 @@ xo_do_format_field (xo_handle_t *xop, xo_buffer_t *xbp,
 		     * we want to ignore
 		     */
 		    if (!XOF_ISSET(xop, XOF_NO_VA_ARG))
-			va_arg(xop->xo_vap, int);
+			(void) va_arg(xop->xo_vap, int);
 		}
 	    }
 	}
@@ -6520,10 +6600,25 @@ xo_do_emit (xo_handle_t *xop, xo_emit_flags_t flags, const char *fmt)
     xo_field_info_t *fields = NULL;
 
     /* Adjust XOEF_RETAIN based on global flags */
-    if (!(flags & XOEF_NO_RETAIN) && XOF_ISSET(xop, XOF_RETAIN_ALL))
-	flags |= XOEF_RETAIN;
-    if (XOF_ISSET(xop, XOF_RETAIN_NONE))
+    if (flags & XOEF_NO_RETAIN) {
+	/* If the "don't retain flag is on, remove the retain, just in case */
 	flags &= ~XOEF_RETAIN;
+
+    } else if (flags & XOEF_RETAIN) {
+	/* If the user doesn't want to retain, even if the caller does */
+	if (XOF_ISSET(xop, XOF_RETAIN_NONE))
+	    flags &= ~XOEF_RETAIN;
+    } else if (!xo_str_is_const(fmt)) {
+	/*
+	 * Unless the caller explicitly tells us otherwise, we can
+	 * only retain (cache) const strings, since dynamic strings
+	 * aren't cachable due to changing content.
+	 */
+	/* Do nothing */
+    } else if (XOF_ISSET(xop, XOF_RETAIN_ALL)) {
+	/* If the user wants to retain allow it */
+	flags |= XOEF_RETAIN;
+    }
 
     /*
      * Check for 'retain' flag, telling us to retain the field
@@ -6622,6 +6717,20 @@ xo_emit (const char *fmt, ...)
 
     va_start(xop->xo_vap, fmt);
     rc = xo_do_emit(xop, 0, fmt);
+    va_end(xop->xo_vap);
+    bzero(&xop->xo_vap, sizeof(xop->xo_vap));
+
+    return rc;
+}
+
+xo_ssize_t
+xo_emitr (const char *fmt, ...)
+{
+    xo_handle_t *xop = xo_default(NULL);
+    ssize_t rc;
+
+    va_start(xop->xo_vap, fmt);
+    rc = xo_do_emit(xop, XOEF_RETAIN, fmt);
     va_end(xop->xo_vap);
     bzero(&xop->xo_vap, sizeof(xop->xo_vap));
 
