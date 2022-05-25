@@ -714,4 +714,7 @@ xo_retain_clear_all (void);
 void
 xo_retain_clear (const char *fmt);
 
+unsigned long
+xo_retain_get_hits (void);
+
 #endif /* INCLUDE_XO_H */
