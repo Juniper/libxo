@@ -99,12 +99,6 @@
 
 #if HAVE_ETEXT == 1		/* Symbol */
 extern char etext;
-#define GET_ETEXT &etext
-#elif HAVE_ETEXT == 2		/* Function */
-#include <mach-o/getsect.h>
-#define GET_ETEXT get_etext()
-#else				/* None */
-#define GET_ETEXT NULL
 #endif /* HAVE_ETEXT */
 
 /* Rather lame that we can't count on these... */
@@ -405,7 +399,6 @@ static THREAD_LOCAL(int) xo_default_inited;
 static int xo_locale_inited;
 static const char *xo_program;
 static int xo_codeset_is_utf8;	/* Is stdout UTF-8? */
-static const char *xo_etext;
 
 /*
  * To allow libxo to be used in diverse environment, we allow the
@@ -538,13 +531,16 @@ xo_printable (const char *str)
     return res;
 }
 
-static int
-xo_str_is_const (const char *str)
+static inline int
+xo_str_is_const (const char *str UNUSED)
 {
-    if (xo_etext == NULL)
-	xo_etext = (const char *) GET_ETEXT;
+#if HAVE_ETEXT == 1
+    const char *xo_etext = (const char *) &etext;
 
-    return (xo_etext && str < xo_etext);
+    return (str < xo_etext);
+#else /* HAVE_ETEXT */
+    return FALSE;
+#endif /* HAVE_ETEXT */
 }
 
 static int
@@ -1365,6 +1361,12 @@ xo_retain_find (const char *fmt UNUSED, xo_field_info_t **valp UNUSED,
     return -1;
 }
 
+unsigned long
+xo_retain_get_hits (void)
+{
+    return 0;
+}
+
 #else /* !LIBXO_NO_RETAIN */
 /*
  * Retain: We retain parsed field definitions to enhance performance,
@@ -1400,6 +1402,7 @@ typedef struct xo_retain_s {
 
 static THREAD_LOCAL(xo_retain_t) xo_retain;
 static THREAD_LOCAL(unsigned) xo_retain_count;
+static THREAD_LOCAL(unsigned long) xo_retain_hits;
 
 /*
  * Simple hash function based on Thomas Wang's paper.  The original is
@@ -1449,6 +1452,7 @@ xo_retain_clear_all (void)
 	xo_retain.xr_bucket[i] = NULL;
     }
     xo_retain_count = 0;
+    xo_retain_hits = 0;
 }
 
 /*
@@ -1488,6 +1492,7 @@ xo_retain_find (const char *fmt, xo_field_info_t **valp, unsigned *nump)
 	    *valp = xrep->xre_fields;
 	    *nump = xrep->xre_num_fields;
 	    xrep->xre_hits += 1;
+	    xo_retain_hits += 1;
 	    return 0;
 	}
     }
@@ -1520,6 +1525,12 @@ xo_retain_add (const char *fmt, xo_field_info_t *fields, unsigned num_fields)
     xrep->xre_next = xo_retain.xr_bucket[hash];
     xo_retain.xr_bucket[hash] = xrep;
     xo_retain_count += 1;
+}
+
+unsigned long
+xo_retain_get_hits (void)
+{
+    return xo_retain_hits;
 }
 
 #endif /* !LIBXO_NO_RETAIN */
@@ -2805,15 +2816,12 @@ xo_format_string_direct (xo_handle_t *xop, xo_buffer_t *xbp,
 	    break;
 
 	case XF_ENC_UTF8:		/* UTF-8 */
-#if 0
-	    /* Simple case: this is a traditional ASCII c */
-	    if (*cp <= 0x7F) {
+	    /* Optimize the simple case: this is a traditional ASCII c */
+	    if (0 < *cp && *cp <= 0x7F) {
+		wc = (wchar_t) *cp++;
 		ilen = 1;
-		wc = (wchar_t) *cp;
-		cp += 1;
 		break;
 	    }
-#endif
 
 	    ilen = xo_utf8_to_wc_len(cp);
 	    if (ilen < 0) {
@@ -5494,6 +5502,10 @@ static xo_mapping_t xo_modifier_short_names[] = {
 };
 #endif /* NOT_NEEDED_YET */
 
+/*
+ * This is not really a count, more like a quick-but-pessimisstic number,
+ * rounded up to an even more pessimisstic number, plus one.
+ */
 static int
 xo_count_fields (xo_handle_t *xop UNUSED, const char *fmt)
 {
