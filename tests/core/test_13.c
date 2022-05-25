@@ -16,6 +16,7 @@
 #include <langinfo.h>
 #include <unistd.h>
 #include <wchar.h>
+#include <fcntl.h>
 
 #include "xo_config.h"
 #include "xo.h"
@@ -169,8 +170,26 @@ main (int argc, char **argv)
 	else if (xo_streq(argv[argc], "no-retain"))
 	    flags &= ~XOF_RETAIN_ALL;
 	else if (xo_streq(argv[argc], "big")) {
-	    if (argv[argc + 1])
-		count = atoi(argv[++argc]);
+	    if (argv[argc + 1]) {
+		const char *cp = argv[++argc];
+		char *ep;
+		count = strtoul(cp, &ep, 0);
+		if (ep && *ep) {
+		    const char suff[] = "kmgt";
+		    unsigned long mult[]
+			= { 1000, 1000000, 1000000000, 1000000000000 };
+		    char *sp = strchr(suff, *ep);
+		    if (sp) {
+			count *= mult[sp - suff];
+		    }
+		}
+	    }
+	} else if (xo_streq(argv[argc], "null")) {
+	    int fd = open("/dev/null", O_WRONLY);
+	    if (fd >= 0) {
+		close(1);
+		dup2(fd, 1);
+	    }
 	}
     }
 
@@ -193,30 +212,32 @@ main (int argc, char **argv)
 	char name[80];
 	snprintf(name, sizeof(name), "xx-%08u", i);
 
-	xo_emit("{ke:name/%hs}", name);
+	xo_emitr("{ke:name/%hs}", name);
 
-	xo_emit("{t:inode/%*ju} ", 3, 12);
-	xo_emit("{t:blocks/%*jd} ", 4, 1234);
+	xo_emitr("{t:inode/%*ju} ", 3, 12);
+	xo_emitr("{t:blocks/%*jd} ", 4, 1234);
 
-	xo_emit("{t:mode/%s}{e:mode_octal/%03o} {t:links/%*ju} {t:user/%-*s}  {t:group/%-*s}  ",
+	xo_emitr("{t:mode/%s}{e:mode_octal/%03o} {t:links/%*ju} {t:user/%-*s}  {t:group/%-*s}  ",
 		"mode", 0660, 2, (uintmax_t) 12,
 		4, "phil", 4, "phil");
 
 
-	xo_emit("{e:type/%s}", "regular");
+	xo_emitr("{e:type/%s}", "regular");
 
-	xo_emit("{:flags/%-*s} ", 3, "123");
-	xo_emit("{t:label/%-*s} ", 4, "1234");
+	xo_emitr("{:flags/%-*s} ", 3, "123");
+	xo_emitr("{t:label/%-*s} ", 4, "1234");
 	printsize("size", 5, 12345);
 	printtime("modify-time", 1644355825);
 
-	xo_emit("{dk:name/%hs}", name);
+	xo_emitr("{dk:name/%hs}", name);
 
 	xo_close_instance("entry");
 	xo_emit("\n");
     }
 
     xo_close_list("entry");
+
+    xo_emit("{Lwc:hits}{:hits/%ld}\n", xo_retain_get_hits());
 
     xo_close_container("data");
     xo_close_container_h(NULL, "top");
