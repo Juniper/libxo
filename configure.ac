@@ -177,6 +177,8 @@ AC_SUBST(GETTEXT_BINDIR)
 
 AM_CONDITIONAL([HAVE_GETTEXT], [test "$HAVE_GETTEXT" = "yes"])
 
+dnl on macosx, strings are not in the .text segment, making the call
+dnl to get_etext pointless
 AC_MSG_CHECKING([style of etext])
 AC_LINK_IFELSE([AC_LANG_SOURCE([
     [#include <stdio.h>]
