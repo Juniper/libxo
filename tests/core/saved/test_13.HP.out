@@ -228,3 +228,9 @@
   <div class="text"> </div>
   <div class="data" data-tag="name">xx-00000009</div>
 </div>
+<div class="line">
+  <div class="label">hits</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="hits">72</div>
+</div>
