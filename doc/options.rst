@@ -30,8 +30,8 @@ to parse these arguments.  See :ref:`xo_parse_args` for details.
 Option Keywords
 ---------------
 
-Options is a comma-separated list of tokens that correspond to output
-styles, flags, or features:
+The options string is a comma- or colon- separated list of tokens that
+correspond to output styles, flags, or features:
 
   =============== =======================================================
   Token           Action
@@ -48,6 +48,8 @@ styles, flags, or features:
   keys            Emit the key attribute for keys (XML)
   log-gettext     Log (via stderr) each gettext(3) string lookup
   log-syslog      Log (via stderr) each syslog message (via xo_syslog)
+  map             Map between tag names
+  map-file        Use a file to specify mapping between tag names
   no-humanize     Ignore the {h:} modifier (TEXT, HTML)
   no-locale       Do not initialize the locale setting
   no-retain       Prevent retaining formatting information
@@ -74,6 +76,7 @@ additional details:
   using names that state with "data-".
 - "keys" adds a "key" attribute for XML output to indicate that a leaf
   is an identifier for the list member.
+- "map" and "map-file" are described in :ref:`tag-mapping`.
 - "no-humanize" avoids "humanizing" numeric output (see
   :ref:`humanize-modifier` for details).
 - "no-locale" instructs libxo to avoid translating output to the
@@ -115,7 +118,6 @@ keywords, as detailed below:
   ======== =============================================
 
 .. index:: Colors
-
 .. _color-mapping:
 
 Color Mapping
@@ -162,6 +164,80 @@ foreground and background output to "yellow", give only the fifth
 mapping, skipping the first four mappings with bare plus signs ("+")::
 
     --libxo colors=++++yellow/yellow
+
+.. _tag-mapping:
+
+Tag Mapping
+-----------
+
+libxo supports mapping between tag names, for scenarios where the tags
+need to make specific values.  For example, the "user" tag might be
+needed as the "owner" tag.  libxo can perform this one-to-one tag
+replacement.
+
+Note that libxo does not perform more complex transformations;
+languages such as XSLT or SLAX should be used when something more than
+simple one-to-one replacement is required.
+
+Mapping can be specified using the "map" and "map-file" options.  The
+"map" option accepts one or more mapping, in the format "old=new",
+separated by colons::
+
+    --libxo map:one=red,map:two=blue
+
+This example would turn::
+
+    <one>fish</one>
+    <two>fish</two>
+
+into::
+    <red>fish</red>
+    <blue>fish</blue>
+
+In another example, the command-line options::
+
+    --libxo map:user=owner:name=file:size=bytes:modify-time=time
+    
+would turn::
+
+    <entry>
+      <name>xx-00000009</name>
+      <user>phil</user>
+      <size>12345</size>
+      <modify-time value="1644355825">1644355825</modify-time>
+    </entry>
+
+into::
+
+    <entry>
+      <file>xx-00000009</file>
+      <owner>phil</owner>
+      <bytes>12345</bytes>
+      <time value="1644355825">1644355825</time>
+    </entry>
+
+The "map-file" option allows the mappings to be placed into a file,
+one per line::
+
+    --libxo map-file=foo.map
+
+where "foo.map" might contain::
+
+    # comments are supported, white space is ignored
+    user = owner
+    name=file
+    # blank lines are allowed
+
+        size = bytes
+    modify-time= time
+
+This untidy example demonstrates the flexibility in the libxo mapping
+files.
+
+If the filename given with the `map-file` option contains no slashes
+("/") and such a file does not exist in the current working directory,
+libxo will look for the file in the "map" subdirectory of the system
+"share" directory, typically /usr/share/libxo/map/.
 
 Encoders
 --------
