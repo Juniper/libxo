@@ -118,7 +118,7 @@ printtime(const char *field, time_t ftime)
 	    now = time(NULL);
 
 #define	SIXMONTHS	((365 / 2) * 86400)
-	if (ftime + SIXMONTHS > now && ftime < now + SIXMONTHS)
+	if (1)
 		/* mmm dd hh:mm || dd mmm hh:mm */
 		format = d_first ? "%e %b %R" : "%b %e %R";
 	else
