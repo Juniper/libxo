@@ -717,4 +717,11 @@ xo_retain_clear (const char *fmt);
 unsigned long
 xo_retain_get_hits (void);
 
+int
+xo_map_add (xo_handle_t *xop, const char *from, size_t flen,
+	    const char *to, size_t tlen);
+
+int
+xo_map_add_file (xo_handle_t *xop, const char *fname);
+
 #endif /* INCLUDE_XO_H */
