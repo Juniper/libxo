@@ -128,6 +128,12 @@ test tests: ${bin_PROGRAMS}
 	    (   fmt=Ecsv3; extra=@csv:path=item:leafs=sku.sold:no-quotes ; \
 			${TEST_JIG2} ); \
 	)
+	-@ (${TEST_TRACE} test=test_12.c; base=test_12; \
+	    (   fmt=XPmap; extra=xml,pretty,map-file=${srcdir}/test_12.map ; \
+			${TEST_JIG2} ); \
+	    (   fmt=JPmap; extra=json,pretty,map-file=${srcdir}/test_12.map ; \
+			${TEST_JIG2} ); \
+	)
 
 one:
 	-@(test=${TEST_CASE}; data=${TEST_DATA}; ${TEST_ONE} ; true)
