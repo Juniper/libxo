@@ -228,3 +228,9 @@
   <div class="text"> </div>
   <div class="data" data-tag="name" data-xpath="/top/data/entry/name">xx-00000009</div>
 </div>
+<div class="line">
+  <div class="label">hits</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="hits" data-xpath="/top/data/hits">72</div>
+</div>
