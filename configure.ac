@@ -57,7 +57,7 @@ AC_CHECK_FUNCS([flock])
 AC_CHECK_FUNCS([asprintf])
 AC_CHECK_FUNCS([__flbf])
 AC_CHECK_FUNCS([sysctlbyname])
-
+AC_CHECK_FUNCS([strchrnul])
 
 AC_CHECK_HEADERS([dlfcn.h])
 AC_CHECK_HEADERS([dlfcn.h])
@@ -485,6 +485,7 @@ AC_CONFIG_FILES([
   tests/core/Makefile
   tests/gettext/Makefile
   tests/xo/Makefile
+  tests/utf8/Makefile
   packaging/libxo.spec
   packaging/libxo.rb.base
 ])
