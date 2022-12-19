@@ -142,3 +142,19 @@ sanitize-memory:
 	${MAKE} CFLAGS="-fsanitize=memory ${SANIFLAGS}"
 	${MAKE} install
 	${MAKE} test
+
+TEST=tests/core/.libs/test_13
+TEST_ARGS=big 10m null
+TEST_TYPE=Time Profiler
+
+instruments: instruments.prep instruments.run instruments.open
+
+instruments.prep:
+	dsymutil ${TEST}.test
+
+instruments.run:
+	rm -fr ${TEST}.trace
+	instruments -t '${TEST_TYPE}' -D ${TEST}.trace ${TEST}.test ${TEST_ARGS}
+
+instruments.open:
+	open -a Instruments ${TEST}.trace
