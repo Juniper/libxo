@@ -727,19 +727,31 @@ xo_default_init (void)
     xo_default_inited = 1;
 }
 
-#if 0
+/*
+ * Indicate if the style is an "encoding" one as opposed to a "display" one.
+ */
+static int
+xo_style_is_encoding (xo_handle_t *xop)
+{
+    if (xo_style(xop) == XO_STYLE_JSON
+	|| xo_style(xop) == XO_STYLE_XML
+	|| xo_style(xop) == XO_STYLE_SDPARAMS
+	|| xo_style(xop) == XO_STYLE_ENCODER)
+	return TRUE;
+    return FALSE;
+}
+
 /*
  * Is the output for this handle UTF-8?
  */
-static int
-xo_is_text_utf8 (xo_handle_t *xop)
+static inline int
+xo_is_style_text_utf8 (xo_handle_t *xop)
 {
     if (xo_style(xop) == XO_STYLE_TEXT)
 	return XOF_ISSET(xop, XOF_UTF8);
 
     return FALSE;
 }
-#endif
 
 /*
  * Cheap convenience function to return either the argument, or
@@ -1096,10 +1108,10 @@ static uint8_t xo_utf8_len_bits[5]  = { 0, 0x00, 0xc0, 0xe0, 0xf0 };
 /*
  * If the byte has a high-bit set, it's UTF-8, not ASCII.
  */
-static int
-xo_is_utf8 (char ch)
+static inline int
+xo_is_byte_utf8 (char ch)
 {
-    return (ch & 0x80);
+    return (ch & 0x80) ? TRUE : FALSE;
 }
 
 /*
@@ -1289,7 +1301,7 @@ xo_buf_append_locale (xo_handle_t *xop, xo_buffer_t *xbp,
     int cols = 0;
 
     for ( ; cp < ep; cp++) {
-	if (!xo_is_utf8(*cp)) {
+	if (!xo_is_byte_utf8(*cp)) {
 	    cols += 1;
 	    continue;
 	}
@@ -2104,20 +2116,6 @@ xo_name_to_style (const char *name)
     return -1;
 }
 
-/*
- * Indicate if the style is an "encoding" one as opposed to a "display" one.
- */
-static int
-xo_style_is_encoding (xo_handle_t *xop)
-{
-    if (xo_style(xop) == XO_STYLE_JSON
-	|| xo_style(xop) == XO_STYLE_XML
-	|| xo_style(xop) == XO_STYLE_SDPARAMS
-	|| xo_style(xop) == XO_STYLE_ENCODER)
-	return 1;
-    return 0;
-}
-
 /* Simple name->value mapping */
 typedef struct xo_flag_mapping_s {
     xo_xff_flags_t xm_value;	/* Flag value */
@@ -2807,26 +2805,27 @@ xo_format_string_direct (xo_handle_t *xop, xo_buffer_t *xbp,
     if (len > 0 && !xo_buf_has_room(xbp, len))
 	return 0;
 
-#if 0
+#if 1
     /*
      * If we have the "right" encoding for text, then our job is
      * simpler.  We can skim over the string and process it quickly.
      */
-    if (cp && xo_is_text_utf8(xop) && need_enc == have_enc) {
+    if (cp && len > 0 && xo_is_style_text_utf8(xop) && need_enc == have_enc) {
 	const char *np, *ep;
-	for (np = cp, ep = cp + len; np < ep; np++)
-	    if (xo_is_utf8(*np) || *np == '\\' || *np == '%'
+	ssize_t clen = len < 0 ? strlen(cp) : len;
+	for (np = cp, ep = cp + clen; np < ep; np++)
+	    if (xo_is_byte_utf8(*np) || *np == '\\' || *np == '%'
 		|| *np == '{' || *np == '}')
 		break;
 
 	/* If we found no non-ascii characters, we're golden */
 	if (np == ep) {
-	    if (!xo_buf_has_room(xbp, len))
+	    if (!xo_buf_has_room(xbp, clen))
 		return -1;
 
-	    memcpy(xbp->xb_curp, cp, len);
-	    xbp->xb_curp += len;
-	    return len;		/* Len is the number of columns */
+	    memcpy(xbp->xb_curp, cp, clen);
+	    xbp->xb_curp += clen;
+	    return clen;		/* Len is the number of columns */
 	}
     }
 #endif
@@ -2859,8 +2858,8 @@ xo_format_string_direct (xo_handle_t *xop, xo_buffer_t *xbp,
 
 	case XF_ENC_UTF8:		/* UTF-8 */
 	    /* Optimize the simple case: this is a traditional ASCII c */
-	    if (0 < *cp && *cp <= 0x7F) {
-		wc = (wchar_t) *cp++;
+	    if (!xo_is_byte_utf8(*cp)) {
+		wc = (wchar_t) (unsigned char) *cp++;
 		ilen = 1;
 		break;
 	    }
@@ -4538,7 +4537,7 @@ xo_map_option (xo_handle_t *xop, const char *opts)
 
 	vp = cp + 1;		/* Skip '=' */
 	ep = strchr(vp, ':');
-	vlen = ep ? ep - vp : strlen(vp);
+	vlen = ep ? (size_t) (ep - vp) : strlen(vp);
 
 	if (xo_map_add(xop, np, nlen, vp, vlen))
 	    return -1;
