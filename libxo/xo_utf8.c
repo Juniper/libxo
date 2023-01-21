@@ -372,7 +372,6 @@ xo_utf8_nupper (char *str, size_t len)
 	if (ulen != xo_utf8_to_len(uc)) /* Sanity check that lengths match */
 	    continue;
 
-
 	xo_utf8_to_bytes(cp, len, uc);
     }
 }
@@ -429,7 +428,7 @@ xo_ustrncasecmp (const char *s1, size_t s1_len, const char *s2, size_t s2_len)
 	}
     }
 
-    return (s1_len > 0 ? -1 : s2_len > 0 ? -1 : 0);
+    return (s1_len > 0 ? -1 : s2_len > 0 ? 1 : 0);
 }
 
 /**
