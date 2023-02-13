@@ -12,5 +12,5 @@ notifications:
 
 branches:
   only:
-    - master
     - develop
+    - master
