@@ -156,8 +156,6 @@ main (int argc, char **argv)
 
     xo_close_container(NULL);
 
-'Äaa', 'äaa'
-
     xo_close_container_h(NULL, "top");
 
     xo_finish();
