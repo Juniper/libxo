@@ -1,0 +1,164 @@
+.\" #
+.\" # Copyright (c) 2014, Juniper Networks, Inc.
+.\" # All rights reserved.
+.\" # This SOFTWARE is licensed under the LICENSE provided in the
+.\" # ../Copyright file. By downloading, installing, copying, or
+.\" # using the SOFTWARE, you agree to be bound by the terms of that
+.\" # LICENSE.
+.\" # Phil Shafer, July 2014
+.\"
+.Dd February 23, 2023
+.Dt LIBXO 3
+.Os
+.Sh NAME
+.Nm libxo
+.Nd description of libxo usage
+.Sh DESCRIPTION
+.Pp
+.Nm libxo
+is a software component that allows other software to generate a
+variety of output styles, including
+.Em text ,
+.Em XML ,
+.Em JSON ,
+and
+.Em HTML .
+By providing formatting and structural information, a single section of code
+can emit any of these formats.
+Using a single section of code allows
+functional equivalence between format options, e.g. XML and JSON
+formatted output carry the same content.
+It also reduces the maintenance cost, since there is a single line of
+code to change or correct, rather than one per output style.
+.Pp
+Command-line options are used to control
+.NM libxo 's
+operation and output.
+These options begin with
+.Em --libxo
+but can take several forms, which trade brevity for clarity.
+.Pp
+See
+.Xr xo_options 7
+for complete details about the option values.
+.Pp
+Options are recognised in three forms:
+.Bl -bullet
+.It
+\-\-libxo <options>
+.It
+\-\-libxo=<options>
+.It
+\-\-libxo:<brief\-options>
+.El
+.Pp
+The first two forms accept a comma\-separated set of words,
+while the third form accepts a set of letters.
+Both are detailed in
+.Xr xo_options 7 .
+.Pp
+The styles can be intermixed in any order.
+.Pp
+For example, the brief "X" option and the word "xml" both trigger XML
+output, while the "P" or "pretty" options will "pretty-print" the
+output, using indentation and multiple lines.
+Any of the following will execute
+.Xr df
+with both the "xml" and "pretty" options:
+.Bl -bullet
+.It
+df \-\-libxo xml,pretty
+.It
+df \-\-libxo xml \-\-libxo pretty
+.It
+df \-\-libxo=xml,pretty
+.It
+df \-\-libxo=xml \-\-libxo pretty
+.It
+df \-\-libxo:XP
+.El
+.Sh EXAMPLES
+.Pp
+The following example shows the same content generated using multiple
+style options: text, XML, JSON, and HTML:
+.Bd -literal
+% df --libxo:JP -h /
+{
+  "storage-system-information": {
+    "filesystem": [
+      {
+        "name": "zroot/ROOT/default",
+        "blocks": "1.5T",
+        "used": "27G",
+        "available": "1.5T",
+        "used-percent": 2,
+        "mounted-on": "/"
+      }
+    ]
+  }
+}
+% df --libxo:XP -h /
+<storage-system-information>
+  <filesystem>
+    <name>zroot/ROOT/default</name>
+    <blocks value="1668731555840">1.5T</blocks>
+    <used value="29448773632">27G</used>
+    <available value="1639282782208">1.5T</available>
+    <used-percent>2</used-percent>
+    <mounted-on>/</mounted-on>
+  </filesystem>
+</storage-system-information>
+% df --libxo:HP -h /
+<div class="line">
+  <div class="title">Filesystem        </div>
+  <div class="text"> </div>
+  <div class="title">   Size</div>
+  <div class="text"> </div>
+  <div class="title">   Used</div>
+  <div class="text"> </div>
+  <div class="title">  Avail</div>
+  <div class="text"> </div>
+  <div class="title">Capacity</div>
+  <div class="text">  </div>
+  <div class="title">Mounted on</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="name">zroot/ROOT/default</div>
+  <div class="text">  </div>
+  <div class="data" data-tag="blocks">  1.5T</div>
+  <div class="text">  </div>
+  <div class="data" data-tag="used">   27G</div>
+  <div class="text">  </div>
+  <div class="data" data-tag="available">  1.5T</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="used-percent">    2</div>
+  <div class="units">%</div>
+  <div class="text">  </div>
+  <div class="text">  </div>
+  <div class="data" data-tag="mounted-on">/</div>
+</div>
+%
+.Ed
+.Pp
+Note that the XML style includes both the raw and "human" formatted
+values, which 'df' generates with the "-h" option.
+.Pp
+Also note that the HTML style is suitable for inclusion in web
+applications with a suitable CSS file, such as
+/usr/share/libxo/xohtml.css which is used by
+.Xr xohtml 1 .
+.Sh SEE ALSO
+.Xr xo_options 7 ,
+.Xr libxo 3 ,
+.Xr xolint 1 ,
+.Xr xo_emit 3
+.Sh HISTORY
+The
+.Nm libxo
+library first appeared in
+.Fx 11.0 .
+.Sh AUTHORS
+.Nm libxo
+was written by
+.An Phil Shafer Aq Mt phil@freebsd.org .
+
