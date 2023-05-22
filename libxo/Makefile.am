@@ -44,6 +44,8 @@ libxo_la_SOURCES = \
     libxo.c \
     xo_encoder.c \
     xo_syslog.c \
+    xo_tolower.c \
+    xo_toupper.c \
     xo_utf8.c
 
 man3_files = \
