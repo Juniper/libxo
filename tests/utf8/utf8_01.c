@@ -80,10 +80,11 @@ main (int argc, char **argv)
 		if (!iswprint(real))
 		    real = ' ';
 
-		xo_emit("[{:offset/%lu}] [{:hex/%#x}] [{:byte/%lc}] "
+		xo_emit("[{:offset/%lu}] [{:hex/%#x}/{:hex-upper/%x}/{:hex-lower/%x}] [{:byte/%lc}] "
 			"[{:upper/%lc}] [{:lower/%lc}]\n",
-			offset + cp - buf, wc, real,
-			xo_utf8_wtoupper(real), xo_utf8_wtolower(real));
+			offset + cp - buf,
+			wc, xo_utf8_wtoupper(real), xo_utf8_wtolower(real),
+			real, xo_utf8_wtoupper(real), xo_utf8_wtolower(real));
 	    }
 	}
 
