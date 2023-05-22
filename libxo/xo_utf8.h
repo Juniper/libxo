@@ -135,12 +135,12 @@ xo_utf8_len_bits (int len)
 }
 
 /**
- * Inspect the fisrt byte of a UTF-8 character representation and
+ * Inspect the first byte of a UTF-8 character representation and
  * return the number of bytes in the representation, as indicated by
  * the high-order bits.
  */
 static inline int
-xo_utf8_len (char ch)
+xo_utf8_rlen (char ch)
 {
     if ((ch & 0x80) == 0x0)   /* 0xxx xxxx */
         return 1;
@@ -151,6 +151,18 @@ xo_utf8_len (char ch)
     if ((ch & 0xf8) == 0xf0)  /* 1111 0xxx */
         return 4;
     return -1;			/* Invalid non-utf8 byte */
+}
+
+/**
+ * Inspect the fisrt byte of a UTF-8 character representation and
+ * return the number of bytes in the representation, as indicated by
+ * the high-order bits.
+ */
+static inline int
+xo_utf8_len (char ch)
+{
+    int ulen = xo_utf8_rlen(ch);
+    return (ulen <= 0) ? 1 : ulen;
 }
 
 /**
@@ -173,7 +185,7 @@ xo_utf8_to_len (wchar_t wc)
 /**
  * Emit one wide character into the given buffer.  'len' must be <= 4.
  */
-static void
+static inline void
 xo_utf8_to_bytes (char *buf, ssize_t len, wchar_t wc)
 {
     ssize_t i = 0;
@@ -422,30 +434,30 @@ xo_utf8_prev(char *start, char *cur)
  * Convert a string to lower case.
  */
 void
-xo_utf8_nlower(char * restrict str, size_t len);
+xo_utf8_ntolower(char * restrict str, size_t len);
 
 /**
  * Convert a string to lower case.
  */
 static inline void
-xo_utf8_lower(char *str)
+xo_utf8_tolower(char *str)
 {
-    return xo_utf8_nlower(str, strlen(str));
+    return xo_utf8_ntolower(str, strlen(str));
 }
 
 /**
  * Convert a string to upper case.
  */
 void
-xo_utf8_nupper(char * str, size_t len);
+xo_utf8_ntoupper(char * str, size_t len);
 
 /**
  * Convert a string to upper case.
  */
 static inline void
-xo_utf8_upper(char *str)
+xo_utf8_toupper(char *str)
 {
-    return xo_utf8_nupper(str, strlen(str));
+    return xo_utf8_ntoupper(str, strlen(str));
 }
 
 /**
@@ -638,5 +650,17 @@ xo_ustrlcpy(char * restrict dst, const char * restrict src, size_t len);
  */
 size_t
 xo_utrunc(char *str, size_t len);
+
+/**
+ * Return the lower case version of a wide character.
+ */
+wchar_t
+xo_utf8_wtolower (wchar_t wc);
+
+/**
+ * Return the upper case version of a wide character.
+ */
+wchar_t
+xo_utf8_wtoupper (wchar_t wc);
 
 #endif /* INCLUDE_XO_UTF8_H */
