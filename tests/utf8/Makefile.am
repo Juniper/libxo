@@ -13,10 +13,12 @@ AM_CFLAGS = -I${top_srcdir} -I${top_srcdir}/libxo
 # Ick: maintained by hand!
 TEST_CASES = \
 utf8_01.c \
-utf8_02.c
+utf8_02.c \
+utf8_03.c
 
 utf8_01_test_SOURCES = utf8_01.c
 utf8_02_test_SOURCES = utf8_02.c
+utf8_03_test_SOURCES = utf8_03.c
 
 # TEST_CASES := $(shell cd ${srcdir} ; echo *.c )
 
