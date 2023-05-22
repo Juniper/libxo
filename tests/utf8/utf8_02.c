@@ -20,6 +20,7 @@
 int
 main (int argc, char **argv)
 {
+    int dump_lower = 0, dump_upper = 0;
     char name[] = "str_01.test";  /* test trimming of xo_program */
     argv[0] = name;
     
@@ -38,6 +39,10 @@ main (int argc, char **argv)
 	    xo_set_style(NULL, XO_STYLE_HTML);
 	else if (xo_streq(argv[argc], "pretty"))
 	    xo_set_flags(NULL, XOF_PRETTY);
+	else if (xo_streq(argv[argc], "lower"))
+	    dump_lower = 1;
+	else if (xo_streq(argv[argc], "upper"))
+	    dump_upper = 1;
     }
 
     char *data[] = {
@@ -55,11 +60,36 @@ main (int argc, char **argv)
 	"෴ණ්ණ෴෴ණ්ණ\xc0\x0f෴෴ණ්ණ෴෴෴",
 	"Reverse Retro | oɿɟɘЯ ɘƨɿɘvɘЯ",
 	"ði ıntəˈnæʃənəl fəˈnɛtık əsoʊsiˈeıʃn",
+	"Äaa",
 	NULL
     };
     char buf[BUFSIZ];
 
     xo_open_container_h(NULL, "top");
+
+    if (dump_lower) {
+	wchar_t wc, lc;
+	for (wc = 0x0041; wc <= 0xff3a; wc += 1) {
+	    lc = xo_utf8_wtolower(wc);
+	    if (lc != wc)
+		printf("%04X %04X: %#06x - %#06x = %#06x ('%lc'->'%lc')\n",
+		       lc, wc, lc, wc, lc - wc, wc, lc);
+	}
+	xo_finish();
+	return 0;
+    }
+
+    if (dump_upper) {
+	wchar_t wc, uc;
+	for (wc = 0x0061; wc <= 0xff5a; wc += 1) {
+	    uc = xo_utf8_wtoupper(wc);
+	    if (uc != wc)
+		printf("%04X %04X: %#06x - %#06x = %#06x ('%lc'->'%lc')\n",
+		       wc, uc, wc, uc, wc - uc, wc, uc);
+	}
+	xo_finish();
+	return 0;
+    }
 
     xo_open_container("xo_utf8_valid");
 
@@ -77,7 +107,7 @@ main (int argc, char **argv)
 
     xo_close_container(NULL);
 
-    int rc;
+    int rc, rc1, rc2;
 
     xo_open_container("xo_utf8_makevalid");
 
@@ -131,25 +161,27 @@ main (int argc, char **argv)
 
     xo_close_container(NULL);
 
-    xo_open_container("xo_utf8_ncasecmp");
+    xo_open_container("xo_ustrcasecmp");
 
     for (int i = 0; data[i]; i++) {
 	xo_open_instance("item");
+	strncpy(buf, data[i], sizeof(buf));
+	xo_emit("{:base}:\n", buf);
+
 	xo_open_container("lower");
-	strncpy(buf, data[i], sizeof(buf));
-
 	xo_utf8_tolower(buf);
-	rc = xo_utf8_ncasecmp(buf, data[i]);
-	xo_emit("{:item/%d}: '{:data}' {:rc/%d}\n", i,
-		buf, rc);
+	rc1 = xo_ustrcasecmp(buf, data[i]);
+	rc2 = xo_ustrcasecmp(data[i], buf);
+	xo_emit("  {:item/%d}: '{:data}' {:rc1/%d}/{:rc2/%d}\n", i,
+		buf, rc1, rc2);
 	xo_close_container("lower");
-	xo_open_container("upper");
-	strncpy(buf, data[i], sizeof(buf));
 
+	xo_open_container("upper");
 	xo_utf8_toupper(buf);
-	rc = xo_utf8_ncasecmp(buf, data[i]);
-	xo_emit("{:item/%d}: '{:data}' {:rc/%d}\n", i,
-		buf, rc);
+	rc1 = xo_ustrcasecmp(buf, data[i]);
+	rc2 = xo_ustrcasecmp(data[i], buf);
+	xo_emit("  {:item/%d}: '{:data}' {:rc1/%d}/{:rc2/%d}\n", i,
+		buf, rc1, rc2);
 	xo_close_container("upper");
 	xo_close_instance("item");
     }
