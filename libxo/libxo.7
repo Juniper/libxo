@@ -23,24 +23,39 @@ variety of output styles, including
 .Em JSON ,
 and
 .Em HTML .
-By providing formatting and structural information, a single section of code
-can emit any of these formats.
+Using
+.Nm libxo ,
+a single section of code provides formatting and structural
+information, allowing a run-time choice of which format to emit.
 Using a single section of code allows
 functional equivalence between format options, e.g. XML and JSON
-formatted output carry the same content.
-It also reduces the maintenance cost, since there is a single line of
-code to change or correct, rather than one per output style.
+formatted output can reliably carry the same content.
+It also reduces software maintenance costs, since there is a single
+code path to change or correct, rather than one per output style.
+.Pp
+"Structured" output styles like JSON and XML allow programmatic
+parsing of the output content in reliable and robust ways, and
+future-proofs by allowing the addition of new fields without impacting
+parsing.
+.Pp
+.Nm libxo
+supports "plug-in" encoders, which allow new output styles to be
+developed independently, such as the "CSV" encoder, which creates
+Comma-Separated Values, suitable for spreadsheets and other common
+uses.
+See
+.Xr xo_csv
 .Pp
 Command-line options are used to control
 .NM libxo 's
-operation and output.
+operation and output style and features.
 These options begin with
 .Em --libxo
-but can take several forms, which trade brevity for clarity.
+but can take one of several forms which trade brevity for clarity.
 .Pp
 See
 .Xr xo_options 7
-for complete details about the option values.
+for complete details about the specific options and their operation.
 .Pp
 Options are recognised in three forms:
 .Bl -bullet
@@ -60,7 +75,7 @@ Both are detailed in
 The styles can be intermixed in any order.
 .Pp
 For example, the brief "X" option and the word "xml" both trigger XML
-output, while the "P" or "pretty" options will "pretty-print" the
+output, while the "P" and "pretty" options will "pretty-print" the
 output, using indentation and multiple lines.
 Any of the following will execute
 .Xr df
