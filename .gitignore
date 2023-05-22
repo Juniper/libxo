@@ -44,3 +44,15 @@ xo_config.h.in
 xtest
 xtest.dSYM
 tests/w
+
+Unicode/data-lower.txt
+Unicode/data-upper.txt
+Unicode/delta.txt
+Unicode/out-lower.txt
+Unicode/out-upper.txt
+Unicode/xo_tolower
+Unicode/xo_tolower.c
+Unicode/xo_tolower.dSYM/
+Unicode/xo_toupper
+Unicode/xo_toupper.c
+Unicode/xo_toupper.dSYM/
