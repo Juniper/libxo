@@ -52,25 +52,39 @@ main (int argc, char **argv)
     }
 
     char buf[BUFSIZ], *cp, *ep;
-    int len, rc;
-    xo_utf8_wchar_t wc;
+    int len, rc, left = 0;
+    wchar_t wc;
     unsigned long offset = 0;
 
     xo_open_container("top");
 
     for (;;) {
-	rc = read(fd, buf, sizeof(buf));
+	rc = read(fd, buf + left, sizeof(buf) - left);
 	if (rc <= 0)
 	    break;
 
-	for (cp = buf, ep = buf + rc; cp < ep; cp += len) {
+	for (cp = buf, ep = buf + rc + left; cp < ep; cp += len, left = 0) {
 	    len = xo_utf8_len(*cp);
 	    if (len <= 0)
 		break;
 
-	    wc = xo_utf8_codepoint(cp, ep - cp, len, ' ');
-	    if (wc < 0)
+	    left = ep - cp;
+	    if (len > left) {
+		xo_emit("{:offset/%lu}: {:message}\n",
+			offset + cp - buf, "end of buffer");
+		memcpy(buf, cp, left);
 		break;
+	    }
+
+	    wc = xo_utf8_codepoint(cp, ep - cp, len, 0);
+	    if (xo_utf8_wchar_is_err(wc)) {
+		const char *msg = xo_utf8_wchar_errmsg(wc);
+		xo_emit("{:offset/%lu}: {:error/%lc} {:message}\n",
+			offset + cp - buf, (wchar_t) wc, msg);
+
+		/* Now get a real one (meaning ' ') */
+		wc = xo_utf8_codepoint(cp, ep - cp, len, ' ');
+	    }
 
 	    if (raw) {
 		xo_emit("{:byte/%lc}", (wchar_t) wc);
@@ -80,7 +94,9 @@ main (int argc, char **argv)
 		if (!iswprint(real))
 		    real = ' ';
 
-		xo_emit("[{:offset/%lu}] [{:hex/%#x}/{:hex-upper/%x}/{:hex-lower/%x}] [{:byte/%lc}] "
+		xo_emit("[{:offset/%lu}] "
+			"[{:hex/%#x}/{:hex-upper/%x}/{:hex-lower/%x}] "
+			"[{:byte/%lc}] "
 			"[{:upper/%lc}] [{:lower/%lc}]\n",
 			offset + cp - buf,
 			wc, xo_utf8_wtoupper(real), xo_utf8_wtolower(real),
@@ -88,7 +104,7 @@ main (int argc, char **argv)
 	    }
 	}
 
-	offset += rc;
+	offset += rc - left;
     }
 
     xo_finish();
