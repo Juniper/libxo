@@ -147,7 +147,7 @@ main (int argc, char **argv)
 		break;
 
 	    ulen = xo_utf8_len(*cp);
-	    xo_utf8_wchar_t wc = xo_utf8_codepoint(cp, len, ulen, 0);
+	    wchar_t wc = xo_utf8_codepoint(cp, len, ulen, 0);
 	    
 	    char isup = xo_utf8_isupper(cp) ? 'U' : '-';
 	    char islw = xo_utf8_islower(cp) ? 'L' : '-';
