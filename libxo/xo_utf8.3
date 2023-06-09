@@ -1,0 +1,255 @@
+.\" #
+.\" # Copyright (c) 2023, Juniper Networks, Inc.
+.\" # All rights reserved.
+.\" # This SOFTWARE is licensed under the LICENSE provided in the
+.\" # ../Copyright file. By downloading, installing, copying, or 
+.\" # using the SOFTWARE, you agree to be bound by the terms of that
+.\" # LICENSE.
+.\" # Phil Shafer, May 2023
+.\" 
+.Dd May 22, 2023
+.Dt LIBXO 3
+.Os
+.Sh NAME
+.Nm xo_utf8_wtolower, xo_utf8_wtoupper
+.Nd handle characters in UTF-8 strings
+.Sh LIBRARY
+.Lb libxo
+.Sh SYNOPSIS
+.In libxo/xo_utf.h
+.Ft wchar_t
+.Fn xo_utf8_wtolower "wchar_t wc"
+.Ft wchar_t
+.Fn xo_utf8_wtoupper "wchar_t wc"
+.Ft int
+.Fn xo_utf8_len "char ch"
+.Ft wchar_t
+.Fn xo_utf8_codepoint "const char *buf, size_t bufsiz, int len, wchar_t on_err"
+.Ft int
+.Fn xo_utf8_wchar_is_err "wchar_t wc"
+.Ft const char *
+.Fn xo_utf8_wchar_errmsg "wchar_t wc"
+.Ft char *
+.Fn xo_utf8_nvalid "char *str, size_t len"
+.Ft char *
+.Fn xo_utf8_valid "char *str"
+.Ft int
+.Fn xo_utf8_nmakevalid "char *str, size_t len, char replacement"
+.Ft int
+.Fn xo_utf8_makevalid "char *str, char replacement"
+.Ft wchar_t
+.Fn xo_utf8_wtolower "wchar_t wc"
+.Ft wchar_t
+.Fn xo_utf8_wtoupper "wchar_t wc"
+.Ft int
+.Fn xo_utf8_wislower "wchar_t wc"
+.Ft int
+.Fn xo_utf8_wisupper "wchar_t wc"
+.Ft int
+.Fn xo_utf8_nislower "char *str, size_t len"
+.Ft int
+.Fn xo_utf8_islower "char *str"
+.Ft int
+.Fn xo_utf8_nisupper "char *str, size_t len"
+.Ft int
+.Fn xo_utf8_isupper "char *str"
+.Ft char *
+.Fn xo_utf8_nnext "char *str, size_t len"
+.Ft char *
+.Fn xo_utf8_next "char *str"
+.Ft char *
+.Fn xo_utf8_prev "char *start, char *cur"
+.Ft void
+.Fn xo_utf8_ntolower "char * restrict str, size_t len"
+.Ft void
+.Fn xo_utf8_tolower "char *str"
+.Ft void
+.Fn xo_utf8_ntoupper "char * restrict str, size_t len"
+.Ft void
+.Fn xo_utf8_toupper "char *str"
+.Ft int
+.Fn xo_ustrncasecmp const char *s1, size_t s1_len, const char *s2, size_t s2_len"
+.Ft int
+.Fn xo_ustrcasecmp "const char *s1, const char *s2"
+.Ft size_t
+.Fn xo_utrunc "char *str, size_t len"
+.Ft size_t
+.Fn xo_ustrlncat "char * restrict dst, const char * restrict append, size_t dstsize, size_t count"
+.Ft size_t
+.Fn xo_ustrlcat "char * restrict dst, const char * restrict append, size_t dstsize"
+.\"
+.\"  Add more functions here....
+.\"
+.Sh DESCRIPTION
+These functions operate on Unicode character code points,
+either as "wide" characters ("wchar_t") or as characters encoded as
+bytes in NUL-terminated strings.
+.Pp
+The
+.Fn xo_utf8_wtolower
+function returns the lower case equivalent of a character, if defined,
+or the character itself, while the
+.Fn xo_utf8_wtoupper
+function performs the same operations for the upper case.
+.Pp
+The
+.Fn xo_utf8_len
+function inspects the first byte of a UTF-8 character representation and
+returns the number of bytes in the representation, as indicated by
+the high-order bits.
+.Pp
+The
+.Fn xo_utf8_codepoint
+function returns the codepoint for a UTF-8 character.
+The 'len' parameter is the value returned by
+.Fn xo_utf8_len ,
+and the
+.Fa buf
+and
+.Fa bufsiz
+parameters must be sufficient for this length.
+If the
+.Fa on_err
+parameter is greater than zero, this value is
+returned when an error is encountered.
+If this value is zero, then a specific error
+value is returned, one of XO_UTF8_ERR_* defines from <xo_utf8.h>.
+The
+.Fn xo_utf8_wchar_errmsg
+function turns an error return code into a human-readable string.
+.Pp
+The
+.Fn xo_utf8_nvalid
+function inspects a string (of length
+.Fa n
+or less) to see if it's valid
+UTF-8.  Returns either NULL indicating success, or a pointer to the
+start of invalid character.
+The
+.Fn xo_utf8_valid
+function performs the same logic on a NUL-terminated string.
+.Pp
+The
+.Fn xo_utf8_nmakevalid
+function ensures that a string is valid UTF-8
+by replacing any invalid bytes with the replacement byte
+given in the
+.Fn replacement
+parameter.
+If the replacement character is NUL (0),
+then replacement will terminate with the first replacement.
+The return value is the number of times a replacement is performed.
+The
+.Fn xo_utf8_makevalid
+function performs the same task for a NUL-terminated string.
+.Pp
+The
+.Fn xo_utf8_wtolower
+function ....
+.Pp
+The
+.Fn xo_utf8_wtoupper
+function ....
+.Pp
+The
+.Fn xo_utf8_wislower
+function ....
+.Pp
+The
+.Fn xo_utf8_wisupper
+function ....
+.Pp
+The
+.Fn xo_utf8_nislower
+function ....
+.Pp
+The
+.Fn xo_utf8_islower
+function ....
+.Pp
+The
+.Fn xo_utf8_nisupper
+function ....
+.Pp
+The
+.Fn xo_utf8_isupper
+function ....
+.Pp
+The
+.Fn xo_utf8_nnext
+function ....
+.Pp
+The
+.Fn xo_utf8_next
+function ....
+.Pp
+The
+.Fn xo_utf8_prev
+function ....
+.Pp
+The
+.Fn xo_utf8_ntolower
+function ....
+.Pp
+The
+.Fn xo_utf8_tolower
+function ....
+.Pp
+The
+.Fn xo_utf8_ntoupper
+function ....
+.Pp
+The
+.Fn xo_utf8_toupper
+function ....
+.Pp
+The
+.Fn xo_ustrncasecmp const char *s1, size_t s1_len, const char *s2, size_t s2_le
+function ....
+.Pp
+The
+.Fn xo_ustrcasecmp
+function ....
+.Pp
+The
+.Fn xo_utrunc
+function ....
+.Pp
+The
+.Fn xo_ustrlncat
+function ....
+.Pp
+The
+.Fn xo_ustrlcat
+function ....
+.Sh EXAMPLES
+Find the upper case character for a given lower case one:
+.Bd  -literal -offset indent
+    wchar_t upper_case_wc = xo_utf8_wtoupper(lower_case_wc);
+.Ed
+.Sh UNICODE NOTES
+These functions is only the "simple" mappings given by
+UnicodeData.txt, not the complex multi-character ones
+listed in SpecialCasing.txt:
+.Bd  -literal -offset indent
+   https://unicode.org/Public/UNIDATA/UnicodeData.txt
+   https://unicode.org/Public/UNIDATA/SpecialCasing.txt
+.Ed
+.Sh RETURN CODE
+Returns codes vary by function.
+See above for details.
+.Pp
+
+.Sh SEE ALSO
+.Xr xo_emit 3 ,
+.Xr libxo 3
+.Xr libxo 7
+.Sh HISTORY
+The
+.Nm libxo
+library first appeared in
+.Fx 11.0 .
+.Sh AUTHORS
+.Nm libxo
+was written by
+.An Phil Shafer Aq Mt phil@freebsd.org .
