@@ -14,12 +14,12 @@
 /**
  * Return the codepoint to a UTF-8 character
  */
-xo_utf8_wchar_t
+wchar_t
 xo_utf8_codepoint (const char *buf, size_t bufsiz, int len,
-		   xo_utf8_wchar_t on_err)
+		   wchar_t on_err)
 {
     char b1 = *buf, b2, b3, b4;
-    xo_utf8_wchar_t wc = 0;
+    wchar_t wc = 0;
 
     /*
      * The caller should really ensure this, but it seems odd to not
@@ -27,6 +27,10 @@ xo_utf8_codepoint (const char *buf, size_t bufsiz, int len,
      */
     if (len <= 0 || (size_t) len > bufsiz)
 	return on_err ?: XO_UTF8_ERR_TRUNCATED;
+
+    /* Are we looking at a secondary byte? */
+    if ((b1 & 0xc0) == 0x80)
+	return on_err ?: XO_UTF8_ERR_SECONDARY;
 
     /*
      * For determining the "shortest form", consider the following table::
@@ -48,7 +52,7 @@ xo_utf8_codepoint (const char *buf, size_t bufsiz, int len,
      * the value is encoded in a "non-shortest form", which we reject as
      * directed by Unicode TR-36.
      */
-    xo_utf8_wchar_t test, match, zeros;
+    wchar_t test, match, zeros;
 
     b1 &= xo_utf8_data_bits(len);
     if (len == 1) {
@@ -91,6 +95,28 @@ xo_utf8_codepoint (const char *buf, size_t bufsiz, int len,
 }
 
 /**
+ * Return a text message describing the error in 'wc'
+ */
+const char *
+xo_utf8_wchar_errmsg (wchar_t wc)
+{
+    switch (wc) {
+    case XO_UTF8_ERR_BAD_LEN:
+	return "incorrect length bits in first byte";
+    case XO_UTF8_ERR_TRAILING:
+	return "incorrect high bits in secondary bytes";
+    case XO_UTF8_ERR_NON_SHORT:
+	return "representation is not the shortest possible form";
+    case XO_UTF8_ERR_TRUNCATED:
+	return "missing trailing bytes (truncated input)";
+    case XO_UTF8_ERR_SECONDARY:
+	return "secondary byte seen; missing first byte";
+    default:
+	return "unknown error";
+    }
+}
+
+/**
  * Inspect a string to see if it's valid UTF-8.  Returns either NULL
  * indicating success, or a pointer to the start of invalid character.
  */
@@ -99,7 +125,7 @@ xo_utf8_nvalid (char *str, size_t len)
 {
     char *cp;
     char *ep;
-    xo_utf8_wchar_t wc;
+    wchar_t wc;
 
     /*
      * Whiffle thru the string, looking for invalid characters.  We
@@ -109,7 +135,7 @@ xo_utf8_nvalid (char *str, size_t len)
     for (cp = str, ep = str + len; cp < ep; cp += len) {
 	len = xo_utf8_len(*cp);
 	wc = xo_utf8_codepoint(cp, ep - cp, len, 0);
-	if (wc < 0)
+	if (xo_utf8_wchar_is_err(wc))
 	    return cp;
     }
 
@@ -127,7 +153,7 @@ xo_utf8_nmakevalid (char *str, size_t len, char replacement)
 {
     char *cp;
     char *ep;
-    xo_utf8_wchar_t wc;
+    wchar_t wc;
     int rc = 0;
 
     /*
@@ -138,7 +164,7 @@ xo_utf8_nmakevalid (char *str, size_t len, char replacement)
     for (cp = str, ep = cp + len; cp < ep; cp += len) {
 	len = xo_utf8_len(*cp);
 	wc = xo_utf8_codepoint(cp, ep - cp, len, 0);
-	if (wc >= 0)
+	if (!xo_utf8_wchar_is_err(wc))
 	    continue;
 
 	rc += 1;
@@ -163,7 +189,7 @@ xo_utf8_ntolower (char *str, size_t len)
     char *cp = str, *ep = cp + len;
     for ( ; cp < ep; cp += ulen) {
 	ulen = xo_utf8_len(*cp);
-	wchar_t wc = xo_utf8_wcodepoint(cp, len, ulen, ' ');
+	wchar_t wc = xo_utf8_codepoint(cp, len, ulen, ' ');
 	wchar_t lc = xo_utf8_wtolower(wc);
 	if (wc == lc)		/* Is it already lower? */
 	    continue;
@@ -186,7 +212,7 @@ xo_utf8_ntoupper (char *str, size_t len)
     char *cp = str, *ep = cp + len;
     for ( ; cp < ep; cp += ulen) {
 	ulen = xo_utf8_len(*cp);
-	wchar_t wc = xo_utf8_wcodepoint(cp, len, ulen, ' ');
+	wchar_t wc = xo_utf8_codepoint(cp, len, ulen, ' ');
 	wchar_t uc = xo_utf8_wtoupper(wc);
 	if (wc == uc)		/* Is it already upper? */
 	    continue;
@@ -237,13 +263,13 @@ xo_ustrncasecmp (const char *s1, size_t s1_len, const char *s2, size_t s2_len)
 	    if (s1_wlen <= 0)
 		return -1;
 
-	    s1_wchar = xo_utf8_wcodepoint(s1, s1_len, s1_wlen, ' ');
+	    s1_wchar = xo_utf8_codepoint(s1, s1_len, s1_wlen, ' ');
 
 	    s2_wlen = xo_utf8_rlen(s2c);
 	    if (s2_wlen <= 0)
 		return 1;
 
-	    s2_wchar = xo_utf8_wcodepoint(s2, s2_len, s2_wlen, ' ');
+	    s2_wchar = xo_utf8_codepoint(s2, s2_len, s2_wlen, ' ');
 
 	    if (s1_wchar != s2_wchar)
 		return (s1_wchar < s2_wchar ? -1 : 1);
@@ -352,7 +378,7 @@ xo_utrunc (char *str, size_t len)
     if (xo_is_utf8_byte(first_char)) {
 	first_lower = 0;
 	first_wlen = xo_utf8_len(first);
-	first_wchar = xo_utf8_wcodepoint(s2, s2_len, first_wlen, ' ');
+	first_wchar = xo_utf8_codepoint(s2, s2_len, first_wlen, ' ');
     } else {
 	first_lower = tolower(first);
 	first_ = 0;
