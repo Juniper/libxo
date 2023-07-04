@@ -220,9 +220,9 @@ main (int argc UNUSED, char **argv)
     } else
 	outfile = stdout;
 
-    int blank = 0, line;
+    int blank = 0;
 
-    for (line = 1;; line++) {
+    for (;;) {
 	if (fgets(buf, sizeof(buf), infile) == NULL)
 	    break;
 
