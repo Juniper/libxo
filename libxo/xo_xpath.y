@@ -273,9 +273,25 @@
 #define yylex(_lvalp, _param) \
     xo_xpath_yylex(_param, _lvalp)
 
+/*
+ * Even if we don't want debug printfs, we still need the arrays with
+ * names for our own nefarious purposes.
+ */
 #undef YYDEBUG
+#ifdef XO_YYDEBUG
 #define YYDEBUG 1		/* Enable debug output */
 #define YYFPRINTF fprintf	/* Log via our function */
+#else /* XO_YYDEBUG */
+#define YYDEBUG 1		/* Enable debug output */
+#define YYFPRINTF xo_dont_bother /* Don't log via our function */
+
+static inline void UNUSED
+xo_dont_bother (FILE *fp UNUSED, const char *fmt UNUSED, ...)
+{
+    return;
+}
+
+#endif /* XO_YYDEBUG */
 
 %}
 
@@ -826,6 +842,11 @@ xp_relational_expr :
 	;
 
 %%
+
+#ifndef XO_YYDEBUG
+#undef yydebug
+#define yydebug 0
+#endif /* XO_YYDEBUG */
 
 /*
  * These definitions need values and defines that are internal to
