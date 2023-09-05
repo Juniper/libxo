@@ -103,6 +103,7 @@ typedef unsigned long long xo_xof_flags_t;
 
 #define XOF_COLOR_MAP	XOF_BIT(32) /** Color map has been initialized */
 #define XOF_CONTINUATION XOF_BIT(33) /** Continuation of previous line */
+#define XOF_DEBUG	XOF_BIT(34) /** Internal debug flag */
 
 typedef unsigned xo_emit_flags_t; /* Flags to xo_emit() and friends */
 #define XOEF_RETAIN	(1<<0)	  /* Retain parsed formatting information */
@@ -723,5 +724,8 @@ xo_map_add (xo_handle_t *xop, const char *from, size_t flen,
 
 int
 xo_map_add_file (xo_handle_t *xop, const char *fname);
+
+void
+xo_dbg (xo_handle_t *xop, const char *fmt, ...);
 
 #endif /* INCLUDE_XO_H */
