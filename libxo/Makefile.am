@@ -57,6 +57,7 @@ xo_xpath.tab.c.orig xo_xpath.tab.h: xo_xpath.y
 
 xo_xpath.c: xo_xpath.tab.c.orig
 	${SED} -e '/extern int YYPARSE_DECL();/d' \
+		-e 's/yydebug = yyn - .0./do {} while(0)/' \
 		< xo_xpath.tab.c.orig > xo_xpath.c
 
 man3_files = \
@@ -97,6 +98,8 @@ man_MANS = ${man3_files} ${man5_files} ${man7_files}
 
 EXTRA_DIST = \
     ${man_MANS}
+
+CLEANFILES = xo_xpath.c xo_xpath.tab.c.orig xo_xpath.tab.h
 
 call-graph:
 	${RM} libxo.o
