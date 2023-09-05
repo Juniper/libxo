@@ -37,6 +37,7 @@ AC_PATH_PROG(MKDIR, mkdir, /bin/mkdir)
 AC_PATH_PROG(MV, mv, /bin/mv)
 AC_PATH_PROG(RM, rm, /bin/rm)
 AC_PATH_PROG(SED, sed, /bin/sed)
+AC_CHECK_PROGS(YACC, [byacc yacc 'bison -y'], )
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_INLINE
@@ -519,4 +520,5 @@ AC_MSG_NOTICE([summary of build options:
   local wcwidth:    ${LIBXO_WCWIDTH:-no}
   retain size:      ${XO_RETAIN_SIZE:-no}
   have etext:       ${HAVE_ETEXT:-no} (${HAVE_ETEXT_STYLE})
+  yacc:             ${YACC}
 ])
