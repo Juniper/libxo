@@ -194,6 +194,13 @@ xo_xparse_ttname_map_t xo_xparse_ttname_map[] = {
     { T_NUMBER,			"number" },
     { T_QUOTED,			"quoted string" },
     { T_VAR,			"variable name" },
+    { C_PREDICATE,		"predicate ('[test]')" },
+    { C_ELEMENT,		"path element" },
+    { C_ABSOLUTE,		"Absolute path" },
+    { C_DESCENDANT,		"descendant child ('one//two')" },
+    { C_TEST,			"node test ('node()')" },
+    { C_UNION,			"union of two paths ('one|two')" },
+    { C_EXPR,			"parenthetical expresions" },
     { 0, NULL }
 };
 
@@ -529,7 +536,7 @@ xo_xpath_feature_warn (const char *tag, xo_xparse_data_t *xdp,
     if (tokens) {
 	for (i = 0; tokens[i] && i < len; i++)
 	    if (tokens[i])
-		map[i] = 1;
+		map[tokens[i]] = 1;
     }
 
     if (bytes) {
@@ -1229,8 +1236,10 @@ main (int argc, char **argv)
     }
 
     xo_xparse_dump(&xd, xd.xd_result);
-    xo_xpath_feature_warn("test", &xd, NULL, "+");
 
+    int bad_horse[] = { C_DESCENDANT, 0 };
+
+    xo_xpath_feature_warn("test", &xd, bad_horse, "+");
 
     xo_xparse_clean(&xd);
 
