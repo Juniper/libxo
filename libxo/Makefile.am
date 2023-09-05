@@ -46,7 +46,18 @@ libxo_la_SOURCES = \
     xo_syslog.c \
     xo_tolower.c \
     xo_toupper.c \
-    xo_utf8.c
+    xo_utf8.c \
+    xo_xpath.c \
+    xo_xparse.c
+
+YACC_OPTS = -P -p xo_xpath_yy -d -v -s -b xo_xpath
+
+xo_xpath.tab.c.orig xo_xpath.tab.h: xo_xpath.y
+	${YACC} ${YACC_OPTS} -o xo_xpath.tab.c.orig ${srcdir}/xo_xpath.y
+
+xo_xpath.c: xo_xpath.tab.c.orig
+	${SED} -e '/extern int YYPARSE_DECL();/d' \
+		< xo_xpath.tab.c.orig > xo_xpath.c
 
 man3_files = \
     libxo.3 \
@@ -99,3 +110,12 @@ install-data-hook:
 	    cat ../libxo/add.man >> ${DESTDIR}${man5dir}/$$file ; done
 	for file in ${man7_files}; do \
 	    cat ../libxo/add.man >> ${DESTDIR}${man7dir}/$$file ; done
+
+xo_xpath: all
+	${COMPILE} -DTEST_XPATH \
+		.libs/libxo.a -L/opt/local/lib -lintl \
+		-o xo_xpath ${srcdir}/xo_xparse.c
+
+var:
+	@echo ${${VAR}}
+
