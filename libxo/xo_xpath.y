@@ -198,7 +198,7 @@
 %token C_PREDICATE		/* Node contains a predicate */
 %token C_ELEMENT		/* Path element */
 %token C_ABSOLUTE		/* An absolute path */
-%token C_ABSCHILD		/* Absolute child ("//tag") */
+%token C_DESCENDANT		/* Absolute child ("//tag") */
 %token C_TEST			/* Node test (e.g. node()) */
 %token C_UNION			/* Union of two paths */
 %token C_EXPR			/* Parenthetical expresion (nested) */
@@ -683,7 +683,7 @@ xpc_step :
 xpc_abbreviated_absolute_location_path :
 	L_DSLASH xpc_relative_location_path
 		{
-		    xo_xparse_node_set_type(xparse_data, $1, C_ABSCHILD);
+		    xo_xparse_node_set_type(xparse_data, $1, C_DESCENDANT);
 		    xo_xparse_node_set_next(xparse_data, $1, $2);
 		    $$ = xo_xparse_yyval(xparse_data, $1);
 		}
@@ -692,7 +692,7 @@ xpc_abbreviated_absolute_location_path :
 xpc_abbreviated_relative_location_path :
 	xpc_relative_location_path L_DSLASH xpc_step
 		{
-		    xo_xparse_node_set_type(xparse_data, $2, C_ABSCHILD);
+		    xo_xparse_node_set_type(xparse_data, $2, C_DESCENDANT);
 		    xo_xparse_node_set_next(xparse_data, $1, $2);
 		    xo_xparse_node_set_next(xparse_data, $2, $3);
 		    $$ = xo_xparse_yyval(xparse_data, $1 ?: $2);
