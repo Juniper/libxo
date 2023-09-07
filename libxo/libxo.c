@@ -46,6 +46,7 @@
 
 #include "xo_config.h"
 #include "xo.h"
+#include "xo_private.h"
 #include "xo_encoder.h"
 #include "xo_buf.h"
 #include "xo_explicit.h"
@@ -1616,7 +1617,7 @@ xo_retain_get_hits (void)
  * standard error.  If the XOF_WARN_XML flag is set, then we generate
  * XMLified content on standard output.
  */
-static void
+void
 xo_warn_hcv (xo_handle_t *xop, int code, int check_warn,
 	     const char *fmt, va_list vap)
 {
