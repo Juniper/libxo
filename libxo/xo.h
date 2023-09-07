@@ -422,6 +422,10 @@ void
 xo_set_leading_xpath (xo_handle_t *xop, const char *path);
 
 void
+xo_warn_hcv (xo_handle_t *xop, int code, int check_warn,
+	     const char *fmt, va_list vap);
+
+void
 xo_warn_hc (xo_handle_t *xop, int code, const char *fmt, ...) PRINTFLIKE(3, 4);
 
 void
