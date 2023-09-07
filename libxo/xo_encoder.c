@@ -24,6 +24,7 @@
 
 #include "xo_config.h"
 #include "xo.h"
+#include "xo_private.h"
 #include "xo_encoder.h"
 
 #ifdef HAVE_DLFCN_H
