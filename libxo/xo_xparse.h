@@ -18,6 +18,8 @@ typedef unsigned xo_xparse_node_type_t;
 typedef xo_off_t xo_xparse_str_id_t;
 typedef xo_off_t xo_xparse_node_id_t;
 
+typedef void (*xo_xpath_warn_func_t)(void *data, const char *, va_list);
+
 typedef struct xo_xparse_node_s {
     unsigned xn_type;		/* Type of this node (token) */
     xo_off_t xn_str;		/* String value (in xd_str_buf) */
@@ -31,8 +33,9 @@ typedef struct xo_xparse_data_s {
     int xd_errors;              /* Number of errors seen */
     char xd_filename[MAXPATHLEN]; /* Path of current file */
     char *xd_buf;		/* XPath contents */
-    int xd_line;                /* Line number */
-    int xd_col;                 /* Column number */
+    unsigned xd_line;           /* Line number */
+    unsigned xd_col;		/* Column number */
+    unsigned xd_col_start;	/* First column of current line */
     int xd_last;		/* Last token returned */
     int xd_ttype;		/* Magic token to return */
     xo_xparse_node_id_t xd_result; /* Final resultsn */
@@ -47,6 +50,9 @@ typedef struct xo_xparse_data_s {
     xo_buffer_t xd_node_buf;    /* Buffer for allocating node data */
     xo_off_t xd_last_node;	/* Node offset of last allocated node */
     xo_off_t xd_last_str;	/* Node offset of last allocated string */
+
+    xo_xpath_warn_func_t xd_warn_func; /* Function to emit warnings */
+    void *xd_warn_data;	       /* Opaque data passed to xd_warn_func */
 } xo_xparse_data_t;
 
 /* Flags for xd_flags */
@@ -152,8 +158,8 @@ xo_xparse_concat_rewrite (xo_xparse_data_t *, xo_xparse_node_id_t *d0,
 			 xo_xparse_node_id_t *d1, xo_xparse_node_id_t *d2,
 			 xo_xparse_node_id_t *d3);
 
-int
-xo_xparse_check_axis_name (xo_xparse_data_t *, xo_xparse_node_id_t *d1);
+void
+xo_xparse_check_axis_name (xo_xparse_data_t *, xo_xparse_node_id_t id);
 
 int
 xo_xpath_parse (xo_xparse_data_t *);
@@ -209,15 +215,9 @@ void
 xo_xparse_node_set_next (xo_xparse_data_t *xdp, xo_xparse_node_id_t id,
 			 xo_xparse_node_id_t value);
 
-static inline void
+void
 xo_xparse_node_set_contents (xo_xparse_data_t *xdp, xo_xparse_node_id_t id,
-			xo_xparse_node_id_t value)
-{
-    if (id) {
-	xo_xparse_node_t *xnp = xo_xparse_node(xdp, id);
-	xnp->xn_contents = value;
-    }
-}
+			     xo_xparse_node_id_t value);
 
 static inline xo_xparse_node_id_t
 xo_xparse_node_contents (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
@@ -237,6 +237,26 @@ xo_xparse_node_type (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
 
     xo_xparse_node_t *xnp = xo_xparse_node(xdp, id);
     return xnp->xn_type;
+}
+
+static inline xo_xparse_str_id_t
+xo_xparse_node_str (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
+{
+    if (id == 0)
+	return 0;
+
+    xo_xparse_node_t *xnp = xo_xparse_node(xdp, id);
+    return xnp->xn_str;
+}
+
+static inline const char *
+xo_xparse_node_string (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
+{
+    xo_xparse_str_id_t sid = xo_xparse_node_str(xdp, id);
+    if (sid == 0)
+	return NULL;
+
+    return xo_xparse_str(xdp, sid);
 }
 
 xo_xparse_str_id_t
@@ -260,5 +280,29 @@ xo_xparse_fancy_token_name (int id);
 int
 xo_xpath_feature_warn (const char *tag, xo_xparse_data_t *xdp,
 		       const int *tokens, const char *bytes);
+
+static inline void
+xo_xpath_set_warn_func (xo_xparse_data_t *xdp, xo_xpath_warn_func_t func,
+			void *data)
+{
+    xdp->xd_warn_func = func;
+    xdp->xd_warn_data = data;
+}
+
+static inline int
+xo_xparse_node_is_attr_axis (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
+{
+    if (id == 0)
+	return 0;
+
+    if (xo_xparse_node_type(xdp, id) != T_AXIS_NAME)
+	return 0;
+
+    const char *str = xo_xparse_node_string(xdp, id);
+    if (str == NULL)
+	return 0;
+
+    return xo_streq(str, "attribute");
+}
 
 #endif /* XO_XPARSE_H */
