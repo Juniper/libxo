@@ -21,8 +21,8 @@
 #include <libxo/xo_encoder.h>
 #include <libxo/xo_buf.h>
 
-#include "xo_xparse.h"
 #include "xo_xpath.tab.h"
+#include "xo_xparse.h"
 
 #define XD_BUF_FUDGE (BUFSIZ/8)
 #define XD_BUF_INCR BUFSIZ
@@ -196,6 +196,7 @@ xo_xparse_ttname_map_t xo_xparse_ttname_map[] = {
     { T_VAR,			"variable name" },
     { C_PREDICATE,		"predicate ('[test]')" },
     { C_ELEMENT,		"path element" },
+    { C_ATTRIBUTE,		"attribute axis" },
     { C_ABSOLUTE,		"Absolute path" },
     { C_DESCENDANT,		"descendant child ('one//two')" },
     { C_TEST,			"node test ('node()')" },
@@ -384,17 +385,35 @@ xo_xparse_move_cur (xo_xparse_data_t *xdp)
     return 0;
 }
 
+static void
+xo_xparse_warn_default (void *data, const char *fmt, va_list vap)
+{
+    xo_handle_t *xop = data;
+
+    xo_warn_hcv(xop, -1, 0, fmt, vap);
+}
+
+static void
+xo_xparse_warn (xo_xparse_data_t *xdp, const char *fmt, ...)
+{
+    xo_xpath_warn_func_t func = xdp->xd_warn_func ?: xo_xparse_warn_default;
+    void *data = xdp->xd_warn_func ? xdp->xd_warn_data : xdp->xd_xop;
+    va_list vap;
+
+    va_start(vap, fmt);
+    func(data, fmt, vap);
+    va_end(vap);
+}
+
 /**
  * Issue an error if the axis name is not valid
  *
  * @param xdp main xplex data structure
  * @param axis name of the axis to check
  */
-int
-xo_xparse_check_axis_name (xo_xparse_data_t *xdp UNUSED, xo_xparse_node_id_t *d1 UNUSED)
+void
+xo_xparse_check_axis_name (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
 {
-    return 0;
-#if 0
     static const char *axis_names[] = {
 	"ancestor",
 	"ancestor-or-self",
@@ -412,21 +431,28 @@ xo_xparse_check_axis_name (xo_xparse_data_t *xdp UNUSED, xo_xparse_node_id_t *d1
 	NULL
     };
     const char **namep;
+    xo_xparse_node_t *xnp = xo_xparse_node(xdp, id);
+
+    if (xnp == NULL)
+	return;
+    
+    const char *str = xo_xparse_str(xdp, xnp->xn_str);
+    if (str == NULL)
+	return;
 
     /*
      * Fix the token type correctly, since sometimes these are parsed
      * as T_BARE.
      */
-    axis->ss_ttype = T_AXIS_NAME;
+    xnp->xn_type = T_AXIS_NAME;
 
     for (namep = axis_names; *namep; namep++) {
-	if (streq(*namep, axis->ss_token))
+	if (xo_streq(*namep, str))
 	    return;
     }
 
-    xmlParserError(xdp->xd_ctxt,  "%s:%d: unknown axis name: %s\n",
-		   xdp->xd_filename, xdp->xd_line, axis->ss_token);
-#endif
+    xo_xparse_warn(xdp, "%s:%u:%u unknown axis name: '%s'\n",
+		   xdp->xd_filename, xdp->xd_line, xdp->xd_col, str);
 }
 
 xo_xparse_str_id_t
@@ -492,9 +518,9 @@ xo_xparse_feature_warn_one_node (const char *tag, xo_xparse_data_t *xdp UNUSED,
     int type = xnp->xn_type;
 
     if (type > 0 && type < len && map[type]) {
-	xo_warnx("%s%sxpath feature is unsupported: %s",
-		tag ?: "", tag ? ": " : "",
-		xo_xparse_fancy_token_name(type));
+	xo_xparse_warn(xdp, "%s%sxpath feature is unsupported: %s\n",
+		       tag ?: "", tag ? ": " : "",
+		       xo_xparse_fancy_token_name(type));
 	return 1;
     }
 
@@ -600,6 +626,27 @@ xo_xparse_node_set_next (xo_xparse_data_t *xdp, xo_xparse_node_id_t id,
 	   id, next, value);
 }
 
+void
+xo_xparse_node_set_contents (xo_xparse_data_t *xdp, xo_xparse_node_id_t id,
+			xo_xparse_node_id_t value)
+{
+    xo_xparse_node_id_t next = 0;
+
+    if (id) {
+	xo_xparse_node_t *xnp = xo_xparse_node(xdp, id);
+	if (xnp->xn_contents == 0) {
+	    xnp->xn_contents = value;
+	} else {
+	    xnp = xo_xparse_node(xdp, xnp->xn_contents);
+	    while (xnp->xn_next != 0) {
+		next = xnp->xn_next;
+		xnp = xo_xparse_node(xdp, next);
+	    }
+	    xnp->xn_next = value;
+	}
+    }
+}
+
 /**
  * This function is the core of the lexer.
  *
@@ -620,11 +667,13 @@ xo_xparse_lexer (xo_xparse_data_t *xdp)
 	   && isspace((int) xdp->xd_buf[xdp->xd_cur])) {
 	if (xdp->xd_buf[xdp->xd_cur] == '\n') {
 	    xdp->xd_line += 1;
+	    xdp->xd_col_start = xdp->xd_cur;
 	}
 
 	xdp->xd_cur += 1;
     }
 
+    xdp->xd_col = xdp->xd_cur - xdp->xd_col_start;
     xdp->xd_start = xdp->xd_cur; /* Mark the start of the token */
 
     /* We're only parsing a string, so no data mean EOF */
@@ -974,8 +1023,8 @@ xo_xpath_yylex (xo_xparse_data_t *xdp, xo_xparse_node_id_t *yylvalp)
     xdp->xd_last = rc;
 
     if (rc > 0 && xdp->xd_start == xdp->xd_cur) {
-	xo_dbg(xdp->xd_xop, "%s:%d: xpath: lex: zero length token: %d/%s",
-	       xdp->xd_filename, xdp->xd_line,
+	xo_dbg(xdp->xd_xop, "%s:%u:%u: xpath: lex: zero length token: %d/%s",
+	       xdp->xd_filename, xdp->xd_line, xdp->xd_col,
 	       rc, xo_xparse_token_name(rc));
 	rc = M_ERROR;
 
@@ -1054,7 +1103,7 @@ xo_xparse_syntax_error (xo_xparse_data_t *xdp UNUSED, const char *token,
 #endif
 
     } else {
-#if 0
+#if 1
 	char *msg = xo_xparse_expecting_error(token, yystate, yychar);
 	if (msg)
 	    return msg;
@@ -1079,7 +1128,12 @@ xo_xparse_syntax_error (xo_xparse_data_t *xdp UNUSED, const char *token,
 int
 xo_xpath_yyerror (xo_xparse_data_t *xdp, const char *str, int yystate)
 {
+#ifdef HAVE_BISON
     static const char leader[] = "syntax error, unexpected";
+#else /* HAVE_BISON */
+    static const char leader[] = "syntax error";
+#endif /* HAVE_BISON */
+    
     static const char leader2[] = "error recovery ignores input";
     const char *token;
     char buf[BUFSIZ * 4];
@@ -1089,57 +1143,29 @@ xo_xpath_yyerror (xo_xparse_data_t *xdp, const char *str, int yystate)
 
     token = xo_xparse_token_name_fancy[xo_xparse_token_translate(xdp->xd_last)];
 
-    /*
-     * See if there's a multi-line string that could be the source
-     * of the problem.
-     */
     buf[0] = '\0';
-#if 0
-    if (vtop && *vtop) {
-	slax_string_t *ssp = *vtop;
-
-	if (ssp->ss_ttype == T_QUOTED) {
-	    char *np = strchr(ssp->ss_token, '\n');
-
-	    if (np != NULL) {
-		int count = 1;
-		char *xp;
-
-		for (xp = np + 1; *xp; xp++)
-		    if (*xp == '\n')
-			count += 1;
-
-		snprintf(buf, sizeof(buf),
-			 "\n%s:%d:   could be related to unterminated string "
-			 "on line %d (\"%.*s\\n...\")",
-			 xdp->xd_filename, xdp->xd_line, xdp->xd_line - count,
-			 (int) (np - ssp->ss_token), ssp->ss_token);
-	    }
-	}
-    }
-#endif
 
     /*
      * Two possibilities: generic "syntax error" or some
      * specific error.  If the message has a generic
      * prefix, use our logic instead.  This avoids tossing
-     * bison token names (K_VERSION) at the user.
+     * token names (K_VERSION) at the user.
      */
     if (strncmp(str, leader, sizeof(leader) - 1) == 0) {
 	char *msg = xo_xparse_syntax_error(xdp, token, yystate, xdp->xd_last);
 
 	if (msg) {
-	    xo_dbg(xdp->xd_xop, "%s:%d: %s%s\n",
-		   xdp->xd_filename, xdp->xd_line,
-		   msg, buf);
+	    xo_xparse_warn(xdp, "%s:%u:%u: %s%s\n",
+			   xdp->xd_filename, xdp->xd_line, xdp->xd_col,
+			   msg, buf);
 	    xo_free(msg);
 	    return 0;
 	}
     }
 
-    xo_dbg(xdp->xd_xop, "%s:%d: %s%s%s%s%s\n",
-	   xdp->xd_filename, xdp->xd_line, str,
-	   token ? " before " : "", token, token ? ": " : "", buf);
+    xo_xparse_warn(xdp, "%s:%u:%u: %s%s%s%s%s\n",
+		   xdp->xd_filename, xdp->xd_line, xdp->xd_col, str,
+		   token ? " before " : "", token, token ? ": " : "", buf);
 
     return 0;
 }
@@ -1148,6 +1174,7 @@ void
 xo_xparse_init (xo_xparse_data_t *xdp)
 {
     bzero(xdp, sizeof(*xdp));
+    xdp->xd_line = 1;
 
     xo_buf_append_val(&xdp->xd_str_buf, "@EOF", 1);
 }
@@ -1212,9 +1239,12 @@ main (int argc, char **argv)
     if (argc < 0)
         return 1;
 
-    xo_set_flags(NULL, XOF_DEBUG);
-
-    xo_xpath_yydebug = 1;
+    for (argc = 1; argv[argc] && argv[argc][0] == '-'; argc++) {
+	if (xo_streq(argv[argc], "--debug"))
+	    xo_set_flags(NULL, XOF_DEBUG);
+	else if (xo_streq(argv[argc], "--yydebug"))
+	    xo_xpath_yydebug = 1;
+    }
 
     if (argc == 0)
 	return 2;
@@ -1224,7 +1254,7 @@ main (int argc, char **argv)
 
     xo_xparse_init(&xd);
 
-    strncpy(xd.xd_filename, "me", sizeof(xd.xd_filename));
+    strncpy(xd.xd_filename, "test", sizeof(xd.xd_filename));
     xd.xd_buf = strdup(argv[1]);
     xd.xd_len = strlen(xd.xd_buf);
 
