@@ -51,14 +51,15 @@ libxo_la_SOURCES = \
     xo_xparse.c
 
 YACC_OPTS = -P -p xo_xpath_yy -d -v -s -b xo_xpath
+SED_OPTS=\
+-e '/extern int YYPARSE_DECL();/d' \
+-e 's/yydebug = yyn - .0./do {} while(0)/'
 
 xo_xpath.tab.c.orig xo_xpath.tab.h: xo_xpath.y
 	${YACC} ${YACC_OPTS} -o xo_xpath.tab.c.orig ${srcdir}/xo_xpath.y
 
 xo_xpath.c: xo_xpath.tab.c.orig
-	${SED} -e '/extern int YYPARSE_DECL();/d' \
-		-e 's/yydebug = yyn - .0./do {} while(0)/' \
-		< xo_xpath.tab.c.orig > xo_xpath.c
+	${SED} ${SED_OPTS} < xo_xpath.tab.c.orig > xo_xpath.c
 
 man3_files = \
     libxo.3 \
