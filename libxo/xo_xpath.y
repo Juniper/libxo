@@ -197,6 +197,7 @@
  */
 %token C_PREDICATE		/* Node contains a predicate */
 %token C_ELEMENT		/* Path element */
+%token C_ATTRIBUTE		/* Attribute axis ('@') */
 %token C_ABSOLUTE		/* An absolute path */
 %token C_DESCENDANT		/* Absolute child ("//tag") */
 %token C_TEST			/* Node test (e.g. node()) */
@@ -233,9 +234,8 @@
 #include "xo.h"
 #include "xo_encoder.h"
 #include "xo_buf.h"
-#include "xo_xparse.h"
-
 #include "xo_xpath.tab.h"
+#include "xo_xparse.h"
 
 /*
  * This is a pure parser, allowing this library to link with other users
@@ -642,7 +642,8 @@ xpc_axis_specifier_optional :
 
 	| T_AXIS_NAME L_DCOLON
 		{
-		    xo_xparse_check_axis_name(xparse_data, &$1);
+		    xo_xparse_check_axis_name(xparse_data, $1);
+		    $$ = xo_xparse_yyval(xparse_data, $1);
 		}
 
 	| xpc_abbreviated_axis_specifier
@@ -687,9 +688,14 @@ xpc_relative_location_path :
 xpc_step :
 	xpc_axis_specifier_optional xpc_node_test xpc_predicate_list
 		{
-		    xo_xparse_node_set_next(xparse_data, $1, $2);
+		    if (xo_xparse_node_type(xparse_data, $1) == L_AT
+			|| xo_xparse_node_is_attr_axis(xparse_data, $1)) {
+			xo_xparse_node_set_type(xparse_data, $2, C_ATTRIBUTE);
+		    } else {
+			xo_xparse_node_set_contents(xparse_data, $2, $1);
+		    }
 		    xo_xparse_node_set_contents(xparse_data, $2, $3);
-		    $$ = xo_xparse_yyval(xparse_data, $1 ?: $2);
+		    $$ = xo_xparse_yyval(xparse_data, $2);
 		}
 
 	| xpc_abbreviated_step
@@ -867,7 +873,7 @@ xp_relational_expr :
 #endif /* YYLAST */
 
 #define yytname xo_xpath_yyname
-#define yypact xo_xpath_defred
+#define yypact xo_xpath_yydefred
 
 const int xo_xparse_num_tokens = YYNTOKENS;
 const char *xo_xparse_keyword_string[YYNTOKENS];
@@ -907,68 +913,26 @@ xo_xparse_token_translate (int ttype)
 #define YYTERROR YYSYMBOL_YYerror /* the new enum */
 #endif /* YYTERROR */
 
-#if 0
+#if 1
 /*
- * Return a better class of error message
+ * Return a better class of error message, if possible.  But it turns
+ * out that this isn't possible in yacc.  bison adds a "lookahead
+ * correction" that gives us information that we can use to find the
+ * list of possibly-valid next tokens, which we use to build an
+ * "expecting ..." message, but lacking that information, we just punt.
+ *
+ * The original code is in libslax/slaxparser.y, so maybe one day I'll
+ * try to make it work.
  */
 char *
-xo_xparse_expecting_error (const char *token, int yystate, int yychar UNUSED)
+xo_xparse_expecting_error (const char *token, int yystate UNUSED,
+			   int yychar UNUSED)
 {
-    const int MAX_EXPECT = 5;
     char buf[BUFSIZ], *cp = buf, *ep = buf + sizeof(buf);
-    int expect = 0, expecting[MAX_EXPECT + 1];
-    int yyn = yypact[yystate];
-    int i;
-    int start, stop;
-    int v_state = 0;
-
-    if (!(YYPACT_NINF < yyn && yyn <= YYLAST))
-	return NULL;
-
-    start = yyn < 0 ? -yyn : 0;
-    stop = YYLAST - yyn + 1;
-    if (stop > YYNTOKENS)
-
-	stop = YYNTOKENS;
-
-    for (i = start; i < stop; ++i) {
-	if (yycheck[i + yyn] == i && i != YYTERROR) {
-	    if (i > YYTRANSLATE(V_FIRST) && i < YYTRANSLATE(V_LAST))
-		v_state = i;
-
-	    if (xo_xparse_token_name_fancy[i] == NULL)
-		continue;
-
-	    expecting[expect++] = i;
-	    if (expect > MAX_EXPECT)
-		break;
-	}
-    }
-
-    if (expect > MAX_EXPECT)
-	expect += 1;		/* Avoid "or" below */
 
     SNPRINTF(cp, ep, "unexpected input");
     if (token)
 	SNPRINTF(cp, ep, ": %s", token);
-
-    if (v_state) {
-	SNPRINTF(cp, ep, "; expected valid XPath expression");
-
-    } else if (expect > 0) {
-	for (i = 0; i < expect; i++) {
-	    const char *pre = (i == 0) ? "; expected"
-		                       : (i == expect - 1) ? " or" : ",";
-	    const char *value = xo_xparse_token_name_fancy[expecting[i]];
-	    if (value)
-		SNPRINTF(cp, ep, "%s %s", pre, value);
-
-	    if (i >= MAX_EXPECT) {
-		SNPRINTF(cp, ep, ", etc.");
-		break;
-	    }
-	}
-    }
 
     return strdup(buf);
 }
