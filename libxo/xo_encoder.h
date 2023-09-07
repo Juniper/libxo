@@ -20,22 +20,6 @@
 
 #include <string.h>
 
-/*
- * Expose libxo's memory allocation functions
- */
-extern xo_realloc_func_t xo_realloc;
-extern xo_free_func_t xo_free;
-
-/*
- * Simple string comparison function (without the temptation
- * to forget the "== 0").
- */
-static inline int
-xo_streq (const char *one, const char *two)
-{
-    return strcmp(one, two) == 0;
-}
-
 /* Flags for formatting functions */
 typedef unsigned long xo_xff_flags_t;
 #define XFF_COLON	(1<<0)	/* Append a ":" */
