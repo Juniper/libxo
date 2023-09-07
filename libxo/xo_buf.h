@@ -19,7 +19,10 @@
 #ifndef XO_BUF_H
 #define XO_BUF_H
 
-#define XO_BUFSIZ		(8*1024) /* Initial buffer size */
+#include "xo_private.h"
+
+#define XO_BUFSIZ		(8*1024) /* Normal buffer size */
+#define XO_BUFSIZ_SMALL		(256)    /* Smaller buffer size */
 #define XO_BUF_HIGH_WATER	(XO_BUFSIZ - 512) /* When to auto-flush */
 
 typedef ssize_t xo_off_t;	/* Offset within a buffer */
@@ -114,14 +117,48 @@ xo_buf_cleanup (xo_buffer_t *xbp)
  * return 0 to tell the caller they are in trouble.
  */
 static inline int
-xo_buf_has_room (xo_buffer_t *xbp, ssize_t len)
+xo_buf_has_some_room (xo_buffer_t *xbp, ssize_t len, ssize_t bufsiz)
 {
     if (xbp->xb_curp + len >= xbp->xb_bufp + xbp->xb_size) {
 	/*
-	 * Find out how much new space we need, round it up to XO_BUFSIZ
+	 * Find out how much new space we need, round it up to bufsiz
 	 */
 	ssize_t sz = (xbp->xb_curp + len) - xbp->xb_bufp;
-	sz = (sz + XO_BUFSIZ - 1) & ~(XO_BUFSIZ - 1);
+	sz = (sz + bufsiz - 1) & ~(bufsiz - 1);
+
+	char *bp = xo_realloc(xbp->xb_bufp, sz);
+	if (bp == NULL)
+	    return 0;
+
+	xbp->xb_curp = bp + (xbp->xb_curp - xbp->xb_bufp);
+	xbp->xb_bufp = bp;
+	xbp->xb_size = sz;
+    }
+
+    return 1;
+}
+
+static inline int
+xo_buf_has_room (xo_buffer_t *xbp, ssize_t len)
+{
+    return xo_buf_has_some_room(xbp, len, XO_BUFSIZ);
+}
+
+static inline int
+xo_buf_has_small_room (xo_buffer_t *xbp, ssize_t len)
+{
+    return xo_buf_has_some_room(xbp, len, XO_BUFSIZ_SMALL);
+}
+
+static inline int
+xo_buf_make_some_room (xo_buffer_t *xbp, ssize_t size, ssize_t bufsiz)
+{
+    if (size >= xbp->xb_size) {
+	/*
+	 * Find out how much new space we need, round it up to bufsiz
+	 */
+	ssize_t sz = (xbp->xb_curp + size) - xbp->xb_bufp;
+	sz = (sz + bufsiz - 1) & ~(bufsiz - 1);
 
 	char *bp = xo_realloc(xbp->xb_bufp, sz);
 	if (bp == NULL)
@@ -138,23 +175,13 @@ xo_buf_has_room (xo_buffer_t *xbp, ssize_t len)
 static inline int
 xo_buf_make_room (xo_buffer_t *xbp, ssize_t size)
 {
-    if (size >= xbp->xb_size) {
-	/*
-	 * Find out how much new space we need, round it up to XO_BUFSIZ
-	 */
-	ssize_t sz = (xbp->xb_curp + size) - xbp->xb_bufp;
-	sz = (sz + XO_BUFSIZ - 1) & ~(XO_BUFSIZ - 1);
+    return xo_buf_make_some_room(xbp, size, XO_BUFSIZ);
+}
 
-	char *bp = xo_realloc(xbp->xb_bufp, sz);
-	if (bp == NULL)
-	    return 0;
-
-	xbp->xb_curp = bp + (xbp->xb_curp - xbp->xb_bufp);
-	xbp->xb_bufp = bp;
-	xbp->xb_size = sz;
-    }
-
-    return 1;
+static inline int
+xo_buf_make_small_room (xo_buffer_t *xbp, ssize_t size)
+{
+    return xo_buf_make_some_room(xbp, size, XO_BUFSIZ_SMALL);
 }
 
 /*
