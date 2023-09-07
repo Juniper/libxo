@@ -10,6 +10,22 @@
 #ifndef XO_PRIVATE_H
 #define XO_PRIVATE_H
 
+/*
+ * Expose libxo's memory allocation functions
+ */
+extern xo_realloc_func_t xo_realloc;
+extern xo_free_func_t xo_free;
+
+/*
+ * Simple string comparison function (without the temptation
+ * to forget the "== 0").
+ */
+static inline int
+xo_streq (const char *one, const char *two)
+{
+    return strcmp(one, two) == 0;
+}
+
 /* Rather lame that we can't count on these... */
 #ifndef FALSE
 #define FALSE 0
