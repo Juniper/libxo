@@ -249,8 +249,14 @@ xo_xparse_node_str (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
     return xnp->xn_str;
 }
 
+/*
+ * Fetch the string from inside a node.
+ *
+ * Note this is very different turning a string id into a string, like
+ * xo_xparse_str() does.
+ */
 static inline const char *
-xo_xparse_node_string (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
+xo_xparse_node_extract_string (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
 {
     xo_xparse_str_id_t sid = xo_xparse_node_str(xdp, id);
     if (sid == 0)
@@ -298,7 +304,7 @@ xo_xparse_node_is_attr_axis (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
     if (xo_xparse_node_type(xdp, id) != T_AXIS_NAME)
 	return 0;
 
-    const char *str = xo_xparse_node_string(xdp, id);
+    const char *str = xo_xparse_node_extract_string(xdp, id);
     if (str == NULL)
 	return 0;
 
