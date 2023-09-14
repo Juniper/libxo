@@ -43,6 +43,7 @@ noinst_HEADERS = \
 libxo_la_SOURCES = \
     libxo.c \
     xo_encoder.c \
+    xo_filter.c \
     xo_syslog.c \
     xo_tolower.c \
     xo_toupper.c \
@@ -115,10 +116,15 @@ install-data-hook:
 	for file in ${man7_files}; do \
 	    cat ../libxo/add.man >> ${DESTDIR}${man7dir}/$$file ; done
 
-xo_xpath: all
+xpath: all
 	${COMPILE} -DTEST_XPATH \
 		.libs/libxo.a -L/opt/local/lib -lintl \
-		-o xo_xpath ${srcdir}/xo_xparse.c
+		-o xpath ${srcdir}/xo_xparse.c
+
+filter: all
+	${COMPILE} -DTEST_FILTER \
+		.libs/libxo.a -L/opt/local/lib -lintl \
+		-o filter ${srcdir}/xo_filter.c
 
 var:
 	@echo ${${VAR}}
