@@ -245,7 +245,7 @@ xo_filter_close_container (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED, con
 int
 main (int argc, char **argv)
 {
-    const char *output = "/dev/stdout";
+    const char *output = "output.temp";
 
     argc = xo_parse_args(argc, argv);
     if (argc < 0)
