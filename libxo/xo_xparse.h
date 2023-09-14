@@ -23,8 +23,9 @@ typedef void (*xo_xpath_warn_func_t)(void *data, const char *, va_list);
 typedef struct xo_xparse_node_s {
     unsigned xn_type;		/* Type of this node (token) */
     xo_off_t xn_str;		/* String value (in xd_str_buf) */
-    xo_xparse_node_id_t xn_contents; /* Left node (main) (in xd_node_buf) */
-    xo_xparse_node_id_t xn_next; /* Right node (secondary) (in xd_node_buf) */
+    xo_xparse_node_id_t xn_contents; /* Child node (main) (in xd_node_buf) */
+    xo_xparse_node_id_t xn_next; /* Next node (in xd_node_buf) */
+    xo_xparse_node_id_t xn_prev; /* Previous node (in xd_node_buf) */
 } xo_xparse_node_t;
 
 typedef struct xo_xparse_data_s {
