@@ -242,14 +242,6 @@ typedef struct xo_colors_s {
 } xo_colors_t;
 
 /*
- * Contains one element of an XPath
- */
-typedef struct xo_path_frame_s {
-    char *pf_name;	       /* Path member name; points into xo_path_buf */
-    uint32_t pf_flags;	       /* Flags for this path element (XPFF_*) */
-} xo_path_frame_t;
-
-/*
  * xo_handle_t: this is the principle data structure for libxo.
  * It's used as a store for state, options, content, and all manor
  * of other information.
@@ -301,10 +293,7 @@ struct xo_handle_s {
     xo_buffer_t xo_map_data;	/* Data values for name mapping */
 #endif /* LIBXO_NEED_MAP */
 #ifdef LIBXO_NEED_FILTER
-    xo_buffer_t xo_filter_buf;	/* Storage for filters */
-    xo_path_frame_t **xo_paths;	/* Array of paths */
-    uint32_t xo_paths_cur;	/* Current depth of xo_paths[] */
-    uint32_t xo_paths_max;	/* Max depth of xo_paths[] */
+    struct xo_filter_s *xo_filters; /* Opaque data pointer */
 #endif /* LIBXO_NEED_FILTER */
 };
 
@@ -463,9 +452,6 @@ xo_anchor_clear (xo_handle_t *xop);
 
 static int
 xo_map_option (xo_handle_t *xop, const char *opts);
-
-static int
-xo_path_add (xo_handle_t *xop, const char *vp);
 
 /*
  * xo_style is used to retrieve the current style.  When we're built
@@ -2573,11 +2559,11 @@ xo_set_options (xo_handle_t *xop, const char *input)
 			xo_warnx("error initializing map-file: '%s'", vp);
 		}
 
-	    } else if (xo_streq(cp, "path")) {
+	    } else if (xo_streq(cp, "filter")) {
 		if (vp == NULL)
-		    xo_failure(xop, "missing value for path option");
+		    xo_failure(xop, "missing value for filter option");
 		else {
-		    rc = xo_path_add(xop, vp);
+		    rc = xo_filter_add(xop, vp);
 		    if (rc)
 			xo_warnx("error initializing path: '%s'", vp);
 		}
@@ -4682,129 +4668,29 @@ xo_map_add_file (xo_handle_t *xop UNUSED, const char *fname UNUSED)
     return 0;
 }
 
+void
+xo_filter_data_set (xo_handle_t *xop UNUSED, struct xo_filter_s *xfp UNUSED)
+{
 #ifdef LIBXO_NEED_FILTER
-/*
- * Knock any whitespace off the front and end of a string
- */
-static char *
-xo_path_trim_space (char *str)
-{
-    char *cp;
-    
-    for ( ; isspace(*str); str++)
-	continue;
-
-    for (cp = str + strlen(str); cp > str; cp--)
-	if (!isspace(cp[-1]))
-	    break;
-
-    *cp = '\0';
-    return str;
-}
-
-static char *
-xo_path_parse_predicate (xo_handle_t *xop UNUSED,
-			 xo_path_frame_t *pfp UNUSED, char *str)
-{
-    /* Ignore these for now */
-    char *cp = strchr(str, ']');
-    return cp ? cp + 1 : NULL;
-}
-
-static int
-xo_path_parse (xo_handle_t *xop, xo_path_frame_t **pathp, char *str)
-{
-    int count;
-    char *cp, *ep, *np, *pp, *xp;
-    ssize_t len = strlen(str);
-
-    /* This is a worst-case guess */
-    for (cp = str, ep = str + len, count = 2;
-	 cp && cp < ep; cp = np) {
-	np = strchr(cp, '/');
-	if (np) {
-	    np += 1;
-	    count += 1;
-	}
-    }
-
-    xo_path_frame_t *path = xo_realloc(NULL, sizeof(path[0]) * count);
-    if (path == NULL) {
-	xo_failure(xop, "allocation failure for path '%s'", str);
-	return -1;
-    }
-
-    bzero(path, sizeof(path[0]) * count);
-
-    /*
-     * Look thru the path, handling both path elements and predicates.
-     * Ideally we'd have a real XPath parser, like:
-     *    https://github.com/Juniper/libslax/libslax/slaxparser.y
-     * but that brings a lot of code that we don't really want.
-     * So we make a cheap version and handle the complexity in
-     * ways that are less than ideal.
-     */
-    xo_path_frame_t *pfp;
-    for (count = 0, cp = str; cp && cp < ep; cp = np) {
-	pfp = &path[count++];
-
-	np = strchr(cp, '/'); /* Maybe next path element */
-	pp = strchr(cp, '['); /* Maybe next predicate */
-
-	if (np) {	      /* Simple path element */
-	    if (pp && pp < np) {
-		*pp++ = '\0';
-		xp = xo_path_parse_predicate(xop, pfp, pp);
-		*pp = '\0';
-		np = xp;
-	    }
-
-	    *np++ = '\0';
-
-	} else if (pp) {
-	    xp = xo_path_parse_predicate(xop, pfp, pp);
-	    *pp = '\0';		/* Terminate the path element */
-	    np = xp;
-	}
-
-	cp = xo_path_trim_space(cp);
-	pfp->pf_name = cp;
-	xo_dbg(xop, "path: [%s]\n", cp);
-    }
-
-    path[count].pf_name = NULL;
-    
-    *pathp = path;
-
-    return 0;
-}
+    xop->xo_filters = xfp;
 #endif /* LIBXO_NEED_FILTER */
+}
 
-static int
-xo_path_add (xo_handle_t *xop UNUSED, const char *vp UNUSED)
+struct xo_filter_s *
+xo_filter_data_get (xo_handle_t *xop UNUSED)
 {
 #ifdef LIBXO_NEED_FILTER
-    /* Make a local carvable copy of the input string */
-    char *str = xo_buf_append_str_val(&xop->xo_filter_buf, vp);
+    return xop->xo_filters;
+#else /* LIBXO_NEED_FILTER */
+    return NULL;
+#endif /* LIBXO_NEED_FILTER */
+}
 
-    /* Grow the array of paths if needed */
-    uint32_t old_cur = xop->xo_paths_cur;
-    uint32_t new_cur = old_cur + 1;
-    if (old_cur >= xop->xo_paths_max) {
-	xo_path_frame_t **paths;
-	uint32_t new_max = (xop->xo_paths_max ?: 2) * 2;
-
-	paths = xo_realloc(xop->xo_paths, sizeof(xop->xo_paths[0]) * new_max);
-	if (paths == NULL)
-	    return -1;
-
-	xop->xo_paths = paths;
-	xop->xo_paths_cur = new_cur;
-	xop->xo_paths_max = new_max;
-    }
-
-    return xo_path_parse(xop, &xop->xo_paths[old_cur], str);
-
+int
+xo_filter_add (xo_handle_t *xop UNUSED, const char *vp UNUSED)
+{
+#ifdef LIBXO_NEED_FILTER
+    return xo_filter_add_one(xop, xop->xo_filters, vp);
 #else /* LIBXO_NEED_FILTER */
     return 0;
 #endif /* LIBXO_NEED_FILTER */
@@ -7559,6 +7445,7 @@ xo_do_open_container (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
     }
 
     name = xo_map_name(xop, name); /* Find mapped name, if any */
+    xo_filter_open_container(xop, xop->xo_filters, name);
 
     const char *leader = xo_xml_leader(xop, name);
     flags |= xop->xo_flags;	/* Pick up handle flags */
