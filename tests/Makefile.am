@@ -6,7 +6,7 @@
 # using the SOFTWARE, you agree to be bound by the terms of that
 # LICENSE.
 
-SUBDIRS = core utf8 xo
+SUBDIRS = core utf8 xo xpath
 
 if HAVE_GETTEXT
 SUBDIRS += gettext
