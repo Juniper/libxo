@@ -486,6 +486,7 @@ AC_CONFIG_FILES([
   tests/core/Makefile
   tests/gettext/Makefile
   tests/xo/Makefile
+  tests/xpath/Makefile
   tests/utf8/Makefile
   packaging/libxo.spec
   packaging/libxo.rb.base
