@@ -195,14 +195,17 @@
  * 'Constructs' refer to high-level constructs, as we move from lexing
  * to semantics.  This is meant to make processing easier.
  */
-%token C_PREDICATE		/* Node contains a predicate */
-%token C_ELEMENT		/* Path element */
-%token C_ATTRIBUTE		/* Attribute axis ('@') */
 %token C_ABSOLUTE		/* An absolute path */
+%token C_ATTRIBUTE		/* Attribute axis ('@') */
 %token C_DESCENDANT		/* Absolute child ("//tag") */
+%token C_ELEMENT		/* Path element */
+%token C_EXPR			/* Parenthetical expresion (nested) */
+%token C_INDEX			/* Index value ('foo[4]') */
+%token C_NOT			/* Negation of path */
+%token C_PATH			/* Path of elements */
+%token C_PREDICATE		/* Node contains a predicate */
 %token C_TEST			/* Node test (e.g. node()) */
 %token C_UNION			/* Union of two paths */
-%token C_EXPR			/* Parenthetical expresion (nested) */
 
 /*
  * Use a "%pure-parser" for reentracy
@@ -306,7 +309,7 @@ start :
         xpath_union_expression
 		{
 		    $$ = xo_xparse_yyval(xparse_data, $1);
-		    xparse_data->xd_result = $1;
+		    xo_xparse_results(xparse_data, $1);
 		    xparse_data->xd_errors = yynerrs;
 		}
 	;
@@ -447,10 +450,17 @@ xp_union_expr :
 
 xp_not_expr :
 	xp_path_expr 
-		{ $$ = xo_xparse_yyval(xparse_data, $1); }
+		{ 
+		    xo_xparse_node_id_t id = xo_xparse_node_new(xparse_data);
+		    xo_xparse_node_t *xnp = xo_xparse_node(xparse_data, id);
+		    xnp->xn_type = C_PATH;
+		    xo_xparse_node_set_contents(xparse_data, id, $1);
+		    $$ = xo_xparse_yyval(xparse_data, id);
+		}
 
 	| L_NOT xp_path_expr
 		{
+		    xo_xparse_node_set_type(xparse_data, $1, C_NOT);
 		    xo_xparse_node_set_contents(xparse_data, $1, $2);
 		    $$ = xo_xparse_yyval(xparse_data, $1);
 		}
@@ -666,6 +676,8 @@ xpc_predicate :
 		{
 		    xo_xparse_node_set_type(xparse_data, $1, C_PREDICATE);
 		    xo_xparse_node_set_str(xparse_data, $1, 0);
+		    if (xo_xparse_node_type(xparse_data, $2) == T_NUMBER)
+			xo_xparse_node_set_type(xparse_data, $2, C_INDEX);
 		    xo_xparse_node_set_contents(xparse_data, $1, $2);
 		    $$ = xo_xparse_yyval(xparse_data, $1);
 		}
@@ -861,7 +873,7 @@ xp_relational_expr :
 
 #ifndef YYNTOKENS
 #ifdef YYMAXTOKEN
-#define YYNTOKENS YYMAXTOKEN
+#define YYNTOKENS (YYMAXTOKEN+1)
 #else
 #error unknown value for YYNTOKENS
 #endif /* YYMAXTOKEN */
