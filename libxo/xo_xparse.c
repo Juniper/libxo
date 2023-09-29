@@ -29,6 +29,8 @@
 
 #define XO_MAX_CHAR	128	/* Size of our character tables */
 
+#define XO_PATHS_DEF	32	/* Number of paths allocated by default */
+
 static int xo_xparse_setup;	/* Have we initialized? */
 
 xo_xparse_node_t xo_xparse_dead_node; /* Dead space when you just don't care */
@@ -194,14 +196,17 @@ xo_xparse_ttname_map_t xo_xparse_ttname_map[] = {
     { T_NUMBER,			"number" },
     { T_QUOTED,			"quoted string" },
     { T_VAR,			"variable name" },
-    { C_PREDICATE,		"predicate ('[test]')" },
-    { C_ELEMENT,		"path element" },
-    { C_ATTRIBUTE,		"attribute axis" },
     { C_ABSOLUTE,		"Absolute path" },
+    { C_ATTRIBUTE,		"attribute axis" },
     { C_DESCENDANT,		"descendant child ('one//two')" },
+    { C_ELEMENT,		"path element" },
+    { C_EXPR,			"parenthetical expresions" },
+    { C_INDEX,			"index value ('foo[4]')" },
+    { C_NOT,			"negation ('!tag')" },
+    { C_PATH,			"path of element" },
+    { C_PREDICATE,		"predicate ('[test]')" },
     { C_TEST,			"node test ('node()')" },
     { C_UNION,			"union of two paths ('one|two')" },
-    { C_EXPR,			"parenthetical expresions" },
     { 0, NULL }
 };
 
@@ -508,9 +513,15 @@ xo_xparse_dump_node (xo_xparse_data_t *xdp, xo_xparse_node_id_t id, int indent)
 }
 
 void
-xo_xparse_dump (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
+xo_xparse_dump (xo_xparse_data_t *xdp)
 {
-    xo_xparse_dump_node(xdp, id, 0);
+    uint32_t i;
+    xo_xparse_node_id_t *pp = xdp->xd_paths;
+
+    for (i = 0; i < xdp->xd_paths_cur; i++, pp++) {
+	printf("--- %u: %ld\n", i, *pp);
+	xo_xparse_dump_node(xdp, *pp, 4);
+    }
 }
 
 static int
@@ -554,23 +565,22 @@ int
 xo_xpath_feature_warn (const char *tag, xo_xparse_data_t *xdp,
 		       const int *tokens, const char *bytes)
 {
-    if (xdp->xd_result == 0)
+    if (xdp->xd_paths_cur == 0)	/* Parsing errors */
 	return 0;
 
     int len = xo_xparse_num_tokens;
     int map[len];
-    int i;
 
     bzero(map, len * sizeof(map[0]));
 
     if (tokens) {
-	for (i = 0; tokens[i] && i < len; i++)
+	for (int i = 0; tokens[i] && i < len; i++)
 	    if (tokens[i])
 		map[tokens[i]] = 1;
     }
 
     if (bytes) {
-	for (i = 0; bytes[i] && i < len; i++)
+	for (int i = 0; bytes[i] && i < len; i++)
 	    if (bytes[i]) {
 		int num = bytes[i];
 		    int val = xo_single_wide[num];
@@ -579,7 +589,15 @@ xo_xpath_feature_warn (const char *tag, xo_xparse_data_t *xdp,
 	    }
     }
 
-    return xo_xparse_feature_warn_node(tag, xdp, map, len, xdp->xd_result);
+    uint32_t i;
+    xo_xparse_node_id_t *pp = xdp->xd_paths;
+    int rc = 0;
+
+    for (i = 0; i < xdp->xd_paths_cur; i++, pp++) {
+	rc += xo_xparse_feature_warn_node(tag, xdp, map, len, *pp);
+    }
+
+    return rc;
 }
 
 int
@@ -610,6 +628,81 @@ xo_xparse_yyval (xo_xparse_data_t *xdp UNUSED, xo_xparse_node_id_t id)
     xo_dbg(NULL, "xo_xparse_yyval: $$ = %ld", id);
 
     return id;
+}
+
+/*
+ * Return a new match struct, allocating a new one if needed
+ */
+static void
+xo_xparse_result_add (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
+{
+    if (xdp->xd_paths_cur >= xdp->xd_paths_max) {
+	uint32_t new_max = xdp->xd_paths_max + XO_PATHS_DEF;
+
+	xo_xparse_node_id_t *pp;
+	pp = xo_realloc(xdp->xd_paths, new_max * sizeof(*pp));
+	if (pp == NULL)
+	    return;
+
+	xdp->xd_paths = pp;
+	xdp->xd_paths_max = new_max;
+    }
+
+    xdp->xd_paths[xdp->xd_paths_cur++] = id;
+}
+
+/*
+ * Add the final results of a parsing to the data.  The real work here
+ * is rewriting patterns (like unions) into more easily handled forms.
+ */
+void
+xo_xparse_results (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
+{
+    xo_xparse_node_t *xnp = xo_xparse_node(xdp, id);
+    xo_xparse_node_id_t next;
+
+    if (xnp == NULL) {
+	/* nothing; error? */
+
+    } else if (xnp->xn_type == C_UNION) {
+	for (id = xnp->xn_contents; id; id = next) {
+	    xnp = xo_xparse_node(xdp, id);
+	    xo_xparse_result_add(xdp, id);
+
+	    /* Break off this node from the chain */
+	    next = xnp->xn_next;
+	    xnp->xn_next = xnp->xn_prev = 0;
+	}
+
+    } else {
+	xo_xparse_result_add(xdp, id);
+    }
+
+    uint32_t deny_count = 0;
+    xo_xparse_node_id_t i;
+    xo_xparse_node_id_t *paths = xdp->xd_paths;
+
+    xo_xparse_node_id_t cur = xdp->xd_paths_cur;
+    for (i = 0; i < cur; i++, paths++) {
+	xnp = xo_xparse_node(xdp, *paths);
+	if (xnp == NULL)
+	    continue;
+
+	if (xnp->xn_type == C_NOT)
+	    deny_count += 1;
+    }
+
+    const char *label;
+    if (deny_count >= cur) {
+	xdp->xd_flags |= XDF_ALL_NOTS;
+	label = "true";
+    } else {
+	xdp->xd_flags &= ~XDF_ALL_NOTS;
+	label = "false";
+    }
+
+    xo_dbg(NULL, "xo: parse results: %u paths, all-nots %s",
+	   cur, label);
 }
 
 void
@@ -1197,6 +1290,16 @@ xo_xparse_init (xo_xparse_data_t *xdp)
     xo_buf_append_val(&xdp->xd_str_buf, "@EOF", 1);
 }
 
+xo_xparse_data_t *
+xo_xparse_create (void)
+{
+    xo_xparse_data_t *xdp = xo_realloc(NULL, sizeof(*xdp));
+    if (xdp)
+	xo_xparse_init(xdp);
+
+    return xdp;
+}
+
 void
 xo_xparse_clean (xo_xparse_data_t *xdp)
 {
@@ -1207,91 +1310,11 @@ xo_xparse_clean (xo_xparse_data_t *xdp)
     }
 }
 
-#ifdef TEST_XPLEX
-int
-main (int argc, char **argv)
+void
+xo_xparse_destroy (xo_xparse_data_t *xdp)
 {
-    argc = xo_parse_args(argc, argv);
-    if (argc < 0)
-        return 1;
-
-    if (argc == 0)
-	return 2;
-
-    xo_xparse_data_t xd;
-    xo_xparse_node_id_t id;
-    xo_xparse_node_t *xnp;
-
-    xo_xparse_init(&xd);
-
-    strncpy(xd.xd_filename, "me", sizeof(xd.xd_filename));
-    xd.xd_buf = strdup(argv[1]);
-    xd.xd_len = strlen(xd.xd_buf);
-
-    for (;;) {
-	int rc = xo_xpath_yylex(&xd, &id);
-	if (rc <= 0)
-	    break;
-
-	xnp = xo_xparse_node(&xd, id);
-	if (xnp) {
-	    xo_dbg(NULL, "parse: type: %u (%p), str: %lu (%p), "
-		   "left: %lu (%p), right %lu (%p)",
-		   xnp->xn_type,
-		   xnp->xn_str, xo_xparse_str(&xd, xnp->xn_str),
-		   xnp->xn_contents, xo_xparse_node(&xd, xnp->xn_contents),
-		   xnp->xn_next, xo_xparse_node(&xd, xnp->xn_next));
-	}
+    if (xdp) {
+	xo_xparse_clean(xdp);
+	xo_free(xdp);
     }
-
-    return 0;
 }
-
-#endif /* TEST_XPLEX */
-
-#ifdef TEST_XPATH
-int
-main (int argc, char **argv)
-{
-    argc = xo_parse_args(argc, argv);
-    if (argc < 0)
-        return 1;
-
-    for (argc = 1; argv[argc] && argv[argc][0] == '-'; argc++) {
-	if (xo_streq(argv[argc], "--debug"))
-	    xo_set_flags(NULL, XOF_DEBUG);
-	else if (xo_streq(argv[argc], "--yydebug"))
-	    xo_xpath_yydebug = 1;
-    }
-
-    if (argc == 0)
-	return 2;
-
-    xo_xparse_data_t xd;
-    xo_xparse_node_t *xnp UNUSED;
-
-    xo_xparse_init(&xd);
-
-    strncpy(xd.xd_filename, "test", sizeof(xd.xd_filename));
-    xd.xd_buf = strdup(argv[1]);
-    xd.xd_len = strlen(xd.xd_buf);
-
-    for (;;) {
-	int rc = xo_xpath_yyparse(&xd);
-	if (rc <= 0)
-	    break;
-	break;
-    }
-
-    xo_xparse_dump(&xd, xd.xd_result);
-
-    int bad_horse[] = { C_DESCENDANT, 0 };
-
-    xo_xpath_feature_warn("test", &xd, bad_horse, "+");
-
-    xo_xparse_clean(&xd);
-
-    return 0;
-}
-
-#endif /* TEST_XPATH */
