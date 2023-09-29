@@ -20,6 +20,8 @@
 
 #include <string.h>
 
+#include "xo_private.h"
+
 /* Flags for formatting functions */
 typedef unsigned long xo_xff_flags_t;
 #define XFF_COLON	(1<<0)	/* Append a ":" */
