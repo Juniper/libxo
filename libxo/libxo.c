@@ -50,6 +50,7 @@
 #include "xo_encoder.h"
 #include "xo_buf.h"
 #include "xo_explicit.h"
+#include "xo_filter.h"
 
 /*
  * We ask wcwidth() to do an impossible job, really.  It's supposed to
