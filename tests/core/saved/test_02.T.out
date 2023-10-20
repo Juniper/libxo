@@ -34,5 +34,10 @@ two more errors
 this is an warning
 two more warnings
 V1/V2 packets: 10
+a 8 long: -45
+a 8 ulong: 45
+a 8 long: -45
+a 8 ulong: 45
+    123412341234
 0004 tries
 improper use of profanity; ten yard penalty; first down
