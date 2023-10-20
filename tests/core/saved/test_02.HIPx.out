@@ -220,6 +220,33 @@
   <div class="data" data-tag="count" data-xpath="/top/data[name = 'em0  '][name = 'em0']/count">10</div>
 </div>
 <div class="line">
+  <div class="text">a </div>
+  <div class="data" data-tag="lsize" data-xpath="/top/data[name = 'em0  '][name = 'em0']/long-long-test/lsize">8</div>
+  <div class="text"> long: </div>
+  <div class="data" data-tag="lval" data-xpath="/top/data[name = 'em0  '][name = 'em0']/long-long-test/lval">-45</div>
+</div>
+<div class="line">
+  <div class="text">a </div>
+  <div class="data" data-tag="usize" data-xpath="/top/data[name = 'em0  '][name = 'em0']/long-long-test/usize">8</div>
+  <div class="text"> ulong: </div>
+  <div class="data" data-tag="uval" data-xpath="/top/data[name = 'em0  '][name = 'em0']/long-long-test/uval">45</div>
+</div>
+<div class="line">
+  <div class="text">a </div>
+  <div class="data" data-tag="lsize" data-xpath="/top/data[name = 'em0  '][name = 'em0']/long-long-test/lsize">8</div>
+  <div class="text"> long: </div>
+  <div class="data" data-tag="lval" data-xpath="/top/data[name = 'em0  '][name = 'em0']/long-long-test/lval">-45</div>
+</div>
+<div class="line">
+  <div class="text">a </div>
+  <div class="data" data-tag="usize" data-xpath="/top/data[name = 'em0  '][name = 'em0']/long-long-test/usize">8</div>
+  <div class="text"> ulong: </div>
+  <div class="data" data-tag="uval" data-xpath="/top/data[name = 'em0  '][name = 'em0']/long-long-test/uval">45</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="value" data-xpath="/top/data[name = 'em0  '][name = 'em0']/value">    123412341234</div>
+</div>
+<div class="line">
   <div class="data" data-tag="test" data-xpath="/top/data[name = 'em0  '][name = 'em0']/test">0004</div>
   <div class="text"> </div>
   <div class="label">tries</div>
