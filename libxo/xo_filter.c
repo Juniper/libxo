@@ -26,6 +26,12 @@
 
 #define XO_MATCHES_DEF	32	/* Number of states allocated by default */
 
+typedef uint32_t xo_filter_flags_t; /* Flags from filter test */
+
+/* Flags for xo_filter_flags_t: */
+#define XFIF_TRUE	(1 << 0) /* This part is true */
+#define XFFI_MISSING	(1 << 1) /* A referenced element is missing  */
+
 typedef struct xo_match_s {
     xo_xparse_node_id_t xm_base; /* Start node of this path */
     xo_xparse_node_id_t xm_next; /* Next node we are looking to match */
@@ -148,10 +154,10 @@ xo_filter_dump_matches (xo_filter_t *xfp)
      * Whiffle thru the states to see if we have any open paths.  We
      * do this first since we'll be pushing new paths.
      */
-    uint32_t cur = xfp->xf_matches_cur;
-    uint32_t i;
     xo_xparse_data_t *xdp = &xfp->xf_xd;
     xo_match_t *xmp = xfp->xf_matches;
+    uint32_t cur = xfp->xf_matches_cur;
+    uint32_t i;
     xo_xparse_node_t *xnp;
 
     for (i = 0; i < cur; i++, xmp++) {	/* For each active match */
@@ -216,10 +222,10 @@ xo_filter_open (xo_handle_t *xop UNUSED, xo_filter_t *xfp,
      * Whiffle thru the states to see if we have any open paths.  We
      * do this first since we'll be pushing new paths.
      */
-    uint32_t cur = xfp->xf_matches_cur;
-    uint32_t i;
     xo_xparse_data_t *xdp = &xfp->xf_xd;
     xo_match_t *xmp = xfp->xf_matches;
+    uint32_t cur = xfp->xf_matches_cur;
+    uint32_t i;
     xo_xparse_node_t *xnp;
 
     for (i = 0; i < cur; i++, xmp++) {	/* For each active match */
@@ -308,9 +314,8 @@ xo_filter_open (xo_handle_t *xop UNUSED, xo_filter_t *xfp,
 	if (xnp->xn_contents) {
 	    xo_xparse_node_t *cnp = xo_xparse_node(xdp, xnp->xn_contents);
 	    if (cnp->xn_type == C_PREDICATE) {
-	    #if 0
-		xmp->xm_predicates = cnp->xn_predicates;
-	    #endif
+		/* Mark these predicates as our's */
+		xmp->xm_predicates = xnp->xn_contents;
 	    }
 
 	} else if (xmp->xm_next == 0) {
@@ -406,11 +411,57 @@ xo_filter_key_find (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED,
     return NULL;
 }
 
-static int UNUSED
+/*
+ * This is the big deal: evaluate a predicate and see if
+ *
+ * (a) any referenced variables are missing; if so we need to delay
+ * (b) if the expression is true or false
+ *
+ * We use our explicit knowledge of the data to "cheat": since we know
+ * that keys must appear first and we know that we are only
+ * (currently) supporting predicates that reference keys, then we
+ * don't have to concern ourselves with N*M problems like: foo[x == y]
+ * If "x" is a key, then it can only appear once; same for "y".  This
+ * means we don't have to think about the case where multiple "x"s and
+ * "y"s can appear and the predicate is true if any "x" matches any "y".
+ */
+static xo_filter_flags_t
 xo_filter_pred_eval (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED,
 		     xo_match_t *xmp UNUSED)
 {
-    return 0;
+    xo_filter_flags_t myflags UNUSED = 0;
+    xo_filter_flags_t subflags UNUSED = 0;
+
+    return myflags;
+}
+
+/*
+ * Recurse down the complete predicate, seeing if it even wants the
+ * tag.
+ */
+static int
+xo_filter_pred_needs (xo_handle_t *xop, xo_xparse_data_t *xdp,
+		      xo_filter_t *xfp, xo_xparse_node_id_t id,
+		      const char *tag, xo_ssize_t tlen)
+{
+    xo_xparse_node_t *xnp;
+
+    for (; id; id = xnp->xn_next) {
+	xnp = xo_xparse_node(xdp, id);
+	if (xnp->xn_type == C_ELEMENT) {
+	    const char *str = xo_xparse_str(xdp, xnp->xn_str);
+	    xo_ssize_t slen = strlen(str);
+	    if (slen == tlen && memcmp(str, tag, slen) == 0)
+		return TRUE;
+	}
+
+	if (xnp->xn_contents)
+	    if (xo_filter_pred_needs(xop, xdp, xfp, xnp->xn_contents,
+				     tag, tlen))
+		return TRUE;
+    }
+
+    return FALSE;
 }
 
 int
@@ -418,8 +469,41 @@ xo_filter_key (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED,
 		      const char *tag UNUSED, xo_ssize_t tlen UNUSED,
 		      const char *value UNUSED, xo_ssize_t vlen UNUSED)
 {
-    
-    
+    xo_xparse_data_t *xdp = &xfp->xf_xd;
+    xo_match_t *xmp = xfp->xf_matches;
+    uint32_t cur = xfp->xf_matches_cur;
+    uint32_t i;
+    xo_xparse_node_t *xnp;
+
+
+    for (i = 0; i < cur; i++, xmp++) {	/* For each active match */
+	if (xmp->xm_next == 0) {	/* Already matched */
+	    xmp->xm_depth += 1;
+	    continue;
+	}
+
+	xnp = xo_xparse_node(xdp, xmp->xm_next);
+
+	if (xnp->xn_type != C_PREDICATE) /* Only type supported */
+	    continue;
+
+	if (!xo_filter_pred_needs(xop, xdp, xfp, xmp->xm_next, tag, tlen))
+	    continue;
+
+	const char *str = xo_xparse_str(xdp, xnp->xn_str);
+	if (str == NULL || !xo_streq(str, tag))
+	    continue;
+
+	xo_filter_key_add(xop, xfp, xmp, tag, tlen, value, vlen);
+
+	xo_filter_flags_t flags = xo_filter_pred_eval(xop, xfp, xmp);
+
+	xo_dbg(NULL, "filter: new key: pred eval [%u] '%s' "
+	       "[base %u/prev %u/next %u] [%u/%u]%s",
+	       i, tag, xmp->xm_base, xmp->xm_prev, xmp->xm_next,
+	       xfp->xf_allow, xfp->xf_deny, flags);
+    }
+
     return 0;
 }
 
