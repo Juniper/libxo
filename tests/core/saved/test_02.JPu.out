@@ -78,6 +78,17 @@
         "message": "two more warnings"
       },
       "count": 10,
+      "long_long_test": {
+        "lsize": 8,
+        "lval": -45,
+        "usize": 8,
+        "uval": 45,
+        "lsize": 8,
+        "lval": -45,
+        "usize": 8,
+        "uval": 45
+      },
+      "value": 123412341234,
       "test": 4,
       "error": {
         "message": "Shut 'er down, Clancey!  She's a-pumpin' mud!  <>!,\"!<>\n"
