@@ -26,12 +26,6 @@
 
 #define XO_MATCHES_DEF	32	/* Number of states allocated by default */
 
-typedef uint32_t xo_filter_flags_t; /* Flags from filter test */
-
-/* Flags for xo_filter_flags_t: */
-#define XFIF_TRUE	(1 << 0) /* This part is true */
-#define XFFI_MISSING	(1 << 1) /* A referenced element is missing  */
-
 typedef struct xo_match_s {
     xo_xparse_node_id_t xm_base; /* Start node of this path */
     xo_xparse_node_id_t xm_next; /* Next node we are looking to match */
@@ -64,6 +58,41 @@ struct xo_filter_s {		   /* Forward/typdef decl in xo_private.h */
 
 /* Flags for xf_flags */
 #define XFSF_BLOCK	(1<<0)	/* Block emitting data */
+
+/*
+ * Our filter data structure.  We keep the size under 128 bits so we
+ * can return it in registers and avoid messing with the stack.  XPath
+ * uses JSON-like floating point:
+ *
+ *    A number represents a floating-point number. A number can have
+ *    any double-precision 64-bit format IEEE 754 value
+ *
+ * but this stinks since floats lose precision, especially with 64-bit
+ * numbers like counters, so we use xfdd_number for simple numbers.
+ */
+typedef struct xo_filter_data_s {
+    unsigned xfd_type:16;	/* Type (token type) */
+    unsigned xfd_flags:8;	/* Flags (XFDF_*) */
+    unsigned xfd_pad:8;		/* Padding */
+    xo_xparse_node_id_t xfd_node;   /* 32 bits of node */
+    union {			    /* Data value (based on xfd_type) */
+	int64_t xfdd_int64:64;	    /* If C_INT64 */
+	uint64_t xfdd_uint64:64;    /* If C_UINT64 or C_INDEX */
+	double xfdd_float;	    /* If C_FLOAT */
+	const char *xfdd_str;	    /* String value */
+    } xfd_data;
+} xo_filter_data_t;
+
+#define xfd_int64 xfd_data.xfdd_int64
+#define xfd_uint64 xfd_data.xfdd_uint64
+#define xfd_float xfd_data.xfdd_float
+#define xfd_str xfd_data.xfdd_str
+
+/* Flags for xfd_flags: */
+#define XFDF_TRUE	(1 << 0) /* This part is true */
+#define XFDF_INVALID	(1 << 1) /* Expression hierarchy is invalid/broken */
+#define XFDF_MISSING	(1 << 2) /* A referenced element is missing  */
+#define XFDF_UNSUPPORTED (1 << 3) /* Token type is not supported */
 
 xo_filter_t *
 xo_filter_create (xo_handle_t *xop)
@@ -173,25 +202,25 @@ xo_filter_dump_matches (xo_filter_t *xfp)
 }
 
 int
-xo_filter_blocking (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED)
+xo_filter_blocking (xo_filter_t *xfp UNUSED)
 {
     return 0;
 }
 
 int
-xo_filter_add_one (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED, const char *vp UNUSED)
+xo_filter_add_one (xo_filter_t *xfp UNUSED, const char *vp UNUSED)
 {
     return 0;
 }
 
 int
-xo_filter_cleanup (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED)
+xo_filter_cleanup (xo_filter_t *xfp UNUSED)
 {
     return 0;
 }
 
 static int
-xo_filter_allow (xo_handle_t *xop UNUSED, xo_filter_t *xfp)
+xo_filter_allow (xo_filter_t *xfp)
 {
     /* No filters means always allow */
     if (xfp == NULL || xfp->xf_xd.xd_paths_cur == 0)
@@ -212,8 +241,7 @@ xo_filter_allow (xo_handle_t *xop UNUSED, xo_filter_t *xfp)
 }
 
 static int
-xo_filter_open (xo_handle_t *xop UNUSED, xo_filter_t *xfp,
-		const char *tag, const char *type)
+xo_filter_open (xo_filter_t *xfp, const char *tag, const char *type)
 {
     if (xfp == NULL)
 	return 0;
@@ -336,19 +364,19 @@ xo_filter_open (xo_handle_t *xop UNUSED, xo_filter_t *xfp,
 
     xo_filter_dump_matches(xfp);
 
-    return xo_filter_allow(xop, xfp);
+    return xo_filter_allow(xfp);
 }
 
 int
-xo_filter_open_container (xo_handle_t *xop, xo_filter_t *xfp, const char *tag)
+xo_filter_open_container (xo_filter_t *xfp, const char *tag)
 {
-    return xo_filter_open(xop, xfp, tag, "container");
+    return xo_filter_open(xfp, tag, "container");
 }
 
 int
-xo_filter_open_instance (xo_handle_t *xop, xo_filter_t *xfp, const char *tag)
+xo_filter_open_instance (xo_filter_t *xfp, const char *tag)
 {
-    return xo_filter_open(xop, xfp, tag, "list");
+    return xo_filter_open(xfp, tag, "list");
 }
 
 /*
@@ -361,12 +389,11 @@ xo_filter_open_instance (xo_handle_t *xop, xo_filter_t *xfp, const char *tag)
  * efficiency shouldn't matter.
  */
 static void UNUSED
-xo_filter_key_add (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED,
-		   xo_match_t *xmp,
+xo_filter_key_add (xo_filter_t *xfp UNUSED, xo_match_t *xmp,
 		   const char *tag, xo_ssize_t tlen,
 		   const char *value, xo_ssize_t vlen)
 {
-    xo_ssize_t new_len = tlen + vlen + 3;
+    xo_ssize_t new_len = tlen + vlen + 3; /* Three NULs */
     char *newp = xo_realloc(xmp->xm_keys, xmp->xm_keys_len + new_len);
 
     if (newp == NULL)
@@ -386,7 +413,7 @@ xo_filter_key_add (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED,
 }
 
 static const char * UNUSED
-xo_filter_key_find (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED,
+xo_filter_key_find (xo_filter_t *xfp UNUSED,
 		    xo_match_t *xmp, const char *tag)
 {
     xo_ssize_t off = 0;
@@ -411,6 +438,157 @@ xo_filter_key_find (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED,
     return NULL;
 }
 
+static inline xo_filter_data_t
+xo_filter_data_make (unsigned type, unsigned flags, xo_xparse_node_id_t id)
+{
+    xo_filter_data_t data = { 0 };
+
+    data.xfd_type = type;
+    data.xfd_flags = flags;
+    data.xfd_pad = 0;
+    data.xfd_node = id;
+    data.xfd_uint64 = 0;
+
+    return data;
+}
+
+static inline xo_filter_data_t
+xo_filter_data_invalid (void)
+{
+    xo_filter_data_t data = { 0 };
+
+    data.xfd_type = M_ERROR;
+    data.xfd_flags = XFDF_INVALID;
+    data.xfd_pad = 0;
+    data.xfd_node = 0;
+    data.xfd_uint64 = 0;
+
+    return data;
+}
+
+#define XO_FILTER_OP_ARGS \
+    xo_filter_t *xfp UNUSED, xo_match_t *xmp UNUSED, \
+	xo_xparse_node_t *xnp UNUSED, \
+	xo_filter_data_t left UNUSED, xo_filter_data_t right UNUSED
+
+typedef xo_filter_data_t (*xo_filter_op_fn_t)(XO_FILTER_OP_ARGS);
+
+#define XO_FILTER_NODE_ARGS \
+    xo_filter_t *xfp UNUSED, xo_match_t *xmp UNUSED, \
+	xo_xparse_node_t *xnp
+
+typedef xo_filter_data_t (xo_filter_node_fn_t)(XO_FILTER_NODE_ARGS);
+
+/* Forward decl */
+static xo_filter_data_t
+xo_filter_eval (xo_filter_t *xfp, xo_match_t *xmp,
+			 xo_xparse_node_id_t id, xo_filter_op_fn_t op_fn);
+
+static xo_filter_data_t
+xo_filter_eval_number (XO_FILTER_NODE_ARGS)
+{
+    xo_filter_data_t data = { .xfd_flags = 0 };
+    const char *str = xo_xparse_str(&xfp->xf_xd, xnp->xn_str);
+    char *ep;
+    int64_t ival = strtoll(str, &ep, 0);
+    double fval;
+
+    if (ep && *ep == '\0') {
+	data = xo_filter_data_make(C_INT64, 0, xnp->xn_str);
+	data.xfd_int64 = ival;
+    } else {
+	fval = strtod(str, &ep);
+	if (ep && *ep == '\0') {
+	    data = xo_filter_data_make(C_FLOAT, 0, xnp->xn_str);
+	    data.xfd_float = fval;
+
+	} else {
+	    /* We can't give an error, so we just return 0 */
+	    data = xo_filter_data_make(C_INT64, 0, xnp->xn_str);
+	    data.xfd_int64 = 0;
+	}
+    }
+
+    return data;
+}
+
+static xo_filter_data_t
+xo_filter_eval_path (XO_FILTER_NODE_ARGS)
+{
+    xo_filter_data_t data = { .xfd_flags = 0 };
+    xo_xparse_node_t *elt = NULL;
+    xo_xparse_node_id_t id;
+
+    /* We only support a single element in the path, which must be a key */
+    for (id = xnp->xn_contents; id; id = xnp->xn_next) {
+	xnp = xo_xparse_node(&xfp->xf_xd, id);
+	if (xnp->xn_type != C_ELEMENT)
+	    continue;
+
+	if (elt == NULL)
+	    elt = xnp;
+	else return xo_filter_data_invalid();
+    }
+
+    if (elt == NULL)
+	return data;
+
+    const char *str = xo_xparse_str(&xfp->xf_xd, elt->xn_str);
+    const char *sval = xo_filter_key_find(xfp, xmp, str);
+    if (sval) {
+	data = xo_filter_data_make(C_STRING, 0, 0);
+	data.xfd_str = sval;
+    } else {
+	data.xfd_flags |= XFDF_MISSING;
+    }
+
+    return data;
+}
+
+static xo_filter_data_t
+xo_filter_eval (xo_filter_t *xfp, xo_match_t *xmp,
+			 xo_xparse_node_id_t id, xo_filter_op_fn_t op_fn)
+{
+    xo_filter_data_t data = { .xfd_flags = 0 };
+
+    xo_xparse_dump_one_node(&xfp->xf_xd, id, 0, "eval one: ");
+
+    xo_xparse_node_t *xnp;
+    xo_filter_node_fn_t *node_fn;
+
+    for (; id; id = xnp->xn_next) {
+	xnp = xo_xparse_node(&xfp->xf_xd, id);
+
+	switch (xnp->xn_type) {
+
+	case T_NUMBER:;
+	    node_fn = xo_filter_eval_number;
+	    break;
+
+	case L_EQUALS:;
+	    if (xnp->xn_contents == 0) {
+		data = xo_filter_data_invalid();
+	    } else {
+		data = xo_filter_eval(xfp, xmp, xnp->xn_contents, op_fn);
+	    }
+
+	    break;
+
+	case C_PATH:
+	    node_fn = xo_filter_eval_path;
+	    break;
+	
+	default:		/* For now; should be XFDF_UNSUPPORTED */
+	    if (xnp->xn_contents)
+		data = xo_filter_eval(xfp, xmp, xnp->xn_contents, op_fn);
+	}
+
+	data = node_fn(xfp, xmp, xnp);
+    }
+
+    return data;
+}
+
 /*
  * This is the big deal: evaluate a predicate and see if
  *
@@ -425,14 +603,26 @@ xo_filter_key_find (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED,
  * means we don't have to think about the case where multiple "x"s and
  * "y"s can appear and the predicate is true if any "x" matches any "y".
  */
-static xo_filter_flags_t
-xo_filter_pred_eval (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED,
-		     xo_match_t *xmp UNUSED)
+static xo_filter_data_t
+xo_filter_pred_eval (xo_filter_t *xfp, xo_match_t *xmp)
 {
-    xo_filter_flags_t myflags UNUSED = 0;
-    xo_filter_flags_t subflags UNUSED = 0;
+    xo_filter_data_t data = { 0 };
 
-    return myflags;
+    xo_xparse_dump_one_node(&xfp->xf_xd, xmp->xm_predicates, 0, "eval: ");
+
+    xo_xparse_node_id_t id;
+    xo_xparse_node_t *xnp;
+
+    for (id = xmp->xm_predicates; id; id = xnp->xn_next) {
+	xnp = xo_xparse_node(&xfp->xf_xd, id);
+
+	if (xnp->xn_type != C_PREDICATE) /* Can't eval anything else */
+	    continue;
+
+	data = xo_filter_eval(xfp, xmp, xnp->xn_contents, NULL);
+    }
+
+    return data;
 }
 
 /*
@@ -440,8 +630,8 @@ xo_filter_pred_eval (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED,
  * tag.
  */
 static int
-xo_filter_pred_needs (xo_handle_t *xop, xo_xparse_data_t *xdp,
-		      xo_filter_t *xfp, xo_xparse_node_id_t id,
+xo_filter_pred_needs (xo_xparse_data_t *xdp, xo_filter_t *xfp,
+		      xo_xparse_node_id_t id,
 		      const char *tag, xo_ssize_t tlen)
 {
     xo_xparse_node_t *xnp;
@@ -456,7 +646,7 @@ xo_filter_pred_needs (xo_handle_t *xop, xo_xparse_data_t *xdp,
 	}
 
 	if (xnp->xn_contents)
-	    if (xo_filter_pred_needs(xop, xdp, xfp, xnp->xn_contents,
+	    if (xo_filter_pred_needs(xdp, xfp, xnp->xn_contents,
 				     tag, tlen))
 		return TRUE;
     }
@@ -465,43 +655,47 @@ xo_filter_pred_needs (xo_handle_t *xop, xo_xparse_data_t *xdp,
 }
 
 int
-xo_filter_key (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED,
-		      const char *tag UNUSED, xo_ssize_t tlen UNUSED,
-		      const char *value UNUSED, xo_ssize_t vlen UNUSED)
+xo_filter_key (xo_filter_t *xfp, const char *tag, xo_ssize_t tlen,
+		      const char *value, xo_ssize_t vlen)
 {
     xo_xparse_data_t *xdp = &xfp->xf_xd;
     xo_match_t *xmp = xfp->xf_matches;
     uint32_t cur = xfp->xf_matches_cur;
     uint32_t i;
     xo_xparse_node_t *xnp;
+    xo_xparse_node_id_t id;
 
 
     for (i = 0; i < cur; i++, xmp++) {	/* For each active match */
-	if (xmp->xm_next == 0) {	/* Already matched */
-	    xmp->xm_depth += 1;
+	if (xmp->xm_next == 0 && xmp->xm_predicates == 0) {
+	    /* Already matched */
 	    continue;
 	}
 
-	xnp = xo_xparse_node(xdp, xmp->xm_next);
+	for (id = xmp->xm_predicates; id; id = xnp->xn_next) {
+	    xnp = xo_xparse_node(xdp, id);
 
-	if (xnp->xn_type != C_PREDICATE) /* Only type supported */
-	    continue;
+	    if (xnp->xn_type != C_PREDICATE) /* Only type supported */
+		continue;
 
-	if (!xo_filter_pred_needs(xop, xdp, xfp, xmp->xm_next, tag, tlen))
-	    continue;
+	    if (!xo_filter_pred_needs(xdp, xfp, xmp->xm_predicates, tag, tlen))
+		continue;
 
-	const char *str = xo_xparse_str(xdp, xnp->xn_str);
-	if (str == NULL || !xo_streq(str, tag))
-	    continue;
+	    xo_filter_key_add(xfp, xmp, tag, tlen, value, vlen);
 
-	xo_filter_key_add(xop, xfp, xmp, tag, tlen, value, vlen);
+	    const char *test = xo_filter_key_find(xfp, xmp, tag);
+	    xo_dbg(NULL, "filter: new key: [%s] %p:'%s'",
+		   tag, test, test ?: "");
 
-	xo_filter_flags_t flags = xo_filter_pred_eval(xop, xfp, xmp);
+	    xo_filter_data_t data UNUSED = xo_filter_pred_eval(xfp, xmp);
 
-	xo_dbg(NULL, "filter: new key: pred eval [%u] '%s' "
-	       "[base %u/prev %u/next %u] [%u/%u]%s",
-	       i, tag, xmp->xm_base, xmp->xm_prev, xmp->xm_next,
-	       xfp->xf_allow, xfp->xf_deny, flags);
+	    xo_dbg(NULL, "filter: new key: pred eval [%u] '%s' "
+		   "[base %u/prev %u/next %u] [%u/%u]",
+		   i, tag, xmp->xm_base, xmp->xm_prev, xmp->xm_next,
+		   xfp->xf_allow, xfp->xf_deny);
+	}
+
+	/* If this is a match, we clear xm_predicates */
     }
 
     return 0;
@@ -513,7 +707,7 @@ xo_filter_key (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED,
  * our buffered output.
  */
 int
-xo_filter_key_done (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED)
+xo_filter_key_done (xo_filter_t *xfp UNUSED)
 {
     
     
@@ -521,8 +715,7 @@ xo_filter_key_done (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED)
 }
 
 static int
-xo_filter_close (xo_handle_t *xop UNUSED, xo_filter_t *xfp,
-		 const char *tag, const char *type)
+xo_filter_close (xo_filter_t *xfp, const char *tag, const char *type)
 {
     if (xfp == NULL)
 	return 0;
@@ -594,17 +787,17 @@ xo_filter_close (xo_handle_t *xop UNUSED, xo_filter_t *xfp,
 
     xo_filter_dump_matches(xfp);
 
-    return xo_filter_allow(xop, xfp);
+    return xo_filter_allow(xfp);
 }
 
 int
-xo_filter_close_instance (xo_handle_t *xop, xo_filter_t *xfp, const char *tag)
+xo_filter_close_instance (xo_filter_t *xfp, const char *tag)
 {
-    return xo_filter_close(xop, xfp, tag, "instance");
+    return xo_filter_close(xfp, tag, "instance");
 }
 
 int
-xo_filter_close_container (xo_handle_t *xop, xo_filter_t *xfp, const char *tag)
+xo_filter_close_container (xo_filter_t *xfp, const char *tag)
 {
-    return xo_filter_close(xop, xfp, tag, "container");
+    return xo_filter_close(xfp, tag, "container");
 }
