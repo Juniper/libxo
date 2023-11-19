@@ -206,6 +206,11 @@
 %token C_PREDICATE		/* Node contains a predicate */
 %token C_TEST			/* Node test (e.g. node()) */
 %token C_UNION			/* Union of two paths */
+%token C_INT64			/* Signed 64-bit integer */
+%token C_UINT64			/* Unsigned 64-bit integer */
+%token C_FLOAT			/* Floating point number (double) */
+%token C_STRING			/* String value (const char *) */
+/* Note: Add new names to xo_xparse_ttname_map[] in xo_xparse.c */
 
 /*
  * Use a "%pure-parser" for reentracy
@@ -452,9 +457,14 @@ xp_not_expr :
 	xp_path_expr 
 		{ 
 		    xo_xparse_node_id_t id = xo_xparse_node_new(xparse_data);
-		    xo_xparse_node_t *xnp = xo_xparse_node(xparse_data, id);
-		    xnp->xn_type = C_PATH;
-		    xo_xparse_node_set_contents(xparse_data, id, $1);
+		    xo_xparse_node_t *xnp = xo_xparse_node(xparse_data, $1);
+		    if (xnp->xn_type == C_ELEMENT) {
+			xnp = xo_xparse_node(xparse_data, id);
+			xnp->xn_type = C_PATH;
+			xo_xparse_node_set_contents(xparse_data, id, $1);
+		    } else {
+			id = $1;
+		    }
 		    $$ = xo_xparse_yyval(xparse_data, id);
 		}
 
