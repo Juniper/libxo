@@ -39,9 +39,18 @@ main (int argc, char **argv)
 	    xo_xpath_yydebug = 1;
     }
 
-    xo_xparse_node_t *xnp UNUSED;
+    if (argv[2])
+	output = argv[2];
 
-    xo_filter_t *xfp = xo_filter_create(NULL);
+    FILE *fp = fopen(output, "w+");
+    if (fp == NULL)
+	xo_errx(1, "open failed");
+
+    xo_handle_t *xop = xo_create_to_file(fp, XO_STYLE_XML, XOF_PRETTY);
+    if (xop == NULL)
+	xo_errx(1, "create failed");
+
+    xo_filter_t *xfp = xo_filter_create(xop);
     if (xfp == NULL)
 	xo_errx(1, "allocation of filter failed");
 
@@ -62,28 +71,18 @@ main (int argc, char **argv)
     
     xo_xparse_dump(xdp);
 
-    if (argv[2])
-	output = argv[2];
 
-    FILE *fp = fopen(output, "w+");
-    if (fp == NULL)
-	xo_errx(1, "open failed");
-
-    xo_handle_t *xop = xo_create_to_file(fp, XO_STYLE_XML, XOF_PRETTY);
-    if (xop == NULL)
-	xo_errx(1, "create failed");
-
-    xo_filter_open_container(xop, xfp, "one");
-    xo_filter_open_container(xop, xfp, "two");
-    xo_filter_open_container(xop, xfp, "three");
-    xo_filter_open_container(xop, xfp, "four");
+    xo_filter_open_container(xfp, "one");
+    xo_filter_open_container(xfp, "two");
+    xo_filter_open_container(xfp, "three");
+    xo_filter_open_container(xfp, "four");
 
     xo_emit_h(xop, "{:success}\n", "yes!");
 
-    xo_filter_close_container(xop, xfp, "four");
-    xo_filter_close_container(xop, xfp, "three");
-    xo_filter_close_container(xop, xfp, "two");
-    xo_filter_close_container(xop, xfp, "one");
+    xo_filter_close_container(xfp, "four");
+    xo_filter_close_container(xfp, "three");
+    xo_filter_close_container(xfp, "two");
+    xo_filter_close_container(xfp, "one");
 
     xo_finish_h(xop);
 
