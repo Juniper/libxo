@@ -39,6 +39,30 @@ trim (char *cp)
     return cp;
 }
 
+static char *
+clean_token (char *cp)
+{
+    while (*cp && !isspace(*cp))
+	cp += 1;
+
+    if (*cp == '\0')
+	return cp;
+
+    *cp++ = '\0';
+
+    while (isspace(*cp))
+	cp += 1;
+
+    char *ep = cp + strlen(cp);
+
+    for (ep--; ep > cp && isspace(*ep); ep--)
+	continue;
+    if (++ep >= cp && (*ep == '\n' || *ep == '\r'))
+	*ep = '\0';
+
+    return cp;
+}
+
 int
 main (int argc, char **argv)
 {
@@ -90,6 +114,7 @@ main (int argc, char **argv)
 	xo_errx(1, "create failed");
 
     char *cp, buf[BUFSIZ];
+    char *key, *value;
     int rc;
 
     for (;;) {
@@ -105,22 +130,29 @@ main (int argc, char **argv)
 	    continue;
 
 	case '?':
-	    xdp->xd_buf = strdup(trim(cp + 1));
-	    xdp->xd_len = strlen(xdp->xd_buf);
+	    cp = trim(cp + 1);
+	    xo_xparse_set_input(xdp, cp, strlen(cp));
 	    xo_xpath_yyparse(xdp);
 	    xo_xparse_dump(xdp);
 	    break;
 
 	case '+':
-	    rc = xo_filter_open_container(xop, xfp, trim(cp + 1));
+	    rc = xo_filter_open_container(xfp, trim(cp + 1));
 	    break;
 
 	case '-':
-	    rc = xo_filter_close_container(xop, xfp, trim(cp + 1));
+	    rc = xo_filter_close_container(xfp, trim(cp + 1));
 	    break;
 
 	case '=':
 	    printf("value: %s\n", trim(cp + 1));
+	    break;
+
+	case '$':
+	    key = cp + 1;
+	    value = clean_token(key);
+	    printf("key: '%s'='%s'\n", key, value);
+	    xo_filter_key(xfp, key, strlen(key), value, strlen(value));
 	    break;
 
 	case 'r':		/* Reset */
