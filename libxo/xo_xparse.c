@@ -207,6 +207,10 @@ xo_xparse_ttname_map_t xo_xparse_ttname_map[] = {
     { C_PREDICATE,		"predicate ('[test]')" },
     { C_TEST,			"node test ('node()')" },
     { C_UNION,			"union of two paths ('one|two')" },
+    { C_INT64,			"Signed 64-bit integer" },
+    { C_UINT64,			"Unsigned 64-bit integer" },
+    { C_FLOAT,			"Floating point number (double)" },
+    { C_STRING,			"String value (const char *)" },
     { 0, NULL }
 };
 
@@ -476,7 +480,35 @@ xo_xparse_str_new (xo_xparse_data_t *xdp UNUSED)
     return newp ? cur : 0;
 }
 
-static void
+void
+xo_xparse_set_input (xo_xparse_data_t *xdp, const char *buf, xo_ssize_t len)
+{
+    if (xdp->xd_size < len + 1) {
+	size_t size = (len + 1 + XD_BUF_FUDGE);
+	size += XD_BUF_INCR - 1;
+	size &= ~(XD_BUF_INCR - 1);
+
+	xdp->xd_buf = xo_realloc(xdp->xd_buf, size);
+	xdp->xd_size = xdp->xd_buf ? size : 0;
+    }
+
+    if (xdp->xd_buf) {
+	xdp->xd_len = len;
+	memcpy(xdp->xd_buf, buf, len);
+	xdp->xd_buf[len] = '\0';
+    } else {
+	xdp->xd_len = 0;
+    }
+
+    xdp->xd_cur = 0;
+    xdp->xd_start = 0;
+
+    xdp->xd_errors = 0;
+    xdp->xd_col = 0;
+    xdp->xd_col_start = 0;
+}
+
+void
 xo_xparse_dump_one_node (xo_xparse_data_t *xdp, xo_xparse_node_id_t id,
 			 int indent, const char *title)
 {
