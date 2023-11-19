@@ -4691,7 +4691,7 @@ int
 xo_filter_add (xo_handle_t *xop UNUSED, const char *vp UNUSED)
 {
 #ifdef LIBXO_NEED_FILTER
-    return xo_filter_add_one(xop, xop->xo_filters, vp);
+    return xo_filter_add_one(xop->xo_filters, vp);
 #else /* LIBXO_NEED_FILTER */
     return 0;
 #endif /* LIBXO_NEED_FILTER */
@@ -7446,7 +7446,7 @@ xo_do_open_container (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
     }
 
     name = xo_map_name(xop, name); /* Find mapped name, if any */
-    xo_filter_open_container(xop, xop->xo_filters, name);
+    xo_filter_open_container(xop->xo_filters, name);
 
     const char *leader = xo_xml_leader(xop, name);
     flags |= xop->xo_flags;	/* Pick up handle flags */
