@@ -37,6 +37,10 @@ main (int argc, char **argv)
     xo_xparse_init(&xd);
 
     strncpy(xd.xd_filename, "me", sizeof(xd.xd_filename));
+
+    if (argv[1] == NULL)
+	exit(1);
+
     xd.xd_buf = strdup(argv[1]);
     xd.xd_len = strlen(xd.xd_buf);
 
