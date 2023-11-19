@@ -82,18 +82,6 @@ xo_xparse_is_bare_char (int ch)
 }
 
 /*
- * Initialize all the input data fields in xdp
- */
-static inline void
-xo_xparse_set_data (xo_xparse_data_t *xdp, const char *str)
-{
-    ssize_t len = strlen(str);
-
-    xdp->xd_buf = xo_realloc(xdp->xd_buf, len);
-    xdp->xd_len = xdp->xd_buf ? len : 0;
-}
-
-/*
  * Return a pointer to a string in the string buffer
  * Note: the lifetime of the pointer ends when a new allocation is made
  */
@@ -324,5 +312,12 @@ xo_xparse_node_is_attr_axis (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
 
 void
 xo_xparse_results (xo_xparse_data_t *xdp, xo_xparse_node_id_t id);
+
+void
+xo_xparse_dump_one_node (xo_xparse_data_t *xdp, xo_xparse_node_id_t id,
+			 int indent, const char *title);
+
+void
+xo_xparse_set_input (xo_xparse_data_t *xdp, const char *buf, xo_ssize_t len);
 
 #endif /* XO_XPARSE_H */
