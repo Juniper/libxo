@@ -17,7 +17,7 @@ as the :ref:`LIBXO_OPTIONS <libxo-options>` environment variable.
 The `xo` utility accepts a format string suitable for `xo_emit` and
 a set of zero or more arguments used to supply data for that string::
 
-    xo "The {k:name} weighs {:weight/%d} pounds.\n" fish 6
+    xo "The {k:name} weighs {:weight/%d} pounds.\\n" fish 6
 
   TEXT:
     The fish weighs 6 pounds.
@@ -112,7 +112,7 @@ braces for JSON output.
     #!/bin/sh
     xo --top-wrap --open top/data
     xo --depth 2 'First {:tag} ' value1
-    xo --depth 2 --continuation 'and then {:tag}\n' value2
+    xo --depth 2 --continuation 'and then {:tag}\\n' value2
     xo --top-wrap --close top/data
 
   TEXT:
@@ -167,7 +167,7 @@ instances::
     NF=
     for name in red green blue; do
         xo $opts --depth 1 $NF --open-instance machine
-        xo $opts --depth 2 "Machine {k:name} has {:memory}\n" $name 55
+        xo $opts --depth 2 "Machine {k:name} has {:memory}\\n" $name 55
         xo $opts --depth 1 --close-instance machine
         NF=--not-first
     done
@@ -181,7 +181,7 @@ command line options.
 The `--instance` option can be used to treat a single `xo` invocation
 as an instance with the given set of fields::
 
-  % xo --libxo:XP --instance foo 'The {:product} is {:status}\n' stereo "in route"
+  % xo --libxo:XP --instance foo 'The {:product} is {:status}\\n' stereo "in route"
   <foo>
     <product>stereo</product>
     <status>in route</status>
@@ -224,11 +224,11 @@ Example
 
 ::
 
-  % xo 'The {:product} is {:status}\n' stereo "in route"
+  % xo 'The {:product} is {:status}\\n' stereo "in route"
   The stereo is in route
-  % xo -p -X 'The {:product} is {:status}\n' stereo "in route"
+  % xo -p -X 'The {:product} is {:status}\\n' stereo "in route"
   <product>stereo</product>
   <status>in route</status>
-  % xo --libxo xml,pretty 'The {:product} is {:status}\n' stereo "in route"
+  % xo --libxo xml,pretty 'The {:product} is {:status}\\n' stereo "in route"
   <product>stereo</product>
   <status>in route</status>
