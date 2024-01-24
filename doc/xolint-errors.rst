@@ -95,13 +95,13 @@ The message "Potential missing slash after C, D, N, L, or T with format" can be 
 
 ::
 
-    xo_emit("{T:%6.6s}\n", "Max");
+    xo_emit("{T:%6.6s}\\n", "Max");
 
 This code should be replaced with code like:
 
 ::
 
-    xo_emit("{T:/%6.6s}\n", "Max");
+    xo_emit("{T:/%6.6s}\\n", "Max");
 
 The "%6.6s" will be a literal, not a field format.  While
 it's possibly valid, it's likely a missing "/".
@@ -135,7 +135,7 @@ static literal content ("{L:Label}") and a
 format ("{L:/%s}").
 This error will also occur when the content has a backslash
 in it, like "{N:Type of I/O}"; backslashes should be escaped,
-like "{N:Type of I\\/O}".  Note the double backslash, one for
+like "{N:Type of I\\\\/O}".  Note the double backslash, one for
 handling 'C' strings, and one for libxo.
 
 
