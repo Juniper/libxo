@@ -27,3 +27,9 @@ html sphinx sphinx-html:
 
 singlehtml:
 	${SPHINX} -M singlehtml ${srcdir} . -N -E
+
+CLEANDIRS= doctrees html
+
+clean-local:
+	${RM} -fr ${CLEANDIRS}
+
