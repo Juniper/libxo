@@ -107,7 +107,7 @@ comma-separated values::
 Be aware that since the CSV encoder looks for data instances, when
 used with :ref:`xo`, the `--instance` option will be needed::
 
-  % xo --libxo encoder=csv --instance foo 'The {:product} is {:status}\n' stereo "in route"
+  % xo --libxo encoder=csv --instance foo 'The {:product} is {:status}\\n' stereo "in route"
   product,status
   stereo,in route
 
