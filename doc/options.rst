@@ -144,12 +144,12 @@ pairs or single colors.
 
 For example consider the following xo_emit call::
 
-    xo_emit("{C:fg-red,bg-green}Merry XMas!!{C:}\n");
+    xo_emit("{C:fg-red,bg-green}Merry XMas!!{C:}\\n");
 
 To turn all colored output to red-on-blue, use eight pairs of
 "red/blue" mappings separated by plus signs ("+")::
 
-    --libxo colors=red/blue+red/blue+red/blue+red/blue+\
+    --libxo colors=red/blue+red/blue+red/blue+red/blue+\\
                    red/blue+red/blue+red/blue+red/blue
 
 To turn the red-on-green text to magenta-on-cyan, give a "magenta"
@@ -191,6 +191,7 @@ This example would turn::
     <two>fish</two>
 
 into::
+
     <red>fish</red>
     <blue>fish</blue>
 
