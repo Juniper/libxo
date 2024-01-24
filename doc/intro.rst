@@ -11,7 +11,7 @@ the field is and what it means.  Each field descriptor is placed in
 braces with printf-like :ref:`format-strings`::
 
     xo_emit(" {:lines/%7ju} {:words/%7ju} "
-            "{:characters/%7ju} {d:filename/%s}\n",
+            "{:characters/%7ju} {d:filename/%s}\\n",
             linect, wordct, charct, file);
 
 Each field can have a role, with the 'value' role being the default,
