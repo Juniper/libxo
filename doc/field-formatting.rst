@@ -156,9 +156,9 @@ string::
         wchar_t when[32];
         wcsftime(when, sizeof(when), L"%d%b%y", timep);
 
-        xo_emit("The hat for {:name/%hs} is {:size/%s}.\n",
+        xo_emit("The hat for {:name/%hs} is {:size/%s}.\\n",
                 name, size_val);
-        xo_emit("It was ordered on {:order-time/%ls}.\n",
+        xo_emit("It was ordered on {:order-time/%ls}.\\n",
                 when);
     }
 
@@ -189,7 +189,7 @@ ignored for the JSON and XML styles.  For HTML, these characters are
 placed in a <div> with class "text"::
 
   EXAMPLE:
-      xo_emit("The hat is {:size/%s}.\n", size_val);
+      xo_emit("The hat is {:size/%s}.\\n", size_val);
   TEXT:
       The hat is extra small.
   XML:
@@ -298,7 +298,7 @@ information is used, avoiding repetitive parsing of the format string::
     SYNTAX:
       int xo_emit_f(xo_emit_flags_t flags, const char fmt, ...);
     EXAMPLE:
-      xo_emit_f(XOEF_RETAIN, "{:some/%02d}{:thing/%-6s}{:fancy}\n",
+      xo_emit_f(XOEF_RETAIN, "{:some/%02d}{:thing/%-6s}{:fancy}\\n",
                      some, thing, fancy);
 
 To retain parsed format information, use the XOEF_RETAIN flag to the
@@ -327,7 +327,7 @@ internal information on either a single format string or all format
 strings, respectively.  Neither is required, but the library will
 retain this information until it is cleared or the process exits::
 
-    const char *fmt = "{:name}  {:count/%d}\n";
+    const char *fmt = "{:name}  {:count/%d}\\n";
     for (i = 0; i < 1000; i++) {
         xo_open_instance("item");
         xo_emit_f(XOEF_RETAIN, fmt, name[i], count[i]);
@@ -341,7 +341,7 @@ Example
 
 In this example, the value for the number of items in stock is emitted::
 
-        xo_emit("{P:   }{Lwc:In stock}{:in-stock/%u}\n",
+        xo_emit("{P:   }{Lwc:In stock}{:in-stock/%u}\\n",
                 instock);
 
 This call will generate the following output::
