@@ -95,7 +95,7 @@ The display modifier indicated the field should only be generated for
 the display output styles, TEXT and HTML::
 
     EXAMPLE:
-        xo_emit("{Lcw:Name}{d:name} {:id/%d}\\n", "phil", 1);
+        xo_emit("{Lcw:Name}{d:name}{:id/%d}\\n", "phil", 1);
     TEXT:
         Name: phil 1
     XML:
@@ -112,11 +112,11 @@ The Encoding Modifier ({e:})
 
 .. index:: Field Modifiers; Encoding
 
-The display modifier indicated the field should only be generated for
-the display output styles, TEXT and HTML::
+The encoding modifier indicated the field should only be generated for
+the encoding output styles, XML and JSON::
 
     EXAMPLE:
-        xo_emit("{Lcw:Name}{:name} {e:id/%d}\\n", "phil", 1);
+        xo_emit("{Lcw:Name}{:name}{e:id/%d}\\n", "phil", 1);
     TEXT:
         Name: phil
     XML:
