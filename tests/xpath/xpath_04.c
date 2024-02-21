@@ -123,10 +123,12 @@ main (int argc, char **argv)
 	    break;
 
 	cp = trim(cp);
-	xo_dbg(NULL, "main: got '%s'", cp ?: "");
+	fprintf(stderr, "main: input '%s'\n", cp ?: "");
 
 	switch (*cp) {
 	case '#':
+	case ' ':
+	case '\0':
 	    continue;
 
 	case '?':
@@ -145,14 +147,15 @@ main (int argc, char **argv)
 	    break;
 
 	case '=':
-	    printf("value: %s\n", trim(cp + 1));
+	    fprintf(stderr, "main: allow: %s\n",
+		   xo_filter_allow(xfp) ? "true" : "false");
 	    break;
 
 	case '$':
 	    key = cp + 1;
 	    value = clean_token(key);
-	    printf("key: '%s'='%s'\n", key, value);
-	    xo_filter_key(xfp, key, strlen(key), value, strlen(value));
+	    fprintf(stderr, "main: key: '%s'='%s'\n", key, value);
+	    rc = xo_filter_key(xfp, key, strlen(key), value, strlen(value));
 	    break;
 
 	case 'r':		/* Reset */
@@ -172,12 +175,12 @@ main (int argc, char **argv)
 	    break;
 
 	default:
-	    xo_dbg(NULL, "filter: invalid line '%s'", cp);
+	    fprintf(stderr, "main: filter: invalid line '%s'\n", cp);
 	    
 	}
 
 	if (rc >= 0)
-	    xo_dbg(NULL, "filter: allow: %s", rc ? "true" : "false");
+	    fprintf(stderr, "main: filter: allow: %s\n", rc ? "true" : "false");
     }
 
 
