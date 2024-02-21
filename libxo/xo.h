@@ -28,9 +28,9 @@
 #include <errno.h>
 
 #ifdef __dead2
-#define NORETURN __dead2
+#define XO_NORETURN __dead2
 #else
-#define NORETURN
+#define XO_NORETURN
 #endif /* __dead2 */
 
 /*
@@ -44,9 +44,9 @@
 #if defined(__linux) && !defined(__printflike)
 #define __printflike(_x, _y) __attribute__((__format__ (__printf__, _x, _y)))
 #endif
-#define PRINTFLIKE(_x, _y) __printflike(_x, _y)
+#define XO_PRINTFLIKE(_x, _y) __printflike(_x, _y)
 #else
-#define PRINTFLIKE(_x, _y)
+#define XO_PRINTFLIKE(_x, _y)
 #endif /* NO_PRINTFLIKE */
 
 /** Formatting types */
@@ -224,14 +224,14 @@ xo_emit_hf (xo_handle_t *xop, xo_emit_flags_t flags, const char *fmt, ...);
 xo_ssize_t
 xo_emit_f (xo_emit_flags_t flags, const char *fmt, ...);
 
-PRINTFLIKE(2, 0)
+XO_PRINTFLIKE(2, 0)
 static inline xo_ssize_t
 xo_emit_hvp (xo_handle_t *xop, const char *fmt, va_list vap)
 {
     return xo_emit_hv(xop, fmt, vap);
 }
 
-PRINTFLIKE(2, 3)
+XO_PRINTFLIKE(2, 3)
 static inline xo_ssize_t
 xo_emit_hp (xo_handle_t *xop, const char *fmt, ...)
 {
@@ -242,7 +242,7 @@ xo_emit_hp (xo_handle_t *xop, const char *fmt, ...)
     return rc;
 }
 
-PRINTFLIKE(1, 2)
+XO_PRINTFLIKE(1, 2)
 static inline xo_ssize_t
 xo_emit_p (const char *fmt, ...)
 {
@@ -253,7 +253,7 @@ xo_emit_p (const char *fmt, ...)
     return rc;
 }
 
-PRINTFLIKE(3, 0)
+XO_PRINTFLIKE(3, 0)
 static inline xo_ssize_t
 xo_emit_hvfp (xo_handle_t *xop, xo_emit_flags_t flags,
 	      const char *fmt, va_list vap)
@@ -261,7 +261,7 @@ xo_emit_hvfp (xo_handle_t *xop, xo_emit_flags_t flags,
     return xo_emit_hvf(xop, flags, fmt, vap);
 }
 
-PRINTFLIKE(3, 4)
+XO_PRINTFLIKE(3, 4)
 static inline xo_ssize_t
 xo_emit_hfp (xo_handle_t *xop, xo_emit_flags_t flags, const char *fmt, ...)
 {
@@ -272,7 +272,7 @@ xo_emit_hfp (xo_handle_t *xop, xo_emit_flags_t flags, const char *fmt, ...)
     return rc;
 }
 
-PRINTFLIKE(2, 3)
+XO_PRINTFLIKE(2, 3)
 static inline xo_ssize_t
 xo_emit_fp (xo_emit_flags_t flags, const char *fmt, ...)
 {
@@ -426,40 +426,40 @@ xo_warn_hcv (xo_handle_t *xop, int code, int check_warn,
 	     const char *fmt, va_list vap);
 
 void
-xo_warn_hc (xo_handle_t *xop, int code, const char *fmt, ...) PRINTFLIKE(3, 4);
+xo_warn_hc (xo_handle_t *xop, int code, const char *fmt, ...) XO_PRINTFLIKE(3, 4);
 
 void
-xo_warn_c (int code, const char *fmt, ...) PRINTFLIKE(2, 3);
+xo_warn_c (int code, const char *fmt, ...) XO_PRINTFLIKE(2, 3);
 
 void
-xo_warn (const char *fmt, ...) PRINTFLIKE(1, 2);
+xo_warn (const char *fmt, ...) XO_PRINTFLIKE(1, 2);
 
 void
-xo_warnx (const char *fmt, ...) PRINTFLIKE(1, 2);
+xo_warnx (const char *fmt, ...) XO_PRINTFLIKE(1, 2);
 
 void
-xo_err (int eval, const char *fmt, ...) NORETURN PRINTFLIKE(2, 3);
+xo_err (int eval, const char *fmt, ...) XO_NORETURN XO_PRINTFLIKE(2, 3);
 
 void
-xo_errx (int eval, const char *fmt, ...) NORETURN PRINTFLIKE(2, 3);
+xo_errx (int eval, const char *fmt, ...) XO_NORETURN XO_PRINTFLIKE(2, 3);
 
 void
-xo_errc (int eval, int code, const char *fmt, ...) NORETURN PRINTFLIKE(3, 4);
+xo_errc (int eval, int code, const char *fmt, ...) XO_NORETURN XO_PRINTFLIKE(3, 4);
 
 void
-xo_message_hcv (xo_handle_t *xop, int code, const char *fmt, va_list vap) PRINTFLIKE(3, 0);
+xo_message_hcv (xo_handle_t *xop, int code, const char *fmt, va_list vap) XO_PRINTFLIKE(3, 0);
 
 void
-xo_message_hc (xo_handle_t *xop, int code, const char *fmt, ...) PRINTFLIKE(3, 4);
+xo_message_hc (xo_handle_t *xop, int code, const char *fmt, ...) XO_PRINTFLIKE(3, 4);
 
 void
-xo_message_c (int code, const char *fmt, ...) PRINTFLIKE(2, 3);
+xo_message_c (int code, const char *fmt, ...) XO_PRINTFLIKE(2, 3);
 
 void
-xo_message_e (const char *fmt, ...) PRINTFLIKE(1, 2);
+xo_message_e (const char *fmt, ...) XO_PRINTFLIKE(1, 2);
 
 void
-xo_message (const char *fmt, ...) PRINTFLIKE(1, 2);
+xo_message (const char *fmt, ...) XO_PRINTFLIKE(1, 2);
 
 void
 xo_emit_warn_hcv (xo_handle_t *xop, int as_warning, int code,
@@ -478,15 +478,15 @@ void
 xo_emit_warnx (const char *fmt, ...);
 
 void
-xo_emit_err (int eval, const char *fmt, ...) NORETURN;
+xo_emit_err (int eval, const char *fmt, ...) XO_NORETURN;
 
 void
-xo_emit_errx (int eval, const char *fmt, ...) NORETURN;
+xo_emit_errx (int eval, const char *fmt, ...) XO_NORETURN;
 
 void
-xo_emit_errc (int eval, int code, const char *fmt, ...) NORETURN;
+xo_emit_errc (int eval, int code, const char *fmt, ...) XO_NORETURN;
 
-PRINTFLIKE(4, 0)
+XO_PRINTFLIKE(4, 0)
 static inline void
 xo_emit_warn_hcvp (xo_handle_t *xop, int as_warning, int code,
 		  const char *fmt, va_list vap)
@@ -494,7 +494,7 @@ xo_emit_warn_hcvp (xo_handle_t *xop, int as_warning, int code,
     xo_emit_warn_hcv(xop, as_warning, code, fmt, vap);
 }
 
-PRINTFLIKE(3, 4)
+XO_PRINTFLIKE(3, 4)
 static inline void
 xo_emit_warn_hcp (xo_handle_t *xop, int code, const char *fmt, ...)
 {
@@ -504,7 +504,7 @@ xo_emit_warn_hcp (xo_handle_t *xop, int code, const char *fmt, ...)
     va_end(vap);
 }
 
-PRINTFLIKE(2, 3)
+XO_PRINTFLIKE(2, 3)
 static inline void
 xo_emit_warn_cp (int code, const char *fmt, ...)
 {
@@ -514,7 +514,7 @@ xo_emit_warn_cp (int code, const char *fmt, ...)
     va_end(vap);
 }
 
-PRINTFLIKE(1, 2)
+XO_PRINTFLIKE(1, 2)
 static inline void
 xo_emit_warn_p (const char *fmt, ...)
 {
@@ -525,7 +525,7 @@ xo_emit_warn_p (const char *fmt, ...)
     va_end(vap);
 }
 
-PRINTFLIKE(1, 2)
+XO_PRINTFLIKE(1, 2)
 static inline void
 xo_emit_warnx_p (const char *fmt, ...)
 {
@@ -535,7 +535,7 @@ xo_emit_warnx_p (const char *fmt, ...)
     va_end(vap);
 }
 
-NORETURN PRINTFLIKE(2, 3)
+XO_NORETURN XO_PRINTFLIKE(2, 3)
 static inline void
 xo_emit_err_p (int eval, const char *fmt, ...)
 {
@@ -548,7 +548,7 @@ xo_emit_err_p (int eval, const char *fmt, ...)
     exit(eval);
 }
 
-PRINTFLIKE(2, 3)
+XO_PRINTFLIKE(2, 3)
 static inline void
 xo_emit_errx_p (int eval, const char *fmt, ...)
 {
@@ -559,7 +559,7 @@ xo_emit_errx_p (int eval, const char *fmt, ...)
     exit(eval);
 }
 
-PRINTFLIKE(3, 4)
+XO_PRINTFLIKE(3, 4)
 static inline void
 xo_emit_errc_p (int eval, int code, const char *fmt, ...)
 {
@@ -571,7 +571,7 @@ xo_emit_errc_p (int eval, int code, const char *fmt, ...)
 }
 
 void
-xo_emit_err_v (int eval, int code, const char *fmt, va_list vap) NORETURN PRINTFLIKE(3, 0);
+xo_emit_err_v (int eval, int code, const char *fmt, va_list vap) XO_NORETURN XO_PRINTFLIKE(3, 0);
 
 void
 xo_no_setlocale (void);
