@@ -10,6 +10,9 @@
 #ifndef XO_FILTER_H
 #define XO_FILTER_H
 
+#define XO_FILTER_MISS	1	/* Missing information, might work later */
+#define XO_FILTER_FAIL	2	/* Test failed; will never succeed */
+
 struct xo_xparse_data_s;
 
 /*
@@ -118,5 +121,8 @@ xo_filter_destroy (xo_filter_t *xfp);
 
 int
 xo_filter_key_done (xo_filter_t *xfp);
+
+int
+xo_filter_allow (xo_filter_t *xfp);
 
 #endif /* XO_FILTER_H */
