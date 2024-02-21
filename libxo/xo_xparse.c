@@ -211,6 +211,7 @@ xo_xparse_ttname_map_t xo_xparse_ttname_map[] = {
     { C_UINT64,			"Unsigned 64-bit integer" },
     { C_FLOAT,			"Floating point number (double)" },
     { C_STRING,			"String value (const char *)" },
+    { C_BOOLEAN,		"Boolean value" },
     { 0, NULL }
 };
 
@@ -465,11 +466,17 @@ xo_xparse_check_axis_name (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
 }
 
 xo_xparse_str_id_t
-xo_xparse_str_new (xo_xparse_data_t *xdp UNUSED)
+xo_xparse_str_new (xo_xparse_data_t *xdp, xo_xparse_token_t type)
 {
     xo_off_t len = xdp->xd_cur - xdp->xd_start;
     const char *start = xdp->xd_buf + xdp->xd_start;
     xo_buffer_t *xbp = &xdp->xd_str_buf;
+
+    /* If this is a quoted string, we want to trim the quotes */
+    if (type == T_QUOTED && len >= 2) {
+	start += 1;		/* Skip the leading quote */
+	len -= 2;
+    }
 
     xo_off_t cur = xbp->xb_curp - xbp->xb_bufp;
     char *newp = xo_buf_append_val(xbp, start, len + 1);
@@ -521,8 +528,8 @@ xo_xparse_dump_one_node (xo_xparse_data_t *xdp, xo_xparse_node_id_t id,
     xo_xparse_node_t *next = xo_xparse_node(xdp, xnp->xn_next);
     xo_xparse_node_t *prev = xo_xparse_node(xdp, xnp->xn_prev);
 
-    printf("%*s%s%06ld/%p: type %u (%s), str %ld %p [%s], "
-	   "contents %ld (%p), next %ld (%p)%s, prev %ld (%p)%s\n",
+    xo_dbg(NULL, "%*s%s%06ld/%p: type %u (%s), str %ld %p [%s], "
+	   "contents %ld (%p), next %ld (%p)%s, prev %ld (%p)%s",
 	   indent, "", title ?: "", id, xnp,
 	   xnp->xn_type, xo_xparse_token_name(xnp->xn_type),
 	   xnp->xn_str, str, str ?: "",
@@ -551,7 +558,7 @@ xo_xparse_dump (xo_xparse_data_t *xdp)
     xo_xparse_node_id_t *pp = xdp->xd_paths;
 
     for (i = 0; i < xdp->xd_paths_cur; i++, pp++) {
-	printf("--- %u: %ld\n", i, *pp);
+	xo_dbg(NULL, "--- %u: %ld", i, *pp);
 	xo_xparse_dump_node(xdp, *pp, 4);
     }
 }
@@ -562,9 +569,9 @@ xo_xparse_feature_warn_one_node (const char *tag, xo_xparse_data_t *xdp UNUSED,
 				 xo_xparse_node_id_t id UNUSED,
 				 xo_xparse_node_t *xnp)
 {
-    int type = xnp->xn_type;
+    xo_xparse_token_t type = xnp->xn_type;
 
-    if (type > 0 && type < len && map[type]) {
+    if ((int) type < len && map[type]) {
 	xo_xparse_warn(xdp, "%s%sxpath feature is unsupported: %s\n",
 		       tag ?: "", tag ? ": " : "",
 		       xo_xparse_fancy_token_name(type));
@@ -1184,7 +1191,7 @@ xo_xpath_yylex (xo_xparse_data_t *xdp, xo_xparse_node_id_t *yylvalp)
 
     xnp->xn_type = rc;
     if (rc > 0)
-	xnp->xn_str = xo_xparse_str_new(xdp);
+	xnp->xn_str = xo_xparse_str_new(xdp, rc);
 
     xo_dbg(NULL, "xo_xplex: lex: %p '%.*s' -> %d/%s %s",
 	   xnp, xdp->xd_cur - xdp->xd_start,
