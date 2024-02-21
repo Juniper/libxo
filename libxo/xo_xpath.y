@@ -210,6 +210,7 @@
 %token C_UINT64			/* Unsigned 64-bit integer */
 %token C_FLOAT			/* Floating point number (double) */
 %token C_STRING			/* String value (const char *) */
+%token C_BOOLEAN		/* Boolean value */
 /* Note: Add new names to xo_xparse_ttname_map[] in xo_xparse.c */
 
 /*
@@ -905,7 +906,7 @@ const char *xo_xparse_token_name_fancy[YYNTOKENS];
  * Return a human-readable name for a given token type
  */
 const char *
-xo_xparse_token_name (int ttype)
+xo_xparse_token_name (xo_xparse_token_t ttype)
 {
     if (ttype < 0 || ttype >= YYNTOKENS)
 	return "unknown";
@@ -914,7 +915,7 @@ xo_xparse_token_name (int ttype)
 }
 
 const char *
-xo_xparse_fancy_token_name (int ttype)
+xo_xparse_fancy_token_name (xo_xparse_token_t ttype)
 {
     if (ttype < 0 || ttype >= YYNTOKENS)
 	return "unknown";
@@ -925,8 +926,8 @@ xo_xparse_fancy_token_name (int ttype)
 /*
  * Expose YYTRANSLATE outside the yacc file
  */
-int
-xo_xparse_token_translate (int ttype)
+xo_xparse_token_t
+xo_xparse_token_translate (xo_xparse_token_t ttype)
 {
     return YYTRANSLATE(ttype);
 }
