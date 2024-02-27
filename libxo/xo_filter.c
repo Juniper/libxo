@@ -78,8 +78,6 @@ typedef struct xo_stack_s {
 #define XSS_FALSE	6	/* Failed match */
 #define XSS_DEADEND	7	/* Dead hierarchy */
 
-#define XSS_MAX		7	/* Max state */
-
 typedef struct xo_match_s {
     struct xo_match_s *xm_next;	 /* Next match */
     xo_xparse_node_id_t xm_base; /* Start node of this path */
@@ -270,10 +268,12 @@ xo_filter_state_name (uint32_t state)
         /* XSS_DEEP */ "DEEP",
         /* XSS_FALSE */ "FALSE",
         /* XSS_DEADEND */ "DEADEND",
-	0
     };
 
-    return (state > XSS_MAX) ? "unknown" : names[state];
+    if (state > sizeof(names) / sizeof(names[0]))
+	return "unknown";
+
+    return names[state];
 }
 
 static void
