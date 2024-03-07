@@ -9,4 +9,5 @@
 SUBDIRS = \
     cbor \
     csv \
+    fullpath \
     test
