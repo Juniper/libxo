@@ -76,8 +76,8 @@ main (int argc, char **argv)
     xo_open_list("employee");
     for ( ; ep->e_first; ep++) {
 	xo_open_instance("employee");
-	rc = xo_emit("{[:-25}{:first-name/%s} ({:nic-name/\"%s\"}){]:}"
-		"{:last-name/%-14..14s/%s}"
+	rc = xo_emit("{[:-25}{k:first-name/%s} ({k:nic-name/\"%s\"}){]:}"
+		"{k:last-name/%-14..14s/%s}"
 		"{:department/%8u/%u}{:percent-time/%8u/%u}\n",
 		ep->e_first, ep->e_nic, ep->e_last, ep->e_dept, ep->e_percent);
 	xo_emit("{:columns/%d}\n", rc);
