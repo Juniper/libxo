@@ -100,6 +100,36 @@ xo_buf_cur (xo_buffer_t *xbp)
     return xbp->xb_curp;
 }
 
+static inline xo_ssize_t
+xo_buf_len (xo_buffer_t *xbp)
+{
+    if (xbp == NULL || xbp->xb_bufp == NULL)
+	return 0;
+
+    return xbp->xb_curp - xbp->xb_bufp;
+}
+
+static inline void
+xo_buf_set_len (xo_buffer_t *xbp, xo_off_t len)
+{
+    if (xbp && xbp->xb_bufp && len < xbp->xb_size)
+	xbp->xb_curp = xbp->xb_bufp + len;
+}
+
+static inline char *
+xo_buf_trim (xo_buffer_t *xbp, xo_ssize_t len)
+{
+    if (xbp == NULL)
+	return NULL;
+
+    if (xbp->xb_bufp - xbp->xb_curp >= len)
+	xbp->xb_curp = xbp->xb_bufp;
+    else
+	xbp->xb_curp -= len;
+
+    return xbp->xb_curp;
+}
+
 /*
  * Initialize the contents of an xo_buffer_t.
  */
@@ -230,6 +260,22 @@ static inline void
 xo_buf_append_str (xo_buffer_t *xbp, const char *str)
 {
     (void) xo_buf_append_str_val(xbp, str);
+}
+
+static inline void
+xo_buf_append_buf (xo_buffer_t *dst, xo_buffer_t *src)
+{
+    char *str = src->xb_bufp;
+    ssize_t len = src->xb_curp - str;
+
+    (void) xo_buf_append_val(dst, str, len);
+}
+
+static inline void
+xo_buf_force_nul (xo_buffer_t *dst)
+{
+    if (xo_buf_append_val(dst, "", 1))
+	dst->xb_curp -= 1;
 }
 
 #endif /* XO_BUF_H */
