@@ -47,32 +47,47 @@ AC_TYPE_SIZE_T
 AC_FUNC_ALLOCA
 AC_FUNC_MALLOC
 AC_FUNC_REALLOC
-AC_CHECK_FUNCS([bzero memmove strchr strcspn strerror strspn])
-AC_CHECK_FUNCS([sranddev srand strlcpy])
-AC_CHECK_FUNCS([fdopen getrusage])
-AC_CHECK_FUNCS([gettimeofday ctime])
+
+AC_CHECK_FUNCS([__flbf])
+AC_CHECK_FUNCS([asprintf])
+AC_CHECK_FUNCS([bzero])
+AC_CHECK_FUNCS([ctime])
+AC_CHECK_FUNCS([dlfunc])
+AC_CHECK_FUNCS([fdopen])
+AC_CHECK_FUNCS([flock])
 AC_CHECK_FUNCS([getpass])
 AC_CHECK_FUNCS([getprogname])
-AC_CHECK_FUNCS([sysctlbyname])
-AC_CHECK_FUNCS([flock])
-AC_CHECK_FUNCS([asprintf])
-AC_CHECK_FUNCS([__flbf])
-AC_CHECK_FUNCS([sysctlbyname])
+AC_CHECK_FUNCS([getrusage])
+AC_CHECK_FUNCS([gettimeofday])
+AC_CHECK_FUNCS([memmove])
+AC_CHECK_FUNCS([memrchr])
+AC_CHECK_FUNCS([srand])
+AC_CHECK_FUNCS([sranddev])
+AC_CHECK_FUNCS([strchr])
 AC_CHECK_FUNCS([strchrnul])
+AC_CHECK_FUNCS([strcspn])
+AC_CHECK_FUNCS([strerror])
+AC_CHECK_FUNCS([strlcpy])
+AC_CHECK_FUNCS([strspn])
+AC_CHECK_FUNCS([sysctlbyname])
+AC_CHECK_FUNCS([sysctlbyname])
 
+AC_CHECK_HEADERS([ctype.h])
 AC_CHECK_HEADERS([dlfcn.h])
 AC_CHECK_HEADERS([dlfcn.h])
-AC_CHECK_HEADERS([stdio_ext.h])
-AC_CHECK_HEADERS([tzfile.h])
-AC_CHECK_HEADERS([stdtime/tzfile.h])
-AC_CHECK_FUNCS([dlfunc])
-
-AC_CHECK_HEADERS([sys/time.h])
-AC_CHECK_HEADERS([ctype.h errno.h stdio.h stdlib.h])
-AC_CHECK_HEADERS([string.h sys/param.h unistd.h ])
-AC_CHECK_HEADERS([sys/sysctl.h])
-AC_CHECK_HEADERS([threads.h])
+AC_CHECK_HEADERS([errno.h])
 AC_CHECK_HEADERS([monitor.h])
+AC_CHECK_HEADERS([stdio.h])
+AC_CHECK_HEADERS([stdio_ext.h])
+AC_CHECK_HEADERS([stdlib.h])
+AC_CHECK_HEADERS([stdtime/tzfile.h])
+AC_CHECK_HEADERS([string.h])
+AC_CHECK_HEADERS([sys/param.h])
+AC_CHECK_HEADERS([sys/sysctl.h])
+AC_CHECK_HEADERS([sys/time.h])
+AC_CHECK_HEADERS([threads.h])
+AC_CHECK_HEADERS([tzfile.h])
+AC_CHECK_HEADERS([unistd.h ])
 
 dnl humanize_number(3) is a great function, but it's not standard.
 dnl Note Macosx has the function in libutil.a but doesn't ship the
@@ -474,6 +489,7 @@ AC_CONFIG_FILES([
   encoder/Makefile
   encoder/cbor/Makefile
   encoder/csv/Makefile
+  encoder/fullpath/Makefile
   encoder/test/Makefile
   xo/Makefile
   xolint/Makefile
