@@ -45,6 +45,13 @@
 #include <langinfo.h>
 
 #include "xo_config.h"
+
+#ifndef LIBXO_TEXT_ONLY
+/* We don't want the overhead of tag maps when in text-only mode */
+#define LIBXO_NEED_MAP
+#define LIBXO_NEED_FILTER	/* Same for filtering */
+#endif /* LIBXO_TEXT_ONLY */
+
 #include "xo.h"
 #include "xo_private.h"
 #include "xo_encoder.h"
@@ -139,15 +146,9 @@ const char xo_version[] = LIBXO_VERSION;
 const char xo_version_extra[] = LIBXO_VERSION_EXTRA;
 static const char xo_default_format[] = "%s";
 
-#ifndef UNUSED
-#define UNUSED __attribute__ ((__unused__))
-#endif /* UNUSED */
+#define UNUSED XO_UNUSED
 
 #ifndef LIBXO_TEXT_ONLY
-/* We don't want the overhead of tag maps when in text-only mode */
-#define LIBXO_NEED_MAP
-#define LIBXO_NEED_FILTER	/* Same for filtering */
-
 #define XO_MAP_INCR 128		/* Must be even */
 
 #ifndef XO_MAPDIR
@@ -286,6 +287,7 @@ struct xo_handle_s {
     int xo_errno;		/* Saved errno for "%m" */
     char *xo_gt_domain;		/* Gettext domain, suitable for dgettext(3) */
     xo_encoder_func_t xo_encoder; /* Encoding function */
+    xo_whiteboard_func_t xo_wb_marker; /* Function to mark whiteboard */
     void *xo_private;		/* Private data for external encoders */
 #ifdef LIBXO_NEED_MAP
     char **xo_map;		/* Name mapping array */
@@ -720,7 +722,7 @@ xo_default_init (void)
     if (xo_codeset_is_utf8)
 	XOF_SET(xop, XOF_UTF8);
 
-#if !defined(NO_LIBXO_OPTIONS)
+#if 0 /* !defined(NO_LIBXO_OPTIONS) */
     if (!XOF_ISSET(xop, XOF_NO_ENV)) {
        char *env = getenv("LIBXO_OPTIONS");
 
@@ -2320,7 +2322,7 @@ xo_set_color_map (xo_handle_t *xop, char *value)
 #endif /* LIBXO_TEXT_ONLY */
 }
 
-static int
+static int UNUSED
 xo_set_options_simple (xo_handle_t *xop, const char *input)
 {
     xo_xof_flags_t new_flag;
@@ -2371,7 +2373,7 @@ int
 xo_set_options (xo_handle_t *xop, const char *input)
 {
     char *cp, *ep, *vp, *np, *bp, *zp;
-    int style = -1, new_style, rc = 0;
+    int style = -1, new_style, rc = 0, final_rc = 0;
     ssize_t len;
     xo_xof_flags_t new_flag;
 
@@ -2466,6 +2468,10 @@ xo_set_options (xo_handle_t *xop, const char *input)
 	    case 'x':
 		XOF_SET(xop, XOF_XPATH);
 		break;
+
+	    default:
+		xo_warnx("unknown option: '%s'", input);
+		final_rc = -1;
 	    }
 	}
 	return 0;
@@ -2476,6 +2482,9 @@ xo_set_options (xo_handle_t *xop, const char *input)
     memcpy(bp, input, len);
 
     for (cp = bp, ep = cp + len - 1; cp && cp < ep; cp = np) {
+	if (rc)
+	    final_rc = rc;
+
 	np = strchr(cp, ',');
 	if (np)
 	    *np++ = '\0';
@@ -2566,7 +2575,7 @@ xo_set_options (xo_handle_t *xop, const char *input)
 		else {
 		    rc = xo_filter_add(xop, vp);
 		    if (rc)
-			xo_warnx("error initializing path: '%s'", vp);
+			xo_warnx("invalid filter expression: '%s'", vp);
 		}
 
 	    } else {
@@ -2579,7 +2588,7 @@ xo_set_options (xo_handle_t *xop, const char *input)
     if (style > 0)
 	xop->xo_style= style;
 
-    return rc;
+    return final_rc ?: rc;
 }
 
 /**
@@ -4678,9 +4687,12 @@ xo_filter_data_set (xo_handle_t *xop UNUSED, struct xo_filter_s *xfp UNUSED)
 }
 
 struct xo_filter_s *
-xo_filter_data_get (xo_handle_t *xop UNUSED)
+xo_filter_data_get (xo_handle_t *xop UNUSED, int create UNUSED)
 {
 #ifdef LIBXO_NEED_FILTER
+    if (xop->xo_filters == NULL && create)
+	xop->xo_filters = xo_filter_create(NULL);
+
     return xop->xo_filters;
 #else /* LIBXO_NEED_FILTER */
     return NULL;
@@ -4691,7 +4703,9 @@ int
 xo_filter_add (xo_handle_t *xop UNUSED, const char *vp UNUSED)
 {
 #ifdef LIBXO_NEED_FILTER
-    return xo_filter_add_one(xop->xo_filters, vp);
+    XOF_SET(xop, XOF_WHITEBOARD); /* Activate filtering */
+
+    return xo_filter_add_one(xop, vp);
 #else /* LIBXO_NEED_FILTER */
     return 0;
 #endif /* LIBXO_NEED_FILTER */
@@ -4791,6 +4805,10 @@ xo_format_value (xo_handle_t *xop, const char *name, ssize_t nlen,
 	name = xo_map_name(xop, new_name);
 	nlen = strlen(name);	/* Need new length for new name */
     }
+
+    if (flags & XFF_KEY) {
+    } else
+	xo_filter_open_field(xop, xop->xo_filters, name, nlen);
 
     const char *leader = xo_xml_leader_len(xop, name, nlen);
 
@@ -5042,20 +5060,23 @@ xo_format_value (xo_handle_t *xop, const char *name, ssize_t nlen,
 
 	ssize_t name_offset = xo_buf_offset(&xop->xo_data);
 	xo_data_append(xop, name, nlen);
-	xo_data_append(xop, "", 1);
+	xo_data_append(xop, "", 1); /* NUL terminate the string */
 
 	ssize_t value_offset = xo_buf_offset(&xop->xo_data);
 
 	xo_simple_field(xop, FALSE, value, vlen, fmt, flen, flags);
 
-	xo_data_append(xop, "", 1);
+	xo_data_append(xop, "", 1); /* NUL terminate the string */
 
-	xo_encoder_handle(xop, quote ? XO_OP_STRING : XO_OP_CONTENT,
+	xo_encoder_handle(xop, quote ? XO_OP_STRING : XO_OP_CONTENT, NULL,
 			  xo_buf_data(&xop->xo_data, name_offset),
 			  xo_buf_data(&xop->xo_data, value_offset), flags);
 	xo_buf_reset(&xop->xo_data);
 	break;
     }
+
+    if (!(flags & XFF_KEY))
+	xo_filter_close_field(xop, xop->xo_filters, name, nlen);
 }
 
 static void
@@ -7290,7 +7311,7 @@ xo_attr_hv (xo_handle_t *xop, const char *name, const char *fmt, va_list vap)
 	if (rc >= 0) {
 	    xbp->xb_curp += rc;
 	    *xbp->xb_curp = '\0';
-	    rc = xo_encoder_handle(xop, XO_OP_ATTRIBUTE,
+	    rc = xo_encoder_handle(xop, XO_OP_ATTRIBUTE, NULL,
 				   xo_buf_data(xbp, name_offset),
 				   xo_buf_data(xbp, value_offset), 0);
 	}
@@ -7446,7 +7467,7 @@ xo_do_open_container (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
     }
 
     name = xo_map_name(xop, name); /* Find mapped name, if any */
-    xo_filter_open_container(xop->xo_filters, name);
+    xo_filter_open_container(xop, xop->xo_filters, name);
 
     const char *leader = xo_xml_leader(xop, name);
     flags |= xop->xo_flags;	/* Pick up handle flags */
@@ -7497,7 +7518,8 @@ xo_do_open_container (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
 	break;
 
     case XO_STYLE_ENCODER:
-	rc = xo_encoder_handle(xop, XO_OP_OPEN_CONTAINER, name, NULL, flags);
+	rc = xo_encoder_handle(xop, XO_OP_OPEN_CONTAINER, NULL,
+			       name, NULL, flags);
 	break;
     }
 
@@ -7595,9 +7617,12 @@ xo_do_close_container (xo_handle_t *xop, const char *name)
 
     case XO_STYLE_ENCODER:
 	xo_depth_change(xop, name, -1, 0, XSS_CLOSE_CONTAINER, 0);
-	rc = xo_encoder_handle(xop, XO_OP_CLOSE_CONTAINER, name, NULL, 0);
+	rc = xo_encoder_handle(xop, XO_OP_CLOSE_CONTAINER, NULL, name, NULL, 0);
 	break;
     }
+
+    /* Now that the work is done, let the filtering code know */
+    xo_filter_close_container(xop, xop->xo_filters, name);
 
     return rc;
 }
@@ -7676,7 +7701,7 @@ xo_do_open_list (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
 	break;
 
     case XO_STYLE_ENCODER:
-	rc = xo_encoder_handle(xop, XO_OP_OPEN_LIST, name, NULL, flags);
+	rc = xo_encoder_handle(xop, XO_OP_OPEN_LIST, NULL, name, NULL, flags);
 	break;
     }
 
@@ -7754,7 +7779,7 @@ xo_do_close_list (xo_handle_t *xop, const char *name)
 
     case XO_STYLE_ENCODER:
 	xo_depth_change(xop, name, -1, 0, XSS_CLOSE_LIST, XSF_LIST);
-	rc = xo_encoder_handle(xop, XO_OP_CLOSE_LIST, name, NULL, 0);
+	rc = xo_encoder_handle(xop, XO_OP_CLOSE_LIST, NULL, name, NULL, 0);
 	break;
 
     default:
@@ -7830,7 +7855,8 @@ xo_do_open_leaf_list (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
 	break;
 
     case XO_STYLE_ENCODER:
-	rc = xo_encoder_handle(xop, XO_OP_OPEN_LEAF_LIST, name, NULL, flags);
+	rc = xo_encoder_handle(xop, XO_OP_OPEN_LEAF_LIST, NULL,
+			       name, NULL, flags);
 	break;
     }
 
@@ -7877,7 +7903,7 @@ xo_do_close_leaf_list (xo_handle_t *xop, const char *name)
 	break;
 
     case XO_STYLE_ENCODER:
-	rc = xo_encoder_handle(xop, XO_OP_CLOSE_LEAF_LIST, name, NULL, 0);
+	rc = xo_encoder_handle(xop, XO_OP_CLOSE_LEAF_LIST, NULL, name, NULL, 0);
 	/* FALLTHRU */
 
     default:
@@ -7904,6 +7930,7 @@ xo_do_open_instance (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
     }
 
     name = xo_map_name(xop, name); /* Find mapped name, if any */
+    xo_filter_open_instance(xop, xop->xo_filters, name);
 
     const char *leader = xo_xml_leader(xop, name);
     flags |= xop->xo_flags;
@@ -7937,7 +7964,8 @@ xo_do_open_instance (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
 	break;
 
     case XO_STYLE_ENCODER:
-	rc = xo_encoder_handle(xop, XO_OP_OPEN_INSTANCE, name, NULL, flags);
+	rc = xo_encoder_handle(xop, XO_OP_OPEN_INSTANCE, NULL,
+			       name, NULL, flags);
 	break;
     }
 
@@ -8030,9 +8058,12 @@ xo_do_close_instance (xo_handle_t *xop, const char *name)
 
     case XO_STYLE_ENCODER:
 	xo_depth_change(xop, name, -1, 0, XSS_CLOSE_INSTANCE, 0);
-	rc = xo_encoder_handle(xop, XO_OP_CLOSE_INSTANCE, name, NULL, 0);
+	rc = xo_encoder_handle(xop, XO_OP_CLOSE_INSTANCE, NULL, name, NULL, 0);
 	break;
     }
+
+    /* Now that the work is done, let the filter code know we're done */
+    xo_filter_close_instance(xop, xop->xo_filters, name);
 
     return rc;
 }
@@ -8499,7 +8530,7 @@ xo_flush_h (xo_handle_t *xop)
 
     switch (xo_style(xop)) {
     case XO_STYLE_ENCODER:
-	xo_encoder_handle(xop, XO_OP_FLUSH, NULL, NULL, 0);
+	xo_encoder_handle(xop, XO_OP_FLUSH, NULL, NULL, NULL, 0);
     }
 
     rc = xo_write(xop);
@@ -8543,7 +8574,7 @@ xo_finish_h (xo_handle_t *xop)
 	break;
 
     case XO_STYLE_ENCODER:
-	xo_encoder_handle(xop, XO_OP_FINISH, NULL, NULL, 0);
+	xo_encoder_handle(xop, XO_OP_FINISH, NULL, NULL, NULL, 0);
 	break;
     }
 
@@ -8825,7 +8856,7 @@ xo_set_version_h (xo_handle_t *xop, const char *version)
 	break;
 
     case XO_STYLE_ENCODER:
-	xo_encoder_handle(xop, XO_OP_VERSION, NULL, version, 0);
+	xo_encoder_handle(xop, XO_OP_VERSION, NULL, NULL, version, 0);
 	break;
     }
 }
@@ -9007,15 +9038,44 @@ xo_get_encoder (xo_handle_t *xop)
 }
 
 /*
+ * Get the whiteboard function
+ */
+xo_whiteboard_func_t
+xo_get_wb_marker (xo_handle_t *xop)
+{
+    xop = xo_default(xop);
+    return xop->xo_wb_marker;
+}
+
+/*
  * Record an encoder callback function in an xo handle.
  */
 void
-xo_set_encoder (xo_handle_t *xop, xo_encoder_func_t encoder)
+xo_set_encoder (xo_handle_t *xop, xo_encoder_func_t encoder,
+		xo_whiteboard_func_t wb_marker)
 {
     xop = xo_default(xop);
 
     xop->xo_style = XO_STYLE_ENCODER;
     xop->xo_encoder = encoder;
+    xop->xo_wb_marker = wb_marker;
+}
+
+int
+xo_encoder_handle (xo_handle_t *xop, xo_encoder_op_t op, xo_buffer_t *bufp,
+		   const char *name, const char *value, xo_xff_flags_t flags)
+{
+    xo_encoder_func_t func = xo_get_encoder(xop);
+    if (func == NULL)
+	return -1;
+
+    void *private = xo_get_private(xop);
+
+    if (XOF_ISSET(xop, XOF_WHITEBOARD))
+	return xo_filter_whiteboard(xop, op, bufp, name, value,
+				    private, flags, func, xop->xo_filters);
+
+    return func(xop, op, bufp, name, value, private, flags);
 }
 
 /*
