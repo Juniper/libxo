@@ -114,6 +114,7 @@ typedef struct xo_encoder_node_s {
     TAILQ_ENTRY(xo_encoder_node_s) xe_link; /* Next session */
     char *xe_name;			/* Name for this encoder */
     xo_encoder_func_t xe_handler;	/* Callback function */
+    xo_whiteboard_func_t xe_wb_marker;	/* Whiteboard marker function */
     void *xe_dlhandle;			/* dlopen handle */
 } xo_encoder_node_t;
 
@@ -274,6 +275,7 @@ xo_encoder_discover (const char *name)
 		xep = xo_encoder_list_add(name);
 		if (xep) {
 		    xep->xe_handler = xei.xei_handler;
+		    xep->xe_wb_marker = xei.xei_wb_marker;
 		    xep->xe_dlhandle = dlp;
 		}
 	    }
@@ -366,15 +368,15 @@ xo_encoder_init (xo_handle_t *xop, const char *name)
 	}
     }
 
-    xo_set_encoder(xop, xep->xe_handler);
+    xo_set_encoder(xop, xep->xe_handler, xep->xe_wb_marker);
 
-    int rc = xo_encoder_handle(xop, XO_OP_CREATE, name, NULL, 0);
+    int rc = xo_encoder_handle(xop, XO_OP_CREATE, NULL, name, NULL, 0);
     if (rc == 0 && opts != NULL) {
 	xo_encoder_op_t op;
 
 	/* Encoder API is limited, so we're stuck with two different options */
 	op = (opts_char == '+') ? XO_OP_OPTIONS_PLUS : XO_OP_OPTIONS;
-	rc = xo_encoder_handle(xop, op, name, opts, 0);
+	rc = xo_encoder_handle(xop, op, NULL, name, opts, 0);
     }
 
     return rc;
@@ -401,19 +403,6 @@ xo_encoder_create (const char *name, xo_xof_flags_t flags)
     return xop;
 }
 
-int
-xo_encoder_handle (xo_handle_t *xop, xo_encoder_op_t op,
-		   const char *name, const char *value, xo_xff_flags_t flags)
-{
-    void *private = xo_get_private(xop);
-    xo_encoder_func_t func = xo_get_encoder(xop);
-
-    if (func == NULL)
-	return -1;
-
-    return func(xop, op, name, value, private, flags);
-}
-
 const char *
 xo_encoder_op_name (xo_encoder_op_t op)
 {
@@ -436,6 +425,24 @@ xo_encoder_op_name (xo_encoder_op_t op)
 	/* 15 */ "attr",
 	/* 16 */ "version",
 	/* 17 */ "options",
+    };
+
+    if (op > sizeof(names) / sizeof(names[0]))
+	return "unknown";
+
+    return names[op];
+}
+
+const char *
+xo_whiteboard_op_name (xo_whiteboard_op_t op)
+{
+    static const char *names[] = {
+	/*  0 */ "unknown",
+	/*  1 */ "init",
+	/*  2 */ "record",
+	/*  3 */ "allow",
+	/*  4 */ "deny",
+	/*  5 */ "clean",
     };
 
     if (op > sizeof(names) / sizeof(names[0]))
