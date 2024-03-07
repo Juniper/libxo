@@ -54,7 +54,7 @@ main (int argc, char **argv)
     if (xfp == NULL)
 	xo_errx(1, "allocation of filter failed");
 
-    xo_xparse_data_t *xdp = xo_filter_data(xfp);
+    xo_xparse_data_t *xdp = xo_filter_data(xop, xfp);
 
     strncpy(xdp->xd_filename, "test", sizeof(xdp->xd_filename));
     xdp->xd_buf = strdup(argv[1]);
@@ -72,17 +72,17 @@ main (int argc, char **argv)
     xo_xparse_dump(xdp);
 
 
-    xo_filter_open_container(xfp, "one");
-    xo_filter_open_container(xfp, "two");
-    xo_filter_open_container(xfp, "three");
-    xo_filter_open_container(xfp, "four");
+    xo_filter_open_container(xop, xfp, "one");
+    xo_filter_open_container(xop, xfp, "two");
+    xo_filter_open_container(xop, xfp, "three");
+    xo_filter_open_container(xop, xfp, "four");
 
     xo_emit_h(xop, "{:success}\n", "yes!");
 
-    xo_filter_close_container(xfp, "four");
-    xo_filter_close_container(xfp, "three");
-    xo_filter_close_container(xfp, "two");
-    xo_filter_close_container(xfp, "one");
+    xo_filter_close_container(xop, xfp, "four");
+    xo_filter_close_container(xop, xfp, "three");
+    xo_filter_close_container(xop, xfp, "two");
+    xo_filter_close_container(xop, xfp, "one");
 
     xo_finish_h(xop);
 
