@@ -936,7 +936,6 @@ xo_xparse_token_translate (xo_xparse_token_t ttype)
 #define YYTERROR YYSYMBOL_YYerror /* the new enum */
 #endif /* YYTERROR */
 
-#if 1
 /*
  * Return a better class of error message, if possible.  But it turns
  * out that this isn't possible in yacc.  bison adds a "lookahead
@@ -959,4 +958,3 @@ xo_xparse_expecting_error (const char *token, int yystate UNUSED,
 
     return strdup(buf);
 }
-#endif
