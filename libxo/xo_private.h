@@ -26,6 +26,16 @@ xo_streq (const char *one, const char *two)
     return strcmp(one, two) == 0;
 }
 
+/*
+ * Simple string comparison function (without the temptation
+ * to forget the "== 0").
+ */
+static inline int
+xo_streqn (const char *one, const char *two, ssize_t len_of_two)
+{
+    return strncmp(one, two, len_of_two + 1) == 0;
+}
+
 /* Rather lame that we can't count on these... */
 #ifndef FALSE
 #define FALSE 0
@@ -34,8 +44,12 @@ xo_streq (const char *one, const char *two)
 #define TRUE 1
 #endif
 
+#ifndef XO_UNUSED
+#define XO_UNUSED __attribute__ ((__unused__))
+#endif /* XO_UNUSED */
+
 #ifndef UNUSED
-#define UNUSED __attribute__ ((__unused__))
+#define UNUSED XO_UNUSED
 #endif /* UNUSED */
 
 #define SNPRINTF(_start, _end, _fmt...) \
@@ -44,5 +58,22 @@ xo_streq (const char *one, const char *two)
         if ((_start) > (_end)) \
             (_start) = (_end); \
     } while (0)
+
+#ifdef HAVE_MEMRCHR
+#define xo_memrchr memrchr
+#else /* HAVE_MEMRCHR */
+static inline void *
+xo_memrchr (void *data, int c, xo_ssize_t len)
+{
+    unsigned char *cp = data;
+
+    for (cp += len; len > 0; len--) {
+	if (*--cp == (unsigned char) c)
+	    return cp;
+    }
+
+    return NULL;
+}
+#endif /* HAVE_MEMRCHR */
 
 #endif /* XO_PRIVATE_H */
