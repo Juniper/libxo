@@ -92,11 +92,19 @@ main (int argc, char **argv)
 
     xo_xparse_node_t *xnp UNUSED;
 
+    FILE *fp = fopen(output, "w+");
+    if (fp == NULL)
+	xo_errx(1, "open failed");
+
+    xo_handle_t *xop = xo_create_to_file(fp, XO_STYLE_XML, XOF_PRETTY);
+    if (xop == NULL)
+	xo_errx(1, "create failed");
+
     xo_filter_t *xfp = xo_filter_create(NULL);
     if (xfp == NULL)
 	xo_errx(1, "allocation of filter failed");
 
-    xo_xparse_data_t *xdp = xo_filter_data(xfp);
+    xo_xparse_data_t *xdp = xo_filter_data(xop, xfp);
 
     xo_xparse_init(xdp);
     strncpy(xdp->xd_filename, "test", sizeof(xdp->xd_filename));
@@ -104,14 +112,6 @@ main (int argc, char **argv)
     FILE *in = input ? fopen(input, "r") : stdin;
     if (in == NULL)
 	xo_err(1, "could not open file '%s'", input);
-
-    FILE *fp = output ? fopen(output, "w+") : stdout;
-    if (fp == NULL)
-	xo_err(1, "open failed for '%s'", output);
-
-    xo_handle_t *xop = xo_create_to_file(fp, XO_STYLE_XML, XOF_PRETTY);
-    if (xop == NULL)
-	xo_errx(1, "create failed");
 
     char *cp, buf[BUFSIZ];
     char *key, *value;
@@ -139,35 +139,35 @@ main (int argc, char **argv)
 	    break;
 
 	case '+':
-	    rc = xo_filter_open_container(xfp, trim(cp + 1));
+	    rc = xo_filter_open_container(xop, xfp, trim(cp + 1));
 	    break;
 
 	case '-':
-	    rc = xo_filter_close_container(xfp, trim(cp + 1));
+	    rc = xo_filter_close_container(xop, xfp, trim(cp + 1));
 	    break;
 
 	case '=':
 	    fprintf(stderr, "main: allow: %s\n",
-		   xo_filter_allow(xfp) ? "true" : "false");
+		    xo_filter_allow(xop, xfp) ? "true" : "false");
 	    break;
 
 	case '$':
 	    key = cp + 1;
 	    value = clean_token(key);
 	    fprintf(stderr, "main: key: '%s'='%s'\n", key, value);
-	    rc = xo_filter_key(xfp, key, strlen(key), value, strlen(value));
+	    rc = xo_filter_key(xop, xfp, key, strlen(key), value, strlen(value));
 	    break;
 
 	case 'r':		/* Reset */
 	    /* Out with the old */
-	    xo_filter_destroy(xfp);
+	    xo_filter_destroy(xop, xfp);
 
 	    /* In with the new */
 	    xfp = xo_filter_create(NULL);
 	    if (xfp == NULL)
 		xo_errx(1, "allocation of filter failed");
 
-	    xdp = xo_filter_data(xfp);
+	    xdp = xo_filter_data(xop, xfp);
 
 	    xo_xparse_init(xdp);
 	    strncpy(xdp->xd_filename, "test", sizeof(xdp->xd_filename));
