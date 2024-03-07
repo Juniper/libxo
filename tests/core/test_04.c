@@ -48,7 +48,7 @@ main (int argc, char **argv)
     xo_emit("{T:Last Name/%-12s}{T:First Name/%-14s}{T:Department/%s}\n");
     for ( ; ep->e_first; ep++) {
 	xo_open_instance("employee");
-	xo_emit("{:first-name/%-12s/%s}{:last-name/%-14s/%s}"
+	xo_emit("{k:first-name/%-12s/%s}{k:last-name/%-14s/%s}"
 		"{:department/%8u/%u}\n",
 		ep->e_first, ep->e_last, ep->e_dept);
 	xo_close_instance("employee");
