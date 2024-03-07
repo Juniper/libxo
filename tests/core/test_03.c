@@ -91,7 +91,7 @@ main (int argc, char **argv)
     while (opt_count-- != 0) {
 	for (ep = employees; ep->e_first; ep++) {
 	    xo_open_instance("employee");
-	    xo_emit("{:first-name} {:last-name} works in "
+	    xo_emit("{k:first-name} {k:last-name} works in "
 		    "dept #{:department/%u}\n",
 		    ep->e_first, ep->e_last, ep->e_dept);
 	    xo_close_instance("employee");
