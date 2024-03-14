@@ -1,7 +1,7 @@
 op create: [test] [] [0]
 op open_container: [top] [] [0x40010]
 op open_container: [data] [] [0x40010]
-op string: [name] [em0] [0x1080]
+op string: [name] [em0] [0x1088]
 op string: [flags] [0x8843] [0x18]
 op string: [name] [em0] [0x1088]
 op string: [flags] [0x8843] [0x18]
