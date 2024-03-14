@@ -69,6 +69,7 @@ main (int argc, char **argv)
     int i;
     const char *input = NULL;
     const char *output = "xpath.out";
+    int debug = 0;
 
     argc = xo_parse_args(argc, argv);
     if (argc < 0)
@@ -76,7 +77,7 @@ main (int argc, char **argv)
 
     for (i = 1; i < argc && argv[i] && argv[i][0] == '-'; i++) {
 	if (xo_streq(argv[i], "--debug"))
-	    xo_set_flags(NULL, XOF_DEBUG);
+	    debug = 1;
 	else if (xo_streq(argv[i], "--input"))
 	    input = argv[++i];
 	else if (xo_streq(argv[i], "--output"))
@@ -85,8 +86,14 @@ main (int argc, char **argv)
 	    xo_xpath_yydebug = 1;
     }
 
-    if (i == 0)
+    if (input == NULL && i == argc)
 	return 2;
+
+    if (input == NULL)
+	input = argv[i++];
+
+    if (output == NULL)
+	output = argv[i++];
 
     xo_set_flags(NULL, XOF_DEBUG);
 
@@ -100,10 +107,14 @@ main (int argc, char **argv)
     if (xop == NULL)
 	xo_errx(1, "create failed");
 
+    if (debug)
+	xo_set_flags(xop, XOF_DEBUG);
+
     xo_filter_t *xfp = xo_filter_create(NULL);
     if (xfp == NULL)
 	xo_errx(1, "allocation of filter failed");
 
+    xo_filter_data_set(xop, xfp);
     xo_xparse_data_t *xdp = xo_filter_data(xop, xfp);
 
     xo_xparse_init(xdp);
@@ -139,23 +150,31 @@ main (int argc, char **argv)
 	    break;
 
 	case '+':
-	    rc = xo_filter_open_container(xop, xfp, trim(cp + 1));
+	    rc = xo_open_container_h(xop, trim(cp + 1));
 	    break;
 
 	case '-':
-	    rc = xo_filter_close_container(xop, xfp, trim(cp + 1));
+	    rc = xo_close_container_h(xop, trim(cp + 1));
+	    break;
+
+	case '<':
+	    rc = xo_open_instance_h(xop, trim(cp + 1));
+	    break;
+
+	case '>':
+	    rc = xo_close_instance_h(xop, trim(cp + 1));
 	    break;
 
 	case '=':
 	    fprintf(stderr, "main: allow: %s\n",
-		    xo_filter_allow(xop, xfp) ? "true" : "false");
+		    xo_filter_get_status(xop, xfp) ? "true" : "false");
 	    break;
 
 	case '$':
 	    key = cp + 1;
 	    value = clean_token(key);
 	    fprintf(stderr, "main: key: '%s'='%s'\n", key, value);
-	    rc = xo_filter_key(xop, xfp, key, strlen(key), value, strlen(value));
+	    rc = xo_emit_field_h(xop, "k", key, "%s", value);
 	    break;
 
 	case 'r':		/* Reset */
