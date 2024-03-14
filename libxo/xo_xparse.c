@@ -548,14 +548,13 @@ xo_xparse_dump_one_node (xo_xparse_data_t *xdp, xo_xparse_node_id_t id,
     xo_xparse_node_t *next = xo_xparse_node(xdp, xnp->xn_next);
     xo_xparse_node_t *prev = xo_xparse_node(xdp, xnp->xn_prev);
 
-    xo_dbg(NULL, "%*s%s%06ld/%p: type %u (%s), str %ld %p [%s], "
-	   "contents %ld (%p), next %ld (%p)%s, prev %ld (%p)%s",
-	   indent, "", title ?: "", id, xnp,
+    xo_dbg(NULL, "%*s%s%06ld: type %u (%s), str %ld [%s], "
+	   "contents %ld, next %ld%s, prev %ld %s",
+	   indent, "", title ?: "", id,
 	   xnp->xn_type, xo_xparse_token_name(xnp->xn_type),
-	   xnp->xn_str, str, str ?: "",
-	   xnp->xn_contents, xo_xparse_node(xdp, xnp->xn_contents),
-	   xnp->xn_next, next, (next && next->xn_prev != id) ? " BAD" : "",
-	   xnp->xn_prev, prev, (prev && prev->xn_next != id) ? " BAD" : "");
+	   xnp->xn_str, str ?: "", xnp->xn_contents, 
+	   xnp->xn_next, (next && next->xn_prev != id) ? " BAD" : "",
+	   xnp->xn_prev, (prev && prev->xn_next != id) ? " BAD" : "");
 }
 
 static void
@@ -1131,8 +1130,8 @@ xo_xpath_yylex (xo_xparse_data_t *xdp, xo_xparse_node_id_t *yylvalp)
     if (rc > 0)
 	xnp->xn_str = xo_xparse_str_new(xdp, rc);
 
-    xo_dbg(NULL, "xo_xplex: lex: %p '%.*s' -> %d/%s %s",
-	   xnp, xdp->xd_cur - xdp->xd_start,
+    xo_dbg(NULL, "xo_xplex: lex: '%.*s' -> %d/%s %s",
+	   xdp->xd_cur - xdp->xd_start,
 	   xdp->xd_buf + xdp->xd_start,
 	   rc, (rc > 0) ? xo_xparse_token_name(rc) : "",
 	   xnp->xn_str ? xo_xparse_str(xdp, xnp->xn_str) : "");
