@@ -425,6 +425,8 @@ xo_encoder_op_name (xo_encoder_op_t op)
 	/* 15 */ "attr",
 	/* 16 */ "version",
 	/* 17 */ "options",
+	/* 18 */ "options-plus",
+	/* 19 */ "deadend",
     };
 
     if (op > sizeof(names) / sizeof(names[0]))
