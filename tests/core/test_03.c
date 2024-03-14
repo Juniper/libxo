@@ -37,7 +37,7 @@ main (int argc, char **argv)
 	{ "Terry", "Jones", 660 },
 	{ "Leslie", "Patterson", 341 },
 	{ "Ashley", "Smith", 1440 },
-	{ NULL, NULL }
+	{ NULL, NULL, 0 }
     }, *ep;
 
     argc = xo_parse_args(argc, argv);
@@ -73,7 +73,6 @@ main (int argc, char **argv)
 	    "{:requests/%8" PRIu64 "}  ",
 	    "name", TO_ULL(12345), TO_ULL(54321), "-", TO_ULL(32145));
 
-    int first = 1, i;
 #if 0
     xo_open_list("size");
     for (i = 0; i < 32; i++) {
