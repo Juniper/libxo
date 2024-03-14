@@ -49,7 +49,7 @@ main (int argc, char **argv)
 	{ "ახლა", "გაიარო", "საერთაშორისო", 123, 90 },
 	{ "෴ණ්ණ෴෴ණ්ණ෴", "Mick",
 	  "෴ණ්ණ෴෴ණ්ණ෴෴ණ්ණ෴෴෴", 110, 20 },
-	{ NULL, NULL }
+	{ NULL, NULL, NULL, 0, 0 }
     }, *ep = employees;
     int rc, i;
 
@@ -123,8 +123,8 @@ main (int argc, char **argv)
 	    "{T:/%-12s}{T:Time (%)}\n", "Department");
     for ( ; ep->e_first; ep++) {
 	xo_open_instance("employee");
-	xo_emit("{[:-25}{k:first-name/%s} ({k:nic-name/\"%s\"}){]:}"
-		"{k:last-name/%-14..14s/%s}"
+	xo_emit("{[:-25}{:first-name/%s} ({:nic-name/\"%s\"}){]:}"
+		"{:last-name/%-14..14s/%s}"
 		"{:department/%8u}{:percent-time/%8u}\n",
 		ep->e_first, ep->e_nic, ep->e_last, ep->e_dept, ep->e_percent);
 	if (ep->e_percent > 50) {
