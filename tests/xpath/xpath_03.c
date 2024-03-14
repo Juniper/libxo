@@ -27,20 +27,23 @@ int
 main (int argc, char **argv)
 {
     const char *output = "output.temp";
+    int ac;
 
     argc = xo_parse_args(argc, argv);
     if (argc < 0)
         return 1;
 
-    for (argc = 1; argv[argc] && argv[argc][0] == '-'; argc++) {
-	if (xo_streq(argv[argc], "--debug"))
+    for (ac = 1; argv[ac] && argv[ac][0] == '-'; ac++) {
+	if (xo_streq(argv[ac], "--debug"))
 	    xo_set_flags(NULL, XOF_DEBUG);
-	else if (xo_streq(argv[argc], "--yydebug"))
+	else if (xo_streq(argv[ac], "--yydebug"))
 	    xo_xpath_yydebug = 1;
     }
 
-    if (argv[2])
-	output = argv[2];
+    if (ac + 2 > argc)
+	return 0;
+
+    output = argv[ac + 1];
 
     FILE *fp = fopen(output, "w+");
     if (fp == NULL)
@@ -57,7 +60,7 @@ main (int argc, char **argv)
     xo_xparse_data_t *xdp = xo_filter_data(xop, xfp);
 
     strncpy(xdp->xd_filename, "test", sizeof(xdp->xd_filename));
-    xdp->xd_buf = strdup(argv[1]);
+    xdp->xd_buf = strdup(argv[ac]);
     xdp->xd_len = strlen(xdp->xd_buf);
 
     xo_set_flags(NULL, XOF_DEBUG);
