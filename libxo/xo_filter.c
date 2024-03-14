@@ -68,6 +68,7 @@ typedef struct xo_stack_s {
     uint32_t xs_allow;		 /* Any 'allow' increment */
     uint32_t xs_deny;		 /* Any 'deny' increment */
     xo_off_t xs_offset;		 /* WB marker */
+    uint32_t xs_flags;		 /* Flags (XSF_*) */
 } xo_stack_t;
 
 #define XSS_INIT	0	/* Initial state */
@@ -78,7 +79,9 @@ typedef struct xo_stack_s {
 #define XSS_DEEP	5	/* Found or not, we go deeper in hierarchy */
 #define XSS_FALSE	6	/* Failed match */
 #define XSS_DEADEND	7	/* Dead hierarchy */
-#define XSS_ABSOLUTE    8	/* Leading '/' of an absolute path */
+
+/* Flags for xs_flags */
+#define XSF_DEAD	(1<<0)	/* Frame is dead */
 
 typedef struct xo_match_s {
     struct xo_match_s *xm_next;	 /* Next match */
@@ -97,11 +100,13 @@ typedef struct xo_match_s {
 
 struct xo_filter_s {		 /* Forward/typdef decl in xo_private.h */
     struct xo_xparse_data_s xf_xd; /* Main parsing structure */
+    xo_filter_status_t xf_status; /* Current status: (see XO_STATUS_*) */
     uint32_t xf_depth;		 /* Depth of hierarchy seen (zero == top) */
     uint32_t xf_allow;		 /* Number of successful matches */
     uint32_t xf_deny;		 /* Number of successful not matches */
     xo_match_t *xf_matches;	 /* Current states */
     unsigned xf_flags;		 /* Flags (XFSF_*) */
+    uint32_t xf_total_depth;	 /* Total depth ('opens' minus 'closes') */
 };
 
 /* Flags for xf_flags */
@@ -169,6 +174,7 @@ xo_filter_create (xo_handle_t *xop)
 
     xo_xparse_init(&xfp->xf_xd);
     xfp->xf_xd.xd_xop = xop;
+    xo_filter_data_set(xop, xfp);
 
     return xfp;
 }
@@ -196,6 +202,7 @@ xo_filter_destroy (xo_handle_t *xop UNUSED, xo_filter_t *xfp)
     }
 
     xo_free(xfp);
+    xo_filter_data_set(xop, NULL);
 }
 
 static int
@@ -289,7 +296,6 @@ xo_filter_state_name (uint32_t state)
         /* XSS_DEEP */ "DEEP",
         /* XSS_FALSE */ "FALSE",
         /* XSS_DEADEND */ "DEADEND",
-        /* XSS_ABSOLUTE */ "ABSOLUTE",
     };
 
     if (state > sizeof(names) / sizeof(names[0]))
@@ -311,6 +317,8 @@ int
 xo_filter_add_one (xo_handle_t *xop, const char *vp)
 {
     int rc;
+    int save_yydebug = xo_xpath_yydebug;
+
     xo_filter_t *xfp = xo_filter_data_get(xop, TRUE);
     if (xfp == NULL)
 	return -1;
@@ -324,7 +332,12 @@ xo_filter_add_one (xo_handle_t *xop, const char *vp)
      * This does the real work of parsing the XPath strings into
      * internal form that we can use.
      */
+    if (xo_get_flags(xop) & XOF_DEBUG)
+	xo_xpath_yydebug = 1;
+
     rc = xo_xpath_yyparse(xdp);
+
+    xo_xpath_yydebug = save_yydebug; /* Restore */
 
     xo_xparse_dump(xdp);
 
@@ -354,62 +367,70 @@ xo_filter_all_dead (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED)
 	rc = TRUE;		/* Found at least one */
     }
 
-    xo_dbg(NULL, "filter: all-dead: -> %d", rc);
+    xo_dbg(xop, "filter: all-dead: -> %d", rc);
 
     return rc; /* Either zero active matches or no DEADENDS */
 }
 
-int
-xo_filter_allow (xo_handle_t *xop UNUSED, xo_filter_t *xfp)
+xo_filter_status_t
+xo_filter_get_status (xo_handle_t *xop UNUSED, xo_filter_t *xfp)
 {
-    /* No filters means always allow */
-    if (xfp == NULL || xfp->xf_xd.xd_paths_cur == 0)
-	return XO_ALLOW_YES;
-
-    int all_nots = (xfp->xf_xd.xd_flags & XDF_ALL_NOTS) ? TRUE : FALSE;
-
-    if (xfp->xf_deny)
-	return XO_ALLOW_NO;		/* No means no */
-
-    if (xfp->xf_allow)
-	return XO_ALLOW_YES;
-
-    if (all_nots)
-	return XO_ALLOW_YES;
-
-    if (xo_filter_all_dead(xop, xfp))
-	return XO_ALLOW_DEAD;
-
-    return XO_ALLOW_NO;
+    return xfp->xf_status;
 }
 
-static const char *
-xo_filter_allow_name (int rc)
+const char *
+xo_filter_status_name (xo_filter_status_t rc)
 {
-    return (rc == XO_ALLOW_NO) ? "no" :
-	(rc == XO_ALLOW_YES) ? "yes" :
-	(rc == XO_ALLOW_DEAD) ? "dead" : "unknown";
+    return (rc == XO_STATUS_TRACK) ? "track" :
+	(rc == XO_STATUS_FULL) ? "full" :
+	(rc == XO_STATUS_DEAD) ? "dead" : "unknown";
 }
 
-int
-xo_filter_dead (xo_handle_t *xop UNUSED, xo_filter_t *xfp)
+static xo_filter_status_t
+xo_filter_change_status (xo_handle_t *xop, xo_filter_t *xfp, const char *tag)
 {
+    const char *why;
+    int rc;
+
     /* No filters means always allow */
-    if (xfp == NULL || xfp->xf_xd.xd_paths_cur == 0)
-	return TRUE;
+    if (xfp == NULL || xfp->xf_xd.xd_paths_cur == 0) {
+	why = "no-filters";
+	rc = XO_STATUS_FULL;
+    } else if (xfp->xf_deny) {
+	why = "deny-is-set";
+	rc = XO_STATUS_TRACK;		/* No means no */
 
-    int all_nots = (xfp->xf_xd.xd_flags & XDF_ALL_NOTS) ? TRUE : FALSE;
+    } else if (xfp->xf_allow) {
+	why = "allow-is-set";
+	rc = XO_STATUS_FULL;
 
-    if (xfp->xf_deny)
-	return FALSE;		/* No means no */
+    } else if (xfp->xf_xd.xd_flags & XDF_ALL_NOTS) {
+	why = "all-nots";
+	rc = XO_STATUS_FULL;
 
-    if (xfp->xf_allow)
-	return TRUE;
+    } else if (xo_filter_all_dead(xop, xfp)) {
+	why = "all-dead";
+	rc = XO_STATUS_DEAD;
 
-    if (all_nots)
-	return TRUE;
+    } else {
+	why = "default-to-no";
+	rc = XO_STATUS_TRACK;
+    }
 
-    return FALSE;
+    xo_dbg(xop, "xo_filter_update_status (%s) returns %s/%d "
+	   "why: %s (was %s/%d)",
+	   tag, xo_filter_status_name(rc), rc, why,
+	   xo_filter_status_name(xfp->xf_status), xfp->xf_status);
+
+    xfp->xf_status = rc;	/* Record new value */
+
+    return rc;
+}
+
+xo_filter_status_t
+xo_filter_update_status (xo_handle_t *xop, xo_filter_t *xfp)
+{
+    return xo_filter_change_status(xop, xfp, "caller");
 }
 
 static int
@@ -427,7 +448,7 @@ xo_filter_has_predicates (xo_filter_t *xfp, xo_xparse_node_id_t id)
 }
 
 static const char *
-xo_filter_match_adjust (xo_filter_t *xfp, xo_match_t *xmp,
+xo_filter_match_adjust (xo_handle_t *xop, xo_filter_t *xfp, xo_match_t *xmp,
 			xo_stack_t *xsp, uint32_t state)
 {
     const char *label;
@@ -443,6 +464,8 @@ xo_filter_match_adjust (xo_filter_t *xfp, xo_match_t *xmp,
 	xsp->xs_allow += 1;
 	label = " allow++";
     }
+
+    xo_filter_update_status(xop, xfp);
 
     return label;
 }
@@ -480,11 +503,17 @@ xo_filter_stack_pop (xo_filter_t *xfp UNUSED, xo_match_t *xmp)
  * and we can ignore everything until we come out of that hierarchy.
  */
 static void
-xo_filter_deadend (xo_filter_t *xfp, xo_match_t *xmp, xo_stack_t *xsp)
+xo_filter_deadend (xo_handle_t *xop UNUSED, xo_filter_t *xfp, xo_match_t *xmp,
+		   xo_stack_t *xsp, int call_op UNUSED)
 {
     xsp->xs_state = XSS_DEADEND;
     xo_filter_stack_free_keys(xfp, xsp);
     xmp->xm_depth = 1;	/* This "open" counts as the first one */
+
+    #if 0
+    if (call_op)
+	xo_encoder_handle(xop, XO_OP_DEADEND, NULL, NULL, NULL, 0);
+    #endif
 }
 
 static int
@@ -495,6 +524,8 @@ xo_filter_open (xo_handle_t *xop, xo_filter_t *xfp,
 	return 0;
 
     xo_dbg(NULL, "filter: open %s: '%.*s'", type, tlen, tag);
+
+    xfp->xf_total_depth += 1;
 
     /*
      * Whiffle thru the states to see if we have any open paths.  We
@@ -519,7 +550,7 @@ xo_filter_open (xo_handle_t *xop, xo_filter_t *xfp,
 	 * open, then we're dead.
 	*/
 	if (xsp->xs_state == XSS_PRED) {
-	    xo_filter_deadend(xfp, xmp, xsp);
+	    xo_filter_deadend(xop, xfp, xmp, xsp, FALSE);
 	    continue;
 	}
 
@@ -530,7 +561,7 @@ xo_filter_open (xo_handle_t *xop, xo_filter_t *xfp,
 
 	const char *str = xo_xparse_str(xdp, xnp->xn_str);
 	if (str == NULL || !xo_streqn(str, tag, tlen)) {
-	    xo_filter_deadend(xfp, xmp, xsp);
+	    xo_filter_deadend(xop, xfp, xmp, xsp, FALSE);
 	    continue;
 	}
 
@@ -545,7 +576,7 @@ xo_filter_open (xo_handle_t *xop, xo_filter_t *xfp,
 
 	} else if (xnp->xn_next == 0) {
 	    /* We don't set xm_depth to 1 here; this "open" doesn't count */
-	    label = xo_filter_match_adjust(xfp, xmp, xsp, XSS_DEEP);
+	    label = xo_filter_match_adjust(xop, xfp, xmp, xsp, XSS_DEEP);
 
 	} else {
 	    xo_xparse_node_t *nextp = xo_xparse_node(xdp, xnp->xn_next);
@@ -574,9 +605,20 @@ xo_filter_open (xo_handle_t *xop, xo_filter_t *xfp,
 	int not = FALSE;
 
 	switch (xnp->xn_type) {
-	case C_ABSOLUTE:
 	case C_ELEMENT:
 	    /* Normal case */
+	    break;
+
+	case C_ABSOLUTE:
+	    /* Absolute means that we only match at the top of the tree */
+	    if (xfp->xf_total_depth != 0)
+		continue;
+
+	    /* Now move to the next node */
+	    id = xnp->xn_next;
+	    xnp = xo_xparse_node(xdp, id);
+	    if (xnp->xn_type != C_ELEMENT)
+		continue;
 	    break;
 
 	case C_NOT:
@@ -596,21 +638,11 @@ xo_filter_open (xo_handle_t *xop, xo_filter_t *xfp,
 	    continue;
 	}
 
-	if (xnp->xn_type == C_ABSOLUTE) {
-	    /*
-	     * A absolute path means a leading '/' that matches only
-	     * the top, so we need to know if we're at the top.
-	     */
-	    if (xfp->xf_depth != 1)
-		continue;
-	    
-	} else {
-	    const char *str = xo_xparse_str(xdp, xnp->xn_str);
+	const char *str = xo_xparse_str(xdp, xnp->xn_str);
 
-	    /* Look for the matching tag */
-	    if (str == NULL || !xo_streqn(str, tag, tlen))
-		continue;
-	}
+	/* Look for the matching tag */
+	if (str == NULL || !xo_streqn(str, tag, tlen))
+	    continue;
 
 	/* A succesful match! Grab a new match struct and fill it in  */
 	xmp = xo_filter_match_new(xfp, *paths);
@@ -634,7 +666,7 @@ xo_filter_open (xo_handle_t *xop, xo_filter_t *xfp,
 	    /* The predicates are already marked as our's */
 
 	} else if (xnp->xn_next == 0) { /* Only element */
-	    label = xo_filter_match_adjust(xfp, xmp, xsp, XSS_DEEP);
+	    label = xo_filter_match_adjust(xop, xfp, xmp, xsp, XSS_DEEP);
 
 	} else {
 	    xo_xparse_node_t *nextp = xo_xparse_node(xdp, xnp->xn_next);
@@ -654,18 +686,20 @@ xo_filter_open (xo_handle_t *xop, xo_filter_t *xfp,
 	 */
 	/* Nothing to do for now.... */
 
-	xo_dbg(NULL, "filter: open %s: new match [%p] '%.*s' [%u/%u] "
+	xo_dbg(NULL, "filter: open %s: new match '%.*s' [%u/%u] "
 	       "[state %u/%s; match %u, pred %u] "
 	       "[%u/%u] %s",
-	       type, xmp, tlen, tag, *paths, xnp->xn_next,
+	       type, tlen, tag, *paths, xnp->xn_next,
 	       xsp->xs_state, xo_filter_state_name(xsp->xs_state),
 	       xsp->xs_match, xsp->xs_predicates,
 	       xfp->xf_allow, xfp->xf_deny, label);
     }
 
+    xo_filter_change_status(xop, xfp, "open");
+
     xo_filter_dump_matches(xop, xfp);
 
-    return xo_filter_allow(xop, xfp);
+    return xfp->xf_status;
 }
 
 int
@@ -857,7 +891,7 @@ xo_filter_eval_path (XO_FILTER_NODE_ARGS)
     /* We only support a single element in the path, which must be a key */
     for (id = xnp->xn_contents; id; id = xnp->xn_next) {
 	xnp = xo_xparse_node(&xfp->xf_xd, id);
-	if (xnp->xn_type != C_ELEMENT && xnp->xn_type != C_ABSOLUTE)
+	if (xnp->xn_type != C_ELEMENT)
 	    continue;
 
 	if (elt == NULL)
@@ -1114,7 +1148,7 @@ xo_filter_pred_needs (xo_xparse_data_t *xdp, xo_filter_t *xfp,
 	    if (slen == tlen && memcmp(str, tag, slen) == 0)
 		return TRUE;
 	} else if (xnp->xn_type == C_ABSOLUTE) {
-	    /* XXX */
+	    /* Nothing to do, just handle the next node (xn_next) */
 	}
 
 	if (xnp->xn_contents)
@@ -1146,7 +1180,7 @@ xo_filter_key (xo_handle_t *xop, xo_filter_t *xfp,
 	if (xsp->xs_state != XSS_PRED) /* Not looking for keys */
 	    continue;
 
-	rc = 0;			/* Start with everything happy */
+	rc = XO_FILTER_MISS; /* Start with needing more data */
 
 	for (id = xsp->xs_predicates; id; id = xnp->xn_next) {
 	    xnp = xo_xparse_node(xdp, id);
@@ -1164,13 +1198,13 @@ xo_filter_key (xo_handle_t *xop, xo_filter_t *xfp,
 	    xo_filter_key_add(xop, xfp, xmp, tag, tlen, value, vlen);
 
 	    const char *test = xo_filter_key_find(xfp, xmp, tag);
-	    xo_dbg(NULL, "filter: new key: [%s] %p:'%s'",
-		   tag, test, test ?: "");
+	    xo_dbg(NULL, "filter: new key: [%s] '%s'",
+		   tag, test ?: "");
 
 	    xo_filter_data_t data = xo_filter_pred_eval(xfp, xmp);
 	    int pred = xo_filter_cast_int64(xfp, data);
 
-	    xo_dbg(NULL, "filter: new key: pred eval [%u] '%s' "
+	    xo_dbg(NULL, "filter: key: pred eval [%u] '%s' "
 		   "[base %u [%u/%u] -> %d",
 		   i, tag, xmp->xm_base,
 		   xfp->xf_allow, xfp->xf_deny, pred);
@@ -1186,10 +1220,12 @@ xo_filter_key (xo_handle_t *xop, xo_filter_t *xfp,
 		rc = XO_FILTER_FAIL;	/* Never going to succeed */
 		break;
 	    }
+
+	    rc = 0;		/* Otherwise we might be done */
 	}
 
 	if (rc == XO_FILTER_FAIL) {	/* Never going to succeed */
-	    xo_filter_deadend(xfp, xmp, xsp);
+	    xo_filter_deadend(xop, xfp, xmp, xsp, TRUE);
 	    continue;
 	}
 
@@ -1209,7 +1245,7 @@ xo_filter_key (xo_handle_t *xop, xo_filter_t *xfp,
 	const char *label = 0;
 	if (xnp->xn_next == 0) {
 	    /* We don't set xm_depth to 1 here; this "open" doesn't count */
-	    label = xo_filter_match_adjust(xfp, xmp, xsp, XSS_DEEP);
+	    label = xo_filter_match_adjust(xop, xfp, xmp, xsp, XSS_DEEP);
 
 	} else {
 	    xo_xparse_node_t *nextp = xo_xparse_node(xdp, xnp->xn_next);
@@ -1229,9 +1265,11 @@ xo_filter_key (xo_handle_t *xop, xo_filter_t *xfp,
     xo_dbg(NULL, "xo_filter_key: '%.*s' = '%.*s' --> %d",
 	   tlen, tag, vlen, value, rc);
 
+    xo_filter_change_status(xop, xfp, "key");
+
     xo_filter_dump_matches(xop, xfp);
 
-    return xo_filter_allow(xop, xfp);
+    return xfp->xf_status;
 }
 
 /*
@@ -1256,6 +1294,9 @@ xo_filter_close (xo_handle_t *xop, xo_filter_t *xfp,
 
     if (xfp->xf_depth > 0)
 	xfp->xf_depth -= 1;		/* Track our depth */
+
+    if (xfp->xf_total_depth > 0)
+	xfp->xf_total_depth -= 1;
 
     xo_dbg(NULL, "filter: close %s: '%.*s'", type, tlen, tag);
 
@@ -1282,13 +1323,6 @@ xo_filter_close (xo_handle_t *xop, xo_filter_t *xfp,
 		if (xsp->xs_state == XSS_DEADEND) {
 		    xsp->xs_state = XSS_NEED;
 		    xo_filter_stack_free_keys(xfp, xsp);
-
-		} else if (xsp->xs_state == XSS_ABSOLUTE) {
-		    /*
-		     * We're at the top of an absolute path, so we just
-		     * clear the match.
-		     */
-		    xo_filter_match_free(xfp, xmp);
 		}
 	    }
 
@@ -1307,10 +1341,6 @@ xo_filter_close (xo_handle_t *xop, xo_filter_t *xfp,
 	}
 
 	xnp = xo_xparse_node(xdp, xsp->xs_match);
-	
-	if (xnp->xn_type == C_ABSOLUTE) {
-	    /* XXX */
-	}
 
 	if (xnp->xn_type != C_ELEMENT)	/* Only other type supported */
 	    continue;
@@ -1320,19 +1350,6 @@ xo_filter_close (xo_handle_t *xop, xo_filter_t *xfp,
 	    continue;
 
 	const char *label = "";
-
-#if 0
-	/* If we're at the end of the path, adjust the allow/deny numbers */
-	if (xnp->xn_next == 0) {
-	    if (xmp->xm_flags & XMF_NOT) {
-		xfp->xf_deny -= 1;
-		label = " deny--";
-	    } else {
-		xfp->xf_allow -= 1;
-		label = " allow--";
-	    }
-	}
-#endif
 
 	/*
 	 * The top stack frame has the deltas to adjust the
@@ -1386,9 +1403,11 @@ xo_filter_close (xo_handle_t *xop, xo_filter_t *xfp,
 	       xfp->xf_allow, xfp->xf_deny, label);
     }
 
+    xo_filter_change_status(xop, xfp, "close");
+
     xo_filter_dump_matches(xop, xfp);
 
-    return xo_filter_allow(xop, xfp);
+    return xfp->xf_status;
 }
 
 int
@@ -1418,8 +1437,9 @@ xo_filter_dump_matches (xo_handle_t *xop, xo_filter_t *xfp)
     if (xfp == NULL)
 	return;
 
-    xo_dbg(NULL, "xo_filter_dump_matches: (%p) [depth %d]",
-	   xfp->xf_matches, xfp->xf_depth);
+    xo_dbg(xop, "xo_filter_dump_matches: [depth %d] status: %s/%d",
+	   xfp->xf_depth, xo_filter_status_name(xfp->xf_status),
+	   xfp->xf_status);
 
     /*
      * Whiffle thru the states to see if we have any open paths.  We
@@ -1432,7 +1452,7 @@ xo_filter_dump_matches (xo_handle_t *xop, xo_filter_t *xfp)
     const char *str;
 
     for (i = 0; xmp; xmp = xmp->xm_next, i++) {
-	xo_dbg(NULL, "  match %d: base %u, depth %u, flags %#x "
+	xo_dbg(xop, "  match %d: base %u, depth %u, flags %#x "
 	       "[allow %u/deny %u]",
 	       i, xmp->xm_base, xmp->xm_depth, xmp->xm_flags,
 	       xfp->xf_allow, xfp->xf_deny);
@@ -1442,19 +1462,13 @@ xo_filter_dump_matches (xo_handle_t *xop, xo_filter_t *xfp)
 	    xnp = xo_xparse_node(xdp, xsp->xs_match);
 	    str = xnp ? xo_xparse_str(xdp, xnp->xn_str) : "";
 
-	    xo_dbg(NULL, "    stack: state %u/%s, node %u, pred %u, [str '%s'] "
-		   "keys %p, len %d, allow %u, deny %u",
+	    xo_dbg(xop, "    stack: state %u/%s, node %u, pred %u, [str '%s'] "
+		   "keys_len %d, allow %u, deny %u",
 		   xsp->xs_state, xo_filter_state_name(xsp->xs_state),
 		   xsp->xs_match, xsp->xs_predicates, str,
-		   xsp->xs_keys, xsp->xs_keys_len,
-		   xsp->xs_allow, xsp->xs_deny);
+		   xsp->xs_keys_len, xsp->xs_allow, xsp->xs_deny);
 	}
     }
-
-    int rc = xo_filter_allow(xop, xfp);
-    xo_dbg(NULL, "  xo_filter_allow: %s (%d) -> all_dead: %s",
-	   xo_filter_allow_name(rc), rc,
-	   xo_filter_all_dead(xop, xfp) ? "true" : "false" );
 }
 
 /*
@@ -1468,27 +1482,36 @@ xo_filter_whiteboard (XO_ENCODER_HANDLER_ARGS,
     int rc = 0;
     xo_buffer_t *xbp = bufp;
 
+    xo_dbg(xop, "filter: entering whiteboard: %s: '%s'%s status: %s/%d",
+	   xo_encoder_op_name(op), name ?: "",
+	   (flags & XFF_KEY) ? " is-a-key" : "",
+	   xo_filter_status_name(xfp->xf_status), xfp->xf_status);
+
     switch (op) {
     case XO_OP_OPEN_CONTAINER:
-    case XO_OP_CLOSE_CONTAINER:
     case XO_OP_OPEN_LIST:
-    case XO_OP_CLOSE_LIST:
     case XO_OP_OPEN_INSTANCE:
-    case XO_OP_CLOSE_INSTANCE:
     case XO_OP_OPEN_LEAF_LIST:
-    case XO_OP_CLOSE_LEAF_LIST:
-	if (xo_filter_all_dead(xop, xfp))
+	#if 0
+	if (xfp->xf_status == XO_STATUS_DEAD) /* The dead have no cares */
 	    return 0;
+	#endif
+	break;
+
+    case XO_OP_CLOSE_CONTAINER:
+    case XO_OP_CLOSE_LIST:
+    case XO_OP_CLOSE_INSTANCE:
+    case XO_OP_CLOSE_LEAF_LIST:
+	#if 0
+	if (xfp->xf_status == XO_STATUS_DEAD) /* The dead have no cares */
+	    return 0;
+	#endif
 	break;
 
     case XO_OP_STRING:		   /* Quoted UTF-8 string */
     case XO_OP_CONTENT:		   /* Other content */
     case XO_OP_ATTRIBUTE:;	   /* Attribute name/value */
-	int allow = xo_filter_allow(xop, xfp);
-	xo_dbg(NULL, "xo_filter_whiteboard: allow %s/%d",
-	       xo_filter_allow_name(allow), allow);
-	       
-	if (allow == XO_ALLOW_DEAD) /* Don't need to care if we're get */
+	if (xfp->xf_status == XO_STATUS_DEAD) /* The dead have no cares */
 	    return 0;
 
 	/*
@@ -1497,8 +1520,9 @@ xo_filter_whiteboard (XO_ENCODER_HANDLER_ARGS,
 	 * allow is false, we don't want it.
 	 */
 	if (!(flags & XFF_KEY)) { /* Always need keys */
-	    if (allow == XO_ALLOW_NO)
-		return 0;
+	    if (xfp->xf_status == XO_STATUS_TRACK)
+		return 0;  	  /* Tracking doesn't need keys */
+
 	} else {
 	    /*
 	     * Let the predicate logic know we've got a key.
@@ -1514,6 +1538,12 @@ xo_filter_whiteboard (XO_ENCODER_HANDLER_ARGS,
     }
 
     rc = func(xop, op, xbp, name, value, private, flags);
+
+
+    xo_dbg(xop, "filter: leaving whiteboard: %s: '%s'%s status: %s/%d",
+	   xo_encoder_op_name(op), name ?: "",
+	   (flags & XFF_KEY) ? " is-a-key" : "",
+	   xo_filter_status_name(xfp->xf_status), xfp->xf_status);
 
     return rc;
 }
