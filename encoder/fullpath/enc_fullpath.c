@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 2015, Juniper Networks, Inc.
+ * Copyright (c) 2015-2024, Juniper Networks, Inc.
  * All rights reserved.
  * This SOFTWARE is licensed under the LICENSE provided in the
  * ../Copyright file. By downloading, installing, copying, or otherwise
  * using the SOFTWARE, you agree to be bound by the terms of that
  * LICENSE.
- * Phil Shafer, August 2015
+ * Phil Shafer, March 2024
  */
 
 #include <unistd.h>
@@ -62,7 +62,8 @@ fullpath_stack_push (fullpath_private_t *fpp, xo_off_t off)
 	fpp->fp_stack_size = new_size;
     }
 
-    xo_dbg(NULL, "fullpath_stack_push: returning %u (%p)", off, fpp->fp_stackp);
+    xo_dbg(NULL, "fullpath_stack_push: pushing %u (%u)",
+	   off, fpp->fp_stackp - fpp->fp_stack);
 
     *fpp->fp_stackp++ = off;
 }
@@ -75,7 +76,8 @@ fullpath_stack_pop (fullpath_private_t *fpp)
     if (fpp->fp_stackp != fpp->fp_stack)
 	off = *--fpp->fp_stackp;
 
-    xo_dbg(NULL, "fullpath_stack_pop: returning %u (%p)", off, fpp->fp_stackp);
+    xo_dbg(NULL, "fullpath_stack_pop: popping %u (%u)",
+	   off, fpp->fp_stackp - fpp->fp_stack);
 
     return off;
 }
@@ -110,8 +112,8 @@ fullpath_handler (XO_ENCODER_HANDLER_ARGS)
     xo_buffer_t *xbp = bufp ?: fp_xbp;		      /* The whiteboard buf */
 
     if (leader)
-	xo_dbg(xop, "fullpath op %s: leader '%s'",
-	       xo_encoder_op_name(op), leader->xb_bufp ?: "");
+	xo_dbg(xop, "fullpath (enter) op %s: '%s' leader '%s'",
+	       xo_encoder_op_name(op), name ?: "", leader->xb_bufp ?: "");
 
     switch (op) {
     case XO_OP_CREATE:		/* Called when the handle is init'd */
@@ -139,10 +141,10 @@ fullpath_handler (XO_ENCODER_HANDLER_ARGS)
 	break;
 
     case XO_OP_CLOSE_CONTAINER:
-    case XO_OP_CLOSE_INSTANCE:;
+    case XO_OP_CLOSE_INSTANCE:
 	xo_buf_set_len(leader, fullpath_stack_pop(fpp));
 	xo_buf_force_nul(leader);
-	xo_dbg(NULL, "fullpath: new leader '%s'", leader->xb_bufp);
+	xo_dbg(xop, "fullpath: new leader '%s'", leader->xb_bufp);
 
 #if 0
 	xo_buf_trim(leader, 1);	/* Trim trailing '/' */
@@ -169,6 +171,7 @@ fullpath_handler (XO_ENCODER_HANDLER_ARGS)
 	    xo_buf_append_str(leader, " == '");
 	    xo_buf_append_str(leader, value);
 	    xo_buf_append_str(leader, "']/");
+	    xo_buf_force_nul(leader);
 	    break;
 	}
 
@@ -178,10 +181,9 @@ fullpath_handler (XO_ENCODER_HANDLER_ARGS)
 	xo_buf_append_str(xbp, " = '");
 	xo_buf_append_str(xbp, value);
 	xo_buf_append_str(xbp, "'\n");
+#if 0
 	break;
-
-    case XO_OP_FINISH:		   /* Clean up function */
-	break;
+#endif
 
     case XO_OP_FLUSH:		   /* Clean up function */
 	rc = write(1, fp_xbp->xb_bufp, fp_xbp->xb_curp - fp_xbp->xb_bufp);
@@ -189,6 +191,9 @@ fullpath_handler (XO_ENCODER_HANDLER_ARGS)
 	    rc = 0;
 
 	xo_buf_reset(fp_xbp);
+	break;
+
+    case XO_OP_FINISH:		   /* Clean up function */
 	break;
 
     case XO_OP_DESTROY:		   /* Clean up function */
@@ -200,7 +205,20 @@ fullpath_handler (XO_ENCODER_HANDLER_ARGS)
 
     case XO_OP_VERSION:		/* Version string */
 	break;
+
+    case XO_OP_DEADEND:
+#if 0
+	xo_buf_set_len(leader, fullpath_stack_pop(fpp));
+	xo_buf_force_nul(leader);
+	xo_dbg(NULL, "fullpath: new leader '%s'", leader->xb_bufp);
+#endif
+	break;
+
     }
+
+    if (leader)
+	xo_dbg(xop, "fullpath (exit) op %s: '%s' leader '%s'",
+	       xo_encoder_op_name(op), name ?: "", leader->xb_bufp ?: "");
 
     return rc;
 }
