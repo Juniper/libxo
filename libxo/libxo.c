@@ -2267,8 +2267,28 @@ xo_set_style_name (xo_handle_t *xop, const char *name)
 
     int style = xo_name_to_style(name);
 
-    if (style < 0)
-	return -1;
+    if (style < 0) {
+	/* Might be a dynamically-loaded one ("csv") */
+
+	if (*name == '@')
+	    name += 1;		/* Allow the "@foo" shorthand */
+
+	int rc = xo_encoder_init(xop, name);
+	if (rc) {
+	    xo_warnx("unknown style or encoder: '%s'", name);
+	    return -1;
+	}
+
+	/*
+	 * The style should already be set by the encoder library,
+	 * when it calls xo_set_encoder() during initialization.  If
+	 * it hasn't, then something might be wrong.  Worth a warning....
+	 */
+	if (xop->xo_style != XO_STYLE_ENCODER) {
+	    xo_warnx("encoder style has not fully initialized");
+	    return -1;
+	}
+    }
 
     xo_set_style(xop, style);
     return 0;
@@ -2604,6 +2624,20 @@ xo_set_flags (xo_handle_t *xop, xo_xof_flags_t flags)
     xop = xo_default(xop);
 
     XOF_SET(xop, flags);
+}
+
+/**
+ * Return non-zero if any of the flags are set.
+ *
+ * @param xop XO handle to test (or NULL for default handle)
+ * @param flags Set of flags to test (XOF_*)
+ */
+int
+xo_isset_flags (xo_handle_t *xop, xo_xof_flags_t flags)
+{
+    xop = xo_default(xop);
+
+    return (xop->xo_flags & flags) ? TRUE : FALSE;
 }
 
 /**
@@ -4682,6 +4716,7 @@ void
 xo_filter_data_set (xo_handle_t *xop UNUSED, struct xo_filter_s *xfp UNUSED)
 {
 #ifdef LIBXO_NEED_FILTER
+    xop = xo_default(xop);
     xop->xo_filters = xfp;
 #endif /* LIBXO_NEED_FILTER */
 }
@@ -4690,6 +4725,7 @@ struct xo_filter_s *
 xo_filter_data_get (xo_handle_t *xop UNUSED, int create UNUSED)
 {
 #ifdef LIBXO_NEED_FILTER
+    xop = xo_default(xop);
     if (xop->xo_filters == NULL && create)
 	xop->xo_filters = xo_filter_create(NULL);
 
@@ -4703,6 +4739,8 @@ int
 xo_filter_add (xo_handle_t *xop UNUSED, const char *vp UNUSED)
 {
 #ifdef LIBXO_NEED_FILTER
+    xop = xo_default(xop);
+
     XOF_SET(xop, XOF_WHITEBOARD); /* Activate filtering */
 
     return xo_filter_add_one(xop, vp);
@@ -7589,6 +7627,9 @@ xo_do_close_container (xo_handle_t *xop, const char *name)
 
     const char *leader = xo_xml_leader(xop, name);
 
+    /* Now that the work is done, let the filtering code know */
+    xo_filter_close_container(xop, xop->xo_filters, name);
+
     switch (xo_style(xop)) {
     case XO_STYLE_XML:
 	xo_depth_change(xop, name, -1, -1, XSS_CLOSE_CONTAINER, 0);
@@ -7620,9 +7661,6 @@ xo_do_close_container (xo_handle_t *xop, const char *name)
 	rc = xo_encoder_handle(xop, XO_OP_CLOSE_CONTAINER, NULL, name, NULL, 0);
 	break;
     }
-
-    /* Now that the work is done, let the filtering code know */
-    xo_filter_close_container(xop, xop->xo_filters, name);
 
     return rc;
 }
@@ -8034,10 +8072,14 @@ xo_do_close_instance (xo_handle_t *xop, const char *name)
 
     const char *leader = xo_xml_leader(xop, name);
 
+    /* Now that the work is done, let the filter code know we're done */
+    xo_filter_close_instance(xop, xop->xo_filters, name);
+
     switch (xo_style(xop)) {
     case XO_STYLE_XML:
 	xo_depth_change(xop, name, -1, -1, XSS_CLOSE_INSTANCE, 0);
-	rc = xo_printf(xop, "%*s</%s%s>%s", xo_indent(xop), "", leader, name, ppn);
+	rc = xo_printf(xop, "%*s</%s%s>%s", xo_indent(xop), "",
+		       leader, name, ppn);
 	break;
 
     case XO_STYLE_JSON:
@@ -8061,9 +8103,6 @@ xo_do_close_instance (xo_handle_t *xop, const char *name)
 	rc = xo_encoder_handle(xop, XO_OP_CLOSE_INSTANCE, NULL, name, NULL, 0);
 	break;
     }
-
-    /* Now that the work is done, let the filter code know we're done */
-    xo_filter_close_instance(xop, xop->xo_filters, name);
 
     return rc;
 }
