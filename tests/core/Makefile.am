@@ -8,7 +8,18 @@
 # using the SOFTWARE, you agree to be bound by the terms of that
 # LICENSE.
 
-AM_CFLAGS = -I${top_srcdir} -I${top_srcdir}/libxo
+if LIBXO_WARNINGS_HIGH
+LIBXO_WARNINGS = HIGH
+endif
+if HAVE_GCC
+GCC_WARNINGS = yes
+endif
+include ${top_srcdir}/warnings.mk
+
+AM_CFLAGS = \
+    -I${top_srcdir} \
+    -I${top_srcdir}/libxo \
+    ${WARNINGS}
 
 # Ick: maintained by hand!
 TEST_CASES = \
