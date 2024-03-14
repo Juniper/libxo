@@ -139,15 +139,21 @@ xo_filter_destroy (xo_handle_t *xop, xo_filter_t *xfp);
 int
 xo_filter_key_done (xo_handle_t *xop, xo_filter_t *xfp);
 
-int
-xo_filter_allow (xo_handle_t *xop, xo_filter_t *xfp);
+typedef uint32_t xo_filter_status_t;
 
-/* Responses from xo_filter_allow: */
-#define XO_ALLOW_YES	1	/* Yes, let's make some output */
-#define XO_ALLOW_NO	2	/* No, not now, but maybe later */
-#define XO_ALLOW_DEAD	3	/* Nope, it's dead under this hierarchy */
+xo_filter_status_t
+xo_filter_get_status (xo_handle_t *xop, xo_filter_t *xfp);
 
-int
-xo_filter_dead (xo_handle_t *xop, xo_filter_t *xfp);
+xo_filter_status_t
+xo_filter_update_status (xo_handle_t *xop, xo_filter_t *xfp);
+
+const char *
+xo_filter_status_name (xo_filter_status_t rc);
+
+
+/* Responses from xo_filter_get_status: */
+#define XO_STATUS_FULL	1	/* Fully open: let's make some output */
+#define XO_STATUS_TRACK	2	/* Track open/close/key paths, but no data */
+#define XO_STATUS_DEAD	3	/* Nope, it's dead under this hierarchy */
 
 #endif /* XO_FILTER_H */
