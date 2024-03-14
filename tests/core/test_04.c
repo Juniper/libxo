@@ -33,7 +33,7 @@ main (int argc, char **argv)
 	{ "Terry", "Jones", 660 },
 	{ "Leslie", "Patterson", 341 },
 	{ "Ashley", "Smith", 1440 },
-	{ NULL, NULL }
+	{ NULL, NULL, 0 }
     }, *ep = employees;
 
     argc = xo_parse_args(argc, argv);
