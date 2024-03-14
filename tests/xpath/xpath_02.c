@@ -23,43 +23,43 @@
 int
 main (int argc, char **argv)
 {
+    int i;
+
     argc = xo_parse_args(argc, argv);
     if (argc < 0)
         return 1;
 
-    for (argc = 1; argv[argc] && argv[argc][0] == '-'; argc++) {
-	if (xo_streq(argv[argc], "--debug"))
+    for (i = 1; argv[i] && argv[i][0] == '-'; i++) {
+	if (xo_streq(argv[i], "--debug"))
 	    xo_set_flags(NULL, XOF_DEBUG);
-	else if (xo_streq(argv[argc], "--yydebug"))
+	else if (xo_streq(argv[i], "--yydebug"))
 	    xo_xpath_yydebug = 1;
     }
 
-    if (argc == 0)
-	return 2;
+    for (; argv[i]; i++) {
+	xo_xparse_data_t xd;
 
-    xo_xparse_data_t xd;
-    xo_xparse_node_t *xnp UNUSED;
+	xo_xparse_init(&xd);
 
-    xo_xparse_init(&xd);
+	strncpy(xd.xd_filename, "test", sizeof(xd.xd_filename));
+	xd.xd_buf = strdup(argv[i]);
+	xd.xd_len = strlen(xd.xd_buf);
 
-    strncpy(xd.xd_filename, "test", sizeof(xd.xd_filename));
-    xd.xd_buf = strdup(argv[1]);
-    xd.xd_len = strlen(xd.xd_buf);
-
-    for (;;) {
 	int rc = xo_xpath_yyparse(&xd);
-	if (rc <= 0)
-	    break;
-	break;
+	printf("rc = %d\n", rc);
+
+	int debug = xo_isset_flags(NULL, XOF_DEBUG);
+	xo_set_flags(NULL, XOF_DEBUG);
+	xo_xparse_dump(&xd);
+
+	int bad_horse[] = { C_DESCENDANT, 0 };
+
+	xo_xpath_feature_warn("test", &xd, bad_horse, "+");
+	if (!debug)
+	    xo_clear_flags(NULL, XOF_DEBUG);
+
+	xo_xparse_clean(&xd);
     }
-
-    xo_xparse_dump(&xd);
-
-    int bad_horse[] = { C_DESCENDANT, 0 };
-
-    xo_xpath_feature_warn("test", &xd, bad_horse, "+");
-
-    xo_xparse_clean(&xd);
 
     return 0;
 }
