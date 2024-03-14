@@ -21,7 +21,6 @@ int
 main (int argc, char **argv)
 {
     int i, count = 10;
-    int mon = 0;
     xo_emit_flags_t flags = XOEF_RETAIN;
     int opt_color = 1;
     const char *map = NULL;
