@@ -185,6 +185,9 @@ xo_get_flags (xo_handle_t *xop);
 void
 xo_set_flags (xo_handle_t *xop, xo_xof_flags_t flags);
 
+int
+xo_isset_flags (xo_handle_t *xop, xo_xof_flags_t flags);
+
 void
 xo_clear_flags (xo_handle_t *xop, xo_xof_flags_t flags);
 
