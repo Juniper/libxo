@@ -26,7 +26,7 @@
 #include "xo_encoder.h"
 #include "xo_utf8.h"
 
-void
+static void
 test_xo_utf8_wtolower (void)
 {
     wchar_t wc;
@@ -38,7 +38,7 @@ test_xo_utf8_wtolower (void)
     }
 }
 
-void
+static void
 test_xo_utf8_wtoupper (void)
 {
     wchar_t wc;
@@ -55,8 +55,6 @@ main (int argc, char **argv)
 {
     int lower = 1;
     int upper = 1;
-    int raw = 0;
-    char *file = NULL;
 
     argc = xo_parse_args(argc, argv);
     if (argc < 0)
