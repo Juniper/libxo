@@ -8,7 +8,18 @@
 # using the SOFTWARE, you agree to be bound by the terms of that
 # LICENSE.
 
-AM_CFLAGS = -I${top_srcdir} -I${top_srcdir}/libxo
+if LIBXO_WARNINGS_HIGH
+LIBXO_WARNINGS = HIGH
+endif
+if HAVE_GCC
+GCC_WARNINGS = yes
+endif
+include ${top_srcdir}/warnings.mk
+
+AM_CFLAGS = \
+    -I${top_srcdir} \
+    -I${top_srcdir}/libxo \
+    ${WARNINGS}
 
 # Ick: maintained by hand!
 TEST_CASES = \
@@ -54,13 +65,7 @@ EXTRA_DIST = \
     ${addprefix saved/, ${TEST_CASES:.c=.X.err}} \
     ${addprefix saved/, ${TEST_CASES:.c=.X.out}} \
     ${addprefix saved/, ${TEST_CASES:.c=.XP.err}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.XP.out}} \
-    ${addprefix saved/, test_01.Ecsv1.out} \
-    ${addprefix saved/, test_01.Ecsv1.err} \
-    ${addprefix saved/, test_01.Ecsv2.out} \
-    ${addprefix saved/, test_01.Ecsv2.err} \
-    ${addprefix saved/, test_01.Ecsv3.out} \
-    ${addprefix saved/, test_01.Ecsv3.err}
+    ${addprefix saved/, ${TEST_CASES:.c=.XP.out}}
 
 S2O = | ${SED} '1,/@@/d'
 
@@ -103,20 +108,6 @@ test tests: ${bin_PROGRAMS}
                 true; \
             done) \
 	done)
-	-@ (${TEST_TRACE} test=test_01.c; base=test_01; \
-	    (   fmt=Ecsv1; extra=encoder=csv ; \
-			${TEST_JIG2} ); \
-	    (   fmt=Ecsv2; extra=encoder=csv:path=top-level/data/item:no-header ; \
-			${TEST_JIG2} ); \
-	    (   fmt=Ecsv3; extra=@csv:path=item:leafs=sku.sold:no-quotes ; \
-			${TEST_JIG2} ); \
-	)
-	-@ (${TEST_TRACE} test=test_12.c; base=test_12; \
-	    (   fmt=XPmap; extra=xml,pretty,map-file=${srcdir}/test_12.map ; \
-			${TEST_JIG2} ); \
-	    (   fmt=JPmap; extra=json,pretty,map-file=${srcdir}/test_12.map ; \
-			${TEST_JIG2} ); \
-	)
 
 one:
 	-@(test=${TEST_CASE}; data=${TEST_DATA}; ${TEST_ONE} ; true)
