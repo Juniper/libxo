@@ -12,11 +12,10 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "xo.h"
 #include "xo_encoder.h"
-
-#include "xo_humanize.h"
 
 int
 main (int argc, char **argv)
