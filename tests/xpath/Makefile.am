@@ -23,15 +23,9 @@ AM_CFLAGS = \
 
 # Ick: maintained by hand!
 TEST_CASES = \
-xpath_01.c \
-xpath_02.c \
-xpath_03.c \
-xpath_04.c
+xpath_01.c
 
 xpath_01_test_SOURCES = xpath_01.c
-xpath_02_test_SOURCES = xpath_02.c
-xpath_03_test_SOURCES = xpath_03.c
-xpath_04_test_SOURCES = xpath_04.c
 
 # TEST_CASES := $(shell cd ${srcdir} ; echo *.c )
 
@@ -91,7 +85,19 @@ ${TEST_JIG}; true;
 #TEST_FORMATS = T XP JP JPu HP X J H HIPx
 TEST_FORMATS = XP
 
+RUN_TESTS = ${srcdir}/../run-tests.sh -d ${srcdir}
+
 test tests: ${bin_PROGRAMS}
+	@${MKDIR} -p out
+	@sh ${RUN_TESTS} run ${TEST_CASES}
+
+one:
+
+accept:
+	@${MKDIR} -p ${srcdir}/saved
+	@env TEST_FORMATS=fullpath sh ${RUN_TESTS} accept ${TEST_CASES}
+
+old-test old-tests: ${bin_PROGRAMS}
 	@${MKDIR} -p out
 	-@ ${TEST_TRACE} (for test in ${TEST_CASES} ; do \
 	    base=`${BASENAME} $$test .c` ; \
@@ -112,7 +118,7 @@ test tests: ${bin_PROGRAMS}
 one:
 	-@(test=${TEST_CASE}; data=${TEST_DATA}; ${TEST_ONE} ; true)
 
-accept:
+old-accept:
 	-@(for test in ${TEST_CASES} ; do \
 	    base=`${BASENAME} $$test .c` ; \
             (for fmt in ${TEST_FORMATS} E ; do \
