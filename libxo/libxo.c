@@ -4727,7 +4727,7 @@ xo_filter_data_get (xo_handle_t *xop UNUSED, int create UNUSED)
 #ifdef LIBXO_NEED_FILTER
     xop = xo_default(xop);
     if (xop->xo_filters == NULL && create)
-	xop->xo_filters = xo_filter_create(NULL);
+	xop->xo_filters = xo_filter_create(xop);
 
     return xop->xo_filters;
 #else /* LIBXO_NEED_FILTER */
@@ -4736,14 +4736,14 @@ xo_filter_data_get (xo_handle_t *xop UNUSED, int create UNUSED)
 }
 
 int
-xo_filter_add (xo_handle_t *xop UNUSED, const char *vp UNUSED)
+xo_filter_add (xo_handle_t *xop UNUSED, const char *input UNUSED)
 {
 #ifdef LIBXO_NEED_FILTER
     xop = xo_default(xop);
 
     XOF_SET(xop, XOF_WHITEBOARD); /* Activate filtering */
 
-    return xo_filter_add_one(xop, vp);
+    return xo_filter_add_one(xop, input);
 #else /* LIBXO_NEED_FILTER */
     return 0;
 #endif /* LIBXO_NEED_FILTER */
@@ -4844,8 +4844,7 @@ xo_format_value (xo_handle_t *xop, const char *name, ssize_t nlen,
 	nlen = strlen(name);	/* Need new length for new name */
     }
 
-    if (flags & XFF_KEY) {
-    } else
+    if (!(flags & XFF_KEY))
 	xo_filter_open_field(xop, xop->xo_filters, name, nlen);
 
     const char *leader = xo_xml_leader_len(xop, name, nlen);
