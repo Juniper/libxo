@@ -1,0 +1,69 @@
+#
+?one/two[three == 3]
+?uno/dos/tres[test == "yup"]/cuatro[test == "sure"]/cinco
++one
++two
+$three 3
++four
+=
++five
+=
++six
+=
+-six
+-five
+=
+-four
+=
+-two
++two
+$three 3333
++four
+=
++five
+=
++six
+=
+-six
+-five
+=
+-four
+=
+-two
+-one
+
++uno
++dos
+$mumble no
++tres
+$test yup
++cuatro
+$test sure
++nope
+-nope
++cinco
++seis
+-sies
+-cinco
++siete
+-sieta
++cinco
+-cinco
+-cuatro
++cuatro
+$test fail
++cinco
++seis
+-seis
+-cinco
+-cuatro
++cuatro
+$test sure
++cinco
++seis
+-seis
+-cinco
+-cuatro
+-tres
+-dos
+-uno
