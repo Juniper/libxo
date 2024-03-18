@@ -318,4 +318,8 @@ xo_xparse_dump_one_node (xo_xparse_data_t *xdp, xo_xparse_node_id_t id,
 void
 xo_xparse_set_input (xo_xparse_data_t *xdp, const char *buf, xo_ssize_t len);
 
+int
+xo_xparse_parse_string (xo_handle_t *xop, xo_xparse_data_t *xdp,
+			const char *input);
+
 #endif /* XO_XPARSE_H */
