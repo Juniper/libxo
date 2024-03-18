@@ -1,0 +1,28 @@
+#
+?one[two == 4]
++one
+$two 4
+-one
+r
+?one[two == 40]
++one
+$two 4
+-one
+r
+?one/two[three == 5]
++one
++two
+$three 5
+-two
+-one
+r
+?one[two == 4]/three[four == 5]
++one
+$two 4
++three
+$four 5
+-three
++three
+$four 6
+-three
+-one
