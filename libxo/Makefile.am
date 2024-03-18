@@ -105,6 +105,8 @@ EXTRA_DIST = \
 
 CLEANFILES = xo_xpath.c xo_xpath.tab.c.orig xo_xpath.tab.h
 
+xo_xparse.o xo_filter.o xo_xparse.lo xo_filter.lo: xo_xpath.tab.h
+
 call-graph:
 	${RM} libxo.o
 	${MAKE} CC="clang -Xclang -analyze -Xclang \
