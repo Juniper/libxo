@@ -173,7 +173,7 @@ xo_filter_create (xo_handle_t *xop)
     bzero(xfp, sizeof(*xfp));
 
     xo_xparse_init(&xfp->xf_xd);
-    xfp->xf_xd.xd_xop = xop;
+
     xo_filter_data_set(xop, xfp);
 
     return xfp;
@@ -197,16 +197,14 @@ xo_filter_destroy (xo_handle_t *xop UNUSED, xo_filter_t *xfp)
 	    next = xmp->xm_next;
 	    xo_free(xmp);
 	}
-
-	xo_free(xfp->xf_matches);
     }
 
-    xo_free(xfp);
     xo_filter_data_set(xop, NULL);
+    xo_free(xfp);
 }
 
 static int
-xo_stack_max (xo_filter_t *xfp, xo_xparse_node_id_t id)
+xo_stack_max (xo_handle_t *xop, xo_filter_t *xfp, xo_xparse_node_id_t id)
 {
     int rc = 1;
     xo_xparse_node_t *xnp;
@@ -215,13 +213,13 @@ xo_stack_max (xo_filter_t *xfp, xo_xparse_node_id_t id)
 	xnp = xo_xparse_node(&xfp->xf_xd, id);
 
 	if (xnp->xn_type == C_PATH) {
-	    rc += xo_stack_max(xfp, xnp->xn_contents);
+	    rc += xo_stack_max(xop, xfp, xnp->xn_contents);
 
 	} else if (xnp->xn_type == C_ELEMENT || xnp->xn_type == C_ABSOLUTE)
 	    rc += 1;
     }
 
-    xo_dbg(NULL, "xo_stack_max: id %u -> %d", id, rc);
+    xo_dbg(xop, "xo_stack_max: id %u -> %d", id, rc);
 
     return rc;
 }
@@ -230,9 +228,9 @@ xo_stack_max (xo_filter_t *xfp, xo_xparse_node_id_t id)
  * Return a new match struct, allocating a new one if needed
  */
 static xo_match_t *
-xo_filter_match_new (xo_filter_t *xfp, xo_xparse_node_id_t id)
+xo_filter_match_new (xo_handle_t *xop, xo_filter_t *xfp, xo_xparse_node_id_t id)
 {
-    int stack_size = xo_stack_max(xfp, id);
+    int stack_size = xo_stack_max(xop, xfp, id);
     int sz = sizeof(xo_match_t) + sizeof(xo_stack_t) * stack_size;
 
     xo_match_t *xmp = xo_realloc(NULL, sz);
@@ -314,33 +312,15 @@ xo_filter_blocking (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED)
  * Add a filter (xpath) to our filtering mechanism
  */
 int
-xo_filter_add_one (xo_handle_t *xop, const char *vp)
+xo_filter_add_one (xo_handle_t *xop, const char *input)
 {
-    int rc;
-    int save_yydebug = xo_xpath_yydebug;
-
     xo_filter_t *xfp = xo_filter_data_get(xop, TRUE);
     if (xfp == NULL)
 	return -1;
 
     xo_xparse_data_t *xdp = xo_filter_data(xop, xfp);
 
-    /* Use our string as the input buffer */
-    xo_xparse_set_input(xdp, vp, strlen(vp));
-
-    /*
-     * This does the real work of parsing the XPath strings into
-     * internal form that we can use.
-     */
-    if (xo_get_flags(xop) & XOF_DEBUG)
-	xo_xpath_yydebug = 1;
-
-    rc = xo_xpath_yyparse(xdp);
-
-    xo_xpath_yydebug = save_yydebug; /* Restore */
-
-    xo_xparse_dump(xdp);
-
+    int rc = xo_xparse_parse_string(xop, xdp, input);
     return rc ? -1 : 0;
 }
 
@@ -381,7 +361,8 @@ xo_filter_get_status (xo_handle_t *xop UNUSED, xo_filter_t *xfp)
 const char *
 xo_filter_status_name (xo_filter_status_t rc)
 {
-    return (rc == XO_STATUS_TRACK) ? "track" :
+    return (rc == 0) ? "zero" :
+	(rc == XO_STATUS_TRACK) ? "track" :
 	(rc == XO_STATUS_FULL) ? "full" :
 	(rc == XO_STATUS_DEAD) ? "dead" : "unknown";
 }
@@ -523,7 +504,7 @@ xo_filter_open (xo_handle_t *xop, xo_filter_t *xfp,
     if (xfp == NULL)
 	return 0;
 
-    xo_dbg(NULL, "filter: open %s: '%.*s'", type, tlen, tag);
+    xo_dbg(xop, "filter: open %s: '%.*s'", type, tlen, tag);
 
     xfp->xf_total_depth += 1;
 
@@ -587,7 +568,7 @@ xo_filter_open (xo_handle_t *xop, xo_filter_t *xfp,
 	}
 
 	/* A succesful match */
-	xo_dbg(NULL, "filter: open %s: progress match [%u] '%.*s' "
+	xo_dbg(xop, "filter: open %s: progress match [%u] '%.*s' "
 	       "[match %u, next %u] [allow %u/deny %u]%s",
 	       type, i, tlen, tag, xmp->xm_base, xsp->xs_match,
 	       xfp->xf_allow, xfp->xf_deny, label);
@@ -645,7 +626,7 @@ xo_filter_open (xo_handle_t *xop, xo_filter_t *xfp,
 	    continue;
 
 	/* A succesful match! Grab a new match struct and fill it in  */
-	xmp = xo_filter_match_new(xfp, *paths);
+	xmp = xo_filter_match_new(xop, xfp, *paths);
 	if (xmp == NULL)
 	    continue;
 
@@ -676,7 +657,7 @@ xo_filter_open (xo_handle_t *xop, xo_filter_t *xfp,
 	}
 
 #if 0
-	xo_encoder_wb_marker(xfp->xf_xd.xd_xop, XO_WB_INIT,
+	xo_encoder_wb_marker(xop, XO_WB_INIT,
 			     &xmp->xm_whiteboard, &xsp->xs_offset);
 #endif
 
@@ -686,7 +667,7 @@ xo_filter_open (xo_handle_t *xop, xo_filter_t *xfp,
 	 */
 	/* Nothing to do for now.... */
 
-	xo_dbg(NULL, "filter: open %s: new match '%.*s' [%u/%u] "
+	xo_dbg(xop, "filter: open %s: new match '%.*s' [%u/%u] "
 	       "[state %u/%s; match %u, pred %u] "
 	       "[%u/%u] %s",
 	       type, tlen, tag, *paths, xnp->xn_next,
@@ -760,7 +741,7 @@ xo_filter_key_add (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED,
     xsp->xs_keys_len += new_len - 1;
     xsp->xs_keys = newp;
 
-    xo_dbg(NULL, "xo_filter_key: adding '%s' = '%s'", t, v);
+    xo_dbg(xop, "xo_filter_key: adding '%s' = '%s'", t, v);
 }
 
 static const char * UNUSED
@@ -820,21 +801,21 @@ xo_filter_data_invalid (void)
 }
 
 #define XO_FILTER_OP_ARGS \
-    xo_filter_t *xfp UNUSED, xo_match_t *xmp UNUSED, \
+    xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED, xo_match_t *xmp UNUSED, \
 	xo_xparse_node_t *xnp UNUSED, \
 	xo_filter_data_t left UNUSED, xo_filter_data_t right UNUSED
 
 typedef xo_filter_data_t (*xo_filter_op_fn_t)(XO_FILTER_OP_ARGS);
 
 #define XO_FILTER_NODE_ARGS \
-    xo_filter_t *xfp UNUSED, xo_match_t *xmp UNUSED, \
+    xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED, xo_match_t *xmp UNUSED, \
 	xo_xparse_node_t *xnp
 
 typedef xo_filter_data_t (xo_filter_node_fn_t)(XO_FILTER_NODE_ARGS);
 
 /* Forward decl */
 static xo_filter_data_t
-xo_filter_eval (xo_filter_t *xfp, xo_match_t *xmp,
+xo_filter_eval (xo_handle_t *xop, xo_filter_t *xfp, xo_match_t *xmp,
 			 xo_xparse_node_id_t id, xo_filter_op_fn_t op_fn);
 
 static xo_filter_data_t
@@ -915,7 +896,8 @@ xo_filter_eval_path (XO_FILTER_NODE_ARGS)
 }
 
 static void
-xo_filter_dump_data (xo_filter_t *xfp UNUSED, xo_filter_data_t data,
+xo_filter_dump_data (xo_handle_t *xop, xo_filter_t *xfp UNUSED,
+		     xo_filter_data_t data,
 		     int indent, const char *title)
 {
     char buf[16];
@@ -946,7 +928,7 @@ xo_filter_dump_data (xo_filter_t *xfp UNUSED, xo_filter_data_t data,
 
     const char *type = xo_xparse_fancy_token_name(data.xfd_type);
 
-    xo_dbg(NULL, "%*s%s: type '%s' (%u), flags %#x, node %lu, val '%s'",
+    xo_dbg(xop, "%*s%s: type '%s' (%u), flags %#x, node %lu, val '%s'",
 	   indent, "", title ?: "",
 	   type, data.xfd_type, data.xfd_flags, data.xfd_node, bp);
 }
@@ -978,8 +960,8 @@ xo_filter_eval_equals_op (XO_FILTER_OP_ARGS)
     int equals = 0;
     int64_t ival;
 
-    xo_filter_dump_data(xfp, left, 0, "equals: left");
-    xo_filter_dump_data(xfp, right, 0, "equals: right");
+    xo_filter_dump_data(xop, xfp, left, 0, "equals: left");
+    xo_filter_dump_data(xop, xfp, right, 0, "equals: right");
 
     switch (TYPE_CMP(left.xfd_type, right.xfd_type)) {
     case TYPE_CMP(C_STRING, C_STRING):
@@ -1028,11 +1010,12 @@ xo_filter_eval_equals_op (XO_FILTER_OP_ARGS)
 static xo_filter_data_t
 xo_filter_eval_equals (XO_FILTER_NODE_ARGS)
 {
-    return xo_filter_eval(xfp, xmp, xnp->xn_contents, xo_filter_eval_equals_op);
+    return xo_filter_eval(xop, xfp, xmp, xnp->xn_contents,
+			  xo_filter_eval_equals_op);
 }
 
 static xo_filter_data_t
-xo_filter_eval (xo_filter_t *xfp, xo_match_t *xmp,
+xo_filter_eval (xo_handle_t *xop, xo_filter_t *xfp, xo_match_t *xmp,
 			 xo_xparse_node_id_t id, xo_filter_op_fn_t op_fn)
 {
     xo_filter_data_t data = xo_filter_data_invalid();
@@ -1067,11 +1050,11 @@ xo_filter_eval (xo_filter_t *xfp, xo_match_t *xmp,
 	
 	default:		/* For now; should be XFDF_UNSUPPORTED */
 	    if (xnp->xn_contents)
-		data = xo_filter_eval(xfp, xmp, xnp->xn_contents, op_fn);
+		data = xo_filter_eval(xop, xfp, xmp, xnp->xn_contents, op_fn);
 	}
 
 	if (node_fn)
-	    data = node_fn(xfp, xmp, xnp);
+	    data = node_fn(xop, xfp, xmp, xnp);
 
 	if (first) {
 	    first = 0;
@@ -1082,8 +1065,8 @@ xo_filter_eval (xo_filter_t *xfp, xo_match_t *xmp,
 	if (op_fn == NULL)
 	    continue;
 
-	data = op_fn(xfp, xmp, xnp, last, data);
-	xo_filter_dump_data(xfp, data, 4, "eval");
+	data = op_fn(xop, xfp, xmp, xnp, last, data);
+	xo_filter_dump_data(xop, xfp, data, 4, "eval");
 	last = data;
     }
 
@@ -1105,7 +1088,7 @@ xo_filter_eval (xo_filter_t *xfp, xo_match_t *xmp,
  * "y"s can appear and the predicate is true if any "x" matches any "y".
  */
 static xo_filter_data_t
-xo_filter_pred_eval (xo_filter_t *xfp, xo_match_t *xmp)
+xo_filter_pred_eval (xo_handle_t *xop, xo_filter_t *xfp, xo_match_t *xmp)
 {
     xo_filter_data_t data = { 0 };
 
@@ -1121,11 +1104,11 @@ xo_filter_pred_eval (xo_filter_t *xfp, xo_match_t *xmp)
 	if (xnp->xn_type != C_PREDICATE) /* Can't eval anything else */
 	    continue;
 
-	data = xo_filter_eval(xfp, xmp, xnp->xn_contents, NULL);
-	xo_filter_dump_data(xfp, data, 4, "xo_filter_pred_eval: working");
+	data = xo_filter_eval(xop, xfp, xmp, xnp->xn_contents, NULL);
+	xo_filter_dump_data(xop, xfp, data, 4, "xo_filter_pred_eval: working");
     }
 
-    xo_filter_dump_data(xfp, data, 2, "xo_filter_pred_eval: final");
+    xo_filter_dump_data(xop, xfp, data, 2, "xo_filter_pred_eval: final");
     return data;
 }
 
@@ -1172,7 +1155,7 @@ xo_filter_key (xo_handle_t *xop, xo_filter_t *xfp,
     xo_xparse_node_id_t id;
     int rc = 0;
 
-    xo_dbg(NULL, "xo_filter_key: '%.*s' = '%.*s'", tlen, tag, vlen, value);
+    xo_dbg(xop, "xo_filter_key: '%.*s' = '%.*s'", tlen, tag, vlen, value);
     xo_filter_dump_matches(xop, xfp);
 
     for (i = 0; xmp; i++, xmp = xmp->xm_next) { /* For each active match */
@@ -1190,7 +1173,7 @@ xo_filter_key (xo_handle_t *xop, xo_filter_t *xfp,
 
 	    if (!xo_filter_pred_needs(xdp, xfp, xsp->xs_predicates,
 				      tag, tlen)) {
-		xo_dbg(NULL, "xo_filter_key: predicate doesn't need '%.*s'",
+		xo_dbg(xop, "xo_filter_key: predicate doesn't need '%.*s'",
 		       tlen, tag);
 		continue;
 	    }
@@ -1198,18 +1181,18 @@ xo_filter_key (xo_handle_t *xop, xo_filter_t *xfp,
 	    xo_filter_key_add(xop, xfp, xmp, tag, tlen, value, vlen);
 
 	    const char *test = xo_filter_key_find(xfp, xmp, tag);
-	    xo_dbg(NULL, "filter: new key: [%s] '%s'",
+	    xo_dbg(xop, "filter: new key: [%s] '%s'",
 		   tag, test ?: "");
 
-	    xo_filter_data_t data = xo_filter_pred_eval(xfp, xmp);
+	    xo_filter_data_t data = xo_filter_pred_eval(xop, xfp, xmp);
 	    int pred = xo_filter_cast_int64(xfp, data);
 
-	    xo_dbg(NULL, "filter: key: pred eval [%u] '%s' "
+	    xo_dbg(xop, "filter: key: pred eval [%u] '%s' "
 		   "[base %u [%u/%u] -> %d",
 		   i, tag, xmp->xm_base,
 		   xfp->xf_allow, xfp->xf_deny, pred);
 
-	    xo_filter_dump_data(xfp, data, 4, "xo_filter_key: working");
+	    xo_filter_dump_data(xop, xfp, data, 4, "xo_filter_key: working");
 
 	    if (data.xfd_flags & XFDF_MISSING) {
 		rc = XO_FILTER_MISS; /* Need more data */
@@ -1256,13 +1239,13 @@ xo_filter_key (xo_handle_t *xop, xo_filter_t *xfp,
 	}
 
 	/* A succesful match */
-	xo_dbg(NULL, "filter: key success [%u] '%.*s' "
+	xo_dbg(xop, "filter: key success [%u] '%.*s' "
 	       "[match %u, next %u] [allow %u/deny %u]%s",
 	       i, tlen, tag, xmp->xm_base, xsp->xs_match,
 	       xfp->xf_allow, xfp->xf_deny, label);
     }
 
-    xo_dbg(NULL, "xo_filter_key: '%.*s' = '%.*s' --> %d",
+    xo_dbg(xop, "xo_filter_key: '%.*s' = '%.*s' --> %d",
 	   tlen, tag, vlen, value, rc);
 
     xo_filter_change_status(xop, xfp, "key");
@@ -1298,7 +1281,7 @@ xo_filter_close (xo_handle_t *xop, xo_filter_t *xfp,
     if (xfp->xf_total_depth > 0)
 	xfp->xf_total_depth -= 1;
 
-    xo_dbg(NULL, "filter: close %s: '%.*s'", type, tlen, tag);
+    xo_dbg(xop, "filter: close %s: '%.*s'", type, tlen, tag);
 
     /*
      * Whiffle thru the states to see if we have any open paths.  We
@@ -1397,7 +1380,7 @@ xo_filter_close (xo_handle_t *xop, xo_filter_t *xfp,
 	}
 
 	/* A succesful un-match */
-	xo_dbg(NULL, "filter: close %s match [%u]: progress match '%.*s' "
+	xo_dbg(xop, "filter: close %s match [%u]: progress match '%.*s' "
 	       "[base %u] [%u/%u]%s",
 	       type, i, tlen, tag, xmp ? xmp->xm_base : 0,
 	       xfp->xf_allow, xfp->xf_deny, label);
