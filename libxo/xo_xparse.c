@@ -1110,9 +1110,9 @@ xo_xpath_yylex (xo_xparse_data_t *xdp, xo_xparse_node_id_t *yylvalp)
     xdp->xd_last = rc;
 
     if (rc > 0 && xdp->xd_start == xdp->xd_cur) {
-	xo_dbg(xdp->xd_xop, "%s:%u:%u: xpath: lex: zero length token: %d/%s",
-	       xdp->xd_filename, xdp->xd_line, xdp->xd_col,
-	       rc, xo_xparse_token_name(rc));
+	xo_dbg(xdp->xd_xop, "%sxpath: found a zero length token: %d/%s",
+	       xo_xparse_location(xdp), rc, xo_xparse_token_name(rc));
+
 	xdp->xd_last = rc = M_ERROR;
 
 	/*
@@ -1271,4 +1271,32 @@ xo_xparse_destroy (xo_xparse_data_t *xdp)
 	xo_xparse_clean(xdp);
 	xo_free(xdp);
     }
+}
+
+/**
+ * Parse the input XPath strings into internal form that we can use.
+ */
+int
+xo_xparse_parse_string (xo_handle_t *xop, xo_xparse_data_t *xdp,
+			const char *input)
+{
+    /* Use our string as the input buffer */
+    xo_xparse_set_input(xdp, input, strlen(input));
+
+    int save_yydebug = xo_xpath_yydebug;
+    if (xo_isset_flags(xop, XOF_DEBUG))
+	xo_xpath_yydebug = 1;
+
+    xdp->xd_xop = xop;		/* Temporarily record the handle */
+
+    /* This is the main parsing function, built from xo_xpath.y */
+    int rc = xo_xpath_yyparse(xdp);
+
+    xdp->xd_xop = NULL;		/* Reset the handle */
+
+    xo_xpath_yydebug = save_yydebug; /* Restore */
+
+    xo_xparse_dump(xdp);
+
+    return rc;
 }
