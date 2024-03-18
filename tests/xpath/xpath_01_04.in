@@ -1,0 +1,16 @@
+#
+?one/two[three == "4"]
++one
++two
+$three 4
+-two
++two
+$three 5
+-two
++two
+$three 4
++four
+=6
+-four
+-two
+-one
