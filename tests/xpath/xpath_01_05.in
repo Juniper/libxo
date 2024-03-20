@@ -1,4 +1,4 @@
-#
+#run
 ?one/two/three/four
 ?a/b/c/d
 ?!e
@@ -7,16 +7,16 @@
 +two
 +three
 +four
-=
+=data foo
 +five
-=
+=data goo
 +six
-=
+=data hoo
 -six
 -five
-=
+=data ioo
 -four
-=
+=data joo
 -three
 -two
 +two
@@ -30,15 +30,15 @@
 +d
 +e
 +f
-=
+=g h
 -f
 -e
 -d
 +d
-=
+=data koo
 +e
 +f
-=
+=data loo
 -f
 -e
 -d
@@ -47,7 +47,7 @@
 -a
 +three
 +four
-=
+=data moo
 -four
 -three
 -two
