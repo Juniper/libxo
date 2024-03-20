@@ -1,0 +1,4 @@
+one[two == '4']/output = 'yes'
+one/two[three == '5']/output = 'sure'
+one[two == '4']/three[four == '5']/output = '1'
+one[two == '4']/three[four == '5']/output = 'finally'
