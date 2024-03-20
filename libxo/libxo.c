@@ -784,6 +784,25 @@ xo_default (xo_handle_t *xop)
  * the undocumented "debug" option.
  */
 void
+xo_dbg_v (xo_handle_t *xop UNUSED, const char *fmt UNUSED, va_list vap UNUSED)
+{
+#ifndef LIBXO_TEXT_ONLY
+    xop = xo_default(xop);
+
+    if (xop == NULL || !(xop->xo_flags & XOF_DEBUG))
+	return;
+
+    size_t len = strlen(fmt);
+    char *new_fmt = alloca(len + 2);
+    memcpy(new_fmt, fmt, len);
+    new_fmt[len] = '\n';
+    new_fmt[len + 1] = '\0';
+
+    vfprintf(stderr, new_fmt, vap);
+#endif /* LIBXO_TEXT_ONLY */
+}
+
+void
 xo_dbg (xo_handle_t *xop UNUSED, const char *fmt UNUSED, ...)
 {
 #ifndef LIBXO_TEXT_ONLY
@@ -793,14 +812,9 @@ xo_dbg (xo_handle_t *xop UNUSED, const char *fmt UNUSED, ...)
 	return;
 
     va_list vap;
-    size_t len = strlen(fmt);
-    char *new_fmt = alloca(len + 2);
-    memcpy(new_fmt, fmt, len);
-    new_fmt[len] = '\n';
-    new_fmt[len + 1] = '\0';
 
     va_start(vap, fmt);
-    vfprintf(stderr, new_fmt, vap);
+    xo_dbg_v(xop, fmt, vap);
     va_end(vap);
 #endif /* LIBXO_TEXT_ONLY */
 }
