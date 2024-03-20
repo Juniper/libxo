@@ -87,15 +87,17 @@ TEST_FORMATS = XP
 
 RUN_TESTS = ${srcdir}/../run-tests.sh -d ${srcdir}
 
+RUN_TESTS_CMD = sh ${RUN_TESTS} -T fullpath
+
 test tests: ${bin_PROGRAMS}
 	@${MKDIR} -p out
-	@sh ${RUN_TESTS} run ${TEST_CASES}
+	${RUN_TESTS_CMD} -l warn run ${TEST_CASES:.c=.test}
 
 one:
 
 accept:
 	@${MKDIR} -p ${srcdir}/saved
-	@env TEST_FORMATS=fullpath sh ${RUN_TESTS} accept ${TEST_CASES}
+	@${RUN_TESTS_CMD} accept ${TEST_CASES}
 
 old-test old-tests: ${bin_PROGRAMS}
 	@${MKDIR} -p out
