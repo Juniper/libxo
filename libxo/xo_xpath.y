@@ -289,7 +289,8 @@
 #undef YYDEBUG
 #ifdef XO_YYDEBUG
 #define YYDEBUG 1		/* Enable debug output */
-#define YYFPRINTF fprintf	/* Log via our function */
+/* Log via our function */
+#define YYFPRINTF(_fp, _fmt...) xo_xparse_yyprintf(xparse_data, _fmt)
 #else /* XO_YYDEBUG */
 #define YYDEBUG 1		/* Enable debug output */
 #define YYFPRINTF xo_dont_bother /* Don't log via our function */
