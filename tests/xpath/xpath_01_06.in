@@ -1,34 +1,34 @@
-#
+#run
 ?one/two[three == 3]
 ?uno/dos/tres[test == "yup"]/cuatro[test == "sure"]/cinco
 +one
 +two
 $three 3
 +four
-=
+=foo goo
 +five
-=
+=foo goo
 +six
-=
+=foo goo
 -six
 -five
-=
+=foo goo
 -four
-=
+=foo goo
 -two
 +two
 $three 3333
 +four
-=
+=foo goo
 +five
-=
+=foo goo
 +six
-=
+=foo goo
 -six
 -five
-=
+=foo goo
 -four
-=
+=foo goo
 -two
 -one
 
@@ -43,15 +43,16 @@ $test sure
 -nope
 +cinco
 +seis
--sies
+-seis
 -cinco
 +siete
--sieta
+-siete
 +cinco
 -cinco
 -cuatro
 +cuatro
 $test fail
+=foo goo
 +cinco
 +seis
 -seis
@@ -60,6 +61,8 @@ $test fail
 +cuatro
 $test sure
 +cinco
+=foo goo
+=goo foo
 +seis
 -seis
 -cinco
