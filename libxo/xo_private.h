@@ -76,4 +76,10 @@ xo_memrchr (void *data, int c, xo_ssize_t len)
 }
 #endif /* HAVE_MEMRCHR */
 
+void
+xo_dbg (xo_handle_t *xop, const char *fmt, ...);
+
+void
+xo_dbg_v (xo_handle_t *xop UNUSED, const char *fmt UNUSED, va_list vap UNUSED);
+
 #endif /* XO_PRIVATE_H */
