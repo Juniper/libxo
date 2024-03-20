@@ -1,19 +1,23 @@
-#
+#run
 ?one[two == 4]
 +one
 $two 4
+=output yes
 -one
 r
 ?one[two == 40]
 +one
 $two 4
+=output nope
 -one
 r
 ?one/two[three == 5]
 +one
 +two
 $three 5
+=output sure
 -two
+=output no
 -one
 r
 ?one[two == 4]/three[four == 5]
@@ -21,8 +25,17 @@ r
 $two 4
 +three
 $four 5
+=output 1
 -three
 +three
 $four 6
+=output 0
+-three
++three
+=output should-not
+-three
++three
+$four 5
+=output finally
 -three
 -one
