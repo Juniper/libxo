@@ -124,13 +124,20 @@ main (int argc, char **argv)
 	    cp = trim(cp + 1);
 
 	    int xof_debug = xo_isset_flags(xop, XOF_DEBUG);
-	    xo_set_flags(xop, XOF_DEBUG);
+	    if (debug)
+		xo_set_flags(xop, XOF_DEBUG);
 
 	    xo_filter_add(xop, cp);
 
 	    int bad_horse[] = { C_DESCENDANT, 0 };
 
 	    xo_xpath_feature_warn("test", xdp, bad_horse, "+");
+
+	    if (!debug) {
+		xo_set_flags(xop, XOF_DEBUG);
+		xo_xparse_dump(xdp);
+	    }
+
 	    if (!xof_debug)
 		xo_clear_flags(xop, XOF_DEBUG);
 	    break;
@@ -154,6 +161,9 @@ main (int argc, char **argv)
 	case '=':		/* Non-key field */
 	    field = cp + 1;
 	    value = clean_token(field);
+	    if (!*field || !*value)
+		break;
+
 	    fprintf(stderr, "main: field: '%s'='%s'\n", field, value);
 	    rc = xo_emit_field_h(xop, "", field, "%s", value);
 	    break;
@@ -161,6 +171,9 @@ main (int argc, char **argv)
 	case '$':
 	    field = cp + 1;
 	    value = clean_token(field);
+	    if (!*field || !*value)
+		break;
+
 	    fprintf(stderr, "main: key: '%s'='%s'\n", field, value);
 	    rc = xo_emit_field_h(xop, "k", field, "%s", value);
 	    break;
