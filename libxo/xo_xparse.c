@@ -481,7 +481,7 @@ xo_xparse_check_axis_name (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
 	    return;
     }
 
-    xo_xparse_warn(xdp, "%sunknown axis name: '%s'\n",
+    xo_xparse_warn(xdp, "%sunknown axis name: '%s'",
 		   xo_xparse_location(xdp), str);
 }
 
@@ -548,7 +548,7 @@ xo_xparse_dump_one_node (xo_xparse_data_t *xdp, xo_xparse_node_id_t id,
     xo_xparse_node_t *next = xo_xparse_node(xdp, xnp->xn_next);
     xo_xparse_node_t *prev = xo_xparse_node(xdp, xnp->xn_prev);
 
-    xo_dbg(NULL, "%*s%s%06ld: type %u (%s), str %ld [%s], "
+    xo_dbg(xdp->xd_xop, "%*s%s%06ld: type %u (%s), str %ld [%s], "
 	   "contents %ld, next %ld%s, prev %ld %s",
 	   indent, "", title ?: "", id,
 	   xnp->xn_type, xo_xparse_token_name(xnp->xn_type),
@@ -591,7 +591,7 @@ xo_xparse_feature_warn_one_node (const char *tag, xo_xparse_data_t *xdp UNUSED,
     xo_xparse_token_t type = xnp->xn_type;
 
     if ((int) type < len && map[type]) {
-	xo_xparse_warn(xdp, "%s%sxpath feature is unsupported: %s\n",
+	xo_xparse_warn(xdp, "%s%sxpath feature is unsupported: %s",
 		       tag ?: "", tag ? ": " : "",
 		       xo_xparse_fancy_token_name(type));
 	return 1;
@@ -1233,6 +1233,16 @@ xo_xpath_yyerror (xo_xparse_data_t *xdp, const char *str, int yystate)
 		   token ? " before " : "", token, token ? ": " : "", buf);
 
     return 0;
+}
+
+void
+xo_xparse_yyprintf(xo_xparse_data_t *xdp, const char *fmt, ...)
+{
+    va_list vap;
+
+    va_start(vap, fmt);
+    xo_dbg_v(xdp->xd_xop, fmt, vap);
+    va_end(vap);
 }
 
 void
