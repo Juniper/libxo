@@ -733,9 +733,6 @@ xo_map_add (xo_handle_t *xop, const char *from, size_t flen,
 int
 xo_map_add_file (xo_handle_t *xop, const char *fname);
 
-void
-xo_dbg (xo_handle_t *xop, const char *fmt, ...);
-
 int
 xo_filter_add (xo_handle_t *xop, const char *vp);
 
