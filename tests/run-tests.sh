@@ -17,26 +17,48 @@ run () {
     cmd="$1"
 
     if [ "$DOC" = doc ]; then
-        ${ECHO} "   - $cmd"
+        ${ECHO} "$cmd"
     else
         if [ ! -z ${TEST_VERBOSE} ]; then
-            ${ECHO} "   - $cmd"
+            ${ECHO} "command: $cmd"
 	fi
 	# We need to eval to handle "&&" in commands
         eval $cmd
     fi
 }
 
+mecho() {
+    if [ "$DOC" = doc ]; then
+        ${ECHO} "# $1"
+    else
+        ${ECHO} "$1"
+    fi
+}
+
 info () {
-    ${ECHO} "$@"
+    mecho "$@"
+}
+
+format_options["fullpath"]="@fullpath"
+
+set_fmt_option () {
+    case $1 in
+	*)
+	    if [ -z "${format_options[$1]}" ]; then
+		opt="--libxo:$1";
+	    else
+		opt="--libxo ${format_options[$1]}";
+            fi;;
+    esac
 }
 
 run_tests () {
     oname=$name.$ds.$fmt
     out=out/$oname
-    ${ECHO} "... $test ... $name ... $ds ..."
-    run "$test $data input $input > $out.out 2> $out.err"
-    ${ECHO} "... done"
+    mecho "... $test ... $name ... $ds ..."
+    set_fmt_option
+    run "$test $LIBXOPTS $opt $data input $input > $out.out 2> $out.err"
+    mecho "... done"
 
     run "diff -Nu ${SRCDIR}/saved/$oname.out out/$oname.out | ${S2O}"
     run "diff -Nu ${SRCDIR}/saved/$oname.err out/$oname.err | ${S2O}"
@@ -53,7 +75,7 @@ do_run_tests () {
 		if [ -f $input ]; then
 		    name=`basename $input .in`
 		    ds=1
-		    grep '^#' $input | while read comment data ; do
+		    grep '^#run' $input | while read comment data ; do
 			run_tests
 			ds=`expr $ds + 1`
 		    done
@@ -71,25 +93,30 @@ accept_file () {
 }
 
 accept_tests () {
-    oname=$name.$ds
+    oname=$name.$ds.$fmt
 
     accept_file out/$oname.out ${SRCDIR}/saved/$oname.out
     accept_file out/$oname.err ${SRCDIR}/saved/$oname.err
 }
 
 do_accept () {
+    mkdir -p ${SRCDIR}/saved
+
     for test in ${TESTS}; do
 	base=`basename $test .test`
+	base=`basename $base .c`
 
-	for input in `echo ${SRCDIR}/${base}*.in`; do
-            if [ -f $input ]; then
-		name=`basename $input .in`
-		ds=1
-		grep '^#' $input | while read comment data ; do
-		    accept_tests
-		    ds=`expr $ds + 1`
-		done
-	    fi
+        for fmt in ${TEST_FORMATS:-T}; do
+	    for input in `echo ${SRCDIR}/${base}*.in`; do
+		if [ -f $input ]; then
+		    name=`basename $input .in`
+		    ds=1
+		    grep '^#run' $input | while read comment data ; do
+			accept_tests
+			ds=`expr $ds + 1`
+		    done
+		fi
+	    done
 	done
     done
 }
@@ -105,7 +132,9 @@ while [ $# -gt 0 ]
 do
     case "$1" in
     -d) SRCDIR=$2; shift;;
-    -D) DOC=doc;;
+    -D) TEST_VERBOSE=1;;
+    -n) DOC=doc;;
+    -l) LIBXOPTS="$LIBXOPTS --libxo '$2'"; shift;;
     -T) TEST_FORMATS=$2; shift;;
     -v) S2O=cat;;
     -*) echo "unknown option" >&2; exit;;
