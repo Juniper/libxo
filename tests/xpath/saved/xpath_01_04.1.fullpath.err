@@ -1,0 +1,50 @@
+main: input '#run'
+main: input '?one/two[three == "4"]'
+--- 0: 12
+    000012: type 512 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 508 (C_ELEMENT), str 1 [one], contents 0, next 3, prev 0 
+        000003: type 508 (C_ELEMENT), str 7 [two], contents 4, next 0, prev 1 
+            000004: type 513 (C_PREDICATE), str 0 [], contents 6, next 0, prev 0 
+                000006: type 278 (L_EQUALS), str 19 [==], contents 7, next 0, prev 0 
+                    000007: type 512 (C_PATH), str 0 [], contents 5, next 8, prev 0 
+                        000005: type 508 (C_ELEMENT), str 13 [three], contents 0, next 0, prev 0 
+                    000008: type 492 (T_QUOTED), str 22 [4], contents 0, next 0, prev 7 
+main: status: zero
+main: input '+one'
+main: status: track
+main: input '+two'
+main: status: track
+main: input '$three 4'
+main: key: 'three'='4'
+main: status: full
+main: input '=output yes'
+main: field: 'output'='yes'
+main: status: full
+main: input '-two'
+main: status: track
+main: input '+two'
+main: status: track
+main: input '$three 5'
+main: key: 'three'='5'
+main: status: dead
+main: input '=output no'
+main: field: 'output'='no'
+main: status: dead
+main: input '-two'
+main: status: track
+main: input '+two'
+main: status: track
+main: input '$three 4'
+main: key: 'three'='4'
+main: status: full
+main: input '+four'
+main: status: full
+main: input '=five 6'
+main: field: 'five'='6'
+main: status: full
+main: input '-four'
+main: status: full
+main: input '-two'
+main: status: track
+main: input '-one'
+main: status: track
