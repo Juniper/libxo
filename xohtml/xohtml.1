@@ -2,11 +2,11 @@
 .\" # Copyright (c) 2015, Juniper Networks, Inc.
 .\" # All rights reserved.
 .\" # This SOFTWARE is licensed under the LICENSE provided in the
-.\" # ../Copyright file. By downloading, installing, copying, or 
+.\" # ../Copyright file. By downloading, installing, copying, or
 .\" # using the SOFTWARE, you agree to be bound by the terms of that
 .\" # LICENSE.
 .\" # Phil Shafer, July 2014
-.\" 
+.\"
 .Dd December 4, 2014
 .Dt XOHTML 1
 .Os
@@ -16,11 +16,11 @@
 .Xr xo_emit 3
 .Sh SYNOPSIS
 .Nm xohtml
-.Op Fl "b <base>"
-.Op Fl "c" <command>"
-.Op Fl "f" <output>
-.Op Fl "w"
-.Op Ar command [argument ...]
+.Op Fl b Ar base
+.Op Fl c Ar command
+.Op Fl f Ar output
+.Op Fl w
+.Op Ar command Op Ar argument ...
 .Sh DESCRIPTION
 .Nm
 is a tool for preparing
@@ -41,36 +41,34 @@ standard input is used.
 is typically used to wrap
 .Nm libxo
 output with sufficient HTML content to allow display in a web browser.
-This includes parent HTML tags as well as
-.Nm CSS
-stylesheets and
-.Nm Javascript
-files.
+This includes parent HTML tags as well as CSS stylesheets and
+Javascript files.
 .Pp
 If the command is given directly on the command line,
 .Nm
 will add the "--libxo=html" option needed to generate HTML output
 from
-.Nm libxo "-enabled"
-applications.  See
+.Nm libxo Ns
+-enabled applications.
+See
 .Xr xo_options 7
 for details.
 .Pp
 The following options are available:
 .Bl -tag -width indent
-.It Ic -b Ar base | Ic --base Ar base
+.It Fl b Ar base | Fl -base Ar base
 Supplies a source path for the CSS and Javascript files referenced in
 the output of
 .Nm xohtml .
-.It Ic -c Ar command | Ic --command Ar command
+.It Fl c Ar command | Fl -command Ar command
 Use the given command instead of one on the command line.
 This command should be quoted if it consists of multiple tokens, and
 should contain the "--libxo=html" option or equivalent, since the
 command is used directly.
-.It Ic -f Ar file | Ic --file Ar file
+.It Fl f Ar file | Fl -file Ar file
 Output is saved to the given file, rather than to the standard output
 descriptor.
-.It Ic -w | --web
+.It Fl w | --web
 Uses the official
 .Nm libxo
 website URL as the source path for the CSS and Javascript files
@@ -101,3 +99,13 @@ the output to /tmp/src.html:
 .Xr libxo 3 ,
 .Xr xo_emit 3 ,
 .Xr xo_options 7
+.Sh HISTORY
+The
+.Nm libxo
+library first appeared in
+.Fx 11.0 .
+.Sh AUTHORS
+The
+.Nm libxo
+library was written by
+.An Phil Shafer Aq Mt phil@freebsd.org .

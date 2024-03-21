@@ -2,11 +2,11 @@
 .\" # Copyright (c) 2015, Juniper Networks, Inc.
 .\" # All rights reserved.
 .\" # This SOFTWARE is licensed under the LICENSE provided in the
-.\" # ../Copyright file. By downloading, installing, copying, or 
+.\" # ../Copyright file. By downloading, installing, copying, or
 .\" # using the SOFTWARE, you agree to be bound by the terms of that
 .\" # LICENSE.
 .\" # Phil Shafer, July 2015
-.\" 
+.\"
 .Dd July 9, 2015
 .Dt XOPO 1
 .Os
@@ -54,17 +54,17 @@ output stream, allowing
 to operated as a filter.
 .Pp
 .Bl -tag -width indent
-.It Ic -f Ar pofile | Ic --po  Ar pofile
+.It Fl f Ar pofile | Fl -po  Ar pofile
 Use the given po file for input.
-.It Ic --help
+.It Fl -help
 Display this help text
-.It Ic -o Ar file | Ic --output Ar file
+.It Fl o Ar file | Fl -output Ar file
 Write output content to the given file
-.It Ic -s Ar text | Ic --simplify Ar text
+.It Fl s Ar text | Fl -simplify Ar text
 Generate the simplified version of a single text string.
-.It Ic -W | Ic --warn
+.It Fl W | Fl -warn
 Generate warnings while parsing the format strings
-.It Ic --version
+.It Fl -version
 Display version information
 .El
 .Pp
@@ -81,7 +81,7 @@ The
 library first appeared in
 .Fx 11.0 .
 .Sh AUTHORS
+The
 .Nm libxo
-was written by
+library was written by
 .An Phil Shafer Aq Mt phil@freebsd.org .
-

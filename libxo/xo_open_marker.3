@@ -2,11 +2,11 @@
 .\" # Copyright (c) 2015, Juniper Networks, Inc.
 .\" # All rights reserved.
 .\" # This SOFTWARE is licensed under the LICENSE provided in the
-.\" # ../Copyright file. By downloading, installing, copying, or 
+.\" # ../Copyright file. By downloading, installing, copying, or
 .\" # using the SOFTWARE, you agree to be bound by the terms of that
 .\" # LICENSE.
 .\" # Phil Shafer, January 2015
-.\" 
+.\"
 .Dd January 22, 2015
 .Dt LIBXO 3
 .Os
@@ -34,7 +34,7 @@ and
 A marker can be used to affect how open constructs are closed, either
 by preventing their (implicit or explicit) closure or by forcing their
 closure.
-While a marker is open, no other open constructs can be closed. 
+While a marker is open, no other open constructs can be closed.
 When a marker is closed, all constructs open since the marker was opened
 will be closed.
 A marker is used to "freeze" any open constructs.
@@ -89,7 +89,8 @@ opened after the "outer" marker.
 .Ed
 .Pp
 In this example, the code whiffles through a list of fish, calling a
-function to emit details about each fish.  The marker "fish-guts" is
+function to emit details about each fish.
+The marker "fish-guts" is
 used to ensure that any constructs opened by the function are closed
 properly.
 .Bd -literal -offset indent
@@ -101,15 +102,15 @@ properly.
     }
 .Ed
 .Sh SEE ALSO
-.Xr xo_emit 3 ,
-.Xr libxo 3
+.Xr libxo 3 ,
+.Xr xo_emit 3
 .Sh HISTORY
 The
 .Nm libxo
 library first appeared in
 .Fx 11.0 .
 .Sh AUTHORS
+The
 .Nm libxo
-was written by
+library was written by
 .An Phil Shafer Aq Mt phil@freebsd.org .
-
