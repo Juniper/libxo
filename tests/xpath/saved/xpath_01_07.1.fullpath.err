@@ -1,0 +1,117 @@
+main: input '#run'
+main: input '?/uno/dos/tres'
+--- 0: 1
+    000001: type 505 (C_ABSOLUTE), str 1 [/], contents 0, next 2, prev 0 
+    000002: type 508 (C_ELEMENT), str 3 [uno], contents 0, next 4, prev 1 
+    000004: type 508 (C_ELEMENT), str 9 [dos], contents 0, next 6, prev 2 
+    000006: type 508 (C_ELEMENT), str 15 [tres], contents 0, next 0, prev 4 
+main: status: zero
+main: input '?/one/two/more'
+--- 0: 1
+    000001: type 505 (C_ABSOLUTE), str 1 [/], contents 0, next 2, prev 0 
+    000002: type 508 (C_ELEMENT), str 3 [uno], contents 0, next 4, prev 1 
+    000004: type 508 (C_ELEMENT), str 9 [dos], contents 0, next 6, prev 2 
+    000006: type 508 (C_ELEMENT), str 15 [tres], contents 0, next 0, prev 4 
+--- 1: 9
+    000009: type 505 (C_ABSOLUTE), str 20 [/], contents 0, next 10, prev 0 
+    000010: type 508 (C_ELEMENT), str 22 [one], contents 0, next 12, prev 9 
+    000012: type 508 (C_ELEMENT), str 28 [two], contents 0, next 14, prev 10 
+    000014: type 508 (C_ELEMENT), str 34 [more], contents 0, next 0, prev 12 
+main: status: zero
+main: input '?three'
+--- 0: 1
+    000001: type 505 (C_ABSOLUTE), str 1 [/], contents 0, next 2, prev 0 
+    000002: type 508 (C_ELEMENT), str 3 [uno], contents 0, next 4, prev 1 
+    000004: type 508 (C_ELEMENT), str 9 [dos], contents 0, next 6, prev 2 
+    000006: type 508 (C_ELEMENT), str 15 [tres], contents 0, next 0, prev 4 
+--- 1: 9
+    000009: type 505 (C_ABSOLUTE), str 20 [/], contents 0, next 10, prev 0 
+    000010: type 508 (C_ELEMENT), str 22 [one], contents 0, next 12, prev 9 
+    000012: type 508 (C_ELEMENT), str 28 [two], contents 0, next 14, prev 10 
+    000014: type 508 (C_ELEMENT), str 34 [more], contents 0, next 0, prev 12 
+--- 2: 19
+    000019: type 512 (C_PATH), str 0 [], contents 17, next 0, prev 0 
+        000017: type 508 (C_ELEMENT), str 39 [three], contents 0, next 0, prev 0 
+main: status: zero
+main: input '+uno'
+main: status: track
+main: input '+dos'
+main: status: track
+main: input '+tres'
+main: status: full
+main: input '=cuatro 4'
+main: field: 'cuatro'='4'
+main: status: full
+main: input '-tres'
+main: status: track
+main: input '+uno'
+main: status: dead
+main: input '+dos'
+main: status: dead
+main: input '+tres'
+main: status: dead
+main: input '=nada 0'
+main: field: 'nada'='0'
+main: status: dead
+main: input '-tres'
+main: status: dead
+main: input '-dos'
+main: status: dead
+main: input '-uno'
+main: status: track
+main: input '+one'
+main: status: dead
+main: input '+two'
+main: status: dead
+main: input '+more'
+main: status: dead
+main: input '=what no'
+main: field: 'what'='no'
+main: status: dead
+main: input '-more'
+main: status: dead
+main: input '-two'
+main: status: dead
+main: input '-one'
+main: status: track
+main: input '-dos'
+main: status: track
+main: input '-uno'
+main: status: track
+main: input '+one'
+main: status: track
+main: input '+two'
+main: status: track
+main: input '+uno'
+main: status: dead
+main: input '+dos'
+main: status: dead
+main: input '+tres'
+main: status: dead
+main: input '=nada 0'
+main: field: 'nada'='0'
+main: status: dead
+main: input '-tres'
+main: status: dead
+main: input '-dos'
+main: status: dead
+main: input '-uno'
+main: status: track
+main: input '+more'
+main: status: full
+main: input '=even yes'
+main: field: 'even'='yes'
+main: status: full
+main: input '-more'
+main: status: track
+main: input '-two'
+main: status: track
+main: input '+three'
+main: status: full
+main: input '=four sure'
+main: field: 'four'='sure'
+main: status: full
+main: input '-three'
+main: status: track
+main: input '-one'
+main: status: track
