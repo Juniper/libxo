@@ -133,12 +133,12 @@ main (int argc, char **argv)
 
 	    xo_xpath_feature_warn("test", xdp, bad_horse, "+");
 
-	    if (!debug) {
+	    if (!debug && !xof_debug) {
 		xo_set_flags(xop, XOF_DEBUG);
 		xo_xparse_dump(xdp);
 	    }
 
-	    if (!xof_debug)
+	    if (debug || !xof_debug)
 		xo_clear_flags(xop, XOF_DEBUG);
 	    break;
 
