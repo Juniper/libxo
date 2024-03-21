@@ -1,41 +1,77 @@
 main: input '#run'
-main: input '?/uno/dos/tres'
+main: input '?/uno[x<4]/dos[y<=5]/tres'
 --- 0: 1
     000001: type 505 (C_ABSOLUTE), str 1 [/], contents 0, next 2, prev 0 
-    000002: type 508 (C_ELEMENT), str 3 [uno], contents 0, next 4, prev 1 
-    000004: type 508 (C_ELEMENT), str 9 [dos], contents 0, next 6, prev 2 
-    000006: type 508 (C_ELEMENT), str 15 [tres], contents 0, next 0, prev 4 
+    000002: type 508 (C_ELEMENT), str 3 [uno], contents 3, next 11, prev 1 
+        000003: type 513 (C_PREDICATE), str 0 [], contents 5, next 0, prev 0 
+            000005: type 282 (L_LESS), str 11 [<], contents 6, next 0, prev 0 
+                000006: type 512 (C_PATH), str 0 [], contents 4, next 7, prev 0 
+                    000004: type 508 (C_ELEMENT), str 9 [x], contents 0, next 0, prev 0 
+                000007: type 491 (T_NUMBER), str 13 [4], contents 0, next 0, prev 6 
+    000011: type 508 (C_ELEMENT), str 19 [dos], contents 12, next 20, prev 2 
+        000012: type 513 (C_PREDICATE), str 0 [], contents 14, next 0, prev 0 
+            000014: type 283 (L_LESSEQ), str 27 [<=], contents 15, next 0, prev 0 
+                000015: type 512 (C_PATH), str 0 [], contents 13, next 16, prev 0 
+                    000013: type 508 (C_ELEMENT), str 25 [y], contents 0, next 0, prev 0 
+                000016: type 491 (T_NUMBER), str 30 [5], contents 0, next 0, prev 15 
+    000020: type 508 (C_ELEMENT), str 36 [tres], contents 0, next 0, prev 11 
 main: status: zero
 main: input '?/one/two/more'
 --- 0: 1
     000001: type 505 (C_ABSOLUTE), str 1 [/], contents 0, next 2, prev 0 
-    000002: type 508 (C_ELEMENT), str 3 [uno], contents 0, next 4, prev 1 
-    000004: type 508 (C_ELEMENT), str 9 [dos], contents 0, next 6, prev 2 
-    000006: type 508 (C_ELEMENT), str 15 [tres], contents 0, next 0, prev 4 
---- 1: 9
-    000009: type 505 (C_ABSOLUTE), str 20 [/], contents 0, next 10, prev 0 
-    000010: type 508 (C_ELEMENT), str 22 [one], contents 0, next 12, prev 9 
-    000012: type 508 (C_ELEMENT), str 28 [two], contents 0, next 14, prev 10 
-    000014: type 508 (C_ELEMENT), str 34 [more], contents 0, next 0, prev 12 
+    000002: type 508 (C_ELEMENT), str 3 [uno], contents 3, next 11, prev 1 
+        000003: type 513 (C_PREDICATE), str 0 [], contents 5, next 0, prev 0 
+            000005: type 282 (L_LESS), str 11 [<], contents 6, next 0, prev 0 
+                000006: type 512 (C_PATH), str 0 [], contents 4, next 7, prev 0 
+                    000004: type 508 (C_ELEMENT), str 9 [x], contents 0, next 0, prev 0 
+                000007: type 491 (T_NUMBER), str 13 [4], contents 0, next 0, prev 6 
+    000011: type 508 (C_ELEMENT), str 19 [dos], contents 12, next 20, prev 2 
+        000012: type 513 (C_PREDICATE), str 0 [], contents 14, next 0, prev 0 
+            000014: type 283 (L_LESSEQ), str 27 [<=], contents 15, next 0, prev 0 
+                000015: type 512 (C_PATH), str 0 [], contents 13, next 16, prev 0 
+                    000013: type 508 (C_ELEMENT), str 25 [y], contents 0, next 0, prev 0 
+                000016: type 491 (T_NUMBER), str 30 [5], contents 0, next 0, prev 15 
+    000020: type 508 (C_ELEMENT), str 36 [tres], contents 0, next 0, prev 11 
+--- 1: 23
+    000023: type 505 (C_ABSOLUTE), str 41 [/], contents 0, next 24, prev 0 
+    000024: type 508 (C_ELEMENT), str 43 [one], contents 0, next 26, prev 23 
+    000026: type 508 (C_ELEMENT), str 49 [two], contents 0, next 28, prev 24 
+    000028: type 508 (C_ELEMENT), str 55 [more], contents 0, next 0, prev 26 
 main: status: zero
 main: input '?three'
 --- 0: 1
     000001: type 505 (C_ABSOLUTE), str 1 [/], contents 0, next 2, prev 0 
-    000002: type 508 (C_ELEMENT), str 3 [uno], contents 0, next 4, prev 1 
-    000004: type 508 (C_ELEMENT), str 9 [dos], contents 0, next 6, prev 2 
-    000006: type 508 (C_ELEMENT), str 15 [tres], contents 0, next 0, prev 4 
---- 1: 9
-    000009: type 505 (C_ABSOLUTE), str 20 [/], contents 0, next 10, prev 0 
-    000010: type 508 (C_ELEMENT), str 22 [one], contents 0, next 12, prev 9 
-    000012: type 508 (C_ELEMENT), str 28 [two], contents 0, next 14, prev 10 
-    000014: type 508 (C_ELEMENT), str 34 [more], contents 0, next 0, prev 12 
---- 2: 19
-    000019: type 512 (C_PATH), str 0 [], contents 17, next 0, prev 0 
-        000017: type 508 (C_ELEMENT), str 39 [three], contents 0, next 0, prev 0 
+    000002: type 508 (C_ELEMENT), str 3 [uno], contents 3, next 11, prev 1 
+        000003: type 513 (C_PREDICATE), str 0 [], contents 5, next 0, prev 0 
+            000005: type 282 (L_LESS), str 11 [<], contents 6, next 0, prev 0 
+                000006: type 512 (C_PATH), str 0 [], contents 4, next 7, prev 0 
+                    000004: type 508 (C_ELEMENT), str 9 [x], contents 0, next 0, prev 0 
+                000007: type 491 (T_NUMBER), str 13 [4], contents 0, next 0, prev 6 
+    000011: type 508 (C_ELEMENT), str 19 [dos], contents 12, next 20, prev 2 
+        000012: type 513 (C_PREDICATE), str 0 [], contents 14, next 0, prev 0 
+            000014: type 283 (L_LESSEQ), str 27 [<=], contents 15, next 0, prev 0 
+                000015: type 512 (C_PATH), str 0 [], contents 13, next 16, prev 0 
+                    000013: type 508 (C_ELEMENT), str 25 [y], contents 0, next 0, prev 0 
+                000016: type 491 (T_NUMBER), str 30 [5], contents 0, next 0, prev 15 
+    000020: type 508 (C_ELEMENT), str 36 [tres], contents 0, next 0, prev 11 
+--- 1: 23
+    000023: type 505 (C_ABSOLUTE), str 41 [/], contents 0, next 24, prev 0 
+    000024: type 508 (C_ELEMENT), str 43 [one], contents 0, next 26, prev 23 
+    000026: type 508 (C_ELEMENT), str 49 [two], contents 0, next 28, prev 24 
+    000028: type 508 (C_ELEMENT), str 55 [more], contents 0, next 0, prev 26 
+--- 2: 33
+    000033: type 512 (C_PATH), str 0 [], contents 31, next 0, prev 0 
+        000031: type 508 (C_ELEMENT), str 60 [three], contents 0, next 0, prev 0 
 main: status: zero
 main: input '+uno'
 main: status: track
+main: input '$x 2'
+main: key: 'x'='2'
+main: status: track
 main: input '+dos'
+main: status: track
+main: input '$y 5'
+main: key: 'y'='5'
 main: status: track
 main: input '+tres'
 main: status: full
