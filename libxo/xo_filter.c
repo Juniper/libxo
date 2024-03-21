@@ -592,7 +592,7 @@ xo_filter_open (xo_handle_t *xop, xo_filter_t *xfp,
 
 	case C_ABSOLUTE:
 	    /* Absolute means that we only match at the top of the tree */
-	    if (xfp->xf_total_depth != 0)
+	    if (xfp->xf_total_depth != 1)
 		continue;
 
 	    /* Now move to the next node */
