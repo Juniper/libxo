@@ -2,11 +2,11 @@
 .\" # Copyright (c) 2014, Juniper Networks, Inc.
 .\" # All rights reserved.
 .\" # This SOFTWARE is licensed under the LICENSE provided in the
-.\" # ../Copyright file. By downloading, installing, copying, or 
+.\" # ../Copyright file. By downloading, installing, copying, or
 .\" # using the SOFTWARE, you agree to be bound by the terms of that
 .\" # LICENSE.
 .\" # Phil Shafer, July 2014
-.\" 
+.\"
 .Dd December 4, 2014
 .Dt XO 1
 .Os
@@ -34,48 +34,48 @@ or
 using the same commands that emit text output.
 .Pp
 .Bl -tag -width indent
-.It Ic --close Ar path
+.It Fl -close Ar path
 Close tags for the given path
-.It Ic -C | Ic --continuation
+.It Fl C | Fl -continuation
 Indicates this output is a continuation of the previous output data
 and should appear on the same line.
 This is allows HTML output to be constructed correctly.
-.It Ic --depth Ar num
+.It Fl -depth Ar num
 Set the depth for pretty printing
-.It Ic --help
+.It Fl -help
 Display help text
-.It Ic -H | Ic --html
+.It Fl H | Fl -html
 Generate HTML output
-.It Ic -J | Ic --json
+.It Fl J | Fl -json
 Generate JSON output
-.It Ic --leading-xpath Ar path
+.It Fl -leading-xpath Ar path
 Add a prefix to generated XPaths (HTML)
-.It Ic --not-first
+.It Fl -not-first
 Indicate that this content is not the first in a series of sibling
 objects, which is vital information for "JSON" output, which requires
 a comma between such objects.
-.It Ic --open Ar path
+.It Fl -open Ar path
 Open tags for the given path
-.It Ic -p | Ic --pretty
+.It Fl p | Fl -pretty
 Make 'pretty' output (add indent, newlines)
-.It Ic --style Ar style
+.It Fl -style Ar style
 Generate given style (xml, json, text, html)
-.It Ic -T | Ic --text
+.It Fl T | Fl -text
 Generate text output (the default style)
-.It Ic --top-warp
+.It Fl -top-warp
 Indicates the entire object should be placed inside a top-level
 object wrapper, specifically when generating JSON output.
-.It Ic --version
+.It Fl -version
 Display version information
-.It Ic -W | Ic --warn
+.It Fl W | Fl -warn
 Display warnings in text on stderr
-.It Ic --warn-xml
+.It Fl -warn-xml
 Display warnings in xml on stdout
-.It Ic --wrap Ar path
+.It Fl -wrap Ar path
 Wrap output in a set of containers
-.It Ic -X | Ic --xml
+.It Fl X | Fl -xml
 Generate XML output
-.It Ic --xpath
+.It Fl -xpath
 Add XPath data to HTML output
 .El
 .Pp
@@ -205,7 +205,7 @@ The
 library first appeared in
 .Fx 11.0 .
 .Sh AUTHORS
+The
 .Nm libxo
-was written by
+library was written by
 .An Phil Shafer Aq Mt phil@freebsd.org .
-

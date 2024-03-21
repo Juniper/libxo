@@ -2,11 +2,11 @@
 .\" # Copyright (c) 2014, Juniper Networks, Inc.
 .\" # All rights reserved.
 .\" # This SOFTWARE is licensed under the LICENSE provided in the
-.\" # ../Copyright file. By downloading, installing, copying, or 
+.\" # ../Copyright file. By downloading, installing, copying, or
 .\" # using the SOFTWARE, you agree to be bound by the terms of that
 .\" # LICENSE.
 .\" # Phil Shafer, July 2014
-.\" 
+.\"
 .Dd December 4, 2014
 .Dt LIBXO 3
 .Os
@@ -51,7 +51,7 @@ source code:
             "{:characters/%7ju} {d:filename/%s}\\n",
             linect, wordct, charct, file);
 .Ed
-Output can then be generated in various style, using 
+Output can then be generated in various style, using
 the "--libxo" option:
 .Bd  -literal -offset indent
     % wc /etc/motd
@@ -92,25 +92,26 @@ the "--libxo" option:
 .Ed
 .Sh RETURN CODE
 .Nm
-returns a negative value on error.  If the
+returns a negative value on error.
+If the
 .Nm XOF_COLUMNS
 flag has been turned on for the specific handle using
 .Xr xo_set_flags 3 ,
 then the number of display columns consumed by the output will be returned.
 .Sh SEE ALSO
-.Xr xo_open_container 3 ,
-.Xr xo_open_list 3 ,
+.Xr libxo 3 ,
 .Xr xo_emit_f 3 ,
 .Xo xo_emit_field 3 ,
-.Xr xo_format 5 ,
-.Xr libxo 3
+.Xr xo_open_container 3 ,
+.Xr xo_open_list 3 ,
+.Xr xo_format 5
 .Sh HISTORY
 The
 .Nm libxo
 library first appeared in
 .Fx 11.0 .
 .Sh AUTHORS
+The
 .Nm libxo
-was written by
+library was written by
 .An Phil Shafer Aq Mt phil@freebsd.org .
-

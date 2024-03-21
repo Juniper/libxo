@@ -2,11 +2,11 @@
 .\" # Copyright (c) 2021, Juniper Networks, Inc.
 .\" # All rights reserved.
 .\" # This SOFTWARE is licensed under the LICENSE provided in the
-.\" # ../Copyright file. By downloading, installing, copying, or 
+.\" # ../Copyright file. By downloading, installing, copying, or
 .\" # using the SOFTWARE, you agree to be bound by the terms of that
 .\" # LICENSE.
 .\" # Phil Shafer, May 2021
-.\" 
+.\"
 .Dd May 13, 2021
 .Dt LIBXO-CSV 7
 .Os
@@ -17,7 +17,8 @@
 The
 .Nm libxo
 library supports a "pluggable" encoder mechanism, and ships with an
-encoder for CSV (comma separated values) files.  The encoder allows
+encoder for CSV (comma separated values) files.
+The encoder allows
 paths and fields to be selected out of the output contents:
 .Bd -literal -offset indent
   % df --libxo @csv
@@ -48,7 +49,8 @@ To allow support for additional encodings, libxo includes a
 .Nm libxo -based
 applications can automatically use any installed encoder.
 .Pp
-Use the "encoder=XXX" option to access encoders.  The following
+Use the "encoder=XXX" option to access encoders.
+The following
 example uses the "cbor" encoder, saving the output into a file:
 .Bd -literal -offset indent
   df --libxo encoder=cbor > df-output.cbor
@@ -81,12 +83,14 @@ The string "@" can be used in place of the string "encoder=".
 .Sh The CSV (Comma Separated Values) Encoder
 .Nm libxo
 ships with a custom encoder for "CSV" files, a common format for
-comma separated values.  The output of the CSV encoder can be loaded
+comma separated values.
+The output of the CSV encoder can be loaded
 directly into spreadsheets or similar applications.
 .Pp
 A standard for CSV files is provided in RFC 4180, but since the
 format predates that standard by decades, there are many minor
-differences in CSV file consumers and their expectations.  The CSV
+differences in CSV file consumers and their expectations.
+The CSV
 encoder has a number of options to tailor output to those
 expectations.
 .Pp
@@ -150,7 +154,8 @@ In some cases, this may be unacceptable, and a specific list may be
 desired.
 .Pp
 Use the "path" option to limit the processing of output to a specific
-hierarchy.  The path should be one or more names of containers or
+hierarchy.
+The path should be one or more names of containers or
 lists.
 .Pp
 For example, if the "list-items" application generates other lists,
@@ -164,19 +169,23 @@ the user can give "path=top/data/item" as a path:
 .Ed
 .Pp
 Paths are "relative", meaning they need not be a complete set
-of names to the list.  This means that "path=item" may be sufficient
+of names to the list.
+This means that "path=item" may be sufficient
 for the above example.
 .Sh The "leafs" Option
 The CSV encoding requires that all lines of output have the same
-number of fields with the same order.  In contrast, XML and JSON allow
+number of fields with the same order.
+In contrast, XML and JSON allow
 any order (though libxo forces key leafs to appear before other
 leafs).
 .Pp
 To maintain a consistent set of fields inside the CSV file, the same
-set of leafs must be selected from each list item.  By default, the
+set of leafs must be selected from each list item.
+By default, the
 CSV encoder records the set of leafs that appear in the first list
 instance it processes, and extract only those leafs from future
-instances.  If the first instance is missing a leaf that is desired by
+instances.
+If the first instance is missing a leaf that is desired by
 the consumer, the "leaf" option can be used to ensure that an empty
 value is recorded for instances that lack a particular leaf.
 .Pp
@@ -184,7 +193,7 @@ The "leafs" option can also be used to exclude leafs, limiting the
 output to only those leafs provided.
 .Pp
 In addition, the order of the output fields follows the order in which
-the leafs are listed.  "leafs=one.two" and "leafs=two.one" give
+the leafs are listed; "leafs=one.two" and "leafs=two.one" give
 distinct output.
 .Pp
 So the "leafs" option can be used to expand, limit, and order the set
@@ -207,7 +216,7 @@ separated by a period ("."):
 .Pp
 Note that since libxo uses terminology from YANG (:RFC:`7950`), the
 data modeling language for NETCONF (:RFC:`6241`), which uses "leafs"
-as the plural form of "leaf".  libxo follows that convention.
+as the plural form of "leaf", libxo follows that convention.
 .Sh The "no-header" Option
 CSV files typical begin with a line that defines the fields included
 in that file, in an attempt to make the contents self-defining:
@@ -225,16 +234,19 @@ The csv encoder defaults to producing the header line, but the
 "no-header" option can be included to avoid the header line.
 .Sh The "no-quotes" Option
 RFC 4180 specifies that fields containing spaces should be quoted, but
-many CSV consumers do not handle quotes.  The "no-quotes" option
+many CSV consumers do not handle quotes.
+The "no-quotes" option
 instruct the CSV encoder to avoid the use of quotes.
 .Sh The "dos" Option
 RFC 4180 defines the end-of-line marker as a carriage return
-followed by a newline.  This "CRLF" convention dates from the distant
+followed by a newline.
+This "CRLF" convention dates from the distant
 past, but its use was anchored in the 1980s by the `DOS` operating
 system.
 .Pp
 The CSV encoder defaults to using the standard Unix end-of-line
-marker, a simple newline.  Use the "dos" option to use the `CRLF`
+marker, a simple newline.
+Use the "dos" option to use the `CRLF`
 convention.
 .Sh Option Handling
 The handling of command-line options is complex, since there are three
@@ -268,7 +280,7 @@ library first appeared in
 The CSV encoder first appeared in
 .Fx 13.0 .
 .Sh AUTHORS
+The
 .Nm libxo
-was written by
+library was written by
 .An Phil Shafer Aq Mt phil@freebsd.org .
-

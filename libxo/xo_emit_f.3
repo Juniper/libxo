@@ -2,11 +2,11 @@
 .\" # Copyright (c) 2016, Juniper Networks, Inc.
 .\" # All rights reserved.
 .\" # This SOFTWARE is licensed under the LICENSE provided in the
-.\" # ../Copyright file. By downloading, installing, copying, or 
+.\" # ../Copyright file. By downloading, installing, copying, or
 .\" # using the SOFTWARE, you agree to be bound by the terms of that
 .\" # LICENSE.
 .\" # Phil Shafer, April 2016
-.\" 
+.\"
 .Dd April 15, 2016
 .Dt LIBXO 3
 .Os
@@ -30,7 +30,8 @@
 .Sh DESCRIPTION
 These functions allow callers to pass a set of flags to
 .Nm
-emitting functions.  These processing of arguments, except for
+emitting functions.
+These processing of arguments, except for
 .Fa flags ,
 is identical to the base functions.
 See
@@ -55,7 +56,8 @@ The format string must be immutable across multiple calls to
 .Xn xo_emit_f ,
 since the library retains the string.
 Typically this is done by using
-static constant strings, such as string literals. If the string is not
+static constant strings, such as string literals.
+If the string is not
 immutable, the
 .Dv XOEF_RETAIN
 flag must not be used.
@@ -100,22 +102,23 @@ In this example, the caller desires to clear the retained information.
 .Ed
 .Sh RETURN CODE
 The return values for these functions is identical to those of their
-traditional counterparts.  See
+traditional counterparts.
+See
 .Xr xo_emit 3
 for details.
 .Sh SEE ALSO
+.Xr libxo 3 ,
 .Xr xo_emit 3 ,
 .Xr xo_open_container 3 ,
 .Xr xo_open_list 3 ,
-.Xr xo_format 5 ,
-.Xr libxo 3
+.Xr xo_format 5
 .Sh HISTORY
 The
 .Nm libxo
 library first appeared in
 .Fx 11.0 .
 .Sh AUTHORS
+The
 .Nm libxo
-was written by
+library was written by
 .An Phil Shafer Aq Mt phil@freebsd.org .
-
