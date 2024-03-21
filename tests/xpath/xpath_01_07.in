@@ -1,0 +1,42 @@
+#run
+?/uno/dos/tres
+?/one/two/more
+?three
++uno
++dos
++tres
+=cuatro 4
+-tres
++uno
++dos
++tres
+=nada 0
+-tres
+-dos
+-uno
++one
++two
++more
+=what no
+-more
+-two
+-one
+-dos
+-uno
++one
++two
++uno
++dos
++tres
+=nada 0
+-tres
+-dos
+-uno
++more
+=even yes
+-more
+-two
++three
+=four sure
+-three
+-one
