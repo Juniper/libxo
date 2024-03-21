@@ -805,6 +805,9 @@ xo_filter_data_invalid (void)
 	xo_xparse_node_t *xnp UNUSED, \
 	xo_filter_data_t left UNUSED, xo_filter_data_t right UNUSED
 
+#define XO_FILTER_OP_PASS \
+    xop, xfp, xmp, xnp, left, right
+
 typedef xo_filter_data_t (*xo_filter_op_fn_t)(XO_FILTER_OP_ARGS);
 
 #define XO_FILTER_NODE_ARGS \
@@ -953,49 +956,72 @@ xo_filter_cast_int64 (xo_filter_t *xfp UNUSED, xo_filter_data_t data)
     }
 }
 
+static double
+xo_filter_cast_float (xo_filter_t *xfp UNUSED, xo_filter_data_t data)
+{
+    switch (data.xfd_type) {
+    case C_STRING:;
+	const char *str = data.xfd_str;
+	char *ep;
+	int64_t ival = strtoll(str, &ep, 0);
+	return (ep && *ep == '\0') ? ival: 0;
+
+    case C_FLOAT:
+	return data.xfd_float;
+
+    default:
+	return data.xfd_int64;
+    }
+}
+
 static xo_filter_data_t
-xo_filter_eval_equals_op (XO_FILTER_OP_ARGS)
+xo_filter_eval_compare (XO_FILTER_OP_ARGS)
 {
     xo_filter_data_t data = { 0 };
-    int equals = 0;
-    int64_t ival;
+    int rc = 0;
+    double fval;
 
     xo_filter_dump_data(xop, xfp, left, 0, "equals: left");
     xo_filter_dump_data(xop, xfp, right, 0, "equals: right");
 
     switch (TYPE_CMP(left.xfd_type, right.xfd_type)) {
     case TYPE_CMP(C_STRING, C_STRING):
-	equals = xo_streq(left.xfd_str, right.xfd_str);
+	rc = strcmp(left.xfd_str, right.xfd_str);
 	break;
 
     case TYPE_CMP(C_INT64, C_INT64):
     case TYPE_CMP(C_INT64, C_BOOLEAN):
     case TYPE_CMP(C_BOOLEAN, C_INT64):
-	equals = (left.xfd_int64 == right.xfd_int64);
+	rc = (left.xfd_int64 > right.xfd_int64) ? 1
+	    : (left.xfd_int64 < right.xfd_int64) ? -1 : 0;
 	break;
 
     case TYPE_CMP(C_UINT64, C_UINT64):
     case TYPE_CMP(C_UINT64, C_BOOLEAN):
     case TYPE_CMP(C_BOOLEAN, C_UINT64):
-	equals = (left.xfd_uint64 == right.xfd_uint64);
+	rc = (left.xfd_uint64 > right.xfd_uint64) ? 1
+	    : (left.xfd_uint64 < right.xfd_uint64) ? -1 : 0;
 	break;
 
     case TYPE_CMP(C_FLOAT, C_FLOAT):
-	equals = (left.xfd_float == right.xfd_float);
+	rc = (left.xfd_float > right.xfd_float) ? 1
+	    : (left.xfd_float < right.xfd_float) ? -1 : 0;
 	break;
 
     case TYPE_CMP(C_STRING, C_INT64):
-	ival = xo_filter_cast_int64(xfp, left);
-	equals = (ival == right.xfd_int64);
+	fval = xo_filter_cast_float(xfp, left);
+	rc = (fval > right.xfd_int64) ? 1
+	    : (fval < right.xfd_int64) ? -1 : 0;
 	break;
 
     case TYPE_CMP(C_INT64, C_STRING):
-	ival = xo_filter_cast_int64(xfp, right);
-	equals = (left.xfd_int64 == ival);
+	fval = xo_filter_cast_float(xfp, right);
+	rc = (left.xfd_int64 > fval) ? 1
+	    : (left.xfd_int64 < fval) ? -1 : 0;
 	break;
 
     case TYPE_CMP(C_BOOLEAN, C_BOOLEAN):
-	equals = ((left.xfd_int64 != 0) && (right.xfd_int64 != 0));
+	rc = ((left.xfd_int64 == 0) && (right.xfd_int64 == 0));
 	break;
 
     default:
@@ -1003,7 +1029,52 @@ xo_filter_eval_equals_op (XO_FILTER_OP_ARGS)
     }
 
     data.xfd_type = C_BOOLEAN;
-    data.xfd_int64 = equals ? 1 : 0;
+    data.xfd_int64 = rc;
+    return data;
+}
+
+static xo_filter_data_t
+xo_filter_eval_equals_op (XO_FILTER_OP_ARGS)
+{
+    xo_filter_data_t data = xo_filter_eval_compare(XO_FILTER_OP_PASS);
+
+    data.xfd_int64 = (data.xfd_int64 == 0) ? 1 : 0;
+    return data;
+}
+
+static xo_filter_data_t
+xo_filter_eval_lt_op (XO_FILTER_OP_ARGS)
+{
+    xo_filter_data_t data = xo_filter_eval_compare(XO_FILTER_OP_PASS);
+
+    data.xfd_int64 = (data.xfd_int64 < 0) ? 1 : 0;
+    return data;
+}
+
+static xo_filter_data_t
+xo_filter_eval_le_op (XO_FILTER_OP_ARGS)
+{
+    xo_filter_data_t data = xo_filter_eval_compare(XO_FILTER_OP_PASS);
+
+    data.xfd_int64 = (data.xfd_int64 <= 0) ? 1 : 0;
+    return data;
+}
+
+static xo_filter_data_t
+xo_filter_eval_gt_op (XO_FILTER_OP_ARGS)
+{
+    xo_filter_data_t data = xo_filter_eval_compare(XO_FILTER_OP_PASS);
+
+    data.xfd_int64 = (data.xfd_int64 > 0) ? 1 : 0;
+    return data;
+}
+
+static xo_filter_data_t
+xo_filter_eval_ge_op (XO_FILTER_OP_ARGS)
+{
+    xo_filter_data_t data = xo_filter_eval_compare(XO_FILTER_OP_PASS);
+
+    data.xfd_int64 = (data.xfd_int64 >= 0) ? 1 : 0;
     return data;
 }
 
@@ -1012,6 +1083,34 @@ xo_filter_eval_equals (XO_FILTER_NODE_ARGS)
 {
     return xo_filter_eval(xop, xfp, xmp, xnp->xn_contents,
 			  xo_filter_eval_equals_op);
+}
+
+static xo_filter_data_t
+xo_filter_eval_lt (XO_FILTER_NODE_ARGS)
+{
+    return xo_filter_eval(xop, xfp, xmp, xnp->xn_contents,
+			  xo_filter_eval_lt_op);
+}
+
+static xo_filter_data_t
+xo_filter_eval_le (XO_FILTER_NODE_ARGS)
+{
+    return xo_filter_eval(xop, xfp, xmp, xnp->xn_contents,
+			  xo_filter_eval_le_op);
+}
+
+static xo_filter_data_t
+xo_filter_eval_gt (XO_FILTER_NODE_ARGS)
+{
+    return xo_filter_eval(xop, xfp, xmp, xnp->xn_contents,
+			  xo_filter_eval_gt_op);
+}
+
+static xo_filter_data_t
+xo_filter_eval_ge (XO_FILTER_NODE_ARGS)
+{
+    return xo_filter_eval(xop, xfp, xmp, xnp->xn_contents,
+			  xo_filter_eval_ge_op);
 }
 
 static xo_filter_data_t
@@ -1038,6 +1137,22 @@ xo_filter_eval (xo_handle_t *xop, xo_filter_t *xfp, xo_match_t *xmp,
 
 	case L_EQUALS:;
 	    node_fn = xo_filter_eval_equals;
+	    break;
+
+	case L_LESS:
+	    node_fn = xo_filter_eval_lt;
+	    break;
+
+	case L_LESSEQ:
+	    node_fn = xo_filter_eval_le;
+	    break;
+
+	case L_GRTR:
+	    node_fn = xo_filter_eval_gt;
+	    break;
+
+	case L_GRTREQ:
+	    node_fn = xo_filter_eval_ge;
 	    break;
 
 	case C_PATH:
