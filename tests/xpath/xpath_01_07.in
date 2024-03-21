@@ -1,9 +1,11 @@
 #run
-?/uno/dos/tres
+?/uno[x<4]/dos[y<=5]/tres
 ?/one/two/more
 ?three
 +uno
+$x 2
 +dos
+$y 5
 +tres
 =cuatro 4
 -tres
