@@ -15,7 +15,7 @@ If the format string is not provided for a value field, it defaults to
 Note a field definition can contain zero or more printf-style
 'directives', which are sequences that start with a '%' and end with
 one of following characters: "diouxXDOUeEfFgGaAcCsSp".  Each directive
-is matched by one of more arguments to the xo_emit function.
+is matched by one or more arguments to the xo_emit function.
 
 The format string has the form::
 
