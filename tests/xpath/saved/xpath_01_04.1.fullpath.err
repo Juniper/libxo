@@ -1,14 +1,14 @@
 main: input '#run'
 main: input '?one/two[three == "4"]'
 --- 0: 12
-    000012: type 512 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 508 (C_ELEMENT), str 1 [one], contents 0, next 3, prev 0 
-        000003: type 508 (C_ELEMENT), str 7 [two], contents 4, next 0, prev 1 
-            000004: type 513 (C_PREDICATE), str 0 [], contents 6, next 0, prev 0 
-                000006: type 278 (L_EQUALS), str 19 [==], contents 7, next 0, prev 0 
-                    000007: type 512 (C_PATH), str 0 [], contents 5, next 8, prev 0 
-                        000005: type 508 (C_ELEMENT), str 13 [three], contents 0, next 0, prev 0 
-                    000008: type 492 (T_QUOTED), str 22 [4], contents 0, next 0, prev 7 
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [one], contents 0, next 3, prev 0 
+        000003: type 70 (C_ELEMENT), str 7 [two], contents 4, next 0, prev 1 
+            000004: type 75 (C_PREDICATE), str 0 [], contents 6, next 0, prev 0 
+                000006: type 14 (L_EQUALS), str 19 [==], contents 7, next 0, prev 0 
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
+                        000005: type 70 (C_ELEMENT), str 13 [three], contents 0, next 0, prev 0 
+                    000008: type 54 (T_QUOTED), str 22 [4], contents 0, next 0, prev 7 
 main: status: zero
 main: input '+one'
 main: status: track
