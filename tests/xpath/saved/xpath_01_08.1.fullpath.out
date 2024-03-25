@@ -1,1 +1,1 @@
-one[a == '4.85']/two[b == '2.7']/three[c == '-3333']/four/five = 'mambo'
+/one[a == '4.85']/two[b == '2.7']/three[c == '-3333']/four/five = 'mambo'
