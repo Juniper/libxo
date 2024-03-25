@@ -614,7 +614,10 @@ xp_unary_expr :
 		{ $$ = xo_xparse_yyval(xparse_data, $1); }
 
 	| L_MINUS xp_unary_expr
-		{ $$ = xo_xparse_yyval(xparse_data, $1); }
+		{
+		    xo_xparse_node_set_contents(xparse_data, $1, $2);
+		    $$ = xo_xparse_yyval(xparse_data, $1);
+		}
 	;
 
 /* ------------------------------------------------------------------- */
