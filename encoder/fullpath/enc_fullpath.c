@@ -39,6 +39,8 @@ fullpath_create (xo_handle_t *xop)
     xo_buf_init(&fpp->fp_data);
     xo_buf_init(&fpp->fp_leader);
 
+    xo_buf_append_val(&fpp->fp_leader, "/", 1); /* Start with leading '/' */
+
     xo_off_t *sp = xo_realloc(NULL, XO_FP_DEFAULT_STACK_SIZE * sizeof(*sp));
     fpp->fp_stackp = fpp->fp_stack = sp;
     if (sp)
