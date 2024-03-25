@@ -32,7 +32,7 @@ msgid "Only {:marzlevanes} {N:marzlevane,marzlevanes} are functioning correctly\
 msgstr ""
 
 #: gt_01.c:63
-msgid "Version {:version} {:date}\n"
+msgid "Version {:version}\n"
 msgstr ""
 
 #: gt_01.c:66
