@@ -19,159 +19,80 @@
 /*
  * Literal tokens which may _not_ preceed the multiplication operator
  */
-%token L_ASSIGN		    ":="
-%token L_AT		    "@"
-%token L_CBRACE		    "}"
-%token L_COMMA		    ","
-%token L_COLON		    ":"
-%token L_DAMPER		    "&&"
-%token L_DCOLON		    "::"
-%token L_DEQUALS	    "=="
-%token L_DOTDOT		    ".."
-%token L_DOTDOTDOT	    "..."
-%token L_DSLASH		    "//"
-%token L_DVBAR		    "||"
-%token L_EOS		    ";"
-%token L_EQUALS		    "="
-%token L_GRTR		    ">"
-%token L_GRTREQ		    ">="
-%token L_LESS		    "<"
-%token L_LESSEQ		    "<="
-%token L_MINUS		    "-"
-%token L_NOT		    "!"
-%token L_NOTEQUALS	    "!="
-%token L_OBRACE		    "{"
-%token L_OBRACK		    "["
-%token L_OPAREN		    "("
-%token L_PLUS		    "+"
-%token L_PLUSEQUALS	    "+="
-%token L_QUESTION	    "?"
-%token L_SLASH		    "/"
-%token L_STAR		    "*"
-%token L_UNDERSCORE	    "_"
-%token L_VBAR		    "|"
+%token L_ASSIGN		    1  ":="
+%token L_AT		    2  "@"
+%token L_CBRACE		    3  "}"
+%token L_COMMA		    4  ","
+%token L_COLON		    5  ":"
+%token L_DAMPER		    6  "&&"
+%token L_DCOLON		    7  "::"
+%token L_DEQUALS	    8  "=="
+%token L_DOTDOT		    9  ".."
+%token L_DOTDOTDOT	    10 "..."
+%token L_DSLASH		    11 "//"
+%token L_DVBAR		    12 "||"
+%token L_EOS		    13 ";"
+%token L_EQUALS		    14 "="
+%token L_GRTR		    15 ">"
+%token L_GRTREQ		    16 ">="
+%token L_LESS		    17 "<"
+%token L_LESSEQ		    18 "<="
+%token L_MINUS		    19 "-"
+%token L_NOT		    20 "!"
+%token L_NOTEQUALS	    21 "!="
+%token L_OBRACE		    22 "{"
+%token L_OBRACK		    23 "["
+%token L_OPAREN		    24 "("
+%token L_PLUS		    25 "+"
+%token L_PLUSEQUALS	    26 "+="
+%token L_QUESTION	    27 "?"
+%token L_SLASH		    28 "/"
+%token L_STAR		    29 "*"
+%token L_UNDERSCORE	    30 "_"
+%token L_VBAR		    31 "|"
 
-%token L_LAST			/* Last literal token value */
+%token L_LAST		    32 /* Last literal token value */
 
 /*
  * Keyword tokens
  */
-%token K_APPEND			"append"
-%token K_APPLY_IMPORTS		"apply-imports"
-%token K_APPLY_TEMPLATES	"apply-templates"
-%token K_ATTRIBUTE		"attribute"
-%token K_ATTRIBUTE_SET		"attribute-set"
-%token K_CALL			"call"
-%token K_CASE_ORDER		"case-order"
-%token K_CDATA_SECTION_ELEMENTS	"cdata-section-elements"
-%token K_COMMENT		"comment"
-%token K_COPY_NODE		"copy-node"
-%token K_COPY_OF		"copy-of"
-%token K_COUNT			"count"
-%token K_DATA_TYPE		"data-type"
-%token K_DECIMAL_FORMAT		"decimal-format"
-%token K_DECIMAL_SEPARATOR	"decimal-separator"
-%token K_DIE			"die"
-%token K_DIGIT			"digit"
-%token K_DOCTYPE_PUBLIC		"doctype-public"
-%token K_DOCTYPE_SYSTEM		"doctype-system"
-%token K_ELEMENT		"element"
-%token K_ELSE			"else"
-%token K_ENCODING		"encoding"
-%token K_EXCLUDE		"exclude"
-%token K_EXPR			"expr"
-%token K_EXTENSION		"extension"
-%token K_FALLBACK		"fallback"
-%token K_FALSE			"false" /* JSON */
-%token K_FOR			"for"
-%token K_FORMAT			"format"
-%token K_FOR_EACH		"for-each"
-%token K_FROM			"from"
-%token K_FUNCTION		"function"
-%token K_GROUPING_SEPARATOR	"grouping-separator"
-%token K_GROUPING_SIZE		"grouping-size"
-%token K_ID			"id"
-%token K_IF			"if"
-%token K_IMPORT			"import"
-%token K_INCLUDE		"include"
-%token K_INDENT			"indent"
-%token K_INFINITY		"infinity"
-%token K_KEY			"key"
-%token K_LANGUAGE		"language"
-%token K_LETTER_VALUE		"letter-value"
-%token K_LEVEL			"level"
-%token K_MATCH			"match"
-%token K_MAIN			"main"
-%token K_MEDIA_TYPE		"media-type"
-%token K_MESSAGE		"message"
-%token K_MINUS_SIGN		"minus-sign"
-%token K_MODE			"mode"
-%token K_MVAR			"mvar"
-%token K_NAN			"nan"
-%token K_NODE			"node"
-%token K_NS			"ns"
-%token K_NS_ALIAS		"ns-alias"
-%token K_NS_TEMPLATE		"ns-template"
-%token K_NULL			"null" /* JSON */
-%token K_NUMBER			"number"
-%token K_OMIT_XML_DECLARATION	"omit-xml-declaration"
-%token K_ORDER			"order"
-%token K_OUTPUT_METHOD		"output-method"
-%token K_PARAM			"param"
-%token K_PATTERN_SEPARATOR	"pattern-separator"
-%token K_PERCENT		"percent"
-%token K_PER_MILLE		"per-mille"
-%token K_PRESERVE_SPACE		"preserve-space"
-%token K_PRIORITY		"priority"
-%token K_PROCESSING_INSTRUCTION "processing-instruction"
-%token K_RESULT			"result"
-%token K_SET			"set"
-%token K_SORT			"sort"
-%token K_STANDALONE		"standalone"
-%token K_STRIP_SPACE		"strip-space"
-%token K_TEMPLATE		"template"
-%token K_TERMINATE		"terminate"
-%token K_TEXT			"text"
-%token K_TRACE			"trace"
-%token K_TRUE			"true" /* JSON */
-%token K_UEXPR			"uexpr"
-%token K_USE_ATTRIBUTE_SETS	"use-attribute-set"
-%token K_VALUE			"value"
-%token K_VAR			"var"
-%token K_VERSION		"version"
-%token K_WHILE			"while"
-%token K_WITH			"with"
-%token K_ZERO_DIGIT		"zero-digit"
+%token K_COMMENT	    33 "comment"
+%token K_ID		    34 "id"
+%token K_KEY		    35 "key"
+%token K_NODE		    36 "node"
+%token K_PROCESSING_INSTRUCTION 37 "processing-instruction"
+%token K_TEXT		    38 "text"
+
 
 /*
  * Operator keyword tokens, which might be NCNames if they appear inside an
  * XPath expression
  */
-%token M_OPERATOR_FIRST		/* Magic marker: first operator keyword */
-%token K_AND			"and"
-%token K_DIV			"div"
-%token K_MOD			"mod"
-%token K_OR			"or"
-%token M_OPERATOR_LAST		/* Magic marker: last operator keyword */
+%token M_OPERATOR_FIRST	    39 /* Magic marker: first operator keyword */
+%token K_AND		    40 "and"
+%token K_DIV		    41 "div"
+%token K_MOD		    42 "mod"
+%token K_OR		    43 "or"
+%token M_OPERATOR_LAST	    44 /* Magic marker: last operator keyword */
 
 /*
  * Literal tokens which _may_ preceed the multiplication operator
  */
-%token M_MULTIPLICATION_TEST_LAST /* Magic marker: highest token number */
-%token L_ASTERISK		"*"
-%token L_CBRACK			"]"
-%token L_CPAREN			")"
-%token L_DOT			"."
+%token M_MULTIPLICATION_TEST_LAST 45 /* Magic marker: highest token number */
+%token L_ASTERISK	    46 "*"
+%token L_CBRACK		    47 "]"
+%token L_CPAREN		    48 ")"
+%token L_DOT		    49 "."
 
 /*
  * Token types: generic tokens (returned via ss_token)
  */
-%token T_AXIS_NAME		/* a built-in axis name */
-%token T_BARE			/* a bare word string (bare-word) */
-%token T_FUNCTION_NAME		/* a function name (bare-word) */
-%token T_NUMBER			/* a number (4) */
-%token T_QUOTED			/* a quoted string ("foo") */
-%token T_VAR			/* a variable name ($foo) */
+%token T_AXIS_NAME	    50 /* a built-in axis name */
+%token T_BARE		    51 /* a bare word string (bare-word) */
+%token T_FUNCTION_NAME	    52 /* a function name (bare-word) */
+%token T_NUMBER		    53 /* a number (4) */
+%token T_QUOTED		    54 /* a quoted string ("foo") */
+%token T_VAR		    55 /* a variable name ($foo) */
 
 /*
  * Magic tokens (used for special purposes).  M_* tokens are used to
@@ -179,44 +100,44 @@
  * really parsed, and the lexer will never return them, except for
  * M_ERROR.
  */
-%token M_SEQUENCE		/* A $x...$y sequence */
-%token M_CONCAT			/* underscore -> concat mapping */
-%token M_TERNARY		/* "?:" -> <xsl:choose> mapping */
-%token M_TERNARY_END		/* End of a M_TERNARY chain */
-%token M_ERROR			/* An error was detected in the lexer */
-%token M_XPATH			/* Building an XPath expression */
-%token M_PARSE_FULL		/* Parse a slax document */
-%token M_PARSE_SLAX		/* Parse a SLAX-style XPath expression */
-%token M_PARSE_XPATH		/* Parse an XPath expression */
-%token M_PARSE_PARTIAL		/* Parse partial SLAX contents */
-%token M_JSON			/* Parse a JSON document */
+%token M_SEQUENCE	    56 /* A $x...$y sequence */
+%token M_CONCAT		    57 /* underscore -> concat mapping */
+%token M_TERNARY	    58 /* "?:" -> <xsl:choose> mapping */
+%token M_TERNARY_END	    59 /* End of a M_TERNARY chain */
+%token M_ERROR		    60 /* An error was detected in the lexer */
+%token M_XPATH		    61 /* Building an XPath expression */
+%token M_PARSE_FULL	    62 /* Parse a slax document */
+%token M_PARSE_SLAX	    63 /* Parse a SLAX-style XPath expression */
+%token M_PARSE_XPATH	    64 /* Parse an XPath expression */
+%token M_PARSE_PARTIAL	    65 /* Parse partial SLAX contents */
+%token M_JSON		    66 /* Parse a JSON document */
 
 /*
  * 'Constructs' refer to high-level constructs, as we move from lexing
  * to semantics.  This is meant to make processing easier.
  */
-%token C_ABSOLUTE		/* An absolute path */
-%token C_ATTRIBUTE		/* Attribute axis ('@') */
-%token C_DESCENDANT		/* Absolute child ("//tag") */
-%token C_ELEMENT		/* Path element */
-%token C_EXPR			/* Parenthetical expresion (nested) */
-%token C_INDEX			/* Index value ('foo[4]') */
-%token C_NOT			/* Negation of path */
-%token C_PATH			/* Path of elements */
-%token C_PREDICATE		/* Node contains a predicate */
-%token C_TEST			/* Node test (e.g. node()) */
-%token C_UNION			/* Union of two paths */
-%token C_INT64			/* Signed 64-bit integer */
-%token C_UINT64			/* Unsigned 64-bit integer */
-%token C_FLOAT			/* Floating point number (double) */
-%token C_STRING			/* String value (const char *) */
-%token C_BOOLEAN		/* Boolean value */
+%token C_ABSOLUTE	    67 /* An absolute path */
+%token C_ATTRIBUTE	    68 /* Attribute axis ('@') */
+%token C_DESCENDANT	    69 /* Absolute child ("//tag") */
+%token C_ELEMENT	    70 /* Path element */
+%token C_EXPR		    71 /* Parenthetical expresion (nested) */
+%token C_INDEX		    72 /* Index value ('foo[4]') */
+%token C_NOT		    73 /* Negation of path */
+%token C_PATH		    74 /* Path of elements */
+%token C_PREDICATE	    75 /* Node contains a predicate */
+%token C_TEST		    76 /* Node test (e.g. node()) */
+%token C_UNION		    77 /* Union of two paths */
+%token C_INT64		    78 /* Signed 64-bit integer */
+%token C_UINT64		    79 /* Unsigned 64-bit integer */
+%token C_FLOAT		    80 /* Floating point number (double) */
+%token C_STRING		    81 /* String value (const char *) */
+%token C_BOOLEAN	    82 /* Boolean value */
 /* Note: Add new names to xo_xparse_ttname_map[] in xo_xparse.c */
 
 /*
  * Use a "%pure-parser" for reentracy
-%define api.pure full
  */
+%define api.pure full
 
 %{
 
@@ -912,7 +833,7 @@ const char *xo_xparse_token_name_fancy[YYNTOKENS];
 const char *
 xo_xparse_token_name (xo_xparse_token_t ttype)
 {
-    if (ttype >= YYNTOKENS)
+    if (ttype < 0 || ttype >= YYNTOKENS)
 	return "unknown";
 
     return yytname[YYTRANSLATE(ttype)];
@@ -921,7 +842,7 @@ xo_xparse_token_name (xo_xparse_token_t ttype)
 const char *
 xo_xparse_fancy_token_name (xo_xparse_token_t ttype)
 {
-    if (ttype >= YYNTOKENS)
+    if (ttype < 0 || ttype >= YYNTOKENS)
 	return "unknown";
 
     return xo_xparse_token_name_fancy[YYTRANSLATE(ttype)];
