@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <inttypes.h>
 #include <string.h>
 #include <sys/param.h>
 #include <math.h>
@@ -26,6 +27,14 @@
 #include "xo_filter.h"
 
 typedef double xo_float_t;	/* Our floating point type */
+
+/*
+ * We extensively return aggregates (structures) in the file, under the
+ * contraint that they are less than 128 bits and can be returned via
+ * registers without impacting performance.  So we turn off warnings
+ * for aggregate returns.
+ */
+#pragma GCC   diagnostic ignored "-Waggregate-return"
 
 #define XO_MATCHES_DEF	32	/* Number of states allocated by default */
 
@@ -132,8 +141,8 @@ typedef struct xo_filter_data_s {
     unsigned xfd_pad:8;		/* Padding */
     xo_xparse_node_id_t xfd_node;   /* 32 bits of node */
     union {			    /* Data value (based on xfd_type) */
-	int64_t xfdd_int64:64;	    /* If C_INT64 */
-	uint64_t xfdd_uint64:64;    /* If C_UINT64 or C_INDEX or C_BOOLEAN */
+	int64_t xfdd_int64;	    /* If C_INT64 */
+	uint64_t xfdd_uint64;	    /* If C_UINT64 or C_INDEX or C_BOOLEAN */
 	xo_float_t xfdd_float;	    /* If C_FLOAT */
 	const char *xfdd_str;	    /* If C_STRING */
     } xfd_data;
@@ -1010,11 +1019,13 @@ xo_filter_dump_data (xo_handle_t *xop, xo_filter_t *xfp UNUSED,
 
     case C_BOOLEAN:
     case C_INT64:
-	snprintf(buf, sizeof(buf), "%lld", data.xfd_int64);
+	snprintf(buf, sizeof(buf), "%" PRId64,
+		 (long long) data.xfd_int64);
 	break;
 
     case C_UINT64:
-	snprintf(buf, sizeof(buf), "%llu", data.xfd_uint64);
+	snprintf(buf, sizeof(buf), "%" PRIu64,
+		 (unsigned long long) data.xfd_uint64);
 	break;
 
     case C_FLOAT:
