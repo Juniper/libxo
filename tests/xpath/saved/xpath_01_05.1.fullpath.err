@@ -1,65 +1,65 @@
 main: input '#run'
 main: input '?one/two/three/four'
 --- 0: 9
-    000009: type 512 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 508 (C_ELEMENT), str 1 [one], contents 0, next 3, prev 0 
-        000003: type 508 (C_ELEMENT), str 7 [two], contents 0, next 5, prev 1 
-        000005: type 508 (C_ELEMENT), str 13 [three], contents 0, next 7, prev 3 
-        000007: type 508 (C_ELEMENT), str 21 [four], contents 0, next 0, prev 5 
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [one], contents 0, next 3, prev 0 
+        000003: type 70 (C_ELEMENT), str 7 [two], contents 0, next 5, prev 1 
+        000005: type 70 (C_ELEMENT), str 13 [three], contents 0, next 7, prev 3 
+        000007: type 70 (C_ELEMENT), str 21 [four], contents 0, next 0, prev 5 
 main: status: zero
 main: input '?a/b/c/d'
 --- 0: 9
-    000009: type 512 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 508 (C_ELEMENT), str 1 [one], contents 0, next 3, prev 0 
-        000003: type 508 (C_ELEMENT), str 7 [two], contents 0, next 5, prev 1 
-        000005: type 508 (C_ELEMENT), str 13 [three], contents 0, next 7, prev 3 
-        000007: type 508 (C_ELEMENT), str 21 [four], contents 0, next 0, prev 5 
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [one], contents 0, next 3, prev 0 
+        000003: type 70 (C_ELEMENT), str 7 [two], contents 0, next 5, prev 1 
+        000005: type 70 (C_ELEMENT), str 13 [three], contents 0, next 7, prev 3 
+        000007: type 70 (C_ELEMENT), str 21 [four], contents 0, next 0, prev 5 
 --- 1: 18
-    000018: type 512 (C_PATH), str 0 [], contents 10, next 0, prev 0 
-        000010: type 508 (C_ELEMENT), str 26 [a], contents 0, next 12, prev 0 
-        000012: type 508 (C_ELEMENT), str 30 [b], contents 0, next 14, prev 10 
-        000014: type 508 (C_ELEMENT), str 34 [c], contents 0, next 16, prev 12 
-        000016: type 508 (C_ELEMENT), str 38 [d], contents 0, next 0, prev 14 
+    000018: type 74 (C_PATH), str 0 [], contents 10, next 0, prev 0 
+        000010: type 70 (C_ELEMENT), str 26 [a], contents 0, next 12, prev 0 
+        000012: type 70 (C_ELEMENT), str 30 [b], contents 0, next 14, prev 10 
+        000014: type 70 (C_ELEMENT), str 34 [c], contents 0, next 16, prev 12 
+        000016: type 70 (C_ELEMENT), str 38 [d], contents 0, next 0, prev 14 
 main: status: zero
 main: input '?!e'
 --- 0: 9
-    000009: type 512 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 508 (C_ELEMENT), str 1 [one], contents 0, next 3, prev 0 
-        000003: type 508 (C_ELEMENT), str 7 [two], contents 0, next 5, prev 1 
-        000005: type 508 (C_ELEMENT), str 13 [three], contents 0, next 7, prev 3 
-        000007: type 508 (C_ELEMENT), str 21 [four], contents 0, next 0, prev 5 
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [one], contents 0, next 3, prev 0 
+        000003: type 70 (C_ELEMENT), str 7 [two], contents 0, next 5, prev 1 
+        000005: type 70 (C_ELEMENT), str 13 [three], contents 0, next 7, prev 3 
+        000007: type 70 (C_ELEMENT), str 21 [four], contents 0, next 0, prev 5 
 --- 1: 18
-    000018: type 512 (C_PATH), str 0 [], contents 10, next 0, prev 0 
-        000010: type 508 (C_ELEMENT), str 26 [a], contents 0, next 12, prev 0 
-        000012: type 508 (C_ELEMENT), str 30 [b], contents 0, next 14, prev 10 
-        000014: type 508 (C_ELEMENT), str 34 [c], contents 0, next 16, prev 12 
-        000016: type 508 (C_ELEMENT), str 38 [d], contents 0, next 0, prev 14 
+    000018: type 74 (C_PATH), str 0 [], contents 10, next 0, prev 0 
+        000010: type 70 (C_ELEMENT), str 26 [a], contents 0, next 12, prev 0 
+        000012: type 70 (C_ELEMENT), str 30 [b], contents 0, next 14, prev 10 
+        000014: type 70 (C_ELEMENT), str 34 [c], contents 0, next 16, prev 12 
+        000016: type 70 (C_ELEMENT), str 38 [d], contents 0, next 0, prev 14 
 --- 2: 19
-    000019: type 511 (C_NOT), str 40 [!], contents 20, next 0, prev 0 
-        000020: type 508 (C_ELEMENT), str 42 [e], contents 0, next 0, prev 0 
+    000019: type 73 (C_NOT), str 40 [!], contents 20, next 0, prev 0 
+        000020: type 70 (C_ELEMENT), str 42 [e], contents 0, next 0, prev 0 
 main: status: zero
 main: input '?uno/dos/tres/cuatro'
 --- 0: 9
-    000009: type 512 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 508 (C_ELEMENT), str 1 [one], contents 0, next 3, prev 0 
-        000003: type 508 (C_ELEMENT), str 7 [two], contents 0, next 5, prev 1 
-        000005: type 508 (C_ELEMENT), str 13 [three], contents 0, next 7, prev 3 
-        000007: type 508 (C_ELEMENT), str 21 [four], contents 0, next 0, prev 5 
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [one], contents 0, next 3, prev 0 
+        000003: type 70 (C_ELEMENT), str 7 [two], contents 0, next 5, prev 1 
+        000005: type 70 (C_ELEMENT), str 13 [three], contents 0, next 7, prev 3 
+        000007: type 70 (C_ELEMENT), str 21 [four], contents 0, next 0, prev 5 
 --- 1: 18
-    000018: type 512 (C_PATH), str 0 [], contents 10, next 0, prev 0 
-        000010: type 508 (C_ELEMENT), str 26 [a], contents 0, next 12, prev 0 
-        000012: type 508 (C_ELEMENT), str 30 [b], contents 0, next 14, prev 10 
-        000014: type 508 (C_ELEMENT), str 34 [c], contents 0, next 16, prev 12 
-        000016: type 508 (C_ELEMENT), str 38 [d], contents 0, next 0, prev 14 
+    000018: type 74 (C_PATH), str 0 [], contents 10, next 0, prev 0 
+        000010: type 70 (C_ELEMENT), str 26 [a], contents 0, next 12, prev 0 
+        000012: type 70 (C_ELEMENT), str 30 [b], contents 0, next 14, prev 10 
+        000014: type 70 (C_ELEMENT), str 34 [c], contents 0, next 16, prev 12 
+        000016: type 70 (C_ELEMENT), str 38 [d], contents 0, next 0, prev 14 
 --- 2: 19
-    000019: type 511 (C_NOT), str 40 [!], contents 20, next 0, prev 0 
-        000020: type 508 (C_ELEMENT), str 42 [e], contents 0, next 0, prev 0 
+    000019: type 73 (C_NOT), str 40 [!], contents 20, next 0, prev 0 
+        000020: type 70 (C_ELEMENT), str 42 [e], contents 0, next 0, prev 0 
 --- 3: 30
-    000030: type 512 (C_PATH), str 0 [], contents 22, next 0, prev 0 
-        000022: type 508 (C_ELEMENT), str 44 [uno], contents 0, next 24, prev 0 
-        000024: type 508 (C_ELEMENT), str 50 [dos], contents 0, next 26, prev 22 
-        000026: type 508 (C_ELEMENT), str 56 [tres], contents 0, next 28, prev 24 
-        000028: type 508 (C_ELEMENT), str 63 [cuatro], contents 0, next 0, prev 26 
+    000030: type 74 (C_PATH), str 0 [], contents 22, next 0, prev 0 
+        000022: type 70 (C_ELEMENT), str 44 [uno], contents 0, next 24, prev 0 
+        000024: type 70 (C_ELEMENT), str 50 [dos], contents 0, next 26, prev 22 
+        000026: type 70 (C_ELEMENT), str 56 [tres], contents 0, next 28, prev 24 
+        000028: type 70 (C_ELEMENT), str 63 [cuatro], contents 0, next 0, prev 26 
 main: status: zero
 main: input '+one'
 main: status: track
