@@ -1018,13 +1018,11 @@ xo_filter_dump_data (xo_handle_t *xop, xo_filter_t *xfp UNUSED,
 
     case C_BOOLEAN:
     case C_INT64:
-	snprintf(buf, sizeof(buf), "%" PRId64,
-		 (long long) data.xfd_int64);
+	snprintf(buf, sizeof(buf), "%" PRId64, data.xfd_int64);
 	break;
 
     case C_UINT64:
-	snprintf(buf, sizeof(buf), "%" PRIu64,
-		 (unsigned long long) data.xfd_uint64);
+	snprintf(buf, sizeof(buf), "%" PRIu64, data.xfd_uint64);
 	break;
 
     case C_FLOAT:
