@@ -14,6 +14,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <sys/param.h>
+#include <math.h>
 
 #define LIBXO_NEED_FILTER
 #include "xo.h"
@@ -23,6 +24,8 @@
 #include "xo_xpath.tab.h"
 #include "xo_xparse.h"
 #include "xo_filter.h"
+
+typedef double xo_float_t;	/* Our floating point type */
 
 #define XO_MATCHES_DEF	32	/* Number of states allocated by default */
 
@@ -130,9 +133,9 @@ typedef struct xo_filter_data_s {
     xo_xparse_node_id_t xfd_node;   /* 32 bits of node */
     union {			    /* Data value (based on xfd_type) */
 	int64_t xfdd_int64:64;	    /* If C_INT64 */
-	uint64_t xfdd_uint64:64;    /* If C_UINT64 or C_INDEX */
-	double xfdd_float;	    /* If C_FLOAT */
-	const char *xfdd_str;	    /* String value */
+	uint64_t xfdd_uint64:64;    /* If C_UINT64 or C_INDEX or C_BOOLEAN */
+	xo_float_t xfdd_float;	    /* If C_FLOAT */
+	const char *xfdd_str;	    /* If C_STRING */
     } xfd_data;
 } xo_filter_data_t;
 
@@ -142,10 +145,11 @@ typedef struct xo_filter_data_s {
 #define xfd_str xfd_data.xfdd_str
 
 /* Flags for xfd_flags: */
-#define XFDF_TRUE	(1 << 0) /* This part is true */
-#define XFDF_INVALID	(1 << 1) /* Expression hierarchy is invalid/broken */
-#define XFDF_MISSING	(1 << 2) /* A referenced element is missing  */
-#define XFDF_UNSUPPORTED (1 << 3) /* Token type is not supported */
+#define XFDF_TRUE	(1<<0) /* This part is true */
+#define XFDF_INVALID	(1<<1) /* Expression hierarchy is invalid/broken */
+#define XFDF_MISSING	(1<<2) /* A referenced element is missing  */
+#define XFDF_UNSUPPORTED (1<<3) /* Token type is not supported */
+#define XFDF_FINAL	(1<<4)  /* This is the final answer */
 
 static void
 xo_filter_dump_matches (xo_handle_t *xop, xo_filter_t *xfp);
@@ -787,6 +791,18 @@ xo_filter_data_make (unsigned type, unsigned flags, xo_xparse_node_id_t id)
 }
 
 static inline xo_filter_data_t
+xo_filter_data_float (unsigned flags, xo_float_t val)
+{
+    xo_filter_data_t data = { 0 };
+
+    data.xfd_type = C_FLOAT;
+    data.xfd_flags = flags;
+    data.xfd_float = val;
+
+    return data;
+}
+
+static inline xo_filter_data_t
 xo_filter_data_invalid (void)
 {
     xo_filter_data_t data = { 0 };
@@ -800,6 +816,76 @@ xo_filter_data_invalid (void)
     return data;
 }
 
+static int64_t
+xo_filter_cast_int64 (xo_filter_t *xfp UNUSED, xo_filter_data_t data)
+{
+    switch (data.xfd_type) {
+    case C_STRING:;
+	const char *str = data.xfd_str;
+	char *ep;
+	int64_t ival = strtoll(str, &ep, 0);
+	return (ep && *ep == '\0') ? ival: 0;
+
+    case C_FLOAT:
+	return (int64_t) data.xfd_float;
+
+    default:
+	return data.xfd_int64;
+    }
+}
+
+static int
+xo_filter_cast_boolean (xo_filter_t *xfp UNUSED, xo_filter_data_t data)
+{
+    switch (data.xfd_type) {
+    case C_STRING:;
+	const char *str = data.xfd_str;
+	char *ep;
+	int64_t ival = strtoll(str, &ep, 0);
+	return (ep == NULL || *ep != '\0') ? 0 : ival ? 1 : 0;
+
+    case C_FLOAT:
+	return (int64_t) data.xfd_float != 0;
+
+    default:
+	return data.xfd_int64 != 0;
+    }
+}
+
+static xo_float_t
+xo_filter_cast_float (xo_filter_t *xfp UNUSED, xo_filter_data_t data)
+{
+    xo_float_t fval = 0;
+
+    switch (data.xfd_type) {
+    case C_STRING:;
+	const char *str = data.xfd_str;
+	char *ep;
+	fval = strtod(str, &ep);
+	return (ep && *ep == '\0') ? fval: 0;
+
+    case C_FLOAT:
+	return data.xfd_float;
+
+    case C_BOOLEAN:
+	return data.xfd_int64 ? 1 : 0;
+
+    case C_UINT64:
+	return (xo_float_t) data.xfd_uint64;
+
+    case C_INT64:
+    default:
+	return (xo_float_t) data.xfd_int64;
+    }
+}
+
+static inline xo_filter_data_t
+xo_filter_cast_float_data (xo_filter_t *xfp UNUSED, xo_filter_data_t old)
+{
+    xo_float_t new = xo_filter_cast_float(xfp, old);
+    return xo_filter_data_float(0, new);
+}
+
 #define XO_FILTER_OP_ARGS \
     xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED, xo_match_t *xmp UNUSED, \
 	xo_xparse_node_t *xnp UNUSED, \
@@ -808,13 +894,19 @@ xo_filter_data_invalid (void)
 #define XO_FILTER_OP_PASS \
     xop, xfp, xmp, xnp, left, right
 
-typedef xo_filter_data_t (*xo_filter_op_fn_t)(XO_FILTER_OP_ARGS);
+typedef xo_filter_data_t (xo_filter_op_fn_t)(XO_FILTER_OP_ARGS);
 
 #define XO_FILTER_NODE_ARGS \
     xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED, xo_match_t *xmp UNUSED, \
 	xo_xparse_node_t *xnp
 
 typedef xo_filter_data_t (xo_filter_node_fn_t)(XO_FILTER_NODE_ARGS);
+
+#define XO_FILTER_CALC_ARGS \
+    xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED, \
+	xo_filter_data_t left UNUSED, xo_filter_data_t right UNUSED
+
+typedef xo_filter_data_t (xo_filter_calc_fn_t)(XO_FILTER_CALC_ARGS);
 
 /* Forward decl */
 static xo_filter_data_t
@@ -828,20 +920,21 @@ xo_filter_eval_number (XO_FILTER_NODE_ARGS)
     const char *str = xo_xparse_str(&xfp->xf_xd, xnp->xn_str);
     char *ep;
     int64_t ival = strtoll(str, &ep, 0);
-    double fval;
+    xo_float_t fval;
 
     if (ep && *ep == '\0') {
-	data = xo_filter_data_make(C_INT64, 0, xnp->xn_str);
+	data = xo_filter_data_make(C_INT64, 0, 0);
 	data.xfd_int64 = ival;
     } else {
 	fval = strtod(str, &ep);
 	if (ep && *ep == '\0') {
-	    data = xo_filter_data_make(C_FLOAT, 0, xnp->xn_str);
+	    data = xo_filter_data_make(C_FLOAT, 0, 0);
 	    data.xfd_float = fval;
 
 	} else {
 	    /* We can't give an error, so we just return 0 */
-	    data = xo_filter_data_make(C_INT64, 0, xnp->xn_str);
+	    xo_failure(xop, "invalid number value: '%s'", xnp->xn_str);
+	    data = xo_filter_data_make(C_INT64, 0, 0);
 	    data.xfd_int64 = 0;
 	}
     }
@@ -875,8 +968,11 @@ xo_filter_eval_path (XO_FILTER_NODE_ARGS)
     /* We only support a single element in the path, which must be a key */
     for (id = xnp->xn_contents; id; id = xnp->xn_next) {
 	xnp = xo_xparse_node(&xfp->xf_xd, id);
-	if (xnp->xn_type != C_ELEMENT)
+	if (xnp->xn_type != C_ELEMENT) {
+	    xo_failure(xop, "filter: non-element path member (%s)",
+		       xo_xparse_fancy_token_name(xnp->xn_type));
 	    continue;
+	}
 
 	if (elt == NULL)
 	    elt = xnp;
@@ -938,51 +1034,15 @@ xo_filter_dump_data (xo_handle_t *xop, xo_filter_t *xfp UNUSED,
 
 #define TYPE_CMP(_a, _b) (((_a) << 16) | (_b))
 
-static int64_t
-xo_filter_cast_int64 (xo_filter_t *xfp UNUSED, xo_filter_data_t data)
-{
-    switch (data.xfd_type) {
-    case C_STRING:;
-	const char *str = data.xfd_str;
-	char *ep;
-	int64_t ival = strtoll(str, &ep, 0);
-	return (ep && *ep == '\0') ? ival: 0;
-
-    case C_FLOAT:
-	return (int64_t) data.xfd_float;
-
-    default:
-	return data.xfd_int64;
-    }
-}
-
-static double
-xo_filter_cast_float (xo_filter_t *xfp UNUSED, xo_filter_data_t data)
-{
-    switch (data.xfd_type) {
-    case C_STRING:;
-	const char *str = data.xfd_str;
-	char *ep;
-	int64_t ival = strtoll(str, &ep, 0);
-	return (ep && *ep == '\0') ? ival: 0;
-
-    case C_FLOAT:
-	return data.xfd_float;
-
-    default:
-	return data.xfd_int64;
-    }
-}
-
 static xo_filter_data_t
 xo_filter_eval_compare (XO_FILTER_OP_ARGS)
 {
     xo_filter_data_t data = { 0 };
     int rc = 0;
-    double fval;
+    xo_float_t fval;
 
-    xo_filter_dump_data(xop, xfp, left, 0, "equals: left");
-    xo_filter_dump_data(xop, xfp, right, 0, "equals: right");
+    xo_filter_dump_data(xop, xfp, left, 0, "compare: left");
+    xo_filter_dump_data(xop, xfp, right, 0, "compare: right");
 
     switch (TYPE_CMP(left.xfd_type, right.xfd_type)) {
     case TYPE_CMP(C_STRING, C_STRING):
@@ -990,15 +1050,11 @@ xo_filter_eval_compare (XO_FILTER_OP_ARGS)
 	break;
 
     case TYPE_CMP(C_INT64, C_INT64):
-    case TYPE_CMP(C_INT64, C_BOOLEAN):
-    case TYPE_CMP(C_BOOLEAN, C_INT64):
 	rc = (left.xfd_int64 > right.xfd_int64) ? 1
 	    : (left.xfd_int64 < right.xfd_int64) ? -1 : 0;
 	break;
 
     case TYPE_CMP(C_UINT64, C_UINT64):
-    case TYPE_CMP(C_UINT64, C_BOOLEAN):
-    case TYPE_CMP(C_BOOLEAN, C_UINT64):
 	rc = (left.xfd_uint64 > right.xfd_uint64) ? 1
 	    : (left.xfd_uint64 < right.xfd_uint64) ? -1 : 0;
 	break;
@@ -1010,71 +1066,86 @@ xo_filter_eval_compare (XO_FILTER_OP_ARGS)
 
     case TYPE_CMP(C_STRING, C_INT64):
 	fval = xo_filter_cast_float(xfp, left);
-	rc = (fval > right.xfd_int64) ? 1
-	    : (fval < right.xfd_int64) ? -1 : 0;
+	rc = (fval > right.xfd_int64) ? 1 : (fval < right.xfd_int64) ? -1 : 0;
 	break;
 
     case TYPE_CMP(C_INT64, C_STRING):
 	fval = xo_filter_cast_float(xfp, right);
-	rc = (left.xfd_int64 > fval) ? 1
-	    : (left.xfd_int64 < fval) ? -1 : 0;
+	rc = (left.xfd_int64 > fval) ? 1 : (left.xfd_int64 < fval) ? -1 : 0;
+	break;
+
+    case TYPE_CMP(C_STRING, C_FLOAT):
+	fval = xo_filter_cast_float(xfp, left);
+	rc = (fval > right.xfd_float) ? 1 : (fval < right.xfd_float) ? -1 : 0;
+	break;
+
+    case TYPE_CMP(C_FLOAT, C_STRING):
+	fval = xo_filter_cast_float(xfp, right);
+	rc = (left.xfd_float > fval) ? 1 : (left.xfd_float < fval) ? -1 : 0;
 	break;
 
     case TYPE_CMP(C_BOOLEAN, C_BOOLEAN):
-	rc = ((left.xfd_int64 == 0) && (right.xfd_int64 == 0));
+    case TYPE_CMP(C_INT64, C_BOOLEAN):
+    case TYPE_CMP(C_BOOLEAN, C_INT64):
+    case TYPE_CMP(C_UINT64, C_BOOLEAN): /* Cheating a bit, but we only ... */
+    case TYPE_CMP(C_BOOLEAN, C_UINT64): /* ... care about non-zero and zero */
+	if (left.xfd_int64 == 0) {
+	    rc = (right.xfd_int64 == 0) ? 0 : 1;
+	} else {
+	    rc = (right.xfd_int64 == 0) ? -1 : 0;
+	}
 	break;
 
     default:
 	return xo_filter_data_invalid();
     }
 
-    data.xfd_type = C_BOOLEAN;
+    data.xfd_type = C_INT64;
     data.xfd_int64 = rc;
+
+    xo_filter_dump_data(xop, xfp, data, 0, "compare");
     return data;
 }
 
 static xo_filter_data_t
-xo_filter_eval_equals_op (XO_FILTER_OP_ARGS)
+xo_filter_eval_op_and (XO_FILTER_OP_ARGS)
+{
+    xo_filter_data_t data = xo_filter_data_make(C_BOOLEAN, 0, 0);
+
+    int bool = xo_filter_cast_boolean(xfp, left);
+    if (!bool) {
+	data.xfd_int64 = 0;
+	data.xfd_flags |= XFDF_FINAL;
+
+	return data;
+    }
+
+    bool = xo_filter_cast_boolean(xfp, right);
+    if (!bool) {
+	data.xfd_int64 = 0;
+	data.xfd_flags |= XFDF_FINAL;
+
+	return data;
+    }
+
+    data.xfd_int64 = 1;
+    return data;
+}
+
+static xo_filter_data_t
+xo_filter_eval_and (XO_FILTER_NODE_ARGS)
+{
+    return xo_filter_eval(xop, xfp, xmp, xnp->xn_contents,
+			  xo_filter_eval_op_and);
+}
+
+static xo_filter_data_t
+xo_filter_eval_op_equals (XO_FILTER_OP_ARGS)
 {
     xo_filter_data_t data = xo_filter_eval_compare(XO_FILTER_OP_PASS);
 
+    data.xfd_type = C_BOOLEAN;
     data.xfd_int64 = (data.xfd_int64 == 0) ? 1 : 0;
-    return data;
-}
-
-static xo_filter_data_t
-xo_filter_eval_lt_op (XO_FILTER_OP_ARGS)
-{
-    xo_filter_data_t data = xo_filter_eval_compare(XO_FILTER_OP_PASS);
-
-    data.xfd_int64 = (data.xfd_int64 < 0) ? 1 : 0;
-    return data;
-}
-
-static xo_filter_data_t
-xo_filter_eval_le_op (XO_FILTER_OP_ARGS)
-{
-    xo_filter_data_t data = xo_filter_eval_compare(XO_FILTER_OP_PASS);
-
-    data.xfd_int64 = (data.xfd_int64 <= 0) ? 1 : 0;
-    return data;
-}
-
-static xo_filter_data_t
-xo_filter_eval_gt_op (XO_FILTER_OP_ARGS)
-{
-    xo_filter_data_t data = xo_filter_eval_compare(XO_FILTER_OP_PASS);
-
-    data.xfd_int64 = (data.xfd_int64 > 0) ? 1 : 0;
-    return data;
-}
-
-static xo_filter_data_t
-xo_filter_eval_ge_op (XO_FILTER_OP_ARGS)
-{
-    xo_filter_data_t data = xo_filter_eval_compare(XO_FILTER_OP_PASS);
-
-    data.xfd_int64 = (data.xfd_int64 >= 0) ? 1 : 0;
     return data;
 }
 
@@ -1082,35 +1153,122 @@ static xo_filter_data_t
 xo_filter_eval_equals (XO_FILTER_NODE_ARGS)
 {
     return xo_filter_eval(xop, xfp, xmp, xnp->xn_contents,
-			  xo_filter_eval_equals_op);
+			  xo_filter_eval_op_equals);
 }
 
 static xo_filter_data_t
-xo_filter_eval_lt (XO_FILTER_NODE_ARGS)
+xo_filter_eval_op_notequals (XO_FILTER_OP_ARGS)
 {
-    return xo_filter_eval(xop, xfp, xmp, xnp->xn_contents,
-			  xo_filter_eval_lt_op);
+    xo_filter_data_t data = xo_filter_eval_compare(XO_FILTER_OP_PASS);
+
+    data.xfd_type = C_BOOLEAN;
+    data.xfd_int64 = (data.xfd_int64 == 0) ? 0 : 1;
+    return data;
 }
 
 static xo_filter_data_t
-xo_filter_eval_le (XO_FILTER_NODE_ARGS)
+xo_filter_eval_op_lt (XO_FILTER_OP_ARGS)
 {
-    return xo_filter_eval(xop, xfp, xmp, xnp->xn_contents,
-			  xo_filter_eval_le_op);
+    xo_filter_data_t data = xo_filter_eval_compare(XO_FILTER_OP_PASS);
+
+    data.xfd_type = C_BOOLEAN;
+    data.xfd_int64 = (data.xfd_int64 < 0) ? 1 : 0;
+    return data;
 }
 
 static xo_filter_data_t
-xo_filter_eval_gt (XO_FILTER_NODE_ARGS)
+xo_filter_eval_op_le (XO_FILTER_OP_ARGS)
 {
-    return xo_filter_eval(xop, xfp, xmp, xnp->xn_contents,
-			  xo_filter_eval_gt_op);
+    xo_filter_data_t data = xo_filter_eval_compare(XO_FILTER_OP_PASS);
+
+    data.xfd_type = C_BOOLEAN;
+    data.xfd_int64 = (data.xfd_int64 <= 0) ? 1 : 0;
+    return data;
 }
 
 static xo_filter_data_t
-xo_filter_eval_ge (XO_FILTER_NODE_ARGS)
+xo_filter_eval_op_gt (XO_FILTER_OP_ARGS)
 {
-    return xo_filter_eval(xop, xfp, xmp, xnp->xn_contents,
-			  xo_filter_eval_ge_op);
+    xo_filter_data_t data = xo_filter_eval_compare(XO_FILTER_OP_PASS);
+
+    data.xfd_type = C_BOOLEAN;
+    data.xfd_int64 = (data.xfd_int64 > 0) ? 1 : 0;
+    return data;
+}
+
+static xo_filter_data_t
+xo_filter_eval_op_ge (XO_FILTER_OP_ARGS)
+{
+    xo_filter_data_t data = xo_filter_eval_compare(XO_FILTER_OP_PASS);
+
+    data.xfd_type = C_BOOLEAN;
+    data.xfd_int64 = (data.xfd_int64 >= 0) ? 1 : 0;
+    return data;
+}
+
+static xo_filter_data_t
+xo_filter_eval_calc (XO_FILTER_OP_ARGS, xo_filter_calc_fn_t calc_fn)
+{
+    xo_filter_data_t lfloat = xo_filter_cast_float_data(xfp, left);
+    xo_filter_data_t rfloat = xo_filter_cast_float_data(xfp, right);
+
+    return calc_fn(xop, xfp, lfloat, rfloat);
+}
+
+static xo_filter_data_t
+xo_filter_eval_calc_plus (XO_FILTER_CALC_ARGS)
+{
+    left.xfd_float += right.xfd_float;
+    return left;
+}
+
+static xo_filter_data_t
+xo_filter_eval_op_plus (XO_FILTER_OP_ARGS)
+{
+    return xo_filter_eval_calc(XO_FILTER_OP_PASS,
+			       xo_filter_eval_calc_plus);
+}
+
+static xo_filter_data_t
+xo_filter_eval_calc_minus (XO_FILTER_CALC_ARGS)
+{
+    left.xfd_float -= right.xfd_float;
+    return left;
+}
+
+static xo_filter_data_t
+xo_filter_eval_op_minus (XO_FILTER_OP_ARGS)
+{
+    return xo_filter_eval_calc(XO_FILTER_OP_PASS,
+			       xo_filter_eval_calc_minus);
+}
+
+static xo_filter_data_t
+xo_filter_eval_calc_div (XO_FILTER_CALC_ARGS)
+{
+    left.xfd_float /= right.xfd_float;
+    return left;
+}
+
+static xo_filter_data_t
+xo_filter_eval_op_div (XO_FILTER_OP_ARGS)
+{
+    return xo_filter_eval_calc(XO_FILTER_OP_PASS,
+			       xo_filter_eval_calc_div);
+}
+
+static xo_filter_data_t
+xo_filter_eval_calc_mod (XO_FILTER_CALC_ARGS)
+{
+    left.xfd_float = fmod(left.xfd_float, right.xfd_float);
+    return left;
+}
+
+static xo_filter_data_t
+xo_filter_eval_op_mod (XO_FILTER_OP_ARGS)
+{
+    return xo_filter_eval_calc(XO_FILTER_OP_PASS,
+			       xo_filter_eval_calc_mod);
 }
 
 static xo_filter_data_t
@@ -1125,63 +1283,124 @@ xo_filter_eval (xo_handle_t *xop, xo_filter_t *xfp, xo_match_t *xmp,
 
     xo_xparse_node_t *xnp;
     xo_filter_node_fn_t *node_fn = NULL;
+    xo_filter_op_fn_t *nested_op_fn = NULL;
 
     for (; id; id = xnp->xn_next) {
 	xnp = xo_xparse_node(&xfp->xf_xd, id);
+	node_fn = NULL;
+	nested_op_fn = NULL;
 
 	switch (xnp->xn_type) {
-
-	case T_NUMBER:;
-	    node_fn = xo_filter_eval_number;
-	    break;
-
-	case L_EQUALS:;
-	    node_fn = xo_filter_eval_equals;
-	    break;
-
-	case L_LESS:
-	    node_fn = xo_filter_eval_lt;
-	    break;
-
-	case L_LESSEQ:
-	    node_fn = xo_filter_eval_le;
-	    break;
-
-	case L_GRTR:
-	    node_fn = xo_filter_eval_gt;
-	    break;
-
-	case L_GRTREQ:
-	    node_fn = xo_filter_eval_ge;
-	    break;
 
 	case C_PATH:
 	    node_fn = xo_filter_eval_path;
 	    break;
-	
+
+	case K_AND:
+	    /* Use a node function to allow short-circuiting the expression */
+	    node_fn = xo_filter_eval_and;
+	    break;
+
+	case K_DIV:
+	    nested_op_fn = xo_filter_eval_op_div;
+	    break;
+
+	case K_MOD:
+	    nested_op_fn = xo_filter_eval_op_mod;
+	    break;
+
+#if 0
+	case K_OR:
+	    /* Use a node function to allow short-circuiting the expression */
+	    node_fn = xo_filter_eval_or;
+	    break;
+#endif
+
+	case L_EQUALS:
+	    node_fn = xo_filter_eval_equals;
+	    break;
+
+	case L_GRTR:
+	    nested_op_fn = xo_filter_eval_op_gt;
+	    break;
+
+	case L_GRTREQ:
+	    nested_op_fn = xo_filter_eval_op_ge;
+	    break;
+
+	case L_LESS:
+	    nested_op_fn = xo_filter_eval_op_lt;
+	    break;
+
+	case L_LESSEQ:
+	    nested_op_fn = xo_filter_eval_op_le;
+	    break;
+
+	case L_PLUS:
+	    nested_op_fn = xo_filter_eval_op_plus;
+	    break;
+
+	case L_MINUS:
+	    nested_op_fn = xo_filter_eval_op_minus;
+	    break;
+
+#if 0
+	case L_NOT:
+	    node_fn = xo_filter_eval_not;
+	    break;
+#endif
+
+	case L_NOTEQUALS:
+	    nested_op_fn = xo_filter_eval_op_notequals;
+	    break;
+
+	case T_FUNCTION_NAME:
+	    data = xo_filter_data_invalid();
+	    break;
+
+	case T_NUMBER:
+	    node_fn = xo_filter_eval_number;
+	    break;
+
 	case T_QUOTED:
 	    node_fn = xo_filter_eval_quoted;
 	    break;
-	
+
 	default:		/* For now; should be XFDF_UNSUPPORTED */
+	    xo_failure(xop, "filter: unhandle type: '%s'",
+		       xo_xparse_fancy_token_name(xnp->xn_type));
+
 	    if (xnp->xn_contents)
 		data = xo_filter_eval(xop, xfp, xmp, xnp->xn_contents, op_fn);
 	}
 
 	if (node_fn)
 	    data = node_fn(xop, xfp, xmp, xnp);
+	else if (nested_op_fn)
+	    data = xo_filter_eval(xop, xfp, xmp, xnp->xn_contents,
+				  nested_op_fn);
 
 	if (first) {
 	    first = 0;
 	    last = data;
-	    continue;
+
+	} else if (op_fn) {
+	    data = op_fn(xop, xfp, xmp, xnp, last, data);
 	}
 
-	if (op_fn == NULL)
-	    continue;
-
-	data = op_fn(xop, xfp, xmp, xnp, last, data);
 	xo_filter_dump_data(xop, xfp, data, 4, "eval");
+
+	/*
+	 * We want to allow short-circuiting so if the 'final' flag is
+	 * on, we stop further processing.  We want to turn the
+	 * 'final' bit off before we return the data, since it's not
+	 * final for our caller.
+	 */
+	if (data.xfd_flags & XFDF_FINAL) {
+	    data.xfd_flags &= ~XFDF_FINAL; /* Turn it off */
+	    break;
+	}
+
 	last = data;
     }
 
@@ -1340,7 +1559,7 @@ xo_filter_key (xo_handle_t *xop, xo_filter_t *xfp,
 	 */
 	xnp = xo_xparse_node(xdp, xsp->xs_match);
 
-	const char *label = 0;
+	const char *label = "";
 	if (xnp->xn_next == 0) {
 	    /* We don't set xm_depth to 1 here; this "open" doesn't count */
 	    label = xo_filter_match_adjust(xop, xfp, xmp, xsp, XSS_DEEP);
