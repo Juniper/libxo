@@ -1,2 +1,2 @@
-one/two[three == '4']/output = 'yes'
-one/two[three == '4']/four/five = '6'
+/one/two[three == '4']/output = 'yes'
+/one/two[three == '4']/four/five = '6'
