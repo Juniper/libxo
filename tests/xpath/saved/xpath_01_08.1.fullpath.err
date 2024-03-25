@@ -1,0 +1,179 @@
+main: input '#run'
+main: input '?/one[a>4.5 && a <6.5]/two[b>=5 div 2]/three[c<-4]/four'
+--- 0: 1
+    000001: type 505 (C_ABSOLUTE), str 1 [/], contents 0, next 2, prev 0 
+    000002: type 508 (C_ELEMENT), str 3 [one], contents 3, next 17, prev 1 
+        000003: type 513 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0 
+            000008: type 474 (K_AND), str 17 [&&], contents 5, next 0, prev 0 
+                000005: type 279 (L_GRTR), str 11 [>], contents 6, next 11, prev 0 
+                    000006: type 512 (C_PATH), str 0 [], contents 4, next 7, prev 0 
+                        000004: type 508 (C_ELEMENT), str 9 [a], contents 0, next 0, prev 0 
+                    000007: type 491 (T_NUMBER), str 13 [4.5], contents 0, next 0, prev 6 
+                000011: type 282 (L_LESS), str 22 [<], contents 12, next 0, prev 5 
+                    000012: type 512 (C_PATH), str 0 [], contents 10, next 13, prev 0 
+                        000010: type 508 (C_ELEMENT), str 20 [a], contents 0, next 0, prev 0 
+                    000013: type 491 (T_NUMBER), str 24 [6.5], contents 0, next 0, prev 12 
+    000017: type 508 (C_ELEMENT), str 32 [two], contents 18, next 29, prev 2 
+        000018: type 513 (C_PREDICATE), str 0 [], contents 20, next 0, prev 0 
+            000020: type 280 (L_GRTREQ), str 40 [>=], contents 21, next 0, prev 0 
+                000021: type 512 (C_PATH), str 0 [], contents 19, next 23, prev 0 
+                    000019: type 508 (C_ELEMENT), str 38 [b], contents 0, next 0, prev 0 
+                000023: type 476 (K_DIV), str 45 [div], contents 22, next 0, prev 21 
+                    000022: type 491 (T_NUMBER), str 43 [5], contents 0, next 25, prev 0 
+                    000025: type 491 (T_NUMBER), str 49 [2], contents 0, next 0, prev 22 
+    000029: type 508 (C_ELEMENT), str 55 [three], contents 30, next 39, prev 17 
+        000030: type 513 (C_PREDICATE), str 0 [], contents 32, next 0, prev 0 
+            000032: type 282 (L_LESS), str 65 [<], contents 33, next 0, prev 0 
+                000033: type 512 (C_PATH), str 0 [], contents 31, next 34, prev 0 
+                    000031: type 508 (C_ELEMENT), str 63 [c], contents 0, next 0, prev 0 
+                000034: type 285 (L_MINUS), str 67 [-], contents 35, next 0, prev 33 
+                    000035: type 491 (T_NUMBER), str 69 [4], contents 0, next 0, prev 0 
+    000039: type 508 (C_ELEMENT), str 75 [four], contents 0, next 0, prev 29 
+main: status: zero
+main: input '?/uno[a<-3 + 5 div 2]/dos[3+5 == 2+6]/tres'
+xpath_01: test: xpath feature is unsupported: plus sign ('+')
+xpath_01: test: xpath feature is unsupported: plus sign ('+')
+xpath_01: test: xpath feature is unsupported: plus sign ('+')
+--- 0: 1
+    000001: type 505 (C_ABSOLUTE), str 1 [/], contents 0, next 2, prev 0 
+    000002: type 508 (C_ELEMENT), str 3 [one], contents 3, next 17, prev 1 
+        000003: type 513 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0 
+            000008: type 474 (K_AND), str 17 [&&], contents 5, next 0, prev 0 
+                000005: type 279 (L_GRTR), str 11 [>], contents 6, next 11, prev 0 
+                    000006: type 512 (C_PATH), str 0 [], contents 4, next 7, prev 0 
+                        000004: type 508 (C_ELEMENT), str 9 [a], contents 0, next 0, prev 0 
+                    000007: type 491 (T_NUMBER), str 13 [4.5], contents 0, next 0, prev 6 
+                000011: type 282 (L_LESS), str 22 [<], contents 12, next 0, prev 5 
+                    000012: type 512 (C_PATH), str 0 [], contents 10, next 13, prev 0 
+                        000010: type 508 (C_ELEMENT), str 20 [a], contents 0, next 0, prev 0 
+                    000013: type 491 (T_NUMBER), str 24 [6.5], contents 0, next 0, prev 12 
+    000017: type 508 (C_ELEMENT), str 32 [two], contents 18, next 29, prev 2 
+        000018: type 513 (C_PREDICATE), str 0 [], contents 20, next 0, prev 0 
+            000020: type 280 (L_GRTREQ), str 40 [>=], contents 21, next 0, prev 0 
+                000021: type 512 (C_PATH), str 0 [], contents 19, next 23, prev 0 
+                    000019: type 508 (C_ELEMENT), str 38 [b], contents 0, next 0, prev 0 
+                000023: type 476 (K_DIV), str 45 [div], contents 22, next 0, prev 21 
+                    000022: type 491 (T_NUMBER), str 43 [5], contents 0, next 25, prev 0 
+                    000025: type 491 (T_NUMBER), str 49 [2], contents 0, next 0, prev 22 
+    000029: type 508 (C_ELEMENT), str 55 [three], contents 30, next 39, prev 17 
+        000030: type 513 (C_PREDICATE), str 0 [], contents 32, next 0, prev 0 
+            000032: type 282 (L_LESS), str 65 [<], contents 33, next 0, prev 0 
+                000033: type 512 (C_PATH), str 0 [], contents 31, next 34, prev 0 
+                    000031: type 508 (C_ELEMENT), str 63 [c], contents 0, next 0, prev 0 
+                000034: type 285 (L_MINUS), str 67 [-], contents 35, next 0, prev 33 
+                    000035: type 491 (T_NUMBER), str 69 [4], contents 0, next 0, prev 0 
+    000039: type 508 (C_ELEMENT), str 75 [four], contents 0, next 0, prev 29 
+--- 1: 42
+    000042: type 505 (C_ABSOLUTE), str 80 [/], contents 0, next 43, prev 0 
+    000043: type 508 (C_ELEMENT), str 82 [uno], contents 44, next 59, prev 42 
+        000044: type 513 (C_PREDICATE), str 0 [], contents 46, next 0, prev 0 
+            000046: type 282 (L_LESS), str 90 [<], contents 47, next 0, prev 0 
+                000047: type 512 (C_PATH), str 0 [], contents 45, next 50, prev 0 
+                    000045: type 508 (C_ELEMENT), str 88 [a], contents 0, next 0, prev 0 
+                000050: type 292 (L_PLUS), str 96 [+], contents 48, next 0, prev 47 
+                    000048: type 285 (L_MINUS), str 92 [-], contents 49, next 53, prev 0 
+                        000049: type 491 (T_NUMBER), str 94 [3], contents 0, next 0, prev 0 
+                    000053: type 476 (K_DIV), str 100 [div], contents 52, next 0, prev 48 
+                        000052: type 491 (T_NUMBER), str 98 [5], contents 0, next 55, prev 0 
+                        000055: type 491 (T_NUMBER), str 104 [2], contents 0, next 0, prev 52 
+    000059: type 508 (C_ELEMENT), str 110 [dos], contents 60, next 74, prev 43 
+        000060: type 513 (C_PREDICATE), str 0 [], contents 65, next 0, prev 0 
+            000065: type 278 (L_EQUALS), str 122 [==], contents 62, next 0, prev 0 
+                000062: type 292 (L_PLUS), str 118 [+], contents 61, next 68, prev 0 
+                    000061: type 491 (T_NUMBER), str 116 [3], contents 0, next 64, prev 0 
+                    000064: type 491 (T_NUMBER), str 120 [5], contents 0, next 0, prev 61 
+                000068: type 292 (L_PLUS), str 127 [+], contents 67, next 0, prev 62 
+                    000067: type 491 (T_NUMBER), str 125 [2], contents 0, next 70, prev 0 
+                    000070: type 491 (T_NUMBER), str 129 [6], contents 0, next 0, prev 67 
+    000074: type 508 (C_ELEMENT), str 135 [tres], contents 0, next 0, prev 59 
+main: status: zero
+main: input '+one'
+main: status: track
+main: input '$a 5555'
+main: key: 'a'='5555'
+main: status: dead
+main: input '+two'
+main: status: dead
+main: input '$b 4444'
+main: key: 'b'='4444'
+main: status: dead
+main: input '+three'
+main: status: dead
+main: input '$c -3333'
+main: key: 'c'='-3333'
+main: status: dead
+main: input '+four'
+main: status: dead
+main: input '=five mambo'
+main: field: 'five'='mambo'
+main: status: dead
+main: input '-four'
+main: status: dead
+main: input '-three'
+main: status: dead
+main: input '-two'
+main: status: dead
+main: input '+two'
+main: status: dead
+main: input '$b 2'
+main: key: 'b'='2'
+main: status: dead
+main: input '+three'
+main: status: dead
+main: input '=c -33'
+main: field: 'c'='-33'
+main: status: dead
+main: input '=four crispo'
+main: field: 'four'='crispo'
+main: status: dead
+main: input '-three'
+main: status: dead
+main: input '-two'
+main: status: dead
+main: input '-one'
+main: status: track
+main: input '+one'
+main: status: track
+main: input '$a 4.85'
+main: key: 'a'='4.85'
+main: status: track
+main: input '+two'
+main: status: track
+main: input '$b 2.7'
+main: key: 'b'='2.7'
+main: status: track
+main: input '+three'
+main: status: track
+main: input '$c -3333'
+main: key: 'c'='-3333'
+main: status: track
+main: input '+four'
+main: status: full
+main: input '=five mambo'
+main: field: 'five'='mambo'
+main: status: full
+main: input '-four'
+main: status: track
+main: input '-three'
+main: status: track
+main: input '-two'
+main: status: track
+main: input '+two'
+main: status: track
+main: input '$b 2'
+main: key: 'b'='2'
+main: status: dead
+main: input '+three'
+main: status: dead
+main: input '=c -33'
+main: field: 'c'='-33'
+main: status: dead
+main: input '=four crispo'
+main: field: 'four'='crispo'
+main: status: dead
+main: input '-three'
+main: status: dead
+main: input '-two'
+main: status: track
+main: input '-one'
+main: status: track
