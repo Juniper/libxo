@@ -118,7 +118,7 @@ static inline xo_xparse_node_id_t
 xo_xparse_node_new (xo_xparse_data_t *xdp)
 {
     xo_off_t new_node = xdp->xd_last_node + 1;
-    if (!xo_buf_make_room(&xdp->xd_node_buf,
+    if (!xo_buf_has_room(&xdp->xd_node_buf,
 			 new_node * sizeof(xo_xparse_node_t)))
 	return 0;
 
