@@ -1,0 +1,41 @@
+#run
+?/one[a>4.5 && a <6.5]/two[b>=5 div 2]/three[c<-4]/four
+?/uno[a<-3 + 5 div 2]/dos[3+5 == 2+6]/tres
++one
+$a 5555
++two
+$b 4444
++three
+$c -3333
++four
+=five mambo
+-four
+-three
+-two
++two
+$b 2
++three
+=c -33
+=four crispo
+-three
+-two
+-one
++one
+$a 4.85
++two
+$b 2.7
++three
+$c -3333
++four
+=five mambo
+-four
+-three
+-two
++two
+$b 2
++three
+=c -33
+=four crispo
+-three
+-two
+-one
