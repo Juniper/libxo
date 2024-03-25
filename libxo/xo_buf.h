@@ -180,6 +180,7 @@ xo_buf_has_small_room (xo_buffer_t *xbp, ssize_t len)
     return xo_buf_has_some_room(xbp, len, XO_BUFSIZ_SMALL);
 }
 
+#if 0
 static inline int
 xo_buf_make_some_room (xo_buffer_t *xbp, ssize_t size, ssize_t bufsiz)
 {
@@ -213,6 +214,7 @@ xo_buf_make_small_room (xo_buffer_t *xbp, ssize_t size)
 {
     return xo_buf_make_some_room(xbp, size, XO_BUFSIZ_SMALL);
 }
+#endif
 
 /*
  * Append the given string to the given buffer
