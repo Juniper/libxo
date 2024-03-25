@@ -183,6 +183,8 @@ fullpath_handler (XO_ENCODER_HANDLER_ARGS)
 	xo_buf_append_str(xbp, "'\n");
 #if 0
 	break;
+#else
+__attribute__((__fallthrough__));
 #endif
 
     case XO_OP_FLUSH:		   /* Clean up function */
