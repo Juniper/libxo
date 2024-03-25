@@ -62,7 +62,7 @@
 /**
  * Check if the wide character value is an error indication
  */
-static int inline
+static inline int
 xo_utf8_wchar_is_err (wchar_t wc)
 {
     return ((long) wc <= 0);
