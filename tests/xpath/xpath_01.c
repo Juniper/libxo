@@ -106,7 +106,7 @@ main (int argc, char **argv)
     char *field, *value;
     int rc;
 
-    for (;;) {
+    for (rc = 0;; rc = 0) {
 	cp = fgets(buf, sizeof(buf), in);
 	if (cp == NULL)
 	    break;
