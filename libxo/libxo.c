@@ -2904,7 +2904,6 @@ xo_format_string_direct (xo_handle_t *xop, xo_buffer_t *xbp,
     if (len > 0 && !xo_buf_has_room(xbp, len))
 	return 0;
 
-#if 1
     /*
      * If we have the "right" encoding for text, then our job is
      * simpler.  We can skim over the string and process it quickly.
@@ -2912,7 +2911,7 @@ xo_format_string_direct (xo_handle_t *xop, xo_buffer_t *xbp,
     if (cp && len > 0 && xo_is_style_text_utf8(xop) && need_enc == have_enc) {
 	const char *np, *ep;
 	ssize_t clen = len < 0 ? (ssize_t) strlen(cp) : len;
-	for (np = cp, ep = cp + clen; np < ep; np++)
+	for (np = cp, ep = cp + clen; *np && np < ep; np++)
 	    if (xo_is_byte_utf8(*np) || *np == '\\' || *np == '%'
 		|| *np == '{' || *np == '}')
 		break;
@@ -2927,7 +2926,6 @@ xo_format_string_direct (xo_handle_t *xop, xo_buffer_t *xbp,
 	    return clen;		/* Len is the number of columns */
 	}
     }
-#endif
 
     for (;;) {
 	if (len == 0)
