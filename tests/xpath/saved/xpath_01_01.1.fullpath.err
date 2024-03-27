@@ -1,3 +1,4 @@
+main: input '#run --libxo @fullpath:slax,pretty'
 main: input '#run'
 main: input '?one/two/three'
 --- 0: 7
