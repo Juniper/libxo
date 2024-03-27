@@ -1,3 +1,4 @@
+main: input '#run --libxo @fullpath:slax,pretty'
 main: input '#run'
 main: input '?/uno[x<4]/dos[y<=5]/tres'
 --- 0: 1
