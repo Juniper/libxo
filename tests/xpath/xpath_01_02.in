@@ -1,3 +1,4 @@
+#run --libxo @fullpath:slax,pretty
 #run
 ?one[two == 4]
 +one
