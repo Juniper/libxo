@@ -1,3 +1,4 @@
+#run --libxo @fullpath:slax,pretty
 #run
 ?one[two][three][5]
 ?one/or/the/other[two == 4][5]
