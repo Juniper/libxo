@@ -15,12 +15,16 @@
 #include "xo_encoder.h"
 
 typedef struct fullpath_private_s {
+    uint32_t fp_flags;		/* Flags for the structure (FPF_*) */
     xo_buffer_t fp_data;
     xo_buffer_t fp_leader;
     xo_off_t *fp_stack;
     xo_off_t *fp_stackp;
     uint32_t fp_stack_size;
 } fullpath_private_t;
+
+/* Flags for fp_flags */
+#define FPF_SLAX	(1<<0)	/* Make slax-like output */
 
 #define XO_FP_DEFAULT_STACK_SIZE 16
 
@@ -95,6 +99,43 @@ fullpath_destroy (xo_handle_t *xop UNUSED, fullpath_private_t *fpp)
     xo_buf_cleanup(&fpp->fp_leader);
 }
 
+/*
+ * Extract the option values.  The format is:
+ *    -libxo encoder=csv:kw=val:kw=val:kw=val,pretty
+ *    -libxo encoder=csv+kw=val+kw=val+kw=val,pretty
+ */
+static int
+fullpath_options (xo_handle_t *xop, fullpath_private_t *fpp,
+	     const char *raw_opts, char opts_char)
+{
+    ssize_t len = strlen(raw_opts);
+    char *options = alloca(len + 1);
+    memcpy(options, raw_opts, len);
+    options[len] = '\0';
+
+    char *cp, *ep, *np, *vp;
+    for (cp = options, ep = options + len + 1; cp && cp < ep; cp = np) {
+	np = strchr(cp, opts_char);
+	if (np)
+	    *np++ = '\0';
+
+	vp = strchr(cp, '=');
+	if (vp)
+	    *vp++ = '\0';
+
+	if (xo_streq(cp, "slax")) {
+	    fpp->fp_flags |= FPF_SLAX;
+
+	} else {
+	    xo_warn_hc(xop, -1,
+		       "unknown encoder option value: '%s'", cp);
+	    return -1;
+	}
+    }
+
+    return 0;
+}
+
 static int
 fullpath_handler (XO_ENCODER_HANDLER_ARGS)
 {
@@ -123,9 +164,11 @@ fullpath_handler (XO_ENCODER_HANDLER_ARGS)
 	break;
 
     case XO_OP_OPTIONS:
+	rc = fullpath_options(xop, fpp, value, ':');
 	break;
 
     case XO_OP_OPTIONS_PLUS:
+	rc = fullpath_options(xop, fpp, value, '+');
 	break;
 
     case XO_OP_OPEN_LIST:
@@ -166,11 +209,17 @@ fullpath_handler (XO_ENCODER_HANDLER_ARGS)
 	if (flags & XFF_DISPLAY_ONLY)
 	    break;
 
+	int is_pretty = xo_isset_flags(xop, XOF_PRETTY);
+
 	if (flags & XFF_KEY) {	 /* Keys turn into predicates */
+	    const char *equals = (fpp->fp_flags & FPF_SLAX)
+		? (is_pretty ? " == '" : "=='")
+		: (is_pretty ? " = '" : "='");
+
 	    xo_buf_trim(leader, 1); /* Trim trailing '/' */
 	    xo_buf_append_val(leader, "[", 1);
 	    xo_buf_append_str(leader, name);
-	    xo_buf_append_str(leader, " == '");
+	    xo_buf_append_str(leader, equals);
 	    xo_buf_append_str(leader, value);
 	    xo_buf_append_str(leader, "']/");
 	    xo_buf_force_nul(leader);
@@ -180,7 +229,7 @@ fullpath_handler (XO_ENCODER_HANDLER_ARGS)
 	/* Non-keys are values */
 	xo_buf_append_buf(xbp, leader); /* Start with our leading string */
 	xo_buf_append_str(xbp, name);
-	xo_buf_append_str(xbp, " = '");
+	xo_buf_append_str(xbp, is_pretty ? " = '" : "='");
 	xo_buf_append_str(xbp, value);
 	xo_buf_append_str(xbp, "'\n");
 #if 0
