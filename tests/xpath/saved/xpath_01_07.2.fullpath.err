@@ -1,0 +1,154 @@
+main: input '#run --libxo @fullpath:slax,pretty'
+main: input '#run'
+main: input '?/uno[x<4]/dos[y<=5]/tres'
+--- 0: 1
+    000001: type 67 (C_ABSOLUTE), str 1 [/], contents 0, next 2, prev 0 
+    000002: type 70 (C_ELEMENT), str 3 [uno], contents 3, next 11, prev 1 
+        000003: type 75 (C_PREDICATE), str 0 [], contents 5, next 0, prev 0 
+            000005: type 17 (L_LESS), str 11 [<], contents 6, next 0, prev 0 
+                000006: type 74 (C_PATH), str 0 [], contents 4, next 7, prev 0 
+                    000004: type 70 (C_ELEMENT), str 9 [x], contents 0, next 0, prev 0 
+                000007: type 53 (T_NUMBER), str 13 [4], contents 0, next 0, prev 6 
+    000011: type 70 (C_ELEMENT), str 19 [dos], contents 12, next 20, prev 2 
+        000012: type 75 (C_PREDICATE), str 0 [], contents 14, next 0, prev 0 
+            000014: type 18 (L_LESSEQ), str 27 [<=], contents 15, next 0, prev 0 
+                000015: type 74 (C_PATH), str 0 [], contents 13, next 16, prev 0 
+                    000013: type 70 (C_ELEMENT), str 25 [y], contents 0, next 0, prev 0 
+                000016: type 53 (T_NUMBER), str 30 [5], contents 0, next 0, prev 15 
+    000020: type 70 (C_ELEMENT), str 36 [tres], contents 0, next 0, prev 11 
+main: status: zero
+main: input '?/one/two/more'
+--- 0: 1
+    000001: type 67 (C_ABSOLUTE), str 1 [/], contents 0, next 2, prev 0 
+    000002: type 70 (C_ELEMENT), str 3 [uno], contents 3, next 11, prev 1 
+        000003: type 75 (C_PREDICATE), str 0 [], contents 5, next 0, prev 0 
+            000005: type 17 (L_LESS), str 11 [<], contents 6, next 0, prev 0 
+                000006: type 74 (C_PATH), str 0 [], contents 4, next 7, prev 0 
+                    000004: type 70 (C_ELEMENT), str 9 [x], contents 0, next 0, prev 0 
+                000007: type 53 (T_NUMBER), str 13 [4], contents 0, next 0, prev 6 
+    000011: type 70 (C_ELEMENT), str 19 [dos], contents 12, next 20, prev 2 
+        000012: type 75 (C_PREDICATE), str 0 [], contents 14, next 0, prev 0 
+            000014: type 18 (L_LESSEQ), str 27 [<=], contents 15, next 0, prev 0 
+                000015: type 74 (C_PATH), str 0 [], contents 13, next 16, prev 0 
+                    000013: type 70 (C_ELEMENT), str 25 [y], contents 0, next 0, prev 0 
+                000016: type 53 (T_NUMBER), str 30 [5], contents 0, next 0, prev 15 
+    000020: type 70 (C_ELEMENT), str 36 [tres], contents 0, next 0, prev 11 
+--- 1: 23
+    000023: type 67 (C_ABSOLUTE), str 41 [/], contents 0, next 24, prev 0 
+    000024: type 70 (C_ELEMENT), str 43 [one], contents 0, next 26, prev 23 
+    000026: type 70 (C_ELEMENT), str 49 [two], contents 0, next 28, prev 24 
+    000028: type 70 (C_ELEMENT), str 55 [more], contents 0, next 0, prev 26 
+main: status: zero
+main: input '?three'
+--- 0: 1
+    000001: type 67 (C_ABSOLUTE), str 1 [/], contents 0, next 2, prev 0 
+    000002: type 70 (C_ELEMENT), str 3 [uno], contents 3, next 11, prev 1 
+        000003: type 75 (C_PREDICATE), str 0 [], contents 5, next 0, prev 0 
+            000005: type 17 (L_LESS), str 11 [<], contents 6, next 0, prev 0 
+                000006: type 74 (C_PATH), str 0 [], contents 4, next 7, prev 0 
+                    000004: type 70 (C_ELEMENT), str 9 [x], contents 0, next 0, prev 0 
+                000007: type 53 (T_NUMBER), str 13 [4], contents 0, next 0, prev 6 
+    000011: type 70 (C_ELEMENT), str 19 [dos], contents 12, next 20, prev 2 
+        000012: type 75 (C_PREDICATE), str 0 [], contents 14, next 0, prev 0 
+            000014: type 18 (L_LESSEQ), str 27 [<=], contents 15, next 0, prev 0 
+                000015: type 74 (C_PATH), str 0 [], contents 13, next 16, prev 0 
+                    000013: type 70 (C_ELEMENT), str 25 [y], contents 0, next 0, prev 0 
+                000016: type 53 (T_NUMBER), str 30 [5], contents 0, next 0, prev 15 
+    000020: type 70 (C_ELEMENT), str 36 [tres], contents 0, next 0, prev 11 
+--- 1: 23
+    000023: type 67 (C_ABSOLUTE), str 41 [/], contents 0, next 24, prev 0 
+    000024: type 70 (C_ELEMENT), str 43 [one], contents 0, next 26, prev 23 
+    000026: type 70 (C_ELEMENT), str 49 [two], contents 0, next 28, prev 24 
+    000028: type 70 (C_ELEMENT), str 55 [more], contents 0, next 0, prev 26 
+--- 2: 33
+    000033: type 74 (C_PATH), str 0 [], contents 31, next 0, prev 0 
+        000031: type 70 (C_ELEMENT), str 60 [three], contents 0, next 0, prev 0 
+main: status: zero
+main: input '+uno'
+main: status: track
+main: input '$x 2'
+main: key: 'x'='2'
+main: status: track
+main: input '+dos'
+main: status: track
+main: input '$y 5'
+main: key: 'y'='5'
+main: status: track
+main: input '+tres'
+main: status: full
+main: input '=cuatro 4'
+main: field: 'cuatro'='4'
+main: status: full
+main: input '-tres'
+main: status: track
+main: input '+uno'
+main: status: dead
+main: input '+dos'
+main: status: dead
+main: input '+tres'
+main: status: dead
+main: input '=nada 0'
+main: field: 'nada'='0'
+main: status: dead
+main: input '-tres'
+main: status: dead
+main: input '-dos'
+main: status: dead
+main: input '-uno'
+main: status: track
+main: input '+one'
+main: status: dead
+main: input '+two'
+main: status: dead
+main: input '+more'
+main: status: dead
+main: input '=what no'
+main: field: 'what'='no'
+main: status: dead
+main: input '-more'
+main: status: dead
+main: input '-two'
+main: status: dead
+main: input '-one'
+main: status: track
+main: input '-dos'
+main: status: track
+main: input '-uno'
+main: status: track
+main: input '+one'
+main: status: track
+main: input '+two'
+main: status: track
+main: input '+uno'
+main: status: dead
+main: input '+dos'
+main: status: dead
+main: input '+tres'
+main: status: dead
+main: input '=nada 0'
+main: field: 'nada'='0'
+main: status: dead
+main: input '-tres'
+main: status: dead
+main: input '-dos'
+main: status: dead
+main: input '-uno'
+main: status: track
+main: input '+more'
+main: status: full
+main: input '=even yes'
+main: field: 'even'='yes'
+main: status: full
+main: input '-more'
+main: status: track
+main: input '-two'
+main: status: track
+main: input '+three'
+main: status: full
+main: input '=four sure'
+main: field: 'four'='sure'
+main: status: full
+main: input '-three'
+main: status: track
+main: input '-one'
+main: status: track
