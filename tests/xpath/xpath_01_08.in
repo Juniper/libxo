@@ -1,3 +1,4 @@
+#run --libxo @fullpath:slax,pretty
 #run
 ?/one[a>4.5 && a <6.5]/two[b>=5 div 2]/three[c<-4]/four
 ?/uno[a<-3 + 5 div 2]/dos[3+5 == 2+6]/tres
