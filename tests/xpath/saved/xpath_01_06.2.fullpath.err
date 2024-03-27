@@ -1,0 +1,198 @@
+main: input '#run --libxo @fullpath:slax,pretty'
+main: input '#run'
+main: input '?one/two[three == 3]'
+--- 0: 12
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [one], contents 0, next 3, prev 0 
+        000003: type 70 (C_ELEMENT), str 7 [two], contents 4, next 0, prev 1 
+            000004: type 75 (C_PREDICATE), str 0 [], contents 6, next 0, prev 0 
+                000006: type 14 (L_EQUALS), str 19 [==], contents 7, next 0, prev 0 
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
+                        000005: type 70 (C_ELEMENT), str 13 [three], contents 0, next 0, prev 0 
+                    000008: type 53 (T_NUMBER), str 22 [3], contents 0, next 0, prev 7 
+main: status: zero
+main: input '?uno/dos/tres[test == "yup"]/cuatro[test == "sure"]/cinco'
+--- 0: 12
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [one], contents 0, next 3, prev 0 
+        000003: type 70 (C_ELEMENT), str 7 [two], contents 4, next 0, prev 1 
+            000004: type 75 (C_PREDICATE), str 0 [], contents 6, next 0, prev 0 
+                000006: type 14 (L_EQUALS), str 19 [==], contents 7, next 0, prev 0 
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
+                        000005: type 70 (C_ELEMENT), str 13 [three], contents 0, next 0, prev 0 
+                    000008: type 53 (T_NUMBER), str 22 [3], contents 0, next 0, prev 7 
+--- 1: 37
+    000037: type 74 (C_PATH), str 0 [], contents 13, next 0, prev 0 
+        000013: type 70 (C_ELEMENT), str 26 [uno], contents 0, next 15, prev 0 
+        000015: type 70 (C_ELEMENT), str 32 [dos], contents 0, next 17, prev 13 
+        000017: type 70 (C_ELEMENT), str 38 [tres], contents 18, next 26, prev 15 
+            000018: type 75 (C_PREDICATE), str 0 [], contents 20, next 0, prev 0 
+                000020: type 14 (L_EQUALS), str 50 [==], contents 21, next 0, prev 0 
+                    000021: type 74 (C_PATH), str 0 [], contents 19, next 22, prev 0 
+                        000019: type 70 (C_ELEMENT), str 45 [test], contents 0, next 0, prev 0 
+                    000022: type 54 (T_QUOTED), str 53 [yup], contents 0, next 0, prev 21 
+        000026: type 70 (C_ELEMENT), str 61 [cuatro], contents 27, next 35, prev 17 
+            000027: type 75 (C_PREDICATE), str 0 [], contents 29, next 0, prev 0 
+                000029: type 14 (L_EQUALS), str 75 [==], contents 30, next 0, prev 0 
+                    000030: type 74 (C_PATH), str 0 [], contents 28, next 31, prev 0 
+                        000028: type 70 (C_ELEMENT), str 70 [test], contents 0, next 0, prev 0 
+                    000031: type 54 (T_QUOTED), str 78 [sure], contents 0, next 0, prev 30 
+        000035: type 70 (C_ELEMENT), str 87 [cinco], contents 0, next 0, prev 26 
+main: status: zero
+main: input '+one'
+main: status: track
+main: input '+two'
+main: status: track
+main: input '$three 3'
+main: key: 'three'='3'
+main: status: full
+main: input '+four'
+main: status: full
+main: input '=foo goo'
+main: field: 'foo'='goo'
+main: status: full
+main: input '+five'
+main: status: full
+main: input '=foo goo'
+main: field: 'foo'='goo'
+main: status: full
+main: input '+six'
+main: status: full
+main: input '=foo goo'
+main: field: 'foo'='goo'
+main: status: full
+main: input '-six'
+main: status: full
+main: input '-five'
+main: status: full
+main: input '=foo goo'
+main: field: 'foo'='goo'
+main: status: full
+main: input '-four'
+main: status: full
+main: input '=foo goo'
+main: field: 'foo'='goo'
+main: status: full
+main: input '-two'
+main: status: track
+main: input '+two'
+main: status: track
+main: input '$three 3333'
+main: key: 'three'='3333'
+main: status: dead
+main: input '+four'
+main: status: dead
+main: input '=foo goo'
+main: field: 'foo'='goo'
+main: status: dead
+main: input '+five'
+main: status: dead
+main: input '=foo goo'
+main: field: 'foo'='goo'
+main: status: dead
+main: input '+six'
+main: status: dead
+main: input '=foo goo'
+main: field: 'foo'='goo'
+main: status: dead
+main: input '-six'
+main: status: dead
+main: input '-five'
+main: status: dead
+main: input '=foo goo'
+main: field: 'foo'='goo'
+main: status: dead
+main: input '-four'
+main: status: dead
+main: input '=foo goo'
+main: field: 'foo'='goo'
+main: status: dead
+main: input '-two'
+main: status: track
+main: input '-one'
+main: status: track
+main: input ''
+main: input '+uno'
+main: status: track
+main: input '+dos'
+main: status: track
+main: input '$mumble no'
+main: key: 'mumble'='no'
+main: status: track
+main: input '+tres'
+main: status: track
+main: input '$test yup'
+main: key: 'test'='yup'
+main: status: track
+main: input '+cuatro'
+main: status: track
+main: input '$test sure'
+main: key: 'test'='sure'
+main: status: track
+main: input '+nope'
+main: status: dead
+main: input '-nope'
+main: status: track
+main: input '+cinco'
+main: status: full
+main: input '+seis'
+main: status: full
+main: input '-seis'
+main: status: full
+main: input '-cinco'
+main: status: track
+main: input '+siete'
+main: status: dead
+main: input '-siete'
+main: status: track
+main: input '+cinco'
+main: status: full
+main: input '-cinco'
+main: status: track
+main: input '-cuatro'
+main: status: track
+main: input '+cuatro'
+main: status: track
+main: input '$test fail'
+main: key: 'test'='fail'
+main: status: dead
+main: input '=foo goo'
+main: field: 'foo'='goo'
+main: status: dead
+main: input '+cinco'
+main: status: dead
+main: input '+seis'
+main: status: dead
+main: input '-seis'
+main: status: dead
+main: input '-cinco'
+main: status: dead
+main: input '-cuatro'
+main: status: track
+main: input '+cuatro'
+main: status: track
+main: input '$test sure'
+main: key: 'test'='sure'
+main: status: track
+main: input '+cinco'
+main: status: full
+main: input '=foo goo'
+main: field: 'foo'='goo'
+main: status: full
+main: input '=goo foo'
+main: field: 'goo'='foo'
+main: status: full
+main: input '+seis'
+main: status: full
+main: input '-seis'
+main: status: full
+main: input '-cinco'
+main: status: track
+main: input '-cuatro'
+main: status: track
+main: input '-tres'
+main: status: track
+main: input '-dos'
+main: status: track
+main: input '-uno'
+main: status: track
