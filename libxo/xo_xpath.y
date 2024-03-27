@@ -138,6 +138,7 @@
  * Use a "%pure-parser" for reentracy
 %define api.pure full
  */
+%pure-parser
 
 %{
 
