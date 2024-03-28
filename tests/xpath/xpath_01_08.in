@@ -40,3 +40,14 @@ $b 2
 -three
 -two
 -one
+
+?one
++a
+$b you've got mail
+$c didn't sweat
++d
++one
+=foo that's good
+-one
+-d
+-a
