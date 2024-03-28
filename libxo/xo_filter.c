@@ -1141,10 +1141,28 @@ xo_filter_eval_op_and (XO_FILTER_OP_ARGS)
 }
 
 static xo_filter_data_t
-xo_filter_eval_and (XO_FILTER_NODE_ARGS)
+xo_filter_eval_op_or (XO_FILTER_OP_ARGS)
 {
-    return xo_filter_eval(xop, xfp, xmp, xnp->xn_contents,
-			  xo_filter_eval_op_and);
+    xo_filter_data_t data = xo_filter_data_make(C_BOOLEAN, 0, 0);
+
+    int bool = xo_filter_cast_boolean(xfp, left);
+    if (bool) {
+	data.xfd_int64 = 1;
+	data.xfd_flags |= XFDF_FINAL;
+
+	return data;
+    }
+
+    bool = xo_filter_cast_boolean(xfp, right);
+    if (bool) {
+	data.xfd_int64 = 1;
+	data.xfd_flags |= XFDF_FINAL;
+
+	return data;
+    }
+
+    data.xfd_int64 = 0;
+    return data;
 }
 
 static xo_filter_data_t
@@ -1155,13 +1173,6 @@ xo_filter_eval_op_equals (XO_FILTER_OP_ARGS)
     data.xfd_type = C_BOOLEAN;
     data.xfd_int64 = (data.xfd_int64 == 0) ? 1 : 0;
     return data;
-}
-
-static xo_filter_data_t
-xo_filter_eval_equals (XO_FILTER_NODE_ARGS)
-{
-    return xo_filter_eval(xop, xfp, xmp, xnp->xn_contents,
-			  xo_filter_eval_op_equals);
 }
 
 static xo_filter_data_t
@@ -1317,8 +1328,7 @@ xo_filter_eval (xo_handle_t *xop, xo_filter_t *xfp, xo_match_t *xmp,
 	    break;
 
 	case K_AND:
-	    /* Use a node function to allow short-circuiting the expression */
-	    node_fn = xo_filter_eval_and;
+	    nested_op_fn = xo_filter_eval_op_and;
 	    break;
 
 	case K_DIV:
@@ -1329,15 +1339,12 @@ xo_filter_eval (xo_handle_t *xop, xo_filter_t *xfp, xo_match_t *xmp,
 	    nested_op_fn = xo_filter_eval_op_mod;
 	    break;
 
-#if 0
 	case K_OR:
-	    /* Use a node function to allow short-circuiting the expression */
-	    node_fn = xo_filter_eval_or;
+	    nested_op_fn = xo_filter_eval_op_or;
 	    break;
-#endif
 
 	case L_EQUALS:
-	    node_fn = xo_filter_eval_equals;
+	    nested_op_fn = xo_filter_eval_op_equals;
 	    break;
 
 	case L_GRTR:
