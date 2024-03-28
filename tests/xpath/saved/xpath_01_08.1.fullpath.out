@@ -1,1 +1,2 @@
 /one[a == '4.85']/two[b == '2.7']/three[c == '-3333']/four/five = 'mambo'
+/a[b == 'you\'ve got mail'][c == 'didn\'t sweat']/d/one/foo = 'that\'s good'
