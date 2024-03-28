@@ -136,6 +136,39 @@ fullpath_options (xo_handle_t *xop, fullpath_private_t *fpp,
     return 0;
 }
 
+/*
+ * Escape a string suitable for adding it to our xpath expression
+ */
+static char *
+fullpath_escape (char *buf, xo_ssize_t bufsiz, const char *str)
+{
+    const char *cp;
+    char *op, *ep;
+    
+
+    for (op = buf, cp = str, ep = buf + bufsiz - 1; *cp && op < ep; cp++) {
+	if (*cp < 26) {
+	    *op++ = '\\';
+	    *op++ = 'a' + *cp;
+	    continue;
+	}
+
+	switch (*cp) {
+	case '\'':
+	case '\"':
+	    *op++ = '\\';
+	    *op++ = *cp;
+	    continue;
+	}
+	
+	*op++ = *cp;
+    }
+
+    *op = '\0';
+
+    return buf;
+}
+
 static int
 fullpath_handler (XO_ENCODER_HANDLER_ARGS)
 {
@@ -211,6 +244,9 @@ fullpath_handler (XO_ENCODER_HANDLER_ARGS)
 
 	int is_pretty = xo_isset_flags(xop, XOF_PRETTY);
 
+	xo_ssize_t esc_size = 2 * strlen(value);
+	char *esc_value = fullpath_escape(alloca(esc_size), esc_size, value);
+
 	if (flags & XFF_KEY) {	 /* Keys turn into predicates */
 	    const char *equals = (fpp->fp_flags & FPF_SLAX)
 		? (is_pretty ? " == '" : "=='")
@@ -220,7 +256,7 @@ fullpath_handler (XO_ENCODER_HANDLER_ARGS)
 	    xo_buf_append_val(leader, "[", 1);
 	    xo_buf_append_str(leader, name);
 	    xo_buf_append_str(leader, equals);
-	    xo_buf_append_str(leader, value);
+	    xo_buf_append_str(leader, esc_value);
 	    xo_buf_append_str(leader, "']/");
 	    xo_buf_force_nul(leader);
 	    break;
@@ -230,7 +266,7 @@ fullpath_handler (XO_ENCODER_HANDLER_ARGS)
 	xo_buf_append_buf(xbp, leader); /* Start with our leading string */
 	xo_buf_append_str(xbp, name);
 	xo_buf_append_str(xbp, is_pretty ? " = '" : "='");
-	xo_buf_append_str(xbp, value);
+	xo_buf_append_str(xbp, esc_value);
 	xo_buf_append_str(xbp, "'\n");
 #if 0
 	break;
