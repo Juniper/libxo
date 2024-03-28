@@ -14,11 +14,9 @@ endif
 
 test tests:
 	@(cur=`pwd` ; for dir in $(SUBDIRS) ; do \
-	    if [ $$dir != "xpath" ]; then \
 		cd $$dir ; \
 		$(MAKE) tests ; \
 		cd $$cur ; \
-	    fi \
 	done)
 
 accept:
