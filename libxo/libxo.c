@@ -46,10 +46,12 @@
 
 #include "xo_config.h"
 
-#ifndef LIBXO_TEXT_ONLY
+#ifdef LIBXO_TEXT_ONLY		/* Turn off unneeded features */
+#undef LIBXO_NEED_MAP		/* No tag maps in text mode */
+#undef LIBXO_NEED_FILTERS	/* No filters in text mode */
+#else  /* LIBXO_TEXT_ONLY */
 /* We don't want the overhead of tag maps when in text-only mode */
-#define LIBXO_NEED_MAP
-#define LIBXO_NEED_FILTER	/* Same for filtering */
+#define LIBXO_NEED_MAP		/* Map tags to new names */
 #endif /* LIBXO_TEXT_ONLY */
 
 #include "xo.h"
@@ -295,9 +297,9 @@ struct xo_handle_s {
     int xo_map_len;		/* Current length (count) of xo_map[] */
     xo_buffer_t xo_map_data;	/* Data values for name mapping */
 #endif /* LIBXO_NEED_MAP */
-#ifdef LIBXO_NEED_FILTER
+#ifdef LIBXO_NEED_FILTERS
     struct xo_filter_s *xo_filters; /* Opaque data pointer */
-#endif /* LIBXO_NEED_FILTER */
+#endif /* LIBXO_NEED_FILTERS */
 };
 
 /* Flag operations */
@@ -4724,41 +4726,56 @@ xo_map_add_file (xo_handle_t *xop UNUSED, const char *fname UNUSED)
     return 0;
 }
 
+/*
+ * Define the xo_filter* functions exposed by the API, even if the
+ * feature is turned off, so linking against a non-NEED_FILTERS
+ * version of the library will work.
+ */
+static inline xo_filter_t *
+xo_filters (xo_handle_t *xop UNUSED)
+{
+#ifdef LIBXO_NEED_FILTERS
+    return xop->xo_filters;
+#else /* LIBXO_NEED_FILTERS */
+    return NULL;
+#endif /* LIBXO_NEED_FILTERS */
+}
+
 void
 xo_filter_data_set (xo_handle_t *xop UNUSED, struct xo_filter_s *xfp UNUSED)
 {
-#ifdef LIBXO_NEED_FILTER
+#ifdef LIBXO_NEED_FILTERS
     xop = xo_default(xop);
     xop->xo_filters = xfp;
-#endif /* LIBXO_NEED_FILTER */
+#endif /* LIBXO_NEED_FILTERS */
 }
 
 struct xo_filter_s *
 xo_filter_data_get (xo_handle_t *xop UNUSED, int create UNUSED)
 {
-#ifdef LIBXO_NEED_FILTER
+#ifdef LIBXO_NEED_FILTERS
     xop = xo_default(xop);
     if (xop->xo_filters == NULL && create)
 	xop->xo_filters = xo_filter_create(xop);
 
     return xop->xo_filters;
-#else /* LIBXO_NEED_FILTER */
+#else /* LIBXO_NEED_FILTERS */
     return NULL;
-#endif /* LIBXO_NEED_FILTER */
+#endif /* LIBXO_NEED_FILTERS */
 }
 
 int
 xo_filter_add (xo_handle_t *xop UNUSED, const char *input UNUSED)
 {
-#ifdef LIBXO_NEED_FILTER
+#ifdef LIBXO_NEED_FILTERS
     xop = xo_default(xop);
 
     XOF_SET(xop, XOF_WHITEBOARD); /* Activate filtering */
 
     return xo_filter_add_one(xop, input);
-#else /* LIBXO_NEED_FILTER */
+#else /* LIBXO_NEED_FILTERS */
     return 0;
-#endif /* LIBXO_NEED_FILTER */
+#endif /* LIBXO_NEED_FILTERS */
 }
 
 static void
@@ -4857,7 +4874,7 @@ xo_format_value (xo_handle_t *xop, const char *name, ssize_t nlen,
     }
 
     if (!(flags & XFF_KEY))
-	xo_filter_open_field(xop, xop->xo_filters, name, nlen);
+	xo_filter_open_field(xop, xo_filters(xop), name, nlen);
 
     const char *leader = xo_xml_leader_len(xop, name, nlen);
 
@@ -5125,7 +5142,7 @@ xo_format_value (xo_handle_t *xop, const char *name, ssize_t nlen,
     }
 
     if (!(flags & XFF_KEY))
-	xo_filter_close_field(xop, xop->xo_filters, name, nlen);
+	xo_filter_close_field(xop, xo_filters(xop), name, nlen);
 }
 
 static void
@@ -7516,7 +7533,7 @@ xo_do_open_container (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
     }
 
     name = xo_map_name(xop, name); /* Find mapped name, if any */
-    xo_filter_open_container(xop, xop->xo_filters, name);
+    xo_filter_open_container(xop, xo_filters(xop), name);
 
     const char *leader = xo_xml_leader(xop, name);
     flags |= xop->xo_flags;	/* Pick up handle flags */
@@ -7639,7 +7656,7 @@ xo_do_close_container (xo_handle_t *xop, const char *name)
     const char *leader = xo_xml_leader(xop, name);
 
     /* Now that the work is done, let the filtering code know */
-    xo_filter_close_container(xop, xop->xo_filters, name);
+    xo_filter_close_container(xop, xo_filters(xop), name);
 
     switch (xo_style(xop)) {
     case XO_STYLE_XML:
@@ -7979,7 +7996,7 @@ xo_do_open_instance (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
     }
 
     name = xo_map_name(xop, name); /* Find mapped name, if any */
-    xo_filter_open_instance(xop, xop->xo_filters, name);
+    xo_filter_open_instance(xop, xo_filters(xop), name);
 
     const char *leader = xo_xml_leader(xop, name);
     flags |= xop->xo_flags;
@@ -8084,7 +8101,7 @@ xo_do_close_instance (xo_handle_t *xop, const char *name)
     const char *leader = xo_xml_leader(xop, name);
 
     /* Now that the work is done, let the filter code know we're done */
-    xo_filter_close_instance(xop, xop->xo_filters, name);
+    xo_filter_close_instance(xop, xo_filters(xop), name);
 
     switch (xo_style(xop)) {
     case XO_STYLE_XML:
@@ -9123,7 +9140,7 @@ xo_encoder_handle (xo_handle_t *xop, xo_encoder_op_t op, xo_buffer_t *bufp,
 
     if (XOF_ISSET(xop, XOF_WHITEBOARD))
 	return xo_filter_whiteboard(xop, op, bufp, name, value,
-				    private, flags, func, xop->xo_filters);
+				    private, flags, func, xo_filters(xop));
 
     return func(xop, op, bufp, name, value, private, flags);
 }
