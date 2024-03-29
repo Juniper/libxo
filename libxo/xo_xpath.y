@@ -184,6 +184,13 @@
 #define YYERROR_VERBOSE
 
 /*
+ * To save space, we use our own YYINT instead of the standard "int"
+ * definition.  Sadly, this isn't an easy replacement, so we use
+ * "SED_OPTS" in Makefile.am to remove the original typedef.
+ */
+#define YYINT int16_t
+
+/*
  * With a "pure" parser, these are all local variables so we don't
  * need to have them #defined into "long" version (with the prefix),
  * so we nuke the #defines and use the real/old names.
