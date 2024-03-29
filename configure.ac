@@ -397,6 +397,15 @@ AC_ARG_ENABLE([libxo-options],
 AC_MSG_RESULT([$LIBXO_OPTS])
 AM_CONDITIONAL([NO_LIBXO_OPTIONS], [test "$LIBXO_OPTS" != "yes"])
 
+AC_MSG_CHECKING([whether to support filters])
+AC_ARG_ENABLE([filters],
+    [  --enable-filters      Support xpath-like filters],
+    [LIBXO_NEED_FILTERS=$enableval; AC_DEFINE([LIBXO_NEED_FILTERS], [1], [Enable xpath-like filters])],
+    [LIBXO_NEED_FILTERS=no])
+AC_MSG_RESULT([$LIBXO_NEED_FILTERS])
+AM_CONDITIONAL([LIBXO_NEED_FILTERS], [test "$LIBXO_NEED_FILTERS" != "no"])
+AC_SUBST(LIBXO_NEED_FILTERS)
+
 case $host_os in
      darwin*)
         LIBTOOL=glibtool
@@ -538,4 +547,5 @@ AC_MSG_NOTICE([summary of build options:
   retain size:      ${XO_RETAIN_SIZE:-no}
   have etext:       ${HAVE_ETEXT:-no} (${HAVE_ETEXT_STYLE})
   yacc:             ${YACC}
+  filters:          ${LIBXO_NEED_FILTERS}
 ])
