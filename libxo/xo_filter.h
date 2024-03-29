@@ -22,16 +22,18 @@ struct xo_xparse_data_s;
 struct xo_filter_s;
 typedef struct xo_filter_s xo_filter_t;
 
-#ifdef LIBXO_NEED_FILTER
+#ifdef LIBXO_NEED_FILTERS
 
+#if 0
 int
 xo_filter_blocking (xo_handle_t *xop, xo_filter_t *);
 
 int
-xo_filter_add_one (xo_handle_t *, const char *vp);
+xo_filter_cleanup (xo_handle_t *xop, xo_filter_t *);
+#endif
 
 int
-xo_filter_cleanup (xo_handle_t *xop, xo_filter_t *);
+xo_filter_add_one (xo_handle_t *, const char *vp);
 
 int
 xo_filter_open_container (xo_handle_t *xop, xo_filter_t *, const char *tag);
@@ -62,8 +64,9 @@ int
 xo_filter_whiteboard (XO_ENCODER_HANDLER_ARGS, xo_encoder_func_t func,
 		      struct xo_filter_s *xfp);
 
-#else /* LIBXO_NEED_FILTER */
+#else /* LIBXO_NEED_FILTERS */
 
+#if 0
 static inline int
 xo_filter_blocking (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED)
 {
@@ -71,14 +74,15 @@ xo_filter_blocking (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED)
 }
 
 static inline int
-xo_filter_add_one (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED,
-		   const char *vp UNUSED)
+xo_filter_cleanup (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED)
 {
     return 0;
 }
+#endif
 
 static inline int
-xo_filter_cleanup (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED)
+xo_filter_add_one (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED,
+		   const char *vp UNUSED)
 {
     return 0;
 }
@@ -106,6 +110,21 @@ xo_filter_key (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED,
 }
 
 static inline int
+xo_filter_open_field (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED,
+		      const char *tag UNUSED, ssize_t tlen UNUSED)
+{
+    return 0;
+}
+
+static inline int
+xo_filter_close_field (xo_handle_t *xop UNUSED, xo_filter_t * xfp UNUSED,
+		       const char *tag UNUSED, ssize_t tlen UNUSED)
+{
+    return 0;
+}
+			   
+
+static inline int
 xo_filter_close_instance (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED,
 			  const char *tag UNUSED)
 {
@@ -119,7 +138,14 @@ xo_filter_close_container (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED,
     return 0;
 }
 
-#endif /* LIBXO_NEED_FILTER */
+static inline int
+xo_filter_whiteboard (XO_ENCODER_HANDLER_ARGS, xo_encoder_func_t func UNUSED,
+		      struct xo_filter_s *xfp UNUSED)
+{
+    return 0;
+}
+
+#endif /* LIBXO_NEED_FILTERS */
 
 void
 xo_filter_data_set (xo_handle_t *xop UNUSED, xo_filter_t *);
@@ -131,13 +157,10 @@ xo_filter_t *
 xo_filter_create (xo_handle_t *xop);
 
 struct xo_xparse_data_s *
-xo_filter_data (xo_handle_t *xop, xo_filter_t *xfp);
+xo_filter_xparse_data (xo_handle_t *xop, xo_filter_t *xfp);
 
 void
 xo_filter_destroy (xo_handle_t *xop, xo_filter_t *xfp);
-
-int
-xo_filter_key_done (xo_handle_t *xop, xo_filter_t *xfp);
 
 typedef uint32_t xo_filter_status_t;
 
