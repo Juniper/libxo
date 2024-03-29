@@ -42,6 +42,13 @@ static short xo_single_wide[XO_MAX_CHAR];
 static char xo_double_wide[XO_MAX_CHAR];
 static char xo_triple_wide[XO_MAX_CHAR];
 
+/* Allows us to turn off all debug overhead */
+#ifdef XO_XPARSE_DEBUG
+#define XO_DBG(_fmt...) xo_dbg(xdp->xd_xop, _fmt)
+#else /* XO_XPARSE_DEBUG */
+#define XO_DBG(_fmt...) do { } while (0)
+#endif /* XO_XPARSE_DEBUG */
+
 /*
  * Define all one character literal tokens, mapping the single
  * character to the xo_xpath.y token
@@ -373,7 +380,8 @@ xo_xparse_get_input (xo_xparse_data_t *xdp UNUSED, int final UNUSED)
 static int
 xo_xparse_move_cur (xo_xparse_data_t *xdp)
 {
-    xo_dbg(NULL, "xo_xplex: move:- %u/%u/%u", xdp->xd_start, xdp->xd_cur, xdp->xd_len);
+    XO_DBG("xo_xplex: move:- %u/%u/%u",
+	   xdp->xd_start, xdp->xd_cur, xdp->xd_len);
 
     int moved;
 
@@ -384,7 +392,7 @@ xo_xparse_move_cur (xo_xparse_data_t *xdp)
 
     if (xdp->xd_cur == xdp->xd_len) {
        if (xo_xparse_get_input(xdp, 0)) {
-           xo_dbg(NULL, "xo_xplex: move:! %u/%u/%u",
+           XO_DBG("xo_xplex: move:! %u/%u/%u",
                    xdp->xd_start, xdp->xd_cur, xdp->xd_len);
 	   if (moved)
 	       xdp->xd_cur -= 1;
@@ -392,7 +400,8 @@ xo_xparse_move_cur (xo_xparse_data_t *xdp)
        }
     }
 
-    xo_dbg(NULL, "xo_xplex: move:+ %u/%u/%u", xdp->xd_start, xdp->xd_cur, xdp->xd_len);
+    XO_DBG("xo_xplex: move:+ %u/%u/%u",
+	   xdp->xd_start, xdp->xd_cur, xdp->xd_len);
     return 0;
 }
 
@@ -573,11 +582,14 @@ xo_xparse_dump_node (xo_xparse_data_t *xdp, xo_xparse_node_id_t id, int indent)
 void
 xo_xparse_dump (xo_xparse_data_t *xdp)
 {
+    if (!xo_isset_flags(xdp->xd_xop, XOF_DEBUG))
+	return;
+
     uint32_t i;
     xo_xparse_node_id_t *pp = xdp->xd_paths;
 
     for (i = 0; i < xdp->xd_paths_cur; i++, pp++) {
-	xo_dbg(NULL, "--- %u: %ld", i, *pp);
+	xo_dbg(xdp->xd_xop, "--- %u: %ld", i, *pp);
 	xo_xparse_dump_node(xdp, *pp, 4);
     }
 }
@@ -683,7 +695,7 @@ xo_xparse_concat_rewrite (xo_xparse_data_t *xdp UNUSED,
 int
 xo_xparse_yyval (xo_xparse_data_t *xdp UNUSED, xo_xparse_node_id_t id)
 {
-    xo_dbg(NULL, "xo_xparse_yyval: $$ = %ld", id);
+    XO_DBG("xo_xparse_yyval: $$ = %ld", id);
 
     return id;
 }
@@ -750,7 +762,7 @@ xo_xparse_results (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
 	    deny_count += 1;
     }
 
-    const char *label;
+    const char *label UNUSED;
     if (deny_count >= cur) {
 	xdp->xd_flags |= XDF_ALL_NOTS;
 	label = "true";
@@ -759,7 +771,7 @@ xo_xparse_results (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
 	label = "false";
     }
 
-    xo_dbg(NULL, "xo: parse results: %u paths, all-nots %s",
+    XO_DBG("xo: parse results: %u paths, all-nots %s",
 	   cur, label);
 }
 
@@ -785,7 +797,7 @@ xo_xparse_node_set_next (xo_xparse_data_t *xdp, xo_xparse_node_id_t id,
 	}
     }
 
-    xo_dbg(NULL, "xo_xparse_node_set_next: id %ld, next %ld, value %ld",
+    XO_DBG("xo_xparse_node_set_next: id %ld, next %ld, value %ld",
 	   id, next, value);
 }
 
@@ -1110,7 +1122,7 @@ xo_xpath_yylex (xo_xparse_data_t *xdp, xo_xparse_node_id_t *yylvalp)
     xdp->xd_last = rc;
 
     if (rc > 0 && xdp->xd_start == xdp->xd_cur) {
-	xo_dbg(xdp->xd_xop, "%sxpath: found a zero length token: %d/%s",
+	XO_DBG("%sxpath: found a zero length token: %d/%s",
 	       xo_xparse_location(xdp), rc, xo_xparse_token_name(rc));
 
 	xdp->xd_last = rc = M_ERROR;
@@ -1130,7 +1142,7 @@ xo_xpath_yylex (xo_xparse_data_t *xdp, xo_xparse_node_id_t *yylvalp)
     if (rc > 0)
 	xnp->xn_str = xo_xparse_str_new(xdp, rc);
 
-    xo_dbg(NULL, "xo_xplex: lex: '%.*s' -> %d/%s %s",
+    XO_DBG("xo_xplex: lex: '%.*s' -> %d/%s %s",
 	   xdp->xd_cur - xdp->xd_start,
 	   xdp->xd_buf + xdp->xd_start,
 	   rc, (rc > 0) ? xo_xparse_token_name(rc) : "",
