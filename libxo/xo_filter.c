@@ -16,7 +16,8 @@
 #include <string.h>
 #include <sys/param.h>
 
-#define LIBXO_NEED_FILTER
+#define LIBXO_NEED_FILTERS
+
 #include "xo.h"
 #include "xo_private.h"
 #include "xo_buf.h"
@@ -192,7 +193,7 @@ xo_filter_create (xo_handle_t *xop)
 }
 
 xo_xparse_data_t *
-xo_filter_data (xo_handle_t *xop UNUSED, xo_filter_t *xfp)
+xo_filter_xparse_data (xo_handle_t *xop UNUSED, xo_filter_t *xfp)
 {
     return &xfp->xf_xd;
 }
@@ -314,12 +315,6 @@ xo_filter_state_name (uint32_t state)
     return names[state];
 }
 
-int
-xo_filter_blocking (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED)
-{
-    return 0;
-}
-
 /*
  * Add a filter (xpath) to our filtering mechanism
  */
@@ -330,16 +325,10 @@ xo_filter_add_one (xo_handle_t *xop, const char *input)
     if (xfp == NULL)
 	return -1;
 
-    xo_xparse_data_t *xdp = xo_filter_data(xop, xfp);
+    xo_xparse_data_t *xdp = xo_filter_xparse_data(xop, xfp);
 
     int rc = xo_xparse_parse_string(xop, xdp, input);
     return rc ? -1 : 0;
-}
-
-int
-xo_filter_cleanup (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED)
-{
-    return 0;
 }
 
 static int
@@ -1614,19 +1603,6 @@ xo_filter_key (xo_handle_t *xop, xo_filter_t *xfp,
     xo_filter_dump_matches(xop, xfp);
 
     return xfp->xf_status;
-}
-
-/*
- * We've seen the first non-key child or the end of the instance, so
- * we need to evaluate any open predicates are see if we should discard
- * our buffered output.
- */
-int
-xo_filter_key_done (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED)
-{
-    
-    
-    return 0;
 }
 
 static int
