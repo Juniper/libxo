@@ -58,7 +58,6 @@ run_tests () {
     mecho "... $test ... $name ... $ds ..."
     set_fmt_option
     run "$test $LIBXOPTS $opt $data input $input > $out.out 2> $out.err"
-    mecho "... done"
 
     run "diff -Nu ${SRCDIR}/saved/$oname.out out/$oname.out | ${S2O}"
     run "diff -Nu ${SRCDIR}/saved/$oname.err out/$oname.err | ${S2O}"
