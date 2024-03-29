@@ -43,13 +43,17 @@ noinst_HEADERS = \
 libxo_la_SOURCES = \
     libxo.c \
     xo_encoder.c \
-    xo_filter.c \
     xo_syslog.c \
     xo_tolower.c \
     xo_toupper.c \
-    xo_utf8.c \
+    xo_utf8.c
+
+if LIBXO_NEED_FILTERS
+libxo_la_SOURCES += \
+    xo_filter.c \
     xo_xpath.c \
     xo_xparse.c
+endif
 
 YACC_OPTS = -P -p xo_xpath_yy -d -v -s -b xo_xpath
 SED_OPTS=\
