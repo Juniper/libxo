@@ -214,8 +214,10 @@
 /* Log via our function */
 #define YYFPRINTF(_fp, _fmt...) xo_xparse_yyprintf(xparse_data, _fmt)
 #else /* XO_YYDEBUG */
-#define YYDEBUG 1		/* Enable debug output */
+#define YYDEBUG 1		/* Needed for yytname[] */
 #define YYFPRINTF xo_dont_bother /* Don't log via our function */
+#define fprintf xo_dont_bother
+#define getenv(_x) NULL		/* Don't let it fetch "YYDEBUG" */
 
 static inline void UNUSED
 xo_dont_bother (FILE *fp UNUSED, const char *fmt UNUSED, ...)
