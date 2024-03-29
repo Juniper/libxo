@@ -58,7 +58,8 @@ endif
 YACC_OPTS = -P -p xo_xpath_yy -d -v -s -b xo_xpath
 SED_OPTS=\
 -e '/extern int YYPARSE_DECL();/d' \
--e 's/yydebug = yyn - .0./do {} while(0)/'
+-e 's/yydebug = yyn - .0./do {} while(0)/' \
+-e '/typedef int YYINT;/d'
 
 xo_xpath.tab.c.orig xo_xpath.tab.h: xo_xpath.y
 	@echo "  YACC     xo_xpath.y ..."
