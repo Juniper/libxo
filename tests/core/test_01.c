@@ -16,8 +16,6 @@
 
 #include "xo.h"
 #include "xo_encoder.h"
-#include "xo_xpath.tab.h"
-#include "xo_xparse.h"
 
 int
 main (int argc, char **argv)
@@ -78,8 +76,6 @@ main (int argc, char **argv)
 	    xo_set_flags(NULL, XOF_INFO);
 	else if (xo_streq(argv[argc], "debug"))
 	    xo_set_flags(NULL, XOF_DEBUG);
-	else if (xo_streq(argv[argc], "yydebug"))
-	    xo_xpath_yydebug = 1;
         else if (xo_streq(argv[argc], "error")) {
             close(-1);
             xo_err(1, "error detected");
