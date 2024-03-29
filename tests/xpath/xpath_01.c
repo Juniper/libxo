@@ -94,7 +94,7 @@ main (int argc, char **argv)
 
     xo_handle_t *xop = NULL;	/* Use default output handle */
     xo_filter_data_set(xop, xfp);
-    xo_xparse_data_t *xdp = xo_filter_data(xop, xfp);
+    xo_xparse_data_t *xdp = xo_filter_xparse_data(xop, xfp);
 
     xo_xparse_init(xdp);
 
@@ -188,7 +188,7 @@ main (int argc, char **argv)
 		xo_errx(1, "allocation of filter failed");
 
 	    xo_filter_data_set(xop, xfp);
-	    xdp = xo_filter_data(xop, xfp);
+	    xdp = xo_filter_xparse_data(xop, xfp);
 
 	    xo_xparse_init(xdp);
 
