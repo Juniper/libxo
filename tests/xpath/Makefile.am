@@ -87,7 +87,7 @@ TEST_FORMATS = XP
 
 RUN_TESTS = ${srcdir}/../run-tests.sh -d ${srcdir}
 
-RUN_TESTS_CMD = sh ${RUN_TESTS} -T fullpath
+RUN_TESTS_CMD = ${BASH} ${RUN_TESTS} -T fullpath
 
 test tests: ${bin_PROGRAMS}
 	@${MKDIR} -p out
