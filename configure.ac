@@ -29,6 +29,7 @@ LT_INIT([dlopen shared])
 
 AC_PATH_PROG(BASENAME, basename, /usr/bin/basename)
 AC_PATH_PROG(BISON, bison, /usr/bin/bison)
+AC_PATH_PROG(BASH, bash, /bin/bash)
 AC_PATH_PROG(CAT, cat, /bin/cat)
 AC_PATH_PROG(CHMOD, chmod, /bin/chmod)
 AC_PATH_PROG(CP, cp, /bin/cp)
