@@ -74,7 +74,7 @@ typedef struct xo_xparse_data_s {
 #define XDF_OPEN_COMMENT        (1<<3)  /* EOF with open comment */
 
 #define XDF_ALL_NOTS		(1<<4)	/* All the paths are "not"s */
-#define XDF_ALL_TOPS		(1<<5)	/* All the paths are absolute paths */
+#define XDF_ALL_ABS		(1<<5)	/* All the paths are absolute paths */
 
 extern const int xo_xparse_num_tokens;
 extern const char *xo_xparse_keyword_string[];
