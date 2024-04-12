@@ -14,6 +14,13 @@
 #include <ctype.h>
 #include "xo_private.h"
 
+/* Allows us to turn off all debug overhead */
+#ifdef XO_XPARSE_DEBUG
+#define XO_DBG(_xop, _fmt...) xo_dbg(_xop, _fmt)
+#else /* XO_XPARSE_DEBUG */
+#define XO_DBG(_xop, _fmt...) do { } while (0)
+#endif /* XO_XPARSE_DEBUG */
+
 typedef unsigned xo_xparse_node_type_t;
 typedef xo_off_t xo_xparse_str_id_t;
 typedef xo_off_t xo_xparse_node_id_t;
@@ -65,7 +72,9 @@ typedef struct xo_xparse_data_s {
 #define XDF_NO_SLAX_KEYWORDS    (1<<1)  /* Do not allow slax keywords */
 #define XDF_NO_XPATH_KEYWORDS   (1<<2)  /* Do not allow xpath keywords */
 #define XDF_OPEN_COMMENT        (1<<3)  /* EOF with open comment */
+
 #define XDF_ALL_NOTS		(1<<4)	/* All the paths are "not"s */
+#define XDF_ALL_TOPS		(1<<5)	/* All the paths are absolute paths */
 
 extern const int xo_xparse_num_tokens;
 extern const char *xo_xparse_keyword_string[];
