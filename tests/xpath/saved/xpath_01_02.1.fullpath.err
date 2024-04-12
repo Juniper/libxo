@@ -36,10 +36,10 @@ main: input '+one'
 main: status: track
 main: input '$two 4'
 main: key: 'two'='4'
-main: status: dead
+main: status: track
 main: input '=output nope'
 main: field: 'output'='nope'
-main: status: dead
+main: status: track
 main: input '-one'
 main: status: track
 main: input 'r'
@@ -109,10 +109,10 @@ main: input '+three'
 main: status: track
 main: input '$four 6'
 main: key: 'four'='6'
-main: status: dead
+main: status: track
 main: input '=output 0'
 main: field: 'output'='0'
-main: status: dead
+main: status: track
 main: input '-three'
 main: status: track
 main: input '+three'
