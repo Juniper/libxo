@@ -42,13 +42,6 @@ static short xo_single_wide[XO_MAX_CHAR];
 static char xo_double_wide[XO_MAX_CHAR];
 static char xo_triple_wide[XO_MAX_CHAR];
 
-/* Allows us to turn off all debug overhead */
-#ifdef XO_XPARSE_DEBUG
-#define XO_DBG(_fmt...) xo_dbg(xdp->xd_xop, _fmt)
-#else /* XO_XPARSE_DEBUG */
-#define XO_DBG(_fmt...) do { } while (0)
-#endif /* XO_XPARSE_DEBUG */
-
 /*
  * Define all one character literal tokens, mapping the single
  * character to the xo_xpath.y token
@@ -380,7 +373,7 @@ xo_xparse_get_input (xo_xparse_data_t *xdp UNUSED, int final UNUSED)
 static int
 xo_xparse_move_cur (xo_xparse_data_t *xdp)
 {
-    XO_DBG("xo_xplex: move:- %u/%u/%u",
+    XO_DBG(xdp->xd_xop, "xo_xplex: move:- %u/%u/%u",
 	   xdp->xd_start, xdp->xd_cur, xdp->xd_len);
 
     int moved;
@@ -392,7 +385,7 @@ xo_xparse_move_cur (xo_xparse_data_t *xdp)
 
     if (xdp->xd_cur == xdp->xd_len) {
        if (xo_xparse_get_input(xdp, 0)) {
-           XO_DBG("xo_xplex: move:! %u/%u/%u",
+           XO_DBG(xdp->xd_xop, "xo_xplex: move:! %u/%u/%u",
                    xdp->xd_start, xdp->xd_cur, xdp->xd_len);
 	   if (moved)
 	       xdp->xd_cur -= 1;
@@ -400,7 +393,7 @@ xo_xparse_move_cur (xo_xparse_data_t *xdp)
        }
     }
 
-    XO_DBG("xo_xplex: move:+ %u/%u/%u",
+    XO_DBG(xdp->xd_xop, "xo_xplex: move:+ %u/%u/%u",
 	   xdp->xd_start, xdp->xd_cur, xdp->xd_len);
     return 0;
 }
@@ -695,7 +688,7 @@ xo_xparse_concat_rewrite (xo_xparse_data_t *xdp UNUSED,
 int
 xo_xparse_yyval (xo_xparse_data_t *xdp UNUSED, xo_xparse_node_id_t id)
 {
-    XO_DBG("xo_xparse_yyval: $$ = %ld", id);
+    XO_DBG(xdp->xd_xop, "xo_xparse_yyval: $$ = %ld", id);
 
     return id;
 }
@@ -748,10 +741,18 @@ xo_xparse_results (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
 	xo_xparse_result_add(xdp, id);
     }
 
-    uint32_t deny_count = 0;
+    uint32_t deny_count = 0, top_count = 0;
     xo_xparse_node_id_t i;
     xo_xparse_node_id_t *paths = xdp->xd_paths;
 
+    /*
+     * If all the expressions are NOTs or absolute paths, our life
+     * gets easier.  So we whiffle thru them, counting the matches,
+     * and then set the flags appropriately.
+     *
+     * all nots: !one | !two | !three
+     * all tops: /one | /two | /three
+     */
     xo_xparse_node_id_t cur = xdp->xd_paths_cur;
     for (i = 0; i < cur; i++, paths++) {
 	xnp = xo_xparse_node(xdp, *paths);
@@ -760,19 +761,31 @@ xo_xparse_results (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
 
 	if (xnp->xn_type == C_NOT)
 	    deny_count += 1;
+
+	if (xnp->xn_type == C_ABSOLUTE)
+	    top_count += 1;
     }
 
-    const char *label UNUSED;
+    const char *all_nots UNUSED;
     if (deny_count >= cur) {
 	xdp->xd_flags |= XDF_ALL_NOTS;
-	label = "true";
+	all_nots = ", all-nots: true";
     } else {
 	xdp->xd_flags &= ~XDF_ALL_NOTS;
-	label = "false";
+	all_nots = "";
     }
 
-    XO_DBG("xo: parse results: %u paths, all-nots %s",
-	   cur, label);
+    const char *all_tops UNUSED;
+    if (top_count >= cur) {
+	xdp->xd_flags |= XDF_ALL_TOPS;
+	all_tops = ", all-nots: true";
+    } else {
+	xdp->xd_flags &= ~XDF_ALL_TOPS;
+	all_tops = "";
+    }
+
+    XO_DBG(xdp->xd_xop, "xo: parse results: %u paths%s%s%s",
+	   cur, all_nots, all_tops);
 }
 
 void
@@ -797,7 +810,7 @@ xo_xparse_node_set_next (xo_xparse_data_t *xdp, xo_xparse_node_id_t id,
 	}
     }
 
-    XO_DBG("xo_xparse_node_set_next: id %ld, next %ld, value %ld",
+    XO_DBG(xdp->xd_xop, "xo_xparse_node_set_next: id %ld, next %ld, value %ld",
 	   id, next, value);
 }
 
@@ -1122,7 +1135,7 @@ xo_xpath_yylex (xo_xparse_data_t *xdp, xo_xparse_node_id_t *yylvalp)
     xdp->xd_last = rc;
 
     if (rc > 0 && xdp->xd_start == xdp->xd_cur) {
-	XO_DBG("%sxpath: found a zero length token: %d/%s",
+	XO_DBG(xdp->xd_xop, "%sxpath: found a zero length token: %d/%s",
 	       xo_xparse_location(xdp), rc, xo_xparse_token_name(rc));
 
 	xdp->xd_last = rc = M_ERROR;
@@ -1142,7 +1155,7 @@ xo_xpath_yylex (xo_xparse_data_t *xdp, xo_xparse_node_id_t *yylvalp)
     if (rc > 0)
 	xnp->xn_str = xo_xparse_str_new(xdp, rc);
 
-    XO_DBG("xo_xplex: lex: '%.*s' -> %d/%s %s",
+    XO_DBG(xdp->xd_xop, "xo_xplex: lex: '%.*s' -> %d/%s %s",
 	   xdp->xd_cur - xdp->xd_start,
 	   xdp->xd_buf + xdp->xd_start,
 	   rc, (rc > 0) ? xo_xparse_token_name(rc) : "",
