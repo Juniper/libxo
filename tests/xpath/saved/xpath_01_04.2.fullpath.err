@@ -27,10 +27,10 @@ main: input '+two'
 main: status: track
 main: input '$three 5'
 main: key: 'three'='5'
-main: status: dead
+main: status: track
 main: input '=output no'
 main: field: 'output'='no'
-main: status: dead
+main: status: track
 main: input '-two'
 main: status: track
 main: input '+two'
