@@ -45,7 +45,7 @@ main (int argc, char **argv)
 	    dump_upper = 1;
     }
 
-    char *data[] = {
+    const char *data[] = {
 	"\x40\x41\x42",
 	"\x81\x82\x83",
 	"xx\x81\x82\x83",

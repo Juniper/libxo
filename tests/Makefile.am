@@ -12,6 +12,10 @@ if HAVE_GETTEXT
 SUBDIRS += gettext
 endif
 
+if LIBXO_NEED_FILTERS
+SUBDIRS += xpath
+endif
+
 test tests:
 	@(cur=`pwd` ; for dir in $(SUBDIRS) ; do \
 		cd $$dir ; \

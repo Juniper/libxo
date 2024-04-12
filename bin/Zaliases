@@ -18,8 +18,9 @@ else
 endif
 
 set opts=' \
---with-libslax-prefix=/Users/phil/work/root \
+--with-libslax-prefix=${HOME}/work/root \
 --enable-debug \
+--enable-filters \
 --enable-warnings \
 --enable-printflike \
 --prefix ${HOME}/work/root \

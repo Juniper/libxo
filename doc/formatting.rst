@@ -28,7 +28,7 @@ output, with attributes that detail how to render the data.
 
 A single libxo function call in source code is all that's required::
 
-    xo_emit("Connecting to {:host}.{:domain}...\n", host, domain);
+    xo_emit("Connecting to {:host}.{:domain}...\\n", host, domain);
 
     TEXT:
       Connecting to my-box.example.com...
@@ -80,7 +80,7 @@ with contents like::
 In this example (taken from *du* source code), the code to generate this
 data might look like::
 
-    printf("%d\t%s\n", num_blocks, path);
+    printf("%d\\t%s\\n", num_blocks, path);
 
 Simple, direct, obvious.  But it's only making text output.  Imagine
 using a single code path to make TEXT, XML, JSON or HTML, deciding at
@@ -89,7 +89,7 @@ run time which to generate.
 libxo expands on the idea of printf format strings to make a single
 format containing instructions for creating multiple output styles::
 
-    xo_emit("{:blocks/%d}\t{:path/%s}\n", num_blocks, path);
+    xo_emit("{:blocks/%d}\\t{:path/%s}\\n", num_blocks, path);
 
 This line will generate the same text output as the earlier printf
 call, but also has enough information to generate XML, JSON, and HTML.

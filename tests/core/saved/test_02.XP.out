@@ -81,6 +81,17 @@
       <message>two more warnings</message>
     </__warning>
     <count>10</count>
+    <long-long-test>
+      <lsize>8</lsize>
+      <lval>-45</lval>
+      <usize>8</usize>
+      <uval>45</uval>
+      <lsize>8</lsize>
+      <lval>-45</lval>
+      <usize>8</usize>
+      <uval>45</uval>
+    </long-long-test>
+    <value>123412341234</value>
     <test>4</test>
   <message>improper use of profanity; ten yard penalty; first down
 </message>

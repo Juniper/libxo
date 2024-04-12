@@ -93,13 +93,10 @@ main (int argc, char **argv)
     struct tm tm;
     (void) gmtime_r(&tv.tv_sec, &tm);
 
-    char date[64];
-    strftime(date, sizeof(date), "%+", &tm);
-
     xo_emit("{G:}Only {:marzlevanes/%d} {Ngp:marzlevane,marzlevanes} "
 	    "are functioning correctly\n", 3);
 
-    xo_emit("{G:}Version {:version} {:date}\n", "1.2.3", date);
+    xo_emit("{G:}Version {:version}\n", "1.2.3");
 
     errno = EACCES;
     xo_emit_warn("{G:}Unable to {g:verb/objectulate} forward velociping");

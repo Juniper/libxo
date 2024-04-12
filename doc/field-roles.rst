@@ -29,7 +29,7 @@ content.  The roles are listed below; only one role is permitted:
 ::
 
     EXAMPLE:
-        xo_emit("{L:Free}{D::}{P:   }{:free/%u} {U:Blocks}\n",
+        xo_emit("{L:Free}{D::}{P:   }{:free/%u} {U:Blocks}\\n",
                 free_blocks);
 
 When a role is not provided, the "*value*" role is used as the default.
@@ -39,7 +39,7 @@ a comma::
 
     EXAMPLE:
         xo_emit("{,label:Free}{,decoration::}{,padding:   }"
-                "{,value:free/%u} {,units:Blocks}\n",
+                "{,value:free/%u} {,units:Blocks}\\n",
                 free_blocks);
 
 .. index:: Field Roles; Color
@@ -51,21 +51,21 @@ The Color Role ({C:})
 Colors and effects control how text values are displayed; they are
 used for display styles (TEXT and HTML)::
 
-    xo_emit("{C:bold}{:value}{C:no-bold}\n", value);
+    xo_emit("{C:bold}{:value}{C:no-bold}\\n", value);
 
 Colors and effects remain in effect until modified by other "C"-role
 fields::
 
-    xo_emit("{C:bold}{C:inverse}both{C:no-bold}only inverse\n");
+    xo_emit("{C:bold}{C:inverse}both{C:no-bold}only inverse\\n");
 
 If the content is empty, the "*reset*" action is performed::
 
-    xo_emit("{C:both,underline}{:value}{C:}\n", value);
+    xo_emit("{C:both,underline}{:value}{C:}\\n", value);
 
 The content should be a comma-separated list of zero or more colors or
 display effects::
 
-    xo_emit("{C:bold,inverse}Ugly{C:no-bold,no-inverse}\n");
+    xo_emit("{C:bold,inverse}Ugly{C:no-bold,no-inverse}\\n");
 
 The color content can be either static, when placed directly within
 the field descriptor, or a printf-style format descriptor can be used,
@@ -77,7 +77,7 @@ if preceded by a slash ("/"):
 Color names are prefixed with either "fg-" or "bg-" to change the
 foreground and background colors, respectively::
 
-    xo_emit("{C:/fg-%s,bg-%s}{Lwc:Cost}{:cost/%u}{C:reset}\n",
+    xo_emit("{C:/fg-%s,bg-%s}{Lwc:Cost}{:cost/%u}{C:reset}\\n",
             fg_color, bg_color, cost);
 
 The following table lists the supported effects:
@@ -133,7 +133,7 @@ semi-colons, and commas used to decorate the text and make it simpler
 for human readers.  By marking these distinctly, HTML usage scenarios
 can use CSS to direct their display parameters::
 
-    xo_emit("{D:((}{:name}{D:))}\n", name);
+    xo_emit("{D:((}{:name}{D:))}\\n", name);
 
 .. index:: Field Roles; Gettext
 .. _gettext-role:
@@ -157,7 +157,7 @@ The simplified version can be generated for a single message using the
 "`xopo -s $text`" command, or an entire .pot can be translated using
 the "`xopo -f $input -o $output`" command.
 
-   xo_emit("{G:}Invalid token\n");
+   xo_emit("{G:}Invalid token\\n");
 
 The {G:} role allows a domain name to be set.  gettext calls will
 continue to use that domain name until the current format string
@@ -166,7 +166,7 @@ using it's own catalog.  The domain name can be either static as the
 content of the field, or a format can be used to get the domain name
 from the arguments.
 
-   xo_emit("{G:libc}Service unavailable in restricted mode\n");
+   xo_emit("{G:libc}Service unavailable in restricted mode\\n");
 
 See :ref:`i18n` for additional details.
 
@@ -178,12 +178,12 @@ The Label Role ({L:})
 
 Labels are text that appears before a value::
 
-    xo_emit("{Lwc:Cost}{:cost/%u}\n", cost);
+    xo_emit("{Lwc:Cost}{:cost/%u}\\n", cost);
 
 If a label needs to include a slash, it must be escaped using two
 backslashes, one for the C compiler and one for libxo::
 
-    xo_emit("{Lc:Low\\/warn level}{:level/%s}\n", level);
+    xo_emit("{Lc:Low\\/warn level}{:level/%s}\\n", level);
 
 .. index:: Field Roles; Note
 .. _note-role:
@@ -193,7 +193,7 @@ The Note Role ({N:})
 
 Notes are text that appears after a value::
 
-    xo_emit("{:cost/%u} {N:per year}\n", cost);
+    xo_emit("{:cost/%u} {N:per year}\\n", cost);
 
 .. index:: Field Roles; Padding
 .. _padding-role:
@@ -207,8 +207,8 @@ The padding content can be either static, when placed directly within
 the field descriptor, or a printf-style format descriptor can be used,
 if preceded by a slash ("/")::
 
-    xo_emit("{P:        }{Lwc:Cost}{:cost/%u}\n", cost);
-    xo_emit("{P:/%30s}{Lwc:Cost}{:cost/%u}\n", "", cost);
+    xo_emit("{P:        }{Lwc:Cost}{:cost/%u}\\n", cost);
+    xo_emit("{P:/%30s}{Lwc:Cost}{:cost/%u}\\n", "", cost);
 
 .. index:: Field Roles; Title
 .. _title-role:
@@ -221,15 +221,15 @@ the user.  The title can be either static, when placed directly within
 the field descriptor, or a printf-style format descriptor can be used,
 if preceded by a slash ("/")::
 
-    xo_emit("{T:Interface Statistics}\n");
-    xo_emit("{T:/%20.20s}{T:/%6.6s}\n", "Item Name", "Cost");
+    xo_emit("{T:Interface Statistics}\\n");
+    xo_emit("{T:/%20.20s}{T:/%6.6s}\\n", "Item Name", "Cost");
 
 Title fields have an extra convenience feature; if both content and
 format are specified, instead of looking to the argument list for a
 value, the content is used, allowing a mixture of format and content
 within the field descriptor::
 
-    xo_emit("{T:Name/%20s}{T:Count/%6s}\n");
+    xo_emit("{T:Name/%20s}{T:Count/%6s}\\n");
 
 Since the incoming argument is a string, the format must be "%s" or
 something suitable.
@@ -245,7 +245,7 @@ Units are the dimension by which values are measured, such as degrees,
 miles, bytes, and decibels.  The units field carries this information
 for the previous value field::
 
-    xo_emit("{Lwc:Distance}{:distance/%u}{Uw:miles}\n", miles);
+    xo_emit("{Lwc:Distance}{:distance/%u}{Uw:miles}\\n", miles);
 
 Note that the sense of the 'w' modifier is reversed for units;
 a blank is added before the contents, rather than after it.
@@ -277,9 +277,9 @@ format is given, the encoding format defaults to the first format,
 with any minimum width removed.  If no first format is given, both
 format descriptors default to "%s"::
 
-    xo_emit("{:length/%02u}x{:width/%02u}x{:height/%02u}\n",
+    xo_emit("{:length/%02u}x{:width/%02u}x{:height/%02u}\\n",
             length, width, height);
-    xo_emit("{:author} wrote \"{:poem}\" in {:year/%4d}\n,
+    xo_emit("{:author} wrote \"{:poem}\" in {:year/%4d}\\n,
             author, poem, year);
 
 .. index:: Field Roles; Anchor
@@ -296,13 +296,13 @@ and stop anchor are padded to meet the minimum width given.
 
 To give a width directly, encode it as the content of the anchor tag::
 
-    xo_emit("({[:10}{:min/%d}/{:max/%d}{]:})\n", min, max);
+    xo_emit("({[:10}{:min/%d}/{:max/%d}{]:})\\n", min, max);
 
 To pass a width as an argument, use "%d" as the format, which must
 appear after the "/".  Note that only "%d" is supported for widths.
 Using any other value could ruin your day::
 
-    xo_emit("({[:/%d}{:min/%d}/{:max/%d}{]:})\n", width, min, max);
+    xo_emit("({[:/%d}{:min/%d}/{:max/%d}{]:})\\n", width, min, max);
 
 If the width is negative, padding will be added on the right, suitable
 for left justification.  Otherwise the padding will be added to the

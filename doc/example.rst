@@ -56,14 +56,14 @@ Here is one of the unit tests as an example::
         for (ip = list; ip->i_title; ip++) {
             xo_open_instance("item");
 
-            xo_emit("{L:Item} '{k:name/%s}':\n", ip->i_title);
-            xo_emit("{P:   }{L:Total sold}: {n:sold/%u%s}\n",
+            xo_emit("{L:Item} '{k:name/%s}':\\n", ip->i_title);
+            xo_emit("{P:   }{L:Total sold}: {n:sold/%u%s}\\n",
                     ip->i_sold, ip->i_sold ? ".0" : "");
-            xo_emit("{P:   }{Lwc:In stock}{:in-stock/%u}\n",
+            xo_emit("{P:   }{Lwc:In stock}{:in-stock/%u}\\n",
                     ip->i_instock);
-            xo_emit("{P:   }{Lwc:On order}{:on-order/%u}\n",
+            xo_emit("{P:   }{Lwc:On order}{:on-order/%u}\\n",
                     ip->i_onorder);
-            xo_emit("{P:   }{L:SKU}: {q:sku/%s-000-%u}\n",
+            xo_emit("{P:   }{L:SKU}: {q:sku/%s-000-%u}\\n",
                     ip->i_sku_base, ip->i_sku_num);
 
             xo_close_instance("item");
@@ -78,14 +78,14 @@ Here is one of the unit tests as an example::
         for (ip = list2; ip->i_title; ip++) {
             xo_open_instance("item");
 
-            xo_emit("{L:Item} '{:name/%s}':\n", ip->i_title);
-            xo_emit("{P:   }{L:Total sold}: {n:sold/%u%s}\n",
+            xo_emit("{L:Item} '{:name/%s}':\\n", ip->i_title);
+            xo_emit("{P:   }{L:Total sold}: {n:sold/%u%s}\\n",
                     ip->i_sold, ip->i_sold ? ".0" : "");
-            xo_emit("{P:   }{Lwc:In stock}{:in-stock/%u}\n",
+            xo_emit("{P:   }{Lwc:In stock}{:in-stock/%u}\\n",
                     ip->i_instock);
-            xo_emit("{P:   }{Lwc:On order}{:on-order/%u}\n",
+            xo_emit("{P:   }{Lwc:On order}{:on-order/%u}\\n",
                     ip->i_onorder);
-            xo_emit("{P:   }{L:SKU}: {q:sku/%s-000-%u}\n",
+            xo_emit("{P:   }{L:SKU}: {q:sku/%s-000-%u}\\n",
                     ip->i_sku_base, ip->i_sku_num);
 
             xo_close_instance("item");

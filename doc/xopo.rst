@@ -31,12 +31,12 @@ stdout:
 ::
 
     EXAMPLE:
-        % xopo -s "There are {:count/%u} {:event/%.6s} events\n"
-        There are {:count} {:event} events\n
+        % xopo -s "There are {:count/%u} {:event/%.6s} events\\n"
+        There are {:count} {:event} events\\n
 
-	% xgettext --default-domain=foo --no-wrap \
-	    --add-comments --keyword=xo_emit --keyword=xo_emit_h \
-	    --keyword=xo_emit_warn -C -E -n --foreign-user \
+	% xgettext --default-domain=foo --no-wrap \\
+	    --add-comments --keyword=xo_emit --keyword=xo_emit_h \\
+	    --keyword=xo_emit_warn -C -E -n --foreign-user \\
 	    -o foo.pot.raw foo.c
         % xopo -f foo.pot.raw -o foo.pot
 

@@ -29,6 +29,7 @@ LT_INIT([dlopen shared])
 
 AC_PATH_PROG(BASENAME, basename, /usr/bin/basename)
 AC_PATH_PROG(BISON, bison, /usr/bin/bison)
+AC_PATH_PROG(BASH, bash, /bin/bash)
 AC_PATH_PROG(CAT, cat, /bin/cat)
 AC_PATH_PROG(CHMOD, chmod, /bin/chmod)
 AC_PATH_PROG(CP, cp, /bin/cp)
@@ -37,6 +38,7 @@ AC_PATH_PROG(MKDIR, mkdir, /bin/mkdir)
 AC_PATH_PROG(MV, mv, /bin/mv)
 AC_PATH_PROG(RM, rm, /bin/rm)
 AC_PATH_PROG(SED, sed, /bin/sed)
+AC_CHECK_PROGS(YACC, [byacc yacc 'bison -y'], )
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_INLINE
@@ -46,32 +48,47 @@ AC_TYPE_SIZE_T
 AC_FUNC_ALLOCA
 AC_FUNC_MALLOC
 AC_FUNC_REALLOC
-AC_CHECK_FUNCS([bzero memmove strchr strcspn strerror strspn])
-AC_CHECK_FUNCS([sranddev srand strlcpy])
-AC_CHECK_FUNCS([fdopen getrusage])
-AC_CHECK_FUNCS([gettimeofday ctime])
+
+AC_CHECK_FUNCS([__flbf])
+AC_CHECK_FUNCS([asprintf])
+AC_CHECK_FUNCS([bzero])
+AC_CHECK_FUNCS([ctime])
+AC_CHECK_FUNCS([dlfunc])
+AC_CHECK_FUNCS([fdopen])
+AC_CHECK_FUNCS([flock])
 AC_CHECK_FUNCS([getpass])
 AC_CHECK_FUNCS([getprogname])
-AC_CHECK_FUNCS([sysctlbyname])
-AC_CHECK_FUNCS([flock])
-AC_CHECK_FUNCS([asprintf])
-AC_CHECK_FUNCS([__flbf])
-AC_CHECK_FUNCS([sysctlbyname])
+AC_CHECK_FUNCS([getrusage])
+AC_CHECK_FUNCS([gettimeofday])
+AC_CHECK_FUNCS([memmove])
+AC_CHECK_FUNCS([memrchr])
+AC_CHECK_FUNCS([srand])
+AC_CHECK_FUNCS([sranddev])
+AC_CHECK_FUNCS([strchr])
 AC_CHECK_FUNCS([strchrnul])
+AC_CHECK_FUNCS([strcspn])
+AC_CHECK_FUNCS([strerror])
+AC_CHECK_FUNCS([strlcpy])
+AC_CHECK_FUNCS([strspn])
+AC_CHECK_FUNCS([sysctlbyname])
+AC_CHECK_FUNCS([sysctlbyname])
 
+AC_CHECK_HEADERS([ctype.h])
 AC_CHECK_HEADERS([dlfcn.h])
 AC_CHECK_HEADERS([dlfcn.h])
-AC_CHECK_HEADERS([stdio_ext.h])
-AC_CHECK_HEADERS([tzfile.h])
-AC_CHECK_HEADERS([stdtime/tzfile.h])
-AC_CHECK_FUNCS([dlfunc])
-
-AC_CHECK_HEADERS([sys/time.h])
-AC_CHECK_HEADERS([ctype.h errno.h stdio.h stdlib.h])
-AC_CHECK_HEADERS([string.h sys/param.h unistd.h ])
-AC_CHECK_HEADERS([sys/sysctl.h])
-AC_CHECK_HEADERS([threads.h])
+AC_CHECK_HEADERS([errno.h])
 AC_CHECK_HEADERS([monitor.h])
+AC_CHECK_HEADERS([stdio.h])
+AC_CHECK_HEADERS([stdio_ext.h])
+AC_CHECK_HEADERS([stdlib.h])
+AC_CHECK_HEADERS([stdtime/tzfile.h])
+AC_CHECK_HEADERS([string.h])
+AC_CHECK_HEADERS([sys/param.h])
+AC_CHECK_HEADERS([sys/sysctl.h])
+AC_CHECK_HEADERS([sys/time.h])
+AC_CHECK_HEADERS([threads.h])
+AC_CHECK_HEADERS([tzfile.h])
+AC_CHECK_HEADERS([unistd.h ])
 
 dnl humanize_number(3) is a great function, but it's not standard.
 dnl Note Macosx has the function in libutil.a but doesn't ship the
@@ -381,6 +398,15 @@ AC_ARG_ENABLE([libxo-options],
 AC_MSG_RESULT([$LIBXO_OPTS])
 AM_CONDITIONAL([NO_LIBXO_OPTIONS], [test "$LIBXO_OPTS" != "yes"])
 
+AC_MSG_CHECKING([whether to support filters])
+AC_ARG_ENABLE([filters],
+    [  --enable-filters      Support xpath-like filters],
+    [LIBXO_NEED_FILTERS=$enableval; AC_DEFINE([LIBXO_NEED_FILTERS], [1], [Enable xpath-like filters])],
+    [LIBXO_NEED_FILTERS=no])
+AC_MSG_RESULT([$LIBXO_NEED_FILTERS])
+AM_CONDITIONAL([LIBXO_NEED_FILTERS], [test "$LIBXO_NEED_FILTERS" != "no"])
+AC_SUBST(LIBXO_NEED_FILTERS)
+
 case $host_os in
      darwin*)
         LIBTOOL=glibtool
@@ -473,6 +499,7 @@ AC_CONFIG_FILES([
   encoder/Makefile
   encoder/cbor/Makefile
   encoder/csv/Makefile
+  encoder/fullpath/Makefile
   encoder/test/Makefile
   xo/Makefile
   xolint/Makefile
@@ -485,6 +512,7 @@ AC_CONFIG_FILES([
   tests/core/Makefile
   tests/gettext/Makefile
   tests/xo/Makefile
+  tests/xpath/Makefile
   tests/utf8/Makefile
   packaging/libxo.spec
   packaging/libxo.rb.base
@@ -519,4 +547,6 @@ AC_MSG_NOTICE([summary of build options:
   local wcwidth:    ${LIBXO_WCWIDTH:-no}
   retain size:      ${XO_RETAIN_SIZE:-no}
   have etext:       ${HAVE_ETEXT:-no} (${HAVE_ETEXT_STYLE})
+  yacc:             ${YACC}
+  filters:          ${LIBXO_NEED_FILTERS}
 ])

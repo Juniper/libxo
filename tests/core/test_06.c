@@ -33,7 +33,7 @@ main (int argc, char **argv)
 	{ "Terry", "Jones", 660 },
 	{ "Leslie", "Patterson", 341 },
 	{ "Ashley", "Smith", 1440 },
-	{ NULL, NULL }
+	{ NULL, NULL, 0 }
     }, *ep = employees;
 
     argc = xo_parse_args(argc, argv);
@@ -49,7 +49,7 @@ main (int argc, char **argv)
 
     for ( ; ep->e_first; ep++) {
 	xo_open_instance("employee");
-	xo_emit("{:first-name} {:last-name} works in dept #{:department/%u}\n",
+	xo_emit("{k:first-name} {k:last-name} works in dept #{:department/%u}\n",
 		ep->e_first, ep->e_last, ep->e_dept);
 	xo_close_instance_d();
     }

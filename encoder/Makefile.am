@@ -10,3 +10,7 @@ SUBDIRS = \
     cbor \
     csv \
     test
+
+if LIBXO_NEED_FILTERS
+SUBDIRS += fullpath
+endif

@@ -20,19 +20,19 @@
 #include "xo.h"
 #include "xo_encoder.h"
 
-void
+static void
 test_syslog_open (void)
 {
     printf("syslog open\n");
 }
 
-void
+static void
 test_syslog_close (void)
 {
     printf("syslog close\n");
 }
 
-void
+static void
 test_syslog_send (const char *full_msg, const char *v0_hdr,
 		  const char *text_only)
 {

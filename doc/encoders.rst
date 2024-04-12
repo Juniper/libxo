@@ -27,7 +27,7 @@ example uses the "cbor" encoder, saving the output into a file::
 
 Encoders can support specific options that can be accessed by
 following the encoder name with a colon (':') or a plus sign ('+') and
-one of more options, separated by the same character::
+one or more options, separated by the same character::
 
     df --libxo encoder=csv+path=filesystem+leaf=name+no-header
     df --libxo encoder=csv:path=filesystem:leaf=name:no-header
@@ -107,7 +107,7 @@ comma-separated values::
 Be aware that since the CSV encoder looks for data instances, when
 used with :ref:`xo`, the `--instance` option will be needed::
 
-  % xo --libxo encoder=csv --instance foo 'The {:product} is {:status}\n' stereo "in route"
+  % xo --libxo encoder=csv --instance foo 'The {:product} is {:status}\\n' stereo "in route"
   product,status
   stereo,in route
 

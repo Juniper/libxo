@@ -92,6 +92,10 @@ source code:
     xo_emit_field_h(NULL, ",leaf-list,quotes", "sku", "%s-%u", "%s-000-%u",
 		    "gum", 1412);
 .Ed
+.Sh NOTES
+There is no currently means to pass variable-width information (e.g. "%*s"),
+since the variadic arguments ("...") are used by both format strings
+will use the same arguments.
 .Sh RETURN CODE
 .Nm
 returns a negative value on error.  If the

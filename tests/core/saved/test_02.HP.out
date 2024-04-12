@@ -1,5 +1,4 @@
 <div class="line">
-  <div class="data" data-tag="name">em0  </div>
   <div class="data">em0  </div>
   <div class="text">We are </div>
   <div class="text">{emit}</div>
@@ -218,6 +217,33 @@
   <div class="label">V1/V2 packets</div>
   <div class="text">: </div>
   <div class="data" data-tag="count">10</div>
+</div>
+<div class="line">
+  <div class="text">a </div>
+  <div class="data" data-tag="lsize">8</div>
+  <div class="text"> long: </div>
+  <div class="data" data-tag="lval">-45</div>
+</div>
+<div class="line">
+  <div class="text">a </div>
+  <div class="data" data-tag="usize">8</div>
+  <div class="text"> ulong: </div>
+  <div class="data" data-tag="uval">45</div>
+</div>
+<div class="line">
+  <div class="text">a </div>
+  <div class="data" data-tag="lsize">8</div>
+  <div class="text"> long: </div>
+  <div class="data" data-tag="lval">-45</div>
+</div>
+<div class="line">
+  <div class="text">a </div>
+  <div class="data" data-tag="usize">8</div>
+  <div class="text"> ulong: </div>
+  <div class="data" data-tag="uval">45</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="value">    123412341234</div>
 </div>
 <div class="line">
   <div class="data" data-tag="test">0004</div>

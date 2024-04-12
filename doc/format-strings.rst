@@ -33,9 +33,9 @@ label ("In stock"), and the third is a value field ("in-stock").  The
 in-stock field has a "%u" format that will parse the next argument
 passed to the xo_emit function as an unsigned integer::
 
-    xo_emit("{P:   }{Lwc:In stock}{:in-stock/%u}\n", 65);
+    xo_emit("{P:   }{Lwc:In stock}{:in-stock/%u}\\n", 65);
 
-This single line of code can generate text (" In stock: 65\n"), XML
+This single line of code can generate text (" In stock: 65\\n"), XML
 ("<in-stock>65</in-stock>"), JSON ('"in-stock": 6'), or HTML (too
 lengthy to be listed here).
 
@@ -44,4 +44,4 @@ there are alternative names for each which allow more verbose
 formatting strings.  These names must be preceded by a comma, and may
 follow any single-character values::
 
-    xo_emit("{L,white,colon:In stock}{,key:in-stock/%u}\n", 65);
+    xo_emit("{L,white,colon:In stock}{,key:in-stock/%u}\\n", 65);

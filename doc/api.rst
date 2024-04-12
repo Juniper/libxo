@@ -65,7 +65,7 @@ xo_create
     EXAMPLE:
         xo_handle_t *xop = xo_create(XO_STYLE_JSON, XOF_WARN | XOF_PRETTY);
         ....
-        xo_emit_h(xop, "testing\n");
+        xo_emit_h(xop, "testing\\n");
 
   See also :ref:`output-styles` and :ref:`flags`.
 
@@ -543,7 +543,7 @@ already emitted in other form.
         xo_attr("seconds", "%ld", (unsigned long) login_time);
         struct tm *tmp = localtime(login_time);
         strftime(buf, sizeof(buf), "%R", tmp);
-        xo_emit("Logged in at {:login-time}\n", buf);
+        xo_emit("Logged in at {:login-time}\\n", buf);
     XML:
         <login-time seconds="1408336270">00:14</login-time>
 
@@ -768,7 +768,7 @@ style and usage expectations::
 
       for (ip = list; ip->i_title; ip++) {
           xo_open_instance("item");
-          xo_emit("{L:Item} '{:name/%s}':\n", ip->i_title);
+          xo_emit("{L:Item} '{:name/%s}':\\n", ip->i_title);
           xo_close_instance("item");
       }
 
@@ -857,7 +857,7 @@ Closing Instances
         xo_open_list("user");
         for (i = 0; i < num_users; i++) {
             xo_open_instance("user");
-            xo_emit("{k:name}:{:uid/%u}:{:gid/%u}:{:home}\n",
+            xo_emit("{k:name}:{:uid/%u}:{:gid/%u}:{:home}\\n",
                     pw[i].pw_name, pw[i].pw_uid,
                     pw[i].pw_gid, pw[i].pw_dir);
             xo_close_instance("user");
@@ -919,7 +919,7 @@ properly::
           xo_close_marker("fish-guts");
       }
 
-.. c:function:: xo_ssize_t xo_open_marker(const char *name)
+.. c:function:: xo_ssize_t xo_open_marker (const char *name)
 
   :param name: Name of the instance
   :type name: const char *
@@ -929,14 +929,14 @@ properly::
   The `xo_open_marker` function records the current state of open tags
   in order for `xo_close_marker` to close them at some later point.
 
-.. c:function:: xo_ssize_t xo_open_marker_h(const char *name)
+.. c:function:: xo_ssize_t xo_open_marker_h (xo_handle_t *xop, const char *name)
 
   :param xop: Handle to use (or NULL for default handle)
   :type xop: xo_handle_t *
 
   The `xo_open_marker_h` function adds a `handle` parameter.
 
-.. c:function:: xo_ssize_t xo_close_marker(const char *name)
+.. c:function:: xo_ssize_t xo_close_marker (const char *name)
 
   :param name: Name of the instance
   :type name: const char *
@@ -947,7 +947,7 @@ properly::
   instances as needed to return to the state recorded when
   `xo_open_marker` was called with the matching name.
 
-.. c:function:: xo_ssize_t xo_close_marker(const char *name)
+.. c:function:: xo_ssize_t xo_close_marker_h (xo_handle_t *xop, const char *name)
 
   :param xop: Handle to use (or NULL for default handle)
   :type xop: xo_handle_t *

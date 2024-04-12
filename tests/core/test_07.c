@@ -39,7 +39,7 @@ main (int argc, char **argv)
 	{ "Ashley", "Ash", "Meter & Smith", 1440, 40 },
 	{ "0123456789", "0123456789", "012345678901234567890", 1440, 40 },
 	{ "ახლა", "გაიარო", "საერთაშორისო", 123, 90 },
-	{ NULL, NULL }
+	{ NULL, NULL, NULL, 0, 0 }
     }, *ep = employees;
     int rc;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2019, Juniper Networks, Inc.
+ * Copyright (c) 2014-2023, Juniper Networks, Inc.
  * All rights reserved.
  * This SOFTWARE is licensed under the LICENSE provided in the
  * ../Copyright file. By downloading, installing, copying, or otherwise
@@ -45,10 +45,21 @@
 #include <langinfo.h>
 
 #include "xo_config.h"
+
+#ifdef LIBXO_TEXT_ONLY		/* Turn off unneeded features */
+#undef LIBXO_NEED_MAP		/* No tag maps in text mode */
+#undef LIBXO_NEED_FILTERS	/* No filters in text mode */
+#else  /* LIBXO_TEXT_ONLY */
+/* We don't want the overhead of tag maps when in text-only mode */
+#define LIBXO_NEED_MAP		/* Map tags to new names */
+#endif /* LIBXO_TEXT_ONLY */
+
 #include "xo.h"
+#include "xo_private.h"
 #include "xo_encoder.h"
 #include "xo_buf.h"
 #include "xo_explicit.h"
+#include "xo_filter.h"
 
 /*
  * We ask wcwidth() to do an impossible job, really.  It's supposed to
@@ -137,14 +148,9 @@ const char xo_version[] = LIBXO_VERSION;
 const char xo_version_extra[] = LIBXO_VERSION_EXTRA;
 static const char xo_default_format[] = "%s";
 
-#ifndef UNUSED
-#define UNUSED __attribute__ ((__unused__))
-#endif /* UNUSED */
+#define UNUSED XO_UNUSED
 
 #ifndef LIBXO_TEXT_ONLY
-/* We don't want the overhead of tag maps when in text-only mode */
-#define LIBXO_NEED_MAP
-
 #define XO_MAP_INCR 128		/* Must be even */
 
 #ifndef XO_MAPDIR
@@ -188,6 +194,7 @@ typedef unsigned xo_xsf_flags_t; /* XSF_* flags */
 typedef struct xo_stack_s {
     xo_xsf_flags_t xs_flags;	/* Flags for this frame */
     xo_state_t xs_state;	/* State for this stack frame */
+    xo_off_t xs_wb_off;		/* Offset of buffer before this level */
     char *xs_name;		/* Name (for XPath value) */
     char *xs_keys;		/* XPath predicate for any key fields */
 } xo_stack_t;
@@ -283,6 +290,7 @@ struct xo_handle_s {
     int xo_errno;		/* Saved errno for "%m" */
     char *xo_gt_domain;		/* Gettext domain, suitable for dgettext(3) */
     xo_encoder_func_t xo_encoder; /* Encoding function */
+    xo_whiteboard_func_t xo_wb_marker; /* Function to mark whiteboard */
     void *xo_private;		/* Private data for external encoders */
 #ifdef LIBXO_NEED_MAP
     char **xo_map;		/* Name mapping array */
@@ -290,6 +298,9 @@ struct xo_handle_s {
     int xo_map_len;		/* Current length (count) of xo_map[] */
     xo_buffer_t xo_map_data;	/* Data values for name mapping */
 #endif /* LIBXO_NEED_MAP */
+#ifdef LIBXO_NEED_FILTERS
+    struct xo_filter_s *xo_filters; /* Opaque data pointer */
+#endif /* LIBXO_NEED_FILTERS */
 };
 
 /* Flag operations */
@@ -714,7 +725,7 @@ xo_default_init (void)
     if (xo_codeset_is_utf8)
 	XOF_SET(xop, XOF_UTF8);
 
-#if !defined(NO_LIBXO_OPTIONS)
+#if 0 /* !defined(NO_LIBXO_OPTIONS) */
     if (!XOF_ISSET(xop, XOF_NO_ENV)) {
        char *env = getenv("LIBXO_OPTIONS");
 
@@ -769,6 +780,46 @@ xo_default (xo_handle_t *xop)
     }
 
     return xop;
+}
+
+/*
+ * A simple debugging print function, similar to psu_dbg.  Controlled by
+ * the undocumented "debug" option.
+ */
+void
+xo_dbg_v (xo_handle_t *xop UNUSED, const char *fmt UNUSED, va_list vap UNUSED)
+{
+#ifndef LIBXO_TEXT_ONLY
+    xop = xo_default(xop);
+
+    if (xop == NULL || !(xop->xo_flags & XOF_DEBUG))
+	return;
+
+    size_t len = strlen(fmt);
+    char *new_fmt = alloca(len + 2);
+    memcpy(new_fmt, fmt, len);
+    new_fmt[len] = '\n';
+    new_fmt[len + 1] = '\0';
+
+    vfprintf(stderr, new_fmt, vap);
+#endif /* LIBXO_TEXT_ONLY */
+}
+
+void
+xo_dbg (xo_handle_t *xop UNUSED, const char *fmt UNUSED, ...)
+{
+#ifndef LIBXO_TEXT_ONLY
+    xop = xo_default(xop);
+
+    if (xop == NULL || !(xop->xo_flags & XOF_DEBUG))
+	return;
+
+    va_list vap;
+
+    va_start(vap, fmt);
+    xo_dbg_v(xop, fmt, vap);
+    va_end(vap);
+#endif /* LIBXO_TEXT_ONLY */
 }
 
 /*
@@ -1572,7 +1623,7 @@ xo_retain_get_hits (void)
  * standard error.  If the XOF_WARN_XML flag is set, then we generate
  * XMLified content on standard output.
  */
-static void
+void
 xo_warn_hcv (xo_handle_t *xop, int code, int check_warn,
 	     const char *fmt, va_list vap)
 {
@@ -2168,6 +2219,7 @@ static xo_flag_mapping_t xo_xof_names[] = {
     { XOF_COLOR_ALLOWED, "color" },
     { XOF_COLOR, "color-force" },
     { XOF_COLUMNS, "columns" },
+    { XOF_DEBUG, "debug" },
     { XOF_DTRT, "dtrt" },
     { XOF_FLUSH, "flush" },
     { XOF_FLUSH_LINE, "flush-line" },
@@ -2211,10 +2263,10 @@ static xo_flag_mapping_t xo_xof_simple_names[] = {
  * Convert string name to XOF_* flag value.
  * Not all are useful.  Or safe.  Or sane.
  */
-static unsigned
+static xo_xof_flags_t
 xo_name_to_flag (const char *name)
 {
-    return (unsigned) xo_name_lookup(xo_xof_names, name, -1);
+    return xo_name_lookup(xo_xof_names, name, -1);
 }
 
 /**
@@ -2232,8 +2284,28 @@ xo_set_style_name (xo_handle_t *xop, const char *name)
 
     int style = xo_name_to_style(name);
 
-    if (style < 0)
-	return -1;
+    if (style < 0) {
+	/* Might be a dynamically-loaded one ("csv") */
+
+	if (*name == '@')
+	    name += 1;		/* Allow the "@foo" shorthand */
+
+	int rc = xo_encoder_init(xop, name);
+	if (rc) {
+	    xo_warnx("unknown style or encoder: '%s'", name);
+	    return -1;
+	}
+
+	/*
+	 * The style should already be set by the encoder library,
+	 * when it calls xo_set_encoder() during initialization.  If
+	 * it hasn't, then something might be wrong.  Worth a warning....
+	 */
+	if (xop->xo_style != XO_STYLE_ENCODER) {
+	    xo_warnx("encoder style has not fully initialized");
+	    return -1;
+	}
+    }
 
     xo_set_style(xop, style);
     return 0;
@@ -2287,7 +2359,7 @@ xo_set_color_map (xo_handle_t *xop, char *value)
 #endif /* LIBXO_TEXT_ONLY */
 }
 
-static int
+static int UNUSED
 xo_set_options_simple (xo_handle_t *xop, const char *input)
 {
     xo_xof_flags_t new_flag;
@@ -2338,7 +2410,7 @@ int
 xo_set_options (xo_handle_t *xop, const char *input)
 {
     char *cp, *ep, *vp, *np, *bp, *zp;
-    int style = -1, new_style, rc = 0;
+    int style = -1, new_style, rc = 0, final_rc = 0;
     ssize_t len;
     xo_xof_flags_t new_flag;
 
@@ -2433,6 +2505,10 @@ xo_set_options (xo_handle_t *xop, const char *input)
 	    case 'x':
 		XOF_SET(xop, XOF_XPATH);
 		break;
+
+	    default:
+		xo_warnx("unknown option: '%s'", input);
+		final_rc = -1;
 	    }
 	}
 	return 0;
@@ -2443,6 +2519,9 @@ xo_set_options (xo_handle_t *xop, const char *input)
     memcpy(bp, input, len);
 
     for (cp = bp, ep = cp + len - 1; cp && cp < ep; cp = np) {
+	if (rc)
+	    final_rc = rc;
+
 	np = strchr(cp, ',');
 	if (np)
 	    *np++ = '\0';
@@ -2527,6 +2606,15 @@ xo_set_options (xo_handle_t *xop, const char *input)
 			xo_warnx("error initializing map-file: '%s'", vp);
 		}
 
+	    } else if (xo_streq(cp, "filter")) {
+		if (vp == NULL)
+		    xo_failure(xop, "missing value for filter option");
+		else {
+		    rc = xo_filter_add(xop, vp);
+		    if (rc)
+			xo_warnx("invalid filter expression: '%s'", vp);
+		}
+
 	    } else {
 		xo_warnx("unknown libxo option value: '%s'", cp);
 		rc = -1;
@@ -2537,7 +2625,7 @@ xo_set_options (xo_handle_t *xop, const char *input)
     if (style > 0)
 	xop->xo_style= style;
 
-    return rc;
+    return final_rc ?: rc;
 }
 
 /**
@@ -2553,6 +2641,20 @@ xo_set_flags (xo_handle_t *xop, xo_xof_flags_t flags)
     xop = xo_default(xop);
 
     XOF_SET(xop, flags);
+}
+
+/**
+ * Return non-zero if any of the flags are set.
+ *
+ * @param xop XO handle to test (or NULL for default handle)
+ * @param flags Set of flags to test (XOF_*)
+ */
+int
+xo_isset_flags (xo_handle_t *xop, xo_xof_flags_t flags)
+{
+    xop = xo_default(xop);
+
+    return (xop->xo_flags & flags) ? TRUE : FALSE;
 }
 
 /**
@@ -2805,15 +2907,14 @@ xo_format_string_direct (xo_handle_t *xop, xo_buffer_t *xbp,
     if (len > 0 && !xo_buf_has_room(xbp, len))
 	return 0;
 
-#if 1
     /*
      * If we have the "right" encoding for text, then our job is
      * simpler.  We can skim over the string and process it quickly.
      */
     if (cp && len > 0 && xo_is_style_text_utf8(xop) && need_enc == have_enc) {
 	const char *np, *ep;
-	ssize_t clen = len < 0 ? strlen(cp) : len;
-	for (np = cp, ep = cp + clen; np < ep; np++)
+	ssize_t clen = len < 0 ? (ssize_t) strlen(cp) : len;
+	for (np = cp, ep = cp + clen; *np && np < ep; np++)
 	    if (xo_is_byte_utf8(*np) || *np == '\\' || *np == '%'
 		|| *np == '{' || *np == '}')
 		break;
@@ -2828,7 +2929,6 @@ xo_format_string_direct (xo_handle_t *xop, xo_buffer_t *xbp,
 	    return clen;		/* Len is the number of columns */
 	}
     }
-#endif
 
     for (;;) {
 	if (len == 0)
@@ -4627,6 +4727,58 @@ xo_map_add_file (xo_handle_t *xop UNUSED, const char *fname UNUSED)
     return 0;
 }
 
+/*
+ * Define the xo_filter* functions exposed by the API, even if the
+ * feature is turned off, so linking against a non-NEED_FILTERS
+ * version of the library will work.
+ */
+static inline xo_filter_t *
+xo_filters (xo_handle_t *xop UNUSED)
+{
+#ifdef LIBXO_NEED_FILTERS
+    return xop->xo_filters;
+#else /* LIBXO_NEED_FILTERS */
+    return NULL;
+#endif /* LIBXO_NEED_FILTERS */
+}
+
+void
+xo_filter_data_set (xo_handle_t *xop UNUSED, struct xo_filter_s *xfp UNUSED)
+{
+#ifdef LIBXO_NEED_FILTERS
+    xop = xo_default(xop);
+    xop->xo_filters = xfp;
+#endif /* LIBXO_NEED_FILTERS */
+}
+
+struct xo_filter_s *
+xo_filter_data_get (xo_handle_t *xop UNUSED, int create UNUSED)
+{
+#ifdef LIBXO_NEED_FILTERS
+    xop = xo_default(xop);
+    if (xop->xo_filters == NULL && create)
+	xop->xo_filters = xo_filter_create(xop);
+
+    return xop->xo_filters;
+#else /* LIBXO_NEED_FILTERS */
+    return NULL;
+#endif /* LIBXO_NEED_FILTERS */
+}
+
+int
+xo_filter_add (xo_handle_t *xop UNUSED, const char *input UNUSED)
+{
+#ifdef LIBXO_NEED_FILTERS
+    xop = xo_default(xop);
+
+    XOF_SET(xop, XOF_FILTER); /* Activate filtering */
+
+    return xo_filter_add_one(xop, input);
+#else /* LIBXO_NEED_FILTERS */
+    return 0;
+#endif /* LIBXO_NEED_FILTERS */
+}
+
 static void
 xo_format_value (xo_handle_t *xop, const char *name, ssize_t nlen,
 		 const char *value, ssize_t vlen,
@@ -4721,6 +4873,9 @@ xo_format_value (xo_handle_t *xop, const char *name, ssize_t nlen,
 	name = xo_map_name(xop, new_name);
 	nlen = strlen(name);	/* Need new length for new name */
     }
+
+    if (!(flags & XFF_KEY))
+	xo_filter_open_field(xop, xo_filters(xop), name, nlen);
 
     const char *leader = xo_xml_leader_len(xop, name, nlen);
 
@@ -4972,20 +5127,23 @@ xo_format_value (xo_handle_t *xop, const char *name, ssize_t nlen,
 
 	ssize_t name_offset = xo_buf_offset(&xop->xo_data);
 	xo_data_append(xop, name, nlen);
-	xo_data_append(xop, "", 1);
+	xo_data_append(xop, "", 1); /* NUL terminate the string */
 
 	ssize_t value_offset = xo_buf_offset(&xop->xo_data);
 
 	xo_simple_field(xop, FALSE, value, vlen, fmt, flen, flags);
 
-	xo_data_append(xop, "", 1);
+	xo_data_append(xop, "", 1); /* NUL terminate the string */
 
-	xo_encoder_handle(xop, quote ? XO_OP_STRING : XO_OP_CONTENT,
+	xo_encoder_handle(xop, quote ? XO_OP_STRING : XO_OP_CONTENT, NULL,
 			  xo_buf_data(&xop->xo_data, name_offset),
 			  xo_buf_data(&xop->xo_data, value_offset), flags);
 	xo_buf_reset(&xop->xo_data);
 	break;
     }
+
+    if (!(flags & XFF_KEY))
+	xo_filter_close_field(xop, xo_filters(xop), name, nlen);
 }
 
 static void
@@ -7220,7 +7378,7 @@ xo_attr_hv (xo_handle_t *xop, const char *name, const char *fmt, va_list vap)
 	if (rc >= 0) {
 	    xbp->xb_curp += rc;
 	    *xbp->xb_curp = '\0';
-	    rc = xo_encoder_handle(xop, XO_OP_ATTRIBUTE,
+	    rc = xo_encoder_handle(xop, XO_OP_ATTRIBUTE, NULL,
 				   xo_buf_data(xbp, name_offset),
 				   xo_buf_data(xbp, value_offset), 0);
 	}
@@ -7272,6 +7430,7 @@ xo_depth_change (xo_handle_t *xop, const char *name,
 	xo_stack_t *xsp = &xop->xo_stack[xop->xo_depth + delta];
 	xsp->xs_flags = flags;
 	xsp->xs_state = state;
+	xsp->xs_wb_off = xo_buf_offset(&xop->xo_data);
 	xo_stack_set_flags(xop);
 
 	if (name == NULL)
@@ -7305,6 +7464,8 @@ xo_depth_change (xo_handle_t *xop, const char *name,
 		return;
 	    }
 	}
+
+	xsp->xs_wb_off = 0;	/* Zero out this field */
 
 	if (xsp->xs_name) {
 	    xo_free(xsp->xs_name);
@@ -7376,6 +7537,7 @@ xo_do_open_container (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
     }
 
     name = xo_map_name(xop, name); /* Find mapped name, if any */
+    xo_filter_open_container(xop, xo_filters(xop), name);
 
     const char *leader = xo_xml_leader(xop, name);
     flags |= xop->xo_flags;	/* Pick up handle flags */
@@ -7426,7 +7588,8 @@ xo_do_open_container (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
 	break;
 
     case XO_STYLE_ENCODER:
-	rc = xo_encoder_handle(xop, XO_OP_OPEN_CONTAINER, name, NULL, flags);
+	rc = xo_encoder_handle(xop, XO_OP_OPEN_CONTAINER, NULL,
+			       name, NULL, flags);
 	break;
     }
 
@@ -7496,6 +7659,9 @@ xo_do_close_container (xo_handle_t *xop, const char *name)
 
     const char *leader = xo_xml_leader(xop, name);
 
+    /* Now that the work is done, let the filtering code know */
+    xo_filter_close_container(xop, xo_filters(xop), name);
+
     switch (xo_style(xop)) {
     case XO_STYLE_XML:
 	xo_depth_change(xop, name, -1, -1, XSS_CLOSE_CONTAINER, 0);
@@ -7524,7 +7690,7 @@ xo_do_close_container (xo_handle_t *xop, const char *name)
 
     case XO_STYLE_ENCODER:
 	xo_depth_change(xop, name, -1, 0, XSS_CLOSE_CONTAINER, 0);
-	rc = xo_encoder_handle(xop, XO_OP_CLOSE_CONTAINER, name, NULL, 0);
+	rc = xo_encoder_handle(xop, XO_OP_CLOSE_CONTAINER, NULL, name, NULL, 0);
 	break;
     }
 
@@ -7605,7 +7771,7 @@ xo_do_open_list (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
 	break;
 
     case XO_STYLE_ENCODER:
-	rc = xo_encoder_handle(xop, XO_OP_OPEN_LIST, name, NULL, flags);
+	rc = xo_encoder_handle(xop, XO_OP_OPEN_LIST, NULL, name, NULL, flags);
 	break;
     }
 
@@ -7683,7 +7849,7 @@ xo_do_close_list (xo_handle_t *xop, const char *name)
 
     case XO_STYLE_ENCODER:
 	xo_depth_change(xop, name, -1, 0, XSS_CLOSE_LIST, XSF_LIST);
-	rc = xo_encoder_handle(xop, XO_OP_CLOSE_LIST, name, NULL, 0);
+	rc = xo_encoder_handle(xop, XO_OP_CLOSE_LIST, NULL, name, NULL, 0);
 	break;
 
     default:
@@ -7759,7 +7925,8 @@ xo_do_open_leaf_list (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
 	break;
 
     case XO_STYLE_ENCODER:
-	rc = xo_encoder_handle(xop, XO_OP_OPEN_LEAF_LIST, name, NULL, flags);
+	rc = xo_encoder_handle(xop, XO_OP_OPEN_LEAF_LIST, NULL,
+			       name, NULL, flags);
 	break;
     }
 
@@ -7806,7 +7973,7 @@ xo_do_close_leaf_list (xo_handle_t *xop, const char *name)
 	break;
 
     case XO_STYLE_ENCODER:
-	rc = xo_encoder_handle(xop, XO_OP_CLOSE_LEAF_LIST, name, NULL, 0);
+	rc = xo_encoder_handle(xop, XO_OP_CLOSE_LEAF_LIST, NULL, name, NULL, 0);
 	/* FALLTHRU */
 
     default:
@@ -7833,6 +8000,7 @@ xo_do_open_instance (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
     }
 
     name = xo_map_name(xop, name); /* Find mapped name, if any */
+    xo_filter_open_instance(xop, xo_filters(xop), name);
 
     const char *leader = xo_xml_leader(xop, name);
     flags |= xop->xo_flags;
@@ -7866,7 +8034,8 @@ xo_do_open_instance (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
 	break;
 
     case XO_STYLE_ENCODER:
-	rc = xo_encoder_handle(xop, XO_OP_OPEN_INSTANCE, name, NULL, flags);
+	rc = xo_encoder_handle(xop, XO_OP_OPEN_INSTANCE, NULL,
+			       name, NULL, flags);
 	break;
     }
 
@@ -7935,10 +8104,14 @@ xo_do_close_instance (xo_handle_t *xop, const char *name)
 
     const char *leader = xo_xml_leader(xop, name);
 
+    /* Now that the work is done, let the filter code know we're done */
+    xo_filter_close_instance(xop, xo_filters(xop), name);
+
     switch (xo_style(xop)) {
     case XO_STYLE_XML:
 	xo_depth_change(xop, name, -1, -1, XSS_CLOSE_INSTANCE, 0);
-	rc = xo_printf(xop, "%*s</%s%s>%s", xo_indent(xop), "", leader, name, ppn);
+	rc = xo_printf(xop, "%*s</%s%s>%s", xo_indent(xop), "",
+		       leader, name, ppn);
 	break;
 
     case XO_STYLE_JSON:
@@ -7959,7 +8132,7 @@ xo_do_close_instance (xo_handle_t *xop, const char *name)
 
     case XO_STYLE_ENCODER:
 	xo_depth_change(xop, name, -1, 0, XSS_CLOSE_INSTANCE, 0);
-	rc = xo_encoder_handle(xop, XO_OP_CLOSE_INSTANCE, name, NULL, 0);
+	rc = xo_encoder_handle(xop, XO_OP_CLOSE_INSTANCE, NULL, name, NULL, 0);
 	break;
     }
 
@@ -8109,15 +8282,13 @@ static ssize_t
 xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
 	       xo_state_t new_state)
 {
-    xo_stack_t *xsp;
     ssize_t rc = 0;
-    int old_state, on_marker;
 
     xop = xo_default(xop);
 
-    xsp = &xop->xo_stack[xop->xo_depth];
-    old_state = xsp->xs_state;
-    on_marker = (old_state == XSS_MARKER);
+    xo_stack_t *xsp = &xop->xo_stack[xop->xo_depth];
+    int old_state = xsp->xs_state;
+    int on_marker = (old_state == XSS_MARKER);
 
     /* If there's a marker on top of the stack, we need to find a real state */
     while (old_state == XSS_MARKER) {
@@ -8428,7 +8599,7 @@ xo_flush_h (xo_handle_t *xop)
 
     switch (xo_style(xop)) {
     case XO_STYLE_ENCODER:
-	xo_encoder_handle(xop, XO_OP_FLUSH, NULL, NULL, 0);
+	xo_encoder_handle(xop, XO_OP_FLUSH, NULL, NULL, NULL, 0);
     }
 
     rc = xo_write(xop);
@@ -8472,7 +8643,7 @@ xo_finish_h (xo_handle_t *xop)
 	break;
 
     case XO_STYLE_ENCODER:
-	xo_encoder_handle(xop, XO_OP_FINISH, NULL, NULL, 0);
+	xo_encoder_handle(xop, XO_OP_FINISH, NULL, NULL, NULL, 0);
 	break;
     }
 
@@ -8754,7 +8925,7 @@ xo_set_version_h (xo_handle_t *xop, const char *version)
 	break;
 
     case XO_STYLE_ENCODER:
-	xo_encoder_handle(xop, XO_OP_VERSION, NULL, version, 0);
+	xo_encoder_handle(xop, XO_OP_VERSION, NULL, NULL, version, 0);
 	break;
     }
 }
@@ -8936,15 +9107,44 @@ xo_get_encoder (xo_handle_t *xop)
 }
 
 /*
+ * Get the whiteboard function
+ */
+xo_whiteboard_func_t
+xo_get_wb_marker (xo_handle_t *xop)
+{
+    xop = xo_default(xop);
+    return xop->xo_wb_marker;
+}
+
+/*
  * Record an encoder callback function in an xo handle.
  */
 void
-xo_set_encoder (xo_handle_t *xop, xo_encoder_func_t encoder)
+xo_set_encoder (xo_handle_t *xop, xo_encoder_func_t encoder,
+		xo_whiteboard_func_t wb_marker)
 {
     xop = xo_default(xop);
 
     xop->xo_style = XO_STYLE_ENCODER;
     xop->xo_encoder = encoder;
+    xop->xo_wb_marker = wb_marker;
+}
+
+int
+xo_encoder_handle (xo_handle_t *xop, xo_encoder_op_t op, xo_buffer_t *bufp,
+		   const char *name, const char *value, xo_xff_flags_t flags)
+{
+    xo_encoder_func_t func = xo_get_encoder(xop);
+    if (func == NULL)
+	return -1;
+
+    void *private = xo_get_private(xop);
+
+    if (XOF_ISSET(xop, XOF_FILTER))
+	return xo_filter_whiteboard(xop, op, bufp, name, value,
+				    private, flags, func, xo_filters(xop));
+
+    return func(xop, op, bufp, name, value, private, flags);
 }
 
 /*

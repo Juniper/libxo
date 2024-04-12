@@ -124,7 +124,7 @@ printtime(const char *field, time_t ftime)
 	else
 		/* mmm dd  yyyy || dd mmm  yyyy */
 		format = d_first ? "%e %b  %Y" : "%b %e  %Y";
-	ls_strftime(longstring, sizeof(longstring), format, localtime(&ftime));
+	ls_strftime(longstring, sizeof(longstring), format, gmtime(&ftime));
 
 	snprintf(fmt, sizeof(fmt), "{d:%s/%%hs} ", field);
 	xo_attr("value", "%ld", (long) ftime);
@@ -138,7 +138,6 @@ int
 main (int argc, char **argv)
 {
     int i, count = 10;
-    int mon = 0;
     xo_emit_flags_t flags = XOF_RETAIN_ALL;
     int opt_color = 1;
 

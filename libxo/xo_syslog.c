@@ -65,6 +65,7 @@
 #endif /* HAVE_SYSCTLBYNAME */
 
 #include "xo.h"
+#include "xo_private.h"
 #include "xo_encoder.h"		/* For xo_realloc */
 #include "xo_buf.h"
 
@@ -105,10 +106,6 @@
 #define HOST_NAME_MAX 255
 #endif /* _POSIX_HOST_NAME_MAX */
 #endif /* HOST_NAME_MAX */
-
-#ifndef UNUSED
-#define UNUSED __attribute__ ((__unused__))
-#endif /* UNUSED */
 
 static int xo_logfile = -1;		/* fd for log */
 static int xo_status;			/* connection xo_status */
