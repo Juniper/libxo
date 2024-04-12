@@ -44,8 +44,8 @@ endif
 
 EXTRA_DIST = \
     ${TEST_CASES} \
-    ${addprefix saved/, ${TEST_CASES:.c=T.err}} \
-    ${addprefix saved/, ${TEST_CASES:.c=T.out}}
+    ${addprefix saved/, ${TEST_CASES:.c=.T.err}} \
+    ${addprefix saved/, ${TEST_CASES:.c=.T.out}}
 
 S2O = | ${SED} '1,/@@/d'
 
