@@ -92,7 +92,7 @@ main: input '+one'
 main: status: track
 main: input '$a 5555'
 main: key: 'a'='5555'
-main: status: dead
+main: status: track
 main: input '+two'
 main: status: dead
 main: input '$b 4444'
@@ -113,7 +113,7 @@ main: status: dead
 main: input '-three'
 main: status: dead
 main: input '-two'
-main: status: dead
+main: status: track
 main: input '+two'
 main: status: dead
 main: input '$b 2'
@@ -130,7 +130,7 @@ main: status: dead
 main: input '-three'
 main: status: dead
 main: input '-two'
-main: status: dead
+main: status: track
 main: input '-one'
 main: status: track
 main: input '+one'
