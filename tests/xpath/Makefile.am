@@ -38,28 +38,47 @@ if HAVE_HUMANIZE_NUMBER
 LDADD += -lutil
 endif
 
+#
+# Sadly, pathetically, this list must be maintained by hand.  We can't
+# just say 'TEST_FILES=`sed "s:^:saved:" ${srcdir}/saved/files.txt`.
+#
+TEST_FILES= \
+    xpath_01_01.1.fullpath.out \
+    xpath_01_01.1.fullpath.err \
+    xpath_01_01.2.fullpath.out \
+    xpath_01_01.2.fullpath.err \
+    xpath_01_02.1.fullpath.out \
+    xpath_01_02.1.fullpath.err \
+    xpath_01_02.2.fullpath.out \
+    xpath_01_02.2.fullpath.err \
+    xpath_01_03.1.fullpath.out \
+    xpath_01_03.1.fullpath.err \
+    xpath_01_03.2.fullpath.out \
+    xpath_01_03.2.fullpath.err \
+    xpath_01_04.1.fullpath.out \
+    xpath_01_04.1.fullpath.err \
+    xpath_01_04.2.fullpath.out \
+    xpath_01_04.2.fullpath.err \
+    xpath_01_05.1.fullpath.out \
+    xpath_01_05.1.fullpath.err \
+    xpath_01_05.2.fullpath.out \
+    xpath_01_05.2.fullpath.err \
+    xpath_01_06.1.fullpath.out \
+    xpath_01_06.1.fullpath.err \
+    xpath_01_06.2.fullpath.out \
+    xpath_01_06.2.fullpath.err \
+    xpath_01_07.1.fullpath.out \
+    xpath_01_07.1.fullpath.err \
+    xpath_01_07.2.fullpath.out \
+    xpath_01_07.2.fullpath.err \
+    xpath_01_08.1.fullpath.out \
+    xpath_01_08.1.fullpath.err \
+    xpath_01_08.2.fullpath.out \
+    xpath_01_08.2.fullpath.err
+
 EXTRA_DIST = \
     ${TEST_CASES} \
-    ${addprefix saved/, ${TEST_CASES:.c=.E.err}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.E.out}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.H.err}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.H.out}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.HIPx.err}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.HIPx.out}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.HP.err}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.HP.out}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.J.err}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.J.out}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.JP.err}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.JP.out}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.JPu.err}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.JPu.out}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.T.err}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.T.out}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.X.err}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.X.out}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.XP.err}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.XP.out}}
+    ${addprefix saved/, ${TEST_FILES}}
 
 S2O = | ${SED} '1,/@@/d'
 
@@ -148,3 +167,6 @@ CLEANDIRS = out
 
 clean-local:
 	rm -rf ${CLEANDIRS}
+
+echo:
+	echo ${${VAR}}
