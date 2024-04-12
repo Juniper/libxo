@@ -194,6 +194,7 @@ typedef unsigned xo_xsf_flags_t; /* XSF_* flags */
 typedef struct xo_stack_s {
     xo_xsf_flags_t xs_flags;	/* Flags for this frame */
     xo_state_t xs_state;	/* State for this stack frame */
+    xo_off_t xs_wb_off;		/* Offset of buffer before this level */
     char *xs_name;		/* Name (for XPath value) */
     char *xs_keys;		/* XPath predicate for any key fields */
 } xo_stack_t;
@@ -4770,7 +4771,7 @@ xo_filter_add (xo_handle_t *xop UNUSED, const char *input UNUSED)
 #ifdef LIBXO_NEED_FILTERS
     xop = xo_default(xop);
 
-    XOF_SET(xop, XOF_WHITEBOARD); /* Activate filtering */
+    XOF_SET(xop, XOF_FILTER); /* Activate filtering */
 
     return xo_filter_add_one(xop, input);
 #else /* LIBXO_NEED_FILTERS */
@@ -7429,6 +7430,7 @@ xo_depth_change (xo_handle_t *xop, const char *name,
 	xo_stack_t *xsp = &xop->xo_stack[xop->xo_depth + delta];
 	xsp->xs_flags = flags;
 	xsp->xs_state = state;
+	xsp->xs_wb_off = xo_buf_offset(&xop->xo_data);
 	xo_stack_set_flags(xop);
 
 	if (name == NULL)
@@ -7462,6 +7464,8 @@ xo_depth_change (xo_handle_t *xop, const char *name,
 		return;
 	    }
 	}
+
+	xsp->xs_wb_off = 0;	/* Zero out this field */
 
 	if (xsp->xs_name) {
 	    xo_free(xsp->xs_name);
@@ -8278,15 +8282,13 @@ static ssize_t
 xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
 	       xo_state_t new_state)
 {
-    xo_stack_t *xsp;
     ssize_t rc = 0;
-    int old_state, on_marker;
 
     xop = xo_default(xop);
 
-    xsp = &xop->xo_stack[xop->xo_depth];
-    old_state = xsp->xs_state;
-    on_marker = (old_state == XSS_MARKER);
+    xo_stack_t *xsp = &xop->xo_stack[xop->xo_depth];
+    int old_state = xsp->xs_state;
+    int on_marker = (old_state == XSS_MARKER);
 
     /* If there's a marker on top of the stack, we need to find a real state */
     while (old_state == XSS_MARKER) {
@@ -9138,7 +9140,7 @@ xo_encoder_handle (xo_handle_t *xop, xo_encoder_op_t op, xo_buffer_t *bufp,
 
     void *private = xo_get_private(xop);
 
-    if (XOF_ISSET(xop, XOF_WHITEBOARD))
+    if (XOF_ISSET(xop, XOF_FILTER))
 	return xo_filter_whiteboard(xop, op, bufp, name, value,
 				    private, flags, func, xo_filters(xop));
 
