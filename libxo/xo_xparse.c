@@ -741,7 +741,7 @@ xo_xparse_results (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
 	xo_xparse_result_add(xdp, id);
     }
 
-    uint32_t deny_count = 0, top_count = 0;
+    uint32_t deny_count = 0, abs_count = 0;
     xo_xparse_node_id_t i;
     xo_xparse_node_id_t *paths = xdp->xd_paths;
 
@@ -751,7 +751,7 @@ xo_xparse_results (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
      * and then set the flags appropriately.
      *
      * all nots: !one | !two | !three
-     * all tops: /one | /two | /three
+     * all abs:  /one | /two | /three
      */
     xo_xparse_node_id_t cur = xdp->xd_paths_cur;
     for (i = 0; i < cur; i++, paths++) {
@@ -763,7 +763,7 @@ xo_xparse_results (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
 	    deny_count += 1;
 
 	if (xnp->xn_type == C_ABSOLUTE)
-	    top_count += 1;
+	    abs_count += 1;
     }
 
     const char *all_nots UNUSED;
@@ -775,17 +775,17 @@ xo_xparse_results (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
 	all_nots = "";
     }
 
-    const char *all_tops UNUSED;
-    if (top_count >= cur) {
-	xdp->xd_flags |= XDF_ALL_TOPS;
-	all_tops = ", all-nots: true";
+    const char *all_abs UNUSED;
+    if (abs_count >= cur) {
+	xdp->xd_flags |= XDF_ALL_ABS;
+	all_abs = ", all-abs: true";
     } else {
-	xdp->xd_flags &= ~XDF_ALL_TOPS;
-	all_tops = "";
+	xdp->xd_flags &= ~XDF_ALL_ABS;
+	all_abs = "";
     }
 
     XO_DBG(xdp->xd_xop, "xo: parse results: %u paths%s%s%s",
-	   cur, all_nots, all_tops);
+	   cur, all_nots, all_abs);
 }
 
 void
