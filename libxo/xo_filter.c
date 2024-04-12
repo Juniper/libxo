@@ -357,6 +357,9 @@ xo_filter_get_status (xo_handle_t *xop UNUSED, xo_filter_t *xfp)
     return xfp->xf_status;
 }
 
+/*
+ * Turn a xo_filter_status_t into a string for debug output
+ */
 const char *
 xo_filter_status_name (xo_filter_status_t rc)
 {
@@ -366,6 +369,16 @@ xo_filter_status_name (xo_filter_status_t rc)
 	(rc == XO_STATUS_DEAD) ? "dead" : "unknown";
 }
 
+/*
+ * Update the status field.  Called when something may have affected it.
+ * The "why" variable tracks why we are in this state, for debug output,
+ * and maybe it should really be part of the status, but that would mean
+ * status would be two parts, and since the "why" doesn't matter past the
+ * lifetime of this function, we don't hold on to it.
+ *
+ * This isn't a cheap activity, so calls should be limited to avoid
+ * performance issues (one reason why we cache the status).
+ */
 static xo_filter_status_t
 xo_filter_change_status (xo_handle_t *xop, xo_filter_t *xfp,
 			 const char *tag UNUSED)
@@ -420,6 +433,10 @@ xo_filter_update_status (xo_handle_t *xop, xo_filter_t *xfp)
     return xo_filter_change_status(xop, xfp, "caller");
 }
 
+/*
+ * Inspect the children of a node (given by `id`) to see if it
+ * contains any predicates.
+ */
 static int
 xo_filter_has_predicates (xo_filter_t *xfp, xo_xparse_node_id_t id)
 {
@@ -434,6 +451,9 @@ xo_filter_has_predicates (xo_filter_t *xfp, xo_xparse_node_id_t id)
     return FALSE;
 }
 
+/*
+ * Adjust the allow/deny numbers for a new match stack element
+ */
 static const char *
 xo_filter_match_adjust (xo_handle_t *xop, xo_filter_t *xfp, xo_match_t *xmp,
 			xo_stack_t *xsp, uint32_t state)
@@ -478,7 +498,7 @@ xo_filter_stack_pop (xo_filter_t *xfp UNUSED, xo_match_t *xmp)
     if (xsp == xmp->xm_stack)	/* Should not occur */
 	return;
 
-    xo_filter_stack_free_keys(xfp, xsp);
+    xo_filter_stack_free_keys(xfp, xsp); /* Make sure the keys are released */
 
     bzero(xsp, sizeof(*xsp));	/* Just to be sure */
 
@@ -496,11 +516,6 @@ xo_filter_deadend (xo_handle_t *xop UNUSED, xo_filter_t *xfp, xo_match_t *xmp,
     xsp->xs_state = XSS_DEADEND;
     xo_filter_stack_free_keys(xfp, xsp);
     xmp->xm_depth = 1;	/* This "open" counts as the first one */
-
-    #if 0
-    if (call_op)
-	xo_encoder_handle(xop, XO_OP_DEADEND, NULL, NULL, NULL, 0);
-    #endif
 }
 
 /*
@@ -692,6 +707,10 @@ xo_filter_open_check_patterns (xo_handle_t *xop, xo_filter_t *xfp,
     }
 }
 
+/*
+ * Open a container/list/instance.  Inspects all open matches and
+ * patterns to see if the new element matters and adjusts the status.
+ */
 static int
 xo_filter_open (xo_handle_t *xop, xo_filter_t *xfp,
 		const char *tag, ssize_t tlen, const char *type)
@@ -735,27 +754,20 @@ xo_filter_open_field (xo_handle_t *xop, xo_filter_t *xfp,
     return xo_filter_open(xop, xfp, tag, tlen, "field");
 }
 
-static int
-xo_filter_close (xo_handle_t *xop, xo_filter_t *xfp,
-		 const char *tag, ssize_t tlen, const char *type UNUSED)
+/*
+ * Whiffle thru the states to see if we have any open paths.
+ */
+static void
+xo_filter_close_check_matches (xo_handle_t *xop UNUSED, xo_filter_t *xfp,
+			       xo_xparse_data_t *xdp,
+			       const char *tag, ssize_t tlen,
+			       const char *type UNUSED)
 {
-    if (xfp == NULL)
-	return 0;
-
-    if (xfp->xf_depth > 0)
-	xfp->xf_depth -= 1;		/* Track our depth */
-
-    if (xfp->xf_total_depth > 0)
-	xfp->xf_total_depth -= 1;
-
-    XO_DBG(xop, "filter: close %s: '%.*s'", type, tlen, tag);
 
     /*
-     * Whiffle thru the states to see if we have any open paths.  We
-     * do this first since we'll be pushing new paths.
+     * Whiffle thru the states to see if we have any open paths.
      */
     uint32_t i UNUSED;
-    xo_xparse_data_t *xdp = &xfp->xf_xd;
     xo_match_t *xmp = xfp->xf_matches;
     xo_match_t *next_xmp = NULL;
     xo_xparse_node_t *xnp;
@@ -852,6 +864,29 @@ xo_filter_close (xo_handle_t *xop, xo_filter_t *xfp,
 	       type, i, tlen, tag, xmp ? xmp->xm_base : 0,
 	       xfp->xf_allow, xfp->xf_deny, label);
     }
+}
+
+/*
+ * Open a container/list/instance.  Inspects all open matches to see
+ * if the new element matters and adjusts the status.
+ */
+static int
+xo_filter_close (xo_handle_t *xop, xo_filter_t *xfp,
+		 const char *tag, ssize_t tlen, const char *type UNUSED)
+{
+    if (xfp == NULL)
+	return 0;
+
+    if (xfp->xf_depth > 0)
+	xfp->xf_depth -= 1;		/* Track our depth */
+
+    if (xfp->xf_total_depth > 0)
+	xfp->xf_total_depth -= 1;
+
+    XO_DBG(xop, "filter: close %s: '%.*s'", type, tlen, tag);
+
+    xo_xparse_data_t *xdp = &xfp->xf_xd;
+    xo_filter_close_check_matches(xop, xfp, xdp, tag, tlen, type);
 
     xo_filter_change_status(xop, xfp, "close");
 
@@ -879,6 +914,80 @@ xo_filter_close_container (xo_handle_t *xop UNUSED, xo_filter_t *xfp,
 			   const char *tag)
 {
     return xo_filter_close(xop, xfp, tag, strlen(tag), "container");
+}
+
+/*
+ * Add a keys for xs_keys for the match.
+ *
+ * We store the keys in a simple-but-slow style that might need
+ * updated/optimized later.  For now, it "key\0val\0k2\0v2\0\0" So
+ * names and values are NUL terminated with another NUL to end the
+ * list.  The number of keys should be low (typically one) so the
+ * efficiency shouldn't matter.
+ */
+static void
+xo_filter_key_add (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED,
+		   xo_match_t *xmp,
+		   const char *tag, xo_ssize_t tlen,
+		   const char *value, xo_ssize_t vlen)
+{
+    xo_stack_t *xsp = xmp->xm_stackp;
+    xo_ssize_t new_len = tlen + vlen + 3; /* Three NULs */
+    char *newp = xo_realloc(xsp->xs_keys, xsp->xs_keys_len + new_len);
+
+    if (newp == NULL)
+	return;
+
+    char *addp = newp + xsp->xs_keys_len;
+    char *t UNUSED = addp;
+
+    memcpy(addp, tag, tlen);
+    addp += tlen;
+    *addp++ = '\0';
+
+    char *v UNUSED = addp;
+    memcpy(addp, value, vlen);
+    addp += vlen;
+    *addp++ = '\0';
+    *addp++ = '\0';
+
+    xsp->xs_keys_len += new_len - 1;
+    xsp->xs_keys = newp;
+
+    XO_DBG(xop, "xo_filter_key: adding '%s' = '%s'", t, v);
+}
+
+/*
+ * Find the current value of a given key and return it.  Since keys
+ * can be added multiple times, we can't short circuit and return the
+ * first value, we have to continue and return the _last_ value.
+ */
+static const char *
+xo_filter_key_find (xo_filter_t *xfp UNUSED,
+		    xo_match_t *xmp, const char *tag)
+{
+    xo_ssize_t off = 0;
+    xo_stack_t *xsp = xmp->xm_stackp; /* Only look at the top of stack */
+    xo_ssize_t len = xsp->xs_keys_len;
+    char *cp = xsp->xs_keys;
+    const char *match = NULL;
+
+    while (off < len) {
+	if (*cp == '\0')	/* SNO: sanity check */
+	    break;
+
+	xo_ssize_t klen = strlen(cp);
+	if (xo_streq(tag, cp))	/* Match! */
+	    match = cp + klen + 1; /* An answer, but keep looking */
+
+	xo_ssize_t vlen = strlen(cp + klen + 1);
+	xo_ssize_t tlen = klen + 1 + vlen + 1;
+
+	off += tlen;		/* Skip over this entry */
+	cp += tlen;
+    }
+
+    return match;
 }
 
 /* ------------------------------------------------------------- */
@@ -944,75 +1053,6 @@ typedef xo_eval_value_t (xo_eval_node_fn_t)(XO_EVAL_NODE_ARGS);
 	xo_eval_value_t left UNUSED, xo_eval_value_t right UNUSED
 
 typedef xo_eval_value_t (xo_eval_calc_fn_t)(XO_EVAL_CALC_ARGS);
-
-/*
- * Add a keys for xs_keys for the match.
- *
- * We store the keys in a simple-but-slow style that might need
- * updated/optimized later.  For now, it "key\0val\0k2\0v2\0\0" So
- * names and values are NUL terminated with another NUL to end the
- * list.  The number of keys should be low (typically one) so the
- * efficiency shouldn't matter.
- */
-static void
-xo_filter_key_add (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED,
-		   xo_match_t *xmp,
-		   const char *tag, xo_ssize_t tlen,
-		   const char *value, xo_ssize_t vlen)
-{
-    xo_stack_t *xsp = xmp->xm_stackp;
-    xo_ssize_t new_len = tlen + vlen + 3; /* Three NULs */
-    char *newp = xo_realloc(xsp->xs_keys, xsp->xs_keys_len + new_len);
-
-    if (newp == NULL)
-	return;
-
-    char *addp = newp + xsp->xs_keys_len;
-    char *t UNUSED = addp;
-
-    memcpy(addp, tag, tlen);
-    addp += tlen;
-    *addp++ = '\0';
-
-    char *v UNUSED = addp;
-    memcpy(addp, value, vlen);
-    addp += vlen;
-    *addp++ = '\0';
-    *addp++ = '\0';
-
-    xsp->xs_keys_len += new_len - 1;
-    xsp->xs_keys = newp;
-
-    XO_DBG(xop, "xo_filter_key: adding '%s' = '%s'", t, v);
-}
-
-static const char * UNUSED
-xo_filter_key_find (xo_filter_t *xfp UNUSED,
-		    xo_match_t *xmp, const char *tag)
-{
-    xo_ssize_t off = 0;
-    xo_stack_t *xsp = xmp->xm_stackp;
-    xo_ssize_t len = xsp->xs_keys_len;
-    char *cp = xsp->xs_keys;
-    const char *match = NULL;
-
-    while (off < len) {
-	if (*cp == '\0')	/* SNO: sanity check */
-	    break;
-
-	xo_ssize_t klen = strlen(cp);
-	if (xo_streq(tag, cp))	/* Match! */
-	    match = cp + klen + 1;
-
-	xo_ssize_t vlen = strlen(cp + klen + 1);
-	xo_ssize_t tlen = klen + 1 + vlen + 1;
-
-	off += tlen;		/* Skip over this entry */
-	cp += tlen;
-    }
-
-    return match;
-}
 
 static inline xo_eval_value_t
 xo_eval_value_make (unsigned type, unsigned flags, xo_xparse_node_id_t id)
