@@ -79,34 +79,34 @@ main: input '+two'
 main: status: track
 main: input '$three 3333'
 main: key: 'three'='3333'
-main: status: dead
+main: status: track
 main: input '+four'
-main: status: dead
+main: status: track
 main: input '=foo goo'
 main: field: 'foo'='goo'
-main: status: dead
+main: status: track
 main: input '+five'
-main: status: dead
+main: status: track
 main: input '=foo goo'
 main: field: 'foo'='goo'
-main: status: dead
+main: status: track
 main: input '+six'
-main: status: dead
+main: status: track
 main: input '=foo goo'
 main: field: 'foo'='goo'
-main: status: dead
+main: status: track
 main: input '-six'
-main: status: dead
+main: status: track
 main: input '-five'
-main: status: dead
+main: status: track
 main: input '=foo goo'
 main: field: 'foo'='goo'
-main: status: dead
+main: status: track
 main: input '-four'
-main: status: dead
+main: status: track
 main: input '=foo goo'
 main: field: 'foo'='goo'
-main: status: dead
+main: status: track
 main: input '-two'
 main: status: track
 main: input '-one'
@@ -130,7 +130,7 @@ main: input '$test sure'
 main: key: 'test'='sure'
 main: status: track
 main: input '+nope'
-main: status: dead
+main: status: track
 main: input '-nope'
 main: status: track
 main: input '+cinco'
@@ -142,7 +142,7 @@ main: status: full
 main: input '-cinco'
 main: status: track
 main: input '+siete'
-main: status: dead
+main: status: track
 main: input '-siete'
 main: status: track
 main: input '+cinco'
@@ -155,18 +155,18 @@ main: input '+cuatro'
 main: status: track
 main: input '$test fail'
 main: key: 'test'='fail'
-main: status: dead
+main: status: track
 main: input '=foo goo'
 main: field: 'foo'='goo'
-main: status: dead
+main: status: track
 main: input '+cinco'
-main: status: dead
+main: status: track
 main: input '+seis'
-main: status: dead
+main: status: track
 main: input '-seis'
-main: status: dead
+main: status: track
 main: input '-cinco'
-main: status: dead
+main: status: track
 main: input '-cuatro'
 main: status: track
 main: input '+cuatro'
