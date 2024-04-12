@@ -391,8 +391,13 @@ xo_filter_change_status (xo_handle_t *xop, xo_filter_t *xfp,
 	rc = XO_STATUS_FULL;
 
     } else if (xo_filter_all_dead(xop, xfp)) {
-	why = "all-dead";
-	rc = XO_STATUS_DEAD;
+	if ((xfp->xf_xd.xd_flags & XDF_ALL_ABS) && xfp->xf_total_depth != 1) {
+	    why = "all-dead";
+	    rc = XO_STATUS_DEAD;
+	} else {
+	    why = "dead-but-still-tracking";
+	    rc = XO_STATUS_TRACK;
+	}
 
     } else {
 	why = "default-to-no";
@@ -1821,6 +1826,13 @@ xo_filter_key (xo_handle_t *xop, xo_filter_t *xfp,
 
 /* ------------------------------------------------------------- */
 
+/*
+ * Dump all the current matches, each with their current state and
+ * stack information, allowing us to see what's going on.
+ *
+ * We don't want to use XO_DBG for this since we want the output to be
+ * available for the "--libxo debug" flag.
+ */
 static void
 xo_filter_dump_matches (xo_handle_t *xop, xo_filter_t *xfp)
 {
@@ -1882,20 +1894,14 @@ xo_filter_whiteboard (XO_ENCODER_HANDLER_ARGS,
     case XO_OP_OPEN_LIST:
     case XO_OP_OPEN_INSTANCE:
     case XO_OP_OPEN_LEAF_LIST:
-	#if 0
-	if (xfp->xf_status == XO_STATUS_DEAD) /* The dead have no cares */
-	    return 0;
-	#endif
-	break;
-
     case XO_OP_CLOSE_CONTAINER:
     case XO_OP_CLOSE_LIST:
     case XO_OP_CLOSE_INSTANCE:
     case XO_OP_CLOSE_LEAF_LIST:
-	#if 0
-	if (xfp->xf_status == XO_STATUS_DEAD) /* The dead have no cares */
-	    return 0;
-	#endif
+	/*
+	 * We need to pass open and close events to the encoder can
+	 * track them, regardless of state.
+	 */
 	break;
 
     case XO_OP_STRING:		   /* Quoted UTF-8 string */
@@ -1909,19 +1915,15 @@ xo_filter_whiteboard (XO_ENCODER_HANDLER_ARGS,
 	 * along.  For non-keys, we look at 'allow' to decide: if
 	 * allow is false, we don't want it.
 	 */
-	if (!(flags & XFF_KEY)) { /* Always need keys */
-	    if (xfp->xf_status == XO_STATUS_TRACK)
-		return 0;  	  /* Tracking doesn't need keys */
-
-	} else {
+	if (flags & XFF_KEY) { /* Always need keys */
 	    /*
 	     * Let the predicate logic know we've got a key.
-	     * 
-	     * XXX This should probably be elsewhere, since it feel like a
-	     * higher-level item, not something that should be handle here,
-	     * but it's just too convenient.  For now....
 	     */
 	    xo_filter_key(xop, xfp, name, strlen(name), value, strlen(value));
+
+	} else {
+	    if (xfp->xf_status == XO_STATUS_TRACK)
+		return 0;  	  /* Tracking doesn't need non-keys */
 	}
 
 	break;
