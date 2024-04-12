@@ -131,10 +131,10 @@ in task, but libxo format strings wrap output fields in braces.  The
 following two calls produce identical text output::
 
   OLD::
-    printf("There are %d %s events\n", count, etype);
+    printf("There are %d %s events\\n", count, etype);
 
   NEW::
-    xo_emit("There are {:count/%d} {:event} events\n", count, etype);
+    xo_emit("There are {:count/%d} {:event} events\\n", count, etype);
 
 "count" and "event" are used as names for JSON and XML output.  The
 "count" field uses the format "%d" and "event" uses the default "%s"
@@ -154,16 +154,16 @@ The "*title*" role indicates the headings of table and sections.  This
 allows HTML output to use CSS to make this relationship more obvious::
 
   OLD::
-    printf("Statistics:\n");
+    printf("Statistics:\\n");
 
   NEW::
-    xo_emit("{T:Statistics}:\n");
+    xo_emit("{T:Statistics}:\\n");
 
 The "*color*" roles controls foreground and background colors, as well
 as effects like bold and underline (see :ref:`color-role`)::
 
   NEW::
-    xo_emit("{C:bold}required{C:}\n");
+    xo_emit("{C:bold}required{C:}\\n");
 
 Finally, the start- and stop-anchor roles allow justification and
 padding over multiple fields (see :ref:`anchor-role`)::
@@ -184,17 +184,17 @@ require this.  Typically applications use indentation to represent
 these relationship::
 
   OLD::
-    printf("table %d\n", tnum);
+    printf("table %d\\n", tnum);
     for (i = 0; i < tmax; i++) {
-        printf("    %s %d\n", table[i].name, table[i].size);
+        printf("    %s %d\\n", table[i].name, table[i].size);
     }
 
   NEW::
-    xo_emit("{T:/table %d}\n", tnum);
+    xo_emit("{T:/table %d}\\n", tnum);
     xo_open_list("table");
     for (i = 0; i < tmax; i++) {
         xo_open_instance("table");
-        xo_emit("{P:    }{k:name} {:size/%d}\n",
+        xo_emit("{P:    }{k:name} {:size/%d}\\n",
                 table[i].name, table[i].size);
         xo_close_instance("table");
     }
@@ -211,16 +211,16 @@ In addition, the open and close container functions allow for
 organization levels of hierarchy::
 
   OLD::
-    printf("Paging information:\n");
-    printf("    Free:      %lu\n", free);
-    printf("    Active:    %lu\n", active);
-    printf("    Inactive:  %lu\n", inactive);
+    printf("Paging information:\\n");
+    printf("    Free:      %lu\\n", free);
+    printf("    Active:    %lu\\n", active);
+    printf("    Inactive:  %lu\\n", inactive);
 
   NEW::
     xo_open_container("paging-information");
-    xo_emit("{P:    }{L:Free:      }{:free/%lu}\n", free);
-    xo_emit("{P:    }{L:Active:    }{:active/%lu}\n", active);
-    xo_emit("{P:    }{L:Inactive:  }{:inactive/%lu}\n", inactive);
+    xo_emit("{P:    }{L:Free:      }{:free/%lu}\\n", free);
+    xo_emit("{P:    }{L:Active:    }{:active/%lu}\\n", active);
+    xo_emit("{P:    }{L:Inactive:  }{:inactive/%lu}\\n", inactive);
     xo_close_container("paging-information");
 
 Converting Error Functions
@@ -300,14 +300,14 @@ message using the `xopo -s $text` command, or an entire .pot can be
 translated using the `xopo -f $input -o $output` command::
 
     EXAMPLE:
-        % xopo -s "There are {:count/%u} {:event/%.6s} events\n"
-        There are {:count} {:event} events\n
+        % xopo -s "There are {:count/%u} {:event/%.6s} events\\n"
+        There are {:count} {:event} events\\n
 
     Recommended workflow:
         # Extract text messages
-	xgettext --default-domain=foo --no-wrap \
-	    --add-comments --keyword=xo_emit --keyword=xo_emit_h \
-	    --keyword=xo_emit_warn -C -E -n --foreign-user \
+	xgettext --default-domain=foo --no-wrap \\
+	    --add-comments --keyword=xo_emit --keyword=xo_emit_h \\
+	    --keyword=xo_emit_warn -C -E -n --foreign-user \\
 	    -o foo.pot.raw foo.c
 
         # Simplify format strings for libxo
@@ -317,7 +317,7 @@ translated using the `xopo -f $input -o $output` command::
         cp foo.pot po/LC/my_lang/foo.po
 
         # For an existing language:
-        msgmerge --no-wrap po/LC/my_lang/foo.po \
+        msgmerge --no-wrap po/LC/my_lang/foo.po \\
                 foo.pot -o po/LC/my_lang/foo.po.new
 
         # Now the hard part: translate foo.po using tools
@@ -328,7 +328,7 @@ translated using the `xopo -f $input -o $output` command::
         msgfmt -v -o po/my_lang/LC_MESSAGES/foo.mo po/my_lang/foo.po
 
         # Install the .mo file
-        sudo cp po/my_lang/LC_MESSAGES/foo.mo \
+        sudo cp po/my_lang/LC_MESSAGES/foo.mo \\
                 /opt/local/share/locale/my_lang/LC_MESSAGE/
 
 Once these steps are complete, you can use the `gettext` command to
@@ -349,24 +349,24 @@ Together these three flags allows a single function call to give
 native language support, as well as libxo's normal XML, JSON, and HTML
 support::
 
-    printf(gettext("Received %zu %s from {g:server} server\n"),
+    printf(gettext("Received %zu %s from {g:server} server\\n"),
            counter, ngettext("byte", "bytes", counter),
            gettext("web"));
 
     xo_emit("{G:}Received {:received/%zu} {Ngp:byte,bytes} "
-            "from {g:server} server\n", counter, "web");
+            "from {g:server} server\\n", counter, "web");
 
 libxo will see the "{G:}" role and will first simplify the format
 string, removing field formats and modifiers::
 
-    "Received {:received} {N:byte,bytes} from {:server} server\n"
+    "Received {:received} {N:byte,bytes} from {:server} server\\n"
 
 libxo calls :manpage:`gettext(3)` with that string to get a localized
 version.  If your language were *Pig Latin*, the result might look
 like::
 
     "Eceivedray {:received} {N:byte,bytes} omfray "
-               "{:server} erversay\n"
+               "{:server} erversay\\n"
 
 Note the field names do not change and they should not be translated.
 The contents of the note ("byte,bytes") should also not be translated,
@@ -387,8 +387,8 @@ If a domain name is needed, it can be supplied as the content of the
 {G:} role.  Domain names remain in use throughout the format string
 until cleared with another domain name::
 
-    printf(dgettext("dns", "Host %s not found: %d(%s)\n"),
+    printf(dgettext("dns", "Host %s not found: %d(%s)\\n"),
         name, errno, dgettext("strerror", strerror(errno)));
 
     xo_emit("{G:dns}Host {:hostname} not found: "
-            "%d({G:strerror}{g:%m})\n", name, errno);
+            "%d({G:strerror}{g:%m})\\n", name, errno);

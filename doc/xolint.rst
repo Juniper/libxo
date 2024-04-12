@@ -26,7 +26,7 @@ The output message will contain the source filename and line number, the
 class of the message, the message, and, if -p is given, the
 line that contains the error::
 
-    % xolint.pl -t xolint.c
+    % xolint -t xolint.c
     xolint.c: 16: error: anchor format should be "%d"
     16         xo_emit("{[:/%s}");
 

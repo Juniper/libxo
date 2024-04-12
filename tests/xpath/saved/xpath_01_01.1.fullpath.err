@@ -1,0 +1,134 @@
+main: input '#run --libxo @fullpath:slax,pretty'
+main: input '#run'
+main: input '?one/two/three'
+--- 0: 7
+    000007: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [one], contents 0, next 3, prev 0 
+        000003: type 70 (C_ELEMENT), str 7 [two], contents 0, next 5, prev 1 
+        000005: type 70 (C_ELEMENT), str 13 [three], contents 0, next 0, prev 3 
+main: status: zero
+main: input '+one'
+main: status: track
+main: input '+two'
+main: status: track
+main: input '+three'
+main: status: full
+main: input '+four'
+main: status: full
+main: input '=five 5'
+main: field: 'five'='5'
+main: status: full
+main: input '-four'
+main: status: full
+main: input '-three'
+main: status: track
+main: input '-two'
+main: status: track
+main: input '-one'
+main: status: track
+main: input 'r'
+main: status: zero
+main: input '?one[two == 4]'
+--- 0: 10
+    000010: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [one], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
+                000004: type 14 (L_EQUALS), str 11 [==], contents 5, next 0, prev 0 
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0 
+                        000003: type 70 (C_ELEMENT), str 7 [two], contents 0, next 0, prev 0 
+                    000006: type 53 (T_NUMBER), str 14 [4], contents 0, next 0, prev 5 
+main: status: zero
+main: input '+one'
+main: status: track
+main: input '$two 4'
+main: key: 'two'='4'
+main: status: full
+main: input '##keys match but no data'
+main: input '-one'
+main: status: track
+main: input 'r'
+main: status: zero
+main: input '?one[two == 4]'
+--- 0: 10
+    000010: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [one], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
+                000004: type 14 (L_EQUALS), str 11 [==], contents 5, next 0, prev 0 
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0 
+                        000003: type 70 (C_ELEMENT), str 7 [two], contents 0, next 0, prev 0 
+                    000006: type 53 (T_NUMBER), str 14 [4], contents 0, next 0, prev 5 
+main: status: zero
+main: input '+one'
+main: status: track
+main: input '$two 4'
+main: key: 'two'='4'
+main: status: full
+main: input '##this time has some data'
+main: input '=brokenness strife'
+main: field: 'brokenness'='strife'
+main: status: full
+main: input '=something beautiful'
+main: field: 'something'='beautiful'
+main: status: full
+main: input '-one'
+main: status: track
+main: input 'r'
+main: status: zero
+main: input '?!one|!two|!three'
+--- 0: 1
+    000001: type 73 (C_NOT), str 1 [!], contents 2, next 0, prev 0 
+        000002: type 70 (C_ELEMENT), str 3 [one], contents 0, next 0, prev 0 
+--- 1: 4
+    000004: type 73 (C_NOT), str 9 [!], contents 5, next 0, prev 0 
+        000005: type 70 (C_ELEMENT), str 11 [two], contents 0, next 0, prev 0 
+--- 2: 7
+    000007: type 73 (C_NOT), str 17 [!], contents 8, next 0, prev 0 
+        000008: type 70 (C_ELEMENT), str 19 [three], contents 0, next 0, prev 0 
+main: status: zero
+main: input '+a'
+main: status: full
+main: input '+b'
+main: status: full
+main: input '+c'
+main: status: full
+main: input '=z zeee'
+main: field: 'z'='zeee'
+main: status: full
+main: input '+d'
+main: status: full
+main: input '+one'
+main: status: track
+main: input '=data 1'
+main: field: 'data'='1'
+main: status: track
+main: input '-one'
+main: status: full
+main: input '+two'
+main: status: track
+main: input '=data 2'
+main: field: 'data'='2'
+main: status: track
+main: input '-two'
+main: status: full
+main: input '+three'
+main: status: track
+main: input '=data 3'
+main: field: 'data'='3'
+main: status: track
+main: input '-three'
+main: status: full
+main: input '+four'
+main: status: full
+main: input '=data 4'
+main: field: 'data'='4'
+main: status: full
+main: input '-four'
+main: status: full
+main: input '-d'
+main: status: full
+main: input '-c'
+main: status: full
+main: input '-b'
+main: status: full
+main: input '-a'
+main: status: full

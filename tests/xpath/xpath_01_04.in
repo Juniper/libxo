@@ -1,0 +1,19 @@
+#run --libxo @fullpath:slax,pretty
+#run
+?one/two[three == "4"]
++one
++two
+$three 4
+=output yes
+-two
++two
+$three 5
+=output no
+-two
++two
+$three 4
++four
+=five 6
+-four
+-two
+-one

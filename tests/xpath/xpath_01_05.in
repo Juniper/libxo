@@ -1,0 +1,55 @@
+#run --libxo @fullpath:slax,pretty
+#run
+?one/two/three/four
+?a/b/c/d
+?!e
+?uno/dos/tres/cuatro
++one
++two
++three
++four
+=data foo
++five
+=data goo
++six
+=data hoo
+-six
+-five
+=data ioo
+-four
+=data joo
+-three
+-two
++two
++a
++b
++c
++uno
+-uno
++uno
+-uno
++d
++e
++f
+=g h
+-f
+-e
+-d
++d
+=data koo
++e
++f
+=data loo
+-f
+-e
+-d
+-c
+-b
+-a
++three
++four
+=data moo
+-four
+-three
+-two
+-one

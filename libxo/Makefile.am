@@ -22,7 +22,8 @@ AM_CFLAGS = \
     ${GETTEXT_CFLAGS}
 
 AM_CFLAGS += \
-    -DXO_ENCODERDIR=\"${XO_ENCODERDIR}\"
+    -DXO_ENCODERDIR=\"${XO_ENCODERDIR}\" \
+    -DXO_SHAREDIR=\"${XO_SHAREDIR}\"
 
 lib_LTLIBRARIES = libxo.la
 
@@ -42,7 +43,31 @@ noinst_HEADERS = \
 libxo_la_SOURCES = \
     libxo.c \
     xo_encoder.c \
-    xo_syslog.c
+    xo_syslog.c \
+    xo_tolower.c \
+    xo_toupper.c \
+    xo_utf8.c
+
+if LIBXO_NEED_FILTERS
+libxo_la_SOURCES += \
+    xo_filter.c \
+    xo_xpath.c \
+    xo_xparse.c
+endif
+
+YACC_OPTS = -P -p xo_xpath_yy -d -v -s -b xo_xpath
+SED_OPTS=\
+-e '/extern int YYPARSE_DECL();/d' \
+-e 's/yydebug = yyn - .0./do {} while(0)/' \
+-e '/typedef int YYINT;/d'
+
+xo_xpath.tab.c.orig xo_xpath.tab.h: xo_xpath.y
+	@echo "  YACC     xo_xpath.y ..."
+	@${YACC} ${YACC_OPTS} -o xo_xpath.tab.c.orig ${srcdir}/xo_xpath.y
+
+xo_xpath.c: xo_xpath.tab.c.orig
+	@echo "  GEN      xo_xpath.c ..."
+	@${SED} ${SED_OPTS} < xo_xpath.tab.c.orig > xo_xpath.c
 
 man3_files = \
     libxo.3 \
@@ -74,13 +99,18 @@ man5_files = \
     xo_format.5
 
 man7_files = \
-    libxo-csv.7 \
+    libxo.7 \
+    xo_csv.7 \
     xo_options.7
 
 man_MANS = ${man3_files} ${man5_files} ${man7_files}
 
 EXTRA_DIST = \
     ${man_MANS}
+
+CLEANFILES = xo_xpath.c xo_xpath.tab.c.orig xo_xpath.tab.h
+
+xo_xparse.o xo_filter.o xo_xparse.lo xo_filter.lo: xo_xpath.tab.h
 
 call-graph:
 	${RM} libxo.o
@@ -94,3 +124,17 @@ install-data-hook:
 	    cat ../libxo/add.man >> ${DESTDIR}${man5dir}/$$file ; done
 	for file in ${man7_files}; do \
 	    cat ../libxo/add.man >> ${DESTDIR}${man7dir}/$$file ; done
+
+xpath: all
+	${COMPILE} -DTEST_XPATH \
+		.libs/libxo.a -L/opt/local/lib -lintl \
+		-o xpath ${srcdir}/xo_xparse.c
+
+filter: all
+	${COMPILE} -DTEST_FILTER \
+		.libs/libxo.a -L/opt/local/lib -lintl \
+		-o filter ${srcdir}/xo_filter.c
+
+var:
+	@echo ${${VAR}}
+

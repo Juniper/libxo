@@ -34,8 +34,8 @@ msgid "Only {:marzlevanes} {N:marzlevane,marzlevanes} are functioning correctly\
 msgstr "Onlyay {:marzlevanes} {N:marzlevane,marzlevanes} areyay unctioningfay orrectlycay\n"
 
 #: gt_01.c:63
-msgid "Version {:version} {:date}\n"
-msgstr "Ersionvay {:date} {:version}\n"
+msgid "Version {:version}\n"
+msgstr "Ersionvay {:version}\n"
 
 #: gt_01.c:66
 msgid "Unable to {:verb} forward velociping"

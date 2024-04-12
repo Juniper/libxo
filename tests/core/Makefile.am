@@ -8,7 +8,18 @@
 # using the SOFTWARE, you agree to be bound by the terms of that
 # LICENSE.
 
-AM_CFLAGS = -I${top_srcdir} -I${top_srcdir}/libxo
+if LIBXO_WARNINGS_HIGH
+LIBXO_WARNINGS = HIGH
+endif
+if HAVE_GCC
+GCC_WARNINGS = yes
+endif
+include ${top_srcdir}/warnings.mk
+
+AM_CFLAGS = \
+    -I${top_srcdir} \
+    -I${top_srcdir}/libxo \
+    ${WARNINGS}
 
 # Ick: maintained by hand!
 TEST_CASES = \
@@ -23,7 +34,8 @@ test_08.c \
 test_09.c \
 test_10.c \
 test_11.c \
-test_12.c
+test_12.c \
+test_13.c
 
 test_01_test_SOURCES = test_01.c
 test_02_test_SOURCES = test_02.c
@@ -37,6 +49,7 @@ test_09_test_SOURCES = test_09.c
 test_10_test_SOURCES = test_10.c
 test_11_test_SOURCES = test_11.c
 test_12_test_SOURCES = test_12.c
+test_13_test_SOURCES = test_13.c
 
 # TEST_CASES := $(shell cd ${srcdir} ; echo *.c )
 
@@ -96,7 +109,7 @@ TEST_JIG = \
 
 TEST_JIG2 = \
 echo "... $$test ... $$fmt ..."; \
-xoopts==warn,$$csv ; \
+xoopts==warn,$$extra ; \
 ${TEST_JIG}; true;
 
 TEST_FORMATS = T XP JP JPu HP X J H HIPx
@@ -119,14 +132,19 @@ test tests: ${bin_PROGRAMS}
             done) \
 	done)
 	-@ (${TEST_TRACE} test=test_01.c; base=test_01; \
-	    (   fmt=Ecsv1; csv=encoder=csv ; \
+	    (   fmt=Ecsv1; extra=encoder=csv ; \
 			${TEST_JIG2} ); \
-	    (   fmt=Ecsv2; csv=encoder=csv:path=top-level/data/item:no-header ; \
+	    (   fmt=Ecsv2; extra=encoder=csv:path=top-level/data/item:no-header ; \
 			${TEST_JIG2} ); \
-	    (   fmt=Ecsv3; csv=@csv:path=item:leafs=sku.sold:no-quotes ; \
+	    (   fmt=Ecsv3; extra=@csv:path=item:leafs=sku.sold:no-quotes ; \
 			${TEST_JIG2} ); \
 	)
-
+	-@ (${TEST_TRACE} test=test_12.c; base=test_12; \
+	    (   fmt=XPmap; extra=xml,pretty,map-file=${srcdir}/test_12.map ; \
+			${TEST_JIG2} ); \
+	    (   fmt=JPmap; extra=json,pretty,map-file=${srcdir}/test_12.map ; \
+			${TEST_JIG2} ); \
+	)
 
 one:
 	-@(test=${TEST_CASE}; data=${TEST_DATA}; ${TEST_ONE} ; true)
@@ -141,6 +159,11 @@ accept:
 	    done) \
 	done)
 	-@(test=test_01.c; base=test_01; for fmt in Ecsv1 Ecsv2 Ecsv3 ; do \
+	        echo "... $$test ... $$fmt ..."; \
+	        ${CP} out/$$base.$$fmt.out ${srcdir}/saved/$$base.$$fmt.out ; \
+	        ${CP} out/$$base.$$fmt.err ${srcdir}/saved/$$base.$$fmt.err ; \
+	done)
+	-@(test=test_01.c; base=test_12; for fmt in XPmap JPmap ; do \
 	        echo "... $$test ... $$fmt ..."; \
 	        ${CP} out/$$base.$$fmt.out ${srcdir}/saved/$$base.$$fmt.out ; \
 	        ${CP} out/$$base.$$fmt.err ${srcdir}/saved/$$base.$$fmt.err ; \

@@ -12,11 +12,10 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "xo.h"
 #include "xo_encoder.h"
-
-#include "xo_humanize.h"
 
 int
 main (int argc, char **argv)
@@ -51,10 +50,10 @@ main (int argc, char **argv)
 
     xo_open_container("data");
 
-    xo_emit("{kt:name/%-*.*s}{eq:flags/0x%x}",
+    xo_emit("{ket:name/%-*.*s}{eq:flags/0x%x}",
 	    5, 5, "em0", 34883);
 
-    xo_emit("{d:/%-*.*s}{etk:name}{eq:flags/0x%x}",
+    xo_emit("{d:/%-*.*s}{tek:name}{eq:flags/0x%x}",
 	    5, 5, "em0", "em0", 34883);
 
     xo_emit("We are {{emit}}{{ting}} some {:what}\n", "braces");
@@ -140,6 +139,20 @@ main (int argc, char **argv)
     xo_emit("{W:this is an warning}\n");
     xo_emit("{W:/%s more warning%s}\n", "two", "s" );
     xo_emit("{L:/V1\\/V2 packet%s}: {:count/%u}\n", "s", 10);
+
+    long long long_long = -45;
+    unsigned long long ulong_long = 45;
+
+    xo_open_container("long-long-test");
+    xo_emit("a {:lsize/%u} long: {:lval/%lld}\n"
+	    "a {:usize/%u} ulong: {:uval/%llu}\n"
+	    "a {:lsize/%u} long: {:lval/%lld}\n"
+	    "a {:usize/%u} ulong: {:uval/%llu}\n",
+	    sizeof(long_long), long_long, sizeof(ulong_long), ulong_long,
+	    sizeof(long_long), long_long, sizeof(ulong_long), ulong_long);
+    xo_close_container("long-long-test");
+
+    xo_emit("{:value/%16lld}\n", 123412341234LL);
 
     int test = 4;
     xo_emit("{:test/%04d} {L:/tr%s}\n", test, (test == 1) ? "y" : "ies");

@@ -1,0 +1,5 @@
+/one/two/three/four/five='5'
+/one[two='4']/brokenness='strife'
+/one[two='4']/something='beautiful'
+/a/b/c/z='zeee'
+/a/b/c/d/four/data='4'

@@ -1,0 +1,49 @@
+#run --libxo @fullpath:slax,pretty
+#run
+?one/two/three
++one
++two
++three
++four
+=five 5
+-four
+-three
+-two
+-one
+r
+?one[two == 4]
++one
+$two 4
+##keys match but no data
+-one
+r
+?one[two == 4]
++one
+$two 4
+##this time has some data
+=brokenness strife
+=something beautiful
+-one
+r
+?!one|!two|!three
++a
++b
++c
+=z zeee
++d
++one
+=data 1
+-one
++two
+=data 2
+-two
++three
+=data 3
+-three
++four
+=data 4
+-four
+-d
+-c
+-b
+-a

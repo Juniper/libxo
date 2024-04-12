@@ -50,7 +50,7 @@ descriptor will be placed as a UTF-8 string (const char \*) argument
 within the xo_emit parameters::
 
     EXAMPLE:
-        xo_emit("{La:} {a:}\n", "Label text", "label", "value");
+        xo_emit("{La:} {a:}\\n", "Label text", "label", "value");
     TEXT:
         Label text value
     JSON:
@@ -75,7 +75,7 @@ The Colon Modifier ({c:})
 The colon modifier appends a single colon to the data value::
 
     EXAMPLE:
-        xo_emit("{Lc:Name}{:name}\n", "phil");
+        xo_emit("{Lc:Name}{:name}\\n", "phil");
     TEXT:
         Name:phil
 
@@ -95,7 +95,7 @@ The display modifier indicated the field should only be generated for
 the display output styles, TEXT and HTML::
 
     EXAMPLE:
-        xo_emit("{Lcw:Name}{d:name} {:id/%d}\n", "phil", 1);
+        xo_emit("{Lcw:Name}{d:name}{:id/%d}\\n", "phil", 1);
     TEXT:
         Name: phil 1
     XML:
@@ -112,11 +112,11 @@ The Encoding Modifier ({e:})
 
 .. index:: Field Modifiers; Encoding
 
-The display modifier indicated the field should only be generated for
-the display output styles, TEXT and HTML::
+The encoding modifier indicated the field should only be generated for
+the encoding output styles, XML and JSON::
 
     EXAMPLE:
-        xo_emit("{Lcw:Name}{:name} {e:id/%d}\n", "phil", 1);
+        xo_emit("{Lcw:Name}{:name}{e:id/%d}\\n", "phil", 1);
     TEXT:
         Name: phil
     XML:
@@ -143,7 +143,7 @@ translation.
 In the following example, the strings "State" and "full" are passed
 to gettext() to find locale-based translated strings::
 
-    xo_emit("{Lgwc:State}{g:state}\n", "full");
+    xo_emit("{Lgwc:State}{g:state}\\n", "full");
 
 See :ref:`gettext-role`, :ref:`plural-modifier`, and
 :ref:`i18n` for additional details.
@@ -180,7 +180,7 @@ tradition::
     EXAMPLE:
         xo_emit("{h:input/%u}, {h,hn-space:output/%u}, "
 	    "{h,hn-decimal:errors/%u}, {h,hn-1000:capacity/%u}, "
-	    "{h,hn-decimal:remaining/%u}\n",
+	    "{h,hn-decimal:remaining/%u}\\n",
             input, output, errors, capacity, remaining);
     TEXT:
         21, 57 K, 96M, 44M, 1.2G
@@ -206,7 +206,7 @@ uniquely identify an instance of list data::
         xo_open_list("user");
         for (i = 0; i < num_users; i++) {
 	    xo_open_instance("user");
-            xo_emit("User {k:name} has {:count} tickets\n",
+            xo_emit("User {k:name} has {:count} tickets\\n",
                user[i].u_name, user[i].u_tickets);
             xo_close_instance("user");
         }
@@ -232,7 +232,7 @@ rendered as single elements, where JSON renders them as arrays::
 
     EXAMPLE:
         for (i = 0; i < num_users; i++) {
-            xo_emit("Member {l:user}\n", user[i].u_name);
+            xo_emit("Member {l:user}\\n", user[i].u_name);
         }
     XML:
         <user>phil</user>
@@ -276,7 +276,7 @@ expression based on the most recent number emitted and the current
 language settings.  The contents of the field should be the singular
 and plural English values, separated by a comma::
 
-    xo_emit("{:bytes} {Ngp:byte,bytes}\n", bytes);
+    xo_emit("{:bytes} {Ngp:byte,bytes}\\n", bytes);
 
 The plural modifier is meant to work with the gettext modifier ({g:})
 but can work independently.  See :ref:`gettext-modifier`.
@@ -341,7 +341,7 @@ The White Space Modifier ({w:})
 The white space modifier appends a single space to the data value::
 
     EXAMPLE:
-        xo_emit("{Lw:Name}{:name}\n", "phil");
+        xo_emit("{Lw:Name}{:name}\\n", "phil");
     TEXT:
         Name phil
 

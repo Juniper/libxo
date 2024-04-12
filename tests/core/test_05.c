@@ -49,7 +49,7 @@ main (int argc, char **argv)
 	{ "ახლა", "გაიარო", "საერთაშორისო", 123, 90 },
 	{ "෴ණ්ණ෴෴ණ්ණ෴", "Mick",
 	  "෴ණ්ණ෴෴ණ්ණ෴෴ණ්ණ෴෴෴", 110, 20 },
-	{ NULL, NULL }
+	{ NULL, NULL, NULL, 0, 0 }
     }, *ep = employees;
     int rc, i;
 

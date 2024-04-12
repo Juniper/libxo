@@ -14,8 +14,18 @@
 static int
 test_handler (XO_ENCODER_HANDLER_ARGS)
 {
+    flags &= ~XOF_UTF8; /* Skip this flag, since it depends on terminal */
+
     printf("op %s: [%s] [%s] [%#llx]\n", xo_encoder_op_name(op),
 	   name ?: "", value ?: "", (unsigned long long) flags);
+
+    return 0;
+}
+
+static int
+test_wb_marker (XO_WHITEBOARD_FUNC_ARGS)
+{
+    printf("marker %s\n", xo_whiteboard_op_name(op));
 
     return 0;
 }
@@ -25,6 +35,7 @@ xo_encoder_library_init (XO_ENCODER_INIT_ARGS)
 {
     arg->xei_version = XO_ENCODER_VERSION;
     arg->xei_handler = test_handler;
+    arg->xei_wb_marker = test_wb_marker;
 
     return 0;
 }

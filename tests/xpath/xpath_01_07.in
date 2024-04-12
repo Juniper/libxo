@@ -1,0 +1,45 @@
+#run --libxo @fullpath:slax,pretty
+#run
+?/uno[x<4]/dos[y<=5]/tres
+?/one/two/more
+?three
++uno
+$x 2
++dos
+$y 5
++tres
+=cuatro 4
+-tres
++uno
++dos
++tres
+=nada 0
+-tres
+-dos
+-uno
++one
++two
++more
+=what no
+-more
+-two
+-one
+-dos
+-uno
++one
++two
++uno
++dos
++tres
+=nada 0
+-tres
+-dos
+-uno
++more
+=even yes
+-more
+-two
++three
+=four sure
+-three
+-one
