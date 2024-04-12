@@ -12,6 +12,8 @@
 GOODDIR=${SRCDIR}/saved
 S2O="sed 1,/@@/d"
 ECHO=/bin/echo
+FILES_BASE=files.txt
+FILES=out/$FILES_BASE
 
 run () {
     cmd="$1"
@@ -59,12 +61,16 @@ run_tests () {
     set_fmt_option
     run "$test $LIBXOPTS $opt $data input $input > $out.out 2> $out.err"
 
+    echo "$oname.out" >> $FILES
+    echo "$oname.err" >> $FILES
+
     run "diff -Nu ${SRCDIR}/saved/$oname.out out/$oname.out | ${S2O}"
     run "diff -Nu ${SRCDIR}/saved/$oname.err out/$oname.err | ${S2O}"
 }
 
 do_run_tests () {
     mkdir -p out
+    cp /dev/null $FILES
 
     for test in ${TESTS}; do
 	base=`basename $test .test`
@@ -118,6 +124,8 @@ do_accept () {
 	    done
 	done
     done
+
+    accept_file $FILES ${SRCDIR}/saved/$FILES_BASE
 }
 
 #

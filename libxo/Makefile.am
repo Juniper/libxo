@@ -37,8 +37,12 @@ libxoinc_HEADERS = \
 noinst_HEADERS = \
      xo_buf.h \
      xo_explicit.h \
+     xo_filter.h \
      xo_humanize.h \
-     xo_wcwidth.h
+     xo_private.h \
+     xo_utf8.h \
+     xo_wcwidth.h \
+     xo_xparse.h
 
 libxo_la_SOURCES = \
     libxo.c \
@@ -106,9 +110,10 @@ man7_files = \
 man_MANS = ${man3_files} ${man5_files} ${man7_files}
 
 EXTRA_DIST = \
+    xo_xpath.y \
     ${man_MANS}
 
-CLEANFILES = xo_xpath.c xo_xpath.tab.c.orig xo_xpath.tab.h
+CLEANFILES = xo_xpath.c xo_xpath.tab.c.orig xo_xpath.tab.h xo_xpath.output
 
 xo_xparse.o xo_filter.o xo_xparse.lo xo_filter.lo: xo_xpath.tab.h
 
