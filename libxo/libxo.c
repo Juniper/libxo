@@ -3478,7 +3478,7 @@ xo_trim_ws (xo_buffer_t *xbp, ssize_t len)
  * Safely pull a "long double" off a va_list.  This is a workaround
  * for a va_arg bug on PowerPC for gcc 4.9.2 and later.
  */
-static void inline
+static inline void
 xo_safe_va_arg_long_double (xo_handle_t *xop)
 {
 #ifndef __GNUC_PREREQ
