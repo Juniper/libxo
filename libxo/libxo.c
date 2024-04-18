@@ -2156,7 +2156,7 @@ xo_name_to_style (const char *name)
 
 /* Simple name->value mapping */
 typedef struct xo_flag_mapping_s {
-    xo_xff_flags_t xm_value;	/* Flag value */
+    xo_xof_flags_t xm_value;	/* Flag value */
     const char *xm_name;	/* String name */
 } xo_flag_mapping_t;
 
