@@ -123,12 +123,11 @@ extern char etext;
 #define TRUE 1
 #endif
 
-/*
- * Older versions of GCC don't have this
- */
+/* Make our own version for older versions of GCC that don't have this */
 #ifndef __GNUC_PREREQ
-#define __GNUC_PREREQ(maj,min) ((__GNUC__ << 16) + __GNUC_MINOR__ >= ((maj) << 16) + (min))
-#endif
+#define __GNUC_PREREQ(maj,min) \
+    ((__GNUC__ << 16) + __GNUC_MINOR__ >= ((maj) << 16) + (min))
+#endif /* __GNUC_PREREQ */
 
 /*
  * Three styles of specifying thread-local variables are supported.
@@ -719,6 +718,13 @@ xo_init_handle (xo_handle_t *xop)
     XOIF_CLEAR(xop, XOIF_INIT_IN_PROGRESS);
 }
 
+static void
+xo_default_init_utf8 (xo_handle_t *xop)
+{
+    if (xo_codeset_is_utf8)
+       XOF_SET(xop, XOF_UTF8);
+}
+
 /*
  * Initialize the default handle.
  */
@@ -728,9 +734,7 @@ xo_default_init (void)
     xo_handle_t *xop = &xo_default_handle;
 
     xo_init_handle(xop);
-
-    if (xo_codeset_is_utf8)
-	XOF_SET(xop, XOF_UTF8);
+    xo_default_init_utf8(xop);
 
     xo_default_inited = 1;
 }
@@ -3475,23 +3479,15 @@ xo_trim_ws (xo_buffer_t *xbp, ssize_t len)
 }
 
 /*
- * Safely pull a "long double" off a va_list.  This is a workaround
- * for a va_arg bug on PowerPC for gcc 4.9.2 and later.
+ * Pull a "long double" off our va_list.  This was originally done as
+ * a function to hide some evil bits we had to do to work around a
+ * gcc-4.9 bug, but that's ancient so we've removed the evil but left
+ * the function just in case the bug returns.  A pessimist, eh?
  */
 static inline void
 xo_safe_va_arg_long_double (xo_handle_t *xop)
 {
-#ifndef __GNUC_PREREQ
-#if !__GNUC_PREREQ(4, 9) || !defined(PPC)
     va_arg(xop->xo_vap, long double);
-#elif (sizeof(long double) != sizeof(uint64_t))
-    #error "size check failure: (sizeof(long double) != sizeof(uint64_t))"
-#else
-    va_arg(xop->xo_vap, uint64_t);
-#endif /* __GNUC_PREREQ(4, 9) */
-#else /* __GNUC_PREREQ */
-    va_arg(xop->xo_vap, uint64_t);
-#endif /* __GNUC_PREREQ */
 }
 
 /*
