@@ -1032,6 +1032,9 @@ typedef struct xo_eval_value_s {
 #define XEVF_UNSUPPORTED (1<<3) /* Token type is not supported */
 #define XEVF_FINAL	(1<<4)  /* This is the final answer */
 
+#define XO_EVAL_VALUE_ZERO { .xev_flags = 0 }
+#define XO_EVAL_VALUE_INVALID { .xev_type = M_ERROR, .xev_flags = XEVF_INVALID }
+
 #define XO_EVAL_OP_ARGS \
     xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED, xo_match_t *xmp UNUSED, \
 	xo_xparse_node_t *xnp UNUSED, \
@@ -1057,7 +1060,7 @@ typedef xo_eval_value_t (xo_eval_calc_fn_t)(XO_EVAL_CALC_ARGS);
 static inline xo_eval_value_t
 xo_eval_value_make (unsigned type, unsigned flags, xo_xparse_node_id_t id)
 {
-    xo_eval_value_t value = { 0 };
+    xo_eval_value_t value = XO_EVAL_VALUE_ZERO;
 
     value.xev_type = type;
     value.xev_flags = flags;
@@ -1071,7 +1074,7 @@ xo_eval_value_make (unsigned type, unsigned flags, xo_xparse_node_id_t id)
 static inline xo_eval_value_t
 xo_eval_value_float (unsigned flags, xo_float_t val)
 {
-    xo_eval_value_t value = { 0 };
+    xo_eval_value_t value = XO_EVAL_VALUE_ZERO;
 
     value.xev_type = C_FLOAT;
     value.xev_flags = flags;
@@ -1083,14 +1086,7 @@ xo_eval_value_float (unsigned flags, xo_float_t val)
 static inline xo_eval_value_t
 xo_eval_value_invalid (void)
 {
-    xo_eval_value_t value = { 0 };
-
-    value.xev_type = M_ERROR;
-    value.xev_flags = XEVF_INVALID;
-    value.xev_pad = 0;
-    value.xev_node = 0;
-    value.xev_uint64 = 0;
-
+    xo_eval_value_t value = XO_EVAL_VALUE_INVALID;
     return value;
 }
 
@@ -1102,7 +1098,7 @@ xo_eval (xo_handle_t *xop, xo_filter_t *xfp, xo_match_t *xmp,
 static xo_eval_value_t
 xo_eval_number (XO_EVAL_NODE_ARGS)
 {
-    xo_eval_value_t value = { .xev_flags = 0 };
+    xo_eval_value_t value = XO_EVAL_VALUE_ZERO;
     const char *str = xo_xparse_str(&xfp->xf_xd, xnp->xn_str);
     char *ep;
     int64_t ival = strtoll(str, &ep, 0);
@@ -1293,7 +1289,7 @@ xo_eval_dump_value (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED,
 static xo_eval_value_t
 xo_eval_compare (XO_EVAL_OP_ARGS)
 {
-    xo_eval_value_t value = { 0 };
+    xo_eval_value_t value = XO_EVAL_VALUE_ZERO;
     int rc = 0;
     xo_float_t fval;
 
@@ -1555,8 +1551,8 @@ xo_eval (xo_handle_t *xop, xo_filter_t *xfp, xo_match_t *xmp,
 			 xo_xparse_node_id_t id, xo_eval_op_fn_t op_fn)
 {
     xo_eval_value_t value = xo_eval_value_invalid();
+    xo_eval_value_t last = XO_EVAL_VALUE_ZERO;
     int first = 1;
-    xo_eval_value_t last = { 0 };
 
     xo_xparse_dump_one_node(&xfp->xf_xd, id, 0, "eval one: ");
 
@@ -1699,7 +1695,7 @@ xo_eval (xo_handle_t *xop, xo_filter_t *xfp, xo_match_t *xmp,
 static xo_eval_value_t
 xo_filter_pred_eval (xo_handle_t *xop, xo_filter_t *xfp, xo_match_t *xmp)
 {
-    xo_eval_value_t value = { 0 };
+    xo_eval_value_t value = XO_EVAL_VALUE_ZERO;
 
     xo_xparse_dump_one_node(&xfp->xf_xd, xmp->xm_stackp->xs_predicates,
 			    0, "eval: ");
