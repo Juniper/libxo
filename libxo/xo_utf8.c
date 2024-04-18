@@ -64,7 +64,7 @@ xo_utf8_codepoint (const char *buf, size_t bufsiz, int len,
 	    test = b2 & 0xc0;
 	    match = 0x80;
 	    wc = (b1 << 6) | (b2 & 0x3f);
-	    zeros = b1 & 0b00011110;
+	    zeros = b1 & 0x1e; /* 0b0001_1110 */
 
 	} else if (len == 3) {
 	    b2 = buf[1];
@@ -72,7 +72,8 @@ xo_utf8_codepoint (const char *buf, size_t bufsiz, int len,
 	    test = (b2 & 0xc0) << 8 | (b3 & 0xc0);
 	    match = 0x8080;
 	    wc = b1 << 12 | (b2 & 0x3f) << 6 | (b3 & 0x3f);
-	    zeros = (b1 & 0b00001111) << 8 | (b2 & 0b00100000);
+	    zeros = (b1 & 0x0f /* 0b0000_1111 */) << 8
+		| (b2 & 0x20 /* 0b0010_0000 */);
 
 	} else if (len == 4) {
 	    b2 = buf[1];
@@ -81,7 +82,8 @@ xo_utf8_codepoint (const char *buf, size_t bufsiz, int len,
 	    test = (b2 & 0xc0) << 16 | (b3 & 0xc0) << 8 | (b4 & 0xc0);
 	    match = 0x808080;
 	    wc = b1 << 18 | (b2 & 0x3f) << 12 | (b3 & 0x3f) << 6 | (b4 & 0x3f);
-	    zeros = (b1 & 0b00000111) << 8 | (b2 & 0b00110000);
+	    zeros = (b1 & 0x07 /* 0b0000_0111 */) << 8
+		| (b2 & 0x30 /* 0b0011_0000 */);
 
 	} else return on_err ?: XO_UTF8_ERR_BAD_LEN;
 

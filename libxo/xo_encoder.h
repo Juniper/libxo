@@ -24,7 +24,7 @@
 #include "xo_buf.h"
 
 /* Flags for formatting functions */
-typedef unsigned long xo_xff_flags_t;
+typedef unsigned long long xo_xff_flags_t;
 #define XFF_COLON	(1<<0)	/* Append a ":" */
 #define XFF_COMMA	(1<<1)	/* Append a "," iff there's more output */
 #define XFF_WS		(1<<2)	/* Append a blank */

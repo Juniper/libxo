@@ -63,15 +63,15 @@ YACC_OPTS = -P -p xo_xpath_yy -d -v -s -b xo_xpath
 SED_OPTS=\
 -e '/extern int YYPARSE_DECL();/d' \
 -e 's/yydebug = yyn - .0./do {} while(0)/' \
--e '/typedef int YYINT;/d'
+-e '/typedef int YYINT;/d' \
+-e '/int yyparse (void .YYPARSE_PARAM);/d' \
+-e 's/yyparse (void .YYPARSE_PARAM)/xo_xpath_yyparse (xo_xparse_data_t *xparse_data)/'
 
-xo_xpath.tab.c.orig xo_xpath.tab.h: xo_xpath.y
+xo_xpath.c xo_xpath.tab.h: xo_xpath.y
 	@echo "  YACC     xo_xpath.y ..."
-	@${YACC} ${YACC_OPTS} -o xo_xpath.tab.c.orig ${srcdir}/xo_xpath.y
-
-xo_xpath.c: xo_xpath.tab.c.orig
+	@${YACC} ${YACC_OPTS} -o xo_xpath.tab.c ${srcdir}/xo_xpath.y
 	@echo "  GEN      xo_xpath.c ..."
-	@${SED} ${SED_OPTS} < xo_xpath.tab.c.orig > xo_xpath.c
+	@${SED} ${SED_OPTS} < xo_xpath.tab.c > xo_xpath.c
 
 man3_files = \
     libxo.3 \
@@ -113,7 +113,12 @@ EXTRA_DIST = \
     xo_xpath.y \
     ${man_MANS}
 
-CLEANFILES = xo_xpath.c xo_xpath.tab.c.orig xo_xpath.tab.h xo_xpath.output
+CLEANFILES = \
+    xo_xpath.c \
+    xo_xpath.tab.c \
+    xo_xpath.tab.c.orig \
+    xo_xpath.tab.h \
+    xo_xpath.output
 
 xo_xparse.o xo_filter.o xo_xparse.lo xo_filter.lo: xo_xpath.tab.h
 
