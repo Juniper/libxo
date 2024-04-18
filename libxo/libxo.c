@@ -441,9 +441,6 @@ xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
 	       xo_state_t new_state);
 
 static int
-xo_set_options_simple (xo_handle_t *xop, const char *input);
-
-static int
 xo_color_find (const char *str);
 
 static void
@@ -724,16 +721,6 @@ xo_default_init (void)
 
     if (xo_codeset_is_utf8)
 	XOF_SET(xop, XOF_UTF8);
-
-#if 0 /* !defined(NO_LIBXO_OPTIONS) */
-    if (!XOF_ISSET(xop, XOF_NO_ENV)) {
-       char *env = getenv("LIBXO_OPTIONS");
-
-       if (env)
-           xo_set_options_simple(xop, env);
-
-    }
-#endif /* NO_LIBXO_OPTIONS */
 
     xo_default_inited = 1;
 }
@@ -2244,21 +2231,6 @@ static xo_flag_mapping_t xo_xof_names[] = {
     { 0, NULL }
 };
 
-/* Options available via the environment variable ($LIBXO_OPTIONS) */
-static xo_flag_mapping_t xo_xof_simple_names[] = {
-    { XOF_COLOR_ALLOWED, "color" },
-    { XOF_FLUSH, "flush" },
-    { XOF_FLUSH_LINE, "flush-line" },
-    { XOF_NO_HUMANIZE, "no-humanize" },
-    { XOF_NO_LOCALE, "no-locale" },
-    { XOF_RETAIN_NONE, "no-retain" },
-    { XOF_PRETTY, "pretty" },
-    { XOF_RETAIN_ALL, "retain" },
-    { XOF_UNDERSCORES, "underscores" },
-    { XOF_WARN, "warn" },
-    { 0, NULL }
-};
-
 /*
  * Convert string name to XOF_* flag value.
  * Not all are useful.  Or safe.  Or sane.
@@ -2342,7 +2314,7 @@ xo_set_color_map (xo_handle_t *xop, char *value)
 	xop->xo_color_map_bg[num] = (bg < 0) ? num : bg;
 #endif /* LIBXO_TEXT_ONLY */
 
-	if (++num > XO_NUM_COLORS)
+	if (++num >= XO_NUM_COLORS)
 	    break;
     }
 
@@ -2357,44 +2329,6 @@ xo_set_color_map (xo_handle_t *xop, char *value)
     for ( ; num < XO_NUM_COLORS; num++)
 	xop->xo_color_map_fg[num] = xop->xo_color_map_bg[num] = num;
 #endif /* LIBXO_TEXT_ONLY */
-}
-
-static int UNUSED
-xo_set_options_simple (xo_handle_t *xop, const char *input)
-{
-    xo_xof_flags_t new_flag;
-    char *cp, *ep, *vp, *np, *bp;
-    ssize_t len = strlen(input) + 1;
-
-    bp = alloca(len);
-    memcpy(bp, input, len);
-
-    for (cp = bp, ep = cp + len - 1; cp && cp < ep; cp = np) {
-	np = strchr(cp, ',');
-	if (np)
-	    *np++ = '\0';
-
-	vp = strchr(cp, '=');
-	if (vp)
-	    *vp++ = '\0';
-
-	if (xo_streq("colors", cp)) {
-	    xo_set_color_map(xop, vp);
-	    continue;
-	}
-
-	new_flag = xo_name_lookup(xo_xof_simple_names, cp, -1);
-	if (new_flag != 0) {
-	    XOF_SET(xop, new_flag);
-	} else if (xo_streq(cp, "no-color")) {
-	    XOF_CLEAR(xop, XOF_COLOR_ALLOWED);
-	} else {
-	    xo_failure(xop, "unknown simple option: %s", cp);
-	    return -1;
-	}
-    }
-
-    return 0;
 }
 
 /**
