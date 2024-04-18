@@ -124,6 +124,13 @@ extern char etext;
 #endif
 
 /*
+ * Older versions of GCC don't have this
+ */
+#ifndef __GNUC_PREREQ
+#define __GNUC_PREREQ(maj,min) ((__GNUC__ << 16) + __GNUC_MINOR__ >= ((maj) << 16) + (min))
+#endif
+
+/*
  * Three styles of specifying thread-local variables are supported.
  * configure.ac has the brains to run each possibility through the
  * compiler and see what works; we are left to define the THREAD_LOCAL
@@ -3468,6 +3475,26 @@ xo_trim_ws (xo_buffer_t *xbp, ssize_t len)
 }
 
 /*
+ * Safely pull a "long double" off a va_list.  This is a workaround
+ * for a va_arg bug on PowerPC for gcc 4.9.2 and later.
+ */
+static void inline
+xo_safe_va_arg_long_double (xo_handle_t *xop)
+{
+#ifndef __GNUC_PREREQ
+#if !__GNUC_PREREQ(4, 9) || !defined(PPC)
+    va_arg(xop->xo_vap, long double);
+#elif (sizeof(long double) != sizeof(uint64_t))
+    #error "size check failure: (sizeof(long double) != sizeof(uint64_t))"
+#else
+    va_arg(xop->xo_vap, uint64_t);
+#endif /* __GNUC_PREREQ(4, 9) */
+#else /* __GNUC_PREREQ */
+    va_arg(xop->xo_vap, uint64_t);
+#endif /* __GNUC_PREREQ */
+}
+
+/*
  * Interface to format a single field.  The arguments are in xo_vap,
  * and the format is in 'fmt'.  If 'xbp' is null, we use xop->xo_data;
  * this is the most common case.
@@ -3780,7 +3807,7 @@ xo_do_format_field (xo_handle_t *xop, xo_buffer_t *xbp,
 		    }
 		} else if (strchr("eEfFgGaA", xf.xf_fc) != NULL)
 		    if (xf.xf_lflag)
-			va_arg(xop->xo_vap, long double);
+			xo_safe_va_arg_long_double(xop);
 		    else
 			va_arg(xop->xo_vap, double);
 
