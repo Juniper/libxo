@@ -62,17 +62,30 @@ xo_humanize_number (char *buf, size_t len, int64_t bytes,
 		    const char *suffix, int scale, int flags)
 {
 	const char *prefixes, *sep;
-	int	b, i, r, maxscale, s1, s2, sign;
+	int b, i, r, s1, s2, sign;
 	int64_t divisor, max;
-	// We multiply bytes by 100 to deal with rounding, so we need something
-	// big enough to hold LLONG_MAX * 100. On 64-bit we can use 128-bit wide
-	// integers with __int128_t, but on 32-bit we have to use long double.
+
+	/*
+	 * We multiply bytes by 100 to deal with rounding, so we need
+	 * something big enough to hold LLONG_MAX * 100. On 64-bit we
+	 * can use 128-bit wide integers with __int128_t, but on
+	 * 32-bit we have to use long double.
+	 *
+	 * Note: For mips 64 but architecture, we have missing
+	 * undefined reference to `__divti3', which is observed when
+	 * 128 bit wide integers with __int128_t is used, so in this
+	 * case also we will use 32-bit and we have to use long
+	 * double.
+	 */
 #ifdef __LP64__
-	__int128_t scalable = (__int128_t)bytes;
+#if  defined __FreeBSD__ && __FreeBSD__ == 6 && defined __mips64__
+        long double scalable = (long double)bytes;
 #else
-	long double scalable = (long double)bytes;
+        __int128_t scalable = (__int128_t)bytes;
 #endif
-	size_t	baselen;
+#else
+        long double scalable = (long double)bytes;
+#endif
 
 	assert(buf != NULL);
 	assert(suffix != NULL);
@@ -98,7 +111,8 @@ xo_humanize_number (char *buf, size_t len, int64_t bytes,
 	}
 
 #define	SCALE2PREFIX(scale)	(&prefixes[(scale) << 1])
-	maxscale = 7;
+	int maxscale = 7;
+	size_t	baselen;
 
 	if (scale >= maxscale &&
 	    (scale & (HN_AUTOSCALE | HN_GETSCALE)) == 0)
@@ -118,12 +132,14 @@ xo_humanize_number (char *buf, size_t len, int64_t bytes,
 		scalable *= 100;
 		baselen = 2;		/* digit, prefix */
 	}
+
 	if (flags & HN_NOSPACE)
 		sep = "";
 	else {
 		sep = " ";
 		baselen++;
 	}
+
 	baselen += strlen(suffix);
 
 	/* Check if enough room for `x y' + suffix + `\0' */
