@@ -42,9 +42,12 @@
 #include <ctype.h>
 #include <wctype.h>
 #include <getopt.h>
-#include <langinfo.h>
 
 #include "xo_config.h"
+
+#ifdef HAVE_LANGINFO_H
+#include <langinfo.h>
+#endif /* HAVE_LANGINFO_H */
 
 #ifdef LIBXO_TEXT_ONLY		/* Turn off unneeded features */
 #undef LIBXO_NEED_MAP		/* No tag maps in text mode */
