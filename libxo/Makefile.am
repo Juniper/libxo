@@ -64,8 +64,8 @@ SED_OPTS=\
 -e '/extern int YYPARSE_DECL();/d' \
 -e 's/yydebug = yyn - .0./do {} while(0)/' \
 -e '/typedef int YYINT;/d' \
-+-e '/int yyparse (void .YYPARSE_PARAM);/d' \
-+-e 's/yyparse (void .YYPARSE_PARAM)/xo_xpath_yyparse (xo_xparse_data_t *xparse_data)/'
+-e '/int yyparse (void .YYPARSE_PARAM);/d' \
+-e 's/yyparse (void .YYPARSE_PARAM)/xo_xpath_yyparse (xo_xparse_data_t *xparse_data)/'
 
 xo_xpath.c xo_xpath.tab.h: xo_xpath.y
 	@echo "  YACC     xo_xpath.y ..."
