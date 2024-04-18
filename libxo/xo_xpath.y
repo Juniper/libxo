@@ -79,7 +79,7 @@
  * Literal tokens which _may_ preceed the multiplication operator
  */
 %token M_MULTIPLICATION_TEST_LAST 45 /* Magic marker: highest token number */
-%token L_ASTERISK	    46 "*"
+%token L_ASTERISK	    46 /* "*" */
 %token L_CBRACK		    47 "]"
 %token L_CPAREN		    48 ")"
 %token L_DOT		    49 "."
@@ -210,6 +210,9 @@
 #undef yylex
 #define yylex(_lvalp, _param) \
     xo_xpath_yylex(_param, _lvalp)
+
+#define yytname xo_xpath_yyname
+#define yypact xo_xpath_yydefred
 
 /*
  * Even if we don't want debug printfs, we still need the arrays with
@@ -829,9 +832,6 @@ xp_relational_expr :
 /* YYLAST -- Last index in YYTABLE.  */
 #define YYLAST ((sizeof(yytable) / sizeof(yytable[0])) - 1)
 #endif /* YYLAST */
-
-#define yytname xo_xpath_yyname
-#define yypact xo_xpath_yydefred
 
 const int xo_xparse_num_tokens = YYNTOKENS;
 const char *xo_xparse_keyword_string[YYNTOKENS];

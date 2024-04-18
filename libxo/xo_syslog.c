@@ -43,7 +43,6 @@
 #include <sys/syslog.h>
 #include <sys/uio.h>
 #include <sys/un.h>
-#include <netdb.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <paths.h>
@@ -99,13 +98,13 @@
 #define XO_DEFAULT_EID	32473	/* Fallback to the "example" number */
 #endif
 
-#ifndef HOST_NAME_MAX
+#ifndef XO_HOST_NAME_MAX
 #ifdef _POSIX_HOST_NAME_MAX
-#define HOST_NAME_MAX _POSIX_HOST_NAME_MAX
+#define XO_HOST_NAME_MAX _POSIX_HOST_NAME_MAX
 #else
-#define HOST_NAME_MAX 255
+#define XO_HOST_NAME_MAX 255
 #endif /* _POSIX_HOST_NAME_MAX */
-#endif /* HOST_NAME_MAX */
+#endif /* XO_HOST_NAME_MAX */
 
 static int xo_logfile = -1;		/* fd for log */
 static int xo_status;			/* connection xo_status */
@@ -550,7 +549,7 @@ xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
     } else
 	gettimeofday(&tv, NULL);
 
-    (void) localtime_r(&tv.tv_sec, &tm);
+    (void) localtime_r((time_t *) &tv.tv_sec, &tm);
 
     if (xo_logstat & LOG_PERROR) {
 	/*
@@ -584,13 +583,13 @@ xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
      * Add HOSTNAME; we rely on gethostname and don't fluff with
      * ip addresses.  Might need to revisit.....
      */
-    char hostname[HOST_NAME_MAX + 1];
+    char hostname[XO_HOST_NAME_MAX + 1];
     hostname[0] = '\0';
     if (xo_unit_test)
 	strcpy(hostname, "worker-host");
     else
 	(void) gethostname(hostname, sizeof(hostname) - 1);
-    hostname[HOST_NAME_MAX] = '\0'; /* Ensure NUL-terminated */
+    hostname[XO_HOST_NAME_MAX] = '\0'; /* Ensure NUL-terminated */
 
     xb.xb_curp += xo_snprintf(xb.xb_curp, xo_buf_left(&xb), "%s ",
 			      hostname[0] ? hostname : "-");
