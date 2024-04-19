@@ -159,7 +159,6 @@
 #include <ctype.h>
 #include <wctype.h>
 #include <getopt.h>
-#include <langinfo.h>
 
 #include "xo_config.h"
 #include "xo.h"
