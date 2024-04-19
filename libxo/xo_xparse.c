@@ -17,9 +17,9 @@
 #include <assert.h>
 #include <sys/param.h>
 
-#include <libxo/xo.h>
-#include <libxo/xo_encoder.h>
-#include <libxo/xo_buf.h>
+#include "xo.h"
+#include "xo_encoder.h"
+#include "xo_buf.h"
 
 #include "xo_xpath.tab.h"
 #include "xo_xparse.h"
@@ -742,7 +742,7 @@ xo_xparse_results (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
     }
 
     uint32_t deny_count = 0, abs_count = 0;
-    xo_xparse_node_id_t i;
+    uint32_t i;
     xo_xparse_node_id_t *paths = xdp->xd_paths;
 
     /*
@@ -753,7 +753,7 @@ xo_xparse_results (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
      * all nots: !one | !two | !three
      * all abs:  /one | /two | /three
      */
-    xo_xparse_node_id_t cur = xdp->xd_paths_cur;
+    uint32_t cur = xdp->xd_paths_cur;
     for (i = 0; i < cur; i++, paths++) {
 	xnp = xo_xparse_node(xdp, *paths);
 	if (xnp == NULL)

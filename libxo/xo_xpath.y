@@ -159,7 +159,6 @@
 #include <ctype.h>
 #include <wctype.h>
 #include <getopt.h>
-#include <langinfo.h>
 
 #include "xo_config.h"
 #include "xo.h"
@@ -213,6 +212,7 @@
 
 #define yytname xo_xpath_yyname
 #define yypact xo_xpath_yydefred
+#define yydebug xo_xpath_yydebug
 
 /*
  * Even if we don't want debug printfs, we still need the arrays with
