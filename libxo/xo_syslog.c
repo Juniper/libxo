@@ -68,6 +68,10 @@
 #include "xo_encoder.h"		/* For xo_realloc */
 #include "xo_buf.h"
 
+#ifdef HAVE_SYS_SYSCTL_H
+#include <sys/sysctl.h>
+#endif
+
 /*
  * SYSLOG (RFC 5424) requires an enterprise identifier.  This turns
  * out to be a fickle little issue.  For a single-vendor box, the
