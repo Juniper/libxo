@@ -8,14 +8,13 @@
 .\" # Phil Shafer, July 2014
 .\"
 .Dd February 23, 2023
-.Dt LIBXO 3
+.Dt LIBXO 7
 .Os
 .Sh NAME
 .Nm libxo
 .Nd description of libxo usage
 .Sh DESCRIPTION
-.Pp
-.Nm libxo
+.Nm
 is a software component that allows other software to generate a
 variety of output styles, including
 .Em text ,
@@ -24,7 +23,7 @@ variety of output styles, including
 and
 .Em HTML .
 Using
-.Nm libxo ,
+.Nm ,
 a single section of code provides formatting and structural
 information, allowing a run-time choice of which format to emit.
 Using a single section of code allows
@@ -38,16 +37,16 @@ parsing of the output content in reliable and robust ways, and
 future-proofs by allowing the addition of new fields without impacting
 parsing.
 .Pp
-.Nm libxo
+.Nm
 supports "plug-in" encoders, which allow new output styles to be
 developed independently, such as the "CSV" encoder, which creates
 Comma-Separated Values, suitable for spreadsheets and other common
 uses.
 See
-.Xr xo_csv
+.Xr xo_csv 7 .
 .Pp
 Command-line options are used to control
-.NM libxo 's
+.Nm Ap s
 operation and output style and features.
 These options begin with
 .Em --libxo
@@ -78,7 +77,7 @@ For example, the brief "X" option and the word "xml" both trigger XML
 output, while the "P" and "pretty" options will "pretty-print" the
 output, using indentation and multiple lines.
 Any of the following will execute
-.Xr df
+.Xr df 1
 with both the "xml" and "pretty" options:
 .Bl -bullet
 .It
@@ -93,7 +92,6 @@ df \-\-libxo=xml \-\-libxo pretty
 df \-\-libxo:XP
 .El
 .Sh EXAMPLES
-.Pp
 The following example shows the same content generated using multiple
 style options: text, XML, JSON, and HTML:
 .Bd -literal
@@ -163,17 +161,16 @@ applications with a suitable CSS file, such as
 /usr/share/libxo/xohtml.css which is used by
 .Xr xohtml 1 .
 .Sh SEE ALSO
-.Xr xo_options 7 ,
-.Xr libxo 3 ,
 .Xr xolint 1 ,
-.Xr xo_emit 3
+.Xr libxo 3 ,
+.Xr xo_emit 3 ,
+.Xr xo_options 7
 .Sh HISTORY
 The
-.Nm libxo
+.Nm
 library first appeared in
 .Fx 11.0 .
 .Sh AUTHORS
-.Nm libxo
+.Nm
 was written by
 .An Phil Shafer Aq Mt phil@freebsd.org .
-
