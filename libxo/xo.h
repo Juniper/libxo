@@ -20,6 +20,10 @@
 #ifndef INCLUDE_XO_H
 #define INCLUDE_XO_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <stdarg.h>
@@ -735,5 +739,9 @@ xo_map_add_file (xo_handle_t *xop, const char *fname);
 
 int
 xo_filter_add (xo_handle_t *xop, const char *vp);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* INCLUDE_XO_H */
