@@ -153,6 +153,8 @@ extern char etext;
 #error unknown thread-local setting
 #endif /* HAVE_THREADS_H */
 
+#define XO_FAKE_TOP_LEVEL_NAME "data"
+
 const char xo_version[] = LIBXO_VERSION;
 const char xo_version_extra[] = LIBXO_VERSION_EXTRA;
 static const char xo_default_format[] = "%s";
@@ -2233,6 +2235,7 @@ static xo_flag_mapping_t xo_xof_names[] = {
     { XOF_NO_LOCALE, "no-locale" },
     { XOF_RETAIN_NONE, "no-retain" },
     { XOF_NO_TOP, "no-top" },
+    { XOF_NO_TOP_LEVEL, "no-top-level" },
     { XOF_NOT_FIRST, "not-first" },
     { XOF_PRETTY, "pretty" },
     { XOF_RETAIN_ALL, "retain" },
@@ -8447,6 +8450,11 @@ xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
 	break;
 
     case XSS_TRANSITION(XSS_INIT, XSS_EMIT):
+	/* Missing a top-level container, so we must fake one */
+	if (!XOF_ISSET(xop, XOF_NO_TOP_LEVEL)) {
+	    xo_failure(xop, "emitting a field before a top-level tag");
+	    rc = xo_do_open_container(xop, flags, XO_FAKE_TOP_LEVEL_NAME);
+	}
 	break;
 
     case XSS_TRANSITION(XSS_OPEN_LEAF_LIST, XSS_EMIT):
