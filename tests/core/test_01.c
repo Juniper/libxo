@@ -85,6 +85,8 @@ main (int argc, char **argv)
     xo_set_info(NULL, info, -1);
     xo_set_flags(NULL, XOF_KEYS);
 
+    xo_emit("Blocks: {:block/%u}\n", 56);
+
     xo_open_container_h(NULL, "top-level");
 
     xo_emit("static {:type/ethernet} {:type/bridge} {:type/%4du} {:type/%3d}",
