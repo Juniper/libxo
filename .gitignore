@@ -44,3 +44,7 @@ xo_config.h.in
 xtest
 xtest.dSYM
 tests/w
+
+cscope.files
+cscope.out
+trash
