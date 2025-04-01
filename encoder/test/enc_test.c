@@ -11,13 +11,34 @@
 #include "xo.h"
 #include "xo_encoder.h"
 
+static void
+test_cleanup (char *buf, const char *value)
+{
+    char *bp;
+    const char *cp;
+
+    for (bp = buf, cp = value; cp && *cp; cp++, bp++) {
+	unsigned char ch = *cp;
+	if (ch >= 0x20 || ch == '\r' || ch == '\n' || ch == '\t')
+	    *bp = *cp;
+	else
+	    *bp = ' ';
+    }
+
+    *bp = '\0';
+}
+
 static int
 test_handler (XO_ENCODER_HANDLER_ARGS)
 {
     flags &= ~XOF_UTF8; /* Skip this flag, since it depends on terminal */
 
+    int len = value ? strlen(value) + 1 : 1;
+    char *clean = alloca(len);
+    test_cleanup(clean, value);
+
     printf("op %s: [%s] [%s] [%#llx]\n", xo_encoder_op_name(op),
-	   name ?: "", value ?: "", (unsigned long long) flags);
+	   name ?: "", clean, (unsigned long long) flags);
 
     return 0;
 }
