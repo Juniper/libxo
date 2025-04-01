@@ -203,6 +203,25 @@ main (int argc, char **argv)
     if (flags != 0)
 	xo_set_flags(NULL, flags);
 
+    xo_open_container("json-escape-sequences");
+    xo_emit("{L:quotation-mark}: {:quotation-mark/\"}\n");
+    xo_emit("{L:backslash}: {,escape-slash:backslash/%s}\n", "\\");
+    xo_emit("{L:slash}: {,escape-slash:slash/%s}\n", "/");
+    xo_emit("{L:slash-2}: {:slash2/%s}\n", "/");
+    xo_emit("{L:backspace}: {:backspace/%s}\n", "\b");
+    xo_emit("{L:form-feed}: {:form-feed/%s}\n", "\f");
+    xo_emit("{L:new-line}: {:new-line/%s}\n", "\n");
+    xo_emit("{L:carriage-return}: {:carriage-return/%s}\n", "\r");
+    xo_emit("L_horizontal-tab}: {:horizontal-tab/%s}\n", "\t");
+
+    for (i = 1; i < 0x20; i++) {
+	xo_open_instance("number");
+        xo_emit("Number: {:num/%d} (Hex: {:hex/%x}): {e:value/%c}\n", i, i, i);
+	xo_close_instance("number");
+    }
+
+    xo_close_container("json-escape-sequences");
+
     xo_open_list("entry");
 
     for (i = 0; i < count; i++) {
