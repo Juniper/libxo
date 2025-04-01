@@ -1,5 +1,173 @@
 <top>
   <data>
+    <json-escape-sequences>
+      <quotation-mark>"</quotation-mark>
+      <backslash>\</backslash>
+      <slash>/</slash>
+      <slash2>/</slash2>
+      <backspace> </backspace>
+      <form-feed> </form-feed>
+      <new-line>
+</new-line>
+      <carriage-return></carriage-return>
+      <horizontal-tab>	</horizontal-tab>
+      <number>
+        <num>1</num>
+        <hex>1</hex>
+        <value> </value>
+      </number>
+      <number>
+        <num>2</num>
+        <hex>2</hex>
+        <value> </value>
+      </number>
+      <number>
+        <num>3</num>
+        <hex>3</hex>
+        <value> </value>
+      </number>
+      <number>
+        <num>4</num>
+        <hex>4</hex>
+        <value> </value>
+      </number>
+      <number>
+        <num>5</num>
+        <hex>5</hex>
+        <value> </value>
+      </number>
+      <number>
+        <num>6</num>
+        <hex>6</hex>
+        <value> </value>
+      </number>
+      <number>
+        <num>7</num>
+        <hex>7</hex>
+        <value> </value>
+      </number>
+      <number>
+        <num>8</num>
+        <hex>8</hex>
+        <value> </value>
+      </number>
+      <number>
+        <num>9</num>
+        <hex>9</hex>
+        <value>	</value>
+      </number>
+      <number>
+        <num>10</num>
+        <hex>a</hex>
+        <value>
+</value>
+      </number>
+      <number>
+        <num>11</num>
+        <hex>b</hex>
+        <value> </value>
+      </number>
+      <number>
+        <num>12</num>
+        <hex>c</hex>
+        <value> </value>
+      </number>
+      <number>
+        <num>13</num>
+        <hex>d</hex>
+        <value></value>
+      </number>
+      <number>
+        <num>14</num>
+        <hex>e</hex>
+        <value> </value>
+      </number>
+      <number>
+        <num>15</num>
+        <hex>f</hex>
+        <value> </value>
+      </number>
+      <number>
+        <num>16</num>
+        <hex>10</hex>
+        <value> </value>
+      </number>
+      <number>
+        <num>17</num>
+        <hex>11</hex>
+        <value> </value>
+      </number>
+      <number>
+        <num>18</num>
+        <hex>12</hex>
+        <value> </value>
+      </number>
+      <number>
+        <num>19</num>
+        <hex>13</hex>
+        <value> </value>
+      </number>
+      <number>
+        <num>20</num>
+        <hex>14</hex>
+        <value> </value>
+      </number>
+      <number>
+        <num>21</num>
+        <hex>15</hex>
+        <value> </value>
+      </number>
+      <number>
+        <num>22</num>
+        <hex>16</hex>
+        <value> </value>
+      </number>
+      <number>
+        <num>23</num>
+        <hex>17</hex>
+        <value> </value>
+      </number>
+      <number>
+        <num>24</num>
+        <hex>18</hex>
+        <value> </value>
+      </number>
+      <number>
+        <num>25</num>
+        <hex>19</hex>
+        <value> </value>
+      </number>
+      <number>
+        <num>26</num>
+        <hex>1a</hex>
+        <value> </value>
+      </number>
+      <number>
+        <num>27</num>
+        <hex>1b</hex>
+        <value> </value>
+      </number>
+      <number>
+        <num>28</num>
+        <hex>1c</hex>
+        <value> </value>
+      </number>
+      <number>
+        <num>29</num>
+        <hex>1d</hex>
+        <value> </value>
+      </number>
+      <number>
+        <num>30</num>
+        <hex>1e</hex>
+        <value> </value>
+      </number>
+      <number>
+        <num>31</num>
+        <hex>1f</hex>
+        <value> </value>
+      </number>
+    </json-escape-sequences>
     <entry>
       <name>xx-00000000</name>
       <inode>12</inode>
