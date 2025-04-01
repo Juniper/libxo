@@ -15,6 +15,7 @@ particular output styles:
    c   colon           A colon (":") is appended after the label
    d   display         Only emit field for display styles (text/HTML)
    e   encoding        Only emit for encoding styles (XML/JSON)
+  \    escape-slash    Escape forward slashes (JSON)
    g   gettext         Call gettext on field's render content
    h   humanize (hn)   Format large numbers in human-readable style
   \    hn-space        Humanize: Place space between numeric and unit
@@ -112,7 +113,7 @@ The Encoding Modifier ({e:})
 
 .. index:: Field Modifiers; Encoding
 
-The encoding modifier indicated the field should only be generated for
+The encoding modifier indicates the field should only be generated for
 the encoding output styles, XML and JSON::
 
     EXAMPLE:
@@ -124,6 +125,20 @@ the encoding output styles, XML and JSON::
 
 The encoding modifier is the opposite of the display modifier, and
 they are often used to give to distinct views of the underlying data.
+
+The escape-slash Modifier
+++++++++++++++++++++++++++++
+
+.. index:: Field Modifiers; Escaping
+
+The escape-slash modifier indicates that if the field is emitted in
+JSON style, any forward slashes ('/') should be escaped.
+
+    EXAMPLE:
+        xo_emit("{L:Tag}{:tag}\\n", "<tag/>");
+
+:RFC:`7159` allows optional escaping of forward slashes to avoid
+circumstances where a slash may be filtered, such as HTML.
 
 .. index:: Field Modifiers; Gettext
 .. _gettext-modifier:
