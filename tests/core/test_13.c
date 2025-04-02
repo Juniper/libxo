@@ -203,6 +203,26 @@ main (int argc, char **argv)
     if (flags != 0)
 	xo_set_flags(NULL, flags);
 
+
+    xo_open_container("doc-examples");
+
+    int tcount = 1234;
+    const char *tname = "goodname";
+
+   /* 8 columns of output, padded with zeroes */
+   xo_emit("[{:count/%.8d}]\n", tcount);  /* "[00001234]" */
+
+   /* 12 columns of output, the last 8 are padded with zeroes */
+   xo_emit("[{:count/%12.8d}]\n", tcount);  /* "[    00001234]" */
+
+   /* 8 columns of output; up to the first 20 bytes of 'name' are inspected */
+   xo_emit("[{:name/%.8.20s}]\n", tname);  /* "[goodname]" */
+
+   /* Same, but with arguments */
+   xo_emit("[{:name/%.*.*s}]\n", 8, 20, tname);  /* "[goodname]" */
+
+    xo_close_container("doc-examples");
+
     xo_open_container("json-escape-sequences");
     xo_emit("{L:quotation-mark}: {:quotation-mark/\"}\n");
     xo_emit("{L:backslash}: {,escape-slash:backslash/%s}\n", "\\");
