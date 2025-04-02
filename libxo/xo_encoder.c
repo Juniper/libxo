@@ -363,7 +363,7 @@ xo_encoder_init (xo_handle_t *xop, const char *name)
     if (xep == NULL) {
 	xep = xo_encoder_discover(name);
 	if (xep == NULL) {
-	    xo_failure(xop, "encoder not founde: %s", name);
+	    xo_failure(xop, "encoder not found: %s", name);
 	    return -1;
 	}
     }
