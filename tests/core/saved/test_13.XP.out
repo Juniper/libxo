@@ -1,5 +1,11 @@
 <top>
   <data>
+    <doc-examples>
+      <count>00001234</count>
+      <count>00001234</count>
+      <name>goodname</name>
+      <name>goodname</name>
+    </doc-examples>
     <json-escape-sequences>
       <quotation-mark>"</quotation-mark>
       <backslash>\</backslash>
