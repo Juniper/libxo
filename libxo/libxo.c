@@ -4868,6 +4868,9 @@ xo_format_value (xo_handle_t *xop, const char *name, ssize_t nlen,
     int pretty = XOF_ISSET(xop, XOF_PRETTY);
     int quote;
 
+    /* Passing NULL to memcpy is undefined behavior, so make a fake here */
+    const char *rname = name ?: "";
+
     /*
      * Before we emit a value, we need to know that the frame is ready.
      */
@@ -4881,7 +4884,7 @@ xo_format_value (xo_handle_t *xop, const char *name, ssize_t nlen,
 	if ((xsp->xs_flags & (XSF_EMIT | XSF_EMIT_KEY))
 	    || !(xsp->xs_flags & XSF_EMIT_LEAF_LIST)) {
 	    char nbuf[nlen + 1];
-	    memcpy(nbuf, name, nlen);
+	    memcpy(nbuf, rname, nlen);
 	    nbuf[nlen] = '\0';
 
 	    ssize_t rc = xo_transition(xop, 0, nbuf, XSS_EMIT_LEAF_LIST);
@@ -4905,7 +4908,7 @@ xo_format_value (xo_handle_t *xop, const char *name, ssize_t nlen,
 
 	} else if (!(xsp->xs_flags & XSF_EMIT_KEY)) {
 	    char nbuf[nlen + 1];
-	    memcpy(nbuf, name, nlen);
+	    memcpy(nbuf, rname, nlen);
 	    nbuf[nlen] = '\0';
 
 	    ssize_t rc = xo_transition(xop, 0, nbuf, XSS_EMIT);
@@ -4923,7 +4926,7 @@ xo_format_value (xo_handle_t *xop, const char *name, ssize_t nlen,
 	if ((xsp->xs_flags & XSF_EMIT_LEAF_LIST)
 	    || !(xsp->xs_flags & XSF_EMIT)) {
 	    char nbuf[nlen + 1];
-	    memcpy(nbuf, name, nlen);
+	    memcpy(nbuf, rname, nlen);
 	    nbuf[nlen] = '\0';
 
 	    ssize_t rc = xo_transition(xop, 0, nbuf, XSS_EMIT);
