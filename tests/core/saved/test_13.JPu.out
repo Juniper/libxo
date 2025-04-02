@@ -1,6 +1,12 @@
 {
   "top": {
     "data": {
+      "doc_examples": {
+        "count": 00001234,
+        "count": 00001234,
+        "name": "goodname",
+        "name": "goodname"
+      },
       "json_escape_sequences": {
         "quotation_mark": "\"",
         "backslash": "\\",
