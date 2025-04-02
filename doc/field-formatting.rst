@@ -79,6 +79,11 @@ padding with spaces if the number of bytes is exhausted.
 
 `libxo` will not dereference memory beyond the given number of bytes.
 
+For the "data" style encodings (XML, JSON), the first group will be
+ignored, since whitespace padding is not desirable in those encodings.
+The second and third will not be ignored, since `libxo` must respect
+floating point precision, leading zeros, and string lengths.
+
 ::
 
    /* 8 columns of output, padded with zeroes */
