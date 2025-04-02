@@ -1,4 +1,24 @@
 <div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="count">00001234</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="count">    00001234</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="name">goodname</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="name">goodname</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
   <div class="label">quotation-mark</div>
   <div class="text">: </div>
   <div class="data" data-tag="quotation-mark">"</div>
