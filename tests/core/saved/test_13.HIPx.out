@@ -1,4 +1,24 @@
 <div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="count" data-xpath="/top/data/doc-examples/count">00001234</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="count" data-xpath="/top/data/doc-examples/count">    00001234</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="name" data-xpath="/top/data/doc-examples/name">goodname</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="name" data-xpath="/top/data/doc-examples/name">goodname</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
   <div class="label">quotation-mark</div>
   <div class="text">: </div>
   <div class="data" data-tag="quotation-mark" data-xpath="/top/data/json-escape-sequences/quotation-mark">"</div>
