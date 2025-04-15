@@ -236,7 +236,9 @@ main (int argc, char **argv)
 
     for (i = 1; i < 0x20; i++) {
 	xo_open_instance("number");
-        xo_emit("Number: {:num/%d} (Hex: {:hex/%x}): {e:value/%c}\n", i, i, i);
+        xo_emit("Number: {:num/%d} (Hex: {:hex/%x}): {e:value/%c}"
+		"{e,escape-private:pvalue/%c}{e,escape-square:svalue/%c}\n",
+		i, i, i, i, i);
 	xo_close_instance("number");
     }
 
