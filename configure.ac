@@ -452,6 +452,13 @@ AC_ARG_WITH(encoder-dir,
 )
 AC_SUBST(XO_ENCODERDIR)
 
+AC_ARG_WITH(filter-dir,
+        [  --with-filter-dir=[DIR]           Specify location of filter libraries],
+        [XO_FILTERDIR=$withval],
+        [XO_FILTERDIR=$libdir/libxo]
+)
+AC_SUBST(XO_FILTERDIR)
+
 AC_ARG_WITH(share-dir,
         [  --with-share-dir=[DIR]           Specify location of shared files],
         [XO_SHAREDIR=$withval],
@@ -495,6 +502,7 @@ AC_CONFIG_FILES([
   libxo-config
   xohtml/xohtml.sh
   libxo/Makefile
+  filter/Makefile
   libxo/add.man
   bin/Makefile
   encoder/Makefile
@@ -531,6 +539,7 @@ AC_MSG_NOTICE([summary of build options:
   includedir:       ${XO_INCLUDEDIR}
   share dir:        ${XO_SHAREDIR}
   extensions dir:   ${XO_ENCODERDIR}
+  filter dir:       ${XO_FILTERDIR}
   oxtradoc dir:     ${SLAX_OXTRADOCDIR}
 
   compiler:         ${CC} (${HAVE_GCC:-no})
