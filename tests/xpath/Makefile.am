@@ -19,6 +19,8 @@ include ${top_srcdir}/warnings.mk
 AM_CFLAGS = \
     -I${top_srcdir} \
     -I${top_srcdir}/libxo \
+    -I${top_builddir}/filter \
+    -I${top_srcdir}/filter \
     ${WARNINGS}
 
 # Ick: maintained by hand!
@@ -32,7 +34,8 @@ xpath_01_test_SOURCES = xpath_01.c
 noinst_PROGRAMS = ${TEST_CASES:.c=.test}
 
 LDADD = \
-    ${top_builddir}/libxo/libxo.la
+    ${top_builddir}/libxo/libxo.la \
+    ${top_builddir}/filter/libxo_filter.la
 
 if HAVE_HUMANIZE_NUMBER
 LDADD += -lutil
