@@ -20,23 +20,12 @@
 #include <string.h>
 #include <sys/queue.h>
 #include <sys/param.h>
-#include <dlfcn.h>
 
 #include "xo_config.h"
 #include "xo.h"
 #include "xo_private.h"
 #include "xo_encoder.h"
-
-#ifdef HAVE_DLFCN_H
-#include <dlfcn.h>
-#if !defined(HAVE_DLFUNC)
-#define dlfunc(_p, _n)		dlsym(_p, _n)
-#endif
-#else /* HAVE_DLFCN_H */
-#define dlopen(_n, _f)		NULL /* Fail */
-#define dlsym(_p, _n)		NULL /* Fail */
-#define dlfunc(_p, _n)		NULL /* Fail */
-#endif /* HAVE_DLFCN_H */
+#include "xo_dyld.h"
 
 static void xo_encoder_setup (void); /* Forward decl */
 
@@ -208,50 +197,17 @@ xo_encoder_find (const char *name)
     return NULL;
 }
 
-/*
- * Return the encoder function for a specific shared library.  This is
- * really just a means of keeping the annoying gcc verbiage out of the
- * main code.  And that's only need because gcc breaks dlfunc's
- * promise that I can cast it's return value to a function: "The
- * precise return type of dlfunc() is unspecified; applications must
- * cast it to an appropriate function pointer type."
- */
-static xo_encoder_init_func_t
-xo_encoder_func (void *dlp)
-{
-    xo_encoder_init_func_t func;
-
-#if defined(HAVE_GCC) && __GNUC__ > 8
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-function-type"
-#endif /* HAVE_GCC */
-
-    func = (xo_encoder_init_func_t) dlfunc(dlp, XO_ENCODER_INIT_NAME);
-
-#if defined(HAVE_GCC) && __GNUC__ > 8
-#pragma GCC diagnostic pop	/* Restore previous setting */
-#endif /* HAVE_GCC */
-
-    return func;
-}
-
 static xo_encoder_node_t *
 xo_encoder_discover (const char *name)
 {
     void *dlp = NULL;
-    char buf[MAXPATHLEN];
     xo_string_node_t *xsp;
     xo_encoder_node_t *xep = NULL;
 
     XO_STRING_LIST_FOREACH(xsp, &xo_encoder_path) {
-	static const char fmt[] = "%s/%s.enc";
 	char *dir = xsp->xs_data;
-	size_t len = snprintf(buf, sizeof(buf), fmt, dir, name);
 
-	if (len > sizeof(buf))	/* Should not occur */
-	    continue;
-
-	dlp = dlopen((const char *) buf, RTLD_NOW);
+	dlp = xo_dyld_open(dir, name, "enc");
 	if (dlp)
 	    break;
     }
@@ -263,7 +219,7 @@ xo_encoder_discover (const char *name)
 	 */
 	xo_encoder_init_func_t func;
 
-	func = xo_encoder_func(dlp);
+	func = (xo_encoder_init_func_t) xo_dyld_func(dlp, XO_ENCODER_INIT_NAME);
 	if (func) {
 	    xo_encoder_init_args_t xei;
 
