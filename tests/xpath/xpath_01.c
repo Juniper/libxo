@@ -13,6 +13,8 @@
 #include <assert.h>
 #include <sys/param.h>
 
+#include "xo_config.h"
+
 #include <libxo/xo.h>
 #include <libxo/xo_encoder.h>
 #include <libxo/xo_buf.h>
@@ -88,6 +90,8 @@ main (int argc, char **argv)
 
     xo_xparse_node_t *xnp UNUSED;
 
+    xo_filter_setup_test();
+
     xo_filter_t *xfp = xo_filter_create(NULL);
     if (xfp == NULL)
 	xo_errx(1, "allocation of filter failed");
@@ -127,7 +131,15 @@ main (int argc, char **argv)
 	    if (debug)
 		xo_set_flags(xop, XOF_DEBUG);
 
-	    xo_filter_add(xop, cp);
+	    rc = xo_add_filter(xop, cp);
+
+	    printf("token: [[%s]]\n", xo_xparse_fancy_token_name(69));
+
+	    /*
+	     * We really _should_ fail here, but it's really wonderful
+	     * to see the dumps of the internal data structures, so we
+	     * ignore the return code an continue on.
+	     */
 
 	    int bad_horse[] = { C_DESCENDANT, 0 };
 
