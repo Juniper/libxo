@@ -62,7 +62,8 @@
 #include "xo_encoder.h"
 #include "xo_buf.h"
 #include "xo_explicit.h"
-#include "xo_filter.h"
+#include "xo_dyld.h"
+#include "../filter/xo_filter.h"
 
 /*
  * We ask wcwidth() to do an impossible job, really.  It's supposed to
@@ -438,6 +439,7 @@ static THREAD_LOCAL(int) xo_default_inited;
 static int xo_locale_inited;
 static const char *xo_program;
 static int xo_codeset_is_utf8;	/* Is stdout UTF-8? */
+static int filter_lib_loaded;
 
 /*
  * To allow libxo to be used in diverse environment, we allow the
@@ -657,6 +659,57 @@ xo_is_line_buffered (FILE *stream)
     return 0;
 }
 
+xo_filter_ops_t xo_filter_ops;	/* The global set of filter operations */
+
+#ifdef LIBXO_NEED_FILTERS
+static int
+xo_load_filter_lib (xo_handle_t *xop UNUSED)
+{
+    if (filter_lib_loaded)
+	return 0;
+
+    xo_filter_init_func_t func;
+    const char *reason = NULL;
+
+    void *dlp = xo_dyld_open(XO_FILTERDIR, "xo_filter", "lib");
+    if (dlp == NULL)
+	reason = "library not found";
+    else {
+	func = (xo_filter_init_func_t) xo_dyld_func(dlp, XO_FILTER_INIT_FUNC);
+
+	if (func == NULL)
+	    reason = "no init function";
+
+	else {
+	    int rc = func(XO_FILTER_OPS_VERSION, &xo_filter_ops);
+
+	    if (rc == -1)
+		reason = "init failed";
+	    else if (rc != XO_FILTER_OPS_VERSION)
+		reason = "version mismatch";
+	}
+    }
+
+    if (reason) {
+	xo_warnx("could not load filter library: %s", reason);
+	return -1;
+    }
+
+    filter_lib_loaded = TRUE;
+    return 0;
+}
+#endif /* LIBXO_NEED_FILTERS */
+
+/*
+ * Used only for test jigs, so avoid dynamic loading
+ */
+void
+xo_setup_filter_lib_test (int version, xo_filter_ops_t *ops)
+{
+    if (version == XO_FILTER_OPS_VERSION)
+	memcpy(&xo_filter_ops, ops, sizeof(*ops));
+}
+
 /*
  * Initialize an xo_handle_t, using both static defaults and
  * the global settings from the LIBXO_OPTIONS environment
@@ -864,6 +917,12 @@ static char xo_xml_amp[] = "&amp;";
 static char xo_xml_lt[] = "&lt;";
 static char xo_xml_gt[] = "&gt;";
 static char xo_xml_quot[] = "&quot;";
+static char xo_xml_square[] = { 0xE2, 0x96, 0xA1, 0 };
+
+#define XO_XML_ESCAPE_BINARY_UNICODE_BASE 0xe000
+#define XO_XML_ESCAPE_BINARY_UNICODE_END 0xe100
+#define XO_XML_ESCAPE_BINARY_UNICODE "&#x%04x;"
+#define XO_XML_ESCAPE_BINARY_UNICODE_SIZE 8
 
 static ssize_t
 xo_escape_xml (xo_buffer_t *xbp, ssize_t len, xo_xff_flags_t flags)
@@ -907,6 +966,15 @@ xo_escape_xml (xo_buffer_t *xbp, ssize_t len, xo_xff_flags_t flags)
     if (delta == 0 && lost == 0) /* Nothing to escape; bail */
 	return len;
 
+    int square = !lost ? 0 : (flags & XFF_ESC_SQUARE) ? 1 : 0;
+    if (square)
+	delta += lost * (sizeof(xo_xml_square) - 2);
+    int private = !lost ? 0 : (flags & XFF_ESC_PRIVATE) ? 1 : 0;
+
+    if (private)
+	delta += lost * (XO_XML_ESCAPE_BINARY_UNICODE_SIZE - 1);
+    char private_buffer[XO_XML_ESCAPE_BINARY_UNICODE_SIZE + 1];
+
     if (!xo_buf_has_room(xbp, delta)) /* No room; bail, but don't append */
 	return 0;
 
@@ -941,7 +1009,14 @@ xo_escape_xml (xo_buffer_t *xbp, ssize_t len, xo_xff_flags_t flags)
 		break;
 
 	    default:
-		ih = ' ';
+		if (square)
+		    sp = xo_xml_square;
+		else if (private) {
+		    snprintf(private_buffer, sizeof(private_buffer),
+			     XO_XML_ESCAPE_BINARY_UNICODE, (unsigned) ch);
+		    sp = private_buffer;
+		} else
+		    ih = ' ';
 	    }
 
 	    if (ih)
@@ -974,7 +1049,7 @@ xo_escape_xml (xo_buffer_t *xbp, ssize_t len, xo_xff_flags_t flags)
  *            %x75 4HEXDIG )  ; uXXXX                U+XXXX
  */
 static ssize_t
-xo_escape_json (xo_buffer_t *xbp, ssize_t len, xo_xff_flags_t flags UNUSED)
+xo_escape_json (xo_buffer_t *xbp, ssize_t len, xo_xff_flags_t flags)
 {
     ssize_t delta = 0;
     char *cp, *ep, *ip;
@@ -2677,11 +2752,8 @@ xo_set_options (xo_handle_t *xop, const char *input)
 	    } else if (xo_streq(cp, "filter")) {
 		if (vp == NULL)
 		    xo_failure(xop, "missing value for filter option");
-		else {
-		    rc = xo_filter_add(xop, vp);
-		    if (rc)
-			xo_warnx("invalid filter expression: '%s'", vp);
-		}
+		else
+		    rc = xo_add_filter(xop, vp); /* Reports its own errors */
 
 	    } else {
 		xo_warnx("unknown libxo option value: '%s'", cp);
@@ -3827,7 +3899,9 @@ xo_do_format_field (xo_handle_t *xop, xo_buffer_t *xbp,
 		    case XO_STYLE_XML:
 			if (flags & XFF_TRIM_WS)
 			    columns = rc = xo_trim_ws(xbp, rc);
-			/* FALLTHRU */
+			rc = xo_escape_xml(xbp, rc, flags);
+			break;
+
 		    case XO_STYLE_HTML:
 			rc = xo_escape_xml(xbp, rc, (flags & XFF_ATTR));
 			break;
@@ -3835,7 +3909,7 @@ xo_do_format_field (xo_handle_t *xop, xo_buffer_t *xbp,
 		    case XO_STYLE_JSON:
 			if (flags & XFF_TRIM_WS)
 			    columns = rc = xo_trim_ws(xbp, rc);
-			rc = xo_escape_json(xbp, rc, 0);
+			rc = xo_escape_json(xbp, rc, flags);
 			break;
 
 		    case XO_STYLE_SDPARAMS:
@@ -4846,17 +4920,28 @@ xo_filter_data_get (xo_handle_t *xop UNUSED, int create UNUSED)
 }
 
 int
-xo_filter_add (xo_handle_t *xop UNUSED, const char *input UNUSED)
+xo_add_filter (xo_handle_t *xop UNUSED, const char *input UNUSED)
 {
+    int rc = -1;
+
 #ifdef LIBXO_NEED_FILTERS
     xop = xo_default(xop);
 
+    rc = xo_load_filter_lib(xop); /* Reports its own error */
+    if (rc)
+	return rc;
+
     XOF_SET(xop, XOF_FILTER); /* Activate filtering */
 
-    return xo_filter_add_one(xop, input);
+    rc = xo_filter_add_one(xop, input);
+    if (rc)
+	xo_warnx("libxo could not add the requested filter");
+
 #else /* LIBXO_NEED_FILTERS */
-    return 0;
+    xo_warnx("libxo filtering is not enabled");
 #endif /* LIBXO_NEED_FILTERS */
+
+    return rc;
 }
 
 static void
@@ -4903,7 +4988,8 @@ xo_format_value (xo_handle_t *xop, const char *name, ssize_t nlen,
     } else if (flags & XFF_KEY) {
 	/* Emitting a 'k' (key) field */
 	if ((xsp->xs_flags & XSF_EMIT) && !(flags & XFF_DISPLAY_ONLY)) {
-	    xo_failure(xop, "key field emitted after normal value field: '%.*s'",
+	    xo_failure(xop,
+		       "key field emitted after normal value field: '%.*s'",
 		       nlen, name);
 
 	} else if (!(xsp->xs_flags & XSF_EMIT_KEY)) {
@@ -5981,7 +6067,9 @@ static xo_flag_mapping_t xo_modifier_names[] = {
     { XFF_COMMA, "comma" },
     { XFF_DISPLAY_ONLY, "display" },
     { XFF_ENCODE_ONLY, "encoding" },
+    { XFF_ESC_PRIVATE, "escape-private" },
     { XFF_ESC_SLASH, "escape-slash" },
+    { XFF_ESC_SQUARE, "escape-square" },
     { XFF_GT_FIELD, "gettext" },
     { XFF_HUMANIZE, "humanize" },
     { XFF_HUMANIZE, "hn" },
