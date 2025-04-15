@@ -10,7 +10,7 @@
 
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = bin libxo xo xopo xolint xohtml tests doc encoder
+SUBDIRS = bin filter libxo xo xopo xolint xohtml tests doc encoder
 bin_SCRIPTS=libxo-config
 dist_doc_DATA = Copyright
 
