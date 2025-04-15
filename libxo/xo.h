@@ -736,6 +736,6 @@ int
 xo_map_add_file (xo_handle_t *xop, const char *fname);
 
 int
-xo_filter_add (xo_handle_t *xop, const char *vp);
+xo_add_filter (xo_handle_t *xop, const char *vp);
 
 #endif /* INCLUDE_XO_H */
