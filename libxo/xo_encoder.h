@@ -53,6 +53,9 @@ typedef unsigned long long xo_xff_flags_t;
 #define XFF_GT_PLURAL	(1<<20)	/* Call dngettext to find plural form */
 #define XFF_ARGUMENT	(1<<21)	/* Content provided via argument */
 #define XFF_ESC_SLASH	(1<<22)	/* Escape a forward slash in a JSON string */
+#define XFF_ESC_SQUARE	(1<<23)	/* Escape XML control chars to UTF8 square */
+
+#define XFF_ESC_PRIVATE (1<<24)	/* Escape XML ctrl chars as private (0xe000) */
 
 /* Flags to turn off when we don't want i18n processing */
 #define XFF_GT_FLAGS (XFF_GT_FIELD | XFF_GT_PLURAL)
