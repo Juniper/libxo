@@ -133,8 +133,6 @@ main (int argc, char **argv)
 
 	    rc = xo_add_filter(xop, cp);
 
-	    printf("token: [[%s]]\n", xo_xparse_fancy_token_name(69));
-
 	    /*
 	     * We really _should_ fail here, but it's really wonderful
 	     * to see the dumps of the internal data structures, so we
