@@ -706,8 +706,10 @@ xo_load_filter_lib (xo_handle_t *xop UNUSED)
 void
 xo_setup_filter_lib_test (int version, xo_filter_ops_t *ops)
 {
-    if (version == XO_FILTER_OPS_VERSION)
+    if (version == XO_FILTER_OPS_VERSION) {
 	memcpy(&xo_filter_ops, ops, sizeof(*ops));
+	filter_lib_loaded = TRUE;
+    }
 }
 
 /*
