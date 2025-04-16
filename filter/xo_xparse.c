@@ -600,8 +600,8 @@ xo_xparse_feature_warn_one_node (const char *tag, xo_xparse_data_t *xdp UNUSED,
 	if (tname == NULL)
 	     tname = "(unknown)";
 
-	xo_xparse_warn(xdp, "%s%sxpath feature is unsupported: %s (%u)",
-		       tag ?: "", tag ? ": " : "", tname, (unsigned) type);
+	xo_xparse_warn(xdp, "%s%sxpath feature is unsupported: %s",
+		       tag ?: "", tag ? ": " : "", tname);
 	map[type] = 0;		/* Turn off, now that the user knows */
 	return 1;
     }
