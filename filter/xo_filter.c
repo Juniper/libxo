@@ -1379,6 +1379,14 @@ xo_eval_compare (XO_EVAL_OP_ARGS)
 	break;
 
     default:
+	if (xop != NULL && (xo_get_flags(xop) & XOF_WARN)) {
+	    static const char unk[] = "(unknown)";
+	    const char *lname = xo_xparse_token_name(left.xev_type) ?: unk;
+	    const char *rname = xo_xparse_token_name(right.xev_type) ?: unk;
+	    xo_failure(xop, "filter: eval: unsupported type comparison (%s/%s)",
+		       lname, rname);
+	}
+
 	return xo_eval_value_invalid();
     }
 
