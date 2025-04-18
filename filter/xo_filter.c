@@ -1354,6 +1354,18 @@ xo_eval_compare (XO_EVAL_OP_ARGS)
 	rc = (left.xev_float > fval) ? 1 : (left.xev_float < fval) ? -1 : 0;
 	break;
 
+    case TYPE_CMP(C_INT64, C_FLOAT):
+    case TYPE_CMP(C_UINT64, C_FLOAT):
+	fval = xo_eval_cast_float(xfp, left);
+	rc = (fval > right.xev_float) ? 1 : (fval < right.xev_float) ? -1 : 0;
+	break;
+
+    case TYPE_CMP(C_FLOAT, C_INT64):
+    case TYPE_CMP(C_FLOAT, C_UINT64):
+	fval = xo_eval_cast_float(xfp, right);
+	rc = (left.xev_float > fval) ? 1 : (left.xev_float < fval) ? -1 : 0;
+	break;
+
     case TYPE_CMP(C_BOOLEAN, C_BOOLEAN):
     case TYPE_CMP(C_INT64, C_BOOLEAN):
     case TYPE_CMP(C_BOOLEAN, C_INT64):
