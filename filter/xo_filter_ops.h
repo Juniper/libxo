@@ -62,15 +62,15 @@ typedef int (*xo_filter_open_field_func_t)(XO_FILTER_OPEN_FIELD_SIGNATURE);
 
 typedef int (*xo_filter_open_instance_func_t)(XO_FILTER_OPEN_INSTANCE_SIGNATURE);
 
+#define XO_FILTER_PASSTHRU_ARGS xop, op, bufp, name, value, private, flags, func, xfp
+#define XO_FILTER_PASSTHRU_SIGNATURE XO_ENCODER_HANDLER_ARGS, xo_encoder_func_t func UNUSED,                      struct xo_filter_s *xfp UNUSED
+
+typedef int (*xo_filter_passthru_func_t)(XO_FILTER_PASSTHRU_SIGNATURE);
+
 #define XO_FILTER_STATUS_NAME_ARGS rc
 #define XO_FILTER_STATUS_NAME_SIGNATURE xo_filter_status_t rc UNUSED
 
 typedef const char * (*xo_filter_status_name_func_t)(XO_FILTER_STATUS_NAME_SIGNATURE);
-
-#define XO_FILTER_WHITEBOARD_ARGS xop, op, bufp, name, value, private, flags, func, xfp
-#define XO_FILTER_WHITEBOARD_SIGNATURE XO_ENCODER_HANDLER_ARGS, xo_encoder_func_t func UNUSED,                      struct xo_filter_s *xfp UNUSED
-
-typedef int (*xo_filter_whiteboard_func_t)(XO_FILTER_WHITEBOARD_SIGNATURE);
 typedef struct xo_filter_ops_s {
     int xfo_version;
     xo_filter_add_one_func_t xfo_filter_add_one_func;
@@ -83,8 +83,8 @@ typedef struct xo_filter_ops_s {
     xo_filter_open_container_func_t xfo_filter_open_container_func;
     xo_filter_open_field_func_t xfo_filter_open_field_func;
     xo_filter_open_instance_func_t xfo_filter_open_instance_func;
+    xo_filter_passthru_func_t xfo_filter_passthru_func;
     xo_filter_status_name_func_t xfo_filter_status_name_func;
-    xo_filter_whiteboard_func_t xfo_filter_whiteboard_func;
 } xo_filter_ops_t;
 
 extern xo_filter_ops_t xo_filter_ops;
@@ -192,6 +192,16 @@ xo_filter_open_instance (XO_FILTER_OPEN_INSTANCE_SIGNATURE)
     return 0;
 }
 
+static inline int
+xo_filter_passthru (XO_FILTER_PASSTHRU_SIGNATURE)
+{
+#ifdef LIBXO_NEED_FILTERS
+    if (xo_filter_ops.xfo_filter_passthru_func)
+        return xo_filter_ops.xfo_filter_passthru_func(XO_FILTER_PASSTHRU_ARGS);
+#endif /* LIBXO_NEED_FILTERS */
+    return 0;
+}
+
 /*
  * Turn a xo_filter_status_t into a string for debug output
  */
@@ -205,16 +215,6 @@ xo_filter_status_name (XO_FILTER_STATUS_NAME_SIGNATURE)
     return "unknown";
 }
 
-static inline int
-xo_filter_whiteboard (XO_FILTER_WHITEBOARD_SIGNATURE)
-{
-#ifdef LIBXO_NEED_FILTERS
-    if (xo_filter_ops.xfo_filter_whiteboard_func)
-        return xo_filter_ops.xfo_filter_whiteboard_func(XO_FILTER_WHITEBOARD_ARGS);
-#endif /* LIBXO_NEED_FILTERS */
-    return 0;
-}
-
 #define XO_FILTER_OPS_FUNCS \
     xo_filter_op_add_one, \
     xo_filter_op_close_container, \
@@ -226,8 +226,8 @@ xo_filter_whiteboard (XO_FILTER_WHITEBOARD_SIGNATURE)
     xo_filter_op_open_container, \
     xo_filter_op_open_field, \
     xo_filter_op_open_instance, \
+    xo_filter_op_passthru, \
     xo_filter_op_status_name, \
-    xo_filter_op_whiteboard, \
     /* end */
 
 #endif /* XO_FILTER_OPS_H */
