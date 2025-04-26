@@ -559,7 +559,7 @@ xo_xparse_dump_one_node (xo_xparse_data_t *xdp, xo_xparse_node_id_t id,
 	   xnp->xn_prev, (prev && prev->xn_next != id) ? " BAD" : "");
 }
 
-static void
+void
 xo_xparse_dump_node (xo_xparse_data_t *xdp, xo_xparse_node_id_t id, int indent)
 {
     xo_xparse_node_t *xnp;
@@ -796,7 +796,7 @@ xo_xparse_results (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
 	all_abs = "";
     }
 
-    XO_DBG(xdp->xd_xop, "xo: parse results: %u paths%s%s%s",
+    XO_DBG(xdp->xd_xop, "xo: parse results: %u paths%s%s",
 	   cur, all_nots, all_abs);
 }
 
