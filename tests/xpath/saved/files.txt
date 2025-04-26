@@ -30,3 +30,5 @@ xpath_01_08.1.fullpath.out
 xpath_01_08.1.fullpath.err
 xpath_01_08.2.fullpath.out
 xpath_01_08.2.fullpath.err
+xpath_01_09.1.fullpath.out
+xpath_01_09.1.fullpath.err
