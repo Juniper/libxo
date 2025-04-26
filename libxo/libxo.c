@@ -2542,6 +2542,61 @@ xo_set_color_map (xo_handle_t *xop, char *value)
 #endif /* LIBXO_TEXT_ONLY */
 }
 
+/*
+ * Return the maximum number of arguments in the string.  We really don't
+ * want to make something exact here, just a worst case thing.
+ */
+static int
+xo_options_to_argv_count (xo_handle_t *xop UNUSED, char *buf)
+{
+    int count = 1;
+    for (char *cp = buf; cp && *cp; cp = strchr(cp + 1, ','))
+	count += 1;
+
+    return count;
+}
+
+/*
+ * Carve the input string into argv-style arguments, processing things
+ * like backslashes
+ */
+static int
+xo_options_to_argv (xo_handle_t *xop UNUSED, char *input,
+		    int max_argc, char **argv)
+{
+    int ac = 0;
+    char *cp, *fp, *sp;
+
+    max_argc -= 1;		/* Save room for the NULL terminator */
+
+    for (cp = fp = sp = input; cp && *cp; cp++, fp++) {
+	char ch = *cp;
+	switch (ch) {
+
+	case '\\':
+	    ch = *++cp;
+	    break;
+
+	case ',':
+	    if (ac < max_argc)
+		argv[ac++] = sp; /* Record the argument */
+
+	    ch = '\0';	/* Terminate it */
+	    sp = fp + 1;		/* This is the start of the next one */
+	    break;
+	}
+
+	if (cp != fp || ch == '\0')
+	    *fp = ch;	/* Copy data if needed */
+    }
+
+    *fp = '\0';	/* Force termination */
+
+    argv[ac++] = sp;
+    argv[ac] = NULL;
+    return ac;
+}
+
 /**
  * Set the options for a handle using a string of options
  * passed in.  The input is a comma-separated set of names
@@ -2554,7 +2609,7 @@ xo_set_color_map (xo_handle_t *xop, char *value)
 int
 xo_set_options (xo_handle_t *xop, const char *input)
 {
-    char *cp, *ep, *vp, *np, *bp, *zp;
+    char *cp, *vp, *bp, *zp;
     int style = -1, new_style, rc = 0, final_rc = 0;
     ssize_t len;
     xo_xof_flags_t new_flag;
@@ -2663,13 +2718,18 @@ xo_set_options (xo_handle_t *xop, const char *input)
     bp = alloca(len);
     memcpy(bp, input, len);
 
-    for (cp = bp, ep = cp + len - 1; cp && cp < ep; cp = np) {
+    int argc = xo_options_to_argv_count(xop, bp);
+    char *argv[argc];
+
+    argc = xo_options_to_argv(xop, bp, argc, argv);
+    if (argc < 0)
+	return argc;
+
+    for (int i = 0; i < argc; i++) {
 	if (rc)
 	    final_rc = rc;
 
-	np = strchr(cp, ',');
-	if (np)
-	    *np++ = '\0';
+	cp = argv[i];
 
 	/*
 	 * "@foo" is a shorthand for "encoder=foo".  This is driven
