@@ -109,8 +109,9 @@ main (int argc, char **argv)
     char *cp, buf[BUFSIZ];
     char *field, *value;
     int rc;
+    int done = FALSE;
 
-    for (rc = 0;; rc = 0) {
+    for (rc = 0; !done; rc = 0) {
 	cp = fgets(buf, sizeof(buf), in);
 	if (cp == NULL)
 	    break;
@@ -203,6 +204,10 @@ main (int argc, char **argv)
 	    xo_xparse_init(xdp);
 
 	    rc = 0;
+	    break;
+
+	case 'q':
+	    done = TRUE;
 	    break;
 
 	default:
