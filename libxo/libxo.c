@@ -9385,7 +9385,7 @@ xo_encoder_handle (xo_handle_t *xop, xo_encoder_op_t op, xo_buffer_t *bufp,
     void *private = xo_get_private(xop);
 
     if (XOF_ISSET(xop, XOF_FILTER))
-	return xo_filter_whiteboard(xop, op, bufp, name, value,
+	return xo_filter_passthru(xop, op, bufp, name, value,
 				    private, flags, func, xo_filters(xop));
 
     return func(xop, op, bufp, name, value, private, flags);
