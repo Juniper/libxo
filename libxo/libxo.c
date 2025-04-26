@@ -4944,22 +4944,14 @@ xo_map_add_file (xo_handle_t *xop UNUSED, const char *fname UNUSED)
 }
 
 /*
- * Define the xo_filter* functions exposed by the API, even if the
- * feature is turned off, so linking against a non-NEED_FILTERS
- * version of the library will work.
+ * Define the filter-related functions exposed by the API.  The filter
+ * library is dynamically loaded and needs these functions to keep its
+ * data in our handle.  If compiled without LIBXO_NEED_FILTERS, these
+ * turn into NULL functions that will allow the filter related code to
+ * be optimized out.
  */
-static inline xo_filter_t *
-xo_filters (xo_handle_t *xop UNUSED)
-{
-#ifdef LIBXO_NEED_FILTERS
-    return xop->xo_filters;
-#else /* LIBXO_NEED_FILTERS */
-    return NULL;
-#endif /* LIBXO_NEED_FILTERS */
-}
-
 void
-xo_filter_data_set (xo_handle_t *xop UNUSED, struct xo_filter_s *xfp UNUSED)
+xo_set_filter_data (xo_handle_t *xop UNUSED, struct xo_filter_s *xfp UNUSED)
 {
 #ifdef LIBXO_NEED_FILTERS
     xop = xo_default(xop);
@@ -4968,13 +4960,26 @@ xo_filter_data_set (xo_handle_t *xop UNUSED, struct xo_filter_s *xfp UNUSED)
 }
 
 struct xo_filter_s *
-xo_filter_data_get (xo_handle_t *xop UNUSED, int create UNUSED)
+xo_get_filter_data (xo_handle_t *xop UNUSED, int create UNUSED)
 {
 #ifdef LIBXO_NEED_FILTERS
     xop = xo_default(xop);
     if (xop->xo_filters == NULL && create)
 	xop->xo_filters = xo_filter_create(xop);
 
+    return xop->xo_filters;
+#else /* LIBXO_NEED_FILTERS */
+    return NULL;
+#endif /* LIBXO_NEED_FILTERS */
+}
+
+/*
+ * This one is just a convenience function for the code in this file
+ */
+static inline xo_filter_t *
+xo_filters (xo_handle_t *xop UNUSED)
+{
+#ifdef LIBXO_NEED_FILTERS
     return xop->xo_filters;
 #else /* LIBXO_NEED_FILTERS */
     return NULL;
