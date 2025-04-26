@@ -11,8 +11,8 @@ get_status
 open_container
 open_field
 open_instance
+passthru
 status_name
-whiteboard
 '
 
 comment_add_one="Add a filter (xpath) to our filtering mechanism"
@@ -51,8 +51,8 @@ args_status_name="rc"
 signature_status_name="xo_filter_status_t rc UNUSED"
 return_value_status_name="\"unknown\""
 
-args_whiteboard="xop, op, bufp, name, value, private, flags, func, xfp"
-signature_whiteboard="XO_ENCODER_HANDLER_ARGS, xo_encoder_func_t func UNUSED,\
+args_passthru="xop, op, bufp, name, value, private, flags, func, xfp"
+signature_passthru="XO_ENCODER_HANDLER_ARGS, xo_encoder_func_t func UNUSED,\
                       struct xo_filter_s *xfp UNUSED"
 
 
