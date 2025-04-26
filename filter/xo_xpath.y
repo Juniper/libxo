@@ -566,7 +566,10 @@ xp_relative_location_path_optional :
 
 xpc_function_call :
 	T_FUNCTION_NAME L_OPAREN xpc_argument_list_optional L_CPAREN
-		{ $$ = xo_xparse_yyval(xparse_data, $1); }
+		{
+		    xo_xparse_node_set_contents(xparse_data, $1, $3);
+		    $$ = xo_xparse_yyval(xparse_data, $1);
+		}
 	;
 
 xpc_argument_list_optional :
@@ -583,8 +586,7 @@ xpc_argument_list :
 
 	| xpc_argument_list L_COMMA xpc_argument
 		{
-		    xo_xparse_node_set_next(xparse_data, $1, $2);
-		    xo_xparse_node_set_next(xparse_data, $2, $3);
+		    xo_xparse_node_set_next(xparse_data, $1, $3);
 		    $$ = xo_xparse_yyval(xparse_data, $1);
 		}
 	;
