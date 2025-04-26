@@ -166,7 +166,7 @@ xo_filter_op_create (xo_handle_t *xop)
 
     xo_xparse_init(&xfp->xf_xd);
 
-    xo_filter_data_set(xop, xfp);
+    xo_set_filter_data(xop, xfp);
 
     return xfp;
 }
@@ -199,7 +199,7 @@ xo_filter_op_destroy (xo_handle_t *xop, xo_filter_t *xfp)
 	}
     }
 
-    xo_filter_data_set(xop, NULL);
+    xo_set_filter_data(xop, NULL);
     xo_free(xfp);
 }
 
@@ -321,7 +321,7 @@ xo_filter_state_name (uint32_t state)
 static int
 xo_filter_op_add_one (xo_handle_t *xop, const char *input)
 {
-    xo_filter_t *xfp = xo_filter_data_get(xop, TRUE);
+    xo_filter_t *xfp = xo_get_filter_data(xop, TRUE);
     if (xfp == NULL)
 	return -1;
 
