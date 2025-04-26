@@ -2255,17 +2255,17 @@ xo_filter_dump_matches (xo_handle_t *xop, xo_filter_t *xfp)
 }
 
 /*
- * We use the whiteboard to stash content that can be reused.
+ * We use the passthru to pass content through to the encoder
  */
 static int
-xo_filter_op_whiteboard (XO_ENCODER_HANDLER_ARGS,
+xo_filter_op_passthru (XO_ENCODER_HANDLER_ARGS,
 		      xo_encoder_func_t func XO_UNUSED,
  		      struct xo_filter_s *xfp)
 {
     int rc = 0;
     xo_buffer_t *xbp = bufp;
 
-    XO_DBG(xop, "filter: entering whiteboard: %s: '%s'%s status: %s/%d",
+    XO_DBG(xop, "filter: entering passthru: %s: '%s'%s status: %s/%d",
 	   xo_encoder_op_name(op), name ?: "",
 	   (flags & XFF_KEY) ? " is-a-key" : "",
 	   xo_filter_status_name(xfp->xf_status), xfp->xf_status);
@@ -2314,7 +2314,7 @@ xo_filter_op_whiteboard (XO_ENCODER_HANDLER_ARGS,
     rc = func(xop, op, xbp, name, value, private, flags);
 
 
-    XO_DBG(xop, "filter: leaving whiteboard: %s: '%s'%s status: %s/%d",
+    XO_DBG(xop, "filter: leaving passthru: %s: '%s'%s status: %s/%d",
 	   xo_encoder_op_name(op), name ?: "",
 	   (flags & XFF_KEY) ? " is-a-key" : "",
 	   xo_filter_status_name(xfp->xf_status), xfp->xf_status);
