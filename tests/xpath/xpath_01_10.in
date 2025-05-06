@@ -1,0 +1,82 @@
+#run --libxo @fullpath
+#?two[starts-with(three, "n")]
+
+#?two[three - 5 == 5]
+?six
++five
++six
+=seven seventh
++eight
+=nine ninth
+-eight
+-six
+-five
++six
+=seven single-layer
++ten
+=four fourth
+-ten
+-six
++one
++two
+$three 10
+=value 10
+-two
++six
+=seven seventh
++six2
+=eight eighth
+-six2
+-six
++two
+$three 9
+=value 9
+-two
++two
+$three 8
+=value 8
+-two
++two
+$three 7
+=value 7
+-two
+#q
+
+#r
+#?two[(three + 3) div 4 == (10 - 2) mod 5]
++two
+$three 10
+=value 10
+-two
++two
+$three 9
+=value 9
+-two
++two
+$three 8
+=value 8
+-two
++two
+$three 7
+=value 7
+-two
+
++two
+$three ten
+=value 10
+-two
++two
+$three nine
+=value 9
+-two
++two
+$three eight
+=value 8
+-two
++two
+$three seven
+=value 7
+-two
+
+
+-one
