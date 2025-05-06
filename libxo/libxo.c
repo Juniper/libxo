@@ -188,6 +188,8 @@ typedef unsigned xo_xsf_flags_t; /* XSF_* flags */
 #define XSF_EMIT_KEY	(1<<6)	/* A key has been emitted */
 #define XSF_EMIT_LEAF_LIST (1<<7) /* A leaf-list field has been emitted */
 
+#define XSF_FILTER	(1<<8)	/* Process any filtering */
+
 /* These are the flags we propagate between markers and their parents */
 #define XSF_MARKER_FLAGS \
  (XSF_NOT_FIRST | XSF_CONTENT | XSF_EMIT | XSF_EMIT_KEY | XSF_EMIT_LEAF_LIST )
@@ -206,10 +208,13 @@ typedef unsigned xo_xsf_flags_t; /* XSF_* flags */
 typedef struct xo_stack_s {
     xo_xsf_flags_t xs_flags;	/* Flags for this frame */
     xo_state_t xs_state;	/* State for this stack frame */
+    xo_filter_status_t xs_fstatus; /* Filter status */
     xo_off_t xs_wb_off;		/* Offset of buffer before this level */
     char *xs_name;		/* Name (for XPath value) */
     char *xs_keys;		/* XPath predicate for any key fields */
 } xo_stack_t;
+
+#define XS_OFFSET_CLEAR -1	/* Used to make a "not in use" offset */
 
 /*
  * libxo supports colors and effects, for those who like them.
@@ -337,6 +342,11 @@ struct xo_handle_s {
 #define XOIF_UNITS_PENDING XOF_BIT(4) /* We have a units-insertion pending */
 #define XOIF_INIT_IN_PROGRESS XOF_BIT(5) /* Init of handle is in progress */
 #define XOIF_MADE_OUTPUT XOF_BIT(6)	 /* Have already made output */
+#ifdef LIBXO_NEED_FILTERS
+#define XOIF_FILTERING	XOF_BIT(7)	 /* Actively filtering (XOF_FILTER) */
+#else  /* LIBXO_NEED_FILTERS */
+#define XOIF_FILTERING 0	/* Allow the compiler to trim filter code */
+#endif /* LIBXO_NEED_FILTERS */
 
 /*
  * Normal printf has width and precision, which for strings operate as
@@ -582,6 +592,13 @@ xo_str_is_const (const char *str UNUSED)
 #else /* HAVE_ETEXT */
     return FALSE;
 #endif /* HAVE_ETEXT */
+}
+
+/* Get the current stack pointer */
+static inline xo_stack_t *
+xo_stack_cur (xo_handle_t *xop)
+{
+    return &xop->xo_stack[xop->xo_depth];
 }
 
 static int
@@ -4330,7 +4347,7 @@ xo_buf_append_div (xo_handle_t *xop, const char *class, xo_xff_flags_t flags,
 	xo_buf_append(pbp, "']", 2);
 
 	/* Now we record this predicate expression in the stack */
-	xo_stack_t *xsp = &xop->xo_stack[xop->xo_depth];
+	xo_stack_t *xsp = xo_stack_cur(xop);
 	ssize_t olen = xsp->xs_keys ? strlen(xsp->xs_keys) : 0;
 	ssize_t dlen = pbp->xb_curp - pbp->xb_bufp;
 
@@ -4693,7 +4710,7 @@ static void
 xo_stack_set_flags (xo_handle_t *xop)
 {
     if (XOF_ISSET(xop, XOF_NOT_FIRST)) {
-	xo_stack_t *xsp = &xop->xo_stack[xop->xo_depth];
+	xo_stack_t *xsp = xo_stack_cur(xop);
 
 	xsp->xs_flags |= XSF_NOT_FIRST;
 	XOF_CLEAR(xop, XOF_NOT_FIRST);
@@ -5000,6 +5017,14 @@ xo_add_filter (xo_handle_t *xop UNUSED, const char *input UNUSED)
 
     XOF_SET(xop, XOF_FILTER); /* Activate filtering */
 
+    /*
+     * The XOIF_FILTERING flag means we are _actively_ filtering,
+     * meaning the the flush routines should not be flushing data.
+     * When we start wanting to make output, we can turn this flag
+     * off.
+     */
+    XOIF_SET(xop, XOIF_FILTERING);
+
     rc = xo_filter_add_one(xop, input);
     if (rc)
 	xo_warnx("libxo could not add the requested filter");
@@ -5009,6 +5034,99 @@ xo_add_filter (xo_handle_t *xop UNUSED, const char *input UNUSED)
 #endif /* LIBXO_NEED_FILTERS */
 
     return rc;
+}
+
+/*
+ * We want our parent objects (on the stack) to be emitted, so that
+ * the filtered object has appropriate context.  We'll set their
+ * fstatus and offsets so that they'll be emitted.  Also turn off
+ * XOIF_FILTERING, so we know that we're not actively filtering.
+ *
+ * FYI: I'm using the "xo_filt_*" namespace for functions in this file
+ * to keep filter-related functions "together", but distinct from the
+ * _actual_ filtering code in xo_filter.[hc].
+ */
+static void
+xo_filt_mark_parents (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED,
+		      xo_filter_status_t fstatus UNUSED)
+{
+#ifdef LIBXO_NEED_FILTERS
+    if (!(xop->xo_flags & XOF_FILTER))
+	return;
+
+    xo_dbg(xop, "xo_filt_mark_parents: setting status to %u", fstatus);
+
+    for (xo_stack_t *xsp = xop->xo_stack; xsp <= cur; xsp++) {
+	xo_dbg(xop, "xo_filt_mark_parents: clearing offset %u, status",
+	       xsp->xs_wb_off, xsp->xs_fstatus);
+	xsp->xs_fstatus = fstatus;
+	xsp->xs_wb_off = XS_OFFSET_CLEAR;
+    }
+
+    XOIF_CLEAR(xop, XOIF_FILTERING);
+#endif /* LIBXO_NEED_FILTERS */
+}
+
+static void
+xo_filt_reset_parent (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED,
+		      xo_filter_status_t fstatus UNUSED,
+		      xo_filter_status_t next_fstatus UNUSED)
+{
+#ifdef LIBXO_NEED_FILTERS
+    if (!(xop->xo_flags & XOF_FILTER))
+	return;
+
+    xo_dbg(xop, "xo_filt_wipe_parent: wiping %p at %u, status %u",
+	   cur, cur->xs_wb_off, fstatus);
+
+    /* If the current status isn't FULL, we need to toss any output */
+    if (fstatus != XO_STATUS_FULL) {
+	/*
+	 * Reset the current offset to the current stack, but only after
+	 * doing some sanity checking.
+	 */
+	if (cur->xs_wb_off != XS_OFFSET_CLEAR) {
+	    xo_off_t off = xop->xo_data.xb_curp - xop->xo_data.xb_bufp;
+	    if (off > cur->xs_wb_off)
+		xop->xo_data.xb_curp = xop->xo_data.xb_bufp + cur->xs_wb_off;
+	}
+    }
+
+    cur->xs_wb_off = XS_OFFSET_CLEAR;
+
+    if (next_fstatus != XO_STATUS_FULL)
+	XOIF_SET(xop, XOIF_FILTERING);
+#endif /* LIBXO_NEED_FILTERS */
+}
+
+static inline int
+xo_filt_make_output (xo_handle_t *xop UNUSED, xo_filter_status_t fstatus)
+{
+#ifdef LIBXO_NEED_FILTERS
+    switch (fstatus) {
+    case XO_STATUS_ZERO:
+    case XO_STATUS_FULL:
+    case XO_STATUS_PRED:
+	return TRUE;
+    default:
+	return FALSE;
+    }
+#else /* LIBXO_NEED_FILTERS */
+    return TRUE;
+#endif /* LIBXO_NEED_FILTERS */
+
+}
+
+/*
+ * Should we avoid flushing the output buffer?  The two reasons to
+ * avoid this are:
+ * - we have an anchor in place and will need to shift the contents
+ * - we are filtering and may need to discard some of the buffered data
+ */
+static inline int
+xo_avoid_flushing (xo_handle_t *xop)
+{
+    return XOIF_ISSET(xop, XOIF_ANCHOR | XOIF_FILTERING);
 }
 
 static void
@@ -5026,7 +5144,7 @@ xo_format_value (xo_handle_t *xop, const char *name, ssize_t nlen,
     /*
      * Before we emit a value, we need to know that the frame is ready.
      */
-    xo_stack_t *xsp = &xop->xo_stack[xop->xo_depth];
+    xo_stack_t *xsp = xo_stack_cur(xop);
 
     if (flags & XFF_LEAF_LIST) {
 	/*
@@ -5046,7 +5164,7 @@ xo_format_value (xo_handle_t *xop, const char *name, ssize_t nlen,
 		xop->xo_stack[xop->xo_depth].xs_flags |= XSF_EMIT_LEAF_LIST;
 	}
 
-	xsp = &xop->xo_stack[xop->xo_depth];
+	xsp = xo_stack_cur(xop);
 	if (xsp->xs_name) {
 	    name = xsp->xs_name;
 	    nlen = strlen(name);
@@ -5070,7 +5188,7 @@ xo_format_value (xo_handle_t *xop, const char *name, ssize_t nlen,
 	    else
 		xop->xo_stack[xop->xo_depth].xs_flags |= XSF_EMIT_KEY;
 
-	    xsp = &xop->xo_stack[xop->xo_depth];
+	    xsp = xo_stack_cur(xop);
 	    xsp->xs_flags |= XSF_EMIT_KEY;
 	}
 
@@ -5088,7 +5206,7 @@ xo_format_value (xo_handle_t *xop, const char *name, ssize_t nlen,
 	    else
 		xop->xo_stack[xop->xo_depth].xs_flags |= XSF_EMIT;
 
-	    xsp = &xop->xo_stack[xop->xo_depth];
+	    xsp = xo_stack_cur(xop);
 	    xsp->xs_flags |= XSF_EMIT;
 	}
     }
@@ -5110,8 +5228,9 @@ xo_format_value (xo_handle_t *xop, const char *name, ssize_t nlen,
 	nlen = strlen(name);	/* Need new length for new name */
     }
 
+    xo_filter_status_t fstatus UNUSED = 0;
     if (!(flags & XFF_KEY))
-	xo_filter_open_field(xop, xo_filters(xop), name, nlen);
+	fstatus = xo_filter_open_field(xop, xo_filters(xop), name, nlen);
 
     const char *leader = xo_xml_leader_len(xop, name, nlen);
 
@@ -5195,7 +5314,7 @@ xo_format_value (xo_handle_t *xop, const char *name, ssize_t nlen,
 	 */
 	if (XOF_ISSET(xop, XOF_UNITS)) {
 	    XOIF_SET(xop, XOIF_UNITS_PENDING);
-	    xop->xo_units_offset = xop->xo_data.xb_curp -xop->xo_data.xb_bufp;
+	    xop->xo_units_offset = xop->xo_data.xb_curp - xop->xo_data.xb_bufp;
 	}
 
 	xo_data_append(xop, ">", 1);
@@ -5379,7 +5498,7 @@ xo_format_value (xo_handle_t *xop, const char *name, ssize_t nlen,
     }
 
     if (!(flags & XFF_KEY))
-	xo_filter_close_field(xop, xo_filters(xop), name, nlen);
+	fstatus = xo_filter_close_field(xop, xo_filters(xop), name, nlen);
 }
 
 static void
@@ -7247,7 +7366,7 @@ xo_do_emit_fields (xo_handle_t *xop, xo_field_info_t *fields,
 	flush = 1;
 
     /* If we don't have an anchor, write the text out */
-    if (flush && !XOIF_ISSET(xop, XOIF_ANCHOR)) {
+    if (flush && !xo_avoid_flushing(xop)) {
 	if (xo_flush_h(xop) < 0)
 	    rc = -1;
     }
@@ -7279,6 +7398,13 @@ xo_do_emit (xo_handle_t *xop, xo_emit_flags_t flags, const char *fmt)
 
     if (fmt == NULL)
 	return 0;
+
+    if (XOIF_ISSET(xop, XOIF_FILTERING)) {
+	/* If we're filtering and our status is DEAD, we can bail */
+	xo_stack_t *xsp = xo_stack_cur(xop);
+	if (xsp->xs_fstatus == XO_STATUS_DEAD)
+	    return 0;		/* Zero columns emitted */
+    }
 
     unsigned max_fields;
     xo_field_info_t *fields = NULL;
@@ -7654,7 +7780,9 @@ xo_attr (const char *name, const char *fmt, ...)
 
 static void
 xo_depth_change (xo_handle_t *xop, const char *name,
-		 int delta, int indent, xo_state_t state, xo_xsf_flags_t flags)
+		 int delta, int indent, xo_state_t state,
+		 xo_xsf_flags_t flags, xo_filter_status_t fstatus,
+		 xo_off_t starting_offset)
 {
     if (xo_style(xop) == XO_STYLE_HTML || xo_style(xop) == XO_STYLE_TEXT)
 	indent = 0;
@@ -7669,7 +7797,8 @@ xo_depth_change (xo_handle_t *xop, const char *name,
 	xo_stack_t *xsp = &xop->xo_stack[xop->xo_depth + delta];
 	xsp->xs_flags = flags;
 	xsp->xs_state = state;
-	xsp->xs_wb_off = xo_buf_offset(&xop->xo_data);
+	xsp->xs_fstatus = fstatus;
+	xsp->xs_wb_off = starting_offset;
 	xo_stack_set_flags(xop);
 
 	if (name == NULL)
@@ -7684,7 +7813,7 @@ xo_depth_change (xo_handle_t *xop, const char *name,
 	    return;
 	}
 
-	xo_stack_t *xsp = &xop->xo_stack[xop->xo_depth];
+	xo_stack_t *xsp = xo_stack_cur(xop);
 	if (XOF_ISSET(xop, XOF_WARN)) {
 	    const char *top = xsp->xs_name;
 	    if (top != NULL && name != NULL && !xo_streq(name, top)) {
@@ -7704,7 +7833,7 @@ xo_depth_change (xo_handle_t *xop, const char *name,
 	    }
 	}
 
-	xsp->xs_wb_off = 0;	/* Zero out this field */
+	xsp->xs_wb_off = XS_OFFSET_CLEAR; /* Clear this field */
 
 	if (xsp->xs_name) {
 	    xo_free(xsp->xs_name);
@@ -7776,13 +7905,30 @@ xo_do_open_container (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
     }
 
     name = xo_map_name(xop, name); /* Find mapped name, if any */
-    xo_filter_open_container(xop, xo_filters(xop), name);
+
+    xo_filter_status_t fstatus;
+    fstatus = xo_filter_open_container(xop, xo_filters(xop), name);
+
+    xo_stack_t *xsp = xo_stack_cur(xop);
+    xo_filter_status_t old_fstatus = xsp->xs_fstatus;
 
     const char *leader = xo_xml_leader(xop, name);
     flags |= xop->xo_flags;	/* Pick up handle flags */
 
+    /* Save the starting point, so depth_change can record it later */
+    xo_off_t starting_offset = xo_buf_offset(&xop->xo_data);
+
     switch (xo_style(xop)) {
     case XO_STYLE_XML:
+	if (fstatus == XO_STATUS_DEAD) /* No one wants this */
+	    break;
+
+	/*
+	 * If we are newly "full", then we need all our parents to be emitted
+	 */
+	if (fstatus == XO_STATUS_FULL && old_fstatus != XO_STATUS_FULL)
+	    xo_filt_mark_parents(xop, xsp, fstatus);
+
 	rc = xo_printf(xop, "%*s<%s%s", xo_indent(xop), "", leader, name);
 
 	if (xop->xo_attrs.xb_curp != xop->xo_attrs.xb_bufp) {
@@ -7833,7 +7979,7 @@ xo_do_open_container (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
     }
 
     xo_depth_change(xop, name, 1, 1, XSS_OPEN_CONTAINER,
-		    xo_stack_flags(flags));
+		    xo_stack_flags(flags), fstatus, starting_offset);
 
     return rc;
 }
@@ -7868,6 +8014,31 @@ xo_open_container_d (const char *name)
     return xo_open_container_hf(NULL, XOF_DTRT, name);
 }
 
+#if 0
+static int
+xo_process_filters (xo_handle_t *xop)
+{
+
+	/*
+	 * Are we filtering?  If so, look at if we're supposed to be
+	 * marking output; if so (XO_STATUS_FULL), make output, reset
+	 * the buffer, and clear any offsets higher up on the stack.
+	 * If not, back up and discard the output, using the stack to
+	 * find the appropriate offset.
+	 */
+	if ((flags & XSF_FILTER) && XOIF_ISSET(xop, XOIF_FILTERING)) {
+	    xo_filter_status_t status;
+
+	    status = xo_filter_get_status(xop, xo_filters(xop));
+	    if (status == XO_STATUS_FULL) {
+		xo_failure(xop, "depth_change: filter status full");
+	    } else {
+		xo_failure(xop, "depth_change: filter status not full");
+	    }
+	}
+#endif
+
+
 static int
 xo_do_close_container (xo_handle_t *xop, const char *name)
 {
@@ -7878,7 +8049,7 @@ xo_do_close_container (xo_handle_t *xop, const char *name)
     const char *pre_nl = "";
 
     if (name == NULL) {
-	xo_stack_t *xsp = &xop->xo_stack[xop->xo_depth];
+	xo_stack_t *xsp = xo_stack_cur(xop);
 
 	name = xsp->xs_name;
 	if (name) {
@@ -7899,13 +8070,22 @@ xo_do_close_container (xo_handle_t *xop, const char *name)
     const char *leader = xo_xml_leader(xop, name);
 
     /* Now that the work is done, let the filtering code know */
-    xo_filter_close_container(xop, xo_filters(xop), name);
+    xo_stack_t *xsp = xo_stack_cur(xop);
+    xo_filter_status_t old_fstatus = xsp->xs_fstatus;
+
+    xo_filter_status_t fstatus;
+    fstatus = xo_filter_close_container(xop, xo_filters(xop), name);
 
     switch (xo_style(xop)) {
     case XO_STYLE_XML:
-	xo_depth_change(xop, name, -1, -1, XSS_CLOSE_CONTAINER, 0);
-	rc = xo_printf(xop, "%*s</%s%s>%s", xo_indent(xop),
-		       "", leader, name, ppn);
+	xo_filt_reset_parent(xop, xsp, old_fstatus, fstatus);
+
+	xo_depth_change(xop, name, -1, -1, XSS_CLOSE_CONTAINER,
+			XSF_FILTER, fstatus, 0);
+
+	if (old_fstatus == 0 || old_fstatus == XO_STATUS_FULL)
+	    rc = xo_printf(xop, "%*s</%s%s>%s", xo_indent(xop),
+			   "", leader, name, ppn);
 	break;
 
     case XO_STYLE_JSON:
@@ -7914,21 +8094,21 @@ xo_do_close_container (xo_handle_t *xop, const char *name)
 	pre_nl = XOF_ISSET(xop, XOF_PRETTY) ? "\n" : "";
 	ppn = "";
 
-	xo_depth_change(xop, name, -1, -1, XSS_CLOSE_CONTAINER, 0);
+	xo_depth_change(xop, name, -1, -1, XSS_CLOSE_CONTAINER, 0, 0, 0);
 	rc = xo_printf(xop, "%s%*s}%s", pre_nl, xo_indent(xop), "", ppn);
 	xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
 	break;
 
     case XO_STYLE_HTML:
     case XO_STYLE_TEXT:
-	xo_depth_change(xop, name, -1, 0, XSS_CLOSE_CONTAINER, 0);
+	xo_depth_change(xop, name, -1, 0, XSS_CLOSE_CONTAINER, 0, 0, 0);
 	break;
 
     case XO_STYLE_SDPARAMS:
 	break;
 
     case XO_STYLE_ENCODER:
-	xo_depth_change(xop, name, -1, 0, XSS_CLOSE_CONTAINER, 0);
+	xo_depth_change(xop, name, -1, 0, XSS_CLOSE_CONTAINER, 0, 0, 0);
 	rc = xo_encoder_handle(xop, XO_OP_CLOSE_CONTAINER, NULL, name, NULL, 0);
 	break;
     }
@@ -7973,6 +8153,8 @@ xo_do_open_list (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
 
     name = xo_map_name(xop, name); /* Find mapped name, if any */
 
+    xo_off_t starting_offset = 0;
+
     switch (xo_style(xop)) {
     case XO_STYLE_JSON:
 
@@ -8015,7 +8197,7 @@ xo_do_open_list (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
     }
 
     xo_depth_change(xop, name, 1, indent, XSS_OPEN_LIST,
-		    XSF_LIST | xo_stack_flags(flags));
+		    XSF_LIST | xo_stack_flags(flags), 0, starting_offset);
 
     return rc;
 }
@@ -8057,7 +8239,7 @@ xo_do_close_list (xo_handle_t *xop, const char *name)
     const char *pre_nl = "";
 
     if (name == NULL) {
-	xo_stack_t *xsp = &xop->xo_stack[xop->xo_depth];
+	xo_stack_t *xsp = xo_stack_cur(xop);
 
 	name = xsp->xs_name;
 	if (name) {
@@ -8081,18 +8263,18 @@ xo_do_close_list (xo_handle_t *xop, const char *name)
 	    pre_nl = XOF_ISSET(xop, XOF_PRETTY) ? "\n" : "";
 	xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
 
-	xo_depth_change(xop, name, -1, -1, XSS_CLOSE_LIST, XSF_LIST);
+	xo_depth_change(xop, name, -1, -1, XSS_CLOSE_LIST, XSF_LIST, 0, 0);
 	rc = xo_printf(xop, "%s%*s]", pre_nl, xo_indent(xop), "");
 	xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
 	break;
 
     case XO_STYLE_ENCODER:
-	xo_depth_change(xop, name, -1, 0, XSS_CLOSE_LIST, XSF_LIST);
+	xo_depth_change(xop, name, -1, 0, XSS_CLOSE_LIST, XSF_LIST, 0, 0);
 	rc = xo_encoder_handle(xop, XO_OP_CLOSE_LIST, NULL, name, NULL, 0);
 	break;
 
     default:
-	xo_depth_change(xop, name, -1, 0, XSS_CLOSE_LIST, XSF_LIST);
+	xo_depth_change(xop, name, -1, 0, XSS_CLOSE_LIST, XSF_LIST, 0, 0);
 	xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
 	break;
     }
@@ -8170,7 +8352,7 @@ xo_do_open_leaf_list (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
     }
 
     xo_depth_change(xop, name, 1, indent, XSS_OPEN_LEAF_LIST,
-		    XSF_LIST | xo_stack_flags(flags));
+		    XSF_LIST | xo_stack_flags(flags), 0, 0);
 
     return rc;
 }
@@ -8182,7 +8364,7 @@ xo_do_close_leaf_list (xo_handle_t *xop, const char *name)
     const char *pre_nl = "";
 
     if (name == NULL) {
-	xo_stack_t *xsp = &xop->xo_stack[xop->xo_depth];
+	xo_stack_t *xsp = xo_stack_cur(xop);
 
 	name = xsp->xs_name;
 	if (name) {
@@ -8206,7 +8388,7 @@ xo_do_close_leaf_list (xo_handle_t *xop, const char *name)
 	    pre_nl = XOF_ISSET(xop, XOF_PRETTY) ? "\n" : "";
 	xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
 
-	xo_depth_change(xop, name, -1, -1, XSS_CLOSE_LEAF_LIST, XSF_LIST);
+	xo_depth_change(xop, name, -1, -1, XSS_CLOSE_LEAF_LIST, XSF_LIST, 0, 0);
 	rc = xo_printf(xop, "%s%*s]", pre_nl, xo_indent(xop), "");
 	xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
 	break;
@@ -8216,7 +8398,7 @@ xo_do_close_leaf_list (xo_handle_t *xop, const char *name)
 	/* FALLTHRU */
 
     default:
-	xo_depth_change(xop, name, -1, 0, XSS_CLOSE_LEAF_LIST, XSF_LIST);
+	xo_depth_change(xop, name, -1, 0, XSS_CLOSE_LEAF_LIST, XSF_LIST, 0, 0);
 	xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
 	break;
     }
@@ -8239,13 +8421,27 @@ xo_do_open_instance (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
     }
 
     name = xo_map_name(xop, name); /* Find mapped name, if any */
-    xo_filter_open_instance(xop, xo_filters(xop), name);
+
+    xo_stack_t *xsp = xo_stack_cur(xop);
+    xo_filter_status_t old_fstatus = xsp->xs_fstatus;
+
+    xo_filter_status_t fstatus;
+    fstatus = xo_filter_open_instance(xop, xo_filters(xop), name);
 
     const char *leader = xo_xml_leader(xop, name);
     flags |= xop->xo_flags;
 
     switch (xo_style(xop)) {
     case XO_STYLE_XML:
+	if (fstatus == XO_STATUS_DEAD) /* No one wants this */
+	    break;
+
+	/*
+	 * If we are newly "full", then we need all our parents to be emitted
+	 */
+	if (fstatus == XO_STATUS_FULL && old_fstatus != XO_STATUS_FULL)
+	    xo_filt_mark_parents(xop, xsp, fstatus);
+
 	rc = xo_printf(xop, "%*s<%s%s", xo_indent(xop), "", leader, name);
 
 	if (xop->xo_attrs.xb_curp != xop->xo_attrs.xb_bufp) {
@@ -8278,7 +8474,8 @@ xo_do_open_instance (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
 	break;
     }
 
-    xo_depth_change(xop, name, 1, 1, XSS_OPEN_INSTANCE, xo_stack_flags(flags));
+    xo_depth_change(xop, name, 1, 1, XSS_OPEN_INSTANCE,
+		    xo_stack_flags(flags), fstatus, 0);
 
     return rc;
 }
@@ -8323,7 +8520,7 @@ xo_do_close_instance (xo_handle_t *xop, const char *name)
     const char *pre_nl = "";
 
     if (name == NULL) {
-	xo_stack_t *xsp = &xop->xo_stack[xop->xo_depth];
+	xo_stack_t *xsp = xo_stack_cur(xop);
 
 	name = xsp->xs_name;
 	if (name) {
@@ -8343,34 +8540,42 @@ xo_do_close_instance (xo_handle_t *xop, const char *name)
 
     const char *leader = xo_xml_leader(xop, name);
 
-    /* Now that the work is done, let the filter code know we're done */
-    xo_filter_close_instance(xop, xo_filters(xop), name);
+    xo_stack_t *xsp = xo_stack_cur(xop);
+    xo_filter_status_t old_fstatus = xsp->xs_fstatus;
+
+    /* Let the filter code know we're closing */
+    xo_filter_status_t fstatus;
+    fstatus = xo_filter_close_instance(xop, xo_filters(xop), name);
 
     switch (xo_style(xop)) {
     case XO_STYLE_XML:
-	xo_depth_change(xop, name, -1, -1, XSS_CLOSE_INSTANCE, 0);
-	rc = xo_printf(xop, "%*s</%s%s>%s", xo_indent(xop), "",
-		       leader, name, ppn);
+	xo_filt_reset_parent(xop, xsp, old_fstatus, fstatus);
+
+	xo_depth_change(xop, name, -1, -1, XSS_CLOSE_INSTANCE, 0, fstatus, 0);
+
+	if (xo_filt_make_output(xop, old_fstatus))
+	    rc = xo_printf(xop, "%*s</%s%s>%s", xo_indent(xop), "",
+			   leader, name, ppn);
 	break;
 
     case XO_STYLE_JSON:
 	pre_nl = XOF_ISSET(xop, XOF_PRETTY) ? "\n" : "";
 
-	xo_depth_change(xop, name, -1, -1, XSS_CLOSE_INSTANCE, 0);
+	xo_depth_change(xop, name, -1, -1, XSS_CLOSE_INSTANCE, 0, 0, 0);
 	rc = xo_printf(xop, "%s%*s}", pre_nl, xo_indent(xop), "");
 	xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
 	break;
 
     case XO_STYLE_HTML:
     case XO_STYLE_TEXT:
-	xo_depth_change(xop, name, -1, 0, XSS_CLOSE_INSTANCE, 0);
+	xo_depth_change(xop, name, -1, 0, XSS_CLOSE_INSTANCE, 0, 0, 0);
 	break;
 
     case XO_STYLE_SDPARAMS:
 	break;
 
     case XO_STYLE_ENCODER:
-	xo_depth_change(xop, name, -1, 0, XSS_CLOSE_INSTANCE, 0);
+	xo_depth_change(xop, name, -1, 0, XSS_CLOSE_INSTANCE, 0, 0, 0);
 	rc = xo_encoder_handle(xop, XO_OP_CLOSE_INSTANCE, NULL, name, NULL, 0);
 	break;
     }
@@ -8409,7 +8614,7 @@ xo_do_close_all (xo_handle_t *xop, xo_stack_t *limit)
     ssize_t rc = 0;
     xo_xsf_flags_t flags;
 
-    for (xsp = &xop->xo_stack[xop->xo_depth]; xsp >= limit; xsp--) {
+    for (xsp = xo_stack_cur(xop); xsp >= limit; xsp--) {
 	switch (xsp->xs_state) {
 	case XSS_INIT:
 	    /* Nothing */
@@ -8434,7 +8639,7 @@ xo_do_close_all (xo_handle_t *xop, xo_stack_t *limit)
 
 	case XSS_MARKER:
 	    flags = xsp->xs_flags & XSF_MARKER_FLAGS;
-	    xo_depth_change(xop, xsp->xs_name, -1, 0, XSS_MARKER, 0);
+	    xo_depth_change(xop, xsp->xs_name, -1, 0, XSS_MARKER, 0, 0, 0);
 	    xop->xo_stack[xop->xo_depth].xs_flags |= flags;
 	    rc = 0;
 	    break;
@@ -8473,7 +8678,7 @@ xo_do_close (xo_handle_t *xop, const char *name, xo_state_t new_state)
 
     name = xo_map_name(xop, name);
 
-    for (xsp = &xop->xo_stack[xop->xo_depth]; xsp > xop->xo_stack; xsp--) {
+    for (xsp = xo_stack_cur(xop); xsp > xop->xo_stack; xsp--) {
 	/*
 	 * Marker's normally stop us from going any further, unless
 	 * we are popping a marker (new_state == XSS_MARKER).
@@ -8525,9 +8730,10 @@ xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
 
     xop = xo_default(xop);
 
-    xo_stack_t *xsp = &xop->xo_stack[xop->xo_depth];
+    xo_stack_t *xsp = xo_stack_cur(xop);
     int old_state = xsp->xs_state;
     int on_marker = (old_state == XSS_MARKER);
+    int flush = XOF_ISSET(xop, XOF_FLUSH);
 
     /* If there's a marker on top of the stack, we need to find a real state */
     while (old_state == XSS_MARKER) {
@@ -8763,8 +8969,14 @@ xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
 		   xsp->xs_state, new_state);
     }
 
+    /*
+     * If we've got enough data, flush it.
+     */
+    if (xo_buf_offset(&xop->xo_data) > XO_BUF_HIGH_WATER)
+	flush = 1;
+
     /* Handle the flush flag */
-    if (rc >= 0 && XOF_ISSET(xop, XOF_FLUSH))
+    if (flush && rc >= 0 && !xo_avoid_flushing(xop))
 	if (xo_flush_h(xop) < 0)
 	    rc = -1;
 
@@ -8786,7 +8998,7 @@ xo_open_marker_h (xo_handle_t *xop, const char *name)
     xop = xo_default(xop);
 
     xo_depth_change(xop, name, 1, 0, XSS_MARKER,
-		    xop->xo_stack[xop->xo_depth].xs_flags & XSF_MARKER_FLAGS);
+	    xop->xo_stack[xop->xo_depth].xs_flags & XSF_MARKER_FLAGS, 0, 0);
 
     return 0;
 }
@@ -9384,9 +9596,17 @@ xo_encoder_handle (xo_handle_t *xop, xo_encoder_op_t op, xo_buffer_t *bufp,
 
     void *private = xo_get_private(xop);
 
-    if (XOF_ISSET(xop, XOF_FILTER))
-	return xo_filter_passthru(xop, op, bufp, name, value,
+    if (XOF_ISSET(xop, XOF_FILTER)) {
+	xo_filter_status_t fstatus;
+
+	fstatus = xo_filter_passthru(xop, op, bufp, name, value,
 				    private, flags, func, xo_filters(xop));
+
+	xo_stack_t *xsp = xo_stack_cur(xop);
+	xsp->xs_fstatus = fstatus;
+
+	return fstatus;
+    }
 
     return func(xop, op, bufp, name, value, private, flags);
 }
@@ -9419,7 +9639,7 @@ xo_explicit_transition (xo_handle_t *xop, xo_state_t new_state,
 
     case XSS_CLOSE_INSTANCE:
 	xo_depth_change(xop, name, 1, 1, XSS_OPEN_INSTANCE,
-			xo_stack_flags(flags));
+			xo_stack_flags(flags), 0, 0);
 	xo_stack_set_flags(xop);
 	xo_do_close_instance(xop, name);
 	break;
@@ -9428,7 +9648,7 @@ xo_explicit_transition (xo_handle_t *xop, xo_state_t new_state,
 	xsf_flags = XOF_ISSET(xop, XOF_NOT_FIRST) ? XSF_NOT_FIRST : 0;
 
 	xo_depth_change(xop, name, 1, 1, XSS_OPEN_LIST,
-			XSF_LIST | xsf_flags | xo_stack_flags(flags));
+			XSF_LIST | xsf_flags | xo_stack_flags(flags), 0, 0);
 	xo_do_close_list(xop, name);
 	break;
     }
