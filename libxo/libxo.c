@@ -2649,7 +2649,7 @@ xo_set_options (xo_handle_t *xop, const char *input)
     if (*input == ':') {
 	ssize_t sz;
 
-	for (input++ ; *input; input++) {
+	for (input++ ; *input && *input != ','; input++) {
 	    switch (*input) {
 	    case 'c':
 		XOF_SET(xop, XOF_COLOR_ALLOWED);
@@ -2728,7 +2728,14 @@ xo_set_options (xo_handle_t *xop, const char *input)
 		final_rc = -1;
 	    }
 	}
-	return 0;
+
+	/*
+	 * Allow ',' to switch into word-style options ("--libxo:XPW,debug")
+	 */
+	if (*input != ',')
+	    return 0;
+
+	input += 1;
     }
 
     len = strlen(input) + 1;
