@@ -88,6 +88,7 @@ typedef struct xo_stack_s {
     char *xs_keys;	         /* Keys stored as "key\0val\0k2\0v2\0\0"*/
     xo_ssize_t xs_keys_len; 	 /* Length of xs_keys */
     uint32_t xs_allow;		 /* Any 'allow' increment */
+    uint32_t xs_pred;		 /* Any 'pred' increment */
     uint32_t xs_deny;		 /* Any 'deny' increment */
     xo_off_t xs_offset;		 /* WB marker */
     uint32_t xs_flags;		 /* Flags (XSF_*) */
@@ -127,6 +128,7 @@ struct xo_filter_s {		 /* Forward/typdef decl in xo_private.h */
     xo_filter_status_t xf_status; /* Current status: (see XO_STATUS_*) */
     uint32_t xf_depth;		 /* Depth of hierarchy seen (zero == top) */
     uint32_t xf_allow;		 /* Number of successful matches */
+    uint32_t xf_pred;		 /* Number of current predicate matches */
     uint32_t xf_deny;		 /* Number of successful not matches */
     xo_match_t *xf_matches;	 /* Current states */
     unsigned xf_flags;		 /* Flags (XFSF_*) */
@@ -387,6 +389,7 @@ xo_filter_op_status_name (xo_filter_status_t rc)
     return (rc == 0) ? "zero" :
 	(rc == XO_STATUS_TRACK) ? "track" :
 	(rc == XO_STATUS_FULL) ? "full" :
+	(rc == XO_STATUS_PRED) ? "predicate" :
 	(rc == XO_STATUS_DEAD) ? "dead" : "unknown";
 }
 
@@ -402,7 +405,8 @@ xo_filter_op_status_name (xo_filter_status_t rc)
  */
 static xo_filter_status_t
 xo_filter_change_status (xo_handle_t *xop, xo_filter_t *xfp,
-			 const char *tag UNUSED)
+			 const char *op UNUSED,
+			 const char *tag UNUSED, ssize_t tlen UNUSED)
 {
     const char *why UNUSED;
     int rc;
@@ -438,9 +442,13 @@ xo_filter_change_status (xo_handle_t *xop, xo_filter_t *xfp,
 	rc = XO_STATUS_TRACK;
     }
 
-    XO_DBG(xop, "xo_filter_update_status (%s) returns %s/%d "
+    if (tlen == 0)		/* Avoid NULL deref */
+	tag = "";
+
+    XO_DBG(xop, "xo_filter_update_status (%s%s%.*s) returns %s/%d "
 	   "why: %s (was %s/%d)",
-	   tag, xo_filter_status_name(rc), rc, why,
+	   op, tlen ? " " : "", tlen, tag,
+	   xo_filter_status_name(rc), rc, why,
 	   xo_filter_status_name(xfp->xf_status), xfp->xf_status);
 
     xfp->xf_status = rc;	/* Record new value */
@@ -451,7 +459,7 @@ xo_filter_change_status (xo_handle_t *xop, xo_filter_t *xfp,
 static xo_filter_status_t
 xo_filter_update_status (xo_handle_t *xop, xo_filter_t *xfp)
 {
-    return xo_filter_change_status(xop, xfp, "caller");
+    return xo_filter_change_status(xop, xfp, "caller", NULL, 0);
 }
 
 /*
@@ -535,6 +543,8 @@ xo_filter_deadend (xo_handle_t *xop UNUSED, xo_filter_t *xfp, xo_match_t *xmp,
 		   xo_stack_t *xsp, int call_op UNUSED)
 {
     xsp->xs_state = XSS_DEADEND;
+    xsp->xs_pred = 0;		/* No longer looking for a predicate */
+
     xo_filter_stack_free_keys(xfp, xsp);
     xmp->xm_depth = 1;	/* This "open" counts as the first one */
 }
@@ -590,6 +600,7 @@ xo_filter_open_check_matches (xo_handle_t *xop, xo_filter_t *xfp,
 	     * old match but add our predicates
 	     */
 	    xsp->xs_state = XSS_PRED;
+	    xsp->xs_pred = 1;
 
 	} else if (xnp->xn_next == 0) {
 	    /* We don't set xm_depth to 1 here; this "open" doesn't count */
@@ -605,9 +616,9 @@ xo_filter_open_check_matches (xo_handle_t *xop, xo_filter_t *xfp,
 
 	/* A succesful match */
 	XO_DBG(xop, "filter: open %s: progress match [%u] '%.*s' "
-	       "[match %u, next %u] [allow %u/deny %u]%s",
+	       "[match %u, next %u] [allow %u/pred %u/deny %u]%s",
 	       type, i, tlen, tag, xmp->xm_base, xsp->xs_match,
-	       xfp->xf_allow, xfp->xf_deny, label);
+	       xfp->xf_allow, xfp->xf_pred, xfp->xf_deny, label);
     }
 }
 
@@ -685,9 +696,16 @@ xo_filter_open_check_patterns (xo_handle_t *xop, xo_filter_t *xfp,
 
 	/* Fill in the initial state frame */
 	xo_stack_t *xsp = xmp->xm_stackp;
-	xsp->xs_state = xnp->xn_contents ? XSS_PRED : XSS_FIRST;
 	xsp->xs_match = id;
-	xsp->xs_predicates = xnp->xn_contents;
+
+	if (xnp->xn_contents) {
+	    xsp->xs_state = XSS_PRED;
+	    xsp->xs_predicates = xnp->xn_contents;
+	    xsp->xs_pred = 1;
+	} else {
+	    xsp->xs_state = XSS_FIRST;
+	    xsp->xs_predicates = xnp->xn_contents;
+	}
 
 	if (not)
 	    xmp->xm_flags |= XMF_NOT;
@@ -720,11 +738,11 @@ xo_filter_open_check_patterns (xo_handle_t *xop, xo_filter_t *xfp,
 
 	XO_DBG(xop, "filter: open %s: new match '%.*s' [%u/%u] "
 	       "[state %u/%s; match %u, pred %u] "
-	       "[%u/%u] %s",
+	       "[allow %u/pred %u/deny %u] %s",
 	       type, tlen, tag, *paths, xnp->xn_next,
 	       xsp->xs_state, xo_filter_state_name(xsp->xs_state),
 	       xsp->xs_match, xsp->xs_predicates,
-	       xfp->xf_allow, xfp->xf_deny, label);
+	       xfp->xf_allow, xfp->xf_pred, xfp->xf_deny, label);
     }
 }
 
@@ -748,7 +766,7 @@ xo_filter_open (xo_handle_t *xop, xo_filter_t *xfp,
     xo_filter_open_check_matches(xop, xfp, xdp, tag, tlen, type);
     xo_filter_open_check_patterns(xop, xfp, xdp, tag, tlen, type);
 
-    xo_filter_change_status(xop, xfp, "open");
+    xo_filter_change_status(xop, xfp, "open", tag, tlen);
 
     xo_filter_dump_matches(xop, xfp);
 
@@ -849,6 +867,7 @@ xo_filter_close_check_matches (xo_handle_t *xop UNUSED, xo_filter_t *xfp,
 	 * global allow/deny by.
 	 */
 	xfp->xf_allow -= xsp->xs_allow;
+	xfp->xf_pred -= xsp->xs_pred;
 	xfp->xf_deny -= xsp->xs_deny;
 
 	if (xsp == xmp->xm_stack) {
@@ -873,7 +892,7 @@ xo_filter_close_check_matches (xo_handle_t *xop UNUSED, xo_filter_t *xfp,
 		 * We didn't really "top" the top frame, so we need to
 		 * reset the allow/deny values
 		 */
-		xsp->xs_allow = xsp->xs_deny =  0;
+		xsp->xs_allow = xsp->xs_pred = xsp->xs_deny =  0;
 
 	    } else {
 		/*
@@ -891,9 +910,9 @@ xo_filter_close_check_matches (xo_handle_t *xop UNUSED, xo_filter_t *xfp,
 
 	/* A succesful un-match */
 	XO_DBG(xop, "filter: close %s match [%u]: progress match '%.*s' "
-	       "[base %u] [%u/%u]%s",
+	       "[base %u] [allow %u/pred %u/deny %u]%s",
 	       type, i, tlen, tag, xmp ? xmp->xm_base : 0,
-	       xfp->xf_allow, xfp->xf_deny, label);
+	       xfp->xf_allow, xfp->xf_pred, xfp->xf_deny, label);
     }
 }
 
@@ -919,7 +938,7 @@ xo_filter_close (xo_handle_t *xop, xo_filter_t *xfp,
     xo_xparse_data_t *xdp = &xfp->xf_xd;
     xo_filter_close_check_matches(xop, xfp, xdp, tag, tlen, type);
 
-    xo_filter_change_status(xop, xfp, "close");
+    xo_filter_change_status(xop, xfp, "close", tag, tlen);
 
     xo_filter_dump_matches(xop, xfp);
 
@@ -2138,9 +2157,9 @@ xo_filter_op_key (xo_handle_t *xop, xo_filter_t *xfp,
 	    int pred = xo_eval_cast_int64(xfp, result);
 
 	    XO_DBG(xop, "filter: key: pred eval [%u] '%s' "
-		   "[base %u [%u/%u] -> %d",
+		   "[base %u [allow %u/pred %u/deny %u] -> %d",
 		   i, tag, xmp->xm_base,
-		   xfp->xf_allow, xfp->xf_deny, pred);
+		   xfp->xf_allow, xfp->xf_pred, xfp->xf_deny, pred);
 
 	    xo_eval_dump_value(xop, xfp, result, 4, "xo_filter_key: working");
 
@@ -2190,15 +2209,15 @@ xo_filter_op_key (xo_handle_t *xop, xo_filter_t *xfp,
 
 	/* A succesful match */
 	XO_DBG(xop, "filter: key success [%u] '%.*s' "
-	       "[match %u, next %u] [allow %u/deny %u]%s",
+	       "[match %u, next %u] [allow %u/pred %u/deny %u]%s",
 	       i, tlen, tag, xmp->xm_base, xsp->xs_match,
-	       xfp->xf_allow, xfp->xf_deny, label);
+	       xfp->xf_allow, xfp->xf_pred, xfp->xf_deny, label);
     }
 
     XO_DBG(xop, "xo_filter_key: '%.*s' = '%.*s' --> %d",
 	   tlen, tag, vlen, value, rc);
 
-    xo_filter_change_status(xop, xfp, "key");
+    xo_filter_change_status(xop, xfp, "key", tag, tlen);
 
     xo_filter_dump_matches(xop, xfp);
 
@@ -2236,9 +2255,9 @@ xo_filter_dump_matches (xo_handle_t *xop, xo_filter_t *xfp)
 
     for (i = 0; xmp; xmp = xmp->xm_next, i++) {
 	xo_dbg(xop, "  match %d: base %u, depth %u, flags %#x "
-	       "[allow %u/deny %u]",
+	       "[allow %u/pred %u/deny %u]",
 	       i, xmp->xm_base, xmp->xm_depth, xmp->xm_flags,
-	       xfp->xf_allow, xfp->xf_deny);
+	       xfp->xf_allow, xfp->xf_pred, xfp->xf_deny);
 
 	xo_stack_t *xsp;
 	for (xsp = xmp->xm_stack; xsp <= xmp->xm_stackp; xsp++) {
@@ -2246,10 +2265,10 @@ xo_filter_dump_matches (xo_handle_t *xop, xo_filter_t *xfp)
 	    str = xnp ? xo_xparse_str(xdp, xnp->xn_str) : "";
 
 	    xo_dbg(xop, "    stack: state %u/%s, node %u, pred %u, [str '%s'] "
-		   "keys_len %d, allow %u, deny %u",
+		   "keys_len %d [allow %u/pred %u/ deny %u]",
 		   xsp->xs_state, xo_filter_state_name(xsp->xs_state),
 		   xsp->xs_match, xsp->xs_predicates, str,
-		   xsp->xs_keys_len, xsp->xs_allow, xsp->xs_deny);
+		   xsp->xs_keys_len, xsp->xs_allow, xsp->xs_pred, xsp->xs_deny);
 	}
     }
 }
