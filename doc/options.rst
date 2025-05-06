@@ -24,6 +24,9 @@ identical in outcome::
   my-app --libxo=warn,pretty arg1
   my-app --libxo:WP arg1
 
+Options can transition from word-style to brief by using a comma after
+the brief options, e.g. `--libxo:XPW,keys`.
+
 Programs using libxo are expecting to call the xo_parse_args function
 to parse these arguments.  See :ref:`xo_parse_args` for details.
 
