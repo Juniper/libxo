@@ -2113,9 +2113,7 @@ xo_filter_pred_needs (xo_xparse_data_t *xdp, xo_filter_t *xfp,
 }
 
 static int
-xo_filter_op_key (xo_handle_t *xop, xo_filter_t *xfp,
-	       const char *tag, xo_ssize_t tlen,
-	       const char *value, xo_ssize_t vlen)
+xo_filter_op_key (XO_FILTER_KEY_SIGNATURE)
 {
     xo_xparse_data_t *xdp = &xfp->xf_xd;
     xo_match_t *xmp = xfp->xf_matches;
@@ -2307,6 +2305,7 @@ xo_filter_op_passthru (XO_ENCODER_HANDLER_ARGS,
     case XO_OP_STRING:		   /* Quoted UTF-8 string */
     case XO_OP_CONTENT:		   /* Other content */
     case XO_OP_ATTRIBUTE:;	   /* Attribute name/value */
+#if 0
 	if (xfp->xf_status == XO_STATUS_DEAD) /* The dead have no cares */
 	    return 0;
 
@@ -2326,12 +2325,12 @@ xo_filter_op_passthru (XO_ENCODER_HANDLER_ARGS,
 	    if (xfp->xf_status == XO_STATUS_TRACK)
 		return 0;  	  /* Tracking doesn't need non-keys */
 	}
+#endif
 
 	break;
     }
 
     rc = func(xop, op, xbp, name, value, private, flags);
-
 
     XO_DBG(xop, "filter: leaving passthru: %s: '%s'%s status: %s/%d",
 	   xo_encoder_op_name(op), name ?: "",
