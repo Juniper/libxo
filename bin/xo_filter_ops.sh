@@ -8,6 +8,7 @@ close_instance
 create
 destroy
 get_status
+key
 open_container
 open_field
 open_instance
