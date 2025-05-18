@@ -512,6 +512,8 @@ xo_filter_stack_push (xo_filter_t *xfp UNUSED, xo_match_t *xmp, uint32_t state,
 {
     xo_stack_t *xsp = ++xmp->xm_stackp;
 
+    bzero(xsp, sizeof(*xsp));
+
     xsp->xs_state = state;
     xsp->xs_match = match;
     xsp->xs_predicates = predicate;
@@ -704,7 +706,7 @@ xo_filter_open_check_patterns (xo_handle_t *xop, xo_filter_t *xfp,
 	    xsp->xs_pred = 1;
 	} else {
 	    xsp->xs_state = XSS_FIRST;
-	    xsp->xs_predicates = xnp->xn_contents;
+	    xsp->xs_predicates = 0;
 	}
 
 	if (not)
@@ -845,7 +847,7 @@ xo_filter_close_check_matches (xo_handle_t *xop UNUSED, xo_filter_t *xfp,
 	 * frame, otherwise we are needing that, so we look at the
 	 * penultimate frame
 	 */
-	if (xsp->xs_state != XSS_DEEP) {
+	if (xsp->xs_state != XSS_DEEP && xsp->xs_state != XSS_PRED) {
 	    if (xsp == xmp->xm_stack) /* Top of stack; nothing to close */
 		continue;
 	    xsp -= 1;		/* Look at penultimate stack frame */
@@ -880,7 +882,7 @@ xo_filter_close_check_matches (xo_handle_t *xop UNUSED, xo_filter_t *xfp,
 	     * Pop a frame from the stack.  If the top is in XSS_DEEP,
 	     * then we just need to set it to XSS_NEED.
 	     */
-	    if (xsp->xs_state == XSS_DEEP) {
+	    if (xsp->xs_state == XSS_DEEP || xsp->xs_state == XSS_PRED) {
 		/*
 		 * DEEP means we've already matched, so instead of
 		 * popping the frame, we just reset it so XSS_NEED state.
@@ -2184,6 +2186,7 @@ xo_filter_op_key (XO_FILTER_KEY_SIGNATURE)
 	    continue;
 
 	xsp->xs_state = XSS_FOUND; /* Mark our success */
+	xsp->xs_pred = 0;	   /* Now longer looking */
 
 	/*
 	 * Lots going on here.  We have a successful match on a
