@@ -1,7 +1,7 @@
 #run --libxo @fullpath
-#?two[starts-with(three, "n")]
+?two[starts-with(three, "n")]
 
-#?two[three - 5 == 5]
+?two[three - 5 == 5]
 ?six
 +five
 +six
@@ -40,10 +40,9 @@ $three 8
 $three 7
 =value 7
 -two
-#q
 
-#r
-#?two[(three + 3) div 4 == (10 - 2) mod 5]
+r
+?two[(three + 3) div 4 == (10 - 2) mod 5]
 +two
 $three 10
 =value 10
