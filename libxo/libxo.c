@@ -5083,7 +5083,7 @@ xo_filt_reset_parent (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED,
     if (!(xop->xo_flags & XOF_FILTER))
 	return;
 
-    xo_dbg(xop, "xo_filt_wipe_parent: wiping %p at %u, status %u",
+    xo_dbg(xop, "xo_filt_reset_parent: wiping %p at %u, status %u",
 	   cur, cur->xs_wb_off, fstatus);
 
     /* If the current status isn't FULL, we need to toss any output */
@@ -5134,6 +5134,79 @@ static inline int
 xo_avoid_flushing (xo_handle_t *xop)
 {
     return XOIF_ISSET(xop, XOIF_ANCHOR | XOIF_FILTERING);
+}
+
+static int
+xo_filt_skip (xo_handle_t *xop, xo_xff_flags_t flags)
+{
+    xo_filter_status_t fstatus;
+    fstatus = xo_filter_get_status(xop, xo_filters(xop));
+
+    /* We don't want to pass "value" fields when only tracking */
+    if (!(flags & XFF_KEY) && fstatus == XO_STATUS_TRACK)
+	return TRUE;
+
+    return (fstatus == XO_STATUS_DEAD);
+	
+
+#if 0
+    switch (fstatus) {
+    case XO_STATUS_ZERO:
+    case XO_STATUS_FULL:
+	return FALSE;
+
+    case XO_STATUS_TRACK:
+    case XO_STATUS_PRED: /* XXX If looking for a predicate, we might skip? */
+	return (flags & XFF_KEY) ? FALSE : TRUE;
+
+    case XO_STATUS_DEAD:
+    default:
+	return TRUE;
+    }
+#endif
+
+}
+
+static xo_filter_status_t 
+xo_filt_do_open_field (xo_handle_t *xop, const char *name, xo_ssize_t nlen,
+		       const char *value, xo_ssize_t vlen, xo_xff_flags_t flags)
+{
+    xo_filter_t *xfp = xo_filters(xop);
+    xo_filter_status_t fstatus = xo_filter_get_status(xop, xfp);
+    if (fstatus == XO_STATUS_DEAD)
+	return fstatus;
+
+    if (flags & XFF_KEY) {
+	fstatus = xo_filter_key(xop, xfp, name, nlen, value, vlen);
+
+    } else {
+	/* If we're tracking, we don't need non-key values */
+	if (fstatus != XO_STATUS_TRACK)
+	    fstatus = xo_filter_open_field(xop, xfp, name, nlen);
+    }
+
+    return fstatus;
+}
+
+static xo_filter_status_t 
+xo_filt_do_close_field (xo_handle_t *xop, const char *name, xo_ssize_t nlen,
+			xo_xff_flags_t flags)
+{
+    xo_filter_t *xfp = xo_filters(xop);
+    xo_filter_status_t fstatus = xo_filter_get_status(xop, xfp);
+
+    if (fstatus == XO_STATUS_DEAD)
+	return fstatus;
+
+    if (flags & XFF_KEY) {
+    } else {
+	if (fstatus == XO_STATUS_TRACK || fstatus == XO_STATUS_PRED)
+	    return fstatus;
+
+	fstatus = xo_filter_close_field(xop, xo_filters(xop), name, nlen);
+    }
+
+    return fstatus;
 }
 
 static void
@@ -5236,8 +5309,6 @@ xo_format_value (xo_handle_t *xop, const char *name, ssize_t nlen,
     }
 
     xo_filter_status_t fstatus UNUSED = 0;
-    if (!(flags & XFF_KEY))
-	fstatus = xo_filter_open_field(xop, xo_filters(xop), name, nlen);
 
     const char *leader = xo_xml_leader_len(xop, name, nlen);
 
@@ -5487,7 +5558,6 @@ xo_format_value (xo_handle_t *xop, const char *name, ssize_t nlen,
 	    nlen = sizeof(missing) - 1;
 	}
 
-	ssize_t name_offset = xo_buf_offset(&xop->xo_data);
 	xo_data_append(xop, name, nlen);
 	xo_data_append(xop, "", 1); /* NUL terminate the string */
 
@@ -5497,15 +5567,24 @@ xo_format_value (xo_handle_t *xop, const char *name, ssize_t nlen,
 
 	xo_data_append(xop, "", 1); /* NUL terminate the string */
 
-	xo_encoder_handle(xop, quote ? XO_OP_STRING : XO_OP_CONTENT, NULL,
-			  xo_buf_data(&xop->xo_data, name_offset),
-			  xo_buf_data(&xop->xo_data, value_offset), flags);
+	/* Find the formatted data in the buffer */
+	const char *data = xo_buf_data(&xop->xo_data, value_offset);
+	xo_ssize_t dlen = xo_buf_offset(&xop->xo_data) - value_offset - 1;
+
+	/* Always call open and close, since they may change the status */
+	xo_filt_do_open_field(xop, name, nlen, data, dlen, flags);
+
+	if (!xo_filt_skip(xop, flags)) {
+	    xo_encoder_handle(xop, quote ? XO_OP_STRING : XO_OP_CONTENT, NULL,
+			      name, data, flags);
+	}
+
+	xo_filt_do_close_field(xop, name, nlen, flags);
+
+
 	xo_buf_reset(&xop->xo_data);
 	break;
     }
-
-    if (!(flags & XFF_KEY))
-	fstatus = xo_filter_close_field(xop, xo_filters(xop), name, nlen);
 }
 
 static void
@@ -9610,7 +9689,8 @@ xo_encoder_handle (xo_handle_t *xop, xo_encoder_op_t op, xo_buffer_t *bufp,
 				    private, flags, func, xo_filters(xop));
 
 	xo_stack_t *xsp = xo_stack_cur(xop);
-	xsp->xs_fstatus = fstatus;
+	if (fstatus)
+	    xsp->xs_fstatus = fstatus;
 
 	return fstatus;
     }
