@@ -5107,7 +5107,7 @@ xo_filt_reset_parent (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED,
 }
 
 static inline int
-xo_filt_make_output (xo_handle_t *xop UNUSED, xo_filter_status_t fstatus)
+xo_filt_want_output (xo_handle_t *xop UNUSED, xo_filter_status_t fstatus)
 {
 #ifdef LIBXO_NEED_FILTERS
     switch (fstatus) {
@@ -7270,6 +7270,8 @@ xo_do_emit_fields (xo_handle_t *xop, xo_field_info_t *fields,
 
     if (XOIF_ISSET(xop, XOIF_REORDER) || xo_style(xop) == XO_STYLE_ENCODER)
 	flush_line = 0;
+    else if (xo_avoid_flushing(xop))
+	flush_line = 0;
 
     /*
      * Some overhead for gettext; if the fields in the msgstr returned
@@ -7880,6 +7882,10 @@ xo_depth_change (xo_handle_t *xop, const char *name,
 	if (xo_depth_check(xop, xop->xo_depth + delta))
 	    return;
 
+	/* If we're not filtering (at the moment), we don't need the offset */
+	if (!XOIF_ISSET(xop, XOIF_FILTERING))
+	    starting_offset = XS_OFFSET_CLEAR;
+
 	xo_stack_t *xsp = &xop->xo_stack[xop->xo_depth + delta];
 	xsp->xs_flags = flags;
 	xsp->xs_state = state;
@@ -8239,7 +8245,7 @@ xo_do_open_list (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
 
     name = xo_map_name(xop, name); /* Find mapped name, if any */
 
-    xo_off_t starting_offset = 0;
+    xo_off_t starting_offset = xo_buf_offset(&xop->xo_data);
 
     switch (xo_style(xop)) {
     case XO_STYLE_JSON:
@@ -8511,6 +8517,8 @@ xo_do_open_instance (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
     xo_stack_t *xsp = xo_stack_cur(xop);
     xo_filter_status_t old_fstatus = xsp->xs_fstatus;
 
+    ssize_t start_offset = xo_buf_offset(&xop->xo_data);
+
     xo_filter_status_t fstatus;
     fstatus = xo_filter_open_instance(xop, xo_filters(xop), name);
 
@@ -8561,7 +8569,7 @@ xo_do_open_instance (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
     }
 
     xo_depth_change(xop, name, 1, 1, XSS_OPEN_INSTANCE,
-		    xo_stack_flags(flags), fstatus, 0);
+		    xo_stack_flags(flags), fstatus, start_offset);
 
     return rc;
 }
@@ -8639,7 +8647,7 @@ xo_do_close_instance (xo_handle_t *xop, const char *name)
 
 	xo_depth_change(xop, name, -1, -1, XSS_CLOSE_INSTANCE, 0, fstatus, 0);
 
-	if (xo_filt_make_output(xop, old_fstatus))
+	if (xo_filt_want_output(xop, old_fstatus))
 	    rc = xo_printf(xop, "%*s</%s%s>%s", xo_indent(xop), "",
 			   leader, name, ppn);
 	break;
@@ -9422,13 +9430,14 @@ xo_dump_stack (xo_handle_t *xop)
 
     xop = xo_default(xop);
 
-    fprintf(stderr, "Stack dump:\n");
+    fprintf(stderr, "Stack dump: (buf: cur %ld, size %ld)\n",
+	    xop->xo_data.xb_curp - xop->xo_data.xb_bufp, xop->xo_data.xb_size);
 
     xsp = xop->xo_stack;
     for (i = 1, xsp++; i <= xop->xo_depth; i++, xsp++) {
-	fprintf(stderr, "   [%d] %s '%s' [%x]\n",
+	fprintf(stderr, "   [%d] %s '%s' [%x] wb_off: %ld\n",
 		i, xo_state_name(xsp->xs_state),
-		xsp->xs_name ?: "--", xsp->xs_flags);
+		xsp->xs_name ?: "--", xsp->xs_flags, xsp->xs_wb_off);
     }
 }
 
