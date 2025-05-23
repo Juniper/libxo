@@ -5210,14 +5210,290 @@ xo_filt_do_close_field (xo_handle_t *xop, const char *name, xo_ssize_t nlen,
 }
 
 static void
+xo_format_value_encoder (xo_handle_t *xop, const char *name, ssize_t nlen,
+		 const char *value, ssize_t vlen,
+		 const char *fmt, ssize_t flen,
+		 const char *encoding, ssize_t elen, xo_xff_flags_t flags)
+{
+    if (flags & XFF_DISPLAY_ONLY) {
+	xo_simple_field(xop, TRUE, value, vlen, fmt, flen, flags);
+	return;
+    }
+
+    int quote;
+    if (flags & XFF_QUOTE)
+	quote = 1;
+    else if (flags & XFF_NOQUOTE)
+	quote = 0;
+    else if (flen == 0) {
+	quote = 0;
+	fmt = "true";	/* JSON encodes empty tags as a boolean true */
+	flen = 4;
+    } else if (strchr("diouxXDOUeEfFgGaAcCp", fmt[flen - 1]) == NULL)
+	quote = 1;
+    else
+	quote = 0;
+
+    if (encoding) {
+	fmt = encoding;
+	flen = elen;
+    } else {
+	char *enc  = alloca(flen + 1);
+	memcpy(enc, fmt, flen);
+	enc[flen] = '\0';
+	fmt = xo_fix_encoding(xop, enc);
+	flen = strlen(fmt);
+    }
+
+    if (nlen == 0) {
+	static char missing[] = "missing-field-name";
+	xo_failure(xop, "missing field name: %s", fmt);
+	name = missing;
+	nlen = sizeof(missing) - 1;
+    }
+
+    xo_data_append(xop, name, nlen);
+    xo_data_append(xop, "", 1); /* NUL terminate the string */
+
+    ssize_t value_offset = xo_buf_offset(&xop->xo_data);
+
+    xo_simple_field(xop, FALSE, value, vlen, fmt, flen, flags);
+
+    xo_data_append(xop, "", 1); /* NUL terminate the string */
+
+    /* Find the formatted data in the buffer */
+    const char *data = xo_buf_data(&xop->xo_data, value_offset);
+    xo_ssize_t dlen = xo_buf_offset(&xop->xo_data) - value_offset - 1;
+
+    /* Always call open and close, since they may change the status */
+    xo_filt_do_open_field(xop, name, nlen, data, dlen, flags);
+
+    if (!xo_filt_skip(xop, flags)) {
+	xo_encoder_handle(xop, quote ? XO_OP_STRING : XO_OP_CONTENT, NULL,
+			  name, data, flags);
+    }
+
+    xo_filt_do_close_field(xop, name, nlen, flags);
+
+    /* Reset our buffer, since we've sent the data to the encoder */
+    xo_buf_reset(&xop->xo_data);
+}
+
+static void
+xo_format_value_sdparams (xo_handle_t *xop, const char *name, ssize_t nlen,
+		 const char *value, ssize_t vlen,
+		 const char *fmt, ssize_t flen,
+		 const char *encoding, ssize_t elen, xo_xff_flags_t flags)
+{
+    if (flags & XFF_DISPLAY_ONLY) {
+	xo_simple_field(xop, TRUE, value, vlen, fmt, flen, flags);
+	return;
+    }
+
+    if (encoding) {
+	fmt = encoding;
+	flen = elen;
+    } else {
+	char *enc  = alloca(flen + 1);
+	memcpy(enc, fmt, flen);
+	enc[flen] = '\0';
+	fmt = xo_fix_encoding(xop, enc);
+	flen = strlen(fmt);
+    }
+
+    if (nlen == 0) {
+	static char missing[] = "missing-field-name";
+	xo_failure(xop, "missing field name: %s", fmt);
+	name = missing;
+	nlen = sizeof(missing) - 1;
+    }
+
+    xo_data_escape(xop, name, nlen);
+    xo_data_append(xop, "=\"", 2);
+
+    xo_simple_field(xop, FALSE, value, vlen, fmt, flen, flags);
+
+    xo_data_append(xop, "\" ", 2);
+}
+
+static void
+xo_format_value_json (xo_handle_t *xop, const char *name, ssize_t nlen,
+		 const char *value, ssize_t vlen,
+		 const char *fmt, ssize_t flen,
+		 const char *encoding, ssize_t elen, xo_xff_flags_t flags)
+{
+    if (flags & XFF_DISPLAY_ONLY) {
+	xo_simple_field(xop, TRUE, value, vlen, fmt, flen, flags);
+	return;
+    }
+
+    if (encoding) {
+	fmt = encoding;
+	flen = elen;
+    } else {
+	char *enc  = alloca(flen + 1);
+	memcpy(enc, fmt, flen);
+	enc[flen] = '\0';
+	fmt = xo_fix_encoding(xop, enc);
+	flen = strlen(fmt);
+    }
+
+    xo_stack_set_flags(xop);
+
+    int first = (xop->xo_stack[xop->xo_depth].xs_flags & XSF_NOT_FIRST)
+	? 0 : 1;
+
+    xo_format_prep(xop, flags);
+
+    int quote;
+    if (flags & XFF_QUOTE)
+	quote = 1;
+    else if (flags & XFF_NOQUOTE)
+	quote = 0;
+    else if (vlen != 0)
+	quote = 1;
+    else if (flen == 0) {
+	quote = 0;
+	fmt = "true";	/* JSON encodes empty tags as a boolean true */
+	flen = 4;
+    } else if (xo_format_is_numeric(fmt, flen))
+	quote = 0;
+    else
+	quote = 1;
+
+    if (nlen == 0) {
+	static char missing[] = "missing-field-name";
+	xo_failure(xop, "missing field name: %s", fmt);
+	name = missing;
+	nlen = sizeof(missing) - 1;
+    }
+
+    xo_buffer_t *xbp = &xop->xo_data;
+    int pretty = XOF_ISSET(xop, XOF_PRETTY);
+
+    if (flags & XFF_LEAF_LIST) {
+	if (!first && pretty)
+	    xo_data_append(xop, "\n", 1);
+	if (pretty)
+	    xo_buf_indent(xop, -1);
+    } else {
+	if (pretty)
+	    xo_buf_indent(xop, -1);
+	xo_data_append(xop, "\"", 1);
+
+	xbp = &xop->xo_data;
+	ssize_t off = xbp->xb_curp - xbp->xb_bufp;
+
+	xo_data_escape(xop, name, nlen);
+
+	if (XOF_ISSET(xop, XOF_UNDERSCORES)) {
+	    ssize_t coff = xbp->xb_curp - xbp->xb_bufp;
+	    for ( ; off < coff; off++)
+		if (xbp->xb_bufp[off] == '-')
+		    xbp->xb_bufp[off] = '_';
+	}
+	xo_data_append(xop, "\":", 2);
+	if (pretty)
+	    xo_data_append(xop, " ", 1);
+    }
+
+    if (quote)
+	xo_data_append(xop, "\"", 1);
+
+    xo_simple_field(xop, FALSE, value, vlen, fmt, flen, flags);
+
+    if (quote)
+	xo_data_append(xop, "\"", 1);
+}
+
+static void
+xo_format_value_xml (xo_handle_t *xop, const char *name, ssize_t nlen,
+		     const char *value, ssize_t vlen,
+		     const char *fmt, ssize_t flen,
+		     const char *encoding, ssize_t elen, xo_xff_flags_t flags,
+		     const char *leader)
+{
+    /*
+     * Even though we're not making output, we still need to
+     * let the formatting code handle the va_arg popping.
+     */
+    if (flags & XFF_DISPLAY_ONLY) {
+	xo_simple_field(xop, TRUE, value, vlen, fmt, flen, flags);
+	return;
+    }
+
+    if (encoding) {
+	fmt = encoding;
+	flen = elen;
+    } else {
+	char *enc  = alloca(flen + 1);
+	memcpy(enc, fmt, flen);
+	enc[flen] = '\0';
+	fmt = xo_fix_encoding(xop, enc);
+	flen = strlen(fmt);
+    }
+
+    if (nlen == 0) {
+	static char missing[] = "missing-field-name";
+	xo_failure(xop, "missing field name: %s", fmt);
+	name = missing;
+	nlen = sizeof(missing) - 1;
+    }
+
+    int pretty = XOF_ISSET(xop, XOF_PRETTY);
+    if (pretty)
+	xo_buf_indent(xop, -1);
+
+    xo_data_append(xop, "<", 1);
+    if (*leader)
+	xo_data_append(xop, leader, 1);
+    xo_data_escape(xop, name, nlen);
+
+    if (xop->xo_attrs.xb_curp != xop->xo_attrs.xb_bufp) {
+	xo_data_append(xop, xop->xo_attrs.xb_bufp,
+		       xop->xo_attrs.xb_curp - xop->xo_attrs.xb_bufp);
+	xop->xo_attrs.xb_curp = xop->xo_attrs.xb_bufp;
+    }
+
+    /*
+     * We indicate 'key' fields using the 'key' attribute.  While
+     * this is really committing the crime of mixing meta-data with
+     * data, it's often useful.  Especially when format meta-data is
+     * difficult to come by.
+     */
+    if ((flags & XFF_KEY) && XOF_ISSET(xop, XOF_KEYS)) {
+	static char attr[] = " key=\"key\"";
+	xo_data_append(xop, attr, sizeof(attr) - 1);
+    }
+
+    /*
+     * Save the offset at which we'd place units.  See xo_format_units.
+     */
+    if (XOF_ISSET(xop, XOF_UNITS)) {
+	XOIF_SET(xop, XOIF_UNITS_PENDING);
+	xop->xo_units_offset = xop->xo_data.xb_curp - xop->xo_data.xb_bufp;
+    }
+
+    xo_data_append(xop, ">", 1);
+
+    xo_simple_field(xop, FALSE, value, vlen, fmt, flen, flags);
+
+    xo_data_append(xop, "</", 2);
+    if (*leader)
+	xo_data_append(xop, leader, 1);
+    xo_data_escape(xop, name, nlen);
+    xo_data_append(xop, ">", 1);
+
+    if (pretty)
+	xo_data_append(xop, "\n", 1);
+}
+
+static void
 xo_format_value (xo_handle_t *xop, const char *name, ssize_t nlen,
 		 const char *value, ssize_t vlen,
 		 const char *fmt, ssize_t flen,
 		 const char *encoding, ssize_t elen, xo_xff_flags_t flags)
 {
-    int pretty = XOF_ISSET(xop, XOF_PRETTY);
-    int quote;
-
     /* Passing NULL to memcpy is undefined behavior, so make a fake here */
     const char *rname = name ?: "";
 
@@ -5336,253 +5612,23 @@ xo_format_value (xo_handle_t *xop, const char *name, ssize_t nlen,
 	break;
 
     case XO_STYLE_XML:
-	/*
-	 * Even though we're not making output, we still need to
-	 * let the formatting code handle the va_arg popping.
-	 */
-	if (flags & XFF_DISPLAY_ONLY) {
-	    xo_simple_field(xop, TRUE, value, vlen, fmt, flen, flags);
-	    break;
-	}
-
-	if (encoding) {
-   	    fmt = encoding;
-	    flen = elen;
-	} else {
-	    char *enc  = alloca(flen + 1);
-	    memcpy(enc, fmt, flen);
-	    enc[flen] = '\0';
-	    fmt = xo_fix_encoding(xop, enc);
-	    flen = strlen(fmt);
-	}
-
-	if (nlen == 0) {
-	    static char missing[] = "missing-field-name";
-	    xo_failure(xop, "missing field name: %s", fmt);
-	    name = missing;
-	    nlen = sizeof(missing) - 1;
-	}
-
-	if (pretty)
-	    xo_buf_indent(xop, -1);
-	xo_data_append(xop, "<", 1);
-        if (*leader)
-            xo_data_append(xop, leader, 1);
-	xo_data_escape(xop, name, nlen);
-
-	if (xop->xo_attrs.xb_curp != xop->xo_attrs.xb_bufp) {
-	    xo_data_append(xop, xop->xo_attrs.xb_bufp,
-			   xop->xo_attrs.xb_curp - xop->xo_attrs.xb_bufp);
-	    xop->xo_attrs.xb_curp = xop->xo_attrs.xb_bufp;
-	}
-
-	/*
-	 * We indicate 'key' fields using the 'key' attribute.  While
-	 * this is really committing the crime of mixing meta-data with
-	 * data, it's often useful.  Especially when format meta-data is
-	 * difficult to come by.
-	 */
-	if ((flags & XFF_KEY) && XOF_ISSET(xop, XOF_KEYS)) {
-	    static char attr[] = " key=\"key\"";
-	    xo_data_append(xop, attr, sizeof(attr) - 1);
-	}
-
-	/*
-	 * Save the offset at which we'd place units.  See xo_format_units.
-	 */
-	if (XOF_ISSET(xop, XOF_UNITS)) {
-	    XOIF_SET(xop, XOIF_UNITS_PENDING);
-	    xop->xo_units_offset = xop->xo_data.xb_curp - xop->xo_data.xb_bufp;
-	}
-
-	xo_data_append(xop, ">", 1);
-
-	xo_simple_field(xop, FALSE, value, vlen, fmt, flen, flags);
-
-	xo_data_append(xop, "</", 2);
-        if (*leader)
-            xo_data_append(xop, leader, 1);
-	xo_data_escape(xop, name, nlen);
-	xo_data_append(xop, ">", 1);
-	if (pretty)
-	    xo_data_append(xop, "\n", 1);
+	xo_format_value_xml(xop, name, nlen, value, vlen,
+			    fmt, flen, encoding, elen, flags, leader);
 	break;
 
     case XO_STYLE_JSON:
-	if (flags & XFF_DISPLAY_ONLY) {
-	    xo_simple_field(xop, TRUE, value, vlen, fmt, flen, flags);
-	    break;
-	}
-
-	if (encoding) {
-	    fmt = encoding;
-	    flen = elen;
-	} else {
-	    char *enc  = alloca(flen + 1);
-	    memcpy(enc, fmt, flen);
-	    enc[flen] = '\0';
-	    fmt = xo_fix_encoding(xop, enc);
-	    flen = strlen(fmt);
-	}
-
-	xo_stack_set_flags(xop);
-
-	int first = (xop->xo_stack[xop->xo_depth].xs_flags & XSF_NOT_FIRST)
-	    ? 0 : 1;
-
-	xo_format_prep(xop, flags);
-
-	if (flags & XFF_QUOTE)
-	    quote = 1;
-	else if (flags & XFF_NOQUOTE)
-	    quote = 0;
-	else if (vlen != 0)
-	    quote = 1;
-	else if (flen == 0) {
-	    quote = 0;
-	    fmt = "true";	/* JSON encodes empty tags as a boolean true */
-	    flen = 4;
-	} else if (xo_format_is_numeric(fmt, flen))
-	    quote = 0;
-	else
-	    quote = 1;
-
-	if (nlen == 0) {
-	    static char missing[] = "missing-field-name";
-	    xo_failure(xop, "missing field name: %s", fmt);
-	    name = missing;
-	    nlen = sizeof(missing) - 1;
-	}
-
-	if (flags & XFF_LEAF_LIST) {
-	    if (!first && pretty)
-		xo_data_append(xop, "\n", 1);
-	    if (pretty)
-		xo_buf_indent(xop, -1);
-	} else {
-	    if (pretty)
-		xo_buf_indent(xop, -1);
-	    xo_data_append(xop, "\"", 1);
-
-	    xbp = &xop->xo_data;
-	    ssize_t off = xbp->xb_curp - xbp->xb_bufp;
-
-	    xo_data_escape(xop, name, nlen);
-
-	    if (XOF_ISSET(xop, XOF_UNDERSCORES)) {
-		ssize_t coff = xbp->xb_curp - xbp->xb_bufp;
-		for ( ; off < coff; off++)
-		    if (xbp->xb_bufp[off] == '-')
-			xbp->xb_bufp[off] = '_';
-	    }
-	    xo_data_append(xop, "\":", 2);
-	    if (pretty)
-	        xo_data_append(xop, " ", 1);
-	}
-
-	if (quote)
-	    xo_data_append(xop, "\"", 1);
-
-	xo_simple_field(xop, FALSE, value, vlen, fmt, flen, flags);
-
-	if (quote)
-	    xo_data_append(xop, "\"", 1);
+	xo_format_value_json(xop, name, nlen, value, vlen,
+			     fmt, flen, encoding, elen, flags);
 	break;
 
     case XO_STYLE_SDPARAMS:
-	if (flags & XFF_DISPLAY_ONLY) {
-	    xo_simple_field(xop, TRUE, value, vlen, fmt, flen, flags);
-	    break;
-	}
-
-	if (encoding) {
-	    fmt = encoding;
-	    flen = elen;
-	} else {
-	    char *enc  = alloca(flen + 1);
-	    memcpy(enc, fmt, flen);
-	    enc[flen] = '\0';
-	    fmt = xo_fix_encoding(xop, enc);
-	    flen = strlen(fmt);
-	}
-
-	if (nlen == 0) {
-	    static char missing[] = "missing-field-name";
-	    xo_failure(xop, "missing field name: %s", fmt);
-	    name = missing;
-	    nlen = sizeof(missing) - 1;
-	}
-
-	xo_data_escape(xop, name, nlen);
-	xo_data_append(xop, "=\"", 2);
-
-	xo_simple_field(xop, FALSE, value, vlen, fmt, flen, flags);
-
-	xo_data_append(xop, "\" ", 2);
+	xo_format_value_sdparams(xop, name, nlen, value, vlen,
+				 fmt, flen, encoding, elen, flags);
 	break;
 
     case XO_STYLE_ENCODER:
-	if (flags & XFF_DISPLAY_ONLY) {
-	    xo_simple_field(xop, TRUE, value, vlen, fmt, flen, flags);
-	    break;
-	}
-
-	if (flags & XFF_QUOTE)
-	    quote = 1;
-	else if (flags & XFF_NOQUOTE)
-	    quote = 0;
-	else if (flen == 0) {
-	    quote = 0;
-	    fmt = "true";	/* JSON encodes empty tags as a boolean true */
-	    flen = 4;
-	} else if (strchr("diouxXDOUeEfFgGaAcCp", fmt[flen - 1]) == NULL)
-	    quote = 1;
-	else
-	    quote = 0;
-
-	if (encoding) {
-	    fmt = encoding;
-	    flen = elen;
-	} else {
-	    char *enc  = alloca(flen + 1);
-	    memcpy(enc, fmt, flen);
-	    enc[flen] = '\0';
-	    fmt = xo_fix_encoding(xop, enc);
-	    flen = strlen(fmt);
-	}
-
-	if (nlen == 0) {
-	    static char missing[] = "missing-field-name";
-	    xo_failure(xop, "missing field name: %s", fmt);
-	    name = missing;
-	    nlen = sizeof(missing) - 1;
-	}
-
-	xo_data_append(xop, name, nlen);
-	xo_data_append(xop, "", 1); /* NUL terminate the string */
-
-	ssize_t value_offset = xo_buf_offset(&xop->xo_data);
-
-	xo_simple_field(xop, FALSE, value, vlen, fmt, flen, flags);
-
-	xo_data_append(xop, "", 1); /* NUL terminate the string */
-
-	/* Find the formatted data in the buffer */
-	const char *data = xo_buf_data(&xop->xo_data, value_offset);
-	xo_ssize_t dlen = xo_buf_offset(&xop->xo_data) - value_offset - 1;
-
-	/* Always call open and close, since they may change the status */
-	xo_filt_do_open_field(xop, name, nlen, data, dlen, flags);
-
-	if (!xo_filt_skip(xop, flags)) {
-	    xo_encoder_handle(xop, quote ? XO_OP_STRING : XO_OP_CONTENT, NULL,
-			      name, data, flags);
-	}
-
-	xo_filt_do_close_field(xop, name, nlen, flags);
-
-
-	xo_buf_reset(&xop->xo_data);
+	xo_format_value_encoder(xop, name, nlen, value, vlen,
+				fmt, flen, encoding, elen, flags);
 	break;
     }
 }
