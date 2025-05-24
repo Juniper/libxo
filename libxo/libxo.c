@@ -5093,9 +5093,10 @@ xo_filt_reset_parent (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED,
 	 * doing some sanity checking.
 	 */
 	if (cur->xs_wb_off != XS_OFFSET_CLEAR) {
-	    xo_off_t off = xop->xo_data.xb_curp - xop->xo_data.xb_bufp;
+	    xo_buffer_t *xbp = &xop->xo_data;
+	    xo_off_t off = xo_buf_offset(xbp);
 	    if (off > cur->xs_wb_off)
-		xop->xo_data.xb_curp = xop->xo_data.xb_bufp + cur->xs_wb_off;
+		xop->xo_data.xb_curp = xo_buf_data(xbp, cur->xs_wb_off);
 	}
     }
 
@@ -5178,6 +5179,8 @@ xo_filt_do_open_field (xo_handle_t *xop, const char *name, xo_ssize_t nlen,
 
     if (flags & XFF_KEY) {
 	fstatus = xo_filter_key(xop, xfp, name, nlen, value, vlen);
+	if (fstatus == XO_STATUS_FULL)
+	    xo_filt_mark_parents(xop, xo_stack_cur(xop), fstatus);
 
     } else {
 	/* If we're tracking, we don't need non-key values */
@@ -5440,6 +5443,8 @@ xo_format_value_xml (xo_handle_t *xop, const char *name, ssize_t nlen,
 	nlen = sizeof(missing) - 1;
     }
 
+    ssize_t start_offset = xo_buf_offset(&xop->xo_data);
+
     int pretty = XOF_ISSET(xop, XOF_PRETTY);
     if (pretty)
 	xo_buf_indent(xop, -1);
@@ -5476,16 +5481,41 @@ xo_format_value_xml (xo_handle_t *xop, const char *name, ssize_t nlen,
 
     xo_data_append(xop, ">", 1);
 
+    ssize_t data_offset = xo_buf_offset(&xop->xo_data);
+
     xo_simple_field(xop, FALSE, value, vlen, fmt, flen, flags);
 
-    xo_data_append(xop, "</", 2);
-    if (*leader)
-	xo_data_append(xop, leader, 1);
-    xo_data_escape(xop, name, nlen);
-    xo_data_append(xop, ">", 1);
+    const char *data = xo_buf_data(&xop->xo_data, data_offset);
+    xo_ssize_t dlen = xo_buf_offset(&xop->xo_data) - data_offset;
 
-    if (pretty)
-	xo_data_append(xop, "\n", 1);
+    /* Always call open and close, since they may change the status */
+    xo_filter_status_t fstatus UNUSED;
+    fstatus = xo_filt_do_open_field(xop, name, nlen, data, dlen, flags);
+
+    /*
+     * We had to call xo_simple_field to format the data and
+     * clear any elements of xo_varg.  But we can skip the rest of
+     * the output (the close tag).
+     */
+    if (!xo_filt_skip(xop, flags)) {
+	xo_data_append(xop, "</", 2);
+	if (*leader)
+	    xo_data_append(xop, leader, 1);
+	xo_data_escape(xop, name, nlen);
+	xo_data_append(xop, ">", 1);
+
+	if (pretty)
+	    xo_data_append(xop, "\n", 1);
+
+    } else {
+	/*
+	 * Reset the current offset back to the saved one.
+	 */
+	xop->xo_data.xb_curp = xo_buf_data(&xop->xo_data, start_offset);
+
+    }
+
+    xo_filt_do_close_field(xop, name, nlen, flags);
 }
 
 static void
