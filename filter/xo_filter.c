@@ -501,6 +501,10 @@ xo_filter_match_adjust (xo_handle_t *xop, xo_filter_t *xfp, xo_match_t *xmp,
 	label = " allow++";
     }
 
+    /*
+     * XXX We likely don't need this call, since it's done at the
+     * bottom of xo_filter_op_key; revisit this later....
+     */
     xo_filter_update_status(xop, xfp);
 
     return label;
