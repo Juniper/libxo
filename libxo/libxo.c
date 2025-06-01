@@ -5148,24 +5148,6 @@ xo_filt_skip (xo_handle_t *xop, xo_xff_flags_t flags)
 	return TRUE;
 
     return (fstatus == XO_STATUS_DEAD);
-	
-
-#if 0
-    switch (fstatus) {
-    case XO_STATUS_ZERO:
-    case XO_STATUS_FULL:
-	return FALSE;
-
-    case XO_STATUS_TRACK:
-    case XO_STATUS_PRED: /* XXX If looking for a predicate, we might skip? */
-	return (flags & XFF_KEY) ? FALSE : TRUE;
-
-    case XO_STATUS_DEAD:
-    default:
-	return TRUE;
-    }
-#endif
-
 }
 
 static xo_filter_status_t 
@@ -5183,9 +5165,9 @@ xo_filt_do_open_field (xo_handle_t *xop, const char *name, xo_ssize_t nlen,
 	    xo_filt_mark_parents(xop, xo_stack_cur(xop), fstatus);
 
     } else {
-	/* If we're tracking, we don't need non-key values */
-	if (fstatus != XO_STATUS_TRACK)
-	    fstatus = xo_filter_open_field(xop, xfp, name, nlen);
+	fstatus = xo_filter_open_field(xop, xfp, name, nlen);
+	if (fstatus == XO_STATUS_FULL)
+	    xo_filt_mark_parents(xop, xo_stack_cur(xop), fstatus);
     }
 
     return fstatus;
@@ -5202,11 +5184,15 @@ xo_filt_do_close_field (xo_handle_t *xop, const char *name, xo_ssize_t nlen,
 	return fstatus;
 
     if (flags & XFF_KEY) {
+	if (fstatus != XO_STATUS_FULL)
+	    XOIF_SET(xop, XOIF_FILTERING);
+
     } else {
-	if (fstatus == XO_STATUS_TRACK || fstatus == XO_STATUS_PRED)
-	    return fstatus;
+	xo_filter_status_t old_fstatus = fstatus;
 
 	fstatus = xo_filter_close_field(xop, xo_filters(xop), name, nlen);
+
+	xo_filt_reset_parent(xop, xo_stack_cur(xop), old_fstatus, fstatus);
     }
 
     return fstatus;
@@ -5269,14 +5255,17 @@ xo_format_value_encoder (xo_handle_t *xop, const char *name, ssize_t nlen,
     xo_ssize_t dlen = xo_buf_offset(&xop->xo_data) - value_offset - 1;
 
     /* Always call open and close, since they may change the status */
-    xo_filt_do_open_field(xop, name, nlen, data, dlen, flags);
+    if (xop->xo_flags & XOF_FILTER)
+	xo_filt_do_open_field(xop, name, nlen, data, dlen, flags);
+    
 
-    if (!xo_filt_skip(xop, flags)) {
+    if (!((xop->xo_flags & XOF_FILTER) && xo_filt_skip(xop, flags))) {
 	xo_encoder_handle(xop, quote ? XO_OP_STRING : XO_OP_CONTENT, NULL,
 			  name, data, flags);
     }
 
-    xo_filt_do_close_field(xop, name, nlen, flags);
+    if (xop->xo_flags & XOF_FILTER)
+	xo_filt_do_close_field(xop, name, nlen, flags);
 
     /* Reset our buffer, since we've sent the data to the encoder */
     xo_buf_reset(&xop->xo_data);
@@ -5490,14 +5479,22 @@ xo_format_value_xml (xo_handle_t *xop, const char *name, ssize_t nlen,
 
     /* Always call open and close, since they may change the status */
     xo_filter_status_t fstatus UNUSED;
-    fstatus = xo_filt_do_open_field(xop, name, nlen, data, dlen, flags);
+    if (xop->xo_flags & XOF_FILTER)
+	fstatus = xo_filt_do_open_field(xop, name, nlen, data, dlen, flags);
 
     /*
      * We had to call xo_simple_field to format the data and
      * clear any elements of xo_varg.  But we can skip the rest of
      * the output (the close tag).
      */
-    if (!xo_filt_skip(xop, flags)) {
+    if ((xop->xo_flags & XOF_FILTER) && xo_filt_skip(xop, flags)) {
+	/*
+	 * Reset the current offset back to the saved one.
+	 */
+	xop->xo_data.xb_curp = xo_buf_data(&xop->xo_data, start_offset);
+
+    } else {
+	/* We can't skip it, so we go ahead and make the closing tag */
 	xo_data_append(xop, "</", 2);
 	if (*leader)
 	    xo_data_append(xop, leader, 1);
@@ -5507,15 +5504,10 @@ xo_format_value_xml (xo_handle_t *xop, const char *name, ssize_t nlen,
 	if (pretty)
 	    xo_data_append(xop, "\n", 1);
 
-    } else {
-	/*
-	 * Reset the current offset back to the saved one.
-	 */
-	xop->xo_data.xb_curp = xo_buf_data(&xop->xo_data, start_offset);
-
     }
 
-    xo_filt_do_close_field(xop, name, nlen, flags);
+    if (xop->xo_flags & XOF_FILTER)
+	xo_filt_do_close_field(xop, name, nlen, flags);
 }
 
 static void
@@ -7335,6 +7327,7 @@ xo_do_emit_fields (xo_handle_t *xop, xo_field_info_t *fields,
     int gettext_reordered = 0;
     unsigned ftype;
     xo_xff_flags_t flags;
+    xo_xff_flags_t has_keys = 0;
     xo_field_info_t *new_fields = NULL;
     xo_field_info_t *xfip;
     unsigned field;
@@ -7513,6 +7506,17 @@ xo_do_emit_fields (xo_handle_t *xop, xo_field_info_t *fields,
 	    fend[field] = xo_buf_offset(&xop->xo_data);
 	    max_fend = field;
 	}
+
+	has_keys |= (flags & XFF_KEY);
+    }
+
+    if (XOIF_ISSET(xop, XOIF_FILTERING)) {
+	/*
+	 * If we're filtering, we can look at the fields to see if we
+	 * have any keys.  If we don't we can bail.
+	 */
+	if (has_keys == 0)
+	    return 0;
     }
 
     if (gettext_changed && gettext_reordered) {
@@ -8094,8 +8098,9 @@ xo_do_open_container (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
 	/*
 	 * If we are newly "full", then we need all our parents to be emitted
 	 */
-	if (fstatus == XO_STATUS_FULL && old_fstatus != XO_STATUS_FULL)
-	    xo_filt_mark_parents(xop, xsp, fstatus);
+	if (xop->xo_flags & XOF_FILTER)
+	    if (fstatus == XO_STATUS_FULL && old_fstatus != XO_STATUS_FULL)
+		xo_filt_mark_parents(xop, xsp, fstatus);
 
 	rc = xo_printf(xop, "%*s<%s%s", xo_indent(xop), "", leader, name);
 
@@ -8182,31 +8187,6 @@ xo_open_container_d (const char *name)
     return xo_open_container_hf(NULL, XOF_DTRT, name);
 }
 
-#if 0
-static int
-xo_process_filters (xo_handle_t *xop)
-{
-
-	/*
-	 * Are we filtering?  If so, look at if we're supposed to be
-	 * marking output; if so (XO_STATUS_FULL), make output, reset
-	 * the buffer, and clear any offsets higher up on the stack.
-	 * If not, back up and discard the output, using the stack to
-	 * find the appropriate offset.
-	 */
-	if ((flags & XSF_FILTER) && XOIF_ISSET(xop, XOIF_FILTERING)) {
-	    xo_filter_status_t status;
-
-	    status = xo_filter_get_status(xop, xo_filters(xop));
-	    if (status == XO_STATUS_FULL) {
-		xo_failure(xop, "depth_change: filter status full");
-	    } else {
-		xo_failure(xop, "depth_change: filter status not full");
-	    }
-	}
-#endif
-
-
 static int
 xo_do_close_container (xo_handle_t *xop, const char *name)
 {
@@ -8246,7 +8226,8 @@ xo_do_close_container (xo_handle_t *xop, const char *name)
 
     switch (xo_style(xop)) {
     case XO_STYLE_XML:
-	xo_filt_reset_parent(xop, xsp, old_fstatus, fstatus);
+	if (xop->xo_flags & XOF_FILTER)
+	    xo_filt_reset_parent(xop, xsp, old_fstatus, fstatus);
 
 	xo_depth_change(xop, name, -1, -1, XSS_CLOSE_CONTAINER,
 			XSF_FILTER, fstatus, 0);
@@ -8609,8 +8590,9 @@ xo_do_open_instance (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
 	/*
 	 * If we are newly "full", then we need all our parents to be emitted
 	 */
-	if (fstatus == XO_STATUS_FULL && old_fstatus != XO_STATUS_FULL)
-	    xo_filt_mark_parents(xop, xsp, fstatus);
+	if (xop->xo_flags & XOF_FILTER)
+	    if (fstatus == XO_STATUS_FULL && old_fstatus != XO_STATUS_FULL)
+		xo_filt_mark_parents(xop, xsp, fstatus);
 
 	rc = xo_printf(xop, "%*s<%s%s", xo_indent(xop), "", leader, name);
 
@@ -8719,11 +8701,13 @@ xo_do_close_instance (xo_handle_t *xop, const char *name)
 
     switch (xo_style(xop)) {
     case XO_STYLE_XML:
-	xo_filt_reset_parent(xop, xsp, old_fstatus, fstatus);
+	if (xop->xo_flags & XOF_FILTER)
+	    xo_filt_reset_parent(xop, xsp, old_fstatus, fstatus);
 
 	xo_depth_change(xop, name, -1, -1, XSS_CLOSE_INSTANCE, 0, fstatus, 0);
 
-	if (xo_filt_want_output(xop, old_fstatus))
+	if (!(xop->xo_flags & XOF_FILTER)
+	    || xo_filt_want_output(xop, old_fstatus))
 	    rc = xo_printf(xop, "%*s</%s%s>%s", xo_indent(xop), "",
 			   leader, name, ppn);
 	break;
