@@ -52,6 +52,8 @@ main (int argc, char **argv)
 	{ XO_INFO_NULL },
     };
 
+    int opt_count = 1;
+
     char name[] = "test_01.test";  /* test trimming of xo_program */
     argv[0] = name;
     
@@ -76,6 +78,8 @@ main (int argc, char **argv)
 	    xo_set_flags(NULL, XOF_INFO);
 	else if (xo_streq(argv[argc], "debug"))
 	    xo_set_flags(NULL, XOF_DEBUG);
+	else if (xo_streq(argv[argc], "count"))
+	    opt_count = atoi(argv[++argc]);
         else if (xo_streq(argv[argc], "error")) {
             close(-1);
             xo_err(1, "error detected");
@@ -154,19 +158,21 @@ main (int argc, char **argv)
     xo_open_container("data2");
     xo_open_list("item");
 
-    for (ip = list; ip->i_title; ip++) {
-	xo_open_instance("item");
+    for (int x = 0; x < opt_count; x++) {
+	for (ip = list; ip->i_title; ip++) {
+	    xo_open_instance("item");
 
-	xo_emit("{keq:sku/%s-%u/%s-000-%u}", ip->i_sku_base, ip->i_sku_num);
-	xo_emit("{L:Item} '{k:name/%s}':\n", ip->i_title);
-	xo_emit("{P:   }{L:Total sold}: {n:sold/%u%s}\n",
-		ip->i_sold, ip->i_sold ? ".0" : "");
-	xo_emit("{P:   }{Lcw:In stock}{:in-stock/%u}\n", ip->i_instock);
-	xo_emit("{P:   }{Lcw:On order}{:on-order/%u}\n", ip->i_onorder);
-	xo_emit("{P:   }{L:SKU}: {qkd:sku/%s-000-%u}\n",
-		ip->i_sku_base, ip->i_sku_num);
+	    xo_emit("{keq:sku/%s-%u/%s-000-%u}", ip->i_sku_base, ip->i_sku_num);
+	    xo_emit("{L:Item} '{k:name/%s}':\n", ip->i_title);
+	    xo_emit("{P:   }{L:Total sold}: {n:sold/%u%s}\n",
+		    ip->i_sold, ip->i_sold ? ".0" : "");
+	    xo_emit("{P:   }{Lcw:In stock}{:in-stock/%u}\n", ip->i_instock);
+	    xo_emit("{P:   }{Lcw:On order}{:on-order/%u}\n", ip->i_onorder);
+	    xo_emit("{P:   }{L:SKU}: {qkd:sku/%s-000-%u}\n",
+		    ip->i_sku_base, ip->i_sku_num);
 
-	xo_close_instance("item");
+	    xo_close_instance("item");
+	}
     }
 
     xo_close_list("item");
