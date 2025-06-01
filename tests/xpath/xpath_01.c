@@ -170,7 +170,7 @@ main (int argc, char **argv)
 	    break;
 
 	case '=':		/* Non-key field */
-	    field = cp + 1;
+	    field = trim(cp + 1);
 	    value = clean_token(field);
 	    if (!*field || !*value)
 		break;
@@ -180,7 +180,7 @@ main (int argc, char **argv)
 	    break;
 
 	case '$':
-	    field = cp + 1;
+	    field = trim(cp + 1);
 	    value = clean_token(field);
 	    if (!*field || !*value)
 		break;
