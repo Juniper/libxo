@@ -2283,8 +2283,8 @@ xo_filter_dump_matches (xo_handle_t *xop, xo_filter_t *xfp)
  */
 static int
 xo_filter_op_passthru (XO_ENCODER_HANDLER_ARGS,
-		      xo_encoder_func_t func XO_UNUSED,
- 		      struct xo_filter_s *xfp)
+		      xo_encoder_func_t func UNUSED,
+ 		      struct xo_filter_s *xfp UNUSED)
 {
     int rc = 0;
     xo_buffer_t *xbp = bufp;
