@@ -158,3 +158,11 @@ instruments.run:
 
 instruments.open:
 	open -a Instruments ${TEST}.trace
+
+BM_IMAGE= ./tests/core/test_01.test
+BM_ARGS=--libxo:XP,filter=data2/item'[sku=="HRD-000-632"]' 
+benchmark:
+	for i in 1 10 100 1000 10000 100000 1000000; do \
+		echo == $$i ===; \
+		time ${BM_IMAGE} ${BM_ARGS} count $$i > /dev/null; \
+	done
