@@ -84,6 +84,16 @@ xo_buf_offset (xo_buffer_t *xbp)
     return xbp ? (xbp->xb_curp - xbp->xb_bufp) : 0;
 }
 
+/*
+ * Get the current offset
+ */
+static inline void
+xo_buf_set_offset (xo_buffer_t *xbp, xo_off_t off)
+{
+    if (xbp && xbp->xb_bufp)
+	xbp->xb_curp = xbp->xb_bufp + off;
+}
+
 static inline char *
 xo_buf_data (xo_buffer_t *xbp, xo_off_t offset)
 {
