@@ -1258,7 +1258,7 @@ xo_write (xo_handle_t *xop)
 	xo_anchor_clear(xop);
 	if (xop->xo_write)
 	    rc = xop->xo_write(xop->xo_opaque, xbp->xb_bufp);
-	xbp->xb_curp = xbp->xb_bufp;
+	xo_buf_reset(xbp);
     }
 
     /* Turn off the flags that don't survive across writes */
@@ -1585,7 +1585,7 @@ xo_buf_append_locale (xo_handle_t *xop, xo_buffer_t *xbp,
 	slen = xo_buf_utf8_len(xop, cp, ep - cp);
 	if (slen <= 0) {
 	    /* Bad data; back it all out */
-	    xbp->xb_curp = xbp->xb_bufp + save_off;
+	    xo_buf_set_offset(xbp, save_off);
 	    return;
 	}
 
@@ -3428,7 +3428,7 @@ xo_format_string (xo_handle_t *xop, xo_buffer_t *xbp, xo_xff_flags_t flags,
 	     */
 	    off2 = xbp->xb_curp - xbp->xb_bufp;
 	    rc = off2 - off;
-	    xbp->xb_curp = xbp->xb_bufp + off;
+	    xo_buf_set_offset(xbp, off);
 
 	    return rc;
 	}
@@ -3445,7 +3445,7 @@ xo_format_string (xo_handle_t *xop, xo_buffer_t *xbp, xo_xff_flags_t flags,
      */
     off2 = xbp->xb_curp - xbp->xb_bufp;
     rc = off2 - off;
-    xbp->xb_curp = xbp->xb_bufp + off;
+    xo_buf_set_offset(xbp, off);
 
     if (cols < xfp->xf_width[XF_WIDTH_MIN]) {
 	/*
@@ -3482,7 +3482,7 @@ xo_format_string (xo_handle_t *xop, xo_buffer_t *xbp, xo_xff_flags_t flags,
     return rc;
 
  bail:
-    xbp->xb_curp = xbp->xb_bufp + off;
+    xo_buf_set_offset(xbp, off);
     return 0;
 }
 
@@ -3685,7 +3685,7 @@ xo_format_gettext (xo_handle_t *xop, xo_xff_flags_t flags,
     char *newcopy = alloca(nlen + 1);
     memcpy(newcopy, newstr, nlen + 1);
 
-    xbp->xb_curp = xbp->xb_bufp + start_offset; /* Reset the buffer */
+    xo_buf_set_offset(xbp, start_offset); /* Reset the buffer */
     return xo_format_string_direct(xop, xbp, flags, NULL, newcopy, nlen, 0,
 				   need_enc, XF_ENC_UTF8);
 }
@@ -4243,7 +4243,7 @@ xo_format_humanize (xo_handle_t *xop, xo_buffer_t *xbp,
 	 * 10 as a rectal number to cover those scenarios.
 	 */
 	if (xo_buf_has_room(xbp, 10)) {
-	    xbp->xb_curp = xbp->xb_bufp + savep->xhs_offset;
+	    xo_buf_set_offset(xbp, savep->xhs_offset);
 
 	    ssize_t rc;
 	    ssize_t left = (xbp->xb_bufp + xbp->xb_size) - xbp->xb_curp;
@@ -4338,7 +4338,7 @@ xo_buf_append_div (xo_handle_t *xop, const char *class, xo_xff_flags_t flags,
 	 * We use the format buffer.
 	 */
 	xo_buffer_t *pbp = &xop->xo_predicate;
-	pbp->xb_curp = pbp->xb_bufp; /* Restart buffer */
+	xo_buf_reset(pbp); /* Restart buffer */
 
 	xo_buf_append(pbp, "[", 1);
 	xo_buf_escape(xop, pbp, name, nlen, 0);
@@ -4637,7 +4637,7 @@ xo_format_title (xo_handle_t *xop, xo_field_info_t *xfip,
 
 	/* xo_do_format_field moved curp, so we need to reset it */
 	rc = xbp->xb_curp - (xbp->xb_bufp + start);
-	xbp->xb_curp = xbp->xb_bufp + start;
+	xo_buf_set_offset(xbp, start);
     }
 
     /* If we're styling HTML, then we need to escape it */
@@ -5096,7 +5096,7 @@ xo_filt_reset_parent (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED,
 	    xo_buffer_t *xbp = &xop->xo_data;
 	    xo_off_t off = xo_buf_offset(xbp);
 	    if (off > cur->xs_wb_off)
-		xop->xo_data.xb_curp = xo_buf_data(xbp, cur->xs_wb_off);
+		xo_buf_set_offset(xbp, cur->xs_wb_off);
 	}
     }
 
@@ -5446,7 +5446,7 @@ xo_format_value_xml (xo_handle_t *xop, const char *name, ssize_t nlen,
     if (xop->xo_attrs.xb_curp != xop->xo_attrs.xb_bufp) {
 	xo_data_append(xop, xop->xo_attrs.xb_bufp,
 		       xop->xo_attrs.xb_curp - xop->xo_attrs.xb_bufp);
-	xop->xo_attrs.xb_curp = xop->xo_attrs.xb_bufp;
+	xo_buf_reset(&xop->xo_attrs);
     }
 
     /*
@@ -5491,7 +5491,7 @@ xo_format_value_xml (xo_handle_t *xop, const char *name, ssize_t nlen,
 	/*
 	 * Reset the current offset back to the saved one.
 	 */
-	xop->xo_data.xb_curp = xo_buf_data(&xop->xo_data, start_offset);
+	xo_buf_set_offset(&xop->xo_data, start_offset);
 
     } else {
 	/* We can't skip it, so we go ahead and make the closing tag */
@@ -5687,7 +5687,7 @@ xo_set_gettext_domain (xo_handle_t *xop, xo_field_info_t *xfip,
 
     /* Reset the current buffer point to avoid emitting the name as output */
     if (start_offset >= 0)
-	xop->xo_data.xb_curp = xop->xo_data.xb_bufp + start_offset;
+	xo_buf_set_offset(&xop->xo_data, start_offset);
 }
 
 static void
@@ -6147,7 +6147,7 @@ xo_format_units (xo_handle_t *xop, xo_field_info_t *xfip,
     ssize_t now = xbp->xb_curp - xbp->xb_bufp;
     ssize_t delta = now - stop;
     if (delta <= 0) {		/* Strange; no output to move */
-	xbp->xb_curp = xbp->xb_bufp + stop; /* Reset buffer to prior state */
+	xo_buf_set_offset(xbp, stop); /* Reset buffer to prior state */
 	return;
     }
 
@@ -6231,7 +6231,7 @@ xo_find_width (xo_handle_t *xop, xo_field_info_t *xfip,
 	    }
 
 	    /* Reset the cur pointer to where we found it */
-	    xbp->xb_curp = xbp->xb_bufp + start_offset;
+	    xo_buf_set_offset(xbp, start_offset);
 	    if (anchor_was_set)
 		XOIF_SET(xop, XOIF_ANCHOR);
 	}
@@ -8108,7 +8108,7 @@ xo_do_open_container (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
 	    rc += xop->xo_attrs.xb_curp - xop->xo_attrs.xb_bufp;
 	    xo_data_append(xop, xop->xo_attrs.xb_bufp,
 			   xop->xo_attrs.xb_curp - xop->xo_attrs.xb_bufp);
-	    xop->xo_attrs.xb_curp = xop->xo_attrs.xb_bufp;
+	    xo_buf_reset(&xop->xo_attrs);
 	}
 
 	rc += xo_printf(xop, ">%s", ppn);
@@ -8600,7 +8600,7 @@ xo_do_open_instance (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
 	    rc += xop->xo_attrs.xb_curp - xop->xo_attrs.xb_bufp;
 	    xo_data_append(xop, xop->xo_attrs.xb_bufp,
 			   xop->xo_attrs.xb_curp - xop->xo_attrs.xb_bufp);
-	    xop->xo_attrs.xb_curp = xop->xo_attrs.xb_bufp;
+	    xo_buf_reset(&xop->xo_attrs);
 	}
 
 	rc += xo_printf(xop, ">%s", ppn);
