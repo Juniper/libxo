@@ -210,6 +210,7 @@ typedef struct xo_stack_s {
     xo_state_t xs_state;	/* State for this stack frame */
     xo_filter_status_t xs_fstatus; /* Filter status */
     xo_off_t xs_wb_off;		/* Offset of buffer before this level */
+    xo_off_t xs_key_off;	/* Offset of end of last key renderer */
     char *xs_name;		/* Name (for XPath value) */
     char *xs_keys;		/* XPath predicate for any key fields */
 } xo_stack_t;
@@ -5068,6 +5069,7 @@ xo_filt_mark_parents (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED,
 	       xsp->xs_wb_off, xsp->xs_fstatus);
 	xsp->xs_fstatus = fstatus;
 	xsp->xs_wb_off = XS_OFFSET_CLEAR;
+	xsp->xs_key_off = XS_OFFSET_CLEAR;
     }
 
     XOIF_CLEAR(xop, XOIF_FILTERING);
@@ -5094,13 +5096,29 @@ xo_filt_reset_parent (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED,
 	 */
 	if (cur->xs_wb_off != XS_OFFSET_CLEAR) {
 	    xo_buffer_t *xbp = &xop->xo_data;
-	    xo_off_t off = xo_buf_offset(xbp);
-	    if (off > cur->xs_wb_off)
-		xo_buf_set_offset(xbp, cur->xs_wb_off);
+	    xo_off_t max_off = xo_buf_offset(xbp);
+	    xo_off_t cur_off = cur->xs_wb_off;
+
+	    if (cur_off < max_off) { /* Sanity check */
+#if 1
+		/*
+		 * If the key offset is set, we don't want to whack
+		 * any key information, so use max(cur_off, key_off)
+		 */
+		xo_off_t key_off = cur->xs_key_off;
+
+		if (key_off != XS_OFFSET_CLEAR
+		    && key_off <= max_off
+		    && key_off > cur_off)
+		    cur_off = key_off;
+#endif
+		xo_buf_set_offset(xbp, cur_off);
+	    }
 	}
     }
 
     cur->xs_wb_off = XS_OFFSET_CLEAR;
+    cur->xs_key_off = XS_OFFSET_CLEAR;
 
     if (next_fstatus != XO_STATUS_FULL)
 	XOIF_SET(xop, XOIF_FILTERING);
@@ -5479,8 +5497,9 @@ xo_format_value_xml (xo_handle_t *xop, const char *name, ssize_t nlen,
 
     /* Always call open and close, since they may change the status */
     xo_filter_status_t fstatus UNUSED;
-    if (xop->xo_flags & XOF_FILTER)
+    if (xop->xo_flags & XOF_FILTER) {
 	fstatus = xo_filt_do_open_field(xop, name, nlen, data, dlen, flags);
+    }
 
     /*
      * We had to call xo_simple_field to format the data and
@@ -5504,6 +5523,11 @@ xo_format_value_xml (xo_handle_t *xop, const char *name, ssize_t nlen,
 	if (pretty)
 	    xo_data_append(xop, "\n", 1);
 
+	/* Record the "end of key" offset */
+	if (flags & XFF_KEY) {
+	    xo_stack_t *xsp = xo_stack_cur(xop);
+	    xsp->xs_key_off = xo_buf_offset(&xop->xo_data);
+	}
     }
 
     if (xop->xo_flags & XOF_FILTER)
@@ -8005,7 +8029,9 @@ xo_depth_change (xo_handle_t *xop, const char *name,
 	    }
 	}
 
-	xsp->xs_wb_off = XS_OFFSET_CLEAR; /* Clear this field */
+	/* Clear any offsets */
+	xsp->xs_wb_off = XS_OFFSET_CLEAR;
+	xsp->xs_key_off = XS_OFFSET_CLEAR;
 
 	if (xsp->xs_name) {
 	    xo_free(xsp->xs_name);
