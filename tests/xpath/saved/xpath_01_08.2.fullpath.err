@@ -109,24 +109,24 @@ main: status: dead
 main: input '-four'
 main: status: dead
 main: input '-three'
-main: status: dead
+main: status: track
 main: input '-two'
 main: status: track
 main: input '+two'
-main: status: dead
+main: status: track
 main: input '$b 2'
 main: key: 'b'='2'
-main: status: dead
+main: status: track
 main: input '+three'
-main: status: dead
+main: status: track
 main: input '=c -33'
 main: field: 'c'='-33'
-main: status: dead
+main: status: track
 main: input '=four crispo'
 main: field: 'four'='crispo'
-main: status: dead
+main: status: track
 main: input '-three'
-main: status: dead
+main: status: track
 main: input '-two'
 main: status: track
 main: input '-one'
@@ -169,9 +169,9 @@ main: field: 'c'='-33'
 main: status: dead
 main: input '=four crispo'
 main: field: 'four'='crispo'
-main: status: dead
+main: status: track
 main: input '-three'
-main: status: dead
+main: status: track
 main: input '-two'
 main: status: track
 main: input '-one'
