@@ -2133,6 +2133,7 @@ xo_filter_op_key (XO_FILTER_KEY_SIGNATURE)
 
     for (i = 0; xmp; i++, xmp = xmp->xm_next) { /* For each active match */
 	xo_stack_t *xsp = xmp->xm_stackp;
+
 	if (xsp->xs_state != XSS_PRED) /* Not looking for keys */
 	    continue;
 
@@ -2154,8 +2155,7 @@ xo_filter_op_key (XO_FILTER_KEY_SIGNATURE)
 	    xo_filter_key_add(xop, xfp, xmp, tag, tlen, value, vlen);
 
 	    const char *test UNUSED = xo_filter_key_find(xfp, xmp, tag);
-	    XO_DBG(xop, "filter: new key: [%s] '%s'",
-		   tag, test ?: "");
+	    XO_DBG(xop, "filter: new key: [%s] '%s'", tag, test ?: "");
 
 	    xo_eval_value_t result = xo_filter_pred_eval(xop, xfp, xmp);
 	    int pred = xo_eval_cast_int64(xfp, result);
