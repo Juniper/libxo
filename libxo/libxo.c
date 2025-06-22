@@ -5100,7 +5100,6 @@ xo_filt_reset_parent (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED,
 	    xo_off_t cur_off = cur->xs_wb_off;
 
 	    if (cur_off < max_off) { /* Sanity check */
-#if 1
 		/*
 		 * If the key offset is set, we don't want to whack
 		 * any key information, so use max(cur_off, key_off)
@@ -5111,7 +5110,7 @@ xo_filt_reset_parent (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED,
 		    && key_off <= max_off
 		    && key_off > cur_off)
 		    cur_off = key_off;
-#endif
+
 		xo_buf_set_offset(xbp, cur_off);
 	    }
 	}
@@ -5170,7 +5169,8 @@ xo_filt_skip (xo_handle_t *xop, xo_xff_flags_t flags)
 
 static xo_filter_status_t 
 xo_filt_do_open_field (xo_handle_t *xop, const char *name, xo_ssize_t nlen,
-		       const char *value, xo_ssize_t vlen, xo_xff_flags_t flags)
+		       const char *value, xo_ssize_t vlen,
+		       int pass_field, xo_xff_flags_t flags)
 {
     xo_filter_t *xfp = xo_filters(xop);
     xo_filter_status_t fstatus = xo_filter_get_status(xop, xfp);
@@ -5182,36 +5182,40 @@ xo_filt_do_open_field (xo_handle_t *xop, const char *name, xo_ssize_t nlen,
 	if (fstatus == XO_STATUS_FULL)
 	    xo_filt_mark_parents(xop, xo_stack_cur(xop), fstatus);
 
-    } else {
-	fstatus = xo_filter_open_field(xop, xfp, name, nlen);
-	if (fstatus == XO_STATUS_FULL)
-	    xo_filt_mark_parents(xop, xo_stack_cur(xop), fstatus);
+	/* The caller doesn't want us calling open/close_field */
+	if (!pass_field)
+	    return fstatus;
     }
+
+    fstatus = xo_filter_open_field(xop, xfp, name, nlen);
+    if (fstatus == XO_STATUS_FULL)
+	xo_filt_mark_parents(xop, xo_stack_cur(xop), fstatus);
 
     return fstatus;
 }
 
 static xo_filter_status_t 
 xo_filt_do_close_field (xo_handle_t *xop, const char *name, xo_ssize_t nlen,
-			xo_xff_flags_t flags)
+			int pass_field, xo_xff_flags_t flags UNUSED)
 {
     xo_filter_t *xfp = xo_filters(xop);
     xo_filter_status_t fstatus = xo_filter_get_status(xop, xfp);
 
+#if 0
     if (fstatus == XO_STATUS_DEAD)
 	return fstatus;
+#endif
 
-    if (flags & XFF_KEY) {
-	if (fstatus != XO_STATUS_FULL)
-	    XOIF_SET(xop, XOIF_FILTERING);
+    xo_filter_status_t old_fstatus = fstatus;
 
-    } else {
-	xo_filter_status_t old_fstatus = fstatus;
+    if ((flags & XFF_KEY) && !pass_field)
+	return fstatus;
 
-	fstatus = xo_filter_close_field(xop, xo_filters(xop), name, nlen);
+    fstatus = xo_filter_close_field(xop, xo_filters(xop), name, nlen);
+    if (fstatus != XO_STATUS_FULL)
+	XOIF_SET(xop, XOIF_FILTERING);
 
-	xo_filt_reset_parent(xop, xo_stack_cur(xop), old_fstatus, fstatus);
-    }
+    xo_filt_reset_parent(xop, xo_stack_cur(xop), old_fstatus, fstatus);
 
     return fstatus;
 }
@@ -5274,7 +5278,7 @@ xo_format_value_encoder (xo_handle_t *xop, const char *name, ssize_t nlen,
 
     /* Always call open and close, since they may change the status */
     if (xop->xo_flags & XOF_FILTER)
-	xo_filt_do_open_field(xop, name, nlen, data, dlen, flags);
+	xo_filt_do_open_field(xop, name, nlen, data, dlen, FALSE, flags);
     
 
     if (!((xop->xo_flags & XOF_FILTER) && xo_filt_skip(xop, flags))) {
@@ -5283,7 +5287,7 @@ xo_format_value_encoder (xo_handle_t *xop, const char *name, ssize_t nlen,
     }
 
     if (xop->xo_flags & XOF_FILTER)
-	xo_filt_do_close_field(xop, name, nlen, flags);
+	xo_filt_do_close_field(xop, name, nlen, FALSE, flags);
 
     /* Reset our buffer, since we've sent the data to the encoder */
     xo_buf_reset(&xop->xo_data);
@@ -5498,7 +5502,8 @@ xo_format_value_xml (xo_handle_t *xop, const char *name, ssize_t nlen,
     /* Always call open and close, since they may change the status */
     xo_filter_status_t fstatus UNUSED;
     if (xop->xo_flags & XOF_FILTER) {
-	fstatus = xo_filt_do_open_field(xop, name, nlen, data, dlen, flags);
+	fstatus = xo_filt_do_open_field(xop, name, nlen, data, dlen,
+					TRUE, flags);
     }
 
     /*
@@ -5531,7 +5536,7 @@ xo_format_value_xml (xo_handle_t *xop, const char *name, ssize_t nlen,
     }
 
     if (xop->xo_flags & XOF_FILTER)
-	xo_filt_do_close_field(xop, name, nlen, flags);
+	xo_filt_do_close_field(xop, name, nlen, TRUE, flags);
 }
 
 static void
