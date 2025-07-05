@@ -24,6 +24,11 @@
 #define XO_DBG(_xop, _fmt...) do { } while (0)
 #endif /* XO_XPARSE_DEBUG */
 
+/*
+ * We do all our allocation in a single blob, so we use offsets to
+ * items in the blob, since we know it can be realloced (moved).
+ */
+
 typedef unsigned xo_xparse_node_type_t;
 typedef xo_off_t xo_xparse_str_id_t;
 typedef xo_off_t xo_xparse_node_id_t;
