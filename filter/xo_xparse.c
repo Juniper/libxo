@@ -959,17 +959,13 @@ xo_xparse_lexer (xo_xparse_data_t *xdp)
 		if ((uint8_t) xdp->xd_buf[xdp->xd_cur] == ch1)
 		    break;
 
-#if 1
 		int bump = (xdp->xd_buf[xdp->xd_cur] == '\\') ? 1 : 0;
-#endif
 
 		if (xo_xparse_move_cur(xdp))
 		    return -1;
 
-#if 1
 		if (bump && xdp->xd_cur < xdp->xd_len)
 		    xdp->xd_cur += bump;
-#endif
 	    }
 
 	    if (xdp->xd_cur < xdp->xd_len)
@@ -1103,12 +1099,6 @@ xo_xpath_yylex (xo_xparse_data_t *xdp, xo_xparse_node_id_t *yylvalp)
 
 	return rc;
     }
-
-#if 0
-    /* Add the record flags to the current set */
-    xdp->xd_flags |= xdp->xd_flags_next;
-    xdp->xd_flags_next = 0;
-#endif
 
     /*
      * Discard the previous token by moving the start pointer
