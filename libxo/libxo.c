@@ -16,7 +16,7 @@
  * encoding including binary ones like CBOR, thrift, protobufs, etc.
  *
  * Full documentation is available in ./doc/libxo.txt or online at:
- *   http://juniper.github.io/libxo/libxo-manual.html
+ *   https://juniper.github.io/libxo/libxo-manual.html
  *
  * For first time readers, the core bits of code to start looking at are:
  * - xo_do_emit() -- parse and emit a set of fields

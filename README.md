@@ -62,6 +62,6 @@ option:
 
 View the beautiful documentation at:
 
-http://juniper.github.io/libxo/libxo-manual.html
+https://juniper.github.io/libxo/libxo-manual.html
 
 [![Analytics](https://ga-beacon.appspot.com/UA-56056421-1/Juniper/libxo/Readme)](https://github.com/Juniper/libxo)

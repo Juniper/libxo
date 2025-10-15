@@ -14,7 +14,7 @@
  * while minimizing the cost/impact on the code.
  *
  * Full documentation is available in ./doc/libxo.txt or online at:
- *   http://juniper.github.io/libxo/libxo-manual.html
+ *   https://juniper.github.io/libxo/libxo-manual.html
  */
 
 #ifndef INCLUDE_XO_H
