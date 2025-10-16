@@ -1,10 +1,6 @@
 name: C/C++ CI
 
-on:
-  push:
-    branches: [ master develop ]
-  pull_request:
-    branches: [ master develop ]
+on: [push, pull_request]
 
 jobs:
   build:
@@ -12,9 +8,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v7
+    - name: resolve dependency
+      run: |
+        sudo apt-get -qq update
+        sudo apt-get -qq install byacc
     - name: configure
-      run: ./configure
+      run: |
+        sh bin/setup.sh
+        ./configure
     - name: make
       run: make
     - name: make check
