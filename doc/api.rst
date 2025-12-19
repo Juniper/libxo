@@ -1358,7 +1358,7 @@ The message name should follow the conventions in
 
     /* Generate a syslog message */
     xo_syslog(LOG_ERR, "upload-failed",
-              "error <%d> uploading file '{:filename}' "
+              "error <{:code/%d}> uploading file '{:filename}' "
               "as '{:target/%s:%s}'",
               code, filename, protocol, remote);
 
