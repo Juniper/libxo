@@ -1,0 +1,22 @@
+op create: [test] [] [0]
+op version: [] [3.1.4] [0]
+{{<11>1 2015-06-23T13:47:09.123-0500 worker-host test-program 222 no-content [no-content@42] ﻿%s}}
+{{test-program: }}
+{{%s}}
+
+{{<11>1 2015-06-23T13:47:09.123-0500 worker-host test-program 222 upload-failed [upload-failed@42 code="42" filename="bloopers.mov" target="https:/tmp/"] ﻿error <42> uploading file 'bloopers.mov' as 'https:/tmp/'}}
+{{test-program: }}
+{{error <42> uploading file 'bloopers.mov' as 'https:/tmp/'}}
+
+{{<14>1 2015-06-23T13:47:09.123-0500 worker-host test-program 222 poofd-invalid-state [poofd-invalid-state@42 current="5" connection="15"] ﻿state 5 is invalid 15}}
+{{test-program: }}
+{{state 5 is invalid 15}}
+
+{{<35>1 2015-06-23T13:47:09.123-0500 worker-host test-program 222 login-failed [login-failed@42 user="phil" address="127.0.0.1"] ﻿Login failed; user 'phil' from host '127.0.0.1'}}
+{{test-program: }}
+{{Login failed; user 'phil' from host '127.0.0.1'}}
+
+{{<11>1 2015-06-23T13:47:09.123-0500 worker-host test-program 222 poofd-missing-file [poofd-missing-file@42 filename="bloopers.mov" error="Cannot allocate memory"] ﻿'bloopers.mov' not found: Cannot allocate memory}}
+{{test-program: }}
+{{'bloopers.mov' not found: Cannot allocate memory}}
+
