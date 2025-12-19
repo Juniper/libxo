@@ -674,6 +674,11 @@ xo_set_syslog_handler (xo_syslog_open_t open_func, xo_syslog_send_t send_func,
 void
 xo_set_syslog_enterprise_id (unsigned short eid);
 
+typedef unsigned short xo_syslog_bufsiz_t;
+
+xo_syslog_bufsiz_t
+xo_set_syslog_bufsiz (xo_syslog_bufsiz_t bufsiz);
+
 typedef void (*xo_simplify_field_func_t)(const char *, unsigned, int);
 
 char *
