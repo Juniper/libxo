@@ -103,6 +103,14 @@
 #endif /* _SC_HOST_NAME_MAX */
 #endif /* HOST_NAME_MAX */
 
+#ifndef XO_SYSLOG_BUFSIZ
+#define XO_SYSLOG_BUFSIZ 2048 /* "SHOULD" value from RFC5424 */
+#endif /* XO_SYSLOG_BUFSIZ */
+
+#ifndef XO_SYSLOG_BUFSIZ_MIN
+#define XO_SYSLOG_BUFSIZ_MIN 480 /* "MUST" value from RFC5424 */
+#endif /* XO_SYSLOG_BUFSIZ_MIN */
+
 #ifndef UNUSED
 #define UNUSED __attribute__ ((__unused__))
 #endif /* UNUSED */
@@ -116,6 +124,7 @@ static int xo_logfacility = LOG_USER;	/* default facility code */
 static int xo_logmask = 0xff;		/* mask of priorities to be logged */
 static pthread_mutex_t xo_syslog_mutex UNUSED = PTHREAD_MUTEX_INITIALIZER;
 static int xo_unit_test;		/* Fake data for unit test */
+static xo_syslog_bufsiz_t xo_syslog_bufsiz = XO_SYSLOG_BUFSIZ; /* Max payload */
 
 #define REAL_VOID(_x) \
     do { int really_ignored = _x; if (really_ignored) { }} while (0)
@@ -149,7 +158,7 @@ static xo_syslog_close_t xo_syslog_close;
 
 static char xo_syslog_enterprise_id[12];
 
-/*
+/**
  * Record an enterprise ID, which functions as a namespace for syslog
  * messages.  The value is pre-formatted into a string.  This allows
  * applications to customize their syslog message set, when needed. 
@@ -159,6 +168,22 @@ xo_set_syslog_enterprise_id (unsigned short eid)
 {
     snprintf(xo_syslog_enterprise_id, sizeof(xo_syslog_enterprise_id),
 	     "%u", eid);
+}
+
+/**
+ * Record a new maximum buffer (payload) size beyond which content is
+ * discarded.   The current value is returned.  Values less than
+ * XO_SYSLOG_BUFSIZ_MIN (480) are ignored, allowing
+ * `xo_set_syslog_bufsiz(0)` to return the current value.
+ * The default value is 2048, the "SHOULD" value from RFC5424.
+ */
+xo_syslog_bufsiz_t
+xo_set_syslog_bufsiz (xo_syslog_bufsiz_t bufsiz)
+{
+    xo_syslog_bufsiz_t old = xo_syslog_bufsiz;
+    if (bufsiz > XO_SYSLOG_BUFSIZ_MIN)
+        xo_syslog_bufsiz = bufsiz;
+    return old;
 }
 
 /*
@@ -458,7 +483,10 @@ xo_syslog_handle_write (void *opaque, const char *data)
     int len = strlen(data);
     int left = xo_buf_left(xbp);
 
-    if (len > left - 1)
+    if (left <= 0)
+	return 0;
+
+    if (len + 1 > left)
 	len = left - 1;
 
     memcpy(xbp->xb_curp, data, len);
@@ -489,7 +517,7 @@ void
 xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
 {
     int saved_errno = errno;
-    char tbuf[2048];
+    char tbuf[xo_syslog_bufsiz];
     char *tp = NULL, *ep = NULL;
     unsigned start_of_msg = 0;
     char *v0_hdr = NULL;
@@ -557,9 +585,9 @@ xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
 	 * For backwards compatibility, we need to make the old-style
 	 * message.  This message can be emitted to the console/tty.
 	 */
-	v0_hdr = alloca(2048);
+	v0_hdr = alloca(xo_syslog_bufsiz);
 	tp = v0_hdr;
-	ep = v0_hdr + 2048;
+	ep = v0_hdr + xo_syslog_bufsiz;
 
 	if (xo_logtag != NULL)
 	    tp += xo_snprintf(tp, ep - tp, "%s", xo_logtag);
@@ -680,7 +708,7 @@ xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
     xo_set_flags(xop, XOF_UTF8);
 
     errno = saved_errno;	/* Restore saved error value */
-    xo_emit_hv(xop, fmt, ap);
+    xo_emit_hv(xop, fmt, vap);
     xo_flush_h(xop);
 
     /* Remove a trailing newline */
