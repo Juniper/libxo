@@ -12,6 +12,7 @@
 .Os
 .Sh NAME
 .Nm xo_syslog , xo_vsyslog , xo_open_log , xo_close_log , xo_set_logmask
+.Nm xo_set_syslog_enterprise_id
 .Nd create SYSLOG (RFC5424) log records using libxo formatting
 .Sh LIBRARY
 .Lb libxo
@@ -27,6 +28,11 @@
 .Fn xo_open_log "const char *ident" "int logstat" "int logfac"
 .Ft int
 .Fn xo_set_logmask "int pmask"
+.Ft void
+.Fn xo_set_syslog_enterprise_id "unsigned short eid"
+
+.Ft xo_syslog_bufsiz_t
+.Fn xo_set_syslog_bufsiz "xo_syslog_bufsiz_t bufsiz"
 .Sh DESCRIPTION
 The
 .Fn xo_syslog
@@ -66,6 +72,20 @@ The extra underscores in the names are unfortunate, but keep
 consistency in
 .Nm libxo
 function names.
+.Pp
+.Fn xo_set_syslog_enterprise_id
+records an enterprise ID, as defined by RFC 5424 and RFC 2578.
+This functions as a namespace for syslog messages,
+applications to customize their syslog message set, when needed. 
+.Pp
+.Fn xo_set_syslog_bufsiz
+records a new maximum buffer (payload) size beyond which content is
+discarded.
+The current value is returned.
+Values less than 480 are ignored, allowing
+.Fn xo_set_syslog_bufsiz "0"
+to return the current value.
+The default value is 2048, the "SHOULD" value from RFC5424.
 .Sh EXAMPLES
 .Bd -literal -offset indent
     xo_syslog(LOG_LOCAL4 | LOG_NOTICE, "ID47",
