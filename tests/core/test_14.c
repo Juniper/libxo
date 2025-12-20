@@ -140,6 +140,8 @@ main (int argc, char **argv)
 	xo_set_syslog_handler(test_syslog_open, test_syslog_send,
 			      test_syslog_close);
 
+    xo_open_container("top");
+
     if (unit_test) {
 	xo_set_unit_test_mode(1);
 	xo_open_log("test-program", LOG_PERROR, 0);
@@ -154,6 +156,9 @@ main (int argc, char **argv)
     test_big_message();
     xo_set_syslog_bufsiz(10 * 1024);
     test_big_message();
+
+    xo_close_container("top");
+    xo_finish();
 
     return 0;
 }
