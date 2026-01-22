@@ -89,6 +89,11 @@ main (int argc, char **argv)
     xo_set_info(NULL, info, -1);
     xo_set_flags(NULL, XOF_KEYS);
 
+    xo_emit("other: {a:}\n", "thing", "one");
+    xo_emit("other: {a:%s}\n", "thing", "two");
+    xo_emit("other: {a:%s/%s}\n", "thing", "three");
+    xo_emit("other: {a:xxx%s/%s}\n", "thing", "four");
+
     xo_emit("Blocks: {:block/%u}\n", 56);
 
     xo_open_container_h(NULL, "top-level");
