@@ -1,5 +1,9 @@
 {
   "data": {
+    "thing": "one",
+    "thing": "two",
+    "thing": "three",
+    "thing": "four",
     "block": 56,
     "top-level": {
       "type": "ethernet",
