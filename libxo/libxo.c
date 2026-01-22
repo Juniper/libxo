@@ -5215,7 +5215,8 @@ xo_filt_do_close_field (xo_handle_t *xop, const char *name, xo_ssize_t nlen,
     if (fstatus != XO_STATUS_FULL)
 	XOIF_SET(xop, XOIF_FILTERING);
 
-    xo_filt_reset_parent(xop, xo_stack_cur(xop), old_fstatus, fstatus);
+    if (!(flags & XFF_KEY))
+	xo_filt_reset_parent(xop, xo_stack_cur(xop), old_fstatus, fstatus);
 
     return fstatus;
 }
@@ -7406,6 +7407,9 @@ xo_do_emit_fields (xo_handle_t *xop, xo_field_info_t *fields,
 	     * Argument flag means the content isn't given in the descriptor,
 	     * but as a UTF-8 string ('const char *') argument in xo_vap.
 	     */
+            if (clen)
+                xo_failure(xop, "invalid content value for 'a' modifier: '%.*s'",
+                            clen, content);
 	    content = va_arg(xop->xo_vap, char *);
 	    clen = content ? strlen(content) : 0;
 	}
