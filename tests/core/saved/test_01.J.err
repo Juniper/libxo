@@ -1,1 +1,4 @@
 test_01: emitting a field before a top-level tag
+test_01: invalid content value for 'a' modifier: '%s'
+test_01: invalid content value for 'a' modifier: '%s'
+test_01: invalid content value for 'a' modifier: 'xxx%s'
