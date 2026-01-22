@@ -508,6 +508,7 @@ AC_CONFIG_FILES([
   encoder/Makefile
   encoder/cbor/Makefile
   encoder/csv/Makefile
+  encoder/fdr/Makefile
   encoder/fullpath/Makefile
   encoder/test/Makefile
   xo/Makefile
