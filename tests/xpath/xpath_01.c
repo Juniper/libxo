@@ -69,8 +69,9 @@ int
 main (int argc, char **argv)
 {
     int i;
-    const char *input = NULL;
-    int debug = 0;
+    const char *opt_input = NULL;
+    int opt_debug = 0;
+    int opt_quiet = 0;
 
     argc = xo_parse_args(argc, argv);
     if (argc < 0)
@@ -78,14 +79,16 @@ main (int argc, char **argv)
 
     for (i = 1; argv[i]; i++) {
 	if (xo_streq(argv[i], "debug"))
-	    debug = 1;
+	    opt_debug = 1;
 	else if (xo_streq(argv[i], "input"))
-	    input = argv[++i];
+	    opt_input = argv[++i];
+	else if (xo_streq(argv[i], "quiet"))
+	    opt_quiet = 1;
 	else if (xo_streq(argv[i], "yydebug"))
 	    xo_xpath_yydebug = 1;
     }
 
-    if (debug)
+    if (opt_debug)
 	xo_set_flags(NULL, XOF_DEBUG);
 
     xo_xparse_node_t *xnp UNUSED;
@@ -102,9 +105,9 @@ main (int argc, char **argv)
 
     xo_xparse_init(xdp);
 
-    FILE *in = input ? fopen(input, "r") : stdin;
+    FILE *in = opt_input ? fopen(opt_input, "r") : stdin;
     if (in == NULL)
-	xo_err(1, "could not open file '%s'", input);
+	xo_err(1, "could not open file '%s'", opt_input);
 
     char *cp, buf[BUFSIZ];
     char *field, *value;
@@ -117,7 +120,8 @@ main (int argc, char **argv)
 	    break;
 
 	cp = trim(cp);
-	fprintf(stderr, "main: input '%s'\n", cp ?: "");
+	if (!opt_quiet)
+	    fprintf(stderr, "main: input '%s'\n", cp ?: "");
 
 	switch (*cp) {
 	case '#':
@@ -129,7 +133,7 @@ main (int argc, char **argv)
 	    cp = trim(cp + 1);
 
 	    int xof_debug = xo_isset_flags(xop, XOF_DEBUG);
-	    if (debug)
+	    if (opt_debug)
 		xo_set_flags(xop, XOF_DEBUG);
 
 	    rc = xo_add_filter(xop, cp);
@@ -144,12 +148,12 @@ main (int argc, char **argv)
 
 	    xo_xpath_feature_warn("test", xdp, bad_horse, "+");
 
-	    if (!debug && !xof_debug) {
+	    if (!opt_quiet && !opt_debug && !xof_debug) {
 		xo_set_flags(xop, XOF_DEBUG);
 		xo_xparse_dump(xdp);
 	    }
 
-	    if (debug || !xof_debug)
+	    if (opt_debug || !xof_debug)
 		xo_clear_flags(xop, XOF_DEBUG);
 	    break;
 
@@ -161,6 +165,14 @@ main (int argc, char **argv)
 	    rc = xo_close_container_h(xop, trim(cp + 1));
 	    break;
 
+	case '{':
+	    rc = xo_open_list_h(xop, trim(cp + 1));
+	    break;
+
+	case '}':
+	    rc = xo_close_list_h(xop, trim(cp + 1));
+	    break;
+
 	case '<':
 	    rc = xo_open_instance_h(xop, trim(cp + 1));
 	    break;
@@ -169,13 +181,27 @@ main (int argc, char **argv)
 	    rc = xo_close_instance_h(xop, trim(cp + 1));
 	    break;
 
+	case '[':
+	    field = trim(cp + 1);
+	    value = clean_token(field);
+	    if (!*field || !*value)
+		break;
+
+	    if (!opt_quiet)
+		fprintf(stderr, "main: field: '%s'='%s'\n", field, value);
+
+	    rc = xo_emit_field_h(xop, "", field, "%s", value);
+	    break;
+
 	case '=':		/* Non-key field */
 	    field = trim(cp + 1);
 	    value = clean_token(field);
 	    if (!*field || !*value)
 		break;
 
-	    fprintf(stderr, "main: field: '%s'='%s'\n", field, value);
+	    if (!opt_quiet)
+		fprintf(stderr, "main: field: '%s'='%s'\n", field, value);
+
 	    rc = xo_emit_field_h(xop, "", field, "%s", value);
 	    break;
 
@@ -185,7 +211,9 @@ main (int argc, char **argv)
 	    if (!*field || !*value)
 		break;
 
-	    fprintf(stderr, "main: key: '%s'='%s'\n", field, value);
+	    if (!opt_quiet)
+		fprintf(stderr, "main: key: '%s'='%s'\n", field, value);
+
 	    rc = xo_emit_field_h(xop, "k", field, "%s", value);
 	    break;
 
@@ -215,11 +243,12 @@ main (int argc, char **argv)
 	    
 	}
 
-	if (rc != 0)
+	if (!opt_quiet && rc != 0)
 	    fprintf(stderr, "main: filter: rc: %d\n", rc);
 
-	fprintf(stderr, "main: status: %s\n",
-		xo_filter_status_name(xo_filter_get_status(xop, xfp)));
+	if (!opt_quiet)
+	    fprintf(stderr, "main: status: %s\n",
+		    xo_filter_status_name(xo_filter_get_status(xop, xfp)));
 
     }
 
