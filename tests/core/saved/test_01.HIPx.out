@@ -1,4 +1,20 @@
 <div class="line">
+  <div class="text">other: </div>
+  <div class="data" data-tag="thing" data-xpath="/data/thing">one</div>
+</div>
+<div class="line">
+  <div class="text">other: </div>
+  <div class="data" data-tag="thing" data-xpath="/data/thing">two</div>
+</div>
+<div class="line">
+  <div class="text">other: </div>
+  <div class="data" data-tag="thing" data-xpath="/data/thing">three</div>
+</div>
+<div class="line">
+  <div class="text">other: </div>
+  <div class="data" data-tag="thing" data-xpath="/data/thing">four</div>
+</div>
+<div class="line">
   <div class="text">Blocks: </div>
   <div class="data" data-tag="block" data-xpath="/data/block">56</div>
 </div>
