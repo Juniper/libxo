@@ -12,5 +12,7 @@ SUBDIRS = \
     test
 
 if LIBXO_NEED_FILTERS
-SUBDIRS += fullpath
+SUBDIRS += \
+    fdr \
+    fullpath
 endif
