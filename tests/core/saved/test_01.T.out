@@ -1,3 +1,7 @@
+other: one
+other: two
+other: three
+other: four
 Blocks: 56
 static ethernet bridge   18u  24anchor             0x0..1
 anchor             0x0..1
