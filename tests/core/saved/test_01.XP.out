@@ -1,4 +1,8 @@
 <data>
+  <thing>one</thing>
+  <thing>two</thing>
+  <thing>three</thing>
+  <thing>four</thing>
   <block>56</block>
   <top-level>
     <type>ethernet</type>
