@@ -8912,6 +8912,15 @@ xo_do_close (xo_handle_t *xop, const char *name, xo_state_t new_state)
  * We are in a given state and need to transition to the new state.
  */
 static ssize_t
+xo_marker_prevents_close (xo_handle_t *xop, int old_state, int new_state)
+{
+    xo_failure(xop, "marker '%s' prevents transition from %s to %s",
+	       xop->xo_stack[xop->xo_depth].xs_name,
+	       xo_state_name(old_state), xo_state_name(new_state));
+    return -1;
+}
+
+static ssize_t
 xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
 	       xo_state_t new_state)
 {
@@ -8949,7 +8958,7 @@ xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
     case XSS_TRANSITION(XSS_OPEN_LIST, XSS_OPEN_CONTAINER):
     case XSS_TRANSITION(XSS_OPEN_LEAF_LIST, XSS_OPEN_CONTAINER):
 	if (on_marker)
-	    goto marker_prevents_close;
+	    return xo_marker_prevents_close(xop, old_state, new_state);
 	rc = xo_do_close_leaf_list(xop, NULL);
 	if (rc >= 0)
 	    goto open_container;
@@ -8965,13 +8974,13 @@ xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
     case XSS_TRANSITION(XSS_OPEN_LIST, XSS_CLOSE_CONTAINER):
     case XSS_TRANSITION(XSS_OPEN_INSTANCE, XSS_CLOSE_CONTAINER):
 	if (on_marker)
-	    goto marker_prevents_close;
+	    return xo_marker_prevents_close(xop, old_state, new_state);
 	rc = xo_do_close(xop, name, new_state);
 	break;
 
     case XSS_TRANSITION(XSS_OPEN_LEAF_LIST, XSS_CLOSE_CONTAINER):
 	if (on_marker)
-	    goto marker_prevents_close;
+	    return xo_marker_prevents_close(xop, old_state, new_state);
 	rc = xo_do_close_leaf_list(xop, NULL);
 	if (rc >= 0)
 	    rc = xo_do_close(xop, name, new_state);
@@ -8986,7 +8995,7 @@ xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
 
     case XSS_TRANSITION(XSS_OPEN_LIST, XSS_OPEN_LIST):
 	if (on_marker)
-	    goto marker_prevents_close;
+	    return xo_marker_prevents_close(xop, old_state, new_state);
 	rc = xo_do_close_list(xop, NULL);
 	if (rc >= 0)
 	    goto open_list;
@@ -8994,7 +9003,7 @@ xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
 
     case XSS_TRANSITION(XSS_OPEN_LEAF_LIST, XSS_OPEN_LIST):
 	if (on_marker)
-	    goto marker_prevents_close;
+	    return xo_marker_prevents_close(xop, old_state, new_state);
 	rc = xo_do_close_leaf_list(xop, NULL);
 	if (rc >= 0)
 	    goto open_list;
@@ -9003,7 +9012,7 @@ xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
     /*close_list:*/
     case XSS_TRANSITION(XSS_OPEN_LIST, XSS_CLOSE_LIST):
 	if (on_marker)
-	    goto marker_prevents_close;
+	    return xo_marker_prevents_close(xop, old_state, new_state);
 	rc = xo_do_close(xop, name, new_state);
 	break;
 
@@ -9038,7 +9047,7 @@ xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
 
     case XSS_TRANSITION(XSS_OPEN_LEAF_LIST, XSS_OPEN_INSTANCE):
 	if (on_marker)
-	    goto marker_prevents_close;
+	    return xo_marker_prevents_close(xop, old_state, new_state);
 	rc = xo_do_close_leaf_list(xop, NULL);
 	if (rc >= 0)
 	    goto open_instance;
@@ -9047,7 +9056,7 @@ xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
     /*close_instance:*/
     case XSS_TRANSITION(XSS_OPEN_INSTANCE, XSS_CLOSE_INSTANCE):
 	if (on_marker)
-	    goto marker_prevents_close;
+	    return xo_marker_prevents_close(xop, old_state, new_state);
 	rc = xo_do_close_instance(xop, name);
 	break;
 
@@ -9060,13 +9069,13 @@ xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
     case XSS_TRANSITION(XSS_OPEN_CONTAINER, XSS_CLOSE_INSTANCE):
     case XSS_TRANSITION(XSS_OPEN_LIST, XSS_CLOSE_INSTANCE):
 	if (on_marker)
-	    goto marker_prevents_close;
+	    return xo_marker_prevents_close(xop, old_state, new_state);
 	rc = xo_do_close(xop, name, new_state);
 	break;
 
     case XSS_TRANSITION(XSS_OPEN_LEAF_LIST, XSS_CLOSE_INSTANCE):
 	if (on_marker)
-	    goto marker_prevents_close;
+	    return xo_marker_prevents_close(xop, old_state, new_state);
 	rc = xo_do_close_leaf_list(xop, NULL);
 	if (rc >= 0)
 	    rc = xo_do_close(xop, name, new_state);
@@ -9082,7 +9091,7 @@ xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
     case XSS_TRANSITION(XSS_OPEN_LIST, XSS_OPEN_LEAF_LIST):
     case XSS_TRANSITION(XSS_OPEN_LEAF_LIST, XSS_OPEN_LEAF_LIST):
 	if (on_marker)
-	    goto marker_prevents_close;
+	    return xo_marker_prevents_close(xop, old_state, new_state);
 	rc = xo_do_close_list(xop, NULL);
 	if (rc >= 0)
 	    goto open_leaf_list;
@@ -9091,7 +9100,7 @@ xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
     /*close_leaf_list:*/
     case XSS_TRANSITION(XSS_OPEN_LEAF_LIST, XSS_CLOSE_LEAF_LIST):
 	if (on_marker)
-	    goto marker_prevents_close;
+	    return xo_marker_prevents_close(xop, old_state, new_state);
 	rc = xo_do_close_leaf_list(xop, name);
 	break;
 
@@ -9105,7 +9114,7 @@ xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
     case XSS_TRANSITION(XSS_OPEN_LIST, XSS_CLOSE_LEAF_LIST):
     case XSS_TRANSITION(XSS_OPEN_INSTANCE, XSS_CLOSE_LEAF_LIST):
 	if (on_marker)
-	    goto marker_prevents_close;
+	    return xo_marker_prevents_close(xop, old_state, new_state);
 	rc = xo_do_close(xop, name, new_state);
 	break;
 
@@ -9116,7 +9125,7 @@ xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
 
     case XSS_TRANSITION(XSS_OPEN_LIST, XSS_EMIT):
 	if (on_marker)
-	    goto marker_prevents_close;
+	    return xo_marker_prevents_close(xop, old_state, new_state);
 	rc = xo_do_close(xop, NULL, XSS_CLOSE_LIST);
 	break;
 
@@ -9130,7 +9139,7 @@ xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
 
     case XSS_TRANSITION(XSS_OPEN_LEAF_LIST, XSS_EMIT):
 	if (on_marker)
-	    goto marker_prevents_close;
+	    return xo_marker_prevents_close(xop, old_state, new_state);
 	rc = xo_do_close_leaf_list(xop, NULL);
 	break;
 
@@ -9173,12 +9182,6 @@ xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
     XOIF_SET(xop, XOIF_MADE_OUTPUT);
 
     return rc;
-
- marker_prevents_close:
-    xo_failure(xop, "marker '%s' prevents transition from %s to %s",
-	       xop->xo_stack[xop->xo_depth].xs_name,
-	       xo_state_name(old_state), xo_state_name(new_state));
-    return -1;
 }
 
 xo_ssize_t
