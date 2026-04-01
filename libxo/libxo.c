@@ -124,6 +124,15 @@ extern char etext;
 #define TRUE 1
 #endif
 
+/*
+ * XO_MAX_FIELDS: the largest number of fields in a format string.
+ * With no max, there's no maximum stack impact, so we choose a
+ * criminally large default which the build environment can override.
+ */
+#ifndef XO_MAX_FIELDS
+#define XO_MAX_FIELDS (32*1024)	/* Pathetically large limit */
+#endif /* XO_MAX_FIELDS */
+
 /* Make our own version for older versions of GCC that don't have this */
 #ifndef __GNUC_PREREQ
 #define __GNUC_PREREQ(maj,min) \
@@ -6543,6 +6552,9 @@ xo_count_fields (xo_handle_t *xop UNUSED, const char *fmt)
     for (cp = fmt; *cp; cp++)
 	if (*cp == '{' || *cp == '\n')
 	    rc += 1;
+
+    if (rc > XO_MAX_FIELDS)
+	rc = XO_MAX_FIELDS;
 
     return rc * 2 + 1;
 }
