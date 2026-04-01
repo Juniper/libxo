@@ -3770,6 +3770,260 @@ xo_safe_va_arg_long_double (xo_handle_t *xop)
 }
 
 /*
+ * Flush a run of literal (non-format) characters to the output buffer,
+ * updating column counts as needed.
+ */
+static ssize_t
+xo_flush_literal (xo_handle_t *xop, xo_buffer_t *xbp, xo_xff_flags_t flags,
+		  int make_output, int need_enc, const char *xp, ssize_t len)
+{
+    if (!make_output)
+
+	return 0;
+
+    ssize_t cols = xo_format_string_direct(xop, xbp, flags | XFF_UNESCAPE,
+					   NULL, xp, len, -1,
+					   need_enc, XF_ENC_UTF8);
+    if (cols > 0) {
+	if (XOF_ISSET(xop, XOF_COLUMNS))
+	    xop->xo_columns += cols;
+	if (XOIF_ISSET(xop, XOIF_ANCHOR))
+	    xop->xo_anchor_columns += cols;
+    }
+
+    return cols;
+}
+
+/*
+ * Parse a printf-style format specifier starting at 'cp' (which points
+ * at the '%').  Fills in *xfp and returns a pointer to the conversion
+ * character, or NULL on error.
+ *
+ * Note that 'n', 'v', and '$' are not supported.
+ */
+static const char *
+xo_parse_format_spec (xo_handle_t *xop, xo_format_t *xfp,
+		      const char *cp, const char *ep, const char *fmt)
+{
+    for (cp += 1; cp < ep; cp++) {
+	if (*cp == 'l')
+	    xfp->xf_lflag += 1;
+	else if (*cp == 'h')
+	    xfp->xf_hflag += 1;
+	else if (*cp == 'j')
+	    xfp->xf_jflag += 1;
+	else if (*cp == 't')
+	    xfp->xf_tflag += 1;
+	else if (*cp == 'z')
+	    xfp->xf_zflag += 1;
+	else if (*cp == 'q')
+	    xfp->xf_qflag += 1;
+	else if (*cp == '.') {
+	    if (xfp->xf_dots + 1 >= XF_WIDTH_NUM) {
+		xo_failure(xop, "Too many dots in format: '%s'", fmt);
+		return NULL;
+	    }
+
+	    xfp->xf_dots += 1;	/* Increment it (after check) */
+
+	} else if (*cp == '-')
+	    xfp->xf_seen_minus = 1;
+	else if (isdigit((int) *cp)) {
+	    if (xfp->xf_leading_zero < 0)
+		xfp->xf_leading_zero = (*cp == '0');
+	    xo_bump_width(xfp, *cp - '0');
+	} else if (*cp == '*') {
+	    xfp->xf_stars += 1;
+	    xfp->xf_star[xfp->xf_dots] = 1;
+	} else if (strchr("diouxXDOUeEfFgGaAcCsSpm", *cp) != NULL)
+	    break;
+	else if (*cp == 'n' || *cp == 'v') {
+	    xo_failure(xop, "unsupported format: '%s'", fmt);
+	    return NULL;
+	}
+    }
+
+    if (cp == ep)
+	xo_failure(xop, "field format missing format character: %s", fmt);
+
+    xfp->xf_fc = *cp;
+    return cp;
+}
+
+/*
+ * Emit the value for one format specifier into xbp.  sp points to the
+ * leading '%' of the specifier; cp points to the conversion character.
+ * Returns 0 on success, -1 on error.
+ */
+static ssize_t
+xo_emit_field_value (xo_handle_t *xop, xo_buffer_t *xbp,
+		     xo_xff_flags_t flags, xo_format_t *xfp,
+		     const char *sp, const char *cp, int style)
+{
+    ssize_t rc = 0;
+
+    if (xfp->xf_skip)
+	return 0;
+
+    xo_buffer_t *fbp = &xop->xo_fmt;
+    ssize_t len = cp - sp + 1;
+    if (!xo_buf_has_room(fbp, len + 1))
+	return -1;
+
+    char *newfmt = fbp->xb_curp;
+    memcpy(newfmt, sp, len);
+    newfmt[0] = '%';		/* If we skipped over a "%@...@s" format */
+    newfmt[len] = '\0';
+
+    /*
+     * Bad news: our strings are UTF-8, but the stock printf
+     * functions won't handle field widths for wide characters
+     * correctly.  So we have to handle this ourselves.
+     */
+    if (xop->xo_formatter == NULL
+	    && (xfp->xf_fc == 's' || xfp->xf_fc == 'S'
+		|| xfp->xf_fc == 'm')) {
+
+	xfp->xf_enc = (xfp->xf_fc == 'm') ? XF_ENC_UTF8
+	    : (xfp->xf_lflag || (xfp->xf_fc == 'S')) ? XF_ENC_WIDE
+	    : xfp->xf_hflag ? XF_ENC_LOCALE : XF_ENC_UTF8;
+
+	rc = xo_format_string(xop, xbp, flags, xfp);
+
+	if ((flags & XFF_TRIM_WS) && xo_style_is_encoding(xop))
+	    rc = xo_trim_ws(xbp, rc);
+
+    } else {
+	ssize_t columns = rc = xo_vsnprintf(xop, xbp, newfmt, xop->xo_vap);
+
+	if (rc > 0) {
+	    /*
+	     * For XML and HTML, we need "&<>" processing; for JSON,
+	     * it's quotes.  Text gets nothing.
+	     */
+	    switch (style) {
+	    case XO_STYLE_XML:
+		if (flags & XFF_TRIM_WS)
+		    columns = rc = xo_trim_ws(xbp, rc);
+		rc = xo_escape_xml(xbp, rc, flags);
+		break;
+
+	    case XO_STYLE_HTML:
+		rc = xo_escape_xml(xbp, rc, (flags & XFF_ATTR));
+		break;
+
+	    case XO_STYLE_JSON:
+		if (flags & XFF_TRIM_WS)
+		    columns = rc = xo_trim_ws(xbp, rc);
+		rc = xo_escape_json(xbp, rc, flags);
+		break;
+
+	    case XO_STYLE_SDPARAMS:
+		if (flags & XFF_TRIM_WS)
+		    columns = rc = xo_trim_ws(xbp, rc);
+		rc = xo_escape_sdparams(xbp, rc, 0);
+		break;
+
+	    case XO_STYLE_ENCODER:
+		if (flags & XFF_TRIM_WS)
+		    columns = rc = xo_trim_ws(xbp, rc);
+		break;
+	    }
+
+	    /*
+	     * We can assume all the non-%s data we've
+	     * added is ASCII, so the columns and bytes are the
+	     * same.  xo_format_string handles all the fancy
+	     * string conversions and updates xo_anchor_columns
+	     * accordingly.
+	     */
+	    if (XOF_ISSET(xop, XOF_COLUMNS))
+		xop->xo_columns += columns;
+	    if (XOIF_ISSET(xop, XOIF_ANCHOR))
+		xop->xo_anchor_columns += columns;
+	}
+    }
+
+    if (rc > 0)
+	xbp->xb_curp += rc;
+
+    return 0;
+}
+
+/*
+ * Advance xop->xo_vap past the argument consumed by one format specifier.
+ */
+static void
+xo_advance_vap (xo_handle_t *xop, xo_format_t *xfp)
+{
+    if (XOF_ISSET(xop, XOF_NO_VA_ARG))
+	return;
+
+    if (xfp->xf_fc == 's' || xfp->xf_fc == 'S') {
+	/*
+	 * The 'S' and 's' formats are normally handled in
+	 * xo_format_string, but if we skipped it, then we
+	 * need to pop it.
+	 */
+	if (xfp->xf_skip)
+	    va_arg(xop->xo_vap, char *);
+
+    } else if (xfp->xf_fc == 'm') {
+	/* Nothing on the stack for "%m" */
+
+    } else {
+	int s;
+	for (s = 0; s < XF_WIDTH_NUM; s++) {
+	    if (xfp->xf_star[s])
+		va_arg(xop->xo_vap, int);
+	}
+
+	if (strchr("diouxXDOU", xfp->xf_fc) != NULL) {
+	    if (xfp->xf_hflag > 1) {
+		va_arg(xop->xo_vap, int);
+
+	    } else if (xfp->xf_hflag > 0) {
+		va_arg(xop->xo_vap, int);
+
+	    } else if (xfp->xf_lflag > 1) {
+		va_arg(xop->xo_vap, unsigned long long);
+
+	    } else if (xfp->xf_lflag > 0) {
+		va_arg(xop->xo_vap, unsigned long);
+
+	    } else if (xfp->xf_jflag > 0) {
+		va_arg(xop->xo_vap, intmax_t);
+
+	    } else if (xfp->xf_tflag > 0) {
+		va_arg(xop->xo_vap, ptrdiff_t);
+
+	    } else if (xfp->xf_zflag > 0) {
+		va_arg(xop->xo_vap, size_t);
+
+	    } else if (xfp->xf_qflag > 0) {
+		va_arg(xop->xo_vap, quad_t);
+
+	    } else {
+		va_arg(xop->xo_vap, int);
+	    }
+	} else if (strchr("eEfFgGaA", xfp->xf_fc) != NULL)
+	    if (xfp->xf_lflag)
+		xo_safe_va_arg_long_double(xop);
+	    else
+		va_arg(xop->xo_vap, double);
+
+	else if (xfp->xf_fc == 'C' || (xfp->xf_fc == 'c' && xfp->xf_lflag))
+	    va_arg(xop->xo_vap, wint_t);
+
+	else if (xfp->xf_fc == 'c')
+	    va_arg(xop->xo_vap, int);
+
+	else if (xfp->xf_fc == 'p')
+	    va_arg(xop->xo_vap, void *);
+    }
+}
+
+/*
  * Interface to format a single field.  The arguments are in xo_vap,
  * and the format is in 'fmt'.  If 'xbp' is null, we use xop->xo_data;
  * this is the most common case.
@@ -3780,7 +4034,6 @@ xo_do_format_field (xo_handle_t *xop, xo_buffer_t *xbp,
 {
     xo_format_t xf;
     const char *cp, *ep, *sp, *xp = NULL;
-    ssize_t rc, cols;
     int style = (flags & XFF_XML) ? XO_STYLE_XML : xo_style(xop);
     unsigned make_output = !(flags & XFF_NO_OUTPUT) ? 1 : 0;
     int need_enc = xo_needed_encoding(xop);
@@ -3817,15 +4070,9 @@ xo_do_format_field (xo_handle_t *xop, xo_buffer_t *xbp,
 	}
 
 	if (xp) {
-	    if (make_output) {
-		cols = xo_format_string_direct(xop, xbp, flags | XFF_UNESCAPE,
-					       NULL, xp, cp - xp, -1,
-					       need_enc, XF_ENC_UTF8);
-		if (XOF_ISSET(xop, XOF_COLUMNS))
-		    xop->xo_columns += cols;
-		if (XOIF_ISSET(xop, XOIF_ANCHOR))
-		    xop->xo_anchor_columns += cols;
-	    }
+	    if (xo_flush_literal(xop, xbp, flags, make_output, need_enc,
+				 xp, cp - xp) < 0)
+		return -1;
 
 	    xp = NULL;
 	}
@@ -3871,59 +4118,20 @@ xo_do_format_field (xo_handle_t *xop, xo_buffer_t *xbp,
 	/*
 	 * Looking at one piece of a format; find the end and
 	 * call snprintf.  Then advance xo_vap on our own.
-	 *
-	 * Note that 'n', 'v', and '$' are not supported.
 	 */
 	sp = cp;		/* Save start pointer */
-	for (cp += 1; cp < ep; cp++) {
-	    if (*cp == 'l')
-		xf.xf_lflag += 1;
-	    else if (*cp == 'h')
-		xf.xf_hflag += 1;
-	    else if (*cp == 'j')
-		xf.xf_jflag += 1;
-	    else if (*cp == 't')
-		xf.xf_tflag += 1;
-	    else if (*cp == 'z')
-		xf.xf_zflag += 1;
-	    else if (*cp == 'q')
-		xf.xf_qflag += 1;
-	    else if (*cp == '.') {
-		if (++xf.xf_dots >= XF_WIDTH_NUM) {
-		    xo_failure(xop, "Too many dots in format: '%s'", fmt);
-		    return -1;
-		}
-	    } else if (*cp == '-')
-		xf.xf_seen_minus = 1;
-	    else if (isdigit((int) *cp)) {
-		if (xf.xf_leading_zero < 0)
-		    xf.xf_leading_zero = (*cp == '0');
-		xo_bump_width(&xf, *cp - '0');
-	    } else if (*cp == '*') {
-		xf.xf_stars += 1;
-		xf.xf_star[xf.xf_dots] = 1;
-	    } else if (strchr("diouxXDOUeEfFgGaAcCsSpm", *cp) != NULL)
-		break;
-	    else if (*cp == 'n' || *cp == 'v') {
-		xo_failure(xop, "unsupported format: '%s'", fmt);
-		return -1;
-	    }
-	}
-
-	if (cp == ep)
-	    xo_failure(xop, "field format missing format character: %s",
-			  fmt);
-
-	xf.xf_fc = *cp;
+	cp = xo_parse_format_spec(xop, &xf, cp, ep, fmt);
+	if (cp == NULL)
+	    return -1;
 
 	if (!XOF_ISSET(xop, XOF_NO_VA_ARG)) {
-	    if (*cp == 's' || *cp == 'S') {
+	    if (xf.xf_fc == 's' || xf.xf_fc == 'S') {
 		/* Handle "%*.*.*s" */
 		int s;
 		for (s = 0; s < XF_WIDTH_NUM; s++) {
 		    if (xf.xf_star[s]) {
 			xf.xf_width[s] = va_arg(xop->xo_vap, int);
-			
+
 			/* Normalize a negative width value */
 			if (xf.xf_width[s] < 0) {
 			    if (s == 0) {
@@ -3944,173 +4152,16 @@ xo_do_format_field (xo_handle_t *xop, xo_buffer_t *xbp,
 	if (xf.xf_fc == 'D' || xf.xf_fc == 'O' || xf.xf_fc == 'U')
 	    xf.xf_lflag = 1;
 
-	if (!xf.xf_skip) {
-	    xo_buffer_t *fbp = &xop->xo_fmt;
-	    ssize_t len = cp - sp + 1;
-	    if (!xo_buf_has_room(fbp, len + 1))
-		return -1;
+	if (xo_emit_field_value(xop, xbp, flags, &xf, sp, cp, style) < 0)
+	    return -1;
 
-	    char *newfmt = fbp->xb_curp;
-	    memcpy(newfmt, sp, len);
-	    newfmt[0] = '%';	/* If we skipped over a "%@...@s" format */
-	    newfmt[len] = '\0';
-
-	    /*
-	     * Bad news: our strings are UTF-8, but the stock printf
-	     * functions won't handle field widths for wide characters
-	     * correctly.  So we have to handle this ourselves.
-	     */
-	    if (xop->xo_formatter == NULL
-		    && (xf.xf_fc == 's' || xf.xf_fc == 'S'
-			|| xf.xf_fc == 'm')) {
-
-		xf.xf_enc = (xf.xf_fc == 'm') ? XF_ENC_UTF8
-		    : (xf.xf_lflag || (xf.xf_fc == 'S')) ? XF_ENC_WIDE
-		    : xf.xf_hflag ? XF_ENC_LOCALE : XF_ENC_UTF8;
-
-		rc = xo_format_string(xop, xbp, flags, &xf);
-
-		if ((flags & XFF_TRIM_WS) && xo_style_is_encoding(xop))
-		    rc = xo_trim_ws(xbp, rc);
-
-	    } else {
-		ssize_t columns = rc = xo_vsnprintf(xop, xbp, newfmt,
-						    xop->xo_vap);
-
-		if (rc > 0) {
-		    /*
-		     * For XML and HTML, we need "&<>" processing; for JSON,
-		     * it's quotes.  Text gets nothing.
-		     */
-		    switch (style) {
-		    case XO_STYLE_XML:
-			if (flags & XFF_TRIM_WS)
-			    columns = rc = xo_trim_ws(xbp, rc);
-			rc = xo_escape_xml(xbp, rc, flags);
-			break;
-
-		    case XO_STYLE_HTML:
-			rc = xo_escape_xml(xbp, rc, (flags & XFF_ATTR));
-			break;
-
-		    case XO_STYLE_JSON:
-			if (flags & XFF_TRIM_WS)
-			    columns = rc = xo_trim_ws(xbp, rc);
-			rc = xo_escape_json(xbp, rc, flags);
-			break;
-
-		    case XO_STYLE_SDPARAMS:
-			if (flags & XFF_TRIM_WS)
-			    columns = rc = xo_trim_ws(xbp, rc);
-			rc = xo_escape_sdparams(xbp, rc, 0);
-			break;
-
-		    case XO_STYLE_ENCODER:
-			if (flags & XFF_TRIM_WS)
-			    columns = rc = xo_trim_ws(xbp, rc);
-			break;
-		    }
-
-		    /*
-		     * We can assume all the non-%s data we've
-		     * added is ASCII, so the columns and bytes are the
-		     * same.  xo_format_string handles all the fancy
-		     * string conversions and updates xo_anchor_columns
-		     * accordingly.
-		     */
-		    if (XOF_ISSET(xop, XOF_COLUMNS))
-			xop->xo_columns += columns;
-		    if (XOIF_ISSET(xop, XOIF_ANCHOR))
-			xop->xo_anchor_columns += columns;
-		}
-	    }
-
-	    if (rc > 0)
-		xbp->xb_curp += rc;
-	}
-
-	/*
-	 * Now for the tricky part: we need to move the argument pointer
-	 * along by the amount needed.
-	 */
-	if (!XOF_ISSET(xop, XOF_NO_VA_ARG)) {
-
-	    if (xf.xf_fc == 's' ||xf.xf_fc == 'S') {
-		/*
-		 * The 'S' and 's' formats are normally handled in
-		 * xo_format_string, but if we skipped it, then we
-		 * need to pop it.
-		 */
-		if (xf.xf_skip)
-		    va_arg(xop->xo_vap, char *);
-
-	    } else if (xf.xf_fc == 'm') {
-		/* Nothing on the stack for "%m" */
-
-	    } else {
-		int s;
-		for (s = 0; s < XF_WIDTH_NUM; s++) {
-		    if (xf.xf_star[s])
-			va_arg(xop->xo_vap, int);
-		}
-
-		if (strchr("diouxXDOU", xf.xf_fc) != NULL) {
-		    if (xf.xf_hflag > 1) {
-			va_arg(xop->xo_vap, int);
-
-		    } else if (xf.xf_hflag > 0) {
-			va_arg(xop->xo_vap, int);
-
-		    } else if (xf.xf_lflag > 1) {
-			va_arg(xop->xo_vap, unsigned long long);
-
-		    } else if (xf.xf_lflag > 0) {
-			va_arg(xop->xo_vap, unsigned long);
-
-		    } else if (xf.xf_jflag > 0) {
-			va_arg(xop->xo_vap, intmax_t);
-
-		    } else if (xf.xf_tflag > 0) {
-			va_arg(xop->xo_vap, ptrdiff_t);
-
-		    } else if (xf.xf_zflag > 0) {
-			va_arg(xop->xo_vap, size_t);
-
-		    } else if (xf.xf_qflag > 0) {
-			va_arg(xop->xo_vap, quad_t);
-
-		    } else {
-			va_arg(xop->xo_vap, int);
-		    }
-		} else if (strchr("eEfFgGaA", xf.xf_fc) != NULL)
-		    if (xf.xf_lflag)
-			xo_safe_va_arg_long_double(xop);
-		    else
-			va_arg(xop->xo_vap, double);
-
-		else if (xf.xf_fc == 'C' || (xf.xf_fc == 'c' && xf.xf_lflag))
-		    va_arg(xop->xo_vap, wint_t);
-
-		else if (xf.xf_fc == 'c')
-		    va_arg(xop->xo_vap, int);
-
-		else if (xf.xf_fc == 'p')
-		    va_arg(xop->xo_vap, void *);
-	    }
-	}
+	xo_advance_vap(xop, &xf);
     }
 
     if (xp) {
-	if (make_output) {
-	    cols = xo_format_string_direct(xop, xbp, flags | XFF_UNESCAPE,
-					   NULL, xp, cp - xp, -1,
-					   need_enc, XF_ENC_UTF8);
-
-	    if (XOF_ISSET(xop, XOF_COLUMNS))
-		xop->xo_columns += cols;
-	    if (XOIF_ISSET(xop, XOIF_ANCHOR))
-		xop->xo_anchor_columns += cols;
-	}
+	if (xo_flush_literal(xop, xbp, flags, make_output, need_enc,
+			     xp, cp - xp) < 0)
+	    return -1;
 
 	xp = NULL;
     }
@@ -4123,11 +4174,13 @@ xo_do_format_field (xo_handle_t *xop, xo_buffer_t *xbp,
 	 */
 	ssize_t new_cols = xo_format_gettext(xop, flags, start_offset,
 					 old_cols, real_need_enc);
-	
-	if (XOF_ISSET(xop, XOF_COLUMNS))
-	    xop->xo_columns += new_cols - old_cols;
-	if (XOIF_ISSET(xop, XOIF_ANCHOR))
-	    xop->xo_anchor_columns += new_cols - old_cols;
+
+	if (new_cols > 0) {
+	    if (XOF_ISSET(xop, XOF_COLUMNS))
+		xop->xo_columns += new_cols - old_cols;
+	    if (XOIF_ISSET(xop, XOIF_ANCHOR))
+		xop->xo_anchor_columns += new_cols - old_cols;
+	}
     }
 
     return 0;
