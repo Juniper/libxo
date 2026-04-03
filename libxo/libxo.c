@@ -3927,6 +3927,9 @@ xo_emit_field_value (xo_handle_t *xop, xo_buffer_t *xbp,
 	    /*
 	     * For XML and HTML, we need "&<>" processing; for JSON,
 	     * it's quotes.  Text gets nothing.
+	     *
+	     * Also we trim (the 't' modifier) for all styles _except_
+	     * text and html.
 	     */
 	    switch (style) {
 	    case XO_STYLE_XML:
