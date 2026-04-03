@@ -927,6 +927,20 @@ xo_indent (xo_handle_t *xop)
     return (rc > 0) ? rc : 0;
 }
 
+/*
+ * Check for sufficient room in the buffer and report if it can't be
+ * accommodated.
+ */
+static int
+xo_check_for_room (xo_handle_t *xop, xo_buffer_t *xbp, int bytes)
+{
+    if (xo_buf_has_room(xbp, bytes))
+	return 0;
+
+    xo_failure(xop, "buffer cannot be expanded for %d bytes", bytes);
+    return -1;
+}
+
 static void
 xo_buf_indent (xo_handle_t *xop, int indent)
 {
@@ -935,7 +949,7 @@ xo_buf_indent (xo_handle_t *xop, int indent)
     if (indent <= 0)
 	indent = xo_indent(xop);
 
-    if (!xo_buf_has_room(xbp, indent))
+    if (xo_check_for_room(xop, xbp, indent))
 	return;
 
     memset(xbp->xb_curp, ' ', indent);
@@ -954,7 +968,8 @@ static char xo_xml_square[] = { 0xE2, 0x96, 0xA1, 0 };
 #define XO_XML_ESCAPE_BINARY_UNICODE_SIZE 8
 
 static ssize_t
-xo_escape_xml (xo_buffer_t *xbp, ssize_t len, xo_xff_flags_t flags)
+xo_escape_xml (xo_handle_t *xop, xo_buffer_t *xbp,
+	       ssize_t len, xo_xff_flags_t flags)
 {
     ssize_t slen;
     ssize_t delta = 0;
@@ -1004,7 +1019,8 @@ xo_escape_xml (xo_buffer_t *xbp, ssize_t len, xo_xff_flags_t flags)
 	delta += lost * (XO_XML_ESCAPE_BINARY_UNICODE_SIZE - 1);
     char private_buffer[XO_XML_ESCAPE_BINARY_UNICODE_SIZE + 1];
 
-    if (!xo_buf_has_room(xbp, delta)) /* No room; bail, but don't append */
+    /* No room?  Bail, but don't append */
+    if (xo_check_for_room(xop, xbp, delta))
 	return 0;
 
     ep = xbp->xb_curp;
@@ -1078,7 +1094,8 @@ xo_escape_xml (xo_buffer_t *xbp, ssize_t len, xo_xff_flags_t flags)
  *            %x75 4HEXDIG )  ; uXXXX                U+XXXX
  */
 static ssize_t
-xo_escape_json (xo_buffer_t *xbp, ssize_t len, xo_xff_flags_t flags)
+xo_escape_json (xo_handle_t *xop, xo_buffer_t *xbp,
+		ssize_t len, xo_xff_flags_t flags)
 {
     ssize_t delta = 0;
     char *cp, *ep, *ip;
@@ -1112,7 +1129,8 @@ xo_escape_json (xo_buffer_t *xbp, ssize_t len, xo_xff_flags_t flags)
     if (delta == 0)		/* Nothing to escape; bail */
 	return len;
 
-    if (!xo_buf_has_room(xbp, delta)) /* No room; bail, but don't append */
+    /* No room?  Bail, but don't append */
+    if (xo_check_for_room(xop, xbp, delta))
 	return 0;
 
     ep = xbp->xb_curp;
@@ -1191,7 +1209,8 @@ xo_escape_json (xo_buffer_t *xbp, ssize_t len, xo_xff_flags_t flags)
  *                                ; ']' MUST be escaped.
  */
 static ssize_t
-xo_escape_sdparams (xo_buffer_t *xbp, ssize_t len, xo_xff_flags_t flags UNUSED)
+xo_escape_sdparams (xo_handle_t *xop, xo_buffer_t *xbp,
+		    ssize_t len, xo_xff_flags_t flags UNUSED)
 {
     ssize_t delta = 0;
     char *cp, *ep, *ip;
@@ -1204,7 +1223,7 @@ xo_escape_sdparams (xo_buffer_t *xbp, ssize_t len, xo_xff_flags_t flags UNUSED)
     if (delta == 0)		/* Nothing to escape; bail */
 	return len;
 
-    if (!xo_buf_has_room(xbp, delta)) /* No room; bail, but don't append */
+    if (xo_check_for_room(xop, xbp, delta)) /* No room; bail, but don't append */
 	return 0;
 
     ep = xbp->xb_curp;
@@ -1230,7 +1249,7 @@ static void
 xo_buf_escape (xo_handle_t *xop, xo_buffer_t *xbp,
 	       const char *str, ssize_t len, xo_xff_flags_t flags)
 {
-    if (!xo_buf_has_room(xbp, len))
+    if (xo_check_for_room(xop, xbp, len))
 	return;
 
     memcpy(xbp->xb_curp, str, len);
@@ -1238,15 +1257,15 @@ xo_buf_escape (xo_handle_t *xop, xo_buffer_t *xbp,
     switch (xo_style(xop)) {
     case XO_STYLE_XML:
     case XO_STYLE_HTML:
-	len = xo_escape_xml(xbp, len, flags);
+	len = xo_escape_xml(xop, xbp, len, flags);
 	break;
 
     case XO_STYLE_JSON:
-	len = xo_escape_json(xbp, len, flags);
+	len = xo_escape_json(xop, xbp, len, flags);
 	break;
 
     case XO_STYLE_SDPARAMS:
-	len = xo_escape_sdparams(xbp, len, flags);
+	len = xo_escape_sdparams(xop, xbp, len, flags);
 	break;
     }
 
@@ -1296,7 +1315,7 @@ xo_vsnprintf (xo_handle_t *xop, xo_buffer_t *xbp, const char *fmt, va_list vap)
 	rc = vsnprintf(xbp->xb_curp, left, fmt, va_local);
 
     if (rc >= left) {
-	if (!xo_buf_has_room(xbp, rc)) {
+	if (xo_check_for_room(xop, xbp, rc)) {
 	    va_end(va_local);
 	    return -1;
 	}
@@ -1339,7 +1358,7 @@ xo_printf_v (xo_handle_t *xop, const char *fmt, va_list vap)
     rc = vsnprintf(xbp->xb_curp, left, fmt, va_local);
 
     if (rc >= left) {
-	if (!xo_buf_has_room(xbp, rc)) {
+	if (xo_check_for_room(xop, xbp, rc)) {
 	    va_end(va_local);
 	    return -1;
 	}
@@ -1539,14 +1558,14 @@ xo_buf_append_locale_from_utf8 (xo_handle_t *xop, xo_buffer_t *xbp,
     }
 
     if (XOF_ISSET(xop, XOF_NO_LOCALE)) {
-	if (!xo_buf_has_room(xbp, ilen))
+	if (xo_check_for_room(xop, xbp, ilen))
 	    return 0;
 
 	memcpy(xbp->xb_curp, ibuf, ilen);
 	xbp->xb_curp += ilen;
 
     } else {
-	if (!xo_buf_has_room(xbp, MB_LEN_MAX + 1))
+	if (xo_check_for_room(xop, xbp, MB_LEN_MAX + 1))
 	    return 0;
 
 	bzero(&xop->xo_mbstate, sizeof(xop->xo_mbstate));
@@ -1889,7 +1908,7 @@ xo_warn_hcv (xo_handle_t *xop, int code, int check_warn,
 	ssize_t rc = vsnprintf(xbp->xb_curp, left, newfmt, vap);
 
 	if (rc >= left) {
-	    if (!xo_buf_has_room(xbp, rc)) {
+	    if (xo_check_for_room(xop, xbp, rc)) {
 		va_end(va_local);
 		return;
 	    }
@@ -1903,7 +1922,7 @@ xo_warn_hcv (xo_handle_t *xop, int code, int check_warn,
 
 	va_end(va_local);
 
-	rc = xo_escape_xml(xbp, rc, 1);
+	rc = xo_escape_xml(xop, xbp, rc, 1);
 	xbp->xb_curp += rc;
 
 	xo_buf_append(xbp, msg_close, sizeof(msg_close) - 1);
@@ -2045,7 +2064,7 @@ xo_message_hcv (xo_handle_t *xop, int code, const char *fmt, va_list vap)
 
 	rc = vsnprintf(xbp->xb_curp, left, fmt, vap);
 	if (rc >= left) {
-	    if (!xo_buf_has_room(xbp, rc)) {
+	    if (xo_check_for_room(xop, xbp, rc)) {
 		va_end(va_local);
 		return;
 	    }
@@ -2059,7 +2078,7 @@ xo_message_hcv (xo_handle_t *xop, int code, const char *fmt, va_list vap)
 
 	va_end(va_local);
 
-	rc = xo_escape_xml(xbp, rc, 0);
+	rc = xo_escape_xml(xop, xbp, rc, 0);
 	xbp->xb_curp += rc;
 
 	if (need_nl && code > 0) {
@@ -3140,7 +3159,7 @@ xo_format_string_direct (xo_handle_t *xop, xo_buffer_t *xbp,
     int attr = XOF_BIT_ISSET(flags, XFF_ATTR);
     const char *sp;
 
-    if (len > 0 && !xo_buf_has_room(xbp, len))
+    if (len > 0 && xo_check_for_room(xop, xbp, len))
 	return 0;
 
     /*
@@ -3157,7 +3176,7 @@ xo_format_string_direct (xo_handle_t *xop, xo_buffer_t *xbp,
 
 	/* If we found no non-ascii characters, we're golden */
 	if (np == ep) {
-	    if (!xo_buf_has_room(xbp, clen))
+	    if (xo_check_for_room(xop, xbp, clen))
 		return -1;
 
 	    memcpy(xbp->xb_curp, cp, clen);
@@ -3277,7 +3296,7 @@ xo_format_string_direct (xo_handle_t *xop, xo_buffer_t *xbp,
 		    break;
 
 		ssize_t slen = strlen(sp);
-		if (!xo_buf_has_room(xbp, slen - 1))
+		if (xo_check_for_room(xop, xbp, slen - 1))
 		    return -1;
 
 		memcpy(xbp->xb_curp, sp, slen);
@@ -3288,7 +3307,7 @@ xo_format_string_direct (xo_handle_t *xop, xo_buffer_t *xbp,
 		if (wc != '\\' && wc != '"' && wc != '\n' && wc != '\r')
 		    break;
 
-		if (!xo_buf_has_room(xbp, 2))
+		if (xo_check_for_room(xop, xbp, 2))
 		    return -1;
 
 		*xbp->xb_curp++ = '\\';
@@ -3305,7 +3324,7 @@ xo_format_string_direct (xo_handle_t *xop, xo_buffer_t *xbp,
 		if (wc != '\\' && wc != '"' && wc != ']')
 		    break;
 
-		if (!xo_buf_has_room(xbp, 2))
+		if (xo_check_for_room(xop, xbp, 2))
 		    return -1;
 
 		*xbp->xb_curp++ = '\\';
@@ -3320,7 +3339,7 @@ xo_format_string_direct (xo_handle_t *xop, xo_buffer_t *xbp,
 		continue;
 	    }
 
-	    if (!xo_buf_has_room(xbp, olen))
+	    if (xo_check_for_room(xop, xbp, olen))
 		return -1;
 
 	    xo_utf8_emit_char(xbp->xb_curp, olen, wc);
@@ -3328,7 +3347,7 @@ xo_format_string_direct (xo_handle_t *xop, xo_buffer_t *xbp,
 	    break;
 
 	case XF_ENC_LOCALE:
-	    if (!xo_buf_has_room(xbp, MB_LEN_MAX + 1))
+	    if (xo_check_for_room(xop, xbp, MB_LEN_MAX + 1))
 		return -1;
 
 	    olen = wcrtomb(xbp->xb_curp, wc, &xop->xo_mbstate);
@@ -3464,7 +3483,7 @@ xo_format_string (xo_handle_t *xop, xo_buffer_t *xbp, xo_xff_flags_t flags,
 	 * but if we did the work ourselves, then we need to do it.
 	 */
 	int delta = xfp->xf_width[XF_WIDTH_MIN] - cols;
-	if (!xo_buf_has_room(xbp, xfp->xf_width[XF_WIDTH_MIN]))
+	if (xo_check_for_room(xop, xbp, xfp->xf_width[XF_WIDTH_MIN]))
 	    goto bail;
 
 	/*
@@ -3621,7 +3640,7 @@ xo_format_gettext (xo_handle_t *xop, xo_xff_flags_t flags,
 {
     xo_buffer_t *xbp = &xop->xo_data;
 
-    if (!xo_buf_has_room(xbp, 1))
+    if (xo_check_for_room(xop, xbp, 1))
 	return cols;
 
     xbp->xb_curp[0] = '\0'; /* NUL-terminate the input string */
@@ -3875,7 +3894,7 @@ xo_emit_field_value (xo_handle_t *xop, xo_buffer_t *xbp,
 
     xo_buffer_t *fbp = &xop->xo_fmt;
     ssize_t len = cp - sp + 1;
-    if (!xo_buf_has_room(fbp, len + 1))
+    if (xo_check_for_room(xop, fbp, len + 1))
 	return -1;
 
     char *newfmt = fbp->xb_curp;
@@ -3913,23 +3932,23 @@ xo_emit_field_value (xo_handle_t *xop, xo_buffer_t *xbp,
 	    case XO_STYLE_XML:
 		if (flags & XFF_TRIM_WS)
 		    columns = rc = xo_trim_ws(xbp, rc);
-		rc = xo_escape_xml(xbp, rc, flags);
+		rc = xo_escape_xml(xop, xbp, rc, flags);
 		break;
 
 	    case XO_STYLE_HTML:
-		rc = xo_escape_xml(xbp, rc, (flags & XFF_ATTR));
+		rc = xo_escape_xml(xop, xbp, rc, (flags & XFF_ATTR));
 		break;
 
 	    case XO_STYLE_JSON:
 		if (flags & XFF_TRIM_WS)
 		    columns = rc = xo_trim_ws(xbp, rc);
-		rc = xo_escape_json(xbp, rc, flags);
+		rc = xo_escape_json(xop, xbp, rc, flags);
 		break;
 
 	    case XO_STYLE_SDPARAMS:
 		if (flags & XFF_TRIM_WS)
 		    columns = rc = xo_trim_ws(xbp, rc);
-		rc = xo_escape_sdparams(xbp, rc, 0);
+		rc = xo_escape_sdparams(xop, xbp, rc, 0);
 		break;
 
 	    case XO_STYLE_ENCODER:
@@ -4302,7 +4321,7 @@ xo_format_humanize (xo_handle_t *xop, xo_buffer_t *xbp,
 	 * more bytes than the original value.  I've used
 	 * 10 as a rectal number to cover those scenarios.
 	 */
-	if (xo_buf_has_room(xbp, 10)) {
+	if (!xo_check_for_room(xop, xbp, 10)) {
 	    xo_buf_set_offset(xbp, savep->xhs_offset);
 
 	    ssize_t rc;
@@ -4567,7 +4586,7 @@ xo_buf_append_div (xo_handle_t *xop, const char *class, xo_xff_flags_t flags,
 
 	xo_format_humanize(xop, xbp, &save, flags);
 
-	if (xo_buf_has_room(xbp, div_len + olen)) {
+	if (!xo_check_for_room(xop, xbp, div_len + olen)) {
 	    ssize_t new_offset = xbp->xb_curp - xbp->xb_bufp;
 
 
@@ -4678,7 +4697,7 @@ xo_format_title (xo_handle_t *xop, xo_field_info_t *xfip,
 	} else {
 	    rc = snprintf(xbp->xb_curp, left, newfmt, newstr);
 	    if (rc >= left) {
-		if (!xo_buf_has_room(xbp, rc))
+		if (xo_check_for_room(xop, xbp, rc))
 		    return;
 		left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
 		rc = snprintf(xbp->xb_curp, left, newfmt, newstr);
@@ -4702,7 +4721,7 @@ xo_format_title (xo_handle_t *xop, xo_field_info_t *xfip,
 
     /* If we're styling HTML, then we need to escape it */
     if (xo_style(xop) == XO_STYLE_HTML) {
-	rc = xo_escape_xml(xbp, rc, 0);
+	rc = xo_escape_xml(xop, xbp, rc, 0);
     }
 
     if (rc > 0)
@@ -7971,7 +7990,7 @@ xo_attr_hv (xo_handle_t *xop, const char *name, const char *fmt, va_list vap)
 
     switch (xo_style(xop)) {
     case XO_STYLE_XML:
-	if (!xo_buf_has_room(xbp, nlen + extra))
+	if (xo_check_for_room(xop, xbp, nlen + extra))
 	    return -1;
 
 	*xbp->xb_curp++ = ' ';
@@ -7983,11 +8002,11 @@ xo_attr_hv (xo_handle_t *xop, const char *name, const char *fmt, va_list vap)
 	rc = xo_vsnprintf(xop, xbp, fmt, vap);
 
 	if (rc >= 0) {
-	    rc = xo_escape_xml(xbp, rc, 1);
+	    rc = xo_escape_xml(xop, xbp, rc, 1);
 	    xbp->xb_curp += rc;
 	}
 
-	if (!xo_buf_has_room(xbp, 2))
+	if (xo_check_for_room(xop, xbp, 2))
 	    return -1;
 
 	*xbp->xb_curp++ = '"';
