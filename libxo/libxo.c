@@ -4183,12 +4183,10 @@ xo_do_format_field (xo_handle_t *xop, xo_buffer_t *xbp,
 	ssize_t new_cols = xo_format_gettext(xop, flags, start_offset,
 					 old_cols, real_need_enc);
 
-	if (new_cols > 0) {
-	    if (XOF_ISSET(xop, XOF_COLUMNS))
-		xop->xo_columns += new_cols - old_cols;
-	    if (XOIF_ISSET(xop, XOIF_ANCHOR))
-		xop->xo_anchor_columns += new_cols - old_cols;
-	}
+	if (XOF_ISSET(xop, XOF_COLUMNS))
+	    xop->xo_columns += new_cols - old_cols;
+	if (XOIF_ISSET(xop, XOIF_ANCHOR))
+	    xop->xo_anchor_columns += new_cols - old_cols;
     }
 
     return 0;
