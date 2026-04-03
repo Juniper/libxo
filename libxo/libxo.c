@@ -3787,7 +3787,6 @@ xo_flush_literal (xo_handle_t *xop, xo_buffer_t *xbp, xo_xff_flags_t flags,
 		  int make_output, int need_enc, const char *xp, ssize_t len)
 {
     if (!make_output)
-
 	return 0;
 
     ssize_t cols = xo_format_string_direct(xop, xbp, flags | XFF_UNESCAPE,
