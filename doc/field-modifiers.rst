@@ -338,7 +338,7 @@ The Trim Modifier ({t:})
 .. index:: Field Modifiers; Trim
 
 The trim modifier removes any leading or trailing whitespace from
-the value::
+the value.  This is only for the 'encoding' output styles::
 
     EXAMPLE:
         xo_emit("{t:description}", "   some  input   ");
