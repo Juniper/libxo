@@ -2110,9 +2110,12 @@ xo_message_hcv (xo_handle_t *xop, int code, const char *fmt, va_list vap)
 	    va_copy(va_local, vap);
 
 	    rc = vsnprintf(bp, bufsiz, fmt, va_local);
-	    if (rc > bufsiz) {
+	    if (rc >= bufsiz) {
 		bufsiz = rc + BUFSIZ;
-		bp = alloca(bufsiz);
+		bp = xo_realloc(NULL, bufsiz);
+		if (bp == NULL)
+		    return;
+
 		va_end(va_local);
 		va_copy(va_local, vap);
 		rc = vsnprintf(bp, bufsiz, fmt, va_local);
@@ -2131,6 +2134,9 @@ xo_message_hcv (xo_handle_t *xop, int code, const char *fmt, va_list vap)
 
 	    xo_buf_append_div(xop, "message", 0, NULL, 0, bp, rc,
 			      NULL, 0, NULL, 0);
+
+	    if (bp != buf)
+		xo_free(bp);
 	}
 	break;
 
@@ -2772,11 +2778,17 @@ xo_set_options (xo_handle_t *xop, const char *input)
     memcpy(bp, input, len);
 
     int argc = xo_options_to_argv_count(xop, bp);
-    char *argv[argc];
+    char **argv = xo_realloc(NULL, sizeof(argv[0]) * argc);
+    if (argv == NULL) {
+	xo_failure(xop, "xo_set_options ran out of memory");
+	return -1;
+    }
 
     argc = xo_options_to_argv(xop, bp, argc, argv);
-    if (argc < 0)
+    if (argc < 0) {
+	xo_free(argv);
 	return argc;
+    }
 
     for (int i = 0; i < argc; i++) {
 	if (rc)
@@ -2879,6 +2891,8 @@ xo_set_options (xo_handle_t *xop, const char *input)
 
     if (style > 0)
 	xop->xo_style= style;
+
+    xo_free(argv);
 
     return final_rc ?: rc;
 }
