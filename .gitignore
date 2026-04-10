@@ -17,6 +17,7 @@
 
 *~
 *.orig
+.#*
 
 aclocal.m4
 ar-lib
