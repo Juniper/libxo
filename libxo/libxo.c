@@ -130,7 +130,7 @@ extern char etext;
  * criminally large default which the build environment can override.
  */
 #ifndef XO_MAX_FIELDS
-#define XO_MAX_FIELDS (32*1024)	/* Pathetically large limit */
+#define XO_MAX_FIELDS (8*1024)	/* Suitably large limit */
 #endif /* XO_MAX_FIELDS */
 
 /* Make our own version for older versions of GCC that don't have this */
@@ -2768,7 +2768,7 @@ xo_set_options (xo_handle_t *xop, const char *input)
 	 * Allow ',' to switch into word-style options ("--libxo:XPW,debug")
 	 */
 	if (*input != ',')
-	    return 0;
+	    return final_rc;
 
 	input += 1;
     }
@@ -2780,7 +2780,7 @@ xo_set_options (xo_handle_t *xop, const char *input)
     int argc = xo_options_to_argv_count(xop, bp);
     char **argv = xo_realloc(NULL, sizeof(argv[0]) * argc);
     if (argv == NULL) {
-	xo_failure(xop, "xo_set_options ran out of memory");
+	xo_warnx("xo_set_options ran out of memory");
 	return -1;
     }
 
@@ -2804,9 +2804,10 @@ xo_set_options (xo_handle_t *xop, const char *input)
 	if (*cp == '@') {
 	    vp = cp + 1;
 
-	    if (*vp == '\0')
-		xo_failure(xop, "missing value for encoder option");
-	    else {
+	    if (*vp == '\0') {
+		xo_warnx("missing value for encoder option");
+		rc = -1;
+	    } else {
 		rc = xo_encoder_init(xop, vp);
 		if (rc)
 		    xo_warnx("error initializing encoder: %s", vp);
@@ -2847,39 +2848,46 @@ xo_set_options (xo_handle_t *xop, const char *input)
 	    else if (xo_streq(cp, "indent")) {
 		if (vp)
 		    xop->xo_indent_by = atoi(vp);
-		else
-		    xo_failure(xop, "missing value for indent option");
-	    } else if (xo_streq(cp, "encoder")) {
-		if (vp == NULL)
-		    xo_failure(xop, "missing value for encoder option");
 		else {
+		    xo_warnx("missing value for indent option");
+		    rc = -1;
+		}
+
+	    } else if (xo_streq(cp, "encoder")) {
+		if (vp == NULL) {
+		    xo_warnx("missing value for encoder option");
+		    rc = -1;
+		} else {
 		    rc = xo_encoder_init(xop, vp);
 		    if (rc)
 			xo_warnx("error initializing encoder: %s", vp);
 		}
 		
 	    } else if (xo_streq(cp, "map")) {
-		if (vp == NULL)
-		    xo_failure(xop, "missing value for map option");
-		else {
+		if (vp == NULL) {
+		    xo_warnx("missing value for map option");
+		    rc = -1;
+		} else {
 		    rc = xo_map_option(xop, vp);
 		    if (rc)
 			xo_warnx("error initializing map: '%s'", vp);
 		}
 
 	    } else if (xo_streq(cp, "map-file")) {
-		if (vp == NULL)
-		    xo_failure(xop, "missing value for map-file option");
-		else {
+		if (vp == NULL) {
+		    xo_warnx("missing value for map-file option");
+		    rc = -1;
+		} else {
 		    rc = xo_map_add_file(xop, vp);
 		    if (rc)
 			xo_warnx("error initializing map-file: '%s'", vp);
 		}
 
 	    } else if (xo_streq(cp, "filter")) {
-		if (vp == NULL)
-		    xo_failure(xop, "missing value for filter option");
-		else
+		if (vp == NULL) {
+		    xo_warnx("missing value for filter option");
+		    rc = -1;
+		} else
 		    rc = xo_add_filter(xop, vp); /* Reports its own errors */
 
 	    } else {
@@ -2889,7 +2897,7 @@ xo_set_options (xo_handle_t *xop, const char *input)
 	}
     }
 
-    if (style > 0)
+    if (style >= 0)
 	xop->xo_style= style;
 
     xo_free(argv);
