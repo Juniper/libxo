@@ -9046,7 +9046,6 @@ xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
      */
     switch (XSS_TRANSITION(old_state, new_state)) {
 
-    open_container:
     case XSS_TRANSITION(XSS_INIT, XSS_OPEN_CONTAINER):
     case XSS_TRANSITION(XSS_OPEN_INSTANCE, XSS_OPEN_CONTAINER):
     case XSS_TRANSITION(XSS_OPEN_CONTAINER, XSS_OPEN_CONTAINER):
@@ -9059,7 +9058,7 @@ xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
 	    return xo_marker_prevents_close(xop, old_state, new_state);
 	rc = xo_do_close_leaf_list(xop, NULL);
 	if (rc >= 0)
-	    goto open_container;
+	    rc = xo_do_open_container(xop, flags, name);
 	break;
 
     case XSS_TRANSITION(XSS_INIT, XSS_CLOSE_CONTAINER):
@@ -9067,7 +9066,6 @@ xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
 	rc = xo_do_close_container(xop, name);
 	break;
 
-    /*close_container:*/
     case XSS_TRANSITION(XSS_OPEN_CONTAINER, XSS_CLOSE_CONTAINER):
     case XSS_TRANSITION(XSS_OPEN_LIST, XSS_CLOSE_CONTAINER):
     case XSS_TRANSITION(XSS_OPEN_INSTANCE, XSS_CLOSE_CONTAINER):
@@ -9084,7 +9082,6 @@ xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
 	    rc = xo_do_close(xop, name, new_state);
 	break;
 
-    open_list:
     case XSS_TRANSITION(XSS_INIT, XSS_OPEN_LIST):
     case XSS_TRANSITION(XSS_OPEN_CONTAINER, XSS_OPEN_LIST):
     case XSS_TRANSITION(XSS_OPEN_INSTANCE, XSS_OPEN_LIST):
@@ -9096,7 +9093,7 @@ xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
 	    return xo_marker_prevents_close(xop, old_state, new_state);
 	rc = xo_do_close_list(xop, NULL);
 	if (rc >= 0)
-	    goto open_list;
+	    rc = xo_do_open_list(xop, flags, name);
 	break;
 
     case XSS_TRANSITION(XSS_OPEN_LEAF_LIST, XSS_OPEN_LIST):
@@ -9104,10 +9101,9 @@ xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
 	    return xo_marker_prevents_close(xop, old_state, new_state);
 	rc = xo_do_close_leaf_list(xop, NULL);
 	if (rc >= 0)
-	    goto open_list;
+	    rc = xo_do_open_list(xop, flags, name);
 	break;
 
-    /*close_list:*/
     case XSS_TRANSITION(XSS_OPEN_LIST, XSS_CLOSE_LIST):
 	if (on_marker)
 	    return xo_marker_prevents_close(xop, old_state, new_state);
@@ -9121,7 +9117,6 @@ xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
 	rc = xo_do_close(xop, name, new_state);
 	break;
 
-    open_instance:
     case XSS_TRANSITION(XSS_OPEN_LIST, XSS_OPEN_INSTANCE):
 	rc = xo_do_open_instance(xop, flags, name);
 	break;
@@ -9130,7 +9125,7 @@ xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
     case XSS_TRANSITION(XSS_OPEN_CONTAINER, XSS_OPEN_INSTANCE):
 	rc = xo_do_open_list(xop, flags, name);
 	if (rc >= 0)
-	    goto open_instance;
+	    rc = xo_do_open_instance(xop, flags, name);
 	break;
 
     case XSS_TRANSITION(XSS_OPEN_INSTANCE, XSS_OPEN_INSTANCE):
@@ -9140,7 +9135,7 @@ xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
 	    rc = xo_do_close_instance(xop, NULL);
 	}
 	if (rc >= 0)
-	    goto open_instance;
+	    rc = xo_do_open_instance(xop, flags, name);
 	break;
 
     case XSS_TRANSITION(XSS_OPEN_LEAF_LIST, XSS_OPEN_INSTANCE):
@@ -9148,10 +9143,9 @@ xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
 	    return xo_marker_prevents_close(xop, old_state, new_state);
 	rc = xo_do_close_leaf_list(xop, NULL);
 	if (rc >= 0)
-	    goto open_instance;
+	    rc = xo_do_open_instance(xop, flags, name);
 	break;
 
-    /*close_instance:*/
     case XSS_TRANSITION(XSS_OPEN_INSTANCE, XSS_CLOSE_INSTANCE):
 	if (on_marker)
 	    return xo_marker_prevents_close(xop, old_state, new_state);
@@ -9179,7 +9173,6 @@ xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
 	    rc = xo_do_close(xop, name, new_state);
 	break;
 
-    open_leaf_list:
     case XSS_TRANSITION(XSS_OPEN_CONTAINER, XSS_OPEN_LEAF_LIST):
     case XSS_TRANSITION(XSS_OPEN_INSTANCE, XSS_OPEN_LEAF_LIST):
     case XSS_TRANSITION(XSS_INIT, XSS_OPEN_LEAF_LIST):
@@ -9192,10 +9185,9 @@ xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
 	    return xo_marker_prevents_close(xop, old_state, new_state);
 	rc = xo_do_close_list(xop, NULL);
 	if (rc >= 0)
-	    goto open_leaf_list;
+	    rc = xo_do_open_leaf_list(xop, flags, name);
 	break;
 
-    /*close_leaf_list:*/
     case XSS_TRANSITION(XSS_OPEN_LEAF_LIST, XSS_CLOSE_LEAF_LIST):
 	if (on_marker)
 	    return xo_marker_prevents_close(xop, old_state, new_state);
@@ -9216,7 +9208,6 @@ xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
 	rc = xo_do_close(xop, name, new_state);
 	break;
 
-    /*emit:*/
     case XSS_TRANSITION(XSS_OPEN_CONTAINER, XSS_EMIT):
     case XSS_TRANSITION(XSS_OPEN_INSTANCE, XSS_EMIT):
 	break;
@@ -9241,7 +9232,6 @@ xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
 	rc = xo_do_close_leaf_list(xop, NULL);
 	break;
 
-    /*emit_leaf_list:*/
     case XSS_TRANSITION(XSS_INIT, XSS_EMIT_LEAF_LIST):
     case XSS_TRANSITION(XSS_OPEN_CONTAINER, XSS_EMIT_LEAF_LIST):
     case XSS_TRANSITION(XSS_OPEN_INSTANCE, XSS_EMIT_LEAF_LIST):
