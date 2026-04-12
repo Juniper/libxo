@@ -7338,32 +7338,33 @@ xo_gettext_build_format (xo_handle_t *xop,
 			 xo_field_info_t *fields, int this_field,
 			 const char *fmt, char **new_fmtp)
 {
-    if (xo_style_is_encoding(xop))
-	goto bail;
-
     xo_buffer_t xb;
-    xo_buf_init(&xb);
+    xo_buf_zero(&xb);
 
-    if (xo_gettext_simplify_format(xop, &xb, fields,
-				   this_field, fmt, NULL))
-	goto bail2;
+    do {
+	if (xo_style_is_encoding(xop))
+	    break;
 
-    const char *gtfmt = xo_dgettext(xop, xb.xb_bufp);
-    if (gtfmt == NULL || gtfmt == fmt || xo_streq(gtfmt, fmt))
-	goto bail2;
+	if (xo_gettext_simplify_format(xop, &xb, fields,
+				       this_field, fmt, NULL))
+	    break;
 
-    char *new_fmt = xo_strndup(gtfmt, -1);
-    if (new_fmt == NULL)
-	goto bail2;
+	const char *gtfmt = xo_dgettext(xop, xb.xb_bufp);
+	if (gtfmt == NULL || gtfmt == fmt || xo_streq(gtfmt, fmt))
+	    break;
+
+	char *new_fmt = xo_strndup(gtfmt, -1);
+	if (new_fmt == NULL)
+	    break;
+
+	xo_buf_cleanup(&xb);
+
+	*new_fmtp = new_fmt;
+	return new_fmt;
+
+    } while (FALSE);		/* Not really a loop at all */
 
     xo_buf_cleanup(&xb);
-
-    *new_fmtp = new_fmt;
-    return new_fmt;
-
- bail2:
-	xo_buf_cleanup(&xb);
- bail:
     *new_fmtp = NULL;
     return fmt;
 }
