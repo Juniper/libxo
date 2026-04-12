@@ -41,11 +41,31 @@ typedef struct xo_buffer_s {
  * Initialize the contents of an xo_buffer_t.
  */
 static inline void
+xo_buf_zero (xo_buffer_t *xbp)
+{
+    bzero(xbp, sizeof(*xbp));
+}
+
+/*
+ * Initialize the contents of an xo_buffer_t.
+ */
+static inline void
 xo_buf_init (xo_buffer_t *xbp)
 {
     xbp->xb_size = XO_BUFSIZ;
     xbp->xb_bufp = xo_realloc(NULL, xbp->xb_size);
     xbp->xb_curp = xbp->xb_bufp;
+}
+
+/*
+ * Free the contents of an xo_buffer_t.
+ */
+static inline void
+xo_buf_cleanup (xo_buffer_t *xbp)
+{
+    if (xbp->xb_bufp)
+	xo_free(xbp->xb_bufp);
+    bzero(xbp, sizeof(*xbp));
 }
 
 /*
@@ -138,17 +158,6 @@ xo_buf_trim (xo_buffer_t *xbp, xo_ssize_t len)
 	xbp->xb_curp -= len;
 
     return xbp->xb_curp;
-}
-
-/*
- * Initialize the contents of an xo_buffer_t.
- */
-static inline void
-xo_buf_cleanup (xo_buffer_t *xbp)
-{
-    if (xbp->xb_bufp)
-	xo_free(xbp->xb_bufp);
-    bzero(xbp, sizeof(*xbp));
 }
 
 /*
