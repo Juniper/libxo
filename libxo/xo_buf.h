@@ -152,7 +152,7 @@ xo_buf_trim (xo_buffer_t *xbp, xo_ssize_t len)
     if (xbp == NULL)
 	return NULL;
 
-    if (xbp->xb_bufp - xbp->xb_curp >= len)
+    if (xbp->xb_curp - xbp->xb_bufp <= len)
 	xbp->xb_curp = xbp->xb_bufp;
     else
 	xbp->xb_curp -= len;
