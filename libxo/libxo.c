@@ -3548,15 +3548,23 @@ xo_buf_find_last_number (xo_buffer_t *xbp, ssize_t start_offset)
     char *sp = xbp->xb_bufp;
     char *cp = sp + start_offset;
 
-    while (--cp >= sp)
+    for (;;) {
+	if (cp == sp)
+	    break;
+	cp -= 1;
 	if (isdigit((int) *cp))
 	    break;
+    }
 
     for ( ; cp >= sp; cp--) {
 	if (!isdigit((int) *cp))
 	    break;
+	if (rc >= INT_MAX / 100) /* Don't even get close to the limit */
+	    break;
 	rc += (*cp - '0') * digit;
 	digit *= 10;
+	if (cp == sp)		/* Avoid "--" */
+	    break;
     }
 
     return rc;
@@ -5651,6 +5659,8 @@ xo_format_value (xo_handle_t *xop, const char *name, ssize_t nlen,
 {
     /* Passing NULL to memcpy is undefined behavior, so make a fake here */
     const char *rname = name ?: "";
+    if (nlen < 0)
+	nlen = 0;
 
     /*
      * Before we emit a value, we need to know that the frame is ready.
@@ -6094,12 +6104,16 @@ xo_colors_handle_text (xo_handle_t *xop, xo_colors_t *newp)
     if (fg != oldp->xoc_col_fg) {
 	cp += snprintf(cp, ep - cp, ";3%u",
 		       (fg != XO_COL_DEFAULT) ? fg - 1 : 9);
+	if (cp >= ep)
+	    return;		/* Should not occur */
     }
 
     xo_color_t bg = newp->xoc_col_bg;
     if (bg != oldp->xoc_col_bg) {
 	cp += snprintf(cp, ep - cp, ";4%u",
 		       (bg != XO_COL_DEFAULT) ? bg - 1 : 9);
+	if (cp >= ep)
+	    return;		/* Should not occur */
     }
 
     if (cp - buf != 1 && cp < ep - 3) {
