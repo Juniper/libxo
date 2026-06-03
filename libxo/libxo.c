@@ -3563,7 +3563,7 @@ xo_buf_find_last_number (xo_buffer_t *xbp, ssize_t start_offset)
 	    break;
 	rc += (*cp - '0') * digit;
 	digit *= 10;
-	if (cp == sp)		/* Avoid "--" */
+	if (cp == sp)		/* Avoid "cp--" */
 	    break;
     }
 
