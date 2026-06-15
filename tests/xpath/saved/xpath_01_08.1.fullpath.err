@@ -92,22 +92,22 @@ main: input '$a 5555'
 main: key: 'a'='5555'
 main: status: track
 main: input '+two'
-main: status: dead
+main: status: track
 main: input '$b 4444'
 main: key: 'b'='4444'
-main: status: dead
+main: status: track
 main: input '+three'
-main: status: dead
+main: status: track
 main: input '$c -3333'
 main: key: 'c'='-3333'
-main: status: dead
+main: status: track
 main: input '+four'
-main: status: dead
+main: status: track
 main: input '=five mambo'
 main: field: 'five'='mambo'
-main: status: dead
+main: status: track
 main: input '-four'
-main: status: dead
+main: status: track
 main: input '-three'
 main: status: track
 main: input '-two'
@@ -161,12 +161,12 @@ main: input '+two'
 main: status: track
 main: input '$b 2'
 main: key: 'b'='2'
-main: status: dead
+main: status: track
 main: input '+three'
-main: status: dead
+main: status: track
 main: input '=c -33'
 main: field: 'c'='-33'
-main: status: dead
+main: status: track
 main: input '=four crispo'
 main: field: 'four'='crispo'
 main: status: track
