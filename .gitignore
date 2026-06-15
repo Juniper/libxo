@@ -46,6 +46,10 @@ xtest
 xtest.dSYM
 tests/w
 
+CLAUDE*
+.CLAUDE*
+.claude*
+
 cscope.files
 cscope.out
 trash
