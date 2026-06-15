@@ -25,6 +25,9 @@
 #include "xo_xparse.h"
 #include "xo_filter.h"
 
+static int opt_debug = 0;
+static int opt_quiet = 0;
+
 static char *
 trim (char *cp)
 {
@@ -65,50 +68,9 @@ clean_token (char *cp)
     return cp;
 }
 
-int
-main (int argc, char **argv)
+static void
+do_work (xo_handle_t *xop, xo_filter_t *xfp, xo_xparse_data_t *xdp, FILE *in)
 {
-    int i;
-    const char *opt_input = NULL;
-    int opt_debug = 0;
-    int opt_quiet = 0;
-
-    argc = xo_parse_args(argc, argv);
-    if (argc < 0)
-        return 1;
-
-    for (i = 1; argv[i]; i++) {
-	if (xo_streq(argv[i], "debug"))
-	    opt_debug = 1;
-	else if (xo_streq(argv[i], "input"))
-	    opt_input = argv[++i];
-	else if (xo_streq(argv[i], "quiet"))
-	    opt_quiet = 1;
-	else if (xo_streq(argv[i], "yydebug"))
-	    xo_xpath_yydebug = 1;
-    }
-
-    if (opt_debug)
-	xo_set_flags(NULL, XOF_DEBUG);
-
-    xo_xparse_node_t *xnp UNUSED;
-
-    xo_filter_setup_test();
-
-    xo_filter_t *xfp = xo_filter_create(NULL);
-    if (xfp == NULL)
-	xo_errx(1, "allocation of filter failed");
-
-    xo_handle_t *xop = NULL;	/* Use default output handle */
-    xo_set_filter_data(xop, xfp);
-    xo_xparse_data_t *xdp = xo_filter_xparse_data(xop, xfp);
-
-    xo_xparse_init(xdp);
-
-    FILE *in = opt_input ? fopen(opt_input, "r") : stdin;
-    if (in == NULL)
-	xo_err(1, "could not open file '%s'", opt_input);
-
     char *cp, buf[BUFSIZ];
     char *field, *value;
     int rc;
@@ -217,6 +179,28 @@ main (int argc, char **argv)
 	    rc = xo_emit_field_h(xop, "k", field, "%s", value);
 	    break;
 
+	case 'i':		/* Include */
+	    field = trim(cp + 1);
+	    value = clean_token(field);
+
+	    if (value == NULL) {
+		fprintf(stderr, "main: include: missing filename\n");
+		continue;
+	    }
+
+	    fprintf(stderr, "main: include: '%s'\n", value);
+	    FILE *newp = fopen(value, "r");
+	    if (newp == NULL) {
+		fprintf(stderr, "main: include: could not open file '%s'\n",
+			value);
+		continue;
+	    }
+
+	    do_work(xop, xfp, xdp, newp);
+
+	    fclose(newp);
+	    break;
+
 	case 'r':		/* Reset */
 	    /* Out with the old */
 	    xo_filter_destroy(xop, xfp);
@@ -251,7 +235,51 @@ main (int argc, char **argv)
 		    xo_filter_status_name(xo_filter_get_status(xop, xfp)));
 
     }
+}
 
+int
+main (int argc, char **argv)
+{
+    int i;
+    const char *opt_input = NULL;
+
+    argc = xo_parse_args(argc, argv);
+    if (argc < 0)
+        return 1;
+
+    for (i = 1; argv[i]; i++) {
+	if (xo_streq(argv[i], "debug"))
+	    opt_debug = 1;
+	else if (xo_streq(argv[i], "input"))
+	    opt_input = argv[++i];
+	else if (xo_streq(argv[i], "quiet"))
+	    opt_quiet = 1;
+	else if (xo_streq(argv[i], "yydebug"))
+	    xo_xpath_yydebug = 1;
+    }
+
+    if (opt_debug)
+	xo_set_flags(NULL, XOF_DEBUG);
+
+    xo_xparse_node_t *xnp UNUSED;
+
+    xo_filter_setup_test();
+
+    xo_filter_t *xfp = xo_filter_create(NULL);
+    if (xfp == NULL)
+	xo_errx(1, "allocation of filter failed");
+
+    xo_handle_t *xop = NULL;	/* Use default output handle */
+    xo_set_filter_data(xop, xfp);
+    xo_xparse_data_t *xdp = xo_filter_xparse_data(xop, xfp);
+
+    xo_xparse_init(xdp);
+
+    FILE *in = opt_input ? fopen(opt_input, "r") : stdin;
+    if (in == NULL)
+	xo_err(1, "could not open file '%s'", opt_input);
+
+    do_work(xop, xfp, xdp, in);
 
     xo_finish_h(xop);
     xo_xparse_clean(xdp);
