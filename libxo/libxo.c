@@ -204,6 +204,13 @@ typedef unsigned xo_xsf_flags_t; /* XSF_* flags */
  (XSF_NOT_FIRST | XSF_CONTENT | XSF_EMIT | XSF_EMIT_KEY | XSF_EMIT_LEAF_LIST )
 
 /*
+ * Bits of xs_flags on a parent frame that a JSON/XML open modifies and
+ * that must be restored if the child element is later discarded by the
+ * filter's whiteboard rollback.
+ */
+#define XSF_WB_BITS (XSF_NOT_FIRST | XSF_CONTENT)
+
+/*
  * Turn the transition between two states into a number suitable for
  * a "switch" statement.
  */
@@ -220,6 +227,7 @@ typedef struct xo_stack_s {
     xo_filter_status_t xs_fstatus; /* Filter status */
     xo_off_t xs_wb_off;		/* Offset of buffer before this level */
     xo_off_t xs_key_off;	/* Offset of end of last key renderer */
+    xo_xsf_flags_t xs_wb_flags; /* Parent XSF_WB_BITS snapshot at wb-marker time */
     char *xs_name;		/* Name (for XPath value) */
     char *xs_keys;		/* XPath predicate for any key fields */
 } xo_stack_t;
@@ -328,6 +336,7 @@ struct xo_handle_s {
 #ifdef LIBXO_NEED_FILTERS
     struct xo_filter_s *xo_filters; /* Opaque data pointer */
 #endif /* LIBXO_NEED_FILTERS */
+    xo_xsf_flags_t xo_wb_snap;	/* Transient: parent XSF_WB_BITS before open */
 };
 
 /* Flag operations */
@@ -5223,6 +5232,18 @@ xo_filt_reset_parent (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED,
 		    cur_off = key_off;
 
 		xo_buf_set_offset(xbp, cur_off);
+
+		/*
+		 * The JSON/XML open that pushed this frame may have set
+		 * XSF_NOT_FIRST or XSF_CONTENT on our parent frame.
+		 * Since we're discarding the child element, restore the
+		 * parent flags to what they were before the open.
+		 */
+		if (cur > xop->xo_stack) {
+		    xo_stack_t *parent = cur - 1;
+		    parent->xs_flags =
+			(parent->xs_flags & ~XSF_WB_BITS) | cur->xs_wb_flags;
+		}
 	    }
 	}
     }
@@ -5317,17 +5338,12 @@ xo_filt_do_close_field (xo_handle_t *xop, const char *name, xo_ssize_t nlen,
 	return fstatus;
 #endif
 
-    xo_filter_status_t old_fstatus = fstatus;
-
     if ((flags & XFF_KEY) && !pass_field)
 	return fstatus;
 
     fstatus = xo_filter_close_field(xop, xo_filters(xop), name, nlen);
     if (fstatus != XO_STATUS_FULL)
 	XOIF_SET(xop, XOIF_FILTERING);
-
-    if (!(flags & XFF_KEY))
-	xo_filt_reset_parent(xop, xo_stack_cur(xop), old_fstatus, fstatus);
 
     return fstatus;
 }
@@ -5446,7 +5462,8 @@ static void
 xo_format_value_json (xo_handle_t *xop, const char *name, ssize_t nlen,
 		 const char *value, ssize_t vlen,
 		 const char *fmt, ssize_t flen,
-		 const char *encoding, ssize_t elen, xo_xff_flags_t flags)
+		 const char *encoding, ssize_t elen, xo_xff_flags_t flags,
+		 xo_off_t *val_offp, xo_off_t *val_endp)
 {
     if (flags & XFF_DISPLAY_ONLY) {
 	xo_simple_field(xop, TRUE, value, vlen, fmt, flen, flags);
@@ -5526,7 +5543,13 @@ xo_format_value_json (xo_handle_t *xop, const char *name, ssize_t nlen,
     if (quote)
 	xo_data_append(xop, "\"", 1);
 
+    if (val_offp)
+	*val_offp = xo_buf_offset(&xop->xo_data);
+
     xo_simple_field(xop, FALSE, value, vlen, fmt, flen, flags);
+
+    if (val_endp)
+	*val_endp = xo_buf_offset(&xop->xo_data);
 
     if (quote)
 	xo_data_append(xop, "\"", 1);
@@ -5782,8 +5805,40 @@ xo_format_value (xo_handle_t *xop, const char *name, ssize_t nlen,
 	break;
 
     case XO_STYLE_JSON:
-	xo_format_value_json(xop, name, nlen, value, vlen,
-			     fmt, flen, encoding, elen, flags);
+	if (xop->xo_flags & XOF_FILTER) {
+	    xo_off_t json_start = xo_buf_offset(&xop->xo_data);
+	    xo_xsf_flags_t saved_not_first =
+		xop->xo_stack[xop->xo_depth].xs_flags & XSF_NOT_FIRST;
+
+	    /*
+	     * Render first so we have the actual formatted value for key
+	     * predicate evaluation.  val_off/val_end bracket only the rendered
+	     * value bytes, excluding the surrounding JSON quotes.  Both are
+	     * initialized to json_start so that an XFF_DISPLAY_ONLY early
+	     * return leaves val_len == 0.  The filter uses vlen throughout
+	     * and copies into its own allocation (xo_tframe_key_add), so
+	     * passing the data buffer pointer directly is safe.
+	     */
+	    xo_off_t val_off = json_start, val_end = json_start;
+	    xo_format_value_json(xop, name, nlen, value, vlen,
+				 fmt, flen, encoding, elen, flags,
+				 &val_off, &val_end);
+	    xo_off_t val_len = val_end - val_off;
+
+	    xo_filt_do_open_field(xop, name, nlen,
+				  xo_buf_data(&xop->xo_data, val_off), val_len,
+				  TRUE, flags);
+	    if (xo_filt_skip(xop, flags)) {
+		xo_buf_set_offset(&xop->xo_data, json_start);
+		xop->xo_stack[xop->xo_depth].xs_flags =
+		    (xop->xo_stack[xop->xo_depth].xs_flags & ~XSF_NOT_FIRST)
+		    | saved_not_first;
+	    }
+	    xo_filt_do_close_field(xop, name, nlen, TRUE, flags);
+	} else {
+	    xo_format_value_json(xop, name, nlen, value, vlen,
+				 fmt, flen, encoding, elen, flags, NULL, NULL);
+	}
 	break;
 
     case XO_STYLE_SDPARAMS:
@@ -8125,6 +8180,8 @@ xo_depth_change (xo_handle_t *xop, const char *name,
 	xsp->xs_state = state;
 	xsp->xs_fstatus = fstatus;
 	xsp->xs_wb_off = starting_offset;
+	xsp->xs_wb_flags = xop->xo_wb_snap; /* parent flags before this open */
+	xop->xo_wb_snap = 0;
 	xo_stack_set_flags(xop);
 
 	if (name == NULL)
@@ -8245,6 +8302,7 @@ xo_do_open_container (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
 
     /* Save the starting point, so depth_change can record it later */
     xo_off_t starting_offset = xo_buf_offset(&xop->xo_data);
+    xop->xo_wb_snap = xop->xo_stack[xop->xo_depth].xs_flags & XSF_WB_BITS;
 
     switch (xo_style(xop)) {
     case XO_STYLE_XML:
@@ -8271,6 +8329,13 @@ xo_do_open_container (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
 	break;
 
     case XO_STYLE_JSON:
+	/*
+	 * If we are newly "full", then we need all our parents to be emitted
+	 */
+	if (xop->xo_flags & XOF_FILTER)
+	    if (fstatus == XO_STATUS_FULL && old_fstatus != XO_STATUS_FULL)
+		xo_filt_mark_parents(xop, xsp, fstatus);
+
 	xo_stack_set_flags(xop);
 
 	if (!XOF_ISSET(xop, XOF_NO_TOP)
@@ -8396,12 +8461,19 @@ xo_do_close_container (xo_handle_t *xop, const char *name)
     case XO_STYLE_JSON:
 	xo_stack_set_flags(xop);
 
+	if (xop->xo_flags & XOF_FILTER)
+	    xo_filt_reset_parent(xop, xsp, old_fstatus, fstatus);
+
 	pre_nl = XOF_ISSET(xop, XOF_PRETTY) ? "\n" : "";
 	ppn = "";
 
 	xo_depth_change(xop, name, -1, -1, XSS_CLOSE_CONTAINER, 0, 0, 0);
-	rc = xo_printf(xop, "%s%*s}%s", pre_nl, xo_indent(xop), "", ppn);
-	xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
+
+	if (!(xop->xo_flags & XOF_FILTER)
+	    || old_fstatus == XO_STATUS_ZERO || old_fstatus == XO_STATUS_FULL) {
+	    rc = xo_printf(xop, "%s%*s}%s", pre_nl, xo_indent(xop), "", ppn);
+	    xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
+	}
 	break;
 
     case XO_STYLE_HTML:
@@ -8459,6 +8531,7 @@ xo_do_open_list (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
     name = xo_map_name(xop, name); /* Find mapped name, if any */
 
     xo_off_t starting_offset = xo_buf_offset(&xop->xo_data);
+    xop->xo_wb_snap = xop->xo_stack[xop->xo_depth].xs_flags & XSF_WB_BITS;
 
     switch (xo_style(xop)) {
     case XO_STYLE_JSON:
@@ -8562,11 +8635,19 @@ xo_do_close_list (xo_handle_t *xop, const char *name)
 
     name = xo_map_name(xop, name); /* Find mapped name, if any */
 
+    xo_stack_t *xsp = xo_stack_cur(xop);
+
     switch (xo_style(xop)) {
     case XO_STYLE_JSON:
 	if (xop->xo_stack[xop->xo_depth].xs_flags & XSF_NOT_FIRST)
 	    pre_nl = XOF_ISSET(xop, XOF_PRETTY) ? "\n" : "";
 	xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
+
+	if ((xop->xo_flags & XOF_FILTER) && xsp->xs_wb_off != XS_OFFSET_CLEAR) {
+	    xo_filt_reset_parent(xop, xsp, xsp->xs_fstatus, xsp->xs_fstatus);
+	    xo_depth_change(xop, name, -1, -1, XSS_CLOSE_LIST, XSF_LIST, 0, 0);
+	    break;
+	}
 
 	xo_depth_change(xop, name, -1, -1, XSS_CLOSE_LIST, XSF_LIST, 0, 0);
 	rc = xo_printf(xop, "%s%*s]", pre_nl, xo_indent(xop), "");
@@ -8624,6 +8705,9 @@ xo_do_open_leaf_list (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
 
     name = xo_map_name(xop, name); /* Find mapped name, if any */
 
+    xo_off_t starting_offset = xo_buf_offset(&xop->xo_data);
+    xop->xo_wb_snap = xop->xo_stack[xop->xo_depth].xs_flags & XSF_WB_BITS;
+
     switch (xo_style(xop)) {
     case XO_STYLE_JSON:
 	indent = 1;
@@ -8657,7 +8741,7 @@ xo_do_open_leaf_list (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
     }
 
     xo_depth_change(xop, name, 1, indent, XSS_OPEN_LEAF_LIST,
-		    XSF_LIST | xo_stack_flags(flags), 0, 0);
+		    XSF_LIST | xo_stack_flags(flags), 0, starting_offset);
 
     return rc;
 }
@@ -8687,11 +8771,19 @@ xo_do_close_leaf_list (xo_handle_t *xop, const char *name)
 
     name = xo_map_name(xop, name); /* Find mapped name, if any */
 
+    xo_stack_t *xsp = xo_stack_cur(xop);
+
     switch (xo_style(xop)) {
     case XO_STYLE_JSON:
 	if (xop->xo_stack[xop->xo_depth].xs_flags & XSF_NOT_FIRST)
 	    pre_nl = XOF_ISSET(xop, XOF_PRETTY) ? "\n" : "";
 	xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
+
+	if ((xop->xo_flags & XOF_FILTER) && xsp->xs_wb_off != XS_OFFSET_CLEAR) {
+	    xo_filt_reset_parent(xop, xsp, xsp->xs_fstatus, xsp->xs_fstatus);
+	    xo_depth_change(xop, name, -1, -1, XSS_CLOSE_LEAF_LIST, XSF_LIST, 0, 0);
+	    break;
+	}
 
 	xo_depth_change(xop, name, -1, -1, XSS_CLOSE_LEAF_LIST, XSF_LIST, 0, 0);
 	rc = xo_printf(xop, "%s%*s]", pre_nl, xo_indent(xop), "");
@@ -8731,6 +8823,7 @@ xo_do_open_instance (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
     xo_filter_status_t old_fstatus = xsp->xs_fstatus;
 
     ssize_t start_offset = xo_buf_offset(&xop->xo_data);
+    xop->xo_wb_snap = xop->xo_stack[xop->xo_depth].xs_flags & XSF_WB_BITS;
 
     xo_filter_status_t fstatus;
     fstatus = xo_filter_open_instance(xop, xo_filters(xop), name);
@@ -8763,6 +8856,13 @@ xo_do_open_instance (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
 	break;
 
     case XO_STYLE_JSON:
+	/*
+	 * If we are newly "full", then we need all our parents to be emitted
+	 */
+	if (xop->xo_flags & XOF_FILTER)
+	    if (fstatus == XO_STATUS_FULL && old_fstatus != XO_STATUS_FULL)
+		xo_filt_mark_parents(xop, xsp, fstatus);
+
 	xo_stack_set_flags(xop);
 
 	if (xop->xo_stack[xop->xo_depth].xs_flags & XSF_NOT_FIRST)
@@ -8857,8 +8957,15 @@ xo_do_close_instance (xo_handle_t *xop, const char *name)
 
     switch (xo_style(xop)) {
     case XO_STYLE_XML:
-	if (xop->xo_flags & XOF_FILTER)
+	if (xop->xo_flags & XOF_FILTER) {
+	    /*
+	     * Clear key_off so rollback goes to xs_wb_off (before <instance>),
+	     * not just past the key fields.  A non-matching instance must be
+	     * fully discarded, not left with partial key-field output.
+	     */
+	    xsp->xs_key_off = XS_OFFSET_CLEAR;
 	    xo_filt_reset_parent(xop, xsp, old_fstatus, fstatus);
+	}
 
 	xo_depth_change(xop, name, -1, -1, XSS_CLOSE_INSTANCE, 0, fstatus, 0);
 
@@ -8870,6 +8977,12 @@ xo_do_close_instance (xo_handle_t *xop, const char *name)
 
     case XO_STYLE_JSON:
 	pre_nl = XOF_ISSET(xop, XOF_PRETTY) ? "\n" : "";
+
+	if ((xop->xo_flags & XOF_FILTER) && xsp->xs_wb_off != XS_OFFSET_CLEAR) {
+	    xo_filt_reset_parent(xop, xsp, old_fstatus, fstatus);
+	    xo_depth_change(xop, name, -1, -1, XSS_CLOSE_INSTANCE, 0, 0, 0);
+	    break;
+	}
 
 	xo_depth_change(xop, name, -1, -1, XSS_CLOSE_INSTANCE, 0, 0, 0);
 	rc = xo_printf(xop, "%s%*s}", pre_nl, xo_indent(xop), "");
