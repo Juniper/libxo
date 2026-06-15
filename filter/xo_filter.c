@@ -46,7 +46,313 @@ typedef double xo_float_t;	/* Our floating point type */
  */
 #pragma GCC   diagnostic ignored "-Waggregate-return"
 
-#define XO_MATCHES_DEF	32	/* Number of states allocated by default */
+/*
+ * Compiled trie for simultaneous multi-expression XPath matching.
+ *
+ * At init time all parsed XPath expressions are compiled into a shared
+ * prefix-trie so expressions with common prefixes share nodes.
+ *
+ * At runtime a stack of xo_tframe_t frames (one per nesting depth)
+ * replaces the old xo_match_t linked list.  Each frame records which
+ * trie nodes are currently active and in what sub-state.
+ */
+typedef uint32_t xo_trie_id_t;	/* Index trie node array (1-based; 0=none) */
+
+/*
+ * One node in the compiled trie.  Stored in a flat 1-based array;
+ * index 0 means "none".
+ */
+typedef struct xo_tnode_s {
+    xo_off_t xtn_name;          /* Element name offset in xparse string table */
+    xo_xparse_node_id_t xtn_pred; /* Predicate subtree root (0=none) */
+    xo_trie_id_t xtn_child;	/* First child trie node (0 = leaf) */
+    xo_trie_id_t xtn_sibling;	/* Next sibling at this level */
+    uint16_t xtn_flags;		/* XTNF_* flags */
+} xo_tnode_t;
+
+#define XTNF_TERMINAL	(1<<0)	/* A complete expression ends here */
+#define XTNF_NOT	(1<<1)	/* "not" expression: deny on match */
+#define XTNF_ABSOLUTE	(1<<2)	/* Anchored at tree root (leading '/') */
+
+/*
+ * The compiled trie: a flat node array plus the root sibling chain.
+ */
+typedef struct xo_trie_s {
+    xo_tnode_t *xt_nodes;	/* [1..xt_count]; slot 0 unused */
+    xo_trie_id_t xt_count;	/* Nodes in use */
+    xo_trie_id_t xt_cap;	/* Allocated capacity */
+    xo_trie_id_t xt_root;	/* First root-level sibling */
+    xo_xparse_data_t *xt_xd;	/* Parse data (for string lookup) */
+} xo_trie_t;
+
+/*
+ * Per-depth runtime frame.  We cap simultaneous active nodes at
+ * XO_TFRAME_MAX; this covers the common case of a handful of filters
+ * without heap allocation.
+ */
+#define XO_TFRAME_MAX	8
+
+typedef struct xo_tframe_s {
+    uint8_t xtf_count;		/* # of active slots */
+    uint8_t xtf_state[XO_TFRAME_MAX]; /* XTFS_* per slot */
+    xo_trie_id_t xtf_node[XO_TFRAME_MAX]; /* trie node id per slot */
+    int16_t xtf_allow_delta;	/* allow contribution to undo on pop */
+    int16_t xtf_deny_delta;	/* deny contribution to undo on pop */
+    char *xtf_keys;		/* buffered "k\0v\0k2\0v2\0\0" pairs */
+    ssize_t xtf_keys_len;
+} xo_tframe_t;
+
+/* Per-slot states */
+#define XTFS_SEEK	0	/* Waiting for this node's element name */
+#define XTFS_PRED	1	/* Name matched; evaluating predicates */
+#define XTFS_LIVE	2	/* Fully matched (name + predicates) */
+#define XTFS_DEAD	3	/* Predicate failed; ignore sub-tree */
+
+/*
+ * Runtime matching state: a stack of frames driven by open/close events.
+ * Replaces the old xo_match_t linked list.
+ */
+typedef struct xo_tmatch_s {
+    xo_trie_t *xm_trie;	        /* The compiled trie */
+    uint32_t xm_depth;	        /* Current stack depth */
+    uint32_t xm_cap;	        /* Allocated frame count */
+    xo_tframe_t *xm_stack;	/* Frame stack [0..xm_depth] */
+    uint32_t xm_allow;          /* Active allow-match count */
+    uint32_t xm_deny;           /* Active deny-match count */
+} xo_tmatch_t;
+
+/*
+ * Allocate a trie node
+ */
+static xo_trie_id_t
+xo_trie_alloc_node (xo_trie_t *xtp)
+{
+    if (xtp->xt_count + 1 >= xtp->xt_cap) {
+	xo_trie_id_t cap = xtp->xt_cap ? xtp->xt_cap * 2 : 16;
+	xo_tnode_t *p = xo_realloc(xtp->xt_nodes, cap * sizeof(*p));
+	if (p == NULL)
+	    return 0;
+
+	xtp->xt_nodes = p;
+	xtp->xt_cap = cap;
+    }
+
+    xo_trie_id_t id = ++xtp->xt_count;
+    bzero(&xtp->xt_nodes[id], sizeof(xo_tnode_t));
+
+    return id;
+}
+
+/*
+ * Return (or create) the child of `parent` with name `name_id`.
+ * parent==0 means the root sibling list.
+ */
+static xo_trie_id_t
+xo_trie_get_child (xo_trie_t *xtp, xo_trie_id_t parent, xo_off_t name_id)
+{
+    xo_trie_id_t *listp = parent
+	? &xtp->xt_nodes[parent].xtn_child
+	: &xtp->xt_root;
+
+    for (xo_trie_id_t s = *listp; s; s = xtp->xt_nodes[s].xtn_sibling)
+	if (xtp->xt_nodes[s].xtn_name == name_id)
+	    return s;
+
+    xo_trie_id_t id = xo_trie_alloc_node(xtp);
+    if (id == 0)
+	return 0;
+
+    xtp->xt_nodes[id].xtn_name = name_id;
+    xtp->xt_nodes[id].xtn_sibling = *listp;
+    *listp = id;
+
+    return id;
+}
+
+static void
+xo_trie_insert (xo_trie_t *xtp, xo_xparse_data_t *xdp,
+		xo_xparse_node_id_t first_elem, uint16_t flags)
+{
+    xo_trie_id_t parent = 0;
+    xo_xparse_node_t *xnp;
+
+    for (xo_xparse_node_id_t id = first_elem; id; id = xnp->xn_next) {
+	xnp = xo_xparse_node(xdp, id);
+	if (xnp->xn_type == C_ABSOLUTE) {
+	    flags |= XTNF_ABSOLUTE;
+	    continue;
+	}
+	if (xnp->xn_type != C_ELEMENT)
+	    continue;
+
+	xo_trie_id_t tid = xo_trie_get_child(xtp, parent, xnp->xn_str);
+	if (tid == 0)
+	    return;
+
+	/*
+	 * XTNF_ABSOLUTE means the path starts at root.  The check in
+	 * xo_tmatch_open runs on root-level trie nodes, so the flag
+	 * must live on the first element of the path (parent == 0),
+	 * not on the terminal node.
+	 */
+	if (parent == 0 && (flags & XTNF_ABSOLUTE))
+	    xtp->xt_nodes[tid].xtn_flags |= XTNF_ABSOLUTE;
+
+	/* Attach predicate if present among this element's children */
+	for (xo_xparse_node_id_t cid = xnp->xn_contents; cid; ) {
+	    xo_xparse_node_t *cp = xo_xparse_node(xdp, cid);
+	    if (cp->xn_type == C_PREDICATE) {
+		xtp->xt_nodes[tid].xtn_pred = cid;
+		break;
+	    }
+	    cid = cp->xn_next;
+	}
+	parent = tid;
+    }
+
+    if (parent)
+	xtp->xt_nodes[parent].xtn_flags |= XTNF_TERMINAL | (flags & ~XTNF_ABSOLUTE);
+}
+
+static xo_trie_t *
+xo_trie_compile (xo_handle_t *xop UNUSED, xo_xparse_data_t *xdp)
+{
+    xo_trie_t *xtp = xo_realloc(NULL, sizeof(*xtp));
+    if (xtp == NULL)
+	return NULL;
+
+    bzero(xtp, sizeof(*xtp));
+    xtp->xt_xd = xdp;
+
+    xo_xparse_node_id_t *paths = xdp->xd_paths;
+    for (uint32_t i = 0; i < xdp->xd_paths_cur; i++, paths++) {
+	xo_xparse_node_t *xnp = xo_xparse_node(xdp, *paths);
+	uint16_t flags = 0;
+	xo_xparse_node_id_t elem = *paths;
+
+	switch (xnp->xn_type) {
+	case C_ELEMENT:
+	    break;
+
+	case C_ABSOLUTE:
+	    flags |= XTNF_ABSOLUTE;
+	    elem = xnp->xn_next;
+	    break;
+
+	case C_NOT:
+	    flags |= XTNF_NOT;
+	    elem = xnp->xn_contents;
+	    break;
+
+	case C_PATH:
+	    elem = xnp->xn_contents;
+	    break;
+
+	default:
+	    continue;
+	}
+	xo_trie_insert(xtp, xdp, elem, flags);
+    }
+
+    return xtp;
+}
+
+static void
+xo_trie_free (xo_trie_t *xtp)
+{
+    if (xtp) {
+	xo_free(xtp->xt_nodes);
+	xo_free(xtp);
+    }
+}
+
+/* xo_tframe_* functions are for runtime processing */
+
+static void
+xo_tframe_key_add (xo_tframe_t *frame,
+		   const char *tag, xo_ssize_t tlen,
+		   const char *value, xo_ssize_t vlen)
+{
+    xo_ssize_t new_len = tlen + vlen + 3; /* two NULs plus final NUL */
+    char *newp = xo_realloc(frame->xtf_keys, frame->xtf_keys_len + new_len);
+    if (newp == NULL)
+	return;
+
+    char *addp = newp + frame->xtf_keys_len;
+    memcpy(addp, tag, tlen);
+    addp += tlen;
+    *addp++ = '\0';
+    memcpy(addp, value, vlen);
+    addp += vlen;
+    *addp++ = '\0';
+    *addp++ = '\0';
+
+    frame->xtf_keys_len += new_len - 1; /* exclude the final extra NUL */
+    frame->xtf_keys = newp;
+}
+
+static void
+xo_tframe_free_keys (xo_tframe_t *frame)
+{
+    if (frame->xtf_keys) {
+	xo_free(frame->xtf_keys);
+	frame->xtf_keys = NULL;
+	frame->xtf_keys_len = 0;
+    }
+}
+
+static int
+xo_tmatch_init (xo_handle_t *xop UNUSED, xo_tmatch_t *xm, xo_trie_t *trie)
+{
+    bzero(xm, sizeof(*xm));
+    xm->xm_trie = trie;
+
+    uint32_t cap = 16;
+    xm->xm_stack = xo_realloc(NULL, cap * sizeof(*xm->xm_stack));
+    if (xm->xm_stack == NULL)
+	return -1;
+    bzero(xm->xm_stack, cap * sizeof(*xm->xm_stack));
+    xm->xm_cap = cap;
+
+    /*
+     * Depth-0 frame: all root trie nodes are LIVE (they are the starting set)
+     */
+    xo_tframe_t *root = &xm->xm_stack[0];
+    xo_trie_t *xtp = trie;
+
+    for (xo_trie_id_t r = xtp->xt_root; r && root->xtf_count < XO_TFRAME_MAX;
+	 r = xtp->xt_nodes[r].xtn_sibling) {
+	uint32_t s = root->xtf_count++;
+	root->xtf_node[s] = r;
+	root->xtf_state[s] = XTFS_LIVE;
+    }
+
+    XO_DBG(xop, "xo_tmatch_init: trie root nodes: %u", root->xtf_count);
+    return 0;
+}
+
+static void
+xo_tmatch_cleanup (xo_tmatch_t *xm)
+{
+    if (xm->xm_stack) {
+	for (uint32_t d = 0; d <= xm->xm_depth; d++)
+	    xo_tframe_free_keys(&xm->xm_stack[d]);
+	xo_free(xm->xm_stack);
+	xm->xm_stack = NULL;
+    }
+}
+
+/*
+ * xo_tmatch_record_live/open/close/key and xo_tmatch_eval_pred all
+ * reference types (xo_eval_value_t, xo_match_t, xo_filter_s fields)
+ * defined later in this file.  They are placed after those definitions;
+ * forward declarations appear here.
+ */
+static void xo_tmatch_record_live(xo_tmatch_t *, xo_tframe_t *, xo_tnode_t *);
+static void xo_tmatch_open(xo_handle_t *, xo_filter_t *, xo_tmatch_t *,
+			   const char *, ssize_t);
+static void xo_tmatch_close(xo_handle_t *, xo_filter_t *, xo_tmatch_t *,
+			    const char *, ssize_t);
 
 /*
  * We maintain a set of filters (xo_filter_t), representing each
@@ -123,23 +429,20 @@ typedef struct xo_match_s {
 /* Flags fpr xm_flags */
 #define XMF_NOT		(1<<0)	 /* Not expression ("!a") */
 
+typedef unsigned xo_xsf_flags_t;   /* Type for XFSF_* flag fields */
+
 struct xo_filter_s {		 /* Forward/typdef decl in xo_private.h */
     struct xo_xparse_data_s xf_xd; /* Main parsing structure */
     xo_filter_status_t xf_status; /* Current status: (see XO_STATUS_*) */
     uint32_t xf_depth;		 /* Depth of hierarchy seen (zero == top) */
-    uint32_t xf_allow;		 /* Number of successful matches */
-    uint32_t xf_pred;		 /* Number of current predicate matches */
-    uint32_t xf_deny;		 /* Number of successful not matches */
-    xo_match_t *xf_matches;	 /* Current states */
-    unsigned xf_flags;		 /* Flags (XFSF_*) */
     uint32_t xf_total_depth;	 /* Total depth ('opens' minus 'closes') */
+    xo_xsf_flags_t xf_flags;	 /* Flags (XFSF_*) */
+    xo_trie_t *xf_trie;	 /* Compiled trie (NULL until first filter added) */
+    xo_tmatch_t xf_tmatch;	 /* Runtime trie-matching state */
 };
 
 /* Flags for xf_flags */
 #define XFSF_BLOCK	(1<<0)	/* Block emitting data */
-
-static void
-xo_filter_dump_matches (xo_handle_t *xop, xo_filter_t *xfp);
 
 int
 xo_encoder_wb_marker (xo_handle_t *xop, xo_whiteboard_op_t op,
@@ -192,130 +495,141 @@ xo_filter_op_destroy (xo_handle_t *xop, xo_filter_t *xfp)
 {
     xo_xparse_clean(&xfp->xf_xd);
 
-    if (xfp->xf_matches) {
-	/* Whiffle down the match list, freeing as we go */
-	xo_match_t *xmp = xfp->xf_matches, *next;
-	for (; xmp; xmp = next) {
-	    next = xmp->xm_next;
-	    xo_free(xmp);
-	}
-    }
+    xo_tmatch_cleanup(&xfp->xf_tmatch);
+    xo_trie_free(xfp->xf_trie);
+    xfp->xf_trie = NULL;
 
     xo_set_filter_data(xop, NULL);
     xo_free(xfp);
 }
 
-/*
- * We size our stack for the "worst case" scenario, rather than resize
- * them, calculating that size from the contents of the expression.
- */
-static int
-xo_stack_max (xo_handle_t *xop, xo_filter_t *xfp, xo_xparse_node_id_t id)
-{
-    int rc = 1;
-    xo_xparse_node_t *xnp;
-
-    for (; id; id = xnp->xn_next) {
-	xnp = xo_xparse_node(&xfp->xf_xd, id);
-
-	if (xnp->xn_type == C_PATH) {
-	    rc += xo_stack_max(xop, xfp, xnp->xn_contents);
-
-	} else if (xnp->xn_type == C_ELEMENT || xnp->xn_type == C_ABSOLUTE)
-	    rc += 1;
-    }
-
-    XO_DBG(xop, "xo_stack_max: id %u -> %d", id, rc);
-
-    return rc;
-}
-
-/*
- * Return a new match struct, allocating a new one if needed
- */
-static xo_match_t *
-xo_filter_match_new (xo_handle_t *xop, xo_filter_t *xfp, xo_xparse_node_id_t id)
-{
-    int stack_size = xo_stack_max(xop, xfp, id);
-    int sz = sizeof(xo_match_t) + sizeof(xo_stack_t) * stack_size;
-
-    xo_match_t *xmp = xo_realloc(NULL, sz);
-    if (xmp == NULL)
-	return NULL;
-
-    bzero(xmp, sz);
-
-    xmp->xm_base = id;
-    xmp->xm_stackp = xmp->xm_stack;
-    xmp->xm_stack_size = stack_size;
-
-    xmp->xm_next = xfp->xf_matches;
-    xfp->xf_matches = xmp;
-
-    return xmp;
-}
-
-/*
- * When we no longer need the recorded keys, we can release them
- */
 static void
-xo_filter_stack_free_keys (xo_filter_t *xfp UNUSED, xo_stack_t *xsp)
+xo_tmatch_record_live (xo_tmatch_t *xm, xo_tframe_t *frame, xo_tnode_t *tn)
 {
-    if (xsp->xs_keys) {
-	xo_free(xsp->xs_keys);
-	xsp->xs_keys = NULL;
-	xsp->xs_keys_len = 0;
+    if (!(tn->xtn_flags & XTNF_TERMINAL))
+	return;
+
+    if (tn->xtn_flags & XTNF_NOT) {
+	xm->xm_deny++;
+	frame->xtf_deny_delta++;
+    } else {
+	xm->xm_allow++;
+	frame->xtf_allow_delta++;
     }
 }
 
-/*
- * Release a "match", that is a pattern which we are currently
- * processing, typically because we've popped the top element.
- */
 static void
-xo_filter_match_free (xo_filter_t *xfp, xo_match_t *xmp)
+xo_tmatch_open (xo_handle_t *xop, xo_filter_t *xfp UNUSED,
+		xo_tmatch_t *xm, const char *tag, ssize_t tlen)
 {
-    xo_match_t **prev, **next;
-    xo_stack_t *xsp;
+    xo_trie_t *xtp = xm->xm_trie;
+    xo_xparse_data_t *xdp = xtp->xt_xd;
 
-    for (prev = next = &xfp->xf_matches; *prev; ) {
-	if (*prev == xmp) {
-	    *prev = xmp->xm_next;
+    if (xm->xm_depth + 1 >= xm->xm_cap) {
+	uint32_t cap = xm->xm_cap * 2;
+	xo_tframe_t *p = xo_realloc(xm->xm_stack, cap * sizeof(*p));
+	if (p == NULL)
+	    return;
+	bzero(p + xm->xm_cap, (cap - xm->xm_cap) * sizeof(*p));
+	xm->xm_stack = p;
+	xm->xm_cap = cap;
+    }
 
-	    /* Release any saved key/value pairs */
-	    for (xsp = xmp->xm_stack; xsp <= xmp->xm_stackp; xsp++)
-		xo_filter_stack_free_keys(xfp, xsp);
+    xo_tframe_t *parent = &xm->xm_stack[xm->xm_depth];
+    xm->xm_depth++;
+    xo_tframe_t *frame = &xm->xm_stack[xm->xm_depth];
+    bzero(frame, sizeof(*frame));
 
-	    xo_buf_cleanup(&xmp->xm_whiteboard);
-	    xo_free(xmp);
+    xo_dbg(xop, "xo_tmatch_open: depth %u tag '%.*s'", xm->xm_depth, tlen, tag);
 
-	} else {
-	    prev = &(*prev)->xm_next;
+    /* Descend from every LIVE parent slot */
+    for (uint32_t i = 0; i < parent->xtf_count; i++) {
+	if (parent->xtf_state[i] != XTFS_LIVE)
+	    continue;
+	xo_tnode_t *ptn = &xtp->xt_nodes[parent->xtf_node[i]];
+	for (xo_trie_id_t c = ptn->xtn_child;
+		     c && frame->xtf_count < XO_TFRAME_MAX;
+		     c = xtp->xt_nodes[c].xtn_sibling) {
+	    xo_tnode_t *tn = &xtp->xt_nodes[c];
+	    const char *nm = xo_xparse_str(xdp, tn->xtn_name);
+	    if (nm == NULL || !xo_streqn(nm, tag, tlen))
+		continue;
+
+	    uint32_t s = frame->xtf_count++;
+	    frame->xtf_node[s] = c;
+
+	    if (tn->xtn_pred) {
+		frame->xtf_state[s] = XTFS_PRED;
+	    } else {
+		frame->xtf_state[s] = XTFS_LIVE;
+		xo_tmatch_record_live(xm, frame, tn);
+	    }
 	}
     }
+
+    /* Re-probe root nodes for relative paths; absolute only at depth 1 */
+    for (xo_trie_id_t r = xtp->xt_root; r && frame->xtf_count < XO_TFRAME_MAX;
+	 r = xtp->xt_nodes[r].xtn_sibling) {
+	xo_tnode_t *tn = &xtp->xt_nodes[r];
+	if ((tn->xtn_flags & XTNF_ABSOLUTE) && xm->xm_depth != 1)
+	    continue;
+
+	const char *nm = xo_xparse_str(xdp, tn->xtn_name);
+	if (nm == NULL || !xo_streqn(nm, tag, tlen))
+	    continue;
+
+	/* Avoid duplicating a node already added via parent descent */
+	int dup = FALSE;
+	for (uint32_t j = 0; j < frame->xtf_count; j++) {
+	    if (frame->xtf_node[j] == r) {
+		dup = TRUE;
+		break;
+	    }
+	}
+
+	if (dup)
+	    continue;
+
+	uint32_t s = frame->xtf_count++;
+	frame->xtf_node[s] = r;
+
+	if (tn->xtn_pred) {
+	    frame->xtf_state[s] = XTFS_PRED;
+	} else {
+	    frame->xtf_state[s] = XTFS_LIVE;
+	    xo_tmatch_record_live(xm, frame, tn);
+	}
+    }
+
+    xo_dbg(xop, "xo_tmatch_open: frame %u active [allow %u/deny %u]",
+	   frame->xtf_count, xm->xm_allow, xm->xm_deny);
+}
+
+static void
+xo_tmatch_close (xo_handle_t *xop, xo_filter_t *xfp UNUSED,
+		 xo_tmatch_t *xm, const char *tag UNUSED, ssize_t tlen UNUSED)
+{
+    if (xm->xm_depth == 0)
+	return;
+
+    xo_tframe_t *frame = &xm->xm_stack[xm->xm_depth];
+    xm->xm_allow -= frame->xtf_allow_delta;
+    xm->xm_deny  -= frame->xtf_deny_delta;
+    xo_tframe_free_keys(frame);
+
+    xo_dbg(xop, "xo_tmatch_close: depth %u [allow %u/deny %u]",
+	   xm->xm_depth, xm->xm_allow, xm->xm_deny);
+
+    xm->xm_depth--;
 }
 
 /*
- * Turn internal states into printable names (for debug output)
+ * xo_tmatch_eval_pred and xo_tmatch_key reference xo_eval_value_t and
+ * other types defined later; they are placed after xo_filter_pred_eval.
  */
-static const char *
-xo_filter_state_name (uint32_t state)
-{
-    static const char *names[] = {
-        /* XSS_INIT */ "INIT",
-	/* XSS_FIRST */ "FIRST",
-        /* XSS_NEED */ "NEED",
-        /* XSS_PRED */ "PRED",
-        /* XSS_FOUND */ "FOUND",
-        /* XSS_DEEP */ "DEEP",
-        /* XSS_DEADEND */ "DEADEND",
-    };
-
-    if (state > sizeof(names) / sizeof(names[0]))
-	return "unknown";
-
-    return names[state];
-}
+static xo_filter_status_t xo_tmatch_key(xo_handle_t *, xo_filter_t *,
+					 xo_tmatch_t *, const char *,
+					 xo_ssize_t, const char *, xo_ssize_t);
 
 /*
  * Add a filter (xpath) to our filtering mechanism
@@ -344,34 +658,24 @@ xo_filter_op_add_one (xo_handle_t *xop, const char *input)
 					 unsupported_tokens, "");
     }
 
-    return rc ? -1 : 0;
-}
+    if (rc)
+	return -1;
 
-/*
- * Indicate if all the matches are XSS_DEADEND, meaning there's no
- * point in future exporation.
- */
-static int
-xo_filter_all_dead (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED)
-{
-    int rc = FALSE;
-    xo_match_t *xmp;
+    /* Recompile the trie from all expressions accumulated so far */
+    xo_trie_free(xfp->xf_trie);
+    xo_tmatch_cleanup(&xfp->xf_tmatch);
 
-    /* For each active match, find one that's not dead */
-    for (xmp = xfp->xf_matches; xmp; xmp = xmp->xm_next) {
-	xo_stack_t *xsp = xmp->xm_stackp; /* Look at the top of the stack */
+    xfp->xf_trie = xo_trie_compile(xop, xdp);
+    if (xfp->xf_trie == NULL)
+	return -1;
 
-	if (xsp->xs_state != XSS_DEADEND) {
-	    rc = FALSE;
-	    break;		/* Short circuit: don't need to continue */
-	}
-
-	rc = TRUE;		/* Found at least one */
+    if (xo_tmatch_init(xop, &xfp->xf_tmatch, xfp->xf_trie) < 0) {
+	xo_trie_free(xfp->xf_trie);
+	xfp->xf_trie = NULL;
+	return -1;
     }
 
-    XO_DBG(xop, "filter: all-dead: -> %d", rc);
-
-    return rc; /* Either zero active matches or no DEADENDS */
+    return 0;
 }
 
 static xo_filter_status_t
@@ -404,7 +708,7 @@ xo_filter_op_status_name (xo_filter_status_t rc)
  * performance issues (one reason why we cache the status).
  */
 static xo_filter_status_t
-xo_filter_change_status (xo_handle_t *xop, xo_filter_t *xfp,
+xo_filter_change_status (xo_handle_t *xop UNUSED, xo_filter_t *xfp,
 			 const char *op UNUSED,
 			 const char *tag UNUSED, ssize_t tlen UNUSED)
 {
@@ -416,11 +720,11 @@ xo_filter_change_status (xo_handle_t *xop, xo_filter_t *xfp,
 	why = "no-filters";
 	rc = XO_STATUS_FULL;
 
-    } else if (xfp->xf_deny) {
+    } else if (xfp->xf_tmatch.xm_deny) {
 	why = "deny-is-set";
 	rc = XO_STATUS_TRACK;		/* No means no */
 
-    } else if (xfp->xf_allow) {
+    } else if (xfp->xf_tmatch.xm_allow) {
 	why = "allow-is-set";
 	rc = XO_STATUS_FULL;
 
@@ -428,16 +732,9 @@ xo_filter_change_status (xo_handle_t *xop, xo_filter_t *xfp,
 	why = "all-nots";
 	rc = XO_STATUS_FULL;
 
-    } else if (xo_filter_all_dead(xop, xfp)) {
-	if ((xfp->xf_xd.xd_flags & XDF_ALL_ABS) && xfp->xf_total_depth != 1) {
-	    why = "all-dead";
-	    rc = XO_STATUS_DEAD;
-	} else {
-	    why = "dead-but-still-tracking";
-	    rc = XO_STATUS_TRACK;
-	}
-
     } else {
+	/* No active matches mean we're tracking; never DEAD in trie mode
+	 * since the trie always re-probes root nodes on each open. */
 	why = "default-to-no";
 	rc = XO_STATUS_TRACK;
     }
@@ -456,325 +753,23 @@ xo_filter_change_status (xo_handle_t *xop, xo_filter_t *xfp,
     return rc;
 }
 
-static xo_filter_status_t
-xo_filter_update_status (xo_handle_t *xop, xo_filter_t *xfp)
-{
-    return xo_filter_change_status(xop, xfp, "caller", NULL, 0);
-}
-
 /*
- * Inspect the children of a node (given by `id`) to see if it
- * contains any predicates.
- */
-static int
-xo_filter_has_predicates (xo_filter_t *xfp, xo_xparse_node_id_t id)
-{
-    xo_xparse_node_t *xnp;
-
-    for (; id; id = xnp->xn_next) {
-	xnp = xo_xparse_node(&xfp->xf_xd, id);
-	if (xnp->xn_type == C_PREDICATE)
-	    return TRUE;
-    }
-
-    return FALSE;
-}
-
-/*
- * Adjust the allow/deny numbers for a new match stack element
- */
-static const char *
-xo_filter_match_adjust (xo_handle_t *xop, xo_filter_t *xfp, xo_match_t *xmp,
-			xo_stack_t *xsp, uint32_t state)
-{
-    const char *label;
-
-    xsp->xs_state = state;
-
-    if (xmp->xm_flags & XMF_NOT) {
-	xfp->xf_deny += 1;
-	xsp->xs_deny += 1;
-	label = " deny++";
-    } else {
-	xfp->xf_allow += 1;
-	xsp->xs_allow += 1;
-	label = " allow++";
-    }
-
-    /*
-     * XXX We likely don't need this call, since it's done at the
-     * bottom of xo_filter_op_key; revisit this later....
-     */
-    xo_filter_update_status(xop, xfp);
-
-    return label;
-}
-
-static xo_stack_t *
-xo_filter_stack_push (xo_filter_t *xfp UNUSED, xo_match_t *xmp, uint32_t state,
-		xo_xparse_node_id_t match, xo_xparse_node_id_t predicate)
-{
-    xo_stack_t *xsp = ++xmp->xm_stackp;
-
-    bzero(xsp, sizeof(*xsp));
-
-    xsp->xs_state = state;
-    xsp->xs_match = match;
-    xsp->xs_predicates = predicate;
-
-    return xsp;
-}
-
-static void
-xo_filter_stack_pop (xo_filter_t *xfp UNUSED, xo_match_t *xmp)
-{
-    xo_stack_t *xsp = xmp->xm_stackp;
-
-    if (xsp == xmp->xm_stack)	/* Should not occur */
-	return;
-
-    xo_filter_stack_free_keys(xfp, xsp); /* Make sure the keys are released */
-
-    bzero(xsp, sizeof(*xsp));	/* Just to be sure */
-
-    xmp->xm_stackp -= 1;
-}
-
-/*
- * XSS_DEADEND means that we've lost the hierarchy we're looking for
- * and we can ignore everything until we come out of that hierarchy.
- */
-static void
-xo_filter_deadend (xo_handle_t *xop UNUSED, xo_filter_t *xfp, xo_match_t *xmp,
-		   xo_stack_t *xsp, int call_op UNUSED)
-{
-    xsp->xs_state = XSS_DEADEND;
-    xsp->xs_pred = 0;		/* No longer looking for a predicate */
-
-    xo_filter_stack_free_keys(xfp, xsp);
-    xmp->xm_depth = 1;	/* This "open" counts as the first one */
-}
-
-/*
- * Whiffle thru the states to see if we have any open paths.  We
- * do this first since we'll be pushing new paths.
- */
-static void
-xo_filter_open_check_matches (xo_handle_t *xop, xo_filter_t *xfp,
-			      xo_xparse_data_t *xdp,
-			      const char *tag, ssize_t tlen,
-			      const char *type UNUSED)
-{
-    xo_match_t *xmp = xfp->xf_matches;
-    uint32_t i UNUSED;
-    xo_xparse_node_t *xnp;
-
-    for (i = 0; xmp; i++, xmp = xmp->xm_next) { /* For each active match */
-	xo_stack_t *xsp = xmp->xm_stackp;
-
-	/* Are we at the end of this match?  Or dead in the middle */
-	if (xsp->xs_state == XSS_DEEP || xsp->xs_state == XSS_DEADEND) {
-	    xmp->xm_depth += 1;
-	    continue;
-	}
-
-	/*
-	 * If we're looking to test a predicate and instead we see an
-	 * open, then we're dead.
-	*/
-	if (xsp->xs_state == XSS_PRED) {
-	    xo_filter_deadend(xop, xfp, xmp, xsp, FALSE);
-	    continue;
-	}
-
-	xnp = xo_xparse_node(xdp, xsp->xs_match);
-
-	if (xnp->xn_type != C_ELEMENT)	/* Only other type supported */
-	    continue;
-
-	const char *str = xo_xparse_str(xdp, xnp->xn_str);
-	if (str == NULL || !xo_streqn(str, tag, tlen)) {
-	    xo_filter_deadend(xop, xfp, xmp, xsp, FALSE);
-	    continue;
-	}
-
-	const char *label UNUSED = "";
-
-	if (xo_filter_has_predicates(xfp, xnp->xn_contents)) {
-	    /*
-	     * Mark these predicates as our's.  To do this we copy the
-	     * old match but add our predicates
-	     */
-	    xsp->xs_state = XSS_PRED;
-	    xsp->xs_pred = 1;
-
-	} else if (xnp->xn_next == 0) {
-	    /* We don't set xm_depth to 1 here; this "open" doesn't count */
-	    label = xo_filter_match_adjust(xop, xfp, xmp, xsp, XSS_DEEP);
-
-	} else {
-	    xo_xparse_node_t *nextp = xo_xparse_node(xdp, xnp->xn_next);
-
-	    xsp->xs_state = XSS_FOUND;
-	    xsp = xo_filter_stack_push(xfp, xmp, XSS_NEED, xnp->xn_next,
-				       nextp ? nextp->xn_contents : 0);
-	}
-
-	/* A succesful match */
-	XO_DBG(xop, "filter: open %s: progress match [%u] '%.*s' "
-	       "[match %u, next %u] [allow %u/pred %u/deny %u]%s",
-	       type, i, tlen, tag, xmp->xm_base, xsp->xs_match,
-	       xfp->xf_allow, xfp->xf_pred, xfp->xf_deny, label);
-    }
-}
-
-/*
- * Whiffle thru the patterns to see if we match any.  When we find one,
- * open a new "match" for it.
- */
-static void
-xo_filter_open_check_patterns (xo_handle_t *xop, xo_filter_t *xfp,
-			       xo_xparse_data_t *xdp,
-			       const char *tag, ssize_t tlen,
-			       const char *type UNUSED)
-{
-    xo_match_t *xmp;
-    uint32_t i;
-    xo_xparse_node_t *xnp;
-
-    xo_xparse_node_id_t *paths = xfp->xf_xd.xd_paths;
-    uint32_t cur = xfp->xf_xd.xd_paths_cur;
-
-    for (i = 0; i < cur; i++, paths++) {
-	xo_xparse_node_id_t id = *paths;
-	xnp = xo_xparse_node(xdp, id);
-	if (xnp == NULL)
-	    continue;
-
-	int not = FALSE;
-
-	switch (xnp->xn_type) {
-	case C_ELEMENT:
-	    /* Normal case */
-	    break;
-
-	case C_ABSOLUTE:
-	    /* Absolute means that we only match at the top of the tree */
-	    if (xfp->xf_total_depth != 1)
-		continue;
-
-	    /* Now move to the next node */
-	    id = xnp->xn_next;
-	    xnp = xo_xparse_node(xdp, id);
-	    if (xnp->xn_type != C_ELEMENT)
-		continue;
-	    break;
-
-	case C_NOT:
-	    /* A "not" is a path that it negated */
-	    not = TRUE;
-	    /* fallthru */
-
-	case C_PATH:
-	    /* A path contains a set of elements to match */
-	    id = xnp->xn_contents;
-	    xnp = xo_xparse_node(xdp, id);
-	    if (xnp->xn_type != C_ELEMENT && xnp->xn_type != C_ABSOLUTE)
-		continue;
-	    break;
-
-	default:
-	    continue;
-	}
-
-	const char *str = xo_xparse_str(xdp, xnp->xn_str);
-
-	/* Look for the matching tag */
-	if (str == NULL || !xo_streqn(str, tag, tlen))
-	    continue;
-
-	/* A succesful match! Grab a new match struct and fill it in  */
-	xmp = xo_filter_match_new(xop, xfp, *paths);
-	if (xmp == NULL)
-	    continue;
-
-	xmp->xm_base = *paths;
-
-	/* Fill in the initial state frame */
-	xo_stack_t *xsp = xmp->xm_stackp;
-	xsp->xs_match = id;
-
-	if (xnp->xn_contents) {
-	    xsp->xs_state = XSS_PRED;
-	    xsp->xs_predicates = xnp->xn_contents;
-	    xsp->xs_pred = 1;
-	} else {
-	    xsp->xs_state = XSS_FIRST;
-	    xsp->xs_predicates = 0;
-	}
-
-	if (not)
-	    xmp->xm_flags |= XMF_NOT;
-
-	const char *label UNUSED = "";
-
-	if (xo_filter_has_predicates(xfp, xnp->xn_contents)) {
-	    /* The predicates are already marked as our's */
-
-	} else if (xnp->xn_next == 0) { /* Only element */
-	    label = xo_filter_match_adjust(xop, xfp, xmp, xsp, XSS_DEEP);
-
-	} else {
-	    xo_xparse_node_t *nextp = xo_xparse_node(xdp, xnp->xn_next);
-
-	    xsp = xo_filter_stack_push(xfp, xmp, XSS_NEED, xnp->xn_next,
-				       nextp ? nextp->xn_contents : 0);
-	}
-
-#if 0
-	xo_encoder_wb_marker(xop, XO_WB_INIT,
-			     &xmp->xm_whiteboard, &xsp->xs_offset);
-#endif
-
-	/*
-	 * Initialize our whiteboard, where the encoder will write
-	 * its data.
-	 */
-	/* Nothing to do for now.... */
-
-	XO_DBG(xop, "filter: open %s: new match '%.*s' [%u/%u] "
-	       "[state %u/%s; match %u, pred %u] "
-	       "[allow %u/pred %u/deny %u] %s",
-	       type, tlen, tag, *paths, xnp->xn_next,
-	       xsp->xs_state, xo_filter_state_name(xsp->xs_state),
-	       xsp->xs_match, xsp->xs_predicates,
-	       xfp->xf_allow, xfp->xf_pred, xfp->xf_deny, label);
-    }
-}
-
-/*
- * Open a container/list/instance.  Inspects all open matches and
- * patterns to see if the new element matters and adjusts the status.
+ * Open a container/list/instance/field: advance the trie FSM.
  */
 static int
 xo_filter_open (xo_handle_t *xop, xo_filter_t *xfp,
-		const char *tag, ssize_t tlen, const char *type)
+		const char *tag, ssize_t tlen, const char *type UNUSED)
 {
-    if (xfp == NULL)
+    if (xfp == NULL || xfp->xf_trie == NULL)
 	return 0;
 
     XO_DBG(xop, "filter: open %s: '%.*s'", type, tlen, tag);
 
     xfp->xf_total_depth += 1;
 
-    xo_xparse_data_t *xdp = &xfp->xf_xd;
-
-    xo_filter_open_check_matches(xop, xfp, xdp, tag, tlen, type);
-    xo_filter_open_check_patterns(xop, xfp, xdp, tag, tlen, type);
+    xo_tmatch_open(xop, xfp, &xfp->xf_tmatch, tag, tlen);
 
     xo_filter_change_status(xop, xfp, "open", tag, tlen);
-
-    xo_filter_dump_matches(xop, xfp);
 
     return xfp->xf_status;
 }
@@ -800,153 +795,25 @@ xo_filter_op_open_field (xo_handle_t *xop, xo_filter_t *xfp,
 }
 
 /*
- * Whiffle thru the states to see if we have any open paths.
- */
-static void
-xo_filter_close_check_matches (xo_handle_t *xop UNUSED, xo_filter_t *xfp,
-			       xo_xparse_data_t *xdp,
-			       const char *tag, ssize_t tlen,
-			       const char *type UNUSED)
-{
-
-    /*
-     * Whiffle thru the states to see if we have any open paths.
-     */
-    uint32_t i UNUSED;
-    xo_match_t *xmp = xfp->xf_matches;
-    xo_match_t *next_xmp = NULL;
-    xo_xparse_node_t *xnp;
-
-    for (i = 0; xmp; i++, xmp = next_xmp) { /* For each active match */
-	next_xmp = xmp->xm_next;	    /* Pre-fetch in case we delete */
-
-	xo_stack_t *xsp = xmp->xm_stackp;
-
-	if (xmp->xm_depth != 0) {	/* Already seen nested tags */
-	    xmp->xm_depth -= 1;
-
-	    if (xmp->xm_depth == 0) {
-		/* If we're closing the last DEADEND tag, go back to NEED */
-		if (xsp->xs_state == XSS_DEADEND) {
-		    xsp->xs_state = XSS_NEED;
-		    xo_filter_stack_free_keys(xfp, xsp);
-		}
-
-		/*
-		 * Matches that are in "need" with an empty stack are
-		 * really just patterns, so we can close them
-		 */
-		if (xsp->xs_state == XSS_NEED
-		    && xmp->xm_stackp == xmp->xm_stack) {
-		    xo_filter_match_free(xfp, xmp);
-		    xmp = NULL;
-		}
-	    }
-
-	    continue;
-	}
-
-	/*
-	 * If we're going deep, then we need a close for the top
-	 * frame, otherwise we are needing that, so we look at the
-	 * penultimate frame
-	 */
-	if (xsp->xs_state != XSS_DEEP && xsp->xs_state != XSS_PRED) {
-	    if (xsp == xmp->xm_stack) /* Top of stack; nothing to close */
-		continue;
-	    xsp -= 1;		/* Look at penultimate stack frame */
-	}
-
-	xnp = xo_xparse_node(xdp, xsp->xs_match);
-
-	if (xnp->xn_type != C_ELEMENT)	/* Only other type supported */
-	    continue;
-
-	const char *str = xo_xparse_str(xdp, xnp->xn_str);
-	if (str == NULL || !xo_streqn(str, tag, tlen))
-	    continue;
-
-	const char *label UNUSED = "";
-
-	/*
-	 * The top stack frame has the deltas to adjust the
-	 * global allow/deny by.
-	 */
-	xfp->xf_allow -= xsp->xs_allow;
-	xfp->xf_pred -= xsp->xs_pred;
-	xfp->xf_deny -= xsp->xs_deny;
-
-	if (xsp == xmp->xm_stack) {
-	    /* We're at the top of the stack, so this match can die */
-	    xo_filter_match_free(xfp, xmp);
-	    xmp = NULL;
-
-	} else {
-	    /*
-	     * Pop a frame from the stack.  If the top is in XSS_DEEP,
-	     * then we just need to set it to XSS_NEED.
-	     */
-	    if (xsp->xs_state == XSS_DEEP || xsp->xs_state == XSS_PRED) {
-		/*
-		 * DEEP means we've already matched, so instead of
-		 * popping the frame, we just reset it so XSS_NEED state.
-		 */
-		xsp->xs_state = XSS_NEED;
-		xo_filter_stack_free_keys(xfp, xsp);
-
-		/*
-		 * We didn't really "top" the top frame, so we need to
-		 * reset the allow/deny values
-		 */
-		xsp->xs_allow = xsp->xs_pred = xsp->xs_deny =  0;
-
-	    } else {
-		/*
-		 * Pop a stack frame.  Then reset the parent to
-		 * XSS_NEED state, since it might have a failed
-		 * predicate (XSS_DEADEND).  Need to use xsp, since xsp
-		 * might not be the top frame.
-		 */
-		xsp->xs_state = XSS_NEED;
-		xo_filter_stack_free_keys(xfp, xsp);
-		
-		xo_filter_stack_pop(xfp, xmp);
-	    }
-	}
-
-	/* A succesful un-match */
-	XO_DBG(xop, "filter: close %s match [%u]: progress match '%.*s' "
-	       "[base %u] [allow %u/pred %u/deny %u]%s",
-	       type, i, tlen, tag, xmp ? xmp->xm_base : 0,
-	       xfp->xf_allow, xfp->xf_pred, xfp->xf_deny, label);
-    }
-}
-
-/*
- * Open a container/list/instance.  Inspects all open matches to see
- * if the new element matters and adjusts the status.
+ * Close a container/list/instance/field: pop the trie FSM frame.
  */
 static int
 xo_filter_close (xo_handle_t *xop, xo_filter_t *xfp,
 		 const char *tag, ssize_t tlen, const char *type UNUSED)
 {
-    if (xfp == NULL)
+    if (xfp == NULL || xfp->xf_trie == NULL)
 	return 0;
 
     if (xfp->xf_depth > 0)
-	xfp->xf_depth -= 1;		/* Track our depth */
-
+	xfp->xf_depth -= 1;
     if (xfp->xf_total_depth > 0)
 	xfp->xf_total_depth -= 1;
 
     XO_DBG(xop, "filter: close %s: '%.*s'", type, tlen, tag);
 
-    xo_xparse_data_t *xdp = &xfp->xf_xd;
-    xo_filter_close_check_matches(xop, xfp, xdp, tag, tlen, type);
+    xo_tmatch_close(xop, xfp, &xfp->xf_tmatch, tag, tlen);
 
     xo_filter_change_status(xop, xfp, "close", tag, tlen);
-
-    xo_filter_dump_matches(xop, xfp);
 
     return xfp->xf_status;
 }
@@ -970,47 +837,6 @@ xo_filter_op_close_container (xo_handle_t *xop UNUSED, xo_filter_t *xfp,
 			   const char *tag)
 {
     return xo_filter_close(xop, xfp, tag, strlen(tag), "container");
-}
-
-/*
- * Add a keys for xs_keys for the match.
- *
- * We store the keys in a simple-but-slow style that might need
- * updated/optimized later.  For now, it "key\0val\0k2\0v2\0\0" So
- * names and values are NUL terminated with another NUL to end the
- * list.  The number of keys should be low (typically one) so the
- * efficiency shouldn't matter.
- */
-static void
-xo_filter_key_add (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED,
-		   xo_match_t *xmp,
-		   const char *tag, xo_ssize_t tlen,
-		   const char *value, xo_ssize_t vlen)
-{
-    xo_stack_t *xsp = xmp->xm_stackp;
-    xo_ssize_t new_len = tlen + vlen + 3; /* Three NULs */
-    char *newp = xo_realloc(xsp->xs_keys, xsp->xs_keys_len + new_len);
-
-    if (newp == NULL)
-	return;
-
-    char *addp = newp + xsp->xs_keys_len;
-    char *t UNUSED = addp;
-
-    memcpy(addp, tag, tlen);
-    addp += tlen;
-    *addp++ = '\0';
-
-    char *v UNUSED = addp;
-    memcpy(addp, value, vlen);
-    addp += vlen;
-    *addp++ = '\0';
-    *addp++ = '\0';
-
-    xsp->xs_keys_len += new_len - 1;
-    xsp->xs_keys = newp;
-
-    XO_DBG(xop, "xo_filter_key: adding '%s' = '%s'", t, v);
 }
 
 /*
@@ -1256,24 +1082,6 @@ xo_eval_path (XO_EVAL_NODE_ARGS)
     }
 
     return value;
-}
-
-static int64_t
-xo_eval_cast_int64 (xo_filter_t *xfp UNUSED, xo_eval_value_t value)
-{
-    switch (value.xev_type) {
-    case C_STRING:;
-	const char *str = value.xev_str;
-	char *ep;
-	int64_t ival = strtoll(str, &ep, 0);
-	return (ep && *ep == '\0') ? ival: 0;
-
-    case C_FLOAT:
-	return (int64_t) value.xev_float;
-
-    default:
-	return value.xev_int64;
-    }
 }
 
 static int
@@ -2118,165 +1926,87 @@ xo_filter_pred_needs (xo_xparse_data_t *xdp, xo_filter_t *xfp,
     return FALSE;
 }
 
-static int
-xo_filter_op_key (XO_FILTER_KEY_SIGNATURE)
+/*
+ * Evaluate a predicate against the keys buffered in `frame`.
+ * Uses a stack-allocated xo_match_t adapter to reuse xo_filter_pred_eval.
+ */
+static xo_eval_value_t
+xo_tmatch_eval_pred (xo_handle_t *xop, xo_filter_t *xfp,
+		     xo_tframe_t *frame, xo_xparse_node_id_t pred_id)
 {
-    xo_xparse_data_t *xdp = &xfp->xf_xd;
-    xo_match_t *xmp = xfp->xf_matches;
-    uint32_t i UNUSED;
-    xo_xparse_node_t *xnp;
-    xo_xparse_node_id_t id;
-    int rc = 0;
+    xo_stack_t tmp_stack;
+    bzero(&tmp_stack, sizeof(tmp_stack));
+    tmp_stack.xs_keys = frame->xtf_keys;
+    tmp_stack.xs_keys_len = frame->xtf_keys_len;
+    tmp_stack.xs_predicates = pred_id;
 
-    XO_DBG(xop, "xo_filter_key: '%.*s' = '%.*s'", tlen, tag, vlen, value);
-    xo_filter_dump_matches(xop, xfp);
+    xo_match_t tmp_match;
+    bzero(&tmp_match, sizeof(tmp_match));
+    tmp_match.xm_stackp = &tmp_stack;
 
-    for (i = 0; xmp; i++, xmp = xmp->xm_next) { /* For each active match */
-	xo_stack_t *xsp = xmp->xm_stackp;
+    return xo_filter_pred_eval(xop, xfp, &tmp_match);
+}
 
-	if (xsp->xs_state != XSS_PRED) /* Not looking for keys */
+static xo_filter_status_t
+xo_tmatch_key (xo_handle_t *xop, xo_filter_t *xfp, xo_tmatch_t *xm,
+	       const char *tag, xo_ssize_t tlen,
+	       const char *value, xo_ssize_t vlen)
+{
+    if (xm->xm_depth == 0)
+	return xfp->xf_status;
+
+    xo_trie_t *xtp = xm->xm_trie;
+    xo_tframe_t *frame = &xm->xm_stack[xm->xm_depth];
+
+    for (uint32_t i = 0; i < frame->xtf_count; i++) {
+	if (frame->xtf_state[i] != XTFS_PRED)
 	    continue;
 
-	rc = XO_FILTER_MISS; /* Start with needing more data */
+	xo_tnode_t *tn = &xtp->xt_nodes[frame->xtf_node[i]];
 
-	for (id = xsp->xs_predicates; id; id = xnp->xn_next) {
-	    xnp = xo_xparse_node(xdp, id);
-
-	    if (xnp->xn_type != C_PREDICATE) /* Only type supported */
-		continue;
-
-	    if (!xo_filter_pred_needs(xdp, xfp, xsp->xs_predicates,
-				      tag, tlen)) {
-		XO_DBG(xop, "xo_filter_key: predicate doesn't need '%.*s'",
-		       tlen, tag);
-		continue;
-	    }
-
-	    xo_filter_key_add(xop, xfp, xmp, tag, tlen, value, vlen);
-
-	    const char *test UNUSED = xo_filter_key_find(xfp, xmp, tag);
-	    XO_DBG(xop, "filter: new key: [%s] '%s'", tag, test ?: "");
-
-	    xo_eval_value_t result = xo_filter_pred_eval(xop, xfp, xmp);
-	    int pred = xo_eval_cast_int64(xfp, result);
-
-	    XO_DBG(xop, "filter: key: pred eval [%u] '%s' "
-		   "[base %u [allow %u/pred %u/deny %u] -> %d",
-		   i, tag, xmp->xm_base,
-		   xfp->xf_allow, xfp->xf_pred, xfp->xf_deny, pred);
-
-	    xo_eval_dump_value(xop, xfp, result, 4, "xo_filter_key: working");
-
-	    if (result.xev_flags & XEVF_MISSING) {
-		rc = XO_FILTER_MISS; /* Need more data */
-		break;
-	    }
-
-	    if (!pred) {
-		rc = XO_FILTER_FAIL;	/* Never going to succeed */
-		break;
-	    }
-
-	    rc = 0;		/* Otherwise we might be done */
-	}
-
-	if (rc == XO_FILTER_FAIL) {	/* Never going to succeed */
-	    xo_filter_deadend(xop, xfp, xmp, xsp, TRUE);
-	    continue;
-	}
-
-	/* If the predicate isn't complete, we skip to the next match */
-	if (rc != 0)
+	if (!xo_filter_pred_needs(&xfp->xf_xd, xfp, tn->xtn_pred, tag, tlen))
 	    continue;
 
-	xsp->xs_state = XSS_FOUND; /* Mark our success */
-	xsp->xs_pred = 0;	   /* Now longer looking */
+	xo_tframe_key_add(frame, tag, tlen, value, vlen);
 
-	/*
-	 * Lots going on here.  We have a successful match on a
-	 * set of predicates, but what's next?  Go back to the stack
-	 * and see.
-	 */
-	xnp = xo_xparse_node(xdp, xsp->xs_match);
+	xo_eval_value_t result =
+	    xo_tmatch_eval_pred(xop, xfp, frame, tn->xtn_pred);
 
-	const char *label UNUSED = "";
-	if (xnp->xn_next == 0) {
-	    /* We don't set xm_depth to 1 here; this "open" doesn't count */
-	    label = xo_filter_match_adjust(xop, xfp, xmp, xsp, XSS_DEEP);
+	if (result.xev_flags & XEVF_MISSING)
+	    continue;
 
+	if (xo_eval_cast_boolean(xfp, result)) {
+	    frame->xtf_state[i] = XTFS_LIVE;
+	    xo_tmatch_record_live(xm, frame, tn);
 	} else {
-	    xo_xparse_node_t *nextp = xo_xparse_node(xdp, xnp->xn_next);
-
-	    /* nextp should never by NULL, but we test anyway */
-	    xsp = xo_filter_stack_push(xfp, xmp, XSS_NEED, xnp->xn_next,
-					   nextp ? nextp->xn_contents : 0);
+	    frame->xtf_state[i] = XTFS_DEAD;
 	}
-
-	/* A succesful match */
-	XO_DBG(xop, "filter: key success [%u] '%.*s' "
-	       "[match %u, next %u] [allow %u/pred %u/deny %u]%s",
-	       i, tlen, tag, xmp->xm_base, xsp->xs_match,
-	       xfp->xf_allow, xfp->xf_pred, xfp->xf_deny, label);
     }
-
-    XO_DBG(xop, "xo_filter_key: '%.*s' = '%.*s' --> %d",
-	   tlen, tag, vlen, value, rc);
-
-    xo_filter_change_status(xop, xfp, "key", tag, tlen);
-
-    xo_filter_dump_matches(xop, xfp);
 
     return xfp->xf_status;
 }
 
-/* ------------------------------------------------------------- */
-
-/*
- * Dump all the current matches, each with their current state and
- * stack information, allowing us to see what's going on.
- *
- * We don't want to use XO_DBG for this since we want the output to be
- * available for the "--libxo debug" flag.
- */
-static void
-xo_filter_dump_matches (xo_handle_t *xop, xo_filter_t *xfp)
+static int
+xo_filter_op_key (XO_FILTER_KEY_SIGNATURE)
 {
-    if (xfp == NULL)
-	return;
+    if (xfp == NULL || xfp->xf_trie == NULL)
+	return 0;
 
-    xo_dbg(xop, "xo_filter_dump_matches: [depth %d] status: %s/%d",
-	   xfp->xf_depth, xo_filter_op_status_name(xfp->xf_status),
-	   xfp->xf_status);
+    XO_DBG(xop, "xo_filter_key: '%.*s' = '%.*s'", tlen, tag, vlen, value);
 
-    /*
-     * Whiffle thru the states to see if we have any open paths.  We
-     * do this first since we'll be pushing new paths.
-     */
-    xo_xparse_data_t *xdp = &xfp->xf_xd;
-    xo_match_t *xmp = xfp->xf_matches;
-    uint32_t i;
-    xo_xparse_node_t *xnp;
-    const char *str;
+    xo_filter_status_t rc = xo_tmatch_key(xop, xfp, &xfp->xf_tmatch,
+					   tag, tlen, value, vlen);
 
-    for (i = 0; xmp; xmp = xmp->xm_next, i++) {
-	xo_dbg(xop, "  match %d: base %u, depth %u, flags %#x "
-	       "[allow %u/pred %u/deny %u]",
-	       i, xmp->xm_base, xmp->xm_depth, xmp->xm_flags,
-	       xfp->xf_allow, xfp->xf_pred, xfp->xf_deny);
+    xo_filter_change_status(xop, xfp, "key", tag, tlen);
 
-	xo_stack_t *xsp;
-	for (xsp = xmp->xm_stack; xsp <= xmp->xm_stackp; xsp++) {
-	    xnp = xo_xparse_node(xdp, xsp->xs_match);
-	    str = xnp ? xo_xparse_str(xdp, xnp->xn_str) : "";
+    XO_DBG(xop, "xo_filter_key: '%.*s' = '%.*s' --> status %s",
+	   tlen, tag, vlen, value,
+	   xo_filter_op_status_name(xfp->xf_status));
 
-	    xo_dbg(xop, "    stack: state %u/%s, node %u, pred %u, [str '%s'] "
-		   "keys_len %d [allow %u/pred %u/ deny %u]",
-		   xsp->xs_state, xo_filter_state_name(xsp->xs_state),
-		   xsp->xs_match, xsp->xs_predicates, str,
-		   xsp->xs_keys_len, xsp->xs_allow, xsp->xs_pred, xsp->xs_deny);
-	}
-    }
+    return rc;
 }
+
+/* ------------------------------------------------------------- */
 
 /*
  * We use the passthru to pass content through to the encoder
