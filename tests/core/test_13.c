@@ -277,8 +277,6 @@ main (int argc, char **argv)
 
     xo_close_list("entry");
 
-    xo_emit("{Lwc:hits}{:hits/%ld}\n", xo_retain_get_hits());
-
     xo_close_container("data");
     xo_close_container_h(NULL, "top");
 
