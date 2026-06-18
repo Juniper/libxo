@@ -71,12 +71,13 @@ AC_CHECK_FUNCS([strerror])
 AC_CHECK_FUNCS([strlcpy])
 AC_CHECK_FUNCS([strspn])
 AC_CHECK_FUNCS([sysctlbyname])
-AC_CHECK_FUNCS([sysctlbyname])
+AC_CHECK_FUNCS([uexterr_gettext])
 
 AC_CHECK_HEADERS([ctype.h])
 AC_CHECK_HEADERS([dlfcn.h])
 AC_CHECK_HEADERS([dlfcn.h])
 AC_CHECK_HEADERS([errno.h])
+AC_CHECK_HEADERS([exterr.h])
 AC_CHECK_HEADERS([langinfo.h])
 AC_CHECK_HEADERS([monitor.h])
 AC_CHECK_HEADERS([stdio.h])
@@ -108,6 +109,17 @@ if test "$HAVE_HUMANIZE_NUMBER" = "yes"; then
 fi
 
 AM_CONDITIONAL([HAVE_HUMANIZE_NUMBER], [test "$HAVE_HUMANIZE_NUMBER" = "yes"])
+
+AC_MSG_CHECKING([exterr results])
+
+if test "$ac_cv_header_exterr_h" = "yes" -a "$ac_cv_func_uexterr_gettext" = "yes"; then
+    HAVE_EXTERR=yes
+    AC_DEFINE([HAVE_EXTERR], [1], [uexterr_gettext(2)])
+fi
+
+AC_MSG_RESULT(:${HAVE_EXTERR}:${ac_cv_header_exterr_h}:${ac_cv_func_uexterr_gettext}:)
+
+AM_CONDITIONAL([HAVE_EXTERR], [test "$HAVE_EXTERR" = "yes"])
 
 AC_ARG_ENABLE([gettext],
     [  --disable-gettext  Turn off support for gettext],
@@ -558,6 +570,7 @@ AC_MSG_NOTICE([summary of build options:
   local wcwidth:    ${LIBXO_WCWIDTH:-no}
   retain size:      ${XO_RETAIN_SIZE:-no}
   have etext:       ${HAVE_ETEXT:-no} (${HAVE_ETEXT_STYLE})
+  have exterr:      ${HAVE_EXTERR:-no}
   yacc:             ${YACC}
   filters:          ${LIBXO_NEED_FILTERS}
 ])
