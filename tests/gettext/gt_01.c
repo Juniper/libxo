@@ -29,7 +29,11 @@ main (int argc, char **argv)
     static char domainname[] = "gt_01";
     static char path[MAXPATHLEN];
     const char *tzone = "EST";
-    const char *lang = "pig_latin";
+    int opt_debug = 0;
+
+    /* For FreeBSD 15+, this must be a valid name in /usr/share/locale */
+    const char *lang = "en_US.UTF-8";
+    const char *sub = "en_US";
 
     argc = xo_parse_args(argc, argv);
     if (argc < 0)
@@ -38,25 +42,37 @@ main (int argc, char **argv)
     for (argc = 1; argv[argc]; argc++) {
 	if (xo_streq(argv[argc], "tz"))
 	    tzone = argv[++argc];
+	else if (xo_streq(argv[argc], "debug"))
+	    opt_debug = 1;
 	else if (xo_streq(argv[argc], "lang"))
 	    lang = argv[++argc];
 	else if (xo_streq(argv[argc], "po"))
 	    strlcpy(path, argv[++argc], sizeof(path));
+	else if (xo_streq(argv[argc], "sub"))
+	    sub = argv[++argc];
     }
-
-    setenv("LANG", lang, 1);
-    setenv("TZ", tzone, 1);
 
     if (path[0] == 0) {
 	getcwd(path, sizeof(path));
 	strlcat(path, "/po", sizeof(path));
     }
 
-    setlocale(LC_ALL, "");
+    const char *lname = setlocale(LC_MESSAGES, lang);
+    if (opt_debug) {
+	xo_emit("lang: {:lang}\nsub:  {:sub}\n", lang, sub);
+	xo_emit("path: {:path}\nname: {:name}\n", path, domainname);
+	xo_emit("setlocale returns {:setlocale-results}\n", lname);
+    }
+
+    setenv("LANGUAGE", lang, 1);
+    setenv("LANG", lang, 1);
+    setenv("TZ", tzone, 1);
+
     bindtextdomain(domainname,  path);
     bindtextdomain("ldns",  path);
     bindtextdomain("strerror",  path);
     textdomain(domainname);
+
     tzset();
 
     xo_open_container("top");
