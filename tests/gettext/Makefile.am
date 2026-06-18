@@ -33,7 +33,8 @@ gt_01_test_SOURCES = gt_01.c
 noinst_PROGRAMS = ${TEST_CASES:.c=.test}
 
 LDADD = \
-    ${top_builddir}/libxo/libxo.la
+    ${top_builddir}/libxo/libxo.la \
+    ${GETTEXT_LIBS}
 
 if HAVE_HUMANIZE_NUMBER
 LDADD += -lutil
@@ -218,15 +219,16 @@ diff:
 	done)
 
 mo build-mo-files:
-	@(for base in ${MO_BASE_FILES} ; do \
+	@(${TEST_TRACE} for base in ${MO_BASE_FILES} ; do \
 	    for lang in ${LANGUAGES} ; do \
-		${MKDIR} -p po/$$lang/LC_MESSAGES ; \
 	 	if [ -f po/$$lang/$$base.po ] ; then \
 		    (${DB} ${MSGFMT} -o po/$$lang/LC_MESSAGES/$$base.mo \
 				po/$$lang/$$base.po ); \
 		elif [ -f ${srcdir}/po/$$lang/$$base.po ]; then \
+		    ${MKDIR} -p po/$$lang/LC_MESSAGES ; \
 		    (${DB} ${MSGFMT} -o po/$$lang/LC_MESSAGES/$$base.mo \
 			${srcdir}/po/$$lang/$$base.po ;) \
                 fi ; \
 	    done ; \
+	    ( cd po ; ${RM} -f en_US ; ${LN_S} -f pig_latin en_US ); \
 	done)
