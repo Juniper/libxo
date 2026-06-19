@@ -59,6 +59,7 @@ valgrind:
 
 TEST_FILE = ${srcdir}/data_01.txt
 TEST_JIG = \
+      LC_ALL=en_US.UTF-8 \
       ${CHECKER} ./$$base.test --libxo$$xoopts ${TEST_OPTS} file ${TEST_FILE} \
       > out/$$base.$$fmt.out 2> out/$$base.$$fmt.err ; \
  ${DIFF} -Nu ${srcdir}/saved/$$base.$$fmt.out out/$$base.$$fmt.out ${S2O} ; \
