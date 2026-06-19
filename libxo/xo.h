@@ -107,8 +107,6 @@ typedef unsigned long long xo_xof_flags_t;
 #define XOF_FILTER      XOF_BIT(35) /** Filters are active; uses whiteboard */
 
 #define XOF_NO_TOP_LEVEL XOF_BIT(36) /** Don't make a fake top-level tag */
-#define XOF_EXTERR_BRIEF XOF_BIT(37) /** Display brief extended error info */
-#define XOF_EXTERR_VERBOSE XOF_BIT(38) /** Display verbose exterr info */
 
 typedef unsigned xo_emit_flags_t; /* Flags to xo_emit() and friends */
 #define XOEF_RETAIN	(1<<0)	  /* Retain parsed formatting information */
