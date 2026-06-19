@@ -102,6 +102,7 @@ valgrind:
 #TEST_TRACE = set -x ; 
 
 TEST_JIG = \
+      LC_ALL=en_US.UTF-8 \
       ${CHECKER} ./$$base.test --libxo$$xoopts ${TEST_OPTS} \
       > out/$$base.$$fmt.out 2> out/$$base.$$fmt.err ; \
  ${DIFF} -Nu ${srcdir}/saved/$$base.$$fmt.out out/$$base.$$fmt.out ${S2O} ; \
