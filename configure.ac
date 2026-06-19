@@ -85,6 +85,7 @@ AC_CHECK_HEADERS([stdio_ext.h])
 AC_CHECK_HEADERS([stdlib.h])
 AC_CHECK_HEADERS([stdtime/tzfile.h])
 AC_CHECK_HEADERS([string.h])
+AC_CHECK_HEADERS([sys/exterrvar.h])
 AC_CHECK_HEADERS([sys/param.h])
 AC_CHECK_HEADERS([sys/sysctl.h])
 AC_CHECK_HEADERS([sys/time.h])
@@ -114,7 +115,7 @@ AC_MSG_CHECKING([exterr results])
 
 if test "$ac_cv_header_exterr_h" = "yes" -a "$ac_cv_func_uexterr_gettext" = "yes"; then
     HAVE_EXTERR=yes
-    AC_DEFINE([HAVE_EXTERR], [1], [uexterr_gettext(2)])
+    AC_DEFINE([HAVE_EXTERR], [1], [Have extended error infra: uexterr_gettext(2)])
 fi
 
 AC_MSG_RESULT(:${HAVE_EXTERR}:${ac_cv_header_exterr_h}:${ac_cv_func_uexterr_gettext}:)
