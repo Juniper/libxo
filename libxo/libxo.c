@@ -49,6 +49,17 @@
 #include <langinfo.h>
 #endif /* HAVE_LANGINFO_H */
 
+#ifdef HAVE_EXTERR
+#include <exterr.h>
+#ifdef HAVE_SYS_EXTERRVAR_H
+#include <sys/exterrvar.h>
+#else /* HAVE_SYS_EXTERRVAR_H */
+#define UEXTERROR_MAXLEN 256    /* A reasonable guess */
+#endif /* HAVE_SYS_EXTERRVAR_H */
+#else /* HAVE_EXTERR */
+#define UEXTERROR_MAXLEN 1	/* Fake size for exterr buffer */
+#endif /* HAVE_EXTERR */
+
 #ifdef LIBXO_TEXT_ONLY		/* Turn off unneeded features */
 #undef LIBXO_NEED_MAP		/* No tag maps in text mode */
 #undef LIBXO_NEED_FILTERS	/* No filters in text mode */
@@ -215,6 +226,16 @@ typedef unsigned xo_xsf_flags_t; /* XSF_* flags */
  * a "switch" statement.
  */
 #define XSS_TRANSITION(_old, _new) ((_old) << 8 | (_new))
+
+/* Options used by name, but not "real": not saved in xo handle */
+#define XO_OPT_NO_COLOR		1 /* Ignore colors */
+#define XO_OPT_INDENT		2 /* Indent by given number */
+#define XO_OPT_ENCODER		3 /* Use a specific encoder */
+#define XO_OPT_MAP		4 /* Map field names */
+#define XO_OPT_MAP_FILE		5 /* Use file full of field names mappings */
+#define XO_OPT_FILTER		6 /* Filter output using path */
+#define XOF_EXTERR_BRIEF	7 /* Display brief extended error info */
+#define XOF_EXTERR_VERBOSE	8 /* Display verbose exterr info */
 
 /*
  * xo_stack_t: As we open and close containers and levels, we
@@ -1871,20 +1892,41 @@ xo_retain_get_hits (void)
 #endif /* !LIBXO_NO_RETAIN */
 
 /*
+ * The "warn" flag has nothing to do with the "warn" function.  This
+ * flag tells libxo to report mistakes in the calling code that are
+ * important to the developer but not-a-all to the user.  xo_failure()
+ * is the driver for this.
+ */
+
+/* Flags for xo_warn_hcfv() */
+typedef unsigned xo_warn_flags_t;
+#define XO_XWF_CHECK_WARN	(1<<0) /* Check for warning flag */
+#define XO_XWF_NO_EXTERR	(1<<1) /* Don't report extended error */
+
+/*
  * Generate a warning.  Normally, this is a text message written to
  * standard error.  If the XOF_WARN_XML flag is set, then we generate
  * XMLified content on standard output.
  */
-void
-xo_warn_hcv (xo_handle_t *xop, int code, int check_warn,
+static void
+xo_warn_hcfv (xo_handle_t *xop, int code, xo_warn_flags_t flags,
 	     const char *fmt, va_list vap)
 {
     xop = xo_default(xop);
-    if (check_warn && !XOF_ISSET(xop, XOF_WARN))
+    if ((flags & XO_XWF_CHECK_WARN) && !XOF_ISSET(xop, XOF_WARN))
 	return;
 
     if (fmt == NULL)
 	return;
+
+    char exterr[UEXTERROR_MAXLEN] XO_UNUSED; /* The optimizer will remove */
+    int extstatus = -1;
+
+#ifdef HAVE_EXTERR
+    if (!(flags & XO_XWF_NO_EXTERR))
+	extstatus = uexterr_gettext(exterr, sizeof(exterr));
+#endif /* HAVE_EXTERR */
+    
 
     ssize_t len = strlen(fmt);
     ssize_t plen = xo_program ? strlen(xo_program) : 0;
@@ -1944,6 +1986,9 @@ xo_warn_hcv (xo_handle_t *xop, int code, int check_warn,
 		xo_buf_append(xbp, ": ", 2);
 		xo_buf_append(xbp, msg, strlen(msg));
 	    }
+
+	    if (extstatus == 0 && exterr[0] != '\0')
+		xo_buf_append(xbp, exterr, strlen(exterr));
 	}
 
 	xo_buf_append(xbp, "\n", 1); /* Append newline and NUL to string */
@@ -1956,9 +2001,25 @@ xo_warn_hcv (xo_handle_t *xop, int code, int check_warn,
 
 	    if (msg)
 		fprintf(stderr, ": %s", msg);
+
+	    if (extstatus == 0 && exterr[0] != '\0')
+		fprintf(stderr, " (%s)", exterr);
 	}
+
 	fprintf(stderr, "\n");
     }
+}
+
+/*
+ * Generate a warning.  Normally, this is a text message written to
+ * standard error.  If the XOF_WARN_XML flag is set, then we generate
+ * XMLified content on standard output.
+ */
+void
+xo_warn_hcv (xo_handle_t *xop, int code, int check_warn,
+	     const char *fmt, va_list vap)
+{
+    xo_warn_hcfv(xop, code, check_warn ? XO_XWF_CHECK_WARN : 0, fmt, vap);
 }
 
 void
@@ -2033,7 +2094,7 @@ xo_errc (int eval, int code, const char *fmt, ...)
     va_list vap;
 
     va_start(vap, fmt);
-    xo_warn_hcv(NULL, code, 0, fmt, vap);
+    xo_warn_hcfv(NULL, code, XO_XWF_NO_EXTERR, fmt, vap);
     va_end(vap);
     xo_finish();
     exit(eval);
@@ -2247,7 +2308,7 @@ xo_failure (xo_handle_t *xop, const char *fmt, ...)
     va_list vap;
 
     va_start(vap, fmt);
-    xo_warn_hcv(xop, -1, 1, fmt, vap);
+    xo_warn_hcv(xop, -1, XO_XWF_CHECK_WARN | XO_XWF_NO_EXTERR, fmt, vap);
     va_end(vap);
 }
 
@@ -2445,15 +2506,18 @@ xo_name_lookup (xo_flag_mapping_t *map, const char *value, ssize_t len)
 	len -= 1;
     }
 
-    while (isspace((int) value[len]))
+    while (len > 0 && isspace((int) value[len - 1]))
 	len -= 1;
 
     if (*value == '\0')
 	return 0;
 
-    for ( ; map->xm_name; map++)
+    for ( ; map->xm_name; map++) {
+	if (len < (ssize_t) strlen(map->xm_name))
+	    continue;
 	if (strncmp(map->xm_name, value, len) == 0)
 	    return map->xm_value;
+    }
 
     return 0;
 }
@@ -2479,9 +2543,6 @@ static xo_flag_mapping_t xo_xof_names[] = {
     { XOF_COLUMNS, "columns" },
     { XOF_DEBUG, "debug" },
     { XOF_DTRT, "dtrt" },
-    { XOF_EXTERR_BRIEF, "exterr" },
-    { XOF_EXTERR_BRIEF, "exterr-brief" },
-    { XOF_EXTERR_VERBOSE, "exterr-verbose" },
     { XOF_FLUSH, "flush" },
     { XOF_FLUSH_LINE, "flush-line" },
     { XOF_IGNORE_CLOSE, "ignore-close" },
@@ -2503,6 +2564,19 @@ static xo_flag_mapping_t xo_xof_names[] = {
     { XOF_WARN, "warn" },
     { XOF_WARN_XML, "warn-xml" },
     { XOF_XPATH, "xpath" },
+    { 0, NULL }
+};
+
+static xo_flag_mapping_t xo_option_names[] = {
+    { XO_OPT_NO_COLOR, "no-color" },
+    { XO_OPT_INDENT, "indent" },
+    { XO_OPT_ENCODER, "encoder" },
+    { XO_OPT_MAP, "map" },
+    { XO_OPT_MAP_FILE, "map-file" },
+    { XO_OPT_FILTER, "filter" },
+    { XOF_EXTERR_BRIEF, "exterr" },
+    { XOF_EXTERR_BRIEF, "exterr-brief" },
+    { XOF_EXTERR_VERBOSE, "exterr-verbose" },
     { 0, NULL }
 };
 
@@ -2656,151 +2730,115 @@ xo_options_to_argv (xo_handle_t *xop UNUSED, char *input,
 
     *fp = '\0';	/* Force termination */
 
-    argv[ac++] = sp;
+    if (sp != NULL)
+	argv[ac++] = sp;
     argv[ac] = NULL;
     return ac;
 }
 
-/**
- * Set the options for a handle using a string of options
- * passed in.  The input is a comma-separated set of names
- * and optional values: "xml,pretty,indent=4"
- *
- * @param xop XO handle
- * @param input Comma-separated set of option values
- * @return 0 on success, non-zero on failure
+/*
+ * Parse the single-character short-hand versions of options, e.g. "XPW"
  */
-int
-xo_set_options (xo_handle_t *xop, const char *input)
+static const char *
+xo_set_options_single (xo_handle_t *xop, const char *input, int *results)
 {
-    char *cp, *vp, *bp, *zp;
-    int style = -1, new_style, rc = 0, final_rc = 0;
-    ssize_t len;
-    xo_xof_flags_t new_flag;
+    ssize_t sz;
+    int rc = 0;
 
-    if (input == NULL)
-	return 0;
+    for (input++ ; *input && *input != ','; input++) {
+	switch (*input) {
+	case 'c':
+	    XOF_SET(xop, XOF_COLOR_ALLOWED);
+	    break;
 
-    xop = xo_default(xop);
+	case 'f':
+	    XOF_SET(xop, XOF_FLUSH);
+	    break;
 
-#ifdef LIBXO_COLOR_ON_BY_DEFAULT
-    /* If the installer used --enable-color-on-by-default, then we allow it */
-    XOF_SET(xop, XOF_COLOR_ALLOWED);
-#endif /* LIBXO_COLOR_ON_BY_DEFAULT */
+	case 'F':
+	    XOF_SET(xop, XOF_FLUSH_LINE);
+	    break;
 
-    /*
-     * We support a simpler, old-school style of giving option
-     * also, using a single character for each option.  It's
-     * ideal for lazy people, such as myself.
-     */
-    if (*input == ':') {
-	ssize_t sz;
+	case 'g':
+	    XOF_SET(xop, XOF_LOG_GETTEXT);
+	    break;
 
-	for (input++ ; *input && *input != ','; input++) {
-	    switch (*input) {
-	    case 'c':
-		XOF_SET(xop, XOF_COLOR_ALLOWED);
-		break;
+	case 'H':
+	    xop->xo_style = XO_STYLE_HTML;
+	    break;
 
-	    case 'f':
-		XOF_SET(xop, XOF_FLUSH);
-		break;
+	case 'I':
+	    XOF_SET(xop, XOF_INFO);
+	    break;
 
-	    case 'F':
-		XOF_SET(xop, XOF_FLUSH_LINE);
-		break;
-
-	    case 'g':
-		XOF_SET(xop, XOF_LOG_GETTEXT);
-		break;
-
-	    case 'H':
-		xop->xo_style = XO_STYLE_HTML;
-		break;
-
-	    case 'I':
-		XOF_SET(xop, XOF_INFO);
-		break;
-
-	    case 'i':
-		sz = strspn(input + 1, "0123456789");
-		if (sz > 0) {
-		    xop->xo_indent_by = atoi(input + 1);
-		    input += sz - 1;	/* Skip value */
-		}
-		break;
-
-	    case 'J':
-		xop->xo_style = XO_STYLE_JSON;
-		break;
-
-	    case 'k':
-		XOF_SET(xop, XOF_KEYS);
-		break;
-
-	    case 'n':
-		XOF_SET(xop, XOF_NO_HUMANIZE);
-		break;
-
-	    case 'P':
-		XOF_SET(xop, XOF_PRETTY);
-		break;
-
-	    case 'T':
-		xop->xo_style = XO_STYLE_TEXT;
-		break;
-
-	    case 'U':
-		XOF_SET(xop, XOF_UNITS);
-		break;
-
-	    case 'u':
-		XOF_SET(xop, XOF_UNDERSCORES);
-		break;
-
-	    case 'W':
-		XOF_SET(xop, XOF_WARN);
-		break;
-
-	    case 'X':
-		xop->xo_style = XO_STYLE_XML;
-		break;
-
-	    case 'x':
-		XOF_SET(xop, XOF_XPATH);
-		break;
-
-	    default:
-		xo_warnx("unknown option: '%s'", input);
-		final_rc = -1;
+	case 'i':
+	    sz = strspn(input + 1, "0123456789");
+	    if (sz > 0) {
+		xop->xo_indent_by = atoi(input + 1);
+		input += sz;	/* Skip value */
 	    }
+	    break;
+
+	case 'J':
+	    xop->xo_style = XO_STYLE_JSON;
+	    break;
+
+	case 'k':
+	    XOF_SET(xop, XOF_KEYS);
+	    break;
+
+	case 'n':
+	    XOF_SET(xop, XOF_NO_HUMANIZE);
+	    break;
+
+	case 'P':
+	    XOF_SET(xop, XOF_PRETTY);
+	    break;
+
+	case 'T':
+	    xop->xo_style = XO_STYLE_TEXT;
+	    break;
+
+	case 'U':
+	    XOF_SET(xop, XOF_UNITS);
+	    break;
+
+	case 'u':
+	    XOF_SET(xop, XOF_UNDERSCORES);
+	    break;
+
+	case 'W':
+	    XOF_SET(xop, XOF_WARN);
+	    break;
+
+	case 'X':
+	    xop->xo_style = XO_STYLE_XML;
+	    break;
+
+	case 'x':
+	    XOF_SET(xop, XOF_XPATH);
+	    break;
+
+	default:
+	    xo_warnx("unknown option: '%s'", input);
+	    rc = -1;
 	}
-
-	/*
-	 * Allow ',' to switch into word-style options ("--libxo:XPW,debug")
-	 */
-	if (*input != ',')
-	    return final_rc;
-
-	input += 1;
     }
 
-    len = strlen(input) + 1;
-    bp = alloca(len);
-    memcpy(bp, input, len);
+    *results = rc;
+    return input;
+}
 
-    int argc = xo_options_to_argv_count(xop, bp);
-    char **argv = xo_realloc(NULL, sizeof(argv[0]) * argc);
-    if (argv == NULL) {
-	xo_warnx("xo_set_options ran out of memory");
-	return -1;
-    }
-
-    argc = xo_options_to_argv(xop, bp, argc, argv);
-    if (argc < 0) {
-	xo_free(argv);
-	return argc;
-    }
+/*
+ * Parse the multi-character long-hand versions of options,
+ * e.g. "xml,pretty,warn"
+ */
+static int
+xo_set_options_words (xo_handle_t *xop, int argc, char **argv)
+{
+    char *cp, *vp, *zp;
+    int style = -1, new_style, rc = 0, final_rc = 0;
+    xo_xof_flags_t new_flag;
 
     for (int i = 0; i < argc; i++) {
 	if (rc)
@@ -2851,70 +2889,155 @@ xo_set_options (xo_handle_t *xop, const char *input)
 		xo_warnx("ignoring multiple styles: '%s'", cp);
 	    else
 		style = new_style;
-	} else {
-	    new_flag = xo_name_to_flag(cp);
-	    if (new_flag != 0)
-		XOF_SET(xop, new_flag);
-	    else if (xo_streq(cp, "no-color"))
-		XOF_CLEAR(xop, XOF_COLOR_ALLOWED);
-	    else if (xo_streq(cp, "indent")) {
-		if (vp)
-		    xop->xo_indent_by = atoi(vp);
-		else {
-		    xo_warnx("missing value for indent option");
-		    rc = -1;
-		}
+	    continue;
+	}
 
-	    } else if (xo_streq(cp, "encoder")) {
-		if (vp == NULL) {
-		    xo_warnx("missing value for encoder option");
-		    rc = -1;
-		} else {
-		    rc = xo_encoder_init(xop, vp);
-		    if (rc)
-			xo_warnx("error initializing encoder: %s", vp);
-		}
-		
-	    } else if (xo_streq(cp, "map")) {
-		if (vp == NULL) {
-		    xo_warnx("missing value for map option");
-		    rc = -1;
-		} else {
-		    rc = xo_map_option(xop, vp);
-		    if (rc)
-			xo_warnx("error initializing map: '%s'", vp);
-		}
+	new_flag = xo_name_to_flag(cp);
+	if (new_flag != 0) {
+	    XOF_SET(xop, new_flag);
+	    continue;
+	}
 
-	    } else if (xo_streq(cp, "map-file")) {
-		if (vp == NULL) {
-		    xo_warnx("missing value for map-file option");
-		    rc = -1;
-		} else {
-		    rc = xo_map_add_file(xop, vp);
-		    if (rc)
-			xo_warnx("error initializing map-file: '%s'", vp);
-		}
+	xo_xof_flags_t opt = xo_name_lookup(xo_option_names, cp, -1);
 
-	    } else if (xo_streq(cp, "filter")) {
-		if (vp == NULL) {
-		    xo_warnx("missing value for filter option");
-		    rc = -1;
-		} else
-		    rc = xo_add_filter(xop, vp); /* Reports its own errors */
+	switch (opt) {
+	case XO_OPT_NO_COLOR: /* Ignore colors */
+	    XOF_CLEAR(xop, XOF_COLOR_ALLOWED);
+	    continue;
 
-	    } else {
-		xo_warnx("unknown libxo option value: '%s'", cp);
+	case XO_OPT_INDENT:	/* Indent by given number */
+	    if (vp)
+		xop->xo_indent_by = atoi(vp);
+	    else {
+		xo_warnx("missing value for indent option");
 		rc = -1;
 	    }
+	    continue;
+
+	case XO_OPT_ENCODER: /* Use a specific encoder */
+	    if (vp == NULL) {
+		xo_warnx("missing value for encoder option");
+		rc = -1;
+	    } else {
+		rc = xo_encoder_init(xop, vp);
+		if (rc)
+		    xo_warnx("error initializing encoder: %s", vp);
+	    }
+	    continue;
+
+	case XO_OPT_MAP: /* Map field names */
+	    if (vp == NULL) {
+		xo_warnx("missing value for map option");
+		rc = -1;
+	    } else {
+		rc = xo_map_option(xop, vp);
+		if (rc)
+		    xo_warnx("error initializing map: '%s'", vp);
+	    }
+	    continue;
+
+	case XO_OPT_MAP_FILE: /* Use file full of field names mappings */
+	    if (vp == NULL) {
+		xo_warnx("missing value for map-file option");
+		rc = -1;
+	    } else {
+		rc = xo_map_add_file(xop, vp);
+		if (rc)
+		    xo_warnx("error initializing map-file: '%s'", vp);
+	    }
+	    continue;
+
+	case XO_OPT_FILTER:	/* Filter output using path */
+	    if (vp == NULL) {
+		xo_warnx("missing value for filter option");
+		rc = -1;
+	    } else
+		rc = xo_add_filter(xop, vp); /* Reports its own errors */
+	    continue;
+
+	case XOF_EXTERR_BRIEF: /* Display brief extended error info */
+	    setenv("EXTERROR_VERBOSE", "brief", 1);
+	    continue;
+
+	case XOF_EXTERR_VERBOSE: /* Display verbose exterr info */
+	    setenv("EXTERROR_VERBOSE", "verbose", 1);
+	    continue;
+
+	default:
+	    xo_warnx("unknown libxo option value: '%s'", cp);
+	    rc = -1;
 	}
     }
 
     if (style >= 0)
 	xop->xo_style= style;
 
+    return final_rc;
+}
+
+/**
+ * Set the options for a handle using a string of options
+ * passed in.  The input is a comma-separated set of names
+ * and optional values: "xml,pretty,indent=4"
+ *
+ * @param xop XO handle
+ * @param input Comma-separated set of option values
+ * @return 0 on success, non-zero on failure
+ */
+int
+xo_set_options (xo_handle_t *xop, const char *input)
+{
+    int rc = 0;
+
+    if (input == NULL)
+	return 0;
+
+    xop = xo_default(xop);
+
+#ifdef LIBXO_COLOR_ON_BY_DEFAULT
+    /* If the installer used --enable-color-on-by-default, then we allow it */
+    XOF_SET(xop, XOF_COLOR_ALLOWED);
+#endif /* LIBXO_COLOR_ON_BY_DEFAULT */
+
+    /*
+     * We support a simpler, old-school style of giving option
+     * also, using a single character for each option.  It's
+     * ideal for lazy people, such as myself.
+     */
+    if (*input == ':') {
+	input = xo_set_options_single(xop, input, &rc);
+
+	/*
+	 * Allow ',' to switch into word-style options ("--libxo:XPW,debug")
+	 */
+	if (*input != ',')
+	    return rc;
+
+	input += 1;
+    }
+
+    ssize_t len = strlen(input) + 1;
+    char *bp = alloca(len);
+    memcpy(bp, input, len);
+
+    int argc = xo_options_to_argv_count(xop, bp);
+    char **argv = xo_realloc(NULL, sizeof(argv[0]) * (argc + 1));
+    if (argv == NULL) {
+	xo_warnx("xo_set_options ran out of memory");
+	return -1;
+    }
+
+    argc = xo_options_to_argv(xop, bp, argc, argv);
+    if (argc < 0) {
+	xo_free(argv);
+	return argc;
+    }
+
+    rc = xo_set_options_words(xop, argc, argv);
+
     xo_free(argv);
 
-    return final_rc ?: rc;
+    return rc;
 }
 
 /**
