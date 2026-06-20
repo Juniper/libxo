@@ -516,6 +516,7 @@ AC_CONFIG_FILES([
   xohtml/xohtml.sh
   libxo/Makefile
   filter/Makefile
+  format/Makefile
   libxo/add.man
   bin/Makefile
   encoder/Makefile
