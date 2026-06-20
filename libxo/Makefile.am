@@ -38,6 +38,7 @@ libxoinc_HEADERS = \
 noinst_HEADERS = \
      xo_buf.h \
      xo_explicit.h \
+     xo_format.h \
      xo_humanize.h \
      xo_private.h \
      xo_utf8.h \
@@ -46,6 +47,7 @@ noinst_HEADERS = \
 libxo_la_SOURCES = \
     libxo.c \
     xo_encoder.c \
+    xo_format.c \
     xo_syslog.c \
     xo_tolower.c \
     xo_toupper.c \
