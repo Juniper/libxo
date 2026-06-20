@@ -10,6 +10,22 @@
 #ifndef XO_PRIVATE_H
 #define XO_PRIVATE_H
 
+/* Thread-local storage macros */
+
+#define THREAD_LOCAL_before 1
+#define THREAD_LOCAL_after 2
+#define THREAD_LOCAL_declspec 3
+
+#ifndef HAVE_THREAD_LOCAL
+#define THREAD_LOCAL(_x) _x
+#elif HAVE_THREAD_LOCAL == THREAD_LOCAL_before
+#define THREAD_LOCAL(_x) __thread _x
+#elif HAVE_THREAD_LOCAL == THREAD_LOCAL_after
+#define THREAD_LOCAL(_x) _x __thread
+#elif HAVE_THREAD_LOCAL == THREAD_LOCAL_declspec
+#define THREAD_LOCAL(_x) __declspec(_x)
+#endif
+
 /*
  * Expose libxo's memory allocation functions
  */
