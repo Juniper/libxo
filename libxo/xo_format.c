@@ -534,6 +534,95 @@ xo_parse_fields (xo_parse_t *xpp, xo_field_info_t *fields,
 	    }
 	}
 
+	/* Semantic validation (mirrors xolint checks) — strict mode only */
+	if (!(xpp->xp_flags & XPF_STRICT))
+	    goto next_field;
+
+	if (xfip->xfi_ftype == 'V') {
+	    const char *np = xfip->xfi_content;
+	    unsigned nlen = xfip->xfi_clen;
+	    unsigned ni;
+
+	    if (nlen == 0 && !(xfip->xfi_flags & XFF_ARGUMENT)) {
+		xo_parse_error(xpp, "value field must have a name: '%s'",
+			       xo_printable(fmt));
+		return -1;
+	    }
+	    if (np && nlen) {
+		if (isdigit((unsigned char) np[0])) {
+		    xo_parse_error(xpp,
+				   "value field name cannot start with a digit: '%.*s'",
+				   (int) nlen, np);
+		    return -1;
+		}
+		for (ni = 0; ni < nlen; ni++) {
+		    unsigned char nc = (unsigned char) np[ni];
+		    if (nc == '_') {
+			xo_parse_error(xpp,
+				       "use hyphens, not underscores, in value field name: '%.*s'",
+				       (int) nlen, np);
+			return -1;
+		    }
+		    if (isupper(nc)) {
+			xo_parse_error(xpp,
+				       "value field name should be lower case: '%.*s'",
+				       (int) nlen, np);
+			return -1;
+		    }
+		    if (!isdigit(nc) && !islower(nc) && nc != '-') {
+			xo_parse_error(xpp,
+				       "value field name contains invalid character: '%.*s'",
+				       (int) nlen, np);
+			return -1;
+		    }
+		}
+		if (nlen <= 2) {
+		    xo_parse_error(xpp,
+				   "value field name should be longer than two characters: '%.*s'",
+				   (int) nlen, np);
+		    return -1;
+		}
+	    }
+	}
+
+	if (xfip->xfi_ftype == '[' || xfip->xfi_ftype == ']') {
+	    const char *np = xfip->xfi_content;
+	    unsigned nlen = xfip->xfi_clen;
+	    if (np && nlen) {
+		unsigned ni = (np[0] == '-') ? 1 : 0;
+		for (; ni < nlen; ni++) {
+		    if (!isdigit((unsigned char) np[ni])) {
+			xo_parse_error(xpp,
+				       "anchor content must be a decimal width: '%.*s'",
+				       (int) nlen, np);
+			return -1;
+		    }
+		}
+		if (format && flen > 0) {
+		    xo_parse_error(xpp,
+				   "anchor cannot have both static width and format: '%s'",
+				   xo_printable(fmt));
+		    return -1;
+		}
+	    }
+	    if (format && flen > 0) {
+		if (flen != 2 || format[0] != '%' || format[1] != 'd') {
+		    xo_parse_error(xpp,
+				   "anchor format must be '%%d': '%.*s'",
+				   (int) flen, format);
+		    return -1;
+		}
+	    }
+	}
+
+	if ((xfip->xfi_flags & XFF_HUMANIZE) && !format) {
+	    xo_parse_error(xpp,
+			   "humanize modifier ('h') requires a format string: '%s'",
+			   xo_printable(fmt));
+	    return -1;
+	}
+
+next_field:
 	cp = sp;
     }
 
