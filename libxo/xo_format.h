@@ -90,11 +90,15 @@ typedef void (*xo_parse_error_func_t)(void *data, const char *fmt,
  * Callback fields that are NULL fall back to the system defaults (realloc,
  * free, silent error reporting).
  */
+/* Flags for xo_parse_t.xp_flags */
+#define XPF_STRICT	(1<<0)	/* Enable lint-style semantic checks */
+
 typedef struct xo_parse_s {
     xo_realloc_func_t xp_realloc;	/* Allocator (NULL → realloc) */
     xo_free_func_t xp_free;		/* Free (NULL → free) */
     xo_parse_error_func_t xp_error;	/* Error reporter (NULL → silent) */
     void *xp_error_data;		/* Opaque data passed to xp_error */
+    unsigned xp_flags;			/* XPF_* flags */
 
     /* Output — filled in by xo_parse_format() */
     xo_field_info_t *xp_fields;	/* Allocated, zero-terminated field array */
