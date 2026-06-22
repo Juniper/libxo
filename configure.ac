@@ -122,6 +122,59 @@ AC_MSG_RESULT(:${HAVE_EXTERR}:${ac_cv_header_exterr_h}:${ac_cv_func_uexterr_gett
 
 AM_CONDITIONAL([HAVE_EXTERR], [test "$HAVE_EXTERR" = "yes"])
 
+AC_ARG_WITH(llvm-config,
+        [  --with-llvm-config=[PFX]        Specify location of llvm-config],
+        [LLVM_CONFIG=$withval],
+	[LLVM_CONFIG="none"])
+
+AC_MSG_CHECKING([llvm-config])
+if test ${LLVM_CONFIG} = "none"; then
+    AC_MSG_RESULT([no llvm-config, so validate plugin is disabled])
+elif ! test -x ${LLVM_CONFIG} ; then
+    AC_MSG_FAILURE("could not find llvm-config tool")
+else
+    AC_DEFINE([HAVE_VALIDATE], [1], [generate plugin for llvm to validate libxo format strings])
+    LLVM_BINDIR=`${LLVM_CONFIG} --bindir 2>/dev/null`
+    LLVM_CLANG=${LLVM_BINDIR}/clang
+    LLVM_CMAKE_DIR=`${LLVM_CONFIG} --cmakedir 2>/dev/null`
+    CLANG_CMAKE_DIR=`dirname ${LLVM_CMAKE_DIR}`/clang
+    HAVE_VALIDATE=yes
+fi
+
+AM_CONDITIONAL([HAVE_VALIDATE], [test "${HAVE_VALIDATE}" = "yes"])
+AC_SUBST(LLVM_CONFIG)
+AC_SUBST(LLVM_BINDIR)
+AC_SUBST(LLVM_CLANG)
+AC_SUBST(LLVM_CMAKE_DIR)
+AC_SUBST(CLANG_CMAKE_DIR)
+
+dnl macOS SDK path for the non-Apple clang used by the validate plugin.
+dnl On darwin, auto-detected via xcrun; override with --with-sdk-path=PATH
+dnl or suppress with --with-sdk-path=no.
+AC_ARG_WITH(sdk-path,
+        [  --with-sdk-path=[PATH]   Specify macOS SDK path for validate plugin (default: auto)],
+        [SDK_PATH=$withval],
+        [SDK_PATH=auto])
+
+if test "${SDK_PATH}" = "auto"; then
+    case $host_os in
+        darwin*)
+            AC_PATH_PROG([XCRUN], [xcrun], [none])
+            if test "${XCRUN}" != "none"; then
+                SDK_PATH=`${XCRUN} --show-sdk-path 2>/dev/null`
+            else
+                SDK_PATH=
+            fi
+            ;;
+        *)
+            SDK_PATH=
+            ;;
+    esac
+elif test "${SDK_PATH}" = "no" -o "${SDK_PATH}" = "none"; then
+    SDK_PATH=
+fi
+AC_SUBST(SDK_PATH)
+
 AC_ARG_ENABLE([gettext],
     [  --disable-gettext  Turn off support for gettext],
     [GETTEXT_ENABLE=$enableval],
@@ -200,7 +253,7 @@ if test -x ${GETTEXT_PREFIX}/bin/msgfmt ; then
 elif test -x ${GETTEXT_PREFIX}/local/bin/msgfmt ; then
     GETTEXT_BINDIR=${GETTEXT_PREFIX}/local/bin
 else
-    AC_MSG_NOTICE("could not find msgfmt tool")
+    AC_MSG_FAILURE("could not find msgfmt tool")
     # Use a (bad) fall back value
     GETTEXT_BINDIR=${GETTEXT_PREFIX}/bin
 fi
@@ -510,6 +563,7 @@ AC_DEFINE_UNQUOTED(LIBXO_VERSION_EXTRA, ["$LIBXO_VERSION_EXTRA"],
     [Version number extra information])
 
 AC_CONFIG_HEADERS([libxo/xo_config.h])
+
 AC_CONFIG_FILES([
   Makefile
   libxo-config
@@ -538,6 +592,7 @@ AC_CONFIG_FILES([
   tests/xo/Makefile
   tests/xpath/Makefile
   tests/utf8/Makefile
+  tests/validate/Makefile
   packaging/libxo.spec
   packaging/libxo.rb.base
 ])
@@ -575,4 +630,6 @@ AC_MSG_NOTICE([summary of build options:
   have exterr:      ${HAVE_EXTERR:-no}
   yacc:             ${YACC}
   filters:          ${LIBXO_NEED_FILTERS}
+  validate:         ${LLVM_CONFIG}:${LLVM_BINDIR:-none}:${LLVM_CMAKE_DIR:-none}
+  sdk path:         ${SDK_PATH:-none}
 ])
