@@ -77,7 +77,7 @@ main (int argc, char **argv)
 	    }
 
 	    wc = xo_utf8_codepoint(cp, ep - cp, len, 0);
-	    if (xo_utf8_wchar_is_err(wc)) {
+	    if (xo_utf8_iserror(wc)) {
 		const char *msg = xo_utf8_wchar_errmsg(wc);
 		xo_emit("{:offset/%lu}: {:error/%lc} {:message}\n",
 			offset + cp - buf, (wchar_t) wc, msg);
