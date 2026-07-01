@@ -579,6 +579,7 @@ AC_CONFIG_FILES([
   encoder/fdr/Makefile
   encoder/fullpath/Makefile
   encoder/test/Makefile
+  validate/Makefile
   xo/Makefile
   xolint/Makefile
   xohtml/Makefile
