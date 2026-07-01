@@ -1,52 +1,52 @@
-validate_01.c:7:39: warning: libxo format: missing closing '}': {:bad/
+../../../tests/validate/validate_01.c:7:39: warning: libxo format: missing closing '}': {:bad/
 void tv_missing_brace(void) { xo_emit("{:bad/", "oops"); }
                                       ^
-validate_01.c:10:39: warning: libxo: format expects 2 argument(s) but 1 provided
+../../../tests/validate/validate_01.c:10:39: warning: libxo: format expects 2 argument(s) but 1 provided
 void tv_count_too_few(void) { xo_emit("{:name/%s} {:age/%d}", "bob"); }
                                       ^
-validate_01.c:13:40: warning: libxo: format expects 1 argument(s) but 2 provided
+../../../tests/validate/validate_01.c:13:40: warning: libxo: format expects 1 argument(s) but 2 provided
 void tv_count_too_many(void) { xo_emit("{:name/%s}", "carol", 99); }
                                        ^
-validate_01.c:16:56: warning: libxo: argument 1 type mismatch: format expects integer
+../../../tests/validate/validate_01.c:16:56: warning: libxo: argument 1 type mismatch: format expects integer
 void tv_type_int_string(void) { xo_emit("{:count/%d}", "oops"); }
                                                        ^
-validate_01.c:19:55: warning: libxo: argument 1 type mismatch: format expects string (char *)
+../../../tests/validate/validate_01.c:19:55: warning: libxo: argument 1 type mismatch: format expects string (char *)
 void tv_type_string_int(void) { xo_emit("{:name/%s}", 42); }
                                                       ^
-validate_01.c:22:40: warning: libxo format: field descriptor uses multiple types: '{LT:Max}'
+../../../tests/validate/validate_01.c:22:40: warning: libxo format: field descriptor uses multiple types: '{LT:Max}'
 void tv_multiple_roles(void) { xo_emit("{LT:Max}"); }
                                        ^
-validate_01.c:25:38: warning: libxo format: value field must have a name: '{:/%s}'
+../../../tests/validate/validate_01.c:25:38: warning: libxo format: value field must have a name: '{:/%s}'
 void tv_name_no_name(void) { xo_emit("{:/%s}", "x"); }
                                      ^
-validate_01.c:28:41: warning: libxo format: use hyphens, not underscores, in value field name: 'no_good'
+../../../tests/validate/validate_01.c:28:41: warning: libxo format: use hyphens, not underscores, in value field name: 'no_good'
 void tv_name_underscore(void) { xo_emit("{:no_good/%s}", "x"); }
                                         ^
-validate_01.c:31:40: warning: libxo format: value field name should be lower case: 'NAME'
+../../../tests/validate/validate_01.c:31:40: warning: libxo format: value field name should be lower case: 'NAME'
 void tv_name_uppercase(void) { xo_emit("{:NAME/%s}", "x"); }
                                        ^
-validate_01.c:34:36: warning: libxo format: value field name cannot start with a digit: '9lives'
+../../../tests/validate/validate_01.c:34:36: warning: libxo format: value field name cannot start with a digit: '9lives'
 void tv_name_digit(void) { xo_emit("{:9lives/%s}", "x"); }
                                    ^
-validate_01.c:37:43: warning: libxo format: value field name contains invalid character: 'a$b'
+../../../tests/validate/validate_01.c:37:43: warning: libxo format: value field name contains invalid character: 'a$b'
 void tv_name_invalid_char(void) { xo_emit("{:a$b/%s}", "x"); }
                                           ^
-validate_01.c:40:40: warning: libxo format: value field name should be longer than two characters: 'ab'
+../../../tests/validate/validate_01.c:40:40: warning: libxo format: value field name should be longer than two characters: 'ab'
 void tv_name_too_short(void) { xo_emit("{:ab/%s}", "x"); }
                                        ^
-validate_01.c:43:43: warning: libxo format: anchor content must be a decimal width: 'mumble'
+../../../tests/validate/validate_01.c:43:43: warning: libxo format: anchor content must be a decimal width: 'mumble'
 void tv_anchor_nonnumeric(void) { xo_emit("{[:mumble}{:name/%s}{]:}", "x"); }
                                           ^
-validate_01.c:46:43: warning: libxo format: anchor format must be '%d': '%s'
+../../../tests/validate/validate_01.c:46:43: warning: libxo format: anchor format must be '%d': '%s'
 void tv_anchor_bad_format(void) { xo_emit("{[:/%s}{:name/%s}{]:}", "32", "x"); }
                                           ^
-validate_01.c:49:37: warning: libxo format: anchor cannot have both static width and format: '{[:32/%d}{:name/%s}{]:}'
+../../../tests/validate/validate_01.c:49:37: warning: libxo format: anchor cannot have both static width and format: '{[:32/%d}{:name/%s}{]:}'
 void tv_anchor_both(void) { xo_emit("{[:32/%d}{:name/%s}{]:}", 32, "x"); }
                                     ^
-validate_01.c:52:44: warning: libxo format: humanize modifier ('h') requires a format string: '{h:size}'
+../../../tests/validate/validate_01.c:52:44: warning: libxo format: humanize modifier ('h') requires a format string: '{h:size}'
 void tv_humanize_no_format(void) { xo_emit("{h:size}", 1024); }
                                            ^
-validate_01.c:55:39: warning: libxo format: unknown keyword ignored: 'humanization'
+../../../tests/validate/validate_01.c:55:39: warning: libxo format: unknown keyword ignored: 'humanization'
 void tv_long_name_bad(void) { xo_emit("{,humanization:size/%d}", 1024); }
                                       ^
 17 warnings generated.
