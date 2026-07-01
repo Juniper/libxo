@@ -19,9 +19,14 @@ SUBDIRS = \
     xopo \
     xolint \
     xohtml \
-    tests \
     doc \
     encoder
+
+if HAVE_VALIDATE
+SUBDIRS += validate
+endif
+
+SUBDIRS += tests
 
 bin_SCRIPTS=libxo-config
 dist_doc_DATA = Copyright
@@ -178,38 +183,3 @@ benchmark:
 		echo == $$i ===; \
 		time ${BM_IMAGE} ${BM_ARGS} count $$i > /dev/null; \
 	done
-
-# Validate plugin (cmake-based).  Enabled by ./configure --with-llvm-config=.
-# The macOS SDK path is detected at configure time via xcrun; override with
-# --with-sdk-path=PATH or suppress with --with-sdk-path=no.
-
-LLVM_CLANG      = @LLVM_CLANG@
-LLVM_CMAKE_DIR  = @LLVM_CMAKE_DIR@
-CLANG_CMAKE_DIR = @CLANG_CMAKE_DIR@
-
-VALIDATE_BUILD    = ${abs_top_builddir}/validate
-VALIDATE_PLUGIN   = ${VALIDATE_BUILD}/xo_validate.so
-VALIDATE_SYSROOT  = @SDK_PATH@
-VALIDATE_SYSROOT_FLAG = $(if ${VALIDATE_SYSROOT},-isysroot ${VALIDATE_SYSROOT},)
-
-.PHONY: validate validate-clean accept-validate
-
-if HAVE_VALIDATE
-
-validate: ${VALIDATE_PLUGIN}
-
-${VALIDATE_PLUGIN}:
-	${MAKE} -C tests/validate ${VALIDATE_PLUGIN}
-
-accept-validate:
-	${MAKE} -C tests/validate accept
-
-validate-clean:
-	${RM} -fr ${VALIDATE_BUILD}
-
-else
-
-validate validate-clean accept-validate:
-	@echo "validate plugin disabled (reconfigure with --with-llvm-config=)"
-
-endif
