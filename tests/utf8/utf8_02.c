@@ -12,6 +12,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <unistd.h>
+#include <wchar.h>
 
 #include "xo.h"
 #include "xo_encoder.h"
@@ -68,24 +69,24 @@ main (int argc, char **argv)
     xo_open_container_h(NULL, "top");
 
     if (dump_lower) {
-	wchar_t wc, lc;
+	xo_codepoint_t wc, lc;
 	for (wc = 0x0041; wc <= 0xff3a; wc += 1) {
 	    lc = xo_utf8_wtolower(wc);
 	    if (lc != wc)
 		printf("%04X %04X: %#06x - %#06x = %#06x ('%lc'->'%lc')\n",
-		       lc, wc, lc, wc, lc - wc, wc, lc);
+		       lc, wc, lc, wc, lc - wc, (wint_t) wc, (wint_t) lc);
 	}
 	xo_finish();
 	return 0;
     }
 
     if (dump_upper) {
-	wchar_t wc, uc;
+	xo_codepoint_t wc, uc;
 	for (wc = 0x0061; wc <= 0xff5a; wc += 1) {
 	    uc = xo_utf8_wtoupper(wc);
 	    if (uc != wc)
 		printf("%04X %04X: %#06x - %#06x = %#06x ('%lc'->'%lc')\n",
-		       wc, uc, wc, uc, wc - uc, wc, uc);
+		       wc, uc, wc, uc, wc - uc, (wint_t) wc, (wint_t) uc);
 	}
 	xo_finish();
 	return 0;
@@ -147,7 +148,7 @@ main (int argc, char **argv)
 		break;
 
 	    ulen = xo_utf8_len(*cp);
-	    wchar_t wc = xo_utf8_codepoint(cp, len, ulen, 0);
+	    xo_codepoint_t wc = xo_utf8_codepoint(cp, len, ulen, 0);
 	    
 	    char isup = xo_utf8_isupper(cp) ? 'U' : '-';
 	    char islw = xo_utf8_islower(cp) ? 'L' : '-';
