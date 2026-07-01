@@ -2775,7 +2775,7 @@ xo_set_options_words (xo_handle_t *xop, int argc, char **argv)
     if (style >= 0)
 	xop->xo_style= style;
 
-    return final_rc;
+    return final_rc ?: rc;
 }
 
 /**
