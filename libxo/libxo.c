@@ -104,6 +104,7 @@
 #else /* LIBXO_WCWIDTH */
 #define xo_wcwidth(_x) wcwidth(_x)
 #endif /* LIBXO_WCWIDTH */
+#include "xo_utf8.h"
 
 #ifdef HAVE_STDIO_EXT_H
 #include <stdio_ext.h>
@@ -234,8 +235,8 @@ typedef unsigned xo_xsf_flags_t; /* XSF_* flags */
 #define XO_OPT_MAP		4 /* Map field names */
 #define XO_OPT_MAP_FILE		5 /* Use file full of field names mappings */
 #define XO_OPT_FILTER		6 /* Filter output using path */
-#define XOF_EXTERR_BRIEF	7 /* Display brief extended error info */
-#define XOF_EXTERR_VERBOSE	8 /* Display verbose exterr info */
+#define XO_EXTERR_BRIEF		7 /* Display brief extended error info */
+#define XO_EXTERR_VERBOSE	8 /* Display verbose exterr info */
 
 /*
  * xo_stack_t: As we open and close containers and levels, we
@@ -1359,53 +1360,13 @@ xo_printf (xo_handle_t *xop, const char *fmt, ...)
     return rc;
 }
 
-/*
- * These next few function are make The Essential UTF-8 Ginsu Knife.
- * Identify an input and output character, and convert it.
- */
-static uint8_t xo_utf8_data_bits[5] = { 0, 0x7f, 0x1f, 0x0f, 0x07 };
-static uint8_t xo_utf8_len_bits[5]  = { 0, 0x00, 0xc0, 0xe0, 0xf0 };
-
-/*
- * If the byte has a high-bit set, it's UTF-8, not ASCII.
- */
-static inline int
-xo_is_byte_utf8 (char ch)
-{
-    return (ch & 0x80) ? TRUE : FALSE;
-}
-
-/*
- * Look at the high bits of the first byte to determine the length
- * of the UTF-8 character.
- */
-static inline ssize_t
-xo_utf8_to_wc_len (const char *buf)
-{
-    uint8_t bval = (uint8_t) *buf;
-    ssize_t len;
-
-    if ((bval & 0x80) == 0x0)
-	len = 1;
-    else if ((bval & 0xe0) == 0xc0)
-	len = 2;
-    else if ((bval & 0xf0) == 0xe0)
-	len = 3;
-    else if ((bval & 0xf8) == 0xf0)
-	len = 4;
-    else
-	len = -1;
-
-    return len;
-}
-
 static ssize_t
 xo_buf_utf8_len (xo_handle_t *xop, const char *buf, ssize_t bufsiz)
 {
     unsigned b = (unsigned char) *buf;
-    ssize_t len, i;
+    ssize_t len;
 
-    len = xo_utf8_to_wc_len(buf);
+    len = xo_utf8_rlen(*buf);
     if (len < 0) {
         xo_failure(xop, "invalid UTF-8 data: %02hhx", b);
 	return -1;
@@ -1417,88 +1378,7 @@ xo_buf_utf8_len (xo_handle_t *xop, const char *buf, ssize_t bufsiz)
 	return -1;
     }
 
-    for (i = 2; i < len; i++) {
-	b = (unsigned char ) buf[i];
-	if ((b & 0xc0) != 0x80) {
-	    xo_failure(xop, "invalid UTF-8 data (byte %d): %x", i, b);
-	    return -1;
-	}
-    }
-
     return len;
-}
-
-/*
- * Build a wide character from the input buffer; the number of
- * bits we pull off the first character is dependent on the length,
- * but we put 6 bits off all other bytes.
- */
-static inline wchar_t
-xo_utf8_char (const char *buf, ssize_t len)
-{
-    /* Most common case: singleton byte */
-    if (len == 1)
-	return (unsigned char) buf[0];
-
-    ssize_t i;
-    wchar_t wc;
-    const unsigned char *cp = (const unsigned char *) buf;
-
-    wc = *cp & xo_utf8_data_bits[len];
-    for (i = 1; i < len; i++) {
-	wc <<= 6;		/* Low six bits have data */
-	wc |= cp[i] & 0x3f;
-	if ((cp[i] & 0xc0) != 0x80)
-	    return (wchar_t) -1;
-    }
-
-    return wc;
-}
-
-/*
- * Determine the number of bytes needed to encode a wide character.
- */
-static ssize_t
-xo_utf8_emit_len (wchar_t wc)
-{
-    ssize_t len;
-
-    if ((wc & ((1 << 7) - 1)) == wc) /* Simple case */
-	len = 1;
-    else if ((wc & ((1 << 11) - 1)) == wc)
-	len = 2;
-    else if ((wc & ((1 << 16) - 1)) == wc)
-	len = 3;
-    else if ((wc & ((1 << 21) - 1)) == wc)
-	len = 4;
-    else
-	len = -1;		/* Invalid */
-
-    return len;
-}
-
-/*
- * Emit one wide character into the given buffer
- */
-static void
-xo_utf8_emit_char (char *buf, ssize_t len, wchar_t wc)
-{
-    ssize_t i;
-
-    if (len == 1) { /* Simple case */
-	buf[0] = wc & 0x7f;
-	return;
-    }
-
-    /* Start with the low bits and insert them, six bits at a time */
-    for (i = len - 1; i >= 0; i--) {
-	buf[i] = 0x80 | (wc & 0x3f);
-	wc >>= 6;		/* Drop the low six bits */
-    }
-
-    /* Finish off the first byte with the length bits */
-    buf[0] &= xo_utf8_data_bits[len]; /* Clear out the length bits */
-    buf[0] |= xo_utf8_len_bits[len]; /* Drop in new length bits */
 }
 
 /*
@@ -1510,7 +1390,7 @@ static ssize_t
 xo_buf_append_locale_from_utf8 (xo_handle_t *xop, xo_buffer_t *xbp,
 				const char *ibuf, ssize_t ilen)
 {
-    wchar_t wc;
+    xo_codepoint_t wc;
     ssize_t len;
 
     /*
@@ -1518,8 +1398,8 @@ xo_buf_append_locale_from_utf8 (xo_handle_t *xop, xo_buffer_t *xbp,
      * bits we pull off the first character is dependent on the length,
      * but we put 6 bits off all other bytes.
      */
-    wc = xo_utf8_char(ibuf, ilen);
-    if (wc == (wchar_t) -1) {
+    wc = xo_utf8_codepoint(ibuf, ilen, ilen, 0);
+    if (xo_utf8_iserror(wc)) {
 	xo_failure(xop, "invalid UTF-8 byte sequence");
 	return 0;
     }
@@ -1562,7 +1442,7 @@ xo_buf_append_locale (xo_handle_t *xop, xo_buffer_t *xbp,
     int cols = 0;
 
     for ( ; cp < ep; cp++) {
-	if (!xo_is_byte_utf8(*cp)) {
+	if (!xo_is_utf8_byte(*cp)) {
 	    cols += 1;
 	    continue;
 	}
@@ -2497,9 +2377,9 @@ static xo_flag_mapping_t xo_option_names[] = {
     { XO_OPT_MAP, "map" },
     { XO_OPT_MAP_FILE, "map-file" },
     { XO_OPT_FILTER, "filter" },
-    { XOF_EXTERR_BRIEF, "exterr" },
-    { XOF_EXTERR_BRIEF, "exterr-brief" },
-    { XOF_EXTERR_VERBOSE, "exterr-verbose" },
+    { XO_EXTERR_BRIEF, "exterr" },
+    { XO_EXTERR_BRIEF, "exterr-brief" },
+    { XO_EXTERR_VERBOSE, "exterr-verbose" },
     { 0, NULL }
 };
 
@@ -2878,11 +2758,11 @@ xo_set_options_words (xo_handle_t *xop, int argc, char **argv)
 		rc = xo_add_filter(xop, vp); /* Reports its own errors */
 	    continue;
 
-	case XOF_EXTERR_BRIEF: /* Display brief extended error info */
+	case XO_EXTERR_BRIEF: /* Display brief extended error info */
 	    setenv("EXTERROR_VERBOSE", "brief", 1);
 	    continue;
 
-	case XOF_EXTERR_VERBOSE: /* Display verbose exterr info */
+	case XO_EXTERR_VERBOSE: /* Display verbose exterr info */
 	    setenv("EXTERROR_VERBOSE", "verbose", 1);
 	    continue;
 
@@ -3233,7 +3113,7 @@ xo_format_string_direct (xo_handle_t *xop, xo_buffer_t *xbp,
 			 int need_enc, int have_enc)
 {
     int cols = 0;
-    wchar_t wc = 0;
+    xo_codepoint_t wc = 0;
     ssize_t ilen, olen;
     ssize_t width;
     int attr = XOF_BIT_ISSET(flags, XFF_ATTR);
@@ -3250,7 +3130,7 @@ xo_format_string_direct (xo_handle_t *xop, xo_buffer_t *xbp,
 	const char *np, *ep;
 	ssize_t clen = len < 0 ? (ssize_t) strlen(cp) : len;
 	for (np = cp, ep = cp + clen; *np && np < ep; np++)
-	    if (xo_is_byte_utf8(*np) || *np == '\\' || *np == '%'
+	    if (xo_is_utf8_byte(*np) || *np == '\\' || *np == '%'
 		|| *np == '{' || *np == '}')
 		break;
 
@@ -3293,13 +3173,13 @@ xo_format_string_direct (xo_handle_t *xop, xo_buffer_t *xbp,
 
 	case XF_ENC_UTF8:		/* UTF-8 */
 	    /* Optimize the simple case: this is a traditional ASCII c */
-	    if (!xo_is_byte_utf8(*cp)) {
-		wc = (wchar_t) (unsigned char) *cp++;
+	    if (!xo_is_utf8_byte(*cp)) {
+		wc = (unsigned char) *cp++;
 		ilen = 1;
 		break;
 	    }
 
-	    ilen = xo_utf8_to_wc_len(cp);
+	    ilen = xo_utf8_rlen(*cp);
 	    if (ilen < 0) {
 		xo_failure(xop, "invalid UTF-8 character: %02hhx", *cp);
 		return -1;	/* Can't continue; we can't find the end */
@@ -3310,8 +3190,8 @@ xo_format_string_direct (xo_handle_t *xop, xo_buffer_t *xbp,
 		continue;
 	    }
 
-	    wc = xo_utf8_char(cp, ilen);
-	    if (wc == (wchar_t) -1) {
+	    wc = xo_utf8_codepoint(cp, ilen, ilen, 0);
+	    if (xo_utf8_iserror(wc)) {
 		xo_failure(xop, "invalid UTF-8 character: %02hhx/%d",
 			   *cp, ilen);
 		return -1;	/* Can't continue; we can't find the end */
@@ -3319,9 +3199,11 @@ xo_format_string_direct (xo_handle_t *xop, xo_buffer_t *xbp,
 	    cp += ilen;
 	    break;
 
-	case XF_ENC_LOCALE:		/* Native locale */
+	case XF_ENC_LOCALE:;		/* Native locale */
+	    wchar_t twc;
 	    ilen = (len > 0) ? len : MB_LEN_MAX;
-	    ilen = mbrtowc(&wc, cp, ilen, &xop->xo_mbstate);
+	    ilen = mbrtowc(&twc, cp, ilen, &xop->xo_mbstate);
+	    wc = (xo_codepoint_t) twc;
 	    if (ilen < 0) {		/* Invalid data; skip */
 		xo_failure(xop, "invalid mbs char: %02hhx", *cp);
 		wc = L'?';
@@ -3413,7 +3295,7 @@ xo_format_string_direct (xo_handle_t *xop, xo_buffer_t *xbp,
 		goto done_with_encoding;
 	    }
 
-	    olen = xo_utf8_emit_len(wc);
+	    olen = xo_utf8_to_len(wc);
 	    if (olen < 0) {
 		xo_failure(xop, "ignoring bad length");
 		continue;
@@ -3632,17 +3514,17 @@ static ssize_t
 xo_count_utf8_cols (const char *str, ssize_t len)
 {
     ssize_t tlen;
-    wchar_t wc;
+    xo_codepoint_t wc;
     ssize_t cols = 0;
     const char *ep = str + len;
 
     while (str < ep) {
-	tlen = xo_utf8_to_wc_len(str);
+	tlen = xo_utf8_rlen(*str);
 	if (tlen < 0)		/* Broken input is very bad */
 	    return cols;
 
-	wc = xo_utf8_char(str, tlen);
-	if (wc == (wchar_t) -1)
+	wc = xo_utf8_codepoint(str, tlen, tlen, 0);
+	if (xo_utf8_iserror(wc))
 	    return cols;
 
 	/* We only print printable characters */
