@@ -6,6 +6,10 @@ set ZENV=""
 switch ( `uname` )
     case FreeBSD*:
        set ZENV="MAKE=gmake "
+       set llvmconfig='--with-llvm-config=/usr/local/llvm19/bin/llvm-config'
+       breaksw
+    case Darwin*:
+       set llvmconfig='--with-llvm-config=/opt/local/libexec/llvm-19/bin/llvm-config'
        breaksw
 endsw
 
@@ -25,6 +29,7 @@ set opts=' \
 --enable-printflike \
 --prefix ${HOME}/work/root \
 ${gettext} \
+${llvmconfig} \
 '
 set opts=`echo $opts`
 
