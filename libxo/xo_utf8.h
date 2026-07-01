@@ -268,7 +268,7 @@ xo_utf8_codepoint (const char *buf, size_t bufsiz, int len,
  * start of invalid character.
  */
 char *
-xo_utf8_nvalid(char *str, size_t len);
+xo_utf8_nvalid (char *str, size_t len);
 
 /**
  * Inspect a string to see if it's valid UTF-8.  Returns either NULL
@@ -408,7 +408,7 @@ xo_utf8_next (char *str)
  * NULL when the start of the string is encountered.
  */
 static inline char *
-xo_utf8_prev(char *start, char *cur)
+xo_utf8_prev (char *start, char *cur)
 {
     char *cp;
 
@@ -434,13 +434,13 @@ xo_utf8_prev(char *start, char *cur)
  * Convert a string to lower case.
  */
 void
-xo_utf8_ntolower(char * restrict str, size_t len);
+xo_utf8_ntolower (char * restrict str, size_t len);
 
 /**
  * Convert a string to lower case.
  */
 static inline void
-xo_utf8_tolower(char *str)
+xo_utf8_tolower (char *str)
 {
     return xo_utf8_ntolower(str, strlen(str));
 }
@@ -449,13 +449,13 @@ xo_utf8_tolower(char *str)
  * Convert a string to upper case.
  */
 void
-xo_utf8_ntoupper(char * str, size_t len);
+xo_utf8_ntoupper (char * str, size_t len);
 
 /**
  * Convert a string to upper case.
  */
 static inline void
-xo_utf8_toupper(char *str)
+xo_utf8_toupper (char *str)
 {
     return xo_utf8_ntoupper(str, strlen(str));
 }
@@ -464,13 +464,13 @@ xo_utf8_toupper(char *str)
  * UTF-8 version of strncasecmp(3)
  */
 int
-xo_ustrncasecmp(const char *s1, size_t s1_len, const char *s2, size_t s2_len );
+xo_ustrncasecmp (const char *s1, size_t s1_len, const char *s2, size_t s2_len );
 
 /**
  * UTF-8 version of strcasecmp(3)
  */
 static inline int
-xo_ustrcasecmp(const char *s1, const char *s2)
+xo_ustrcasecmp (const char *s1, const char *s2)
 {
     return xo_ustrncasecmp(s1, strlen(s1), s2, strlen(s2));
 }
@@ -479,14 +479,14 @@ xo_ustrcasecmp(const char *s1, const char *s2)
  * UTF-8 version of strncat(3)
  */
 size_t
-xo_ustrlncat(char * restrict dst, const char * restrict append,
+xo_ustrlncat (char * restrict dst, const char * restrict append,
 	     size_t dstsize, size_t count);
 
 /**
  * UTF-8 version of strlcat(3)
  */
 static inline size_t
-xo_ustrlcat(char * restrict dst, const char * restrict append, size_t dstsize)
+xo_ustrlcat (char * restrict dst, const char * restrict append, size_t dstsize)
 {
     return xo_ustrlncat(dst, append, dstsize, strlen(append));
 }
@@ -495,7 +495,7 @@ xo_ustrlcat(char * restrict dst, const char * restrict append, size_t dstsize)
  * UTF-8 version of strpncpy(3)
  */
 char *
-xo_ustpncpy(char * restrict dst, const char * restrict src, size_t len);
+xo_ustpncpy (char * restrict dst, const char * restrict src, size_t len);
 
 /**
  * UTF-8 version of strpcpy(3)
@@ -510,7 +510,7 @@ xo_ustpcpy (char * restrict dst, const char * restrict src)
  * UTF-8 version of strncpy(3)
  */
 char *
-xo_ustrncpy(char * restrict dst, const char * restrict src, size_t len);
+xo_ustrncpy (char * restrict dst, const char * restrict src, size_t len);
 
 /**
  * UTF-8 version of strcpy(3)
@@ -525,7 +525,7 @@ xo_ustrcpy (char * restrict dst, const char * restrict src)
  * UTF-8 version of strchr(3)
  */
 char *
-xo_ustrchr_long(const char *str, xo_codepoint_t c);
+xo_ustrchr_long (const char *str, xo_codepoint_t c);
 
 static inline char *
 xo_ustrchr (const char *str, xo_codepoint_t c)
@@ -539,10 +539,10 @@ xo_ustrchr (const char *str, xo_codepoint_t c)
  * UTF-8 version of strrchr(3)
  */
 char *
-xo_ustrrchr_long(const char *str, xo_codepoint_t c);
+xo_ustrrchr_long (const char *str, xo_codepoint_t c);
 
 static inline char *
-xo_ustrrchr(const char *str, xo_codepoint_t c)
+xo_ustrrchr (const char *str, xo_codepoint_t c)
 {
     if ((c & 0x7f) == c)
 	return strrchr(str, c);
@@ -553,7 +553,7 @@ xo_ustrrchr(const char *str, xo_codepoint_t c)
  * UTF-8 version of strchrnul(3)
  */
 char *
-xo_ustrchrnul_long(const char *str, xo_codepoint_t c);
+xo_ustrchrnul_long (const char *str, xo_codepoint_t c);
 
 static inline char *
 xo_ustrchrnul (char *str, xo_codepoint_t c)
@@ -567,19 +567,19 @@ xo_ustrchrnul (char *str, xo_codepoint_t c)
  * UTF-8 version of strspn(3)
  */
 size_t
-xo_ustrspn(const char *str, const char *charset);
+xo_ustrspn (const char *str, const char *charset);
 
 /**
  * UTF-8 version of strcspn(3)
  */
 size_t
-xo_ustrcspn(const char *str, const char *charset);
+xo_ustrcspn (const char *str, const char *charset);
 
 /**
  * UTF-8 version of strndup(3)
  */
 char *
-xo_ustrndup(const char *str, size_t len);
+xo_ustrndup (const char *str, size_t len);
 
 /**
  * UTF-8 version of strdup(3)
@@ -594,7 +594,7 @@ xo_ustrdup (const char *str)
  * UTF-8 version of strnlen(3)
  */
 size_t
-xo_ustrnlen(const char *str, size_t maxlen);
+xo_ustrnlen (const char *str, size_t maxlen);
 
 /**
  * UTF-8 version of strlen(3)
@@ -609,13 +609,13 @@ xo_ustrlen (const char *str)
  * UTF-8 version of strpbrk(3)
  */
 char *
-xo_ustrpbrk(const char *str, const char *charset);
+xo_ustrpbrk (const char *str, const char *charset);
 
 /**
  * UTF-8 version of strnstr(3)
  */
 char *
-xo_ustrnstr(const char *big, const char *little, size_t len);
+xo_ustrnstr (const char *big, const char *little, size_t len);
 
 /**
  * UTF-8 version of strstr(3)
@@ -630,25 +630,25 @@ xo_ustrstr (const char *big, const char *little)
  * UTF-8 version of strcasestr(3)
  */
 char *
-xo_ustrcasestr(const char *big, const char *little);
+xo_ustrcasestr (const char *big, const char *little);
 
 /**
  * UTF-8 version of strlcat(3)
  */
 size_t
-xo_ustrlcat(char * restrict str, const char * restrict append, size_t len);
+xo_ustrlcat (char * restrict str, const char * restrict append, size_t len);
 
 /**
  * UTF-8 version of strlcpy(3)
  */
 size_t
-xo_ustrlcpy(char * restrict dst, const char * restrict src, size_t len);
+xo_ustrlcpy (char * restrict dst, const char * restrict src, size_t len);
 
 /**
  * Truncate a string at the given length while keeping the string
  * UTF-8 valid.
  */
 size_t
-xo_utrunc(char *str, size_t len);
+xo_utrunc (char *str, size_t len);
 
 #endif /* INCLUDE_XO_UTF8_H */
