@@ -100,6 +100,8 @@ typedef struct xo_tframe_s {
     int16_t xtf_deny_delta;	/* deny contribution to undo on pop */
     char *xtf_keys;		/* buffered "k\0v\0k2\0v2\0\0" pairs */
     ssize_t xtf_keys_len;
+    char *xtf_attrs;		/* buffered "@k\0v\0..." pairs (attributes) */
+    ssize_t xtf_attrs_len;
 } xo_tframe_t;
 
 /* Per-slot states */
@@ -301,6 +303,39 @@ xo_tframe_free_keys (xo_tframe_t *frame)
     }
 }
 
+static void
+xo_tframe_attr_add (xo_tframe_t *frame,
+		    const char *tag, xo_ssize_t tlen,
+		    const char *value, xo_ssize_t vlen)
+{
+    xo_ssize_t new_len = tlen + vlen + 3;
+    char *newp = xo_realloc(frame->xtf_attrs, frame->xtf_attrs_len + new_len);
+    if (newp == NULL)
+	return;
+
+    char *addp = newp + frame->xtf_attrs_len;
+    memcpy(addp, tag, tlen);
+    addp += tlen;
+    *addp++ = '\0';
+    memcpy(addp, value, vlen);
+    addp += vlen;
+    *addp++ = '\0';
+    *addp++ = '\0';
+
+    frame->xtf_attrs_len += new_len - 1;
+    frame->xtf_attrs = newp;
+}
+
+static void
+xo_tframe_free_attrs (xo_tframe_t *frame)
+{
+    if (frame->xtf_attrs) {
+	xo_free(frame->xtf_attrs);
+	frame->xtf_attrs = NULL;
+	frame->xtf_attrs_len = 0;
+    }
+}
+
 static int
 xo_tmatch_init (xo_handle_t *xop UNUSED, xo_tmatch_t *xm, xo_trie_t *trie)
 {
@@ -335,8 +370,10 @@ static void
 xo_tmatch_cleanup (xo_tmatch_t *xm)
 {
     if (xm->xm_stack) {
-	for (uint32_t d = 0; d <= xm->xm_depth; d++)
+	for (uint32_t d = 0; d <= xm->xm_depth; d++) {
 	    xo_tframe_free_keys(&xm->xm_stack[d]);
+	    xo_tframe_free_attrs(&xm->xm_stack[d]);
+	}
 	xo_free(xm->xm_stack);
 	xm->xm_stack = NULL;
     }
@@ -393,6 +430,8 @@ typedef struct xo_stack_s {
     xo_xparse_node_id_t xs_predicates; /* Predicate node */
     char *xs_keys;	         /* Keys stored as "key\0val\0k2\0v2\0\0"*/
     xo_ssize_t xs_keys_len; 	 /* Length of xs_keys */
+    char *xs_attrs;		 /* Attributes stored as "k\0v\0k2\0v2\0\0" */
+    xo_ssize_t xs_attrs_len;	 /* Length of xs_attrs */
     uint32_t xs_allow;		 /* Any 'allow' increment */
     uint32_t xs_pred;		 /* Any 'pred' increment */
     uint32_t xs_deny;		 /* Any 'deny' increment */
@@ -616,6 +655,7 @@ xo_tmatch_close (xo_handle_t *xop, xo_filter_t *xfp UNUSED,
     xm->xm_allow -= frame->xtf_allow_delta;
     xm->xm_deny  -= frame->xtf_deny_delta;
     xo_tframe_free_keys(frame);
+    xo_tframe_free_attrs(frame);
 
     xo_dbg(xop, "xo_tmatch_close: depth %u [allow %u/deny %u]",
 	   xm->xm_depth, xm->xm_allow, xm->xm_deny);
@@ -630,6 +670,9 @@ xo_tmatch_close (xo_handle_t *xop, xo_filter_t *xfp UNUSED,
 static xo_filter_status_t xo_tmatch_key(xo_handle_t *, xo_filter_t *,
 					 xo_tmatch_t *, const char *,
 					 xo_ssize_t, const char *, xo_ssize_t);
+static xo_filter_status_t xo_tmatch_attr(xo_handle_t *, xo_filter_t *,
+					  xo_tmatch_t *, const char *,
+					  xo_ssize_t, const char *, xo_ssize_t);
 
 /*
  * Add a filter (xpath) to our filtering mechanism
@@ -648,7 +691,7 @@ xo_filter_op_add_one (xo_handle_t *xop, const char *input)
 
     if (rc == 0) {
 	static int unsupported_tokens[] = {
-	    L_AT, L_DOTDOT, L_DOTDOTDOT, L_DSLASH, L_QUESTION, L_STAR,
+	    L_DOTDOT, L_DOTDOTDOT, L_DSLASH, L_QUESTION, L_STAR,
 	    L_UNDERSCORE, K_COMMENT, K_ID, K_KEY, K_NODE, K_TEXT,
 	    T_VAR, M_SEQUENCE, C_INDEX, C_TEST, C_UNION,
 	    0
@@ -872,6 +915,34 @@ xo_filter_key_find (xo_filter_t *xfp UNUSED,
     return match;
 }
 
+static const char *
+xo_filter_attr_find (xo_filter_t *xfp UNUSED,
+		     xo_match_t *xmp, const char *tag)
+{
+    xo_ssize_t off = 0;
+    xo_stack_t *xsp = xmp->xm_stackp;
+    xo_ssize_t len = xsp->xs_attrs_len;
+    char *cp = xsp->xs_attrs;
+    const char *match = NULL;
+
+    while (off < len) {
+	if (*cp == '\0')
+	    break;
+
+	xo_ssize_t klen = strlen(cp);
+	if (xo_streq(tag, cp))
+	    match = cp + klen + 1;
+
+	xo_ssize_t vlen = strlen(cp + klen + 1);
+	xo_ssize_t tlen = klen + 1 + vlen + 1;
+
+	off += tlen;
+	cp += tlen;
+    }
+
+    return match;
+}
+
 /* ------------------------------------------------------------- */
 
 /*
@@ -1049,31 +1120,57 @@ xo_eval_quoted (XO_EVAL_NODE_ARGS)
 }
 
 static xo_eval_value_t
+xo_eval_attribute (XO_EVAL_NODE_ARGS)
+{
+    xo_eval_value_t value = { .xev_flags = 0 };
+    const char *str = xo_xparse_str(&xfp->xf_xd, xnp->xn_str);
+    const char *aval = xo_filter_attr_find(xfp, xmp, str);
+    if (aval) {
+	value = xo_eval_value_make(C_STRING, 0, 0);
+	value.xev_str = aval;
+    } else {
+	value.xev_flags |= XEVF_MISSING;
+    }
+    return value;
+}
+
+static xo_eval_value_t
 xo_eval_path (XO_EVAL_NODE_ARGS)
 {
     xo_eval_value_t value = { .xev_flags = 0 };
     xo_xparse_node_t *elt = NULL;
+    int is_attr = FALSE;
     xo_xparse_node_id_t id;
 
-    /* We only support a single element in the path, which must be a key */
+    /* We only support a single element or attribute in the path */
     for (id = xnp->xn_contents; id; id = xnp->xn_next) {
 	xnp = xo_xparse_node(&xfp->xf_xd, id);
-	if (xnp->xn_type != C_ELEMENT) {
+	if (xnp->xn_type == C_ELEMENT) {
+	    if (elt == NULL) {
+		elt = xnp;
+		is_attr = FALSE;
+	    } else return xo_eval_value_invalid();
+	} else if (xnp->xn_type == C_ATTRIBUTE) {
+	    if (elt == NULL) {
+		elt = xnp;
+		is_attr = TRUE;
+	    } else return xo_eval_value_invalid();
+	} else if (xnp->xn_type == C_ABSOLUTE) {
+	    /* skip */
+	} else {
 	    xo_failure(xop, "filter: non-element path member (%s)",
 		       xo_xparse_fancy_token_name(xnp->xn_type));
 	    continue;
 	}
-
-	if (elt == NULL)
-	    elt = xnp;
-	else return xo_eval_value_invalid();
     }
 
     if (elt == NULL)
 	return value;
 
     const char *str = xo_xparse_str(&xfp->xf_xd, elt->xn_str);
-    const char *sval = xo_filter_key_find(xfp, xmp, str);
+    const char *sval = is_attr
+	? xo_filter_attr_find(xfp, xmp, str)
+	: xo_filter_key_find(xfp, xmp, str);
     if (sval) {
 	value = xo_eval_value_make(C_STRING, 0, 0);
 	value.xev_str = sval;
@@ -1714,6 +1811,10 @@ xo_eval (xo_handle_t *xop, xo_filter_t *xfp, xo_match_t *xmp,
 
 	switch (xnp->xn_type) {
 
+	case C_ATTRIBUTE:
+	    node_fn = xo_eval_attribute;
+	    break;
+
 	case C_PATH:
 	    node_fn = xo_eval_path;
 	    break;
@@ -1902,13 +2003,14 @@ xo_filter_pred_eval (xo_handle_t *xop, xo_filter_t *xfp, xo_match_t *xmp)
 static int
 xo_filter_pred_needs (xo_xparse_data_t *xdp, xo_filter_t *xfp,
 		      xo_xparse_node_id_t id,
-		      const char *tag, xo_ssize_t tlen)
+		      const char *tag, xo_ssize_t tlen, int is_attr)
 {
     xo_xparse_node_t *xnp;
+    xo_xparse_token_t want_type = is_attr ? C_ATTRIBUTE : C_ELEMENT;
 
     for (; id; id = xnp->xn_next) {
 	xnp = xo_xparse_node(xdp, id);
-	if (xnp->xn_type == C_ELEMENT) {
+	if (xnp->xn_type == want_type) {
 	    const char *str = xo_xparse_str(xdp, xnp->xn_str);
 	    xo_ssize_t slen = strlen(str);
 	    if (slen == tlen && memcmp(str, tag, slen) == 0)
@@ -1919,7 +2021,7 @@ xo_filter_pred_needs (xo_xparse_data_t *xdp, xo_filter_t *xfp,
 
 	if (xnp->xn_contents)
 	    if (xo_filter_pred_needs(xdp, xfp, xnp->xn_contents,
-				     tag, tlen))
+				     tag, tlen, is_attr))
 		return TRUE;
     }
 
@@ -1938,6 +2040,8 @@ xo_tmatch_eval_pred (xo_handle_t *xop, xo_filter_t *xfp,
     bzero(&tmp_stack, sizeof(tmp_stack));
     tmp_stack.xs_keys = frame->xtf_keys;
     tmp_stack.xs_keys_len = frame->xtf_keys_len;
+    tmp_stack.xs_attrs = frame->xtf_attrs;
+    tmp_stack.xs_attrs_len = frame->xtf_attrs_len;
     tmp_stack.xs_predicates = pred_id;
 
     xo_match_t tmp_match;
@@ -1964,7 +2068,7 @@ xo_tmatch_key (xo_handle_t *xop, xo_filter_t *xfp, xo_tmatch_t *xm,
 
 	xo_tnode_t *tn = &xtp->xt_nodes[frame->xtf_node[i]];
 
-	if (!xo_filter_pred_needs(&xfp->xf_xd, xfp, tn->xtn_pred, tag, tlen))
+	if (!xo_filter_pred_needs(&xfp->xf_xd, xfp, tn->xtn_pred, tag, tlen, FALSE))
 	    continue;
 
 	xo_tframe_key_add(frame, tag, tlen, value, vlen);
@@ -2006,6 +2110,68 @@ xo_filter_op_key (XO_FILTER_KEY_SIGNATURE)
     return rc;
 }
 
+static xo_filter_status_t
+xo_tmatch_attr (xo_handle_t *xop, xo_filter_t *xfp, xo_tmatch_t *xm,
+		const char *tag, xo_ssize_t tlen,
+		const char *value, xo_ssize_t vlen)
+{
+    if (xm->xm_depth == 0)
+	return xfp->xf_status;
+
+    xo_trie_t *xtp = xm->xm_trie;
+    xo_tframe_t *frame = &xm->xm_stack[xm->xm_depth];
+
+    for (uint32_t i = 0; i < frame->xtf_count; i++) {
+	if (frame->xtf_state[i] != XTFS_PRED)
+	    continue;
+
+	xo_tnode_t *tn = &xtp->xt_nodes[frame->xtf_node[i]];
+
+	if (!xo_filter_pred_needs(&xfp->xf_xd, xfp, tn->xtn_pred,
+				  tag, tlen, TRUE))
+	    continue;
+
+	xo_tframe_attr_add(frame, tag, tlen, value, vlen);
+
+	xo_eval_value_t result =
+	    xo_tmatch_eval_pred(xop, xfp, frame, tn->xtn_pred);
+
+	if (result.xev_flags & XEVF_MISSING)
+	    continue;
+
+	if (xo_eval_cast_boolean(xfp, result)) {
+	    frame->xtf_state[i] = XTFS_LIVE;
+	    xo_tmatch_record_live(xm, frame, tn);
+	} else {
+	    frame->xtf_state[i] = XTFS_DEAD;
+	}
+    }
+
+    return xfp->xf_status;
+}
+
+static int
+xo_filter_op_attribute (xo_handle_t *xop, xo_filter_t *xfp,
+			const char *tag, xo_ssize_t tlen,
+			const char *value, xo_ssize_t vlen)
+{
+    if (xfp == NULL || xfp->xf_trie == NULL)
+	return 0;
+
+    XO_DBG(xop, "xo_filter_attribute: '@%.*s' = '%.*s'", tlen, tag, vlen, value);
+
+    xo_filter_status_t rc = xo_tmatch_attr(xop, xfp, &xfp->xf_tmatch,
+					    tag, tlen, value, vlen);
+
+    xo_filter_change_status(xop, xfp, "attr", tag, tlen);
+
+    XO_DBG(xop, "xo_filter_attribute: '@%.*s' = '%.*s' --> status %s",
+	   tlen, tag, vlen, value,
+	   xo_filter_op_status_name(xfp->xf_status));
+
+    return rc;
+}
+
 /* ------------------------------------------------------------- */
 
 /*
@@ -2039,31 +2205,14 @@ xo_filter_op_passthru (XO_ENCODER_HANDLER_ARGS,
 	 */
 	break;
 
+    case XO_OP_ATTRIBUTE:	   /* Attribute name/value */
+	if (name && value)
+	    xo_filter_op_attribute(xop, xfp, name, strlen(name),
+				   value, strlen(value));
+	break;
+
     case XO_OP_STRING:		   /* Quoted UTF-8 string */
     case XO_OP_CONTENT:		   /* Other content */
-    case XO_OP_ATTRIBUTE:;	   /* Attribute name/value */
-#if 0
-	if (xfp->xf_status == XO_STATUS_DEAD) /* The dead have no cares */
-	    return 0;
-
-	/*
-	 * If the filters aren't all dead, we always want to pass keys
-	 * along.  For non-keys, we look at 'allow' to decide: if
-	 * allow is false, we don't want it.
-	 */
-	if (flags & XFF_KEY) { /* Always need keys */
-	    /*
-	     * Let the predicate logic know we've got a key.
-	     */
-	    xo_filter_op_key(xop, xfp, name, strlen(name),
-			     value, strlen(value));
-
-	} else {
-	    if (xfp->xf_status == XO_STATUS_TRACK)
-		return 0;  	  /* Tracking doesn't need non-keys */
-	}
-#endif
-
 	break;
     }
 
