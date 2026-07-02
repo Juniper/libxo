@@ -179,6 +179,18 @@ do_work (xo_handle_t *xop, xo_filter_t *xfp, xo_xparse_data_t *xdp, FILE *in)
 	    rc = xo_emit_field_h(xop, "k", field, "%s", value);
 	    break;
 
+	case '@':
+	    field = trim(cp + 1);
+	    value = clean_token(field);
+	    if (!*field || !*value)
+		break;
+
+	    if (!opt_quiet)
+		fprintf(stderr, "main: attr: '%s'='%s'\n", field, value);
+
+	    rc = xo_attr_h(xop, field, "%s", value);
+	    break;
+
 	case 'i':		/* Include */
 	    field = trim(cp + 1);
 	    value = clean_token(field);
