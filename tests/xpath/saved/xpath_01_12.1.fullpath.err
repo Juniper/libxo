@@ -569,3 +569,62 @@ main: input '>item'
 main: status: track
 main: input '}item'
 main: status: track
+main: input ''
+main: input '# number(price)'
+main: input 'r'
+main: status: zero
+main: input '?item[number(price) == 2]'
+--- 0: 14
+    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0 
+                000008: type 14 (L_EQUALS), str 25 [==], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [number], contents 7, next 10, prev 0 
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
+                            000005: type 70 (C_ELEMENT), str 17 [price], contents 0, next 0, prev 0 
+                    000010: type 53 (T_NUMBER), str 28 [2], contents 0, next 0, prev 3 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: track
+main: input '$ price 2.0'
+main: key: 'price'='2.0'
+main: status: full
+main: input '= val a'
+main: field: 'val'='a'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ price 2gether'
+main: key: 'price'='2gether'
+main: status: track
+main: input '= val b'
+main: field: 'val'='b'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ price 3'
+main: key: 'price'='3'
+main: status: track
+main: input '= val c'
+main: field: 'val'='c'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ price 2.0.4.5'
+main: key: 'price'='2.0.4.5'
+main: status: track
+main: input '= val d'
+main: field: 'val'='d'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
