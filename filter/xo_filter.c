@@ -1107,7 +1107,7 @@ xo_eval_number (XO_EVAL_NODE_ARGS)
 
 	} else {
 	    /* We can't give an error, so we just return 0 */
-	    xo_failure(xop, "invalid number value: '%s'", xnp->xn_str);
+	    xo_failure(xop, "invalid number value: '%s'", str);
 	    value = xo_eval_value_make(C_INT64, 0, 0);
 	    value.xev_int64 = 0;
 	}
@@ -1810,6 +1810,21 @@ xo_eval_func_floor (XO_EVAL_NODE_ARGS)
     return xo_eval_value_float(0, fval);
 }
 
+static xo_eval_value_t
+xo_eval_func_number (XO_EVAL_NODE_ARGS)
+{
+    xo_eval_value_t value;
+
+    /* We only support a single element in the path, which must be a key */
+    value = xo_eval(xop, xfp, xmp, "arguments", indent,
+                       xnp->xn_contents, NULL);
+    if (value.xev_flags & XEVF_MISSING)
+	return value;
+
+    xo_float_t fval = xo_eval_cast_float(xfp, value);
+    return xo_eval_value_float(0, fval);
+}
+
 /*
  * Map between names and numbers and functions, searchable by string
  * name.
@@ -1826,6 +1841,7 @@ xo_eval_func_map_t xo_eval_functions[] = {
     { xo_eval_func_false, "false" },
     { xo_eval_func_floor, "floor" },
     { xo_eval_not, "not" },
+    { xo_eval_func_number, "number" },
     { xo_eval_func_starts_with, "starts-with" },
     { xo_eval_func_true, "true" },
     
