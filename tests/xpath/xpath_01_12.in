@@ -214,3 +214,25 @@ $ price 3.9
 = val d
 >item
 }item
+
+# number(price)
+r
+?item[number(price) == 2]
+{item
+<item
+$ price 2.0
+= val a
+>item
+<item
+$ price 2gether
+= val b
+>item
+<item
+$ price 3
+= val c
+>item
+<item
+$ price 2.0.4.5
+= val d
+>item
+}item
