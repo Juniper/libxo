@@ -166,6 +166,8 @@ main: input '?!six'
         000059: type 70 (C_ELEMENT), str 108 [six], contents 0, next 0, prev 0 
 main: status: zero
 main: input '?foo//goo'
+xpath_01: xpath feature is unsupported: descendant child (e.g. 'one//two')
+xpath_01: libxo could not add the requested filter
 xpath_01: test: xpath feature is unsupported: descendant child (e.g. 'one//two')
 --- 0: 15
     000015: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
@@ -213,6 +215,7 @@ xpath_01: test: xpath feature is unsupported: descendant child (e.g. 'one//two')
         000061: type 70 (C_ELEMENT), str 112 [foo], contents 0, next 62, prev 0 
         000062: type 69 (C_DESCENDANT), str 116 [//], contents 0, next 63, prev 61 
         000063: type 70 (C_ELEMENT), str 119 [goo], contents 0, next 0, prev 62 
+main: filter: rc: -1
 main: status: zero
 main: input '?!seven[x==4]/y[z==4]|fish'
 xpath_01: test: xpath feature is unsupported: descendant child (e.g. 'one//two')
