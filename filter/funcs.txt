@@ -1,0 +1,182 @@
+- boolean(obj)
+
+  - The boolean function evaluates an expression and returns true or false.
+
+- ceiling(obj)
+
+  - The ceiling function evaluates a decimal number and returns the
+    smallest integer greater than or equal to the decimal number.
+
+- choose(boolean, if-true, if-false)
+
+  - The choose function returns one of the specified objects based on
+    a boolean parameter.
+
+- concat(obj, ...)
+
+  - The concat function concatenates two or more strings and returns
+    the resulting string.
+
+- contains(where, what)
+
+  - The contains function determines whether the first argument string
+    contains the second argument string and returns boolean true or false.
+
+- count(node-set)
+
+  - The count function counts the number of nodes in a node-set and
+    returns an integer.
+
+- current()
+
+  - The current function can be used to get the context node in an
+    XSLT instruction.
+
+- document(obj, node-set?)
+
+  - The document finds a node-set in an external document, or multiple
+    external documents, and returns the resulting node-set.
+
+- element-available(name)
+
+  - The element-available function determines if an element is
+    available and returns true or false.
+
+- false()
+
+  - The false function returns boolean false.
+
+- floor(number)
+
+  - The floor function evaluates a decimal number and returns the
+    largest integer less than or equal to the decimal number.
+
+- format-number(number, pattern, decimalFormat?)
+
+  - The format-number function evaluates a number and returns a string
+    representing the number in a given format.
+
+- function-available(name)
+
+  - The function-available function determines if a given function is
+    available and returns boolean true or false.
+
+- generate-id()
+
+  - The generate-id function generates a unique id for the first node
+    in a given node-set and returns a string containing that id.
+
+- id(expression)
+
+  - The id function finds nodes matching the given ids and returns a
+    node-set containing the identified nodes.
+
+- key(keyname, value)
+
+  - The key function returns a node-set of nodes that have the given
+    value for the given key.
+
+- lang(string)
+
+  - The lang function determines whether the context node matches the
+    given language and returns boolean true or false.
+
+- last()
+
+  - The last function returns a number equal to the context size from
+    the expression evaluation context.
+
+- local-name()
+
+  - The local-name function returns a string representing the local
+    name of the first node in a given node-set.
+
+- name()
+
+  - The name function returns a string representing the QName of the
+    first node in a given node-set.
+
+- namespace-uri()
+
+  - The namespace-uri function returns a string representing the
+    namespace URI of the first node in a given node-set.
+
+- normalize-space(string?)
+
+  - The normalize-space function strips leading and trailing
+    white-space from a string, replaces sequences of whitespace
+    characters by a single space, and returns the resulting string.
+
+- not(obj)
+
+  - The not function evaluates a boolean expression and returns the
+    opposite value.
+
+- number(obj)
+
+  - The number function converts an object to a number and returns the
+    number.
+
+- position
+
+  - The position function returns a number equal to the context
+    position from the expression evaluation context.
+
+- round
+
+  - The round function returns a number that is the nearest integer to
+    the given number.
+
+- starts-with
+
+  - The starts-with checks whether the first string starts with the
+    second string and returns true or false.
+
+- string
+
+  - The string function converts the given argument to a string.
+
+- string-length
+
+  - The string-length function returns a number equal to the number of
+    characters in a given string.
+
+- substring
+
+  - The substring function returns a part of a given string.
+
+- substring-after
+
+  - The substring-after function returns a string that is the rest of
+    a given string after a given substring.
+
+- substring-before
+
+  - The substring-before function returns a string that is the part of
+    a given string before a given substring.
+
+- sum
+
+  - The sum function returns a number that is the sum of the numeric
+    values of each node in a given node-set.
+
+- system-property
+
+  - The system-property function returns an object representing the
+    given system-property.
+
+- translate
+
+  - The translate function evaluates a string and a set of characters
+    to translate and returns the translated string.
+
+- true
+
+  - The true function returns a boolean value of true.
+
+- unparsed-entity-url
+
+  - The unparsed-entity-url() function returns the URI of the unparsed
+    entity with the given name. This is non-XML data referenced in the
+    DTD of the source document.
+
