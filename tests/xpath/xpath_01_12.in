@@ -1,0 +1,216 @@
+#run --libxo @fullpath
+
+# true() always passes every instance
+r
+?item[true()]
+{item
+<item
+$ id 1
+= val alpha
+>item
+<item
+$ id 2
+= val beta
+>item
+<item
+$ id 3
+= val gamma
+>item
+}item
+
+# false() never passes any instance
+r
+?item[false()]
+{item
+<item
+$ id 1
+= val alpha
+>item
+<item
+$ id 2
+= val beta
+>item
+<item
+$ id 3
+= val gamma
+>item
+}item
+
+# not() inverts a key equality predicate
+r
+?item[not(color='red')]
+{item
+<item
+$ color red
+= val 1
+>item
+<item
+$ color blue
+= val 2
+>item
+<item
+$ color red
+= val 3
+>item
+<item
+$ color green
+= val 4
+>item
+}item
+
+# not(true()) is always false
+r
+?item[not(true())]
+{item
+<item
+$ id 1
+= val alpha
+>item
+<item
+$ id 2
+= val beta
+>item
+}item
+
+# not(false()) is always true
+r
+?item[not(false())]
+{item
+<item
+$ id 1
+= val alpha
+>item
+<item
+$ id 2
+= val beta
+>item
+}item
+
+# not(not(x)) == x: double negation is identity
+r
+?item[not(not(color='red'))]
+{item
+<item
+$ color red
+= val 1
+>item
+<item
+$ color blue
+= val 2
+>item
+<item
+$ color red
+= val 3
+>item
+}item
+
+# boolean(1) is true; boolean(0) is false
+r
+?item[boolean(1)]
+{item
+<item
+$ id 1
+= val alpha
+>item
+<item
+$ id 2
+= val beta
+>item
+}item
+
+r
+?item[boolean(0)]
+{item
+<item
+$ id 1
+= val alpha
+>item
+<item
+$ id 2
+= val beta
+>item
+}item
+
+# boolean() of a comparison is the same as the comparison itself
+r
+?item[boolean(color='red')]
+{item
+<item
+$ color red
+= val 1
+>item
+<item
+$ color blue
+= val 2
+>item
+<item
+$ color red
+= val 3
+>item
+}item
+
+# ceiling() rounds fractional values up
+r
+?item[ceiling(price) > 3]
+{item
+<item
+$ price 1.2
+= val a
+>item
+<item
+$ price 3.1
+= val b
+>item
+<item
+$ price 3.9
+= val c
+>item
+<item
+$ price 2.7
+= val d
+>item
+}item
+
+# floor() rounds fractional values down
+r
+?item[floor(price) >= 3]
+{item
+<item
+$ price 2.9
+= val a
+>item
+<item
+$ price 3.0
+= val b
+>item
+<item
+$ price 3.7
+= val c
+>item
+<item
+$ price 4.1
+= val d
+>item
+}item
+
+# ceiling(x) == floor(x) only when x is an integer
+r
+?item[ceiling(price) == floor(price)]
+{item
+<item
+$ price 2.0
+= val a
+>item
+<item
+$ price 2.5
+= val b
+>item
+<item
+$ price 3.0
+= val c
+>item
+<item
+$ price 3.9
+= val d
+>item
+}item
