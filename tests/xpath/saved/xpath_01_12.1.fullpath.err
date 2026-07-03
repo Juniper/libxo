@@ -1,0 +1,571 @@
+main: input '#run --libxo @fullpath'
+main: input ''
+main: input '# true() always passes every instance'
+main: input 'r'
+main: status: zero
+main: input '?item[true()]'
+--- 0: 9
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [true], contents 0, next 0, prev 0 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: full
+main: input '$ id 1'
+main: key: 'id'='1'
+main: status: full
+main: input '= val alpha'
+main: field: 'val'='alpha'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: full
+main: input '$ id 2'
+main: key: 'id'='2'
+main: status: full
+main: input '= val beta'
+main: field: 'val'='beta'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: full
+main: input '$ id 3'
+main: key: 'id'='3'
+main: status: full
+main: input '= val gamma'
+main: field: 'val'='gamma'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# false() never passes any instance'
+main: input 'r'
+main: status: zero
+main: input '?item[false()]'
+--- 0: 9
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [false], contents 0, next 0, prev 0 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: track
+main: input '$ id 1'
+main: key: 'id'='1'
+main: status: track
+main: input '= val alpha'
+main: field: 'val'='alpha'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ id 2'
+main: key: 'id'='2'
+main: status: track
+main: input '= val beta'
+main: field: 'val'='beta'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ id 3'
+main: key: 'id'='3'
+main: status: track
+main: input '= val gamma'
+main: field: 'val'='gamma'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# not() inverts a key equality predicate'
+main: input 'r'
+main: status: zero
+main: input '?item[not(color='red')]'
+--- 0: 14
+    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [not], contents 6, next 0, prev 0 
+                    000006: type 14 (L_EQUALS), str 20 [=], contents 7, next 0, prev 0 
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
+                            000005: type 70 (C_ELEMENT), str 14 [color], contents 0, next 0, prev 0 
+                        000008: type 54 (T_QUOTED), str 22 [red], contents 0, next 0, prev 7 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: track
+main: input '$ color red'
+main: key: 'color'='red'
+main: status: track
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ color blue'
+main: key: 'color'='blue'
+main: status: full
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ color red'
+main: key: 'color'='red'
+main: status: track
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ color green'
+main: key: 'color'='green'
+main: status: full
+main: input '= val 4'
+main: field: 'val'='4'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# not(true()) is always false'
+main: input 'r'
+main: status: zero
+main: input '?item[not(true())]'
+--- 0: 13
+    000013: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [not], contents 5, next 0, prev 0 
+                    000005: type 52 (T_FUNCTION_NAME), str 14 [true], contents 0, next 0, prev 0 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: track
+main: input '$ id 1'
+main: key: 'id'='1'
+main: status: track
+main: input '= val alpha'
+main: field: 'val'='alpha'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ id 2'
+main: key: 'id'='2'
+main: status: track
+main: input '= val beta'
+main: field: 'val'='beta'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# not(false()) is always true'
+main: input 'r'
+main: status: zero
+main: input '?item[not(false())]'
+--- 0: 13
+    000013: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [not], contents 5, next 0, prev 0 
+                    000005: type 52 (T_FUNCTION_NAME), str 14 [false], contents 0, next 0, prev 0 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: full
+main: input '$ id 1'
+main: key: 'id'='1'
+main: status: full
+main: input '= val alpha'
+main: field: 'val'='alpha'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: full
+main: input '$ id 2'
+main: key: 'id'='2'
+main: status: full
+main: input '= val beta'
+main: field: 'val'='beta'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# not(not(x)) == x: double negation is identity'
+main: input 'r'
+main: status: zero
+main: input '?item[not(not(color='red'))]'
+--- 0: 18
+    000018: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [not], contents 5, next 0, prev 0 
+                    000005: type 52 (T_FUNCTION_NAME), str 14 [not], contents 8, next 0, prev 0 
+                        000008: type 14 (L_EQUALS), str 26 [=], contents 9, next 0, prev 0 
+                            000009: type 74 (C_PATH), str 0 [], contents 7, next 10, prev 0 
+                                000007: type 70 (C_ELEMENT), str 20 [color], contents 0, next 0, prev 0 
+                            000010: type 54 (T_QUOTED), str 28 [red], contents 0, next 0, prev 9 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: track
+main: input '$ color red'
+main: key: 'color'='red'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ color blue'
+main: key: 'color'='blue'
+main: status: track
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ color red'
+main: key: 'color'='red'
+main: status: full
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# boolean(1) is true; boolean(0) is false'
+main: input 'r'
+main: status: zero
+main: input '?item[boolean(1)]'
+--- 0: 11
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [boolean], contents 5, next 0, prev 0 
+                    000005: type 53 (T_NUMBER), str 18 [1], contents 0, next 0, prev 0 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: full
+main: input '$ id 1'
+main: key: 'id'='1'
+main: status: full
+main: input '= val alpha'
+main: field: 'val'='alpha'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: full
+main: input '$ id 2'
+main: key: 'id'='2'
+main: status: full
+main: input '= val beta'
+main: field: 'val'='beta'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input 'r'
+main: status: zero
+main: input '?item[boolean(0)]'
+--- 0: 11
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [boolean], contents 5, next 0, prev 0 
+                    000005: type 53 (T_NUMBER), str 18 [0], contents 0, next 0, prev 0 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: track
+main: input '$ id 1'
+main: key: 'id'='1'
+main: status: track
+main: input '= val alpha'
+main: field: 'val'='alpha'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ id 2'
+main: key: 'id'='2'
+main: status: track
+main: input '= val beta'
+main: field: 'val'='beta'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# boolean() of a comparison is the same as the comparison itself'
+main: input 'r'
+main: status: zero
+main: input '?item[boolean(color='red')]'
+--- 0: 14
+    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [boolean], contents 6, next 0, prev 0 
+                    000006: type 14 (L_EQUALS), str 24 [=], contents 7, next 0, prev 0 
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
+                            000005: type 70 (C_ELEMENT), str 18 [color], contents 0, next 0, prev 0 
+                        000008: type 54 (T_QUOTED), str 26 [red], contents 0, next 0, prev 7 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: track
+main: input '$ color red'
+main: key: 'color'='red'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ color blue'
+main: key: 'color'='blue'
+main: status: track
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ color red'
+main: key: 'color'='red'
+main: status: full
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# ceiling() rounds fractional values up'
+main: input 'r'
+main: status: zero
+main: input '?item[ceiling(price) > 3]'
+--- 0: 14
+    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0 
+                000008: type 15 (L_GRTR), str 26 [>], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [ceiling], contents 7, next 10, prev 0 
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
+                            000005: type 70 (C_ELEMENT), str 18 [price], contents 0, next 0, prev 0 
+                    000010: type 53 (T_NUMBER), str 28 [3], contents 0, next 0, prev 3 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: track
+main: input '$ price 1.2'
+main: key: 'price'='1.2'
+main: status: track
+main: input '= val a'
+main: field: 'val'='a'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ price 3.1'
+main: key: 'price'='3.1'
+main: status: full
+main: input '= val b'
+main: field: 'val'='b'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ price 3.9'
+main: key: 'price'='3.9'
+main: status: full
+main: input '= val c'
+main: field: 'val'='c'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ price 2.7'
+main: key: 'price'='2.7'
+main: status: track
+main: input '= val d'
+main: field: 'val'='d'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# floor() rounds fractional values down'
+main: input 'r'
+main: status: zero
+main: input '?item[floor(price) >= 3]'
+--- 0: 14
+    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0 
+                000008: type 16 (L_GRTREQ), str 24 [>=], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [floor], contents 7, next 10, prev 0 
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
+                            000005: type 70 (C_ELEMENT), str 16 [price], contents 0, next 0, prev 0 
+                    000010: type 53 (T_NUMBER), str 27 [3], contents 0, next 0, prev 3 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: track
+main: input '$ price 2.9'
+main: key: 'price'='2.9'
+main: status: track
+main: input '= val a'
+main: field: 'val'='a'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ price 3.0'
+main: key: 'price'='3.0'
+main: status: full
+main: input '= val b'
+main: field: 'val'='b'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ price 3.7'
+main: key: 'price'='3.7'
+main: status: full
+main: input '= val c'
+main: field: 'val'='c'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ price 4.1'
+main: key: 'price'='4.1'
+main: status: full
+main: input '= val d'
+main: field: 'val'='d'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# ceiling(x) == floor(x) only when x is an integer'
+main: input 'r'
+main: status: zero
+main: input '?item[ceiling(price) == floor(price)]'
+--- 0: 18
+    000018: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0 
+                000008: type 14 (L_EQUALS), str 26 [==], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [ceiling], contents 7, next 10, prev 0 
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
+                            000005: type 70 (C_ELEMENT), str 18 [price], contents 0, next 0, prev 0 
+                    000010: type 52 (T_FUNCTION_NAME), str 29 [floor], contents 14, next 0, prev 3 
+                        000014: type 74 (C_PATH), str 0 [], contents 12, next 0, prev 0 
+                            000012: type 70 (C_ELEMENT), str 37 [price], contents 0, next 0, prev 0 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: track
+main: input '$ price 2.0'
+main: key: 'price'='2.0'
+main: status: full
+main: input '= val a'
+main: field: 'val'='a'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ price 2.5'
+main: key: 'price'='2.5'
+main: status: track
+main: input '= val b'
+main: field: 'val'='b'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ price 3.0'
+main: key: 'price'='3.0'
+main: status: full
+main: input '= val c'
+main: field: 'val'='c'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ price 3.9'
+main: key: 'price'='3.9'
+main: status: track
+main: input '= val d'
+main: field: 'val'='d'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
