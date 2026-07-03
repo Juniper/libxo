@@ -691,9 +691,11 @@ xo_filter_op_add_one (xo_handle_t *xop, const char *input)
 
     if (rc == 0) {
 	static int unsupported_tokens[] = {
-	    L_DOTDOT, L_DOTDOTDOT, L_DSLASH, L_QUESTION, L_STAR,
-	    L_UNDERSCORE, K_COMMENT, K_ID, K_KEY, K_NODE, K_TEXT,
-	    T_VAR, M_SEQUENCE, C_INDEX, C_TEST, C_UNION,
+	    L_DOTDOT, L_DOTDOTDOT, L_DOT, L_QUESTION, L_STAR,
+	    L_ASTERISK, L_UNDERSCORE, K_COMMENT, K_ID, K_KEY, K_NODE,
+	    K_PROCESSING_INSTRUCTION, K_TEXT,
+	    T_AXIS_NAME, T_VAR, M_SEQUENCE, C_DESCENDANT, C_INDEX,
+	    C_TEST, C_UNION,
 	    0
 	};
 
@@ -986,6 +988,7 @@ typedef struct xo_eval_value_s {
 
 #define XO_EVAL_VALUE_ZERO { .xev_type = C_INT64, .xev_flags = 0 }
 #define XO_EVAL_VALUE_BOOLEAN_FALSE { .xev_type = C_BOOLEAN }
+#define XO_EVAL_VALUE_BOOLEAN_TRUE { .xev_type = C_BOOLEAN, .xev_int64 = 1 }
 #define XO_EVAL_VALUE_INVALID { .xev_type = M_ERROR, .xev_flags = XEVF_INVALID }
 #define XO_EVAL_VALUE_MISSING {  .xev_flags = XEVF_MISSING }
 #define XO_EVAL_VALUE_UNSUPPORTED {  .xev_flags = XEVF_UNSUPPORTED }
@@ -1737,6 +1740,20 @@ xo_eval_func_ends_with (XO_EVAL_NODE_ARGS)
     return value;
 }
 
+static xo_eval_value_t
+xo_eval_func_true (XO_EVAL_NODE_ARGS)
+{
+    xo_eval_value_t value = XO_EVAL_VALUE_BOOLEAN_TRUE;
+    return value;
+}
+
+static xo_eval_value_t
+xo_eval_func_false (XO_EVAL_NODE_ARGS)
+{
+    xo_eval_value_t value = XO_EVAL_VALUE_BOOLEAN_FALSE;
+    return value;
+}
+
 /*
  * Map between names and numbers and functions, searchable by string
  * name.
@@ -1747,8 +1764,11 @@ typedef struct xo_eval_func_map_s {
 } xo_eval_func_map_t;
 
 xo_eval_func_map_t xo_eval_functions[] = {
-    { xo_eval_func_starts_with, "starts-with" },
     { xo_eval_func_ends_with, "ends-with" },
+    { xo_eval_func_false, "false" },
+    { xo_eval_func_starts_with, "starts-with" },
+    { xo_eval_func_true, "true" },
+    
     { NULL, NULL }
 };
 
