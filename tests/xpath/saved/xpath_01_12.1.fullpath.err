@@ -803,3 +803,293 @@ main: input '>item'
 main: status: track
 main: input '}item'
 main: status: track
+main: input ''
+main: input '# substring-before(str, needle) returns the part before the first needle'
+main: input 'r'
+main: status: zero
+main: input '?item[substring-before(iface, '.') = 'eth0']'
+--- 0: 17
+    000017: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 11, next 0, prev 0 
+                000011: type 14 (L_EQUALS), str 39 [=], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring-before], contents 7, next 13, prev 0 
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
+                            000005: type 70 (C_ELEMENT), str 27 [iface], contents 0, next 0, prev 0 
+                        000008: type 54 (T_QUOTED), str 35 [.], contents 0, next 0, prev 7 
+                    000013: type 54 (T_QUOTED), str 41 [eth0], contents 0, next 0, prev 3 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: track
+main: input '$ iface eth0.0'
+main: key: 'iface'='eth0.0'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ iface eth1.0'
+main: key: 'iface'='eth1.0'
+main: status: track
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ iface eth0.1'
+main: key: 'iface'='eth0.1'
+main: status: full
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ iface lo0'
+main: key: 'iface'='lo0'
+main: status: track
+main: input '= val 4'
+main: field: 'val'='4'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# substring-before returns '' when needle is absent (no match)'
+main: input 'r'
+main: status: zero
+main: input '?item[substring-before(name, '-') = 'pkg']'
+--- 0: 17
+    000017: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 11, next 0, prev 0 
+                000011: type 14 (L_EQUALS), str 38 [=], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring-before], contents 7, next 13, prev 0 
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
+                            000005: type 70 (C_ELEMENT), str 27 [name], contents 0, next 0, prev 0 
+                        000008: type 54 (T_QUOTED), str 34 [-], contents 0, next 0, prev 7 
+                    000013: type 54 (T_QUOTED), str 40 [pkg], contents 0, next 0, prev 3 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: track
+main: input '$ name pkg-a'
+main: key: 'name'='pkg-a'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ name pkg-b'
+main: key: 'name'='pkg-b'
+main: status: full
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ name lib-c'
+main: key: 'name'='lib-c'
+main: status: track
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ name nohyphen'
+main: key: 'name'='nohyphen'
+main: status: track
+main: input '= val 4'
+main: field: 'val'='4'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# substring-after(str, needle) returns the part after the first needle'
+main: input 'r'
+main: status: zero
+main: input '?item[substring-after(version, '-') = '2']'
+--- 0: 17
+    000017: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 11, next 0, prev 0 
+                000011: type 14 (L_EQUALS), str 40 [=], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring-after], contents 7, next 13, prev 0 
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
+                            000005: type 70 (C_ELEMENT), str 26 [version], contents 0, next 0, prev 0 
+                        000008: type 54 (T_QUOTED), str 36 [-], contents 0, next 0, prev 7 
+                    000013: type 54 (T_QUOTED), str 42 [2], contents 0, next 0, prev 3 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: track
+main: input '$ version pkg-1'
+main: key: 'version'='pkg-1'
+main: status: track
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ version pkg-2'
+main: key: 'version'='pkg-2'
+main: status: full
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ version lib-2'
+main: key: 'version'='lib-2'
+main: status: full
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ version nohyphen'
+main: key: 'version'='nohyphen'
+main: status: track
+main: input '= val 4'
+main: field: 'val'='4'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# substring-after returns '' when needle absent (no match)'
+main: input 'r'
+main: status: zero
+main: input '?item[substring-after(path, '/') = 'usr']'
+--- 0: 17
+    000017: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 11, next 0, prev 0 
+                000011: type 14 (L_EQUALS), str 37 [=], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring-after], contents 7, next 13, prev 0 
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
+                            000005: type 70 (C_ELEMENT), str 26 [path], contents 0, next 0, prev 0 
+                        000008: type 54 (T_QUOTED), str 33 [/], contents 0, next 0, prev 7 
+                    000013: type 54 (T_QUOTED), str 39 [usr], contents 0, next 0, prev 3 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: track
+main: input '$ path /usr'
+main: key: 'path'='/usr'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ path /etc'
+main: key: 'path'='/etc'
+main: status: track
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ path noslash'
+main: key: 'path'='noslash'
+main: status: track
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# composition: starts-with(substring-after(name, '.'), 'e')'
+main: input 'r'
+main: status: zero
+main: input '?item[starts-with(substring-after(name, '.'), 'e')]'
+--- 0: 21
+    000021: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [starts-with], contents 5, next 0, prev 0 
+                    000005: type 52 (T_FUNCTION_NAME), str 22 [substring-after], contents 9, next 15, prev 0 
+                        000009: type 74 (C_PATH), str 0 [], contents 7, next 10, prev 0 
+                            000007: type 70 (C_ELEMENT), str 40 [name], contents 0, next 0, prev 0 
+                        000010: type 54 (T_QUOTED), str 47 [.], contents 0, next 0, prev 9 
+                    000015: type 54 (T_QUOTED), str 53 [e], contents 0, next 0, prev 5 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: track
+main: input '$ name lo.eth0'
+main: key: 'name'='lo.eth0'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ name lo.lo0'
+main: key: 'name'='lo.lo0'
+main: status: track
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ name lo.eth1'
+main: key: 'name'='lo.eth1'
+main: status: full
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ name nodot'
+main: key: 'name'='nodot'
+main: status: track
+main: input '= val 4'
+main: field: 'val'='4'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
