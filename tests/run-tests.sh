@@ -81,7 +81,7 @@ do_run_one_command () {
     mecho "... $test ... $name ... $ds ..."
 
     set_fmt_option
-    run "$test $LIBXOPTS $opt $@ input $input > $out.out 2> $out.err"
+    run "$test $LIBXOPTS $opt $* input $input > $out.out 2> $out.err"
 
     echo "$oname.out" >> $FILES
     echo "$oname.err" >> $FILES
