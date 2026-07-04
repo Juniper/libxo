@@ -132,6 +132,7 @@
 %token C_FLOAT		    80 /* Floating point number (double) */
 %token C_STRING		    81 /* String value (const char *) */
 %token C_BOOLEAN	    82 /* Boolean value */
+%token C_DSTRING	    83 /* String value that is dynamically allocated */
 /* Note: Add new names to xo_xparse_ttname_map[] in xo_xparse.c */
 
 /*
