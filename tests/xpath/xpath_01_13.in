@@ -56,6 +56,16 @@ $ id 2
 >item
 }item
 
+# too few arguments to a variable-argument function (concat needs >= 2)
+r
+?item[concat('only-one')]
+{item
+<item
+$ id 1
+= val alpha
+>item
+}item
+
 # too few arguments to ceiling
 r
 ?item[ceiling()]
