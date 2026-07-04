@@ -215,7 +215,7 @@ $ price 3.9
 >item
 }item
 
-# number(price)
+# number() converts string key to numeric value; non-numeric strings become 0
 r
 ?item[number(price) == 2]
 {item
@@ -234,5 +234,71 @@ $ price 3
 <item
 $ price 2.0.4.5
 = val d
+>item
+}item
+
+# contains(haystack, needle) is true when haystack contains needle as a substring
+r
+?item[contains(label, 'eth')]
+{item
+<item
+$ label eth0
+= val 1
+>item
+<item
+$ label lo0
+= val 2
+>item
+<item
+$ label eth1
+= val 3
+>item
+<item
+$ label wlan0
+= val 4
+>item
+}item
+
+# contains with value from the middle of the string
+r
+?item[contains(name, 'oo')]
+{item
+<item
+$ name foo
+= val 1
+>item
+<item
+$ name bar
+= val 2
+>item
+<item
+$ name foobar
+= val 3
+>item
+<item
+$ name boo
+= val 4
+>item
+}item
+
+# contains combined with not()
+r
+?item[not(contains(label, 'eth'))]
+{item
+<item
+$ label eth0
+= val 1
+>item
+<item
+$ label lo0
+= val 2
+>item
+<item
+$ label eth1
+= val 3
+>item
+<item
+$ label wlan0
+= val 4
 >item
 }item
