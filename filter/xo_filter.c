@@ -1855,6 +1855,49 @@ xo_eval_func_substring_after (XO_EVAL_NODE_ARGS)
 }
 
 static xo_eval_value_t
+xo_eval_func_concat (XO_EVAL_NODE_ARGS)
+{
+    xo_buffer_t buf;
+    xo_buf_init(&buf);
+
+    xo_xparse_node_id_t id;
+    int count = 0;
+
+    for (id = xnp->xn_contents; id; id = xnp->xn_next) {
+	xnp = xo_xparse_node(&xfp->xf_xd, id);
+	count += 1;
+
+	xo_eval_value_t value = xo_eval(xop, xfp, xmp, "concat-arg",
+					indent + XO_INDENT, id, NULL);
+	if (value.xev_flags & XEVF_MISSING) {
+	    xo_eval_value_free(value);
+	    xo_buf_cleanup(&buf);
+	    return xo_eval_value_missing();
+	}
+	char *str = xo_eval_cast_string(xfp, value);
+	if (str) {
+	    xo_buf_append(&buf, str, strlen(str));
+	    xo_free(str);
+	}
+	xo_eval_value_free(value);
+    }
+
+    if (count < 2) {
+	xo_failure(xop, "function 'concat' requires at least 2 arguments, got %d",
+		   count);
+	xo_buf_cleanup(&buf);
+	xo_eval_value_t false_val = XO_EVAL_VALUE_BOOLEAN_FALSE;
+	return false_val;
+    }
+
+    xo_buf_append(&buf, "", 1);	/* null terminator */
+    xo_eval_value_t result = xo_eval_value_make(C_DSTRING, 0, 0);
+    result.xev_str = strdup(xo_buf_data(&buf, 0));
+    xo_buf_cleanup(&buf);
+    return result;
+}
+
+static xo_eval_value_t
 xo_eval_func_contains (XO_EVAL_NODE_ARGS)
 {
     xo_eval_value_t value = XO_EVAL_VALUE_BOOLEAN_FALSE;
@@ -1899,6 +1942,7 @@ typedef struct xo_eval_func_map_s {
 xo_eval_func_map_t xo_eval_functions[] = {
     { xo_eval_func_boolean, "boolean", 0, 1 },
     { xo_eval_func_ceiling, "ceiling", 0, 1 },
+    { xo_eval_func_concat, "concat", XEFF_NO_EVAL, -1 },
     { xo_eval_func_contains, "contains", 0, 2 },
     { xo_eval_func_ends_with, "ends-with", 0, 2 },
     { xo_eval_func_false, "false", 0, 0 },
