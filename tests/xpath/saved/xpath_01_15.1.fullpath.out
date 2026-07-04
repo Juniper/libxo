@@ -1,0 +1,4 @@
+/item[name='eth0']/val='1'
+/item[val='3']/label='b'
+/item[val='5']/label='c'
+/item[flag='1'][name='eth0'][alt='lo0']/val='1'
