@@ -1,0 +1,193 @@
+main: input '#run --libxo @fullpath'
+main: input ''
+main: input '# too few arguments to a two-argument function'
+main: input 'r'
+main: status: zero
+main: input '?item[contains(name)]'
+--- 0: 11
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [contains], contents 7, next 0, prev 0 
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
+                        000005: type 70 (C_ELEMENT), str 19 [name], contents 0, next 0, prev 0 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+xpath_01: function 'contains' requires 2 argument(s), got 1
+main: status: track
+main: input '$ name foo'
+main: key: 'name'='foo'
+main: status: track
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+xpath_01: function 'contains' requires 2 argument(s), got 1
+main: status: track
+main: input '$ name bar'
+main: key: 'name'='bar'
+main: status: track
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# too many arguments to a two-argument function'
+main: input 'r'
+main: status: zero
+main: input '?item[starts-with(name, 'foo', 'extra')]'
+--- 0: 17
+    000017: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [starts-with], contents 7, next 0, prev 0 
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
+                        000005: type 70 (C_ELEMENT), str 22 [name], contents 0, next 0, prev 0 
+                    000008: type 54 (T_QUOTED), str 29 [foo], contents 0, next 11, prev 7 
+                    000011: type 54 (T_QUOTED), str 35 [extra], contents 0, next 0, prev 8 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+xpath_01: function 'starts-with' requires 2 argument(s), got 3
+main: status: track
+main: input '$ name foo'
+main: key: 'name'='foo'
+main: status: track
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+xpath_01: function 'starts-with' requires 2 argument(s), got 3
+main: status: track
+main: input '$ name bar'
+main: key: 'name'='bar'
+main: status: track
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# too few arguments to a one-argument function'
+main: input 'r'
+main: status: zero
+main: input '?item[not()]'
+--- 0: 9
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [not], contents 0, next 0, prev 0 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+xpath_01: function 'not' requires 1 argument(s), got 0
+main: status: track
+main: input '$ id 1'
+main: key: 'id'='1'
+main: status: track
+main: input '= val alpha'
+main: field: 'val'='alpha'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+xpath_01: function 'not' requires 1 argument(s), got 0
+main: status: track
+main: input '$ id 2'
+main: key: 'id'='2'
+main: status: track
+main: input '= val beta'
+main: field: 'val'='beta'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# too many arguments to a zero-argument function'
+main: input 'r'
+main: status: zero
+main: input '?item[true('extra')]'
+--- 0: 11
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [true], contents 5, next 0, prev 0 
+                    000005: type 54 (T_QUOTED), str 15 [extra], contents 0, next 0, prev 0 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+xpath_01: function 'true' requires 0 argument(s), got 1
+main: status: track
+main: input '$ id 1'
+main: key: 'id'='1'
+main: status: track
+main: input '= val alpha'
+main: field: 'val'='alpha'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+xpath_01: function 'true' requires 0 argument(s), got 1
+main: status: track
+main: input '$ id 2'
+main: key: 'id'='2'
+main: status: track
+main: input '= val beta'
+main: field: 'val'='beta'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# too few arguments to ceiling'
+main: input 'r'
+main: status: zero
+main: input '?item[ceiling()]'
+--- 0: 9
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [ceiling], contents 0, next 0, prev 0 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+xpath_01: function 'ceiling' requires 1 argument(s), got 0
+main: status: track
+main: input '$ price 3.5'
+main: key: 'price'='3.5'
+main: status: track
+main: input '= val a'
+main: field: 'val'='a'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+xpath_01: function 'ceiling' requires 1 argument(s), got 0
+main: status: track
+main: input '$ price 1.2'
+main: key: 'price'='1.2'
+main: status: track
+main: input '= val b'
+main: field: 'val'='b'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
