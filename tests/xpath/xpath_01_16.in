@@ -1,0 +1,52 @@
+#run --libxo @fullpath
+
+# choose2(a, b): if a is truthy return a's own value, else return b.
+# Missing first key falls through to the second (fallback) key.
+# Keys with an override are listed first so the filter resolves on override.
+r
+?item[choose2(override, base-id) = '42']
+{item
+<item
+$ override 99
+$ base-id 42
+= val 1
+>item
+<item
+$ base-id 42
+= val 2
+>item
+<item
+$ override 42
+$ base-id 10
+= val 3
+>item
+<item
+$ base-id 10
+= val 4
+>item
+}item
+
+# choose2 returns arg1's own value (not a boolean cast).
+# override=5 is truthy so the 5 itself is compared, not boolean true.
+r
+?item[choose2(override, val) > 3]
+{item
+<item
+$ override 5
+$ val 1
+= label a
+>item
+<item
+$ val 4
+= label b
+>item
+<item
+$ override 2
+$ val 5
+= label c
+>item
+<item
+$ val 1
+= label d
+>item
+}item
