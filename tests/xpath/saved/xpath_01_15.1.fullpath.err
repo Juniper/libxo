@@ -1,0 +1,182 @@
+main: input '#run --libxo @fullpath'
+main: input ''
+main: input '# choose() returns then-value when condition is boolean true, else-value otherwise.'
+main: input '# Condition is a contains() call so it yields a proper boolean.'
+main: input 'r'
+main: status: zero
+main: input '?item[choose(contains(name, 'eth'), name, 'none') = 'eth0']'
+--- 0: 27
+    000027: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 21, next 0, prev 0 
+                000021: type 14 (L_EQUALS), str 57 [=], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [choose], contents 5, next 23, prev 0 
+                        000005: type 52 (T_FUNCTION_NAME), str 17 [contains], contents 9, next 17, prev 0 
+                            000009: type 74 (C_PATH), str 0 [], contents 7, next 10, prev 0 
+                                000007: type 70 (C_ELEMENT), str 28 [name], contents 0, next 0, prev 0 
+                            000010: type 54 (T_QUOTED), str 35 [eth], contents 0, next 0, prev 9 
+                        000017: type 74 (C_PATH), str 0 [], contents 15, next 18, prev 5 
+                            000015: type 70 (C_ELEMENT), str 43 [name], contents 0, next 0, prev 0 
+                        000018: type 54 (T_QUOTED), str 50 [none], contents 0, next 0, prev 17 
+                    000023: type 54 (T_QUOTED), str 59 [eth0], contents 0, next 0, prev 3 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: track
+main: input '$ name eth0'
+main: key: 'name'='eth0'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ name lo0'
+main: key: 'name'='lo0'
+main: status: track
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ name eth1'
+main: key: 'name'='eth1'
+main: status: track
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# choose with a numeric comparison as the condition'
+main: input 'r'
+main: status: zero
+main: input '?item[choose(val > 2, 'high', 'low') = 'high']'
+--- 0: 23
+    000023: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 17, next 0, prev 0 
+                000017: type 14 (L_EQUALS), str 40 [=], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [choose], contents 6, next 19, prev 0 
+                        000006: type 15 (L_GRTR), str 21 [>], contents 7, next 11, prev 0 
+                            000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
+                                000005: type 70 (C_ELEMENT), str 17 [val], contents 0, next 0, prev 0 
+                            000008: type 53 (T_NUMBER), str 23 [2], contents 0, next 0, prev 7 
+                        000011: type 54 (T_QUOTED), str 27 [high], contents 0, next 14, prev 6 
+                        000014: type 54 (T_QUOTED), str 34 [low], contents 0, next 0, prev 11 
+                    000019: type 54 (T_QUOTED), str 42 [high], contents 0, next 0, prev 3 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: track
+main: input '$ val 1'
+main: key: 'val'='1'
+main: status: track
+main: input '= label a'
+main: field: 'label'='a'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ val 3'
+main: key: 'val'='3'
+main: status: full
+main: input '= label b'
+main: field: 'label'='b'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ val 5'
+main: key: 'val'='5'
+main: status: full
+main: input '= label c'
+main: field: 'label'='c'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# choose result used as argument to contains(); condition is an equality test'
+main: input 'r'
+main: status: zero
+main: input '?item[contains(choose(flag = '1', name, alt), 'eth')]'
+--- 0: 27
+    000027: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [contains], contents 5, next 0, prev 0 
+                    000005: type 52 (T_FUNCTION_NAME), str 19 [choose], contents 8, next 21, prev 0 
+                        000008: type 14 (L_EQUALS), str 33 [=], contents 9, next 15, prev 0 
+                            000009: type 74 (C_PATH), str 0 [], contents 7, next 10, prev 0 
+                                000007: type 70 (C_ELEMENT), str 28 [flag], contents 0, next 0, prev 0 
+                            000010: type 54 (T_QUOTED), str 35 [1], contents 0, next 0, prev 9 
+                        000015: type 74 (C_PATH), str 0 [], contents 13, next 18, prev 8 
+                            000013: type 70 (C_ELEMENT), str 39 [name], contents 0, next 0, prev 0 
+                        000018: type 74 (C_PATH), str 0 [], contents 16, next 0, prev 15 
+                            000016: type 70 (C_ELEMENT), str 46 [alt], contents 0, next 0, prev 0 
+                    000021: type 54 (T_QUOTED), str 54 [eth], contents 0, next 0, prev 5 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: track
+main: input '$ flag 1'
+main: key: 'flag'='1'
+main: status: track
+main: input '$ name eth0'
+main: key: 'name'='eth0'
+main: status: full
+main: input '$ alt lo0'
+main: key: 'alt'='lo0'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ flag 0'
+main: key: 'flag'='0'
+main: status: track
+main: input '$ name eth1'
+main: key: 'name'='eth1'
+main: status: track
+main: input '$ alt lo0'
+main: key: 'alt'='lo0'
+main: status: track
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ flag 1'
+main: key: 'flag'='1'
+main: status: track
+main: input '$ name wlan0'
+main: key: 'name'='wlan0'
+main: status: track
+main: input '$ alt eth2'
+main: key: 'alt'='eth2'
+main: status: track
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
