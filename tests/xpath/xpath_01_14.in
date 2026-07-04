@@ -1,0 +1,85 @@
+#run --libxo @fullpath
+
+# concat two key fields: only items where first+last = 'JohnDoe' pass
+r
+?item[concat(first, last) = 'JohnDoe']
+{item
+<item
+$ first John
+$ last Doe
+= val 1
+>item
+<item
+$ first Jane
+$ last Doe
+= val 2
+>item
+<item
+$ first John
+$ last Smith
+= val 3
+>item
+}item
+
+# concat with a literal separator
+r
+?item[concat(host, ':', port) = 'db:5432']
+{item
+<item
+$ host db
+$ port 5432
+= val 1
+>item
+<item
+$ host db
+$ port 3306
+= val 2
+>item
+<item
+$ host web
+$ port 5432
+= val 3
+>item
+}item
+
+# concat three arguments
+r
+?item[concat(a, b, c) = 'xyz']
+{item
+<item
+$ a x
+$ b y
+$ c z
+= val 1
+>item
+<item
+$ a x
+$ b y
+$ c w
+= val 2
+>item
+<item
+$ a x
+$ b b
+$ c z
+= val 3
+>item
+}item
+
+# concat result used in starts-with
+r
+?item[starts-with(concat(proto, '://'), 'http://')]
+{item
+<item
+$ proto http
+= val 1
+>item
+<item
+$ proto ftp
+= val 2
+>item
+<item
+$ proto http
+= val 3
+>item
+}item
