@@ -1855,6 +1855,50 @@ xo_eval_func_substring_after (XO_EVAL_NODE_ARGS)
 }
 
 static xo_eval_value_t
+xo_eval_func_choose (XO_EVAL_NODE_ARGS)
+{
+    /* Evaluate the condition (first arg) */
+    xo_xparse_node_id_t cond_id = xnp->xn_contents;
+    xnp = xo_xparse_node(&xfp->xf_xd, cond_id);
+
+    xo_eval_value_t cond = xo_eval(xop, xfp, xmp, "choose-cond",
+				   indent + XO_INDENT, cond_id, NULL);
+    if (cond.xev_flags & XEVF_MISSING) {
+	xo_eval_value_free(cond);
+	return xo_eval_value_missing();
+    }
+
+    int bool = xo_eval_cast_boolean(xfp, cond);
+    xo_eval_value_free(cond);
+
+    /* Locate the then and else node ids */
+    xo_xparse_node_id_t then_id = xnp->xn_next;
+    xnp = xo_xparse_node(&xfp->xf_xd, then_id);
+    xo_xparse_node_id_t else_id = xnp->xn_next;
+
+    xo_xparse_node_id_t branch_id = bool ? then_id : else_id;
+    return xo_eval(xop, xfp, xmp, bool ? "choose-then" : "choose-else",
+		   indent + XO_INDENT, branch_id, NULL);
+}
+
+static xo_eval_value_t
+xo_eval_func_choose2 (XO_EVAL_NODE_ARGS)
+{
+    xo_xparse_node_id_t first_id = xnp->xn_contents;
+    xnp = xo_xparse_node(&xfp->xf_xd, first_id);
+    xo_xparse_node_id_t second_id = xnp->xn_next;
+
+    xo_eval_value_t value = xo_eval(xop, xfp, xmp, "choose2-first",
+				    indent + XO_INDENT, first_id, NULL);
+    if (!(value.xev_flags & XEVF_MISSING) && xo_eval_cast_boolean(xfp, value))
+	return value;
+
+    xo_eval_value_free(value);
+    return xo_eval(xop, xfp, xmp, "choose2-second",
+		   indent + XO_INDENT, second_id, NULL);
+}
+
+static xo_eval_value_t
 xo_eval_func_concat (XO_EVAL_NODE_ARGS)
 {
     xo_buffer_t buf;
@@ -1942,6 +1986,8 @@ typedef struct xo_eval_func_map_s {
 xo_eval_func_map_t xo_eval_functions[] = {
     { xo_eval_func_boolean, "boolean", 0, 1 },
     { xo_eval_func_ceiling, "ceiling", 0, 1 },
+    { xo_eval_func_choose, "choose", XEFF_NO_EVAL, 3 },
+    { xo_eval_func_choose2, "choose2", XEFF_NO_EVAL, 2 },
     { xo_eval_func_concat, "concat", XEFF_NO_EVAL, -1 },
     { xo_eval_func_contains, "contains", 0, 2 },
     { xo_eval_func_ends_with, "ends-with", 0, 2 },
