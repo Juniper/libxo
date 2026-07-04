@@ -1811,6 +1811,36 @@ xo_eval_func_floor (XO_EVAL_NODE_ARGS)
 }
 
 static xo_eval_value_t
+xo_eval_func_contains (XO_EVAL_NODE_ARGS)
+{
+    const int argc = 2;
+    xo_eval_value_t argv[argc];
+    xo_eval_value_t value = XO_EVAL_VALUE_BOOLEAN_FALSE;
+
+    xo_eval_arguments(XO_EVAL_NODE_PASS, argc, argv);
+
+    if ((argv[0].xev_flags & XEVF_MISSING)
+	|| (argv[1].xev_flags & XEVF_MISSING)) {
+	value.xev_flags = XEVF_MISSING;
+	return value;
+    }
+
+    char *haystack = xo_eval_cast_string(xfp, argv[0]);
+    char *needle = xo_eval_cast_string(xfp, argv[1]);
+    XO_DBG(xop, "contains: '%s' '%s'", haystack ?: "", needle ?: "");
+
+    if (haystack && needle && strstr(haystack, needle) != NULL)
+	value.xev_int64 = TRUE;
+
+    if (haystack)
+	xo_free(haystack);
+    if (needle)
+	xo_free(needle);
+
+    return value;
+}
+
+static xo_eval_value_t
 xo_eval_func_number (XO_EVAL_NODE_ARGS)
 {
     xo_eval_value_t value;
@@ -1837,6 +1867,7 @@ typedef struct xo_eval_func_map_s {
 xo_eval_func_map_t xo_eval_functions[] = {
     { xo_eval_func_boolean, "boolean" },
     { xo_eval_func_ceiling, "ceiling" },
+    { xo_eval_func_contains, "contains" },
     { xo_eval_func_ends_with, "ends-with" },
     { xo_eval_func_false, "false" },
     { xo_eval_func_floor, "floor" },
