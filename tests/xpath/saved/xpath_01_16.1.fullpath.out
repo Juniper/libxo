@@ -1,0 +1,4 @@
+/item[base-id='42']/val='2'
+/item[override='42'][base-id='10']/val='3'
+/item[override='5'][val='1']/label='a'
+/item[val='4']/label='b'
