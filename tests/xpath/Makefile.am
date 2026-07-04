@@ -83,7 +83,9 @@ TEST_FILES= \
     xpath_01_12.1.fullpath.out \
     xpath_01_12.1.fullpath.err \
     xpath_01_13.1.fullpath.out \
-    xpath_01_13.1.fullpath.err
+    xpath_01_13.1.fullpath.err \
+    xpath_01_14.1.fullpath.out \
+    xpath_01_14.1.fullpath.err
 
 EXTRA_DIST = \
     ${TEST_CASES} \
