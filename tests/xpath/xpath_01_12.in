@@ -302,3 +302,109 @@ $ label wlan0
 = val 4
 >item
 }item
+
+# substring-before(str, needle) returns the part before the first needle
+r
+?item[substring-before(iface, '.') = 'eth0']
+{item
+<item
+$ iface eth0.0
+= val 1
+>item
+<item
+$ iface eth1.0
+= val 2
+>item
+<item
+$ iface eth0.1
+= val 3
+>item
+<item
+$ iface lo0
+= val 4
+>item
+}item
+
+# substring-before returns '' when needle is absent (no match)
+r
+?item[substring-before(name, '-') = 'pkg']
+{item
+<item
+$ name pkg-a
+= val 1
+>item
+<item
+$ name pkg-b
+= val 2
+>item
+<item
+$ name lib-c
+= val 3
+>item
+<item
+$ name nohyphen
+= val 4
+>item
+}item
+
+# substring-after(str, needle) returns the part after the first needle
+r
+?item[substring-after(version, '-') = '2']
+{item
+<item
+$ version pkg-1
+= val 1
+>item
+<item
+$ version pkg-2
+= val 2
+>item
+<item
+$ version lib-2
+= val 3
+>item
+<item
+$ version nohyphen
+= val 4
+>item
+}item
+
+# substring-after returns '' when needle absent (no match)
+r
+?item[substring-after(path, '/') = 'usr']
+{item
+<item
+$ path /usr
+= val 1
+>item
+<item
+$ path /etc
+= val 2
+>item
+<item
+$ path noslash
+= val 3
+>item
+}item
+
+# composition: starts-with(substring-after(name, '.'), 'e')
+r
+?item[starts-with(substring-after(name, '.'), 'e')]
+{item
+<item
+$ name lo.eth0
+= val 1
+>item
+<item
+$ name lo.lo0
+= val 2
+>item
+<item
+$ name lo.eth1
+= val 3
+>item
+<item
+$ name nodot
+= val 4
+>item
+}item
