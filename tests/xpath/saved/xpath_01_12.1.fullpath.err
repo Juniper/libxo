@@ -570,7 +570,7 @@ main: status: track
 main: input '}item'
 main: status: track
 main: input ''
-main: input '# number(price)'
+main: input '# number() converts string key to numeric value; non-numeric strings become 0'
 main: input 'r'
 main: status: zero
 main: input '?item[number(price) == 2]'
@@ -624,6 +624,181 @@ main: status: track
 main: input '= val d'
 main: field: 'val'='d'
 main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# contains(haystack, needle) is true when haystack contains needle as a substring'
+main: input 'r'
+main: status: zero
+main: input '?item[contains(label, 'eth')]'
+--- 0: 14
+    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [contains], contents 7, next 0, prev 0 
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
+                        000005: type 70 (C_ELEMENT), str 19 [label], contents 0, next 0, prev 0 
+                    000008: type 54 (T_QUOTED), str 27 [eth], contents 0, next 0, prev 7 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: track
+main: input '$ label eth0'
+main: key: 'label'='eth0'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ label lo0'
+main: key: 'label'='lo0'
+main: status: track
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ label eth1'
+main: key: 'label'='eth1'
+main: status: full
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ label wlan0'
+main: key: 'label'='wlan0'
+main: status: track
+main: input '= val 4'
+main: field: 'val'='4'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# contains with value from the middle of the string'
+main: input 'r'
+main: status: zero
+main: input '?item[contains(name, 'oo')]'
+--- 0: 14
+    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [contains], contents 7, next 0, prev 0 
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
+                        000005: type 70 (C_ELEMENT), str 19 [name], contents 0, next 0, prev 0 
+                    000008: type 54 (T_QUOTED), str 26 [oo], contents 0, next 0, prev 7 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: track
+main: input '$ name foo'
+main: key: 'name'='foo'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ name bar'
+main: key: 'name'='bar'
+main: status: track
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ name foobar'
+main: key: 'name'='foobar'
+main: status: full
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ name boo'
+main: key: 'name'='boo'
+main: status: full
+main: input '= val 4'
+main: field: 'val'='4'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# contains combined with not()'
+main: input 'r'
+main: status: zero
+main: input '?item[not(contains(label, 'eth'))]'
+--- 0: 18
+    000018: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [not], contents 5, next 0, prev 0 
+                    000005: type 52 (T_FUNCTION_NAME), str 14 [contains], contents 9, next 0, prev 0 
+                        000009: type 74 (C_PATH), str 0 [], contents 7, next 10, prev 0 
+                            000007: type 70 (C_ELEMENT), str 25 [label], contents 0, next 0, prev 0 
+                        000010: type 54 (T_QUOTED), str 33 [eth], contents 0, next 0, prev 9 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: track
+main: input '$ label eth0'
+main: key: 'label'='eth0'
+main: status: track
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ label lo0'
+main: key: 'label'='lo0'
+main: status: full
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ label eth1'
+main: key: 'label'='eth1'
+main: status: track
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ label wlan0'
+main: key: 'label'='wlan0'
+main: status: full
+main: input '= val 4'
+main: field: 'val'='4'
+main: status: full
 main: input '>item'
 main: status: track
 main: input '}item'
