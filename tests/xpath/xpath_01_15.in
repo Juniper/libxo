@@ -1,0 +1,62 @@
+#run --libxo @fullpath
+
+# choose() returns then-value when condition is boolean true, else-value otherwise.
+# Condition is a contains() call so it yields a proper boolean.
+r
+?item[choose(contains(name, 'eth'), name, 'none') = 'eth0']
+{item
+<item
+$ name eth0
+= val 1
+>item
+<item
+$ name lo0
+= val 2
+>item
+<item
+$ name eth1
+= val 3
+>item
+}item
+
+# choose with a numeric comparison as the condition
+r
+?item[choose(val > 2, 'high', 'low') = 'high']
+{item
+<item
+$ val 1
+= label a
+>item
+<item
+$ val 3
+= label b
+>item
+<item
+$ val 5
+= label c
+>item
+}item
+
+# choose result used as argument to contains(); condition is an equality test
+r
+?item[contains(choose(flag = '1', name, alt), 'eth')]
+{item
+<item
+$ flag 1
+$ name eth0
+$ alt lo0
+= val 1
+>item
+<item
+$ flag 0
+$ name eth1
+$ alt lo0
+= val 2
+>item
+<item
+$ flag 1
+$ name wlan0
+$ alt eth2
+= val 3
+>item
+}item
