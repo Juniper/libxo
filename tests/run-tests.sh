@@ -68,6 +68,67 @@ run_tests () {
     run "diff -Nu ${SRCDIR}/saved/$oname.err out/$oname.err | ${S2O}"
 }
 
+do_run_one_command () {
+    local test=$1 ; shift
+    local fmt=$1 ; shift
+    local name=$1 ; shift
+    local ds=$1 ; shift
+    local input=$1 ; shift
+
+    local oname=$name.$ds.$fmt
+    local out=out/$oname
+
+    mecho "... $test ... $name ... $ds ..."
+
+    set_fmt_option
+    run "$test $LIBXOPTS $opt $@ input $input > $out.out 2> $out.err"
+
+    echo "$oname.out" >> $FILES
+    echo "$oname.err" >> $FILES
+
+    run "diff -Nu ${SRCDIR}/saved/$oname.out out/$oname.out | ${S2O}"
+    run "diff -Nu ${SRCDIR}/saved/$oname.err out/$oname.err | ${S2O}"
+}
+
+do_run_one_input () {
+    local test=$1 ; shift
+    local fmt=$1 ; shift
+    local input=$1 ; shift
+
+    local name=`basename $input .in`
+    local ds=1
+
+    grep '^#run' $input | while read comment arguments ; do
+	do_run_one_command $test $fmt $name $ds $input $arguments
+	ds=`expr $ds + 1`
+    done
+}
+
+do_run_one_test () {
+    local test=$1 ; shift
+
+    local base=`basename $test .test`
+
+    for fmt in ${TEST_FORMATS:-T}; do
+  	for input in `echo ${SRCDIR}/${base}*.in`; do
+	    if [ -f $input ]; then
+		do_run_one_input $test $fmt $input
+	    fi
+	done
+    done
+}
+
+do_run_tests_new () {
+    local tests="$@"
+
+    mkdir -p out
+    cp /dev/null $FILES
+
+    for test in $tests; do
+	do_run_one_test $test
+    done
+}
+
 do_run_tests () {
     mkdir -p out
     cp /dev/null $FILES
@@ -154,9 +215,18 @@ verb=$1
 shift
 
 case $verb in
-    run)
+    run-old)
         TESTS="$@"
         do_run_tests
+    ;;
+
+    run)
+        do_run_tests_new $@
+    ;;
+
+    run-one)
+	## run-one foo_01.test fullpath foo_01_11.in
+        do_run_one_input $1 $2 ${SRCDIR}/$3
     ;;
 
     run-all)
