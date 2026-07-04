@@ -212,6 +212,7 @@ xo_xparse_ttname_map_t xo_xparse_ttname_map[] = {
     { C_FLOAT,			"floating point number (double)" },
     { C_STRING,			"string value (const char *)" },
     { C_BOOLEAN,		"boolean value" },
+    { C_DSTRING,		"string value that is dynamically allocated" },
     { M_ERROR,                  "invalid xpath expression" },
     { 0, NULL }
 };
