@@ -536,7 +536,6 @@ static void
 xo_filter_op_destroy (xo_handle_t *xop, xo_filter_t *xfp)
 {
     xo_xparse_clean(&xfp->xf_xd);
-
     xo_tmatch_cleanup(&xfp->xf_tmatch);
     xo_trie_free(xfp->xf_trie);
     xfp->xf_trie = NULL;
@@ -976,7 +975,7 @@ typedef struct xo_eval_value_s {
 	int64_t xevd_int64;	    /* If C_INT64 */
 	uint64_t xevd_uint64;	    /* If C_UINT64 or C_INDEX or C_BOOLEAN */
 	xo_float_t xevd_float;	    /* If C_FLOAT */
-	const char *xevd_str;	    /* If C_STRING */
+	const char *xevd_str;	    /* If C_STRING or C_DSTRING */
     } xev_data;
 } xo_eval_value_t;
 
@@ -990,6 +989,9 @@ typedef struct xo_eval_value_s {
 #define XEVF_MISSING	(1<<1) /* A referenced element is missing  */
 #define XEVF_UNSUPPORTED (1<<2) /* Token type is not supported */
 #define XEVF_FINAL	(1<<3)  /* This is the final answer */
+
+/* C_DSTRING: a C_STRING whose xev_str is malloc'd and owned by this value */
+#define C_DSTRING	83
 
 #define XO_EVAL_VALUE_ZERO { .xev_type = C_INT64, .xev_flags = 0 }
 #define XO_EVAL_VALUE_FLOAT { .xev_type = C_FLOAT, .xev_flags = 0 }
@@ -1037,6 +1039,17 @@ xo_eval_value_make (unsigned type, unsigned flags, xo_xparse_node_id_t id)
     value.xev_node = id;
 
     return value;
+}
+
+static inline void
+xo_eval_value_free (xo_eval_value_t v)
+{
+    if (v.xev_type == C_DSTRING) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
+	xo_free((char *) v.xev_str);
+#pragma GCC diagnostic pop
+    }
 }
 
 static inline xo_eval_value_t
@@ -1198,6 +1211,7 @@ static int
 xo_eval_cast_boolean (xo_filter_t *xfp UNUSED, xo_eval_value_t value)
 {
     switch (value.xev_type) {
+    case C_DSTRING:
     case C_STRING:;
 	const char *str = value.xev_str;
 	char *ep;
@@ -1218,6 +1232,7 @@ xo_eval_cast_float (xo_filter_t *xfp UNUSED, xo_eval_value_t value)
     xo_float_t fval = 0;
 
     switch (value.xev_type) {
+    case C_DSTRING:
     case C_STRING:;
 	const char *str = value.xev_str;
 	char *ep;
@@ -1247,6 +1262,7 @@ xo_eval_cast_string (xo_filter_t *xfp UNUSED, xo_eval_value_t value)
 
     switch (value.xev_type) {
 
+    case C_DSTRING:
     case C_STRING:
 	bp = value.xev_str;
 	break;
@@ -1291,6 +1307,7 @@ xo_eval_dump_value (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED,
 
     switch (value.xev_type) {
 
+    case C_DSTRING:
     case C_STRING:
 	bp = value.xev_str;
 	break;
@@ -1341,7 +1358,10 @@ xo_eval_compare (XO_EVAL_OP_ARGS)
     xo_eval_dump_value(xop, xfp, left, indent, "compare: left");
     xo_eval_dump_value(xop, xfp, right, indent, "compare: right");
 
-    switch (TYPE_CMP(left.xev_type, right.xev_type)) {
+    unsigned left_type = (left.xev_type == C_DSTRING) ? C_STRING : left.xev_type;
+    unsigned right_type = (right.xev_type == C_DSTRING) ? C_STRING : right.xev_type;
+
+    switch (TYPE_CMP(left_type, right_type)) {
     case TYPE_CMP(C_STRING, C_STRING):
 	rc = strcmp(left.xev_str, right.xev_str);
 	break;
@@ -1636,8 +1656,9 @@ xo_eval_not (XO_EVAL_NODE_ARGS)
 	return value;
 
     int bool = xo_eval_cast_boolean(xfp, value);
-    value.xev_int64 = bool ? 0 : 1; /* Perform the 'not' */
+    xo_eval_value_free(value);
     value.xev_type = C_BOOLEAN;
+    value.xev_int64 = bool ? 0 : 1; /* Perform the 'not' */
     return value;
 }
 
@@ -1699,12 +1720,16 @@ xo_eval_func_starts_with (XO_EVAL_NODE_ARGS)
 
     if ((argv[0].xev_flags & XEVF_MISSING)
 	|| (argv[1].xev_flags & XEVF_MISSING)) {
+	xo_eval_value_free(argv[0]);
+	xo_eval_value_free(argv[1]);
 	value.xev_flags = XEVF_MISSING;
 	return value;
     }
 
     char *base = xo_eval_cast_string(xfp, argv[0]);
+    xo_eval_value_free(argv[0]);
     char *start = xo_eval_cast_string(xfp, argv[1]);
+    xo_eval_value_free(argv[1]);
     XO_DBG(xop, "starts_with: '%s' '%s'", base ?: "", start ?: "");
 
     if (base && start && strncmp(base, start, strlen(start)) == 0)
@@ -1729,12 +1754,16 @@ xo_eval_func_ends_with (XO_EVAL_NODE_ARGS)
 
     if ((argv[0].xev_flags & XEVF_MISSING)
 	|| (argv[1].xev_flags & XEVF_MISSING)) {
+	xo_eval_value_free(argv[0]);
+	xo_eval_value_free(argv[1]);
 	value.xev_flags = XEVF_MISSING;
 	return value;
     }
 
     char *base = xo_eval_cast_string(xfp, argv[0]);
+    xo_eval_value_free(argv[0]);
     char *start = xo_eval_cast_string(xfp, argv[1]);
+    xo_eval_value_free(argv[1]);
     XO_DBG(xop, "ends_with: '%s' '%s'", base ?: "", start ?: "");
 
     if (base && start) {
@@ -1790,6 +1819,7 @@ xo_eval_func_ceiling (XO_EVAL_NODE_ARGS)
 	return value;
 
     xo_float_t fval = xo_eval_cast_float(xfp, value);
+    xo_eval_value_free(value);
     fval = ceil(fval);
     return xo_eval_value_float(0, fval);
 }
@@ -1806,8 +1836,80 @@ xo_eval_func_floor (XO_EVAL_NODE_ARGS)
 	return value;
 
     xo_float_t fval = xo_eval_cast_float(xfp, value);
+    xo_eval_value_free(value);
     fval = floor(fval);
     return xo_eval_value_float(0, fval);
+}
+
+static xo_eval_value_t
+xo_eval_func_substring_before (XO_EVAL_NODE_ARGS)
+{
+    const int argc = 2;
+    xo_eval_value_t argv[argc];
+    xo_eval_value_t value = xo_eval_value_make(C_STRING, 0, 0);
+
+    xo_eval_arguments(XO_EVAL_NODE_PASS, argc, argv);
+
+    if ((argv[0].xev_flags & XEVF_MISSING)
+	|| (argv[1].xev_flags & XEVF_MISSING)) {
+	xo_eval_value_free(argv[0]);
+	xo_eval_value_free(argv[1]);
+	value.xev_flags = XEVF_MISSING;
+	return value;
+    }
+
+    char *haystack = xo_eval_cast_string(xfp, argv[0]);
+    xo_eval_value_free(argv[0]);
+    char *needle = xo_eval_cast_string(xfp, argv[1]);
+    xo_eval_value_free(argv[1]);
+    char *found = (haystack && needle) ? strstr(haystack, needle) : NULL;
+
+    if (found) {
+	value.xev_type = C_DSTRING;
+	value.xev_str = strndup(haystack, found - haystack);
+    } else {
+	value.xev_str = "";
+    }
+
+    xo_free(haystack);
+    xo_free(needle);
+    return value;
+}
+
+static xo_eval_value_t
+xo_eval_func_substring_after (XO_EVAL_NODE_ARGS)
+{
+    const int argc = 2;
+    xo_eval_value_t argv[argc];
+    xo_eval_value_t value = xo_eval_value_make(C_STRING, 0, 0);
+
+    xo_eval_arguments(XO_EVAL_NODE_PASS, argc, argv);
+
+    if ((argv[0].xev_flags & XEVF_MISSING)
+	|| (argv[1].xev_flags & XEVF_MISSING)) {
+	xo_eval_value_free(argv[0]);
+	xo_eval_value_free(argv[1]);
+	value.xev_flags = XEVF_MISSING;
+	return value;
+    }
+
+    char *haystack = xo_eval_cast_string(xfp, argv[0]);
+    xo_eval_value_free(argv[0]);
+    char *needle = xo_eval_cast_string(xfp, argv[1]);
+    xo_eval_value_free(argv[1]);
+    char *found = (haystack && needle) ? strstr(haystack, needle) : NULL;
+
+    if (found) {
+	const char *after = found + strlen(needle);
+	value.xev_type = C_DSTRING;
+	value.xev_str = strdup(after);
+    } else {
+	value.xev_str = "";
+    }
+
+    xo_free(haystack);
+    xo_free(needle);
+    return value;
 }
 
 static xo_eval_value_t
@@ -1821,12 +1923,16 @@ xo_eval_func_contains (XO_EVAL_NODE_ARGS)
 
     if ((argv[0].xev_flags & XEVF_MISSING)
 	|| (argv[1].xev_flags & XEVF_MISSING)) {
+	xo_eval_value_free(argv[0]);
+	xo_eval_value_free(argv[1]);
 	value.xev_flags = XEVF_MISSING;
 	return value;
     }
 
     char *haystack = xo_eval_cast_string(xfp, argv[0]);
+    xo_eval_value_free(argv[0]);
     char *needle = xo_eval_cast_string(xfp, argv[1]);
+    xo_eval_value_free(argv[1]);
     XO_DBG(xop, "contains: '%s' '%s'", haystack ?: "", needle ?: "");
 
     if (haystack && needle && strstr(haystack, needle) != NULL)
@@ -1852,6 +1958,7 @@ xo_eval_func_number (XO_EVAL_NODE_ARGS)
 	return value;
 
     xo_float_t fval = xo_eval_cast_float(xfp, value);
+    xo_eval_value_free(value);
     return xo_eval_value_float(0, fval);
 }
 
@@ -1874,6 +1981,8 @@ xo_eval_func_map_t xo_eval_functions[] = {
     { xo_eval_not, "not" },
     { xo_eval_func_number, "number" },
     { xo_eval_func_starts_with, "starts-with" },
+    { xo_eval_func_substring_after, "substring-after" },
+    { xo_eval_func_substring_before, "substring-before" },
     { xo_eval_func_true, "true" },
     
     { NULL, NULL }
@@ -2048,11 +2157,16 @@ xo_eval (xo_handle_t *xop, xo_filter_t *xfp, xo_match_t *xmp,
 	     */
 	    if ((last.xev_flags & XEVF_MISSING)
 		|| (value.xev_flags & XEVF_MISSING)) {
+		xo_eval_value_free(last);
+		xo_eval_value_free(value);
 		value = xo_eval_value_missing();
 
 	    } else {
-		value = op_fn(xop, xfp, xmp, xnp, pname,
-			      indent + XO_INDENT, last, value);
+		xo_eval_value_t result = op_fn(xop, xfp, xmp, xnp, pname,
+					       indent + XO_INDENT, last, value);
+		xo_eval_value_free(last);
+		xo_eval_value_free(value);
+		value = result;
 	    }
 	}
 
@@ -2190,7 +2304,9 @@ xo_tmatch_try_eager (xo_handle_t *xop, xo_filter_t *xfp,
     xo_eval_value_t result = xo_tmatch_eval_pred(xop, xfp, frame, pred);
     if (result.xev_flags & XEVF_MISSING)
 	return XTFS_PRED;
-    if (xo_eval_cast_boolean(xfp, result)) {
+    int live = xo_eval_cast_boolean(xfp, result);
+    xo_eval_value_free(result);
+    if (live) {
 	xo_tmatch_record_live(xm, frame, tn);
 	return XTFS_LIVE;
     }
@@ -2225,7 +2341,9 @@ xo_tmatch_key (xo_handle_t *xop, xo_filter_t *xfp, xo_tmatch_t *xm,
 	if (result.xev_flags & XEVF_MISSING)
 	    continue;
 
-	if (xo_eval_cast_boolean(xfp, result)) {
+	int live = xo_eval_cast_boolean(xfp, result);
+	xo_eval_value_free(result);
+	if (live) {
 	    frame->xtf_state[i] = XTFS_LIVE;
 	    xo_tmatch_record_live(xm, frame, tn);
 	} else {
@@ -2285,7 +2403,9 @@ xo_tmatch_attr (xo_handle_t *xop, xo_filter_t *xfp, xo_tmatch_t *xm,
 	if (result.xev_flags & XEVF_MISSING)
 	    continue;
 
-	if (xo_eval_cast_boolean(xfp, result)) {
+	int live = xo_eval_cast_boolean(xfp, result);
+	xo_eval_value_free(result);
+	if (live) {
 	    frame->xtf_state[i] = XTFS_LIVE;
 	    xo_tmatch_record_live(xm, frame, tn);
 	} else {
