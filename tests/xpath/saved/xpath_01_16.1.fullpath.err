@@ -1,0 +1,138 @@
+main: input '#run --libxo @fullpath'
+main: input ''
+main: input '# choose2(a, b): if a is truthy return a's own value, else return b.'
+main: input '# Missing first key falls through to the second (fallback) key.'
+main: input '# Keys with an override are listed first so the filter resolves on override.'
+main: input 'r'
+main: status: zero
+main: input '?item[choose2(override, base-id) = '42']'
+--- 0: 17
+    000017: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 11, next 0, prev 0 
+                000011: type 14 (L_EQUALS), str 39 [=], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [choose2], contents 7, next 13, prev 0 
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 10, prev 0 
+                            000005: type 70 (C_ELEMENT), str 18 [override], contents 0, next 0, prev 0 
+                        000010: type 74 (C_PATH), str 0 [], contents 8, next 0, prev 7 
+                            000008: type 70 (C_ELEMENT), str 29 [base-id], contents 0, next 0, prev 0 
+                    000013: type 54 (T_QUOTED), str 41 [42], contents 0, next 0, prev 3 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: track
+main: input '$ override 99'
+main: key: 'override'='99'
+main: status: track
+main: input '$ base-id 42'
+main: key: 'base-id'='42'
+main: status: track
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ base-id 42'
+main: key: 'base-id'='42'
+main: status: full
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ override 42'
+main: key: 'override'='42'
+main: status: full
+main: input '$ base-id 10'
+main: key: 'base-id'='10'
+main: status: full
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ base-id 10'
+main: key: 'base-id'='10'
+main: status: track
+main: input '= val 4'
+main: field: 'val'='4'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# choose2 returns arg1's own value (not a boolean cast).'
+main: input '# override=5 is truthy so the 5 itself is compared, not boolean true.'
+main: input 'r'
+main: status: zero
+main: input '?item[choose2(override, val) > 3]'
+--- 0: 17
+    000017: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 11, next 0, prev 0 
+                000011: type 15 (L_GRTR), str 35 [>], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [choose2], contents 7, next 13, prev 0 
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 10, prev 0 
+                            000005: type 70 (C_ELEMENT), str 18 [override], contents 0, next 0, prev 0 
+                        000010: type 74 (C_PATH), str 0 [], contents 8, next 0, prev 7 
+                            000008: type 70 (C_ELEMENT), str 29 [val], contents 0, next 0, prev 0 
+                    000013: type 53 (T_NUMBER), str 37 [3], contents 0, next 0, prev 3 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: track
+main: input '$ override 5'
+main: key: 'override'='5'
+main: status: full
+main: input '$ val 1'
+main: key: 'val'='1'
+main: status: full
+main: input '= label a'
+main: field: 'label'='a'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ val 4'
+main: key: 'val'='4'
+main: status: full
+main: input '= label b'
+main: field: 'label'='b'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ override 2'
+main: key: 'override'='2'
+main: status: track
+main: input '$ val 5'
+main: key: 'val'='5'
+main: status: track
+main: input '= label c'
+main: field: 'label'='c'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ val 1'
+main: key: 'val'='1'
+main: status: track
+main: input '= label d'
+main: field: 'label'='d'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
