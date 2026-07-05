@@ -159,15 +159,15 @@ int
 xo_xpath_yylex (xo_xparse_data_t *, xo_xparse_node_id_t *);
 
 int
-xo_xparse_ternary_rewrite (xo_xparse_data_t *, xo_xparse_node_id_t *d0,
-			  xo_xparse_node_id_t *d1, xo_xparse_node_id_t *d2,
-			  xo_xparse_node_id_t *d3, xo_xparse_node_id_t *d4,
-			  xo_xparse_node_id_t *d5);
+xo_xparse_ternary_rewrite (xo_xparse_data_t *, xo_xparse_node_id_t *result,
+			  xo_xparse_node_id_t *cond, xo_xparse_node_id_t *question,
+			  xo_xparse_node_id_t *then, xo_xparse_node_id_t *colon,
+			  xo_xparse_node_id_t *alt);
 
 int
-xo_xparse_concat_rewrite (xo_xparse_data_t *, xo_xparse_node_id_t *d0,
-			 xo_xparse_node_id_t *d1, xo_xparse_node_id_t *d2,
-			 xo_xparse_node_id_t *d3);
+xo_xparse_concat_rewrite (xo_xparse_data_t *, xo_xparse_node_id_t *result,
+			 xo_xparse_node_id_t *left, xo_xparse_node_id_t *op,
+			 xo_xparse_node_id_t *right);
 
 void
 xo_xparse_check_axis_name (xo_xparse_data_t *, xo_xparse_node_id_t id);
