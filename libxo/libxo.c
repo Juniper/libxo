@@ -5218,14 +5218,19 @@ xo_avoid_flushing (xo_handle_t *xop)
 }
 
 static int
-xo_filt_skip (xo_handle_t *xop, xo_xff_flags_t flags)
+xo_filt_skip (xo_handle_t *xop, xo_xff_flags_t flags,
+	      const char *name, xo_ssize_t nlen)
 {
     xo_filter_status_t fstatus;
     fstatus = xo_filter_get_status(xop, xo_filters(xop));
 
     /* We don't want to pass "value" fields when only tracking */
-    if (!(flags & XFF_KEY) && fstatus == XO_STATUS_TRACK)
+    if (!(flags & XFF_KEY) && fstatus == XO_STATUS_TRACK) {
+	/* Don't skip if a pending predicate references this field */
+	if (name && xo_filter_needs_nonkey_field(xop, xo_filters(xop), name, nlen))
+	    return FALSE;
 	return TRUE;
+    }
 
     return (fstatus == XO_STATUS_DEAD);
 }
@@ -5248,6 +5253,11 @@ xo_filt_do_open_field (xo_handle_t *xop, const char *name, xo_ssize_t nlen,
 	/* The caller doesn't want us calling open/close_field */
 	if (!pass_field)
 	    return fstatus;
+    } else if (fstatus == XO_STATUS_TRACK && value && vlen > 0) {
+	/* Non-key field: buffer its value if a pending predicate references it */
+	fstatus = xo_filter_pred_field(xop, xfp, name, nlen, value, vlen);
+	if (fstatus == XO_STATUS_FULL)
+	    xo_filt_mark_parents(xop, xo_stack_cur(xop), fstatus);
     }
 
     fstatus = xo_filter_open_field(xop, xfp, name, nlen);
@@ -5340,7 +5350,7 @@ xo_format_value_encoder (xo_handle_t *xop, const char *name, ssize_t nlen,
 	xo_filt_do_open_field(xop, name, nlen, data, dlen, FALSE, flags);
     
 
-    if (!((xop->xo_flags & XOF_FILTER) && xo_filt_skip(xop, flags))) {
+    if (!((xop->xo_flags & XOF_FILTER) && xo_filt_skip(xop, flags, name, nlen))) {
 	xo_encoder_handle(xop, quote ? XO_OP_STRING : XO_OP_CONTENT, NULL,
 			  name, data, flags);
     }
@@ -5577,7 +5587,7 @@ xo_format_value_xml (xo_handle_t *xop, const char *name, ssize_t nlen,
      * clear any elements of xo_varg.  But we can skip the rest of
      * the output (the close tag).
      */
-    if ((xop->xo_flags & XOF_FILTER) && xo_filt_skip(xop, flags)) {
+    if ((xop->xo_flags & XOF_FILTER) && xo_filt_skip(xop, flags, name, nlen)) {
 	/*
 	 * Reset the current offset back to the saved one.
 	 */
@@ -5759,7 +5769,7 @@ xo_format_value (xo_handle_t *xop, const char *name, ssize_t nlen,
 	    xo_filt_do_open_field(xop, name, nlen,
 				  xo_buf_data(&xop->xo_data, val_off), val_len,
 				  TRUE, flags);
-	    if (xo_filt_skip(xop, flags)) {
+	    if (xo_filt_skip(xop, flags, name, nlen)) {
 		xo_buf_set_offset(&xop->xo_data, json_start);
 		xop->xo_stack[xop->xo_depth].xs_flags =
 		    (xop->xo_stack[xop->xo_depth].xs_flags & ~XSF_NOT_FIRST)
