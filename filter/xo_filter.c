@@ -2739,6 +2739,59 @@ xo_filter_op_passthru (XO_ENCODER_HANDLER_ARGS,
     return rc;
 }
 
+/*
+ * Return TRUE if any XTFS_PRED slot in the current frame references `tag`
+ * as a non-attribute element in its predicate.  Used by libxo to decide
+ * whether to keep a non-key field's output tentatively in the whiteboard.
+ */
+static int
+xo_filter_op_needs_nonkey_field (XO_FILTER_NEEDS_NONKEY_FIELD_SIGNATURE)
+{
+    if (xfp == NULL || xfp->xf_trie == NULL)
+	return FALSE;
+
+    if (xfp->xf_status != XO_STATUS_TRACK)
+	return FALSE;
+
+    xo_tmatch_t *xm = &xfp->xf_tmatch;
+    if (xm->xm_depth == 0)
+	return FALSE;
+
+    xo_trie_t *xtp = xm->xm_trie;
+    xo_tframe_t *frame = &xm->xm_stack[xm->xm_depth];
+
+    for (uint32_t i = 0; i < frame->xtf_count; i++) {
+	if (frame->xtf_state[i] != XTFS_PRED)
+	    continue;
+	xo_tnode_t *tn = &xtp->xt_nodes[frame->xtf_node[i]];
+	if (xo_filter_pred_needs(&xfp->xf_xd, xfp, tn->xtn_pred, tag, tlen, FALSE))
+	    return TRUE;
+    }
+
+    return FALSE;
+}
+
+/*
+ * Buffer a non-key field's value for predicate evaluation, just like
+ * xo_filter_op_key does for key fields.  xo_tmatch_key internally gates on
+ * xo_filter_pred_needs, so fields not referenced by any predicate are no-ops.
+ */
+static int
+xo_filter_op_pred_field (XO_FILTER_PRED_FIELD_SIGNATURE)
+{
+    if (xfp == NULL || xfp->xf_trie == NULL)
+	return 0;
+
+    if (xfp->xf_status != XO_STATUS_TRACK)
+	return xfp->xf_status;
+
+    xo_tmatch_key(xop, xfp, &xfp->xf_tmatch, tag, tlen, value, vlen);
+
+    xo_filter_change_status(xop, xfp, "pred-field", tag, tlen);
+
+    return xfp->xf_status;
+}
+
 static xo_filter_ops_t xo_filter_ops_local = {
     XO_FILTER_OPS_VERSION,
     XO_FILTER_OPS_FUNCS
