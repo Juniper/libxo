@@ -1,0 +1,4 @@
+/servers/item[id='2']/host='beta'
+/clients/item[id='2']/host='gamma'
+/top/a/leaf[val='x']/data='1'
+/top/b/leaf[val='x']/data='3'
