@@ -8,3 +8,5 @@
 ?foo//goo
 ?!seven[x==4]/y[z==4]|fish
 ?some[long=one+two+three+four div 5 - 3]/more[stuff == here + they + are]/maybe[x<y && y <= z]
+?item[a[b] = 1]
+?item[a/b = 1]
