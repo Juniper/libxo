@@ -2027,6 +2027,103 @@ xo_eval_func_number (XO_EVAL_NODE_ARGS)
     return xo_eval_value_float(0, fval);
 }
 
+static xo_eval_value_t
+xo_eval_func_round (XO_EVAL_NODE_ARGS)
+{
+    xo_float_t fval = xo_eval_cast_float(xfp, argv[0]);
+    fval = round(fval);
+    return xo_eval_value_float(0, fval);
+}
+
+static xo_eval_value_t
+xo_eval_func_string_length (XO_EVAL_NODE_ARGS)
+{
+    char *str = xo_eval_cast_string(xfp, argv[0]);
+    xo_float_t len = str ? strlen(str) : 0;
+    xo_free(str);
+    return xo_eval_value_float(0, len);
+}
+
+/*
+ * sum(a, b, ...) — sum all arguments converted to numbers.
+ */
+static xo_eval_value_t
+xo_eval_func_sum (XO_EVAL_NODE_ARGS)
+{
+    xo_float_t total = 0;
+
+    for (xo_xparse_node_id_t id = xnp->xn_contents; id; id = xnp->xn_next) {
+	xnp = xo_xparse_node(&xfp->xf_xd, id);
+
+	xo_eval_value_t value = xo_eval(xop, xfp, xmp, "sum-arg",
+					indent + XO_INDENT, id, NULL);
+	if (value.xev_flags & XEVF_MISSING) {
+	    xo_eval_value_free(value);
+	    return xo_eval_value_missing();
+	}
+	total += xo_eval_cast_float(xfp, value);
+	xo_eval_value_free(value);
+    }
+
+    return xo_eval_value_float(0, total);
+}
+
+/*
+ * translate(string, from, to) — replace each char in string that appears
+ * in from with the corresponding char in to; delete chars with no mapping.
+ */
+static xo_eval_value_t
+xo_eval_func_translate (XO_EVAL_NODE_ARGS)
+{
+    char *str = xo_eval_cast_string(xfp, argv[0]);
+    char *from = xo_eval_cast_string(xfp, argv[1]);
+    char *to = xo_eval_cast_string(xfp, argv[2]);
+
+    if (str == NULL || from == NULL) {
+	xo_free(str);
+	xo_free(from);
+	xo_free(to);
+	xo_eval_value_t result = xo_eval_value_make(C_DSTRING, 0, 0);
+	result.xev_str = strdup("");
+	return result;
+    }
+
+    size_t from_len = strlen(from);
+    size_t to_len = to ? strlen(to) : 0;
+    char *out = xo_realloc(NULL, strlen(str) + 1);
+
+    if (out == NULL) {
+	xo_free(str);
+	xo_free(from);
+	xo_free(to);
+	xo_eval_value_t result = xo_eval_value_make(C_DSTRING, 0, 0);
+	result.xev_str = strdup("");
+	return result;
+    }
+
+    char *q = out;
+    for (const char *p = str; *p; p++) {
+	const char *found = memchr(from, (unsigned char) *p, from_len);
+	if (found == NULL) {
+	    *q++ = *p;		/* not in from: copy as-is */
+	} else {
+	    size_t idx = found - from;
+	    if (idx < to_len)
+		*q++ = to[idx];	/* replacement char */
+	    /* else: no mapping — delete the character */
+	}
+    }
+    *q = '\0';
+
+    xo_free(str);
+    xo_free(from);
+    xo_free(to);
+
+    xo_eval_value_t result = xo_eval_value_make(C_DSTRING, 0, 0);
+    result.xev_str = out;
+    return result;
+}
+
 /*
  * Map between names and numbers and functions, searchable by string
  * name.
@@ -2039,7 +2136,7 @@ typedef struct xo_eval_func_map_s {
     xo_eval_node_fn_t xfm_func;	/* The function that implements the logic */
     const char *xfm_name;	/* Name (e.g. "plus") */
     xo_eval_func_flags_t xfm_flags; /* Flags (XEFF_*) */
-    int xfm_nargs;		/* Required arg count; -1 means function checks */
+    int xfm_nargs;		/* Required arg count; -1 means don't checks */
 } xo_eval_func_map_t;
 
 xo_eval_func_map_t xo_eval_functions[] = {
@@ -2055,10 +2152,14 @@ xo_eval_func_map_t xo_eval_functions[] = {
     { xo_eval_func_normalize_space, "normalize-space", 0, 1 },
     { xo_eval_func_not, "not", 0, 1 },
     { xo_eval_func_number, "number", 0, 1 },
-    { xo_eval_func_string, "string", 0, 1 },
+    { xo_eval_func_round, "round", 0, 1 },
     { xo_eval_func_starts_with, "starts-with", 0, 2 },
+    { xo_eval_func_string, "string", 0, 1 },
+    { xo_eval_func_string_length, "string-length", 0, 1 },
     { xo_eval_func_substring_after, "substring-after", 0, 2 },
     { xo_eval_func_substring_before, "substring-before", 0, 2 },
+    { xo_eval_func_sum, "sum", XEFF_NO_EVAL, -1 },
+    { xo_eval_func_translate, "translate", 0, 3 },
     { xo_eval_func_true, "true", 0, 0 },
 
     { NULL, NULL, 0, 0 }
