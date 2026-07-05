@@ -2,3 +2,8 @@
 /item[override='42'][base-id='10']/val='3'
 /item[override='5'][val='1']/label='a'
 /item[val='4']/label='b'
+/item[score='15'][default_score='5']/val='a'
+/item[score='0'][default_score='20']/val='b'
+/item[a='7'][b='3'][c='9']/val='1'
+/item[a='0'][b='7'][c='9']/val='2'
+/item[b='0'][c='7']/val='3'
