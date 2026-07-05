@@ -7,3 +7,7 @@
 /item[a='7'][b='3'][c='9']/val='1'
 /item[a='0'][b='7'][c='9']/val='2'
 /item[b='0'][c='7']/val='3'
+/item[text='hello  world']/val='1'
+/item[text='hello world']/val='2'
+/item[text='foo   bar baz']/val='1'
+/item[text='baz foo   bar']/val='2'
