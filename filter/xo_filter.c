@@ -74,6 +74,7 @@ typedef struct xo_tnode_s {
 #define XTNF_TERMINAL	(1<<0)	/* A complete expression ends here */
 #define XTNF_NOT	(1<<1)	/* "not" expression: deny on match */
 #define XTNF_ABSOLUTE	(1<<2)	/* Anchored at tree root (leading '/') */
+#define XTNF_WILDCARD	(1<<3)	/* Wildcard step ('*'): matches any tag */
 
 /*
  * The compiled trie: a flat node array plus the root sibling chain.
@@ -147,6 +148,32 @@ xo_trie_alloc_node (xo_trie_t *xtp)
 }
 
 /*
+ * Return (or create) the wildcard child of `parent`.
+ * parent==0 means the root sibling list.
+ */
+static xo_trie_id_t
+xo_trie_get_wildcard_child (xo_trie_t *xtp, xo_trie_id_t parent)
+{
+    xo_trie_id_t *listp = parent
+	? &xtp->xt_nodes[parent].xtn_child
+	: &xtp->xt_root;
+
+    for (xo_trie_id_t s = *listp; s; s = xtp->xt_nodes[s].xtn_sibling)
+	if (xtp->xt_nodes[s].xtn_flags & XTNF_WILDCARD)
+	    return s;
+
+    xo_trie_id_t id = xo_trie_alloc_node(xtp);
+    if (id == 0)
+	return 0;
+
+    xtp->xt_nodes[id].xtn_flags |= XTNF_WILDCARD;
+    xtp->xt_nodes[id].xtn_sibling = *listp;
+    *listp = id;
+
+    return id;
+}
+
+/*
  * Return (or create) the child of `parent` with name `name_id`.
  * parent==0 means the root sibling list.
  */
@@ -185,10 +212,15 @@ xo_trie_insert (xo_trie_t *xtp, xo_xparse_data_t *xdp,
 	    flags |= XTNF_ABSOLUTE;
 	    continue;
 	}
-	if (xnp->xn_type != C_ELEMENT)
-	    continue;
 
-	xo_trie_id_t tid = xo_trie_get_child(xtp, parent, xnp->xn_str);
+	xo_trie_id_t tid;
+	if (xnp->xn_type == L_ASTERISK) {
+	    tid = xo_trie_get_wildcard_child(xtp, parent);
+	} else if (xnp->xn_type == C_ELEMENT) {
+	    tid = xo_trie_get_child(xtp, parent, xnp->xn_str);
+	} else {
+	    continue;
+	}
 	if (tid == 0)
 	    return;
 
@@ -250,6 +282,9 @@ xo_trie_compile (xo_handle_t *xop UNUSED, xo_xparse_data_t *xdp)
 	case C_PATH:
 	    elem = xnp->xn_contents;
 	    break;
+
+	case L_ASTERISK:
+	    break;		/* wildcard root: elem already = *paths */
 
 	default:
 	    continue;
@@ -593,7 +628,8 @@ xo_tmatch_open (xo_handle_t *xop, xo_filter_t *xfp UNUSED,
 		     c = xtp->xt_nodes[c].xtn_sibling) {
 	    xo_tnode_t *tn = &xtp->xt_nodes[c];
 	    const char *nm = xo_xparse_str(xdp, tn->xtn_name);
-	    if (nm == NULL || !xo_streqn(nm, tag, tlen))
+	    if (!(tn->xtn_flags & XTNF_WILDCARD) &&
+		    (nm == NULL || !xo_streqn(nm, tag, tlen)))
 		continue;
 
 	    uint32_t s = frame->xtf_count++;
@@ -617,7 +653,8 @@ xo_tmatch_open (xo_handle_t *xop, xo_filter_t *xfp UNUSED,
 	    continue;
 
 	const char *nm = xo_xparse_str(xdp, tn->xtn_name);
-	if (nm == NULL || !xo_streqn(nm, tag, tlen))
+	if (!(tn->xtn_flags & XTNF_WILDCARD) &&
+		(nm == NULL || !xo_streqn(nm, tag, tlen)))
 	    continue;
 
 	/* Avoid duplicating a node already added via parent descent */
@@ -695,11 +732,11 @@ xo_filter_op_add_one (xo_handle_t *xop, const char *input)
 
     if (rc == 0) {
 	static int unsupported_tokens[] = {
-	    L_DOTDOT, L_DOTDOTDOT, L_DOT, L_QUESTION, L_STAR,
-	    L_ASTERISK, L_UNDERSCORE, K_COMMENT, K_ID, K_KEY, K_NODE,
+	    L_DOTDOT, L_DOTDOTDOT, L_DOT, L_STAR,
+	    K_COMMENT, K_ID, K_KEY, K_NODE,
 	    K_PROCESSING_INSTRUCTION, K_TEXT,
 	    T_AXIS_NAME, T_VAR, M_SEQUENCE, C_DESCENDANT, C_INDEX,
-	    C_TEST, C_UNION,
+	    C_TEST, C_UNION, C_NESTED_PREDICATES, C_PREDICATE_PATHS,
 	    0
 	};
 
