@@ -83,3 +83,72 @@ $ proto http
 = val 3
 >item
 }item
+
+# '_' operator: two-arg concat, no parens needed (binds tighter than '=')
+r
+?item[first _ last = 'JohnDoe']
+{item
+<item
+$ first John
+$ last Doe
+= val 1
+>item
+<item
+$ first Jane
+$ last Doe
+= val 2
+>item
+<item
+$ first John
+$ last Smith
+= val 3
+>item
+}item
+
+# '_' three-arg with literal: exercises the flat-list extension in concat_rewrite
+r
+?item[host _ ':' _ port = 'db:5432']
+{item
+<item
+$ host db
+$ port 5432
+= val 1
+>item
+<item
+$ host db
+$ port 3306
+= val 2
+>item
+<item
+$ host web
+$ port 5432
+= val 3
+>item
+}item
+
+# '_' four-arg chain: two successive flat extensions (a_b_c_d -> concat(a,b,c,d))
+r
+?item[a _ b _ c _ d = 'wxyz']
+{item
+<item
+$ a w
+$ b x
+$ c y
+$ d z
+= val 1
+>item
+<item
+$ a w
+$ b x
+$ c y
+$ d q
+= val 2
+>item
+<item
+$ a w
+$ b X
+$ c y
+$ d z
+= val 3
+>item
+}item
