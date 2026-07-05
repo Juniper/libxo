@@ -15,6 +15,13 @@ ECHO=/bin/echo
 FILES_BASE=files.txt
 FILES=out/$FILES_BASE
 
+# trap trap_fail SIGABRT
+
+trap_fail () {
+    echo "SIGABRT receieved; exitting..."
+    exit 1;
+}
+
 run () {
     cmd="$1"
 
