@@ -9,10 +9,12 @@ create
 destroy
 get_status
 key
+needs_nonkey_field
 open_container
 open_field
 open_instance
 passthru
+pred_field
 status_name
 '
 
@@ -43,6 +45,15 @@ signature_get_status="xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED"
 
 args_key="xop, xfp, tag, tlen, value, vlen"
 signature_key="xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED, \
+               const char *tag UNUSED, xo_ssize_t tlen UNUSED, \
+               const char *value UNUSED, xo_ssize_t vlen UNUSED"
+
+args_needs_nonkey_field="xop, xfp, tag, tlen"
+signature_needs_nonkey_field="xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED, \
+               const char *tag UNUSED, xo_ssize_t tlen UNUSED"
+
+args_pred_field="xop, xfp, tag, tlen, value, vlen"
+signature_pred_field="xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED, \
                const char *tag UNUSED, xo_ssize_t tlen UNUSED, \
                const char *value UNUSED, xo_ssize_t vlen UNUSED"
 
