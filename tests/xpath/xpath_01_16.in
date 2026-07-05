@@ -104,3 +104,45 @@ $ c 3
 = val 4
 >item
 }item
+
+# normalize-space() collapses runs of whitespace to a single space.
+# Items with 'hello  world' (two spaces) normalize to 'hello world'.
+r
+?item[normalize-space(text) = 'hello world']
+{item
+<item
+$ text hello  world
+= val 1
+>item
+<item
+$ text hello world
+= val 2
+>item
+<item
+$ text goodbye world
+= val 3
+>item
+}item
+
+# normalize-space() enables contains() to match across inconsistent spacing.
+# Without normalize-space, none of these values contain the literal 'foo bar'.
+r
+?item[contains(normalize-space(text), 'foo bar')]
+{item
+<item
+$ text foo   bar baz
+= val 1
+>item
+<item
+$ text baz foo   bar
+= val 2
+>item
+<item
+$ text foo   baz bar
+= val 3
+>item
+<item
+$ text something else
+= val 4
+>item
+}item
