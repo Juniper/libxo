@@ -1,0 +1,42 @@
+#run --libxo @fullpath
+
+# Non-key predicate field: filter ?item[host='beta'] where host is a plain
+# field (not declared with the 'k' key modifier).  Only the item with
+# host='beta' should appear in the output.
+r
+?item[host = 'beta']
+{item
+<item
+$ id 1
+= host alpha
+>item
+<item
+$ id 2
+= host beta
+>item
+<item
+$ id 3
+= host gamma
+>item
+}item
+
+# Two-field predicate on non-key fields: ?item[type='A' and color='red']
+r
+?item[type = 'A' and color = 'red']
+{item
+<item
+$ type A
+= color red
+= data 1
+>item
+<item
+$ type A
+= color blue
+= data 2
+>item
+<item
+$ type B
+= color red
+= data 3
+>item
+}item
