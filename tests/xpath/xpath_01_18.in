@@ -1,0 +1,56 @@
+#run --libxo @fullpath
+
+# '*' wildcard step matches any container at that path position.
+# ?*/item selects instances regardless of which top-level container wraps them.
+r
+?*/item[id = '2']
++servers
+{item
+<item
+$ id 1
+= host alpha
+>item
+<item
+$ id 2
+= host beta
+>item
+}item
+-servers
++clients
+{item
+<item
+$ id 2
+= host gamma
+>item
+<item
+$ id 3
+= host delta
+>item
+}item
+-clients
+
+# Multi-step wildcard: top/*/leaf — middle container can be anything.
+r
+?top/*/leaf[val = 'x']
++top
++a
+{leaf
+<leaf
+$ val x
+= data 1
+>leaf
+<leaf
+$ val y
+= data 2
+>leaf
+}leaf
+-a
++b
+{leaf
+<leaf
+$ val x
+= data 3
+>leaf
+}leaf
+-b
+-top
