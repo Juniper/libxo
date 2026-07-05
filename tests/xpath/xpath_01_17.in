@@ -1,0 +1,88 @@
+#run --libxo @fullpath
+
+# round() rounds to nearest integer; .5 rounds toward positive infinity.
+r
+?item[round(val) = 3]
+{item
+<item
+$ val 2.6
+= label a
+>item
+<item
+$ val 3.0
+= label b
+>item
+<item
+$ val 3.4
+= label c
+>item
+<item
+$ val 3.5
+= label d
+>item
+<item
+$ val 3.6
+= label e
+>item
+}item
+
+# string-length() returns the number of characters in the string value.
+r
+?item[string-length(name) > 4]
+{item
+<item
+$ name eth0
+= val 1
+>item
+<item
+$ name lo0
+= val 2
+>item
+<item
+$ name wlan0
+= val 3
+>item
+<item
+$ name e1
+= val 4
+>item
+}item
+
+# sum() adds its arguments; useful for combining numeric fields.
+r
+?item[sum(rx, tx) > 100]
+{item
+<item
+$ rx 80
+$ tx 40
+= iface eth0
+>item
+<item
+$ rx 30
+$ tx 60
+= iface lo0
+>item
+<item
+$ rx 50
+$ tx 50
+= iface wlan0
+>item
+}item
+
+# translate() replaces characters: here uppercasing a-z to A-Z subset.
+r
+?item[translate(proto, 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ') = 'HTTP']
+{item
+<item
+$ proto http
+= val 1
+>item
+<item
+$ proto ftp
+= val 2
+>item
+<item
+$ proto HTTP
+= val 3
+>item
+}item
