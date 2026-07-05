@@ -10,7 +10,7 @@
 #ifndef XO_FILTER_H
 #define XO_FILTER_H
 
-#define XO_FILTER_OPS_VERSION 1	/* Current API version number */
+#define XO_FILTER_OPS_VERSION 2	/* Current API version number */
 
 #define XO_FILTER_MISS	1	/* Missing information, might work later */
 #define XO_FILTER_FAIL	2	/* Test failed; will never succeed */
