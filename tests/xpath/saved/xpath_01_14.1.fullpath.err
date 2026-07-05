@@ -241,3 +241,206 @@ main: input '>item'
 main: status: track
 main: input '}item'
 main: status: track
+main: input ''
+main: input '# '_' operator: two-arg concat, no parens needed (binds tighter than '=')'
+main: input 'r'
+main: status: zero
+main: input '?item[first _ last = 'JohnDoe']'
+--- 0: 13
+    000013: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 7, next 0, prev 0 
+                000007: type 14 (L_EQUALS), str 21 [=], contents 4, next 0, prev 0 
+                    000004: type 52 (T_FUNCTION_NAME), str 23 [concat], contents 5, next 9, prev 0 
+                        000005: type 74 (C_PATH), str 0 [], contents 3, next 8, prev 0 
+                            000003: type 70 (C_ELEMENT), str 8 [first], contents 0, next 0, prev 0 
+                        000008: type 74 (C_PATH), str 0 [], contents 6, next 0, prev 5 
+                            000006: type 70 (C_ELEMENT), str 16 [last], contents 0, next 0, prev 0 
+                    000009: type 54 (T_QUOTED), str 30 [JohnDoe], contents 0, next 0, prev 4 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: track
+main: input '$ first John'
+main: key: 'first'='John'
+main: status: track
+main: input '$ last Doe'
+main: key: 'last'='Doe'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ first Jane'
+main: key: 'first'='Jane'
+main: status: track
+main: input '$ last Doe'
+main: key: 'last'='Doe'
+main: status: track
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ first John'
+main: key: 'first'='John'
+main: status: track
+main: input '$ last Smith'
+main: key: 'last'='Smith'
+main: status: track
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# '_' three-arg with literal: exercises the flat-list extension in concat_rewrite'
+main: input 'r'
+main: status: zero
+main: input '?item[host _ ':' _ port = 'db:5432']'
+--- 0: 16
+    000016: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 10, next 0, prev 0 
+                000010: type 14 (L_EQUALS), str 31 [=], contents 4, next 0, prev 0 
+                    000004: type 52 (T_FUNCTION_NAME), str 19 [concat], contents 5, next 12, prev 0 
+                        000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0 
+                            000003: type 70 (C_ELEMENT), str 8 [host], contents 0, next 0, prev 0 
+                        000006: type 54 (T_QUOTED), str 15 [:], contents 0, next 11, prev 5 
+                        000011: type 74 (C_PATH), str 0 [], contents 9, next 0, prev 6 
+                            000009: type 70 (C_ELEMENT), str 26 [port], contents 0, next 0, prev 0 
+                    000012: type 54 (T_QUOTED), str 33 [db:5432], contents 0, next 0, prev 4 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: track
+main: input '$ host db'
+main: key: 'host'='db'
+main: status: track
+main: input '$ port 5432'
+main: key: 'port'='5432'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ host db'
+main: key: 'host'='db'
+main: status: track
+main: input '$ port 3306'
+main: key: 'port'='3306'
+main: status: track
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ host web'
+main: key: 'host'='web'
+main: status: track
+main: input '$ port 5432'
+main: key: 'port'='5432'
+main: status: track
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# '_' four-arg chain: two successive flat extensions (a_b_c_d -> concat(a,b,c,d))'
+main: input 'r'
+main: status: zero
+main: input '?item[a _ b _ c _ d = 'wxyz']'
+--- 0: 19
+    000019: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 13, next 0, prev 0 
+                000013: type 14 (L_EQUALS), str 29 [=], contents 4, next 0, prev 0 
+                    000004: type 52 (T_FUNCTION_NAME), str 16 [concat], contents 5, next 15, prev 0 
+                        000005: type 74 (C_PATH), str 0 [], contents 3, next 8, prev 0 
+                            000003: type 70 (C_ELEMENT), str 8 [a], contents 0, next 0, prev 0 
+                        000008: type 74 (C_PATH), str 0 [], contents 6, next 11, prev 5 
+                            000006: type 70 (C_ELEMENT), str 12 [b], contents 0, next 0, prev 0 
+                        000011: type 74 (C_PATH), str 0 [], contents 9, next 14, prev 8 
+                            000009: type 70 (C_ELEMENT), str 23 [c], contents 0, next 0, prev 0 
+                        000014: type 74 (C_PATH), str 0 [], contents 12, next 0, prev 11 
+                            000012: type 70 (C_ELEMENT), str 27 [d], contents 0, next 0, prev 0 
+                    000015: type 54 (T_QUOTED), str 31 [wxyz], contents 0, next 0, prev 4 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: track
+main: input '$ a w'
+main: key: 'a'='w'
+main: status: track
+main: input '$ b x'
+main: key: 'b'='x'
+main: status: track
+main: input '$ c y'
+main: key: 'c'='y'
+main: status: track
+main: input '$ d z'
+main: key: 'd'='z'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ a w'
+main: key: 'a'='w'
+main: status: track
+main: input '$ b x'
+main: key: 'b'='x'
+main: status: track
+main: input '$ c y'
+main: key: 'c'='y'
+main: status: track
+main: input '$ d q'
+main: key: 'd'='q'
+main: status: track
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ a w'
+main: key: 'a'='w'
+main: status: track
+main: input '$ b X'
+main: key: 'b'='X'
+main: status: track
+main: input '$ c y'
+main: key: 'c'='y'
+main: status: track
+main: input '$ d z'
+main: key: 'd'='z'
+main: status: track
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
