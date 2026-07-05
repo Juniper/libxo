@@ -289,3 +289,113 @@ main: input '>item'
 main: status: track
 main: input '}item'
 main: status: track
+main: input ''
+main: input '# normalize-space() collapses runs of whitespace to a single space.'
+main: input '# Items with 'hello  world' (two spaces) normalize to 'hello world'.'
+main: input 'r'
+main: status: zero
+main: input '?item[normalize-space(text) = 'hello world']'
+--- 0: 14
+    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0 
+                000008: type 14 (L_EQUALS), str 33 [=], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [normalize-space], contents 7, next 10, prev 0 
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
+                            000005: type 70 (C_ELEMENT), str 26 [text], contents 0, next 0, prev 0 
+                    000010: type 54 (T_QUOTED), str 35 [hello world], contents 0, next 0, prev 3 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: track
+main: input '$ text hello  world'
+main: key: 'text'='hello  world'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ text hello world'
+main: key: 'text'='hello world'
+main: status: full
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ text goodbye world'
+main: key: 'text'='goodbye world'
+main: status: track
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# normalize-space() enables contains() to match across inconsistent spacing.'
+main: input '# Without normalize-space, none of these values contain the literal 'foo bar'.'
+main: input 'r'
+main: status: zero
+main: input '?item[contains(normalize-space(text), 'foo bar')]'
+--- 0: 18
+    000018: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [contains], contents 5, next 0, prev 0 
+                    000005: type 52 (T_FUNCTION_NAME), str 19 [normalize-space], contents 9, next 12, prev 0 
+                        000009: type 74 (C_PATH), str 0 [], contents 7, next 0, prev 0 
+                            000007: type 70 (C_ELEMENT), str 37 [text], contents 0, next 0, prev 0 
+                    000012: type 54 (T_QUOTED), str 46 [foo bar], contents 0, next 0, prev 5 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: track
+main: input '$ text foo   bar baz'
+main: key: 'text'='foo   bar baz'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ text baz foo   bar'
+main: key: 'text'='baz foo   bar'
+main: status: full
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ text foo   baz bar'
+main: key: 'text'='foo   baz bar'
+main: status: track
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ text something else'
+main: key: 'text'='something else'
+main: status: track
+main: input '= val 4'
+main: field: 'val'='4'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
