@@ -50,3 +50,57 @@ $ val 1
 = label d
 >item
 }item
+
+# '?:' is the short-form ternary: syntax for choose2().
+# Non-zero numeric values are truthy; zero and missing fall through.
+# Parens required when comparing the result (precedence lower than '>').
+r
+?item[(score ?: default_score) > 10]
+{item
+<item
+$ score 15
+$ default_score 5
+= val a
+>item
+<item
+$ score 0
+$ default_score 20
+= val b
+>item
+<item
+$ default_score 8
+= val c
+>item
+<item
+$ score 5
+$ default_score 50
+= val d
+>item
+}item
+
+# '?:' is right-recursive: a ?: b ?: c  parses as  a ?: (b ?: c).
+r
+?item[(a ?: b ?: c) = '7']
+{item
+<item
+$ a 7
+$ b 3
+$ c 9
+= val 1
+>item
+<item
+$ a 0
+$ b 7
+$ c 9
+= val 2
+>item
+<item
+$ b 0
+$ c 7
+= val 3
+>item
+<item
+$ c 3
+= val 4
+>item
+}item
