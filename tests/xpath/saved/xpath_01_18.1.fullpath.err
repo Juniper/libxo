@@ -1,0 +1,138 @@
+main: input '#run --libxo @fullpath'
+main: input ''
+main: input '# '*' wildcard step matches any container at that path position.'
+main: input '# ?*/item selects instances regardless of which top-level container wraps them.'
+main: input 'r'
+main: status: zero
+main: input '?*/item[id = '2']'
+--- 0: 1
+    000001: type 46 (L_ASTERISK), str 1 [*], contents 0, next 3, prev 0 
+    000003: type 70 (C_ELEMENT), str 5 [item], contents 4, next 0, prev 1 
+        000004: type 75 (C_PREDICATE), str 0 [], contents 6, next 0, prev 0 
+            000006: type 14 (L_EQUALS), str 15 [=], contents 7, next 0, prev 0 
+                000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
+                    000005: type 70 (C_ELEMENT), str 12 [id], contents 0, next 0, prev 0 
+                000008: type 54 (T_QUOTED), str 17 [2], contents 0, next 0, prev 7 
+main: status: zero
+main: input '+servers'
+main: status: track
+main: input '{item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ id 1'
+main: key: 'id'='1'
+main: status: track
+main: input '= host alpha'
+main: field: 'host'='alpha'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ id 2'
+main: key: 'id'='2'
+main: status: full
+main: input '= host beta'
+main: field: 'host'='beta'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input '-servers'
+main: status: track
+main: input '+clients'
+main: status: track
+main: input '{item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ id 2'
+main: key: 'id'='2'
+main: status: full
+main: input '= host gamma'
+main: field: 'host'='gamma'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ id 3'
+main: key: 'id'='3'
+main: status: track
+main: input '= host delta'
+main: field: 'host'='delta'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input '-clients'
+main: status: track
+main: input ''
+main: input '# Multi-step wildcard: top/*/leaf — middle container can be anything.'
+main: input 'r'
+main: status: zero
+main: input '?top/*/leaf[val = 'x']'
+--- 0: 14
+    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [top], contents 0, next 3, prev 0 
+        000003: type 46 (L_ASTERISK), str 7 [*], contents 0, next 5, prev 1 
+        000005: type 70 (C_ELEMENT), str 11 [leaf], contents 6, next 0, prev 3 
+            000006: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0 
+                000008: type 14 (L_EQUALS), str 22 [=], contents 9, next 0, prev 0 
+                    000009: type 74 (C_PATH), str 0 [], contents 7, next 10, prev 0 
+                        000007: type 70 (C_ELEMENT), str 18 [val], contents 0, next 0, prev 0 
+                    000010: type 54 (T_QUOTED), str 24 [x], contents 0, next 0, prev 9 
+main: status: zero
+main: input '+top'
+main: status: track
+main: input '+a'
+main: status: track
+main: input '{leaf'
+main: status: track
+main: input '<leaf'
+main: status: track
+main: input '$ val x'
+main: key: 'val'='x'
+main: status: full
+main: input '= data 1'
+main: field: 'data'='1'
+main: status: full
+main: input '>leaf'
+main: status: track
+main: input '<leaf'
+main: status: track
+main: input '$ val y'
+main: key: 'val'='y'
+main: status: track
+main: input '= data 2'
+main: field: 'data'='2'
+main: status: track
+main: input '>leaf'
+main: status: track
+main: input '}leaf'
+main: status: track
+main: input '-a'
+main: status: track
+main: input '+b'
+main: status: track
+main: input '{leaf'
+main: status: track
+main: input '<leaf'
+main: status: track
+main: input '$ val x'
+main: key: 'val'='x'
+main: status: full
+main: input '= data 3'
+main: field: 'data'='3'
+main: status: full
+main: input '>leaf'
+main: status: track
+main: input '}leaf'
+main: status: track
+main: input '-b'
+main: status: track
+main: input '-top'
+main: status: track
