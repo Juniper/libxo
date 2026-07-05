@@ -213,6 +213,8 @@ xo_xparse_ttname_map_t xo_xparse_ttname_map[] = {
     { C_STRING,			"string value (const char *)" },
     { C_BOOLEAN,		"boolean value" },
     { C_DSTRING,		"string value that is dynamically allocated" },
+    { C_NESTED_PREDICATES,      "predicates inside predicates" },
+    { C_PREDICATE_PATHS,        "Multi-element paths in predicates" },
     { M_ERROR,                  "invalid xpath expression" },
     { 0, NULL }
 };
@@ -587,12 +589,16 @@ xo_xparse_dump (xo_xparse_data_t *xdp)
     }
 }
 
+/* Context flags for xo_xparse_feature_warn_* */
+#define XWF_PREDICATE	(1<<0)	/* Currently inside a predicate's contents */
+
 static int
-xo_xparse_feature_warn_one_node (const char *tag, xo_xparse_data_t *xdp UNUSED,
+xo_xparse_feature_warn_one_node (const char *tag, xo_xparse_data_t *xdp,
 				 int *map, int len,
 				 xo_xparse_node_id_t id UNUSED,
-				 xo_xparse_node_t *xnp)
+				 xo_xparse_node_t *xnp, unsigned flags)
 {
+    int hit = 0;
     xo_xparse_token_t type = xnp->xn_type;
 
     if ((int) type < len && map[type]) {
@@ -603,26 +609,57 @@ xo_xparse_feature_warn_one_node (const char *tag, xo_xparse_data_t *xdp UNUSED,
 	xo_xparse_warn(xdp, "%s%sxpath feature is unsupported: %s",
 		       tag ?: "", tag ? ": " : "", tname);
 	map[type] = 0;		/* Turn off, now that the user knows */
-	return 1;
+	hit++;
     }
 
-    return 0;
+    if (flags & XWF_PREDICATE) {
+	/* Predicate nested inside another predicate */
+	if (type == C_PREDICATE
+		&& C_NESTED_PREDICATES < len && map[C_NESTED_PREDICATES]) {
+	    const char *tname = xo_xparse_fancy_token_name(C_NESTED_PREDICATES);
+	    xo_xparse_warn(xdp, "%s%sxpath feature is unsupported: %s",
+			   tag ?: "", tag ? ": " : "",
+			   tname ?: "nested predicates");
+	    map[C_NESTED_PREDICATES] = 0;
+	    hit++;
+	}
+
+	/* Multi-element path inside a predicate (e.g. a[b/c]) */
+	if (type == C_PATH && C_PREDICATE_PATHS < len && map[C_PREDICATE_PATHS]) {
+	    xo_xparse_node_t *cp = xo_xparse_node(xdp, xnp->xn_contents);
+	    if (cp && cp->xn_next) {
+		const char *tname = xo_xparse_fancy_token_name(C_PREDICATE_PATHS);
+		xo_xparse_warn(xdp, "%s%sxpath feature is unsupported: %s",
+			       tag ?: "", tag ? ": " : "",
+			       tname ?: "multi-element path in predicate");
+		map[C_PREDICATE_PATHS] = 0;
+		hit++;
+	    }
+	}
+    }
+
+    return hit;
 }
 
 static int
 xo_xparse_feature_warn_node (const char *tag, xo_xparse_data_t *xdp,
 			     int *map, int len,
-			     xo_xparse_node_id_t id)
+			     xo_xparse_node_id_t id, unsigned flags)
 {
     int hit = 0;
     xo_xparse_node_t *xnp;
 
     for ( ; id; id = xnp->xn_next) {
 	xnp = xo_xparse_node(xdp, id);
-	hit += xo_xparse_feature_warn_one_node(tag, xdp, map, len, id, xnp);
-	if (xnp->xn_contents)
+	hit += xo_xparse_feature_warn_one_node(tag, xdp, map, len, id, xnp,
+					       flags);
+	if (xnp->xn_contents) {
+	    unsigned child_flags = flags;
+	    if (xnp->xn_type == C_PREDICATE)
+		child_flags |= XWF_PREDICATE;
 	    hit += xo_xparse_feature_warn_node(tag, xdp, map, len,
-					       xnp->xn_contents);
+					       xnp->xn_contents, child_flags);
+	}
     }
 
     return hit;
@@ -662,7 +699,7 @@ xo_xpath_feature_warn_since (const char *tag, xo_xparse_data_t *xdp,
     int rc = 0;
 
     for (i = start, pp += start; i < xdp->xd_paths_cur; i++, pp++) {
-	rc += xo_xparse_feature_warn_node(tag, xdp, map, len, *pp);
+	rc += xo_xparse_feature_warn_node(tag, xdp, map, len, *pp, 0);
     }
 
     return rc;
