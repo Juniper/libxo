@@ -676,25 +676,100 @@ xo_xpath_feature_warn (const char *tag, xo_xparse_data_t *xdp,
     return xo_xpath_feature_warn_since(tag, xdp, 0, tokens, bytes);
 }
 
-int
-xo_xparse_ternary_rewrite (xo_xparse_data_t *xdp UNUSED,
-			   xo_xparse_node_id_t *d0 UNUSED,
-			   xo_xparse_node_id_t *d1 UNUSED,
-			   xo_xparse_node_id_t *d2 UNUSED,
-			   xo_xparse_node_id_t *d3 UNUSED,
-			   xo_xparse_node_id_t *d4 UNUSED,
-			   xo_xparse_str_id_t *d5 UNUSED)
+/*
+ * Append a constant string to the string buffer and return its offset,
+ * for use when constructing synthetic nodes outside the lexer.
+ */
+static xo_xparse_str_id_t
+xo_xparse_str_literal (xo_xparse_data_t *xdp, const char *str)
 {
+    xo_buffer_t *xbp = &xdp->xd_str_buf;
+    xo_off_t cur = xbp->xb_curp - xbp->xb_bufp;
+    size_t len = strlen(str);
+
+    if (xo_buf_append_val(xbp, str, len + 1) == NULL)
+	return 0;
+
+    return cur;
+}
+
+/*
+ * Rewrite a ternary expression into a choose() or choose2() function call.
+ *
+ * Full form:  cond ? then : alt  ->  choose(cond, then, alt)
+ * Short form: cond ?: alt        ->  choose2(cond, alt)   (then == NULL)
+ *
+ * The L_QUESTION node is repurposed as the function call node; L_COLON
+ * is abandoned in the node pool.
+ */
+int
+xo_xparse_ternary_rewrite (xo_xparse_data_t *xdp,
+			   xo_xparse_node_id_t *result,
+			   xo_xparse_node_id_t *cond,
+			   xo_xparse_node_id_t *question,
+			   xo_xparse_node_id_t *then,
+			   xo_xparse_node_id_t *colon UNUSED,
+			   xo_xparse_node_id_t *alt)
+{
+    xo_xparse_node_id_t fn_id = *question;
+    xo_xparse_node_id_t cond_id = *cond;
+    xo_xparse_node_id_t alt_id = *alt;
+    const char *name = (then != NULL) ? "choose" : "choose2";
+
+    xo_xparse_str_id_t name_id = xo_xparse_str_literal(xdp, name);
+
+    xo_xparse_node_set_type(xdp, fn_id, T_FUNCTION_NAME);
+    xo_xparse_node_set_str(xdp, fn_id, name_id);
+
+    if (then != NULL) {
+	xo_xparse_node_set_next(xdp, cond_id, *then);
+	xo_xparse_node_set_next(xdp, cond_id, alt_id);
+    } else {
+	xo_xparse_node_set_next(xdp, cond_id, alt_id);
+    }
+
+    xo_xparse_node_set_contents(xdp, fn_id, cond_id);
+
+    *result = fn_id;
     return 0;
 }
 
+/*
+ * Rewrite a _ b into concat(a, b).  If the left operand is already a
+ * concat() call (from a prior reduction), extend its argument list so
+ * that a _ b _ c produces flat concat(a, b, c) rather than nested calls.
+ *
+ * The L_UNDERSCORE node is repurposed as the function call node.
+ */
 int
-xo_xparse_concat_rewrite (xo_xparse_data_t *xdp UNUSED,
-			  xo_xparse_node_id_t *d0 UNUSED,
-			  xo_xparse_node_id_t *d1 UNUSED,
-			  xo_xparse_node_id_t *d2 UNUSED,
-			  xo_xparse_node_id_t *d3 UNUSED)
+xo_xparse_concat_rewrite (xo_xparse_data_t *xdp,
+			  xo_xparse_node_id_t *result,
+			  xo_xparse_node_id_t *left,
+			  xo_xparse_node_id_t *op,
+			  xo_xparse_node_id_t *right)
 {
+    xo_xparse_node_id_t left_id = *left;
+    xo_xparse_node_id_t right_id = *right;
+
+    xo_xparse_node_t *lnp = xo_xparse_node(xdp, left_id);
+    if (lnp != NULL && lnp->xn_type == T_FUNCTION_NAME) {
+	const char *str = xo_xparse_str(xdp, lnp->xn_str);
+	if (str && strcmp(str, "concat") == 0) {
+	    xo_xparse_node_set_contents(xdp, left_id, right_id);
+	    *result = left_id;
+	    return 0;
+	}
+    }
+
+    xo_xparse_str_id_t name_id = xo_xparse_str_literal(xdp, "concat");
+    xo_xparse_node_id_t fn_id = *op;
+
+    xo_xparse_node_set_type(xdp, fn_id, T_FUNCTION_NAME);
+    xo_xparse_node_set_str(xdp, fn_id, name_id);
+    xo_xparse_node_set_next(xdp, left_id, right_id);
+    xo_xparse_node_set_contents(xdp, fn_id, left_id);
+
+    *result = fn_id;
     return 0;
 }
 
