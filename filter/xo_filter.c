@@ -1065,6 +1065,18 @@ xo_eval_value_float (unsigned flags, xo_float_t val)
     return value;
 }
 
+static inline xo_eval_value_t
+xo_eval_value_string (int stype, unsigned flags, const char *str)
+{
+    xo_eval_value_t value = XO_EVAL_VALUE_ZERO;
+
+    value.xev_type = stype;
+    value.xev_flags = flags;
+    value.xev_str = str;
+
+    return value;
+}
+
 /*
  * C allows structure creation via fields, but doesn't support directly
  * assigning them, like either of these two lines:
@@ -1787,6 +1799,53 @@ xo_eval_func_boolean (XO_EVAL_NODE_ARGS)
 }
 
 static xo_eval_value_t
+xo_eval_func_string (XO_EVAL_NODE_ARGS)
+{
+    char *str = xo_eval_cast_string(xfp, argv[0]);
+    return xo_eval_value_string(C_DSTRING, 0, str);
+}
+
+static xo_eval_value_t
+xo_eval_func_normalize_space (XO_EVAL_NODE_ARGS)
+{
+    char *str = xo_eval_cast_string(xfp, argv[0]);
+    const char *p = str ?: "";
+
+    char *out = xo_realloc(NULL, strlen(p) + 1);
+    if (out == NULL) {
+	xo_free(str);
+	xo_eval_value_t result = xo_eval_value_make(C_DSTRING, 0, 0);
+	result.xev_str = strdup("");
+	return result;
+    }
+
+    char *q = out;
+
+    while (isspace((unsigned char) *p))	/* strip leading whitespace */
+	p++;
+
+    while (*p) {
+	if (isspace((unsigned char) *p)) {
+	    *q++ = ' ';
+	    while (isspace((unsigned char) *p))
+		p++;
+	} else {
+	    *q++ = *p++;
+	}
+    }
+
+    if (q > out && q[-1] == ' ')	/* strip trailing whitespace */
+	q--;
+    *q = '\0';
+
+    xo_free(str);
+
+    xo_eval_value_t result = xo_eval_value_make(C_DSTRING, 0, 0);
+    result.xev_str = out;
+    return result;
+}
+
+static xo_eval_value_t
 xo_eval_func_not (XO_EVAL_NODE_ARGS)
 {
     int bool = xo_eval_cast_boolean(xfp, argv[0]);
@@ -1993,8 +2052,10 @@ xo_eval_func_map_t xo_eval_functions[] = {
     { xo_eval_func_ends_with, "ends-with", 0, 2 },
     { xo_eval_func_false, "false", 0, 0 },
     { xo_eval_func_floor, "floor", 0, 1 },
+    { xo_eval_func_normalize_space, "normalize-space", 0, 1 },
     { xo_eval_func_not, "not", 0, 1 },
     { xo_eval_func_number, "number", 0, 1 },
+    { xo_eval_func_string, "string", 0, 1 },
     { xo_eval_func_starts_with, "starts-with", 0, 2 },
     { xo_eval_func_substring_after, "substring-after", 0, 2 },
     { xo_eval_func_substring_before, "substring-before", 0, 2 },
