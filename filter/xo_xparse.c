@@ -336,8 +336,6 @@ xo_xparse_keyword (xo_xparse_data_t *xdp)
 
     for (kmp = keywordMap; kmp->km_string; kmp++) {
 	if (xo_xparse_keyword_match(xdp, kmp->km_string)) {
-	    return kmp->km_ttype;
-
 	    if (kmp->km_flags & KMF_NODE_TEST) {
 		int look = xdp->xd_cur + strlen(kmp->km_string);
 
@@ -350,9 +348,10 @@ xo_xparse_keyword (xo_xparse_data_t *xdp)
 		}
 
 		/* Didn't see the open paren, so it's not a node test */
+		return 0;
 	    }
 
-	    return 0;
+	    return kmp->km_ttype;
 	}
     }
 
