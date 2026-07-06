@@ -1,5 +1,3 @@
-#run --libxo @fullpath
-
 # Non-key predicate field: filter ?item[host='beta'] where host is a plain
 # field (not declared with the 'k' key modifier).  Only the item with
 # host='beta' should appear in the output.
