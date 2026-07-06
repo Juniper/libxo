@@ -1,11 +1,11 @@
-main: input '#run --libxo @fullpath'
-main: input ''
 main: input '# choose2(a, b): if a is truthy return a's own value, else return b.'
 main: input '# Missing first key falls through to the second (fallback) key.'
 main: input '# Keys with an override are listed first so the filter resolves on override.'
 main: input 'r'
 main: status: zero
 main: input '?item[choose2(override, base-id) = '42']'
+adding filter: 'item[choose2(override, base-id) = '42']'
+added filter: 0
 --- 0: 17
     000017: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -21,7 +21,7 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ override 99'
 main: key: 'override'='99'
 main: status: track
@@ -34,7 +34,7 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ base-id 42'
 main: key: 'base-id'='42'
 main: status: full
@@ -44,7 +44,7 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ override 42'
 main: key: 'override'='42'
 main: status: full
@@ -57,7 +57,7 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ base-id 10'
 main: key: 'base-id'='10'
 main: status: track
@@ -74,6 +74,8 @@ main: input '# override=5 is truthy so the 5 itself is compared, not boolean tru
 main: input 'r'
 main: status: zero
 main: input '?item[choose2(override, val) > 3]'
+adding filter: 'item[choose2(override, val) > 3]'
+added filter: 0
 --- 0: 17
     000017: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -89,7 +91,7 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ override 5'
 main: key: 'override'='5'
 main: status: full
@@ -102,7 +104,7 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ val 4'
 main: key: 'val'='4'
 main: status: full
@@ -112,7 +114,7 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ override 2'
 main: key: 'override'='2'
 main: status: track
@@ -125,7 +127,7 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ val 1'
 main: key: 'val'='1'
 main: status: track
@@ -143,6 +145,8 @@ main: input '# Parens required when comparing the result (precedence lower than 
 main: input 'r'
 main: status: zero
 main: input '?item[(score ?: default_score) > 10]'
+adding filter: 'item[(score ?: default_score) > 10]'
+added filter: 0
 --- 0: 17
     000017: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -159,7 +163,7 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ score 15'
 main: key: 'score'='15'
 main: status: full
@@ -172,10 +176,10 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ score 0'
 main: key: 'score'='0'
-main: status: track
+main: status: predicate
 main: input '$ default_score 20'
 main: key: 'default_score'='20'
 main: status: full
@@ -185,7 +189,7 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ default_score 8'
 main: key: 'default_score'='8'
 main: status: track
@@ -195,7 +199,7 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ score 5'
 main: key: 'score'='5'
 main: status: track
@@ -214,6 +218,8 @@ main: input '# '?:' is right-recursive: a ?: b ?: c  parses as  a ?: (b ?: c).'
 main: input 'r'
 main: status: zero
 main: input '?item[(a ?: b ?: c) = '7']'
+adding filter: 'item[(a ?: b ?: c) = '7']'
+added filter: 0
 --- 0: 21
     000021: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -233,7 +239,7 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ a 7'
 main: key: 'a'='7'
 main: status: full
@@ -249,10 +255,10 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ a 0'
 main: key: 'a'='0'
-main: status: track
+main: status: predicate
 main: input '$ b 7'
 main: key: 'b'='7'
 main: status: full
@@ -265,10 +271,10 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ b 0'
 main: key: 'b'='0'
-main: status: track
+main: status: predicate
 main: input '$ c 7'
 main: key: 'c'='7'
 main: status: full
@@ -278,7 +284,7 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ c 3'
 main: key: 'c'='3'
 main: status: track
@@ -295,6 +301,8 @@ main: input '# Items with 'hello  world' (two spaces) normalize to 'hello world'
 main: input 'r'
 main: status: zero
 main: input '?item[normalize-space(text) = 'hello world']'
+adding filter: 'item[normalize-space(text) = 'hello world']'
+added filter: 0
 --- 0: 14
     000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -308,7 +316,7 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ text hello  world'
 main: key: 'text'='hello  world'
 main: status: full
@@ -318,7 +326,7 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ text hello world'
 main: key: 'text'='hello world'
 main: status: full
@@ -328,7 +336,7 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ text goodbye world'
 main: key: 'text'='goodbye world'
 main: status: track
@@ -345,6 +353,8 @@ main: input '# Without normalize-space, none of these values contain the literal
 main: input 'r'
 main: status: zero
 main: input '?item[contains(normalize-space(text), 'foo bar')]'
+adding filter: 'item[contains(normalize-space(text), 'foo bar')]'
+added filter: 0
 --- 0: 18
     000018: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -358,7 +368,7 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ text foo   bar baz'
 main: key: 'text'='foo   bar baz'
 main: status: full
@@ -368,7 +378,7 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ text baz foo   bar'
 main: key: 'text'='baz foo   bar'
 main: status: full
@@ -378,7 +388,7 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ text foo   baz bar'
 main: key: 'text'='foo   baz bar'
 main: status: track
@@ -388,7 +398,7 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ text something else'
 main: key: 'text'='something else'
 main: status: track
