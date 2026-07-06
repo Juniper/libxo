@@ -1,5 +1,3 @@
-#run --libxo @fullpath
-
 # Test 1: basic attribute equality predicate
 r
 ?interface[@name='eth0']
