@@ -1,5 +1,3 @@
-#run --libxo @fullpath
-
 # concat two key fields: only items where first+last = 'JohnDoe' pass
 r
 ?item[concat(first, last) = 'JohnDoe']
