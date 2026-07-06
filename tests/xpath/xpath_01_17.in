@@ -1,5 +1,3 @@
-#run --libxo @fullpath
-
 # round() rounds to nearest integer; .5 rounds toward positive infinity.
 r
 ?item[round(val) = 3]
