@@ -1,0 +1,31 @@
+{
+  "statistics": {
+    "socket": [
+      {
+        "protocol": "tcp4",
+        "receive-bytes-waiting": "1111",
+        "send-bytes-waiting": "1",
+        "local": {
+          "address": "172.16.188.131",
+          "port": "ssh"
+        },
+        "remote": {
+          "address": "172.16.188.1",
+          "port": "63510"
+        },
+        "tcp-state": "ESTABLISHED"
+      },
+      {
+        "address": "ffffa0000d003a80",
+        "type": "stream",
+        "receive-bytes-waiting": "2222",
+        "send-bytes-waiting": "2",
+        "vnode": "ffffa0000dce7000",
+        "connection": "0",
+        "first-reference": "0",
+        "next-reference": "0",
+        "path": "/tmp/ssh-DQWvehZ5Bz/agent.39523"
+      }
+    ]
+  }
+}
