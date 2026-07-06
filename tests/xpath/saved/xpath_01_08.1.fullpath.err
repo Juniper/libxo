@@ -1,6 +1,6 @@
-main: input '#run --libxo @fullpath:slax,pretty'
-main: input '#run'
 main: input '?/one[a>4.5 && a <6.5]/two[b>=5 div 2]/three[c<-4]/four'
+adding filter: '/one[a>4.5 && a <6.5]/two[b>=5 div 2]/three[c<-4]/four'
+added filter: 0
 --- 0: 1
     000001: type 67 (C_ABSOLUTE), str 1 [/], contents 0, next 2, prev 0 
     000002: type 70 (C_ELEMENT), str 3 [one], contents 3, next 17, prev 1 
@@ -32,6 +32,8 @@ main: input '?/one[a>4.5 && a <6.5]/two[b>=5 div 2]/three[c<-4]/four'
     000039: type 70 (C_ELEMENT), str 75 [four], contents 0, next 0, prev 29 
 main: status: zero
 main: input '?/uno[a<-3 + 5 div 2]/dos[3+5 == 2+6]/tres'
+adding filter: '/uno[a<-3 + 5 div 2]/dos[3+5 == 2+6]/tres'
+added filter: 0
 xpath_01: test: xpath feature is unsupported: plus sign ('+')
 --- 0: 1
     000001: type 67 (C_ABSOLUTE), str 1 [/], contents 0, next 2, prev 0 
@@ -87,7 +89,7 @@ xpath_01: test: xpath feature is unsupported: plus sign ('+')
     000074: type 70 (C_ELEMENT), str 135 [tres], contents 0, next 0, prev 59 
 main: status: zero
 main: input '+one'
-main: status: track
+main: status: predicate
 main: input '$a 5555'
 main: key: 'a'='5555'
 main: status: track
@@ -132,17 +134,17 @@ main: status: track
 main: input '-one'
 main: status: track
 main: input '+one'
-main: status: track
+main: status: predicate
 main: input '$a 4.85'
 main: key: 'a'='4.85'
 main: status: track
 main: input '+two'
-main: status: track
+main: status: predicate
 main: input '$b 2.7'
 main: key: 'b'='2.7'
 main: status: track
 main: input '+three'
-main: status: track
+main: status: predicate
 main: input '$c -3333'
 main: key: 'c'='-3333'
 main: status: track
@@ -158,7 +160,7 @@ main: status: track
 main: input '-two'
 main: status: track
 main: input '+two'
-main: status: track
+main: status: predicate
 main: input '$b 2'
 main: key: 'b'='2'
 main: status: track
@@ -178,6 +180,8 @@ main: input '-one'
 main: status: track
 main: input ''
 main: input '?one'
+adding filter: 'one'
+added filter: 0
 xpath_01: test: xpath feature is unsupported: plus sign ('+')
 --- 0: 1
     000001: type 67 (C_ABSOLUTE), str 1 [/], contents 0, next 2, prev 0 
