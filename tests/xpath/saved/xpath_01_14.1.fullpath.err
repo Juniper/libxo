@@ -1,9 +1,9 @@
-main: input '#run --libxo @fullpath'
-main: input ''
 main: input '# concat two key fields: only items where first+last = 'JohnDoe' pass'
 main: input 'r'
 main: status: zero
 main: input '?item[concat(first, last) = 'JohnDoe']'
+adding filter: 'item[concat(first, last) = 'JohnDoe']'
+added filter: 0
 --- 0: 17
     000017: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -19,10 +19,10 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ first John'
 main: key: 'first'='John'
-main: status: track
+main: status: predicate
 main: input '$ last Doe'
 main: key: 'last'='Doe'
 main: status: full
@@ -32,10 +32,10 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ first Jane'
 main: key: 'first'='Jane'
-main: status: track
+main: status: predicate
 main: input '$ last Doe'
 main: key: 'last'='Doe'
 main: status: track
@@ -45,10 +45,10 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ first John'
 main: key: 'first'='John'
-main: status: track
+main: status: predicate
 main: input '$ last Smith'
 main: key: 'last'='Smith'
 main: status: track
@@ -64,6 +64,8 @@ main: input '# concat with a literal separator'
 main: input 'r'
 main: status: zero
 main: input '?item[concat(host, ':', port) = 'db:5432']'
+adding filter: 'item[concat(host, ':', port) = 'db:5432']'
+added filter: 0
 --- 0: 20
     000020: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -80,10 +82,10 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ host db'
 main: key: 'host'='db'
-main: status: track
+main: status: predicate
 main: input '$ port 5432'
 main: key: 'port'='5432'
 main: status: full
@@ -93,10 +95,10 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ host db'
 main: key: 'host'='db'
-main: status: track
+main: status: predicate
 main: input '$ port 3306'
 main: key: 'port'='3306'
 main: status: track
@@ -106,10 +108,10 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ host web'
 main: key: 'host'='web'
-main: status: track
+main: status: predicate
 main: input '$ port 5432'
 main: key: 'port'='5432'
 main: status: track
@@ -125,6 +127,8 @@ main: input '# concat three arguments'
 main: input 'r'
 main: status: zero
 main: input '?item[concat(a, b, c) = 'xyz']'
+adding filter: 'item[concat(a, b, c) = 'xyz']'
+added filter: 0
 --- 0: 20
     000020: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -142,13 +146,13 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ a x'
 main: key: 'a'='x'
-main: status: track
+main: status: predicate
 main: input '$ b y'
 main: key: 'b'='y'
-main: status: track
+main: status: predicate
 main: input '$ c z'
 main: key: 'c'='z'
 main: status: full
@@ -158,13 +162,13 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ a x'
 main: key: 'a'='x'
-main: status: track
+main: status: predicate
 main: input '$ b y'
 main: key: 'b'='y'
-main: status: track
+main: status: predicate
 main: input '$ c w'
 main: key: 'c'='w'
 main: status: track
@@ -174,13 +178,13 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ a x'
 main: key: 'a'='x'
-main: status: track
+main: status: predicate
 main: input '$ b b'
 main: key: 'b'='b'
-main: status: track
+main: status: predicate
 main: input '$ c z'
 main: key: 'c'='z'
 main: status: track
@@ -196,6 +200,8 @@ main: input '# concat result used in starts-with'
 main: input 'r'
 main: status: zero
 main: input '?item[starts-with(concat(proto, '://'), 'http://')]'
+adding filter: 'item[starts-with(concat(proto, '://'), 'http://')]'
+added filter: 0
 --- 0: 21
     000021: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -210,7 +216,7 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ proto http'
 main: key: 'proto'='http'
 main: status: full
@@ -220,7 +226,7 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ proto ftp'
 main: key: 'proto'='ftp'
 main: status: track
@@ -230,7 +236,7 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ proto http'
 main: key: 'proto'='http'
 main: status: full
@@ -246,6 +252,8 @@ main: input '# '_' operator: two-arg concat, no parens needed (binds tighter tha
 main: input 'r'
 main: status: zero
 main: input '?item[first _ last = 'JohnDoe']'
+adding filter: 'item[first _ last = 'JohnDoe']'
+added filter: 0
 --- 0: 13
     000013: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -261,10 +269,10 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ first John'
 main: key: 'first'='John'
-main: status: track
+main: status: predicate
 main: input '$ last Doe'
 main: key: 'last'='Doe'
 main: status: full
@@ -274,10 +282,10 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ first Jane'
 main: key: 'first'='Jane'
-main: status: track
+main: status: predicate
 main: input '$ last Doe'
 main: key: 'last'='Doe'
 main: status: track
@@ -287,10 +295,10 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ first John'
 main: key: 'first'='John'
-main: status: track
+main: status: predicate
 main: input '$ last Smith'
 main: key: 'last'='Smith'
 main: status: track
@@ -306,6 +314,8 @@ main: input '# '_' three-arg with literal: exercises the flat-list extension in 
 main: input 'r'
 main: status: zero
 main: input '?item[host _ ':' _ port = 'db:5432']'
+adding filter: 'item[host _ ':' _ port = 'db:5432']'
+added filter: 0
 --- 0: 16
     000016: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -322,10 +332,10 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ host db'
 main: key: 'host'='db'
-main: status: track
+main: status: predicate
 main: input '$ port 5432'
 main: key: 'port'='5432'
 main: status: full
@@ -335,10 +345,10 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ host db'
 main: key: 'host'='db'
-main: status: track
+main: status: predicate
 main: input '$ port 3306'
 main: key: 'port'='3306'
 main: status: track
@@ -348,10 +358,10 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ host web'
 main: key: 'host'='web'
-main: status: track
+main: status: predicate
 main: input '$ port 5432'
 main: key: 'port'='5432'
 main: status: track
@@ -367,6 +377,8 @@ main: input '# '_' four-arg chain: two successive flat extensions (a_b_c_d -> co
 main: input 'r'
 main: status: zero
 main: input '?item[a _ b _ c _ d = 'wxyz']'
+adding filter: 'item[a _ b _ c _ d = 'wxyz']'
+added filter: 0
 --- 0: 19
     000019: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -386,16 +398,16 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ a w'
 main: key: 'a'='w'
-main: status: track
+main: status: predicate
 main: input '$ b x'
 main: key: 'b'='x'
-main: status: track
+main: status: predicate
 main: input '$ c y'
 main: key: 'c'='y'
-main: status: track
+main: status: predicate
 main: input '$ d z'
 main: key: 'd'='z'
 main: status: full
@@ -405,16 +417,16 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ a w'
 main: key: 'a'='w'
-main: status: track
+main: status: predicate
 main: input '$ b x'
 main: key: 'b'='x'
-main: status: track
+main: status: predicate
 main: input '$ c y'
 main: key: 'c'='y'
-main: status: track
+main: status: predicate
 main: input '$ d q'
 main: key: 'd'='q'
 main: status: track
@@ -424,16 +436,16 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ a w'
 main: key: 'a'='w'
-main: status: track
+main: status: predicate
 main: input '$ b X'
 main: key: 'b'='X'
-main: status: track
+main: status: predicate
 main: input '$ c y'
 main: key: 'c'='y'
-main: status: track
+main: status: predicate
 main: input '$ d z'
 main: key: 'd'='z'
 main: status: track
