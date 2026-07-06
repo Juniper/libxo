@@ -25,8 +25,9 @@
 #include "xo_xparse.h"
 #include "xo_filter.h"
 
-static int opt_debug = 0;
-static int opt_quiet = 0;
+static int opt_debug;
+static int opt_quiet;
+static const char *opt_filter;
 
 static char *
 trim (char *cp)
@@ -69,6 +70,36 @@ clean_token (char *cp)
 }
 
 static void
+do_add_filter (xo_handle_t *xop, xo_xparse_data_t *xdp, const char *filter)
+{
+    int xof_debug = xo_isset_flags(xop, XOF_DEBUG);
+    if (opt_debug)
+	xo_set_flags(xop, XOF_DEBUG);
+
+    fprintf(stderr, "adding filter: '%s'\n", filter);
+    int rc = xo_add_filter(xop, filter);
+    fprintf(stderr, "added filter: %d\n", rc);
+
+    /*
+     * We really _should_ fail here, but it's really wonderful
+     * to see the dumps of the internal data structures, so we
+     * ignore the return code an continue on.
+     */
+
+    int bad_horse[] = { C_DESCENDANT, 0 };
+
+    xo_xpath_feature_warn("test", xdp, bad_horse, "+");
+
+    if (!opt_quiet && !opt_debug && !xof_debug) {
+	xo_set_flags(xop, XOF_DEBUG);
+	xo_xparse_dump(xdp);
+    }
+
+    if (opt_debug || !xof_debug)
+	xo_clear_flags(xop, XOF_DEBUG);
+}
+
+static void
 do_work (xo_handle_t *xop, xo_filter_t *xfp, xo_xparse_data_t *xdp, FILE *in)
 {
     char *cp, buf[BUFSIZ];
@@ -92,31 +123,12 @@ do_work (xo_handle_t *xop, xo_filter_t *xfp, xo_xparse_data_t *xdp, FILE *in)
 	    continue;
 
 	case '?':
+	    if (opt_filter)
+		break;		/* Ignore if there's a command-line filter */
+
 	    cp = trim(cp + 1);
 
-	    int xof_debug = xo_isset_flags(xop, XOF_DEBUG);
-	    if (opt_debug)
-		xo_set_flags(xop, XOF_DEBUG);
-
-	    rc = xo_add_filter(xop, cp);
-
-	    /*
-	     * We really _should_ fail here, but it's really wonderful
-	     * to see the dumps of the internal data structures, so we
-	     * ignore the return code an continue on.
-	     */
-
-	    int bad_horse[] = { C_DESCENDANT, 0 };
-
-	    xo_xpath_feature_warn("test", xdp, bad_horse, "+");
-
-	    if (!opt_quiet && !opt_debug && !xof_debug) {
-		xo_set_flags(xop, XOF_DEBUG);
-		xo_xparse_dump(xdp);
-	    }
-
-	    if (opt_debug || !xof_debug)
-		xo_clear_flags(xop, XOF_DEBUG);
+	    do_add_filter(xop, xdp, cp);
 	    break;
 
 	case '+':
@@ -214,6 +226,9 @@ do_work (xo_handle_t *xop, xo_filter_t *xfp, xo_xparse_data_t *xdp, FILE *in)
 	    break;
 
 	case 'r':		/* Reset */
+	    if (opt_filter)
+		break;		/* Ignore if there's a command-line filter */
+
 	    /* Out with the old */
 	    xo_filter_destroy(xop, xfp);
 
@@ -262,6 +277,8 @@ main (int argc, char **argv)
     for (i = 1; argv[i]; i++) {
 	if (xo_streq(argv[i], "debug"))
 	    opt_debug = 1;
+	else if (xo_streq(argv[i], "filter"))
+	    opt_filter = argv[++i];
 	else if (xo_streq(argv[i], "input"))
 	    opt_input = argv[++i];
 	else if (xo_streq(argv[i], "quiet"))
@@ -290,6 +307,9 @@ main (int argc, char **argv)
     FILE *in = opt_input ? fopen(opt_input, "r") : stdin;
     if (in == NULL)
 	xo_err(1, "could not open file '%s'", opt_input);
+
+    if (opt_filter)
+	do_add_filter(xop, xdp, opt_filter);
 
     do_work(xop, xfp, xdp, in);
 
