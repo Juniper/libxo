@@ -1,5 +1,3 @@
-#run --libxo @fullpath
-
 # choose2(a, b): if a is truthy return a's own value, else return b.
 # Missing first key falls through to the second (fallback) key.
 # Keys with an override are listed first so the filter resolves on override.
