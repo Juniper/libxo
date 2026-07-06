@@ -1,0 +1,40 @@
+{
+  "one": {
+    "two": {
+      "three": {
+        "four": {
+          "five": "5"
+        }
+      }
+    }
+  },
+  "one": {
+    "two": "4"
+  },
+  "one": {
+    "two": "4",
+    "brokenness": "strife",
+    "something": "beautiful"
+  },
+  "a": {
+    "b": {
+      "c": {
+        "z": "zeee",
+        "d": {
+          "one": {
+
+          },
+          "two": {
+            "data": "2"
+          },
+          "three": {
+            "data": "3"
+          },
+          "four": {
+            "data": "4"
+          }
+        }
+      }
+    }
+  }
+}
