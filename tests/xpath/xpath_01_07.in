@@ -1,5 +1,3 @@
-#run --libxo @fullpath:slax,pretty
-#run
 ?/uno[x<4]/dos[y<=5]/tres
 ?/one/two/more
 ?three
