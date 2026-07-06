@@ -1,6 +1,6 @@
-main: input '#run --libxo @fullpath:slax,pretty'
-main: input '#run'
 main: input '?one/two/three/four'
+adding filter: 'one/two/three/four'
+added filter: 0
 --- 0: 9
     000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [one], contents 0, next 3, prev 0 
@@ -9,6 +9,8 @@ main: input '?one/two/three/four'
         000007: type 70 (C_ELEMENT), str 21 [four], contents 0, next 0, prev 5 
 main: status: zero
 main: input '?a/b/c/d'
+adding filter: 'a/b/c/d'
+added filter: 0
 --- 0: 9
     000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [one], contents 0, next 3, prev 0 
@@ -23,6 +25,8 @@ main: input '?a/b/c/d'
         000016: type 70 (C_ELEMENT), str 38 [d], contents 0, next 0, prev 14 
 main: status: zero
 main: input '?!e'
+adding filter: '!e'
+added filter: 0
 --- 0: 9
     000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [one], contents 0, next 3, prev 0 
@@ -40,6 +44,8 @@ main: input '?!e'
         000020: type 70 (C_ELEMENT), str 42 [e], contents 0, next 0, prev 0 
 main: status: zero
 main: input '?uno/dos/tres/cuatro'
+adding filter: 'uno/dos/tres/cuatro'
+added filter: 0
 --- 0: 9
     000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [one], contents 0, next 3, prev 0 
