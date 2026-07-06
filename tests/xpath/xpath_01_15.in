@@ -1,5 +1,3 @@
-#run --libxo @fullpath
-
 # choose() returns then-value when condition is boolean true, else-value otherwise.
 # Condition is a contains() call so it yields a proper boolean.
 r
