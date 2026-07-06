@@ -1,0 +1,18 @@
+{
+  "one": {
+    "two": {
+      "three": "4",
+      "output": "yes"
+    },
+    "two": {
+      "three": "5",
+      "output": "no"
+    },
+    "two": {
+      "three": "4",
+      "four": {
+        "five": "6"
+      }
+    }
+  }
+}
