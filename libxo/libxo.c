@@ -2129,6 +2129,19 @@ xo_failure (xo_handle_t *xop, const char *fmt, ...)
     va_end(vap);
 }
 
+void
+xo_failure_filter (xo_handle_t *xop, const char *fmt, ...)
+{
+    if (!XOF_ISSET(xop, XOF_FILTER_WARN))
+	return;
+
+    va_list vap;
+
+    va_start(vap, fmt);
+    xo_warn_hcv(xop, -1, XO_XWF_CHECK_WARN | XO_XWF_NO_EXTERR, fmt, vap);
+    va_end(vap);
+}
+
 /* Error callback bridging xo_parse_t errors to xo_failure() */
 static void
 xo_parse_fail_cb (void *data, const char *fmt, va_list vap)
@@ -2346,6 +2359,7 @@ static xo_flag_mapping_t xo_xof_names[] = {
     { XOF_COLUMNS, "columns" },
     { XOF_DEBUG, "debug" },
     { XOF_DTRT, "dtrt" },
+    { XOF_FILTER_WARN, "filter-warn" },
     { XOF_FLUSH, "flush" },
     { XOF_FLUSH_LINE, "flush-line" },
     { XOF_IGNORE_CLOSE, "ignore-close" },
@@ -5194,7 +5208,6 @@ xo_filt_want_output (xo_handle_t *xop UNUSED, xo_filter_status_t fstatus)
     switch (fstatus) {
     case XO_STATUS_ZERO:
     case XO_STATUS_FULL:
-    case XO_STATUS_PRED:
 	return TRUE;
     default:
 	return FALSE;
@@ -5226,6 +5239,15 @@ xo_filt_skip (xo_handle_t *xop, xo_xff_flags_t flags,
 
     /* We don't want to pass "value" fields when only tracking */
     if (!(flags & XFF_KEY) && fstatus == XO_STATUS_TRACK) {
+	/*
+	 * If we're inside a whiteboard capture for a PRED instance, buffer
+	 * all sibling/nested content tentatively (XML/JSON only — encoder
+	 * state cannot be rolled back by the whiteboard).
+	 */
+	if (XOIF_ISSET(xop, XOIF_FILTERING)
+		&& xo_style(xop) != XO_STYLE_ENCODER)
+	    return FALSE;
+
 	/* Don't skip if a pending predicate references this field */
 	if (name && xo_filter_needs_nonkey_field(xop, xo_filters(xop), name, nlen))
 	    return FALSE;
@@ -5249,15 +5271,28 @@ xo_filt_do_open_field (xo_handle_t *xop, const char *name, xo_ssize_t nlen,
 	fstatus = xo_filter_key(xop, xfp, name, nlen, value, vlen);
 	if (fstatus == XO_STATUS_FULL)
 	    xo_filt_mark_parents(xop, xo_stack_cur(xop), fstatus);
+	else if (fstatus == XO_STATUS_TRACK || fstatus == XO_STATUS_DEAD) {
+	    /* Predicate resolved FALSE; deactivate PRED bypass on instance frame */
+	    xo_stack_t *xsp = xo_stack_cur(xop);
+	    if (xsp && xsp->xs_fstatus == XO_STATUS_PRED)
+		xsp->xs_fstatus = XO_STATUS_TRACK;
+	}
 
 	/* The caller doesn't want us calling open/close_field */
 	if (!pass_field)
 	    return fstatus;
-    } else if (fstatus == XO_STATUS_TRACK && value && vlen > 0) {
+    } else if ((fstatus == XO_STATUS_TRACK || fstatus == XO_STATUS_PRED)
+	       && value && vlen > 0) {
 	/* Non-key field: buffer its value if a pending predicate references it */
 	fstatus = xo_filter_pred_field(xop, xfp, name, nlen, value, vlen);
 	if (fstatus == XO_STATUS_FULL)
 	    xo_filt_mark_parents(xop, xo_stack_cur(xop), fstatus);
+	else if (fstatus == XO_STATUS_TRACK || fstatus == XO_STATUS_DEAD) {
+	    /* Predicate resolved FALSE; deactivate PRED bypass on instance frame */
+	    xo_stack_t *xsp = xo_stack_cur(xop);
+	    if (xsp && xsp->xs_fstatus == XO_STATUS_PRED)
+		xsp->xs_fstatus = XO_STATUS_TRACK;
+	}
     }
 
     fstatus = xo_filter_open_field(xop, xfp, name, nlen);
@@ -8097,13 +8132,19 @@ xo_do_close_container (xo_handle_t *xop, const char *name)
 
     switch (xo_style(xop)) {
     case XO_STYLE_XML:
-	if (xop->xo_flags & XOF_FILTER)
+	/*
+	 * When inside a whiteboard capture for a PRED instance, don't roll
+	 * back this sub-container's content — the parent instance handles
+	 * commit/rollback as a unit.  Always write </tag> tentatively.
+	 */
+	if ((xop->xo_flags & XOF_FILTER) && !XOIF_ISSET(xop, XOIF_FILTERING))
 	    xo_filt_reset_parent(xop, xsp, old_fstatus, fstatus);
 
 	xo_depth_change(xop, name, -1, -1, XSS_CLOSE_CONTAINER,
 			XSF_FILTER, fstatus, 0);
 
-	if (old_fstatus == 0 || old_fstatus == XO_STATUS_FULL)
+	if (!(xop->xo_flags & XOF_FILTER) || XOIF_ISSET(xop, XOIF_FILTERING)
+		|| old_fstatus == 0 || old_fstatus == XO_STATUS_FULL)
 	    rc = xo_printf(xop, "%*s</%s%s>%s", xo_indent(xop),
 			   "", leader, name, ppn);
 	break;
@@ -8111,7 +8152,7 @@ xo_do_close_container (xo_handle_t *xop, const char *name)
     case XO_STYLE_JSON:
 	xo_stack_set_flags(xop);
 
-	if (xop->xo_flags & XOF_FILTER)
+	if ((xop->xo_flags & XOF_FILTER) && !XOIF_ISSET(xop, XOIF_FILTERING))
 	    xo_filt_reset_parent(xop, xsp, old_fstatus, fstatus);
 
 	pre_nl = XOF_ISSET(xop, XOF_PRETTY) ? "\n" : "";
@@ -8119,8 +8160,8 @@ xo_do_close_container (xo_handle_t *xop, const char *name)
 
 	xo_depth_change(xop, name, -1, -1, XSS_CLOSE_CONTAINER, 0, 0, 0);
 
-	if (!(xop->xo_flags & XOF_FILTER)
-	    || old_fstatus == XO_STATUS_ZERO || old_fstatus == XO_STATUS_FULL) {
+	if (!(xop->xo_flags & XOF_FILTER) || XOIF_ISSET(xop, XOIF_FILTERING)
+		|| old_fstatus == XO_STATUS_ZERO || old_fstatus == XO_STATUS_FULL) {
 	    rc = xo_printf(xop, "%s%*s}%s", pre_nl, xo_indent(xop), "", ppn);
 	    xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
 	}
@@ -8293,7 +8334,8 @@ xo_do_close_list (xo_handle_t *xop, const char *name)
 	    pre_nl = XOF_ISSET(xop, XOF_PRETTY) ? "\n" : "";
 	xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
 
-	if ((xop->xo_flags & XOF_FILTER) && xsp->xs_wb_off != XS_OFFSET_CLEAR) {
+	if ((xop->xo_flags & XOF_FILTER) && !XOIF_ISSET(xop, XOIF_FILTERING)
+		&& xsp->xs_wb_off != XS_OFFSET_CLEAR) {
 	    xo_filt_reset_parent(xop, xsp, xsp->xs_fstatus, xsp->xs_fstatus);
 	    xo_depth_change(xop, name, -1, -1, XSS_CLOSE_LIST, XSF_LIST, 0, 0);
 	    break;
@@ -8532,6 +8574,14 @@ xo_do_open_instance (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
 	break;
     }
 
+    /*
+     * If a non-key predicate is pending, ensure the whiteboard offset is
+     * recorded so we can roll back on predicate failure.  This must be set
+     * before xo_depth_change so that xs_wb_off is stored (not cleared).
+     */
+    if ((xop->xo_flags & XOF_FILTER) && fstatus == XO_STATUS_PRED)
+	XOIF_SET(xop, XOIF_FILTERING);
+
     xo_depth_change(xop, name, 1, 1, XSS_OPEN_INSTANCE,
 		    xo_stack_flags(flags), fstatus, start_offset);
 
@@ -8604,6 +8654,17 @@ xo_do_close_instance (xo_handle_t *xop, const char *name)
     /* Let the filter code know we're closing */
     xo_filter_status_t fstatus;
     fstatus = xo_filter_close_instance(xop, xo_filters(xop), name);
+
+    /*
+     * If a non-key predicate was force-resolved to FULL at close time
+     * (the predicate field was absent from this instance), commit the
+     * whiteboard so all tentatively-buffered sibling content is kept.
+     */
+    if ((xop->xo_flags & XOF_FILTER)
+	    && old_fstatus == XO_STATUS_PRED && fstatus == XO_STATUS_FULL) {
+	xo_filt_mark_parents(xop, xsp, XO_STATUS_FULL);
+	old_fstatus = XO_STATUS_FULL;
+    }
 
     switch (xo_style(xop)) {
     case XO_STYLE_XML:
