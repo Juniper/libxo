@@ -1,0 +1,272 @@
+main: input '# round() rounds to nearest integer; .5 rounds toward positive infinity.'
+main: input 'r'
+main: status: zero
+main: input '?item[round(val) = 3]'
+adding filter: 'item[round(val) = 3]'
+added filter: 0
+--- 0: 14
+    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0 
+                000008: type 14 (L_EQUALS), str 22 [=], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [round], contents 7, next 10, prev 0 
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
+                            000005: type 70 (C_ELEMENT), str 16 [val], contents 0, next 0, prev 0 
+                    000010: type 53 (T_NUMBER), str 24 [3], contents 0, next 0, prev 3 
+main: status: zero
+main: input '{item'
+main: filter: rc: 12
+main: status: zero
+main: input '<item'
+main: filter: rc: 6
+main: status: predicate
+main: input '$ val 2.6'
+main: key: 'val'='2.6'
+main: status: full
+main: input '= label a'
+main: field: 'label'='a'
+main: status: full
+main: input '>item'
+main: filter: rc: 6
+main: status: track
+main: input '<item'
+main: filter: rc: 8
+main: status: predicate
+main: input '$ val 3.0'
+main: key: 'val'='3.0'
+main: status: full
+main: input '= label b'
+main: field: 'label'='b'
+main: status: full
+main: input '>item'
+main: filter: rc: 6
+main: status: track
+main: input '<item'
+main: filter: rc: 8
+main: status: predicate
+main: input '$ val 3.4'
+main: key: 'val'='3.4'
+main: status: full
+main: input '= label c'
+main: field: 'label'='c'
+main: status: full
+main: input '>item'
+main: filter: rc: 6
+main: status: track
+main: input '<item'
+main: filter: rc: 8
+main: status: predicate
+main: input '$ val 3.5'
+main: key: 'val'='3.5'
+main: status: track
+main: input '= label d'
+main: field: 'label'='d'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: filter: rc: 8
+main: status: predicate
+main: input '$ val 3.6'
+main: key: 'val'='3.6'
+main: status: track
+main: input '= label e'
+main: field: 'label'='e'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# string-length() returns the number of characters in the string value.'
+main: input 'r'
+main: status: zero
+main: input '?item[string-length(name) > 4]'
+adding filter: 'item[string-length(name) > 4]'
+added filter: 0
+--- 0: 14
+    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0 
+                000008: type 15 (L_GRTR), str 31 [>], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [string-length], contents 7, next 10, prev 0 
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
+                            000005: type 70 (C_ELEMENT), str 24 [name], contents 0, next 0, prev 0 
+                    000010: type 53 (T_NUMBER), str 33 [4], contents 0, next 0, prev 3 
+main: status: zero
+main: input '{item'
+main: filter: rc: 14
+main: status: zero
+main: input '<item'
+main: filter: rc: 6
+main: status: predicate
+main: input '$ name eth0'
+main: key: 'name'='eth0'
+main: status: track
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: filter: rc: 6
+main: status: predicate
+main: input '$ name lo0'
+main: key: 'name'='lo0'
+main: status: track
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: filter: rc: 6
+main: status: predicate
+main: input '$ name wlan0'
+main: key: 'name'='wlan0'
+main: status: full
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: full
+main: input '>item'
+main: filter: rc: 6
+main: status: track
+main: input '<item'
+main: filter: rc: 8
+main: status: predicate
+main: input '$ name e1'
+main: key: 'name'='e1'
+main: status: track
+main: input '= val 4'
+main: field: 'val'='4'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# sum() adds its arguments; useful for combining numeric fields.'
+main: input 'r'
+main: status: zero
+main: input '?item[sum(rx, tx) > 100]'
+adding filter: 'item[sum(rx, tx) > 100]'
+added filter: 0
+--- 0: 17
+    000017: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 11, next 0, prev 0 
+                000011: type 15 (L_GRTR), str 24 [>], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [sum], contents 7, next 13, prev 0 
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 10, prev 0 
+                            000005: type 70 (C_ELEMENT), str 14 [rx], contents 0, next 0, prev 0 
+                        000010: type 74 (C_PATH), str 0 [], contents 8, next 0, prev 7 
+                            000008: type 70 (C_ELEMENT), str 19 [tx], contents 0, next 0, prev 0 
+                    000013: type 53 (T_NUMBER), str 26 [100], contents 0, next 0, prev 3 
+main: status: zero
+main: input '{item'
+main: filter: rc: 14
+main: status: zero
+main: input '<item'
+main: filter: rc: 6
+main: status: predicate
+main: input '$ rx 80'
+main: key: 'rx'='80'
+main: status: predicate
+main: input '$ tx 40'
+main: key: 'tx'='40'
+main: status: full
+main: input '= iface eth0'
+main: field: 'iface'='eth0'
+main: status: full
+main: input '>item'
+main: filter: rc: 6
+main: status: track
+main: input '<item'
+main: filter: rc: 8
+main: status: predicate
+main: input '$ rx 30'
+main: key: 'rx'='30'
+main: status: predicate
+main: input '$ tx 60'
+main: key: 'tx'='60'
+main: status: track
+main: input '= iface lo0'
+main: field: 'iface'='lo0'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: filter: rc: 8
+main: status: predicate
+main: input '$ rx 50'
+main: key: 'rx'='50'
+main: status: predicate
+main: input '$ tx 50'
+main: key: 'tx'='50'
+main: status: track
+main: input '= iface wlan0'
+main: field: 'iface'='wlan0'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# translate() replaces characters: here uppercasing a-z to A-Z subset.'
+main: input 'r'
+main: status: zero
+main: input '?item[translate(proto, 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ') = 'HTTP']'
+adding filter: 'item[translate(proto, 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ') = 'HTTP']'
+added filter: 0
+--- 0: 20
+    000020: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 14, next 0, prev 0 
+                000014: type 14 (L_EQUALS), str 86 [=], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [translate], contents 7, next 16, prev 0 
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
+                            000005: type 70 (C_ELEMENT), str 20 [proto], contents 0, next 0, prev 0 
+                        000008: type 54 (T_QUOTED), str 28 [abcdefghijklmnopqrstuvwxyz], contents 0, next 11, prev 7 
+                        000011: type 54 (T_QUOTED), str 57 [ABCDEFGHIJKLMNOPQRSTUVWXYZ], contents 0, next 0, prev 8 
+                    000016: type 54 (T_QUOTED), str 88 [HTTP], contents 0, next 0, prev 3 
+main: status: zero
+main: input '{item'
+main: filter: rc: 14
+main: status: zero
+main: input '<item'
+main: filter: rc: 6
+main: status: predicate
+main: input '$ proto http'
+main: key: 'proto'='http'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: filter: rc: 6
+main: status: track
+main: input '<item'
+main: filter: rc: 8
+main: status: predicate
+main: input '$ proto ftp'
+main: key: 'proto'='ftp'
+main: status: track
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: filter: rc: 8
+main: status: predicate
+main: input '$ proto HTTP'
+main: key: 'proto'='HTTP'
+main: status: full
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: full
+main: input '>item'
+main: filter: rc: 6
+main: status: track
+main: input '}item'
+main: status: track
