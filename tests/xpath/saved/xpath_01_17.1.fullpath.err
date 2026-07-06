@@ -1,9 +1,9 @@
-main: input '#run --libxo @fullpath'
-main: input ''
 main: input '# round() rounds to nearest integer; .5 rounds toward positive infinity.'
 main: input 'r'
 main: status: zero
 main: input '?item[round(val) = 3]'
+adding filter: 'item[round(val) = 3]'
+added filter: 0
 --- 0: 14
     000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -17,7 +17,7 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ val 2.6'
 main: key: 'val'='2.6'
 main: status: full
@@ -27,7 +27,7 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ val 3.0'
 main: key: 'val'='3.0'
 main: status: full
@@ -37,7 +37,7 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ val 3.4'
 main: key: 'val'='3.4'
 main: status: full
@@ -47,7 +47,7 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ val 3.5'
 main: key: 'val'='3.5'
 main: status: track
@@ -57,7 +57,7 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ val 3.6'
 main: key: 'val'='3.6'
 main: status: track
@@ -73,6 +73,8 @@ main: input '# string-length() returns the number of characters in the string va
 main: input 'r'
 main: status: zero
 main: input '?item[string-length(name) > 4]'
+adding filter: 'item[string-length(name) > 4]'
+added filter: 0
 --- 0: 14
     000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -86,7 +88,7 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ name eth0'
 main: key: 'name'='eth0'
 main: status: track
@@ -96,7 +98,7 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ name lo0'
 main: key: 'name'='lo0'
 main: status: track
@@ -106,7 +108,7 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ name wlan0'
 main: key: 'name'='wlan0'
 main: status: full
@@ -116,7 +118,7 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ name e1'
 main: key: 'name'='e1'
 main: status: track
@@ -132,6 +134,8 @@ main: input '# sum() adds its arguments; useful for combining numeric fields.'
 main: input 'r'
 main: status: zero
 main: input '?item[sum(rx, tx) > 100]'
+adding filter: 'item[sum(rx, tx) > 100]'
+added filter: 0
 --- 0: 17
     000017: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -147,10 +151,10 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ rx 80'
 main: key: 'rx'='80'
-main: status: track
+main: status: predicate
 main: input '$ tx 40'
 main: key: 'tx'='40'
 main: status: full
@@ -160,10 +164,10 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ rx 30'
 main: key: 'rx'='30'
-main: status: track
+main: status: predicate
 main: input '$ tx 60'
 main: key: 'tx'='60'
 main: status: track
@@ -173,10 +177,10 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ rx 50'
 main: key: 'rx'='50'
-main: status: track
+main: status: predicate
 main: input '$ tx 50'
 main: key: 'tx'='50'
 main: status: track
@@ -192,6 +196,8 @@ main: input '# translate() replaces characters: here uppercasing a-z to A-Z subs
 main: input 'r'
 main: status: zero
 main: input '?item[translate(proto, 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ') = 'HTTP']'
+adding filter: 'item[translate(proto, 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ') = 'HTTP']'
+added filter: 0
 --- 0: 20
     000020: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -207,7 +213,7 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ proto http'
 main: key: 'proto'='http'
 main: status: full
@@ -217,7 +223,7 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ proto ftp'
 main: key: 'proto'='ftp'
 main: status: track
@@ -227,7 +233,7 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ proto HTTP'
 main: key: 'proto'='HTTP'
 main: status: full
