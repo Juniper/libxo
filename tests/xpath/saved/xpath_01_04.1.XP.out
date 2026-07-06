@@ -1,0 +1,16 @@
+<one>
+  <two>
+    <three>4</three>
+    <output>yes</output>
+  </two>
+  <two>
+    <three>5</three>
+    <output>no</output>
+  </two>
+  <two>
+    <three>4</three>
+    <four>
+      <five>6</five>
+    </four>
+  </two>
+</one>
