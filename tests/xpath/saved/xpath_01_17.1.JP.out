@@ -1,0 +1,39 @@
+{
+  "item": [
+    {
+      "val": "2.6",
+      "label": "a"
+    },
+    {
+      "val": "3.0",
+      "label": "b"
+    },
+    {
+      "val": "3.4",
+      "label": "c"
+    }
+  ],
+  "item": [
+    {
+      "name": "wlan0",
+      "val": "3"
+    }
+  ],
+  "item": [
+    {
+      "rx": "80",
+      "tx": "40",
+      "iface": "eth0"
+    }
+  ],
+  "item": [
+    {
+      "proto": "http",
+      "val": "1"
+    },
+    {
+      "proto": "HTTP",
+      "val": "3"
+    }
+  ]
+}
