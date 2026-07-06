@@ -1,9 +1,9 @@
-main: input '#run --libxo @fullpath'
-main: input ''
 main: input '# true() always passes every instance'
 main: input 'r'
 main: status: zero
 main: input '?item[true()]'
+adding filter: 'item[true()]'
+added filter: 0
 --- 0: 9
     000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -49,6 +49,8 @@ main: input '# false() never passes any instance'
 main: input 'r'
 main: status: zero
 main: input '?item[false()]'
+adding filter: 'item[false()]'
+added filter: 0
 --- 0: 9
     000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -94,6 +96,8 @@ main: input '# not() inverts a key equality predicate'
 main: input 'r'
 main: status: zero
 main: input '?item[not(color='red')]'
+adding filter: 'item[not(color='red')]'
+added filter: 0
 --- 0: 14
     000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -107,7 +111,7 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ color red'
 main: key: 'color'='red'
 main: status: track
@@ -117,7 +121,7 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ color blue'
 main: key: 'color'='blue'
 main: status: full
@@ -127,7 +131,7 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ color red'
 main: key: 'color'='red'
 main: status: track
@@ -137,7 +141,7 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ color green'
 main: key: 'color'='green'
 main: status: full
@@ -153,6 +157,8 @@ main: input '# not(true()) is always false'
 main: input 'r'
 main: status: zero
 main: input '?item[not(true())]'
+adding filter: 'item[not(true())]'
+added filter: 0
 --- 0: 13
     000013: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -189,6 +195,8 @@ main: input '# not(false()) is always true'
 main: input 'r'
 main: status: zero
 main: input '?item[not(false())]'
+adding filter: 'item[not(false())]'
+added filter: 0
 --- 0: 13
     000013: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -225,6 +233,8 @@ main: input '# not(not(x)) == x: double negation is identity'
 main: input 'r'
 main: status: zero
 main: input '?item[not(not(color='red'))]'
+adding filter: 'item[not(not(color='red'))]'
+added filter: 0
 --- 0: 18
     000018: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -239,7 +249,7 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ color red'
 main: key: 'color'='red'
 main: status: full
@@ -249,7 +259,7 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ color blue'
 main: key: 'color'='blue'
 main: status: track
@@ -259,7 +269,7 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ color red'
 main: key: 'color'='red'
 main: status: full
@@ -275,6 +285,8 @@ main: input '# boolean(1) is true; boolean(0) is false'
 main: input 'r'
 main: status: zero
 main: input '?item[boolean(1)]'
+adding filter: 'item[boolean(1)]'
+added filter: 0
 --- 0: 11
     000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -310,6 +322,8 @@ main: input ''
 main: input 'r'
 main: status: zero
 main: input '?item[boolean(0)]'
+adding filter: 'item[boolean(0)]'
+added filter: 0
 --- 0: 11
     000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -346,6 +360,8 @@ main: input '# boolean() of a comparison is the same as the comparison itself'
 main: input 'r'
 main: status: zero
 main: input '?item[boolean(color='red')]'
+adding filter: 'item[boolean(color='red')]'
+added filter: 0
 --- 0: 14
     000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -359,7 +375,7 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ color red'
 main: key: 'color'='red'
 main: status: full
@@ -369,7 +385,7 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ color blue'
 main: key: 'color'='blue'
 main: status: track
@@ -379,7 +395,7 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ color red'
 main: key: 'color'='red'
 main: status: full
@@ -395,6 +411,8 @@ main: input '# ceiling() rounds fractional values up'
 main: input 'r'
 main: status: zero
 main: input '?item[ceiling(price) > 3]'
+adding filter: 'item[ceiling(price) > 3]'
+added filter: 0
 --- 0: 14
     000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -408,7 +426,7 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ price 1.2'
 main: key: 'price'='1.2'
 main: status: track
@@ -418,7 +436,7 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ price 3.1'
 main: key: 'price'='3.1'
 main: status: full
@@ -428,7 +446,7 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ price 3.9'
 main: key: 'price'='3.9'
 main: status: full
@@ -438,7 +456,7 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ price 2.7'
 main: key: 'price'='2.7'
 main: status: track
@@ -454,6 +472,8 @@ main: input '# floor() rounds fractional values down'
 main: input 'r'
 main: status: zero
 main: input '?item[floor(price) >= 3]'
+adding filter: 'item[floor(price) >= 3]'
+added filter: 0
 --- 0: 14
     000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -467,7 +487,7 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ price 2.9'
 main: key: 'price'='2.9'
 main: status: track
@@ -477,7 +497,7 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ price 3.0'
 main: key: 'price'='3.0'
 main: status: full
@@ -487,7 +507,7 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ price 3.7'
 main: key: 'price'='3.7'
 main: status: full
@@ -497,7 +517,7 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ price 4.1'
 main: key: 'price'='4.1'
 main: status: full
@@ -513,6 +533,8 @@ main: input '# ceiling(x) == floor(x) only when x is an integer'
 main: input 'r'
 main: status: zero
 main: input '?item[ceiling(price) == floor(price)]'
+adding filter: 'item[ceiling(price) == floor(price)]'
+added filter: 0
 --- 0: 18
     000018: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -528,7 +550,7 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ price 2.0'
 main: key: 'price'='2.0'
 main: status: full
@@ -538,7 +560,7 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ price 2.5'
 main: key: 'price'='2.5'
 main: status: track
@@ -548,7 +570,7 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ price 3.0'
 main: key: 'price'='3.0'
 main: status: full
@@ -558,7 +580,7 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ price 3.9'
 main: key: 'price'='3.9'
 main: status: track
@@ -574,6 +596,8 @@ main: input '# number() converts string key to numeric value; non-numeric string
 main: input 'r'
 main: status: zero
 main: input '?item[number(price) == 2]'
+adding filter: 'item[number(price) == 2]'
+added filter: 0
 --- 0: 14
     000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -587,7 +611,7 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ price 2.0'
 main: key: 'price'='2.0'
 main: status: full
@@ -597,9 +621,10 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ price 2gether'
 main: key: 'price'='2gether'
+xpath_01: invalid number value: '2gether'
 main: status: track
 main: input '= val b'
 main: field: 'val'='b'
@@ -607,7 +632,7 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ price 3'
 main: key: 'price'='3'
 main: status: track
@@ -617,9 +642,10 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ price 2.0.4.5'
 main: key: 'price'='2.0.4.5'
+xpath_01: invalid number value: '2.0.4.5'
 main: status: track
 main: input '= val d'
 main: field: 'val'='d'
@@ -633,6 +659,8 @@ main: input '# contains(haystack, needle) is true when haystack contains needle 
 main: input 'r'
 main: status: zero
 main: input '?item[contains(label, 'eth')]'
+adding filter: 'item[contains(label, 'eth')]'
+added filter: 0
 --- 0: 14
     000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -645,7 +673,7 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ label eth0'
 main: key: 'label'='eth0'
 main: status: full
@@ -655,7 +683,7 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ label lo0'
 main: key: 'label'='lo0'
 main: status: track
@@ -665,7 +693,7 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ label eth1'
 main: key: 'label'='eth1'
 main: status: full
@@ -675,7 +703,7 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ label wlan0'
 main: key: 'label'='wlan0'
 main: status: track
@@ -691,6 +719,8 @@ main: input '# contains with value from the middle of the string'
 main: input 'r'
 main: status: zero
 main: input '?item[contains(name, 'oo')]'
+adding filter: 'item[contains(name, 'oo')]'
+added filter: 0
 --- 0: 14
     000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -703,7 +733,7 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ name foo'
 main: key: 'name'='foo'
 main: status: full
@@ -713,7 +743,7 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ name bar'
 main: key: 'name'='bar'
 main: status: track
@@ -723,7 +753,7 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ name foobar'
 main: key: 'name'='foobar'
 main: status: full
@@ -733,7 +763,7 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ name boo'
 main: key: 'name'='boo'
 main: status: full
@@ -749,6 +779,8 @@ main: input '# contains combined with not()'
 main: input 'r'
 main: status: zero
 main: input '?item[not(contains(label, 'eth'))]'
+adding filter: 'item[not(contains(label, 'eth'))]'
+added filter: 0
 --- 0: 18
     000018: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -762,7 +794,7 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ label eth0'
 main: key: 'label'='eth0'
 main: status: track
@@ -772,7 +804,7 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ label lo0'
 main: key: 'label'='lo0'
 main: status: full
@@ -782,7 +814,7 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ label eth1'
 main: key: 'label'='eth1'
 main: status: track
@@ -792,7 +824,7 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ label wlan0'
 main: key: 'label'='wlan0'
 main: status: full
@@ -808,6 +840,8 @@ main: input '# substring-before(str, needle) returns the part before the first n
 main: input 'r'
 main: status: zero
 main: input '?item[substring-before(iface, '.') = 'eth0']'
+adding filter: 'item[substring-before(iface, '.') = 'eth0']'
+added filter: 0
 --- 0: 17
     000017: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -822,7 +856,7 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ iface eth0.0'
 main: key: 'iface'='eth0.0'
 main: status: full
@@ -832,7 +866,7 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ iface eth1.0'
 main: key: 'iface'='eth1.0'
 main: status: track
@@ -842,7 +876,7 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ iface eth0.1'
 main: key: 'iface'='eth0.1'
 main: status: full
@@ -852,7 +886,7 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ iface lo0'
 main: key: 'iface'='lo0'
 main: status: track
@@ -868,6 +902,8 @@ main: input '# substring-before returns '' when needle is absent (no match)'
 main: input 'r'
 main: status: zero
 main: input '?item[substring-before(name, '-') = 'pkg']'
+adding filter: 'item[substring-before(name, '-') = 'pkg']'
+added filter: 0
 --- 0: 17
     000017: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -882,7 +918,7 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ name pkg-a'
 main: key: 'name'='pkg-a'
 main: status: full
@@ -892,7 +928,7 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ name pkg-b'
 main: key: 'name'='pkg-b'
 main: status: full
@@ -902,7 +938,7 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ name lib-c'
 main: key: 'name'='lib-c'
 main: status: track
@@ -912,7 +948,7 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ name nohyphen'
 main: key: 'name'='nohyphen'
 main: status: track
@@ -928,6 +964,8 @@ main: input '# substring-after(str, needle) returns the part after the first nee
 main: input 'r'
 main: status: zero
 main: input '?item[substring-after(version, '-') = '2']'
+adding filter: 'item[substring-after(version, '-') = '2']'
+added filter: 0
 --- 0: 17
     000017: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -942,7 +980,7 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ version pkg-1'
 main: key: 'version'='pkg-1'
 main: status: track
@@ -952,7 +990,7 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ version pkg-2'
 main: key: 'version'='pkg-2'
 main: status: full
@@ -962,7 +1000,7 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ version lib-2'
 main: key: 'version'='lib-2'
 main: status: full
@@ -972,7 +1010,7 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ version nohyphen'
 main: key: 'version'='nohyphen'
 main: status: track
@@ -988,6 +1026,8 @@ main: input '# substring-after returns '' when needle absent (no match)'
 main: input 'r'
 main: status: zero
 main: input '?item[substring-after(path, '/') = 'usr']'
+adding filter: 'item[substring-after(path, '/') = 'usr']'
+added filter: 0
 --- 0: 17
     000017: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -1002,7 +1042,7 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ path /usr'
 main: key: 'path'='/usr'
 main: status: full
@@ -1012,7 +1052,7 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ path /etc'
 main: key: 'path'='/etc'
 main: status: track
@@ -1022,7 +1062,7 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ path noslash'
 main: key: 'path'='noslash'
 main: status: track
@@ -1038,6 +1078,8 @@ main: input '# composition: starts-with(substring-after(name, '.'), 'e')'
 main: input 'r'
 main: status: zero
 main: input '?item[starts-with(substring-after(name, '.'), 'e')]'
+adding filter: 'item[starts-with(substring-after(name, '.'), 'e')]'
+added filter: 0
 --- 0: 21
     000021: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -1052,7 +1094,7 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ name lo.eth0'
 main: key: 'name'='lo.eth0'
 main: status: full
@@ -1062,7 +1104,7 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ name lo.lo0'
 main: key: 'name'='lo.lo0'
 main: status: track
@@ -1072,7 +1114,7 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ name lo.eth1'
 main: key: 'name'='lo.eth1'
 main: status: full
@@ -1082,7 +1124,7 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ name nodot'
 main: key: 'name'='nodot'
 main: status: track
