@@ -1,0 +1,70 @@
+<five>
+  <six>
+    <seven>seventh</seven>
+    <eight>
+      <nine>ninth</nine>
+    </eight>
+  </six>
+</five>
+<six>
+  <seven>single-layer</seven>
+  <ten>
+    <four>fourth</four>
+  </ten>
+</six>
+<one>
+  <two>
+    <three>10</three>
+    <value>10</value>
+  </two>
+  <six>
+    <seven>seventh</seven>
+    <six2>
+      <eight>eighth</eight>
+    </six2>
+  </six>
+  <two>
+    <three>9</three>
+    <value>9</value>
+  </two>
+  <two>
+    <three>8</three>
+    <value>8</value>
+  </two>
+  <two>
+    <three>7</three>
+    <value>7</value>
+  </two>
+  <two>
+    <three>10</three>
+    <value>10</value>
+  </two>
+  <two>
+    <three>9</three>
+    <value>9</value>
+  </two>
+  <two>
+    <three>8</three>
+    <value>8</value>
+  </two>
+  <two>
+    <three>7</three>
+    <value>7</value>
+  </two>
+  <two>
+    <three>ten</three>
+    <value>10</value>
+  </two>
+  <two>
+    <three>nine</three>
+    <value>9</value>
+  </two>
+  <two>
+    <three>eight</three>
+    <value>8</value>
+  </two>
+  <two>
+    <three>seven</three>
+    <value>7</value>
+  </two>
+</one>
