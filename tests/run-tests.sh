@@ -48,24 +48,22 @@ info () {
     mecho "$@"
 }
 
-format_options["fullpath"]="@fullpath"
-
 set_fmt_option () {
     case $1 in
+	fullpath*)
+	    opt="--libxo @$1"
+	    ;;
 	*)
-	    if [ -z "${format_options[$1]}" ]; then
-		opt="--libxo:$1";
-	    else
-		opt="--libxo ${format_options[$1]}";
-            fi;;
+	    opt="--libxo:$1"
+	    ;;
     esac
 }
 
 run_tests () {
     oname=$name.$ds.$fmt
     out=out/$oname
-    mecho "... $test ... $name ... $ds ..."
-    set_fmt_option
+    mecho "... $test ... $fmt ... $name ... $ds ..."
+    set_fmt_option 
     run "$test $LIBXOPTS $opt $data input $input > $out.out 2> $out.err"
 
     echo "$oname.out" >> $FILES
@@ -82,12 +80,12 @@ do_run_one_command () {
     local ds=$1 ; shift
     local input=$1 ; shift
 
-    local oname=$name.$ds.$fmt
+    local oname=`echo "$name.$ds.$fmt" | sed -e 's@:@_@g' -e 's@,@_@g'`
     local out=out/$oname
 
     mecho "... $test ... $name ... $ds ..."
 
-    set_fmt_option
+    set_fmt_option $fmt
     run "$test $LIBXOPTS $opt $* input $input > $out.out 2> $out.err"
 
     echo "$oname.out" >> $FILES
@@ -105,10 +103,17 @@ do_run_one_input () {
     local name=`basename $input .in`
     local ds=1
 
-    grep '^#run' $input | while read comment arguments ; do
-	do_run_one_command $test $fmt $name $ds $input $arguments
-	ds=`expr $ds + 1`
-    done
+    # echo "run_one_input: ${test}::${fmt}::${input} ..."
+
+    do_run_one_command $test $fmt $name $ds $input
+
+    run_data=`grep '^#run' $input`
+    if [ ! -z "${run_data}" ]; then
+        echo "${run_data}" | while read comment arguments ; do
+	    ds=`expr $ds + 1`
+	    do_run_one_command $test $fmt $name $ds $input $arguments
+	done
+    fi
 }
 
 do_run_one_test () {
@@ -165,14 +170,26 @@ accept_file () {
     fi
 }
 
-accept_tests () {
-    oname=$name.$ds.$fmt
+do_one_accept () {
+    local test=$1 ; shift
+    local fmt=$1 ; shift
+    local name=$1; shift
+    local ds=$1; shift
+    local input=$1; shift
+
+    local oname=`echo "$name.$ds.$fmt" | sed -e 's@:@_@g' -e 's@,@_@g'`
 
     accept_file out/$oname.out ${SRCDIR}/saved/$oname.out
     accept_file out/$oname.err ${SRCDIR}/saved/$oname.err
 }
 
 do_accept () {
+    local base
+    local fmt
+    local input
+    local ds
+    local name
+
     mkdir -p ${SRCDIR}/saved
 
     for test in ${TESTS}; do
@@ -184,9 +201,12 @@ do_accept () {
 		if [ -f $input ]; then
 		    name=`basename $input .in`
 		    ds=1
+
+		    do_one_accept $test $fmt $name $ds $input
+
 		    grep '^#run' $input | while read comment data ; do
-			accept_tests
 			ds=`expr $ds + 1`
+			do_one_accept $test $fmt $name $ds $input
 		    done
 		fi
 	    done
