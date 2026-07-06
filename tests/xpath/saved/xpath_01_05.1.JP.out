@@ -1,0 +1,53 @@
+{
+  "one": {
+    "two": {
+      "three": {
+        "four": {
+          "data": "foo",
+          "five": {
+            "data": "goo",
+            "six": {
+              "data": "hoo"
+            }
+          },
+          "data": "ioo"
+        },
+        "data": "joo"
+      }
+    },
+    "two": {
+      "a": {
+        "b": {
+          "c": {
+            "uno": {
+
+            },
+            "uno": {
+
+            },
+            "d": {
+              "e": {
+                "f": {
+
+                }
+              }
+            },
+            "d": {
+              "data": "koo",
+              "e": {
+                "f": {
+
+                }
+              }
+            }
+          }
+        }
+      },
+      "three": {
+        "four": {
+          "data": "moo"
+        }
+      }
+    }
+  }
+}
