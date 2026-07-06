@@ -1,10 +1,10 @@
-main: input '#run --libxo @fullpath'
-main: input ''
 main: input '# '*' wildcard step matches any container at that path position.'
 main: input '# ?*/item selects instances regardless of which top-level container wraps them.'
 main: input 'r'
 main: status: zero
 main: input '?*/item[id = '2']'
+adding filter: '*/item[id = '2']'
+added filter: 0
 --- 0: 1
     000001: type 46 (L_ASTERISK), str 1 [*], contents 0, next 3, prev 0 
     000003: type 70 (C_ELEMENT), str 5 [item], contents 4, next 0, prev 1 
@@ -19,7 +19,7 @@ main: status: track
 main: input '{item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ id 1'
 main: key: 'id'='1'
 main: status: track
@@ -29,7 +29,7 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ id 2'
 main: key: 'id'='2'
 main: status: full
@@ -47,7 +47,7 @@ main: status: track
 main: input '{item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ id 2'
 main: key: 'id'='2'
 main: status: full
@@ -57,7 +57,7 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ id 3'
 main: key: 'id'='3'
 main: status: track
@@ -75,6 +75,8 @@ main: input '# Multi-step wildcard: top/*/leaf — middle container can be anyth
 main: input 'r'
 main: status: zero
 main: input '?top/*/leaf[val = 'x']'
+adding filter: 'top/*/leaf[val = 'x']'
+added filter: 0
 --- 0: 14
     000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [top], contents 0, next 3, prev 0 
@@ -93,7 +95,7 @@ main: status: track
 main: input '{leaf'
 main: status: track
 main: input '<leaf'
-main: status: track
+main: status: predicate
 main: input '$ val x'
 main: key: 'val'='x'
 main: status: full
@@ -103,7 +105,7 @@ main: status: full
 main: input '>leaf'
 main: status: track
 main: input '<leaf'
-main: status: track
+main: status: predicate
 main: input '$ val y'
 main: key: 'val'='y'
 main: status: track
@@ -121,7 +123,7 @@ main: status: track
 main: input '{leaf'
 main: status: track
 main: input '<leaf'
-main: status: track
+main: status: predicate
 main: input '$ val x'
 main: key: 'val'='x'
 main: status: full
