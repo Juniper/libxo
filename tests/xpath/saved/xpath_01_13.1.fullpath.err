@@ -1,9 +1,9 @@
-main: input '#run --libxo @fullpath'
-main: input ''
 main: input '# too few arguments to a two-argument function'
 main: input 'r'
 main: status: zero
 main: input '?item[contains(name)]'
+adding filter: 'item[contains(name)]'
+added filter: 0
 --- 0: 11
     000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -43,6 +43,8 @@ main: input '# too many arguments to a two-argument function'
 main: input 'r'
 main: status: zero
 main: input '?item[starts-with(name, 'foo', 'extra')]'
+adding filter: 'item[starts-with(name, 'foo', 'extra')]'
+added filter: 0
 --- 0: 17
     000017: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -84,6 +86,8 @@ main: input '# too few arguments to a one-argument function'
 main: input 'r'
 main: status: zero
 main: input '?item[not()]'
+adding filter: 'item[not()]'
+added filter: 0
 --- 0: 9
     000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -121,6 +125,8 @@ main: input '# too many arguments to a zero-argument function'
 main: input 'r'
 main: status: zero
 main: input '?item[true('extra')]'
+adding filter: 'item[true('extra')]'
+added filter: 0
 --- 0: 11
     000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -159,6 +165,8 @@ main: input '# too few arguments to a variable-argument function (concat needs >
 main: input 'r'
 main: status: zero
 main: input '?item[concat('only-one')]'
+adding filter: 'item[concat('only-one')]'
+added filter: 0
 --- 0: 11
     000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -186,6 +194,8 @@ main: input '# too few arguments to ceiling'
 main: input 'r'
 main: status: zero
 main: input '?item[ceiling()]'
+adding filter: 'item[ceiling()]'
+added filter: 0
 --- 0: 9
     000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
