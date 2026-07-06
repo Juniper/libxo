@@ -1,6 +1,6 @@
-main: input '#run --libxo @fullpath:slax,pretty'
-main: input '#run'
 main: input '?/uno[x<4]/dos[y<=5]/tres'
+adding filter: '/uno[x<4]/dos[y<=5]/tres'
+added filter: 0
 --- 0: 1
     000001: type 67 (C_ABSOLUTE), str 1 [/], contents 0, next 2, prev 0 
     000002: type 70 (C_ELEMENT), str 3 [uno], contents 3, next 11, prev 1 
@@ -18,6 +18,8 @@ main: input '?/uno[x<4]/dos[y<=5]/tres'
     000020: type 70 (C_ELEMENT), str 36 [tres], contents 0, next 0, prev 11 
 main: status: zero
 main: input '?/one/two/more'
+adding filter: '/one/two/more'
+added filter: 0
 --- 0: 1
     000001: type 67 (C_ABSOLUTE), str 1 [/], contents 0, next 2, prev 0 
     000002: type 70 (C_ELEMENT), str 3 [uno], contents 3, next 11, prev 1 
@@ -40,6 +42,8 @@ main: input '?/one/two/more'
     000028: type 70 (C_ELEMENT), str 55 [more], contents 0, next 0, prev 26 
 main: status: zero
 main: input '?three'
+adding filter: 'three'
+added filter: 0
 --- 0: 1
     000001: type 67 (C_ABSOLUTE), str 1 [/], contents 0, next 2, prev 0 
     000002: type 70 (C_ELEMENT), str 3 [uno], contents 3, next 11, prev 1 
@@ -65,12 +69,12 @@ main: input '?three'
         000031: type 70 (C_ELEMENT), str 60 [three], contents 0, next 0, prev 0 
 main: status: zero
 main: input '+uno'
-main: status: track
+main: status: predicate
 main: input '$x 2'
 main: key: 'x'='2'
 main: status: track
 main: input '+dos'
-main: status: track
+main: status: predicate
 main: input '$y 5'
 main: key: 'y'='5'
 main: status: track
