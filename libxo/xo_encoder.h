@@ -212,4 +212,12 @@ xo_whiteboard_op_name (xo_whiteboard_op_t op);
 void
 xo_failure (xo_handle_t *xop, const char *fmt, ...);
 
+/*
+ * Similar to xo_failure, but used in filter code, which, depending on
+ * the incoming data, might be insanely verbose, so it gets its own
+ * flag ("--libxo filter-warn").
+ */
+void
+xo_failure_filter (xo_handle_t *xop, const char *fmt, ...);
+
 #endif /* XO_ENCODER_H */
