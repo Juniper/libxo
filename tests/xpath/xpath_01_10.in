@@ -1,4 +1,3 @@
-#run --libxo @fullpath
 ?two[starts-with(three, "n")]
 
 ?two[three - 5 == 5]
