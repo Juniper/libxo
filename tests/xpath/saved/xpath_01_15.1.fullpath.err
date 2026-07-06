@@ -1,10 +1,10 @@
-main: input '#run --libxo @fullpath'
-main: input ''
 main: input '# choose() returns then-value when condition is boolean true, else-value otherwise.'
 main: input '# Condition is a contains() call so it yields a proper boolean.'
 main: input 'r'
 main: status: zero
 main: input '?item[choose(contains(name, 'eth'), name, 'none') = 'eth0']'
+adding filter: 'item[choose(contains(name, 'eth'), name, 'none') = 'eth0']'
+added filter: 0
 --- 0: 27
     000027: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -23,7 +23,7 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ name eth0'
 main: key: 'name'='eth0'
 main: status: full
@@ -33,7 +33,7 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ name lo0'
 main: key: 'name'='lo0'
 main: status: track
@@ -43,7 +43,7 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ name eth1'
 main: key: 'name'='eth1'
 main: status: track
@@ -59,6 +59,8 @@ main: input '# choose with a numeric comparison as the condition'
 main: input 'r'
 main: status: zero
 main: input '?item[choose(val > 2, 'high', 'low') = 'high']'
+adding filter: 'item[choose(val > 2, 'high', 'low') = 'high']'
+added filter: 0
 --- 0: 23
     000023: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -76,7 +78,7 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ val 1'
 main: key: 'val'='1'
 main: status: track
@@ -86,7 +88,7 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ val 3'
 main: key: 'val'='3'
 main: status: full
@@ -96,7 +98,7 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ val 5'
 main: key: 'val'='5'
 main: status: full
@@ -112,6 +114,8 @@ main: input '# choose result used as argument to contains(); condition is an equ
 main: input 'r'
 main: status: zero
 main: input '?item[contains(choose(flag = '1', name, alt), 'eth')]'
+adding filter: 'item[contains(choose(flag = '1', name, alt), 'eth')]'
+added filter: 0
 --- 0: 27
     000027: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -131,10 +135,10 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ flag 1'
 main: key: 'flag'='1'
-main: status: track
+main: status: predicate
 main: input '$ name eth0'
 main: key: 'name'='eth0'
 main: status: full
@@ -147,13 +151,13 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ flag 0'
 main: key: 'flag'='0'
-main: status: track
+main: status: predicate
 main: input '$ name eth1'
 main: key: 'name'='eth1'
-main: status: track
+main: status: predicate
 main: input '$ alt lo0'
 main: key: 'alt'='lo0'
 main: status: track
@@ -163,10 +167,10 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ flag 1'
 main: key: 'flag'='1'
-main: status: track
+main: status: predicate
 main: input '$ name wlan0'
 main: key: 'name'='wlan0'
 main: status: track
