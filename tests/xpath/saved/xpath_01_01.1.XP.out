@@ -1,0 +1,37 @@
+<one>
+  <two>
+    <three>
+      <four>
+        <five>5</five>
+      </four>
+    </three>
+  </two>
+</one>
+<one>
+  <two>4</two>
+</one>
+<one>
+  <two>4</two>
+  <brokenness>strife</brokenness>
+  <something>beautiful</something>
+</one>
+<a>
+  <b>
+    <c>
+      <z>zeee</z>
+      <d>
+        <one>
+        </one>
+        <two>
+          <data>2</data>
+        </two>
+        <three>
+          <data>3</data>
+        </three>
+        <four>
+          <data>4</data>
+        </four>
+      </d>
+    </c>
+  </b>
+</a>
