@@ -1,5 +1,6 @@
-main: input '#run --libxo @fullpath'
 main: input '?two[starts-with(three, "n")]'
+adding filter: 'two[starts-with(three, "n")]'
+added filter: 0
 --- 0: 14
     000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [two], contents 2, next 0, prev 0 
@@ -14,7 +15,7 @@ main: input '#?two[three - 5 == 5]'
 main: input '+one'
 main: status: track
 main: input '+two'
-main: status: track
+main: status: predicate
 main: input '$three 10'
 main: key: 'three'='10'
 main: status: track
@@ -24,7 +25,7 @@ main: status: track
 main: input '-two'
 main: status: track
 main: input '+two'
-main: status: track
+main: status: predicate
 main: input '$three 9'
 main: key: 'three'='9'
 main: status: track
@@ -34,7 +35,7 @@ main: status: track
 main: input '-two'
 main: status: track
 main: input '+two'
-main: status: track
+main: status: predicate
 main: input '$three 8'
 main: key: 'three'='8'
 main: status: track
@@ -44,7 +45,7 @@ main: status: track
 main: input '-two'
 main: status: track
 main: input '+two'
-main: status: track
+main: status: predicate
 main: input '$three 7'
 main: key: 'three'='7'
 main: status: track
@@ -57,6 +58,8 @@ main: input ''
 main: input 'r'
 main: status: zero
 main: input '?two[(three + 3) div 4 == (10 - 2) mod 5]'
+adding filter: 'two[(three + 3) div 4 == (10 - 2) mod 5]'
+added filter: 0
 xpath_01: test: xpath feature is unsupported: plus sign ('+')
 --- 0: 28
     000028: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
@@ -78,7 +81,7 @@ xpath_01: test: xpath feature is unsupported: plus sign ('+')
                         000024: type 53 (T_NUMBER), str 45 [5], contents 0, next 0, prev 15 
 main: status: zero
 main: input '+two'
-main: status: track
+main: status: predicate
 main: input '$three 10'
 main: key: 'three'='10'
 main: status: track
@@ -88,7 +91,7 @@ main: status: track
 main: input '-two'
 main: status: track
 main: input '+two'
-main: status: track
+main: status: predicate
 main: input '$three 9'
 main: key: 'three'='9'
 main: status: full
@@ -98,7 +101,7 @@ main: status: full
 main: input '-two'
 main: status: track
 main: input '+two'
-main: status: track
+main: status: predicate
 main: input '$three 8'
 main: key: 'three'='8'
 main: status: track
@@ -108,7 +111,7 @@ main: status: track
 main: input '-two'
 main: status: track
 main: input '+two'
-main: status: track
+main: status: predicate
 main: input '$three 7'
 main: key: 'three'='7'
 main: status: track
@@ -119,9 +122,10 @@ main: input '-two'
 main: status: track
 main: input ''
 main: input '+two'
-main: status: track
+main: status: predicate
 main: input '$three ten'
 main: key: 'three'='ten'
+xpath_01: invalid number value: 'ten'
 main: status: track
 main: input '=value 10'
 main: field: 'value'='10'
@@ -129,9 +133,10 @@ main: status: track
 main: input '-two'
 main: status: track
 main: input '+two'
-main: status: track
+main: status: predicate
 main: input '$three nine'
 main: key: 'three'='nine'
+xpath_01: invalid number value: 'nine'
 main: status: track
 main: input '=value 9'
 main: field: 'value'='9'
@@ -139,9 +144,10 @@ main: status: track
 main: input '-two'
 main: status: track
 main: input '+two'
-main: status: track
+main: status: predicate
 main: input '$three eight'
 main: key: 'three'='eight'
+xpath_01: invalid number value: 'eight'
 main: status: track
 main: input '=value 8'
 main: field: 'value'='8'
@@ -149,9 +155,10 @@ main: status: track
 main: input '-two'
 main: status: track
 main: input '+two'
-main: status: track
+main: status: predicate
 main: input '$three seven'
 main: key: 'three'='seven'
+xpath_01: invalid number value: 'seven'
 main: status: track
 main: input '=value 7'
 main: field: 'value'='7'
