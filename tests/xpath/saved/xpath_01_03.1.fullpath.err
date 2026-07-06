@@ -1,8 +1,8 @@
-main: input '#run --libxo @fullpath:slax,pretty'
-main: input '#run'
 main: input '?one[two][three][5]'
+adding filter: 'one[two][three][5]'
 xpath_01: xpath feature is unsupported: index value (e.g. 'foo[4]')
 xpath_01: libxo could not add the requested filter
+added filter: -1
 --- 0: 15
     000015: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [one], contents 2, next 0, prev 0 
@@ -14,11 +14,12 @@ xpath_01: libxo could not add the requested filter
                     000007: type 70 (C_ELEMENT), str 15 [three], contents 0, next 0, prev 0 
             000010: type 75 (C_PREDICATE), str 0 [], contents 11, next 0, prev 6 
                 000011: type 72 (C_INDEX), str 25 [5], contents 0, next 0, prev 0 
-main: filter: rc: -1
 main: status: zero
 main: input '?one/or/the/other[two == 4][5]'
+adding filter: 'one/or/the/other[two == 4][5]'
 xpath_01: xpath feature is unsupported: index value (e.g. 'foo[4]')
 xpath_01: libxo could not add the requested filter
+added filter: -1
 --- 0: 15
     000015: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [one], contents 2, next 0, prev 0 
@@ -43,11 +44,12 @@ xpath_01: libxo could not add the requested filter
                     000027: type 53 (T_NUMBER), str 61 [4], contents 0, next 0, prev 26 
             000030: type 75 (C_PREDICATE), str 0 [], contents 31, next 0, prev 23 
                 000031: type 72 (C_INDEX), str 67 [5], contents 0, next 0, prev 0 
-main: filter: rc: -1
 main: status: zero
 main: input '?three[4]'
+adding filter: 'three[4]'
 xpath_01: xpath feature is unsupported: index value (e.g. 'foo[4]')
 xpath_01: libxo could not add the requested filter
+added filter: -1
 --- 0: 15
     000015: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [one], contents 2, next 0, prev 0 
@@ -77,11 +79,12 @@ xpath_01: libxo could not add the requested filter
         000036: type 70 (C_ELEMENT), str 71 [three], contents 37, next 0, prev 0 
             000037: type 75 (C_PREDICATE), str 0 [], contents 38, next 0, prev 0 
                 000038: type 72 (C_INDEX), str 79 [4], contents 0, next 0, prev 0 
-main: filter: rc: -1
 main: status: zero
 main: input '?five[6][7][8]'
+adding filter: 'five[6][7][8]'
 xpath_01: xpath feature is unsupported: index value (e.g. 'foo[4]')
 xpath_01: libxo could not add the requested filter
+added filter: -1
 --- 0: 15
     000015: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [one], contents 2, next 0, prev 0 
@@ -120,9 +123,10 @@ xpath_01: libxo could not add the requested filter
                 000049: type 72 (C_INDEX), str 96 [7], contents 0, next 0, prev 0 
             000052: type 75 (C_PREDICATE), str 0 [], contents 53, next 0, prev 48 
                 000053: type 72 (C_INDEX), str 102 [8], contents 0, next 0, prev 0 
-main: filter: rc: -1
 main: status: zero
 main: input '?!six'
+adding filter: '!six'
+added filter: 0
 --- 0: 15
     000015: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [one], contents 2, next 0, prev 0 
@@ -166,8 +170,10 @@ main: input '?!six'
         000059: type 70 (C_ELEMENT), str 108 [six], contents 0, next 0, prev 0 
 main: status: zero
 main: input '?foo//goo'
+adding filter: 'foo//goo'
 xpath_01: xpath feature is unsupported: descendant child (e.g. 'one//two')
 xpath_01: libxo could not add the requested filter
+added filter: -1
 xpath_01: test: xpath feature is unsupported: descendant child (e.g. 'one//two')
 --- 0: 15
     000015: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
@@ -215,9 +221,10 @@ xpath_01: test: xpath feature is unsupported: descendant child (e.g. 'one//two')
         000061: type 70 (C_ELEMENT), str 112 [foo], contents 0, next 62, prev 0 
         000062: type 69 (C_DESCENDANT), str 116 [//], contents 0, next 63, prev 61 
         000063: type 70 (C_ELEMENT), str 119 [goo], contents 0, next 0, prev 62 
-main: filter: rc: -1
 main: status: zero
 main: input '?!seven[x==4]/y[z==4]|fish'
+adding filter: '!seven[x==4]/y[z==4]|fish'
+added filter: 0
 xpath_01: test: xpath feature is unsupported: descendant child (e.g. 'one//two')
 --- 0: 15
     000015: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
@@ -284,6 +291,8 @@ xpath_01: test: xpath feature is unsupported: descendant child (e.g. 'one//two')
         000085: type 70 (C_ELEMENT), str 159 [fish], contents 0, next 0, prev 0 
 main: status: zero
 main: input '?some[long=one+two+three+four div 5 - 3]/more[stuff == here + they + are]/maybe[x<y && y <= z]'
+adding filter: 'some[long=one+two+three+four div 5 - 3]/more[stuff == here + they + are]/maybe[x<y && y <= z]'
+added filter: 0
 xpath_01: test: xpath feature is unsupported: descendant child (e.g. 'one//two')
 xpath_01: test: xpath feature is unsupported: plus sign ('+')
 --- 0: 15
@@ -399,8 +408,10 @@ xpath_01: test: xpath feature is unsupported: plus sign ('+')
                             000138: type 70 (C_ELEMENT), str 277 [z], contents 0, next 0, prev 0 
 main: status: zero
 main: input '?item[a[b] = 1]'
+adding filter: 'item[a[b] = 1]'
 xpath_01: xpath feature is unsupported: predicates inside predicates
 xpath_01: libxo could not add the requested filter
+added filter: -1
 xpath_01: test: xpath feature is unsupported: descendant child (e.g. 'one//two')
 xpath_01: test: xpath feature is unsupported: plus sign ('+')
 --- 0: 15
@@ -525,11 +536,12 @@ xpath_01: test: xpath feature is unsupported: plus sign ('+')
                                 000149: type 74 (C_PATH), str 0 [], contents 147, next 0, prev 0 
                                     000147: type 70 (C_ELEMENT), str 292 [b], contents 0, next 0, prev 0 
                     000152: type 53 (T_NUMBER), str 298 [1], contents 0, next 0, prev 151 
-main: filter: rc: -1
 main: status: zero
 main: input '?item[a/b = 1]'
+adding filter: 'item[a/b = 1]'
 xpath_01: xpath feature is unsupported: Multi-element paths in predicates
 xpath_01: libxo could not add the requested filter
+added filter: -1
 xpath_01: test: xpath feature is unsupported: descendant child (e.g. 'one//two')
 xpath_01: test: xpath feature is unsupported: plus sign ('+')
 --- 0: 15
@@ -663,5 +675,4 @@ xpath_01: test: xpath feature is unsupported: plus sign ('+')
                         000159: type 70 (C_ELEMENT), str 309 [a], contents 0, next 161, prev 0 
                         000161: type 70 (C_ELEMENT), str 313 [b], contents 0, next 0, prev 159 
                     000164: type 53 (T_NUMBER), str 317 [1], contents 0, next 0, prev 163 
-main: filter: rc: -1
 main: status: zero
