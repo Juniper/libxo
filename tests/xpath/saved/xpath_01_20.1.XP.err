@@ -1,0 +1,708 @@
+main: input 'r'
+main: status: zero
+main: input '? socket[!contains(path, "/var/run/")]'
+adding filter: 'socket[!contains(path, "/var/run/")]'
+added filter: 0
+--- 0: 14
+    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [socket], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 73 (C_NOT), str 10 [!], contents 4, next 0, prev 0 
+                    000004: type 52 (T_FUNCTION_NAME), str 12 [contains], contents 8, next 0, prev 0 
+                        000008: type 74 (C_PATH), str 0 [], contents 6, next 9, prev 0 
+                            000006: type 70 (C_ELEMENT), str 23 [path], contents 0, next 0, prev 0 
+                        000009: type 54 (T_QUOTED), str 30 [/var/run/], contents 0, next 0, prev 8 
+main: status: zero
+main: input '+ statistics'
+main: filter: rc: 13
+main: status: track
+main: input '{ socket'
+main: status: track
+main: input '< socket'
+main: filter: rc: 11
+main: status: predicate
+main: input '= protocol tcp4'
+main: field: 'protocol'='tcp4'
+main: status: predicate
+main: input '= receive-bytes-waiting 0'
+main: field: 'receive-bytes-waiting'='0'
+main: status: predicate
+main: input '= send-bytes-waiting 0'
+main: field: 'send-bytes-waiting'='0'
+main: status: predicate
+main: input '+ local'
+main: filter: rc: 12
+main: status: track
+main: input '= address 172.16.188.131'
+main: field: 'address'='172.16.188.131'
+main: status: track
+main: input '= port ssh'
+main: field: 'port'='ssh'
+main: status: track
+main: input '- local'
+main: status: predicate
+main: input '+ remote'
+main: filter: rc: 13
+main: status: track
+main: input '= address 172.16.188.1'
+main: field: 'address'='172.16.188.1'
+main: status: track
+main: input '= port 63510'
+main: field: 'port'='63510'
+main: status: track
+main: input '- remote'
+main: status: predicate
+main: input '= tcp-state ESTABLISHED'
+main: field: 'tcp-state'='ESTABLISHED'
+main: status: predicate
+main: input '> socket'
+main: filter: rc: 12
+main: status: track
+main: input '< socket'
+main: filter: rc: 11
+main: status: predicate
+main: input '= address ffffa0000d003a80'
+main: field: 'address'='ffffa0000d003a80'
+main: status: predicate
+main: input '= type stream'
+main: field: 'type'='stream'
+main: status: predicate
+main: input '= receive-bytes-waiting 0'
+main: field: 'receive-bytes-waiting'='0'
+main: status: predicate
+main: input '= send-bytes-waiting 0'
+main: field: 'send-bytes-waiting'='0'
+main: status: predicate
+main: input '= vnode ffffa0000dce7000'
+main: field: 'vnode'='ffffa0000dce7000'
+main: status: predicate
+main: input '= connection 0'
+main: field: 'connection'='0'
+main: status: predicate
+main: input '= first-reference 0'
+main: field: 'first-reference'='0'
+main: status: predicate
+main: input '= next-reference 0'
+main: field: 'next-reference'='0'
+main: status: predicate
+main: input '= path /tmp/ssh-DQWvehZ5Bz/agent.39523'
+main: field: 'path'='/tmp/ssh-DQWvehZ5Bz/agent.39523'
+main: status: full
+main: input '> socket'
+main: filter: rc: 12
+main: status: track
+main: input '< socket'
+main: filter: rc: 11
+main: status: predicate
+main: input '= address ffffa0000d024900'
+main: field: 'address'='ffffa0000d024900'
+main: status: predicate
+main: input '= type stream'
+main: field: 'type'='stream'
+main: status: predicate
+main: input '= receive-bytes-waiting 0'
+main: field: 'receive-bytes-waiting'='0'
+main: status: predicate
+main: input '= send-bytes-waiting 0'
+main: field: 'send-bytes-waiting'='0'
+main: status: predicate
+main: input '= vnode 0'
+main: field: 'vnode'='0'
+main: status: predicate
+main: input '= connection ffffa0000d024780'
+main: field: 'connection'='ffffa0000d024780'
+main: status: predicate
+main: input '= first-reference 0'
+main: field: 'first-reference'='0'
+main: status: predicate
+main: input '= next-reference 0'
+main: field: 'next-reference'='0'
+main: status: predicate
+main: input '> socket'
+main: filter: rc: 12
+main: status: track
+main: input '< socket'
+main: filter: rc: 11
+main: status: predicate
+main: input '= address ffffa0000d024780'
+main: field: 'address'='ffffa0000d024780'
+main: status: predicate
+main: input '= type stream'
+main: field: 'type'='stream'
+main: status: predicate
+main: input '= receive-bytes-waiting 0'
+main: field: 'receive-bytes-waiting'='0'
+main: status: predicate
+main: input '= send-bytes-waiting 0'
+main: field: 'send-bytes-waiting'='0'
+main: status: predicate
+main: input '= vnode 0'
+main: field: 'vnode'='0'
+main: status: predicate
+main: input '= connection ffffa0000d024900'
+main: field: 'connection'='ffffa0000d024900'
+main: status: predicate
+main: input '= first-reference 0'
+main: field: 'first-reference'='0'
+main: status: predicate
+main: input '= next-reference 0'
+main: field: 'next-reference'='0'
+main: status: predicate
+main: input '> socket'
+main: filter: rc: 12
+main: status: track
+main: input '< socket'
+main: filter: rc: 11
+main: status: predicate
+main: input '= address ffffa0000d023000'
+main: field: 'address'='ffffa0000d023000'
+main: status: predicate
+main: input '= type stream'
+main: field: 'type'='stream'
+main: status: predicate
+main: input '= receive-bytes-waiting 0'
+main: field: 'receive-bytes-waiting'='0'
+main: status: predicate
+main: input '= send-bytes-waiting 0'
+main: field: 'send-bytes-waiting'='0'
+main: status: predicate
+main: input '= vnode 0'
+main: field: 'vnode'='0'
+main: status: predicate
+main: input '= connection 0'
+main: field: 'connection'='0'
+main: status: predicate
+main: input '= first-reference 0'
+main: field: 'first-reference'='0'
+main: status: predicate
+main: input '= next-reference 0'
+main: field: 'next-reference'='0'
+main: status: predicate
+main: input '> socket'
+main: filter: rc: 12
+main: status: track
+main: input '< socket'
+main: filter: rc: 11
+main: status: predicate
+main: input '= address ffffa0000d003180'
+main: field: 'address'='ffffa0000d003180'
+main: status: predicate
+main: input '= type stream'
+main: field: 'type'='stream'
+main: status: predicate
+main: input '= receive-bytes-waiting 0'
+main: field: 'receive-bytes-waiting'='0'
+main: status: predicate
+main: input '= send-bytes-waiting 0'
+main: field: 'send-bytes-waiting'='0'
+main: status: predicate
+main: input '= vnode 0'
+main: field: 'vnode'='0'
+main: status: predicate
+main: input '= connection ffffa0000d003300'
+main: field: 'connection'='ffffa0000d003300'
+main: status: predicate
+main: input '= first-reference 0'
+main: field: 'first-reference'='0'
+main: status: predicate
+main: input '= next-reference 0'
+main: field: 'next-reference'='0'
+main: status: predicate
+main: input '> socket'
+main: filter: rc: 12
+main: status: track
+main: input '< socket'
+main: filter: rc: 11
+main: status: predicate
+main: input '= address ffffa0000d003300'
+main: field: 'address'='ffffa0000d003300'
+main: status: predicate
+main: input '= type stream'
+main: field: 'type'='stream'
+main: status: predicate
+main: input '= receive-bytes-waiting 0'
+main: field: 'receive-bytes-waiting'='0'
+main: status: predicate
+main: input '= send-bytes-waiting 0'
+main: field: 'send-bytes-waiting'='0'
+main: status: predicate
+main: input '= vnode 0'
+main: field: 'vnode'='0'
+main: status: predicate
+main: input '= connection ffffa0000d003180'
+main: field: 'connection'='ffffa0000d003180'
+main: status: predicate
+main: input '= first-reference 0'
+main: field: 'first-reference'='0'
+main: status: predicate
+main: input '= next-reference 0'
+main: field: 'next-reference'='0'
+main: status: predicate
+main: input '> socket'
+main: filter: rc: 12
+main: status: track
+main: input '< socket'
+main: filter: rc: 11
+main: status: predicate
+main: input '= address ffffa00001f60300'
+main: field: 'address'='ffffa00001f60300'
+main: status: predicate
+main: input '= type stream'
+main: field: 'type'='stream'
+main: status: predicate
+main: input '= receive-bytes-waiting 0'
+main: field: 'receive-bytes-waiting'='0'
+main: status: predicate
+main: input '= send-bytes-waiting 0'
+main: field: 'send-bytes-waiting'='0'
+main: status: predicate
+main: input '= vnode ffffa0000d85f370'
+main: field: 'vnode'='ffffa0000d85f370'
+main: status: predicate
+main: input '= connection 0'
+main: field: 'connection'='0'
+main: status: predicate
+main: input '= first-reference 0'
+main: field: 'first-reference'='0'
+main: status: predicate
+main: input '= next-reference 0'
+main: field: 'next-reference'='0'
+main: status: predicate
+main: input '= path /z/phil/.screen/1527.pts-0.box'
+main: field: 'path'='/z/phil/.screen/1527.pts-0.box'
+main: status: full
+main: input '> socket'
+main: filter: rc: 12
+main: status: track
+main: input '< socket'
+main: filter: rc: 11
+main: status: predicate
+main: input '= address ffffa0000d023480'
+main: field: 'address'='ffffa0000d023480'
+main: status: predicate
+main: input '= type stream'
+main: field: 'type'='stream'
+main: status: predicate
+main: input '= receive-bytes-waiting 0'
+main: field: 'receive-bytes-waiting'='0'
+main: status: predicate
+main: input '= send-bytes-waiting 0'
+main: field: 'send-bytes-waiting'='0'
+main: status: predicate
+main: input '= vnode 0'
+main: field: 'vnode'='0'
+main: status: predicate
+main: input '= connection ffffa00001f60c00'
+main: field: 'connection'='ffffa00001f60c00'
+main: status: predicate
+main: input '= first-reference 0'
+main: field: 'first-reference'='0'
+main: status: predicate
+main: input '= next-reference 0'
+main: field: 'next-reference'='0'
+main: status: predicate
+main: input '> socket'
+main: filter: rc: 12
+main: status: track
+main: input '< socket'
+main: filter: rc: 11
+main: status: predicate
+main: input '= address ffffa00001f60c00'
+main: field: 'address'='ffffa00001f60c00'
+main: status: predicate
+main: input '= type stream'
+main: field: 'type'='stream'
+main: status: predicate
+main: input '= receive-bytes-waiting 0'
+main: field: 'receive-bytes-waiting'='0'
+main: status: predicate
+main: input '= send-bytes-waiting 0'
+main: field: 'send-bytes-waiting'='0'
+main: status: predicate
+main: input '= vnode 0'
+main: field: 'vnode'='0'
+main: status: predicate
+main: input '= connection ffffa0000d023480'
+main: field: 'connection'='ffffa0000d023480'
+main: status: predicate
+main: input '= first-reference 0'
+main: field: 'first-reference'='0'
+main: status: predicate
+main: input '= next-reference 0'
+main: field: 'next-reference'='0'
+main: status: predicate
+main: input '> socket'
+main: filter: rc: 12
+main: status: track
+main: input '< socket'
+main: filter: rc: 11
+main: status: predicate
+main: input '= address ffffa00001fa9480'
+main: field: 'address'='ffffa00001fa9480'
+main: status: predicate
+main: input '= type stream'
+main: field: 'type'='stream'
+main: status: predicate
+main: input '= receive-bytes-waiting 0'
+main: field: 'receive-bytes-waiting'='0'
+main: status: predicate
+main: input '= send-bytes-waiting 0'
+main: field: 'send-bytes-waiting'='0'
+main: status: predicate
+main: input '= vnode 0'
+main: field: 'vnode'='0'
+main: status: predicate
+main: input '= connection ffffa00001f60a80'
+main: field: 'connection'='ffffa00001f60a80'
+main: status: predicate
+main: input '= first-reference 0'
+main: field: 'first-reference'='0'
+main: status: predicate
+main: input '= next-reference 0'
+main: field: 'next-reference'='0'
+main: status: predicate
+main: input '> socket'
+main: filter: rc: 12
+main: status: track
+main: input '< socket'
+main: filter: rc: 11
+main: status: predicate
+main: input '= address ffffa00001f60a80'
+main: field: 'address'='ffffa00001f60a80'
+main: status: predicate
+main: input '= type stream'
+main: field: 'type'='stream'
+main: status: predicate
+main: input '= receive-bytes-waiting 0'
+main: field: 'receive-bytes-waiting'='0'
+main: status: predicate
+main: input '= send-bytes-waiting 0'
+main: field: 'send-bytes-waiting'='0'
+main: status: predicate
+main: input '= vnode 0'
+main: field: 'vnode'='0'
+main: status: predicate
+main: input '= connection ffffa00001fa9480'
+main: field: 'connection'='ffffa00001fa9480'
+main: status: predicate
+main: input '= first-reference 0'
+main: field: 'first-reference'='0'
+main: status: predicate
+main: input '= next-reference 0'
+main: field: 'next-reference'='0'
+main: status: predicate
+main: input '> socket'
+main: filter: rc: 12
+main: status: track
+main: input '< socket'
+main: filter: rc: 11
+main: status: predicate
+main: input '= address ffffa00001fa9180'
+main: field: 'address'='ffffa00001fa9180'
+main: status: predicate
+main: input '= type stream'
+main: field: 'type'='stream'
+main: status: predicate
+main: input '= receive-bytes-waiting 0'
+main: field: 'receive-bytes-waiting'='0'
+main: status: predicate
+main: input '= send-bytes-waiting 0'
+main: field: 'send-bytes-waiting'='0'
+main: status: predicate
+main: input '= vnode 0'
+main: field: 'vnode'='0'
+main: status: predicate
+main: input '= connection ffffa0000d023780'
+main: field: 'connection'='ffffa0000d023780'
+main: status: predicate
+main: input '= first-reference 0'
+main: field: 'first-reference'='0'
+main: status: predicate
+main: input '= next-reference 0'
+main: field: 'next-reference'='0'
+main: status: predicate
+main: input '> socket'
+main: filter: rc: 12
+main: status: track
+main: input '< socket'
+main: filter: rc: 11
+main: status: predicate
+main: input '= address ffffa0000d023780'
+main: field: 'address'='ffffa0000d023780'
+main: status: predicate
+main: input '= type stream'
+main: field: 'type'='stream'
+main: status: predicate
+main: input '= receive-bytes-waiting 0'
+main: field: 'receive-bytes-waiting'='0'
+main: status: predicate
+main: input '= send-bytes-waiting 0'
+main: field: 'send-bytes-waiting'='0'
+main: status: predicate
+main: input '= vnode 0'
+main: field: 'vnode'='0'
+main: status: predicate
+main: input '= connection ffffa00001fa9180'
+main: field: 'connection'='ffffa00001fa9180'
+main: status: predicate
+main: input '= first-reference 0'
+main: field: 'first-reference'='0'
+main: status: predicate
+main: input '= next-reference 0'
+main: field: 'next-reference'='0'
+main: status: predicate
+main: input '> socket'
+main: filter: rc: 12
+main: status: track
+main: input '< socket'
+main: filter: rc: 11
+main: status: predicate
+main: input '= address ffffa0000d023300'
+main: field: 'address'='ffffa0000d023300'
+main: status: predicate
+main: input '= type stream'
+main: field: 'type'='stream'
+main: status: predicate
+main: input '= receive-bytes-waiting 0'
+main: field: 'receive-bytes-waiting'='0'
+main: status: predicate
+main: input '= send-bytes-waiting 0'
+main: field: 'send-bytes-waiting'='0'
+main: status: predicate
+main: input '= vnode ffffa00001f85c08'
+main: field: 'vnode'='ffffa00001f85c08'
+main: status: predicate
+main: input '= connection 0'
+main: field: 'connection'='0'
+main: status: predicate
+main: input '= first-reference 0'
+main: field: 'first-reference'='0'
+main: status: predicate
+main: input '= next-reference 0'
+main: field: 'next-reference'='0'
+main: status: predicate
+main: input '= path /var/run/devd.pipe'
+main: field: 'path'='/var/run/devd.pipe'
+main: status: track
+main: input '> socket'
+main: status: track
+main: input '< socket'
+main: filter: rc: 11
+main: status: predicate
+main: input '= address ffffa0000d003480'
+main: field: 'address'='ffffa0000d003480'
+main: status: predicate
+main: input '= type dgram'
+main: field: 'type'='dgram'
+main: status: predicate
+main: input '= receive-bytes-waiting 0'
+main: field: 'receive-bytes-waiting'='0'
+main: status: predicate
+main: input '= send-bytes-waiting 0'
+main: field: 'send-bytes-waiting'='0'
+main: status: predicate
+main: input '= vnode 0'
+main: field: 'vnode'='0'
+main: status: predicate
+main: input '= connection ffffa00001f60480'
+main: field: 'connection'='ffffa00001f60480'
+main: status: predicate
+main: input '= first-reference 0'
+main: field: 'first-reference'='0'
+main: status: predicate
+main: input '= next-reference ffffa0000d003d80'
+main: field: 'next-reference'='ffffa0000d003d80'
+main: status: predicate
+main: input '> socket'
+main: filter: rc: 12
+main: status: track
+main: input '< socket'
+main: filter: rc: 11
+main: status: predicate
+main: input '= address ffffa0000d003d80'
+main: field: 'address'='ffffa0000d003d80'
+main: status: predicate
+main: input '= type dgram'
+main: field: 'type'='dgram'
+main: status: predicate
+main: input '= receive-bytes-waiting 0'
+main: field: 'receive-bytes-waiting'='0'
+main: status: predicate
+main: input '= send-bytes-waiting 0'
+main: field: 'send-bytes-waiting'='0'
+main: status: predicate
+main: input '= vnode 0'
+main: field: 'vnode'='0'
+main: status: predicate
+main: input '= connection ffffa00001f60480'
+main: field: 'connection'='ffffa00001f60480'
+main: status: predicate
+main: input '= first-reference 0'
+main: field: 'first-reference'='0'
+main: status: predicate
+main: input '= next-reference ffffa0000d003600'
+main: field: 'next-reference'='ffffa0000d003600'
+main: status: predicate
+main: input '> socket'
+main: filter: rc: 12
+main: status: track
+main: input '< socket'
+main: filter: rc: 11
+main: status: predicate
+main: input '= address ffffa0000d003600'
+main: field: 'address'='ffffa0000d003600'
+main: status: predicate
+main: input '= type dgram'
+main: field: 'type'='dgram'
+main: status: predicate
+main: input '= receive-bytes-waiting 0'
+main: field: 'receive-bytes-waiting'='0'
+main: status: predicate
+main: input '= send-bytes-waiting 0'
+main: field: 'send-bytes-waiting'='0'
+main: status: predicate
+main: input '= vnode 0'
+main: field: 'vnode'='0'
+main: status: predicate
+main: input '= connection ffffa00001f60480'
+main: field: 'connection'='ffffa00001f60480'
+main: status: predicate
+main: input '= first-reference 0'
+main: field: 'first-reference'='0'
+main: status: predicate
+main: input '= next-reference ffffa00001f60180'
+main: field: 'next-reference'='ffffa00001f60180'
+main: status: predicate
+main: input '> socket'
+main: filter: rc: 12
+main: status: track
+main: input '< socket'
+main: filter: rc: 11
+main: status: predicate
+main: input '= address ffffa00001f60180'
+main: field: 'address'='ffffa00001f60180'
+main: status: predicate
+main: input '= type dgram'
+main: field: 'type'='dgram'
+main: status: predicate
+main: input '= receive-bytes-waiting 0'
+main: field: 'receive-bytes-waiting'='0'
+main: status: predicate
+main: input '= send-bytes-waiting 0'
+main: field: 'send-bytes-waiting'='0'
+main: status: predicate
+main: input '= vnode 0'
+main: field: 'vnode'='0'
+main: status: predicate
+main: input '= connection ffffa00001f60480'
+main: field: 'connection'='ffffa00001f60480'
+main: status: predicate
+main: input '= first-reference 0'
+main: field: 'first-reference'='0'
+main: status: predicate
+main: input '= next-reference 0'
+main: field: 'next-reference'='0'
+main: status: predicate
+main: input '> socket'
+main: filter: rc: 12
+main: status: track
+main: input '< socket'
+main: filter: rc: 11
+main: status: predicate
+main: input '= address ffffa00001f60780'
+main: field: 'address'='ffffa00001f60780'
+main: status: predicate
+main: input '= type dgram'
+main: field: 'type'='dgram'
+main: status: predicate
+main: input '= receive-bytes-waiting 0'
+main: field: 'receive-bytes-waiting'='0'
+main: status: predicate
+main: input '= send-bytes-waiting 0'
+main: field: 'send-bytes-waiting'='0'
+main: status: predicate
+main: input '= vnode ffffa0000d482898'
+main: field: 'vnode'='ffffa0000d482898'
+main: status: predicate
+main: input '= connection 0'
+main: field: 'connection'='0'
+main: status: predicate
+main: input '= first-reference 0'
+main: field: 'first-reference'='0'
+main: status: predicate
+main: input '= next-reference 0'
+main: field: 'next-reference'='0'
+main: status: predicate
+main: input '= path /var/run/logpriv'
+main: field: 'path'='/var/run/logpriv'
+main: status: track
+main: input '> socket'
+main: status: track
+main: input '< socket'
+main: filter: rc: 11
+main: status: predicate
+main: input '= address ffffa00001f60480'
+main: field: 'address'='ffffa00001f60480'
+main: status: predicate
+main: input '= type dgram'
+main: field: 'type'='dgram'
+main: status: predicate
+main: input '= receive-bytes-waiting 0'
+main: field: 'receive-bytes-waiting'='0'
+main: status: predicate
+main: input '= send-bytes-waiting 0'
+main: field: 'send-bytes-waiting'='0'
+main: status: predicate
+main: input '= vnode ffffa0000d482a50'
+main: field: 'vnode'='ffffa0000d482a50'
+main: status: predicate
+main: input '= connection 0'
+main: field: 'connection'='0'
+main: status: predicate
+main: input '= first-reference ffffa0000d003480'
+main: field: 'first-reference'='ffffa0000d003480'
+main: status: predicate
+main: input '= next-reference 0'
+main: field: 'next-reference'='0'
+main: status: predicate
+main: input '= path /var/run/log'
+main: field: 'path'='/var/run/log'
+main: status: track
+main: input '> socket'
+main: status: track
+main: input '< socket'
+main: filter: rc: 11
+main: status: predicate
+main: input '= address ffffa00001fa9000'
+main: field: 'address'='ffffa00001fa9000'
+main: status: predicate
+main: input '= type seqpac'
+main: field: 'type'='seqpac'
+main: status: predicate
+main: input '= receive-bytes-waiting 0'
+main: field: 'receive-bytes-waiting'='0'
+main: status: predicate
+main: input '= send-bytes-waiting 0'
+main: field: 'send-bytes-waiting'='0'
+main: status: predicate
+main: input '= vnode ffffa00001f85a50'
+main: field: 'vnode'='ffffa00001f85a50'
+main: status: predicate
+main: input '= connection 0'
+main: field: 'connection'='0'
+main: status: predicate
+main: input '= first-reference 0'
+main: field: 'first-reference'='0'
+main: status: predicate
+main: input '= next-reference 0'
+main: field: 'next-reference'='0'
+main: status: predicate
+main: input '= path /var/run/devd.seqpacket.pipe'
+main: field: 'path'='/var/run/devd.seqpacket.pipe'
+main: status: track
+main: input '> socket'
+main: status: track
+main: input '} socket'
+main: status: track
+main: input '- statistics'
+main: status: track
