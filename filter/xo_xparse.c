@@ -1121,6 +1121,18 @@ xo_xparse_lexer (xo_xparse_data_t *xdp)
 	    }
 	    return T_NUMBER;
 	}
+
+	/* Test for hex numbers starting with "0x" */
+	if (ch1 == '0' && ch2 == 'x'&& isxdigit(ch3)) {
+	    for ( ; xdp->xd_cur < xdp->xd_len; xdp->xd_cur++) {
+		int ch4 =  xdp->xd_buf[xdp->xd_cur];
+		if (isxdigit(ch4))
+		    continue;
+
+		break;		/* Otherwise, we're done */
+	    }
+	    return T_NUMBER;
+	}
     }
 
     /*
