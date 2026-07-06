@@ -1,5 +1,3 @@
-#run --libxo @fullpath
-
 # too few arguments to a two-argument function
 r
 ?item[contains(name)]
