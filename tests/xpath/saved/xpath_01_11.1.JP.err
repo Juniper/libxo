@@ -1,0 +1,172 @@
+main: input '# Test 1: basic attribute equality predicate'
+main: input 'r'
+main: status: zero
+main: input '?interface[@name='eth0']'
+adding filter: 'interface[@name='eth0']'
+added filter: 0
+--- 0: 11
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [interface], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 5, next 0, prev 0 
+                000005: type 14 (L_EQUALS), str 20 [=], contents 4, next 0, prev 0 
+                    000004: type 68 (C_ATTRIBUTE), str 15 [name], contents 0, next 7, prev 0 
+                    000007: type 54 (T_QUOTED), str 22 [eth0], contents 0, next 0, prev 4 
+main: status: zero
+main: input '{interface'
+main: filter: rc: 17
+main: status: zero
+main: input '<interface'
+main: filter: rc: 6
+main: status: predicate
+main: input '@ name eth0'
+main: attr: 'name'='eth0'
+main: status: predicate
+main: input '= ifindex 1'
+main: field: 'ifindex'='1'
+main: status: predicate
+main: input '>interface'
+main: status: track
+main: input '<interface'
+main: filter: rc: 6
+main: status: predicate
+main: input '@ name lo0'
+main: attr: 'name'='lo0'
+main: status: predicate
+main: input '= ifindex 2'
+main: field: 'ifindex'='2'
+main: status: predicate
+main: input '>interface'
+main: status: track
+main: input '<interface'
+main: filter: rc: 6
+main: status: predicate
+main: input '@ name eth1'
+main: attr: 'name'='eth1'
+main: status: predicate
+main: input '= ifindex 3'
+main: field: 'ifindex'='3'
+main: status: predicate
+main: input '>interface'
+main: status: track
+main: input '}interface'
+main: status: track
+main: input ''
+main: input '# Test 2: starts-with function on attribute'
+main: input 'r'
+main: status: zero
+main: input '?interface[starts-with(@name, 'eth')]'
+adding filter: 'interface[starts-with(@name, 'eth')]'
+added filter: 0
+--- 0: 15
+    000015: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [interface], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 13 [starts-with], contents 6, next 0, prev 0 
+                    000006: type 68 (C_ATTRIBUTE), str 29 [name], contents 0, next 9, prev 0 
+                    000009: type 54 (T_QUOTED), str 36 [eth], contents 0, next 0, prev 6 
+main: status: zero
+main: input '{interface'
+main: filter: rc: 19
+main: status: zero
+main: input '<interface'
+main: filter: rc: 6
+main: status: predicate
+main: input '@ name eth0'
+main: attr: 'name'='eth0'
+main: status: predicate
+main: input '= ifindex 1'
+main: field: 'ifindex'='1'
+main: status: predicate
+main: input '>interface'
+main: status: track
+main: input '<interface'
+main: filter: rc: 6
+main: status: predicate
+main: input '@ name lo0'
+main: attr: 'name'='lo0'
+main: status: predicate
+main: input '= ifindex 2'
+main: field: 'ifindex'='2'
+main: status: predicate
+main: input '>interface'
+main: status: track
+main: input '<interface'
+main: filter: rc: 6
+main: status: predicate
+main: input '@ name eth1'
+main: attr: 'name'='eth1'
+main: status: predicate
+main: input '= ifindex 3'
+main: field: 'ifindex'='3'
+main: status: predicate
+main: input '>interface'
+main: status: track
+main: input '}interface'
+main: status: track
+main: input ''
+main: input '# Test 3: attribute combined with key predicate using 'and''
+main: input 'r'
+main: status: zero
+main: input '?interface[@type='ethernet' and state='up']'
+adding filter: 'interface[@type='ethernet' and state='up']'
+added filter: 0
+--- 0: 17
+    000017: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [interface], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0 
+                000008: type 40 ('('), str 31 [and], contents 5, next 0, prev 0 
+                    000005: type 14 (L_EQUALS), str 20 [=], contents 4, next 11, prev 0 
+                        000004: type 68 (C_ATTRIBUTE), str 15 [type], contents 0, next 7, prev 0 
+                        000007: type 54 (T_QUOTED), str 22 [ethernet], contents 0, next 0, prev 4 
+                    000011: type 14 (L_EQUALS), str 41 [=], contents 12, next 0, prev 5 
+                        000012: type 74 (C_PATH), str 0 [], contents 10, next 13, prev 0 
+                            000010: type 70 (C_ELEMENT), str 35 [state], contents 0, next 0, prev 0 
+                        000013: type 54 (T_QUOTED), str 43 [up], contents 0, next 0, prev 12 
+main: status: zero
+main: input '{interface'
+main: filter: rc: 19
+main: status: zero
+main: input '<interface'
+main: filter: rc: 6
+main: status: predicate
+main: input '@ type ethernet'
+main: attr: 'type'='ethernet'
+main: status: predicate
+main: input '$ state up'
+main: key: 'state'='up'
+main: status: predicate
+main: input '= ifindex 1'
+main: field: 'ifindex'='1'
+main: status: predicate
+main: input '>interface'
+main: status: track
+main: input '<interface'
+main: filter: rc: 6
+main: status: predicate
+main: input '@ type ethernet'
+main: attr: 'type'='ethernet'
+main: status: predicate
+main: input '$ state down'
+main: key: 'state'='down'
+main: status: predicate
+main: input '= ifindex 2'
+main: field: 'ifindex'='2'
+main: status: predicate
+main: input '>interface'
+main: status: track
+main: input '<interface'
+main: filter: rc: 6
+main: status: predicate
+main: input '@ type loopback'
+main: attr: 'type'='loopback'
+main: status: predicate
+main: input '$ state up'
+main: key: 'state'='up'
+main: status: predicate
+main: input '= ifindex 3'
+main: field: 'ifindex'='3'
+main: status: predicate
+main: input '>interface'
+main: status: track
+main: input '}interface'
+main: status: track
