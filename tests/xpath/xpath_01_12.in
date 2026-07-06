@@ -1,5 +1,3 @@
-#run --libxo @fullpath
-
 # true() always passes every instance
 r
 ?item[true()]
