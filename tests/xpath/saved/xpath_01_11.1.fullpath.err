@@ -1,9 +1,9 @@
-main: input '#run --libxo @fullpath'
-main: input ''
 main: input '# Test 1: basic attribute equality predicate'
 main: input 'r'
 main: status: zero
 main: input '?interface[@name='eth0']'
+adding filter: 'interface[@name='eth0']'
+added filter: 0
 --- 0: 11
     000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [interface], contents 2, next 0, prev 0 
@@ -15,7 +15,7 @@ main: status: zero
 main: input '{interface'
 main: status: zero
 main: input '<interface'
-main: status: track
+main: status: predicate
 main: input '@ name eth0'
 main: attr: 'name'='eth0'
 main: status: full
@@ -25,7 +25,7 @@ main: status: full
 main: input '>interface'
 main: status: track
 main: input '<interface'
-main: status: track
+main: status: predicate
 main: input '@ name lo0'
 main: attr: 'name'='lo0'
 main: status: track
@@ -35,7 +35,7 @@ main: status: track
 main: input '>interface'
 main: status: track
 main: input '<interface'
-main: status: track
+main: status: predicate
 main: input '@ name eth1'
 main: attr: 'name'='eth1'
 main: status: track
@@ -51,6 +51,8 @@ main: input '# Test 2: starts-with function on attribute'
 main: input 'r'
 main: status: zero
 main: input '?interface[starts-with(@name, 'eth')]'
+adding filter: 'interface[starts-with(@name, 'eth')]'
+added filter: 0
 --- 0: 15
     000015: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [interface], contents 2, next 0, prev 0 
@@ -62,7 +64,7 @@ main: status: zero
 main: input '{interface'
 main: status: zero
 main: input '<interface'
-main: status: track
+main: status: predicate
 main: input '@ name eth0'
 main: attr: 'name'='eth0'
 main: status: full
@@ -72,7 +74,7 @@ main: status: full
 main: input '>interface'
 main: status: track
 main: input '<interface'
-main: status: track
+main: status: predicate
 main: input '@ name lo0'
 main: attr: 'name'='lo0'
 main: status: track
@@ -82,7 +84,7 @@ main: status: track
 main: input '>interface'
 main: status: track
 main: input '<interface'
-main: status: track
+main: status: predicate
 main: input '@ name eth1'
 main: attr: 'name'='eth1'
 main: status: full
@@ -98,6 +100,8 @@ main: input '# Test 3: attribute combined with key predicate using 'and''
 main: input 'r'
 main: status: zero
 main: input '?interface[@type='ethernet' and state='up']'
+adding filter: 'interface[@type='ethernet' and state='up']'
+added filter: 0
 --- 0: 17
     000017: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [interface], contents 2, next 0, prev 0 
@@ -114,10 +118,10 @@ main: status: zero
 main: input '{interface'
 main: status: zero
 main: input '<interface'
-main: status: track
+main: status: predicate
 main: input '@ type ethernet'
 main: attr: 'type'='ethernet'
-main: status: track
+main: status: predicate
 main: input '$ state up'
 main: key: 'state'='up'
 main: status: full
@@ -127,10 +131,10 @@ main: status: full
 main: input '>interface'
 main: status: track
 main: input '<interface'
-main: status: track
+main: status: predicate
 main: input '@ type ethernet'
 main: attr: 'type'='ethernet'
-main: status: track
+main: status: predicate
 main: input '$ state down'
 main: key: 'state'='down'
 main: status: track
@@ -140,10 +144,10 @@ main: status: track
 main: input '>interface'
 main: status: track
 main: input '<interface'
-main: status: track
+main: status: predicate
 main: input '@ type loopback'
 main: attr: 'type'='loopback'
-main: status: track
+main: status: predicate
 main: input '$ state up'
 main: key: 'state'='up'
 main: status: track
