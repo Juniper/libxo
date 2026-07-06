@@ -1,5 +1,3 @@
-#run --libxo @fullpath
-
 # '*' wildcard step matches any container at that path position.
 # ?*/item selects instances regardless of which top-level container wraps them.
 r
