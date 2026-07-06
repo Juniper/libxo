@@ -1,11 +1,11 @@
-main: input '#run --libxo @fullpath'
-main: input ''
 main: input '# Non-key predicate field: filter ?item[host='beta'] where host is a plain'
 main: input '# field (not declared with the 'k' key modifier).  Only the item with'
 main: input '# host='beta' should appear in the output.'
 main: input 'r'
 main: status: zero
 main: input '?item[host = 'beta']'
+adding filter: 'item[host = 'beta']'
+added filter: 0
 --- 0: 10
     000010: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -18,30 +18,30 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ id 1'
 main: key: 'id'='1'
-main: status: track
+main: status: predicate
 main: input '= host alpha'
 main: field: 'host'='alpha'
 main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ id 2'
 main: key: 'id'='2'
-main: status: track
+main: status: predicate
 main: input '= host beta'
 main: field: 'host'='beta'
 main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ id 3'
 main: key: 'id'='3'
-main: status: track
+main: status: predicate
 main: input '= host gamma'
 main: field: 'host'='gamma'
 main: status: track
@@ -54,6 +54,8 @@ main: input '# Two-field predicate on non-key fields: ?item[type='A' and color='
 main: input 'r'
 main: status: zero
 main: input '?item[type = 'A' and color = 'red']'
+adding filter: 'item[type = 'A' and color = 'red']'
+added filter: 0
 --- 0: 16
     000016: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -71,10 +73,10 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ type A'
 main: key: 'type'='A'
-main: status: track
+main: status: predicate
 main: input '= color red'
 main: field: 'color'='red'
 main: status: full
@@ -84,10 +86,10 @@ main: status: full
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ type A'
 main: key: 'type'='A'
-main: status: track
+main: status: predicate
 main: input '= color blue'
 main: field: 'color'='blue'
 main: status: track
@@ -97,10 +99,10 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: status: track
+main: status: predicate
 main: input '$ type B'
 main: key: 'type'='B'
-main: status: track
+main: status: predicate
 main: input '= color red'
 main: field: 'color'='red'
 main: status: track
