@@ -1,0 +1,15 @@
+{
+  "item": [
+    {
+      "id": "2",
+      "host": "beta"
+    }
+  ],
+  "item": [
+    {
+      "type": "A",
+      "color": "red",
+      "data": "1"
+    }
+  ]
+}
