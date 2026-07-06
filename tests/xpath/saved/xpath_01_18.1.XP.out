@@ -1,0 +1,26 @@
+<servers>
+  <item>
+    <id>2</id>
+    <host>beta</host>
+  </item>
+</servers>
+<clients>
+  <item>
+    <id>2</id>
+    <host>gamma</host>
+  </item>
+</clients>
+<top>
+  <a>
+    <leaf>
+      <val>x</val>
+      <data>1</data>
+    </leaf>
+  </a>
+  <b>
+    <leaf>
+      <val>x</val>
+      <data>3</data>
+    </leaf>
+  </b>
+</top>
