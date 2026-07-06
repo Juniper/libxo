@@ -95,7 +95,11 @@ TEST_FILES= \
     xpath_01_18.1.fullpath.out \
     xpath_01_18.1.fullpath.err \
     xpath_01_19.1.fullpath.out \
-    xpath_01_19.1.fullpath.err
+    xpath_01_19.1.fullpath.err \
+    xpath_01_20.1.fullpath.out \
+    xpath_01_20.1.fullpath.err \
+    xpath_01_21.1.fullpath.out \
+    xpath_01_21.1.fullpath.err
 
 EXTRA_DIST = \
     ${TEST_CASES} \
@@ -123,15 +127,15 @@ xoopts==warn,$$extra ; \
 ${TEST_JIG}; true;
 
 #TEST_FORMATS = T XP JP JPu HP X J H HIPx
-TEST_FORMATS = XP
+TEST_FORMATS = fullpath:slax,pretty fullpath XP JP
 
 RUN_TESTS = ${srcdir}/../run-tests.sh -d ${srcdir}
 
-RUN_TESTS_CMD = ${BASH} ${RUN_TESTS} -T fullpath
+RUN_TESTS_CMD = ${BASH} ${RUN_TESTS} -T "${TEST_FORMATS}"
 
 test tests: ${bin_PROGRAMS}
 	@${MKDIR} -p out
-	${RUN_TESTS_CMD} -l warn run ${TEST_CASES:.c=.test}
+	${RUN_TESTS_CMD} -l warn,filter-warn run ${TEST_CASES:.c=.test}
 
 one:
 
