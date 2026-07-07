@@ -225,6 +225,22 @@ The CSV encoder defaults to using the standard Unix end-of-line
 marker, a simple newline.  Use the "dos" option to use the `CRLF`
 convention.
 
+.. _fdr_encoder:
+
+FDR - "Flight Data Recorder" Encoder
+------------------------------------
+
+The "Flight Data Recorder" encoder is a diagnostic tool that records
+field data and open/close events in a simple format that allows
+`libxo` developers to debug software issues with formatting and filter
+issues with needing access to 3rd party source code or development
+environments.  FDR data is emitted to standard output and saved for
+later posting as part of bug reports or feature requests.
+
+NOTE: Please inspect your data for any sensitive or private data
+before posting or sharing it with anyone.
+
+ 
 The Encoder API
 ---------------
 
@@ -270,5 +286,3 @@ This function will be called with the "op" codes defined in
 processing model.  For example OP_OPEN_CONTAINER tells the encoder
 that a new container has been opened, and the encoder can behave in an
 appropriate manner.
-
-
