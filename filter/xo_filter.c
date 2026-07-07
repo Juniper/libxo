@@ -1503,6 +1503,26 @@ xo_eval_compare (XO_EVAL_OP_ARGS)
 	    : (left.xev_uint64 < right.xev_uint64) ? -1 : 0;
 	break;
 
+    case TYPE_CMP(C_INT64, C_UINT64):
+       if (left.xev_int64 < 0)
+           rc = -1;
+       else {
+           uint64_t lval = (uint64_t) left.xev_int64;
+           rc = (lval > right.xev_uint64) ? 1
+               : (lval < right.xev_uint64) ? -1 : 0;
+       }
+       break;
+
+    case TYPE_CMP(C_UINT64, C_INT64):
+       if (right.xev_int64 < 0)
+           rc = 1;
+       else {
+           uint64_t rval = (uint64_t) right.xev_int64;
+           rc = (left.xev_uint64 > rval) ? 1
+               : (left.xev_uint64 < rval) ? -1 : 0;
+       }
+       break;
+
     case TYPE_CMP(C_FLOAT, C_FLOAT):
 	rc = (left.xev_float > right.xev_float) ? 1
 	    : (left.xev_float < right.xev_float) ? -1 : 0;
@@ -1516,6 +1536,16 @@ xo_eval_compare (XO_EVAL_OP_ARGS)
     case TYPE_CMP(C_INT64, C_STRING):
 	fval = xo_eval_cast_float(xop, right);
 	rc = (left.xev_int64 > fval) ? 1 : (left.xev_int64 < fval) ? -1 : 0;
+	break;
+
+    case TYPE_CMP(C_STRING, C_UINT64):
+	fval = xo_eval_cast_float(xop, left);
+	rc = (fval > right.xev_uint64) ? 1 : (fval < right.xev_uint64) ? -1 : 0;
+	break;
+
+    case TYPE_CMP(C_UINT64, C_STRING):
+	fval = xo_eval_cast_float(xop, right);
+	rc = (left.xev_uint64 > fval) ? 1 : (left.xev_uint64 < fval) ? -1 : 0;
 	break;
 
     case TYPE_CMP(C_STRING, C_FLOAT):
