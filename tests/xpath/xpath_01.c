@@ -69,7 +69,7 @@ clean_token (char *cp)
     return cp;
 }
 
-static void
+static int
 do_add_filter (xo_handle_t *xop, xo_xparse_data_t *xdp, const char *filter)
 {
     int xof_debug = xo_isset_flags(xop, XOF_DEBUG);
@@ -97,6 +97,8 @@ do_add_filter (xo_handle_t *xop, xo_xparse_data_t *xdp, const char *filter)
 
     if (opt_debug || !xof_debug)
 	xo_clear_flags(xop, XOF_DEBUG);
+
+    return rc;
 }
 
 static void
@@ -309,7 +311,8 @@ main (int argc, char **argv)
 	xo_err(1, "could not open file '%s'", opt_input);
 
     if (opt_filter)
-	do_add_filter(xop, xdp, opt_filter);
+	if (do_add_filter(xop, xdp, opt_filter))
+	    return 1;
 
     do_work(xop, xfp, xdp, in);
 
