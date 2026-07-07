@@ -19,6 +19,9 @@ main: input '{ socket'
 main: status: track
 main: input '< socket'
 main: status: predicate
+main: input '@ name TCP4'
+main: attr: 'name'='TCP4'
+main: status: predicate
 main: input '= protocol tcp4'
 main: field: 'protocol'='tcp4'
 main: status: predicate
@@ -30,6 +33,9 @@ main: field: 'send-bytes-waiting'='0'
 main: status: predicate
 main: input '+ local'
 main: status: track
+main: input '@ type inet'
+main: attr: 'type'='inet'
+main: status: track
 main: input '= address 172.16.188.131'
 main: field: 'address'='172.16.188.131'
 main: status: track
@@ -39,6 +45,9 @@ main: status: track
 main: input '- local'
 main: status: predicate
 main: input '+ remote'
+main: status: track
+main: input '@ type inet'
+main: attr: 'type'='inet'
 main: status: track
 main: input '= address 172.16.188.1'
 main: field: 'address'='172.16.188.1'
@@ -54,6 +63,9 @@ main: status: predicate
 main: input '> socket'
 main: status: track
 main: input '< socket'
+main: status: predicate
+main: input '@ type hex'
+main: attr: 'type'='hex'
 main: status: predicate
 main: input '= address ffffa0000d003a80'
 main: field: 'address'='ffffa0000d003a80'
@@ -86,6 +98,9 @@ main: input '> socket'
 main: status: track
 main: input '< socket'
 main: status: predicate
+main: input '@ type hex'
+main: attr: 'type'='hex'
+main: status: predicate
 main: input '= address ffffa0000d024900'
 main: field: 'address'='ffffa0000d024900'
 main: status: predicate
@@ -113,6 +128,9 @@ main: status: predicate
 main: input '> socket'
 main: status: track
 main: input '< socket'
+main: status: predicate
+main: input '@ type hex'
+main: attr: 'type'='hex'
 main: status: predicate
 main: input '= address ffffa0000d024780'
 main: field: 'address'='ffffa0000d024780'
@@ -142,6 +160,9 @@ main: input '> socket'
 main: status: track
 main: input '< socket'
 main: status: predicate
+main: input '@ type hex'
+main: attr: 'type'='hex'
+main: status: predicate
 main: input '= address ffffa0000d023000'
 main: field: 'address'='ffffa0000d023000'
 main: status: predicate
@@ -169,6 +190,9 @@ main: status: predicate
 main: input '> socket'
 main: status: track
 main: input '< socket'
+main: status: predicate
+main: input '@ type hex'
+main: attr: 'type'='hex'
 main: status: predicate
 main: input '= address ffffa0000d003180'
 main: field: 'address'='ffffa0000d003180'
@@ -198,6 +222,9 @@ main: input '> socket'
 main: status: track
 main: input '< socket'
 main: status: predicate
+main: input '@ type hex'
+main: attr: 'type'='hex'
+main: status: predicate
 main: input '= address ffffa0000d003300'
 main: field: 'address'='ffffa0000d003300'
 main: status: predicate
@@ -225,6 +252,9 @@ main: status: predicate
 main: input '> socket'
 main: status: track
 main: input '< socket'
+main: status: predicate
+main: input '@ type hex'
+main: attr: 'type'='hex'
 main: status: predicate
 main: input '= address ffffa00001f60300'
 main: field: 'address'='ffffa00001f60300'
@@ -257,6 +287,9 @@ main: input '> socket'
 main: status: track
 main: input '< socket'
 main: status: predicate
+main: input '@ type hex'
+main: attr: 'type'='hex'
+main: status: predicate
 main: input '= address ffffa0000d023480'
 main: field: 'address'='ffffa0000d023480'
 main: status: predicate
@@ -284,6 +317,9 @@ main: status: predicate
 main: input '> socket'
 main: status: track
 main: input '< socket'
+main: status: predicate
+main: input '@ type hex'
+main: attr: 'type'='hex'
 main: status: predicate
 main: input '= address ffffa00001f60c00'
 main: field: 'address'='ffffa00001f60c00'
@@ -313,6 +349,9 @@ main: input '> socket'
 main: status: track
 main: input '< socket'
 main: status: predicate
+main: input '@ type hex'
+main: attr: 'type'='hex'
+main: status: predicate
 main: input '= address ffffa00001fa9480'
 main: field: 'address'='ffffa00001fa9480'
 main: status: predicate
@@ -340,6 +379,9 @@ main: status: predicate
 main: input '> socket'
 main: status: track
 main: input '< socket'
+main: status: predicate
+main: input '@ type hex'
+main: attr: 'type'='hex'
 main: status: predicate
 main: input '= address ffffa00001f60a80'
 main: field: 'address'='ffffa00001f60a80'
@@ -369,6 +411,9 @@ main: input '> socket'
 main: status: track
 main: input '< socket'
 main: status: predicate
+main: input '@ type hex'
+main: attr: 'type'='hex'
+main: status: predicate
 main: input '= address ffffa00001fa9180'
 main: field: 'address'='ffffa00001fa9180'
 main: status: predicate
@@ -397,6 +442,9 @@ main: input '> socket'
 main: status: track
 main: input '< socket'
 main: status: predicate
+main: input '@ type hex'
+main: attr: 'type'='hex'
+main: status: predicate
 main: input '= address ffffa0000d023780'
 main: field: 'address'='ffffa0000d023780'
 main: status: predicate
@@ -424,6 +472,9 @@ main: status: predicate
 main: input '> socket'
 main: status: track
 main: input '< socket'
+main: status: predicate
+main: input '@ type hex'
+main: attr: 'type'='hex'
 main: status: predicate
 main: input '= address ffffa0000d023300'
 main: field: 'address'='ffffa0000d023300'
@@ -456,6 +507,9 @@ main: input '> socket'
 main: status: track
 main: input '< socket'
 main: status: predicate
+main: input '@ type hex'
+main: attr: 'type'='hex'
+main: status: predicate
 main: input '= address ffffa0000d003480'
 main: field: 'address'='ffffa0000d003480'
 main: status: predicate
@@ -483,6 +537,9 @@ main: status: predicate
 main: input '> socket'
 main: status: track
 main: input '< socket'
+main: status: predicate
+main: input '@ type hex'
+main: attr: 'type'='hex'
 main: status: predicate
 main: input '= address ffffa0000d003d80'
 main: field: 'address'='ffffa0000d003d80'
@@ -512,6 +569,9 @@ main: input '> socket'
 main: status: track
 main: input '< socket'
 main: status: predicate
+main: input '@ type hex'
+main: attr: 'type'='hex'
+main: status: predicate
 main: input '= address ffffa0000d003600'
 main: field: 'address'='ffffa0000d003600'
 main: status: predicate
@@ -540,6 +600,9 @@ main: input '> socket'
 main: status: track
 main: input '< socket'
 main: status: predicate
+main: input '@ type hex'
+main: attr: 'type'='hex'
+main: status: predicate
 main: input '= address ffffa00001f60180'
 main: field: 'address'='ffffa00001f60180'
 main: status: predicate
@@ -567,6 +630,9 @@ main: status: predicate
 main: input '> socket'
 main: status: track
 main: input '< socket'
+main: status: predicate
+main: input '@ type hex'
+main: attr: 'type'='hex'
 main: status: predicate
 main: input '= address ffffa00001f60780'
 main: field: 'address'='ffffa00001f60780'
@@ -599,6 +665,9 @@ main: input '> socket'
 main: status: track
 main: input '< socket'
 main: status: predicate
+main: input '@ type hex'
+main: attr: 'type'='hex'
+main: status: predicate
 main: input '= address ffffa00001f60480'
 main: field: 'address'='ffffa00001f60480'
 main: status: predicate
@@ -629,6 +698,9 @@ main: status: track
 main: input '> socket'
 main: status: track
 main: input '< socket'
+main: status: predicate
+main: input '@ type hex'
+main: attr: 'type'='hex'
 main: status: predicate
 main: input '= address ffffa00001fa9000'
 main: field: 'address'='ffffa00001fa9000'
