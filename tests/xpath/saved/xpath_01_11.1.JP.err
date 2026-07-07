@@ -20,32 +20,33 @@ main: filter: rc: 6
 main: status: predicate
 main: input '@ name eth0'
 main: attr: 'name'='eth0'
-main: status: predicate
+main: status: full
 main: input '= ifindex 1'
 main: field: 'ifindex'='1'
-main: status: predicate
+main: status: full
 main: input '>interface'
+main: filter: rc: 6
 main: status: track
 main: input '<interface'
-main: filter: rc: 6
+main: filter: rc: 8
 main: status: predicate
 main: input '@ name lo0'
 main: attr: 'name'='lo0'
-main: status: predicate
+main: status: track
 main: input '= ifindex 2'
 main: field: 'ifindex'='2'
-main: status: predicate
+main: status: track
 main: input '>interface'
 main: status: track
 main: input '<interface'
-main: filter: rc: 6
+main: filter: rc: 8
 main: status: predicate
 main: input '@ name eth1'
 main: attr: 'name'='eth1'
-main: status: predicate
+main: status: track
 main: input '= ifindex 3'
 main: field: 'ifindex'='3'
-main: status: predicate
+main: status: track
 main: input '>interface'
 main: status: track
 main: input '}interface'
@@ -73,33 +74,35 @@ main: filter: rc: 6
 main: status: predicate
 main: input '@ name eth0'
 main: attr: 'name'='eth0'
-main: status: predicate
+main: status: full
 main: input '= ifindex 1'
 main: field: 'ifindex'='1'
-main: status: predicate
+main: status: full
 main: input '>interface'
+main: filter: rc: 6
 main: status: track
 main: input '<interface'
-main: filter: rc: 6
+main: filter: rc: 8
 main: status: predicate
 main: input '@ name lo0'
 main: attr: 'name'='lo0'
-main: status: predicate
+main: status: track
 main: input '= ifindex 2'
 main: field: 'ifindex'='2'
-main: status: predicate
+main: status: track
 main: input '>interface'
 main: status: track
 main: input '<interface'
-main: filter: rc: 6
+main: filter: rc: 8
 main: status: predicate
 main: input '@ name eth1'
 main: attr: 'name'='eth1'
-main: status: predicate
+main: status: full
 main: input '= ifindex 3'
 main: field: 'ifindex'='3'
-main: status: predicate
+main: status: full
 main: input '>interface'
+main: filter: rc: 6
 main: status: track
 main: input '}interface'
 main: status: track
@@ -134,38 +137,39 @@ main: attr: 'type'='ethernet'
 main: status: predicate
 main: input '$ state up'
 main: key: 'state'='up'
-main: status: predicate
+main: status: full
 main: input '= ifindex 1'
 main: field: 'ifindex'='1'
-main: status: predicate
+main: status: full
 main: input '>interface'
+main: filter: rc: 6
 main: status: track
 main: input '<interface'
-main: filter: rc: 6
+main: filter: rc: 8
 main: status: predicate
 main: input '@ type ethernet'
 main: attr: 'type'='ethernet'
 main: status: predicate
 main: input '$ state down'
 main: key: 'state'='down'
-main: status: predicate
+main: status: track
 main: input '= ifindex 2'
 main: field: 'ifindex'='2'
-main: status: predicate
+main: status: track
 main: input '>interface'
 main: status: track
 main: input '<interface'
-main: filter: rc: 6
+main: filter: rc: 8
 main: status: predicate
 main: input '@ type loopback'
 main: attr: 'type'='loopback'
 main: status: predicate
 main: input '$ state up'
 main: key: 'state'='up'
-main: status: predicate
+main: status: track
 main: input '= ifindex 3'
 main: field: 'ifindex'='3'
-main: status: predicate
+main: status: track
 main: input '>interface'
 main: status: track
 main: input '}interface'
