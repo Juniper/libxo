@@ -44,7 +44,8 @@ correspond to output styles, flags, or features:
   dtrt            Enable "Do The Right Thing" mode
   exterr          Extended error information (brief)
   exterr-verbose  Extended error information (verbose)
-  filter=xxxx     Filter output based on a hierarchy and key values
+  filter=xxxx     Filter output using an XPath-like expression
+  filter-warn     Emit warnings for runtime filter errors (stderr)
   flush           Flush after every libxo function call
   flush-line      Flush after every line (line-buffered)
   html            Emit HTML output
@@ -78,6 +79,15 @@ additional details:
 - "colors" is described in :ref:`color-mapping`.
 - "exterr" and "exterr-verbose" cause additional, developer-oriented
   details to be emitted from xo_err, xo_warn, and related functions.
+- "filter" selects which instances to emit using XPath-like
+  expressions.  See :ref:`filter` for syntax and examples.  Multiple
+  ``filter=`` options are combined as a union: an instance matches if
+  it satisfies any of the given expressions.
+- "filter-warn" enables diagnostic messages on standard error when
+  runtime issues are encountered while processing filters against
+  incoming data.  The volume of output will depend on the filter
+  expressions and input data, but might be useful in debugging issues
+  with filter expressions.
 - "flush-line" performs line buffering, even when the output is not
   directed to a TTY device.
 - "info" generates additional data for HTML, encoded in attributes
