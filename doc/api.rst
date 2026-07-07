@@ -236,6 +236,7 @@ xo_set_flags
 .. index:: XOF_COLOR
 .. index:: XOF_COLOR_ALLOWED
 .. index:: XOF_DTRT
+.. index:: XOF_FILTER_WARN
 .. index:: XOF_INFO
 .. index:: XOF_KEYS
 .. index:: XOF_NO_ENV
@@ -263,6 +264,7 @@ The set of valid flags include:
    XOF_COLOR           Enable color and effects in output
    XOF_COLOR_ALLOWED   Allow color/effect for terminal output
    XOF_DTRT            Enable "do the right thing" mode
+   XOF_FILTER_WARN     Warn about runtime filter errors
    XOF_INFO            Display info data attributes (HTML)
    XOF_KEYS            Emit the key attribute (XML)
    XOF_NO_ENV          Do not use the :ref:`libxo-options` env var
@@ -296,6 +298,12 @@ such conditions are ignored.
 Warnings allow developers to debug their interaction with libxo.
 The function `xo_failure` can used as a breakpoint for a debugger,
 regardless of whether warnings are enabled.
+
+The `XOF_FILTER_WARN` flag triggers similar diagnostic output when
+runtime issues are encountered while processing filters against
+incoming data.  The volume of output will depend on the filter
+expressions and input data, but might be useful in debugging issues
+with filter expressions.
 
 If the style is `XO_STYLE_HTML`, the following additional flags can be
 used:
@@ -365,6 +373,40 @@ xo_set_options
   output styles and modifier flags and enables them for a specific
   handle.  The options are identical to those listed in
   :ref:`options`.  To use the default handle, pass a `NULL` handle.
+
+
+.. index:: xo_add_filter
+.. _xo_add_filter:
+
+xo_add_filter
+-------------
+
+.. c:function:: int xo_add_filter (xo_handle_t *xop, const char *expr)
+
+  :param xop: Handle to configure (or NULL for the default handle)
+  :type xop: xo_handle_t \*
+  :param expr: Filter expression string
+  :type expr: const char \*
+  :returns: Zero for success, non-zero for error
+  :rtype: int
+
+  The `xo_add_filter` function adds a filter expression to the given
+  handle.  Only instances matching the expression are emitted;
+  non-matching instances are discarded.
+
+  Multiple calls to `xo_add_filter` are equivalent to a `|`-separated
+  union expression: an instance matches if it satisfies any of the
+  added filters.  Filters added with `xo_add_filter` combine with any
+  filters provided via `--libxo filter=` on the command line.
+
+  The filter expression uses the XPath-like syntax described in
+  :ref:`filter-expressions`.
+
+  ::
+
+    EXAMPLE:
+        /* Only emit sockets in the ESTABLISHED state */
+        int rc = xo_add_filter(NULL, "socket[tcp-state==\"ESTABLISHED\"]");
 
 .. index:: xo_destroy
 
