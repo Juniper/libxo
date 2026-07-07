@@ -104,7 +104,9 @@ typedef unsigned long long xo_xof_flags_t;
 #define XOF_COLOR_MAP	XOF_BIT(32) /** Color map has been initialized */
 #define XOF_CONTINUATION XOF_BIT(33) /** Continuation of previous line */
 #define XOF_DEBUG	XOF_BIT(34) /** Internal debug flag */
-#define XOF_FILTER      XOF_BIT(35) /** Filters are active; uses whiteboard */
+#ifdef XO_WANT_FILTER_FLAG	    /* Only visible internally */
+#define XOF_FILTER      XOF_BIT(35) /* Filters are active; uses whiteboard */
+#endif /* XO_WANT_FILTER_FLAG */
 
 #define XOF_NO_TOP_LEVEL XOF_BIT(36) /** Don't make a fake top-level tag */
 #define XOF_FILTER_WARN	XOF_BIT(37)  /** Warn about runtime errors w/ filters */
