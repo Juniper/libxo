@@ -2,6 +2,7 @@
 
 OPS='
 add_one
+attribute
 close_container
 close_field
 close_instance
@@ -21,6 +22,11 @@ status_name
 comment_add_one="Add a filter (xpath) to our filtering mechanism"
 args_add_one="xop, vp"
 signature_add_one="xo_handle_t *xop UNUSED, const char *vp UNUSED"
+
+args_attribute="xop, xfp, tag, tlen, value, vlen"
+signature_attribute="xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED, \
+               const char *tag UNUSED, xo_ssize_t tlen UNUSED, \
+               const char *value UNUSED, xo_ssize_t vlen UNUSED"
 
 args_open_field="xop, xfp, tag, tlen"
 signature_open_field="xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED,\
