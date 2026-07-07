@@ -1,0 +1,13 @@
+<interface>
+  <ifindex name="eth0">1</ifindex>
+</interface>
+<interface>
+  <ifindex name="eth0">1</ifindex>
+</interface>
+<interface>
+  <ifindex name="eth1">3</ifindex>
+</interface>
+<interface>
+  <state type="ethernet">up</state>
+  <ifindex>1</ifindex>
+</interface>
