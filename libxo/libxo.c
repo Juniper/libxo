@@ -68,6 +68,7 @@
 #define LIBXO_NEED_MAP		/* Map tags to new names */
 #endif /* LIBXO_TEXT_ONLY */
 
+#define XO_WANT_FILTER_FLAG
 #include "xo.h"
 #include "xo_private.h"
 #include "xo_encoder.h"
@@ -7782,6 +7783,9 @@ xo_attr_hv (xo_handle_t *xop, const char *name, const char *fmt, va_list vap)
 	rc = xo_vsnprintf(xop, xbp, fmt, vap);
 
 	if (rc >= 0) {
+	    if (xop->xo_flags & XOF_FILTER)
+		xo_filter_attribute(xop, xo_filters(xop),
+				    name, nlen, xbp->xb_curp, rc);
 	    rc = xo_escape_xml(xop, xbp, rc, 1);
 	    xbp->xb_curp += rc;
 	}
@@ -7809,6 +7813,17 @@ xo_attr_hv (xo_handle_t *xop, const char *name, const char *fmt, va_list vap)
 				   xo_buf_data(xbp, name_offset),
 				   xo_buf_data(xbp, value_offset), 0);
 	}
+	break;
+
+    default:
+	if (xop->xo_flags & XOF_FILTER) {
+	    rc = xo_vsnprintf(xop, xbp, fmt, vap);
+	    if (rc >= 0)
+		xo_filter_attribute(xop, xo_filters(xop),
+				    name, nlen, xbp->xb_curp, rc);
+	    rc = 0;		/* value written to xbp as scratch; don't advance */
+	}
+	break;
     }
 
     return rc;
