@@ -1102,6 +1102,19 @@ xo_xparse_lexer (xo_xparse_data_t *xdp)
 	    return rc;
 	}
 
+	/* Test for hex numbers starting with "0x" */
+	if (ch1 == '0' && ch2 == 'x'&& isxdigit(ch3)) {
+	    xdp->xd_cur += 3;
+	    for ( ; xdp->xd_cur < xdp->xd_len; xdp->xd_cur++) {
+		int ch4 =  xdp->xd_buf[xdp->xd_cur];
+		if (isxdigit(ch4))
+		    continue;
+
+		break;		/* Otherwise, we're done */
+	    }
+	    return T_NUMBER;
+	}
+
 	if (isdigit(ch1) || (ch1 == '.' && isdigit(ch2))) {
 	    int seen_e = FALSE;
 
@@ -1117,18 +1130,6 @@ xo_xparse_lexer (xo_xparse_data_t *xdp)
 		}
 		if (seen_e && (ch4 == '+' || ch4 == '-'))
 		    continue;
-		break;		/* Otherwise, we're done */
-	    }
-	    return T_NUMBER;
-	}
-
-	/* Test for hex numbers starting with "0x" */
-	if (ch1 == '0' && ch2 == 'x'&& isxdigit(ch3)) {
-	    for ( ; xdp->xd_cur < xdp->xd_len; xdp->xd_cur++) {
-		int ch4 =  xdp->xd_buf[xdp->xd_cur];
-		if (isxdigit(ch4))
-		    continue;
-
 		break;		/* Otherwise, we're done */
 	    }
 	    return T_NUMBER;
@@ -1422,6 +1423,7 @@ xo_xparse_clean (xo_xparse_data_t *xdp)
 	xo_buf_cleanup(&xdp->xd_node_buf);
 	xo_buf_cleanup(&xdp->xd_str_buf);
 	xo_free(xdp->xd_buf);
+	bzero(xdp, sizeof(*xdp));
     }
 }
 
