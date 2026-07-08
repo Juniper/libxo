@@ -113,8 +113,10 @@ xo_xparse_str (xo_xparse_data_t *xdp, xo_xparse_str_id_t off)
 static inline xo_xparse_node_t *
 xo_xparse_node (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
 {
+    if (id == 0) return NULL;
+
     xo_off_t off = id * sizeof(xo_xparse_node_t);
-    return id ? (void *) xo_buf_data(&xdp->xd_node_buf, off) : NULL;
+    return (void *) xo_buf_data(&xdp->xd_node_buf, off);
 }
 
 /*
@@ -135,11 +137,16 @@ static inline xo_xparse_node_id_t
 xo_xparse_node_new (xo_xparse_data_t *xdp)
 {
     xo_off_t new_node = xdp->xd_last_node + 1;
-    if (!xo_buf_has_room(&xdp->xd_node_buf,
-			 new_node * sizeof(xo_xparse_node_t)))
+    xo_buffer_t *xbp = &xdp->xd_node_buf;
+    xo_off_t off = new_node * sizeof(xo_xparse_node_t);
+
+    if (!xo_buf_has_room(xbp, off))
 	return 0;
 
-    xdp->xd_last_node += 1;
+    /* We don't need to move xb_cur along since our test new_node * sz */
+    xdp->xd_last_node = new_node;
+    bzero(xo_buf_data(xbp, off), sizeof(xo_xparse_node_t));
+
     return new_node;
 }
 
