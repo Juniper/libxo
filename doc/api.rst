@@ -379,7 +379,7 @@ xo_set_options
 .. _xo_add_filter:
 
 xo_add_filter
--------------
++++++++++++++
 
 .. c:function:: int xo_add_filter (xo_handle_t *xop, const char *expr)
 
