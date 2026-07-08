@@ -113,7 +113,8 @@ xo_xparse_str (xo_xparse_data_t *xdp, xo_xparse_str_id_t off)
 static inline xo_xparse_node_t *
 xo_xparse_node (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
 {
-    if (id == 0) return NULL;
+    if (id == 0)
+	return NULL;
 
     xo_off_t off = id * sizeof(xo_xparse_node_t);
     return (void *) xo_buf_data(&xdp->xd_node_buf, off);
@@ -128,9 +129,11 @@ extern xo_xparse_node_t xo_xparse_dead_node;
 static inline xo_xparse_node_t *
 xo_xparse_node_ok (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
 {
+    if (id == 0)
+	return &xo_xparse_dead_node;
+
     xo_off_t off = id * sizeof(xo_xparse_node_t);
-    return id ? (void *) xo_buf_data(&xdp->xd_node_buf, off)
-	: &xo_xparse_dead_node;
+    return (void *) xo_buf_data(&xdp->xd_node_buf, off);
 }
 
 static inline xo_xparse_node_id_t
