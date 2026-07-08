@@ -277,10 +277,19 @@ xo_ustrncasecmp (const char *s1, size_t s1_len, const char *s2, size_t s2_len)
 		return (s1_wchar < s2_wchar ? -1 : 1);
 
 	    /* Move pointers and lengths */
-	    s1 += s1_wlen;
-	    s1_len -= s1_wlen;
-	    s2 += s2_wlen;
-	    s2_len -= s2_wlen;
+	    if ((size_t) s1_wlen <= s1_len) {
+		s1 += s1_wlen;
+		s1_len -= s1_wlen;
+	    } else {
+		s1_len = 0;
+	    }
+
+	    if ((size_t) s2_wlen <= s2_len) {
+		s2 += s2_wlen;
+		s2_len -= s2_wlen;
+	    } else {
+		s2_len = 0;
+	    }
 	}
     }
 
