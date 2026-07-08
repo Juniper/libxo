@@ -2464,7 +2464,7 @@ xo_set_color_map (xo_handle_t *xop, char *value)
     ssize_t len = value ? strlen(value) + 1 : 0;
     int num = 1, fg, bg;
 
-    for (cp = value, ep = cp + len - 1; cp && *cp && cp < ep; cp = np) {
+    for (cp = value, ep = cp + len - 1; cp && cp < ep && *cp; cp = np) {
 	np = strchr(cp, '+');
 	if (np)
 	    *np++ = '\0';
@@ -3144,7 +3144,7 @@ xo_format_string_direct (xo_handle_t *xop, xo_buffer_t *xbp,
     if (cp && len > 0 && xo_is_style_text_utf8(xop) && need_enc == have_enc) {
 	const char *np, *ep;
 	ssize_t clen = len < 0 ? (ssize_t) strlen(cp) : len;
-	for (np = cp, ep = cp + clen; *np && np < ep; np++)
+	for (np = cp, ep = cp + clen; np < ep && *np; np++)
 	    if (xo_is_utf8_byte(*np) || *np == '\\' || *np == '%'
 		|| *np == '{' || *np == '}')
 		break;
