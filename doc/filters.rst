@@ -63,9 +63,10 @@ for content to be selected.  Expressions contain five constructs:
       a value of 2 which are parented by a `chapter` element which
       have a `number` attribute with a value of 1.
 
-#  - Use a number to select the <n>th node from a node set
-#
-#    - Example: chapter[1]
+  - Use a number to select the <n>th node from a node set
+
+    - Example: chapter[1]
+    - Selects the first `chapter` element
 
   - Multiple predicate tests can be specified (ANDed together)
 
@@ -190,10 +191,10 @@ the output::
 
     my-app --libxo filter=item[color=='red'],filter-warn
 
-From application code, call `xo_add_filter` after creating the
-handle::
+Application code should likely never need it, but they can call
+`xo_add_filter` to add a filter to a handle::
 
-    xo_add_filter(NULL, "socket[tcp-state==\"ESTABLISHED\"]");
+    xo_add_filter(xop, "socket[tcp-state==\"ESTABLISHED\"]");
 
 See :ref:`xo_add_filter` for details.
 
