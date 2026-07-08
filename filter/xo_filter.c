@@ -166,6 +166,9 @@ xo_trie_get_wildcard_child (xo_trie_t *xtp, xo_trie_id_t parent)
     if (id == 0)
 	return 0;
 
+    /* xo_trie_alloc_node may have realloced xt_nodes; recalculate listp */
+    listp = parent ? &xtp->xt_nodes[parent].xtn_child : &xtp->xt_root;
+
     xtp->xt_nodes[id].xtn_flags |= XTNF_WILDCARD;
     xtp->xt_nodes[id].xtn_sibling = *listp;
     *listp = id;
@@ -191,6 +194,9 @@ xo_trie_get_child (xo_trie_t *xtp, xo_trie_id_t parent, xo_off_t name_id)
     xo_trie_id_t id = xo_trie_alloc_node(xtp);
     if (id == 0)
 	return 0;
+
+    /* xo_trie_alloc_node may have realloced xt_nodes; recalculate listp */
+    listp = parent ? &xtp->xt_nodes[parent].xtn_child : &xtp->xt_root;
 
     xtp->xt_nodes[id].xtn_name = name_id;
     xtp->xt_nodes[id].xtn_sibling = *listp;
