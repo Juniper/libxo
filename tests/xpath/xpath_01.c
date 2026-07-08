@@ -166,7 +166,7 @@ do_work (xo_handle_t *xop, xo_filter_t *xfp, xo_xparse_data_t *xdp, FILE *in)
 	    if (!opt_quiet)
 		fprintf(stderr, "main: field: '%s'='%s'\n", field, value);
 
-	    rc = xo_emit_field_h(xop, "", field, "%s", value);
+	    rc = xo_emit_field_h(xop, "", field, "%s", NULL, value);
 	    break;
 
 	case '=':		/* Non-key field */
@@ -178,7 +178,7 @@ do_work (xo_handle_t *xop, xo_filter_t *xfp, xo_xparse_data_t *xdp, FILE *in)
 	    if (!opt_quiet)
 		fprintf(stderr, "main: field: '%s'='%s'\n", field, value);
 
-	    rc = xo_emit_field_h(xop, "", field, "%s", value);
+	    rc = xo_emit_field_h(xop, "", field, "%s", NULL, value);
 	    break;
 
 	case '$':
@@ -190,7 +190,7 @@ do_work (xo_handle_t *xop, xo_filter_t *xfp, xo_xparse_data_t *xdp, FILE *in)
 	    if (!opt_quiet)
 		fprintf(stderr, "main: key: '%s'='%s'\n", field, value);
 
-	    rc = xo_emit_field_h(xop, "k", field, "%s", value);
+	    rc = xo_emit_field_h(xop, "k", field, "%s", NULL, value);
 	    break;
 
 	case '@':
