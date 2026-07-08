@@ -741,7 +741,7 @@ xo_filter_op_add_one (xo_handle_t *xop, const char *input)
 
     if (rc == 0) {
 	static int unsupported_tokens[] = {
-	    L_DOTDOT, L_DOTDOTDOT, L_DOT, L_STAR,
+	    L_DOTDOT, L_DOTDOTDOT, L_DOT,
 	    K_COMMENT, K_ID, K_KEY, K_NODE,
 	    K_PROCESSING_INSTRUCTION, K_TEXT,
 	    T_AXIS_NAME, T_VAR, M_SEQUENCE, C_DESCENDANT, C_INDEX,
@@ -1783,6 +1783,20 @@ xo_eval_op_div (XO_EVAL_OP_ARGS)
 			       xo_eval_calc_div);
 }
 
+static xo_eval_value_t
+xo_eval_calc_mul (XO_EVAL_CALC_ARGS)
+{
+    left.xev_float *= right.xev_float;
+    return left;
+}
+
+static xo_eval_value_t
+xo_eval_op_mul (XO_EVAL_OP_ARGS)
+{
+    return xo_eval_calc(XO_EVAL_OP_PASS,
+			       xo_eval_calc_mul);
+}
+
 static xo_float_t
 xo_fmod (xo_float_t x, xo_float_t y)
 {
@@ -2426,6 +2440,10 @@ xo_eval (xo_handle_t *xop, xo_filter_t *xfp, xo_match_t *xmp,
 
 	case K_DIV:
 	    nested_op_fn = xo_eval_op_div;
+	    break;
+
+	case L_STAR:
+	    nested_op_fn = xo_eval_op_mul;
 	    break;
 
 	case K_MOD:
