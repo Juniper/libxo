@@ -317,7 +317,6 @@ main (int argc, char **argv)
     do_work(xop, xfp, xdp, in);
 
     xo_finish_h(xop);
-    xo_xparse_clean(xdp);
 
     return 0;
 }
