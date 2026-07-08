@@ -59,6 +59,7 @@ cbor_memdump (FILE *fp, const char *title, const char *data,
 
     while (len > 0) {
         bp = buf;
+	char *ep = buf + sizeof(buf);
         tp = text;
 
         for (i = 0; i < MAX_PER_LINE && i < len; i++) {
@@ -67,7 +68,7 @@ cbor_memdump (FILE *fp, const char *title, const char *data,
                 *bp++ = '-';
                 *bp++ = ' ';
             }
-            sprintf(bp, "%02x ", (unsigned char) *data);
+            snprintf(bp, ep - bp, "%02x ", (unsigned char) *data);
             bp += strlen(bp);
             *tp++ = (isprint((int) *data) && *data >= ' ') ? *data : '.';
             data += 1;
