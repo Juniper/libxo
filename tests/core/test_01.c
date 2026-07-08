@@ -89,10 +89,10 @@ main (int argc, char **argv)
     xo_set_info(NULL, info, -1);
     xo_set_flags(NULL, XOF_KEYS);
 
-    xo_emit("other: {a:}\n", "thing", "one");
-    xo_emit("other: {a:%s}\n", "thing", "two");
-    xo_emit("other: {a:%s/%s}\n", "thing", "three");
-    xo_emit("other: {a:xxx%s/%s}\n", "thing", "four");
+    xo_emit("other: {a:}\n", "thing", "one"); /* field before top-level tag */
+    xo_emit("other: {a:%s}\n", "thing", "two"); /* invalid content */
+    xo_emit("other: {a:%s/%s}\n", "thing", "three");  /* same */
+    xo_emit("other: {a:xxx%s/%s}\n", "thing", "four"); /* same */
 
     xo_emit("Blocks: {:block/%u}\n", 56);
 
