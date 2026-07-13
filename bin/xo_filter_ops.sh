@@ -16,7 +16,6 @@ open_field
 open_instance
 passthru
 pred_field
-status_name
 '
 
 comment_add_one="Add a filter (xpath) to our filtering mechanism"
@@ -62,12 +61,6 @@ args_pred_field="xop, xfp, tag, tlen, value, vlen"
 signature_pred_field="xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED, \
                const char *tag UNUSED, xo_ssize_t tlen UNUSED, \
                const char *value UNUSED, xo_ssize_t vlen UNUSED"
-
-comment_status_name="Turn a xo_filter_status_t into a string for debug output"
-return_type_status_name="const char *"
-args_status_name="rc"
-signature_status_name="xo_filter_status_t rc UNUSED"
-return_value_status_name="\"unknown\""
 
 args_passthru="xop, op, bufp, name, value, private, flags, func, xfp"
 signature_passthru="XO_ENCODER_HANDLER_ARGS, xo_encoder_func_t func UNUSED,\
