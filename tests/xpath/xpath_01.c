@@ -114,6 +114,7 @@ do_work (xo_handle_t *xop, xo_filter_t *xfp, xo_xparse_data_t *xdp, FILE *in)
     char *field, *value;
     int rc;
     int done = FALSE;
+    int this_case = 1;
 
     for (rc = 0; !done; rc = 0) {
 	cp = fgets(buf, sizeof(buf), in);
@@ -121,20 +122,18 @@ do_work (xo_handle_t *xop, xo_filter_t *xfp, xo_xparse_data_t *xdp, FILE *in)
 	    break;
 
 	cp = trim(cp);
-	if (!opt_quiet)
-	    fprintf(stderr, "main: input '%s'\n", cp ?: "");
 
 	if (*cp == 'r') {
-	    if (opt_skip) {
+	    if (opt_skip)
 		opt_skip -= 1;
-	    } else if (opt_case) {
-		opt_case -= 1;
-	    }
+	    this_case += 1;
 	}
 
-	if (opt_case || opt_skip) /* Skip on skipping on */
-	    continue;
+	if ((opt_case && opt_case != this_case) || opt_skip)
+	    continue;		/* Skip on skipping on */
 	    
+	if (!opt_quiet)
+	    fprintf(stderr, "main: input '%s'\n", cp ?: "");
 
 	switch (*cp) {
 	case '#':
