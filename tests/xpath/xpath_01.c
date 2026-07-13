@@ -26,6 +26,8 @@
 #include "xo_filter.h"
 
 static int opt_debug;
+static int opt_case;
+static int opt_skip;
 static int opt_quiet;
 static const char *opt_filter;
 
@@ -76,9 +78,13 @@ do_add_filter (xo_handle_t *xop, xo_xparse_data_t *xdp, const char *filter)
     if (opt_debug)
 	xo_set_flags(xop, XOF_DEBUG);
 
-    fprintf(stderr, "adding filter: '%s'\n", filter);
+    if (!opt_quiet)
+	fprintf(stderr, "adding filter: '%s'\n", filter);
+
     int rc = xo_add_filter(xop, filter);
-    fprintf(stderr, "added filter: %d\n", rc);
+
+    if (!opt_quiet)
+	fprintf(stderr, "added filter: %d\n", rc);
 
     /*
      * We really _should_ fail here, but it's really wonderful
@@ -117,6 +123,18 @@ do_work (xo_handle_t *xop, xo_filter_t *xfp, xo_xparse_data_t *xdp, FILE *in)
 	cp = trim(cp);
 	if (!opt_quiet)
 	    fprintf(stderr, "main: input '%s'\n", cp ?: "");
+
+	if (*cp == 'r') {
+	    if (opt_skip) {
+		opt_skip -= 1;
+	    } else if (opt_case) {
+		opt_case -= 1;
+	    }
+	}
+
+	if (opt_case || opt_skip) /* Skip on skipping on */
+	    continue;
+	    
 
 	switch (*cp) {
 	case '#':
@@ -261,7 +279,7 @@ do_work (xo_handle_t *xop, xo_filter_t *xfp, xo_xparse_data_t *xdp, FILE *in)
 
 	if (!opt_quiet)
 	    fprintf(stderr, "main: status: %s\n",
-		    xo_filter_status_name(xo_filter_get_status(xop, xfp)));
+		    xo_filt_status_name(xo_filter_get_status(xop, xfp)));
 
     }
 }
@@ -283,6 +301,10 @@ main (int argc, char **argv)
 	    opt_filter = argv[++i];
 	else if (xo_streq(argv[i], "input"))
 	    opt_input = argv[++i];
+	else if (xo_streq(argv[i], "case")) /* Execute only the nth case */
+	    opt_case = atoi(argv[++i]);
+	else if (xo_streq(argv[i], "skip")) /* Skip the first n cases */
+	    opt_case = atoi(argv[++i]);
 	else if (xo_streq(argv[i], "quiet"))
 	    opt_quiet = 1;
 	else if (xo_streq(argv[i], "yydebug"))
