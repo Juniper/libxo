@@ -645,7 +645,7 @@ xo_tmatch_open (xo_handle_t *xop, xo_filter_t *xfp UNUSED,
 		    (nm == NULL || !xo_streqn(nm, tag, tlen)))
 		continue;
 
-	    uint32_t s = frame->xtf_count += 1;
+	    uint32_t s = frame->xtf_count++;
 	    frame->xtf_node[s] = c;
 
 	    if (tn->xtn_pred) {
@@ -683,7 +683,7 @@ xo_tmatch_open (xo_handle_t *xop, xo_filter_t *xfp UNUSED,
 	if (dup)
 	    continue;
 
-	uint32_t s = frame->xtf_count += 1;
+	uint32_t s = frame->xtf_count++;
 	frame->xtf_node[s] = r;
 
 	if (tn->xtn_pred) {
