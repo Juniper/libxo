@@ -101,7 +101,7 @@ do_add_filter (xo_handle_t *xop, xo_xparse_data_t *xdp, const char *filter)
 	xo_xparse_dump(xdp);
     }
 
-    if (opt_debug || !xof_debug)
+    if (!opt_debug && !xof_debug)
 	xo_clear_flags(xop, XOF_DEBUG);
 
     return rc;
