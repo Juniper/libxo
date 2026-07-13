@@ -86,11 +86,6 @@ typedef int (*xo_filter_passthru_func_t)(XO_FILTER_PASSTHRU_SIGNATURE);
 #define XO_FILTER_PRED_FIELD_SIGNATURE xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED,                const char *tag UNUSED, xo_ssize_t tlen UNUSED,                const char *value UNUSED, xo_ssize_t vlen UNUSED
 
 typedef int (*xo_filter_pred_field_func_t)(XO_FILTER_PRED_FIELD_SIGNATURE);
-
-#define XO_FILTER_STATUS_NAME_ARGS rc
-#define XO_FILTER_STATUS_NAME_SIGNATURE xo_filter_status_t rc UNUSED
-
-typedef const char * (*xo_filter_status_name_func_t)(XO_FILTER_STATUS_NAME_SIGNATURE);
 typedef struct xo_filter_ops_s {
     int xfo_version;
     xo_filter_add_one_func_t xfo_filter_add_one_func;
@@ -108,7 +103,6 @@ typedef struct xo_filter_ops_s {
     xo_filter_open_instance_func_t xfo_filter_open_instance_func;
     xo_filter_passthru_func_t xfo_filter_passthru_func;
     xo_filter_pred_field_func_t xfo_filter_pred_field_func;
-    xo_filter_status_name_func_t xfo_filter_status_name_func;
 } xo_filter_ops_t;
 
 extern xo_filter_ops_t xo_filter_ops;
@@ -266,19 +260,6 @@ xo_filter_pred_field (XO_FILTER_PRED_FIELD_SIGNATURE)
     return 0;
 }
 
-/*
- * Turn a xo_filter_status_t into a string for debug output
- */
-static inline const char *
-xo_filter_status_name (XO_FILTER_STATUS_NAME_SIGNATURE)
-{
-#ifdef LIBXO_NEED_FILTERS
-    if (xo_filter_ops.xfo_filter_status_name_func)
-        return xo_filter_ops.xfo_filter_status_name_func(XO_FILTER_STATUS_NAME_ARGS);
-#endif /* LIBXO_NEED_FILTERS */
-    return "unknown";
-}
-
 #define XO_FILTER_OPS_FUNCS \
     xo_filter_op_add_one, \
     xo_filter_op_attribute, \
@@ -295,7 +276,6 @@ xo_filter_status_name (XO_FILTER_STATUS_NAME_SIGNATURE)
     xo_filter_op_open_instance, \
     xo_filter_op_passthru, \
     xo_filter_op_pred_field, \
-    xo_filter_op_status_name, \
     /* end */
 
 #endif /* XO_FILTER_OPS_H */
