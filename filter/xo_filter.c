@@ -53,9 +53,9 @@ typedef double xo_float_t;	/* Our floating point type */
  * At init time all parsed XPath expressions are compiled into a shared
  * prefix-trie so expressions with common prefixes share nodes.
  *
- * At runtime a stack of xo_tframe_t frames (one per nesting depth)
- * replaces the old xo_match_t linked list.  Each frame records which
- * trie nodes are currently active and in what sub-state.
+ * At runtime a stack of xo_tframe_t frames (one per nesting depth).
+ * Each frame records which trie nodes are currently active and in
+ * what sub-state.
  */
 typedef uint32_t xo_trie_id_t;	/* Index trie node array (1-based; 0=none) */
 
@@ -114,15 +114,14 @@ typedef struct xo_tframe_s {
 
 /*
  * Runtime matching state: a stack of frames driven by open/close events.
- * Replaces the old xo_match_t linked list.
  */
 typedef struct xo_tmatch_s {
-    xo_trie_t *xm_trie;	        /* The compiled trie */
-    uint32_t xm_depth;	        /* Current stack depth */
-    uint32_t xm_cap;	        /* Allocated frame count */
-    xo_tframe_t *xm_stack;	/* Frame stack [0..xm_depth] */
-    uint32_t xm_allow;          /* Active allow-match count */
-    uint32_t xm_deny;           /* Active deny-match count */
+    xo_trie_t *xtm_trie;	        /* The compiled trie */
+    uint32_t xtm_depth;	        /* Current stack depth */
+    uint32_t xtm_cap;	        /* Allocated frame count */
+    xo_tframe_t *xtm_stack;	/* Frame stack [0..xtm_depth] */
+    uint32_t xtm_allow;          /* Active allow-match count */
+    uint32_t xtm_deny;           /* Active deny-match count */
 } xo_tmatch_t;
 
 /*
@@ -379,45 +378,50 @@ xo_tframe_free_attrs (xo_tframe_t *frame)
 }
 
 static int
-xo_tmatch_init (xo_handle_t *xop UNUSED, xo_tmatch_t *xm, xo_trie_t *trie)
+xo_tmatch_init (xo_handle_t *xop UNUSED, xo_tmatch_t *xtmp, xo_trie_t *trie)
 {
-    bzero(xm, sizeof(*xm));
-    xm->xm_trie = trie;
+    bzero(xtmp, sizeof(*xtmp));
+    xtmp->xtm_trie = trie;
 
     uint32_t cap = 16;
-    xm->xm_stack = xo_realloc(NULL, cap * sizeof(*xm->xm_stack));
-    if (xm->xm_stack == NULL)
+    xtmp->xtm_stack = xo_realloc(NULL, cap * sizeof(*xtmp->xtm_stack));
+    if (xtmp->xtm_stack == NULL)
 	return -1;
-    bzero(xm->xm_stack, cap * sizeof(*xm->xm_stack));
-    xm->xm_cap = cap;
+
+    bzero(xtmp->xtm_stack, cap * sizeof(*xtmp->xtm_stack));
+    xtmp->xtm_cap = cap;
 
     /*
-     * Depth-0 frame: all root trie nodes are LIVE (they are the starting set)
+     * Depth-0 is an empty virtual frame.  The root re-probe loop in
+     * xo_tmatch_open matches root trie nodes at every real depth, so
+     * pre-seeding depth-0 with LIVE root nodes is wrong: it would let
+     * the parent-descent loop skip the first step of a multi-step path
+     * (e.g. "d/one" would match when "one" is opened directly).
      */
-    xo_tframe_t *root = &xm->xm_stack[0];
-    xo_trie_t *xtp = trie;
+#if defined(XO_DEBUG)
+    if (XOIF_ISSET(xop, XOF_DEBUG)) {
+	xo_trie_t *xtp = trie;
+	uint32_t root_count = 0;
+	for (xo_trie_id_t r = xtp->xt_root; r; r = xtp->xt_nodes[r].xtn_sibling)
+	    root_count += 1;
 
-    for (xo_trie_id_t r = xtp->xt_root; r && root->xtf_count < XO_TFRAME_MAX;
-	 r = xtp->xt_nodes[r].xtn_sibling) {
-	uint32_t s = root->xtf_count++;
-	root->xtf_node[s] = r;
-	root->xtf_state[s] = XTFS_LIVE;
+	xo_dbg(xop, "xo_tmatch_init: trie root nodes: %u", root_count);
     }
+#endif /* XO_DEBUG */
 
-    XO_DBG(xop, "xo_tmatch_init: trie root nodes: %u", root->xtf_count);
     return 0;
 }
 
 static void
-xo_tmatch_cleanup (xo_tmatch_t *xm)
+xo_tmatch_cleanup (xo_tmatch_t *xtmp)
 {
-    if (xm->xm_stack) {
-	for (uint32_t d = 0; d <= xm->xm_depth; d++) {
-	    xo_tframe_free_keys(&xm->xm_stack[d]);
-	    xo_tframe_free_attrs(&xm->xm_stack[d]);
+    if (xtmp->xtm_stack) {
+	for (uint32_t d = 0; d <= xtmp->xtm_depth; d++) {
+	    xo_tframe_free_keys(&xtmp->xtm_stack[d]);
+	    xo_tframe_free_attrs(&xtmp->xtm_stack[d]);
 	}
-	xo_free(xm->xm_stack);
-	xm->xm_stack = NULL;
+	xo_free(xtmp->xtm_stack);
+	xtmp->xtm_stack = NULL;
     }
 }
 
@@ -507,8 +511,8 @@ typedef struct xo_match_s {
     uint32_t xm_flags;	         /* Flags for this match instance (XMF_*) */
     xo_buffer_t xm_whiteboard;	 /* Whiteboard */
     uint32_t xm_stack_size;	 /* Number of entries in the stack */
-    xo_stack_t *xm_stackp;	 /* Stack pointer (xo_stack) */
     xo_stack_t xm_stack[0];	 /* Stack of nodes */
+    xo_stack_t *xm_stackp;	 /* Stack pointer (xo_stack) */
 } xo_match_t;
 
 /* Flags fpr xm_flags */
@@ -589,43 +593,43 @@ xo_filter_op_destroy (xo_handle_t *xop, xo_filter_t *xfp)
 }
 
 static void
-xo_tmatch_record_live (xo_tmatch_t *xm, xo_tframe_t *frame, xo_tnode_t *tn)
+xo_tmatch_record_live (xo_tmatch_t *xtmp, xo_tframe_t *frame, xo_tnode_t *tn)
 {
     if (!(tn->xtn_flags & XTNF_TERMINAL))
 	return;
 
     if (tn->xtn_flags & XTNF_NOT) {
-	xm->xm_deny++;
-	frame->xtf_deny_delta++;
+	xtmp->xtm_deny += 1;
+	frame->xtf_deny_delta += 1;
     } else {
-	xm->xm_allow++;
-	frame->xtf_allow_delta++;
+	xtmp->xtm_allow += 1;
+	frame->xtf_allow_delta += 1;
     }
 }
 
 static void
 xo_tmatch_open (xo_handle_t *xop, xo_filter_t *xfp UNUSED,
-		xo_tmatch_t *xm, const char *tag, ssize_t tlen)
+		xo_tmatch_t *xtmp, const char *tag, ssize_t tlen)
 {
-    xo_trie_t *xtp = xm->xm_trie;
+    xo_trie_t *xtp = xtmp->xtm_trie;
     xo_xparse_data_t *xdp = xtp->xt_xd;
 
-    if (xm->xm_depth + 1 >= xm->xm_cap) {
-	uint32_t cap = xm->xm_cap * 2;
-	xo_tframe_t *p = xo_realloc(xm->xm_stack, cap * sizeof(*p));
+    if (xtmp->xtm_depth + 1 >= xtmp->xtm_cap) {
+	uint32_t cap = xtmp->xtm_cap * 2;
+	xo_tframe_t *p = xo_realloc(xtmp->xtm_stack, cap * sizeof(*p));
 	if (p == NULL)
 	    return;
-	bzero(p + xm->xm_cap, (cap - xm->xm_cap) * sizeof(*p));
-	xm->xm_stack = p;
-	xm->xm_cap = cap;
+	bzero(p + xtmp->xtm_cap, (cap - xtmp->xtm_cap) * sizeof(*p));
+	xtmp->xtm_stack = p;
+	xtmp->xtm_cap = cap;
     }
 
-    xo_tframe_t *parent = &xm->xm_stack[xm->xm_depth];
-    xm->xm_depth++;
-    xo_tframe_t *frame = &xm->xm_stack[xm->xm_depth];
+    xo_tframe_t *parent = &xtmp->xtm_stack[xtmp->xtm_depth];
+    xtmp->xtm_depth += 1;
+    xo_tframe_t *frame = &xtmp->xtm_stack[xtmp->xtm_depth];
     bzero(frame, sizeof(*frame));
 
-    xo_dbg(xop, "xo_tmatch_open: depth %u tag '%.*s'", xm->xm_depth, tlen, tag);
+    xo_dbg(xop, "xo_tmatch_open: depth %u tag '%.*s'", xtmp->xtm_depth, tlen, tag);
 
     /* Descend from every LIVE parent slot */
     for (uint32_t i = 0; i < parent->xtf_count; i++) {
@@ -641,15 +645,16 @@ xo_tmatch_open (xo_handle_t *xop, xo_filter_t *xfp UNUSED,
 		    (nm == NULL || !xo_streqn(nm, tag, tlen)))
 		continue;
 
-	    uint32_t s = frame->xtf_count++;
+	    uint32_t s = frame->xtf_count += 1;
 	    frame->xtf_node[s] = c;
 
 	    if (tn->xtn_pred) {
 		frame->xtf_state[s] =
-		    xo_tmatch_try_eager(xop, xfp, frame, tn->xtn_pred, tn, xm);
+		    xo_tmatch_try_eager(xop, xfp, frame, tn->xtn_pred,
+					tn, xtmp);
 	    } else {
 		frame->xtf_state[s] = XTFS_LIVE;
-		xo_tmatch_record_live(xm, frame, tn);
+		xo_tmatch_record_live(xtmp, frame, tn);
 	    }
 	}
     }
@@ -658,7 +663,7 @@ xo_tmatch_open (xo_handle_t *xop, xo_filter_t *xfp UNUSED,
     for (xo_trie_id_t r = xtp->xt_root; r && frame->xtf_count < XO_TFRAME_MAX;
 	 r = xtp->xt_nodes[r].xtn_sibling) {
 	xo_tnode_t *tn = &xtp->xt_nodes[r];
-	if ((tn->xtn_flags & XTNF_ABSOLUTE) && xm->xm_depth != 1)
+	if ((tn->xtn_flags & XTNF_ABSOLUTE) && xtmp->xtm_depth != 1)
 	    continue;
 
 	const char *nm = xo_xparse_str(xdp, tn->xtn_name);
@@ -678,39 +683,39 @@ xo_tmatch_open (xo_handle_t *xop, xo_filter_t *xfp UNUSED,
 	if (dup)
 	    continue;
 
-	uint32_t s = frame->xtf_count++;
+	uint32_t s = frame->xtf_count += 1;
 	frame->xtf_node[s] = r;
 
 	if (tn->xtn_pred) {
 	    frame->xtf_state[s] =
-		xo_tmatch_try_eager(xop, xfp, frame, tn->xtn_pred, tn, xm);
+		xo_tmatch_try_eager(xop, xfp, frame, tn->xtn_pred, tn, xtmp);
 	} else {
 	    frame->xtf_state[s] = XTFS_LIVE;
-	    xo_tmatch_record_live(xm, frame, tn);
+	    xo_tmatch_record_live(xtmp, frame, tn);
 	}
     }
 
     xo_dbg(xop, "xo_tmatch_open: frame %u active [allow %u/deny %u]",
-	   frame->xtf_count, xm->xm_allow, xm->xm_deny);
+	   frame->xtf_count, xtmp->xtm_allow, xtmp->xtm_deny);
 }
 
 static void
 xo_tmatch_close (xo_handle_t *xop, xo_filter_t *xfp UNUSED,
-		 xo_tmatch_t *xm, const char *tag UNUSED, ssize_t tlen UNUSED)
+		 xo_tmatch_t *xtmp, const char *tag UNUSED, ssize_t tlen UNUSED)
 {
-    if (xm->xm_depth == 0)
+    if (xtmp->xtm_depth == 0)
 	return;
 
-    xo_tframe_t *frame = &xm->xm_stack[xm->xm_depth];
-    xm->xm_allow -= frame->xtf_allow_delta;
-    xm->xm_deny  -= frame->xtf_deny_delta;
+    xo_tframe_t *frame = &xtmp->xtm_stack[xtmp->xtm_depth];
+    xtmp->xtm_allow -= frame->xtf_allow_delta;
+    xtmp->xtm_deny  -= frame->xtf_deny_delta;
     xo_tframe_free_keys(frame);
     xo_tframe_free_attrs(frame);
 
     xo_dbg(xop, "xo_tmatch_close: depth %u [allow %u/deny %u]",
-	   xm->xm_depth, xm->xm_allow, xm->xm_deny);
+	   xtmp->xtm_depth, xtmp->xtm_allow, xtmp->xtm_deny);
 
-    xm->xm_depth--;
+    xtmp->xtm_depth -= 1;
 }
 
 /*
@@ -780,19 +785,6 @@ xo_filter_op_get_status (xo_handle_t *xop UNUSED, xo_filter_t *xfp)
 }
 
 /*
- * Turn a xo_filter_status_t into a string for debug output
- */
-static const char *
-xo_filter_op_status_name (xo_filter_status_t rc)
-{
-    return (rc == 0) ? "zero" :
-	(rc == XO_STATUS_TRACK) ? "track" :
-	(rc == XO_STATUS_FULL) ? "full" :
-	(rc == XO_STATUS_PRED) ? "predicate" :
-	(rc == XO_STATUS_DEAD) ? "dead" : "unknown";
-}
-
-/*
  * Update the status field.  Called when something may have affected it.
  * The "why" variable tracks why we are in this state, for debug output,
  * and maybe it should really be part of the status, but that would mean
@@ -815,11 +807,11 @@ xo_filter_change_status (xo_handle_t *xop UNUSED, xo_filter_t *xfp,
 	why = "no-filters";
 	rc = XO_STATUS_FULL;
 
-    } else if (xfp->xf_tmatch.xm_deny) {
+    } else if (xfp->xf_tmatch.xtm_deny) {
 	why = "deny-is-set";
 	rc = XO_STATUS_TRACK;		/* No means no */
 
-    } else if (xfp->xf_tmatch.xm_allow) {
+    } else if (xfp->xf_tmatch.xtm_allow) {
 	why = "allow-is-set";
 	rc = XO_STATUS_FULL;
 
@@ -835,9 +827,9 @@ xo_filter_change_status (xo_handle_t *xop UNUSED, xo_filter_t *xfp,
 	 * non-key predicate field, use PRED so all sibling content is
 	 * kept tentatively.
 	 */
-	xo_tmatch_t *xm = &xfp->xf_tmatch;
-	if (xm->xm_depth > 0) {
-	    xo_tframe_t *frame = &xm->xm_stack[xm->xm_depth];
+	xo_tmatch_t *xtmp = &xfp->xf_tmatch;
+	if (xtmp->xtm_depth > 0) {
+	    xo_tframe_t *frame = &xtmp->xtm_stack[xtmp->xtm_depth];
 	    for (uint32_t i = 0; i < frame->xtf_count; i++) {
 		if (frame->xtf_state[i] == XTFS_PRED) {
 		    why = "pred-pending";
@@ -846,6 +838,7 @@ xo_filter_change_status (xo_handle_t *xop UNUSED, xo_filter_t *xfp,
 		}
 	    }
 	}
+
 	why = "default-to-no";
 	rc = XO_STATUS_TRACK;
     done_status:;
@@ -857,8 +850,8 @@ xo_filter_change_status (xo_handle_t *xop UNUSED, xo_filter_t *xfp,
     XO_DBG(xop, "xo_filter_update_status (%s%s%.*s) returns %s/%d "
 	   "why: %s (was %s/%d)",
 	   op, tlen ? " " : "", tlen, tag,
-	   xo_filter_status_name(rc), rc, why,
-	   xo_filter_status_name(xfp->xf_status), xfp->xf_status);
+	   xo_filt_status_name(rc), rc, why,
+	   xo_filt_status_name(xfp->xf_status), xfp->xf_status);
 
     xfp->xf_status = rc;	/* Record new value */
 
@@ -955,7 +948,7 @@ xo_filter_op_close_instance (xo_handle_t *xop, xo_filter_t *xfp,
 
     /*
      * If force-resolve promoted us to FULL, return FULL even though the
-     * frame pop has now decremented xm_allow back.
+     * frame pop has now decremented xtm_allow back.
      */
     return (pre_close == XO_STATUS_FULL) ? XO_STATUS_FULL
 	: (xfp ? xfp->xf_status : XO_STATUS_ZERO);
@@ -1990,20 +1983,20 @@ xo_eval_func_normalize_space (XO_EVAL_NODE_ARGS)
     char *q = out;
 
     while (isspace((unsigned char) *p))	/* strip leading whitespace */
-	p++;
+	p += 1;
 
     while (*p) {
 	if (isspace((unsigned char) *p)) {
 	    *q++ = ' ';
 	    while (isspace((unsigned char) *p))
-		p++;
+		p += 1;
 	} else {
 	    *q++ = *p++;
 	}
     }
 
     if (q > out && q[-1] == ' ')	/* strip trailing whitespace */
-	q--;
+	q -= 1;
     *q = '\0';
 
     xo_free(str);
@@ -2658,14 +2651,14 @@ xo_filter_pred_needs (xo_xparse_data_t *xdp, xo_filter_t *xfp,
  */
 static xo_eval_value_t
 xo_tmatch_eval_pred (xo_handle_t *xop, xo_filter_t *xfp,
-		     xo_tframe_t *frame, xo_xparse_node_id_t pred_id)
+		     xo_tframe_t *framep, xo_xparse_node_id_t pred_id)
 {
     xo_stack_t tmp_stack;
     bzero(&tmp_stack, sizeof(tmp_stack));
-    tmp_stack.xs_keys = frame->xtf_keys;
-    tmp_stack.xs_keys_len = frame->xtf_keys_len;
-    tmp_stack.xs_attrs = frame->xtf_attrs;
-    tmp_stack.xs_attrs_len = frame->xtf_attrs_len;
+    tmp_stack.xs_keys = framep->xtf_keys;
+    tmp_stack.xs_keys_len = framep->xtf_keys_len;
+    tmp_stack.xs_attrs = framep->xtf_attrs;
+    tmp_stack.xs_attrs_len = framep->xtf_attrs_len;
     tmp_stack.xs_predicates = pred_id;
 
     xo_match_t tmp_match;
@@ -2681,45 +2674,45 @@ xo_tmatch_eval_pred (xo_handle_t *xop, xo_filter_t *xfp,
  */
 static int
 xo_tmatch_try_eager (xo_handle_t *xop, xo_filter_t *xfp,
-		     xo_tframe_t *frame, xo_xparse_node_id_t pred,
-		     xo_tnode_t *tn, xo_tmatch_t *xm)
+		     xo_tframe_t *framep, xo_xparse_node_id_t pred,
+		     xo_tnode_t *tn, xo_tmatch_t *xtmp)
 {
-    xo_eval_value_t result = xo_tmatch_eval_pred(xop, xfp, frame, pred);
+    xo_eval_value_t result = xo_tmatch_eval_pred(xop, xfp, framep, pred);
     if (result.xev_flags & XEVF_MISSING)
 	return XTFS_PRED;
     int live = xo_eval_cast_boolean(xop, result);
     xo_eval_value_free(result);
     if (live) {
-	xo_tmatch_record_live(xm, frame, tn);
+	xo_tmatch_record_live(xtmp, framep, tn);
 	return XTFS_LIVE;
     }
     return XTFS_DEAD;
 }
 
 static xo_filter_status_t
-xo_tmatch_key (xo_handle_t *xop, xo_filter_t *xfp, xo_tmatch_t *xm,
+xo_tmatch_key (xo_handle_t *xop, xo_filter_t *xfp, xo_tmatch_t *xtmp,
 	       const char *tag, xo_ssize_t tlen,
 	       const char *value, xo_ssize_t vlen)
 {
-    if (xm->xm_depth == 0)
+    if (xtmp->xtm_depth == 0)
 	return xfp->xf_status;
 
-    xo_trie_t *xtp = xm->xm_trie;
-    xo_tframe_t *frame = &xm->xm_stack[xm->xm_depth];
+    xo_trie_t *xtp = xtmp->xtm_trie;
+    xo_tframe_t *framep = &xtmp->xtm_stack[xtmp->xtm_depth];
 
-    for (uint32_t i = 0; i < frame->xtf_count; i++) {
-	if (frame->xtf_state[i] != XTFS_PRED)
+    for (uint32_t i = 0; i < framep->xtf_count; i++) {
+	if (framep->xtf_state[i] != XTFS_PRED)
 	    continue;
 
-	xo_tnode_t *tn = &xtp->xt_nodes[frame->xtf_node[i]];
+	xo_tnode_t *tn = &xtp->xt_nodes[framep->xtf_node[i]];
 
 	if (!xo_filter_pred_needs(&xfp->xf_xd, xfp, tn->xtn_pred, tag, tlen, FALSE))
 	    continue;
 
-	xo_tframe_key_add(frame, tag, tlen, value, vlen);
+	xo_tframe_key_add(framep, tag, tlen, value, vlen);
 
 	xo_eval_value_t result =
-	    xo_tmatch_eval_pred(xop, xfp, frame, tn->xtn_pred);
+	    xo_tmatch_eval_pred(xop, xfp, framep, tn->xtn_pred);
 
 	if (result.xev_flags & XEVF_MISSING)
 	    continue;
@@ -2727,10 +2720,10 @@ xo_tmatch_key (xo_handle_t *xop, xo_filter_t *xfp, xo_tmatch_t *xm,
 	int live = xo_eval_cast_boolean(xop, result);
 	xo_eval_value_free(result);
 	if (live) {
-	    frame->xtf_state[i] = XTFS_LIVE;
-	    xo_tmatch_record_live(xm, frame, tn);
+	    framep->xtf_state[i] = XTFS_LIVE;
+	    xo_tmatch_record_live(xtmp, framep, tn);
 	} else {
-	    frame->xtf_state[i] = XTFS_DEAD;
+	    framep->xtf_state[i] = XTFS_DEAD;
 	}
     }
 
@@ -2752,36 +2745,36 @@ xo_filter_op_key (XO_FILTER_KEY_SIGNATURE)
 
     XO_DBG(xop, "xo_filter_key: '%.*s' = '%.*s' --> status %s",
 	   tlen, tag, vlen, value,
-	   xo_filter_op_status_name(xfp->xf_status));
+	   xo_filt_status_name(xfp->xf_status));
 
     return rc;
 }
 
 static xo_filter_status_t
-xo_tmatch_attr (xo_handle_t *xop, xo_filter_t *xfp, xo_tmatch_t *xm,
+xo_tmatch_attr (xo_handle_t *xop, xo_filter_t *xfp, xo_tmatch_t *xtmp,
 		const char *tag, xo_ssize_t tlen,
 		const char *value, xo_ssize_t vlen)
 {
-    if (xm->xm_depth == 0)
+    if (xtmp->xtm_depth == 0)
 	return xfp->xf_status;
 
-    xo_trie_t *xtp = xm->xm_trie;
-    xo_tframe_t *frame = &xm->xm_stack[xm->xm_depth];
+    xo_trie_t *xtp = xtmp->xtm_trie;
+    xo_tframe_t *framep = &xtmp->xtm_stack[xtmp->xtm_depth];
 
-    for (uint32_t i = 0; i < frame->xtf_count; i++) {
-	if (frame->xtf_state[i] != XTFS_PRED)
+    for (uint32_t i = 0; i < framep->xtf_count; i++) {
+	if (framep->xtf_state[i] != XTFS_PRED)
 	    continue;
 
-	xo_tnode_t *tn = &xtp->xt_nodes[frame->xtf_node[i]];
+	xo_tnode_t *tn = &xtp->xt_nodes[framep->xtf_node[i]];
 
 	if (!xo_filter_pred_needs(&xfp->xf_xd, xfp, tn->xtn_pred,
 				  tag, tlen, TRUE))
 	    continue;
 
-	xo_tframe_attr_add(frame, tag, tlen, value, vlen);
+	xo_tframe_attr_add(framep, tag, tlen, value, vlen);
 
 	xo_eval_value_t result =
-	    xo_tmatch_eval_pred(xop, xfp, frame, tn->xtn_pred);
+	    xo_tmatch_eval_pred(xop, xfp, framep, tn->xtn_pred);
 
 	if (result.xev_flags & XEVF_MISSING)
 	    continue;
@@ -2789,10 +2782,10 @@ xo_tmatch_attr (xo_handle_t *xop, xo_filter_t *xfp, xo_tmatch_t *xm,
 	int live = xo_eval_cast_boolean(xop, result);
 	xo_eval_value_free(result);
 	if (live) {
-	    frame->xtf_state[i] = XTFS_LIVE;
-	    xo_tmatch_record_live(xm, frame, tn);
+	    framep->xtf_state[i] = XTFS_LIVE;
+	    xo_tmatch_record_live(xtmp, framep, tn);
 	} else {
-	    frame->xtf_state[i] = XTFS_DEAD;
+	    framep->xtf_state[i] = XTFS_DEAD;
 	}
     }
 
@@ -2816,7 +2809,7 @@ xo_filter_op_attribute (xo_handle_t *xop, xo_filter_t *xfp,
 
     XO_DBG(xop, "xo_filter_attribute: '@%.*s' = '%.*s' --> status %s",
 	   tlen, tag, vlen, value,
-	   xo_filter_op_status_name(xfp->xf_status));
+	   xo_filt_status_name(xfp->xf_status));
 
     return rc;
 }
@@ -2837,7 +2830,7 @@ xo_filter_op_passthru (XO_ENCODER_HANDLER_ARGS,
     XO_DBG(xop, "filter: entering passthru: %s: '%s'%s status: %s/%d",
 	   xo_encoder_op_name(op), name ?: "",
 	   (flags & XFF_KEY) ? " is-a-key" : "",
-	   xo_filter_status_name(xfp->xf_status), xfp->xf_status);
+	   xo_filt_status_name(xfp->xf_status), xfp->xf_status);
 
     switch (op) {
     case XO_OP_OPEN_CONTAINER:
@@ -2870,7 +2863,7 @@ xo_filter_op_passthru (XO_ENCODER_HANDLER_ARGS,
     XO_DBG(xop, "filter: leaving passthru: %s: '%s'%s status: %s/%d",
 	   xo_encoder_op_name(op), name ?: "",
 	   (flags & XFF_KEY) ? " is-a-key" : "",
-	   xo_filter_status_name(xfp->xf_status), xfp->xf_status);
+	   xo_filt_status_name(xfp->xf_status), xfp->xf_status);
 
     return rc;
 }
@@ -2889,17 +2882,17 @@ xo_filter_op_needs_nonkey_field (XO_FILTER_NEEDS_NONKEY_FIELD_SIGNATURE)
     if (xfp->xf_status != XO_STATUS_TRACK)
 	return FALSE;
 
-    xo_tmatch_t *xm = &xfp->xf_tmatch;
-    if (xm->xm_depth == 0)
+    xo_tmatch_t *xtmp = &xfp->xf_tmatch;
+    if (xtmp->xtm_depth == 0)
 	return FALSE;
 
-    xo_trie_t *xtp = xm->xm_trie;
-    xo_tframe_t *frame = &xm->xm_stack[xm->xm_depth];
+    xo_trie_t *xtp = xtmp->xtm_trie;
+    xo_tframe_t *framep = &xtmp->xtm_stack[xtmp->xtm_depth];
 
-    for (uint32_t i = 0; i < frame->xtf_count; i++) {
-	if (frame->xtf_state[i] != XTFS_PRED)
+    for (uint32_t i = 0; i < framep->xtf_count; i++) {
+	if (framep->xtf_state[i] != XTFS_PRED)
 	    continue;
-	xo_tnode_t *tn = &xtp->xt_nodes[frame->xtf_node[i]];
+	xo_tnode_t *tn = &xtp->xt_nodes[framep->xtf_node[i]];
 	if (xo_filter_pred_needs(&xfp->xf_xd, xfp, tn->xtn_pred, tag, tlen, FALSE))
 	    return TRUE;
     }
@@ -2917,32 +2910,32 @@ static void
 xo_filter_force_resolve_pred (xo_handle_t *xop, xo_filter_t *xfp,
 			      const char *tag)
 {
-    xo_tmatch_t *xm = &xfp->xf_tmatch;
-    if (xm->xm_depth == 0)
+    xo_tmatch_t *xtmp = &xfp->xf_tmatch;
+    if (xtmp->xtm_depth == 0)
 	return;
 
-    xo_tframe_t *frame = &xm->xm_stack[xm->xm_depth];
+    xo_tframe_t *framep = &xtmp->xtm_stack[xtmp->xtm_depth];
     xfp->xf_flags |= XFSF_FORCE_RESOLVE;
 
-    for (uint32_t i = 0; i < frame->xtf_count; i++) {
-	if (frame->xtf_state[i] != XTFS_PRED)
+    for (uint32_t i = 0; i < framep->xtf_count; i++) {
+	if (framep->xtf_state[i] != XTFS_PRED)
 	    continue;
-	xo_tnode_t *tn = &xm->xm_trie->xt_nodes[frame->xtf_node[i]];
+	xo_tnode_t *tn = &xtmp->xtm_trie->xt_nodes[framep->xtf_node[i]];
 	if (tn->xtn_pred == 0) {
-	    frame->xtf_state[i] = XTFS_LIVE;
-	    xo_tmatch_record_live(xm, frame, tn);
+	    framep->xtf_state[i] = XTFS_LIVE;
+	    xo_tmatch_record_live(xtmp, framep, tn);
 	    continue;
 	}
 	xo_eval_value_t result =
-	    xo_tmatch_eval_pred(xop, xfp, frame, tn->xtn_pred);
+	    xo_tmatch_eval_pred(xop, xfp, framep, tn->xtn_pred);
 	if (!(result.xev_flags & XEVF_MISSING)) {
 	    int live = xo_eval_cast_boolean(xop, result);
 	    xo_eval_value_free(result);
 	    if (live) {
-		frame->xtf_state[i] = XTFS_LIVE;
-		xo_tmatch_record_live(xm, frame, tn);
+		framep->xtf_state[i] = XTFS_LIVE;
+		xo_tmatch_record_live(xtmp, framep, tn);
 	    } else {
-		frame->xtf_state[i] = XTFS_DEAD;
+		framep->xtf_state[i] = XTFS_DEAD;
 	    }
 	}
     }
