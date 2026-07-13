@@ -14,16 +14,6 @@
 #include <ctype.h>
 #include "xo_private.h"
 
-/* Allows us to turn off all debug overhead */
-#define XO_HAS_DEBUG(_xop) ((_xop) && xo_get_flags(_xop) & XOF_DEBUG)
-
-#ifdef XO_XPARSE_DEBUG
-#define XO_DBG(_xop, _fmt...) \
-    do { if (XO_HAS_DEBUG(_xop)) xo_dbg(_xop, _fmt);} while(0)
-#else /* XO_XPARSE_DEBUG */
-#define XO_DBG(_xop, _fmt...) do { } while (0)
-#endif /* XO_XPARSE_DEBUG */
-
 /*
  * We do all our allocation in a single blob, so we use offsets to
  * items in the blob, since we know it can be realloced (moved).
