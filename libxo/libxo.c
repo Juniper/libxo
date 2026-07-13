@@ -219,9 +219,9 @@ typedef unsigned xo_xsf_flags_t; /* XSF_* flags */
 /*
  * Bits of xs_flags on a parent frame that a JSON/XML open modifies and
  * that must be restored if the child element is later discarded by the
- * filter's whiteboard rollback.
+ * filter's rollback.
  */
-#define XSF_WB_BITS (XSF_NOT_FIRST | XSF_CONTENT)
+#define XSF_RB_BITS (XSF_NOT_FIRST | XSF_CONTENT)
 
 /*
  * Turn the transition between two states into a number suitable for
@@ -248,9 +248,9 @@ typedef struct xo_stack_s {
     xo_xsf_flags_t xs_flags;	/* Flags for this frame */
     xo_state_t xs_state;	/* State for this stack frame */
     xo_filter_status_t xs_fstatus; /* Filter status */
-    xo_off_t xs_wb_off;		/* Offset of buffer before this level */
+    xo_off_t xs_rb_off;		/* Offset of buffer before this level */
     xo_off_t xs_key_off;	/* Offset of end of last key renderer */
-    xo_xsf_flags_t xs_wb_flags; /* Parent XSF_WB_BITS snapshot at wb-marker time */
+    xo_xsf_flags_t xs_rb_flags; /* Parent XSF_RB_BITS  at rb-marker time */
     char *xs_name;		/* Name (for XPath value) */
     char *xs_keys;		/* XPath predicate for any key fields */
 } xo_stack_t;
@@ -359,7 +359,7 @@ struct xo_handle_s {
 #ifdef LIBXO_NEED_FILTERS
     struct xo_filter_s *xo_filters; /* Opaque data pointer */
 #endif /* LIBXO_NEED_FILTERS */
-    xo_xsf_flags_t xo_wb_snap;	/* Transient: parent XSF_WB_BITS before open */
+    xo_xsf_flags_t xo_rb_snap;	/* Transient: parent XSF_RB_BITS before open */
 };
 
 /* Flag operations */
@@ -594,11 +594,18 @@ xo_depth_check (xo_handle_t *xop, int depth)
 	    return -1;
 	}
 
-	int count = depth - xop->xo_stack_size;
+	int old_size = xop->xo_stack_size;
+	int count = depth - old_size;
 
-	bzero(xsp + xop->xo_stack_size, count * sizeof(*xsp));
+	bzero(xsp + old_size, count * sizeof(*xsp));
 	xop->xo_stack_size = depth;
 	xop->xo_stack = xsp;
+
+	/* bzero sets xs_rb_off/xs_key_off to 0, but XS_OFFSET_CLEAR == -1 */
+	for (int i = old_size; i < depth; i++) {
+	    xsp[i].xs_rb_off = XS_OFFSET_CLEAR;
+	    xsp[i].xs_key_off = XS_OFFSET_CLEAR;
+	}
     }
 
     return 0;
@@ -1256,7 +1263,11 @@ xo_write (xo_handle_t *xop)
 	xo_anchor_clear(xop);
 	if (xop->xo_write)
 	    rc = xop->xo_write(xop->xo_opaque, xbp->xb_bufp);
+
 	xo_buf_reset(xbp);
+
+	/* We have now official made output */
+	XOIF_SET(xop, XOIF_MADE_OUTPUT);
     }
 
     /* Turn off the flags that don't survive across writes */
@@ -5077,6 +5088,16 @@ xo_filters (xo_handle_t *xop UNUSED)
 #endif /* LIBXO_NEED_FILTERS */
 }
 
+const char *
+xo_filt_status_name (xo_filter_status_t fstatus)
+{
+    return (fstatus == 0) ? "zero" :
+        (fstatus == XO_STATUS_TRACK) ? "track" :
+        (fstatus == XO_STATUS_FULL) ? "full" :
+        (fstatus == XO_STATUS_PRED) ? "predicate" :
+        (fstatus == XO_STATUS_DEAD) ? "dead" : "unknown";
+}
+
 int
 xo_add_filter (xo_handle_t *xop UNUSED, const char *input UNUSED)
 {
@@ -5110,6 +5131,82 @@ xo_add_filter (xo_handle_t *xop UNUSED, const char *input UNUSED)
     return rc;
 }
 
+#ifdef LIBXO_NEED_FILTERS
+static void
+xo_filt_dump_escape_contents (char *buf, int bufsiz, char *data)
+{
+    while (bufsiz > 0 && *data) {
+	if (*data == ' ') {
+	    *buf = *data;
+	} else if (isspace((int) *data)) {
+	    *buf = ' ';
+	} else if (!isprint((int) *data)) {
+	    *buf = ' ';
+	} else {
+	    *buf = *data;
+	}
+
+	bufsiz -= 1;
+	buf += 1;
+	data += 1;
+    }
+    *buf = '\0';
+}
+
+static void
+xo_filt_dump_context (xo_handle_t *xop, xo_buffer_t *xbp,
+		      xo_ssize_t off, int size)
+{
+    xo_ssize_t len = xo_buf_len(xbp);
+
+    if (size == 0)
+	size = 32;		/* Magic "enough" number */
+    
+    int pre_len = (off < size) ? off : (len < size) ? len : size;
+    int pre_off = off - pre_len;
+    int post_len = (off + size > len) ? len - off : size;
+
+    char buf[BUFSIZ];
+    char obuf[BUFSIZ];
+
+    snprintf(buf, sizeof(buf), "[%*.*s][%*.*s]",
+	   pre_len, pre_len, xo_buf_data(xbp, pre_off),
+	   post_len, post_len, xo_buf_data(xbp, off));
+
+    xo_filt_dump_escape_contents(obuf, sizeof(obuf), buf);
+    xo_dbg(xop, "        contents: %s", obuf);
+}
+
+/* Debugging helper function (w/ fake forward) */
+void
+xo_filt_dump (xo_handle_t *xop, const char *tag);
+void
+xo_filt_dump (xo_handle_t *xop, const char *tag)
+{
+    xop = xo_default(xop);	/* NULL if called from lldb */
+
+    if (!XO_HAS_DEBUG(xop))
+	return;
+
+    xo_dbg(xop, "xo_filt_dump: %s current depth %d", tag ?: "", xop->xo_depth);
+
+    for (int depth = xop->xo_depth; depth >= 0; depth--) {
+	xo_stack_t *xsp = &xop->xo_stack[depth];
+
+	xo_dbg(xop, "    %d: '%s' state %u=%s, status %u=%s, flags %#x, "
+	       "rb_off %d, key_off %d, rb_flags %#x, keys %p",
+	       depth, xsp->xs_name ?: "", 
+	       xsp->xs_state, xo_state_name(xsp->xs_state),
+	       xsp->xs_fstatus, xo_filt_status_name(xsp->xs_fstatus),
+	       xsp->xs_flags,
+	       (int) xsp->xs_rb_off, (int) xsp->xs_key_off, xsp->xs_keys);
+
+	if (xsp->xs_rb_off != XS_OFFSET_CLEAR)
+	    xo_filt_dump_context(xop, &xop->xo_data, xsp->xs_rb_off, 0);
+    }
+}
+#endif /* LIBXO_NEED_FILTERS */
+
 /*
  * We want our parent objects (on the stack) to be emitted, so that
  * the filtered object has appropriate context.  We'll set their
@@ -5121,29 +5218,73 @@ xo_add_filter (xo_handle_t *xop UNUSED, const char *input UNUSED)
  * _actual_ filtering code in xo_filter.[hc].
  */
 static void
-xo_filt_mark_parents (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED,
+xo_filt_commit (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED,
 		      xo_filter_status_t fstatus UNUSED)
 {
 #ifdef LIBXO_NEED_FILTERS
     if (!(xop->xo_flags & XOF_FILTER))
 	return;
 
-    xo_dbg(xop, "xo_filt_mark_parents: setting status to %u", fstatus);
+    XO_DBG(xop, "xo_filt_commit: status -> %u=%s (stack depth %u)",
+	   fstatus, xo_filt_status_name(fstatus), xop->xo_depth);
+    xo_filt_dump(xop, "commit before");
 
     for (xo_stack_t *xsp = xop->xo_stack; xsp <= cur; xsp++) {
-	xo_dbg(xop, "xo_filt_mark_parents: clearing offset %u, status",
-	       xsp->xs_wb_off, xsp->xs_fstatus);
+	XO_DBG(xop, "xo_filt_commit: clearing offset %d, "
+	       "status %u=%s -> %u=%s",
+	       (int) xsp->xs_rb_off,
+	       xsp->xs_fstatus, xo_filt_status_name(xsp->xs_fstatus),
+	       fstatus, xo_filt_status_name(fstatus));
+
 	xsp->xs_fstatus = fstatus;
-	xsp->xs_wb_off = XS_OFFSET_CLEAR;
+	xsp->xs_rb_off = XS_OFFSET_CLEAR;
 	xsp->xs_key_off = XS_OFFSET_CLEAR;
     }
+
+    xo_filt_dump(xop, "commit after");
 
     XOIF_CLEAR(xop, XOIF_FILTERING);
 #endif /* LIBXO_NEED_FILTERS */
 }
 
 static void
-xo_filt_reset_parent (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED,
+xo_filt_handle_open_status (xo_handle_t *xop, xo_filter_status_t fstatus)
+{
+    xo_stack_t *xsp = xo_stack_cur(xop);
+    
+    if (fstatus == XO_STATUS_FULL) {
+	xo_filt_commit(xop, xsp, fstatus);
+	return;
+    }
+
+    if (fstatus == XO_STATUS_TRACK || fstatus == XO_STATUS_DEAD) {
+	/*
+	 * Predicate resolved FALSE; deactivate PRED bypass
+	 * on instance frame
+	 */
+	if (xsp && xsp->xs_fstatus == XO_STATUS_PRED)
+	    xsp->xs_fstatus = XO_STATUS_TRACK;
+    }
+}
+
+static void
+xo_filt_handle_change_status (xo_handle_t *xop, xo_filter_status_t old_status,
+			     xo_filter_status_t new_status)
+{
+    if (!(xop->xo_flags & XOF_FILTER))
+	return;
+
+    XO_DBG(xop, "xo_filt_handle_change_status: depth %d, old_status %u=%s, "
+	   "new_status %u=%s", xop->xo_depth,
+	   old_status, xo_filt_status_name(old_status),
+	   new_status, xo_filt_status_name(new_status));
+
+    if (new_status == XO_STATUS_FULL && old_status != XO_STATUS_FULL)
+	xo_filt_commit(xop, xo_stack_cur(xop), new_status);
+}
+
+static void
+xo_filt_rollback (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED,
 		      xo_filter_status_t fstatus UNUSED,
 		      xo_filter_status_t next_fstatus UNUSED)
 {
@@ -5151,51 +5292,74 @@ xo_filt_reset_parent (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED,
     if (!(xop->xo_flags & XOF_FILTER))
 	return;
 
-    xo_dbg(xop, "xo_filt_reset_parent: wiping %p at %u, status %u",
-	   cur, cur->xs_wb_off, fstatus);
+    XO_DBG(xop, "xo_filt_rollback: wiping %p (%d/depth %d) at %u, "
+	   "status %u=%s",
+	   cur, cur - xop->xo_stack, xop->xo_depth, cur->xs_rb_off,
+	   fstatus, xo_filt_status_name(fstatus));
+    xo_filt_dump(xop, "rollback before");
 
-    /* If the current status isn't FULL, we need to toss any output */
-    if (fstatus != XO_STATUS_FULL) {
-	/*
-	 * Reset the current offset to the current stack, but only after
-	 * doing some sanity checking.
-	 */
-	if (cur->xs_wb_off != XS_OFFSET_CLEAR) {
-	    xo_buffer_t *xbp = &xop->xo_data;
-	    xo_off_t max_off = xo_buf_offset(xbp);
-	    xo_off_t cur_off = cur->xs_wb_off;
+    /*
+     * If the current status isn't FULL, we need to toss any output
+     * We reset the current offset to the current stack, but only after
+     * doing some sanity checking.
+     */
+    if (fstatus != XO_STATUS_FULL && cur->xs_rb_off != XS_OFFSET_CLEAR) {
+	xo_buffer_t *xbp = &xop->xo_data;
+	xo_off_t max_off = xo_buf_offset(xbp);
+	xo_off_t cur_off = cur->xs_rb_off;
 
-	    if (cur_off < max_off) { /* Sanity check */
-		/*
-		 * If the key offset is set, we don't want to whack
-		 * any key information, so use max(cur_off, key_off)
-		 */
-		xo_off_t key_off = cur->xs_key_off;
+	if (cur_off < max_off) { /* Sanity check */
+#if 0
+	    /*
+	     * If the key offset is set, we don't want to whack
+	     * any key information, so use max(cur_off, key_off)
+	     */
+	    xo_off_t key_off = cur->xs_key_off;
 
-		if (key_off != XS_OFFSET_CLEAR
-		    && key_off <= max_off
-		    && key_off > cur_off)
-		    cur_off = key_off;
+	    if (key_off != XS_OFFSET_CLEAR
+		&& key_off <= max_off
+		&& key_off > cur_off)
+		cur_off = key_off;
+#endif
 
-		xo_buf_set_offset(xbp, cur_off);
+	    XO_DBG(xop, "xo_filt_rollback: rolling back to %u, depth %d",
+		   cur_off, xop->xo_depth);
+	    xo_buf_set_offset(xbp, cur_off);
 
-		/*
-		 * The JSON/XML open that pushed this frame may have set
-		 * XSF_NOT_FIRST or XSF_CONTENT on our parent frame.
-		 * Since we're discarding the child element, restore the
-		 * parent flags to what they were before the open.
-		 */
-		if (cur > xop->xo_stack) {
-		    xo_stack_t *parent = cur - 1;
-		    parent->xs_flags =
-			(parent->xs_flags & ~XSF_WB_BITS) | cur->xs_wb_flags;
+	    if (cur_off == 0) {
+		/* Going to zero means undo the "make output" flag */
+		XOIF_CLEAR(xop, XOIF_MADE_OUTPUT);
+		
+		if (xo_style(xop) == XO_STYLE_JSON) {
+		    /*
+		     * If rolling back to the very start of the buffer,
+		     * the JSON top-level '{' (if any) was inside the
+		     * rolled-back range.  Clear TOP_EMITTED so xo_finish
+		     * does not emit an unmatched '}'.
+		     */
+		    XO_DBG(xop, "xo_filt_rollback: clearing TOP_EMITTED");
+		    XOIF_CLEAR(xop, XOIF_TOP_EMITTED);
 		}
+	    }
+
+	    /*
+	     * The JSON/XML open that pushed this frame may have set
+	     * XSF_NOT_FIRST or XSF_CONTENT on our parent frame.
+	     * Since we're discarding the child element, restore the
+	     * parent flags to what they were before the open.
+	     */
+	    if (cur > xop->xo_stack) {
+		xo_stack_t *parent = cur - 1;
+		parent->xs_flags =
+		    (parent->xs_flags & ~XSF_RB_BITS) | cur->xs_rb_flags;
 	    }
 	}
     }
 
-    cur->xs_wb_off = XS_OFFSET_CLEAR;
+    cur->xs_rb_off = XS_OFFSET_CLEAR;
     cur->xs_key_off = XS_OFFSET_CLEAR;
+
+    xo_filt_dump(xop, "rollback after");
 
     if (next_fstatus != XO_STATUS_FULL)
 	XOIF_SET(xop, XOIF_FILTERING);
@@ -5231,31 +5395,68 @@ xo_avoid_flushing (xo_handle_t *xop)
     return XOIF_ISSET(xop, XOIF_ANCHOR | XOIF_FILTERING);
 }
 
+/*
+ * Decide if the just-rendered field can be skipped (rolled back)
+ */
+static int
+xo_filt_is_skippable (xo_handle_t *xop, xo_xff_flags_t flags,
+		      const char *name, xo_ssize_t nlen,
+		      xo_filter_status_t fstatus)
+{
+    /* If we're "full" open, don't skip anything */
+    if (fstatus == XO_STATUS_FULL)
+	return FALSE;
+
+    /* Unless we're dea, we continue to care about key fields */
+    if (flags & XFF_KEY)
+	return (fstatus == XO_STATUS_DEAD);
+
+    /*
+     * In general, we don't want to pass "value" fields when only
+     * tracking, but if we aren't dead and we need a field for a
+     * predicate, we keep them all.
+     */
+
+    if (fstatus == XO_STATUS_DEAD) /* The dead don't care */
+	return TRUE;
+
+    /*
+     * If we're inside a capture for a PRED instance, buffer all
+     * sibling/nested content tentatively (XML/JSON only — encoder
+     * state cannot be rolled back).
+     */
+    if (XOIF_ISSET(xop, XOIF_FILTERING) && xo_style(xop) == XO_STYLE_ENCODER)
+	return FALSE;
+
+    if (fstatus == XO_STATUS_PRED)
+	return FALSE;
+
+    /* Don't skip if a pending predicate references this field */
+    if (name) {
+	int rc = xo_filter_needs_nonkey_field(xop, xo_filters(xop), name, nlen);
+	XO_DBG(xop, "xo_filt_is_skippable: '%.*s' needs_nonkey_field -> %s",
+	       nlen, name, rc ? "true" : "false");
+	if (rc)
+	    return FALSE;
+    }
+
+    return TRUE;
+}
+
 static int
 xo_filt_skip (xo_handle_t *xop, xo_xff_flags_t flags,
 	      const char *name, xo_ssize_t nlen)
 {
-    xo_filter_status_t fstatus;
-    fstatus = xo_filter_get_status(xop, xo_filters(xop));
+    xo_filter_status_t fstatus = xo_filter_get_status(xop, xo_filters(xop));
 
-    /* We don't want to pass "value" fields when only tracking */
-    if (!(flags & XFF_KEY) && fstatus == XO_STATUS_TRACK) {
-	/*
-	 * If we're inside a whiteboard capture for a PRED instance, buffer
-	 * all sibling/nested content tentatively (XML/JSON only — encoder
-	 * state cannot be rolled back by the whiteboard).
-	 */
-	if (XOIF_ISSET(xop, XOIF_FILTERING)
-		&& xo_style(xop) != XO_STYLE_ENCODER)
-	    return FALSE;
+    int rc = xo_filt_is_skippable(xop, flags, name, nlen, fstatus);
 
-	/* Don't skip if a pending predicate references this field */
-	if (name && xo_filter_needs_nonkey_field(xop, xo_filters(xop), name, nlen))
-	    return FALSE;
-	return TRUE;
-    }
+    XO_DBG(xop, "xo_filt_skip: '%.*s' %sdepth %d, status %u=%s -> %s",
+	   nlen, name, (flags &XFF_KEY) ? "key " : "", xop->xo_depth,
+	   fstatus, xo_filt_status_name(fstatus),
+	   rc ? "true" : "false");
 
-    return (fstatus == XO_STATUS_DEAD);
+    return rc;
 }
 
 static xo_filter_status_t 
@@ -5268,37 +5469,31 @@ xo_filt_do_open_field (xo_handle_t *xop, const char *name, xo_ssize_t nlen,
     if (fstatus == XO_STATUS_DEAD)
 	return fstatus;
 
+    XO_DBG(xop, "xo_filt_do_open_field: %sdepth %d, status %u=%s",
+	   (flags & XFF_KEY) ? "key " : "", xop->xo_depth,
+	   fstatus, xo_filt_status_name(fstatus));
+
     if (flags & XFF_KEY) {
 	fstatus = xo_filter_key(xop, xfp, name, nlen, value, vlen);
-	if (fstatus == XO_STATUS_FULL)
-	    xo_filt_mark_parents(xop, xo_stack_cur(xop), fstatus);
-	else if (fstatus == XO_STATUS_TRACK || fstatus == XO_STATUS_DEAD) {
-	    /* Predicate resolved FALSE; deactivate PRED bypass on instance frame */
-	    xo_stack_t *xsp = xo_stack_cur(xop);
-	    if (xsp && xsp->xs_fstatus == XO_STATUS_PRED)
-		xsp->xs_fstatus = XO_STATUS_TRACK;
-	}
+	xo_filt_handle_open_status(xop, fstatus);
 
 	/* The caller doesn't want us calling open/close_field */
 	if (!pass_field)
 	    return fstatus;
+
     } else if ((fstatus == XO_STATUS_TRACK || fstatus == XO_STATUS_PRED)
 	       && value && vlen > 0) {
-	/* Non-key field: buffer its value if a pending predicate references it */
+	/*
+	 * Non-key field: buffer its value if a pending predicate
+	 * references it
+	 */
 	fstatus = xo_filter_pred_field(xop, xfp, name, nlen, value, vlen);
-	if (fstatus == XO_STATUS_FULL)
-	    xo_filt_mark_parents(xop, xo_stack_cur(xop), fstatus);
-	else if (fstatus == XO_STATUS_TRACK || fstatus == XO_STATUS_DEAD) {
-	    /* Predicate resolved FALSE; deactivate PRED bypass on instance frame */
-	    xo_stack_t *xsp = xo_stack_cur(xop);
-	    if (xsp && xsp->xs_fstatus == XO_STATUS_PRED)
-		xsp->xs_fstatus = XO_STATUS_TRACK;
-	}
+	xo_filt_handle_open_status(xop, fstatus);
     }
 
     fstatus = xo_filter_open_field(xop, xfp, name, nlen);
     if (fstatus == XO_STATUS_FULL)
-	xo_filt_mark_parents(xop, xo_stack_cur(xop), fstatus);
+	xo_filt_commit(xop, xo_stack_cur(xop), fstatus);
 
     return fstatus;
 }
@@ -5310,10 +5505,18 @@ xo_filt_do_close_field (xo_handle_t *xop, const char *name, xo_ssize_t nlen,
     xo_filter_t *xfp = xo_filters(xop);
     xo_filter_status_t fstatus = xo_filter_get_status(xop, xfp);
 
+    XO_DBG(xop, "xo_filt_do_close_field: depth %d, status %u=%s",
+	   xop->xo_depth, fstatus, xo_filt_status_name(fstatus));
+
 #if 0
     if (fstatus == XO_STATUS_DEAD)
 	return fstatus;
 #endif
+
+    /*
+     * We need to decide whether to keep the field or not keep our
+     * freshly-renderer field.
+     */
 
     if ((flags & XFF_KEY) && !pass_field)
 	return fstatus;
@@ -5748,8 +5951,6 @@ xo_format_value (xo_handle_t *xop, const char *name, ssize_t nlen,
 	name = xo_map_name(xop, new_name);
 	nlen = strlen(name);	/* Need new length for new name */
     }
-
-    xo_filter_status_t fstatus UNUSED = 0;
 
     const char *leader = xo_xml_leader_len(xop, name, nlen);
 
@@ -7871,18 +8072,27 @@ xo_depth_change (xo_handle_t *xop, const char *name,
 	if (xo_depth_check(xop, xop->xo_depth + delta))
 	    return;
 
+#if 0
 	/* If we're not filtering (at the moment), we don't need the offset */
 	if (!XOIF_ISSET(xop, XOIF_FILTERING))
 	    starting_offset = XS_OFFSET_CLEAR;
+#endif
 
 	xo_stack_t *xsp = &xop->xo_stack[xop->xo_depth + delta];
 	xsp->xs_flags = flags;
 	xsp->xs_state = state;
 	xsp->xs_fstatus = fstatus;
-	xsp->xs_wb_off = starting_offset;
-	xsp->xs_wb_flags = xop->xo_wb_snap; /* parent flags before this open */
-	xop->xo_wb_snap = 0;
+	xsp->xs_rb_off = starting_offset;
+	xsp->xs_rb_flags = xop->xo_rb_snap; /* parent flags before this open */
+	xop->xo_rb_snap = 0;
 	xo_stack_set_flags(xop);
+
+	XO_DBG(xop, "xo_depth_change: '%s' depth %d, state %u=%s, "
+	       "status %u=%s,  rb_off %d, rb_flags %#x",
+	       name, xop->xo_depth + delta,
+	       state, xo_state_name(state),
+	       fstatus, xo_filt_status_name(fstatus),
+	       (int) starting_offset, xsp->xs_rb_flags);
 
 	if (name == NULL)
 	    name = XO_FAILURE_NAME;
@@ -7917,7 +8127,7 @@ xo_depth_change (xo_handle_t *xop, const char *name,
 	}
 
 	/* Clear any offsets */
-	xsp->xs_wb_off = XS_OFFSET_CLEAR;
+	xsp->xs_rb_off = XS_OFFSET_CLEAR;
 	xsp->xs_key_off = XS_OFFSET_CLEAR;
 
 	if (xsp->xs_name) {
@@ -8002,7 +8212,7 @@ xo_do_open_container (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
 
     /* Save the starting point, so depth_change can record it later */
     xo_off_t starting_offset = xo_buf_offset(&xop->xo_data);
-    xop->xo_wb_snap = xop->xo_stack[xop->xo_depth].xs_flags & XSF_WB_BITS;
+    xop->xo_rb_snap = xop->xo_stack[xop->xo_depth].xs_flags & XSF_RB_BITS;
 
     switch (xo_style(xop)) {
     case XO_STYLE_XML:
@@ -8012,9 +8222,7 @@ xo_do_open_container (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
 	/*
 	 * If we are newly "full", then we need all our parents to be emitted
 	 */
-	if (xop->xo_flags & XOF_FILTER)
-	    if (fstatus == XO_STATUS_FULL && old_fstatus != XO_STATUS_FULL)
-		xo_filt_mark_parents(xop, xsp, fstatus);
+	xo_filt_handle_change_status(xop, old_fstatus, fstatus);
 
 	rc = xo_printf(xop, "%*s<%s%s", xo_indent(xop), "", leader, name);
 
@@ -8032,9 +8240,7 @@ xo_do_open_container (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
 	/*
 	 * If we are newly "full", then we need all our parents to be emitted
 	 */
-	if (xop->xo_flags & XOF_FILTER)
-	    if (fstatus == XO_STATUS_FULL && old_fstatus != XO_STATUS_FULL)
-		xo_filt_mark_parents(xop, xsp, fstatus);
+	xo_filt_handle_change_status(xop, old_fstatus, fstatus);
 
 	xo_stack_set_flags(xop);
 
@@ -8148,38 +8354,43 @@ xo_do_close_container (xo_handle_t *xop, const char *name)
     switch (xo_style(xop)) {
     case XO_STYLE_XML:
 	/*
-	 * When inside a whiteboard capture for a PRED instance, don't roll
-	 * back this sub-container's content — the parent instance handles
-	 * commit/rollback as a unit.  Always write </tag> tentatively.
+	 * Roll back if this container was tentatively captured (xs_rb_off set)
+	 * and is the top of the tentative region (parent's xs_rb_off is clear).
+	 * Nested containers inside a still-tracked instance must not be rolled
+	 * back independently — the enclosing instance handles that on close.
 	 */
-	if ((xop->xo_flags & XOF_FILTER) && !XOIF_ISSET(xop, XOIF_FILTERING))
-	    xo_filt_reset_parent(xop, xsp, old_fstatus, fstatus);
-
+	if ((xop->xo_flags & XOF_FILTER) && xsp->xs_rb_off != XS_OFFSET_CLEAR) {
+#if 0
+	        && (xop->xo_depth == 0 || (xsp - 1)->xs_rb_off == XS_OFFSET_CLEAR)) {
+#endif
+	    xo_filt_rollback(xop, xsp, old_fstatus, fstatus);
+	    xo_depth_change(xop, name, -1, -1, XSS_CLOSE_CONTAINER,
+			    XSF_FILTER, fstatus, 0);
+	    break;
+	}
 	xo_depth_change(xop, name, -1, -1, XSS_CLOSE_CONTAINER,
 			XSF_FILTER, fstatus, 0);
-
-	if (!(xop->xo_flags & XOF_FILTER) || XOIF_ISSET(xop, XOIF_FILTERING)
-		|| old_fstatus == 0 || old_fstatus == XO_STATUS_FULL)
-	    rc = xo_printf(xop, "%*s</%s%s>%s", xo_indent(xop),
-			   "", leader, name, ppn);
+	rc = xo_printf(xop, "%*s</%s%s>%s", xo_indent(xop),
+		       "", leader, name, ppn);
 	break;
 
     case XO_STYLE_JSON:
 	xo_stack_set_flags(xop);
 
-	if ((xop->xo_flags & XOF_FILTER) && !XOIF_ISSET(xop, XOIF_FILTERING))
-	    xo_filt_reset_parent(xop, xsp, old_fstatus, fstatus);
-
 	pre_nl = XOF_ISSET(xop, XOF_PRETTY) ? "\n" : "";
 	ppn = "";
 
-	xo_depth_change(xop, name, -1, -1, XSS_CLOSE_CONTAINER, 0, 0, 0);
-
-	if (!(xop->xo_flags & XOF_FILTER) || XOIF_ISSET(xop, XOIF_FILTERING)
-		|| old_fstatus == XO_STATUS_ZERO || old_fstatus == XO_STATUS_FULL) {
-	    rc = xo_printf(xop, "%s%*s}%s", pre_nl, xo_indent(xop), "", ppn);
-	    xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
+	if ((xop->xo_flags & XOF_FILTER) && xsp->xs_rb_off != XS_OFFSET_CLEAR) {
+#if 0
+	        && (xop->xo_depth == 0 || (xsp - 1)->xs_rb_off == XS_OFFSET_CLEAR)) {
+#endif
+	    xo_filt_rollback(xop, xsp, old_fstatus, fstatus);
+	    xo_depth_change(xop, name, -1, -1, XSS_CLOSE_CONTAINER, 0, 0, 0);
+	    break;
 	}
+	xo_depth_change(xop, name, -1, -1, XSS_CLOSE_CONTAINER, 0, 0, 0);
+	rc = xo_printf(xop, "%s%*s}%s", pre_nl, xo_indent(xop), "", ppn);
+	xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
 	break;
 
     case XO_STYLE_HTML:
@@ -8237,7 +8448,7 @@ xo_do_open_list (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
     name = xo_map_name(xop, name); /* Find mapped name, if any */
 
     xo_off_t starting_offset = xo_buf_offset(&xop->xo_data);
-    xop->xo_wb_snap = xop->xo_stack[xop->xo_depth].xs_flags & XSF_WB_BITS;
+    xop->xo_rb_snap = xop->xo_stack[xop->xo_depth].xs_flags & XSF_RB_BITS;
 
     switch (xo_style(xop)) {
     case XO_STYLE_JSON:
@@ -8349,9 +8560,8 @@ xo_do_close_list (xo_handle_t *xop, const char *name)
 	    pre_nl = XOF_ISSET(xop, XOF_PRETTY) ? "\n" : "";
 	xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
 
-	if ((xop->xo_flags & XOF_FILTER) && !XOIF_ISSET(xop, XOIF_FILTERING)
-		&& xsp->xs_wb_off != XS_OFFSET_CLEAR) {
-	    xo_filt_reset_parent(xop, xsp, xsp->xs_fstatus, xsp->xs_fstatus);
+	if ((xop->xo_flags & XOF_FILTER) && xsp->xs_rb_off != XS_OFFSET_CLEAR) {
+	    xo_filt_rollback(xop, xsp, xsp->xs_fstatus, xsp->xs_fstatus);
 	    xo_depth_change(xop, name, -1, -1, XSS_CLOSE_LIST, XSF_LIST, 0, 0);
 	    break;
 	}
@@ -8413,7 +8623,7 @@ xo_do_open_leaf_list (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
     name = xo_map_name(xop, name); /* Find mapped name, if any */
 
     xo_off_t starting_offset = xo_buf_offset(&xop->xo_data);
-    xop->xo_wb_snap = xop->xo_stack[xop->xo_depth].xs_flags & XSF_WB_BITS;
+    xop->xo_rb_snap = xop->xo_stack[xop->xo_depth].xs_flags & XSF_RB_BITS;
 
     switch (xo_style(xop)) {
     case XO_STYLE_JSON:
@@ -8486,8 +8696,8 @@ xo_do_close_leaf_list (xo_handle_t *xop, const char *name)
 	    pre_nl = XOF_ISSET(xop, XOF_PRETTY) ? "\n" : "";
 	xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
 
-	if ((xop->xo_flags & XOF_FILTER) && xsp->xs_wb_off != XS_OFFSET_CLEAR) {
-	    xo_filt_reset_parent(xop, xsp, xsp->xs_fstatus, xsp->xs_fstatus);
+	if ((xop->xo_flags & XOF_FILTER) && xsp->xs_rb_off != XS_OFFSET_CLEAR) {
+	    xo_filt_rollback(xop, xsp, xsp->xs_fstatus, xsp->xs_fstatus);
 	    xo_depth_change(xop, name, -1, -1, XSS_CLOSE_LEAF_LIST, XSF_LIST, 0, 0);
 	    break;
 	}
@@ -8530,7 +8740,7 @@ xo_do_open_instance (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
     xo_filter_status_t old_fstatus = xsp->xs_fstatus;
 
     ssize_t start_offset = xo_buf_offset(&xop->xo_data);
-    xop->xo_wb_snap = xop->xo_stack[xop->xo_depth].xs_flags & XSF_WB_BITS;
+    xop->xo_rb_snap = xop->xo_stack[xop->xo_depth].xs_flags & XSF_RB_BITS;
 
     xo_filter_status_t fstatus;
     fstatus = xo_filter_open_instance(xop, xo_filters(xop), name);
@@ -8546,9 +8756,7 @@ xo_do_open_instance (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
 	/*
 	 * If we are newly "full", then we need all our parents to be emitted
 	 */
-	if (xop->xo_flags & XOF_FILTER)
-	    if (fstatus == XO_STATUS_FULL && old_fstatus != XO_STATUS_FULL)
-		xo_filt_mark_parents(xop, xsp, fstatus);
+	xo_filt_handle_change_status(xop, old_fstatus, fstatus);
 
 	rc = xo_printf(xop, "%*s<%s%s", xo_indent(xop), "", leader, name);
 
@@ -8566,9 +8774,7 @@ xo_do_open_instance (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
 	/*
 	 * If we are newly "full", then we need all our parents to be emitted
 	 */
-	if (xop->xo_flags & XOF_FILTER)
-	    if (fstatus == XO_STATUS_FULL && old_fstatus != XO_STATUS_FULL)
-		xo_filt_mark_parents(xop, xsp, fstatus);
+	xo_filt_handle_change_status(xop, old_fstatus, fstatus);
 
 	xo_stack_set_flags(xop);
 
@@ -8590,9 +8796,10 @@ xo_do_open_instance (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
     }
 
     /*
-     * If a non-key predicate is pending, ensure the whiteboard offset is
-     * recorded so we can roll back on predicate failure.  This must be set
-     * before xo_depth_change so that xs_wb_off is stored (not cleared).
+     * If a non-key predicate is pending, ensure the rollback offset
+     * is recorded so we can roll back on predicate failure.  This
+     * must be set before xo_depth_change so that xs_rb_off is stored
+     * (not cleared).
      */
     if ((xop->xo_flags & XOF_FILTER) && fstatus == XO_STATUS_PRED)
 	XOIF_SET(xop, XOIF_FILTERING);
@@ -8673,24 +8880,26 @@ xo_do_close_instance (xo_handle_t *xop, const char *name)
     /*
      * If a non-key predicate was force-resolved to FULL at close time
      * (the predicate field was absent from this instance), commit the
-     * whiteboard so all tentatively-buffered sibling content is kept.
+     * rollback so all tentatively-buffered sibling content is kept.
      */
     if ((xop->xo_flags & XOF_FILTER)
 	    && old_fstatus == XO_STATUS_PRED && fstatus == XO_STATUS_FULL) {
-	xo_filt_mark_parents(xop, xsp, XO_STATUS_FULL);
+	xo_filt_commit(xop, xsp, XO_STATUS_FULL);
 	old_fstatus = XO_STATUS_FULL;
     }
 
     switch (xo_style(xop)) {
     case XO_STYLE_XML:
 	if (xop->xo_flags & XOF_FILTER) {
+#if 0
 	    /*
-	     * Clear key_off so rollback goes to xs_wb_off (before <instance>),
+	     * Clear key_off so rollback goes to xs_rb_off (before <instance>),
 	     * not just past the key fields.  A non-matching instance must be
 	     * fully discarded, not left with partial key-field output.
 	     */
 	    xsp->xs_key_off = XS_OFFSET_CLEAR;
-	    xo_filt_reset_parent(xop, xsp, old_fstatus, fstatus);
+#endif
+	    xo_filt_rollback(xop, xsp, old_fstatus, fstatus);
 	}
 
 	xo_depth_change(xop, name, -1, -1, XSS_CLOSE_INSTANCE, 0, fstatus, 0);
@@ -8704,8 +8913,8 @@ xo_do_close_instance (xo_handle_t *xop, const char *name)
     case XO_STYLE_JSON:
 	pre_nl = XOF_ISSET(xop, XOF_PRETTY) ? "\n" : "";
 
-	if ((xop->xo_flags & XOF_FILTER) && xsp->xs_wb_off != XS_OFFSET_CLEAR) {
-	    xo_filt_reset_parent(xop, xsp, old_fstatus, fstatus);
+	if ((xop->xo_flags & XOF_FILTER) && xsp->xs_rb_off != XS_OFFSET_CLEAR) {
+	    xo_filt_rollback(xop, xsp, old_fstatus, fstatus);
 	    xo_depth_change(xop, name, -1, -1, XSS_CLOSE_INSTANCE, 0, 0, 0);
 	    break;
 	}
@@ -9128,9 +9337,6 @@ xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
 	if (xo_flush_h(xop) < 0)
 	    rc = -1;
 
-    /* We have now official made output */
-    XOIF_SET(xop, XOIF_MADE_OUTPUT);
-
     return rc;
 }
 
@@ -9230,7 +9436,13 @@ xo_finish_h (xo_handle_t *xop)
 
 	    if (XOIF_ISSET(xop, XOIF_TOP_EMITTED))
 		XOIF_CLEAR(xop, XOIF_TOP_EMITTED); /* Turn off before output */
-	    else if (!XOIF_ISSET(xop, XOIF_MADE_OUTPUT)) {
+	    else if (!(XOIF_ISSET(xop, XOIF_MADE_OUTPUT)
+		       || !xo_buf_is_empty(&xop->xo_data))) {
+		/*
+		 * No output made and nothing pending in the buffer,
+		 * so have fake up an empty set of braces just to make
+		 * valid JSON.
+		 */
 		open_if_empty = "{ ";
 		pre_nl = "";
 	    }
@@ -9483,9 +9695,9 @@ xo_dump_stack (xo_handle_t *xop)
 
     xsp = xop->xo_stack;
     for (i = 1, xsp++; i <= xop->xo_depth; i++, xsp++) {
-	fprintf(stderr, "   [%d] %s '%s' [%x] wb_off: %ld\n",
+	fprintf(stderr, "   [%d] %s '%s' [%x] rb_off: %ld\n",
 		i, xo_state_name(xsp->xs_state),
-		xsp->xs_name ?: "--", xsp->xs_flags, xsp->xs_wb_off);
+		xsp->xs_name ?: "--", xsp->xs_flags, xsp->xs_rb_off);
     }
 }
 
