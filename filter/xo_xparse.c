@@ -625,10 +625,13 @@ xo_xparse_feature_warn_one_node (const char *tag, xo_xparse_data_t *xdp,
 	}
 
 	/* Multi-element path inside a predicate (e.g. a[b/c]) */
-	if (type == C_PATH && C_PREDICATE_PATHS < len && map[C_PREDICATE_PATHS]) {
+	if (type == C_PATH && C_PREDICATE_PATHS < len
+	    	&& map[C_PREDICATE_PATHS]) {
 	    xo_xparse_node_t *cp = xo_xparse_node(xdp, xnp->xn_contents);
 	    if (cp && cp->xn_next) {
-		const char *tname = xo_xparse_fancy_token_name(C_PREDICATE_PATHS);
+		const char *tname;
+
+		tname = xo_xparse_fancy_token_name(C_PREDICATE_PATHS);
 		xo_xparse_warn(xdp, "%s%sxpath feature is unsupported: %s",
 			       tag ?: "", tag ? ": " : "",
 			       tname ?: "multi-element path in predicate");
