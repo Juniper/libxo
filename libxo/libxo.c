@@ -249,6 +249,7 @@ typedef struct xo_stack_s {
     xo_state_t xs_state;	/* State for this stack frame */
     xo_filter_status_t xs_fstatus; /* Filter status */
     xo_off_t xs_rb_off;		/* Offset of buffer before this level */
+    xo_off_t xs_tag_end;	/* Offset just after this level's opening tag */
     xo_off_t xs_key_off;	/* Offset of end of last key renderer */
     xo_xsf_flags_t xs_rb_flags; /* Parent XSF_RB_BITS  at rb-marker time */
     char *xs_name;		/* Name (for XPath value) */
@@ -601,9 +602,10 @@ xo_depth_check (xo_handle_t *xop, int depth)
 	xop->xo_stack_size = depth;
 	xop->xo_stack = xsp;
 
-	/* bzero sets xs_rb_off/xs_key_off to 0, but XS_OFFSET_CLEAR == -1 */
+	/* bzero sets xs_rb_off/xs_key_off/xs_tag_end to 0, but XS_OFFSET_CLEAR == -1 */
 	for (int i = old_size; i < depth; i++) {
 	    xsp[i].xs_rb_off = XS_OFFSET_CLEAR;
+	    xsp[i].xs_tag_end = XS_OFFSET_CLEAR;
 	    xsp[i].xs_key_off = XS_OFFSET_CLEAR;
 	}
     }
@@ -5247,6 +5249,7 @@ xo_filt_commit (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED,
 #endif /* LIBXO_NEED_FILTERS */
 }
 
+
 static void
 xo_filt_handle_open_status (xo_handle_t *xop, xo_filter_status_t fstatus)
 {
@@ -5425,7 +5428,7 @@ xo_filt_is_skippable (xo_handle_t *xop, xo_xff_flags_t flags,
      * sibling/nested content tentatively (XML/JSON only — encoder
      * state cannot be rolled back).
      */
-    if (XOIF_ISSET(xop, XOIF_FILTERING) && xo_style(xop) == XO_STYLE_ENCODER)
+    if (XOIF_ISSET(xop, XOIF_FILTERING) && xo_style(xop) != XO_STYLE_ENCODER)
 	return FALSE;
 
     if (fstatus == XO_STATUS_PRED)
@@ -8083,6 +8086,7 @@ xo_depth_change (xo_handle_t *xop, const char *name,
 	xsp->xs_state = state;
 	xsp->xs_fstatus = fstatus;
 	xsp->xs_rb_off = starting_offset;
+	xsp->xs_tag_end = XS_OFFSET_CLEAR;
 	xsp->xs_rb_flags = xop->xo_rb_snap; /* parent flags before this open */
 	xop->xo_rb_snap = 0;
 	xo_stack_set_flags(xop);
@@ -8128,6 +8132,7 @@ xo_depth_change (xo_handle_t *xop, const char *name,
 
 	/* Clear any offsets */
 	xsp->xs_rb_off = XS_OFFSET_CLEAR;
+	xsp->xs_tag_end = XS_OFFSET_CLEAR;
 	xsp->xs_key_off = XS_OFFSET_CLEAR;
 
 	if (xsp->xs_name) {
@@ -8280,6 +8285,8 @@ xo_do_open_container (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
 
     xo_depth_change(xop, name, 1, 1, XSS_OPEN_CONTAINER,
 		    xo_stack_flags(flags), fstatus, starting_offset);
+
+    xo_stack_cur(xop)->xs_tag_end = xo_buf_offset(&xop->xo_data);
 
     return rc;
 }
@@ -8494,6 +8501,8 @@ xo_do_open_list (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
     xo_depth_change(xop, name, 1, indent, XSS_OPEN_LIST,
 		    XSF_LIST | xo_stack_flags(flags), 0, starting_offset);
 
+    xo_stack_cur(xop)->xs_tag_end = xo_buf_offset(&xop->xo_data);
+
     return rc;
 }
 
@@ -8660,6 +8669,8 @@ xo_do_open_leaf_list (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
     xo_depth_change(xop, name, 1, indent, XSS_OPEN_LEAF_LIST,
 		    XSF_LIST | xo_stack_flags(flags), 0, starting_offset);
 
+    xo_stack_cur(xop)->xs_tag_end = xo_buf_offset(&xop->xo_data);
+
     return rc;
 }
 
@@ -8796,16 +8807,25 @@ xo_do_open_instance (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
     }
 
     /*
-     * If a non-key predicate is pending, ensure the rollback offset
-     * is recorded so we can roll back on predicate failure.  This
-     * must be set before xo_depth_change so that xs_rb_off is stored
-     * (not cleared).
+     * Set XOIF_FILTERING so xs_rb_off is preserved by xo_depth_change:
+     *
+     * PRED: key/non-key predicate pending — buffer tentatively until resolved.
+     *
+     * TRACK after FULL: positional predicate already matched (old_fstatus==FULL);
+     *   subsequent siblings are TRACK and must be buffered so their whiteboard
+     *   can be discarded on close.
      */
-    if ((xop->xo_flags & XOF_FILTER) && fstatus == XO_STATUS_PRED)
-	XOIF_SET(xop, XOIF_FILTERING);
+    if (xop->xo_flags & XOF_FILTER) {
+	if (fstatus == XO_STATUS_PRED)
+	    XOIF_SET(xop, XOIF_FILTERING);
+	else if (fstatus == XO_STATUS_TRACK && old_fstatus == XO_STATUS_FULL)
+	    XOIF_SET(xop, XOIF_FILTERING);
+    }
 
     xo_depth_change(xop, name, 1, 1, XSS_OPEN_INSTANCE,
 		    xo_stack_flags(flags), fstatus, start_offset);
+
+    xo_stack_cur(xop)->xs_tag_end = xo_buf_offset(&xop->xo_data);
 
     return rc;
 }
