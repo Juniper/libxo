@@ -97,14 +97,29 @@ typedef struct xo_trie_s {
 typedef struct xo_tframe_s {
     uint8_t xtf_count;		/* # of active slots */
     uint8_t xtf_state[XO_TFRAME_MAX]; /* XTFS_* per slot */
+    uint8_t xtf_flags[XO_TFRAME_MAX]; /* XTFF_* per slot */
     xo_trie_id_t xtf_node[XO_TFRAME_MAX]; /* trie node id per slot */
+    uint32_t xtf_position[XO_TFRAME_MAX]; /* 1-based open position per slot */
+    uint32_t xtf_qual_position[XO_TFRAME_MAX]; /* qualified position (leading-pred-gated) */
     int16_t xtf_allow_delta;	/* allow contribution to undo on pop */
     int16_t xtf_deny_delta;	/* deny contribution to undo on pop */
     char *xtf_keys;		/* buffered "k\0v\0k2\0v2\0\0" pairs */
     ssize_t xtf_keys_len;
     char *xtf_attrs;		/* buffered "@k\0v\0..." pairs (attributes) */
     ssize_t xtf_attrs_len;
+    uint32_t xtf_position_cur;  /* scratch: position for current C_INDEX eval */
+    /* Child sibling counters (tracked in the PARENT frame, survive close) */
+    uint8_t xtf_child_ncount;
+    xo_trie_id_t xtf_child_node[XO_TFRAME_MAX];
+    uint32_t xtf_child_count_val[XO_TFRAME_MAX];
+    /* Qualified child counters: only count when leading predicates pass */
+    uint8_t xtf_child_qual_ncount;
+    xo_trie_id_t xtf_child_qual_node[XO_TFRAME_MAX];
+    uint32_t xtf_child_qual_val[XO_TFRAME_MAX];
 } xo_tframe_t;
+
+/* Per-slot flags (xtf_flags[]) */
+#define XTFF_QUAL_COUNTED  (1 << 0)  /* leading-pred qualified position counted */
 
 /* Per-slot states */
 #define XTFS_SEEK	0	/* Waiting for this node's element name */
@@ -530,6 +545,74 @@ xo_tmatch_record_live (xo_tmatch_t *xtmp, xo_tframe_t *frame, xo_tnode_t *tn)
     }
 }
 
+/*
+ * Look up child trie node `c` in the parent's sibling-counter table,
+ * increment its count, and return the new (1-based) open position.
+ */
+static uint32_t
+xo_tframe_child_position (xo_tframe_t *parent, xo_trie_id_t c)
+{
+    for (uint32_t j = 0; j < parent->xtf_child_ncount; j++) {
+	if (parent->xtf_child_node[j] == c)
+	    return ++parent->xtf_child_count_val[j];
+    }
+    if (parent->xtf_child_ncount < XO_TFRAME_MAX) {
+	uint32_t j = parent->xtf_child_ncount++;
+	parent->xtf_child_node[j] = c;
+	parent->xtf_child_count_val[j] = 1;
+	return 1;
+    }
+    return 0; /* table full; can't track */
+}
+
+/*
+ * Like xo_tframe_child_position, but only counts opens where the leading
+ * (non-positional) predicates passed.  Stored in separate parallel counters
+ * in the parent frame so the two counts never interfere.
+ */
+static uint32_t
+xo_tframe_child_qualified_position (xo_tframe_t *parent, xo_trie_id_t c)
+{
+    for (uint32_t j = 0; j < parent->xtf_child_qual_ncount; j++) {
+	if (parent->xtf_child_qual_node[j] == c)
+	    return ++parent->xtf_child_qual_val[j];
+    }
+    if (parent->xtf_child_qual_ncount < XO_TFRAME_MAX) {
+	uint32_t j = parent->xtf_child_qual_ncount++;
+	parent->xtf_child_qual_node[j] = c;
+	parent->xtf_child_qual_val[j] = 1;
+	return 1;
+    }
+    return 0; /* table full; can't track */
+}
+
+/*
+ * Return TRUE if the predicate list has a C_INDEX predicate that is NOT
+ * the first predicate (meaning there are leading key/test predicates before it).
+ * foo[2]           → FALSE (C_INDEX is first, use open-time position)
+ * foo[x=1][2]      → TRUE  (C_INDEX is trailing, must use qualified position)
+ * foo[2][x=1]      → FALSE (C_INDEX is first)
+ */
+static int
+xo_pred_has_trailing_cindex (xo_filter_t *xfp, xo_xparse_node_id_t pred_id)
+{
+    int has_leading = FALSE;
+    xo_xparse_node_t *xnp;
+    for (xo_xparse_node_id_t id = pred_id; id; id = xnp->xn_next) {
+	xnp = xo_xparse_node(&xfp->xf_xd, id);
+	if (xnp->xn_type != C_PREDICATE)
+	    continue;
+	xo_xparse_node_id_t cid = xnp->xn_contents;
+	int is_cindex = cid
+	    && xo_xparse_node(&xfp->xf_xd, cid)->xn_type == C_INDEX;
+	if (is_cindex && has_leading)
+	    return TRUE;
+	if (!is_cindex)
+	    has_leading = TRUE;
+    }
+    return FALSE;
+}
+
 static void
 xo_tmatch_open (xo_handle_t *xop, xo_filter_t *xfp UNUSED,
 		xo_tmatch_t *xtmp, const char *tag, ssize_t tlen)
@@ -568,10 +651,13 @@ xo_tmatch_open (xo_handle_t *xop, xo_filter_t *xfp UNUSED,
 		    (nm == NULL || !xo_streqn(nm, tag, tlen)))
 		continue;
 
+	    uint32_t position = xo_tframe_child_position(parent, c);
 	    uint32_t s = frame->xtf_count++;
 	    frame->xtf_node[s] = c;
+	    frame->xtf_position[s] = position;
 
 	    if (tn->xtn_pred) {
+		frame->xtf_position_cur = position;
 		frame->xtf_state[s] =
 		    xo_tmatch_try_eager(xop, xfp, frame, tn->xtn_pred,
 					tn, xtmp);
@@ -606,10 +692,13 @@ xo_tmatch_open (xo_handle_t *xop, xo_filter_t *xfp UNUSED,
 	if (dup)
 	    continue;
 
+	uint32_t position = xo_tframe_child_position(parent, r);
 	uint32_t s = frame->xtf_count++;
 	frame->xtf_node[s] = r;
+	frame->xtf_position[s] = position;
 
 	if (tn->xtn_pred) {
+	    frame->xtf_position_cur = position;
 	    frame->xtf_state[s] =
 		xo_tmatch_try_eager(xop, xfp, frame, tn->xtn_pred, tn, xtmp);
 	} else {
@@ -672,7 +761,7 @@ xo_filter_op_add_one (xo_handle_t *xop, const char *input)
 	    L_DOTDOT, L_DOTDOTDOT, L_DOT,
 	    K_COMMENT, K_ID, K_KEY, K_NODE,
 	    K_PROCESSING_INSTRUCTION, K_TEXT,
-	    T_AXIS_NAME, T_VAR, M_SEQUENCE, C_DESCENDANT, C_INDEX,
+	    T_AXIS_NAME, T_VAR, M_SEQUENCE, C_DESCENDANT,
 	    C_TEST, C_UNION, C_NESTED_PREDICATES, C_PREDICATE_PATHS,
 	    0
 	};
@@ -1039,12 +1128,12 @@ xo_eval_value_make (unsigned type, unsigned flags, xo_xparse_node_id_t id)
 }
 
 static inline void
-xo_eval_value_free (xo_eval_value_t v)
+xo_eval_value_free (xo_eval_value_t val)
 {
-    if (v.xev_type == C_DSTRING) {
+    if (val.xev_type == C_DSTRING && val.xev_str != NULL) {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
-	xo_free((char *) v.xev_str);
+	xo_free((char *) val.xev_str);
 #pragma GCC diagnostic pop
     }
 }
@@ -1091,6 +1180,20 @@ static inline xo_eval_value_t
 xo_eval_value_missing (void)
 {
     xo_eval_value_t value = XO_EVAL_VALUE_MISSING;
+    return value;
+}
+
+static inline xo_eval_value_t
+xo_eval_value_boolean_false (void)
+{
+    xo_eval_value_t value = XO_EVAL_VALUE_BOOLEAN_FALSE;
+    return value;
+}
+
+static inline xo_eval_value_t
+xo_eval_value_boolean_true (void)
+{
+    xo_eval_value_t value = XO_EVAL_VALUE_BOOLEAN_TRUE;
     return value;
 }
 
@@ -1159,6 +1262,17 @@ xo_eval_make_number_from_value (xo_handle_t *xop, xo_eval_value_t value)
     default:
 	return value;
     }
+}
+
+static xo_eval_value_t
+xo_eval_position (XO_EVAL_NODE_ARGS)
+{
+    const char *str = xo_xparse_str(&xfp->xf_xd, xnp->xn_str);
+    uint64_t idx = str ? (uint64_t) strtoul(str, NULL, 10) : 0;
+    uint32_t pos = framep->xtf_position_cur;
+    xo_eval_value_t value = xo_eval_value_make(C_BOOLEAN, 0, 0);
+    value.xev_uint64 = (pos != 0 && pos == idx) ? 1 : 0;
+    return value;
 }
 
 static xo_eval_value_t
@@ -2411,6 +2525,10 @@ xo_eval (xo_handle_t *xop, xo_filter_t *xfp, xo_tframe_t *framep,
 	    node_fn = xo_eval_function;
 	    break;
 
+	case C_INDEX:
+	    node_fn = xo_eval_position;
+	    break;
+
 	case T_NUMBER:
 	    node_fn = xo_eval_number;
 	    break;
@@ -2511,7 +2629,7 @@ static xo_eval_value_t
 xo_filter_pred_eval (xo_handle_t *xop, xo_filter_t *xfp,
 		     xo_tframe_t *framep, xo_xparse_node_id_t pred_id)
 {
-    xo_eval_value_t value = XO_EVAL_VALUE_ZERO;
+    int have_missing = FALSE;
 
     xo_xparse_dump_one_node(&xfp->xf_xd, pred_id, 0, "eval: ");
 
@@ -2527,14 +2645,38 @@ xo_filter_pred_eval (xo_handle_t *xop, xo_filter_t *xfp,
 	if (xnp->xn_type != C_PREDICATE) /* Can't eval anything else */
 	    continue;
 
-	value = xo_eval(xop, xfp, framep, "top", XO_INDENT,
-			xnp->xn_contents, NULL);
-	xo_eval_dump_value(xop, xfp, value, XO_INDENT,
+	xo_eval_value_t pv = xo_eval(xop, xfp, framep, "top", XO_INDENT,
+				     xnp->xn_contents, NULL);
+	xo_eval_dump_value(xop, xfp, pv, XO_INDENT,
 			   "xo_filter_pred_eval: working");
+
+	if (pv.xev_flags & XEVF_MISSING) {
+	    /* Key not yet seen — can't resolve this predicate yet */
+	    have_missing = TRUE;
+	    xo_eval_value_free(pv);
+	    continue;
+	}
+
+	int passes = xo_eval_cast_boolean(xop, pv);
+	xo_eval_value_free(pv);
+
+	if (!passes) {
+	    /* Definitive FALSE: AND short-circuits regardless of other preds */
+	    xo_eval_dump_value(xop, xfp, xo_eval_value_boolean_false(),
+			       0, "xo_filter_pred_eval: final");
+	    return xo_eval_value_boolean_false();
+	}
     }
 
-    xo_eval_dump_value(xop, xfp, value, 0, "xo_filter_pred_eval: final");
-    return value;
+    if (have_missing) {
+	xo_eval_dump_value(xop, xfp, xo_eval_value_missing(),
+			   0, "xo_filter_pred_eval: final");
+	return xo_eval_value_missing();
+    }
+
+    xo_eval_dump_value(xop, xfp, xo_eval_value_boolean_true(),
+		       0, "xo_filter_pred_eval: final");
+    return xo_eval_value_boolean_true();
 }
 
 /*
@@ -2578,6 +2720,15 @@ xo_tmatch_try_eager (xo_handle_t *xop, xo_filter_t *xfp,
 		     xo_tframe_t *framep, xo_xparse_node_id_t pred,
 		     xo_tnode_t *tn, xo_tmatch_t *xtmp)
 {
+    /*
+     * For foo[A][N] (trailing C_INDEX after leading predicates) we cannot
+     * evaluate the positional predicate eagerly because the qualified
+     * position (counting only instances where A passes) is not yet known.
+     * Defer to key-arrival or force-resolve time.
+     */
+    if (xo_pred_has_trailing_cindex(xfp, pred))
+	return XTFS_PRED;
+
     xo_eval_value_t result = xo_filter_pred_eval(xop, xfp, framep, pred);
     if (result.xev_flags & XEVF_MISSING)
 	return XTFS_PRED;
@@ -2588,6 +2739,75 @@ xo_tmatch_try_eager (xo_handle_t *xop, xo_filter_t *xfp,
 	return XTFS_LIVE;
     }
     return XTFS_DEAD;
+}
+
+/*
+ * Evaluate only the leading (non-C_INDEX) predicates in the list.
+ * Returns MISSING if any leading predicate still needs unseen keys,
+ * TRUE/FALSE otherwise.  C_INDEX predicates are skipped entirely.
+ */
+static xo_eval_value_t
+xo_filter_leading_preds_eval (xo_handle_t *xop, xo_filter_t *xfp,
+			      xo_tframe_t *framep, xo_xparse_node_id_t pred_id)
+{
+    xo_eval_value_t value = XO_EVAL_VALUE_BOOLEAN_TRUE;
+    xo_xparse_node_t *xnp;
+    for (xo_xparse_node_id_t id = pred_id; id; id = xnp->xn_next) {
+	xnp = xo_xparse_node(&xfp->xf_xd, id);
+	if (xnp->xn_type != C_PREDICATE)
+	    continue;
+	xo_xparse_node_id_t cid = xnp->xn_contents;
+	if (cid && xo_xparse_node(&xfp->xf_xd, cid)->xn_type == C_INDEX)
+	    continue;  /* skip positional predicates */
+	value = xo_eval(xop, xfp, framep, "lead-pred", XO_INDENT, cid, NULL);
+	if (value.xev_flags & XEVF_MISSING)
+	    return value;
+    }
+    return value;
+}
+
+/*
+ * Determine the position to use for C_INDEX evaluation for slot `slot` in
+ * `framep`.  If the predicate list has a trailing C_INDEX (i.e. leading
+ * key/test predicates precede it), we maintain a separate "qualified"
+ * counter in the parent frame that only advances when those leading
+ * predicates pass.  Otherwise we fall back to the at-open-time position.
+ */
+static uint32_t
+xo_tmatch_slot_position (xo_handle_t *xop, xo_filter_t *xfp,
+			  xo_tmatch_t *xtmp, xo_tframe_t *framep,
+			  uint32_t slot, xo_xparse_node_id_t pred_id)
+{
+    /* Already counted for this slot: return saved qualified position */
+    if (framep->xtf_flags[slot] & XTFF_QUAL_COUNTED)
+	return framep->xtf_qual_position[slot];
+
+    /* No trailing C_INDEX → use normal open-time position */
+    if (!xo_pred_has_trailing_cindex(xfp, pred_id))
+	return framep->xtf_position[slot];
+
+    /* Evaluate leading predicates to see if they currently pass */
+    xo_eval_value_t lv = xo_filter_leading_preds_eval(xop, xfp, framep, pred_id);
+    if (lv.xev_flags & XEVF_MISSING) {
+	xo_eval_value_free(lv);
+	return framep->xtf_position[slot]; /* not yet decidable */
+    }
+    int passes = xo_eval_cast_boolean(xop, lv);
+    xo_eval_value_free(lv);
+
+    if (!passes)
+	return framep->xtf_position[slot]; /* C_INDEX outcome won't matter */
+
+    /* Leading predicates passed: advance the qualified counter in parent frame */
+    xo_tframe_t *parentp = xtmp->xtm_depth > 0
+	? &xtmp->xtm_stack[xtmp->xtm_depth - 1] : NULL;
+    if (parentp == NULL)
+	return framep->xtf_position[slot];
+
+    uint32_t qpos = xo_tframe_child_qualified_position(parentp, framep->xtf_node[slot]);
+    framep->xtf_qual_position[slot] = qpos;
+    framep->xtf_flags[slot] |= XTFF_QUAL_COUNTED;
+    return qpos;
 }
 
 static xo_filter_status_t
@@ -2612,6 +2832,9 @@ xo_tmatch_key (xo_handle_t *xop, xo_filter_t *xfp, xo_tmatch_t *xtmp,
 
 	xo_tframe_key_add(framep, tag, tlen, value, vlen);
 
+	framep->xtf_position_cur = xo_tmatch_slot_position(xop, xfp, xtmp,
+							    framep, i,
+							    tn->xtn_pred);
 	xo_eval_value_t result =
 	    xo_filter_pred_eval(xop, xfp, framep, tn->xtn_pred);
 
@@ -2674,6 +2897,9 @@ xo_tmatch_attr (xo_handle_t *xop, xo_filter_t *xfp, xo_tmatch_t *xtmp,
 
 	xo_tframe_attr_add(framep, tag, tlen, value, vlen);
 
+	framep->xtf_position_cur = xo_tmatch_slot_position(xop, xfp, xtmp,
+							    framep, i,
+							    tn->xtn_pred);
 	xo_eval_value_t result =
 	    xo_filter_pred_eval(xop, xfp, framep, tn->xtn_pred);
 
@@ -2827,6 +3053,8 @@ xo_filter_force_resolve_pred (xo_handle_t *xop, xo_filter_t *xfp,
 	    xo_tmatch_record_live(xtmp, framep, tn);
 	    continue;
 	}
+	framep->xtf_position_cur = (framep->xtf_flags[i] & XTFF_QUAL_COUNTED)
+	    ? framep->xtf_qual_position[i] : framep->xtf_position[i];
 	xo_eval_value_t result =
 	    xo_filter_pred_eval(xop, xfp, framep, tn->xtn_pred);
 	if (!(result.xev_flags & XEVF_MISSING)) {
