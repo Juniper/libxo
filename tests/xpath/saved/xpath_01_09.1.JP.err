@@ -27,7 +27,7 @@ main: status: track
 main: input '-two'
 main: status: track
 main: input '+two'
-main: filter: rc: 15
+main: filter: rc: 13
 main: status: predicate
 main: input '$three 9'
 main: key: 'three'='9'
@@ -38,7 +38,7 @@ main: status: track
 main: input '-two'
 main: status: track
 main: input '+two'
-main: filter: rc: 15
+main: filter: rc: 13
 main: status: predicate
 main: input '$three 8'
 main: key: 'three'='8'
@@ -49,7 +49,7 @@ main: status: track
 main: input '-two'
 main: status: track
 main: input '+two'
-main: filter: rc: 15
+main: filter: rc: 13
 main: status: predicate
 main: input '$three 7'
 main: key: 'three'='7'
@@ -86,7 +86,7 @@ xpath_01: test: xpath feature is unsupported: plus sign ('+')
                         000024: type 53 (T_NUMBER), str 45 [5], contents 0, next 0, prev 15 
 main: status: zero
 main: input '+two'
-main: filter: rc: 15
+main: filter: rc: 13
 main: status: predicate
 main: input '$three 10'
 main: key: 'three'='10'
@@ -97,7 +97,7 @@ main: status: track
 main: input '-two'
 main: status: track
 main: input '+two'
-main: filter: rc: 15
+main: filter: rc: 13
 main: status: predicate
 main: input '$three 9'
 main: key: 'three'='9'
