@@ -129,12 +129,12 @@ main: status: track
 main: input '-uno'
 main: status: track
 main: input '+uno'
-main: filter: rc: 23
+main: filter: rc: 21
 main: status: track
 main: input '-uno'
 main: status: track
 main: input '+d'
-main: filter: rc: 21
+main: filter: rc: 19
 main: status: full
 main: input '+e'
 main: filter: rc: 21
