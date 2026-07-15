@@ -1,0 +1,44 @@
+<data>
+  <top-level>
+    <data4>
+      <item test4="value4">gum</item>
+      <item test4="value4">rope</item>
+      <item test4="value4">ladder</item>
+    </data4>
+  </top-level>
+</data>
+<data>
+  <top-level>
+    <data4>
+      <item test4="value4">gum</item>
+      <item test4="value4">rope</item>
+      <item test4="value4">ladder</item>
+      <item test4="value4">bolt</item>
+      <item test4="value4">water</item>
+    </data4>
+    <cost>425</cost>
+    <cost>455</cost>
+    <mode>mode</mode>
+    <mode_octal>octal</mode_octal>
+    <links>links</links>
+    <user>user</user>
+    <group>group</group>
+    <pre>that</pre>
+    <links>3</links>
+    <post>this</post>
+    <mode>/some/file</mode>
+    <mode_octal>640</mode_octal>
+    <links>1</links>
+    <user>user</user>
+    <group>group</group>
+    <one>1</one>
+    <two>2</two>
+    <three>3</three>
+    <one>1</one>
+    <two>2</two>
+    <three>3</three>
+    <one>1</one>
+    <two>2</two>
+    <three>3</three>
+  </top-level>
+</data>
