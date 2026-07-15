@@ -1,0 +1,43 @@
+{
+  "interface": [
+    {
+      "ifindex": "2",
+      "name": "lo0"
+    }
+  ],
+  "interface": [
+    {
+      "ifindex": "1",
+      "name": "eth0"
+    }
+  ],
+  "socket": [
+    {
+      "protocol": "tcp4",
+      "recv": "100"
+    },
+    {
+      "protocol": "tcp4",
+      "recv": "200"
+    }
+  ],
+  "socket": [
+    {
+      "protocol": "tcp4",
+      "recv": "200"
+    }
+  ],
+  "socket": [
+    {
+      "protocol": "tcp4",
+      "recv": "300",
+      "answer": "right"
+    }
+  ],
+  "data": {
+    "thing": "one",
+    "thing": "two",
+    "thing": "three",
+    "thing": "four"
+  }
+}
