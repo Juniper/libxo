@@ -140,7 +140,7 @@ main: status: track
 main: input '-one'
 main: status: track
 main: input '+one'
-main: filter: rc: 13
+main: filter: rc: 11
 main: status: predicate
 main: input '$a 4.85'
 main: key: 'a'='4.85'
