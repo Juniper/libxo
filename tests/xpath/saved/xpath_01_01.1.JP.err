@@ -121,7 +121,7 @@ main: status: track
 main: input '-one'
 main: status: full
 main: input '+two'
-main: filter: rc: 21
+main: filter: rc: 19
 main: status: track
 main: input '=data 2'
 main: field: 'data'='2'
@@ -129,7 +129,7 @@ main: status: track
 main: input '-two'
 main: status: full
 main: input '+three'
-main: filter: rc: 23
+main: filter: rc: 21
 main: status: track
 main: input '=data 3'
 main: field: 'data'='3'
@@ -137,7 +137,7 @@ main: status: track
 main: input '-three'
 main: status: full
 main: input '+four'
-main: filter: rc: 22
+main: filter: rc: 20
 main: status: full
 main: input '=data 4'
 main: field: 'data'='4'
