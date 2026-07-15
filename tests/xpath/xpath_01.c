@@ -283,6 +283,15 @@ do_work (xo_handle_t *xop, xo_filter_t *xfp, xo_xparse_data_t *xdp, FILE *in)
     }
 }
 
+static inline const char *
+get_arg (const char *arg, const char *msg)
+{
+    if (arg == NULL)
+	xo_errx(1, "missing arg: %s", msg);
+
+    return arg;
+}
+
 int
 main (int argc, char **argv)
 {
@@ -297,13 +306,13 @@ main (int argc, char **argv)
 	if (xo_streq(argv[i], "debug"))
 	    opt_debug = 1;
 	else if (xo_streq(argv[i], "filter"))
-	    opt_filter = argv[++i];
+	    opt_filter = get_arg(argv[++i], "filter name");
 	else if (xo_streq(argv[i], "input"))
-	    opt_input = argv[++i];
+	    opt_input = get_arg(argv[++i], "input file");
 	else if (xo_streq(argv[i], "case")) /* Execute only the nth case */
-	    opt_case = atoi(argv[++i]);
+	    opt_case = atoi(get_arg(argv[++i], "case number"));
 	else if (xo_streq(argv[i], "skip")) /* Skip the first n cases */
-	    opt_case = atoi(argv[++i]);
+	    opt_case = atoi(get_arg(argv[++i], "skip count"));
 	else if (xo_streq(argv[i], "quiet"))
 	    opt_quiet = 1;
 	else if (xo_streq(argv[i], "yydebug"))
