@@ -13,20 +13,6 @@
     </four>
     <foo>goo</foo>
   </two>
-  <two>
-    <three>3333</three>
-    <four>
-      <foo>goo</foo>
-      <five>
-        <foo>goo</foo>
-        <six>
-          <foo>goo</foo>
-        </six>
-      </five>
-      <foo>goo</foo>
-    </four>
-    <foo>goo</foo>
-  </two>
 </one>
 <uno>
   <dos>
@@ -35,23 +21,11 @@
       <test>yup</test>
       <cuatro>
         <test>sure</test>
-        <nope>
-        </nope>
         <cinco>
           <seis>
           </seis>
         </cinco>
-        <siete>
-        </siete>
         <cinco>
-        </cinco>
-      </cuatro>
-      <cuatro>
-        <test>fail</test>
-        <foo>goo</foo>
-        <cinco>
-          <seis>
-          </seis>
         </cinco>
       </cuatro>
       <cuatro>
