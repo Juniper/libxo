@@ -3,14 +3,6 @@
     <protocol>tcp4</protocol>
     <receive-bytes-waiting>1111</receive-bytes-waiting>
     <send-bytes-waiting>1</send-bytes-waiting>
-    <local>
-      <address>172.16.188.131</address>
-      <port>ssh</port>
-    </local>
-    <remote>
-      <address>172.16.188.1</address>
-      <port>63510</port>
-    </remote>
     <tcp-state>ESTABLISHED</tcp-state>
   </socket>
   <socket>
