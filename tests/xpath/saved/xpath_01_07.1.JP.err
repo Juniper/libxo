@@ -153,7 +153,7 @@ main: status: track
 main: input '-uno'
 main: status: track
 main: input '+more'
-main: filter: rc: 18
+main: filter: rc: 16
 main: status: full
 main: input '=even yes'
 main: field: 'even'='yes'
