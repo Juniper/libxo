@@ -8283,6 +8283,16 @@ xo_do_open_container (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
 	break;
     }
 
+    /*
+     * FULL frames are permanently committed; xs_rb_off must be CLEAR so the
+     * close path writes the closing tag normally instead of entering the
+     * rollback branch and skipping it.
+     */
+    if (xop->xo_flags & XOF_FILTER) {
+	if (fstatus == XO_STATUS_FULL || fstatus == XO_STATUS_ZERO)
+	    starting_offset = XS_OFFSET_CLEAR;
+    }
+
     xo_depth_change(xop, name, 1, 1, XSS_OPEN_CONTAINER,
 		    xo_stack_flags(flags), fstatus, starting_offset);
 
