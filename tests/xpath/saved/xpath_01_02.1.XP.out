@@ -3,28 +3,16 @@
   <output>yes</output>
 </one>
 <one>
-  <two>4</two>
-  <output>nope</output>
-</one>
-<one>
   <two>
     <three>5</three>
     <output>sure</output>
   </two>
-  <output>no</output>
 </one>
 <one>
   <two>4</two>
   <three>
     <four>5</four>
     <output>1</output>
-  </three>
-  <three>
-    <four>6</four>
-    <output>0</output>
-  </three>
-  <three>
-    <output>should-not</output>
   </three>
   <three>
     <four>5</four>
