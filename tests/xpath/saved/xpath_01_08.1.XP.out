@@ -1,23 +1,4 @@
 <one>
-  <a>5555</a>
-  <two>
-    <b>4444</b>
-    <three>
-      <c>-3333</c>
-      <four>
-        <five>mambo</five>
-      </four>
-    </three>
-  </two>
-  <two>
-    <b>2</b>
-    <three>
-      <c>-33</c>
-      <four>crispo</four>
-    </three>
-  </two>
-</one>
-<one>
   <a>4.85</a>
   <two>
     <b>2.7</b>
@@ -26,13 +7,6 @@
       <four>
         <five>mambo</five>
       </four>
-    </three>
-  </two>
-  <two>
-    <b>2</b>
-    <three>
-      <c>-33</c>
-      <four>crispo</four>
     </three>
   </two>
 </one>
