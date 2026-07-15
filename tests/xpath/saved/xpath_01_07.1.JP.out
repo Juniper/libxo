@@ -5,32 +5,11 @@
       "y": "5",
       "tres": {
         "cuatro": "4"
-      },
-      "uno": {
-        "dos": {
-          "tres": {
-            "nada": "0"
-          }
-        }
-      },
-      "one": {
-        "two": {
-          "more": {
-            "what": "no"
-          }
-        }
       }
     }
   },
   "one": {
     "two": {
-      "uno": {
-        "dos": {
-          "tres": {
-            "nada": "0"
-          }
-        }
-      },
       "more": {
         "even": "yes"
       }
