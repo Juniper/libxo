@@ -59,7 +59,7 @@ added filter: 0
                     000011: type 54 (T_QUOTED), str 35 [extra], contents 0, next 0, prev 8 
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: filter: rc: 12
 main: status: zero
 main: input '<item'
 xpath_01: function 'starts-with' requires 2 argument(s), got 3
@@ -101,7 +101,7 @@ added filter: 0
                 000003: type 52 (T_FUNCTION_NAME), str 8 [not], contents 0, next 0, prev 0 
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: filter: rc: 12
 main: status: zero
 main: input '<item'
 xpath_01: function 'not' requires 1 argument(s), got 0
@@ -144,7 +144,7 @@ added filter: 0
                     000005: type 54 (T_QUOTED), str 15 [extra], contents 0, next 0, prev 0 
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: filter: rc: 12
 main: status: zero
 main: input '<item'
 xpath_01: function 'true' requires 0 argument(s), got 1
@@ -187,7 +187,7 @@ added filter: 0
                     000005: type 54 (T_QUOTED), str 17 [only-one], contents 0, next 0, prev 0 
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: filter: rc: 12
 main: status: zero
 main: input '<item'
 xpath_01: function 'concat' requires at least 2 arguments, got 1
@@ -217,7 +217,7 @@ added filter: 0
                 000003: type 52 (T_FUNCTION_NAME), str 8 [ceiling], contents 0, next 0, prev 0 
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: filter: rc: 12
 main: status: zero
 main: input '<item'
 xpath_01: function 'ceiling' requires 1 argument(s), got 0
