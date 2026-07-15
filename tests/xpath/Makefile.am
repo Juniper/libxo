@@ -99,7 +99,15 @@ TEST_FILES= \
     xpath_01_20.1.fullpath.out \
     xpath_01_20.1.fullpath.err \
     xpath_01_21.1.fullpath.out \
-    xpath_01_21.1.fullpath.err
+    xpath_01_21.1.fullpath.err \
+    xpath_01_22.1.fullpath.out \
+    xpath_01_22.1.fullpath.err \
+    xpath_01_22.1.XP.out \
+    xpath_01_22.1.XP.err \
+    xpath_01_22.1.JP.out \
+    xpath_01_22.1.JP.err \
+    xpath_01_22.1.fullpath_slax_pretty.out \
+    xpath_01_22.1.fullpath_slax_pretty.err
 
 EXTRA_DIST = \
     ${TEST_CASES} \
