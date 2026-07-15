@@ -5312,19 +5312,6 @@ xo_filt_rollback (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED,
 	xo_off_t cur_off = cur->xs_rb_off;
 
 	if (cur_off < max_off) { /* Sanity check */
-#if 0
-	    /*
-	     * If the key offset is set, we don't want to whack
-	     * any key information, so use max(cur_off, key_off)
-	     */
-	    xo_off_t key_off = cur->xs_key_off;
-
-	    if (key_off != XS_OFFSET_CLEAR
-		&& key_off <= max_off
-		&& key_off > cur_off)
-		cur_off = key_off;
-#endif
-
 	    XO_DBG(xop, "xo_filt_rollback: rolling back to %u, depth %d",
 		   cur_off, xop->xo_depth);
 	    xo_buf_set_offset(xbp, cur_off);
@@ -5510,11 +5497,6 @@ xo_filt_do_close_field (xo_handle_t *xop, const char *name, xo_ssize_t nlen,
 
     XO_DBG(xop, "xo_filt_do_close_field: depth %d, status %u=%s",
 	   xop->xo_depth, fstatus, xo_filt_status_name(fstatus));
-
-#if 0
-    if (fstatus == XO_STATUS_DEAD)
-	return fstatus;
-#endif
 
     /*
      * We need to decide whether to keep the field or not keep our
@@ -6808,206 +6790,6 @@ xo_gettext_finish_numbering_fields (xo_handle_t *xop UNUSED,
 }
 
 /*
- * xo_parse_field_numbers() and xo_parse_fields() are now in xo_field.c.
- */
-#if 0
-static int
-xo_parse_field_numbers (xo_handle_t *xop, const char *fmt,
-			xo_field_info_t *fields, unsigned num_fields)
-{
-    xo_field_info_t *xfip;
-    unsigned field, fnum;
-    uint64_t bits = 0;
-    const uint64_t one = 1;	/* Avoid 1ULL */
-
-    for (xfip = fields, field = 0; field < num_fields; xfip++, field++) {
-	/* Fields default to 1:1 with natural position */
-	if (xfip->xfi_fnum == 0)
-	    xfip->xfi_fnum = field + 1;
-	else if (xfip->xfi_fnum > num_fields) {
-	    xo_failure(xop, "field number exceeds number of fields: '%s'", fmt);
-	    return -1;
-	}
-
-	fnum = xfip->xfi_fnum - 1; /* Move to zero origin */
-	if (fnum < 64) {	/* Only test what fits */
-	    if (bits & (one << fnum)) {
-		xo_failure(xop, "field number %u reused: '%s'",
-			   xfip->xfi_fnum, fmt);
-		return -1;
-	    }
-	    bits |= one << fnum;
-	}
-    }
-
-    return 0;
-}
-
-static int
-xo_parse_fields (xo_handle_t *xop, xo_field_info_t *fields,
-		 unsigned num_fields, const char *fmt)
-{
-    const char *cp, *sp, *ep, *basep;
-    unsigned field = 0;
-    xo_field_info_t *xfip = fields;
-    unsigned seen_fnum = 0;
-
-    for (cp = fmt; *cp && field < num_fields; field++, xfip++) {
-	xfip->xfi_start = cp;
-
-	if (*cp == '\n') {
-	    xfip->xfi_ftype = XO_ROLE_NEWLINE;
-	    xfip->xfi_len = 1;
-	    cp += 1;
-	    continue;
-	}
-
-	if (*cp != '{') {
-	    /* Normal text */
-	    for (sp = cp; *sp; sp++) {
-		if (*sp == '{' || *sp == '\n')
-		    break;
-	    }
-
-	    xfip->xfi_ftype = XO_ROLE_TEXT;
-	    xfip->xfi_content = cp;
-	    xfip->xfi_clen = sp - cp;
-	    xfip->xfi_next = sp;
-
-	    cp = sp;
-	    continue;
-	}
-
-	if (cp[1] == '{') {	/* Start of {{escaped braces}} */
-	    xfip->xfi_start = cp + 1; /* Start at second brace */
-	    xfip->xfi_ftype = XO_ROLE_EBRACE;
-
-	    cp += 2;	/* Skip over _both_ characters */
-	    for (sp = cp; *sp; sp++) {
-		if (*sp == '}' && sp[1] == '}')
-		    break;
-	    }
-	    if (*sp == '\0') {
-		xo_failure(xop, "missing closing '}}': '%s'",
-			   xo_printable(fmt));
-		return -1;
-	    }
-
-	    xfip->xfi_len = sp - xfip->xfi_start + 1;
-
-	    /* Move along the string, but don't run off the end */
-	    if (*sp == '}' && sp[1] == '}') /* Paranoid; must be true */
-		sp += 2;
-
-	    cp = sp;
-	    xfip->xfi_next = cp;
-	    continue;
-	}
-
-	/* We are looking at the start of a field definition */
-	xfip->xfi_start = basep = cp + 1;
-
-	const char *format = NULL;
-	ssize_t flen = 0;
-
-	/* Looking at roles and modifiers */
-	sp = xo_parse_roles(xop, fmt, basep, xfip);
-	if (sp == NULL) {
-	    /* xo_failure has already been called */
-	    return -1;
-	}
-
-	if (xfip->xfi_fnum)
-	    seen_fnum = 1;
-
-	/* Looking at content */
-	if (*sp == ':') {
-	    for (ep = ++sp; *sp; sp++) {
-		if (*sp == '}' || *sp == '/')
-		    break;
-		if (*sp == '\\') {
-		    if (sp[1] == '\0') {
-			xo_failure(xop, "backslash at the end of string");
-			return -1;
-		    }
-		    sp += 1;
-		    continue;
-		}
-	    }
-	    if (ep != sp) {
-		xfip->xfi_clen = sp - ep;
-		xfip->xfi_content = ep;
-	    }
-	} else {
-	    xo_failure(xop, "missing content (':'): '%s'", xo_printable(fmt));
-	    return -1;
-	}
-
-	/* Looking at main (display) format */
-	if (*sp == '/') {
-	    for (ep = ++sp; *sp; sp++) {
-		if (*sp == '}' || *sp == '/')
-		    break;
-		if (*sp == '\\') {
-		    if (sp[1] == '\0') {
-			xo_failure(xop, "backslash at the end of string");
-			return -1;
-		    }
-		    sp += 1;
-		    continue;
-		}
-	    }
-	    flen = sp - ep;
-	    format = ep;
-	}
-
-	/* Looking at encoding format */
-	if (*sp == '/') {
-	    for (ep = ++sp; *sp; sp++) {
-		if (*sp == '}')
-		    break;
-	    }
-
-	    xfip->xfi_encoding = ep;
-	    xfip->xfi_elen = sp - ep;
-	}
-
-	if (*sp != '}') {
-	    xo_failure(xop, "missing closing '}': %s", xo_printable(fmt));
-	    return -1;
-	}
-
-	xfip->xfi_len = sp - xfip->xfi_start;
-	xfip->xfi_next = ++sp;
-
-	/* If we have content, then we have a default format */
-	if (xfip->xfi_clen || format || (xfip->xfi_flags & XFF_ARGUMENT)) {
-	    if (format) {
-		xfip->xfi_format = format;
-		xfip->xfi_flen = flen;
-	    } else if (xo_role_wants_default_format(xfip->xfi_ftype)) {
-		xfip->xfi_format = xo_default_format;
-		xfip->xfi_flen = 2;
-	    }
-	}
-
-	cp = sp;
-    }
-
-    int rc = 0;
-
-    /*
-     * If we saw a field number on at least one field, then we need
-     * to enforce some rules and/or guidelines.
-     */
-    if (seen_fnum)
-	rc = xo_parse_field_numbers(xop, fmt, fields, field);
-
-    return rc;
-}
-#endif /* 0 — xo_parse_field_numbers/xo_parse_fields moved to xo_field.c */
-
-/*
  * We are passed a pointer to a format string just past the "{G:}"
  * field.  We build a simplified version of the format string.
  */
@@ -8075,12 +7857,6 @@ xo_depth_change (xo_handle_t *xop, const char *name,
 	if (xo_depth_check(xop, xop->xo_depth + delta))
 	    return;
 
-#if 0
-	/* If we're not filtering (at the moment), we don't need the offset */
-	if (!XOIF_ISSET(xop, XOIF_FILTERING))
-	    starting_offset = XS_OFFSET_CLEAR;
-#endif
-
 	xo_stack_t *xsp = &xop->xo_stack[xop->xo_depth + delta];
 	xsp->xs_flags = flags;
 	xsp->xs_state = state;
@@ -8377,9 +8153,6 @@ xo_do_close_container (xo_handle_t *xop, const char *name)
 	 * back independently — the enclosing instance handles that on close.
 	 */
 	if (XOF_ISSET(xop, XOF_FILTER) && xsp->xs_rb_off != XS_OFFSET_CLEAR) {
-#if 0
-	        && (xop->xo_depth == 0 || (xsp - 1)->xs_rb_off == XS_OFFSET_CLEAR)) {
-#endif
 	    xo_filt_rollback(xop, xsp, old_fstatus, fstatus);
 	    xo_depth_change(xop, name, -1, -1, XSS_CLOSE_CONTAINER,
 			    XSF_FILTER, fstatus, 0);
@@ -8398,9 +8171,6 @@ xo_do_close_container (xo_handle_t *xop, const char *name)
 	ppn = "";
 
 	if (XOF_ISSET(xop, XOF_FILTER) && xsp->xs_rb_off != XS_OFFSET_CLEAR) {
-#if 0
-	        && (xop->xo_depth == 0 || (xsp - 1)->xs_rb_off == XS_OFFSET_CLEAR)) {
-#endif
 	    xo_filt_rollback(xop, xsp, old_fstatus, fstatus);
 	    xo_depth_change(xop, name, -1, -1, XSS_CLOSE_CONTAINER, 0, 0, 0);
 	    break;
@@ -8921,14 +8691,6 @@ xo_do_close_instance (xo_handle_t *xop, const char *name)
     switch (xo_style(xop)) {
     case XO_STYLE_XML:
 	if (XOF_ISSET(xop, XOF_FILTER)) {
-#if 0
-	    /*
-	     * Clear key_off so rollback goes to xs_rb_off (before <instance>),
-	     * not just past the key fields.  A non-matching instance must be
-	     * fully discarded, not left with partial key-field output.
-	     */
-	    xsp->xs_key_off = XS_OFFSET_CLEAR;
-#endif
 	    xo_filt_rollback(xop, xsp, old_fstatus, fstatus);
 	}
 
