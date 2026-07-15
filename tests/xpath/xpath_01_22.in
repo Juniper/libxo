@@ -96,3 +96,13 @@ r
 = thing three
 = thing four
 - data
+
+# test 7: boring sub elements, which somehow I broke
+r
+? item
++ data
+= thing one
+= thing two
+= thing three
+= thing four
+- data
