@@ -296,3 +296,31 @@ main: field: 'thing'='four'
 main: status: full
 main: input '- data'
 main: status: track
+main: input ''
+main: input '# test 7: boring sub elements, which somehow I broke'
+main: input 'r'
+main: status: zero
+main: input '? item'
+adding filter: 'item'
+added filter: 0
+--- 0: 3
+    000003: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 0, next 0, prev 0 
+main: status: zero
+main: input '+ data'
+main: filter: rc: 14
+main: status: track
+main: input '= thing one'
+main: field: 'thing'='one'
+main: status: track
+main: input '= thing two'
+main: field: 'thing'='two'
+main: status: track
+main: input '= thing three'
+main: field: 'thing'='three'
+main: status: track
+main: input '= thing four'
+main: field: 'thing'='four'
+main: status: track
+main: input '- data'
+main: status: track
