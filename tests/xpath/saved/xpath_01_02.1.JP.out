@@ -4,28 +4,16 @@
     "output": "yes"
   },
   "one": {
-    "two": "4",
-    "output": "nope"
-  },
-  "one": {
     "two": {
       "three": "5",
       "output": "sure"
-    },
-    "output": "no"
+    }
   },
   "one": {
     "two": "4",
     "three": {
       "four": "5",
       "output": "1"
-    },
-    "three": {
-      "four": "6",
-      "output": "0"
-    },
-    "three": {
-      "output": "should-not"
     },
     "three": {
       "four": "5",
