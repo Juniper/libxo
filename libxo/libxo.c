@@ -5270,6 +5270,80 @@ xo_filt_handle_open_status (xo_handle_t *xop, xo_filter_status_t fstatus)
     }
 }
 
+/*
+ * Compact-commit: emit ancestor opening tags and key fields, discarding
+ * any non-key sibling content that accumulated while ancestors were TRACK.
+ *
+ * For each ancestor frame with a pending xs_rb_off, keep bytes from
+ * xs_rb_off to max(xs_tag_end, xs_key_off): that span covers the opening
+ * tag plus any key fields written before a deeper container opened.
+ * Everything else (non-key sibling fields) is stripped.
+ */
+static void
+xo_filt_commit_compact (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED,
+			xo_filter_status_t fstatus UNUSED)
+{
+#ifdef LIBXO_NEED_FILTERS
+    if (!(xop->xo_flags & XOF_FILTER))
+	return;
+
+    XO_DBG(xop, "xo_filt_commit_compact: status -> %u=%s (stack depth %u)",
+	   fstatus, xo_filt_status_name(fstatus), xop->xo_depth);
+
+    xop->xo_stack[0].xs_fstatus = fstatus;
+
+    xo_buffer_t *xbp = &xop->xo_data;
+    xo_off_t write_off = XS_OFFSET_CLEAR;
+
+    for (xo_stack_t *xsp = xop->xo_stack + 1; xsp <= cur; xsp++) {
+	XO_DBG(xop, "xo_filt_commit_compact: frame %u rb_off %d "
+	       "tag_end %d key_off %d",
+	       (unsigned)(xsp - xop->xo_stack),
+	       (int) xsp->xs_rb_off, (int) xsp->xs_tag_end,
+	       (int) xsp->xs_key_off);
+
+	xo_off_t key_off = xsp->xs_key_off;	/* save before clearing */
+	xsp->xs_fstatus = fstatus;
+	xsp->xs_key_off = XS_OFFSET_CLEAR;
+
+	if (xsp->xs_rb_off == XS_OFFSET_CLEAR) {
+	    continue;
+	}
+
+	xo_off_t tag_start = xsp->xs_rb_off;
+
+	/*
+	 * Keep from xs_rb_off up to xs_tag_end (the opening tag), extended
+	 * to xs_key_off when key fields follow (xs_key_off > xs_tag_end).
+	 */
+	xo_off_t keep_end = (xsp->xs_tag_end != XS_OFFSET_CLEAR)
+	    ? xsp->xs_tag_end : tag_start;
+	if (key_off != XS_OFFSET_CLEAR && key_off > keep_end)
+	    keep_end = key_off;
+
+	ssize_t keep_len = (keep_end > tag_start) ? (keep_end - tag_start) : 0;
+
+	if (write_off == XS_OFFSET_CLEAR)
+	    write_off = tag_start;
+
+	if (keep_len > 0) {
+	    if (tag_start != write_off)
+		memmove(xbp->xb_bufp + write_off, xbp->xb_bufp + tag_start,
+			keep_len);
+	    write_off += keep_len;
+	}
+
+	xsp->xs_rb_off = XS_OFFSET_CLEAR;
+	xsp->xs_tag_end = XS_OFFSET_CLEAR;
+    }
+
+    if (write_off != XS_OFFSET_CLEAR)
+	xo_buf_set_offset(xbp, write_off);
+
+    XOIF_CLEAR(xop, XOIF_FILTERING);
+#endif /* LIBXO_NEED_FILTERS */
+}
+
 static void
 xo_filt_handle_change_status (xo_handle_t *xop, xo_filter_status_t old_status,
 			     xo_filter_status_t new_status)
@@ -5283,7 +5357,7 @@ xo_filt_handle_change_status (xo_handle_t *xop, xo_filter_status_t old_status,
 	   new_status, xo_filt_status_name(new_status));
 
     if (new_status == XO_STATUS_FULL && old_status != XO_STATUS_FULL)
-	xo_filt_commit(xop, xo_stack_cur(xop), new_status);
+	xo_filt_commit_compact(xop, xo_stack_cur(xop), new_status);
 }
 
 static void
@@ -5996,6 +6070,9 @@ xo_format_value (xo_handle_t *xop, const char *name, ssize_t nlen,
 		xop->xo_stack[xop->xo_depth].xs_flags =
 		    (xop->xo_stack[xop->xo_depth].xs_flags & ~XSF_NOT_FIRST)
 		    | saved_not_first;
+	    } else if (flags & XFF_KEY) {
+		/* Record end-of-key offset for compact-commit, same as XML path */
+		xsp->xs_key_off = xo_buf_offset(&xop->xo_data);
 	    }
 	    xo_filt_do_close_field(xop, name, nlen, TRUE, flags);
 	} else {
