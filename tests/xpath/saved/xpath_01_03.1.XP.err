@@ -1,8 +1,6 @@
 main: input '?one[two][three][5]'
 adding filter: 'one[two][three][5]'
-xpath_01: xpath feature is unsupported: index value (e.g. 'foo[4]')
-xpath_01: libxo could not add the requested filter
-added filter: -1
+added filter: 0
 --- 0: 15
     000015: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [one], contents 2, next 0, prev 0 
@@ -17,9 +15,7 @@ added filter: -1
 main: status: zero
 main: input '?one/or/the/other[two == 4][5]'
 adding filter: 'one/or/the/other[two == 4][5]'
-xpath_01: xpath feature is unsupported: index value (e.g. 'foo[4]')
-xpath_01: libxo could not add the requested filter
-added filter: -1
+added filter: 0
 --- 0: 15
     000015: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [one], contents 2, next 0, prev 0 
@@ -47,9 +43,7 @@ added filter: -1
 main: status: zero
 main: input '?three[4]'
 adding filter: 'three[4]'
-xpath_01: xpath feature is unsupported: index value (e.g. 'foo[4]')
-xpath_01: libxo could not add the requested filter
-added filter: -1
+added filter: 0
 --- 0: 15
     000015: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [one], contents 2, next 0, prev 0 
@@ -82,9 +76,7 @@ added filter: -1
 main: status: zero
 main: input '?five[6][7][8]'
 adding filter: 'five[6][7][8]'
-xpath_01: xpath feature is unsupported: index value (e.g. 'foo[4]')
-xpath_01: libxo could not add the requested filter
-added filter: -1
+added filter: 0
 --- 0: 15
     000015: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [one], contents 2, next 0, prev 0 
