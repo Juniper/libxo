@@ -83,7 +83,7 @@ do_run_one_command () {
     local oname=`echo "$name.$ds.$fmt" | sed -e 's@:@_@g' -e 's@,@_@g'`
     local out=out/$oname
 
-    mecho "... $test ... $name ... $ds ..."
+    mecho "... $test ... $fmt ... $name ... $ds ..."
 
     set_fmt_option $fmt
     run "$test $LIBXOPTS $opt $* input $input > $out.out 2> $out.err"
