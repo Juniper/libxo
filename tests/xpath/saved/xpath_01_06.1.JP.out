@@ -13,20 +13,6 @@
         "foo": "goo"
       },
       "foo": "goo"
-    },
-    "two": {
-      "three": "3333",
-      "four": {
-        "foo": "goo",
-        "five": {
-          "foo": "goo",
-          "six": {
-            "foo": "goo"
-          }
-        },
-        "foo": "goo"
-      },
-      "foo": "goo"
     }
   },
   "uno": {
@@ -36,28 +22,13 @@
         "test": "yup",
         "cuatro": {
           "test": "sure",
-          "nope": {
-
-          },
           "cinco": {
             "seis": {
 
             }
           },
-          "siete": {
-
-          },
           "cinco": {
 
-          }
-        },
-        "cuatro": {
-          "test": "fail",
-          "foo": "goo",
-          "cinco": {
-            "seis": {
-
-            }
           }
         },
         "cuatro": {
