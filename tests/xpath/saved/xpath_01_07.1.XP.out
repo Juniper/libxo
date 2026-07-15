@@ -5,31 +5,10 @@
     <tres>
       <cuatro>4</cuatro>
     </tres>
-    <uno>
-      <dos>
-        <tres>
-          <nada>0</nada>
-        </tres>
-      </dos>
-    </uno>
-    <one>
-      <two>
-        <more>
-          <what>no</what>
-        </more>
-      </two>
-    </one>
   </dos>
 </uno>
 <one>
   <two>
-    <uno>
-      <dos>
-        <tres>
-          <nada>0</nada>
-        </tres>
-      </dos>
-    </uno>
     <more>
       <even>yes</even>
     </more>
