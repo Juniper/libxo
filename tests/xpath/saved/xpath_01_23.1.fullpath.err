@@ -95,6 +95,7 @@ main: input '@ test-attr attr-value'
 main: attr: 'test-attr'='attr-value'
 main: status: track
 main: input '[ sku'
+main: open leaf list: 'sku'
 main: status: track
 main: input '= sku gum-000-1412'
 main: field: 'sku'='gum-000-1412'
@@ -103,7 +104,7 @@ main: input '= sku sum-000-4121'
 main: field: 'sku'='sum-000-4121'
 main: status: track
 main: input '] sku'
-main: filter: invalid line '] sku'
+main: close leaf list: 'sku'
 main: status: track
 main: input '= host my-box'
 main: field: 'host'='my-box'
@@ -712,6 +713,7 @@ main: input '@ test-attr attr-value'
 main: attr: 'test-attr'='attr-value'
 main: status: track
 main: input '[ sku'
+main: open leaf list: 'sku'
 main: status: track
 main: input '= sku gum-000-1412'
 main: field: 'sku'='gum-000-1412'
@@ -720,7 +722,7 @@ main: input '= sku sum-000-4121'
 main: field: 'sku'='sum-000-4121'
 main: status: track
 main: input '] sku'
-main: filter: invalid line '] sku'
+main: close leaf list: 'sku'
 main: status: track
 main: input '= host my-box'
 main: field: 'host'='my-box'
@@ -1329,6 +1331,7 @@ main: input '@ test-attr attr-value'
 main: attr: 'test-attr'='attr-value'
 main: status: track
 main: input '[ sku'
+main: open leaf list: 'sku'
 main: status: track
 main: input '= sku gum-000-1412'
 main: field: 'sku'='gum-000-1412'
@@ -1337,7 +1340,7 @@ main: input '= sku sum-000-4121'
 main: field: 'sku'='sum-000-4121'
 main: status: track
 main: input '] sku'
-main: filter: invalid line '] sku'
+main: close leaf list: 'sku'
 main: status: track
 main: input '= host my-box'
 main: field: 'host'='my-box'
@@ -1947,6 +1950,7 @@ main: input '@ test-attr attr-value'
 main: attr: 'test-attr'='attr-value'
 main: status: track
 main: input '[ sku'
+main: open leaf list: 'sku'
 main: status: track
 main: input '= sku gum-000-1412'
 main: field: 'sku'='gum-000-1412'
@@ -1955,7 +1959,7 @@ main: input '= sku sum-000-4121'
 main: field: 'sku'='sum-000-4121'
 main: status: track
 main: input '] sku'
-main: filter: invalid line '] sku'
+main: close leaf list: 'sku'
 main: status: track
 main: input '= host my-box'
 main: field: 'host'='my-box'
@@ -2564,6 +2568,7 @@ main: input '@ test-attr attr-value'
 main: attr: 'test-attr'='attr-value'
 main: status: track
 main: input '[ sku'
+main: open leaf list: 'sku'
 main: status: track
 main: input '= sku gum-000-1412'
 main: field: 'sku'='gum-000-1412'
@@ -2572,7 +2577,7 @@ main: input '= sku sum-000-4121'
 main: field: 'sku'='sum-000-4121'
 main: status: track
 main: input '] sku'
-main: filter: invalid line '] sku'
+main: close leaf list: 'sku'
 main: status: track
 main: input '= host my-box'
 main: field: 'host'='my-box'
@@ -3186,6 +3191,7 @@ main: input '@ test-attr attr-value'
 main: attr: 'test-attr'='attr-value'
 main: status: track
 main: input '[ sku'
+main: open leaf list: 'sku'
 main: status: track
 main: input '= sku gum-000-1412'
 main: field: 'sku'='gum-000-1412'
@@ -3194,7 +3200,7 @@ main: input '= sku sum-000-4121'
 main: field: 'sku'='sum-000-4121'
 main: status: track
 main: input '] sku'
-main: filter: invalid line '] sku'
+main: close leaf list: 'sku'
 main: status: track
 main: input '= host my-box'
 main: field: 'host'='my-box'
@@ -3813,6 +3819,7 @@ main: input '@ test-attr attr-value'
 main: attr: 'test-attr'='attr-value'
 main: status: track
 main: input '[ sku'
+main: open leaf list: 'sku'
 main: status: track
 main: input '= sku gum-000-1412'
 main: field: 'sku'='gum-000-1412'
@@ -3821,7 +3828,7 @@ main: input '= sku sum-000-4121'
 main: field: 'sku'='sum-000-4121'
 main: status: track
 main: input '] sku'
-main: filter: invalid line '] sku'
+main: close leaf list: 'sku'
 main: status: track
 main: input '= host my-box'
 main: field: 'host'='my-box'
@@ -4439,6 +4446,7 @@ main: input '@ test-attr attr-value'
 main: attr: 'test-attr'='attr-value'
 main: status: track
 main: input '[ sku'
+main: open leaf list: 'sku'
 main: status: track
 main: input '= sku gum-000-1412'
 main: field: 'sku'='gum-000-1412'
@@ -4447,7 +4455,7 @@ main: input '= sku sum-000-4121'
 main: field: 'sku'='sum-000-4121'
 main: status: track
 main: input '] sku'
-main: filter: invalid line '] sku'
+main: close leaf list: 'sku'
 main: status: track
 main: input '= host my-box'
 main: field: 'host'='my-box'
@@ -5062,6 +5070,7 @@ main: input '@ test-attr attr-value'
 main: attr: 'test-attr'='attr-value'
 main: status: track
 main: input '[ sku'
+main: open leaf list: 'sku'
 main: status: track
 main: input '= sku gum-000-1412'
 main: field: 'sku'='gum-000-1412'
@@ -5070,7 +5079,7 @@ main: input '= sku sum-000-4121'
 main: field: 'sku'='sum-000-4121'
 main: status: track
 main: input '] sku'
-main: filter: invalid line '] sku'
+main: close leaf list: 'sku'
 main: status: track
 main: input '= host my-box'
 main: field: 'host'='my-box'
