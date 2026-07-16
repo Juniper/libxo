@@ -151,37 +151,7 @@
   <thing>four</thing>
 </data>
 <data>
-  <thing>one</thing>
-  <thing>two</thing>
-  <thing>three</thing>
-  <thing>four</thing>
-  <block>56</block>
   <top-level>
-    <type>ethernet</type>
-    <type>bridge</type>
-    <type>18u</type>
-    <type>24</type>
-    <address>0x0</address>
-    <port>1</port>
-    <address>0x0</address>
-    <port>1</port>
-    <address>0x0</address>
-    <port>1</port>
-    <used-percent>12</used-percent>
-    <kve_start>0xdeadbeef</kve_start>
-    <kve_end>0xcabb1e</kve_end>
-    <host>my-box</host>
-    <domain>example.com</domain>
-    <host>my-box</host>
-    <domain>example.com</domain>
-    <label>value</label>
-    <max-chaos>very</max-chaos>
-    <min-chaos>42</min-chaos>
-    <some-chaos>[42]</some-chaos>
-    <sku test-attr="attr-value">gum-000-1412</sku>
-    <sku>sum-000-4121</sku>
-    <host>my-box</host>
-    <domain>example.com</domain>
     <data test="value">
       <item test2="value2">
         <sku test3="value3">GRO-000-415</sku>
@@ -243,37 +213,7 @@
   </top-level>
 </data>
 <data>
-  <thing>one</thing>
-  <thing>two</thing>
-  <thing>three</thing>
-  <thing>four</thing>
-  <block>56</block>
   <top-level>
-    <type>ethernet</type>
-    <type>bridge</type>
-    <type>18u</type>
-    <type>24</type>
-    <address>0x0</address>
-    <port>1</port>
-    <address>0x0</address>
-    <port>1</port>
-    <address>0x0</address>
-    <port>1</port>
-    <used-percent>12</used-percent>
-    <kve_start>0xdeadbeef</kve_start>
-    <kve_end>0xcabb1e</kve_end>
-    <host>my-box</host>
-    <domain>example.com</domain>
-    <host>my-box</host>
-    <domain>example.com</domain>
-    <label>value</label>
-    <max-chaos>very</max-chaos>
-    <min-chaos>42</min-chaos>
-    <some-chaos>[42]</some-chaos>
-    <sku test-attr="attr-value">gum-000-1412</sku>
-    <sku>sum-000-4121</sku>
-    <host>my-box</host>
-    <domain>example.com</domain>
     <data test="value">
       <item>
         <sku test3="value3">HRD-000-517</sku>
@@ -314,37 +254,7 @@
   </top-level>
 </data>
 <data>
-  <thing>one</thing>
-  <thing>two</thing>
-  <thing>three</thing>
-  <thing>four</thing>
-  <block>56</block>
   <top-level>
-    <type>ethernet</type>
-    <type>bridge</type>
-    <type>18u</type>
-    <type>24</type>
-    <address>0x0</address>
-    <port>1</port>
-    <address>0x0</address>
-    <port>1</port>
-    <address>0x0</address>
-    <port>1</port>
-    <used-percent>12</used-percent>
-    <kve_start>0xdeadbeef</kve_start>
-    <kve_end>0xcabb1e</kve_end>
-    <host>my-box</host>
-    <domain>example.com</domain>
-    <host>my-box</host>
-    <domain>example.com</domain>
-    <label>value</label>
-    <max-chaos>very</max-chaos>
-    <min-chaos>42</min-chaos>
-    <some-chaos>[42]</some-chaos>
-    <sku test-attr="attr-value">gum-000-1412</sku>
-    <sku>sum-000-4121</sku>
-    <host>my-box</host>
-    <domain>example.com</domain>
     <data test="value">
       <item>
         <sku test3="value3">HRD-000-212</sku>
@@ -420,37 +330,7 @@
   </top-level>
 </data>
 <data>
-  <thing>one</thing>
-  <thing>two</thing>
-  <thing>three</thing>
-  <thing>four</thing>
-  <block>56</block>
   <top-level>
-    <type>ethernet</type>
-    <type>bridge</type>
-    <type>18u</type>
-    <type>24</type>
-    <address>0x0</address>
-    <port>1</port>
-    <address>0x0</address>
-    <port>1</port>
-    <address>0x0</address>
-    <port>1</port>
-    <used-percent>12</used-percent>
-    <kve_start>0xdeadbeef</kve_start>
-    <kve_end>0xcabb1e</kve_end>
-    <host>my-box</host>
-    <domain>example.com</domain>
-    <host>my-box</host>
-    <domain>example.com</domain>
-    <label>value</label>
-    <max-chaos>very</max-chaos>
-    <min-chaos>42</min-chaos>
-    <some-chaos>[42]</some-chaos>
-    <sku test-attr="attr-value">gum-000-1412</sku>
-    <sku>sum-000-4121</sku>
-    <host>my-box</host>
-    <domain>example.com</domain>
     <data test="value">
       <item>
         <sku test3="value3">HRD-000-632</sku>
