@@ -118,6 +118,7 @@ do_work (xo_handle_t *xop, xo_filter_t *xfp, xo_xparse_data_t *xdp,
     char *field, *value;
     int rc;
     int done = FALSE;
+    const char *rolmod = "";
 
     for (rc = 0; !done; rc = 0) {
 	cp = fgets(buf, sizeof(buf), in);
@@ -179,14 +180,24 @@ do_work (xo_handle_t *xop, xo_filter_t *xfp, xo_xparse_data_t *xdp,
 
 	case '[':
 	    field = trim(cp + 1);
-	    value = clean_token(field);
-	    if (!*field || !*value)
+	    if (!*field)
 		break;
 
 	    if (!opt_quiet)
-		fprintf(stderr, "main: field: '%s'='%s'\n", field, value);
+		fprintf(stderr, "main: open leaf list: '%s'\n", field);
 
-	    rc = xo_emit_field_h(xop, "", field, "%s", NULL, value);
+	    rolmod = "l";
+	    break;
+
+	case ']':
+	    field = trim(cp + 1);
+	    if (!*field)
+		break;
+
+	    if (!opt_quiet)
+		fprintf(stderr, "main: close leaf list: '%s'\n", field);
+
+	    rolmod = "";
 	    break;
 
 	case '=':		/* Non-key field */
@@ -198,7 +209,7 @@ do_work (xo_handle_t *xop, xo_filter_t *xfp, xo_xparse_data_t *xdp,
 	    if (!opt_quiet)
 		fprintf(stderr, "main: field: '%s'='%s'\n", field, value);
 
-	    rc = xo_emit_field_h(xop, "", field, "%s", NULL, value);
+	    rc = xo_emit_field_h(xop, rolmod, field, "%s", NULL, value);
 	    break;
 
 	case '$':
@@ -240,7 +251,8 @@ do_work (xo_handle_t *xop, xo_filter_t *xfp, xo_xparse_data_t *xdp,
 		value = incfile;
 	    }
 
-	    fprintf(stderr, "main: include: '%s'\n", value);
+	    if (!opt_quiet)
+		fprintf(stderr, "main: include: '%s'\n", value);
 	    FILE *newp = fopen(value, "r");
 	    if (newp == NULL) {
 		fprintf(stderr, "main: include: could not open file '%s'\n",
