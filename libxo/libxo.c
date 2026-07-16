@@ -5250,6 +5250,7 @@ xo_filt_commit (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED,
 	xop->xo_stack[0].xs_fstatus = fstatus;
 	xo_off_t write_off = XS_OFFSET_CLEAR;
 	xo_off_t prev_keep_end = XS_OFFSET_CLEAR;
+	int prev_had_key = FALSE;
 
 	for (xo_stack_t *xsp = xop->xo_stack + 1; xsp < cur; xsp++) {
 	    xo_off_t key_off = xsp->xs_key_off;
@@ -5258,6 +5259,7 @@ xo_filt_commit (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED,
 
 	    if (xsp->xs_rb_off == XS_OFFSET_CLEAR) {
 		prev_keep_end = XS_OFFSET_CLEAR;
+		prev_had_key = FALSE;
 		continue;
 	    }
 
@@ -5273,11 +5275,13 @@ xo_filt_commit (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED,
 	    if (xo_style(xop) == XO_STYLE_JSON
 		    && (xsp->xs_rb_flags & XSF_NOT_FIRST)
 		    && prev_keep_end != XS_OFFSET_CLEAR
-		    && tag_start > prev_keep_end) {
+		    && tag_start > prev_keep_end
+		    && !prev_had_key) {
 		actual_tag_start += 2;
 		keep_len = (keep_len > 2) ? keep_len - 2 : 0;
 	    }
 	    prev_keep_end = keep_end;
+	    prev_had_key = (key_off != XS_OFFSET_CLEAR);
 
 	    if (write_off == XS_OFFSET_CLEAR)
 		write_off = actual_tag_start;
@@ -5377,6 +5381,8 @@ xo_filt_commit_compact (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED,
     xo_buffer_t *xbp = &xop->xo_data;
     xo_off_t write_off = XS_OFFSET_CLEAR;
     xo_off_t prev_keep_end = XS_OFFSET_CLEAR;
+    int prev_had_key = FALSE;
+    int cur_was_pending = (cur->xs_rb_off != XS_OFFSET_CLEAR);
 
     for (xo_stack_t *xsp = xop->xo_stack + 1; xsp <= cur; xsp++) {
 	XO_DBG(xop, "xo_filt_commit_compact: frame %u rb_off %d "
@@ -5391,6 +5397,7 @@ xo_filt_commit_compact (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED,
 
 	if (xsp->xs_rb_off == XS_OFFSET_CLEAR) {
 	    prev_keep_end = XS_OFFSET_CLEAR; /* parent already committed; unknown end */
+	    prev_had_key = FALSE;
 	    continue;
 	}
 
@@ -5409,23 +5416,26 @@ xo_filt_commit_compact (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED,
 
 	/*
 	 * If this frame's opening bytes begin with a JSON comma prefix
-	 * (",\n" or ", "), the prefix was written because the parent
+	 * (",\n" or ", "), that prefix was written because the parent
 	 * already had at least one child (xs_rb_flags & XSF_NOT_FIRST).
-	 * When those prior siblings fall entirely in the gap between
-	 * prev_keep_end and tag_start, they are being discarded by this
-	 * compaction, so the comma is no longer valid — strip it.
-	 * Both compact (",  ") and pretty (",\n") forms are 2 bytes.
+	 * Strip the comma only when ALL of those prior children fall in the
+	 * gap being discarded (prev_keep_end..tag_start) AND the parent
+	 * kept no key fields — kept key fields legitimately set NOT_FIRST
+	 * and the comma must remain.
+	 * Both compact (", ") and pretty (",\n") forms are 2 bytes.
 	 */
 	xo_off_t actual_tag_start = tag_start;
 	if (xo_style(xop) == XO_STYLE_JSON
 	        && (xsp->xs_rb_flags & XSF_NOT_FIRST)
 	        && prev_keep_end != XS_OFFSET_CLEAR
-	        && tag_start > prev_keep_end) {
+	        && tag_start > prev_keep_end
+	        && !prev_had_key) {
 	    actual_tag_start += 2;
 	    keep_len = (keep_len > 2) ? keep_len - 2 : 0;
 	}
 
 	prev_keep_end = keep_end;
+	prev_had_key = (key_off != XS_OFFSET_CLEAR);
 
 	if (write_off == XS_OFFSET_CLEAR)
 	    write_off = actual_tag_start;
@@ -5445,12 +5455,15 @@ xo_filt_commit_compact (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED,
 	xo_buf_set_offset(xbp, write_off);
 
     /*
-     * cur's prior children were discarded by the compaction above.
-     * Reset NOT_FIRST and CONTENT so the first child we emit for real
-     * (the newly-FULL container about to open) does not get a spurious
-     * JSON comma or duplicate-content treatment.
+     * Reset NOT_FIRST/CONTENT on cur so the first real child (the
+     * newly-FULL container about to open) does not inherit a stale JSON
+     * comma.  Only do this when cur itself had pending (un-committed)
+     * content: if cur's xs_rb_off was already CLEAR it was committed with
+     * genuine content and NOT_FIRST must be preserved.
+     * Also skip when cur kept key fields — those legitimately set NOT_FIRST.
      */
-    cur->xs_flags &= ~XSF_RB_BITS;
+    if (cur_was_pending && !prev_had_key)
+	cur->xs_flags &= ~XSF_RB_BITS;
 
     XOIF_CLEAR(xop, XOIF_FILTERING);
 #endif /* LIBXO_NEED_FILTERS */
