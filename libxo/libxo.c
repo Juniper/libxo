@@ -8375,6 +8375,21 @@ xo_do_open_list (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
 	break;
     }
 
+    /*
+     * When the parent frame is committed (FULL), its xs_rb_off is CLEAR but
+     * the list frame we are about to push will carry a live starting_offset.
+     * If a tty or high-water flush fires before the first FULL item triggers
+     * commit_compact, that offset becomes meaningless — commit_compact would
+     * use it to set xb_curp to a position that no longer corresponds to the
+     * ancestor content in the buffer, corrupting output.  Keep
+     * XOIF_FILTERING set so xo_avoid_flushing() suppresses any such flush
+     * until commit_compact fires and clears both xs_rb_off and XOIF_FILTERING.
+     */
+    if (XOF_ISSET(xop, XOF_FILTER)) {
+	if (xo_stack_cur(xop)->xs_fstatus == XO_STATUS_FULL)
+	    XOIF_SET(xop, XOIF_FILTERING);
+    }
+
     xo_depth_change(xop, name, 1, indent, XSS_OPEN_LIST,
 		    XSF_LIST | xo_stack_flags(flags), 0, starting_offset);
 
