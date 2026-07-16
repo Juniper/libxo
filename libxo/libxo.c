@@ -5231,6 +5231,75 @@ xo_filt_commit (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED,
 	   fstatus, xo_filt_status_name(fstatus), xop->xo_depth);
     xo_filt_dump(xop, "commit before");
 
+    /*
+     * If the current frame still holds tentative content (xs_rb_off set),
+     * ancestor TRACK frames will have buffered non-tag content (e.g. sibling
+     * fields before the matching path) that must be discarded.  Compact the
+     * ancestors like xo_filt_commit_compact does, then move the current
+     * frame's entire buffered range (opening tag plus any fields written so
+     * far) to follow the compacted ancestors.  This handles the case where a
+     * predicate field or key field resolves a PRED instance to FULL while
+     * ancestor TRACK containers have accumulated junk in the buffer.
+     */
+    if (cur && cur->xs_rb_off != XS_OFFSET_CLEAR) {
+	xo_buffer_t *xbp = &xop->xo_data;
+	xo_off_t item_start = cur->xs_rb_off;
+	xo_off_t item_end = xo_buf_offset(xbp);
+	ssize_t item_len = (item_end > item_start) ? (item_end - item_start) : 0;
+
+	xop->xo_stack[0].xs_fstatus = fstatus;
+	xo_off_t write_off = XS_OFFSET_CLEAR;
+
+	for (xo_stack_t *xsp = xop->xo_stack + 1; xsp < cur; xsp++) {
+	    xo_off_t key_off = xsp->xs_key_off;
+	    xsp->xs_fstatus = fstatus;
+	    xsp->xs_key_off = XS_OFFSET_CLEAR;
+
+	    if (xsp->xs_rb_off == XS_OFFSET_CLEAR)
+		continue;
+
+	    xo_off_t tag_start = xsp->xs_rb_off;
+	    xo_off_t keep_end = (xsp->xs_tag_end != XS_OFFSET_CLEAR)
+		? xsp->xs_tag_end : tag_start;
+	    if (key_off != XS_OFFSET_CLEAR && key_off > keep_end)
+		keep_end = key_off;
+
+	    ssize_t keep_len = (keep_end > tag_start) ? (keep_end - tag_start) : 0;
+
+	    if (write_off == XS_OFFSET_CLEAR)
+		write_off = tag_start;
+	    if (keep_len > 0) {
+		if (tag_start != write_off)
+		    memmove(xbp->xb_bufp + write_off, xbp->xb_bufp + tag_start,
+			    keep_len);
+		write_off += keep_len;
+	    }
+	    xsp->xs_rb_off = XS_OFFSET_CLEAR;
+	    xsp->xs_tag_end = XS_OFFSET_CLEAR;
+	}
+
+	/* Commit cur, preserving its entire buffered content */
+	cur->xs_fstatus = fstatus;
+	cur->xs_rb_off = XS_OFFSET_CLEAR;
+	cur->xs_tag_end = XS_OFFSET_CLEAR;
+	cur->xs_key_off = XS_OFFSET_CLEAR;
+
+	if (item_len > 0) {
+	    if (write_off == XS_OFFSET_CLEAR)
+		write_off = item_start;
+	    if (item_start != write_off)
+		memmove(xbp->xb_bufp + write_off, xbp->xb_bufp + item_start,
+			item_len);
+	    write_off += item_len;
+	}
+	if (write_off != XS_OFFSET_CLEAR)
+	    xo_buf_set_offset(xbp, write_off);
+
+	xo_filt_dump(xop, "commit after");
+	XOIF_CLEAR(xop, XOIF_FILTERING);
+	return;
+    }
+
     for (xo_stack_t *xsp = xop->xo_stack; xsp <= cur; xsp++) {
 	XO_DBG(xop, "xo_filt_commit: clearing offset %d, "
 	       "status %u=%s -> %u=%s",
