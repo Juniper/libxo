@@ -1,8 +1,6 @@
 {
   "data": {
-,
     "top-level": {
-,
       "data4": {
         "item": "gum",
         "item": "rope",
@@ -13,9 +11,7 @@
     }
   },
   "data": {
-,
     "top-level": {
-,
       "data3": {
         "item": [
           {
@@ -30,9 +26,7 @@
     }
   },
   "data": {
-,
     "top-level": {
-,
       "data2": {
         "item": [
           {
@@ -75,9 +69,7 @@
     }
   },
   "data": {
-,
     "top-level": {
-,
       "data": {
         "item": [
           {
@@ -168,37 +160,7 @@
     "thing": "four"
   },
   "data": {
-    "thing": "one",
-    "thing": "two",
-    "thing": "three",
-    "thing": "four",
-    "block": "56",
     "top-level": {
-      "type": "ethernet",
-      "type": "bridge",
-      "type": "18u",
-      "type": "24",
-      "address": "0x0",
-      "port": "1",
-      "address": "0x0",
-      "port": "1",
-      "address": "0x0",
-      "port": "1",
-      "used-percent": "12",
-      "kve_start": "0xdeadbeef",
-      "kve_end": "0xcabb1e",
-      "host": "my-box",
-      "domain": "example.com",
-      "host": "my-box",
-      "domain": "example.com",
-      "label": "value",
-      "max-chaos": "very",
-      "min-chaos": "42",
-      "some-chaos": "[42]",
-      "sku": "gum-000-1412",
-      "sku": "sum-000-4121",
-      "host": "my-box",
-      "domain": "example.com",
       "data": {
         "item": [
           {
@@ -268,37 +230,7 @@
     }
   },
   "data": {
-    "thing": "one",
-    "thing": "two",
-    "thing": "three",
-    "thing": "four",
-    "block": "56",
     "top-level": {
-      "type": "ethernet",
-      "type": "bridge",
-      "type": "18u",
-      "type": "24",
-      "address": "0x0",
-      "port": "1",
-      "address": "0x0",
-      "port": "1",
-      "address": "0x0",
-      "port": "1",
-      "used-percent": "12",
-      "kve_start": "0xdeadbeef",
-      "kve_end": "0xcabb1e",
-      "host": "my-box",
-      "domain": "example.com",
-      "host": "my-box",
-      "domain": "example.com",
-      "label": "value",
-      "max-chaos": "very",
-      "min-chaos": "42",
-      "some-chaos": "[42]",
-      "sku": "gum-000-1412",
-      "sku": "sum-000-4121",
-      "host": "my-box",
-      "domain": "example.com",
       "data": {
         "item": [
           {
@@ -347,37 +279,7 @@
     }
   },
   "data": {
-    "thing": "one",
-    "thing": "two",
-    "thing": "three",
-    "thing": "four",
-    "block": "56",
     "top-level": {
-      "type": "ethernet",
-      "type": "bridge",
-      "type": "18u",
-      "type": "24",
-      "address": "0x0",
-      "port": "1",
-      "address": "0x0",
-      "port": "1",
-      "address": "0x0",
-      "port": "1",
-      "used-percent": "12",
-      "kve_start": "0xdeadbeef",
-      "kve_end": "0xcabb1e",
-      "host": "my-box",
-      "domain": "example.com",
-      "host": "my-box",
-      "domain": "example.com",
-      "label": "value",
-      "max-chaos": "very",
-      "min-chaos": "42",
-      "some-chaos": "[42]",
-      "sku": "gum-000-1412",
-      "sku": "sum-000-4121",
-      "host": "my-box",
-      "domain": "example.com",
       "data": {
         "item": [
           {
@@ -459,37 +361,7 @@
     }
   },
   "data": {
-    "thing": "one",
-    "thing": "two",
-    "thing": "three",
-    "thing": "four",
-    "block": "56",
     "top-level": {
-      "type": "ethernet",
-      "type": "bridge",
-      "type": "18u",
-      "type": "24",
-      "address": "0x0",
-      "port": "1",
-      "address": "0x0",
-      "port": "1",
-      "address": "0x0",
-      "port": "1",
-      "used-percent": "12",
-      "kve_start": "0xdeadbeef",
-      "kve_end": "0xcabb1e",
-      "host": "my-box",
-      "domain": "example.com",
-      "host": "my-box",
-      "domain": "example.com",
-      "label": "value",
-      "max-chaos": "very",
-      "min-chaos": "42",
-      "some-chaos": "[42]",
-      "sku": "gum-000-1412",
-      "sku": "sum-000-4121",
-      "host": "my-box",
-      "domain": "example.com",
       "data": {
         "item": [
           {
