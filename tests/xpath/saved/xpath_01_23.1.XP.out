@@ -16,29 +16,5 @@
       <item test4="value4">bolt</item>
       <item test4="value4">water</item>
     </data4>
-    <cost>425</cost>
-    <cost>455</cost>
-    <mode>mode</mode>
-    <mode_octal>octal</mode_octal>
-    <links>links</links>
-    <user>user</user>
-    <group>group</group>
-    <pre>that</pre>
-    <links>3</links>
-    <post>this</post>
-    <mode>/some/file</mode>
-    <mode_octal>640</mode_octal>
-    <links>1</links>
-    <user>user</user>
-    <group>group</group>
-    <one>1</one>
-    <two>2</two>
-    <three>3</three>
-    <one>1</one>
-    <two>2</two>
-    <three>3</three>
-    <one>1</one>
-    <two>2</two>
-    <three>3</three>
   </top-level>
 </data>
