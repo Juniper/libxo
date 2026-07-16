@@ -18,7 +18,18 @@ r
 ? thing
 i xpath_01_23.inc
 
+r
 ? item[starts-with(sku, "GRO")]
-? item[on-order + 2 < 10 - 6]
-? item[on-order + 20 > number(in-stock)]
+i xpath_01_23.inc
 
+r
+? item[on-order + 2 < 10 - 6]
+i xpath_01_23.inc
+
+r
+? item[on-order + 20 > in-stock]
+i xpath_01_23.inc
+
+r
+? item[on-order > in-stock]
+i xpath_01_23.inc
