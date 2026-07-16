@@ -5487,9 +5487,14 @@ xo_filt_is_skippable (xo_handle_t *xop, xo_xff_flags_t flags,
     /*
      * If we're inside a capture for a PRED instance, buffer all
      * sibling/nested content tentatively (XML/JSON only — encoder
-     * state cannot be rolled back).
+     * state cannot be rolled back).  Only applies when the current
+     * frame has an active whiteboard (xs_rb_off set); after compact
+     * commit clears xs_rb_off, XOIF_FILTERING may still be set by
+     * rollback of a sibling container, but fields at that level are
+     * individually skippable and must not be suppressed here.
      */
-    if (XOIF_ISSET(xop, XOIF_FILTERING) && xo_style(xop) != XO_STYLE_ENCODER)
+    if (XOIF_ISSET(xop, XOIF_FILTERING) && xo_style(xop) != XO_STYLE_ENCODER
+	    && xo_stack_cur(xop)->xs_rb_off != XS_OFFSET_CLEAR)
 	return FALSE;
 
     if (fstatus == XO_STATUS_PRED)
@@ -8144,6 +8149,21 @@ xo_do_open_container (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
     if (XOF_ISSET(xop, XOF_FILTER)) {
 	if (fstatus == XO_STATUS_FULL || fstatus == XO_STATUS_ZERO)
 	    starting_offset = XS_OFFSET_CLEAR;
+    }
+
+    /*
+     * After compact-commit clears XOIF_FILTERING, a new TRACK container
+     * that opens as a sibling of the committed region still needs
+     * XOIF_FILTERING set so that the buffer is not flushed to the fd
+     * before the rollback on close (which would make the opening tag
+     * permanent while the closing tag is suppressed).  Mirror the same
+     * guard used in xo_do_open_instance().
+     */
+    if (XOF_ISSET(xop, XOF_FILTER)) {
+	if (fstatus == XO_STATUS_PRED)
+	    XOIF_SET(xop, XOIF_FILTERING);
+	else if (fstatus == XO_STATUS_TRACK && old_fstatus == XO_STATUS_FULL)
+	    XOIF_SET(xop, XOIF_FILTERING);
     }
 
     xo_depth_change(xop, name, 1, 1, XSS_OPEN_CONTAINER,
