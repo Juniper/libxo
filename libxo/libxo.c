@@ -5249,14 +5249,17 @@ xo_filt_commit (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED,
 
 	xop->xo_stack[0].xs_fstatus = fstatus;
 	xo_off_t write_off = XS_OFFSET_CLEAR;
+	xo_off_t prev_keep_end = XS_OFFSET_CLEAR;
 
 	for (xo_stack_t *xsp = xop->xo_stack + 1; xsp < cur; xsp++) {
 	    xo_off_t key_off = xsp->xs_key_off;
 	    xsp->xs_fstatus = fstatus;
 	    xsp->xs_key_off = XS_OFFSET_CLEAR;
 
-	    if (xsp->xs_rb_off == XS_OFFSET_CLEAR)
+	    if (xsp->xs_rb_off == XS_OFFSET_CLEAR) {
+		prev_keep_end = XS_OFFSET_CLEAR;
 		continue;
+	    }
 
 	    xo_off_t tag_start = xsp->xs_rb_off;
 	    xo_off_t keep_end = (xsp->xs_tag_end != XS_OFFSET_CLEAR)
@@ -5266,11 +5269,21 @@ xo_filt_commit (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED,
 
 	    ssize_t keep_len = (keep_end > tag_start) ? (keep_end - tag_start) : 0;
 
+	    xo_off_t actual_tag_start = tag_start;
+	    if (xo_style(xop) == XO_STYLE_JSON
+		    && (xsp->xs_rb_flags & XSF_NOT_FIRST)
+		    && prev_keep_end != XS_OFFSET_CLEAR
+		    && tag_start > prev_keep_end) {
+		actual_tag_start += 2;
+		keep_len = (keep_len > 2) ? keep_len - 2 : 0;
+	    }
+	    prev_keep_end = keep_end;
+
 	    if (write_off == XS_OFFSET_CLEAR)
-		write_off = tag_start;
+		write_off = actual_tag_start;
 	    if (keep_len > 0) {
-		if (tag_start != write_off)
-		    memmove(xbp->xb_bufp + write_off, xbp->xb_bufp + tag_start,
+		if (actual_tag_start != write_off)
+		    memmove(xbp->xb_bufp + write_off, xbp->xb_bufp + actual_tag_start,
 			    keep_len);
 		write_off += keep_len;
 	    }
@@ -5363,6 +5376,7 @@ xo_filt_commit_compact (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED,
 
     xo_buffer_t *xbp = &xop->xo_data;
     xo_off_t write_off = XS_OFFSET_CLEAR;
+    xo_off_t prev_keep_end = XS_OFFSET_CLEAR;
 
     for (xo_stack_t *xsp = xop->xo_stack + 1; xsp <= cur; xsp++) {
 	XO_DBG(xop, "xo_filt_commit_compact: frame %u rb_off %d "
@@ -5376,6 +5390,7 @@ xo_filt_commit_compact (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED,
 	xsp->xs_key_off = XS_OFFSET_CLEAR;
 
 	if (xsp->xs_rb_off == XS_OFFSET_CLEAR) {
+	    prev_keep_end = XS_OFFSET_CLEAR; /* parent already committed; unknown end */
 	    continue;
 	}
 
@@ -5392,12 +5407,32 @@ xo_filt_commit_compact (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED,
 
 	ssize_t keep_len = (keep_end > tag_start) ? (keep_end - tag_start) : 0;
 
+	/*
+	 * If this frame's opening bytes begin with a JSON comma prefix
+	 * (",\n" or ", "), the prefix was written because the parent
+	 * already had at least one child (xs_rb_flags & XSF_NOT_FIRST).
+	 * When those prior siblings fall entirely in the gap between
+	 * prev_keep_end and tag_start, they are being discarded by this
+	 * compaction, so the comma is no longer valid — strip it.
+	 * Both compact (",  ") and pretty (",\n") forms are 2 bytes.
+	 */
+	xo_off_t actual_tag_start = tag_start;
+	if (xo_style(xop) == XO_STYLE_JSON
+	        && (xsp->xs_rb_flags & XSF_NOT_FIRST)
+	        && prev_keep_end != XS_OFFSET_CLEAR
+	        && tag_start > prev_keep_end) {
+	    actual_tag_start += 2;
+	    keep_len = (keep_len > 2) ? keep_len - 2 : 0;
+	}
+
+	prev_keep_end = keep_end;
+
 	if (write_off == XS_OFFSET_CLEAR)
-	    write_off = tag_start;
+	    write_off = actual_tag_start;
 
 	if (keep_len > 0) {
-	    if (tag_start != write_off)
-		memmove(xbp->xb_bufp + write_off, xbp->xb_bufp + tag_start,
+	    if (actual_tag_start != write_off)
+		memmove(xbp->xb_bufp + write_off, xbp->xb_bufp + actual_tag_start,
 			keep_len);
 	    write_off += keep_len;
 	}
@@ -5408,6 +5443,14 @@ xo_filt_commit_compact (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED,
 
     if (write_off != XS_OFFSET_CLEAR)
 	xo_buf_set_offset(xbp, write_off);
+
+    /*
+     * cur's prior children were discarded by the compaction above.
+     * Reset NOT_FIRST and CONTENT so the first child we emit for real
+     * (the newly-FULL container about to open) does not get a spurious
+     * JSON comma or duplicate-content treatment.
+     */
+    cur->xs_flags &= ~XSF_RB_BITS;
 
     XOIF_CLEAR(xop, XOIF_FILTERING);
 #endif /* LIBXO_NEED_FILTERS */
