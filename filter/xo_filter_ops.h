@@ -67,8 +67,8 @@ typedef int (*xo_filter_needs_nonkey_field_func_t)(XO_FILTER_NEEDS_NONKEY_FIELD_
 
 typedef int (*xo_filter_open_container_func_t)(XO_FILTER_OPEN_CONTAINER_SIGNATURE);
 
-#define XO_FILTER_OPEN_FIELD_ARGS xop, xfp, tag, tlen
-#define XO_FILTER_OPEN_FIELD_SIGNATURE xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED,                       const char *tag UNUSED, ssize_t tlen UNUSED
+#define XO_FILTER_OPEN_FIELD_ARGS xop, xfp, tag, tlen, value, vlen
+#define XO_FILTER_OPEN_FIELD_SIGNATURE xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED,                       const char *tag UNUSED, ssize_t tlen UNUSED, 		       const char *value UNUSED, ssize_t vlen UNUSED
 
 typedef int (*xo_filter_open_field_func_t)(XO_FILTER_OPEN_FIELD_SIGNATURE);
 
