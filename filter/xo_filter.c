@@ -506,6 +506,19 @@ struct xo_filter_s {		 /* Forward/typdef decl in xo_private.h */
 /* Flags for xf_flags */
 #define XFSF_BLOCK		(1<<0)	/* Block emitting data */
 #define XFSF_FORCE_RESOLVE	(1<<1)	/* Missing fields are "" at close */
+#define XFSF_USES_DOT		(1<<2)	/* Some predicate references '.' (L_DOT) */
+
+/*
+ * Does any active filter reference the context node ('.', L_DOT)?  When it
+ * does, xo_tmatch_open must stash each node's own value (an allocation) so
+ * xo_eval_dot can resolve it.  The common case uses no '.', so this cached
+ * flag (set at filter-add time) lets us skip that copy entirely.
+ */
+static inline int
+xo_filter_dot_is_used (xo_filter_t *xfp)
+{
+    return xfp != NULL && (xfp->xf_flags & XFSF_USES_DOT);
+}
 
 int
 xo_encoder_wb_marker (xo_handle_t *xop, xo_whiteboard_op_t op,
@@ -651,7 +664,7 @@ xo_pred_has_trailing_cindex (xo_filter_t *xfp, xo_xparse_node_id_t pred_id)
 }
 
 static void
-xo_tmatch_open (xo_handle_t *xop, xo_filter_t *xfp UNUSED,
+xo_tmatch_open (xo_handle_t *xop, xo_filter_t *xfp,
 		xo_tmatch_t *xtmp, const char *tag, ssize_t tlen,
 		const char *value, ssize_t vlen)
 {
@@ -675,9 +688,11 @@ xo_tmatch_open (xo_handle_t *xop, xo_filter_t *xfp UNUSED,
 
     /*
      * Stash this node's own value so a '.' reference in a predicate on
-     * this node can resolve to it during the eager eval below.
+     * this node can resolve to it during the eager eval below.  Only pay
+     * for the copy when some filter actually uses '.' (L_DOT).
      */
-    xo_tframe_set_self(frame, value, vlen);
+    if (xo_filter_dot_is_used(xfp))
+	xo_tframe_set_self(frame, value, vlen);
 
     xo_dbg(xop, "xo_tmatch_open: depth %u tag '%.*s'",
 	   xtmp->xtm_depth, tlen, tag);
@@ -788,6 +803,22 @@ static xo_filter_status_t xo_tmatch_attr(xo_handle_t *, xo_filter_t *,
 					  xo_ssize_t, const char *, xo_ssize_t);
 
 /*
+ * Scan all parsed nodes for a context-node reference ('.', L_DOT).  Nodes
+ * are 1-based, allocated contiguously up to xd_last_node.
+ */
+static int
+xo_filter_nodes_use_dot (xo_xparse_data_t *xdp)
+{
+    for (xo_xparse_node_id_t id = 1; id <= xdp->xd_last_node; id++) {
+	xo_xparse_node_t *xnp = xo_xparse_node(xdp, id);
+	if (xnp && xnp->xn_type == L_DOT)
+	    return TRUE;
+    }
+
+    return FALSE;
+}
+
+/*
  * Add a filter (xpath) to our filtering mechanism
  */
 static int
@@ -832,6 +863,13 @@ xo_filter_op_add_one (xo_handle_t *xop, const char *input)
 	xfp->xf_trie = NULL;
 	return -1;
     }
+
+    /* Cache whether any accumulated filter uses '.' so opens can skip the
+     * per-node self-value copy when none do. */
+    if (xo_filter_nodes_use_dot(xdp))
+	xfp->xf_flags |= XFSF_USES_DOT;
+    else
+	xfp->xf_flags &= ~XFSF_USES_DOT;
 
     return 0;
 }
