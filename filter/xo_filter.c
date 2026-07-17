@@ -107,6 +107,8 @@ typedef struct xo_tframe_s {
     ssize_t xtf_keys_len;
     char *xtf_attrs;		/* buffered "@k\0v\0..." pairs (attributes) */
     ssize_t xtf_attrs_len;
+    char *xtf_self;		/* this node's own value (for '.' in predicates) */
+    ssize_t xtf_self_len;
     uint32_t xtf_position_cur;  /* scratch: position for current C_INDEX eval */
     /* Child sibling counters (tracked in the PARENT frame, survive close) */
     uint8_t xtf_child_ncount;
@@ -360,6 +362,37 @@ xo_tframe_free_keys (xo_tframe_t *frame)
     }
 }
 
+/*
+ * Record this node's own value so a '.' (L_DOT) reference in a predicate
+ * attached to the node can resolve to it.  Copied since the caller's
+ * buffer may not outlive the frame.
+ */
+static void
+xo_tframe_set_self (xo_tframe_t *frame, const char *value, xo_ssize_t vlen)
+{
+    if (value == NULL || vlen <= 0)
+	return;
+
+    char *newp = xo_realloc(NULL, vlen + 1);
+    if (newp == NULL)
+	return;
+
+    memcpy(newp, value, vlen);
+    newp[vlen] = '\0';
+    frame->xtf_self = newp;
+    frame->xtf_self_len = vlen;
+}
+
+static void
+xo_tframe_free_self (xo_tframe_t *frame)
+{
+    if (frame->xtf_self) {
+	xo_free(frame->xtf_self);
+	frame->xtf_self = NULL;
+	frame->xtf_self_len = 0;
+    }
+}
+
 static void
 xo_tframe_attr_add (xo_tframe_t *frame,
 		    const char *tag, xo_ssize_t tlen,
@@ -449,7 +482,7 @@ xo_tmatch_cleanup (xo_tmatch_t *xtmp)
  */
 static void xo_tmatch_record_live(xo_tmatch_t *, xo_tframe_t *, xo_tnode_t *);
 static void xo_tmatch_open(xo_handle_t *, xo_filter_t *, xo_tmatch_t *,
-			   const char *, ssize_t);
+			   const char *, ssize_t, const char *, ssize_t);
 static void xo_tmatch_close(xo_handle_t *, xo_filter_t *, xo_tmatch_t *,
 			    const char *, ssize_t);
 static int xo_tmatch_try_eager(xo_handle_t *, xo_filter_t *, xo_tframe_t *,
@@ -619,7 +652,8 @@ xo_pred_has_trailing_cindex (xo_filter_t *xfp, xo_xparse_node_id_t pred_id)
 
 static void
 xo_tmatch_open (xo_handle_t *xop, xo_filter_t *xfp UNUSED,
-		xo_tmatch_t *xtmp, const char *tag, ssize_t tlen)
+		xo_tmatch_t *xtmp, const char *tag, ssize_t tlen,
+		const char *value, ssize_t vlen)
 {
     xo_trie_t *xtp = xtmp->xtm_trie;
     xo_xparse_data_t *xdp = xtp->xt_xd;
@@ -638,6 +672,12 @@ xo_tmatch_open (xo_handle_t *xop, xo_filter_t *xfp UNUSED,
     xtmp->xtm_depth += 1;
     xo_tframe_t *frame = &xtmp->xtm_stack[xtmp->xtm_depth];
     bzero(frame, sizeof(*frame));
+
+    /*
+     * Stash this node's own value so a '.' reference in a predicate on
+     * this node can resolve to it during the eager eval below.
+     */
+    xo_tframe_set_self(frame, value, vlen);
 
     xo_dbg(xop, "xo_tmatch_open: depth %u tag '%.*s'",
 	   xtmp->xtm_depth, tlen, tag);
@@ -728,6 +768,7 @@ xo_tmatch_close (xo_handle_t *xop, xo_filter_t *xfp UNUSED,
     xtmp->xtm_deny  -= frame->xtf_deny_delta;
     xo_tframe_free_keys(frame);
     xo_tframe_free_attrs(frame);
+    xo_tframe_free_self(frame);
 
     xo_dbg(xop, "xo_tmatch_close: depth %u [allow %u/deny %u]",
 	   xtmp->xtm_depth, xtmp->xtm_allow, xtmp->xtm_deny);
@@ -763,7 +804,7 @@ xo_filter_op_add_one (xo_handle_t *xop, const char *input)
 
     if (rc == 0) {
 	static int unsupported_tokens[] = {
-	    L_DOTDOT, L_DOTDOTDOT, L_DOT,
+	    L_DOTDOT, L_DOTDOTDOT,
 	    K_COMMENT, K_ID, K_KEY, K_NODE,
 	    K_PROCESSING_INSTRUCTION, K_TEXT,
 	    T_AXIS_NAME, T_VAR, M_SEQUENCE, C_DESCENDANT,
@@ -880,7 +921,8 @@ xo_filter_change_status (xo_handle_t *xop UNUSED, xo_filter_t *xfp,
  */
 static int
 xo_filter_open (xo_handle_t *xop, xo_filter_t *xfp,
-		const char *tag, ssize_t tlen, const char *type UNUSED)
+		const char *tag, ssize_t tlen, const char *type UNUSED,
+		const char *value, ssize_t vlen)
 {
     if (xfp == NULL || xfp->xf_trie == NULL)
 	return 0;
@@ -889,7 +931,7 @@ xo_filter_open (xo_handle_t *xop, xo_filter_t *xfp,
 
     xfp->xf_total_depth += 1;
 
-    xo_tmatch_open(xop, xfp, &xfp->xf_tmatch, tag, tlen);
+    xo_tmatch_open(xop, xfp, &xfp->xf_tmatch, tag, tlen, value, vlen);
 
     xo_filter_change_status(xop, xfp, "open", tag, tlen);
 
@@ -900,20 +942,19 @@ static int
 xo_filter_op_open_container (xo_handle_t *xop, xo_filter_t *xfp,
 			  const char *tag)
 {
-    return xo_filter_open(xop, xfp, tag, strlen(tag), "container");
+    return xo_filter_open(xop, xfp, tag, strlen(tag), "container", NULL, 0);
 }
 
 static int
 xo_filter_op_open_instance (xo_handle_t *xop, xo_filter_t *xfp, const char *tag)
 {
-    return xo_filter_open(xop, xfp, tag, strlen(tag), "list");
+    return xo_filter_open(xop, xfp, tag, strlen(tag), "list", NULL, 0);
 }
 
 static int
-xo_filter_op_open_field (xo_handle_t *xop, xo_filter_t *xfp,
-		      const char *tag, ssize_t  tlen)
+xo_filter_op_open_field (XO_FILTER_OPEN_FIELD_SIGNATURE)
 {
-    return xo_filter_open(xop, xfp, tag, tlen, "field");
+    return xo_filter_open(xop, xfp, tag, tlen, "field", value, vlen);
 }
 
 /*
@@ -1360,6 +1401,26 @@ xo_eval_path (XO_EVAL_NODE_ARGS)
 	value.xev_str = sval;
     } else if (xfp->xf_flags & XFSF_FORCE_RESOLVE) {
 	/* Absent field = empty string per XPath semantics */
+	value = xo_eval_value_make(C_STRING, 0, 0);
+	value.xev_str = "";
+    } else {
+	value.xev_flags |= XEVF_MISSING;
+    }
+
+    return value;
+}
+
+static xo_eval_value_t
+xo_eval_dot (XO_EVAL_NODE_ARGS)
+{
+    xo_eval_value_t value = { .xev_flags = 0 };
+
+    /* '.' is the context node: this frame's own value */
+    if (framep->xtf_self) {
+	value = xo_eval_value_make(C_STRING, 0, 0);
+	value.xev_str = framep->xtf_self;
+    } else if (xfp->xf_flags & XFSF_FORCE_RESOLVE) {
+	/* Absent value = empty string per XPath semantics */
 	value = xo_eval_value_make(C_STRING, 0, 0);
 	value.xev_str = "";
     } else {
@@ -2470,6 +2531,10 @@ xo_eval (xo_handle_t *xop, xo_filter_t *xfp, xo_tframe_t *framep,
 
 	case C_PATH:
 	    node_fn = xo_eval_path;
+	    break;
+
+	case L_DOT:
+	    node_fn = xo_eval_dot;
 	    break;
 
 	case K_AND:
