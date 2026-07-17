@@ -109,6 +109,7 @@ typedef struct xo_tframe_s {
     ssize_t xtf_attrs_len;
     char *xtf_self;		/* this node's own value (for '.' in predicates) */
     ssize_t xtf_self_len;
+    uint8_t xtf_dot_count;	/* # matched slots whose predicate uses '.' */
     uint32_t xtf_position_cur;  /* scratch: position for current C_INDEX eval */
     /* Child sibling counters (tracked in the PARENT frame, survive close) */
     uint8_t xtf_child_ncount;
@@ -506,19 +507,6 @@ struct xo_filter_s {		 /* Forward/typdef decl in xo_private.h */
 /* Flags for xf_flags */
 #define XFSF_BLOCK		(1<<0)	/* Block emitting data */
 #define XFSF_FORCE_RESOLVE	(1<<1)	/* Missing fields are "" at close */
-#define XFSF_USES_DOT		(1<<2)	/* Some predicate references '.' (L_DOT) */
-
-/*
- * Does any active filter reference the context node ('.', L_DOT)?  When it
- * does, xo_tmatch_open must stash each node's own value (an allocation) so
- * xo_eval_dot can resolve it.  The common case uses no '.', so this cached
- * flag (set at filter-add time) lets us skip that copy entirely.
- */
-static inline int
-xo_filter_dot_is_used (xo_filter_t *xfp)
-{
-    return xfp != NULL && (xfp->xf_flags & XFSF_USES_DOT);
-}
 
 int
 xo_encoder_wb_marker (xo_handle_t *xop, xo_whiteboard_op_t op,
@@ -663,6 +651,40 @@ xo_pred_has_trailing_cindex (xo_filter_t *xfp, xo_xparse_node_id_t pred_id)
     return FALSE;
 }
 
+/*
+ * Does this node's predicate chain reference the context node ('.')?  The
+ * grammar marks such C_PREDICATE nodes with XXPF_USES_DOT at parse time.
+ */
+static int
+xo_pred_uses_dot (xo_filter_t *xfp, xo_xparse_node_id_t pred)
+{
+    xo_xparse_node_t *xnp;
+
+    for ( ; pred; pred = xnp->xn_next) {
+	xnp = xo_xparse_node(&xfp->xf_xd, pred);
+	if (xnp->xn_type == C_PREDICATE && (xnp->xn_flags & XXPF_USES_DOT))
+	    return TRUE;
+    }
+
+    return FALSE;
+}
+
+/*
+ * Record a matched predicate slot: if it references '.', the frame must hold
+ * this node's own value before the eager eval reads it (via xo_eval_dot).
+ * We stash the value only once per frame and count such slots.
+ */
+static void
+xo_tmatch_note_pred (xo_filter_t *xfp, xo_tframe_t *frame,
+		     xo_xparse_node_id_t pred,
+		     const char *value, ssize_t vlen)
+{
+    if (xo_pred_uses_dot(xfp, pred)) {
+	if (frame->xtf_dot_count++ == 0)
+	    xo_tframe_set_self(frame, value, vlen);
+    }
+}
+
 static void
 xo_tmatch_open (xo_handle_t *xop, xo_filter_t *xfp,
 		xo_tmatch_t *xtmp, const char *tag, ssize_t tlen,
@@ -685,14 +707,6 @@ xo_tmatch_open (xo_handle_t *xop, xo_filter_t *xfp,
     xtmp->xtm_depth += 1;
     xo_tframe_t *frame = &xtmp->xtm_stack[xtmp->xtm_depth];
     bzero(frame, sizeof(*frame));
-
-    /*
-     * Stash this node's own value so a '.' reference in a predicate on
-     * this node can resolve to it during the eager eval below.  Only pay
-     * for the copy when some filter actually uses '.' (L_DOT).
-     */
-    if (xo_filter_dot_is_used(xfp))
-	xo_tframe_set_self(frame, value, vlen);
 
     xo_dbg(xop, "xo_tmatch_open: depth %u tag '%.*s'",
 	   xtmp->xtm_depth, tlen, tag);
@@ -717,6 +731,7 @@ xo_tmatch_open (xo_handle_t *xop, xo_filter_t *xfp,
 	    frame->xtf_position[s] = position;
 
 	    if (tn->xtn_pred) {
+		xo_tmatch_note_pred(xfp, frame, tn->xtn_pred, value, vlen);
 		frame->xtf_position_cur = position;
 		frame->xtf_state[s] =
 		    xo_tmatch_try_eager(xop, xfp, frame, tn->xtn_pred,
@@ -758,6 +773,7 @@ xo_tmatch_open (xo_handle_t *xop, xo_filter_t *xfp,
 	frame->xtf_position[s] = position;
 
 	if (tn->xtn_pred) {
+	    xo_tmatch_note_pred(xfp, frame, tn->xtn_pred, value, vlen);
 	    frame->xtf_position_cur = position;
 	    frame->xtf_state[s] =
 		xo_tmatch_try_eager(xop, xfp, frame, tn->xtn_pred, tn, xtmp);
@@ -801,22 +817,6 @@ static xo_filter_status_t xo_tmatch_key(xo_handle_t *, xo_filter_t *,
 static xo_filter_status_t xo_tmatch_attr(xo_handle_t *, xo_filter_t *,
 					  xo_tmatch_t *, const char *,
 					  xo_ssize_t, const char *, xo_ssize_t);
-
-/*
- * Scan all parsed nodes for a context-node reference ('.', L_DOT).  Nodes
- * are 1-based, allocated contiguously up to xd_last_node.
- */
-static int
-xo_filter_nodes_use_dot (xo_xparse_data_t *xdp)
-{
-    for (xo_xparse_node_id_t id = 1; id <= xdp->xd_last_node; id++) {
-	xo_xparse_node_t *xnp = xo_xparse_node(xdp, id);
-	if (xnp && xnp->xn_type == L_DOT)
-	    return TRUE;
-    }
-
-    return FALSE;
-}
 
 /*
  * Add a filter (xpath) to our filtering mechanism
@@ -863,13 +863,6 @@ xo_filter_op_add_one (xo_handle_t *xop, const char *input)
 	xfp->xf_trie = NULL;
 	return -1;
     }
-
-    /* Cache whether any accumulated filter uses '.' so opens can skip the
-     * per-node self-value copy when none do. */
-    if (xo_filter_nodes_use_dot(xdp))
-	xfp->xf_flags |= XFSF_USES_DOT;
-    else
-	xfp->xf_flags &= ~XFSF_USES_DOT;
 
     return 0;
 }
