@@ -120,3 +120,5 @@
 /data/top-level/data4/item='water'
 /data/top-level/data/item[sku='HRD-000-632'][name='bolt']/in-stock='144'
 /data/top-level/data/item[sku='GRO-000-2331'][name='water']/in-stock='14'
+/data/top-level/cost='455'
+/data/top-level/type='18u'
