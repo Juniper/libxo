@@ -915,6 +915,23 @@ xo_xparse_results (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
 	   cur, all_nots, all_abs);
 }
 
+int
+xo_xparse_node_contains_dot (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
+{
+    xo_xparse_node_t *xnp;
+
+    for ( ; id; id = xnp->xn_next) {
+	xnp = xo_xparse_node(xdp, id);
+	if (xnp->xn_type == L_DOT)
+	    return TRUE;
+	if (xnp->xn_contents
+		&& xo_xparse_node_contains_dot(xdp, xnp->xn_contents))
+	    return TRUE;
+    }
+
+    return FALSE;
+}
+
 void
 xo_xparse_node_set_next (xo_xparse_data_t *xdp, xo_xparse_node_id_t id,
 			xo_xparse_node_id_t value)
