@@ -33,3 +33,11 @@ i xpath_01_23.inc
 r
 ? item[on-order > in-stock]
 i xpath_01_23.inc
+
+r
+? cost[. > 450]
+i xpath_01_23.inc
+
+r
+? type[. == "18u"]
+i xpath_01_23.inc
