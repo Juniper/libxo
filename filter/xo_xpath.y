@@ -636,6 +636,9 @@ xpc_predicate :
 		    if (xo_xparse_node_type(xparse_data, $2) == T_NUMBER)
 			xo_xparse_node_set_type(xparse_data, $2, C_INDEX);
 		    xo_xparse_node_set_contents(xparse_data, $1, $2);
+		    /* Flag predicates that reference the context node ('.') */
+		    if (xo_xparse_node_contains_dot(xparse_data, $2))
+			xo_xparse_node_set_flags(xparse_data, $1, XXPF_USES_DOT);
 		    $$ = xo_xparse_yyval(xparse_data, $1);
 		}
 	;
