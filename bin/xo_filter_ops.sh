@@ -27,9 +27,10 @@ signature_attribute="xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED, \
                const char *tag UNUSED, xo_ssize_t tlen UNUSED, \
                const char *value UNUSED, xo_ssize_t vlen UNUSED"
 
-args_open_field="xop, xfp, tag, tlen"
+args_open_field="xop, xfp, tag, tlen, value, vlen"
 signature_open_field="xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED,\
-                       const char *tag UNUSED, ssize_t tlen UNUSED"
+                       const char *tag UNUSED, ssize_t tlen UNUSED, \
+		       const char *value UNUSED, ssize_t vlen UNUSED"
 
 args_close_field="xop, xfp, tag, tlen"
 signature_close_field="xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED,\
