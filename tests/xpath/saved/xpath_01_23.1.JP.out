@@ -418,5 +418,15 @@
         ]
       }
     }
+  },
+  "data": {
+    "top-level": {
+      "cost": "455"
+    }
+  },
+  "data": {
+    "top-level": {
+      "type": "18u"
+    }
   }
 }
