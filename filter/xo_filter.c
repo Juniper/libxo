@@ -824,6 +824,15 @@ static xo_filter_status_t xo_tmatch_attr(xo_handle_t *, xo_filter_t *,
 static int
 xo_filter_op_add_one (xo_handle_t *xop, const char *input)
 {
+    static int unsupported_tokens[] = {
+	L_DOTDOT, L_DOTDOTDOT,
+	K_COMMENT, K_ID, K_KEY, K_NODE,
+	K_PROCESSING_INSTRUCTION, K_TEXT, L_DSLASH,
+	T_AXIS_NAME, T_VAR, M_SEQUENCE, C_DESCENDANT,
+	C_TEST, C_UNION, C_NESTED_PREDICATES, C_PREDICATE_PATHS,
+	0
+    };
+
     xo_filter_t *xfp = xo_get_filter_data(xop, TRUE);
     if (xfp == NULL)
 	return -1;
@@ -831,18 +840,11 @@ xo_filter_op_add_one (xo_handle_t *xop, const char *input)
     xo_xparse_data_t *xdp = xo_filter_xparse_data(xop, xfp);
     int start = xdp->xd_paths_cur;
 
+    xo_xparse_set_unsupported_tokens(xdp, unsupported_tokens);
+
     int rc = xo_xparse_parse_string(xop, xdp, input);
 
     if (rc == 0) {
-	static int unsupported_tokens[] = {
-	    L_DOTDOT, L_DOTDOTDOT,
-	    K_COMMENT, K_ID, K_KEY, K_NODE,
-	    K_PROCESSING_INSTRUCTION, K_TEXT,
-	    T_AXIS_NAME, T_VAR, M_SEQUENCE, C_DESCENDANT,
-	    C_TEST, C_UNION, C_NESTED_PREDICATES, C_PREDICATE_PATHS,
-	    0
-	};
-
 	rc = xo_xpath_feature_warn_since(NULL, xdp, start,
 					 unsupported_tokens, "");
     }
