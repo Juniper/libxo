@@ -668,6 +668,13 @@ xo_xparse_feature_warn_node (const char *tag, xo_xparse_data_t *xdp,
     return hit;
 }
 
+void
+xo_xparse_set_unsupported_tokens (xo_xparse_data_t *xdp,
+				  int *unsupported_tokens)
+{
+    xdp->xd_unsupported_tokens = unsupported_tokens;
+}
+
 int
 xo_xpath_feature_warn_since (const char *tag, xo_xparse_data_t *xdp,
 			     uint32_t start,
@@ -1318,7 +1325,7 @@ xo_xpath_yylex (xo_xparse_data_t *xdp, xo_xparse_node_id_t *yylvalp)
  * @returns freshly allocated string containing error message
  */
 static char *
-xo_xparse_syntax_error (xo_xparse_data_t *xdp UNUSED, const char *token,
+xo_xparse_syntax_error (xo_xparse_data_t *xdp, const char *token,
 		       int yystate, int yychar)
 {
     char buf[BUFSIZ], *cp = buf, *ep = buf + sizeof(buf);
@@ -1343,7 +1350,7 @@ xo_xparse_syntax_error (xo_xparse_data_t *xdp UNUSED, const char *token,
 	SNPRINTF(cp, ep, "unexpected end-of-expression");
 
     } else {
-	char *msg = xo_xparse_expecting_error(token, yystate, yychar);
+	char *msg = xo_xparse_expecting_error(xdp, token, yystate, yychar);
 	if (msg)
 	    return msg;
 
