@@ -432,6 +432,7 @@ xp_path_expr :
 
 	| xp_filter_expr L_DSLASH xpc_relative_location_path
 		{
+		    xo_xparse_node_set_type(xparse_data, $2, C_DESCENDANT);
 		    xo_xparse_node_set_next(xparse_data, $1, $2);
 		    xo_xparse_node_set_next(xparse_data, $2, $3);
 		    $$ = xo_xparse_yyval(xparse_data, $1);
@@ -882,25 +883,86 @@ xo_xparse_token_translate (xo_xparse_token_t ttype)
 #define YYTERROR YYSYMBOL_YYerror /* the new enum */
 #endif /* YYTERROR */
 
+static int
+xo_xparse_is_unsupported_token (xo_xparse_data_t *xdp, int token)
+{
+    for (const int *ip = xdp->xd_unsupported_tokens; ip && *ip; ip++) {
+	if (*ip == token)
+	    return TRUE;
+    }
+    return FALSE;
+}
+
 /*
- * Return a better class of error message, if possible.  But it turns
- * out that this isn't possible in yacc.  bison adds a "lookahead
- * correction" that gives us information that we can use to find the
- * list of possibly-valid next tokens, which we use to build an
- * "expecting ..." message, but lacking that information, we just punt.
+ * Return a better error message listing the tokens that would have been
+ * valid in the current parser state.  bison exposes this via a single
+ * action-offset table (yypact); byacc splits it into a shift-index table
+ * (yysindex) and a reduce-index table (yyrindex).  A token T is a valid
+ * lookahead in 'yystate' when either lookup resolves to it, mirroring the
+ * generated parser loop:
  *
- * The original code is in libslax/slaxparser.y, so maybe one day I'll
- * try to make it work.
+ *     base = yysindex[state];
+ *     if (base != 0 && base+T in [0,YYTABLESIZE] && yycheck[base+T] == T)
+ *         ... T is shiftable ...
+ *
+ * (and likewise via yyrindex for reductions).  Returns NULL when nothing
+ * useful can be said, so the caller can fall back to a generic message.
  */
 char *
-xo_xparse_expecting_error (const char *token, int yystate UNUSED,
-			   int yychar UNUSED)
+xo_xparse_expecting_error (xo_xparse_data_t *xdp, const char *token,
+			   int yystate, int yychar UNUSED)
 {
+    const int MAX_EXPECT = 5;
     char buf[BUFSIZ], *cp = buf, *ep = buf + sizeof(buf);
+    int expect = 0, expecting[MAX_EXPECT + 1];
+    int i;
+
+    for (i = 1; i <= YYMAXTOKEN; i++) {
+	int base = yysindex[yystate];
+	int idx = base + i;
+	int ok = (base != 0 && idx >= 0 && idx <= YYTABLESIZE
+		  && yycheck[idx] == (YYINT) i);
+
+	if (!ok) {
+	    base = yyrindex[yystate];
+	    idx = base + i;
+	    ok = (base != 0 && idx >= 0 && idx <= YYTABLESIZE
+		  && yycheck[idx] == (YYINT) i);
+	}
+
+	if (!ok || xo_xparse_token_name_fancy[i] == NULL)
+	    continue;
+
+	if (xo_xparse_is_unsupported_token(xdp, i))
+	    continue;
+
+	expecting[expect++] = i;
+	if (expect > MAX_EXPECT)
+	    break;
+    }
+
+    if (expect == 0)
+	return NULL;
+
+    if (expect > MAX_EXPECT)
+	expect += 1;
 
     SNPRINTF(cp, ep, "unexpected input");
     if (token)
 	SNPRINTF(cp, ep, ": %s", token);
+
+    for (i = 0; i < expect; i++) {
+	const char *pre = (i == 0) ? "; expected"
+	    : (i == expect - 1) ? " or" : ",";
+	const char *value = xo_xparse_token_name_fancy[expecting[i]];
+	if (value)
+	    SNPRINTF(cp, ep, "%s %s", pre, value);
+
+	if (i >= MAX_EXPECT) {
+	    SNPRINTF(cp, ep, ", etc.");
+	    break;
+	}
+    }
 
     return strdup(buf);
 }
