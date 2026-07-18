@@ -67,6 +67,8 @@ typedef struct xo_xparse_data_s {
 
     xo_xpath_warn_func_t xd_warn_func; /* Function to emit warnings */
     void *xd_warn_data;	       /* Opaque data passed to xd_warn_func */
+
+    const int *xd_unsupported_tokens; /* Tokens that we don't support */
 } xo_xparse_data_t;
 
 /* Flags for xd_flags */
@@ -195,7 +197,8 @@ xo_xparse_token_translate (xo_xparse_token_t ttype);
  * Return a better class of error message
  */
 char *
-xo_xparse_expecting_error (const char *token, int yystate, int yychar);
+xo_xparse_expecting_error (xo_xparse_data_t *xdp, const char *token,
+			   int yystate, int yychar);
 
 /*
  * Is the given character valid inside variable names (T_VAR)?
@@ -370,5 +373,8 @@ xo_xparse_set_input (xo_xparse_data_t *xdp, const char *buf, xo_ssize_t len);
 int
 xo_xparse_parse_string (xo_handle_t *xop, xo_xparse_data_t *xdp,
 			const char *input);
+void
+xo_xparse_set_unsupported_tokens (xo_xparse_data_t *xdp,
+				  int *unsupported_tokens);
 
 #endif /* XO_XPARSE_H */
