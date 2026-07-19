@@ -5209,6 +5209,112 @@ xo_filt_dump (xo_handle_t *xop, const char *tag)
 }
 #endif /* LIBXO_NEED_FILTERS */
 
+#ifdef LIBXO_NEED_FILTERS
+/*
+ * Result block filled in by xo_filt_compact_range().
+ */
+typedef struct xo_compact_result_s {
+    xo_off_t xcr_write_off;	/* next write offset, or XS_OFFSET_CLEAR */
+    int xcr_last_clear;		/* last visited frame had xs_rb_off CLEAR */
+    int xcr_prev_had_key;	/* last kept frame ended with a key field */
+} xo_compact_result_t;
+
+/*
+ * Walk ancestor frames [first, end) — 'end' is exclusive — compacting each
+ * one down to its opening tag plus any key fields.  Non-key sibling content
+ * accumulated while the frame was TRACK is discarded via memmove.  The JSON
+ * leading-comma invariant is handled here: if a frame's tag begins with a
+ * 2-byte separator (",\n" or ", ") and every prior child in that gap was
+ * also discarded (prev_keep_end < tag_start and parent kept no key), the
+ * separator is stripped so the compacted tag doesn't start with a stray comma.
+ *
+ * On return, rp is filled with the next write offset (xcr_write_off), whether
+ * the last frame visited was already committed (xcr_last_clear), and whether
+ * the last kept frame ended with a key (xcr_prev_had_key).  Callers use these
+ * to relocate any trailing content and strip a leading comma from it when needed.
+ */
+static void
+xo_filt_compact_range (xo_handle_t *xop, xo_stack_t *first, xo_stack_t *end,
+		       xo_filter_status_t fstatus, xo_compact_result_t *rp)
+{
+    xo_buffer_t *xbp = &xop->xo_data;
+    xo_off_t prev_keep_end = XS_OFFSET_CLEAR;
+
+    rp->xcr_write_off = XS_OFFSET_CLEAR;
+    rp->xcr_last_clear = TRUE;
+    rp->xcr_prev_had_key = FALSE;
+
+    for (xo_stack_t *xsp = first; xsp < end; xsp++) {
+	XO_DBG(xop, "xo_filt_compact_range: frame %u rb_off %d "
+	       "tag_end %d key_off %d",
+	       (unsigned)(xsp - xop->xo_stack),
+	       (int) xsp->xs_rb_off, (int) xsp->xs_tag_end,
+	       (int) xsp->xs_key_off);
+
+	xo_off_t key_off = xsp->xs_key_off;
+	xsp->xs_fstatus = fstatus;
+	xsp->xs_key_off = XS_OFFSET_CLEAR;
+
+	if (xsp->xs_rb_off == XS_OFFSET_CLEAR) {
+	    prev_keep_end = XS_OFFSET_CLEAR;
+	    rp->xcr_prev_had_key = FALSE;
+	    rp->xcr_last_clear = TRUE;
+	    continue;
+	}
+	rp->xcr_last_clear = FALSE;
+
+	xo_off_t tag_start = xsp->xs_rb_off;
+	xo_off_t keep_end = (xsp->xs_tag_end != XS_OFFSET_CLEAR)
+	    ? xsp->xs_tag_end : tag_start;
+	if (key_off != XS_OFFSET_CLEAR && key_off > keep_end)
+	    keep_end = key_off;
+
+	ssize_t keep_len = (keep_end > tag_start) ? (keep_end - tag_start) : 0;
+
+	xo_off_t actual_tag_start = tag_start;
+	if (xo_style(xop) == XO_STYLE_JSON
+		&& (xsp->xs_rb_flags & XSF_NOT_FIRST)
+		&& prev_keep_end != XS_OFFSET_CLEAR
+		&& tag_start > prev_keep_end
+		&& !rp->xcr_prev_had_key) {
+	    actual_tag_start += 2;
+	    keep_len = (keep_len > 2) ? keep_len - 2 : 0;
+	}
+	prev_keep_end = keep_end;
+	rp->xcr_prev_had_key = (key_off != XS_OFFSET_CLEAR);
+
+	if (rp->xcr_write_off == XS_OFFSET_CLEAR)
+	    rp->xcr_write_off = actual_tag_start;
+	if (keep_len > 0) {
+	    if (actual_tag_start != rp->xcr_write_off)
+		memmove(xbp->xb_bufp + rp->xcr_write_off,
+			xbp->xb_bufp + actual_tag_start, keep_len);
+	    rp->xcr_write_off += keep_len;
+	}
+	xsp->xs_rb_off = XS_OFFSET_CLEAR;
+	xsp->xs_tag_end = XS_OFFSET_CLEAR;
+    }
+}
+
+/*
+ * Move 'len' bytes from 'start' in the output buffer to follow 'write_off',
+ * returning the updated write position.  When write_off is CLEAR, the bytes
+ * are already in place and only the end offset is returned.
+ */
+static xo_off_t
+xo_filt_relocate (xo_buffer_t *xbp, xo_off_t write_off,
+		  xo_off_t start, ssize_t len)
+{
+    if (len <= 0)
+	return write_off;
+    if (write_off == XS_OFFSET_CLEAR)
+	write_off = start;
+    if (start != write_off)
+	memmove(xbp->xb_bufp + write_off, xbp->xb_bufp + start, len);
+    return write_off + len;
+}
+#endif /* LIBXO_NEED_FILTERS */
+
 /*
  * We want our parent objects (on the stack) to be emitted, so that
  * the filtered object has appropriate context.  We'll set their
@@ -5248,52 +5354,10 @@ xo_filt_commit (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED,
 	ssize_t item_len = (item_end > item_start) ? (item_end - item_start) : 0;
 
 	xop->xo_stack[0].xs_fstatus = fstatus;
-	xo_off_t write_off = XS_OFFSET_CLEAR;
-	xo_off_t prev_keep_end = XS_OFFSET_CLEAR;
-	int prev_had_key = FALSE;
 
-	for (xo_stack_t *xsp = xop->xo_stack + 1; xsp < cur; xsp++) {
-	    xo_off_t key_off = xsp->xs_key_off;
-	    xsp->xs_fstatus = fstatus;
-	    xsp->xs_key_off = XS_OFFSET_CLEAR;
-
-	    if (xsp->xs_rb_off == XS_OFFSET_CLEAR) {
-		prev_keep_end = XS_OFFSET_CLEAR;
-		prev_had_key = FALSE;
-		continue;
-	    }
-
-	    xo_off_t tag_start = xsp->xs_rb_off;
-	    xo_off_t keep_end = (xsp->xs_tag_end != XS_OFFSET_CLEAR)
-		? xsp->xs_tag_end : tag_start;
-	    if (key_off != XS_OFFSET_CLEAR && key_off > keep_end)
-		keep_end = key_off;
-
-	    ssize_t keep_len = (keep_end > tag_start) ? (keep_end - tag_start) : 0;
-
-	    xo_off_t actual_tag_start = tag_start;
-	    if (xo_style(xop) == XO_STYLE_JSON
-		    && (xsp->xs_rb_flags & XSF_NOT_FIRST)
-		    && prev_keep_end != XS_OFFSET_CLEAR
-		    && tag_start > prev_keep_end
-		    && !prev_had_key) {
-		actual_tag_start += 2;
-		keep_len = (keep_len > 2) ? keep_len - 2 : 0;
-	    }
-	    prev_keep_end = keep_end;
-	    prev_had_key = (key_off != XS_OFFSET_CLEAR);
-
-	    if (write_off == XS_OFFSET_CLEAR)
-		write_off = actual_tag_start;
-	    if (keep_len > 0) {
-		if (actual_tag_start != write_off)
-		    memmove(xbp->xb_bufp + write_off, xbp->xb_bufp + actual_tag_start,
-			    keep_len);
-		write_off += keep_len;
-	    }
-	    xsp->xs_rb_off = XS_OFFSET_CLEAR;
-	    xsp->xs_tag_end = XS_OFFSET_CLEAR;
-	}
+	/* Compact ancestors [1, cur); cur itself is relocated wholesale below */
+	xo_compact_result_t r;
+	xo_filt_compact_range(xop, xop->xo_stack + 1, cur, fstatus, &r);
 
 	/* Commit cur, preserving its entire buffered content */
 	cur->xs_fstatus = fstatus;
@@ -5301,14 +5365,8 @@ xo_filt_commit (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED,
 	cur->xs_tag_end = XS_OFFSET_CLEAR;
 	cur->xs_key_off = XS_OFFSET_CLEAR;
 
-	if (item_len > 0) {
-	    if (write_off == XS_OFFSET_CLEAR)
-		write_off = item_start;
-	    if (item_start != write_off)
-		memmove(xbp->xb_bufp + write_off, xbp->xb_bufp + item_start,
-			item_len);
-	    write_off += item_len;
-	}
+	xo_off_t write_off =
+	    xo_filt_relocate(xbp, r.xcr_write_off, item_start, item_len);
 	if (write_off != XS_OFFSET_CLEAR)
 	    xo_buf_set_offset(xbp, write_off);
 
@@ -5367,79 +5425,26 @@ xo_filt_commit_field (xo_handle_t *xop UNUSED, xo_off_t field_start UNUSED,
 
     xop->xo_stack[0].xs_fstatus = fstatus;
 
-    xo_off_t write_off = XS_OFFSET_CLEAR;
-    xo_off_t prev_keep_end = XS_OFFSET_CLEAR;
-    int prev_had_key = FALSE;
-    int last_clear = TRUE;	/* was the parent (cur) already committed? */
-
     /* Compact every open frame, cur included, to tag + keys */
-    for (xo_stack_t *xsp = xop->xo_stack + 1; xsp <= cur; xsp++) {
-	xo_off_t key_off = xsp->xs_key_off;
-	xsp->xs_fstatus = fstatus;
-	xsp->xs_key_off = XS_OFFSET_CLEAR;
-
-	if (xsp->xs_rb_off == XS_OFFSET_CLEAR) {
-	    prev_keep_end = XS_OFFSET_CLEAR;
-	    prev_had_key = FALSE;
-	    last_clear = TRUE;
-	    continue;
-	}
-	last_clear = FALSE;
-
-	xo_off_t tag_start = xsp->xs_rb_off;
-	xo_off_t keep_end = (xsp->xs_tag_end != XS_OFFSET_CLEAR)
-	    ? xsp->xs_tag_end : tag_start;
-	if (key_off != XS_OFFSET_CLEAR && key_off > keep_end)
-	    keep_end = key_off;
-
-	ssize_t keep_len = (keep_end > tag_start) ? (keep_end - tag_start) : 0;
-
-	xo_off_t actual_tag_start = tag_start;
-	if (xo_style(xop) == XO_STYLE_JSON
-		&& (xsp->xs_rb_flags & XSF_NOT_FIRST)
-		&& prev_keep_end != XS_OFFSET_CLEAR
-		&& tag_start > prev_keep_end
-		&& !prev_had_key) {
-	    actual_tag_start += 2;
-	    keep_len = (keep_len > 2) ? keep_len - 2 : 0;
-	}
-	prev_keep_end = keep_end;
-	prev_had_key = (key_off != XS_OFFSET_CLEAR);
-
-	if (write_off == XS_OFFSET_CLEAR)
-	    write_off = actual_tag_start;
-	if (keep_len > 0) {
-	    if (actual_tag_start != write_off)
-		memmove(xbp->xb_bufp + write_off, xbp->xb_bufp + actual_tag_start,
-			keep_len);
-	    write_off += keep_len;
-	}
-	xsp->xs_rb_off = XS_OFFSET_CLEAR;
-	xsp->xs_tag_end = XS_OFFSET_CLEAR;
-    }
+    xo_compact_result_t r;
+    xo_filt_compact_range(xop, xop->xo_stack + 1, cur + 1, fstatus, &r);
 
     /*
      * In JSON the matched leaf carries a leading 2-byte separator (", " or
      * ",\n") since siblings preceded it.  Now that those siblings are gone and
      * the leaf becomes the first member after the parent's freshly-kept '{',
-     * strip that separator (mirrors the ancestor-tag handling above).  Only do
-     * this when the parent was compacted here (not already committed) and kept
-     * no key ahead of the leaf.
+     * strip that separator.  Only do this when the parent was compacted here
+     * (not already committed) and kept no key ahead of the leaf.
      */
-    if (xo_style(xop) == XO_STYLE_JSON && !last_clear && !prev_had_key
+    if (xo_style(xop) == XO_STYLE_JSON && !r.xcr_last_clear && !r.xcr_prev_had_key
 	    && item_len >= 2 && xbp->xb_bufp[item_start] == ',') {
 	item_start += 2;
 	item_len -= 2;
     }
 
     /* Move the matched leaf to follow the compacted ancestor tags */
-    if (item_len > 0) {
-	if (write_off == XS_OFFSET_CLEAR)
-	    write_off = item_start;
-	if (item_start != write_off)
-	    memmove(xbp->xb_bufp + write_off, xbp->xb_bufp + item_start, item_len);
-	write_off += item_len;
-    }
+    xo_off_t write_off =
+	xo_filt_relocate(xbp, r.xcr_write_off, item_start, item_len);
     if (write_off != XS_OFFSET_CLEAR)
 	xo_buf_set_offset(xbp, write_off);
 
@@ -5490,82 +5495,13 @@ xo_filt_commit_compact (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED,
 	   fstatus, xo_filt_status_name(fstatus), xop->xo_depth);
 
     xop->xo_stack[0].xs_fstatus = fstatus;
-
-    xo_buffer_t *xbp = &xop->xo_data;
-    xo_off_t write_off = XS_OFFSET_CLEAR;
-    xo_off_t prev_keep_end = XS_OFFSET_CLEAR;
-    int prev_had_key = FALSE;
     int cur_was_pending = (cur->xs_rb_off != XS_OFFSET_CLEAR);
 
-    for (xo_stack_t *xsp = xop->xo_stack + 1; xsp <= cur; xsp++) {
-	XO_DBG(xop, "xo_filt_commit_compact: frame %u rb_off %d "
-	       "tag_end %d key_off %d",
-	       (unsigned)(xsp - xop->xo_stack),
-	       (int) xsp->xs_rb_off, (int) xsp->xs_tag_end,
-	       (int) xsp->xs_key_off);
+    xo_compact_result_t r;
+    xo_filt_compact_range(xop, xop->xo_stack + 1, cur + 1, fstatus, &r);
 
-	xo_off_t key_off = xsp->xs_key_off;	/* save before clearing */
-	xsp->xs_fstatus = fstatus;
-	xsp->xs_key_off = XS_OFFSET_CLEAR;
-
-	if (xsp->xs_rb_off == XS_OFFSET_CLEAR) {
-	    prev_keep_end = XS_OFFSET_CLEAR; /* parent already committed; unknown end */
-	    prev_had_key = FALSE;
-	    continue;
-	}
-
-	xo_off_t tag_start = xsp->xs_rb_off;
-
-	/*
-	 * Keep from xs_rb_off up to xs_tag_end (the opening tag), extended
-	 * to xs_key_off when key fields follow (xs_key_off > xs_tag_end).
-	 */
-	xo_off_t keep_end = (xsp->xs_tag_end != XS_OFFSET_CLEAR)
-	    ? xsp->xs_tag_end : tag_start;
-	if (key_off != XS_OFFSET_CLEAR && key_off > keep_end)
-	    keep_end = key_off;
-
-	ssize_t keep_len = (keep_end > tag_start) ? (keep_end - tag_start) : 0;
-
-	/*
-	 * If this frame's opening bytes begin with a JSON comma prefix
-	 * (",\n" or ", "), that prefix was written because the parent
-	 * already had at least one child (xs_rb_flags & XSF_NOT_FIRST).
-	 * Strip the comma only when ALL of those prior children fall in the
-	 * gap being discarded (prev_keep_end..tag_start) AND the parent
-	 * kept no key fields — kept key fields legitimately set NOT_FIRST
-	 * and the comma must remain.
-	 * Both compact (", ") and pretty (",\n") forms are 2 bytes.
-	 */
-	xo_off_t actual_tag_start = tag_start;
-	if (xo_style(xop) == XO_STYLE_JSON
-	        && (xsp->xs_rb_flags & XSF_NOT_FIRST)
-	        && prev_keep_end != XS_OFFSET_CLEAR
-	        && tag_start > prev_keep_end
-	        && !prev_had_key) {
-	    actual_tag_start += 2;
-	    keep_len = (keep_len > 2) ? keep_len - 2 : 0;
-	}
-
-	prev_keep_end = keep_end;
-	prev_had_key = (key_off != XS_OFFSET_CLEAR);
-
-	if (write_off == XS_OFFSET_CLEAR)
-	    write_off = actual_tag_start;
-
-	if (keep_len > 0) {
-	    if (actual_tag_start != write_off)
-		memmove(xbp->xb_bufp + write_off, xbp->xb_bufp + actual_tag_start,
-			keep_len);
-	    write_off += keep_len;
-	}
-
-	xsp->xs_rb_off = XS_OFFSET_CLEAR;
-	xsp->xs_tag_end = XS_OFFSET_CLEAR;
-    }
-
-    if (write_off != XS_OFFSET_CLEAR)
-	xo_buf_set_offset(xbp, write_off);
+    if (r.xcr_write_off != XS_OFFSET_CLEAR)
+	xo_buf_set_offset(&xop->xo_data, r.xcr_write_off);
 
     /*
      * Reset NOT_FIRST/CONTENT on cur so the first real child (the
@@ -5575,7 +5511,7 @@ xo_filt_commit_compact (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED,
      * genuine content and NOT_FIRST must be preserved.
      * Also skip when cur kept key fields — those legitimately set NOT_FIRST.
      */
-    if (cur_was_pending && !prev_had_key)
+    if (cur_was_pending && !r.xcr_prev_had_key)
 	cur->xs_flags &= ~XSF_RB_BITS;
 
     XOIF_CLEAR(xop, XOIF_FILTERING);
