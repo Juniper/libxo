@@ -138,6 +138,7 @@ else
     LLVM_CLANG=${LLVM_BINDIR}/clang
     LLVM_CMAKE_DIR=`${LLVM_CONFIG} --cmakedir 2>/dev/null`
     CLANG_CMAKE_DIR=`dirname ${LLVM_CMAKE_DIR}`/clang
+    AC_PATH_PROG([CMAKE_COMMAND], [cmake], [cmake])
     HAVE_VALIDATE=yes
 fi
 
@@ -147,6 +148,23 @@ AC_SUBST(LLVM_BINDIR)
 AC_SUBST(LLVM_CLANG)
 AC_SUBST(LLVM_CMAKE_DIR)
 AC_SUBST(CLANG_CMAKE_DIR)
+AC_SUBST(CMAKE_COMMAND)
+
+dnl On macOS the cmake plugin build must match the libxo build architecture.
+dnl Derive this from host_cpu so the right -DCMAKE_OSX_ARCHITECTURES flag is
+dnl baked into the Makefile at configure time.  This ensures the plugin is
+dnl built correctly even when cmake itself runs under Rosetta (x86_64 emulation)
+dnl at make time, which would otherwise cause cmake to auto-detect x86_64.
+CMAKE_OSX_ARCHITECTURES=
+case $host_cpu in
+    arm64 | aarch64)
+        CMAKE_OSX_ARCHITECTURES=arm64
+        ;;
+    x86_64)
+        CMAKE_OSX_ARCHITECTURES=x86_64
+        ;;
+esac
+AC_SUBST(CMAKE_OSX_ARCHITECTURES)
 
 dnl macOS SDK path for the non-Apple clang used by the validate plugin.
 dnl On darwin, auto-detected via xcrun; override with --with-sdk-path=PATH
