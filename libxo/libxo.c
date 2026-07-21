@@ -5128,7 +5128,7 @@ xo_add_filter (xo_handle_t *xop UNUSED, const char *input UNUSED)
 
     rc = xo_filter_add_one(xop, input);
     if (rc)
-	xo_warnx("libxo could not add the requested filter");
+	xo_warnx("could not add the requested filter");
 
 #else /* LIBXO_NEED_FILTERS */
     xo_warnx("libxo filtering is not enabled");
