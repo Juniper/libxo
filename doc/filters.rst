@@ -318,14 +318,14 @@ String functions:
 ========================== ==================================================
  Function                   Description
 ========================== ==================================================
+ concat(s1, s2, ...)        Concatenates strings
  contains(str, sub)         True when *str* contains *sub* as a substring
+ normalize-space(str)       Strips leading/trailing space and collapses runs
  starts-with(str, prefix)   True when *str* begins with *prefix*
  string-length(str)         Returns the length of *str*
  substring(str, pos, len)   Returns a substring of *str*
- substring-before(str, s)   Returns the part of *str* before the first *s*
  substring-after(str, s)    Returns the part of *str* after the first *s*
- concat(s1, s2, ...)        Concatenates strings
- normalize-space(str)       Strips leading/trailing space and collapses runs
+ substring-before(str, s)   Returns the part of *str* before the first *s*
  translate(str, from, to)   Character-by-character translation
 ========================== ==================================================
 
@@ -334,9 +334,9 @@ Numeric functions:
 ========================== ==================================================
  Function                   Description
 ========================== ==================================================
- number(val)                Converts a value to a number
- floor(num)                 Rounds down to the nearest integer
  ceiling(num)               Rounds up to the nearest integer
+ floor(num)                 Rounds down to the nearest integer
+ number(val)                Converts a value to a number
  round(num)                 Rounds to the nearest integer
  sum(node-set)              Returns the sum of a node set
 ========================== ==================================================
@@ -346,10 +346,10 @@ Boolean functions:
 ========================== ==================================================
  Function                   Description
 ========================== ==================================================
- true()                     Always returns true
+ boolean(val)               Converts a value to a boolean
  false()                    Always returns false
  not(expr)                  Negates the expression
- boolean(val)               Converts a value to a boolean
+ true()                     Always returns true
 ========================== ==================================================
 
 Note that `true()` and `true` are annoyingly different.  The former
@@ -369,6 +369,44 @@ Examples::
 
     # Items where the part of version after '-' equals "2"
     item[substring-after(version, "-") == "2"]
+
+Regular expression functions:
+
+========================== ==================================================
+ Function                   Description
+========================== ==================================================
+ rematch(re, str, flags?)   Match a regular expression
+========================== ==================================================
+
+The rematch() function matches a `regular expression`_ (`regex`) and
+returns either a boolean indicating the success of the match (the
+default behavior) or the portion of the string that matches all or
+part of the regex.  rematch() defaults to "enhanced" regex matching.
+If the `flags` argument is not provided, it defaults to an empty
+string.
+
+.. _regular expression: https://en.wikipedia.org/wiki/Regular_expression
+
+The `flags` string contains zero or more of the following flags:
+
+======= ====================================================================
+ Flag   Description
+======= ====================================================================
+  'b'    Use 'basic' REs (BRE) instead of the default 'extended' RE (ERE)
+  'i'    Case-insensitive matching (REG_ICASE)
+  'n'    Newline-sensitive REG_NEWLINE)
+  '^'    Does not match at start of REG_NOTBOL)
+  '$'    Does not match at end of string (REG_NOTEOL)
+  's'    Return full match text as a string
+  'm'    Return first capture group as string
+  'mN'   Return capture group N as string (N: 0–9)
+  'p'    REG_POSIX (platform-specific; ignored if unavailable)
+======= ====================================================================
+
+For example, the following expression would match for when the
+`protocol` field is `tcp4`, but not for `tcp6`:
+
+  socket[rematch("([a-z]+)([0-9]+)", protocol, "m2") == 4]
 
 Multiple Predicates
 ~~~~~~~~~~~~~~~~~~~
