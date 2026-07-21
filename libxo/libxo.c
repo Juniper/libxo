@@ -5134,10 +5134,10 @@ xo_add_filter (xo_handle_t *xop UNUSED, const char *input UNUSED)
 }
 
 /*
- * Return TRUE when the current output position is permanently filtered out
- * (XO_STATUS_DEAD): the active filter has determined that no content generated
- * here can ever appear in the final output.  Callers can use this to skip
- * expensive computation before calling xo_emit:
+ * Return TRUE when the current output position is permanently
+ * filtered out.  An active filter has determined that no content
+ * generated here can ever appear in the final output.  Callers can
+ * use this to skip expensive computation before calling xo_emit:
  *
  *     xo_open_container("foo");
  *     if (!xo_discarding_output()) {
@@ -5146,9 +5146,10 @@ xo_add_filter (xo_handle_t *xop UNUSED, const char *input UNUSED)
  *     }
  *     xo_close_container("foo");
  *
- * Returns FALSE (proceed normally) when filtering is disabled, when no filter
- * is loaded, or when the status is anything other than DEAD (including TRACK
- * and PRED, which still need key and predicate fields to resolve matches).
+ * Returns FALSE (proceed normally) when filtering is disabled, when
+ * no filter is loaded, or when the status is anything other than DEAD
+ * (including TRACK and PRED, which still need key and predicate
+ * fields to resolve matches).
  */
 int
 xo_discarding_output_h (xo_handle_t *xop UNUSED)
@@ -5169,7 +5170,7 @@ xo_discarding_output (void)
     return xo_discarding_output_h(NULL);
 }
 
-#ifdef LIBXO_NEED_FILTERS
+#if defined(LIBXO_NEED_FILTERS) && defined(LIBXO_DEBUG)
 static void
 xo_filt_dump_escape_contents (char *buf, int bufsiz, char *data)
 {
@@ -5243,7 +5244,7 @@ xo_filt_dump (xo_handle_t *xop, const char *tag)
 	    xo_filt_dump_context(xop, &xop->xo_data, xsp->xs_rb_off, 0);
     }
 }
-#endif /* LIBXO_NEED_FILTERS */
+#endif /* LIBXO_NEED_FILTERS && LIBXO_DEBUG */
 
 #ifdef LIBXO_NEED_FILTERS
 /*
@@ -5256,18 +5257,20 @@ typedef struct xo_compact_result_s {
 } xo_compact_result_t;
 
 /*
- * Walk ancestor frames [first, end) — 'end' is exclusive — compacting each
- * one down to its opening tag plus any key fields.  Non-key sibling content
- * accumulated while the frame was TRACK is discarded via memmove.  The JSON
- * leading-comma invariant is handled here: if a frame's tag begins with a
- * 2-byte separator (",\n" or ", ") and every prior child in that gap was
- * also discarded (prev_keep_end < tag_start and parent kept no key), the
- * separator is stripped so the compacted tag doesn't start with a stray comma.
+ * Walk ancestor frames [first, end) — 'end' is exclusive — compacting
+ * each one down to its opening tag plus any key fields.  Non-key
+ * sibling content accumulated while the frame was TRACK is discarded
+ * via memmove.  The JSON leading-comma invariant is handled here: if
+ * a frame's tag begins with a 2-byte separator (",\n" or ", ") and
+ * every prior child in that gap was also discarded (prev_keep_end <
+ * tag_start and parent kept no key), the separator is stripped so the
+ * compacted tag doesn't start with a stray comma.
  *
- * On return, rp is filled with the next write offset (xcr_write_off), whether
- * the last frame visited was already committed (xcr_last_clear), and whether
- * the last kept frame ended with a key (xcr_prev_had_key).  Callers use these
- * to relocate any trailing content and strip a leading comma from it when needed.
+ * On return, rp is filled with the next write offset (xcr_write_off),
+ * whether the last frame visited was already committed
+ * (xcr_last_clear), and whether the last kept frame ended with a key
+ * (xcr_prev_had_key).  Callers use these to relocate any trailing
+ * content and strip a leading comma from it when needed.
  */
 static void
 xo_filt_compact_range (xo_handle_t *xop, xo_stack_t *first, xo_stack_t *end,
@@ -7165,6 +7168,7 @@ xo_gettext_simplify_format (xo_handle_t *xop UNUSED,
     return 0;
 }
 
+#ifdef LIBXO_DEBUG
 void
 xo_dump_fields (xo_field_info_t *); /* Fake prototype for debug function */
 void
@@ -7183,6 +7187,8 @@ xo_dump_fields (xo_field_info_t *fields)
 	       (int) xfip->xfi_elen, xfip->xfi_encoding ?: "");
     }
 }
+#endif /* LIBXO_DEBUG */
+
 
 #ifdef HAVE_GETTEXT
 /*
@@ -7745,6 +7751,7 @@ xo_do_emit (xo_handle_t *xop, xo_emit_flags_t flags, const char *fmt)
     if (fmt == NULL)
 	return 0;
 
+    /* Don't bother emitting fields is there's we're discarding output */
     if (xo_discarding_output_h(xop))
 	return 0;		/* Zero columns emitted */
 
@@ -9813,10 +9820,20 @@ xo_parse_args (int argc, char **argv)
     return save;
 }
 
+
 /*
+ * This diagnostic function is something I will ask you to call from
+ * your program when you write to tell me libxo has gone bat-guano
+ * crazy and has discarded your list or container or content.  Output
+ * content will be what we lovingly call "developer entertainment".
+ *
  * Debugging function that dumps the current stack of open libxo constructs,
  * suitable for calling from the debugger.
+ *
+ * @param[in] xop A valid libxo handle, or NULL for the default handle
  */
+void
+xo_dump_stack (xo_handle_t *xop);
 void
 xo_dump_stack (xo_handle_t *xop)
 {
