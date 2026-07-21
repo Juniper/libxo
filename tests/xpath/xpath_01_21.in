@@ -1,3 +1,135 @@
+##
+## rematch() tests
+##
+
+## Default (boolean, 2-arg form): sockets whose path starts with /tmp
+r
+? socket[rematch("^/tmp/", path)]
++ statistics
+{ socket
+< socket
+= path /tmp/ssh-agent.1234
+> socket
+< socket
+= path /var/run/log
+> socket
+< socket
+= path /tmp/other.sock
+> socket
+} socket
+- statistics
+
+## Default (boolean, 3-arg form): same filter with explicit empty options
+r
+? socket[rematch("^/tmp/", path, "")]
++ statistics
+{ socket
+< socket
+= path /tmp/ssh-agent.1234
+> socket
+< socket
+= path /var/run/log
+> socket
+< socket
+= path /tmp/other.sock
+> socket
+} socket
+- statistics
+
+## Case-insensitive (boolean): protocol matches "tcp" regardless of case
+r
+? socket[rematch("tcp", protocol, "i")]
++ statistics
+{ socket
+< socket
+= protocol TCP4
+= receive-bytes-waiting 100
+> socket
+< socket
+= protocol udp
+= receive-bytes-waiting 200
+> socket
+< socket
+= protocol tcp6
+= receive-bytes-waiting 300
+> socket
+} socket
+- statistics
+
+## Negated (boolean): exclude sockets whose path matches /var/run/
+r
+? socket[!rematch("/var/run/", path, "")]
++ statistics
+{ socket
+< socket
+= path /tmp/ssh-DQWvehZ5Bz/agent.39523
+> socket
+< socket
+= path /var/run/log
+> socket
+< socket
+= path /var/run/devd.seqpacket.pipe
+> socket
+< socket
+= path /tmp/other.sock
+> socket
+} socket
+- statistics
+
+## 's' flag: full match text (pmatch[0]) — truthy when digits found in path
+r
+? socket[rematch("[0-9]+", path, "s")]
++ statistics
+{ socket
+< socket
+= path /tmp/ssh-agent.1234
+> socket
+< socket
+= path /var/run/log
+> socket
+< socket
+= path /tmp/abc
+> socket
+} socket
+- statistics
+
+## 'm' flag: first capture group (pmatch[1]) — match port number after ":"
+r
+? socket[rematch(":([0-9]+)", address, "m")]
++ statistics
+{ socket
+< socket
+= address 127.0.0.1:8080
+> socket
+< socket
+= address 127.0.0.1:0
+> socket
+< socket
+= address /var/run/log
+> socket
+} socket
+- statistics
+
+## 'm2' flag: second capture group (pmatch[2])
+r
+? socket[rematch("([a-z]+)([0-9]+)", protocol, "m2")]
++ statistics
+{ socket
+< socket
+= protocol tcp4
+> socket
+< socket
+= protocol udp
+> socket
+< socket
+= protocol tcp6
+> socket
+} socket
+- statistics
+
+##
+## Original contains() test
+##
 r
 ? socket[!contains(path, "/var/run/")]
 + statistics
