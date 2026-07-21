@@ -34,7 +34,7 @@ main: status: zero
 main: input '?/uno[a<-3 + 5 div 2]/dos[3+5 == 2+6]/tres'
 adding filter: '/uno[a<-3 + 5 div 2]/dos[3+5 == 2+6]/tres'
 added filter: 0
-xpath_01: test: xpath feature is unsupported: plus sign ('+')
+xpath_01: test: filter expression feature is unsupported: plus sign ('+')
 --- 0: 1
     000001: type 67 (C_ABSOLUTE), str 1 [/], contents 0, next 2, prev 0 
     000002: type 70 (C_ELEMENT), str 3 [one], contents 3, next 17, prev 1 
@@ -182,7 +182,7 @@ main: input ''
 main: input '?one'
 adding filter: 'one'
 added filter: 0
-xpath_01: test: xpath feature is unsupported: plus sign ('+')
+xpath_01: test: filter expression feature is unsupported: plus sign ('+')
 --- 0: 1
     000001: type 67 (C_ABSOLUTE), str 1 [/], contents 0, next 2, prev 0 
     000002: type 70 (C_ELEMENT), str 3 [one], contents 3, next 17, prev 1 
