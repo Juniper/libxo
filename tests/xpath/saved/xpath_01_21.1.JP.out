@@ -2,6 +2,72 @@
   "statistics": {
     "socket": [
       {
+        "path": "/tmp/ssh-agent.1234"
+      },
+      {
+        "path": "/tmp/other.sock"
+      }
+    ]
+  },
+  "statistics": {
+    "socket": [
+      {
+        "path": "/tmp/ssh-agent.1234"
+      },
+      {
+        "path": "/tmp/other.sock"
+      }
+    ]
+  },
+  "statistics": {
+    "socket": [
+      {
+        "protocol": "TCP4",
+        "receive-bytes-waiting": "100"
+      },
+      {
+        "protocol": "tcp6",
+        "receive-bytes-waiting": "300"
+      }
+    ]
+  },
+  "statistics": {
+    "socket": [
+      {
+        "path": "/tmp/ssh-DQWvehZ5Bz/agent.39523"
+      },
+      {
+        "path": "/tmp/other.sock"
+      }
+    ]
+  },
+  "statistics": {
+    "socket": [
+      {
+        "path": "/tmp/ssh-agent.1234"
+      }
+    ]
+  },
+  "statistics": {
+    "socket": [
+      {
+        "address": "127.0.0.1:8080"
+      }
+    ]
+  },
+  "statistics": {
+    "socket": [
+      {
+        "protocol": "tcp4"
+      },
+      {
+        "protocol": "tcp6"
+      }
+    ]
+  },
+  "statistics": {
+    "socket": [
+      {
         "protocol": "tcp4",
         "receive-bytes-waiting": "1111",
         "send-bytes-waiting": "1",
