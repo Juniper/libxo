@@ -741,4 +741,10 @@ xo_map_add_file (xo_handle_t *xop, const char *fname);
 int
 xo_add_filter (xo_handle_t *xop, const char *vp);
 
+int
+xo_discarding_output_h (xo_handle_t *xop);
+
+int
+xo_discarding_output (void);
+
 #endif /* INCLUDE_XO_H */
