@@ -164,7 +164,7 @@ main: status: zero
 main: input '?two[(three + 3) div 4 == (10 - 2) mod 5]'
 adding filter: 'two[(three + 3) div 4 == (10 - 2) mod 5]'
 added filter: 0
-xpath_01: test: xpath feature is unsupported: plus sign ('+')
+xpath_01: test: filter expression feature is unsupported: plus sign ('+')
 --- 0: 28
     000028: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [two], contents 2, next 0, prev 0 
