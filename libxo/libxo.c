@@ -1733,6 +1733,7 @@ xo_retain_get_hits (void)
 typedef unsigned xo_warn_flags_t;
 #define XO_XWF_CHECK_WARN	(1<<0) /* Check for warning flag */
 #define XO_XWF_NO_EXTERR	(1<<1) /* Don't report extended error */
+#define XO_XWF_CHECK_FILT	(1<<2) /* Check for filter warning flag */
 
 /*
  * Generate a warning.  Normally, this is a text message written to
@@ -1745,6 +1746,9 @@ xo_warn_hcfv (xo_handle_t *xop, int code, xo_warn_flags_t flags,
 {
     xop = xo_default(xop);
     if ((flags & XO_XWF_CHECK_WARN) && !XOF_ISSET(xop, XOF_WARN))
+	return;
+
+    if ((flags & XO_XWF_CHECK_FILT) && !XOF_ISSET(xop, XOF_FILTER_WARN))
 	return;
 
     if (fmt == NULL)
@@ -1850,7 +1854,7 @@ void
 xo_warn_hcv (xo_handle_t *xop, int code, int check_warn,
 	     const char *fmt, va_list vap)
 {
-    xo_warn_hcfv(xop, code, check_warn ? XO_XWF_CHECK_WARN : 0, fmt, vap);
+    xo_warn_hcfv(xop, code, check_warn, fmt, vap);
 }
 
 void
@@ -2152,7 +2156,7 @@ xo_failure_filter (xo_handle_t *xop, const char *fmt, ...)
     va_list vap;
 
     va_start(vap, fmt);
-    xo_warn_hcv(xop, -1, XO_XWF_CHECK_WARN | XO_XWF_NO_EXTERR, fmt, vap);
+    xo_warn_hcv(xop, -1, XO_XWF_CHECK_FILT | XO_XWF_NO_EXTERR, fmt, vap);
     va_end(vap);
 }
 
