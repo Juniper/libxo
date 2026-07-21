@@ -618,18 +618,6 @@ extern const char xo_version[];	      /** Base version triple string */
 extern const char xo_version_extra[]; /** Extra version magic content */
 
 /**
- * @brief Dump the internal stack of a libxo handle.
- *
- * This diagnostic function is something I will ask you to call from
- * your program when you write to tell me libxo has gone bat-stink
- * crazy and has discarded your list or container or content.  Output
- * content will be what we lovingly call "developer entertainment".
- * @param[in] xop A valid libxo handle, or NULL for the default handle
- */
-void
-xo_dump_stack (xo_handle_t *xop);
-
-/**
  * @brief Recode the name of the program, suitable for error output.
  *
  * libxo will record the given name for use while generating error
