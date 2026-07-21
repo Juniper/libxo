@@ -14,6 +14,7 @@
 #include <stdint.h>
 #include <inttypes.h>
 #include <string.h>
+#include <regex.h>
 #include <sys/param.h>
 #include <math.h>
 
@@ -1545,6 +1546,10 @@ xo_eval_cast_string (xo_handle_t *xop UNUSED, xo_eval_value_t value)
 	snprintf(buf, sizeof(buf), "%lf", value.xev_float);
 	break;
 
+    case M_ERROR:
+	bp = "";		/* Silently ignore; cast to "" */
+	break;
+
     default:
 	bp = "(unknown)";
     }
@@ -2424,6 +2429,143 @@ xo_eval_func_translate (XO_EVAL_NODE_ARGS)
 }
 
 /*
+ * rematch(pattern, input, options?) — POSIX regex match.
+ *
+ * Options (each is a single character in the options string):
+ *   'b'    Use basic RE (BRE) instead of the default extended RE (ERE)
+ *   'i'    REG_ICASE — case-insensitive matching
+ *   'n'    REG_NEWLINE — newline-sensitive matching
+ *   '^'    REG_NOTBOL — '^' does not match at start of string
+ *   '$'    REG_NOTEOL — '$' does not match at end of string
+ *   's'    Return full match text (pmatch[0]) as C_DSTRING
+ *   'm'    Return first capture group (pmatch[1]) as C_DSTRING;
+ *   'mN'   Return capture group N (pmatch[N]) as C_DSTRING (N: 0–9)
+ *   'p'    REG_POSIX (platform-specific; ignored if unavailable)
+ *
+ * Default (no 's' or 'm'): returns C_BOOLEAN true/false.
+ * With 's' or 'm'/'mN': returns C_DSTRING — empty string if no match
+ * or the requested group did not participate.
+ *
+ * Don't call it a regex, though I don't know what it is...
+ */
+static xo_eval_value_t
+xo_eval_func_rematch (XO_EVAL_NODE_ARGS)
+{
+    int fn_argc = xo_eval_argument_count(XO_EVAL_NODE_PASS);
+    if (fn_argc < 2 || fn_argc > 3) {
+	xo_failure_filter(xop, "rematch() requires 2 or 3 arguments, got %d",
+			  fn_argc);
+	return xo_eval_value_invalid();
+    }
+
+    xo_eval_value_t fn_argv[3];
+    xo_eval_arguments(XO_EVAL_NODE_PASS, 3, fn_argv);
+
+    /* Defer if arguments aren't resolved yet (field not yet seen) */
+    if ((fn_argv[0].xev_flags & XEVF_MISSING)
+  	    || (fn_argv[1].xev_flags & XEVF_MISSING)
+  	    || (fn_argv[2].xev_flags & XEVF_MISSING)) {
+	xo_eval_arguments_free(xop, xfp, framep, xnp, indent, 3, fn_argv);
+	return xo_eval_value_missing();
+    }
+
+    char *pattern = xo_eval_cast_string(xop, fn_argv[0]);
+    char *input   = xo_eval_cast_string(xop, fn_argv[1]);
+
+    /* Third arg is optional; absent slot is XEVF_INVALID — treat as "" */
+    char *opts;
+
+    if (fn_argc >= 3)
+	opts = xo_eval_cast_string(xop, fn_argv[2]);
+    else
+	opts = strdup("");
+
+    xo_eval_arguments_free(xop, xfp, framep, xnp, indent, 3, fn_argv);
+
+    /* want_group: -1 = boolean; 0 = 's' (pmatch[0]); 1+ = 'm'/'mN' */
+    int rflags = REG_EXTENDED;
+    int want_group = -1;
+
+    for (const char *op = opts; op && *op; op++) {
+	switch (*op) {
+	case 'b': rflags &= ~REG_EXTENDED; break;
+	case 'i': rflags |= REG_ICASE;    break;
+	case 'n': rflags |= REG_NEWLINE;  break;
+	case '^': rflags |= REG_NOTBOL;   break;
+	case '$': rflags |= REG_NOTEOL;   break;
+	case 's': want_group = 0;         break;
+
+	case 'm':
+	    want_group = 1;		/* default: first capture group */
+	    if (op[1] >= '0' && op[1] <= '9')
+		want_group = *++op - '0';
+	    break;
+
+	case 'p':
+#ifdef REG_POSIX
+	    rflags |= REG_POSIX;
+#endif
+	    break;
+
+	default:
+	    xo_failure_filter(xop, "unknown rematch() flag: '%c'", *op);
+	}
+    }
+
+    /* For boolean mode we don't need match offsets */
+    int ngroups = (want_group < 0) ? 0 : want_group + 1;
+
+    xo_eval_value_t result;
+    if (want_group < 0) {
+	result = xo_eval_value_make(C_BOOLEAN, 0, 0); /* false */
+    } else {
+	result = xo_eval_value_make(C_DSTRING, 0, 0);
+    }
+
+    if (pattern == NULL || input == NULL)
+	goto rematch_done;
+
+    regex_t re;
+    char errbuf[128];
+    int rc = regcomp(&re, pattern, rflags);
+    if (rc != 0) {
+	regerror(rc, &re, errbuf, sizeof(errbuf));
+	xo_failure_filter(xop, "rematch: bad pattern '%s': %s", pattern, errbuf);
+	goto rematch_done;
+    }
+
+    regmatch_t pmatch[10];
+    bzero(pmatch, sizeof(pmatch));
+
+    rc = regexec(&re, input, ngroups > 0 ? (size_t) ngroups : 0,
+		 ngroups > 0 ? pmatch : NULL, 0);
+    regfree(&re);
+
+    if (rc == 0) {
+	if (want_group < 0) {
+	    result.xev_int64 = 1;	/* boolean true */
+	} else {
+	    regmatch_t *m = &pmatch[want_group];
+	    if (m->rm_so >= 0) {
+		int mlen = (int)(m->rm_eo - m->rm_so);
+		result.xev_str = strndup(input + m->rm_so, mlen);
+	    }
+	    /* else: group didn't participate — leave empty string */
+	}
+    }
+
+ rematch_done:
+    xo_free(pattern);
+    xo_free(input);
+    xo_free(opts);
+
+    if (result.xev_type == C_DSTRING && result.xev_str == NULL)
+	result.xev_str = strdup(""); /* default value */
+
+    return result;
+}
+
+/*
  * Map between names and numbers and functions, searchable by string
  * name.
  */
@@ -2451,6 +2593,7 @@ xo_eval_func_map_t xo_eval_functions[] = {
     { xo_eval_func_normalize_space, "normalize-space", 0, 1 },
     { xo_eval_func_not, "not", 0, 1 },
     { xo_eval_func_number, "number", 0, 1 },
+    { xo_eval_func_rematch, "rematch", XEFF_NO_EVAL, -1 },
     { xo_eval_func_round, "round", 0, 1 },
     { xo_eval_func_starts_with, "starts-with", 0, 2 },
     { xo_eval_func_string, "string", 0, 1 },
