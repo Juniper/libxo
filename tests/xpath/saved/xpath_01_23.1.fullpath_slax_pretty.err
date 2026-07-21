@@ -3717,7 +3717,7 @@ main: status: zero
 main: input '? item[on-order + 2 < 10 - 6]'
 adding filter: 'item[on-order + 2 < 10 - 6]'
 added filter: 0
-xpath_01: test: xpath feature is unsupported: plus sign ('+')
+xpath_01: test: filter expression feature is unsupported: plus sign ('+')
 --- 0: 16
     000016: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
@@ -4345,7 +4345,7 @@ main: status: zero
 main: input '? item[on-order + 20 > in-stock]'
 adding filter: 'item[on-order + 20 > in-stock]'
 added filter: 0
-xpath_01: test: xpath feature is unsupported: plus sign ('+')
+xpath_01: test: filter expression feature is unsupported: plus sign ('+')
 --- 0: 13
     000013: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
