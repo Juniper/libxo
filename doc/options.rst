@@ -87,7 +87,7 @@ additional details:
   runtime issues are encountered while processing filters against
   incoming data.  The volume of output will depend on the filter
   expressions and input data, but might be useful in debugging issues
-  with filter expressions.
+  with filter expressions.  See also :ref:`filter-warn`.
 - "flush-line" performs line buffering, even when the output is not
   directed to a TTY device.
 - "info" generates additional data for HTML, encoded in attributes
