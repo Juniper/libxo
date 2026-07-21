@@ -374,7 +374,6 @@ xo_set_options
   handle.  The options are identical to those listed in
   :ref:`options`.  To use the default handle, pass a `NULL` handle.
 
-
 .. index:: xo_add_filter
 .. _xo_add_filter:
 
@@ -422,6 +421,43 @@ xo_destroy
   The `xo_destroy` function releases a handle and any resources it is
   using.  Calling `xo_destroy` with a `NULL` handle will release any
   resources associated with the default handle.
+
+.. index:: xo_discarding_output
+
+Checking for Filtering (xo_discarding_output)
+---------------------------------------------
+
+.. c:function:: void xo_discarding_output (void)
+
+  :returns: int
+
+.. c:function:: void xo_discarding_output_h (xo_handle_t *xop)
+
+  :param xop: Handle for modify (or NULL for default handle)
+  :type xop: xo_handle_t \*
+  :returns: void  
+
+  When a filter is in place, circumstances may occur where ay additional
+  output will be discarding.  xo_discarding_output will return TRUE when
+  the current output position is permanently filtered out
+  (XO_STATUS_DEAD): the active filter has determined that no content
+  generated here can ever appear in the final output.  Callers can use
+  this to skip expensive computation before calling xo_emit::
+
+    xo_open_container("interface-information");
+    if (xo_discarding_output()) {
+        xo_open_container("connections");
+
+        xo_emit("{:field/...}", value);
+
+        xo_close_container("connections");
+    }
+    xo_close_container("interface-information");
+
+  Returns FALSE (proceed normally) when filtering is disabled, when the filter
+  module is not loaded, or when the status is anything other than DEAD
+  (including TRACK and PRED, which still may need key and predicate fields
+  to resolve matches).
 
 .. index:: xo_emit
 
