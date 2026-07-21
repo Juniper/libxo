@@ -26,3 +26,8 @@
 ?eight[5+4+6+2 == ]
 ?nine["two" == @"two"]
 ?ten[@foo/@goo]
+# a run-time error, but still....
+? item[number("the")]'
+? item[number(
+? item[..//fail]
+? item[..//node()]
