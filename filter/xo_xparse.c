@@ -176,12 +176,12 @@ xo_xparse_ttname_map_t xo_xparse_ttname_map[] = {
     { L_STAR,			"star ('*')" },
     { L_UNDERSCORE,		"concatenation operator ('_')" },
     { L_VBAR,			"union operator ('|')" },
-    { K_COMMENT,		"'comment'" },
-    { K_ID,			"'id'" },
-    { K_KEY,			"'key'" },
-    { K_NODE,			"'node'" },
-    { K_PROCESSING_INSTRUCTION,	"'processing-instruction'" },
-    { K_TEXT,			"'text'" },
+    { K_COMMENT,		"'comment()'" },
+    { K_ID,			"'id()'" },
+    { K_KEY,			"'key()'" },
+    { K_NODE,			"'node()'" },
+    { K_PROCESSING_INSTRUCTION,	"'processing-instruction()'" },
+    { K_TEXT,			"'text()'" },
     { K_AND,			"'and'" },
     { K_DIV,			"'div'" },
     { K_MOD,			"'mod'" },
@@ -606,7 +606,7 @@ xo_xparse_feature_warn_one_node (const char *tag, xo_xparse_data_t *xdp,
 	if (tname == NULL)
 	     tname = "(unknown)";
 
-	xo_xparse_warn(xdp, "%s%sxpath feature is unsupported: %s",
+	xo_xparse_warn(xdp, "%s%sfilter expression feature is unsupported: %s",
 		       tag ?: "", tag ? ": " : "", tname);
 	map[type] = 0;		/* Turn off, now that the user knows */
 	hit++;
@@ -617,7 +617,8 @@ xo_xparse_feature_warn_one_node (const char *tag, xo_xparse_data_t *xdp,
 	if (type == C_PREDICATE
 		&& C_NESTED_PREDICATES < len && map[C_NESTED_PREDICATES]) {
 	    const char *tname = xo_xparse_fancy_token_name(C_NESTED_PREDICATES);
-	    xo_xparse_warn(xdp, "%s%sxpath feature is unsupported: %s",
+	    xo_xparse_warn(xdp, "%s%filter expression feature is "
+			   "unsupported: %s",
 			   tag ?: "", tag ? ": " : "",
 			   tname ?: "nested predicates");
 	    map[C_NESTED_PREDICATES] = 0;
@@ -632,7 +633,8 @@ xo_xparse_feature_warn_one_node (const char *tag, xo_xparse_data_t *xdp,
 		const char *tname;
 
 		tname = xo_xparse_fancy_token_name(C_PREDICATE_PATHS);
-		xo_xparse_warn(xdp, "%s%sxpath feature is unsupported: %s",
+		xo_xparse_warn(xdp, "%s%sfilter expression feature is "
+			       "unsupported: %s",
 			       tag ?: "", tag ? ": " : "",
 			       tname ?: "multi-element path in predicate");
 		map[C_PREDICATE_PATHS] = 0;
