@@ -163,10 +163,10 @@ added filter: 0
 main: status: zero
 main: input '?foo//goo'
 adding filter: 'foo//goo'
-xpath_01: xpath feature is unsupported: descendant child (e.g. 'one//two')
-xpath_01: libxo could not add the requested filter
+xpath_01: filter expression feature is unsupported: descendant child (e.g. 'one//two')
+xpath_01: could not add the requested filter
 added filter: -1
-xpath_01: test: xpath feature is unsupported: descendant child (e.g. 'one//two')
+xpath_01: test: filter expression feature is unsupported: descendant child (e.g. 'one//two')
 --- 0: 15
     000015: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [one], contents 2, next 0, prev 0 
@@ -217,7 +217,7 @@ main: status: zero
 main: input '?!seven[x==4]/y[z==4]|fish'
 adding filter: '!seven[x==4]/y[z==4]|fish'
 added filter: 0
-xpath_01: test: xpath feature is unsupported: descendant child (e.g. 'one//two')
+xpath_01: test: filter expression feature is unsupported: descendant child (e.g. 'one//two')
 --- 0: 15
     000015: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [one], contents 2, next 0, prev 0 
@@ -285,8 +285,8 @@ main: status: zero
 main: input '?some[long=one+two+three+four div 5 - 3]/more[stuff == here + they + are]/maybe[x<y && y <= z]'
 adding filter: 'some[long=one+two+three+four div 5 - 3]/more[stuff == here + they + are]/maybe[x<y && y <= z]'
 added filter: 0
-xpath_01: test: xpath feature is unsupported: descendant child (e.g. 'one//two')
-xpath_01: test: xpath feature is unsupported: plus sign ('+')
+xpath_01: test: filter expression feature is unsupported: descendant child (e.g. 'one//two')
+xpath_01: test: filter expression feature is unsupported: plus sign ('+')
 --- 0: 15
     000015: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [one], contents 2, next 0, prev 0 
@@ -401,11 +401,11 @@ xpath_01: test: xpath feature is unsupported: plus sign ('+')
 main: status: zero
 main: input '?item[a[b] = 1]'
 adding filter: 'item[a[b] = 1]'
-xpath_01: xpath feature is unsupported: predicates inside predicates
-xpath_01: libxo could not add the requested filter
+xpath_01: 0.000000ilter expression feature is unsupported: predicates inside predicates
+xpath_01: could not add the requested filter
 added filter: -1
-xpath_01: test: xpath feature is unsupported: descendant child (e.g. 'one//two')
-xpath_01: test: xpath feature is unsupported: plus sign ('+')
+xpath_01: test: filter expression feature is unsupported: descendant child (e.g. 'one//two')
+xpath_01: test: filter expression feature is unsupported: plus sign ('+')
 --- 0: 15
     000015: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [one], contents 2, next 0, prev 0 
@@ -531,11 +531,11 @@ xpath_01: test: xpath feature is unsupported: plus sign ('+')
 main: status: zero
 main: input '?item[a/b = 1]'
 adding filter: 'item[a/b = 1]'
-xpath_01: xpath feature is unsupported: Multi-element paths in predicates
-xpath_01: libxo could not add the requested filter
+xpath_01: filter expression feature is unsupported: Multi-element paths in predicates
+xpath_01: could not add the requested filter
 added filter: -1
-xpath_01: test: xpath feature is unsupported: descendant child (e.g. 'one//two')
-xpath_01: test: xpath feature is unsupported: plus sign ('+')
+xpath_01: test: filter expression feature is unsupported: descendant child (e.g. 'one//two')
+xpath_01: test: filter expression feature is unsupported: plus sign ('+')
 --- 0: 15
     000015: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [one], contents 2, next 0, prev 0 
@@ -672,10 +672,10 @@ main: input '##broken: dangling relational operator (dot context)'
 main: input '?cost[. > ]'
 adding filter: 'cost[. > ]'
 xpath_01: filter expression error: unexpected input: close bracket (']'); expected attribute axis ('@'), minus sign ('-'), not sign ('!'), open parentheses ('('), slash ('/'), asterisk ('*'), etc.
-xpath_01: libxo could not add the requested filter
+xpath_01: could not add the requested filter
 added filter: -1
-xpath_01: test: xpath feature is unsupported: descendant child (e.g. 'one//two')
-xpath_01: test: xpath feature is unsupported: plus sign ('+')
+xpath_01: test: filter expression feature is unsupported: descendant child (e.g. 'one//two')
+xpath_01: test: filter expression feature is unsupported: plus sign ('+')
 --- 0: 15
     000015: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [one], contents 2, next 0, prev 0 
@@ -812,10 +812,10 @@ main: input '##broken: empty predicate'
 main: input '?item['
 adding filter: 'item['
 xpath_01: filter expression error: unexpected input; expected attribute axis ('@'), minus sign ('-'), not sign ('!'), open parentheses ('('), slash ('/'), asterisk ('*'), etc.
-xpath_01: libxo could not add the requested filter
+xpath_01: could not add the requested filter
 added filter: -1
-xpath_01: test: xpath feature is unsupported: descendant child (e.g. 'one//two')
-xpath_01: test: xpath feature is unsupported: plus sign ('+')
+xpath_01: test: filter expression feature is unsupported: descendant child (e.g. 'one//two')
+xpath_01: test: filter expression feature is unsupported: plus sign ('+')
 --- 0: 15
     000015: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [one], contents 2, next 0, prev 0 
@@ -952,10 +952,10 @@ main: input '##broken: trailing operator after path step'
 main: input '?a +'
 adding filter: 'a +'
 xpath_01: filter expression error: unexpected input: plus sign ('+'); expected union operator ('|')
-xpath_01: libxo could not add the requested filter
+xpath_01: could not add the requested filter
 added filter: -1
-xpath_01: test: xpath feature is unsupported: descendant child (e.g. 'one//two')
-xpath_01: test: xpath feature is unsupported: plus sign ('+')
+xpath_01: test: filter expression feature is unsupported: descendant child (e.g. 'one//two')
+xpath_01: test: filter expression feature is unsupported: plus sign ('+')
 --- 0: 15
     000015: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [one], contents 2, next 0, prev 0 
@@ -1092,10 +1092,10 @@ main: input '##broken: attribute reference with missing name'
 main: input '?foo[@]'
 adding filter: 'foo[@]'
 xpath_01: filter expression error: unexpected input: close bracket (']'); expected asterisk ('*') or bare word string
-xpath_01: libxo could not add the requested filter
+xpath_01: could not add the requested filter
 added filter: -1
-xpath_01: test: xpath feature is unsupported: descendant child (e.g. 'one//two')
-xpath_01: test: xpath feature is unsupported: plus sign ('+')
+xpath_01: test: filter expression feature is unsupported: descendant child (e.g. 'one//two')
+xpath_01: test: filter expression feature is unsupported: plus sign ('+')
 --- 0: 15
     000015: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [one], contents 2, next 0, prev 0 
@@ -1231,10 +1231,10 @@ main: status: zero
 main: input '?one[two(three(foo'
 adding filter: 'one[two(three(foo'
 xpath_01: filter expression error: unexpected input; expected comma (','), colon (':'), logical AND operator ('&&'), equality operator ('=='), logical OR operator ('||'), equal sign ('='), etc.
-xpath_01: libxo could not add the requested filter
+xpath_01: could not add the requested filter
 added filter: -1
-xpath_01: test: xpath feature is unsupported: descendant child (e.g. 'one//two')
-xpath_01: test: xpath feature is unsupported: plus sign ('+')
+xpath_01: test: filter expression feature is unsupported: descendant child (e.g. 'one//two')
+xpath_01: test: filter expression feature is unsupported: plus sign ('+')
 --- 0: 15
     000015: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [one], contents 2, next 0, prev 0 
@@ -1370,10 +1370,10 @@ main: status: zero
 main: input '?two[()]'
 adding filter: 'two[()]'
 xpath_01: filter expression error: unexpected input: close parentheses (')'); expected attribute axis ('@'), minus sign ('-'), not sign ('!'), open parentheses ('('), slash ('/'), asterisk ('*'), etc.
-xpath_01: libxo could not add the requested filter
+xpath_01: could not add the requested filter
 added filter: -1
-xpath_01: test: xpath feature is unsupported: descendant child (e.g. 'one//two')
-xpath_01: test: xpath feature is unsupported: plus sign ('+')
+xpath_01: test: filter expression feature is unsupported: descendant child (e.g. 'one//two')
+xpath_01: test: filter expression feature is unsupported: plus sign ('+')
 --- 0: 15
     000015: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [one], contents 2, next 0, prev 0 
@@ -1509,10 +1509,10 @@ main: status: zero
 main: input '?three[x+(]'
 adding filter: 'three[x+(]'
 xpath_01: filter expression error: unexpected input: close bracket (']'); expected attribute axis ('@'), minus sign ('-'), not sign ('!'), open parentheses ('('), slash ('/'), asterisk ('*'), etc.
-xpath_01: libxo could not add the requested filter
+xpath_01: could not add the requested filter
 added filter: -1
-xpath_01: test: xpath feature is unsupported: descendant child (e.g. 'one//two')
-xpath_01: test: xpath feature is unsupported: plus sign ('+')
+xpath_01: test: filter expression feature is unsupported: descendant child (e.g. 'one//two')
+xpath_01: test: filter expression feature is unsupported: plus sign ('+')
 --- 0: 15
     000015: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [one], contents 2, next 0, prev 0 
@@ -1648,10 +1648,10 @@ main: status: zero
 main: input '?four[) - seven]'
 adding filter: 'four[) - seven]'
 xpath_01: filter expression error: unexpected input: close parentheses (')'); expected attribute axis ('@'), minus sign ('-'), not sign ('!'), open parentheses ('('), slash ('/'), asterisk ('*'), etc.
-xpath_01: libxo could not add the requested filter
+xpath_01: could not add the requested filter
 added filter: -1
-xpath_01: test: xpath feature is unsupported: descendant child (e.g. 'one//two')
-xpath_01: test: xpath feature is unsupported: plus sign ('+')
+xpath_01: test: filter expression feature is unsupported: descendant child (e.g. 'one//two')
+xpath_01: test: filter expression feature is unsupported: plus sign ('+')
 --- 0: 15
     000015: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [one], contents 2, next 0, prev 0 
@@ -1787,8 +1787,8 @@ main: status: zero
 main: input '?five/@foo'
 adding filter: 'five/@foo'
 added filter: 0
-xpath_01: test: xpath feature is unsupported: descendant child (e.g. 'one//two')
-xpath_01: test: xpath feature is unsupported: plus sign ('+')
+xpath_01: test: filter expression feature is unsupported: descendant child (e.g. 'one//two')
+xpath_01: test: filter expression feature is unsupported: plus sign ('+')
 --- 0: 15
     000015: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [one], contents 2, next 0, prev 0 
@@ -1928,10 +1928,10 @@ main: status: zero
 main: input '?six@miss'
 adding filter: 'six@miss'
 xpath_01: filter expression error: unexpected input: attribute axis ('@'); expected comma (','), colon (':'), logical AND operator ('&&'), equality operator ('=='), logical OR operator ('||'), equal sign ('='), etc.
-xpath_01: libxo could not add the requested filter
+xpath_01: could not add the requested filter
 added filter: -1
-xpath_01: test: xpath feature is unsupported: descendant child (e.g. 'one//two')
-xpath_01: test: xpath feature is unsupported: plus sign ('+')
+xpath_01: test: filter expression feature is unsupported: descendant child (e.g. 'one//two')
+xpath_01: test: filter expression feature is unsupported: plus sign ('+')
 --- 0: 15
     000015: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [one], contents 2, next 0, prev 0 
@@ -2071,10 +2071,10 @@ main: status: zero
 main: input '?seven[starts-with(")]'
 adding filter: 'seven[starts-with(")]'
 xpath_01: filter expression error: unexpected input; expected attribute axis ('@'), minus sign ('-'), not sign ('!'), open parentheses ('('), slash ('/'), asterisk ('*'), etc.
-xpath_01: libxo could not add the requested filter
+xpath_01: could not add the requested filter
 added filter: -1
-xpath_01: test: xpath feature is unsupported: descendant child (e.g. 'one//two')
-xpath_01: test: xpath feature is unsupported: plus sign ('+')
+xpath_01: test: filter expression feature is unsupported: descendant child (e.g. 'one//two')
+xpath_01: test: filter expression feature is unsupported: plus sign ('+')
 --- 0: 15
     000015: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [one], contents 2, next 0, prev 0 
@@ -2214,10 +2214,10 @@ main: status: zero
 main: input '?eight[5+4+6+2 == ]'
 adding filter: 'eight[5+4+6+2 == ]'
 xpath_01: filter expression error: unexpected input: close bracket (']'); expected attribute axis ('@'), minus sign ('-'), not sign ('!'), open parentheses ('('), slash ('/'), asterisk ('*'), etc.
-xpath_01: libxo could not add the requested filter
+xpath_01: could not add the requested filter
 added filter: -1
-xpath_01: test: xpath feature is unsupported: descendant child (e.g. 'one//two')
-xpath_01: test: xpath feature is unsupported: plus sign ('+')
+xpath_01: test: filter expression feature is unsupported: descendant child (e.g. 'one//two')
+xpath_01: test: filter expression feature is unsupported: plus sign ('+')
 --- 0: 15
     000015: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [one], contents 2, next 0, prev 0 
@@ -2357,10 +2357,10 @@ main: status: zero
 main: input '?nine["two" == @"two"]'
 adding filter: 'nine["two" == @"two"]'
 xpath_01: filter expression error: unexpected input: quoted string; expected asterisk ('*') or bare word string
-xpath_01: libxo could not add the requested filter
+xpath_01: could not add the requested filter
 added filter: -1
-xpath_01: test: xpath feature is unsupported: descendant child (e.g. 'one//two')
-xpath_01: test: xpath feature is unsupported: plus sign ('+')
+xpath_01: test: filter expression feature is unsupported: descendant child (e.g. 'one//two')
+xpath_01: test: filter expression feature is unsupported: plus sign ('+')
 --- 0: 15
     000015: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [one], contents 2, next 0, prev 0 
@@ -2500,8 +2500,8 @@ main: status: zero
 main: input '?ten[@foo/@goo]'
 adding filter: 'ten[@foo/@goo]'
 added filter: 0
-xpath_01: test: xpath feature is unsupported: descendant child (e.g. 'one//two')
-xpath_01: test: xpath feature is unsupported: plus sign ('+')
+xpath_01: test: filter expression feature is unsupported: descendant child (e.g. 'one//two')
+xpath_01: test: filter expression feature is unsupported: plus sign ('+')
 --- 0: 15
     000015: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [one], contents 2, next 0, prev 0 
