@@ -5155,9 +5155,9 @@ xo_discarding_output_h (xo_handle_t *xop UNUSED)
 {
 #ifdef LIBXO_NEED_FILTERS
     xop = xo_default(xop);
-    if (!XOF_ISSET(xop, XOF_FILTER))
+    if (!XOIF_ISSET(xop, XOIF_FILTERING))
 	return FALSE;
-    return xo_filter_get_status(xop, xo_filters(xop)) == XO_STATUS_DEAD;
+    return xo_stack_cur(xop)->xs_fstatus == XO_STATUS_DEAD;
 #else /* LIBXO_NEED_FILTERS */
     return FALSE;
 #endif /* LIBXO_NEED_FILTERS */
@@ -7745,12 +7745,8 @@ xo_do_emit (xo_handle_t *xop, xo_emit_flags_t flags, const char *fmt)
     if (fmt == NULL)
 	return 0;
 
-    if (XOIF_ISSET(xop, XOIF_FILTERING)) {
-	/* If we're filtering and our status is DEAD, we can bail */
-	xo_stack_t *xsp = xo_stack_cur(xop);
-	if (xsp->xs_fstatus == XO_STATUS_DEAD)
-	    return 0;		/* Zero columns emitted */
-    }
+    if (xo_discarding_output_h(xop))
+	return 0;		/* Zero columns emitted */
 
     unsigned max_fields;
     xo_field_info_t *fields = NULL;
