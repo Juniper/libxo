@@ -5133,6 +5133,42 @@ xo_add_filter (xo_handle_t *xop UNUSED, const char *input UNUSED)
     return rc;
 }
 
+/*
+ * Return TRUE when the current output position is permanently filtered out
+ * (XO_STATUS_DEAD): the active filter has determined that no content generated
+ * here can ever appear in the final output.  Callers can use this to skip
+ * expensive computation before calling xo_emit:
+ *
+ *     xo_open_container("foo");
+ *     if (!xo_discarding_output()) {
+ *         ... expensive work ...
+ *         xo_emit("{:field/...}", value);
+ *     }
+ *     xo_close_container("foo");
+ *
+ * Returns FALSE (proceed normally) when filtering is disabled, when no filter
+ * is loaded, or when the status is anything other than DEAD (including TRACK
+ * and PRED, which still need key and predicate fields to resolve matches).
+ */
+int
+xo_discarding_output_h (xo_handle_t *xop UNUSED)
+{
+#ifdef LIBXO_NEED_FILTERS
+    xop = xo_default(xop);
+    if (!XOF_ISSET(xop, XOF_FILTER))
+	return FALSE;
+    return xo_filter_get_status(xop, xo_filters(xop)) == XO_STATUS_DEAD;
+#else /* LIBXO_NEED_FILTERS */
+    return FALSE;
+#endif /* LIBXO_NEED_FILTERS */
+}
+
+int
+xo_discarding_output (void)
+{
+    return xo_discarding_output_h(NULL);
+}
+
 #ifdef LIBXO_NEED_FILTERS
 static void
 xo_filt_dump_escape_contents (char *buf, int bufsiz, char *data)
