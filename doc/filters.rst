@@ -63,7 +63,8 @@ for content to be selected.  Expressions contain five constructs:
       a value of 2 which are parented by a `chapter` element which
       have a `number` attribute with a value of 1.
 
-  - Use a number to select the <n>th node from a node set
+  - Use a number to select the <n>th node from a node set, using an
+    origin of 1 (not 0):
 
     - Example: chapter[1]
     - Selects the first `chapter` element
@@ -106,7 +107,7 @@ for content to be selected.  Expressions contain five constructs:
 
   - Function calls can be used in expressions or predicate tests
 
-    - Example: chapter[count(section) > 15]
+    - Example: chapter[number(section) > 15]
 
   - Allows calls to pre-defined or user-defined functions
 
@@ -241,7 +242,6 @@ due to implementation cost and performance impact.
 Among the unimplemented features are:
 
 - ".." (parent); requires buffering parent siblings.
-- "." (self); not needed in this context.
 - node tests: comment(), text(), node(), and processing-instruction();
   not needed in this context.
 - id() and key(); not needed in this context.
@@ -398,15 +398,52 @@ Quote the expression appropriately for the shell being used::
     # pass via environment variable to avoid quoting issues
     LIBXO_OPTIONS='filter=socket[tcp-state=="ESTABLISHED"]' my-app
 
-Commas are using between options to `--libxo`, such as `--libxo
-xml,pretty,warn` but commas are also used to predicate functions,
-which requires them to be escaped in a manner that allows the escapes
-to be seen by `libxo`, not the shell::
+Commas are particularly awkward since they are used for two purposes:
+the separate libxo options (e.g. "warn,pretty") as well as separate
+arguments in filter function arguments (e.g. "start-with(one, two)").
+Option parsing happens first and the filter string is opaque to the
+option parsing, so the commas any functions have to be escaped::
 
   my-app --libxo 'filter=food[substring(name\, 1\, 4) == "hush"]'
 
+Unsupported Features
+--------------------
+
+While filter path expressions are based heavily on the XPath standard,
+many XPath features are not supported, chiefly due to their
+complexity, impact on steaming data processing, buffering costs, and
+performance impacts.  This following list describes the unsupported
+features::
+
+    ================== ========================================================
+    Unsupported        Details
+    ================== ========================================================
+    ..                 Alias for the parent axis, e.g. item[../count == 4]
+    Node tests         comment(), text(), processing-instruction()
+    Identities         id(), key()
+    //                 Deep ancestor, e.g. top//deep or //deep
+    Variables          XPath variables, e.g. $one
+    axis names         Any of the axis names
+    Nested predicates  Predicates within predicates, e.g. one[two[three]]
+    Predicate paths    Multi-member paths inside predicates, e.g. one[two/three]
+    ================== ========================================================
+
+While no axis names are supported, `libxo` does support the "@" alias
+for the attribute axis.
+
+When an unsupported feature is parsed in a filter expression, `libxo`
+will give an error message::
+
+    % my-app --libxo:XP,filter-warn,filter='item[..//node()]'
+    my-app: filter expression feature is unsupported: parent axis ('..')
+    my-app: filter expression feature is unsupported: descendant child (e.g. 'one//two')
+    my-app: filter expression feature is unsupported: 'node()'
+    my-app: could not add the requested filter
+
+.. _filter-warn:
+
 Filter Flags (XOF\_FILTER\_WARN)
--------------------------------------------------
+--------------------------------
 
   =================== =========================================================
    Flag                Description
@@ -421,4 +458,7 @@ expressions and input data, but might be useful in debugging issues
 with filter expressions.  It corresponds to the `filter-warn`
 command-line option::
 
-    my-app --libxo filter='socket[tcp-state=="ESTABLISHED"]',filter-warn
+    my-app --libxo filter='socket[number(tcp-state)==2]',filter-warn
+    my-app: invalid number value: 'tcp-state'
+
+This message will be repeated on each conversion error.
