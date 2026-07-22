@@ -98,7 +98,7 @@ typedef unsigned long long xo_xof_flags_t;
 
 #define XOF_LOG_GETTEXT	XOF_BIT(28) /** Log (stderr) gettext lookup strings */
 #define XOF_UTF8	XOF_BIT(29) /** Force text output to be UTF8 */
-#define XOF_RETAIN_ALL	XOF_BIT(30) /** Force use of XOEF_RETAIN */
+/* XOF_BIT(30) is unused (was XOF_RETAIN_ALL; removed as unsafe) */
 #define XOF_RETAIN_NONE	XOF_BIT(31) /** Prevent use of XOEF_RETAIN */
 
 #define XOF_COLOR_MAP	XOF_BIT(32) /** Color map has been initialized */
