@@ -63,7 +63,6 @@ correspond to output styles, flags, or features:
   no-top          Do not emit a top set of braces (JSON)
   not-first       Pretend the 1st output item was not 1st (JSON)
   pretty          Emit pretty-printed output
-  retain          Force retaining formatting information
   text            Emit TEXT output
   underscores     Replace XML-friendly "-"s with JSON friendly "_"s
   units           Add the 'units' (XML) or 'data-units (HTML) attribute
