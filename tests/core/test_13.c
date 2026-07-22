@@ -138,7 +138,7 @@ int
 main (int argc, char **argv)
 {
     int i, count = 10;
-    xo_emit_flags_t flags = XOF_RETAIN_ALL;
+    xo_xof_flags_t flags = 0;	/* Emits use xo_emitr(); "no-retain" vetoes */
     int opt_color = 1;
 
     xo_set_program("test_13");
@@ -167,7 +167,7 @@ main (int argc, char **argv)
 	else if (xo_streq(argv[argc], "info"))
 	    xo_set_flags(NULL, XOF_INFO);
 	else if (xo_streq(argv[argc], "no-retain"))
-	    flags &= ~XOF_RETAIN_ALL;
+	    flags |= XOF_RETAIN_NONE;
 	else if (xo_streq(argv[argc], "big")) {
 	    if (argv[argc + 1]) {
 		const char *cp = argv[++argc];
