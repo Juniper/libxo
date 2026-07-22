@@ -129,6 +129,21 @@ xo_name_lookup (xo_flag_mapping_t *map, const char *value, ssize_t len)
     return 0;
 }
 
+#ifdef NOT_NEEDED_YET
+static const char *
+xo_value_lookup (xo_flag_mapping_t *map, xo_xff_flags_t value)
+{
+    if (value == 0)
+	return NULL;
+
+    for ( ; map->xm_name; map++)
+	if (map->xm_value == value)
+	    return map->xm_name;
+
+    return NULL;
+}
+#endif /* NOT_NEEDED_YET */
+
 /*
  * Role and modifier tables
  */
