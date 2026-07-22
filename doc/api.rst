@@ -1252,7 +1252,6 @@ libxo options, including:
 - no-locale
 - no-retain
 - pretty
-- retain
 - underscores
 - warn
 
