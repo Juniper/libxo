@@ -13,6 +13,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/param.h>
+#include <fcntl.h>
 
 #include "xo.h"
 #include "xo_encoder.h"
@@ -53,6 +54,7 @@ main (int argc, char **argv)
     };
 
     int opt_count = 1;
+    int opt_discard = 0;
 
     char name[] = "test_01.test";  /* test trimming of xo_program */
     argv[0] = name;
@@ -80,10 +82,20 @@ main (int argc, char **argv)
 	    xo_set_flags(NULL, XOF_DEBUG);
 	else if (xo_streq(argv[argc], "count"))
 	    opt_count = atoi(argv[++argc]);
+	else if (xo_streq(argv[argc], "discard"))
+	    opt_discard = 1;
         else if (xo_streq(argv[argc], "error")) {
             close(-1);
             xo_err(1, "error detected");
         }
+    }
+
+    if (opt_discard) {
+	int fd = open("/dev/null", O_WRONLY);
+	if (fd > 0) {
+	    close(1);
+	    dup2(fd, 1);
+	}
     }
 
     xo_set_info(NULL, info, -1);
