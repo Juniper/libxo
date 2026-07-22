@@ -126,10 +126,6 @@
 #include <libintl.h>
 #endif /* HAVE_GETTEXT */
 
-#if HAVE_ETEXT == 1		/* Symbol */
-extern char etext;
-#endif /* HAVE_ETEXT */
-
 /* Rather lame that we can't count on these... */
 #ifndef FALSE
 #define FALSE 0
@@ -560,18 +556,6 @@ xo_flush_file (void *opaque)
     FILE *fp = (FILE *) opaque;
 
     return fflush(fp);
-}
-
-static inline int
-xo_str_is_const (const char *str UNUSED)
-{
-#if HAVE_ETEXT == 1
-    const char *xo_etext = (const char *) &etext;
-
-    return (str < xo_etext);
-#else /* HAVE_ETEXT */
-    return FALSE;
-#endif /* HAVE_ETEXT */
 }
 
 /* Get the current stack pointer */
@@ -2354,23 +2338,6 @@ xo_name_to_style (const char *name)
     return -1;
 }
 
-/* xo_flag_mapping_t and xo_name_lookup() are defined in xo_field.h/xo_field.c */
-
-#ifdef NOT_NEEDED_YET
-static const char *
-xo_value_lookup (xo_flag_mapping_t *map, xo_xff_flags_t value)
-{
-    if (value == 0)
-	return NULL;
-
-    for ( ; map->xm_name; map++)
-	if (map->xm_value == value)
-	    return map->xm_name;
-
-    return NULL;
-}
-#endif /* NOT_NEEDED_YET */
-
 static xo_flag_mapping_t xo_xof_names[] = {
     { XOF_COLOR_ALLOWED, "color" },
     { XOF_COLOR, "color-force" },
@@ -2392,7 +2359,7 @@ static xo_flag_mapping_t xo_xof_names[] = {
     { XOF_NO_TOP_LEVEL, "no-top-level" },
     { XOF_NOT_FIRST, "not-first" },
     { XOF_PRETTY, "pretty" },
-    { XOF_RETAIN_ALL, "retain" },
+    { 0, "retain" },		/* Deprecated, so use zero */
     { XOF_UNDERSCORES, "underscores" },
     { XOF_UNITS, "units" },
     { XOF_UTF8, "utf8" },
@@ -7762,25 +7729,21 @@ xo_do_emit (xo_handle_t *xop, xo_emit_flags_t flags, const char *fmt)
     unsigned max_fields;
     xo_field_info_t *fields = NULL;
 
-    /* Adjust XOEF_RETAIN based on global flags */
+    /*
+     * Retaining (caching) parsed field information means holding
+     * pointers into the caller's format string, so we can only do it
+     * when the caller explicitly asserts the string is safe to retain
+     * (via XOEF_RETAIN, i.e. xo_emitr() or xo_emit_f(XOEF_RETAIN, ...)).
+     * XOEF_NO_RETAIN and the global XOF_RETAIN_NONE flag can veto it.
+     */
     if (flags & XOEF_NO_RETAIN) {
-	/* If the "don't retain flag is on, remove the retain, just in case */
+	/* If the "don't retain" flag is on, remove the retain, just in case */
 	flags &= ~XOEF_RETAIN;
 
     } else if (flags & XOEF_RETAIN) {
 	/* If the user doesn't want to retain, even if the caller does */
 	if (XOF_ISSET(xop, XOF_RETAIN_NONE))
 	    flags &= ~XOEF_RETAIN;
-    } else if (!xo_str_is_const(fmt)) {
-	/*
-	 * Unless the caller explicitly tells us otherwise, we can
-	 * only retain (cache) const strings, since dynamic strings
-	 * aren't cachable due to changing content.
-	 */
-	/* Do nothing */
-    } else if (XOF_ISSET(xop, XOF_RETAIN_ALL)) {
-	/* If the user wants to retain allow it */
-	flags |= XOEF_RETAIN;
     }
 
     /*
