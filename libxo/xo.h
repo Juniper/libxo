@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <stdarg.h>
+#include <stdint.h>
 #include <limits.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -114,6 +115,108 @@ typedef unsigned long long xo_xof_flags_t;
 typedef unsigned xo_emit_flags_t; /* Flags to xo_emit() and friends */
 #define XOEF_RETAIN	(1<<0)	  /* Retain parsed formatting information */
 #define XOEF_NO_RETAIN	(1<<1)	  /* Format must not be retained (dynamic) */
+
+/*
+ * Field modifier flags (xfi_flags in xo_field_info_t).
+ * These are shared between the public field-cache API and the internal
+ * encoder plugin API (xo_encoder.h).
+ */
+typedef unsigned long long xo_xff_flags_t;
+#define XFF_COLON	(1<<0)	/* Append a ":" */
+#define XFF_COMMA	(1<<1)	/* Append a "," iff there's more output */
+#define XFF_WS		(1<<2)	/* Append a blank */
+#define XFF_ENCODE_ONLY	(1<<3)	/* Only emit for encoding styles (XML, JSON) */
+
+#define XFF_QUOTE	(1<<4)	/* Force quotes */
+#define XFF_NOQUOTE	(1<<5)	/* Force no quotes */
+#define XFF_DISPLAY_ONLY (1<<6)	/* Only emit for display styles (text, html) */
+#define XFF_KEY		(1<<7)	/* Field is a key (for XPath) */
+
+#define XFF_XML		(1<<8)	/* Force XML encoding style (for XPath) */
+#define XFF_ATTR	(1<<9)	/* Escape value using attribute rules (XML) */
+#define XFF_BLANK_LINE	(1<<10)	/* Emit a blank line */
+#define XFF_NO_OUTPUT	(1<<11)	/* Do not make any output */
+
+#define XFF_TRIM_WS	(1<<12)	/* Trim whitespace off encoded values */
+#define XFF_LEAF_LIST	(1<<13)	/* A leaf-list (list of values) */
+#define XFF_UNESCAPE	(1<<14)	/* Need to printf-style unescape the value */
+#define XFF_HUMANIZE	(1<<15)	/* Humanize the value (for display styles) */
+
+#define XFF_HN_SPACE	(1<<16)	/* Humanize: put space before suffix */
+#define XFF_HN_DECIMAL	(1<<17)	/* Humanize: add one decimal place if <10 */
+#define XFF_HN_1000	(1<<18)	/* Humanize: use 1000, not 1024 */
+#define XFF_GT_FIELD	(1<<19) /* Call gettext() on a field */
+
+#define XFF_GT_PLURAL	(1<<20)	/* Call dngettext to find plural form */
+#define XFF_ARGUMENT	(1<<21)	/* Content provided via argument */
+#define XFF_ESC_SLASH	(1<<22)	/* Escape a forward slash in a JSON string */
+#define XFF_ESC_SQUARE	(1<<23)	/* Escape XML control chars to UTF8 square */
+
+#define XFF_ESC_PRIVATE (1<<24)	/* Escape XML ctrl chars as private (0xe000) */
+
+/* Flags to turn off when we don't want i18n processing */
+#define XFF_GT_FLAGS (XFF_GT_FIELD | XFF_GT_PLURAL)
+
+/*
+ * xo_format_offset_t: signed byte offset into a format string.
+ * Negative values are sentinels:
+ *   XO_FOFF_NONE    (-1)  field absent (replaces NULL pointer)
+ *   XO_FOFF_DEFAULT (-2)  use the default "%s" format
+ * Any value >= 0 is a real byte offset into the base string.
+ * Format strings longer than XO_FORMAT_MAX are rejected by the parser.
+ */
+typedef int16_t xo_format_offset_t;
+#define XO_FOFF_NONE	((xo_format_offset_t) -1)
+#define XO_FOFF_DEFAULT	((xo_format_offset_t) -2)
+#define XO_FORMAT_MAX	32000	/* leaves room below INT16_MAX for one-past-end */
+
+/* xfi_ftype values for non-character field roles */
+#define XO_ROLE_EBRACE	'{'	/* Escaped brace: {{ content }} */
+#define XO_ROLE_TEXT	'+'	/* Plain text between fields */
+#define XO_ROLE_NEWLINE	'\n'	/* Bare newline */
+
+/* The default printf-style format used when a field has no explicit format. */
+extern const char xo_default_format[];
+
+/*
+ * Resolve an xo_format_offset_t to a const char *.
+ * Returns NULL for XO_FOFF_NONE, the global default "%s" for XO_FOFF_DEFAULT,
+ * and base+off for any non-negative offset.
+ */
+static inline const char *
+xo_foff (const char *base, xo_format_offset_t off)
+{
+    if (off >= 0)               return base + off;
+    if (off == XO_FOFF_DEFAULT) return xo_default_format;
+    return NULL;                /* XO_FOFF_NONE */
+}
+
+/*
+ * Parsed representation of one field descriptor from a libxo format string.
+ * All string members are xo_format_offset_t values — byte offsets into the
+ * "base" format string from which the field was parsed.  Use xo_foff(base, off)
+ * to recover a const char *.  XO_FOFF_NONE (-1) means absent; xfi_format may
+ * additionally take XO_FOFF_DEFAULT (-2) to indicate the default "%s" format.
+ *
+ * This struct is exposed publicly so callers can populate pre-built const
+ * field tables for xo_emit_cached().  The layout is stable within a given
+ * XO_EMIT_CACHE_VERSION; bump the version whenever the layout changes.
+ */
+typedef struct xo_field_info_s {
+    xo_xff_flags_t xfi_flags;		/* Modifier flags (XFF_*) */
+    unsigned xfi_ftype;			/* Role character ('V','L','G', XO_ROLE_*) */
+    xo_format_offset_t xfi_start;	/* Offset of field start in base string */
+    xo_format_offset_t xfi_content;	/* Offset of content (name) */
+    xo_format_offset_t xfi_format;	/* Offset of display format (or XO_FOFF_DEFAULT) */
+    xo_format_offset_t xfi_encoding;	/* Offset of encoding format */
+    xo_format_offset_t xfi_next;	/* Offset just past this field */
+    xo_format_offset_t xfi_len;		/* Length of whole field descriptor */
+    xo_format_offset_t xfi_clen;	/* Length of content */
+    xo_format_offset_t xfi_flen;	/* Length of format */
+    xo_format_offset_t xfi_elen;	/* Length of encoding */
+    unsigned xfi_fnum;			/* Field number (0 = unset) */
+    unsigned xfi_renum;			/* Reordered field number (0 = none) */
+} xo_field_info_t;
 
 /*
  * The xo_info_t structure provides a mapping between names and
@@ -232,6 +335,36 @@ xo_emit_hf (xo_handle_t *xop, xo_emit_flags_t flags, const char *fmt, ...);
 
 xo_ssize_t
 xo_emit_f (xo_emit_flags_t flags, const char *fmt, ...);
+
+/*
+ * Build-time pre-parsed format string cache.
+ *
+ * xo_emit_cached() is the target of the LLVM IR pass: it takes a pointer to
+ * a pre-built xo_format_cache_t (holding a const xo_field_info_t[] parsed at
+ * compile time) plus the original format string (kept for the gettext path
+ * and as a version-mismatch fallback).
+ *
+ * If the cache version does not match XO_EMIT_CACHE_VERSION, or if the cache
+ * pointer is NULL, the call silently falls back to parsing fmt at runtime.
+ *
+ * xo_field_info_t is defined above; callers may populate xfc_fields[] directly
+ * (e.g. as a static const array) using the XFF_* flags, XO_FOFF_* sentinels,
+ * and XO_ROLE_* constants defined above.
+ */
+#define XO_EMIT_CACHE_VERSION 1  /* bump on any xo_field_info_t layout change */
+
+typedef struct xo_format_cache_s {
+    unsigned xfc_version;		/* == XO_EMIT_CACHE_VERSION */
+    unsigned xfc_num_fields;
+    const xo_field_info_t *xfc_fields;	/* const xo_field_info_t[] */
+} xo_format_cache_t;
+
+xo_ssize_t
+xo_emit_cached_h (xo_handle_t *xop, const xo_format_cache_t *fcp,
+		  const char *fmt, ...);
+
+xo_ssize_t
+xo_emit_cached (const xo_format_cache_t *fcp, const char *fmt, ...);
 
 XO_PRINTFLIKE(2, 0)
 static inline xo_ssize_t
