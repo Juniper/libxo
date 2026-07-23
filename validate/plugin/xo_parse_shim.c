@@ -56,7 +56,7 @@ xo_shim_parse (const char *fmt, xo_shim_error_t error, void *data)
 static int
 field_consumes_varg (const xo_field_info_t *xfip)
 {
-    if (xfip->xfi_format == NULL)
+    if (xfip->xfi_format == XO_FOFF_NONE)
         return 0;
 
     switch ((int) xfip->xfi_ftype) {
@@ -104,7 +104,8 @@ xo_shim_parse_args (const char *fmt,
             arg_cb(arg_data, NULL, 0);
 
         if (field_consumes_varg(xfip))
-            arg_cb(arg_data, xfip->xfi_format, (unsigned) xfip->xfi_flen);
+            arg_cb(arg_data, xo_foff(fmt, xfip->xfi_format),
+		   (unsigned) xfip->xfi_flen);
     }
 
     xo_parse_release(&xpp);
