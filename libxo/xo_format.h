@@ -19,8 +19,12 @@
 #include <stddef.h>
 #include <sys/types.h>
 
-#include "xo.h"		    /* xo_realloc_func_t, xo_free_func_t, xo_xff_flags_t */
-#include "xo_encoder.h"	    /* XFF_* field flags */
+/*
+ * xo.h provides: xo_realloc_func_t, xo_free_func_t, xo_xff_flags_t, XFF_*,
+ * xo_format_offset_t, XO_FOFF_*, XO_FORMAT_MAX, XO_ROLE_*,
+ * xo_default_format, xo_foff(), xo_field_info_t.
+ */
+#include "xo.h"
 
 /*
  * Maximum number of fields in a format string.  Override at compile
@@ -29,11 +33,6 @@
 #ifndef XO_MAX_FIELDS
 #define XO_MAX_FIELDS (8 * 1024)
 #endif /* XO_MAX_FIELDS */
-
-/* xfi_ftype values for non-character roles */
-#define XO_ROLE_EBRACE	'{'	/* Escaped braces: {{ content }} */
-#define XO_ROLE_TEXT	'+'	/* Plain text between fields */
-#define XO_ROLE_NEWLINE	'\n'	/* Bare newline */
 
 /*
  * Simple name→value table used for role and modifier lookup.
@@ -44,37 +43,6 @@ typedef struct xo_flag_mapping_s {
     xo_xof_flags_t xm_value;
     const char *xm_name;
 } xo_flag_mapping_t;
-
-/*
- * This structure represents the parsed field information, suitable for
- * processing by xo_do_emit and anything else that needs to parse fields.
- * Note that all pointers point to the main format string.
- *
- * XXX This is a first step toward compilable or cachable format
- * strings.  We can also cache the results of dgettext when no format
- * is used, assuming the 'p' modifier has _not_ been set.
- */
-
-/*
- * Parsed representation of one field descriptor from a format string.
- * All string pointers are interior pointers into the original fmt string;
- * they are NOT NUL-terminated — use the corresponding length fields.
- */
-typedef struct xo_field_info_s {
-    xo_xff_flags_t xfi_flags;	/* Modifier flags (XFF_*) */
-    unsigned xfi_ftype;		/* Role character ('V','L','G', XO_ROLE_*) */
-    const char *xfi_start;	/* Start of field in format string */
-    const char *xfi_content;	/* Field content (name) */
-    const char *xfi_format;	/* Display format string */
-    const char *xfi_encoding;	/* Encoding format string */
-    const char *xfi_next;	/* Next position after this field */
-    ssize_t xfi_len;		/* Length of whole field descriptor */
-    ssize_t xfi_clen;		/* Length of content */
-    ssize_t xfi_flen;		/* Length of format */
-    ssize_t xfi_elen;		/* Length of encoding */
-    unsigned xfi_fnum;		/* Field number (0 = unset) */
-    unsigned xfi_renum;		/* Reordered field number (0 = none) */
-} xo_field_info_t;
 
 /*
  * Error callback.  Called when xo_parse_format() encounters a problem.
