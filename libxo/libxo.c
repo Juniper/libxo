@@ -4596,10 +4596,10 @@ xo_format_text (xo_handle_t *xop, const char *str, ssize_t len)
 }
 
 static void
-xo_format_title (xo_handle_t *xop, xo_field_info_t *xfip,
+xo_format_title (xo_handle_t *xop, const char *base, xo_field_info_t *xfip,
 		 const char *value, ssize_t vlen)
 {
-    const char *fmt = xfip->xfi_format;
+    const char *fmt = xo_foff(base, xfip->xfi_format);
     ssize_t flen = xfip->xfi_flen;
     xo_xff_flags_t flags = xfip->xfi_flags;
 
@@ -6295,10 +6295,11 @@ xo_format_value (xo_handle_t *xop, const char *name, ssize_t nlen,
 }
 
 static void
-xo_set_gettext_domain (xo_handle_t *xop, xo_field_info_t *xfip,
+xo_set_gettext_domain (xo_handle_t *xop, const char *base,
+		       xo_field_info_t *xfip,
 		       const char *str, ssize_t len)
 {
-    const char *fmt = xfip->xfi_format;
+    const char *fmt = xo_foff(base, xfip->xfi_format);
     ssize_t flen = xfip->xfi_flen;
 
     /* Start by discarding previous domain */
@@ -6680,10 +6681,10 @@ xo_colors_handle_html (xo_handle_t *xop, xo_colors_t *newp)
 }
 
 static void
-xo_format_colors (xo_handle_t *xop, xo_field_info_t *xfip,
+xo_format_colors (xo_handle_t *xop, const char *base, xo_field_info_t *xfip,
 		  const char *value, ssize_t vlen)
 {
-    const char *fmt = xfip->xfi_format;
+    const char *fmt = xo_foff(base, xfip->xfi_format);
     ssize_t flen = xfip->xfi_flen;
 
     xo_buffer_t xb;
@@ -6754,10 +6755,10 @@ xo_format_colors (xo_handle_t *xop, xo_field_info_t *xfip,
 }
 
 static void
-xo_format_units (xo_handle_t *xop, xo_field_info_t *xfip,
+xo_format_units (xo_handle_t *xop, const char *base, xo_field_info_t *xfip,
 		 const char *value, ssize_t vlen)
 {
-    const char *fmt = xfip->xfi_format;
+    const char *fmt = xo_foff(base, xfip->xfi_format);
     ssize_t flen = xfip->xfi_flen;
     xo_xff_flags_t flags = xfip->xfi_flags;
 
@@ -6808,10 +6809,10 @@ xo_format_units (xo_handle_t *xop, xo_field_info_t *xfip,
 }
 
 static ssize_t
-xo_find_width (xo_handle_t *xop, xo_field_info_t *xfip,
+xo_find_width (xo_handle_t *xop, const char *base, xo_field_info_t *xfip,
 	       const char *value, ssize_t vlen)
 {
-    const char *fmt = xfip->xfi_format;
+    const char *fmt = xo_foff(base, xfip->xfi_format);
     ssize_t flen = xfip->xfi_flen;
 
     long width = 0;
@@ -6901,7 +6902,7 @@ xo_anchor_clear (xo_handle_t *xop)
  * format it when the end anchor tag is seen.
  */
 static void
-xo_anchor_start (xo_handle_t *xop, xo_field_info_t *xfip,
+xo_anchor_start (xo_handle_t *xop, const char *base, xo_field_info_t *xfip,
 		 const char *value, ssize_t vlen)
 {
     if (XOIF_ISSET(xop, XOIF_ANCHOR))
@@ -6916,11 +6917,11 @@ xo_anchor_start (xo_handle_t *xop, xo_field_info_t *xfip,
      * Now we find the width, if possible.  If it's not there,
      * we'll get it on the end anchor.
      */
-    xop->xo_anchor_min_width = xo_find_width(xop, xfip, value, vlen);
+    xop->xo_anchor_min_width = xo_find_width(xop, base, xfip, value, vlen);
 }
 
 static void
-xo_anchor_stop (xo_handle_t *xop, xo_field_info_t *xfip,
+xo_anchor_stop (xo_handle_t *xop, const char *base, xo_field_info_t *xfip,
 		 const char *value, ssize_t vlen)
 {
     if (!XOIF_ISSET(xop, XOIF_ANCHOR)) {
@@ -6930,7 +6931,7 @@ xo_anchor_stop (xo_handle_t *xop, xo_field_info_t *xfip,
 
     XOIF_CLEAR(xop, XOIF_UNITS_PENDING);
 
-    ssize_t width = xo_find_width(xop, xfip, value, vlen);
+    ssize_t width = xo_find_width(xop, base, xfip, value, vlen);
     if (width == 0)
 	width = xop->xo_anchor_min_width;
 
@@ -7076,7 +7077,7 @@ xo_gettext_simplify_format (xo_handle_t *xop UNUSED,
 		       xo_buffer_t *xbp,
 		       xo_field_info_t *fields,
 		       int this_field,
-		       const char *fmt UNUSED,
+		       const char *base,
 		       xo_simplify_field_func_t field_cb)
 {
     unsigned ftype;
@@ -7089,9 +7090,12 @@ xo_gettext_simplify_format (xo_handle_t *xop UNUSED,
 	ftype = xfip->xfi_ftype;
 	flags = xfip->xfi_flags;
 
-	if ((flags & XFF_GT_FIELD) && xfip->xfi_content && ftype != 'V') {
+	const char *content = xo_foff(base, xfip->xfi_content);
+
+	if ((flags & XFF_GT_FIELD) && xfip->xfi_content != XO_FOFF_NONE
+		&& ftype != 'V') {
 	    if (field_cb)
-		field_cb(xfip->xfi_content, xfip->xfi_clen,
+		field_cb(content, xfip->xfi_clen,
 			 (flags & XFF_GT_PLURAL) ? 1 : 0);
 	}
 
@@ -7106,12 +7110,12 @@ xo_gettext_simplify_format (xo_handle_t *xop UNUSED,
 
 	case XO_ROLE_EBRACE:
 	    xo_buf_append(xbp, "{", 1);
-	    xo_buf_append(xbp, xfip->xfi_content, xfip->xfi_clen);
+	    xo_buf_append(xbp, content, xfip->xfi_clen);
 	    xo_buf_append(xbp, "}", 1);
 	    break;
 
 	case XO_ROLE_TEXT:
-	    xo_buf_append(xbp, xfip->xfi_content, xfip->xfi_clen);
+	    xo_buf_append(xbp, content, xfip->xfi_clen);
 	    break;
 
 	default:
@@ -7130,7 +7134,7 @@ xo_gettext_simplify_format (xo_handle_t *xop UNUSED,
 	    }
 
 	    xo_buf_append(xbp, ":", 1);
-	    xo_buf_append(xbp, xfip->xfi_content, xfip->xfi_clen);
+	    xo_buf_append(xbp, content, xfip->xfi_clen);
 	    xo_buf_append(xbp, "}", 1);
 	}
     }
@@ -7141,9 +7145,9 @@ xo_gettext_simplify_format (xo_handle_t *xop UNUSED,
 
 #ifdef LIBXO_DEBUG
 void
-xo_dump_fields (xo_field_info_t *); /* Fake prototype for debug function */
+xo_dump_fields (const char *, xo_field_info_t *); /* Fake prototype for debug */
 void
-xo_dump_fields (xo_field_info_t *fields)
+xo_dump_fields (const char *base, xo_field_info_t *fields)
 {
     xo_field_info_t *xfip;
 
@@ -7153,9 +7157,9 @@ xo_dump_fields (xo_field_info_t *fields)
 	       (unsigned long) xfip->xfi_flags,
 	       isprint((int) xfip->xfi_ftype) ? xfip->xfi_ftype : ' ',
 	       xfip->xfi_ftype,
-	       (int) xfip->xfi_clen, xfip->xfi_content ?: "", 
-	       (int) xfip->xfi_flen, xfip->xfi_format ?: "", 
-	       (int) xfip->xfi_elen, xfip->xfi_encoding ?: "");
+	       (int) xfip->xfi_clen, xo_foff(base, xfip->xfi_content) ?: "",
+	       (int) xfip->xfi_flen, xo_foff(base, xfip->xfi_format) ?: "",
+	       (int) xfip->xfi_elen, xo_foff(base, xfip->xfi_encoding) ?: "");
     }
 }
 #endif /* LIBXO_DEBUG */
@@ -7233,7 +7237,7 @@ xo_gettext_rewrite_fields (xo_handle_t *xop UNUSED,
  * to do.
  */
 static int
-xo_gettext_combine_formats (xo_handle_t *xop, const char *fmt UNUSED,
+xo_gettext_combine_formats (xo_handle_t *xop, const char *fmt,
 		    const char *gtfmt, xo_field_info_t *old_fields,
 		    xo_field_info_t *new_fields, unsigned new_max_fields,
 		    int *reorderedp)
@@ -7255,7 +7259,8 @@ xo_gettext_combine_formats (xo_handle_t *xop, const char *fmt UNUSED,
 		if (oldp->xfi_ftype != 'V')
 		    continue;
 		if (newp->xfi_clen != oldp->xfi_clen
-		    || strncmp(newp->xfi_content, oldp->xfi_content,
+		    || strncmp(xo_foff(gtfmt, newp->xfi_content),
+			       xo_foff(fmt, oldp->xfi_content),
 			       oldp->xfi_clen) != 0) {
 		    reordered = 1;
 		    continue;
@@ -7271,7 +7276,8 @@ xo_gettext_combine_formats (xo_handle_t *xop, const char *fmt UNUSED,
 			continue;
 		    if (newp->xfi_clen != oldp->xfi_clen)
 			continue;
-		    if (strncmp(newp->xfi_content, oldp->xfi_content,
+		    if (strncmp(xo_foff(gtfmt, newp->xfi_content),
+				xo_foff(fmt, oldp->xfi_content),
 				oldp->xfi_clen) != 0)
 			continue;
 		    reordered = 1;
@@ -7281,7 +7287,8 @@ xo_gettext_combine_formats (xo_handle_t *xop, const char *fmt UNUSED,
 		    /* Field not found */
 		    xo_failure(xop, "post-gettext format can't find field "
 			       "'%.*s' in format '%s'",
-			       newp->xfi_clen, newp->xfi_content,
+			       (int) newp->xfi_clen,
+			       xo_foff(gtfmt, newp->xfi_content),
 			       xo_printable(gtfmt));
 		    return -1;
 		}
@@ -7348,7 +7355,8 @@ xo_gettext_combine_formats (xo_handle_t *xop, const char *fmt UNUSED,
 static const char *
 xo_gettext_build_format (xo_handle_t *xop,
 			 xo_field_info_t *fields, int this_field,
-			 const char *fmt, char **new_fmtp)
+			 const char *base, const char *next,
+			 char **new_fmtp)
 {
     xo_buffer_t xb;
     xo_buf_zero(&xb);
@@ -7358,11 +7366,11 @@ xo_gettext_build_format (xo_handle_t *xop,
 	    break;
 
 	if (xo_gettext_simplify_format(xop, &xb, fields,
-				       this_field, fmt, NULL))
+				       this_field, base, NULL))
 	    break;
 
 	const char *gtfmt = xo_dgettext(xop, xb.xb_bufp);
-	if (gtfmt == NULL || gtfmt == fmt || xo_streq(gtfmt, fmt))
+	if (gtfmt == NULL || gtfmt == next || xo_streq(gtfmt, next))
 	    break;
 
 	char *new_fmt = xo_strndup(gtfmt, -1);
@@ -7378,7 +7386,7 @@ xo_gettext_build_format (xo_handle_t *xop,
 
     xo_buf_cleanup(&xb);
     *new_fmtp = NULL;
-    return fmt;
+    return next;
 }
 
 static void
@@ -7437,10 +7445,11 @@ static const char *
 xo_gettext_build_format (xo_handle_t *xop UNUSED,
 			 xo_field_info_t *fields UNUSED,
 			 int this_field UNUSED,
-			 const char *fmt UNUSED, char **new_fmtp)
+			 const char *base UNUSED, const char *next UNUSED,
+			 char **new_fmtp)
 {
     *new_fmtp = NULL;
-    return fmt;
+    return next;
 }
 
 static int
@@ -7482,6 +7491,16 @@ xo_do_emit_fields (xo_handle_t *xop, xo_field_info_t *fields,
     unsigned field;
     ssize_t rc = 0;
 
+    /*
+     * Two bases for offset resolution:
+     *   base     — for xfi_content, xfi_start, xfi_next (switches to new_fmt on gettext)
+     *   base_fmt — for xfi_format, xfi_encoding (stays as original fmt; format
+     *              offsets copied from old_fields in the gettext combine step remain
+     *              relative to the original fmt)
+     */
+    const char *base = fmt;
+    const char *base_fmt = fmt;
+
     int flush = XOF_ISSET(xop, XOF_FLUSH);
     int flush_line = XOF_ISSET(xop, XOF_FLUSH_LINE);
     char *new_fmt = NULL;
@@ -7518,7 +7537,7 @@ xo_do_emit_fields (xo_handle_t *xop, xo_field_info_t *fields,
 		min_fstart = field;
 	}
 
-	const char *content = xfip->xfi_content;
+	const char *content = xo_foff(base, xfip->xfi_content);
 	ssize_t clen = xfip->xfi_clen;
 
 	if (flags & XFF_ARGUMENT) {
@@ -7540,12 +7559,12 @@ xo_do_emit_fields (xo_handle_t *xop, xo_field_info_t *fields,
 	    goto bottom;
 
 	} else if (ftype == XO_ROLE_EBRACE) {
-	    xo_format_text(xop, xfip->xfi_start, xfip->xfi_len);
+	    xo_format_text(xop, xo_foff(base, xfip->xfi_start), xfip->xfi_len);
 	    goto bottom;
 
 	} else if (ftype == XO_ROLE_TEXT) {
 	    /* Normal text */
-	    xo_format_text(xop, xfip->xfi_content, xfip->xfi_clen);
+	    xo_format_text(xop, content, xfip->xfi_clen);
 	    goto bottom;
 	}
 
@@ -7562,14 +7581,15 @@ xo_do_emit_fields (xo_handle_t *xop, xo_field_info_t *fields,
 
 	if (ftype == 'V')
 	    xo_format_value(xop, content, clen, NULL, 0,
-			    xfip->xfi_format, xfip->xfi_flen,
-			    xfip->xfi_encoding, xfip->xfi_elen, flags);
+			    xo_foff(base_fmt, xfip->xfi_format), xfip->xfi_flen,
+			    xo_foff(base_fmt, xfip->xfi_encoding), xfip->xfi_elen,
+			    flags);
 	else if (ftype == '[')
-	    xo_anchor_start(xop, xfip, content, clen);
+	    xo_anchor_start(xop, base_fmt, xfip, content, clen);
 	else if (ftype == ']')
-	    xo_anchor_stop(xop, xfip, content, clen);
+	    xo_anchor_stop(xop, base_fmt, xfip, content, clen);
 	else if (ftype == 'C')
-	    xo_format_colors(xop, xfip, content, clen);
+	    xo_format_colors(xop, base_fmt, xfip, content, clen);
 
 	else if (ftype == 'G') {
 	    /*
@@ -7580,7 +7600,7 @@ xo_do_emit_fields (xo_handle_t *xop, xo_field_info_t *fields,
 	     * Since gettext returns strings in a static buffer, we make
 	     * a copy in new_fmt.
 	     */
-	    xo_set_gettext_domain(xop, xfip, content, clen);
+	    xo_set_gettext_domain(xop, base_fmt, xfip, content, clen);
 
 	    if (!gettext_inuse) { /* Only translate once */
 		gettext_inuse = 1;
@@ -7590,7 +7610,9 @@ xo_do_emit_fields (xo_handle_t *xop, xo_field_info_t *fields,
 		}
 
 		xo_gettext_build_format(xop, fields, field,
-					xfip->xfi_next, &new_fmt);
+					base,
+					xo_foff(base, xfip->xfi_next),
+					&new_fmt);
 		if (new_fmt) {
 		    gettext_changed = 1;
 
@@ -7628,23 +7650,27 @@ xo_do_emit_fields (xo_handle_t *xop, xo_field_info_t *fields,
 			    field = -1; /* Will be incremented at top of loop */
 			    xfip = new_fields;
 			    max_fields = new_max_fields;
+			    base = new_fmt; /* content offsets now relative to new_fmt */
+			    /* base_fmt stays as original fmt: format/encoding
+			     * offsets copied from old_fields remain relative to fmt */
 			}
 		    }
 		}
 	    }
 	    continue;
 
-	} else  if (clen || xfip->xfi_format) {
+	} else  if (clen || xfip->xfi_format != XO_FOFF_NONE) {
 
 	    const char *class_name = xo_class_name(ftype);
 	    if (class_name)
 		xo_format_content(xop, class_name, xo_tag_name(ftype),
 				  content, clen,
-				  xfip->xfi_format, xfip->xfi_flen, flags);
+				  xo_foff(base_fmt, xfip->xfi_format),
+				  xfip->xfi_flen, flags);
 	    else if (ftype == 'T')
-		xo_format_title(xop, xfip, content, clen);
+		xo_format_title(xop, base_fmt, xfip, content, clen);
 	    else if (ftype == 'U')
-		xo_format_units(xop, xfip, content, clen);
+		xo_format_units(xop, base_fmt, xfip, content, clen);
 	    else
 		xo_failure(xop, "unknown field type: '%c'", ftype);
 	}
@@ -7774,6 +7800,69 @@ xo_do_emit (xo_handle_t *xop, xo_emit_flags_t flags, const char *fmt)
     }
 
     return xo_do_emit_fields(xop, fields, max_fields, fmt);
+}
+
+/*
+ * Core of xo_emit_cached: use a pre-parsed const field table when valid.
+ * Copies the const table to a mutable stack array (xo_do_emit_fields mutates
+ * in place for gettext/fnum finalization).  Falls back to xo_do_emit() on
+ * version mismatch or null cache.
+ */
+static int
+xo_do_emit_cached (xo_handle_t *xop, const xo_format_cache_t *fcp,
+		   const char *fmt)
+{
+    if (fcp == NULL || fcp->xfc_fields == NULL
+	    || fcp->xfc_version != XO_EMIT_CACHE_VERSION)
+	return xo_do_emit(xop, 0, fmt);	/* safe fallback: parse at runtime */
+
+    xop->xo_columns = 0;
+    xop->xo_errno = errno;
+
+    if (fmt == NULL)
+	return 0;
+
+    if (xo_discarding_output_h(xop))
+	return 0;
+
+    unsigned n = fcp->xfc_num_fields;
+    unsigned max_fields = n + 1;     /* +1 for zero-terminator slot */
+
+    /* Copy to mutable stack array; same type, same layout — plain memcpy. */
+    xo_field_info_t *fields = alloca(max_fields * sizeof(fields[0]));
+    memcpy(fields, fcp->xfc_fields, n * sizeof(fields[0]));
+    bzero(&fields[n], sizeof(fields[n]));    /* xfi_ftype==0 terminates */
+
+    return xo_do_emit_fields(xop, fields, max_fields, fmt);
+}
+
+xo_ssize_t
+xo_emit_cached_h (xo_handle_t *xop, const xo_format_cache_t *fcp,
+		  const char *fmt, ...)
+{
+    ssize_t rc;
+
+    xop = xo_default(xop);
+    va_start(xop->xo_vap, fmt);
+    rc = xo_do_emit_cached(xop, fcp, fmt);
+    va_end(xop->xo_vap);
+    bzero(&xop->xo_vap, sizeof(xop->xo_vap));
+
+    return rc;
+}
+
+xo_ssize_t
+xo_emit_cached (const xo_format_cache_t *fcp, const char *fmt, ...)
+{
+    xo_handle_t *xop = xo_default(NULL);
+    ssize_t rc;
+
+    va_start(xop->xo_vap, fmt);
+    rc = xo_do_emit_cached(xop, fcp, fmt);
+    va_end(xop->xo_vap);
+    bzero(&xop->xo_vap, sizeof(xop->xo_vap));
+
+    return rc;
 }
 
 /*
@@ -7941,24 +8030,64 @@ xo_emit_field_hvf (xo_handle_t *xop, xo_emit_flags_t flags UNUSED,
     if (cp == NULL)
 	return -1;
 
-    xfi.xfi_start = fmt;
-    xfi.xfi_content = contents;
-    xfi.xfi_format = fmt;
-    xfi.xfi_encoding = efmt;
-    xfi.xfi_clen = contents ? strlen(contents) : 0;
-    xfi.xfi_flen = fmt ? strlen(fmt) : 0;
-    xfi.xfi_elen = efmt ? strlen(efmt) : 0;
+    ssize_t clen = contents ? (ssize_t) strlen(contents) : 0;
+    ssize_t flen = fmt ? (ssize_t) strlen(fmt) : 0;
+    ssize_t elen = efmt ? (ssize_t) strlen(efmt) : 0;
+    int want_default = (contents && fmt == NULL
+		&& xo_role_wants_default_format(xfi.xfi_ftype));
 
-    /* If we have content, then we have a default format */
-    if (contents && fmt == NULL
-		&& xo_role_wants_default_format(xfi.xfi_ftype)) {
-	xfi.xfi_format = xo_default_format;
-	xfi.xfi_flen = 2;
+    /*
+     * Build a scratch base buffer packing [contents\0][fmt\0][efmt\0] so
+     * all three strings share one base and can be represented as offsets.
+     */
+    size_t baselen = (size_t)(contents ? clen + 1 : 0)
+		   + (size_t)(fmt ? flen + 1 : 0)
+		   + (size_t)(efmt ? elen + 1 : 0);
+    if (baselen == 0)
+	baselen = 1;    /* ensure non-null alloca */
+
+    if (baselen > XO_FORMAT_MAX) {
+	xo_failure(xop, "xo_emit_field: combined content/format/encoding too long");
+	return -1;
     }
+
+    char *xfi_base = alloca(baselen);
+    char *bp = xfi_base;
+
+    xo_format_offset_t c_off = XO_FOFF_NONE, f_off = XO_FOFF_NONE;
+    xo_format_offset_t e_off = XO_FOFF_NONE;
+
+    if (contents) {
+	c_off = (xo_format_offset_t)(bp - xfi_base);
+	memcpy(bp, contents, (size_t)(clen + 1));
+	bp += clen + 1;
+    }
+    if (fmt) {
+	f_off = (xo_format_offset_t)(bp - xfi_base);
+	memcpy(bp, fmt, (size_t)(flen + 1));
+	bp += flen + 1;
+    } else if (want_default) {
+	f_off = XO_FOFF_DEFAULT;
+	flen = 2;
+    }
+    if (efmt) {
+	e_off = (xo_format_offset_t)(bp - xfi_base);
+	memcpy(bp, efmt, (size_t)(elen + 1));
+	bp += elen + 1;
+    }
+
+    xfi.xfi_start    = (contents || fmt) ? 0 : XO_FOFF_NONE;
+    xfi.xfi_content  = c_off;
+    xfi.xfi_clen     = (xo_format_offset_t)clen;
+    xfi.xfi_format   = f_off;
+    xfi.xfi_flen     = (xo_format_offset_t)flen;
+    xfi.xfi_encoding = e_off;
+    xfi.xfi_elen     = (xo_format_offset_t)elen;
+    xfi.xfi_next     = (xo_format_offset_t)(bp - xfi_base);
 
     va_copy(xop->xo_vap, vap);
 
-    rc = xo_do_emit_fields(xop, &xfi, 1, fmt ?: contents ?: "field");
+    rc = xo_do_emit_fields(xop, &xfi, 1, xfi_base);
 
     va_end(xop->xo_vap);
 
