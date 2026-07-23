@@ -22,7 +22,8 @@
 #include <sys/types.h>
 
 #include "xo_config.h"
-#include "xo_format.h"
+#include "xo_format.h"     /* xo.h + field types */
+#include "xo_private.h"    /* THREAD_LOCAL (needs xo.h types) */
 
 /*
  * Return a printable version of str, escaping control characters.
@@ -418,8 +419,21 @@ xo_parse_fields (xo_parse_t *xpp, xo_field_info_t *fields,
     xo_field_info_t *xfip = fields;
     unsigned seen_fnum = 0;
 
+    /* Reject oversized format strings (int16_t offset range) */
+    if (strlen(fmt) > XO_FORMAT_MAX) {
+	xo_parse_error(xpp, "format string too long (max %d bytes)", XO_FORMAT_MAX);
+	return -1;
+    }
+
     for (cp = fmt; *cp && field < num_fields; field++, xfip++) {
-	xfip->xfi_start = cp;
+	/* Initialize offset members to XO_FOFF_NONE; 0 is a valid offset */
+	xfip->xfi_start    = XO_FOFF_NONE;
+	xfip->xfi_content  = XO_FOFF_NONE;
+	xfip->xfi_format   = XO_FOFF_NONE;
+	xfip->xfi_encoding = XO_FOFF_NONE;
+	xfip->xfi_next     = XO_FOFF_NONE;
+
+	xfip->xfi_start = (xo_format_offset_t)(cp - fmt);
 
 	if (*cp == '\n') {
 	    xfip->xfi_ftype = XO_ROLE_NEWLINE;
@@ -434,15 +448,16 @@ xo_parse_fields (xo_parse_t *xpp, xo_field_info_t *fields,
 		    break;
 
 	    xfip->xfi_ftype   = XO_ROLE_TEXT;
-	    xfip->xfi_content = cp;
-	    xfip->xfi_clen    = sp - cp;
-	    xfip->xfi_next    = sp;
+	    xfip->xfi_content = (xo_format_offset_t)(cp - fmt);
+	    xfip->xfi_clen    = (xo_format_offset_t)(sp - cp);
+	    xfip->xfi_next    = (xo_format_offset_t)(sp - fmt);
 	    cp = sp;
 	    continue;
 	}
 
 	if (cp[1] == '{') {		/* {{ escaped brace */
-	    xfip->xfi_start = cp + 1;
+	    const char *start_ptr = cp + 1;
+	    xfip->xfi_start = (xo_format_offset_t)(start_ptr - fmt);
 	    xfip->xfi_ftype = XO_ROLE_EBRACE;
 
 	    cp += 2;
@@ -456,17 +471,18 @@ xo_parse_fields (xo_parse_t *xpp, xo_field_info_t *fields,
 		return -1;
 	    }
 
-	    xfip->xfi_len = sp - xfip->xfi_start + 1;
+	    xfip->xfi_len = (xo_format_offset_t)(sp - start_ptr + 1);
 
 	    if (*sp == '}' && sp[1] == '}')
 		sp += 2;
 
 	    cp = sp;
-	    xfip->xfi_next = cp;
+	    xfip->xfi_next = (xo_format_offset_t)(cp - fmt);
 	    continue;
 	}
 
-	xfip->xfi_start = basep = cp + 1;
+	basep = cp + 1;
+	xfip->xfi_start = (xo_format_offset_t)(basep - fmt);
 
 	const char *format = NULL;
 	ssize_t flen = 0;
@@ -493,8 +509,8 @@ xo_parse_fields (xo_parse_t *xpp, xo_field_info_t *fields,
 		}
 	    }
 	    if (ep != sp) {
-		xfip->xfi_clen    = sp - ep;
-		xfip->xfi_content = ep;
+		xfip->xfi_clen    = (xo_format_offset_t)(sp - ep);
+		xfip->xfi_content = (xo_format_offset_t)(ep - fmt);
 	    }
 	} else {
 	    xo_parse_error(xpp, "missing content (':'): '%s'",
@@ -526,8 +542,8 @@ xo_parse_fields (xo_parse_t *xpp, xo_field_info_t *fields,
 		if (*sp == '}')
 		    break;
 
-	    xfip->xfi_encoding = ep;
-	    xfip->xfi_elen     = sp - ep;
+	    xfip->xfi_encoding = (xo_format_offset_t)(ep - fmt);
+	    xfip->xfi_elen     = (xo_format_offset_t)(sp - ep);
 	}
 
 	if (*sp != '}') {
@@ -536,15 +552,16 @@ xo_parse_fields (xo_parse_t *xpp, xo_field_info_t *fields,
 	    return -1;
 	}
 
-	xfip->xfi_len  = sp - xfip->xfi_start;
-	xfip->xfi_next = ++sp;
+	xfip->xfi_len  = (xo_format_offset_t)(sp - basep);
+	xfip->xfi_next = (xo_format_offset_t)(sp + 1 - fmt);
+	sp += 1;
 
 	if (xfip->xfi_clen || format || (xfip->xfi_flags & XFF_ARGUMENT)) {
 	    if (format) {
-		xfip->xfi_format = format;
-		xfip->xfi_flen   = flen;
+		xfip->xfi_format = (xo_format_offset_t)(format - fmt);
+		xfip->xfi_flen   = (xo_format_offset_t)flen;
 	    } else if (xo_role_wants_default_format(xfip->xfi_ftype)) {
-		xfip->xfi_format = xo_default_format;
+		xfip->xfi_format = XO_FOFF_DEFAULT;
 		xfip->xfi_flen   = 2;
 	    }
 	}
@@ -554,8 +571,8 @@ xo_parse_fields (xo_parse_t *xpp, xo_field_info_t *fields,
 	    goto next_field;
 
 	if (xfip->xfi_ftype == 'V') {
-	    const char *np = xfip->xfi_content;
-	    unsigned nlen = xfip->xfi_clen;
+	    const char *np = xo_foff(fmt, xfip->xfi_content);
+	    unsigned nlen = (unsigned)xfip->xfi_clen;
 	    unsigned ni;
 
 	    if (nlen == 0 && !(xfip->xfi_flags & XFF_ARGUMENT)) {
@@ -601,8 +618,8 @@ xo_parse_fields (xo_parse_t *xpp, xo_field_info_t *fields,
 	}
 
 	if (xfip->xfi_ftype == '[' || xfip->xfi_ftype == ']') {
-	    const char *np = xfip->xfi_content;
-	    unsigned nlen = xfip->xfi_clen;
+	    const char *np = xo_foff(fmt, xfip->xfi_content);
+	    unsigned nlen = (unsigned)xfip->xfi_clen;
 	    if (np && nlen) {
 		unsigned ni = (np[0] == '-') ? 1 : 0;
 		for (; ni < nlen; ni++) {
