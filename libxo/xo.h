@@ -366,6 +366,25 @@ xo_emit_cached_h (xo_handle_t *xop, const xo_format_cache_t *fcp,
 xo_ssize_t
 xo_emit_cached (const xo_format_cache_t *fcp, const char *fmt, ...);
 
+xo_ssize_t
+xo_emit_cachedr (const xo_format_cache_t *fcp, const char *fmt, ...);
+
+xo_ssize_t
+xo_emit_cached_hv (xo_handle_t *xop, const xo_format_cache_t *fcp,
+		   const char *fmt, va_list vap);
+
+xo_ssize_t
+xo_emit_cached_hvf (xo_handle_t *xop, xo_emit_flags_t flags,
+		    const xo_format_cache_t *fcp, const char *fmt, va_list vap);
+
+xo_ssize_t
+xo_emit_cached_hf (xo_handle_t *xop, xo_emit_flags_t flags,
+		   const xo_format_cache_t *fcp, const char *fmt, ...);
+
+xo_ssize_t
+xo_emit_cached_f (xo_emit_flags_t flags, const xo_format_cache_t *fcp,
+		  const char *fmt, ...);
+
 XO_PRINTFLIKE(2, 0)
 static inline xo_ssize_t
 xo_emit_hvp (xo_handle_t *xop, const char *fmt, va_list vap)
@@ -421,6 +440,72 @@ xo_emit_fp (xo_emit_flags_t flags, const char *fmt, ...)
     va_list vap;
     va_start(vap, fmt);
     xo_ssize_t rc = xo_emit_hvf(NULL, flags, fmt, vap);
+    va_end(vap);
+    return rc;
+}
+
+/* Cached _p variants: mirror the _p wrappers above, targeting xo_emit_cached_hv
+ * and xo_emit_cached_hvf so the IR pass can rewrite _p calls uniformly. */
+
+XO_PRINTFLIKE(3, 0)
+static inline xo_ssize_t
+xo_emit_cached_hvp (xo_handle_t *xop, const xo_format_cache_t *fcp,
+		    const char *fmt, va_list vap)
+{
+    return xo_emit_cached_hv(xop, fcp, fmt, vap);
+}
+
+XO_PRINTFLIKE(3, 4)
+static inline xo_ssize_t
+xo_emit_cached_hp (xo_handle_t *xop, const xo_format_cache_t *fcp,
+		   const char *fmt, ...)
+{
+    va_list vap;
+    va_start(vap, fmt);
+    xo_ssize_t rc = xo_emit_cached_hv(xop, fcp, fmt, vap);
+    va_end(vap);
+    return rc;
+}
+
+XO_PRINTFLIKE(2, 3)
+static inline xo_ssize_t
+xo_emit_cached_p (const xo_format_cache_t *fcp, const char *fmt, ...)
+{
+    va_list vap;
+    va_start(vap, fmt);
+    xo_ssize_t rc = xo_emit_cached_hv(NULL, fcp, fmt, vap);
+    va_end(vap);
+    return rc;
+}
+
+XO_PRINTFLIKE(4, 0)
+static inline xo_ssize_t
+xo_emit_cached_hvfp (xo_handle_t *xop, xo_emit_flags_t flags,
+		     const xo_format_cache_t *fcp, const char *fmt, va_list vap)
+{
+    return xo_emit_cached_hvf(xop, flags, fcp, fmt, vap);
+}
+
+XO_PRINTFLIKE(4, 5)
+static inline xo_ssize_t
+xo_emit_cached_hfp (xo_handle_t *xop, xo_emit_flags_t flags,
+		    const xo_format_cache_t *fcp, const char *fmt, ...)
+{
+    va_list vap;
+    va_start(vap, fmt);
+    xo_ssize_t rc = xo_emit_cached_hvf(xop, flags, fcp, fmt, vap);
+    va_end(vap);
+    return rc;
+}
+
+XO_PRINTFLIKE(3, 4)
+static inline xo_ssize_t
+xo_emit_cached_fp (xo_emit_flags_t flags, const xo_format_cache_t *fcp,
+		   const char *fmt, ...)
+{
+    va_list vap;
+    va_start(vap, fmt);
+    xo_ssize_t rc = xo_emit_cached_hvf(NULL, flags, fcp, fmt, vap);
     va_end(vap);
     return rc;
 }
