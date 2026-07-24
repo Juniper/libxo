@@ -7806,15 +7806,16 @@ xo_do_emit (xo_handle_t *xop, xo_emit_flags_t flags, const char *fmt)
  * Core of xo_emit_cached: use a pre-parsed const field table when valid.
  * Copies the const table to a mutable stack array (xo_do_emit_fields mutates
  * in place for gettext/fnum finalization).  Falls back to xo_do_emit() on
- * version mismatch or null cache.
+ * version mismatch or null cache.  flags is passed to xo_do_emit() only on
+ * the fallback path (the cached path calls xo_do_emit_fields directly).
  */
 static int
-xo_do_emit_cached (xo_handle_t *xop, const xo_format_cache_t *fcp,
-		   const char *fmt)
+xo_do_emit_cached (xo_handle_t *xop, xo_emit_flags_t flags,
+		   const xo_format_cache_t *fcp, const char *fmt)
 {
     if (fcp == NULL || fcp->xfc_fields == NULL
 	    || fcp->xfc_version != XO_EMIT_CACHE_VERSION)
-	return xo_do_emit(xop, 0, fmt);	/* safe fallback: parse at runtime */
+	return xo_do_emit(xop, flags, fmt);	/* safe fallback: parse at runtime */
 
     xop->xo_columns = 0;
     xop->xo_errno = errno;
@@ -7844,7 +7845,7 @@ xo_emit_cached_h (xo_handle_t *xop, const xo_format_cache_t *fcp,
 
     xop = xo_default(xop);
     va_start(xop->xo_vap, fmt);
-    rc = xo_do_emit_cached(xop, fcp, fmt);
+    rc = xo_do_emit_cached(xop, 0, fcp, fmt);
     va_end(xop->xo_vap);
     bzero(&xop->xo_vap, sizeof(xop->xo_vap));
 
@@ -7858,7 +7859,81 @@ xo_emit_cached (const xo_format_cache_t *fcp, const char *fmt, ...)
     ssize_t rc;
 
     va_start(xop->xo_vap, fmt);
-    rc = xo_do_emit_cached(xop, fcp, fmt);
+    rc = xo_do_emit_cached(xop, 0, fcp, fmt);
+    va_end(xop->xo_vap);
+    bzero(&xop->xo_vap, sizeof(xop->xo_vap));
+
+    return rc;
+}
+
+xo_ssize_t
+xo_emit_cachedr (const xo_format_cache_t *fcp, const char *fmt, ...)
+{
+    xo_handle_t *xop = xo_default(NULL);
+    ssize_t rc;
+
+    va_start(xop->xo_vap, fmt);
+    rc = xo_do_emit_cached(xop, XOEF_RETAIN, fcp, fmt);
+    va_end(xop->xo_vap);
+    bzero(&xop->xo_vap, sizeof(xop->xo_vap));
+
+    return rc;
+}
+
+xo_ssize_t
+xo_emit_cached_hv (xo_handle_t *xop, const xo_format_cache_t *fcp,
+		   const char *fmt, va_list vap)
+{
+    ssize_t rc;
+
+    xop = xo_default(xop);
+    va_copy(xop->xo_vap, vap);
+    rc = xo_do_emit_cached(xop, 0, fcp, fmt);
+    va_end(xop->xo_vap);
+    bzero(&xop->xo_vap, sizeof(xop->xo_vap));
+
+    return rc;
+}
+
+xo_ssize_t
+xo_emit_cached_hvf (xo_handle_t *xop, xo_emit_flags_t flags,
+		    const xo_format_cache_t *fcp, const char *fmt, va_list vap)
+{
+    ssize_t rc;
+
+    xop = xo_default(xop);
+    va_copy(xop->xo_vap, vap);
+    rc = xo_do_emit_cached(xop, flags, fcp, fmt);
+    va_end(xop->xo_vap);
+    bzero(&xop->xo_vap, sizeof(xop->xo_vap));
+
+    return rc;
+}
+
+xo_ssize_t
+xo_emit_cached_hf (xo_handle_t *xop, xo_emit_flags_t flags,
+		   const xo_format_cache_t *fcp, const char *fmt, ...)
+{
+    ssize_t rc;
+
+    xop = xo_default(xop);
+    va_start(xop->xo_vap, fmt);
+    rc = xo_do_emit_cached(xop, flags, fcp, fmt);
+    va_end(xop->xo_vap);
+    bzero(&xop->xo_vap, sizeof(xop->xo_vap));
+
+    return rc;
+}
+
+xo_ssize_t
+xo_emit_cached_f (xo_emit_flags_t flags, const xo_format_cache_t *fcp,
+		  const char *fmt, ...)
+{
+    xo_handle_t *xop = xo_default(NULL);
+    ssize_t rc;
+
+    va_start(xop->xo_vap, fmt);
+    rc = xo_do_emit_cached(xop, flags, fcp, fmt);
     va_end(xop->xo_vap);
     bzero(&xop->xo_vap, sizeof(xop->xo_vap));
 
