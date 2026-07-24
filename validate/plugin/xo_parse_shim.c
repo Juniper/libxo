@@ -111,3 +111,41 @@ xo_shim_parse_args (const char *fmt,
     xo_parse_release(&xpp);
     return 0;
 }
+
+int
+xo_shim_parse_fields (const char *fmt,
+                       xo_shim_error_t error_cb, void *error_data,
+                       xo_shim_field_cb_t field_cb, void *field_data)
+{
+    struct xo_shim_state ss = { error_cb, error_data };
+    xo_parse_t xpp = { 0 };
+    xpp.xp_error      = shim_error_cb;
+    xpp.xp_error_data = &ss;
+
+    if (xo_parse_format(&xpp, fmt) < 0) {
+        xo_parse_release(&xpp);
+        return -1;
+    }
+
+    for (unsigned i = 0; i < xpp.xp_num_fields; i++) {
+        const xo_field_info_t *xfip = &xpp.xp_fields[i];
+        xo_shim_field_t f;
+        f.xsf_flags    = (unsigned long long) xfip->xfi_flags;
+        f.xsf_ftype    = xfip->xfi_ftype;
+        f.xsf_start    = (short) xfip->xfi_start;
+        f.xsf_content  = (short) xfip->xfi_content;
+        f.xsf_format   = (short) xfip->xfi_format;
+        f.xsf_encoding = (short) xfip->xfi_encoding;
+        f.xsf_next     = (short) xfip->xfi_next;
+        f.xsf_len      = (short) xfip->xfi_len;
+        f.xsf_clen     = (short) xfip->xfi_clen;
+        f.xsf_flen     = (short) xfip->xfi_flen;
+        f.xsf_elen     = (short) xfip->xfi_elen;
+        f.xsf_fnum     = xfip->xfi_fnum;
+        f.xsf_renum    = xfip->xfi_renum;
+        field_cb(field_data, &f);
+    }
+
+    xo_parse_release(&xpp);
+    return 0;
+}
