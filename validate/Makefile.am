@@ -25,11 +25,18 @@ VALIDATE_RELPATH = ${VALIDATE_DIR}/${VALIDATE_NAME}
 VALIDATE_BUILD = ${top_builddir}/validate/${VALIDATE_DIR}
 VALIDATE_PLUGIN = ${VALIDATE_BUILD}/${VALIDATE_NAME}
 
-.PHONY: validate validate-clean accept-validate
+PRECOMPILE_NAME = xo_precompile.so
+PRECOMPILE_DIR = precompile
+PRECOMPILE_RELPATH = ${PRECOMPILE_DIR}/${PRECOMPILE_NAME}
+
+PRECOMPILE_BUILD = ${top_builddir}/validate/${PRECOMPILE_DIR}
+PRECOMPILE_PLUGIN = ${PRECOMPILE_BUILD}/${PRECOMPILE_NAME}
+
+.PHONY: validate validate-clean precompile precompile-clean
 
 if HAVE_VALIDATE
 
-all: ${VALIDATE_PLUGIN}
+all: ${VALIDATE_PLUGIN} ${PRECOMPILE_PLUGIN}
 
 ${VALIDATE_PLUGIN}: ${VALIDATE_DIR}/CMakeCache.txt
 	${MAKE} -C ${VALIDATE_DIR}
@@ -42,16 +49,23 @@ ${VALIDATE_DIR}/CMakeCache.txt:
 	    -DCMAKE_OSX_ARCHITECTURES="${CMAKE_OSX_ARCHITECTURES}" \
 	    -DXO_BUILDDIR="$(CURDIR)/${top_builddir}"
 
-accept:
-	${MAKE} -C ${top_builddir}/tests/validate accept
+${PRECOMPILE_PLUGIN}: ${PRECOMPILE_DIR}/CMakeCache.txt
+	${MAKE} -C ${PRECOMPILE_DIR}
 
-test tests:
-	${MAKE} -C ${top_builddir}/tests/validate test
+${PRECOMPILE_DIR}/CMakeCache.txt:
+	${MKDIR} -p ${PRECOMPILE_DIR}
+	${CMAKE_COMMAND} -S ${top_srcdir}/validate/precompile -B ${PRECOMPILE_DIR} \
+	    -DLLVM_DIR="${LLVM_CMAKE_DIR}" \
+	    -DCMAKE_OSX_ARCHITECTURES="${CMAKE_OSX_ARCHITECTURES}" \
+	    -DXO_BUILDDIR="$(CURDIR)/${top_builddir}"
 
 validate-clean:
 	${RM} -fr ${VALIDATE_DIR}
 
-CLEANDIRS = ${VALIDATE_DIR}
+precompile-clean:
+	${RM} -fr ${PRECOMPILE_DIR}
+
+CLEANDIRS = ${VALIDATE_DIR} ${PRECOMPILE_DIR}
 
 clean-local:
 	rm -rf ${CLEANDIRS}
@@ -60,7 +74,7 @@ else
 
 all:
 
-validate validate-clean accept:
+validate validate-clean precompile precompile-clean:
 	@echo "validate plugin disabled. use --with-llvm-config=PATH"
 
 endif
