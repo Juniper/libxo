@@ -1,0 +1,18 @@
+<div class="line">
+  <div class="data" data-tag="name">alice</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="count">42</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="first">john</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="last">doe</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="label">item</div>
+</div>
+  <div class="padding">              </div>
+<div class="line">
+  <div class="data" data-tag="value">padded</div>
+</div>
