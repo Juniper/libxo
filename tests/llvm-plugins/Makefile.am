@@ -72,9 +72,9 @@ EXTRA_DIST = \
         ${addprefix saved/, ${addsuffix .plain.${fmt}.err, ${PRECOMPILE_TEST_CASES}}} \
         ${addprefix saved/, ${addsuffix .pass.${fmt}.out,  ${PRECOMPILE_TEST_CASES}}} \
         ${addprefix saved/, ${addsuffix .pass.${fmt}.err,  ${PRECOMPILE_TEST_CASES}}}} \
-    ${addprefix saved/, ${addsuffix .ir.out, ${PRECOMPILE_TEST_CASES}}} \
-    ${addprefix saved/, ${addsuffix .ir.err, ${PRECOMPILE_TEST_CASES}}} \
-    ${addprefix saved/, ${addsuffix .ll,     ${PRECOMPILE_TEST_CASES}}}
+    ${addprefix saved/, ${addsuffix .ir.out,   ${PRECOMPILE_TEST_CASES}}} \
+    ${addprefix saved/, ${addsuffix .ir.err,   ${PRECOMPILE_TEST_CASES}}} \
+    ${addprefix saved/, ${addsuffix .ll.norm,  ${PRECOMPILE_TEST_CASES}}}
 
 all:
 
@@ -138,9 +138,19 @@ test-precompile: ${PRECOMPILE_PLUGIN}
 	    ${CLANG_PASS} -S -emit-llvm ${srcdir}/$$tc.c \
 	        -o out/$$tc.ll \
 	        > out/$$tc.ir.out 2> out/$$tc.ir.err ; \
-	    ${DIFF} -Nu ${srcdir}/saved/$$tc.ll     out/$$tc.ll     ; \
-	    ${DIFF} -Nu ${srcdir}/saved/$$tc.ir.out out/$$tc.ir.out ; \
-	    ${DIFF} -Nu ${srcdir}/saved/$$tc.ir.err out/$$tc.ir.err ; \
+	    ${SED} \
+	        -e '/^target /d' \
+	        -e '/^module asm/d' \
+	        -e '/^attributes #/d' \
+	        -e '/^!/d' \
+	        -e 's/dso_local //g' \
+	        -e 's/ !dbg ![0-9]*//g' \
+	        -e 's/, !dbg ![0-9]*//g' \
+	        -e '/^[[:space:]]*#dbg_value/d' \
+	        out/$$tc.ll > out/$$tc.ll.norm ; \
+	    ${DIFF} -Nu ${srcdir}/saved/$$tc.ll.norm out/$$tc.ll.norm ; \
+	    ${DIFF} -Nu ${srcdir}/saved/$$tc.ir.out  out/$$tc.ir.out ; \
+	    ${DIFF} -Nu ${srcdir}/saved/$$tc.ir.err  out/$$tc.ir.err ; \
 	    grep -q "xo_emit_cached" out/$$tc.ll \
 	        || echo "FAIL: no xo_emit_cached in $$tc.ll" ; \
 	    grep -q "xo_fcache" out/$$tc.ll \
@@ -166,9 +176,9 @@ accept: ${VALIDATE_PLUGIN} ${PRECOMPILE_PLUGIN}
 	        ${CP} out/$$tc.pass.$$fmt.out  ${srcdir}/saved/$$tc.pass.$$fmt.out  ; \
 	        ${CP} out/$$tc.pass.$$fmt.err  ${srcdir}/saved/$$tc.pass.$$fmt.err  ; \
 	    done ; \
-	    ${CP} out/$$tc.ll     ${srcdir}/saved/$$tc.ll     ; \
-	    ${CP} out/$$tc.ir.out ${srcdir}/saved/$$tc.ir.out ; \
-	    ${CP} out/$$tc.ir.err ${srcdir}/saved/$$tc.ir.err ; \
+	    ${CP} out/$$tc.ll.norm ${srcdir}/saved/$$tc.ll.norm ; \
+	    ${CP} out/$$tc.ir.out  ${srcdir}/saved/$$tc.ir.out  ; \
+	    ${CP} out/$$tc.ir.err  ${srcdir}/saved/$$tc.ir.err  ; \
 	done)
 
 CLEANDIRS = out
