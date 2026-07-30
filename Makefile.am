@@ -23,7 +23,7 @@ SUBDIRS = \
     encoder
 
 if HAVE_VALIDATE
-SUBDIRS += validate
+SUBDIRS += llvm-plugin
 endif
 
 SUBDIRS += tests
