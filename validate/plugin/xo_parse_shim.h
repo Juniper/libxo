@@ -17,6 +17,8 @@
 #ifndef XO_PARSE_SHIM_H
 #define XO_PARSE_SHIM_H
 
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -61,19 +63,19 @@ int xo_shim_parse_args(const char *fmt,
  * field-by-field.
  */
 typedef struct xo_shim_field_s {
-    unsigned long long xsf_flags;   /* xfi_flags (xo_xff_flags_t) */
-    unsigned           xsf_ftype;   /* xfi_ftype */
-    short xsf_start;                /* xfi_start */
-    short xsf_content;              /* xfi_content */
-    short xsf_format;               /* xfi_format */
-    short xsf_encoding;             /* xfi_encoding */
-    short xsf_next;                 /* xfi_next */
-    short xsf_len;                  /* xfi_len */
-    short xsf_clen;                 /* xfi_clen */
-    short xsf_flen;                 /* xfi_flen */
-    short xsf_elen;                 /* xfi_elen */
-    unsigned xsf_fnum;              /* xfi_fnum */
-    unsigned xsf_renum;             /* xfi_renum */
+    uint64_t xsf_flags;    /* xfi_flags (xo_xff_flags_t) */
+    uint32_t xsf_ftype;    /* xfi_ftype */
+    int16_t  xsf_start;    /* xfi_start */
+    int16_t  xsf_content;  /* xfi_content */
+    int16_t  xsf_format;   /* xfi_format */
+    int16_t  xsf_encoding; /* xfi_encoding */
+    int16_t  xsf_next;     /* xfi_next */
+    int16_t  xsf_len;      /* xfi_len */
+    int16_t  xsf_clen;     /* xfi_clen */
+    int16_t  xsf_flen;     /* xfi_flen */
+    int16_t  xsf_elen;     /* xfi_elen */
+    uint32_t xsf_fnum;     /* xfi_fnum */
+    uint32_t xsf_renum;    /* xfi_renum */
 } xo_shim_field_t;
 
 typedef void (*xo_shim_field_cb_t)(void *data, const xo_shim_field_t *f);
