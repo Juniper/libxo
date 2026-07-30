@@ -17,7 +17,7 @@ SUBDIRS += xpath
 endif
 
 if HAVE_VALIDATE
-SUBDIRS += validate
+SUBDIRS += llvm-plugins
 endif
 
 test tests:
