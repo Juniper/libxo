@@ -121,7 +121,7 @@ typedef unsigned xo_emit_flags_t; /* Flags to xo_emit() and friends */
  * These are shared between the public field-cache API and the internal
  * encoder plugin API (xo_encoder.h).
  */
-typedef unsigned long long xo_xff_flags_t;
+typedef uint64_t xo_xff_flags_t;
 #define XFF_COLON	(1<<0)	/* Append a ":" */
 #define XFF_COMMA	(1<<1)	/* Append a "," iff there's more output */
 #define XFF_WS		(1<<2)	/* Append a blank */
@@ -204,7 +204,7 @@ xo_foff (const char *base, xo_format_offset_t off)
  */
 typedef struct xo_field_info_s {
     xo_xff_flags_t xfi_flags;		/* Modifier flags (XFF_*) */
-    unsigned xfi_ftype;			/* Role character ('V','L','G', XO_ROLE_*) */
+    uint32_t xfi_ftype;			/* Role character ('V','L','G', XO_ROLE_*) */
     xo_format_offset_t xfi_start;	/* Offset of field start in base string */
     xo_format_offset_t xfi_content;	/* Offset of content (name) */
     xo_format_offset_t xfi_format;	/* Offset of display format (or XO_FOFF_DEFAULT) */
@@ -214,8 +214,8 @@ typedef struct xo_field_info_s {
     xo_format_offset_t xfi_clen;	/* Length of content */
     xo_format_offset_t xfi_flen;	/* Length of format */
     xo_format_offset_t xfi_elen;	/* Length of encoding */
-    unsigned xfi_fnum;			/* Field number (0 = unset) */
-    unsigned xfi_renum;			/* Reordered field number (0 = none) */
+    uint32_t xfi_fnum;			/* Field number (0 = unset) */
+    uint32_t xfi_renum;			/* Reordered field number (0 = none) */
 } xo_field_info_t;
 
 /*
