@@ -597,7 +597,7 @@ AC_CONFIG_FILES([
   encoder/fdr/Makefile
   encoder/fullpath/Makefile
   encoder/test/Makefile
-  validate/Makefile
+  llvm-plugin/Makefile
   xo/Makefile
   xolint/Makefile
   xohtml/Makefile
