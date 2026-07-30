@@ -597,7 +597,7 @@ AC_CONFIG_FILES([
   encoder/fdr/Makefile
   encoder/fullpath/Makefile
   encoder/test/Makefile
-  llvm-plugin/Makefile
+  llvm-plugins/Makefile
   xo/Makefile
   xolint/Makefile
   xohtml/Makefile
@@ -611,7 +611,7 @@ AC_CONFIG_FILES([
   tests/xo/Makefile
   tests/xpath/Makefile
   tests/utf8/Makefile
-  tests/validate/Makefile
+  tests/llvm-plugins/Makefile
   packaging/libxo.spec
   packaging/libxo.rb.base
 ])
