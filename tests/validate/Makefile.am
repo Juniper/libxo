@@ -19,11 +19,11 @@ LLVM_CMAKE_DIR = @LLVM_CMAKE_DIR@
 CLANG_CMAKE_DIR = @CLANG_CMAKE_DIR@
 SDK_PATH = @SDK_PATH@
 
-VALIDATE_BUILD = ${top_builddir}/validate/plugin
+VALIDATE_BUILD = ${top_builddir}/llvm-plugin/validate
 VALIDATE_PLUGIN = ${VALIDATE_BUILD}/xo_validate.so
 VALIDATE_PLUGIN_PATH = $(CURDIR)/${VALIDATE_PLUGIN}
 
-PRECOMPILE_BUILD = ${top_builddir}/validate/precompile
+PRECOMPILE_BUILD = ${top_builddir}/llvm-plugin/precompile
 PRECOMPILE_PLUGIN = ${PRECOMPILE_BUILD}/xo_precompile.so
 PRECOMPILE_PLUGIN_PATH = $(CURDIR)/${PRECOMPILE_PLUGIN}
 
