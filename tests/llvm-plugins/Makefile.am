@@ -109,12 +109,12 @@ test-precompile: ${PRECOMPILE_PLUGIN}
 	@${MKDIR} -p out
 	-@(for tc in ${PRECOMPILE_TEST_CASES}; do \
 	    echo "... precompile build $$tc ..."; \
-	    ${CLANG_PLAIN} ${srcdir}/$$tc.c -L${LIBDIR} -lxo \
+	    ${CLANG_PLAIN} ${srcdir}/$$tc.c -L${LIBDIR} -Wl,-rpath,${LIBDIR} -lxo \
 	        -o out/$$tc.plain \
 	        > out/$$tc.plain.build.out 2> out/$$tc.plain.build.err ; \
 	    ${DIFF} -Nu ${srcdir}/saved/$$tc.plain.build.out out/$$tc.plain.build.out ; \
 	    ${DIFF} -Nu ${srcdir}/saved/$$tc.plain.build.err out/$$tc.plain.build.err ; \
-	    ${CLANG_PASS} ${srcdir}/$$tc.c -L${LIBDIR} -lxo \
+	    ${CLANG_PASS} ${srcdir}/$$tc.c -L${LIBDIR} -Wl,-rpath,${LIBDIR} -lxo \
 	        -o out/$$tc.pass \
 	        > out/$$tc.pass.build.out 2> out/$$tc.pass.build.err ; \
 	    ${DIFF} -Nu ${srcdir}/saved/$$tc.pass.build.out out/$$tc.pass.build.out ; \
