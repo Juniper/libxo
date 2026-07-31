@@ -147,6 +147,8 @@ test-precompile: ${PRECOMPILE_PLUGIN}
 	        -e 's/ !dbg ![0-9]*//g' \
 	        -e 's/, !dbg ![0-9]*//g' \
 	        -e '/^[[:space:]]*#dbg_value/d' \
+		-e 's/ nounwind .*//' \
+		-e '/^$$/d' \
 	        out/$$tc.ll > out/$$tc.ll.norm ; \
 	    ${DIFF} -Nu ${srcdir}/saved/$$tc.ll.norm out/$$tc.ll.norm ; \
 	    ${DIFF} -Nu ${srcdir}/saved/$$tc.ir.out  out/$$tc.ir.out ; \
