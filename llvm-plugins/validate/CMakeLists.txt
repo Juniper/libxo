@@ -58,4 +58,4 @@ endif()
 # platforms — clang's -fplugin= accepts the path as-is.
 set_target_properties(xo_validate PROPERTIES PREFIX "")
 
-install(TARGETS xo_validate DESTINATION lib)
+install(TARGETS xo_validate DESTINATION lib/libxo)
