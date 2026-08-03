@@ -25,11 +25,17 @@
 #include <clang/Basic/Diagnostic.h>
 #include <clang/Frontend/CompilerInstance.h>
 #include <clang/Frontend/FrontendPluginRegistry.h>
+#include <llvm/Support/CommandLine.h>
 
 #include <cctype>
 #include <climits>
 #include <string>
 #include <vector>
+
+static llvm::cl::opt<bool> ErrorsAsWarnings(
+    "xo-validate-errors-as-warnings",
+    llvm::cl::desc("Treat xo_validate errors as warnings (do not fail compilation)"),
+    llvm::cl::init(false));
 
 #include "xo_parse_shim.h"
 
@@ -177,17 +183,23 @@ class XoValidateVisitor : public RecursiveASTVisitor<XoValidateVisitor> {
     unsigned           SyntaxDiagID;
     unsigned           CountDiagID;
     unsigned           TypeDiagID;
+    unsigned           WarnDiagID;  /* always Warning; for style issues from xp_warn */
 
 public:
     explicit XoValidateVisitor(CompilerInstance &CI)
         : Diags(CI.getDiagnostics())
     {
-        SyntaxDiagID = Diags.getCustomDiagID(DiagnosticsEngine::Warning,
-                                              "libxo format: %0");
-        CountDiagID  = Diags.getCustomDiagID(DiagnosticsEngine::Warning,
-                                              "libxo: format expects %0 argument(s) but %1 provided");
-        TypeDiagID   = Diags.getCustomDiagID(DiagnosticsEngine::Warning,
-                                              "libxo: argument %0 type mismatch: format expects %1");
+        auto errLevel = ErrorsAsWarnings
+            ? DiagnosticsEngine::Warning : DiagnosticsEngine::Error;
+
+        SyntaxDiagID = Diags.getCustomDiagID(errLevel,
+                           "libxo format: %0");
+        CountDiagID  = Diags.getCustomDiagID(errLevel,
+                           "libxo: format expects %0 argument(s) but %1 provided");
+        TypeDiagID   = Diags.getCustomDiagID(errLevel,
+                           "libxo: argument %0 type mismatch: format expects %1");
+        WarnDiagID   = Diags.getCustomDiagID(DiagnosticsEngine::Warning,
+                           "libxo format: %0");
     }
 
     bool VisitCallExpr(CallExpr *CE)
@@ -213,11 +225,13 @@ public:
             return true;    /* non-literal format strings: skip */
 
         std::string fmt = SL->getString().str();
-        DiagCb dc { &Diags, SyntaxDiagID, SL->getBeginLoc() };
+        DiagCb dc_err  { &Diags, SyntaxDiagID, SL->getBeginLoc() };
+        DiagCb dc_warn { &Diags, WarnDiagID,   SL->getBeginLoc() };
         ArgCollector ac;
 
         int rc = xo_shim_parse_args(fmt.c_str(),
-                                     emit_diag, &dc,
+                                     emit_diag, &dc_err,
+                                     emit_diag, &dc_warn,
                                      ArgCollector::callback, &ac);
         if (rc < 0)
             return true;    /* parse error already reported */
