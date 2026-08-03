@@ -2164,6 +2164,8 @@ xo_parse_for_handle (xo_handle_t *xop, xo_parse_t *xpp)
     xpp->xp_free = xo_free;
     xpp->xp_error = xo_parse_fail_cb;
     xpp->xp_error_data = xop;
+    xpp->xp_warn = xo_parse_fail_cb;
+    xpp->xp_warn_data = xop;
 }
 
 /**
