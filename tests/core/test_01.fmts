@@ -1,0 +1,3 @@
+Ecsv1=warn,encoder=csv
+Ecsv2=warn,encoder=csv:path=top-level/data/item:no-header
+Ecsv3=warn,@csv:path=item:leafs=sku.sold:no-quotes
