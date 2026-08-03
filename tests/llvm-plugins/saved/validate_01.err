@@ -16,22 +16,22 @@
 ../../../tests/llvm-plugins/validate_01.c:22:40: warning: libxo format: field descriptor uses multiple types: '{LT:Max}'
    22 | void tv_multiple_roles(void) { xo_emit("{LT:Max}"); }
       |                                        ^
-../../../tests/llvm-plugins/validate_01.c:25:38: warning: libxo format: value field must have a name: '{:/%s}'
+../../../tests/llvm-plugins/validate_01.c:25:38: warning: libxo format: field must have a name: '{:/%s}'
    25 | void tv_name_no_name(void) { xo_emit("{:/%s}", "x"); }
       |                                      ^
-../../../tests/llvm-plugins/validate_01.c:28:41: warning: libxo format: use hyphens, not underscores, in value field name: 'no_good'
+../../../tests/llvm-plugins/validate_01.c:28:41: warning: libxo format: use hyphens, not underscores, in field name: 'no_good'
    28 | void tv_name_underscore(void) { xo_emit("{:no_good/%s}", "x"); }
       |                                         ^
-../../../tests/llvm-plugins/validate_01.c:31:40: warning: libxo format: value field name should be lower case: 'NAME'
+../../../tests/llvm-plugins/validate_01.c:31:40: warning: libxo format: field name should be lower case: 'NAME'
    31 | void tv_name_uppercase(void) { xo_emit("{:NAME/%s}", "x"); }
       |                                        ^
-../../../tests/llvm-plugins/validate_01.c:34:36: warning: libxo format: value field name cannot start with a digit: '9lives'
+../../../tests/llvm-plugins/validate_01.c:34:36: warning: libxo format: field name cannot start with a digit: '9lives'
    34 | void tv_name_digit(void) { xo_emit("{:9lives/%s}", "x"); }
       |                                    ^
-../../../tests/llvm-plugins/validate_01.c:37:43: warning: libxo format: value field name contains invalid character: 'a$b'
+../../../tests/llvm-plugins/validate_01.c:37:43: warning: libxo format: field name contains invalid character: 'a$b'
    37 | void tv_name_invalid_char(void) { xo_emit("{:a$b/%s}", "x"); }
       |                                           ^
-../../../tests/llvm-plugins/validate_01.c:40:40: warning: libxo format: value field name should be longer than two characters: 'ab'
+../../../tests/llvm-plugins/validate_01.c:40:40: warning: libxo format: field name should be longer than two characters: 'ab'
    40 | void tv_name_too_short(void) { xo_emit("{:ab/%s}", "x"); }
       |                                        ^
 ../../../tests/llvm-plugins/validate_01.c:43:43: warning: libxo format: anchor content must be a decimal width: 'mumble'
