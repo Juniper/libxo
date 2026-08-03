@@ -72,6 +72,15 @@ shim_error_cb (void *data, const char *fmt, va_list vap)
     ss->error(ss->data, buf);
 }
 
+static void
+shim_warn_cb (void *data, const char *fmt, va_list vap)
+{
+    struct xo_shim_state *ss = data;
+    char buf[512];
+    vsnprintf(buf, sizeof(buf), fmt, vap);
+    ss->error(ss->data, buf);
+}
+
 int
 xo_shim_parse (const char *fmt, xo_shim_error_t error, void *data)
 {
@@ -79,6 +88,8 @@ xo_shim_parse (const char *fmt, xo_shim_error_t error, void *data)
     xo_parse_t xpp = { 0 };
     xpp.xp_error      = shim_error_cb;
     xpp.xp_error_data = &ss;
+    xpp.xp_warn       = shim_warn_cb;
+    xpp.xp_warn_data = &ss;
     xpp.xp_flags      = XPF_STRICT;
 
     int rc = xo_parse_format(&xpp, fmt);
