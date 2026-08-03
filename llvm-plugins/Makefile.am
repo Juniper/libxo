@@ -47,6 +47,7 @@ ${VALIDATE_DIR}/CMakeCache.txt:
 	    -DLLVM_DIR="${LLVM_CMAKE_DIR}" \
 	    -DClang_DIR="${CLANG_CMAKE_DIR}" \
 	    -DCMAKE_OSX_ARCHITECTURES="${CMAKE_OSX_ARCHITECTURES}" \
+	    -DCMAKE_INSTALL_PREFIX="${prefix}" \
 	    -DXO_BUILDDIR="$(CURDIR)/${top_builddir}"
 
 ${PRECOMPILE_PLUGIN}: ${PRECOMPILE_DIR}/CMakeCache.txt
@@ -57,7 +58,12 @@ ${PRECOMPILE_DIR}/CMakeCache.txt:
 	${CMAKE_COMMAND} -S ${top_srcdir}/llvm-plugins/precompile -B ${PRECOMPILE_DIR} \
 	    -DLLVM_DIR="${LLVM_CMAKE_DIR}" \
 	    -DCMAKE_OSX_ARCHITECTURES="${CMAKE_OSX_ARCHITECTURES}" \
+	    -DCMAKE_INSTALL_PREFIX="${prefix}" \
 	    -DXO_BUILDDIR="$(CURDIR)/${top_builddir}"
+
+install-exec-local:
+	${MAKE} -C ${VALIDATE_DIR} install
+	${MAKE} -C ${PRECOMPILE_DIR} install
 
 validate-clean:
 	${RM} -fr ${VALIDATE_DIR}
@@ -74,7 +80,6 @@ else
 
 all:
 
-validate validate-clean precompile precompile-clean:
-	@echo "validate plugin disabled. use --with-llvm-config=PATH"
+install-exec-local validate validate-clean precompile precompile-clean:
 
 endif
