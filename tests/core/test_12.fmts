@@ -1,0 +1,2 @@
+XPmap=warn,xml,pretty,map-file=SRCDIR/test_12.map
+JPmap=warn,json,pretty,map-file=SRCDIR/test_12.map
