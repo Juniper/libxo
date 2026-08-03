@@ -76,6 +76,18 @@ xo_parse_error (xo_parse_t *xpp, const char *fmt, ...)
     va_end(vap);
 }
 
+static void
+xo_parse_warning (xo_parse_t *xpp, const char *fmt, ...)
+{
+    if (xpp == NULL || xpp->xp_error == NULL)
+	return;
+
+    va_list vap;
+    va_start(vap, fmt);
+    xpp->xp_error(xpp->xp_error_data, fmt, vap);
+    va_end(vap);
+}
+
 /* Allocator helper functions */
 
 static void *
@@ -243,7 +255,7 @@ xo_parse_roles (xo_parse_t *xpp, const char *fmt,
 
 	if (*sp == '\\') {
 	    if (sp[1] == '\0') {
-		xo_parse_error(xpp, "backslash at the end of string");
+		xo_parse_error(xpp, "backslash at the end of string, ignored");
 		return NULL;
 	    }
 	    sp += 1;		/* Anything backslashed is ignored */
@@ -323,14 +335,13 @@ xo_parse_roles (xo_parse_t *xpp, const char *fmt,
 	    xo_parse_error(xpp,
 			   "field descriptor uses unknown modifier: '%s'",
 			   xo_printable(fmt));
-	    return NULL;
 	}
 
 	if (ftype == 'N' || ftype == 'U') {
 	    if (flags & XFF_COLON) {
 		xo_parse_error(xpp,
-			       "colon modifier on 'N' or 'U' field ignored: '%s'",
-			       xo_printable(fmt));
+		       "colon modifier on 'N' or 'U' field ignored: '%s'",
+		       xo_printable(fmt));
 		flags &= ~XFF_COLON;
 	    }
 	}
@@ -360,15 +371,16 @@ xo_parse_field_numbers (xo_parse_t *xpp, const char *fmt,
 	    xfip->xfi_fnum = field + 1;
 	else if (xfip->xfi_fnum > num_fields) {
 	    xo_parse_error(xpp,
-			   "field number exceeds number of fields: '%s'", fmt);
+			   "field number exceeds number of fields: '%s'",
+			   xo_printable(fmt));
 	    return -1;
 	}
 
 	fnum = xfip->xfi_fnum - 1;
 	if (fnum < 64) {
 	    if (bits & (one << fnum)) {
-		xo_parse_error(xpp, "field number %u reused: '%s'",
-			       xfip->xfi_fnum, fmt);
+		xo_parse_error(xpp, "field number reused: #%u in '%s'",
+			       xfip->xfi_fnum, xo_printable(fmt));
 		return -1;
 	    }
 	    bits |= one << fnum;
@@ -421,7 +433,8 @@ xo_parse_fields (xo_parse_t *xpp, xo_field_info_t *fields,
 
     /* Reject oversized format strings (int16_t offset range) */
     if (strlen(fmt) > XO_FORMAT_MAX) {
-	xo_parse_error(xpp, "format string too long (max %d bytes)", XO_FORMAT_MAX);
+	xo_parse_error(xpp, "format string too long (max %d bytes, len %d)",
+		       XO_FORMAT_MAX, strlen(fmt));
 	return -1;
     }
 
@@ -576,43 +589,69 @@ xo_parse_fields (xo_parse_t *xpp, xo_field_info_t *fields,
 	    unsigned ni;
 
 	    if (nlen == 0 && !(xfip->xfi_flags & XFF_ARGUMENT)) {
-		xo_parse_error(xpp, "value field must have a name: '%s'",
+		xo_parse_error(xpp, "field must have a name: '%s'",
 			       xo_printable(fmt));
 		return -1;
 	    }
 	    if (np && nlen) {
 		if (isdigit((unsigned char) np[0])) {
-		    xo_parse_error(xpp,
-				   "value field name cannot start with a digit: '%.*s'",
-				   (int) nlen, np);
-		    return -1;
+		    xo_parse_warning(xpp,
+			   "field name cannot start with a digit: '%.*s'",
+			   (int) nlen, np);
 		}
+
+		struct reported_errors {
+		    int re_percent; /* Percent sign */
+		    int re_under; /* Underscores */
+		    int re_upper; /* Upper case */
+		    int re_invalid; /* Invalid character */
+		} re = { 0, 0, 0, 0 };
+
 		for (ni = 0; ni < nlen; ni++) {
 		    unsigned char nc = (unsigned char) np[ni];
-		    if (nc == '_') {
-			xo_parse_error(xpp,
-				       "use hyphens, not underscores, in value field name: '%.*s'",
-				       (int) nlen, np);
-			return -1;
+
+		    if (!re.re_percent && nc == '%') {
+			xo_parse_warning(xpp,
+			       "field name contains percent sign: '%.*s'",
+			       (int) nlen, np);
+			re.re_percent = 1;
+			continue;
 		    }
-		    if (isupper(nc)) {
-			xo_parse_error(xpp,
-				       "value field name should be lower case: '%.*s'",
-				       (int) nlen, np);
-			return -1;
+
+		    if (!re.re_under && nc == '_') {
+			xo_parse_warning(xpp,
+			       "use hyphens, not underscores, "
+				       "in field name: '%.*s'",
+			       (int) nlen, np);
+			re.re_under = 1;
 		    }
-		    if (!isdigit(nc) && !islower(nc) && nc != '-') {
-			xo_parse_error(xpp,
-				       "value field name contains invalid character: '%.*s'",
-				       (int) nlen, np);
-			return -1;
+
+		    if (!re.re_upper && isupper(nc)) {
+			xo_parse_warning(xpp,
+			       "field name should be lower case: '%.*s'",
+			       (int) nlen, np);
+			re.re_upper = 1;
+		    }
+
+		    /*
+		     * Underscores and upper case are reported above,
+		     * so skip them here
+		     */
+		    if (!re.re_invalid && !isdigit(nc)
+			    && !(islower(nc) || isupper(nc))
+ 			    && nc != '-' && nc != '_') {
+			xo_parse_warning(xpp,
+			       "field name contains invalid character: '%.*s'",
+			       (int) nlen, np);
+			re.re_invalid = 1;
 		    }
 		}
-		if (nlen <= 2) {
-		    xo_parse_error(xpp,
-				   "value field name should be longer than two characters: '%.*s'",
-				   (int) nlen, np);
-		    return -1;
+
+		if (!re.re_percent && nlen <= 2) {
+		    xo_parse_warning(xpp,
+			   "field name should be longer than "
+				   "two characters: '%.*s'",
+			   (int) nlen, np);
 		}
 	    }
 	}
@@ -625,32 +664,35 @@ xo_parse_fields (xo_parse_t *xpp, xo_field_info_t *fields,
 		for (; ni < nlen; ni++) {
 		    if (!isdigit((unsigned char) np[ni])) {
 			xo_parse_error(xpp,
-				       "anchor content must be a decimal width: '%.*s'",
-				       (int) nlen, np);
-			return -1;
+			       "anchor content must be a decimal width: '%.*s'",
+			       (int) nlen, np);
+			break;
 		    }
 		}
 		if (format && flen > 0) {
 		    xo_parse_error(xpp,
-				   "anchor cannot have both static width and format: '%s'",
-				   xo_printable(fmt));
-		    return -1;
+			   "anchor cannot have both static "
+				   "width and format: '%s'",
+			   xo_printable(fmt));
 		}
 	    }
 	    if (format && flen > 0) {
+		/* Anchor width must be "%d" or numeric */
 		if (flen != 2 || format[0] != '%' || format[1] != 'd') {
-		    xo_parse_error(xpp,
-				   "anchor format must be '%%d': '%.*s'",
-				   (int) flen, format);
-		    return -1;
+		    char *aep = NULL;
+		    (void) strtol(format, &aep, 10);
+		    if (aep != format + flen)
+			xo_parse_error(xpp,
+				       "anchor format must be '%%d': '%.*s'",
+				       (int) flen, format);
 		}
 	    }
 	}
 
 	if ((xfip->xfi_flags & XFF_HUMANIZE) && !format) {
 	    xo_parse_error(xpp,
-			   "humanize modifier ('h') requires a format string: '%s'",
-			   xo_printable(fmt));
+		   "humanize modifier ('h') requires a format string: '%s'",
+		   xo_printable(fmt));
 	    return -1;
 	}
 
