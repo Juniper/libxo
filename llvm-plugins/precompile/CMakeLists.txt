@@ -57,4 +57,4 @@ endif()
 # Drop the .dylib/.so prefix so -fpass-plugin= can use the path as-is.
 set_target_properties(xo_precompile PROPERTIES PREFIX "")
 
-install(TARGETS xo_precompile DESTINATION lib)
+install(TARGETS xo_precompile DESTINATION lib/libxo)
