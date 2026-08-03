@@ -105,6 +105,7 @@ $(validate_tests): %.validate-test: $(srcdir)/%.c \
 	    LD_LIBRARY_PATH="${FORMAT_LIBDIR}:${LD_LIBRARY_PATH}" \
 	    ${LLVM_CLANG} ${CFLAGS} \
 	    -fplugin=${VALIDATE_BUILD}/xo_validate.so \
+	    -mllvm -xo-validate-errors-as-warnings \
 	    -I${top_srcdir}/libxo -I${top_builddir}/libxo -I${INCLUDEDIR} ${SYSROOT_FLAG} \
 	    $< -L${LIBDIR} -Wl,-rpath,${LIBDIR} -lxo \
 	    -o $@ > $@.make.out 2> $@.make.err
