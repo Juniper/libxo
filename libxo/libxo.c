@@ -2144,7 +2144,9 @@ xo_failure_filter (xo_handle_t *xop, const char *fmt, ...)
     va_end(vap);
 }
 
-/* Error callback bridging xo_parse_t errors to xo_failure() */
+/*
+ * Error callback bridging xo_parse_t errors to xo_failure()
+ */
 static void
 xo_parse_fail_cb (void *data, const char *fmt, va_list vap)
 {
