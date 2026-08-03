@@ -53,9 +53,14 @@ test_12_test_SOURCES = test_12.c
 test_13_test_SOURCES = test_13.c
 test_14_test_SOURCES = test_14.c
 
-# TEST_CASES := $(shell cd ${srcdir} ; echo *.c )
+base_tests = ${TEST_CASES:.c=.test}
 
-noinst_PROGRAMS = ${TEST_CASES:.c=.test}
+noinst_PROGRAMS = ${base_tests}
+
+if HAVE_VALIDATE
+validate_tests = ${TEST_CASES:.c=.validate-test}
+pass_tests = ${TEST_CASES:.c=.pass-test}
+endif
 
 LDADD = \
     ${top_builddir}/libxo/libxo.la
@@ -66,6 +71,8 @@ endif
 
 EXTRA_DIST = \
     ${TEST_CASES} \
+    test_01.fmts \
+    test_12.fmts \
     ${addprefix saved/, ${TEST_CASES:.c=.E.err}} \
     ${addprefix saved/, ${TEST_CASES:.c=.E.out}} \
     ${addprefix saved/, ${TEST_CASES:.c=.H.err}} \
@@ -91,91 +98,139 @@ EXTRA_DIST = \
     ${addprefix saved/, test_01.Ecsv2.out} \
     ${addprefix saved/, test_01.Ecsv2.err} \
     ${addprefix saved/, test_01.Ecsv3.out} \
-    ${addprefix saved/, test_01.Ecsv3.err}
+    ${addprefix saved/, test_01.Ecsv3.err} \
+    ${addprefix saved/, test_12.XPmap.out} \
+    ${addprefix saved/, test_12.XPmap.err} \
+    ${addprefix saved/, test_12.JPmap.out} \
+    ${addprefix saved/, test_12.JPmap.err}
 
-S2O = | ${SED} '1,/@@/d'
+# ---------------------------------------------------------------------------
+# Test runner
+# ---------------------------------------------------------------------------
+
+RUN_TESTS_SH = ${srcdir}/../run-tests.sh
+RUN_TESTS_CMD = ${BASH} ${RUN_TESTS_SH} -d ${srcdir}
+
+# Standard formats; per-test extras live in test_NN.fmts sidecar files.
+TEST_FORMATS = T XP JP JPu HP X J H HIPx E=warn,encoder=test
 
 all:
 
 valgrind:
 	@echo '## Running the regression tests under Valgrind'
-	${MAKE} CHECKER='valgrind -q' tests
+	CHECKER='valgrind -q' ${MAKE} run-plain-tests
 
-#TEST_TRACE = set -x ; 
+.PHONY: run-plain-tests build-plugin-tests run-validate-tests run-pass-tests
 
-TEST_JIG = \
-      LC_ALL=en_US.UTF-8 \
-      ${CHECKER} ./$$base.test --libxo$$xoopts ${TEST_OPTS} \
-      > out/$$base.$$fmt.out 2> out/$$base.$$fmt.err ; \
- ${DIFF} -Nu ${srcdir}/saved/$$base.$$fmt.out out/$$base.$$fmt.out ${S2O} ; \
- ${DIFF} -Nu ${srcdir}/saved/$$base.$$fmt.err out/$$base.$$fmt.err ${S2O}
+# These are substituted by configure; non-empty only when HAVE_VALIDATE is set.
+LLVM_CLANG = @LLVM_CLANG@
+SDK_PATH = @SDK_PATH@
+INCLUDEDIR = ${prefix}/include
+LIBDIR = ${prefix}/lib
+SYSROOT_FLAG = $(if ${SDK_PATH},-isysroot ${SDK_PATH},)
+VALIDATE_BUILD = ${top_builddir}/llvm-plugins/validate
+PRECOMPILE_BUILD = ${top_builddir}/llvm-plugins/precompile
+FORMAT_LIBDIR = ${top_builddir}/format/.libs
+FORMAT_LA = ${top_builddir}/format/libxo_format.la
 
-TEST_JIG2 = \
-echo "... $$test ... $$fmt ..."; \
-xoopts==warn,$$extra ; \
-${TEST_JIG}; true;
+if HAVE_VALIDATE
+PLUGIN_TESTS = run-validate-tests run-pass-tests
+else
+PLUGIN_TESTS =
+endif
 
-TEST_FORMATS = T XP JP JPu HP X J H HIPx
+test tests: ${noinst_PROGRAMS} run-plain-tests ${PLUGIN_TESTS}
 
-test tests: ${bin_PROGRAMS}
+run-plain-tests:
 	@${MKDIR} -p out
-	-@ ${TEST_TRACE} (for test in ${TEST_CASES} ; do \
-	    base=`${BASENAME} $$test .c` ; \
-            (for fmt in ${TEST_FORMATS}; do \
-	        echo "... $$test ... $$fmt ..."; \
-                xoopts=:W$$fmt ; \
-	        ${TEST_JIG}; \
-                true; \
-            done) ; \
-            (for fmt in E; do \
-	        echo "... $$test ... $$fmt ..."; \
-                xoopts==warn,encoder=test ; \
-	        ${TEST_JIG}; \
-                true; \
-            done) \
-	done)
-	-@ (${TEST_TRACE} test=test_01.c; base=test_01; \
-	    (   fmt=Ecsv1; extra=encoder=csv ; \
-			${TEST_JIG2} ); \
-	    (   fmt=Ecsv2; extra=encoder=csv:path=top-level/data/item:no-header ; \
-			${TEST_JIG2} ); \
-	    (   fmt=Ecsv3; extra=@csv:path=item:leafs=sku.sold:no-quotes ; \
-			${TEST_JIG2} ); \
-	)
-	-@ (${TEST_TRACE} test=test_12.c; base=test_12; \
-	    (   fmt=XPmap; extra=xml,pretty,map-file=${srcdir}/test_12.map ; \
-			${TEST_JIG2} ); \
-	    (   fmt=JPmap; extra=json,pretty,map-file=${srcdir}/test_12.map ; \
-			${TEST_JIG2} ); \
-	)
+	${RUN_TESTS_CMD} -T "${TEST_FORMATS}" run-bin ${TEST_CASES:.c=.test}
 
+if HAVE_VALIDATE
+
+# Static pattern rules: each plugin binary has an explicit source dependency
+# and is compiled + linked in one LLVM_CLANG invocation.  This bypasses
+# automake's link rule (which uses CC) so the plugin flags actually take effect.
+all-local: $(validate_tests) $(pass_tests)
+
+$(validate_tests): %.validate-test: $(srcdir)/%.c \
+    $(VALIDATE_BUILD)/xo_validate.so \
+    $(FORMAT_LA)
+	@${MKDIR} -p out
+	$(AM_V_GEN)DYLD_LIBRARY_PATH="${FORMAT_LIBDIR}:${DYLD_LIBRARY_PATH}" \
+	    LD_LIBRARY_PATH="${FORMAT_LIBDIR}:${LD_LIBRARY_PATH}" \
+	    ${LLVM_CLANG} ${CFLAGS} \
+	    -fplugin=${VALIDATE_BUILD}/xo_validate.so \
+	    -I${top_srcdir}/libxo -I${top_builddir}/libxo -I${INCLUDEDIR} ${SYSROOT_FLAG} \
+	    $< -L${LIBDIR} -Wl,-rpath,${LIBDIR} -lxo \
+	    -o $@ > out/$@.make.out 2> out/$@.make.err
+
+$(pass_tests): %.pass-test: $(srcdir)/%.c \
+    $(PRECOMPILE_BUILD)/xo_precompile.so \
+    $(FORMAT_LA)
+	@${MKDIR} -p out
+	$(AM_V_GEN)DYLD_LIBRARY_PATH="${FORMAT_LIBDIR}:${DYLD_LIBRARY_PATH}" \
+	    LD_LIBRARY_PATH="${FORMAT_LIBDIR}:${LD_LIBRARY_PATH}" \
+	    ${LLVM_CLANG} ${CFLAGS} \
+	    -fpass-plugin=${PRECOMPILE_BUILD}/xo_precompile.so \
+	    -I${top_srcdir}/libxo -I${top_builddir}/libxo -I${INCLUDEDIR} ${SYSROOT_FLAG} \
+	    $< -L${LIBDIR} -Wl,-rpath,${LIBDIR} -lxo \
+	    -o $@ > out/$@.make.out 2> out/$@.make.err
+
+run-validate-tests: $(validate_tests)
+	@${MKDIR} -p out
+	-@for tc in ${TEST_CASES:.c=}; do \
+	    diff -Nu ${srcdir}/saved/$$tc.validate-test.make.out \
+	        out/$$tc.validate-test.make.out ; \
+	    diff -Nu ${srcdir}/saved/$$tc.validate-test.make.err \
+	        out/$$tc.validate-test.make.err ; \
+	done
+	${RUN_TESTS_CMD} -T "${TEST_FORMATS}" -m validate run-bin ${TEST_CASES:.c=.test}
+
+run-pass-tests: $(pass_tests)
+	@${MKDIR} -p out
+	-@for tc in ${TEST_CASES:.c=}; do \
+	    diff -Nu ${srcdir}/saved/$$tc.pass-test.make.out \
+	        out/$$tc.pass-test.make.out ; \
+	    diff -Nu ${srcdir}/saved/$$tc.pass-test.make.err \
+	        out/$$tc.pass-test.make.err ; \
+	done
+	${RUN_TESTS_CMD} -T "${TEST_FORMATS}" -m pass run-bin ${TEST_CASES:.c=.test}
+
+else
+
+run-validate-tests run-pass-tests:
+
+endif
+
+# Run a single test/format for quick iteration:
+#   make one TEST_BIN=test_01.test TEST_FMT=JP
 one:
-	-@(test=${TEST_CASE}; data=${TEST_DATA}; ${TEST_ONE} ; true)
+	${RUN_TESTS_CMD} -T "${TEST_FMT:-T}" run-bin ${TEST_BIN:-test_01.test}
 
 accept:
-	-@(for test in ${TEST_CASES} ; do \
-	    base=`${BASENAME} $$test .c` ; \
-            (for fmt in ${TEST_FORMATS} E ; do \
-	        echo "... $$test ... $$fmt ..."; \
-	        ${CP} out/$$base.$$fmt.out ${srcdir}/saved/$$base.$$fmt.out ; \
-	        ${CP} out/$$base.$$fmt.err ${srcdir}/saved/$$base.$$fmt.err ; \
-	    done) \
-	done)
-	-@(test=test_01.c; base=test_01; for fmt in Ecsv1 Ecsv2 Ecsv3 ; do \
-	        echo "... $$test ... $$fmt ..."; \
-	        ${CP} out/$$base.$$fmt.out ${srcdir}/saved/$$base.$$fmt.out ; \
-	        ${CP} out/$$base.$$fmt.err ${srcdir}/saved/$$base.$$fmt.err ; \
-	done)
-	-@(test=test_01.c; base=test_12; for fmt in XPmap JPmap ; do \
-	        echo "... $$test ... $$fmt ..."; \
-	        ${CP} out/$$base.$$fmt.out ${srcdir}/saved/$$base.$$fmt.out ; \
-	        ${CP} out/$$base.$$fmt.err ${srcdir}/saved/$$base.$$fmt.err ; \
-	done)
+	@${MKDIR} -p ${srcdir}/saved
+	${RUN_TESTS_CMD} -T "${TEST_FORMATS}" accept-bin ${TEST_CASES:.c=.test}
+	-@test -z "${LLVM_CLANG}" || for tc in ${TEST_CASES:.c=}; do \
+	    cp out/$$tc.validate-test.make.out \
+	        ${srcdir}/saved/$$tc.validate-test.make.out 2>/dev/null ; \
+	    cp out/$$tc.validate-test.make.err \
+	        ${srcdir}/saved/$$tc.validate-test.make.err 2>/dev/null ; \
+	    cp out/$$tc.pass-test.make.out \
+	        ${srcdir}/saved/$$tc.pass-test.make.out 2>/dev/null ; \
+	    cp out/$$tc.pass-test.make.err \
+	        ${srcdir}/saved/$$tc.pass-test.make.err 2>/dev/null ; \
+	done
 
 .c.test:
 	$(AM_V_CC)$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -o $@ $<
 
-CLEANFILES = ${TEST_CASES:.c=.test}
+CLEANFILES = ${TEST_CASES:.c=.test} \
+    ${TEST_CASES:.c=.validate-test} \
+    ${TEST_CASES:.c=.validate-test.make.out} \
+    ${TEST_CASES:.c=.validate-test.make.err} \
+    ${TEST_CASES:.c=.pass-test} \
+    ${TEST_CASES:.c=.pass-test.make.out} \
+    ${TEST_CASES:.c=.pass-test.make.err}
 CLEANDIRS = out
 
 clean-local:
