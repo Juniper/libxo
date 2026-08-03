@@ -76,6 +76,8 @@ static void
 shim_warn_cb (void *data, const char *fmt, va_list vap)
 {
     struct xo_shim_state *ss = data;
+    if (ss->error == NULL)
+        return;
     char buf[512];
     vsnprintf(buf, sizeof(buf), fmt, vap);
     ss->error(ss->data, buf);
@@ -136,12 +138,16 @@ field_consumes_varg (const xo_field_info_t *xfip)
 int
 xo_shim_parse_args (const char *fmt,
                      xo_shim_error_t error_cb, void *error_data,
-                     xo_shim_arg_cb_t arg_cb,   void *arg_data)
+                     xo_shim_error_t warn_cb,  void *warn_data,
+                     xo_shim_arg_cb_t arg_cb,  void *arg_data)
 {
-    struct xo_shim_state ss = { error_cb, error_data };
+    struct xo_shim_state ss_err  = { error_cb, error_data };
+    struct xo_shim_state ss_warn = { warn_cb, warn_data };
     xo_parse_t xpp = { 0 };
     xpp.xp_error      = shim_error_cb;
-    xpp.xp_error_data = &ss;
+    xpp.xp_error_data = &ss_err;
+    xpp.xp_warn       = shim_warn_cb;
+    xpp.xp_warn_data  = &ss_warn;
     xpp.xp_flags      = XPF_STRICT;
 
     if (xo_parse_format(&xpp, fmt) < 0) {
