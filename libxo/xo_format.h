@@ -66,6 +66,8 @@ typedef struct xo_parse_s {
     xo_free_func_t xp_free;		/* Free (NULL → free) */
     xo_parse_error_func_t xp_error;	/* Error reporter (NULL → silent) */
     void *xp_error_data;		/* Opaque data passed to xp_error */
+    xo_parse_error_func_t xp_warn;	/* Warning reporter (NULL → silent) */
+    void *xp_warn_data;			/* Opaque data passed to xp_warn */
     unsigned xp_flags;			/* XPF_* flags */
 
     /* Output — filled in by xo_parse_format() */
