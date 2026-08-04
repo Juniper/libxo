@@ -35,6 +35,7 @@ SYSROOT_FLAG = $(if ${SDK_PATH},-isysroot ${SDK_PATH},)
 CLANG_CMD = ${LLVM_CLANG} \
     ${CFLAGS} \
     -fplugin=${VALIDATE_PLUGIN_PATH} \
+    -mllvm -xo-validate-errors-as-warnings \
     -I${INCLUDEDIR} \
     ${SYSROOT_FLAG} \
     -fsyntax-only
