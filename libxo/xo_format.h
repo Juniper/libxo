@@ -143,4 +143,13 @@ int xo_role_wants_default_format(int ftype);
 
 const char * xo_printable (const char *str);
 
+/*
+ * Some roles need a name, some don't
+ */
+#define XO_FORMAT_ROLES_NEEDING_NAME "DLNPTUV" /* Can't have empty name (:XX)*/
+#define XO_FORMAT_ROLES_OPTIONAL_NAME "G["     /* Might have empty name */
+#define XO_FORMAT_ROLES_NO_NAME "]"	       /* Must have empty name */
+#define XO_FORMAT_ROLES_NO_FORMAT "G]"	       /* Can't have a format (/XX) */
+#define XO_FORMAT_MODIFIERS_NEED_STRING "a"    /* "a" has a string argument */
+
 #endif /* XO_FIELD_H */
