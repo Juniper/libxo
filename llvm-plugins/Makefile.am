@@ -25,6 +25,15 @@ VALIDATE_RELPATH = ${VALIDATE_DIR}/${VALIDATE_NAME}
 VALIDATE_BUILD = ${top_builddir}/llvm-plugins/${VALIDATE_DIR}
 VALIDATE_PLUGIN = ${VALIDATE_BUILD}/${VALIDATE_NAME}
 
+VALIDATE_SRCS = \
+    ${top_builddir}/libxo/xo_config.h \
+    ${top_srcdir}/libxo/xo.h \
+    ${top_srcdir}/libxo/xo_format.h \
+    ${top_srcdir}/llvm-plugins/validate/CMakeLists.txt \
+    ${top_srcdir}/llvm-plugins/validate/xo_validate.cc \
+    ${top_srcdir}/llvm-plugins/validate/xo_parse_shim.c \
+    ${top_srcdir}/llvm-plugins/validate/xo_parse_shim.h
+
 PRECOMPILE_NAME = xo_precompile.so
 PRECOMPILE_DIR = precompile
 PRECOMPILE_RELPATH = ${PRECOMPILE_DIR}/${PRECOMPILE_NAME}
@@ -32,13 +41,17 @@ PRECOMPILE_RELPATH = ${PRECOMPILE_DIR}/${PRECOMPILE_NAME}
 PRECOMPILE_BUILD = ${top_builddir}/llvm-plugins/${PRECOMPILE_DIR}
 PRECOMPILE_PLUGIN = ${PRECOMPILE_BUILD}/${PRECOMPILE_NAME}
 
+PRECOMPILE_SRCS = \
+    ${top_srcdir}/llvm-plugins/precompile/CMakeLists.txt \
+    ${top_srcdir}/llvm-plugins/precompile/xo_precompile.cc
+
 .PHONY: validate validate-clean precompile precompile-clean
 
 if HAVE_VALIDATE
 
 all: ${VALIDATE_PLUGIN} ${PRECOMPILE_PLUGIN}
 
-${VALIDATE_PLUGIN}: ${VALIDATE_DIR}/CMakeCache.txt
+${VALIDATE_PLUGIN}: ${VALIDATE_DIR}/CMakeCache.txt ${VALIDATE_SRCS}
 	${MAKE} -C ${VALIDATE_DIR}
 
 ${VALIDATE_DIR}/CMakeCache.txt:
@@ -50,7 +63,7 @@ ${VALIDATE_DIR}/CMakeCache.txt:
 	    -DCMAKE_INSTALL_PREFIX="${prefix}" \
 	    -DXO_BUILDDIR="$(CURDIR)/${top_builddir}"
 
-${PRECOMPILE_PLUGIN}: ${PRECOMPILE_DIR}/CMakeCache.txt
+${PRECOMPILE_PLUGIN}: ${PRECOMPILE_DIR}/CMakeCache.txt ${PRECOMPILE_SRCS}
 	${MAKE} -C ${PRECOMPILE_DIR}
 
 ${PRECOMPILE_DIR}/CMakeCache.txt:
@@ -62,8 +75,8 @@ ${PRECOMPILE_DIR}/CMakeCache.txt:
 	    -DXO_BUILDDIR="$(CURDIR)/${top_builddir}"
 
 install-exec-local:
-	${MAKE} -C ${VALIDATE_DIR} install
-	${MAKE} -C ${PRECOMPILE_DIR} install
+	${CMAKE_COMMAND} --install ${VALIDATE_DIR}
+	${CMAKE_COMMAND} --install ${PRECOMPILE_DIR}
 
 validate-clean:
 	${RM} -fr ${VALIDATE_DIR}
