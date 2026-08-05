@@ -435,7 +435,7 @@ Checking for Filtering (xo_discarding_output)
 
   :param xop: Handle for modify (or NULL for default handle)
   :type xop: xo_handle_t \*
-  :returns: void  
+  :returns: int
 
   When a filter is in place, circumstances may occur where ay additional
   output will be discarding.  xo_discarding_output will return TRUE when
