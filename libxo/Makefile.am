@@ -55,8 +55,10 @@ libxo_la_SOURCES = \
 
 man3_files = \
     libxo.3 \
+    xo_add_filter.3 \
     xo_attr.3 \
     xo_create.3 \
+    xo_discarding_output.3 \
     xo_emit.3 \
     xo_emit_err.3 \
     xo_err.3 \
@@ -85,6 +87,7 @@ man5_files = \
 man7_files = \
     libxo.7 \
     xo_csv.7 \
+    xo_filter.7 \
     xo_options.7
 
 man_MANS = ${man3_files} ${man5_files} ${man7_files}
