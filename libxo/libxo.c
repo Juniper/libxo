@@ -5619,7 +5619,7 @@ xo_filt_rollback (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED,
 }
 
 static inline int
-xo_filt_want_output (xo_handle_t *xop UNUSED, xo_filter_status_t fstatus)
+xo_filt_want_output (xo_handle_t *xop UNUSED, xo_filter_status_t fstatus UNUSED)
 {
 #ifdef LIBXO_NEED_FILTERS
     switch (fstatus) {
