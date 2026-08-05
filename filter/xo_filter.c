@@ -2226,8 +2226,6 @@ xo_eval_func_substring (XO_EVAL_NODE_ARGS)
 	return xo_eval_value_missing();
     }
 
-    
-
     xo_eval_value_t value = xo_eval_value_make(C_STRING, 0, 0);
 
     char *str = xo_eval_cast_string(xop, fn_argv[0]);
@@ -2235,6 +2233,9 @@ xo_eval_func_substring (XO_EVAL_NODE_ARGS)
 
     int64_t pos = xo_eval_cast_int64(xop, fn_argv[1]);
     int64_t len = fn_argc == 2 ? slen : xo_eval_cast_int64(xop, fn_argv[2]);
+
+    /* Release our arguments */
+    xo_eval_arguments_free(xop, xfp, framep, xnp, indent, 3, fn_argv);
 
     /*
      * Strings a 1-origin, not 0.  Also the spec says:
