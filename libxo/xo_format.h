@@ -12,8 +12,8 @@
  * libxo runtime.
  */
 
-#ifndef XO_FIELD_H
-#define XO_FIELD_H
+#ifndef XO_FORMAT_H
+#define XO_FORMAT_H
 
 #include <stdarg.h>
 #include <stddef.h>
@@ -152,4 +152,4 @@ const char * xo_printable (const char *str);
 #define XO_FORMAT_ROLES_NO_FORMAT "G]"	       /* Can't have a format (/XX) */
 #define XO_FORMAT_MODIFIERS_NEED_STRING "a"    /* "a" has a string argument */
 
-#endif /* XO_FIELD_H */
+#endif /* XO_FORMAT_H */

@@ -7380,11 +7380,10 @@ xo_gettext_combine_formats (xo_handle_t *xop, const char *fmt,
  *
  * Summary: i18n aighn't cheap.
  */
-static const char *
+static char *
 xo_gettext_build_format (xo_handle_t *xop,
 			 xo_field_info_t *fields, int this_field,
-			 const char *base, const char *next,
-			 char **new_fmtp)
+			 const char *base)
 {
     xo_buffer_t xb;
     xo_buf_zero(&xb);
@@ -7398,7 +7397,7 @@ xo_gettext_build_format (xo_handle_t *xop,
 	    break;
 
 	const char *gtfmt = xo_dgettext(xop, xb.xb_bufp);
-	if (gtfmt == NULL || gtfmt == next || xo_streq(gtfmt, next))
+	if (gtfmt == NULL || gtfmt == xb.xb_bufp)
 	    break;
 
 	char *new_fmt = xo_strndup(gtfmt, -1);
@@ -7407,14 +7406,12 @@ xo_gettext_build_format (xo_handle_t *xop,
 
 	xo_buf_cleanup(&xb);
 
-	*new_fmtp = new_fmt;
 	return new_fmt;
 
     } while (FALSE);		/* Not really a loop at all */
 
     xo_buf_cleanup(&xb);
-    *new_fmtp = NULL;
-    return next;
+    return NULL;
 }
 
 static void
@@ -7469,15 +7466,12 @@ xo_gettext_rebuild_content (xo_handle_t *xop, xo_field_info_t *fields,
     xo_free(buf);
 }
 #else  /* HAVE_GETTEXT */
-static const char *
+static char *
 xo_gettext_build_format (xo_handle_t *xop UNUSED,
 			 xo_field_info_t *fields UNUSED,
-			 int this_field UNUSED,
-			 const char *base UNUSED, const char *next UNUSED,
-			 char **new_fmtp)
+			 int this_field UNUSED, const char *base UNUSED)
 {
-    *new_fmtp = NULL;
-    return next;
+    return NULL;
 }
 
 static int
@@ -7637,10 +7631,7 @@ xo_do_emit_fields (xo_handle_t *xop, xo_field_info_t *fields,
 		    new_fmt = NULL;
 		}
 
-		xo_gettext_build_format(xop, fields, field,
-					base,
-					xo_foff(base, xfip->xfi_next),
-					&new_fmt);
+		new_fmt = xo_gettext_build_format(xop, fields, field, base);
 		if (new_fmt) {
 		    gettext_changed = 1;
 
@@ -7678,9 +7669,13 @@ xo_do_emit_fields (xo_handle_t *xop, xo_field_info_t *fields,
 			    field = -1; /* Will be incremented at top of loop */
 			    xfip = new_fields;
 			    max_fields = new_max_fields;
-			    base = new_fmt; /* content offsets now relative to new_fmt */
-			    /* base_fmt stays as original fmt: format/encoding
-			     * offsets copied from old_fields remain relative to fmt */
+			    base = new_fmt;
+			    /*
+			     * The content offsets are now relative to
+			     * new_fmt.  base_fmt stays as original
+			     * fmt: format/encoding offsets copied
+			     * from old_fields remain relative to fmt
+			     */
 			}
 		    }
 		}
