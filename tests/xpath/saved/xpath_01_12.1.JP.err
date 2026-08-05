@@ -932,6 +932,144 @@ main: status: track
 main: input '}item'
 main: status: track
 main: input ''
+main: input '# substring(str, pos, len) returns a partial string'
+main: input 'r'
+main: status: zero
+main: input '?item[substring(iface, 2, 3) = 'th0']'
+adding filter: 'item[substring(iface, 2, 3) = 'th0']'
+added filter: 0
+--- 0: 20
+    000020: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 14, next 0, prev 0 
+                000014: type 14 (L_EQUALS), str 36 [=], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring], contents 7, next 16, prev 0 
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
+                            000005: type 70 (C_ELEMENT), str 20 [iface], contents 0, next 0, prev 0 
+                        000008: type 53 (T_NUMBER), str 28 [2], contents 0, next 11, prev 7 
+                        000011: type 53 (T_NUMBER), str 32 [3], contents 0, next 0, prev 8 
+                    000016: type 54 (T_QUOTED), str 38 [th0], contents 0, next 0, prev 3 
+main: status: zero
+main: input '{item'
+main: filter: rc: 14
+main: status: zero
+main: input '<item'
+main: filter: rc: 6
+main: status: predicate
+main: input '$ iface eth0.0'
+main: key: 'iface'='eth0.0'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: filter: rc: 6
+main: status: track
+main: input '<item'
+main: filter: rc: 8
+main: status: predicate
+main: input '$ iface eth1.0'
+main: key: 'iface'='eth1.0'
+main: status: track
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: filter: rc: 8
+main: status: predicate
+main: input '$ iface eth0.1'
+main: key: 'iface'='eth0.1'
+main: status: full
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: full
+main: input '>item'
+main: filter: rc: 6
+main: status: track
+main: input '<item'
+main: filter: rc: 8
+main: status: predicate
+main: input '$ iface lo0'
+main: key: 'iface'='lo0'
+main: status: track
+main: input '= val 4'
+main: field: 'val'='4'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# substring again'
+main: input 'r'
+main: status: zero
+main: input '?item[substring(name, 5) = 'c']'
+adding filter: 'item[substring(name, 5) = 'c']'
+added filter: 0
+--- 0: 17
+    000017: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 11, next 0, prev 0 
+                000011: type 14 (L_EQUALS), str 31 [=], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring], contents 7, next 13, prev 0 
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
+                            000005: type 70 (C_ELEMENT), str 20 [name], contents 0, next 0, prev 0 
+                        000008: type 53 (T_NUMBER), str 27 [5], contents 0, next 0, prev 7 
+                    000013: type 54 (T_QUOTED), str 33 [c], contents 0, next 0, prev 3 
+main: status: zero
+main: input '{item'
+main: filter: rc: 14
+main: status: zero
+main: input '<item'
+main: filter: rc: 6
+main: status: predicate
+main: input '$ name pkg-a'
+main: key: 'name'='pkg-a'
+main: status: track
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: filter: rc: 6
+main: status: predicate
+main: input '$ name pkg-b'
+main: key: 'name'='pkg-b'
+main: status: track
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: filter: rc: 6
+main: status: predicate
+main: input '$ name lib-c'
+main: key: 'name'='lib-c'
+main: status: full
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: full
+main: input '>item'
+main: filter: rc: 6
+main: status: track
+main: input '<item'
+main: filter: rc: 8
+main: status: predicate
+main: input '$ name nohyphen'
+main: key: 'name'='nohyphen'
+main: status: track
+main: input '= val 4'
+main: field: 'val'='4'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
 main: input '# substring-before(str, needle) returns the part before the first needle'
 main: input 'r'
 main: status: zero
