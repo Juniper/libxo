@@ -67,7 +67,7 @@ CLEANFILES = \
 
 xo_xparse.o xo_filter.o xo_xparse.lo xo_filter.lo: xo_xpath.tab.h
 
-EXTRA_DIRST = \
+EXTRA_DIST = \
     xo_xpath.y
 
 install-exec-hook:
