@@ -119,6 +119,18 @@
   <val>3</val>
 </item>
 <item>
+  <name>lib-c</name>
+  <val>3</val>
+</item>
+<item>
+  <iface>eth0.0</iface>
+  <val>1</val>
+</item>
+<item>
+  <iface>eth0.1</iface>
+  <val>3</val>
+</item>
+<item>
   <name>pkg-a</name>
   <val>1</val>
 </item>
