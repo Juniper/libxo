@@ -41,6 +41,8 @@ The triggered functionality is identical.
 .Bl -column "Token2341234"
 .It Sy "Option     " "Action"
 .It "color      " "Enable colors/effects for display styles (TEXT, HTML)"
+.It "filter=expr" "Filter output using an XPath\-like expression"
+.It "filter\-warn" "Warn about runtime filter expression errors"
 .It "flush      " "Flush after each emit call"
 .It "flush\-line " "Flush each line of output"
 .It "html       " "Emit HTML output"
@@ -170,7 +172,7 @@ For example consider the following xo_emit call:
 To turn all colored output to red-on-blue, use eight pairs of
 "red/blue" mappings separated by plus signs ("+"):
 .Bd -literal -offset indent
-    --libxo colors=red/blue+red/blue+red/blue+red/blue+\
+    --libxo colors=red/blue+red/blue+red/blue+red/blue+\\
                    red/blue+red/blue+red/blue+red/blue
 .Ed
 .Pp
@@ -285,6 +287,29 @@ exist in the current working directory,
 .Nm libxo
 will look for the file in the "map" subdirectory of the system
 "share" directory, typically /usr/share/libxo/map/.
+.Sh Filters
+The
+.Fa filter
+option enables output filtering using an XPath-like expression.
+Only list instances that match the expression are emitted;
+non-matching instances are silently discarded.
+.Bd -literal -offset indent
+    netstat \-\-libxo xml,pretty,filter='socket[tcp-state=="ESTABLISHED"]'
+.Ed
+.Pp
+Multiple
+.Fa filter=
+options are combined as a union (logical OR): an instance matches if
+it satisfies any one of the given expressions.
+.Pp
+The
+.Fa filter-warn
+option enables diagnostic messages on standard error when filter
+predicates reference fields that are not present in the output.
+.Pp
+See
+.Xr xo_filter 7
+for full documentation of the filter expression syntax.
 .Sh Encoders
 In addition to the four "built-in" formats,
 .Nm libxo
@@ -320,6 +345,8 @@ The following are three example invocations of
       ps \-\-libxo:Hxc 1
 .Ed
 .Sh SEE ALSO
+.Xr xo_add_filter 3 ,
+.Xr xo_filter 7 ,
 .Xr libxo 3 ,
 .Xr xo_format 5
 .Sh HISTORY
