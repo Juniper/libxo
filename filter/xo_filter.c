@@ -1517,6 +1517,37 @@ xo_eval_cast_float (xo_handle_t *xop, xo_eval_value_t value)
     }
 }
 
+static int64_t
+xo_eval_cast_int64 (xo_handle_t *xop, xo_eval_value_t value)
+{
+    xo_float_t fval = 0;
+
+    if (value.xev_type == C_STRING || value.xev_type == C_DSTRING)
+	value = xo_eval_make_number_from_value(xop, value);
+
+    switch (value.xev_type) {
+    case C_DSTRING:
+    case C_STRING:;
+	const char *str = value.xev_str; /* Should not occur */
+	char *ep;
+	fval = strtod(str, &ep);
+	return (ep && *ep == '\0') ? fval: 0;
+
+    case C_FLOAT:
+	return (int64_t) value.xev_float;
+
+    case C_BOOLEAN:
+	return value.xev_int64 ? 1 : 0;
+
+    case C_UINT64:
+	return (int64_t) value.xev_uint64;
+
+    case C_INT64:
+    default:
+	return value.xev_int64;
+    }
+}
+
 static char *
 xo_eval_cast_string (xo_handle_t *xop UNUSED, xo_eval_value_t value)
 {
@@ -2175,6 +2206,79 @@ xo_eval_func_floor (XO_EVAL_NODE_ARGS)
 }
 
 static xo_eval_value_t
+xo_eval_func_substring (XO_EVAL_NODE_ARGS)
+{
+    int fn_argc = xo_eval_argument_count(XO_EVAL_NODE_PASS);
+    if (fn_argc < 2 || fn_argc > 3) {
+	xo_failure_filter(xop, "substring() requires 2 or 3 arguments, got %d",
+			  fn_argc);
+	return xo_eval_value_invalid();
+    }
+
+    xo_eval_value_t fn_argv[3];
+    xo_eval_arguments(XO_EVAL_NODE_PASS, 3, fn_argv);
+
+    /* Defer if arguments aren't resolved yet (field not yet seen) */
+    if ((fn_argv[0].xev_flags & XEVF_MISSING)
+  	    || (fn_argv[1].xev_flags & XEVF_MISSING)
+  	    || (fn_argv[2].xev_flags & XEVF_MISSING)) {
+	xo_eval_arguments_free(xop, xfp, framep, xnp, indent, 3, fn_argv);
+	return xo_eval_value_missing();
+    }
+
+    
+
+    xo_eval_value_t value = xo_eval_value_make(C_STRING, 0, 0);
+
+    char *str = xo_eval_cast_string(xop, fn_argv[0]);
+    int64_t slen = strlen(str);
+
+    int64_t pos = xo_eval_cast_int64(xop, fn_argv[1]);
+    int64_t len = fn_argc == 2 ? slen : xo_eval_cast_int64(xop, fn_argv[2]);
+
+    /*
+     * Strings a 1-origin, not 0.  Also the spec says:
+     *
+     * The returned substring contains those characters for which the
+     * position of the character is greater than or equal to the
+     * rounded value of the second argument and, if the third argument
+     * is specified, less than the sum of the rounded value of the
+     * second argument and the rounded value of the third argument;
+     * the comparisons and addition used for the above follow the
+     * standard IEEE 754 rules; rounding is done as if by a call to
+     * the round function. The following examples illustrate various
+     * unusual cases:
+     */
+    const char *cp = str;
+    if (pos > 1) {
+	if (pos <= slen) {
+	    cp += pos - 1;
+	    slen -= pos - 1;
+	} else {
+	    cp = "";
+	    slen = 0;
+	}
+    }
+
+    if (len < 0)
+	len = 0;
+    else {
+	if (len > slen)
+	    len = slen;
+    }
+
+    if (len > 0) {
+	value.xev_type = C_DSTRING;
+	value.xev_str = strndup(cp, len);
+    } else {
+	value.xev_str = "";
+    }
+
+    xo_free(str);
+    return value;
+}
+
+static xo_eval_value_t
 xo_eval_func_substring_before (XO_EVAL_NODE_ARGS)
 {
     xo_eval_value_t value = xo_eval_value_make(C_STRING, 0, 0);
@@ -2598,6 +2702,7 @@ xo_eval_func_map_t xo_eval_functions[] = {
     { xo_eval_func_starts_with, "starts-with", 0, 2 },
     { xo_eval_func_string, "string", 0, 1 },
     { xo_eval_func_string_length, "string-length", 0, 1 },
+    { xo_eval_func_substring, "substring", XEFF_NO_EVAL, -1 },
     { xo_eval_func_substring_after, "substring-after", 0, 2 },
     { xo_eval_func_substring_before, "substring-before", 0, 2 },
     { xo_eval_func_sum, "sum", XEFF_NO_EVAL, -1 },
