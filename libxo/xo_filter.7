@@ -30,8 +30,8 @@ Filters use an XPath-like expression language.
 Expressions are used to select content hierarchies and specify
 conditions for content to be selected.
 .Pp
-Expressions contain five constructs: paths to elements, predicate
-tests, literal strings, numbers, and function calls.
+Expressions may include paths to elements, negated paths, wildcards,
+predicate tests, literal strings, numbers, and function calls.
 .Ss Paths
 A single element name selects all elements with that name:
 .Bd -literal -offset indent
@@ -55,6 +55,56 @@ which must be under a
 which must be under a
 .Li doc
 element.
+.Ss Path Negation
+Prefixing a path expression with
+.Li \&!
+suppresses matching instances rather than emitting them.
+When all filters use negation,
+.Nm libxo
+defaults to allowing output and suppresses only the matching instances.
+.Bd -literal -offset indent
+\&!remote
+.Ed
+.Pp
+Suppresses all elements named
+.Li remote
+and their descendants.
+.Ss Wildcard Elements
+An asterisk
+.Pq Li *
+matches any element name at that position in the path:
+.Bd -literal -offset indent
+one/*/three
+.Ed
+.Pp
+Selects any
+.Li three
+element that is a direct child of an element with any name, which
+must itself be a direct child of a
+.Li one
+element.
+.Ss Absolute and Relative Paths
+A path beginning with
+.Li /
+is anchored at the root of the output tree.
+A path without a leading
+.Li /
+matches the named element at any depth in the output hierarchy.
+.Bd -literal -offset indent
+/one/two
+one/two
+.Ed
+.Pp
+The first expression matches
+.Li two
+elements that are children of a root-level
+.Li one
+element.
+The second matches
+.Li two
+elements under any
+.Li one
+element in the tree, regardless of depth.
 .Ss Predicate Tests
 Square-bracket predicates filter elements by condition.
 An expression in brackets is evaluated to true or false
@@ -76,6 +126,27 @@ Predicates can refer to attributes using a leading at-sign
 .Bd -literal -offset indent
 chapter[@number == 1]
 .Ed
+.Pp
+Predicates may perform arithmetic using addition
+.Pq Li +  ,
+subtraction
+.Pq Li \-  ,
+multiplication
+.Pq Li *  ,
+and division
+.Pq Li div .
+Comparisons allow type coercion when the operands have different types:
+.Bd -literal -offset indent
+item[cost * count >= 1500]
+.Ed
+.Pp
+Selects any
+.Li item
+element where the product of its
+.Li cost
+and
+.Li count
+children is greater than or equal to 1500.
 .Pp
 Predicates may be applied to any step in a path:
 .Bd -literal -offset indent
@@ -322,6 +393,7 @@ The following XPath functions are supported in filter predicates.
 .It Sy Function Ta Sy Description
 .It Li "concat(s1, s2, ...)" Ta "Concatenates strings"
 .It Li "contains(str, sub)" Ta "True when str contains sub as a substring"
+.It Li "ends-with(str, suffix)" Ta "True when str ends with suffix"
 .It Li "normalize-space(str)" Ta "Strips leading/trailing space; collapses runs"
 .It Li "starts-with(str, prefix)" Ta "True when str begins with prefix"
 .It Li "string-length(str)" Ta "Returns the length of str"
