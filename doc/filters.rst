@@ -41,6 +41,32 @@ for content to be selected.  Expressions contain five constructs:
       element, which are themselves under a `chapter` element, which
       in turn must be under a `doc` element.
 
+- Negate elements
+
+  - Select nodes not to emit
+
+    - Example: !remote
+    - Select all node except `remote` and its descendants
+
+- Wildcard elements
+
+  - Select any nodes.  A "*" matches any element.
+
+    - Example: one/*/three
+    - Select any `three` elements that are under an element of any
+      name, which in turn must be under a `one` element .
+
+- Relative and absolute paths
+
+  - A path with a leading slash is "anchored" at the root of the
+    output tree, while one without matches anywhere in the output
+    hierarchy.
+
+    - Example: /one/two and one/two
+    - The former matches any `two` elements under a root-level `one`
+      element, while the latter matches any `two` elements under a
+      `one` element anywhere in the tree.
+
 - Predicate tests
 
   - Selects nodes for which the expression in the square brackets
@@ -55,6 +81,16 @@ for content to be selected.  Expressions contain five constructs:
     - Example chapter[@number == 1]
     - Selects all `chapter` elements which have a `number` attribute with
       a value of 1.
+
+  - Can perform math using addition ("+"), subtraction ("-"),
+    multiplication ("*") , and division ("div") and comparisons using
+    equals ("=" or "=="), greater than (">"), greater than or equal
+    (">="), less than ("<"), less than or equal ("<=").  Comparisons
+    allow type forcing when the types are unequal.
+
+    - Example: item[cost * count >= 1500]
+    - Selects any `item` element where the product of their `cost` and
+      `count` elements are greater than or equal to 1500.
 
   - Can be applied to any path member
 
@@ -245,7 +281,7 @@ Among the unimplemented features are:
 - node tests: comment(), text(), node(), and processing-instruction();
   not needed in this context.
 - id() and key(); not needed in this context.
-- "//" (descendent); requires additional buffering.
+- "//" (descendant); requires additional buffering.
 - nested predicates (predicates with predicates); complexity issues.
 - predicate paths (deep paths in predicates); requires additional buffering.
 
@@ -320,6 +356,7 @@ String functions:
 ========================== ==================================================
  concat(s1, s2, ...)        Concatenates strings
  contains(str, sub)         True when *str* contains *sub* as a substring
+ ends-with(str, suffix)     True when *str* ends with *suffix*
  normalize-space(str)       Strips leading/trailing space and collapses runs
  starts-with(str, prefix)   True when *str* begins with *prefix*
  string-length(str)         Returns the length of *str*
