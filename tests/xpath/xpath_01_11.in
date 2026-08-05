@@ -1,0 +1,56 @@
+# Test 1: basic attribute equality predicate
+r
+?interface[@name='eth0']
+{interface
+<interface
+@ name eth0
+= ifindex 1
+>interface
+<interface
+@ name lo0
+= ifindex 2
+>interface
+<interface
+@ name eth1
+= ifindex 3
+>interface
+}interface
+
+# Test 2: starts-with function on attribute
+r
+?interface[starts-with(@name, 'eth')]
+{interface
+<interface
+@ name eth0
+= ifindex 1
+>interface
+<interface
+@ name lo0
+= ifindex 2
+>interface
+<interface
+@ name eth1
+= ifindex 3
+>interface
+}interface
+
+# Test 3: attribute combined with key predicate using 'and'
+r
+?interface[@type='ethernet' and state='up']
+{interface
+<interface
+@ type ethernet
+$ state up
+= ifindex 1
+>interface
+<interface
+@ type ethernet
+$ state down
+= ifindex 2
+>interface
+<interface
+@ type loopback
+$ state up
+= ifindex 3
+>interface
+}interface

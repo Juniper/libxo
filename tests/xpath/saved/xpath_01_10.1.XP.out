@@ -1,0 +1,30 @@
+<five>
+  <six>
+    <seven>seventh</seven>
+    <eight>
+      <nine>ninth</nine>
+    </eight>
+  </six>
+</five>
+<six>
+  <seven>single-layer</seven>
+  <ten>
+    <four>fourth</four>
+  </ten>
+</six>
+<one>
+  <two>
+    <three>10</three>
+    <value>10</value>
+  </two>
+  <six>
+    <seven>seventh</seven>
+    <six2>
+      <eight>eighth</eight>
+    </six2>
+  </six>
+  <two>
+    <three>9</three>
+    <value>9</value>
+  </two>
+</one>

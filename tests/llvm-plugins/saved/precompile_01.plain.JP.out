@@ -1,0 +1,11 @@
+{
+  "data": {
+    "name": "alice",
+    "count": 42,
+    "first": "john",
+    "last": "doe",
+    "id": 7,
+    "label": "item",
+    "value": "padded"
+  }
+}

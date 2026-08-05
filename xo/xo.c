@@ -432,7 +432,8 @@ main (int argc UNUSED, char **argv)
     }
 
     xo_set_formatter(NULL, formatter, checkpoint);
-    xo_set_flags(NULL, XOF_NO_VA_ARG | XOF_NO_TOP | XOF_NO_CLOSE);
+    xo_set_flags(NULL, XOF_NO_VA_ARG | XOF_NO_TOP
+		 | XOF_NO_CLOSE | XOF_NO_TOP_LEVEL);
 
     /*
      * If we have some explicit state change, handle it

@@ -15,8 +15,11 @@
 *.exe
 *.app
 
+*.swp
+#*#
 *~
 *.orig
+.#*
 
 aclocal.m4
 ar-lib
@@ -44,3 +47,11 @@ xo_config.h.in
 xtest
 xtest.dSYM
 tests/w
+
+CLAUDE*
+.CLAUDE*
+.claude*
+
+cscope.files
+cscope.out
+trash

@@ -1,0 +1,71 @@
+<statistics>
+  <socket>
+    <path>/tmp/ssh-agent.1234</path>
+  </socket>
+  <socket>
+    <path>/tmp/other.sock</path>
+  </socket>
+</statistics>
+<statistics>
+  <socket>
+    <path>/tmp/ssh-agent.1234</path>
+  </socket>
+  <socket>
+    <path>/tmp/other.sock</path>
+  </socket>
+</statistics>
+<statistics>
+  <socket>
+    <protocol>TCP4</protocol>
+    <receive-bytes-waiting>100</receive-bytes-waiting>
+  </socket>
+  <socket>
+    <protocol>tcp6</protocol>
+    <receive-bytes-waiting>300</receive-bytes-waiting>
+  </socket>
+</statistics>
+<statistics>
+  <socket>
+    <path>/tmp/ssh-DQWvehZ5Bz/agent.39523</path>
+  </socket>
+  <socket>
+    <path>/tmp/other.sock</path>
+  </socket>
+</statistics>
+<statistics>
+  <socket>
+    <path>/tmp/ssh-agent.1234</path>
+  </socket>
+</statistics>
+<statistics>
+  <socket>
+    <address>127.0.0.1:8080</address>
+  </socket>
+</statistics>
+<statistics>
+  <socket>
+    <protocol>tcp4</protocol>
+  </socket>
+  <socket>
+    <protocol>tcp6</protocol>
+  </socket>
+</statistics>
+<statistics>
+  <socket>
+    <protocol>tcp4</protocol>
+    <receive-bytes-waiting>1111</receive-bytes-waiting>
+    <send-bytes-waiting>1</send-bytes-waiting>
+    <tcp-state>ESTABLISHED</tcp-state>
+  </socket>
+  <socket>
+    <address>ffffa0000d003a80</address>
+    <type>stream</type>
+    <receive-bytes-waiting>2222</receive-bytes-waiting>
+    <send-bytes-waiting>2</send-bytes-waiting>
+    <vnode>ffffa0000dce7000</vnode>
+    <connection>0</connection>
+    <first-reference>0</first-reference>
+    <next-reference>0</next-reference>
+    <path>/tmp/ssh-DQWvehZ5Bz/agent.39523</path>
+  </socket>
+</statistics>

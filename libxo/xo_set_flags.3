@@ -81,6 +81,14 @@ The function
 .Fn xo_failure
 can be used as a breakpoint for a debugger,
 regardless of whether warnings are enabled.
+.It Dv XOF_FILTER_WARN
+Trigger diagnostic output on standard error when runtime issues are
+encountered while processing filter expressions against incoming data.
+The volume of output depends on the filter expressions and the input
+data, but can be useful when debugging filter behavior.
+See
+.Xr xo_filter 7
+for details.
 .It Dv XOF_WARN_XML
 Generate warnings in XML on stdout
 .It Dv XOF_XPATH

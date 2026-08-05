@@ -71,12 +71,13 @@ AC_CHECK_FUNCS([strerror])
 AC_CHECK_FUNCS([strlcpy])
 AC_CHECK_FUNCS([strspn])
 AC_CHECK_FUNCS([sysctlbyname])
-AC_CHECK_FUNCS([sysctlbyname])
+AC_CHECK_FUNCS([uexterr_gettext])
 
 AC_CHECK_HEADERS([ctype.h])
 AC_CHECK_HEADERS([dlfcn.h])
 AC_CHECK_HEADERS([dlfcn.h])
 AC_CHECK_HEADERS([errno.h])
+AC_CHECK_HEADERS([exterr.h])
 AC_CHECK_HEADERS([langinfo.h])
 AC_CHECK_HEADERS([monitor.h])
 AC_CHECK_HEADERS([stdio.h])
@@ -84,6 +85,7 @@ AC_CHECK_HEADERS([stdio_ext.h])
 AC_CHECK_HEADERS([stdlib.h])
 AC_CHECK_HEADERS([stdtime/tzfile.h])
 AC_CHECK_HEADERS([string.h])
+AC_CHECK_HEADERS([sys/exterrvar.h])
 AC_CHECK_HEADERS([sys/param.h])
 AC_CHECK_HEADERS([sys/sysctl.h])
 AC_CHECK_HEADERS([sys/time.h])
@@ -108,6 +110,88 @@ if test "$HAVE_HUMANIZE_NUMBER" = "yes"; then
 fi
 
 AM_CONDITIONAL([HAVE_HUMANIZE_NUMBER], [test "$HAVE_HUMANIZE_NUMBER" = "yes"])
+
+AC_MSG_CHECKING([exterr results])
+
+if test "$ac_cv_header_exterr_h" = "yes" -a "$ac_cv_func_uexterr_gettext" = "yes"; then
+    HAVE_EXTERR=yes
+    AC_DEFINE([HAVE_EXTERR], [1], [Have extended error infra: uexterr_gettext(2)])
+fi
+
+AC_MSG_RESULT(:${HAVE_EXTERR}:${ac_cv_header_exterr_h}:${ac_cv_func_uexterr_gettext}:)
+
+AM_CONDITIONAL([HAVE_EXTERR], [test "$HAVE_EXTERR" = "yes"])
+
+AC_ARG_WITH(llvm-config,
+        [  --with-llvm-config=[PFX]        Specify location of llvm-config],
+        [LLVM_CONFIG=$withval],
+	[LLVM_CONFIG="none"])
+
+AC_MSG_CHECKING([llvm-config])
+if test ${LLVM_CONFIG} = "none"; then
+    AC_MSG_RESULT([no llvm-config, so validate plugin is disabled])
+elif ! test -x ${LLVM_CONFIG} ; then
+    AC_MSG_FAILURE("could not find llvm-config tool")
+else
+    AC_DEFINE([HAVE_VALIDATE], [1], [generate plugin for llvm to validate libxo format strings])
+    LLVM_BINDIR=`${LLVM_CONFIG} --bindir 2>/dev/null`
+    LLVM_CLANG=${LLVM_BINDIR}/clang
+    LLVM_CMAKE_DIR=`${LLVM_CONFIG} --cmakedir 2>/dev/null`
+    CLANG_CMAKE_DIR=`dirname ${LLVM_CMAKE_DIR}`/clang
+    AC_PATH_PROG([CMAKE_COMMAND], [cmake], [cmake])
+    HAVE_VALIDATE=yes
+fi
+
+AM_CONDITIONAL([HAVE_VALIDATE], [test "${HAVE_VALIDATE}" = "yes"])
+AC_SUBST(LLVM_CONFIG)
+AC_SUBST(LLVM_BINDIR)
+AC_SUBST(LLVM_CLANG)
+AC_SUBST(LLVM_CMAKE_DIR)
+AC_SUBST(CLANG_CMAKE_DIR)
+AC_SUBST(CMAKE_COMMAND)
+
+dnl On macOS the cmake plugin build must match the libxo build architecture.
+dnl Derive this from host_cpu so the right -DCMAKE_OSX_ARCHITECTURES flag is
+dnl baked into the Makefile at configure time.  This ensures the plugin is
+dnl built correctly even when cmake itself runs under Rosetta (x86_64 emulation)
+dnl at make time, which would otherwise cause cmake to auto-detect x86_64.
+CMAKE_OSX_ARCHITECTURES=
+case $host_cpu in
+    arm64 | aarch64)
+        CMAKE_OSX_ARCHITECTURES=arm64
+        ;;
+    x86_64)
+        CMAKE_OSX_ARCHITECTURES=x86_64
+        ;;
+esac
+AC_SUBST(CMAKE_OSX_ARCHITECTURES)
+
+dnl macOS SDK path for the non-Apple clang used by the validate plugin.
+dnl On darwin, auto-detected via xcrun; override with --with-sdk-path=PATH
+dnl or suppress with --with-sdk-path=no.
+AC_ARG_WITH(sdk-path,
+        [  --with-sdk-path=[PATH]   Specify macOS SDK path for validate plugin (default: auto)],
+        [SDK_PATH=$withval],
+        [SDK_PATH=auto])
+
+if test "${SDK_PATH}" = "auto"; then
+    case $host_os in
+        darwin*)
+            AC_PATH_PROG([XCRUN], [xcrun], [none])
+            if test "${XCRUN}" != "none"; then
+                SDK_PATH=`${XCRUN} --show-sdk-path 2>/dev/null`
+            else
+                SDK_PATH=
+            fi
+            ;;
+        *)
+            SDK_PATH=
+            ;;
+    esac
+elif test "${SDK_PATH}" = "no" -o "${SDK_PATH}" = "none"; then
+    SDK_PATH=
+fi
+AC_SUBST(SDK_PATH)
 
 AC_ARG_ENABLE([gettext],
     [  --disable-gettext  Turn off support for gettext],
@@ -187,7 +271,7 @@ if test -x ${GETTEXT_PREFIX}/bin/msgfmt ; then
 elif test -x ${GETTEXT_PREFIX}/local/bin/msgfmt ; then
     GETTEXT_BINDIR=${GETTEXT_PREFIX}/local/bin
 else
-    AC_MSG_NOTICE("could not find msgfmt tool")
+    AC_MSG_FAILURE("could not find msgfmt tool")
     # Use a (bad) fall back value
     GETTEXT_BINDIR=${GETTEXT_PREFIX}/bin
 fi
@@ -452,6 +536,13 @@ AC_ARG_WITH(encoder-dir,
 )
 AC_SUBST(XO_ENCODERDIR)
 
+AC_ARG_WITH(filter-dir,
+        [  --with-filter-dir=[DIR]           Specify location of filter libraries],
+        [XO_FILTERDIR=$withval],
+        [XO_FILTERDIR=$libdir/libxo]
+)
+AC_SUBST(XO_FILTERDIR)
+
 AC_ARG_WITH(share-dir,
         [  --with-share-dir=[DIR]           Specify location of shared files],
         [XO_SHAREDIR=$withval],
@@ -490,18 +581,23 @@ AC_DEFINE_UNQUOTED(LIBXO_VERSION_EXTRA, ["$LIBXO_VERSION_EXTRA"],
     [Version number extra information])
 
 AC_CONFIG_HEADERS([libxo/xo_config.h])
+
 AC_CONFIG_FILES([
   Makefile
   libxo-config
   xohtml/xohtml.sh
   libxo/Makefile
+  filter/Makefile
+  format/Makefile
   libxo/add.man
   bin/Makefile
   encoder/Makefile
   encoder/cbor/Makefile
   encoder/csv/Makefile
+  encoder/fdr/Makefile
   encoder/fullpath/Makefile
   encoder/test/Makefile
+  llvm-plugins/Makefile
   xo/Makefile
   xolint/Makefile
   xohtml/Makefile
@@ -515,6 +611,7 @@ AC_CONFIG_FILES([
   tests/xo/Makefile
   tests/xpath/Makefile
   tests/utf8/Makefile
+  tests/llvm-plugins/Makefile
   packaging/libxo.spec
   packaging/libxo.rb.base
 ])
@@ -531,6 +628,7 @@ AC_MSG_NOTICE([summary of build options:
   includedir:       ${XO_INCLUDEDIR}
   share dir:        ${XO_SHAREDIR}
   extensions dir:   ${XO_ENCODERDIR}
+  filter dir:       ${XO_FILTERDIR}
   oxtradoc dir:     ${SLAX_OXTRADOCDIR}
 
   compiler:         ${CC} (${HAVE_GCC:-no})
@@ -548,6 +646,9 @@ AC_MSG_NOTICE([summary of build options:
   local wcwidth:    ${LIBXO_WCWIDTH:-no}
   retain size:      ${XO_RETAIN_SIZE:-no}
   have etext:       ${HAVE_ETEXT:-no} (${HAVE_ETEXT_STYLE})
+  have exterr:      ${HAVE_EXTERR:-no}
   yacc:             ${YACC}
   filters:          ${LIBXO_NEED_FILTERS}
+  validate:         ${LLVM_CONFIG}:${LLVM_BINDIR:-none}:${LLVM_CMAKE_DIR:-none}
+  sdk path:         ${SDK_PATH:-none}
 ])

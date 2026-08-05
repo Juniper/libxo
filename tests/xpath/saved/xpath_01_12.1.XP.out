@@ -1,0 +1,160 @@
+<item>
+  <id>1</id>
+  <val>alpha</val>
+</item>
+<item>
+  <id>2</id>
+  <val>beta</val>
+</item>
+<item>
+  <id>3</id>
+  <val>gamma</val>
+</item>
+<item>
+  <color>blue</color>
+  <val>2</val>
+</item>
+<item>
+  <color>green</color>
+  <val>4</val>
+</item>
+<item>
+  <id>1</id>
+  <val>alpha</val>
+</item>
+<item>
+  <id>2</id>
+  <val>beta</val>
+</item>
+<item>
+  <color>red</color>
+  <val>1</val>
+</item>
+<item>
+  <color>red</color>
+  <val>3</val>
+</item>
+<item>
+  <id>1</id>
+  <val>alpha</val>
+</item>
+<item>
+  <id>2</id>
+  <val>beta</val>
+</item>
+<item>
+  <color>red</color>
+  <val>1</val>
+</item>
+<item>
+  <color>red</color>
+  <val>3</val>
+</item>
+<item>
+  <price>3.1</price>
+  <val>b</val>
+</item>
+<item>
+  <price>3.9</price>
+  <val>c</val>
+</item>
+<item>
+  <price>3.0</price>
+  <val>b</val>
+</item>
+<item>
+  <price>3.7</price>
+  <val>c</val>
+</item>
+<item>
+  <price>4.1</price>
+  <val>d</val>
+</item>
+<item>
+  <price>2.0</price>
+  <val>a</val>
+</item>
+<item>
+  <price>3.0</price>
+  <val>c</val>
+</item>
+<item>
+  <price>2.0</price>
+  <val>a</val>
+</item>
+<item>
+  <label>eth0</label>
+  <val>1</val>
+</item>
+<item>
+  <label>eth1</label>
+  <val>3</val>
+</item>
+<item>
+  <name>foo</name>
+  <val>1</val>
+</item>
+<item>
+  <name>foobar</name>
+  <val>3</val>
+</item>
+<item>
+  <name>boo</name>
+  <val>4</val>
+</item>
+<item>
+  <label>lo0</label>
+  <val>2</val>
+</item>
+<item>
+  <label>wlan0</label>
+  <val>4</val>
+</item>
+<item>
+  <iface>eth0.0</iface>
+  <val>1</val>
+</item>
+<item>
+  <iface>eth0.1</iface>
+  <val>3</val>
+</item>
+<item>
+  <name>lib-c</name>
+  <val>3</val>
+</item>
+<item>
+  <iface>eth0.0</iface>
+  <val>1</val>
+</item>
+<item>
+  <iface>eth0.1</iface>
+  <val>3</val>
+</item>
+<item>
+  <name>pkg-a</name>
+  <val>1</val>
+</item>
+<item>
+  <name>pkg-b</name>
+  <val>2</val>
+</item>
+<item>
+  <version>pkg-2</version>
+  <val>2</val>
+</item>
+<item>
+  <version>lib-2</version>
+  <val>3</val>
+</item>
+<item>
+  <path>/usr</path>
+  <val>1</val>
+</item>
+<item>
+  <name>lo.eth0</name>
+  <val>1</val>
+</item>
+<item>
+  <name>lo.eth1</name>
+  <val>3</val>
+</item>

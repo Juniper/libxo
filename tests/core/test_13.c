@@ -138,7 +138,7 @@ int
 main (int argc, char **argv)
 {
     int i, count = 10;
-    xo_emit_flags_t flags = XOF_RETAIN_ALL;
+    xo_xof_flags_t flags = 0;	/* Emits use xo_emitr(); "no-retain" vetoes */
     int opt_color = 1;
 
     xo_set_program("test_13");
@@ -167,7 +167,7 @@ main (int argc, char **argv)
 	else if (xo_streq(argv[argc], "info"))
 	    xo_set_flags(NULL, XOF_INFO);
 	else if (xo_streq(argv[argc], "no-retain"))
-	    flags &= ~XOF_RETAIN_ALL;
+	    flags |= XOF_RETAIN_NONE;
 	else if (xo_streq(argv[argc], "big")) {
 	    if (argv[argc + 1]) {
 		const char *cp = argv[++argc];
@@ -203,6 +203,47 @@ main (int argc, char **argv)
     if (flags != 0)
 	xo_set_flags(NULL, flags);
 
+
+    xo_open_container("doc-examples");
+
+    int tcount = 1234;
+    const char *tname = "goodname";
+
+   /* 8 columns of output, padded with zeroes */
+   xo_emit("[{:count/%.8d}]\n", tcount);  /* "[00001234]" */
+
+   /* 12 columns of output, the last 8 are padded with zeroes */
+   xo_emit("[{:count/%12.8d}]\n", tcount);  /* "[    00001234]" */
+
+   /* 8 columns of output; up to the first 20 bytes of 'name' are inspected */
+   xo_emit("[{:name/%.8.20s}]\n", tname);  /* "[goodname]" */
+
+   /* Same, but with arguments */
+   xo_emit("[{:name/%.*.*s}]\n", 8, 20, tname);  /* "[goodname]" */
+
+    xo_close_container("doc-examples");
+
+    xo_open_container("json-escape-sequences");
+    xo_emit("{L:quotation-mark}: {:quotation-mark/\"}\n");
+    xo_emit("{L:backslash}: {,escape-slash:backslash/%s}\n", "\\");
+    xo_emit("{L:slash}: {,escape-slash:slash/%s}\n", "/");
+    xo_emit("{L:slash-2}: {:slash2/%s}\n", "/");
+    xo_emit("{L:backspace}: {:backspace/%s}\n", "\b");
+    xo_emit("{L:form-feed}: {:form-feed/%s}\n", "\f");
+    xo_emit("{L:new-line}: {:new-line/%s}\n", "\n");
+    xo_emit("{L:carriage-return}: {:carriage-return/%s}\n", "\r");
+    xo_emit("L_horizontal-tab}: {:horizontal-tab/%s}\n", "\t");
+
+    for (i = 1; i < 0x20; i++) {
+	xo_open_instance("number");
+        xo_emit("Number: {:num/%d} (Hex: {:hex/%x}): {e:value/%c}"
+		"{e,escape-private:pvalue/%c}{e,escape-square:svalue/%c}\n",
+		i, i, i, i, i);
+	xo_close_instance("number");
+    }
+
+    xo_close_container("json-escape-sequences");
+
     xo_open_list("entry");
 
     for (i = 0; i < count; i++) {
@@ -235,8 +276,6 @@ main (int argc, char **argv)
     }
 
     xo_close_list("entry");
-
-    xo_emit("{Lwc:hits}{:hits/%ld}\n", xo_retain_get_hits());
 
     xo_close_container("data");
     xo_close_container_h(NULL, "top");

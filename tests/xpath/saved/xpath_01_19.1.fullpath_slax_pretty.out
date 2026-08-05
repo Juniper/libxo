@@ -1,0 +1,3 @@
+/item[id == '2']/host = 'beta'
+/item[type == 'A']/color = 'red'
+/item[type == 'A']/data = '1'

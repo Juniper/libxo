@@ -1,0 +1,89 @@
+{
+  "statistics": {
+    "socket": [
+      {
+        "path": "/tmp/ssh-agent.1234"
+      },
+      {
+        "path": "/tmp/other.sock"
+      }
+    ]
+  },
+  "statistics": {
+    "socket": [
+      {
+        "path": "/tmp/ssh-agent.1234"
+      },
+      {
+        "path": "/tmp/other.sock"
+      }
+    ]
+  },
+  "statistics": {
+    "socket": [
+      {
+        "protocol": "TCP4",
+        "receive-bytes-waiting": "100"
+      },
+      {
+        "protocol": "tcp6",
+        "receive-bytes-waiting": "300"
+      }
+    ]
+  },
+  "statistics": {
+    "socket": [
+      {
+        "path": "/tmp/ssh-DQWvehZ5Bz/agent.39523"
+      },
+      {
+        "path": "/tmp/other.sock"
+      }
+    ]
+  },
+  "statistics": {
+    "socket": [
+      {
+        "path": "/tmp/ssh-agent.1234"
+      }
+    ]
+  },
+  "statistics": {
+    "socket": [
+      {
+        "address": "127.0.0.1:8080"
+      }
+    ]
+  },
+  "statistics": {
+    "socket": [
+      {
+        "protocol": "tcp4"
+      },
+      {
+        "protocol": "tcp6"
+      }
+    ]
+  },
+  "statistics": {
+    "socket": [
+      {
+        "protocol": "tcp4",
+        "receive-bytes-waiting": "1111",
+        "send-bytes-waiting": "1",
+        "tcp-state": "ESTABLISHED"
+      },
+      {
+        "address": "ffffa0000d003a80",
+        "type": "stream",
+        "receive-bytes-waiting": "2222",
+        "send-bytes-waiting": "2",
+        "vnode": "ffffa0000dce7000",
+        "connection": "0",
+        "first-reference": "0",
+        "next-reference": "0",
+        "path": "/tmp/ssh-DQWvehZ5Bz/agent.39523"
+      }
+    ]
+  }
+}

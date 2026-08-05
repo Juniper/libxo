@@ -1,0 +1,607 @@
+.\" #
+.\" # Copyright (c) 2025, Juniper Networks, Inc.
+.\" # All rights reserved.
+.\" # This SOFTWARE is licensed under the LICENSE provided in the
+.\" # ../Copyright file. By downloading, installing, copying, or
+.\" # using the SOFTWARE, you agree to be bound by the terms of that
+.\" # LICENSE.
+.\" # Phil Shafer, 2025
+.\"
+.Dd June 1, 2025
+.Dt XO_FILTER 7
+.Os
+.Sh NAME
+.Nm xo_filter
+.Nd output filtering for libxo\-based commands
+.Sh DESCRIPTION
+The filter feature allows applications to select which portions of
+structured output are emitted, based on XPath-like expressions.
+Only matching instances are written to the output stream;
+non-matching instances are silently discarded.
+.Pp
+Filters are useful when an application emits a large dataset (for
+example, all network sockets) but only a subset is of interest (for
+example, established TCP connections).
+The filter can be applied without modifying the application code.
+Unlike traditional Unix tools, filters are aware of the fields and
+their context.
+.Sh EXPRESSION SYNTAX
+Filters use an XPath-like expression language.
+Expressions are used to select content hierarchies and specify
+conditions for content to be selected.
+.Pp
+Expressions may include paths to elements, negated paths, wildcards,
+predicate tests, literal strings, numbers, and function calls.
+.Ss Paths
+A single element name selects all elements with that name:
+.Bd -literal -offset indent
+chapter
+.Ed
+.Pp
+Selects all elements named
+.Li chapter .
+.Pp
+A slash-separated path selects child elements relative to their parents:
+.Bd -literal -offset indent
+doc/chapter/section/paragraph
+.Ed
+.Pp
+Selects all
+.Li paragraph
+elements that are under a
+.Li section ,
+which must be under a
+.Li chapter ,
+which must be under a
+.Li doc
+element.
+.Ss Path Negation
+Prefixing a path expression with
+.Li \&!
+suppresses matching instances rather than emitting them.
+When all filters use negation,
+.Nm libxo
+defaults to allowing output and suppresses only the matching instances.
+.Bd -literal -offset indent
+\&!remote
+.Ed
+.Pp
+Suppresses all elements named
+.Li remote
+and their descendants.
+.Ss Wildcard Elements
+An asterisk
+.Pq Li *
+matches any element name at that position in the path:
+.Bd -literal -offset indent
+one/*/three
+.Ed
+.Pp
+Selects any
+.Li three
+element that is a direct child of an element with any name, which
+must itself be a direct child of a
+.Li one
+element.
+.Ss Absolute and Relative Paths
+A path beginning with
+.Li /
+is anchored at the root of the output tree.
+A path without a leading
+.Li /
+matches the named element at any depth in the output hierarchy.
+.Bd -literal -offset indent
+/one/two
+one/two
+.Ed
+.Pp
+The first expression matches
+.Li two
+elements that are children of a root-level
+.Li one
+element.
+The second matches
+.Li two
+elements under any
+.Li one
+element in the tree, regardless of depth.
+.Ss Predicate Tests
+Square-bracket predicates filter elements by condition.
+An expression in brackets is evaluated to true or false
+(with boolean type conversion).
+.Pp
+Selecting by child element value:
+.Bd -literal -offset indent
+chapter[number == 1]
+.Ed
+.Pp
+Selects all
+.Li chapter
+elements that contain a
+.Li number
+child element with value 1.
+.Pp
+Predicates can refer to attributes using a leading at-sign
+.Pq Dq @  :
+.Bd -literal -offset indent
+chapter[@number == 1]
+.Ed
+.Pp
+Predicates may perform arithmetic using addition
+.Pq Li +  ,
+subtraction
+.Pq Li \-  ,
+multiplication
+.Pq Li *  ,
+and division
+.Pq Li div .
+Comparisons allow type coercion when the operands have different types:
+.Bd -literal -offset indent
+item[cost * count >= 1500]
+.Ed
+.Pp
+Selects any
+.Li item
+element where the product of its
+.Li cost
+and
+.Li count
+children is greater than or equal to 1500.
+.Pp
+Predicates may be applied to any step in a path:
+.Bd -literal -offset indent
+chapter[@number == 1]/section[@number == 2]
+.Ed
+.Pp
+A numeric predicate selects the
+.Em n Ns th
+element from a set, using origin 1 (not 0):
+.Bd -literal -offset indent
+chapter[1]
+.Ed
+.Pp
+Multiple predicates on the same step are ANDed; all must be true:
+.Bd -literal -offset indent
+chapter[@number > 15][page-count > 10]
+.Ed
+.Pp
+Each step in a path may have zero or more predicates:
+.Bd -literal -offset indent
+one[a > 4]/two[b < 3]/three[c == 2]/four[d == 1]
+.Ed
+.Ss Literals
+.Nm libxo
+accepts string literals in single or double quotes,
+in a way that will feel natural to C programmers.
+Character escaping is supported:
+.Bd -literal -offset indent
+"test"
+\&'\\tthat\\'s good\\n\\tnow what?\\n'
+.Ed
+.Ss Numbers
+Integer, floating-point, and hexadecimal values are all supported:
+.Bd -literal -offset indent
+5, 10, 20000
+3.14, 4.3e50, 0.125
+0x20, 0xABCD, 0xfefefefe
+.Ed
+.Ss Function Calls
+Functions may be used in expressions or predicate tests:
+.Bd -literal -offset indent
+chapter[number(section) > 15]
+chapter[substring-before(title, "ne") == "O"]
+.Ed
+.Sh LIBXO EXTENSIONS
+.Nm libxo
+follows XPath syntax with the following extensions:
+.Bl -tag -width "?:"
+.It Li "&&"
+May be used in place of the
+.Dq and
+operator.
+.Bd -literal -offset indent
+food[@fruit && @delicious]
+.Ed
+.It Li "||"
+May be used in place of the
+.Dq or
+operator.
+.Bd -literal -offset indent
+fish[tropical || colorful]
+.Ed
+.It Li "=="
+May be used in place of the
+.Dq =
+operator.
+.Bd -literal -offset indent
+tree[height == 10]
+.Ed
+.It Li \&!
+May be used in place of the
+.Fn not
+function.
+.Bd -literal -offset indent
+socket[!contains(path, "/var/run/")]
+.Ed
+.It Li "_"
+The underscore is the string concatenation operator,
+equivalent to the
+.Fn concat
+function.
+.Bd -literal -offset indent
+thing[number("0x" _ hex-digits _ "00") > length]
+.Ed
+.It Li "?:"
+Converted into
+.Fn choose
+and
+.Fn choose2
+function calls.
+Both the
+.Dq "condition ? if-true : if-false"
+and
+.Dq "condition ?: if-false"
+styles are supported.
+.Bd -literal -offset indent
+item[(user ?: login ?: owner) == "phil"]
+.Ed
+.El
+.Pp
+The first four extensions
+.Po Li && , Li || , Li == , Li \&!
+.Pc
+are provided so programmers do not learn habits that negatively affect
+their ability to write in other languages, and to avoid surprising
+users with familiar but differently-behaved syntax.
+The last two
+.Po Li _ , Li ?:
+.Pc
+are for convenience and readability;
+the
+.Dq ?:
+operator is particularly useful and hard to live without.
+.Pp
+Strings may be concatenated with the underscore
+.Pq Dq _
+operator.
+While this may seem an odd choice, many familiar operators such as
+.Dq +
+and
+.Dq \&.
+have other meanings in XPath and cannot be used.
+.Sh ENABLING FILTERS
+Filters can be enabled from the command line or from application code.
+.Pp
+From the command line, pass one or more
+.Cm filter=
+options to
+.Fl \-libxo :
+.Bd -literal -offset indent
+netstat \-\-libxo xml,pretty,filter='socket[tcp-state=="ESTABLISHED"]'
+.Ed
+.Pp
+Multiple filter expressions are combined as a union (logical OR):
+an instance matches if it satisfies any one of the given expressions.
+The same effect can be achieved with a single
+.Dq |
+separated expression or with repeated
+.Cm filter=
+options:
+.Bd -literal -offset indent
+# Two expressions in a single option (union)
+my-app \-\-libxo \
+    filter='socket[tcp-state=="ESTABLISHED"]|interface[name=="eth0"]'
+
+# Equivalently, two separate filter= options
+my-app \-\-libxo filter='socket[tcp-state=="ESTABLISHED"]' \e
+       \-\-libxo filter='interface[name=="eth0"]'
+.Ed
+.Pp
+The
+.Cm filter-warn
+option enables diagnostic messages on standard error when filter
+predicates reference fields that are not present in the output:
+.Bd -literal -offset indent
+my-app \-\-libxo filter=item[color=='red'],filter-warn
+.Ed
+.Pp
+Application code can call
+.Xr xo_add_filter 3
+to add a filter expression to a handle:
+.Bd -literal -offset indent
+xo_add_filter(xop, "socket[tcp-state==\\"ESTABLISHED\\"]");
+.Ed
+.Sh FILTER EXPRESSION DETAIL
+A filter path identifies which list to filter.
+The path uses the same element names as the
+.Fn xo_open_list
+and
+.Fn xo_open_instance
+calls in the application.
+.Pp
+The filter system is an optional component of
+.Nm libxo .
+It is compiled and linked into the library only when the
+.Cm \-\-enable-filters
+option is passed to
+.Xr configure 1 .
+When filters are not compiled in, the
+.Fn xo_add_filter
+function is still present but returns an error.
+.Pp
+Filtering is provided via a dynamically loaded library, reducing the
+overhead when filtering is not used.
+If the filter library cannot be loaded, an error message is emitted.
+.Pp
+While content is being generated,
+.Nm libxo
+applies any active filters and decides what can be discarded
+immediately, what can be emitted immediately, and what must be
+buffered pending a final decision.
+The quicker a decision can be made, the better the performance.
+Filter expressions can be written to enable early decisions.
+.Pp
+For example, the expression
+.Li /one/two/three
+can discard any top-level element that is not
+.Li one ,
+then discard any child of
+.Li one
+that is not
+.Li two ,
+and so on.
+.Pp
+A predicate like
+.Li "socket[type == \(dqtcp4\(dq]"
+buffers any
+.Li socket
+element along with its complete hierarchy until a
+.Li type
+child element arrives.
+At that point the predicate is evaluated and a decision to discard
+or emit can be made.
+.Ss Keys and Non-Key Fields
+Key fields use the
+.Dq k
+modifier in the format string and must appear before non-key fields.
+Since key fields appear first, buffering needs are reduced,
+leading to better performance when predicates use keys.
+Predicates using non-key fields require more rendering and buffering.
+.Pp
+If an instance closes while a predicate is still pending due to a
+missing field, that predicate is evaluated with an empty value for
+the missing field.
+.Ss Sub-container Content
+When an instance matches, all of its content is emitted, including
+fields inside nested containers opened with
+.Fn xo_open_container
+inside the instance.
+.Pp
+However, the limitation on predicate paths means that subelements of
+nested containers cannot be used in predicate tests.
+.Pp
+Content in nested containers that appears before the predicate field
+is buffered along with the top-level fields.
+If the predicate resolves to true, the nested container content is
+committed as part of the matched instance.
+If the predicate resolves to false, the entire instance, including
+nested content, is discarded.
+.Sh FUNCTIONS
+The following XPath functions are supported in filter predicates.
+.Ss String Functions
+.Bl -column "substring-before(str, s)" "Returns part of str before the first s" -compact
+.It Sy Function Ta Sy Description
+.It Li "concat(s1, s2, ...)" Ta "Concatenates strings"
+.It Li "contains(str, sub)" Ta "True when str contains sub as a substring"
+.It Li "ends-with(str, suffix)" Ta "True when str ends with suffix"
+.It Li "normalize-space(str)" Ta "Strips leading/trailing space; collapses runs"
+.It Li "starts-with(str, prefix)" Ta "True when str begins with prefix"
+.It Li "string-length(str)" Ta "Returns the length of str"
+.It Li "substring(str, pos, len)" Ta "Returns a substring of str"
+.It Li "substring-after(str, s)" Ta "Returns the part of str after the first s"
+.It Li "substring-before(str, s)" Ta "Returns the part of str before the first s"
+.It Li "translate(str, from, to)" Ta "Character-by-character translation"
+.El
+.Ss Numeric Functions
+.Bl -column "ceiling(num)" "Rounds down to the nearest integer" -compact
+.It Sy Function Ta Sy Description
+.It Li "ceiling(num)" Ta "Rounds up to the nearest integer"
+.It Li "floor(num)" Ta "Rounds down to the nearest integer"
+.It Li "number(val)" Ta "Converts a value to a number"
+.It Li "round(num)" Ta "Rounds to the nearest integer"
+.It Li "sum(node-set)" Ta "Returns the sum of a node set"
+.El
+.Ss Boolean Functions
+.Bl -column "boolean(val)" "Converts a value to a boolean" -compact
+.It Sy Function Ta Sy Description
+.It Li "boolean(val)" Ta "Converts a value to a boolean"
+.It Li "false()" Ta "Always returns false"
+.It Li "not(expr)" Ta "Negates the expression"
+.It Li "true()" Ta "Always returns true"
+.El
+.Pp
+Note that
+.Li true()
+and
+.Li true
+are different.
+The former returns the boolean value true while the latter returns the
+value of an element named
+.Dq true ,
+which is likely absent.
+.Ss Regular Expression Functions
+The
+.Fn rematch
+function matches a regular expression against a string.
+It returns either a boolean indicating match success (the default)
+or the portion of the string matching all or part of the regex.
+It defaults to extended
+.Pq ERE
+regex matching.
+.Bd -literal -offset indent
+rematch(re, str, flags?)
+.Ed
+.Pp
+The optional
+.Fa flags
+argument controls matching behavior:
+.Bl -column "Flag" "Description 12345678901234567890123456789012" -compact
+.It Sy Flag Ta Sy Description
+.It Li b Ta "Use basic REs (BRE) instead of extended RE (ERE)"
+.It Li i Ta "Case-insensitive matching (REG_ICASE)"
+.It Li n Ta "Newline-sensitive matching (REG_NEWLINE)"
+.It Li ^ Ta "Do not match at start of string (REG_NOTBOL)"
+.It Li $ Ta "Do not match at end of string (REG_NOTEOL)"
+.It Li s Ta "Return full match text as a string"
+.It Li m Ta "Return first capture group as a string"
+.It Li mN Ta "Return capture group N as a string (N: 0-9)"
+.It Li p Ta "REG_POSIX (platform-specific; ignored if unavailable)"
+.El
+.Pp
+Example: match sockets whose protocol version is 4 but not 6:
+.Bd -literal -offset indent
+socket[rematch("([a-z]+)([0-9]+)", protocol, "m2") == 4]
+.Ed
+.Pp
+Further examples:
+.Bd -literal -offset indent
+# Items whose label starts with "eth"
+item[starts-with(label, "eth")]
+
+# Items whose price rounds up to more than 3
+item[ceiling(price) > 3]
+
+# Sockets whose path does not contain "/var/run/"
+socket[!contains(path, "/var/run/")]
+
+# Items where the part of version after '-' equals "2"
+item[substring-after(version, "-") == "2"]
+.Ed
+.Sh MULTIPLE PREDICATES
+Multiple predicates on the same node are ANDed: all must be true for
+the instance to be selected.
+.Bd -literal -offset indent
+# Established TCP connections with pending received data
+socket[tcp-state=="ESTABLISHED"][receive-bytes-waiting > 0]
+
+# Interfaces that are ethernet and administratively up
+interface[type=="ethernet"][state=="up"]
+.Ed
+.Sh SHELL QUOTING
+Filter expressions contain characters that many shells interpret
+specially, including
+.Dq \&[ ,
+.Dq \&] ,
+.Dq \&" ,
+.Dq \&' ,
+.Dq = ,
+and
+.Dq | .
+Quote the expression appropriately for the shell in use:
+.Bd -literal -offset indent
+# bash / zsh
+my-app \-\-libxo "filter=socket[tcp-state==\\"ESTABLISHED\\"]"
+
+# tcsh
+my-app \-\-libxo 'filter=socket[tcp-state=="ESTABLISHED"]'
+.Ed
+.Pp
+Commas serve two purposes in
+.Fl \-libxo
+arguments: separating libxo options
+.Pq e.g., Dq warn,pretty
+and separating arguments in filter function calls
+.Pq e.g., Dq starts-with(one, two) .
+Option parsing happens first, so commas inside filter function
+arguments must be escaped with a backslash:
+.Bd -literal -offset indent
+my-app \-\-libxo 'filter=food[substring(name\\, 1\\, 4) == "hush"]'
+.Ed
+.Sh UNSUPPORTED FEATURES
+While filter expressions are based on XPath, many XPath features are
+not supported, primarily due to complexity, buffering costs, and
+performance impact on streaming data processing.
+.Pp
+The following XPath features are not supported:
+.Bl -column "Nested predicates" "Multi-element paths inside predicates" -compact
+.It Sy Feature Ta Sy Details
+.It Li ".." Ta "Parent axis, e.g. item[../count == 4]"
+.It Li "Node tests" Ta "comment, text, processing-instruction node tests"
+.It Li "Identities" Ta "id and key functions"
+.It Li "//" Ta "Descendant, e.g. top//deep or //deep"
+.It Li "Variables" Ta "XPath variables, e.g. $one"
+.It Li "Axis names" Ta "Any named axis"
+.It Li "Nested predicates" Ta "Predicates within predicates, e.g. one[two[three]]"
+.It Li "Predicate paths" Ta "Multi-element paths inside predicates, e.g. one[two/three]"
+.El
+.Pp
+While no axis names are supported,
+.Nm libxo
+does support the
+.Dq @
+alias for the attribute axis.
+.Pp
+When an unsupported feature is parsed,
+.Nm libxo
+reports an error:
+.Bd -literal -offset indent
+% my-app \-\-libxo:XP,filter-warn,filter='item[..//node()]'
+my-app: filter expression feature is unsupported: parent axis ('..')
+my-app: filter expression feature is unsupported: descendant child (e.g. 'one//two')
+my-app: filter expression feature is unsupported: 'node()'
+my-app: could not add the requested filter
+.Ed
+.Sh FLAGS
+.Bl -tag -width "XOF_FILTER_WARN"
+.It Dv XOF_FILTER_WARN
+Enable diagnostic output to standard error when runtime issues are
+encountered while processing filters against incoming data.
+The volume of output depends on the filter expressions and input data,
+but can be useful when debugging filter expression behavior.
+It corresponds to the
+.Cm filter-warn
+command-line option.
+.Bd -literal -offset indent
+my-app \-\-libxo filter='socket[number(tcp-state)==2]',filter-warn
+my-app: invalid number value: 'tcp-state'
+.Ed
+.Pp
+This message is repeated on each conversion error.
+.El
+.Sh THE "fdr" ENCODER
+Filters are complex expressions, and the software that implements them
+is also complex.
+Despite the efforts of the author, it is possible
+that expressions could be used that were not considered, tested, or
+implemented.
+In many cases, the setup required to support the failing
+situation may not be something that can be shared to allow debugging.
+To allow such debugging, an encoder named "fdr" (after the aviation
+industry's "flight data recorder") allows the recording of the specific
+output tags being passed to the filter software, making reproducing
+problems trivial.
+In addition, these failing cases can be added to
+the test suite to ensure the quality of future releases.
+.Pp
+To use the FDR, just add "\-\-libxo @fdr" to your command line and
+redirect output to a file suitable for submission.
+As normal, all
+"\-\-libxo" options must appear before any other options or arguments.
+.Pp
+Please be extremely careful to ensure no secret or sensitive data
+appears in this output before submitting it as a bug attachment.
+.Sh SEE ALSO
+.Xr libxo 3 ,
+.Xr xo_add_filter 3 ,
+.Xr xo_discarding_output 3 ,
+.Xr xo_set_flags 3 ,
+.Xr xo_options 7
+.Sh HISTORY
+The filter feature of
+.Nm libxo
+first appeared in
+.Fx XX.y (unknown) .
+.Sh AUTHORS
+.Nm libxo
+was written by
+.An Phil Shafer Aq Mt phil@freebsd.org .

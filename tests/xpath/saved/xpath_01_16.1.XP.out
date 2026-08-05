@@ -1,0 +1,61 @@
+<item>
+  <base-id>42</base-id>
+  <val>2</val>
+</item>
+<item>
+  <override>42</override>
+  <base-id>10</base-id>
+  <val>3</val>
+</item>
+<item>
+  <override>5</override>
+  <val>1</val>
+  <label>a</label>
+</item>
+<item>
+  <val>4</val>
+  <label>b</label>
+</item>
+<item>
+  <score>15</score>
+  <default_score>5</default_score>
+  <val>a</val>
+</item>
+<item>
+  <score>0</score>
+  <default_score>20</default_score>
+  <val>b</val>
+</item>
+<item>
+  <a>7</a>
+  <b>3</b>
+  <c>9</c>
+  <val>1</val>
+</item>
+<item>
+  <a>0</a>
+  <b>7</b>
+  <c>9</c>
+  <val>2</val>
+</item>
+<item>
+  <b>0</b>
+  <c>7</c>
+  <val>3</val>
+</item>
+<item>
+  <text>hello  world</text>
+  <val>1</val>
+</item>
+<item>
+  <text>hello world</text>
+  <val>2</val>
+</item>
+<item>
+  <text>foo   bar baz</text>
+  <val>1</val>
+</item>
+<item>
+  <text>baz foo   bar</text>
+  <val>2</val>
+</item>

@@ -1,0 +1,67 @@
+.\" #
+.\" # Copyright (c) 2025, Juniper Networks, Inc.
+.\" # All rights reserved.
+.\" # This SOFTWARE is licensed under the LICENSE provided in the
+.\" # ../Copyright file. By downloading, installing, copying, or
+.\" # using the SOFTWARE, you agree to be bound by the terms of that
+.\" # LICENSE.
+.\" # Phil Shafer, 2025
+.\"
+.Dd June 1, 2025
+.Dt XO_ADD_FILTER 3
+.Os
+.Sh NAME
+.Nm xo_add_filter
+.Nd add an output filter expression to a libxo handle
+.Sh LIBRARY
+.Lb libxo
+.Sh SYNOPSIS
+.In libxo/xo.h
+.Ft int
+.Fn xo_add_filter "xo_handle_t *xop" "const char *expr"
+.Sh DESCRIPTION
+The
+.Fn xo_add_filter
+function adds a filter expression to the given handle.
+Only instances matching the expression are emitted;
+non-matching instances are silently discarded.
+.Pp
+To use the default handle, pass a
+.Dv NULL
+handle.
+.Pp
+Multiple calls to
+.Fn xo_add_filter
+are equivalent to a
+.Dq |
+separated union expression: an instance matches if it satisfies any
+one of the added filters.
+Filters added with
+.Fn xo_add_filter
+combine with any filters provided via
+.Cm \-\-libxo filter=
+on the command line.
+.Pp
+The filter expression uses the XPath-like syntax described in
+.Xr xo_filter 7 .
+.Sh RETURN VALUES
+Returns zero on success, non-zero on error.
+.Sh EXAMPLES
+.Bd -literal -offset indent
+/* Only emit sockets in the ESTABLISHED state */
+int rc = xo_add_filter(NULL, "socket[tcp-state==\\"ESTABLISHED\\"]");
+.Ed
+.Sh SEE ALSO
+.Xr libxo 3 ,
+.Xr xo_discarding_output 3 ,
+.Xr xo_set_flags 3 ,
+.Xr xo_filter 7
+.Sh HISTORY
+The
+.Fn xo_add_filter
+function first appeared in
+.Fx 15.0 .
+.Sh AUTHORS
+.Nm libxo
+was written by
+.An Phil Shafer Aq Mt phil@freebsd.org .

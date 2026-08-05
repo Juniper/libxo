@@ -1,0 +1,79 @@
+# too few arguments to a two-argument function
+r
+?item[contains(name)]
+{item
+<item
+$ name foo
+= val 1
+>item
+<item
+$ name bar
+= val 2
+>item
+}item
+
+# too many arguments to a two-argument function
+r
+?item[starts-with(name, 'foo', 'extra')]
+{item
+<item
+$ name foo
+= val 1
+>item
+<item
+$ name bar
+= val 2
+>item
+}item
+
+# too few arguments to a one-argument function
+r
+?item[not()]
+{item
+<item
+$ id 1
+= val alpha
+>item
+<item
+$ id 2
+= val beta
+>item
+}item
+
+# too many arguments to a zero-argument function
+r
+?item[true('extra')]
+{item
+<item
+$ id 1
+= val alpha
+>item
+<item
+$ id 2
+= val beta
+>item
+}item
+
+# too few arguments to a variable-argument function (concat needs >= 2)
+r
+?item[concat('only-one')]
+{item
+<item
+$ id 1
+= val alpha
+>item
+}item
+
+# too few arguments to ceiling
+r
+?item[ceiling()]
+{item
+<item
+$ price 3.5
+= val a
+>item
+<item
+$ price 1.2
+= val b
+>item
+}item

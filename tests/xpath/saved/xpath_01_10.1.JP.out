@@ -1,0 +1,32 @@
+{
+  "five": {
+    "six": {
+      "seven": "seventh",
+      "eight": {
+        "nine": "ninth"
+      }
+    }
+  },
+  "six": {
+    "seven": "single-layer",
+    "ten": {
+      "four": "fourth"
+    }
+  },
+  "one": {
+    "two": {
+      "three": "10",
+      "value": "10"
+    },
+    "six": {
+      "seven": "seventh",
+      "six2": {
+        "eight": "eighth"
+      }
+    },
+    "two": {
+      "three": "9",
+      "value": "9"
+    }
+  }
+}

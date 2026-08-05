@@ -1,0 +1,146 @@
+# choose2(a, b): if a is truthy return a's own value, else return b.
+# Missing first key falls through to the second (fallback) key.
+# Keys with an override are listed first so the filter resolves on override.
+r
+?item[choose2(override, base-id) = '42']
+{item
+<item
+$ override 99
+$ base-id 42
+= val 1
+>item
+<item
+$ base-id 42
+= val 2
+>item
+<item
+$ override 42
+$ base-id 10
+= val 3
+>item
+<item
+$ base-id 10
+= val 4
+>item
+}item
+
+# choose2 returns arg1's own value (not a boolean cast).
+# override=5 is truthy so the 5 itself is compared, not boolean true.
+r
+?item[choose2(override, val) > 3]
+{item
+<item
+$ override 5
+$ val 1
+= label a
+>item
+<item
+$ val 4
+= label b
+>item
+<item
+$ override 2
+$ val 5
+= label c
+>item
+<item
+$ val 1
+= label d
+>item
+}item
+
+# '?:' is the short-form ternary: syntax for choose2().
+# Non-zero numeric values are truthy; zero and missing fall through.
+# Parens required when comparing the result (precedence lower than '>').
+r
+?item[(score ?: default_score) > 10]
+{item
+<item
+$ score 15
+$ default_score 5
+= val a
+>item
+<item
+$ score 0
+$ default_score 20
+= val b
+>item
+<item
+$ default_score 8
+= val c
+>item
+<item
+$ score 5
+$ default_score 50
+= val d
+>item
+}item
+
+# '?:' is right-recursive: a ?: b ?: c  parses as  a ?: (b ?: c).
+r
+?item[(a ?: b ?: c) = '7']
+{item
+<item
+$ a 7
+$ b 3
+$ c 9
+= val 1
+>item
+<item
+$ a 0
+$ b 7
+$ c 9
+= val 2
+>item
+<item
+$ b 0
+$ c 7
+= val 3
+>item
+<item
+$ c 3
+= val 4
+>item
+}item
+
+# normalize-space() collapses runs of whitespace to a single space.
+# Items with 'hello  world' (two spaces) normalize to 'hello world'.
+r
+?item[normalize-space(text) = 'hello world']
+{item
+<item
+$ text hello  world
+= val 1
+>item
+<item
+$ text hello world
+= val 2
+>item
+<item
+$ text goodbye world
+= val 3
+>item
+}item
+
+# normalize-space() enables contains() to match across inconsistent spacing.
+# Without normalize-space, none of these values contain the literal 'foo bar'.
+r
+?item[contains(normalize-space(text), 'foo bar')]
+{item
+<item
+$ text foo   bar baz
+= val 1
+>item
+<item
+$ text baz foo   bar
+= val 2
+>item
+<item
+$ text foo   baz bar
+= val 3
+>item
+<item
+$ text something else
+= val 4
+>item
+}item

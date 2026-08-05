@@ -16,12 +16,11 @@
  */
 
 #include <stdio.h>
-#include <wchar.h>
 
 #include "xo_utf8.h"
 
-wchar_t
-xo_utf8_wtoupper (wchar_t wc)
+xo_codepoint_t
+xo_utf8_wtoupper (xo_codepoint_t wc)
 {
 
     if ((0x0101 <= wc && wc <= 0x012f)

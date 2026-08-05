@@ -1,0 +1,41 @@
+<item>
+  <first>John</first>
+  <last>Doe</last>
+  <val>1</val>
+</item>
+<item>
+  <host>db</host>
+  <port>5432</port>
+  <val>1</val>
+</item>
+<item>
+  <a>x</a>
+  <b>y</b>
+  <c>z</c>
+  <val>1</val>
+</item>
+<item>
+  <proto>http</proto>
+  <val>1</val>
+</item>
+<item>
+  <proto>http</proto>
+  <val>3</val>
+</item>
+<item>
+  <first>John</first>
+  <last>Doe</last>
+  <val>1</val>
+</item>
+<item>
+  <host>db</host>
+  <port>5432</port>
+  <val>1</val>
+</item>
+<item>
+  <a>w</a>
+  <b>x</b>
+  <c>y</c>
+  <d>z</d>
+  <val>1</val>
+</item>

@@ -1,0 +1,108 @@
+# Test 1: positional predicate - select the 2nd instance
+
+?interface[2]
+{interface
+<interface
+= ifindex 1
+= name eth0
+>interface
+<interface
+= ifindex 2
+= name lo0
+>interface
+<interface
+= ifindex 3
+= name eth1
+>interface
+}interface
+
+# Test 2: positional predicate - select the 1st instance
+r
+?interface[1]
+{interface
+<interface
+= ifindex 1
+= name eth0
+>interface
+<interface
+= ifindex 2
+= name lo0
+>interface
+}interface
+
+# Test 3: positional predicate combined with key predicate (and)
+r
+?socket[2 and protocol='tcp4']
+{socket
+<socket
+$ protocol tcp4
+= recv 100
+>socket
+<socket
+$ protocol tcp4
+= recv 200
+>socket
+<socket
+$ protocol udp
+= recv 300
+> socket
+} socket
+
+# Test 4: positional predicate combined with key predicate and another predicate
+r
+?socket[2][protocol='tcp4']
+{socket
+<socket
+$ protocol tcp4
+= recv 100
+>socket
+<socket
+$ protocol tcp4
+= recv 200
+>socket
+<socket
+$ protocol udp
+= recv 300
+>socket
+}socket
+
+# Test 5: positional predicate where leading predicate excludes earlier instances
+# socket[protocol='tcp4'][2] must select the 2nd tcp4, not the 2nd overall socket
+r
+?socket[protocol='tcp4'][2]
+{socket
+<socket
+$ protocol udp
+= recv 100
+>socket
+<socket
+$ protocol tcp4
+= recv 200
+= wrong answer
+>socket
+<socket
+$ protocol tcp4
+= recv 300
+= answer right
+>socket
+}socket
+
+# test 6: boring sub elements, which somehow I broke
+r
+? data
++ data
+= thing one
+= thing two
+= thing three
+= thing four
+- data
+
+# test 7: boring sub elements, which somehow I broke
+r
+? item
++ data
+= thing one
+= thing two
+= thing three
+= thing four
+- data

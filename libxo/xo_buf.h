@@ -41,11 +41,31 @@ typedef struct xo_buffer_s {
  * Initialize the contents of an xo_buffer_t.
  */
 static inline void
+xo_buf_zero (xo_buffer_t *xbp)
+{
+    bzero(xbp, sizeof(*xbp));
+}
+
+/*
+ * Initialize the contents of an xo_buffer_t.
+ */
+static inline void
 xo_buf_init (xo_buffer_t *xbp)
 {
     xbp->xb_size = XO_BUFSIZ;
     xbp->xb_bufp = xo_realloc(NULL, xbp->xb_size);
     xbp->xb_curp = xbp->xb_bufp;
+}
+
+/*
+ * Free the contents of an xo_buffer_t.
+ */
+static inline void
+xo_buf_cleanup (xo_buffer_t *xbp)
+{
+    if (xbp->xb_bufp)
+	xo_free(xbp->xb_bufp);
+    bzero(xbp, sizeof(*xbp));
 }
 
 /*
@@ -82,6 +102,16 @@ static inline xo_off_t
 xo_buf_offset (xo_buffer_t *xbp)
 {
     return xbp ? (xbp->xb_curp - xbp->xb_bufp) : 0;
+}
+
+/*
+ * Get the current offset
+ */
+static inline void
+xo_buf_set_offset (xo_buffer_t *xbp, xo_off_t off)
+{
+    if (xbp && xbp->xb_bufp)
+	xbp->xb_curp = xbp->xb_bufp + off;
 }
 
 static inline char *
@@ -122,23 +152,12 @@ xo_buf_trim (xo_buffer_t *xbp, xo_ssize_t len)
     if (xbp == NULL)
 	return NULL;
 
-    if (xbp->xb_bufp - xbp->xb_curp >= len)
+    if (xbp->xb_curp - xbp->xb_bufp <= len)
 	xbp->xb_curp = xbp->xb_bufp;
     else
 	xbp->xb_curp -= len;
 
     return xbp->xb_curp;
-}
-
-/*
- * Initialize the contents of an xo_buffer_t.
- */
-static inline void
-xo_buf_cleanup (xo_buffer_t *xbp)
-{
-    if (xbp->xb_bufp)
-	xo_free(xbp->xb_bufp);
-    bzero(xbp, sizeof(*xbp));
 }
 
 /*

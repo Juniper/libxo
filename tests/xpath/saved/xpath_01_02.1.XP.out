@@ -1,0 +1,21 @@
+<one>
+  <two>4</two>
+  <output>yes</output>
+</one>
+<one>
+  <two>
+    <three>5</three>
+    <output>sure</output>
+  </two>
+</one>
+<one>
+  <two>4</two>
+  <three>
+    <four>5</four>
+    <output>1</output>
+  </three>
+  <three>
+    <four>5</four>
+    <output>finally</output>
+  </three>
+</one>

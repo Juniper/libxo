@@ -1,0 +1,321 @@
+main: input '# Test 1: positional predicate - select the 2nd instance'
+main: input ''
+main: input '?interface[2]'
+adding filter: 'interface[2]'
+added filter: 0
+--- 0: 7
+    000007: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [interface], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 72 (C_INDEX), str 13 [2], contents 0, next 0, prev 0 
+main: status: zero
+main: input '{interface'
+main: status: zero
+main: input '<interface'
+main: filter: rc: 12
+main: status: track
+main: input '= ifindex 1'
+main: field: 'ifindex'='1'
+main: status: track
+main: input '= name eth0'
+main: field: 'name'='eth0'
+main: status: track
+main: input '>interface'
+main: status: track
+main: input '<interface'
+main: filter: rc: 12
+main: status: full
+main: input '= ifindex 2'
+main: field: 'ifindex'='2'
+main: status: full
+main: input '= name lo0'
+main: field: 'name'='lo0'
+main: status: full
+main: input '>interface'
+main: filter: rc: 13
+main: status: track
+main: input '<interface'
+main: filter: rc: 12
+main: status: track
+main: input '= ifindex 3'
+main: field: 'ifindex'='3'
+main: status: track
+main: input '= name eth1'
+main: field: 'name'='eth1'
+main: status: track
+main: input '>interface'
+main: status: track
+main: input '}interface'
+main: status: track
+main: input ''
+main: input '# Test 2: positional predicate - select the 1st instance'
+main: input 'r'
+main: status: zero
+main: input '?interface[1]'
+adding filter: 'interface[1]'
+added filter: 0
+--- 0: 7
+    000007: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [interface], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 72 (C_INDEX), str 13 [1], contents 0, next 0, prev 0 
+main: status: zero
+main: input '{interface'
+main: status: zero
+main: input '<interface'
+main: filter: rc: 12
+main: status: full
+main: input '= ifindex 1'
+main: field: 'ifindex'='1'
+main: status: full
+main: input '= name eth0'
+main: field: 'name'='eth0'
+main: status: full
+main: input '>interface'
+main: filter: rc: 13
+main: status: track
+main: input '<interface'
+main: filter: rc: 12
+main: status: track
+main: input '= ifindex 2'
+main: field: 'ifindex'='2'
+main: status: track
+main: input '= name lo0'
+main: field: 'name'='lo0'
+main: status: track
+main: input '>interface'
+main: status: track
+main: input '}interface'
+main: status: track
+main: input ''
+main: input '# Test 3: positional predicate combined with key predicate (and)'
+main: input 'r'
+main: status: zero
+main: input '?socket[2 and protocol='tcp4']'
+adding filter: 'socket[2 and protocol='tcp4']'
+added filter: 0
+--- 0: 13
+    000013: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [socket], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
+                000004: type 40 ('('), str 12 [and], contents 3, next 0, prev 0 
+                    000003: type 53 (T_NUMBER), str 10 [2], contents 0, next 7, prev 0 
+                    000007: type 14 (L_EQUALS), str 25 [=], contents 8, next 0, prev 3 
+                        000008: type 74 (C_PATH), str 0 [], contents 6, next 9, prev 0 
+                            000006: type 70 (C_ELEMENT), str 16 [protocol], contents 0, next 0, prev 0 
+                        000009: type 54 (T_QUOTED), str 27 [tcp4], contents 0, next 0, prev 8 
+main: status: zero
+main: input '{socket'
+main: status: zero
+main: input '<socket'
+main: filter: rc: 9
+main: status: predicate
+main: input '$ protocol tcp4'
+main: key: 'protocol'='tcp4'
+main: status: full
+main: input '= recv 100'
+main: field: 'recv'='100'
+main: status: full
+main: input '>socket'
+main: filter: rc: 10
+main: status: track
+main: input '<socket'
+main: filter: rc: 9
+main: status: predicate
+main: input '$ protocol tcp4'
+main: key: 'protocol'='tcp4'
+main: status: full
+main: input '= recv 200'
+main: field: 'recv'='200'
+main: status: full
+main: input '>socket'
+main: filter: rc: 10
+main: status: track
+main: input '<socket'
+main: filter: rc: 9
+main: status: predicate
+main: input '$ protocol udp'
+main: key: 'protocol'='udp'
+main: status: track
+main: input '= recv 300'
+main: field: 'recv'='300'
+main: status: track
+main: input '> socket'
+main: status: track
+main: input '} socket'
+main: status: track
+main: input ''
+main: input '# Test 4: positional predicate combined with key predicate and another predicate'
+main: input 'r'
+main: status: zero
+main: input '?socket[2][protocol='tcp4']'
+adding filter: 'socket[2][protocol='tcp4']'
+added filter: 0
+--- 0: 14
+    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [socket], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 6, prev 0 
+                000003: type 72 (C_INDEX), str 10 [2], contents 0, next 0, prev 0 
+            000006: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 2 
+                000008: type 14 (L_EQUALS), str 25 [=], contents 9, next 0, prev 0 
+                    000009: type 74 (C_PATH), str 0 [], contents 7, next 10, prev 0 
+                        000007: type 70 (C_ELEMENT), str 16 [protocol], contents 0, next 0, prev 0 
+                    000010: type 54 (T_QUOTED), str 27 [tcp4], contents 0, next 0, prev 9 
+main: status: zero
+main: input '{socket'
+main: status: zero
+main: input '<socket'
+main: filter: rc: 9
+main: status: track
+main: input '$ protocol tcp4'
+main: key: 'protocol'='tcp4'
+main: status: track
+main: input '= recv 100'
+main: field: 'recv'='100'
+main: status: track
+main: input '>socket'
+main: status: track
+main: input '<socket'
+main: filter: rc: 9
+main: status: predicate
+main: input '$ protocol tcp4'
+main: key: 'protocol'='tcp4'
+main: status: full
+main: input '= recv 200'
+main: field: 'recv'='200'
+main: status: full
+main: input '>socket'
+main: filter: rc: 10
+main: status: track
+main: input '<socket'
+main: filter: rc: 9
+main: status: track
+main: input '$ protocol udp'
+main: key: 'protocol'='udp'
+main: status: track
+main: input '= recv 300'
+main: field: 'recv'='300'
+main: status: track
+main: input '>socket'
+main: status: track
+main: input '}socket'
+main: status: track
+main: input ''
+main: input '# Test 5: positional predicate where leading predicate excludes earlier instances'
+main: input '# socket[protocol='tcp4'][2] must select the 2nd tcp4, not the 2nd overall socket'
+main: input 'r'
+main: status: zero
+main: input '?socket[protocol='tcp4'][2]'
+adding filter: 'socket[protocol='tcp4'][2]'
+added filter: 0
+--- 0: 14
+    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [socket], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 9, prev 0 
+                000004: type 14 (L_EQUALS), str 19 [=], contents 5, next 0, prev 0 
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0 
+                        000003: type 70 (C_ELEMENT), str 10 [protocol], contents 0, next 0, prev 0 
+                    000006: type 54 (T_QUOTED), str 21 [tcp4], contents 0, next 0, prev 5 
+            000009: type 75 (C_PREDICATE), str 0 [], contents 10, next 0, prev 2 
+                000010: type 72 (C_INDEX), str 30 [2], contents 0, next 0, prev 0 
+main: status: zero
+main: input '{socket'
+main: status: zero
+main: input '<socket'
+main: filter: rc: 9
+main: status: predicate
+main: input '$ protocol udp'
+main: key: 'protocol'='udp'
+main: status: track
+main: input '= recv 100'
+main: field: 'recv'='100'
+main: status: track
+main: input '>socket'
+main: status: track
+main: input '<socket'
+main: filter: rc: 9
+main: status: predicate
+main: input '$ protocol tcp4'
+main: key: 'protocol'='tcp4'
+main: status: track
+main: input '= recv 200'
+main: field: 'recv'='200'
+main: status: track
+main: input '= wrong answer'
+main: field: 'wrong'='answer'
+main: status: track
+main: input '>socket'
+main: status: track
+main: input '<socket'
+main: filter: rc: 9
+main: status: predicate
+main: input '$ protocol tcp4'
+main: key: 'protocol'='tcp4'
+main: status: full
+main: input '= recv 300'
+main: field: 'recv'='300'
+main: status: full
+main: input '= answer right'
+main: field: 'answer'='right'
+main: status: full
+main: input '>socket'
+main: filter: rc: 10
+main: status: track
+main: input '}socket'
+main: status: track
+main: input ''
+main: input '# test 6: boring sub elements, which somehow I broke'
+main: input 'r'
+main: status: zero
+main: input '? data'
+adding filter: 'data'
+added filter: 0
+--- 0: 3
+    000003: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [data], contents 0, next 0, prev 0 
+main: status: zero
+main: input '+ data'
+main: filter: rc: 7
+main: status: full
+main: input '= thing one'
+main: field: 'thing'='one'
+main: status: full
+main: input '= thing two'
+main: field: 'thing'='two'
+main: status: full
+main: input '= thing three'
+main: field: 'thing'='three'
+main: status: full
+main: input '= thing four'
+main: field: 'thing'='four'
+main: status: full
+main: input '- data'
+main: status: track
+main: input ''
+main: input '# test 7: boring sub elements, which somehow I broke'
+main: input 'r'
+main: status: zero
+main: input '? item'
+adding filter: 'item'
+added filter: 0
+--- 0: 3
+    000003: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 0, next 0, prev 0 
+main: status: zero
+main: input '+ data'
+main: filter: rc: 7
+main: status: track
+main: input '= thing one'
+main: field: 'thing'='one'
+main: status: track
+main: input '= thing two'
+main: field: 'thing'='two'
+main: status: track
+main: input '= thing three'
+main: field: 'thing'='three'
+main: status: track
+main: input '= thing four'
+main: field: 'thing'='four'
+main: status: track
+main: input '- data'
+main: status: track

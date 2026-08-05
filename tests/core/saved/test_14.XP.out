@@ -1,0 +1,20 @@
+<cached>
+  <name>hello</name>
+  <name>world</name>
+  <count>3</count>
+  <total>10</total>
+  <enc>enc-val</enc>
+  <vis>vis-val</vis>
+  <addr>0x0</addr>
+  <port>80</port>
+</cached>
+<fallback>
+  <name>hello</name>
+  <name>world</name>
+  <count>3</count>
+  <total>10</total>
+  <enc>enc-val</enc>
+  <vis>vis-val</vis>
+  <addr>0x0</addr>
+  <port>80</port>
+</fallback>

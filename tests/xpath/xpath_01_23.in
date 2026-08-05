@@ -1,0 +1,43 @@
+r
+?data4
+i xpath_01_23.inc
+
+r
+? data3
+i xpath_01_23.inc
+
+r
+? data2
+i xpath_01_23.inc
+
+r
+? top-level/data
+i xpath_01_23.inc
+
+r
+? thing
+i xpath_01_23.inc
+
+r
+? item[starts-with(sku, "GRO")]
+i xpath_01_23.inc
+
+r
+? item[on-order + 2 < 10 - 6]
+i xpath_01_23.inc
+
+r
+? item[on-order + 20 > in-stock]
+i xpath_01_23.inc
+
+r
+? item[on-order > in-stock]
+i xpath_01_23.inc
+
+r
+? cost[. > 450]
+i xpath_01_23.inc
+
+r
+? type[. == "18u"]
+i xpath_01_23.inc

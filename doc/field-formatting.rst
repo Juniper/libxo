@@ -29,18 +29,6 @@ The format-modifier can be:
   the right instead of the left.
 - a leading zero ('0') indicating the output value should be padded on the
   left with zeroes instead of spaces (' ').
-- one or more digits ('0' - '9') indicating the minimum width of the
-  argument.  If the width in columns of the output value is less than
-  the minimum width, the value will be padded to reach the minimum.
-- a period followed by one or more digits indicating the maximum
-  number of bytes which will be examined for a string argument, or the maximum
-  width for a non-string argument.  When handling ASCII strings this
-  functions as the field width but for multi-byte characters, a single
-  character may be composed of multiple bytes.
-  xo_emit will never dereference memory beyond the given number of bytes.
-- a second period followed by one or more digits indicating the maximum
-  width for a string argument.  This modifier cannot be given for non-string
-  arguments.
 - one or more 'h' characters, indicating shorter input data.
 - one or more 'l' characters, indicating longer input data.
 - a 'z' character, indicating a 'size_t' argument.
@@ -48,9 +36,70 @@ The format-modifier can be:
 - a ' ' character, indicating a space should be emitted before
   positive numbers.
 - a '+' character, indicating sign should emitted before any number.
+- a field-width indication as described under :ref:`field-widths`.
 
 Note that 'q', 'D', 'O', and 'U' are considered deprecated and will be
-removed eventually.
+removed eventually.  They are supported for compatibility with
+:manpage:`printf(3)` strings.
+
+.. _field-widths:
+
+Field Widths
+~~~~~~~~~~~~
+
+Field widths are included in the format modifier using an optional set
+of up to three groups of one or more digits ('0' - '9'), separated by
+a period ('.').
+
+If any of the groups consists of a '*' instead of a decimal digit
+string, the value is given by the next argument to the function.
+
+The first group specifies a minimum field width, in columns.  If the
+formatted value uses fewer columns, spaces will be added for padding
+give the proper width.
+
+The second group specifies the "precision" which is has differing
+impact, depending on the type of the field.  For floating point
+values, it represents the maximum number of significant digits after
+the decimal point.  For integer values, it gives the minimum number of
+digits to appear, using leading zeroes for padding.
+
+For strings, the second group has traditionally served two purposes,
+giving the number of columns to fill and the number of bytes of memory
+to be referenced.  But with UTF-8 character encodings, a single column
+can consume up to four bytes of data in a string.
+
+For this reason, `libxo` supports a third group, allowing the second
+to represent the maximum number of columns while the third represents
+the maximum number of bytes to be inspected while processing.  This
+allows multi-byte characters and columns to be handled distinctly.  If
+the third group is used as both the bytes count and the number of
+columns, using the limited number of bytes to fill the columns,
+padding with spaces if the number of bytes is exhausted.
+
+`libxo` will not dereference memory beyond the given number of bytes.
+
+For the "data" style encodings (XML, JSON), the first group will be
+ignored, since whitespace padding is not desirable in those encodings.
+The second and third will not be ignored, since `libxo` must respect
+floating point precision, leading zeros, and string lengths.
+
+::
+
+   /* 8 columns of output, padded with zeroes */
+   xo_emit("[{:count/%.8d}]\\n", count);  /* "[00001234]" */
+
+   /* 12 columns of output, the last 8 are padded with zeroes */
+   xo_emit("[{:count/%12.8d}]\\n", count);  /* "[    00001234]" */
+
+   /* 8 columns of output; up to the first 20 bytes of 'name' are inspected */
+   xo_emit("[{:name/%.8.20s}]\\n", name);  /* "[goodname]" */
+
+   /* Same, but using '*' and function arguments */
+   xo_emit("[{:name/%.*.*s}]\\n", 8, 20, name);  /* "[goodname]" */
+
+Format Character
+~~~~~~~~~~~~~~~~
 
 The format character is described in the following table:
 

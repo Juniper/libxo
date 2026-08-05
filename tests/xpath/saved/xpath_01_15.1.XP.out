@@ -1,0 +1,18 @@
+<item>
+  <name>eth0</name>
+  <val>1</val>
+</item>
+<item>
+  <val>3</val>
+  <label>b</label>
+</item>
+<item>
+  <val>5</val>
+  <label>c</label>
+</item>
+<item>
+  <flag>1</flag>
+  <name>eth0</name>
+  <alt>lo0</alt>
+  <val>1</val>
+</item>

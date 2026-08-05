@@ -1,0 +1,7186 @@
+main: input 'r'
+main: status: zero
+main: input '?data4'
+adding filter: 'data4'
+added filter: 0
+--- 0: 3
+    000003: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [data4], contents 0, next 0, prev 0 
+main: status: zero
+main: input 'i xpath_01_23.inc'
+main: include: '../../../tests/xpath/xpath_01_23.inc'
+main: input '+ data'
+main: filter: rc: 12
+main: status: track
+main: input '= thing one'
+main: field: 'thing'='one'
+main: status: track
+main: input '= thing two'
+main: field: 'thing'='two'
+main: status: track
+main: input '= thing three'
+main: field: 'thing'='three'
+main: status: track
+main: input '= thing four'
+main: field: 'thing'='four'
+main: status: track
+main: input '= block 56'
+main: field: 'block'='56'
+main: status: track
+main: input '+ top-level'
+main: filter: rc: 21
+main: status: track
+main: input '= type ethernet'
+main: field: 'type'='ethernet'
+main: status: track
+main: input '= type bridge'
+main: field: 'type'='bridge'
+main: status: track
+main: input '= type 18u'
+main: field: 'type'='18u'
+main: status: track
+main: input '= type 24'
+main: field: 'type'='24'
+main: status: track
+main: input '= address 0x0'
+main: field: 'address'='0x0'
+main: status: track
+main: input '= port 1'
+main: field: 'port'='1'
+main: status: track
+main: input '= address 0x0'
+main: field: 'address'='0x0'
+main: status: track
+main: input '= port 1'
+main: field: 'port'='1'
+main: status: track
+main: input '= address 0x0'
+main: field: 'address'='0x0'
+main: status: track
+main: input '= port 1'
+main: field: 'port'='1'
+main: status: track
+main: input '= used-percent 12'
+main: field: 'used-percent'='12'
+main: status: track
+main: input '= kve_start 0xdeadbeef'
+main: field: 'kve_start'='0xdeadbeef'
+main: status: track
+main: input '= kve_end 0xcabb1e'
+main: field: 'kve_end'='0xcabb1e'
+main: status: track
+main: input '= host my-box'
+main: field: 'host'='my-box'
+main: status: track
+main: input '= domain example.com'
+main: field: 'domain'='example.com'
+main: status: track
+main: input '= host my-box'
+main: field: 'host'='my-box'
+main: status: track
+main: input '= domain example.com'
+main: field: 'domain'='example.com'
+main: status: track
+main: input '= label value'
+main: field: 'label'='value'
+main: status: track
+main: input '= max-chaos very'
+main: field: 'max-chaos'='very'
+main: status: track
+main: input '= min-chaos 42'
+main: field: 'min-chaos'='42'
+main: status: track
+main: input '= some-chaos [42]'
+main: field: 'some-chaos'='[42]'
+main: status: track
+main: input '@ test-attr attr-value'
+main: attr: 'test-attr'='attr-value'
+main: status: track
+main: input '[ sku'
+main: open leaf list: 'sku'
+main: status: track
+main: input '= sku gum-000-1412'
+main: field: 'sku'='gum-000-1412'
+main: status: track
+main: input '= sku sum-000-4121'
+main: field: 'sku'='sum-000-4121'
+main: status: track
+main: input '] sku'
+main: close leaf list: 'sku'
+main: status: track
+main: input '= host my-box'
+main: field: 'host'='my-box'
+main: status: track
+main: input '= domain example.com'
+main: field: 'domain'='example.com'
+main: status: track
+main: input '@ test value'
+main: attr: 'test'='value'
+main: status: track
+main: input '+ data'
+main: filter: rc: 18
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '@ test2 value2'
+main: attr: 'test2'='value2'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku GRO-000-415'
+main: key: 'sku'='GRO-000-415'
+main: status: track
+main: input '$ name gum'
+main: key: 'name'='gum'
+main: status: track
+main: input '= sold 1412'
+main: field: 'sold'='1412'
+main: status: track
+main: input '= in-stock 54'
+main: field: 'in-stock'='54'
+main: status: track
+main: input '= on-order 10'
+main: field: 'on-order'='10'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku HRD-000-212'
+main: key: 'sku'='HRD-000-212'
+main: status: track
+main: input '$ name rope'
+main: key: 'name'='rope'
+main: status: track
+main: input '= sold 85'
+main: field: 'sold'='85'
+main: status: track
+main: input '= in-stock 4'
+main: field: 'in-stock'='4'
+main: status: track
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku HRD-000-517'
+main: key: 'sku'='HRD-000-517'
+main: status: track
+main: input '$ name ladder'
+main: key: 'name'='ladder'
+main: status: track
+main: input '= sold 0'
+main: field: 'sold'='0'
+main: status: track
+main: input '= in-stock 2'
+main: field: 'in-stock'='2'
+main: status: track
+main: input '= on-order 1'
+main: field: 'on-order'='1'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku HRD-000-632'
+main: key: 'sku'='HRD-000-632'
+main: status: track
+main: input '$ name bolt'
+main: key: 'name'='bolt'
+main: status: track
+main: input '= sold 4123'
+main: field: 'sold'='4123'
+main: status: track
+main: input '= in-stock 144'
+main: field: 'in-stock'='144'
+main: status: track
+main: input '= on-order 42'
+main: field: 'on-order'='42'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku GRO-000-2331'
+main: key: 'sku'='GRO-000-2331'
+main: status: track
+main: input '$ name water'
+main: key: 'name'='water'
+main: status: track
+main: input '= sold 17'
+main: field: 'sold'='17'
+main: status: track
+main: input '= in-stock 14'
+main: field: 'in-stock'='14'
+main: status: track
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- data'
+main: status: track
+main: input '+ data2'
+main: filter: rc: 19
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '$ sku GRO-000-415'
+main: key: 'sku'='GRO-000-415'
+main: status: track
+main: input '$ name gum'
+main: key: 'name'='gum'
+main: status: track
+main: input '= sold 1412.0'
+main: field: 'sold'='1412.0'
+main: status: track
+main: input '= in-stock 54'
+main: field: 'in-stock'='54'
+main: status: track
+main: input '= on-order 10'
+main: field: 'on-order'='10'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '$ sku HRD-000-212'
+main: key: 'sku'='HRD-000-212'
+main: status: track
+main: input '$ name rope'
+main: key: 'name'='rope'
+main: status: track
+main: input '= sold 85.0'
+main: field: 'sold'='85.0'
+main: status: track
+main: input '= in-stock 4'
+main: field: 'in-stock'='4'
+main: status: track
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '$ sku HRD-000-517'
+main: key: 'sku'='HRD-000-517'
+main: status: track
+main: input '$ name ladder'
+main: key: 'name'='ladder'
+main: status: track
+main: input '= sold 0'
+main: field: 'sold'='0'
+main: status: track
+main: input '= in-stock 2'
+main: field: 'in-stock'='2'
+main: status: track
+main: input '= on-order 1'
+main: field: 'on-order'='1'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '$ sku HRD-000-632'
+main: key: 'sku'='HRD-000-632'
+main: status: track
+main: input '$ name bolt'
+main: key: 'name'='bolt'
+main: status: track
+main: input '= sold 4123.0'
+main: field: 'sold'='4123.0'
+main: status: track
+main: input '= in-stock 144'
+main: field: 'in-stock'='144'
+main: status: track
+main: input '= on-order 42'
+main: field: 'on-order'='42'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '$ sku GRO-000-2331'
+main: key: 'sku'='GRO-000-2331'
+main: status: track
+main: input '$ name water'
+main: key: 'name'='water'
+main: status: track
+main: input '= sold 17.0'
+main: field: 'sold'='17.0'
+main: status: track
+main: input '= in-stock 14'
+main: field: 'in-stock'='14'
+main: status: track
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- data2'
+main: status: track
+main: input '+ data3'
+main: filter: rc: 19
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '$ sku GRO-000-533'
+main: key: 'sku'='GRO-000-533'
+main: status: track
+main: input '$ name fish'
+main: key: 'name'='fish'
+main: status: track
+main: input '= sold 1321.0'
+main: field: 'sold'='1321.0'
+main: status: track
+main: input '= in-stock 45'
+main: field: 'in-stock'='45'
+main: status: track
+main: input '= on-order 1'
+main: field: 'on-order'='1'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- data3'
+main: status: track
+main: input '+ data4'
+main: filter: rc: 17
+main: status: full
+main: input '{ item'
+main: filter: rc: 18
+main: status: full
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: full
+main: input '= item gum'
+main: field: 'item'='gum'
+main: status: full
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: full
+main: input '= item rope'
+main: field: 'item'='rope'
+main: status: full
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: full
+main: input '= item ladder'
+main: field: 'item'='ladder'
+main: status: full
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: full
+main: input '= item bolt'
+main: field: 'item'='bolt'
+main: status: full
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: full
+main: input '= item water'
+main: field: 'item'='water'
+main: status: full
+main: input '} item'
+xpath_01: xo_close_list can't find match for 'item'
+main: status: full
+main: input '- data4'
+main: status: track
+main: input '@ test value'
+main: attr: 'test'='value'
+main: status: track
+main: input '+ data'
+main: filter: rc: 18
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '@ test2 value2'
+main: attr: 'test2'='value2'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku GRO-000-415'
+main: key: 'sku'='GRO-000-415'
+main: status: track
+main: input '$ name gum'
+main: key: 'name'='gum'
+main: status: track
+main: input '= sold 1412'
+main: field: 'sold'='1412'
+main: status: track
+main: input '= on-order 10'
+main: field: 'on-order'='10'
+main: status: track
+main: input '= in-stock 54'
+main: field: 'in-stock'='54'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku HRD-000-212'
+main: key: 'sku'='HRD-000-212'
+main: status: track
+main: input '$ name rope'
+main: key: 'name'='rope'
+main: status: track
+main: input '= sold 85'
+main: field: 'sold'='85'
+main: status: track
+main: input '= extra special'
+main: field: 'extra'='special'
+main: status: track
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: track
+main: input '= in-stock 4'
+main: field: 'in-stock'='4'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku HRD-000-517'
+main: key: 'sku'='HRD-000-517'
+main: status: track
+main: input '$ name ladder'
+main: key: 'name'='ladder'
+main: status: track
+main: input '= sold 0'
+main: field: 'sold'='0'
+main: status: track
+main: input '= extra special'
+main: field: 'extra'='special'
+main: status: track
+main: input '= on-order 1'
+main: field: 'on-order'='1'
+main: status: track
+main: input '= in-stock 2'
+main: field: 'in-stock'='2'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku HRD-000-632'
+main: key: 'sku'='HRD-000-632'
+main: status: track
+main: input '$ name bolt'
+main: key: 'name'='bolt'
+main: status: track
+main: input '= sold 4123'
+main: field: 'sold'='4123'
+main: status: track
+main: input '= on-order 42'
+main: field: 'on-order'='42'
+main: status: track
+main: input '= in-stock 144'
+main: field: 'in-stock'='144'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku GRO-000-2331'
+main: key: 'sku'='GRO-000-2331'
+main: status: track
+main: input '$ name water'
+main: key: 'name'='water'
+main: status: track
+main: input '= sold 17'
+main: field: 'sold'='17'
+main: status: track
+main: input '= extra special'
+main: field: 'extra'='special'
+main: status: track
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: track
+main: input '= in-stock 14'
+main: field: 'in-stock'='14'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- data'
+main: status: track
+main: input '= cost 425'
+main: field: 'cost'='425'
+main: status: track
+main: input '= cost 455'
+main: field: 'cost'='455'
+main: status: track
+main: input '= mode mode'
+main: field: 'mode'='mode'
+main: status: track
+main: input '= mode_octal octal'
+main: field: 'mode_octal'='octal'
+main: status: track
+main: input '= links links'
+main: field: 'links'='links'
+main: status: track
+main: input '= user user'
+main: field: 'user'='user'
+main: status: track
+main: input '= group group'
+main: field: 'group'='group'
+main: status: track
+main: input '= pre that'
+main: field: 'pre'='that'
+main: status: track
+main: input '= links 3'
+main: field: 'links'='3'
+main: status: track
+main: input '= post this'
+main: field: 'post'='this'
+main: status: track
+main: input '= mode /some/file'
+main: field: 'mode'='/some/file'
+main: status: track
+main: input '= mode_octal 640'
+main: field: 'mode_octal'='640'
+main: status: track
+main: input '= links 1'
+main: field: 'links'='1'
+main: status: track
+main: input '= user user'
+main: field: 'user'='user'
+main: status: track
+main: input '= group group'
+main: field: 'group'='group'
+main: status: track
+main: input '= one 1'
+main: field: 'one'='1'
+main: status: track
+main: input '= two 2'
+main: field: 'two'='2'
+main: status: track
+main: input '= three 3'
+main: field: 'three'='3'
+main: status: track
+main: input '= one 1'
+main: field: 'one'='1'
+main: status: track
+main: input '= two 2'
+main: field: 'two'='2'
+main: status: track
+main: input '= three 3'
+main: field: 'three'='3'
+main: status: track
+main: input '= one 1'
+main: field: 'one'='1'
+main: status: track
+main: input '= two 2'
+main: field: 'two'='2'
+main: status: track
+main: input '= three 3'
+main: field: 'three'='3'
+main: status: track
+main: input '- top-level'
+main: status: track
+main: input '- data'
+main: status: track
+main: status: track
+main: input ''
+main: input 'r'
+main: status: zero
+main: input '? data3'
+adding filter: 'data3'
+added filter: 0
+--- 0: 3
+    000003: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [data3], contents 0, next 0, prev 0 
+main: status: zero
+main: input 'i xpath_01_23.inc'
+main: include: '../../../tests/xpath/xpath_01_23.inc'
+main: input '+ data'
+main: filter: rc: 14
+main: status: track
+main: input '= thing one'
+main: field: 'thing'='one'
+main: status: track
+main: input '= thing two'
+main: field: 'thing'='two'
+main: status: track
+main: input '= thing three'
+main: field: 'thing'='three'
+main: status: track
+main: input '= thing four'
+main: field: 'thing'='four'
+main: status: track
+main: input '= block 56'
+main: field: 'block'='56'
+main: status: track
+main: input '+ top-level'
+main: filter: rc: 21
+main: status: track
+main: input '= type ethernet'
+main: field: 'type'='ethernet'
+main: status: track
+main: input '= type bridge'
+main: field: 'type'='bridge'
+main: status: track
+main: input '= type 18u'
+main: field: 'type'='18u'
+main: status: track
+main: input '= type 24'
+main: field: 'type'='24'
+main: status: track
+main: input '= address 0x0'
+main: field: 'address'='0x0'
+main: status: track
+main: input '= port 1'
+main: field: 'port'='1'
+main: status: track
+main: input '= address 0x0'
+main: field: 'address'='0x0'
+main: status: track
+main: input '= port 1'
+main: field: 'port'='1'
+main: status: track
+main: input '= address 0x0'
+main: field: 'address'='0x0'
+main: status: track
+main: input '= port 1'
+main: field: 'port'='1'
+main: status: track
+main: input '= used-percent 12'
+main: field: 'used-percent'='12'
+main: status: track
+main: input '= kve_start 0xdeadbeef'
+main: field: 'kve_start'='0xdeadbeef'
+main: status: track
+main: input '= kve_end 0xcabb1e'
+main: field: 'kve_end'='0xcabb1e'
+main: status: track
+main: input '= host my-box'
+main: field: 'host'='my-box'
+main: status: track
+main: input '= domain example.com'
+main: field: 'domain'='example.com'
+main: status: track
+main: input '= host my-box'
+main: field: 'host'='my-box'
+main: status: track
+main: input '= domain example.com'
+main: field: 'domain'='example.com'
+main: status: track
+main: input '= label value'
+main: field: 'label'='value'
+main: status: track
+main: input '= max-chaos very'
+main: field: 'max-chaos'='very'
+main: status: track
+main: input '= min-chaos 42'
+main: field: 'min-chaos'='42'
+main: status: track
+main: input '= some-chaos [42]'
+main: field: 'some-chaos'='[42]'
+main: status: track
+main: input '@ test-attr attr-value'
+main: attr: 'test-attr'='attr-value'
+main: status: track
+main: input '[ sku'
+main: open leaf list: 'sku'
+main: status: track
+main: input '= sku gum-000-1412'
+main: field: 'sku'='gum-000-1412'
+main: status: track
+main: input '= sku sum-000-4121'
+main: field: 'sku'='sum-000-4121'
+main: status: track
+main: input '] sku'
+main: close leaf list: 'sku'
+main: status: track
+main: input '= host my-box'
+main: field: 'host'='my-box'
+main: status: track
+main: input '= domain example.com'
+main: field: 'domain'='example.com'
+main: status: track
+main: input '@ test value'
+main: attr: 'test'='value'
+main: status: track
+main: input '+ data'
+main: filter: rc: 18
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '@ test2 value2'
+main: attr: 'test2'='value2'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku GRO-000-415'
+main: key: 'sku'='GRO-000-415'
+main: status: track
+main: input '$ name gum'
+main: key: 'name'='gum'
+main: status: track
+main: input '= sold 1412'
+main: field: 'sold'='1412'
+main: status: track
+main: input '= in-stock 54'
+main: field: 'in-stock'='54'
+main: status: track
+main: input '= on-order 10'
+main: field: 'on-order'='10'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku HRD-000-212'
+main: key: 'sku'='HRD-000-212'
+main: status: track
+main: input '$ name rope'
+main: key: 'name'='rope'
+main: status: track
+main: input '= sold 85'
+main: field: 'sold'='85'
+main: status: track
+main: input '= in-stock 4'
+main: field: 'in-stock'='4'
+main: status: track
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku HRD-000-517'
+main: key: 'sku'='HRD-000-517'
+main: status: track
+main: input '$ name ladder'
+main: key: 'name'='ladder'
+main: status: track
+main: input '= sold 0'
+main: field: 'sold'='0'
+main: status: track
+main: input '= in-stock 2'
+main: field: 'in-stock'='2'
+main: status: track
+main: input '= on-order 1'
+main: field: 'on-order'='1'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku HRD-000-632'
+main: key: 'sku'='HRD-000-632'
+main: status: track
+main: input '$ name bolt'
+main: key: 'name'='bolt'
+main: status: track
+main: input '= sold 4123'
+main: field: 'sold'='4123'
+main: status: track
+main: input '= in-stock 144'
+main: field: 'in-stock'='144'
+main: status: track
+main: input '= on-order 42'
+main: field: 'on-order'='42'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku GRO-000-2331'
+main: key: 'sku'='GRO-000-2331'
+main: status: track
+main: input '$ name water'
+main: key: 'name'='water'
+main: status: track
+main: input '= sold 17'
+main: field: 'sold'='17'
+main: status: track
+main: input '= in-stock 14'
+main: field: 'in-stock'='14'
+main: status: track
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- data'
+main: status: track
+main: input '+ data2'
+main: filter: rc: 19
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '$ sku GRO-000-415'
+main: key: 'sku'='GRO-000-415'
+main: status: track
+main: input '$ name gum'
+main: key: 'name'='gum'
+main: status: track
+main: input '= sold 1412.0'
+main: field: 'sold'='1412.0'
+main: status: track
+main: input '= in-stock 54'
+main: field: 'in-stock'='54'
+main: status: track
+main: input '= on-order 10'
+main: field: 'on-order'='10'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '$ sku HRD-000-212'
+main: key: 'sku'='HRD-000-212'
+main: status: track
+main: input '$ name rope'
+main: key: 'name'='rope'
+main: status: track
+main: input '= sold 85.0'
+main: field: 'sold'='85.0'
+main: status: track
+main: input '= in-stock 4'
+main: field: 'in-stock'='4'
+main: status: track
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '$ sku HRD-000-517'
+main: key: 'sku'='HRD-000-517'
+main: status: track
+main: input '$ name ladder'
+main: key: 'name'='ladder'
+main: status: track
+main: input '= sold 0'
+main: field: 'sold'='0'
+main: status: track
+main: input '= in-stock 2'
+main: field: 'in-stock'='2'
+main: status: track
+main: input '= on-order 1'
+main: field: 'on-order'='1'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '$ sku HRD-000-632'
+main: key: 'sku'='HRD-000-632'
+main: status: track
+main: input '$ name bolt'
+main: key: 'name'='bolt'
+main: status: track
+main: input '= sold 4123.0'
+main: field: 'sold'='4123.0'
+main: status: track
+main: input '= in-stock 144'
+main: field: 'in-stock'='144'
+main: status: track
+main: input '= on-order 42'
+main: field: 'on-order'='42'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '$ sku GRO-000-2331'
+main: key: 'sku'='GRO-000-2331'
+main: status: track
+main: input '$ name water'
+main: key: 'name'='water'
+main: status: track
+main: input '= sold 17.0'
+main: field: 'sold'='17.0'
+main: status: track
+main: input '= in-stock 14'
+main: field: 'in-stock'='14'
+main: status: track
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- data2'
+main: status: track
+main: input '+ data3'
+main: filter: rc: 17
+main: status: full
+main: input '{ item'
+main: filter: rc: 18
+main: status: full
+main: input '< item'
+main: filter: rc: 12
+main: status: full
+main: input '$ sku GRO-000-533'
+main: key: 'sku'='GRO-000-533'
+main: status: full
+main: input '$ name fish'
+main: key: 'name'='fish'
+main: status: full
+main: input '= sold 1321.0'
+main: field: 'sold'='1321.0'
+main: status: full
+main: input '= in-stock 45'
+main: field: 'in-stock'='45'
+main: status: full
+main: input '= on-order 1'
+main: field: 'on-order'='1'
+main: status: full
+main: input '> item'
+main: filter: rc: 12
+main: status: full
+main: input '} item'
+main: status: full
+main: input '- data3'
+main: status: track
+main: input '+ data4'
+main: filter: rc: 19
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item gum'
+main: field: 'item'='gum'
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item rope'
+main: field: 'item'='rope'
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item ladder'
+main: field: 'item'='ladder'
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item bolt'
+main: field: 'item'='bolt'
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item water'
+main: field: 'item'='water'
+main: status: track
+main: input '} item'
+xpath_01: xo_close_list can't find match for 'item'
+main: status: track
+main: input '- data4'
+main: status: track
+main: input '@ test value'
+main: attr: 'test'='value'
+main: status: track
+main: input '+ data'
+main: filter: rc: 18
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '@ test2 value2'
+main: attr: 'test2'='value2'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku GRO-000-415'
+main: key: 'sku'='GRO-000-415'
+main: status: track
+main: input '$ name gum'
+main: key: 'name'='gum'
+main: status: track
+main: input '= sold 1412'
+main: field: 'sold'='1412'
+main: status: track
+main: input '= on-order 10'
+main: field: 'on-order'='10'
+main: status: track
+main: input '= in-stock 54'
+main: field: 'in-stock'='54'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku HRD-000-212'
+main: key: 'sku'='HRD-000-212'
+main: status: track
+main: input '$ name rope'
+main: key: 'name'='rope'
+main: status: track
+main: input '= sold 85'
+main: field: 'sold'='85'
+main: status: track
+main: input '= extra special'
+main: field: 'extra'='special'
+main: status: track
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: track
+main: input '= in-stock 4'
+main: field: 'in-stock'='4'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku HRD-000-517'
+main: key: 'sku'='HRD-000-517'
+main: status: track
+main: input '$ name ladder'
+main: key: 'name'='ladder'
+main: status: track
+main: input '= sold 0'
+main: field: 'sold'='0'
+main: status: track
+main: input '= extra special'
+main: field: 'extra'='special'
+main: status: track
+main: input '= on-order 1'
+main: field: 'on-order'='1'
+main: status: track
+main: input '= in-stock 2'
+main: field: 'in-stock'='2'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku HRD-000-632'
+main: key: 'sku'='HRD-000-632'
+main: status: track
+main: input '$ name bolt'
+main: key: 'name'='bolt'
+main: status: track
+main: input '= sold 4123'
+main: field: 'sold'='4123'
+main: status: track
+main: input '= on-order 42'
+main: field: 'on-order'='42'
+main: status: track
+main: input '= in-stock 144'
+main: field: 'in-stock'='144'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku GRO-000-2331'
+main: key: 'sku'='GRO-000-2331'
+main: status: track
+main: input '$ name water'
+main: key: 'name'='water'
+main: status: track
+main: input '= sold 17'
+main: field: 'sold'='17'
+main: status: track
+main: input '= extra special'
+main: field: 'extra'='special'
+main: status: track
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: track
+main: input '= in-stock 14'
+main: field: 'in-stock'='14'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- data'
+main: status: track
+main: input '= cost 425'
+main: field: 'cost'='425'
+main: status: track
+main: input '= cost 455'
+main: field: 'cost'='455'
+main: status: track
+main: input '= mode mode'
+main: field: 'mode'='mode'
+main: status: track
+main: input '= mode_octal octal'
+main: field: 'mode_octal'='octal'
+main: status: track
+main: input '= links links'
+main: field: 'links'='links'
+main: status: track
+main: input '= user user'
+main: field: 'user'='user'
+main: status: track
+main: input '= group group'
+main: field: 'group'='group'
+main: status: track
+main: input '= pre that'
+main: field: 'pre'='that'
+main: status: track
+main: input '= links 3'
+main: field: 'links'='3'
+main: status: track
+main: input '= post this'
+main: field: 'post'='this'
+main: status: track
+main: input '= mode /some/file'
+main: field: 'mode'='/some/file'
+main: status: track
+main: input '= mode_octal 640'
+main: field: 'mode_octal'='640'
+main: status: track
+main: input '= links 1'
+main: field: 'links'='1'
+main: status: track
+main: input '= user user'
+main: field: 'user'='user'
+main: status: track
+main: input '= group group'
+main: field: 'group'='group'
+main: status: track
+main: input '= one 1'
+main: field: 'one'='1'
+main: status: track
+main: input '= two 2'
+main: field: 'two'='2'
+main: status: track
+main: input '= three 3'
+main: field: 'three'='3'
+main: status: track
+main: input '= one 1'
+main: field: 'one'='1'
+main: status: track
+main: input '= two 2'
+main: field: 'two'='2'
+main: status: track
+main: input '= three 3'
+main: field: 'three'='3'
+main: status: track
+main: input '= one 1'
+main: field: 'one'='1'
+main: status: track
+main: input '= two 2'
+main: field: 'two'='2'
+main: status: track
+main: input '= three 3'
+main: field: 'three'='3'
+main: status: track
+main: input '- top-level'
+main: status: track
+main: input '- data'
+main: status: track
+main: status: track
+main: input ''
+main: input 'r'
+main: status: zero
+main: input '? data2'
+adding filter: 'data2'
+added filter: 0
+--- 0: 3
+    000003: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [data2], contents 0, next 0, prev 0 
+main: status: zero
+main: input 'i xpath_01_23.inc'
+main: include: '../../../tests/xpath/xpath_01_23.inc'
+main: input '+ data'
+main: filter: rc: 14
+main: status: track
+main: input '= thing one'
+main: field: 'thing'='one'
+main: status: track
+main: input '= thing two'
+main: field: 'thing'='two'
+main: status: track
+main: input '= thing three'
+main: field: 'thing'='three'
+main: status: track
+main: input '= thing four'
+main: field: 'thing'='four'
+main: status: track
+main: input '= block 56'
+main: field: 'block'='56'
+main: status: track
+main: input '+ top-level'
+main: filter: rc: 21
+main: status: track
+main: input '= type ethernet'
+main: field: 'type'='ethernet'
+main: status: track
+main: input '= type bridge'
+main: field: 'type'='bridge'
+main: status: track
+main: input '= type 18u'
+main: field: 'type'='18u'
+main: status: track
+main: input '= type 24'
+main: field: 'type'='24'
+main: status: track
+main: input '= address 0x0'
+main: field: 'address'='0x0'
+main: status: track
+main: input '= port 1'
+main: field: 'port'='1'
+main: status: track
+main: input '= address 0x0'
+main: field: 'address'='0x0'
+main: status: track
+main: input '= port 1'
+main: field: 'port'='1'
+main: status: track
+main: input '= address 0x0'
+main: field: 'address'='0x0'
+main: status: track
+main: input '= port 1'
+main: field: 'port'='1'
+main: status: track
+main: input '= used-percent 12'
+main: field: 'used-percent'='12'
+main: status: track
+main: input '= kve_start 0xdeadbeef'
+main: field: 'kve_start'='0xdeadbeef'
+main: status: track
+main: input '= kve_end 0xcabb1e'
+main: field: 'kve_end'='0xcabb1e'
+main: status: track
+main: input '= host my-box'
+main: field: 'host'='my-box'
+main: status: track
+main: input '= domain example.com'
+main: field: 'domain'='example.com'
+main: status: track
+main: input '= host my-box'
+main: field: 'host'='my-box'
+main: status: track
+main: input '= domain example.com'
+main: field: 'domain'='example.com'
+main: status: track
+main: input '= label value'
+main: field: 'label'='value'
+main: status: track
+main: input '= max-chaos very'
+main: field: 'max-chaos'='very'
+main: status: track
+main: input '= min-chaos 42'
+main: field: 'min-chaos'='42'
+main: status: track
+main: input '= some-chaos [42]'
+main: field: 'some-chaos'='[42]'
+main: status: track
+main: input '@ test-attr attr-value'
+main: attr: 'test-attr'='attr-value'
+main: status: track
+main: input '[ sku'
+main: open leaf list: 'sku'
+main: status: track
+main: input '= sku gum-000-1412'
+main: field: 'sku'='gum-000-1412'
+main: status: track
+main: input '= sku sum-000-4121'
+main: field: 'sku'='sum-000-4121'
+main: status: track
+main: input '] sku'
+main: close leaf list: 'sku'
+main: status: track
+main: input '= host my-box'
+main: field: 'host'='my-box'
+main: status: track
+main: input '= domain example.com'
+main: field: 'domain'='example.com'
+main: status: track
+main: input '@ test value'
+main: attr: 'test'='value'
+main: status: track
+main: input '+ data'
+main: filter: rc: 18
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '@ test2 value2'
+main: attr: 'test2'='value2'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku GRO-000-415'
+main: key: 'sku'='GRO-000-415'
+main: status: track
+main: input '$ name gum'
+main: key: 'name'='gum'
+main: status: track
+main: input '= sold 1412'
+main: field: 'sold'='1412'
+main: status: track
+main: input '= in-stock 54'
+main: field: 'in-stock'='54'
+main: status: track
+main: input '= on-order 10'
+main: field: 'on-order'='10'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku HRD-000-212'
+main: key: 'sku'='HRD-000-212'
+main: status: track
+main: input '$ name rope'
+main: key: 'name'='rope'
+main: status: track
+main: input '= sold 85'
+main: field: 'sold'='85'
+main: status: track
+main: input '= in-stock 4'
+main: field: 'in-stock'='4'
+main: status: track
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku HRD-000-517'
+main: key: 'sku'='HRD-000-517'
+main: status: track
+main: input '$ name ladder'
+main: key: 'name'='ladder'
+main: status: track
+main: input '= sold 0'
+main: field: 'sold'='0'
+main: status: track
+main: input '= in-stock 2'
+main: field: 'in-stock'='2'
+main: status: track
+main: input '= on-order 1'
+main: field: 'on-order'='1'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku HRD-000-632'
+main: key: 'sku'='HRD-000-632'
+main: status: track
+main: input '$ name bolt'
+main: key: 'name'='bolt'
+main: status: track
+main: input '= sold 4123'
+main: field: 'sold'='4123'
+main: status: track
+main: input '= in-stock 144'
+main: field: 'in-stock'='144'
+main: status: track
+main: input '= on-order 42'
+main: field: 'on-order'='42'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku GRO-000-2331'
+main: key: 'sku'='GRO-000-2331'
+main: status: track
+main: input '$ name water'
+main: key: 'name'='water'
+main: status: track
+main: input '= sold 17'
+main: field: 'sold'='17'
+main: status: track
+main: input '= in-stock 14'
+main: field: 'in-stock'='14'
+main: status: track
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- data'
+main: status: track
+main: input '+ data2'
+main: filter: rc: 17
+main: status: full
+main: input '{ item'
+main: filter: rc: 18
+main: status: full
+main: input '< item'
+main: filter: rc: 12
+main: status: full
+main: input '$ sku GRO-000-415'
+main: key: 'sku'='GRO-000-415'
+main: status: full
+main: input '$ name gum'
+main: key: 'name'='gum'
+main: status: full
+main: input '= sold 1412.0'
+main: field: 'sold'='1412.0'
+main: status: full
+main: input '= in-stock 54'
+main: field: 'in-stock'='54'
+main: status: full
+main: input '= on-order 10'
+main: field: 'on-order'='10'
+main: status: full
+main: input '> item'
+main: filter: rc: 12
+main: status: full
+main: input '< item'
+main: filter: rc: 14
+main: status: full
+main: input '$ sku HRD-000-212'
+main: key: 'sku'='HRD-000-212'
+main: status: full
+main: input '$ name rope'
+main: key: 'name'='rope'
+main: status: full
+main: input '= sold 85.0'
+main: field: 'sold'='85.0'
+main: status: full
+main: input '= in-stock 4'
+main: field: 'in-stock'='4'
+main: status: full
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: full
+main: input '> item'
+main: filter: rc: 12
+main: status: full
+main: input '< item'
+main: filter: rc: 14
+main: status: full
+main: input '$ sku HRD-000-517'
+main: key: 'sku'='HRD-000-517'
+main: status: full
+main: input '$ name ladder'
+main: key: 'name'='ladder'
+main: status: full
+main: input '= sold 0'
+main: field: 'sold'='0'
+main: status: full
+main: input '= in-stock 2'
+main: field: 'in-stock'='2'
+main: status: full
+main: input '= on-order 1'
+main: field: 'on-order'='1'
+main: status: full
+main: input '> item'
+main: filter: rc: 12
+main: status: full
+main: input '< item'
+main: filter: rc: 14
+main: status: full
+main: input '$ sku HRD-000-632'
+main: key: 'sku'='HRD-000-632'
+main: status: full
+main: input '$ name bolt'
+main: key: 'name'='bolt'
+main: status: full
+main: input '= sold 4123.0'
+main: field: 'sold'='4123.0'
+main: status: full
+main: input '= in-stock 144'
+main: field: 'in-stock'='144'
+main: status: full
+main: input '= on-order 42'
+main: field: 'on-order'='42'
+main: status: full
+main: input '> item'
+main: filter: rc: 12
+main: status: full
+main: input '< item'
+main: filter: rc: 14
+main: status: full
+main: input '$ sku GRO-000-2331'
+main: key: 'sku'='GRO-000-2331'
+main: status: full
+main: input '$ name water'
+main: key: 'name'='water'
+main: status: full
+main: input '= sold 17.0'
+main: field: 'sold'='17.0'
+main: status: full
+main: input '= in-stock 14'
+main: field: 'in-stock'='14'
+main: status: full
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: full
+main: input '> item'
+main: filter: rc: 12
+main: status: full
+main: input '} item'
+main: status: full
+main: input '- data2'
+main: status: track
+main: input '+ data3'
+main: filter: rc: 19
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '$ sku GRO-000-533'
+main: key: 'sku'='GRO-000-533'
+main: status: track
+main: input '$ name fish'
+main: key: 'name'='fish'
+main: status: track
+main: input '= sold 1321.0'
+main: field: 'sold'='1321.0'
+main: status: track
+main: input '= in-stock 45'
+main: field: 'in-stock'='45'
+main: status: track
+main: input '= on-order 1'
+main: field: 'on-order'='1'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- data3'
+main: status: track
+main: input '+ data4'
+main: filter: rc: 19
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item gum'
+main: field: 'item'='gum'
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item rope'
+main: field: 'item'='rope'
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item ladder'
+main: field: 'item'='ladder'
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item bolt'
+main: field: 'item'='bolt'
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item water'
+main: field: 'item'='water'
+main: status: track
+main: input '} item'
+xpath_01: xo_close_list can't find match for 'item'
+main: status: track
+main: input '- data4'
+main: status: track
+main: input '@ test value'
+main: attr: 'test'='value'
+main: status: track
+main: input '+ data'
+main: filter: rc: 18
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '@ test2 value2'
+main: attr: 'test2'='value2'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku GRO-000-415'
+main: key: 'sku'='GRO-000-415'
+main: status: track
+main: input '$ name gum'
+main: key: 'name'='gum'
+main: status: track
+main: input '= sold 1412'
+main: field: 'sold'='1412'
+main: status: track
+main: input '= on-order 10'
+main: field: 'on-order'='10'
+main: status: track
+main: input '= in-stock 54'
+main: field: 'in-stock'='54'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku HRD-000-212'
+main: key: 'sku'='HRD-000-212'
+main: status: track
+main: input '$ name rope'
+main: key: 'name'='rope'
+main: status: track
+main: input '= sold 85'
+main: field: 'sold'='85'
+main: status: track
+main: input '= extra special'
+main: field: 'extra'='special'
+main: status: track
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: track
+main: input '= in-stock 4'
+main: field: 'in-stock'='4'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku HRD-000-517'
+main: key: 'sku'='HRD-000-517'
+main: status: track
+main: input '$ name ladder'
+main: key: 'name'='ladder'
+main: status: track
+main: input '= sold 0'
+main: field: 'sold'='0'
+main: status: track
+main: input '= extra special'
+main: field: 'extra'='special'
+main: status: track
+main: input '= on-order 1'
+main: field: 'on-order'='1'
+main: status: track
+main: input '= in-stock 2'
+main: field: 'in-stock'='2'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku HRD-000-632'
+main: key: 'sku'='HRD-000-632'
+main: status: track
+main: input '$ name bolt'
+main: key: 'name'='bolt'
+main: status: track
+main: input '= sold 4123'
+main: field: 'sold'='4123'
+main: status: track
+main: input '= on-order 42'
+main: field: 'on-order'='42'
+main: status: track
+main: input '= in-stock 144'
+main: field: 'in-stock'='144'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku GRO-000-2331'
+main: key: 'sku'='GRO-000-2331'
+main: status: track
+main: input '$ name water'
+main: key: 'name'='water'
+main: status: track
+main: input '= sold 17'
+main: field: 'sold'='17'
+main: status: track
+main: input '= extra special'
+main: field: 'extra'='special'
+main: status: track
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: track
+main: input '= in-stock 14'
+main: field: 'in-stock'='14'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- data'
+main: status: track
+main: input '= cost 425'
+main: field: 'cost'='425'
+main: status: track
+main: input '= cost 455'
+main: field: 'cost'='455'
+main: status: track
+main: input '= mode mode'
+main: field: 'mode'='mode'
+main: status: track
+main: input '= mode_octal octal'
+main: field: 'mode_octal'='octal'
+main: status: track
+main: input '= links links'
+main: field: 'links'='links'
+main: status: track
+main: input '= user user'
+main: field: 'user'='user'
+main: status: track
+main: input '= group group'
+main: field: 'group'='group'
+main: status: track
+main: input '= pre that'
+main: field: 'pre'='that'
+main: status: track
+main: input '= links 3'
+main: field: 'links'='3'
+main: status: track
+main: input '= post this'
+main: field: 'post'='this'
+main: status: track
+main: input '= mode /some/file'
+main: field: 'mode'='/some/file'
+main: status: track
+main: input '= mode_octal 640'
+main: field: 'mode_octal'='640'
+main: status: track
+main: input '= links 1'
+main: field: 'links'='1'
+main: status: track
+main: input '= user user'
+main: field: 'user'='user'
+main: status: track
+main: input '= group group'
+main: field: 'group'='group'
+main: status: track
+main: input '= one 1'
+main: field: 'one'='1'
+main: status: track
+main: input '= two 2'
+main: field: 'two'='2'
+main: status: track
+main: input '= three 3'
+main: field: 'three'='3'
+main: status: track
+main: input '= one 1'
+main: field: 'one'='1'
+main: status: track
+main: input '= two 2'
+main: field: 'two'='2'
+main: status: track
+main: input '= three 3'
+main: field: 'three'='3'
+main: status: track
+main: input '= one 1'
+main: field: 'one'='1'
+main: status: track
+main: input '= two 2'
+main: field: 'two'='2'
+main: status: track
+main: input '= three 3'
+main: field: 'three'='3'
+main: status: track
+main: input '- top-level'
+main: status: track
+main: input '- data'
+main: status: track
+main: status: track
+main: input ''
+main: input 'r'
+main: status: zero
+main: input '? top-level/data'
+adding filter: 'top-level/data'
+added filter: 0
+--- 0: 5
+    000005: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [top-level], contents 0, next 3, prev 0 
+        000003: type 70 (C_ELEMENT), str 13 [data], contents 0, next 0, prev 1 
+main: status: zero
+main: input 'i xpath_01_23.inc'
+main: include: '../../../tests/xpath/xpath_01_23.inc'
+main: input '+ data'
+main: filter: rc: 14
+main: status: track
+main: input '= thing one'
+main: field: 'thing'='one'
+main: status: track
+main: input '= thing two'
+main: field: 'thing'='two'
+main: status: track
+main: input '= thing three'
+main: field: 'thing'='three'
+main: status: track
+main: input '= thing four'
+main: field: 'thing'='four'
+main: status: track
+main: input '= block 56'
+main: field: 'block'='56'
+main: status: track
+main: input '+ top-level'
+main: filter: rc: 21
+main: status: track
+main: input '= type ethernet'
+main: field: 'type'='ethernet'
+main: status: track
+main: input '= type bridge'
+main: field: 'type'='bridge'
+main: status: track
+main: input '= type 18u'
+main: field: 'type'='18u'
+main: status: track
+main: input '= type 24'
+main: field: 'type'='24'
+main: status: track
+main: input '= address 0x0'
+main: field: 'address'='0x0'
+main: status: track
+main: input '= port 1'
+main: field: 'port'='1'
+main: status: track
+main: input '= address 0x0'
+main: field: 'address'='0x0'
+main: status: track
+main: input '= port 1'
+main: field: 'port'='1'
+main: status: track
+main: input '= address 0x0'
+main: field: 'address'='0x0'
+main: status: track
+main: input '= port 1'
+main: field: 'port'='1'
+main: status: track
+main: input '= used-percent 12'
+main: field: 'used-percent'='12'
+main: status: track
+main: input '= kve_start 0xdeadbeef'
+main: field: 'kve_start'='0xdeadbeef'
+main: status: track
+main: input '= kve_end 0xcabb1e'
+main: field: 'kve_end'='0xcabb1e'
+main: status: track
+main: input '= host my-box'
+main: field: 'host'='my-box'
+main: status: track
+main: input '= domain example.com'
+main: field: 'domain'='example.com'
+main: status: track
+main: input '= host my-box'
+main: field: 'host'='my-box'
+main: status: track
+main: input '= domain example.com'
+main: field: 'domain'='example.com'
+main: status: track
+main: input '= label value'
+main: field: 'label'='value'
+main: status: track
+main: input '= max-chaos very'
+main: field: 'max-chaos'='very'
+main: status: track
+main: input '= min-chaos 42'
+main: field: 'min-chaos'='42'
+main: status: track
+main: input '= some-chaos [42]'
+main: field: 'some-chaos'='[42]'
+main: status: track
+main: input '@ test-attr attr-value'
+main: attr: 'test-attr'='attr-value'
+main: status: track
+main: input '[ sku'
+main: open leaf list: 'sku'
+main: status: track
+main: input '= sku gum-000-1412'
+main: field: 'sku'='gum-000-1412'
+main: status: track
+main: input '= sku sum-000-4121'
+main: field: 'sku'='sum-000-4121'
+main: status: track
+main: input '] sku'
+main: close leaf list: 'sku'
+main: status: track
+main: input '= host my-box'
+main: field: 'host'='my-box'
+main: status: track
+main: input '= domain example.com'
+main: field: 'domain'='example.com'
+main: status: track
+main: input '@ test value'
+main: attr: 'test'='value'
+main: status: track
+main: input '+ data'
+main: filter: rc: 16
+main: status: full
+main: input '{ item'
+main: filter: rc: 18
+main: status: full
+main: input '@ test2 value2'
+main: attr: 'test2'='value2'
+main: status: full
+main: input '< item'
+main: filter: rc: 12
+main: status: full
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: full
+main: input '$ sku GRO-000-415'
+main: key: 'sku'='GRO-000-415'
+main: status: full
+main: input '$ name gum'
+main: key: 'name'='gum'
+main: status: full
+main: input '= sold 1412'
+main: field: 'sold'='1412'
+main: status: full
+main: input '= in-stock 54'
+main: field: 'in-stock'='54'
+main: status: full
+main: input '= on-order 10'
+main: field: 'on-order'='10'
+main: status: full
+main: input '> item'
+main: filter: rc: 12
+main: status: full
+main: input '< item'
+main: filter: rc: 14
+main: status: full
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: full
+main: input '$ sku HRD-000-212'
+main: key: 'sku'='HRD-000-212'
+main: status: full
+main: input '$ name rope'
+main: key: 'name'='rope'
+main: status: full
+main: input '= sold 85'
+main: field: 'sold'='85'
+main: status: full
+main: input '= in-stock 4'
+main: field: 'in-stock'='4'
+main: status: full
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: full
+main: input '> item'
+main: filter: rc: 12
+main: status: full
+main: input '< item'
+main: filter: rc: 14
+main: status: full
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: full
+main: input '$ sku HRD-000-517'
+main: key: 'sku'='HRD-000-517'
+main: status: full
+main: input '$ name ladder'
+main: key: 'name'='ladder'
+main: status: full
+main: input '= sold 0'
+main: field: 'sold'='0'
+main: status: full
+main: input '= in-stock 2'
+main: field: 'in-stock'='2'
+main: status: full
+main: input '= on-order 1'
+main: field: 'on-order'='1'
+main: status: full
+main: input '> item'
+main: filter: rc: 12
+main: status: full
+main: input '< item'
+main: filter: rc: 14
+main: status: full
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: full
+main: input '$ sku HRD-000-632'
+main: key: 'sku'='HRD-000-632'
+main: status: full
+main: input '$ name bolt'
+main: key: 'name'='bolt'
+main: status: full
+main: input '= sold 4123'
+main: field: 'sold'='4123'
+main: status: full
+main: input '= in-stock 144'
+main: field: 'in-stock'='144'
+main: status: full
+main: input '= on-order 42'
+main: field: 'on-order'='42'
+main: status: full
+main: input '> item'
+main: filter: rc: 12
+main: status: full
+main: input '< item'
+main: filter: rc: 14
+main: status: full
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: full
+main: input '$ sku GRO-000-2331'
+main: key: 'sku'='GRO-000-2331'
+main: status: full
+main: input '$ name water'
+main: key: 'name'='water'
+main: status: full
+main: input '= sold 17'
+main: field: 'sold'='17'
+main: status: full
+main: input '= in-stock 14'
+main: field: 'in-stock'='14'
+main: status: full
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: full
+main: input '> item'
+main: filter: rc: 12
+main: status: full
+main: input '} item'
+main: status: full
+main: input '- data'
+main: status: track
+main: input '+ data2'
+main: filter: rc: 19
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '$ sku GRO-000-415'
+main: key: 'sku'='GRO-000-415'
+main: status: track
+main: input '$ name gum'
+main: key: 'name'='gum'
+main: status: track
+main: input '= sold 1412.0'
+main: field: 'sold'='1412.0'
+main: status: track
+main: input '= in-stock 54'
+main: field: 'in-stock'='54'
+main: status: track
+main: input '= on-order 10'
+main: field: 'on-order'='10'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '$ sku HRD-000-212'
+main: key: 'sku'='HRD-000-212'
+main: status: track
+main: input '$ name rope'
+main: key: 'name'='rope'
+main: status: track
+main: input '= sold 85.0'
+main: field: 'sold'='85.0'
+main: status: track
+main: input '= in-stock 4'
+main: field: 'in-stock'='4'
+main: status: track
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '$ sku HRD-000-517'
+main: key: 'sku'='HRD-000-517'
+main: status: track
+main: input '$ name ladder'
+main: key: 'name'='ladder'
+main: status: track
+main: input '= sold 0'
+main: field: 'sold'='0'
+main: status: track
+main: input '= in-stock 2'
+main: field: 'in-stock'='2'
+main: status: track
+main: input '= on-order 1'
+main: field: 'on-order'='1'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '$ sku HRD-000-632'
+main: key: 'sku'='HRD-000-632'
+main: status: track
+main: input '$ name bolt'
+main: key: 'name'='bolt'
+main: status: track
+main: input '= sold 4123.0'
+main: field: 'sold'='4123.0'
+main: status: track
+main: input '= in-stock 144'
+main: field: 'in-stock'='144'
+main: status: track
+main: input '= on-order 42'
+main: field: 'on-order'='42'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '$ sku GRO-000-2331'
+main: key: 'sku'='GRO-000-2331'
+main: status: track
+main: input '$ name water'
+main: key: 'name'='water'
+main: status: track
+main: input '= sold 17.0'
+main: field: 'sold'='17.0'
+main: status: track
+main: input '= in-stock 14'
+main: field: 'in-stock'='14'
+main: status: track
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- data2'
+main: status: track
+main: input '+ data3'
+main: filter: rc: 19
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '$ sku GRO-000-533'
+main: key: 'sku'='GRO-000-533'
+main: status: track
+main: input '$ name fish'
+main: key: 'name'='fish'
+main: status: track
+main: input '= sold 1321.0'
+main: field: 'sold'='1321.0'
+main: status: track
+main: input '= in-stock 45'
+main: field: 'in-stock'='45'
+main: status: track
+main: input '= on-order 1'
+main: field: 'on-order'='1'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- data3'
+main: status: track
+main: input '+ data4'
+main: filter: rc: 19
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item gum'
+main: field: 'item'='gum'
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item rope'
+main: field: 'item'='rope'
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item ladder'
+main: field: 'item'='ladder'
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item bolt'
+main: field: 'item'='bolt'
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item water'
+main: field: 'item'='water'
+main: status: track
+main: input '} item'
+xpath_01: xo_close_list can't find match for 'item'
+main: status: track
+main: input '- data4'
+main: status: track
+main: input '@ test value'
+main: attr: 'test'='value'
+main: status: track
+main: input '+ data'
+main: filter: rc: 18
+main: status: full
+main: input '{ item'
+main: filter: rc: 18
+main: status: full
+main: input '@ test2 value2'
+main: attr: 'test2'='value2'
+main: status: full
+main: input '< item'
+main: filter: rc: 12
+main: status: full
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: full
+main: input '$ sku GRO-000-415'
+main: key: 'sku'='GRO-000-415'
+main: status: full
+main: input '$ name gum'
+main: key: 'name'='gum'
+main: status: full
+main: input '= sold 1412'
+main: field: 'sold'='1412'
+main: status: full
+main: input '= on-order 10'
+main: field: 'on-order'='10'
+main: status: full
+main: input '= in-stock 54'
+main: field: 'in-stock'='54'
+main: status: full
+main: input '> item'
+main: filter: rc: 12
+main: status: full
+main: input '< item'
+main: filter: rc: 14
+main: status: full
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: full
+main: input '$ sku HRD-000-212'
+main: key: 'sku'='HRD-000-212'
+main: status: full
+main: input '$ name rope'
+main: key: 'name'='rope'
+main: status: full
+main: input '= sold 85'
+main: field: 'sold'='85'
+main: status: full
+main: input '= extra special'
+main: field: 'extra'='special'
+main: status: full
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: full
+main: input '= in-stock 4'
+main: field: 'in-stock'='4'
+main: status: full
+main: input '> item'
+main: filter: rc: 12
+main: status: full
+main: input '< item'
+main: filter: rc: 14
+main: status: full
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: full
+main: input '$ sku HRD-000-517'
+main: key: 'sku'='HRD-000-517'
+main: status: full
+main: input '$ name ladder'
+main: key: 'name'='ladder'
+main: status: full
+main: input '= sold 0'
+main: field: 'sold'='0'
+main: status: full
+main: input '= extra special'
+main: field: 'extra'='special'
+main: status: full
+main: input '= on-order 1'
+main: field: 'on-order'='1'
+main: status: full
+main: input '= in-stock 2'
+main: field: 'in-stock'='2'
+main: status: full
+main: input '> item'
+main: filter: rc: 12
+main: status: full
+main: input '< item'
+main: filter: rc: 14
+main: status: full
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: full
+main: input '$ sku HRD-000-632'
+main: key: 'sku'='HRD-000-632'
+main: status: full
+main: input '$ name bolt'
+main: key: 'name'='bolt'
+main: status: full
+main: input '= sold 4123'
+main: field: 'sold'='4123'
+main: status: full
+main: input '= on-order 42'
+main: field: 'on-order'='42'
+main: status: full
+main: input '= in-stock 144'
+main: field: 'in-stock'='144'
+main: status: full
+main: input '> item'
+main: filter: rc: 12
+main: status: full
+main: input '< item'
+main: filter: rc: 14
+main: status: full
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: full
+main: input '$ sku GRO-000-2331'
+main: key: 'sku'='GRO-000-2331'
+main: status: full
+main: input '$ name water'
+main: key: 'name'='water'
+main: status: full
+main: input '= sold 17'
+main: field: 'sold'='17'
+main: status: full
+main: input '= extra special'
+main: field: 'extra'='special'
+main: status: full
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: full
+main: input '= in-stock 14'
+main: field: 'in-stock'='14'
+main: status: full
+main: input '> item'
+main: filter: rc: 12
+main: status: full
+main: input '} item'
+main: status: full
+main: input '- data'
+main: status: track
+main: input '= cost 425'
+main: field: 'cost'='425'
+main: status: track
+main: input '= cost 455'
+main: field: 'cost'='455'
+main: status: track
+main: input '= mode mode'
+main: field: 'mode'='mode'
+main: status: track
+main: input '= mode_octal octal'
+main: field: 'mode_octal'='octal'
+main: status: track
+main: input '= links links'
+main: field: 'links'='links'
+main: status: track
+main: input '= user user'
+main: field: 'user'='user'
+main: status: track
+main: input '= group group'
+main: field: 'group'='group'
+main: status: track
+main: input '= pre that'
+main: field: 'pre'='that'
+main: status: track
+main: input '= links 3'
+main: field: 'links'='3'
+main: status: track
+main: input '= post this'
+main: field: 'post'='this'
+main: status: track
+main: input '= mode /some/file'
+main: field: 'mode'='/some/file'
+main: status: track
+main: input '= mode_octal 640'
+main: field: 'mode_octal'='640'
+main: status: track
+main: input '= links 1'
+main: field: 'links'='1'
+main: status: track
+main: input '= user user'
+main: field: 'user'='user'
+main: status: track
+main: input '= group group'
+main: field: 'group'='group'
+main: status: track
+main: input '= one 1'
+main: field: 'one'='1'
+main: status: track
+main: input '= two 2'
+main: field: 'two'='2'
+main: status: track
+main: input '= three 3'
+main: field: 'three'='3'
+main: status: track
+main: input '= one 1'
+main: field: 'one'='1'
+main: status: track
+main: input '= two 2'
+main: field: 'two'='2'
+main: status: track
+main: input '= three 3'
+main: field: 'three'='3'
+main: status: track
+main: input '= one 1'
+main: field: 'one'='1'
+main: status: track
+main: input '= two 2'
+main: field: 'two'='2'
+main: status: track
+main: input '= three 3'
+main: field: 'three'='3'
+main: status: track
+main: input '- top-level'
+main: status: track
+main: input '- data'
+main: status: track
+main: status: track
+main: input ''
+main: input 'r'
+main: status: zero
+main: input '? thing'
+adding filter: 'thing'
+added filter: 0
+--- 0: 3
+    000003: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [thing], contents 0, next 0, prev 0 
+main: status: zero
+main: input 'i xpath_01_23.inc'
+main: include: '../../../tests/xpath/xpath_01_23.inc'
+main: input '+ data'
+main: filter: rc: 14
+main: status: track
+main: input '= thing one'
+main: field: 'thing'='one'
+main: status: track
+main: input '= thing two'
+main: field: 'thing'='two'
+main: status: track
+main: input '= thing three'
+main: field: 'thing'='three'
+main: status: track
+main: input '= thing four'
+main: field: 'thing'='four'
+main: status: track
+main: input '= block 56'
+main: field: 'block'='56'
+main: status: track
+main: input '+ top-level'
+main: filter: rc: 21
+main: status: track
+main: input '= type ethernet'
+main: field: 'type'='ethernet'
+main: status: track
+main: input '= type bridge'
+main: field: 'type'='bridge'
+main: status: track
+main: input '= type 18u'
+main: field: 'type'='18u'
+main: status: track
+main: input '= type 24'
+main: field: 'type'='24'
+main: status: track
+main: input '= address 0x0'
+main: field: 'address'='0x0'
+main: status: track
+main: input '= port 1'
+main: field: 'port'='1'
+main: status: track
+main: input '= address 0x0'
+main: field: 'address'='0x0'
+main: status: track
+main: input '= port 1'
+main: field: 'port'='1'
+main: status: track
+main: input '= address 0x0'
+main: field: 'address'='0x0'
+main: status: track
+main: input '= port 1'
+main: field: 'port'='1'
+main: status: track
+main: input '= used-percent 12'
+main: field: 'used-percent'='12'
+main: status: track
+main: input '= kve_start 0xdeadbeef'
+main: field: 'kve_start'='0xdeadbeef'
+main: status: track
+main: input '= kve_end 0xcabb1e'
+main: field: 'kve_end'='0xcabb1e'
+main: status: track
+main: input '= host my-box'
+main: field: 'host'='my-box'
+main: status: track
+main: input '= domain example.com'
+main: field: 'domain'='example.com'
+main: status: track
+main: input '= host my-box'
+main: field: 'host'='my-box'
+main: status: track
+main: input '= domain example.com'
+main: field: 'domain'='example.com'
+main: status: track
+main: input '= label value'
+main: field: 'label'='value'
+main: status: track
+main: input '= max-chaos very'
+main: field: 'max-chaos'='very'
+main: status: track
+main: input '= min-chaos 42'
+main: field: 'min-chaos'='42'
+main: status: track
+main: input '= some-chaos [42]'
+main: field: 'some-chaos'='[42]'
+main: status: track
+main: input '@ test-attr attr-value'
+main: attr: 'test-attr'='attr-value'
+main: status: track
+main: input '[ sku'
+main: open leaf list: 'sku'
+main: status: track
+main: input '= sku gum-000-1412'
+main: field: 'sku'='gum-000-1412'
+main: status: track
+main: input '= sku sum-000-4121'
+main: field: 'sku'='sum-000-4121'
+main: status: track
+main: input '] sku'
+main: close leaf list: 'sku'
+main: status: track
+main: input '= host my-box'
+main: field: 'host'='my-box'
+main: status: track
+main: input '= domain example.com'
+main: field: 'domain'='example.com'
+main: status: track
+main: input '@ test value'
+main: attr: 'test'='value'
+main: status: track
+main: input '+ data'
+main: filter: rc: 18
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '@ test2 value2'
+main: attr: 'test2'='value2'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku GRO-000-415'
+main: key: 'sku'='GRO-000-415'
+main: status: track
+main: input '$ name gum'
+main: key: 'name'='gum'
+main: status: track
+main: input '= sold 1412'
+main: field: 'sold'='1412'
+main: status: track
+main: input '= in-stock 54'
+main: field: 'in-stock'='54'
+main: status: track
+main: input '= on-order 10'
+main: field: 'on-order'='10'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku HRD-000-212'
+main: key: 'sku'='HRD-000-212'
+main: status: track
+main: input '$ name rope'
+main: key: 'name'='rope'
+main: status: track
+main: input '= sold 85'
+main: field: 'sold'='85'
+main: status: track
+main: input '= in-stock 4'
+main: field: 'in-stock'='4'
+main: status: track
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku HRD-000-517'
+main: key: 'sku'='HRD-000-517'
+main: status: track
+main: input '$ name ladder'
+main: key: 'name'='ladder'
+main: status: track
+main: input '= sold 0'
+main: field: 'sold'='0'
+main: status: track
+main: input '= in-stock 2'
+main: field: 'in-stock'='2'
+main: status: track
+main: input '= on-order 1'
+main: field: 'on-order'='1'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku HRD-000-632'
+main: key: 'sku'='HRD-000-632'
+main: status: track
+main: input '$ name bolt'
+main: key: 'name'='bolt'
+main: status: track
+main: input '= sold 4123'
+main: field: 'sold'='4123'
+main: status: track
+main: input '= in-stock 144'
+main: field: 'in-stock'='144'
+main: status: track
+main: input '= on-order 42'
+main: field: 'on-order'='42'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku GRO-000-2331'
+main: key: 'sku'='GRO-000-2331'
+main: status: track
+main: input '$ name water'
+main: key: 'name'='water'
+main: status: track
+main: input '= sold 17'
+main: field: 'sold'='17'
+main: status: track
+main: input '= in-stock 14'
+main: field: 'in-stock'='14'
+main: status: track
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- data'
+main: status: track
+main: input '+ data2'
+main: filter: rc: 19
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '$ sku GRO-000-415'
+main: key: 'sku'='GRO-000-415'
+main: status: track
+main: input '$ name gum'
+main: key: 'name'='gum'
+main: status: track
+main: input '= sold 1412.0'
+main: field: 'sold'='1412.0'
+main: status: track
+main: input '= in-stock 54'
+main: field: 'in-stock'='54'
+main: status: track
+main: input '= on-order 10'
+main: field: 'on-order'='10'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '$ sku HRD-000-212'
+main: key: 'sku'='HRD-000-212'
+main: status: track
+main: input '$ name rope'
+main: key: 'name'='rope'
+main: status: track
+main: input '= sold 85.0'
+main: field: 'sold'='85.0'
+main: status: track
+main: input '= in-stock 4'
+main: field: 'in-stock'='4'
+main: status: track
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '$ sku HRD-000-517'
+main: key: 'sku'='HRD-000-517'
+main: status: track
+main: input '$ name ladder'
+main: key: 'name'='ladder'
+main: status: track
+main: input '= sold 0'
+main: field: 'sold'='0'
+main: status: track
+main: input '= in-stock 2'
+main: field: 'in-stock'='2'
+main: status: track
+main: input '= on-order 1'
+main: field: 'on-order'='1'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '$ sku HRD-000-632'
+main: key: 'sku'='HRD-000-632'
+main: status: track
+main: input '$ name bolt'
+main: key: 'name'='bolt'
+main: status: track
+main: input '= sold 4123.0'
+main: field: 'sold'='4123.0'
+main: status: track
+main: input '= in-stock 144'
+main: field: 'in-stock'='144'
+main: status: track
+main: input '= on-order 42'
+main: field: 'on-order'='42'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '$ sku GRO-000-2331'
+main: key: 'sku'='GRO-000-2331'
+main: status: track
+main: input '$ name water'
+main: key: 'name'='water'
+main: status: track
+main: input '= sold 17.0'
+main: field: 'sold'='17.0'
+main: status: track
+main: input '= in-stock 14'
+main: field: 'in-stock'='14'
+main: status: track
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- data2'
+main: status: track
+main: input '+ data3'
+main: filter: rc: 19
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '$ sku GRO-000-533'
+main: key: 'sku'='GRO-000-533'
+main: status: track
+main: input '$ name fish'
+main: key: 'name'='fish'
+main: status: track
+main: input '= sold 1321.0'
+main: field: 'sold'='1321.0'
+main: status: track
+main: input '= in-stock 45'
+main: field: 'in-stock'='45'
+main: status: track
+main: input '= on-order 1'
+main: field: 'on-order'='1'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- data3'
+main: status: track
+main: input '+ data4'
+main: filter: rc: 19
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item gum'
+main: field: 'item'='gum'
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item rope'
+main: field: 'item'='rope'
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item ladder'
+main: field: 'item'='ladder'
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item bolt'
+main: field: 'item'='bolt'
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item water'
+main: field: 'item'='water'
+main: status: track
+main: input '} item'
+xpath_01: xo_close_list can't find match for 'item'
+main: status: track
+main: input '- data4'
+main: status: track
+main: input '@ test value'
+main: attr: 'test'='value'
+main: status: track
+main: input '+ data'
+main: filter: rc: 18
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '@ test2 value2'
+main: attr: 'test2'='value2'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku GRO-000-415'
+main: key: 'sku'='GRO-000-415'
+main: status: track
+main: input '$ name gum'
+main: key: 'name'='gum'
+main: status: track
+main: input '= sold 1412'
+main: field: 'sold'='1412'
+main: status: track
+main: input '= on-order 10'
+main: field: 'on-order'='10'
+main: status: track
+main: input '= in-stock 54'
+main: field: 'in-stock'='54'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku HRD-000-212'
+main: key: 'sku'='HRD-000-212'
+main: status: track
+main: input '$ name rope'
+main: key: 'name'='rope'
+main: status: track
+main: input '= sold 85'
+main: field: 'sold'='85'
+main: status: track
+main: input '= extra special'
+main: field: 'extra'='special'
+main: status: track
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: track
+main: input '= in-stock 4'
+main: field: 'in-stock'='4'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku HRD-000-517'
+main: key: 'sku'='HRD-000-517'
+main: status: track
+main: input '$ name ladder'
+main: key: 'name'='ladder'
+main: status: track
+main: input '= sold 0'
+main: field: 'sold'='0'
+main: status: track
+main: input '= extra special'
+main: field: 'extra'='special'
+main: status: track
+main: input '= on-order 1'
+main: field: 'on-order'='1'
+main: status: track
+main: input '= in-stock 2'
+main: field: 'in-stock'='2'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku HRD-000-632'
+main: key: 'sku'='HRD-000-632'
+main: status: track
+main: input '$ name bolt'
+main: key: 'name'='bolt'
+main: status: track
+main: input '= sold 4123'
+main: field: 'sold'='4123'
+main: status: track
+main: input '= on-order 42'
+main: field: 'on-order'='42'
+main: status: track
+main: input '= in-stock 144'
+main: field: 'in-stock'='144'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku GRO-000-2331'
+main: key: 'sku'='GRO-000-2331'
+main: status: track
+main: input '$ name water'
+main: key: 'name'='water'
+main: status: track
+main: input '= sold 17'
+main: field: 'sold'='17'
+main: status: track
+main: input '= extra special'
+main: field: 'extra'='special'
+main: status: track
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: track
+main: input '= in-stock 14'
+main: field: 'in-stock'='14'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- data'
+main: status: track
+main: input '= cost 425'
+main: field: 'cost'='425'
+main: status: track
+main: input '= cost 455'
+main: field: 'cost'='455'
+main: status: track
+main: input '= mode mode'
+main: field: 'mode'='mode'
+main: status: track
+main: input '= mode_octal octal'
+main: field: 'mode_octal'='octal'
+main: status: track
+main: input '= links links'
+main: field: 'links'='links'
+main: status: track
+main: input '= user user'
+main: field: 'user'='user'
+main: status: track
+main: input '= group group'
+main: field: 'group'='group'
+main: status: track
+main: input '= pre that'
+main: field: 'pre'='that'
+main: status: track
+main: input '= links 3'
+main: field: 'links'='3'
+main: status: track
+main: input '= post this'
+main: field: 'post'='this'
+main: status: track
+main: input '= mode /some/file'
+main: field: 'mode'='/some/file'
+main: status: track
+main: input '= mode_octal 640'
+main: field: 'mode_octal'='640'
+main: status: track
+main: input '= links 1'
+main: field: 'links'='1'
+main: status: track
+main: input '= user user'
+main: field: 'user'='user'
+main: status: track
+main: input '= group group'
+main: field: 'group'='group'
+main: status: track
+main: input '= one 1'
+main: field: 'one'='1'
+main: status: track
+main: input '= two 2'
+main: field: 'two'='2'
+main: status: track
+main: input '= three 3'
+main: field: 'three'='3'
+main: status: track
+main: input '= one 1'
+main: field: 'one'='1'
+main: status: track
+main: input '= two 2'
+main: field: 'two'='2'
+main: status: track
+main: input '= three 3'
+main: field: 'three'='3'
+main: status: track
+main: input '= one 1'
+main: field: 'one'='1'
+main: status: track
+main: input '= two 2'
+main: field: 'two'='2'
+main: status: track
+main: input '= three 3'
+main: field: 'three'='3'
+main: status: track
+main: input '- top-level'
+main: status: track
+main: input '- data'
+main: status: track
+main: status: track
+main: input ''
+main: input 'r'
+main: status: zero
+main: input '? item[starts-with(sku, "GRO")]'
+adding filter: 'item[starts-with(sku, "GRO")]'
+added filter: 0
+--- 0: 14
+    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [starts-with], contents 7, next 0, prev 0 
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
+                        000005: type 70 (C_ELEMENT), str 22 [sku], contents 0, next 0, prev 0 
+                    000008: type 54 (T_QUOTED), str 28 [GRO], contents 0, next 0, prev 7 
+main: status: zero
+main: input 'i xpath_01_23.inc'
+main: include: '../../../tests/xpath/xpath_01_23.inc'
+main: input '+ data'
+main: filter: rc: 14
+main: status: track
+main: input '= thing one'
+main: field: 'thing'='one'
+main: status: track
+main: input '= thing two'
+main: field: 'thing'='two'
+main: status: track
+main: input '= thing three'
+main: field: 'thing'='three'
+main: status: track
+main: input '= thing four'
+main: field: 'thing'='four'
+main: status: track
+main: input '= block 56'
+main: field: 'block'='56'
+main: status: track
+main: input '+ top-level'
+main: filter: rc: 21
+main: status: track
+main: input '= type ethernet'
+main: field: 'type'='ethernet'
+main: status: track
+main: input '= type bridge'
+main: field: 'type'='bridge'
+main: status: track
+main: input '= type 18u'
+main: field: 'type'='18u'
+main: status: track
+main: input '= type 24'
+main: field: 'type'='24'
+main: status: track
+main: input '= address 0x0'
+main: field: 'address'='0x0'
+main: status: track
+main: input '= port 1'
+main: field: 'port'='1'
+main: status: track
+main: input '= address 0x0'
+main: field: 'address'='0x0'
+main: status: track
+main: input '= port 1'
+main: field: 'port'='1'
+main: status: track
+main: input '= address 0x0'
+main: field: 'address'='0x0'
+main: status: track
+main: input '= port 1'
+main: field: 'port'='1'
+main: status: track
+main: input '= used-percent 12'
+main: field: 'used-percent'='12'
+main: status: track
+main: input '= kve_start 0xdeadbeef'
+main: field: 'kve_start'='0xdeadbeef'
+main: status: track
+main: input '= kve_end 0xcabb1e'
+main: field: 'kve_end'='0xcabb1e'
+main: status: track
+main: input '= host my-box'
+main: field: 'host'='my-box'
+main: status: track
+main: input '= domain example.com'
+main: field: 'domain'='example.com'
+main: status: track
+main: input '= host my-box'
+main: field: 'host'='my-box'
+main: status: track
+main: input '= domain example.com'
+main: field: 'domain'='example.com'
+main: status: track
+main: input '= label value'
+main: field: 'label'='value'
+main: status: track
+main: input '= max-chaos very'
+main: field: 'max-chaos'='very'
+main: status: track
+main: input '= min-chaos 42'
+main: field: 'min-chaos'='42'
+main: status: track
+main: input '= some-chaos [42]'
+main: field: 'some-chaos'='[42]'
+main: status: track
+main: input '@ test-attr attr-value'
+main: attr: 'test-attr'='attr-value'
+main: status: track
+main: input '[ sku'
+main: open leaf list: 'sku'
+main: status: track
+main: input '= sku gum-000-1412'
+main: field: 'sku'='gum-000-1412'
+main: status: track
+main: input '= sku sum-000-4121'
+main: field: 'sku'='sum-000-4121'
+main: status: track
+main: input '] sku'
+main: close leaf list: 'sku'
+main: status: track
+main: input '= host my-box'
+main: field: 'host'='my-box'
+main: status: track
+main: input '= domain example.com'
+main: field: 'domain'='example.com'
+main: status: track
+main: input '@ test value'
+main: attr: 'test'='value'
+main: status: track
+main: input '+ data'
+main: filter: rc: 18
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '@ test2 value2'
+main: attr: 'test2'='value2'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: predicate
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: predicate
+main: input '$ sku GRO-000-415'
+main: key: 'sku'='GRO-000-415'
+main: status: full
+main: input '$ name gum'
+main: key: 'name'='gum'
+main: status: full
+main: input '= sold 1412'
+main: field: 'sold'='1412'
+main: status: full
+main: input '= in-stock 54'
+main: field: 'in-stock'='54'
+main: status: full
+main: input '= on-order 10'
+main: field: 'on-order'='10'
+main: status: full
+main: input '> item'
+main: filter: rc: 12
+main: status: track
+main: input '< item'
+main: filter: rc: 14
+main: status: predicate
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: predicate
+main: input '$ sku HRD-000-212'
+main: key: 'sku'='HRD-000-212'
+main: status: track
+main: input '$ name rope'
+main: key: 'name'='rope'
+main: status: track
+main: input '= sold 85'
+main: field: 'sold'='85'
+main: status: track
+main: input '= in-stock 4'
+main: field: 'in-stock'='4'
+main: status: track
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 14
+main: status: predicate
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: predicate
+main: input '$ sku HRD-000-517'
+main: key: 'sku'='HRD-000-517'
+main: status: track
+main: input '$ name ladder'
+main: key: 'name'='ladder'
+main: status: track
+main: input '= sold 0'
+main: field: 'sold'='0'
+main: status: track
+main: input '= in-stock 2'
+main: field: 'in-stock'='2'
+main: status: track
+main: input '= on-order 1'
+main: field: 'on-order'='1'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 14
+main: status: predicate
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: predicate
+main: input '$ sku HRD-000-632'
+main: key: 'sku'='HRD-000-632'
+main: status: track
+main: input '$ name bolt'
+main: key: 'name'='bolt'
+main: status: track
+main: input '= sold 4123'
+main: field: 'sold'='4123'
+main: status: track
+main: input '= in-stock 144'
+main: field: 'in-stock'='144'
+main: status: track
+main: input '= on-order 42'
+main: field: 'on-order'='42'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 14
+main: status: predicate
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: predicate
+main: input '$ sku GRO-000-2331'
+main: key: 'sku'='GRO-000-2331'
+main: status: full
+main: input '$ name water'
+main: key: 'name'='water'
+main: status: full
+main: input '= sold 17'
+main: field: 'sold'='17'
+main: status: full
+main: input '= in-stock 14'
+main: field: 'in-stock'='14'
+main: status: full
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: full
+main: input '> item'
+main: filter: rc: 12
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- data'
+main: status: track
+main: input '+ data2'
+main: filter: rc: 19
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: predicate
+main: input '$ sku GRO-000-415'
+main: key: 'sku'='GRO-000-415'
+main: status: full
+main: input '$ name gum'
+main: key: 'name'='gum'
+main: status: full
+main: input '= sold 1412.0'
+main: field: 'sold'='1412.0'
+main: status: full
+main: input '= in-stock 54'
+main: field: 'in-stock'='54'
+main: status: full
+main: input '= on-order 10'
+main: field: 'on-order'='10'
+main: status: full
+main: input '> item'
+main: filter: rc: 12
+main: status: track
+main: input '< item'
+main: filter: rc: 14
+main: status: predicate
+main: input '$ sku HRD-000-212'
+main: key: 'sku'='HRD-000-212'
+main: status: track
+main: input '$ name rope'
+main: key: 'name'='rope'
+main: status: track
+main: input '= sold 85.0'
+main: field: 'sold'='85.0'
+main: status: track
+main: input '= in-stock 4'
+main: field: 'in-stock'='4'
+main: status: track
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 14
+main: status: predicate
+main: input '$ sku HRD-000-517'
+main: key: 'sku'='HRD-000-517'
+main: status: track
+main: input '$ name ladder'
+main: key: 'name'='ladder'
+main: status: track
+main: input '= sold 0'
+main: field: 'sold'='0'
+main: status: track
+main: input '= in-stock 2'
+main: field: 'in-stock'='2'
+main: status: track
+main: input '= on-order 1'
+main: field: 'on-order'='1'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 14
+main: status: predicate
+main: input '$ sku HRD-000-632'
+main: key: 'sku'='HRD-000-632'
+main: status: track
+main: input '$ name bolt'
+main: key: 'name'='bolt'
+main: status: track
+main: input '= sold 4123.0'
+main: field: 'sold'='4123.0'
+main: status: track
+main: input '= in-stock 144'
+main: field: 'in-stock'='144'
+main: status: track
+main: input '= on-order 42'
+main: field: 'on-order'='42'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 14
+main: status: predicate
+main: input '$ sku GRO-000-2331'
+main: key: 'sku'='GRO-000-2331'
+main: status: full
+main: input '$ name water'
+main: key: 'name'='water'
+main: status: full
+main: input '= sold 17.0'
+main: field: 'sold'='17.0'
+main: status: full
+main: input '= in-stock 14'
+main: field: 'in-stock'='14'
+main: status: full
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: full
+main: input '> item'
+main: filter: rc: 12
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- data2'
+main: status: track
+main: input '+ data3'
+main: filter: rc: 19
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: predicate
+main: input '$ sku GRO-000-533'
+main: key: 'sku'='GRO-000-533'
+main: status: full
+main: input '$ name fish'
+main: key: 'name'='fish'
+main: status: full
+main: input '= sold 1321.0'
+main: field: 'sold'='1321.0'
+main: status: full
+main: input '= in-stock 45'
+main: field: 'in-stock'='45'
+main: status: full
+main: input '= on-order 1'
+main: field: 'on-order'='1'
+main: status: full
+main: input '> item'
+main: filter: rc: 12
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- data3'
+main: status: track
+main: input '+ data4'
+main: filter: rc: 19
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item gum'
+main: field: 'item'='gum'
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item rope'
+main: field: 'item'='rope'
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item ladder'
+main: field: 'item'='ladder'
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item bolt'
+main: field: 'item'='bolt'
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item water'
+main: field: 'item'='water'
+main: status: track
+main: input '} item'
+xpath_01: xo_close_list can't find match for 'item'
+main: status: track
+main: input '- data4'
+main: status: track
+main: input '@ test value'
+main: attr: 'test'='value'
+main: status: track
+main: input '+ data'
+main: filter: rc: 18
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '@ test2 value2'
+main: attr: 'test2'='value2'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: predicate
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: predicate
+main: input '$ sku GRO-000-415'
+main: key: 'sku'='GRO-000-415'
+main: status: full
+main: input '$ name gum'
+main: key: 'name'='gum'
+main: status: full
+main: input '= sold 1412'
+main: field: 'sold'='1412'
+main: status: full
+main: input '= on-order 10'
+main: field: 'on-order'='10'
+main: status: full
+main: input '= in-stock 54'
+main: field: 'in-stock'='54'
+main: status: full
+main: input '> item'
+main: filter: rc: 12
+main: status: track
+main: input '< item'
+main: filter: rc: 14
+main: status: predicate
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: predicate
+main: input '$ sku HRD-000-212'
+main: key: 'sku'='HRD-000-212'
+main: status: track
+main: input '$ name rope'
+main: key: 'name'='rope'
+main: status: track
+main: input '= sold 85'
+main: field: 'sold'='85'
+main: status: track
+main: input '= extra special'
+main: field: 'extra'='special'
+main: status: track
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: track
+main: input '= in-stock 4'
+main: field: 'in-stock'='4'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 14
+main: status: predicate
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: predicate
+main: input '$ sku HRD-000-517'
+main: key: 'sku'='HRD-000-517'
+main: status: track
+main: input '$ name ladder'
+main: key: 'name'='ladder'
+main: status: track
+main: input '= sold 0'
+main: field: 'sold'='0'
+main: status: track
+main: input '= extra special'
+main: field: 'extra'='special'
+main: status: track
+main: input '= on-order 1'
+main: field: 'on-order'='1'
+main: status: track
+main: input '= in-stock 2'
+main: field: 'in-stock'='2'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 14
+main: status: predicate
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: predicate
+main: input '$ sku HRD-000-632'
+main: key: 'sku'='HRD-000-632'
+main: status: track
+main: input '$ name bolt'
+main: key: 'name'='bolt'
+main: status: track
+main: input '= sold 4123'
+main: field: 'sold'='4123'
+main: status: track
+main: input '= on-order 42'
+main: field: 'on-order'='42'
+main: status: track
+main: input '= in-stock 144'
+main: field: 'in-stock'='144'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 14
+main: status: predicate
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: predicate
+main: input '$ sku GRO-000-2331'
+main: key: 'sku'='GRO-000-2331'
+main: status: full
+main: input '$ name water'
+main: key: 'name'='water'
+main: status: full
+main: input '= sold 17'
+main: field: 'sold'='17'
+main: status: full
+main: input '= extra special'
+main: field: 'extra'='special'
+main: status: full
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: full
+main: input '= in-stock 14'
+main: field: 'in-stock'='14'
+main: status: full
+main: input '> item'
+main: filter: rc: 12
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- data'
+main: status: track
+main: input '= cost 425'
+main: field: 'cost'='425'
+main: status: track
+main: input '= cost 455'
+main: field: 'cost'='455'
+main: status: track
+main: input '= mode mode'
+main: field: 'mode'='mode'
+main: status: track
+main: input '= mode_octal octal'
+main: field: 'mode_octal'='octal'
+main: status: track
+main: input '= links links'
+main: field: 'links'='links'
+main: status: track
+main: input '= user user'
+main: field: 'user'='user'
+main: status: track
+main: input '= group group'
+main: field: 'group'='group'
+main: status: track
+main: input '= pre that'
+main: field: 'pre'='that'
+main: status: track
+main: input '= links 3'
+main: field: 'links'='3'
+main: status: track
+main: input '= post this'
+main: field: 'post'='this'
+main: status: track
+main: input '= mode /some/file'
+main: field: 'mode'='/some/file'
+main: status: track
+main: input '= mode_octal 640'
+main: field: 'mode_octal'='640'
+main: status: track
+main: input '= links 1'
+main: field: 'links'='1'
+main: status: track
+main: input '= user user'
+main: field: 'user'='user'
+main: status: track
+main: input '= group group'
+main: field: 'group'='group'
+main: status: track
+main: input '= one 1'
+main: field: 'one'='1'
+main: status: track
+main: input '= two 2'
+main: field: 'two'='2'
+main: status: track
+main: input '= three 3'
+main: field: 'three'='3'
+main: status: track
+main: input '= one 1'
+main: field: 'one'='1'
+main: status: track
+main: input '= two 2'
+main: field: 'two'='2'
+main: status: track
+main: input '= three 3'
+main: field: 'three'='3'
+main: status: track
+main: input '= one 1'
+main: field: 'one'='1'
+main: status: track
+main: input '= two 2'
+main: field: 'two'='2'
+main: status: track
+main: input '= three 3'
+main: field: 'three'='3'
+main: status: track
+main: input '- top-level'
+main: status: track
+main: input '- data'
+main: status: track
+main: status: track
+main: input ''
+main: input 'r'
+main: status: zero
+main: input '? item[on-order + 2 < 10 - 6]'
+adding filter: 'item[on-order + 2 < 10 - 6]'
+added filter: 0
+xpath_01: test: filter expression feature is unsupported: plus sign ('+')
+--- 0: 16
+    000016: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 7, next 0, prev 0 
+                000007: type 17 (L_LESS), str 21 [<], contents 4, next 0, prev 0 
+                    000004: type 25 (L_PLUS), str 17 [+], contents 5, next 10, prev 0 
+                        000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0 
+                            000003: type 70 (C_ELEMENT), str 8 [on-order], contents 0, next 0, prev 0 
+                        000006: type 53 (T_NUMBER), str 19 [2], contents 0, next 0, prev 5 
+                    000010: type 19 (L_MINUS), str 26 [-], contents 9, next 0, prev 4 
+                        000009: type 53 (T_NUMBER), str 23 [10], contents 0, next 12, prev 0 
+                        000012: type 53 (T_NUMBER), str 28 [6], contents 0, next 0, prev 9 
+main: status: zero
+main: input 'i xpath_01_23.inc'
+main: include: '../../../tests/xpath/xpath_01_23.inc'
+main: input '+ data'
+main: filter: rc: 14
+main: status: track
+main: input '= thing one'
+main: field: 'thing'='one'
+main: status: track
+main: input '= thing two'
+main: field: 'thing'='two'
+main: status: track
+main: input '= thing three'
+main: field: 'thing'='three'
+main: status: track
+main: input '= thing four'
+main: field: 'thing'='four'
+main: status: track
+main: input '= block 56'
+main: field: 'block'='56'
+main: status: track
+main: input '+ top-level'
+main: filter: rc: 21
+main: status: track
+main: input '= type ethernet'
+main: field: 'type'='ethernet'
+main: status: track
+main: input '= type bridge'
+main: field: 'type'='bridge'
+main: status: track
+main: input '= type 18u'
+main: field: 'type'='18u'
+main: status: track
+main: input '= type 24'
+main: field: 'type'='24'
+main: status: track
+main: input '= address 0x0'
+main: field: 'address'='0x0'
+main: status: track
+main: input '= port 1'
+main: field: 'port'='1'
+main: status: track
+main: input '= address 0x0'
+main: field: 'address'='0x0'
+main: status: track
+main: input '= port 1'
+main: field: 'port'='1'
+main: status: track
+main: input '= address 0x0'
+main: field: 'address'='0x0'
+main: status: track
+main: input '= port 1'
+main: field: 'port'='1'
+main: status: track
+main: input '= used-percent 12'
+main: field: 'used-percent'='12'
+main: status: track
+main: input '= kve_start 0xdeadbeef'
+main: field: 'kve_start'='0xdeadbeef'
+main: status: track
+main: input '= kve_end 0xcabb1e'
+main: field: 'kve_end'='0xcabb1e'
+main: status: track
+main: input '= host my-box'
+main: field: 'host'='my-box'
+main: status: track
+main: input '= domain example.com'
+main: field: 'domain'='example.com'
+main: status: track
+main: input '= host my-box'
+main: field: 'host'='my-box'
+main: status: track
+main: input '= domain example.com'
+main: field: 'domain'='example.com'
+main: status: track
+main: input '= label value'
+main: field: 'label'='value'
+main: status: track
+main: input '= max-chaos very'
+main: field: 'max-chaos'='very'
+main: status: track
+main: input '= min-chaos 42'
+main: field: 'min-chaos'='42'
+main: status: track
+main: input '= some-chaos [42]'
+main: field: 'some-chaos'='[42]'
+main: status: track
+main: input '@ test-attr attr-value'
+main: attr: 'test-attr'='attr-value'
+main: status: track
+main: input '[ sku'
+main: open leaf list: 'sku'
+main: status: track
+main: input '= sku gum-000-1412'
+main: field: 'sku'='gum-000-1412'
+main: status: track
+main: input '= sku sum-000-4121'
+main: field: 'sku'='sum-000-4121'
+main: status: track
+main: input '] sku'
+main: close leaf list: 'sku'
+main: status: track
+main: input '= host my-box'
+main: field: 'host'='my-box'
+main: status: track
+main: input '= domain example.com'
+main: field: 'domain'='example.com'
+main: status: track
+main: input '@ test value'
+main: attr: 'test'='value'
+main: status: track
+main: input '+ data'
+main: filter: rc: 18
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '@ test2 value2'
+main: attr: 'test2'='value2'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: predicate
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: predicate
+main: input '$ sku GRO-000-415'
+main: key: 'sku'='GRO-000-415'
+main: status: predicate
+main: input '$ name gum'
+main: key: 'name'='gum'
+main: status: predicate
+main: input '= sold 1412'
+main: field: 'sold'='1412'
+main: status: predicate
+main: input '= in-stock 54'
+main: field: 'in-stock'='54'
+main: status: predicate
+main: input '= on-order 10'
+main: field: 'on-order'='10'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: predicate
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: predicate
+main: input '$ sku HRD-000-212'
+main: key: 'sku'='HRD-000-212'
+main: status: predicate
+main: input '$ name rope'
+main: key: 'name'='rope'
+main: status: predicate
+main: input '= sold 85'
+main: field: 'sold'='85'
+main: status: predicate
+main: input '= in-stock 4'
+main: field: 'in-stock'='4'
+main: status: predicate
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: predicate
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: predicate
+main: input '$ sku HRD-000-517'
+main: key: 'sku'='HRD-000-517'
+main: status: predicate
+main: input '$ name ladder'
+main: key: 'name'='ladder'
+main: status: predicate
+main: input '= sold 0'
+main: field: 'sold'='0'
+main: status: predicate
+main: input '= in-stock 2'
+main: field: 'in-stock'='2'
+main: status: predicate
+main: input '= on-order 1'
+main: field: 'on-order'='1'
+main: status: full
+main: input '> item'
+main: filter: rc: 12
+main: status: track
+main: input '< item'
+main: filter: rc: 14
+main: status: predicate
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: predicate
+main: input '$ sku HRD-000-632'
+main: key: 'sku'='HRD-000-632'
+main: status: predicate
+main: input '$ name bolt'
+main: key: 'name'='bolt'
+main: status: predicate
+main: input '= sold 4123'
+main: field: 'sold'='4123'
+main: status: predicate
+main: input '= in-stock 144'
+main: field: 'in-stock'='144'
+main: status: predicate
+main: input '= on-order 42'
+main: field: 'on-order'='42'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 14
+main: status: predicate
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: predicate
+main: input '$ sku GRO-000-2331'
+main: key: 'sku'='GRO-000-2331'
+main: status: predicate
+main: input '$ name water'
+main: key: 'name'='water'
+main: status: predicate
+main: input '= sold 17'
+main: field: 'sold'='17'
+main: status: predicate
+main: input '= in-stock 14'
+main: field: 'in-stock'='14'
+main: status: predicate
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- data'
+main: status: track
+main: input '+ data2'
+main: filter: rc: 19
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: predicate
+main: input '$ sku GRO-000-415'
+main: key: 'sku'='GRO-000-415'
+main: status: predicate
+main: input '$ name gum'
+main: key: 'name'='gum'
+main: status: predicate
+main: input '= sold 1412.0'
+main: field: 'sold'='1412.0'
+main: status: predicate
+main: input '= in-stock 54'
+main: field: 'in-stock'='54'
+main: status: predicate
+main: input '= on-order 10'
+main: field: 'on-order'='10'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: predicate
+main: input '$ sku HRD-000-212'
+main: key: 'sku'='HRD-000-212'
+main: status: predicate
+main: input '$ name rope'
+main: key: 'name'='rope'
+main: status: predicate
+main: input '= sold 85.0'
+main: field: 'sold'='85.0'
+main: status: predicate
+main: input '= in-stock 4'
+main: field: 'in-stock'='4'
+main: status: predicate
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: predicate
+main: input '$ sku HRD-000-517'
+main: key: 'sku'='HRD-000-517'
+main: status: predicate
+main: input '$ name ladder'
+main: key: 'name'='ladder'
+main: status: predicate
+main: input '= sold 0'
+main: field: 'sold'='0'
+main: status: predicate
+main: input '= in-stock 2'
+main: field: 'in-stock'='2'
+main: status: predicate
+main: input '= on-order 1'
+main: field: 'on-order'='1'
+main: status: full
+main: input '> item'
+main: filter: rc: 12
+main: status: track
+main: input '< item'
+main: filter: rc: 14
+main: status: predicate
+main: input '$ sku HRD-000-632'
+main: key: 'sku'='HRD-000-632'
+main: status: predicate
+main: input '$ name bolt'
+main: key: 'name'='bolt'
+main: status: predicate
+main: input '= sold 4123.0'
+main: field: 'sold'='4123.0'
+main: status: predicate
+main: input '= in-stock 144'
+main: field: 'in-stock'='144'
+main: status: predicate
+main: input '= on-order 42'
+main: field: 'on-order'='42'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 14
+main: status: predicate
+main: input '$ sku GRO-000-2331'
+main: key: 'sku'='GRO-000-2331'
+main: status: predicate
+main: input '$ name water'
+main: key: 'name'='water'
+main: status: predicate
+main: input '= sold 17.0'
+main: field: 'sold'='17.0'
+main: status: predicate
+main: input '= in-stock 14'
+main: field: 'in-stock'='14'
+main: status: predicate
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- data2'
+main: status: track
+main: input '+ data3'
+main: filter: rc: 19
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: predicate
+main: input '$ sku GRO-000-533'
+main: key: 'sku'='GRO-000-533'
+main: status: predicate
+main: input '$ name fish'
+main: key: 'name'='fish'
+main: status: predicate
+main: input '= sold 1321.0'
+main: field: 'sold'='1321.0'
+main: status: predicate
+main: input '= in-stock 45'
+main: field: 'in-stock'='45'
+main: status: predicate
+main: input '= on-order 1'
+main: field: 'on-order'='1'
+main: status: full
+main: input '> item'
+main: filter: rc: 12
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- data3'
+main: status: track
+main: input '+ data4'
+main: filter: rc: 19
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item gum'
+main: field: 'item'='gum'
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item rope'
+main: field: 'item'='rope'
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item ladder'
+main: field: 'item'='ladder'
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item bolt'
+main: field: 'item'='bolt'
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item water'
+main: field: 'item'='water'
+main: status: track
+main: input '} item'
+xpath_01: xo_close_list can't find match for 'item'
+main: status: track
+main: input '- data4'
+main: status: track
+main: input '@ test value'
+main: attr: 'test'='value'
+main: status: track
+main: input '+ data'
+main: filter: rc: 18
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '@ test2 value2'
+main: attr: 'test2'='value2'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: predicate
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: predicate
+main: input '$ sku GRO-000-415'
+main: key: 'sku'='GRO-000-415'
+main: status: predicate
+main: input '$ name gum'
+main: key: 'name'='gum'
+main: status: predicate
+main: input '= sold 1412'
+main: field: 'sold'='1412'
+main: status: predicate
+main: input '= on-order 10'
+main: field: 'on-order'='10'
+main: status: track
+main: input '= in-stock 54'
+main: field: 'in-stock'='54'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: predicate
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: predicate
+main: input '$ sku HRD-000-212'
+main: key: 'sku'='HRD-000-212'
+main: status: predicate
+main: input '$ name rope'
+main: key: 'name'='rope'
+main: status: predicate
+main: input '= sold 85'
+main: field: 'sold'='85'
+main: status: predicate
+main: input '= extra special'
+main: field: 'extra'='special'
+main: status: predicate
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: track
+main: input '= in-stock 4'
+main: field: 'in-stock'='4'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: predicate
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: predicate
+main: input '$ sku HRD-000-517'
+main: key: 'sku'='HRD-000-517'
+main: status: predicate
+main: input '$ name ladder'
+main: key: 'name'='ladder'
+main: status: predicate
+main: input '= sold 0'
+main: field: 'sold'='0'
+main: status: predicate
+main: input '= extra special'
+main: field: 'extra'='special'
+main: status: predicate
+main: input '= on-order 1'
+main: field: 'on-order'='1'
+main: status: full
+main: input '= in-stock 2'
+main: field: 'in-stock'='2'
+main: status: full
+main: input '> item'
+main: filter: rc: 12
+main: status: track
+main: input '< item'
+main: filter: rc: 14
+main: status: predicate
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: predicate
+main: input '$ sku HRD-000-632'
+main: key: 'sku'='HRD-000-632'
+main: status: predicate
+main: input '$ name bolt'
+main: key: 'name'='bolt'
+main: status: predicate
+main: input '= sold 4123'
+main: field: 'sold'='4123'
+main: status: predicate
+main: input '= on-order 42'
+main: field: 'on-order'='42'
+main: status: track
+main: input '= in-stock 144'
+main: field: 'in-stock'='144'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 14
+main: status: predicate
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: predicate
+main: input '$ sku GRO-000-2331'
+main: key: 'sku'='GRO-000-2331'
+main: status: predicate
+main: input '$ name water'
+main: key: 'name'='water'
+main: status: predicate
+main: input '= sold 17'
+main: field: 'sold'='17'
+main: status: predicate
+main: input '= extra special'
+main: field: 'extra'='special'
+main: status: predicate
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: track
+main: input '= in-stock 14'
+main: field: 'in-stock'='14'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- data'
+main: status: track
+main: input '= cost 425'
+main: field: 'cost'='425'
+main: status: track
+main: input '= cost 455'
+main: field: 'cost'='455'
+main: status: track
+main: input '= mode mode'
+main: field: 'mode'='mode'
+main: status: track
+main: input '= mode_octal octal'
+main: field: 'mode_octal'='octal'
+main: status: track
+main: input '= links links'
+main: field: 'links'='links'
+main: status: track
+main: input '= user user'
+main: field: 'user'='user'
+main: status: track
+main: input '= group group'
+main: field: 'group'='group'
+main: status: track
+main: input '= pre that'
+main: field: 'pre'='that'
+main: status: track
+main: input '= links 3'
+main: field: 'links'='3'
+main: status: track
+main: input '= post this'
+main: field: 'post'='this'
+main: status: track
+main: input '= mode /some/file'
+main: field: 'mode'='/some/file'
+main: status: track
+main: input '= mode_octal 640'
+main: field: 'mode_octal'='640'
+main: status: track
+main: input '= links 1'
+main: field: 'links'='1'
+main: status: track
+main: input '= user user'
+main: field: 'user'='user'
+main: status: track
+main: input '= group group'
+main: field: 'group'='group'
+main: status: track
+main: input '= one 1'
+main: field: 'one'='1'
+main: status: track
+main: input '= two 2'
+main: field: 'two'='2'
+main: status: track
+main: input '= three 3'
+main: field: 'three'='3'
+main: status: track
+main: input '= one 1'
+main: field: 'one'='1'
+main: status: track
+main: input '= two 2'
+main: field: 'two'='2'
+main: status: track
+main: input '= three 3'
+main: field: 'three'='3'
+main: status: track
+main: input '= one 1'
+main: field: 'one'='1'
+main: status: track
+main: input '= two 2'
+main: field: 'two'='2'
+main: status: track
+main: input '= three 3'
+main: field: 'three'='3'
+main: status: track
+main: input '- top-level'
+main: status: track
+main: input '- data'
+main: status: track
+main: status: track
+main: input ''
+main: input 'r'
+main: status: zero
+main: input '? item[on-order + 20 > in-stock]'
+adding filter: 'item[on-order + 20 > in-stock]'
+added filter: 0
+xpath_01: test: filter expression feature is unsupported: plus sign ('+')
+--- 0: 13
+    000013: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 7, next 0, prev 0 
+                000007: type 15 (L_GRTR), str 22 [>], contents 4, next 0, prev 0 
+                    000004: type 25 (L_PLUS), str 17 [+], contents 5, next 11, prev 0 
+                        000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0 
+                            000003: type 70 (C_ELEMENT), str 8 [on-order], contents 0, next 0, prev 0 
+                        000006: type 53 (T_NUMBER), str 19 [20], contents 0, next 0, prev 5 
+                    000011: type 74 (C_PATH), str 0 [], contents 9, next 0, prev 4 
+                        000009: type 70 (C_ELEMENT), str 24 [in-stock], contents 0, next 0, prev 0 
+main: status: zero
+main: input 'i xpath_01_23.inc'
+main: include: '../../../tests/xpath/xpath_01_23.inc'
+main: input '+ data'
+main: filter: rc: 14
+main: status: track
+main: input '= thing one'
+main: field: 'thing'='one'
+main: status: track
+main: input '= thing two'
+main: field: 'thing'='two'
+main: status: track
+main: input '= thing three'
+main: field: 'thing'='three'
+main: status: track
+main: input '= thing four'
+main: field: 'thing'='four'
+main: status: track
+main: input '= block 56'
+main: field: 'block'='56'
+main: status: track
+main: input '+ top-level'
+main: filter: rc: 21
+main: status: track
+main: input '= type ethernet'
+main: field: 'type'='ethernet'
+main: status: track
+main: input '= type bridge'
+main: field: 'type'='bridge'
+main: status: track
+main: input '= type 18u'
+main: field: 'type'='18u'
+main: status: track
+main: input '= type 24'
+main: field: 'type'='24'
+main: status: track
+main: input '= address 0x0'
+main: field: 'address'='0x0'
+main: status: track
+main: input '= port 1'
+main: field: 'port'='1'
+main: status: track
+main: input '= address 0x0'
+main: field: 'address'='0x0'
+main: status: track
+main: input '= port 1'
+main: field: 'port'='1'
+main: status: track
+main: input '= address 0x0'
+main: field: 'address'='0x0'
+main: status: track
+main: input '= port 1'
+main: field: 'port'='1'
+main: status: track
+main: input '= used-percent 12'
+main: field: 'used-percent'='12'
+main: status: track
+main: input '= kve_start 0xdeadbeef'
+main: field: 'kve_start'='0xdeadbeef'
+main: status: track
+main: input '= kve_end 0xcabb1e'
+main: field: 'kve_end'='0xcabb1e'
+main: status: track
+main: input '= host my-box'
+main: field: 'host'='my-box'
+main: status: track
+main: input '= domain example.com'
+main: field: 'domain'='example.com'
+main: status: track
+main: input '= host my-box'
+main: field: 'host'='my-box'
+main: status: track
+main: input '= domain example.com'
+main: field: 'domain'='example.com'
+main: status: track
+main: input '= label value'
+main: field: 'label'='value'
+main: status: track
+main: input '= max-chaos very'
+main: field: 'max-chaos'='very'
+main: status: track
+main: input '= min-chaos 42'
+main: field: 'min-chaos'='42'
+main: status: track
+main: input '= some-chaos [42]'
+main: field: 'some-chaos'='[42]'
+main: status: track
+main: input '@ test-attr attr-value'
+main: attr: 'test-attr'='attr-value'
+main: status: track
+main: input '[ sku'
+main: open leaf list: 'sku'
+main: status: track
+main: input '= sku gum-000-1412'
+main: field: 'sku'='gum-000-1412'
+main: status: track
+main: input '= sku sum-000-4121'
+main: field: 'sku'='sum-000-4121'
+main: status: track
+main: input '] sku'
+main: close leaf list: 'sku'
+main: status: track
+main: input '= host my-box'
+main: field: 'host'='my-box'
+main: status: track
+main: input '= domain example.com'
+main: field: 'domain'='example.com'
+main: status: track
+main: input '@ test value'
+main: attr: 'test'='value'
+main: status: track
+main: input '+ data'
+main: filter: rc: 18
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '@ test2 value2'
+main: attr: 'test2'='value2'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: predicate
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: predicate
+main: input '$ sku GRO-000-415'
+main: key: 'sku'='GRO-000-415'
+main: status: predicate
+main: input '$ name gum'
+main: key: 'name'='gum'
+main: status: predicate
+main: input '= sold 1412'
+main: field: 'sold'='1412'
+main: status: predicate
+main: input '= in-stock 54'
+main: field: 'in-stock'='54'
+main: status: predicate
+main: input '= on-order 10'
+main: field: 'on-order'='10'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: predicate
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: predicate
+main: input '$ sku HRD-000-212'
+main: key: 'sku'='HRD-000-212'
+main: status: predicate
+main: input '$ name rope'
+main: key: 'name'='rope'
+main: status: predicate
+main: input '= sold 85'
+main: field: 'sold'='85'
+main: status: predicate
+main: input '= in-stock 4'
+main: field: 'in-stock'='4'
+main: status: predicate
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: full
+main: input '> item'
+main: filter: rc: 12
+main: status: track
+main: input '< item'
+main: filter: rc: 14
+main: status: predicate
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: predicate
+main: input '$ sku HRD-000-517'
+main: key: 'sku'='HRD-000-517'
+main: status: predicate
+main: input '$ name ladder'
+main: key: 'name'='ladder'
+main: status: predicate
+main: input '= sold 0'
+main: field: 'sold'='0'
+main: status: predicate
+main: input '= in-stock 2'
+main: field: 'in-stock'='2'
+main: status: predicate
+main: input '= on-order 1'
+main: field: 'on-order'='1'
+main: status: full
+main: input '> item'
+main: filter: rc: 12
+main: status: track
+main: input '< item'
+main: filter: rc: 14
+main: status: predicate
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: predicate
+main: input '$ sku HRD-000-632'
+main: key: 'sku'='HRD-000-632'
+main: status: predicate
+main: input '$ name bolt'
+main: key: 'name'='bolt'
+main: status: predicate
+main: input '= sold 4123'
+main: field: 'sold'='4123'
+main: status: predicate
+main: input '= in-stock 144'
+main: field: 'in-stock'='144'
+main: status: predicate
+main: input '= on-order 42'
+main: field: 'on-order'='42'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 14
+main: status: predicate
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: predicate
+main: input '$ sku GRO-000-2331'
+main: key: 'sku'='GRO-000-2331'
+main: status: predicate
+main: input '$ name water'
+main: key: 'name'='water'
+main: status: predicate
+main: input '= sold 17'
+main: field: 'sold'='17'
+main: status: predicate
+main: input '= in-stock 14'
+main: field: 'in-stock'='14'
+main: status: predicate
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: full
+main: input '> item'
+main: filter: rc: 12
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- data'
+main: status: track
+main: input '+ data2'
+main: filter: rc: 19
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: predicate
+main: input '$ sku GRO-000-415'
+main: key: 'sku'='GRO-000-415'
+main: status: predicate
+main: input '$ name gum'
+main: key: 'name'='gum'
+main: status: predicate
+main: input '= sold 1412.0'
+main: field: 'sold'='1412.0'
+main: status: predicate
+main: input '= in-stock 54'
+main: field: 'in-stock'='54'
+main: status: predicate
+main: input '= on-order 10'
+main: field: 'on-order'='10'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: predicate
+main: input '$ sku HRD-000-212'
+main: key: 'sku'='HRD-000-212'
+main: status: predicate
+main: input '$ name rope'
+main: key: 'name'='rope'
+main: status: predicate
+main: input '= sold 85.0'
+main: field: 'sold'='85.0'
+main: status: predicate
+main: input '= in-stock 4'
+main: field: 'in-stock'='4'
+main: status: predicate
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: full
+main: input '> item'
+main: filter: rc: 12
+main: status: track
+main: input '< item'
+main: filter: rc: 14
+main: status: predicate
+main: input '$ sku HRD-000-517'
+main: key: 'sku'='HRD-000-517'
+main: status: predicate
+main: input '$ name ladder'
+main: key: 'name'='ladder'
+main: status: predicate
+main: input '= sold 0'
+main: field: 'sold'='0'
+main: status: predicate
+main: input '= in-stock 2'
+main: field: 'in-stock'='2'
+main: status: predicate
+main: input '= on-order 1'
+main: field: 'on-order'='1'
+main: status: full
+main: input '> item'
+main: filter: rc: 12
+main: status: track
+main: input '< item'
+main: filter: rc: 14
+main: status: predicate
+main: input '$ sku HRD-000-632'
+main: key: 'sku'='HRD-000-632'
+main: status: predicate
+main: input '$ name bolt'
+main: key: 'name'='bolt'
+main: status: predicate
+main: input '= sold 4123.0'
+main: field: 'sold'='4123.0'
+main: status: predicate
+main: input '= in-stock 144'
+main: field: 'in-stock'='144'
+main: status: predicate
+main: input '= on-order 42'
+main: field: 'on-order'='42'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 14
+main: status: predicate
+main: input '$ sku GRO-000-2331'
+main: key: 'sku'='GRO-000-2331'
+main: status: predicate
+main: input '$ name water'
+main: key: 'name'='water'
+main: status: predicate
+main: input '= sold 17.0'
+main: field: 'sold'='17.0'
+main: status: predicate
+main: input '= in-stock 14'
+main: field: 'in-stock'='14'
+main: status: predicate
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: full
+main: input '> item'
+main: filter: rc: 12
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- data2'
+main: status: track
+main: input '+ data3'
+main: filter: rc: 19
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: predicate
+main: input '$ sku GRO-000-533'
+main: key: 'sku'='GRO-000-533'
+main: status: predicate
+main: input '$ name fish'
+main: key: 'name'='fish'
+main: status: predicate
+main: input '= sold 1321.0'
+main: field: 'sold'='1321.0'
+main: status: predicate
+main: input '= in-stock 45'
+main: field: 'in-stock'='45'
+main: status: predicate
+main: input '= on-order 1'
+main: field: 'on-order'='1'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- data3'
+main: status: track
+main: input '+ data4'
+main: filter: rc: 19
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item gum'
+main: field: 'item'='gum'
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item rope'
+main: field: 'item'='rope'
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item ladder'
+main: field: 'item'='ladder'
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item bolt'
+main: field: 'item'='bolt'
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item water'
+main: field: 'item'='water'
+main: status: track
+main: input '} item'
+xpath_01: xo_close_list can't find match for 'item'
+main: status: track
+main: input '- data4'
+main: status: track
+main: input '@ test value'
+main: attr: 'test'='value'
+main: status: track
+main: input '+ data'
+main: filter: rc: 18
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '@ test2 value2'
+main: attr: 'test2'='value2'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: predicate
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: predicate
+main: input '$ sku GRO-000-415'
+main: key: 'sku'='GRO-000-415'
+main: status: predicate
+main: input '$ name gum'
+main: key: 'name'='gum'
+main: status: predicate
+main: input '= sold 1412'
+main: field: 'sold'='1412'
+main: status: predicate
+main: input '= on-order 10'
+main: field: 'on-order'='10'
+main: status: predicate
+main: input '= in-stock 54'
+main: field: 'in-stock'='54'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: predicate
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: predicate
+main: input '$ sku HRD-000-212'
+main: key: 'sku'='HRD-000-212'
+main: status: predicate
+main: input '$ name rope'
+main: key: 'name'='rope'
+main: status: predicate
+main: input '= sold 85'
+main: field: 'sold'='85'
+main: status: predicate
+main: input '= extra special'
+main: field: 'extra'='special'
+main: status: predicate
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: predicate
+main: input '= in-stock 4'
+main: field: 'in-stock'='4'
+main: status: full
+main: input '> item'
+main: filter: rc: 12
+main: status: track
+main: input '< item'
+main: filter: rc: 14
+main: status: predicate
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: predicate
+main: input '$ sku HRD-000-517'
+main: key: 'sku'='HRD-000-517'
+main: status: predicate
+main: input '$ name ladder'
+main: key: 'name'='ladder'
+main: status: predicate
+main: input '= sold 0'
+main: field: 'sold'='0'
+main: status: predicate
+main: input '= extra special'
+main: field: 'extra'='special'
+main: status: predicate
+main: input '= on-order 1'
+main: field: 'on-order'='1'
+main: status: predicate
+main: input '= in-stock 2'
+main: field: 'in-stock'='2'
+main: status: full
+main: input '> item'
+main: filter: rc: 12
+main: status: track
+main: input '< item'
+main: filter: rc: 14
+main: status: predicate
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: predicate
+main: input '$ sku HRD-000-632'
+main: key: 'sku'='HRD-000-632'
+main: status: predicate
+main: input '$ name bolt'
+main: key: 'name'='bolt'
+main: status: predicate
+main: input '= sold 4123'
+main: field: 'sold'='4123'
+main: status: predicate
+main: input '= on-order 42'
+main: field: 'on-order'='42'
+main: status: predicate
+main: input '= in-stock 144'
+main: field: 'in-stock'='144'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 14
+main: status: predicate
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: predicate
+main: input '$ sku GRO-000-2331'
+main: key: 'sku'='GRO-000-2331'
+main: status: predicate
+main: input '$ name water'
+main: key: 'name'='water'
+main: status: predicate
+main: input '= sold 17'
+main: field: 'sold'='17'
+main: status: predicate
+main: input '= extra special'
+main: field: 'extra'='special'
+main: status: predicate
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: predicate
+main: input '= in-stock 14'
+main: field: 'in-stock'='14'
+main: status: full
+main: input '> item'
+main: filter: rc: 12
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- data'
+main: status: track
+main: input '= cost 425'
+main: field: 'cost'='425'
+main: status: track
+main: input '= cost 455'
+main: field: 'cost'='455'
+main: status: track
+main: input '= mode mode'
+main: field: 'mode'='mode'
+main: status: track
+main: input '= mode_octal octal'
+main: field: 'mode_octal'='octal'
+main: status: track
+main: input '= links links'
+main: field: 'links'='links'
+main: status: track
+main: input '= user user'
+main: field: 'user'='user'
+main: status: track
+main: input '= group group'
+main: field: 'group'='group'
+main: status: track
+main: input '= pre that'
+main: field: 'pre'='that'
+main: status: track
+main: input '= links 3'
+main: field: 'links'='3'
+main: status: track
+main: input '= post this'
+main: field: 'post'='this'
+main: status: track
+main: input '= mode /some/file'
+main: field: 'mode'='/some/file'
+main: status: track
+main: input '= mode_octal 640'
+main: field: 'mode_octal'='640'
+main: status: track
+main: input '= links 1'
+main: field: 'links'='1'
+main: status: track
+main: input '= user user'
+main: field: 'user'='user'
+main: status: track
+main: input '= group group'
+main: field: 'group'='group'
+main: status: track
+main: input '= one 1'
+main: field: 'one'='1'
+main: status: track
+main: input '= two 2'
+main: field: 'two'='2'
+main: status: track
+main: input '= three 3'
+main: field: 'three'='3'
+main: status: track
+main: input '= one 1'
+main: field: 'one'='1'
+main: status: track
+main: input '= two 2'
+main: field: 'two'='2'
+main: status: track
+main: input '= three 3'
+main: field: 'three'='3'
+main: status: track
+main: input '= one 1'
+main: field: 'one'='1'
+main: status: track
+main: input '= two 2'
+main: field: 'two'='2'
+main: status: track
+main: input '= three 3'
+main: field: 'three'='3'
+main: status: track
+main: input '- top-level'
+main: status: track
+main: input '- data'
+main: status: track
+main: status: track
+main: input ''
+main: input 'r'
+main: status: zero
+main: input '? item[on-order > in-stock]'
+adding filter: 'item[on-order > in-stock]'
+added filter: 0
+--- 0: 10
+    000010: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
+                000004: type 15 (L_GRTR), str 17 [>], contents 5, next 0, prev 0 
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 8, prev 0 
+                        000003: type 70 (C_ELEMENT), str 8 [on-order], contents 0, next 0, prev 0 
+                    000008: type 74 (C_PATH), str 0 [], contents 6, next 0, prev 5 
+                        000006: type 70 (C_ELEMENT), str 19 [in-stock], contents 0, next 0, prev 0 
+main: status: zero
+main: input 'i xpath_01_23.inc'
+main: include: '../../../tests/xpath/xpath_01_23.inc'
+main: input '+ data'
+main: filter: rc: 14
+main: status: track
+main: input '= thing one'
+main: field: 'thing'='one'
+main: status: track
+main: input '= thing two'
+main: field: 'thing'='two'
+main: status: track
+main: input '= thing three'
+main: field: 'thing'='three'
+main: status: track
+main: input '= thing four'
+main: field: 'thing'='four'
+main: status: track
+main: input '= block 56'
+main: field: 'block'='56'
+main: status: track
+main: input '+ top-level'
+main: filter: rc: 21
+main: status: track
+main: input '= type ethernet'
+main: field: 'type'='ethernet'
+main: status: track
+main: input '= type bridge'
+main: field: 'type'='bridge'
+main: status: track
+main: input '= type 18u'
+main: field: 'type'='18u'
+main: status: track
+main: input '= type 24'
+main: field: 'type'='24'
+main: status: track
+main: input '= address 0x0'
+main: field: 'address'='0x0'
+main: status: track
+main: input '= port 1'
+main: field: 'port'='1'
+main: status: track
+main: input '= address 0x0'
+main: field: 'address'='0x0'
+main: status: track
+main: input '= port 1'
+main: field: 'port'='1'
+main: status: track
+main: input '= address 0x0'
+main: field: 'address'='0x0'
+main: status: track
+main: input '= port 1'
+main: field: 'port'='1'
+main: status: track
+main: input '= used-percent 12'
+main: field: 'used-percent'='12'
+main: status: track
+main: input '= kve_start 0xdeadbeef'
+main: field: 'kve_start'='0xdeadbeef'
+main: status: track
+main: input '= kve_end 0xcabb1e'
+main: field: 'kve_end'='0xcabb1e'
+main: status: track
+main: input '= host my-box'
+main: field: 'host'='my-box'
+main: status: track
+main: input '= domain example.com'
+main: field: 'domain'='example.com'
+main: status: track
+main: input '= host my-box'
+main: field: 'host'='my-box'
+main: status: track
+main: input '= domain example.com'
+main: field: 'domain'='example.com'
+main: status: track
+main: input '= label value'
+main: field: 'label'='value'
+main: status: track
+main: input '= max-chaos very'
+main: field: 'max-chaos'='very'
+main: status: track
+main: input '= min-chaos 42'
+main: field: 'min-chaos'='42'
+main: status: track
+main: input '= some-chaos [42]'
+main: field: 'some-chaos'='[42]'
+main: status: track
+main: input '@ test-attr attr-value'
+main: attr: 'test-attr'='attr-value'
+main: status: track
+main: input '[ sku'
+main: open leaf list: 'sku'
+main: status: track
+main: input '= sku gum-000-1412'
+main: field: 'sku'='gum-000-1412'
+main: status: track
+main: input '= sku sum-000-4121'
+main: field: 'sku'='sum-000-4121'
+main: status: track
+main: input '] sku'
+main: close leaf list: 'sku'
+main: status: track
+main: input '= host my-box'
+main: field: 'host'='my-box'
+main: status: track
+main: input '= domain example.com'
+main: field: 'domain'='example.com'
+main: status: track
+main: input '@ test value'
+main: attr: 'test'='value'
+main: status: track
+main: input '+ data'
+main: filter: rc: 18
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '@ test2 value2'
+main: attr: 'test2'='value2'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: predicate
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: predicate
+main: input '$ sku GRO-000-415'
+main: key: 'sku'='GRO-000-415'
+main: status: predicate
+main: input '$ name gum'
+main: key: 'name'='gum'
+main: status: predicate
+main: input '= sold 1412'
+main: field: 'sold'='1412'
+main: status: predicate
+main: input '= in-stock 54'
+main: field: 'in-stock'='54'
+main: status: predicate
+main: input '= on-order 10'
+main: field: 'on-order'='10'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: predicate
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: predicate
+main: input '$ sku HRD-000-212'
+main: key: 'sku'='HRD-000-212'
+main: status: predicate
+main: input '$ name rope'
+main: key: 'name'='rope'
+main: status: predicate
+main: input '= sold 85'
+main: field: 'sold'='85'
+main: status: predicate
+main: input '= in-stock 4'
+main: field: 'in-stock'='4'
+main: status: predicate
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: predicate
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: predicate
+main: input '$ sku HRD-000-517'
+main: key: 'sku'='HRD-000-517'
+main: status: predicate
+main: input '$ name ladder'
+main: key: 'name'='ladder'
+main: status: predicate
+main: input '= sold 0'
+main: field: 'sold'='0'
+main: status: predicate
+main: input '= in-stock 2'
+main: field: 'in-stock'='2'
+main: status: predicate
+main: input '= on-order 1'
+main: field: 'on-order'='1'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: predicate
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: predicate
+main: input '$ sku HRD-000-632'
+main: key: 'sku'='HRD-000-632'
+main: status: predicate
+main: input '$ name bolt'
+main: key: 'name'='bolt'
+main: status: predicate
+main: input '= sold 4123'
+main: field: 'sold'='4123'
+main: status: predicate
+main: input '= in-stock 144'
+main: field: 'in-stock'='144'
+main: status: predicate
+main: input '= on-order 42'
+main: field: 'on-order'='42'
+main: status: full
+main: input '> item'
+main: filter: rc: 12
+main: status: track
+main: input '< item'
+main: filter: rc: 14
+main: status: predicate
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: predicate
+main: input '$ sku GRO-000-2331'
+main: key: 'sku'='GRO-000-2331'
+main: status: predicate
+main: input '$ name water'
+main: key: 'name'='water'
+main: status: predicate
+main: input '= sold 17'
+main: field: 'sold'='17'
+main: status: predicate
+main: input '= in-stock 14'
+main: field: 'in-stock'='14'
+main: status: predicate
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: full
+main: input '> item'
+main: filter: rc: 12
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- data'
+main: status: track
+main: input '+ data2'
+main: filter: rc: 19
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: predicate
+main: input '$ sku GRO-000-415'
+main: key: 'sku'='GRO-000-415'
+main: status: predicate
+main: input '$ name gum'
+main: key: 'name'='gum'
+main: status: predicate
+main: input '= sold 1412.0'
+main: field: 'sold'='1412.0'
+main: status: predicate
+main: input '= in-stock 54'
+main: field: 'in-stock'='54'
+main: status: predicate
+main: input '= on-order 10'
+main: field: 'on-order'='10'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: predicate
+main: input '$ sku HRD-000-212'
+main: key: 'sku'='HRD-000-212'
+main: status: predicate
+main: input '$ name rope'
+main: key: 'name'='rope'
+main: status: predicate
+main: input '= sold 85.0'
+main: field: 'sold'='85.0'
+main: status: predicate
+main: input '= in-stock 4'
+main: field: 'in-stock'='4'
+main: status: predicate
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: predicate
+main: input '$ sku HRD-000-517'
+main: key: 'sku'='HRD-000-517'
+main: status: predicate
+main: input '$ name ladder'
+main: key: 'name'='ladder'
+main: status: predicate
+main: input '= sold 0'
+main: field: 'sold'='0'
+main: status: predicate
+main: input '= in-stock 2'
+main: field: 'in-stock'='2'
+main: status: predicate
+main: input '= on-order 1'
+main: field: 'on-order'='1'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: predicate
+main: input '$ sku HRD-000-632'
+main: key: 'sku'='HRD-000-632'
+main: status: predicate
+main: input '$ name bolt'
+main: key: 'name'='bolt'
+main: status: predicate
+main: input '= sold 4123.0'
+main: field: 'sold'='4123.0'
+main: status: predicate
+main: input '= in-stock 144'
+main: field: 'in-stock'='144'
+main: status: predicate
+main: input '= on-order 42'
+main: field: 'on-order'='42'
+main: status: full
+main: input '> item'
+main: filter: rc: 12
+main: status: track
+main: input '< item'
+main: filter: rc: 14
+main: status: predicate
+main: input '$ sku GRO-000-2331'
+main: key: 'sku'='GRO-000-2331'
+main: status: predicate
+main: input '$ name water'
+main: key: 'name'='water'
+main: status: predicate
+main: input '= sold 17.0'
+main: field: 'sold'='17.0'
+main: status: predicate
+main: input '= in-stock 14'
+main: field: 'in-stock'='14'
+main: status: predicate
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: full
+main: input '> item'
+main: filter: rc: 12
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- data2'
+main: status: track
+main: input '+ data3'
+main: filter: rc: 19
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: predicate
+main: input '$ sku GRO-000-533'
+main: key: 'sku'='GRO-000-533'
+main: status: predicate
+main: input '$ name fish'
+main: key: 'name'='fish'
+main: status: predicate
+main: input '= sold 1321.0'
+main: field: 'sold'='1321.0'
+main: status: predicate
+main: input '= in-stock 45'
+main: field: 'in-stock'='45'
+main: status: predicate
+main: input '= on-order 1'
+main: field: 'on-order'='1'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- data3'
+main: status: track
+main: input '+ data4'
+main: filter: rc: 19
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item gum'
+main: field: 'item'='gum'
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item rope'
+main: field: 'item'='rope'
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item ladder'
+main: field: 'item'='ladder'
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item bolt'
+main: field: 'item'='bolt'
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item water'
+main: field: 'item'='water'
+main: status: track
+main: input '} item'
+xpath_01: xo_close_list can't find match for 'item'
+main: status: track
+main: input '- data4'
+main: status: track
+main: input '@ test value'
+main: attr: 'test'='value'
+main: status: track
+main: input '+ data'
+main: filter: rc: 18
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '@ test2 value2'
+main: attr: 'test2'='value2'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: predicate
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: predicate
+main: input '$ sku GRO-000-415'
+main: key: 'sku'='GRO-000-415'
+main: status: predicate
+main: input '$ name gum'
+main: key: 'name'='gum'
+main: status: predicate
+main: input '= sold 1412'
+main: field: 'sold'='1412'
+main: status: predicate
+main: input '= on-order 10'
+main: field: 'on-order'='10'
+main: status: predicate
+main: input '= in-stock 54'
+main: field: 'in-stock'='54'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: predicate
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: predicate
+main: input '$ sku HRD-000-212'
+main: key: 'sku'='HRD-000-212'
+main: status: predicate
+main: input '$ name rope'
+main: key: 'name'='rope'
+main: status: predicate
+main: input '= sold 85'
+main: field: 'sold'='85'
+main: status: predicate
+main: input '= extra special'
+main: field: 'extra'='special'
+main: status: predicate
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: predicate
+main: input '= in-stock 4'
+main: field: 'in-stock'='4'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: predicate
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: predicate
+main: input '$ sku HRD-000-517'
+main: key: 'sku'='HRD-000-517'
+main: status: predicate
+main: input '$ name ladder'
+main: key: 'name'='ladder'
+main: status: predicate
+main: input '= sold 0'
+main: field: 'sold'='0'
+main: status: predicate
+main: input '= extra special'
+main: field: 'extra'='special'
+main: status: predicate
+main: input '= on-order 1'
+main: field: 'on-order'='1'
+main: status: predicate
+main: input '= in-stock 2'
+main: field: 'in-stock'='2'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: predicate
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: predicate
+main: input '$ sku HRD-000-632'
+main: key: 'sku'='HRD-000-632'
+main: status: predicate
+main: input '$ name bolt'
+main: key: 'name'='bolt'
+main: status: predicate
+main: input '= sold 4123'
+main: field: 'sold'='4123'
+main: status: predicate
+main: input '= on-order 42'
+main: field: 'on-order'='42'
+main: status: predicate
+main: input '= in-stock 144'
+main: field: 'in-stock'='144'
+main: status: full
+main: input '> item'
+main: filter: rc: 12
+main: status: track
+main: input '< item'
+main: filter: rc: 14
+main: status: predicate
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: predicate
+main: input '$ sku GRO-000-2331'
+main: key: 'sku'='GRO-000-2331'
+main: status: predicate
+main: input '$ name water'
+main: key: 'name'='water'
+main: status: predicate
+main: input '= sold 17'
+main: field: 'sold'='17'
+main: status: predicate
+main: input '= extra special'
+main: field: 'extra'='special'
+main: status: predicate
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: predicate
+main: input '= in-stock 14'
+main: field: 'in-stock'='14'
+main: status: full
+main: input '> item'
+main: filter: rc: 12
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- data'
+main: status: track
+main: input '= cost 425'
+main: field: 'cost'='425'
+main: status: track
+main: input '= cost 455'
+main: field: 'cost'='455'
+main: status: track
+main: input '= mode mode'
+main: field: 'mode'='mode'
+main: status: track
+main: input '= mode_octal octal'
+main: field: 'mode_octal'='octal'
+main: status: track
+main: input '= links links'
+main: field: 'links'='links'
+main: status: track
+main: input '= user user'
+main: field: 'user'='user'
+main: status: track
+main: input '= group group'
+main: field: 'group'='group'
+main: status: track
+main: input '= pre that'
+main: field: 'pre'='that'
+main: status: track
+main: input '= links 3'
+main: field: 'links'='3'
+main: status: track
+main: input '= post this'
+main: field: 'post'='this'
+main: status: track
+main: input '= mode /some/file'
+main: field: 'mode'='/some/file'
+main: status: track
+main: input '= mode_octal 640'
+main: field: 'mode_octal'='640'
+main: status: track
+main: input '= links 1'
+main: field: 'links'='1'
+main: status: track
+main: input '= user user'
+main: field: 'user'='user'
+main: status: track
+main: input '= group group'
+main: field: 'group'='group'
+main: status: track
+main: input '= one 1'
+main: field: 'one'='1'
+main: status: track
+main: input '= two 2'
+main: field: 'two'='2'
+main: status: track
+main: input '= three 3'
+main: field: 'three'='3'
+main: status: track
+main: input '= one 1'
+main: field: 'one'='1'
+main: status: track
+main: input '= two 2'
+main: field: 'two'='2'
+main: status: track
+main: input '= three 3'
+main: field: 'three'='3'
+main: status: track
+main: input '= one 1'
+main: field: 'one'='1'
+main: status: track
+main: input '= two 2'
+main: field: 'two'='2'
+main: status: track
+main: input '= three 3'
+main: field: 'three'='3'
+main: status: track
+main: input '- top-level'
+main: status: track
+main: input '- data'
+main: status: track
+main: status: track
+main: input ''
+main: input 'r'
+main: status: zero
+main: input '? cost[. > 450]'
+adding filter: 'cost[. > 450]'
+added filter: 0
+--- 0: 10
+    000010: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [cost], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
+                000004: type 15 (L_GRTR), str 10 [>], contents 3, next 0, prev 0 
+                    000003: type 49 (L_DOT), str 8 [.], contents 0, next 6, prev 0 
+                    000006: type 53 (T_NUMBER), str 12 [450], contents 0, next 0, prev 3 
+main: status: zero
+main: input 'i xpath_01_23.inc'
+main: include: '../../../tests/xpath/xpath_01_23.inc'
+main: input '+ data'
+main: filter: rc: 14
+main: status: track
+main: input '= thing one'
+main: field: 'thing'='one'
+main: status: track
+main: input '= thing two'
+main: field: 'thing'='two'
+main: status: track
+main: input '= thing three'
+main: field: 'thing'='three'
+main: status: track
+main: input '= thing four'
+main: field: 'thing'='four'
+main: status: track
+main: input '= block 56'
+main: field: 'block'='56'
+main: status: track
+main: input '+ top-level'
+main: filter: rc: 21
+main: status: track
+main: input '= type ethernet'
+main: field: 'type'='ethernet'
+main: status: track
+main: input '= type bridge'
+main: field: 'type'='bridge'
+main: status: track
+main: input '= type 18u'
+main: field: 'type'='18u'
+main: status: track
+main: input '= type 24'
+main: field: 'type'='24'
+main: status: track
+main: input '= address 0x0'
+main: field: 'address'='0x0'
+main: status: track
+main: input '= port 1'
+main: field: 'port'='1'
+main: status: track
+main: input '= address 0x0'
+main: field: 'address'='0x0'
+main: status: track
+main: input '= port 1'
+main: field: 'port'='1'
+main: status: track
+main: input '= address 0x0'
+main: field: 'address'='0x0'
+main: status: track
+main: input '= port 1'
+main: field: 'port'='1'
+main: status: track
+main: input '= used-percent 12'
+main: field: 'used-percent'='12'
+main: status: track
+main: input '= kve_start 0xdeadbeef'
+main: field: 'kve_start'='0xdeadbeef'
+main: status: track
+main: input '= kve_end 0xcabb1e'
+main: field: 'kve_end'='0xcabb1e'
+main: status: track
+main: input '= host my-box'
+main: field: 'host'='my-box'
+main: status: track
+main: input '= domain example.com'
+main: field: 'domain'='example.com'
+main: status: track
+main: input '= host my-box'
+main: field: 'host'='my-box'
+main: status: track
+main: input '= domain example.com'
+main: field: 'domain'='example.com'
+main: status: track
+main: input '= label value'
+main: field: 'label'='value'
+main: status: track
+main: input '= max-chaos very'
+main: field: 'max-chaos'='very'
+main: status: track
+main: input '= min-chaos 42'
+main: field: 'min-chaos'='42'
+main: status: track
+main: input '= some-chaos [42]'
+main: field: 'some-chaos'='[42]'
+main: status: track
+main: input '@ test-attr attr-value'
+main: attr: 'test-attr'='attr-value'
+main: status: track
+main: input '[ sku'
+main: open leaf list: 'sku'
+main: status: track
+main: input '= sku gum-000-1412'
+main: field: 'sku'='gum-000-1412'
+main: status: track
+main: input '= sku sum-000-4121'
+main: field: 'sku'='sum-000-4121'
+main: status: track
+main: input '] sku'
+main: close leaf list: 'sku'
+main: status: track
+main: input '= host my-box'
+main: field: 'host'='my-box'
+main: status: track
+main: input '= domain example.com'
+main: field: 'domain'='example.com'
+main: status: track
+main: input '@ test value'
+main: attr: 'test'='value'
+main: status: track
+main: input '+ data'
+main: filter: rc: 18
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '@ test2 value2'
+main: attr: 'test2'='value2'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku GRO-000-415'
+main: key: 'sku'='GRO-000-415'
+main: status: track
+main: input '$ name gum'
+main: key: 'name'='gum'
+main: status: track
+main: input '= sold 1412'
+main: field: 'sold'='1412'
+main: status: track
+main: input '= in-stock 54'
+main: field: 'in-stock'='54'
+main: status: track
+main: input '= on-order 10'
+main: field: 'on-order'='10'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku HRD-000-212'
+main: key: 'sku'='HRD-000-212'
+main: status: track
+main: input '$ name rope'
+main: key: 'name'='rope'
+main: status: track
+main: input '= sold 85'
+main: field: 'sold'='85'
+main: status: track
+main: input '= in-stock 4'
+main: field: 'in-stock'='4'
+main: status: track
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku HRD-000-517'
+main: key: 'sku'='HRD-000-517'
+main: status: track
+main: input '$ name ladder'
+main: key: 'name'='ladder'
+main: status: track
+main: input '= sold 0'
+main: field: 'sold'='0'
+main: status: track
+main: input '= in-stock 2'
+main: field: 'in-stock'='2'
+main: status: track
+main: input '= on-order 1'
+main: field: 'on-order'='1'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku HRD-000-632'
+main: key: 'sku'='HRD-000-632'
+main: status: track
+main: input '$ name bolt'
+main: key: 'name'='bolt'
+main: status: track
+main: input '= sold 4123'
+main: field: 'sold'='4123'
+main: status: track
+main: input '= in-stock 144'
+main: field: 'in-stock'='144'
+main: status: track
+main: input '= on-order 42'
+main: field: 'on-order'='42'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku GRO-000-2331'
+main: key: 'sku'='GRO-000-2331'
+main: status: track
+main: input '$ name water'
+main: key: 'name'='water'
+main: status: track
+main: input '= sold 17'
+main: field: 'sold'='17'
+main: status: track
+main: input '= in-stock 14'
+main: field: 'in-stock'='14'
+main: status: track
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- data'
+main: status: track
+main: input '+ data2'
+main: filter: rc: 19
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '$ sku GRO-000-415'
+main: key: 'sku'='GRO-000-415'
+main: status: track
+main: input '$ name gum'
+main: key: 'name'='gum'
+main: status: track
+main: input '= sold 1412.0'
+main: field: 'sold'='1412.0'
+main: status: track
+main: input '= in-stock 54'
+main: field: 'in-stock'='54'
+main: status: track
+main: input '= on-order 10'
+main: field: 'on-order'='10'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '$ sku HRD-000-212'
+main: key: 'sku'='HRD-000-212'
+main: status: track
+main: input '$ name rope'
+main: key: 'name'='rope'
+main: status: track
+main: input '= sold 85.0'
+main: field: 'sold'='85.0'
+main: status: track
+main: input '= in-stock 4'
+main: field: 'in-stock'='4'
+main: status: track
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '$ sku HRD-000-517'
+main: key: 'sku'='HRD-000-517'
+main: status: track
+main: input '$ name ladder'
+main: key: 'name'='ladder'
+main: status: track
+main: input '= sold 0'
+main: field: 'sold'='0'
+main: status: track
+main: input '= in-stock 2'
+main: field: 'in-stock'='2'
+main: status: track
+main: input '= on-order 1'
+main: field: 'on-order'='1'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '$ sku HRD-000-632'
+main: key: 'sku'='HRD-000-632'
+main: status: track
+main: input '$ name bolt'
+main: key: 'name'='bolt'
+main: status: track
+main: input '= sold 4123.0'
+main: field: 'sold'='4123.0'
+main: status: track
+main: input '= in-stock 144'
+main: field: 'in-stock'='144'
+main: status: track
+main: input '= on-order 42'
+main: field: 'on-order'='42'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '$ sku GRO-000-2331'
+main: key: 'sku'='GRO-000-2331'
+main: status: track
+main: input '$ name water'
+main: key: 'name'='water'
+main: status: track
+main: input '= sold 17.0'
+main: field: 'sold'='17.0'
+main: status: track
+main: input '= in-stock 14'
+main: field: 'in-stock'='14'
+main: status: track
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- data2'
+main: status: track
+main: input '+ data3'
+main: filter: rc: 19
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '$ sku GRO-000-533'
+main: key: 'sku'='GRO-000-533'
+main: status: track
+main: input '$ name fish'
+main: key: 'name'='fish'
+main: status: track
+main: input '= sold 1321.0'
+main: field: 'sold'='1321.0'
+main: status: track
+main: input '= in-stock 45'
+main: field: 'in-stock'='45'
+main: status: track
+main: input '= on-order 1'
+main: field: 'on-order'='1'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- data3'
+main: status: track
+main: input '+ data4'
+main: filter: rc: 19
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item gum'
+main: field: 'item'='gum'
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item rope'
+main: field: 'item'='rope'
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item ladder'
+main: field: 'item'='ladder'
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item bolt'
+main: field: 'item'='bolt'
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item water'
+main: field: 'item'='water'
+main: status: track
+main: input '} item'
+xpath_01: xo_close_list can't find match for 'item'
+main: status: track
+main: input '- data4'
+main: status: track
+main: input '@ test value'
+main: attr: 'test'='value'
+main: status: track
+main: input '+ data'
+main: filter: rc: 18
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '@ test2 value2'
+main: attr: 'test2'='value2'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku GRO-000-415'
+main: key: 'sku'='GRO-000-415'
+main: status: track
+main: input '$ name gum'
+main: key: 'name'='gum'
+main: status: track
+main: input '= sold 1412'
+main: field: 'sold'='1412'
+main: status: track
+main: input '= on-order 10'
+main: field: 'on-order'='10'
+main: status: track
+main: input '= in-stock 54'
+main: field: 'in-stock'='54'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku HRD-000-212'
+main: key: 'sku'='HRD-000-212'
+main: status: track
+main: input '$ name rope'
+main: key: 'name'='rope'
+main: status: track
+main: input '= sold 85'
+main: field: 'sold'='85'
+main: status: track
+main: input '= extra special'
+main: field: 'extra'='special'
+main: status: track
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: track
+main: input '= in-stock 4'
+main: field: 'in-stock'='4'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku HRD-000-517'
+main: key: 'sku'='HRD-000-517'
+main: status: track
+main: input '$ name ladder'
+main: key: 'name'='ladder'
+main: status: track
+main: input '= sold 0'
+main: field: 'sold'='0'
+main: status: track
+main: input '= extra special'
+main: field: 'extra'='special'
+main: status: track
+main: input '= on-order 1'
+main: field: 'on-order'='1'
+main: status: track
+main: input '= in-stock 2'
+main: field: 'in-stock'='2'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku HRD-000-632'
+main: key: 'sku'='HRD-000-632'
+main: status: track
+main: input '$ name bolt'
+main: key: 'name'='bolt'
+main: status: track
+main: input '= sold 4123'
+main: field: 'sold'='4123'
+main: status: track
+main: input '= on-order 42'
+main: field: 'on-order'='42'
+main: status: track
+main: input '= in-stock 144'
+main: field: 'in-stock'='144'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku GRO-000-2331'
+main: key: 'sku'='GRO-000-2331'
+main: status: track
+main: input '$ name water'
+main: key: 'name'='water'
+main: status: track
+main: input '= sold 17'
+main: field: 'sold'='17'
+main: status: track
+main: input '= extra special'
+main: field: 'extra'='special'
+main: status: track
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: track
+main: input '= in-stock 14'
+main: field: 'in-stock'='14'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- data'
+main: status: track
+main: input '= cost 425'
+main: field: 'cost'='425'
+main: status: track
+main: input '= cost 455'
+main: field: 'cost'='455'
+main: status: track
+main: input '= mode mode'
+main: field: 'mode'='mode'
+main: status: track
+main: input '= mode_octal octal'
+main: field: 'mode_octal'='octal'
+main: status: track
+main: input '= links links'
+main: field: 'links'='links'
+main: status: track
+main: input '= user user'
+main: field: 'user'='user'
+main: status: track
+main: input '= group group'
+main: field: 'group'='group'
+main: status: track
+main: input '= pre that'
+main: field: 'pre'='that'
+main: status: track
+main: input '= links 3'
+main: field: 'links'='3'
+main: status: track
+main: input '= post this'
+main: field: 'post'='this'
+main: status: track
+main: input '= mode /some/file'
+main: field: 'mode'='/some/file'
+main: status: track
+main: input '= mode_octal 640'
+main: field: 'mode_octal'='640'
+main: status: track
+main: input '= links 1'
+main: field: 'links'='1'
+main: status: track
+main: input '= user user'
+main: field: 'user'='user'
+main: status: track
+main: input '= group group'
+main: field: 'group'='group'
+main: status: track
+main: input '= one 1'
+main: field: 'one'='1'
+main: status: track
+main: input '= two 2'
+main: field: 'two'='2'
+main: status: track
+main: input '= three 3'
+main: field: 'three'='3'
+main: status: track
+main: input '= one 1'
+main: field: 'one'='1'
+main: status: track
+main: input '= two 2'
+main: field: 'two'='2'
+main: status: track
+main: input '= three 3'
+main: field: 'three'='3'
+main: status: track
+main: input '= one 1'
+main: field: 'one'='1'
+main: status: track
+main: input '= two 2'
+main: field: 'two'='2'
+main: status: track
+main: input '= three 3'
+main: field: 'three'='3'
+main: status: track
+main: input '- top-level'
+main: status: track
+main: input '- data'
+main: status: track
+main: status: track
+main: input ''
+main: input 'r'
+main: status: zero
+main: input '? type[. == "18u"]'
+adding filter: 'type[. == "18u"]'
+added filter: 0
+--- 0: 10
+    000010: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [type], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
+                000004: type 14 (L_EQUALS), str 10 [==], contents 3, next 0, prev 0 
+                    000003: type 49 (L_DOT), str 8 [.], contents 0, next 6, prev 0 
+                    000006: type 54 (T_QUOTED), str 13 [18u], contents 0, next 0, prev 3 
+main: status: zero
+main: input 'i xpath_01_23.inc'
+main: include: '../../../tests/xpath/xpath_01_23.inc'
+main: input '+ data'
+main: filter: rc: 14
+main: status: track
+main: input '= thing one'
+main: field: 'thing'='one'
+main: status: track
+main: input '= thing two'
+main: field: 'thing'='two'
+main: status: track
+main: input '= thing three'
+main: field: 'thing'='three'
+main: status: track
+main: input '= thing four'
+main: field: 'thing'='four'
+main: status: track
+main: input '= block 56'
+main: field: 'block'='56'
+main: status: track
+main: input '+ top-level'
+main: filter: rc: 21
+main: status: track
+main: input '= type ethernet'
+main: field: 'type'='ethernet'
+main: status: track
+main: input '= type bridge'
+main: field: 'type'='bridge'
+main: status: track
+main: input '= type 18u'
+main: field: 'type'='18u'
+main: status: track
+main: input '= type 24'
+main: field: 'type'='24'
+main: status: track
+main: input '= address 0x0'
+main: field: 'address'='0x0'
+main: status: track
+main: input '= port 1'
+main: field: 'port'='1'
+main: status: track
+main: input '= address 0x0'
+main: field: 'address'='0x0'
+main: status: track
+main: input '= port 1'
+main: field: 'port'='1'
+main: status: track
+main: input '= address 0x0'
+main: field: 'address'='0x0'
+main: status: track
+main: input '= port 1'
+main: field: 'port'='1'
+main: status: track
+main: input '= used-percent 12'
+main: field: 'used-percent'='12'
+main: status: track
+main: input '= kve_start 0xdeadbeef'
+main: field: 'kve_start'='0xdeadbeef'
+main: status: track
+main: input '= kve_end 0xcabb1e'
+main: field: 'kve_end'='0xcabb1e'
+main: status: track
+main: input '= host my-box'
+main: field: 'host'='my-box'
+main: status: track
+main: input '= domain example.com'
+main: field: 'domain'='example.com'
+main: status: track
+main: input '= host my-box'
+main: field: 'host'='my-box'
+main: status: track
+main: input '= domain example.com'
+main: field: 'domain'='example.com'
+main: status: track
+main: input '= label value'
+main: field: 'label'='value'
+main: status: track
+main: input '= max-chaos very'
+main: field: 'max-chaos'='very'
+main: status: track
+main: input '= min-chaos 42'
+main: field: 'min-chaos'='42'
+main: status: track
+main: input '= some-chaos [42]'
+main: field: 'some-chaos'='[42]'
+main: status: track
+main: input '@ test-attr attr-value'
+main: attr: 'test-attr'='attr-value'
+main: status: track
+main: input '[ sku'
+main: open leaf list: 'sku'
+main: status: track
+main: input '= sku gum-000-1412'
+main: field: 'sku'='gum-000-1412'
+main: status: track
+main: input '= sku sum-000-4121'
+main: field: 'sku'='sum-000-4121'
+main: status: track
+main: input '] sku'
+main: close leaf list: 'sku'
+main: status: track
+main: input '= host my-box'
+main: field: 'host'='my-box'
+main: status: track
+main: input '= domain example.com'
+main: field: 'domain'='example.com'
+main: status: track
+main: input '@ test value'
+main: attr: 'test'='value'
+main: status: track
+main: input '+ data'
+main: filter: rc: 18
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '@ test2 value2'
+main: attr: 'test2'='value2'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku GRO-000-415'
+main: key: 'sku'='GRO-000-415'
+main: status: track
+main: input '$ name gum'
+main: key: 'name'='gum'
+main: status: track
+main: input '= sold 1412'
+main: field: 'sold'='1412'
+main: status: track
+main: input '= in-stock 54'
+main: field: 'in-stock'='54'
+main: status: track
+main: input '= on-order 10'
+main: field: 'on-order'='10'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku HRD-000-212'
+main: key: 'sku'='HRD-000-212'
+main: status: track
+main: input '$ name rope'
+main: key: 'name'='rope'
+main: status: track
+main: input '= sold 85'
+main: field: 'sold'='85'
+main: status: track
+main: input '= in-stock 4'
+main: field: 'in-stock'='4'
+main: status: track
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku HRD-000-517'
+main: key: 'sku'='HRD-000-517'
+main: status: track
+main: input '$ name ladder'
+main: key: 'name'='ladder'
+main: status: track
+main: input '= sold 0'
+main: field: 'sold'='0'
+main: status: track
+main: input '= in-stock 2'
+main: field: 'in-stock'='2'
+main: status: track
+main: input '= on-order 1'
+main: field: 'on-order'='1'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku HRD-000-632'
+main: key: 'sku'='HRD-000-632'
+main: status: track
+main: input '$ name bolt'
+main: key: 'name'='bolt'
+main: status: track
+main: input '= sold 4123'
+main: field: 'sold'='4123'
+main: status: track
+main: input '= in-stock 144'
+main: field: 'in-stock'='144'
+main: status: track
+main: input '= on-order 42'
+main: field: 'on-order'='42'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku GRO-000-2331'
+main: key: 'sku'='GRO-000-2331'
+main: status: track
+main: input '$ name water'
+main: key: 'name'='water'
+main: status: track
+main: input '= sold 17'
+main: field: 'sold'='17'
+main: status: track
+main: input '= in-stock 14'
+main: field: 'in-stock'='14'
+main: status: track
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- data'
+main: status: track
+main: input '+ data2'
+main: filter: rc: 19
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '$ sku GRO-000-415'
+main: key: 'sku'='GRO-000-415'
+main: status: track
+main: input '$ name gum'
+main: key: 'name'='gum'
+main: status: track
+main: input '= sold 1412.0'
+main: field: 'sold'='1412.0'
+main: status: track
+main: input '= in-stock 54'
+main: field: 'in-stock'='54'
+main: status: track
+main: input '= on-order 10'
+main: field: 'on-order'='10'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '$ sku HRD-000-212'
+main: key: 'sku'='HRD-000-212'
+main: status: track
+main: input '$ name rope'
+main: key: 'name'='rope'
+main: status: track
+main: input '= sold 85.0'
+main: field: 'sold'='85.0'
+main: status: track
+main: input '= in-stock 4'
+main: field: 'in-stock'='4'
+main: status: track
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '$ sku HRD-000-517'
+main: key: 'sku'='HRD-000-517'
+main: status: track
+main: input '$ name ladder'
+main: key: 'name'='ladder'
+main: status: track
+main: input '= sold 0'
+main: field: 'sold'='0'
+main: status: track
+main: input '= in-stock 2'
+main: field: 'in-stock'='2'
+main: status: track
+main: input '= on-order 1'
+main: field: 'on-order'='1'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '$ sku HRD-000-632'
+main: key: 'sku'='HRD-000-632'
+main: status: track
+main: input '$ name bolt'
+main: key: 'name'='bolt'
+main: status: track
+main: input '= sold 4123.0'
+main: field: 'sold'='4123.0'
+main: status: track
+main: input '= in-stock 144'
+main: field: 'in-stock'='144'
+main: status: track
+main: input '= on-order 42'
+main: field: 'on-order'='42'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '$ sku GRO-000-2331'
+main: key: 'sku'='GRO-000-2331'
+main: status: track
+main: input '$ name water'
+main: key: 'name'='water'
+main: status: track
+main: input '= sold 17.0'
+main: field: 'sold'='17.0'
+main: status: track
+main: input '= in-stock 14'
+main: field: 'in-stock'='14'
+main: status: track
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- data2'
+main: status: track
+main: input '+ data3'
+main: filter: rc: 19
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '$ sku GRO-000-533'
+main: key: 'sku'='GRO-000-533'
+main: status: track
+main: input '$ name fish'
+main: key: 'name'='fish'
+main: status: track
+main: input '= sold 1321.0'
+main: field: 'sold'='1321.0'
+main: status: track
+main: input '= in-stock 45'
+main: field: 'in-stock'='45'
+main: status: track
+main: input '= on-order 1'
+main: field: 'on-order'='1'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- data3'
+main: status: track
+main: input '+ data4'
+main: filter: rc: 19
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item gum'
+main: field: 'item'='gum'
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item rope'
+main: field: 'item'='rope'
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item ladder'
+main: field: 'item'='ladder'
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item bolt'
+main: field: 'item'='bolt'
+main: status: track
+main: input '@ test4 value4'
+main: attr: 'test4'='value4'
+main: status: track
+main: input '= item water'
+main: field: 'item'='water'
+main: status: track
+main: input '} item'
+xpath_01: xo_close_list can't find match for 'item'
+main: status: track
+main: input '- data4'
+main: status: track
+main: input '@ test value'
+main: attr: 'test'='value'
+main: status: track
+main: input '+ data'
+main: filter: rc: 18
+main: status: track
+main: input '{ item'
+main: filter: rc: 18
+main: status: track
+main: input '@ test2 value2'
+main: attr: 'test2'='value2'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku GRO-000-415'
+main: key: 'sku'='GRO-000-415'
+main: status: track
+main: input '$ name gum'
+main: key: 'name'='gum'
+main: status: track
+main: input '= sold 1412'
+main: field: 'sold'='1412'
+main: status: track
+main: input '= on-order 10'
+main: field: 'on-order'='10'
+main: status: track
+main: input '= in-stock 54'
+main: field: 'in-stock'='54'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku HRD-000-212'
+main: key: 'sku'='HRD-000-212'
+main: status: track
+main: input '$ name rope'
+main: key: 'name'='rope'
+main: status: track
+main: input '= sold 85'
+main: field: 'sold'='85'
+main: status: track
+main: input '= extra special'
+main: field: 'extra'='special'
+main: status: track
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: track
+main: input '= in-stock 4'
+main: field: 'in-stock'='4'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku HRD-000-517'
+main: key: 'sku'='HRD-000-517'
+main: status: track
+main: input '$ name ladder'
+main: key: 'name'='ladder'
+main: status: track
+main: input '= sold 0'
+main: field: 'sold'='0'
+main: status: track
+main: input '= extra special'
+main: field: 'extra'='special'
+main: status: track
+main: input '= on-order 1'
+main: field: 'on-order'='1'
+main: status: track
+main: input '= in-stock 2'
+main: field: 'in-stock'='2'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku HRD-000-632'
+main: key: 'sku'='HRD-000-632'
+main: status: track
+main: input '$ name bolt'
+main: key: 'name'='bolt'
+main: status: track
+main: input '= sold 4123'
+main: field: 'sold'='4123'
+main: status: track
+main: input '= on-order 42'
+main: field: 'on-order'='42'
+main: status: track
+main: input '= in-stock 144'
+main: field: 'in-stock'='144'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 12
+main: status: track
+main: input '@ test3 value3'
+main: attr: 'test3'='value3'
+main: status: track
+main: input '$ sku GRO-000-2331'
+main: key: 'sku'='GRO-000-2331'
+main: status: track
+main: input '$ name water'
+main: key: 'name'='water'
+main: status: track
+main: input '= sold 17'
+main: field: 'sold'='17'
+main: status: track
+main: input '= extra special'
+main: field: 'extra'='special'
+main: status: track
+main: input '= on-order 2'
+main: field: 'on-order'='2'
+main: status: track
+main: input '= in-stock 14'
+main: field: 'in-stock'='14'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- data'
+main: status: track
+main: input '= cost 425'
+main: field: 'cost'='425'
+main: status: track
+main: input '= cost 455'
+main: field: 'cost'='455'
+main: status: track
+main: input '= mode mode'
+main: field: 'mode'='mode'
+main: status: track
+main: input '= mode_octal octal'
+main: field: 'mode_octal'='octal'
+main: status: track
+main: input '= links links'
+main: field: 'links'='links'
+main: status: track
+main: input '= user user'
+main: field: 'user'='user'
+main: status: track
+main: input '= group group'
+main: field: 'group'='group'
+main: status: track
+main: input '= pre that'
+main: field: 'pre'='that'
+main: status: track
+main: input '= links 3'
+main: field: 'links'='3'
+main: status: track
+main: input '= post this'
+main: field: 'post'='this'
+main: status: track
+main: input '= mode /some/file'
+main: field: 'mode'='/some/file'
+main: status: track
+main: input '= mode_octal 640'
+main: field: 'mode_octal'='640'
+main: status: track
+main: input '= links 1'
+main: field: 'links'='1'
+main: status: track
+main: input '= user user'
+main: field: 'user'='user'
+main: status: track
+main: input '= group group'
+main: field: 'group'='group'
+main: status: track
+main: input '= one 1'
+main: field: 'one'='1'
+main: status: track
+main: input '= two 2'
+main: field: 'two'='2'
+main: status: track
+main: input '= three 3'
+main: field: 'three'='3'
+main: status: track
+main: input '= one 1'
+main: field: 'one'='1'
+main: status: track
+main: input '= two 2'
+main: field: 'two'='2'
+main: status: track
+main: input '= three 3'
+main: field: 'three'='3'
+main: status: track
+main: input '= one 1'
+main: field: 'one'='1'
+main: status: track
+main: input '= two 2'
+main: field: 'two'='2'
+main: status: track
+main: input '= three 3'
+main: field: 'three'='3'
+main: status: track
+main: input '- top-level'
+main: status: track
+main: input '- data'
+main: status: track
+main: status: track

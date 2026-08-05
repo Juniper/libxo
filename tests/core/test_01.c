@@ -13,6 +13,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/param.h>
+#include <fcntl.h>
 
 #include "xo.h"
 #include "xo_encoder.h"
@@ -52,6 +53,9 @@ main (int argc, char **argv)
 	{ XO_INFO_NULL },
     };
 
+    int opt_count = 1;
+    int opt_discard = 0;
+
     char name[] = "test_01.test";  /* test trimming of xo_program */
     argv[0] = name;
     
@@ -76,14 +80,33 @@ main (int argc, char **argv)
 	    xo_set_flags(NULL, XOF_INFO);
 	else if (xo_streq(argv[argc], "debug"))
 	    xo_set_flags(NULL, XOF_DEBUG);
+	else if (xo_streq(argv[argc], "count"))
+	    opt_count = atoi(argv[++argc]);
+	else if (xo_streq(argv[argc], "discard"))
+	    opt_discard = 1;
         else if (xo_streq(argv[argc], "error")) {
             close(-1);
             xo_err(1, "error detected");
         }
     }
 
+    if (opt_discard) {
+	int fd = open("/dev/null", O_WRONLY);
+	if (fd > 0) {
+	    close(1);
+	    dup2(fd, 1);
+	}
+    }
+
     xo_set_info(NULL, info, -1);
     xo_set_flags(NULL, XOF_KEYS);
+
+    xo_emit("other: {a:}\n", "thing", "one"); /* field before top-level tag */
+    xo_emit("other: {a:%s}\n", "thing", "two"); /* invalid content */
+    xo_emit("other: {a:%s/%s}\n", "thing", "three");  /* same */
+    xo_emit("other: {a:xxx%s/%s}\n", "thing", "four"); /* same */
+
+    xo_emit("Blocks: {:block/%u}\n", 56);
 
     xo_open_container_h(NULL, "top-level");
 
@@ -152,19 +175,21 @@ main (int argc, char **argv)
     xo_open_container("data2");
     xo_open_list("item");
 
-    for (ip = list; ip->i_title; ip++) {
-	xo_open_instance("item");
+    for (int x = 0; x < opt_count; x++) {
+	for (ip = list; ip->i_title; ip++) {
+	    xo_open_instance("item");
 
-	xo_emit("{keq:sku/%s-%u/%s-000-%u}", ip->i_sku_base, ip->i_sku_num);
-	xo_emit("{L:Item} '{k:name/%s}':\n", ip->i_title);
-	xo_emit("{P:   }{L:Total sold}: {n:sold/%u%s}\n",
-		ip->i_sold, ip->i_sold ? ".0" : "");
-	xo_emit("{P:   }{Lcw:In stock}{:in-stock/%u}\n", ip->i_instock);
-	xo_emit("{P:   }{Lcw:On order}{:on-order/%u}\n", ip->i_onorder);
-	xo_emit("{P:   }{L:SKU}: {qkd:sku/%s-000-%u}\n",
-		ip->i_sku_base, ip->i_sku_num);
+	    xo_emit("{keq:sku/%s-%u/%s-000-%u}", ip->i_sku_base, ip->i_sku_num);
+	    xo_emit("{L:Item} '{k:name/%s}':\n", ip->i_title);
+	    xo_emit("{P:   }{L:Total sold}: {n:sold/%u%s}\n",
+		    ip->i_sold, ip->i_sold ? ".0" : "");
+	    xo_emit("{P:   }{Lcw:In stock}{:in-stock/%u}\n", ip->i_instock);
+	    xo_emit("{P:   }{Lcw:On order}{:on-order/%u}\n", ip->i_onorder);
+	    xo_emit("{P:   }{L:SKU}: {qkd:sku/%s-000-%u}\n",
+		    ip->i_sku_base, ip->i_sku_num);
 
-	xo_close_instance("item");
+	    xo_close_instance("item");
+	}
     }
 
     xo_close_list("item");
@@ -260,13 +285,12 @@ main (int argc, char **argv)
 	    "/some/file", (int) 0640, 8, 1,
 	    10, "user", 12, "group");
 
-    /* Test retain flag for dynamic data */
-    xo_set_flags(NULL, XOF_RETAIN_ALL);
+    /* Test retain flag for dynamic data (explicit via xo_emitr) */
     char buf[] = "Testing...{:one/%d}...{:two/%d}...{:three/%d}\n";
-    xo_emit(buf, 1, 2, 3);
-    xo_emit(buf, 1, 2, 3);
+    xo_emitr(buf, 1, 2, 3);
+    xo_emitr(buf, 1, 2, 3);
     buf[0] = 'X';
-    xo_emit(buf, 1, 2, 3);
+    xo_emitr(buf, 1, 2, 3);
 
     xo_close_container_h(NULL, "top-level");
 

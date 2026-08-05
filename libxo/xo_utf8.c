@@ -14,12 +14,12 @@
 /**
  * Return the codepoint to a UTF-8 character
  */
-wchar_t
+xo_codepoint_t
 xo_utf8_codepoint (const char *buf, size_t bufsiz, int len,
-		   wchar_t on_err)
+		   xo_codepoint_t on_err)
 {
     char b1 = *buf, b2, b3, b4;
-    wchar_t wc = 0;
+    xo_codepoint_t wc = 0;
 
     /*
      * The caller should really ensure this, but it seems odd to not
@@ -52,7 +52,7 @@ xo_utf8_codepoint (const char *buf, size_t bufsiz, int len,
      * the value is encoded in a "non-shortest form", which we reject as
      * directed by Unicode TR-36.
      */
-    wchar_t test, match, zeros;
+    xo_codepoint_t test, match, zeros;
 
     b1 &= xo_utf8_data_bits(len);
     if (len == 1) {
@@ -100,7 +100,7 @@ xo_utf8_codepoint (const char *buf, size_t bufsiz, int len,
  * Return a text message describing the error in 'wc'
  */
 const char *
-xo_utf8_wchar_errmsg (wchar_t wc)
+xo_utf8_wchar_errmsg (xo_codepoint_t wc)
 {
     switch (wc) {
     case XO_UTF8_ERR_BAD_LEN:
@@ -127,7 +127,7 @@ xo_utf8_nvalid (char *str, size_t len)
 {
     char *cp;
     char *ep;
-    wchar_t wc;
+    xo_codepoint_t wc;
 
     /*
      * Whiffle thru the string, looking for invalid characters.  We
@@ -137,7 +137,7 @@ xo_utf8_nvalid (char *str, size_t len)
     for (cp = str, ep = str + len; cp < ep; cp += len) {
 	len = xo_utf8_len(*cp);
 	wc = xo_utf8_codepoint(cp, ep - cp, len, 0);
-	if (xo_utf8_wchar_is_err(wc))
+	if (xo_utf8_iserror(wc))
 	    return cp;
     }
 
@@ -155,7 +155,7 @@ xo_utf8_nmakevalid (char *str, size_t len, char replacement)
 {
     char *cp;
     char *ep;
-    wchar_t wc;
+    xo_codepoint_t wc;
     int rc = 0;
 
     /*
@@ -166,7 +166,7 @@ xo_utf8_nmakevalid (char *str, size_t len, char replacement)
     for (cp = str, ep = cp + len; cp < ep; cp += len) {
 	len = xo_utf8_len(*cp);
 	wc = xo_utf8_codepoint(cp, ep - cp, len, 0);
-	if (!xo_utf8_wchar_is_err(wc))
+	if (!xo_utf8_iserror(wc))
 	    continue;
 
 	rc += 1;
@@ -191,8 +191,8 @@ xo_utf8_ntolower (char *str, size_t len)
     char *cp = str, *ep = cp + len;
     for ( ; cp < ep; cp += ulen) {
 	ulen = xo_utf8_len(*cp);
-	wchar_t wc = xo_utf8_codepoint(cp, len, ulen, ' ');
-	wchar_t lc = xo_utf8_wtolower(wc);
+	xo_codepoint_t wc = xo_utf8_codepoint(cp, len, ulen, ' ');
+	xo_codepoint_t lc = xo_utf8_wtolower(wc);
 	if (wc == lc)		/* Is it already lower? */
 	    continue;
 
@@ -214,8 +214,8 @@ xo_utf8_ntoupper (char *str, size_t len)
     char *cp = str, *ep = cp + len;
     for ( ; cp < ep; cp += ulen) {
 	ulen = xo_utf8_len(*cp);
-	wchar_t wc = xo_utf8_codepoint(cp, len, ulen, ' ');
-	wchar_t uc = xo_utf8_wtoupper(wc);
+	xo_codepoint_t wc = xo_utf8_codepoint(cp, len, ulen, ' ');
+	xo_codepoint_t uc = xo_utf8_wtoupper(wc);
 	if (wc == uc)		/* Is it already upper? */
 	    continue;
 
@@ -233,7 +233,7 @@ int
 xo_ustrncasecmp (const char *s1, size_t s1_len, const char *s2, size_t s2_len)
 {
     char s1c, s2c;
-    wchar_t s1_wchar, s2_wchar;
+    xo_codepoint_t s1_wchar, s2_wchar;
     int s1_wlen, s2_wlen;
 
     while (s1_len > 0 && s2_len > 0) {
@@ -277,10 +277,21 @@ xo_ustrncasecmp (const char *s1, size_t s1_len, const char *s2, size_t s2_len)
 		return (s1_wchar < s2_wchar ? -1 : 1);
 
 	    /* Move pointers and lengths */
-	    s1 += s1_wlen;
-	    s1_len -= s1_wlen;
-	    s2 += s2_wlen;
-	    s2_len -= s2_wlen;
+            if (s1_len >= (size_t) s1_wlen) {
+               s1 += s1_wlen;
+               s1_len -= s1_wlen;
+            } else {
+                s1 = NULL;
+                s1_len = 0;
+            }
+
+            if (s2_len >= (size_t) s2_wlen) {
+               s2 += s2_wlen;
+               s2_len -= s2_wlen;
+            } else {
+                s2 = NULL;
+                s2_len = 0;
+            }
 	}
     }
 
@@ -293,14 +304,14 @@ xo_ustrncasecmp (const char *s1, size_t s1_len, const char *s2, size_t s2_len)
  * end, and turn invalid characters into spaces.
  */
 size_t
-xo_ustrlncat(char * restrict dst, const char * restrict append,
-	     size_t dstsize, size_t count)
+xo_ustrlncat (char * restrict dst, const char * restrict append,
+	      size_t dstsize, size_t count)
 {
     size_t dstlen = strnlen(dst, dstsize);
     char *cp, *ep;
     int ulen;
     char first;
-    wchar_t wc;
+    xo_codepoint_t wc;
 
     if (dstsize == 0)
 	return 0;
@@ -372,8 +383,8 @@ xo_utrunc (char *str, size_t len)
 
     char first_char = *s2;
     char first_lower;
-    wchar_t first_wchar;
-    wchar_t first_wlower;
+    xo_codepoint_t first_wchar;
+    xo_codepoint_t first_wlower;
     int first_wlen;
 
     /* Cache the first byte in upper or lower case */

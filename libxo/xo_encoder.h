@@ -20,41 +20,9 @@
 
 #include <string.h>
 
+#include "xo.h"		    /* xo_xff_flags_t, XFF_*, xo_field_info_t, xo_handle_t */
 #include "xo_private.h"
 #include "xo_buf.h"
-
-/* Flags for formatting functions */
-typedef unsigned long long xo_xff_flags_t;
-#define XFF_COLON	(1<<0)	/* Append a ":" */
-#define XFF_COMMA	(1<<1)	/* Append a "," iff there's more output */
-#define XFF_WS		(1<<2)	/* Append a blank */
-#define XFF_ENCODE_ONLY	(1<<3)	/* Only emit for encoding styles (XML, JSON) */
-
-#define XFF_QUOTE	(1<<4)	/* Force quotes */
-#define XFF_NOQUOTE	(1<<5)	/* Force no quotes */
-#define XFF_DISPLAY_ONLY (1<<6)	/* Only emit for display styles (text, html) */
-#define XFF_KEY		(1<<7)	/* Field is a key (for XPath) */
-
-#define XFF_XML		(1<<8)	/* Force XML encoding style (for XPath) */
-#define XFF_ATTR	(1<<9)	/* Escape value using attribute rules (XML) */
-#define XFF_BLANK_LINE	(1<<10)	/* Emit a blank line */
-#define XFF_NO_OUTPUT	(1<<11)	/* Do not make any output */
-
-#define XFF_TRIM_WS	(1<<12)	/* Trim whitespace off encoded values */
-#define XFF_LEAF_LIST	(1<<13)	/* A leaf-list (list of values) */
-#define XFF_UNESCAPE	(1<<14)	/* Need to printf-style unescape the value */
-#define XFF_HUMANIZE	(1<<15)	/* Humanize the value (for display styles) */
-
-#define XFF_HN_SPACE	(1<<16)	/* Humanize: put space before suffix */
-#define XFF_HN_DECIMAL	(1<<17)	/* Humanize: add one decimal place if <10 */
-#define XFF_HN_1000	(1<<18)	/* Humanize: use 1000, not 1024 */
-#define XFF_GT_FIELD	(1<<19) /* Call gettext() on a field */
-
-#define XFF_GT_PLURAL	(1<<20)	/* Call dngettext to find plural form */
-#define XFF_ARGUMENT	(1<<21)	/* Content provided via argument */
-
-/* Flags to turn off when we don't want i18n processing */
-#define XFF_GT_FLAGS (XFF_GT_FIELD | XFF_GT_PLURAL)
 
 typedef unsigned xo_encoder_op_t;
 
@@ -207,5 +175,13 @@ xo_whiteboard_op_name (xo_whiteboard_op_t op);
  */
 void
 xo_failure (xo_handle_t *xop, const char *fmt, ...);
+
+/*
+ * Similar to xo_failure, but used in filter code, which, depending on
+ * the incoming data, might be insanely verbose, so it gets its own
+ * flag ("--libxo filter-warn").
+ */
+void
+xo_failure_filter (xo_handle_t *xop, const char *fmt, ...);
 
 #endif /* XO_ENCODER_H */

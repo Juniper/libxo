@@ -24,6 +24,9 @@ identical in outcome::
   my-app --libxo=warn,pretty arg1
   my-app --libxo:WP arg1
 
+Options can transition from word-style to brief by using a comma after
+the brief options, e.g. `--libxo:XPW,keys`.
+
 Programs using libxo are expecting to call the xo_parse_args function
 to parse these arguments.  See :ref:`xo_parse_args` for details.
 
@@ -39,6 +42,10 @@ correspond to output styles, flags, or features:
   color           Enable colors/effects for display styles (TEXT, HTML)
   colors=xxxx     Adjust color output values
   dtrt            Enable "Do The Right Thing" mode
+  exterr          Extended error information (brief)
+  exterr-verbose  Extended error information (verbose)
+  filter=xxxx     Filter output using an XPath-like expression
+  filter-warn     Emit warnings for runtime filter errors (stderr)
   flush           Flush after every libxo function call
   flush-line      Flush after every line (line-buffered)
   html            Emit HTML output
@@ -56,7 +63,6 @@ correspond to output styles, flags, or features:
   no-top          Do not emit a top set of braces (JSON)
   not-first       Pretend the 1st output item was not 1st (JSON)
   pretty          Emit pretty-printed output
-  retain          Force retaining formatting information
   text            Emit TEXT output
   underscores     Replace XML-friendly "-"s with JSON friendly "_"s
   units           Add the 'units' (XML) or 'data-units (HTML) attribute
@@ -70,6 +76,17 @@ Most of these option are simple and direct, but some require
 additional details:
 
 - "colors" is described in :ref:`color-mapping`.
+- "exterr" and "exterr-verbose" cause additional, developer-oriented
+  details to be emitted from xo_err, xo_warn, and related functions.
+- "filter" selects which instances to emit using XPath-like
+  expressions.  See :ref:`filter` for syntax and examples.  Multiple
+  ``filter=`` options are combined as a union: an instance matches if
+  it satisfies any of the given expressions.
+- "filter-warn" enables diagnostic messages on standard error when
+  runtime issues are encountered while processing filters against
+  incoming data.  The volume of output will depend on the filter
+  expressions and input data, but might be useful in debugging issues
+  with filter expressions.  See also :ref:`filter-warn`.
 - "flush-line" performs line buffering, even when the output is not
   directed to a TTY device.
 - "info" generates additional data for HTML, encoded in attributes

@@ -1,0 +1,452 @@
+# true() always passes every instance
+r
+?item[true()]
+{item
+<item
+$ id 1
+= val alpha
+>item
+<item
+$ id 2
+= val beta
+>item
+<item
+$ id 3
+= val gamma
+>item
+}item
+
+# false() never passes any instance
+r
+?item[false()]
+{item
+<item
+$ id 1
+= val alpha
+>item
+<item
+$ id 2
+= val beta
+>item
+<item
+$ id 3
+= val gamma
+>item
+}item
+
+# not() inverts a key equality predicate
+r
+?item[not(color='red')]
+{item
+<item
+$ color red
+= val 1
+>item
+<item
+$ color blue
+= val 2
+>item
+<item
+$ color red
+= val 3
+>item
+<item
+$ color green
+= val 4
+>item
+}item
+
+# not(true()) is always false
+r
+?item[not(true())]
+{item
+<item
+$ id 1
+= val alpha
+>item
+<item
+$ id 2
+= val beta
+>item
+}item
+
+# not(false()) is always true
+r
+?item[not(false())]
+{item
+<item
+$ id 1
+= val alpha
+>item
+<item
+$ id 2
+= val beta
+>item
+}item
+
+# not(not(x)) == x: double negation is identity
+r
+?item[not(not(color='red'))]
+{item
+<item
+$ color red
+= val 1
+>item
+<item
+$ color blue
+= val 2
+>item
+<item
+$ color red
+= val 3
+>item
+}item
+
+# boolean(1) is true; boolean(0) is false
+r
+?item[boolean(1)]
+{item
+<item
+$ id 1
+= val alpha
+>item
+<item
+$ id 2
+= val beta
+>item
+}item
+
+r
+?item[boolean(0)]
+{item
+<item
+$ id 1
+= val alpha
+>item
+<item
+$ id 2
+= val beta
+>item
+}item
+
+# boolean() of a comparison is the same as the comparison itself
+r
+?item[boolean(color='red')]
+{item
+<item
+$ color red
+= val 1
+>item
+<item
+$ color blue
+= val 2
+>item
+<item
+$ color red
+= val 3
+>item
+}item
+
+# ceiling() rounds fractional values up
+r
+?item[ceiling(price) > 3]
+{item
+<item
+$ price 1.2
+= val a
+>item
+<item
+$ price 3.1
+= val b
+>item
+<item
+$ price 3.9
+= val c
+>item
+<item
+$ price 2.7
+= val d
+>item
+}item
+
+# floor() rounds fractional values down
+r
+?item[floor(price) >= 3]
+{item
+<item
+$ price 2.9
+= val a
+>item
+<item
+$ price 3.0
+= val b
+>item
+<item
+$ price 3.7
+= val c
+>item
+<item
+$ price 4.1
+= val d
+>item
+}item
+
+# ceiling(x) == floor(x) only when x is an integer
+r
+?item[ceiling(price) == floor(price)]
+{item
+<item
+$ price 2.0
+= val a
+>item
+<item
+$ price 2.5
+= val b
+>item
+<item
+$ price 3.0
+= val c
+>item
+<item
+$ price 3.9
+= val d
+>item
+}item
+
+# number() converts string key to numeric value; non-numeric strings become 0
+r
+?item[number(price) == 2]
+{item
+<item
+$ price 2.0
+= val a
+>item
+<item
+$ price 2gether
+= val b
+>item
+<item
+$ price 3
+= val c
+>item
+<item
+$ price 2.0.4.5
+= val d
+>item
+}item
+
+# contains(haystack, needle) is true when haystack contains needle as a substring
+r
+?item[contains(label, 'eth')]
+{item
+<item
+$ label eth0
+= val 1
+>item
+<item
+$ label lo0
+= val 2
+>item
+<item
+$ label eth1
+= val 3
+>item
+<item
+$ label wlan0
+= val 4
+>item
+}item
+
+# contains with value from the middle of the string
+r
+?item[contains(name, 'oo')]
+{item
+<item
+$ name foo
+= val 1
+>item
+<item
+$ name bar
+= val 2
+>item
+<item
+$ name foobar
+= val 3
+>item
+<item
+$ name boo
+= val 4
+>item
+}item
+
+# contains combined with not()
+r
+?item[not(contains(label, 'eth'))]
+{item
+<item
+$ label eth0
+= val 1
+>item
+<item
+$ label lo0
+= val 2
+>item
+<item
+$ label eth1
+= val 3
+>item
+<item
+$ label wlan0
+= val 4
+>item
+}item
+
+# substring(str, pos, len) returns a partial string
+r
+?item[substring(iface, 2, 3) = 'th0']
+{item
+<item
+$ iface eth0.0
+= val 1
+>item
+<item
+$ iface eth1.0
+= val 2
+>item
+<item
+$ iface eth0.1
+= val 3
+>item
+<item
+$ iface lo0
+= val 4
+>item
+}item
+
+# substring again
+r
+?item[substring(name, 5) = 'c']
+{item
+<item
+$ name pkg-a
+= val 1
+>item
+<item
+$ name pkg-b
+= val 2
+>item
+<item
+$ name lib-c
+= val 3
+>item
+<item
+$ name nohyphen
+= val 4
+>item
+}item
+
+# substring-before(str, needle) returns the part before the first needle
+r
+?item[substring-before(iface, '.') = 'eth0']
+{item
+<item
+$ iface eth0.0
+= val 1
+>item
+<item
+$ iface eth1.0
+= val 2
+>item
+<item
+$ iface eth0.1
+= val 3
+>item
+<item
+$ iface lo0
+= val 4
+>item
+}item
+
+# substring-before returns '' when needle is absent (no match)
+r
+?item[substring-before(name, '-') = 'pkg']
+{item
+<item
+$ name pkg-a
+= val 1
+>item
+<item
+$ name pkg-b
+= val 2
+>item
+<item
+$ name lib-c
+= val 3
+>item
+<item
+$ name nohyphen
+= val 4
+>item
+}item
+
+# substring-after(str, needle) returns the part after the first needle
+r
+?item[substring-after(version, '-') = '2']
+{item
+<item
+$ version pkg-1
+= val 1
+>item
+<item
+$ version pkg-2
+= val 2
+>item
+<item
+$ version lib-2
+= val 3
+>item
+<item
+$ version nohyphen
+= val 4
+>item
+}item
+
+# substring-after returns '' when needle absent (no match)
+r
+?item[substring-after(path, '/') = 'usr']
+{item
+<item
+$ path /usr
+= val 1
+>item
+<item
+$ path /etc
+= val 2
+>item
+<item
+$ path noslash
+= val 3
+>item
+}item
+
+# composition: starts-with(substring-after(name, '.'), 'e')
+r
+?item[starts-with(substring-after(name, '.'), 'e')]
+{item
+<item
+$ name lo.eth0
+= val 1
+>item
+<item
+$ name lo.lo0
+= val 2
+>item
+<item
+$ name lo.eth1
+= val 3
+>item
+<item
+$ name nodot
+= val 4
+>item
+}item

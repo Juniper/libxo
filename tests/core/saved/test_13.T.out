@@ -1,3 +1,48 @@
+[00001234]
+[    00001234]
+[goodname]
+[goodname]
+quotation-mark: "
+backslash: \
+slash: /
+slash-2: /
+backspace: 
+form-feed: 
+new-line: 
+
+carriage-return: 
+L_horizontal-tab}: 	
+Number: 1 (Hex: 1): 
+Number: 2 (Hex: 2): 
+Number: 3 (Hex: 3): 
+Number: 4 (Hex: 4): 
+Number: 5 (Hex: 5): 
+Number: 6 (Hex: 6): 
+Number: 7 (Hex: 7): 
+Number: 8 (Hex: 8): 
+Number: 9 (Hex: 9): 
+Number: 10 (Hex: a): 
+Number: 11 (Hex: b): 
+Number: 12 (Hex: c): 
+Number: 13 (Hex: d): 
+Number: 14 (Hex: e): 
+Number: 15 (Hex: f): 
+Number: 16 (Hex: 10): 
+Number: 17 (Hex: 11): 
+Number: 18 (Hex: 12): 
+Number: 19 (Hex: 13): 
+Number: 20 (Hex: 14): 
+Number: 21 (Hex: 15): 
+Number: 22 (Hex: 16): 
+Number: 23 (Hex: 17): 
+Number: 24 (Hex: 18): 
+Number: 25 (Hex: 19): 
+Number: 26 (Hex: 1a): 
+Number: 27 (Hex: 1b): 
+Number: 28 (Hex: 1c): 
+Number: 29 (Hex: 1d): 
+Number: 30 (Hex: 1e): 
+Number: 31 (Hex: 1f): 
  12 1234 mode 12 phil  phil  123 1234 12345  8 Feb 21:30 xx-00000000
  12 1234 mode 12 phil  phil  123 1234 12345  8 Feb 21:30 xx-00000001
  12 1234 mode 12 phil  phil  123 1234 12345  8 Feb 21:30 xx-00000002
@@ -8,4 +53,3 @@
  12 1234 mode 12 phil  phil  123 1234 12345  8 Feb 21:30 xx-00000007
  12 1234 mode 12 phil  phil  123 1234 12345  8 Feb 21:30 xx-00000008
  12 1234 mode 12 phil  phil  123 1234 12345  8 Feb 21:30 xx-00000009
-hits: 72

@@ -1,4 +1,286 @@
 <div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="count" data-xpath="/top/data/doc-examples/count">00001234</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="count" data-xpath="/top/data/doc-examples/count">    00001234</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="name" data-xpath="/top/data/doc-examples/name">goodname</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="name" data-xpath="/top/data/doc-examples/name">goodname</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="label">quotation-mark</div>
+  <div class="text">: </div>
+  <div class="data" data-tag="quotation-mark" data-xpath="/top/data/json-escape-sequences/quotation-mark">"</div>
+</div>
+<div class="line">
+  <div class="label">backslash</div>
+  <div class="text">: </div>
+  <div class="data" data-tag="backslash" data-xpath="/top/data/json-escape-sequences/backslash">\</div>
+</div>
+<div class="line">
+  <div class="label">slash</div>
+  <div class="text">: </div>
+  <div class="data" data-tag="slash" data-xpath="/top/data/json-escape-sequences/slash">/</div>
+</div>
+<div class="line">
+  <div class="label">slash-2</div>
+  <div class="text">: </div>
+  <div class="data" data-tag="slash2" data-xpath="/top/data/json-escape-sequences/slash2">/</div>
+</div>
+<div class="line">
+  <div class="label">backspace</div>
+  <div class="text">: </div>
+  <div class="data" data-tag="backspace" data-xpath="/top/data/json-escape-sequences/backspace"> </div>
+</div>
+<div class="line">
+  <div class="label">form-feed</div>
+  <div class="text">: </div>
+  <div class="data" data-tag="form-feed" data-xpath="/top/data/json-escape-sequences/form-feed"> </div>
+</div>
+<div class="line">
+  <div class="label">new-line</div>
+  <div class="text">: </div>
+  <div class="data" data-tag="new-line" data-xpath="/top/data/json-escape-sequences/new-line">
+</div>
+</div>
+<div class="line">
+  <div class="label">carriage-return</div>
+  <div class="text">: </div>
+  <div class="data" data-tag="carriage-return" data-xpath="/top/data/json-escape-sequences/carriage-return"></div>
+</div>
+<div class="line">
+  <div class="text">L_horizontal-tab}: </div>
+  <div class="data" data-tag="horizontal-tab" data-xpath="/top/data/json-escape-sequences/horizontal-tab">	</div>
+</div>
+<div class="line">
+  <div class="text">Number: </div>
+  <div class="data" data-tag="num" data-xpath="/top/data/json-escape-sequences/number/num">1</div>
+  <div class="text"> (Hex: </div>
+  <div class="data" data-tag="hex" data-xpath="/top/data/json-escape-sequences/number/hex">1</div>
+  <div class="text">): </div>
+</div>
+<div class="line">
+  <div class="text">Number: </div>
+  <div class="data" data-tag="num" data-xpath="/top/data/json-escape-sequences/number/num">2</div>
+  <div class="text"> (Hex: </div>
+  <div class="data" data-tag="hex" data-xpath="/top/data/json-escape-sequences/number/hex">2</div>
+  <div class="text">): </div>
+</div>
+<div class="line">
+  <div class="text">Number: </div>
+  <div class="data" data-tag="num" data-xpath="/top/data/json-escape-sequences/number/num">3</div>
+  <div class="text"> (Hex: </div>
+  <div class="data" data-tag="hex" data-xpath="/top/data/json-escape-sequences/number/hex">3</div>
+  <div class="text">): </div>
+</div>
+<div class="line">
+  <div class="text">Number: </div>
+  <div class="data" data-tag="num" data-xpath="/top/data/json-escape-sequences/number/num">4</div>
+  <div class="text"> (Hex: </div>
+  <div class="data" data-tag="hex" data-xpath="/top/data/json-escape-sequences/number/hex">4</div>
+  <div class="text">): </div>
+</div>
+<div class="line">
+  <div class="text">Number: </div>
+  <div class="data" data-tag="num" data-xpath="/top/data/json-escape-sequences/number/num">5</div>
+  <div class="text"> (Hex: </div>
+  <div class="data" data-tag="hex" data-xpath="/top/data/json-escape-sequences/number/hex">5</div>
+  <div class="text">): </div>
+</div>
+<div class="line">
+  <div class="text">Number: </div>
+  <div class="data" data-tag="num" data-xpath="/top/data/json-escape-sequences/number/num">6</div>
+  <div class="text"> (Hex: </div>
+  <div class="data" data-tag="hex" data-xpath="/top/data/json-escape-sequences/number/hex">6</div>
+  <div class="text">): </div>
+</div>
+<div class="line">
+  <div class="text">Number: </div>
+  <div class="data" data-tag="num" data-xpath="/top/data/json-escape-sequences/number/num">7</div>
+  <div class="text"> (Hex: </div>
+  <div class="data" data-tag="hex" data-xpath="/top/data/json-escape-sequences/number/hex">7</div>
+  <div class="text">): </div>
+</div>
+<div class="line">
+  <div class="text">Number: </div>
+  <div class="data" data-tag="num" data-xpath="/top/data/json-escape-sequences/number/num">8</div>
+  <div class="text"> (Hex: </div>
+  <div class="data" data-tag="hex" data-xpath="/top/data/json-escape-sequences/number/hex">8</div>
+  <div class="text">): </div>
+</div>
+<div class="line">
+  <div class="text">Number: </div>
+  <div class="data" data-tag="num" data-xpath="/top/data/json-escape-sequences/number/num">9</div>
+  <div class="text"> (Hex: </div>
+  <div class="data" data-tag="hex" data-xpath="/top/data/json-escape-sequences/number/hex">9</div>
+  <div class="text">): </div>
+</div>
+<div class="line">
+  <div class="text">Number: </div>
+  <div class="data" data-tag="num" data-xpath="/top/data/json-escape-sequences/number/num">10</div>
+  <div class="text"> (Hex: </div>
+  <div class="data" data-tag="hex" data-xpath="/top/data/json-escape-sequences/number/hex">a</div>
+  <div class="text">): </div>
+</div>
+<div class="line">
+  <div class="text">Number: </div>
+  <div class="data" data-tag="num" data-xpath="/top/data/json-escape-sequences/number/num">11</div>
+  <div class="text"> (Hex: </div>
+  <div class="data" data-tag="hex" data-xpath="/top/data/json-escape-sequences/number/hex">b</div>
+  <div class="text">): </div>
+</div>
+<div class="line">
+  <div class="text">Number: </div>
+  <div class="data" data-tag="num" data-xpath="/top/data/json-escape-sequences/number/num">12</div>
+  <div class="text"> (Hex: </div>
+  <div class="data" data-tag="hex" data-xpath="/top/data/json-escape-sequences/number/hex">c</div>
+  <div class="text">): </div>
+</div>
+<div class="line">
+  <div class="text">Number: </div>
+  <div class="data" data-tag="num" data-xpath="/top/data/json-escape-sequences/number/num">13</div>
+  <div class="text"> (Hex: </div>
+  <div class="data" data-tag="hex" data-xpath="/top/data/json-escape-sequences/number/hex">d</div>
+  <div class="text">): </div>
+</div>
+<div class="line">
+  <div class="text">Number: </div>
+  <div class="data" data-tag="num" data-xpath="/top/data/json-escape-sequences/number/num">14</div>
+  <div class="text"> (Hex: </div>
+  <div class="data" data-tag="hex" data-xpath="/top/data/json-escape-sequences/number/hex">e</div>
+  <div class="text">): </div>
+</div>
+<div class="line">
+  <div class="text">Number: </div>
+  <div class="data" data-tag="num" data-xpath="/top/data/json-escape-sequences/number/num">15</div>
+  <div class="text"> (Hex: </div>
+  <div class="data" data-tag="hex" data-xpath="/top/data/json-escape-sequences/number/hex">f</div>
+  <div class="text">): </div>
+</div>
+<div class="line">
+  <div class="text">Number: </div>
+  <div class="data" data-tag="num" data-xpath="/top/data/json-escape-sequences/number/num">16</div>
+  <div class="text"> (Hex: </div>
+  <div class="data" data-tag="hex" data-xpath="/top/data/json-escape-sequences/number/hex">10</div>
+  <div class="text">): </div>
+</div>
+<div class="line">
+  <div class="text">Number: </div>
+  <div class="data" data-tag="num" data-xpath="/top/data/json-escape-sequences/number/num">17</div>
+  <div class="text"> (Hex: </div>
+  <div class="data" data-tag="hex" data-xpath="/top/data/json-escape-sequences/number/hex">11</div>
+  <div class="text">): </div>
+</div>
+<div class="line">
+  <div class="text">Number: </div>
+  <div class="data" data-tag="num" data-xpath="/top/data/json-escape-sequences/number/num">18</div>
+  <div class="text"> (Hex: </div>
+  <div class="data" data-tag="hex" data-xpath="/top/data/json-escape-sequences/number/hex">12</div>
+  <div class="text">): </div>
+</div>
+<div class="line">
+  <div class="text">Number: </div>
+  <div class="data" data-tag="num" data-xpath="/top/data/json-escape-sequences/number/num">19</div>
+  <div class="text"> (Hex: </div>
+  <div class="data" data-tag="hex" data-xpath="/top/data/json-escape-sequences/number/hex">13</div>
+  <div class="text">): </div>
+</div>
+<div class="line">
+  <div class="text">Number: </div>
+  <div class="data" data-tag="num" data-xpath="/top/data/json-escape-sequences/number/num">20</div>
+  <div class="text"> (Hex: </div>
+  <div class="data" data-tag="hex" data-xpath="/top/data/json-escape-sequences/number/hex">14</div>
+  <div class="text">): </div>
+</div>
+<div class="line">
+  <div class="text">Number: </div>
+  <div class="data" data-tag="num" data-xpath="/top/data/json-escape-sequences/number/num">21</div>
+  <div class="text"> (Hex: </div>
+  <div class="data" data-tag="hex" data-xpath="/top/data/json-escape-sequences/number/hex">15</div>
+  <div class="text">): </div>
+</div>
+<div class="line">
+  <div class="text">Number: </div>
+  <div class="data" data-tag="num" data-xpath="/top/data/json-escape-sequences/number/num">22</div>
+  <div class="text"> (Hex: </div>
+  <div class="data" data-tag="hex" data-xpath="/top/data/json-escape-sequences/number/hex">16</div>
+  <div class="text">): </div>
+</div>
+<div class="line">
+  <div class="text">Number: </div>
+  <div class="data" data-tag="num" data-xpath="/top/data/json-escape-sequences/number/num">23</div>
+  <div class="text"> (Hex: </div>
+  <div class="data" data-tag="hex" data-xpath="/top/data/json-escape-sequences/number/hex">17</div>
+  <div class="text">): </div>
+</div>
+<div class="line">
+  <div class="text">Number: </div>
+  <div class="data" data-tag="num" data-xpath="/top/data/json-escape-sequences/number/num">24</div>
+  <div class="text"> (Hex: </div>
+  <div class="data" data-tag="hex" data-xpath="/top/data/json-escape-sequences/number/hex">18</div>
+  <div class="text">): </div>
+</div>
+<div class="line">
+  <div class="text">Number: </div>
+  <div class="data" data-tag="num" data-xpath="/top/data/json-escape-sequences/number/num">25</div>
+  <div class="text"> (Hex: </div>
+  <div class="data" data-tag="hex" data-xpath="/top/data/json-escape-sequences/number/hex">19</div>
+  <div class="text">): </div>
+</div>
+<div class="line">
+  <div class="text">Number: </div>
+  <div class="data" data-tag="num" data-xpath="/top/data/json-escape-sequences/number/num">26</div>
+  <div class="text"> (Hex: </div>
+  <div class="data" data-tag="hex" data-xpath="/top/data/json-escape-sequences/number/hex">1a</div>
+  <div class="text">): </div>
+</div>
+<div class="line">
+  <div class="text">Number: </div>
+  <div class="data" data-tag="num" data-xpath="/top/data/json-escape-sequences/number/num">27</div>
+  <div class="text"> (Hex: </div>
+  <div class="data" data-tag="hex" data-xpath="/top/data/json-escape-sequences/number/hex">1b</div>
+  <div class="text">): </div>
+</div>
+<div class="line">
+  <div class="text">Number: </div>
+  <div class="data" data-tag="num" data-xpath="/top/data/json-escape-sequences/number/num">28</div>
+  <div class="text"> (Hex: </div>
+  <div class="data" data-tag="hex" data-xpath="/top/data/json-escape-sequences/number/hex">1c</div>
+  <div class="text">): </div>
+</div>
+<div class="line">
+  <div class="text">Number: </div>
+  <div class="data" data-tag="num" data-xpath="/top/data/json-escape-sequences/number/num">29</div>
+  <div class="text"> (Hex: </div>
+  <div class="data" data-tag="hex" data-xpath="/top/data/json-escape-sequences/number/hex">1d</div>
+  <div class="text">): </div>
+</div>
+<div class="line">
+  <div class="text">Number: </div>
+  <div class="data" data-tag="num" data-xpath="/top/data/json-escape-sequences/number/num">30</div>
+  <div class="text"> (Hex: </div>
+  <div class="data" data-tag="hex" data-xpath="/top/data/json-escape-sequences/number/hex">1e</div>
+  <div class="text">): </div>
+</div>
+<div class="line">
+  <div class="text">Number: </div>
+  <div class="data" data-tag="num" data-xpath="/top/data/json-escape-sequences/number/num">31</div>
+  <div class="text"> (Hex: </div>
+  <div class="data" data-tag="hex" data-xpath="/top/data/json-escape-sequences/number/hex">1f</div>
+  <div class="text">): </div>
+</div>
+<div class="line">
   <div class="data" data-tag="inode" data-xpath="/top/data/entry[name = 'xx-00000000']/inode"> 12</div>
   <div class="text"> </div>
   <div class="data" data-tag="blocks" data-xpath="/top/data/entry[name = 'xx-00000000']/blocks">1234</div>
@@ -227,10 +509,4 @@
   <div class="data" data-tag="modify-time" data-xpath="/top/data/entry[name = 'xx-00000009']/modify-time"> 8 Feb 21:30</div>
   <div class="text"> </div>
   <div class="data" data-tag="name" data-xpath="/top/data/entry/name">xx-00000009</div>
-</div>
-<div class="line">
-  <div class="label">hits</div>
-  <div class="decoration">:</div>
-  <div class="padding"> </div>
-  <div class="data" data-tag="hits" data-xpath="/top/data/hits">72</div>
 </div>

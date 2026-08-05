@@ -1,0 +1,9 @@
+<data>
+  <name>alice</name>
+  <count>42</count>
+  <first>john</first>
+  <last>doe</last>
+  <id>7</id>
+  <label>item</label>
+  <value>padded</value>
+</data>

@@ -1,0 +1,29 @@
+<item>
+  <val>2.6</val>
+  <label>a</label>
+</item>
+<item>
+  <val>3.0</val>
+  <label>b</label>
+</item>
+<item>
+  <val>3.4</val>
+  <label>c</label>
+</item>
+<item>
+  <name>wlan0</name>
+  <val>3</val>
+</item>
+<item>
+  <rx>80</rx>
+  <tx>40</tx>
+  <iface>eth0</iface>
+</item>
+<item>
+  <proto>http</proto>
+  <val>1</val>
+</item>
+<item>
+  <proto>HTTP</proto>
+  <val>3</val>
+</item>

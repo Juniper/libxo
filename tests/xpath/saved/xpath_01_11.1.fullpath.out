@@ -1,0 +1,4 @@
+/interface/ifindex='1'
+/interface/ifindex='1'
+/interface/ifindex='3'
+/interface[state='up']/ifindex='1'

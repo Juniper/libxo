@@ -1,0 +1,42 @@
+<one>
+  <two>
+    <three>3</three>
+    <four>
+      <foo>goo</foo>
+      <five>
+        <foo>goo</foo>
+        <six>
+          <foo>goo</foo>
+        </six>
+      </five>
+      <foo>goo</foo>
+    </four>
+    <foo>goo</foo>
+  </two>
+</one>
+<uno>
+  <dos>
+    <mumble>no</mumble>
+    <tres>
+      <test>yup</test>
+      <cuatro>
+        <test>sure</test>
+        <cinco>
+          <seis>
+          </seis>
+        </cinco>
+        <cinco>
+        </cinco>
+      </cuatro>
+      <cuatro>
+        <test>sure</test>
+        <cinco>
+          <foo>goo</foo>
+          <goo>foo</goo>
+          <seis>
+          </seis>
+        </cinco>
+      </cuatro>
+    </tres>
+  </dos>
+</uno>

@@ -37,6 +37,7 @@ libxo ships as part of FreeBSD.
     field-roles
     field-modifiers
     field-formatting
+    filters
     api
     encoders
     xo

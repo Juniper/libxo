@@ -1,0 +1,34 @@
+<one>
+  <two>
+    <three>
+      <four>
+        <data>foo</data>
+        <five>
+          <data>goo</data>
+          <six>
+            <data>hoo</data>
+          </six>
+        </five>
+        <data>ioo</data>
+      </four>
+    </three>
+  </two>
+  <two>
+    <a>
+      <b>
+        <c>
+          <d>
+          </d>
+          <d>
+            <data>koo</data>
+          </d>
+        </c>
+      </b>
+    </a>
+    <three>
+      <four>
+        <data>moo</data>
+      </four>
+    </three>
+  </two>
+</one>

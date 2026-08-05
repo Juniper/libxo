@@ -16,6 +16,10 @@ if LIBXO_NEED_FILTERS
 SUBDIRS += xpath
 endif
 
+if HAVE_VALIDATE
+SUBDIRS += llvm-plugins
+endif
+
 test tests:
 	@(cur=`pwd` ; for dir in $(SUBDIRS) ; do \
 		cd $$dir ; \

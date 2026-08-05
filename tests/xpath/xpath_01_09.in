@@ -1,0 +1,59 @@
+?two[starts-with(three, "n")]
+
+#?two[three - 5 == 5]
++one
++two
+$three 10
+=value 10
+-two
++two
+$three 9
+=value 9
+-two
++two
+$three 8
+=value 8
+-two
++two
+$three 7
+=value 7
+-two
+
+r
+?two[(three + 3) div 4 == (10 - 2) mod 5]
++two
+$three 10
+=value 10
+-two
++two
+$three 9
+=value 9
+-two
++two
+$three 8
+=value 8
+-two
++two
+$three 7
+=value 7
+-two
+
++two
+$three ten
+=value 10
+-two
++two
+$three nine
+=value 9
+-two
++two
+$three eight
+=value 8
+-two
++two
+$three seven
+=value 7
+-two
+
+
+-one

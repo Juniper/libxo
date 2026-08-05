@@ -1,0 +1,180 @@
+<statistics>
+  <socket>
+    <protocol name="TCP4">tcp4</protocol>
+    <receive-bytes-waiting>0</receive-bytes-waiting>
+    <send-bytes-waiting>0</send-bytes-waiting>
+    <tcp-state>ESTABLISHED</tcp-state>
+  </socket>
+  <socket>
+    <address type="hex">ffffa0000d003a80</address>
+    <type>stream</type>
+    <receive-bytes-waiting>0</receive-bytes-waiting>
+    <send-bytes-waiting>0</send-bytes-waiting>
+    <vnode>ffffa0000dce7000</vnode>
+    <connection>0</connection>
+    <first-reference>0</first-reference>
+    <next-reference>0</next-reference>
+    <path>/tmp/ssh-DQWvehZ5Bz/agent.39523</path>
+  </socket>
+  <socket>
+    <address type="hex">ffffa0000d024900</address>
+    <type>stream</type>
+    <receive-bytes-waiting>0</receive-bytes-waiting>
+    <send-bytes-waiting>0</send-bytes-waiting>
+    <vnode>0</vnode>
+    <connection>ffffa0000d024780</connection>
+    <first-reference>0</first-reference>
+    <next-reference>0</next-reference>
+  </socket>
+  <socket>
+    <address type="hex">ffffa0000d024780</address>
+    <type>stream</type>
+    <receive-bytes-waiting>0</receive-bytes-waiting>
+    <send-bytes-waiting>0</send-bytes-waiting>
+    <vnode>0</vnode>
+    <connection>ffffa0000d024900</connection>
+    <first-reference>0</first-reference>
+    <next-reference>0</next-reference>
+  </socket>
+  <socket>
+    <address type="hex">ffffa0000d023000</address>
+    <type>stream</type>
+    <receive-bytes-waiting>0</receive-bytes-waiting>
+    <send-bytes-waiting>0</send-bytes-waiting>
+    <vnode>0</vnode>
+    <connection>0</connection>
+    <first-reference>0</first-reference>
+    <next-reference>0</next-reference>
+  </socket>
+  <socket>
+    <address type="hex">ffffa0000d003180</address>
+    <type>stream</type>
+    <receive-bytes-waiting>0</receive-bytes-waiting>
+    <send-bytes-waiting>0</send-bytes-waiting>
+    <vnode>0</vnode>
+    <connection>ffffa0000d003300</connection>
+    <first-reference>0</first-reference>
+    <next-reference>0</next-reference>
+  </socket>
+  <socket>
+    <address type="hex">ffffa0000d003300</address>
+    <type>stream</type>
+    <receive-bytes-waiting>0</receive-bytes-waiting>
+    <send-bytes-waiting>0</send-bytes-waiting>
+    <vnode>0</vnode>
+    <connection>ffffa0000d003180</connection>
+    <first-reference>0</first-reference>
+    <next-reference>0</next-reference>
+  </socket>
+  <socket>
+    <address type="hex">ffffa00001f60300</address>
+    <type>stream</type>
+    <receive-bytes-waiting>0</receive-bytes-waiting>
+    <send-bytes-waiting>0</send-bytes-waiting>
+    <vnode>ffffa0000d85f370</vnode>
+    <connection>0</connection>
+    <first-reference>0</first-reference>
+    <next-reference>0</next-reference>
+    <path>/z/phil/.screen/1527.pts-0.box</path>
+  </socket>
+  <socket>
+    <address type="hex">ffffa0000d023480</address>
+    <type>stream</type>
+    <receive-bytes-waiting>0</receive-bytes-waiting>
+    <send-bytes-waiting>0</send-bytes-waiting>
+    <vnode>0</vnode>
+    <connection>ffffa00001f60c00</connection>
+    <first-reference>0</first-reference>
+    <next-reference>0</next-reference>
+  </socket>
+  <socket>
+    <address type="hex">ffffa00001f60c00</address>
+    <type>stream</type>
+    <receive-bytes-waiting>0</receive-bytes-waiting>
+    <send-bytes-waiting>0</send-bytes-waiting>
+    <vnode>0</vnode>
+    <connection>ffffa0000d023480</connection>
+    <first-reference>0</first-reference>
+    <next-reference>0</next-reference>
+  </socket>
+  <socket>
+    <address type="hex">ffffa00001fa9480</address>
+    <type>stream</type>
+    <receive-bytes-waiting>0</receive-bytes-waiting>
+    <send-bytes-waiting>0</send-bytes-waiting>
+    <vnode>0</vnode>
+    <connection>ffffa00001f60a80</connection>
+    <first-reference>0</first-reference>
+    <next-reference>0</next-reference>
+  </socket>
+  <socket>
+    <address type="hex">ffffa00001f60a80</address>
+    <type>stream</type>
+    <receive-bytes-waiting>0</receive-bytes-waiting>
+    <send-bytes-waiting>0</send-bytes-waiting>
+    <vnode>0</vnode>
+    <connection>ffffa00001fa9480</connection>
+    <first-reference>0</first-reference>
+    <next-reference>0</next-reference>
+  </socket>
+  <socket>
+    <address type="hex">ffffa00001fa9180</address>
+    <type>stream</type>
+    <receive-bytes-waiting>0</receive-bytes-waiting>
+    <send-bytes-waiting>0</send-bytes-waiting>
+    <vnode>0</vnode>
+    <connection>ffffa0000d023780</connection>
+    <first-reference>0</first-reference>
+    <next-reference>0</next-reference>
+  </socket>
+  <socket>
+    <address type="hex">ffffa0000d023780</address>
+    <type>stream</type>
+    <receive-bytes-waiting>0</receive-bytes-waiting>
+    <send-bytes-waiting>0</send-bytes-waiting>
+    <vnode>0</vnode>
+    <connection>ffffa00001fa9180</connection>
+    <first-reference>0</first-reference>
+    <next-reference>0</next-reference>
+  </socket>
+  <socket>
+    <address type="hex">ffffa0000d003480</address>
+    <type>dgram</type>
+    <receive-bytes-waiting>0</receive-bytes-waiting>
+    <send-bytes-waiting>0</send-bytes-waiting>
+    <vnode>0</vnode>
+    <connection>ffffa00001f60480</connection>
+    <first-reference>0</first-reference>
+    <next-reference>ffffa0000d003d80</next-reference>
+  </socket>
+  <socket>
+    <address type="hex">ffffa0000d003d80</address>
+    <type>dgram</type>
+    <receive-bytes-waiting>0</receive-bytes-waiting>
+    <send-bytes-waiting>0</send-bytes-waiting>
+    <vnode>0</vnode>
+    <connection>ffffa00001f60480</connection>
+    <first-reference>0</first-reference>
+    <next-reference>ffffa0000d003600</next-reference>
+  </socket>
+  <socket>
+    <address type="hex">ffffa0000d003600</address>
+    <type>dgram</type>
+    <receive-bytes-waiting>0</receive-bytes-waiting>
+    <send-bytes-waiting>0</send-bytes-waiting>
+    <vnode>0</vnode>
+    <connection>ffffa00001f60480</connection>
+    <first-reference>0</first-reference>
+    <next-reference>ffffa00001f60180</next-reference>
+  </socket>
+  <socket>
+    <address type="hex">ffffa00001f60180</address>
+    <type>dgram</type>
+    <receive-bytes-waiting>0</receive-bytes-waiting>
+    <send-bytes-waiting>0</send-bytes-waiting>
+    <vnode>0</vnode>
+    <connection>ffffa00001f60480</connection>
+    <first-reference>0</first-reference>
+    <next-reference>0</next-reference>
+  </socket>
+</statistics>

@@ -1,0 +1,8 @@
+/five/six/seven = 'seventh'
+/five/six/eight/nine = 'ninth'
+/six/seven = 'single-layer'
+/six/ten/four = 'fourth'
+/one/two[three == '10']/value = '10'
+/one/six/seven = 'seventh'
+/one/six/six2/eight = 'eighth'
+/one/two[three == '9']/value = '9'

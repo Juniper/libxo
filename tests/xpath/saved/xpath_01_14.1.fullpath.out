@@ -1,0 +1,8 @@
+/item[first='John'][last='Doe']/val='1'
+/item[host='db'][port='5432']/val='1'
+/item[a='x'][b='y'][c='z']/val='1'
+/item[proto='http']/val='1'
+/item[proto='http']/val='3'
+/item[first='John'][last='Doe']/val='1'
+/item[host='db'][port='5432']/val='1'
+/item[a='w'][b='x'][c='y'][d='z']/val='1'

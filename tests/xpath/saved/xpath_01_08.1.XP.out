@@ -1,0 +1,21 @@
+<one>
+  <a>4.85</a>
+  <two>
+    <b>2.7</b>
+    <three>
+      <c>-3333</c>
+      <four>
+        <five>mambo</five>
+      </four>
+    </three>
+  </two>
+</one>
+<a>
+  <b>you've got mail</b>
+  <c>didn't sweat</c>
+  <d>
+    <one>
+      <foo>that's good</foo>
+    </one>
+  </d>
+</a>

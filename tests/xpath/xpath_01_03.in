@@ -1,5 +1,3 @@
-#run --libxo @fullpath:slax,pretty
-#run
 ?one[two][three][5]
 ?one/or/the/other[two == 4][5]
 ?three[4]
@@ -8,3 +6,28 @@
 ?foo//goo
 ?!seven[x==4]/y[z==4]|fish
 ?some[long=one+two+three+four div 5 - 3]/more[stuff == here + they + are]/maybe[x<y && y <= z]
+?item[a[b] = 1]
+?item[a/b = 1]
+##broken: dangling relational operator (dot context)
+?cost[. > ]
+##broken: empty predicate
+?item[
+##broken: trailing operator after path step
+?a +
+##broken: attribute reference with missing name
+?foo[@]
+?one[two(three(foo
+?two[()]
+?three[x+(]
+?four[) - seven]
+?five/@foo
+?six@miss
+?seven[starts-with(")]
+?eight[5+4+6+2 == ]
+?nine["two" == @"two"]
+?ten[@foo/@goo]
+# a run-time error, but still....
+? item[number("the")]'
+? item[number(
+? item[..//fail]
+? item[..//node()]

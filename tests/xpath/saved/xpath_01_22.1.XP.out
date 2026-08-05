@@ -1,0 +1,31 @@
+<interface>
+  <ifindex>2</ifindex>
+  <name>lo0</name>
+</interface>
+<interface>
+  <ifindex>1</ifindex>
+  <name>eth0</name>
+</interface>
+<socket>
+  <protocol>tcp4</protocol>
+  <recv>100</recv>
+</socket>
+<socket>
+  <protocol>tcp4</protocol>
+  <recv>200</recv>
+</socket>
+<socket>
+  <protocol>tcp4</protocol>
+  <recv>200</recv>
+</socket>
+<socket>
+  <protocol>tcp4</protocol>
+  <recv>300</recv>
+  <answer>right</answer>
+</socket>
+<data>
+  <thing>one</thing>
+  <thing>two</thing>
+  <thing>three</thing>
+  <thing>four</thing>
+</data>

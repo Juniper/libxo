@@ -1,0 +1,260 @@
+r
+? socket[!contains(path, "/var/run/")]
++ statistics
+{ socket
+< socket
+@ name TCP4
+= protocol tcp4
+= receive-bytes-waiting 0
+= send-bytes-waiting 0
++ local
+@ type inet
+= address 172.16.188.131
+= port ssh
+- local
++ remote
+@ type inet
+= address 172.16.188.1
+= port 63510
+- remote
+= tcp-state ESTABLISHED
+> socket
+< socket
+@ type hex
+= address ffffa0000d003a80
+= type stream
+= receive-bytes-waiting 0
+= send-bytes-waiting 0
+= vnode ffffa0000dce7000
+= connection 0
+= first-reference 0
+= next-reference 0
+= path /tmp/ssh-DQWvehZ5Bz/agent.39523
+> socket
+< socket
+@ type hex
+= address ffffa0000d024900
+= type stream
+= receive-bytes-waiting 0
+= send-bytes-waiting 0
+= vnode 0
+= connection ffffa0000d024780
+= first-reference 0
+= next-reference 0
+> socket
+< socket
+@ type hex
+= address ffffa0000d024780
+= type stream
+= receive-bytes-waiting 0
+= send-bytes-waiting 0
+= vnode 0
+= connection ffffa0000d024900
+= first-reference 0
+= next-reference 0
+> socket
+< socket
+@ type hex
+= address ffffa0000d023000
+= type stream
+= receive-bytes-waiting 0
+= send-bytes-waiting 0
+= vnode 0
+= connection 0
+= first-reference 0
+= next-reference 0
+> socket
+< socket
+@ type hex
+= address ffffa0000d003180
+= type stream
+= receive-bytes-waiting 0
+= send-bytes-waiting 0
+= vnode 0
+= connection ffffa0000d003300
+= first-reference 0
+= next-reference 0
+> socket
+< socket
+@ type hex
+= address ffffa0000d003300
+= type stream
+= receive-bytes-waiting 0
+= send-bytes-waiting 0
+= vnode 0
+= connection ffffa0000d003180
+= first-reference 0
+= next-reference 0
+> socket
+< socket
+@ type hex
+= address ffffa00001f60300
+= type stream
+= receive-bytes-waiting 0
+= send-bytes-waiting 0
+= vnode ffffa0000d85f370
+= connection 0
+= first-reference 0
+= next-reference 0
+= path /z/phil/.screen/1527.pts-0.box
+> socket
+< socket
+@ type hex
+= address ffffa0000d023480
+= type stream
+= receive-bytes-waiting 0
+= send-bytes-waiting 0
+= vnode 0
+= connection ffffa00001f60c00
+= first-reference 0
+= next-reference 0
+> socket
+< socket
+@ type hex
+= address ffffa00001f60c00
+= type stream
+= receive-bytes-waiting 0
+= send-bytes-waiting 0
+= vnode 0
+= connection ffffa0000d023480
+= first-reference 0
+= next-reference 0
+> socket
+< socket
+@ type hex
+= address ffffa00001fa9480
+= type stream
+= receive-bytes-waiting 0
+= send-bytes-waiting 0
+= vnode 0
+= connection ffffa00001f60a80
+= first-reference 0
+= next-reference 0
+> socket
+< socket
+@ type hex
+= address ffffa00001f60a80
+= type stream
+= receive-bytes-waiting 0
+= send-bytes-waiting 0
+= vnode 0
+= connection ffffa00001fa9480
+= first-reference 0
+= next-reference 0
+> socket
+< socket
+@ type hex
+= address ffffa00001fa9180
+= type stream
+= receive-bytes-waiting 0
+= send-bytes-waiting 0
+= vnode 0
+= connection ffffa0000d023780
+= first-reference 0
+= next-reference 0
+> socket
+< socket
+@ type hex
+= address ffffa0000d023780
+= type stream
+= receive-bytes-waiting 0
+= send-bytes-waiting 0
+= vnode 0
+= connection ffffa00001fa9180
+= first-reference 0
+= next-reference 0
+> socket
+< socket
+@ type hex
+= address ffffa0000d023300
+= type stream
+= receive-bytes-waiting 0
+= send-bytes-waiting 0
+= vnode ffffa00001f85c08
+= connection 0
+= first-reference 0
+= next-reference 0
+= path /var/run/devd.pipe
+> socket
+< socket
+@ type hex
+= address ffffa0000d003480
+= type dgram
+= receive-bytes-waiting 0
+= send-bytes-waiting 0
+= vnode 0
+= connection ffffa00001f60480
+= first-reference 0
+= next-reference ffffa0000d003d80
+> socket
+< socket
+@ type hex
+= address ffffa0000d003d80
+= type dgram
+= receive-bytes-waiting 0
+= send-bytes-waiting 0
+= vnode 0
+= connection ffffa00001f60480
+= first-reference 0
+= next-reference ffffa0000d003600
+> socket
+< socket
+@ type hex
+= address ffffa0000d003600
+= type dgram
+= receive-bytes-waiting 0
+= send-bytes-waiting 0
+= vnode 0
+= connection ffffa00001f60480
+= first-reference 0
+= next-reference ffffa00001f60180
+> socket
+< socket
+@ type hex
+= address ffffa00001f60180
+= type dgram
+= receive-bytes-waiting 0
+= send-bytes-waiting 0
+= vnode 0
+= connection ffffa00001f60480
+= first-reference 0
+= next-reference 0
+> socket
+< socket
+@ type hex
+= address ffffa00001f60780
+= type dgram
+= receive-bytes-waiting 0
+= send-bytes-waiting 0
+= vnode ffffa0000d482898
+= connection 0
+= first-reference 0
+= next-reference 0
+= path /var/run/logpriv
+> socket
+< socket
+@ type hex
+= address ffffa00001f60480
+= type dgram
+= receive-bytes-waiting 0
+= send-bytes-waiting 0
+= vnode ffffa0000d482a50
+= connection 0
+= first-reference ffffa0000d003480
+= next-reference 0
+= path /var/run/log
+> socket
+< socket
+@ type hex
+= address ffffa00001fa9000
+= type seqpac
+= receive-bytes-waiting 0
+= send-bytes-waiting 0
+= vnode ffffa00001f85a50
+= connection 0
+= first-reference 0
+= next-reference 0
+= path /var/run/devd.seqpacket.pipe
+> socket
+} socket
+- statistics

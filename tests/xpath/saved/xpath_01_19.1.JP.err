@@ -1,0 +1,125 @@
+main: input '# Non-key predicate field: filter ?item[host='beta'] where host is a plain'
+main: input '# field (not declared with the 'k' key modifier).  Only the item with'
+main: input '# host='beta' should appear in the output.'
+main: input 'r'
+main: status: zero
+main: input '?item[host = 'beta']'
+adding filter: 'item[host = 'beta']'
+added filter: 0
+--- 0: 10
+    000010: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
+                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0 
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0 
+                        000003: type 70 (C_ELEMENT), str 8 [host], contents 0, next 0, prev 0 
+                    000006: type 54 (T_QUOTED), str 15 [beta], contents 0, next 0, prev 5 
+main: status: zero
+main: input '{item'
+main: filter: rc: 12
+main: status: zero
+main: input '<item'
+main: filter: rc: 6
+main: status: predicate
+main: input '$ id 1'
+main: key: 'id'='1'
+main: status: predicate
+main: input '= host alpha'
+main: field: 'host'='alpha'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: filter: rc: 6
+main: status: predicate
+main: input '$ id 2'
+main: key: 'id'='2'
+main: status: predicate
+main: input '= host beta'
+main: field: 'host'='beta'
+main: status: full
+main: input '>item'
+main: filter: rc: 6
+main: status: track
+main: input '<item'
+main: filter: rc: 8
+main: status: predicate
+main: input '$ id 3'
+main: key: 'id'='3'
+main: status: predicate
+main: input '= host gamma'
+main: field: 'host'='gamma'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# Two-field predicate on non-key fields: ?item[type='A' and color='red']'
+main: input 'r'
+main: status: zero
+main: input '?item[type = 'A' and color = 'red']'
+adding filter: 'item[type = 'A' and color = 'red']'
+added filter: 0
+--- 0: 16
+    000016: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 7, next 0, prev 0 
+                000007: type 40 ('('), str 17 [and], contents 4, next 0, prev 0 
+                    000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 10, prev 0 
+                        000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0 
+                            000003: type 70 (C_ELEMENT), str 8 [type], contents 0, next 0, prev 0 
+                        000006: type 54 (T_QUOTED), str 15 [A], contents 0, next 0, prev 5 
+                    000010: type 14 (L_EQUALS), str 27 [=], contents 11, next 0, prev 4 
+                        000011: type 74 (C_PATH), str 0 [], contents 9, next 12, prev 0 
+                            000009: type 70 (C_ELEMENT), str 21 [color], contents 0, next 0, prev 0 
+                        000012: type 54 (T_QUOTED), str 29 [red], contents 0, next 0, prev 11 
+main: status: zero
+main: input '{item'
+main: filter: rc: 14
+main: status: zero
+main: input '<item'
+main: filter: rc: 6
+main: status: predicate
+main: input '$ type A'
+main: key: 'type'='A'
+main: status: predicate
+main: input '= color red'
+main: field: 'color'='red'
+main: status: full
+main: input '= data 1'
+main: field: 'data'='1'
+main: status: full
+main: input '>item'
+main: filter: rc: 6
+main: status: track
+main: input '<item'
+main: filter: rc: 8
+main: status: predicate
+main: input '$ type A'
+main: key: 'type'='A'
+main: status: predicate
+main: input '= color blue'
+main: field: 'color'='blue'
+main: status: track
+main: input '= data 2'
+main: field: 'data'='2'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: filter: rc: 8
+main: status: predicate
+main: input '$ type B'
+main: key: 'type'='B'
+main: status: predicate
+main: input '= color red'
+main: field: 'color'='red'
+main: status: track
+main: input '= data 3'
+main: field: 'data'='3'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track

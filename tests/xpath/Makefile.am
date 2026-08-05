@@ -19,6 +19,8 @@ include ${top_srcdir}/warnings.mk
 AM_CFLAGS = \
     -I${top_srcdir} \
     -I${top_srcdir}/libxo \
+    -I${top_builddir}/filter \
+    -I${top_srcdir}/filter \
     ${WARNINGS}
 
 # Ick: maintained by hand!
@@ -32,7 +34,8 @@ xpath_01_test_SOURCES = xpath_01.c
 noinst_PROGRAMS = ${TEST_CASES:.c=.test}
 
 LDADD = \
-    ${top_builddir}/libxo/libxo.la
+    ${top_builddir}/libxo/libxo.la \
+    ${top_builddir}/filter/libxo_filter.la
 
 if HAVE_HUMANIZE_NUMBER
 LDADD += -lutil
@@ -74,10 +77,49 @@ TEST_FILES= \
     xpath_01_08.1.fullpath.out \
     xpath_01_08.1.fullpath.err \
     xpath_01_08.2.fullpath.out \
-    xpath_01_08.2.fullpath.err
+    xpath_01_08.2.fullpath.err \
+    xpath_01_11.1.fullpath.out \
+    xpath_01_11.1.fullpath.err \
+    xpath_01_12.1.fullpath.out \
+    xpath_01_12.1.fullpath.err \
+    xpath_01_13.1.fullpath.out \
+    xpath_01_13.1.fullpath.err \
+    xpath_01_14.1.fullpath.out \
+    xpath_01_14.1.fullpath.err \
+    xpath_01_15.1.fullpath.out \
+    xpath_01_15.1.fullpath.err \
+    xpath_01_16.1.fullpath.out \
+    xpath_01_16.1.fullpath.err \
+    xpath_01_17.1.fullpath.out \
+    xpath_01_17.1.fullpath.err \
+    xpath_01_18.1.fullpath.out \
+    xpath_01_18.1.fullpath.err \
+    xpath_01_19.1.fullpath.out \
+    xpath_01_19.1.fullpath.err \
+    xpath_01_20.1.fullpath.out \
+    xpath_01_20.1.fullpath.err \
+    xpath_01_21.1.fullpath.out \
+    xpath_01_21.1.fullpath.err \
+    xpath_01_22.1.fullpath.out \
+    xpath_01_22.1.fullpath.err \
+    xpath_01_22.1.XP.out \
+    xpath_01_22.1.XP.err \
+    xpath_01_22.1.JP.out \
+    xpath_01_22.1.JP.err \
+    xpath_01_22.1.fullpath_slax_pretty.out \
+    xpath_01_22.1.fullpath_slax_pretty.err \
+    xpath_01_23.1.fullpath.out \
+    xpath_01_23.1.fullpath.err \
+    xpath_01_23.1.XP.out \
+    xpath_01_23.1.XP.err \
+    xpath_01_23.1.JP.out \
+    xpath_01_23.1.JP.err \
+    xpath_01_23.1.fullpath_slax_pretty.out \
+    xpath_01_23.1.fullpath_slax_pretty.err
 
 EXTRA_DIST = \
     ${TEST_CASES} \
+    xpath_01_23.inc \
     ${addprefix saved/, ${TEST_FILES}}
 
 S2O = | ${SED} '1,/@@/d'
@@ -102,15 +144,15 @@ xoopts==warn,$$extra ; \
 ${TEST_JIG}; true;
 
 #TEST_FORMATS = T XP JP JPu HP X J H HIPx
-TEST_FORMATS = XP
+TEST_FORMATS = fullpath:slax,pretty fullpath XP JP
 
 RUN_TESTS = ${srcdir}/../run-tests.sh -d ${srcdir}
 
-RUN_TESTS_CMD = ${BASH} ${RUN_TESTS} -T fullpath
+RUN_TESTS_CMD = ${BASH} ${RUN_TESTS} -T "${TEST_FORMATS}"
 
 test tests: ${bin_PROGRAMS}
 	@${MKDIR} -p out
-	${RUN_TESTS_CMD} -l warn run ${TEST_CASES:.c=.test}
+	${RUN_TESTS_CMD} -l warn,filter-warn run ${TEST_CASES:.c=.test}
 
 one:
 

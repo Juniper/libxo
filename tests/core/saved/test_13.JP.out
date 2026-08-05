@@ -1,6 +1,242 @@
 {
   "top": {
     "data": {
+      "doc-examples": {
+        "count": 00001234,
+        "count": 00001234,
+        "name": "goodname",
+        "name": "goodname"
+      },
+      "json-escape-sequences": {
+        "quotation-mark": "\"",
+        "backslash": "\\",
+        "slash": "\/",
+        "slash2": "/",
+        "backspace": "\b",
+        "form-feed": "\f",
+        "new-line": "\n",
+        "carriage-return": "\r",
+        "horizontal-tab": "\t",
+        "number": [
+          {
+            "num": 1,
+            "hex": "1",
+            "value": "\u0001",
+            "pvalue": "\u0001",
+            "svalue": "\u0001"
+          },
+          {
+            "num": 2,
+            "hex": "2",
+            "value": "\u0002",
+            "pvalue": "\u0002",
+            "svalue": "\u0002"
+          },
+          {
+            "num": 3,
+            "hex": "3",
+            "value": "\u0003",
+            "pvalue": "\u0003",
+            "svalue": "\u0003"
+          },
+          {
+            "num": 4,
+            "hex": "4",
+            "value": "\u0004",
+            "pvalue": "\u0004",
+            "svalue": "\u0004"
+          },
+          {
+            "num": 5,
+            "hex": "5",
+            "value": "\u0005",
+            "pvalue": "\u0005",
+            "svalue": "\u0005"
+          },
+          {
+            "num": 6,
+            "hex": "6",
+            "value": "\u0006",
+            "pvalue": "\u0006",
+            "svalue": "\u0006"
+          },
+          {
+            "num": 7,
+            "hex": "7",
+            "value": "\u0007",
+            "pvalue": "\u0007",
+            "svalue": "\u0007"
+          },
+          {
+            "num": 8,
+            "hex": "8",
+            "value": "\b",
+            "pvalue": "\b",
+            "svalue": "\b"
+          },
+          {
+            "num": 9,
+            "hex": "9",
+            "value": "\t",
+            "pvalue": "\t",
+            "svalue": "\t"
+          },
+          {
+            "num": 10,
+            "hex": "a",
+            "value": "\n",
+            "pvalue": "\n",
+            "svalue": "\n"
+          },
+          {
+            "num": 11,
+            "hex": "b",
+            "value": "\u000b",
+            "pvalue": "\u000b",
+            "svalue": "\u000b"
+          },
+          {
+            "num": 12,
+            "hex": "c",
+            "value": "\f",
+            "pvalue": "\f",
+            "svalue": "\f"
+          },
+          {
+            "num": 13,
+            "hex": "d",
+            "value": "\r",
+            "pvalue": "\r",
+            "svalue": "\r"
+          },
+          {
+            "num": 14,
+            "hex": "e",
+            "value": "\u000e",
+            "pvalue": "\u000e",
+            "svalue": "\u000e"
+          },
+          {
+            "num": 15,
+            "hex": "f",
+            "value": "\u000f",
+            "pvalue": "\u000f",
+            "svalue": "\u000f"
+          },
+          {
+            "num": 16,
+            "hex": "10",
+            "value": "\u0010",
+            "pvalue": "\u0010",
+            "svalue": "\u0010"
+          },
+          {
+            "num": 17,
+            "hex": "11",
+            "value": "\u0011",
+            "pvalue": "\u0011",
+            "svalue": "\u0011"
+          },
+          {
+            "num": 18,
+            "hex": "12",
+            "value": "\u0012",
+            "pvalue": "\u0012",
+            "svalue": "\u0012"
+          },
+          {
+            "num": 19,
+            "hex": "13",
+            "value": "\u0013",
+            "pvalue": "\u0013",
+            "svalue": "\u0013"
+          },
+          {
+            "num": 20,
+            "hex": "14",
+            "value": "\u0014",
+            "pvalue": "\u0014",
+            "svalue": "\u0014"
+          },
+          {
+            "num": 21,
+            "hex": "15",
+            "value": "\u0015",
+            "pvalue": "\u0015",
+            "svalue": "\u0015"
+          },
+          {
+            "num": 22,
+            "hex": "16",
+            "value": "\u0016",
+            "pvalue": "\u0016",
+            "svalue": "\u0016"
+          },
+          {
+            "num": 23,
+            "hex": "17",
+            "value": "\u0017",
+            "pvalue": "\u0017",
+            "svalue": "\u0017"
+          },
+          {
+            "num": 24,
+            "hex": "18",
+            "value": "\u0018",
+            "pvalue": "\u0018",
+            "svalue": "\u0018"
+          },
+          {
+            "num": 25,
+            "hex": "19",
+            "value": "\u0019",
+            "pvalue": "\u0019",
+            "svalue": "\u0019"
+          },
+          {
+            "num": 26,
+            "hex": "1a",
+            "value": "\u001a",
+            "pvalue": "\u001a",
+            "svalue": "\u001a"
+          },
+          {
+            "num": 27,
+            "hex": "1b",
+            "value": "\u001b",
+            "pvalue": "\u001b",
+            "svalue": "\u001b"
+          },
+          {
+            "num": 28,
+            "hex": "1c",
+            "value": "\u001c",
+            "pvalue": "\u001c",
+            "svalue": "\u001c"
+          },
+          {
+            "num": 29,
+            "hex": "1d",
+            "value": "\u001d",
+            "pvalue": "\u001d",
+            "svalue": "\u001d"
+          },
+          {
+            "num": 30,
+            "hex": "1e",
+            "value": "\u001e",
+            "pvalue": "\u001e",
+            "svalue": "\u001e"
+          },
+          {
+            "num": 31,
+            "hex": "1f",
+            "value": "\u001f",
+            "pvalue": "\u001f",
+            "svalue": "\u001f"
+          }
+        ]
+      },
       "entry": [
         {
           "name": "xx-00000000",
@@ -152,8 +388,7 @@
           "size": 12345,
           "modify-time": 1644355825
         }
-      ],
-      "hits": 72
+      ]
     }
   }
 }
