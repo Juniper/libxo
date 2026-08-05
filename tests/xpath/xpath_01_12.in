@@ -301,6 +301,50 @@ $ label wlan0
 >item
 }item
 
+# substring(str, pos, len) returns a partial string
+r
+?item[substring(iface, 2, 3) = 'th0']
+{item
+<item
+$ iface eth0.0
+= val 1
+>item
+<item
+$ iface eth1.0
+= val 2
+>item
+<item
+$ iface eth0.1
+= val 3
+>item
+<item
+$ iface lo0
+= val 4
+>item
+}item
+
+# substring again
+r
+?item[substring(name, 5) = 'c']
+{item
+<item
+$ name pkg-a
+= val 1
+>item
+<item
+$ name pkg-b
+= val 2
+>item
+<item
+$ name lib-c
+= val 3
+>item
+<item
+$ name nohyphen
+= val 4
+>item
+}item
+
 # substring-before(str, needle) returns the part before the first needle
 r
 ?item[substring-before(iface, '.') = 'eth0']
