@@ -433,9 +433,6 @@ Quote the expression appropriately for the shell being used::
     # tcsh
     my-app --libxo 'filter=socket[tcp-state=="ESTABLISHED"]'
 
-    # pass via environment variable to avoid quoting issues
-    LIBXO_OPTIONS='filter=socket[tcp-state=="ESTABLISHED"]' my-app
-
 Commas are particularly awkward since they are used for two purposes:
 the separate libxo options (e.g. "warn,pretty") as well as separate
 arguments in filter function arguments (e.g. "start-with(one, two)").
@@ -500,3 +497,24 @@ command-line option::
     my-app: invalid number value: 'tcp-state'
 
 This message will be repeated on each conversion error.
+
+The "fdr" Encoder
+-----------------
+
+Filters are complex expressions, and the software that implements them
+is also complex.  Despite the efforts of the author, it is possible
+that expressions could be used that were not considered, tested, or
+implemented.  In many cases, the setup required to support the failing
+situation may not be something that can be shared to allow debugging.
+To allow such debugging, an encoder named "fdr" (after the aviation
+industry's "flight data recorder") allows the recording of the specific
+output tags being passed to the filter software, making reproducing
+problems trivial.  In addition, these failing cases can be added to
+the test suite to ensure the quality of future releases.
+
+To use the FDR, just add `--libxo @fdr` to your command line and
+redirect output to a file suitable for submission.  As normal, all
+`--libxo` options must appear before any other options or arguments.
+
+Please be extremely careful to ensure no secret or sensitive data
+appears in this output before submitting it as a bug attachment.
