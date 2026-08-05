@@ -7380,7 +7380,7 @@ xo_gettext_combine_formats (xo_handle_t *xop, const char *fmt,
  *
  * Summary: i18n aighn't cheap.
  */
-static const char *
+static char *
 xo_gettext_build_format (xo_handle_t *xop,
 			 xo_field_info_t *fields, int this_field,
 			 const char *base)
@@ -7397,7 +7397,7 @@ xo_gettext_build_format (xo_handle_t *xop,
 	    break;
 
 	const char *gtfmt = xo_dgettext(xop, xb.xb_bufp);
-	if (gtfmt == NULL || gtfmt == xb.xb_bufp || xo_streq(gtfmt, xb.xb_bufp))
+	if (gtfmt == NULL || gtfmt == xb.xb_bufp)
 	    break;
 
 	char *new_fmt = xo_strndup(gtfmt, -1);
@@ -7466,7 +7466,7 @@ xo_gettext_rebuild_content (xo_handle_t *xop, xo_field_info_t *fields,
     xo_free(buf);
 }
 #else  /* HAVE_GETTEXT */
-static const char *
+static char *
 xo_gettext_build_format (xo_handle_t *xop UNUSED,
 			 xo_field_info_t *fields UNUSED,
 			 int this_field UNUSED, const char *base UNUSED)
