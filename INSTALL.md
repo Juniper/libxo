@@ -12,4 +12,4 @@
 ## Instructions for building libxo
 
 Instructions for building libxo are now available in the
-[wiki](http://juniper.github.io/libxo/libxo-manual.html#getting-libxo).
+[wiki](https://juniper.github.io/libxo/libxo-manual.html#getting-libxo).
