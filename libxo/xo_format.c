@@ -583,24 +583,6 @@ xo_parse_fields (xo_parse_t *xpp, xo_field_info_t *fields,
 	if (!(xpp->xp_flags & XPF_STRICT))
 	    goto next_field;
 
-	unsigned ftype = xfip->xfi_ftype;
-
-        /* 'a' role: attribute name always comes from va_arg as const char * */
-        if (strchr(XO_FORMAT_MODIFIERS_NEED_STRING, ftype) != 0) {
-	    /* Enforce name/format restrictions */
-	    if (strchr(XO_FORMAT_ROLES_NEEDING_NAME, ftype)
-			&& xfip->xfi_clen == 0)
-		xo_parse_error(xpp, "field role requires a non-empty name");
-
-	    if (strchr(XO_FORMAT_ROLES_NO_NAME, ftype) && xfip->xfi_clen != 0)
-		xo_parse_error(xpp, "field role must have an empty name");
-
-	    if (strchr(XO_FORMAT_ROLES_NO_FORMAT, ftype)
-			&& xfip->xfi_format != XO_FOFF_NONE)
-		xo_parse_error(xpp, "field role cannot have a format specifier");
-	}
-
-
 	if (xfip->xfi_ftype == 'V') {
 	    const char *np = xo_foff(fmt, xfip->xfi_content);
 	    unsigned nlen = (unsigned)xfip->xfi_clen;
