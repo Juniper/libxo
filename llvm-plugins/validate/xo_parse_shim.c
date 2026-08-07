@@ -222,14 +222,21 @@ xo_shim_parse_args (const char *fmt,
         /* 'a' role: attribute name always comes from va_arg as const char * */
         if (strchr(XO_FORMAT_MODIFIERS_NEED_STRING, ftype))
             arg_cb(arg_data, "%s", 2);
+	else {
+	    /* Enforce name/format restrictions */
+	    if (strchr(XO_FORMAT_ROLES_NEEDING_NAME, ftype)
+			&& xfip->xfi_clen == 0)
+		ss_err.error(ss_err.data,
+			     "field role requires a non-empty name");
 
-        /* Enforce name/format restrictions */
-        if (strchr(XO_FORMAT_ROLES_NEEDING_NAME, ftype) && xfip->xfi_clen == 0)
-            ss_err.error(ss_err.data, "field role requires a non-empty name");
-        if (strchr(XO_FORMAT_ROLES_NO_NAME, ftype) && xfip->xfi_clen != 0)
-            ss_err.error(ss_err.data, "field role must have an empty name");
-        if (strchr(XO_FORMAT_ROLES_NO_FORMAT, ftype) && xfip->xfi_format != XO_FOFF_NONE)
-            ss_err.error(ss_err.data, "field role cannot have a format specifier");
+	    if (strchr(XO_FORMAT_ROLES_NO_NAME, ftype) && xfip->xfi_clen != 0)
+		ss_err.error(ss_err.data, "field role must have an empty name");
+
+	    if (strchr(XO_FORMAT_ROLES_NO_FORMAT, ftype)
+			&& xfip->xfi_format != XO_FOFF_NONE)
+		ss_err.error(ss_err.data,
+			     "field role cannot have a format specifier");
+	}
 
         if (field_consumes_varg(xfip))
             scan_format_args(xo_foff(fmt, xfip->xfi_format),
