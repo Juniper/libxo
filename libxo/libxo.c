@@ -8145,7 +8145,8 @@ xo_emit_field_hvf (xo_handle_t *xop, xo_emit_flags_t flags UNUSED,
 	baselen = 1;    /* ensure non-null alloca */
 
     if (baselen > XO_FORMAT_MAX) {
-	xo_failure(xop, "xo_emit_field: combined content/format/encoding too long");
+	xo_failure(xop,
+		   "xo_emit_field: combined content/format/encoding too long");
 	return -1;
     }
 
