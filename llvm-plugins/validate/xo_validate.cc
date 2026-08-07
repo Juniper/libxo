@@ -14,9 +14,11 @@
  * Checks performed:
  *   1. Format string syntax (malformed field descriptors)
  *   2. Argument count (too few or too many va_args)
- *   3. Basic argument type mismatch (%s vs non-pointer, %d vs non-integer, etc.)
- *
- * TODO: %* width/precision args, length-modifier precision checking.
+ *   3. Argument type category mismatch (%s vs non-pointer, %d vs non-integer,
+ *      %f vs non-float, %p vs non-pointer).  Length-modifier precision (e.g.
+ *      %lu vs unsigned long vs unsigned int) is intentionally not checked here
+ *      to avoid depending on internal Clang APIs that have hidden visibility
+ *      and change across LLVM versions.
  */
 
 #include <clang/AST/ASTConsumer.h>
@@ -60,19 +62,27 @@ static const XoEmitEntry xo_emit_table[] = {
 
 /*
  * Expected type category derived from a printf format spec.
+ * Intentionally coarse — we check category (integer/float/pointer/string),
+ * not precision (int vs long vs long long).  This keeps us independent of
+ * internal Clang type-checking APIs.
  */
 enum class FmtExpect { String, Integer, Float, Pointer, Name, Unknown };
 
 /*
- * Parse a printf format spec (not NUL-terminated, length fmtlen) and
- * return the expected argument type category.  NULL fmt means this is
- * an XFF_ARGUMENT name arg (expects const char *).
+ * Parse a printf format spec (not NUL-terminated, length fmtlen) and return
+ * the expected argument type category.  NULL fmt means this field's name
+ * comes from a va_arg (XFF_ARGUMENT), which must be const char *.
+ *
+ * scan_format_args() in xo_parse_shim.c already emits a separate "%d" entry
+ * for each '*' width/precision before emitting the full specifier, so by the
+ * time we see "%*d" here the '*' is just part of the spec string and we skip
+ * it while scanning for the conversion character.
  */
 static FmtExpect
 parse_fmt_expect (const char *fmt, unsigned fmtlen)
 {
     if (!fmt || fmtlen == 0)
-        return FmtExpect::Name;         /* XFF_ARGUMENT name: const char * */
+        return FmtExpect::Name;
 
     const char *p = fmt, *end = fmt + fmtlen;
     if (*p != '%')
@@ -83,16 +93,22 @@ parse_fmt_expect (const char *fmt, unsigned fmtlen)
     while (p < end && (*p == '-' || *p == '+' || *p == ' ' ||
                         *p == '0' || *p == '#' || *p == '\''))
         p++;
-    /* width — '*' would consume a va_arg, not handled yet */
-    while (p < end && isdigit((unsigned char)*p))
+    /* width: digits or '*' (scan_format_args already emitted a separate %d) */
+    if (p < end && *p == '*')
         p++;
+    else
+        while (p < end && isdigit((unsigned char)*p))
+            p++;
     /* precision */
     if (p < end && *p == '.') {
         p++;
-        while (p < end && isdigit((unsigned char)*p))
+        if (p < end && *p == '*')
             p++;
+        else
+            while (p < end && isdigit((unsigned char)*p))
+                p++;
     }
-    /* length modifier */
+    /* length modifiers — skip, we don't check precision */
     while (p < end && (*p == 'l' || *p == 'h' || *p == 'L' ||
                         *p == 'z' || *p == 't' || *p == 'j' || *p == 'q'))
         p++;
@@ -127,13 +143,12 @@ arg_type_ok (const Expr *arg, FmtExpect expect)
     switch (expect) {
     case FmtExpect::Name:
     case FmtExpect::String:
+    case FmtExpect::Pointer:
         return qt->isPointerType();
     case FmtExpect::Integer:
         return qt->isIntegerType();
     case FmtExpect::Float:
         return qt->isFloatingType();
-    case FmtExpect::Pointer:
-        return qt->isPointerType();
     case FmtExpect::Unknown:
         return true;
     }
@@ -155,7 +170,7 @@ expect_name (FmtExpect e)
 
 /* State collected by the xo_shim_arg_cb_t callback */
 struct ArgCollector {
-    std::vector<std::pair<std::string, unsigned>> args; /* (fmt, fmtlen) */
+    std::vector<std::pair<std::string, unsigned>> args; /* (spec, speclen) */
 
     static void callback(void *data, const char *fmt, unsigned fmtlen) {
         auto *ac = static_cast<ArgCollector *>(data);
@@ -164,7 +179,7 @@ struct ArgCollector {
     }
 };
 
-/* State for the error callback */
+/* State for the error/warn callback passed to xo_shim_parse_args */
 struct DiagCb {
     DiagnosticsEngine *diags;
     unsigned           id;
@@ -183,7 +198,7 @@ class XoValidateVisitor : public RecursiveASTVisitor<XoValidateVisitor> {
     unsigned           SyntaxDiagID;
     unsigned           CountDiagID;
     unsigned           TypeDiagID;
-    unsigned           WarnDiagID;  /* always Warning; for style issues from xp_warn */
+    unsigned           WarnDiagID;
 
 public:
     explicit XoValidateVisitor(CompilerInstance &CI)
