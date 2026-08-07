@@ -214,6 +214,7 @@ if test "$GETTEXT_ENABLE" != "no"; then
   _save_cflags="$CFLAGS"
   CFLAGS="$CFLAGS -I${GETTEXT_PREFIX}/include -L${GETTEXT_PREFIX}/lib -Werror -lintl"
   AC_LINK_IFELSE([AC_LANG_SOURCE([[#include <libintl.h>]
+             [#include <stddef.h>]
              [int main() {char *cp = dgettext(NULL, "xx"); return 0; }]])],
              [HAVE_GETTEXT=yes],
              [HAVE_GETTEXT=no])
@@ -228,6 +229,7 @@ if test "$GETTEXT_ENABLE" != "no"; then
       _save_cflags="$CFLAGS"
       CFLAGS="$CFLAGS -I${GETTEXT_PREFIX}/include -L${GETTEXT_PREFIX}/lib -Werror -lintl"
       AC_LINK_IFELSE([AC_LANG_SOURCE([[#include <libintl.h>]
+                 [#include <stddef.h>]
                  [int main() {char *cp = dgettext(NULL, "xx"); return 0; }]])],
                  [HAVE_GETTEXT=yes],
                  [HAVE_GETTEXT=no])
@@ -243,6 +245,7 @@ if test "$GETTEXT_ENABLE" != "no"; then
       _save_cflags="$CFLAGS"
       CFLAGS="$CFLAGS -I${GETTEXT_PREFIX}/include -L${GETTEXT_PREFIX}/lib -Werror -lintl"
       AC_LINK_IFELSE([AC_LANG_SOURCE([[#include <libintl.h>]
+                 [#include <stddef.h>]
                  [int main() {char *cp = dgettext(NULL, "xx"); return 0; }]])],
                  [HAVE_GETTEXT=yes],
                  [HAVE_GETTEXT=no])
