@@ -1,0 +1,33 @@
+../../../tests/core/test_10.c:103:14: warning: libxo: format expects 0 argument(s) but 1 provided
+  103 |             xo_emit("{C:/bg-%s}", colors[i-1]);
+      |                     ^
+../../../tests/core/test_10.c:104:10: warning: libxo format: field role requires a non-empty name
+  104 |         xo_emit("{C:/fg-%s}{T:/%s}", colors[i], colors[i]);
+      |                 ^
+../../../tests/core/test_10.c:104:10: warning: libxo: format expects 1 argument(s) but 2 provided
+../../../tests/core/test_10.c:113:13: warning: libxo: format expects 0 argument(s) but 1 provided
+  113 |     xo_emit("{T:Item/%-10s}{C:bold,underline}{T:Total Sold/%12s}{C:no-bold}"
+      |             ^
+../../../tests/core/test_10.c:126:10: warning: libxo: format expects 8 argument(s) but 10 provided
+  126 |         xo_emit("{keq:sku/%s-%u/%s-000-%u}"
+      |                 ^
+../../../tests/core/test_10.c:200:13: warning: libxo format: field role requires a non-empty name
+  200 |     xo_emit("X{P:}X", "epic fail");
+      |             ^
+../../../tests/core/test_10.c:200:13: warning: libxo: format expects 0 argument(s) but 1 provided
+../../../tests/core/test_10.c:201:13: warning: libxo format: field role requires a non-empty name
+  201 |     xo_emit("X{T:}X", "epic fail");
+      |             ^
+../../../tests/core/test_10.c:201:13: warning: libxo: format expects 0 argument(s) but 1 provided
+../../../tests/core/test_10.c:202:13: warning: libxo format: field role requires a non-empty name
+  202 |     xo_emit("X{N:}X", "epic fail");
+      |             ^
+../../../tests/core/test_10.c:202:13: warning: libxo: format expects 0 argument(s) but 1 provided
+../../../tests/core/test_10.c:203:13: warning: libxo format: field role requires a non-empty name
+  203 |     xo_emit("X{L:}X\n", "epic fail");
+      |             ^
+../../../tests/core/test_10.c:203:13: warning: libxo: format expects 0 argument(s) but 1 provided
+../../../tests/core/test_10.c:206:13: warning: libxo format: field role requires a non-empty name
+  206 |     xo_emit("X{P:/%30s}X{Lwc:Cost}{:cost/%u}\n", "", 455);
+      |             ^
+14 warnings generated.

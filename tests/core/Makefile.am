@@ -132,6 +132,8 @@ VALIDATE_BUILD = ${top_builddir}/llvm-plugins/validate
 PRECOMPILE_BUILD = ${top_builddir}/llvm-plugins/precompile
 FORMAT_LIBDIR = ${top_builddir}/format/.libs
 FORMAT_LA = ${top_builddir}/format/libxo_format.la
+LIBXO_LIBDIR = ${top_builddir}/libxo/.libs
+LIBXO_LA = ${top_builddir}/libxo/libxo.la
 
 if HAVE_VALIDATE
 PLUGIN_TESTS = run-validate-tests run-pass-tests
@@ -154,27 +156,27 @@ all-local: $(validate_tests) $(pass_tests)
 
 $(validate_tests): %.validate-test: $(srcdir)/%.c \
     $(VALIDATE_BUILD)/xo_validate.so \
-    $(FORMAT_LA)
+    $(FORMAT_LA) $(LIBXO_LA)
 	@${MKDIR} -p out
-	$(AM_V_GEN)DYLD_LIBRARY_PATH="${FORMAT_LIBDIR}:${DYLD_LIBRARY_PATH}" \
-	    LD_LIBRARY_PATH="${FORMAT_LIBDIR}:${LD_LIBRARY_PATH}" \
+	$(AM_V_GEN)DYLD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${DYLD_LIBRARY_PATH}" \
+	    LD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${LD_LIBRARY_PATH}" \
 	    ${LLVM_CLANG} ${CFLAGS} \
 	    -fplugin=${VALIDATE_BUILD}/xo_validate.so \
 	    -mllvm -xo-validate-errors-as-warnings \
 	    -I${top_srcdir}/libxo -I${top_builddir}/libxo -I${INCLUDEDIR} ${SYSROOT_FLAG} \
-	    $< -L${LIBDIR} -Wl,-rpath,${LIBDIR} -lxo \
+	    $< -L${LIBXO_LIBDIR} -lxo \
 	    -o $@ > out/$@.make.out 2> out/$@.make.err
 
 $(pass_tests): %.pass-test: $(srcdir)/%.c \
     $(PRECOMPILE_BUILD)/xo_precompile.so \
-    $(FORMAT_LA)
+    $(FORMAT_LA) $(LIBXO_LA)
 	@${MKDIR} -p out
-	$(AM_V_GEN)DYLD_LIBRARY_PATH="${FORMAT_LIBDIR}:${DYLD_LIBRARY_PATH}" \
-	    LD_LIBRARY_PATH="${FORMAT_LIBDIR}:${LD_LIBRARY_PATH}" \
+	$(AM_V_GEN)DYLD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${DYLD_LIBRARY_PATH}" \
+	    LD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${LD_LIBRARY_PATH}" \
 	    ${LLVM_CLANG} ${CFLAGS} \
 	    -fpass-plugin=${PRECOMPILE_BUILD}/xo_precompile.so \
 	    -I${top_srcdir}/libxo -I${top_builddir}/libxo -I${INCLUDEDIR} ${SYSROOT_FLAG} \
-	    $< -L${LIBDIR} -Wl,-rpath,${LIBDIR} -lxo \
+	    $< -L${LIBXO_LIBDIR} -lxo \
 	    -o $@ > out/$@.make.out 2> out/$@.make.err
 
 run-validate-tests: $(validate_tests)
@@ -185,7 +187,9 @@ run-validate-tests: $(validate_tests)
 	    diff -Nu ${srcdir}/saved/$$tc.validate-test.make.err \
 	        out/$$tc.validate-test.make.err ; \
 	done
-	${RUN_TESTS_CMD} -T "${TEST_FORMATS}" -m validate run-bin ${TEST_CASES:.c=.test}
+	DYLD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${DYLD_LIBRARY_PATH}" \
+	    LD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${LD_LIBRARY_PATH}" \
+	    ${RUN_TESTS_CMD} -T "${TEST_FORMATS}" -m validate run-bin ${TEST_CASES:.c=.test}
 
 run-pass-tests: $(pass_tests)
 	@${MKDIR} -p out
@@ -195,7 +199,9 @@ run-pass-tests: $(pass_tests)
 	    diff -Nu ${srcdir}/saved/$$tc.pass-test.make.err \
 	        out/$$tc.pass-test.make.err ; \
 	done
-	${RUN_TESTS_CMD} -T "${TEST_FORMATS}" -m pass run-bin ${TEST_CASES:.c=.test}
+	DYLD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${DYLD_LIBRARY_PATH}" \
+	    LD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${LD_LIBRARY_PATH}" \
+	    ${RUN_TESTS_CMD} -T "${TEST_FORMATS}" -m pass run-bin ${TEST_CASES:.c=.test}
 
 else
 

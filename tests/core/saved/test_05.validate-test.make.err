@@ -1,0 +1,18 @@
+../../../tests/core/test_05.c:88:10: warning: libxo format: field name should be longer than two characters: 'wc'
+   88 |         xo_emit("Wide char: {lq:wc/%lc - %#lx - %d}\n",
+      |                 ^
+../../../tests/core/test_05.c:93:10: warning: libxo format: field name should be longer than two characters: 'wc'
+   93 |         xo_emit("Wide char: {lq:wc/%lc - %#lx - %d}\n",
+      |                 ^
+../../../tests/core/test_05.c:97:13: warning: libxo format: field name should be longer than two characters: 'v1'
+   97 |     xo_emit("Οὐχὶ ταὐτὰ παρίσταταί μοι {:v1/%s}, {:v2/%s}\n",
+      |             ^
+../../../tests/core/test_05.c:97:13: warning: libxo format: field name should be longer than two characters: 'v2'
+../../../tests/core/test_05.c:100:18: warning: libxo format: field name should be longer than two characters: 'v1'
+  100 |     rc = xo_emit("გთხოვთ {:v1/%s} {:v2/%s}\n",
+      |                  ^
+../../../tests/core/test_05.c:100:18: warning: libxo format: field name should be longer than two characters: 'v2'
+../../../tests/core/test_05.c:122:13: warning: libxo format: field role requires a non-empty name
+  122 |     xo_emit("{T:First Name/%-25s}{T:Last Name/%-14s}"
+      |             ^
+7 warnings generated.

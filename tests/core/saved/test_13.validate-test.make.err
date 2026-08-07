@@ -1,0 +1,4 @@
+../../../tests/core/test_13.c:222:12: warning: libxo: format expects 2 argument(s) but 3 provided
+  222 |    xo_emit("[{:name/%.*.*s}]\n", 8, 20, tname);  /* "[goodname]" */
+      |            ^
+1 warning generated.

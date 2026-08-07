@@ -1,0 +1,8 @@
+../../../tests/core/test_03.c:64:13: warning: libxo format: field role requires a non-empty name
+   64 |     xo_emit("{T:/%13s} {T:/%5s} {T:/%6s} {T:/%7s} {T:/%8s}  {T:Size(s)}\n",
+      |             ^
+../../../tests/core/test_03.c:64:13: warning: libxo format: field role requires a non-empty name
+../../../tests/core/test_03.c:64:13: warning: libxo format: field role requires a non-empty name
+../../../tests/core/test_03.c:64:13: warning: libxo format: field role requires a non-empty name
+../../../tests/core/test_03.c:64:13: warning: libxo format: field role requires a non-empty name
+5 warnings generated.
