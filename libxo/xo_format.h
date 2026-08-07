@@ -7,7 +7,7 @@
  * LICENSE.
  * Phil Shafer, 2025
  *
- * xo_field.h: libxo format-string parsing, factored out so it can be
+ * xo_format.h: libxo format-string parsing, factored out so it can be
  * linked into tools (e.g. LLVM plugins) that do not carry the full
  * libxo runtime.
  */
