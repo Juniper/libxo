@@ -133,6 +133,12 @@ static bool extractCString(GlobalVariable *GV, std::string &out)
     return true;
 }
 
+static void
+parse_error_cb (void *data, const char *, ...)
+{
+    *static_cast<bool *>(data) = true;
+}
+
 /* ---------- the pass ----------------------------------------------------- */
 
 struct XoPrecompile : PassInfoMixin<XoPrecompile> {
@@ -212,10 +218,8 @@ struct XoPrecompile : PassInfoMixin<XoPrecompile> {
 
             int rc = xo_shim_parse_fields(
                 FmtStr.c_str(),
-                [](void *d, const char *) {
-                    static_cast<ParseCtx *>(d)->error = true;
-                },
-                &PCtx,
+                parse_error_cb,
+                &PCtx.error,
                 [](void *d, const xo_shim_field_t *f) {
                     static_cast<ParseCtx *>(d)->fields.push_back(*f);
                 },
