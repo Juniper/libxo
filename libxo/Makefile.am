@@ -61,6 +61,7 @@ man3_files = \
     xo_create.3 \
     xo_discarding_output.3 \
     xo_emit.3 \
+    xo_emit_f.3 \
     xo_emit_err.3 \
     xo_err.3 \
     xo_error.3 \
