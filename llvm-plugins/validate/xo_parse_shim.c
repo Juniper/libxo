@@ -121,46 +121,66 @@ scan_format_args (const char *field_fmt, unsigned flen,
     const char *p = field_fmt, *end = field_fmt + flen;
 
     while (p < end) {
-        if (*p != '%') { p++; continue; }
+        if (*p != '%') {
+	    p += 1;
+	    continue;
+	}
+
         const char *spec = p++;
-        if (p >= end) break;
-        if (*p == '%') { p++; continue; }  /* literal %% */
+        if (p >= end)
+	    break;
+
+        if (*p == '%') {  /* literal: "%%" */
+	    p += 1;
+	    continue;
+	}
 
         /* flags */
-        while (p < end && (*p == '-' || *p == '+' || *p == ' ' ||
-                            *p == '0' || *p == '#' || *p == '\''))
-            p++;
+        while (p < end && (*p == '-' || *p == '+' || *p == ' '
+			   || *p == '0' || *p == '#' || *p == '\''))
+            p += 1;
+
         /* width: digits or '*' (the '*' consumes one int va_arg) */
         if (p < end && *p == '*') {
             arg_cb(arg_data, "%d", 2);
-            p++;
+            p += 1;
+
         } else {
             while (p < end && isdigit((int) (unsigned char) *p))
-                p++;
+                p += 1;
         }
+
         /*
          * Groups 2 and 3 of libxo's three width groups are both '.'-prefixed:
          *   %*.*.*s → width(*), columns(.*), bytes(.*), value
          * The loop handles any number of '.' groups, each with optional '*'.
          */
         while (p < end && *p == '.') {
-            p++;
+            p += 1;
+
             if (p < end && *p == '*') {
                 arg_cb(arg_data, "%d", 2);
-                p++;
+                p += 1;
+
             } else {
                 while (p < end && isdigit((unsigned char)*p))
-                    p++;
+                    p += 1;
             }
         }
         /* length modifiers */
         while (p < end && (*p == 'l' || *p == 'h' || *p == 'L' ||
                             *p == 'z' || *p == 't' || *p == 'j' || *p == 'q'))
-            p++;
+            p += 1;
+
         /* conversion character */
-        if (p >= end) break;
-        if (*p == 'm') { p++; continue; }  /* %m uses errno, no va_arg */
-        p++;
+        if (p >= end)
+	    break;
+
+        if (*p == 'm') {  /* %m uses errno, no va_arg */
+	    p += 1;
+	    continue;
+	}
+        p += 1;
 
         arg_cb(arg_data, spec, (unsigned)(p - spec));
     }
@@ -203,6 +223,30 @@ field_consumes_varg (const xo_field_info_t *xfip)
     default:
         return (xfip->xfi_clen == 0);
     }
+}
+
+typedef struct arg_record_s {
+    char ar_data[64];		/* Record */
+    int ar_cur;
+} arg_record_t;
+
+static void
+arg_record_cb (void *data, const char *fmt, unsigned fmtlen)
+{
+    arg_record_t *arp = data;
+
+    if (fmtlen > 1 && arp->ar_cur < (int) sizeof(arp->ar_data) - 1)
+	arp->ar_data[arp->ar_cur++] = fmt[fmtlen - 1];
+}
+
+static unsigned
+count_format_args (const char *field_fmt, unsigned flen, arg_record_t *arp)
+{
+    bzero(arp, sizeof(*arp));
+
+    scan_format_args(field_fmt, flen, arg_record_cb, arp);
+
+    return arp->ar_cur;
 }
 
 int
@@ -272,6 +316,46 @@ xo_shim_parse_args (const char *fmt,
          * NULL callback above; the value still comes from the format spec.
          */
         int skip_value = (xfip->xfi_flags & XFF_ARGUMENT) && (ftype != 'V');
+
+        /* Check that display and encoding formats consume the same arg count */
+        if (!skip_value && xfip->xfi_encoding != XO_FOFF_NONE) {
+            const char *dfmt, *efmt;
+            unsigned dlen, elen;
+
+            if (xfip->xfi_format >= 0) {
+                dfmt = xo_foff(fmt, xfip->xfi_format);
+                dlen = (unsigned) xfip->xfi_flen;
+            } else if (xfip->xfi_format == XO_FOFF_DEFAULT) {
+                dfmt = xo_default_format;
+                dlen = (unsigned) strlen(xo_default_format);
+            } else {
+                dfmt = "";
+                dlen = 0;
+            }
+
+            if (xfip->xfi_encoding >= 0) {
+                efmt = xo_foff(fmt, xfip->xfi_encoding);
+                elen = (unsigned) xfip->xfi_elen;
+            } else {
+                efmt = xo_default_format;
+                elen = (unsigned) strlen(xo_default_format);
+            }
+
+	    arg_record_t dargs, eargs;
+            unsigned dc = count_format_args(dfmt, dlen, &dargs);
+            unsigned ec = count_format_args(efmt, elen, &eargs);
+            if (dc != ec)
+                ss_err.error(ss_err.data,
+                    "display and encoding formats consume "
+			     "%u vs %u argument(s): '%s'",
+			     dc, ec, xo_printable2(str, slen, 1));
+            else if (strcmp(dargs.ar_data, eargs.ar_data) != 0)
+                ss_err.error(ss_err.data,
+                    "display and encoding formats consume different "
+			     "argument(s): '%s'",
+			     xo_printable2(str, slen, 1));
+        }
+
         if (!skip_value && field_consumes_varg(xfip))
             scan_format_args(xo_foff(fmt, xfip->xfi_format),
                              (unsigned) xfip->xfi_flen,
