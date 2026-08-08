@@ -1,18 +1,15 @@
-../../../tests/core/test_05.c:88:10: warning: libxo format: field name should be longer than two characters: 'wc'
+../../../tests/core/test_05.c:88:10: warning: libxo: field name should not be less than 3 characters long: '{lq:wc/%lc - %#lx - %d}'
    88 |         xo_emit("Wide char: {lq:wc/%lc - %#lx - %d}\n",
       |                 ^
-../../../tests/core/test_05.c:93:10: warning: libxo format: field name should be longer than two characters: 'wc'
+../../../tests/core/test_05.c:93:10: warning: libxo: field name should not be less than 3 characters long: '{lq:wc/%lc - %#lx - %d}'
    93 |         xo_emit("Wide char: {lq:wc/%lc - %#lx - %d}\n",
       |                 ^
-../../../tests/core/test_05.c:97:13: warning: libxo format: field name should be longer than two characters: 'v1'
+../../../tests/core/test_05.c:97:13: warning: libxo: field name should not be less than 3 characters long: '{:v1/%s}'
    97 |     xo_emit("Οὐχὶ ταὐτὰ παρίσταταί μοι {:v1/%s}, {:v2/%s}\n",
       |             ^
-../../../tests/core/test_05.c:97:13: warning: libxo format: field name should be longer than two characters: 'v2'
-../../../tests/core/test_05.c:100:18: warning: libxo format: field name should be longer than two characters: 'v1'
+../../../tests/core/test_05.c:97:13: warning: libxo: field name should not be less than 3 characters long: '{:v2/%s}'
+../../../tests/core/test_05.c:100:18: warning: libxo: field name should not be less than 3 characters long: '{:v1/%s}'
   100 |     rc = xo_emit("გთხოვთ {:v1/%s} {:v2/%s}\n",
       |                  ^
-../../../tests/core/test_05.c:100:18: warning: libxo format: field name should be longer than two characters: 'v2'
-../../../tests/core/test_05.c:122:13: warning: libxo format: field role requires a non-empty name
-  122 |     xo_emit("{T:First Name/%-25s}{T:Last Name/%-14s}"
-      |             ^
-7 warnings generated.
+../../../tests/core/test_05.c:100:18: warning: libxo: field name should not be less than 3 characters long: '{:v2/%s}'
+6 warnings generated.
