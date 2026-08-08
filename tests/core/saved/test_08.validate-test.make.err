@@ -1,7 +1,0 @@
-../../../tests/core/test_08.c:141:14: warning: libxo format: field role requires a non-empty name
-  141 |             xo_emit("{Lwc:/Name}{:name/%d} + 1 = {:next/%d}\n", i, i + 1);
-      |                     ^
-../../../tests/core/test_08.c:145:10: warning: libxo format: field role requires a non-empty name
-  145 |         xo_emit("{Lwc:/Last}{:last/%d}\n", i);
-      |                 ^
-2 warnings generated.
