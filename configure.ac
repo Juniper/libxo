@@ -266,7 +266,9 @@ AC_SUBST(GETTEXT_LIBS)
 
 GETTEXT_LIBDIR=${GETTEXT_PREFIX}/lib
 AC_SUBST(GETTEXT_LIBDIR)
-if test -x ${GETTEXT_PREFIX}/bin/msgfmt ; then
+if test "$GETTEXT_ENABLE" = "no"; then
+    GETTEXT_BINDIR=
+elif test -x ${GETTEXT_PREFIX}/bin/msgfmt ; then
     GETTEXT_BINDIR=${GETTEXT_PREFIX}/bin
 elif test -x ${GETTEXT_PREFIX}/local/bin/msgfmt ; then
     GETTEXT_BINDIR=${GETTEXT_PREFIX}/local/bin
