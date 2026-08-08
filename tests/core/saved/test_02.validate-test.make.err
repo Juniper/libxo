@@ -1,43 +1,16 @@
-../../../tests/core/test_02.c:56:13: warning: libxo format: field must have a name: '{d:/%-*.*s}{tek:name}{eq:flags/0x%x}'
+../../../tests/core/test_02.c:56:13: warning: libxo: field must have a name: '{d:/%-*.*s}'
    56 |     xo_emit("{d:/%-*.*s}{tek:name}{eq:flags/0x%x}",
       |             ^
-../../../tests/core/test_02.c:71:13: warning: libxo format: field name should be longer than two characters: 'fd'
+../../../tests/core/test_02.c:71:13: warning: libxo: field name should not be less than 3 characters long: '{:fd/%d}'
    71 |     xo_emit("close {:fd/%d} returned {:error/%m} {:test}\n", -1, "good");
       |             ^
-../../../tests/core/test_02.c:71:13: warning: libxo: format expects 3 argument(s) but 2 provided
-../../../tests/core/test_02.c:73:13: warning: libxo format: field name should be longer than two characters: 'fd'
+../../../tests/core/test_02.c:73:13: warning: libxo: field name should not be less than 3 characters long: '{:fd/%d}'
    73 |     xo_emit("close {:fd/%d} returned {:error/%6.6m} {:test}\n", -1, "good");
       |             ^
-../../../tests/core/test_02.c:73:13: warning: libxo: format expects 3 argument(s) but 2 provided
-../../../tests/core/test_02.c:87:13: warning: libxo format: field role requires a non-empty name
-   87 |     xo_emit("{Lc:Low\\/warn granularity}{P:\t}{:granularity-lw/%d}{Uw:/%sh}\n",
-      |             ^
-../../../tests/core/test_02.c:96:13: warning: libxo format: field role requires a non-empty name
-   96 |     xo_emit("{:memory/%u}{U:/%s} left out of {:total/%u}{U:/%s}\n",
-      |             ^
-../../../tests/core/test_02.c:96:13: warning: libxo format: field role requires a non-empty name
-../../../tests/core/test_02.c:99:13: warning: libxo format: field role requires a non-empty name
-   99 |     xo_emit("{,title:/before%safter:}\n", "working");
-      |             ^
-../../../tests/core/test_02.c:105:13: warning: libxo format: field role requires a non-empty name
-  105 |     xo_emit("{:unknown/%u} "
-      |             ^
-../../../tests/core/test_02.c:109:13: warning: libxo format: field role requires a non-empty name
-  109 |     xo_emit("{:unknown/%u} "
-      |             ^
-../../../tests/core/test_02.c:116:13: warning: libxo format: field role cannot have a format specifier
-  116 |     xo_emit("({[:}{:min/%u}/{:cur/%u}/{:max/%u}{]:/%d})\n", 15, 20, 125, -30);
-      |             ^
-../../../tests/core/test_02.c:134:13: warning: libxo format: field name should be longer than two characters: 't1'
+../../../tests/core/test_02.c:134:13: warning: libxo: field name should not be less than 3 characters long: '{qt:t1/%*d}'
   134 |     xo_emit("1:{qt:t1/%*d} 2:{qt:t2/test%-*u} "
       |             ^
-../../../tests/core/test_02.c:134:13: warning: libxo format: field name should be longer than two characters: 't2'
-../../../tests/core/test_02.c:134:13: warning: libxo format: field name should be longer than two characters: 't3'
-../../../tests/core/test_02.c:134:13: warning: libxo format: field name should be longer than two characters: 't4'
-../../../tests/core/test_02.c:141:13: warning: libxo format: field role requires a non-empty name
-  141 |     xo_emit("{L:/V1\\/V2 packet%s}: {:count/%u}\n", "s", 10);
-      |             ^
-../../../tests/core/test_02.c:158:13: warning: libxo format: field role requires a non-empty name
-  158 |     xo_emit("{:test/%04d} {L:/tr%s}\n", test, (test == 1) ? "y" : "ies");
-      |             ^
-18 warnings generated.
+../../../tests/core/test_02.c:134:13: warning: libxo: field name should not be less than 3 characters long: '{qt:t2/test%-*u}'
+../../../tests/core/test_02.c:134:13: warning: libxo: field name should not be less than 3 characters long: '{qt:t3/%10sx}'
+../../../tests/core/test_02.c:134:13: warning: libxo: field name should not be less than 3 characters long: '{qt:t4/x%-*.*s}'
+7 warnings generated.
