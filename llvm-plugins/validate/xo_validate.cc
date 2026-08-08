@@ -31,6 +31,8 @@
 
 #include <cctype>
 #include <climits>
+#include <cstdarg>
+#include <cstdio>
 #include <string>
 #include <vector>
 
@@ -187,10 +189,15 @@ struct DiagCb {
 };
 
 static void
-emit_diag (void *data, const char *msg)
+emit_diag (void *data, const char *fmt, ...)
 {
     auto *dc = static_cast<DiagCb *>(data);
-    dc->diags->Report(dc->loc, dc->id) << msg;
+    char buf[512];
+    va_list vap;
+    va_start(vap, fmt);
+    vsnprintf(buf, sizeof(buf), fmt, vap);
+    va_end(vap);
+    dc->diags->Report(dc->loc, dc->id) << buf;
 }
 
 class XoValidateVisitor : public RecursiveASTVisitor<XoValidateVisitor> {
