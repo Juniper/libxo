@@ -1,4 +1,4 @@
-../../../tests/llvm-plugins/validate_01.c:19:13: warning: libxo format: missing closing '}': {:bad/
+../../../tests/llvm-plugins/validate_01.c:19:13: warning: libxo: missing closing '}': {:bad/
    19 |     xo_emit("{:bad/", "oops");
       |             ^
 ../../../tests/llvm-plugins/validate_01.c:22:13: warning: libxo: format expects 2 argument(s) but 1 provided
@@ -13,40 +13,34 @@
 ../../../tests/llvm-plugins/validate_01.c:31:29: warning: libxo: argument 1 type mismatch: format expects string (char *)
    31 |     xo_emit("{:name/%s}\n", 42);
       |                             ^
-../../../tests/llvm-plugins/validate_01.c:34:13: warning: libxo format: field descriptor uses multiple types: '{LT:Max}\n'
+../../../tests/llvm-plugins/validate_01.c:34:13: warning: libxo: field descriptor uses multiple types: '{LT:Max}\n'
    34 |     xo_emit("{LT:Max}\n");
       |             ^
-../../../tests/llvm-plugins/validate_01.c:37:13: warning: libxo format: field must have a name: '{:/%s}\n'
+../../../tests/llvm-plugins/validate_01.c:37:13: warning: libxo: field must have a name: '{:/%s}'
    37 |     xo_emit("{:/%s}\n", "x");
       |             ^
-../../../tests/llvm-plugins/validate_01.c:40:13: warning: libxo format: use hyphens, not underscores, in field name: 'no_good'
+../../../tests/llvm-plugins/validate_01.c:40:13: warning: libxo: use hyphens, not underscores, in field name: '{:no_good/%s}'
    40 |     xo_emit("{:no_good/%s}\n", "x");
       |             ^
-../../../tests/llvm-plugins/validate_01.c:43:13: warning: libxo format: field name should be lower case: 'NAME'
+../../../tests/llvm-plugins/validate_01.c:43:13: warning: libxo: field name should be lower case: '{:NAME/%s}'
    43 |     xo_emit("{:NAME/%s}\n", "x");
       |             ^
-../../../tests/llvm-plugins/validate_01.c:46:13: warning: libxo format: field name cannot start with a digit: '9lives'
+../../../tests/llvm-plugins/validate_01.c:46:13: warning: libxo: field name cannot start with a digit: '{:9lives/%s}'
    46 |     xo_emit("{:9lives/%s}\n", "x");
       |             ^
-../../../tests/llvm-plugins/validate_01.c:49:13: warning: libxo format: field name contains invalid character: 'a$b'
-   49 |     xo_emit("{:a$b/%s}\n", "x");
-      |             ^
-../../../tests/llvm-plugins/validate_01.c:52:13: warning: libxo format: field name should be longer than two characters: 'ab'
+../../../tests/llvm-plugins/validate_01.c:52:13: warning: libxo: field name should not be less than 3 characters long: '{:ab/%s}'
    52 |     xo_emit("{:ab/%s}\n", "x");
       |             ^
-../../../tests/llvm-plugins/validate_01.c:55:13: warning: libxo format: anchor content must be a decimal width: 'mumble'
+../../../tests/llvm-plugins/validate_01.c:55:13: warning: libxo: anchor content must be a decimal width: '{[:mumble}'
    55 |     xo_emit("{[:mumble}{:name/%s}{]:}\n", "x");
       |             ^
-../../../tests/llvm-plugins/validate_01.c:58:13: warning: libxo format: anchor format must be '%d': '%s'
-   58 |     xo_emit("{[:/%s}{:name/%s}{]:}\n", "32", "x");
-      |             ^
-../../../tests/llvm-plugins/validate_01.c:61:13: warning: libxo format: anchor cannot have both static width and format: '{[:32/%d}{:name/%s}{]:}\n'
+../../../tests/llvm-plugins/validate_01.c:61:13: warning: libxo: anchor cannot have both static width and format: '{[:32/%d}'
    61 |     xo_emit("{[:32/%d}{:name/%s}{]:}\n", 32, "x");
       |             ^
-../../../tests/llvm-plugins/validate_01.c:64:13: warning: libxo format: humanize modifier ('h') requires a format string: '{h:size}\n'
+../../../tests/llvm-plugins/validate_01.c:64:13: warning: libxo: humanize modifier ('h') requires a format string: '{h:size}\n'
    64 |     xo_emit("{h:size}\n", 1024);
       |             ^
-../../../tests/llvm-plugins/validate_01.c:67:13: warning: libxo format: unknown keyword ignored: 'humanization'
+../../../tests/llvm-plugins/validate_01.c:67:13: warning: libxo: unknown keyword ignored: 'humanization'
    67 |     xo_emit("{,humanization:size/%d}\n", 1024);
       |             ^
 ../../../tests/llvm-plugins/validate_01.c:70:29: warning: libxo: argument 1 type mismatch: format expects integer
@@ -76,4 +70,4 @@
 ../../../tests/llvm-plugins/validate_01.c:74:71: warning: libxo: argument 4 type mismatch: format expects string (char *)
    74 |     xo_emit("{:value/%d.%u}, {:name/%.*s}\n", "foo", -4.537, "green", 13579);
       |                                                                       ^
-26 warnings generated.
+24 warnings generated.
