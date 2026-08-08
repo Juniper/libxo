@@ -215,13 +215,13 @@ public:
             ? DiagnosticsEngine::Warning : DiagnosticsEngine::Error;
 
         SyntaxDiagID = Diags.getCustomDiagID(errLevel,
-                           "libxo format: %0");
+                           "libxo: %0");
         CountDiagID  = Diags.getCustomDiagID(errLevel,
                            "libxo: format expects %0 argument(s) but %1 provided");
         TypeDiagID   = Diags.getCustomDiagID(errLevel,
                            "libxo: argument %0 type mismatch: format expects %1");
         WarnDiagID   = Diags.getCustomDiagID(DiagnosticsEngine::Warning,
-                           "libxo format: %0");
+                           "libxo: %0");
     }
 
     bool VisitCallExpr(CallExpr *CE)
