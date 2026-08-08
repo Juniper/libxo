@@ -31,7 +31,7 @@
  * Only used for error-message formatting.
  */
 const char *
-xo_printable (const char *str)
+xo_printable2 (const char *str, int len, int bracesp)
 {
     static THREAD_LOCAL(char) bufset[XO_NUMBUFS][XO_SMBUFSZ];
     static THREAD_LOCAL(int) bufnum = 0;
@@ -43,8 +43,14 @@ xo_printable (const char *str)
 	bufnum = 0;
 
     char *res = bufset[bufnum], *cp, *ep;
+    const char *str_end = str + len;
 
-    for (cp = res, ep = res + XO_SMBUFSZ - 1; *str && cp < ep; cp++, str++) {
+    cp = res;
+    if (bracesp)
+	*cp++ = '{';
+
+    for (ep = res + XO_SMBUFSZ - 2;
+	     str < str_end && *str && cp < ep; cp++, str++) {
 	if (*str == '\n') {
 	    *cp++ = '\\';
 	    *cp = 'n';
@@ -58,8 +64,17 @@ xo_printable (const char *str)
 	    *cp = *str;
     }
 
+    if (bracesp && cp < ep)
+	*cp++ = '}';
+
     *cp = '\0';
     return res;
+}
+
+const char *
+xo_printable (const char *str)
+{
+    return xo_printable2(str, strlen(str), 0);
 }
 
 /* Error reporting */
@@ -70,22 +85,26 @@ xo_parse_error (xo_parse_t *xpp, const char *fmt, ...)
     if (xpp == NULL || xpp->xp_error == NULL)
 	return;
 
+    char buf[512];
     va_list vap;
     va_start(vap, fmt);
-    xpp->xp_error(xpp->xp_error_data, fmt, vap);
+    vsnprintf(buf, sizeof(buf), fmt, vap);
     va_end(vap);
+    xpp->xp_error(xpp->xp_error_data, "%s", buf);
 }
 
 static void
 xo_parse_warning (xo_parse_t *xpp, const char *fmt, ...)
 {
-    if (xpp == NULL || xpp->xp_error == NULL)
+    if (xpp == NULL || xpp->xp_warn == NULL)
 	return;
 
+    char buf[512];
     va_list vap;
     va_start(vap, fmt);
-    xpp->xp_error(xpp->xp_error_data, fmt, vap);
+    vsnprintf(buf, sizeof(buf), fmt, vap);
     va_end(vap);
+    xpp->xp_warn(xpp->xp_warn_data, "%s", buf);
 }
 
 /* Allocator helper functions */
@@ -583,6 +602,9 @@ xo_parse_fields (xo_parse_t *xpp, xo_field_info_t *fields,
 	if (!(xpp->xp_flags & XPF_STRICT))
 	    goto next_field;
 
+	const char *str = xo_foff(fmt, xfip->xfi_start);
+	int slen = xfip->xfi_len;
+
 	if (xfip->xfi_ftype == 'V') {
 	    const char *np = xo_foff(fmt, xfip->xfi_content);
 	    unsigned nlen = (unsigned)xfip->xfi_clen;
@@ -590,14 +612,14 @@ xo_parse_fields (xo_parse_t *xpp, xo_field_info_t *fields,
 
 	    if (nlen == 0 && !(xfip->xfi_flags & XFF_ARGUMENT)) {
 		xo_parse_error(xpp, "field must have a name: '%s'",
-			       xo_printable(fmt));
+			       xo_printable2(str, slen, TRUE));
 		return -1;
 	    }
 	    if (np && nlen) {
 		if (isdigit((unsigned char) np[0])) {
 		    xo_parse_warning(xpp,
-			   "field name cannot start with a digit: '%.*s'",
-			   (int) nlen, np);
+			   "field name cannot start with a digit: '%s'",
+				     xo_printable2(str, slen, TRUE));
 		}
 
 		struct reported_errors {
@@ -612,8 +634,8 @@ xo_parse_fields (xo_parse_t *xpp, xo_field_info_t *fields,
 
 		    if (!re.re_percent && nc == '%') {
 			xo_parse_warning(xpp,
-			       "field name contains percent sign: '%.*s'",
-			       (int) nlen, np);
+			       "field name contains percent sign: '%s'",
+					 xo_printable2(str, slen, TRUE));
 			re.re_percent = 1;
 			continue;
 		    }
@@ -621,37 +643,44 @@ xo_parse_fields (xo_parse_t *xpp, xo_field_info_t *fields,
 		    if (!re.re_under && nc == '_') {
 			xo_parse_warning(xpp,
 			       "use hyphens, not underscores, "
-				       "in field name: '%.*s'",
-			       (int) nlen, np);
+				       "in field name: '%s'",
+					 xo_printable2(str, slen, TRUE));
 			re.re_under = 1;
 		    }
 
 		    if (!re.re_upper && isupper(nc)) {
 			xo_parse_warning(xpp,
-			       "field name should be lower case: '%.*s'",
-			       (int) nlen, np);
+			       "field name should be lower case: '%s'",
+					 xo_printable2(str, slen, TRUE));
 			re.re_upper = 1;
 		    }
 
 		    /*
+		     * XML element names are UTF8 values.  Looking at
+		     * them one character at a time won't work.
+		     */
+#if 0
+		    /*
 		     * Underscores and upper case are reported above,
 		     * so skip them here
 		     */
-		    if (!re.re_invalid && !isdigit(nc)
-			    && !(islower(nc) || isupper(nc))
+		    if (!re.re_invalid && !isdigit((int) nc)
+			    && !(islower((int) nc) || isupper((int) nc))
  			    && nc != '-' && nc != '_') {
 			xo_parse_warning(xpp,
-			       "field name contains invalid character: '%.*s'",
-			       (int) nlen, np);
+			       "field name contains invalid character: '%s'",
+					 xo_printable2(str, slen, TRUE));
 			re.re_invalid = 1;
 		    }
+#endif /* 0 */
 		}
 
-		if (!re.re_percent && nlen <= 2) {
+		if (!re.re_percent && nlen < XO_LINT_MIN_NAME) {
 		    xo_parse_warning(xpp,
-			   "field name should be longer than "
-				   "two characters: '%.*s'",
-			   (int) nlen, np);
+				     "field name should not be less than "
+				     "%d characters long: '%s'",
+				     XO_LINT_MIN_NAME,
+				     xo_printable2(str, slen, TRUE));
 		}
 	    }
 	}
@@ -664,8 +693,8 @@ xo_parse_fields (xo_parse_t *xpp, xo_field_info_t *fields,
 		for (; ni < nlen; ni++) {
 		    if (!isdigit((unsigned char) np[ni])) {
 			xo_parse_error(xpp,
-			       "anchor content must be a decimal width: '%.*s'",
-			       (int) nlen, np);
+			       "anchor content must be a decimal width: '%s'",
+				       xo_printable2(str, slen, TRUE));
 			break;
 		    }
 		}
@@ -673,18 +702,19 @@ xo_parse_fields (xo_parse_t *xpp, xo_field_info_t *fields,
 		    xo_parse_error(xpp,
 			   "anchor cannot have both static "
 				   "width and format: '%s'",
-			   xo_printable(fmt));
+				   xo_printable2(str, slen, TRUE));
 		}
 	    }
 	    if (format && flen > 0) {
 		/* Anchor width must be "%d" or numeric */
-		if (flen != 2 || format[0] != '%' || format[1] != 'd') {
+		if (flen != 2 || format[0] != '%'
+		        || !(format[1] != 'd' || format[1] != 'u')) {
 		    char *aep = NULL;
 		    (void) strtol(format, &aep, 10);
 		    if (aep != format + flen)
 			xo_parse_error(xpp,
-				       "anchor format must be '%%d': '%.*s'",
-				       (int) flen, format);
+			       "anchor format must be '%%d' or '%%u: '%s'",
+				       xo_printable2(str, slen, TRUE));
 		}
 	    }
 	}
