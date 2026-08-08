@@ -46,10 +46,9 @@ typedef struct xo_flag_mapping_s {
 
 /*
  * Error callback.  Called when xo_parse_format() encounters a problem.
- * The fmt/vap are a printf-style message; the caller owns the va_list.
+ * The fmt/... are a printf-style message.
  */
-typedef void (*xo_parse_error_func_t)(void *data, const char *fmt,
-				      va_list vap);
+typedef void (*xo_parse_error_func_t)(void *data, const char *fmt, ...);
 
 /*
  * Parse context.  The caller fills in the callback fields; xo_parse_format()
@@ -141,15 +140,21 @@ int xo_role_wants_default_format(int ftype);
 #define XO_NUMBUFS 8
 #define XO_SMBUFSZ 128
 
-const char * xo_printable (const char *str);
+const char *
+xo_printable (const char *str);
+const char *
+xo_printable2 (const char *str, int len, int bracesp);
 
 /*
  * Some roles need a name, some don't
  */
-#define XO_FORMAT_ROLES_NEEDING_NAME "DLNPTUV" /* Can't have empty name (:XX)*/
-#define XO_FORMAT_ROLES_OPTIONAL_NAME "G["     /* Might have empty name */
-#define XO_FORMAT_ROLES_NO_NAME "]"	       /* Must have empty name */
-#define XO_FORMAT_ROLES_NO_FORMAT "G]"	       /* Can't have a format (/XX) */
-#define XO_FORMAT_MODIFIERS_NEED_STRING "a"    /* "a" has a string argument */
+#define XO_LINT_ROLES_NEEDING_NAME "V" /* Can't have empty name (:XX)*/
+#define XO_LINT_ROLES_NEEDING_NAME_OR_FORMAT "DELNPTUW" /* One or the other */
+#define XO_LINT_ROLES_NO_DEFAULT_FORMAT "DELNPTUW[]" /* No '%s' default */
+#define XO_LINT_ROLES_OPTIONAL_NAME "CG"      /* Might have empty name */
+#define XO_LINT_ROLES_DEC_NAME_OR_FORMAT "[]"	       /* ":XX" or "/%d"" */
+#define XO_LINT_ROLES_NO_FORMAT "G"	       /* Can't have a format (/XX) */
+
+#define XO_LINT_MIN_NAME 3	/* Lint: no names less than this length  */
 
 #endif /* XO_FORMAT_H */
