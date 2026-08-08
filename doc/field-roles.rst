@@ -298,11 +298,12 @@ To give a width directly, encode it as the content of the anchor tag::
 
     xo_emit("({[:10}{:min/%d}/{:max/%d}{]:})\\n", min, max);
 
-To pass a width as an argument, use "%d" as the format, which must
-appear after the "/".  Note that only "%d" is supported for widths.
-Using any other value could ruin your day::
+To pass a width as an argument, use ``%d`` or ``%u`` as the format,
+which must appear after the "/".  The width may be on either the start
+or stop anchor::
 
     xo_emit("({[:/%d}{:min/%d}/{:max/%d}{]:})\\n", width, min, max);
+    xo_emit("({[:}{:min/%d}/{:max/%d}{]:/%d})\\n", min, max, width);
 
 If the width is negative, padding will be added on the right, suitable
 for left justification.  Otherwise the padding will be added to the
