@@ -117,9 +117,10 @@ typedef unsigned xo_emit_flags_t; /* Flags to xo_emit() and friends */
 #define XOEF_NO_RETAIN	(1<<1)	  /* Format must not be retained (dynamic) */
 
 /*
- * Field modifier flags (xfi_flags in xo_field_info_t).
- * These are shared between the public field-cache API and the internal
- * encoder plugin API (xo_encoder.h).
+ * Field modifier flags (xfi_flags in xo_field_info_t).  These are
+ * shared between the public field-cache API and the internal encoder
+ * plugin API (xo_encoder.h).  This structure is not public and should
+ * not be used by API client code.
  */
 typedef uint64_t xo_xff_flags_t;
 #define XFF_COLON	(1<<0)	/* Append a ":" */
