@@ -1,4 +1,0 @@
-../../../tests/core/test_09.c:98:13: warning: libxo format: field role requires a non-empty name
-   98 |     xo_emit("{Lwc:/Total:}{:total}\n", "six");
-      |             ^
-1 warning generated.
