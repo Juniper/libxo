@@ -100,7 +100,8 @@ typedef unsigned long long xo_xof_flags_t;
 #define XOF_LOG_GETTEXT	XOF_BIT(28) /** Log (stderr) gettext lookup strings */
 #define XOF_UTF8	XOF_BIT(29) /** Force text output to be UTF8 */
 /* XOF_BIT(30) is unused (was XOF_RETAIN_ALL; removed as unsafe) */
-#define XOF_RETAIN_NONE	XOF_BIT(31) /** Prevent use of XOEF_RETAIN */
+/* XOF_BIT(31) is unused (was XOF_RETAIN_NONE; retain feature removed) */
+#define XOF_RETAIN_NONE	0 /** Deprecated: retain feature removed */
 
 #define XOF_COLOR_MAP	XOF_BIT(32) /** Color map has been initialized */
 #define XOF_CONTINUATION XOF_BIT(33) /** Continuation of previous line */
@@ -113,8 +114,8 @@ typedef unsigned long long xo_xof_flags_t;
 #define XOF_FILTER_WARN	XOF_BIT(37)  /** Warn about runtime errors w/ filters */
 
 typedef unsigned xo_emit_flags_t; /* Flags to xo_emit() and friends */
-#define XOEF_RETAIN	(1<<0)	  /* Retain parsed formatting information */
-#define XOEF_NO_RETAIN	(1<<1)	  /* Format must not be retained (dynamic) */
+#define XOEF_RETAIN	0	  /* Deprecated: retain feature removed */
+#define XOEF_NO_RETAIN	0	  /* Deprecated: retain feature removed */
 
 /*
  * Field modifier flags (xfi_flags in xo_field_info_t).  These are
@@ -325,7 +326,7 @@ xo_ssize_t
 xo_emit (const char *fmt, ...);
 
 xo_ssize_t
-xo_emitr (const char *fmt, ...);
+xo_emitr (const char *fmt, ...); /* Deprecated: use xo_emit() */
 
 xo_ssize_t
 xo_emit_hvf (xo_handle_t *xop, xo_emit_flags_t flags,
@@ -930,13 +931,13 @@ xo_emit_field (const char *rolmod, const char *contents,
 	       const char *fmt, const char *efmt, ...);
 
 void
-xo_retain_clear_all (void);
+xo_retain_clear_all (void); /* Deprecated: retain feature removed */
 
 void
-xo_retain_clear (const char *fmt);
+xo_retain_clear (const char *fmt); /* Deprecated: retain feature removed */
 
 unsigned long
-xo_retain_get_hits (void);
+xo_retain_get_hits (void); /* Deprecated: retain feature removed */
 
 int
 xo_map_add (xo_handle_t *xop, const char *from, size_t flen,
