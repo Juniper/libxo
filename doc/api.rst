@@ -422,42 +422,120 @@ xo_destroy
   using.  Calling `xo_destroy` with a `NULL` handle will release any
   resources associated with the default handle.
 
-.. index:: xo_discarding_output
+.. index:: xo_map_add
+.. _xo_map_add:
 
-Checking for Filtering (xo_discarding_output)
----------------------------------------------
+xo_map_add
+++++++++++
 
-.. c:function:: void xo_discarding_output (void)
+.. c:function:: int xo_map_add (xo_handle_t *xop, const char *from, size_t flen, const char *to, size_t tlen)
 
-  :returns: int
-
-.. c:function:: void xo_discarding_output_h (xo_handle_t *xop)
-
-  :param xop: Handle for modify (or NULL for default handle)
+  :param xop: Handle to configure (or NULL for the default handle)
   :type xop: xo_handle_t \*
-  :returns: int
+  :param from: Source tag name (UTF-8, need not be NUL-terminated)
+  :type from: const char \*
+  :param flen: Length of ``from`` in bytes
+  :type flen: size_t
+  :param to: Replacement tag name (UTF-8, need not be NUL-terminated)
+  :type to: const char \*
+  :param tlen: Length of ``to`` in bytes
+  :type tlen: size_t
+  :returns: Zero for success, non-zero for error
+  :rtype: int
 
-  When a filter is in place, circumstances may occur where ay additional
-  output will be discarding.  xo_discarding_output will return TRUE when
-  the current output position is permanently filtered out
-  (XO_STATUS_DEAD): the active filter has determined that no content
-  generated here can ever appear in the final output.  Callers can use
-  this to skip expensive computation before calling xo_emit::
+  The `xo_map_add` function registers a one-to-one tag-name substitution
+  for the given handle.  Every time libxo would emit ``from`` as a
+  container, list, instance, or field name, it emits ``to`` instead.
+  The strings are copied internally; the caller does not need to keep them
+  alive after the call returns.
+
+  If a mapping for ``from`` already exists it is replaced.
+
+  This is the programmatic equivalent of the ``map=from=to`` option
+  described in :ref:`tag-mapping`.  To use the default handle, pass a
+  ``NULL`` handle.
+
+  ::
+
+    EXAMPLE:
+        xo_map_add(NULL, "user", 4, "owner", 5);
+
+.. index:: xo_map_add_file
+.. _xo_map_add_file:
+
+xo_map_add_file
++++++++++++++++
+
+.. c:function:: int xo_map_add_file (xo_handle_t *xop, const char *fname)
+
+  :param xop: Handle to configure (or NULL for the default handle)
+  :type xop: xo_handle_t \*
+  :param fname: Path to the mapping file, or a bare filename
+  :type fname: const char \*
+  :returns: Zero for success, non-zero for error
+  :rtype: int
+
+  The `xo_map_add_file` function loads tag-name mappings from a file and
+  registers them with the given handle.  The file format is one mapping
+  per line::
+
+    # comments begin with '#'; blank lines are allowed
+    old-tag = new-tag
+    another = replacement
+
+  Lines beginning with ``#`` and blank lines are ignored.  Whitespace
+  around the ``=`` separator is ignored.  A UTF-8 BOM at the start of the
+  file is accepted and skipped.
+
+  If ``fname`` contains no path separator (``/``) and does not exist in
+  the current working directory, libxo looks for it in the system map
+  directory (typically ``/usr/share/libxo/map/``).
+
+  This is the programmatic equivalent of the ``map-file=fname`` option
+  described in :ref:`tag-mapping`.  To use the default handle, pass a
+  ``NULL`` handle.
+
+  ::
+
+    EXAMPLE:
+        xo_map_add_file(NULL, "rename.map");
+
+.. index:: xo_is_emitting
+
+Checking for Active Output (xo_is_emitting)
+-------------------------------------------
+
+.. c:function:: int xo_is_emitting (void)
+
+  :returns: Non-zero when output at the current position will reach the final output, zero otherwise
+  :rtype: int
+
+.. c:function:: int xo_is_emitting_h (xo_handle_t *xop)
+
+  :param xop: Handle to query (or NULL for the default handle)
+  :type xop: xo_handle_t \*
+  :returns: Non-zero when output at the current position will reach the final output, zero otherwise
+  :rtype: int
+
+  When a filter is active, the current output position may be permanently
+  filtered out: the filter has determined that no content generated here
+  can ever appear in the final output (``XO_STATUS_DEAD``).  Callers can
+  use this to skip expensive computation before calling `xo_emit`::
 
     xo_open_container("interface-information");
-    if (xo_discarding_output()) {
+    if (xo_is_emitting()) {
         xo_open_container("connections");
-
         xo_emit("{:field/...}", value);
-
         xo_close_container("connections");
     }
     xo_close_container("interface-information");
 
-  Returns FALSE (proceed normally) when filtering is disabled, when the filter
-  module is not loaded, or when the status is anything other than DEAD
-  (including TRACK and PRED, which still may need key and predicate fields
-  to resolve matches).
+  Both functions return true when filtering is disabled, when the filter
+  module is not loaded, or when the filter status is anything other than
+  ``XO_STATUS_DEAD`` (for example ``XO_STATUS_TRACK`` or
+  ``XO_STATUS_PRED``, which still require key and predicate fields to be
+  evaluated before a decision can be made).  Both return false only when
+  the filter has permanently discarded the current output position.
 
 .. index:: xo_emit
 
