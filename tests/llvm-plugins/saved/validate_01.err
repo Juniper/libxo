@@ -7,10 +7,10 @@
 ../../../tests/llvm-plugins/validate_01.c:25:13: warning: libxo: format expects 1 argument(s) but 2 provided
    25 |     xo_emit("{:name/%s}\n", "carol", 99);
       |             ^
-../../../tests/llvm-plugins/validate_01.c:28:30: warning: libxo: argument 1 type mismatch: format expects integer
+../../../tests/llvm-plugins/validate_01.c:28:30: warning: libxo: argument 1: format specifies type 'int' but the argument has type 'char[5]'
    28 |     xo_emit("{:count/%d}\n", "oops");
       |                              ^
-../../../tests/llvm-plugins/validate_01.c:31:29: warning: libxo: argument 1 type mismatch: format expects string (char *)
+../../../tests/llvm-plugins/validate_01.c:31:29: warning: libxo: argument 1: format specifies type 'char *' but the argument has type 'int'
    31 |     xo_emit("{:name/%s}\n", 42);
       |                             ^
 ../../../tests/llvm-plugins/validate_01.c:34:13: warning: libxo: field descriptor uses multiple types: '{LT:Max}\n'
@@ -43,31 +43,40 @@
 ../../../tests/llvm-plugins/validate_01.c:67:13: warning: libxo: unknown keyword ignored: 'humanization'
    67 |     xo_emit("{,humanization:size/%d}\n", 1024);
       |             ^
-../../../tests/llvm-plugins/validate_01.c:70:29: warning: libxo: argument 1 type mismatch: format expects integer
+../../../tests/llvm-plugins/validate_01.c:70:29: warning: libxo: argument 1: format specifies type 'int' but the argument has type 'char[4]'
    70 |     xo_emit("{:name/%d}\n", "foo");
       |                             ^
-../../../tests/llvm-plugins/validate_01.c:71:30: warning: libxo: argument 1 type mismatch: format expects string (char *)
+../../../tests/llvm-plugins/validate_01.c:71:30: warning: libxo: argument 1: format specifies type 'char *' but the argument has type 'int'
    71 |     xo_emit("{:count/%s}\n", 37);
       |                              ^
-../../../tests/llvm-plugins/validate_01.c:72:29: warning: libxo: argument 1 type mismatch: format expects string (char *)
+../../../tests/llvm-plugins/validate_01.c:72:29: warning: libxo: argument 1: format specifies type 'char *' but the argument has type 'int'
    72 |     xo_emit("{:default}\n", 39);
       |                             ^
-../../../tests/llvm-plugins/validate_01.c:73:41: warning: libxo: argument 1 type mismatch: format expects integer
+../../../tests/llvm-plugins/validate_01.c:73:41: warning: libxo: argument 1: format specifies type 'int' but the argument has type 'char[4]'
    73 |     xo_emit("{:name/%d}, {:name/%s}\n", "foo", 37);
       |                                         ^
-../../../tests/llvm-plugins/validate_01.c:73:48: warning: libxo: argument 2 type mismatch: format expects string (char *)
+../../../tests/llvm-plugins/validate_01.c:73:48: warning: libxo: argument 2: format specifies type 'char *' but the argument has type 'int'
    73 |     xo_emit("{:name/%d}, {:name/%s}\n", "foo", 37);
       |                                                ^
-../../../tests/llvm-plugins/validate_01.c:74:47: warning: libxo: argument 1 type mismatch: format expects integer
+../../../tests/llvm-plugins/validate_01.c:74:47: warning: libxo: argument 1: format specifies type 'int' but the argument has type 'char[4]'
    74 |     xo_emit("{:value/%d.%u}, {:name/%.*s}\n", "foo", -4.537, "green", 13579);
       |                                               ^
-../../../tests/llvm-plugins/validate_01.c:74:54: warning: libxo: argument 2 type mismatch: format expects integer
+../../../tests/llvm-plugins/validate_01.c:74:54: warning: libxo: argument 2: format specifies type 'unsigned int' but the argument has type 'double'
    74 |     xo_emit("{:value/%d.%u}, {:name/%.*s}\n", "foo", -4.537, "green", 13579);
       |                                                      ^
-../../../tests/llvm-plugins/validate_01.c:74:62: warning: libxo: argument 3 type mismatch: format expects integer
+../../../tests/llvm-plugins/validate_01.c:74:62: warning: libxo: argument 3: format specifies type 'int' but the argument has type 'char[6]'
    74 |     xo_emit("{:value/%d.%u}, {:name/%.*s}\n", "foo", -4.537, "green", 13579);
       |                                                              ^
-../../../tests/llvm-plugins/validate_01.c:74:71: warning: libxo: argument 4 type mismatch: format expects string (char *)
+../../../tests/llvm-plugins/validate_01.c:74:71: warning: libxo: argument 4: format specifies type 'char *' but the argument has type 'int'
    74 |     xo_emit("{:value/%d.%u}, {:name/%.*s}\n", "foo", -4.537, "green", 13579);
       |                                                                       ^
-24 warnings generated.
+../../../tests/llvm-plugins/validate_01.c:79:39: warning: libxo: argument 1: format specifies type 'int' but the argument has type 'uint64_t'
+   79 |     xo_emit("{:types/%c-%ld-%lld}\n", u64, u32, u8);
+      |                                       ^
+../../../tests/llvm-plugins/validate_01.c:79:44: warning: libxo: argument 2: format specifies type 'long' but the argument has type 'uint32_t'
+   79 |     xo_emit("{:types/%c-%ld-%lld}\n", u64, u32, u8);
+      |                                            ^
+../../../tests/llvm-plugins/validate_01.c:79:49: warning: libxo: argument 3: format specifies type 'long long' but the argument has type 'uint8_t'
+   79 |     xo_emit("{:types/%c-%ld-%lld}\n", u64, u32, u8);
+      |                                                 ^
+27 warnings generated.
