@@ -59,7 +59,7 @@ correspond to output styles, flags, or features:
   map-file        Use a file to specify mapping between tag names
   no-humanize     Ignore the {h:} modifier (TEXT, HTML)
   no-locale       Do not initialize the locale setting
-  no-retain       Prevent retaining formatting information
+  no-retain       Deprecated; accepted but ignored
   no-top          Do not emit a top set of braces (JSON)
   not-first       Pretend the 1st output item was not 1st (JSON)
   pretty          Emit pretty-printed output
@@ -98,9 +98,8 @@ additional details:
   :ref:`humanize-modifier` for details).
 - "no-locale" instructs libxo to avoid translating output to the
   current locale.
-- "no-retain" disables the ability of libxo to internally retain
-  "compiled" information about formatting strings (see :ref:`retain`
-  for details).
+- "no-retain" is accepted for compatibility but ignored; the retain
+  feature has been removed.
 - "underscores" can be used with JSON output to change XML-friendly
   names with dashes into JSON-friendly name with underscores.
 - "warn" allows libxo to emit warnings on stderr when application code
