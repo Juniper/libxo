@@ -117,7 +117,8 @@ keywords, as detailed below:
    Option   Action
   ======== =============================================
    c        Enable color/effects for TEXT/HTML
-   F        Force line-buffered flushing
+   f        Flush output after each emit (XOF_FLUSH)
+   F        Force line-buffered flushing (XOF_FLUSH_LINE)
    H        Enable HTML output (XO_STYLE_HTML)
    I        Enable info output (XOF_INFO)
    i<num>   Indent by <number>
