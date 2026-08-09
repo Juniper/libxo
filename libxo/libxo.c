@@ -4931,40 +4931,40 @@ xo_add_filter (xo_handle_t *xop UNUSED, const char *input UNUSED)
 }
 
 /*
- * Return TRUE when the current output position is permanently
- * filtered out.  An active filter has determined that no content
- * generated here can ever appear in the final output.  Callers can
- * use this to skip expensive computation before calling xo_emit:
+ * Return TRUE when output at the current position will reach the final
+ * output: either filtering is not active, or the active filter has not
+ * permanently discarded this position.  Callers can use this to skip
+ * expensive computation before calling xo_emit:
  *
  *     xo_open_container("foo");
- *     if (!xo_discarding_output()) {
+ *     if (xo_is_emitting()) {
  *         ... expensive work ...
  *         xo_emit("{:field/...}", value);
  *     }
  *     xo_close_container("foo");
  *
- * Returns FALSE (proceed normally) when filtering is disabled, when
- * no filter is loaded, or when the status is anything other than DEAD
- * (including TRACK and PRED, which still need key and predicate
- * fields to resolve matches).
+ * Returns FALSE only when the filter status is DEAD (XO_STATUS_DEAD).
+ * Returns TRUE when filtering is disabled, when no filter is loaded,
+ * or when the status is TRACK or PRED (which still need key and
+ * predicate fields to resolve matches).
  */
 int
-xo_discarding_output_h (xo_handle_t *xop UNUSED)
+xo_is_emitting_h (xo_handle_t *xop UNUSED)
 {
 #ifdef LIBXO_NEED_FILTERS
     xop = xo_default(xop);
     if (!XOIF_ISSET(xop, XOIF_FILTERING))
-	return FALSE;
-    return xo_stack_cur(xop)->xs_fstatus == XO_STATUS_DEAD;
+	return TRUE;
+    return xo_stack_cur(xop)->xs_fstatus != XO_STATUS_DEAD;
 #else /* LIBXO_NEED_FILTERS */
-    return FALSE;
+    return TRUE;
 #endif /* LIBXO_NEED_FILTERS */
 }
 
 int
-xo_discarding_output (void)
+xo_is_emitting (void)
 {
-    return xo_discarding_output_h(NULL);
+    return xo_is_emitting_h(NULL);
 }
 
 #if defined(LIBXO_NEED_FILTERS) && defined(LIBXO_DEBUG)
@@ -7593,8 +7593,8 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
     if (fmt == NULL)
 	return 0;
 
-    /* Don't bother emitting fields is there's we're discarding output */
-    if (xo_discarding_output_h(xop))
+    /* Skip emit work when this position is permanently filtered out */
+    if (!xo_is_emitting_h(xop))
 	return 0;		/* Zero columns emitted */
 
     xo_parse_t xpp;
@@ -7629,7 +7629,7 @@ xo_do_emit_cached (xo_handle_t *xop, const xo_format_cache_t *fcp,
     if (fmt == NULL)
 	return 0;
 
-    if (xo_discarding_output_h(xop))
+    if (!xo_is_emitting_h(xop))
 	return 0;
 
     unsigned n = fcp->xfc_num_fields;
