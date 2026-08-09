@@ -56,9 +56,9 @@ The triggered functionality is identical.
 .It "map\-file   " "Use a file to specify mapping between tag names"
 .It "no\-humanize" "Ignore the {h:} modifier (TEXT, HTML)"
 .It "no\-locale  " "Do not initialize the locale setting"
-.It "no\-retain  " "Prevent retaining formatting information"
+.It "no\-retain  " "Deprecated; accepted but ignored"
 .It "pretty     " "Emit pretty\-printed output"
-.It "retain     " "Force retaining formatting information"
+.It "retain     " "Deprecated; accepted but ignored"
 .It "text       " "Emit TEXT output"
 .It "underscores" "Replace XML\-friendly dashes with JSON\-friendly underscores"
 .It "units      " "Add the 'units' (XML) or 'data\-units (HTML) attribute"
@@ -119,11 +119,6 @@ for details).
 instructs
 .Nm libxo
 to avoid translating output to the current locale.
-.Pp
-.Fa no\-retain
-disables the ability of
-.Nm libxo
-to internally retain "compiled" information about formatting strings.
 .Pp
 .Fa underscores
 can be used with
