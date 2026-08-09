@@ -1250,7 +1250,6 @@ libxo options, including:
 - no-color
 - no-humanize
 - no-locale
-- no-retain
 - pretty
 - underscores
 - warn
