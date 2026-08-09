@@ -59,13 +59,14 @@ man3_files = \
     xo_add_filter.3 \
     xo_attr.3 \
     xo_create.3 \
-    xo_discarding_output.3 \
     xo_emit.3 \
     xo_emit_err.3 \
     xo_err.3 \
     xo_error.3 \
     xo_finish.3 \
     xo_flush.3 \
+    xo_is_emitting.3 \
+    xo_map_add.3 \
     xo_message.3 \
     xo_no_setlocale.3 \
     xo_open_container.3 \
