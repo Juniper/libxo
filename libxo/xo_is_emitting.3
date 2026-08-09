@@ -22,9 +22,9 @@
 .Ft int
 .Fn xo_is_emitting_h "xo_handle_t *xop"
 .Sh DESCRIPTION
-When a filter is in place, some output positions may be permanently
-filtered out: the active filter has determined that no content
-generated at the current position can ever appear in the final output.
+When a filter is active, the current output hierarchy may be permanently
+filtered out: the filtering software has determined that no further
+content generated here can ever appear in the final output.
 .Pp
 The
 .Fn xo_is_emitting
@@ -41,45 +41,40 @@ To use the default handle, pass a
 .Dv NULL
 handle.
 .Pp
-Both functions return true when:
-.Bl -bullet -compact
-.It
-filtering is disabled,
-.It
-the filter module is not loaded, or
-.It
-the filter status is anything other than
-.Dv XO_STATUS_DEAD
-(for example
-.Dv XO_STATUS_TRACK
-or
-.Dv XO_STATUS_PRED ,
-which still require key and predicate fields to be evaluated before
-a decision can be made).
-.El
-.Pp
-Both functions return false only when the filter status is
-.Dv XO_STATUS_DEAD :
-the active filter has permanently discarded this output position.
+Both functions return true when filtering is disabled, when the filter
+module is not loaded, or when the filter status does not indicate a
+permanent filtering state.
+Both functions return false only when the filter has permanently
+discarded the current output position.
 .Sh RETURN VALUES
 Returns true
 .Pq non-zero
 when output at the current position will reach the final output.
 Returns false
 .Pq zero
-when the current position is permanently filtered out
-.Pq Dv XO_STATUS_DEAD .
+when the filter has permanently discarded the current output position.
 .Sh EXAMPLES
 .Bd -literal -offset indent
-xo_open_container("interface-information");
+xo_open_container("some-parent");
 if (xo_is_emitting()) {
-    /* skip expensive work only when output will actually be seen */
     xo_open_container("connections");
     xo_emit("{:field/...}", value);
+    /* Massive content generation */
     xo_close_container("connections");
 }
-xo_close_container("interface-information");
+xo_close_container("some-parent");
 .Ed
+.Pp
+For example,
+.Dq my-app --libxo filter=!some-parent
+means that when
+.Nm libxo
+sees the
+.Dq some-parent
+tag, it knows that nothing under that container will be emitted.
+By calling
+.Fn xo_is_emitting ,
+the code avoids the expense of massive content generation.
 .Sh SEE ALSO
 .Xr libxo 3 ,
 .Xr xo_add_filter 3 ,
