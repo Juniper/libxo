@@ -332,59 +332,6 @@ variants might be wise:
    xo_emit_errc       xo_emit_errc_p
   ================== ========================
 
-.. index:: performance
-.. index:: XOEF_RETAIN
-
-.. _retain:
-
-Retaining Parsed Format Information
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-libxo can retain the parsed internal information related to the given
-format string, allowing subsequent xo_emit calls, the retained
-information is used, avoiding repetitive parsing of the format string::
-
-    SYNTAX:
-      int xo_emit_f(xo_emit_flags_t flags, const char fmt, ...);
-    EXAMPLE:
-      xo_emit_f(XOEF_RETAIN, "{:some/%02d}{:thing/%-6s}{:fancy}\\n",
-                     some, thing, fancy);
-
-To retain parsed format information, use the XOEF_RETAIN flag to the
-xo_emit_f() function.  A complete set of xo_emit_f functions exist to
-match all the xo_emit function signatures (with handles, varadic
-argument, and printf-like flags):
-
-  ================== ========================
-   Function           Flags Equivalent
-  ================== ========================
-   xo_emit_hv         xo_emit_hvf
-   xo_emit_h          xo_emit_hf
-   xo_emit            xo_emit_f
-   xo_emit_hvp        xo_emit_hvfp
-   xo_emit_hp         xo_emit_hfp
-   xo_emit_p          xo_emit_fp
-  ================== ========================
-
-The format string must be immutable across multiple calls to xo_emit_f(),
-since the library retains the string.  Typically this is done by using
-static constant strings, such as string literals. If the string is not
-immutable, the XOEF_RETAIN flag must not be used.
-
-The functions xo_retain_clear() and xo_retain_clear_all() release
-internal information on either a single format string or all format
-strings, respectively.  Neither is required, but the library will
-retain this information until it is cleared or the process exits::
-
-    const char *fmt = "{:name}  {:count/%d}\\n";
-    for (i = 0; i < 1000; i++) {
-        xo_open_instance("item");
-        xo_emit_f(XOEF_RETAIN, fmt, name[i], count[i]);
-    }
-    xo_retain_clear(fmt);
-
-The retained information is kept as thread-specific data.
-
 Example
 ~~~~~~~
 
