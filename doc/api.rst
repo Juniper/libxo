@@ -517,25 +517,31 @@ Checking for Active Output (xo_is_emitting)
   :returns: Non-zero when output at the current position will reach the final output, zero otherwise
   :rtype: int
 
-  When a filter is active, the current output position may be permanently
-  filtered out: the filter has determined that no content generated here
-  can ever appear in the final output (``XO_STATUS_DEAD``).  Callers can
-  use this to skip expensive computation before calling `xo_emit`::
+  When a filter is active, the current output hierarchy may be
+  permanently filtered out: the filtering software has determined that
+  no further content generated here can ever appear in the final
+  output.  Callers can use this to skip expensive computation before
+  calling `xo_emit`::
 
-    xo_open_container("interface-information");
+    xo_open_container("some-parent");
     if (xo_is_emitting()) {
         xo_open_container("connections");
         xo_emit("{:field/...}", value);
+        /* Massive content generation */
         xo_close_container("connections");
     }
-    xo_close_container("interface-information");
+    xo_close_container("some-parent");
 
-  Both functions return true when filtering is disabled, when the filter
-  module is not loaded, or when the filter status is anything other than
-  ``XO_STATUS_DEAD`` (for example ``XO_STATUS_TRACK`` or
-  ``XO_STATUS_PRED``, which still require key and predicate fields to be
-  evaluated before a decision can be made).  Both return false only when
-  the filter has permanently discarded the current output position.
+  Both functions return true when filtering is disabled, when the
+  filter module is not loaded, or when the filter status does not
+  indicate a permanent filtering state.  Both functions will return
+  false only when the filter has permanently discarded the current
+  output position.
+
+  For example, "my-app --libxo filter=!some-parent" means that when libxo
+  sees the "some-parent" tag, it knows that nothing under that
+  container will be emitted.  By calling `xo_is_emitting`, the code
+  avoids the expense of massive content generation.
 
 .. index:: xo_emit
 
