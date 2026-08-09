@@ -1,0 +1,96 @@
+.\" #
+.\" # Copyright (c) 2025, Juniper Networks, Inc.
+.\" # All rights reserved.
+.\" # This SOFTWARE is licensed under the LICENSE provided in the
+.\" # ../Copyright file. By downloading, installing, copying, or
+.\" # using the SOFTWARE, you agree to be bound by the terms of that
+.\" # LICENSE.
+.\" # Phil Shafer, 2025
+.\"
+.Dd June 1, 2025
+.Dt XO_IS_EMITTING 3
+.Os
+.Sh NAME
+.Nm xo_is_emitting , xo_is_emitting_h
+.Nd test whether libxo will emit output at the current position
+.Sh LIBRARY
+.Lb libxo
+.Sh SYNOPSIS
+.In libxo/xo.h
+.Ft int
+.Fn xo_is_emitting "void"
+.Ft int
+.Fn xo_is_emitting_h "xo_handle_t *xop"
+.Sh DESCRIPTION
+When a filter is in place, some output positions may be permanently
+filtered out: the active filter has determined that no content
+generated at the current position can ever appear in the final output.
+.Pp
+The
+.Fn xo_is_emitting
+function returns true when output at the current position of the default
+handle will reach the final output.
+Callers can use this to skip expensive computation that would otherwise
+precede a call to
+.Xr xo_emit 3 .
+.Pp
+The
+.Fn xo_is_emitting_h
+variant operates on the specified handle.
+To use the default handle, pass a
+.Dv NULL
+handle.
+.Pp
+Both functions return true when:
+.Bl -bullet -compact
+.It
+filtering is disabled,
+.It
+the filter module is not loaded, or
+.It
+the filter status is anything other than
+.Dv XO_STATUS_DEAD
+(for example
+.Dv XO_STATUS_TRACK
+or
+.Dv XO_STATUS_PRED ,
+which still require key and predicate fields to be evaluated before
+a decision can be made).
+.El
+.Pp
+Both functions return false only when the filter status is
+.Dv XO_STATUS_DEAD :
+the active filter has permanently discarded this output position.
+.Sh RETURN VALUES
+Returns true
+.Pq non-zero
+when output at the current position will reach the final output.
+Returns false
+.Pq zero
+when the current position is permanently filtered out
+.Pq Dv XO_STATUS_DEAD .
+.Sh EXAMPLES
+.Bd -literal -offset indent
+xo_open_container("interface-information");
+if (xo_is_emitting()) {
+    /* skip expensive work only when output will actually be seen */
+    xo_open_container("connections");
+    xo_emit("{:field/...}", value);
+    xo_close_container("connections");
+}
+xo_close_container("interface-information");
+.Ed
+.Sh SEE ALSO
+.Xr libxo 3 ,
+.Xr xo_add_filter 3 ,
+.Xr xo_emit 3 ,
+.Xr xo_filter 7
+.Sh HISTORY
+The
+.Fn xo_is_emitting
+function first appeared in
+.Fx 15.0 .
+.Sh AUTHORS
+.Nm libxo
+was written by
+.An Phil Shafer Aq Mt phil@freebsd.org .
