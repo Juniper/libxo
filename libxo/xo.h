@@ -950,9 +950,9 @@ int
 xo_add_filter (xo_handle_t *xop, const char *vp);
 
 int
-xo_discarding_output_h (xo_handle_t *xop);
+xo_is_emitting_h (xo_handle_t *xop);
 
 int
-xo_discarding_output (void);
+xo_is_emitting (void);
 
 #endif /* INCLUDE_XO_H */
