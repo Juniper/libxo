@@ -279,25 +279,6 @@ AC_SUBST(GETTEXT_BINDIR)
 
 AM_CONDITIONAL([HAVE_GETTEXT], [test "$HAVE_GETTEXT" = "yes"])
 
-dnl on macosx, strings are not in the .text segment, making the call
-dnl to get_etext pointless
-AC_MSG_CHECKING([style of etext])
-AC_LINK_IFELSE([AC_LANG_SOURCE([
-    [#include <stdio.h>]
-    [extern char etext;]
-    [int main() { const char *p = &etext; printf("%p\n", p); return 0; }]])],
-    [HAVE_ETEXT=1 ; HAVE_ETEXT_STYLE="symbol"],
-    AC_LINK_IFELSE([AC_LANG_SOURCE([
-	[#include <stdio.h>]
-	[#include <mach-o/getsect.h>]
-	[int main() { const char *p = (const char *) get_etext(); printf("%p\n", p); return 0; }]])],
-        [HAVE_ETEXT=2 ; HAVE_ETEXT_STYLE="function"],
-	[HAVE_ETEXT=0 ; HAVE_ETEXT_STYLE="none"]
-    )
-)
-AC_MSG_RESULT(${HAVE_ETEXT_STYLE})
-AC_DEFINE_UNQUOTED([HAVE_ETEXT], [$HAVE_ETEXT], [Style of etext])
-
 dnl Looking for how to do thread-local variables
 AC_ARG_WITH(threads,
         [  --with-threads=[STYLE]           Specify style of thread-local support (none)],
@@ -435,18 +416,6 @@ AC_ARG_ENABLE([wcwidth],
 AC_MSG_RESULT([$LIBXO_WCWIDTH])
 if test "${LIBXO_WCWIDTH}" != "no"; then
   AC_DEFINE([LIBXO_WCWIDTH], [1], [Enable local wcwidth implementation])
-fi
-
-AC_MSG_CHECKING([retain hash bucket size])
-AC_ARG_WITH(retain-size,
-        [  --with-retain-size=[DIR]           Specify retain hash bucket size (in bits)],
-        [XO_RETAIN_SIZE=$withval],
-        [XO_RETAIN_SIZE=default]
-)
-
-AC_MSG_RESULT([$XO_RETAIN_SIZE])
-if test "${XO_RETAIN_SIZE}" != "default"; then
-  AC_DEFINE_UNQUOTED([XO_RETAIN_SIZE], ${XO_RETAIN_SIZE}, [Retain hash bucket size])
 fi
 
 AC_CHECK_LIB([m], [lrint])
@@ -644,8 +613,6 @@ AC_MSG_NOTICE([summary of build options:
   isthreaded:       ${HAVE_ISTHREADED:-no}
   thread-local:     ${THREAD_LOCAL:-no}
   local wcwidth:    ${LIBXO_WCWIDTH:-no}
-  retain size:      ${XO_RETAIN_SIZE:-no}
-  have etext:       ${HAVE_ETEXT:-no} (${HAVE_ETEXT_STYLE})
   have exterr:      ${HAVE_EXTERR:-no}
   yacc:             ${YACC}
   filters:          ${LIBXO_NEED_FILTERS}
