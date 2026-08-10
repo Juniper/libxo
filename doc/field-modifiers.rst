@@ -15,7 +15,9 @@ particular output styles:
    c   colon           A colon (":") is appended after the label
    d   display         Only emit field for display styles (text/HTML)
    e   encoding        Only emit for encoding styles (XML/JSON)
+  \    escape-private  Escape control chars as Unicode private-use refs (XML/HTML)
   \    escape-slash    Escape forward slashes (JSON)
+  \    escape-square   Escape control chars as U+25A1 WHITE SQUARE (XML/HTML)
    g   gettext         Call gettext on field's render content
    h   humanize (hn)   Format large numbers in human-readable style
   \    hn-space        Humanize: Place space between numeric and unit
@@ -126,6 +128,25 @@ the encoding output styles, XML and JSON::
 The encoding modifier is the opposite of the display modifier, and
 they are often used to give to distinct views of the underlying data.
 
+The escape-private Modifier
+++++++++++++++++++++++++++++
+
+.. index:: Field Modifiers; escape-private
+
+The escape-private modifier causes control characters in a field value
+to be escaped as Unicode XML character references in the private-use
+area (U+E000\-U+E0FF).
+A control character with byte value *b* (0x00\-0x1F, excluding
+newline, carriage return, and tab) is replaced with the XML character
+reference ``&#xE0bb;``, where *bb* is the hexadecimal byte value.
+For example, byte 0x01 becomes ``&#xE001;``.
+
+This substitution is reversible: the original byte value can be
+recovered by subtracting 0xE000 from the Unicode code point.
+
+The escape-private modifier only affects XML and HTML output styles.
+Without this modifier, control characters are replaced with spaces.
+
 The escape-slash Modifier
 ++++++++++++++++++++++++++++
 
@@ -139,6 +160,21 @@ JSON style, any forward slashes ('/') should be escaped.
 
 :RFC:`7159` allows optional escaping of forward slashes to avoid
 circumstances where a slash may be filtered, such as HTML.
+
+The escape-square Modifier
+++++++++++++++++++++++++++++
+
+.. index:: Field Modifiers; escape-square
+
+The escape-square modifier causes control characters in a field value
+to be replaced with the Unicode WHITE SQUARE character (U+25A1, \☐).
+A control character is any byte value less than 0x20, except for
+newline, carriage return, and tab.
+
+This substitution is not reversible.
+
+The escape-square modifier only affects XML and HTML output styles.
+Without this modifier, control characters are replaced with spaces.
 
 .. index:: Field Modifiers; Gettext
 .. _gettext-modifier:
