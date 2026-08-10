@@ -337,46 +337,6 @@ dnl
 AC_DEFUN([VERSION_TO_NUMBER],
 [`$1 | sed -e 's/lib.* //' | awk 'BEGIN { FS = "."; } { printf "%d", ([$]1 * 1000 + [$]2) * 1000 + [$]3;}'`])
 
-LIBSLAX_CONFIG_PREFIX=""
-LIBSLAX_SRC=""
-
-AC_ARG_WITH(libslax-prefix,
-        [  --with-libslax-prefix=[PFX]           Specify location of libslax config],
-        LIBSLAX_CONFIG_PREFIX=$withval
-)
-
-AC_MSG_CHECKING(for libslax) 
-if test "x$LIBSLAX_CONFIG_PREFIX" != "x"
-then
-        SLAX_CONFIG=${LIBSLAX_CONFIG_PREFIX}/bin/slax-config
-else
-        SLAX_CONFIG=slax-config
-fi
-
-dnl
-dnl make sure slax-config is executable,
-dnl test version and init our variables
-dnl
-
-if ${SLAX_CONFIG} --libs > /dev/null 2>&1
-then
-	LIBSLAX_VERSION=`$SLAX_CONFIG --version`
-	SLAX_BINDIR="`$SLAX_CONFIG --bindir | head -1`"
-	SLAX_OXTRADOCDIR="`$SLAX_CONFIG --oxtradoc | head -1`"
-	AC_MSG_RESULT($LIBSLAX_VERSION found)
-	HAVE_OXTRADOC=yes
-else
-	LIBSLAX_VERSION=
-	SLAX_BINDIR=
-	SLAX_OXTRADOCDIR=
-	AC_MSG_RESULT([no])
-	HAVE_OXTRADOC=no
-fi
-AM_CONDITIONAL([HAVE_OXTRADOC], [test "$HAVE_OXTRADOC" != "no"])
-
-AC_SUBST(SLAX_BINDIR)
-AC_SUBST(SLAX_OXTRADOCDIR)
-
 AC_MSG_CHECKING([whether to build with warnings])
 AC_ARG_ENABLE([warnings],
     [  --enable-warnings    Turn on compiler warnings],
@@ -598,7 +558,6 @@ AC_MSG_NOTICE([summary of build options:
   share dir:        ${XO_SHAREDIR}
   extensions dir:   ${XO_ENCODERDIR}
   filter dir:       ${XO_FILTERDIR}
-  oxtradoc dir:     ${SLAX_OXTRADOCDIR}
 
   compiler:         ${CC} (${HAVE_GCC:-no})
   compiler flags:   ${CFLAGS}
