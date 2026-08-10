@@ -128,7 +128,7 @@ main (int argc, char **argv)
     xo_emit("{lq:flag/one} {lq:flag/two} {lq:flag/three}\n");
     xo_close_list("flag");
 
-    xo_emit("{n:works/%s}\n", NULL);
+    xo_emit("{n:works/%s}\n", (const char *) NULL);
 
     xo_emit("{e:empty-tag/}");
     xo_emit("1:{qt:t1/%*d} 2:{qt:t2/test%-*u} "
@@ -148,8 +148,10 @@ main (int argc, char **argv)
 	    "a {:usize/%u} ulong: {:uval/%llu}\n"
 	    "a {:lsize/%u} long: {:lval/%lld}\n"
 	    "a {:usize/%u} ulong: {:uval/%llu}\n",
-	    sizeof(long_long), long_long, sizeof(ulong_long), ulong_long,
-	    sizeof(long_long), long_long, sizeof(ulong_long), ulong_long);
+	    (unsigned) sizeof(long_long), long_long,
+	    (unsigned) sizeof(ulong_long), ulong_long,
+	    (unsigned) sizeof(long_long), long_long,
+	    (unsigned) sizeof(ulong_long), ulong_long);
     xo_close_container("long-long-test");
 
     xo_emit("{:value/%16lld}\n", 123412341234LL);
