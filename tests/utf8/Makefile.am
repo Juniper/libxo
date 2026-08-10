@@ -103,7 +103,7 @@ all-local: $(validate_tests) $(pass_tests)
 $(validate_tests): %.validate-test: $(srcdir)/%.c \
     $(VALIDATE_BUILD)/xo_validate.so \
     $(FORMAT_LA) $(LIBXO_LA)
-	$(AM_V_GEN)DYLD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${DYLD_LIBRARY_PATH}" \
+	@$(AM_V_GEN)DYLD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${DYLD_LIBRARY_PATH}" \
 	    LD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${LD_LIBRARY_PATH}" \
 	    ${LLVM_CLANG} ${CFLAGS} \
 	    -fplugin=${VALIDATE_BUILD}/xo_validate.so \
@@ -115,7 +115,7 @@ $(validate_tests): %.validate-test: $(srcdir)/%.c \
 $(pass_tests): %.pass-test: $(srcdir)/%.c \
     $(PRECOMPILE_BUILD)/xo_precompile.so \
     $(FORMAT_LA) $(LIBXO_LA)
-	$(AM_V_GEN)DYLD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${DYLD_LIBRARY_PATH}" \
+	@$(AM_V_GEN)DYLD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${DYLD_LIBRARY_PATH}" \
 	    LD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${LD_LIBRARY_PATH}" \
 	    ${LLVM_CLANG} ${CFLAGS} \
 	    -fpass-plugin=${PRECOMPILE_BUILD}/xo_precompile.so \
@@ -131,7 +131,7 @@ run-validate-tests: $(validate_tests)
 	    diff -Nu ${srcdir}/saved/$$tc.validate-test.make.err \
 	        $$tc.validate-test.make.err ; \
 	done
-	DYLD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${DYLD_LIBRARY_PATH}" \
+	@DYLD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${DYLD_LIBRARY_PATH}" \
 	    LD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${LD_LIBRARY_PATH}" \
 	    ${RUN_TESTS_CMD} -T "${TEST_FORMATS}" -m validate \
 	    -a "file ${TEST_FILE}" run-bin ${TEST_CASES:.c=.test}
@@ -144,7 +144,7 @@ run-pass-tests: $(pass_tests)
 	    diff -Nu ${srcdir}/saved/$$tc.pass-test.make.err \
 	        $$tc.pass-test.make.err ; \
 	done
-	DYLD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${DYLD_LIBRARY_PATH}" \
+	@DYLD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${DYLD_LIBRARY_PATH}" \
 	    LD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${LD_LIBRARY_PATH}" \
 	    ${RUN_TESTS_CMD} -T "${TEST_FORMATS}" -m pass \
 	    -a "file ${TEST_FILE}" run-bin ${TEST_CASES:.c=.test}
