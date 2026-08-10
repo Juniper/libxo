@@ -290,6 +290,8 @@ fmt_expected_type (ASTContext &C, const char *spec, unsigned len)
             return C.LongDoubleTy;
         return C.DoubleTy;  /* float promotes to double in varargs */
     case 's':
+        if (lm == LM_L)
+            return C.getPointerType(C.WCharTy);
         return C.getPointerType(C.CharTy);
     case 'p':
         return C.VoidPtrTy;
@@ -344,15 +346,42 @@ type_matches (ASTContext &C, QualType expected, const Expr *arg)
     if (e->isIntegerType() && act->isIntegerType())
         return to_unsigned(C, act) == to_unsigned(C, e);
 
-    /* %s: any char pointer (char *, const char *, unsigned char *, etc.) */
-    if (e->isPointerType() && e->getPointeeType()->isCharType()) {
-        return act->isPointerType()
-            && act->getPointeeType()->isCharType();
-    }
+    /* Pointer checks — also handle array-to-pointer decay (T[N] for T *).
+     * Arrays may arrive un-decayed when Clang does not apply the implicit
+     * ArrayToPointerDecay cast before the vararg boundary. */
+    if (e->isPointerType()) {
+        /* Unwrap actual: pointer T * → T, array T[N] → T */
+        QualType ap;
+        if (act->isPointerType())
+            ap = act->getPointeeType().getCanonicalType().getUnqualifiedType();
+        else if (act->isArrayType())
+            ap = C.getAsArrayType(act)->getElementType()
+                  .getCanonicalType().getUnqualifiedType();
+        else
+            return false;
 
-    /* %p: any pointer */
-    if (e->isVoidPointerType())
-        return act->isPointerType();
+        QualType ep = e->getPointeeType().getCanonicalType().getUnqualifiedType();
+
+        if (ap == ep)
+            return true;
+
+        /* %s/%hs: any char kind (char *, unsigned char *, char[N], …) */
+        if (ep->isCharType() && ap->isCharType())
+            return true;
+
+        /* %ls: in C mode the wchar_t typedef resolves to an integer type
+         * (e.g. int on macOS) while C.WCharTy may be a distinct built-in
+         * BuiltinType::WChar_S.  Accept any same-sized integer as wchar_t. */
+        if (ep->isWideCharType() && ap->isIntegerType() &&
+            C.getTypeSize(ap) == C.getTypeSize(ep))
+            return true;
+
+        /* %p: void * accepts any pointer-or-array argument */
+        if (ep->isVoidType())
+            return true;
+
+        return false;
+    }
 
     /* Float: exact canonical type match.
      * On macOS ARM long double and double are both 64-bit, but they are
