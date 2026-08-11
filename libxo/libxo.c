@@ -178,8 +178,6 @@
 const char xo_version[] = LIBXO_VERSION;
 const char xo_version_extra[] = LIBXO_VERSION_EXTRA;
 
-#define UNUSED XO_UNUSED
-
 #ifndef LIBXO_TEXT_ONLY
 #define XO_MAP_INCR 128		/* Must be even */
 
@@ -7458,7 +7456,9 @@ xo_do_emit_fields (xo_handle_t *xop, xo_field_info_t *fields,
 		    xo_parse_t nxpp;
 		    xo_parse_for_handle(xop, &nxpp);
 
-		    unsigned new_max_fields = xo_count_fields(&nxpp, new_fmt);
+		    size_t new_fmt_len;
+		    unsigned new_max_fields
+			= xo_count_fields(&nxpp, new_fmt, &new_fmt_len);
 
 		    if (++new_max_fields < max_fields)
 			new_max_fields = max_fields;
@@ -7469,7 +7469,7 @@ xo_do_emit_fields (xo_handle_t *xop, xo_field_info_t *fields,
 		    bzero(new_fields, sz);
 
 		    if (!xo_parse_fields(&nxpp, new_fields + 1,
-					 new_max_fields, new_fmt)) {
+				 new_max_fields, new_fmt, new_fmt_len)) {
 			gettext_reordered = 0;
 
 			if (!xo_gettext_combine_formats(xop, fmt, new_fmt,
@@ -7597,11 +7597,14 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 
     xo_parse_t xpp;
     xo_parse_for_handle(xop, &xpp);
-    unsigned max_fields = xo_count_fields(&xpp, fmt);
-    xo_field_info_t *fields = alloca(max_fields * sizeof(fields[0]));
+
+    size_t fmt_len;
+    unsigned max_fields = xo_count_fields(&xpp, fmt, &fmt_len);
+
+    xo_field_info_t fields[max_fields];
     bzero(fields, max_fields * sizeof(fields[0]));
 
-    if (xo_parse_fields(&xpp, fields, max_fields, fmt))
+    if (xo_parse_fields(&xpp, fields, max_fields, fmt, fmt_len))
 	return -1;		/* Warning already displayed */
 
     return xo_do_emit_fields(xop, fields, max_fields, fmt);
@@ -7760,12 +7763,14 @@ xo_simplify_format (xo_handle_t *xop, const char *fmt, int with_numbers,
 
     xo_parse_t xpp;
     xo_parse_for_handle(xop, &xpp);
-    unsigned max_fields = xo_count_fields(&xpp, fmt);
+
+    size_t fmt_len;
+    unsigned max_fields = xo_count_fields(&xpp, fmt, &fmt_len);
     xo_field_info_t fields[max_fields];
 
     bzero(fields, max_fields * sizeof(fields[0]));
 
-    if (xo_parse_fields(&xpp, fields, max_fields, fmt))
+    if (xo_parse_fields(&xpp, fields, max_fields, fmt, fmt_len))
 	return NULL;		/* Warning already displayed */
 
     xo_buffer_t xb;
