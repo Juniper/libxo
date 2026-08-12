@@ -4005,35 +4005,36 @@ xo_do_format_field (xo_handle_t *xop, xo_buffer_t *xbp,
     return 0;
 }
 
-static inline int
-xo_fix_encoding_char (char ch)
-{
-    if (ch == '-')
-	return TRUE;
-    if (isdigit((int) ch))
-	return TRUE;
-    return FALSE;
-}
-
 /*
- * Remove any numeric precision/width format from the format string by
- * inserting the "%" after the [0-9]+, returning the substring.
+ * Remove a numeric width from the format string by inserting "%" just
+ * before the conversion letter, and returning the new substring.
+ * An optional leading '-' flag is skipped, but only when followed by
+ * actual digits (e.g. %-10s -> %s, %-8.1f -> %.1f).  Formats that use
+ * '*' for the width are returned unchanged because the width value lives
+ * in va_args and cannot be consumed here.
  */
 static char *
 xo_fix_encoding (xo_handle_t *xop UNUSED, char *encoding)
 {
     char *cp = encoding;
 
-    if (cp[0] != '%' || !xo_fix_encoding_char(cp[1]))
+    if (cp[0] != '%')
 	return encoding;
 
-    for (cp += 2; *cp; cp++) {
-	if (!xo_fix_encoding_char(*cp))
+    /* Skip optional '-' alignment flag, then require a literal digit width. */
+    cp++;
+    if (*cp == '-')
+	cp++;
+
+    if (!isdigit((int) *cp))
+	return encoding;
+
+    for (cp++; *cp; cp++) {
+	if (!isdigit((int) *cp))
 	    break;
     }
 
     *--cp = '%';		/* Back off and insert the '%' */
-
     return cp;
 }
 
@@ -4171,6 +4172,138 @@ xo_simple_field (xo_handle_t *xop, unsigned encode_only,
 	xo_data_append_content(xop, value, vlen, flags);
 }
 
+static const char *
+xo_key_find_matching (const char *cp, char ch)
+{
+    for (; *cp; cp++) {
+	if (*cp == ch)
+	    return cp;
+
+	if (*cp == '\\')
+	    if (*++cp == '\0')
+		break;
+    }
+
+    return NULL;
+}
+
+static int
+xo_key_is_duplicate (const char *name, ssize_t nlen, const char *keys)
+{
+    const char *cp = keys;
+
+    for (;;)  {
+	/* Start of the predicate */
+	if (*cp++ != '[')
+	    break;
+
+	if (strncmp(cp, name, nlen) == 0) {
+	    char ch = cp[nlen];
+	    if (ch == ' ' || ch == '=') {
+		/* Got a match; first wins, so we ignore this one */
+		return TRUE;
+	    }
+	}
+
+	for (; *cp; cp++) {
+	    if (*cp == ']')
+		break;
+	    if (*cp == '\'') {
+		cp = xo_key_find_matching(cp + 1, *cp);
+		if (cp == NULL)
+		    return FALSE; /* Bail! */
+	    }
+	}
+
+	if (*cp == '\0')
+	    break;
+	cp += 1;		/* Move over ']' */
+    }
+
+    return FALSE;
+}
+
+static void
+xo_build_predicate (xo_handle_t *xop, const char *name, ssize_t nlen,
+		    xo_xff_flags_t flags,
+		    const char *encoding, ssize_t elen)
+{
+    xo_stack_t *xsp = xo_stack_cur(xop);
+
+    if (xsp->xs_keys && xo_key_is_duplicate(name, nlen, xsp->xs_keys))
+	return;
+
+    va_list va_local;
+
+    va_copy(va_local, xop->xo_vap);
+    if (xop->xo_checkpointer)
+	xop->xo_checkpointer(xop, xop->xo_vap, 0);
+
+    /*
+     * Build an XPath predicate expression to match this key.
+     * We use the format buffer.
+     */
+    xo_buffer_t *pbp = &xop->xo_predicate;
+    xo_buf_reset(pbp); /* Restart buffer */
+
+    xo_buf_append(pbp, "[", 1);
+    xo_buf_escape(xop, pbp, name, nlen, 0);
+    if (XOF_ISSET(xop, XOF_PRETTY))
+	xo_buf_append(pbp, " = '", 4);
+    else
+	xo_buf_append(pbp, "='", 2);
+
+    xo_xff_flags_t pflags = flags | XFF_XML | XFF_ATTR;
+    pflags &= ~(XFF_NO_OUTPUT | XFF_ENCODE_ONLY);
+
+    /* Save offset before format call; xb_bufp may move on realloc. */
+    ssize_t val_off = pbp->xb_curp - pbp->xb_bufp;
+    xo_do_format_field(xop, pbp, encoding, elen, pflags);
+
+    /*
+     * Trim leading/trailing spaces from the predicate value
+     * when requested, regardless of output style (predicates
+     * are always XPath strings).
+     */
+    if (flags & XFF_TRIM_WS) {
+	/* Recompute after possible realloc */
+	char *vs = pbp->xb_bufp + val_off;
+	char *ep = pbp->xb_curp;
+	while (ep > vs && ep[-1] == ' ')
+	    ep -= 1;
+
+	char *sp = vs;
+	while (sp < ep && *sp == ' ')
+	    sp += 1;
+
+	if (sp > vs || ep < pbp->xb_curp) {
+	    ssize_t trimlen = ep - sp;
+	    memmove(vs, sp, trimlen);
+	    pbp->xb_curp = vs + trimlen;
+	}
+    }
+
+    xo_buf_append(pbp, "']", 2);
+
+    /* Append this predicate to the stack's key list */
+    ssize_t dlen = pbp->xb_curp - pbp->xb_bufp;
+    ssize_t olen = xsp->xs_keys ? strlen(xsp->xs_keys) : 0;
+    char *cp = xo_realloc(xsp->xs_keys, olen + dlen + 1);
+    if (cp) {
+	memcpy(cp + olen, pbp->xb_bufp, dlen);
+	cp[olen + dlen] = '\0';
+	xsp->xs_keys = cp;
+    }
+
+    /* Now we reset the xo_vap as if we were never here */
+    va_end(xop->xo_vap);
+    va_copy(xop->xo_vap, va_local);
+    va_end(va_local);
+
+    if (xop->xo_checkpointer)
+	xop->xo_checkpointer(xop, xop->xo_vap, 1);
+}
+
 /*
  * Html mode: append a <div> to the output buffer contain a field
  * along with all the supporting information indicated by the flags.
@@ -4209,52 +4342,8 @@ xo_buf_append_div (xo_handle_t *xop, const char *class, xo_xff_flags_t flags,
 	(name && (flags & XFF_KEY) && !(flags & XFF_DISPLAY_ONLY)
 	 && XOF_ISSET(xop, XOF_XPATH)) ? 1 : 0;
 
-    if (need_predidate) {
-	va_list va_local;
-
-	va_copy(va_local, xop->xo_vap);
-	if (xop->xo_checkpointer)
-	    xop->xo_checkpointer(xop, xop->xo_vap, 0);
-
-	/*
-	 * Build an XPath predicate expression to match this key.
-	 * We use the format buffer.
-	 */
-	xo_buffer_t *pbp = &xop->xo_predicate;
-	xo_buf_reset(pbp); /* Restart buffer */
-
-	xo_buf_append(pbp, "[", 1);
-	xo_buf_escape(xop, pbp, name, nlen, 0);
-	if (XOF_ISSET(xop, XOF_PRETTY))
-	    xo_buf_append(pbp, " = '", 4);
-	else
-	    xo_buf_append(pbp, "='", 2);
-
-	xo_xff_flags_t pflags = flags | XFF_XML | XFF_ATTR;
-	pflags &= ~(XFF_NO_OUTPUT | XFF_ENCODE_ONLY);
-	xo_do_format_field(xop, pbp, encoding, elen, pflags);
-
-	xo_buf_append(pbp, "']", 2);
-
-	/* Now we record this predicate expression in the stack */
-	xo_stack_t *xsp = xo_stack_cur(xop);
-	ssize_t olen = xsp->xs_keys ? strlen(xsp->xs_keys) : 0;
-	ssize_t dlen = pbp->xb_curp - pbp->xb_bufp;
-
-	char *cp = xo_realloc(xsp->xs_keys, olen + dlen + 1);
-	if (cp) {
-	    memcpy(cp + olen, pbp->xb_bufp, dlen);
-	    cp[olen + dlen] = '\0';
-	    xsp->xs_keys = cp;
-	}
-
-	/* Now we reset the xo_vap as if we were never here */
-	va_end(xop->xo_vap);
-	va_copy(xop->xo_vap, va_local);
-	va_end(va_local);
-	if (xop->xo_checkpointer)
-	    xop->xo_checkpointer(xop, xop->xo_vap, 1);
-    }
+    if (need_predidate)
+	xo_build_predicate(xop, name, nlen, flags, encoding, elen);
 
     if (flags & XFF_ENCODE_ONLY) {
 	/*
