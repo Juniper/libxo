@@ -26,7 +26,6 @@ else
 endif
 
 set opts=' \
---with-libslax-prefix=${ROOT_DIR} \
 --enable-debug \
 --enable-filters \
 --enable-warnings \
