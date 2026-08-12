@@ -101,6 +101,12 @@ main (int argc, char **argv)
     xo_set_info(NULL, info, -1);
     xo_set_flags(NULL, XOF_KEYS);
 
+    xo_emit("[{:plus/%8.1f}] [{:minus/%-8.1f}]\n", 42.1, 41.2);
+
+    xo_emit("[{:label/%-16s}]  [{:total/%15s}] [{:per-call/%8.1f}] "
+	    "[{:min/%15s}] [{:max/%15s}]\n",
+	    "label", "format", 35.7, "format", "format");
+
     xo_emit("other: {a:}\n", "thing", "one"); /* field before top-level tag */
     xo_emit("other: {a:%s}\n", "thing", "two"); /* invalid content */
     xo_emit("other: {a:%s/%s}\n", "thing", "three");  /* same */
