@@ -4005,6 +4005,16 @@ xo_do_format_field (xo_handle_t *xop, xo_buffer_t *xbp,
     return 0;
 }
 
+static inline int
+xo_fix_encoding_char (char ch)
+{
+    if (ch == '-')
+	return TRUE;
+    if (isdigit((int) ch))
+	return TRUE;
+    return FALSE;
+}
+
 /*
  * Remove any numeric precision/width format from the format string by
  * inserting the "%" after the [0-9]+, returning the substring.
@@ -4014,11 +4024,11 @@ xo_fix_encoding (xo_handle_t *xop UNUSED, char *encoding)
 {
     char *cp = encoding;
 
-    if (cp[0] != '%' || !isdigit((int) cp[1]))
+    if (cp[0] != '%' || !xo_fix_encoding_char(cp[1]))
 	return encoding;
 
     for (cp += 2; *cp; cp++) {
-	if (!isdigit((int) *cp))
+	if (!xo_fix_encoding_char(*cp))
 	    break;
     }
 
