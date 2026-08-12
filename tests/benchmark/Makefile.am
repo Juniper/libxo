@@ -85,7 +85,9 @@ test tests:
 
 benchmark bm:
 	${MKDIR_P} out
-	./bm_01.test > out/bm_01.out 2> out/bm_01.err
+	DYLD_LIBRARY_PATH=${top_builddir}/libxo/.libs \
+		./.libs/${BM_TEST} ${BM_ARGS} \
+		> out/bm_01.out 2> out/bm_01.err
 
 BM_COUNT=100
 BM_ARGS=text count ${BM_COUNT} discard
@@ -95,12 +97,26 @@ SAMPLE_ARGS=
 # The sleep 0.3 gives the process time to get into its hot loop before
 # sample attaches. sample $BG_PID 8 samples for 8 seconds at the
 # default 1 ms interval.
+
 BM_TEST=bm_01.test
-BM_AWK=/^PID/ {print $$2; exit(0);}
+
 sample:
 	${MKDIR_P} out
 	DYLD_LIBRARY_PATH=${top_builddir}/libxo/.libs \
 		BIN=./.libs/${BM_TEST} \
+		BM_TEST=${BM_TEST} \
+	 	BM_ARGS="${BM_ARGS}" \
+		SAMPLE=${SAMPLE} \
+		SAMPLE_ARGS="${SAMPLE_ARGS}" \
+		sh ${srcdir}/run-bm.sh
+
+PASS_TEST=bm_01.pass-test
+
+sample.pass:
+	${MKDIR_P} out
+	DYLD_LIBRARY_PATH=${top_builddir}/libxo/.libs \
+		BIN=./${PASS_TEST} \
+		BM_TEST=${PASS_TEST} \
 	 	BM_ARGS="${BM_ARGS}" \
 		SAMPLE=${SAMPLE} \
 		SAMPLE_ARGS="${SAMPLE_ARGS}" \
@@ -118,25 +134,33 @@ all-local: $(validate_tests) $(pass_tests)
 $(validate_tests): %.validate-test: $(srcdir)/%.c \
     $(VALIDATE_BUILD)/xo_validate.so \
     $(FORMAT_LA) $(LIBXO_LA)
+	@${MKDIR} -p out
 	@$(AM_V_GEN)DYLD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${DYLD_LIBRARY_PATH}" \
 	    LD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${LD_LIBRARY_PATH}" \
 	    ${LLVM_CLANG} ${CFLAGS} \
 	    -fplugin=${VALIDATE_BUILD}/xo_validate.so \
 	    -mllvm -xo-validate-errors-as-warnings \
 	    -I${top_srcdir}/libxo -I${top_builddir}/libxo -I${INCLUDEDIR} ${SYSROOT_FLAG} \
-	    $< -L${LIBXO_LIBDIR} -lxo \
-	    -o $@ > $@.make.out 2> $@.make.err
+	    -c $< -o $*.validate-test.o > out/$@.make.out 2> out/$@.make.err
+	@$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link \
+	    ${LLVM_CLANG} ${CFLAGS} ${SYSROOT_FLAG} \
+	    $*.validate-test.o ${LIBXO_LA} \
+	    -o $@
 
 $(pass_tests): %.pass-test: $(srcdir)/%.c \
     $(PRECOMPILE_BUILD)/xo_precompile.so \
     $(FORMAT_LA) $(LIBXO_LA)
+	@${MKDIR} -p out
 	@$(AM_V_GEN)DYLD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${DYLD_LIBRARY_PATH}" \
 	    LD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${LD_LIBRARY_PATH}" \
 	    ${LLVM_CLANG} ${CFLAGS} \
 	    -fpass-plugin=${PRECOMPILE_BUILD}/xo_precompile.so \
 	    -I${top_srcdir}/libxo -I${top_builddir}/libxo -I${INCLUDEDIR} ${SYSROOT_FLAG} \
-	    $< -L${LIBXO_LIBDIR} -lxo \
-	    -o $@ > $@.make.out 2> $@.make.err
+	    -c $< -o $*.pass-test.o > out/$@.make.out 2> out/$@.make.err
+	@$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link \
+	    ${LLVM_CLANG} ${CFLAGS} ${SYSROOT_FLAG} \
+	    $*.pass-test.o ${LIBXO_LA} \
+	    -o $@
 
 run-validate-tests: $(validate_tests)
 	@${MKDIR} -p out
@@ -195,9 +219,11 @@ no-accept:
 
 CLEANFILES = ${TEST_CASES:.c=.test} \
     ${TEST_CASES:.c=.validate-test} \
+    ${TEST_CASES:.c=.validate-test.o} \
     ${TEST_CASES:.c=.validate-test.make.out} \
     ${TEST_CASES:.c=.validate-test.make.err} \
     ${TEST_CASES:.c=.pass-test} \
+    ${TEST_CASES:.c=.pass-test.o} \
     ${TEST_CASES:.c=.pass-test.make.out} \
     ${TEST_CASES:.c=.pass-test.make.err}
 CLEANDIRS = out
