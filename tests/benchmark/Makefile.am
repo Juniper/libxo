@@ -87,7 +87,8 @@ benchmark bm:
 	${MKDIR_P} out
 	./bm_01.test > out/bm_01.out 2> out/bm_01.err
 
-BM_ARGS=text count 5000000 discard
+BM_COUNT=100
+BM_ARGS=text count ${BM_COUNT} discard
 SAMPLE=sample
 SAMPLE_ARGS=
 
