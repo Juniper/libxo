@@ -1,8 +1,8 @@
 {
   "data": {
     "plus": 42.1,
-    "minus": 41.2    ,
-    "label": "label           ",
+    "minus": 41.2,
+    "label": "label",
     "total": "format",
     "per-call": 35.7,
     "min": "format",
