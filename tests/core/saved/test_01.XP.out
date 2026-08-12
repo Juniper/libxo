@@ -1,4 +1,11 @@
 <data>
+  <plus>42.1</plus>
+  <minus>41.2    </minus>
+  <label>label           </label>
+  <total>format</total>
+  <per-call>35.7</per-call>
+  <min>format</min>
+  <max>format</max>
   <thing>one</thing>
   <thing>two</thing>
   <thing>three</thing>
