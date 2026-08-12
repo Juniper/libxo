@@ -115,7 +115,7 @@ xo_xff_flags_t xo_name_lookup(xo_flag_mapping_t *map, const char *value,
  * Return the pessimistic maximum number of field slots needed for fmt.
  * Used internally and by callers that supply their own field buffer.
  */
-unsigned xo_count_fields(xo_parse_t *xpp, const char *fmt);
+unsigned xo_count_fields(xo_parse_t *xpp, const char *fmt, size_t *fmt_lenp);
 
 /*
  * Lower-level parser: fill the caller-supplied fields[] array (up to
@@ -126,7 +126,7 @@ unsigned xo_count_fields(xo_parse_t *xpp, const char *fmt);
  * Returns 0 on success, -1 on error.
  */
 int xo_parse_fields(xo_parse_t *xpp, xo_field_info_t *fields,
-		    unsigned max_fields, const char *fmt);
+		    unsigned max_fields, const char *fmt, size_t fmt_len);
 
 /*
  * Return non-zero if this field role should receive a default "%s" format
