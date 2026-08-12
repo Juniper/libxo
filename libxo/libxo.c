@@ -920,6 +920,7 @@ static char xo_xml_amp[] = "&amp;";
 static char xo_xml_lt[] = "&lt;";
 static char xo_xml_gt[] = "&gt;";
 static char xo_xml_quot[] = "&quot;";
+#define XO_LEN_QUOT 6		/* strlen("&quot;") */
 static char xo_xml_square[] = { 0xE2, 0x96, 0xA1, 0 };
 
 #define XO_XML_ESCAPE_BINARY_UNICODE_BASE 0xe000
@@ -4172,18 +4173,94 @@ xo_simple_field (xo_handle_t *xop, unsigned encode_only,
 	xo_data_append_content(xop, value, vlen, flags);
 }
 
+/*
+ * Append an XPath string literal for a predicate value.
+ *
+ * XPath 1.0 has no escape sequences, so we choose a quoting strategy
+ * based on what the value contains.  The value arrives already
+ * XML-attribute-escaped (XFF_ATTR), so a raw '"' has become "&quot;".
+ * We detect that form, and any '"' we write for XPath syntax also
+ * uses "&quot;" so that the enclosing HTML data-xpath="..." attribute
+ * stays well-formed (the HTML parser decodes &quot; -> " before XPath
+ * sees it).
+ *
+ *   no single quotes: 'value'
+ *   no double quotes: &quot;value&quot;
+ *   both: concat('seg', &quot;'&quot;, 'seg2', ...)
+ */
+static void
+xo_buf_append_xpath_string (xo_buffer_t *xbp, const char *val, ssize_t vlen)
+{
+    int has_sq = (memchr(val, '\'', vlen) != NULL);
+    /* &quot; is how XFF_ATTR encodes '"'; raw '"' should not appear */
+    int has_dq = (memmem(val, vlen, "&quot;", XO_LEN_QUOT) != NULL
+		  || memchr(val, '"', vlen) != NULL);
+
+    if (!has_sq) {
+	xo_buf_append(xbp, "'", 1);
+	xo_buf_append(xbp, val, vlen);
+	xo_buf_append(xbp, "'", 1);
+	return;
+    }
+
+    if (!has_dq) {
+	/* Delimiters written as &quot; so the HTML attribute stays valid */
+	xo_buf_append(xbp, "&quot;", XO_LEN_QUOT);
+	xo_buf_append(xbp, val, vlen);
+	xo_buf_append(xbp, "&quot;", XO_LEN_QUOT);
+	return;
+    }
+
+    /*
+     * Both quote types: split at each ' and use concat().  The
+     * single-quote separator is &quot;'&quot; in the HTML attribute,
+     * which the HTML parser decodes to "'" for XPath.
+     */
+    xo_buf_append(xbp, "concat(", 7);
+
+    const char *cp = val;
+    const char *ep = val + vlen;
+    int first = TRUE;
+
+    while (cp < ep) {
+	const char *np = memchr(cp, '\'', ep - cp);
+	ssize_t seglen = np ? np - cp : ep - cp;
+
+	if (seglen > 0) {
+	    if (!first)
+		xo_buf_append(xbp, ", ", 2);
+	    xo_buf_append(xbp, "'", 1);
+	    xo_buf_append(xbp, cp, seglen);
+	    xo_buf_append(xbp, "'", 1);
+	    first = FALSE;
+	}
+
+	if (np) {
+	    if (!first)
+		xo_buf_append(xbp, ", ", 2);
+	    xo_buf_append(xbp, "&quot;'&quot;", XO_LEN_QUOT + 1 + XO_LEN_QUOT);
+	    first = FALSE;
+	    cp = np + 1;
+	} else {
+	    break;
+	}
+    }
+
+    xo_buf_append(xbp, ")", 1);
+}
+
 static const char *
 xo_key_find_matching (const char *cp, char ch)
 {
+    if (ch == '"') {
+	/* Double-quote delimiter is stored as &quot; in the HTML attribute */
+	const char *np = strstr(cp, "&quot;");
+	return np ? np + XO_LEN_QUOT - 1 : NULL;  /* point to last char of &quot; */
+    }
     for (; *cp; cp++) {
 	if (*cp == ch)
 	    return cp;
-
-	if (*cp == '\\')
-	    if (*++cp == '\0')
-		break;
     }
-
     return NULL;
 }
 
@@ -4209,7 +4286,11 @@ xo_key_is_duplicate (const char *name, ssize_t nlen, const char *keys)
 	    if (*cp == ']')
 		break;
 	    if (*cp == '\'') {
-		cp = xo_key_find_matching(cp + 1, *cp);
+		cp = xo_key_find_matching(cp + 1, '\'');
+		if (cp == NULL)
+		    return FALSE; /* Bail! */
+	    } else if (strncmp(cp, "&quot;", XO_LEN_QUOT) == 0) {
+		cp = xo_key_find_matching(cp + XO_LEN_QUOT, '"');
 		if (cp == NULL)
 		    return FALSE; /* Bail! */
 	    }
@@ -4256,7 +4337,10 @@ xo_build_predicate (xo_handle_t *xop, const char *name, ssize_t nlen,
     xo_xff_flags_t pflags = flags | XFF_XML | XFF_ATTR;
     pflags &= ~(XFF_NO_OUTPUT | XFF_ENCODE_ONLY);
 
-    /* Save offset before format call; xb_bufp may move on realloc. */
+    /*
+     * Save offset after the opening "'" so val_off - 1 is the "'"
+     * itself.  xb_bufp may move on realloc inside xo_do_format_field.
+     */
     ssize_t val_off = pbp->xb_curp - pbp->xb_bufp;
     xo_do_format_field(xop, pbp, encoding, elen, pflags);
 
@@ -4283,12 +4367,52 @@ xo_build_predicate (xo_handle_t *xop, const char *name, ssize_t nlen,
 	}
     }
 
-    xo_buf_append(pbp, "']", 2);
+    /*
+     * Quote the value for XPath.  XPath 1.0 has no escape mechanism.
+     * We already wrote an opening "'" before val_off (at val_off-1).
+     * Three cases based on what the formatted value contains:
+     * - no "'": close the single-quoted form (zero copy)
+     * - "'" only: swap to double-quoted form (small copy)
+     * -  both: use concat(); pay the alloca copy cost (rare, but expensive)
+     */
+    ssize_t vlen = pbp->xb_curp - (pbp->xb_bufp + val_off);
+    char *vs = pbp->xb_bufp + val_off;
+
+    if (memchr(vs, '\'', vlen) == NULL) {
+	/* Common case: no single quotes — close the single-quoted form */
+	xo_buf_append(pbp, "']", 2);
+
+    } else if (memmem(vs, vlen, "&quot;", XO_LEN_QUOT) == NULL
+	       && memchr(vs, '"', vlen) == NULL) {
+	/*
+	 * Has single-quote but no double-quote so we switch using
+	 * double quotes: &quot;value&quot;.  The opening "'" at
+	 * val_off - 1 is 1 byte; &quot; is XO_LEN_QUOT bytes, so
+	 * shift the value right by XO_LEN_QUOT-1 to make room.
+	 */
+	if (xo_buf_has_room(pbp, XO_LEN_QUOT - 1 + XO_LEN_QUOT + 1)) {
+	    /* Recompute since xb_bufp may have moved */
+	    vs = pbp->xb_bufp + val_off;
+	    memmove(vs + XO_LEN_QUOT - 1, vs, vlen);
+	    memcpy(vs - 1, "&quot;", XO_LEN_QUOT);
+	    pbp->xb_curp = vs + XO_LEN_QUOT - 1 + vlen;
+	    xo_buf_append(pbp, "&quot;]", XO_LEN_QUOT + 1);
+	}
+
+    } else {
+	/* Both kinds of quotes: must build concat(); copy value to stack */
+	char *val_copy = alloca(vlen);
+	memcpy(val_copy, vs, vlen);
+	pbp->xb_curp = pbp->xb_bufp + val_off - 1; /* Reset to opening quote */
+	xo_buf_append_xpath_string(pbp, val_copy, vlen);
+	xo_buf_append(pbp, "]", 1);
+    }
 
     /* Append this predicate to the stack's key list */
     ssize_t dlen = pbp->xb_curp - pbp->xb_bufp;
     ssize_t olen = xsp->xs_keys ? strlen(xsp->xs_keys) : 0;
     char *cp = xo_realloc(xsp->xs_keys, olen + dlen + 1);
+
     if (cp) {
 	memcpy(cp + olen, pbp->xb_bufp, dlen);
 	cp[olen + dlen] = '\0';
