@@ -1,5 +1,12 @@
 {
   "data": {
+    "plus": 42.1,
+    "minus": 41.2    ,
+    "label": "label           ",
+    "total": "format",
+    "per_call": 35.7,
+    "min": "format",
+    "max": "format",
     "thing": "one",
     "thing": "two",
     "thing": "three",
