@@ -239,7 +239,8 @@ xo_role_wants_default_format (int ftype)
 }
 
 unsigned
-xo_count_fields (xo_parse_t *xpp __attribute__((unused)), const char *fmt)
+xo_count_fields (xo_parse_t *xpp XO_UNUSED, const char *fmt,
+		 size_t *fmt_lenp)
 {
     unsigned rc = 1;
     const char *cp;
@@ -250,6 +251,9 @@ xo_count_fields (xo_parse_t *xpp __attribute__((unused)), const char *fmt)
 
     if (rc > XO_MAX_FIELDS)
 	rc = XO_MAX_FIELDS;
+
+    if (fmt_lenp)
+	*fmt_lenp = cp - fmt;
 
     return rc * 2 + 1;
 }
@@ -443,7 +447,7 @@ xo_parse_field_numbers (xo_parse_t *xpp, const char *fmt,
  */
 int
 xo_parse_fields (xo_parse_t *xpp, xo_field_info_t *fields,
-		 unsigned num_fields, const char *fmt)
+		 unsigned num_fields, const char *fmt, size_t fmt_len)
 {
     const char *cp, *sp, *ep, *basep;
     unsigned field = 0;
@@ -451,9 +455,9 @@ xo_parse_fields (xo_parse_t *xpp, xo_field_info_t *fields,
     unsigned seen_fnum = 0;
 
     /* Reject oversized format strings (int16_t offset range) */
-    if (strlen(fmt) > XO_FORMAT_MAX) {
+    if (fmt_len > XO_FORMAT_MAX) {
 	xo_parse_error(xpp, "format string too long (max %d bytes, len %d)",
-		       XO_FORMAT_MAX, strlen(fmt));
+		       XO_FORMAT_MAX, fmt_len);
 	return -1;
     }
 
@@ -761,7 +765,8 @@ xo_parse_format (xo_parse_t *xpp, const char *fmt)
 
     xo_parse_release(xpp);
 
-    unsigned max_fields = xo_count_fields(xpp, fmt);
+    size_t fmt_len;
+    unsigned max_fields = xo_count_fields(xpp, fmt, &fmt_len);
     size_t sz = max_fields * sizeof(xo_field_info_t);
 
     xo_field_info_t *fields = xo_parse_alloc(xpp, sz);
@@ -771,7 +776,7 @@ xo_parse_format (xo_parse_t *xpp, const char *fmt)
     }
     memset(fields, 0, sz);
 
-    if (xo_parse_fields(xpp, fields, max_fields, fmt) < 0) {
+    if (xo_parse_fields(xpp, fields, max_fields, fmt, fmt_len) < 0) {
 	xo_parse_free(xpp, fields);
 	return -1;
     }
