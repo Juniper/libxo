@@ -512,37 +512,38 @@ AC_DEFINE_UNQUOTED(LIBXO_VERSION_EXTRA, ["$LIBXO_VERSION_EXTRA"],
 AC_CONFIG_HEADERS([libxo/xo_config.h])
 
 AC_CONFIG_FILES([
-  Makefile
-  libxo-config
-  xohtml/xohtml.sh
-  libxo/Makefile
-  filter/Makefile
-  format/Makefile
-  libxo/add.man
-  bin/Makefile
-  encoder/Makefile
-  encoder/cbor/Makefile
-  encoder/csv/Makefile
-  encoder/fdr/Makefile
-  encoder/fullpath/Makefile
-  encoder/test/Makefile
-  llvm-plugins/Makefile
-  xo/Makefile
-  xolint/Makefile
-  xohtml/Makefile
-  xopo/Makefile
-  packaging/libxo.pc
-  doc/Makefile
-  doc/top-link.html
-  tests/Makefile
-  tests/core/Makefile
-  tests/gettext/Makefile
-  tests/xo/Makefile
-  tests/xpath/Makefile
-  tests/utf8/Makefile
-  tests/llvm-plugins/Makefile
-  packaging/libxo.spec
-  packaging/libxo.rb.base
+     Makefile
+     libxo-config
+     xohtml/xohtml.sh
+     libxo/Makefile
+     filter/Makefile
+     format/Makefile
+     libxo/add.man
+     bin/Makefile
+     encoder/Makefile
+     encoder/cbor/Makefile
+     encoder/csv/Makefile
+     encoder/fdr/Makefile
+     encoder/fullpath/Makefile
+     encoder/test/Makefile
+     llvm-plugins/Makefile
+     xo/Makefile
+     xolint/Makefile
+     xohtml/Makefile
+     xopo/Makefile
+     packaging/libxo.pc
+     doc/Makefile
+     doc/top-link.html
+     tests/Makefile
+     tests/benchmark/Makefile
+     tests/core/Makefile
+     tests/gettext/Makefile
+     tests/xo/Makefile
+     tests/xpath/Makefile
+     tests/utf8/Makefile
+     tests/llvm-plugins/Makefile
+     packaging/libxo.spec
+     packaging/libxo.rb.base
 ])
 AC_OUTPUT
 
