@@ -25,5 +25,31 @@
       <two>two</two>
       <three>three</three>
     </contents>
+    <quotes>
+      <item>
+        <name key="key">plain</name>
+        <count>1</count>
+      </item>
+      <item>
+        <name key="key">don't</name>
+        <count>2</count>
+      </item>
+      <item>
+        <name key="key">a'"b</name>
+        <count>3</count>
+      </item>
+      <item>
+        <name key="key">this&amp;&amp;that</name>
+        <count>4</count>
+      </item>
+      <item>
+        <name key="key">'"sure"'</name>
+        <count>5</count>
+      </item>
+      <item>
+        <name key="key">"'nuff'"</name>
+        <count>5</count>
+      </item>
+    </quotes>
   </data>
 </top>
