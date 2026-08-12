@@ -1,0 +1,39 @@
+../../../tests/core/test_01.c:111:13: warning: libxo: field name contains percent sign: '{a:%s}'
+  111 |     xo_emit("other: {a:%s}\n", "thing", "two"); /* invalid content */
+      |             ^
+../../../tests/core/test_01.c:112:13: warning: libxo: field name contains percent sign: '{a:%s/%s}'
+  112 |     xo_emit("other: {a:%s/%s}\n", "thing", "three");  /* same */
+      |             ^
+../../../tests/core/test_01.c:113:13: warning: libxo: field name contains percent sign: '{a:xxx%s/%s}'
+  113 |     xo_emit("other: {a:xxx%s/%s}\n", "thing", "four"); /* same */
+      |             ^
+../../../tests/core/test_01.c:128:13: warning: libxo: use hyphens, not underscores, in field name: '{e:kve_start/%#jx}'
+  128 |     xo_emit("{e:kve_start/%#jx}", (uintmax_t) 0xdeadbeef);
+      |             ^
+../../../tests/core/test_01.c:129:13: warning: libxo: use hyphens, not underscores, in field name: '{e:kve_end/%#jx}'
+  129 |     xo_emit("{e:kve_end/%#jx}", (uintmax_t) 0xcabb1e);
+      |             ^
+../../../tests/core/test_01.c:274:13: warning: libxo: field role ('P') requires a name or format: '{P:}'
+  274 |     xo_emit("X{P:}X", "epic fail");
+      |             ^
+../../../tests/core/test_01.c:274:13: warning: libxo: format expects 0 argument(s) but 1 provided
+../../../tests/core/test_01.c:275:13: warning: libxo: field role ('T') requires a name or format: '{T:}'
+  275 |     xo_emit("X{T:}X", "epic fail");
+      |             ^
+../../../tests/core/test_01.c:275:13: warning: libxo: format expects 0 argument(s) but 1 provided
+../../../tests/core/test_01.c:276:13: warning: libxo: field role ('N') requires a name or format: '{N:}'
+  276 |     xo_emit("X{N:}X", "epic fail");
+      |             ^
+../../../tests/core/test_01.c:276:13: warning: libxo: format expects 0 argument(s) but 1 provided
+../../../tests/core/test_01.c:277:13: warning: libxo: field role ('L') requires a name or format: '{L:}'
+  277 |     xo_emit("X{L:}X\n", "epic fail");
+      |             ^
+../../../tests/core/test_01.c:277:13: warning: libxo: format expects 0 argument(s) but 1 provided
+../../../tests/core/test_01.c:282:13: warning: libxo: use hyphens, not underscores, in field name: '{e:mode_octal/%s}'
+  282 |     xo_emit("{e:mode/%s}{e:mode_octal/%s} {t:links/%s} "
+      |             ^
+../../../tests/core/test_01.c:282:13: warning: libxo: format expects 5 argument(s) but 8 provided
+../../../tests/core/test_01.c:289:13: warning: libxo: use hyphens, not underscores, in field name: '{e:mode_octal/%03o}'
+  289 |     xo_emit("{t:mode/%s}{e:mode_octal/%03o} {t:links/%*u} "
+      |             ^
+16 warnings generated.

@@ -66,6 +66,8 @@ main (int argc, char **argv)
     };
     char buf[BUFSIZ];
 
+    FILE *dev_null = fopen("/dev/null", "w");
+
     xo_open_container_h(NULL, "top");
 
     if (dump_lower) {
@@ -99,10 +101,10 @@ main (int argc, char **argv)
 	strncpy(buf, data[i], sizeof(buf));
 
 	char *cp = xo_utf8_valid(buf);
-	xo_emit("{:item/%d}: '{:data}' {:test} {:offset/%d}\n", i,
-		buf,
-		cp ? "F" : "T",
-		cp ? cp - buf : 0);
+	xo_emit("{:item/%d}: '{:data}' {:test} {:offset/%zu}\n",
+		i, buf, cp ? "F" : "T", (size_t) cp ? cp - buf : 0);
+	fprintf(dev_null, "{:item/%d}: '{:data/%s}' {:test/%s} {:offset/%zu}\n",
+		i, buf, cp ? "F" : "T", (size_t) cp ? cp - buf : 0);
 	xo_close_instance("item");
     }
 
@@ -143,9 +145,10 @@ main (int argc, char **argv)
 	size_t ulen = 0;
 
 	for (char *cp = buf; cp; cp = xo_utf8_nnext(cp, len)) {
-	    len -= ulen;	/* Substract last time's length */
-	    if (len <= 0)
+	    if (ulen > len)
 		break;
+
+	    len -= ulen;	/* Substract last time's length */
 
 	    ulen = xo_utf8_len(*cp);
 	    xo_codepoint_t wc = xo_utf8_codepoint(cp, len, ulen, 0);
@@ -153,8 +156,12 @@ main (int argc, char **argv)
 	    char isup = xo_utf8_isupper(cp) ? 'U' : '-';
 	    char islw = xo_utf8_islower(cp) ? 'L' : '-';
 
-	    xo_emit("{:item/%d}: wc={:data/%#x:%d} {:case/%c%c} {:len/%d:%d:%d}\n", i,
-		    wc, wc, isup, islw, len, ulen, cp - buf);
+	    xo_emit("{:item/%d}: wc={:data/%#x:%d} {:case/%c%c} "
+		    "{:len/%zu:%zu:%zu}\n",
+		    i, wc, wc, isup, islw, len, ulen, (size_t)(cp - buf));
+	    fprintf(dev_null, "{:item/%d}: wc={:data/%#x:%d} {:case/%c%c} "
+		    "{:len/%zu:%zu:%zu}\n",
+		    i, wc, wc, isup, islw, len, ulen, (size_t)(cp - buf));
 	}
 
 	xo_close_instance("item");
@@ -192,6 +199,7 @@ main (int argc, char **argv)
     xo_close_container_h(NULL, "top");
 
     xo_finish();
+    fclose(dev_null);
 
     return 0;
 }

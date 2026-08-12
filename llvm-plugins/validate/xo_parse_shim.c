@@ -66,23 +66,29 @@ struct xo_shim_state {
 };
 
 static void
-shim_error_cb (void *data, const char *fmt, va_list vap)
+shim_error_cb (void *data, const char *fmt, ...)
 {
     struct xo_shim_state *ss = data;
     char buf[512];
+    va_list vap;
+    va_start(vap, fmt);
     vsnprintf(buf, sizeof(buf), fmt, vap);
-    ss->error(ss->data, buf);
+    va_end(vap);
+    ss->error(ss->data, "%s", buf);
 }
 
 static void
-shim_warn_cb (void *data, const char *fmt, va_list vap)
+shim_warn_cb (void *data, const char *fmt, ...)
 {
     struct xo_shim_state *ss = data;
     if (ss->error == NULL)
         return;
     char buf[512];
+    va_list vap;
+    va_start(vap, fmt);
     vsnprintf(buf, sizeof(buf), fmt, vap);
-    ss->error(ss->data, buf);
+    va_end(vap);
+    ss->error(ss->data, "%s", buf);
 }
 
 int
@@ -115,41 +121,66 @@ scan_format_args (const char *field_fmt, unsigned flen,
     const char *p = field_fmt, *end = field_fmt + flen;
 
     while (p < end) {
-        if (*p != '%') { p++; continue; }
+        if (*p != '%') {
+	    p += 1;
+	    continue;
+	}
+
         const char *spec = p++;
-        if (p >= end) break;
-        if (*p == '%') { p++; continue; }  /* literal %% */
+        if (p >= end)
+	    break;
+
+        if (*p == '%') {  /* literal: "%%" */
+	    p += 1;
+	    continue;
+	}
 
         /* flags */
-        while (p < end && (*p == '-' || *p == '+' || *p == ' ' ||
-                            *p == '0' || *p == '#' || *p == '\''))
-            p++;
+        while (p < end && (*p == '-' || *p == '+' || *p == ' '
+			   || *p == '0' || *p == '#' || *p == '\''))
+            p += 1;
+
         /* width: digits or '*' (the '*' consumes one int va_arg) */
         if (p < end && *p == '*') {
             arg_cb(arg_data, "%d", 2);
-            p++;
+            p += 1;
+
         } else {
             while (p < end && isdigit((int) (unsigned char) *p))
-                p++;
+                p += 1;
         }
-        /* precision */
-        if (p < end && *p == '.') {
-            p++;
-            /* '*' precision also consumes one int va_arg */
+
+        /*
+         * Groups 2 and 3 of libxo's three width groups are both '.'-prefixed:
+         *   %*.*.*s → width(*), columns(.*), bytes(.*), value
+         * The loop handles any number of '.' groups, each with optional '*'.
+         */
+        while (p < end && *p == '.') {
+            p += 1;
+
             if (p < end && *p == '*') {
                 arg_cb(arg_data, "%d", 2);
-                p++;
+                p += 1;
+
             } else {
                 while (p < end && isdigit((unsigned char)*p))
-                    p++;
+                    p += 1;
             }
         }
         /* length modifiers */
         while (p < end && (*p == 'l' || *p == 'h' || *p == 'L' ||
                             *p == 'z' || *p == 't' || *p == 'j' || *p == 'q'))
-            p++;
+            p += 1;
+
         /* conversion character */
-        if (p < end) p++;
+        if (p >= end)
+	    break;
+
+        if (*p == 'm') {  /* %m uses errno, no va_arg */
+	    p += 1;
+	    continue;
+	}
+        p += 1;
 
         arg_cb(arg_data, spec, (unsigned)(p - spec));
     }
@@ -160,9 +191,10 @@ scan_format_args (const char *field_fmt, unsigned flen,
  *
  * Rule:
  *   V (value) — the content field is the key name; VALUE always from va_arg.
- *   L/D/N/P/T/U/W/E — the content IS the display text; va_arg only when
- *                      content is absent (xfi_clen == 0).
- *   G / C / [ / ] / TEXT / NEWLINE / EBRACE — never consume va_arg.
+ *   C/D/E/L/N/P/T/U/W — content IS the display text; va_arg only when
+ *                        content is absent (xfi_clen == 0) and format present.
+ *   G / [ / ] / TEXT / NEWLINE / EBRACE — never consume va_arg (G is
+ *                        forbidden from having a format by XO_LINT_ROLES_NO_FORMAT).
  */
 static int
 field_consumes_varg (const xo_field_info_t *xfip)
@@ -175,7 +207,6 @@ field_consumes_varg (const xo_field_info_t *xfip)
     case XO_ROLE_NEWLINE:
     case XO_ROLE_EBRACE:
     case 'G':
-    case 'C':
         return 0;
 
     case '[':
@@ -186,9 +217,36 @@ field_consumes_varg (const xo_field_info_t *xfip)
     case 'V':
         return 1;
 
+    case 'C':
+        return (xfip->xfi_flen > 0);
+
     default:
         return (xfip->xfi_clen == 0);
     }
+}
+
+typedef struct arg_record_s {
+    char ar_data[64];		/* Record */
+    int ar_cur;
+} arg_record_t;
+
+static void
+arg_record_cb (void *data, const char *fmt, unsigned fmtlen)
+{
+    arg_record_t *arp = data;
+
+    if (fmtlen > 1 && arp->ar_cur < (int) sizeof(arp->ar_data) - 1)
+	arp->ar_data[arp->ar_cur++] = fmt[fmtlen - 1];
+}
+
+static unsigned
+count_format_args (const char *field_fmt, unsigned flen, arg_record_t *arp)
+{
+    bzero(arp, sizeof(*arp));
+
+    scan_format_args(field_fmt, flen, arg_record_cb, arp);
+
+    return arp->ar_cur;
 }
 
 int
@@ -214,24 +272,91 @@ xo_shim_parse_args (const char *fmt,
     for (unsigned i = 0; i < xpp.xp_num_fields; i++) {
         const xo_field_info_t *xfip = &xpp.xp_fields[i];
         int ftype = (int) xfip->xfi_ftype;
+	int slen = (xfip->xfi_len > 0) ? xfip->xfi_len : 0;
+	const char *str = xo_foff(fmt, xfip->xfi_start);
 
-        /* XFF_ARGUMENT: field name itself comes from va_arg as const char * */
+        /* XFF_ARGUMENT: field name/content comes from va_arg as const char * */
         if (xfip->xfi_flags & XFF_ARGUMENT)
             arg_cb(arg_data, NULL, 0);
 
-        /* 'a' role: attribute name always comes from va_arg as const char * */
-        if (strchr(XO_FORMAT_MODIFIERS_NEED_STRING, ftype))
-            arg_cb(arg_data, "%s", 2);
+	else {
+	    /* Enforce name/format restrictions */
+	    if (strchr(XO_LINT_ROLES_NEEDING_NAME, ftype)
+			&& xfip->xfi_clen == 0)
+		ss_err.error(ss_err.data,
+			     "field role ('%c') requires a non-empty name: "
+			     "'%s'",
+			     ftype, xo_printable2(str, slen, 1));
 
-        /* Enforce name/format restrictions */
-        if (strchr(XO_FORMAT_ROLES_NEEDING_NAME, ftype) && xfip->xfi_clen == 0)
-            ss_err.error(ss_err.data, "field role requires a non-empty name");
-        if (strchr(XO_FORMAT_ROLES_NO_NAME, ftype) && xfip->xfi_clen != 0)
-            ss_err.error(ss_err.data, "field role must have an empty name");
-        if (strchr(XO_FORMAT_ROLES_NO_FORMAT, ftype) && xfip->xfi_format != XO_FOFF_NONE)
-            ss_err.error(ss_err.data, "field role cannot have a format specifier");
+	    /*
+	     * xfi_format >= 0 means an explicit format was written in the
+	     * format string.  XO_FOFF_DEFAULT (-2) is an implicit "%s"
+	     * added by the parser; XO_FOFF_NONE (-1) means no format at all.
+	     * Only error when the user wrote neither content nor format.
+	     */
+	    if (strchr(XO_LINT_ROLES_NEEDING_NAME_OR_FORMAT, ftype)
+		&& xfip->xfi_clen == 0 && xfip->xfi_format < 0)
+		ss_err.error(ss_err.data,
+			     "field role ('%c') requires a name or format: "
+			     "'%s'",
+			     ftype, xo_printable2(str, slen, 1));
 
-        if (field_consumes_varg(xfip))
+	    if (strchr(XO_LINT_ROLES_NO_FORMAT, ftype)
+			&& xfip->xfi_format != XO_FOFF_NONE)
+		ss_err.error(ss_err.data,
+			     "field role ('%c') cannot have a "
+			     "format specifier: '%s'",
+			     ftype, xo_printable2(str, slen, 1));
+	}
+
+        /*
+         * For non-V roles with XFF_ARGUMENT (e.g. {La:}), the content IS
+         * the va_arg already consumed above; no additional value arg.
+         * For V role with XFF_ARGUMENT (e.g. {a:}), the name came from the
+         * NULL callback above; the value still comes from the format spec.
+         */
+        int skip_value = (xfip->xfi_flags & XFF_ARGUMENT) && (ftype != 'V');
+
+        /* Check that display and encoding formats consume the same arg count */
+        if (!skip_value && xfip->xfi_encoding != XO_FOFF_NONE) {
+            const char *dfmt, *efmt;
+            unsigned dlen, elen;
+
+            if (xfip->xfi_format >= 0) {
+                dfmt = xo_foff(fmt, xfip->xfi_format);
+                dlen = (unsigned) xfip->xfi_flen;
+            } else if (xfip->xfi_format == XO_FOFF_DEFAULT) {
+                dfmt = xo_default_format;
+                dlen = (unsigned) strlen(xo_default_format);
+            } else {
+                dfmt = "";
+                dlen = 0;
+            }
+
+            if (xfip->xfi_encoding >= 0) {
+                efmt = xo_foff(fmt, xfip->xfi_encoding);
+                elen = (unsigned) xfip->xfi_elen;
+            } else {
+                efmt = xo_default_format;
+                elen = (unsigned) strlen(xo_default_format);
+            }
+
+	    arg_record_t dargs, eargs;
+            unsigned dc = count_format_args(dfmt, dlen, &dargs);
+            unsigned ec = count_format_args(efmt, elen, &eargs);
+            if (dc != ec)
+                ss_err.error(ss_err.data,
+                    "display and encoding formats consume "
+			     "%u vs %u argument(s): '%s'",
+			     dc, ec, xo_printable2(str, slen, 1));
+            else if (strcmp(dargs.ar_data, eargs.ar_data) != 0)
+                ss_err.error(ss_err.data,
+                    "display and encoding formats consume different "
+			     "argument(s): '%s'",
+			     xo_printable2(str, slen, 1));
+        }
+
+        if (!skip_value && field_consumes_varg(xfip))
             scan_format_args(xo_foff(fmt, xfip->xfi_format),
                              (unsigned) xfip->xfi_flen,
                              arg_cb, arg_data);

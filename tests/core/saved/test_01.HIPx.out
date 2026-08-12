@@ -1,4 +1,24 @@
 <div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="plus" data-xpath="/data/plus">    42.1</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="minus" data-xpath="/data/minus">41.2    </div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="label" data-xpath="/data/label">label           </div>
+  <div class="text">]  [</div>
+  <div class="data" data-tag="total" data-xpath="/data/total">         format</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="per-call" data-xpath="/data/per-call">    35.7</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="min" data-xpath="/data/min">         format</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="max" data-xpath="/data/max">         format</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
   <div class="text">other: </div>
   <div class="data" data-tag="thing" data-xpath="/data/thing">one</div>
 </div>

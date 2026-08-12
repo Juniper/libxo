@@ -54,7 +54,8 @@ CLANG_PASS = ${LLVM_CLANG} \
 PRECOMPILE_FORMATS = T XP JP JPu HP
 
 TEST_CASES = \
-    validate_01
+    validate_01 \
+    validate_02
 
 PRECOMPILE_TEST_CASES = \
     precompile_01

@@ -279,25 +279,6 @@ AC_SUBST(GETTEXT_BINDIR)
 
 AM_CONDITIONAL([HAVE_GETTEXT], [test "$HAVE_GETTEXT" = "yes"])
 
-dnl on macosx, strings are not in the .text segment, making the call
-dnl to get_etext pointless
-AC_MSG_CHECKING([style of etext])
-AC_LINK_IFELSE([AC_LANG_SOURCE([
-    [#include <stdio.h>]
-    [extern char etext;]
-    [int main() { const char *p = &etext; printf("%p\n", p); return 0; }]])],
-    [HAVE_ETEXT=1 ; HAVE_ETEXT_STYLE="symbol"],
-    AC_LINK_IFELSE([AC_LANG_SOURCE([
-	[#include <stdio.h>]
-	[#include <mach-o/getsect.h>]
-	[int main() { const char *p = (const char *) get_etext(); printf("%p\n", p); return 0; }]])],
-        [HAVE_ETEXT=2 ; HAVE_ETEXT_STYLE="function"],
-	[HAVE_ETEXT=0 ; HAVE_ETEXT_STYLE="none"]
-    )
-)
-AC_MSG_RESULT(${HAVE_ETEXT_STYLE})
-AC_DEFINE_UNQUOTED([HAVE_ETEXT], [$HAVE_ETEXT], [Style of etext])
-
 dnl Looking for how to do thread-local variables
 AC_ARG_WITH(threads,
         [  --with-threads=[STYLE]           Specify style of thread-local support (none)],
@@ -356,46 +337,6 @@ dnl
 AC_DEFUN([VERSION_TO_NUMBER],
 [`$1 | sed -e 's/lib.* //' | awk 'BEGIN { FS = "."; } { printf "%d", ([$]1 * 1000 + [$]2) * 1000 + [$]3;}'`])
 
-LIBSLAX_CONFIG_PREFIX=""
-LIBSLAX_SRC=""
-
-AC_ARG_WITH(libslax-prefix,
-        [  --with-libslax-prefix=[PFX]           Specify location of libslax config],
-        LIBSLAX_CONFIG_PREFIX=$withval
-)
-
-AC_MSG_CHECKING(for libslax) 
-if test "x$LIBSLAX_CONFIG_PREFIX" != "x"
-then
-        SLAX_CONFIG=${LIBSLAX_CONFIG_PREFIX}/bin/slax-config
-else
-        SLAX_CONFIG=slax-config
-fi
-
-dnl
-dnl make sure slax-config is executable,
-dnl test version and init our variables
-dnl
-
-if ${SLAX_CONFIG} --libs > /dev/null 2>&1
-then
-	LIBSLAX_VERSION=`$SLAX_CONFIG --version`
-	SLAX_BINDIR="`$SLAX_CONFIG --bindir | head -1`"
-	SLAX_OXTRADOCDIR="`$SLAX_CONFIG --oxtradoc | head -1`"
-	AC_MSG_RESULT($LIBSLAX_VERSION found)
-	HAVE_OXTRADOC=yes
-else
-	LIBSLAX_VERSION=
-	SLAX_BINDIR=
-	SLAX_OXTRADOCDIR=
-	AC_MSG_RESULT([no])
-	HAVE_OXTRADOC=no
-fi
-AM_CONDITIONAL([HAVE_OXTRADOC], [test "$HAVE_OXTRADOC" != "no"])
-
-AC_SUBST(SLAX_BINDIR)
-AC_SUBST(SLAX_OXTRADOCDIR)
-
 AC_MSG_CHECKING([whether to build with warnings])
 AC_ARG_ENABLE([warnings],
     [  --enable-warnings    Turn on compiler warnings],
@@ -435,18 +376,6 @@ AC_ARG_ENABLE([wcwidth],
 AC_MSG_RESULT([$LIBXO_WCWIDTH])
 if test "${LIBXO_WCWIDTH}" != "no"; then
   AC_DEFINE([LIBXO_WCWIDTH], [1], [Enable local wcwidth implementation])
-fi
-
-AC_MSG_CHECKING([retain hash bucket size])
-AC_ARG_WITH(retain-size,
-        [  --with-retain-size=[DIR]           Specify retain hash bucket size (in bits)],
-        [XO_RETAIN_SIZE=$withval],
-        [XO_RETAIN_SIZE=default]
-)
-
-AC_MSG_RESULT([$XO_RETAIN_SIZE])
-if test "${XO_RETAIN_SIZE}" != "default"; then
-  AC_DEFINE_UNQUOTED([XO_RETAIN_SIZE], ${XO_RETAIN_SIZE}, [Retain hash bucket size])
 fi
 
 AC_CHECK_LIB([m], [lrint])
@@ -583,37 +512,38 @@ AC_DEFINE_UNQUOTED(LIBXO_VERSION_EXTRA, ["$LIBXO_VERSION_EXTRA"],
 AC_CONFIG_HEADERS([libxo/xo_config.h])
 
 AC_CONFIG_FILES([
-  Makefile
-  libxo-config
-  xohtml/xohtml.sh
-  libxo/Makefile
-  filter/Makefile
-  format/Makefile
-  libxo/add.man
-  bin/Makefile
-  encoder/Makefile
-  encoder/cbor/Makefile
-  encoder/csv/Makefile
-  encoder/fdr/Makefile
-  encoder/fullpath/Makefile
-  encoder/test/Makefile
-  llvm-plugins/Makefile
-  xo/Makefile
-  xolint/Makefile
-  xohtml/Makefile
-  xopo/Makefile
-  packaging/libxo.pc
-  doc/Makefile
-  doc/top-link.html
-  tests/Makefile
-  tests/core/Makefile
-  tests/gettext/Makefile
-  tests/xo/Makefile
-  tests/xpath/Makefile
-  tests/utf8/Makefile
-  tests/llvm-plugins/Makefile
-  packaging/libxo.spec
-  packaging/libxo.rb.base
+     Makefile
+     libxo-config
+     xohtml/xohtml.sh
+     libxo/Makefile
+     filter/Makefile
+     format/Makefile
+     libxo/add.man
+     bin/Makefile
+     encoder/Makefile
+     encoder/cbor/Makefile
+     encoder/csv/Makefile
+     encoder/fdr/Makefile
+     encoder/fullpath/Makefile
+     encoder/test/Makefile
+     llvm-plugins/Makefile
+     xo/Makefile
+     xolint/Makefile
+     xohtml/Makefile
+     xopo/Makefile
+     packaging/libxo.pc
+     doc/Makefile
+     doc/top-link.html
+     tests/Makefile
+     tests/benchmark/Makefile
+     tests/core/Makefile
+     tests/gettext/Makefile
+     tests/xo/Makefile
+     tests/xpath/Makefile
+     tests/utf8/Makefile
+     tests/llvm-plugins/Makefile
+     packaging/libxo.spec
+     packaging/libxo.rb.base
 ])
 AC_OUTPUT
 
@@ -629,7 +559,6 @@ AC_MSG_NOTICE([summary of build options:
   share dir:        ${XO_SHAREDIR}
   extensions dir:   ${XO_ENCODERDIR}
   filter dir:       ${XO_FILTERDIR}
-  oxtradoc dir:     ${SLAX_OXTRADOCDIR}
 
   compiler:         ${CC} (${HAVE_GCC:-no})
   compiler flags:   ${CFLAGS}
@@ -644,8 +573,6 @@ AC_MSG_NOTICE([summary of build options:
   isthreaded:       ${HAVE_ISTHREADED:-no}
   thread-local:     ${THREAD_LOCAL:-no}
   local wcwidth:    ${LIBXO_WCWIDTH:-no}
-  retain size:      ${XO_RETAIN_SIZE:-no}
-  have etext:       ${HAVE_ETEXT:-no} (${HAVE_ETEXT_STYLE})
   have exterr:      ${HAVE_EXTERR:-no}
   yacc:             ${YACC}
   filters:          ${LIBXO_NEED_FILTERS}

@@ -1,0 +1,111 @@
+.\" #
+.\" # Copyright (c) 2025, Juniper Networks, Inc.
+.\" # All rights reserved.
+.\" # This SOFTWARE is licensed under the LICENSE provided in the
+.\" # ../Copyright file. By downloading, installing, copying, or
+.\" # using the SOFTWARE, you agree to be bound by the terms of that
+.\" # LICENSE.
+.\" # Phil Shafer, 2025
+.\"
+.Dd June 1, 2025
+.Dt XO_MAP_ADD 3
+.Os
+.Sh NAME
+.Nm xo_map_add , xo_map_add_file
+.Nd register tag\-name mappings for a libxo handle
+.Sh LIBRARY
+.Lb libxo
+.Sh SYNOPSIS
+.In libxo/xo.h
+.Ft int
+.Fn xo_map_add "xo_handle_t *xop" "const char *from" "size_t flen" "const char *to" "size_t tlen"
+.Ft int
+.Fn xo_map_add_file "xo_handle_t *xop" "const char *fname"
+.Sh DESCRIPTION
+These functions register one\-to\-one tag\-name substitutions for a
+.Nm libxo
+handle.
+Every time
+.Nm libxo
+would emit
+.Fa from
+as a container, list, instance, or field name, it emits
+.Fa to
+instead.
+.Pp
+The
+.Fn xo_map_add
+function adds a single mapping.
+.Fa from
+and
+.Fa to
+are UTF\-8 strings that need not be NUL\-terminated;
+.Fa flen
+and
+.Fa tlen
+give their lengths in bytes.
+The strings are copied internally; the caller does not need to keep them alive
+after the call returns.
+If a mapping for
+.Fa from
+already exists it is replaced.
+.Pp
+The
+.Fn xo_map_add_file
+function loads mappings from a file, one per line:
+.Bd -literal -offset indent
+# comments begin with '#'; blank lines are allowed
+old\-tag = new\-tag
+another = replacement
+.Ed
+.Pp
+Lines beginning with
+.Sq #
+and blank lines are ignored.
+Whitespace around the
+.Sq =
+separator is ignored.
+A UTF\-8 BOM at the start of the file is accepted and skipped.
+.Pp
+If
+.Fa fname
+contains no path separator
+.Pq Sq /
+and does not exist in the current working directory,
+.Nm libxo
+looks for it in the system map directory
+.Pq typically Pa /usr/share/libxo/map/ .
+.Pp
+Both functions accept a
+.Dv NULL
+handle to operate on the default handle.
+These functions are the programmatic equivalents of the
+.Cm map=from=to
+and
+.Cm map\-file=fname
+options described in
+.Xr xo_options 7 .
+.Sh RETURN VALUES
+Return zero on success, non\-zero on error.
+.Sh EXAMPLES
+.Bd -literal -offset indent
+/* Rename "user" to "owner" for this handle */
+xo_map_add(NULL, "user", 4, "owner", 5);
+
+/* Load bulk mappings from a file */
+xo_map_add_file(NULL, "rename.map");
+.Ed
+.Sh SEE ALSO
+.Xr libxo 3 ,
+.Xr xo_options 7
+.Sh HISTORY
+The
+.Fn xo_map_add
+and
+.Fn xo_map_add_file
+functions first appeared in
+.Fx 15.0 .
+.Sh AUTHORS
+.Nm libxo
+was written by
+.An Phil Shafer Aq Mt phil@freebsd.org .

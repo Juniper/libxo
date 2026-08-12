@@ -27,7 +27,7 @@ extern "C" {
  * Error callback: receives a fully-formatted message (the va_list has
  * already been consumed by the shim).
  */
-typedef void (*xo_shim_error_t)(void *data, const char *msg);
+typedef void (*xo_shim_error_t)(void *data, const char *fmt, ...);
 
 /*
  * Parse fmt for syntax errors only.  Calls error(data, msg) for each

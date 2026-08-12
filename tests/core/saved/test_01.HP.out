@@ -1,4 +1,24 @@
 <div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="plus">    42.1</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="minus">41.2    </div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="label">label           </div>
+  <div class="text">]  [</div>
+  <div class="data" data-tag="total">         format</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="per-call">    35.7</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="min">         format</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="max">         format</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
   <div class="text">other: </div>
   <div class="data" data-tag="thing">one</div>
 </div>
