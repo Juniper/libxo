@@ -83,11 +83,20 @@ all:
 
 test tests:
 
+BM_TEST=bm_01.test
+PASS_TEST=bm_01.pass-test
+
 benchmark bm:
 	${MKDIR_P} out
 	DYLD_LIBRARY_PATH=${top_builddir}/libxo/.libs \
 		./.libs/${BM_TEST} ${BM_ARGS} \
-		> out/bm_01.out 2> out/bm_01.err
+		> out/${BM_TEST}.out 2> out/${BM_TEST}.err
+
+bm.pass:
+	${MKDIR_P} out
+	DYLD_LIBRARY_PATH=${top_builddir}/libxo/.libs \
+		./.libs/${PASS_TEST} ${BM_ARGS} \
+		> out/${PASS_TEST}.out 2> out/${PASS_TEST}.err
 
 BM_COUNT=100
 BM_ARGS=text count ${BM_COUNT} discard
@@ -98,8 +107,6 @@ SAMPLE_ARGS=
 # sample attaches. sample $BG_PID 8 samples for 8 seconds at the
 # default 1 ms interval.
 
-BM_TEST=bm_01.test
-
 sample:
 	${MKDIR_P} out
 	DYLD_LIBRARY_PATH=${top_builddir}/libxo/.libs \
@@ -109,8 +116,6 @@ sample:
 		SAMPLE=${SAMPLE} \
 		SAMPLE_ARGS="${SAMPLE_ARGS}" \
 		sh ${srcdir}/run-bm.sh
-
-PASS_TEST=bm_01.pass-test
 
 sample.pass:
 	${MKDIR_P} out
