@@ -98,7 +98,7 @@ bm.pass:
 		./.libs/${PASS_TEST} ${BM_ARGS} \
 		> out/${PASS_TEST}.out 2> out/${PASS_TEST}.err
 
-BM_COUNT=100
+BM_COUNT=1000
 BM_ARGS=text count ${BM_COUNT} discard
 SAMPLE=sample
 SAMPLE_ARGS=
