@@ -447,6 +447,8 @@ typedef struct xo_format_s {
     int xf_width[XF_WIDTH_NUM]; /* Width/precision/size numeric fields */
     unsigned xf_stars;		/* Seen one or more '*'s */
     unsigned char xf_star[XF_WIDTH_NUM]; /* Seen one or more '*'s */
+    unsigned char xf_consumed;	/* va_arg already consumed by fast path */
+    unsigned char xf_alt;	/* "alternate form" ('#') flag */
 } xo_format_t;
 
 /*
@@ -3647,15 +3649,22 @@ xo_parse_format_spec (xo_handle_t *xop, xo_format_t *xfp,
 
 	} else if (*cp == '-')
 	    xfp->xf_seen_minus = 1;
+
+	else if (*cp == '#')
+	    xfp->xf_alt = 1;
+
 	else if (isdigit((int) *cp)) {
 	    if (xfp->xf_leading_zero < 0)
 		xfp->xf_leading_zero = (*cp == '0');
 	    xo_bump_width(xfp, *cp - '0');
+
 	} else if (*cp == '*') {
 	    xfp->xf_stars += 1;
 	    xfp->xf_star[xfp->xf_dots] = 1;
+
 	} else if (strchr("diouxXDOUeEfFgGaAcCsSpm", *cp) != NULL)
 	    break;
+
 	else if (*cp == 'n' || *cp == 'v') {
 	    xo_failure(xop, "unsupported format: '%s'", fmt);
 	    return NULL;
@@ -3667,6 +3676,166 @@ xo_parse_format_spec (xo_handle_t *xop, xo_format_t *xfp,
 
     xfp->xf_fc = *cp;
     return cp;
+}
+
+/*
+ * A fast integer formatter — avoids vsnprintf/localeconv/lock
+ * overhead.  Handles %d/%i/%u/%o/%x/%X with optional l/ll, width,
+ * precision, '#', '0'.  We pull the integer from xop->xo_vap and write
+ * ASCII directly into xbp.  Sets xfp->xf_consumed so xo_advance_vap
+ * skips the double-pop.  Returns byte count written, or -1 on buffer
+ * error.
+ */
+static ssize_t
+xo_format_int_text (xo_handle_t *xop, xo_buffer_t *xbp, xo_format_t *xfp)
+{
+    char fc = xfp->xf_fc;
+    int is_signed = (fc == 'd' || fc == 'i');
+    int is_hex    = (fc == 'x' || fc == 'X');
+    int is_octal  = (fc == 'o');
+
+    unsigned long long uval;
+    long long sval = 0;
+
+    if (xfp->xf_lflag >= 2) {
+	if (is_signed) {
+	    sval = va_arg(xop->xo_vap, long long);
+	    uval = (unsigned long long) sval;
+
+	} else
+	    uval = va_arg(xop->xo_vap, unsigned long long);
+
+    } else if (xfp->xf_lflag == 1) {
+	if (is_signed) {
+	    sval = (long long) va_arg(xop->xo_vap, long);
+	    uval = (unsigned long long) sval;
+	} else
+	    uval = (unsigned long long) va_arg(xop->xo_vap, unsigned long);
+
+    } else {
+	if (is_signed) {
+	    sval = (long long) va_arg(xop->xo_vap, int);
+	    uval = (unsigned long long) sval;
+	} else
+	    uval = (unsigned long long) va_arg(xop->xo_vap, unsigned int);
+    }
+
+    xfp->xf_consumed = 1;
+
+    int negative = (is_signed && sval < 0);
+    unsigned long long absval = negative ? (0ULL - uval) : uval;
+
+    /* Format digits right-to-left */
+    char dbuf[24];		/* 22 digits max for 64-bit octal */
+    char *dep = dbuf + sizeof(dbuf);
+    char *dcp = dep;
+
+    if (absval == 0) {
+	*--dcp = '0';
+
+    } else if (is_hex) {
+	static const char lx[] = "0123456789abcdef";
+	static const char ux[] = "0123456789ABCDEF";
+	const char *digs = (fc == 'X') ? ux : lx;
+	while (absval) {
+	    *--dcp = digs[absval & 0xf];
+	    absval >>= 4;
+	}
+
+    } else if (is_octal) {
+	while (absval) {
+	    *--dcp = '0' + (int)(absval & 7);
+	    absval >>= 3;
+	}
+
+    } else {
+	while (absval) {
+	    unsigned long long q = absval / 10;
+	    *--dcp = '0' + (int)(absval - q * 10);
+	    absval = q;
+	}
+    }
+    ssize_t dlen = dep - dcp;
+
+    /* Precision: minimum digit count (e.g. %.8d → at least 8 digits) */
+    ssize_t precision = (xfp->xf_dots > 0 && xfp->xf_width[XF_WIDTH_SIZE] >= 0)
+	? xfp->xf_width[XF_WIDTH_SIZE] : -1;
+    ssize_t prec_zeros = (precision > dlen) ? precision - dlen : 0;
+
+    /*
+     * The "alternate form" prefix and octal zero.  Yes, this is the
+     * term from the printf(3) man page.
+     */
+    const char *prefix = "";
+    ssize_t prefix_len = 0;
+    if (xfp->xf_alt) {
+	if (is_hex && uval != 0) {
+	    prefix = (fc == 'X') ? "0X" : "0x";
+	    prefix_len = 2;
+	} else if (is_octal && prec_zeros == 0 && *dcp != '0') {
+	    prec_zeros = 1;	/* prepend a '0' for non-zero octal */
+	}
+    }
+
+    char sign = negative ? '-' : '\0';
+    ssize_t sign_len = sign ? 1 : 0;
+    ssize_t content_len = sign_len + prefix_len + prec_zeros + dlen;
+
+    /* Minimum field width */
+    ssize_t min_width = (xfp->xf_width[XF_WIDTH_MIN] >= 0)
+	? xfp->xf_width[XF_WIDTH_MIN] : 0;
+    ssize_t pad = (content_len < min_width) ? min_width - content_len : 0;
+
+    /* Zero-fill flag applies to width, but is ignored when precision is set */
+    int zero_fill = (xfp->xf_leading_zero > 0) && (precision < 0);
+
+    ssize_t total = content_len + pad;
+    if (xo_check_for_room(xop, xbp, total))
+	return -1;
+
+    char *op = xbp->xb_curp;
+
+    if (!xfp->xf_seen_minus && !zero_fill && pad > 0) {
+	memset(op, ' ', pad);	/* right-justify: leading spaces */
+	op += pad;
+    }
+
+    if (sign) *op++ = sign;
+    memcpy(op, prefix, prefix_len);
+    op += prefix_len;
+
+    ssize_t fill_zeros = prec_zeros + (zero_fill ? pad : 0);
+    if (fill_zeros > 0) {
+	memset(op, '0', fill_zeros);
+	op += fill_zeros;
+    }
+
+    memcpy(op, dcp, dlen);
+    op += dlen;
+
+    if (xfp->xf_seen_minus && pad > 0) {
+	memset(op, ' ', pad);	/* left-justify: trailing spaces */
+	op += pad;
+    }
+
+    return total;
+}
+
+/*
+ * Can we use the format_int code?
+ */
+static inline int
+xo_use_format_int (xo_handle_t *xop, int style, xo_format_t *xfp)
+{
+    if (xop->xo_formatter == NULL && style == XO_STYLE_TEXT
+            && !xfp->xf_stars
+	    && (xfp->xf_fc == 'd' || xfp->xf_fc == 'i' || xfp->xf_fc == 'u'
+	        || xfp->xf_fc == 'o' || xfp->xf_fc == 'x' || xfp->xf_fc == 'X')
+	    && !xfp->xf_jflag && !xfp->xf_tflag
+	    && !xfp->xf_zflag && !xfp->xf_qflag)
+	return TRUE;
+
+    return FALSE;
 }
 
 /*
@@ -3713,7 +3882,14 @@ xo_emit_field_value (xo_handle_t *xop, xo_buffer_t *xbp,
 	    rc = xo_trim_ws(xbp, rc);
 
     } else {
-	ssize_t columns = rc = xo_vsnprintf(xop, xbp, newfmt, xop->xo_vap);
+	ssize_t columns;
+
+	/* Use the fast path for integer formats — no vsnprintf/localeconv */
+	if (xo_use_format_int(xop, style, xfp)) {
+	    rc = columns = xo_format_int_text(xop, xbp, xfp);
+	} else {
+	    columns = rc = xo_vsnprintf(xop, xbp, newfmt, xop->xo_vap);
+	}
 
 	if (rc > 0) {
 	    /*
@@ -3779,6 +3955,10 @@ static void
 xo_advance_vap (xo_handle_t *xop, xo_format_t *xfp)
 {
     if (XOF_ISSET(xop, XOF_NO_VA_ARG))
+	return;
+
+    /* The fast integer path already consumed the arg */
+    if (xfp->xf_consumed)
 	return;
 
     if (xfp->xf_fc == 's' || xfp->xf_fc == 'S') {
@@ -4255,12 +4435,14 @@ xo_key_find_matching (const char *cp, char ch)
     if (ch == '"') {
 	/* Double-quote delimiter is stored as &quot; in the HTML attribute */
 	const char *np = strstr(cp, "&quot;");
-	return np ? np + XO_LEN_QUOT - 1 : NULL;  /* point to last char of &quot; */
+	return np ? np + XO_LEN_QUOT - 1 : NULL;  /* last char of &quot; */
     }
+
     for (; *cp; cp++) {
 	if (*cp == ch)
 	    return cp;
     }
+
     return NULL;
 }
 
