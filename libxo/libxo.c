@@ -357,34 +357,6 @@ struct xo_handle_s {
     xo_xsf_flags_t xo_rb_snap;	/* Transient: parent XSF_RB_BITS before open */
 };
 
-/* Flag operations */
-#define XOF_BIT_ISSET(_flag, _bit)	(((_flag) & (_bit)) ? 1 : 0)
-#define XOF_BIT_SET(_flag, _bit)	do { (_flag) |= (_bit); } while (0)
-#define XOF_BIT_CLEAR(_flag, _bit)	do { (_flag) &= ~(_bit); } while (0)
-
-#define XOF_ISSET(_xop, _bit) XOF_BIT_ISSET(_xop->xo_flags, _bit)
-#define XOF_SET(_xop, _bit) XOF_BIT_SET(_xop->xo_flags, _bit)
-#define XOF_CLEAR(_xop, _bit) XOF_BIT_CLEAR(_xop->xo_flags, _bit)
-
-#define XOIF_ISSET(_xop, _bit) XOF_BIT_ISSET(_xop->xo_iflags, _bit)
-#define XOIF_SET(_xop, _bit) XOF_BIT_SET(_xop->xo_iflags, _bit)
-#define XOIF_CLEAR(_xop, _bit) XOF_BIT_CLEAR(_xop->xo_iflags, _bit)
-
-/* Internal flags */
-#define XOIF_REORDER	XOF_BIT(0) /* Reordering fields; record field info */
-#define XOIF_DIV_OPEN	XOF_BIT(1) /* A <div> is open */
-#define XOIF_TOP_EMITTED XOF_BIT(2) /* The top JSON braces have been emitted */
-#define XOIF_ANCHOR	XOF_BIT(3) /* An anchor is in place  */
-
-#define XOIF_UNITS_PENDING XOF_BIT(4) /* We have a units-insertion pending */
-#define XOIF_INIT_IN_PROGRESS XOF_BIT(5) /* Init of handle is in progress */
-#define XOIF_MADE_OUTPUT XOF_BIT(6)	 /* Have already made output */
-#ifdef LIBXO_NEED_FILTERS
-#define XOIF_FILTERING	XOF_BIT(7)	 /* Actively filtering (XOF_FILTER) */
-#else  /* LIBXO_NEED_FILTERS */
-#define XOIF_FILTERING 0	/* Allow the compiler to trim filter code */
-#endif /* LIBXO_NEED_FILTERS */
-
 /*
  * Normal printf has width and precision, which for strings operate as
  * min and max number of columns.  But this depends on the idea that
@@ -432,24 +404,52 @@ struct xo_handle_s {
  * A place to parse printf-style format flags for each field
  */
 typedef struct xo_format_s {
-    unsigned char xf_fc;	/* Format character */
-    unsigned char xf_enc;	/* Encoding of the string (XF_ENC_*) */
-    unsigned char xf_skip;	/* Skip this field */
-    unsigned char xf_lflag;	/* 'l' (long) */
-    unsigned char xf_hflag;;	/* 'h' (half) */
-    unsigned char xf_jflag;	/* 'j' (intmax_t) */
-    unsigned char xf_tflag;	/* 't' (ptrdiff_t) */
-    unsigned char xf_zflag;	/* 'z' (size_t) */
-    unsigned char xf_qflag;	/* 'q' (quad_t) */
-    unsigned char xf_seen_minus; /* Seen a minus */
-    int xf_leading_zero;	/* Seen a leading zero (zero fill)  */
-    unsigned xf_dots;		/* Seen one or more '.'s */
     int xf_width[XF_WIDTH_NUM]; /* Width/precision/size numeric fields */
-    unsigned xf_stars;		/* Seen one or more '*'s */
-    unsigned char xf_star[XF_WIDTH_NUM]; /* Seen one or more '*'s */
-    unsigned char xf_consumed;	/* va_arg already consumed by fast path */
-    unsigned char xf_alt;	/* "alternate form" ('#') flag */
+    uint8_t xf_star[XF_WIDTH_NUM]; /* Seen one or more '*'s */
+    uint8_t xf_stars;		/* Seen one or more '*'s */
+    uint8_t xf_fc;	/* Format character */
+    uint8_t xf_enc;	/* Encoding of the string (XF_ENC_*) */
+    uint8_t xf_skip;	/* Skip this field */
+    uint8_t xf_lflag;	/* 'l' (long) */
+    uint8_t xf_hflag;;	/* 'h' (half) */
+    uint8_t xf_jflag;	/* 'j' (intmax_t) */
+    uint8_t xf_tflag;	/* 't' (ptrdiff_t) */
+    uint8_t xf_zflag;	/* 'z' (size_t) */
+    uint8_t xf_qflag;	/* 'q' (quad_t) */
+    uint8_t xf_seen_minus; /* Seen a minus */
+    int8_t xf_leading_zero;	/* Seen a leading zero (zero fill)  */
+    uint8_t xf_dots;		/* Seen one or more '.'s */
+    uint8_t xf_consumed;	/* va_arg already consumed by fast path */
+    uint8_t xf_alt;	/* "alternate form" ('#') flag */
 } xo_format_t;
+
+/* Flag operations */
+#define XOF_BIT_ISSET(_flag, _bit)	(((_flag) & (_bit)) ? 1 : 0)
+#define XOF_BIT_SET(_flag, _bit)	do { (_flag) |= (_bit); } while (0)
+#define XOF_BIT_CLEAR(_flag, _bit)	do { (_flag) &= ~(_bit); } while (0)
+
+#define XOF_ISSET(_xop, _bit) XOF_BIT_ISSET(_xop->xo_flags, _bit)
+#define XOF_SET(_xop, _bit) XOF_BIT_SET(_xop->xo_flags, _bit)
+#define XOF_CLEAR(_xop, _bit) XOF_BIT_CLEAR(_xop->xo_flags, _bit)
+
+#define XOIF_ISSET(_xop, _bit) XOF_BIT_ISSET(_xop->xo_iflags, _bit)
+#define XOIF_SET(_xop, _bit) XOF_BIT_SET(_xop->xo_iflags, _bit)
+#define XOIF_CLEAR(_xop, _bit) XOF_BIT_CLEAR(_xop->xo_iflags, _bit)
+
+/* Internal flags */
+#define XOIF_REORDER	XOF_BIT(0) /* Reordering fields; record field info */
+#define XOIF_DIV_OPEN	XOF_BIT(1) /* A <div> is open */
+#define XOIF_TOP_EMITTED XOF_BIT(2) /* The top JSON braces have been emitted */
+#define XOIF_ANCHOR	XOF_BIT(3) /* An anchor is in place  */
+
+#define XOIF_UNITS_PENDING XOF_BIT(4) /* We have a units-insertion pending */
+#define XOIF_INIT_IN_PROGRESS XOF_BIT(5) /* Init of handle is in progress */
+#define XOIF_MADE_OUTPUT XOF_BIT(6)	 /* Have already made output */
+#ifdef LIBXO_NEED_FILTERS
+#define XOIF_FILTERING	XOF_BIT(7)	 /* Actively filtering (XOF_FILTER) */
+#else  /* LIBXO_NEED_FILTERS */
+#define XOIF_FILTERING 0	/* Allow the compiler to trim filter code */
+#endif /* LIBXO_NEED_FILTERS */
 
 /*
  * We keep a 'default' handle to allow callers to avoid having to
@@ -3160,9 +3160,6 @@ xo_needed_encoding (xo_handle_t *xop)
     if (XOF_ISSET(xop, XOF_UTF8)) /* Check the override flag */
 	return XF_ENC_UTF8;
 
-    if (xo_style(xop) == XO_STYLE_TEXT) /* Text defaults to locale */
-	return XF_ENC_LOCALE;
-
     return XF_ENC_UTF8;		/* Otherwise, we love UTF-8 */
 }
 
@@ -4102,6 +4099,8 @@ xo_do_format_field (xo_handle_t *xop, xo_buffer_t *xbp,
 		}
 	    }
 	}
+
+	xf.xf_skip = 0;
 
 	/* Hidden fields are only visible to JSON and XML */
 	if (XOF_ISSET(xop, XFF_ENCODE_ONLY)) {
