@@ -180,6 +180,72 @@ bench_instance4 (int n XO_UNUSED)
     }
 }
 
+static void
+bench_top10 (int n XO_UNUSED)
+{
+    static char base_grocery[] = "GRO";
+    static char base_hardware[] = "HRD";
+    static char base_other[] = "OTH";
+    struct item {
+	const char *i_title;
+	int i_sold;
+	int i_instock;
+	int i_onorder;
+	const char *i_sku_base;
+	int i_sku_num;
+    };
+    struct item list[] = {
+	{ "gum", 1412, 54, 10, base_grocery, 415 },
+	{ "rope", 85, 4, 2, base_hardware, 212 },
+	{ "ladder", 0, 2, 1, base_hardware, 517 },
+	{ "bolt", 4123, 144, 42, base_hardware, 632 },
+	{ "water", 17, 14, 2, base_grocery, 2331 },
+	{ "fish food", 234, 12, 4, base_other, 432 },
+	{ "coffee", 324, 21, 14, base_other, 423 },
+	{ "macroons", 674, 102, 823, base_other, 342 },
+	{ "fish", 1321, 45, 1, base_grocery, 533 },
+	{ NULL, 0, 0, 0, NULL, 0 }
+    };
+    struct item *ip;
+    xo_info_t info[] = {
+	{ "in-stock", "number", "Number of items in stock" },
+	{ "name", "string", "Name of the item" },
+	{ "on-order", "number", "Number of items on order" },
+	{ "sku", "string", "Stock Keeping Unit" },
+	{ "sold", "number", "Number of items sold" },
+	{ XO_INFO_NULL },
+    };
+
+    xo_set_info(g_xo, info, -1);
+    xo_set_flags(g_xo, XOF_KEYS);
+
+    for (int i = 0; i < 1 /* N_INNER */; i++) {
+	xo_open_container_h(g_xo, "data");
+	xo_open_list_h(g_xo, "item");
+
+	xo_emit_h(g_xo, "{T:Item/%-10s}{T:Total Sold/%12s}{T:In Stock/%12s}"
+		"{T:On Order/%12s}{T:SKU/%5s}\n");
+
+	for (ip = list; ip->i_title; ip++) {
+	    xo_open_instance_h(g_xo, "item");
+	    xo_attr_h(g_xo, "test3", "value3");
+
+	    xo_emit_h(g_xo, "{keq:sku/%s-%u/%s-000-%u}"
+		    "{k:name/%-10s/%s}{n:sold/%12u/%u}{:in-stock/%12u/%u}"
+		    "{:on-order/%12u/%u}{qkd:sku/%5s-000-%u/%s-000-%u}\n",
+		    ip->i_sku_base, ip->i_sku_num,
+		    ip->i_title, ip->i_sold, ip->i_instock, ip->i_onorder,
+		    ip->i_sku_base, ip->i_sku_num);
+
+	    xo_close_instance_h(g_xo, "item");
+	}
+
+	xo_close_list_h(g_xo, "item");
+	xo_close_container_h(g_xo, "data");
+	xo_emit_h(g_xo, "\n\n");
+    }
+}
+
 typedef struct {
     const char *b_label;
     void (*b_fn)(int);
@@ -198,6 +264,7 @@ static bench_t benches[] = {
     { "2-field",      bench_2f,        2, 0, 0, 0 },
     { "4-field",      bench_4f,        4, 0, 0, 0 },
     { "8-field",      bench_8f,        8, 0, 0, 0 },
+    { "top-10",	      bench_top10,     6, 0, 0, 0 },
     { "container",    bench_container, -1, 0, 0, 0 },
     { "instance+4f",  bench_instance4, -1, 0, 0, 0 },
     { NULL,           NULL,         0, 0, 0, 0 }
@@ -215,6 +282,7 @@ main (int argc, char **argv)
     xo_set_program("test");
 
     g_xo = xo_create(XO_STYLE_TEXT, 0);
+    xo_set_flags(g_xo, XOF_UTF8);
 
     for (int i = 1; argv[i]; i++) {
 	const char *cp = argv[i];
@@ -229,6 +297,8 @@ main (int argc, char **argv)
 
         } else if (xo_streq(cp, "html"))
             xo_set_style(g_xo, XO_STYLE_HTML);
+	else if (xo_streq(cp, "info"))
+	    xo_set_flags(NULL, XOF_INFO);
 	else if (xo_streq(cp, "json"))
             xo_set_style(g_xo, XO_STYLE_JSON);
         else if (xo_streq(cp, "text"))
