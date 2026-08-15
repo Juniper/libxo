@@ -54,7 +54,9 @@ main (int argc, char **argv)
     };
 
     int opt_count = 1;
+    int opt_top_count = 1;
     int opt_discard = 0;
+    int opt_pid = 0;
 
     char name[] = "test_01.test";  /* test trimming of xo_program */
     argv[0] = name;
@@ -64,30 +66,34 @@ main (int argc, char **argv)
 	return 1;
 
     for (argc = 1; argv[argc]; argc++) {
-	if (xo_streq(argv[argc], "xml"))
-	    xo_set_style(NULL, XO_STYLE_XML);
-	else if (xo_streq(argv[argc], "json"))
-	    xo_set_style(NULL, XO_STYLE_JSON);
-	else if (xo_streq(argv[argc], "text"))
-	    xo_set_style(NULL, XO_STYLE_TEXT);
-	else if (xo_streq(argv[argc], "html"))
-	    xo_set_style(NULL, XO_STYLE_HTML);
-	else if (xo_streq(argv[argc], "pretty"))
-	    xo_set_flags(NULL, XOF_PRETTY);
-	else if (xo_streq(argv[argc], "xpath"))
-	    xo_set_flags(NULL, XOF_XPATH);
-	else if (xo_streq(argv[argc], "info"))
-	    xo_set_flags(NULL, XOF_INFO);
-	else if (xo_streq(argv[argc], "debug"))
-	    xo_set_flags(NULL, XOF_DEBUG);
-	else if (xo_streq(argv[argc], "count"))
+	char *cp = argv[argc];
+	if (xo_streq(cp, "count"))
 	    opt_count = atoi(argv[++argc]);
-	else if (xo_streq(argv[argc], "discard"))
+	else if (xo_streq(cp, "debug"))
+	    xo_set_flags(NULL, XOF_DEBUG);
+	else if (xo_streq(cp, "discard"))
 	    opt_discard = 1;
-        else if (xo_streq(argv[argc], "error")) {
+        else if (xo_streq(cp, "error")) {
             close(-1);
             xo_err(1, "error detected");
-        }
+        } else if (xo_streq(cp, "html"))
+	    xo_set_style(NULL, XO_STYLE_HTML);
+	else if (xo_streq(cp, "info"))
+	    xo_set_flags(NULL, XOF_INFO);
+	else if (xo_streq(cp, "json"))
+	    xo_set_style(NULL, XO_STYLE_JSON);
+	else if (xo_streq(cp, "pid"))
+	    opt_pid = 1;
+	else if (xo_streq(cp, "pretty"))
+	    xo_set_flags(NULL, XOF_PRETTY);
+	else if (xo_streq(cp, "text"))
+	    xo_set_style(NULL, XO_STYLE_TEXT);
+	else if (xo_streq(cp, "top-count"))
+	    opt_top_count = atoi(argv[++argc]);
+	else if (xo_streq(cp, "xpath"))
+	    xo_set_flags(NULL, XOF_XPATH);
+	else if (xo_streq(cp, "xml"))
+	    xo_set_style(NULL, XO_STYLE_XML);
     }
 
     if (opt_discard) {
@@ -97,6 +103,9 @@ main (int argc, char **argv)
 	    dup2(fd, 1);
 	}
     }
+
+    if (opt_pid)
+	fprintf(stderr, "PID %lu\n", (long unsigned) getpid());
 
     xo_set_info(NULL, info, -1);
     xo_set_flags(NULL, XOF_KEYS);
@@ -115,6 +124,8 @@ main (int argc, char **argv)
     xo_emit("Blocks: {:block/%u}\n", 56);
 
     xo_open_container_h(NULL, "top-level");
+
+ top:
 
     xo_emit("static {:type/ethernet} {:type/bridge} {:type/%4du} {:type/%3d}",
 	    18, 24);
@@ -297,6 +308,9 @@ main (int argc, char **argv)
     xo_emitr(buf, 1, 2, 3);
     buf[0] = 'X';
     xo_emitr(buf, 1, 2, 3);
+
+    if (opt_top_count && --opt_top_count > 0)
+	goto top;
 
     xo_close_container_h(NULL, "top-level");
 
