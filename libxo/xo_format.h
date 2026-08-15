@@ -45,6 +45,56 @@ typedef struct xo_flag_mapping_s {
 } xo_flag_mapping_t;
 
 /*
+ * Parsed representation of one field descriptor from a libxo format string.
+ * All string members are xo_format_offset_t values — byte offsets into the
+ * "base" format string from which the field was parsed.  Use xo_foff(base, off)
+ * to recover a const char *.  XO_FOFF_NONE (-1) means absent; xfi_format may
+ * additionally take XO_FOFF_DEFAULT (-2) to indicate the default "%s" format.
+ *
+ * This struct is exposed publicly so callers can populate pre-built const
+ * field tables for xo_emit_cached().  The layout is stable within a given
+ * XO_EMIT_CACHE_VERSION; bump the version whenever the layout changes.
+ */
+typedef struct xo_field_info_s {
+    xo_xff_flags_t xfi_flags;		/* Modifier flags (XFF_*) */
+    uint32_t xfi_ftype;			/* Role character ('V','L','G', XO_ROLE_*) */
+    xo_format_offset_t xfi_start;	/* Offset of field start in base string */
+    xo_format_offset_t xfi_content;	/* Offset of content (name) */
+    xo_format_offset_t xfi_format;	/* Offset of display format (or XO_FOFF_DEFAULT) */
+    xo_format_offset_t xfi_encoding;	/* Offset of encoding format */
+    xo_format_offset_t xfi_next;	/* Offset just past this field */
+    xo_format_offset_t xfi_len;		/* Length of whole field descriptor */
+    xo_format_offset_t xfi_clen;	/* Length of content */
+    xo_format_offset_t xfi_flen;	/* Length of format */
+    xo_format_offset_t xfi_elen;	/* Length of encoding */
+    uint32_t xfi_fnum;			/* Field number (0 = unset) */
+    uint32_t xfi_renum;			/* Reordered field number (0 = none) */
+} xo_field_info_t;
+
+/*
+ * Build-time pre-parsed format string cache.
+ *
+ * xo_emit_cached() is the target of the LLVM IR pass: it takes a pointer to
+ * a pre-built xo_format_cache_t (holding a const xo_field_info_t[] parsed at
+ * compile time) plus the original format string (kept for the gettext path
+ * and as a version-mismatch fallback).
+ *
+ * If the cache version does not match XO_EMIT_CACHE_VERSION, or if the cache
+ * pointer is NULL, the call silently falls back to parsing fmt at runtime.
+ *
+ * xo_field_info_t is defined above; callers may populate xfc_fields[] directly
+ * (e.g. as a static const array) using the XFF_* flags, XO_FOFF_* sentinels,
+ * and XO_ROLE_* constants defined above.
+ */
+#define XO_EMIT_CACHE_VERSION 1  /* bump on any xo_field_info_t layout change */
+
+struct xo_format_cache_s {
+    unsigned xfc_version;		/* == XO_EMIT_CACHE_VERSION */
+    unsigned xfc_num_fields;
+    const xo_field_info_t *xfc_fields;	/* const xo_field_info_t[] */
+};
+
+/*
  * Error callback.  Called when xo_parse_format() encounters a problem.
  * The fmt/... are a printf-style message.
  */
