@@ -65,11 +65,13 @@ typedef uint32_t xo_trie_id_t;	/* Index trie node array (1-based; 0=none) */
  * index 0 means "none".
  */
 typedef struct xo_tnode_s {
-    xo_off_t xtn_name;          /* Element name offset in xparse string table */
+    xo_name_id_t xtn_name;      /* Interned element name (backend-opaque id) */
     xo_xparse_node_id_t xtn_pred; /* Predicate subtree root (0=none) */
     xo_trie_id_t xtn_child;	/* First child trie node (0 = leaf) */
     xo_trie_id_t xtn_sibling;	/* Next sibling at this level */
     uint16_t xtn_flags;		/* XTNF_* flags */
+    uint16_t xtn_pad;		/* reserved */
+    uint32_t xtn_action;	/* backend-opaque action id (XTNF_TERMINAL only) */
 } xo_tnode_t;
 
 #define XTNF_TERMINAL	(1<<0)	/* A complete expression ends here */
@@ -86,6 +88,8 @@ typedef struct xo_trie_s {
     xo_trie_id_t xt_cap;	/* Allocated capacity */
     xo_trie_id_t xt_root;	/* First root-level sibling */
     xo_xparse_data_t *xt_xd;	/* Parse data (for string lookup) */
+    xo_filter_data_t *xt_data;	/* Host context (opaque to core) */
+    xo_filter_data_ops_t *xt_ops; /* Data vtable for alloc and name ops */
 } xo_trie_t;
 
 /*
@@ -141,6 +145,7 @@ typedef struct xo_tmatch_s {
     xo_tframe_t *xtm_stack;	/* Frame stack [0..xtm_depth] */
     uint32_t xtm_allow;          /* Active allow-match count */
     uint32_t xtm_deny;           /* Active deny-match count */
+    uint32_t xtm_cur_action;     /* xtn_action from last matched TERMINAL node */
 } xo_tmatch_t;
 
 /*
@@ -151,7 +156,9 @@ xo_trie_alloc_node (xo_trie_t *xtp)
 {
     if (xtp->xt_count + 1 >= xtp->xt_cap) {
 	xo_trie_id_t cap = xtp->xt_cap ? xtp->xt_cap * 2 : 16;
-	xo_tnode_t *p = xo_realloc(xtp->xt_nodes, cap * sizeof(*p));
+	xo_tnode_t *p = xtp->xt_ops->xfdo_realloc(xtp->xt_data,
+						    xtp->xt_nodes,
+						    cap * sizeof(*p));
 	if (p == NULL)
 	    return 0;
 
@@ -199,14 +206,14 @@ xo_trie_get_wildcard_child (xo_trie_t *xtp, xo_trie_id_t parent)
  * parent==0 means the root sibling list.
  */
 static xo_trie_id_t
-xo_trie_get_child (xo_trie_t *xtp, xo_trie_id_t parent, xo_off_t name_id)
+xo_trie_get_child (xo_trie_t *xtp, xo_trie_id_t parent, xo_name_id_t name_id)
 {
     xo_trie_id_t *listp = parent
 	? &xtp->xt_nodes[parent].xtn_child
 	: &xtp->xt_root;
 
     for (xo_trie_id_t s = *listp; s; s = xtp->xt_nodes[s].xtn_sibling)
-	if (xtp->xt_nodes[s].xtn_name == name_id)
+	if (xtp->xt_nodes[s].xtn_name.ni_id == name_id.ni_id)
 	    return s;
 
     xo_trie_id_t id = xo_trie_alloc_node(xtp);
@@ -225,7 +232,7 @@ xo_trie_get_child (xo_trie_t *xtp, xo_trie_id_t parent, xo_off_t name_id)
 
 static void
 xo_trie_insert (xo_trie_t *xtp, xo_xparse_data_t *xdp,
-		xo_xparse_node_id_t first_elem, uint16_t flags)
+		xo_xparse_node_id_t first_elem, uint16_t flags, uint32_t action)
 {
     xo_trie_id_t parent = 0;
     xo_xparse_node_t *xnp;
@@ -241,7 +248,15 @@ xo_trie_insert (xo_trie_t *xtp, xo_xparse_data_t *xdp,
 	if (xnp->xn_type == L_ASTERISK) {
 	    tid = xo_trie_get_wildcard_child(xtp, parent);
 	} else if (xnp->xn_type == C_ELEMENT) {
-	    tid = xo_trie_get_child(xtp, parent, xnp->xn_str);
+	    xo_name_id_t nid;
+	    if (xtp->xt_ops->xfdo_name_intern) {
+		const char *nm = xo_xparse_str(xdp, xnp->xn_str);
+		nid = xtp->xt_ops->xfdo_name_intern(xtp->xt_data, nm,
+						     nm ? (ssize_t) strlen(nm) : 0);
+	    } else {
+		nid.ni_id = (uint32_t) xnp->xn_str;
+	    }
+	    tid = xo_trie_get_child(xtp, parent, nid);
 	} else {
 	    continue;
 	}
@@ -269,20 +284,26 @@ xo_trie_insert (xo_trie_t *xtp, xo_xparse_data_t *xdp,
 	parent = tid;
     }
 
-    if (parent)
+    if (parent) {
 	xtp->xt_nodes[parent].xtn_flags |=
 	    XTNF_TERMINAL | (flags & ~XTNF_ABSOLUTE);
+	xtp->xt_nodes[parent].xtn_action = action;
+    }
 }
 
 static xo_trie_t *
-xo_trie_compile (xo_handle_t *xop UNUSED, xo_xparse_data_t *xdp)
+xo_trie_compile (xo_handle_t *xop UNUSED, xo_xparse_data_t *xdp,
+		 xo_filter_data_t *dp, xo_filter_data_ops_t *ops,
+		 uint32_t *actions)
 {
-    xo_trie_t *xtp = xo_realloc(NULL, sizeof(*xtp));
+    xo_trie_t *xtp = ops->xfdo_realloc(dp, NULL, sizeof(*xtp));
     if (xtp == NULL)
 	return NULL;
 
     bzero(xtp, sizeof(*xtp));
     xtp->xt_xd = xdp;
+    xtp->xt_data = dp;
+    xtp->xt_ops = ops;
 
     xo_xparse_node_id_t *paths = xdp->xd_paths;
     for (uint32_t i = 0; i < xdp->xd_paths_cur; i++, paths++) {
@@ -314,7 +335,8 @@ xo_trie_compile (xo_handle_t *xop UNUSED, xo_xparse_data_t *xdp)
 	default:
 	    continue;
 	}
-	xo_trie_insert(xtp, xdp, elem, flags);
+	uint32_t action = (actions != NULL) ? actions[i] : 0;
+	xo_trie_insert(xtp, xdp, elem, flags, action);
     }
 
     return xtp;
@@ -324,8 +346,10 @@ static void
 xo_trie_free (xo_trie_t *xtp)
 {
     if (xtp) {
-	xo_free(xtp->xt_nodes);
-	xo_free(xtp);
+	xo_filter_data_t *dp = xtp->xt_data;
+	xo_filter_data_ops_t *ops = xtp->xt_ops;
+	ops->xfdo_free(dp, xtp->xt_nodes);
+	ops->xfdo_free(dp, xtp);
     }
 }
 
@@ -495,6 +519,49 @@ static void xo_filter_force_resolve_pred(xo_handle_t *, xo_filter_t *,
 
 typedef unsigned xo_xsf_flags_t;   /* Type for XFSF_* flag fields */
 
+/*
+ * Default data backend: heap allocation + xparse string table.
+ * This is the real definition of xo_filter_data_t used within this .so.
+ * Alternative backends (e.g. libpin) define their own struct in their
+ * own translation unit; the core only ever sees the forward declaration.
+ */
+struct xo_filter_data_s {
+    xo_handle_t *xfd_xop;	 /* libxo handle (for xo_dbg calls) */
+    xo_xparse_data_t *xfd_xdp;	 /* xparse data (for string-table lookup) */
+};
+
+static void *
+xo_filter_data_default_realloc (xo_filter_data_t *dp UNUSED,
+				 void *ptr, size_t sz)
+{
+    return xo_realloc(ptr, sz);
+}
+
+static void
+xo_filter_data_default_free (xo_filter_data_t *dp UNUSED, void *ptr)
+{
+    xo_free(ptr);
+}
+
+static int
+xo_filter_data_default_name_eq (xo_filter_data_t *dp,
+				 xo_name_id_t id,
+				 const char *tag, ssize_t tlen)
+{
+    const char *nm = xo_xparse_str(dp->xfd_xdp, (xo_xparse_str_id_t) id.ni_id);
+    if (nm == NULL)
+	return 0;
+    return xo_streqn(nm, tag, tlen);
+}
+
+xo_filter_data_ops_t xo_filter_data_ops_default = {
+    .xfdo_version     = XO_FILTER_DATA_OPS_VERSION,
+    .xfdo_realloc     = xo_filter_data_default_realloc,
+    .xfdo_free        = xo_filter_data_default_free,
+    .xfdo_name_intern = NULL,   /* optional; NULL wraps xparse str_id directly */
+    .xfdo_name_eq     = xo_filter_data_default_name_eq,
+};
+
 struct xo_filter_s {		 /* Forward/typdef decl in xo_private.h */
     struct xo_xparse_data_s xf_xd; /* Main parsing structure */
     xo_filter_status_t xf_status; /* Current status: (see XO_STATUS_*) */
@@ -503,6 +570,12 @@ struct xo_filter_s {		 /* Forward/typdef decl in xo_private.h */
     xo_xsf_flags_t xf_flags;	 /* Flags (XFSF_*) */
     xo_trie_t *xf_trie;	 /* Compiled trie (NULL until first filter added) */
     xo_tmatch_t xf_tmatch;	 /* Runtime trie-matching state */
+    xo_filter_data_t *xf_data;	 /* Host context (opaque to core) */
+    xo_filter_data_ops_t *xf_ops; /* Data vtable */
+    xo_filter_data_t xf_def_data; /* Embedded default data context (avoids extra alloc) */
+    uint32_t *xf_path_actions;	 /* per-path action ids (parallel to xf_xd.xd_paths[]) */
+    uint32_t xf_path_actions_cap; /* allocated capacity of xf_path_actions[] */
+    uint32_t xf_cur_action;	 /* action from the last XO_STATUS_FULL transition */
 };
 
 /* Flags for xf_flags */
@@ -536,6 +609,32 @@ xo_filter_op_create (xo_handle_t *xop)
 
     xo_xparse_init(&xfp->xf_xd);
 
+    /* Use embedded default data context; point xfd_xdp at our own xparse data */
+    xfp->xf_def_data.xfd_xop = xop;
+    xfp->xf_def_data.xfd_xdp = &xfp->xf_xd;
+    xfp->xf_data = &xfp->xf_def_data;
+    xfp->xf_ops  = &xo_filter_data_ops_default;
+
+    xo_set_filter_data(xop, xfp);
+
+    return xfp;
+}
+
+xo_filter_t *
+xo_filter_create_with_data (xo_handle_t *xop, xo_filter_data_t *dp,
+			     xo_filter_data_ops_t *ops)
+{
+    xo_filter_t *xfp = xo_realloc(NULL, sizeof(*xfp));
+    if (xfp == NULL)
+	return NULL;
+
+    bzero(xfp, sizeof(*xfp));
+
+    xo_xparse_init(&xfp->xf_xd);
+
+    xfp->xf_data = dp;
+    xfp->xf_ops  = ops;
+
     xo_set_filter_data(xop, xfp);
 
     return xfp;
@@ -563,6 +662,11 @@ xo_filter_op_destroy (xo_handle_t *xop, xo_filter_t *xfp)
     xo_trie_free(xfp->xf_trie);
     xfp->xf_trie = NULL;
 
+    if (xfp->xf_path_actions) {
+	free(xfp->xf_path_actions);
+	xfp->xf_path_actions = NULL;
+    }
+
     xo_set_filter_data(xop, NULL);
     xo_free(xfp);
 }
@@ -579,6 +683,7 @@ xo_tmatch_record_live (xo_tmatch_t *xtmp, xo_tframe_t *frame, xo_tnode_t *tn)
     } else {
 	xtmp->xtm_allow += 1;
 	frame->xtf_allow_delta += 1;
+	xtmp->xtm_cur_action = tn->xtn_action;
     }
 }
 
@@ -692,7 +797,8 @@ xo_tmatch_open (xo_handle_t *xop, xo_filter_t *xfp,
 		const char *value, ssize_t vlen)
 {
     xo_trie_t *xtp = xtmp->xtm_trie;
-    xo_xparse_data_t *xdp = xtp->xt_xd;
+    xo_filter_data_t *dp = xtp->xt_data;
+    xo_filter_data_ops_t *ops = xtp->xt_ops;
 
     if (xtmp->xtm_depth + 1 >= xtmp->xtm_cap) {
 	uint32_t cap = xtmp->xtm_cap * 2;
@@ -721,9 +827,8 @@ xo_tmatch_open (xo_handle_t *xop, xo_filter_t *xfp,
 		     c && frame->xtf_count < XO_TFRAME_MAX;
 		     c = xtp->xt_nodes[c].xtn_sibling) {
 	    xo_tnode_t *tn = &xtp->xt_nodes[c];
-	    const char *nm = xo_xparse_str(xdp, tn->xtn_name);
 	    if (!(tn->xtn_flags & XTNF_WILDCARD) &&
-		    (nm == NULL || !xo_streqn(nm, tag, tlen)))
+		    !ops->xfdo_name_eq(dp, tn->xtn_name, tag, tlen))
 		continue;
 
 	    uint32_t position = xo_tframe_child_position(parent, c);
@@ -751,9 +856,8 @@ xo_tmatch_open (xo_handle_t *xop, xo_filter_t *xfp,
 	if ((tn->xtn_flags & XTNF_ABSOLUTE) && xtmp->xtm_depth != 1)
 	    continue;
 
-	const char *nm = xo_xparse_str(xdp, tn->xtn_name);
 	if (!(tn->xtn_flags & XTNF_WILDCARD) &&
-		(nm == NULL || !xo_streqn(nm, tag, tlen)))
+		!ops->xfdo_name_eq(dp, tn->xtn_name, tag, tlen))
 	    continue;
 
 	/* Avoid duplicating a node already added via parent descent */
@@ -820,44 +924,63 @@ static xo_filter_status_t xo_tmatch_attr(xo_handle_t *, xo_filter_t *,
 					  xo_ssize_t, const char *, xo_ssize_t);
 
 /*
- * Add a filter (xpath) to our filtering mechanism
+ * Unsupported XPath tokens for the filter grammar (Phase 1: no predicates
+ * involving descendant-or-self, union, variables, or axis steps).
+ */
+static int xo_filter_unsupported_tokens[] = {
+    L_DOTDOT, L_DOTDOTDOT,
+    K_COMMENT, K_ID, K_KEY, K_NODE,
+    K_PROCESSING_INSTRUCTION, K_TEXT, L_DSLASH,
+    T_AXIS_NAME, T_VAR, M_SEQUENCE, C_DESCENDANT,
+    C_TEST, C_UNION, C_NESTED_PREDICATES, C_PREDICATE_PATHS,
+    0
+};
+
+/*
+ * Core implementation: parse an XPath expression string and recompile the
+ * trie for the given filter.  Called by both xo_filter_op_add_one (which
+ * looks up xfp from xop) and xo_filter_walk_add (which already has xfp).
  */
 static int
-xo_filter_op_add_one (xo_handle_t *xop, const char *input)
+xo_filter_compile_xpath_action (xo_handle_t *xop, xo_filter_t *xfp,
+				 const char *input, uint32_t action)
 {
-    static int unsupported_tokens[] = {
-	L_DOTDOT, L_DOTDOTDOT,
-	K_COMMENT, K_ID, K_KEY, K_NODE,
-	K_PROCESSING_INSTRUCTION, K_TEXT, L_DSLASH,
-	T_AXIS_NAME, T_VAR, M_SEQUENCE, C_DESCENDANT,
-	C_TEST, C_UNION, C_NESTED_PREDICATES, C_PREDICATE_PATHS,
-	0
-    };
-
-    xo_filter_t *xfp = xo_get_filter_data(xop, TRUE);
-    if (xfp == NULL)
+    xo_xparse_data_t *xdp = xo_filter_xparse_data(xop, xfp);
+    if (xdp == NULL)
 	return -1;
 
-    xo_xparse_data_t *xdp = xo_filter_xparse_data(xop, xfp);
     int start = xdp->xd_paths_cur;
-
-    xo_xparse_set_unsupported_tokens(xdp, unsupported_tokens);
+    xo_xparse_set_unsupported_tokens(xdp, xo_filter_unsupported_tokens);
 
     int rc = xo_xparse_parse_string(xop, xdp, input);
-
-    if (rc == 0) {
+    if (rc == 0)
 	rc = xo_xpath_feature_warn_since(NULL, xdp, start,
-					 unsupported_tokens, "");
-    }
-
+					 xo_filter_unsupported_tokens, "");
     if (rc)
 	return -1;
 
-    /* Recompile the trie from all expressions accumulated so far */
+    /* Grow xf_path_actions to cover the new capacity if needed */
+    if (xdp->xd_paths_max > xfp->xf_path_actions_cap) {
+	uint32_t *newp = realloc(xfp->xf_path_actions,
+				  xdp->xd_paths_max * sizeof(*newp));
+	if (newp == NULL)
+	    return -1;
+	/* zero-init the newly allocated slots */
+	bzero(newp + xfp->xf_path_actions_cap,
+	      (xdp->xd_paths_max - xfp->xf_path_actions_cap) * sizeof(*newp));
+	xfp->xf_path_actions = newp;
+	xfp->xf_path_actions_cap = xdp->xd_paths_max;
+    }
+
+    /* Record the action for each path added by this parse */
+    for (uint32_t i = (uint32_t) start; i < xdp->xd_paths_cur; i++)
+	xfp->xf_path_actions[i] = action;
+
     xo_trie_free(xfp->xf_trie);
     xo_tmatch_cleanup(&xfp->xf_tmatch);
 
-    xfp->xf_trie = xo_trie_compile(xop, xdp);
+    xfp->xf_trie = xo_trie_compile(xop, xdp, xfp->xf_data, xfp->xf_ops,
+				    xfp->xf_path_actions);
     if (xfp->xf_trie == NULL)
 	return -1;
 
@@ -868,6 +991,25 @@ xo_filter_op_add_one (xo_handle_t *xop, const char *input)
     }
 
     return 0;
+}
+
+static int
+xo_filter_compile_xpath (xo_handle_t *xop, xo_filter_t *xfp, const char *input)
+{
+    return xo_filter_compile_xpath_action(xop, xfp, input, 0);
+}
+
+/*
+ * Add a filter (xpath) to our filtering mechanism
+ */
+static int
+xo_filter_op_add_one (xo_handle_t *xop, const char *input)
+{
+    xo_filter_t *xfp = xo_get_filter_data(xop, TRUE);
+    if (xfp == NULL)
+	return -1;
+
+    return xo_filter_compile_xpath(xop, xfp, input);
 }
 
 static xo_filter_status_t
@@ -906,6 +1048,7 @@ xo_filter_change_status (xo_handle_t *xop UNUSED, xo_filter_t *xfp,
     } else if (xfp->xf_tmatch.xtm_allow) {
 	why = "allow-is-set";
 	rc = XO_STATUS_FULL;
+	xfp->xf_cur_action = xfp->xf_tmatch.xtm_cur_action;
 
     } else if (xfp->xf_xd.xd_flags & XDF_ALL_NOTS) {
 	why = "all-nots";
@@ -1111,8 +1254,6 @@ xo_filter_attr_find (xo_filter_t *xfp UNUSED,
 
     return match;
 }
-
-/* ------------------------------------------------------------- */
 
 /*
  * This is the 'key' and 'predicate' processing code.
@@ -1383,7 +1524,11 @@ xo_eval_attribute (XO_EVAL_NODE_ARGS)
 {
     xo_eval_value_t value = { .xev_flags = 0 };
     const char *str = xo_xparse_str(&xfp->xf_xd, xnp->xn_str);
-    const char *aval = xo_filter_attr_find(xfp, framep, str);
+    const char *aval;
+    if (xfp->xf_ops && xfp->xf_ops->xfdo_value_of)
+	aval = xfp->xf_ops->xfdo_value_of(xfp->xf_data, str, -1);
+    else
+	aval = xo_filter_attr_find(xfp, framep, str);
     if (aval) {
 	value = xo_eval_value_make(C_STRING, 0, 0);
 	value.xev_str = aval;
@@ -1427,9 +1572,13 @@ xo_eval_path (XO_EVAL_NODE_ARGS)
 	return value;
 
     const char *str = xo_xparse_str(&xfp->xf_xd, elt->xn_str);
-    const char *sval = is_attr
-	? xo_filter_attr_find(xfp, framep, str)
-	: xo_filter_key_find(xfp, framep, str);
+    const char *sval;
+    if (xfp->xf_ops && xfp->xf_ops->xfdo_value_of)
+	sval = xfp->xf_ops->xfdo_value_of(xfp->xf_data, str, -1);
+    else
+	sval = is_attr
+	    ? xo_filter_attr_find(xfp, framep, str)
+	    : xo_filter_key_find(xfp, framep, str);
     if (sval) {
 	value = xo_eval_value_make(C_STRING, 0, 0);
 	value.xev_str = sval;
@@ -3304,8 +3453,6 @@ xo_filter_op_attribute (xo_handle_t *xop, xo_filter_t *xfp,
     return rc;
 }
 
-/* ------------------------------------------------------------- */
-
 /*
  * We use the passthru to pass content through to the encoder
  */
@@ -3482,4 +3629,74 @@ xo_filter_setup_test (void)
 {
     xo_setup_filter_lib_test(XO_FILTER_OPS_VERSION, &xo_filter_ops_local);
 
+}
+
+/*
+ * Public direct-call ops for non-libxo callers (e.g. libpin).
+ *
+ * All xo_filter_op_* counterparts above are static; these wrappers
+ * provide external linkage while remaining in the same translation
+ * unit so they can call the static helpers.
+ *
+ * xop may be NULL — it is only used for debug logging.
+ */
+int
+xo_filter_walk_open (xo_handle_t *xop, xo_filter_t *xfp,
+		     const char *tag, ssize_t tlen)
+{
+    if (tlen < 0)
+	tlen = (ssize_t) strlen(tag);
+    return xo_filter_open(xop, xfp, tag, tlen, "container", NULL, 0);
+}
+
+int
+xo_filter_walk_close (xo_handle_t *xop, xo_filter_t *xfp,
+		      const char *tag, ssize_t tlen)
+{
+    if (tlen < 0)
+	tlen = (ssize_t) strlen(tag);
+    return xo_filter_close(xop, xfp, tag, tlen, "container");
+}
+
+int
+xo_filter_walk_key (xo_handle_t *xop, xo_filter_t *xfp,
+		    const char *tag, ssize_t tlen,
+		    const char *value, ssize_t vlen)
+{
+    return xo_filter_op_key(xop, xfp, tag, tlen, value, vlen);
+}
+
+xo_filter_status_t
+xo_filter_walk_status (xo_handle_t *xop UNUSED, xo_filter_t *xfp)
+{
+    return xfp ? xfp->xf_status : XO_STATUS_ZERO;
+}
+
+int
+xo_filter_walk_add (xo_handle_t *xop, xo_filter_t *xfp, const char *xpath)
+{
+    if (xfp == NULL)
+	return -1;
+    return xo_filter_compile_xpath(xop, xfp, xpath);
+}
+
+int
+xo_filter_walk_add_with_action (xo_handle_t *xop, xo_filter_t *xfp,
+				 const char *xpath, uint32_t action)
+{
+    if (xfp == NULL)
+	return -1;
+    return xo_filter_compile_xpath_action(xop, xfp, xpath, action);
+}
+
+uint32_t
+xo_filter_walk_get_action (xo_handle_t *xop UNUSED, xo_filter_t *xfp)
+{
+    return xfp ? xfp->xf_cur_action : 0;
+}
+
+xo_filter_data_t *
+xo_filter_get_data_ptr (xo_filter_t *xfp)
+{
+    return xfp ? xfp->xf_data : NULL;
 }
