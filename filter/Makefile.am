@@ -65,7 +65,7 @@ CLEANFILES = \
     xo_xpath.tab.h \
     xo_xpath.output
 
-xo_xparse.o xo_filter.o xo_xparse.lo xo_filter.lo: xo_xpath.tab.h
+xo_xpath.o xo_xpath.lo xo_xparse.o xo_filter.o xo_xparse.lo xo_filter.lo: xo_xpath.tab.h
 
 EXTRA_DIST = \
     xo_xpath.y
