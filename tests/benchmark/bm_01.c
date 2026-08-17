@@ -27,13 +27,23 @@
 #include "xo_private.h"
 #include "xo_encoder.h"
 
+#if defined(CLOCK_MONOTONIC_RAW)
+#define BM_CLOCK CLOCK_MONOTONIC_RAW
+#elif defined(CLOCK_REALTIME_PRECISE)
+#define BM_CLOCK CLOCK_REALTIME_PRECISE
+#elif defined(CLOCK_MONOTONIC)
+#define BM_CLOCK CLOCK_MONOTONIC
+#else
+#error "can't find usable clock_gettime() parameter"
+#endif /* CLOCK_MONOTONIC_RAW */
+
 static int opt_count = 1000;
 
 static uint64_t
 now_ns (void)
 {
     struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
+    clock_gettime(BM_CLOCK, &ts);
     return (uint64_t) ts.tv_sec * 1000000000ULL + ts.tv_nsec;
 }
 
@@ -219,7 +229,7 @@ bench_top10 (int n XO_UNUSED)
     xo_set_info(g_xo, info, -1);
     xo_set_flags(g_xo, XOF_KEYS);
 
-    for (int i = 0; i < 1 /* N_INNER */; i++) {
+    for (int i = 0; i < N_INNER; i++) {
 	xo_open_container_h(g_xo, "data");
 	xo_open_list_h(g_xo, "item");
 
