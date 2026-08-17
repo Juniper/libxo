@@ -149,21 +149,27 @@ struct XoPrecompile : PassInfoMixin<XoPrecompile> {
         Type *i64 = Type::getInt64Ty(Ctx);
         Type *i32 = Type::getInt32Ty(Ctx);
         Type *i16 = Type::getInt16Ty(Ctx);
+        Type *PtrTy = voidPtrTy(Ctx);
 
         /*
-         * LLVM StructType mirroring xo_field_info_t (13 logical members).
+         * LLVM StructType mirroring xo_field_info_t (17 logical members).
          * The DataLayout inserts the 2-byte pad between xfi_elen and xfi_fnum
-         * automatically (same target as the C compiler).
+         * automatically (same target as the C compiler).  The trailing
+         * xfi_fspecs/xfi_num_fspecs/xfi_padding members are the runtime's
+         * parse cache; precompiled tables always populate them as
+         * null/zero, which xo_do_format_field treats as "not cached" and
+         * falls back to parsing the field's format substring on the fly.
          */
         StructType *FieldTy = StructType::get(Ctx, {
             i64,                                /* xfi_flags */
             i32,                                /* xfi_ftype */
             i16, i16, i16, i16, i16,           /* start, content, format, encoding, next */
             i16, i16, i16, i16,                 /* len, clen, flen, elen */
-            i32, i32                            /* fnum, renum */
+            i32, i32,                           /* fnum, renum */
+            PtrTy,                              /* xfi_fspecs (always null) */
+            i16,                                 /* xfi_num_fspecs (always 0) */
+            ArrayType::get(i16, 3)               /* xfi_padding[3] */
         });
-
-        Type *PtrTy = voidPtrTy(Ctx);
 
         /* StructType matching xo_format_cache_t: { version, num_fields, *fields } */
         StructType *CacheTy = StructType::get(Ctx, {i32, i32, PtrTy});
@@ -248,10 +254,24 @@ struct XoPrecompile : PassInfoMixin<XoPrecompile> {
                     ConstantInt::getSigned(i16, f.xsf_elen),
                     ConstantInt::get(i32, f.xsf_fnum),
                     ConstantInt::get(i32, f.xsf_renum),
+                    Constant::getNullValue(PtrTy),        /* xfi_fspecs */
+                    ConstantInt::get(i16, 0),              /* xfi_num_fspecs */
+                    Constant::getNullValue(
+                        ArrayType::get(i16, 3)),           /* xfi_padding */
                 }));
             }
 
-            ArrayType *ArrTy = ArrayType::get(FieldTy, N);
+            /*
+             * Append a zeroed terminator entry (xfi_ftype == 0) after the
+             * real N fields, matching the convention hand-built caches rely
+             * on (see tests/core/test_14.c's make_cache()).  Several gettext
+             * helpers walk a fields array bounded only by xfi_ftype == 0,
+             * with no separate count, so the array must be self-terminating
+             * even though xfc_num_fields only counts the real N entries.
+             */
+            Elems.push_back(Constant::getNullValue(FieldTy));
+
+            ArrayType *ArrTy = ArrayType::get(FieldTy, N + 1);
             auto *FieldsGV = new GlobalVariable(M, ArrTy, /*isConst*/ true,
                 GlobalValue::PrivateLinkage,
                 ConstantArray::get(ArrTy, Elems),
