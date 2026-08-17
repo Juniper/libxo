@@ -155,6 +155,8 @@ typedef uint64_t xo_xff_flags_t;
 #define XFF_ESC_SQUARE	(1<<23)	/* Escape XML control chars to UTF8 square */
 
 #define XFF_ESC_PRIVATE (1<<24)	/* Escape XML ctrl chars as private (0xe000) */
+#define XFF_SKIP	(1<<25)	/* Skip this field (runtime state, not
+				   parse data; never cached) */
 
 /* Flags to turn off when we don't want i18n processing */
 #define XFF_GT_FLAGS (XFF_GT_FIELD | XFF_GT_PLURAL)
