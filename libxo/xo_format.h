@@ -17,13 +17,9 @@
 
 #include <stdarg.h>
 #include <stddef.h>
+#include <string.h>
 #include <sys/types.h>
 
-/*
- * xo.h provides: xo_realloc_func_t, xo_free_func_t, xo_xff_flags_t, XFF_*,
- * xo_format_offset_t, XO_FOFF_*, XO_FORMAT_MAX, XO_ROLE_*,
- * xo_default_format, xo_foff(), xo_field_info_t.
- */
 #include "xo.h"
 
 /*
@@ -34,6 +30,10 @@
 #define XO_MAX_FIELDS (8 * 1024)
 #endif /* XO_MAX_FIELDS */
 
+#ifndef XO_MAX_SPECS
+#define XO_MAX_SPECS (8 * 1024)
+#endif /* XO_MAX_SPECS */
+
 /*
  * Simple name→value table used for role and modifier lookup.
  * Kept here so callers (e.g. xo_set_options) can define their own tables
@@ -43,6 +43,86 @@ typedef struct xo_flag_mapping_s {
     xo_xof_flags_t xm_value;
     const char *xm_name;
 } xo_flag_mapping_t;
+
+/*
+ * Normal printf has width and precision, which for strings operate as
+ * min and max number of columns.  But this depends on the idea that
+ * one byte means one column, which UTF-8 and multi-byte characters
+ * pitches on its ear.  It may take 40 bytes of data to populate 14
+ * columns, but we can't go off looking at 40 bytes of data without the
+ * caller's permission for fear/knowledge that we'll generate core files.
+ * 
+ * So we make three values, distinguishing between "max column" and
+ * "number of bytes that we will inspect inspect safely" We call the
+ * later "size", and make the format "%[[<min>].[[<size>].<max>]]s".
+ *
+ * Under the "first do no harm" theory, we default "max" to "size".
+ * This is a reasonable assumption for folks that don't grok the
+ * MBS/WCS/UTF-8 world, and while it will be annoying, it will never
+ * be evil.
+ *
+ * For example, xo_emit("{:tag/%-14.14s}", buf) will make 14
+ * columns of output, but will never look at more than 14 bytes of the
+ * input buffer.  This is mostly compatible with printf and caller's
+ * expectations.
+ *
+ * In contrast xo_emit("{:tag/%-14..14s}", buf) will look at however
+ * many bytes (or until a NUL is seen) are needed to fill 14 columns
+ * of output.  xo_emit("{:tag/%-14.*.14s}", xx, buf) will look at up
+ * to xx bytes (or until a NUL is seen) in order to fill 14 columns
+ * of output.
+ *
+ * It's fairly amazing how a good idea (handle all languages of the
+ * world) blows such a big hole in the bottom of the fairly weak boat
+ * that is C string handling.  The simplicity and completenesss are
+ * sunk in ways we haven't even begun to understand.
+ */
+#define XF_WIDTH_MIN	0	/* Minimal width */
+#define XF_WIDTH_SIZE	1	/* Maximum number of bytes to examine */
+#define XF_WIDTH_MAX	2	/* Maximum width */
+#define XF_WIDTH_NUM	3	/* Numeric fields in printf (min.size.max) */
+
+/* Input and output string encodings */
+#define XF_ENC_WIDE	1	/* Wide characters (wchar_t) */
+#define XF_ENC_UTF8	2	/* UTF-8 */
+#define XF_ENC_LOCALE	3	/* Current locale */
+
+/*
+ * A place to parse printf-style format flags for each "field specifier"
+ */
+typedef struct xo_fspec_s {
+    uint8_t xf_fc;	/* Format character */
+    uint8_t xf_lflag;	/* 'l' (long) */
+    uint8_t xf_hflag;	/* 'h' (half) */
+    uint8_t xf_jflag;	/* 'j' (intmax_t) */
+    uint8_t xf_tflag;	/* 't' (ptrdiff_t) */
+    uint8_t xf_zflag;	/* 'z' (size_t) */
+    uint8_t xf_qflag;	/* 'q' (quad_t) */
+    uint8_t xf_seen_minus; /* Seen a minus */
+    int8_t xf_leading_zero;	/* Seen a leading zero (zero fill)  */
+    uint8_t xf_dots;		/* Seen one or more '.'s */
+    uint8_t xf_alt;	/* "alternate form" ('#') flag */
+    uint8_t xf_stars;		/* Seen one or more '*'s */
+    uint8_t xf_star[XF_WIDTH_NUM]; /* Seen one or more '*'s */
+
+    /*
+     * Number of '*'s seen in a "%@...@" prefix.  This many int args
+     * must be consumed (and discarded) from va_list before this
+     * field's own value is pulled.
+     */
+    uint8_t xf_at_stars;
+    int16_t xf_width[XF_WIDTH_NUM]; /* Width/precision/size numeric fields */
+    uint16_t xf_start;		    /* Start off in format string */
+    uint16_t xf_len;		    /* Length in format string */
+
+    /*
+     * Offset from xf_start to the position that should be treated as
+     * the '%' for reconstructing a real printf spec: 0 if there's no
+     * "%@...@" prefix, or the offset of the prefix's closing '@'
+     * (itself treated as a pseudo-'%') if there is.
+     */
+    uint16_t xf_prefix_len;
+} xo_fspec_t;
 
 /*
  * Parsed representation of one field descriptor from a libxo format string.
@@ -69,6 +149,9 @@ typedef struct xo_field_info_s {
     xo_format_offset_t xfi_elen;	/* Length of encoding */
     uint32_t xfi_fnum;			/* Field number (0 = unset) */
     uint32_t xfi_renum;			/* Reordered field number (0 = none) */
+    xo_fspec_t *xfi_fspecs;		/* Cached format elements */
+    uint16_t xfi_num_fspecs;		/* Number of fspecs at xfi_fspec */
+    uint16_t xfi_padding[3];		/* Padding (unused) */
 } xo_field_info_t;
 
 /*
@@ -121,7 +204,14 @@ typedef struct xo_parse_s {
 
     /* Output — filled in by xo_parse_format() */
     xo_field_info_t *xp_fields;	/* Allocated, zero-terminated field array */
-    unsigned xp_num_fields;		/* Number of valid entries */
+    unsigned xp_num_fields;	/* Number of valid entries */
+    xo_fspec_t *xp_fspecs;	/* Allocated, zero-terminated fspec array */
+    unsigned xp_num_fspecs;	/* Number of valid entries */
+
+    /* Working: these fields hold the current values during parsing */
+    xo_field_info_t *xp_cur_field; /* Current item in xp_fields */
+    xo_fspec_t *xp_cur_fspec;	   /* Current item in xp_fspecs */
+
 } xo_parse_t;
 
 /* The default printf-style format used when a field has no explicit format. */
@@ -165,7 +255,10 @@ xo_xff_flags_t xo_name_lookup(xo_flag_mapping_t *map, const char *value,
  * Return the pessimistic maximum number of field slots needed for fmt.
  * Used internally and by callers that supply their own field buffer.
  */
-unsigned xo_count_fields(xo_parse_t *xpp, const char *fmt, size_t *fmt_lenp);
+void
+xo_count_fields(xo_parse_t *xpp, const char *fmt, size_t *fmt_lenp,
+		unsigned *max_fields, unsigned *max_specs);
+
 
 /*
  * Lower-level parser: fill the caller-supplied fields[] array (up to
@@ -175,8 +268,7 @@ unsigned xo_count_fields(xo_parse_t *xpp, const char *fmt, size_t *fmt_lenp);
  *
  * Returns 0 on success, -1 on error.
  */
-int xo_parse_fields(xo_parse_t *xpp, xo_field_info_t *fields,
-		    unsigned max_fields, const char *fmt, size_t fmt_len);
+int xo_parse_fields(xo_parse_t *xpp, const char *fmt, size_t fmt_len);
 
 /*
  * Return non-zero if this field role should receive a default "%s" format
@@ -206,5 +298,40 @@ xo_printable2 (const char *str, int len, int bracesp);
 #define XO_LINT_ROLES_NO_FORMAT "G"	       /* Can't have a format (/XX) */
 
 #define XO_LINT_MIN_NAME 3	/* Lint: no names less than this length  */
+
+/*
+ * Parse a single printf-style format specifier starting at 'cp' (which
+ * points at the '%').  Fills in *xfp and returns a pointer to the
+ * conversion character, or NULL on error.
+ */
+const char *
+xo_parse_format_spec (xo_parse_t *xpp, xo_fspec_t *xfp,
+		      const char *cp, const char *ep, const char *fmt);
+
+/*
+ * Parse a field's format substring [fmt, ep) into fspec entries, writing
+ * them starting at xpp->xp_cur_fspec (bounded by xpp->xp_fspecs +
+ * xpp->xp_num_fspecs) and advancing xpp->xp_cur_fspec past the entries
+ * written and their terminator.  Each entry's xf_start/xf_len are byte
+ * offsets relative to 'fmt' (the field's format substring passed here,
+ * NOT the whole xo_emit format string the field was found in).
+ *
+ * Returns the number of entries written (not counting the terminator) on
+ * success; -1 on a genuine format-spec error (already reported via
+ * xpp->xp_error); or -2 if there was not enough room left in
+ * xpp->xp_fspecs.  -2 is never an error the caller need report: a field
+ * with xfi_fspecs left NULL is always a safe "re-parse at runtime" signal.
+ */
+int
+xo_parse_fspecs (xo_parse_t *xpp, const char *fmt, const char *ep);
+
+static inline int
+xo_is_format_char (char ch, int numeric_only)
+{
+    const char *cp = numeric_only ? "DEFGOUdefgiou" : "ACDEFGOSUXacdefgimopsux";
+    return strchr(cp, ch) != NULL;
+}
+
+
 
 #endif /* XO_FORMAT_H */
