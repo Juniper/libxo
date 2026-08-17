@@ -984,9 +984,11 @@ next_field:
 	cp = sp;
     }
 
-    /* Leave the cursor just past the last field written (a zeroed
+    /*
+     * Leave the cursor just past the last field written (a zeroed
      * terminator slot from the initial bzero); our caller uses the
-     * cursor delta to learn the real entry count. */
+     * cursor delta to learn the real entry count.
+     */
     xpp->xp_cur_field = xfip;
 
     if (seen_fnum)
