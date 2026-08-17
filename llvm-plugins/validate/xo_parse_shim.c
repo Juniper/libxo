@@ -41,24 +41,46 @@
  *   [2-byte pad at offset 30 — inserted by compiler to align xfi_fnum]
  *   offset 32: uint32_t xfi_fnum     (i32)
  *   offset 36: uint32_t xfi_renum    (i32)
- *   total: 40 bytes
+ *   offset 40: pointer xfi_cachep    (pointer)
+ *   total: 48 bytes (for a 64-bit pointer
  */
-_Static_assert(sizeof(xo_xff_flags_t)    == 8,  "xo_xff_flags_t must be 8 bytes");
-_Static_assert(sizeof(xo_format_offset_t) == 2, "xo_format_offset_t must be 2 bytes");
-_Static_assert(sizeof(xo_field_info_t)   == 40, "xo_field_info_t size mismatch; update xo_precompile.cc FieldTy");
-_Static_assert(offsetof(xo_field_info_t, xfi_flags)    ==  0, "xfi_flags offset");
-_Static_assert(offsetof(xo_field_info_t, xfi_ftype)    ==  8, "xfi_ftype offset");
-_Static_assert(offsetof(xo_field_info_t, xfi_start)    == 12, "xfi_start offset");
-_Static_assert(offsetof(xo_field_info_t, xfi_content)  == 14, "xfi_content offset");
-_Static_assert(offsetof(xo_field_info_t, xfi_format)   == 16, "xfi_format offset");
-_Static_assert(offsetof(xo_field_info_t, xfi_encoding) == 18, "xfi_encoding offset");
-_Static_assert(offsetof(xo_field_info_t, xfi_next)     == 20, "xfi_next offset");
-_Static_assert(offsetof(xo_field_info_t, xfi_len)      == 22, "xfi_len offset");
-_Static_assert(offsetof(xo_field_info_t, xfi_clen)     == 24, "xfi_clen offset");
-_Static_assert(offsetof(xo_field_info_t, xfi_flen)     == 26, "xfi_flen offset");
-_Static_assert(offsetof(xo_field_info_t, xfi_elen)     == 28, "xfi_elen offset");
-_Static_assert(offsetof(xo_field_info_t, xfi_fnum)     == 32, "xfi_fnum offset");
-_Static_assert(offsetof(xo_field_info_t, xfi_renum)    == 36, "xfi_renum offset");
+_Static_assert(sizeof(xo_xff_flags_t)    == 8,
+	       "xo_xff_flags_t must be 8 bytes");
+_Static_assert(sizeof(xo_format_offset_t) == 2,
+	       "xo_format_offset_t must be 2 bytes");
+_Static_assert(sizeof(xo_field_info_t)   == 48 + sizeof(void *),
+       "xo_field_info_t size mismatch; update xo_precompile.cc FieldTy");
+
+_Static_assert(offsetof(xo_field_info_t, xfi_flags)    ==  0,
+	       "xfi_flags offset");
+_Static_assert(offsetof(xo_field_info_t, xfi_ftype)    ==  8,
+	       "xfi_ftype offset");
+_Static_assert(offsetof(xo_field_info_t, xfi_start)    == 12,
+	       "xfi_start offset");
+_Static_assert(offsetof(xo_field_info_t, xfi_content)  == 14,
+	       "xfi_content offset");
+_Static_assert(offsetof(xo_field_info_t, xfi_format)   == 16,
+	       "xfi_format offset");
+_Static_assert(offsetof(xo_field_info_t, xfi_encoding) == 18,
+	       "xfi_encoding offset");
+_Static_assert(offsetof(xo_field_info_t, xfi_next)     == 20,
+	       "xfi_next offset");
+_Static_assert(offsetof(xo_field_info_t, xfi_len)      == 22,
+	       "xfi_len offset");
+_Static_assert(offsetof(xo_field_info_t, xfi_clen)     == 24,
+	       "xfi_clen offset");
+_Static_assert(offsetof(xo_field_info_t, xfi_flen)     == 26,
+	       "xfi_flen offset");
+_Static_assert(offsetof(xo_field_info_t, xfi_elen)     == 28,
+	       "xfi_elen offset");
+_Static_assert(offsetof(xo_field_info_t, xfi_fnum)     == 32,
+	       "xfi_fnum offset");
+_Static_assert(offsetof(xo_field_info_t, xfi_renum)    == 36,
+	       "xfi_renum offset");
+_Static_assert(offsetof(xo_field_info_t, xfi_fspecs)   == 40,
+	       "xfi_fspecs offset");
+_Static_assert(offsetof(xo_field_info_t, xfi_num_fspecs) == 40 + sizeof(void *),
+	       "xfi_num_fspecs offset");
 
 struct xo_shim_state {
     xo_shim_error_t error;
