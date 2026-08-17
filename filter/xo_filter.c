@@ -88,7 +88,7 @@ typedef struct xo_trie_s {
     xo_trie_id_t xt_cap;	/* Allocated capacity */
     xo_trie_id_t xt_root;	/* First root-level sibling */
     xo_xparse_data_t *xt_xd;	/* Parse data (for string lookup) */
-    xo_filter_data_t *xt_data;	/* Host context (opaque to core) */
+    xo_filter_data_t *xt_data;	/* Data context (opaque to core) */
     xo_filter_data_ops_t *xt_ops; /* Data vtable for alloc and name ops */
 } xo_trie_t;
 
@@ -570,7 +570,7 @@ struct xo_filter_s {		 /* Forward/typdef decl in xo_private.h */
     xo_xsf_flags_t xf_flags;	 /* Flags (XFSF_*) */
     xo_trie_t *xf_trie;	 /* Compiled trie (NULL until first filter added) */
     xo_tmatch_t xf_tmatch;	 /* Runtime trie-matching state */
-    xo_filter_data_t *xf_data;	 /* Host context (opaque to core) */
+    xo_filter_data_t *xf_data;	 /* Data context (opaque to core) */
     xo_filter_data_ops_t *xf_ops; /* Data vtable */
     xo_filter_data_t xf_def_data; /* Embedded default data context (avoids extra alloc) */
     uint32_t *xf_path_actions;	 /* per-path action ids (parallel to xf_xd.xd_paths[]) */
