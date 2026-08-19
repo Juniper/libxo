@@ -40,6 +40,7 @@ libxo ships as part of FreeBSD.
     filters
     api
     encoders
+    plugins
     xo
     xolint
     xohtml
