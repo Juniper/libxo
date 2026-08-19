@@ -79,18 +79,51 @@ typedef struct xo_shim_field_s {
     int16_t  xsf_elen;     /* xfi_elen */
     uint32_t xsf_fnum;     /* xfi_fnum */
     uint32_t xsf_renum;    /* xfi_renum */
+    uint16_t xsf_num_fspecs; /* xfi_num_fspecs: fspec_cb calls for this field */
 } xo_shim_field_t;
 
 typedef void (*xo_shim_field_cb_t)(void *data, const xo_shim_field_t *f);
 
 /*
+ * Offset-based fspec record: mirrors xo_fspec_t (the pre-parsed "%..."
+ * conversion spec cached at xfi_fspecs).  Field names, order, and widths
+ * match the real struct exactly; the C shim copies field-by-field.
+ */
+typedef struct xo_shim_fspec_s {
+    uint8_t  xsp_fc;            /* xf_fc */
+    uint8_t  xsp_lflag;         /* xf_lflag */
+    uint8_t  xsp_hflag;         /* xf_hflag */
+    uint8_t  xsp_jflag;         /* xf_jflag */
+    uint8_t  xsp_tflag;         /* xf_tflag */
+    uint8_t  xsp_zflag;         /* xf_zflag */
+    uint8_t  xsp_qflag;         /* xf_qflag */
+    uint8_t  xsp_seen_minus;    /* xf_seen_minus */
+    int8_t   xsp_leading_zero;  /* xf_leading_zero */
+    uint8_t  xsp_dots;          /* xf_dots */
+    uint8_t  xsp_alt;           /* xf_alt */
+    uint8_t  xsp_stars;         /* xf_stars */
+    uint8_t  xsp_star[3];       /* xf_star[XF_WIDTH_NUM] */
+    uint8_t  xsp_at_stars;      /* xf_at_stars */
+    int16_t  xsp_width[3];      /* xf_width[XF_WIDTH_NUM] */
+    uint16_t xsp_start;         /* xf_start */
+    uint16_t xsp_len;           /* xf_len */
+    uint16_t xsp_prefix_len;    /* xf_prefix_len */
+} xo_shim_fspec_t;
+
+typedef void (*xo_shim_fspec_cb_t)(void *data, const xo_shim_fspec_t *f);
+
+/*
  * Parse fmt and call field_cb once per field with the offset-based field
- * descriptor.  Calls error_cb on syntax problems.
+ * descriptor.  Immediately after each field_cb call, fspec_cb is called
+ * f->xsf_num_fspecs times, once per pre-parsed display-format element for
+ * that field, before the next field_cb call.  fspec_cb/fspec_data may be
+ * NULL to skip fspecs entirely.  Calls error_cb on syntax problems.
  * Returns 0 on success, -1 on parse error.
  */
 int xo_shim_parse_fields(const char *fmt,
                           xo_shim_error_t error_cb, void *error_data,
-                          xo_shim_field_cb_t field_cb, void *field_data);
+                          xo_shim_field_cb_t field_cb, void *field_data,
+                          xo_shim_fspec_cb_t fspec_cb, void *fspec_data);
 
 #ifdef __cplusplus
 }
