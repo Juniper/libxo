@@ -82,6 +82,40 @@ _Static_assert(offsetof(xo_field_info_t, xfi_fspecs)   == 40,
 _Static_assert(offsetof(xo_field_info_t, xfi_num_fspecs) == 40 + sizeof(void *),
 	       "xfi_num_fspecs offset");
 
+/*
+ * Same protection for xo_fspec_t, mirrored in xo_precompile.cc's FspecTy.
+ * Expected layout (LP64):
+ *   offset  0: uint8_t xf_fc .. xf_stars (8 flag bytes, then leading_zero,
+ *              dots, alt, stars — 12 individual uint8_t members)
+ *   offset 12: uint8_t xf_star[3]
+ *   offset 15: uint8_t xf_at_stars
+ *   offset 16: int16_t xf_width[3]
+ *   offset 22: uint16_t xf_start
+ *   offset 24: uint16_t xf_len
+ *   offset 26: uint16_t xf_prefix_len
+ *   total: 28 bytes
+ */
+_Static_assert(sizeof(xo_fspec_t) == 28,
+	       "xo_fspec_t size mismatch; update xo_precompile.cc FspecTy");
+_Static_assert(offsetof(xo_fspec_t, xf_fc)           ==  0, "xf_fc offset");
+_Static_assert(offsetof(xo_fspec_t, xf_lflag)        ==  1, "xf_lflag offset");
+_Static_assert(offsetof(xo_fspec_t, xf_hflag)        ==  2, "xf_hflag offset");
+_Static_assert(offsetof(xo_fspec_t, xf_jflag)        ==  3, "xf_jflag offset");
+_Static_assert(offsetof(xo_fspec_t, xf_tflag)        ==  4, "xf_tflag offset");
+_Static_assert(offsetof(xo_fspec_t, xf_zflag)        ==  5, "xf_zflag offset");
+_Static_assert(offsetof(xo_fspec_t, xf_qflag)        ==  6, "xf_qflag offset");
+_Static_assert(offsetof(xo_fspec_t, xf_seen_minus)   ==  7, "xf_seen_minus offset");
+_Static_assert(offsetof(xo_fspec_t, xf_leading_zero) ==  8, "xf_leading_zero offset");
+_Static_assert(offsetof(xo_fspec_t, xf_dots)         ==  9, "xf_dots offset");
+_Static_assert(offsetof(xo_fspec_t, xf_alt)          == 10, "xf_alt offset");
+_Static_assert(offsetof(xo_fspec_t, xf_stars)        == 11, "xf_stars offset");
+_Static_assert(offsetof(xo_fspec_t, xf_star)         == 12, "xf_star offset");
+_Static_assert(offsetof(xo_fspec_t, xf_at_stars)     == 15, "xf_at_stars offset");
+_Static_assert(offsetof(xo_fspec_t, xf_width)        == 16, "xf_width offset");
+_Static_assert(offsetof(xo_fspec_t, xf_start)        == 22, "xf_start offset");
+_Static_assert(offsetof(xo_fspec_t, xf_len)          == 24, "xf_len offset");
+_Static_assert(offsetof(xo_fspec_t, xf_prefix_len)   == 26, "xf_prefix_len offset");
+
 struct xo_shim_state {
     xo_shim_error_t error;
     void           *data;
@@ -391,7 +425,8 @@ xo_shim_parse_args (const char *fmt,
 int
 xo_shim_parse_fields (const char *fmt,
                        xo_shim_error_t error_cb, void *error_data,
-                       xo_shim_field_cb_t field_cb, void *field_data)
+                       xo_shim_field_cb_t field_cb, void *field_data,
+                       xo_shim_fspec_cb_t fspec_cb, void *fspec_data)
 {
     struct xo_shim_state ss = { error_cb, error_data };
     xo_parse_t xpp = { 0 };
@@ -406,20 +441,52 @@ xo_shim_parse_fields (const char *fmt,
     for (unsigned i = 0; i < xpp.xp_num_fields; i++) {
         const xo_field_info_t *xfip = &xpp.xp_fields[i];
         xo_shim_field_t f;
-        f.xsf_flags    = xfip->xfi_flags;
-        f.xsf_ftype    = xfip->xfi_ftype;
-        f.xsf_start    = xfip->xfi_start;
-        f.xsf_content  = xfip->xfi_content;
-        f.xsf_format   = xfip->xfi_format;
-        f.xsf_encoding = xfip->xfi_encoding;
-        f.xsf_next     = xfip->xfi_next;
-        f.xsf_len      = xfip->xfi_len;
-        f.xsf_clen     = xfip->xfi_clen;
-        f.xsf_flen     = xfip->xfi_flen;
-        f.xsf_elen     = xfip->xfi_elen;
-        f.xsf_fnum     = xfip->xfi_fnum;
-        f.xsf_renum    = xfip->xfi_renum;
+        f.xsf_flags       = xfip->xfi_flags;
+        f.xsf_ftype       = xfip->xfi_ftype;
+        f.xsf_start       = xfip->xfi_start;
+        f.xsf_content     = xfip->xfi_content;
+        f.xsf_format      = xfip->xfi_format;
+        f.xsf_encoding    = xfip->xfi_encoding;
+        f.xsf_next        = xfip->xfi_next;
+        f.xsf_len         = xfip->xfi_len;
+        f.xsf_clen        = xfip->xfi_clen;
+        f.xsf_flen        = xfip->xfi_flen;
+        f.xsf_elen        = xfip->xfi_elen;
+        f.xsf_fnum        = xfip->xfi_fnum;
+        f.xsf_renum       = xfip->xfi_renum;
+        f.xsf_num_fspecs  = xfip->xfi_fspecs ? xfip->xfi_num_fspecs : 0;
         field_cb(field_data, &f);
+
+        if (fspec_cb == NULL)
+            continue;
+
+        for (unsigned j = 0; j < f.xsf_num_fspecs; j++) {
+            const xo_fspec_t *xfp = &xfip->xfi_fspecs[j];
+            xo_shim_fspec_t sf;
+            sf.xsp_fc           = xfp->xf_fc;
+            sf.xsp_lflag        = xfp->xf_lflag;
+            sf.xsp_hflag        = xfp->xf_hflag;
+            sf.xsp_jflag        = xfp->xf_jflag;
+            sf.xsp_tflag        = xfp->xf_tflag;
+            sf.xsp_zflag        = xfp->xf_zflag;
+            sf.xsp_qflag        = xfp->xf_qflag;
+            sf.xsp_seen_minus   = xfp->xf_seen_minus;
+            sf.xsp_leading_zero = xfp->xf_leading_zero;
+            sf.xsp_dots         = xfp->xf_dots;
+            sf.xsp_alt          = xfp->xf_alt;
+            sf.xsp_stars        = xfp->xf_stars;
+            sf.xsp_star[0]      = xfp->xf_star[0];
+            sf.xsp_star[1]      = xfp->xf_star[1];
+            sf.xsp_star[2]      = xfp->xf_star[2];
+            sf.xsp_at_stars     = xfp->xf_at_stars;
+            sf.xsp_width[0]     = xfp->xf_width[0];
+            sf.xsp_width[1]     = xfp->xf_width[1];
+            sf.xsp_width[2]     = xfp->xf_width[2];
+            sf.xsp_start        = xfp->xf_start;
+            sf.xsp_len          = xfp->xf_len;
+            sf.xsp_prefix_len   = xfp->xf_prefix_len;
+            fspec_cb(fspec_data, &sf);
+        }
     }
 
     xo_parse_release(&xpp);
