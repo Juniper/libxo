@@ -266,7 +266,7 @@ RUN_TESTS_CMD = ${BASH} ${RUN_TESTS} -T "${TEST_FORMATS}"
 
 test tests: ${bin_PROGRAMS}
 	@${MKDIR} -p out
-	${RUN_TESTS_CMD} -l warn,filter-warn run ${TEST_CASES:.c=.test}
+	@${RUN_TESTS_CMD} -l warn,filter-warn run ${TEST_CASES:.c=.test}
 
 one:
 
