@@ -126,7 +126,7 @@ XGETTEXT = ${GETTEXT_BINDIR}/xgettext
 MSGFMT = ${GETTEXT_BINDIR}/msgfmt -v
 MSGMERGE = ${GETTEXT_BINDIR}/msgmerge
 ECHO = echo
-DB=set -x;
+#DB=set -x;
 XOMSGMERGE = ${MSGMERGE} --no-wrap
 XODIFF = ${DIFF} -bu
 
