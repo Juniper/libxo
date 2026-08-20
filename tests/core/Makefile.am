@@ -205,7 +205,7 @@ run-pass-tests: $(pass_tests)
 	    diff -Nu ${srcdir}/saved/$$tc.pass-test.make.err \
 	        out/$$tc.pass-test.make.err ; \
 	done
-	DYLD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${DYLD_LIBRARY_PATH}" \
+	@DYLD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${DYLD_LIBRARY_PATH}" \
 	    LD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${LD_LIBRARY_PATH}" \
 	    ${RUN_TESTS_CMD} -T "${TEST_FORMATS}" -m pass run-bin ${TEST_CASES:.c=.test}
 
