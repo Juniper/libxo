@@ -93,7 +93,7 @@ test tests: ${noinst_PROGRAMS} run-plain-tests ${PLUGIN_TESTS}
 
 run-plain-tests:
 	@${MKDIR} -p out
-	${RUN_TESTS_CMD} -T "${TEST_FORMATS}" -a "file ${TEST_FILE}" \
+	@${RUN_TESTS_CMD} -T "${TEST_FORMATS}" -a "file ${TEST_FILE}" \
 	    run-bin ${TEST_CASES:.c=.test}
 
 if HAVE_VALIDATE
