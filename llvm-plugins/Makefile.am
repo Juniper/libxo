@@ -45,6 +45,8 @@ PRECOMPILE_SRCS = \
     ${top_srcdir}/llvm-plugins/precompile/CMakeLists.txt \
     ${top_srcdir}/llvm-plugins/precompile/xo_precompile.cc
 
+EXTRA_DIST = xocc.sh.in
+
 .PHONY: validate validate-clean precompile precompile-clean
 
 if HAVE_VALIDATE
@@ -77,6 +79,11 @@ ${PRECOMPILE_DIR}/CMakeCache.txt:
 install-exec-local:
 	${CMAKE_COMMAND} --install ${VALIDATE_DIR}
 	${CMAKE_COMMAND} --install ${PRECOMPILE_DIR}
+	mkdir -p ${DESTDIR}${bindir}
+	install xocc.sh ${DESTDIR}${bindir}/xocc
+
+uninstall-local:
+	${RM} -f ${DESTDIR}${bindir}/xocc
 
 validate-clean:
 	${RM} -fr ${VALIDATE_DIR}
@@ -93,6 +100,6 @@ else
 
 all:
 
-install-exec-local validate validate-clean precompile precompile-clean:
+install-exec-local uninstall-local validate validate-clean precompile precompile-clean:
 
 endif
