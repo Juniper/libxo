@@ -57,6 +57,7 @@ correspond to output styles, flags, or features:
   log-syslog      Log (via stderr) each syslog message (via xo_syslog)
   map             Map between tag names
   map-file        Use a file to specify mapping between tag names
+  no-cache        Ignore precompiled/cached format data; always parse
   no-humanize     Ignore the {h:} modifier (TEXT, HTML)
   no-locale       Do not initialize the locale setting
   no-retain       Deprecated; accepted but ignored
@@ -94,6 +95,11 @@ additional details:
 - "keys" adds a "key" attribute for XML output to indicate that a leaf
   is an identifier for the list member.
 - "map" and "map-file" are described in :ref:`tag-mapping`.
+- "no-cache" forces libxo to parse every format string at run time,
+  even for calls a build-time tool has precompiled into a cached field
+  table (see the ``xo_precompile`` plugin, documented separately).
+  Useful for isolating whether the cached path is the cause of some
+  behavior difference.
 - "no-humanize" avoids "humanizing" numeric output (see
   :ref:`humanize-modifier` for details).
 - "no-locale" instructs libxo to avoid translating output to the
