@@ -54,6 +54,7 @@ The triggered functionality is identical.
 .It "log\-syslog " "Log (via stderr) each syslog message (via xo_syslog)"
 .It "map        " "Map between tag names"
 .It "map\-file   " "Use a file to specify mapping between tag names"
+.It "no\-cache   " "Ignore precompiled/cached format data; always parse"
 .It "no\-humanize" "Ignore the {h:} modifier (TEXT, HTML)"
 .It "no\-locale  " "Do not initialize the locale setting"
 .It "no\-retain  " "Deprecated; accepted but ignored"
@@ -109,6 +110,16 @@ an identifier for the list member.
 and
 .Fa map\-file
 are described below.
+.Pp
+.Fa no\-cache
+forces
+.Nm libxo
+to parse every format string at run time, even for calls a build\-time
+tool has precompiled into a cached field table (see the
+.Nm xo_precompile
+plugin).
+Useful for isolating whether the cached path is the cause of some
+behavior difference.
 .Pp
 .Fa no\-humanize
 avoids "humanizing" numeric output (see
