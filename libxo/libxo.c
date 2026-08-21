@@ -178,6 +178,8 @@
 const char xo_version[] = LIBXO_VERSION;
 const char xo_version_extra[] = LIBXO_VERSION_EXTRA;
 
+static unsigned xo_no_cache; /* Ignore cached data (aka XO_OPT_NO_CACHE) */
+
 #ifndef LIBXO_TEXT_ONLY
 #define XO_MAP_INCR 128		/* Must be even */
 
@@ -232,6 +234,9 @@ typedef unsigned xo_xsf_flags_t; /* XSF_* flags */
 #define XO_OPT_FILTER		6 /* Filter output using path */
 #define XO_EXTERR_BRIEF		7 /* Display brief extended error info */
 #define XO_EXTERR_VERBOSE	8 /* Display verbose exterr info */
+#define XO_OPT_NO_CACHE		9 /* Ignore cached field and fspec data */
+
+#define XO_XS_NAMESIZE	64	/* Size of stack's built-in name buffer */
 
 /*
  * xo_stack_t: As we open and close containers and levels, we
@@ -248,6 +253,7 @@ typedef struct xo_stack_s {
     xo_xsf_flags_t xs_rb_flags; /* Parent XSF_RB_BITS  at rb-marker time */
     char *xs_name;		/* Name (for XPath value) */
     char *xs_keys;		/* XPath predicate for any key fields */
+    char xs_namebuf[XO_XS_NAMESIZE]; /* Buffer for small xs_names */
 } xo_stack_t;
 
 #define XS_OFFSET_CLEAR -1	/* Used to make a "not in use" offset */
@@ -460,6 +466,12 @@ xo_text_only (void)
 #endif /* LIBXO_TEXT_ONLY */
 }
 
+void
+xo_set_no_cache (int value)
+{
+    xo_no_cache = value;
+}
+
 /*
  * Callback to write data to a FILE pointer
  */
@@ -521,12 +533,17 @@ xo_depth_check (xo_handle_t *xop, int depth)
 	xop->xo_stack_size = depth;
 	xop->xo_stack = xsp;
 
-	/* bzero sets xs_rb_off/xs_key_off/xs_tag_end to 0, but XS_OFFSET_CLEAR == -1 */
+#if 0
+	/*
+	 * bzero sets xs_rb_off/xs_key_off/xs_tag_end to 0, but we need
+	 * XS_OFFSET_CLEAR == -1
+	 */
 	for (int i = old_size; i < depth; i++) {
 	    xsp[i].xs_rb_off = XS_OFFSET_CLEAR;
 	    xsp[i].xs_tag_end = XS_OFFSET_CLEAR;
 	    xsp[i].xs_key_off = XS_OFFSET_CLEAR;
 	}
+#endif
     }
 
     return 0;
@@ -2137,6 +2154,7 @@ static xo_flag_mapping_t xo_option_names[] = {
     { XO_OPT_ENCODER, "encoder" },
     { XO_OPT_MAP, "map" },
     { XO_OPT_MAP_FILE, "map-file" },
+    { XO_OPT_NO_CACHE, "no-cache" },
     { XO_OPT_FILTER, "filter" },
     { XO_EXTERR_BRIEF, "exterr" },
     { XO_EXTERR_BRIEF, "exterr-brief" },
@@ -2485,6 +2503,10 @@ xo_set_options_words (xo_handle_t *xop, int argc, char **argv)
 		if (rc)
 		    xo_warnx("error initializing encoder: %s", vp);
 	    }
+	    continue;
+
+	case XO_OPT_NO_CACHE:
+	    xo_no_cache = 1;
 	    continue;
 
 	case XO_OPT_MAP: /* Map field names */
@@ -4783,19 +4805,21 @@ xo_format_title (xo_handle_t *xop, const xo_field_info_t *xfip,
 	newstr[vlen] = '\0';
 
 	if (newstr[vlen - 1] == 's') {
-	    char *bp;
+	    char buf[XO_BUFSIZ_SMALL];
+	    char *bp = buf;
 
-	    rc = snprintf(NULL, 0, newfmt, newstr);
-	    if (rc > 0) {
+	    rc = snprintf(buf, sizeof(buf), newfmt, newstr);
+	    if (rc >= (int) sizeof(buf)) {
 		/*
 		 * We have to do this the hard way, since we might need
 		 * the columns.
 		 */
 		bp = alloca(rc + 1);
 		rc = snprintf(bp, rc + 1, newfmt, newstr);
-
-		xo_data_append_content(xop, bp, rc, flags);
 	    }
+
+	    xo_data_append_content(xop, bp, rc, flags);
+
 	    goto move_along;
 
 	} else {
@@ -7808,14 +7832,17 @@ xo_do_emit_fields (xo_handle_t *xop, const xo_field_info_t *fields,
 		    if (++new_max_fields < max_fields)
 			new_max_fields = max_fields;
 
-		    /* Leave a blank slot at the beginning */
+		    /*
+		     * Leave a blank slot at the beginning; it is never
+		     * dereferenced (only used as a base for the "xfip =
+		     * new_fields; ... xfip++" trick below), so it needs
+		     * no explicit init.
+		     */
 		    ssize_t sz = (new_max_fields + 1) * sizeof(xo_field_info_t);
 		    new_fields = alloca(sz);
-		    bzero(new_fields, sz);
 
 		    sz = (new_max_fspecs + 1) * sizeof(xo_fspec_t);
 		    new_fspecs = alloca(sz);
-		    bzero(new_fspecs, sz);
 
 		    nxpp.xp_fields = nxpp.xp_cur_field = new_fields + 1;
 		    nxpp.xp_num_fields = new_max_fields;
@@ -7971,10 +7998,7 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
     xo_count_fields(&xpp, fmt, &fmt_len, &max_fields, &max_fspecs);
 
     xo_field_info_t fields[max_fields];
-    bzero(fields, max_fields * sizeof(fields[0]));
-
     xo_fspec_t fspecs[max_fspecs];
-    bzero(fspecs, max_fspecs * sizeof(fspecs[0]));
 
     xpp.xp_fields = xpp.xp_cur_field = fields;
     xpp.xp_num_fields = max_fields;
@@ -8001,7 +8025,7 @@ static int
 xo_do_emit_cached (xo_handle_t *xop, const xo_format_cache_t *fcp,
 		   const char *fmt)
 {
-    if (fcp == NULL || fcp->xfc_fields == NULL
+    if (fcp == NULL || xo_no_cache || fcp->xfc_fields == NULL
 	    || fcp->xfc_version != XO_EMIT_CACHE_VERSION)
 	return xo_do_emit(xop, fmt);	/* safe fallback: parse at runtime */
 
@@ -8144,10 +8168,7 @@ xo_simplify_format (xo_handle_t *xop, const char *fmt, int with_numbers,
     xo_count_fields(&xpp, fmt, &fmt_len, &max_fields, &max_fspecs);
 
     xo_field_info_t fields[max_fields];
-    bzero(fields, max_fields * sizeof(fields[0]));
-
     xo_fspec_t fspecs[max_fspecs];
-    bzero(fspecs, max_fspecs * sizeof(fspecs[0]));
 
     xpp.xp_fields = xpp.xp_cur_field = fields;
     xpp.xp_num_fields = max_fields;
@@ -8538,6 +8559,7 @@ xo_depth_change (xo_handle_t *xop, const char *name,
 	xsp->xs_fstatus = fstatus;
 	xsp->xs_rb_off = starting_offset;
 	xsp->xs_tag_end = XS_OFFSET_CLEAR;
+	xsp->xs_key_off = XS_OFFSET_CLEAR;
 	xsp->xs_rb_flags = xop->xo_rb_snap; /* parent flags before this open */
 	xop->xo_rb_snap = 0;
 	xo_stack_set_flags(xop);
@@ -8552,7 +8574,20 @@ xo_depth_change (xo_handle_t *xop, const char *name,
 	if (name == NULL)
 	    name = XO_FAILURE_NAME;
 
-	xsp->xs_name = xo_strndup(name, -1);
+	/*
+	 * Optimization: we use a small buffer in the stack for names if
+	 * they fit.  Avoids alloc/free overhead in most common cases.
+	 */
+	size_t len = strlen(name) + 1;
+	if (len < sizeof(xsp->xs_namebuf)) {
+	    xsp->xs_name = xsp->xs_namebuf;
+	    memcpy(xsp->xs_name, name, len + 1);
+
+	} else {
+	    xsp->xs_name = xo_realloc(NULL, len);
+	    if (xsp->xs_name)
+		memcpy(xsp->xs_name, name, len + 1);
+	}
 
     } else {			/* Pop operation */
 	if (xop->xo_depth == 0) {
@@ -8587,7 +8622,8 @@ xo_depth_change (xo_handle_t *xop, const char *name,
 	xsp->xs_key_off = XS_OFFSET_CLEAR;
 
 	if (xsp->xs_name) {
-	    xo_free(xsp->xs_name);
+	    if (xsp->xs_name != xsp->xs_namebuf)
+		xo_free(xsp->xs_name);
 	    xsp->xs_name = NULL;
 	}
 	if (xsp->xs_keys) {
