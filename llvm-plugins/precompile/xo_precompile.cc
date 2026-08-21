@@ -126,7 +126,20 @@ static bool extractCString(GlobalVariable *GV, std::string &out)
 {
     if (!GV || !GV->isConstant() || !GV->hasDefinitiveInitializer())
         return false;
-    auto *CDA = dyn_cast<ConstantDataArray>(GV->getInitializer());
+    Constant *Init = GV->getInitializer();
+
+    /*
+     * LLVM canonicalizes an all-zero constant array (e.g. the "\0" behind
+     * a "" literal) to ConstantAggregateZero instead of ConstantDataArray,
+     * regardless of length.  Its first byte is a NUL, so it's the empty
+     * string.
+     */
+    if (isa<ConstantAggregateZero>(Init)) {
+        out.clear();
+        return true;
+    }
+
+    auto *CDA = dyn_cast<ConstantDataArray>(Init);
     if (!CDA || !CDA->isCString())
         return false;
     out = CDA->getAsCString().str();
