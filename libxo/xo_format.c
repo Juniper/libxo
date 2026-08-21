@@ -699,6 +699,20 @@ xo_parse_fields (xo_parse_t *xpp, const char *fmt, size_t fmt_len)
 	xfip->xfi_start = (xo_format_offset_t)(cp - fmt);
 
 	if (*cp == '\n') {
+	    /*
+	     * xfi_flags/xfi_fnum/xfi_renum are each read unconditionally
+	     * (no ftype check) by some consumer downstream -- xfi_flags by
+	     * xo_do_emit_fields()'s hot loop (before the ftype switch),
+	     * xfi_fnum/xfi_renum by the gettext helpers.  NEWLINE/TEXT/
+	     * EBRACE never run xo_parse_roles(), which is what normally
+	     * sets these, so they must be zeroed here explicitly: a stray
+	     * XFF_ARGUMENT bit in leftover stack data would steal a
+	     * va_arg() on this field, and a stray field number would
+	     * confuse gettext field lookup/renumbering.
+	     */
+	    xfip->xfi_flags = 0;
+	    xfip->xfi_fnum = 0;
+	    xfip->xfi_renum = 0;
 	    xfip->xfi_ftype = XO_ROLE_NEWLINE;
 	    xfip->xfi_len = 1;
 	    cp += 1;
@@ -710,6 +724,9 @@ xo_parse_fields (xo_parse_t *xpp, const char *fmt, size_t fmt_len)
 		if (*sp == '{' || *sp == '\n')
 		    break;
 
+	    xfip->xfi_flags   = 0;	/* See NEWLINE case above */
+	    xfip->xfi_fnum    = 0;
+	    xfip->xfi_renum   = 0;
 	    xfip->xfi_ftype   = XO_ROLE_TEXT;
 	    xfip->xfi_content = (xo_format_offset_t)(cp - fmt);
 	    xfip->xfi_clen    = (xo_format_offset_t)(sp - cp);
@@ -721,6 +738,9 @@ xo_parse_fields (xo_parse_t *xpp, const char *fmt, size_t fmt_len)
 	if (cp[1] == '{') {		/* {{ escaped brace */
 	    const char *start_ptr = cp + 1;
 	    xfip->xfi_start = (xo_format_offset_t)(start_ptr - fmt);
+	    xfip->xfi_flags = 0;	/* See NEWLINE case above */
+	    xfip->xfi_fnum = 0;
+	    xfip->xfi_renum = 0;
 	    xfip->xfi_ftype = XO_ROLE_EBRACE;
 
 	    cp += 2;
@@ -774,6 +794,15 @@ xo_parse_fields (xo_parse_t *xpp, const char *fmt, size_t fmt_len)
 	    if (ep != sp) {
 		xfip->xfi_clen    = (xo_format_offset_t)(sp - ep);
 		xfip->xfi_content = (xo_format_offset_t)(ep - fmt);
+	    } else {
+		/*
+		 * Empty content (e.g. "{[:/%d}"): xfi_content is already
+		 * XO_FOFF_NONE from the top-of-loop reset, but xfi_clen
+		 * isn't one of those offset members and consumers like
+		 * xo_find_width() trust a nonzero length even when the
+		 * resolved pointer is NULL, so it must be zeroed here.
+		 */
+		xfip->xfi_clen = 0;
 	    }
 	} else {
 	    xo_parse_error(xpp, "missing content (':'): '%s'",
@@ -807,6 +836,14 @@ xo_parse_fields (xo_parse_t *xpp, const char *fmt, size_t fmt_len)
 
 	    xfip->xfi_encoding = (xo_format_offset_t)(ep - fmt);
 	    xfip->xfi_elen     = (xo_format_offset_t)(sp - ep);
+	} else {
+	    /*
+	     * No encoding format: xfi_encoding is already XO_FOFF_NONE
+	     * from the top-of-loop reset, but consumers (e.g. xo_format_
+	     * title()'s "flen == 0 means use the default" check) trust
+	     * xfi_elen/xfi_flen directly, so it must be zeroed here too.
+	     */
+	    xfip->xfi_elen = 0;
 	}
 
 	if (*sp != '}') {
@@ -819,14 +856,34 @@ xo_parse_fields (xo_parse_t *xpp, const char *fmt, size_t fmt_len)
 	xfip->xfi_next = (xo_format_offset_t)(sp + 1 - fmt);
 	sp += 1;
 
-	if (xfip->xfi_clen || format || (xfip->xfi_flags & XFF_ARGUMENT)) {
-	    if (format) {
-		xfip->xfi_format = (xo_format_offset_t)(format - fmt);
-		xfip->xfi_flen   = (xo_format_offset_t)flen;
-	    } else if (xo_role_wants_default_format(xfip->xfi_ftype)) {
-		xfip->xfi_format = XO_FOFF_DEFAULT;
-		xfip->xfi_flen   = 2;
-	    }
+	if (format) {
+	    xfip->xfi_format = (xo_format_offset_t)(format - fmt);
+	    xfip->xfi_flen   = (xo_format_offset_t)flen;
+	} else if ((xfip->xfi_clen || (xfip->xfi_flags & XFF_ARGUMENT))
+		&& xo_role_wants_default_format(xfip->xfi_ftype)) {
+	    xfip->xfi_format = XO_FOFF_DEFAULT;
+	    xfip->xfi_flen   = 2;
+	} else {
+	    /*
+	     * No display format at all (e.g. an anchor's "{[:...}"):
+	     * xfi_format is already XO_FOFF_NONE from the top-of-loop
+	     * reset, but consumers trust xfi_flen directly (e.g.
+	     * xo_format_title()'s "flen == 0 means use the default"
+	     * check), so it must be zeroed here too.
+	     */
+	    xfip->xfi_flen = 0;
+	}
+
+	/*
+	 * xfi_format stayed XO_FOFF_NONE: the eager fspecs pass below
+	 * won't run, so xfi_fspecs must be NULL (never left as leftover
+	 * stack data) -- NULL is xo_do_format_field()'s "re-parse the
+	 * format on the fly" signal, and a stray non-NULL pointer here
+	 * paired with a stray xfi_num_fspecs would walk unrelated memory.
+	 */
+	if (xfip->xfi_format == XO_FOFF_NONE) {
+	    xfip->xfi_fspecs = NULL;
+	    xfip->xfi_num_fspecs = 0;
 	}
 
 	/*
@@ -985,10 +1042,15 @@ next_field:
     }
 
     /*
-     * Leave the cursor just past the last field written (a zeroed
-     * terminator slot from the initial bzero); our caller uses the
-     * cursor delta to learn the real entry count.
+     * Leave the cursor just past the last field written.  Sentinel
+     * scans elsewhere walk fields[] until xfi_ftype == 0, so this one
+     * slot (guaranteed to exist by xo_count_fields()'s pessimistic
+     * sizing) must be zeroed explicitly now that we no longer bzero
+     * the whole array.  Our caller also uses the cursor delta to
+     * learn the real entry count.
      */
+    if (field < num_fields)
+	bzero(xfip, sizeof(*xfip));
     xpp->xp_cur_field = xfip;
 
     if (seen_fnum)
