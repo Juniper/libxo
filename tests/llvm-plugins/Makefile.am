@@ -150,6 +150,7 @@ test-precompile: ${PRECOMPILE_PLUGIN}
 	        -e 's/, !dbg ![0-9]*//g' \
 	        -e '/^[[:space:]]*#dbg_value/d' \
 		-e 's/ nounwind .*//' \
+		-e 's/,$$//' \
 		-e '/^$$/d' \
 	        out/$$tc.ll > out/$$tc.ll.norm ; \
 	    ${DIFF} -Nu ${srcdir}/saved/$$tc.ll.norm out/$$tc.ll.norm ; \
