@@ -910,4 +910,7 @@ xo_is_emitting_h (xo_handle_t *xop);
 int
 xo_is_emitting (void);
 
+void
+xo_set_no_cache (int value);
+
 #endif /* INCLUDE_XO_H */
