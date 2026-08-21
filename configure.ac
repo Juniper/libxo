@@ -129,7 +129,7 @@ AC_ARG_WITH(llvm-config,
 
 AC_MSG_CHECKING([llvm-config])
 if test ${LLVM_CONFIG} = "none"; then
-    AC_MSG_RESULT([no llvm-config, so validate plugin is disabled])
+    AC_MSG_RESULT([no llvm-config, so llvm-plugins are disabled])
 elif ! test -x ${LLVM_CONFIG} ; then
     AC_MSG_FAILURE("could not find llvm-config tool")
 else
@@ -394,6 +394,7 @@ if test "${CC}" != ""; then
 fi
 AC_MSG_RESULT([$HAVE_GCC])
 AM_CONDITIONAL([HAVE_GCC], [test "$HAVE_GCC" = "yes"])
+AC_SUBST(HAVE_GCC)
 
 AC_MSG_CHECKING([whether to build with printflike])
 AC_ARG_ENABLE([printflike],
@@ -452,11 +453,13 @@ XO_CFLAGS="${CFLAGS}"
 
 AC_SUBST(XO_LIBS)
 AC_SUBST(XO_SRCDIR)
-AC_SUBST(XO_LIBDIR)
 AC_SUBST(XO_BINDIR)
 AC_SUBST(XO_INCLUDEDIR)
 AC_SUBST(XO_LIBEXT)
 AC_SUBST(XO_CFLAGS)
+
+AC_SUBST(XO_LIBDIR)
+XO_LIBDIR=`echo $XO_LIBDIR | sed "s;\\${exec_prefix};$prefix;"`
 
 AC_ARG_WITH(encoder-dir,
         [  --with-encoder-dir=[DIR]           Specify location of encoder libraries],
@@ -479,6 +482,9 @@ AC_ARG_WITH(share-dir,
 )
 XO_SHAREDIR=`echo $XO_SHAREDIR | sed "s;\\${prefix};$prefix;"`
 AC_SUBST(XO_SHAREDIR)
+
+XO_LLVMDIR=`echo $XO_LIBDIR | sed "s;\\${exec_prefix};$prefix;"`/libxo
+AC_SUBST(XO_LLVMDIR)
 
 dnl for the spec file
 RELDATE=`date +'%Y-%m-%d%n'`
@@ -527,6 +533,7 @@ AC_CONFIG_FILES([
      encoder/fullpath/Makefile
      encoder/test/Makefile
      llvm-plugins/Makefile
+     llvm-plugins/xocc.sh
      xo/Makefile
      xolint/Makefile
      xohtml/Makefile
