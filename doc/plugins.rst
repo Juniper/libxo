@@ -1,5 +1,7 @@
 .. index:: plugins
 
+.. _plugins:
+
 LLVM/clang Plugins
 ===================
 
@@ -229,6 +231,10 @@ For a project already building against libxo, add the plugin flags to
 `CFLAGS`::
 
     make CFLAGS='-O2 -fplugin=/path/to/xo_validate.so -fpass-plugin=/path/to/xo_precompile.so'
+
+libxo also installs `xocc`, a compiler wrapper that already knows
+these paths (and the link-time `-lxo` flags); see :ref:`xocc` for
+using it instead of setting these flags by hand.
 
 Caveats and known limitations
 --------------------------------
