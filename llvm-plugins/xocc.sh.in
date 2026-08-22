@@ -6,31 +6,56 @@
 # compile-time parsing and storage of format strings, giving improved
 # performance.
 #
-# Invoke as "make CC=xocc" or "XO_REAL_CC=mycc make CC=xocc"
+# Invoke as "make CC='xocc full'" or "XO_REAL_CC=mycc make CC='xocc full'"
+# "xocc validate" and "xocc precompile" are also supported.
 #
 
 XO_LIBDIR=@XO_LIBDIR@
-XO_LOCATION=@XO_LLVMDIR@
+XO_LLVMDIR=@XO_LLVMDIR@
 XO_SDK_PATH=@SDK_PATH@
 XO_LLVM_CLANG=@LLVM_CLANG@
 
+# Note these are repeated in libxo-config.sh.in
 XO_SDK_OPTIONS=${XO_SDK_PATH:+-isysroot ${XO_SDK_PATH}}
 
 XO_VALIDATE_OPTS="\
--fplugin=${XO_LOCATION}/xo_validate.so \
+-fplugin=${XO_LLVMDIR}/xo_validate.so \
 -mllvm -xo-validate-errors-as-warnings \
 "
 
 XO_PRECOMPILE_OPTS="\
--fpass-plugin=${XO_LOCATION}/xo_precompile.so \
+-fpass-plugin=${XO_LLVMDIR}/xo_precompile.so \
 "
 
-XO_OPTIONS="${XO_VALIDATE_OPTS} ${XO_PRECOMPILE_OPTS}"
+local msg="need 'full', 'validate' or 'precompile'"
+case "$1" in
+    full|both|all)
+	XO_OPTIONS="${XO_VALIDATE_OPTS} ${XO_PRECOMPILE_OPTS}"
+	shift
+	;;
+    validate|lint)
+	XO_OPTIONS="${XO_VALIDATE_OPTS}"
+	shift
+	;;
+    precompile)
+	XO_OPTIONS="${XO_PRECOMPILE_OPTS}"
+	shift
+	;;
+    -*|*.c)
+	echo "xxcc: missing verb; $msg"
+	exit 1
+	;;
+    *)
+	echo "xxcc: unknown verb '$1'; $msg"
+	exit 1
+	;;
+esac
+
 XO_CC="@CC@ ${XO_OPTIONS}"
 
 if [ ! -z "${XO_REAL_CC}" ]; then
     # Explictly set implies the user wants our options
-    COMPILER="${XO_REAL_CC} ${XO_OPTIONS}"
+    COMPILER="${XO_REAL_CC} ${XO_OPTIONS} ${XO_SDK_OPTIONS}"
 elif [ ! -z "${XO_LLVM_CLANG}" ]; then
     COMPILER="${XO_LLVM_CLANG} ${XO_OPTIONS} ${XO_SDK_OPTIONS}"
 elif [ "@HAVE_GCC@" = "no" ]; then
