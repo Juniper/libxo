@@ -33,7 +33,7 @@ LIBDIR = ${prefix}/lib
 SYSROOT_FLAG = $(if ${SDK_PATH},-isysroot ${SDK_PATH},)
 
 CLANG_CMD = ${LLVM_CLANG} \
-    ${CFLAGS} \
+    ${CFLAGS} ${LDADD} \
     -fplugin=${VALIDATE_PLUGIN_PATH} \
     -mllvm -xo-validate-errors-as-warnings \
     -I${INCLUDEDIR} \
@@ -41,12 +41,12 @@ CLANG_CMD = ${LLVM_CLANG} \
     -fsyntax-only
 
 CLANG_PLAIN = ${LLVM_CLANG} \
-    ${CFLAGS} \
+    ${CFLAGS} ${LDADD} \
     -I${INCLUDEDIR} \
     ${SYSROOT_FLAG}
 
 CLANG_PASS = ${LLVM_CLANG} \
-    ${CFLAGS} \
+    ${CFLAGS} ${LDADD} \
     -fpass-plugin=${PRECOMPILE_PLUGIN_PATH} \
     -I${INCLUDEDIR} \
     ${SYSROOT_FLAG}
