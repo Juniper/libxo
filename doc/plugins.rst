@@ -6,12 +6,12 @@ LLVM/clang Plugins
 libxo ships two optional LLVM/clang plugins that operate on
 :func:`xo_emit`-family calls at compile time:
 
-- **xo_validate** — a clang AST plugin that checks `xo_emit()` format
+- **xo_validate** — a clang AST plugin that checks `libxo` format
   strings for syntax errors and checks each format string's field
   descriptors against the types and count of the arguments actually
   passed, much like `-Wformat` does for `printf()`.
 
-- **xo_precompile** — an LLVM IR pass that finds `xo_emit()` calls whose
+- **xo_precompile** — an LLVM IR pass that finds `libxo` calls whose
   format string is a compile-time constant, parses that format string
   during the build, and rewrites the call to `xo_emit_cached()`, passing
   a pre-parsed field table as a constant.  This removes the runtime cost
