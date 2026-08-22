@@ -43,7 +43,7 @@ if HAVE_HUMANIZE_NUMBER
 LDADD += -lutil
 endif
 
-EXTRA_DIST = \
+no_ship_EXTRA_DIST = \
     ${TEST_CASES} \
     ${addprefix saved/, ${TEST_CASES:.c=.T.err}} \
     ${addprefix saved/, ${TEST_CASES:.c=.T.out}}
