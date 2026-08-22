@@ -137,7 +137,7 @@ install-exec-local:
 	install libxo-config.sh ${DESTDIR}${bindir}/libxo-config
 
 uninstall-local:
-	${RM} -f ${DESTDIR}${bindir}/xocc
+	${RM} -f ${DESTDIR}${bindir}/libxo-config
 
 
 ANALYZE_DIR = ~/trash/libxo
