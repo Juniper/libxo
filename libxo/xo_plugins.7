@@ -1,0 +1,457 @@
+.\" #
+.\" # Copyright (c) 2026, Juniper Networks, Inc.
+.\" # All rights reserved.
+.\" # This SOFTWARE is licensed under the LICENSE provided in the
+.\" # ../Copyright file. By downloading, installing, copying, or
+.\" # using the SOFTWARE, you agree to be bound by the terms of that
+.\" # LICENSE.
+.\" # Phil Shafer, 2026
+.\"
+.Dd August 21, 2026
+.Dt XO_PLUGINS 7
+.Os
+.Sh NAME
+.Nm xo_plugins
+.Nd LLVM/clang plugins for libxo
+.Sh DESCRIPTION
+.Nm libxo
+ships two optional LLVM/clang plugins that operate on
+.Fn xo_emit
+family calls at compile time:
+.Bl -tag -width "xo_precompile"
+.It Sy xo_validate
+a clang AST plugin that checks
+.Nm libxo
+format strings for syntax errors and checks each format string's
+field descriptors against the types and count of the arguments
+actually passed, much like
+.Fl Wformat
+does for
+.Fn printf .
+.It Sy xo_precompile
+an LLVM IR pass that finds
+.Nm libxo
+calls whose format string is a compile-time constant, parses that
+format string during the build, and rewrites the call to
+.Fn xo_emit_cached ,
+passing a pre-parsed field table as a constant.
+This removes the runtime cost of parsing the format string on every
+call.
+.El
+.Pp
+Both plugins share a single format-string parser (the same one
+.Nm libxo
+uses internally, reached through a small C shim so the C++ plugin code
+never has to include libxo's non-C++-safe internal headers), so their
+understanding of field syntax never drifts from the library's own.
+.Pp
+These plugins are entirely optional.
+Code built without them runs exactly as it always has, parsing format
+strings at run time.
+Neither plugin changes
+.Nm libxo Ns 's
+public behavior or output;
+.Nm xo_precompile
+specifically only ever changes
+.Em when
+a format string is parsed, never
+.Em what
+it means.
+.Sh BUILDING THE PLUGINS
+The plugins require LLVM/clang development files (specifically
+.Ic llvm\-config
+and the matching Clang cmake package) and
+.Ic cmake .
+They are built as a
+.Ic cmake
+subproject, driven from the normal autoconf/automake build via
+.Fl \-with\-llvm\-config :
+.Bd -literal -offset indent
+\&../configure \-\-with\-llvm\-config=/opt/local/libexec/llvm\-19/bin/llvm\-config \e
+    \-\-prefix ~/work/root
+.Ed
+.Pp
+If
+.Fl \-with\-llvm\-config
+is omitted (or
+.Ic llvm\-config
+can't be found),
+.Ic configure
+disables the plugins entirely and the rest of the build is unaffected.
+.Pp
+On macOS, the plugins are built with the same clang that provides
+.Ic llvm\-config ,
+which is not Apple's system clang and does not know where the macOS
+SDK headers live.
+.Ic configure
+locates the SDK automatically via
+.Ic xcrun ;
+override it with
+.Fl \-with\-sdk\-path=PATH ,
+or suppress the
+.Fl isysroot
+flag entirely with
+.Fl \-with\-sdk\-path=no :
+.Bd -literal -offset indent
+\&../configure \-\-with\-llvm\-config=/opt/local/libexec/llvm\-19/bin/llvm\-config \e
+    \-\-with\-sdk\-path=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk
+.Ed
+.Pp
+After configuring, build normally; the plugins build alongside the
+rest of the tree and install into
+.Pa ${prefix}/lib :
+.Bd -literal -offset indent
+cd build
+make CFLAGS='\-O2'
+make install
+.Ed
+.Pp
+Building just the plugins (skipping the rest of
+.Nm libxo )
+can be done from their subdirectory:
+.Bd -literal -offset indent
+cd build/llvm\-plugins
+make
+.Ed
+.Pp
+This produces
+.Pa validate/xo_validate.so
+and
+.Pa precompile/xo_precompile.so .
+Both are
+.Ic cmake Ns \-driven
+subprojects;
+.Ic configure
+seeds each one's cmake cache with the right
+.Ev LLVM_DIR ,
+.Ev Clang_DIR ,
+target architecture, and install prefix, so plain
+.Ic make
+in that directory is sufficient \(en there is no separate
+.Ic cmake configure
+step to run by hand.
+.Sh THE "xo_validate" PLUGIN
+.Nm xo_validate
+is a standard clang
+.Fl fplugin
+AST plugin.
+It runs alongside the compiler's normal parsing and codegen (it does
+not replace or suppress them), inspecting every call to
+.Fn xo_emit
+and its variants
+.Po
+.Fn xo_emit_h ,
+.Fn xo_emit_hf ,
+.Fn xo_emit_hvf ,
+the
+.Sq _p
+wrappers, etc.
+.Pc
+whose format string is a compile-time string constant.
+For each one it checks:
+.Bl -enum
+.It
+.Sy Syntax
+\(en malformed field descriptors, such as an unclosed
+.Sq { .
+.It
+.Sy Argument count
+\(en too few or too many arguments for the fields in the format
+string.
+.It
+.Sy Argument type
+\(en the type each field's display format expects (following the same
+length-modifier rules as
+.Fn printf ,
+e.g.
+.Li %ld
+expects
+.Vt long ,
+.Li %zu
+expects
+.Vt size_t )
+is compared against the actual argument's type, after the usual
+varargs promotions.
+.It
+.Sy Style
+\(en a number of
+.Ic xolint Ns \-style
+warnings about field naming conventions (upper case, underscores,
+leading digits, names that are too short, anchors with conflicting
+width sources, and so on).
+.El
+.Pp
+Diagnostics are reported through clang's normal diagnostic engine, so
+they appear exactly like any other compiler warning, with source
+location and a caret pointing at the offending call:
+.Bd -literal -offset indent
+xo_validate_demo.c:22:13: warning: libxo: format expects 2 argument(s) but 1 provided
+   22 |     xo_emit("{:name/%s} {:age/%d}\en", "bob");
+      |             ^
+.Ed
+.Pp
+By default these diagnostics are warnings, not errors, so a build with
+the plugin loaded does not fail because of them (unless the
+surrounding build otherwise treats warnings as errors, e.g.
+.Fl Werror ) .
+This is a deliberate choice: syntax/type problems in a format string
+are almost always real bugs worth fixing, but a checker with corner
+case false positives shouldn't be able to break an otherwise-correct
+build.
+The
+.Fl mllvm Fl xo\-validate\-errors\-as\-warnings
+flag exists but is a no-op today since diagnostics are already
+warnings; it is present for future use if a hard-error mode is added.
+.Ss Invoking xo_validate
+Invoke the validate plugin using
+.Fl fplugin= ,
+pointing at the built
+.Pa .so :
+.Bd -literal -offset indent
+clang \e
+    \-fplugin=/path/to/xo_validate.so \e
+    \-I/path/to/xo/include \e
+    \-isysroot $(xcrun \-\-show\-sdk\-path) \e
+    myprogram.c
+.Ed
+.Pp
+It can also be loaded during a normal compile (the diagnostics appear
+alongside the compiler's own, and compilation proceeds as usual):
+.Bd -literal -offset indent
+clang \-c \e
+    \-fplugin=/path/to/xo_validate.so \e
+    \-I/path/to/xo/include \e
+    myprogram.c \-o myprogram.o
+.Ed
+.Pp
+To integrate it into a real build, add the two
+.Li \-fplugin=... / \-I...
+flags to
+.Ev CFLAGS
+for the translation units to be checked; there is nothing else to
+configure or link against.
+.Pp
+Since it only inspects the AST and does not need to link, using the
+.Fl fsyntax\-only
+option is the fastest way to run it standalone, if only syntax
+checking is needed.
+.Sh THE "xo_precompile" PLUGIN
+.Nm xo_precompile
+is an LLVM
+.Em "new pass-manager module"
+plugin, loaded using
+.Fl fpass\-plugin= .
+It runs early in the optimization pipeline
+.Pq Li PipelineStart ,
+before inlining or constant-folding can obscure a call or the string
+it references, and looks for calls to
+.Fn xo_emit
+and its variants where the format-string argument resolves to a
+constant C string.
+.Pp
+For each such call it will:
+.Bl -enum
+.It
+parse the format string with
+.Nm libxo Ns 's
+own parser (via the shared C shim), producing the same offset-based
+field table
+.Pq Vt xo_field_info_t Ns []
+and pre-parsed display-format table
+.Pq Vt xo_fspec_t Ns []
+that
+.Fn xo_emit
+would otherwise build at run time, on every call.
+.It
+emit those tables as
+.Li private constant
+LLVM globals in the module.
+.It
+rewrite the call to the matching
+.Li xo_emit_cached*()
+entry point
+.Po
+.Fn xo_emit
+becomes
+.Fn xo_emit_cached ,
+.Fn xo_emit_hf
+becomes
+.Fn xo_emit_cached_hf ,
+and so on
+.Pc ,
+passing a pointer to the generated table ahead of the format string
+and value arguments.
+.El
+.Pp
+At run time,
+.Fn xo_emit_cached
+skips straight to formatting using the supplied table instead of
+first scanning the format string to build one.
+Output is byte-for-byte identical to what
+.Fn xo_emit
+would have produced from the same format string and arguments \(en the
+pass changes only when the format string gets parsed, never the
+result.
+.Pp
+If precompiling isn't possible or safe, calls are left untouched,
+falling back to ordinary
+.Fn xo_emit
+and parsing format strings at run time.
+This is needed when:
+.Bl -bullet
+.It
+the format string isn't a compile-time constant (e.g. it was built at
+run time, or came from a variable),
+.It
+the shim reports a parse error for it (the ordinary runtime path will
+report the same error, so nothing is silently swallowed), or
+.It
+the callee isn't one of the known
+.Fn xo_emit
+names, or is called indirectly through a function pointer.
+.El
+.Pp
+Because the rewrite happens at the IR level, it works regardless of
+what source-level macros or wrappers were used to reach
+.Fn xo_emit ,
+as long as the call and its format-string argument survive to IR in a
+form the pass can see.
+It does
+.Em not
+require any source changes \(en the same
+.Pa .c
+file compiles correctly whether or not the pass is loaded, just faster
+when it is.
+.Ss Invoking xo_precompile
+Invoke the precompile module by passing the
+.Fl fpass\-plugin=
+option on a normal compile; nothing else about the command line
+changes, and the resulting object file links against the same
+.Nm libxo
+as an unmodified build
+.Po
+.Fn xo_emit_cached
+and friends are ordinary exported
+.Nm libxo
+symbols, not something the plugin invents
+.Pc :
+.Bd -literal -offset indent
+clang \-c \e
+    \-fpass\-plugin=/path/to/xo_precompile.so \e
+    \-I/path/to/xo/include \e
+    myprogram.c \-o myprogram.o
+
+clang myprogram.o \-L/path/to/xo/lib \-lxo \-o myprogram
+.Ed
+.Pp
+To see the effect directly, dump LLVM IR instead of an object file and
+look for the generated
+.Li .xo_fields.* / .xo_fspecs.* / .xo_fcache.*
+globals and the
+.Fn xo_emit_cached
+call:
+.Bd -literal -offset indent
+clang \-S \-emit\-llvm \e
+    \-fpass\-plugin=/path/to/xo_precompile.so \e
+    \-I/path/to/xo/include \e
+    myprogram.c \-o \- | grep \-A2 xo_fcache
+.Ed
+.Pp
+.Nm xo_validate
+and
+.Nm xo_precompile
+are independent but can be used together \(en one checks correctness
+at the AST level, the other rewrites at the IR level \(en so both
+flags are normally passed on the same command line:
+.Bd -literal -offset indent
+clang \-c \e
+    \-fplugin=/path/to/xo_validate.so \e
+    \-fpass\-plugin=/path/to/xo_precompile.so \e
+    \-I/path/to/xo/include \e
+    myprogram.c \-o myprogram.o
+.Ed
+.Ss Wiring into a build
+For a project already building against
+.Nm libxo ,
+add the plugin flags to
+.Ev CFLAGS :
+.Bd -literal -offset indent
+make CFLAGS='\-O2 \-fplugin=/path/to/xo_validate.so \-fpass\-plugin=/path/to/xo_precompile.so'
+.Ed
+.Pp
+For a project that would rather not edit its own build files, the
+.Ic xocc
+wrapper script installed alongside
+.Nm libxo
+invokes the real compiler with both plugins already wired in, adding
+the
+.Fl L
+and
+.Fl lxo
+flags automatically at the link stage:
+.Bd -literal -offset indent
+make CC=xocc
+.Ed
+.Sh CAVEATS AND KNOWN LIMITATIONS
+.Bl -bullet
+.It
+Only calls with a
+.Sy literal, compile-time-constant
+format string can be precompiled.
+A format string built with
+.Fn sprintf ,
+concatenation of a runtime value, gettext lookups that select between
+strings at runtime, etc. is left as an ordinary
+.Fn xo_emit
+call.
+.It
+.Nm xo_precompile
+currently registers at
+.Li PipelineStart .
+At
+.Fl O0
+this still fires under the current New Pass Manager, but if a future
+LLVM version changes when
+.Li PipelineStart
+callbacks run at
+.Fl O0 ,
+building the precompiled translation units at
+.Fl O1
+or higher is the fallback.
+.It
+Both plugins are LLVM/clang-specific; there is no equivalent for GCC.
+Code is fully portable either way \(en without the plugins it just
+behaves like ordinary, unmodified
+.Nm libxo .
+.It
+The plugins are versioned against
+.Vt xo_field_info_t Ns 's
+in-memory layout via
+.Dv XO_EMIT_CACHE_VERSION
+(in
+.In xo.h )
+and a set of
+.Li _Static_assert
+layout checks in the shared C shim
+.Pq Pa llvm\-plugins/validate/xo_parse_shim.c .
+A
+.Nm libxo
+built with a mismatched header will refuse the precompiled table at
+run time and fall back to normal parsing rather than misinterpreting
+it.
+.El
+.Sh SEE ALSO
+.Xr libxo 3 ,
+.Xr xo_emit 3 ,
+.Xr xo_options 7
+.Sh HISTORY
+The
+.Nm xo_validate
+and
+.Nm xo_precompile
+plugins first appeared in
+.Fx XX.y (unknown) .
+.Sh AUTHORS
+.Nm libxo
+was written by
+.An Phil Shafer Aq Mt phil@freebsd.org .
