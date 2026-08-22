@@ -27,7 +27,7 @@ XO_PRECOMPILE_OPTS="\
 -fpass-plugin=${XO_LLVMDIR}/xo_precompile.so \
 "
 
-local msg="need 'full', 'validate' or 'precompile'"
+msg="need 'full', 'validate' or 'precompile'"
 case "$1" in
     full|both|all)
 	XO_OPTIONS="${XO_VALIDATE_OPTS} ${XO_PRECOMPILE_OPTS}"
