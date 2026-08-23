@@ -95,7 +95,7 @@ test-validate: ${VALIDATE_PLUGIN}
 	@${MKDIR} -p out
 	-@(for tc in ${TEST_CASES}; do \
 	    echo "... $$tc ..."; \
-	    ${CLANG_CMD} ${LDADD} ${srcdir}/$$tc.c -o $$tc.test-val \
+	    ${CLANG_CMD} ${srcdir}/$$tc.c \
 	        > out/$$tc.out 2> out/$$tc.err ; \
 	    ${DIFF} -Nu ${srcdir}/saved/$$tc.out out/$$tc.out ; \
 	    ${DIFF} -Nu ${srcdir}/saved/$$tc.err out/$$tc.err ; \
