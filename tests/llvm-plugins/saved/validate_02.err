@@ -1,220 +1,226 @@
-../../../tests/llvm-plugins/validate_02.c:147:38: warning: format specifies type 'int' but the argument has type 'long' [-Wformat]
-  147 |     fprintf(dev_null, "{:val/%d}\n", l_val);
+../../../tests/llvm-plugins/validate_02.c:156:38: warning: format specifies type 'int' but the argument has type 'long' [-Wformat]
+  156 |     fprintf(dev_null, "{:val/%d}\n", l_val);
       |                              ~~      ^~~~~
       |                              %ld
-../../../tests/llvm-plugins/validate_02.c:155:39: warning: format specifies type 'long' but the argument has type 'int' [-Wformat]
-  155 |     fprintf(dev_null, "{:val/%ld}\n", i_val);
+../../../tests/llvm-plugins/validate_02.c:164:39: warning: format specifies type 'long' but the argument has type 'int' [-Wformat]
+  164 |     fprintf(dev_null, "{:val/%ld}\n", i_val);
       |                              ~~~      ^~~~~
       |                              %d
-../../../tests/llvm-plugins/validate_02.c:187:39: warning: format specifies type 'unsigned long' but the argument has type 'unsigned int' [-Wformat]
-  187 |     fprintf(dev_null, "{:val/%lu}\n", u_val);
+../../../tests/llvm-plugins/validate_02.c:196:39: warning: format specifies type 'unsigned long' but the argument has type 'unsigned int' [-Wformat]
+  196 |     fprintf(dev_null, "{:val/%lu}\n", u_val);
       |                              ~~~      ^~~~~
       |                              %u
-../../../tests/llvm-plugins/validate_02.c:195:40: warning: format specifies type 'unsigned long long' but the argument has type 'unsigned int' [-Wformat]
-  195 |     fprintf(dev_null, "{:val/%llu}\n", u_val);
+../../../tests/llvm-plugins/validate_02.c:204:40: warning: format specifies type 'unsigned long long' but the argument has type 'unsigned int' [-Wformat]
+  204 |     fprintf(dev_null, "{:val/%llu}\n", u_val);
       |                              ~~~~      ^~~~~
       |                              %u
-../../../tests/llvm-plugins/validate_02.c:224:39: warning: format specifies type 'size_t' (aka 'unsigned long') but the argument has type 'int' [-Wformat]
-  224 |     fprintf(dev_null, "{:val/%zu}\n", i_val);
+../../../tests/llvm-plugins/validate_02.c:233:39: warning: format specifies type 'size_t' (aka 'unsigned long') but the argument has type 'int' [-Wformat]
+  233 |     fprintf(dev_null, "{:val/%zu}\n", i_val);
       |                              ~~~      ^~~~~
       |                              %d
-../../../tests/llvm-plugins/validate_02.c:236:39: warning: format specifies type 'ptrdiff_t' (aka 'long') but the argument has type 'int' [-Wformat]
-  236 |     fprintf(dev_null, "{:val/%td}\n", i_val);
+../../../tests/llvm-plugins/validate_02.c:245:39: warning: format specifies type 'ptrdiff_t' (aka 'long') but the argument has type 'int' [-Wformat]
+  245 |     fprintf(dev_null, "{:val/%td}\n", i_val);
       |                              ~~~      ^~~~~
       |                              %d
-../../../tests/llvm-plugins/validate_02.c:268:38: warning: format specifies type 'double' but the argument has type 'int' [-Wformat]
-  268 |     fprintf(dev_null, "{:val/%g}\n", i_val);
+../../../tests/llvm-plugins/validate_02.c:277:38: warning: format specifies type 'double' but the argument has type 'int' [-Wformat]
+  277 |     fprintf(dev_null, "{:val/%g}\n", i_val);
       |                              ~~      ^~~~~
       |                              %d
-../../../tests/llvm-plugins/validate_02.c:276:39: warning: format specifies type 'long double' but the argument has type 'double' [-Wformat]
-  276 |     fprintf(dev_null, "{:val/%Lg}\n", d_val);
+../../../tests/llvm-plugins/validate_02.c:285:39: warning: format specifies type 'long double' but the argument has type 'double' [-Wformat]
+  285 |     fprintf(dev_null, "{:val/%Lg}\n", d_val);
       |                              ~~~      ^~~~~
       |                              %g
-../../../tests/llvm-plugins/validate_02.c:288:38: warning: format specifies type 'double' but the argument has type 'int' [-Wformat]
-  288 |     fprintf(dev_null, "{:val/%f}\n", i_val);
+../../../tests/llvm-plugins/validate_02.c:297:38: warning: format specifies type 'double' but the argument has type 'int' [-Wformat]
+  297 |     fprintf(dev_null, "{:val/%f}\n", i_val);
       |                              ~~      ^~~~~
       |                              %d
-../../../tests/llvm-plugins/validate_02.c:314:38: warning: format specifies type 'char *' but the argument has type 'int *' [-Wformat]
-  314 |     fprintf(dev_null, "{:val/%s}\n", ip_val);
+../../../tests/llvm-plugins/validate_02.c:323:38: warning: format specifies type 'char *' but the argument has type 'int *' [-Wformat]
+  323 |     fprintf(dev_null, "{:val/%s}\n", ip_val);
       |                              ~~      ^~~~~~
-../../../tests/llvm-plugins/validate_02.c:318:38: warning: format specifies type 'char *' but the argument has type 'int' [-Wformat]
-  318 |     fprintf(dev_null, "{:val/%s}\n", i_val);
+../../../tests/llvm-plugins/validate_02.c:327:38: warning: format specifies type 'char *' but the argument has type 'int' [-Wformat]
+  327 |     fprintf(dev_null, "{:val/%s}\n", i_val);
       |                              ~~      ^~~~~
       |                              %d
-../../../tests/llvm-plugins/validate_02.c:333:38: warning: format specifies type 'void *' but the argument has type 'int' [-Wformat]
-  333 |     fprintf(dev_null, "{:val/%p}\n", i_val);
+../../../tests/llvm-plugins/validate_02.c:342:38: warning: format specifies type 'void *' but the argument has type 'int' [-Wformat]
+  342 |     fprintf(dev_null, "{:val/%p}\n", i_val);
       |                              ~~      ^~~~~
       |                              %d
-../../../tests/llvm-plugins/validate_02.c:353:32: warning: field width should have type 'int', but argument has type 'long' [-Wformat]
-  353 |     fprintf(dev_null, "{:val/%*s}\n", l_val, cs_val);
+../../../tests/llvm-plugins/validate_02.c:362:32: warning: field width should have type 'int', but argument has type 'long' [-Wformat]
+  362 |     fprintf(dev_null, "{:val/%*s}\n", l_val, cs_val);
       |                              ~~^      ~~~~~
-../../../tests/llvm-plugins/validate_02.c:357:32: warning: field precision should have type 'int', but argument has type 'long' [-Wformat]
-  357 |     fprintf(dev_null, "{:val/%.*s}\n", l_val, cs_val);
+../../../tests/llvm-plugins/validate_02.c:366:32: warning: field precision should have type 'int', but argument has type 'long' [-Wformat]
+  366 |     fprintf(dev_null, "{:val/%.*s}\n", l_val, cs_val);
       |                              ~~^~      ~~~~~
-../../../tests/llvm-plugins/validate_02.c:386:39: warning: format specifies type 'unsigned long' but the argument has type 'uint64_t' (aka 'unsigned long long') [-Wformat]
-  386 |     fprintf(dev_null, "{:val/%lu}\n", u64);
+../../../tests/llvm-plugins/validate_02.c:395:39: warning: format specifies type 'unsigned long' but the argument has type 'uint64_t' (aka 'unsigned long long') [-Wformat]
+  395 |     fprintf(dev_null, "{:val/%lu}\n", u64);
       |                              ~~~      ^~~
       |                              %llu
-../../../tests/llvm-plugins/validate_02.c:390:39: warning: format specifies type 'long' but the argument has type 'int64_t' (aka 'long long') [-Wformat]
-  390 |     fprintf(dev_null, "{:val/%ld}\n", i64);
+../../../tests/llvm-plugins/validate_02.c:399:39: warning: format specifies type 'long' but the argument has type 'int64_t' (aka 'long long') [-Wformat]
+  399 |     fprintf(dev_null, "{:val/%ld}\n", i64);
       |                              ~~~      ^~~
       |                              %lld
-../../../tests/llvm-plugins/validate_02.c:394:38: warning: format specifies type 'unsigned int' but the argument has type 'uint64_t' (aka 'unsigned long long') [-Wformat]
-  394 |     fprintf(dev_null, "{:val/%u}\n", u64);
+../../../tests/llvm-plugins/validate_02.c:403:38: warning: format specifies type 'unsigned int' but the argument has type 'uint64_t' (aka 'unsigned long long') [-Wformat]
+  403 |     fprintf(dev_null, "{:val/%u}\n", u64);
       |                              ~~      ^~~
       |                              %llu
-../../../tests/llvm-plugins/validate_02.c:398:38: warning: format specifies type 'int' but the argument has type 'int64_t' (aka 'long long') [-Wformat]
-  398 |     fprintf(dev_null, "{:val/%d}\n", i64);
+../../../tests/llvm-plugins/validate_02.c:407:38: warning: format specifies type 'int' but the argument has type 'int64_t' (aka 'long long') [-Wformat]
+  407 |     fprintf(dev_null, "{:val/%d}\n", i64);
       |                              ~~      ^~~
       |                              %lld
-../../../tests/llvm-plugins/validate_02.c:410:41: warning: format specifies type 'int' but the argument has type 'const char *' [-Wformat]
-  410 |     fprintf(dev_null, "{e:count/%d}\n", cs_val);
+../../../tests/llvm-plugins/validate_02.c:419:41: warning: format specifies type 'int' but the argument has type 'const char *' [-Wformat]
+  419 |     fprintf(dev_null, "{e:count/%d}\n", cs_val);
       |                                 ~~      ^~~~~~
       |                                 %s
-../../../tests/llvm-plugins/validate_02.c:418:41: warning: format specifies type 'char *' but the argument has type 'int' [-Wformat]
-  418 |     fprintf(dev_null, "{d:label/%s}\n", i_val);
+../../../tests/llvm-plugins/validate_02.c:427:41: warning: format specifies type 'char *' but the argument has type 'int' [-Wformat]
+  427 |     fprintf(dev_null, "{d:label/%s}\n", i_val);
       |                                 ~~      ^~~~~
       |                                 %d
-../../../tests/llvm-plugins/validate_02.c:434:41: warning: format specifies type 'unsigned long' but the argument has type 'int' [-Wformat]
-  434 |     fprintf(dev_null, "{h:size/%lu}\n", i_val);
+../../../tests/llvm-plugins/validate_02.c:443:41: warning: format specifies type 'unsigned long' but the argument has type 'int' [-Wformat]
+  443 |     fprintf(dev_null, "{h:size/%lu}\n", i_val);
       |                                ~~~      ^~~~~
       |                                %d
-../../../tests/llvm-plugins/validate_02.c:442:37: warning: format specifies type 'char *' but the argument has type 'int' [-Wformat]
-  442 |     fprintf(dev_null, "{C:/fg-%s}", i_val);
+../../../tests/llvm-plugins/validate_02.c:451:37: warning: format specifies type 'char *' but the argument has type 'int' [-Wformat]
+  451 |     fprintf(dev_null, "{C:/fg-%s}", i_val);
       |                               ~~    ^~~~~
       |                               %d
-../../../tests/llvm-plugins/validate_02.c:457:47: warning: field width should have type 'int', but argument has type 'long' [-Wformat]
-  457 |     fprintf(dev_null, "{t:mode/%s} {t:links/%*u} {t:user/%-*s}\n",
+../../../tests/llvm-plugins/validate_02.c:466:47: warning: field width should have type 'int', but argument has type 'long' [-Wformat]
+  466 |     fprintf(dev_null, "{t:mode/%s} {t:links/%*u} {t:user/%-*s}\n",
       |                                             ~~^
-  458 |             cs_val, l_val, u_val, (int) 12, cs_val);
+  467 |             cs_val, l_val, u_val, (int) 12, cs_val);
       |                     ~~~~~
-../../../tests/llvm-plugins/validate_02.c:470:6: warning: format specifies type 'long' but the argument has type 'int' [-Wformat]
-  469 |     fprintf(dev_null, "{:pid/%ld} {:uid/%u} {:size/%lu} {:name/%s}\n",
+../../../tests/llvm-plugins/validate_02.c:479:6: warning: format specifies type 'long' but the argument has type 'int' [-Wformat]
+  478 |     fprintf(dev_null, "{:pid/%ld} {:uid/%u} {:size/%lu} {:name/%s}\n",
       |                              ~~~
       |                              %d
-  470 |             i_val, u_val, ul_val, cs_val);
+  479 |             i_val, u_val, ul_val, cs_val);
       |             ^~~~~
-../../../tests/llvm-plugins/validate_02.c:44:13: warning: libxo: missing closing '}': {:bad/\n
-   44 |     xo_emit("{:bad/\n", "oops");
+../../../tests/llvm-plugins/validate_02.c:43:33: warning: libxo: argument 1: format specifies type 'int' but the argument has type 'size_t'
+   43 |     xo_emit("{:width/%*.*s}\n", width, width, "x");
+      |                                 ^
+../../../tests/llvm-plugins/validate_02.c:43:40: warning: libxo: argument 2: format specifies type 'int' but the argument has type 'size_t'
+   43 |     xo_emit("{:width/%*.*s}\n", width, width, "x");
+      |                                        ^
+../../../tests/llvm-plugins/validate_02.c:53:13: warning: libxo: missing closing '}': {:bad/\n
+   53 |     xo_emit("{:bad/\n", "oops");
       |             ^
-../../../tests/llvm-plugins/validate_02.c:50:13: warning: libxo: format expects 2 argument(s) but 1 provided
-   50 |     xo_emit("{:name/%s} {:age/%d}\n", "bob");
+../../../tests/llvm-plugins/validate_02.c:59:13: warning: libxo: format expects 2 argument(s) but 1 provided
+   59 |     xo_emit("{:name/%s} {:age/%d}\n", "bob");
       |             ^
-../../../tests/llvm-plugins/validate_02.c:53:13: warning: libxo: format expects 1 argument(s) but 2 provided
-   53 |     xo_emit("{:name/%s}\n", "carol", 99);
+../../../tests/llvm-plugins/validate_02.c:62:13: warning: libxo: format expects 1 argument(s) but 2 provided
+   62 |     xo_emit("{:name/%s}\n", "carol", 99);
       |             ^
-../../../tests/llvm-plugins/validate_02.c:63:30: warning: libxo: argument 1: format specifies type 'int' but the argument has type 'char[5]'
-   63 |     xo_emit("{:count/%d}\n", "oops");
+../../../tests/llvm-plugins/validate_02.c:72:30: warning: libxo: argument 1: format specifies type 'int' but the argument has type 'char[5]'
+   72 |     xo_emit("{:count/%d}\n", "oops");
       |                              ^
-../../../tests/llvm-plugins/validate_02.c:69:29: warning: libxo: argument 1: format specifies type 'char *' but the argument has type 'int'
-   69 |     xo_emit("{:name/%s}\n", 42);
+../../../tests/llvm-plugins/validate_02.c:78:29: warning: libxo: argument 1: format specifies type 'char *' but the argument has type 'int'
+   78 |     xo_emit("{:name/%s}\n", 42);
       |                             ^
-../../../tests/llvm-plugins/validate_02.c:76:13: warning: libxo: field descriptor uses multiple types: '{LT:Max}\n'
-   76 |     xo_emit("{LT:Max}\n");
+../../../tests/llvm-plugins/validate_02.c:85:13: warning: libxo: field descriptor uses multiple types: '{LT:Max}\n'
+   85 |     xo_emit("{LT:Max}\n");
       |             ^
-../../../tests/llvm-plugins/validate_02.c:79:13: warning: libxo: field must have a name: '{:/%s}'
-   79 |     xo_emit("{:/%s}\n", "x");
+../../../tests/llvm-plugins/validate_02.c:88:13: warning: libxo: field must have a name: '{:/%s}'
+   88 |     xo_emit("{:/%s}\n", "x");
       |             ^
-../../../tests/llvm-plugins/validate_02.c:82:13: warning: libxo: use hyphens, not underscores, in field name: '{:no_good/%s}'
-   82 |     xo_emit("{:no_good/%s}\n", "x");
+../../../tests/llvm-plugins/validate_02.c:91:13: warning: libxo: use hyphens, not underscores, in field name: '{:no_good/%s}'
+   91 |     xo_emit("{:no_good/%s}\n", "x");
       |             ^
-../../../tests/llvm-plugins/validate_02.c:85:13: warning: libxo: field name should be lower case: '{:NAME/%s}'
-   85 |     xo_emit("{:NAME/%s}\n", "x");
+../../../tests/llvm-plugins/validate_02.c:94:13: warning: libxo: field name should be lower case: '{:NAME/%s}'
+   94 |     xo_emit("{:NAME/%s}\n", "x");
       |             ^
-../../../tests/llvm-plugins/validate_02.c:88:13: warning: libxo: field name cannot start with a digit: '{:9lives/%s}'
-   88 |     xo_emit("{:9lives/%s}\n", "x");
+../../../tests/llvm-plugins/validate_02.c:97:13: warning: libxo: field name cannot start with a digit: '{:9lives/%s}'
+   97 |     xo_emit("{:9lives/%s}\n", "x");
       |             ^
-../../../tests/llvm-plugins/validate_02.c:91:13: warning: libxo: field name should not be less than 3 characters long: '{:ab/%s}'
-   91 |     xo_emit("{:ab/%s}\n", "x");
+../../../tests/llvm-plugins/validate_02.c:100:13: warning: libxo: field name should not be less than 3 characters long: '{:ab/%s}'
+  100 |     xo_emit("{:ab/%s}\n", "x");
       |             ^
-../../../tests/llvm-plugins/validate_02.c:107:13: warning: libxo: anchor content must be a decimal width: '{[:mumble}'
-  107 |     xo_emit("{[:mumble}{:name/%s}{]:}\n", "x");
+../../../tests/llvm-plugins/validate_02.c:116:13: warning: libxo: anchor content must be a decimal width: '{[:mumble}'
+  116 |     xo_emit("{[:mumble}{:name/%s}{]:}\n", "x");
       |             ^
-../../../tests/llvm-plugins/validate_02.c:110:13: warning: libxo: anchor cannot have both static width and format: '{[:32/%d}'
-  110 |     xo_emit("{[:32/%d}{:name/%s}{]:}\n", 32, "x");
+../../../tests/llvm-plugins/validate_02.c:119:13: warning: libxo: anchor cannot have both static width and format: '{[:32/%d}'
+  119 |     xo_emit("{[:32/%d}{:name/%s}{]:}\n", 32, "x");
       |             ^
-../../../tests/llvm-plugins/validate_02.c:120:13: warning: libxo: humanize modifier ('h') requires a format string: '{h:size}\n'
-  120 |     xo_emit("{h:size}\n", 1024);
+../../../tests/llvm-plugins/validate_02.c:129:13: warning: libxo: humanize modifier ('h') requires a format string: '{h:size}\n'
+  129 |     xo_emit("{h:size}\n", 1024);
       |             ^
-../../../tests/llvm-plugins/validate_02.c:146:28: warning: libxo: argument 1: format specifies type 'int' but the argument has type 'long'
-  146 |     xo_emit("{:val/%d}\n", l_val);
+../../../tests/llvm-plugins/validate_02.c:155:28: warning: libxo: argument 1: format specifies type 'int' but the argument has type 'long'
+  155 |     xo_emit("{:val/%d}\n", l_val);
       |                            ^
-../../../tests/llvm-plugins/validate_02.c:154:29: warning: libxo: argument 1: format specifies type 'long' but the argument has type 'int'
-  154 |     xo_emit("{:val/%ld}\n", i_val);
+../../../tests/llvm-plugins/validate_02.c:163:29: warning: libxo: argument 1: format specifies type 'long' but the argument has type 'int'
+  163 |     xo_emit("{:val/%ld}\n", i_val);
       |                             ^
-../../../tests/llvm-plugins/validate_02.c:186:29: warning: libxo: argument 1: format specifies type 'unsigned long' but the argument has type 'unsigned int'
-  186 |     xo_emit("{:val/%lu}\n", u_val);
+../../../tests/llvm-plugins/validate_02.c:195:29: warning: libxo: argument 1: format specifies type 'unsigned long' but the argument has type 'unsigned int'
+  195 |     xo_emit("{:val/%lu}\n", u_val);
       |                             ^
-../../../tests/llvm-plugins/validate_02.c:194:30: warning: libxo: argument 1: format specifies type 'unsigned long long' but the argument has type 'unsigned int'
-  194 |     xo_emit("{:val/%llu}\n", u_val);
+../../../tests/llvm-plugins/validate_02.c:203:30: warning: libxo: argument 1: format specifies type 'unsigned long long' but the argument has type 'unsigned int'
+  203 |     xo_emit("{:val/%llu}\n", u_val);
       |                              ^
-../../../tests/llvm-plugins/validate_02.c:223:29: warning: libxo: argument 1: format specifies type 'unsigned long' but the argument has type 'int'
-  223 |     xo_emit("{:val/%zu}\n", i_val);
+../../../tests/llvm-plugins/validate_02.c:232:29: warning: libxo: argument 1: format specifies type 'unsigned long' but the argument has type 'int'
+  232 |     xo_emit("{:val/%zu}\n", i_val);
       |                             ^
-../../../tests/llvm-plugins/validate_02.c:235:29: warning: libxo: argument 1: format specifies type 'long' but the argument has type 'int'
-  235 |     xo_emit("{:val/%td}\n", i_val);
+../../../tests/llvm-plugins/validate_02.c:244:29: warning: libxo: argument 1: format specifies type 'long' but the argument has type 'int'
+  244 |     xo_emit("{:val/%td}\n", i_val);
       |                             ^
-../../../tests/llvm-plugins/validate_02.c:267:28: warning: libxo: argument 1: format specifies type 'double' but the argument has type 'int'
-  267 |     xo_emit("{:val/%g}\n", i_val);
+../../../tests/llvm-plugins/validate_02.c:276:28: warning: libxo: argument 1: format specifies type 'double' but the argument has type 'int'
+  276 |     xo_emit("{:val/%g}\n", i_val);
       |                            ^
-../../../tests/llvm-plugins/validate_02.c:275:29: warning: libxo: argument 1: format specifies type 'long double' but the argument has type 'double'
-  275 |     xo_emit("{:val/%Lg}\n", d_val);
+../../../tests/llvm-plugins/validate_02.c:284:29: warning: libxo: argument 1: format specifies type 'long double' but the argument has type 'double'
+  284 |     xo_emit("{:val/%Lg}\n", d_val);
       |                             ^
-../../../tests/llvm-plugins/validate_02.c:287:28: warning: libxo: argument 1: format specifies type 'double' but the argument has type 'int'
-  287 |     xo_emit("{:val/%f}\n", i_val);
+../../../tests/llvm-plugins/validate_02.c:296:28: warning: libxo: argument 1: format specifies type 'double' but the argument has type 'int'
+  296 |     xo_emit("{:val/%f}\n", i_val);
       |                            ^
-../../../tests/llvm-plugins/validate_02.c:313:28: warning: libxo: argument 1: format specifies type 'char *' but the argument has type 'int *'
-  313 |     xo_emit("{:val/%s}\n", ip_val);
+../../../tests/llvm-plugins/validate_02.c:322:28: warning: libxo: argument 1: format specifies type 'char *' but the argument has type 'int *'
+  322 |     xo_emit("{:val/%s}\n", ip_val);
       |                            ^
-../../../tests/llvm-plugins/validate_02.c:317:28: warning: libxo: argument 1: format specifies type 'char *' but the argument has type 'int'
-  317 |     xo_emit("{:val/%s}\n", i_val);
+../../../tests/llvm-plugins/validate_02.c:326:28: warning: libxo: argument 1: format specifies type 'char *' but the argument has type 'int'
+  326 |     xo_emit("{:val/%s}\n", i_val);
       |                            ^
-../../../tests/llvm-plugins/validate_02.c:332:28: warning: libxo: argument 1: format specifies type 'void *' but the argument has type 'int'
-  332 |     xo_emit("{:val/%p}\n", i_val);
+../../../tests/llvm-plugins/validate_02.c:341:28: warning: libxo: argument 1: format specifies type 'void *' but the argument has type 'int'
+  341 |     xo_emit("{:val/%p}\n", i_val);
       |                            ^
-../../../tests/llvm-plugins/validate_02.c:352:29: warning: libxo: argument 1: format specifies type 'int' but the argument has type 'long'
-  352 |     xo_emit("{:val/%*s}\n", l_val, cs_val);
+../../../tests/llvm-plugins/validate_02.c:361:29: warning: libxo: argument 1: format specifies type 'int' but the argument has type 'long'
+  361 |     xo_emit("{:val/%*s}\n", l_val, cs_val);
       |                             ^
-../../../tests/llvm-plugins/validate_02.c:356:30: warning: libxo: argument 1: format specifies type 'int' but the argument has type 'long'
-  356 |     xo_emit("{:val/%.*s}\n", l_val, cs_val);
+../../../tests/llvm-plugins/validate_02.c:365:30: warning: libxo: argument 1: format specifies type 'int' but the argument has type 'long'
+  365 |     xo_emit("{:val/%.*s}\n", l_val, cs_val);
       |                              ^
-../../../tests/llvm-plugins/validate_02.c:385:29: warning: libxo: argument 1: format specifies type 'unsigned long' but the argument has type 'uint64_t'
-  385 |     xo_emit("{:val/%lu}\n", u64);
+../../../tests/llvm-plugins/validate_02.c:394:29: warning: libxo: argument 1: format specifies type 'unsigned long' but the argument has type 'uint64_t'
+  394 |     xo_emit("{:val/%lu}\n", u64);
       |                             ^
-../../../tests/llvm-plugins/validate_02.c:389:29: warning: libxo: argument 1: format specifies type 'long' but the argument has type 'int64_t'
-  389 |     xo_emit("{:val/%ld}\n", i64);
+../../../tests/llvm-plugins/validate_02.c:398:29: warning: libxo: argument 1: format specifies type 'long' but the argument has type 'int64_t'
+  398 |     xo_emit("{:val/%ld}\n", i64);
       |                             ^
-../../../tests/llvm-plugins/validate_02.c:393:28: warning: libxo: argument 1: format specifies type 'unsigned int' but the argument has type 'uint64_t'
-  393 |     xo_emit("{:val/%u}\n", u64);
+../../../tests/llvm-plugins/validate_02.c:402:28: warning: libxo: argument 1: format specifies type 'unsigned int' but the argument has type 'uint64_t'
+  402 |     xo_emit("{:val/%u}\n", u64);
       |                            ^
-../../../tests/llvm-plugins/validate_02.c:397:28: warning: libxo: argument 1: format specifies type 'int' but the argument has type 'int64_t'
-  397 |     xo_emit("{:val/%d}\n", i64);
+../../../tests/llvm-plugins/validate_02.c:406:28: warning: libxo: argument 1: format specifies type 'int' but the argument has type 'int64_t'
+  406 |     xo_emit("{:val/%d}\n", i64);
       |                            ^
-../../../tests/llvm-plugins/validate_02.c:409:31: warning: libxo: argument 1: format specifies type 'int' but the argument has type 'const char *'
-  409 |     xo_emit("{e:count/%d}\n", cs_val);
+../../../tests/llvm-plugins/validate_02.c:418:31: warning: libxo: argument 1: format specifies type 'int' but the argument has type 'const char *'
+  418 |     xo_emit("{e:count/%d}\n", cs_val);
       |                               ^
-../../../tests/llvm-plugins/validate_02.c:417:31: warning: libxo: argument 1: format specifies type 'char *' but the argument has type 'int'
-  417 |     xo_emit("{d:label/%s}\n", i_val);
+../../../tests/llvm-plugins/validate_02.c:426:31: warning: libxo: argument 1: format specifies type 'char *' but the argument has type 'int'
+  426 |     xo_emit("{d:label/%s}\n", i_val);
       |                               ^
-../../../tests/llvm-plugins/validate_02.c:433:31: warning: libxo: argument 1: format specifies type 'unsigned long' but the argument has type 'int'
-  433 |     xo_emit("{h:size/%lu}\n", i_val);
+../../../tests/llvm-plugins/validate_02.c:442:31: warning: libxo: argument 1: format specifies type 'unsigned long' but the argument has type 'int'
+  442 |     xo_emit("{h:size/%lu}\n", i_val);
       |                               ^
-../../../tests/llvm-plugins/validate_02.c:441:27: warning: libxo: argument 1: format specifies type 'char *' but the argument has type 'int'
-  441 |     xo_emit("{C:/fg-%s}", i_val);
+../../../tests/llvm-plugins/validate_02.c:450:27: warning: libxo: argument 1: format specifies type 'char *' but the argument has type 'int'
+  450 |     xo_emit("{C:/fg-%s}", i_val);
       |                           ^
-../../../tests/llvm-plugins/validate_02.c:456:14: warning: libxo: argument 2: format specifies type 'int' but the argument has type 'long'
-  456 |             cs_val, l_val, u_val, (int) 12, cs_val);
+../../../tests/llvm-plugins/validate_02.c:465:14: warning: libxo: argument 2: format specifies type 'int' but the argument has type 'long'
+  465 |             cs_val, l_val, u_val, (int) 12, cs_val);
       |                     ^
-../../../tests/llvm-plugins/validate_02.c:468:6: warning: libxo: argument 1: format specifies type 'long' but the argument has type 'int'
-  468 |             i_val, u_val, ul_val, cs_val);
+../../../tests/llvm-plugins/validate_02.c:477:6: warning: libxo: argument 1: format specifies type 'long' but the argument has type 'int'
+  477 |             i_val, u_val, ul_val, cs_val);
       |             ^
-../../../tests/llvm-plugins/validate_02.c:493:13: warning: libxo: display and encoding formats consume 1 vs 2 argument(s): '{:val/%d/%d%d}'
-  493 |     xo_emit("{:val/%d/%d%d}\n", i_val);
+../../../tests/llvm-plugins/validate_02.c:502:13: warning: libxo: display and encoding formats consume 1 vs 2 argument(s): '{:val/%d/%d%d}'
+  502 |     xo_emit("{:val/%d/%d%d}\n", i_val);
       |             ^
-../../../tests/llvm-plugins/validate_02.c:496:13: warning: libxo: display and encoding formats consume different argument(s): '{:val/%d/%s}'
-  496 |     xo_emit("{:val/%d/%s}\n", i_val);
+../../../tests/llvm-plugins/validate_02.c:505:13: warning: libxo: display and encoding formats consume different argument(s): '{:val/%d/%s}'
+  505 |     xo_emit("{:val/%d/%s}\n", i_val);
       |             ^
-../../../tests/llvm-plugins/validate_02.c:506:13: warning: libxo: unknown keyword ignored: 'humanization'
-  506 |     xo_emit("{,humanization:size/%d}\n", 1024);
+../../../tests/llvm-plugins/validate_02.c:515:13: warning: libxo: unknown keyword ignored: 'humanization'
+  515 |     xo_emit("{,humanization:size/%d}\n", 1024);
       |             ^
-65 warnings generated.
+67 warnings generated.
