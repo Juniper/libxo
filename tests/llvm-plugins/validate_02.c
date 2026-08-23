@@ -525,6 +525,8 @@ main (int argc, char **argv)
     /* WARN: unknown long name */
     xo_emit("{,humanization:size/%d}\n", 1024);
 
+    xo_emit("{:missing-encoding/%d/}\n", 1024);
+
     fclose(dev_null);
 
     return 0;
