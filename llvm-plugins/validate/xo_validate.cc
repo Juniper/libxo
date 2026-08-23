@@ -304,25 +304,18 @@ fmt_expected_type (ASTContext &C, const char *spec, unsigned len)
 }
 
 /*
- * Normalise an integer type to its unsigned equivalent, preserving
- * kind.  int→unsigned int, long→unsigned long, long long→unsigned
- * long long, etc.  This lets us test "same integer kind ignoring
- * signedness" by comparing the normalised forms of two types.
- */
-static QualType
-to_unsigned (ASTContext &C, QualType t)
-{
-    return t->isSignedIntegerType() ? C.getCorrespondingUnsignedType(t) : t;
-}
-
-/*
  * Return true if the actual argument type is compatible with the expected type.
  * Uses arg->getType() (the promoted type seen by the callee) for matching so
  * that varargs promotions (char→int, float→double) are already applied.
  *
- * Matching rules mirror clang's own -Wformat:
- *  - Integer: exact kind match, sign may differ (int↔unsigned int OK, but
- *    unsigned long ≠ unsigned long long even when both are 64-bit).
+ * Matching rules:
+ *  - Integer: same bit width, sign ignored (long == unsigned long long
+ *    when both are 64-bit).  This is looser than clang's own -Wformat
+ *    (which requires exact kind match) by design: fixed-width typedefs
+ *    like uint64_t/int64_t alias different builtin kinds across
+ *    platforms (unsigned long on FreeBSD/Linux, unsigned long long on
+ *    macOS), and a libxo format string that is correct on one platform
+ *    must not warn on another.
  *  - Float:   exact canonical type (long double ≠ double even if same size).
  *  - %s:      any char pointer.
  *  - %p:      any pointer.
@@ -345,14 +338,13 @@ type_matches (ASTContext &ctxt, QualType expected, const Expr *arg)
         return true;
 
     /*
-     * Integers of the same kind, where signed-ness may differ (int
-     * .vs. unsigned int, etc.).  Cross-kind is rejected even when
-     * sizes are equal on this platform (unsigned long != unsigned
-     * long long on macOS even though both are 64-bit).  This matches
-     * clang's own -Wformat behaviour.
+     * Integers: same bit width, sign ignored (int vs unsigned int is
+     * fine, as is unsigned long vs unsigned long long when both are
+     * 64-bit).  See the note above type_matches() for why cross-kind
+     * matches are accepted here.
      */
     if (exp->isIntegerType() && act->isIntegerType())
-        return to_unsigned(ctxt, act) == to_unsigned(ctxt, exp);
+        return ctxt.getTypeSize(act) == ctxt.getTypeSize(exp);
 
     /*
      * Also handle array-to-pointer conversion (T[N] for T*).  Arrays
