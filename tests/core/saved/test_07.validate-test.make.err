@@ -1,12 +1,6 @@
 ../../../tests/core/test_07.c:57:33: warning: libxo: argument 1: format specifies type 'char *' but the argument has type 'void *'
-   57 |     xo_emit("{ek:filename/%s}", NULL);
+   57 |     xo_emit("{ek:filename/%s}", (void *) 0);
       |                                 ^
-/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_null.h:30:15: note: expanded from macro 'NULL'
-   30 | #define NULL  __DARWIN_NULL
-      |               ^
-/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types.h:52:23: note: expanded from macro '__DARWIN_NULL'
-   52 | #define __DARWIN_NULL ((void *)0)
-      |                       ^
 ../../../tests/core/test_07.c:61:18: warning: libxo: field name should not be less than 3 characters long: '{:v1/%s}'
    61 |     rc = xo_emit("Οὐχὶ ταὐτὰ παρίσταταί μοι {:v1/%s}, {:v2/%s}\n",
       |                  ^
