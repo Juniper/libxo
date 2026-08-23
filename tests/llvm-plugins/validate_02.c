@@ -10,10 +10,16 @@
  * Platform notes (LP64 / macOS ARM):
  *   sizeof(int) = 4, sizeof(long) = sizeof(long long) = 8
  *   size_t = unsigned long,  ptrdiff_t = long,  intmax_t = long
- *   uint64_t = unsigned long long,  int64_t = long long  (NOT unsigned long / long)
+ *   uint64_t = unsigned long long,  int64_t = long long  (NOT unsigned long /
+ *   long -- but IS unsigned long / long on FreeBSD and Linux)
  *   long double == double in size (64-bit) but are distinct types.
- *   Matching follows clang -Wformat: same integer *kind* ignoring sign is OK,
- *   but crossing kinds (long vs long long) is not, even when sizes are equal.
+ *   Integer matching is by bit width, sign ignored: any 64-bit integer
+ *   kind matches any other 64-bit integer kind of the same signedness
+ *   category, so uint64_t/int64_t vs %lu/%ld warn or don't warn the
+ *   same way regardless of which builtin kind they alias on this
+ *   platform.  (clang's own -Wformat, checking fprintf() below, does
+ *   not make this concession -- its output for the u64/i64 cases is
+ *   expected to differ from ours and from platform to platform.)
  */
 
 #include <stdio.h>
@@ -390,13 +396,18 @@ main (int argc, char **argv)
     xo_emit("{:val/%u}\n", i32);
     fprintf(dev_null, "{:val/%u}\n", i32);
 
-    /* WARN: uint64_t is unsigned long long on macOS, not unsigned long; use %llu */
+    /*
+     * OK (portable): %lu wants a 64-bit unsigned value and u64 is
+     * 64-bit unsigned, regardless of whether uint64_t aliases
+     * "unsigned long" (FreeBSD/Linux) or "unsigned long long" (macOS).
+     * No fprintf() pair: clang's own -Wformat checks against the real
+     * platform typedef and disagrees between those two platforms,
+     * which is expected and outside our control.
+     */
     xo_emit("{:val/%lu}\n", u64);
-    fprintf(dev_null, "{:val/%lu}\n", u64);
 
-    /* WARN: int64_t is long long on macOS, not long; use %lld */
+    /* OK (portable): same reasoning, int64_t vs %ld */
     xo_emit("{:val/%ld}\n", i64);
-    fprintf(dev_null, "{:val/%ld}\n", i64);
 
     /* WARN: size — uint64_t (64-bit) vs %u (32-bit unsigned) */
     xo_emit("{:val/%u}\n", u64);
