@@ -55,9 +55,8 @@ Invoking "xocc"
 Unlike a normal `$CC`, `xocc` requires a verb as its first argument,
 telling it which plugin flags to add:
 
-- `full`, `both`, or `all` — add both `xo_validate` and
-  `xo_precompile`.
-- `validate` or `lint` — add `xo_validate` only.
+- `full` — add both `xo_validate` and `xo_precompile`.
+- `validate` — add `xo_validate` only.
 - `precompile` — add `xo_precompile` only.
 
 Any other first argument (including a bare compiler flag or a `.c`
