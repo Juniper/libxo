@@ -45,11 +45,15 @@ PRECOMPILE_SRCS = \
     ${top_srcdir}/llvm-plugins/precompile/CMakeLists.txt \
     ${top_srcdir}/llvm-plugins/precompile/xo_precompile.cc
 
-EXTRA_DIST = xocc.sh.in
+EXTRA_DIST = xocc.sh.in xocc.1
 
 .PHONY: validate validate-clean precompile precompile-clean
 
 if HAVE_VALIDATE
+
+man1_files = xocc.1
+
+man_MANS = ${man1_files}
 
 all: ${VALIDATE_PLUGIN} ${PRECOMPILE_PLUGIN}
 
