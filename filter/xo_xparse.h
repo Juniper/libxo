@@ -155,6 +155,7 @@ xo_xparse_node_new (xo_xparse_data_t *xdp)
 int
 xo_xpath_yyerror (xo_xparse_data_t *, const char *, int yystate);
 
+XO_PRINTFLIKE(2, 3)
 void
 xo_xparse_yyprintf(xo_xparse_data_t *xdp, const char *fmt, ...);
 
