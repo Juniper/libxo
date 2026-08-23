@@ -1,7 +1,7 @@
 ../../../tests/llvm-plugins/validate_02.c:162:38: warning: format specifies type 'int' but the argument has type 'long' [-Wformat]
   162 |     fprintf(dev_null, "{:val/%d}\n", l_val);
       |                              ~~      ^~~~~
-      |                              %ld
+      |                             %XXX
 ../../../tests/llvm-plugins/validate_02.c:170:39: warning: format specifies type 'long' but the argument has type 'int' [-Wformat]
   170 |     fprintf(dev_null, "{:val/%ld}\n", i_val);
       |                              ~~~      ^~~~~
@@ -54,11 +54,11 @@
 ../../../tests/llvm-plugins/validate_02.c:414:38: warning: format specifies type 'unsigned int' but the argument has type 'uint64_t' [-Wformat]
   414 |     fprintf(dev_null, "{:val/%u}\n", u64);
       |                              ~~      ^~~
-      |                              %llu
+      |                             %XXX
 ../../../tests/llvm-plugins/validate_02.c:418:38: warning: format specifies type 'int' but the argument has type 'int64_t' [-Wformat]
   418 |     fprintf(dev_null, "{:val/%d}\n", i64);
       |                              ~~      ^~~
-      |                              %lld
+      |                             %XXX
 ../../../tests/llvm-plugins/validate_02.c:430:41: warning: format specifies type 'int' but the argument has type 'const char *' [-Wformat]
   430 |     fprintf(dev_null, "{e:count/%d}\n", cs_val);
       |                                 ~~      ^~~~~~
