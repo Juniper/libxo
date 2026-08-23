@@ -96,7 +96,8 @@ test-validate: ${VALIDATE_PLUGIN}
 	-@(for tc in ${TEST_CASES}; do \
 	    echo "... $$tc ..."; \
 	    ${CLANG_CMD} ${srcdir}/$$tc.c \
-	        > out/$$tc.out 2> out/$$tc.err ; \
+	        > out/$$tc.out 2> out/$$tc.err.raw ; \
+	    ${SED} -e "s/ (aka '[^']*')//" out/$$tc.err.raw > out/$$tc.err ; \
 	    ${DIFF} -Nu ${srcdir}/saved/$$tc.out out/$$tc.out ; \
 	    ${DIFF} -Nu ${srcdir}/saved/$$tc.err out/$$tc.err ; \
 	done)
