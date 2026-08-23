@@ -39,7 +39,7 @@ main (int argc, char **argv)
      * digits and a ‘$’ instead of a digit string.  In this case, an
      * int argument supplies the field width or precision.
      */
-    size_t width = 5;
+    int width = 5;
     xo_emit("{:width/%*.*s}\n", width, width, "x");
 
     /*
