@@ -32,8 +32,12 @@ LIBDIR = ${prefix}/lib
 
 SYSROOT_FLAG = $(if ${SDK_PATH},-isysroot ${SDK_PATH},)
 
+if HAVE_HUMANIZE_NUMBER
+LDADD = -lutil
+endif
+
 CLANG_CMD = ${LLVM_CLANG} \
-    ${CFLAGS} ${LDADD} \
+    ${CFLAGS} \
     -fplugin=${VALIDATE_PLUGIN_PATH} \
     -mllvm -xo-validate-errors-as-warnings \
     -I${INCLUDEDIR} \
@@ -41,12 +45,12 @@ CLANG_CMD = ${LLVM_CLANG} \
     -fsyntax-only
 
 CLANG_PLAIN = ${LLVM_CLANG} \
-    ${CFLAGS} ${LDADD} \
+    ${CFLAGS} \
     -I${INCLUDEDIR} \
     ${SYSROOT_FLAG}
 
 CLANG_PASS = ${LLVM_CLANG} \
-    ${CFLAGS} ${LDADD} \
+    ${CFLAGS} \
     -fpass-plugin=${PRECOMPILE_PLUGIN_PATH} \
     -I${INCLUDEDIR} \
     ${SYSROOT_FLAG}
@@ -91,7 +95,7 @@ test-validate: ${VALIDATE_PLUGIN}
 	@${MKDIR} -p out
 	-@(for tc in ${TEST_CASES}; do \
 	    echo "... $$tc ..."; \
-	    ${CLANG_CMD} ${srcdir}/$$tc.c \
+	    ${CLANG_CMD} ${LDADD} ${srcdir}/$$tc.c -o $$tc.test-val \
 	        > out/$$tc.out 2> out/$$tc.err ; \
 	    ${DIFF} -Nu ${srcdir}/saved/$$tc.out out/$$tc.out ; \
 	    ${DIFF} -Nu ${srcdir}/saved/$$tc.err out/$$tc.err ; \
@@ -111,12 +115,12 @@ test-precompile: ${PRECOMPILE_PLUGIN}
 	@${MKDIR} -p out
 	-@(for tc in ${PRECOMPILE_TEST_CASES}; do \
 	    echo "... precompile build $$tc ..."; \
-	    ${CLANG_PLAIN} ${srcdir}/$$tc.c -L${LIBDIR} -Wl,-rpath,${LIBDIR} -lxo \
+	    ${CLANG_PLAIN} ${LDADD} ${srcdir}/$$tc.c -L${LIBDIR} -Wl,-rpath,${LIBDIR} -lxo \
 	        -o out/$$tc.plain \
 	        > out/$$tc.plain.build.out 2> out/$$tc.plain.build.err ; \
 	    ${DIFF} -Nu ${srcdir}/saved/$$tc.plain.build.out out/$$tc.plain.build.out ; \
 	    ${DIFF} -Nu ${srcdir}/saved/$$tc.plain.build.err out/$$tc.plain.build.err ; \
-	    ${CLANG_PASS} ${srcdir}/$$tc.c -L${LIBDIR} -Wl,-rpath,${LIBDIR} -lxo \
+	    ${CLANG_PASS} ${LDADD} ${srcdir}/$$tc.c -L${LIBDIR} -Wl,-rpath,${LIBDIR} -lxo \
 	        -o out/$$tc.pass \
 	        > out/$$tc.pass.build.out 2> out/$$tc.pass.build.err ; \
 	    ${DIFF} -Nu ${srcdir}/saved/$$tc.pass.build.out out/$$tc.pass.build.out ; \
