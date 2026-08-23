@@ -1,0 +1,268 @@
+.\" #
+.\" # Copyright (c) 2026, Juniper Networks, Inc.
+.\" # All rights reserved.
+.\" # This SOFTWARE is licensed under the LICENSE provided in the
+.\" # ../Copyright file. By downloading, installing, copying, or
+.\" # using the SOFTWARE, you agree to be bound by the terms of that
+.\" # LICENSE.
+.\" # Phil Shafer, 2026
+.\"
+.Dd August 22, 2026
+.Dt XOCC 1
+.Os
+.Sh NAME
+.Nm xocc
+.Nd compiler wrapper for libxo's LLVM/clang plugins
+.Sh SYNOPSIS
+.Nm xocc
+.Cm full | validate | precompile
+.Ar compiler-args ...
+.Sh DESCRIPTION
+.Xr xo_plugins 7
+describes
+.Nm libxo Ns 's
+two optional LLVM/clang plugins,
+.Nm xo_validate
+and
+.Nm xo_precompile ,
+and how to invoke them by hand with
+.Fl fplugin=
+and
+.Fl fpass\-plugin= .
+Wiring those flags into another project's build by hand means finding
+the
+.Pa .so
+paths, the SDK
+.Fl isysroot ,
+and the
+.Fl L Ns Ar dir
+/
+.Fl lxo
+link flags, and repeating them on every compile and link line.
+.Pp
+.Nm
+is a small shell wrapper, generated at configure time, that already
+knows all of that.
+It stands in for
+.Ev CC
+in another project's build: pass it wherever that project's build
+system expects a compiler, and it runs the real compiler with
+.Nm libxo Ns 's
+plugin flags (and, at link time,
+.Fl lxo )
+already added.
+.Pp
+.Nm
+is generated from
+.Pa llvm\-plugins/xocc.sh.in
+by
+.Ic configure
+(via
+.Ic AC_CONFIG_FILES )
+and installed as
+.Pa ${bindir}/xocc
+\(en it only exists, and only makes sense, in a
+.Nm libxo
+tree that was configured with the plugins enabled.
+.Sh CONFIGURING
+.Nm
+is only useful if
+.Nm libxo
+itself was configured with
+.Fl \-with\-llvm\-config ,
+exactly as described in
+.Xr xo_plugins 7 Ns 's
+.Sx BUILDING THE PLUGINS
+section:
+.Bd -literal -offset indent
+\&../configure \-\-with\-llvm\-config=/opt/local/libexec/llvm\-19/bin/llvm\-config \e
+    \-\-prefix ~/work/root
+.Ed
+.Pp
+The same
+.Fl \-with\-sdk\-path=PATH
+(or
+.Fl \-with\-sdk\-path=no )
+override applies here too;
+.Nm
+passes the configured SDK path to the real compiler as
+.Fl isysroot
+whenever it invokes the LLVM clang directly.
+.Pp
+If
+.Fl \-with\-llvm\-config
+was omitted, the plugins aren't built,
+.Nm
+still gets generated and installed, but it won't have real plugin
+.Pa .so
+files to point at.
+Build and install
+.Nm libxo
+normally afterward:
+.Bd -literal -offset indent
+cd build
+make CFLAGS='\-O2'
+make install
+.Ed
+.Pp
+This installs
+.Nm
+into
+.Pa ${prefix}/bin
+alongside the rest of
+.Nm libxo .
+.Sh INVOKING XOCC
+Unlike a normal
+.Ev CC ,
+.Nm
+requires a verb as its first argument, telling it which plugin flags
+to add:
+.Bl -tag -width "validate"
+.It Cm full
+add both
+.Nm xo_validate
+and
+.Nm xo_precompile .
+.It Cm validate
+add
+.Nm xo_validate
+only.
+.It Cm precompile
+add
+.Nm xo_precompile
+only.
+.El
+.Pp
+Any other first argument (including a bare compiler flag or a
+.Pa .c
+file, which means the verb was left off) is an error, and
+.Nm
+refuses to run rather than silently compiling without
+.Nm libxo Ns 's
+flags.
+.Pp
+The verb is consumed before the rest of the command line is handed to
+the real compiler, so
+.Nm
+can otherwise be dropped in wherever a compiler is expected.
+The most common use is setting
+.Ev CC
+for a
+.Ic make Ns \-based
+build:
+.Bd -literal -offset indent
+make CC='xocc full'
+.Ed
+.Pp
+The quotes matter \(en
+.Ev CC
+becomes the two-word command
+.Ic xocc full ,
+and
+.Ic make
+passes the rest of its usual compiler invocation
+.Po
+.Fl c Ar foo.c Fl o Ar foo.o ,
+or the final link line
+.Pc
+after it.
+To check format strings without paying for precompilation, or vice
+versa, swap in the narrower verb:
+.Bd -literal -offset indent
+make CC='xocc validate'
+make CC='xocc precompile'
+.Ed
+.Pp
+.Nm
+picks which real compiler to invoke, in order:
+.Bl -enum
+.It
+.Ev XO_REAL_CC ,
+if set \(en an explicit override, e.g. when the project's build
+otherwise assumes a specific compiler:
+.Bd -literal -offset indent
+XO_REAL_CC=/usr/local/bin/clang\-19 make CC='xocc full'
+.Ed
+.It
+the LLVM clang that built the plugins (the one found via
+.Fl \-with\-llvm\-config
+at
+.Nm libxo Ns 's
+own configure time), since the plugins are LLVM-version-specific and
+only reliably load into a matching clang.
+.It
+otherwise,
+.Nm libxo Ns 's
+own build compiler, with the plugin flags added anyway if that
+compiler isn't real
+.Ic gcc
+.Po Ic gcc
+has no equivalent plugin support, so if it
+.Em is
+.Ic gcc ,
+the plugin flags are dropped and the plain compiler is used
+unmodified
+.Pc .
+.El
+.Pp
+.Nm
+also inspects the rest of its arguments to tell a compile stage
+.Po
+.Fl c ,
+.Fl E ,
+or
+.Fl S
+present
+.Pc
+from a link stage.
+At the link stage it adds
+.Fl L Ns Ar libdir
+.Fl lxo
+automatically, so linking a program that used
+.Nm
+for its compiles needs no extra
+.Nm libxo
+flags:
+.Bd -literal -offset indent
+xocc full \-c myprogram.c \-o myprogram.o
+xocc full myprogram.o \-o myprogram
+.Ed
+.Pp
+Both plugin flags, the SDK
+.Fl isysroot ,
+and the link flags come from values baked in when
+.Nm libxo
+itself was configured \(en
+.Nm
+needs no
+.Fl I Ns Ar dir
+/
+.Fl L Ns Ar dir
+flags pointing back at the
+.Nm libxo
+tree, beyond whatever the project's own build already passes for
+.Nm libxo Ns 's
+headers.
+.Sh ENVIRONMENT
+.Bl -tag -width XO_REAL_CC
+.It Ev XO_REAL_CC
+Overrides the real compiler
+.Nm
+invokes, taking priority over the LLVM clang detected at
+.Nm libxo Ns 's
+configure time.
+.El
+.Sh SEE ALSO
+.Xr libxo 3 ,
+.Xr xo_emit 3 ,
+.Xr xo_options 7 ,
+.Xr xo_plugins 7
+.Sh HISTORY
+The
+.Nm
+wrapper first appeared in
+.Fx XX.y (unknown) .
+.Sh AUTHORS
+.Nm libxo
+was written by
+.An Phil Shafer Aq Mt phil@freebsd.org .
