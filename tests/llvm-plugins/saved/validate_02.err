@@ -94,12 +94,6 @@
       |                              %d
   479 |             i_val, u_val, ul_val, cs_val);
       |             ^~~~~
-../../../tests/llvm-plugins/validate_02.c:43:33: warning: libxo: argument 1: format specifies type 'int' but the argument has type 'size_t'
-   43 |     xo_emit("{:width/%*.*s}\n", width, width, "x");
-      |                                 ^
-../../../tests/llvm-plugins/validate_02.c:43:40: warning: libxo: argument 2: format specifies type 'int' but the argument has type 'size_t'
-   43 |     xo_emit("{:width/%*.*s}\n", width, width, "x");
-      |                                        ^
 ../../../tests/llvm-plugins/validate_02.c:53:13: warning: libxo: missing closing '}': {:bad/\n
    53 |     xo_emit("{:bad/\n", "oops");
       |             ^
@@ -223,4 +217,4 @@
 ../../../tests/llvm-plugins/validate_02.c:515:13: warning: libxo: unknown keyword ignored: 'humanization'
   515 |     xo_emit("{,humanization:size/%d}\n", 1024);
       |             ^
-67 warnings generated.
+65 warnings generated.
