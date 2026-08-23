@@ -79,6 +79,8 @@ xo_printable (const char *str)
 
 /* Error reporting */
 
+
+XO_PRINTFLIKE(2, 3)
 static void
 xo_parse_error (xo_parse_t *xpp, const char *fmt, ...)
 {
@@ -93,6 +95,7 @@ xo_parse_error (xo_parse_t *xpp, const char *fmt, ...)
     xpp->xp_error(xpp->xp_error_data, "%s", buf);
 }
 
+XO_PRINTFLIKE(2, 3)
 static void
 xo_parse_warning (xo_parse_t *xpp, const char *fmt, ...)
 {
