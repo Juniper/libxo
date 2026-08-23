@@ -42,11 +42,11 @@ case "$1" in
 	shift
 	;;
     -*|*.c)
-	echo "xxcc: missing verb; $msg"
+	echo "xocc: missing verb; $msg"
 	exit 1
 	;;
     *)
-	echo "xxcc: unknown verb '$1'; $msg"
+	echo "xocc: unknown verb '$1'; $msg"
 	exit 1
 	;;
 esac
