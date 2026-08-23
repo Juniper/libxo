@@ -145,7 +145,7 @@ test tests: ${noinst_PROGRAMS} run-plain-tests ${PLUGIN_TESTS}
 
 run-plain-tests:
 	@${MKDIR} -p out
-	${RUN_TESTS_CMD} -T "${TEST_FORMATS}" run-bin ${TEST_CASES:.c=.test}
+	@${RUN_TESTS_CMD} -T "${TEST_FORMATS}" run-bin ${TEST_CASES:.c=.test}
 
 if HAVE_VALIDATE
 
@@ -218,7 +218,7 @@ endif
 # Run a single test/format for quick iteration:
 #   make one TEST_BIN=test_01.test TEST_FMT=JP
 one:
-	${RUN_TESTS_CMD} -T "${TEST_FMT:-T}" run-bin ${TEST_BIN:-test_01.test}
+	@${RUN_TESTS_CMD} -T "${TEST_FMT:-T}" run-bin ${TEST_BIN:-test_01.test}
 
 accept:
 	@${MKDIR} -p ${srcdir}/saved
