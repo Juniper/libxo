@@ -203,4 +203,7 @@
 ../../../tests/llvm-plugins/validate_02.c:526:13: warning: libxo: unknown keyword ignored: 'humanization'
   526 |     xo_emit("{,humanization:size/%d}\n", 1024);
       |             ^
-61 warnings generated.
+../../../tests/llvm-plugins/validate_02.c:528:13: warning: libxo: zero length encoding format, ignored
+  528 |     xo_emit("{:missing-encoding/%d/}\n", 1024);
+      |             ^
+62 warnings generated.
