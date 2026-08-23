@@ -53,6 +53,9 @@ esac
 
 XO_CC="@CC@ ${XO_OPTIONS}"
 
+# The plugins need to be able to find libxo_format
+export LD_LIBRARY_PATH=${XO_LIBDIR}:${LD_LIBRARY_PATH}
+
 if [ ! -z "${XO_REAL_CC}" ]; then
     # Explictly set implies the user wants our options
     COMPILER="${XO_REAL_CC} ${XO_OPTIONS} ${XO_SDK_OPTIONS}"
