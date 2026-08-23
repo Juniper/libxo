@@ -837,8 +837,15 @@ xo_parse_fields (xo_parse_t *xpp, const char *fmt, size_t fmt_len)
 		if (*sp == '}')
 		    break;
 
-	    xfip->xfi_encoding = (xo_format_offset_t)(ep - fmt);
-	    xfip->xfi_elen     = (xo_format_offset_t)(sp - ep);
+	    /* A probable typo, since the encoding field is empty: {:foo/%s/} */
+	    if (ep == sp) {
+		xo_parse_error(xpp, "zero length encoding format, ignored");
+		xfip->xfi_elen = (xo_format_offset_t)(sp - ep);
+	    } else {
+		xfip->xfi_encoding = (xo_format_offset_t)(ep - fmt);
+		xfip->xfi_elen = (xo_format_offset_t)(sp - ep);
+	    }
+
 	} else {
 	    /*
 	     * No encoding format: xfi_encoding is already XO_FOFF_NONE
