@@ -178,12 +178,6 @@
 ../../../tests/llvm-plugins/validate_02.c:365:30: warning: libxo: argument 1: format specifies type 'int' but the argument has type 'long'
   365 |     xo_emit("{:val/%.*s}\n", l_val, cs_val);
       |                              ^
-../../../tests/llvm-plugins/validate_02.c:394:29: warning: libxo: argument 1: format specifies type 'unsigned long' but the argument has type 'uint64_t'
-  394 |     xo_emit("{:val/%lu}\n", u64);
-      |                             ^
-../../../tests/llvm-plugins/validate_02.c:398:29: warning: libxo: argument 1: format specifies type 'long' but the argument has type 'int64_t'
-  398 |     xo_emit("{:val/%ld}\n", i64);
-      |                             ^
 ../../../tests/llvm-plugins/validate_02.c:402:28: warning: libxo: argument 1: format specifies type 'unsigned int' but the argument has type 'uint64_t'
   402 |     xo_emit("{:val/%u}\n", u64);
       |                            ^
@@ -217,4 +211,4 @@
 ../../../tests/llvm-plugins/validate_02.c:515:13: warning: libxo: unknown keyword ignored: 'humanization'
   515 |     xo_emit("{,humanization:size/%d}\n", 1024);
       |             ^
-65 warnings generated.
+63 warnings generated.
