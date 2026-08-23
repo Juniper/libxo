@@ -62,11 +62,11 @@ validate_tests = ${TEST_CASES:.c=.validate-test}
 pass_tests = ${TEST_CASES:.c=.pass-test}
 endif
 
-ADD = \
+LDADD = \
     ${top_builddir}/libxo/libxo.la
 
 if HAVE_HUMANIZE_NUMBER
-LDADD = -lutil
+LDADD += -lutil
 endif
 
 EXTRA_DIST = \
