@@ -34,6 +34,15 @@ main (int argc, char **argv)
 	xo_err(1, "failed to open dev/null");
 
     /*
+     *  A field width or precision, or both, may be indicated by an
+     * asterisk ‘*’ or an asterisk followed by one or more decimal
+     * digits and a ‘$’ instead of a digit string.  In this case, an
+     * int argument supplies the field width or precision.
+     */
+    size_t width = 5;
+    xo_emit("{:width/%*.*s}\n", width, width, "x");
+
+    /*
      * Syntax and count
      */
 
