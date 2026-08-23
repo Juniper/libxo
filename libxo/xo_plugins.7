@@ -388,10 +388,17 @@ the
 .Fl L
 and
 .Fl lxo
-flags automatically at the link stage:
+flags automatically at the link stage.
+It requires a verb
+.Pq Cm full , Cm validate , "or" Cm precompile
+as its first argument:
 .Bd -literal -offset indent
-make CC=xocc
+make CC='xocc full'
 .Ed
+.Pp
+See
+.Xr xocc 1
+for the full set of verbs and invocation options.
 .Sh CAVEATS AND KNOWN LIMITATIONS
 .Bl -bullet
 .It
