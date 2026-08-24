@@ -10,6 +10,12 @@
 # "xocc validate" and "xocc precompile" are also supported.
 #
 
+if [ "$1" = "debug" ]; then
+    set -x
+    XO_DEBUG=1
+    shift
+fi
+
 XO_LIBDIR=@XO_LIBDIR@
 XO_LLVMDIR=@XO_LLVMDIR@
 XO_SDK_PATH=@SDK_PATH@
@@ -17,57 +23,140 @@ XO_LLVM_CLANG=@LLVM_CLANG@
 
 # Note these are repeated in libxo-config.sh.in
 XO_SDK_OPTIONS=${XO_SDK_PATH:+-isysroot ${XO_SDK_PATH}}
+XO_VALIDATE_OPTS="-fplugin=${XO_LLVMDIR}/xo_validate.so"
+XO_PRECOMPILE_OPTS="-fpass-plugin=${XO_LLVMDIR}/xo_precompile.so"
+XO_LDFLAGS="-L${XO_LIBDIR} -lxo"
 
-XO_VALIDATE_OPTS="\
--fplugin=${XO_LLVMDIR}/xo_validate.so \
--mllvm -xo-validate-errors-as-warnings \
-"
+dbg () {
+    if [ ! -z "${XO_DEBUG}" ]; then
+	echo "dbg:" "$@"
+    fi
+}
 
-XO_PRECOMPILE_OPTS="\
--fpass-plugin=${XO_LLVMDIR}/xo_precompile.so \
-"
+parse_verb () {
+    local verb=`echo "$1" | sed -e 's:+: :g' -e 's:-: -:g'`
 
-msg="need 'full', 'validate' or 'precompile'"
-case "$1" in
-    full|both|all)
-	XO_OPTIONS="${XO_VALIDATE_OPTS} ${XO_PRECOMPILE_OPTS}"
+    set -- $verb
+
+    need_validate=0
+    need_lint=0
+    need_errors=0
+    need_precompile=0
+    need_sdk=1
+    need_ldflags=1
+    need_echo=0
+
+    local msg="see xocc(1) for details"
+
+    while [ ! -z "$1" ]; do
+	dbg "processing [$1]"
+
+	case "$1" in
+	    all)
+		need_validate=1
+		need_lint=1
+		need_precompile=1
+		;;
+
+	    v|validate)
+		need_validate=1
+		;;
+	    -v|-validate)
+		need_validate=0
+		;;
+	    l|lint)
+		need_lint=1
+		;;
+	    -l|-lint)
+		need_lint=0
+		;;
+	    e|errors)
+		need_errors=1
+		;;
+	    -e|-errors)
+		need_errors=0
+		;;
+	    p|precompile)
+		need_precompile=1
+		;;
+	    -p|-precompile)
+		need_precompile=0
+		;;
+	    sdk)
+		need_sdk=1
+		;;
+	    -sdk)
+		need_sdk=0
+		;;
+	    ldflags)
+		need_ldflags=1
+		;;
+	    -ldflags)
+		need_ldflags=0
+		;;
+	    echo)
+		need_echo=1
+		;;
+	    -echo)
+		need_echo=0
+		;;
+	    -*|*.c)
+		echo "xocc: missing verb; $msg"
+		exit 1
+		;;
+	    *)
+		echo "xocc: unknown verb '$1'; $msg"
+		exit 1
+		;;
+	esac
 	shift
-	;;
-    validate|lint)
-	XO_OPTIONS="${XO_VALIDATE_OPTS}"
-	shift
-	;;
-    precompile)
-	XO_OPTIONS="${XO_PRECOMPILE_OPTS}"
-	shift
-	;;
-    -*|*.c)
-	echo "xocc: missing verb; $msg"
-	exit 1
-	;;
-    *)
+    done
+
+    all=`expr $need_lint + $need_errors + $need_validate + $need_precompile`
+    if [ "$all" -eq 0 ]; then
 	echo "xocc: unknown verb '$1'; $msg"
 	exit 1
-	;;
-esac
+    fi
 
-XO_CC="@CC@ ${XO_OPTIONS}"
+    all_but_lint=`expr $need_errors + $need_validate + $need_precompile`
+    if [ "$all_but_lint" -eq 0 ]; then
+	syntax="-fsyntax-only"
+    fi
 
-# The plugins need to be able to find libxo_format
-export LD_LIBRARY_PATH=${XO_LIBDIR}:${LD_LIBRARY_PATH}
+    if [ "$need_lint" = 1 ]; then
+	lint="-mllvm -xo-validate-lint"
+	need_validate=1
+    fi
+    if [ "$need_errors" != 1 ]; then
+	if [ "$need_validate" = 1 ]; then
+	    errors="-mllvm -xo-validate-errors-as-warnings"
+	fi
+    fi
+    if [ "$need_validate" = 1 ]; then
+	validate="${XO_VALIDATE_OPTS}"
+    fi
+    if [ "$need_precompile" = 1 ]; then
+	precompile="${XO_PRECOMPILE_OPTS}"
+    fi
+    if [ "$need_sdk" = 1 ]; then
+	sdk="${XO_SDK_OPTIONS}"
+    fi
+    if [ "$need_ldflags" = 1 ]; then
+	ldflags="${XO_LDFLAGS}"
+    fi
 
-if [ ! -z "${XO_REAL_CC}" ]; then
-    # Explictly set implies the user wants our options
-    COMPILER="${XO_REAL_CC} ${XO_OPTIONS} ${XO_SDK_OPTIONS}"
-elif [ ! -z "${XO_LLVM_CLANG}" ]; then
-    COMPILER="${XO_LLVM_CLANG} ${XO_OPTIONS} ${XO_SDK_OPTIONS}"
-elif [ "@HAVE_GCC@" = "no" ]; then
-    # The compiler libxo was compiled with, which isn't gcc, but is not clang?
-    COMPILER="${XO_CC}"
-else
-    # Assumably gcc
-    COMPILER="@CC@"
-fi
+    if [ ! -z "${XO_DEBUG}" ]; then
+        dbg "need_validate[$need_validate] validate[$validate]"
+ 	dbg "need_lint[$need_lint] lint[$lint]"
+        dbg "need_errors[$need_errors] errors[$errors]"
+        dbg "need_precompile[$need_precompile] precompile[$precompile]"
+        dbg "need_sdk[$need_sdk] sdk[$sdk]"
+        dbg "need_ldflags[$need_ldflags] ldflags[$ldflags]"
+        dbg "need_echo[$need_echo]"
+    fi
+
+    XO_OPTIONS="${syntax} ${validate} ${lint} ${errors} ${precompile} ${sdk}"
+}
 
 find_stage () {
     local stage=ld
@@ -81,9 +170,32 @@ find_stage () {
 }
 
 XO_STAGE=`find_stage "$@"`
+dbg XO_STAGE is ${XO_STAGE}
 
-if [ "${XO_STAGE}" = "ld" ]; then
-    XO_LDFLAGS="-L${XO_LIBDIR} -lxo"
+verb="$1"
+shift
+parse_verb "$verb"
+
+if [ "${XO_STAGE}" != "ld" ]; then
+    ldflags=""
 fi
 
-exec ${COMPILER} ${XO_LDFLAGS} "$@"
+# The plugins need to be able to find libxo_format
+export LD_LIBRARY_PATH=${XO_LIBDIR}:${LD_LIBRARY_PATH}
+
+if [ ! -z "${XO_REAL_CC}" ]; then
+    # Explictly set implies the user wants our options
+    COMPILER="${XO_REAL_CC} ${XO_OPTIONS}"
+elif [ ! -z "${XO_LLVM_CLANG}" ]; then
+    COMPILER="${XO_LLVM_CLANG} ${XO_OPTIONS}"
+else
+    # The compiler libxo was compiled with, which isn't gcc, but is not clang?
+    # Well, they are running "xocc" so they must want our magic....
+    COMPILER="@CC@ ${XO_OPTIONS}"
+fi
+
+if [ "$need_echo" = 1 ]; then
+    set -x
+fi
+
+exec ${COMPILER} ${ldflags} "$@"
