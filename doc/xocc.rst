@@ -5,100 +5,104 @@
 The "xocc" compiler wrapper
 =============================
 
-:ref:`plugins` describes libxo's two optional LLVM/clang plugins,
-`xo_validate` and `xo_precompile`, and how to invoke them by hand with
-`-fplugin=` / `-fpass-plugin=`.  Wiring those flags into another
-project's build by hand means finding the `.so` paths, the SDK
-`-isysroot`, and the `-L/-lxo` link flags, and repeating them on every
-compile and link line.
-
-`xocc` is a small shell wrapper, generated at configure time, that
-already knows all of that.  It stands in for `$CC` in another
-project's build: pass it wherever that project's build system expects
-a compiler, and it runs the real compiler with libxo's plugin flags
-(and, at link time, `-lxo`) already added.
-
-`xocc` is generated from `llvm-plugins/xocc.sh.in` by `configure`
-(via `AC_CONFIG_FILES`) and installed as `${bindir}/xocc` — it only
-exists, and only makes sense, in a libxo tree that was configured with
-the plugins enabled.
-
-Configuring
-------------
-
-`xocc` is only useful if libxo itself was configured with
-`--with-llvm-config`, exactly as described in :ref:`plugins`'s
-"Building the plugins" section::
-
-    ../configure --with-llvm-config=/opt/local/libexec/llvm-19/bin/llvm-config \
-        --prefix ~/work/root
-
-The same `--with-sdk-path=PATH` (or `--with-sdk-path=no`) override
-described there applies here too; `xocc` passes the configured SDK
-path to the real compiler as `-isysroot` whenever it invokes the LLVM
-clang directly.
-
-If `--with-llvm-config` was omitted, the plugins aren't built, `xocc`
-still gets generated and installed, but it won't have real plugin
-`.so` files to point at.  Build and install libxo normally afterward::
-
-    cd build
-    make CFLAGS='-O2'
-    make install
-
-This installs `xocc` into `${prefix}/bin` alongside the rest of
-libxo.
+`xocc` is a small shell wrapper to aid with invoking the C compiler
+with using `libxo`'s LLVM plugins.  `xocc` can be used in place of
+`cc` in another project's build: pass it wherever that project's build
+system expects a compiler, and it will invoke the real C compiler with
+libxo's plugin flags as needed.  `libxo` includes LLVM/clang plugins,
+described in :ref:`xo_plugins` and `xocc` handles some of the details
+needed to invoke them properly.
 
 Invoking "xocc"
 -----------------
 
-Unlike a normal `$CC`, `xocc` requires a verb as its first argument,
-telling it which plugin flags to add:
+`xocc` requires a verb as its first argument that describe and adjusts
+the actions and behaviors requested.  A verb is one or more tokens
+joined with `+` (enabled) or `-` (disabled):
 
-- `full` — add both `xo_validate` and `xo_precompile`.
-- `validate` — add `xo_validate` only.
-- `precompile` — add `xo_precompile` only.
+- **validate** - Add the xo_validate plugin to the compiler
+  invocation.  (default: disabled)
 
-Any other first argument (including a bare compiler flag or a `.c`
-file, which means the verb was left off) is an error, and `xocc`
-refuses to run rather than silently compiling without libxo's flags.
+- **lint** - Add the extra xo_validate style checks
+  (--xo-validate-lint); implies `validate`.  (default: disabled)
 
-The verb is consumed before the rest of the command line is handed to
-the real compiler, so `xocc` can otherwise be dropped in wherever a
-compiler is expected.  The most common use is setting `CC` for a
-`make`-based build::
+- **errors** - Report the syntactic and semantic problems found by
+  xo_validate as errors instead of warnings.  (default: disabled -
+  i.e. warnings by default)
+
+- **precompile** - Add the xo_precompile plugin to the compiler
+  invocation.  (default: disabled)
+
+- **sdk** - Add any configured SDK flags to the compiler invocation.
+  (default: enabled if the operating system needs it)
+
+- **ldflags** - Add any `ld` flags needed for proper libxo
+  compilation.  These are only needed (and passed) at the link stage.
+  (default: enabled)
+
+- **echo** - Echo the command line for the underlying compiler
+  invocation before execution.  (default: disabled).
+
+The token full is a shorthand for turning on validate, lint, and
+precompile together.  It is a provided since this is the typical use
+case::
 
     make CC='xocc full'
 
-The quotes matter — `CC` becomes the two-word command `xocc full`, and
-`make` passes the rest of its usual compiler invocation
-(`-c foo.c -o foo.o`, or the final link line) after it.  To check
-format strings without paying for precompilation, or vice versa, swap
-in the narrower verb::
+Examples
+--------
 
-    make CC='xocc validate'
-    make CC='xocc precompile'
+To turn warnings into hard errors, use `errors`:
 
-`xocc` picks which real compiler to invoke, in order:
+    make CC='xocc full'
 
-1. `$XO_REAL_CC`, if set — an explicit override, e.g. when the
-   project's build otherwise assumes a specific compiler::
+Adding `+errors` will turn warnings into hard errors::n
+
+    make CC='xocc full+errors'
+
+Drop the SDK flag, or drop precompilation, the same way::
+
+    make CC='xocc full-sdk'
+    make CC='xocc full-precompile'
+    make CC='xocc full-sdk+errors'
+
+Or build a verb up from nothing instead of trimming `full` down — these
+two are equivalent::
+
+    make CC='xocc validate+precompile'
+    make CC='xocc full-lint'
+
+`lint` on its own (without `validate`, `errors`, or `precompile`) is a
+quick check rather than a real build: `xocc` adds `-fsyntax-only`
+automatically, since there's nothing to actually compile::
+
+    make CC='xocc lint'
+
+Word and letter forms can be mixed freely, but tokens must be joined
+with `+`/`-` — letters can't just be run together.  `v+l+p` is `full`
+spelled out; `vlp`, with no separators, is an error.
+
+At least one of `validate`, `lint`, `errors`, or `precompile` has to
+end up enabled, or `xocc` refuses to run.  `xocc sdk` on its own, or a
+bare compiler flag or `.c` file (meaning the verb was left off
+entirely), are both errors too, rather than a silent compile without
+libxo's flags.
+
+Add `echo` to see exactly what `xocc` is about to run — often the
+fastest way to check a verb combination did what you expected::
+
+    make CC='xocc full+echo'
+
+`xocc` picks which compiler to invoke, but an explicit compiler can be
+specified using the `XO_REAL_CC`, environment variable:
 
        XO_REAL_CC=/usr/local/bin/clang-19 make CC='xocc full'
 
-2. the LLVM clang that built the plugins (the one found via
-   `--with-llvm-config` at libxo's own configure time), since the
-   plugins are LLVM-version-specific and only reliably load into a
-   matching clang.
-3. otherwise, libxo's own build compiler, with the plugin flags added
-   anyway if that compiler isn't real gcc (gcc has no equivalent
-   plugin support, so if it *is* gcc, the plugin flags are dropped and
-   the plain compiler is used unmodified).
-
 `xocc` also inspects the rest of its arguments to tell a compile stage
-(`-c`, `-E`, or `-S` present) from a link stage.  At the link stage it
-adds `-L${libdir} -lxo` automatically, so linking a program that used
-`xocc` for its compiles needs no extra libxo flags::
+(`-c`, `-E`, or `-S` present) from a link stage.  The `-L${libdir}
+-lxo` from the `ldflags` token is only ever added at the link stage —
+`xocc` suppresses it automatically for a compile-only invocation even
+if `ldflags` is on, since there's nothing to link yet::
 
     xocc full -c myprogram.c -o myprogram.o
     xocc full myprogram.o -o myprogram
