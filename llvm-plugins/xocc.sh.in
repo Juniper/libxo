@@ -34,6 +34,7 @@ dbg () {
 }
 
 parse_verb () {
+    local save_verb="$1"
     local verb=`echo "$1" | sed -e 's:+: :g' -e 's:-: -:g'`
 
     set -- $verb
@@ -45,6 +46,7 @@ parse_verb () {
     need_sdk=1
     need_ldflags=1
     need_echo=0
+    need_dry=0
 
     local msg="see xocc(1) for details"
 
@@ -52,7 +54,7 @@ parse_verb () {
 	dbg "processing [$1]"
 
 	case "$1" in
-	    all)
+	    full)
 		need_validate=1
 		need_lint=1
 		need_precompile=1
@@ -100,8 +102,18 @@ parse_verb () {
 	    -echo)
 		need_echo=0
 		;;
-	    -*|*.c)
+	    dry)
+		need_dry=1
+		;;
+	    -dry)
+		need_dry=0
+		;;
+	    *.c)
 		echo "xocc: missing verb; $msg"
+		exit 1
+		;;
+	    "")
+		echo "xocc: unknown verb '$1'; $msg"
 		exit 1
 		;;
 	    *)
@@ -112,14 +124,14 @@ parse_verb () {
 	shift
     done
 
-    all=`expr $need_lint + $need_errors + $need_validate + $need_precompile`
-    if [ "$all" -eq 0 ]; then
-	echo "xocc: unknown verb '$1'; $msg"
+    jobs=`expr $need_lint + $need_errors + $need_validate + $need_precompile`
+    if [ "$jobs" -eq 0 ]; then
+	echo "xocc: unknown verb '$save_verb'; $msg"
 	exit 1
     fi
 
-    all_but_lint=`expr $need_errors + $need_validate + $need_precompile`
-    if [ "$all_but_lint" -eq 0 ]; then
+    other_than_lint=`expr $need_errors + $need_validate + $need_precompile`
+    if [ "$other_than_lint" -eq 0 -a "$need_lint" -eq 1 ]; then
 	syntax="-fsyntax-only"
     fi
 
@@ -128,9 +140,8 @@ parse_verb () {
 	need_validate=1
     fi
     if [ "$need_errors" != 1 ]; then
-	if [ "$need_validate" = 1 ]; then
-	    errors="-mllvm -xo-validate-errors-as-warnings"
-	fi
+	errors="-mllvm -xo-validate-errors-as-warnings"
+	need_validate=1
     fi
     if [ "$need_validate" = 1 ]; then
 	validate="${XO_VALIDATE_OPTS}"
@@ -196,6 +207,11 @@ fi
 
 if [ "$need_echo" = 1 ]; then
     set -x
+fi
+
+if [ "$need_dry" = 1 ]; then
+    echo ${COMPILER} ${ldflags} "$@"
+    exit 0
 fi
 
 exec ${COMPILER} ${ldflags} "$@"
