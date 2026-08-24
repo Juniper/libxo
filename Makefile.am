@@ -12,7 +12,6 @@ ACLOCAL_AMFLAGS = -I m4
 
 SUBDIRS = \
     bin \
-    filter \
     format \
     libxo \
     xo \
@@ -21,6 +20,10 @@ SUBDIRS = \
     xohtml \
     doc \
     encoder
+
+if LIBXO_NEED_FILTERS
+SUBDIRS += filter
+endif
 
 if HAVE_VALIDATE
 SUBDIRS += llvm-plugins
