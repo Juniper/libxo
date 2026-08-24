@@ -191,7 +191,10 @@ typedef void (*xo_parse_error_func_t)(void *data, const char *fmt, ...);
  * free, silent error reporting).
  */
 /* Flags for xo_parse_t.xp_flags */
-#define XPF_STRICT	(1<<0)	/* Enable lint-style semantic checks */
+#define XPF_STRICT	(1<<0)  /* Enable semantic checks */
+#define XPF_LINT	(1<<1)	/* Enable lint warnings (minor, non-fatal) */
+
+typedef uint32_t xo_parse_flags_t; /* XPF_* */
 
 typedef struct xo_parse_s {
     xo_realloc_func_t xp_realloc;	/* Allocator (NULL → realloc) */
@@ -200,7 +203,7 @@ typedef struct xo_parse_s {
     void *xp_error_data;		/* Opaque data passed to xp_error */
     xo_parse_error_func_t xp_warn;	/* Warning reporter (NULL → silent) */
     void *xp_warn_data;			/* Opaque data passed to xp_warn */
-    unsigned xp_flags;			/* XPF_* flags */
+    xo_parse_flags_t xp_flags;		/* XPF_* flags */
 
     /* Output — filled in by xo_parse_format() */
     xo_field_info_t *xp_fields;	/* Allocated, zero-terminated field array */
@@ -213,6 +216,8 @@ typedef struct xo_parse_s {
     xo_fspec_t *xp_cur_fspec;	   /* Current item in xp_fspecs */
 
 } xo_parse_t;
+
+#define XO_IS_LINT(_p) (((_p)->xp_flags & XPF_LINT) ? TRUE : FALSE)
 
 /* The default printf-style format used when a field has no explicit format. */
 extern const char xo_default_format[];
