@@ -54,7 +54,7 @@ parse_verb () {
 	dbg "processing [$1]"
 
 	case "$1" in
-	    full)
+	    full|all)
 		need_validate=1
 		need_lint=1
 		need_precompile=1
