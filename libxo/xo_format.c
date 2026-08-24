@@ -919,7 +919,7 @@ xo_parse_fields (xo_parse_t *xpp, const char *fmt, size_t fmt_len)
 	    }
 	}
 
-	/* Semantic validation (mirrors xolint checks) — strict mode only */
+	/* Semantic validation in strict mode only; not during xo_emit() */
 	if (!(xpp->xp_flags & XPF_STRICT))
 	    goto next_field;
 
@@ -961,7 +961,7 @@ xo_parse_fields (xo_parse_t *xpp, const char *fmt, size_t fmt_len)
 			continue;
 		    }
 
-		    if (!re.re_under && nc == '_') {
+		    if (XO_IS_LINT(xpp) && !re.re_under && nc == '_') {
 			xo_parse_warning(xpp,
 			       "use hyphens, not underscores, "
 				       "in field name: '%s'",
@@ -969,34 +969,16 @@ xo_parse_fields (xo_parse_t *xpp, const char *fmt, size_t fmt_len)
 			re.re_under = 1;
 		    }
 
-		    if (!re.re_upper && isupper(nc)) {
+		    if (XO_IS_LINT(xpp) && !re.re_upper && isupper(nc)) {
 			xo_parse_warning(xpp,
 			       "field name should be lower case: '%s'",
 					 xo_printable2(str, slen, TRUE));
 			re.re_upper = 1;
 		    }
-
-		    /*
-		     * XML element names are UTF8 values.  Looking at
-		     * them one character at a time won't work.
-		     */
-#if 0
-		    /*
-		     * Underscores and upper case are reported above,
-		     * so skip them here
-		     */
-		    if (!re.re_invalid && !isdigit((int) nc)
-			    && !(islower((int) nc) || isupper((int) nc))
- 			    && nc != '-' && nc != '_') {
-			xo_parse_warning(xpp,
-			       "field name contains invalid character: '%s'",
-					 xo_printable2(str, slen, TRUE));
-			re.re_invalid = 1;
-		    }
-#endif /* 0 */
 		}
 
-		if (!re.re_percent && nlen < XO_LINT_MIN_NAME) {
+		if (XO_IS_LINT(xpp) && !re.re_percent
+			    && nlen < XO_LINT_MIN_NAME) {
 		    xo_parse_warning(xpp,
 				     "field name should not be less than "
 				     "%d characters long: '%s'",
