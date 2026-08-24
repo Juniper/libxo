@@ -30,6 +30,10 @@ plugin changes libxo's public behavior or output — `xo_precompile`
 specifically only ever changes *when* a format string is parsed, never
 *what* it means.
 
+libxo includes `xocc`, a compiler wrapper that already knows
+these paths (and the link-time `-lxo` flags); see :ref:`xocc` for
+using it instead of setting these flags by hand.
+
 Building the plugins
 ---------------------
 
@@ -90,27 +94,51 @@ one it checks:
    (following the same length-modifier rules as `printf`, e.g. `%ld`
    expects `long`, `%zu` expects `size_t`) is compared against the
    actual argument's type, after the usual varargs promotions.
-4. **Style** — a number of `xolint`-style warnings about field naming
-   conventions (upper case, underscores, leading digits, names that are
-   too short, anchors with conflicting width sources, and so on).
+4. **Style** — a number of `xolint`-style checks on field naming and
+   anchor usage.  Leading digits, stray `%` characters, and anchor
+   width/format mismatches are always checked; underscores (instead of
+   hyphens), upper-case letters, and names shorter than the minimum
+   length are checked only when lint mode is enabled (see below).
 
 Diagnostics are reported through clang's normal diagnostic engine, so
-they appear exactly like any other compiler warning, with source
+they appear exactly like any other compiler diagnostic, with source
 location and a caret pointing at the offending call::
 
-    xo_validate_demo.c:22:13: warning: libxo: format expects 2 argument(s) but 1 provided
+    xo_validate_demo.c:22:13: error: libxo: format expects 2 argument(s) but 1 provided
        22 |     xo_emit("{:name/%s} {:age/%d}\n", "bob");
           |             ^
 
-By default these diagnostics are warnings, not errors, so a build with
-the plugin loaded does not fail because of them (unless the surrounding
-build otherwise treats warnings as errors, e.g. `-Werror`).  This is a
-deliberate choice: syntax/type problems in a format string are almost
-always real bugs worth fixing, but a checker with corner cases false
-positives shouldn't be able to break an otherwise-correct build.  The
-`-mllvm -xo-validate-errors-as-warnings` flag exists but is a no-op today
-since diagnostics are already warnings; it is present for future use if
-a hard-error mode is added.
+Tuning diagnostics
+~~~~~~~~~~~~~~~~~~~~
+
+Two `-mllvm` flags control how `xo_validate` reports problems:
+
+- **`-mllvm -xo-validate-errors-as-warnings`** — by default, syntax,
+  argument count, and argument type problems (checks 1-3 above) are
+  reported as **errors**, so a build with the plugin loaded fails on
+  them.  This is deliberate: these are almost always real bugs, and a
+  checker that only ever warns is too easy to ignore.  This flag
+  downgrades them to warnings instead, which is useful when first
+  introducing the plugin to a codebase with an existing backlog of
+  violations, or to keep a build green while an individual false
+  positive gets sorted out upstream.  Style diagnostics (check 4) are
+  always warnings and are unaffected by this flag.
+
+- **`-mllvm -xo-validate-lint`** — enables the additional cosmetic
+  naming checks described under **Style** above (underscores, upper
+  case, short names).  These are off by default since they're closer
+  to style preference than correctness; the always-on style checks
+  (leading digits, anchor mismatches) still run either way.
+
+Both flags can be combined with any of the `-fplugin=` invocations
+shown below, e.g.::
+
+    clang -c \
+        -fplugin=/path/to/xo_validate.so \
+        -mllvm -xo-validate-errors-as-warnings \
+        -mllvm -xo-validate-lint \
+        -I/path/to/xo/include \
+        myprogram.c -o myprogram.o
 
 Invoking `xo_validate`
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -231,10 +259,6 @@ For a project already building against libxo, add the plugin flags to
 `CFLAGS`::
 
     make CFLAGS='-O2 -fplugin=/path/to/xo_validate.so -fpass-plugin=/path/to/xo_precompile.so'
-
-libxo also installs `xocc`, a compiler wrapper that already knows
-these paths (and the link-time `-lxo` flags); see :ref:`xocc` for
-using it instead of setting these flags by hand.
 
 Caveats and known limitations
 --------------------------------
