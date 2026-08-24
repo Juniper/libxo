@@ -39,7 +39,7 @@ endif
 CLANG_CMD = ${LLVM_CLANG} \
     ${CFLAGS} \
     -fplugin=${VALIDATE_PLUGIN_PATH} \
-    -mllvm -xo-validate-errors-as-warnings \
+    -mllvm -xo-validate-errors-as-warnings -mllvm -xo-validate-lint \
     -I${INCLUDEDIR} \
     ${SYSROOT_FLAG} \
     -fsyntax-only
