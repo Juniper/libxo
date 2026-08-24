@@ -53,7 +53,9 @@ if HAVE_VALIDATE
 
 man1_files = xocc.1
 
-man_MANS = ${man1_files}
+man7_files = xo_plugins.7
+
+man_MANS = ${man1_files} ${man7_files}
 
 all: ${VALIDATE_PLUGIN} ${PRECOMPILE_PLUGIN}
 
