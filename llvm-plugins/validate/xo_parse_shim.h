@@ -23,6 +23,8 @@
 extern "C" {
 #endif
 
+#include "xo_format.h"
+
 /*
  * Error callback: receives a fully-formatted message (the va_list has
  * already been consumed by the shim).
@@ -52,12 +54,15 @@ typedef void (*xo_shim_arg_cb_t)(void *data, const char *fmt, unsigned fmtlen);
  * Parse fmt, calling error_cb for hard errors, warn_cb for style warnings
  * (e.g. "use lower case"), and arg_cb once per expected va_arg.
  * warn_cb / warn_data may be NULL, in which case warnings are silently dropped.
+ * lint is non-zero to enable the minor, non-fatal lint-style warnings
+ * (XPF_LINT); those are reported via warn_cb like any other warning.
  * Returns 0 on success, -1 on parse error.
  */
 int xo_shim_parse_args(const char *fmt,
                         xo_shim_error_t error_cb, void *error_data,
                         xo_shim_error_t warn_cb,  void *warn_data,
-                        xo_shim_arg_cb_t arg_cb,  void *arg_data);
+                        xo_shim_arg_cb_t arg_cb,  void *arg_data,
+                        xo_parse_flags_t flags);
 
 /*
  * Offset-based field record: mirrors xo_field_info_t but uses only plain C
