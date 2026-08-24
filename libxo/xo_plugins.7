@@ -57,6 +57,15 @@ specifically only ever changes
 a format string is parsed, never
 .Em what
 it means.
+.Pp
+.Nm libxo
+includes
+.Xr xocc 1 ,
+a compiler wrapper that already knows these paths (and the
+link-time "-lxo" flags).
+See 
+.Xr xocc 1
+for using it instead of setting these flags by hand.
 .Sh BUILDING THE PLUGINS
 The plugins require LLVM/clang development files (specifically
 .Ic llvm\-config
@@ -176,32 +185,66 @@ varargs promotions.
 .Sy Style
 \(en a number of
 .Ic xolint Ns \-style
-warnings about field naming conventions (upper case, underscores,
-leading digits, names that are too short, anchors with conflicting
-width sources, and so on).
+checks on field naming and anchor usage.
+Leading digits, stray
+.Sq %
+characters, and anchor width/format mismatches are always checked;
+underscores (instead of hyphens), upper-case letters, and names
+shorter than the minimum length are checked only when lint mode is
+enabled
+.Pq see below .
 .El
 .Pp
 Diagnostics are reported through clang's normal diagnostic engine, so
-they appear exactly like any other compiler warning, with source
+they appear exactly like any other compiler diagnostic, with source
 location and a caret pointing at the offending call:
 .Bd -literal -offset indent
-xo_validate_demo.c:22:13: warning: libxo: format expects 2 argument(s) but 1 provided
+xo_validate_demo.c:22:13: error: libxo: format expects 2 argument(s) but 1 provided
    22 |     xo_emit("{:name/%s} {:age/%d}\en", "bob");
       |             ^
 .Ed
+.Ss Tuning diagnostics
+Two
+.Fl mllvm
+flags control how
+.Nm xo_validate
+reports problems:
+.Bl -tag -width "xo-validate-errors-as-warnings"
+.It Fl mllvm Fl xo\-validate\-errors\-as\-warnings
+By default, syntax, argument count, and argument type problems
+.Pq checks 1\(en3 above
+are reported as
+.Em errors ,
+so a build with the plugin loaded fails on them.
+This is deliberate: these are almost always real bugs, and a checker
+that only ever warns is too easy to ignore.
+This flag downgrades them to warnings instead, which is useful when
+first introducing the plugin to a codebase with an existing backlog of
+violations, or to keep a build green while an individual false
+positive gets sorted out upstream.
+Style diagnostics
+.Pq check 4
+are always warnings and are unaffected by this flag.
+.It Fl mllvm Fl xo\-validate\-lint
+Enables the additional cosmetic naming checks described under
+.Sy Style
+above (underscores, upper case, short names).
+These are off by default since they're closer to style preference
+than correctness; the always-on style checks (leading digits, anchor
+mismatches) still run either way.
+.El
 .Pp
-By default these diagnostics are warnings, not errors, so a build with
-the plugin loaded does not fail because of them (unless the
-surrounding build otherwise treats warnings as errors, e.g.
-.Fl Werror ) .
-This is a deliberate choice: syntax/type problems in a format string
-are almost always real bugs worth fixing, but a checker with corner
-case false positives shouldn't be able to break an otherwise-correct
-build.
-The
-.Fl mllvm Fl xo\-validate\-errors\-as\-warnings
-flag exists but is a no-op today since diagnostics are already
-warnings; it is present for future use if a hard-error mode is added.
+Both flags can be combined with any of the
+.Fl fplugin=
+invocations shown below, e.g.:
+.Bd -literal -offset indent
+clang \-c \e
+    \-fplugin=/path/to/xo_validate.so \e
+    \-mllvm \-xo\-validate\-errors\-as\-warnings \e
+    \-mllvm \-xo\-validate\-lint \e
+    \-I/path/to/xo/include \e
+    myprogram.c \-o myprogram.o
+.Ed
 .Ss Invoking xo_validate
 Invoke the validate plugin using
 .Fl fplugin= ,
@@ -379,26 +422,6 @@ add the plugin flags to
 make CFLAGS='\-O2 \-fplugin=/path/to/xo_validate.so \-fpass\-plugin=/path/to/xo_precompile.so'
 .Ed
 .Pp
-For a project that would rather not edit its own build files, the
-.Ic xocc
-wrapper script installed alongside
-.Nm libxo
-invokes the real compiler with both plugins already wired in, adding
-the
-.Fl L
-and
-.Fl lxo
-flags automatically at the link stage.
-It requires a verb
-.Pq Cm full , Cm validate , "or" Cm precompile
-as its first argument:
-.Bd -literal -offset indent
-make CC='xocc full'
-.Ed
-.Pp
-See
-.Xr xocc 1
-for the full set of verbs and invocation options.
 .Sh CAVEATS AND KNOWN LIMITATIONS
 .Bl -bullet
 .It
@@ -448,6 +471,7 @@ run time and fall back to normal parsing rather than misinterpreting
 it.
 .El
 .Sh SEE ALSO
+.Xr xocc 1 ,
 .Xr libxo 3 ,
 .Xr xo_emit 3 ,
 .Xr xo_options 7
