@@ -52,6 +52,11 @@ static llvm::cl::opt<bool> ErrorsAsWarnings(
     llvm::cl::desc("Treat xo_validate errors as warnings (do not fail compilation)"),
     llvm::cl::init(false));
 
+static llvm::cl::opt<bool> LintWarnings(
+    "xo-validate-lint",
+    llvm::cl::desc("xo_validate should give lint errors (minor, non-fatal)"),
+    llvm::cl::init(false));
+
 #include "xo_parse_shim.h"
 
 using namespace clang;
@@ -489,10 +494,15 @@ public:
         DiagCb dc_warn { &Diags, WarnDiagID,   SL->getBeginLoc() };
         ArgCollector ac;
 
+	xo_parse_flags_t flags = XPF_STRICT;
+	if (LintWarnings)
+	    flags |= XPF_LINT;
+
         int rc = xo_shim_parse_args(fmt.c_str(),
-                                     emit_diag, &dc_err,
-                                     emit_diag, &dc_warn,
-                                     ArgCollector::callback, &ac);
+				    emit_diag, &dc_err,
+				    emit_diag, &dc_warn,
+				    ArgCollector::callback, &ac,
+				    flags);
         if (rc < 0)
             return true;    /* parse error already reported */
 
