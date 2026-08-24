@@ -152,11 +152,11 @@ xo_shim_parse (const char *fmt, xo_shim_error_t error, void *data)
 {
     struct xo_shim_state ss = { error, data };
     xo_parse_t xpp = { 0 };
-    xpp.xp_error      = shim_error_cb;
+    xpp.xp_error = shim_error_cb;
     xpp.xp_error_data = &ss;
-    xpp.xp_warn       = shim_warn_cb;
+    xpp.xp_warn = shim_warn_cb;
     xpp.xp_warn_data = &ss;
-    xpp.xp_flags      = XPF_STRICT;
+    xpp.xp_flags = XPF_STRICT;
 
     int rc = xo_parse_format(&xpp, fmt);
     xo_parse_release(&xpp);
@@ -309,7 +309,8 @@ int
 xo_shim_parse_args (const char *fmt,
                      xo_shim_error_t error_cb, void *error_data,
                      xo_shim_error_t warn_cb,  void *warn_data,
-                     xo_shim_arg_cb_t arg_cb,  void *arg_data)
+                     xo_shim_arg_cb_t arg_cb,  void *arg_data,
+                     xo_parse_flags_t flags)
 {
     struct xo_shim_state ss_err  = { error_cb, error_data };
     struct xo_shim_state ss_warn = { warn_cb, warn_data };
@@ -318,7 +319,7 @@ xo_shim_parse_args (const char *fmt,
     xpp.xp_error_data = &ss_err;
     xpp.xp_warn       = shim_warn_cb;
     xpp.xp_warn_data  = &ss_warn;
-    xpp.xp_flags      = XPF_STRICT;
+    xpp.xp_flags      = flags;
 
     if (xo_parse_format(&xpp, fmt) < 0) {
         xo_parse_release(&xpp);
