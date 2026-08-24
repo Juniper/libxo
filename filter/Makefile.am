@@ -40,6 +40,10 @@ noinst_HEADERS = \
      xo_filter_ops.h \
      xo_xparse.h
 
+man7_files = xo_filter.7
+
+man_MANS = ${man7_files}
+
 pkglibdir = ${XO_FILTERDIR}
 
 UGLY_NAME = xo_filter.lib
