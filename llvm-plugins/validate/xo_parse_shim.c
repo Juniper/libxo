@@ -93,9 +93,10 @@ _Static_assert(offsetof(xo_field_info_t, xfi_num_fspecs) == 40 + sizeof(void *),
  *   offset 22: uint16_t xf_start
  *   offset 24: uint16_t xf_len
  *   offset 26: uint16_t xf_prefix_len
- *   total: 28 bytes
+ *   offset 28: uint16_t xf_num_bits, padding
+ *   total: 30 bytes
  */
-_Static_assert(sizeof(xo_fspec_t) == 28,
+_Static_assert(sizeof(xo_fspec_t) == 30,
 	       "xo_fspec_t size mismatch; update xo_precompile.cc FspecTy");
 _Static_assert(offsetof(xo_fspec_t, xf_fc)           ==  0, "xf_fc offset");
 _Static_assert(offsetof(xo_fspec_t, xf_lflag)        ==  1, "xf_lflag offset");
@@ -115,6 +116,7 @@ _Static_assert(offsetof(xo_fspec_t, xf_width)        == 16, "xf_width offset");
 _Static_assert(offsetof(xo_fspec_t, xf_start)        == 22, "xf_start offset");
 _Static_assert(offsetof(xo_fspec_t, xf_len)          == 24, "xf_len offset");
 _Static_assert(offsetof(xo_fspec_t, xf_prefix_len)   == 26, "xf_prefix_len offset");
+_Static_assert(offsetof(xo_fspec_t, xf_num_bits  )   == 28, "xf_num_bits offset");
 
 struct xo_shim_state {
     xo_shim_error_t error;
@@ -486,6 +488,8 @@ xo_shim_parse_fields (const char *fmt,
             sf.xsp_start        = xfp->xf_start;
             sf.xsp_len          = xfp->xf_len;
             sf.xsp_prefix_len   = xfp->xf_prefix_len;
+            sf.xsp_num_bits     = xfp->xf_num_bits;
+            sf.xsp_padding      = xfp->xf_padding;
             fspec_cb(fspec_data, &sf);
         }
     }
