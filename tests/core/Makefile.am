@@ -21,6 +21,19 @@ AM_CFLAGS = \
     -I${top_srcdir}/libxo \
     ${WARNINGS}
 
+if LIBXO_TEXT_ONLY
+TEST_CASES_COLOR =
+else
+TEST_CASES_COLOR = \
+test_10.c \
+test_11.c \
+test_12.c
+
+test_10_test_SOURCES = test_10.c
+test_11_test_SOURCES = test_11.c
+test_12_test_SOURCES = test_12.c
+endif
+
 # Ick: maintained by hand!
 TEST_CASES = \
 test_01.c \
@@ -32,9 +45,7 @@ test_06.c \
 test_07.c \
 test_08.c \
 test_09.c \
-test_10.c \
-test_11.c \
-test_12.c \
+${TEST_CASES_COLOR} \
 test_13.c \
 test_14.c
 
@@ -47,9 +58,6 @@ test_06_test_SOURCES = test_06.c
 test_07_test_SOURCES = test_07.c
 test_08_test_SOURCES = test_08.c
 test_09_test_SOURCES = test_09.c
-test_10_test_SOURCES = test_10.c
-test_11_test_SOURCES = test_11.c
-test_12_test_SOURCES = test_12.c
 test_13_test_SOURCES = test_13.c
 test_14_test_SOURCES = test_14.c
 
@@ -108,11 +116,16 @@ EXTRA_DIST = \
 # Test runner
 # ---------------------------------------------------------------------------
 
-RUN_TESTS_SH = ${srcdir}/../run-tests.sh
-RUN_TESTS_CMD = ${BASH} ${RUN_TESTS_SH} -d ${srcdir}
-
 # Standard formats; per-test extras live in test_NN.fmts sidecar files.
+if LIBXO_TEXT_ONLY
+TEST_FORMATS = T
+else
 TEST_FORMATS = T XP JP JPu HP X J H HIPx E=warn,encoder=test
+EXTRA_FMTS = -X
+endif
+
+RUN_TESTS_SH = ${srcdir}/../run-tests.sh
+RUN_TESTS_CMD = ${BASH} ${RUN_TESTS_SH} -d ${srcdir} ${EXTRA_FMTS}
 
 all:
 
