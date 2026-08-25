@@ -265,6 +265,8 @@ const char *
 xo_parse_format_spec (xo_parse_t *xpp, xo_fspec_t *xfp,
 		      const char *cp, const char *ep, const char *fmt)
 {
+    const char *start = cp;
+
     for (cp += 1; cp < ep; cp++) {
 	if (*cp == 'l')
 	    xfp->xf_lflag += 1;
@@ -292,7 +294,32 @@ xo_parse_format_spec (xo_parse_t *xpp, xo_fspec_t *xfp,
 	else if (*cp == '#')
 	    xfp->xf_alt = 1;
 
-	else if (isdigit((int) *cp)) {
+	else if (*cp == '!') {
+	    /* "%!NNd" is a NN-bit signed value */
+	    const char *sp = cp + 1;
+	    const char *np = sp;
+	    uint64_t num_bits = 0;
+
+	    for (; np < ep; np++) {
+		if (!isdigit((int) *np))
+		    break;
+		num_bits = num_bits * 10 + (*np - '0');
+	    }
+
+	    cp += np - sp;	/* Move pointer along */
+
+	    /* Report errors, which leave xf_num_bits as 0, ignoring the "!" */
+	    if (np == sp)
+		xo_parse_error(xpp, "missing integer size: '%s'",
+			       xo_printable2(start, ep - start, TRUE));
+	    else if (num_bits != 8 && num_bits != 16
+		     && num_bits != 32 && num_bits != 64)
+		xo_parse_error(xpp, "invalid integer size: '%s'",
+			       xo_printable2(start, ep - start, TRUE));
+	    else
+		xfp->xf_num_bits = num_bits;
+
+	} else if (isdigit((int) *cp)) {
 	    if (xfp->xf_leading_zero < 0)
 		xfp->xf_leading_zero = (*cp == '0');
 	    xo_bump_width(xfp, *cp - '0');
