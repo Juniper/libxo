@@ -314,13 +314,15 @@ do_run_bins () {
         done
 
         # Per-test extra formats from sidecar file (NAME=OPTS lines, # comments ok)
-        fmts_file="${SRCDIR}/${base}.fmts"
-        if [ -f "$fmts_file" ]; then
-            while IFS= read -r spec; do
-                case $spec in '#'*|'') continue ;; esac
-                do_run_bin_one "$binary" "$base" "$spec"
-            done < "$fmts_file"
-        fi
+        if [ ! -z "${EXTRA_FMTS}" ]; then
+            fmts_file="${SRCDIR}/${base}.fmts"
+            if [ -f "$fmts_file" ]; then
+		while IFS= read -r spec; do
+                    case $spec in '#'*|'') continue ;; esac
+                    do_run_bin_one "$binary" "$base" "$spec"
+		done < "$fmts_file"
+            fi
+	fi
     done
 }
 
@@ -374,6 +376,7 @@ do
     -a) BIN_EXTRA_ARGS=$2; shift;;
     -T) TEST_FORMATS=$2; shift;;
     -v) S2O=cat;;
+    -X) EXTRA_FMTS=1;;
     -*) echo "unknown option" >&2; exit;;
     *) break;;
     esac
