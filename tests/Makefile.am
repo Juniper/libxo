@@ -38,3 +38,6 @@ valgrind:
 	@echo '## Running the regression tests under Valgrind'
 	@echo '## Go get a cup of coffee it is gonna take a while ...'
 	${MAKE} VALGRIND='valgrind -q' tests
+
+EXTRA_DIST = \
+	run-tests.sh
