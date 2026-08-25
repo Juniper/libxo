@@ -36,4 +36,19 @@
 ../../../tests/core/test_01.c:300:13: warning: libxo: use hyphens, not underscores, in field name: '{e:mode_octal/%03o}'
   300 |     xo_emit("{t:mode/%s}{e:mode_octal/%03o} {t:links/%*u} "
       |             ^
-16 warnings generated.
+../../../tests/core/test_01.c:317:13: warning: libxo: field name should not be less than 3 characters long: '{:i8/%!8d}'
+  317 |     xo_emit("i64 {:i64/%!64d}, i32 {:i32/%!32d}, i16 {:i16/%!16d}, "
+      |             ^
+../../../tests/core/test_01.c:321:13: warning: libxo: field name should not be less than 3 characters long: '{:u8/%!8u}'
+  321 |     xo_emit("u64 {:u64/%!64u}, u32 {:u32/%!32u}, u16 {:u16/%!16u}, "
+      |             ^
+../../../tests/core/test_01.c:325:13: warning: libxo: invalid integer size: '{%!0u}'
+  325 |     xo_emit("u64 {:u64/%8.8!64u}, u32 {:u32/%*.*!32u}, u64 {:u64-hex/%#!64x}, "
+      |             ^
+../../../tests/core/test_01.c:325:13: warning: libxo: field name should not be less than 3 characters long: '{:u0/%!0u}'
+../../../tests/core/test_01.c:329:13: warning: libxo: invalid integer size: '{%!31u}'
+  329 |     xo_emit("u31 {:u31/%!31u}, u33 {:u33/%!33u}, u32s {:u32s/%!32s}, "
+      |             ^
+../../../tests/core/test_01.c:329:13: warning: libxo: invalid integer size: '{%!33u}'
+../../../tests/core/test_01.c:329:13: warning: libxo: missing integer size: '{%!u}'
+23 warnings generated.
