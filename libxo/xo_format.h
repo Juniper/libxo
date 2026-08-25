@@ -95,14 +95,17 @@ typedef struct xo_fspec_s {
     uint8_t xf_lflag;	/* 'l' (long) */
     uint8_t xf_hflag;	/* 'h' (half) */
     uint8_t xf_jflag;	/* 'j' (intmax_t) */
+
     uint8_t xf_tflag;	/* 't' (ptrdiff_t) */
     uint8_t xf_zflag;	/* 'z' (size_t) */
     uint8_t xf_qflag;	/* 'q' (quad_t) */
     uint8_t xf_seen_minus; /* Seen a minus */
+
     int8_t xf_leading_zero;	/* Seen a leading zero (zero fill)  */
     uint8_t xf_dots;		/* Seen one or more '.'s */
     uint8_t xf_alt;	/* "alternate form" ('#') flag */
     uint8_t xf_stars;		/* Seen one or more '*'s */
+
     uint8_t xf_star[XF_WIDTH_NUM]; /* Seen one or more '*'s */
 
     /*
@@ -122,6 +125,8 @@ typedef struct xo_fspec_s {
      * (itself treated as a pseudo-'%') if there is.
      */
     uint16_t xf_prefix_len;
+    uint8_t xf_num_bits;  /* '!' Number of bits in a number (signed/unsigned) */
+    uint8_t xf_padding;
 } xo_fspec_t;
 
 /*
