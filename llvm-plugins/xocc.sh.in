@@ -51,6 +51,11 @@ self_help () {
 }
 
 parse_verb () {
+    if [ -z "$1" ]; then
+	self_help
+	exit 1
+    fi
+
     local save_verb="$1"
     local verb=`echo "$1" | sed -e 's:+: :g' -e 's:-: -:g'`
 
@@ -146,7 +151,7 @@ parse_verb () {
 		exit 1
 		;;
 	    "")
-		echo "xocc: unknown verb '$1'; $msg"
+		self_help
 		exit 1
 		;;
 	    *)
