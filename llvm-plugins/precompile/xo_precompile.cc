@@ -175,14 +175,14 @@ struct XoPrecompile : PassInfoMixin<XoPrecompile> {
          * as a safe "re-parse at runtime" signal.
          */
         StructType *FieldTy = StructType::get(Ctx, {
-            i64,                                /* xfi_flags */
-            i32,                                /* xfi_ftype */
-            i16, i16, i16, i16, i16,           /* start, content, format, encoding, next */
-            i16, i16, i16, i16,                 /* len, clen, flen, elen */
-            i32, i32,                           /* fnum, renum */
-            PtrTy,                              /* xfi_fspecs */
-            i16,                                 /* xfi_num_fspecs */
-            ArrayType::get(i16, 3)               /* xfi_padding[3] */
+            i64,                             /* xfi_flags */
+            i32,                             /* xfi_ftype */
+            i16, i16, i16, i16, i16,         /* start, content, format, encoding, next */
+            i16, i16, i16, i16,              /* len, clen, flen, elen */
+            i32, i32,                        /* fnum, renum */
+            PtrTy,                           /* xfi_fspecs */
+            i16,                             /* xfi_num_fspecs */
+            ArrayType::get(i16, 3)           /* xfi_padding[3] */
         });
 
         Type *i8 = Type::getInt8Ty(Ctx);
@@ -193,13 +193,14 @@ struct XoPrecompile : PassInfoMixin<XoPrecompile> {
          * xo_parse_shim.c; keep the two in sync.
          */
         StructType *FspecTy = StructType::get(Ctx, {
-            i8, i8, i8, i8, i8, i8, i8, i8,     /* fc,lflag,hflag,jflag,tflag,zflag,qflag,seen_minus */
-            i8,                                  /* leading_zero (signed) */
-            i8, i8, i8,                          /* dots, alt, stars */
-            ArrayType::get(i8, 3),                /* xf_star[3] */
-            i8,                                   /* at_stars */
-            ArrayType::get(i16, 3),               /* xf_width[3] (signed) */
-            i16, i16, i16                        /* start, len, prefix_len */
+            i8, i8, i8, i8, i8, i8, i8, i8,  /* fc,lflag,hflag,jflag,tflag,zflag,qflag,seen_minus */
+            i8,                              /* leading_zero (signed) */
+            i8, i8, i8,                      /* dots, alt, stars */
+            ArrayType::get(i8, 3),           /* xf_star[3] */
+            i8,                              /* at_stars */
+            ArrayType::get(i16, 3),          /* xf_width[3] (signed) */
+            i16, i16, i16,                   /* start, len, prefix_len */
+	    i8, i8, 			     /* num_bits, padding */
         });
 
         /* StructType matching xo_format_cache_t: { version, num_fields, *fields } */
@@ -313,6 +314,8 @@ struct XoPrecompile : PassInfoMixin<XoPrecompile> {
                         ConstantInt::get(i16, sf.xsp_start),
                         ConstantInt::get(i16, sf.xsp_len),
                         ConstantInt::get(i16, sf.xsp_prefix_len),
+                        ConstantInt::get(i8, sf.xsp_num_bits),
+                        ConstantInt::get(i8, sf.xsp_padding),
                     }));
                 }
 
