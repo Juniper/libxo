@@ -500,3 +500,43 @@
   <div class="text">...</div>
   <div class="data" data-tag="three">3</div>
 </div>
+<div class="line">
+  <div class="text">i64 </div>
+  <div class="data" data-tag="i64">5</div>
+  <div class="text">, i32 </div>
+  <div class="data" data-tag="i32">5</div>
+  <div class="text">, i16 </div>
+  <div class="data" data-tag="i16">5</div>
+  <div class="text">, i8 </div>
+  <div class="data" data-tag="i8">5</div>
+</div>
+<div class="line">
+  <div class="text">u64 </div>
+  <div class="data" data-tag="u64">5</div>
+  <div class="text">, u32 </div>
+  <div class="data" data-tag="u32">5</div>
+  <div class="text">, u16 </div>
+  <div class="data" data-tag="u16">5</div>
+  <div class="text">, u8 </div>
+  <div class="data" data-tag="u8">5</div>
+</div>
+<div class="line">
+  <div class="text">u64 </div>
+  <div class="data" data-tag="u64">00000005</div>
+  <div class="text">, u32 </div>
+  <div class="data" data-tag="u32">   !32u</div>
+  <div class="text">, u64 </div>
+  <div class="data" data-tag="u64-hex">0x5</div>
+  <div class="text">, u0 </div>
+  <div class="data" data-tag="u0">5</div>
+</div>
+<div class="line">
+  <div class="text">u31 </div>
+  <div class="data" data-tag="u31">5</div>
+  <div class="text">, u33 </div>
+  <div class="data" data-tag="u33">5</div>
+  <div class="text">, u32s </div>
+  <div class="data" data-tag="u32s">five_u32</div>
+  <div class="text">, unothing </div>
+  <div class="data" data-tag="unothing">5</div>
+</div>
