@@ -10,6 +10,8 @@
 # "xocc validate" and "xocc precompile" are also supported.
 #
 
+SELF="$0"
+
 if [ "$1" = "debug" ]; then
     set -x
     XO_DEBUG=1
@@ -33,6 +35,21 @@ dbg () {
     fi
 }
 
+self_help () {
+    echo "xocc: helper script for compiling with libxo(7)"
+    echo " "
+    echo "  usage:"
+    echo "    xocc <verbs> <compiler-options-and-arguments>"
+    echo " "
+
+    grep "#\#\#" $SELF | sed -e 's:^.*#\#\# ::' -e 's/: /@/' \
+	| awk -F@ '{ printf("        %-16s%s\n", $1, $2); }'
+
+    echo " "
+    echo "  verbs can be combine using '+' or removed using '-'"
+    echo "     e.g. xocc full+errors+sdk-ldflags ..."
+}
+
 parse_verb () {
     local save_verb="$1"
     local verb=`echo "$1" | sed -e 's:+: :g' -e 's:-: -:g'`
@@ -54,60 +71,76 @@ parse_verb () {
 	dbg "processing [$1]"
 
 	case "$1" in
+	    help|-help)
+		self_help
+		exit 0
+		;;
+
 	    full|all)
+		### full: compile with both plugins
 		need_validate=1
 		need_lint=1
 		need_precompile=1
 		;;
 
 	    v|validate)
+		### validate: use plugin to find format string issues
 		need_validate=1
 		;;
 	    -v|-validate)
 		need_validate=0
 		;;
 	    l|lint)
+		### lint: add flags to validate that report additional issues
 		need_lint=1
 		;;
 	    -l|-lint)
 		need_lint=0
 		;;
 	    e|errors)
+		### errors: turn warnings into errors (ala -Werror)
 		need_errors=1
 		;;
 	    -e|-errors)
 		need_errors=0
 		;;
 	    p|precompile)
+		### precompile: use plugin to precompile format strings
 		need_precompile=1
 		;;
 	    -p|-precompile)
 		need_precompile=0
 		;;
 	    sdk)
+		### sdk: add any compile-time SDK flags needed (MacOS)
 		need_sdk=1
 		;;
 	    -sdk)
 		need_sdk=0
 		;;
 	    ldflags)
+		### ldflags: add ld(1) flags as needed for libxo
 		need_ldflags=1
 		;;
 	    -ldflags)
 		need_ldflags=0
 		;;
 	    echo)
+		### echo: echo the final command line before executing it
 		need_echo=1
 		;;
 	    -echo)
 		need_echo=0
 		;;
 	    dry)
+		### dry: report the command line without executing it
 		need_dry=1
 		;;
 	    -dry)
 		need_dry=0
 		;;
+	    -)
+		;; # ignore
 	    *.c)
 		echo "xocc: missing verb; $msg"
 		exit 1
