@@ -309,6 +309,27 @@ main (int argc, char **argv)
     buf[0] = 'X';
     xo_emitr(buf, 1, 2, 3);
 
+    uint64_t five_u64 = 5; int64_t five_i64 = 5;
+    uint32_t five_u32 = 5; int32_t five_i32 = 5;
+    uint16_t five_u16 = 5; int16_t five_i16 = 5;
+    uint8_t five_u8 = 5; int8_t five_i8 = 5;
+
+    xo_emit("i64 {:i64/%!64d}, i32 {:i32/%!32d}, i16 {:i16/%!16d}, "
+	    "i8 {:i8/%!8d}\n",
+	    five_i64, five_i32, five_i16, five_i8);
+
+    xo_emit("u64 {:u64/%!64u}, u32 {:u32/%!32u}, u16 {:u16/%!16u}, "
+	    "u8 {:u8/%!8u}\n",
+	    five_u64, five_u32, five_u16, five_u8);
+
+    xo_emit("u64 {:u64/%8.8!64u}, u32 {:u32/%*.*!32u}, u64 {:u64-hex/%#!64x}, "
+	    "u0 {:u0/%!0u}\n",
+	    five_u64, 4, 4, five_u32, five_u64, five_u32);
+
+    xo_emit("u31 {:u31/%!31u}, u33 {:u33/%!33u}, u32s {:u32s/%!32s}, "
+	    "unothing {:unothing/%!u}\n",
+	    five_u32, five_u32, "five_u32", five_u32);
+
     if (opt_top_count && --opt_top_count > 0)
 	goto top;
 
