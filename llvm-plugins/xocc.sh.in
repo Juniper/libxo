@@ -43,7 +43,7 @@ self_help () {
     echo " "
 
     grep "#\#\#" $SELF | sed -e 's:^.*#\#\# ::' -e 's/: /@/' \
-	| awk -F@ '{ printf("        %-16s%s\n", $1, $2); }'
+	| awk -F@ '{ printf("        %-16s%s\n", $1, $2); }' | sort
 
     echo " "
     echo "  verbs can be combine using '+' or removed using '-'"
@@ -84,7 +84,7 @@ parse_verb () {
 		;;
 
 	    v|validate)
-		### validate: use plugin to find format string issues
+		### validate: report issues with libxo format strings
 		need_validate=1
 		;;
 	    -v|-validate)
@@ -105,7 +105,7 @@ parse_verb () {
 		need_errors=0
 		;;
 	    p|precompile)
-		### precompile: use plugin to precompile format strings
+		### precompile: request build-time compilation of format strings
 		need_precompile=1
 		;;
 	    -p|-precompile)
