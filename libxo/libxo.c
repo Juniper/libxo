@@ -3573,34 +3573,60 @@ xo_format_int_text (xo_handle_t *xop, xo_buffer_t *xbp, xo_fspec_t *xfp)
     int is_hex = (fc == 'x' || fc == 'X');
     int is_octal = (fc == 'o');
 
-    unsigned long long uval;
-    long long sval = 0;
+    uint64_t uval;
+    int64_t sval = 0;
 
-    if (xfp->xf_lflag >= 2) {
+    if (xfp->xf_num_bits) {
+	if (xfp->xf_num_bits == 64) {
+	    if (is_signed) {
+		sval = (int64_t) va_arg(xop->xo_vap, int64_t);
+		uval = (uint64_t) sval;
+
+	    } else
+		uval = (uint64_t) va_arg(xop->xo_vap, uint64_t);
+
+	} else if (xfp->xf_num_bits == 32) {
+	    if (is_signed) {
+		sval = (int64_t) va_arg(xop->xo_vap, int32_t);
+		uval = (uint64_t) sval;
+
+	    } else
+		uval = (uint64_t) va_arg(xop->xo_vap, uint32_t);
+
+	} else { /* Anything smaller turns into an int */
+	    if (is_signed) {
+		sval = (int64_t) va_arg(xop->xo_vap, int);
+		uval = (uint64_t) sval;
+
+	    } else
+		uval = (uint64_t) va_arg(xop->xo_vap, unsigned);
+	}
+
+    } else if (xfp->xf_lflag >= 2) {
 	if (is_signed) {
 	    sval = va_arg(xop->xo_vap, long long);
-	    uval = (unsigned long long) sval;
+	    uval = (uint64_t) sval;
 
 	} else
 	    uval = va_arg(xop->xo_vap, unsigned long long);
 
     } else if (xfp->xf_lflag == 1) {
 	if (is_signed) {
-	    sval = (long long) va_arg(xop->xo_vap, long);
-	    uval = (unsigned long long) sval;
+	    sval = (int64_t) va_arg(xop->xo_vap, long);
+	    uval = (uint64_t) sval;
 	} else
-	    uval = (unsigned long long) va_arg(xop->xo_vap, unsigned long);
+	    uval = (uint64_t) va_arg(xop->xo_vap, unsigned long);
 
     } else {
 	if (is_signed) {
-	    sval = (long long) va_arg(xop->xo_vap, int);
-	    uval = (unsigned long long) sval;
+	    sval = (int64_t) va_arg(xop->xo_vap, int);
+	    uval = (uint64_t) sval;
 	} else
-	    uval = (unsigned long long) va_arg(xop->xo_vap, unsigned int);
+	    uval = (uint64_t) va_arg(xop->xo_vap, unsigned int);
     }
 
     int negative = (is_signed && sval < 0);
-    unsigned long long absval = negative ? (0ULL - uval) : uval;
+    uint64_t absval = negative ? (0ULL - uval) : uval;
 
     /* Format digits right-to-left */
     char dbuf[24];		/* 22 digits max for 64-bit octal */
@@ -3627,7 +3653,7 @@ xo_format_int_text (xo_handle_t *xop, xo_buffer_t *xbp, xo_fspec_t *xfp)
 
     } else {
 	while (absval) {
-	    unsigned long long q = absval / 10;
+	    uint64_t q = absval / 10;
 	    *--dcp = '0' + (int)(absval - q * 10);
 	    absval = q;
 	}
@@ -3702,9 +3728,9 @@ xo_format_int_text (xo_handle_t *xop, xo_buffer_t *xbp, xo_fspec_t *xfp)
  * Can we use the format_int code?
  */
 static inline int
-xo_use_format_int (xo_handle_t *xop, int style, xo_fspec_t *xfp)
+xo_use_format_int (xo_handle_t *xop, int style UNUSED, xo_fspec_t *xfp)
 {
-    if (xop->xo_formatter == NULL && style == XO_STYLE_TEXT
+    if (xop->xo_formatter == NULL
             && !xfp->xf_stars
 	    && (xfp->xf_fc == 'd' || xfp->xf_fc == 'i' || xfp->xf_fc == 'u'
 	        || xfp->xf_fc == 'o' || xfp->xf_fc == 'x' || xfp->xf_fc == 'X')
@@ -3862,7 +3888,18 @@ xo_advance_vap (xo_handle_t *xop, xo_xff_flags_t flags, int consumed,
 	}
 
 	if (strchr("diouxXDOU", xfp->xf_fc) != NULL) {
-	    if (xfp->xf_hflag > 1) {
+
+	    if (xfp->xf_num_bits) {
+		if (xfp->xf_num_bits == 64)
+		    va_arg(xop->xo_vap, uint64_t);
+
+		else if (xfp->xf_num_bits == 32)
+		    va_arg(xop->xo_vap, uint32_t);
+
+		else
+		    va_arg(xop->xo_vap, unsigned);
+
+	    } else if (xfp->xf_hflag > 1) {
 		va_arg(xop->xo_vap, int);
 
 	    } else if (xfp->xf_hflag > 0) {
@@ -4895,7 +4932,7 @@ xo_format_is_numeric (const char *fmt, ssize_t flen)
     flen -= 1;
 
     /* Handle leading flags; don't want "#" since JSON can't handle hex */
-    ssize_t spn = xo_strnspn(fmt, flen, "0123456789.*+ -");
+    ssize_t spn = xo_strnspn(fmt, flen, "0123456789.*+ -!");
     if (spn >= flen)
 	return FALSE;
 
