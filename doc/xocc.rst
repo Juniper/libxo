@@ -10,7 +10,7 @@ with using `libxo`'s LLVM plugins.  `xocc` can be used in place of
 `cc` in another project's build: pass it wherever that project's build
 system expects a compiler, and it will invoke the real C compiler with
 libxo's plugin flags as needed.  `libxo` includes LLVM/clang plugins,
-described in :ref:`xo_plugins` and `xocc` handles some of the details
+described in :ref:`plugins` and `xocc` handles some of the details
 needed to invoke them properly.
 
 Invoking "xocc"
