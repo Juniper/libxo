@@ -257,7 +257,6 @@ echo "... $$test ... $$fmt ..."; \
 xoopts==warn,$$extra ; \
 ${TEST_JIG}; true;
 
-#TEST_FORMATS = T XP JP JPu HP X J H HIPx
 TEST_FORMATS = fullpath:slax,pretty fullpath XP JP
 
 RUN_TESTS = ${srcdir}/../run-tests.sh -d ${srcdir}
