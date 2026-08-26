@@ -586,7 +586,7 @@ xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
     char hostname[XO_HOST_NAME_MAX + 1];
     hostname[0] = '\0';
     if (xo_unit_test)
-	strlcpy(hostname, "worker-host", sizeof(hostname));
+	snprintf(hostname, sizeof(hostname), "%s", "worker-host");
     else
 	(void) gethostname(hostname, sizeof(hostname) - 1);
     hostname[XO_HOST_NAME_MAX] = '\0'; /* Ensure NUL-terminated */

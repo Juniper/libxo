@@ -47,14 +47,14 @@ main (int argc, char **argv)
 	else if (xo_streq(argv[argc], "lang"))
 	    lang = argv[++argc];
 	else if (xo_streq(argv[argc], "po"))
-	    strlcpy(path, argv[++argc], sizeof(path));
+	    snprintf(path, sizeof(path), "%s", argv[++argc]);
 	else if (xo_streq(argv[argc], "sub"))
 	    sub = argv[++argc];
     }
 
     if (path[0] == 0) {
 	getcwd(path, sizeof(path));
-	strlcat(path, "/po", sizeof(path));
+	strncat(path, "/po", sizeof(path) - strlen(path) - 1);
     }
 
     const char *lname = setlocale(LC_MESSAGES, lang);
