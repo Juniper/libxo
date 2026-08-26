@@ -38,7 +38,15 @@ AC_PATH_PROG(MKDIR, mkdir, /bin/mkdir)
 AC_PATH_PROG(MV, mv, /bin/mv)
 AC_PATH_PROG(RM, rm, /bin/rm)
 AC_PATH_PROG(SED, sed, /bin/sed)
-AC_CHECK_PROGS(YACC, [byacc yacc 'bison -y'], )
+AC_CHECK_PROGS(YACC, [byacc yacc], )
+
+dnl The XPath grammar relies on byacc extensions (a reentrant parser
+dnl exposing yystate and byacc-generated tables) that GNU bison does not
+dnl provide, so require byacc instead of silently using an incompatible bison.
+AS_IF([test -z "$YACC"],
+  [AC_MSG_ERROR([byacc is required to build the XPath filter; please install byacc])])
+AS_IF([$YACC --version 2>/dev/null | grep -qi bison],
+  [AC_MSG_ERROR([byacc is required to build the XPath filter; the detected yacc is GNU bison, which is not compatible. Please install byacc])])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_INLINE
@@ -209,11 +217,20 @@ HAVE_GETTEXT=no
 
 if test "$GETTEXT_ENABLE" != "no"; then
 
+  dnl glibc provides gettext in libc; only link -lintl when a separate
+  dnl libintl is required (e.g. macOS, *BSD), so detection also works on glibc.
+  GETTEXT_INTL=-lintl
+  AC_LINK_IFELSE([AC_LANG_SOURCE([[#include <libintl.h>]
+             [#include <stddef.h>]
+             [int main() {char *cp = dgettext(NULL, "xx"); return 0; }]])],
+                 [GETTEXT_INTL=])
+
   AC_MSG_CHECKING([gettext in ${GETTEXT_PREFIX}])
 
   _save_cflags="$CFLAGS"
-  CFLAGS="$CFLAGS -I${GETTEXT_PREFIX}/include -L${GETTEXT_PREFIX}/lib -Werror -lintl"
+  CFLAGS="$CFLAGS -I${GETTEXT_PREFIX}/include -L${GETTEXT_PREFIX}/lib -Werror ${GETTEXT_INTL}"
   AC_LINK_IFELSE([AC_LANG_SOURCE([[#include <libintl.h>]
+             [#include <stddef.h>]
              [int main() {char *cp = dgettext(NULL, "xx"); return 0; }]])],
              [HAVE_GETTEXT=yes],
              [HAVE_GETTEXT=no])
@@ -226,8 +243,9 @@ if test "$GETTEXT_ENABLE" != "no"; then
       AC_MSG_CHECKING([gettext in ${GETTEXT_PREFIX}])
 
       _save_cflags="$CFLAGS"
-      CFLAGS="$CFLAGS -I${GETTEXT_PREFIX}/include -L${GETTEXT_PREFIX}/lib -Werror -lintl"
+      CFLAGS="$CFLAGS -I${GETTEXT_PREFIX}/include -L${GETTEXT_PREFIX}/lib -Werror ${GETTEXT_INTL}"
       AC_LINK_IFELSE([AC_LANG_SOURCE([[#include <libintl.h>]
+             [#include <stddef.h>]
                  [int main() {char *cp = dgettext(NULL, "xx"); return 0; }]])],
                  [HAVE_GETTEXT=yes],
                  [HAVE_GETTEXT=no])
@@ -241,8 +259,9 @@ if test "$GETTEXT_ENABLE" != "no"; then
       AC_MSG_CHECKING([gettext in ${GETTEXT_PREFIX}])
 
       _save_cflags="$CFLAGS"
-      CFLAGS="$CFLAGS -I${GETTEXT_PREFIX}/include -L${GETTEXT_PREFIX}/lib -Werror -lintl"
+      CFLAGS="$CFLAGS -I${GETTEXT_PREFIX}/include -L${GETTEXT_PREFIX}/lib -Werror ${GETTEXT_INTL}"
       AC_LINK_IFELSE([AC_LANG_SOURCE([[#include <libintl.h>]
+             [#include <stddef.h>]
                  [int main() {char *cp = dgettext(NULL, "xx"); return 0; }]])],
                  [HAVE_GETTEXT=yes],
                  [HAVE_GETTEXT=no])
@@ -255,7 +274,7 @@ fi
 if test "$HAVE_GETTEXT" = "yes"; then
     AC_DEFINE([HAVE_GETTEXT], [1], [gettext(3)])
     GETTEXT_CFLAGS="-I${GETTEXT_PREFIX}/include"
-    GETTEXT_LIBS="-L${GETTEXT_PREFIX}/lib -lintl"
+    GETTEXT_LIBS="-L${GETTEXT_PREFIX}/lib ${GETTEXT_INTL}"
 else
     GETTEXT_PREFIX=none
     GETTEXT_CFLAGS=
@@ -266,14 +285,17 @@ AC_SUBST(GETTEXT_LIBS)
 
 GETTEXT_LIBDIR=${GETTEXT_PREFIX}/lib
 AC_SUBST(GETTEXT_LIBDIR)
-if test -x ${GETTEXT_PREFIX}/bin/msgfmt ; then
+if test "$HAVE_GETTEXT" != "yes"; then
+    GETTEXT_BINDIR=
+elif test -x ${GETTEXT_PREFIX}/bin/msgfmt ; then
     GETTEXT_BINDIR=${GETTEXT_PREFIX}/bin
 elif test -x ${GETTEXT_PREFIX}/local/bin/msgfmt ; then
     GETTEXT_BINDIR=${GETTEXT_PREFIX}/local/bin
 else
-    AC_MSG_FAILURE("could not find msgfmt tool")
-    # Use a (bad) fall back value
-    GETTEXT_BINDIR=${GETTEXT_PREFIX}/bin
+    dnl gettext may live in libc (glibc); msgfmt can be elsewhere on PATH
+    AC_PATH_PROG([MSGFMT], [msgfmt])
+    AS_IF([test -n "$MSGFMT"], [GETTEXT_BINDIR=`AS_DIRNAME([$MSGFMT])`],
+          [AC_MSG_FAILURE([could not find msgfmt tool])])
 fi
 AC_SUBST(GETTEXT_BINDIR)
 
