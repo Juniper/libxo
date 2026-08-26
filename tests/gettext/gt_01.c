@@ -20,6 +20,12 @@
 #include <locale.h>
 #include <libintl.h>
 
+#include "xo_config.h"
+
+#ifdef HAVE_GCC
+#include <bsd/string.h>
+#endif /* HAVE_GCC */
+
 #include "xo.h"
 #include "xo_encoder.h"
 
@@ -47,14 +53,14 @@ main (int argc, char **argv)
 	else if (xo_streq(argv[argc], "lang"))
 	    lang = argv[++argc];
 	else if (xo_streq(argv[argc], "po"))
-	    snprintf(path, sizeof(path), "%s", argv[++argc]);
+	    strlcpy(path, argv[++argc], sizeof(path));
 	else if (xo_streq(argv[argc], "sub"))
 	    sub = argv[++argc];
     }
 
     if (path[0] == 0) {
 	getcwd(path, sizeof(path));
-	strncat(path, "/po", sizeof(path) - strlen(path) - 1);
+	strlcat(path, "/po", sizeof(path));
     }
 
     const char *lname = setlocale(LC_MESSAGES, lang);
