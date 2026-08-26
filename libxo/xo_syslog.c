@@ -63,6 +63,10 @@
 #include <sys/sysctl.h>
 #endif /* HAVE_SYSCTLBYNAME */
 
+#ifdef HAVE_GCC
+#include <bsd/string.h>
+#endif /* HAVE_GCC */
+
 #include "xo.h"
 #include "xo_private.h"
 #include "xo_encoder.h"		/* For xo_realloc */
@@ -586,7 +590,7 @@ xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
     char hostname[XO_HOST_NAME_MAX + 1];
     hostname[0] = '\0';
     if (xo_unit_test)
-	snprintf(hostname, sizeof(hostname), "%s", "worker-host");
+	strlcpy(hostname, "worker-host", sizeof(hostname));
     else
 	(void) gethostname(hostname, sizeof(hostname) - 1);
     hostname[XO_HOST_NAME_MAX] = '\0'; /* Ensure NUL-terminated */
