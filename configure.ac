@@ -396,6 +396,19 @@ AC_MSG_RESULT([$HAVE_GCC])
 AM_CONDITIONAL([HAVE_GCC], [test "$HAVE_GCC" = "yes"])
 AC_SUBST(HAVE_GCC)
 
+AC_MSG_CHECKING([compiler for clang])
+HAVE_CLANG=no
+if test "${CC}" != ""; then
+    HAVE_CLANG=`${CC} cc --help 2>&1 | head -1 | grep -i clang`
+    if test "${HAVE_CLANG}" != ""; then
+        HAVE_CLANG=yes
+    else
+        HAVE_CLANG=no
+    fi
+fi
+AC_MSG_RESULT([$HAVE_CLANG])
+AM_CONDITIONAL([HAVE_CLANG], [test "$HAVE_CLANG" = "yes"])
+
 AC_MSG_CHECKING([whether to build with printflike])
 AC_ARG_ENABLE([printflike],
     [  --enable-printflike    Enable use of GCC __printflike attribute],
@@ -567,7 +580,7 @@ AC_MSG_NOTICE([summary of build options:
   extensions dir:   ${XO_ENCODERDIR}
   filter dir:       ${XO_FILTERDIR}
 
-  compiler:         ${CC} (${HAVE_GCC:-no})
+  compiler:         ${CC} (gcc: ${HAVE_GCC:-no}) (clang: ${HAVE_CLANG:-no})
   compiler flags:   ${CFLAGS}
   library types:    Shared=${enable_shared}, Static=${enable_static}
 
