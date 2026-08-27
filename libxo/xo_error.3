@@ -2,11 +2,11 @@
 .\" # Copyright (c) 2014, Juniper Networks, Inc.
 .\" # All rights reserved.
 .\" # This SOFTWARE is licensed under the LICENSE provided in the
-.\" # ../Copyright file. By downloading, installing, copying, or 
+.\" # ../Copyright file. By downloading, installing, copying, or
 .\" # using the SOFTWARE, you agree to be bound by the terms of that
 .\" # LICENSE.
 .\" # Phil Shafer, July 2014
-.\" 
+.\"
 .Dd December 4, 2014
 .Dt LIBXO 3
 .Os
@@ -23,7 +23,7 @@
 Use the
 .Fn xo_error
 function to generate error messages to standard error.
-The 
+The
 .Fa fmt
 argument is a string containing printf-style formatting
 instructions that describe the remaining arguments.
@@ -31,21 +31,21 @@ instructions that describe the remaining arguments.
 When converting an application to
 .Nm libxo ,
 one can replace
-.Em "fprintf(stderr,...)"
+.Em "fprintf(stderr, ...)"
 calls with
 .Fn xo_error
 calls.
 .Sh SEE ALSO
+.Xr libxo 3 ,
 .Xr printf 3 ,
-.Xr xo_emit 3 ,
-.Xr libxo 3
+.Xr xo_emit 3
 .Sh HISTORY
 The
 .Nm libxo
 library first appeared in
 .Fx 11.0 .
 .Sh AUTHORS
+The
 .Nm libxo
-was written by
+library was written by
 .An Phil Shafer Aq Mt phil@freebsd.org .
-
