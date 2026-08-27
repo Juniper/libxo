@@ -1,5 +1,5 @@
-../../../tests/core/test_12.c:93:13: warning: libxo: field name cannot start with a digit: '{:4x4}'
-   93 |     xo_emit("There is {:4x4} in {:2morrow}\n", "truck", "tomorrow");
+../../../tests/core/test_12.c:94:13: warning: libxo: field name cannot start with a digit: '{:4x4}'
+   94 |     xo_emit("There is {:4x4} in {:2morrow}\n", "truck", "tomorrow");
       |             ^
-../../../tests/core/test_12.c:93:13: warning: libxo: field name cannot start with a digit: '{:2morrow}'
+../../../tests/core/test_12.c:94:13: warning: libxo: field name cannot start with a digit: '{:2morrow}'
 2 warnings generated.
