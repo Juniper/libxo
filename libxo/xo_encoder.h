@@ -18,6 +18,10 @@
 #ifndef XO_ENCODER_H
 #define XO_ENCODER_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 #include <string.h>
 
 #include "xo.h"		    /* xo_xff_flags_t, XFF_*, xo_field_info_t, xo_handle_t */
@@ -183,5 +187,9 @@ xo_failure (xo_handle_t *xop, const char *fmt, ...);
  */
 void
 xo_failure_filter (xo_handle_t *xop, const char *fmt, ...);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* XO_ENCODER_H */
