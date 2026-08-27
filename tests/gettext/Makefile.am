@@ -151,7 +151,7 @@ build-pot-files:
 	    --add-comments --keyword=xo_emit --keyword=xo_emit_h \
 	    --keyword=xo_emit_warn \
 	    -C -E -n --foreign-user \
-	    -o $$base.pot.new $$base.c ; \
+	    -o $$base.pot.new $$base.c 2>& 1; \
 	done
 
 accept-pot-files:
@@ -227,11 +227,11 @@ mo build-mo-files:
 	    for lang in ${LANGUAGES} ; do \
 	 	if [ -f po/$$lang/$$base.po ] ; then \
 		    (${DB} ${MSGFMT} -o po/$$lang/LC_MESSAGES/$$base.mo \
-				po/$$lang/$$base.po ); \
+				po/$$lang/$$base.po 2>&1 ); \
 		elif [ -f ${srcdir}/po/$$lang/$$base.po ]; then \
 		    ${MKDIR} -p po/$$lang/LC_MESSAGES ; \
 		    (${DB} ${MSGFMT} -o po/$$lang/LC_MESSAGES/$$base.mo \
-			${srcdir}/po/$$lang/$$base.po ;) \
+			${srcdir}/po/$$lang/$$base.po 2>&1 ;) \
                 fi ; \
 	    done ; \
 	    ( cd po ; ${RM} -f en_US ; ${LN_S} -f pig_latin en_US ); \
