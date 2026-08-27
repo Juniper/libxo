@@ -81,6 +81,7 @@ AC_CHECK_FUNCS([strspn])
 AC_CHECK_FUNCS([sysctlbyname])
 AC_CHECK_FUNCS([uexterr_gettext])
 
+AC_CHECK_HEADERS([bsd/string.h])
 AC_CHECK_HEADERS([ctype.h])
 AC_CHECK_HEADERS([dlfcn.h])
 AC_CHECK_HEADERS([dlfcn.h])
