@@ -16,8 +16,8 @@ jobs:
     - name: configure
       run: |
         sh bin/setup.sh
-	ls -l /bin/msgfmt
-	which msgfmt
+        ls -l /bin/msgfmt
+        which msgfmt
         cd build; sh -x ../configure
     - name: make
       run: cd build ; make
