@@ -36,7 +36,6 @@
 #include <locale.h>
 #include <sys/types.h>
 #include <stdarg.h>
-#include <string.h>
 #include <errno.h>
 #include <limits.h>
 #include <ctype.h>
@@ -44,6 +43,15 @@
 #include <getopt.h>
 
 #include "xo_config.h"
+
+#ifdef HAVE_GCC
+#define _GNU_SOURCE
+#define __USE_GNU 1
+#include <string.h>
+#include <bsd/string.h>
+#else /* HAVE_GCC */
+#include <string.h>
+#endif /* HAVE_GCC */
 
 #ifdef HAVE_LANGINFO_H
 #include <langinfo.h>
@@ -3742,6 +3750,47 @@ xo_use_format_int (xo_handle_t *xop, int style UNUSED, xo_fspec_t *xfp)
 }
 
 /*
+ * We replace the "%!32d" with "%lld", "%ld", or "d" as appropriate
+ */
+static void
+xo_format_int_fixup (xo_handle_t *xop UNUSED, char *newfmt)
+{
+    const unsigned sz_u64 = sizeof(uint64_t);
+    const unsigned sz_u32 = sizeof(uint32_t);
+    const unsigned sz_ld = sizeof(unsigned long);
+    const unsigned sz_lld = sizeof(unsigned long long);
+    const char *fmt_64 =
+	(sz_u64 == sz_ld) ? "l" : (sz_u64 == sz_lld) ? "ll" : "";
+    const char *fmt_32 =
+	(sz_u32 == sz_ld) ? "l" : (sz_u32 == sz_lld) ? "ll" : "";
+
+    for (char *cp = newfmt; *cp; cp++) {
+	if (*cp != '!')
+	    continue;
+
+	const char *repl = "";
+	if (cp[1] == '6' && cp[2] == '4')
+	    repl = fmt_64;
+	else if (cp[1] == '3' && cp[2] == '2')
+	    repl = fmt_32;
+
+	const char *sp = cp + 2;
+	for (; *sp; sp++)
+	    if (*sp == 'd' || *sp == 'u' || *sp == 'x')
+		break;
+	if (*sp == '\0')
+	    sp -= 1; /* Back up to whatever was the last character */
+
+	/* Reconstruct the string; the new one is always equal or smaller */
+	int rlen = strlen(repl);
+	memcpy(cp, repl, rlen);
+	cp += rlen;
+	cp[0] = *sp;		/* d|u|x */
+	cp[1] = '\0';
+    }
+}
+
+/*
  * Emit the value for one format specifier into xbp.  sp points to the
  * leading '%' of the specifier; cp points to the conversion character.
  * Returns 0 on success, -1 on error.
@@ -3759,7 +3808,7 @@ xo_emit_field_value (xo_handle_t *xop, xo_buffer_t *xbp,
 
     xo_buffer_t *fbp = &xop->xo_fmt;
     ssize_t len = cp - sp + 1;
-    if (xo_check_for_room(xop, fbp, len + 1))
+    if (xo_check_for_room(xop, fbp, len + 2))
 	return -1;
 
     char *newfmt = fbp->xb_curp;
@@ -3794,6 +3843,8 @@ xo_emit_field_value (xo_handle_t *xop, xo_buffer_t *xbp,
 	    rc = columns = xo_format_int_text(xop, xbp, xfp);
 	    *consumedp = 1;
 	} else {
+	    xo_format_int_fixup(xop, newfmt);
+
 	    columns = rc = xo_vsnprintf(xop, xbp, newfmt, xop->xo_vap);
 	}
 
