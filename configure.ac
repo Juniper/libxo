@@ -242,8 +242,6 @@ if test "$GETTEXT_ENABLE" != "no"; then
              [HAVE_GETTEXT=no])
   CFLAGS="$_save_cflags"
 
-  AC_MSG_RESULT([$HAVE_GETTEXT])
-
   if test "$HAVE_GETTEXT" != "yes"; then
       GETTEXT_PREFIX=/opt/local
       AC_MSG_CHECKING([gettext in ${GETTEXT_PREFIX}])
@@ -301,8 +299,11 @@ else
     dnl gettext may live in libc (glibc); msgfmt can be elsewhere on PATH
     AC_PATH_PROG([MSGFMT], [msgfmt])
     AS_IF([test -n "$MSGFMT"], [GETTEXT_BINDIR=`AS_DIRNAME([$MSGFMT])`],
-          [AC_MSG_FAILURE([could not find msgfmt tool])])
+          [HAVE_GETTEXT=no])
 fi
+
+AC_MSG_CHECKING([final result for gettext])
+AC_MSG_RESULT([$HAVE_GETTEXT])
 AC_SUBST(GETTEXT_BINDIR)
 
 AM_CONDITIONAL([HAVE_GETTEXT], [test "$HAVE_GETTEXT" = "yes"])
