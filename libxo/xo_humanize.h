@@ -1,6 +1,7 @@
 /*	$NetBSD: humanize_number.c,v 1.8 2004/07/27 01:56:24 enami Exp $	*/
 
 /*
+ * SPDX-License-Identifier: BSD-4-Clause
  * Copyright (c) 1997, 1998, 1999, 2002 The NetBSD Foundation, Inc.
  * All rights reserved.
  *
