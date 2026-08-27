@@ -140,10 +140,10 @@ AM_CONDITIONAL([HAVE_EXTERR], [test "$HAVE_EXTERR" = "yes"])
 AC_ARG_WITH(llvm-config,
         [  --with-llvm-config=[PFX]        Specify location of llvm-config],
         [LLVM_CONFIG=$withval],
-	[LLVM_CONFIG="none"])
+	[LLVM_CONFIG="no"])
 
 AC_MSG_CHECKING([llvm-config])
-if test ${LLVM_CONFIG} = "none"; then
+if test ${LLVM_CONFIG} = "no"; then
     AC_MSG_RESULT([no llvm-config, so llvm-plugins are disabled])
 elif ! test -x ${LLVM_CONFIG} ; then
     AC_MSG_FAILURE("could not find llvm-config tool")
