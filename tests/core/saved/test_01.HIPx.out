@@ -524,7 +524,7 @@
   <div class="text">u64 </div>
   <div class="data" data-tag="u64" data-xpath="/data/top-level/u64">00000005</div>
   <div class="text">, u32 </div>
-  <div class="data" data-tag="u32" data-xpath="/data/top-level/u32">   !32u</div>
+  <div class="data" data-tag="u32" data-xpath="/data/top-level/u32">0005</div>
   <div class="text">, u64 </div>
   <div class="data" data-tag="u64-hex" data-xpath="/data/top-level/u64-hex">0x5</div>
   <div class="text">, u0 </div>
