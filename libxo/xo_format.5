@@ -300,7 +300,7 @@ Units can also be rendered in HTML as the "data\-units" attribute:
          data\-xpath="/top/data/distance">50</div>
 .Ed
 .Ss "The Value Role ({V:} and {:})"
-The value role is used to represent the a data value that is
+The value role is used to represent the data value that is
 interesting for the non\-display output styles (XML and JSON).
 Value
 is the default role; if no other role designation is given, the field
@@ -318,7 +318,7 @@ format descriptors default to "%s".
 .Bd -literal -offset indent
     xo_emit("{:length/%02u}x{:width/%02u}x{:height/%02u}\\n",
             length, width, height);
-    xo_emit("{:author} wrote \"{:poem}\" in {:year/%4d}\\n,
+    xo_emit("{:author} wrote \"{:poem}\" in {:year/%4d}\\n",
             author, poem, year);
 .Ed
 .Ss "The Anchor Roles ({[:} and {]:})"
@@ -368,6 +368,9 @@ particular output styles:
 .It c "colon         " "A colon ("":"") is appended after the label"
 .It d "display       " "Only emit field for display styles (text/HTML)"
 .It e "encoding      " "Only emit for encoding styles (XML/JSON)"
+.It " " "escape\-private" "Escape control chars as Unicode private\-use refs (XML/HTML)"
+.It " " "escape\-slash  " "Escape forward slashes (JSON)"
+.It " " "escape\-square " "Escape control chars as U+25A1 WHITE SQUARE (XML/HTML)"
 .It h "humanize (hn) " "Format large numbers in human\-readable style"
 .It " " "hn\-space     " "Humanize: Place space between numeric and unit"
 .It " " "hn\-decimal   " "Humanize: Add a decimal digit, if number < 10"
@@ -457,6 +460,46 @@ the encoding output styles, such as JSON and XML.
 .Pp
 The encoding modifier is the opposite of the display modifier, and
 they are often used to give to distinct views of the underlying data.
+.Ss "The escape-private Modifier"
+The escape-private modifier causes control characters in a field value
+to be escaped as Unicode XML character references in the private-use
+area (U+E000\-U+E0FF).
+A control character with byte value
+.Em b
+(0x00\-0x1F, excluding newline, carriage return, and tab) is replaced
+with the XML character reference
+.Ql &#xE0bb; ,
+where
+.Em bb
+is the hexadecimal byte value.
+For example, byte 0x01 becomes
+.Ql &#xE001; .
+.Pp
+This substitution is reversible: the original byte value can be
+recovered by subtracting 0xE000 from the Unicode code point.
+.Pp
+The escape-private modifier only affects XML and HTML output styles.
+Without this modifier, control characters are replaced with spaces.
+.Ss "The escape-slash Modifier"
+The escape-slash modifier indicates that if the field is emitted in
+JSON style, any forward slashes
+.Ql ( / )
+should be escaped.
+.Pp
+.Xr RFC 7159
+allows optional escaping of forward slashes to avoid
+circumstances where a slash may be filtered, such as in HTML.
+.Ss "The escape-square Modifier"
+The escape-square modifier causes control characters in a field value
+to be replaced with the Unicode WHITE SQUARE character
+.Pq "U+25A1, [u25A1]" .
+A control character is any byte value less than 0x20, except for
+newline, carriage return, and tab.
+.Pp
+This substitution is not reversible.
+.Pp
+The escape-square modifier only affects XML and HTML output styles.
+Without this modifier, control characters are replaced with spaces.
 .Ss "The Humanize Modifier ({h:})"
 The humanize modifier is used to render large numbers as in a
 human\-readable format.
@@ -531,8 +574,9 @@ for the HTML output style when
 is set, but other uses are likely in the near future.
 .Ss "The Leaf\-List Modifier ({l:})"
 The leaf\-list modifier is used to distinguish lists where each
-instance consists of only a single value.  In XML, these are
-rendered as single elements, where JSON renders them as arrays.
+instance consists of only a single value.
+In XML, these are
+rendered as single elements, whereas JSON renders them as arrays.
 .Bd -literal -offset indent
     EXAMPLE:
         xo_open_list("user");
@@ -679,11 +723,93 @@ a \(aq \(aq character, indicating a space should be emitted before
 positive numbers.
 .It
 a \(aq+\(aq character, indicating sign should emitted before any number.
+.It
+a \(aq!\(aq character followed by the number of bits in the integer
+argument (8, 16, 32, or 64).
+See the INTEGER SIZES section below.
 .El
 .Pp
 Note that \(aqq\(aq, \(aqD\(aq, \(aqO\(aq, and \(aqU\(aq are considered deprecated and will be
 removed eventually.
+.Sh INTEGER SIZES
+Use the integer size indicator to convey the size of the argument in
+bytes, easing the burden of the mismatch between the fixed size types
+in <stdint.h> and the implementation-dependent sizes in `printf(3)`,
+e.g "%lld", "%ld", and "%d".  Having defined a `uint64_t`, you can use
+"%!64x" to print it without worrying about portability issues or
+resorting to using casts, not to mention "PRIu64".
+.Bd -literal -offset indent
+uint64_t count, code;
+...
+xo_emit("Count: {:count/%!64u}, Code {:code/%#.12!64x}\n", count, code);
+.Ed
+The integer size indicator consists of a '!' character followed by
+"64", "32", "16" or "8" to indicate the number of bits in the argument
+type and can use "d", "u", or "x" as the format-character.  Using the "8"
+and "16" values is optional, since these types are guaranteed to be
+smaller than "int", which is the minimal size for variadic arguments,
+but their presence allow a one-to-one matching between the type
+name (uint16_t) and the format ("%!16d").
 .Pp
+As a mnemonic, consider that '!' looks like an upside down 'i' for
+integer.
+.Pp
+.Sh FIELD WIDTHS
+Field widths are included in the format modifier using an optional set
+of up to three groups of one or more digits ('0' - '9'), separated by
+a period ('.').
+.Pp
+If any of the groups consists of a '*' instead of a decimal digit
+string, the value is given by the next argument to the function.
+.Pp
+The first group specifies a minimum field width, in columns.
+If the formatted value uses fewer columns, spaces will be added for
+padding give the proper width.
+.Pp
+The second group specifies the "precision" which is has differing
+impact, depending on the type of the field.
+For floating point values, it represents the maximum number of
+significant digits after the decimal point.
+For integer values, it gives the minimum number of digits to appear,
+using leading zeroes for padding.
+.Pp
+For strings, the second group has traditionally served two purposes,
+giving the number of columns to fill and the number of bytes of memory
+to be referenced.
+But with UTF-8 character encodings, a single column can consume up to
+four bytes of data in a string.
+.Pp
+For this reason,
+.Nm libxo
+supports a third group, allowing the second to represent the maximum
+number of columns while the third represents the maximum number of
+ytes to be inspected while processing.
+This allows multi-byte characters and columns to be handled
+distinctly.
+If the third group is used as both the bytes count and the number of
+columns, using the limited number of bytes to fill the columns,
+padding with spaces if the number of bytes is exhausted.
+.Pp
+.Nm libxo
+will not dereference memory beyond the given number of bytes.
+For the "data" style encodings (XML, JSON), the first group will be
+ignored, since whitespace padding is not desirable in those encodings.
+The second and third will not be ignored, since `libxo` must respect
+floating point precision, leading zeros, and string lengths.
+.Bd -literal -offset indent
+/* 8 columns of output, padded with zeroes */
+xo_emit("[{:count/%.8d}]\\n", count);  /* "[00001234]" */
+
+/* 12 columns of output, the last 8 are padded with zeroes */
+xo_emit("[{:count/%12.8d}]\\n", count);  /* "[    00001234]" */
+
+/* 8 columns of output; up to the first 20 bytes of 'name' are inspected */
+xo_emit("[{:name/%.8.20s}]\\n", name);  /* "[goodname]" */
+
+/* Same, but using '*' and function arguments */
+xo_emit("[{:name/%.*.*s}]\\n", 8, 20, name);  /* "[goodname]" */
+.Ed
+.Sh FORMAT CHARACTER
 The format character is described in the following table:
 .Bl -column C "Argument Type12"
 .It Sy "C" "Argument Type  " "Format"
@@ -969,8 +1095,8 @@ use only one of the field names.
 If there is a difference, change the
 names to make that difference more obvious.
 .Sh SEE ALSO
-.Xr libxo 3 ,
 .Xr xolint 1 ,
+.Xr libxo 3 ,
 .Xr xo_emit 3
 .Sh HISTORY
 The
@@ -978,7 +1104,7 @@ The
 library first appeared in
 .Fx 11.0 .
 .Sh AUTHORS
+The
 .Nm libxo
-was written by
+library was written by
 .An Phil Shafer Aq Mt phil@freebsd.org .
-

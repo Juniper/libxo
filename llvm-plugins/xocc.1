@@ -1,0 +1,227 @@
+.\" #
+.\" # Copyright (c) 2026, Juniper Networks, Inc.
+.\" # All rights reserved.
+.\" # This SOFTWARE is licensed under the LICENSE provided in the
+.\" # ../Copyright file. By downloading, installing, copying, or
+.\" # using the SOFTWARE, you agree to be bound by the terms of that
+.\" # LICENSE.
+.\" # Phil Shafer, 2026
+.\"
+.Dd August 22, 2026
+.Dt XOCC 1
+.Os
+.Sh NAME
+.Nm xocc
+.Nd compiler wrapper for libxo's LLVM/clang plugins
+.Sh SYNOPSIS
+.Nm xocc
+.Ar verb
+.Ar compiler-args ...
+.Sh DESCRIPTION
+.Nm
+is a small shell wrapper to aid with invoking the C compiler with
+using
+.Nm libxo Ns 's
+LLVM plugins.
+.Nm
+can be used in place of
+.Ev CC
+in another project's build: pass it wherever that project's build
+system expects a compiler, and it will invoke the real C compiler with
+.Nm libxo Ns 's
+plugin flags as needed.
+.Nm libxo
+includes LLVM/clang plugins, described in
+.Xr xo_plugins 7
+and xocc handles some of the details needed to invoke them properly.
+.Pp
+.Sh INVOKING XOCC
+.Nm
+requires a verb as its first argument that describe and adjusts the
+actions and behaviors requested.
+A verb is one or more tokens joined with
+.Sq +
+(enabled) or
+.Sq \-
+(disabled):
+.Bl -tag -width "precompile"
+.It Cm validate
+Add the
+.Nm xo_validate
+plugin to the compiler invocation.
+(default: disabled)
+.It Cm lint
+Add the extra
+.Nm xo_validate
+style checks
+.Pq Fl \-xo\-validate\-lint ;
+implies
+.Cm validate .
+(default: disabled)
+.It Cm errors
+Report the syntactic and semantic problems found by
+.Nm xo_validate
+as errors instead of warnings.
+(default: disabled \(en i.e. warnings by default)
+.It Cm precompile
+Add the
+.Nm xo_precompile
+plugin to the compiler invocation.
+(default: disabled)
+.It Cm sdk
+Add any configured SDK flags to the compiler invocation.
+(default: enabled if the operating system needs it)
+.It Cm ldflags
+Add any
+.Xr ld 1
+flags needed for proper libxo compilation.
+These are only needed (and passed) at the link stage.
+(default: enabled)
+.It Cm echo
+Echo the command line for the underlying compiler
+invocation before execution.
+(default: disabled).
+.El
+.Pp
+The token
+.Cm full
+is a shorthand for turning on
+.Cm validate ,
+.Cm lint ,
+and
+.Cm precompile
+together.
+It is a provided since this is the typical use case.
+.Bd -literal -offset indent
+make CC='xocc full'
+.Ed
+Trailing "+token" / "-token" pairs adjust that starting point.
+.Sh EXAMPLES
+.Pp
+To turn warnings into hard errors, use
+.Cm errors :
+.Bd -literal -offset indent
+make CC='xocc full+errors'
+.Ed
+.Pp
+Drop the SDK flag, or drop precompilation, the same way:
+.Bd -literal -offset indent
+make CC='xocc full-sdk'
+make CC='xocc full-precompile'
+make CC='xocc full-sdk+errors'
+.Ed
+.Pp
+Or build a verb up from nothing instead of trimming
+.Cm full
+down \(en these two are equivalent:
+.Bd -literal -offset indent
+make CC='xocc validate+precompile'
+make CC='xocc full-lint'
+.Ed
+.Pp
+.Cm lint
+on its own (without
+.Cm validate ,
+.Cm errors ,
+or
+.Cm precompile )
+is a quick check rather than a real build:
+.Nm
+adds
+.Fl fsyntax\-only
+automatically, since there's nothing to actually compile:
+.Bd -literal -offset indent
+make CC='xocc lint'
+.Ed
+.Pp
+At least one of
+.Cm validate ,
+.Cm lint ,
+.Cm errors ,
+or
+.Cm precompile
+has to end up enabled, or
+.Nm
+emits an appropriate error message and exits.
+.Pp
+Use
+.Cm echo
+to see exactly what
+.Nm
+is about to run \(en to check a verb combination is working as expected:
+.Bd -literal -offset indent
+make CC='xocc full+echo'
+.Ed
+.Pp
+.Nm
+picks which real compiler to invoke, but an explicit compiler can be
+specified using the 
+.Ev XO_REAL_CC ,
+environment variable:
+.Bd -literal -offset indent
+XO_REAL_CC=/usr/local/bin/clang\-19 make CC='xocc full'
+.Ed
+.Pp
+.Nm
+also inspects the rest of its arguments to tell a compile stage
+.Po
+.Fl c ,
+.Fl E ,
+or
+.Fl S
+present
+.Pc
+from a link stage.
+The
+.Fl L Ns Ar libdir
+.Fl lxo
+from the
+.Cm ldflags
+token is only ever added at the link stage \(en
+.Nm
+suppresses it automatically for a compile-only invocation even if
+.Cm ldflags
+is on, since there's nothing to link yet:
+.Bd -literal -offset indent
+xocc full \-c myprogram.c \-o myprogram.o
+xocc full myprogram.o \-o myprogram
+.Ed
+.Pp
+Both plugin flags, the SDK
+.Fl isysroot ,
+and the link flags come from values baked in when
+.Nm libxo
+itself was configured \(en
+.Nm
+needs no
+.Fl I Ns Ar dir
+/
+.Fl L Ns Ar dir
+flags pointing back at the
+.Nm libxo
+tree, beyond whatever the project's own build already passes for
+.Nm libxo Ns 's
+headers.
+.Sh ENVIRONMENT
+.Bl -tag -width XO_REAL_CC
+.It Ev XO_REAL_CC
+Overrides the real compiler
+.Nm
+invokes, taking priority over the LLVM clang detected at
+.Nm libxo Ns 's
+configure time.
+.El
+.Sh SEE ALSO
+.Xr libxo 3 ,
+.Xr xo_emit 3 ,
+.Xr xo_options 7 ,
+.Xr xo_plugins 7
+.Sh HISTORY
+The
+.Nm
+wrapper first appeared in
+.Fx XX.y (unknown) .
+.Sh AUTHORS
+.Nm libxo
+was written by
+.An Phil Shafer Aq Mt phil@freebsd.org .

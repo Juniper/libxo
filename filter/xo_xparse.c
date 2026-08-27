@@ -1,4 +1,5 @@
 /*
+ * SPDX-License-Identifier: BSD-2-Clause
  * Copyright (c) 2006-2023, Juniper Networks, Inc.
  * All rights reserved.
  * This SOFTWARE is licensed under the LICENSE provided in the
@@ -408,6 +409,7 @@ xo_xparse_warn_default (void *data, const char *fmt, va_list vap)
     xo_warn_hcv(xop, -1, 0, fmt, vap);
 }
 
+XO_PRINTFLIKE(2, 3)
 static void
 xo_xparse_warn (xo_xparse_data_t *xdp, const char *fmt, ...)
 {
@@ -617,7 +619,7 @@ xo_xparse_feature_warn_one_node (const char *tag, xo_xparse_data_t *xdp,
 	if (type == C_PREDICATE
 		&& C_NESTED_PREDICATES < len && map[C_NESTED_PREDICATES]) {
 	    const char *tname = xo_xparse_fancy_token_name(C_NESTED_PREDICATES);
-	    xo_xparse_warn(xdp, "%s%filter expression feature is "
+	    xo_xparse_warn(xdp, "%s%sfilter expression feature is "
 			   "unsupported: %s",
 			   tag ?: "", tag ? ": " : "",
 			   tname ?: "nested predicates");
@@ -1403,7 +1405,7 @@ xo_xpath_yyerror (xo_xparse_data_t *xdp, const char *str, int yystate)
 
 	if (msg) {
 	    xo_xparse_warn(xdp, "%sfilter expression error: %s",
-			   xo_xparse_location(xdp), msg, buf);
+			   xo_xparse_location(xdp), msg);
 	    xo_free(msg);
 	    return 0;
 	}

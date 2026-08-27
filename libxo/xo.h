@@ -1,4 +1,5 @@
 /*
+ * SPDX-License-Identifier: BSD-2-Clause
  * Copyright (c) 2014-2018, Juniper Networks, Inc.
  * All rights reserved.
  * This SOFTWARE is licensed under the LICENSE provided in the
@@ -19,6 +20,10 @@
 
 #ifndef INCLUDE_XO_H
 #define INCLUDE_XO_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -100,7 +105,8 @@ typedef unsigned long long xo_xof_flags_t;
 #define XOF_LOG_GETTEXT	XOF_BIT(28) /** Log (stderr) gettext lookup strings */
 #define XOF_UTF8	XOF_BIT(29) /** Force text output to be UTF8 */
 /* XOF_BIT(30) is unused (was XOF_RETAIN_ALL; removed as unsafe) */
-#define XOF_RETAIN_NONE	XOF_BIT(31) /** Prevent use of XOEF_RETAIN */
+/* XOF_BIT(31) is unused (was XOF_RETAIN_NONE; retain feature removed) */
+#define XOF_RETAIN_NONE	0 /** Deprecated: retain feature removed */
 
 #define XOF_COLOR_MAP	XOF_BIT(32) /** Color map has been initialized */
 #define XOF_CONTINUATION XOF_BIT(33) /** Continuation of previous line */
@@ -113,13 +119,14 @@ typedef unsigned long long xo_xof_flags_t;
 #define XOF_FILTER_WARN	XOF_BIT(37)  /** Warn about runtime errors w/ filters */
 
 typedef unsigned xo_emit_flags_t; /* Flags to xo_emit() and friends */
-#define XOEF_RETAIN	(1<<0)	  /* Retain parsed formatting information */
-#define XOEF_NO_RETAIN	(1<<1)	  /* Format must not be retained (dynamic) */
+#define XOEF_RETAIN	0	  /* Deprecated: retain feature removed */
+#define XOEF_NO_RETAIN	0	  /* Deprecated: retain feature removed */
 
 /*
- * Field modifier flags (xfi_flags in xo_field_info_t).
- * These are shared between the public field-cache API and the internal
- * encoder plugin API (xo_encoder.h).
+ * Field modifier flags (xfi_flags in xo_field_info_t).  These are
+ * shared between the public field-cache API and the internal encoder
+ * plugin API (xo_encoder.h).  This structure is not public and should
+ * not be used by API client code.
  */
 typedef uint64_t xo_xff_flags_t;
 #define XFF_COLON	(1<<0)	/* Append a ":" */
@@ -153,6 +160,8 @@ typedef uint64_t xo_xff_flags_t;
 #define XFF_ESC_SQUARE	(1<<23)	/* Escape XML control chars to UTF8 square */
 
 #define XFF_ESC_PRIVATE (1<<24)	/* Escape XML ctrl chars as private (0xe000) */
+#define XFF_SKIP	(1<<25)	/* Skip this field (runtime state, not
+				   parse data; never cached) */
 
 /* Flags to turn off when we don't want i18n processing */
 #define XFF_GT_FLAGS (XFF_GT_FIELD | XFF_GT_PLURAL)
@@ -190,33 +199,6 @@ xo_foff (const char *base, xo_format_offset_t off)
     if (off == XO_FOFF_DEFAULT) return xo_default_format;
     return NULL;                /* XO_FOFF_NONE */
 }
-
-/*
- * Parsed representation of one field descriptor from a libxo format string.
- * All string members are xo_format_offset_t values — byte offsets into the
- * "base" format string from which the field was parsed.  Use xo_foff(base, off)
- * to recover a const char *.  XO_FOFF_NONE (-1) means absent; xfi_format may
- * additionally take XO_FOFF_DEFAULT (-2) to indicate the default "%s" format.
- *
- * This struct is exposed publicly so callers can populate pre-built const
- * field tables for xo_emit_cached().  The layout is stable within a given
- * XO_EMIT_CACHE_VERSION; bump the version whenever the layout changes.
- */
-typedef struct xo_field_info_s {
-    xo_xff_flags_t xfi_flags;		/* Modifier flags (XFF_*) */
-    uint32_t xfi_ftype;			/* Role character ('V','L','G', XO_ROLE_*) */
-    xo_format_offset_t xfi_start;	/* Offset of field start in base string */
-    xo_format_offset_t xfi_content;	/* Offset of content (name) */
-    xo_format_offset_t xfi_format;	/* Offset of display format (or XO_FOFF_DEFAULT) */
-    xo_format_offset_t xfi_encoding;	/* Offset of encoding format */
-    xo_format_offset_t xfi_next;	/* Offset just past this field */
-    xo_format_offset_t xfi_len;		/* Length of whole field descriptor */
-    xo_format_offset_t xfi_clen;	/* Length of content */
-    xo_format_offset_t xfi_flen;	/* Length of format */
-    xo_format_offset_t xfi_elen;	/* Length of encoding */
-    uint32_t xfi_fnum;			/* Field number (0 = unset) */
-    uint32_t xfi_renum;			/* Reordered field number (0 = none) */
-} xo_field_info_t;
 
 /*
  * The xo_info_t structure provides a mapping between names and
@@ -324,7 +306,7 @@ xo_ssize_t
 xo_emit (const char *fmt, ...);
 
 xo_ssize_t
-xo_emitr (const char *fmt, ...);
+xo_emitr (const char *fmt, ...); /* Deprecated: use xo_emit() */
 
 xo_ssize_t
 xo_emit_hvf (xo_handle_t *xop, xo_emit_flags_t flags,
@@ -336,28 +318,8 @@ xo_emit_hf (xo_handle_t *xop, xo_emit_flags_t flags, const char *fmt, ...);
 xo_ssize_t
 xo_emit_f (xo_emit_flags_t flags, const char *fmt, ...);
 
-/*
- * Build-time pre-parsed format string cache.
- *
- * xo_emit_cached() is the target of the LLVM IR pass: it takes a pointer to
- * a pre-built xo_format_cache_t (holding a const xo_field_info_t[] parsed at
- * compile time) plus the original format string (kept for the gettext path
- * and as a version-mismatch fallback).
- *
- * If the cache version does not match XO_EMIT_CACHE_VERSION, or if the cache
- * pointer is NULL, the call silently falls back to parsing fmt at runtime.
- *
- * xo_field_info_t is defined above; callers may populate xfc_fields[] directly
- * (e.g. as a static const array) using the XFF_* flags, XO_FOFF_* sentinels,
- * and XO_ROLE_* constants defined above.
- */
-#define XO_EMIT_CACHE_VERSION 1  /* bump on any xo_field_info_t layout change */
-
-typedef struct xo_format_cache_s {
-    unsigned xfc_version;		/* == XO_EMIT_CACHE_VERSION */
-    unsigned xfc_num_fields;
-    const xo_field_info_t *xfc_fields;	/* const xo_field_info_t[] */
-} xo_format_cache_t;
+struct xo_format_cache_s;
+typedef struct xo_format_cache_s xo_format_cache_t;
 
 xo_ssize_t
 xo_emit_cached_h (xo_handle_t *xop, const xo_format_cache_t *fcp,
@@ -929,13 +891,13 @@ xo_emit_field (const char *rolmod, const char *contents,
 	       const char *fmt, const char *efmt, ...);
 
 void
-xo_retain_clear_all (void);
+xo_retain_clear_all (void); /* Deprecated: retain feature removed */
 
 void
-xo_retain_clear (const char *fmt);
+xo_retain_clear (const char *fmt); /* Deprecated: retain feature removed */
 
 unsigned long
-xo_retain_get_hits (void);
+xo_retain_get_hits (void); /* Deprecated: retain feature removed */
 
 int
 xo_map_add (xo_handle_t *xop, const char *from, size_t flen,
@@ -948,9 +910,16 @@ int
 xo_add_filter (xo_handle_t *xop, const char *vp);
 
 int
-xo_discarding_output_h (xo_handle_t *xop);
+xo_is_emitting_h (xo_handle_t *xop);
 
 int
-xo_discarding_output (void);
+xo_is_emitting (void);
+
+void
+xo_set_no_cache (int value);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* INCLUDE_XO_H */

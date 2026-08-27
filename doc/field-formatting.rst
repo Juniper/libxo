@@ -19,7 +19,7 @@ is matched by one or more arguments to the xo_emit function.
 
 The format string has the form::
 
-  '%' format-modifier * format-character
+  '%' format-modifier* format-character
 
 The format-modifier can be:
 
@@ -37,10 +37,42 @@ The format-modifier can be:
   positive numbers.
 - a '+' character, indicating sign should emitted before any number.
 - a field-width indication as described under :ref:`field-widths`.
+- a '!' character followed by the number of bits in the integer
+  argument (8, 16, 32, or 64).  See `integer-size_` below.
 
 Note that 'q', 'D', 'O', and 'U' are considered deprecated and will be
 removed eventually.  They are supported for compatibility with
 :manpage:`printf(3)` strings.
+
+.. _integer-sizes:
+
+Integer Sizes
+~~~~~~~~~~~~~
+
+Use the integer size indicator to convey the size of the argument in
+bytes, easing the burden of the mismatch between the fixed size types
+in <stdint.h> and the implementation-dependent sizes in `printf(3)`,
+e.g "%lld", "%ld", and "%d".  Having defined a `uint64_t`, you can use
+"%!64x" to print it without worrying about portability issues or
+resorting to using casts, not to mention "PRIu64".
+
+::
+
+   uint64_t count, code;
+   ...
+   xo_emit("Count: {:count/%!64u}, Code {:code/%#.12!64x}\n",
+            count, code);
+
+The integer size indicator consists of a '!' character followed by
+"64", "32", "16" or "8" to indicate the number of bits in the argument
+type and can use "d", "u", or "x" as the format-character.  Using the
+"8" and "16" values is optional, since these types are guaranteed to be the
+same size of smaller than "int", which is the minimal size for
+variadic arguments, but their presence allow a one-to-one matching
+between the type name (uint16_t) and the format ("%!16d").
+
+As a mnemonic, consider that '!' looks like an upside down "i" for
+integer.
 
 .. _field-widths:
 
@@ -331,59 +363,6 @@ variants might be wise:
    xo_emit_errx       xo_emit_errx_p
    xo_emit_errc       xo_emit_errc_p
   ================== ========================
-
-.. index:: performance
-.. index:: XOEF_RETAIN
-
-.. _retain:
-
-Retaining Parsed Format Information
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-libxo can retain the parsed internal information related to the given
-format string, allowing subsequent xo_emit calls, the retained
-information is used, avoiding repetitive parsing of the format string::
-
-    SYNTAX:
-      int xo_emit_f(xo_emit_flags_t flags, const char fmt, ...);
-    EXAMPLE:
-      xo_emit_f(XOEF_RETAIN, "{:some/%02d}{:thing/%-6s}{:fancy}\\n",
-                     some, thing, fancy);
-
-To retain parsed format information, use the XOEF_RETAIN flag to the
-xo_emit_f() function.  A complete set of xo_emit_f functions exist to
-match all the xo_emit function signatures (with handles, varadic
-argument, and printf-like flags):
-
-  ================== ========================
-   Function           Flags Equivalent
-  ================== ========================
-   xo_emit_hv         xo_emit_hvf
-   xo_emit_h          xo_emit_hf
-   xo_emit            xo_emit_f
-   xo_emit_hvp        xo_emit_hvfp
-   xo_emit_hp         xo_emit_hfp
-   xo_emit_p          xo_emit_fp
-  ================== ========================
-
-The format string must be immutable across multiple calls to xo_emit_f(),
-since the library retains the string.  Typically this is done by using
-static constant strings, such as string literals. If the string is not
-immutable, the XOEF_RETAIN flag must not be used.
-
-The functions xo_retain_clear() and xo_retain_clear_all() release
-internal information on either a single format string or all format
-strings, respectively.  Neither is required, but the library will
-retain this information until it is cleared or the process exits::
-
-    const char *fmt = "{:name}  {:count/%d}\\n";
-    for (i = 0; i < 1000; i++) {
-        xo_open_instance("item");
-        xo_emit_f(XOEF_RETAIN, fmt, name[i], count[i]);
-    }
-    xo_retain_clear(fmt);
-
-The retained information is kept as thread-specific data.
 
 Example
 ~~~~~~~

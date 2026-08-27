@@ -1,0 +1,16 @@
+../../../tests/core/test_02.c:57:13: warning: libxo: field must have a name: '{d:/%-*.*s}'
+   57 |     xo_emit("{d:/%-*.*s}{tek:name}{eq:flags/0x%x}",
+      |             ^
+../../../tests/core/test_02.c:72:13: warning: libxo: field name should not be less than 3 characters long: '{:fd/%d}'
+   72 |     xo_emit("close {:fd/%d} returned {:error/%m} {:test}\n", -1, "good");
+      |             ^
+../../../tests/core/test_02.c:74:13: warning: libxo: field name should not be less than 3 characters long: '{:fd/%d}'
+   74 |     xo_emit("close {:fd/%d} returned {:error/%6.6m} {:test}\n", -1, "good");
+      |             ^
+../../../tests/core/test_02.c:135:13: warning: libxo: field name should not be less than 3 characters long: '{qt:t1/%*d}'
+  135 |     xo_emit("1:{qt:t1/%*d} 2:{qt:t2/test%-*u} "
+      |             ^
+../../../tests/core/test_02.c:135:13: warning: libxo: field name should not be less than 3 characters long: '{qt:t2/test%-*u}'
+../../../tests/core/test_02.c:135:13: warning: libxo: field name should not be less than 3 characters long: '{qt:t3/%10sx}'
+../../../tests/core/test_02.c:135:13: warning: libxo: field name should not be less than 3 characters long: '{qt:t4/x%-*.*s}'
+7 warnings generated.

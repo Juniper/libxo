@@ -2,11 +2,11 @@
 .\" # Copyright (c) 2014, Juniper Networks, Inc.
 .\" # All rights reserved.
 .\" # This SOFTWARE is licensed under the LICENSE provided in the
-.\" # ../Copyright file. By downloading, installing, copying, or 
+.\" # ../Copyright file. By downloading, installing, copying, or
 .\" # using the SOFTWARE, you agree to be bound by the terms of that
 .\" # LICENSE.
 .\" # Phil Shafer, July 2014
-.\" 
+.\"
 .Dd December 4, 2014
 .Dt LIBXO 3
 .Os
@@ -23,8 +23,6 @@
 .Fn xo_emit_h "xo_handle_t *xop" "const char *fmt" "..."
 .Ft xo_ssize_t
 .Fn xo_emit_hv "xo_handle_t *xop" "const char *fmt" "va_list vap"
-.Ft xo_ssize_t
-.Fn xo_emitr "const char *fmt"  "..."
 .Sh DESCRIPTION
 The
 .Fn xo_emit
@@ -53,7 +51,7 @@ source code:
             "{:characters/%7ju} {d:filename/%s}\\n",
             linect, wordct, charct, file);
 .Ed
-Output can then be generated in various style, using 
+Output can then be generated in various style, using
 the "--libxo" option:
 .Bd  -literal -offset indent
     % wc /etc/motd
@@ -92,54 +90,28 @@ the "--libxo" option:
       <div class="data" data-tag="filename">/etc/motd</div>
     </div>
 .Ed
-.Sh Retaining Formatting Information for Constant Strings
-.Pp
-The
-.Nm libxo
-library can cache the compiled internal version of the format for
-circumstances when the format will be used repeatedly, such as a loop.
-This cannot be used when the format string is in a dynamic buffer,
-since the cache retains a reference to the static format string,
-typically a static compile-time constant value.
-.Pp
-Typically static strings are placed in an executable's ".text" segment,
-so
-.Nm libxo
-knows that the formatting information in such static strings can be
-cached (retained), but shared libraries will have their own ".text"
-segment, so without the XOEF_RETAIN flag,
-.Nm libxo
-cannot presume to retain formatting information.
-If a caller in shared library code want their formats retained, they
-need to pass the XOEF_RETAIN flag.
-.Pp
-The
-.Fn xo_emitr
-function is a convenience function that passes the XOEF_RETAIN
-flag to
-.Fn xo_emit_hvf ,
-and can be used in shared libraries when the format string is static.
 .Sh RETURN CODE
 .Nm
-returns a negative value on error.  If the
+returns a negative value on error.
+If the
 .Nm XOF_COLUMNS
 flag has been turned on for the specific handle using
 .Xr xo_set_flags 3 ,
 then the number of display columns consumed by the output will be returned.
 .Sh SEE ALSO
-.Xr xo_open_container 3 ,
-.Xr xo_open_list 3 ,
+.Xr libxo 3 ,
 .Xr xo_emit_f 3 ,
 .Xo xo_emit_field 3 ,
-.Xr xo_format 5 ,
-.Xr libxo 3
+.Xr xo_open_container 3 ,
+.Xr xo_open_list 3 ,
+.Xr xo_format 5
 .Sh HISTORY
 The
 .Nm libxo
 library first appeared in
 .Fx 11.0 .
 .Sh AUTHORS
+The
 .Nm libxo
-was written by
+library was written by
 .An Phil Shafer Aq Mt phil@freebsd.org .
-

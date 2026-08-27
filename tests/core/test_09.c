@@ -1,4 +1,5 @@
 /*
+ * SPDX-License-Identifier: BSD-2-Clause
  * Copyright (c) 2015, Juniper Networks, Inc.
  * All rights reserved.
  * This SOFTWARE is licensed under the LICENSE provided in the
@@ -33,7 +34,22 @@ main (int argc, char **argv)
 	{ NULL, 0 }
     };
     struct item *ip;
-    
+
+    /* Three key values exercising the XPath predicate quoting strategies:
+     *   plain  -> [name='plain']
+     *   don't  -> [name=&quot;don't&quot;]   (single quote forces &quot; delimiters)
+     *   a'"b   -> [name=concat('a', &quot;'&quot;, '&quot;b')]  (both -> concat) */
+    struct item qlist[] = {
+	{ "plain",  1 },
+	{ "don't",  2 },
+	{ "a'\"b",  3 },
+   	{ "this&&that", 4 },
+	{ "'\"sure\"'", 5 },
+	{ "\"'nuff'\"", 5 },
+	{ NULL, 0 }
+    };
+    struct item *qp;
+
     argc = xo_parse_args(argc, argv);
     if (argc < 0)
 	return 1;
@@ -105,6 +121,18 @@ main (int argc, char **argv)
     xo_close_container("contents");
 
     xo_emit("\n\n");
+
+    xo_open_container("quotes");
+    xo_open_list("item");
+
+    for (qp = qlist; qp->i_title; qp++) {
+	xo_open_instance("item");
+	xo_emit("{k:name/%s}{:count/%d}\n", qp->i_title, qp->i_count);
+	xo_close_instance("item");
+    }
+
+    xo_close_list("item");
+    xo_close_container("quotes");
 
     xo_close_container_h(NULL, "top");
 

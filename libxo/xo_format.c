@@ -1,4 +1,5 @@
 /*
+ * SPDX-License-Identifier: BSD-2-Clause
  * Copyright (c) 2014-2025, Juniper Networks, Inc.
  * All rights reserved.
  * This SOFTWARE is licensed under the LICENSE provided in the
@@ -31,7 +32,7 @@
  * Only used for error-message formatting.
  */
 const char *
-xo_printable (const char *str)
+xo_printable2 (const char *str, int len, int bracesp)
 {
     static THREAD_LOCAL(char) bufset[XO_NUMBUFS][XO_SMBUFSZ];
     static THREAD_LOCAL(int) bufnum = 0;
@@ -43,8 +44,14 @@ xo_printable (const char *str)
 	bufnum = 0;
 
     char *res = bufset[bufnum], *cp, *ep;
+    const char *str_end = str + len;
 
-    for (cp = res, ep = res + XO_SMBUFSZ - 1; *str && cp < ep; cp++, str++) {
+    cp = res;
+    if (bracesp)
+	*cp++ = '{';
+
+    for (ep = res + XO_SMBUFSZ - 2;
+	     str < str_end && *str && cp < ep; cp++, str++) {
 	if (*str == '\n') {
 	    *cp++ = '\\';
 	    *cp = 'n';
@@ -58,34 +65,50 @@ xo_printable (const char *str)
 	    *cp = *str;
     }
 
+    if (bracesp && cp < ep)
+	*cp++ = '}';
+
     *cp = '\0';
     return res;
 }
 
+const char *
+xo_printable (const char *str)
+{
+    return xo_printable2(str, strlen(str), 0);
+}
+
 /* Error reporting */
 
+
+XO_PRINTFLIKE(2, 3)
 static void
 xo_parse_error (xo_parse_t *xpp, const char *fmt, ...)
 {
     if (xpp == NULL || xpp->xp_error == NULL)
 	return;
 
+    char buf[512];
     va_list vap;
     va_start(vap, fmt);
-    xpp->xp_error(xpp->xp_error_data, fmt, vap);
+    vsnprintf(buf, sizeof(buf), fmt, vap);
     va_end(vap);
+    xpp->xp_error(xpp->xp_error_data, "%s", buf);
 }
 
+XO_PRINTFLIKE(2, 3)
 static void
 xo_parse_warning (xo_parse_t *xpp, const char *fmt, ...)
 {
-    if (xpp == NULL || xpp->xp_error == NULL)
+    if (xpp == NULL || xpp->xp_warn == NULL)
 	return;
 
+    char buf[512];
     va_list vap;
     va_start(vap, fmt);
-    xpp->xp_error(xpp->xp_error_data, fmt, vap);
+    vsnprintf(buf, sizeof(buf), fmt, vap);
     va_end(vap);
+    xpp->xp_warn(xpp->xp_warn_data, "%s", buf);
 }
 
 /* Allocator helper functions */
@@ -219,20 +242,277 @@ xo_role_wants_default_format (int ftype)
     return 1;
 }
 
-unsigned
-xo_count_fields (xo_parse_t *xpp __attribute__((unused)), const char *fmt)
+/**
+ * Bump one of the 'width' values in a format strings (e.g. "%40.50.60s").
+ * @param xfp Formatting instructions
+ * @param digit Single digit (0-9) of input
+ */
+static void
+xo_bump_width (xo_fspec_t *xfp, int digit)
 {
-    unsigned rc = 1;
+    int16_t *ip = &xfp->xf_width[xfp->xf_dots];
+
+    *ip = ((*ip > 0) ? *ip : 0) * 10 + digit;
+}
+
+/*
+ * Parse a printf-style format specifier starting at 'cp' (which points
+ * at the '%').  Fills in *xfp and returns a pointer to the conversion
+ * character, or NULL on error.
+ *
+ * Note that 'n', 'v', and '$' are not supported.
+ */
+const char *
+xo_parse_format_spec (xo_parse_t *xpp, xo_fspec_t *xfp,
+		      const char *cp, const char *ep, const char *fmt)
+{
+    const char *start = cp;
+
+    for (cp += 1; cp < ep; cp++) {
+	if (*cp == 'l')
+	    xfp->xf_lflag += 1;
+	else if (*cp == 'h')
+	    xfp->xf_hflag += 1;
+	else if (*cp == 'j')
+	    xfp->xf_jflag += 1;
+	else if (*cp == 't')
+	    xfp->xf_tflag += 1;
+	else if (*cp == 'z')
+	    xfp->xf_zflag += 1;
+	else if (*cp == 'q')
+	    xfp->xf_qflag += 1;
+	else if (*cp == '.') {
+	    if (xfp->xf_dots + 1 >= XF_WIDTH_NUM) {
+		xo_parse_error(xpp, "Too many dots in format: '%s'", fmt);
+		return NULL;
+	    }
+
+	    xfp->xf_dots += 1;	/* Increment it (after check) */
+
+	} else if (*cp == '-')
+	    xfp->xf_seen_minus = 1;
+
+	else if (*cp == '#')
+	    xfp->xf_alt = 1;
+
+	else if (*cp == '!') {
+	    /* "%!NNd" is a NN-bit signed value */
+	    const char *sp = cp + 1;
+	    const char *np = sp;
+	    uint64_t num_bits = 0;
+
+	    for (; np < ep; np++) {
+		if (!isdigit((int) *np))
+		    break;
+		num_bits = num_bits * 10 + (*np - '0');
+	    }
+
+	    cp += np - sp;	/* Move pointer along */
+
+	    /* Report errors, which leave xf_num_bits as 0, ignoring the "!" */
+	    if (np == sp)
+		xo_parse_error(xpp, "missing integer size: '%s'",
+			       xo_printable2(start, ep - start, TRUE));
+	    else if (num_bits != 8 && num_bits != 16
+		     && num_bits != 32 && num_bits != 64)
+		xo_parse_error(xpp, "invalid integer size: '%s'",
+			       xo_printable2(start, ep - start, TRUE));
+	    else
+		xfp->xf_num_bits = num_bits;
+
+	} else if (isdigit((int) *cp)) {
+	    if (xfp->xf_leading_zero < 0)
+		xfp->xf_leading_zero = (*cp == '0');
+	    xo_bump_width(xfp, *cp - '0');
+
+	} else if (*cp == '*') {
+	    xfp->xf_stars += 1;
+	    xfp->xf_star[xfp->xf_dots] = 1;
+
+	} else if (strchr("diouxXDOUeEfFgGaAcCsSpm", *cp) != NULL)
+	    break;
+
+	else if (*cp == 'n' || *cp == 'v') {
+	    xo_parse_error(xpp, "unsupported format: '%s'", fmt);
+	    return NULL;
+	}
+    }
+
+    if (cp == ep)
+	xo_parse_error(xpp, "field format missing format character: %s", fmt);
+
+    xfp->xf_fc = *cp;
+    return cp;
+}
+
+/*
+ * Parse one "%..." conversion starting at 'cp' (which points at the '%').
+ * Pure parser: no handle, no va_list, no style/skip decisions — those are
+ * per-call and stay in libxo.c's xo_do_format_field().  Fills in *xfp,
+ * including xf_start/xf_len (byte offsets relative to 'fmt', covering the
+ * '%' through and including the conversion character), and returns a
+ * pointer to the conversion character, or NULL on error.
+ */
+static const char *
+xo_parse_one_format (xo_parse_t *xpp, xo_fspec_t *xfp, const char *cp,
+		     const char *ep, const char *fmt)
+{
+    const char *start = cp;		/* Points at the '%' */
+
+    bzero(xfp, sizeof(*xfp));
+    xfp->xf_leading_zero = -1;
+    xfp->xf_width[0] = xfp->xf_width[1] = xfp->xf_width[2] = -1;
+
+    /*
+     * "%@...@" is an XO-specific prefix.  Each '*' inside marks an int
+     * arg (from a "%*.*s"-style caller) that must be consumed from
+     * va_list and discarded before this field's own value is pulled.
+     * We have no va_list here (pure parser), so just count the '*'s
+     * into xf_at_stars; the emit path does the actual consuming.
+     */
+    if (cp[1] == '@') {
+	for (cp += 2; cp < ep; cp++) {
+	    if (*cp == '@')
+		break;
+	    if (*cp == '*')
+		xfp->xf_at_stars += 1;
+	}
+
+	/* 'cp' now sits on the prefix's closing '@', our pseudo-'%' */
+	xfp->xf_prefix_len = (uint16_t)(cp - start);
+    }
+
+    cp = xo_parse_format_spec(xpp, xfp, cp, ep, fmt);
+    if (cp == NULL)
+	return NULL;
+
+    /* If no max is given, it defaults to size */
+    if (xfp->xf_width[XF_WIDTH_MAX] < 0
+		&& xfp->xf_width[XF_WIDTH_SIZE] >= 0)
+	xfp->xf_width[XF_WIDTH_MAX] = xfp->xf_width[XF_WIDTH_SIZE];
+
+    if (xfp->xf_fc == 'D' || xfp->xf_fc == 'O' || xfp->xf_fc == 'U')
+	xfp->xf_lflag = 1;
+
+    xfp->xf_start = (uint16_t)(start - fmt);
+    xfp->xf_len   = (uint16_t)(cp - start + 1);
+
+    return cp;
+}
+
+/*
+ * Parse a single "%..." format specifier, returning the next
+ * character to be processed.  Information about the fspec is recorded
+ * in the xpp->xp_fspecs array and xp_cur_fspec is moved along.
+ */
+int
+xo_parse_fspecs (xo_parse_t *xpp, const char *fmt, const char *ep)
+{
+    xo_fspec_t *xfp = xpp->xp_cur_fspec;
+    xo_fspec_t *limit = xpp->xp_fspecs + xpp->xp_num_fspecs;
+    const char *cp, *xp = NULL;
+    int num = 0;
+
+    for (cp = fmt; cp < ep; cp++) {
+	if (*cp != '%') {
+	add_one:
+	    if (xp == NULL)
+		xp = cp;
+	    if (*cp == '\\' && cp[1] != '\0')
+		cp += 1;
+	    continue;
+
+	} else if (cp + 1 < ep && cp[1] == '%') {
+	    /* "%%" folds into the preceding literal run as one '%' byte */
+	    cp += 1;
+	    goto add_one;
+	}
+
+	if (xp) {
+	    if (xfp + 1 >= limit)
+		return -2;	/* Out of room; caller falls back at runtime */
+
+	    /*
+	     * xf_fc is the format character (e.g. 'd' in "%10d");
+	     * it's not really a "role" but we reuse XO_ROLE_TEXT
+	     * here, since it's safe ('+' isn't a formatting
+	     * character).  We'll notice it when making output and
+	     * emit it as normal text.
+	     */
+	    xfp->xf_fc = XO_ROLE_TEXT;
+	    xfp->xf_start = (uint16_t)(xp - fmt);
+	    xfp->xf_len = (uint16_t)(cp - xp);
+	    xfp += 1;
+	    num += 1;
+	    xp = NULL;
+	}
+
+	if (xfp + 1 >= limit)
+	    return -2;
+
+	cp = xo_parse_one_format(xpp, xfp, cp, ep, fmt);
+	if (cp == NULL)
+	    return -1;
+
+	xfp += 1;
+	num += 1;
+    }
+
+    if (xp) {
+	if (xfp + 1 >= limit)
+	    return -2;
+
+	xfp->xf_fc = XO_ROLE_TEXT;
+	xfp->xf_start = (uint16_t)(xp - fmt);
+	xfp->xf_len = (uint16_t)(cp - xp);
+	xfp += 1;
+	num += 1;
+    }
+
+    /*
+     * xfp points at a zeroed slot (from the initial bzero); that's our
+     * terminator.  Advance the cursor past it so the next field's run
+     * starts on a fresh zeroed slot.
+     */
+    xpp->xp_cur_fspec = xfp + 1;
+
+    return num;
+}
+
+void
+xo_count_fields (xo_parse_t *xpp XO_UNUSED, const char *fmt,
+		 size_t *fmt_lenp, unsigned *max_fields, unsigned *max_specs)
+{
+    unsigned fields = 1;
+    unsigned percents = 0;
     const char *cp;
 
-    for (cp = fmt; *cp; cp++)
+    for (cp = fmt; *cp; cp++) {
 	if (*cp == '{' || *cp == '\n')
-	    rc += 1;
+	    fields += 1;
+	if (*cp == '%')
+	    percents += 1;
+    }
 
-    if (rc > XO_MAX_FIELDS)
-	rc = XO_MAX_FIELDS;
+    fields = fields * 2 + 1;	/* Maximally pessimistic */
 
-    return rc * 2 + 1;
+    /*
+     * Pessimistic fspec bound: one text entry plus one spec entry per
+     * '%', plus one terminator per field.
+     */
+    unsigned specs = 2 * (percents + 1) + fields;
+
+    if (fields > XO_MAX_FIELDS)
+	fields = XO_MAX_FIELDS;
+
+    if (specs > XO_MAX_SPECS)
+	specs = XO_MAX_SPECS;
+
+    if (fmt_lenp)
+	*fmt_lenp = cp - fmt;
+
+    *max_fields = fields;
+    *max_specs = specs;
 }
 
 /*
@@ -423,18 +703,19 @@ xo_parse_field_numbers (xo_parse_t *xpp, const char *fmt,
  * xo_parse_roles() is now in xo_field.c.
  */
 int
-xo_parse_fields (xo_parse_t *xpp, xo_field_info_t *fields,
-		 unsigned num_fields, const char *fmt)
+xo_parse_fields (xo_parse_t *xpp, const char *fmt, size_t fmt_len)
 {
     const char *cp, *sp, *ep, *basep;
     unsigned field = 0;
-    xo_field_info_t *xfip = fields;
+    xo_field_info_t *fields = xpp->xp_fields;
+    unsigned num_fields = xpp->xp_num_fields; /* Capacity, set by our caller */
+    xo_field_info_t *xfip = xpp->xp_cur_field;
     unsigned seen_fnum = 0;
 
     /* Reject oversized format strings (int16_t offset range) */
-    if (strlen(fmt) > XO_FORMAT_MAX) {
-	xo_parse_error(xpp, "format string too long (max %d bytes, len %d)",
-		       XO_FORMAT_MAX, strlen(fmt));
+    if (fmt_len > XO_FORMAT_MAX) {
+	xo_parse_error(xpp, "format string too long (max %zu bytes, len %zu)",
+		       (size_t) XO_FORMAT_MAX, fmt_len);
 	return -1;
     }
 
@@ -445,10 +726,25 @@ xo_parse_fields (xo_parse_t *xpp, xo_field_info_t *fields,
 	xfip->xfi_format   = XO_FOFF_NONE;
 	xfip->xfi_encoding = XO_FOFF_NONE;
 	xfip->xfi_next     = XO_FOFF_NONE;
+	xfip->xfi_padding[0] = xfip->xfi_padding[1] = xfip->xfi_padding[2] = 0;
 
 	xfip->xfi_start = (xo_format_offset_t)(cp - fmt);
 
 	if (*cp == '\n') {
+	    /*
+	     * xfi_flags/xfi_fnum/xfi_renum are each read unconditionally
+	     * (no ftype check) by some consumer downstream -- xfi_flags by
+	     * xo_do_emit_fields()'s hot loop (before the ftype switch),
+	     * xfi_fnum/xfi_renum by the gettext helpers.  NEWLINE/TEXT/
+	     * EBRACE never run xo_parse_roles(), which is what normally
+	     * sets these, so they must be zeroed here explicitly: a stray
+	     * XFF_ARGUMENT bit in leftover stack data would steal a
+	     * va_arg() on this field, and a stray field number would
+	     * confuse gettext field lookup/renumbering.
+	     */
+	    xfip->xfi_flags = 0;
+	    xfip->xfi_fnum = 0;
+	    xfip->xfi_renum = 0;
 	    xfip->xfi_ftype = XO_ROLE_NEWLINE;
 	    xfip->xfi_len = 1;
 	    cp += 1;
@@ -460,6 +756,9 @@ xo_parse_fields (xo_parse_t *xpp, xo_field_info_t *fields,
 		if (*sp == '{' || *sp == '\n')
 		    break;
 
+	    xfip->xfi_flags   = 0;	/* See NEWLINE case above */
+	    xfip->xfi_fnum    = 0;
+	    xfip->xfi_renum   = 0;
 	    xfip->xfi_ftype   = XO_ROLE_TEXT;
 	    xfip->xfi_content = (xo_format_offset_t)(cp - fmt);
 	    xfip->xfi_clen    = (xo_format_offset_t)(sp - cp);
@@ -471,6 +770,9 @@ xo_parse_fields (xo_parse_t *xpp, xo_field_info_t *fields,
 	if (cp[1] == '{') {		/* {{ escaped brace */
 	    const char *start_ptr = cp + 1;
 	    xfip->xfi_start = (xo_format_offset_t)(start_ptr - fmt);
+	    xfip->xfi_flags = 0;	/* See NEWLINE case above */
+	    xfip->xfi_fnum = 0;
+	    xfip->xfi_renum = 0;
 	    xfip->xfi_ftype = XO_ROLE_EBRACE;
 
 	    cp += 2;
@@ -524,6 +826,15 @@ xo_parse_fields (xo_parse_t *xpp, xo_field_info_t *fields,
 	    if (ep != sp) {
 		xfip->xfi_clen    = (xo_format_offset_t)(sp - ep);
 		xfip->xfi_content = (xo_format_offset_t)(ep - fmt);
+	    } else {
+		/*
+		 * Empty content (e.g. "{[:/%d}"): xfi_content is already
+		 * XO_FOFF_NONE from the top-of-loop reset, but xfi_clen
+		 * isn't one of those offset members and consumers like
+		 * xo_find_width() trust a nonzero length even when the
+		 * resolved pointer is NULL, so it must be zeroed here.
+		 */
+		xfip->xfi_clen = 0;
 	    }
 	} else {
 	    xo_parse_error(xpp, "missing content (':'): '%s'",
@@ -555,8 +866,23 @@ xo_parse_fields (xo_parse_t *xpp, xo_field_info_t *fields,
 		if (*sp == '}')
 		    break;
 
-	    xfip->xfi_encoding = (xo_format_offset_t)(ep - fmt);
-	    xfip->xfi_elen     = (xo_format_offset_t)(sp - ep);
+	    /* A probable typo, since the encoding field is empty: {:foo/%s/} */
+	    if (ep == sp) {
+		xo_parse_error(xpp, "zero length encoding format, ignored");
+		xfip->xfi_elen = (xo_format_offset_t)(sp - ep);
+	    } else {
+		xfip->xfi_encoding = (xo_format_offset_t)(ep - fmt);
+		xfip->xfi_elen = (xo_format_offset_t)(sp - ep);
+	    }
+
+	} else {
+	    /*
+	     * No encoding format: xfi_encoding is already XO_FOFF_NONE
+	     * from the top-of-loop reset, but consumers (e.g. xo_format_
+	     * title()'s "flen == 0 means use the default" check) trust
+	     * xfi_elen/xfi_flen directly, so it must be zeroed here too.
+	     */
+	    xfip->xfi_elen = 0;
 	}
 
 	if (*sp != '}') {
@@ -569,19 +895,65 @@ xo_parse_fields (xo_parse_t *xpp, xo_field_info_t *fields,
 	xfip->xfi_next = (xo_format_offset_t)(sp + 1 - fmt);
 	sp += 1;
 
-	if (xfip->xfi_clen || format || (xfip->xfi_flags & XFF_ARGUMENT)) {
-	    if (format) {
-		xfip->xfi_format = (xo_format_offset_t)(format - fmt);
-		xfip->xfi_flen   = (xo_format_offset_t)flen;
-	    } else if (xo_role_wants_default_format(xfip->xfi_ftype)) {
-		xfip->xfi_format = XO_FOFF_DEFAULT;
-		xfip->xfi_flen   = 2;
+	if (format) {
+	    xfip->xfi_format = (xo_format_offset_t)(format - fmt);
+	    xfip->xfi_flen   = (xo_format_offset_t)flen;
+	} else if ((xfip->xfi_clen || (xfip->xfi_flags & XFF_ARGUMENT))
+		&& xo_role_wants_default_format(xfip->xfi_ftype)) {
+	    xfip->xfi_format = XO_FOFF_DEFAULT;
+	    xfip->xfi_flen   = 2;
+	} else {
+	    /*
+	     * No display format at all (e.g. an anchor's "{[:...}"):
+	     * xfi_format is already XO_FOFF_NONE from the top-of-loop
+	     * reset, but consumers trust xfi_flen directly (e.g.
+	     * xo_format_title()'s "flen == 0 means use the default"
+	     * check), so it must be zeroed here too.
+	     */
+	    xfip->xfi_flen = 0;
+	}
+
+	/*
+	 * xfi_format stayed XO_FOFF_NONE: the eager fspecs pass below
+	 * won't run, so xfi_fspecs must be NULL (never left as leftover
+	 * stack data) -- NULL is xo_do_format_field()'s "re-parse the
+	 * format on the fly" signal, and a stray non-NULL pointer here
+	 * paired with a stray xfi_num_fspecs would walk unrelated memory.
+	 */
+	if (xfip->xfi_format == XO_FOFF_NONE) {
+	    xfip->xfi_fspecs = NULL;
+	    xfip->xfi_num_fspecs = 0;
+	}
+
+	/*
+	 * Populate: pre-parse the display format into fspec entries so
+	 * the emit path can walk them instead of rescanning.  Encoding
+	 * formats are out of scope for now (Phase 1 decision); that path
+	 * still re-parses at call time.
+	 */
+	if (xfip->xfi_format != XO_FOFF_NONE) {
+	    const char *ffmt = xo_foff(fmt, xfip->xfi_format);
+	    xo_fspec_t *fstart = xpp->xp_cur_fspec;
+	    int nspecs = xo_parse_fspecs(xpp, ffmt, ffmt + xfip->xfi_flen);
+
+	    if (nspecs >= 0) {
+		xfip->xfi_fspecs = fstart;
+		xfip->xfi_num_fspecs = (uint16_t)nspecs;
+	    } else if (nspecs == -2) {
+		/* Out of room; NULL is always a safe "re-parse" signal */
+		xfip->xfi_fspecs = NULL;
+		xfip->xfi_num_fspecs = 0;
+	    } else {
+		return -1;	/* Genuine error; already reported */
 	    }
 	}
 
-	/* Semantic validation (mirrors xolint checks) — strict mode only */
+	/* Semantic validation in strict mode only; not during xo_emit() */
 	if (!(xpp->xp_flags & XPF_STRICT))
 	    goto next_field;
+
+	const char *str = xo_foff(fmt, xfip->xfi_start);
+	int slen = xfip->xfi_len;
 
 	if (xfip->xfi_ftype == 'V') {
 	    const char *np = xo_foff(fmt, xfip->xfi_content);
@@ -590,14 +962,14 @@ xo_parse_fields (xo_parse_t *xpp, xo_field_info_t *fields,
 
 	    if (nlen == 0 && !(xfip->xfi_flags & XFF_ARGUMENT)) {
 		xo_parse_error(xpp, "field must have a name: '%s'",
-			       xo_printable(fmt));
+			       xo_printable2(str, slen, TRUE));
 		return -1;
 	    }
 	    if (np && nlen) {
 		if (isdigit((unsigned char) np[0])) {
 		    xo_parse_warning(xpp,
-			   "field name cannot start with a digit: '%.*s'",
-			   (int) nlen, np);
+			   "field name cannot start with a digit: '%s'",
+				     xo_printable2(str, slen, TRUE));
 		}
 
 		struct reported_errors {
@@ -612,46 +984,35 @@ xo_parse_fields (xo_parse_t *xpp, xo_field_info_t *fields,
 
 		    if (!re.re_percent && nc == '%') {
 			xo_parse_warning(xpp,
-			       "field name contains percent sign: '%.*s'",
-			       (int) nlen, np);
+			       "field name contains percent sign: '%s'",
+					 xo_printable2(str, slen, TRUE));
 			re.re_percent = 1;
 			continue;
 		    }
 
-		    if (!re.re_under && nc == '_') {
+		    if (XO_IS_LINT(xpp) && !re.re_under && nc == '_') {
 			xo_parse_warning(xpp,
 			       "use hyphens, not underscores, "
-				       "in field name: '%.*s'",
-			       (int) nlen, np);
+				       "in field name: '%s'",
+					 xo_printable2(str, slen, TRUE));
 			re.re_under = 1;
 		    }
 
-		    if (!re.re_upper && isupper(nc)) {
+		    if (XO_IS_LINT(xpp) && !re.re_upper && isupper(nc)) {
 			xo_parse_warning(xpp,
-			       "field name should be lower case: '%.*s'",
-			       (int) nlen, np);
+			       "field name should be lower case: '%s'",
+					 xo_printable2(str, slen, TRUE));
 			re.re_upper = 1;
-		    }
-
-		    /*
-		     * Underscores and upper case are reported above,
-		     * so skip them here
-		     */
-		    if (!re.re_invalid && !isdigit(nc)
-			    && !(islower(nc) || isupper(nc))
- 			    && nc != '-' && nc != '_') {
-			xo_parse_warning(xpp,
-			       "field name contains invalid character: '%.*s'",
-			       (int) nlen, np);
-			re.re_invalid = 1;
 		    }
 		}
 
-		if (!re.re_percent && nlen <= 2) {
+		if (XO_IS_LINT(xpp) && !re.re_percent
+			    && nlen < XO_LINT_MIN_NAME) {
 		    xo_parse_warning(xpp,
-			   "field name should be longer than "
-				   "two characters: '%.*s'",
-			   (int) nlen, np);
+				     "field name should not be less than "
+				     "%d characters long: '%s'",
+				     XO_LINT_MIN_NAME,
+				     xo_printable2(str, slen, TRUE));
 		}
 	    }
 	}
@@ -664,8 +1025,8 @@ xo_parse_fields (xo_parse_t *xpp, xo_field_info_t *fields,
 		for (; ni < nlen; ni++) {
 		    if (!isdigit((unsigned char) np[ni])) {
 			xo_parse_error(xpp,
-			       "anchor content must be a decimal width: '%.*s'",
-			       (int) nlen, np);
+			       "anchor content must be a decimal width: '%s'",
+				       xo_printable2(str, slen, TRUE));
 			break;
 		    }
 		}
@@ -673,18 +1034,19 @@ xo_parse_fields (xo_parse_t *xpp, xo_field_info_t *fields,
 		    xo_parse_error(xpp,
 			   "anchor cannot have both static "
 				   "width and format: '%s'",
-			   xo_printable(fmt));
+				   xo_printable2(str, slen, TRUE));
 		}
 	    }
 	    if (format && flen > 0) {
 		/* Anchor width must be "%d" or numeric */
-		if (flen != 2 || format[0] != '%' || format[1] != 'd') {
+		if (flen != 2 || format[0] != '%'
+		        || !(format[1] != 'd' || format[1] != 'u')) {
 		    char *aep = NULL;
 		    (void) strtol(format, &aep, 10);
 		    if (aep != format + flen)
 			xo_parse_error(xpp,
-				       "anchor format must be '%%d': '%.*s'",
-				       (int) flen, format);
+			       "anchor format must be '%%d' or '%%u: '%s'",
+				       xo_printable2(str, slen, TRUE));
 		}
 	    }
 	}
@@ -699,6 +1061,18 @@ xo_parse_fields (xo_parse_t *xpp, xo_field_info_t *fields,
 next_field:
 	cp = sp;
     }
+
+    /*
+     * Leave the cursor just past the last field written.  Sentinel
+     * scans elsewhere walk fields[] until xfi_ftype == 0, so this one
+     * slot (guaranteed to exist by xo_count_fields()'s pessimistic
+     * sizing) must be zeroed explicitly now that we no longer bzero
+     * the whole array.  Our caller also uses the cursor delta to
+     * learn the real entry count.
+     */
+    if (field < num_fields)
+	bzero(xfip, sizeof(*xfip));
+    xpp->xp_cur_field = xfip;
 
     if (seen_fnum)
 	return xo_parse_field_numbers(xpp, fmt, fields, field);
@@ -721,6 +1095,15 @@ xo_parse_release (xo_parse_t *xpp)
 	xpp->xp_fields = NULL;
 	xpp->xp_num_fields = 0;
     }
+
+    if (xpp->xp_fspecs) {
+	xo_parse_free(xpp, xpp->xp_fspecs);
+	xpp->xp_fspecs = NULL;
+	xpp->xp_num_fspecs = 0;
+    }
+
+    xpp->xp_cur_field = NULL;
+    xpp->xp_cur_fspec = NULL;
 }
 
 int
@@ -731,7 +1114,10 @@ xo_parse_format (xo_parse_t *xpp, const char *fmt)
 
     xo_parse_release(xpp);
 
-    unsigned max_fields = xo_count_fields(xpp, fmt);
+    size_t fmt_len;
+    unsigned max_fields, max_fspecs;
+    xo_count_fields(xpp, fmt, &fmt_len, &max_fields, &max_fspecs);
+
     size_t sz = max_fields * sizeof(xo_field_info_t);
 
     xo_field_info_t *fields = xo_parse_alloc(xpp, sz);
@@ -739,19 +1125,41 @@ xo_parse_format (xo_parse_t *xpp, const char *fmt)
 	xo_parse_error(xpp, "xo_parse_format: out of memory");
 	return -1;
     }
-    memset(fields, 0, sz);
+    bzero(fields, sz);
 
-    if (xo_parse_fields(xpp, fields, max_fields, fmt) < 0) {
+    sz = max_fspecs * sizeof(xo_fspec_t);
+
+    xo_fspec_t *fspecs = xo_parse_alloc(xpp, sz);
+    if (fspecs == NULL) {
+	xo_parse_error(xpp, "xo_parse_format: out of memory");
 	xo_parse_free(xpp, fields);
 	return -1;
     }
+    memset(fspecs, 0, sz);
 
-    /* Count actual entries (array is zero-terminated via xfi_ftype) */
-    unsigned n = 0;
-    for (xo_field_info_t *xfip = fields; xfip->xfi_ftype; xfip++)
-	n++;
+    xpp->xp_fields = xpp->xp_cur_field = fields;
+    xpp->xp_fspecs = xpp->xp_cur_fspec = fspecs;
+    xpp->xp_num_fields = max_fields;
+    xpp->xp_num_fspecs = max_fspecs;
 
+    if (xo_parse_fields(xpp, fmt, fmt_len) < 0) {
+	xo_parse_free(xpp, fields);
+	xo_parse_free(xpp, fspecs);
+	xpp->xp_fields = xpp->xp_cur_field = NULL;
+	xpp->xp_fspecs = xpp->xp_cur_fspec = NULL;
+	xpp->xp_num_fields = xpp->xp_num_fspecs = 0;
+	return -1;
+    }
+
+    /*
+     * xo_parse_fields() leaves xp_cur_field/xp_cur_fspec pointing just
+     * past the last entry written (a zeroed terminator slot); the delta
+     * from the base is exactly the real entry count.
+     */
     xpp->xp_fields = fields;
-    xpp->xp_num_fields = n;
+    xpp->xp_num_fields = (unsigned)(xpp->xp_cur_field - fields);
+    xpp->xp_fspecs = fspecs;
+    xpp->xp_num_fspecs = (unsigned)(xpp->xp_cur_fspec - fspecs);
+
     return 0;
 }

@@ -91,3 +91,27 @@
 </div>
 <div class="line">
 </div>
+<div class="line">
+  <div class="data" data-tag="name" data-key="key">plain</div>
+  <div class="data" data-tag="count">1</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="name" data-key="key">don't</div>
+  <div class="data" data-tag="count">2</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="name" data-key="key">a'"b</div>
+  <div class="data" data-tag="count">3</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="name" data-key="key">this&amp;&amp;that</div>
+  <div class="data" data-tag="count">4</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="name" data-key="key">'"sure"'</div>
+  <div class="data" data-tag="count">5</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="name" data-key="key">"'nuff'"</div>
+  <div class="data" data-tag="count">5</div>
+</div>

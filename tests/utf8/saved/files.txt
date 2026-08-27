@@ -1,0 +1,6 @@
+utf8_01.pass.T.out
+utf8_01.pass.T.err
+utf8_02.pass.T.out
+utf8_02.pass.T.err
+utf8_03.pass.T.out
+utf8_03.pass.T.err

@@ -47,6 +47,10 @@ if HAVE_HUMANIZE_NUMBER
 LDADD += -lutil
 endif
 
+if HAVE_LIBBSD
+LDADD += -lbsd
+endif
+
 EXTRA_DIST = \
     ${TEST_CASES} \
     ${addprefix saved/, ${TEST_CASES:.c=.T.err}} \
@@ -80,6 +84,8 @@ VALIDATE_BUILD = ${top_builddir}/llvm-plugins/validate
 PRECOMPILE_BUILD = ${top_builddir}/llvm-plugins/precompile
 FORMAT_LIBDIR = ${top_builddir}/format/.libs
 FORMAT_LA = ${top_builddir}/format/libxo_format.la
+LIBXO_LIBDIR = ${top_builddir}/libxo/.libs
+LIBXO_LA = ${top_builddir}/libxo/libxo.la
 
 if HAVE_VALIDATE
 PLUGIN_TESTS = run-validate-tests run-pass-tests
@@ -91,7 +97,7 @@ test tests: ${noinst_PROGRAMS} run-plain-tests ${PLUGIN_TESTS}
 
 run-plain-tests:
 	@${MKDIR} -p out
-	${RUN_TESTS_CMD} -T "${TEST_FORMATS}" -a "file ${TEST_FILE}" \
+	@${RUN_TESTS_CMD} -T "${TEST_FORMATS}" -a "file ${TEST_FILE}" \
 	    run-bin ${TEST_CASES:.c=.test}
 
 if HAVE_VALIDATE
@@ -100,47 +106,59 @@ all-local: $(validate_tests) $(pass_tests)
 
 $(validate_tests): %.validate-test: $(srcdir)/%.c \
     $(VALIDATE_BUILD)/xo_validate.so \
-    $(FORMAT_LA)
-	$(AM_V_GEN)DYLD_LIBRARY_PATH="${FORMAT_LIBDIR}:${DYLD_LIBRARY_PATH}" \
-	    LD_LIBRARY_PATH="${FORMAT_LIBDIR}:${LD_LIBRARY_PATH}" \
+    $(FORMAT_LA) $(LIBXO_LA)
+	@${MKDIR} -p out
+	@$(AM_V_GEN)DYLD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${DYLD_LIBRARY_PATH}" \
+	    LD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${LD_LIBRARY_PATH}" \
 	    ${LLVM_CLANG} ${CFLAGS} \
 	    -fplugin=${VALIDATE_BUILD}/xo_validate.so \
-	    -mllvm -xo-validate-errors-as-warnings \
+	    -mllvm -xo-validate-errors-as-warnings -mllvm -xo-validate-lint \
 	    -I${top_srcdir}/libxo -I${top_builddir}/libxo -I${INCLUDEDIR} ${SYSROOT_FLAG} \
-	    $< -L${LIBDIR} -Wl,-rpath,${LIBDIR} -lxo \
-	    -o $@ > $@.make.out 2> $@.make.err
+	    -c $< -o $*.validate-test.o > out/$@.make.out 2> out/$@.make.err
+	@$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link \
+	    ${LLVM_CLANG} ${CFLAGS} ${LDADD} ${SYSROOT_FLAG} \
+	    $*.validate-test.o ${LIBXO_LA} \
+	    -o $@
 
 $(pass_tests): %.pass-test: $(srcdir)/%.c \
     $(PRECOMPILE_BUILD)/xo_precompile.so \
-    $(FORMAT_LA)
-	$(AM_V_GEN)DYLD_LIBRARY_PATH="${FORMAT_LIBDIR}:${DYLD_LIBRARY_PATH}" \
-	    LD_LIBRARY_PATH="${FORMAT_LIBDIR}:${LD_LIBRARY_PATH}" \
+    $(FORMAT_LA) $(LIBXO_LA)
+	@${MKDIR} -p out
+	@$(AM_V_GEN)DYLD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${DYLD_LIBRARY_PATH}" \
+	    LD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${LD_LIBRARY_PATH}" \
 	    ${LLVM_CLANG} ${CFLAGS} \
 	    -fpass-plugin=${PRECOMPILE_BUILD}/xo_precompile.so \
 	    -I${top_srcdir}/libxo -I${top_builddir}/libxo -I${INCLUDEDIR} ${SYSROOT_FLAG} \
-	    $< -L${LIBDIR} -Wl,-rpath,${LIBDIR} -lxo \
-	    -o $@ > $@.make.out 2> $@.make.err
+	    -c $< -o $*.pass-test.o > out/$@.make.out 2> out/$@.make.err
+	@$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link \
+	    ${LLVM_CLANG} ${CFLAGS} ${LDADD} ${SYSROOT_FLAG} \
+	    $*.pass-test.o ${LIBXO_LA} \
+	    -o $@
 
 run-validate-tests: $(validate_tests)
 	@${MKDIR} -p out
 	-@for tc in ${TEST_CASES:.c=}; do \
 	    diff -Nu ${srcdir}/saved/$$tc.validate-test.make.out \
-	        $$tc.validate-test.make.out ; \
+	        out/$$tc.validate-test.make.out ; \
 	    diff -Nu ${srcdir}/saved/$$tc.validate-test.make.err \
-	        $$tc.validate-test.make.err ; \
+	        out/$$tc.validate-test.make.err ; \
 	done
-	${RUN_TESTS_CMD} -T "${TEST_FORMATS}" -m validate \
+	@DYLD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${DYLD_LIBRARY_PATH}" \
+	    LD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${LD_LIBRARY_PATH}" \
+	    ${RUN_TESTS_CMD} -T "${TEST_FORMATS}" -m validate \
 	    -a "file ${TEST_FILE}" run-bin ${TEST_CASES:.c=.test}
 
 run-pass-tests: $(pass_tests)
 	@${MKDIR} -p out
 	-@for tc in ${TEST_CASES:.c=}; do \
 	    diff -Nu ${srcdir}/saved/$$tc.pass-test.make.out \
-	        $$tc.pass-test.make.out ; \
+	        out/$$tc.pass-test.make.out ; \
 	    diff -Nu ${srcdir}/saved/$$tc.pass-test.make.err \
-	        $$tc.pass-test.make.err ; \
+	        out/$$tc.pass-test.make.err ; \
 	done
-	${RUN_TESTS_CMD} -T "${TEST_FORMATS}" -m pass \
+	@DYLD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${DYLD_LIBRARY_PATH}" \
+	    LD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${LD_LIBRARY_PATH}" \
+	    ${RUN_TESTS_CMD} -T "${TEST_FORMATS}" -m pass \
 	    -a "file ${TEST_FILE}" run-bin ${TEST_CASES:.c=.test}
 
 else
@@ -159,13 +177,13 @@ accept:
 	@${MKDIR} -p ${srcdir}/saved
 	${RUN_TESTS_CMD} -T "${TEST_FORMATS}" accept-bin ${TEST_CASES:.c=.test}
 	-@test -z "${LLVM_CLANG}" || for tc in ${TEST_CASES:.c=}; do \
-	    cp $$tc.validate-test.make.out \
+	    cp out/$$tc.validate-test.make.out \
 	        ${srcdir}/saved/$$tc.validate-test.make.out 2>/dev/null ; \
-	    cp $$tc.validate-test.make.err \
+	    cp out/$$tc.validate-test.make.err \
 	        ${srcdir}/saved/$$tc.validate-test.make.err 2>/dev/null ; \
-	    cp $$tc.pass-test.make.out \
+	    cp out/$$tc.pass-test.make.out \
 	        ${srcdir}/saved/$$tc.pass-test.make.out 2>/dev/null ; \
-	    cp $$tc.pass-test.make.err \
+	    cp out/$$tc.pass-test.make.err \
 	        ${srcdir}/saved/$$tc.pass-test.make.err 2>/dev/null ; \
 	done
 
@@ -174,9 +192,11 @@ accept:
 
 CLEANFILES = ${TEST_CASES:.c=.test} \
     ${TEST_CASES:.c=.validate-test} \
+    ${TEST_CASES:.c=.validate-test.o} \
     ${TEST_CASES:.c=.validate-test.make.out} \
     ${TEST_CASES:.c=.validate-test.make.err} \
     ${TEST_CASES:.c=.pass-test} \
+    ${TEST_CASES:.c=.pass-test.o} \
     ${TEST_CASES:.c=.pass-test.make.out} \
     ${TEST_CASES:.c=.pass-test.make.err}
 CLEANDIRS = out

@@ -1,4 +1,11 @@
 <data>
+  <plus>42.1</plus>
+  <minus>41.2</minus>
+  <label>label</label>
+  <total>format</total>
+  <per-call>35.7</per-call>
+  <min>format</min>
+  <max>format</max>
   <thing>one</thing>
   <thing>two</thing>
   <thing>three</thing>
@@ -184,5 +191,21 @@
     <one>1</one>
     <two>2</two>
     <three>3</three>
+    <i64>5</i64>
+    <i32>5</i32>
+    <i16>5</i16>
+    <i8>5</i8>
+    <u64>5</u64>
+    <u32>5</u32>
+    <u16>5</u16>
+    <u8>5</u8>
+    <u64>00000005</u64>
+    <u32>0005</u32>
+    <u64-hex>0x5</u64-hex>
+    <u0>5</u0>
+    <u31>5</u31>
+    <u33>5</u33>
+    <u32s>five_u32</u32s>
+    <unothing>5</unothing>
   </top-level>
 </data>

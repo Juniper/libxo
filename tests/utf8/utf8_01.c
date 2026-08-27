@@ -1,4 +1,5 @@
 /*
+ * SPDX-License-Identifier: BSD-2-Clause
  * Copyright (c) 2022, Juniper Networks, Inc.
  * All rights reserved.
  * This SOFTWARE is licensed under the LICENSE provided in the
@@ -25,6 +26,7 @@ main (int argc, char **argv)
     int print = 1;
     int raw = 0;
     char *file = NULL;
+    size_t bufsiz = 1024;
 
     argc = xo_parse_args(argc, argv);
     if (argc < 0)
@@ -33,7 +35,10 @@ main (int argc, char **argv)
     for (argc = 1; argv[argc]; argc++) {
 	if (xo_streq(argv[argc], "print"))
 	    print = 1;
-	else if (xo_streq(argv[argc], "null"))
+	else if (xo_streq(argv[argc], "bufsiz")) {
+	    if (argv[argc + 1])
+		bufsiz = atoi(argv[++argc]);
+	} else if (xo_streq(argv[argc], "null"))
 	    print = 0;
 	else if (xo_streq(argv[argc], "raw"))
 	    raw = 1;
@@ -51,7 +56,7 @@ main (int argc, char **argv)
 	    xo_err(1, "could not open file: '%s'", file);
     }
 
-    char buf[BUFSIZ], *cp, *ep;
+    char buf[bufsiz], *cp, *ep;
     int len, rc, left = 0;
     wchar_t wc;
     unsigned long offset = 0;
@@ -94,17 +99,17 @@ main (int argc, char **argv)
 		if (!iswprint(real))
 		    real = ' ';
 
-		xo_emit("[{:offset/%lu}] "
+		xo_emit("[{:offset/%lu}] [{:len/%d}] "
 			"[{:hex/%#x}/{:hex-upper/%x}/{:hex-lower/%x}] "
 			"[{:byte/%lc}] "
 			"[{:upper/%lc}] [{:lower/%lc}]\n",
-			offset + cp - buf,
+			offset + cp - buf, len,
 			wc, xo_utf8_wtoupper(real), xo_utf8_wtolower(real),
 			real, xo_utf8_wtoupper(real), xo_utf8_wtolower(real));
 	    }
 	}
 
-	offset += rc - left;
+	offset += cp - buf;
     }
 
     xo_finish();

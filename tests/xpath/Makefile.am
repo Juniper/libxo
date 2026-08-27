@@ -41,6 +41,10 @@ if HAVE_HUMANIZE_NUMBER
 LDADD += -lutil
 endif
 
+if HAVE_LIBBSD
+LDADD += -lbsd
+endif
+
 #
 # Sadly, pathetically, this list must be maintained by hand.  We can't
 # just say 'TEST_FILES=`sed "s:^:saved:" ${srcdir}/saved/files.txt`.
@@ -257,7 +261,6 @@ echo "... $$test ... $$fmt ..."; \
 xoopts==warn,$$extra ; \
 ${TEST_JIG}; true;
 
-#TEST_FORMATS = T XP JP JPu HP X J H HIPx
 TEST_FORMATS = fullpath:slax,pretty fullpath XP JP
 
 RUN_TESTS = ${srcdir}/../run-tests.sh -d ${srcdir}
@@ -266,7 +269,7 @@ RUN_TESTS_CMD = ${BASH} ${RUN_TESTS} -T "${TEST_FORMATS}"
 
 test tests: ${bin_PROGRAMS}
 	@${MKDIR} -p out
-	${RUN_TESTS_CMD} -l warn,filter-warn run ${TEST_CASES:.c=.test}
+	@${RUN_TESTS_CMD} -l warn,filter-warn run ${TEST_CASES:.c=.test}
 
 one:
 

@@ -1,4 +1,5 @@
 /*
+ * SPDX-License-Identifier: BSD-2-Clause
  * Copyright (c) 2015, Juniper Networks, Inc.
  * All rights reserved.
  * This SOFTWARE is licensed under the LICENSE provided in the
@@ -17,6 +18,10 @@
 
 #ifndef XO_ENCODER_H
 #define XO_ENCODER_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 #include <string.h>
 
@@ -183,5 +188,9 @@ xo_failure (xo_handle_t *xop, const char *fmt, ...);
  */
 void
 xo_failure_filter (xo_handle_t *xop, const char *fmt, ...);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* XO_ENCODER_H */

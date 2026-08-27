@@ -40,6 +40,10 @@ noinst_HEADERS = \
      xo_filter_ops.h \
      xo_xparse.h
 
+man7_files = xo_filter.7
+
+man_MANS = ${man7_files}
+
 pkglibdir = ${XO_FILTERDIR}
 
 UGLY_NAME = xo_filter.lib
@@ -65,7 +69,7 @@ CLEANFILES = \
     xo_xpath.tab.h \
     xo_xpath.output
 
-xo_xparse.o xo_filter.o xo_xparse.lo xo_filter.lo: xo_xpath.tab.h
+xo_xpath.o xo_xpath.lo xo_xparse.o xo_filter.o xo_xparse.lo xo_filter.lo: xo_xpath.tab.h
 
 EXTRA_DIST = \
     xo_xpath.y

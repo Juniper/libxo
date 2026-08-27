@@ -50,9 +50,9 @@ for content to be selected.  Expressions contain five constructs:
 
 - Wildcard elements
 
-  - Select any nodes.  A "*" matches any element.
+  - Select any nodes.  A "\*" matches any element.
 
-    - Example: one/*/three
+    - Example: one/\*/three
     - Select any `three` elements that are under an element of any
       name, which in turn must be under a `one` element .
 

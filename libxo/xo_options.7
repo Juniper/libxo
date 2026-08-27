@@ -54,11 +54,12 @@ The triggered functionality is identical.
 .It "log\-syslog " "Log (via stderr) each syslog message (via xo_syslog)"
 .It "map        " "Map between tag names"
 .It "map\-file   " "Use a file to specify mapping between tag names"
+.It "no\-cache   " "Ignore precompiled/cached format data; always parse"
 .It "no\-humanize" "Ignore the {h:} modifier (TEXT, HTML)"
 .It "no\-locale  " "Do not initialize the locale setting"
-.It "no\-retain  " "Prevent retaining formatting information"
+.It "no\-retain  " "Deprecated; accepted but ignored"
 .It "pretty     " "Emit pretty\-printed output"
-.It "retain     " "Force retaining formatting information"
+.It "retain     " "Deprecated; accepted but ignored"
 .It "text       " "Emit TEXT output"
 .It "underscores" "Replace XML\-friendly dashes with JSON\-friendly underscores"
 .It "units      " "Add the 'units' (XML) or 'data\-units (HTML) attribute"
@@ -72,7 +73,7 @@ The brief options are a set of single\-letter aliases for the longer
 terms, used as a single string:
 .Bl -column "Value" "Equivalent Token"
 .It Sy "Value" "Equivalent Token"
-.It "c 
+.It "c
 .It "f     " "flush"
 .It "F     " "flush\-line"
 .It "H     " "html"
@@ -110,6 +111,16 @@ and
 .Fa map\-file
 are described below.
 .Pp
+.Fa no\-cache
+forces
+.Nm libxo
+to parse every format string at run time, even for calls a build\-time
+tool has precompiled into a cached field table (see the
+.Nm xo_precompile
+plugin).
+Useful for isolating whether the cached path is the cause of some
+behavior difference.
+.Pp
 .Fa no\-humanize
 avoids "humanizing" numeric output (see
 .Xr humanize_number 3
@@ -119,11 +130,6 @@ for details).
 instructs
 .Nm libxo
 to avoid translating output to the current locale.
-.Pp
-.Fa no\-retain
-disables the ability of
-.Nm libxo
-to internally retain "compiled" information about formatting strings.
 .Pp
 .Fa underscores
 can be used with
@@ -355,6 +361,7 @@ The
 library first appeared in
 .Fx 11.0 .
 .Sh AUTHORS
+The
 .Nm libxo
-was written by
+library was written by
 .An Phil Shafer Aq Mt phil@freebsd.org .

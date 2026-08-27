@@ -40,6 +40,10 @@ if HAVE_HUMANIZE_NUMBER
 LDADD += -lutil
 endif
 
+if HAVE_LIBBSD
+LDADD += -lbsd
+endif
+
 EXTRA_DIST = \
     ${TEST_CASES} \
     ${addprefix saved/, ${TEST_CASES:.c=.T.err}} \
@@ -126,7 +130,7 @@ XGETTEXT = ${GETTEXT_BINDIR}/xgettext
 MSGFMT = ${GETTEXT_BINDIR}/msgfmt -v
 MSGMERGE = ${GETTEXT_BINDIR}/msgmerge
 ECHO = echo
-DB=set -x;
+#DB=set -x;
 XOMSGMERGE = ${MSGMERGE} --no-wrap
 XODIFF = ${DIFF} -bu
 
@@ -147,7 +151,7 @@ build-pot-files:
 	    --add-comments --keyword=xo_emit --keyword=xo_emit_h \
 	    --keyword=xo_emit_warn \
 	    -C -E -n --foreign-user \
-	    -o $$base.pot.new $$base.c ; \
+	    -o $$base.pot.new $$base.c 2>& 1; \
 	done
 
 accept-pot-files:
@@ -223,11 +227,11 @@ mo build-mo-files:
 	    for lang in ${LANGUAGES} ; do \
 	 	if [ -f po/$$lang/$$base.po ] ; then \
 		    (${DB} ${MSGFMT} -o po/$$lang/LC_MESSAGES/$$base.mo \
-				po/$$lang/$$base.po ); \
+				po/$$lang/$$base.po 2>&1 ); \
 		elif [ -f ${srcdir}/po/$$lang/$$base.po ]; then \
 		    ${MKDIR} -p po/$$lang/LC_MESSAGES ; \
 		    (${DB} ${MSGFMT} -o po/$$lang/LC_MESSAGES/$$base.mo \
-			${srcdir}/po/$$lang/$$base.po ;) \
+			${srcdir}/po/$$lang/$$base.po 2>&1 ;) \
                 fi ; \
 	    done ; \
 	    ( cd po ; ${RM} -f en_US ; ${LN_S} -f pig_latin en_US ); \

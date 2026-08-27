@@ -1,0 +1,217 @@
+#! /bin/sh
+#
+# $Id$
+#
+# Copyright 2011-2014, 2026, Juniper Networks, Inc.
+# All rights reserved.
+# This SOFTWARE is licensed under the LICENSE provided in the
+# ../Copyright file. By downloading, installing, copying, or otherwise
+# using the SOFTWARE, you agree to be bound by the terms of that
+# LICENSE.
+#
+
+prefix="@prefix@"
+exec_prefix="@exec_prefix@"
+includedir="@includedir@"
+libdir="@libdir@"
+
+XO_BINDIR="@XO_BINDIR@"
+XO_LIBDIR="@XO_LIBDIR@"
+XO_INCLUDEDIR="@XO_INCLUDEDIR@"
+XO_SHAREDIR="@XO_SHAREDIR@"
+XO_ENCODERDIR="@XO_ENCODERDIR@"
+XO_FILTERDIR="@XO_FILTERDIR@"
+XO_LLVMDIR="@XO_LLVMDIR@"
+
+XO_SDK_PATH="@SDK_PATH@"
+XO_LLVM_CLANG="@LLVM_CLANG@"
+XO_LLVM_CONFIG="@LLVM_CONFIG@"
+
+XO_GETTEXT_CFLAGS="@GETTEXT_CFLAGS@"
+XO_GETTEXT_LIBS="@GETTEXT_LIBS@"
+XO_GETTEXT_LIBDIR="@GETTEXT_LIBDIR@"
+XO_GETTEXT_BINDIR="@GETTEXT_BINDIR@"
+
+LIBXO_VERSION=""@LIBXO_VERSION@"
+LIBXO_VERSION_EXTRA=""@LIBXO_VERSION_EXTRA@"
+LIBXO_NEED_FILTERS="@LIBXO_NEED_FILTERS@"
+
+# Note these are repeated in xocc.sh.in
+XO_SDK_OPTIONS=${XO_SDK_PATH:+-isysroot ${XO_SDK_PATH}}
+
+XO_VALIDATE_OPTS="\
+-fplugin=${XO_LLVMDIR}/xo_validate.so \
+-mllvm -xo-validate-errors-as-warnings \
+"
+
+XO_PRECOMPILE_OPTS="\
+-fpass-plugin=${XO_LLVMDIR}/xo_precompile.so \
+"
+
+XO_LIBS="-lxo ${XO_GETTEXT_LIBS}"
+
+usage()
+{
+    cat <<EOF
+Usage: libxo-config [OPTION]
+
+Known values for OPTION are:
+
+  --bindir              libxo XO_BINDIR value
+  --cflags		print pre-processor and compiler flags
+  --encoderdir          libxo XO_ENCODERDIR value
+  --filterdir           libxo XO_FILTERDIR value
+  --filters             libxo LIBXO_NEED_FILTERS value
+  --gettext-bindir      libxo XO_GETTEXT_BINDIR value
+  --gettext-cflags      libxo XO_GETTEXT_CFLAGS value
+  --gettext-libdir      libxo XO_GETTEXT_LIBDIR value
+  --gettext-libs        libxo XO_GETTEXT_LIBS value
+  --help		display this help and exit
+  --includedir          libxo XO_INCLUDEDIR value
+  --libdir              libxo XO_LIBDIR value
+  --libs		print library linking information
+  --llvm-cflags         compiler cflags for validate and precompile plugins
+  --llvm-cflags-precompile compiler cflags for precompile plugins
+  --llvm-cflags-validate compiler cflags for validate plugins
+  --llvm-clang          libxo LLVM_CLANG value
+  --llvm-config         libxo LLVM_CONFIG value
+  --llvmdir             libxo XO_LLVMDIR value
+  --sdk-cflags          compile flags (if any) needed by the sdk (MacOS)
+  --sdk-path            libxo SDK_PATH value
+  --share		print share directory
+  --sharedir            libxo XOSHAREDIR value
+  --version		output version information
+
+EOF
+
+    exit $1
+}
+
+if test $# -eq 0; then
+    usage 1
+fi
+
+cflags=false
+libs=false
+
+while test $# -gt 0; do
+    case "$1" in
+    --prefix)
+	echo $prefix
+	;;
+
+    --exec-prefix)
+	echo $exec_prefix
+	;;
+
+    --version)
+	echo @VERSION@
+	;;
+
+    --help)
+	usage 0
+	;;
+
+    --cflags)
+       	echo -I@XO_INCLUDEDIR@ @XO_CFLAGS@
+       	;;
+
+    --libs|--ldflags)
+        if [ "`uname`" = "Linux" ]
+	then
+	    if [ "@XO_LIBDIR@" = "-L/usr/lib" -o "@XO_LIBDIR@" = "-L/usr/lib64" ]
+	    then
+		echo @XO_LIBS@ 
+	    else
+		echo -L@XO_LIBDIR@ @XO_LIBS@ 
+	    fi
+	else
+	    echo -L@XO_LIBDIR@ @XO_LIBS@
+	fi
+       	;;
+
+    --bindir)
+	echo ${XO_BINDIR}
+	;;
+
+    --libdir)
+	echo ${XO_LIBDIR}
+	;;
+
+    --includedir)
+	echo ${XO_INCLUDEDIR}
+	;;
+
+    --sharedir|--share)
+	echo ${XO_SHAREDIR}
+	;;
+
+    --encoderdir)
+	echo ${XO_ENCODERDIR}
+	;;
+
+    --filterdir)
+	echo ${XO_FILTERDIR}
+	;;
+
+    --llvmdir)
+	echo ${XO_LLVMDIR}
+	;;
+
+    --sdk-cflags|--sdk_cflags)
+	echo ${XO_SDK_OPTIONS}
+	;;
+
+    --sdk-path|--sdk_path)
+	echo ${XO_SDK_PATH}
+	;;
+
+    --llvm-cflags|--llvm_cflags)
+	echo ${XO_VALIDATE_OPTS} ${XO_PRECOMPILE_OPTS}
+	;;
+
+    --llvm-cflags-precompile|--llvm_cflags_precompile)
+	echo ${XO_PRECOMPILE_OPTS}
+	;;
+
+    --llvm-cflags-validate|--llvm_cflags_validate)
+	echo ${XO_PRECOMPILE_OPTS}
+	;;
+
+    --llvm-clang|--llvm_clang)
+	echo ${XO_LLVM_CLANG}
+	;;
+
+    --llvm-config|--llvm_config)
+	echo ${XO_LLVM_CONFIG}
+	;;
+
+    --gettext-cflags|--gettext_cflags)
+	echo ${XO_GETTEXT_CFLAGS}
+	;;
+
+    --gettext-libs|--gettext_libs)
+	echo ${XO_GETTEXT_LIBS}
+	;;
+
+    --gettext-libdir|--gettext_libdir)
+	echo ${XO_GETTEXT_LIBDIR}
+	;;
+
+    --gettext-bindir|--gettext_bindir)
+	echo ${XO_GETTEXT_BINDIR}
+	;;
+
+    --filters)
+	echo ${LIBXO_NEED_FILTERS}
+	;;
+
+    *)
+	usage
+	exit 1
+	;;
+    esac
+    shift
+done
+
+exit 0

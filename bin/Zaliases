@@ -1,6 +1,8 @@
 set top_src=`pwd`
 alias Zautoreconf "(cd $top_src ; autoreconf --install)"
 
+set ROOT_DIR=${HOME}/work/root
+
 set ZENV=""
 
 switch ( `uname` )
@@ -24,12 +26,11 @@ else
 endif
 
 set opts=' \
---with-libslax-prefix=${HOME}/work/root \
 --enable-debug \
 --enable-filters \
 --enable-warnings \
 --enable-printflike \
---prefix ${HOME}/work/root \
+--prefix ${ROOT_DIR} \
 ${gettext} \
 ${llvmconfig} \
 '
@@ -45,6 +46,12 @@ alias mk "make CFLAGS='$mycflags' all install"
 
 mkdir -p build
 cd build
+
+if ( -e root ) then
+    set ROOT_DIR=`readlink root`
+else
+    ln -s ${ROOT_DIR} root
+endif
 
 
 alias xx 'cc -I.. -W -Wall -Wstrict-prototypes -Wmissing-prototypes -Wpointer-arith -Werror -Waggregate-return -Wcast-align -Wcast-qual -Wchar-subscripts -Wcomment -Wformat -Wimplicit -Wmissing-declarations -Wnested-externs -Wparentheses -Wreturn-type -Wshadow -Wswitch -Wtrigraphs -Wuninitialized -Wunused -Wwrite-strings -fno-inline-functions-called-once -g -O2 -o xtest -DUNIT_TEST libxo.c'

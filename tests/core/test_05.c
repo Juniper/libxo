@@ -1,4 +1,5 @@
 /*
+ * SPDX-License-Identifier: BSD-2-Clause
  * Copyright (c) 2014, Juniper Networks, Inc.
  * All rights reserved.
  * This SOFTWARE is licensed under the LICENSE provided in the
@@ -10,11 +11,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <wchar.h>
 
-#include "xo.h"
 #include "xo_config.h"
+#include "xo.h"
+#include "xo_string.h"
 
 #ifdef LIBXO_WCWIDTH
 #include "xo_wcwidth.h"

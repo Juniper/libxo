@@ -1,4 +1,5 @@
 /*
+ * SPDX-License-Identifier: BSD-2-Clause
  * Copyright (c) 2015, Juniper Networks, Inc.
  * All rights reserved.
  * This SOFTWARE is licensed under the LICENSE provided in the
@@ -64,6 +65,7 @@
 #endif /* HAVE_SYSCTLBYNAME */
 
 #include "xo.h"
+#include "xo_string.h"
 #include "xo_private.h"
 #include "xo_encoder.h"		/* For xo_realloc */
 #include "xo_buf.h"

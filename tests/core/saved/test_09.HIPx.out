@@ -91,3 +91,27 @@
 </div>
 <div class="line">
 </div>
+<div class="line">
+  <div class="data" data-tag="name" data-xpath="/top/data/quotes/item/name" data-key="key">plain</div>
+  <div class="data" data-tag="count" data-xpath="/top/data/quotes/item[name = 'plain']/count">1</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="name" data-xpath="/top/data/quotes/item/name" data-key="key">don't</div>
+  <div class="data" data-tag="count" data-xpath="/top/data/quotes/item[name = &quot;don't&quot;]/count">2</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="name" data-xpath="/top/data/quotes/item/name" data-key="key">a'"b</div>
+  <div class="data" data-tag="count" data-xpath="/top/data/quotes/item[name = concat('a', &quot;'&quot;, '&quot;b')]/count">3</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="name" data-xpath="/top/data/quotes/item/name" data-key="key">this&amp;&amp;that</div>
+  <div class="data" data-tag="count" data-xpath="/top/data/quotes/item[name = 'this&amp;&amp;that']/count">4</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="name" data-xpath="/top/data/quotes/item/name" data-key="key">'"sure"'</div>
+  <div class="data" data-tag="count" data-xpath="/top/data/quotes/item[name = concat(&quot;'&quot;, '&quot;sure&quot;', &quot;'&quot;)]/count">5</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="name" data-xpath="/top/data/quotes/item/name" data-key="key">"'nuff'"</div>
+  <div class="data" data-tag="count" data-xpath="/top/data/quotes/item[name = concat('&quot;', &quot;'&quot;, 'nuff', &quot;'&quot;, '&quot;')]/count">5</div>
+</div>

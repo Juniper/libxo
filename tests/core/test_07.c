@@ -1,4 +1,5 @@
 /*
+ * SPDX-License-Identifier: BSD-2-Clause
  * Copyright (c) 2014, Juniper Networks, Inc.
  * All rights reserved.
  * This SOFTWARE is licensed under the LICENSE provided in the
@@ -54,7 +55,7 @@ main (int argc, char **argv)
 
     xo_open_list("test");
     xo_open_instance("test");
-    xo_emit("{ek:filename/%s}", NULL);
+    xo_emit("{ek:filename/%s}", (void *) 0);
     xo_close_instance("test");
     xo_close_list("test");
 

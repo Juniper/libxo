@@ -42,6 +42,7 @@ noinst_HEADERS = \
      xo_format.h \
      xo_humanize.h \
      xo_private.h \
+     xo_string.h \
      xo_utf8.h \
      xo_wcwidth.h
 
@@ -59,13 +60,14 @@ man3_files = \
     xo_add_filter.3 \
     xo_attr.3 \
     xo_create.3 \
-    xo_discarding_output.3 \
     xo_emit.3 \
     xo_emit_err.3 \
     xo_err.3 \
     xo_error.3 \
     xo_finish.3 \
     xo_flush.3 \
+    xo_is_emitting.3 \
+    xo_map_add.3 \
     xo_message.3 \
     xo_no_setlocale.3 \
     xo_open_container.3 \
@@ -88,7 +90,6 @@ man5_files = \
 man7_files = \
     libxo.7 \
     xo_csv.7 \
-    xo_filter.7 \
     xo_options.7
 
 man_MANS = ${man3_files} ${man5_files} ${man7_files}

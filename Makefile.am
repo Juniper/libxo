@@ -12,7 +12,6 @@ ACLOCAL_AMFLAGS = -I m4
 
 SUBDIRS = \
     bin \
-    filter \
     format \
     libxo \
     xo \
@@ -22,17 +21,20 @@ SUBDIRS = \
     doc \
     encoder
 
+if LIBXO_NEED_FILTERS
+SUBDIRS += filter
+endif
+
 if HAVE_VALIDATE
 SUBDIRS += llvm-plugins
 endif
 
 SUBDIRS += tests
 
-bin_SCRIPTS=libxo-config
 dist_doc_DATA = Copyright
 
 EXTRA_DIST = \
-    libxo-config.in \
+    libxo-config.sh.in \
     warnings.mk \
     README.md \
     INSTALL.md \
@@ -132,6 +134,14 @@ packages:
 			&& git commit -m 'new packaging data' \
                                ${GH_PACKAGING_DIR} \
 			&& git push origin gh-pages ) ; true
+
+install-exec-local:
+	mkdir -p ${DESTDIR}${bindir}
+	install libxo-config.sh ${DESTDIR}${bindir}/libxo-config
+
+uninstall-local:
+	${RM} -f ${DESTDIR}${bindir}/libxo-config
+
 
 ANALYZE_DIR = ~/trash/libxo
 ANALYZE_CMD = scan-build-mp-3.6

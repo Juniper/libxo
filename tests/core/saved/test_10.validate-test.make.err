@@ -1,0 +1,17 @@
+../../../tests/core/test_10.c:201:13: warning: libxo: field role ('P') requires a name or format: '{P:}'
+  201 |     xo_emit("X{P:}X", "epic fail");
+      |             ^
+../../../tests/core/test_10.c:201:13: warning: libxo: format expects 0 argument(s) but 1 provided
+../../../tests/core/test_10.c:202:13: warning: libxo: field role ('T') requires a name or format: '{T:}'
+  202 |     xo_emit("X{T:}X", "epic fail");
+      |             ^
+../../../tests/core/test_10.c:202:13: warning: libxo: format expects 0 argument(s) but 1 provided
+../../../tests/core/test_10.c:203:13: warning: libxo: field role ('N') requires a name or format: '{N:}'
+  203 |     xo_emit("X{N:}X", "epic fail");
+      |             ^
+../../../tests/core/test_10.c:203:13: warning: libxo: format expects 0 argument(s) but 1 provided
+../../../tests/core/test_10.c:204:13: warning: libxo: field role ('L') requires a name or format: '{L:}'
+  204 |     xo_emit("X{L:}X\n", "epic fail");
+      |             ^
+../../../tests/core/test_10.c:204:13: warning: libxo: format expects 0 argument(s) but 1 provided
+8 warnings generated.

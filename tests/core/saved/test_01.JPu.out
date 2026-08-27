@@ -1,5 +1,12 @@
 {
   "data": {
+    "plus": 42.1,
+    "minus": 41.2,
+    "label": "label",
+    "total": "format",
+    "per_call": 35.7,
+    "min": "format",
+    "max": "format",
     "thing": "one",
     "thing": "two",
     "thing": "three",
@@ -196,7 +203,23 @@
       "three": 3,
       "one": 1,
       "two": 2,
-      "three": 3
+      "three": 3,
+      "i64": 5,
+      "i32": 5,
+      "i16": 5,
+      "i8": 5,
+      "u64": 5,
+      "u32": 5,
+      "u16": 5,
+      "u8": 5,
+      "u64": 00000005,
+      "u32": 0005,
+      "u64_hex": "0x5",
+      "u0": 5,
+      "u31": 5,
+      "u33": 5,
+      "u32s": "five_u32",
+      "unothing": 5
     }
   }
 }

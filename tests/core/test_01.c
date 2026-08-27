@@ -1,4 +1,5 @@
 /*
+ * SPDX-License-Identifier: BSD-2-Clause
  * Copyright (c) 2014-2019, Juniper Networks, Inc.
  * All rights reserved.
  * This SOFTWARE is licensed under the LICENSE provided in the
@@ -54,7 +55,9 @@ main (int argc, char **argv)
     };
 
     int opt_count = 1;
+    int opt_top_count = 1;
     int opt_discard = 0;
+    int opt_pid = 0;
 
     char name[] = "test_01.test";  /* test trimming of xo_program */
     argv[0] = name;
@@ -64,30 +67,34 @@ main (int argc, char **argv)
 	return 1;
 
     for (argc = 1; argv[argc]; argc++) {
-	if (xo_streq(argv[argc], "xml"))
-	    xo_set_style(NULL, XO_STYLE_XML);
-	else if (xo_streq(argv[argc], "json"))
-	    xo_set_style(NULL, XO_STYLE_JSON);
-	else if (xo_streq(argv[argc], "text"))
-	    xo_set_style(NULL, XO_STYLE_TEXT);
-	else if (xo_streq(argv[argc], "html"))
-	    xo_set_style(NULL, XO_STYLE_HTML);
-	else if (xo_streq(argv[argc], "pretty"))
-	    xo_set_flags(NULL, XOF_PRETTY);
-	else if (xo_streq(argv[argc], "xpath"))
-	    xo_set_flags(NULL, XOF_XPATH);
-	else if (xo_streq(argv[argc], "info"))
-	    xo_set_flags(NULL, XOF_INFO);
-	else if (xo_streq(argv[argc], "debug"))
-	    xo_set_flags(NULL, XOF_DEBUG);
-	else if (xo_streq(argv[argc], "count"))
+	char *cp = argv[argc];
+	if (xo_streq(cp, "count"))
 	    opt_count = atoi(argv[++argc]);
-	else if (xo_streq(argv[argc], "discard"))
+	else if (xo_streq(cp, "debug"))
+	    xo_set_flags(NULL, XOF_DEBUG);
+	else if (xo_streq(cp, "discard"))
 	    opt_discard = 1;
-        else if (xo_streq(argv[argc], "error")) {
+        else if (xo_streq(cp, "error")) {
             close(-1);
             xo_err(1, "error detected");
-        }
+        } else if (xo_streq(cp, "html"))
+	    xo_set_style(NULL, XO_STYLE_HTML);
+	else if (xo_streq(cp, "info"))
+	    xo_set_flags(NULL, XOF_INFO);
+	else if (xo_streq(cp, "json"))
+	    xo_set_style(NULL, XO_STYLE_JSON);
+	else if (xo_streq(cp, "pid"))
+	    opt_pid = 1;
+	else if (xo_streq(cp, "pretty"))
+	    xo_set_flags(NULL, XOF_PRETTY);
+	else if (xo_streq(cp, "text"))
+	    xo_set_style(NULL, XO_STYLE_TEXT);
+	else if (xo_streq(cp, "top-count"))
+	    opt_top_count = atoi(argv[++argc]);
+	else if (xo_streq(cp, "xpath"))
+	    xo_set_flags(NULL, XOF_XPATH);
+	else if (xo_streq(cp, "xml"))
+	    xo_set_style(NULL, XO_STYLE_XML);
     }
 
     if (opt_discard) {
@@ -98,8 +105,17 @@ main (int argc, char **argv)
 	}
     }
 
+    if (opt_pid)
+	fprintf(stderr, "PID %lu\n", (long unsigned) getpid());
+
     xo_set_info(NULL, info, -1);
     xo_set_flags(NULL, XOF_KEYS);
+
+    xo_emit("[{:plus/%8.1f}] [{:minus/%-8.1f}]\n", 42.1, 41.2);
+
+    xo_emit("[{:label/%-16s}]  [{:total/%15s}] [{:per-call/%8.1f}] "
+	    "[{:min/%15s}] [{:max/%15s}]\n",
+	    "label", "format", 35.7, "format", "format");
 
     xo_emit("other: {a:}\n", "thing", "one"); /* field before top-level tag */
     xo_emit("other: {a:%s}\n", "thing", "two"); /* invalid content */
@@ -109,6 +125,8 @@ main (int argc, char **argv)
     xo_emit("Blocks: {:block/%u}\n", 56);
 
     xo_open_container_h(NULL, "top-level");
+
+ top:
 
     xo_emit("static {:type/ethernet} {:type/bridge} {:type/%4du} {:type/%3d}",
 	    18, 24);
@@ -291,6 +309,30 @@ main (int argc, char **argv)
     xo_emitr(buf, 1, 2, 3);
     buf[0] = 'X';
     xo_emitr(buf, 1, 2, 3);
+
+    uint64_t five_u64 = 5; int64_t five_i64 = 5;
+    uint32_t five_u32 = 5; int32_t five_i32 = 5;
+    uint16_t five_u16 = 5; int16_t five_i16 = 5;
+    uint8_t five_u8 = 5; int8_t five_i8 = 5;
+
+    xo_emit("i64 {:i64/%!64d}, i32 {:i32/%!32d}, i16 {:i16/%!16d}, "
+	    "i8 {:i8/%!8d}\n",
+	    five_i64, five_i32, five_i16, five_i8);
+
+    xo_emit("u64 {:u64/%!64u}, u32 {:u32/%!32u}, u16 {:u16/%!16u}, "
+	    "u8 {:u8/%!8u}\n",
+	    five_u64, five_u32, five_u16, five_u8);
+
+    xo_emit("u64 {:u64/%8.8!64u}, u32 {:u32/%*.*!32u}, u64 {:u64-hex/%#!64x}, "
+	    "u0 {:u0/%!0u}\n",
+	    five_u64, 4, 4, five_u32, five_u64, five_u32);
+
+    xo_emit("u31 {:u31/%!31u}, u33 {:u33/%!33u}, u32s {:u32s/%!32s}, "
+	    "unothing {:unothing/%!u}\n",
+	    five_u32, five_u32, "five_u32", five_u32);
+
+    if (opt_top_count && --opt_top_count > 0)
+	goto top;
 
     xo_close_container_h(NULL, "top-level");
 

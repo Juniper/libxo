@@ -6,7 +6,7 @@
 # using the SOFTWARE, you agree to be bound by the terms of that
 # LICENSE.
 
-SUBDIRS = core utf8 xo
+SUBDIRS = benchmark core utf8 xo
 
 if HAVE_GETTEXT
 SUBDIRS += gettext
@@ -38,3 +38,6 @@ valgrind:
 	@echo '## Running the regression tests under Valgrind'
 	@echo '## Go get a cup of coffee it is gonna take a while ...'
 	${MAKE} VALGRIND='valgrind -q' tests
+
+EXTRA_DIST = \
+	run-tests.sh
