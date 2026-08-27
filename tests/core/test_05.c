@@ -13,17 +13,8 @@
 #include <wchar.h>
 
 #include "xo_config.h"
-
-#ifdef HAVE_GCC
-#define _GNU_SOURCE
-#define __USE_GNU 1
-#include <string.h>
-#include <bsd/string.h>
-#else /* HAVE_GCC */
-#include <string.h>
-#endif /* HAVE_GCC */
-
 #include "xo.h"
+#include "xo_string.h"
 
 #ifdef LIBXO_WCWIDTH
 #include "xo_wcwidth.h"
