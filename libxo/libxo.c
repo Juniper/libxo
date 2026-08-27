@@ -3496,7 +3496,7 @@ xo_trim_ws (xo_buffer_t *xbp, ssize_t len)
 
     /* First trim leading space */
     for (cp = sp = xbp->xb_curp, ep = cp + len; cp < ep; cp++) {
-	if (*cp != ' ')
+	if (!isblank((int) *cp))
 	    break;
     }
 
@@ -3508,7 +3508,7 @@ xo_trim_ws (xo_buffer_t *xbp, ssize_t len)
 
     /* Then trim off the end */
     for (cp = xbp->xb_curp, sp = ep = cp + len; cp < ep; ep--) {
-	if (ep[-1] != ' ')
+	if (!isblank((int) ep[-1]))
 	    break;
     }
 
@@ -4509,7 +4509,7 @@ xo_build_predicate (xo_handle_t *xop, const char *name, ssize_t nlen,
 	/* Recompute after possible realloc */
 	char *vs = pbp->xb_bufp + val_off;
 	char *ep = pbp->xb_curp;
-	while (ep > vs && ep[-1] == ' ')
+	while (ep > vs && isblank((int)ep[-1]))
 	    ep -= 1;
 
 	char *sp = vs;
