@@ -157,7 +157,7 @@ test-precompile: ${PRECOMPILE_PLUGIN}
 	        > out/$$tc.ir.out 2> out/$$tc.ir.err ; \
 	    ${DIFF} -Nu ${srcdir}/saved/$$tc.ir.out  out/$$tc.ir.out ; \
 	    ${DIFF} -Nu ${srcdir}/saved/$$tc.ir.err  out/$$tc.ir.err ; \
-	    nm out/$$tc.pass.o | grep xo_ | ${SED} -E -e 's/.{16}//' | sort \
+	    nm out/$$tc.pass.o | grep xo_emit_cached | sort -u \
 	        > out/$$tc.nm ; \
 	    ${DIFF} -Nu ${srcdir}/saved/$$tc.nm out/$$tc.nm ; \
 	done)
