@@ -119,6 +119,11 @@ fi
 
 AM_CONDITIONAL([HAVE_HUMANIZE_NUMBER], [test "$HAVE_HUMANIZE_NUMBER" = "yes"])
 
+AC_CHECK_LIB([bsd], [strlcpy],
+     [HAVE_LIBBSD=yes],
+     [HAVE_LIBBSD=no])
+AM_CONDITIONAL([HAVE_LIBBSD], [test "$HAVE_LIBBSD" = "yes"])
+
 AC_MSG_CHECKING([exterr results])
 
 if test "$ac_cv_header_exterr_h" = "yes" -a "$ac_cv_func_uexterr_gettext" = "yes"; then
