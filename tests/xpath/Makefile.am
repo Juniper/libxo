@@ -41,6 +41,10 @@ if HAVE_HUMANIZE_NUMBER
 LDADD += -lutil
 endif
 
+if HAVE_LIBBSD
+LDADD += -lbsd
+endif
+
 #
 # Sadly, pathetically, this list must be maintained by hand.  We can't
 # just say 'TEST_FILES=`sed "s:^:saved:" ${srcdir}/saved/files.txt`.
