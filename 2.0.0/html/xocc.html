@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>The “xocc” compiler wrapper &#8212; libxo 
+ documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinxdoc.css?v=3ac2912a" />
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="The “xo” Utility" href="xo.html" />
+    <link rel="prev" title="LLVM/clang Plugins" href="plugins.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="xo.html" title="The “xo” Utility"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="plugins.html" title="LLVM/clang Plugins"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">libxo 
+ documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">The “xocc” compiler wrapper</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="the-xocc-compiler-wrapper">
+<span id="xocc"></span><span id="index-0"></span><h1>The “xocc” compiler wrapper<a class="headerlink" href="#the-xocc-compiler-wrapper" title="Link to this heading">¶</a></h1>
+<p><code class="code docutils literal notranslate"><span class="pre">xocc</span></code> is a small shell wrapper to aid with invoking the C compiler
+with using <code class="code docutils literal notranslate"><span class="pre">libxo</span></code>’s LLVM plugins.  <code class="code docutils literal notranslate"><span class="pre">xocc</span></code> can be used in place of
+<code class="code docutils literal notranslate"><span class="pre">cc</span></code> in another project’s build: pass it wherever that project’s build
+system expects a compiler, and it will invoke the real C compiler with
+libxo’s plugin flags as needed.  <code class="code docutils literal notranslate"><span class="pre">libxo</span></code> includes LLVM/clang plugins,
+described in <a class="reference internal" href="plugins.html#plugins"><span class="std std-ref">LLVM/clang Plugins</span></a> and <code class="code docutils literal notranslate"><span class="pre">xocc</span></code> handles some of the details
+needed to invoke them properly.</p>
+<section id="invoking-xocc">
+<h2>Invoking “xocc”<a class="headerlink" href="#invoking-xocc" title="Link to this heading">¶</a></h2>
+<p><code class="code docutils literal notranslate"><span class="pre">xocc</span></code> requires a verb as its first argument that describe and adjusts
+the actions and behaviors requested.  A verb is one or more tokens
+joined with <code class="code docutils literal notranslate"><span class="pre">+</span></code> (enabled) or <code class="code docutils literal notranslate"><span class="pre">-</span></code> (disabled):</p>
+<ul class="simple">
+<li><p><strong>validate</strong> - Add the xo_validate plugin to the compiler
+invocation.  (default: disabled)</p></li>
+<li><p><strong>lint</strong> - Add the extra xo_validate style checks
+(–xo-validate-lint); implies <code class="code docutils literal notranslate"><span class="pre">validate</span></code>.  (default: disabled)</p></li>
+<li><p><strong>errors</strong> - Report the syntactic and semantic problems found by
+xo_validate as errors instead of warnings.  (default: disabled -
+i.e. warnings by default)</p></li>
+<li><p><strong>precompile</strong> - Add the xo_precompile plugin to the compiler
+invocation.  (default: disabled)</p></li>
+<li><p><strong>sdk</strong> - Add any configured SDK flags to the compiler invocation.
+(default: enabled if the operating system needs it)</p></li>
+<li><p><strong>ldflags</strong> - Add any <code class="code docutils literal notranslate"><span class="pre">ld</span></code> flags needed for proper libxo
+compilation.  These are only needed (and passed) at the link stage.
+(default: enabled)</p></li>
+<li><p><strong>echo</strong> - Echo the command line for the underlying compiler
+invocation before execution.  (default: disabled).</p></li>
+</ul>
+<p>The token full is a shorthand for turning on validate, lint, and
+precompile together.  It is a provided since this is the typical use
+case:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">CC</span><span class="o">=</span><span class="s1">&#39;xocc full&#39;</span>
+</pre></div>
+</div>
+</section>
+<section id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Link to this heading">¶</a></h2>
+<p>To turn warnings into hard errors, use <code class="code docutils literal notranslate"><span class="pre">errors</span></code>:</p>
+<blockquote>
+<div><p>make CC=’xocc full’</p>
+</div></blockquote>
+<p>Adding <code class="code docutils literal notranslate"><span class="pre">+errors</span></code> will turn warnings into hard errors::n</p>
+<blockquote>
+<div><p>make CC=’xocc full+errors’</p>
+</div></blockquote>
+<p>Drop the SDK flag, or drop precompilation, the same way:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">CC</span><span class="o">=</span><span class="s1">&#39;xocc full-sdk&#39;</span>
+<span class="n">make</span> <span class="n">CC</span><span class="o">=</span><span class="s1">&#39;xocc full-precompile&#39;</span>
+<span class="n">make</span> <span class="n">CC</span><span class="o">=</span><span class="s1">&#39;xocc full-sdk+errors&#39;</span>
+</pre></div>
+</div>
+<p>Or build a verb up from nothing instead of trimming <code class="code docutils literal notranslate"><span class="pre">full</span></code> down — these
+two are equivalent:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">CC</span><span class="o">=</span><span class="s1">&#39;xocc validate+precompile&#39;</span>
+<span class="n">make</span> <span class="n">CC</span><span class="o">=</span><span class="s1">&#39;xocc full-lint&#39;</span>
+</pre></div>
+</div>
+<p><code class="code docutils literal notranslate"><span class="pre">lint</span></code> on its own (without <code class="code docutils literal notranslate"><span class="pre">validate</span></code>, <code class="code docutils literal notranslate"><span class="pre">errors</span></code>, or <code class="code docutils literal notranslate"><span class="pre">precompile</span></code>) is a
+quick check rather than a real build: <code class="code docutils literal notranslate"><span class="pre">xocc</span></code> adds <code class="code docutils literal notranslate"><span class="pre">-fsyntax-only</span></code>
+automatically, since there’s nothing to actually compile:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">CC</span><span class="o">=</span><span class="s1">&#39;xocc lint&#39;</span>
+</pre></div>
+</div>
+<p>Word and letter forms can be mixed freely, but tokens must be joined
+with <code class="code docutils literal notranslate"><span class="pre">+</span></code>/<code class="code docutils literal notranslate"><span class="pre">-</span></code> — letters can’t just be run together.  <code class="code docutils literal notranslate"><span class="pre">v+l+p</span></code> is <code class="code docutils literal notranslate"><span class="pre">full</span></code>
+spelled out; <code class="code docutils literal notranslate"><span class="pre">vlp</span></code>, with no separators, is an error.</p>
+<p>At least one of <code class="code docutils literal notranslate"><span class="pre">validate</span></code>, <code class="code docutils literal notranslate"><span class="pre">lint</span></code>, <code class="code docutils literal notranslate"><span class="pre">errors</span></code>, or <code class="code docutils literal notranslate"><span class="pre">precompile</span></code> has to
+end up enabled, or <code class="code docutils literal notranslate"><span class="pre">xocc</span></code> refuses to run.  <code class="code docutils literal notranslate"><span class="pre">xocc</span> <span class="pre">sdk</span></code> on its own, or a
+bare compiler flag or <code class="code docutils literal notranslate"><span class="pre">.c</span></code> file (meaning the verb was left off
+entirely), are both errors too, rather than a silent compile without
+libxo’s flags.</p>
+<p>Add <code class="code docutils literal notranslate"><span class="pre">echo</span></code> to see exactly what <code class="code docutils literal notranslate"><span class="pre">xocc</span></code> is about to run — often the
+fastest way to check a verb combination did what you expected:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">CC</span><span class="o">=</span><span class="s1">&#39;xocc full+echo&#39;</span>
+</pre></div>
+</div>
+<p><code class="code docutils literal notranslate"><span class="pre">xocc</span></code> picks which compiler to invoke, but an explicit compiler can be
+specified using the <code class="code docutils literal notranslate"><span class="pre">XO_REAL_CC</span></code>, environment variable:</p>
+<blockquote>
+<div><p>XO_REAL_CC=/usr/local/bin/clang-19 make CC=’xocc full’</p>
+</div></blockquote>
+<p><code class="code docutils literal notranslate"><span class="pre">xocc</span></code> also inspects the rest of its arguments to tell a compile stage
+(<code class="code docutils literal notranslate"><span class="pre">-c</span></code>, <code class="code docutils literal notranslate"><span class="pre">-E</span></code>, or <code class="code docutils literal notranslate"><span class="pre">-S</span></code> present) from a link stage.  The <code class="code docutils literal notranslate"><span class="pre">-L${libdir}</span>
+<span class="pre">-lxo</span></code> from the <code class="code docutils literal notranslate"><span class="pre">ldflags</span></code> token is only ever added at the link stage —
+<code class="code docutils literal notranslate"><span class="pre">xocc</span></code> suppresses it automatically for a compile-only invocation even
+if <code class="code docutils literal notranslate"><span class="pre">ldflags</span></code> is on, since there’s nothing to link yet:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xocc</span> <span class="n">full</span> <span class="o">-</span><span class="n">c</span> <span class="n">myprogram</span><span class="o">.</span><span class="n">c</span> <span class="o">-</span><span class="n">o</span> <span class="n">myprogram</span><span class="o">.</span><span class="n">o</span>
+<span class="n">xocc</span> <span class="n">full</span> <span class="n">myprogram</span><span class="o">.</span><span class="n">o</span> <span class="o">-</span><span class="n">o</span> <span class="n">myprogram</span>
+</pre></div>
+</div>
+<p>Both plugin flags, the SDK <code class="code docutils literal notranslate"><span class="pre">-isysroot</span></code>, and the link flags come from
+values baked in when libxo itself was configured — <code class="code docutils literal notranslate"><span class="pre">xocc</span></code> needs no
+<code class="code docutils literal notranslate"><span class="pre">-I</span></code>/<code class="code docutils literal notranslate"><span class="pre">-L</span></code> flags pointing back at the libxo tree, beyond whatever the
+project’s own build already passes for libxo’s headers.</p>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">On This Page</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">The “xocc” compiler wrapper</a><ul>
+<li><a class="reference internal" href="#invoking-xocc">Invoking “xocc”</a></li>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3><a href="index.html">Full Documentation</a></h3>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="plugins.html"
+                          title="previous chapter">LLVM/clang Plugins</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="xo.html"
+                          title="next chapter">The “xo” Utility</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/xocc.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="xo.html" title="The “xo” Utility"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="plugins.html" title="LLVM/clang Plugins"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">libxo 
+ documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">The “xocc” compiler wrapper</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2017-2019, Juniper Networks Inc.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

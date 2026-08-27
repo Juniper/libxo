@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>LLVM/clang Plugins &#8212; libxo 
+ documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinxdoc.css?v=3ac2912a" />
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="The “xocc” compiler wrapper" href="xocc.html" />
+    <link rel="prev" title="Encoders" href="encoders.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="xocc.html" title="The “xocc” compiler wrapper"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="encoders.html" title="Encoders"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">libxo 
+ documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">LLVM/clang Plugins</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="llvm-clang-plugins">
+<span id="plugins"></span><span id="index-0"></span><h1>LLVM/clang Plugins<a class="headerlink" href="#llvm-clang-plugins" title="Link to this heading">¶</a></h1>
+<p>libxo ships two optional LLVM/clang plugins that operate on
+<a class="reference internal" href="api.html#c.xo_emit" title="xo_emit"><code class="xref c c-func docutils literal notranslate"><span class="pre">xo_emit()</span></code></a>-family calls at compile time:</p>
+<ul class="simple">
+<li><p><strong>xo_validate</strong> — a clang AST plugin that checks <code class="code docutils literal notranslate"><span class="pre">libxo</span></code> format
+strings for syntax errors and checks each format string’s field
+descriptors against the types and count of the arguments actually
+passed, much like <code class="code docutils literal notranslate"><span class="pre">-Wformat</span></code> does for <code class="code docutils literal notranslate"><span class="pre">printf()</span></code>.</p></li>
+<li><p><strong>xo_precompile</strong> — an LLVM IR pass that finds <code class="code docutils literal notranslate"><span class="pre">libxo</span></code> calls whose
+format string is a compile-time constant, parses that format string
+during the build, and rewrites the call to <code class="code docutils literal notranslate"><span class="pre">xo_emit_cached()</span></code>, passing
+a pre-parsed field table as a constant.  This removes the runtime cost
+of parsing the format string on every call.</p></li>
+</ul>
+<p>Both plugins share a single format-string parser (the same one libxo
+uses internally, reached through a small C shim so the C++ plugin code
+never has to include libxo’s non-C++-safe internal headers), so their
+understanding of field syntax never drifts from the library’s own.</p>
+<p>These plugins are entirely optional.  Code built without them runs
+exactly as it always has, parsing format strings at run time.  Neither
+plugin changes libxo’s public behavior or output — <code class="code docutils literal notranslate"><span class="pre">xo_precompile</span></code>
+specifically only ever changes <em>when</em> a format string is parsed, never
+<em>what</em> it means.</p>
+<p>libxo includes <code class="code docutils literal notranslate"><span class="pre">xocc</span></code>, a compiler wrapper that already knows
+these paths (and the link-time <code class="code docutils literal notranslate"><span class="pre">-lxo</span></code> flags); see <a class="reference internal" href="xocc.html#xocc"><span class="std std-ref">The “xocc” compiler wrapper</span></a> for
+using it instead of setting these flags by hand.</p>
+<section id="building-the-plugins">
+<h2>Building the plugins<a class="headerlink" href="#building-the-plugins" title="Link to this heading">¶</a></h2>
+<p>The plugins require LLVM/clang development files (specifically
+<code class="code docutils literal notranslate"><span class="pre">llvm-config</span></code> and the matching Clang cmake package) and <code class="code docutils literal notranslate"><span class="pre">cmake</span></code>.  They
+are built as a <code class="code docutils literal notranslate"><span class="pre">cmake</span></code> subproject, driven from the normal
+autoconf/automake build via <code class="code docutils literal notranslate"><span class="pre">--with-llvm-config</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">../</span><span class="n">configure</span> <span class="o">--</span><span class="k">with</span><span class="o">-</span><span class="n">llvm</span><span class="o">-</span><span class="n">config</span><span class="o">=/</span><span class="n">opt</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">libexec</span><span class="o">/</span><span class="n">llvm</span><span class="o">-</span><span class="mi">19</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">llvm</span><span class="o">-</span><span class="n">config</span> \
+    <span class="o">--</span><span class="n">prefix</span> <span class="o">~/</span><span class="n">work</span><span class="o">/</span><span class="n">root</span>
+</pre></div>
+</div>
+<p>If <code class="code docutils literal notranslate"><span class="pre">--with-llvm-config</span></code> is omitted (or <code class="code docutils literal notranslate"><span class="pre">llvm-config</span></code> can’t be found),
+<code class="code docutils literal notranslate"><span class="pre">configure</span></code> disables the plugins entirely and the rest of the build is
+unaffected.</p>
+<p>On macOS, the plugins are built with the same clang that provides
+<code class="code docutils literal notranslate"><span class="pre">llvm-config</span></code>, which is not Apple’s system clang and does not know
+where the macOS SDK headers live.  <code class="code docutils literal notranslate"><span class="pre">configure</span></code> locates the SDK
+automatically via <code class="code docutils literal notranslate"><span class="pre">xcrun</span></code>; override it with <code class="code docutils literal notranslate"><span class="pre">--with-sdk-path=PATH</span></code>, or
+suppress the <code class="code docutils literal notranslate"><span class="pre">-isysroot</span></code> flag entirely with <code class="code docutils literal notranslate"><span class="pre">--with-sdk-path=no</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">../</span><span class="n">configure</span> <span class="o">--</span><span class="k">with</span><span class="o">-</span><span class="n">llvm</span><span class="o">-</span><span class="n">config</span><span class="o">=/</span><span class="n">opt</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">libexec</span><span class="o">/</span><span class="n">llvm</span><span class="o">-</span><span class="mi">19</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">llvm</span><span class="o">-</span><span class="n">config</span> \
+    <span class="o">--</span><span class="k">with</span><span class="o">-</span><span class="n">sdk</span><span class="o">-</span><span class="n">path</span><span class="o">=/</span><span class="n">Library</span><span class="o">/</span><span class="n">Developer</span><span class="o">/</span><span class="n">CommandLineTools</span><span class="o">/</span><span class="n">SDKs</span><span class="o">/</span><span class="n">MacOSX</span><span class="o">.</span><span class="n">sdk</span>
+</pre></div>
+</div>
+<p>After configuring, build normally; the plugins build alongside the rest
+of the tree and install into <code class="code docutils literal notranslate"><span class="pre">${prefix}/lib</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">build</span>
+<span class="n">make</span> <span class="n">CFLAGS</span><span class="o">=</span><span class="s1">&#39;-O2&#39;</span>
+<span class="n">make</span> <span class="n">install</span>
+</pre></div>
+</div>
+<p>Building just the plugins (skipping the rest of libxo) can be done from
+their subdirectory:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">build</span><span class="o">/</span><span class="n">llvm</span><span class="o">-</span><span class="n">plugins</span>
+<span class="n">make</span>
+</pre></div>
+</div>
+<p>This produces <code class="code docutils literal notranslate"><span class="pre">validate/xo_validate.so</span></code> and <code class="code docutils literal notranslate"><span class="pre">precompile/xo_precompile.so</span></code>.
+Both are <code class="code docutils literal notranslate"><span class="pre">cmake</span></code>-driven subprojects; <code class="code docutils literal notranslate"><span class="pre">configure</span></code> seeds each one’s cmake
+cache with the right <code class="code docutils literal notranslate"><span class="pre">LLVM_DIR</span></code>, <code class="code docutils literal notranslate"><span class="pre">Clang_DIR</span></code>, target architecture, and
+install prefix, so plain <code class="code docutils literal notranslate"><span class="pre">make</span></code> in that directory is sufficient — there
+is no separate <code class="code docutils literal notranslate"><span class="pre">cmake</span> <span class="pre">configure</span></code> step to run by hand.</p>
+</section>
+<section id="xo-validate-format-string-checking">
+<h2>xo_validate: format-string checking<a class="headerlink" href="#xo-validate-format-string-checking" title="Link to this heading">¶</a></h2>
+<p><code class="code docutils literal notranslate"><span class="pre">xo_validate</span></code> is a standard clang <code class="code docutils literal notranslate"><span class="pre">-fplugin</span></code> AST plugin.  It runs
+alongside the compiler’s normal parsing and codegen (it does not
+replace or suppress them), inspecting every call to <code class="code docutils literal notranslate"><span class="pre">xo_emit()</span></code> and its
+variants (<code class="code docutils literal notranslate"><span class="pre">xo_emit_h</span></code>, <code class="code docutils literal notranslate"><span class="pre">xo_emit_hf</span></code>, <code class="code docutils literal notranslate"><span class="pre">xo_emit_hvf</span></code>, the <code class="code docutils literal notranslate"><span class="pre">_p</span></code> wrappers,
+etc.) whose format string is a compile-time string constant.  For each
+one it checks:</p>
+<ol class="arabic simple">
+<li><p><strong>Syntax</strong> — malformed field descriptors, such as an unclosed <code class="code docutils literal notranslate"><span class="pre">{</span></code>.</p></li>
+<li><p><strong>Argument count</strong> — too few or too many arguments for the fields
+in the format string.</p></li>
+<li><p><strong>Argument type</strong> — the type each field’s display format expects
+(following the same length-modifier rules as <code class="code docutils literal notranslate"><span class="pre">printf</span></code>, e.g. <code class="code docutils literal notranslate"><span class="pre">%ld</span></code>
+expects <code class="code docutils literal notranslate"><span class="pre">long</span></code>, <code class="code docutils literal notranslate"><span class="pre">%zu</span></code> expects <code class="code docutils literal notranslate"><span class="pre">size_t</span></code>) is compared against the
+actual argument’s type, after the usual varargs promotions.</p></li>
+<li><p><strong>Style</strong> — a number of <code class="code docutils literal notranslate"><span class="pre">xolint</span></code>-style checks on field naming and
+anchor usage.  Leading digits, stray <code class="code docutils literal notranslate"><span class="pre">%</span></code> characters, and anchor
+width/format mismatches are always checked; underscores (instead of
+hyphens), upper-case letters, and names shorter than the minimum
+length are checked only when lint mode is enabled (see below).</p></li>
+</ol>
+<p>Diagnostics are reported through clang’s normal diagnostic engine, so
+they appear exactly like any other compiler diagnostic, with source
+location and a caret pointing at the offending call:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xo_validate_demo</span><span class="o">.</span><span class="n">c</span><span class="p">:</span><span class="mi">22</span><span class="p">:</span><span class="mi">13</span><span class="p">:</span> <span class="n">error</span><span class="p">:</span> <span class="n">libxo</span><span class="p">:</span> <span class="nb">format</span> <span class="n">expects</span> <span class="mi">2</span> <span class="n">argument</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="n">but</span> <span class="mi">1</span> <span class="n">provided</span>
+   <span class="mi">22</span> <span class="o">|</span>     <span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;{:name/</span><span class="si">%s</span><span class="s2">} {:age/</span><span class="si">%d</span><span class="s2">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;bob&quot;</span><span class="p">);</span>
+      <span class="o">|</span>             <span class="o">^</span>
+</pre></div>
+</div>
+<section id="tuning-diagnostics">
+<h3>Tuning diagnostics<a class="headerlink" href="#tuning-diagnostics" title="Link to this heading">¶</a></h3>
+<p>Two <code class="code docutils literal notranslate"><span class="pre">-mllvm</span></code> flags control how <code class="code docutils literal notranslate"><span class="pre">xo_validate</span></code> reports problems:</p>
+<ul class="simple">
+<li><p><strong>`-mllvm -xo-validate-errors-as-warnings`</strong> — by default, syntax,
+argument count, and argument type problems (checks 1-3 above) are
+reported as <strong>errors</strong>, so a build with the plugin loaded fails on
+them.  This is deliberate: these are almost always real bugs, and a
+checker that only ever warns is too easy to ignore.  This flag
+downgrades them to warnings instead, which is useful when first
+introducing the plugin to a codebase with an existing backlog of
+violations, or to keep a build green while an individual false
+positive gets sorted out upstream.  Style diagnostics (check 4) are
+always warnings and are unaffected by this flag.</p></li>
+<li><p><strong>`-mllvm -xo-validate-lint`</strong> — enables the additional cosmetic
+naming checks described under <strong>Style</strong> above (underscores, upper
+case, short names).  These are off by default since they’re closer
+to style preference than correctness; the always-on style checks
+(leading digits, anchor mismatches) still run either way.</p></li>
+</ul>
+<p>Both flags can be combined with any of the <code class="code docutils literal notranslate"><span class="pre">-fplugin=</span></code> invocations
+shown below, e.g.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">clang</span> <span class="o">-</span><span class="n">c</span> \
+    <span class="o">-</span><span class="n">fplugin</span><span class="o">=/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">xo_validate</span><span class="o">.</span><span class="n">so</span> \
+    <span class="o">-</span><span class="n">mllvm</span> <span class="o">-</span><span class="n">xo</span><span class="o">-</span><span class="n">validate</span><span class="o">-</span><span class="n">errors</span><span class="o">-</span><span class="k">as</span><span class="o">-</span><span class="n">warnings</span> \
+    <span class="o">-</span><span class="n">mllvm</span> <span class="o">-</span><span class="n">xo</span><span class="o">-</span><span class="n">validate</span><span class="o">-</span><span class="n">lint</span> \
+    <span class="o">-</span><span class="n">I</span><span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">xo</span><span class="o">/</span><span class="n">include</span> \
+    <span class="n">myprogram</span><span class="o">.</span><span class="n">c</span> <span class="o">-</span><span class="n">o</span> <span class="n">myprogram</span><span class="o">.</span><span class="n">o</span>
+</pre></div>
+</div>
+</section>
+<section id="invoking-xo-validate">
+<h3>Invoking <code class="code docutils literal notranslate"><span class="pre">xo_validate</span></code><a class="headerlink" href="#invoking-xo-validate" title="Link to this heading">¶</a></h3>
+<p>Invoke the validate plugin using <code class="code docutils literal notranslate"><span class="pre">-fplugin=</span></code>, pointing at the built
+<code class="code docutils literal notranslate"><span class="pre">.so</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>clang \
+    -fplugin=/path/to/xo_validate.so \
+    -I/path/to/xo/include \
+    -isysroot $(xcrun --show-sdk-path) \
+    myprogram.c
+</pre></div>
+</div>
+<p>It can also be loaded during a normal compile (the diagnostics appear
+alongside the compiler’s own, and compilation proceeds as usual):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">clang</span> <span class="o">-</span><span class="n">c</span> \
+    <span class="o">-</span><span class="n">fplugin</span><span class="o">=/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">xo_validate</span><span class="o">.</span><span class="n">so</span> \
+    <span class="o">-</span><span class="n">I</span><span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">xo</span><span class="o">/</span><span class="n">include</span> \
+    <span class="n">myprogram</span><span class="o">.</span><span class="n">c</span> <span class="o">-</span><span class="n">o</span> <span class="n">myprogram</span><span class="o">.</span><span class="n">o</span>
+</pre></div>
+</div>
+<p>To integrate it into a real build, add the two <code class="code docutils literal notranslate"><span class="pre">-fplugin=...</span></code> /
+<code class="code docutils literal notranslate"><span class="pre">-I...</span></code> flags to <code class="code docutils literal notranslate"><span class="pre">CFLAGS</span></code> for the translation units you want checked;
+there is nothing else to configure or link against.</p>
+<p>Since it only inspects the AST and does not need to link, using the
+<code class="code docutils literal notranslate"><span class="pre">-fsyntax-only</span></code> option is the fastest way to run it standalone, if
+only syntax checking is needed.</p>
+</section>
+</section>
+<section id="xo-precompile-build-time-format-parsing">
+<h2>xo_precompile: build-time format parsing<a class="headerlink" href="#xo-precompile-build-time-format-parsing" title="Link to this heading">¶</a></h2>
+<p><code class="code docutils literal notranslate"><span class="pre">xo_precompile</span></code> is an LLVM <strong>new pass-manager module</strong> plugin, loaded
+using <code class="code docutils literal notranslate"><span class="pre">-fpass-plugin=</span></code>.  It runs early in the optimization pipeline
+(<code class="code docutils literal notranslate"><span class="pre">PipelineStart</span></code>, before inlining or constant-folding can obscure a
+call or the string it references), and looks for calls to <code class="code docutils literal notranslate"><span class="pre">xo_emit()</span></code>
+and its variants where the format-string argument resolves to a
+constant C string.</p>
+<p>For each such call it will:</p>
+<ol class="arabic simple">
+<li><p>parse the format string with libxo’s own parser (via the shared C
+shim), producing the same offset-based field table
+(<code class="code docutils literal notranslate"><span class="pre">xo_field_info_t[]</span></code>) and pre-parsed display-format table
+(<code class="code docutils literal notranslate"><span class="pre">xo_fspec_t[]</span></code>) that <code class="code docutils literal notranslate"><span class="pre">xo_emit()</span></code> would otherwise build at run time,
+on every call.</p></li>
+<li><p>emit those tables as <code class="code docutils literal notranslate"><span class="pre">private</span> <span class="pre">constant</span></code> LLVM globals in the
+module.</p></li>
+<li><p>rewrite the call to the matching <code class="code docutils literal notranslate"><span class="pre">xo_emit_cached*()</span></code> entry point
+(<code class="code docutils literal notranslate"><span class="pre">xo_emit</span></code> → <code class="code docutils literal notranslate"><span class="pre">xo_emit_cached</span></code>, <code class="code docutils literal notranslate"><span class="pre">xo_emit_hf</span></code> → <code class="code docutils literal notranslate"><span class="pre">xo_emit_cached_hf</span></code>,
+and so on), passing a pointer to the generated table ahead of the
+format string and value arguments.</p></li>
+</ol>
+<p>At run time, <code class="code docutils literal notranslate"><span class="pre">xo_emit_cached()</span></code> skips straight to formatting using the
+supplied table instead of first scanning the format string to build
+one.  Output is byte-for-byte identical to what <code class="code docutils literal notranslate"><span class="pre">xo_emit()</span></code> would have
+produced from the same format string and arguments — the pass changes
+only when the format string gets parsed, never the result.</p>
+<p>If precompiling it isn’t possible or safe, calls are left untouched,
+falling back to ordinary <code class="code docutils literal notranslate"><span class="pre">xo_emit()</span></code> and parsing format strings at run
+time.  This is needed when:</p>
+<ul class="simple">
+<li><p>the format string isn’t a compile-time constant (e.g. it was built at
+run time, or came from a variable),</p></li>
+<li><p>the shim reports a parse error for it (the ordinary runtime path will
+report the same error, so nothing is silently swallowed), or</p></li>
+<li><p>the callee isn’t one of the known <code class="code docutils literal notranslate"><span class="pre">xo_emit*()</span></code> names, or is called
+indirectly through a function pointer.</p></li>
+</ul>
+<p>Because the rewrite happens at the IR level, it works regardless of
+what source-level macros or wrappers were used to reach <code class="code docutils literal notranslate"><span class="pre">xo_emit()</span></code>, as
+long as the call and its format-string argument survive to IR in a form
+the pass can see. It does <em>not</em> require any source changes — the same
+<code class="code docutils literal notranslate"><span class="pre">.c</span></code> file compiles correctly whether or not the pass is loaded, just
+faster when it is.</p>
+<section id="invoking-xo-precompile">
+<h3>Invoking <code class="code docutils literal notranslate"><span class="pre">xo_precompile</span></code><a class="headerlink" href="#invoking-xo-precompile" title="Link to this heading">¶</a></h3>
+<p>Invoke the precompile module by passing the <code class="code docutils literal notranslate"><span class="pre">-fpass-plugin=</span></code> option on
+a normal compile; nothing else about the command line changes, and the
+resulting object file links against the same <code class="code docutils literal notranslate"><span class="pre">libxo</span></code> as an unmodified
+build (<code class="code docutils literal notranslate"><span class="pre">xo_emit_cached()</span></code> and friends are ordinary exported libxo
+symbols, not something the plugin invents):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">clang</span> <span class="o">-</span><span class="n">c</span> \
+    <span class="o">-</span><span class="n">fpass</span><span class="o">-</span><span class="n">plugin</span><span class="o">=/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">xo_precompile</span><span class="o">.</span><span class="n">so</span> \
+    <span class="o">-</span><span class="n">I</span><span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">xo</span><span class="o">/</span><span class="n">include</span> \
+    <span class="n">myprogram</span><span class="o">.</span><span class="n">c</span> <span class="o">-</span><span class="n">o</span> <span class="n">myprogram</span><span class="o">.</span><span class="n">o</span>
+
+<span class="n">clang</span> <span class="n">myprogram</span><span class="o">.</span><span class="n">o</span> <span class="o">-</span><span class="n">L</span><span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">xo</span><span class="o">/</span><span class="n">lib</span> <span class="o">-</span><span class="n">lxo</span> <span class="o">-</span><span class="n">o</span> <span class="n">myprogram</span>
+</pre></div>
+</div>
+<p>To see the effect directly, dump LLVM IR instead of an object file and
+look for the generated <code class="code docutils literal notranslate"><span class="pre">.xo_fields.*</span></code> / <code class="code docutils literal notranslate"><span class="pre">.xo_fspecs.*</span></code> / <code class="code docutils literal notranslate"><span class="pre">.xo_fcache.*</span></code>
+globals and the <code class="code docutils literal notranslate"><span class="pre">xo_emit_cached</span></code> call:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">clang</span> <span class="o">-</span><span class="n">S</span> <span class="o">-</span><span class="n">emit</span><span class="o">-</span><span class="n">llvm</span> \
+    <span class="o">-</span><span class="n">fpass</span><span class="o">-</span><span class="n">plugin</span><span class="o">=/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">xo_precompile</span><span class="o">.</span><span class="n">so</span> \
+    <span class="o">-</span><span class="n">I</span><span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">xo</span><span class="o">/</span><span class="n">include</span> \
+    <span class="n">myprogram</span><span class="o">.</span><span class="n">c</span> <span class="o">-</span><span class="n">o</span> <span class="o">-</span> <span class="o">|</span> <span class="n">grep</span> <span class="o">-</span><span class="n">A2</span> <span class="n">xo_fcache</span>
+</pre></div>
+</div>
+<p><code class="code docutils literal notranslate"><span class="pre">xo_validate</span></code> and <code class="code docutils literal notranslate"><span class="pre">xo_precompile</span></code> are independent but can be used
+together — one checks correctness at the AST level, the other rewrites
+at the IR level — so both flags are normally passed on the same
+command line:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">clang</span> <span class="o">-</span><span class="n">c</span> \
+    <span class="o">-</span><span class="n">fplugin</span><span class="o">=/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">xo_validate</span><span class="o">.</span><span class="n">so</span> \
+    <span class="o">-</span><span class="n">fpass</span><span class="o">-</span><span class="n">plugin</span><span class="o">=/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">xo_precompile</span><span class="o">.</span><span class="n">so</span> \
+    <span class="o">-</span><span class="n">I</span><span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">xo</span><span class="o">/</span><span class="n">include</span> \
+    <span class="n">myprogram</span><span class="o">.</span><span class="n">c</span> <span class="o">-</span><span class="n">o</span> <span class="n">myprogram</span><span class="o">.</span><span class="n">o</span>
+</pre></div>
+</div>
+</section>
+<section id="wiring-into-a-build">
+<h3>Wiring into a build<a class="headerlink" href="#wiring-into-a-build" title="Link to this heading">¶</a></h3>
+<p>For a project already building against libxo, add the plugin flags to
+<code class="code docutils literal notranslate"><span class="pre">CFLAGS</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">CFLAGS</span><span class="o">=</span><span class="s1">&#39;-O2 -fplugin=/path/to/xo_validate.so -fpass-plugin=/path/to/xo_precompile.so&#39;</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="caveats-and-known-limitations">
+<h2>Caveats and known limitations<a class="headerlink" href="#caveats-and-known-limitations" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Only calls with a <strong>literal, compile-time-constant</strong> format string
+can be precompiled. A format string built with <code class="code docutils literal notranslate"><span class="pre">sprintf()</span></code>,
+concatenation of a runtime value, gettext lookups that select between
+strings at runtime, etc. is left as an ordinary <code class="code docutils literal notranslate"><span class="pre">xo_emit()</span></code> call.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">xo_precompile</span></code> currently registers at <code class="code docutils literal notranslate"><span class="pre">PipelineStart</span></code>. At <code class="code docutils literal notranslate"><span class="pre">-O0</span></code> this
+still fires under the current New Pass Manager, but if a future LLVM
+version changes when <code class="code docutils literal notranslate"><span class="pre">PipelineStart</span></code> callbacks run at <code class="code docutils literal notranslate"><span class="pre">-O0</span></code>, building
+the precompiled translation units at <code class="code docutils literal notranslate"><span class="pre">-O1</span></code> or higher is the fallback.</p></li>
+<li><p>Both plugins are LLVM/clang-specific; there is no equivalent for GCC.
+Code is fully portable either way — without the plugins it just
+behaves like ordinary, unmodified libxo.</p></li>
+<li><p>The plugins are versioned against <code class="code docutils literal notranslate"><span class="pre">xo_field_info_t</span></code>’s in-memory
+layout via <code class="code docutils literal notranslate"><span class="pre">XO_EMIT_CACHE_VERSION</span></code> (in <code class="code docutils literal notranslate"><span class="pre">xo.h</span></code>) and a set of
+<code class="code docutils literal notranslate"><span class="pre">_Static_assert</span></code> layout checks in the shared C shim
+(<code class="code docutils literal notranslate"><span class="pre">llvm-plugins/validate/xo_parse_shim.c</span></code>). A libxo built with a
+mismatched header will refuse the precompiled table at run time and
+fall back to normal parsing rather than misinterpreting it.</p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">On This Page</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">LLVM/clang Plugins</a><ul>
+<li><a class="reference internal" href="#building-the-plugins">Building the plugins</a></li>
+<li><a class="reference internal" href="#xo-validate-format-string-checking">xo_validate: format-string checking</a><ul>
+<li><a class="reference internal" href="#tuning-diagnostics">Tuning diagnostics</a></li>
+<li><a class="reference internal" href="#invoking-xo-validate">Invoking <code class="code docutils literal notranslate"><span class="pre">xo_validate</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#xo-precompile-build-time-format-parsing">xo_precompile: build-time format parsing</a><ul>
+<li><a class="reference internal" href="#invoking-xo-precompile">Invoking <code class="code docutils literal notranslate"><span class="pre">xo_precompile</span></code></a></li>
+<li><a class="reference internal" href="#wiring-into-a-build">Wiring into a build</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#caveats-and-known-limitations">Caveats and known limitations</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3><a href="index.html">Full Documentation</a></h3>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="encoders.html"
+                          title="previous chapter">Encoders</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="xocc.html"
+                          title="next chapter">The “xocc” compiler wrapper</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/plugins.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="xocc.html" title="The “xocc” compiler wrapper"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="encoders.html" title="Encoders"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">libxo 
+ documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">LLVM/clang Plugins</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2017-2019, Juniper Networks Inc.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>
