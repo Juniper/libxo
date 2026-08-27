@@ -42,6 +42,7 @@ noinst_HEADERS = \
      xo_format.h \
      xo_humanize.h \
      xo_private.h \
+     xo_string.h \
      xo_utf8.h \
      xo_wcwidth.h
 
