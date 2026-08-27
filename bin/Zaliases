@@ -8,21 +8,21 @@ set ZENV=""
 switch ( `uname` )
     case FreeBSD*:
        set ZENV="MAKE=gmake "
-       set llvmconfig='--with-llvm-config=/usr/local/llvm19/bin/llvm-config'
+       setenv LLVMCONFIG '--with-llvm-config=/usr/local/llvm19/bin/llvm-config'
        breaksw
     case Darwin*:
-       set llvmconfig='--with-llvm-config=/opt/local/libexec/llvm-19/bin/llvm-config'
+       setenv LLVMCONFIG '--with-llvm-config=/opt/local/libexec/llvm-19/bin/llvm-config'
        breaksw
 endsw
 
 set mycflags="-g -O0 -DXO_XPARSE_DEBUG -DLIBXO_DEBUG -DSLAX_DEBUG"
 
 if ( -x /opt/local/bin/msgfmt ) then
-    set gettext='--with-gettext=/opt/local'
+    setenv GETTEXT '--with-gettext=/opt/local'
 else if ( -x /usr/local/bin/msgfmt ) then
-     set gettext='--with-gettext=/usr/local'
+     setenv GETTEXT '--with-gettext=/usr/local'
 else
-     set gettext=''
+     setenv GETTEXT ''
 endif
 
 set opts=' \
@@ -31,8 +31,8 @@ set opts=' \
 --enable-warnings \
 --enable-printflike \
 --prefix ${ROOT_DIR} \
-${gettext} \
-${llvmconfig} \
+${GETTEXT} \
+${LLVMCONFIG} \
 '
 set opts=`echo $opts`
 
