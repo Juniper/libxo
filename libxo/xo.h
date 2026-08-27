@@ -20,6 +20,10 @@
 #ifndef INCLUDE_XO_H
 #define INCLUDE_XO_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <stdarg.h>
@@ -912,5 +916,9 @@ xo_is_emitting (void);
 
 void
 xo_set_no_cache (int value);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* INCLUDE_XO_H */
