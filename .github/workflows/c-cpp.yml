@@ -17,7 +17,6 @@ jobs:
       run: |
         sh bin/setup.sh
         cd build; sh ../configure
-        cat /usr/include/bsd/string.h
     - name: make
       run: cd build ; make
     - name: make check
