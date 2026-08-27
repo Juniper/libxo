@@ -725,6 +725,7 @@ xo_parse_fields (xo_parse_t *xpp, const char *fmt, size_t fmt_len)
 	xfip->xfi_format   = XO_FOFF_NONE;
 	xfip->xfi_encoding = XO_FOFF_NONE;
 	xfip->xfi_next     = XO_FOFF_NONE;
+	xfip->xfi_padding[0] = xfip->xfi_padding[1] = xfip->xfi_padding[2] = 0;
 
 	xfip->xfi_start = (xo_format_offset_t)(cp - fmt);
 
