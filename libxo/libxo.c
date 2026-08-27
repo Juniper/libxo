@@ -43,17 +43,7 @@
 #include <getopt.h>
 
 #include "xo_config.h"
-
-#ifdef HAVE_GCC
-#define _GNU_SOURCE
-#define __USE_GNU 1
-#include <string.h>
-#undef _GNU_SOURCE
-#undef ___USE_GNU
-#include <bsd/string.h>
-#else /* HAVE_GCC */
-#include <string.h>
-#endif /* HAVE_GCC */
+#include <libxo/xo_string.h>
 
 #ifdef HAVE_LANGINFO_H
 #include <langinfo.h>
