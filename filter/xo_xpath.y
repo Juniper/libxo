@@ -1,5 +1,6 @@
 %{
 /*
+ * SPDX-License-Identifier: BSD-2-Clause
  * Copyright (c) 2006-2023, Juniper Networks, Inc.
  * All rights reserved.
  * This SOFTWARE is licensed under the LICENSE provided in the
