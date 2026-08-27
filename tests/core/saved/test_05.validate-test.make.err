@@ -1,15 +1,15 @@
-../../../tests/core/test_05.c:97:10: warning: libxo: field name should not be less than 3 characters long: '{lq:wc/%lc - %#lx - %d}'
-   97 |         xo_emit("Wide char: {lq:wc/%lc - %#lx - %d}\n",
+../../../tests/core/test_05.c:89:10: warning: libxo: field name should not be less than 3 characters long: '{lq:wc/%lc - %#lx - %d}'
+   89 |         xo_emit("Wide char: {lq:wc/%lc - %#lx - %d}\n",
       |                 ^
-../../../tests/core/test_05.c:102:10: warning: libxo: field name should not be less than 3 characters long: '{lq:wc/%lc - %#lx - %d}'
-  102 |         xo_emit("Wide char: {lq:wc/%lc - %#lx - %d}\n",
+../../../tests/core/test_05.c:94:10: warning: libxo: field name should not be less than 3 characters long: '{lq:wc/%lc - %#lx - %d}'
+   94 |         xo_emit("Wide char: {lq:wc/%lc - %#lx - %d}\n",
       |                 ^
-../../../tests/core/test_05.c:106:13: warning: libxo: field name should not be less than 3 characters long: '{:v1/%s}'
-  106 |     xo_emit("Οὐχὶ ταὐτὰ παρίσταταί μοι {:v1/%s}, {:v2/%s}\n",
+../../../tests/core/test_05.c:98:13: warning: libxo: field name should not be less than 3 characters long: '{:v1/%s}'
+   98 |     xo_emit("Οὐχὶ ταὐτὰ παρίσταταί μοι {:v1/%s}, {:v2/%s}\n",
       |             ^
-../../../tests/core/test_05.c:106:13: warning: libxo: field name should not be less than 3 characters long: '{:v2/%s}'
-../../../tests/core/test_05.c:109:18: warning: libxo: field name should not be less than 3 characters long: '{:v1/%s}'
-  109 |     rc = xo_emit("გთხოვთ {:v1/%s} {:v2/%s}\n",
+../../../tests/core/test_05.c:98:13: warning: libxo: field name should not be less than 3 characters long: '{:v2/%s}'
+../../../tests/core/test_05.c:101:18: warning: libxo: field name should not be less than 3 characters long: '{:v1/%s}'
+  101 |     rc = xo_emit("გთხოვთ {:v1/%s} {:v2/%s}\n",
       |                  ^
-../../../tests/core/test_05.c:109:18: warning: libxo: field name should not be less than 3 characters long: '{:v2/%s}'
+../../../tests/core/test_05.c:101:18: warning: libxo: field name should not be less than 3 characters long: '{:v2/%s}'
 6 warnings generated.
