@@ -16,10 +16,12 @@ jobs:
     - name: configure
       run: |
         sh bin/setup.sh
-        ./configure
+	ls -l /bin/msgfmt
+	which msgfmt
+        cd build; sh -x ../configure
     - name: make
-      run: make
+      run: cd build ; make
     - name: make check
-      run: make check
+      run: cd build ; make check
     - name: make distcheck
-      run: make distcheck
+      run: cd build ; make distcheck
