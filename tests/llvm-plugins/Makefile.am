@@ -32,8 +32,14 @@ LIBDIR = ${prefix}/lib
 
 SYSROOT_FLAG = $(if ${SDK_PATH},-isysroot ${SDK_PATH},)
 
+LDADD =
+
 if HAVE_HUMANIZE_NUMBER
-LDADD = -lutil
+LDADD += -lutil
+endif
+
+if HAVE_LIBBSD
+LDADD += -lbsd
 endif
 
 CLANG_CMD = ${LLVM_CLANG} \
@@ -80,7 +86,7 @@ EXTRA_DIST = \
         ${addprefix saved/, ${addsuffix .pass.${fmt}.err,  ${PRECOMPILE_TEST_CASES}}}} \
     ${addprefix saved/, ${addsuffix .ir.out,   ${PRECOMPILE_TEST_CASES}}} \
     ${addprefix saved/, ${addsuffix .ir.err,   ${PRECOMPILE_TEST_CASES}}} \
-    ${addprefix saved/, ${addsuffix .ll.norm,  ${PRECOMPILE_TEST_CASES}}}
+    ${addprefix saved/, ${addsuffix .nm,       ${PRECOMPILE_TEST_CASES}}}
 
 all:
 
@@ -111,8 +117,10 @@ test-validate: ${VALIDATE_PLUGIN}
 #   - Build with and without the pass; diff build output against saved/
 #   - Run under each output format; diff plain and pass outputs against saved/
 #   - Cross-check: diff plain vs pass for each format (round-trip sanity)
-#   - Generate IR with the pass; diff .ll and stderr against saved/
-#   - Grep .ll to confirm xo_emit_cached and .xo_fcache appear
+#   - Compile with the pass; dump the object's xo_* symbols (addresses
+#     stripped, sorted) and diff against saved/ to confirm the expected
+#     calls/globals (xo_emit_cached, .xo_fcache, .xo_fields, .xo_fspecs)
+#     are present, without depending on LLVM-IR-text-level detail
 #
 test-precompile: ${PRECOMPILE_PLUGIN}
 	@${MKDIR} -p out
@@ -144,29 +152,14 @@ test-precompile: ${PRECOMPILE_PLUGIN}
 	            || echo "FAIL: round-trip mismatch $$tc $$fmt stderr" ; \
 	    done ; \
 	    echo "... precompile ir $$tc ..."; \
-	    ${CLANG_PASS} -S -emit-llvm ${srcdir}/$$tc.c \
-	        -o out/$$tc.ll \
+	    ${CLANG_PASS} -c ${srcdir}/$$tc.c \
+	        -o out/$$tc.pass.o \
 	        > out/$$tc.ir.out 2> out/$$tc.ir.err ; \
-	    ${SED} \
-	        -e '/^target /d' \
-	        -e '/^module asm/d' \
-	        -e '/^attributes #/d' \
-	        -e '/^!/d' \
-	        -e 's/dso_local //g' \
-	        -e 's/ !dbg ![0-9]*//g' \
-	        -e 's/, !dbg ![0-9]*//g' \
-	        -e '/^[[:space:]]*#dbg_value/d' \
-		-e 's/ nounwind .*//' \
-		-e 's/,$$//' \
-		-e '/^$$/d' \
-	        out/$$tc.ll > out/$$tc.ll.norm ; \
-	    ${DIFF} -Nu ${srcdir}/saved/$$tc.ll.norm out/$$tc.ll.norm ; \
 	    ${DIFF} -Nu ${srcdir}/saved/$$tc.ir.out  out/$$tc.ir.out ; \
 	    ${DIFF} -Nu ${srcdir}/saved/$$tc.ir.err  out/$$tc.ir.err ; \
-	    grep -q "xo_emit_cached" out/$$tc.ll \
-	        || echo "FAIL: no xo_emit_cached in $$tc.ll" ; \
-	    grep -q "xo_fcache" out/$$tc.ll \
-	        || echo "FAIL: no .xo_fcache in $$tc.ll" ; \
+	    nm out/$$tc.pass.o | grep xo_ | ${SED} -E -e 's/.{16}//' | sort \
+	        > out/$$tc.nm ; \
+	    ${DIFF} -Nu ${srcdir}/saved/$$tc.nm out/$$tc.nm ; \
 	done)
 
 accept: ${VALIDATE_PLUGIN} ${PRECOMPILE_PLUGIN}
@@ -188,9 +181,9 @@ accept: ${VALIDATE_PLUGIN} ${PRECOMPILE_PLUGIN}
 	        ${CP} out/$$tc.pass.$$fmt.out  ${srcdir}/saved/$$tc.pass.$$fmt.out  ; \
 	        ${CP} out/$$tc.pass.$$fmt.err  ${srcdir}/saved/$$tc.pass.$$fmt.err  ; \
 	    done ; \
-	    ${CP} out/$$tc.ll.norm ${srcdir}/saved/$$tc.ll.norm ; \
 	    ${CP} out/$$tc.ir.out  ${srcdir}/saved/$$tc.ir.out  ; \
 	    ${CP} out/$$tc.ir.err  ${srcdir}/saved/$$tc.ir.err  ; \
+	    ${CP} out/$$tc.nm      ${srcdir}/saved/$$tc.nm      ; \
 	done)
 
 CLEANDIRS = out
