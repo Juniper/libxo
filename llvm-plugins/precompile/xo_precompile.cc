@@ -18,13 +18,18 @@
  * New PM, PipelineStart EP callbacks do fire.
  */
 
+#include "llvm/Config/llvm-config.h"
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/GlobalVariable.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/Module.h"
 #include "llvm/Passes/PassBuilder.h"
+#if LLVM_VERSION_MAJOR < 22
 #include "llvm/Passes/PassPlugin.h"
+#else
+#include "llvm/Plugins/PassPlugin.h"
+#endif
 #include "llvm/Support/raw_ostream.h"
 
 #include "../validate/xo_parse_shim.h"
