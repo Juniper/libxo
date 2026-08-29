@@ -1457,6 +1457,20 @@ xo_data_escape (xo_handle_t *xop, const char *str, ssize_t len)
 }
 
 /*
+ * Like xo_data_escape(), but for strings destined for a quoted
+ * HTML/XML attribute value, where a literal '"' must be escaped
+ * (XFF_ATTR) to avoid breaking out of the attribute.
+ */
+static void
+xo_data_escape_attr (xo_handle_t *xop, const char *str, ssize_t len)
+{
+    if (len == -1)
+	len = strlen(str);
+
+    xo_buf_escape(xop, &xop->xo_data, str, len, XFF_ATTR);
+}
+
+/*
  * The retain feature (caching parsed field info by format string pointer)
  * has been removed.  These stubs preserve the public API.
  */
@@ -4659,7 +4673,7 @@ xo_buf_append_div (xo_handle_t *xop, const xo_field_info_t *xfip,
 
     if (name) {
 	xo_data_append(xop, div_tag, sizeof(div_tag) - 1);
-	xo_data_escape(xop, name, nlen);
+	xo_data_escape_attr(xop, name, nlen);
 
 	/*
 	 * Save the offset at which we'd place units.  See xo_format_units.
@@ -4699,7 +4713,7 @@ xo_buf_append_div (xo_handle_t *xop, const xo_field_info_t *xfip,
 		    continue;
 
 		xo_data_append(xop, "/", 1);
-		xo_data_escape(xop, xsp->xs_name, strlen(xsp->xs_name));
+		xo_data_escape_attr(xop, xsp->xs_name, -1);
 		if (xsp->xs_keys) {
 		    /* Don't show keys for the key field */
 		    if (i != xop->xo_depth || !(flags & XFF_KEY))
@@ -4708,7 +4722,7 @@ xo_buf_append_div (xo_handle_t *xop, const xo_field_info_t *xfip,
 	    }
 
 	    xo_data_append(xop, "/", 1);
-	    xo_data_escape(xop, name, nlen);
+	    xo_data_escape_attr(xop, name, nlen);
 	}
 
 	if (XOF_ISSET(xop, XOF_INFO) && xop->xo_info) {
@@ -4719,11 +4733,11 @@ xo_buf_append_div (xo_handle_t *xop, const xo_field_info_t *xfip,
 	    if (xip) {
 		if (xip->xi_type) {
 		    xo_data_append(xop, in_type, sizeof(in_type) - 1);
-		    xo_data_escape(xop, xip->xi_type, strlen(xip->xi_type));
+		    xo_data_escape_attr(xop, xip->xi_type, -1);
 		}
 		if (xip->xi_help) {
 		    xo_data_append(xop, in_help, sizeof(in_help) - 1);
-		    xo_data_escape(xop, xip->xi_help, strlen(xip->xi_help));
+		    xo_data_escape_attr(xop, xip->xi_help, -1);
 		}
 	    }
 	}
@@ -7057,8 +7071,11 @@ xo_format_units (xo_handle_t *xop, const xo_field_info_t *xfip,
     else
 	return;
 
+    /* We're writing into a quoted attribute value; escape accordingly. */
+    flags |= XFF_ATTR;
+
     if (vlen)
-	xo_data_escape(xop, value, vlen);
+	xo_data_escape_attr(xop, value, vlen);
     else
 	xo_do_format_field(xop, xfip, NULL, fmt, flen, flags);
 
