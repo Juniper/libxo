@@ -287,7 +287,6 @@
             return;
 
         var groups = findGroups(content);
-        var built = 0;
 
         groups.forEach(function (group) {
             var model = buildModel(group);
@@ -295,24 +294,25 @@
                 return;
 
             var table = buildTable(model);
+            table.style.display = "none";
             group.header.insertAdjacentElement("afterend", table);
-            built++;
+
+            var toggle = document.createElement("button");
+            toggle.type = "button";
+            toggle.className = "xohtml-view-toggle";
+            toggle.textContent = "Table view";
+
+            toggle.addEventListener("click", function () {
+                var on = table.style.display === "none";
+                table.style.display = on ? "table" : "none";
+                group.rows.forEach(function (row) {
+                    row.style.display = on ? "none" : "";
+                });
+                toggle.textContent = on ? "Line view" : "Table view";
+            });
+
+            group.header.appendChild(toggle);
         });
-
-        if (!built)
-            return;
-
-        var toggle = document.createElement("button");
-        toggle.type = "button";
-        toggle.className = "xohtml-view-toggle";
-        toggle.textContent = "Table view";
-
-        toggle.addEventListener("click", function () {
-            var on = content.classList.toggle("xohtml-table-view");
-            toggle.textContent = on ? "Line view" : "Table view";
-        });
-
-        content.insertBefore(toggle, content.firstChild);
     }
 
     function init () {

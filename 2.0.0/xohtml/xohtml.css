@@ -231,10 +231,6 @@ div.effect-reset, div.effect-normal {
     font-size: inherit;
 }
 
-#xohtml-content.xohtml-table-view table.xohtml-table {
-    display: table;
-}
-
 #xohtml-content table.xohtml-table th,
 #xohtml-content table.xohtml-table td {
     border: 1px solid var(--xo-border);
@@ -261,10 +257,11 @@ div.effect-reset, div.effect-normal {
 
 .xohtml-view-toggle {
     display: inline-block;
-    margin: 4px 0 10px 0;
-    padding: 3px 10px;
+    vertical-align: baseline;
+    margin: 0 0 0 10px;
+    padding: 1px 8px;
     font-family: var(--xo-sans);
-    font-size: 12px;
+    font-size: 11px;
     border: 1px solid var(--xo-border);
     border-radius: 4px;
     background: var(--xo-accent-bg);
@@ -274,8 +271,4 @@ div.effect-reset, div.effect-normal {
 
 .xohtml-view-toggle:hover {
     background: #dfe9f8;
-}
-
-.xohtml-table-view div.line {
-    display: none;
 }
