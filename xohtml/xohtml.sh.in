@@ -23,15 +23,18 @@ do_help () {
     echo "xohtml: wrap libxo-enabled output in HTML"
     echo "Usage: xohtml [options] [command [arguments]]"
     echo "Valid options are:"
-    echo "    -b <basepath> | --base <basepath>"
-    echo "    -c <command> | --command <command>"
-    echo "    -f <output-file> | --file <output-file>"
-    echo "    -i | --internal"
-    echo "    -k | --keep"
-    echo "    -l | --local"
-    echo "    -w | --web"
+    echo "    -b --base <basepath>        Use a different base location for js/css files"
+    echo "    -c | --command <command>    Execute the given command"
+    echo "    -f | --file <output-file>   Write all output to the given file "
+    echo "    -i | --internal             js/css files are written directly into the output"
+    echo "    -k | --keep                 Keep the output file (no auto-delete)"
+    echo "    -l | --local                js/css files use a local path reference"
+    echo "    -m | --minimal              Pass minimal libxo options to the command"
+    echo "    -w | --web                  js/css files use a github URL reference"
     exit 1
 }
+
+XOPTS=html,xpath,units,info
 
 while [ -z "$DONE" -a ! -z "$1" ]; do
     case "$1" in
@@ -64,6 +67,10 @@ while [ -z "$DONE" -a ! -z "$1" ]; do
             MODE=ref;
             BASE="${LOCAL}";
             ;;
+        -m|--minimal)
+            shift;
+            XOPTS=html
+            ;;
         -w|--web)
             shift;
             MODE=ref;
@@ -77,7 +84,7 @@ while [ -z "$DONE" -a ! -z "$1" ]; do
 	    DONE=1;
 	    XX=$1;
 	    shift;
-	    CMD="$XX --libxo=html $@"
+	    CMD="$XX --libxo=$XOPTS $@"
 	    ;;
     esac
 done
