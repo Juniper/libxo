@@ -137,13 +137,14 @@ div[data-key] {
 }
 
 /* Fields carrying tooltip data get a hover cue. */
-div.data[data-help], div.data[data-type], div.data[data-xpath] {
+div.data[data-help], div.data[data-type], div.data[data-units],
+div.data[data-xpath] {
     cursor: help;
     border-bottom: 1px dotted var(--xo-border);
 }
 
 div.data[data-help]:hover, div.data[data-type]:hover,
-div.data[data-xpath]:hover {
+div.data[data-units]:hover, div.data[data-xpath]:hover {
     border-bottom-color: var(--xo-accent);
 }
 
