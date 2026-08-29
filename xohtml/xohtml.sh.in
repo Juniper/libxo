@@ -9,11 +9,15 @@
 # Phil Shafer, July 2014
 #
 
-BASE=@XO_SHAREDIR@
 VERSION=@LIBXO_VERSION@
+LOCAL=@XO_SHAREDIR@
+WEB=http://juniper.github.io/libxo/${VERSION}/xohtml
+MODE=internal
+BASE=
 CMD=cat
 DONE=
-WEB=http://juniper.github.io/libxo/${VERSION}/xohtml
+KEEP=
+FILE=
 
 do_help () {
     echo "xohtml: wrap libxo-enabled output in HTML"
@@ -22,6 +26,10 @@ do_help () {
     echo "    -b <basepath> | --base <basepath>"
     echo "    -c <command> | --command <command>"
     echo "    -f <output-file> | --file <output-file>"
+    echo "    -i | --internal"
+    echo "    -k | --keep"
+    echo "    -l | --local"
+    echo "    -w | --web"
     exit 1
 }
 
@@ -29,6 +37,7 @@ while [ -z "$DONE" -a ! -z "$1" ]; do
     case "$1" in
         -b|--base)
             shift;
+            MODE=ref;
             BASE="$1";
 	    shift;
             ;;
@@ -41,10 +50,23 @@ while [ -z "$DONE" -a ! -z "$1" ]; do
             shift;
             FILE="$1";
 	    shift;
-	    exec > "$FILE";
+            ;;
+        -i|--internal)
+            shift;
+            MODE=internal;
+            ;;
+        -k|--keep)
+            shift;
+            KEEP=1;
+            ;;
+        -l|--local)
+            shift;
+            MODE=ref;
+            BASE="${LOCAL}";
             ;;
         -w|--web)
             shift;
+            MODE=ref;
             BASE="${WEB}";
             ;;
 
@@ -64,22 +86,71 @@ if [ "$CMD" = "cat" -a -t 0 ]; then
     do_help
 fi
 
+# Default output goes to an auto-named file under /tmp, which we then
+# open in a browser.  "-f" opts out of both: the caller gets exactly
+# the file they asked for and nothing gets opened for them.
+OPEN=
+if [ -z "$FILE" ]; then
+    DIR="/tmp/${USER}.xohtml"
+    mkdir -p "$DIR"
+
+    # Sweep old plain runs.  Files saved with -k/--keep use a
+    # different prefix (xohtml-keep.*) and are never touched here.
+    rm -f "$DIR"/xohtml.*.html
+
+    TS=`/bin/date "+%y%m%d%H%M.%S"`
+    if [ -n "$KEEP" ]; then
+        FILE="$DIR/xohtml-keep.${TS}$$.html"
+    else
+        FILE="$DIR/xohtml.${TS}$$.html"
+    fi
+    OPEN=1
+fi
+
+exec > "$FILE"
+
+esc () {
+    printf '%s' "$1" | sed -e 's/&/\&amp;/g' -e 's/</\&lt;/g' -e 's/>/\&gt;/g'
+}
+
 echo '<html>'
 echo '<head>'
 echo '<meta http-equiv="content-type" content="text/html; charset=utf-8"/>'
-echo '<link rel="stylesheet" href="'$BASE'/xohtml.css">'
-echo '<link rel="stylesheet" href="'$BASE'/external/jquery.qtip.css"/>'
-echo '<script type="text/javascript" src="'$BASE'/external/jquery.js"></script>'
-echo '<script type="text/javascript" src="'$BASE'/external/jquery.qtip.js"></script>'
-echo '<script type="text/javascript" src="'$BASE'/xohtml.js"></script>'
-echo '<script>'
-echo '</script>'
+if [ "$MODE" = internal ]; then
+    echo '<style>'
+    cat "${LOCAL}/xohtml.css"
+    echo '</style>'
+    echo '<script>'
+    cat "${LOCAL}/xohtml.js"
+    echo '</script>'
+else
+    echo '<link rel="stylesheet" href="'$BASE'/xohtml.css">'
+    echo '<script src="'$BASE'/xohtml.js"></script>'
+fi
 echo '</head>'
 echo '<body>'
+echo '<div id="xohtml-header">'
+echo '<span class="xohtml-cmd">'"$(esc "$CMD")"'</span>'
+echo '<span class="xohtml-time">'"$(/bin/date)"'</span>'
+echo '</div>'
+echo '<div id="xohtml-content">'
 
 $CMD
 
+echo '</div>'
 echo '</body>'
 echo '</html>'
+
+exec 1>&2
+
+if [ -n "$OPEN" ]; then
+    if command -v open >/dev/null 2>&1; then
+        open "$FILE"
+    elif command -v xdg-open >/dev/null 2>&1; then
+        xdg-open "$FILE"
+    else
+        echo "xohtml: output written to $FILE"
+    fi
+fi
 
 exit 0
