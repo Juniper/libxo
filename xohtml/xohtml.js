@@ -50,6 +50,7 @@
     function buildContent (el) {
         var help = el.getAttribute("data-help");
         var type = el.getAttribute("data-type");
+        var units = el.getAttribute("data-units");
         var xpath = el.getAttribute("data-xpath");
         var tag = el.getAttribute("data-tag");
 
@@ -67,6 +68,8 @@
             addLabeled(frag, "Help", help);
         if (type)
             addLabeled(frag, "Type", type);
+        if (units)
+            addLabeled(frag, "Units", units);
 
         if (xpath) {
             var wrap = document.createElement("div");
@@ -100,6 +103,7 @@
     function showTip (el) {
         var hasContent = el.getAttribute("data-help")
             || el.getAttribute("data-type")
+            || el.getAttribute("data-units")
             || el.getAttribute("data-xpath")
             || el.getAttribute("data-tag");
         if (!hasContent)
