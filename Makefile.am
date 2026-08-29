@@ -58,10 +58,7 @@ PACKAGE_FILE = ${PACKAGE_TARNAME}-${PACKAGE_VERSION}.tar.gz
 
 XOHTML_FILES = \
     ${top_srcdir}/xohtml/xohtml.css \
-    ${top_srcdir}/xohtml/xohtml.js \
-    ${top_srcdir}/xohtml/external/jquery.js \
-    ${top_srcdir}/xohtml/external/jquery.qtip.css \
-    ${top_srcdir}/xohtml/external/jquery.qtip.js
+    ${top_srcdir}/xohtml/xohtml.js
 
 upload: dist upload-docs upload-xohtml-files
 	@echo "Remember to run:"
