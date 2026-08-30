@@ -135,7 +135,7 @@ typedef uint64_t xo_xff_flags_t;
 #define XFF_ENCODE_ONLY	(1<<3)	/* Only emit for encoding styles (XML, JSON) */
 
 #define XFF_QUOTE	(1<<4)	/* Force quotes */
-#define XFF_NOQUOTE	(1<<5)	/* Force no quotes */
+#define XFF_NO_QUOTE	(1<<5)	/* Force no quotes */
 #define XFF_DISPLAY_ONLY (1<<6)	/* Only emit for display styles (text, html) */
 #define XFF_KEY		(1<<7)	/* Field is a key (for XPath) */
 
@@ -162,9 +162,14 @@ typedef uint64_t xo_xff_flags_t;
 #define XFF_ESC_PRIVATE (1<<24)	/* Escape XML ctrl chars as private (0xe000) */
 #define XFF_SKIP	(1<<25)	/* Skip this field (runtime state, not
 				   parse data; never cached) */
+#define XFF_NO_UNESCAPE (1<<26) /* Ignore XFF_UNESCAPE */
+#define XFF_UNITS_ATTR  (1<<27)	/* Units only appear in attribute */
+#define XFF_FIRST_CAP	(1<<28)	/* First letter get capitalized (toupper) */
 
 /* Flags to turn off when we don't want i18n processing */
 #define XFF_GT_FLAGS (XFF_GT_FIELD | XFF_GT_PLURAL)
+
+#define XFF_NOQUOTE XFF_NO_QUOTE /* Backwards compatible with bad name */
 
 /*
  * xo_format_offset_t: signed byte offset into a format string.
