@@ -7,48 +7,48 @@
 ../../../tests/core/test_01.c:123:13: warning: libxo: field name contains percent sign: '{a:xxx%s/%s}'
   123 |     xo_emit("other: {a:xxx%s/%s}\n", "thing", "four"); /* same */
       |             ^
-../../../tests/core/test_01.c:140:13: warning: libxo: use hyphens, not underscores, in field name: '{e:kve_start/%#jx}'
-  140 |     xo_emit("{e:kve_start/%#jx}", (uintmax_t) 0xdeadbeef);
+../../../tests/core/test_01.c:152:13: warning: libxo: use hyphens, not underscores, in field name: '{e:kve_start/%#jx}'
+  152 |     xo_emit("{e:kve_start/%#jx}", (uintmax_t) 0xdeadbeef);
       |             ^
-../../../tests/core/test_01.c:141:13: warning: libxo: use hyphens, not underscores, in field name: '{e:kve_end/%#jx}'
-  141 |     xo_emit("{e:kve_end/%#jx}", (uintmax_t) 0xcabb1e);
+../../../tests/core/test_01.c:153:13: warning: libxo: use hyphens, not underscores, in field name: '{e:kve_end/%#jx}'
+  153 |     xo_emit("{e:kve_end/%#jx}", (uintmax_t) 0xcabb1e);
       |             ^
-../../../tests/core/test_01.c:286:13: warning: libxo: field role ('P') requires a name or format: '{P:}'
-  286 |     xo_emit("X{P:}X", "epic fail");
+../../../tests/core/test_01.c:298:13: warning: libxo: field role ('P') requires a name or format: '{P:}'
+  298 |     xo_emit("X{P:}X", "epic fail");
       |             ^
-../../../tests/core/test_01.c:286:13: warning: libxo: format expects 0 argument(s) but 1 provided
-../../../tests/core/test_01.c:287:13: warning: libxo: field role ('T') requires a name or format: '{T:}'
-  287 |     xo_emit("X{T:}X", "epic fail");
+../../../tests/core/test_01.c:298:13: warning: libxo: format expects 0 argument(s) but 1 provided
+../../../tests/core/test_01.c:299:13: warning: libxo: field role ('T') requires a name or format: '{T:}'
+  299 |     xo_emit("X{T:}X", "epic fail");
       |             ^
-../../../tests/core/test_01.c:287:13: warning: libxo: format expects 0 argument(s) but 1 provided
-../../../tests/core/test_01.c:288:13: warning: libxo: field role ('N') requires a name or format: '{N:}'
-  288 |     xo_emit("X{N:}X", "epic fail");
+../../../tests/core/test_01.c:299:13: warning: libxo: format expects 0 argument(s) but 1 provided
+../../../tests/core/test_01.c:300:13: warning: libxo: field role ('N') requires a name or format: '{N:}'
+  300 |     xo_emit("X{N:}X", "epic fail");
       |             ^
-../../../tests/core/test_01.c:288:13: warning: libxo: format expects 0 argument(s) but 1 provided
-../../../tests/core/test_01.c:289:13: warning: libxo: field role ('L') requires a name or format: '{L:}'
-  289 |     xo_emit("X{L:}X\n", "epic fail");
+../../../tests/core/test_01.c:300:13: warning: libxo: format expects 0 argument(s) but 1 provided
+../../../tests/core/test_01.c:301:13: warning: libxo: field role ('L') requires a name or format: '{L:}'
+  301 |     xo_emit("X{L:}X\n", "epic fail");
       |             ^
-../../../tests/core/test_01.c:289:13: warning: libxo: format expects 0 argument(s) but 1 provided
-../../../tests/core/test_01.c:294:13: warning: libxo: use hyphens, not underscores, in field name: '{e:mode_octal/%s}'
-  294 |     xo_emit("{e:mode/%s}{e:mode_octal/%s} {t:links/%s} "
+../../../tests/core/test_01.c:301:13: warning: libxo: format expects 0 argument(s) but 1 provided
+../../../tests/core/test_01.c:306:13: warning: libxo: use hyphens, not underscores, in field name: '{e:mode_octal/%s}'
+  306 |     xo_emit("{e:mode/%s}{e:mode_octal/%s} {t:links/%s} "
       |             ^
-../../../tests/core/test_01.c:294:13: warning: libxo: format expects 5 argument(s) but 8 provided
-../../../tests/core/test_01.c:301:13: warning: libxo: use hyphens, not underscores, in field name: '{e:mode_octal/%03o}'
-  301 |     xo_emit("{t:mode/%s}{e:mode_octal/%03o} {t:links/%*u} "
+../../../tests/core/test_01.c:306:13: warning: libxo: format expects 5 argument(s) but 8 provided
+../../../tests/core/test_01.c:313:13: warning: libxo: use hyphens, not underscores, in field name: '{e:mode_octal/%03o}'
+  313 |     xo_emit("{t:mode/%s}{e:mode_octal/%03o} {t:links/%*u} "
       |             ^
-../../../tests/core/test_01.c:318:13: warning: libxo: field name should not be less than 3 characters long: '{:i8/%!8d}'
-  318 |     xo_emit("i64 {:i64/%!64d}, i32 {:i32/%!32d}, i16 {:i16/%!16d}, "
+../../../tests/core/test_01.c:330:13: warning: libxo: field name should not be less than 3 characters long: '{:i8/%!8d}'
+  330 |     xo_emit("i64 {:i64/%!64d}, i32 {:i32/%!32d}, i16 {:i16/%!16d}, "
       |             ^
-../../../tests/core/test_01.c:322:13: warning: libxo: field name should not be less than 3 characters long: '{:u8/%!8u}'
-  322 |     xo_emit("u64 {:u64/%!64u}, u32 {:u32/%!32u}, u16 {:u16/%!16u}, "
+../../../tests/core/test_01.c:334:13: warning: libxo: field name should not be less than 3 characters long: '{:u8/%!8u}'
+  334 |     xo_emit("u64 {:u64/%!64u}, u32 {:u32/%!32u}, u16 {:u16/%!16u}, "
       |             ^
-../../../tests/core/test_01.c:326:13: warning: libxo: invalid integer size: '{%!0u}'
-  326 |     xo_emit("u64 {:u64/%8.8!64u}, u32 {:u32/%*.*!32u}, u64 {:u64-hex/%#!64x}, "
+../../../tests/core/test_01.c:338:13: warning: libxo: invalid integer size: '{%!0u}'
+  338 |     xo_emit("u64 {:u64/%8.8!64u}, u32 {:u32/%*.*!32u}, u64 {:u64-hex/%#!64x}, "
       |             ^
-../../../tests/core/test_01.c:326:13: warning: libxo: field name should not be less than 3 characters long: '{:u0/%!0u}'
-../../../tests/core/test_01.c:330:13: warning: libxo: invalid integer size: '{%!31u}'
-  330 |     xo_emit("u31 {:u31/%!31u}, u33 {:u33/%!33u}, u32s {:u32s/%!32s}, "
+../../../tests/core/test_01.c:338:13: warning: libxo: field name should not be less than 3 characters long: '{:u0/%!0u}'
+../../../tests/core/test_01.c:342:13: warning: libxo: invalid integer size: '{%!31u}'
+  342 |     xo_emit("u31 {:u31/%!31u}, u33 {:u33/%!33u}, u32s {:u32s/%!32s}, "
       |             ^
-../../../tests/core/test_01.c:330:13: warning: libxo: invalid integer size: '{%!33u}'
-../../../tests/core/test_01.c:330:13: warning: libxo: missing integer size: '{%!u}'
+../../../tests/core/test_01.c:342:13: warning: libxo: invalid integer size: '{%!33u}'
+../../../tests/core/test_01.c:342:13: warning: libxo: missing integer size: '{%!u}'
 23 warnings generated.
