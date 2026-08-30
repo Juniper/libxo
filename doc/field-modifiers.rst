@@ -30,6 +30,7 @@ particular output styles:
    p   plural          Gettext: Use comma-separated plural form
    q   quotes          Quote the field when using JSON style
    t   trim            Trim leading and trailing whitespace
+  \    units-attr      This "{U:} value should appear in attributes only (XML/HTML)
    w   white           A blank (" ") is appended after the label
   === =============== ===================================================
 
@@ -130,7 +131,7 @@ The encoding modifier is the opposite of the display modifier, and
 they are often used to give to distinct views of the underlying data.
 
 The escape-private Modifier
-++++++++++++++++++++++++++++
++++++++++++++++++++++++++++
 
 .. index:: Field Modifiers; escape-private
 
@@ -149,7 +150,7 @@ The escape-private modifier only affects XML and HTML output styles.
 Without this modifier, control characters are replaced with spaces.
 
 The escape-slash Modifier
-++++++++++++++++++++++++++++
++++++++++++++++++++++++++
 
 .. index:: Field Modifiers; Escaping
 
@@ -163,7 +164,7 @@ JSON style, any forward slashes ('/') should be escaped.
 circumstances where a slash may be filtered, such as HTML.
 
 The escape-square Modifier
-++++++++++++++++++++++++++++
+++++++++++++++++++++++++++
 
 .. index:: Field Modifiers; escape-square
 
@@ -181,14 +182,19 @@ Without this modifier, control characters are replaced with spaces.
 .. _gettext-modifier:
 
 The first-cap Modifier ({f:})
-++++++++++++++++++++++++++++++++++++++
++++++++++++++++++++++++++++++
 
-The first-cap modifier will capitalize the first character in the
-field value, allowing the user data to look user friendly while the
-encoded data has more uniform rendering ("perfect" versus "Perfect").
+In text and html mode, the `first-cap` modifier will capitalize the
+first character in the field value, allowing the user data to look
+user friendly while the encoded data has more uniform rendering
+("perfect" versus "Perfect").
 
 UTF-8 data is also handled, using libxo's built-in upper case
 UTF-8 formatting code.
+
+::
+
+   xo_emit("Condition is {f:status}\n", "true");
 
 The Gettext Modifier ({g:})
 +++++++++++++++++++++++++++
@@ -394,6 +400,19 @@ the value.  This is only for the 'encoding' output styles::
 
 .. index:: Field Modifiers; White Space
 .. _white-space-modifier:
+
+The units-attr modifier ({U,units-attr:})
++++++++++++++++++++++++++++++++++++++++++
+
+The `units-attr` applies only to fields with the `units` roles, and
+causes the units value to appear only in the XML "units=XX` attribute
+or the HTML "data-units=XX" attribute.  The values do not appear in
+either the text output or the HTML "<div class='units'>" elements.
+
+::
+
+    xo_emit("{:memory/%u}{U:kb} out of {:total/%u}{U,units-attr:kilobytes}\n",
+	    64, 640);
 
 The White Space Modifier ({w:})
 +++++++++++++++++++++++++++++++
