@@ -22,6 +22,17 @@
     <port>1</port>
     <address>0x0</address>
     <port>1</port>
+    <speed>100</speed>
+    <was>100</was>
+    <speed>fast</speed>
+    <was>fast</was>
+    <speedier>αsoprano</speedier>
+    <was>αsoprano</was>
+    <speedierest>α alto</speedierest>
+    <was>α alto</was>
+    <speedid>ψ basso</speedid>
+    <was>ψ basso</was>
+    <used-percent>12</used-percent>
     <used-percent>12</used-percent>
     <kve_start>0xdeadbeef</kve_start>
     <kve_end>0xcabb1e</kve_end>
