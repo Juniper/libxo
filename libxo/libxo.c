@@ -257,7 +257,7 @@ typedef struct xo_stack_s {
     char *xs_name;		/* Name (for XPath value) */
     char *xs_keys;		/* XPath predicate for any key fields */
     char xs_namebuf[XO_XS_NAMESIZE]; /* Buffer for small xs_names */
-    xo_ident_t xs_ident;	/* XML/HTML: id for list/instances */
+    xo_ident_t xs_ident;	/* HTML: id for list/instances */
 } xo_stack_t;
 
 #define XS_OFFSET_CLEAR -1	/* Used to make a "not in use" offset */
@@ -365,7 +365,7 @@ struct xo_handle_s {
     struct xo_filter_s *xo_filters; /* Opaque data pointer */
 #endif /* LIBXO_NEED_FILTERS */
     xo_xsf_flags_t xo_rb_snap;	/* Transient: parent XSF_RB_BITS before open */
-    xo_ident_t xo_ident;        /* XML/HTML: id for lists and instances*/
+    xo_ident_t xo_ident;        /* HTML: id for lists and instances*/
 };
 
 /* Flag operations */
@@ -4723,6 +4723,17 @@ xo_buf_append_div (xo_handle_t *xop, const xo_field_info_t *xfip,
 	xo_data_append(xop, div_tag, sizeof(div_tag) - 1);
 	xo_data_escape_attr(xop, name, nlen);
 
+	xo_stack_t *xsp = xo_stack_cur(xop);
+	if (xsp->xs_ident) {
+	    static char div_ident[] = "\" data-ident=\"";
+	    char id_buf[16];
+
+	    snprintf(id_buf, sizeof(id_buf), "%d", xsp->xs_ident);
+
+	    xo_data_append(xop, div_ident, sizeof(div_ident) - 1);
+	    xo_data_escape_attr(xop, id_buf, -1);
+	}
+
 	/*
 	 * Save the offset at which we'd place units.  See xo_format_units.
 	 */
@@ -4739,7 +4750,6 @@ xo_buf_append_div (xo_handle_t *xop, const xo_field_info_t *xfip,
 
 	if (XOF_ISSET(xop, XOF_XPATH)) {
 	    int i;
-	    xo_stack_t *xsp;
 
 	    xo_data_append(xop, div_xpath, sizeof(div_xpath) - 1);
 	    if (xop->xo_leading_xpath)
@@ -8748,7 +8758,7 @@ xo_depth_change (xo_handle_t *xop, const char *name,
 	if (state == XSS_OPEN_LIST || state == XSS_OPEN_INSTANCE)
 	    xsp->xs_ident = ++xop->xo_ident;
 	else 
-	    xsp->xs_ident = old_xsp->xo_ident;
+	    xsp->xs_ident = old_xsp->xs_ident;
 
 	xo_stack_set_flags(xop);
 
