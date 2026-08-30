@@ -18,6 +18,7 @@ particular output styles:
   \    escape-private  Escape control chars as Unicode private-use refs (XML/HTML)
   \    escape-slash    Escape forward slashes (JSON)
   \    escape-square   Escape control chars as U+25A1 WHITE SQUARE (XML/HTML)
+   f   first-cap       Capitalize the first character in the rendered data
    g   gettext         Call gettext on field's render content
    h   humanize (hn)   Format large numbers in human-readable style
   \    hn-space        Humanize: Place space between numeric and unit
@@ -178,6 +179,16 @@ Without this modifier, control characters are replaced with spaces.
 
 .. index:: Field Modifiers; Gettext
 .. _gettext-modifier:
+
+The first-cap Modifier ({f:})
+++++++++++++++++++++++++++++++++++++++
+
+The first-cap modifier will capitalize the first character in the
+field value, allowing the user data to look user friendly while the
+encoded data has more uniform rendering ("perfect" versus "Perfect").
+
+UTF-8 data is also handled, using libxo's built-in upper case
+UTF-8 formatting code.
 
 The Gettext Modifier ({g:})
 +++++++++++++++++++++++++++
