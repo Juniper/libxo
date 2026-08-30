@@ -83,6 +83,7 @@
   <div class="padding">	</div>
   <div class="data" data-tag="granularity-lw" data-units="mAh" data-xpath="/top/data[name = 'em0']/granularity-lw">155</div>
   <div class="padding"> </div>
+  <div class="units">mAh</div>
 </div>
 <div class="line">
   <div class="data" data-tag="mbuf-current" data-xpath="/top/data[name = 'em0']/mbuf-current">10</div>
@@ -96,18 +97,23 @@
 <div class="line">
   <div class="data" data-tag="distance" data-units="miles" data-xpath="/top/data[name = 'em0']/distance">50</div>
   <div class="padding"> </div>
+  <div class="units">miles</div>
   <div class="text"> from </div>
   <div class="data" data-tag="location" data-xpath="/top/data[name = 'em0']/location">Boston</div>
 </div>
 <div class="line">
   <div class="data" data-tag="memory" data-units="k" data-xpath="/top/data[name = 'em0']/memory">64</div>
+  <div class="units">k</div>
   <div class="text"> left out of </div>
   <div class="data" data-tag="total" data-units="kb" data-xpath="/top/data[name = 'em0']/total">640</div>
+  <div class="units">kb</div>
 </div>
 <div class="line">
   <div class="data" data-tag="memory" data-units="k" data-xpath="/top/data[name = 'em0']/memory">64</div>
+  <div class="units">k</div>
   <div class="text"> left out of </div>
   <div class="data" data-tag="total" data-units="kilobytes" data-xpath="/top/data[name = 'em0']/total">640</div>
+  <div class="units">kilobytes</div>
 </div>
 <div class="line">
   <div class="title">beforeworkingafter:</div>
