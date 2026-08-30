@@ -34,7 +34,7 @@ do_help () {
     exit 1
 }
 
-XOPTS=html,xpath,units,info
+XOPTS=html,xpath,info
 
 while [ -z "$DONE" -a ! -z "$1" ]; do
     case "$1" in
