@@ -180,6 +180,80 @@
         return groups;
     }
 
+    /*
+     * Untitled record dumps ("Item 'gum': / Total sold: ... / SKU: ...")
+     * have no title line to key off of, but libxo stamps every field
+     * belonging to the same list/instance with a shared, monotonically
+     * increasing data-ident (xo_depth_change in libxo.c).  Opening a new
+     * list or instance always burns an id that never appears on a field,
+     * so unrelated lists never end up with contiguous idents even when
+     * their field shapes are identical -- a run of contiguous idents is
+     * exactly one table.
+     */
+
+    function rowIdent (line) {
+        var el = line.querySelector(".data[data-tag][data-ident]");
+        return el ? el.getAttribute("data-ident") : null;
+    }
+
+    function humanizeTag (tag) {
+        return tag.split("-").map(function (word) {
+            return word.charAt(0).toUpperCase() + word.slice(1);
+        }).join(" ");
+    }
+
+    function findIdentGroups (content, used) {
+        var lines = content.querySelectorAll("div.line");
+        var groups = [];
+
+        var rows = [];
+        var curIdent = null;
+        var curLines = [];
+
+        function finishRow () {
+            if (curLines.length)
+                rows.push(curLines);
+            curLines = [];
+        }
+
+        function finishGroup () {
+            finishRow();
+            if (rows.length >= 2)
+                groups.push({ rows: rows });
+            rows = [];
+            curIdent = null;
+        }
+
+        for (var i = 0; i < lines.length; i++) {
+            var line = lines[i];
+            var ident = used.has(line) ? null : rowIdent(line);
+
+            if (ident === null) {
+                finishGroup();
+                continue;
+            }
+
+            if (curIdent === null) {
+                curIdent = ident;
+                curLines = [line];
+            } else if (ident === curIdent) {
+                curLines.push(line);
+            } else if (Number(ident) === Number(curIdent) + 1) {
+                finishRow();
+                curIdent = ident;
+                curLines = [line];
+            } else {
+                /* Not contiguous with the row just finished: new table. */
+                finishGroup();
+                curIdent = ident;
+                curLines = [line];
+            }
+        }
+        finishGroup();
+
+        return groups;
+    }
+
     function buildModel (group) {
         var columns = [];
         var seen = {};
@@ -209,6 +283,45 @@
         var labels = columns.map(function (tag, i) {
             var text = titleDivs[i] ? titleDivs[i].textContent : tag;
             return text.trim() || tag;
+        });
+
+        return { columns: columns, labels: labels, rows: rows };
+    }
+
+    function buildIdentModel (group) {
+        var columns = [];
+        var labelMap = {};
+        var rows = [];
+
+        group.rows.forEach(function (rowLines) {
+            var rowData = {};
+            var any = false;
+
+            rowLines.forEach(function (line) {
+                var cells = line.querySelectorAll(".data[data-tag]");
+                var label = line.querySelector(".label");
+                var labelText = label ? label.textContent.trim() : null;
+
+                for (var c = 0; c < cells.length; c++) {
+                    var tag = cells[c].getAttribute("data-tag");
+                    if (!(tag in labelMap)) {
+                        labelMap[tag] = labelText || humanizeTag(tag);
+                        columns.push(tag);
+                    }
+                    rowData[tag] = cells[c].textContent.trim();
+                    any = true;
+                }
+            });
+
+            if (any)
+                rows.push(rowData);
+        });
+
+        if (!columns.length || rows.length < 2)
+            return null;
+
+        var labels = columns.map(function (tag) {
+            return labelMap[tag];
         });
 
         return { columns: columns, labels: labels, rows: rows };
@@ -285,14 +398,36 @@
         return table;
     }
 
-    function setupTableView () {
-        var content = document.getElementById("xohtml-content");
-        if (!content)
-            return;
+    function addToggle (table, lines, anchor, place) {
+        var toggle = document.createElement("button");
+        toggle.type = "button";
+        toggle.className = "xohtml-view-toggle";
+        toggle.textContent = "Table view";
 
+        toggle.addEventListener("click", function () {
+            var on = table.style.display === "none";
+            table.style.display = on ? "table" : "none";
+            lines.forEach(function (line) {
+                line.style.display = on ? "none" : "";
+            });
+            toggle.textContent = on ? "Line view" : "Table view";
+        });
+
+        if (place === "append")
+            anchor.appendChild(toggle);
+        else
+            anchor.insertAdjacentElement(place, toggle);
+
+        return toggle;
+    }
+
+    function setupTitledGroups (content, used) {
         var groups = findGroups(content);
 
         groups.forEach(function (group) {
+            used.add(group.header);
+            group.rows.forEach(function (row) { used.add(row); });
+
             var model = buildModel(group);
             if (!model)
                 return;
@@ -301,22 +436,46 @@
             table.style.display = "none";
             group.header.insertAdjacentElement("afterend", table);
 
-            var toggle = document.createElement("button");
-            toggle.type = "button";
-            toggle.className = "xohtml-view-toggle";
-            toggle.textContent = "Table view";
+            addToggle(table, group.rows, group.header, "append");
+        });
+    }
 
-            toggle.addEventListener("click", function () {
-                var on = table.style.display === "none";
-                table.style.display = on ? "table" : "none";
-                group.rows.forEach(function (row) {
-                    row.style.display = on ? "none" : "";
+    function setupIdentGroups (content, used) {
+        var groups = findIdentGroups(content, used);
+
+        groups.forEach(function (group) {
+            var model = buildIdentModel(group);
+            if (!model)
+                return;
+
+            var allLines = [];
+            group.rows.forEach(function (rowLines) {
+                rowLines.forEach(function (line) {
+                    allLines.push(line);
                 });
-                toggle.textContent = on ? "Line view" : "Table view";
             });
 
-            group.header.appendChild(toggle);
+            var table = buildTable(model);
+            table.style.display = "none";
+            allLines[allLines.length - 1]
+                .insertAdjacentElement("afterend", table);
+
+            var bar = document.createElement("div");
+            bar.className = "line xohtml-ident-toggle";
+            allLines[0].insertAdjacentElement("beforebegin", bar);
+
+            addToggle(table, allLines, bar, "append");
         });
+    }
+
+    function setupTableView () {
+        var content = document.getElementById("xohtml-content");
+        if (!content)
+            return;
+
+        var used = new Set();
+        setupTitledGroups(content, used);
+        setupIdentGroups(content, used);
     }
 
     function init () {
