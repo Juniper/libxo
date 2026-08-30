@@ -220,6 +220,8 @@ typedef unsigned xo_xsf_flags_t; /* XSF_* flags */
  */
 #define XSF_RB_BITS (XSF_NOT_FIRST | XSF_CONTENT)
 
+typedef uint32_t xo_ident_t;	/* Identifier for lists/instances/etc */
+
 /*
  * Turn the transition between two states into a number suitable for
  * a "switch" statement.
@@ -255,6 +257,7 @@ typedef struct xo_stack_s {
     char *xs_name;		/* Name (for XPath value) */
     char *xs_keys;		/* XPath predicate for any key fields */
     char xs_namebuf[XO_XS_NAMESIZE]; /* Buffer for small xs_names */
+    xo_ident_t xs_ident;	/* XML/HTML: id for list/instances */
 } xo_stack_t;
 
 #define XS_OFFSET_CLEAR -1	/* Used to make a "not in use" offset */
@@ -362,6 +365,7 @@ struct xo_handle_s {
     struct xo_filter_s *xo_filters; /* Opaque data pointer */
 #endif /* LIBXO_NEED_FILTERS */
     xo_xsf_flags_t xo_rb_snap;	/* Transient: parent XSF_RB_BITS before open */
+    xo_ident_t xo_ident;        /* XML/HTML: id for lists and instances*/
 };
 
 /* Flag operations */
@@ -533,18 +537,6 @@ xo_depth_check (xo_handle_t *xop, int depth)
 	bzero(xsp + old_size, count * sizeof(*xsp));
 	xop->xo_stack_size = depth;
 	xop->xo_stack = xsp;
-
-#if 0
-	/*
-	 * bzero sets xs_rb_off/xs_key_off/xs_tag_end to 0, but we need
-	 * XS_OFFSET_CLEAR == -1
-	 */
-	for (int i = old_size; i < depth; i++) {
-	    xsp[i].xs_rb_off = XS_OFFSET_CLEAR;
-	    xsp[i].xs_tag_end = XS_OFFSET_CLEAR;
-	    xsp[i].xs_key_off = XS_OFFSET_CLEAR;
-	}
-#endif
     }
 
     return 0;
@@ -4334,10 +4326,13 @@ xo_format_humanize (xo_handle_t *xop, xo_buffer_t *xbp,
  * saved offset.
  */
 static void
-xo_format_first_cap (xo_handle_t *xop UNUSED, xo_buffer_t *xbp,
+xo_format_first_cap (xo_handle_t *xop, xo_buffer_t *xbp,
 		     xo_humanize_save_t *savep, xo_xff_flags_t flags)
 {
-    if (!(flags & XFF_FIRST_CAP))
+    if (!(flags & XFF_FIRST_CAP)) /* Not enabled */
+	return;
+
+    if (!xo_style_is_encoding(xop)) /* Only display styles */
 	return;
 
     xo_off_t cur_off = xo_buf_offset(xbp);
@@ -8739,6 +8734,7 @@ xo_depth_change (xo_handle_t *xop, const char *name,
 	if (xo_depth_check(xop, xop->xo_depth + delta))
 	    return;
 
+	xo_stack_t *old_xsp = &xop->xo_stack[xop->xo_depth];
 	xo_stack_t *xsp = &xop->xo_stack[xop->xo_depth + delta];
 	xsp->xs_flags = flags;
 	xsp->xs_state = state;
@@ -8748,14 +8744,20 @@ xo_depth_change (xo_handle_t *xop, const char *name,
 	xsp->xs_key_off = XS_OFFSET_CLEAR;
 	xsp->xs_rb_flags = xop->xo_rb_snap; /* parent flags before this open */
 	xop->xo_rb_snap = 0;
+
+	if (state == XSS_OPEN_LIST || state == XSS_OPEN_INSTANCE)
+	    xsp->xs_ident = ++xop->xo_ident;
+	else 
+	    xsp->xs_ident = old_xsp->xo_ident;
+
 	xo_stack_set_flags(xop);
 
 	XO_DBG(xop, "xo_depth_change: '%s' depth %d, state %u=%s, "
-	       "status %u=%s,  rb_off %d, rb_flags %#x",
+	       "status %u=%s,  rb_off %d, rb_flags %#x, ident = %d",
 	       name, xop->xo_depth + delta,
 	       state, xo_state_name(state),
 	       fstatus, xo_filt_status_name(fstatus),
-	       (int) starting_offset, xsp->xs_rb_flags);
+	       (int) starting_offset, xsp->xs_rb_flags, xsp->xs_ident);
 
 	if (name == NULL)
 	    name = XO_FAILURE_NAME;
