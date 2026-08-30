@@ -135,7 +135,19 @@ main (int argc, char **argv)
     xo_emit("anchor {[:18}{:address/%p}..{:port/%u}{]:}\n", NULL, 1);
     xo_emit("anchor {[:/18}{:address/%p}..{:port/%u}{]:}\n", NULL, 1);
 
-    xo_emit("df {:used-percent/%5.0f}{U:%%}\n", (double) 12);
+    xo_emit("Random {{text}}\n");
+    xo_emit("not speed {,first-cap:speed} {:was}\n", "100", "100");
+    xo_emit("speed {,first-cap:speed} {:was}\n", "fast", "fast");
+    xo_emit("speedier {:speedier} {:was}\n",
+	    "\xce\xb1soprano", "\xce\xb1soprano");
+    xo_emit("speediserest {,first-cap:speedierest} {:was}\n",
+	    "\xce\xb1 alto", "\xce\xb1 alto");
+    xo_emit("speedid {,first-cap:speedid} {:was}\n",
+	    "\xcf\x88 basso", "\xcf\x88 basso");
+
+    xo_emit("{T:name} {T:Used %}\n");
+    xo_emit("df     {:used-percent/%5.0f}{U,units-attr:%}\n", (double) 12);
+    xo_emit("fd     {:used-percent/%5.0f}{U:%}\n", (double) 12);
 
     xo_emit("{e:kve_start/%#jx}", (uintmax_t) 0xdeadbeef);
     xo_emit("{e:kve_end/%#jx}", (uintmax_t) 0xcabb1e);
