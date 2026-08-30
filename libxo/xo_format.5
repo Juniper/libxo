@@ -500,6 +500,36 @@ This substitution is not reversible.
 .Pp
 The escape-square modifier only affects XML and HTML output styles.
 Without this modifier, control characters are replaced with spaces.
+.Ss "The first-cap Modifier ({f:})"
+In TEXT and HTML modes, the \(aqfirst-cap\(aq modifier will capitalize
+the first character in the field value, allowing the user data to
+look user friendly while the encoded data has more uniform
+rendering ("perfect" versus "Perfect").
+.Pp
+UTF\-8 data is also handled, using
+.Nm libxo 's
+built-in upper case
+UTF\-8 formatting code.
+.Bd -literal -offset indent
+    xo_emit("Condition is {f:status}\n", "true");
+.Ed
+.Ss "The Gettext Modifier ({g:})"
+The gettext modifier is used to translate individual fields using the
+gettext domain (typically set using the "{G:}" role) and current
+language settings.
+Once libxo renders the field value, it is passed
+to
+.Xr gettext 3 ,
+where it is used as a key to find the native language
+translation.
+.Pp
+In the following example, the strings "State" and "full" are passed
+to
+.Fn gettext
+to find locale\-based translated strings.
+.Bd -literal -offset indent
+    xo_emit("{Lgwc:State}{g:state}\\n", "full");
+.Ed
 .Ss "The Humanize Modifier ({h:})"
 The humanize modifier is used to render large numbers as in a
 human\-readable format.
@@ -535,23 +565,6 @@ In the HTML style, the original numeric value is rendered in the
 .Bd -literal -offset indent
     <div class="data" data\-tag="errors"
          data\-number="100663296">96M</div>
-.Ed
-.Ss "The Gettext Modifier ({g:})"
-The gettext modifier is used to translate individual fields using the
-gettext domain (typically set using the "{G:}" role) and current
-language settings.
-Once libxo renders the field value, it is passed
-to
-.Xr gettext 3 ,
-where it is used as a key to find the native language
-translation.
-.Pp
-In the following example, the strings "State" and "full" are passed
-to
-.Fn gettext
-to find locale\-based translated strings.
-.Bd -literal -offset indent
-    xo_emit("{Lgwc:State}{g:state}\\n", "full");
 .Ed
 .Ss "The Key Modifier ({k:})"
 The key modifier is used to indicate that a particular field helps
@@ -641,6 +654,17 @@ needed, but often this needs to be controlled by the caller.
       xo_emit("{q:time/%d}", 2014);
     JSON:
       "year": "2014"
+.Ed
+
+.Ss "The units-attr modifier ({U,units-attr:})"
+The \(aqunits-attr\(aq applies only to fields with the \(aqunits\(aq roles, and
+causes the units value to appear only in the XML \(aqunits=XX\(aq attribute
+or the HTML \(aqdata-units=XX\(aq attribute.
+The values do not appear in either the text output or the
+HTML \(aq<div class='units'>\(aq elements.
+.Bd -literal -offset indent
+    xo_emit("{:memory/%u}{U:kb} out of {:total/%u}{U,units-attr:kb}\\n",
+	    64, 640);
 .Ed
 .Ss "The White Space Modifier ({w:})"
 The white space modifier appends a single space to the data value:
@@ -734,8 +758,9 @@ removed eventually.
 .Sh INTEGER SIZES
 Use the integer size indicator to convey the size of the argument in
 bytes, easing the burden of the mismatch between the fixed size types
-in <stdint.h> and the implementation-dependent sizes in `printf(3)`,
-e.g "%lld", "%ld", and "%d".  Having defined a `uint64_t`, you can use
+in <stdint.h> and the implementation-dependent sizes in
+.Xr printf 3 ,
+e.g "%lld", "%ld", and "%d".  Having defined a \(aquint64_t\(aq, you can use
 "%!64x" to print it without worrying about portability issues or
 resorting to using casts, not to mention "PRIu64".
 .Bd -literal -offset indent
@@ -794,8 +819,9 @@ padding with spaces if the number of bytes is exhausted.
 will not dereference memory beyond the given number of bytes.
 For the "data" style encodings (XML, JSON), the first group will be
 ignored, since whitespace padding is not desirable in those encodings.
-The second and third will not be ignored, since `libxo` must respect
-floating point precision, leading zeros, and string lengths.
+The second and third will not be ignored, since
+.Nm libxo
+must respect floating point precision, leading zeros, and string lengths.
 .Bd -literal -offset indent
 /* 8 columns of output, padded with zeroes */
 xo_emit("[{:count/%.8d}]\\n", count);  /* "[00001234]" */
