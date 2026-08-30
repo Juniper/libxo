@@ -188,11 +188,11 @@
   <div class="data" data-tag="val5" data-xpath="/top/data[name = 'em0']/val5" data-number="1342172800">1.2G</div>
 </div>
 <div class="line">
-  <div class="data" data-tag="flag" data-xpath="/top/data[name = 'em0']/flag">one</div>
+  <div class="data" data-tag="flag" data-ident="1" data-xpath="/top/data[name = 'em0']/flag">one</div>
   <div class="text"> </div>
-  <div class="data" data-tag="flag" data-xpath="/top/data[name = 'em0']/flag">two</div>
+  <div class="data" data-tag="flag" data-ident="1" data-xpath="/top/data[name = 'em0']/flag">two</div>
   <div class="text"> </div>
-  <div class="data" data-tag="flag" data-xpath="/top/data[name = 'em0']/flag">three</div>
+  <div class="data" data-tag="flag" data-ident="1" data-xpath="/top/data[name = 'em0']/flag">three</div>
 </div>
 <div class="line">
   <div class="data" data-tag="works" data-xpath="/top/data[name = 'em0']/works">(null)</div>
