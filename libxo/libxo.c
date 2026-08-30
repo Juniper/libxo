@@ -3183,7 +3183,7 @@ xo_format_string (xo_handle_t *xop, xo_fspec_t *xfp, xo_buffer_t *xbp,
 
 	/* Echo "Dont' deref NULL" logic */
 	if (cp == NULL) {
-	    if ((flags & XFF_NOQUOTE) && xo_style_is_encoding(xop)) {
+	    if ((flags & XFF_NO_QUOTE) && xo_style_is_encoding(xop)) {
 		cp = null_no_quotes;
 		len = sizeof(null_no_quotes) - 1;
 	    } else {
@@ -3490,7 +3490,12 @@ xo_data_append_content (xo_handle_t *xop, const char *str, ssize_t len,
     int need_enc = xo_needed_encoding(xop);
     ssize_t start_offset = xo_buf_offset(&xop->xo_data);
 
-    cols = xo_format_string_direct(xop, &xop->xo_data, XFF_UNESCAPE | flags,
+
+    xo_xff_flags_t sub_flags = flags;
+    if (!(flags & XFF_NO_UNESCAPE))
+	sub_flags |= XFF_UNESCAPE;
+
+    cols = xo_format_string_direct(xop, &xop->xo_data, sub_flags,
 				   NULL, str, len, -1,
 				   need_enc, XF_ENC_UTF8);
     if (flags & XFF_GT_FLAGS)
@@ -4322,6 +4327,54 @@ xo_format_humanize (xo_handle_t *xop, xo_buffer_t *xbp,
 }
 
 /*
+ * Capitalize the first character in the last chunk of emitted data.
+ * For ASCII, this is trivial, but UTF-8 isn't.
+ *
+ * We reuse the structure for xo_format_humanize(), since it has the
+ * saved offset.
+ */
+static void
+xo_format_first_cap (xo_handle_t *xop UNUSED, xo_buffer_t *xbp,
+		     xo_humanize_save_t *savep, xo_xff_flags_t flags)
+{
+    if (!(flags & XFF_FIRST_CAP))
+	return;
+
+    xo_off_t cur_off = xo_buf_offset(xbp);
+    xo_off_t save_off = savep->xhs_offset;
+
+    if (cur_off <= save_off)	/* See if anything was written */
+	return;
+
+    char *cp = xo_buf_data(xbp, save_off);
+    unsigned char ch = *cp;
+
+    if (!xo_is_utf8_byte(ch)) {		/* Simple ASCII */
+	*cp = toupper(ch);
+	return;
+    }
+
+    int rlen = xo_utf8_rlen(ch);
+    if (rlen > cur_off - save_off) /* Not enought data in the buffer? */
+	return;			   /* non-utf8 data was written in buffer */
+
+    xo_codepoint_t wc = xo_utf8_codepoint(cp, rlen, rlen, XO_UTF8_ERR_BAD_LEN);
+    if (wc == XO_UTF8_ERR_BAD_LEN)
+	return;
+
+    xo_codepoint_t new_wc = xo_utf8_wtoupper(wc);
+    if (wc == new_wc)
+	return;
+
+    ssize_t new_len = xo_utf8_to_len(new_wc);
+    if (new_len != rlen)
+	return;
+
+    /* Finally crossed all the hurdles; write the new value */
+    xo_utf8_to_bytes(cp, rlen, new_wc);
+}
+
+/*
  * Convenience function that either append a fixed value (if one is
  * given) or formats a field using a format string.  If it's
  * encode_only, then we can't skip formatting the field, since it may
@@ -4758,6 +4811,9 @@ xo_buf_append_div (xo_handle_t *xop, const xo_field_info_t *xfip,
     save.xhs_anchor_columns = xop->xo_anchor_columns;
 
     xo_simple_field(xop, xfip, FALSE, value, vlen, fmt, flen, flags);
+
+    if (flags & XFF_FIRST_CAP)
+	xo_format_first_cap(xop,xbp, &save, flags);
 
     if (flags & XFF_HUMANIZE) {
 	/*
@@ -6054,7 +6110,7 @@ xo_format_value_encoder (xo_handle_t *xop, const xo_field_info_t *xfip,
     int quote;
     if (flags & XFF_QUOTE)
 	quote = 1;
-    else if (flags & XFF_NOQUOTE)
+    else if (flags & XFF_NO_QUOTE)
 	quote = 0;
     else if (flen == 0) {
 	quote = 0;
@@ -6203,7 +6259,7 @@ xo_format_value_json (xo_handle_t *xop, const xo_field_info_t *xfip,
     int quote;
     if (flags & XFF_QUOTE)
 	quote = 1;
-    else if (flags & XFF_NOQUOTE)
+    else if (flags & XFF_NO_QUOTE)
 	quote = 0;
     else if (vlen != 0)
 	quote = 1;
@@ -6500,6 +6556,9 @@ xo_format_value (xo_handle_t *xop, const xo_field_info_t *xfip,
 	save.xhs_anchor_columns = xop->xo_anchor_columns;
 
 	xo_simple_field(xop, xfip, FALSE, value, vlen, fmt, flen, flags);
+
+	if (flags & XFF_FIRST_CAP)
+	    xo_format_first_cap(xop,xbp, &save, flags);
 
 	if (flags & XFF_HUMANIZE)
 	    xo_format_humanize(xop, xbp, &save, flags);
@@ -7054,22 +7113,45 @@ xo_format_units (xo_handle_t *xop, const xo_field_info_t *xfip,
     static char units_start_xml[] = " units=\"";
     static char units_start_html[] = " data-units=\"";
 
+    /*
+     * The "units-attr" flag says only render the units in the
+     * "data-units" attribute and then only when asked (via
+     * XOF_UNITS in XML or HTML).
+     */
+    int units_attr = (xfip->xfi_flags & XFF_UNITS_ATTR) ? 1 : 0;
+    xo_buffer_t *xbp = &xop->xo_data;
+    xo_off_t start_off = xo_buf_offset(xbp);
+
     if (!XOIF_ISSET(xop, XOIF_UNITS_PENDING)) {
 	xo_format_content(xop, xfip, "units", NULL, value, vlen,
-			  fmt, flen, flags);
+			  fmt, flen, flags | XFF_NO_UNESCAPE);
+
+	/*
+	 * If units-attr was used, we don't want to render the units
+	 * in normal output, we just need to eat any data off the
+	 * stack.  Reset and pretend we're happy about it.
+	 */
+	if (units_attr)
+	    xo_buf_set_offset(xbp, start_off);
+
 	return;
     }
 
-    xo_buffer_t *xbp = &xop->xo_data;
     ssize_t start = xop->xo_units_offset;
     ssize_t stop = xbp->xb_curp - xbp->xb_bufp;
 
-    if (xo_style(xop) == XO_STYLE_XML)
-	xo_buf_append(xbp, units_start_xml, sizeof(units_start_xml) - 1);
-    else if (xo_style(xop) == XO_STYLE_HTML)
-	xo_buf_append(xbp, units_start_html, sizeof(units_start_html) - 1);
-    else
+    const char *leader;
+    int llen;
+    if (xo_style(xop) == XO_STYLE_XML) {
+	leader = units_start_xml;
+	llen = sizeof(units_start_xml) - 1;
+    } else if (xo_style(xop) == XO_STYLE_HTML) {
+	leader = units_start_html;
+	llen = sizeof(units_start_html) - 1;
+    } else
 	return;
+
+    xo_buf_append(xbp, leader, llen);
 
     /* We're writing into a quoted attribute value; escape accordingly. */
     flags |= XFF_ATTR;
@@ -7099,6 +7181,12 @@ xo_format_units (xo_handle_t *xop, const xo_field_info_t *xfip,
     memcpy(buf, xbp->xb_bufp + stop, delta);
     memmove(xbp->xb_bufp + start + delta, xbp->xb_bufp + start, stop - start);
     memmove(xbp->xb_bufp + start, buf, delta);
+
+    if (!units_attr) {
+	buf[--delta] = '\0';
+	xo_format_content(xop, xfip, "units", NULL, buf + llen, delta - llen,
+			  fmt, flen, flags | XFF_NO_UNESCAPE);
+    }
 }
 
 static ssize_t
