@@ -208,6 +208,7 @@ static xo_flag_mapping_t xo_modifier_names[] = {
     { XFF_ESC_PRIVATE, "escape-private" },
     { XFF_ESC_SLASH, "escape-slash" },
     { XFF_ESC_SQUARE, "escape-square" },
+    { XFF_FIRST_CAP, "first-cap" },
     { XFF_GT_FIELD, "gettext" },
     { XFF_HUMANIZE, "humanize" },
     { XFF_HUMANIZE, "hn" },
@@ -217,12 +218,13 @@ static xo_flag_mapping_t xo_modifier_names[] = {
     { XFF_KEY, "key" },
     { XFF_LEAF_LIST, "leaf-list" },
     { XFF_LEAF_LIST, "list" },
-    { XFF_NOQUOTE, "no-quotes" },
-    { XFF_NOQUOTE, "no-quote" },
+    { XFF_NO_QUOTE, "no-quotes" },
+    { XFF_NO_QUOTE, "no-quote" },
     { XFF_GT_PLURAL, "plural" },
     { XFF_QUOTE, "quotes" },
     { XFF_QUOTE, "quote" },
     { XFF_TRIM_WS, "trim" },
+    { XFF_UNITS_ATTR, "units-attr" },
     { XFF_WS, "white" },
     { 0, NULL }
 };
@@ -601,11 +603,12 @@ xo_parse_roles (xo_parse_t *xpp, const char *fmt,
 	case 'c': flags |= XFF_COLON;       break;
 	case 'd': flags |= XFF_DISPLAY_ONLY; break;
 	case 'e': flags |= XFF_ENCODE_ONLY; break;
+	case 'f': flags |= XFF_FIRST_CAP;   break;
 	case 'g': flags |= XFF_GT_FIELD;    break;
 	case 'h': flags |= XFF_HUMANIZE;    break;
 	case 'k': flags |= XFF_KEY;         break;
 	case 'l': flags |= XFF_LEAF_LIST;   break;
-	case 'n': flags |= XFF_NOQUOTE;     break;
+	case 'n': flags |= XFF_NO_QUOTE;    break;
 	case 'p': flags |= XFF_GT_PLURAL;   break;
 	case 'q': flags |= XFF_QUOTE;       break;
 	case 't': flags |= XFF_TRIM_WS;     break;
