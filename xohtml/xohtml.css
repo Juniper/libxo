@@ -256,6 +256,14 @@ div.effect-reset, div.effect-normal {
     margin-left: 4px;
 }
 
+div.xohtml-ident-toggle {
+    margin-top: 6px;
+}
+
+div.xohtml-ident-toggle .xohtml-view-toggle {
+    margin-left: 0;
+}
+
 .xohtml-view-toggle {
     display: inline-block;
     vertical-align: baseline;
