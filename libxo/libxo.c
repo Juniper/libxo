@@ -8763,7 +8763,7 @@ xo_depth_change (xo_handle_t *xop, const char *name,
 	xo_stack_set_flags(xop);
 
 	XO_DBG(xop, "xo_depth_change: '%s' depth %d, state %u=%s, "
-	       "status %u=%s,  rb_off %d, rb_flags %#x, ident = %d",
+	       "status %u=%s,  rb_off %d, rb_flags %#x, ident = %u",
 	       name, xop->xo_depth + delta,
 	       state, xo_state_name(state),
 	       fstatus, xo_filt_status_name(fstatus),
