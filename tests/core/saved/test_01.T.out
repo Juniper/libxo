@@ -10,10 +10,10 @@ anchor             0x0..1
 anchor             0x0..1
 Random {text}
 not speed 100 100
-speed Fast fast
+speed fast fast
 speedier αsoprano αsoprano
-speediserest Α alto α alto
-speedid Ψ basso ψ basso
+speediserest α alto α alto
+speedid ψ basso ψ basso
 name Used %
 df        12
 fd        12%
