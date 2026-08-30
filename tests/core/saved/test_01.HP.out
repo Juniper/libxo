@@ -68,7 +68,50 @@
   <div class="data" data-tag="port">1</div>
 </div>
 <div class="line">
-  <div class="text">df </div>
+  <div class="text">Random </div>
+  <div class="text">{text}</div>
+</div>
+<div class="line">
+  <div class="text">not speed </div>
+  <div class="data" data-tag="speed">100</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="was">100</div>
+</div>
+<div class="line">
+  <div class="text">speed </div>
+  <div class="data" data-tag="speed">Fast</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="was">fast</div>
+</div>
+<div class="line">
+  <div class="text">speedier </div>
+  <div class="data" data-tag="speedier">αsoprano</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="was">αsoprano</div>
+</div>
+<div class="line">
+  <div class="text">speediserest </div>
+  <div class="data" data-tag="speedierest">Α alto</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="was">α alto</div>
+</div>
+<div class="line">
+  <div class="text">speedid </div>
+  <div class="data" data-tag="speedid">Ψ basso</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="was">ψ basso</div>
+</div>
+<div class="line">
+  <div class="title">name</div>
+  <div class="text"> </div>
+  <div class="title">Used %</div>
+</div>
+<div class="line">
+  <div class="text">df     </div>
+  <div class="data" data-tag="used-percent">   12</div>
+</div>
+<div class="line">
+  <div class="text">fd     </div>
   <div class="data" data-tag="used-percent">   12</div>
   <div class="units">%</div>
 </div>
