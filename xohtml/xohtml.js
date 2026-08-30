@@ -130,9 +130,16 @@
         t.style.left = left + "px";
     }
 
-    function wireTooltips () {
-        var els = document.querySelectorAll("#xohtml-content .data[data-tag]");
+    function wireTooltips (root) {
+        var scope = root || document.getElementById("xohtml-content");
+        if (!scope)
+            return;
+
+        var els = scope.querySelectorAll(".data[data-tag]");
         for (var i = 0; i < els.length; i++) {
+            if (els[i].dataset.tipWired)
+                continue;
+            els[i].dataset.tipWired = "1";
             els[i].addEventListener("mouseenter", (function (el) {
                 return function () { showTip(el); };
             })(els[i]));
@@ -202,26 +209,63 @@
         }).join(" ");
     }
 
+    function rowShape (rowLines) {
+        var tags = [];
+        rowLines.forEach(function (line) {
+            var cells = line.querySelectorAll(".data[data-tag]");
+            for (var i = 0; i < cells.length; i++)
+                tags.push(cells[i].getAttribute("data-tag"));
+        });
+        return tags.sort().join(",");
+    }
+
+    /*
+     * A run of contiguous idents is only one table if every row also
+     * has the same set of field tags.  This matters because opening a
+     * leaf-list burns exactly one ident (like a list/instance does)
+     * but never gives its individual values idents of their own, so
+     * a single-instance record immediately followed by a leaf-list
+     * can land on contiguous idents despite being unrelated -- e.g. a
+     * lone "fish" instance (ident N) followed by an "item" leaf-list
+     * (ident N+1, one shared ident across all its values).  Without
+     * the shape check, that leaf-list's last value would get merged
+     * in as a bogus extra row.
+     */
     function findIdentGroups (content, used) {
         var lines = content.querySelectorAll("div.line");
         var groups = [];
 
         var rows = [];
+        var groupShape = null;
+        var lastIdent = null;
         var curIdent = null;
         var curLines = [];
 
-        function finishRow () {
-            if (curLines.length)
-                rows.push(curLines);
-            curLines = [];
-        }
-
-        function finishGroup () {
-            finishRow();
+        function closeGroup () {
             if (rows.length >= 2)
                 groups.push({ rows: rows });
             rows = [];
-            curIdent = null;
+            groupShape = null;
+            lastIdent = null;
+        }
+
+        function commitRow () {
+            if (!curLines.length)
+                return;
+
+            var shape = rowShape(curLines);
+            var contiguous = lastIdent !== null
+                && Number(curIdent) === Number(lastIdent) + 1;
+
+            if (rows.length && (!contiguous || shape !== groupShape))
+                closeGroup();
+
+            if (!rows.length)
+                groupShape = shape;
+
+            rows.push(curLines);
+            lastIdent = curIdent;
+            curLines = [];
         }
 
         for (var i = 0; i < lines.length; i++) {
@@ -229,29 +273,38 @@
             var ident = used.has(line) ? null : rowIdent(line);
 
             if (ident === null) {
-                finishGroup();
+                commitRow();
+                closeGroup();
+                curIdent = null;
                 continue;
             }
 
-            if (curIdent === null) {
-                curIdent = ident;
-                curLines = [line];
-            } else if (ident === curIdent) {
-                curLines.push(line);
-            } else if (Number(ident) === Number(curIdent) + 1) {
-                finishRow();
-                curIdent = ident;
-                curLines = [line];
-            } else {
-                /* Not contiguous with the row just finished: new table. */
-                finishGroup();
-                curIdent = ident;
-                curLines = [line];
-            }
+            if (curIdent !== null && ident !== curIdent)
+                commitRow();
+
+            curIdent = ident;
+            curLines.push(line);
         }
-        finishGroup();
+        commitRow();
+        closeGroup();
 
         return groups;
+    }
+
+    /*
+     * A table cell needs both the trimmed display/sort text and a
+     * copy of the source .data div (data-help/type/units/xpath) so
+     * the generated <td> can still drive the tooltip.  The source
+     * div was already wired at init() time, so cloneNode() would
+     * otherwise copy its data-tip-wired marker along with it and
+     * make wireTooltips() skip attaching a listener to the clone.
+     */
+    function cellValue (el) {
+        var text = el.textContent.trim();
+        var clone = el.cloneNode(false);
+        delete clone.dataset.tipWired;
+        clone.textContent = text;
+        return { text: text, el: clone };
     }
 
     function buildModel (group) {
@@ -271,7 +324,7 @@
                     seen[tag] = true;
                     columns.push(tag);
                 }
-                rowData[tag] = cells[c].textContent.trim();
+                rowData[tag] = cellValue(cells[c]);
             }
             rows.push(rowData);
         }
@@ -308,7 +361,7 @@
                         labelMap[tag] = labelText || humanizeTag(tag);
                         columns.push(tag);
                     }
-                    rowData[tag] = cells[c].textContent.trim();
+                    rowData[tag] = cellValue(cells[c]);
                     any = true;
                 }
             });
@@ -359,7 +412,9 @@
                 sortCol = i;
 
                 model.rows.sort(function (ra, rb) {
-                    return sortDir * compareValues(ra[tag], rb[tag]);
+                    var va = ra[tag] ? ra[tag].text : "";
+                    var vb = rb[tag] ? rb[tag].text : "";
+                    return sortDir * compareValues(va, vb);
                 });
 
                 ths.forEach(function (other, oi) {
@@ -386,11 +441,14 @@
                 var tr = document.createElement("tr");
                 model.columns.forEach(function (tag) {
                     var td = document.createElement("td");
-                    td.textContent = rowData[tag] || "";
+                    var cell = rowData[tag];
+                    if (cell)
+                        td.appendChild(cell.el.cloneNode(true));
                     tr.appendChild(td);
                 });
                 tbody.appendChild(tr);
             });
+            wireTooltips(tbody);
         }
 
         renderBody();
