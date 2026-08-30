@@ -68,7 +68,50 @@
   <div class="data" data-tag="port" data-xpath="/data/top-level/port">1</div>
 </div>
 <div class="line">
-  <div class="text">df </div>
+  <div class="text">Random </div>
+  <div class="text">{text}</div>
+</div>
+<div class="line">
+  <div class="text">not speed </div>
+  <div class="data" data-tag="speed" data-xpath="/data/top-level/speed">100</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="was" data-xpath="/data/top-level/was">100</div>
+</div>
+<div class="line">
+  <div class="text">speed </div>
+  <div class="data" data-tag="speed" data-xpath="/data/top-level/speed">Fast</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="was" data-xpath="/data/top-level/was">fast</div>
+</div>
+<div class="line">
+  <div class="text">speedier </div>
+  <div class="data" data-tag="speedier" data-xpath="/data/top-level/speedier">αsoprano</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="was" data-xpath="/data/top-level/was">αsoprano</div>
+</div>
+<div class="line">
+  <div class="text">speediserest </div>
+  <div class="data" data-tag="speedierest" data-xpath="/data/top-level/speedierest">Α alto</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="was" data-xpath="/data/top-level/was">α alto</div>
+</div>
+<div class="line">
+  <div class="text">speedid </div>
+  <div class="data" data-tag="speedid" data-xpath="/data/top-level/speedid">Ψ basso</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="was" data-xpath="/data/top-level/was">ψ basso</div>
+</div>
+<div class="line">
+  <div class="title">name</div>
+  <div class="text"> </div>
+  <div class="title">Used %</div>
+</div>
+<div class="line">
+  <div class="text">df     </div>
+  <div class="data" data-tag="used-percent" data-xpath="/data/top-level/used-percent">   12</div>
+</div>
+<div class="line">
+  <div class="text">fd     </div>
   <div class="data" data-tag="used-percent" data-xpath="/data/top-level/used-percent">   12</div>
   <div class="units">%</div>
 </div>
