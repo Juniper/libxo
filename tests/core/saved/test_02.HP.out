@@ -188,11 +188,11 @@
   <div class="data" data-tag="val5" data-number="1342172800">1.2G</div>
 </div>
 <div class="line">
-  <div class="data" data-tag="flag">one</div>
+  <div class="data" data-tag="flag" data-ident="1">one</div>
   <div class="text"> </div>
-  <div class="data" data-tag="flag">two</div>
+  <div class="data" data-tag="flag" data-ident="1">two</div>
   <div class="text"> </div>
-  <div class="data" data-tag="flag">three</div>
+  <div class="data" data-tag="flag" data-ident="1">three</div>
 </div>
 <div class="line">
   <div class="data" data-tag="works">(null)</div>
