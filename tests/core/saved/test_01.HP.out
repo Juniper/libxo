@@ -583,3 +583,16 @@
   <div class="text">, unothing </div>
   <div class="data" data-tag="unothing">5</div>
 </div>
+<div class="line">
+  <div class="text">2face</div>
+</div>
+<div class="line">
+  <div class="text">static text</div>
+</div>
+<div class="line">
+  <div class="text">see both text</div>
+</div>
+<div class="line">
+  <div class="text">X</div>
+  <div class="text">X</div>
+</div>
