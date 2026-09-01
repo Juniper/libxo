@@ -14,6 +14,7 @@ content.  The roles are listed below; only one role is permitted:
   C   color          Field has color and effect controls
   D   decoration     Field is non-text (e.g., colon, comma)
   E   error          Field is an error message
+  F   format         Field for formatting text content
   G   gettext        Call gettext(3) on the format string
   L   label          Field is text that prefixes a value
   N   note           Field is text that follows a value
@@ -135,6 +136,37 @@ can use CSS to direct their display parameters::
 
     xo_emit("{D:((}{:name}{D:))}\\n", name);
 
+.. index:: Field Roles; format-role
+.. _format-role:
+
+The Format Role ({F:})
++++++++++++++++++++++++
+
+The format role is used to format text data, and should be used for
+text strings that are not values that should encoding in XML or JSON.
+The format role is often used as an alternative to encode-only
+("{e:}") fields.  The use of display-only fields "{d:}" inspired the
+creation of the format role as a first-class construct in libxo.
+
+The format field can be used with a printf-style format descriptor, if
+preceded by a slash ("/").  It can also be used to static content,
+when placed directly within the field descriptor, though this is
+rarely used::
+
+    xo_emit("{F:/(incomplete)}{en:incomplete/true}");
+    xo_emit("{F:/%s}", nname);
+    xo_emit("{F:static-content}");
+
+Format fields have an extra convenience feature; if both content and
+format are specified, instead of looking to the argument list for a
+value, the content is used, allowing a mixture of format and content
+within the field descriptor, though overlaps the `label_role`_::
+
+    xo_emit("{F:name is /%20s}{:count/%d}\\n", count);
+
+Since the incoming argument is a string, the format must be "%s" or
+something suitable.
+
 .. index:: Field Roles; Gettext
 .. _gettext-role:
 
@@ -218,8 +250,8 @@ The Title Role ({T:})
 
 Title are heading or column headers that are meant to be displayed to
 the user.  The title can be either static, when placed directly within
-the field descriptor, or a printf-style format descriptor can be used,
-if preceded by a slash ("/")::
+the field descriptor, or a printf-style format descriptor, if preceded
+by a slash ("/")::
 
     xo_emit("{T:Interface Statistics}\\n");
     xo_emit("{T:/%20.20s}{T:/%6.6s}\\n", "Item Name", "Cost");
