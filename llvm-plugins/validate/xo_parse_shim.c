@@ -357,21 +357,11 @@ xo_shim_parse_args (const char *fmt,
             arg_cb(arg_data, NULL, 0);
 
 	else {
-	    /*
-	     * We have "display values" ("{d:/xxx}") where there is no
-	     * tag name.  The caller is really just trying to format a
-	     * text string for display.  We could make a flag for
-	     * this, but that would just make it ugly for no win.  So
-	     * we declare that a "value field with the "display" flag
-	     * is fine, and we skip the two "missing name" lint checks
-	     * below.
-	     */
 	    int no_name = (xfip->xfi_flags & XFF_DISPLAY_ONLY) != 0;
-	    const char use_instead[] =
-		"use 'T'/text, 'P'/padding, or 'D'/decoration role instead";
+	    const char use_instead[] = "use 'F'/format role instead";
 
 	    /* Enforce name/format restrictions */
-	    if (strchr(XO_LINT_ROLES_NEEDING_NAME, ftype)
+	    if ((flags & XPF_LINT) && strchr(XO_LINT_ROLES_NEEDING_NAME, ftype)
 			&& xfip->xfi_clen == 0) {
 		const char *role_name = xo_lookup_role_name(ftype);
 		if (no_name)
