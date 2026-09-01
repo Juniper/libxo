@@ -104,7 +104,7 @@
 ../../../tests/llvm-plugins/validate_02.c:91:13: warning: libxo: field descriptor uses multiple types: '{LT:Max}\n'
    91 |     xo_emit("{LT:Max}\n");
       |             ^
-../../../tests/llvm-plugins/validate_02.c:94:13: warning: libxo: field must have a name: '{:/%s}'
+../../../tests/llvm-plugins/validate_02.c:94:13: warning: libxo: field role ('V'/value) requires a non-empty name: '{:/%s}'
    94 |     xo_emit("{:/%s}\n", "x");
       |             ^
 ../../../tests/llvm-plugins/validate_02.c:97:13: warning: libxo: use hyphens, not underscores, in field name: '{:no_good/%s}'
@@ -206,4 +206,7 @@
 ../../../tests/llvm-plugins/validate_02.c:528:13: warning: libxo: zero length encoding format, ignored
   528 |     xo_emit("{:missing-encoding/%d/}\n", 1024);
       |             ^
-62 warnings generated.
+../../../tests/llvm-plugins/validate_02.c:530:13: warning: libxo: value field ('V'/value) has empty name, but has the 'display' flag set; use 'F'/format role instead: '{d:/this should be %s}'
+  530 |     xo_emit("{d:/this should be %s}\n", "text");
+      |             ^
+63 warnings generated.
