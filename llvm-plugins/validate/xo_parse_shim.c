@@ -367,14 +367,26 @@ xo_shim_parse_args (const char *fmt,
 	     * below.
 	     */
 	    int no_name = (xfip->xfi_flags & XFF_DISPLAY_ONLY) != 0;
+	    const char use_instead[] =
+		"use 'T'/text, 'P'/padding, or 'D'/decoration role instead";
 
 	    /* Enforce name/format restrictions */
 	    if (strchr(XO_LINT_ROLES_NEEDING_NAME, ftype)
-			&& xfip->xfi_clen == 0 && !no_name)
-		ss_err.error(ss_err.data,
-			     "field role ('%c') requires a non-empty name: "
-			     "'%s'",
-			     ftype, xo_printable2(str, slen, 1));
+			&& xfip->xfi_clen == 0) {
+		const char *role_name = xo_lookup_role_name(ftype);
+		if (no_name)
+		    ss_err.error(ss_err.data,
+				 "value field ('%c'%s%s) has empty name, but "
+				 "has the 'display' flag set; %s: '%s'",
+				 ftype, role_name ? "/" : "", role_name ?: "",
+				 use_instead, xo_printable2(str, slen, 1));
+		else 
+		    ss_err.error(ss_err.data,
+				 "field role ('%c'%s%s) requires a non-empty "
+				 "name: '%s'",
+				 ftype, role_name ? "/" : "", role_name ?: "",
+				 xo_printable2(str, slen, 1));
+	    }
 
 	    /*
 	     * xfi_format >= 0 means an explicit format was written in the
@@ -383,7 +395,7 @@ xo_shim_parse_args (const char *fmt,
 	     * Only error when the user wrote neither content nor format.
 	     */
 	    if (strchr(XO_LINT_ROLES_NEEDING_NAME_OR_FORMAT, ftype)
-		    && xfip->xfi_clen == 0 && xfip->xfi_format < 0 && !no_name) {
+		    && xfip->xfi_clen == 0 && xfip->xfi_format < 0) {
 		const char *role_name = xo_lookup_role_name(ftype);
 		ss_err.error(ss_err.data,
 			     "field role ('%c'%s%s) requires a name or format: "
