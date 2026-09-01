@@ -263,9 +263,9 @@ xo_xff_flags_t xo_name_lookup(xo_flag_mapping_t *map, const char *value,
 			       ssize_t len);
 
 /*
- * Look up name by value in a flag-mapping table; NULL if not found.
+ * Look up the name of a role
  */
-const char *xo_value_lookup(xo_flag_mapping_t *map, xo_xff_flags_t value);
+const char *xo_lookup_role_name(uint32_t value);
 
 /*
  * Table mapping field role characters (e.g. 'C', 'L', 'N') to their
