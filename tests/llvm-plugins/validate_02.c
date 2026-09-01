@@ -527,6 +527,9 @@ main (int argc, char **argv)
 
     xo_emit("{:missing-encoding/%d/}\n", 1024);
 
+    xo_emit("{d:/this should be %s}\n", "text");
+    xo_emit("{F:/this should be %s}\n", "text");
+
     fclose(dev_null);
 
     return 0;
