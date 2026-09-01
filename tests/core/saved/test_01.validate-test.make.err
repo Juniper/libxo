@@ -51,4 +51,8 @@
       |             ^
 ../../../tests/core/test_01.c:342:13: warning: libxo: invalid integer size: '{%!33u}'
 ../../../tests/core/test_01.c:342:13: warning: libxo: missing integer size: '{%!u}'
-23 warnings generated.
+../../../tests/core/test_01.c:349:13: warning: libxo: field role ('F'/format) requires a name or format: '{F:}'
+  349 |     xo_emit("X{F:}X\n", "empty");
+      |             ^
+../../../tests/core/test_01.c:349:13: warning: libxo: format expects 0 argument(s) but 1 provided
+25 warnings generated.
