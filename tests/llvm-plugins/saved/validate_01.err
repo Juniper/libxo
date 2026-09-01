@@ -16,7 +16,7 @@
 ../../../tests/llvm-plugins/validate_01.c:34:13: warning: libxo: field descriptor uses multiple types: '{LT:Max}\n'
    34 |     xo_emit("{LT:Max}\n");
       |             ^
-../../../tests/llvm-plugins/validate_01.c:37:13: warning: libxo: field must have a name: '{:/%s}'
+../../../tests/llvm-plugins/validate_01.c:37:13: warning: libxo: field role ('V'/value) requires a non-empty name: '{:/%s}'
    37 |     xo_emit("{:/%s}\n", "x");
       |             ^
 ../../../tests/llvm-plugins/validate_01.c:40:13: warning: libxo: use hyphens, not underscores, in field name: '{:no_good/%s}'
