@@ -343,6 +343,11 @@ main (int argc, char **argv)
 	    "unothing {:unothing/%!u}\n",
 	    five_u32, five_u32, "five_u32", five_u32);
 
+    xo_emit("{F:/%dface}\n", 2);
+    xo_emit("{F:static text}\n");
+    xo_emit("{F:both text/see %s}\n");
+    xo_emit("X{F:}X\n", "empty");
+
     if (opt_top_count && --opt_top_count > 0)
 	goto top;
 
