@@ -4075,11 +4075,11 @@ xo_do_format_field (xo_handle_t *xop, const xo_field_info_t *xfip,
         xo_xff_flags_t field_flags = flags;
 
         /* Hidden fields are only visible to JSON and XML */
-        if (XOF_ISSET(xop, XFF_ENCODE_ONLY)) {
+        if (flags & XFF_ENCODE_ONLY) {
             if (style != XO_STYLE_XML
                     && !xo_style_is_encoding(xop))
                 field_flags |= XFF_SKIP;
-        } else if (XOF_ISSET(xop, XFF_DISPLAY_ONLY)) {
+        } else if (flags & XFF_DISPLAY_ONLY) {
             if (style != XO_STYLE_TEXT
                     && xo_style(xop) != XO_STYLE_HTML)
                 field_flags |= XFF_SKIP;
@@ -4910,14 +4910,28 @@ xo_format_title (xo_handle_t *xop, const xo_field_info_t *xfip,
     ssize_t flen = xfip->xfi_flen;
     xo_xff_flags_t flags = xfip->xfi_flags;
 
-    static char div_open[] = "<div class=\"title";
+    static char div_open[] = "<div class=\"";
     static char div_middle[] = "\">";
     static char div_close[] = "</div>";
+    const char *class_name = (xfip->xfi_ftype == 'F') ? "text" : "title";
 
     if (flen == 0) {
 	fmt = "%s";
 	flen = 2;
 	xfip = &xo_default_field_info;
+    }
+
+    /*
+     * 'F' formats exactly like titles, but only appear in display styles
+     */
+    if (xfip->xfi_ftype == 'F' && xo_style_is_encoding(xop)) {
+	/*
+	 * Even though we don't care about 'format' fields in
+	 * encoding, we need to do enough parsing work to skip over
+	 * the right bits of xo_vap.
+	 */
+	xo_simple_field(xop, xfip, TRUE, value, vlen, fmt, flen, flags);
+	return;
     }
 
     switch (xo_style(xop)) {
@@ -4943,6 +4957,7 @@ xo_format_title (xo_handle_t *xop, const xo_field_info_t *xfip,
 	if (XOF_ISSET(xop, XOF_PRETTY))
 	    xo_buf_indent(xop, xop->xo_indent_by);
 	xo_buf_append(&xop->xo_data, div_open, sizeof(div_open) - 1);
+	xo_buf_append(&xop->xo_data, class_name, strlen(class_name));
 	xo_color_append_html(xop);
 	xo_buf_append(&xop->xo_data, div_middle, sizeof(div_middle) - 1);
     }
@@ -7379,6 +7394,7 @@ xo_class_name (int ftype)
     switch (ftype) {
     case 'D': return "decoration";
     case 'E': return "error";
+    case 'F': return NULL;
     case 'L': return "label";
     case 'N': return "note";
     case 'P': return "padding";
@@ -8096,6 +8112,8 @@ xo_do_emit_fields (xo_handle_t *xop, const xo_field_info_t *fields,
 				  xo_foff(base_fmt, xfip->xfi_format),
 				  xfip->xfi_flen, flags);
 	    else if (ftype == 'T')
+		xo_format_title(xop, xfip, base_fmt, content, clen);
+	    else if (ftype == 'F') /* 'format' works like like titles */
 		xo_format_title(xop, xfip, base_fmt, content, clen);
 	    else if (ftype == 'U')
 		xo_format_units(xop, xfip, base_fmt, content, clen);
