@@ -263,6 +263,17 @@ xo_xff_flags_t xo_name_lookup(xo_flag_mapping_t *map, const char *value,
 			       ssize_t len);
 
 /*
+ * Look up name by value in a flag-mapping table; NULL if not found.
+ */
+const char *xo_value_lookup(xo_flag_mapping_t *map, xo_xff_flags_t value);
+
+/*
+ * Table mapping field role characters (e.g. 'C', 'L', 'N') to their
+ * human-readable names, for use in diagnostics.
+ */
+extern xo_flag_mapping_t xo_role_names[];
+
+/*
  * Return the pessimistic maximum number of field slots needed for fmt.
  * Used internally and by callers that supply their own field buffer.
  */
