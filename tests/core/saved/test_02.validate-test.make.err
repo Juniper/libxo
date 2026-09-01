@@ -1,4 +1,4 @@
-../../../tests/core/test_02.c:57:13: warning: libxo: field must have a name: '{d:/%-*.*s}'
+../../../tests/core/test_02.c:57:13: warning: libxo: value field ('V'/value) has empty name, but has the 'display' flag set; use 'F'/format role instead: '{d:/%-*.*s}'
    57 |     xo_emit("{d:/%-*.*s}{tek:name}{eq:flags/0x%x}",
       |             ^
 ../../../tests/core/test_02.c:72:13: warning: libxo: field name should not be less than 3 characters long: '{:fd/%d}'
