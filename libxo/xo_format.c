@@ -165,7 +165,6 @@ xo_name_lookup (xo_flag_mapping_t *map, const char *value, ssize_t len)
     return 0;
 }
 
-#ifdef NOT_NEEDED_YET
 static const char *
 xo_value_lookup (xo_flag_mapping_t *map, xo_xff_flags_t value)
 {
@@ -178,12 +177,11 @@ xo_value_lookup (xo_flag_mapping_t *map, xo_xff_flags_t value)
 
     return NULL;
 }
-#endif /* NOT_NEEDED_YET */
 
 /*
  * Role and modifier tables
  */
-static xo_flag_mapping_t xo_role_names[] = {
+xo_flag_mapping_t xo_role_names[] = {
     { 'C', "color" },
     { 'D', "decoration" },
     { 'E', "error" },
@@ -230,6 +228,15 @@ static xo_flag_mapping_t xo_modifier_names[] = {
 };
 
 const char xo_default_format[] = "%s";
+
+/*
+ * Look up the name of a role
+ */
+const char *
+xo_lookup_role_name (uint32_t value)
+{
+    return xo_value_lookup(xo_role_names, value);
+}
 
 int
 xo_role_wants_default_format (int ftype)
