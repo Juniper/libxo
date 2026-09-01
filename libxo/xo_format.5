@@ -98,6 +98,7 @@ The roles are listed below; only one role is permitted:
 .It C "color       " "Field is a color or effect"
 .It D "decoration  " "Field is non\-text (e.g. colon, comma)"
 .It E "error       " "Field is an error message"
+.It F "format      " "Field is a formatted text string, not encoded"
 .It L "label       " "Field is text that prefixes a value"
 .It N "note        " "Field is text that follows a value"
 .It P "padding     " "Field is spaces needed for vertical alignment"
@@ -200,6 +201,36 @@ can use CSS to direct their display parameters.
 .Bd -literal -offset indent
     xo_emit("{D:((}{:name}{D:))}\\n", name);
 .Ed
+.Ss "The Format Role ({F:})"
+The format role is used to format text data, and should be used for
+text strings that are not values that should be encoded in XML or
+JSON.
+The format role is often used as an alternative to encode\-only
+("{e:}") fields.
+The use of display\-only fields ("{d:}") inspired the
+creation of the format role as a first\-class construct in
+.Nm libxo .
+.Pp
+The format field can be used with a printf\-style format descriptor, if
+preceded by a slash ("/").
+It can also be used as static content, when placed directly within the
+field descriptor, though this is rarely used:
+.Bd -literal -offset indent
+    xo_emit("{F:/(incomplete)}{en:incomplete/true}");
+    xo_emit("{F:/%s}", nname);
+    xo_emit("{F:static\-content}");
+.Ed
+.Pp
+Format fields have an extra convenience feature; if both content and
+format are specified, instead of looking to the argument list for a
+value, the content is used, allowing a mixture of format and content
+within the field descriptor, though this overlaps the Label Role:
+.Bd -literal -offset indent
+    xo_emit("{F:name is /%20s}{:count/%d}\\n", count);
+.Ed
+.Pp
+Since the incoming argument is a string, the format must be "%s" or
+something suitable.
 .Ss "The Gettext Role ({G:})"
 .Nm libxo
 supports internationalization (i18n) through its use of
