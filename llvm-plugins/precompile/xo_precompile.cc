@@ -18,13 +18,19 @@
  * New PM, PipelineStart EP callbacks do fire.
  */
 
+#include "xo_config.h"
+
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/GlobalVariable.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/Module.h"
 #include "llvm/Passes/PassBuilder.h"
+#if CLANG_VERSION_NUMBER > 22000000
+#include "llvm/Plugins/PassPlugin.h"
+#else /* CLANG_VERSION_NUMBER > 22000000 */
 #include "llvm/Passes/PassPlugin.h"
+#endif /* ACLANG_VERSION_NUMBER > 22000000 */
 #include "llvm/Support/raw_ostream.h"
 
 #include "../validate/xo_parse_shim.h"
