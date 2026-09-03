@@ -34,6 +34,9 @@
 ../../../tests/llvm-plugins/validate_01.c:55:13: warning: libxo: anchor content must be a decimal width: '{[:mumble}'
    55 |     xo_emit("{[:mumble}{:name/%s}{]:}\n", "x");
       |             ^
+../../../tests/llvm-plugins/validate_01.c:58:13: warning: libxo: anchor format must be '%d' or '%u: '{[:/%s}'
+   58 |     xo_emit("{[:/%s}{:name/%s}{]:}\n", "32", "x");
+      |             ^
 ../../../tests/llvm-plugins/validate_01.c:61:13: warning: libxo: anchor cannot have both static width and format: '{[:32/%d}'
    61 |     xo_emit("{[:32/%d}{:name/%s}{]:}\n", 32, "x");
       |             ^
@@ -79,4 +82,4 @@
 ../../../tests/llvm-plugins/validate_01.c:79:49: warning: libxo: argument 3: format specifies type 'long long' but the argument has type 'uint8_t'
    79 |     xo_emit("{:types/%c-%ld-%lld}\n", u64, u32, u8);
       |                                                 ^
-27 warnings generated.
+28 warnings generated.
