@@ -103,6 +103,13 @@ AC_CHECK_HEADERS([threads.h])
 AC_CHECK_HEADERS([tzfile.h])
 AC_CHECK_HEADERS([unistd.h ])
 
+dnl
+dnl Some packages need to be checked against version numbers so we
+dnl define a function here for later use
+dnl
+AC_DEFUN([VERSION_TO_NUMBER],
+[`$1 | sed -e 's/lib.* //' | awk 'BEGIN { FS = "."; } { printf "%d", ([$]1 * 1000 + [$]2) * 1000 + [$]3;}'`])
+
 dnl humanize_number(3) is a great function, but it's not standard.
 dnl Note Macosx has the function in libutil.a but doesn't ship the
 dnl header file, so I'll need to carry my own implementation.  See:
@@ -153,6 +160,11 @@ else
     LLVM_CLANG=${LLVM_BINDIR}/clang
     LLVM_CMAKE_DIR=`${LLVM_CONFIG} --cmakedir 2>/dev/null`
     CLANG_CMAKE_DIR=`dirname ${LLVM_CMAKE_DIR}`/clang
+    CLANG_VERSION=`${LLVM_CONFIG} --version 2>/dev/null`
+    CLANG_VERSION_NUMBER=VERSION_TO_NUMBER(echo $CLANG_VERSION)
+
+    AC_DEFINE_UNQUOTED(CLANG_VERSION_NUMBER, [$CLANG_VERSION_NUMBER], [clang version as a number])
+
     AC_PATH_PROG([CMAKE_COMMAND], [cmake], [cmake])
     HAVE_VALIDATE=yes
 fi
@@ -164,6 +176,8 @@ AC_SUBST(LLVM_CLANG)
 AC_SUBST(LLVM_CMAKE_DIR)
 AC_SUBST(CLANG_CMAKE_DIR)
 AC_SUBST(CMAKE_COMMAND)
+AC_SUBST(CLANG_VERSION)
+AC_SUBST(CLANG_VERSION_NUMBER)
 
 dnl On macOS the cmake plugin build must match the libxo build architecture.
 dnl Derive this from host_cpu so the right -DCMAKE_OSX_ARCHITECTURES flag is
@@ -359,13 +373,6 @@ AC_CHECK_MEMBER([struct sockaddr_un.sun_len],
 
 AC_CHECK_DECLS([__isthreaded], [], [], [#include <stdio.h>])
 HAVE_ISTHREADED=${ac_cv_have_decl___isthreaded}
-
-dnl
-dnl Some packages need to be checked against version numbers so we
-dnl define a function here for later use
-dnl
-AC_DEFUN([VERSION_TO_NUMBER],
-[`$1 | sed -e 's/lib.* //' | awk 'BEGIN { FS = "."; } { printf "%d", ([$]1 * 1000 + [$]2) * 1000 + [$]3;}'`])
 
 AC_MSG_CHECKING([whether to build with warnings])
 AC_ARG_ENABLE([warnings],
@@ -626,6 +633,7 @@ AC_MSG_NOTICE([summary of build options:
   have exterr:      ${HAVE_EXTERR:-no}
   yacc:             ${YACC}
   filters:          ${LIBXO_NEED_FILTERS}
+  clang version:    ${CLANG_VERSION:-none}:${CLANG_VERSION_NUMBER:-none}
   validate:         ${LLVM_CONFIG}:${LLVM_BINDIR:-none}:${LLVM_CMAKE_DIR:-none}
   sdk path:         ${SDK_PATH:-none}
 ])
