@@ -1056,7 +1056,7 @@ xo_parse_fields (xo_parse_t *xpp, const char *fmt, size_t fmt_len)
 	    if (format && flen > 0) {
 		/* Anchor width must be "%d" or numeric */
 		if (flen != 2 || format[0] != '%'
-		        || !(format[1] != 'd' || format[1] != 'u')) {
+		        || !(format[1] == 'd' || format[1] == 'u')) {
 		    char *aep = NULL;
 		    (void) strtol(format, &aep, 10);
 		    if (aep != format + flen)
