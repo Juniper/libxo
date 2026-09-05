@@ -530,6 +530,8 @@ main (int argc, char **argv)
     xo_emit("{d:/this should be %s}\n", "text");
     xo_emit("{F:/this should be %s}\n", "text");
 
+    xo_emit("works: [{:works/%JNs}], fail: [{:fails/%JZs}]n", NULL, NULL);
+
     fclose(dev_null);
 
     return 0;
