@@ -3131,10 +3131,11 @@ static ssize_t
 xo_format_string (xo_handle_t *xop, xo_fspec_t *xfp, xo_buffer_t *xbp,
 		  xo_xff_flags_t flags, int enc)
 {
-    static char null[] = "(null)";
-    static char null_no_quotes[] = "null";
+    int null_as_empty = (xfp->xf_extflags & XXF_NULL_AS_EMPTY) ? 1 : 0;
+    const char *null = null_as_empty ? "" : "(null)";
+    const char *null_no_quotes = null_as_empty ? "" : "null";
 
-    char *cp = NULL;
+    const char *cp = NULL;
     wchar_t *wcp = NULL;
     ssize_t len;
     ssize_t cols = 0, rc = 0;
@@ -3163,7 +3164,7 @@ xo_format_string (xo_handle_t *xop, xo_fspec_t *xfp, xo_buffer_t *xbp,
 	 */
 	if (wcp == NULL) {
 	    cp = null;
-	    len = sizeof(null) - 1;
+	    len = (xfp->xf_extflags & XXF_NULL_AS_EMPTY) ? 0 : strlen(cp);
 	}
 
     } else {
@@ -3175,13 +3176,12 @@ xo_format_string (xo_handle_t *xop, xo_fspec_t *xfp, xo_buffer_t *xbp,
 
 	/* Echo "Dont' deref NULL" logic */
 	if (cp == NULL) {
-	    if ((flags & XFF_NO_QUOTE) && xo_style_is_encoding(xop)) {
+	    if ((flags & XFF_NO_QUOTE) && xo_style_is_encoding(xop))
 		cp = null_no_quotes;
-		len = sizeof(null_no_quotes) - 1;
-	    } else {
+	    else
 		cp = null;
-		len = sizeof(null) - 1;
-	    }
+	
+	    len = null_as_empty ? 0 : strlen(cp);
 	}
 
 	/*
@@ -3237,15 +3237,16 @@ xo_format_string (xo_handle_t *xop, xo_fspec_t *xfp, xo_buffer_t *xbp,
 	 * If seen_minus, then pad on the right; otherwise move it so
 	 * we can pad on the left.
 	 */
+	char *np;
 	if (xfp->xf_seen_minus) {
-	    cp = xbp->xb_curp + rc;
+	    np = xbp->xb_curp + rc;
 	} else {
-	    cp = xbp->xb_curp;
+	    np = xbp->xb_curp;
 	    memmove(xbp->xb_curp + delta, xbp->xb_curp, rc);
 	}
 
 	/* Set the padding */
-	memset(cp, (xfp->xf_leading_zero > 0) ? '0' : ' ', delta);
+	memset(np, (xfp->xf_leading_zero > 0) ? '0' : ' ', delta);
 	rc += delta;
 	cols += delta;
     }
