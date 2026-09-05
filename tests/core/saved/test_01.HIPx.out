@@ -596,3 +596,10 @@
   <div class="text">X</div>
   <div class="text">X</div>
 </div>
+<div class="line">
+  <div class="text">nil: [</div>
+  <div class="data" data-tag="ptr" data-xpath="/data/top-level/ptr">(null)</div>
+  <div class="text">], nil-as-empty: [</div>
+  <div class="data" data-tag="ptr2" data-xpath="/data/top-level/ptr2"></div>
+  <div class="text">]</div>
+</div>
