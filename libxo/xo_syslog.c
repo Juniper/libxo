@@ -713,7 +713,8 @@ xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
         *--xb.xb_curp = '\0';
 
     if (xo_get_flags(xop) & XOF_LOG_SYSLOG)
-	fprintf(stderr, "xo: syslog: %s\n", xb.xb_bufp + log_offset);
+	fprintf(stderr, "xo: syslog: %d/%o/%#x=(%o/%o): %s\n", pri, pri, pri,
+		pri >> 3, LOG_PRI(pri), xb.xb_bufp + log_offset);
 
     xo_send_syslog(xb.xb_bufp, v0_hdr, xb.xb_bufp + start_of_msg);
 
