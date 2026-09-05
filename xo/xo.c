@@ -35,6 +35,7 @@ static int opt_log_severity;
 static int opt_log_pid;
 static int opt_log_opts;
 static int opt_log_debug;
+static int opt_log_priority;
 static const char *opt_log_event;
 static const char *opt_log_input;
 static int xo_log_need_argv;
@@ -280,6 +281,7 @@ print_help (const char *message)
 "    --log-console         Write syslog message to the console\n"
 "    --log-debug           Generate debugging info about logging\n"
 "    --log-print           Write syslog message to the terminal\n"
+"    --log-priority <fac.sev>  Provide facility and severity in one options\n"
 "    --pid OR -P <pid>     Process number/id for syslog message\n"
 "    --severity OR -S <name> Syslog severity name (defaults to 'notice')\n");
 }
@@ -293,6 +295,7 @@ static struct opts {
     int o_log_debug;
     int o_log_print;
     int o_not_first;
+    int o_log_priority;
     int o_open_instance;
     int o_open_list;
     int o_top_wrap;
@@ -320,6 +323,7 @@ static struct option long_opts[] = {
     { "logger", no_argument, NULL, 'L' },
     { "log-console", no_argument, &opts.o_log_console, 1 },
     { "log-debug", no_argument, &opts.o_log_debug, 1 },
+    { "log-priority", required_argument, &opts.o_log_priority, 1 },
     { "log-print", no_argument, &opts.o_log_print, 1 },
     { "not-first", no_argument, &opts.o_not_first, 1 },
     { "open", required_argument, NULL, 'o' },
@@ -415,6 +419,25 @@ xo_find_map (xo_nmap_t *map, const char *name, const char *error)
     return 0;
 }
 
+static int
+xo_find_priority (const char *str)
+{
+    int len = strlen(str);
+    char buf[len + 1];
+    memcpy(buf, str, len + 1);
+    int fac = 0, sev = 0;
+
+    char *cp = strchr(buf, '.');
+    if (cp)
+	*cp++ = '\0';
+
+    fac = xo_find_map(xo_map_facility, buf, "facility");
+    if (cp)
+	sev = xo_find_map(xo_map_severity, cp, "severity");
+
+    return fac | sev;
+}
+
 typedef struct xo_log_err_s {
     char e_opt[3];
     const char *e_sep;
@@ -506,6 +529,9 @@ main (int argc UNUSED, char **argv)
 
 	case 'F':
 	    xo_log_check(1, rc, NULL, NULL);
+	    if (opt_log_priority)
+		xo_errx(1, "priority was already provided");
+
 	    opt_log_facility = xo_find_map(xo_map_facility, optarg,
 					   "facility name");
 	    break;
@@ -568,6 +594,9 @@ main (int argc UNUSED, char **argv)
 
 	case 'S':
 	    xo_log_check(1, rc, NULL, NULL);
+	    if (opt_log_priority)
+		xo_errx(1, "priority was already provided");
+
 	    opt_log_severity = xo_find_map(xo_map_severity, optarg,
 					   "severity name");
 	    break;
@@ -611,6 +640,16 @@ main (int argc UNUSED, char **argv)
 	    } else if (opts.o_log_print) {
 		xo_log_check(1, rc, "log-print", NULL);
 		opt_log_opts |= LOG_PERROR;
+
+	    } else if (opts.o_log_priority) {
+		xo_log_check(1, rc, "log-priority", NULL);
+		if (opt_log_severity)
+		    xo_errx(1, "severity was already provided");
+		if (opt_log_facility)
+		    xo_errx(1, "facility was already provided");
+
+		opt_log_priority
+		    = xo_find_priority(get_arg(optarg, "log priority"));
 
 	    } else if (opts.o_not_first) {
 		xo_log_check(-1, rc, "not-first", NULL);
