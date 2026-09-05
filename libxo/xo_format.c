@@ -330,6 +330,17 @@ xo_parse_format_spec (xo_parse_t *xpp, xo_fspec_t *xfp,
 	    else
 		xfp->xf_num_bits = num_bits;
 
+	} else if (*cp == 'J') {
+	    switch (cp[1]) {
+	    case 'N':
+		xfp->xf_extflags |= XXF_NULL_AS_EMPTY;
+		break;
+
+	    default:
+		xo_parse_error(xpp, "unknown 'J' flag: '%s'",
+			       xo_printable2(start, ep - start, TRUE));		
+	    }
+
 	} else if (isdigit((int) *cp)) {
 	    if (xfp->xf_leading_zero < 0)
 		xfp->xf_leading_zero = (*cp == '0');
