@@ -865,6 +865,16 @@ xo_set_syslog_handler (xo_syslog_open_t open_func, xo_syslog_send_t send_func,
 void
 xo_set_syslog_enterprise_id (unsigned short eid);
 
+void
+xo_syslog_set_pid (pid_t pid);
+
+typedef void (*xo_syslog_setup_t)(xo_handle_t *xop, unsigned op);
+#define XSUP_INIT	1
+#define XSUP_REINIT	2
+
+void
+xo_syslog_set_setup (xo_syslog_setup_t func);
+
 typedef void (*xo_simplify_field_func_t)(const char *, unsigned, int);
 
 char *
