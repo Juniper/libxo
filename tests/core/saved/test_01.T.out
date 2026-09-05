@@ -91,3 +91,4 @@ u31 5, u33 5, u32s five_u32, unothing 5
 static text
 see both text
 XX
+nil: [(null)], nil-as-empty: []
