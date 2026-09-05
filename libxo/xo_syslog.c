@@ -118,6 +118,8 @@ static int xo_logmask = 0xff;		/* mask of priorities to be logged */
 static pthread_mutex_t xo_syslog_mutex UNUSED = PTHREAD_MUTEX_INITIALIZER;
 static int xo_unit_test;		/* Fake data for unit test */
 
+static pid_t xo_syslog_pid;
+
 #define REAL_VOID(_x) \
     do { int really_ignored = _x; if (really_ignored) { }} while (0)
 
@@ -160,6 +162,40 @@ xo_set_syslog_enterprise_id (unsigned short eid)
 {
     snprintf(xo_syslog_enterprise_id, sizeof(xo_syslog_enterprise_id),
 	     "%u", eid);
+}
+
+/* xo_set_logmask -- set the log mask level */
+int
+xo_set_logmask (int pmask)
+{
+    int omask;
+
+    THREAD_LOCK();
+    omask = xo_logmask;
+    if (pmask != 0)
+        xo_logmask = pmask;
+    THREAD_UNLOCK();
+    return (omask);
+}
+
+void
+xo_set_unit_test_mode (int value)
+{
+    xo_unit_test = value;
+}
+
+void
+xo_syslog_set_pid (pid_t pid)
+{
+    xo_syslog_pid = pid;
+}
+
+xo_syslog_setup_t xo_syslog_setup;
+
+void
+xo_syslog_set_setup (xo_syslog_setup_t func)
+{
+    xo_syslog_setup = func;
 }
 
 /*
@@ -405,20 +441,6 @@ xo_close_log (void)
     THREAD_UNLOCK();
 }
 
-/* xo_set_logmask -- set the log mask level */
-int
-xo_set_logmask (int pmask)
-{
-    int omask;
-
-    THREAD_LOCK();
-    omask = xo_logmask;
-    if (pmask != 0)
-        xo_logmask = pmask;
-    THREAD_UNLOCK();
-    return (omask);
-}
-
 void
 xo_set_syslog_handler (xo_syslog_open_t open_func,
 		       xo_syslog_send_t send_func,
@@ -438,7 +460,8 @@ xo_snprintf (char *out, ssize_t outsize, const char *fmt, ...)
 
     if (out && outsize) {
         va_start(ap, fmt);
-        status = vsnprintf(out, outsize, fmt, ap);
+
+	status = vsnprintf(out, outsize, fmt, ap);
         if (status < 0) { /* this should never happen, */
             *out = 0;     /* handle it in the safest way possible if it does */
             retval = 0;
@@ -481,12 +504,6 @@ xo_syslog_handle_flush (void *opaque UNUSED)
 }
 
 void
-xo_set_unit_test_mode (int value)
-{
-    xo_unit_test = value;
-}
-
-void
 xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
 {
     int saved_errno = errno;
@@ -495,11 +512,10 @@ xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
     unsigned start_of_msg = 0;
     char *v0_hdr = NULL;
     xo_buffer_t xb;
-    static pid_t my_pid;
     unsigned log_offset;
 
-    if (my_pid == 0)
-	my_pid = xo_unit_test ? 222 : getpid();
+    if (xo_syslog_pid == 0)
+	xo_syslog_pid = xo_unit_test ? 222 : getpid();
 
     /* Check for invalid bits */
     if (pri & ~(LOG_PRIMASK|LOG_FACMASK)) {
@@ -565,7 +581,7 @@ xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
 	if (xo_logtag != NULL)
 	    tp += xo_snprintf(tp, ep - tp, "%s", xo_logtag);
 	if (xo_logstat & LOG_PID)
-	    tp += xo_snprintf(tp, ep - tp, "[%d]", my_pid);
+	    tp += xo_snprintf(tp, ep - tp, "[%d]", xo_syslog_pid);
 	if (xo_logtag)
 	    tp += xo_snprintf(tp, ep - tp, ": ");
     }
@@ -601,7 +617,8 @@ xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
 			      xo_logtag ?: "-");
 
     /* Add PROCID */
-    xb.xb_curp += xo_snprintf(xb.xb_curp, xo_buf_left(&xb), "%d ", my_pid);
+    xb.xb_curp += xo_snprintf(xb.xb_curp, xo_buf_left(&xb), "%d ",
+			      xo_syslog_pid);
 
     /*
      * Add MSGID.  The user should provide us with a name, which we
@@ -654,6 +671,9 @@ xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
     va_list ap;
     va_copy(ap, vap);
 
+    if (xo_syslog_setup)
+	xo_syslog_setup(xop, XSUP_INIT);
+
     errno = saved_errno;	/* Restore saved error value */
     xo_emit_hv(xop, fmt, ap);
     xo_flush_h(xop);
@@ -680,6 +700,9 @@ xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
 
     xo_set_style(xop, XO_STYLE_TEXT);
     xo_set_flags(xop, XOF_UTF8);
+
+    if (xo_syslog_setup)
+	xo_syslog_setup(xop, XSUP_REINIT);
 
     errno = saved_errno;	/* Restore saved error value */
     xo_emit_hv(xop, fmt, ap);
