@@ -209,4 +209,7 @@
 ../../../tests/llvm-plugins/validate_02.c:530:13: warning: libxo: value field ('V'/value) has empty name, but has the 'display' flag set; use 'F'/format role instead: '{d:/this should be %s}'
   530 |     xo_emit("{d:/this should be %s}\n", "text");
       |             ^
-63 warnings generated.
+../../../tests/llvm-plugins/validate_02.c:533:13: warning: libxo: unknown 'J' flag: '{%JZs}'
+  533 |     xo_emit("works: [{:works/%JNs}], fail: [{:fails/%JZs}]n", NULL, NULL);
+      |             ^
+64 warnings generated.
