@@ -111,6 +111,8 @@ main (int argc, char **argv)
     xo_set_info(NULL, info, -1);
     xo_set_flags(NULL, XOF_KEYS);
 
+    xo_emit("nil: [{:ptr}], nil-as-empty: [{:ptr2/%JNs}]\n", NULL, NULL);
+
     xo_emit("[{:plus/%8.1f}] [{:minus/%-8.1f}]\n", 42.1, 41.2);
 
     xo_emit("[{:label/%-16s}]  [{:total/%15s}] [{:per-call/%8.1f}] "
