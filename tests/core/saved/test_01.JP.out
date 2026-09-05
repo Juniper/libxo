@@ -230,7 +230,9 @@
       "u31": 5,
       "u33": 5,
       "u32s": "five_u32",
-      "unothing": 5
+      "unothing": 5,
+      "ptr": "(null)",
+      "ptr2": ""
     }
   }
 }
