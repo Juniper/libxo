@@ -28,14 +28,16 @@
 
 static int opt_warn;		/* Enable warnings */
 
-int opt_syslog;		/* 0 == unset; -1 == not-syslog; 1 == syslog */
-char *opt_log_ident;
-int opt_log_facility;
-int opt_log_severity;
-int opt_log_pid;
-int opt_log_opts;
-const char *opt_log_event;
-int opt_log_debug;
+static int opt_syslog;		/* 0 == unset; -1 == not-syslog; 1 == syslog */
+static char *opt_log_ident;
+static int opt_log_facility;
+static int opt_log_severity;
+static int opt_log_pid;
+static int opt_log_opts;
+static int opt_log_debug;
+static const char *opt_log_event;
+static const char *opt_log_input;
+static int xo_log_need_argv;
 
 static char **save_argv;
 static char **checkpoint_argv;
@@ -50,6 +52,16 @@ next_arg (void)
 
     save_argv += 1;
     return cp;
+}
+
+static void
+chomp (char *buf)
+{
+    int len = strlen(buf);
+    char *ep = buf + len;
+    for (; ep > buf && (ep[-1] == '\n' || ep[-1] == '\r'); ep--)
+	continue;
+    *ep = '\0';
 }
 
 static void
@@ -197,11 +209,15 @@ static void
 xo_log_setup (xo_handle_t *xop, unsigned op)
 {
     if (op == XSUP_INIT) {
-	checkpoint_argv = save_argv;
-	xo_set_formatter(xop, formatter, checkpoint);
+	xo_xof_flags_t flags = 0;
 
-	xo_xof_flags_t flags;
-	flags = XOF_NO_VA_ARG | XOF_NO_TOP | XOF_NO_CLOSE | XOF_NO_TOP_LEVEL;
+	if (xo_log_need_argv) {
+	    checkpoint_argv = save_argv;
+	    xo_set_formatter(xop, formatter, checkpoint);
+
+	    flags |= XOF_NO_VA_ARG | XOF_NO_TOP
+		| XOF_NO_CLOSE | XOF_NO_TOP_LEVEL;
+	}
 
 	if (opt_log_debug)
 	    flags |= XOF_LOG_SYSLOG;
@@ -294,6 +310,7 @@ static struct option long_opts[] = {
     { "depth", required_argument, &opts.o_depth, 1 },
     { "event-name ", required_argument, NULL, 'E' },
     { "facilty", required_argument, NULL, 'F' },
+    { "filename", required_argument, NULL, 'f' },
     { "help", no_argument, &opts.o_help, 1 },
     { "html", no_argument, NULL, 'H' },
     { "instance", required_argument, NULL, 'I' },
@@ -467,7 +484,7 @@ main (int argc UNUSED, char **argv)
     if (argc < 0)
 	return 1;
 
-    while ((rc = getopt_long(argc, argv, "Cc:E:F:Hi:I:JLl:O:o:P:ps:S:TXW",
+    while ((rc = getopt_long(argc, argv, "Cc:E:F:f:Hi:I:JLl:O:o:P:ps:S:TXW",
 				long_opts, NULL)) != -1) {
 
 	switch (rc) {
@@ -491,6 +508,10 @@ main (int argc UNUSED, char **argv)
 	    xo_log_check(1, rc, NULL, NULL);
 	    opt_log_facility = xo_find_map(xo_map_facility, optarg,
 					   "facility name");
+	    break;
+
+	case 'f':
+	    opt_log_input = get_arg(optarg, "filename for log input");
 	    break;
 
 	case 'H':
@@ -675,14 +696,10 @@ main (int argc UNUSED, char **argv)
 	    xo_errx(1, "invalid options: %s", opt_options);
     }
 
-    xo_set_formatter(NULL, formatter, checkpoint);
-    xo_set_flags(NULL, XOF_NO_VA_ARG | XOF_NO_TOP
-		 | XOF_NO_CLOSE | XOF_NO_TOP_LEVEL);
-
     fmt = *argv++;
-    if (opt_opener == NULL && opt_closer == NULL
-		&& fmt == NULL && opt_name == NULL) {
-	print_help("missing format, list or container name ");
+    if (opt_opener == NULL && opt_closer == NULL && fmt == NULL &&
+		opt_name == NULL && opt_log_input == NULL) {
+	print_help("missing format, input file, list or container name ");
 	return 1;
     }
 
@@ -696,19 +713,46 @@ main (int argc UNUSED, char **argv)
 	    opt_log_severity = LOG_NOTICE;
 
 	checkpoint_argv = save_argv = argv;
-	prep_arg(fmt);
+	if (fmt)
+	    prep_arg(fmt);
 
 	if (opt_log_pid)
 	    xo_syslog_set_pid(opt_log_pid);
 
-	xo_syslog_set_setup(xo_log_setup);
-
 	xo_open_log(opt_log_ident, opt_log_opts,
 		    opt_log_facility | opt_log_severity);
 
-	xo_syslog(opt_log_facility | opt_log_severity, opt_log_event, fmt);
+	if (opt_log_input == NULL) {
+	    xo_log_need_argv = 1;
+	    xo_syslog_set_setup(xo_log_setup);
+	    xo_syslog(opt_log_facility | opt_log_severity, opt_log_event, fmt);
+
+	} else {
+	    xo_syslog_set_setup(xo_log_setup);
+
+	    FILE *fp = fopen(opt_log_input, "r");
+	    if (fp == NULL)
+		xo_err(1, "could not open input file: '%s'", opt_log_input);
+
+	    char buf[BUFSIZ];
+	    while (fgets(buf, sizeof(buf), fp) != NULL) {
+		int blen = strlen(buf);
+		if (blen > 0 && buf[blen - 1] == '\n')
+		    chomp(buf);
+
+		xo_syslog(opt_log_facility | opt_log_severity, opt_log_event,
+			  "{F:/%s}", buf);
+	    }
+
+	    fclose(fp);
+	}
+
 	exit(0);
     }
+
+    xo_set_formatter(NULL, formatter, checkpoint);
+    xo_set_flags(NULL, XOF_NO_VA_ARG | XOF_NO_TOP
+		 | XOF_NO_CLOSE | XOF_NO_TOP_LEVEL);
 
     /*
      * If we have some explicit state change, handle it
