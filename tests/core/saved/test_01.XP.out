@@ -218,5 +218,7 @@
     <u33>5</u33>
     <u32s>five_u32</u32s>
     <unothing>5</unothing>
+    <ptr>(null)</ptr>
+    <ptr2></ptr2>
   </top-level>
 </data>
