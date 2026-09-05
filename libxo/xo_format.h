@@ -127,8 +127,13 @@ typedef struct xo_fspec_s {
      */
     uint16_t xf_prefix_len;
     uint8_t xf_num_bits;  /* '!' Number of bits in a number (signed/unsigned) */
-    uint8_t xf_padding;
+    uint8_t xf_padding[3];
+
+    uint32_t xf_extflags;		/* "%J" "extended" flags (XXF_*) */
 } xo_fspec_t;
+
+/* Flags for xf_extflags */
+#define XXF_NULL_AS_EMPTY	(1<<0) /* Render a NULL "%s" value as "" */
 
 /*
  * Parsed representation of one field descriptor from a libxo format string.
