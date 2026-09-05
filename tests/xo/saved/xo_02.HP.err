@@ -31,5 +31,6 @@ Usage: xo [options] format [fields]
     --log-console         Write syslog message to the console
     --log-debug           Generate debugging info about logging
     --log-print           Write syslog message to the terminal
+    --log-priority <fac.sev>  Provide facility and severity in one options
     --pid OR -P <pid>     Process number/id for syslog message
     --severity OR -S <name> Syslog severity name (defaults to 'notice')
