@@ -13,6 +13,8 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
+#include <strings.h>
+#include <syslog.h>
 
 #include "xo_config.h"
 #include "xo.h"
@@ -25,6 +27,15 @@
 #endif /* UNUSED */
 
 static int opt_warn;		/* Enable warnings */
+
+int opt_syslog;		/* 0 == unset; -1 == not-syslog; 1 == syslog */
+char *opt_log_ident;
+int opt_log_facility;
+int opt_log_severity;
+int opt_log_pid;
+int opt_log_opts;
+const char *opt_log_event;
+int opt_log_debug;
 
 static char **save_argv;
 static char **checkpoint_argv;
@@ -183,6 +194,26 @@ formatter (xo_handle_t *xop, char *buf, xo_ssize_t bufsiz,
 }
 
 static void
+xo_log_setup (xo_handle_t *xop, unsigned op)
+{
+    if (op == XSUP_INIT) {
+	checkpoint_argv = save_argv;
+	xo_set_formatter(xop, formatter, checkpoint);
+
+	xo_xof_flags_t flags;
+	flags = XOF_NO_VA_ARG | XOF_NO_TOP | XOF_NO_CLOSE | XOF_NO_TOP_LEVEL;
+
+	if (opt_log_debug)
+	    flags |= XOF_LOG_SYSLOG;
+
+	xo_set_flags(xop, flags);
+
+    } else if (op == XSUP_REINIT) {
+	save_argv = checkpoint_argv;
+    }
+}
+
+static void
 print_version (void)
 {
     fprintf(stderr, "libxo version %s%s\n",
@@ -192,8 +223,11 @@ print_version (void)
 }
 
 static void
-print_help (void)
+print_help (const char *message)
 {
+    if (message)
+	fprintf(stderr, "xo: invalid arguments: %s\n\n", message);
+
     fprintf(stderr,
 "Usage: xo [options] format [fields]\n"
 "    --close <path>        Close tags for the given path\n"
@@ -207,6 +241,7 @@ print_help (void)
 "    --json OR -J          Generate JSON output\n"
 "    --leading-xpath <path> OR -l <path> "
 	    "Add a prefix to generated XPaths (HTML)\n"
+"    --logger OR -L        Generate syslog message\n"
 "    --not-first           Indicate this object is not the first (JSON)\n"
 "    --open <path>         Open tags for the given path\n"
 "    --open-instance <name> Open an instance given by name\n"
@@ -222,7 +257,15 @@ print_help (void)
 "    --warn-xml            Display warnings in xml on stdout\n"
 "    --wrap <path>         Wrap output in a set of containers\n"
 "    --xml OR -X           Generate XML output\n"
-"    --xpath               Add XPath data to HTML output\n");
+"    --xpath               Add XPath data to HTML output\n"
+"  syslog mode options (for --logger/-L):\n"
+"    --facility OR -F <name> Syslog facility name (defaults to 'user')\n"
+"    --ident OR -i <name>  Process identifier for syslog message\n"
+"    --log-console         Write syslog message to the console\n"
+"    --log-debug           Generate debugging info about logging\n"
+"    --log-print           Write syslog message to the terminal\n"
+"    --pid OR -P <pid>     Process number/id for syslog message\n"
+"    --severity OR -S <name> Syslog severity name (defaults to 'notice')\n");
 }
 
 static struct opts {
@@ -230,6 +273,9 @@ static struct opts {
     int o_close_list;
     int o_depth;
     int o_help;
+    int o_log_console;
+    int o_log_debug;
+    int o_log_print;
     int o_not_first;
     int o_open_instance;
     int o_open_list;
@@ -246,18 +292,27 @@ static struct option long_opts[] = {
     { "close-list", required_argument, &opts.o_close_list, 1 },
     { "continuation", no_argument, NULL, 'C' },
     { "depth", required_argument, &opts.o_depth, 1 },
+    { "event-name ", required_argument, NULL, 'E' },
+    { "facilty", required_argument, NULL, 'F' },
     { "help", no_argument, &opts.o_help, 1 },
     { "html", no_argument, NULL, 'H' },
     { "instance", required_argument, NULL, 'I' },
+    { "ident", no_argument, NULL, 'i' },
     { "json", no_argument, NULL, 'J' },
     { "leading-xpath", required_argument, NULL, 'l' },
+    { "logger", no_argument, NULL, 'L' },
+    { "log-console", no_argument, &opts.o_log_console, 1 },
+    { "log-debug", no_argument, &opts.o_log_debug, 1 },
+    { "log-print", no_argument, &opts.o_log_print, 1 },
     { "not-first", no_argument, &opts.o_not_first, 1 },
     { "open", required_argument, NULL, 'o' },
     { "open-instance", required_argument, &opts.o_open_instance, 1 },
     { "open-list", required_argument, &opts.o_open_list, 1 },
     { "option", required_argument, NULL, 'O' },
     { "pretty", no_argument, NULL, 'p' },
+    { "pid", required_argument, NULL, 'P' },
     { "style", required_argument, NULL, 's' },
+    { "severity", no_argument, NULL, 'S' },
     { "text", no_argument, NULL, 'T' },
     { "top-wrap", no_argument, &opts.o_top_wrap, 1 },
     { "xml", no_argument, NULL, 'X' },
@@ -268,6 +323,131 @@ static struct option long_opts[] = {
     { "wrap", required_argument, &opts.o_wrap, 1 },
     { NULL, 0, NULL, 0 }
 };
+
+static inline char *
+get_arg (char *arg, const char *msg)
+{
+    if (arg == NULL)
+        xo_errx(1, "missing arg: %s", msg);
+
+    return arg;
+}
+
+typedef struct xo_nmap_s {
+    const char *xn_name;		/* Name */
+    int xn_value;		/* Facilty/severity */
+} xo_nmap_t;
+
+xo_nmap_t xo_map_severity[] = {
+    { "emerg", LOG_EMERG },
+    { "emergency", LOG_EMERG },
+    { "alert", LOG_ALERT },
+    { "crit", LOG_CRIT },
+    { "critical", LOG_CRIT },
+    { "err", LOG_ERR },
+    { "error", LOG_ERR },
+    { "warning", LOG_WARNING },
+    { "notice", LOG_NOTICE },
+    { "info", LOG_INFO },
+    { "information", LOG_INFO },
+    { "debug", LOG_DEBUG },
+    { NULL, 0 }
+};
+
+xo_nmap_t xo_map_facility[] = {
+    { "auth", LOG_AUTH },
+    { "authpriv", LOG_AUTHPRIV },
+#ifdef LOG_CONSOLE
+    { "console", LOG_CONSOLE },
+#endif /* LOG_CONSOLE */
+    { "cron", LOG_CRON },
+    { "daemon", LOG_DAEMON },
+    { "ftp", LOG_FTP },
+    { "kern", LOG_KERN },
+    { "lpr", LOG_LPR },
+    { "mail", LOG_MAIL },
+    { "news", LOG_NEWS },
+#ifdef LOG_NTP
+    { "ntp", LOG_NTP },
+#endif /* LOG_NTP */
+#ifdef LOG_SECURITY
+    { "security", LOG_SECURITY },
+#endif /* LOG_SECURITY */
+    { "syslog", LOG_SYSLOG },
+    { "user", LOG_USER },
+    { "uucp", LOG_UUCP },
+    { "local0", LOG_LOCAL0 },
+    { NULL, 0 }
+};
+
+static int
+xo_find_map (xo_nmap_t *map, const char *name, const char *error)
+{
+    const char *cp = name;
+
+    if (strncmp(cp, "LOG_", 4) == 0)
+	cp += 4;
+
+    for (; map->xn_name; map++)
+	if (strcasecmp(map->xn_name, cp) == 0)
+	    return map->xn_value;
+
+    if (error)
+	xo_errx(1, "unknown %s: '%s'", error, name);
+
+    return 0;
+}
+
+typedef struct xo_log_err_s {
+    char e_opt[3];
+    const char *e_sep;
+    const char *e_pref;
+    const char *e_message;
+    const char *e_name;
+} xo_log_err_t;
+
+static void
+xo_log_check_prep (xo_log_err_t *ep, int letter,
+		   const char *name, const char *message)
+{
+    ep->e_opt[0] = letter ? '-' : 0;
+    ep->e_opt[1] = letter;
+    ep->e_opt[2] = 0;
+
+    if (name == NULL && letter) {
+	for (struct option *op = long_opts; op->name; op++)
+	    if (op->flag == NULL && op->val == letter) {
+		name = op->name;
+		break;
+	    }
+    }
+
+    ep->e_sep = (name && letter) ? "/--" : name ? "--" : "";
+    ep->e_pref = message ? ": " : "";
+    ep->e_message = message ?: "";
+
+    ep->e_name = name ?: "";
+}
+
+static void
+xo_log_check (int is_logging, int letter, const char *name, const char *message)
+{
+    xo_log_err_t e;
+
+    if (is_logging > 0 && opt_syslog < 0) {
+	xo_log_check_prep(&e, letter, name, message);
+	xo_errx(1, "option only supported under -L/--logger mode: %s%s%s%s%s",
+	       e.e_message, e.e_pref, e.e_opt, e.e_sep, e.e_name);
+
+    } else if (is_logging < 0 && opt_syslog > 0) {
+	xo_log_check_prep(&e, letter, name, message);
+	xo_errx(1, "option not supported under -L/--logger mode: %s%s%s%s%s",
+	       e.e_message, e.e_pref, e.e_opt, e.e_sep, e.e_name);
+
+    } else if (is_logging != 0) {
+	opt_syslog = is_logging;
+    }
+}
 
 int
 main (int argc UNUSED, char **argv)
@@ -287,40 +467,73 @@ main (int argc UNUSED, char **argv)
     if (argc < 0)
 	return 1;
 
-    while ((rc = getopt_long(argc, argv, "Cc:HJl:O:o:ps:TXW",
+    while ((rc = getopt_long(argc, argv, "Cc:E:F:Hi:I:JLl:O:o:P:ps:S:TXW",
 				long_opts, NULL)) != -1) {
+
 	switch (rc) {
 	case 'C':
+	    xo_log_check(-1, rc, NULL, NULL);
 	    xo_set_flags(NULL, XOF_CONTINUATION);
 	    break;
 
 	case 'c':
-	    opt_closer = optarg;
+	    xo_log_check(-1, rc, NULL, NULL);
+	    opt_closer = get_arg(optarg, "close tag path");
 	    xo_set_flags(NULL, XOF_IGNORE_CLOSE);
+	    break;
+
+	case 'E':
+	    xo_log_check(1, rc, NULL, NULL);
+	    opt_log_event = get_arg(optarg, "syslog event name");
+	    break;
+
+	case 'F':
+	    xo_log_check(1, rc, NULL, NULL);
+	    opt_log_facility = xo_find_map(xo_map_facility, optarg,
+					   "facility name");
 	    break;
 
 	case 'H':
 	    xo_set_style(NULL, XO_STYLE_HTML);
 	    break;
 
+	case 'i':
+	    xo_log_check(1, rc, NULL, NULL);
+	    opt_log_ident = get_arg(optarg, "program identifier");
+	    break;
+
 	case 'I':
-	    opt_instance = optarg;
+	    xo_log_check(-1, rc, NULL, NULL);
+	    opt_instance = get_arg(optarg, "instance name");
 	    break;
 
 	case 'J':
 	    xo_set_style(NULL, XO_STYLE_JSON);
 	    break;
 
+	case 'L':
+	    xo_log_check(1, rc, NULL, NULL);
+	    opt_syslog = 1;
+	    break;
+
 	case 'l':
-	    xo_set_leading_xpath(NULL, optarg);
+	    xo_log_check(-1, rc, NULL, NULL);
+	    xo_set_leading_xpath(NULL, get_arg(optarg, "leading xpath"));
 	    break;
 
 	case 'O':
-	    opt_options = optarg;
+	    opt_options = get_arg(optarg, "formatter options");
 	    break;
 
 	case 'o':
-	    opt_opener = optarg;
+	    xo_log_check(-1, rc, NULL, NULL);
+	    opt_opener = get_arg(optarg, "opening tag path");
+	    break;
+
+	case 'P':
+	    xo_log_check(1, rc, NULL, NULL);
+	    opt_log_pid = atoi(get_arg(optarg, "process id"));
+	    opt_log_opts |= LOG_PID; /* Turns on automatically */
 	    break;
 
 	case 'p':
@@ -328,8 +541,14 @@ main (int argc UNUSED, char **argv)
 	    break;
 
 	case 's':
-	    if (xo_set_style_name(NULL, optarg) < 0)
+	    if (xo_set_style_name(NULL, get_arg(optarg, "libxo style")) < 0)
 		xo_errx(1, "unknown style: %s", optarg);
+	    break;
+
+	case 'S':
+	    xo_log_check(1, rc, NULL, NULL);
+	    opt_log_severity = xo_find_map(xo_map_severity, optarg,
+					   "severity name");
 	    break;
 
 	case 'T':
@@ -351,16 +570,33 @@ main (int argc UNUSED, char **argv)
 
 	case 0:
 	    if (opts.o_depth) {
-		opt_depth = atoi(optarg);
+		xo_log_check(-1, rc, "depth", NULL);
+		opt_depth = atoi(get_arg(optarg, "depth"));
 		
 	    } else if (opts.o_help) {
-		print_help();
+		print_help(NULL);
 		return 1;
 
+	    } else if (opts.o_log_console) {
+		xo_log_check(1, rc, "log-console", NULL);
+#ifdef LOG_CONS
+		opt_log_opts |= LOG_CONS;
+#endif /* LOG_CONS */
+
+	    } else if (opts.o_log_debug) {
+		xo_log_check(1, rc, "log-debug", NULL);
+		opt_log_debug = 1;
+
+	    } else if (opts.o_log_print) {
+		xo_log_check(1, rc, "log-print", NULL);
+		opt_log_opts |= LOG_PERROR;
+
 	    } else if (opts.o_not_first) {
+		xo_log_check(-1, rc, "not-first", NULL);
 		opt_not_first = 1;
 
 	    } else if (opts.o_xpath) {
+		xo_log_check(-1, rc, "xpath", NULL);
 		xo_set_flags(NULL, XOF_XPATH);
 
 	    } else if (opts.o_version) {
@@ -368,49 +604,56 @@ main (int argc UNUSED, char **argv)
 		return 0;
 
 	    } else if (opts.o_warn_xml) {
+		xo_log_check(-1, rc, "warn-xml", NULL);
 		opt_warn = 1;
 		xo_set_flags(NULL, XOF_WARN | XOF_WARN_XML);
 
 	    } else if (opts.o_wrap) {
-		opt_wrapper = optarg;
+		xo_log_check(-1, rc, "wrap", NULL);
+		opt_wrapper = get_arg(optarg, "wrapping tag path");
 
 	    } else if (opts.o_top_wrap) {
+		xo_log_check(-1, rc, "top-wrap", NULL);
 		opt_top_wrap = 1;
 
 	    } else if (opts.o_open_list) {
+		xo_log_check(-1, rc, "open-list", NULL);
 		if (opt_name)
 		    xo_errx(1, "only one open/close list/instance allowed: %s",
-			    optarg);
+			    get_arg(optarg, "list name"));
 
-		opt_name = optarg;
+		opt_name = get_arg(optarg, "list name");
 		new_state = XSS_OPEN_LIST;
 
 	    } else if (opts.o_open_instance) {
+		xo_log_check(-1, rc, "open-instance", NULL);
 		if (opt_name)
 		    xo_errx(1, "only one open/close list/instance allowed: %s",
-			    optarg);
+			    get_arg(optarg, "instance name"));
 
-		opt_name = optarg;
+		opt_name = get_arg(optarg, "instance name");
 		new_state = XSS_OPEN_INSTANCE;
 
 	    } else if (opts.o_close_list) {
+		xo_log_check(-1, rc, "close-list", NULL);
 		if (opt_name)
 		    xo_errx(1, "only one open/close list/instance allowed: %s",
-			    optarg);
+			    get_arg(optarg, "list name"));
 
-		opt_name = optarg;
+		opt_name = get_arg(optarg, "list name");
 		new_state = XSS_CLOSE_LIST;
 
 	    } else if (opts.o_close_instance) {
+		xo_log_check(-1, rc, "close-instance", NULL);
 		if (opt_name)
 		    xo_errx(1, "only one open/close list/instance allowed: %s",
-			    optarg);
+			    get_arg(optarg, "instance name"));
 
-		opt_name = optarg;
+		opt_name = get_arg(optarg, "instance name");
 		new_state = XSS_CLOSE_INSTANCE;
 
 	    } else {
-		print_help();
+		print_help(argv[optind]);
 		return 1;
 	    }
 
@@ -418,7 +661,7 @@ main (int argc UNUSED, char **argv)
 	    break;
 
 	default:
-	    print_help();
+	    print_help(argv[optind]);
 	    return 1;
 	}
     }
@@ -436,6 +679,37 @@ main (int argc UNUSED, char **argv)
     xo_set_flags(NULL, XOF_NO_VA_ARG | XOF_NO_TOP
 		 | XOF_NO_CLOSE | XOF_NO_TOP_LEVEL);
 
+    fmt = *argv++;
+    if (opt_opener == NULL && opt_closer == NULL
+		&& fmt == NULL && opt_name == NULL) {
+	print_help("missing format, list or container name ");
+	return 1;
+    }
+
+    /*
+     * Syslog mode
+     */
+    if (opt_syslog > 0) {
+	if (opt_log_facility == 0)
+	    opt_log_facility = LOG_USER;
+	if (opt_log_severity == 0)
+	    opt_log_severity = LOG_NOTICE;
+
+	checkpoint_argv = save_argv = argv;
+	prep_arg(fmt);
+
+	if (opt_log_pid)
+	    xo_syslog_set_pid(opt_log_pid);
+
+	xo_syslog_set_setup(xo_log_setup);
+
+	xo_open_log(opt_log_ident, opt_log_opts,
+		    opt_log_facility | opt_log_severity);
+
+	xo_syslog(opt_log_facility | opt_log_severity, opt_log_event, fmt);
+	exit(0);
+    }
+
     /*
      * If we have some explicit state change, handle it
      */
@@ -449,12 +723,6 @@ main (int argc UNUSED, char **argv)
 	xo_explicit_transition(NULL, new_state, opt_name, 0);
 	xo_finish();
 	exit(0);
-    }
-
-    fmt = *argv++;
-    if (opt_opener == NULL && opt_closer == NULL && fmt == NULL) {
-	print_help();
-	return 1;
     }
 
     if (opt_top_wrap) {
