@@ -585,6 +585,7 @@ AC_CONFIG_FILES([
      llvm-plugins/Makefile
      llvm-plugins/xocc.sh
      xo/Makefile
+     xo-logger/Makefile
      xolint/Makefile
      xohtml/Makefile
      xopo/Makefile
@@ -596,6 +597,7 @@ AC_CONFIG_FILES([
      tests/core/Makefile
      tests/gettext/Makefile
      tests/xo/Makefile
+     tests/xo-logger/Makefile
      tests/xpath/Makefile
      tests/utf8/Makefile
      tests/llvm-plugins/Makefile
