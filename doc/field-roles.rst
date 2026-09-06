@@ -160,7 +160,7 @@ rarely used::
 Format fields have an extra convenience feature; if both content and
 format are specified, instead of looking to the argument list for a
 value, the content is used, allowing a mixture of format and content
-within the field descriptor, though overlaps the `label_role`_::
+within the field descriptor, though overlaps the `label-role`_::
 
     xo_emit("{F:name is /%20s}{:count/%d}\\n", count);
 
