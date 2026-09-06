@@ -44,6 +44,8 @@
 #include <sys/syslog.h>
 #include <sys/uio.h>
 #include <sys/un.h>
+#include <netinet/in.h>
+#include <netdb.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <paths.h>
@@ -146,6 +148,200 @@ enum {
     CONNPRIV,
 };
 
+/*
+ * State for remote syslog delivery (e.g. "xo-logger -h ...").  All
+ * hostname/service resolution happens in the caller; we only ever
+ * store already-resolved addresses.
+ */
+#define XO_LOG_MAX_ADDR 16
+
+typedef struct xo_log_addr_s {
+    struct sockaddr_storage xla_ss;
+    unsigned xla_len;
+} xo_log_addr_t;
+
+static xo_log_addr_t xo_log_remote_addrs[XO_LOG_MAX_ADDR];
+static int xo_log_remote_naddrs;	/* Number of entries in the above */
+static char *xo_log_remote_path;	/* AF_LOCAL destination, if any */
+static int xo_log_remote_port = 514;	/* Remote port, host byte order */
+static int xo_log_all_addresses;	/* Send to all resolved addrs (-A) */
+static char *xo_log_hostname_override;	/* HOSTNAME field override (-H) */
+static struct sockaddr_storage xo_log_source_ss; /* Source addr (-S) */
+static unsigned xo_log_source_len;
+static int xo_log_has_source;
+
+static int
+xo_log_remote_active (void)
+{
+    return (xo_log_remote_naddrs > 0 || xo_log_remote_path != NULL);
+}
+
+void
+xo_log_set_hostname (const char *hostname)
+{
+    free(xo_log_hostname_override);
+    xo_log_hostname_override = hostname ? strdup(hostname) : NULL;
+}
+
+void
+xo_log_set_host (struct hostent *hp)
+{
+    int i;
+
+    xo_log_remote_naddrs = 0;
+    free(xo_log_remote_path);
+    xo_log_remote_path = NULL;
+
+    if (hp == NULL)
+	return;
+
+    for (i = 0; hp->h_addr_list[i] != NULL
+		&& xo_log_remote_naddrs < XO_LOG_MAX_ADDR; i++) {
+	xo_log_addr_t *ap = &xo_log_remote_addrs[xo_log_remote_naddrs];
+
+	memset(ap, 0, sizeof(*ap));
+
+	if (hp->h_addrtype == AF_INET) {
+	    struct sockaddr_in *sin = (struct sockaddr_in *) &ap->xla_ss;
+	    sin->sin_family = AF_INET;
+	    memcpy(&sin->sin_addr, hp->h_addr_list[i], sizeof(sin->sin_addr));
+	    ap->xla_len = sizeof(*sin);
+
+	} else if (hp->h_addrtype == AF_INET6) {
+	    struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *) &ap->xla_ss;
+	    sin6->sin6_family = AF_INET6;
+	    memcpy(&sin6->sin6_addr, hp->h_addr_list[i],
+		   sizeof(sin6->sin6_addr));
+	    ap->xla_len = sizeof(*sin6);
+
+	} else
+	    continue;
+
+	xo_log_remote_naddrs += 1;
+    }
+}
+
+void
+xo_log_set_host_path (const char *path)
+{
+    xo_log_remote_naddrs = 0;
+
+    free(xo_log_remote_path);
+    xo_log_remote_path = path ? strdup(path) : NULL;
+}
+
+void
+xo_log_set_port (int port)
+{
+    xo_log_remote_port = port;
+}
+
+void
+xo_log_set_source (struct sockaddr *sa, unsigned salen)
+{
+    if (sa == NULL || salen > sizeof(xo_log_source_ss)) {
+	xo_log_has_source = 0;
+	return;
+    }
+
+    memcpy(&xo_log_source_ss, sa, salen);
+    xo_log_source_len = salen;
+    xo_log_has_source = 1;
+}
+
+void
+xo_log_set_all_addresses (int value)
+{
+    xo_log_all_addresses = value;
+}
+
+/* Should be called with mutex acquired */
+static void
+xo_connect_remote_log (void)
+{
+    if (xo_logfile != -1)
+	return;
+
+    int family;
+    if (xo_log_remote_path)
+	family = AF_LOCAL;
+    else if (xo_log_remote_naddrs > 0)
+	family = xo_log_remote_addrs[0].xla_ss.ss_family;
+    else
+	return;
+
+    int flags = SOCK_DGRAM;
+#ifdef SOCK_CLOEXEC
+    flags |= SOCK_CLOEXEC;
+#endif /* SOCK_CLOEXEC */
+
+    xo_logfile = socket(family, flags, 0);
+    if (xo_logfile == -1)
+	return;
+
+    if (xo_log_has_source
+	&& bind(xo_logfile, (struct sockaddr *) &xo_log_source_ss,
+		xo_log_source_len) < 0) {
+	close(xo_logfile);
+	xo_logfile = -1;
+	return;
+    }
+
+    if (xo_log_remote_path) {
+	struct sockaddr_un saddr;
+
+	memset(&saddr, 0, sizeof(saddr));
+	saddr.sun_family = AF_LOCAL;
+	strncpy(saddr.sun_path, xo_log_remote_path, sizeof(saddr.sun_path) - 1);
+#ifdef HAVE_SUN_LEN
+	saddr.sun_len = sizeof(saddr);
+#endif /* HAVE_SUN_LEN */
+
+	if (connect(xo_logfile, (struct sockaddr *) &saddr,
+		    sizeof(saddr)) < 0) {
+	    close(xo_logfile);
+	    xo_logfile = -1;
+	    return;
+	}
+    }
+
+    xo_status = CONNDEF;
+}
+
+/* Should be called with mutex acquired */
+static void
+xo_send_remote_syslog (const char *full_msg, int full_len)
+{
+    if (!xo_opened)
+	xo_open_log_unlocked(xo_logtag, xo_logstat | LOG_NDELAY, 0);
+    xo_connect_log();
+
+    if (xo_logfile == -1)
+	return;
+
+    if (xo_log_remote_path) {
+	REAL_VOID(send(xo_logfile, full_msg, full_len, 0));
+	return;
+    }
+
+    int n = xo_log_all_addresses ? xo_log_remote_naddrs
+	: (xo_log_remote_naddrs > 0 ? 1 : 0);
+
+    for (int i = 0; i < n; i++) {
+	xo_log_addr_t *ap = &xo_log_remote_addrs[i];
+	struct sockaddr_storage ss = ap->xla_ss;
+
+	if (ss.ss_family == AF_INET)
+	    ((struct sockaddr_in *) &ss)->sin_port = htons(xo_log_remote_port);
+	else if (ss.ss_family == AF_INET6)
+	    ((struct sockaddr_in6 *) &ss)->sin6_port
+		= htons(xo_log_remote_port);
+
+	REAL_VOID(sendto(xo_logfile, full_msg, full_len, 0,
+			  (struct sockaddr *) &ss, ap->xla_len));
+    }
+}
+
 static xo_syslog_open_t xo_syslog_open;
 static xo_syslog_send_t xo_syslog_send;
 static xo_syslog_close_t xo_syslog_close;
@@ -229,6 +425,11 @@ xo_send_syslog (char *full_msg, char *v0_hdr,
         v->iov_len = 1;
         v += 1;
         REAL_VOID(writev(STDERR_FILENO, iov, 3));
+    }
+
+    if (xo_log_remote_active()) {
+	xo_send_remote_syslog(full_msg, full_len);
+	return;
     }
 
     /* Get connected, output the message to the local logger. */
@@ -341,6 +542,11 @@ xo_connect_log (void)
 {
     if (xo_syslog_open) {
 	xo_syslog_open();
+	return;
+    }
+
+    if (xo_log_remote_active()) {
+	xo_connect_remote_log();
 	return;
     }
 
@@ -609,7 +815,9 @@ xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
      */
     char hostname[XO_HOST_NAME_MAX + 1];
     hostname[0] = '\0';
-    if (xo_unit_test)
+    if (xo_log_hostname_override)
+	strlcpy(hostname, xo_log_hostname_override, sizeof(hostname));
+    else if (xo_unit_test)
 	strlcpy(hostname, "worker-host", sizeof(hostname));
     else
 	(void) gethostname(hostname, sizeof(hostname) - 1);
