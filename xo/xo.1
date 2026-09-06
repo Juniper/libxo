@@ -50,6 +50,13 @@ Generate HTML output
 Generate JSON output
 .It Fl -leading-xpath Ar path
 Add a prefix to generated XPaths (HTML)
+.It Fl L | Fl -logger
+Generate a syslog message instead of the normal
+.Nm libxo
+output styles.
+See
+.Sx Syslog Mode
+below.
 .It Fl -not-first
 Indicate that this content is not the first in a series of sibling
 objects, which is vital information for "JSON" output, which requires
@@ -91,6 +98,95 @@ accepts any of the
 .Nm libxo
 options listed in
 .Xr xo_options 7 .
+.Ss Syslog Mode
+The
+.Fl L
+.Pq Fl -logger
+option puts
+.Nm
+into "syslog mode".
+Instead of generating XML, JSON, HTML, or text output,
+.Nm
+formats the message using the given format string and arguments
+(just as it would for normal output) and hands the result to the
+system's syslog service via the
+.Xr xo_syslog 3
+function, generating an RFC 5424-style structured log message:
+.Bd -literal -offset indent
+  xo --logger --facility local0 --severity error \\
+      'Disk {:disk} is at {:percent/%d}%\\n' /dev/da0 97
+.Ed
+.Pp
+Because syslog mode builds a single log message rather than a
+document, most of the options described above
+.Po
+.Fl -wrap ,
+.Fl -open ,
+.Fl -close ,
+.Fl -depth ,
+.Fl -not-first ,
+lists and instances, etc.
+.Pc
+are rejected when
+.Fl L Ns / Ns Fl -logger
+is given.
+Conversely, the syslog-specific options below may only be used
+along with
+.Fl L Ns / Ns Fl -logger .
+.Pp
+Facility and severity may be given separately:
+.Bl -tag -width indent
+.It Fl F Ar name | Fl -facility Ar name
+Syslog facility name (defaults to "user")
+.It Fl S Ar name | Fl -severity Ar name
+Syslog severity name (defaults to "notice")
+.El
+.Pp
+or together as a single "facility.severity" pair:
+.Bl -tag -width indent
+.It Fl -log-priority Ar fac.sev
+Provide facility and severity in one option
+.El
+.Pp
+.Fl -log-priority
+cannot be combined with
+.Fl -facility
+or
+.Fl -severity .
+The valid facility and severity names can be listed with:
+.Bl -tag -width indent
+.It Fl -list-facilities
+List all valid logging facilities
+.It Fl -list-severities
+List all valid logging severities
+.El
+.Pp
+The identity of the message can be controlled with:
+.Bl -tag -width indent
+.It Fl i Ar name | Fl -ident Ar name
+Process identifier for syslog message
+.It Fl P Ar pid | Fl -pid Ar pid
+Process number/id for syslog message
+.El
+.Pp
+.Fl -ident
+sets the program name recorded as the message's tag (the program's
+own name is used if this is not given).
+.Fl -pid
+records a process id in the message, turning on syslog's
+.Dv LOG_PID
+option automatically.
+.Pp
+In addition to the system log, the message can be echoed elsewhere
+for debugging or interactive use:
+.Bl -tag -width indent
+.It Fl -log-console
+Write syslog message to the console
+.It Fl -log-print
+Write syslog message to the terminal
+.It Fl -log-debug
+Generate debugging info about logging
+.El
 .Sh EXAMPLES
 In this example,
 .Nm
@@ -195,9 +291,19 @@ prepend data to the XPath values used for HTML output style.
       }
     }
 .Ed
+.Pp
+In this example,
+.Nm
+is used in syslog mode to record a message with an explicit
+facility and severity:
+.Bd -literal -offset indent
+  xo --logger --facility local0 --severity error \\
+      'Disk {:disk} is at {:percent/%d}%%\\n' /dev/da0 97
+.Ed
 .Sh SEE ALSO
 .Xr libxo 3 ,
 .Xr xo_emit 3 ,
+.Xr xo_syslog 3 ,
 .Xr xo_options 7
 .Sh HISTORY
 The
