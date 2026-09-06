@@ -187,6 +187,59 @@ as an instance with the given set of fields::
     <status>in route</status>
   </foo>
 
+Syslog Mode
+-----------
+
+The `--logger` (or `-L`) option puts `xo` into "syslog mode".
+Instead of generating XML, JSON, HTML, or text output, `xo` formats
+the message using the given format string and arguments (just as it
+would for normal output) and hands the result to the system's
+syslog service via the `xo_syslog()` function, generating an
+RFC 5424-style structured log message::
+
+    xo --logger --facility local0 --severity error \\
+        'Disk {:disk} is at {:percent/%d}%\\n' /dev/da0 97
+
+Because syslog mode builds a single log message rather than a
+document, most of the options described above (`--wrap`, `--open`,
+`--close`, `--depth`, `--not-first`, lists and instances, etc.) are
+rejected when `--logger`/`-L` is given.  Conversely, the
+syslog-specific options below may only be used along with
+`--logger`/`-L`.
+
+Facility and severity may be given separately::
+
+    --facility OR -F <name>    Syslog facility name (defaults to 'user')
+    --severity OR -S <name>    Syslog severity name (defaults to 'notice')
+
+or together as a single "facility.severity" pair::
+
+    --log-priority <fac.sev>   Provide facility and severity in one option
+
+`--log-priority` cannot be combined with `--facility` or
+`--severity`.  The valid facility and severity names can be listed
+with::
+
+    --list-facilities          List all valid logging facilities
+    --list-severities          List all valid logging severities
+
+The identity of the message can be controlled with::
+
+    --ident OR -i <name>       Process identifier for syslog message
+    --pid OR -P <pid>          Process number/id for syslog message
+
+`--ident` sets the program name recorded as the message's tag
+(the program's own name is used if this is not given).  `--pid`
+records a process id in the message, turning on syslog's `LOG_PID`
+option automatically.
+
+In addition to the system log, the message can be echoed elsewhere
+for debugging or interactive use::
+
+    --log-console              Write syslog message to the console
+    --log-print                Write syslog message to the terminal
+    --log-debug                Generate debugging info about logging
+
 Command Line Options
 --------------------
 
@@ -202,7 +255,8 @@ Command Line Options
     --html OR -H          Generate HTML output
     --instance OR -I <name> Wrap in an instance of the given name
     --json OR -J          Generate JSON output
-    --leading-xpath <path> Add a prefix to generated XPaths (HTML)
+    --leading-xpath <path> OR -l <path> Add a prefix to generated XPaths (HTML)
+    --logger OR -L        Generate syslog message
     --not-first           Indicate this object is not the first (JSON)
     --open <path>         Open tags for the given path
     --open-instance <name> Open an instance given by name
@@ -217,7 +271,18 @@ Command Line Options
     --warn-xml            Display warnings in xml on stdout
     --wrap <path>         Wrap output in a set of containers
     --xml OR -X           Generate XML output
-    --xpath               Add XPath data to HTML output)
+    --xpath               Add XPath data to HTML output
+  syslog mode options (for --logger/-L):
+    --facility OR -F <name> Syslog facility name (defaults to 'user')
+    --ident OR -i <name>  Process identifier for syslog message
+    --list-facilities     List all valid logging facilities
+    --list-severities     List all valid logging severities
+    --log-console         Write syslog message to the console
+    --log-debug           Generate debugging info about logging
+    --log-print           Write syslog message to the terminal
+    --log-priority <fac.sev>  Provide facility and severity in one options
+    --pid OR -P <pid>     Process number/id for syslog message
+    --severity OR -S <name> Syslog severity name (defaults to 'notice'))
 
 Example
 -------
