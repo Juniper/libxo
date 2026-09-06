@@ -316,12 +316,12 @@ static struct option long_opts[] = {
     { "continuation", no_argument, NULL, 'C' },
     { "depth", required_argument, &opts.o_depth, 1 },
     { "event-name ", required_argument, NULL, 'E' },
-    { "facilty", required_argument, NULL, 'F' },
+    { "facility", required_argument, NULL, 'F' },
     { "filename", required_argument, NULL, 'f' },
     { "help", no_argument, &opts.o_help, 1 },
     { "html", no_argument, NULL, 'H' },
     { "instance", required_argument, NULL, 'I' },
-    { "ident", no_argument, NULL, 'i' },
+    { "ident", required_argument, NULL, 'i' },
     { "json", no_argument, NULL, 'J' },
     { "leading-xpath", required_argument, NULL, 'l' },
     { "logger", no_argument, NULL, 'L' },
@@ -339,7 +339,7 @@ static struct option long_opts[] = {
     { "pretty", no_argument, NULL, 'p' },
     { "pid", required_argument, NULL, 'P' },
     { "style", required_argument, NULL, 's' },
-    { "severity", no_argument, NULL, 'S' },
+    { "severity", required_argument, NULL, 'S' },
     { "text", no_argument, NULL, 'T' },
     { "top-wrap", no_argument, &opts.o_top_wrap, 1 },
     { "xml", no_argument, NULL, 'X' },
@@ -453,10 +453,9 @@ xo_list_map (xo_nmap_t *map, const char *tag)
     xo_open_container(buf);
 
     for (; map->xn_name; map++) {
-	snprintf(buf, sizeof(buf), "{l:%s/%s}\n", tag, map->xn_name);
-	xo_emit(buf);
+	xo_emit("{la:}\n", tag, map->xn_name);
     }
-    snprintf(buf, sizeof(buf), "%s-information", tag);
+
     xo_close_container(buf);
 
     xo_finish();
@@ -813,8 +812,7 @@ main (int argc UNUSED, char **argv)
 		if (blen > 0 && buf[blen - 1] == '\n')
 		    chomp(buf);
 
-		xo_syslog(opt_log_facility | opt_log_severity, opt_log_event,
-			  "{F:/%s}", buf);
+		xo_syslog(opt_log_priority, opt_log_event, "{F:/%s}", buf);
 	    }
 
 	    fclose(fp);
