@@ -1,3 +1,4 @@
+.. _formatting:
 
 Formatting with libxo
 =====================
