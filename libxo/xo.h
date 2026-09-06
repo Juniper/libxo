@@ -875,6 +875,33 @@ typedef void (*xo_syslog_setup_t)(xo_handle_t *xop, unsigned op);
 void
 xo_syslog_set_setup (xo_syslog_setup_t func);
 
+/*
+ * Networking support for remote syslog delivery (e.g. the "xo-logger"
+ * command's -h/-4/-6/-A/-S/-P/-H options).  All name/service resolution
+ * (gethostbyname(3), getservbyname(3), etc.) is the caller's
+ * responsibility; these functions only accept already-resolved values.
+ */
+struct hostent;
+struct sockaddr;
+
+void
+xo_log_set_hostname (const char *hostname);
+
+void
+xo_log_set_host (struct hostent *hp);
+
+void
+xo_log_set_host_path (const char *path);
+
+void
+xo_log_set_port (int port);
+
+void
+xo_log_set_source (struct sockaddr *sa, unsigned salen);
+
+void
+xo_log_set_all_addresses (int value);
+
 typedef void (*xo_simplify_field_func_t)(const char *, unsigned, int);
 
 char *
