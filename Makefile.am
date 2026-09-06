@@ -15,6 +15,7 @@ SUBDIRS = \
     format \
     libxo \
     xo \
+    xo-logger \
     xopo \
     xolint \
     xohtml \
