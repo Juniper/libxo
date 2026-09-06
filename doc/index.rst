@@ -43,6 +43,7 @@ libxo ships as part of FreeBSD.
     plugins
     xocc
     xo
+    xo-logger
     xolint
     xohtml
     xopo
