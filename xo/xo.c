@@ -30,12 +30,12 @@ static int opt_warn;		/* Enable warnings */
 
 static int opt_syslog;		/* 0 == unset; -1 == not-syslog; 1 == syslog */
 static char *opt_log_ident;
-static int opt_log_facility;
-static int opt_log_severity;
+static int opt_log_facility = -1;
+static int opt_log_severity = -1;
+static int opt_log_priority = -1;
 static int opt_log_pid;
 static int opt_log_opts;
 static int opt_log_debug;
-static int opt_log_priority;
 static const char *opt_log_event;
 static const char *opt_log_input;
 static int xo_log_need_argv;
@@ -278,6 +278,8 @@ print_help (const char *message)
 "  syslog mode options (for --logger/-L):\n"
 "    --facility OR -F <name> Syslog facility name (defaults to 'user')\n"
 "    --ident OR -i <name>  Process identifier for syslog message\n"
+"    --list-facilities     List all valid logging facilities\n"
+"    --list-severities     List all valid logging severities\n"
 "    --log-console         Write syslog message to the console\n"
 "    --log-debug           Generate debugging info about logging\n"
 "    --log-print           Write syslog message to the terminal\n"
@@ -291,6 +293,8 @@ static struct opts {
     int o_close_list;
     int o_depth;
     int o_help;
+    int o_list_facilities;
+    int o_list_severities;
     int o_log_console;
     int o_log_debug;
     int o_log_print;
@@ -321,6 +325,8 @@ static struct option long_opts[] = {
     { "json", no_argument, NULL, 'J' },
     { "leading-xpath", required_argument, NULL, 'l' },
     { "logger", no_argument, NULL, 'L' },
+    { "list-facilities", no_argument, &opts.o_list_facilities, 1 },
+    { "list-severities", no_argument, &opts.o_list_severities, 1 },
     { "log-console", no_argument, &opts.o_log_console, 1 },
     { "log-debug", no_argument, &opts.o_log_debug, 1 },
     { "log-priority", required_argument, &opts.o_log_priority, 1 },
@@ -384,7 +390,7 @@ xo_nmap_t xo_map_facility[] = {
     { "cron", LOG_CRON },
     { "daemon", LOG_DAEMON },
     { "ftp", LOG_FTP },
-    { "kern", LOG_KERN },
+    /* { "kern", LOG_KERN }, -- We shouldn't be emitting kernel messages */
     { "lpr", LOG_LPR },
     { "mail", LOG_MAIL },
     { "news", LOG_NEWS },
@@ -436,6 +442,25 @@ xo_find_priority (const char *str)
 	sev = xo_find_map(xo_map_severity, cp, "severity");
 
     return fac | sev;
+}
+
+static void
+xo_list_map (xo_nmap_t *map, const char *tag)
+{
+    char buf[1024];
+
+    snprintf(buf, sizeof(buf), "%s-information", tag);
+    xo_open_container(buf);
+
+    for (; map->xn_name; map++) {
+	snprintf(buf, sizeof(buf), "{l:%s/%s}\n", tag, map->xn_name);
+	xo_emit(buf);
+    }
+    snprintf(buf, sizeof(buf), "%s-information", tag);
+    xo_close_container(buf);
+
+    xo_finish();
+    exit(0);
 }
 
 typedef struct xo_log_err_s {
@@ -529,7 +554,7 @@ main (int argc UNUSED, char **argv)
 
 	case 'F':
 	    xo_log_check(1, rc, NULL, NULL);
-	    if (opt_log_priority)
+	    if (opt_log_priority >= 0)
 		xo_errx(1, "priority was already provided");
 
 	    opt_log_facility = xo_find_map(xo_map_facility, optarg,
@@ -594,7 +619,7 @@ main (int argc UNUSED, char **argv)
 
 	case 'S':
 	    xo_log_check(1, rc, NULL, NULL);
-	    if (opt_log_priority)
+	    if (opt_log_priority >= 0)
 		xo_errx(1, "priority was already provided");
 
 	    opt_log_severity = xo_find_map(xo_map_severity, optarg,
@@ -627,6 +652,12 @@ main (int argc UNUSED, char **argv)
 		print_help(NULL);
 		return 1;
 
+	    } else if (opts.o_list_facilities) {
+		xo_list_map(xo_map_facility, "facility");
+
+	    } else if (opts.o_list_severities) {
+		xo_list_map(xo_map_severity, "severity");
+
 	    } else if (opts.o_log_console) {
 		xo_log_check(1, rc, "log-console", NULL);
 #ifdef LOG_CONS
@@ -643,9 +674,9 @@ main (int argc UNUSED, char **argv)
 
 	    } else if (opts.o_log_priority) {
 		xo_log_check(1, rc, "log-priority", NULL);
-		if (opt_log_severity)
+		if (opt_log_severity >= 0)
 		    xo_errx(1, "severity was already provided");
-		if (opt_log_facility)
+		if (opt_log_facility >= 0)
 		    xo_errx(1, "facility was already provided");
 
 		opt_log_priority
@@ -746,10 +777,13 @@ main (int argc UNUSED, char **argv)
      * Syslog mode
      */
     if (opt_syslog > 0) {
-	if (opt_log_facility == 0)
-	    opt_log_facility = LOG_USER;
-	if (opt_log_severity == 0)
-	    opt_log_severity = LOG_NOTICE;
+	if (opt_log_priority < 0) {
+	    if (opt_log_facility < 0)
+		opt_log_facility = LOG_USER;
+	    if (opt_log_severity < 0)
+		opt_log_severity = LOG_NOTICE;
+	    opt_log_priority = opt_log_facility | opt_log_severity;
+	}
 
 	checkpoint_argv = save_argv = argv;
 	if (fmt)
@@ -759,12 +793,12 @@ main (int argc UNUSED, char **argv)
 	    xo_syslog_set_pid(opt_log_pid);
 
 	xo_open_log(opt_log_ident, opt_log_opts,
-		    opt_log_facility | opt_log_severity);
+		    opt_log_priority);
 
 	if (opt_log_input == NULL) {
 	    xo_log_need_argv = 1;
 	    xo_syslog_set_setup(xo_log_setup);
-	    xo_syslog(opt_log_facility | opt_log_severity, opt_log_event, fmt);
+	    xo_syslog(opt_log_priority, opt_log_event, fmt);
 
 	} else {
 	    xo_syslog_set_setup(xo_log_setup);
