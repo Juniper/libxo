@@ -410,6 +410,12 @@ xo_open_log_unlocked (const char *ident, int logstat, int logfac)
     if (ident != NULL)
         xo_logtag = ident;
     xo_logstat = logstat;
+
+    /*
+     * While LOG_KERN is 0, we know that we won't be emitting LOG_KERN
+     * messages, so it logfac has non-zero facility, we use it for
+     * xo_logfacility, which otherwise defaults to LOG_USER.
+     */
     if (logfac != 0 && (logfac &~ LOG_FACMASK) == 0)
         xo_logfacility = logfac;
 
@@ -534,7 +540,7 @@ xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
     }
 
     /* Set default facility if none specified. */
-    if ((pri & LOG_FACMASK) == 0)
+    if ((pri & LOG_FACMASK) == 0) /* We know this isn't LOG_KERN */
         pri |= xo_logfacility;
 
     /* Create the primary stdio hook */
@@ -713,7 +719,7 @@ xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
         *--xb.xb_curp = '\0';
 
     if (xo_get_flags(xop) & XOF_LOG_SYSLOG)
-	fprintf(stderr, "xo: syslog: %d/%o/%#x=(%o/%o): %s\n", pri, pri, pri,
+	fprintf(stderr, "xo: syslog: %d(%d/%d): %s\n", pri,
 		pri >> 3, LOG_PRI(pri), xb.xb_bufp + log_offset);
 
     xo_send_syslog(xb.xb_bufp, v0_hdr, xb.xb_bufp + start_of_msg);
