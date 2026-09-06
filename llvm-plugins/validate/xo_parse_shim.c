@@ -525,7 +525,9 @@ xo_shim_parse_fields (const char *fmt,
             sf.xsp_len          = xfp->xf_len;
             sf.xsp_prefix_len   = xfp->xf_prefix_len;
             sf.xsp_num_bits     = xfp->xf_num_bits;
-            sf.xsp_padding      = xfp->xf_padding;
+            sf.xsp_padding[0]   = xfp->xf_padding[0];
+            sf.xsp_padding[1]   = xfp->xf_padding[1];
+            sf.xsp_padding[2]   = xfp->xf_padding[2];
             sf.xsp_extflags      = xfp->xf_extflags;
             fspec_cb(fspec_data, &sf);
         }
