@@ -28,6 +28,8 @@ Usage: xo [options] format [fields]
   syslog mode options (for --logger/-L):
     --facility OR -F <name> Syslog facility name (defaults to 'user')
     --ident OR -i <name>  Process identifier for syslog message
+    --list-facilities     List all valid logging facilities
+    --list-severities     List all valid logging severities
     --log-console         Write syslog message to the console
     --log-debug           Generate debugging info about logging
     --log-print           Write syslog message to the terminal
