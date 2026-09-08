@@ -124,8 +124,13 @@ main (int argc, char **argv)
 	    "{T:/%-12s}{T:Time (%)}\n", "Department");
     for ( ; ep->e_first; ep++) {
 	xo_open_instance("employee");
+#if 0
+	xo_emit("{[:-25}{k:first-name/%s} ({k:nic-name/\"%s\"}){]:}"
+		"{k:last-name/%-14..14s/%s}"
+#else
 	xo_emit("{[:-25}{:first-name/%s} ({:nic-name/\"%s\"}){]:}"
 		"{:last-name/%-14..14s/%s}"
+#endif
 		"{:department/%8u}{:percent-time/%8u}\n",
 		ep->e_first, ep->e_nic, ep->e_last, ep->e_dept, ep->e_percent);
 	if (ep->e_percent > 50) {
