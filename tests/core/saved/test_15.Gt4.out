@@ -1,14 +1,14 @@
-plain int 1@3234@3567
-unsigned 7@3654@3321
-negative -1@3234@3567
+plain int 1:23:45:67
+unsigned 7:65:43:21
+negative -1:23:45:67
 precision 0000000042
-long 1@3234@3567@3890
-long long 123@3456@3789@3012@3345
-star width              1@3234@3567
-bit-width 64 9@3876@3543@3210
+long 12:34:56:78:90
+long long 1:23:45:67:89:01:23:45
+star width              1:23:45:67
+bit-width 64 98:76:54:32:10
 small 42
 zero 0
-field forced, short 3@3456@3789
-field forced, long 4@3567@3890
+field forced, short 3:45:67:89
+field forced, long 4:56:78:90
 hex unaffected abcdef
 octal unaffected 12345670
