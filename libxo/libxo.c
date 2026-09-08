@@ -4846,32 +4846,12 @@ xo_key_is_duplicate (const char *name, ssize_t nlen, const char *keys)
 }
 
 /*
- * Scan a frame's xs_sibnames buffer (a run of back-to-back NUL-terminated
- * names) for an exact match.  Only ever called/populated when XOF_WARN is
- * set; see xo_sibling_add().
- */
-static int
-xo_sibling_is_duplicate (const char *name, ssize_t nlen, const char *names)
-{
-    const char *cp = names;
-
-    while (cp != NULL && *cp != '\0') {
-	size_t elen = strlen(cp);
-	if ((ssize_t) elen == nlen && strncmp(cp, name, nlen) == 0)
-	    return TRUE;
-	cp += elen + 1;
-    }
-
-    return FALSE;
-}
-
-/*
  * Append a name to a frame's xs_sibnames buffer, growing it as needed.
- * Only called when XOF_WARN is set, so this cost isn't paid otherwise.
- *
- * The buffer holds a run of NUL-terminated names followed by one more
- * NUL byte marking the end of the run, so xo_sibling_is_duplicate()
- * always has a safe stopping point to scan to.
+ * Each entry is a one-byte marker (' ') followed by the NUL-terminated
+ * name; see xo_sibling_check() for how the marker is used.  The buffer
+ * holds a run of such entries followed by one more NUL byte marking the
+ * end of the run, so a scan always has a safe stopping point.  Only
+ * called when XOF_WARN is set, so this cost isn't paid otherwise.
  */
 static void
 xo_sibling_add (xo_stack_t *xsp, const char *name, ssize_t nlen)
@@ -4881,20 +4861,59 @@ xo_sibling_add (xo_stack_t *xsp, const char *name, ssize_t nlen)
     if (xsp->xs_sibnames != NULL) {
 	const char *cp = xsp->xs_sibnames;
 	while (*cp != '\0') {
-	    ssize_t elen = (ssize_t) strlen(cp) + 1;
+	    ssize_t elen = (ssize_t) strlen(cp + 1) + 2;
 	    cp += elen;
 	    olen += elen;
 	}
     }
 
-    char *cp = xo_realloc(xsp->xs_sibnames, olen + nlen + 2);
+    char *cp = xo_realloc(xsp->xs_sibnames, olen + nlen + 3);
     if (cp == NULL)
 	return;
 
-    memcpy(cp + olen, name, nlen);
-    cp[olen + nlen] = '\0';
-    cp[olen + nlen + 1] = '\0';
+    cp[olen] = ' ';
+    memcpy(cp + olen + 1, name, nlen);
+    cp[olen + 1 + nlen] = '\0';
+    cp[olen + 1 + nlen + 1] = '\0';
     xsp->xs_sibnames = cp;
+}
+
+/*
+ * Record a sibling name usage in xsp->xs_sibnames and report whether this
+ * occurrence should generate a "duplicate sibling name" warning.
+ *
+ * Each recorded name carries a one-byte marker: ' ' means the name has
+ * been seen exactly once so far, '+' means a duplicate use of it has
+ * already been warned about.  This lets a name be reused many times
+ * (e.g. a field emitted in a loop that isn't a proper list) while only
+ * ever warning once, instead of once per repeat.
+ *
+ *   - name not yet recorded: record it (marker ' '), return FALSE --
+ *     nothing to warn about on a first use.
+ *   - name recorded with marker ' ': this is the first duplicate; flip
+ *     the marker to '+' and return TRUE so the caller warns once.
+ *   - name recorded with marker '+': already warned about; return FALSE.
+ *
+ * Only ever called when XOF_WARN is set, so this cost isn't paid otherwise.
+ */
+static int
+xo_sibling_check (xo_stack_t *xsp, const char *name, ssize_t nlen)
+{
+    char *cp = xsp->xs_sibnames;
+
+    while (cp != NULL && cp[0] != '\0') {
+	ssize_t elen = (ssize_t) strlen(cp + 1);
+	if (elen == nlen && strncmp(cp + 1, name, nlen) == 0) {
+	    if (cp[0] == '+')
+		return FALSE;
+	    cp[0] = '+';
+	    return TRUE;
+	}
+	cp += elen + 2;
+    }
+
+    xo_sibling_add(xsp, name, nlen);
+    return FALSE;
 }
 
 static void
@@ -6934,10 +6953,8 @@ xo_format_value (xo_handle_t *xop, const xo_field_info_t *xfip,
     if (XOF_ISSET(xop, XOF_WARN) && name != NULL
 	    && xfip != NULL && xfip->xfi_ftype == 'V'
 	    && !(flags & (XFF_DISPLAY_ONLY | XFF_LEAF_LIST))) {
-	if (xo_sibling_is_duplicate(name, nlen, xsp->xs_sibnames))
+	if (xo_sibling_check(xsp, name, nlen))
 	    xo_failure(xop, "duplicate sibling name: '%.*s'", (int) nlen, name);
-	else
-	    xo_sibling_add(xsp, name, nlen);
     }
 
     xo_buffer_t *xbp = &xop->xo_data;
@@ -9170,10 +9187,8 @@ xo_depth_change (xo_handle_t *xop, const char *name,
 	if (XOF_ISSET(xop, XOF_WARN) && name != NULL
 	        && (state == XSS_OPEN_CONTAINER || state == XSS_OPEN_LIST)) {
 	    ssize_t nlen = strlen(name);
-	    if (xo_sibling_is_duplicate(name, nlen, old_xsp->xs_sibnames))
+	    if (xo_sibling_check(old_xsp, name, nlen))
 		xo_failure(xop, "duplicate sibling name: '%s'", name);
-	    else
-		xo_sibling_add(old_xsp, name, nlen);
 	}
 
 	xsp->xs_flags = flags;
