@@ -117,6 +117,8 @@ typedef unsigned long long xo_xof_flags_t;
 
 #define XOF_NO_TOP_LEVEL XOF_BIT(36) /** Don't make a fake top-level tag */
 #define XOF_FILTER_WARN	XOF_BIT(37)  /** Warn about runtime errors w/ filters */
+#define XOF_GROUP	XOF_BIT(38)  /** Insert locale thousands separators */
+#define XOF_LINT	XOF_BIT(39)  /** Warn about lint issues */
 
 typedef unsigned xo_emit_flags_t; /* Flags to xo_emit() and friends */
 #define XOEF_RETAIN	0	  /* Deprecated: retain feature removed */
@@ -165,6 +167,7 @@ typedef uint64_t xo_xff_flags_t;
 #define XFF_NO_UNESCAPE (1<<26) /* Ignore XFF_UNESCAPE */
 #define XFF_UNITS_ATTR  (1<<27)	/* Units only appear in attribute */
 #define XFF_FIRST_CAP	(1<<28)	/* First letter get capitalized (toupper) */
+#define XFF_INT_GROUP	(1<<29) /* Integer group: an int that wants grouping */
 
 /* Flags to turn off when we don't want i18n processing */
 #define XFF_GT_FLAGS (XFF_GT_FIELD | XFF_GT_PLURAL)
