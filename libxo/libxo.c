@@ -238,6 +238,7 @@ typedef uint32_t xo_ident_t;	/* Identifier for lists/instances/etc */
 #define XO_EXTERR_BRIEF		7 /* Display brief extended error info */
 #define XO_EXTERR_VERBOSE	8 /* Display verbose exterr info */
 #define XO_OPT_NO_CACHE		9 /* Ignore cached field and fspec data */
+#define XO_OPT_GROUPING		10 /* Give specific locale.grouping info */
 
 #define XO_XS_NAMESIZE	64	/* Size of stack's built-in name buffer */
 
@@ -409,6 +410,12 @@ static int xo_locale_inited;
 static const char *xo_program;
 static int xo_codeset_is_utf8;	/* Is stdout UTF-8? */
 static int filter_lib_loaded;
+
+static char *xo_group_sep;      /* Copy of locale's thousands separator */
+static int xo_group_sep_len;    /* strlen(xo_group_sep) */
+static uint64_t xo_group_map;	/* Precomputed grouping-shape map */
+
+#define XO_DEFAULT_GROUP_MAP 0x33333333 /* 3s all the way */
 
 /*
  * To allow libxo to be used in diverse environment, we allow the
@@ -647,6 +654,128 @@ xo_setup_filter_lib_test (int version, xo_filter_ops_t *ops)
 }
 
 /*
+ * Build a nibble-packed map of the locale's grouping shape, so we
+ * don't have to re-walk the (short, cheap, but still not-free)
+ * "grouping" string from struct lconv on every field we format.
+ * Each nibble holds the number of digits in one group, starting
+ * with the group nearest the decimal point; a nibble of 0 means
+ * "repeat the previous group forever" and is left implicit by
+ * simply stopping early.  We cap at 16 nibbles / 20 covered digits,
+ * which is more than enough for any real locale and for the 64-bit
+ * integers libxo can format.
+ */
+static uint64_t
+xo_group_map_build (const char *grouping)
+{
+    uint64_t map = 0;
+    const unsigned char *gp = (const unsigned char *) grouping;
+    unsigned char cur = *gp;
+    int idx = 0, covered = 0;
+
+    while (idx < 16 && covered < 20) {
+	if (cur == 0 || cur == (unsigned char) CHAR_MAX)
+	    break;			/* "no more grouping": leave 0s */
+
+	map |= ((uint64_t) cur) << (4 * idx);
+	covered += cur;
+	idx++;
+
+	if (gp[1] != '\0') {		/* more explicit bytes remain */
+	    gp++;
+	    cur = *gp;
+	}
+	/* else: gp[1] == '\0' means repeat `cur` forever -- leave it alone */
+    }
+
+    return map;
+}
+
+/*
+ * Accept a setting for the grouping normally found via the locale.
+ * The format is: "--libxo grouping=x+n1+n2+n3...", where:
+ *  'x' is the separator character ("thousands_sep")
+ *
+ *  'n1...' is the "grouping" value from the locale, but with "+"
+ *     instead of ";" for ease-of-use, and "-1" (instead of the
+ *     locale's CHAR_MAX) meaning "stop grouping here"; a value list
+ *     that runs out of numbers (without a trailing "-1") repeats the
+ *     last number forever, exactly as struct lconv's grouping does.
+ *
+ * Note that the separator is one character, but it could be one UTF-8
+ * character, so we need to keep it as a string.
+ *
+ * Since xo_set_options()/xo_set_options_words() split their input on
+ * unescaped commas, a separator of "," (the common case) would normally
+ * need to be backslash-escaped in the option string, e.g.
+ * "grouping=\,+3+2".  To avoid that, 'x' may be omitted entirely (the
+ * value starts directly with "+"), in which case the separator defaults
+ * to ",", e.g. "grouping=+3+2", making "--libxo group,grouping=+3+2"
+ * usable without escaping.
+ */
+static int
+xo_set_grouping (xo_handle_t *xop UNUSED, const char *value)
+{
+    int len = strlen(value);
+    char buf[len + 1];
+    memcpy(buf, value, len + 1);
+
+    char *cp = buf;
+    char *sep = buf;		/* Starts with the thousands_sep */
+
+    while (*cp && *cp != '+')
+	cp += 1;
+    if (*cp != '+')		/* no "+n1..." portion given */
+	return -1;
+
+    int sep_len = cp - buf;
+    *cp++ = '\0';
+
+    if (sep_len == 0) {
+	/* No separator given (e.g. "grouping=+3+2"): default to "," */
+	xo_free(xo_group_sep);
+	xo_group_sep = NULL;
+	xo_group_sep_len = 0;
+
+    } else {
+	char *new_sep = xo_realloc(xo_group_sep, sep_len + 1);
+	if (new_sep == NULL)
+	    return -1;
+
+	xo_group_sep = new_sep;
+	memcpy(xo_group_sep, sep, sep_len + 1);
+	xo_group_sep_len = sep_len;
+    }
+
+    if (*cp && *cp != '0' && *cp != '-') { /* All "none" indicators */
+	char grouping[len + 1], *gp = grouping;
+	for (; *cp; cp++) {
+	    if (cp[0] == '-' && cp[1] == '1') {
+		*gp++ = CHAR_MAX;
+		break;
+	    }
+
+	    if (!isdigit((unsigned char) *cp))
+		return -1;
+
+	    *gp++ = (char) (*cp - '0');
+	    if (cp[1] != '+' && cp[1] != ';' && cp[1] != '\0')
+		return -1;
+
+	    if (cp[1] == '+' || cp[1] == ';')
+		cp += 1; /* Skip the '+|;'; the loop's cp++ covers the digit */
+	}
+
+	*gp++ = '\0';
+	xo_group_map = xo_group_map_build(grouping);
+
+    } else {
+	xo_group_map = XO_DEFAULT_GROUP_MAP;
+    }
+
+    return 0;
+}
+
+/*
  * Initialize an xo_handle_t, using both static defaults and
  * the global settings from the LIBXO_OPTIONS environment
  * variable.
@@ -683,6 +812,7 @@ xo_init_handle (xo_handle_t *xop)
 #endif /* __FreeBSD__ */
 
 	(void) setlocale(LC_CTYPE, cp);
+	(void) setlocale(LC_NUMERIC, cp);
 
 #ifdef CODESET
 	/* Now that locale is set, determine if our stdout output is UTF-8 */
@@ -690,6 +820,28 @@ xo_init_handle (xo_handle_t *xop)
 	if (codeset && xo_streq(codeset, "UTF-8"))
 	    xo_codeset_is_utf8 = TRUE;
 #endif /* CODESET */
+
+	/* Cache the grouping separator and precompute the grouping map */
+	struct lconv *lcp = localeconv();
+	if (lcp->thousands_sep && *lcp->thousands_sep) {
+	    int glen = strlen(lcp->thousands_sep);
+	    xo_group_sep = xo_realloc(xo_group_sep, glen + 1);
+	    if (xo_group_sep) {
+		memcpy(xo_group_sep, lcp->thousands_sep, glen + 1);
+		xo_group_sep_len = glen;
+	    }
+	} else {
+	    if (xo_group_sep) {
+		xo_free(xo_group_sep);
+		xo_group_sep = NULL;
+		xo_group_sep_len = 0;
+	    }
+	}
+
+	if (lcp->grouping)
+	    xo_group_map = xo_group_map_build(lcp->grouping);
+	else
+	    xo_group_map = XO_DEFAULT_GROUP_MAP;
     }
 
     /*
@@ -846,6 +998,120 @@ xo_check_for_room (xo_handle_t *xop, xo_buffer_t *xbp, int bytes)
 
     xo_failure(xop, "buffer cannot be expanded for %d bytes", bytes);
     return -1;
+}
+
+/*
+ * Peel the locale's grouping map (see xo_group_map_build()) for a
+ * specific number of digits, producing a call-scoped,
+ * low-nibble-first packed count of segment lengths.
+ * Returns the number of segments.
+ */
+static int
+xo_group_segments (uint64_t locale_map, int ndigits, uint64_t *segs_out)
+{
+    uint64_t map = locale_map;		/* local copy: peeling is destructive */
+    uint64_t segs = 0;
+    int nsegs = 0;
+
+    while (ndigits > 0 && nsegs < 16) {
+	int mine = map & 0xF;
+	map >>= 4;
+
+	if (mine == 0 || mine > ndigits)
+	    mine = ndigits;		/* map exhausted / CHAR_MAX reached:
+					   everything left is one final
+					   segment */
+	if (mine > 15)
+	    mine = 15;			/* must still fit in a nibble */
+
+	segs |= ((uint64_t) mine) << (4 * nsegs);
+	nsegs++;
+	ndigits -= mine;
+    }
+
+    *segs_out = segs;
+    return nsegs;
+}
+
+/*
+ * Insert the locale's thousands separator into a just-rendered decimal
+ * integer field, in place, within "xbp".  The field is "rc" bytes long,
+ * starting at "xbp->xb_bufp + start_off", which must equal xbp->xb_curp
+ * (i.e. the field has been rendered but not yet consumed).  Returns the
+ * field's new length, which is "rc" unchanged if no separators apply.
+ *
+ * Callers are responsible for checking XOF_GROUP and that the field's
+ * conversion character is 'd'/'i'/'u' before calling this function; it
+ * does no gating of its own, just the mechanical scan-and-insert.
+ */
+xo_off_t
+xo_grouping_fixup (xo_handle_t *xop, xo_buffer_t *xbp,
+		    xo_off_t start_off, xo_off_t rc)
+{
+    char *field_start = xbp->xb_bufp + start_off;
+    char *end = field_start + rc;
+    char *p = field_start;
+
+    while (p < end && *p == ' ')	/* right-justify width padding */
+	p++;
+    if (p < end && *p == '-')		/* sign */
+	p++;
+
+    char *digit_start = p;
+    while (p < end && isdigit((unsigned char) *p))
+	p++;
+    char *digit_end = p;
+
+    int ndigits = digit_end - digit_start;
+    if (ndigits < 2)
+	return rc;
+
+    if (*digit_start == '0')	/* leading zero: zero-padded, not grouped */
+	return rc;
+
+    uint64_t segs;
+    int nsegs = xo_group_segments(xo_group_map, ndigits, &segs);
+
+    int seplen = xo_group_sep_len ?: 1;
+    xo_off_t extra = (xo_off_t) (nsegs - 1) * seplen;
+    if (extra <= 0)
+	return rc;
+
+    /* Capture offsets now: xo_check_for_room() below may call realloc()
+     * and move xbp->xb_bufp, invalidating field_start/end/digit_end. */
+    xo_off_t tail_len = end - digit_end;
+
+    if (xo_check_for_room(xop, xbp, rc + extra))
+	return rc;
+
+    field_start = xbp->xb_bufp + start_off;
+    char *old_end = field_start + rc;
+    char *new_end = field_start + rc + extra;
+
+    /* 1. shift any trailing content (left-justify padding) right */
+    if (tail_len > 0)
+	memmove(old_end + extra - tail_len, old_end - tail_len, tail_len);
+
+    /* 2. peel segments off the right, moving each into place and writing
+     *    one separator to its left -- except before the leftmost segment */
+    char *wp = new_end - tail_len;
+    char *rp = old_end - tail_len;
+
+    for (int i = 0; i < nsegs; i++) {
+	int seglen = segs & 0xF;
+	segs >>= 4;
+
+	memmove(wp - seglen, rp - seglen, seglen);
+	wp -= seglen;
+	rp -= seglen;
+
+	if (i + 1 < nsegs) {		/* not the leftmost segment */
+	    wp -= seplen;
+	    memcpy(wp, xo_group_sep ?: ",", seplen);
+	}
+    }
+
+    return rc + extra;
 }
 
 static void
@@ -1948,6 +2214,9 @@ xo_parse_for_handle (xo_handle_t *xop, xo_parse_t *xpp)
     xpp->xp_error_data = xop;
     xpp->xp_warn = xo_parse_fail_cb;
     xpp->xp_warn_data = xop;
+
+    if (XOF_ISSET(xop, XOF_LINT))
+	xpp->xp_flags |= XPF_STRICT;
 }
 
 /**
@@ -2133,9 +2402,11 @@ static xo_flag_mapping_t xo_xof_names[] = {
     { XOF_FILTER_WARN, "filter-warn" },
     { XOF_FLUSH, "flush" },
     { XOF_FLUSH_LINE, "flush-line" },
+    { XOF_GROUP, "group" },
     { XOF_IGNORE_CLOSE, "ignore-close" },
     { XOF_INFO, "info" },
     { XOF_KEYS, "keys" },
+    { XOF_LINT, "lint" },
     { XOF_LOG_GETTEXT, "log-gettext" },
     { XOF_LOG_SYSLOG, "log-syslog" },
     { XOF_NO_HUMANIZE, "no-humanize" },
@@ -2156,13 +2427,14 @@ static xo_flag_mapping_t xo_xof_names[] = {
 };
 
 static xo_flag_mapping_t xo_option_names[] = {
-    { XO_OPT_NO_COLOR, "no-color" },
-    { XO_OPT_INDENT, "indent" },
     { XO_OPT_ENCODER, "encoder" },
+    { XO_OPT_FILTER, "filter" },
+    { XO_OPT_GROUPING, "grouping" },
+    { XO_OPT_INDENT, "indent" },
     { XO_OPT_MAP, "map" },
     { XO_OPT_MAP_FILE, "map-file" },
     { XO_OPT_NO_CACHE, "no-cache" },
-    { XO_OPT_FILTER, "filter" },
+    { XO_OPT_NO_COLOR, "no-color" },
     { XO_EXTERR_BRIEF, "exterr" },
     { XO_EXTERR_BRIEF, "exterr-brief" },
     { XO_EXTERR_VERBOSE, "exterr-verbose" },
@@ -2348,6 +2620,10 @@ xo_set_options_single (xo_handle_t *xop, const char *input, int *results)
 
 	case 'g':
 	    XOF_SET(xop, XOF_LOG_GETTEXT);
+	    break;
+
+	case 'G':
+	    XOF_SET(xop, XOF_GROUP);
 	    break;
 
 	case 'H':
@@ -2544,6 +2820,17 @@ xo_set_options_words (xo_handle_t *xop, int argc, char **argv)
 		rc = -1;
 	    } else
 		rc = xo_add_filter(xop, vp); /* Reports its own errors */
+	    continue;
+
+	case XO_OPT_GROUPING: /* Give specific locale.grouping info */
+	    if (vp == NULL) {
+		xo_warnx("missing value for grouping option");
+		rc = -1;
+	    } else {
+		rc = xo_set_grouping(xop, vp);
+		if (rc)
+		    xo_warnx("error parsing grouping value: '%s'", vp);
+	    }
 	    continue;
 
 	case XO_EXTERR_BRIEF: /* Display brief extended error info */
@@ -3851,6 +4138,15 @@ xo_emit_field_value (xo_handle_t *xop, xo_buffer_t *xbp,
 	    xo_format_int_fixup(xop, newfmt);
 
 	    columns = rc = xo_vsnprintf(xop, xbp, newfmt, xop->xo_vap);
+	}
+
+	if (rc > 0
+	        && (XOF_ISSET(xop, XOF_GROUP) || (flags & XFF_INT_GROUP))
+	        && (style == XO_STYLE_TEXT || style == XO_STYLE_HTML)
+	        && (xfp->xf_fc == 'd' || xfp->xf_fc == 'i'
+		    || xfp->xf_fc == 'u')) {
+	    xo_off_t start_off = xbp->xb_curp - xbp->xb_bufp;
+	    columns = rc = xo_grouping_fixup(xop, xbp, start_off, rc);
 	}
 
 	if (rc > 0) {
