@@ -24,6 +24,7 @@ particular output styles:
   \    hn-space        Humanize: Place space between numeric and unit
   \    hn-decimal      Humanize: Add a decimal digit, if number < 10
   \    hn-1000         Humanize: Use 1000 as divisor instead of 1024
+   i   int-group       Insert locale thousands separators into this field
    k   key             Field is a key, suitable for XPath predicates
    l   leaf-list       Field is a leaf-list
    n   no-quotes       Do not quote the field when using JSON style
@@ -258,6 +259,30 @@ In the HTML style, the original numeric value is rendered in the
 
     <div class="data" data-tag="errors"
          data-number="100663296">96M</div>
+
+.. index:: Field Modifiers; Int-Group
+.. _int-group-modifier:
+
+The Int-Group Modifier ({i:})
+++++++++++++++++++++++++++++
+
+.. index:: Field Modifiers; Int-Group
+
+The int-group modifier inserts a thousands separator into a decimal
+integer field (``%d``, ``%i``, ``%u``, with any length modifier), (see
+:ref:`integer-grouping`) to be set.  It is useful when only a specific
+field, rather than an entire program's output, should be grouped::
+
+    EXAMPLE:
+        xo_emit("{i:count/%u}\n", 1234567);
+    TEXT:
+        1,234,567
+
+Like the "`group`" option, int-group only affects the TEXT and HTML
+output styles; XML, JSON, syslog structured-data, and encoder styles
+always emit the plain, ungrouped digits, since a grouping separator
+would make the value a syntactically invalid (or non-numeric) encoded
+value.
 
 .. index:: Field Modifiers; Key
 .. _key-modifier:
