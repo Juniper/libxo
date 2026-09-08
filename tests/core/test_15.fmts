@@ -3,3 +3,7 @@
 # as a not-broken-by-default check; these variants turn it on.
 Gtext=group,text
 Gjson=group,json,pretty
+Gt2=group,grouping=+4
+Gt3=group,grouping=+3+2
+Gt3=group,grouping=:+2+2+2
+Gt4=group,grouping=@3+3
