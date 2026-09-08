@@ -117,10 +117,10 @@ main (int argc, char **argv)
 	    "[{:min/%15s}] [{:max/%15s}]\n",
 	    "label", "format", 35.7, "format", "format");
 
-    xo_emit("other: {a:}\n", "thing", "one"); /* field before top-level tag */
-    xo_emit("other: {a:%s}\n", "thing", "two"); /* invalid content */
-    xo_emit("other: {a:%s/%s}\n", "thing", "three");  /* same */
-    xo_emit("other: {a:xxx%s/%s}\n", "thing", "four"); /* same */
+    xo_emit("other: {a:}\n", "thing1", "one"); /* field before top-level tag */
+    xo_emit("other: {a:%s}\n", "thing2", "two"); /* invalid content */
+    xo_emit("other: {a:%s/%s}\n", "thing3", "three");  /* same */
+    xo_emit("other: {a:xxx%s/%s}\n", "thing4", "four"); /* same */
 
     xo_emit("Blocks: {:block/%u}\n", 56);
 
