@@ -1,0 +1,5 @@
+# Extra format specs for test_15: exercise "--libxo group" itself.
+# The base TEST_FORMATS (T, JP, XP, ...) run this test with grouping off,
+# as a not-broken-by-default check; these variants turn it on.
+Gtext=group,text
+Gjson=group,json,pretty
