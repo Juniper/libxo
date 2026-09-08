@@ -532,6 +532,9 @@ main (int argc, char **argv)
 
     xo_emit("works: [{:works/%JNs}], fail: [{:fails/%JZs}]n", NULL, NULL);
 
+    xo_emit("i:leading zero: {i:fail/%05d}\n", 50);
+    xo_emit("i:bad type: {i:fail2/%s}\n", "bad");
+
     fclose(dev_null);
 
     return 0;
