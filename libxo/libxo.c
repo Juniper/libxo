@@ -776,6 +776,18 @@ xo_set_grouping (xo_handle_t *xop UNUSED, const char *value)
 }
 
 /*
+ * Column/anchor tracking reflects the visible output stream
+ * (xo_data); a scratch buffer (e.g. the XPath predicate buffer in
+ * xo_build_predicate, or the color buffer in xo_format_colors) never
+ * touches xo_data, so it must not pollute these counts.
+ */
+static int
+xo_should_update_columns (xo_handle_t *xop, xo_buffer_t *xbp)
+{
+    return (xbp == &xop->xo_data);
+}
+
+/*
  * Initialize an xo_handle_t, using both static defaults and
  * the global settings from the LIBXO_OPTIONS environment
  * variable.
@@ -3538,10 +3550,13 @@ xo_format_string (xo_handle_t *xop, xo_fspec_t *xfp, xo_buffer_t *xbp,
 	cols += delta;
     }
 
-    if (XOF_ISSET(xop, XOF_COLUMNS))
-	xop->xo_columns += cols;
-    if (XOIF_ISSET(xop, XOIF_ANCHOR))
-	xop->xo_anchor_columns += cols;
+    /* skip if scratch buffer (predicate, color) */
+    if (xo_should_update_columns(xop, xbp)) {
+	if (XOF_ISSET(xop, XOF_COLUMNS))
+	    xop->xo_columns += cols;
+	if (XOIF_ISSET(xop, XOIF_ANCHOR))
+	    xop->xo_anchor_columns += cols;
+    }
 
     return rc;
 
@@ -3846,7 +3861,8 @@ xo_flush_literal (xo_handle_t *xop, xo_buffer_t *xbp, xo_xff_flags_t flags,
     ssize_t cols = xo_format_string_direct(xop, xbp, flags | XFF_UNESCAPE,
 					   NULL, xp, len, -1,
 					   need_enc, XF_ENC_UTF8);
-    if (cols > 0) {
+    /* skip if scratch buffer (predicate, color) */
+    if (cols > 0 && xbp == &xop->xo_data) {
 	if (XOF_ISSET(xop, XOF_COLUMNS))
 	    xop->xo_columns += cols;
 	if (XOIF_ISSET(xop, XOIF_ANCHOR))
@@ -4193,10 +4209,13 @@ xo_emit_field_value (xo_handle_t *xop, xo_buffer_t *xbp,
 	     * string conversions and updates xo_anchor_columns
 	     * accordingly.
 	     */
-	    if (XOF_ISSET(xop, XOF_COLUMNS))
-		xop->xo_columns += columns;
-	    if (XOIF_ISSET(xop, XOIF_ANCHOR))
-		xop->xo_anchor_columns += columns;
+	    /* skip if scratch buffer (predicate, color) */
+	    if (xo_should_update_columns(xop, xbp)) {
+		if (XOF_ISSET(xop, XOF_COLUMNS))
+		    xop->xo_columns += columns;
+		if (XOIF_ISSET(xop, XOIF_ANCHOR))
+		    xop->xo_anchor_columns += columns;
+	    }
 	}
     }
 
@@ -4459,10 +4478,13 @@ xo_do_format_field (xo_handle_t *xop, const xo_field_info_t *xfip,
 	ssize_t new_cols = xo_format_gettext(xop, flags, start_offset,
 					 old_cols, real_need_enc);
 
-	if (XOF_ISSET(xop, XOF_COLUMNS))
-	    xop->xo_columns += new_cols - old_cols;
-	if (XOIF_ISSET(xop, XOIF_ANCHOR))
-	    xop->xo_anchor_columns += new_cols - old_cols;
+	/* skip if scratch buffer (predicate, color) */
+	if (xo_should_update_columns(xop, xbp)) {
+	    if (XOF_ISSET(xop, XOF_COLUMNS))
+		xop->xo_columns += new_cols - old_cols;
+	    if (XOIF_ISSET(xop, XOIF_ANCHOR))
+		xop->xo_anchor_columns += new_cols - old_cols;
+	}
     }
 
     return 0;
