@@ -30,6 +30,8 @@
 #include <string.h>
 #include <stdarg.h>
 
+#include "xo_buf.h"
+
 #ifndef UNUSED
 #define UNUSED __attribute__ ((__unused__))
 #endif /* UNUSED */
@@ -38,6 +40,50 @@ static int opt_warn;		/* Enable warnings */
 
 static char **save_argv;
 static char **checkpoint_argv;
+
+/*
+ * Scratch buffer used to render decimal integer fields when grouping is
+ * enabled, since xo_grouping_fixup() needs a real xo_realloc-managed
+ * xo_buffer_t (with a valid xb_bufp) to grow into, which the "buf"/
+ * "bufsiz" pair handed to formatter() by xo_vsnprintf() is not -- it
+ * points into the middle of xop's own output buffer.
+ */
+static xo_buffer_t grouping_buf;
+
+/*
+ * Render a decimal integer field via "_snprintf_expr" (an expression
+ * that must call snprintf() with a destination of "grouping_curp" and a
+ * size of "grouping_left" -- it may be evaluated more than once, if more
+ * room is needed) into our private, growable scratch buffer, apply
+ * locale grouping, and copy the result (truncated to fit, per the usual
+ * snprintf contract) into "_buf"/"_bufsiz".  Sets "_rc" to the field's
+ * true length, same as snprintf()/vsnprintf() would.
+ */
+#define XO_CLI_GROUPED_SNPRINTF(_xop, _buf, _bufsiz, _rc, _snprintf_expr) \
+    do { \
+	if (grouping_buf.xb_bufp == NULL) \
+	    xo_buf_init(&grouping_buf); \
+	xo_buf_reset(&grouping_buf); \
+	\
+	for (;;) { \
+	    xo_ssize_t grouping_left UNUSED = xo_buf_left(&grouping_buf); \
+	    char *grouping_curp UNUSED = grouping_buf.xb_curp; \
+	    (_rc) = (_snprintf_expr); \
+	    if ((_rc) < grouping_left) \
+		break; \
+	    if (!xo_buf_has_room(&grouping_buf, (_rc))) \
+		break; \
+	} \
+	\
+	(_rc) = xo_grouping_fixup((_xop), &grouping_buf, 0, (_rc)); \
+	\
+	if ((_rc) > 0 && (_bufsiz) > 0) { \
+	    xo_ssize_t _copy = ((_rc) < (_bufsiz)) ? (_rc) : (_bufsiz) - 1; \
+	    if (_copy > 0) \
+		memcpy((_buf), grouping_buf.xb_bufp, _copy); \
+	    (_buf)[_copy] = '\0'; \
+	} \
+    } while (0)
 
 static inline char *
 next_arg (void)
@@ -161,9 +207,21 @@ formatter (xo_handle_t *xop, char *buf, xo_ssize_t bufsiz,
     if (fc == 'D' || fc == 'O' || fc == 'U')
 	lflag = 1;
 
+    int style = xo_get_style(xop);
+    int grouping = (xo_get_flags(xop) & XOF_GROUP)
+	&& (style == XO_STYLE_TEXT || style == XO_STYLE_HTML)
+	&& strchr("diDuU", fc) != NULL;
+
     if (strchr("diD", fc) != NULL) {
 	long long value = strtoll(next_arg(), NULL, 0);
-	if (star1 && star2)
+	if (grouping)
+	    XO_CLI_GROUPED_SNPRINTF(xop, buf, bufsiz, rc,
+		star1 && star2
+		    ? snprintf(grouping_curp, grouping_left, fmt, w1, w2, value)
+		    : star1
+		    ? snprintf(grouping_curp, grouping_left, fmt, w1, value)
+		    : snprintf(grouping_curp, grouping_left, fmt, value));
+	else if (star1 && star2)
 	    rc = snprintf(buf, bufsiz, fmt, w1, w2, value);
 	else if (star1)
 	    rc = snprintf(buf, bufsiz, fmt, w1, value);
@@ -172,7 +230,14 @@ formatter (xo_handle_t *xop, char *buf, xo_ssize_t bufsiz,
 
     } else if (strchr("ouxXOUp", fc) != NULL) {
 	unsigned long long value = strtoull(next_arg(), NULL, 0);
-	if (star1 && star2)
+	if (grouping)
+	    XO_CLI_GROUPED_SNPRINTF(xop, buf, bufsiz, rc,
+		star1 && star2
+		    ? snprintf(grouping_curp, grouping_left, fmt, w1, w2, value)
+		    : star1
+		    ? snprintf(grouping_curp, grouping_left, fmt, w1, value)
+		    : snprintf(grouping_curp, grouping_left, fmt, value));
+	else if (star1 && star2)
 	    rc = snprintf(buf, bufsiz, fmt, w1, w2, value);
 	else if (star1)
 	    rc = snprintf(buf, bufsiz, fmt, w1, value);
