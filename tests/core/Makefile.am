@@ -47,7 +47,8 @@ test_08.c \
 test_09.c \
 ${TEST_CASES_COLOR} \
 test_13.c \
-test_14.c
+test_14.c \
+test_15.c
 
 test_01_test_SOURCES = test_01.c
 test_02_test_SOURCES = test_02.c
@@ -60,6 +61,7 @@ test_08_test_SOURCES = test_08.c
 test_09_test_SOURCES = test_09.c
 test_13_test_SOURCES = test_13.c
 test_14_test_SOURCES = test_14.c
+test_15_test_SOURCES = test_15.c
 
 base_tests = ${TEST_CASES:.c=.test}
 
@@ -85,6 +87,7 @@ EXTRA_DIST = \
     ${TEST_CASES} \
     test_01.fmts \
     test_12.fmts \
+    test_15.fmts \
     ${addprefix saved/, ${TEST_CASES:.c=.E.err}} \
     ${addprefix saved/, ${TEST_CASES:.c=.E.out}} \
     ${addprefix saved/, ${TEST_CASES:.c=.H.err}} \
