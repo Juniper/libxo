@@ -18,6 +18,7 @@
 #include "xo.h"
 #include "xo_encoder.h"
 #include "xo_utf8.h"
+#include "xo_wcwidth.h"
 
 int
 main (int argc, char **argv)
@@ -75,9 +76,10 @@ main (int argc, char **argv)
 	xo_codepoint_t wc, lc;
 	for (wc = 0x0041; wc <= 0xff3a; wc += 1) {
 	    lc = xo_utf8_wtolower(wc);
+            int wid = xo_wcwidth(lc);
 	    if (lc != wc)
-		printf("%04X %04X: %#06x - %#06x = %#06x ('%lc'->'%lc')\n",
-		       lc, wc, lc, wc, lc - wc, (wint_t) wc, (wint_t) lc);
+		printf("%04X %04X: %#06x - %#06x = %#06x, w=%d ('%lc'->'%lc')\n",
+		       lc, wc, lc, wc, lc - wc, wid, (wint_t) wc, (wint_t) lc);
 	}
 	xo_finish();
 	return 0;
@@ -87,9 +89,10 @@ main (int argc, char **argv)
 	xo_codepoint_t wc, uc;
 	for (wc = 0x0061; wc <= 0xff5a; wc += 1) {
 	    uc = xo_utf8_wtoupper(wc);
+            int wid = xo_wcwidth(uc);
 	    if (uc != wc)
-		printf("%04X %04X: %#06x - %#06x = %#06x ('%lc'->'%lc')\n",
-		       wc, uc, wc, uc, wc - uc, (wint_t) wc, (wint_t) uc);
+		printf("%04X %04X: %#06x - %#06x = %#06x, w=%d ('%lc'->'%lc')\n",
+		       wc, uc, wc, uc, wc - uc, wid, (wint_t) wc, (wint_t) uc);
 	}
 	xo_finish();
 	return 0;
