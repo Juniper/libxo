@@ -758,11 +758,11 @@ xo_set_grouping (xo_handle_t *xop UNUSED, const char *value)
 		return -1;
 
 	    *gp++ = (char) (*cp - '0');
-	    if (cp[1] != '+' && cp[1] != ';' && cp[1] != '\0')
+	    if (cp[1] != '+' && cp[1] != ';' && cp[1] != ':' && cp[1] != '\0')
 		return -1;
 
-	    if (cp[1] == '+' || cp[1] == ';')
-		cp += 1; /* Skip the '+|;'; the loop's cp++ covers the digit */
+	    if (cp[1] == '+' || cp[1] == ';' || cp[1] == ':')
+		cp += 1; /* Skip the sep; the loop's cp++ covers the digit */
 	}
 
 	*gp++ = '\0';
