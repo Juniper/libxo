@@ -212,4 +212,10 @@
 ../../../tests/llvm-plugins/validate_02.c:533:13: warning: libxo: unknown 'J' flag: '{%JZs}'
   533 |     xo_emit("works: [{:works/%JNs}], fail: [{:fails/%JZs}]n", NULL, NULL);
       |             ^
-64 warnings generated.
+../../../tests/llvm-plugins/validate_02.c:535:13: warning: libxo: 'int-group|i' set on field with leading zeroes: '{i:fail/%05d}'
+  535 |     xo_emit("i:leading zero: {i:fail/%05d}\n", 50);
+      |             ^
+../../../tests/llvm-plugins/validate_02.c:536:13: warning: libxo: 'int-group|i' set on field with invalid type (s; must be d|i|u): '{i:fail2/%s}'
+  536 |     xo_emit("i:bad type: {i:fail2/%s}\n", "bad");
+      |             ^
+66 warnings generated.
