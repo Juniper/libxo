@@ -210,3 +210,71 @@
   <div class="data" data-tag="department" data-ident="8">     110</div>
   <div class="data" data-tag="percent-time" data-ident="8">      20</div>
 </div>
+<div class="line">
+  <div class="title">First Name               </div>
+  <div class="title">Last Name     </div>
+  <div class="title">Department  </div>
+  <div class="title">Time (%)</div>
+</div>
+<div class="line">
+  <div class="text">X</div>
+  <div class="data" data-tag="first-name" data-ident="10">Jim</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="nic-name" data-ident="10">"რეგტ"</div>
+  <div class="text">)</div>
+  <div class="padding">             </div>
+  <div class="text">X</div>
+</div>
+<div class="line">
+  <div class="text">X</div>
+  <div class="data" data-tag="first-name" data-ident="11">Terry</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="nic-name" data-ident="11">"&lt;one"</div>
+  <div class="text">)</div>
+  <div class="padding">           </div>
+  <div class="text">X</div>
+</div>
+<div class="line">
+  <div class="text">X</div>
+  <div class="data" data-tag="first-name" data-ident="12">Leslie</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="nic-name" data-ident="12">"Les"</div>
+  <div class="text">)</div>
+  <div class="padding">           </div>
+  <div class="text">X</div>
+</div>
+<div class="line">
+  <div class="text">X</div>
+  <div class="data" data-tag="first-name" data-ident="13">Ashley</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="nic-name" data-ident="13">"Ash"</div>
+  <div class="text">)</div>
+  <div class="padding">           </div>
+  <div class="text">X</div>
+</div>
+<div class="line">
+  <div class="text">X</div>
+  <div class="data" data-tag="first-name" data-ident="14">0123456789</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="nic-name" data-ident="14">"0123456789"</div>
+  <div class="text">)</div>
+  <div class="text">X</div>
+</div>
+<div class="line">
+  <div class="text">X</div>
+  <div class="data" data-tag="first-name" data-ident="15">ახლა</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="nic-name" data-ident="15">"გაიარო"</div>
+  <div class="text">)</div>
+  <div class="padding">          </div>
+  <div class="text">X</div>
+</div>
+<div class="line">
+  <div class="text">X</div>
+  <div class="data" data-tag="first-name" data-ident="16">෴ණ්ණ෴෴ණ්ණ෴</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="nic-name" data-ident="16">"Mick"</div>
+  <div class="text">)</div>
+  <div class="padding">        </div>
+  <div class="text">X</div>
+</div>
