@@ -312,3 +312,11 @@ test_15.pass.Gtext.out
 test_15.pass.Gtext.err
 test_15.pass.Gjson.out
 test_15.pass.Gjson.err
+test_15.pass.Gt2.out
+test_15.pass.Gt2.err
+test_15.pass.Gt3.out
+test_15.pass.Gt3.err
+test_15.pass.Gt3.out
+test_15.pass.Gt3.err
+test_15.pass.Gt4.out
+test_15.pass.Gt4.err
