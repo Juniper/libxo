@@ -214,6 +214,7 @@ static xo_flag_mapping_t xo_modifier_names[] = {
     { XFF_HN_SPACE, "hn-space" },
     { XFF_HN_DECIMAL, "hn-decimal" },
     { XFF_HN_1000, "hn-1000" },
+    { XFF_INT_GROUP, "int-group" },
     { XFF_KEY, "key" },
     { XFF_LEAF_LIST, "leaf-list" },
     { XFF_LEAF_LIST, "list" },
@@ -626,6 +627,7 @@ xo_parse_roles (xo_parse_t *xpp, const char *fmt,
 	case 'f': flags |= XFF_FIRST_CAP;   break;
 	case 'g': flags |= XFF_GT_FIELD;    break;
 	case 'h': flags |= XFF_HUMANIZE;    break;
+	case 'i': flags |= XFF_INT_GROUP;   break;
 	case 'k': flags |= XFF_KEY;         break;
 	case 'l': flags |= XFF_LEAF_LIST;   break;
 	case 'n': flags |= XFF_NO_QUOTE;    break;
@@ -1040,6 +1042,29 @@ xo_parse_fields (xo_parse_t *xpp, const char *fmt, size_t fmt_len)
 				     "%d characters long: '%s'",
 				     XO_LINT_MIN_NAME,
 				     xo_printable2(str, slen, TRUE));
+		}
+	    }
+
+	    if (xfip->xfi_flags & XFF_INT_GROUP) {
+		if (xfip->xfi_num_fspecs != 1) {
+		    xo_parse_error(xpp,
+				   "'int-group|i' set on field with invalid "
+				   "format: '%s'",
+				   xo_printable2(str, slen, 1));
+		} else {
+		    xo_fspec_t *xfp = &xfip->xfi_fspecs[0]; /* Only one */
+		    int fc = xfp->xf_fc;
+
+		    if (fc != 'd' && fc != 'i' && fc != 'u')
+			xo_parse_error(xpp,
+				   "'int-group|i' set on field with invalid "
+				   "type (%c; must be d|i|u): '%s'", fc,
+				   xo_printable2(str, slen, 1));
+		    else if (xfp->xf_leading_zero)
+			xo_parse_error(xpp,
+				   "'int-group|i' set on field with "
+				   "leading zeroes: '%s'",
+				   xo_printable2(str, slen, 1));
 		}
 	    }
 	}
