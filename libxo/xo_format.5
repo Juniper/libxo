@@ -1065,6 +1065,55 @@ data, which would expand the penultimate line to:
           data\-type="number"
           data\-help="Number of items in stock">144</div>
 .Ed
+.Ss "Runtime Format Checking (\(dqlint\(dq)"
+In addition to the
+.Xr xolint 1
+static analysis tool, which checks format strings at build time,
+.Nm libxo
+can perform a subset of the same semantic checks at run time, when
+.Xr xo_emit 3
+actually parses a format string.
+Enable these checks with the
+.Dq lint
+.Fl \-libxo
+option.
+As with all
+.Nm libxo
+warnings,
+.Dq warn
+(or
+.Fl W )
+must also be given for the checks to be reported:
+.Bd -literal -offset indent
+    --libxo warn,lint
+    --libxo:W,lint
+.Ed
+.Pp
+The checks currently performed include:
+.Bl -bullet
+.It
+a value field must have a name;
+.It
+a field name may not start with a digit or contain a percent sign
+.Pq Ql % ;
+.It
+a field using the
+.Dq int\-group
+modifier
+.Pq Sq {i:}
+must be applied to a single
+.Ql %d ,
+.Ql %i ,
+or
+.Ql %u
+conversion, with no leading\-zero padding (e.g.
+.Ql %05d ) ,
+since zero\-padded fields are never grouped.
+.El
+.Pp
+.Dq lint
+affects only the parsing of format strings; it has no effect on
+rendered output.
 .Sh WHAT MAKES A GOOD FIELD NAME?
 To make useful, consistent field names, follow these guidelines:
 .Ss "Use lower case, even for TLAs"
