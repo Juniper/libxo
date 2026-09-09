@@ -80,6 +80,7 @@ added filter: 0
                     000019: type 54 (T_QUOTED), str 42 [high], contents 0, next 0, prev 3 
 main: status: zero
 main: input '{item'
+xpath_01: duplicate sibling name: 'item'
 main: status: zero
 main: input '<item'
 main: filter: rc: 7
