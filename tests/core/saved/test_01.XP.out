@@ -6,10 +6,10 @@
   <per-call>35.7</per-call>
   <min>format</min>
   <max>format</max>
-  <thing>one</thing>
-  <thing>two</thing>
-  <thing>three</thing>
-  <thing>four</thing>
+  <thing1>one</thing1>
+  <thing2>two</thing2>
+  <thing3>three</thing3>
+  <thing4>four</thing4>
   <block>56</block>
   <top-level>
     <type>ethernet</type>
