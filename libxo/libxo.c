@@ -4899,17 +4899,23 @@ xo_sibling_add (xo_stack_t *xsp, const char *name, ssize_t nlen)
 static int
 xo_sibling_check (xo_stack_t *xsp, const char *name, ssize_t nlen)
 {
-    char *cp = xsp->xs_sibnames;
+    static const char *safe_dups[]
+	= { "error", "__error", "__warning", "message", NULL };
 
-    while (cp != NULL && cp[0] != '\0') {
-	ssize_t elen = (ssize_t) strlen(cp + 1);
+    /* If the name is in our "safe" list, ignore it */
+    for (const char **sdp = safe_dups; *sdp; sdp++)
+	if (strncmp(*sdp, name, nlen) == 0)
+	    return FALSE;
+
+    ssize_t elen;
+    for (char *cp = xsp->xs_sibnames; cp && *cp; cp += elen + 2) {
+	elen = (ssize_t) strlen(cp + 1);
 	if (elen == nlen && strncmp(cp + 1, name, nlen) == 0) {
 	    if (cp[0] == '+')
 		return FALSE;
 	    cp[0] = '+';
 	    return TRUE;
 	}
-	cp += elen + 2;
     }
 
     xo_sibling_add(xsp, name, nlen);
