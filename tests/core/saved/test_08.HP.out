@@ -3,52 +3,24 @@
   <div class="title">       Count</div>
 </div>
 <div class="line">
-  <div class="data" data-tag="name" data-key="key">gum       </div>
-  <div class="data" data-tag="count">        1412</div>
+  <div class="data" data-tag="name" data-ident="2" data-key="key">gum       </div>
+  <div class="data" data-tag="count" data-ident="2">        1412</div>
 </div>
 <div class="line">
-  <div class="data" data-tag="name" data-key="key">rope      </div>
-  <div class="data" data-tag="count">          85</div>
+  <div class="data" data-tag="name" data-ident="3" data-key="key">rope      </div>
+  <div class="data" data-tag="count" data-ident="3">          85</div>
 </div>
 <div class="line">
-  <div class="data" data-tag="name" data-key="key">ladder    </div>
-  <div class="data" data-tag="count">           0</div>
+  <div class="data" data-tag="name" data-ident="4" data-key="key">ladder    </div>
+  <div class="data" data-tag="count" data-ident="4">           0</div>
 </div>
 <div class="line">
-  <div class="data" data-tag="name" data-key="key">bolt      </div>
-  <div class="data" data-tag="count">        4123</div>
+  <div class="data" data-tag="name" data-ident="5" data-key="key">bolt      </div>
+  <div class="data" data-tag="count" data-ident="5">        4123</div>
 </div>
 <div class="line">
-  <div class="data" data-tag="name" data-key="key">water     </div>
-  <div class="data" data-tag="count">          17</div>
-</div>
-<div class="line">
-</div>
-<div class="line">
-</div>
-<div class="line">
-  <div class="title">Item      </div>
-  <div class="title">       Count</div>
-</div>
-<div class="line">
-  <div class="data" data-tag="name" data-key="key">gum       </div>
-  <div class="data" data-tag="count">        1412</div>
-</div>
-<div class="line">
-  <div class="data" data-tag="name" data-key="key">rope      </div>
-  <div class="data" data-tag="count">          85</div>
-</div>
-<div class="line">
-  <div class="data" data-tag="name" data-key="key">ladder    </div>
-  <div class="data" data-tag="count">           0</div>
-</div>
-<div class="line">
-  <div class="data" data-tag="name" data-key="key">bolt      </div>
-  <div class="data" data-tag="count">        4123</div>
-</div>
-<div class="line">
-  <div class="data" data-tag="name" data-key="key">water     </div>
-  <div class="data" data-tag="count">          17</div>
+  <div class="data" data-tag="name" data-ident="6" data-key="key">water     </div>
+  <div class="data" data-tag="count" data-ident="6">          17</div>
 </div>
 <div class="line">
 </div>
@@ -59,27 +31,26 @@
   <div class="title">       Count</div>
 </div>
 <div class="line">
-  <div class="data" data-tag="name" data-key="key">gum       </div>
-  <div class="data" data-tag="count">        1412</div>
+  <div class="data" data-tag="name" data-ident="8" data-key="key">gum       </div>
+  <div class="data" data-tag="count" data-ident="8">        1412</div>
 </div>
 <div class="line">
-  <div class="data" data-tag="name" data-key="key">rope      </div>
-  <div class="data" data-tag="count">          85</div>
+  <div class="data" data-tag="name" data-ident="9" data-key="key">rope      </div>
+  <div class="data" data-tag="count" data-ident="9">          85</div>
 </div>
 <div class="line">
-  <div class="data" data-tag="name" data-key="key">ladder    </div>
-  <div class="data" data-tag="count">           0</div>
+  <div class="data" data-tag="name" data-ident="10" data-key="key">ladder    </div>
+  <div class="data" data-tag="count" data-ident="10">           0</div>
 </div>
 <div class="line">
-  <div class="data" data-tag="name" data-key="key">bolt      </div>
-  <div class="data" data-tag="count">        4123</div>
+  <div class="data" data-tag="name" data-ident="11" data-key="key">bolt      </div>
+  <div class="data" data-tag="count" data-ident="11">        4123</div>
 </div>
 <div class="line">
-  <div class="data" data-tag="name" data-key="key">water     </div>
-  <div class="data" data-tag="count">          17</div>
+  <div class="data" data-tag="name" data-ident="12" data-key="key">water     </div>
+  <div class="data" data-tag="count" data-ident="12">          17</div>
 </div>
 <div class="line">
-  <div class="data" data-tag="test">one</div>
 </div>
 <div class="line">
 </div>
@@ -88,177 +59,206 @@
   <div class="title">       Count</div>
 </div>
 <div class="line">
-  <div class="data" data-tag="name" data-key="key">gum       </div>
-  <div class="data" data-tag="count">        1412</div>
+  <div class="data" data-tag="name" data-ident="14" data-key="key">gum       </div>
+  <div class="data" data-tag="count" data-ident="14">        1412</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="name" data-ident="15" data-key="key">rope      </div>
+  <div class="data" data-tag="count" data-ident="15">          85</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="name" data-ident="16" data-key="key">ladder    </div>
+  <div class="data" data-tag="count" data-ident="16">           0</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="name" data-ident="17" data-key="key">bolt      </div>
+  <div class="data" data-tag="count" data-ident="17">        4123</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="name" data-ident="18" data-key="key">water     </div>
+  <div class="data" data-tag="count" data-ident="18">          17</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="test" data-ident="18">one</div>
+</div>
+<div class="line">
+</div>
+<div class="line">
+  <div class="title">Item      </div>
+  <div class="title">       Count</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="name" data-ident="20" data-key="key">gum       </div>
+  <div class="data" data-tag="count" data-ident="20">        1412</div>
 </div>
 <div class="line">
   <div class="label">Name</div>
   <div class="decoration">:</div>
   <div class="padding"> </div>
-  <div class="data" data-tag="name">0</div>
+  <div class="data" data-tag="name" data-ident="22">0</div>
   <div class="text"> + 1 = </div>
-  <div class="data" data-tag="next">1</div>
+  <div class="data" data-tag="next" data-ident="22">1</div>
 </div>
 <div class="line">
   <div class="label">Name</div>
   <div class="decoration">:</div>
   <div class="padding"> </div>
-  <div class="data" data-tag="name">1</div>
+  <div class="data" data-tag="name" data-ident="23">1</div>
   <div class="text"> + 1 = </div>
-  <div class="data" data-tag="next">2</div>
+  <div class="data" data-tag="next" data-ident="23">2</div>
 </div>
 <div class="line">
   <div class="label">Name</div>
   <div class="decoration">:</div>
   <div class="padding"> </div>
-  <div class="data" data-tag="name">2</div>
+  <div class="data" data-tag="name" data-ident="24">2</div>
   <div class="text"> + 1 = </div>
-  <div class="data" data-tag="next">3</div>
+  <div class="data" data-tag="next" data-ident="24">3</div>
 </div>
 <div class="line">
   <div class="label">Last</div>
   <div class="decoration">:</div>
   <div class="padding"> </div>
-  <div class="data" data-tag="last">3</div>
+  <div class="data" data-tag="last" data-ident="20">3</div>
 </div>
 <div class="line">
-  <div class="data" data-tag="name" data-key="key">rope      </div>
-  <div class="data" data-tag="count">          85</div>
-</div>
-<div class="line">
-  <div class="label">Name</div>
-  <div class="decoration">:</div>
-  <div class="padding"> </div>
-  <div class="data" data-tag="name">0</div>
-  <div class="text"> + 1 = </div>
-  <div class="data" data-tag="next">1</div>
+  <div class="data" data-tag="name" data-ident="25" data-key="key">rope      </div>
+  <div class="data" data-tag="count" data-ident="25">          85</div>
 </div>
 <div class="line">
   <div class="label">Name</div>
   <div class="decoration">:</div>
   <div class="padding"> </div>
-  <div class="data" data-tag="name">1</div>
+  <div class="data" data-tag="name" data-ident="27">0</div>
   <div class="text"> + 1 = </div>
-  <div class="data" data-tag="next">2</div>
+  <div class="data" data-tag="next" data-ident="27">1</div>
 </div>
 <div class="line">
   <div class="label">Name</div>
   <div class="decoration">:</div>
   <div class="padding"> </div>
-  <div class="data" data-tag="name">2</div>
+  <div class="data" data-tag="name" data-ident="28">1</div>
   <div class="text"> + 1 = </div>
-  <div class="data" data-tag="next">3</div>
+  <div class="data" data-tag="next" data-ident="28">2</div>
+</div>
+<div class="line">
+  <div class="label">Name</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="name" data-ident="29">2</div>
+  <div class="text"> + 1 = </div>
+  <div class="data" data-tag="next" data-ident="29">3</div>
 </div>
 <div class="line">
   <div class="label">Last</div>
   <div class="decoration">:</div>
   <div class="padding"> </div>
-  <div class="data" data-tag="last">3</div>
+  <div class="data" data-tag="last" data-ident="25">3</div>
 </div>
 <div class="line">
-  <div class="data" data-tag="name" data-key="key">ladder    </div>
-  <div class="data" data-tag="count">           0</div>
-</div>
-<div class="line">
-  <div class="label">Name</div>
-  <div class="decoration">:</div>
-  <div class="padding"> </div>
-  <div class="data" data-tag="name">0</div>
-  <div class="text"> + 1 = </div>
-  <div class="data" data-tag="next">1</div>
+  <div class="data" data-tag="name" data-ident="30" data-key="key">ladder    </div>
+  <div class="data" data-tag="count" data-ident="30">           0</div>
 </div>
 <div class="line">
   <div class="label">Name</div>
   <div class="decoration">:</div>
   <div class="padding"> </div>
-  <div class="data" data-tag="name">1</div>
+  <div class="data" data-tag="name" data-ident="32">0</div>
   <div class="text"> + 1 = </div>
-  <div class="data" data-tag="next">2</div>
+  <div class="data" data-tag="next" data-ident="32">1</div>
 </div>
 <div class="line">
   <div class="label">Name</div>
   <div class="decoration">:</div>
   <div class="padding"> </div>
-  <div class="data" data-tag="name">2</div>
+  <div class="data" data-tag="name" data-ident="33">1</div>
   <div class="text"> + 1 = </div>
-  <div class="data" data-tag="next">3</div>
+  <div class="data" data-tag="next" data-ident="33">2</div>
+</div>
+<div class="line">
+  <div class="label">Name</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="name" data-ident="34">2</div>
+  <div class="text"> + 1 = </div>
+  <div class="data" data-tag="next" data-ident="34">3</div>
 </div>
 <div class="line">
   <div class="label">Last</div>
   <div class="decoration">:</div>
   <div class="padding"> </div>
-  <div class="data" data-tag="last">3</div>
+  <div class="data" data-tag="last" data-ident="30">3</div>
 </div>
 <div class="line">
-  <div class="data" data-tag="name" data-key="key">bolt      </div>
-  <div class="data" data-tag="count">        4123</div>
-</div>
-<div class="line">
-  <div class="label">Name</div>
-  <div class="decoration">:</div>
-  <div class="padding"> </div>
-  <div class="data" data-tag="name">0</div>
-  <div class="text"> + 1 = </div>
-  <div class="data" data-tag="next">1</div>
+  <div class="data" data-tag="name" data-ident="35" data-key="key">bolt      </div>
+  <div class="data" data-tag="count" data-ident="35">        4123</div>
 </div>
 <div class="line">
   <div class="label">Name</div>
   <div class="decoration">:</div>
   <div class="padding"> </div>
-  <div class="data" data-tag="name">1</div>
+  <div class="data" data-tag="name" data-ident="37">0</div>
   <div class="text"> + 1 = </div>
-  <div class="data" data-tag="next">2</div>
+  <div class="data" data-tag="next" data-ident="37">1</div>
 </div>
 <div class="line">
   <div class="label">Name</div>
   <div class="decoration">:</div>
   <div class="padding"> </div>
-  <div class="data" data-tag="name">2</div>
+  <div class="data" data-tag="name" data-ident="38">1</div>
   <div class="text"> + 1 = </div>
-  <div class="data" data-tag="next">3</div>
+  <div class="data" data-tag="next" data-ident="38">2</div>
+</div>
+<div class="line">
+  <div class="label">Name</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="name" data-ident="39">2</div>
+  <div class="text"> + 1 = </div>
+  <div class="data" data-tag="next" data-ident="39">3</div>
 </div>
 <div class="line">
   <div class="label">Last</div>
   <div class="decoration">:</div>
   <div class="padding"> </div>
-  <div class="data" data-tag="last">3</div>
+  <div class="data" data-tag="last" data-ident="35">3</div>
 </div>
 <div class="line">
-  <div class="data" data-tag="name" data-key="key">water     </div>
-  <div class="data" data-tag="count">          17</div>
-</div>
-<div class="line">
-  <div class="label">Name</div>
-  <div class="decoration">:</div>
-  <div class="padding"> </div>
-  <div class="data" data-tag="name">0</div>
-  <div class="text"> + 1 = </div>
-  <div class="data" data-tag="next">1</div>
+  <div class="data" data-tag="name" data-ident="40" data-key="key">water     </div>
+  <div class="data" data-tag="count" data-ident="40">          17</div>
 </div>
 <div class="line">
   <div class="label">Name</div>
   <div class="decoration">:</div>
   <div class="padding"> </div>
-  <div class="data" data-tag="name">1</div>
+  <div class="data" data-tag="name" data-ident="42">0</div>
   <div class="text"> + 1 = </div>
-  <div class="data" data-tag="next">2</div>
+  <div class="data" data-tag="next" data-ident="42">1</div>
 </div>
 <div class="line">
   <div class="label">Name</div>
   <div class="decoration">:</div>
   <div class="padding"> </div>
-  <div class="data" data-tag="name">2</div>
+  <div class="data" data-tag="name" data-ident="43">1</div>
   <div class="text"> + 1 = </div>
-  <div class="data" data-tag="next">3</div>
+  <div class="data" data-tag="next" data-ident="43">2</div>
+</div>
+<div class="line">
+  <div class="label">Name</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="name" data-ident="44">2</div>
+  <div class="text"> + 1 = </div>
+  <div class="data" data-tag="next" data-ident="44">3</div>
 </div>
 <div class="line">
   <div class="label">Last</div>
   <div class="decoration">:</div>
   <div class="padding"> </div>
-  <div class="data" data-tag="last">3</div>
+  <div class="data" data-tag="last" data-ident="40">3</div>
 </div>
 <div class="line">
-  <div class="data" data-tag="test">one</div>
+  <div class="data" data-tag="test" data-ident="40">one</div>
 </div>
 <div class="line">
 </div>

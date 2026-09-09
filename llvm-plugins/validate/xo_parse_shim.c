@@ -95,9 +95,10 @@ _Static_assert(offsetof(xo_field_info_t, xfi_num_fspecs) == 40 + sizeof(void *),
  *   offset 24: uint16_t xf_len
  *   offset 26: uint16_t xf_prefix_len
  *   offset 28: uint16_t xf_num_bits, padding
- *   total: 30 bytes
+ *   offset 30: uint32_t xf_extflags
+ *   total: 34 bytes
  */
-_Static_assert(sizeof(xo_fspec_t) == 30,
+_Static_assert(sizeof(xo_fspec_t) == 36,
 	       "xo_fspec_t size mismatch; update xo_precompile.cc FspecTy");
 _Static_assert(offsetof(xo_fspec_t, xf_fc)           ==  0, "xf_fc offset");
 _Static_assert(offsetof(xo_fspec_t, xf_lflag)        ==  1, "xf_lflag offset");
@@ -118,6 +119,7 @@ _Static_assert(offsetof(xo_fspec_t, xf_start)        == 22, "xf_start offset");
 _Static_assert(offsetof(xo_fspec_t, xf_len)          == 24, "xf_len offset");
 _Static_assert(offsetof(xo_fspec_t, xf_prefix_len)   == 26, "xf_prefix_len offset");
 _Static_assert(offsetof(xo_fspec_t, xf_num_bits  )   == 28, "xf_num_bits offset");
+_Static_assert(offsetof(xo_fspec_t, xf_extflags  )   == 32, "xf_extflags offset");
 
 struct xo_shim_state {
     xo_shim_error_t error;
@@ -193,6 +195,23 @@ scan_format_args (const char *field_fmt, unsigned flen,
 	    p += 1;
 	    continue;
 	}
+
+        /*
+         * "%@...@" is an XO-specific prefix: each '*' between the two
+         * '@'s marks an int arg that must be consumed and discarded
+         * before the real conversion's own args are pulled (see
+         * xo_parse_one_format() in xo_format.c).  Record one int arg
+         * per '*', then treat the closing '@' as the pseudo '%' and
+         * keep parsing the rest of the spec from there.
+         */
+        if (*p == '@') {
+            for (p += 1; p < end && *p != '@'; p++) {
+                if (*p == '*')
+                    arg_cb(arg_data, "%d", 2);
+            }
+            if (p < end)
+                p += 1;  /* skip the closing '@' (pseudo '%') */
+        }
 
         /* flags */
         while (p < end && (*p == '-' || *p == '+' || *p == ' '
@@ -340,13 +359,26 @@ xo_shim_parse_args (const char *fmt,
             arg_cb(arg_data, NULL, 0);
 
 	else {
+	    int no_name = (xfip->xfi_flags & XFF_DISPLAY_ONLY) != 0;
+	    const char use_instead[] = "use 'F'/format role instead";
+
 	    /* Enforce name/format restrictions */
-	    if (strchr(XO_LINT_ROLES_NEEDING_NAME, ftype)
-			&& xfip->xfi_clen == 0)
-		ss_err.error(ss_err.data,
-			     "field role ('%c') requires a non-empty name: "
-			     "'%s'",
-			     ftype, xo_printable2(str, slen, 1));
+	    if ((flags & XPF_LINT) && strchr(XO_LINT_ROLES_NEEDING_NAME, ftype)
+			&& xfip->xfi_clen == 0) {
+		const char *role_name = xo_lookup_role_name(ftype);
+		if (no_name)
+		    ss_err.error(ss_err.data,
+				 "value field ('%c'%s%s) has empty name, but "
+				 "has the 'display' flag set; %s: '%s'",
+				 ftype, role_name ? "/" : "", role_name ?: "",
+				 use_instead, xo_printable2(str, slen, 1));
+		else 
+		    ss_err.error(ss_err.data,
+				 "field role ('%c'%s%s) requires a non-empty "
+				 "name: '%s'",
+				 ftype, role_name ? "/" : "", role_name ?: "",
+				 xo_printable2(str, slen, 1));
+	    }
 
 	    /*
 	     * xfi_format >= 0 means an explicit format was written in the
@@ -355,11 +387,14 @@ xo_shim_parse_args (const char *fmt,
 	     * Only error when the user wrote neither content nor format.
 	     */
 	    if (strchr(XO_LINT_ROLES_NEEDING_NAME_OR_FORMAT, ftype)
-		&& xfip->xfi_clen == 0 && xfip->xfi_format < 0)
+		    && xfip->xfi_clen == 0 && xfip->xfi_format < 0) {
+		const char *role_name = xo_lookup_role_name(ftype);
 		ss_err.error(ss_err.data,
-			     "field role ('%c') requires a name or format: "
+			     "field role ('%c'%s%s) requires a name or format: "
 			     "'%s'",
-			     ftype, xo_printable2(str, slen, 1));
+			     ftype, role_name ? "/" : "", role_name ?: "",
+			     xo_printable2(str, slen, 1));
+	    }
 
 	    if (strchr(XO_LINT_ROLES_NO_FORMAT, ftype)
 			&& xfip->xfi_format != XO_FOFF_NONE)
@@ -490,7 +525,10 @@ xo_shim_parse_fields (const char *fmt,
             sf.xsp_len          = xfp->xf_len;
             sf.xsp_prefix_len   = xfp->xf_prefix_len;
             sf.xsp_num_bits     = xfp->xf_num_bits;
-            sf.xsp_padding      = xfp->xf_padding;
+            sf.xsp_padding[0]   = xfp->xf_padding[0];
+            sf.xsp_padding[1]   = xfp->xf_padding[1];
+            sf.xsp_padding[2]   = xfp->xf_padding[2];
+            sf.xsp_extflags      = xfp->xf_extflags;
             fspec_cb(fspec_data, &sf);
         }
     }

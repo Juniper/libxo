@@ -1,4 +1,18 @@
 test_02: key field emitted after normal value field: 'name'
+test_02: duplicate sibling name: 'name'
+test_02: duplicate sibling name: 'flags'
+test_02: duplicate sibling name: 'fd'
+test_02: duplicate sibling name: 'test'
+test_02: duplicate sibling name: 'memory'
+test_02: duplicate sibling name: 'total'
+test_02: duplicate sibling name: 'unknown'
+test_02: duplicate sibling name: 'min'
+test_02: duplicate sibling name: 'cur'
+test_02: duplicate sibling name: 'max'
+test_02: duplicate sibling name: 'lsize'
+test_02: duplicate sibling name: 'lval'
+test_02: duplicate sibling name: 'usize'
+test_02: duplicate sibling name: 'uval'
 Shut 'er down, Clancey!  She's a-pumpin' mud!  <>!,"!<>
 err message (1)err message (2)
 err message (1)

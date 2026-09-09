@@ -18,13 +18,19 @@
  * New PM, PipelineStart EP callbacks do fire.
  */
 
+#include "xo_config.h"
+
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/GlobalVariable.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/Module.h"
 #include "llvm/Passes/PassBuilder.h"
+#if CLANG_VERSION_NUMBER >= 22000000
+#include "llvm/Plugins/PassPlugin.h"
+#else /* CLANG_VERSION_NUMBER >= 22000000 */
 #include "llvm/Passes/PassPlugin.h"
+#endif /* ACLANG_VERSION_NUMBER >= 22000000 */
 #include "llvm/Support/raw_ostream.h"
 
 #include "../validate/xo_parse_shim.h"
@@ -200,7 +206,9 @@ struct XoPrecompile : PassInfoMixin<XoPrecompile> {
             i8,                              /* at_stars */
             ArrayType::get(i16, 3),          /* xf_width[3] (signed) */
             i16, i16, i16,                   /* start, len, prefix_len */
-	    i8, i8, 			     /* num_bits, padding */
+	    i8, 			     /* num_bits, padding */
+            ArrayType::get(i8, 3),           /* padding[3] */
+	    i32,			     /* extflags */
         });
 
         /* StructType matching xo_format_cache_t: { version, num_fields, *fields } */
@@ -265,7 +273,7 @@ struct XoPrecompile : PassInfoMixin<XoPrecompile> {
                     ctx->fspec_start.push_back((unsigned) ctx->fspecs.size());
                     ctx->fields.push_back(*f);
                 },
-                &PCtx,
+		&PCtx,
                 [](void *d, const xo_shim_fspec_t *f) {
                     static_cast<ParseCtx *>(d)->fspecs.push_back(*f);
                 },
@@ -315,12 +323,14 @@ struct XoPrecompile : PassInfoMixin<XoPrecompile> {
                         ConstantInt::get(i16, sf.xsp_len),
                         ConstantInt::get(i16, sf.xsp_prefix_len),
                         ConstantInt::get(i8, sf.xsp_num_bits),
-                        ConstantInt::get(i8, sf.xsp_padding),
-                    }));
+			Constant::getNullValue(
+			    ArrayType::get(i8, 3)), /* xf_padding */
+                        ConstantInt::get(i32, sf.xsp_extflags),
+		    }));
                 }
 
                 ArrayType *FspecArrTy = ArrayType::get(FspecTy,
-                                                        (unsigned) PCtx.fspecs.size());
+                                             (unsigned) PCtx.fspecs.size());
                 FspecsGV = new GlobalVariable(M, FspecArrTy, /*isConst*/ true,
                     GlobalValue::PrivateLinkage,
                     ConstantArray::get(FspecArrTy, FspecElems),
@@ -362,7 +372,7 @@ struct XoPrecompile : PassInfoMixin<XoPrecompile> {
                     ConstantInt::get(i16, f.xsf_num_fspecs), /* xfi_num_fspecs */
                     Constant::getNullValue(
                         ArrayType::get(i16, 3)),           /* xfi_padding */
-                }));
+		}));
             }
 
             /*

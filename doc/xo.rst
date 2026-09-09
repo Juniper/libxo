@@ -202,7 +202,7 @@ Command Line Options
     --html OR -H          Generate HTML output
     --instance OR -I <name> Wrap in an instance of the given name
     --json OR -J          Generate JSON output
-    --leading-xpath <path> Add a prefix to generated XPaths (HTML)
+    --leading-xpath <path> OR -l <path> Add a prefix to generated XPaths (HTML)
     --not-first           Indicate this object is not the first (JSON)
     --open <path>         Open tags for the given path
     --open-instance <name> Open an instance given by name
@@ -217,7 +217,7 @@ Command Line Options
     --warn-xml            Display warnings in xml on stdout
     --wrap <path>         Wrap output in a set of containers
     --xml OR -X           Generate XML output
-    --xpath               Add XPath data to HTML output)
+    --xpath               Add XPath data to HTML output
 
 Example
 -------

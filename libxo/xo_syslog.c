@@ -44,6 +44,8 @@
 #include <sys/syslog.h>
 #include <sys/uio.h>
 #include <sys/un.h>
+#include <netinet/in.h>
+#include <netdb.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <paths.h>
@@ -118,6 +120,8 @@ static int xo_logmask = 0xff;		/* mask of priorities to be logged */
 static pthread_mutex_t xo_syslog_mutex UNUSED = PTHREAD_MUTEX_INITIALIZER;
 static int xo_unit_test;		/* Fake data for unit test */
 
+static pid_t xo_syslog_pid;
+
 #define REAL_VOID(_x) \
     do { int really_ignored = _x; if (really_ignored) { }} while (0)
 
@@ -144,6 +148,200 @@ enum {
     CONNPRIV,
 };
 
+/*
+ * State for remote syslog delivery (e.g. "xo-logger -h ...").  All
+ * hostname/service resolution happens in the caller; we only ever
+ * store already-resolved addresses.
+ */
+#define XO_LOG_MAX_ADDR 16
+
+typedef struct xo_log_addr_s {
+    struct sockaddr_storage xla_ss;
+    unsigned xla_len;
+} xo_log_addr_t;
+
+static xo_log_addr_t xo_log_remote_addrs[XO_LOG_MAX_ADDR];
+static int xo_log_remote_naddrs;	/* Number of entries in the above */
+static char *xo_log_remote_path;	/* AF_LOCAL destination, if any */
+static int xo_log_remote_port = 514;	/* Remote port, host byte order */
+static int xo_log_all_addresses;	/* Send to all resolved addrs (-A) */
+static char *xo_log_hostname_override;	/* HOSTNAME field override (-H) */
+static struct sockaddr_storage xo_log_source_ss; /* Source addr (-S) */
+static unsigned xo_log_source_len;
+static int xo_log_has_source;
+
+static int
+xo_log_remote_active (void)
+{
+    return (xo_log_remote_naddrs > 0 || xo_log_remote_path != NULL);
+}
+
+void
+xo_log_set_hostname (const char *hostname)
+{
+    free(xo_log_hostname_override);
+    xo_log_hostname_override = hostname ? strdup(hostname) : NULL;
+}
+
+void
+xo_log_set_host (struct hostent *hp)
+{
+    int i;
+
+    xo_log_remote_naddrs = 0;
+    free(xo_log_remote_path);
+    xo_log_remote_path = NULL;
+
+    if (hp == NULL)
+	return;
+
+    for (i = 0; hp->h_addr_list[i] != NULL
+		&& xo_log_remote_naddrs < XO_LOG_MAX_ADDR; i++) {
+	xo_log_addr_t *ap = &xo_log_remote_addrs[xo_log_remote_naddrs];
+
+	memset(ap, 0, sizeof(*ap));
+
+	if (hp->h_addrtype == AF_INET) {
+	    struct sockaddr_in *sin = (struct sockaddr_in *) &ap->xla_ss;
+	    sin->sin_family = AF_INET;
+	    memcpy(&sin->sin_addr, hp->h_addr_list[i], sizeof(sin->sin_addr));
+	    ap->xla_len = sizeof(*sin);
+
+	} else if (hp->h_addrtype == AF_INET6) {
+	    struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *) &ap->xla_ss;
+	    sin6->sin6_family = AF_INET6;
+	    memcpy(&sin6->sin6_addr, hp->h_addr_list[i],
+		   sizeof(sin6->sin6_addr));
+	    ap->xla_len = sizeof(*sin6);
+
+	} else
+	    continue;
+
+	xo_log_remote_naddrs += 1;
+    }
+}
+
+void
+xo_log_set_host_path (const char *path)
+{
+    xo_log_remote_naddrs = 0;
+
+    free(xo_log_remote_path);
+    xo_log_remote_path = path ? strdup(path) : NULL;
+}
+
+void
+xo_log_set_port (int port)
+{
+    xo_log_remote_port = port;
+}
+
+void
+xo_log_set_source (struct sockaddr *sa, unsigned salen)
+{
+    if (sa == NULL || salen > sizeof(xo_log_source_ss)) {
+	xo_log_has_source = 0;
+	return;
+    }
+
+    memcpy(&xo_log_source_ss, sa, salen);
+    xo_log_source_len = salen;
+    xo_log_has_source = 1;
+}
+
+void
+xo_log_set_all_addresses (int value)
+{
+    xo_log_all_addresses = value;
+}
+
+/* Should be called with mutex acquired */
+static void
+xo_connect_remote_log (void)
+{
+    if (xo_logfile != -1)
+	return;
+
+    int family;
+    if (xo_log_remote_path)
+	family = AF_LOCAL;
+    else if (xo_log_remote_naddrs > 0)
+	family = xo_log_remote_addrs[0].xla_ss.ss_family;
+    else
+	return;
+
+    int flags = SOCK_DGRAM;
+#ifdef SOCK_CLOEXEC
+    flags |= SOCK_CLOEXEC;
+#endif /* SOCK_CLOEXEC */
+
+    xo_logfile = socket(family, flags, 0);
+    if (xo_logfile == -1)
+	return;
+
+    if (xo_log_has_source
+	&& bind(xo_logfile, (struct sockaddr *) &xo_log_source_ss,
+		xo_log_source_len) < 0) {
+	close(xo_logfile);
+	xo_logfile = -1;
+	return;
+    }
+
+    if (xo_log_remote_path) {
+	struct sockaddr_un saddr;
+
+	memset(&saddr, 0, sizeof(saddr));
+	saddr.sun_family = AF_LOCAL;
+	strncpy(saddr.sun_path, xo_log_remote_path, sizeof(saddr.sun_path) - 1);
+#ifdef HAVE_SUN_LEN
+	saddr.sun_len = sizeof(saddr);
+#endif /* HAVE_SUN_LEN */
+
+	if (connect(xo_logfile, (struct sockaddr *) &saddr,
+		    sizeof(saddr)) < 0) {
+	    close(xo_logfile);
+	    xo_logfile = -1;
+	    return;
+	}
+    }
+
+    xo_status = CONNDEF;
+}
+
+/* Should be called with mutex acquired */
+static void
+xo_send_remote_syslog (const char *full_msg, int full_len)
+{
+    if (!xo_opened)
+	xo_open_log_unlocked(xo_logtag, xo_logstat | LOG_NDELAY, 0);
+    xo_connect_log();
+
+    if (xo_logfile == -1)
+	return;
+
+    if (xo_log_remote_path) {
+	REAL_VOID(send(xo_logfile, full_msg, full_len, 0));
+	return;
+    }
+
+    int n = xo_log_all_addresses ? xo_log_remote_naddrs
+	: (xo_log_remote_naddrs > 0 ? 1 : 0);
+
+    for (int i = 0; i < n; i++) {
+	xo_log_addr_t *ap = &xo_log_remote_addrs[i];
+	struct sockaddr_storage ss = ap->xla_ss;
+
+	if (ss.ss_family == AF_INET)
+	    ((struct sockaddr_in *) &ss)->sin_port = htons(xo_log_remote_port);
+	else if (ss.ss_family == AF_INET6)
+	    ((struct sockaddr_in6 *) &ss)->sin6_port
+		= htons(xo_log_remote_port);
+
+	REAL_VOID(sendto(xo_logfile, full_msg, full_len, 0,
+			  (struct sockaddr *) &ss, ap->xla_len));
+    }
+}
+
 static xo_syslog_open_t xo_syslog_open;
 static xo_syslog_send_t xo_syslog_send;
 static xo_syslog_close_t xo_syslog_close;
@@ -160,6 +358,40 @@ xo_set_syslog_enterprise_id (unsigned short eid)
 {
     snprintf(xo_syslog_enterprise_id, sizeof(xo_syslog_enterprise_id),
 	     "%u", eid);
+}
+
+/* xo_set_logmask -- set the log mask level */
+int
+xo_set_logmask (int pmask)
+{
+    int omask;
+
+    THREAD_LOCK();
+    omask = xo_logmask;
+    if (pmask != 0)
+        xo_logmask = pmask;
+    THREAD_UNLOCK();
+    return (omask);
+}
+
+void
+xo_set_unit_test_mode (int value)
+{
+    xo_unit_test = value;
+}
+
+void
+xo_syslog_set_pid (pid_t pid)
+{
+    xo_syslog_pid = pid;
+}
+
+xo_syslog_setup_t xo_syslog_setup;
+
+void
+xo_syslog_set_setup (xo_syslog_setup_t func)
+{
+    xo_syslog_setup = func;
 }
 
 /*
@@ -193,6 +425,11 @@ xo_send_syslog (char *full_msg, char *v0_hdr,
         v->iov_len = 1;
         v += 1;
         REAL_VOID(writev(STDERR_FILENO, iov, 3));
+    }
+
+    if (xo_log_remote_active()) {
+	xo_send_remote_syslog(full_msg, full_len);
+	return;
     }
 
     /* Get connected, output the message to the local logger. */
@@ -308,6 +545,11 @@ xo_connect_log (void)
 	return;
     }
 
+    if (xo_log_remote_active()) {
+	xo_connect_remote_log();
+	return;
+    }
+
     struct sockaddr_un saddr;    /* AF_UNIX address of local logger */
 
     if (xo_logfile == -1) {
@@ -374,6 +616,12 @@ xo_open_log_unlocked (const char *ident, int logstat, int logfac)
     if (ident != NULL)
         xo_logtag = ident;
     xo_logstat = logstat;
+
+    /*
+     * While LOG_KERN is 0, we know that we won't be emitting LOG_KERN
+     * messages, so it logfac has non-zero facility, we use it for
+     * xo_logfacility, which otherwise defaults to LOG_USER.
+     */
     if (logfac != 0 && (logfac &~ LOG_FACMASK) == 0)
         xo_logfacility = logfac;
 
@@ -405,20 +653,6 @@ xo_close_log (void)
     THREAD_UNLOCK();
 }
 
-/* xo_set_logmask -- set the log mask level */
-int
-xo_set_logmask (int pmask)
-{
-    int omask;
-
-    THREAD_LOCK();
-    omask = xo_logmask;
-    if (pmask != 0)
-        xo_logmask = pmask;
-    THREAD_UNLOCK();
-    return (omask);
-}
-
 void
 xo_set_syslog_handler (xo_syslog_open_t open_func,
 		       xo_syslog_send_t send_func,
@@ -438,7 +672,8 @@ xo_snprintf (char *out, ssize_t outsize, const char *fmt, ...)
 
     if (out && outsize) {
         va_start(ap, fmt);
-        status = vsnprintf(out, outsize, fmt, ap);
+
+	status = vsnprintf(out, outsize, fmt, ap);
         if (status < 0) { /* this should never happen, */
             *out = 0;     /* handle it in the safest way possible if it does */
             retval = 0;
@@ -481,12 +716,6 @@ xo_syslog_handle_flush (void *opaque UNUSED)
 }
 
 void
-xo_set_unit_test_mode (int value)
-{
-    xo_unit_test = value;
-}
-
-void
 xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
 {
     int saved_errno = errno;
@@ -495,11 +724,10 @@ xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
     unsigned start_of_msg = 0;
     char *v0_hdr = NULL;
     xo_buffer_t xb;
-    static pid_t my_pid;
     unsigned log_offset;
 
-    if (my_pid == 0)
-	my_pid = xo_unit_test ? 222 : getpid();
+    if (xo_syslog_pid == 0)
+	xo_syslog_pid = xo_unit_test ? 222 : getpid();
 
     /* Check for invalid bits */
     if (pri & ~(LOG_PRIMASK|LOG_FACMASK)) {
@@ -518,7 +746,7 @@ xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
     }
 
     /* Set default facility if none specified. */
-    if ((pri & LOG_FACMASK) == 0)
+    if ((pri & LOG_FACMASK) == 0) /* We know this isn't LOG_KERN */
         pri |= xo_logfacility;
 
     /* Create the primary stdio hook */
@@ -565,7 +793,7 @@ xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
 	if (xo_logtag != NULL)
 	    tp += xo_snprintf(tp, ep - tp, "%s", xo_logtag);
 	if (xo_logstat & LOG_PID)
-	    tp += xo_snprintf(tp, ep - tp, "[%d]", my_pid);
+	    tp += xo_snprintf(tp, ep - tp, "[%d]", xo_syslog_pid);
 	if (xo_logtag)
 	    tp += xo_snprintf(tp, ep - tp, ": ");
     }
@@ -587,7 +815,9 @@ xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
      */
     char hostname[XO_HOST_NAME_MAX + 1];
     hostname[0] = '\0';
-    if (xo_unit_test)
+    if (xo_log_hostname_override)
+	strlcpy(hostname, xo_log_hostname_override, sizeof(hostname));
+    else if (xo_unit_test)
 	strlcpy(hostname, "worker-host", sizeof(hostname));
     else
 	(void) gethostname(hostname, sizeof(hostname) - 1);
@@ -601,7 +831,8 @@ xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
 			      xo_logtag ?: "-");
 
     /* Add PROCID */
-    xb.xb_curp += xo_snprintf(xb.xb_curp, xo_buf_left(&xb), "%d ", my_pid);
+    xb.xb_curp += xo_snprintf(xb.xb_curp, xo_buf_left(&xb), "%d ",
+			      xo_syslog_pid);
 
     /*
      * Add MSGID.  The user should provide us with a name, which we
@@ -654,6 +885,9 @@ xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
     va_list ap;
     va_copy(ap, vap);
 
+    if (xo_syslog_setup)
+	xo_syslog_setup(xop, XSUP_INIT);
+
     errno = saved_errno;	/* Restore saved error value */
     xo_emit_hv(xop, fmt, ap);
     xo_flush_h(xop);
@@ -681,6 +915,9 @@ xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
     xo_set_style(xop, XO_STYLE_TEXT);
     xo_set_flags(xop, XOF_UTF8);
 
+    if (xo_syslog_setup)
+	xo_syslog_setup(xop, XSUP_REINIT);
+
     errno = saved_errno;	/* Restore saved error value */
     xo_emit_hv(xop, fmt, ap);
     xo_flush_h(xop);
@@ -690,7 +927,8 @@ xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
         *--xb.xb_curp = '\0';
 
     if (xo_get_flags(xop) & XOF_LOG_SYSLOG)
-	fprintf(stderr, "xo: syslog: %s\n", xb.xb_bufp + log_offset);
+	fprintf(stderr, "xo: syslog: %d(%d/%d): %s\n", pri,
+		pri >> 3, LOG_PRI(pri), xb.xb_bufp + log_offset);
 
     xo_send_syslog(xb.xb_bufp, v0_hdr, xb.xb_bufp + start_of_msg);
 

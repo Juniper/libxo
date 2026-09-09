@@ -17,6 +17,7 @@ main: field: 'thing'='one'
 main: status: track
 main: input '= thing two'
 main: field: 'thing'='two'
+xpath_01: duplicate sibling name: 'thing'
 main: status: track
 main: input '= thing three'
 main: field: 'thing'='three'
@@ -35,6 +36,7 @@ main: field: 'type'='ethernet'
 main: status: track
 main: input '= type bridge'
 main: field: 'type'='bridge'
+xpath_01: duplicate sibling name: 'type'
 main: status: track
 main: input '= type 18u'
 main: field: 'type'='18u'
@@ -50,9 +52,11 @@ main: field: 'port'='1'
 main: status: track
 main: input '= address 0x0'
 main: field: 'address'='0x0'
+xpath_01: duplicate sibling name: 'address'
 main: status: track
 main: input '= port 1'
 main: field: 'port'='1'
+xpath_01: duplicate sibling name: 'port'
 main: status: track
 main: input '= address 0x0'
 main: field: 'address'='0x0'
@@ -77,9 +81,11 @@ main: field: 'domain'='example.com'
 main: status: track
 main: input '= host my-box'
 main: field: 'host'='my-box'
+xpath_01: duplicate sibling name: 'host'
 main: status: track
 main: input '= domain example.com'
 main: field: 'domain'='example.com'
+xpath_01: duplicate sibling name: 'domain'
 main: status: track
 main: input '= label value'
 main: field: 'label'='value'
@@ -396,6 +402,7 @@ main: attr: 'test4'='value4'
 main: status: full
 main: input '= item gum'
 main: field: 'item'='gum'
+xpath_01: duplicate sibling name: 'item'
 main: status: full
 main: input '@ test4 value4'
 main: attr: 'test4'='value4'
@@ -430,6 +437,7 @@ main: input '@ test value'
 main: attr: 'test'='value'
 main: status: track
 main: input '+ data'
+xpath_01: duplicate sibling name: 'data'
 main: filter: rc: 18
 main: status: track
 main: input '{ item'
@@ -571,6 +579,7 @@ main: field: 'cost'='425'
 main: status: track
 main: input '= cost 455'
 main: field: 'cost'='455'
+xpath_01: duplicate sibling name: 'cost'
 main: status: track
 main: input '= mode mode'
 main: field: 'mode'='mode'
@@ -592,24 +601,29 @@ main: field: 'pre'='that'
 main: status: track
 main: input '= links 3'
 main: field: 'links'='3'
+xpath_01: duplicate sibling name: 'links'
 main: status: track
 main: input '= post this'
 main: field: 'post'='this'
 main: status: track
 main: input '= mode /some/file'
 main: field: 'mode'='/some/file'
+xpath_01: duplicate sibling name: 'mode'
 main: status: track
 main: input '= mode_octal 640'
 main: field: 'mode_octal'='640'
+xpath_01: duplicate sibling name: 'mode_octal'
 main: status: track
 main: input '= links 1'
 main: field: 'links'='1'
 main: status: track
 main: input '= user user'
 main: field: 'user'='user'
+xpath_01: duplicate sibling name: 'user'
 main: status: track
 main: input '= group group'
 main: field: 'group'='group'
+xpath_01: duplicate sibling name: 'group'
 main: status: track
 main: input '= one 1'
 main: field: 'one'='1'
@@ -622,12 +636,15 @@ main: field: 'three'='3'
 main: status: track
 main: input '= one 1'
 main: field: 'one'='1'
+xpath_01: duplicate sibling name: 'one'
 main: status: track
 main: input '= two 2'
 main: field: 'two'='2'
+xpath_01: duplicate sibling name: 'two'
 main: status: track
 main: input '= three 3'
 main: field: 'three'='3'
+xpath_01: duplicate sibling name: 'three'
 main: status: track
 main: input '= one 1'
 main: field: 'one'='1'
@@ -656,6 +673,7 @@ main: status: zero
 main: input 'i xpath_01_23.inc'
 main: include: '../../../tests/xpath/xpath_01_23.inc'
 main: input '+ data'
+xpath_01: duplicate sibling name: 'data'
 main: filter: rc: 14
 main: status: track
 main: input '= thing one'
@@ -663,6 +681,7 @@ main: field: 'thing'='one'
 main: status: track
 main: input '= thing two'
 main: field: 'thing'='two'
+xpath_01: duplicate sibling name: 'thing'
 main: status: track
 main: input '= thing three'
 main: field: 'thing'='three'
@@ -681,6 +700,7 @@ main: field: 'type'='ethernet'
 main: status: track
 main: input '= type bridge'
 main: field: 'type'='bridge'
+xpath_01: duplicate sibling name: 'type'
 main: status: track
 main: input '= type 18u'
 main: field: 'type'='18u'
@@ -696,9 +716,11 @@ main: field: 'port'='1'
 main: status: track
 main: input '= address 0x0'
 main: field: 'address'='0x0'
+xpath_01: duplicate sibling name: 'address'
 main: status: track
 main: input '= port 1'
 main: field: 'port'='1'
+xpath_01: duplicate sibling name: 'port'
 main: status: track
 main: input '= address 0x0'
 main: field: 'address'='0x0'
@@ -723,9 +745,11 @@ main: field: 'domain'='example.com'
 main: status: track
 main: input '= host my-box'
 main: field: 'host'='my-box'
+xpath_01: duplicate sibling name: 'host'
 main: status: track
 main: input '= domain example.com'
 main: field: 'domain'='example.com'
+xpath_01: duplicate sibling name: 'domain'
 main: status: track
 main: input '= label value'
 main: field: 'label'='value'
@@ -1043,6 +1067,7 @@ main: attr: 'test4'='value4'
 main: status: track
 main: input '= item gum'
 main: field: 'item'='gum'
+xpath_01: duplicate sibling name: 'item'
 main: status: track
 main: input '@ test4 value4'
 main: attr: 'test4'='value4'
@@ -1077,6 +1102,7 @@ main: input '@ test value'
 main: attr: 'test'='value'
 main: status: track
 main: input '+ data'
+xpath_01: duplicate sibling name: 'data'
 main: filter: rc: 18
 main: status: track
 main: input '{ item'
@@ -1218,6 +1244,7 @@ main: field: 'cost'='425'
 main: status: track
 main: input '= cost 455'
 main: field: 'cost'='455'
+xpath_01: duplicate sibling name: 'cost'
 main: status: track
 main: input '= mode mode'
 main: field: 'mode'='mode'
@@ -1239,24 +1266,29 @@ main: field: 'pre'='that'
 main: status: track
 main: input '= links 3'
 main: field: 'links'='3'
+xpath_01: duplicate sibling name: 'links'
 main: status: track
 main: input '= post this'
 main: field: 'post'='this'
 main: status: track
 main: input '= mode /some/file'
 main: field: 'mode'='/some/file'
+xpath_01: duplicate sibling name: 'mode'
 main: status: track
 main: input '= mode_octal 640'
 main: field: 'mode_octal'='640'
+xpath_01: duplicate sibling name: 'mode_octal'
 main: status: track
 main: input '= links 1'
 main: field: 'links'='1'
 main: status: track
 main: input '= user user'
 main: field: 'user'='user'
+xpath_01: duplicate sibling name: 'user'
 main: status: track
 main: input '= group group'
 main: field: 'group'='group'
+xpath_01: duplicate sibling name: 'group'
 main: status: track
 main: input '= one 1'
 main: field: 'one'='1'
@@ -1269,12 +1301,15 @@ main: field: 'three'='3'
 main: status: track
 main: input '= one 1'
 main: field: 'one'='1'
+xpath_01: duplicate sibling name: 'one'
 main: status: track
 main: input '= two 2'
 main: field: 'two'='2'
+xpath_01: duplicate sibling name: 'two'
 main: status: track
 main: input '= three 3'
 main: field: 'three'='3'
+xpath_01: duplicate sibling name: 'three'
 main: status: track
 main: input '= one 1'
 main: field: 'one'='1'
@@ -1310,6 +1345,7 @@ main: field: 'thing'='one'
 main: status: track
 main: input '= thing two'
 main: field: 'thing'='two'
+xpath_01: duplicate sibling name: 'thing'
 main: status: track
 main: input '= thing three'
 main: field: 'thing'='three'
@@ -1328,6 +1364,7 @@ main: field: 'type'='ethernet'
 main: status: track
 main: input '= type bridge'
 main: field: 'type'='bridge'
+xpath_01: duplicate sibling name: 'type'
 main: status: track
 main: input '= type 18u'
 main: field: 'type'='18u'
@@ -1343,9 +1380,11 @@ main: field: 'port'='1'
 main: status: track
 main: input '= address 0x0'
 main: field: 'address'='0x0'
+xpath_01: duplicate sibling name: 'address'
 main: status: track
 main: input '= port 1'
 main: field: 'port'='1'
+xpath_01: duplicate sibling name: 'port'
 main: status: track
 main: input '= address 0x0'
 main: field: 'address'='0x0'
@@ -1370,9 +1409,11 @@ main: field: 'domain'='example.com'
 main: status: track
 main: input '= host my-box'
 main: field: 'host'='my-box'
+xpath_01: duplicate sibling name: 'host'
 main: status: track
 main: input '= domain example.com'
 main: field: 'domain'='example.com'
+xpath_01: duplicate sibling name: 'domain'
 main: status: track
 main: input '= label value'
 main: field: 'label'='value'
@@ -1694,6 +1735,7 @@ main: attr: 'test4'='value4'
 main: status: track
 main: input '= item gum'
 main: field: 'item'='gum'
+xpath_01: duplicate sibling name: 'item'
 main: status: track
 main: input '@ test4 value4'
 main: attr: 'test4'='value4'
@@ -1728,6 +1770,7 @@ main: input '@ test value'
 main: attr: 'test'='value'
 main: status: track
 main: input '+ data'
+xpath_01: duplicate sibling name: 'data'
 main: filter: rc: 18
 main: status: track
 main: input '{ item'
@@ -1869,6 +1912,7 @@ main: field: 'cost'='425'
 main: status: track
 main: input '= cost 455'
 main: field: 'cost'='455'
+xpath_01: duplicate sibling name: 'cost'
 main: status: track
 main: input '= mode mode'
 main: field: 'mode'='mode'
@@ -1890,24 +1934,29 @@ main: field: 'pre'='that'
 main: status: track
 main: input '= links 3'
 main: field: 'links'='3'
+xpath_01: duplicate sibling name: 'links'
 main: status: track
 main: input '= post this'
 main: field: 'post'='this'
 main: status: track
 main: input '= mode /some/file'
 main: field: 'mode'='/some/file'
+xpath_01: duplicate sibling name: 'mode'
 main: status: track
 main: input '= mode_octal 640'
 main: field: 'mode_octal'='640'
+xpath_01: duplicate sibling name: 'mode_octal'
 main: status: track
 main: input '= links 1'
 main: field: 'links'='1'
 main: status: track
 main: input '= user user'
 main: field: 'user'='user'
+xpath_01: duplicate sibling name: 'user'
 main: status: track
 main: input '= group group'
 main: field: 'group'='group'
+xpath_01: duplicate sibling name: 'group'
 main: status: track
 main: input '= one 1'
 main: field: 'one'='1'
@@ -1920,12 +1969,15 @@ main: field: 'three'='3'
 main: status: track
 main: input '= one 1'
 main: field: 'one'='1'
+xpath_01: duplicate sibling name: 'one'
 main: status: track
 main: input '= two 2'
 main: field: 'two'='2'
+xpath_01: duplicate sibling name: 'two'
 main: status: track
 main: input '= three 3'
 main: field: 'three'='3'
+xpath_01: duplicate sibling name: 'three'
 main: status: track
 main: input '= one 1'
 main: field: 'one'='1'
@@ -1962,6 +2014,7 @@ main: field: 'thing'='one'
 main: status: track
 main: input '= thing two'
 main: field: 'thing'='two'
+xpath_01: duplicate sibling name: 'thing'
 main: status: track
 main: input '= thing three'
 main: field: 'thing'='three'
@@ -1980,6 +2033,7 @@ main: field: 'type'='ethernet'
 main: status: track
 main: input '= type bridge'
 main: field: 'type'='bridge'
+xpath_01: duplicate sibling name: 'type'
 main: status: track
 main: input '= type 18u'
 main: field: 'type'='18u'
@@ -1995,9 +2049,11 @@ main: field: 'port'='1'
 main: status: track
 main: input '= address 0x0'
 main: field: 'address'='0x0'
+xpath_01: duplicate sibling name: 'address'
 main: status: track
 main: input '= port 1'
 main: field: 'port'='1'
+xpath_01: duplicate sibling name: 'port'
 main: status: track
 main: input '= address 0x0'
 main: field: 'address'='0x0'
@@ -2022,9 +2078,11 @@ main: field: 'domain'='example.com'
 main: status: track
 main: input '= host my-box'
 main: field: 'host'='my-box'
+xpath_01: duplicate sibling name: 'host'
 main: status: track
 main: input '= domain example.com'
 main: field: 'domain'='example.com'
+xpath_01: duplicate sibling name: 'domain'
 main: status: track
 main: input '= label value'
 main: field: 'label'='value'
@@ -2346,6 +2404,7 @@ main: attr: 'test4'='value4'
 main: status: track
 main: input '= item gum'
 main: field: 'item'='gum'
+xpath_01: duplicate sibling name: 'item'
 main: status: track
 main: input '@ test4 value4'
 main: attr: 'test4'='value4'
@@ -2380,6 +2439,7 @@ main: input '@ test value'
 main: attr: 'test'='value'
 main: status: track
 main: input '+ data'
+xpath_01: duplicate sibling name: 'data'
 main: filter: rc: 18
 main: status: full
 main: input '{ item'
@@ -2526,6 +2586,7 @@ main: field: 'cost'='425'
 main: status: track
 main: input '= cost 455'
 main: field: 'cost'='455'
+xpath_01: duplicate sibling name: 'cost'
 main: status: track
 main: input '= mode mode'
 main: field: 'mode'='mode'
@@ -2547,24 +2608,29 @@ main: field: 'pre'='that'
 main: status: track
 main: input '= links 3'
 main: field: 'links'='3'
+xpath_01: duplicate sibling name: 'links'
 main: status: track
 main: input '= post this'
 main: field: 'post'='this'
 main: status: track
 main: input '= mode /some/file'
 main: field: 'mode'='/some/file'
+xpath_01: duplicate sibling name: 'mode'
 main: status: track
 main: input '= mode_octal 640'
 main: field: 'mode_octal'='640'
+xpath_01: duplicate sibling name: 'mode_octal'
 main: status: track
 main: input '= links 1'
 main: field: 'links'='1'
 main: status: track
 main: input '= user user'
 main: field: 'user'='user'
+xpath_01: duplicate sibling name: 'user'
 main: status: track
 main: input '= group group'
 main: field: 'group'='group'
+xpath_01: duplicate sibling name: 'group'
 main: status: track
 main: input '= one 1'
 main: field: 'one'='1'
@@ -2577,12 +2643,15 @@ main: field: 'three'='3'
 main: status: track
 main: input '= one 1'
 main: field: 'one'='1'
+xpath_01: duplicate sibling name: 'one'
 main: status: track
 main: input '= two 2'
 main: field: 'two'='2'
+xpath_01: duplicate sibling name: 'two'
 main: status: track
 main: input '= three 3'
 main: field: 'three'='3'
+xpath_01: duplicate sibling name: 'three'
 main: status: track
 main: input '= one 1'
 main: field: 'one'='1'
@@ -2618,6 +2687,7 @@ main: field: 'thing'='one'
 main: status: track
 main: input '= thing two'
 main: field: 'thing'='two'
+xpath_01: duplicate sibling name: 'thing'
 main: status: track
 main: input '= thing three'
 main: field: 'thing'='three'
@@ -2636,6 +2706,7 @@ main: field: 'type'='ethernet'
 main: status: track
 main: input '= type bridge'
 main: field: 'type'='bridge'
+xpath_01: duplicate sibling name: 'type'
 main: status: track
 main: input '= type 18u'
 main: field: 'type'='18u'
@@ -2651,9 +2722,11 @@ main: field: 'port'='1'
 main: status: track
 main: input '= address 0x0'
 main: field: 'address'='0x0'
+xpath_01: duplicate sibling name: 'address'
 main: status: track
 main: input '= port 1'
 main: field: 'port'='1'
+xpath_01: duplicate sibling name: 'port'
 main: status: track
 main: input '= address 0x0'
 main: field: 'address'='0x0'
@@ -2678,9 +2751,11 @@ main: field: 'domain'='example.com'
 main: status: track
 main: input '= host my-box'
 main: field: 'host'='my-box'
+xpath_01: duplicate sibling name: 'host'
 main: status: track
 main: input '= domain example.com'
 main: field: 'domain'='example.com'
+xpath_01: duplicate sibling name: 'domain'
 main: status: track
 main: input '= label value'
 main: field: 'label'='value'
@@ -2997,6 +3072,7 @@ main: attr: 'test4'='value4'
 main: status: track
 main: input '= item gum'
 main: field: 'item'='gum'
+xpath_01: duplicate sibling name: 'item'
 main: status: track
 main: input '@ test4 value4'
 main: attr: 'test4'='value4'
@@ -3031,6 +3107,7 @@ main: input '@ test value'
 main: attr: 'test'='value'
 main: status: track
 main: input '+ data'
+xpath_01: duplicate sibling name: 'data'
 main: filter: rc: 18
 main: status: track
 main: input '{ item'
@@ -3172,6 +3249,7 @@ main: field: 'cost'='425'
 main: status: track
 main: input '= cost 455'
 main: field: 'cost'='455'
+xpath_01: duplicate sibling name: 'cost'
 main: status: track
 main: input '= mode mode'
 main: field: 'mode'='mode'
@@ -3193,24 +3271,29 @@ main: field: 'pre'='that'
 main: status: track
 main: input '= links 3'
 main: field: 'links'='3'
+xpath_01: duplicate sibling name: 'links'
 main: status: track
 main: input '= post this'
 main: field: 'post'='this'
 main: status: track
 main: input '= mode /some/file'
 main: field: 'mode'='/some/file'
+xpath_01: duplicate sibling name: 'mode'
 main: status: track
 main: input '= mode_octal 640'
 main: field: 'mode_octal'='640'
+xpath_01: duplicate sibling name: 'mode_octal'
 main: status: track
 main: input '= links 1'
 main: field: 'links'='1'
 main: status: track
 main: input '= user user'
 main: field: 'user'='user'
+xpath_01: duplicate sibling name: 'user'
 main: status: track
 main: input '= group group'
 main: field: 'group'='group'
+xpath_01: duplicate sibling name: 'group'
 main: status: track
 main: input '= one 1'
 main: field: 'one'='1'
@@ -3223,12 +3306,15 @@ main: field: 'three'='3'
 main: status: track
 main: input '= one 1'
 main: field: 'one'='1'
+xpath_01: duplicate sibling name: 'one'
 main: status: track
 main: input '= two 2'
 main: field: 'two'='2'
+xpath_01: duplicate sibling name: 'two'
 main: status: track
 main: input '= three 3'
 main: field: 'three'='3'
+xpath_01: duplicate sibling name: 'three'
 main: status: track
 main: input '= one 1'
 main: field: 'one'='1'
@@ -3269,6 +3355,7 @@ main: field: 'thing'='one'
 main: status: track
 main: input '= thing two'
 main: field: 'thing'='two'
+xpath_01: duplicate sibling name: 'thing'
 main: status: track
 main: input '= thing three'
 main: field: 'thing'='three'
@@ -3287,6 +3374,7 @@ main: field: 'type'='ethernet'
 main: status: track
 main: input '= type bridge'
 main: field: 'type'='bridge'
+xpath_01: duplicate sibling name: 'type'
 main: status: track
 main: input '= type 18u'
 main: field: 'type'='18u'
@@ -3302,9 +3390,11 @@ main: field: 'port'='1'
 main: status: track
 main: input '= address 0x0'
 main: field: 'address'='0x0'
+xpath_01: duplicate sibling name: 'address'
 main: status: track
 main: input '= port 1'
 main: field: 'port'='1'
+xpath_01: duplicate sibling name: 'port'
 main: status: track
 main: input '= address 0x0'
 main: field: 'address'='0x0'
@@ -3329,9 +3419,11 @@ main: field: 'domain'='example.com'
 main: status: track
 main: input '= host my-box'
 main: field: 'host'='my-box'
+xpath_01: duplicate sibling name: 'host'
 main: status: track
 main: input '= domain example.com'
 main: field: 'domain'='example.com'
+xpath_01: duplicate sibling name: 'domain'
 main: status: track
 main: input '= label value'
 main: field: 'label'='value'
@@ -3653,6 +3745,7 @@ main: attr: 'test4'='value4'
 main: status: track
 main: input '= item gum'
 main: field: 'item'='gum'
+xpath_01: duplicate sibling name: 'item'
 main: status: track
 main: input '@ test4 value4'
 main: attr: 'test4'='value4'
@@ -3687,6 +3780,7 @@ main: input '@ test value'
 main: attr: 'test'='value'
 main: status: track
 main: input '+ data'
+xpath_01: duplicate sibling name: 'data'
 main: filter: rc: 18
 main: status: track
 main: input '{ item'
@@ -3830,6 +3924,7 @@ main: field: 'cost'='425'
 main: status: track
 main: input '= cost 455'
 main: field: 'cost'='455'
+xpath_01: duplicate sibling name: 'cost'
 main: status: track
 main: input '= mode mode'
 main: field: 'mode'='mode'
@@ -3851,24 +3946,29 @@ main: field: 'pre'='that'
 main: status: track
 main: input '= links 3'
 main: field: 'links'='3'
+xpath_01: duplicate sibling name: 'links'
 main: status: track
 main: input '= post this'
 main: field: 'post'='this'
 main: status: track
 main: input '= mode /some/file'
 main: field: 'mode'='/some/file'
+xpath_01: duplicate sibling name: 'mode'
 main: status: track
 main: input '= mode_octal 640'
 main: field: 'mode_octal'='640'
+xpath_01: duplicate sibling name: 'mode_octal'
 main: status: track
 main: input '= links 1'
 main: field: 'links'='1'
 main: status: track
 main: input '= user user'
 main: field: 'user'='user'
+xpath_01: duplicate sibling name: 'user'
 main: status: track
 main: input '= group group'
 main: field: 'group'='group'
+xpath_01: duplicate sibling name: 'group'
 main: status: track
 main: input '= one 1'
 main: field: 'one'='1'
@@ -3881,12 +3981,15 @@ main: field: 'three'='3'
 main: status: track
 main: input '= one 1'
 main: field: 'one'='1'
+xpath_01: duplicate sibling name: 'one'
 main: status: track
 main: input '= two 2'
 main: field: 'two'='2'
+xpath_01: duplicate sibling name: 'two'
 main: status: track
 main: input '= three 3'
 main: field: 'three'='3'
+xpath_01: duplicate sibling name: 'three'
 main: status: track
 main: input '= one 1'
 main: field: 'one'='1'
@@ -3932,6 +4035,7 @@ main: field: 'thing'='one'
 main: status: track
 main: input '= thing two'
 main: field: 'thing'='two'
+xpath_01: duplicate sibling name: 'thing'
 main: status: track
 main: input '= thing three'
 main: field: 'thing'='three'
@@ -3950,6 +4054,7 @@ main: field: 'type'='ethernet'
 main: status: track
 main: input '= type bridge'
 main: field: 'type'='bridge'
+xpath_01: duplicate sibling name: 'type'
 main: status: track
 main: input '= type 18u'
 main: field: 'type'='18u'
@@ -3965,9 +4070,11 @@ main: field: 'port'='1'
 main: status: track
 main: input '= address 0x0'
 main: field: 'address'='0x0'
+xpath_01: duplicate sibling name: 'address'
 main: status: track
 main: input '= port 1'
 main: field: 'port'='1'
+xpath_01: duplicate sibling name: 'port'
 main: status: track
 main: input '= address 0x0'
 main: field: 'address'='0x0'
@@ -3992,9 +4099,11 @@ main: field: 'domain'='example.com'
 main: status: track
 main: input '= host my-box'
 main: field: 'host'='my-box'
+xpath_01: duplicate sibling name: 'host'
 main: status: track
 main: input '= domain example.com'
 main: field: 'domain'='example.com'
+xpath_01: duplicate sibling name: 'domain'
 main: status: track
 main: input '= label value'
 main: field: 'label'='value'
@@ -4314,6 +4423,7 @@ main: attr: 'test4'='value4'
 main: status: track
 main: input '= item gum'
 main: field: 'item'='gum'
+xpath_01: duplicate sibling name: 'item'
 main: status: track
 main: input '@ test4 value4'
 main: attr: 'test4'='value4'
@@ -4348,6 +4458,7 @@ main: input '@ test value'
 main: attr: 'test'='value'
 main: status: track
 main: input '+ data'
+xpath_01: duplicate sibling name: 'data'
 main: filter: rc: 18
 main: status: track
 main: input '{ item'
@@ -4490,6 +4601,7 @@ main: field: 'cost'='425'
 main: status: track
 main: input '= cost 455'
 main: field: 'cost'='455'
+xpath_01: duplicate sibling name: 'cost'
 main: status: track
 main: input '= mode mode'
 main: field: 'mode'='mode'
@@ -4511,24 +4623,29 @@ main: field: 'pre'='that'
 main: status: track
 main: input '= links 3'
 main: field: 'links'='3'
+xpath_01: duplicate sibling name: 'links'
 main: status: track
 main: input '= post this'
 main: field: 'post'='this'
 main: status: track
 main: input '= mode /some/file'
 main: field: 'mode'='/some/file'
+xpath_01: duplicate sibling name: 'mode'
 main: status: track
 main: input '= mode_octal 640'
 main: field: 'mode_octal'='640'
+xpath_01: duplicate sibling name: 'mode_octal'
 main: status: track
 main: input '= links 1'
 main: field: 'links'='1'
 main: status: track
 main: input '= user user'
 main: field: 'user'='user'
+xpath_01: duplicate sibling name: 'user'
 main: status: track
 main: input '= group group'
 main: field: 'group'='group'
+xpath_01: duplicate sibling name: 'group'
 main: status: track
 main: input '= one 1'
 main: field: 'one'='1'
@@ -4541,12 +4658,15 @@ main: field: 'three'='3'
 main: status: track
 main: input '= one 1'
 main: field: 'one'='1'
+xpath_01: duplicate sibling name: 'one'
 main: status: track
 main: input '= two 2'
 main: field: 'two'='2'
+xpath_01: duplicate sibling name: 'two'
 main: status: track
 main: input '= three 3'
 main: field: 'three'='3'
+xpath_01: duplicate sibling name: 'three'
 main: status: track
 main: input '= one 1'
 main: field: 'one'='1'
@@ -4591,6 +4711,7 @@ main: field: 'thing'='one'
 main: status: track
 main: input '= thing two'
 main: field: 'thing'='two'
+xpath_01: duplicate sibling name: 'thing'
 main: status: track
 main: input '= thing three'
 main: field: 'thing'='three'
@@ -4609,6 +4730,7 @@ main: field: 'type'='ethernet'
 main: status: track
 main: input '= type bridge'
 main: field: 'type'='bridge'
+xpath_01: duplicate sibling name: 'type'
 main: status: track
 main: input '= type 18u'
 main: field: 'type'='18u'
@@ -4624,9 +4746,11 @@ main: field: 'port'='1'
 main: status: track
 main: input '= address 0x0'
 main: field: 'address'='0x0'
+xpath_01: duplicate sibling name: 'address'
 main: status: track
 main: input '= port 1'
 main: field: 'port'='1'
+xpath_01: duplicate sibling name: 'port'
 main: status: track
 main: input '= address 0x0'
 main: field: 'address'='0x0'
@@ -4651,9 +4775,11 @@ main: field: 'domain'='example.com'
 main: status: track
 main: input '= host my-box'
 main: field: 'host'='my-box'
+xpath_01: duplicate sibling name: 'host'
 main: status: track
 main: input '= domain example.com'
 main: field: 'domain'='example.com'
+xpath_01: duplicate sibling name: 'domain'
 main: status: track
 main: input '= label value'
 main: field: 'label'='value'
@@ -4976,6 +5102,7 @@ main: attr: 'test4'='value4'
 main: status: track
 main: input '= item gum'
 main: field: 'item'='gum'
+xpath_01: duplicate sibling name: 'item'
 main: status: track
 main: input '@ test4 value4'
 main: attr: 'test4'='value4'
@@ -5010,6 +5137,7 @@ main: input '@ test value'
 main: attr: 'test'='value'
 main: status: track
 main: input '+ data'
+xpath_01: duplicate sibling name: 'data'
 main: filter: rc: 18
 main: status: track
 main: input '{ item'
@@ -5154,6 +5282,7 @@ main: field: 'cost'='425'
 main: status: track
 main: input '= cost 455'
 main: field: 'cost'='455'
+xpath_01: duplicate sibling name: 'cost'
 main: status: track
 main: input '= mode mode'
 main: field: 'mode'='mode'
@@ -5175,24 +5304,29 @@ main: field: 'pre'='that'
 main: status: track
 main: input '= links 3'
 main: field: 'links'='3'
+xpath_01: duplicate sibling name: 'links'
 main: status: track
 main: input '= post this'
 main: field: 'post'='this'
 main: status: track
 main: input '= mode /some/file'
 main: field: 'mode'='/some/file'
+xpath_01: duplicate sibling name: 'mode'
 main: status: track
 main: input '= mode_octal 640'
 main: field: 'mode_octal'='640'
+xpath_01: duplicate sibling name: 'mode_octal'
 main: status: track
 main: input '= links 1'
 main: field: 'links'='1'
 main: status: track
 main: input '= user user'
 main: field: 'user'='user'
+xpath_01: duplicate sibling name: 'user'
 main: status: track
 main: input '= group group'
 main: field: 'group'='group'
+xpath_01: duplicate sibling name: 'group'
 main: status: track
 main: input '= one 1'
 main: field: 'one'='1'
@@ -5205,12 +5339,15 @@ main: field: 'three'='3'
 main: status: track
 main: input '= one 1'
 main: field: 'one'='1'
+xpath_01: duplicate sibling name: 'one'
 main: status: track
 main: input '= two 2'
 main: field: 'two'='2'
+xpath_01: duplicate sibling name: 'two'
 main: status: track
 main: input '= three 3'
 main: field: 'three'='3'
+xpath_01: duplicate sibling name: 'three'
 main: status: track
 main: input '= one 1'
 main: field: 'one'='1'
@@ -5252,6 +5389,7 @@ main: field: 'thing'='one'
 main: status: track
 main: input '= thing two'
 main: field: 'thing'='two'
+xpath_01: duplicate sibling name: 'thing'
 main: status: track
 main: input '= thing three'
 main: field: 'thing'='three'
@@ -5270,6 +5408,7 @@ main: field: 'type'='ethernet'
 main: status: track
 main: input '= type bridge'
 main: field: 'type'='bridge'
+xpath_01: duplicate sibling name: 'type'
 main: status: track
 main: input '= type 18u'
 main: field: 'type'='18u'
@@ -5285,9 +5424,11 @@ main: field: 'port'='1'
 main: status: track
 main: input '= address 0x0'
 main: field: 'address'='0x0'
+xpath_01: duplicate sibling name: 'address'
 main: status: track
 main: input '= port 1'
 main: field: 'port'='1'
+xpath_01: duplicate sibling name: 'port'
 main: status: track
 main: input '= address 0x0'
 main: field: 'address'='0x0'
@@ -5312,9 +5453,11 @@ main: field: 'domain'='example.com'
 main: status: track
 main: input '= host my-box'
 main: field: 'host'='my-box'
+xpath_01: duplicate sibling name: 'host'
 main: status: track
 main: input '= domain example.com'
 main: field: 'domain'='example.com'
+xpath_01: duplicate sibling name: 'domain'
 main: status: track
 main: input '= label value'
 main: field: 'label'='value'
@@ -5635,6 +5778,7 @@ main: attr: 'test4'='value4'
 main: status: track
 main: input '= item gum'
 main: field: 'item'='gum'
+xpath_01: duplicate sibling name: 'item'
 main: status: track
 main: input '@ test4 value4'
 main: attr: 'test4'='value4'
@@ -5669,6 +5813,7 @@ main: input '@ test value'
 main: attr: 'test'='value'
 main: status: track
 main: input '+ data'
+xpath_01: duplicate sibling name: 'data'
 main: filter: rc: 18
 main: status: track
 main: input '{ item'
@@ -5812,6 +5957,7 @@ main: field: 'cost'='425'
 main: status: track
 main: input '= cost 455'
 main: field: 'cost'='455'
+xpath_01: duplicate sibling name: 'cost'
 main: status: track
 main: input '= mode mode'
 main: field: 'mode'='mode'
@@ -5833,24 +5979,29 @@ main: field: 'pre'='that'
 main: status: track
 main: input '= links 3'
 main: field: 'links'='3'
+xpath_01: duplicate sibling name: 'links'
 main: status: track
 main: input '= post this'
 main: field: 'post'='this'
 main: status: track
 main: input '= mode /some/file'
 main: field: 'mode'='/some/file'
+xpath_01: duplicate sibling name: 'mode'
 main: status: track
 main: input '= mode_octal 640'
 main: field: 'mode_octal'='640'
+xpath_01: duplicate sibling name: 'mode_octal'
 main: status: track
 main: input '= links 1'
 main: field: 'links'='1'
 main: status: track
 main: input '= user user'
 main: field: 'user'='user'
+xpath_01: duplicate sibling name: 'user'
 main: status: track
 main: input '= group group'
 main: field: 'group'='group'
+xpath_01: duplicate sibling name: 'group'
 main: status: track
 main: input '= one 1'
 main: field: 'one'='1'
@@ -5863,12 +6014,15 @@ main: field: 'three'='3'
 main: status: track
 main: input '= one 1'
 main: field: 'one'='1'
+xpath_01: duplicate sibling name: 'one'
 main: status: track
 main: input '= two 2'
 main: field: 'two'='2'
+xpath_01: duplicate sibling name: 'two'
 main: status: track
 main: input '= three 3'
 main: field: 'three'='3'
+xpath_01: duplicate sibling name: 'three'
 main: status: track
 main: input '= one 1'
 main: field: 'one'='1'
@@ -5908,6 +6062,7 @@ main: field: 'thing'='one'
 main: status: track
 main: input '= thing two'
 main: field: 'thing'='two'
+xpath_01: duplicate sibling name: 'thing'
 main: status: track
 main: input '= thing three'
 main: field: 'thing'='three'
@@ -5926,6 +6081,7 @@ main: field: 'type'='ethernet'
 main: status: track
 main: input '= type bridge'
 main: field: 'type'='bridge'
+xpath_01: duplicate sibling name: 'type'
 main: status: track
 main: input '= type 18u'
 main: field: 'type'='18u'
@@ -5941,9 +6097,11 @@ main: field: 'port'='1'
 main: status: track
 main: input '= address 0x0'
 main: field: 'address'='0x0'
+xpath_01: duplicate sibling name: 'address'
 main: status: track
 main: input '= port 1'
 main: field: 'port'='1'
+xpath_01: duplicate sibling name: 'port'
 main: status: track
 main: input '= address 0x0'
 main: field: 'address'='0x0'
@@ -5968,9 +6126,11 @@ main: field: 'domain'='example.com'
 main: status: track
 main: input '= host my-box'
 main: field: 'host'='my-box'
+xpath_01: duplicate sibling name: 'host'
 main: status: track
 main: input '= domain example.com'
 main: field: 'domain'='example.com'
+xpath_01: duplicate sibling name: 'domain'
 main: status: track
 main: input '= label value'
 main: field: 'label'='value'
@@ -6287,6 +6447,7 @@ main: attr: 'test4'='value4'
 main: status: track
 main: input '= item gum'
 main: field: 'item'='gum'
+xpath_01: duplicate sibling name: 'item'
 main: status: track
 main: input '@ test4 value4'
 main: attr: 'test4'='value4'
@@ -6321,6 +6482,7 @@ main: input '@ test value'
 main: attr: 'test'='value'
 main: status: track
 main: input '+ data'
+xpath_01: duplicate sibling name: 'data'
 main: filter: rc: 18
 main: status: track
 main: input '{ item'
@@ -6462,6 +6624,7 @@ main: field: 'cost'='425'
 main: status: track
 main: input '= cost 455'
 main: field: 'cost'='455'
+xpath_01: duplicate sibling name: 'cost'
 main: status: track
 main: input '= mode mode'
 main: field: 'mode'='mode'
@@ -6483,24 +6646,29 @@ main: field: 'pre'='that'
 main: status: track
 main: input '= links 3'
 main: field: 'links'='3'
+xpath_01: duplicate sibling name: 'links'
 main: status: track
 main: input '= post this'
 main: field: 'post'='this'
 main: status: track
 main: input '= mode /some/file'
 main: field: 'mode'='/some/file'
+xpath_01: duplicate sibling name: 'mode'
 main: status: track
 main: input '= mode_octal 640'
 main: field: 'mode_octal'='640'
+xpath_01: duplicate sibling name: 'mode_octal'
 main: status: track
 main: input '= links 1'
 main: field: 'links'='1'
 main: status: track
 main: input '= user user'
 main: field: 'user'='user'
+xpath_01: duplicate sibling name: 'user'
 main: status: track
 main: input '= group group'
 main: field: 'group'='group'
+xpath_01: duplicate sibling name: 'group'
 main: status: track
 main: input '= one 1'
 main: field: 'one'='1'
@@ -6513,12 +6681,15 @@ main: field: 'three'='3'
 main: status: track
 main: input '= one 1'
 main: field: 'one'='1'
+xpath_01: duplicate sibling name: 'one'
 main: status: track
 main: input '= two 2'
 main: field: 'two'='2'
+xpath_01: duplicate sibling name: 'two'
 main: status: track
 main: input '= three 3'
 main: field: 'three'='3'
+xpath_01: duplicate sibling name: 'three'
 main: status: track
 main: input '= one 1'
 main: field: 'one'='1'
@@ -6558,6 +6729,7 @@ main: field: 'thing'='one'
 main: status: track
 main: input '= thing two'
 main: field: 'thing'='two'
+xpath_01: duplicate sibling name: 'thing'
 main: status: track
 main: input '= thing three'
 main: field: 'thing'='three'
@@ -6576,6 +6748,7 @@ main: field: 'type'='ethernet'
 main: status: track
 main: input '= type bridge'
 main: field: 'type'='bridge'
+xpath_01: duplicate sibling name: 'type'
 main: status: track
 main: input '= type 18u'
 main: field: 'type'='18u'
@@ -6591,9 +6764,11 @@ main: field: 'port'='1'
 main: status: track
 main: input '= address 0x0'
 main: field: 'address'='0x0'
+xpath_01: duplicate sibling name: 'address'
 main: status: track
 main: input '= port 1'
 main: field: 'port'='1'
+xpath_01: duplicate sibling name: 'port'
 main: status: track
 main: input '= address 0x0'
 main: field: 'address'='0x0'
@@ -6618,9 +6793,11 @@ main: field: 'domain'='example.com'
 main: status: track
 main: input '= host my-box'
 main: field: 'host'='my-box'
+xpath_01: duplicate sibling name: 'host'
 main: status: track
 main: input '= domain example.com'
 main: field: 'domain'='example.com'
+xpath_01: duplicate sibling name: 'domain'
 main: status: track
 main: input '= label value'
 main: field: 'label'='value'
@@ -6937,6 +7114,7 @@ main: attr: 'test4'='value4'
 main: status: track
 main: input '= item gum'
 main: field: 'item'='gum'
+xpath_01: duplicate sibling name: 'item'
 main: status: track
 main: input '@ test4 value4'
 main: attr: 'test4'='value4'
@@ -6971,6 +7149,7 @@ main: input '@ test value'
 main: attr: 'test'='value'
 main: status: track
 main: input '+ data'
+xpath_01: duplicate sibling name: 'data'
 main: filter: rc: 18
 main: status: track
 main: input '{ item'
@@ -7112,6 +7291,7 @@ main: field: 'cost'='425'
 main: status: track
 main: input '= cost 455'
 main: field: 'cost'='455'
+xpath_01: duplicate sibling name: 'cost'
 main: status: track
 main: input '= mode mode'
 main: field: 'mode'='mode'
@@ -7133,24 +7313,29 @@ main: field: 'pre'='that'
 main: status: track
 main: input '= links 3'
 main: field: 'links'='3'
+xpath_01: duplicate sibling name: 'links'
 main: status: track
 main: input '= post this'
 main: field: 'post'='this'
 main: status: track
 main: input '= mode /some/file'
 main: field: 'mode'='/some/file'
+xpath_01: duplicate sibling name: 'mode'
 main: status: track
 main: input '= mode_octal 640'
 main: field: 'mode_octal'='640'
+xpath_01: duplicate sibling name: 'mode_octal'
 main: status: track
 main: input '= links 1'
 main: field: 'links'='1'
 main: status: track
 main: input '= user user'
 main: field: 'user'='user'
+xpath_01: duplicate sibling name: 'user'
 main: status: track
 main: input '= group group'
 main: field: 'group'='group'
+xpath_01: duplicate sibling name: 'group'
 main: status: track
 main: input '= one 1'
 main: field: 'one'='1'
@@ -7163,12 +7348,15 @@ main: field: 'three'='3'
 main: status: track
 main: input '= one 1'
 main: field: 'one'='1'
+xpath_01: duplicate sibling name: 'one'
 main: status: track
 main: input '= two 2'
 main: field: 'two'='2'
+xpath_01: duplicate sibling name: 'two'
 main: status: track
 main: input '= three 3'
 main: field: 'three'='3'
+xpath_01: duplicate sibling name: 'three'
 main: status: track
 main: input '= one 1'
 main: field: 'one'='1'

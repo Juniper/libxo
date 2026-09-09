@@ -20,167 +20,7 @@
 
 #include <getopt.h>		/* Include after xo.h for testing */
 
-#ifndef UNUSED
-#define UNUSED __attribute__ ((__unused__))
-#endif /* UNUSED */
-
-static int opt_warn;		/* Enable warnings */
-
-static char **save_argv;
-static char **checkpoint_argv;
-
-static char *
-next_arg (void)
-{
-    char *cp = *save_argv;
-
-    if (cp == NULL)
-	xo_errx(1, "missing argument");
-
-    save_argv += 1;
-    return cp;
-}
-
-static void
-prep_arg (char *fmt)
-{
-    char *cp, *fp;
-
-    for (cp = fp = fmt; *cp; cp++, fp++) {
-	if (*cp != '\\') {
-	    if (cp != fp)
-		*fp = *cp;
-	    continue;
-	}
-
-	switch (*++cp) {
-	case 'n':
-	    *fp = '\n';
-	    break;
-
-	case 'r':
-	    *fp = '\r';
-	    break;
-
-	case 'b':
-	    *fp = '\b';
-	    break;
-
-	case 'e':
-	    *fp = '\e';
-	    break;
-
-	default:
-	    *fp = *cp;
-	}
-    }
-
-    *fp = '\0';
-}
-
-static void
-checkpoint (xo_handle_t *xop UNUSED, va_list vap UNUSED, int restore)
-{
-    if (restore)
-	save_argv = checkpoint_argv;
-    else
-	checkpoint_argv = save_argv;
-}
-
-/*
- * Our custom formatter is responsible for combining format string pieces
- * with our command line arguments to build strings.  This involves faking
- * some printf-style logic.
- */
-static xo_ssize_t
-formatter (xo_handle_t *xop, char *buf, xo_ssize_t bufsiz,
-	   const char *fmt, va_list vap UNUSED)
-{
-    /* printf-style formatting flags, currently ignored */
-    int lflag UNUSED = 0, hflag UNUSED = 0, jflag UNUSED = 0,
-	tflag UNUSED = 0, zflag UNUSED = 0, qflag UNUSED = 0;
-    int star1 = 0, star2 = 0;
-    int rc = 0;
-    int w1 = 0, w2 = 0;
-    const char *cp;
-
-    for (cp = fmt + 1; *cp; cp++) {
-	if (*cp == 'l')
-	    lflag += 1;
-	else if (*cp == 'h')
-	    hflag += 1;
-	else if (*cp == 'j')
-	    jflag += 1;
-	else if (*cp == 't')
-	    tflag += 1;
-	else if (*cp == 'z')
-	    zflag += 1;
-	else if (*cp == 'q')
-	    qflag += 1;
-	else if (*cp == '*') {
-	    if (star1 == 0)
-		star1 = 1;
-	    else
-		star2 = 1;
-	} else if (strchr("diouxXDOUeEfFgGaAcCsSp", *cp) != NULL)
-	    break;
-	else if (*cp == 'n' || *cp == 'v') {
-	    if (opt_warn)
-		xo_error_h(xop, "unsupported format: '%s'", fmt);
-	    return -1;
-	}
-    }
-
-    char fc = *cp;
-
-    /* Handle "%*.*s" */
-    if (star1)
-	w1 = strtol(next_arg(), NULL, 0);
-    if (star2 > 1)
-	w2 = strtol(next_arg(), NULL, 0);
-
-    if (fc == 'D' || fc == 'O' || fc == 'U')
-	lflag = 1;
-
-    if (strchr("diD", fc) != NULL) {
-	long long value = strtoll(next_arg(), NULL, 0);
-	if (star1 && star2)
-	    rc = snprintf(buf, bufsiz, fmt, w1, w2, value);
-	else if (star1)
-	    rc = snprintf(buf, bufsiz, fmt, w1, value);
-	else
-	    rc = snprintf(buf, bufsiz, fmt, value);
-
-    } else if (strchr("ouxXOUp", fc) != NULL) {
-	unsigned long long value = strtoull(next_arg(), NULL, 0);
-	if (star1 && star2)
-	    rc = snprintf(buf, bufsiz, fmt, w1, w2, value);
-	else if (star1)
-	    rc = snprintf(buf, bufsiz, fmt, w1, value);
-	else
-	    rc = snprintf(buf, bufsiz, fmt, value);
-
-    } else if (strchr("eEfFgGaA", fc) != NULL) {
-	double value = strtold(next_arg(), NULL);
-	if (star1 && star2)
-	    rc = snprintf(buf, bufsiz, fmt, w1, w2, value);
-	else if (star1)
-	    rc = snprintf(buf, bufsiz, fmt, w1, value);
-	else
-	    rc = snprintf(buf, bufsiz, fmt, value);
-
-    } else if (fc == 'C' || fc == 'c' || fc == 'S' || fc == 's') {
-	char *value = next_arg();
-	if (star1 && star2)
-	    rc = snprintf(buf, bufsiz, fmt, w1, w2, value);
-	else if (star1)
-	    rc = snprintf(buf, bufsiz, fmt, w1, value);
-	else
-	    rc = snprintf(buf, bufsiz, fmt, value);
-    }
-
-    return rc;
-}
+#include "xo_cli_helpers.h"
 
 static void
 print_version (void)
@@ -192,8 +32,11 @@ print_version (void)
 }
 
 static void
-print_help (void)
+print_help (const char *message)
 {
+    if (message)
+	fprintf(stderr, "xo: invalid arguments: %s\n\n", message);
+
     fprintf(stderr,
 "Usage: xo [options] format [fields]\n"
 "    --close <path>        Close tags for the given path\n"
@@ -287,15 +130,16 @@ main (int argc UNUSED, char **argv)
     if (argc < 0)
 	return 1;
 
-    while ((rc = getopt_long(argc, argv, "Cc:HJl:O:o:ps:TXW",
+    while ((rc = getopt_long(argc, argv, "Cc:HI:Jl:O:o:ps:TXW",
 				long_opts, NULL)) != -1) {
+
 	switch (rc) {
 	case 'C':
 	    xo_set_flags(NULL, XOF_CONTINUATION);
 	    break;
 
 	case 'c':
-	    opt_closer = optarg;
+	    opt_closer = get_arg(optarg, "close tag path");
 	    xo_set_flags(NULL, XOF_IGNORE_CLOSE);
 	    break;
 
@@ -304,7 +148,7 @@ main (int argc UNUSED, char **argv)
 	    break;
 
 	case 'I':
-	    opt_instance = optarg;
+	    opt_instance = get_arg(optarg, "instance name");
 	    break;
 
 	case 'J':
@@ -312,15 +156,15 @@ main (int argc UNUSED, char **argv)
 	    break;
 
 	case 'l':
-	    xo_set_leading_xpath(NULL, optarg);
+	    xo_set_leading_xpath(NULL, get_arg(optarg, "leading xpath"));
 	    break;
 
 	case 'O':
-	    opt_options = optarg;
+	    opt_options = get_arg(optarg, "formatter options");
 	    break;
 
 	case 'o':
-	    opt_opener = optarg;
+	    opt_opener = get_arg(optarg, "opening tag path");
 	    break;
 
 	case 'p':
@@ -328,7 +172,7 @@ main (int argc UNUSED, char **argv)
 	    break;
 
 	case 's':
-	    if (xo_set_style_name(NULL, optarg) < 0)
+	    if (xo_set_style_name(NULL, get_arg(optarg, "libxo style")) < 0)
 		xo_errx(1, "unknown style: %s", optarg);
 	    break;
 
@@ -351,10 +195,10 @@ main (int argc UNUSED, char **argv)
 
 	case 0:
 	    if (opts.o_depth) {
-		opt_depth = atoi(optarg);
-		
+		opt_depth = atoi(get_arg(optarg, "depth"));
+
 	    } else if (opts.o_help) {
-		print_help();
+		print_help(NULL);
 		return 1;
 
 	    } else if (opts.o_not_first) {
@@ -372,7 +216,7 @@ main (int argc UNUSED, char **argv)
 		xo_set_flags(NULL, XOF_WARN | XOF_WARN_XML);
 
 	    } else if (opts.o_wrap) {
-		opt_wrapper = optarg;
+		opt_wrapper = get_arg(optarg, "wrapping tag path");
 
 	    } else if (opts.o_top_wrap) {
 		opt_top_wrap = 1;
@@ -380,37 +224,37 @@ main (int argc UNUSED, char **argv)
 	    } else if (opts.o_open_list) {
 		if (opt_name)
 		    xo_errx(1, "only one open/close list/instance allowed: %s",
-			    optarg);
+			    get_arg(optarg, "list name"));
 
-		opt_name = optarg;
+		opt_name = get_arg(optarg, "list name");
 		new_state = XSS_OPEN_LIST;
 
 	    } else if (opts.o_open_instance) {
 		if (opt_name)
 		    xo_errx(1, "only one open/close list/instance allowed: %s",
-			    optarg);
+			    get_arg(optarg, "instance name"));
 
-		opt_name = optarg;
+		opt_name = get_arg(optarg, "instance name");
 		new_state = XSS_OPEN_INSTANCE;
 
 	    } else if (opts.o_close_list) {
 		if (opt_name)
 		    xo_errx(1, "only one open/close list/instance allowed: %s",
-			    optarg);
+			    get_arg(optarg, "list name"));
 
-		opt_name = optarg;
+		opt_name = get_arg(optarg, "list name");
 		new_state = XSS_CLOSE_LIST;
 
 	    } else if (opts.o_close_instance) {
 		if (opt_name)
 		    xo_errx(1, "only one open/close list/instance allowed: %s",
-			    optarg);
+			    get_arg(optarg, "instance name"));
 
-		opt_name = optarg;
+		opt_name = get_arg(optarg, "instance name");
 		new_state = XSS_CLOSE_INSTANCE;
 
 	    } else {
-		print_help();
+		print_help(argv[optind]);
 		return 1;
 	    }
 
@@ -418,7 +262,7 @@ main (int argc UNUSED, char **argv)
 	    break;
 
 	default:
-	    print_help();
+	    print_help(argv[optind]);
 	    return 1;
 	}
     }
@@ -430,6 +274,13 @@ main (int argc UNUSED, char **argv)
 	rc = xo_set_options(NULL, opt_options);
 	if (rc < 0)
 	    xo_errx(1, "invalid options: %s", opt_options);
+    }
+
+    fmt = *argv++;
+    if (opt_opener == NULL && opt_closer == NULL && fmt == NULL &&
+		opt_name == NULL) {
+	print_help("missing format, input file, list or container name ");
+	return 1;
     }
 
     xo_set_formatter(NULL, formatter, checkpoint);
@@ -449,12 +300,6 @@ main (int argc UNUSED, char **argv)
 	xo_explicit_transition(NULL, new_state, opt_name, 0);
 	xo_finish();
 	exit(0);
-    }
-
-    fmt = *argv++;
-    if (opt_opener == NULL && opt_closer == NULL && fmt == NULL) {
-	print_help();
-	return 1;
     }
 
     if (opt_top_wrap) {
@@ -518,7 +363,7 @@ main (int argc UNUSED, char **argv)
 
     if (opt_instance)
 	xo_close_instance(opt_instance);
-    
+
     /* If there's an wrapper hierarchy, close each element's container */
     while (opt_wrapper) {
 	np = strrchr(opt_wrapper, '/');

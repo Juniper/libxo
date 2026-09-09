@@ -48,11 +48,14 @@ correspond to output styles, flags, or features:
   filter-warn     Emit warnings for runtime filter errors (stderr)
   flush           Flush after every libxo function call
   flush-line      Flush after every line (line-buffered)
+  group           Insert locale thousands separators into decimal integers
+  grouping=xxxx   Override the locale's thousands separator/grouping shape
   html            Emit HTML output
   indent=xx       Set the indentation level
   info            Add info attributes (HTML)
   json            Emit JSON output
   keys            Emit the key attribute for keys (XML)
+  lint            Perform semantic checks on format strings at run time
   log-gettext     Log (via stderr) each gettext(3) string lookup
   log-syslog      Log (via stderr) each syslog message (via xo_syslog)
   map             Map between tag names
@@ -90,10 +93,16 @@ additional details:
   with filter expressions.  See also :ref:`filter-warn`.
 - "flush-line" performs line buffering, even when the output is not
   directed to a TTY device.
+- "group" requests insertion of the locale "thousands separator" into
+  integer fields.  See :ref:`integer-grouping` for details.
+- "grouping=xxxx" overrides the locale's separator and grouping width.
+  See :ref:`integer-grouping` for details.
 - "info" generates additional data for HTML, encoded in attributes
   using names that state with "data-".
 - "keys" adds a "key" attribute for XML output to indicate that a leaf
   is an identifier for the list member.
+- "lint" enables semantic validation of `xo_emit()` format strings at
+  run time, issuing warnings as issues are found.
 - "map" and "map-file" are described in :ref:`tag-mapping`.
 - "no-cache" forces libxo to parse every format string at run time,
   even for calls a build-time tool has precompiled into a cached field
@@ -113,6 +122,53 @@ additional details:
 - "warn-xml" causes those warnings to be placed in XML inside the
   output.
 
+.. _integer-grouping:
+
+Integer Grouping
+----------------
+
+Integer grouping allows numbers to be displaying using separators to
+enhance readability (e.g. "331,449,281" instead of "331449281").
+
+Integer groupings are only performed in the "display" styles (TEXT and
+HTML).  Full numbers are always generated for the "encoding" styles
+(XML, JSON, etc).
+
+Integer groupings are only performed on decimal integer values,
+meaning those with "%d", "%u" or "%i" formats, and does not work on
+any hexadecimal format ("%x" or "%X").  Additionally is does not work
+for fields that have requested leading zeroes (e.g. "%05d".
+
+Grouping relies on four items:
+
+- The separator is the character placed between the groups of digits
+  (e.g. the comma in the example about).
+
+- The digits grouping is the size of each group of digits, with the
+  right-most grouping listed first, followed by a series of numbers for
+  each group.  If the grouping ends with "-1", not further groups are
+  needed, otherwise the last size given applies for any additional
+  groups.  The most common groupings are "3", "3:2", and "4".
+
+- The '{i:}' modifier (aka "{:,int-group}") allows the developer to
+  flag a particular field as wanting integer groupings.
+
+- The "--libxo group" option instructs `libxo` to perform integer
+  grouping on any suitable integer.  In this situation, `libxo` may
+  perform groupings on fields that are not specifically integers (e.g
+  model numbers), and may be used on fields that are monetary units,
+  which may have distinct separators or digit group sizes.
+
+`libxo` gains the separator and digit groupings from the locale, if
+available, or defaults to using comma as the separator and "3" as the
+digit grouping.
+
+In addition, the "--libxo grouping=" option allows these value to be
+specified directly.  The value for this option is the separator
+character followed by digit groupings, each separated with a plus
+("+").  For example, "--libxo groupings=:+3" would generate number
+like "1:234:567".
+
 Brief Options
 -------------
 
@@ -125,6 +181,7 @@ keywords, as detailed below:
    c        Enable color/effects for TEXT/HTML
    f        Flush output after each emit (XOF_FLUSH)
    F        Force line-buffered flushing (XOF_FLUSH_LINE)
+   G        Insert locale thousands separators (XOF_GROUP)
    H        Enable HTML output (XO_STYLE_HTML)
    I        Enable info output (XOF_INFO)
    i<num>   Indent by <number>

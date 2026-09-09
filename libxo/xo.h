@@ -117,6 +117,8 @@ typedef unsigned long long xo_xof_flags_t;
 
 #define XOF_NO_TOP_LEVEL XOF_BIT(36) /** Don't make a fake top-level tag */
 #define XOF_FILTER_WARN	XOF_BIT(37)  /** Warn about runtime errors w/ filters */
+#define XOF_GROUP	XOF_BIT(38)  /** Insert locale thousands separators */
+#define XOF_LINT	XOF_BIT(39)  /** Warn about lint issues */
 
 typedef unsigned xo_emit_flags_t; /* Flags to xo_emit() and friends */
 #define XOEF_RETAIN	0	  /* Deprecated: retain feature removed */
@@ -135,7 +137,7 @@ typedef uint64_t xo_xff_flags_t;
 #define XFF_ENCODE_ONLY	(1<<3)	/* Only emit for encoding styles (XML, JSON) */
 
 #define XFF_QUOTE	(1<<4)	/* Force quotes */
-#define XFF_NOQUOTE	(1<<5)	/* Force no quotes */
+#define XFF_NO_QUOTE	(1<<5)	/* Force no quotes */
 #define XFF_DISPLAY_ONLY (1<<6)	/* Only emit for display styles (text, html) */
 #define XFF_KEY		(1<<7)	/* Field is a key (for XPath) */
 
@@ -162,9 +164,15 @@ typedef uint64_t xo_xff_flags_t;
 #define XFF_ESC_PRIVATE (1<<24)	/* Escape XML ctrl chars as private (0xe000) */
 #define XFF_SKIP	(1<<25)	/* Skip this field (runtime state, not
 				   parse data; never cached) */
+#define XFF_NO_UNESCAPE (1<<26) /* Ignore XFF_UNESCAPE */
+#define XFF_UNITS_ATTR  (1<<27)	/* Units only appear in attribute */
+#define XFF_FIRST_CAP	(1<<28)	/* First letter get capitalized (toupper) */
+#define XFF_INT_GROUP	(1<<29) /* Integer group: an int that wants grouping */
 
 /* Flags to turn off when we don't want i18n processing */
 #define XFF_GT_FLAGS (XFF_GT_FIELD | XFF_GT_PLURAL)
+
+#define XFF_NOQUOTE XFF_NO_QUOTE /* Backwards compatible with bad name */
 
 /*
  * xo_format_offset_t: signed byte offset into a format string.
@@ -859,6 +867,43 @@ xo_set_syslog_handler (xo_syslog_open_t open_func, xo_syslog_send_t send_func,
 
 void
 xo_set_syslog_enterprise_id (unsigned short eid);
+
+void
+xo_syslog_set_pid (pid_t pid);
+
+typedef void (*xo_syslog_setup_t)(xo_handle_t *xop, unsigned op);
+#define XSUP_INIT	1
+#define XSUP_REINIT	2
+
+void
+xo_syslog_set_setup (xo_syslog_setup_t func);
+
+/*
+ * Networking support for remote syslog delivery (e.g. the "xo-logger"
+ * command's -h/-4/-6/-A/-S/-P/-H options).  All name/service resolution
+ * (gethostbyname(3), getservbyname(3), etc.) is the caller's
+ * responsibility; these functions only accept already-resolved values.
+ */
+struct hostent;
+struct sockaddr;
+
+void
+xo_log_set_hostname (const char *hostname);
+
+void
+xo_log_set_host (struct hostent *hp);
+
+void
+xo_log_set_host_path (const char *path);
+
+void
+xo_log_set_port (int port);
+
+void
+xo_log_set_source (struct sockaddr *sa, unsigned salen);
+
+void
+xo_log_set_all_addresses (int value);
 
 typedef void (*xo_simplify_field_func_t)(const char *, unsigned, int);
 

@@ -165,7 +165,6 @@ xo_name_lookup (xo_flag_mapping_t *map, const char *value, ssize_t len)
     return 0;
 }
 
-#ifdef NOT_NEEDED_YET
 static const char *
 xo_value_lookup (xo_flag_mapping_t *map, xo_xff_flags_t value)
 {
@@ -178,15 +177,15 @@ xo_value_lookup (xo_flag_mapping_t *map, xo_xff_flags_t value)
 
     return NULL;
 }
-#endif /* NOT_NEEDED_YET */
 
 /*
  * Role and modifier tables
  */
-static xo_flag_mapping_t xo_role_names[] = {
+xo_flag_mapping_t xo_role_names[] = {
     { 'C', "color" },
     { 'D', "decoration" },
     { 'E', "error" },
+    { 'F', "format" },
     { 'L', "label" },
     { 'N', "note" },
     { 'P', "padding" },
@@ -208,26 +207,38 @@ static xo_flag_mapping_t xo_modifier_names[] = {
     { XFF_ESC_PRIVATE, "escape-private" },
     { XFF_ESC_SLASH, "escape-slash" },
     { XFF_ESC_SQUARE, "escape-square" },
+    { XFF_FIRST_CAP, "first-cap" },
     { XFF_GT_FIELD, "gettext" },
     { XFF_HUMANIZE, "humanize" },
     { XFF_HUMANIZE, "hn" },
     { XFF_HN_SPACE, "hn-space" },
     { XFF_HN_DECIMAL, "hn-decimal" },
     { XFF_HN_1000, "hn-1000" },
+    { XFF_INT_GROUP, "int-group" },
     { XFF_KEY, "key" },
     { XFF_LEAF_LIST, "leaf-list" },
     { XFF_LEAF_LIST, "list" },
-    { XFF_NOQUOTE, "no-quotes" },
-    { XFF_NOQUOTE, "no-quote" },
+    { XFF_NO_QUOTE, "no-quotes" },
+    { XFF_NO_QUOTE, "no-quote" },
     { XFF_GT_PLURAL, "plural" },
     { XFF_QUOTE, "quotes" },
     { XFF_QUOTE, "quote" },
     { XFF_TRIM_WS, "trim" },
+    { XFF_UNITS_ATTR, "units-attr" },
     { XFF_WS, "white" },
     { 0, NULL }
 };
 
 const char xo_default_format[] = "%s";
+
+/*
+ * Look up the name of a role
+ */
+const char *
+xo_lookup_role_name (uint32_t value)
+{
+    return xo_value_lookup(xo_role_names, value);
+}
 
 int
 xo_role_wants_default_format (int ftype)
@@ -319,6 +330,17 @@ xo_parse_format_spec (xo_parse_t *xpp, xo_fspec_t *xfp,
 			       xo_printable2(start, ep - start, TRUE));
 	    else
 		xfp->xf_num_bits = num_bits;
+
+	} else if (*cp == 'J') {
+	    switch (cp[1]) {
+	    case 'N':
+		xfp->xf_extflags |= XXF_NULL_AS_EMPTY;
+		break;
+
+	    default:
+		xo_parse_error(xpp, "unknown 'J' flag: '%s'",
+			       xo_printable2(start, ep - start, TRUE));		
+	    }
 
 	} else if (isdigit((int) *cp)) {
 	    if (xfp->xf_leading_zero < 0)
@@ -573,6 +595,7 @@ xo_parse_roles (xo_parse_t *xpp, const char *fmt,
 	case 'C':
 	case 'D':
 	case 'E':
+	case 'F':
 	case 'G':
 	case 'L':
 	case 'N':
@@ -601,11 +624,13 @@ xo_parse_roles (xo_parse_t *xpp, const char *fmt,
 	case 'c': flags |= XFF_COLON;       break;
 	case 'd': flags |= XFF_DISPLAY_ONLY; break;
 	case 'e': flags |= XFF_ENCODE_ONLY; break;
+	case 'f': flags |= XFF_FIRST_CAP;   break;
 	case 'g': flags |= XFF_GT_FIELD;    break;
 	case 'h': flags |= XFF_HUMANIZE;    break;
+	case 'i': flags |= XFF_INT_GROUP;   break;
 	case 'k': flags |= XFF_KEY;         break;
 	case 'l': flags |= XFF_LEAF_LIST;   break;
-	case 'n': flags |= XFF_NOQUOTE;     break;
+	case 'n': flags |= XFF_NO_QUOTE;    break;
 	case 'p': flags |= XFF_GT_PLURAL;   break;
 	case 'q': flags |= XFF_QUOTE;       break;
 	case 't': flags |= XFF_TRIM_WS;     break;
@@ -676,6 +701,7 @@ xo_parse_field_numbers (xo_parse_t *xpp, const char *fmt,
  * Roles are optional and include the following field types:
  *   'D': decoration; something non-text and non-data (colons, commmas)
  *   'E': error message
+ *   'F': format text
  *   'G': gettext() the entire string; optional domainname as content
  *   'L': label; text preceding data
  *   'N': note; text following data
@@ -960,11 +986,14 @@ xo_parse_fields (xo_parse_t *xpp, const char *fmt, size_t fmt_len)
 	    unsigned nlen = (unsigned)xfip->xfi_clen;
 	    unsigned ni;
 
+#if 0
 	    if (nlen == 0 && !(xfip->xfi_flags & XFF_ARGUMENT)) {
 		xo_parse_error(xpp, "field must have a name: '%s'",
 			       xo_printable2(str, slen, TRUE));
 		return -1;
 	    }
+#endif
+
 	    if (np && nlen) {
 		if (isdigit((unsigned char) np[0])) {
 		    xo_parse_warning(xpp,
@@ -1015,6 +1044,29 @@ xo_parse_fields (xo_parse_t *xpp, const char *fmt, size_t fmt_len)
 				     xo_printable2(str, slen, TRUE));
 		}
 	    }
+
+	    if (xfip->xfi_flags & XFF_INT_GROUP) {
+		if (xfip->xfi_num_fspecs != 1) {
+		    xo_parse_error(xpp,
+				   "'int-group|i' set on field with invalid "
+				   "format: '%s'",
+				   xo_printable2(str, slen, 1));
+		} else {
+		    xo_fspec_t *xfp = &xfip->xfi_fspecs[0]; /* Only one */
+		    int fc = xfp->xf_fc;
+
+		    if (fc != 'd' && fc != 'i' && fc != 'u')
+			xo_parse_error(xpp,
+				   "'int-group|i' set on field with invalid "
+				   "type (%c; must be d|i|u): '%s'", fc,
+				   xo_printable2(str, slen, 1));
+		    else if (xfp->xf_leading_zero)
+			xo_parse_error(xpp,
+				   "'int-group|i' set on field with "
+				   "leading zeroes: '%s'",
+				   xo_printable2(str, slen, 1));
+		}
+	    }
 	}
 
 	if (xfip->xfi_ftype == '[' || xfip->xfi_ftype == ']') {
@@ -1040,7 +1092,7 @@ xo_parse_fields (xo_parse_t *xpp, const char *fmt, size_t fmt_len)
 	    if (format && flen > 0) {
 		/* Anchor width must be "%d" or numeric */
 		if (flen != 2 || format[0] != '%'
-		        || !(format[1] != 'd' || format[1] != 'u')) {
+		        || !(format[1] == 'd' || format[1] == 'u')) {
 		    char *aep = NULL;
 		    (void) strtol(format, &aep, 10);
 		    if (aep != format + flen)

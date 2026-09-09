@@ -19,7 +19,8 @@
 .Op Fl b Ar base
 .Op Fl c Ar command
 .Op Fl f Ar output
-.Op Fl w
+.Op Fl k
+.Op Fl l
 .Op Ar command Op Ar argument ...
 .Sh DESCRIPTION
 .Nm
@@ -41,8 +42,8 @@ standard input is used.
 is typically used to wrap
 .Nm libxo
 output with sufficient HTML content to allow display in a web browser.
-This includes parent HTML tags as well as CSS stylesheets and
-Javascript files.
+This includes parent HTML tags, a CSS stylesheet, and an inlined
+Javascript tooltip.
 .Pp
 If the command is given directly on the command line,
 .Nm
@@ -54,33 +55,66 @@ See
 .Xr xo_options 7
 for details.
 .Pp
+Unless
+.Fl f
+is given,
+.Nm
+writes its output to an automatically named file under
+.Pa /tmp/$USER.xohtml
+and opens it in a browser
+(using
+.Xr open 1
+or
+.Xr xdg-open 1 ,
+whichever is available).
+On each run,
+.Nm
+also removes stale files left behind by earlier runs from that
+directory, unless they were saved with
+.Fl k .
+.Pp
 The following options are available:
 .Bl -tag -width indent
 .It Fl b Ar base | Fl -base Ar base
-Supplies a source path for the CSS and Javascript files referenced in
+Supplies a source path for the CSS stylesheet referenced in
 the output of
 .Nm xohtml .
+Overrides both the default and
+.Fl l .
 .It Fl c Ar command | Fl -command Ar command
 Use the given command instead of one on the command line.
 This command should be quoted if it consists of multiple tokens, and
 should contain the "--libxo=html" option or equivalent, since the
 command is used directly.
 .It Fl f Ar file | Fl -file Ar file
-Output is saved to the given file, rather than to the standard output
-descriptor.
-.It Fl w | --web
-Uses the official
+Output is saved to the given file, rather than to an automatically
+named file, and no browser is opened.
+.It Fl k | Fl -keep
+Saves the generated file under a name that
+.Nm Ns 's
+own cleanup pass will not remove on a later run.
+Only meaningful when
+.Fl f
+is not given.
+.It Fl l | Fl -local
+Uses the installed local copy of the CSS stylesheet, instead of
+fetching it from the official
 .Nm libxo
-website URL as the source path for the CSS and Javascript files
-referenced in the output of
-.Nm xohtml .
+website, which is the default source.
 .El
 .Pp
 .Sh EXAMPLES
-The following command line will run "du --libxo=html ~/src" and save
-the output to /tmp/src.html:
+The following command line will run "du --libxo=html ~/src", write the
+result to an automatically named file under /tmp, and open it in a
+browser:
 .Bd -literal -offset indent
-    xohtml du ~/src > /tmp/src.html
+    xohtml du ~/src
+.Ed
+.Pp
+The following command line will run "du --libxo=html ~/src" and save
+the output to /tmp/src.html without opening a browser:
+.Bd -literal -offset indent
+    xohtml du ~/src -f /tmp/src.html
 .Ed
 .Pp
 The following command line will run "du --libxo=html,warn ~/src" and save

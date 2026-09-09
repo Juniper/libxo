@@ -117,10 +117,10 @@ main (int argc, char **argv)
 	    "[{:min/%15s}] [{:max/%15s}]\n",
 	    "label", "format", 35.7, "format", "format");
 
-    xo_emit("other: {a:}\n", "thing", "one"); /* field before top-level tag */
-    xo_emit("other: {a:%s}\n", "thing", "two"); /* invalid content */
-    xo_emit("other: {a:%s/%s}\n", "thing", "three");  /* same */
-    xo_emit("other: {a:xxx%s/%s}\n", "thing", "four"); /* same */
+    xo_emit("other: {a:}\n", "thing1", "one"); /* field before top-level tag */
+    xo_emit("other: {a:%s}\n", "thing2", "two"); /* invalid content */
+    xo_emit("other: {a:%s/%s}\n", "thing3", "three");  /* same */
+    xo_emit("other: {a:xxx%s/%s}\n", "thing4", "four"); /* same */
 
     xo_emit("Blocks: {:block/%u}\n", 56);
 
@@ -135,7 +135,19 @@ main (int argc, char **argv)
     xo_emit("anchor {[:18}{:address/%p}..{:port/%u}{]:}\n", NULL, 1);
     xo_emit("anchor {[:/18}{:address/%p}..{:port/%u}{]:}\n", NULL, 1);
 
-    xo_emit("df {:used-percent/%5.0f}{U:%%}\n", (double) 12);
+    xo_emit("Random {{text}}\n");
+    xo_emit("not speed {,first-cap:speed} {:was}\n", "100", "100");
+    xo_emit("speed {,first-cap:speed} {:was}\n", "fast", "fast");
+    xo_emit("speedier {:speedier} {:was}\n",
+	    "\xce\xb1soprano", "\xce\xb1soprano");
+    xo_emit("speediserest {,first-cap:speedierest} {:was}\n",
+	    "\xce\xb1 alto", "\xce\xb1 alto");
+    xo_emit("speedid {,first-cap:speedid} {:was}\n",
+	    "\xcf\x88 basso", "\xcf\x88 basso");
+
+    xo_emit("{T:name} {T:Used %}\n");
+    xo_emit("df     {:used-percent/%5.0f}{U,units-attr:%}\n", (double) 12);
+    xo_emit("fd     {:used-percent/%5.0f}{U:%}\n", (double) 12);
 
     xo_emit("{e:kve_start/%#jx}", (uintmax_t) 0xdeadbeef);
     xo_emit("{e:kve_end/%#jx}", (uintmax_t) 0xcabb1e);
@@ -330,6 +342,14 @@ main (int argc, char **argv)
     xo_emit("u31 {:u31/%!31u}, u33 {:u33/%!33u}, u32s {:u32s/%!32s}, "
 	    "unothing {:unothing/%!u}\n",
 	    five_u32, five_u32, "five_u32", five_u32);
+
+    xo_emit("{F:/%dface}\n", 2);
+    xo_emit("{F:static text}\n");
+    xo_emit("{F:both text/see %s}\n");
+    xo_emit("X{F:}X\n", "empty");
+
+    char *nil = NULL;
+    xo_emit("nil: [{:ptr}], nil-as-empty: [{:ptr2/%JNs}]\n", nil, nil);
 
     if (opt_top_count && --opt_top_count > 0)
 	goto top;

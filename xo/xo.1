@@ -36,6 +36,10 @@ using the same commands that emit text output.
 .Bl -tag -width indent
 .It Fl -close Ar path
 Close tags for the given path
+.It Fl -close-instance Ar name
+Close an open instance name
+.It Fl -close-list Ar name
+Close an open list name
 .It Fl C | Fl -continuation
 Indicates this output is a continuation of the previous output data
 and should appear on the same line.
@@ -46,6 +50,11 @@ Set the depth for pretty printing
 Display help text
 .It Fl H | Fl -html
 Generate HTML output
+.It Fl I Ar name | Fl -instance Ar name
+Wrap in an instance of the given name.
+See
+.Sx Lists and Instances
+below.
 .It Fl J | Fl -json
 Generate JSON output
 .It Fl -leading-xpath Ar path
@@ -56,6 +65,18 @@ objects, which is vital information for "JSON" output, which requires
 a comma between such objects.
 .It Fl -open Ar path
 Open tags for the given path
+.It Fl -open-instance Ar name
+Open an instance given by name.
+See
+.Sx Lists and Instances
+below.
+.It Fl -open-list Ar name
+Open a list given by name.
+See
+.Sx Lists and Instances
+below.
+.It Fl O Ar opts | Fl -option Ar opts
+Give formatting options
 .It Fl p | Fl -pretty
 Make 'pretty' output (add indent, newlines)
 .It Fl -style Ar style
@@ -91,6 +112,66 @@ accepts any of the
 .Nm libxo
 options listed in
 .Xr xo_options 7 .
+.Ss Lists and Instances
+A
+.Em list
+is a set of one or more instances that appear under the same parent.
+The instances contain details about a specific object.
+One can think of instances as objects or records.
+A call is needed to open and close the list, while a distinct call
+is needed to open and close each instance of the list.
+.Pp
+Use
+.Fl -open-list
+and
+.Fl -open-instance
+to open lists and instances.
+Use
+.Fl -close-list
+and
+.Fl -close-instance
+to close them.
+Each of these options take a
+.Ar name
+parameter, providing the name of the list and instance.
+.Pp
+In the following example, a list named "machine" is created with
+three instances:
+.Bd -literal -offset indent
+  opts="--json"
+  xo $opts --open-list machine
+  NF=
+  for name in red green blue; do
+      xo $opts --depth 1 $NF --open-instance machine
+      xo $opts --depth 2 "Machine {k:name} has {:memory}\\n" $name 55
+      xo $opts --depth 1 --close-instance machine
+      NF=--not-first
+  done
+  xo $opts $NF --close-list machine
+.Ed
+.Pp
+The normal
+.Nm libxo
+functions use a state machine to help these transitions, but since
+each
+.Nm
+command is invoked independent of the previous calls, the state
+must be passed in explicitly via these command line options.
+.Pp
+The
+.Fl I
+.Pq Fl -instance
+option can be used to treat a single
+.Nm
+invocation as an instance with the given set of fields:
+.Bd -literal -offset indent
+  % xo --libxo:XP --instance foo 'The {:product} is {:status}\\n' \\
+        stereo "in route"
+  <foo>
+    <product>stereo</product>
+    <status>in route</status>
+  </foo>
+.Ed
 .Sh EXAMPLES
 In this example,
 .Nm

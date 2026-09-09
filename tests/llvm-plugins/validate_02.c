@@ -527,6 +527,14 @@ main (int argc, char **argv)
 
     xo_emit("{:missing-encoding/%d/}\n", 1024);
 
+    xo_emit("{d:/this should be %s}\n", "text");
+    xo_emit("{F:/this should be %s}\n", "text");
+
+    xo_emit("works: [{:works/%JNs}], fail: [{:fails/%JZs}]n", NULL, NULL);
+
+    xo_emit("i:leading zero: {i:fail/%05d}\n", 50);
+    xo_emit("i:bad type: {i:fail2/%s}\n", "bad");
+
     fclose(dev_null);
 
     return 0;

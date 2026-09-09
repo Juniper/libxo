@@ -220,6 +220,8 @@ typedef unsigned xo_xsf_flags_t; /* XSF_* flags */
  */
 #define XSF_RB_BITS (XSF_NOT_FIRST | XSF_CONTENT)
 
+typedef uint32_t xo_ident_t;	/* Identifier for lists/instances/etc */
+
 /*
  * Turn the transition between two states into a number suitable for
  * a "switch" statement.
@@ -236,6 +238,7 @@ typedef unsigned xo_xsf_flags_t; /* XSF_* flags */
 #define XO_EXTERR_BRIEF		7 /* Display brief extended error info */
 #define XO_EXTERR_VERBOSE	8 /* Display verbose exterr info */
 #define XO_OPT_NO_CACHE		9 /* Ignore cached field and fspec data */
+#define XO_OPT_GROUPING		10 /* Give specific locale.grouping info */
 
 #define XO_XS_NAMESIZE	64	/* Size of stack's built-in name buffer */
 
@@ -254,7 +257,12 @@ typedef struct xo_stack_s {
     xo_xsf_flags_t xs_rb_flags; /* Parent XSF_RB_BITS  at rb-marker time */
     char *xs_name;		/* Name (for XPath value) */
     char *xs_keys;		/* XPath predicate for any key fields */
+    char *xs_sibnames;		/* NUL-separated names used by this
+				   frame's container/list/value children
+				   so far; only populated when XOF_WARN
+				   is set (see xo_sibling_add) */
     char xs_namebuf[XO_XS_NAMESIZE]; /* Buffer for small xs_names */
+    xo_ident_t xs_ident;	/* HTML: id for list/instances */
 } xo_stack_t;
 
 #define XS_OFFSET_CLEAR -1	/* Used to make a "not in use" offset */
@@ -362,6 +370,7 @@ struct xo_handle_s {
     struct xo_filter_s *xo_filters; /* Opaque data pointer */
 #endif /* LIBXO_NEED_FILTERS */
     xo_xsf_flags_t xo_rb_snap;	/* Transient: parent XSF_RB_BITS before open */
+    xo_ident_t xo_ident;        /* HTML: id for lists and instances*/
 };
 
 /* Flag operations */
@@ -405,6 +414,12 @@ static int xo_locale_inited;
 static const char *xo_program;
 static int xo_codeset_is_utf8;	/* Is stdout UTF-8? */
 static int filter_lib_loaded;
+
+static char *xo_group_sep;      /* Copy of locale's thousands separator */
+static int xo_group_sep_len;    /* strlen(xo_group_sep) */
+static uint64_t xo_group_map;	/* Precomputed grouping-shape map */
+
+#define XO_DEFAULT_GROUP_MAP 0x33333333 /* 3s all the way */
 
 /*
  * To allow libxo to be used in diverse environment, we allow the
@@ -533,18 +548,6 @@ xo_depth_check (xo_handle_t *xop, int depth)
 	bzero(xsp + old_size, count * sizeof(*xsp));
 	xop->xo_stack_size = depth;
 	xop->xo_stack = xsp;
-
-#if 0
-	/*
-	 * bzero sets xs_rb_off/xs_key_off/xs_tag_end to 0, but we need
-	 * XS_OFFSET_CLEAR == -1
-	 */
-	for (int i = old_size; i < depth; i++) {
-	    xsp[i].xs_rb_off = XS_OFFSET_CLEAR;
-	    xsp[i].xs_tag_end = XS_OFFSET_CLEAR;
-	    xsp[i].xs_key_off = XS_OFFSET_CLEAR;
-	}
-#endif
     }
 
     return 0;
@@ -655,6 +658,140 @@ xo_setup_filter_lib_test (int version, xo_filter_ops_t *ops)
 }
 
 /*
+ * Build a nibble-packed map of the locale's grouping shape, so we
+ * don't have to re-walk the (short, cheap, but still not-free)
+ * "grouping" string from struct lconv on every field we format.
+ * Each nibble holds the number of digits in one group, starting
+ * with the group nearest the decimal point; a nibble of 0 means
+ * "repeat the previous group forever" and is left implicit by
+ * simply stopping early.  We cap at 16 nibbles / 20 covered digits,
+ * which is more than enough for any real locale and for the 64-bit
+ * integers libxo can format.
+ */
+static uint64_t
+xo_group_map_build (const char *grouping)
+{
+    uint64_t map = 0;
+    const unsigned char *gp = (const unsigned char *) grouping;
+    unsigned char cur = *gp;
+    int idx = 0, covered = 0;
+
+    while (idx < 16 && covered < 20) {
+	if (cur == 0 || cur == (unsigned char) CHAR_MAX)
+	    break;			/* "no more grouping": leave 0s */
+
+	map |= ((uint64_t) cur) << (4 * idx);
+	covered += cur;
+	idx++;
+
+	if (gp[1] != '\0') {		/* more explicit bytes remain */
+	    gp++;
+	    cur = *gp;
+	}
+	/* else: gp[1] == '\0' means repeat `cur` forever -- leave it alone */
+    }
+
+    return map;
+}
+
+/*
+ * Accept a setting for the grouping normally found via the locale.
+ * The format is: "--libxo grouping=x+n1+n2+n3...", where:
+ *  'x' is the separator character ("thousands_sep")
+ *
+ *  'n1...' is the "grouping" value from the locale, but with "+"
+ *     instead of ";" for ease-of-use, and "-1" (instead of the
+ *     locale's CHAR_MAX) meaning "stop grouping here"; a value list
+ *     that runs out of numbers (without a trailing "-1") repeats the
+ *     last number forever, exactly as struct lconv's grouping does.
+ *
+ * Note that the separator is one character, but it could be one UTF-8
+ * character, so we need to keep it as a string.
+ *
+ * Since xo_set_options()/xo_set_options_words() split their input on
+ * unescaped commas, a separator of "," (the common case) would normally
+ * need to be backslash-escaped in the option string, e.g.
+ * "grouping=\,+3+2".  To avoid that, 'x' may be omitted entirely (the
+ * value starts directly with "+"), in which case the separator defaults
+ * to ",", e.g. "grouping=+3+2", making "--libxo group,grouping=+3+2"
+ * usable without escaping.
+ */
+static int
+xo_set_grouping (xo_handle_t *xop UNUSED, const char *value)
+{
+    int len = strlen(value);
+    char buf[len + 1];
+    memcpy(buf, value, len + 1);
+
+    char *cp = buf;
+    char *sep = buf;		/* Starts with the thousands_sep */
+
+    while (*cp && *cp != '+')
+	cp += 1;
+    if (*cp != '+')		/* no "+n1..." portion given */
+	return -1;
+
+    int sep_len = cp - buf;
+    *cp++ = '\0';
+
+    if (sep_len == 0) {
+	/* No separator given (e.g. "grouping=+3+2"): default to "," */
+	xo_free(xo_group_sep);
+	xo_group_sep = NULL;
+	xo_group_sep_len = 0;
+
+    } else {
+	char *new_sep = xo_realloc(xo_group_sep, sep_len + 1);
+	if (new_sep == NULL)
+	    return -1;
+
+	xo_group_sep = new_sep;
+	memcpy(xo_group_sep, sep, sep_len + 1);
+	xo_group_sep_len = sep_len;
+    }
+
+    if (*cp && *cp != '0' && *cp != '-') { /* All "none" indicators */
+	char grouping[len + 1], *gp = grouping;
+	for (; *cp; cp++) {
+	    if (cp[0] == '-' && cp[1] == '1') {
+		*gp++ = CHAR_MAX;
+		break;
+	    }
+
+	    if (!isdigit((unsigned char) *cp))
+		return -1;
+
+	    *gp++ = (char) (*cp - '0');
+	    if (cp[1] != '+' && cp[1] != ';' && cp[1] != ':' && cp[1] != '\0')
+		return -1;
+
+	    if (cp[1] == '+' || cp[1] == ';' || cp[1] == ':')
+		cp += 1; /* Skip the sep; the loop's cp++ covers the digit */
+	}
+
+	*gp++ = '\0';
+	xo_group_map = xo_group_map_build(grouping);
+
+    } else {
+	xo_group_map = XO_DEFAULT_GROUP_MAP;
+    }
+
+    return 0;
+}
+
+/*
+ * Column/anchor tracking reflects the visible output stream
+ * (xo_data); a scratch buffer (e.g. the XPath predicate buffer in
+ * xo_build_predicate, or the color buffer in xo_format_colors) never
+ * touches xo_data, so it must not pollute these counts.
+ */
+static int
+xo_should_update_columns (xo_handle_t *xop, xo_buffer_t *xbp)
+{
+    return (xbp == &xop->xo_data);
+}
+
+/*
  * Initialize an xo_handle_t, using both static defaults and
  * the global settings from the LIBXO_OPTIONS environment
  * variable.
@@ -691,6 +828,7 @@ xo_init_handle (xo_handle_t *xop)
 #endif /* __FreeBSD__ */
 
 	(void) setlocale(LC_CTYPE, cp);
+	(void) setlocale(LC_NUMERIC, cp);
 
 #ifdef CODESET
 	/* Now that locale is set, determine if our stdout output is UTF-8 */
@@ -698,6 +836,28 @@ xo_init_handle (xo_handle_t *xop)
 	if (codeset && xo_streq(codeset, "UTF-8"))
 	    xo_codeset_is_utf8 = TRUE;
 #endif /* CODESET */
+
+	/* Cache the grouping separator and precompute the grouping map */
+	struct lconv *lcp = localeconv();
+	if (lcp->thousands_sep && *lcp->thousands_sep) {
+	    int glen = strlen(lcp->thousands_sep);
+	    xo_group_sep = xo_realloc(xo_group_sep, glen + 1);
+	    if (xo_group_sep) {
+		memcpy(xo_group_sep, lcp->thousands_sep, glen + 1);
+		xo_group_sep_len = glen;
+	    }
+	} else {
+	    if (xo_group_sep) {
+		xo_free(xo_group_sep);
+		xo_group_sep = NULL;
+		xo_group_sep_len = 0;
+	    }
+	}
+
+	if (lcp->grouping)
+	    xo_group_map = xo_group_map_build(lcp->grouping);
+	else
+	    xo_group_map = XO_DEFAULT_GROUP_MAP;
     }
 
     /*
@@ -854,6 +1014,120 @@ xo_check_for_room (xo_handle_t *xop, xo_buffer_t *xbp, int bytes)
 
     xo_failure(xop, "buffer cannot be expanded for %d bytes", bytes);
     return -1;
+}
+
+/*
+ * Peel the locale's grouping map (see xo_group_map_build()) for a
+ * specific number of digits, producing a call-scoped,
+ * low-nibble-first packed count of segment lengths.
+ * Returns the number of segments.
+ */
+static int
+xo_group_segments (uint64_t locale_map, int ndigits, uint64_t *segs_out)
+{
+    uint64_t map = locale_map;		/* local copy: peeling is destructive */
+    uint64_t segs = 0;
+    int nsegs = 0;
+
+    while (ndigits > 0 && nsegs < 16) {
+	int mine = map & 0xF;
+	map >>= 4;
+
+	if (mine == 0 || mine > ndigits)
+	    mine = ndigits;		/* map exhausted / CHAR_MAX reached:
+					   everything left is one final
+					   segment */
+	if (mine > 15)
+	    mine = 15;			/* must still fit in a nibble */
+
+	segs |= ((uint64_t) mine) << (4 * nsegs);
+	nsegs++;
+	ndigits -= mine;
+    }
+
+    *segs_out = segs;
+    return nsegs;
+}
+
+/*
+ * Insert the locale's thousands separator into a just-rendered decimal
+ * integer field, in place, within "xbp".  The field is "rc" bytes long,
+ * starting at "xbp->xb_bufp + start_off", which must equal xbp->xb_curp
+ * (i.e. the field has been rendered but not yet consumed).  Returns the
+ * field's new length, which is "rc" unchanged if no separators apply.
+ *
+ * Callers are responsible for checking XOF_GROUP and that the field's
+ * conversion character is 'd'/'i'/'u' before calling this function; it
+ * does no gating of its own, just the mechanical scan-and-insert.
+ */
+xo_off_t
+xo_grouping_fixup (xo_handle_t *xop, xo_buffer_t *xbp,
+		    xo_off_t start_off, xo_off_t rc)
+{
+    char *field_start = xbp->xb_bufp + start_off;
+    char *end = field_start + rc;
+    char *p = field_start;
+
+    while (p < end && *p == ' ')	/* right-justify width padding */
+	p++;
+    if (p < end && *p == '-')		/* sign */
+	p++;
+
+    char *digit_start = p;
+    while (p < end && isdigit((unsigned char) *p))
+	p++;
+    char *digit_end = p;
+
+    int ndigits = digit_end - digit_start;
+    if (ndigits < 2)
+	return rc;
+
+    if (*digit_start == '0')	/* leading zero: zero-padded, not grouped */
+	return rc;
+
+    uint64_t segs;
+    int nsegs = xo_group_segments(xo_group_map, ndigits, &segs);
+
+    int seplen = xo_group_sep_len ?: 1;
+    xo_off_t extra = (xo_off_t) (nsegs - 1) * seplen;
+    if (extra <= 0)
+	return rc;
+
+    /* Capture offsets now: xo_check_for_room() below may call realloc()
+     * and move xbp->xb_bufp, invalidating field_start/end/digit_end. */
+    xo_off_t tail_len = end - digit_end;
+
+    if (xo_check_for_room(xop, xbp, rc + extra))
+	return rc;
+
+    field_start = xbp->xb_bufp + start_off;
+    char *old_end = field_start + rc;
+    char *new_end = field_start + rc + extra;
+
+    /* 1. shift any trailing content (left-justify padding) right */
+    if (tail_len > 0)
+	memmove(old_end + extra - tail_len, old_end - tail_len, tail_len);
+
+    /* 2. peel segments off the right, moving each into place and writing
+     *    one separator to its left -- except before the leftmost segment */
+    char *wp = new_end - tail_len;
+    char *rp = old_end - tail_len;
+
+    for (int i = 0; i < nsegs; i++) {
+	int seglen = segs & 0xF;
+	segs >>= 4;
+
+	memmove(wp - seglen, rp - seglen, seglen);
+	wp -= seglen;
+	rp -= seglen;
+
+	if (i + 1 < nsegs) {		/* not the leftmost segment */
+	    wp -= seplen;
+	    memcpy(wp, xo_group_sep ?: ",", seplen);
+	}
+    }
+
+    return rc + extra;
 }
 
 static void
@@ -1457,6 +1731,20 @@ xo_data_escape (xo_handle_t *xop, const char *str, ssize_t len)
 }
 
 /*
+ * Like xo_data_escape(), but for strings destined for a quoted
+ * HTML/XML attribute value, where a literal '"' must be escaped
+ * (XFF_ATTR) to avoid breaking out of the attribute.
+ */
+static void
+xo_data_escape_attr (xo_handle_t *xop, const char *str, ssize_t len)
+{
+    if (len == -1)
+	len = strlen(str);
+
+    xo_buf_escape(xop, &xop->xo_data, str, len, XFF_ATTR);
+}
+
+/*
  * The retain feature (caching parsed field info by format string pointer)
  * has been removed.  These stubs preserve the public API.
  */
@@ -1942,6 +2230,9 @@ xo_parse_for_handle (xo_handle_t *xop, xo_parse_t *xpp)
     xpp->xp_error_data = xop;
     xpp->xp_warn = xo_parse_fail_cb;
     xpp->xp_warn_data = xop;
+
+    if (XOF_ISSET(xop, XOF_LINT))
+	xpp->xp_flags |= XPF_STRICT;
 }
 
 /**
@@ -2127,9 +2418,11 @@ static xo_flag_mapping_t xo_xof_names[] = {
     { XOF_FILTER_WARN, "filter-warn" },
     { XOF_FLUSH, "flush" },
     { XOF_FLUSH_LINE, "flush-line" },
+    { XOF_GROUP, "group" },
     { XOF_IGNORE_CLOSE, "ignore-close" },
     { XOF_INFO, "info" },
     { XOF_KEYS, "keys" },
+    { XOF_LINT, "lint" },
     { XOF_LOG_GETTEXT, "log-gettext" },
     { XOF_LOG_SYSLOG, "log-syslog" },
     { XOF_NO_HUMANIZE, "no-humanize" },
@@ -2150,13 +2443,14 @@ static xo_flag_mapping_t xo_xof_names[] = {
 };
 
 static xo_flag_mapping_t xo_option_names[] = {
-    { XO_OPT_NO_COLOR, "no-color" },
-    { XO_OPT_INDENT, "indent" },
     { XO_OPT_ENCODER, "encoder" },
+    { XO_OPT_FILTER, "filter" },
+    { XO_OPT_GROUPING, "grouping" },
+    { XO_OPT_INDENT, "indent" },
     { XO_OPT_MAP, "map" },
     { XO_OPT_MAP_FILE, "map-file" },
     { XO_OPT_NO_CACHE, "no-cache" },
-    { XO_OPT_FILTER, "filter" },
+    { XO_OPT_NO_COLOR, "no-color" },
     { XO_EXTERR_BRIEF, "exterr" },
     { XO_EXTERR_BRIEF, "exterr-brief" },
     { XO_EXTERR_VERBOSE, "exterr-verbose" },
@@ -2342,6 +2636,10 @@ xo_set_options_single (xo_handle_t *xop, const char *input, int *results)
 
 	case 'g':
 	    XOF_SET(xop, XOF_LOG_GETTEXT);
+	    break;
+
+	case 'G':
+	    XOF_SET(xop, XOF_GROUP);
 	    break;
 
 	case 'H':
@@ -2538,6 +2836,17 @@ xo_set_options_words (xo_handle_t *xop, int argc, char **argv)
 		rc = -1;
 	    } else
 		rc = xo_add_filter(xop, vp); /* Reports its own errors */
+	    continue;
+
+	case XO_OPT_GROUPING: /* Give specific locale.grouping info */
+	    if (vp == NULL) {
+		xo_warnx("missing value for grouping option");
+		rc = -1;
+	    } else {
+		rc = xo_set_grouping(xop, vp);
+		if (rc)
+		    xo_warnx("error parsing grouping value: '%s'", vp);
+	    }
 	    continue;
 
 	case XO_EXTERR_BRIEF: /* Display brief extended error info */
@@ -3125,10 +3434,11 @@ static ssize_t
 xo_format_string (xo_handle_t *xop, xo_fspec_t *xfp, xo_buffer_t *xbp,
 		  xo_xff_flags_t flags, int enc)
 {
-    static char null[] = "(null)";
-    static char null_no_quotes[] = "null";
+    int null_as_empty = (xfp->xf_extflags & XXF_NULL_AS_EMPTY) ? 1 : 0;
+    const char *null = null_as_empty ? "" : "(null)";
+    const char *null_no_quotes = null_as_empty ? "" : "null";
 
-    char *cp = NULL;
+    const char *cp = NULL;
     wchar_t *wcp = NULL;
     ssize_t len;
     ssize_t cols = 0, rc = 0;
@@ -3157,7 +3467,7 @@ xo_format_string (xo_handle_t *xop, xo_fspec_t *xfp, xo_buffer_t *xbp,
 	 */
 	if (wcp == NULL) {
 	    cp = null;
-	    len = sizeof(null) - 1;
+	    len = (xfp->xf_extflags & XXF_NULL_AS_EMPTY) ? 0 : strlen(cp);
 	}
 
     } else {
@@ -3169,13 +3479,12 @@ xo_format_string (xo_handle_t *xop, xo_fspec_t *xfp, xo_buffer_t *xbp,
 
 	/* Echo "Dont' deref NULL" logic */
 	if (cp == NULL) {
-	    if ((flags & XFF_NOQUOTE) && xo_style_is_encoding(xop)) {
+	    if ((flags & XFF_NO_QUOTE) && xo_style_is_encoding(xop))
 		cp = null_no_quotes;
-		len = sizeof(null_no_quotes) - 1;
-	    } else {
+	    else
 		cp = null;
-		len = sizeof(null) - 1;
-	    }
+	
+	    len = null_as_empty ? 0 : strlen(cp);
 	}
 
 	/*
@@ -3231,23 +3540,27 @@ xo_format_string (xo_handle_t *xop, xo_fspec_t *xfp, xo_buffer_t *xbp,
 	 * If seen_minus, then pad on the right; otherwise move it so
 	 * we can pad on the left.
 	 */
+	char *np;
 	if (xfp->xf_seen_minus) {
-	    cp = xbp->xb_curp + rc;
+	    np = xbp->xb_curp + rc;
 	} else {
-	    cp = xbp->xb_curp;
+	    np = xbp->xb_curp;
 	    memmove(xbp->xb_curp + delta, xbp->xb_curp, rc);
 	}
 
 	/* Set the padding */
-	memset(cp, (xfp->xf_leading_zero > 0) ? '0' : ' ', delta);
+	memset(np, (xfp->xf_leading_zero > 0) ? '0' : ' ', delta);
 	rc += delta;
 	cols += delta;
     }
 
-    if (XOF_ISSET(xop, XOF_COLUMNS))
-	xop->xo_columns += cols;
-    if (XOIF_ISSET(xop, XOIF_ANCHOR))
-	xop->xo_anchor_columns += cols;
+    /* skip if scratch buffer (predicate, color) */
+    if (xo_should_update_columns(xop, xbp)) {
+	if (XOF_ISSET(xop, XOF_COLUMNS))
+	    xop->xo_columns += cols;
+	if (XOIF_ISSET(xop, XOIF_ANCHOR))
+	    xop->xo_anchor_columns += cols;
+    }
 
     return rc;
 
@@ -3476,7 +3789,12 @@ xo_data_append_content (xo_handle_t *xop, const char *str, ssize_t len,
     int need_enc = xo_needed_encoding(xop);
     ssize_t start_offset = xo_buf_offset(&xop->xo_data);
 
-    cols = xo_format_string_direct(xop, &xop->xo_data, XFF_UNESCAPE | flags,
+
+    xo_xff_flags_t sub_flags = flags;
+    if (!(flags & XFF_NO_UNESCAPE))
+	sub_flags |= XFF_UNESCAPE;
+
+    cols = xo_format_string_direct(xop, &xop->xo_data, sub_flags,
 				   NULL, str, len, -1,
 				   need_enc, XF_ENC_UTF8);
     if (flags & XFF_GT_FLAGS)
@@ -3547,7 +3865,8 @@ xo_flush_literal (xo_handle_t *xop, xo_buffer_t *xbp, xo_xff_flags_t flags,
     ssize_t cols = xo_format_string_direct(xop, xbp, flags | XFF_UNESCAPE,
 					   NULL, xp, len, -1,
 					   need_enc, XF_ENC_UTF8);
-    if (cols > 0) {
+    /* skip if scratch buffer (predicate, color) */
+    if (cols > 0 && xbp == &xop->xo_data) {
 	if (XOF_ISSET(xop, XOF_COLUMNS))
 	    xop->xo_columns += cols;
 	if (XOIF_ISSET(xop, XOIF_ANCHOR))
@@ -3841,6 +4160,15 @@ xo_emit_field_value (xo_handle_t *xop, xo_buffer_t *xbp,
 	    columns = rc = xo_vsnprintf(xop, xbp, newfmt, xop->xo_vap);
 	}
 
+	if (rc > 0
+	        && (XOF_ISSET(xop, XOF_GROUP) || (flags & XFF_INT_GROUP))
+	        && (style == XO_STYLE_TEXT || style == XO_STYLE_HTML)
+	        && (xfp->xf_fc == 'd' || xfp->xf_fc == 'i'
+		    || xfp->xf_fc == 'u')) {
+	    xo_off_t start_off = xbp->xb_curp - xbp->xb_bufp;
+	    columns = rc = xo_grouping_fixup(xop, xbp, start_off, rc);
+	}
+
 	if (rc > 0) {
 	    /*
 	     * For XML and HTML, we need "&<>" processing; for JSON,
@@ -3885,10 +4213,13 @@ xo_emit_field_value (xo_handle_t *xop, xo_buffer_t *xbp,
 	     * string conversions and updates xo_anchor_columns
 	     * accordingly.
 	     */
-	    if (XOF_ISSET(xop, XOF_COLUMNS))
-		xop->xo_columns += columns;
-	    if (XOIF_ISSET(xop, XOIF_ANCHOR))
-		xop->xo_anchor_columns += columns;
+	    /* skip if scratch buffer (predicate, color) */
+	    if (xo_should_update_columns(xop, xbp)) {
+		if (XOF_ISSET(xop, XOF_COLUMNS))
+		    xop->xo_columns += columns;
+		if (XOIF_ISSET(xop, XOIF_ANCHOR))
+		    xop->xo_anchor_columns += columns;
+	    }
 	}
     }
 
@@ -4064,11 +4395,11 @@ xo_do_format_field (xo_handle_t *xop, const xo_field_info_t *xfip,
         xo_xff_flags_t field_flags = flags;
 
         /* Hidden fields are only visible to JSON and XML */
-        if (XOF_ISSET(xop, XFF_ENCODE_ONLY)) {
+        if (flags & XFF_ENCODE_ONLY) {
             if (style != XO_STYLE_XML
                     && !xo_style_is_encoding(xop))
                 field_flags |= XFF_SKIP;
-        } else if (XOF_ISSET(xop, XFF_DISPLAY_ONLY)) {
+        } else if (flags & XFF_DISPLAY_ONLY) {
             if (style != XO_STYLE_TEXT
                     && xo_style(xop) != XO_STYLE_HTML)
                 field_flags |= XFF_SKIP;
@@ -4151,10 +4482,13 @@ xo_do_format_field (xo_handle_t *xop, const xo_field_info_t *xfip,
 	ssize_t new_cols = xo_format_gettext(xop, flags, start_offset,
 					 old_cols, real_need_enc);
 
-	if (XOF_ISSET(xop, XOF_COLUMNS))
-	    xop->xo_columns += new_cols - old_cols;
-	if (XOIF_ISSET(xop, XOIF_ANCHOR))
-	    xop->xo_anchor_columns += new_cols - old_cols;
+	/* skip if scratch buffer (predicate, color) */
+	if (xo_should_update_columns(xop, xbp)) {
+	    if (XOF_ISSET(xop, XOF_COLUMNS))
+		xop->xo_columns += new_cols - old_cols;
+	    if (XOIF_ISSET(xop, XOIF_ANCHOR))
+		xop->xo_anchor_columns += new_cols - old_cols;
+	}
     }
 
     return 0;
@@ -4308,6 +4642,57 @@ xo_format_humanize (xo_handle_t *xop, xo_buffer_t *xbp,
 }
 
 /*
+ * Capitalize the first character in the last chunk of emitted data.
+ * For ASCII, this is trivial, but UTF-8 isn't.
+ *
+ * We reuse the structure for xo_format_humanize(), since it has the
+ * saved offset.
+ */
+static void
+xo_format_first_cap (xo_handle_t *xop, xo_buffer_t *xbp,
+		     xo_humanize_save_t *savep, xo_xff_flags_t flags)
+{
+    if (!(flags & XFF_FIRST_CAP)) /* Not enabled */
+	return;
+
+    if (!xo_style_is_encoding(xop)) /* Only display styles */
+	return;
+
+    xo_off_t cur_off = xo_buf_offset(xbp);
+    xo_off_t save_off = savep->xhs_offset;
+
+    if (cur_off <= save_off)	/* See if anything was written */
+	return;
+
+    char *cp = xo_buf_data(xbp, save_off);
+    unsigned char ch = *cp;
+
+    if (!xo_is_utf8_byte(ch)) {		/* Simple ASCII */
+	*cp = toupper(ch);
+	return;
+    }
+
+    int rlen = xo_utf8_rlen(ch);
+    if (rlen > cur_off - save_off) /* Not enought data in the buffer? */
+	return;			   /* non-utf8 data was written in buffer */
+
+    xo_codepoint_t wc = xo_utf8_codepoint(cp, rlen, rlen, XO_UTF8_ERR_BAD_LEN);
+    if (wc == XO_UTF8_ERR_BAD_LEN)
+	return;
+
+    xo_codepoint_t new_wc = xo_utf8_wtoupper(wc);
+    if (wc == new_wc)
+	return;
+
+    ssize_t new_len = xo_utf8_to_len(new_wc);
+    if (new_len != rlen)
+	return;
+
+    /* Finally crossed all the hurdles; write the new value */
+    xo_utf8_to_bytes(cp, rlen, new_wc);
+}
+
+/*
  * Convenience function that either append a fixed value (if one is
  * given) or formats a field using a format string.  If it's
  * encode_only, then we can't skip formatting the field, since it may
@@ -4457,6 +4842,83 @@ xo_key_is_duplicate (const char *name, ssize_t nlen, const char *keys)
 	cp += 1;		/* Move over ']' */
     }
 
+    return FALSE;
+}
+
+/*
+ * Append a name to a frame's xs_sibnames buffer, growing it as needed.
+ * Each entry is a one-byte marker (' ') followed by the NUL-terminated
+ * name; see xo_sibling_check() for how the marker is used.  The buffer
+ * holds a run of such entries followed by one more NUL byte marking the
+ * end of the run, so a scan always has a safe stopping point.  Only
+ * called when XOF_WARN is set, so this cost isn't paid otherwise.
+ */
+static void
+xo_sibling_add (xo_stack_t *xsp, const char *name, ssize_t nlen)
+{
+    ssize_t olen = 0;
+
+    if (xsp->xs_sibnames != NULL) {
+	const char *cp = xsp->xs_sibnames;
+	while (*cp != '\0') {
+	    ssize_t elen = (ssize_t) strlen(cp + 1) + 2;
+	    cp += elen;
+	    olen += elen;
+	}
+    }
+
+    char *cp = xo_realloc(xsp->xs_sibnames, olen + nlen + 3);
+    if (cp == NULL)
+	return;
+
+    cp[olen] = ' ';
+    memcpy(cp + olen + 1, name, nlen);
+    cp[olen + 1 + nlen] = '\0';
+    cp[olen + 1 + nlen + 1] = '\0';
+    xsp->xs_sibnames = cp;
+}
+
+/*
+ * Record a sibling name usage in xsp->xs_sibnames and report whether this
+ * occurrence should generate a "duplicate sibling name" warning.
+ *
+ * Each recorded name carries a one-byte marker: ' ' means the name has
+ * been seen exactly once so far, '+' means a duplicate use of it has
+ * already been warned about.  This lets a name be reused many times
+ * (e.g. a field emitted in a loop that isn't a proper list) while only
+ * ever warning once, instead of once per repeat.
+ *
+ *   - name not yet recorded: record it (marker ' '), return FALSE --
+ *     nothing to warn about on a first use.
+ *   - name recorded with marker ' ': this is the first duplicate; flip
+ *     the marker to '+' and return TRUE so the caller warns once.
+ *   - name recorded with marker '+': already warned about; return FALSE.
+ *
+ * Only ever called when XOF_WARN is set, so this cost isn't paid otherwise.
+ */
+static int
+xo_sibling_check (xo_stack_t *xsp, const char *name, ssize_t nlen)
+{
+    static const char *safe_dups[]
+	= { "error", "__error", "__warning", "message", NULL };
+
+    /* If the name is in our "safe" list, ignore it */
+    for (const char **sdp = safe_dups; *sdp; sdp++)
+	if (strncmp(*sdp, name, nlen) == 0)
+	    return FALSE;
+
+    ssize_t elen;
+    for (char *cp = xsp->xs_sibnames; cp && *cp; cp += elen + 2) {
+	elen = (ssize_t) strlen(cp + 1);
+	if (elen == nlen && strncmp(cp + 1, name, nlen) == 0) {
+	    if (cp[0] == '+')
+		return FALSE;
+	    cp[0] = '+';
+	    return TRUE;
+	}
+    }
+
+    xo_sibling_add(xsp, name, nlen);
     return FALSE;
 }
 
@@ -4659,7 +5121,18 @@ xo_buf_append_div (xo_handle_t *xop, const xo_field_info_t *xfip,
 
     if (name) {
 	xo_data_append(xop, div_tag, sizeof(div_tag) - 1);
-	xo_data_escape(xop, name, nlen);
+	xo_data_escape_attr(xop, name, nlen);
+
+	xo_stack_t *xsp = xo_stack_cur(xop);
+	if (xsp->xs_ident) {
+	    static char div_ident[] = "\" data-ident=\"";
+	    char id_buf[16];
+
+	    snprintf(id_buf, sizeof(id_buf), "%d", xsp->xs_ident);
+
+	    xo_data_append(xop, div_ident, sizeof(div_ident) - 1);
+	    xo_data_escape_attr(xop, id_buf, -1);
+	}
 
 	/*
 	 * Save the offset at which we'd place units.  See xo_format_units.
@@ -4677,7 +5150,6 @@ xo_buf_append_div (xo_handle_t *xop, const xo_field_info_t *xfip,
 
 	if (XOF_ISSET(xop, XOF_XPATH)) {
 	    int i;
-	    xo_stack_t *xsp;
 
 	    xo_data_append(xop, div_xpath, sizeof(div_xpath) - 1);
 	    if (xop->xo_leading_xpath)
@@ -4699,7 +5171,7 @@ xo_buf_append_div (xo_handle_t *xop, const xo_field_info_t *xfip,
 		    continue;
 
 		xo_data_append(xop, "/", 1);
-		xo_data_escape(xop, xsp->xs_name, strlen(xsp->xs_name));
+		xo_data_escape_attr(xop, xsp->xs_name, -1);
 		if (xsp->xs_keys) {
 		    /* Don't show keys for the key field */
 		    if (i != xop->xo_depth || !(flags & XFF_KEY))
@@ -4708,7 +5180,7 @@ xo_buf_append_div (xo_handle_t *xop, const xo_field_info_t *xfip,
 	    }
 
 	    xo_data_append(xop, "/", 1);
-	    xo_data_escape(xop, name, nlen);
+	    xo_data_escape_attr(xop, name, nlen);
 	}
 
 	if (XOF_ISSET(xop, XOF_INFO) && xop->xo_info) {
@@ -4719,11 +5191,11 @@ xo_buf_append_div (xo_handle_t *xop, const xo_field_info_t *xfip,
 	    if (xip) {
 		if (xip->xi_type) {
 		    xo_data_append(xop, in_type, sizeof(in_type) - 1);
-		    xo_data_escape(xop, xip->xi_type, strlen(xip->xi_type));
+		    xo_data_escape_attr(xop, xip->xi_type, -1);
 		}
 		if (xip->xi_help) {
 		    xo_data_append(xop, in_help, sizeof(in_help) - 1);
-		    xo_data_escape(xop, xip->xi_help, strlen(xip->xi_help));
+		    xo_data_escape_attr(xop, xip->xi_help, -1);
 		}
 	    }
 	}
@@ -4744,6 +5216,9 @@ xo_buf_append_div (xo_handle_t *xop, const xo_field_info_t *xfip,
     save.xhs_anchor_columns = xop->xo_anchor_columns;
 
     xo_simple_field(xop, xfip, FALSE, value, vlen, fmt, flen, flags);
+
+    if (flags & XFF_FIRST_CAP)
+	xo_format_first_cap(xop,xbp, &save, flags);
 
     if (flags & XFF_HUMANIZE) {
 	/*
@@ -4835,14 +5310,28 @@ xo_format_title (xo_handle_t *xop, const xo_field_info_t *xfip,
     ssize_t flen = xfip->xfi_flen;
     xo_xff_flags_t flags = xfip->xfi_flags;
 
-    static char div_open[] = "<div class=\"title";
+    static char div_open[] = "<div class=\"";
     static char div_middle[] = "\">";
     static char div_close[] = "</div>";
+    const char *class_name = (xfip->xfi_ftype == 'F') ? "text" : "title";
 
     if (flen == 0) {
 	fmt = "%s";
 	flen = 2;
 	xfip = &xo_default_field_info;
+    }
+
+    /*
+     * 'F' formats exactly like titles, but only appear in display styles
+     */
+    if (xfip->xfi_ftype == 'F' && xo_style_is_encoding(xop)) {
+	/*
+	 * Even though we don't care about 'format' fields in
+	 * encoding, we need to do enough parsing work to skip over
+	 * the right bits of xo_vap.
+	 */
+	xo_simple_field(xop, xfip, TRUE, value, vlen, fmt, flen, flags);
+	return;
     }
 
     switch (xo_style(xop)) {
@@ -4868,6 +5357,7 @@ xo_format_title (xo_handle_t *xop, const xo_field_info_t *xfip,
 	if (XOF_ISSET(xop, XOF_PRETTY))
 	    xo_buf_indent(xop, xop->xo_indent_by);
 	xo_buf_append(&xop->xo_data, div_open, sizeof(div_open) - 1);
+	xo_buf_append(&xop->xo_data, class_name, strlen(class_name));
 	xo_color_append_html(xop);
 	xo_buf_append(&xop->xo_data, div_middle, sizeof(div_middle) - 1);
     }
@@ -6040,7 +6530,7 @@ xo_format_value_encoder (xo_handle_t *xop, const xo_field_info_t *xfip,
     int quote;
     if (flags & XFF_QUOTE)
 	quote = 1;
-    else if (flags & XFF_NOQUOTE)
+    else if (flags & XFF_NO_QUOTE)
 	quote = 0;
     else if (flen == 0) {
 	quote = 0;
@@ -6189,7 +6679,7 @@ xo_format_value_json (xo_handle_t *xop, const xo_field_info_t *xfip,
     int quote;
     if (flags & XFF_QUOTE)
 	quote = 1;
-    else if (flags & XFF_NOQUOTE)
+    else if (flags & XFF_NO_QUOTE)
 	quote = 0;
     else if (vlen != 0)
 	quote = 1;
@@ -6457,6 +6947,22 @@ xo_format_value (xo_handle_t *xop, const xo_field_info_t *xfip,
 	}
     }
 
+    /*
+     * Warn if this V-role field reuses a name already used (and possibly
+     * retired) by an earlier sibling under the same parent.  Other field
+     * roles (title, label, color, ...) are decorative and don't produce
+     * a named node; display-only fields never reach XML/JSON; leaf-lists
+     * are their own light-weight construct and are exempt.  Gated on
+     * XOF_WARN so the xs_sibnames bookkeeping is only paid for when
+     * warnings are actually enabled.
+     */
+    if (XOF_ISSET(xop, XOF_WARN) && name != NULL
+	    && xfip != NULL && xfip->xfi_ftype == 'V'
+	    && !(flags & (XFF_DISPLAY_ONLY | XFF_LEAF_LIST))) {
+	if (xo_sibling_check(xsp, name, nlen))
+	    xo_failure(xop, "duplicate sibling name: '%.*s'", (int) nlen, name);
+    }
+
     xo_buffer_t *xbp = &xop->xo_data;
     xo_humanize_save_t save;	/* Save values for humanizing logic */
 
@@ -6486,6 +6992,9 @@ xo_format_value (xo_handle_t *xop, const xo_field_info_t *xfip,
 	save.xhs_anchor_columns = xop->xo_anchor_columns;
 
 	xo_simple_field(xop, xfip, FALSE, value, vlen, fmt, flen, flags);
+
+	if (flags & XFF_FIRST_CAP)
+	    xo_format_first_cap(xop,xbp, &save, flags);
 
 	if (flags & XFF_HUMANIZE)
 	    xo_format_humanize(xop, xbp, &save, flags);
@@ -7040,25 +7549,51 @@ xo_format_units (xo_handle_t *xop, const xo_field_info_t *xfip,
     static char units_start_xml[] = " units=\"";
     static char units_start_html[] = " data-units=\"";
 
+    /*
+     * The "units-attr" flag says only render the units in the
+     * "data-units" attribute and then only when asked (via
+     * XOF_UNITS in XML or HTML).
+     */
+    int units_attr = (xfip->xfi_flags & XFF_UNITS_ATTR) ? 1 : 0;
+    xo_buffer_t *xbp = &xop->xo_data;
+    xo_off_t start_off = xo_buf_offset(xbp);
+
     if (!XOIF_ISSET(xop, XOIF_UNITS_PENDING)) {
 	xo_format_content(xop, xfip, "units", NULL, value, vlen,
-			  fmt, flen, flags);
+			  fmt, flen, flags | XFF_NO_UNESCAPE);
+
+	/*
+	 * If units-attr was used, we don't want to render the units
+	 * in normal output, we just need to eat any data off the
+	 * stack.  Reset and pretend we're happy about it.
+	 */
+	if (units_attr)
+	    xo_buf_set_offset(xbp, start_off);
+
 	return;
     }
 
-    xo_buffer_t *xbp = &xop->xo_data;
     ssize_t start = xop->xo_units_offset;
     ssize_t stop = xbp->xb_curp - xbp->xb_bufp;
 
-    if (xo_style(xop) == XO_STYLE_XML)
-	xo_buf_append(xbp, units_start_xml, sizeof(units_start_xml) - 1);
-    else if (xo_style(xop) == XO_STYLE_HTML)
-	xo_buf_append(xbp, units_start_html, sizeof(units_start_html) - 1);
-    else
+    const char *leader;
+    int llen;
+    if (xo_style(xop) == XO_STYLE_XML) {
+	leader = units_start_xml;
+	llen = sizeof(units_start_xml) - 1;
+    } else if (xo_style(xop) == XO_STYLE_HTML) {
+	leader = units_start_html;
+	llen = sizeof(units_start_html) - 1;
+    } else
 	return;
 
+    xo_buf_append(xbp, leader, llen);
+
+    /* We're writing into a quoted attribute value; escape accordingly. */
+    flags |= XFF_ATTR;
+
     if (vlen)
-	xo_data_escape(xop, value, vlen);
+	xo_data_escape_attr(xop, value, vlen);
     else
 	xo_do_format_field(xop, xfip, NULL, fmt, flen, flags);
 
@@ -7082,6 +7617,12 @@ xo_format_units (xo_handle_t *xop, const xo_field_info_t *xfip,
     memcpy(buf, xbp->xb_bufp + stop, delta);
     memmove(xbp->xb_bufp + start + delta, xbp->xb_bufp + start, stop - start);
     memmove(xbp->xb_bufp + start, buf, delta);
+
+    if (!units_attr) {
+	buf[--delta] = '\0';
+	xo_format_content(xop, xfip, "units", NULL, buf + llen, delta - llen,
+			  fmt, flen, flags | XFF_NO_UNESCAPE);
+    }
 }
 
 static ssize_t
@@ -7269,6 +7810,7 @@ xo_class_name (int ftype)
     switch (ftype) {
     case 'D': return "decoration";
     case 'E': return "error";
+    case 'F': return NULL;
     case 'L': return "label";
     case 'N': return "note";
     case 'P': return "padding";
@@ -7987,6 +8529,8 @@ xo_do_emit_fields (xo_handle_t *xop, const xo_field_info_t *fields,
 				  xfip->xfi_flen, flags);
 	    else if (ftype == 'T')
 		xo_format_title(xop, xfip, base_fmt, content, clen);
+	    else if (ftype == 'F') /* 'format' works like like titles */
+		xo_format_title(xop, xfip, base_fmt, content, clen);
 	    else if (ftype == 'U')
 		xo_format_units(xop, xfip, base_fmt, content, clen);
 	    else
@@ -8634,7 +9178,25 @@ xo_depth_change (xo_handle_t *xop, const char *name,
 	if (xo_depth_check(xop, xop->xo_depth + delta))
 	    return;
 
+	xo_stack_t *old_xsp = &xop->xo_stack[xop->xo_depth];
 	xo_stack_t *xsp = &xop->xo_stack[xop->xo_depth + delta];
+
+	/*
+	 * Warn if this container/list reuses a name already used (and
+	 * possibly retired) by an earlier sibling under the same parent.
+	 * Instances and leaf-lists are exempt: instances are expected to
+	 * repeat their list's own name, and leaf-lists are their own
+	 * light-weight construct.  Gated on XOF_WARN so the xs_sibnames
+	 * bookkeeping (and its realloc/scan cost) is only paid when
+	 * warnings are actually enabled.
+	 */
+	if (XOF_ISSET(xop, XOF_WARN) && name != NULL
+	        && (state == XSS_OPEN_CONTAINER || state == XSS_OPEN_LIST)) {
+	    ssize_t nlen = strlen(name);
+	    if (xo_sibling_check(old_xsp, name, nlen))
+		xo_failure(xop, "duplicate sibling name: '%s'", name);
+	}
+
 	xsp->xs_flags = flags;
 	xsp->xs_state = state;
 	xsp->xs_fstatus = fstatus;
@@ -8643,14 +9205,20 @@ xo_depth_change (xo_handle_t *xop, const char *name,
 	xsp->xs_key_off = XS_OFFSET_CLEAR;
 	xsp->xs_rb_flags = xop->xo_rb_snap; /* parent flags before this open */
 	xop->xo_rb_snap = 0;
+
+	if (state == XSS_OPEN_LIST || state == XSS_OPEN_INSTANCE)
+	    xsp->xs_ident = ++xop->xo_ident;
+	else 
+	    xsp->xs_ident = old_xsp->xs_ident;
+
 	xo_stack_set_flags(xop);
 
 	XO_DBG(xop, "xo_depth_change: '%s' depth %d, state %u=%s, "
-	       "status %u=%s,  rb_off %d, rb_flags %#x",
+	       "status %u=%s,  rb_off %d, rb_flags %#x, ident = %u",
 	       name, xop->xo_depth + delta,
 	       state, xo_state_name(state),
 	       fstatus, xo_filt_status_name(fstatus),
-	       (int) starting_offset, xsp->xs_rb_flags);
+	       (int) starting_offset, xsp->xs_rb_flags, xsp->xs_ident);
 
 	if (name == NULL)
 	    name = XO_FAILURE_NAME;
@@ -8710,6 +9278,10 @@ xo_depth_change (xo_handle_t *xop, const char *name,
 	if (xsp->xs_keys) {
 	    xo_free(xsp->xs_keys);
 	    xsp->xs_keys = NULL;
+	}
+	if (xsp->xs_sibnames) {
+	    xo_free(xsp->xs_sibnames);
+	    xsp->xs_sibnames = NULL;
 	}
     }
 

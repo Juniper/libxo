@@ -60,23 +60,23 @@
 </div>
 <div class="line">
   <div class="text">Name: </div>
-  <div class="data" data-tag="item">gum       </div>
+  <div class="data" data-tag="item" data-ident="1">gum       </div>
 </div>
 <div class="line">
   <div class="text">Name: </div>
-  <div class="data" data-tag="item">rope      </div>
+  <div class="data" data-tag="item" data-ident="1">rope      </div>
 </div>
 <div class="line">
   <div class="text">Name: </div>
-  <div class="data" data-tag="item">ladder    </div>
+  <div class="data" data-tag="item" data-ident="1">ladder    </div>
 </div>
 <div class="line">
   <div class="text">Name: </div>
-  <div class="data" data-tag="item">bolt      </div>
+  <div class="data" data-tag="item" data-ident="1">bolt      </div>
 </div>
 <div class="line">
   <div class="text">Name: </div>
-  <div class="data" data-tag="item">water     </div>
+  <div class="data" data-tag="item" data-ident="1">water     </div>
 </div>
 <div class="line">
   <div class="label">Total:</div>
@@ -92,26 +92,26 @@
 <div class="line">
 </div>
 <div class="line">
-  <div class="data" data-tag="name" data-key="key">plain</div>
-  <div class="data" data-tag="count">1</div>
+  <div class="data" data-tag="name" data-ident="3" data-key="key">plain</div>
+  <div class="data" data-tag="count" data-ident="3">1</div>
 </div>
 <div class="line">
-  <div class="data" data-tag="name" data-key="key">don't</div>
-  <div class="data" data-tag="count">2</div>
+  <div class="data" data-tag="name" data-ident="4" data-key="key">don't</div>
+  <div class="data" data-tag="count" data-ident="4">2</div>
 </div>
 <div class="line">
-  <div class="data" data-tag="name" data-key="key">a'"b</div>
-  <div class="data" data-tag="count">3</div>
+  <div class="data" data-tag="name" data-ident="5" data-key="key">a'"b</div>
+  <div class="data" data-tag="count" data-ident="5">3</div>
 </div>
 <div class="line">
-  <div class="data" data-tag="name" data-key="key">this&amp;&amp;that</div>
-  <div class="data" data-tag="count">4</div>
+  <div class="data" data-tag="name" data-ident="6" data-key="key">this&amp;&amp;that</div>
+  <div class="data" data-tag="count" data-ident="6">4</div>
 </div>
 <div class="line">
-  <div class="data" data-tag="name" data-key="key">'"sure"'</div>
-  <div class="data" data-tag="count">5</div>
+  <div class="data" data-tag="name" data-ident="7" data-key="key">'"sure"'</div>
+  <div class="data" data-tag="count" data-ident="7">5</div>
 </div>
 <div class="line">
-  <div class="data" data-tag="name" data-key="key">"'nuff'"</div>
-  <div class="data" data-tag="count">5</div>
+  <div class="data" data-tag="name" data-ident="8" data-key="key">"'nuff'"</div>
+  <div class="data" data-tag="count" data-ident="8">5</div>
 </div>

@@ -62,6 +62,9 @@ RUN_TESTS_CMD = ${BASH} ${RUN_TESTS_SH} -d ${srcdir}
 TEST_FILE = ${srcdir}/data_01.txt
 TEST_FORMATS = T
 
+accept:
+	@-true
+
 .PHONY: run-plain-tests run-validate-tests run-pass-tests
 
 # These are substituted by configure; non-empty only when HAVE_VALIDATE is set.

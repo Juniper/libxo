@@ -18,17 +18,20 @@ particular output styles:
   \    escape-private  Escape control chars as Unicode private-use refs (XML/HTML)
   \    escape-slash    Escape forward slashes (JSON)
   \    escape-square   Escape control chars as U+25A1 WHITE SQUARE (XML/HTML)
+   f   first-cap       Capitalize the first character in the rendered data
    g   gettext         Call gettext on field's render content
    h   humanize (hn)   Format large numbers in human-readable style
   \    hn-space        Humanize: Place space between numeric and unit
   \    hn-decimal      Humanize: Add a decimal digit, if number < 10
   \    hn-1000         Humanize: Use 1000 as divisor instead of 1024
+   i   int-group       Insert locale thousands separators into this field
    k   key             Field is a key, suitable for XPath predicates
    l   leaf-list       Field is a leaf-list
    n   no-quotes       Do not quote the field when using JSON style
    p   plural          Gettext: Use comma-separated plural form
    q   quotes          Quote the field when using JSON style
    t   trim            Trim leading and trailing whitespace
+  \    units-attr      This "{U:} value should appear in attributes only (XML/HTML)
    w   white           A blank (" ") is appended after the label
   === =============== ===================================================
 
@@ -129,7 +132,7 @@ The encoding modifier is the opposite of the display modifier, and
 they are often used to give to distinct views of the underlying data.
 
 The escape-private Modifier
-++++++++++++++++++++++++++++
++++++++++++++++++++++++++++
 
 .. index:: Field Modifiers; escape-private
 
@@ -148,7 +151,7 @@ The escape-private modifier only affects XML and HTML output styles.
 Without this modifier, control characters are replaced with spaces.
 
 The escape-slash Modifier
-++++++++++++++++++++++++++++
++++++++++++++++++++++++++
 
 .. index:: Field Modifiers; Escaping
 
@@ -162,7 +165,7 @@ JSON style, any forward slashes ('/') should be escaped.
 circumstances where a slash may be filtered, such as HTML.
 
 The escape-square Modifier
-++++++++++++++++++++++++++++
+++++++++++++++++++++++++++
 
 .. index:: Field Modifiers; escape-square
 
@@ -178,6 +181,21 @@ Without this modifier, control characters are replaced with spaces.
 
 .. index:: Field Modifiers; Gettext
 .. _gettext-modifier:
+
+The first-cap Modifier ({f:})
++++++++++++++++++++++++++++++
+
+In text and html mode, the `first-cap` modifier will capitalize the
+first character in the field value, allowing the user data to look
+user friendly while the encoded data has more uniform rendering
+("perfect" versus "Perfect").
+
+UTF-8 data is also handled, using libxo's built-in upper case
+UTF-8 formatting code.
+
+::
+
+   xo_emit("Condition is {f:status}\n", "true");
 
 The Gettext Modifier ({g:})
 +++++++++++++++++++++++++++
@@ -241,6 +259,30 @@ In the HTML style, the original numeric value is rendered in the
 
     <div class="data" data-tag="errors"
          data-number="100663296">96M</div>
+
+.. index:: Field Modifiers; Int-Group
+.. _int-group-modifier:
+
+The Int-Group Modifier ({i:})
+++++++++++++++++++++++++++++
+
+.. index:: Field Modifiers; Int-Group
+
+The int-group modifier inserts a thousands separator into a decimal
+integer field (``%d``, ``%i``, ``%u``, with any length modifier), (see
+:ref:`integer-grouping`) to be set.  It is useful when only a specific
+field, rather than an entire program's output, should be grouped::
+
+    EXAMPLE:
+        xo_emit("{i:count/%u}\n", 1234567);
+    TEXT:
+        1,234,567
+
+Like the "`group`" option, int-group only affects the TEXT and HTML
+output styles; XML, JSON, syslog structured-data, and encoder styles
+always emit the plain, ungrouped digits, since a grouping separator
+would make the value a syntactically invalid (or non-numeric) encoded
+value.
 
 .. index:: Field Modifiers; Key
 .. _key-modifier:
@@ -383,6 +425,19 @@ the value.  This is only for the 'encoding' output styles::
 
 .. index:: Field Modifiers; White Space
 .. _white-space-modifier:
+
+The units-attr modifier ({U,units-attr:})
++++++++++++++++++++++++++++++++++++++++++
+
+The `units-attr` applies only to fields with the `units` roles, and
+causes the units value to appear only in the XML "units=XX` attribute
+or the HTML "data-units=XX" attribute.  The values do not appear in
+either the text output or the HTML "<div class='units'>" elements.
+
+::
+
+    xo_emit("{:memory/%u}{U:kb} out of {:total/%u}{U,units-attr:kilobytes}\n",
+	    64, 640);
 
 The White Space Modifier ({w:})
 +++++++++++++++++++++++++++++++

@@ -15,6 +15,7 @@
 
 #include "xo_config.h"
 #include "xo.h"
+#include "xo_encoder.h"
 #include "xo_string.h"
 
 #ifdef LIBXO_WCWIDTH
@@ -53,16 +54,49 @@ main (int argc, char **argv)
 	{ NULL, NULL, NULL, 0, 0 }
     }, *ep = employees;
     int rc, i;
+    int opt_key = 0;
+    int opt_only_key = 0;
 
     argc = xo_parse_args(argc, argv);
     if (argc < 0)
 	return 1;
 
+    for (argc = 1; argv[argc]; argc++) {
+	char *cp = argv[argc];
+	if (xo_streq(cp, "debug"))
+	    xo_set_flags(NULL, XOF_DEBUG);
+	else if (xo_streq(cp, "html"))
+	    xo_set_style(NULL, XO_STYLE_HTML);
+	else if (xo_streq(cp, "info"))
+	    xo_set_flags(NULL, XOF_INFO);
+	else if (xo_streq(cp, "json"))
+	    xo_set_style(NULL, XO_STYLE_JSON);
+	else if (xo_streq(cp, "key"))
+	    opt_key = 1;
+	else if (xo_streq(cp, "only-key"))
+	    opt_only_key = 1;
+	else if (xo_streq(cp, "pretty"))
+	    xo_set_flags(NULL, XOF_PRETTY);
+	else if (xo_streq(cp, "text"))
+	    xo_set_style(NULL, XO_STYLE_TEXT);
+	else if (xo_streq(cp, "xpath"))
+	    xo_set_flags(NULL, XOF_XPATH);
+	else if (xo_streq(cp, "xml"))
+	    xo_set_style(NULL, XO_STYLE_XML);
+    }
+
+
     xo_set_info(NULL, info, info_count);
     xo_set_flags(NULL, XOF_COLUMNS);
 
+    if (opt_only_key) {
+	xo_open_container("employees");
+	goto just_key;
+    }
+
     xo_open_container("indian-languages");
     
+	
     xo_emit("{T:Sample text}\n");
     xo_emit("This sample text was taken from the Punjabi Wikipedia "
 	    "article on Lahore and transliterated into the Latin script.\n");
@@ -122,12 +156,21 @@ main (int argc, char **argv)
 
     xo_emit("{T:First Name/%-25s}{T:Last Name/%-14s}"
 	    "{T:/%-12s}{T:Time (%)}\n", "Department");
-    for ( ; ep->e_first; ep++) {
+    for (ep = employees; ep->e_first; ep++) {
 	xo_open_instance("employee");
-	xo_emit("{[:-25}{:first-name/%s} ({:nic-name/\"%s\"}){]:}"
+
+	if (opt_key) {
+	    xo_emit("{[:-25}{k:first-name/%s} ({k:nic-name/\"%s\"}){]:}"
+		    "{k:last-name/%-14..14s/%s}"
+		"{:department/%8u}{:percent-time/%8u}\n",
+		ep->e_first, ep->e_nic, ep->e_last, ep->e_dept, ep->e_percent);
+	} else {
+	    xo_emit("{[:-25}{:first-name/%s} ({:nic-name/\"%s\"}){]:}"
 		"{:last-name/%-14..14s/%s}"
 		"{:department/%8u}{:percent-time/%8u}\n",
 		ep->e_first, ep->e_nic, ep->e_last, ep->e_dept, ep->e_percent);
+	}
+
 	if (ep->e_percent > 50) {
 	    xo_attr("full-time", "%s", "honest & for true");
 	    xo_emit("{e:benefits/%s}", "full");
@@ -136,6 +179,34 @@ main (int argc, char **argv)
     }
 
     xo_close_list("employee");
+
+ just_key:
+
+    xo_open_list("employee");
+
+    xo_emit("{T:First Name/%-25s}{T:Last Name/%-14s}"
+	    "{T:/%-12s}{T:Time (%)}\n", "Department");
+    for (ep = employees; ep->e_first; ep++) {
+	xo_open_instance("employee");
+
+	if (opt_key) {
+	    xo_emit("X{[:-25}{k:first-name/%s} ({k:nic-name/\"%s\"}){]:}X\n",
+		    ep->e_first, ep->e_nic);
+	} else {
+	    xo_emit("X{[:-25}{:first-name/%s} ({:nic-name/\"%s\"}){]:}X\n",
+		    ep->e_first, ep->e_nic);
+	}
+
+	if (ep->e_percent > 50) {
+	    xo_attr("full-time", "%s", "honest & for true");
+	    xo_emit("{e:benefits/%s}", "full");
+	}
+	xo_close_instance("employee");
+    }
+
+    xo_close_list("employee");
+
+
     xo_close_container("employees");
 
     xo_finish();

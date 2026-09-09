@@ -528,7 +528,16 @@ public:
             QualType exp_type = fmt_expected_type(*Ctx_, spec, speclen);
             if (!exp_type.isNull()) {
                 if (!type_matches(*Ctx_, exp_type, arg)) {
-                    std::string exp_str = exp_type.getAsString(PP);
+                    /*
+                     * Newer clang (LLVM 21+, https://github.com/llvm/llvm-project/pull/143653)
+                     * made getSizeType()/getPointerDiffType() return a
+                     * PredefinedSugarType ("__size_t"/"__ptrdiff_t") instead
+                     * of the canonical builtin.  Desugar explicitly so the
+                     * printed name (e.g. "unsigned long") is stable across
+                     * clang versions.
+                     */
+                    std::string exp_str = exp_type.getCanonicalType()
+                                                   .getAsString(PP);
                     std::string act_str = arg->IgnoreImpCasts()->getType()
                                              .getAsString(PP);
                     Diags.Report(arg->getBeginLoc(), TypePreciseDiagID)

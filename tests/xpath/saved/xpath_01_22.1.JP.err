@@ -62,6 +62,7 @@ added filter: 0
                 000003: type 72 (C_INDEX), str 13 [1], contents 0, next 0, prev 0 
 main: status: zero
 main: input '{interface'
+xpath_01: duplicate sibling name: 'interface'
 main: filter: rc: 19
 main: status: zero
 main: input '<interface'
@@ -166,6 +167,7 @@ added filter: 0
                     000010: type 54 (T_QUOTED), str 27 [tcp4], contents 0, next 0, prev 9 
 main: status: zero
 main: input '{socket'
+xpath_01: duplicate sibling name: 'socket'
 main: filter: rc: 16
 main: status: zero
 main: input '<socket'
@@ -287,6 +289,7 @@ main: field: 'thing'='one'
 main: status: full
 main: input '= thing two'
 main: field: 'thing'='two'
+xpath_01: duplicate sibling name: 'thing'
 main: status: full
 main: input '= thing three'
 main: field: 'thing'='three'
@@ -308,6 +311,7 @@ added filter: 0
         000001: type 70 (C_ELEMENT), str 1 [item], contents 0, next 0, prev 0 
 main: status: zero
 main: input '+ data'
+xpath_01: duplicate sibling name: 'data'
 main: filter: rc: 14
 main: status: track
 main: input '= thing one'
@@ -315,6 +319,7 @@ main: field: 'thing'='one'
 main: status: track
 main: input '= thing two'
 main: field: 'thing'='two'
+xpath_01: duplicate sibling name: 'thing'
 main: status: track
 main: input '= thing three'
 main: field: 'thing'='three'
