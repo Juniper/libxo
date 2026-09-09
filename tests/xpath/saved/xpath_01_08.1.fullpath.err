@@ -115,6 +115,7 @@ main: status: track
 main: input '-two'
 main: status: track
 main: input '+two'
+xpath_01: duplicate sibling name: 'two'
 main: status: track
 main: input '$b 2'
 main: key: 'b'='2'
@@ -134,6 +135,7 @@ main: status: track
 main: input '-one'
 main: status: track
 main: input '+one'
+xpath_01: duplicate sibling name: 'one'
 main: status: predicate
 main: input '$a 4.85'
 main: key: 'a'='4.85'
@@ -160,6 +162,7 @@ main: status: track
 main: input '-two'
 main: status: track
 main: input '+two'
+xpath_01: duplicate sibling name: 'two'
 main: status: predicate
 main: input '$b 2'
 main: key: 'b'='2'
