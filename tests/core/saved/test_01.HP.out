@@ -20,19 +20,19 @@
 </div>
 <div class="line">
   <div class="text">other: </div>
-  <div class="data" data-tag="thing">one</div>
+  <div class="data" data-tag="thing1">one</div>
 </div>
 <div class="line">
   <div class="text">other: </div>
-  <div class="data" data-tag="thing">two</div>
+  <div class="data" data-tag="thing2">two</div>
 </div>
 <div class="line">
   <div class="text">other: </div>
-  <div class="data" data-tag="thing">three</div>
+  <div class="data" data-tag="thing3">three</div>
 </div>
 <div class="line">
   <div class="text">other: </div>
-  <div class="data" data-tag="thing">four</div>
+  <div class="data" data-tag="thing4">four</div>
 </div>
 <div class="line">
   <div class="text">Blocks: </div>
