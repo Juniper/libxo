@@ -67,6 +67,7 @@ added filter: 0
                     000009: type 54 (T_QUOTED), str 36 [eth], contents 0, next 0, prev 6 
 main: status: zero
 main: input '{interface'
+xpath_01: duplicate sibling name: 'interface'
 main: filter: rc: 19
 main: status: zero
 main: input '<interface'
