@@ -41,6 +41,7 @@ added filter: 0
                     000006: type 53 (T_NUMBER), str 14 [4], contents 0, next 0, prev 5 
 main: status: zero
 main: input '+one'
+xpath_01: duplicate sibling name: 'one'
 main: status: predicate
 main: input '$two 4'
 main: key: 'two'='4'
