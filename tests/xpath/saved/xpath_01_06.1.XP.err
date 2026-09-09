@@ -74,6 +74,7 @@ main: input '-five'
 main: status: full
 main: input '=foo goo'
 main: field: 'foo'='goo'
+xpath_01: duplicate sibling name: 'foo'
 main: status: full
 main: input '-four'
 main: status: full
@@ -83,6 +84,7 @@ main: status: full
 main: input '-two'
 main: status: track
 main: input '+two'
+xpath_01: duplicate sibling name: 'two'
 main: filter: rc: 8
 main: status: predicate
 main: input '$three 3333'
@@ -112,6 +114,7 @@ main: input '-five'
 main: status: track
 main: input '=foo goo'
 main: field: 'foo'='goo'
+xpath_01: duplicate sibling name: 'foo'
 main: status: track
 main: input '-four'
 main: status: track
@@ -165,6 +168,7 @@ main: status: track
 main: input '-siete'
 main: status: track
 main: input '+cinco'
+xpath_01: duplicate sibling name: 'cinco'
 main: filter: rc: 16
 main: status: full
 main: input '-cinco'
@@ -172,6 +176,7 @@ main: status: track
 main: input '-cuatro'
 main: status: track
 main: input '+cuatro'
+xpath_01: duplicate sibling name: 'cuatro'
 main: filter: rc: 15
 main: status: predicate
 main: input '$test fail'
