@@ -1,0 +1,8 @@
+utf8_01: duplicate sibling name: 'offset'
+utf8_01: duplicate sibling name: 'len'
+utf8_01: duplicate sibling name: 'hex'
+utf8_01: duplicate sibling name: 'hex-upper'
+utf8_01: duplicate sibling name: 'hex-lower'
+utf8_01: duplicate sibling name: 'byte'
+utf8_01: duplicate sibling name: 'upper'
+utf8_01: duplicate sibling name: 'lower'
