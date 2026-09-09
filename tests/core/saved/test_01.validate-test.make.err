@@ -1,11 +1,11 @@
 ../../../tests/core/test_01.c:121:13: warning: libxo: field name contains percent sign: '{a:%s}'
-  121 |     xo_emit("other: {a:%s}\n", "thing", "two"); /* invalid content */
+  121 |     xo_emit("other: {a:%s}\n", "thing2", "two"); /* invalid content */
       |             ^
 ../../../tests/core/test_01.c:122:13: warning: libxo: field name contains percent sign: '{a:%s/%s}'
-  122 |     xo_emit("other: {a:%s/%s}\n", "thing", "three");  /* same */
+  122 |     xo_emit("other: {a:%s/%s}\n", "thing3", "three");  /* same */
       |             ^
 ../../../tests/core/test_01.c:123:13: warning: libxo: field name contains percent sign: '{a:xxx%s/%s}'
-  123 |     xo_emit("other: {a:xxx%s/%s}\n", "thing", "four"); /* same */
+  123 |     xo_emit("other: {a:xxx%s/%s}\n", "thing4", "four"); /* same */
       |             ^
 ../../../tests/core/test_01.c:152:13: warning: libxo: use hyphens, not underscores, in field name: '{e:kve_start/%#jx}'
   152 |     xo_emit("{e:kve_start/%#jx}", (uintmax_t) 0xdeadbeef);
