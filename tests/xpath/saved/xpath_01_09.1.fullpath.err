@@ -25,6 +25,7 @@ main: status: track
 main: input '-two'
 main: status: track
 main: input '+two'
+xpath_01: duplicate sibling name: 'two'
 main: status: predicate
 main: input '$three 9'
 main: key: 'three'='9'
