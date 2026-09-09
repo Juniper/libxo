@@ -95,6 +95,7 @@ main: input '-five'
 main: status: full
 main: input '=data ioo'
 main: field: 'data'='ioo'
+xpath_01: duplicate sibling name: 'data'
 main: status: full
 main: input '-four'
 main: status: track
@@ -106,6 +107,7 @@ main: status: track
 main: input '-two'
 main: status: track
 main: input '+two'
+xpath_01: duplicate sibling name: 'two'
 main: status: track
 main: input '+a'
 main: status: track
@@ -118,6 +120,7 @@ main: status: track
 main: input '-uno'
 main: status: track
 main: input '+uno'
+xpath_01: duplicate sibling name: 'uno'
 main: status: track
 main: input '-uno'
 main: status: track
@@ -137,6 +140,7 @@ main: status: full
 main: input '-d'
 main: status: track
 main: input '+d'
+xpath_01: duplicate sibling name: 'd'
 main: status: full
 main: input '=data koo'
 main: field: 'data'='koo'
