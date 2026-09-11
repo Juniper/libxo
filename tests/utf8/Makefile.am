@@ -176,6 +176,8 @@ one:
 accept:
 	@${MKDIR} -p ${srcdir}/saved
 	${RUN_TESTS_CMD} -T "${TEST_FORMATS}" accept-bin ${TEST_CASES:.c=.test}
+	${RUN_TESTS_CMD} -m validate -T "${TEST_FORMATS}" accept-bin ${TEST_CASES:.c=.test}
+	${RUN_TESTS_CMD} -m pass -T "${TEST_FORMATS}" accept-bin ${TEST_CASES:.c=.test}
 	-@test -z "${LLVM_CLANG}" || for tc in ${TEST_CASES:.c=}; do \
 	    cp out/$$tc.validate-test.make.out \
 	        ${srcdir}/saved/$$tc.validate-test.make.out 2>/dev/null ; \
