@@ -49,13 +49,14 @@ EXTRA_DIST = xocc.sh.in xocc.1
 
 .PHONY: validate validate-clean precompile precompile-clean
 
-if HAVE_VALIDATE
-
 man1_files = xocc.1
 
 man7_files = xo_plugins.7
 
 man_MANS = ${man1_files} ${man7_files}
+
+EXTRA_DIST += \
+    ${man_MANS}
 
 all: ${VALIDATE_PLUGIN} ${PRECOMPILE_PLUGIN}
 
@@ -102,10 +103,10 @@ CLEANDIRS = ${VALIDATE_DIR} ${PRECOMPILE_DIR}
 clean-local:
 	rm -rf ${CLEANDIRS}
 
-else
-
-all:
-
-install-exec-local uninstall-local validate validate-clean precompile precompile-clean:
-
-endif
+EXTRA_DIST += \
+    precompile/xo_precompile.cc \
+    precompile/CMakeLists.txt \
+    validate/xo_validate.cc \
+    validate/xo_parse_shim.h \
+    validate/xo_parse_shim.c \
+    validate/CMakeLists.txt
