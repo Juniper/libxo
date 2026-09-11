@@ -83,41 +83,67 @@ if HAVE_LIBBSD
 LDADD += -lbsd
 endif
 
+if HAVE_VALIDATE
+LLVM_PASSES = validate-test pass-test
+ALL_PASSES = . .validate. .pass.
+else
+LLVM_PASSES =
+ALL_PASSES = .
+endif
+
+if HAVE_GETTEXT
+GTEXT_EXT = Gjson Gt2 Gt3 Gt4 Gt5 Gtext
+else
+GTEXT_EXT = 
+endif
+
+CSV_EXT = Ecsv1 Ecsv2 Ecsv3
+PMAP_EXT = JPmap  XPmap
+
+STYLES = T XP JP JPu HP X J H HIPx E
+
+TEST_OUTPUT_FILES = \
+$(foreach file, ${TEST_CASES}, \
+    $(foreach pass, ${LLVM_PASSES}, \
+        $(foreach fd, out err, \
+            $(addprefix saved/, ${file:.c=.${pass}.make.${fd}}))) \
+    $(foreach pass, ${ALL_PASSES}, \
+        $(foreach ext, ${STYLES}, \
+            $(foreach fd, out err, \
+                $(addprefix saved/, ${file:.c=${pass}${ext}.${fd}})))))
+
+TEST_OUTPUT_FILES += \
+$(foreach file, test_15.c, \
+    $(foreach pass, ${ALL_PASSES}, \
+        $(foreach ext, ${GTEXT_EXT}, \
+            $(foreach fd, out err, \
+                $(addprefix saved/, ${file:.c=${pass}${ext}.${fd}})))))
+
+TEST_OUTPUT_FILES += \
+$(foreach file, test_01.c, \
+    $(foreach pass, ${ALL_PASSES}, \
+        $(foreach ext, ${CSV_EXT}, \
+            $(foreach fd, out err, \
+                $(addprefix saved/, ${file:.c=${pass}${ext}.${fd}})))))
+
+TEST_OUTPUT_FILES += \
+$(foreach file, test_12.c, \
+    $(foreach pass, ${ALL_PASSES}, \
+        $(foreach ext, ${PMAP_EXT}, \
+            $(foreach fd, out err, \
+                $(addprefix saved/, ${file:.c=${pass}${ext}.${fd}})))))
+
+sayit:
+	echo ${TEST_OUTPUT_FILES}
+
 EXTRA_DIST = \
     ${TEST_CASES} \
     test_01.fmts \
     test_12.fmts \
+    test_12.fmts \
     test_15.fmts \
-    ${addprefix saved/, ${TEST_CASES:.c=.E.err}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.E.out}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.H.err}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.H.out}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.HIPx.err}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.HIPx.out}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.HP.err}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.HP.out}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.J.err}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.J.out}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.JP.err}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.JP.out}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.JPu.err}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.JPu.out}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.T.err}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.T.out}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.X.err}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.X.out}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.XP.err}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.XP.out}} \
-    ${addprefix saved/, test_01.Ecsv1.out} \
-    ${addprefix saved/, test_01.Ecsv1.err} \
-    ${addprefix saved/, test_01.Ecsv2.out} \
-    ${addprefix saved/, test_01.Ecsv2.err} \
-    ${addprefix saved/, test_01.Ecsv3.out} \
-    ${addprefix saved/, test_01.Ecsv3.err} \
-    ${addprefix saved/, test_12.XPmap.out} \
-    ${addprefix saved/, test_12.XPmap.err} \
-    ${addprefix saved/, test_12.JPmap.out} \
-    ${addprefix saved/, test_12.JPmap.err}
+    test_12.map \
+    ${TEST_OUTPUT_FILES}
 
 # ---------------------------------------------------------------------------
 # Test runner

@@ -51,10 +51,31 @@ if HAVE_LIBBSD
 LDADD += -lbsd
 endif
 
+
+if HAVE_VALIDATE
+LLVM_PASSES = validate-test pass-test
+ALL_PASSES = . .validate. .pass.
+else
+LLVM_PASSES =
+ALL_PASSES = .
+endif
+
+STYLES = T
+
+TEST_OUTPUT_FILES = \
+$(foreach file, ${TEST_CASES}, \
+    $(foreach pass, ${LLVM_PASSES}, \
+        $(foreach fd, out err, \
+            $(addprefix saved/, ${file:.c=.${pass}.make.${fd}}))) \
+    $(foreach pass, ${ALL_PASSES}, \
+        $(foreach ext, ${STYLES}, \
+            $(foreach fd, out err, \
+                $(addprefix saved/, ${file:.c=${pass}${ext}.${fd}})))))
+
 EXTRA_DIST = \
+    data_01.txt \
     ${TEST_CASES} \
-    ${addprefix saved/, ${TEST_CASES:.c=.T.err}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.T.out}}
+    ${TEST_OUTPUT_FILES}
 
 # ---------------------------------------------------------------------------
 # Test runner
