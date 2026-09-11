@@ -289,8 +289,8 @@ do_run_bin_one () {
     echo "$out_base.err" >> $FILES
 
     # Always diff against plain saved baselines (all modes should match).
-    run "diff -Nu ${SRCDIR}/saved/${base}.${fmt_name}.out ${out}.out | ${S2O}"
-    run "diff -Nu ${SRCDIR}/saved/${base}.${fmt_name}.err ${out}.err | ${S2O}"
+    run "diff -Nu ${SRCDIR}/saved/${out_base}.out ${out}.out | ${S2O}"
+    run "diff -Nu ${SRCDIR}/saved/${out_base}.err ${out}.err | ${S2O}"
 }
 
 # Run all format specs for all listed test binaries.
@@ -336,9 +336,15 @@ do_accept_bins () {
     for test_bin in "$@"; do
         base=$(basename "$test_bin" .test)
 
+        case $RUN_MODE in
+        validate) mode="validate." ;;
+        pass)     mode="pass." ;;
+        *)        mode="" ;;
+        esac
+
         for spec in ${TEST_FORMATS}; do
             parse_fmt_spec "$spec"
-            local oname="${base}.${fmt_name}"
+            local oname="${base}.${mode}${fmt_name}"
             accept_file "out/$oname.out" "${SRCDIR}/saved/$oname.out"
             accept_file "out/$oname.err" "${SRCDIR}/saved/$oname.err"
         done
@@ -348,7 +354,7 @@ do_accept_bins () {
             while IFS= read -r spec; do
                 case $spec in '#'*|'') continue ;; esac
                 parse_fmt_spec "$spec"
-                local oname="${base}.${fmt_name}"
+                local oname="${base}.${mode}${fmt_name}"
                 accept_file "out/$oname.out" "${SRCDIR}/saved/$oname.out"
                 accept_file "out/$oname.err" "${SRCDIR}/saved/$oname.err"
             done < "$fmts_file"
