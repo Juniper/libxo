@@ -253,6 +253,20 @@ accept:
 	    cp out/$$tc.pass-test.make.err \
 	        ${srcdir}/saved/$$tc.pass-test.make.err 2>/dev/null ; \
 	done
+	-@for tc in ${TEST_CASES:.c=}; do \
+	    cp out/$$tc.validate-test.make.out \
+		${srcdir}/saved/$$tc.validate-test.make.out ; \
+	    cp out/$$tc.validate-test.make.err  \
+	    	${srcdir}/saved/$$tc.validate-test.make.err ; \
+	done
+	-@for tc in ${TEST_CASES:.c=}; do \
+	    cp out/$$tc.pass-test.make.out \
+	    	${srcdir}/saved/$$tc.pass-test.make.out ; \
+	    cp out/$$tc.pass-test.make.err \
+	    	${srcdir}/saved/$$tc.pass-test.make.err ; \
+	done
+	-@${RUN_TESTS_CMD} -T "${TEST_FORMATS}" -m validate accept-bin ${TEST_CASES:.c=.test}
+	-@${RUN_TESTS_CMD} -T "${TEST_FORMATS}" -m pass accept-bin ${TEST_CASES:.c=.test}
 
 .c.test:
 	$(AM_V_CC)$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -o $@ $<
