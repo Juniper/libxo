@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>xohtml &#8212; libxo 
+ documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinxdoc.css?v=3ac2912a" />
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="xopo" href="xopo.html" />
+    <link rel="prev" title="xolint" href="xolint.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="xopo.html" title="xopo"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="xolint.html" title="xolint"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">libxo 
+ documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">xohtml</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="xohtml">
+<span id="index-0"></span><span id="id1"></span><h1>xohtml<a class="headerlink" href="#xohtml" title="Link to this heading">¶</a></h1>
+<p><code class="code docutils literal notranslate"><span class="pre">xohtml</span></code> is a tool for turning the output of libxo-enabled commands into
+html files suitable for display in modern HTML web browsers.  It can
+be used to test and debug HTML output, as well as to make the user
+ache to escape the world of ’70s terminal devices.</p>
+<p><code class="code docutils literal notranslate"><span class="pre">xohtml</span></code> is given a command, either on the command line or via the “-c”
+option.  If not command is given, standard input is used.  The
+command’s output is wrapped in HTML tags, with references to
+supporting CSS and Javascript files, and written to standard output or
+the file given in the “-f” option.  The “-b” option can be used to
+provide an alternative base path for the support files:</p>
+<blockquote>
+<div><table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Option</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>-b &lt;base&gt;</p></td>
+<td><p>Base path for finding css/javascript files</p></td>
+</tr>
+<tr class="row-odd"><td><p>-c &lt;command&gt;</p></td>
+<td><p>Command to execute</p></td>
+</tr>
+<tr class="row-even"><td><p>-f &lt;file&gt;</p></td>
+<td><p>Output file name</p></td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>The “-c” option takes a full command with arguments, including
+any libxo options needed to generate html (<code class="code docutils literal notranslate"><span class="pre">--libxo=html</span></code>).  This
+value must be quoted if it consists of multiple tokens.</p>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="xolint.html"
+                          title="previous chapter">xolint</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="xopo.html"
+                          title="next chapter">xopo</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/xohtml.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="xopo.html" title="xopo"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="xolint.html" title="xolint"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">libxo 
+ documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">xohtml</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2017-2019, Juniper Networks Inc.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

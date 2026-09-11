@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Format Strings &#8212; libxo 
+ documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinxdoc.css?v=3ac2912a" />
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Field Roles" href="field-roles.html" />
+    <link rel="prev" title="Command-line Arguments" href="options.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="field-roles.html" title="Field Roles"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="options.html" title="Command-line Arguments"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">libxo 
+ documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Format Strings</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="format-strings">
+<span id="index-0"></span><span id="id1"></span><h1>Format Strings<a class="headerlink" href="#format-strings" title="Link to this heading">¶</a></h1>
+<p>libxo uses format strings to control the rendering of data into the
+various output styles.  Each format string contains a set of zero or
+more field descriptions, which describe independent data fields.  Each
+field description contains a set of modifiers, a content string, and
+zero, one, or two format descriptors.  The modifiers tell libxo what
+the field is and how to treat it, while the format descriptors are
+formatting instructions using printf-style format strings, telling
+libxo how to format the field.  The field description is placed inside
+a set of braces, with a colon (“:”) after the modifiers and a slash
+(“/”) before each format descriptors.  Text may be intermixed with
+field descriptions within the format string.</p>
+<p>The field description is given as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;{&#39;</span> <span class="p">[</span> <span class="n">role</span> <span class="o">|</span> <span class="n">modifier</span> <span class="p">]</span><span class="o">*</span> <span class="p">[</span><span class="s1">&#39;,&#39;</span> <span class="n">long</span><span class="o">-</span><span class="n">names</span> <span class="p">]</span><span class="o">*</span> <span class="s1">&#39;:&#39;</span> <span class="p">[</span> <span class="n">content</span> <span class="p">]</span>
+        <span class="p">[</span> <span class="s1">&#39;/&#39;</span> <span class="n">field</span><span class="o">-</span><span class="nb">format</span> <span class="p">[</span> <span class="s1">&#39;/&#39;</span> <span class="n">encoding</span><span class="o">-</span><span class="nb">format</span> <span class="p">]]</span> <span class="s1">&#39;}&#39;</span>
+</pre></div>
+</div>
+<p>The role describes the function of the field, while the modifiers
+enable optional behaviors.  The contents, field-format, and
+encoding-format are used in varying ways, based on the role.  These
+are described in the following sections.</p>
+<p>In the following example, three field descriptors appear.  The first
+is a padding field containing three spaces of padding, the second is a
+label (“In stock”), and the third is a value field (“in-stock”).  The
+in-stock field has a “%u” format that will parse the next argument
+passed to the xo_emit function as an unsigned integer:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;{P:   }{Lwc:In stock}{:in-stock/</span><span class="si">%u</span><span class="s2">}</span><span class="se">\\</span><span class="s2">n&quot;</span><span class="p">,</span> <span class="mi">65</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>This single line of code can generate text (” In stock: 65\n”), XML
+(“&lt;in-stock&gt;65&lt;/in-stock&gt;”), JSON (‘“in-stock”: 6’), or HTML (too
+lengthy to be listed here).</p>
+<p>While roles and modifiers typically use single character for brevity,
+there are alternative names for each which allow more verbose
+formatting strings.  These names must be preceded by a comma, and may
+follow any single-character values:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xo_emit</span><span class="p">(</span><span class="s2">&quot;{L,white,colon:In stock}{,key:in-stock/</span><span class="si">%u</span><span class="s2">}</span><span class="se">\\</span><span class="s2">n&quot;</span><span class="p">,</span> <span class="mi">65</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="options.html"
+                          title="previous chapter">Command-line Arguments</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="field-roles.html"
+                          title="next chapter">Field Roles</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/format-strings.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="field-roles.html" title="Field Roles"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="options.html" title="Command-line Arguments"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">libxo 
+ documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Format Strings</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2017-2019, Juniper Networks Inc.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

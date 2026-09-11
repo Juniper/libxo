@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Filtering Output &#8212; libxo 
+ documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinxdoc.css?v=3ac2912a" />
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="The libxo API" href="api.html" />
+    <link rel="prev" title="Field Formatting" href="field-formatting.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="api.html" title="The libxo API"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="field-formatting.html" title="Field Formatting"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">libxo 
+ documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Filtering Output</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="filtering-output">
+<span id="filter"></span><span id="index-0"></span><h1>Filtering Output<a class="headerlink" href="#filtering-output" title="Link to this heading">¶</a></h1>
+<p>The filter feature allows applications to select which portions of
+structured output are emitted, based on XPath-like expressions.  Only
+matching instances are written to the output stream; non-matching
+instances are silently discarded.</p>
+<p>Filters are useful when an application emits a large dataset (for
+example, all network sockets) but only a subset is of interest (for
+example, established TCP connections).  The filter can be applied
+without modifying the application code.  Unlike traditional unix
+tools, filters are aware of the fields and their context.</p>
+<section id="expression-syntax">
+<span id="filter-expressions"></span><span id="index-2"></span><span id="index-1"></span><h2>Expression Syntax<a class="headerlink" href="#expression-syntax" title="Link to this heading">¶</a></h2>
+<p>Filters use an XPath-like expression language.
+Expressions are used to select content hierarchies and specify conditions
+for content to be selected.  Expressions contain five constructs:</p>
+<ul class="simple">
+<li><p>Paths to elements</p>
+<ul>
+<li><p>Select nodes based on node names</p>
+<ul>
+<li><p>Example: chapter</p></li>
+<li><p>Selects all elements with the name <code class="code docutils literal notranslate"><span class="pre">chapter</span></code></p></li>
+</ul>
+</li>
+<li><p>Selects child nodes based on parent node names</p>
+<ul>
+<li><p>Example: doc/chapter/section/paragraph</p></li>
+<li><p>Selects all <code class="code docutils literal notranslate"><span class="pre">paragraph</span></code> elements that are under a <code class="code docutils literal notranslate"><span class="pre">section</span></code>
+element, which are themselves under a <code class="code docutils literal notranslate"><span class="pre">chapter</span></code> element, which
+in turn must be under a <code class="code docutils literal notranslate"><span class="pre">doc</span></code> element.</p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Negate elements</p>
+<ul>
+<li><p>Select nodes not to emit</p>
+<ul>
+<li><p>Example: !remote</p></li>
+<li><p>Select all node except <code class="code docutils literal notranslate"><span class="pre">remote</span></code> and its descendants</p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Wildcard elements</p>
+<ul>
+<li><p>Select any nodes.  A “*” matches any element.</p>
+<ul>
+<li><p>Example: one/*/three</p></li>
+<li><p>Select any <code class="code docutils literal notranslate"><span class="pre">three</span></code> elements that are under an element of any
+name, which in turn must be under a <code class="code docutils literal notranslate"><span class="pre">one</span></code> element .</p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Relative and absolute paths</p>
+<ul>
+<li><p>A path with a leading slash is “anchored” at the root of the
+output tree, while one without matches anywhere in the output
+hierarchy.</p>
+<ul>
+<li><p>Example: /one/two and one/two</p></li>
+<li><p>The former matches any <code class="code docutils literal notranslate"><span class="pre">two</span></code> elements under a root-level <code class="code docutils literal notranslate"><span class="pre">one</span></code>
+element, while the latter matches any <code class="code docutils literal notranslate"><span class="pre">two</span></code> elements under a
+<code class="code docutils literal notranslate"><span class="pre">one</span></code> element anywhere in the tree.</p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Predicate tests</p>
+<ul>
+<li><p>Selects nodes for which the expression in the square brackets
+evaluates to “true” (with boolean() type conversion)</p>
+<ul>
+<li><p>Example chapter[number == 1]</p></li>
+<li><p>Selects all <code class="code docutils literal notranslate"><span class="pre">chapter</span></code> elements which contain a <code class="code docutils literal notranslate"><span class="pre">number</span></code> element with
+a value of 1.</p></li>
+</ul>
+</li>
+<li><p>Can refer to attributes using a leading at-sign (“&#64;”)</p>
+<ul>
+<li><p>Example chapter[&#64;number == 1]</p></li>
+<li><p>Selects all <code class="code docutils literal notranslate"><span class="pre">chapter</span></code> elements which have a <code class="code docutils literal notranslate"><span class="pre">number</span></code> attribute with
+a value of 1.</p></li>
+</ul>
+</li>
+<li><p>Can perform math using addition (“+”), subtraction (“-“),
+multiplication (“*”) , and division (“div”) and comparisons using
+equals (“=” or “==”), greater than (“&gt;”), greater than or equal
+(“&gt;=”), less than (“&lt;”), less than or equal (“&lt;=”).  Comparisons
+allow type forcing when the types are unequal.</p>
+<ul>
+<li><p>Example: item[cost * count &gt;= 1500]</p></li>
+<li><p>Selects any <code class="code docutils literal notranslate"><span class="pre">item</span></code> element where the product of their <code class="code docutils literal notranslate"><span class="pre">cost</span></code> and
+<code class="code docutils literal notranslate"><span class="pre">count</span></code> elements are greater than or equal to 1500.</p></li>
+</ul>
+</li>
+<li><p>Can be applied to any path member</p>
+<ul>
+<li><p>Example: chapter[&#64;number == 1]/section[&#64;number == 2]</p></li>
+<li><p>Selects all <code class="code docutils literal notranslate"><span class="pre">section</span></code> elements which have a <code class="code docutils literal notranslate"><span class="pre">number</span></code> attribute with
+a value of 2 which are parented by a <code class="code docutils literal notranslate"><span class="pre">chapter</span></code> element which
+have a <code class="code docutils literal notranslate"><span class="pre">number</span></code> attribute with a value of 1.</p></li>
+</ul>
+</li>
+<li><p>Use a number to select the &lt;n&gt;th node from a node set, using an
+origin of 1 (not 0):</p>
+<ul>
+<li><p>Example: chapter[1]</p></li>
+<li><p>Selects the first <code class="code docutils literal notranslate"><span class="pre">chapter</span></code> element</p></li>
+</ul>
+</li>
+<li><p>Multiple predicate tests can be specified (ANDed together)</p>
+<ul>
+<li><p>Example: chapter[&#64;number &gt; 15][page-count &gt; 10]</p></li>
+<li><p>Selects all <code class="code docutils literal notranslate"><span class="pre">chapter</span></code> elements with a <code class="code docutils literal notranslate"><span class="pre">number</span></code> attribute with a
+value greater than 15 and contains a <code class="code docutils literal notranslate"><span class="pre">page-count</span></code> element with
+value greater than 10.</p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><dl class="simple">
+<dt>Each step of the path can zero or more predicates</dt><dd><ul>
+<li><p>Example: one[a &gt; 4]/two[b &lt; 3]/three[c == 2]/four[d == 1]</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>Literal string</p>
+<ul>
+<li><p><code class="code docutils literal notranslate"><span class="pre">libxo</span></code> accepts single or double quotes</p>
+<ul>
+<li><p>Example: “test”</p></li>
+</ul>
+</li>
+<li><p>Character escaping is supported</p>
+<ul>
+<li><p>Example: ‘\tthat\’s good\n\tnow what?\n’</p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Numbers</p>
+<ul>
+<li><p>Integer values</p>
+<ul>
+<li><p>Example: 5, 10, 20000</p></li>
+</ul>
+</li>
+<li><p>Floating point values</p>
+<ul>
+<li><p>Example: 3.14, 4.3e50, 0.125</p></li>
+</ul>
+</li>
+<li><p>Hexadecimal numbers (base 16)</p>
+<ul>
+<li><p>Example: 0x20, 0xABCD, 0xfefefefe</p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Calls to functions</p>
+<ul>
+<li><p>Function calls can be used in expressions or predicate tests</p>
+<ul>
+<li><p>Example: chapter[number(section) &gt; 15]</p></li>
+</ul>
+</li>
+<li><p>Allows calls to pre-defined or user-defined functions</p>
+<ul>
+<li><p>Example: chapter[substring-before(title, “ne”) == “O”]</p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><code class="code docutils literal notranslate"><span class="pre">libxo</span></code> follows XPath syntax, with the following additions:</p>
+<ul class="simple">
+<li><p>“&amp;&amp;” may be used in place of the “and” operator.</p>
+<ul>
+<li><p>Example: food[&#64;fruit &amp;&amp; &#64;delicious]</p></li>
+<li><p>Synonym: food[&#64;fruit and &#64;delicious]</p></li>
+</ul>
+</li>
+<li><p>“||” may be used in place of the “or” operator.</p>
+<ul>
+<li><p>Example: fish[tropical || colorful]</p></li>
+<li><p>Synonym: fish[tropical or colorful]</p></li>
+</ul>
+</li>
+<li><p>“==” may be used in place of the “=” operator.</p>
+<ul>
+<li><p>Example: tree[height == 10]</p></li>
+<li><p>Synonym: tree[height = 10]</p></li>
+</ul>
+</li>
+<li><p>“!” may be used in place of the “not()” operator.</p>
+<ul>
+<li><p>Example: socket[!contains(path, “/var/run/”)]</p></li>
+<li><p>Synonym: socket[not(contains(path, “/var/run/”))]</p></li>
+</ul>
+</li>
+<li><p>“_” is the concatenation operator: (“x” _ “y” === concat(“x”, “y”))</p>
+<ul>
+<li><p>Example: thing[number(“0x” _ hex-digits _ “00”) &gt; length]</p></li>
+<li><p>Synonym: thing[number(concat(“0x”, hex-digits, “00”)) &gt; length]</p></li>
+</ul>
+</li>
+<li><p>“?:” is converted into choose() and choose2() function calls.  Both
+the “condition ? if-true : if-false” and “condition ?: if-false”
+styles are supported.</p>
+<ul>
+<li><p>Example: item[(user ?: login ?: owner) == “phil”]</p></li>
+<li><p>Synonym: item[choose2(user, choose2(login, owner)) == “phil”]</p></li>
+</ul>
+</li>
+</ul>
+<p>The first four additions are meant to prevent programmers from
+learning habits writing expression that will negatively affect their
+ability to program in other languages.  It also keep users from
+getting bitten when using familiar syntax.</p>
+<p>The last two additions are for convenience and readability.
+The colon-question is amazingly useful and hard to live without.</p>
+<p>Strings are encoded using quotes (single or double) in a way that will
+feel natural to C programmers.  The concatenation operator is
+underscore (“_”).  While this may seem an odd choice for the
+concatenation operator, many of the familiar operators like “+” and
+“.” have other meanings in XPath expressions and cannot be used.</p>
+<p>When referring to <code class="code docutils literal notranslate"><span class="pre">filter</span> <span class="pre">expressions</span></code> or <code class="code docutils literal notranslate"><span class="pre">path</span> <span class="pre">expressions</span></code> in this
+document, we mean this extended syntax.</p>
+</section>
+<section id="enabling-filters">
+<h2>Enabling Filters<a class="headerlink" href="#enabling-filters" title="Link to this heading">¶</a></h2>
+<p>Filters can be enabled from the command line or from application code.</p>
+<p>From the command line, pass one or more <code class="code docutils literal notranslate"><span class="pre">filter=</span></code> options to
+<code class="code docutils literal notranslate"><span class="pre">--libxo</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">netstat</span> <span class="o">--</span><span class="n">libxo</span> <span class="n">xml</span><span class="p">,</span><span class="n">pretty</span><span class="p">,</span><span class="nb">filter</span><span class="o">=</span><span class="s1">&#39;socket[tcp-state==&quot;ESTABLISHED&quot;]&#39;</span>
+</pre></div>
+</div>
+<p>Multiple filter expressions are combined as a union (logical OR): an
+instance matches if it satisfies any of the given expressions.  The
+same effect can be achieved with a single <code class="code docutils literal notranslate"><span class="pre">|</span></code>-separated expression or
+with repeated <code class="code docutils literal notranslate"><span class="pre">filter=</span></code> options:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Two expressions in a single option (union)</span>
+<span class="n">my</span><span class="o">-</span><span class="n">app</span> <span class="o">--</span><span class="n">libxo</span> <span class="nb">filter</span><span class="o">=</span><span class="s1">&#39;socket[tcp-state==&quot;ESTABLISHED&quot;]|interface[name==&quot;eth0&quot;]&#39;</span>
+
+<span class="c1"># Equivalently, two separate options</span>
+<span class="n">my</span><span class="o">-</span><span class="n">app</span> <span class="o">--</span><span class="n">libxo</span> <span class="nb">filter</span><span class="o">=</span><span class="s1">&#39;socket[tcp-state==&quot;ESTABLISHED&quot;]&#39;</span> \
+       <span class="o">--</span><span class="n">libxo</span> <span class="nb">filter</span><span class="o">=</span><span class="s1">&#39;interface[name==&quot;eth0&quot;]&#39;</span>
+</pre></div>
+</div>
+<p>The <code class="code docutils literal notranslate"><span class="pre">filter-warn</span></code> option enables diagnostic messages on standard
+error when filter predicates reference fields that are not present in
+the output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">my</span><span class="o">-</span><span class="n">app</span> <span class="o">--</span><span class="n">libxo</span> <span class="nb">filter</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="n">color</span><span class="o">==</span><span class="s1">&#39;red&#39;</span><span class="p">],</span><span class="nb">filter</span><span class="o">-</span><span class="n">warn</span>
+</pre></div>
+</div>
+<p>Application code should likely never need it, but they can call
+<code class="code docutils literal notranslate"><span class="pre">xo_add_filter</span></code> to add a filter to a handle:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xo_add_filter</span><span class="p">(</span><span class="n">xop</span><span class="p">,</span> <span class="s2">&quot;socket[tcp-state==</span><span class="se">\&quot;</span><span class="s2">ESTABLISHED</span><span class="se">\&quot;</span><span class="s2">]&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>See <a class="reference internal" href="api.html#xo-add-filter"><span class="std std-ref">xo_add_filter</span></a> for details.</p>
+</section>
+<section id="filter-expression-detail">
+<h2>Filter Expression Detail<a class="headerlink" href="#filter-expression-detail" title="Link to this heading">¶</a></h2>
+<p>A filter path identifies which list to filter.  The path uses the same
+element names as the <code class="code docutils literal notranslate"><span class="pre">xo_open_list</span></code>/<code class="code docutils literal notranslate"><span class="pre">xo_open_instance</span></code> calls in the
+application.</p>
+<p>The filter system is an optional component of libxo.  It is compiled
+and linked into the library only when the <code class="code docutils literal notranslate"><span class="pre">--enable-filters</span></code> option
+is passed to <code class="code docutils literal notranslate"><span class="pre">configure</span></code>.  When filters are not compiled in, the
+<code class="code docutils literal notranslate"><span class="pre">xo_add_filter</span></code> function is still present but returns an error.</p>
+<p>Filtering is provided via a dynamically loaded library, reducing the
+impact when filtering is not used.  If the filter library cannot be
+loaded, an error message is emitted.</p>
+<p>While content is being generated, <code class="code docutils literal notranslate"><span class="pre">libxo</span></code> is applying any filters and
+deciding what can be discarded completely, what can be emitted
+immediately, and what must be buffered pending a final decision.  The
+quicker this decision can be made, the better performance will be, and
+filter expressions can be tailored to increase performance by allowing
+that decision to be made as soon as possible.</p>
+<p>For example the expression “/one/two/three” can discard any top-level element
+that isn’t <code class="code docutils literal notranslate"><span class="pre">one</span></code>, which must then be rendered and buffered.  Any child
+element of <code class="code docutils literal notranslate"><span class="pre">one</span></code> that is not a <code class="code docutils literal notranslate"><span class="pre">two</span></code> can be discard until a <code class="code docutils literal notranslate"><span class="pre">two</span></code> is
+seen, at which time <code class="code docutils literal notranslate"><span class="pre">libxo</span></code> will similarly discard anything that’s not
+a <code class="code docutils literal notranslate"><span class="pre">three</span></code>.</p>
+<p>A predicate like <code class="code docutils literal notranslate"><span class="pre">socket[type</span> <span class="pre">==</span> <span class="pre">&quot;tcp4&quot;]'</span> <span class="pre">will</span> <span class="pre">buffer</span> <span class="pre">any</span> <span class="pre">`socket</span></code>
+element, along with its complete hierarchy, until a <code class="code docutils literal notranslate"><span class="pre">type</span></code> element
+arrives, at which point a decision to discard or emit can be made
+based on the contents of that <code class="code docutils literal notranslate"><span class="pre">type</span></code> element.</p>
+<p>A predicate using attributes is simpler, since the attribute will be
+know when the element is emitted.</p>
+<p>Filter expressions are a subset of XPath, with many features avoided
+due to implementation cost and performance impact.</p>
+<p>Among the unimplemented features are:</p>
+<ul class="simple">
+<li><p>“..” (parent); requires buffering parent siblings.</p></li>
+<li><p>node tests: comment(), text(), node(), and processing-instruction();
+not needed in this context.</p></li>
+<li><p>id() and key(); not needed in this context.</p></li>
+<li><p>“//” (descendant); requires additional buffering.</p></li>
+<li><p>nested predicates (predicates with predicates); complexity issues.</p></li>
+<li><p>predicate paths (deep paths in predicates); requires additional buffering.</p></li>
+</ul>
+<p>Use of these features is detected and reported by <code class="code docutils literal notranslate"><span class="pre">libxo</span></code> as errors.</p>
+<section id="keys-and-non-keys-in-predicates">
+<h3>Keys and Non-Keys in Predicates<a class="headerlink" href="#keys-and-non-keys-in-predicates" title="Link to this heading">¶</a></h3>
+<p>Keys are those fields using the “k” modifier and must appear before
+non-key fields.  Since these appear first, buffering needs are
+reduced, leading to better performance.  Predicates using non-key
+fields will require more rendering and buffering.</p>
+<p>In an instance closes while a predicate is still being evaluated due
+to a with a missing field, that predicate will be evaluated with an
+empty value for that field.</p>
+<p>Example: filtering sockets by TCP state:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ netstat --libxo xml,pretty,filter=&#39;socket[tcp-state==&quot;ESTABLISHED&quot;]&#39;
+&lt;statistics&gt;
+  &lt;socket&gt;
+    &lt;protocol&gt;tcp4&lt;/protocol&gt;
+    &lt;receive-bytes-waiting&gt;0&lt;/receive-bytes-waiting&gt;
+    &lt;send-bytes-waiting&gt;0&lt;/send-bytes-waiting&gt;
+    &lt;local&gt;
+      &lt;address&gt;172.16.188.131&lt;/address&gt;
+      &lt;port&gt;ssh&lt;/port&gt;
+    &lt;/local&gt;
+    &lt;remote&gt;
+      &lt;address&gt;172.16.188.1&lt;/address&gt;
+      &lt;port&gt;63510&lt;/port&gt;
+    &lt;/remote&gt;
+    &lt;tcp-state&gt;ESTABLISHED&lt;/tcp-state&gt;
+  &lt;/socket&gt;
+&lt;/statistics&gt;
+</pre></div>
+</div>
+<p>The <code class="code docutils literal notranslate"><span class="pre">socket</span></code> element is completely rendered into text and buffered
+before the <code class="code docutils literal notranslate"><span class="pre">tcp-state</span></code> field arrives and the predicate evaluates to
+true.  Any <code class="code docutils literal notranslate"><span class="pre">socket</span></code> elements that don’t have a <code class="code docutils literal notranslate"><span class="pre">tcp-state</span></code> will also be
+fully rendered before <code class="code docutils literal notranslate"><span class="pre">libxo</span></code> knows that the field is not present.</p>
+</section>
+<section id="sub-container-content">
+<h3>Sub-container Content<a class="headerlink" href="#sub-container-content" title="Link to this heading">¶</a></h3>
+<p>When an instance is matched, all of its content is emitted — including
+fields inside nested containers (child containers opened with
+<code class="code docutils literal notranslate"><span class="pre">xo_open_container</span></code> inside the instance).  In the example above, the
+<code class="code docutils literal notranslate"><span class="pre">local</span></code> and <code class="code docutils literal notranslate"><span class="pre">remote</span></code> containers and their fields are included in
+the output for the matched socket.</p>
+<p>But the limitation on predicate paths (deep paths in predicates) means
+that you cannot use subelements of <code class="code docutils literal notranslate"><span class="pre">local</span></code> or <code class="code docutils literal notranslate"><span class="pre">remote</span></code> in a predicate.</p>
+<p>Content in nested containers that appear before the predicate field is
+buffered along with the top-level fields.  If the predicate resolves
+true, the nested container content is committed as part of the
+instance.  If the predicate resolves false, the entire instance —
+including nested content — is discarded.</p>
+<section id="functions-in-predicates">
+<span id="index-3"></span><h4>Functions in Predicates<a class="headerlink" href="#functions-in-predicates" title="Link to this heading">¶</a></h4>
+<p>The following XPath functions are supported in filter predicates:</p>
+<p>String functions:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Function</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>concat(s1, s2, …)</p></td>
+<td><p>Concatenates strings</p></td>
+</tr>
+<tr class="row-odd"><td><p>contains(str, sub)</p></td>
+<td><p>True when <em>str</em> contains <em>sub</em> as a substring</p></td>
+</tr>
+<tr class="row-even"><td><p>ends-with(str, suffix)</p></td>
+<td><p>True when <em>str</em> ends with <em>suffix</em></p></td>
+</tr>
+<tr class="row-odd"><td><p>normalize-space(str)</p></td>
+<td><p>Strips leading/trailing space and collapses runs</p></td>
+</tr>
+<tr class="row-even"><td><p>starts-with(str, prefix)</p></td>
+<td><p>True when <em>str</em> begins with <em>prefix</em></p></td>
+</tr>
+<tr class="row-odd"><td><p>string-length(str)</p></td>
+<td><p>Returns the length of <em>str</em></p></td>
+</tr>
+<tr class="row-even"><td><p>substring(str, pos, len)</p></td>
+<td><p>Returns a substring of <em>str</em></p></td>
+</tr>
+<tr class="row-odd"><td><p>substring-after(str, s)</p></td>
+<td><p>Returns the part of <em>str</em> after the first <em>s</em></p></td>
+</tr>
+<tr class="row-even"><td><p>substring-before(str, s)</p></td>
+<td><p>Returns the part of <em>str</em> before the first <em>s</em></p></td>
+</tr>
+<tr class="row-odd"><td><p>translate(str, from, to)</p></td>
+<td><p>Character-by-character translation</p></td>
+</tr>
+</tbody>
+</table>
+<p>Numeric functions:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Function</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>ceiling(num)</p></td>
+<td><p>Rounds up to the nearest integer</p></td>
+</tr>
+<tr class="row-odd"><td><p>floor(num)</p></td>
+<td><p>Rounds down to the nearest integer</p></td>
+</tr>
+<tr class="row-even"><td><p>number(val)</p></td>
+<td><p>Converts a value to a number</p></td>
+</tr>
+<tr class="row-odd"><td><p>round(num)</p></td>
+<td><p>Rounds to the nearest integer</p></td>
+</tr>
+<tr class="row-even"><td><p>sum(node-set)</p></td>
+<td><p>Returns the sum of a node set</p></td>
+</tr>
+</tbody>
+</table>
+<p>Boolean functions:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Function</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>boolean(val)</p></td>
+<td><p>Converts a value to a boolean</p></td>
+</tr>
+<tr class="row-odd"><td><p>false()</p></td>
+<td><p>Always returns false</p></td>
+</tr>
+<tr class="row-even"><td><p>not(expr)</p></td>
+<td><p>Negates the expression</p></td>
+</tr>
+<tr class="row-odd"><td><p>true()</p></td>
+<td><p>Always returns true</p></td>
+</tr>
+</tbody>
+</table>
+<p>Note that <code class="code docutils literal notranslate"><span class="pre">true()</span></code> and <code class="code docutils literal notranslate"><span class="pre">true</span></code> are annoyingly different.  The former
+returns the boolean value true while the latter returns the value of
+an element named <code class="code docutils literal notranslate"><span class="pre">true</span></code>, which is likely non-existent.</p>
+<p>Examples:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span># Items whose label starts with &quot;eth&quot;
+item[starts-with(label, &quot;eth&quot;)]
+
+# Items whose price rounds up to more than 3
+item[ceiling(price) &gt; 3]
+
+# Sockets whose path field does not contain &quot;/var/run/&quot;
+socket[!contains(path, &quot;/var/run/&quot;)]
+
+# Items where the part of version after &#39;-&#39; equals &quot;2&quot;
+item[substring-after(version, &quot;-&quot;) == &quot;2&quot;]
+</pre></div>
+</div>
+<p>Regular expression functions:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Function</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>rematch(re, str, flags?)</p></td>
+<td><p>Match a regular expression</p></td>
+</tr>
+</tbody>
+</table>
+<p>The rematch() function matches a <a class="reference external" href="https://en.wikipedia.org/wiki/Regular_expression">regular expression</a> (<code class="code docutils literal notranslate"><span class="pre">regex</span></code>) and
+returns either a boolean indicating the success of the match (the
+default behavior) or the portion of the string that matches all or
+part of the regex.  rematch() defaults to “enhanced” regex matching.
+If the <code class="code docutils literal notranslate"><span class="pre">flags</span></code> argument is not provided, it defaults to an empty
+string.</p>
+<p>The <code class="code docutils literal notranslate"><span class="pre">flags</span></code> string contains zero or more of the following flags:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Flag</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>‘b’</p></td>
+<td><p>Use ‘basic’ REs (BRE) instead of the default ‘extended’ RE (ERE)</p></td>
+</tr>
+<tr class="row-odd"><td><p>‘i’</p></td>
+<td><p>Case-insensitive matching (REG_ICASE)</p></td>
+</tr>
+<tr class="row-even"><td><p>‘n’</p></td>
+<td><p>Newline-sensitive REG_NEWLINE)</p></td>
+</tr>
+<tr class="row-odd"><td><p>‘^’</p></td>
+<td><p>Does not match at start of REG_NOTBOL)</p></td>
+</tr>
+<tr class="row-even"><td><p>‘$’</p></td>
+<td><p>Does not match at end of string (REG_NOTEOL)</p></td>
+</tr>
+<tr class="row-odd"><td><p>‘s’</p></td>
+<td><p>Return full match text as a string</p></td>
+</tr>
+<tr class="row-even"><td><p>‘m’</p></td>
+<td><p>Return first capture group as string</p></td>
+</tr>
+<tr class="row-odd"><td><p>‘mN’</p></td>
+<td><p>Return capture group N as string (N: 0–9)</p></td>
+</tr>
+<tr class="row-even"><td><p>‘p’</p></td>
+<td><p>REG_POSIX (platform-specific; ignored if unavailable)</p></td>
+</tr>
+</tbody>
+</table>
+<p>For example, the following expression would match for when the
+<code class="code docutils literal notranslate"><span class="pre">protocol</span></code> field is <code class="code docutils literal notranslate"><span class="pre">tcp4</span></code>, but not for <code class="code docutils literal notranslate"><span class="pre">tcp6</span></code>:</p>
+<blockquote>
+<div><p>socket[rematch(“([a-z]+)([0-9]+)”, protocol, “m2”) == 4]</p>
+</div></blockquote>
+</section>
+<section id="multiple-predicates">
+<h4>Multiple Predicates<a class="headerlink" href="#multiple-predicates" title="Link to this heading">¶</a></h4>
+<p>Multiple predicates on the same node are ANDed: all must be true for
+the instance to be selected:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Established TCP connections with pending data</span>
+<span class="n">socket</span><span class="p">[</span><span class="n">tcp</span><span class="o">-</span><span class="n">state</span><span class="o">==</span><span class="s2">&quot;ESTABLISHED&quot;</span><span class="p">][</span><span class="n">receive</span><span class="o">-</span><span class="nb">bytes</span><span class="o">-</span><span class="n">waiting</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
+
+<span class="c1"># Interfaces that are ethernet and administratively up</span>
+<span class="n">interface</span><span class="p">[</span><span class="nb">type</span><span class="o">==</span><span class="s2">&quot;ethernet&quot;</span><span class="p">][</span><span class="n">state</span><span class="o">==</span><span class="s2">&quot;up&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="shell-quoting">
+<h2>Shell Quoting<a class="headerlink" href="#shell-quoting" title="Link to this heading">¶</a></h2>
+<p>Filter expressions contain characters that many shells interpret
+specially, including <code class="code docutils literal notranslate"><span class="pre">[</span></code>, <code class="code docutils literal notranslate"><span class="pre">]</span></code>, <code class="code docutils literal notranslate"><span class="pre">&quot;</span></code>, <code class="code docutils literal notranslate"><span class="pre">'</span></code>, <code class="code docutils literal notranslate"><span class="pre">=</span></code>, and <code class="code docutils literal notranslate"><span class="pre">|</span></code>.
+Quote the expression appropriately for the shell being used:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># bash / zsh</span>
+<span class="n">my</span><span class="o">-</span><span class="n">app</span> <span class="o">--</span><span class="n">libxo</span> <span class="s2">&quot;filter=socket[tcp-state==</span><span class="se">\&quot;</span><span class="s2">ESTABLISHED</span><span class="se">\&quot;</span><span class="s2">]&quot;</span>
+
+<span class="c1"># tcsh</span>
+<span class="n">my</span><span class="o">-</span><span class="n">app</span> <span class="o">--</span><span class="n">libxo</span> <span class="s1">&#39;filter=socket[tcp-state==&quot;ESTABLISHED&quot;]&#39;</span>
+</pre></div>
+</div>
+<p>Commas are particularly awkward since they are used for two purposes:
+the separate libxo options (e.g. “warn,pretty”) as well as separate
+arguments in filter function arguments (e.g. “start-with(one, two)”).
+Option parsing happens first and the filter string is opaque to the
+option parsing, so the commas any functions have to be escaped:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">my</span><span class="o">-</span><span class="n">app</span> <span class="o">--</span><span class="n">libxo</span> <span class="s1">&#39;filter=food[substring(name\, 1\, 4) == &quot;hush&quot;]&#39;</span>
+</pre></div>
+</div>
+</section>
+<section id="unsupported-features">
+<h2>Unsupported Features<a class="headerlink" href="#unsupported-features" title="Link to this heading">¶</a></h2>
+<p>While filter path expressions are based heavily on the XPath standard,
+many XPath features are not supported, chiefly due to their
+complexity, impact on steaming data processing, buffering costs, and
+performance impacts.  This following list describes the unsupported
+features:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>================== ========================================================
+Unsupported        Details
+================== ========================================================
+..                 Alias for the parent axis, e.g. item[../count == 4]
+Node tests         comment(), text(), processing-instruction()
+Identities         id(), key()
+//                 Deep ancestor, e.g. top//deep or //deep
+Variables          XPath variables, e.g. $one
+axis names         Any of the axis names
+Nested predicates  Predicates within predicates, e.g. one[two[three]]
+Predicate paths    Multi-member paths inside predicates, e.g. one[two/three]
+================== ========================================================
+</pre></div>
+</div>
+<p>While no axis names are supported, <code class="code docutils literal notranslate"><span class="pre">libxo</span></code> does support the “&#64;” alias
+for the attribute axis.</p>
+<p>When an unsupported feature is parsed in a filter expression, <code class="code docutils literal notranslate"><span class="pre">libxo</span></code>
+will give an error message:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">%</span> <span class="n">my</span><span class="o">-</span><span class="n">app</span> <span class="o">--</span><span class="n">libxo</span><span class="p">:</span><span class="n">XP</span><span class="p">,</span><span class="nb">filter</span><span class="o">-</span><span class="n">warn</span><span class="p">,</span><span class="nb">filter</span><span class="o">=</span><span class="s1">&#39;item[..//node()]&#39;</span>
+<span class="n">my</span><span class="o">-</span><span class="n">app</span><span class="p">:</span> <span class="nb">filter</span> <span class="n">expression</span> <span class="n">feature</span> <span class="ow">is</span> <span class="n">unsupported</span><span class="p">:</span> <span class="n">parent</span> <span class="n">axis</span> <span class="p">(</span><span class="s1">&#39;..&#39;</span><span class="p">)</span>
+<span class="n">my</span><span class="o">-</span><span class="n">app</span><span class="p">:</span> <span class="nb">filter</span> <span class="n">expression</span> <span class="n">feature</span> <span class="ow">is</span> <span class="n">unsupported</span><span class="p">:</span> <span class="n">descendant</span> <span class="n">child</span> <span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">g</span><span class="o">.</span> <span class="s1">&#39;one//two&#39;</span><span class="p">)</span>
+<span class="n">my</span><span class="o">-</span><span class="n">app</span><span class="p">:</span> <span class="nb">filter</span> <span class="n">expression</span> <span class="n">feature</span> <span class="ow">is</span> <span class="n">unsupported</span><span class="p">:</span> <span class="s1">&#39;node()&#39;</span>
+<span class="n">my</span><span class="o">-</span><span class="n">app</span><span class="p">:</span> <span class="n">could</span> <span class="ow">not</span> <span class="n">add</span> <span class="n">the</span> <span class="n">requested</span> <span class="nb">filter</span>
+</pre></div>
+</div>
+</section>
+<section id="filter-flags-xof-filter-warn">
+<span id="filter-warn"></span><h2>Filter Flags (XOF_FILTER_WARN)<a class="headerlink" href="#filter-flags-xof-filter-warn" title="Link to this heading">¶</a></h2>
+<blockquote>
+<div><table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Flag</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>XOF_FILTER_WARN</p></td>
+<td><p>Emit diagnostic warnings for runtime filter errors</p></td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>The <code class="code docutils literal notranslate"><span class="pre">XOF_FILTER_WARN</span></code> flag enables diagnostic output to standard error
+when runtime issues are encountered while processing filters against
+incoming data.  The volume of output will depend on the filter
+expressions and input data, but might be useful in debugging issues
+with filter expressions.  It corresponds to the <code class="code docutils literal notranslate"><span class="pre">filter-warn</span></code>
+command-line option:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">my</span><span class="o">-</span><span class="n">app</span> <span class="o">--</span><span class="n">libxo</span> <span class="nb">filter</span><span class="o">=</span><span class="s1">&#39;socket[number(tcp-state)==2]&#39;</span><span class="p">,</span><span class="nb">filter</span><span class="o">-</span><span class="n">warn</span>
+<span class="n">my</span><span class="o">-</span><span class="n">app</span><span class="p">:</span> <span class="n">invalid</span> <span class="n">number</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;tcp-state&#39;</span>
+</pre></div>
+</div>
+<p>This message will be repeated on each conversion error.</p>
+</section>
+<section id="the-fdr-encoder">
+<h2>The “fdr” Encoder<a class="headerlink" href="#the-fdr-encoder" title="Link to this heading">¶</a></h2>
+<p>Filters are complex expressions, and the software that implements them
+is also complex.  Despite the efforts of the author, it is possible
+that expressions could be used that were not considered, tested, or
+implemented.  In many cases, the setup required to support the failing
+situation may not be something that can be shared to allow debugging.
+To allow such debugging, an encoder named “fdr” (after the aviation
+industry’s “flight data recorder”) allows the recording of the specific
+output tags being passed to the filter software, making reproducing
+problems trivial.  In addition, these failing cases can be added to
+the test suite to ensure the quality of future releases.</p>
+<p>To use the FDR, just add <code class="code docutils literal notranslate"><span class="pre">--libxo</span> <span class="pre">&#64;fdr</span></code> to your command line and
+redirect output to a file suitable for submission.  As normal, all
+<code class="code docutils literal notranslate"><span class="pre">--libxo</span></code> options must appear before any other options or arguments.</p>
+<p>Please be extremely careful to ensure no secret or sensitive data
+appears in this output before submitting it as a bug attachment.</p>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">On This Page</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Filtering Output</a><ul>
+<li><a class="reference internal" href="#expression-syntax">Expression Syntax</a></li>
+<li><a class="reference internal" href="#enabling-filters">Enabling Filters</a></li>
+<li><a class="reference internal" href="#filter-expression-detail">Filter Expression Detail</a><ul>
+<li><a class="reference internal" href="#keys-and-non-keys-in-predicates">Keys and Non-Keys in Predicates</a></li>
+<li><a class="reference internal" href="#sub-container-content">Sub-container Content</a><ul>
+<li><a class="reference internal" href="#functions-in-predicates">Functions in Predicates</a></li>
+<li><a class="reference internal" href="#multiple-predicates">Multiple Predicates</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#shell-quoting">Shell Quoting</a></li>
+<li><a class="reference internal" href="#unsupported-features">Unsupported Features</a></li>
+<li><a class="reference internal" href="#filter-flags-xof-filter-warn">Filter Flags (XOF_FILTER_WARN)</a></li>
+<li><a class="reference internal" href="#the-fdr-encoder">The “fdr” Encoder</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3><a href="index.html">Full Documentation</a></h3>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="field-formatting.html"
+                          title="previous chapter">Field Formatting</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="api.html"
+                          title="next chapter">The libxo API</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/filters.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="api.html" title="The libxo API"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="field-formatting.html" title="Field Formatting"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">libxo 
+ documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Filtering Output</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2017-2019, Juniper Networks Inc.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>
