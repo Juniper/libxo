@@ -87,6 +87,10 @@ parse_verb () {
 		exit 0
 		;;
 
+	    clang|-clang)
+		# ignore
+		;;
+
 	    full|all)
 		### full: compile with both plugins
 		need_validate=1
