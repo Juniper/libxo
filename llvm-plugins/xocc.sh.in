@@ -18,6 +18,7 @@ if [ "$1" = "debug" ]; then
     shift
 fi
 
+XO_VERSION=@LIBXO_VERSION@
 XO_LIBDIR=@XO_LIBDIR@
 XO_LLVMDIR=@XO_LLVMDIR@
 XO_SDK_PATH=@SDK_PATH@
@@ -76,6 +77,11 @@ parse_verb () {
 	dbg "processing [$1]"
 
 	case "$1" in
+	    version|-version|--version)
+		echo xocc: "$XO_VERSION"
+		exit 0
+		;;
+
 	    help|-help)
 		self_help
 		exit 0
@@ -221,8 +227,27 @@ find_stage () {
 XO_STAGE=`find_stage "$@"`
 dbg XO_STAGE is ${XO_STAGE}
 
+if [ ! -z "${XO_REAL_CC}" ]; then
+    # Explictly set implies the user wants our options
+    COMPILER="${XO_REAL_CC}"
+elif [ ! -z "${XO_LLVM_CLANG}" ]; then
+    COMPILER="${XO_LLVM_CLANG}"
+else
+    # The compiler libxo was compiled with, which isn't gcc, but is not clang?
+    # Well, they are running "xocc" so they must want our magic....
+    COMPILER="@CC@"
+fi
+
 verb="$1"
 shift
+
+# FreeBSD runs "cc -v" to find the compiler type, so we have to play along
+dbg first arg is "$1"
+if [ "$1" = "-v" ]; then
+    ${COMPILER} -v
+    exit 0
+fi
+
 parse_verb "$verb"
 
 if [ "${XO_STAGE}" != "ld" ]; then
@@ -232,16 +257,7 @@ fi
 # The plugins need to be able to find libxo_format
 export LD_LIBRARY_PATH=${XO_LIBDIR}:${LD_LIBRARY_PATH}
 
-if [ ! -z "${XO_REAL_CC}" ]; then
-    # Explictly set implies the user wants our options
-    COMPILER="${XO_REAL_CC} ${XO_OPTIONS}"
-elif [ ! -z "${XO_LLVM_CLANG}" ]; then
-    COMPILER="${XO_LLVM_CLANG} ${XO_OPTIONS}"
-else
-    # The compiler libxo was compiled with, which isn't gcc, but is not clang?
-    # Well, they are running "xocc" so they must want our magic....
-    COMPILER="@CC@ ${XO_OPTIONS}"
-fi
+COMPILER="${COMPILER} ${XO_OPTIONS}"
 
 if [ "$need_echo" = 1 ]; then
     set -x
