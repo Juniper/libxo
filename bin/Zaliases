@@ -5,15 +5,26 @@ set ROOT_DIR=${HOME}/work/root
 
 set ZENV=""
 
-switch ( `uname` )
+set llvm_topdir=/usr/local
+set llvm_vers=llvm19
+set llvm_path=bin/llvm-config
+
+switch ( `uname`-`uname -r` )
     case FreeBSD*:
        set ZENV="MAKE=gmake "
-       setenv LLVMCONFIG '--with-llvm-config=/usr/local/llvm19/bin/llvm-config'
+       breaksw
+    case Darwin-25*:
+       set llvm_topdir=/opt/local/libexec
+       set llvm_vers=llvm-21
        breaksw
     case Darwin*:
-       setenv LLVMCONFIG '--with-llvm-config=/opt/local/libexec/llvm-19/bin/llvm-config'
+       set llvm_topdir=/opt/local/libexec
+       set llvm_vers=llvm-19
        breaksw
 endsw
+
+set llvm_config="${llvm_topdir}/${llvm_vers}/${llvm_path}"
+setenv LLVMCONFIG "--with-llvm-config=${llvm_config}"
 
 set mycflags="-g -O0 -DXO_XPARSE_DEBUG -DLIBXO_DEBUG -DSLAX_DEBUG"
 
