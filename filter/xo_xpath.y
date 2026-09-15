@@ -913,7 +913,7 @@ char *
 xo_xparse_expecting_error (xo_xparse_data_t *xdp, const char *token,
 			   int yystate, int yychar UNUSED)
 {
-    const int MAX_EXPECT = 5;
+#define MAX_EXPECT 5
     char buf[BUFSIZ], *cp = buf, *ep = buf + sizeof(buf);
     int expect = 0, expecting[MAX_EXPECT + 1];
     int i;
