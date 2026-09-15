@@ -160,6 +160,43 @@ else
     LLVM_CLANG=${LLVM_BINDIR}/clang
     LLVM_CMAKE_DIR=`${LLVM_CONFIG} --cmakedir 2>/dev/null`
     CLANG_CMAKE_DIR=`dirname ${LLVM_CMAKE_DIR}`/clang
+
+    AC_MSG_CHECKING([for Clang cmake config])
+    if test -f "${CLANG_CMAKE_DIR}/ClangConfig.cmake"; then
+        AC_MSG_RESULT([${CLANG_CMAKE_DIR}])
+    else
+        AC_MSG_RESULT([not found])
+        LLVM_PREFIX_DIR=`dirname ${LLVM_BINDIR}`
+        LLVM_VER=`basename ${LLVM_PREFIX_DIR} | sed 's/^llvm-//'`
+        case ${LLVM_PREFIX_DIR} in
+          /opt/local/libexec/llvm-*)
+            AC_MSG_FAILURE([
+Clang's cmake package config was not found at:
+    ${CLANG_CMAKE_DIR}/ClangConfig.cmake
+
+llvm-${LLVM_VER} is installed via MacPorts, but its companion clang-${LLVM_VER}
+package (which provides ClangConfig.cmake) is not installed.  Install it
+with:
+
+    sudo port install clang-${LLVM_VER}
+
+and re-run configure.])
+            ;;
+          *)
+            AC_MSG_FAILURE([
+Clang's cmake package config was not found at:
+    ${CLANG_CMAKE_DIR}/ClangConfig.cmake
+
+llvm-config (${LLVM_CONFIG}) reports its cmake directory as
+${LLVM_CMAKE_DIR}, but the sibling "clang" cmake directory is missing or
+incomplete.  Install the Clang development/cmake package matching your
+LLVM installation (on MacPorts this is the "clang-<version>" port; on
+other systems it may be "libclang-dev", "clang-cmake", or similar), then
+re-run configure.])
+            ;;
+        esac
+    fi
+
     CLANG_VERSION=`${LLVM_CONFIG} --version 2>/dev/null`
     CLANG_VERSION_NUMBER=VERSION_TO_NUMBER(echo $CLANG_VERSION)
 
