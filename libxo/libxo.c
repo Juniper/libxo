@@ -322,6 +322,7 @@ typedef struct xo_colors_s {
 struct xo_handle_s {
     xo_xof_flags_t xo_flags;	/* Flags (XOF_*) from the user*/
     xo_xof_flags_t xo_iflags;	/* Internal flags (XOIF_*) */
+    xo_xof_flags_t xo_eflags;	/* Internal "encoding" flags (XOEF_*) */
     xo_style_t xo_style;	/* XO_STYLE_* value */
     unsigned short xo_indent;	/* Indent level (if pretty) */
     unsigned short xo_indent_by; /* Indent amount (tab stop) */
@@ -358,7 +359,6 @@ struct xo_handle_s {
     int xo_errno;		/* Saved errno for "%m" */
     char *xo_gt_domain;		/* Gettext domain, suitable for dgettext(3) */
     xo_encoder_func_t xo_encoder; /* Encoding function */
-    xo_whiteboard_func_t xo_wb_marker; /* Function to mark whiteboard */
     void *xo_private;		/* Private data for external encoders */
 #ifdef LIBXO_NEED_MAP
     char **xo_map;		/* Name mapping array */
@@ -386,6 +386,10 @@ struct xo_handle_s {
 #define XOIF_SET(_xop, _bit) XOF_BIT_SET(_xop->xo_iflags, _bit)
 #define XOIF_CLEAR(_xop, _bit) XOF_BIT_CLEAR(_xop->xo_iflags, _bit)
 
+#define XOEF_ISSET(_xop, _bit) XOF_BIT_ISSET(_xop->xo_eflags, _bit)
+#define XOEF_SET(_xop, _bit) XOF_BIT_SET(_xop->xo_eflags, _bit)
+#define XOEF_CLEAR(_xop, _bit) XOF_BIT_CLEAR(_xop->xo_eflags, _bit)
+
 /* Internal flags */
 #define XOIF_REORDER	XOF_BIT(0) /* Reordering fields; record field info */
 #define XOIF_DIV_OPEN	XOF_BIT(1) /* A <div> is open */
@@ -400,6 +404,21 @@ struct xo_handle_s {
 #else  /* LIBXO_NEED_FILTERS */
 #define XOIF_FILTERING 0	/* Allow the compiler to trim filter code */
 #endif /* LIBXO_NEED_FILTERS */
+
+/*
+ * "encoding" flags: set once, when a style or encoder is
+ * established, describing how the shared filter/rollback plumbing
+ * should treat this handle from then on.  Unlike XOIF_*, these are
+ * not toggled during emission.  xo_eflags is its own field, with its
+ * own independent bit-numbering space -- XOEF_* bits do not compete
+ * with XOF_* or XOIF_* for slots.
+ */
+#define XOEF_RB_STRIP_LEAD_SEP    XOF_BIT(0) /* strip leading ',' on leaf commit */
+#define XOEF_RB_CLEAR_TOP_EMITTED XOF_BIT(1) /* clear TOP_EMITTED on rollback-to-0 */
+#define XOEF_RB_CLEAR_ON_COMPACT  XOF_BIT(2) /* clear XSF_RB_BITS on compact-commit */
+#define XOEF_TENTATIVE            XOF_BIT(3) /* buffers tentative content; needs rollback guard on close */
+#define XOEF_FILTER_AWARE         XOF_BIT(4) /* encoder may be used with filters */
+#define XOEF_FILTER_NOTIFY_DEADEND XOF_BIT(5) /* encoder wants tentative data + DEADEND */
 
 /*
  * We keep a 'default' handle to allow callers to avoid having to
@@ -2235,6 +2254,35 @@ xo_parse_for_handle (xo_handle_t *xop, xo_parse_t *xpp)
 	xpp->xp_flags |= XPF_STRICT;
 }
 
+/*
+ * Set the XOEF_* "encoding" flags appropriate for the handle's
+ * current style.  Called once, at the end of any public API function
+ * that can change xo_style (xo_create(), xo_set_style(),
+ * xo_set_options(), xo_set_encoder()), rather than at every individual
+ * "xop->xo_style = ..." assignment site.
+ */
+static void
+xo_set_flags_for_style (xo_handle_t *xop, xo_style_t style)
+{
+    XOEF_CLEAR(xop, XOEF_RB_STRIP_LEAD_SEP | XOEF_RB_CLEAR_TOP_EMITTED
+	       | XOEF_RB_CLEAR_ON_COMPACT | XOEF_TENTATIVE);
+
+    switch (style) {
+    case XO_STYLE_JSON:
+	XOEF_SET(xop, XOEF_RB_STRIP_LEAD_SEP | XOEF_RB_CLEAR_TOP_EMITTED
+		 | XOEF_RB_CLEAR_ON_COMPACT | XOEF_TENTATIVE);
+	break;
+
+    case XO_STYLE_XML:
+    case XO_STYLE_HTML:
+	XOEF_SET(xop, XOEF_TENTATIVE);
+	break;
+
+    default:
+	break;
+    }
+}
+
 /**
  * Create a handle for use by later libxo functions.
  *
@@ -2258,6 +2306,7 @@ xo_create (xo_style_t style, xo_xof_flags_t flags)
 	XOF_SET(xop, flags);
 	xo_init_handle(xop);
 	xop->xo_style = style;	/* Reset style (see LIBXO_OPTIONS) */
+	xo_set_flags_for_style(xop, xop->xo_style);
     }
 
     return xop;
@@ -2361,14 +2410,36 @@ xo_destroy (xo_handle_t *xop_arg)
  * Record a new output style to use for the given handle (or default if
  * handle is NULL).  This output style will be used for any future output.
  *
+ * The style change is applied unconditionally, even when it is
+ * reported as incompatible below: our caller may be in the middle of
+ * processing a "--libxo" options string where a later word can still
+ * change the outcome (e.g. picking a different encoder, or dropping
+ * back to a built-in style), so we can't refuse the assignment here
+ * without knowing whether this is really the last word.  What we can
+ * do is complain immediately when the combination is already known to
+ * be bad: setting XO_STYLE_ENCODER while a filter is active and the
+ * encoder just installed (see xo_set_encoder()) hasn't declared itself
+ * filter-aware.
+ *
  * @param xop XO handle to alter (or NULL for default handle)
  * @param style new output style (XO_STYLE_*)
+ * @return 0 on success, non-zero if the style conflicts with an
+ * already-active filter
  */
-void
+int
 xo_set_style (xo_handle_t *xop, xo_style_t style)
 {
     xop = xo_default(xop);
     xop->xo_style = style;
+    xo_set_flags_for_style(xop, style);
+
+    if (style == XO_STYLE_ENCODER && XOF_ISSET(xop, XOF_FILTER)
+	    && !XOEF_ISSET(xop, XOEF_FILTER_AWARE)) {
+	xo_failure(xop, "filters require a filter-aware encoder");
+	return -1;
+    }
+
+    return 0;
 }
 
 /**
@@ -2718,6 +2789,7 @@ xo_set_options_words (xo_handle_t *xop, int argc, char **argv)
     char *cp, *vp, *zp;
     int style = -1, new_style, rc = 0, final_rc = 0;
     xo_xof_flags_t new_flag;
+    char *pending_encoder = NULL;
 
     for (int i = 0; i < argc; i++) {
 	if (rc)
@@ -2736,11 +2808,8 @@ xo_set_options_words (xo_handle_t *xop, int argc, char **argv)
 	    if (*vp == '\0') {
 		xo_warnx("missing value for encoder option");
 		rc = -1;
-	    } else {
-		rc = xo_encoder_init(xop, vp);
-		if (rc)
-		    xo_warnx("error initializing encoder: %s", vp);
-	    }
+	    } else
+		pending_encoder = vp; /* Applied once the winner is known */
 
 	    continue;
 	}
@@ -2797,11 +2866,8 @@ xo_set_options_words (xo_handle_t *xop, int argc, char **argv)
 	    if (vp == NULL) {
 		xo_warnx("missing value for encoder option");
 		rc = -1;
-	    } else {
-		rc = xo_encoder_init(xop, vp);
-		if (rc)
-		    xo_warnx("error initializing encoder: %s", vp);
-	    }
+	    } else
+		pending_encoder = vp; /* Applied once the winner is known */
 	    continue;
 
 	case XO_OPT_NO_CACHE:
@@ -2863,8 +2929,38 @@ xo_set_options_words (xo_handle_t *xop, int argc, char **argv)
 	}
     }
 
+    if (rc)
+	final_rc = rc;
+    rc = 0;
+
+    /*
+     * Filters are applied immediately, as each "filter=" word is seen
+     * (there may be more than one), since xo_add_filter() itself is
+     * cheap to validate against whatever style/encoder is current at
+     * that point.  The encoder is different: only now, having seen
+     * every word in this options string, do we know the "winner", so
+     * we apply a plain style word first (as a fallback), then load
+     * any requested encoder, which overrides the style to
+     * XO_STYLE_ENCODER just as it always has.  If that winning
+     * encoder turns out to be incompatible with a filter already
+     * added above, xo_set_style() (called from xo_set_encoder())
+     * reports the error via xo_failure(), but its return value is
+     * lost since xo_set_encoder() is void, so we re-check the same
+     * condition here to fold the failure into our own return value.
+     */
     if (style >= 0)
 	xop->xo_style= style;
+
+    if (pending_encoder != NULL) {
+	rc = xo_encoder_init(xop, pending_encoder);
+	if (rc)
+	    xo_warnx("error initializing encoder: %s", pending_encoder);
+	else if (XOF_ISSET(xop, XOF_FILTER)
+		 && !XOEF_ISSET(xop, XOEF_FILTER_AWARE))
+	    rc = -1;		/* xo_set_style() already reported this */
+	if (rc)
+	    final_rc = rc;
+    }
 
     return final_rc ?: rc;
 }
@@ -2904,8 +3000,10 @@ xo_set_options (xo_handle_t *xop, const char *input)
 	/*
 	 * Allow ',' to switch into word-style options ("--libxo:XPW,debug")
 	 */
-	if (*input != ',')
+	if (*input != ',') {
+	    xo_set_flags_for_style(xop, xop->xo_style);
 	    return rc;
+	}
 
 	input += 1;
     }
@@ -2918,18 +3016,22 @@ xo_set_options (xo_handle_t *xop, const char *input)
     char **argv = xo_realloc(NULL, sizeof(argv[0]) * (argc + 1));
     if (argv == NULL) {
 	xo_warnx("xo_set_options ran out of memory");
+	xo_set_flags_for_style(xop, xop->xo_style);
 	return -1;
     }
 
     argc = xo_options_to_argv(xop, bp, argc, argv);
     if (argc < 0) {
 	xo_free(argv);
+	xo_set_flags_for_style(xop, xop->xo_style);
 	return argc;
     }
 
     rc = xo_set_options_words(xop, argc, argv);
 
     xo_free(argv);
+
+    xo_set_flags_for_style(xop, xop->xo_style);
 
     return rc;
 }
@@ -5810,6 +5912,12 @@ xo_add_filter (xo_handle_t *xop UNUSED, const char *input UNUSED)
     if (rc)
 	return rc;
 
+    if (xo_style(xop) == XO_STYLE_ENCODER
+	    && !XOEF_ISSET(xop, XOEF_FILTER_AWARE)) {
+	xo_failure(xop, "filters require a filter-aware encoder");
+	return -1;
+    }
+
     XOF_SET(xop, XOF_FILTER); /* Activate filtering */
 
     /*
@@ -6173,7 +6281,8 @@ xo_filt_commit_field (xo_handle_t *xop UNUSED, xo_off_t field_start UNUSED,
      * strip that separator.  Only do this when the parent was compacted here
      * (not already committed) and kept no key ahead of the leaf.
      */
-    if (xo_style(xop) == XO_STYLE_JSON && !r.xcr_last_clear && !r.xcr_prev_had_key
+    if (XOEF_ISSET(xop, XOEF_RB_STRIP_LEAD_SEP)
+	    && !r.xcr_last_clear && !r.xcr_prev_had_key
 	    && item_len >= 2 && xbp->xb_bufp[item_start] == ',') {
 	item_start += 2;
 	item_len -= 2;
@@ -6248,7 +6357,8 @@ xo_filt_commit_compact (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED,
      * genuine content and NOT_FIRST must be preserved.
      * Also skip when cur kept key fields — those legitimately set NOT_FIRST.
      */
-    if (cur_was_pending && !r.xcr_prev_had_key)
+    if (cur_was_pending && !r.xcr_prev_had_key
+	    && XOEF_ISSET(xop, XOEF_RB_CLEAR_ON_COMPACT))
 	cur->xs_flags &= ~XSF_RB_BITS;
 
     XOIF_CLEAR(xop, XOIF_FILTERING);
@@ -6292,41 +6402,52 @@ xo_filt_rollback (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED,
      * doing some sanity checking.
      */
     if (fstatus != XO_STATUS_FULL && cur->xs_rb_off != XS_OFFSET_CLEAR) {
-	xo_buffer_t *xbp = &xop->xo_data;
-	xo_off_t max_off = xo_buf_offset(xbp);
-	xo_off_t cur_off = cur->xs_rb_off;
-
-	if (cur_off < max_off) { /* Sanity check */
-	    XO_DBG(xop, "xo_filt_rollback: rolling back to %u, depth %d",
-		   cur_off, xop->xo_depth);
-	    xo_buf_set_offset(xbp, cur_off);
-
-	    if (cur_off == 0) {
-		/* Going to zero means undo the "make output" flag */
-		XOIF_CLEAR(xop, XOIF_MADE_OUTPUT);
-		
-		if (xo_style(xop) == XO_STYLE_JSON) {
-		    /*
-		     * If rolling back to the very start of the buffer,
-		     * the JSON top-level '{' (if any) was inside the
-		     * rolled-back range.  Clear TOP_EMITTED so xo_finish
-		     * does not emit an unmatched '}'.
-		     */
-		    XO_DBG(xop, "xo_filt_rollback: clearing TOP_EMITTED");
-		    XOIF_CLEAR(xop, XOIF_TOP_EMITTED);
-		}
-	    }
-
+	if (xo_style(xop) == XO_STYLE_ENCODER
+	    && XOEF_ISSET(xop, XOEF_FILTER_NOTIFY_DEADEND)) {
 	    /*
-	     * The JSON/XML open that pushed this frame may have set
-	     * XSF_NOT_FIRST or XSF_CONTENT on our parent frame.
-	     * Since we're discarding the child element, restore the
-	     * parent flags to what they were before the open.
+	     * An encoder that asked for DEADEND notification has no byte
+	     * buffer to truncate; tell it directly to discard whatever it
+	     * was accumulating for the scope it's about to close.
 	     */
-	    if (cur > xop->xo_stack) {
-		xo_stack_t *parent = cur - 1;
-		parent->xs_flags =
-		    (parent->xs_flags & ~XSF_RB_BITS) | cur->xs_rb_flags;
+	    XO_DBG(xop, "xo_filt_rollback: dispatching DEADEND");
+	    xo_encoder_handle(xop, XO_OP_DEADEND, NULL, NULL, NULL, 0);
+	} else {
+	    xo_buffer_t *xbp = &xop->xo_data;
+	    xo_off_t max_off = xo_buf_offset(xbp);
+	    xo_off_t cur_off = cur->xs_rb_off;
+
+	    if (cur_off < max_off) { /* Sanity check */
+		XO_DBG(xop, "xo_filt_rollback: rolling back to %u, depth %d",
+		       cur_off, xop->xo_depth);
+		xo_buf_set_offset(xbp, cur_off);
+
+		if (cur_off == 0) {
+		    /* Going to zero means undo the "make output" flag */
+		    XOIF_CLEAR(xop, XOIF_MADE_OUTPUT);
+
+		    if (XOEF_ISSET(xop, XOEF_RB_CLEAR_TOP_EMITTED)) {
+			/*
+			 * If rolling back to the very start of the buffer,
+			 * the top-level open (if any) was inside the
+			 * rolled-back range.  Clear TOP_EMITTED so xo_finish
+			 * does not emit an unmatched close.
+			 */
+			XO_DBG(xop, "xo_filt_rollback: clearing TOP_EMITTED");
+			XOIF_CLEAR(xop, XOIF_TOP_EMITTED);
+		    }
+		}
+
+		/*
+		 * The JSON/XML open that pushed this frame may have set
+		 * XSF_NOT_FIRST or XSF_CONTENT on our parent frame.
+		 * Since we're discarding the child element, restore the
+		 * parent flags to what they were before the open.
+		 */
+		if (cur > xop->xo_stack) {
+		    xo_stack_t *parent = cur - 1;
+		    parent->xs_flags =
+			(parent->xs_flags & ~XSF_RB_BITS) | cur->xs_rb_flags;
+		}
 	    }
 	}
     }
@@ -6397,14 +6518,18 @@ xo_filt_is_skippable (xo_handle_t *xop, xo_xff_flags_t flags,
 
     /*
      * If we're inside a capture for a PRED instance, buffer all
-     * sibling/nested content tentatively (XML/JSON only — encoder
-     * state cannot be rolled back).  Only applies when the current
-     * frame has an active whiteboard (xs_rb_off set); after compact
-     * commit clears xs_rb_off, XOIF_FILTERING may still be set by
-     * rollback of a sibling container, but fields at that level are
-     * individually skippable and must not be suppressed here.
+     * sibling/nested content tentatively (styles/encoders that
+     * cannot be rolled back are excluded, unless an encoder has opted
+     * into DEADEND notification, which is what makes rollback safe).
+     * Only applies when the current frame has an active whiteboard
+     * (xs_rb_off set); after compact commit clears xs_rb_off,
+     * XOIF_FILTERING may still be set by rollback of a sibling
+     * container, but fields at that level are individually skippable
+     * and must not be suppressed here.
      */
-    if (XOIF_ISSET(xop, XOIF_FILTERING) && xo_style(xop) != XO_STYLE_ENCODER
+    if (XOIF_ISSET(xop, XOIF_FILTERING)
+	    && (xo_style(xop) != XO_STYLE_ENCODER
+		|| XOEF_ISSET(xop, XOEF_FILTER_NOTIFY_DEADEND))
 	    && xo_stack_cur(xop)->xs_rb_off != XS_OFFSET_CLEAR)
 	return FALSE;
 
@@ -6883,16 +7008,22 @@ xo_format_value (xo_handle_t *xop, const xo_field_info_t *xfip,
     xo_stack_t *xsp = xo_stack_cur(xop);
 
     if (flags & XFF_LEAF_LIST) {
+	char nbuf[nlen + 1];
+	memcpy(nbuf, rname, nlen);
+	nbuf[nlen] = '\0';
+
 	/*
-	 * Check if we've already started to emit normal leafs
-	 * or if we're not in a leaf list.
+	 * Check if we've already started to emit normal leafs, if
+	 * we're not in a leaf list, or if the leaf-list that's
+	 * currently open has a different name.  That last case
+	 * happens when two leaf-lists with different names are
+	 * emitted back-to-back with no other field between them;
+	 * without this check, the second leaf-list's values were
+	 * silently folded into the first leaf-list's name/values.
 	 */
 	if ((xsp->xs_flags & (XSF_EMIT | XSF_EMIT_KEY))
-	    || !(xsp->xs_flags & XSF_EMIT_LEAF_LIST)) {
-	    char nbuf[nlen + 1];
-	    memcpy(nbuf, rname, nlen);
-	    nbuf[nlen] = '\0';
-
+	    || !(xsp->xs_flags & XSF_EMIT_LEAF_LIST)
+	    || (xsp->xs_name && !xo_streq(xsp->xs_name, nbuf))) {
 	    ssize_t rc = xo_transition(xop, 0, nbuf, XSS_EMIT_LEAF_LIST);
 	    if (rc < 0)
 		flags |= XFF_DISPLAY_ONLY | XFF_ENCODE_ONLY;
@@ -9568,6 +9699,12 @@ xo_do_close_container (xo_handle_t *xop, const char *name)
 	break;
 
     case XO_STYLE_ENCODER:
+	if (XOF_ISSET(xop, XOF_FILTER) && XOEF_ISSET(xop, XOEF_FILTER_NOTIFY_DEADEND)
+		&& xsp->xs_rb_off != XS_OFFSET_CLEAR) {
+	    xo_filt_rollback(xop, xsp, old_fstatus, fstatus);
+	    xo_depth_change(xop, name, -1, 0, XSS_CLOSE_CONTAINER, 0, 0, 0);
+	    break;
+	}
 	xo_depth_change(xop, name, -1, 0, XSS_CLOSE_CONTAINER, 0, 0, 0);
 	rc = xo_encoder_handle(xop, XO_OP_CLOSE_CONTAINER, NULL, name, NULL, 0);
 	break;
@@ -9755,6 +9892,12 @@ xo_do_close_list (xo_handle_t *xop, const char *name)
 	break;
 
     case XO_STYLE_ENCODER:
+	if (XOF_ISSET(xop, XOF_FILTER) && XOEF_ISSET(xop, XOEF_FILTER_NOTIFY_DEADEND)
+		&& xsp->xs_rb_off != XS_OFFSET_CLEAR) {
+	    xo_filt_rollback(xop, xsp, xsp->xs_fstatus, xsp->xs_fstatus);
+	    xo_depth_change(xop, name, -1, 0, XSS_CLOSE_LIST, XSF_LIST, 0, 0);
+	    break;
+	}
 	xo_depth_change(xop, name, -1, 0, XSS_CLOSE_LIST, XSF_LIST, 0, 0);
 	rc = xo_encoder_handle(xop, XO_OP_CLOSE_LIST, NULL, name, NULL, 0);
 	break;
@@ -9906,6 +10049,13 @@ xo_do_close_leaf_list (xo_handle_t *xop, const char *name)
 	break;
 
     case XO_STYLE_ENCODER:
+	if (XOF_ISSET(xop, XOF_FILTER) && XOEF_ISSET(xop, XOEF_FILTER_NOTIFY_DEADEND)
+		&& xsp->xs_rb_off != XS_OFFSET_CLEAR) {
+	    xo_filt_rollback(xop, xsp, xsp->xs_fstatus, xsp->xs_fstatus);
+	    xo_depth_change(xop, name, -1, 0, XSS_CLOSE_LEAF_LIST, XSF_LIST, 0, 0);
+	    xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
+	    break;
+	}
 	rc = xo_encoder_handle(xop, XO_OP_CLOSE_LEAF_LIST, NULL, name, NULL, 0);
 	/* FALLTHRU */
 
@@ -10132,6 +10282,12 @@ xo_do_close_instance (xo_handle_t *xop, const char *name)
 	break;
 
     case XO_STYLE_ENCODER:
+	if (XOF_ISSET(xop, XOF_FILTER) && XOEF_ISSET(xop, XOEF_FILTER_NOTIFY_DEADEND)
+		&& xsp->xs_rb_off != XS_OFFSET_CLEAR) {
+	    xo_filt_rollback(xop, xsp, old_fstatus, fstatus);
+	    xo_depth_change(xop, name, -1, 0, XSS_CLOSE_INSTANCE, 0, 0, 0);
+	    break;
+	}
 	xo_depth_change(xop, name, -1, 0, XSS_CLOSE_INSTANCE, 0, 0, 0);
 	rc = xo_encoder_handle(xop, XO_OP_CLOSE_INSTANCE, NULL, name, NULL, 0);
 	break;
@@ -10509,6 +10665,20 @@ xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
 	break;
 
     case XSS_TRANSITION(XSS_OPEN_LEAF_LIST, XSS_EMIT_LEAF_LIST):
+	/*
+	 * Same state, but is it the same leaf-list?  If the name
+	 * has changed, close the old leaf-list and open a new one
+	 * instead of silently continuing to accumulate under the
+	 * old name.
+	 */
+	if (name != NULL && xsp->xs_name != NULL
+	    && !xo_streq(name, xsp->xs_name)) {
+	    if (on_marker)
+		return xo_marker_prevents_close(xop, old_state, new_state);
+	    rc = xo_do_close_leaf_list(xop, NULL);
+	    if (rc >= 0)
+		rc = xo_do_open_leaf_list(xop, flags, name);
+	}
 	break;
 
     case XSS_TRANSITION(XSS_OPEN_LIST, XSS_EMIT_LEAF_LIST):
@@ -10873,6 +11043,23 @@ xo_parse_args (int argc, char **argv)
     if (XOF_ISSET(xop, XOF_COLOR_ALLOWED) && isatty(1))
 	XOF_SET(xop, XOF_COLOR);
 
+    /*
+     * Every "--libxo" occurrence in argv has now been processed, so
+     * whatever style/encoder/filter combination is left on the handle
+     * is the real "winner" -- unlike checks made along the way (e.g.
+     * inside xo_add_filter() or xo_set_style(), as each "--libxo"
+     * string is parsed), this one can't be invalidated by some later
+     * option word or occurrence still to come.  Catch the one
+     * combination those per-word checks can't fully guard against on
+     * their own: a filter left active with a final encoder that never
+     * declared itself filter-aware.
+     */
+    if (XOF_ISSET(xop, XOF_FILTER) && xo_style(xop) == XO_STYLE_ENCODER
+	    && !XOEF_ISSET(xop, XOEF_FILTER_AWARE)) {
+	xo_warnx("filters require a filter-aware encoder");
+	return -1;
+    }
+
     argv[save] = NULL;
     return save;
 }
@@ -11127,27 +11314,28 @@ xo_get_encoder (xo_handle_t *xop)
 }
 
 /*
- * Get the whiteboard function
- */
-xo_whiteboard_func_t
-xo_get_wb_marker (xo_handle_t *xop)
-{
-    xop = xo_default(xop);
-    return xop->xo_wb_marker;
-}
-
-/*
- * Record an encoder callback function in an xo handle.
+ * Record an encoder callback function in an xo handle.  "xei_flags"
+ * is the encoder's capability flags (XEIF_*), as declared in its
+ * xo_encoder_init_args_t at registration time; we map those onto this
+ * handle's xo_eflags (XOEF_*) here, once, before calling xo_set_style()
+ * to install XO_STYLE_ENCODER, so that if a filter is already active,
+ * xo_set_style()'s compatibility check sees the encoder's real
+ * capabilities rather than whatever was on the handle before.
  */
 void
 xo_set_encoder (xo_handle_t *xop, xo_encoder_func_t encoder,
-		xo_whiteboard_func_t wb_marker)
+		xo_xof_flags_t xei_flags)
 {
     xop = xo_default(xop);
 
-    xop->xo_style = XO_STYLE_ENCODER;
     xop->xo_encoder = encoder;
-    xop->xo_wb_marker = wb_marker;
+
+    if (xei_flags & XEIF_FILTER_AWARE)
+	XOEF_SET(xop, XOEF_FILTER_AWARE);
+    if (xei_flags & XEIF_FILTER_NOTIFY_DEADEND)
+	XOEF_SET(xop, XOEF_FILTER_NOTIFY_DEADEND);
+
+    xo_set_style(xop, XO_STYLE_ENCODER); /* Reports its own error */
 }
 
 int
