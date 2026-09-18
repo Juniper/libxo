@@ -42,6 +42,7 @@
 
 #include "xo.h"
 #include "xo_encoder.h"
+#include "xo_utf8.h"
 
 /*
  * A field name/key-flag pair, recorded on a dense list's currently
@@ -317,7 +318,8 @@ rtoon_key_needs_quote (const char *name)
 
     for (const char *cp = name; *cp; cp++) {
 	unsigned char ch = (unsigned char) *cp;
-	if (ch == '=' || ch == ',' || ch == '"' || ch == '\\' || isspace(ch))
+	if (ch == '=' || ch == ',' || ch == '"' || ch == '\\' || ch <= 0x20
+	    || ch >= 0x80)
 	    return 1;
     }
 
@@ -345,9 +347,11 @@ rtoon_value_needs_quote (const char *value, int in_delimited, int is_string,
     if (value[0] == '{')
 	return 1;
 
-    for (const char *cp = value; *cp; cp++)
-	if (*cp == ',' || *cp == '"' || *cp == '\\')
+    for (const char *cp = value; *cp; cp++) {
+	unsigned char ch = (unsigned char) *cp;
+	if (ch == ',' || ch == '"' || ch == '\\' || ch <= 0x1f || ch >= 0x80)
 	    return 1;
+    }
 
     if (!in_delimited && value[0] == '\0')
 	return 1;
@@ -359,27 +363,98 @@ rtoon_value_needs_quote (const char *value, int in_delimited, int is_string,
     return 0;
 }
 
+/*
+ * Escaping matches TOON's Section 7.1 table: '\\' and '"' get a
+ * backslash, LF/CR/HTAB get their short mnemonic escapes, and every
+ * other C0 control character (U+0000-U+001F) gets a \uXXXX escape so
+ * a raw control byte can never appear inside a quoted token -- rtoon
+ * is line-oriented, so an unescaped LF/CR would otherwise split the
+ * output mid-value and corrupt the surrounding line structure.
+ *
+ * Beyond that table, rtoon also \uXXXX-escapes every non-ASCII BMP
+ * codepoint (U+0080-U+D7FF, U+E000-U+FFFF) it can decode, rather than
+ * writing it out as literal UTF-8 -- TOON's table leaves that choice
+ * to the encoder (SHOULD emit literal, MAY emit \uXXXX), and rtoon
+ * takes the \uXXXX option everywhere it can, so a quoted token is
+ * plain ASCII outside of the small set of characters that have no
+ * BMP escape. Supplementary-plane codepoints (U+10000-U+10FFFF) have
+ * no such escape -- a decoder MUST reject a surrogate-pair \uXXXX
+ * pair standing in for one -- so those, and any byte sequence that
+ * doesn't decode as valid UTF-8 at all, are copied through unchanged.
+ */
 static void
-rtoon_write_escaped (xo_buffer_t *out, const char *value)
+rtoon_write_escaped (xo_buffer_t *xbp, const char *value)
 {
-    for (const char *cp = value; *cp; cp++) {
-	if (*cp == '"' || *cp == '\\')
-	    xo_buf_append(out, "\\", 1);
-	xo_buf_append(out, cp, 1);
+    static const char hex[] = "0123456789abcdef";
+    size_t total = strlen(value);
+
+    for (const char *cp = value; *cp; ) {
+	unsigned char ch = (unsigned char) *cp;
+
+	if (ch == '"' || ch == '\\') {
+	    xo_buf_append(xbp, "\\", 1);
+	    xo_buf_append(xbp, cp, 1);
+	    cp += 1;
+
+	} else if (ch == '\n') {
+	    xo_buf_append(xbp, "\\n", 2);
+	    cp += 1;
+
+	} else if (ch == '\r') {
+	    xo_buf_append(xbp, "\\r", 2);
+	    cp += 1;
+
+	} else if (ch == '\t') {
+	    xo_buf_append(xbp, "\\t", 2);
+	    cp += 1;
+
+	} else if (ch <= 0x1f) {
+	    char buf[6] = { '\\', 'u', '0', '0',
+			     hex[(ch >> 4) & 0xf], hex[ch & 0xf] };
+	    xo_buf_append(xbp, buf, sizeof(buf));
+	    cp += 1;
+
+	} else if (!xo_is_utf8_byte(ch)) {
+	    xo_buf_append(xbp, cp, 1);
+	    cp += 1;
+
+	} else {
+	    size_t remaining = total - (size_t) (cp - value);
+	    int rlen = xo_utf8_rlen(ch);
+	    xo_codepoint_t wc = (rlen < 1 || (size_t) rlen > remaining)
+		? XO_UTF8_ERR_BAD_LEN
+		: xo_utf8_codepoint(cp, remaining, rlen, XO_UTF8_ERR_BAD_LEN);
+
+	    if (xo_utf8_iserror(wc) || wc > 0xffff) {
+		/* Invalid UTF-8, or a supplementary-plane codepoint: copy
+		 * the raw byte(s) through rather than mangling them. */
+		int copy = (rlen < 1) ? 1
+		    : ((size_t) rlen > remaining) ? (int) remaining : rlen;
+		xo_buf_append(xbp, cp, copy);
+		cp += copy;
+
+	    } else {
+		char buf[6] = { '\\', 'u',
+				 hex[(wc >> 12) & 0xf], hex[(wc >> 8) & 0xf],
+				 hex[(wc >> 4) & 0xf], hex[wc & 0xf] };
+		xo_buf_append(xbp, buf, sizeof(buf));
+		cp += rlen;
+	    }
+	}
     }
 }
 
 static void
-rtoon_write_key (xo_buffer_t *out, const char *name)
+rtoon_write_key (xo_buffer_t *xbp, const char *name)
 {
     const char *nm = name ? name : "";
 
     if (rtoon_key_needs_quote(nm)) {
-	xo_buf_append(out, "\"", 1);
-	rtoon_write_escaped(out, nm);
-	xo_buf_append(out, "\"", 1);
+	xo_buf_append(xbp, "\"", 1);
+	rtoon_write_escaped(xbp, nm);
+	xo_buf_append(xbp, "\"", 1);
     } else {
-	xo_buf_append_str(out, nm);
+	xo_buf_append_str(xbp, nm);
     }
 }
 
@@ -390,30 +465,30 @@ rtoon_write_key (xo_buffer_t *out, const char *name)
  * already intends. Only XO_OP_STRING values go through quoting.
  */
 static void
-rtoon_write_value (xo_buffer_t *out, const char *value, int in_delimited,
+rtoon_write_value (xo_buffer_t *xbp, const char *value, int in_delimited,
 		    int is_string, int is_last)
 {
     const char *v = value ? value : "";
 
     if (!is_string) {
-	xo_buf_append_str(out, v);
+	xo_buf_append_str(xbp, v);
 	return;
     }
 
     if (rtoon_value_needs_quote(v, in_delimited, is_string, is_last)) {
-	xo_buf_append(out, "\"", 1);
-	rtoon_write_escaped(out, v);
-	xo_buf_append(out, "\"", 1);
+	xo_buf_append(xbp, "\"", 1);
+	rtoon_write_escaped(xbp, v);
+	xo_buf_append(xbp, "\"", 1);
     } else {
-	xo_buf_append_str(out, v);
+	xo_buf_append_str(xbp, v);
     }
 }
 
 static void
-rtoon_indent (xo_buffer_t *out, int depth)
+rtoon_indent (xo_buffer_t *xbp, int depth)
 {
     for (int i = 0; i < depth; i++)
-	xo_buf_append(out, "  ", 2);
+	xo_buf_append(xbp, "  ", 2);
 }
 
 /*
@@ -502,12 +577,12 @@ rtoon_cell_push (rtoon_frame_t *inst, const char *name, const char *value,
 }
 
 static void
-rtoon_write_cell_value (xo_buffer_t *out, rtoon_cell_t *cell, int in_delimited)
+rtoon_write_cell_value (xo_buffer_t *xbp, rtoon_cell_t *cell, int in_delimited)
 {
     if (cell->rc_flags & RC_RAW)
-	xo_buf_append_str(out, cell->rc_value);
+	xo_buf_append_str(xbp, cell->rc_value);
     else
-	rtoon_write_value(out, cell->rc_value, in_delimited,
+	rtoon_write_value(xbp, cell->rc_value, in_delimited,
 			   (cell->rc_flags & RC_IS_STRING) != 0, 0);
 }
 
@@ -528,11 +603,11 @@ rtoon_write_cell_value (xo_buffer_t *out, rtoon_cell_t *cell, int in_delimited)
 static void
 rtoon_flush_sparse_dash (rtoon_private_t *priv, rtoon_frame_t *inst)
 {
-    xo_buffer_t *out = &priv->rt_data;
+    xo_buffer_t *xbp = &priv->rt_data;
 
     if (inst->ri_cells_len == 0) {
 	rtoon_write_line_prefix(priv, inst->ri_dash_depth);
-	xo_buf_append_str(out, "- ");
+	xo_buf_append_str(xbp, "- ");
 	priv->rt_mid_line = 1;
 	inst->ri_wrote_dash = 1;
 	priv->rt_depth = inst->ri_field_depth;
@@ -545,12 +620,12 @@ rtoon_flush_sparse_dash (rtoon_private_t *priv, rtoon_frame_t *inst)
 
 	rtoon_write_line_prefix(priv, depth);
 	if (i == 0)
-	    xo_buf_append_str(out, "- ");
+	    xo_buf_append_str(xbp, "- ");
 
-	rtoon_write_key(out, cell->rc_name);
-	xo_buf_append(out, (cell->rc_flags & RC_KEY) ? "=" : " ", 1);
-	rtoon_write_cell_value(out, cell, 0);
-	xo_buf_append(out, "\n", 1);
+	rtoon_write_key(xbp, cell->rc_name);
+	xo_buf_append(xbp, (cell->rc_flags & RC_KEY) ? "=" : " ", 1);
+	rtoon_write_cell_value(xbp, cell, 0);
+	xo_buf_append(xbp, "\n", 1);
 
 	xo_free(cell->rc_name);
 	xo_free(cell->rc_value);
@@ -564,20 +639,20 @@ rtoon_flush_sparse_dash (rtoon_private_t *priv, rtoon_frame_t *inst)
 static void
 rtoon_emit_fields_line (rtoon_private_t *priv, rtoon_frame_t *list)
 {
-    xo_buffer_t *out = &priv->rt_data;
+    xo_buffer_t *xbp = &priv->rt_data;
 
     rtoon_write_line_prefix(priv, list->rl_child_depth);
-    xo_buf_append(out, "{", 1);
+    xo_buf_append(xbp, "{", 1);
 
     for (unsigned i = 0; i < list->rl_fields_len; i++) {
 	if (i != 0)
-	    xo_buf_append(out, ",", 1);
-	rtoon_write_key(out, list->rl_fields[i].rf_name);
+	    xo_buf_append(xbp, ",", 1);
+	rtoon_write_key(xbp, list->rl_fields[i].rf_name);
 	if (list->rl_fields[i].rf_flags & RF_KEY)
-	    xo_buf_append(out, "=", 1);
+	    xo_buf_append(xbp, "=", 1);
     }
 
-    xo_buf_append(out, "}\n", 2);
+    xo_buf_append(xbp, "}\n", 2);
     list->rl_fields_dirty = 0;
 }
 
@@ -588,12 +663,12 @@ rtoon_flush_dense_row (rtoon_private_t *priv, rtoon_frame_t *list,
     if (list->rl_fields_dirty)
 	rtoon_emit_fields_line(priv, list);
 
-    xo_buffer_t *out = &priv->rt_data;
+    xo_buffer_t *xbp = &priv->rt_data;
     rtoon_write_line_prefix(priv, list->rl_child_depth);
 
     for (unsigned i = 0; i < list->rl_fields_len; i++) {
 	if (i != 0)
-	    xo_buf_append(out, ",", 1);
+	    xo_buf_append(xbp, ",", 1);
 
 	rtoon_cell_t *cell = NULL;
 	for (unsigned j = 0; j < inst->ri_cells_len; j++) {
@@ -605,11 +680,11 @@ rtoon_flush_dense_row (rtoon_private_t *priv, rtoon_frame_t *list,
 	}
 
 	if (cell != NULL)
-	    rtoon_write_cell_value(out, cell, 1);
+	    rtoon_write_cell_value(xbp, cell, 1);
 	/* else: field not supplied for this row -> empty cell */
     }
 
-    xo_buf_append(out, "\n", 1);
+    xo_buf_append(xbp, "\n", 1);
 
     for (unsigned j = 0; j < inst->ri_cells_len; j++) {
 	xo_free(inst->ri_cells[j].rc_name);
@@ -629,18 +704,18 @@ static void
 rtoon_emit_field (rtoon_private_t *priv, const char *name, const char *value,
 		   xo_xff_flags_t flags, int is_string, int raw)
 {
-    xo_buffer_t *out = &priv->rt_data;
+    xo_buffer_t *xbp = &priv->rt_data;
     int inst_idx = rtoon_cur_instance_idx(priv);
 
     if (inst_idx < 0) {
 	rtoon_write_line_prefix(priv, priv->rt_depth);
-	rtoon_write_key(out, name);
-	xo_buf_append(out, (flags & XFF_KEY) ? "=" : " ", 1);
+	rtoon_write_key(xbp, name);
+	xo_buf_append(xbp, (flags & XFF_KEY) ? "=" : " ", 1);
 	if (raw)
-	    xo_buf_append_str(out, value ? value : "");
+	    xo_buf_append_str(xbp, value ? value : "");
 	else
-	    rtoon_write_value(out, value, 0, is_string, 0);
-	xo_buf_append(out, "\n", 1);
+	    rtoon_write_value(xbp, value, 0, is_string, 0);
+	xo_buf_append(xbp, "\n", 1);
 	return;
     }
 
@@ -682,13 +757,13 @@ rtoon_emit_field (rtoon_private_t *priv, const char *name, const char *value,
     } else { /* RTOON_LIST_SPARSE */
 	if (inst->ri_wrote_dash) {
 	    rtoon_write_line_prefix(priv, priv->rt_depth);
-	    rtoon_write_key(out, full_name);
-	    xo_buf_append(out, (flags & XFF_KEY) ? "=" : " ", 1);
+	    rtoon_write_key(xbp, full_name);
+	    xo_buf_append(xbp, (flags & XFF_KEY) ? "=" : " ", 1);
 	    if (raw)
-		xo_buf_append_str(out, value ? value : "");
+		xo_buf_append_str(xbp, value ? value : "");
 	    else
-		rtoon_write_value(out, value, 0, is_string, 0);
-	    xo_buf_append(out, "\n", 1);
+		rtoon_write_value(xbp, value, 0, is_string, 0);
+	    xo_buf_append(xbp, "\n", 1);
 	} else {
 	    rtoon_cell_push(inst, full_name, value, cflags);
 	}
@@ -1024,7 +1099,7 @@ static int
 rtoon_options (xo_handle_t *xop, rtoon_private_t *priv,
 	       const char *raw_opts, char opts_char)
 {
-    ssize_t len = strlen(raw_opts);
+    xo_ssize_t len = strlen(raw_opts);
     char *options = alloca(len + 1);
     memcpy(options, raw_opts, len);
     options[len] = '\0';
@@ -1162,11 +1237,11 @@ rtoon_handler (XO_ENCODER_HANDLER_ARGS)
 	break; /* xo_finish_h() always calls xo_flush_h() next */
 
     case XO_OP_FLUSH: {
-	xo_buffer_t *out = &priv->rt_data;
-	ssize_t left = out->xb_curp - out->xb_bufp;
-	ssize_t rc = (left > 0) ? write(1, out->xb_bufp, left) : 0;
+	xo_buffer_t *xbp = &priv->rt_data;
+	xo_ssize_t len = xo_buf_len(xbp);
+	xo_ssize_t rc = (len > 0) ? write(1, xbp->xb_bufp, len) : 0;
 
-	xo_buf_reset(out);
+	xo_buf_reset(xbp);
 	if (rc < 0)
 	    return -1;
 	break;
