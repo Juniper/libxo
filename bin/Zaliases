@@ -1,7 +1,7 @@
 set top_src=`pwd`
 alias Zautoreconf "(cd $top_src ; autoreconf --install)"
 
-set ROOT_DIR=${HOME}/work/root
+setenv ROOT_DIR ${HOME}/work/root
 
 set ZENV=""
 
