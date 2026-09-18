@@ -536,6 +536,78 @@ main (int argc, char **argv)
     xo_close_instance("s32-alwaysempty");
     xo_close_list("s32-alwaysempty");
 
+    /*
+     * 33. Escaping of embedded C0 control characters (added alongside
+     * the fix that taught rtoon_write_escaped()/rtoon_value_needs_quote()
+     * about them - previously only '"' and '\\' were escaped, so a raw
+     * control byte in a value went out unescaped and could corrupt
+     * rtoon's line-oriented structure). Covers the LF/CR/HTAB mnemonic
+     * escapes, the \uXXXX fallback for a control byte with no mnemonic,
+     * a control char combined with the pre-existing comma-quoting
+     * trigger, the same path through a dense-list row cell, and a
+     * container name (a "key") carrying a control character.
+     */
+
+    /* 33a. plain data-value: LF, CR, and HTAB together */
+    xo_open_container("s33a-newlines");
+    xo_emit("{:msg}\n", "line1\nline2\r\nline3\ttabbed");
+    xo_close_container("s33a-newlines");
+
+    /*
+     * 33b: control bytes with no mnemonic escape - fall back to
+     * \uXXXX. SOH (0x01) and US (0x1f) are used here rather than, say,
+     * BEL (0x07) or ESC (0x1b), since those two are silently ignored
+     * by every common terminal instead of ringing the bell or being
+     * parsed as the start of an escape sequence when this test's
+     * output is viewed directly (e.g. under "make test").
+     */
+    xo_open_container("s33b-nonmnemonic");
+    xo_emit("{:msg}\n", "ctrl\x01here\x1fnext");
+    xo_close_container("s33b-nonmnemonic");
+
+    /*
+     * 33c: leaf-list value combining an embedded newline with the
+     * comma-quoting trigger already exercised in scenario 10, to
+     * confirm the two quoting reasons compose correctly.
+     */
+    xo_open_container("s33c-colors");
+    xo_emit("{l:tag}", "needs,quote\nand-newline");
+    xo_close_container("s33c-colors");
+
+    /* 33d: dense-list row cell (rtoon_write_cell_value's non-RAW path) */
+    xo_open_list_hf(NULL, XOF_DENSE, "s33d-row");
+    xo_open_instance("s33d-row");
+    xo_emit("{k:num/%d}{:note}\n", 1, "tab\there");
+    xo_close_instance("s33d-row");
+    xo_close_list("s33d-row");
+
+    /* 33e: a container name (key position) carrying an embedded tab */
+    xo_open_container("s33e-odd\tname");
+    xo_close_container("s33e-odd\tname");
+
+    /*
+     * 34. Escaping of non-ASCII UTF-8 (added alongside the fix that
+     * taught rtoon_write_escaped()/rtoon_value_needs_quote()/
+     * rtoon_key_needs_quote() to decode UTF-8: a BMP codepoint now
+     * gets a \uXXXX escape rather than going out as literal UTF-8,
+     * while a supplementary-plane codepoint (above U+FFFF, which has
+     * no \uXXXX form a decoder can accept) stays literal.
+     */
+
+    /* 34a: a BMP non-ASCII character ('e' with acute accent, U+00E9) */
+    xo_open_container("s34a-bmp");
+    xo_emit("{:msg}\n", "caf\xc3\xa9");
+    xo_close_container("s34a-bmp");
+
+    /* 34b: a supplementary-plane character (U+1F600, four UTF-8 bytes) */
+    xo_open_container("s34b-supplementary");
+    xo_emit("{:msg}\n", "\xf0\x9f\x98\x80hi");
+    xo_close_container("s34b-supplementary");
+
+    /* 34c: a container name (key position) carrying a BMP character */
+    xo_open_container("s34c-caf\xc3\xa9");
+    xo_close_container("s34c-caf\xc3\xa9");
+
     xo_close_container("rtoon-test");
 
     xo_finish();
