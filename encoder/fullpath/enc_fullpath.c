@@ -303,20 +303,28 @@ fullpath_handler (XO_ENCODER_HANDLER_ARGS)
     return rc;
 }
 
-static int
-fullpath_wb_marker (XO_WHITEBOARD_FUNC_ARGS)
-{
-    printf("marker %s\n", xo_whiteboard_op_name(op));
-
-    return 0;
-}
-
 int
 xo_encoder_library_init (XO_ENCODER_INIT_ARGS)
 {
+    /* Caller's version is older than we need; report ours and fail */
+    if (arg->xei_version < XO_ENCODER_VERSION) {
+	arg->xei_version = XO_ENCODER_VERSION;
+	return -1;
+    }
+
     arg->xei_version = XO_ENCODER_VERSION;
     arg->xei_handler = fullpath_handler;
-    arg->xei_wb_marker = fullpath_wb_marker;
+
+    /*
+     * We support filters, but don't need XO_OP_DEADEND: our
+     * OPEN/CLOSE_CONTAINER and OPEN/CLOSE_INSTANCE bookkeeping only
+     * pushes/pops our own "leader" buffer (trivially reversible), and
+     * our real output (STRING/CONTENT) is only ever reached for
+     * fields libxo's generic filtering has already decided are real,
+     * since it holds tentative fields back rather than pushing them
+     * to us.  So we never accumulate anything that needs rolling back.
+     */
+    arg->xei_flags |= XEIF_FILTER_AWARE;
 
     return 0;
 }

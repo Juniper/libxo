@@ -9,6 +9,7 @@
 SUBDIRS = \
     cbor \
     csv \
+    rtoon \
     test
 
 if LIBXO_NEED_FILTERS

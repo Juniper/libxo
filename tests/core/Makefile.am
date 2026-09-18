@@ -48,7 +48,8 @@ test_09.c \
 ${TEST_CASES_COLOR} \
 test_13.c \
 test_14.c \
-test_15.c
+test_15.c \
+test_16.c
 
 test_01_test_SOURCES = test_01.c
 test_02_test_SOURCES = test_02.c
@@ -62,6 +63,7 @@ test_09_test_SOURCES = test_09.c
 test_13_test_SOURCES = test_13.c
 test_14_test_SOURCES = test_14.c
 test_15_test_SOURCES = test_15.c
+test_16_test_SOURCES = test_16.c
 
 base_tests = ${TEST_CASES:.c=.test}
 
@@ -99,6 +101,7 @@ endif
 
 CSV_EXT = Ecsv1 Ecsv2 Ecsv3
 PMAP_EXT = JPmap  XPmap
+RTOON_EXT = Ertoon
 
 STYLES = T XP JP JPu HP X J H HIPx E
 
@@ -133,15 +136,24 @@ $(foreach file, test_12.c, \
             $(foreach fd, out err, \
                 $(addprefix saved/, ${file:.c=${pass}${ext}.${fd}})))))
 
+TEST_OUTPUT_FILES += \
+$(foreach file, test_04.c test_16.c, \
+    $(foreach pass, ${ALL_PASSES}, \
+        $(foreach ext, ${RTOON_EXT}, \
+            $(foreach fd, out err, \
+                $(addprefix saved/, ${file:.c=${pass}${ext}.${fd}})))))
+
 sayit:
 	echo ${TEST_OUTPUT_FILES}
 
 EXTRA_DIST = \
     ${TEST_CASES} \
     test_01.fmts \
+    test_04.fmts \
     test_12.fmts \
     test_12.fmts \
     test_15.fmts \
+    test_16.fmts \
     test_12.map \
     ${TEST_OUTPUT_FILES}
 

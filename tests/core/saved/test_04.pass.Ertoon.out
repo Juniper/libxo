@@ -1,0 +1,7 @@
+@version 1.0.0
+employees
+  employee
+    {first-name=,last-name=,department}
+    Terry,Jones,660
+    Leslie,Patterson,341
+    Ashley,Smith,1440
