@@ -97,12 +97,26 @@ this order when classifying a line:
    dedent) it was an object; decode its children as that object's
    properties, or decode it as `{}` if there's nothing under it at all.
 
-Quoting: a value or key may be wrapped in `"..."` with `\"`/`\\` as
-escapes, exactly like JSON strings. When you see a quoted token, just
-unescape it and use the result - the quoting itself carries no meaning
-beyond "take this literally, don't apply the structural rules above to
-its contents." A quoted token is always a string, no matter what it
-looks like.
+Quoting: a value or key may be wrapped in `"..."`. Escapes: `\"` and
+`\\` for the literal quote/backslash characters, `\n`/`\r`/`\t` for
+LF/CR/HTAB, and `\uXXXX` (hex) for any other control character below
+U+0020 - this is TOON's own Section 7.1 escape table, not JSON's (JSON
+has no `\uXXXX`-only fallback rule the same way, and JSON permits a
+few escapes, like `\/`, that never appear in rtoon output). A raw,
+unescaped control byte never appears inside a quoted token.
+
+`\uXXXX` also covers non-ASCII characters: any character in the Basic
+Multilingual Plane (U+0080-U+D7FF, U+E000-U+FFFF) that rtoon quotes
+comes out as `\uXXXX`, not literal UTF-8 - e.g. an accented letter
+shows up as `é`, not as its raw UTF-8 bytes. The one exception is
+a supplementary-plane character (above U+FFFF, e.g. most emoji) -
+those have no `\uXXXX` form (a decoder must reject a surrogate-pair
+escape standing in for one), so they appear as literal UTF-8 bytes
+inside the quotes instead. When you see a quoted token, unescape it
+per that table and use the result - the quoting itself carries no
+meaning beyond "take this literally, don't apply the structural rules
+above to its contents." A quoted token is always a string, no matter
+what it looks like.
 
 Scalar typing: this part is exact, not a heuristic. Every unquoted
 value token (a data-value's value, a leaf-list value, a dense-row
