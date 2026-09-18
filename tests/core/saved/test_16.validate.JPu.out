@@ -343,6 +343,35 @@
       {
 
       }
-    ]
+    ],
+    "s33a_newlines": {
+      "msg": "line1\nline2\r\nline3\ttabbed"
+    },
+    "s33b_nonmnemonic": {
+      "msg": "ctrl\u0001here\u001fnext"
+    },
+    "s33c_colors": {
+      "tag": [
+        "needs,quote\nand-newline"
+      ]
+    },
+    "s33d_row": [
+      {
+        "num": 1,
+        "note": "tab\there"
+      }
+    ],
+    "s33e_odd	name": {
+
+    },
+    "s34a_bmp": {
+      "msg": "café"
+    },
+    "s34b_supplementary": {
+      "msg": "😀hi"
+    },
+    "s34c_café": {
+
+    }
   }
 }

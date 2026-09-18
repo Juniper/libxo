@@ -151,3 +151,18 @@ rtoon-test
   s32-alwaysempty
     
     
+  s33a-newlines
+    msg "line1\nline2\r\nline3\ttabbed"
+  s33b-nonmnemonic
+    msg "ctrl\u0001here\u001fnext"
+  s33c-colors
+    tag "needs,quote\nand-newline",
+  s33d-row
+    {num=,note}
+    1,"tab\there"
+  "s33e-odd\tname"
+  s34a-bmp
+    msg "caf\u00e9"
+  s34b-supplementary
+    msg "😀hi"
+  "s34c-caf\u00e9"
