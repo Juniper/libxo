@@ -257,3 +257,23 @@
   <div class="data" data-tag="name" data-ident="78">later</div>
   <div class="data" data-tag="val" data-ident="78">99</div>
 </div>
+<div class="line">
+  <div class="data" data-tag="msg">line1
+line2
+line3	tabbed</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="msg">ctrlherenext</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="tag">needs,quote
+and-newline</div>
+  <div class="data" data-tag="num" data-ident="83">1</div>
+  <div class="data" data-tag="note" data-ident="83">tab	here</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="msg">café</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="msg">😀hi</div>
+</div>
