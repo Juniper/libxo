@@ -141,8 +141,9 @@ typedef struct rtoon_private_s {
 #define RTF_NO_VERSION	(1 << 0) /* User asked us to skip @version */
 #define RTF_VERSION_DONE (1 << 1) /* @version already resolved/written */
 
-/* ------------------------------------------------------------------ */
-/* Frame stack */
+/*
+ * Frame stack
+ */
 
 static int
 rtoon_push_idx (rtoon_private_t *priv, rtoon_frame_type_t type)
@@ -259,8 +260,9 @@ rtoon_free_frame (rtoon_frame_t *fp)
     }
 }
 
-/* ------------------------------------------------------------------ */
-/* Quoting and low-level writing */
+/*
+ * Quoting and low-level writing
+ */
 
 static int
 rtoon_is_number (const char *value)
@@ -342,10 +344,11 @@ rtoon_value_needs_quote (const char *value, int in_delimited, int is_string,
 {
     if (value[0] == '{')
 	return 1;
-    if (strchr(value, ','))
-	return 1;
-    if (strchr(value, '"') || strchr(value, '\\'))
-	return 1;
+
+    for (const char *cp = value; *cp; cp++)
+	if (*cp == ',' || *cp == '"' || *cp == '\\')
+	    return 1;
+
     if (!in_delimited && value[0] == '\0')
 	return 1;
     if (in_delimited && is_last && value[0] == '\0')
@@ -694,8 +697,9 @@ rtoon_emit_field (rtoon_private_t *priv, const char *name, const char *value,
     xo_free(full_name);
 }
 
-/* ------------------------------------------------------------------ */
-/* Leaf-lists */
+/*
+ * Leaf-lists
+ */
 
 static void
 rtoon_open_leaf_list (rtoon_private_t *priv)
@@ -710,7 +714,8 @@ rtoon_ll_add (rtoon_private_t *priv, const char *value, int is_string)
 {
     if (priv->rt_ll_count >= priv->rt_ll_size) {
 	unsigned new_size = priv->rt_ll_size ? priv->rt_ll_size * 2 : 8;
-	rtoon_ll_val_t *np = xo_realloc(priv->rt_ll_vals, new_size * sizeof(*np));
+	rtoon_ll_val_t *np = xo_realloc(priv->rt_ll_vals,
+					new_size * sizeof(*np));
 	if (np == NULL)
 	    return;
 	priv->rt_ll_vals = np;
@@ -756,8 +761,9 @@ rtoon_close_leaf_list (rtoon_private_t *priv, const char *name,
     priv->rt_ll_count = 0;
 }
 
-/* ------------------------------------------------------------------ */
-/* Structural operations: containers, lists, instances */
+/*
+ * Structural operations: containers, lists, instances
+ */
 
 static void
 rtoon_open_container (rtoon_private_t *priv, const char *name)
@@ -771,8 +777,10 @@ rtoon_open_container (rtoon_private_t *priv, const char *name)
 	    priv->rt_stack[list_idx].rl_mode = RTOON_LIST_SPARSE;
 
 	if (priv->rt_stack[list_idx].rl_mode == RTOON_LIST_DENSE) {
-	    /* Flatten: fold this nested container's leaves into the
-	       dense row as prefixed columns (rtoon-spec.md Section 6.6) */
+	    /*
+	     * Flatten: fold this nested container's leaves into the
+	     * dense row as prefixed columns (rtoon-spec.md Section 6.6)
+	     */
 	    int fidx = rtoon_push_idx(priv, RTOON_FRAME_FLATTEN);
 	    rtoon_frame_t *fp = &priv->rt_stack[fidx];
 	    size_t len = strlen(name);
@@ -806,7 +814,8 @@ rtoon_close_container (rtoon_private_t *priv)
 
     rtoon_frame_t *fp = &priv->rt_stack[idx];
 
-    if (fp->rf_type == RTOON_FRAME_FLATTEN || fp->rf_type == RTOON_FRAME_ERROR) {
+    if (fp->rf_type == RTOON_FRAME_FLATTEN
+		|| fp->rf_type == RTOON_FRAME_ERROR) {
 	rtoon_free_frame(fp);
 	priv->rt_stack_len -= 1;
 	return;
@@ -830,10 +839,12 @@ rtoon_open_list (xo_handle_t *xop, rtoon_private_t *priv, const char *name,
 	    priv->rt_stack[list_idx].rl_mode = RTOON_LIST_SPARSE;
 
 	if (priv->rt_stack[list_idx].rl_mode == RTOON_LIST_DENSE) {
-	    /* A dense row's cells are plain scalars; a nested list can't
-	       be flattened (its cardinality varies row to row) and we
-	       don't attempt a mid-stream dense->sparse downgrade -- see
-	       rtoon-spec.md Section 6.5. */
+	    /*
+	     * A dense row's cells are plain scalars; a nested list
+	     * can't be flattened (its cardinality varies row to row)
+	     * and we don't attempt a mid-stream dense->sparse
+	     * downgrade -- see rtoon-spec.md Section 6.5.
+	     */
 	    xo_failure(xop, "rtoon: nested list not permitted inside a "
 		       "dense list instance ('%s')", name ?: "");
 	    rtoon_push_idx(priv, RTOON_FRAME_ERROR);
@@ -917,12 +928,21 @@ rtoon_close_instance (rtoon_private_t *priv)
 
     } else if (!inst->ri_wrote_dash) {
 	if (inst->ri_cells_len == 0) {
-	    /* Pathological: an instance that never received a single
-	       field. libxo's own emit calls don't produce this (every
-	       instance carries at least a key), but keep this well
-	       formed rather than leaving a dangling mid-line marker. */
+	    /*
+	     * Pathological: an instance that never received a single
+	     * field. libxo's own emit calls don't produce this (every
+	     * instance carries at least a key), but keep this well
+	     * formed. We encode it as "- \"\"" -- an instance holding
+	     * a single empty string -- rather than a bare "-": a bare
+	     * dash reads as a truncated/malformed line, while "- \"\""
+	     * is an unambiguous, self-describing empty element.
+	     * See rtoon-spec.md Section 4.2.
+	     */
 	    rtoon_write_line_prefix(priv, inst->ri_dash_depth);
-	    xo_buf_append_str(&priv->rt_data, "-\n");
+	    xo_buf_append_str(&priv->rt_data, "- ");
+	    rtoon_write_value(&priv->rt_data, "", 0, 1, 0);
+	    xo_buf_append(&priv->rt_data, "\n", 1);
+
 	    priv->rt_depth = inst->ri_field_depth;
 	} else {
 	    rtoon_flush_sparse_dash(priv, inst);
@@ -956,8 +976,9 @@ rtoon_deadend (rtoon_private_t *priv)
     priv->rt_stack_len -= 1;
 }
 
-/* ------------------------------------------------------------------ */
-/* Setup, options, teardown */
+/*
+ * Setup, options, teardown
+ */
 
 static int
 rtoon_create (xo_handle_t *xop)
@@ -1031,8 +1052,9 @@ rtoon_options (xo_handle_t *xop, rtoon_private_t *priv,
     return 0;
 }
 
-/* ------------------------------------------------------------------ */
-/* Dispatch */
+/*
+ * Dispatch
+ */
 
 static int
 rtoon_handler (XO_ENCODER_HANDLER_ARGS)
@@ -1048,7 +1070,8 @@ rtoon_handler (XO_ENCODER_HANDLER_ARGS)
 
     if (priv != NULL) {
 	int top_idx = rtoon_top_idx(priv);
-	if (top_idx >= 0 && priv->rt_stack[top_idx].rf_type == RTOON_FRAME_ERROR) {
+	if (top_idx >= 0
+	    	&& priv->rt_stack[top_idx].rf_type == RTOON_FRAME_ERROR) {
 	    /*
 	     * We're inside a rejected (dense-nested-list) scope; swallow
 	     * everything except the structural balance needed to find
@@ -1136,7 +1159,7 @@ rtoon_handler (XO_ENCODER_HANDLER_ARGS)
 	break;
 
     case XO_OP_FINISH:
-	break;			/* xo_finish_h() always calls xo_flush_h() next */
+	break; /* xo_finish_h() always calls xo_flush_h() next */
 
     case XO_OP_FLUSH: {
 	xo_buffer_t *out = &priv->rt_data;
@@ -1166,6 +1189,12 @@ rtoon_handler (XO_ENCODER_HANDLER_ARGS)
 int
 xo_encoder_library_init (XO_ENCODER_INIT_ARGS)
 {
+    /* Caller's version is older than we need; report ours and fail */
+    if (arg->xei_version < XO_ENCODER_VERSION) {
+	arg->xei_version = XO_ENCODER_VERSION;
+	return -1;
+    }
+
     arg->xei_handler = rtoon_handler;
     arg->xei_version = XO_ENCODER_VERSION;
     arg->xei_flags |= XEIF_FILTER_AWARE | XEIF_FILTER_NOTIFY_DEADEND;
