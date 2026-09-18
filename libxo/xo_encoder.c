@@ -104,7 +104,7 @@ typedef struct xo_encoder_node_s {
     TAILQ_ENTRY(xo_encoder_node_s) xe_link; /* Next session */
     char *xe_name;			/* Name for this encoder */
     xo_encoder_func_t xe_handler;	/* Callback function */
-    xo_whiteboard_func_t xe_wb_marker;	/* Whiteboard marker function */
+    xo_xof_flags_t xe_flags;		/* Encoder capability flags (XEIF_*) */
     void *xe_dlhandle;			/* dlopen handle */
 } xo_encoder_node_t;
 
@@ -139,6 +139,7 @@ xo_encoder_list_add (const char *name)
 	}
 
 	memcpy(xep->xe_name, name, len);
+	xep->xe_flags = 0;
 
 	TAILQ_INSERT_TAIL(&xo_encoders, xep, xe_link);
     }
@@ -232,7 +233,7 @@ xo_encoder_discover (const char *name)
 		xep = xo_encoder_list_add(name);
 		if (xep) {
 		    xep->xe_handler = xei.xei_handler;
-		    xep->xe_wb_marker = xei.xei_wb_marker;
+		    xep->xe_flags = xei.xei_flags;
 		    xep->xe_dlhandle = dlp;
 		}
 	    }
@@ -325,7 +326,7 @@ xo_encoder_init (xo_handle_t *xop, const char *name)
 	}
     }
 
-    xo_set_encoder(xop, xep->xe_handler, xep->xe_wb_marker);
+    xo_set_encoder(xop, xep->xe_handler, xep->xe_flags);
 
     int rc = xo_encoder_handle(xop, XO_OP_CREATE, NULL, name, NULL, 0);
     if (rc == 0 && opts != NULL) {
