@@ -257,3 +257,23 @@
   <div class="data" data-tag="name" data-ident="78" data-xpath="/rtoon-test/s31-emptyfirst/name">later</div>
   <div class="data" data-tag="val" data-ident="78" data-xpath="/rtoon-test/s31-emptyfirst[name = 'later']/val">99</div>
 </div>
+<div class="line">
+  <div class="data" data-tag="msg" data-xpath="/rtoon-test/s33a-newlines/msg">line1
+line2
+line3	tabbed</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="msg" data-xpath="/rtoon-test/s33b-nonmnemonic/msg">ctrlherenext</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="tag" data-xpath="/rtoon-test/s33c-colors/tag">needs,quote
+and-newline</div>
+  <div class="data" data-tag="num" data-ident="83" data-xpath="/rtoon-test/s33d-row/num">1</div>
+  <div class="data" data-tag="note" data-ident="83" data-xpath="/rtoon-test/s33d-row[num = '1']/note">tab	here</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="msg" data-xpath="/rtoon-test/s34a-bmp/msg">café</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="msg" data-xpath="/rtoon-test/s34b-supplementary/msg">😀hi</div>
+</div>
