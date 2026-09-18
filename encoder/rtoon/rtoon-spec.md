@@ -136,9 +136,32 @@ character:
 
 ### 2.2 Quoting
 
-Quoting uses double quotes, with `\"` and `\\` as the only escapes -
-identical to TOON's own Section 7.1 / JSON string escaping. No new escape
-syntax is introduced.
+Quoting uses double quotes. Escaping matches TOON's own Section 7.1
+table exactly, not just its `\"` / `\\` rows: `\"` and `\\` are the
+structural escapes, LF/CR/HTAB get the short mnemonic escapes `\n`,
+`\r`, `\t`, and every other C0 control character (U+0000-U+001F) gets
+a `\uXXXX` escape (lowercase hex). No control byte may ever appear
+literally inside a quoted token. This is a hard requirement, not a
+style choice: rtoon is line-oriented (indentation and line boundaries
+carry structure), so a raw, unescaped LF or CR inside a value would
+split the output mid-token and corrupt the surrounding line -
+something a purely comma/quote-oriented escape set doesn't protect
+against. No escape syntax beyond TOON's own is introduced.
+
+rtoon also makes a policy choice where TOON leaves the encoder free to
+pick: every non-ASCII Basic Multilingual Plane codepoint (U+0080
+through U+D7FF and U+E000 through U+FFFF) is `\uXXXX`-escaped rather
+than written out as literal UTF-8, even though TOON's table only says
+an encoder MAY do this (its default is SHOULD emit literal UTF-8).
+rtoon always takes the `\uXXXX` option here, so a quoted token's bytes
+are all plain ASCII except for the one case that has no `\uXXXX` form
+at all: a supplementary-plane codepoint (U+10000-U+10FFFF, encoded as
+4 UTF-8 bytes) is written out as literal UTF-8, unescaped, because a
+decoder MUST reject a surrogate-pair `\uXXXX` escape standing in for
+one (Section 7.1's table again). This choice keeps the encoder's
+output byte-for-byte predictable without a UTF-8-aware tokenizer for
+the overwhelming majority of non-ASCII input, at the cost of not being
+purely ASCII for the rare supplementary-plane character.
 
 **Keys** (the first token of a line, or a field name inside a `{...}`
 fields-line) MUST be quoted if any of:
@@ -148,8 +171,14 @@ fields-line) MUST be quoted if any of:
 - it starts with `{` (would be read as a fields-line),
 - it starts with `-` (would be read as a list-instance/empty-list
   marker),
-- it contains unquoted whitespace or an unquoted comma,
+- it contains unquoted whitespace (including any C0 control character,
+  U+0000-U+001F, treated as whitespace for this purpose - it needs
+  quoting whether or not it happens to satisfy `isspace()`) or an
+  unquoted comma,
 - it contains an unquoted `"` or `\`,
+- it contains any non-ASCII byte (>= U+0080), since that byte is
+  subject to the `\uXXXX`/literal-UTF-8 policy above and escaping only
+  happens inside quotes,
 - it is empty.
 
 **Values** (a data-value's or key-value's value; a leaf-list or dense
@@ -159,7 +188,10 @@ row cell) MUST be quoted if any of:
   see Section 6.3),
 - (leaf-list / dense row cell only) it contains the active delimiter
   (`,`) unquoted,
-- it contains an unquoted `"` or `\`,
+- it contains an unquoted `"`, `\`, any C0 control character
+  (U+0000-U+001F) - including LF/CR/HTAB - or any non-ASCII byte
+  (>= U+0080), since any of those is subject to the escaping/`\uXXXX`
+  policy above and escaping only happens inside quotes,
 - (data-value / key-value only) it is empty - an empty scalar value
   MUST be spelled `""`, never bare nothing. This is the one quoting
   rule that exists purely for structural disambiguation rather than
@@ -207,6 +239,15 @@ looks like: `"true"`, `"42"`, `"null"` decode to the strings `true`,
 `42`, `null`, never to the typed values. Quoting is precisely the
 mechanism for spelling a string that would otherwise collide with a
 typed literal - see Section 2.2's matching quoting-trigger bullet.
+
+**Numeric normalization** (TOON SPEC.md Section 3's `-0` -> `0` and
+NaN/Infinity -> `null` rules) is not something the encoder does: an
+`XO_OP_CONTENT` numeric value arrives already formatted by libxo's own
+core number-formatting layer (the same layer every other encoder -
+CSV, CBOR, FDR - trusts as-is), and rtoon writes it through unchanged.
+If libxo's own formatting ever needs to guarantee `-0`/NaN/Infinity
+normalization, that's a libxo-wide concern to fix once upstream of all
+encoders, not something duplicated per-encoder here.
 
 ```
 count 42        -> number 42
@@ -686,6 +727,11 @@ keep it from decoding as the number 42.
   real TOON's tabular eligibility requires uniform, purely-scalar
   objects; it has no mechanism for absorbing a nested object's fields
   into the parent row at all.
+- Always `\uXXXX`-escaping non-ASCII BMP codepoints (Section 2.2) -
+  real TOON's Section 7.1 table leaves this as an encoder's own choice
+  (SHOULD emit literal UTF-8, MAY emit `\uXXXX`); rtoon commits to the
+  `\uXXXX` option everywhere it applies, rather than leaving it
+  unspecified per-encoder.
 
 Scalar typing (Section 2.3 - unquoted `true`/`false`/`null`/numbers
 decode as their typed values, quoting is what forces a string reading)
