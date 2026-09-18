@@ -618,6 +618,7 @@ AC_CONFIG_FILES([
      encoder/csv/Makefile
      encoder/fdr/Makefile
      encoder/fullpath/Makefile
+     encoder/rtoon/Makefile
      encoder/test/Makefile
      llvm-plugins/Makefile
      llvm-plugins/xocc.sh
