@@ -177,7 +177,7 @@ main (int argc, char **argv)
 
     xo_attr("test", "value");
     xo_open_container("data");
-    xo_open_list("item");
+    xo_open_list_hf(NULL, XOF_DENSE, "item");
     xo_attr("test2", "value2");
 
     xo_emit("{T:Item/%-10s}{T:Total Sold/%12s}{T:In Stock/%12s}"
@@ -203,7 +203,7 @@ main (int argc, char **argv)
     xo_emit("\n\n");
 
     xo_open_container("data2");
-    xo_open_list("item");
+    xo_open_list_hf(NULL, XOF_DENSE, "item");
 
     for (int x = 0; x < opt_count; x++) {
 	for (ip = list; ip->i_title; ip++) {
@@ -226,7 +226,7 @@ main (int argc, char **argv)
     xo_close_container("data2");
 
     xo_open_container("data3");
-    xo_open_list("item");
+    xo_open_list_hf(NULL, XOF_DENSE, "item");
 
     for (ip = list2; ip->i_title; ip++) {
 	xo_open_instance("item");
