@@ -40,9 +40,9 @@ everything else in this section (Section 1.1):
 
 - a line that is blank, or whose first non-whitespace character is `#`,
   carries no data and is ignored entirely;
-- a line whose first non-whitespace character is `@` is an **operation**,
-  not data - a directive to the decoder, distinct from the six data-line
-  kinds below.
+- a line whose first non-whitespace character is `@` is an
+  **instruction**, not data - a directive to the decoder, distinct from
+  the six data-line kinds below.
 
 Every other line, once its leading indentation is stripped, is one of
 six kinds:
@@ -64,35 +64,35 @@ like when the encoder chooses the tabular form (Section 6) instead of
 list-instance lines, for arrays of records that stay uniform (or
 monotonically widening) in shape.
 
-### 1.1 Comments, blank lines, and operations
+### 1.1 Comments, blank lines, and instructions
 
 These are checked before the six data-line kinds above, at any
 indentation, in any context (inside a container, a list, mid-instance -
 anywhere a line can appear):
 
 - **Comment**: a line whose first non-whitespace character is `#`. The
-  entire line is ignored - it is not data, not an operation, and
+  entire line is ignored - it is not data, not an instruction, and
   contributes nothing to structure (in particular, it does not count as
   content for the purposes of Section 3/4's "is this container/list
   empty" lookahead).
 - **Blank line**: a line containing only whitespace (or nothing at all).
   Also ignored, same as a comment.
-- **Operation**: a line whose first non-whitespace character is `@`.
+- **Instruction**: a line whose first non-whitespace character is `@`.
   This is not data - it is a directive telling the decoder how to
   process what follows, distinct from all six data-line kinds. The
-  general operation mechanism is intentionally left underspecified here:
-  future work will add operations such as "replace", "merge",
+  general instruction mechanism is intentionally left underspecified
+  here: future work will add instructions such as "replace", "merge",
   "activate", "deactivate", "delete", and others, for use cases beyond a
   single self-contained document. This spec defines exactly one
-  operation today (Section 1.2, `@version`); a decoder encountering an
-  operation it doesn't recognize SHOULD treat it as an error rather than
-  silently ignoring it, since operations (unlike comments) are meant to
-  change how the rest of the document is read.
+  instruction today (Section 1.2, `@version`); a decoder encountering an
+  instruction it doesn't recognize SHOULD treat it as an error rather
+  than silently ignoring it, since instructions (unlike comments) are
+  meant to change how the rest of the document is read.
 
-### 1.2 The `@version` operation
+### 1.2 The `@version` instruction
 
 Every RTOON document is expected to begin with a version-declaration
-operation, before any other content:
+instruction, before any other content:
 
 ```
 @version 1.0.0
@@ -586,9 +586,9 @@ For a body line at some depth, in order:
 1. If the line is blank, or its first non-whitespace character is `#`
    -> ignore it entirely (Section 1.1); it does not affect depth
    tracking or "is this container/list empty" lookahead.
-2. If the line's first non-whitespace character is `@` -> operation
+2. If the line's first non-whitespace character is `@` -> instruction
    (Section 1.1), not data; process per Section 1.2 (`@version`) or
-   error on an unrecognized operation.
+   error on an unrecognized instruction.
 3. Strip indentation, compute depth. Reject tabs in indentation.
    Depth must be <= (previous meaningful depth + 1); anything deeper is
    a structural error.
@@ -679,7 +679,7 @@ keep it from decoding as the number 42.
 - Mandatory trailing comma on a leaf-list (Section 5) - real TOON's
   tabular rows are already fixed-width by header, so it has no
   equivalent one-value-vs-scalar ambiguity to resolve.
-- Comments (`#`), blank-line skipping, and `@`-operations including
+- Comments (`#`), blank-line skipping, and `@`-instructions including
   `@version` (Section 1.1/1.2) - real TOON has no equivalent of any of
   these.
 - Flattening a nested container into path-named columns (Section 6.6) -
