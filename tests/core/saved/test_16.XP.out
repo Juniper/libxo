@@ -264,4 +264,30 @@
   </s32-alwaysempty>
   <s32-alwaysempty>
   </s32-alwaysempty>
+  <s33a-newlines>
+    <msg>line1
+line2
+line3	tabbed</msg>
+  </s33a-newlines>
+  <s33b-nonmnemonic>
+    <msg>ctrlherenext</msg>
+  </s33b-nonmnemonic>
+  <s33c-colors>
+    <tag>needs,quote
+and-newline</tag>
+  </s33c-colors>
+  <s33d-row>
+    <num>1</num>
+    <note>tab	here</note>
+  </s33d-row>
+  <s33e-odd	name>
+  </s33e-odd	name>
+  <s34a-bmp>
+    <msg>café</msg>
+  </s34a-bmp>
+  <s34b-supplementary>
+    <msg>😀hi</msg>
+  </s34b-supplementary>
+  <s34c-café>
+  </s34c-café>
 </rtoon-test>
