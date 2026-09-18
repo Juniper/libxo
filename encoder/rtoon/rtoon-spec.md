@@ -353,6 +353,23 @@ list
       zip 00000
 ```
 
+An instance that closes without ever emitting a single field (an empty
+instance) is written as `- ""` - a dash followed by a single empty
+string - rather than a bare `-`:
+
+```
+list
+  - ""
+  - name second
+```
+
+`- ""` reads unambiguously as "an instance whose content is one empty
+string," the same way any other single-value instance would look
+(`- somevalue`); a bare `-` would instead read as a truncated or
+malformed line. libxo's own `xo_emit()` calls never produce an empty
+instance in practice - every instance carries at least a key - but the
+encoding stays well-formed for one either way.
+
 ## 5. Leaf-list
 
 ```
