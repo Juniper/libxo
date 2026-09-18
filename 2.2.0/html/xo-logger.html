@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>The “xo-logger” Utility &#8212; libxo 
+ documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinxdoc.css?v=3ac2912a" />
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="xolint" href="xolint.html" />
+    <link rel="prev" title="The “xo” Utility" href="xo.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="xolint.html" title="xolint"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="xo.html" title="The “xo” Utility"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">libxo 
+ documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">The “xo-logger” Utility</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="the-xo-logger-utility">
+<span id="xo-logger"></span><span id="index-0"></span><h1>The “xo-logger” Utility<a class="headerlink" href="#the-xo-logger-utility" title="Link to this heading">¶</a></h1>
+<p>The <code class="code docutils literal notranslate"><span class="pre">xo-logger</span></code> utility is a command-line-compatible replacement for
+the traditional <code class="code docutils literal notranslate"><span class="pre">logger(1)</span></code> utility, built on the libxo library.  It
+reads a message, either from the command line, a file, or its
+standard input, and passes it to the system log module via libxo’s
+<code class="code docutils literal notranslate"><span class="pre">xo_syslog()</span></code> function, generating an RFC 5424-style structured log
+message:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>  <span class="o">%</span> <span class="n">xo</span><span class="o">-</span><span class="n">logger</span> <span class="s1">&#39;disk failure on da0&#39;</span>
+
+<span class="n">syslog</span><span class="p">:</span>
+  <span class="o">&lt;</span><span class="mi">13</span><span class="o">&gt;</span><span class="mi">1</span> <span class="mi">2026</span><span class="o">-</span><span class="mi">08</span><span class="o">-</span><span class="mi">31</span><span class="n">T10</span><span class="p">:</span><span class="mi">22</span><span class="p">:</span><span class="mf">03.512</span><span class="o">-</span><span class="mi">0400</span> <span class="n">myhost</span> <span class="n">phil</span> <span class="mi">4207</span> <span class="o">-</span> <span class="o">-</span> <span class="n">disk</span> <span class="n">failure</span> <span class="n">on</span> <span class="n">da0</span>
+</pre></div>
+</div>
+<p>Every option below that also appears in the traditional <code class="code docutils literal notranslate"><span class="pre">logger(1)</span></code>
+utility behaves the same way, so existing scripts that invoke
+<code class="code docutils literal notranslate"><span class="pre">logger</span></code> can generally be switched over to <code class="code docutils literal notranslate"><span class="pre">xo-logger</span></code> unchanged.
+The message argument’s libxo formatting is the one deliberate
+extension beyond that compatibility, described next.</p>
+<section id="message-format-and-arguments">
+<h2>Message Format and Arguments<a class="headerlink" href="#message-format-and-arguments" title="Link to this heading">¶</a></h2>
+<p>Unlike stock <code class="code docutils literal notranslate"><span class="pre">logger(1)</span></code>, the <code class="code docutils literal notranslate"><span class="pre">message</span></code> argument may use the libxo
+field-descriptor format string syntax described in
+<a class="reference internal" href="format-strings.html#format-strings"><span class="std std-ref">Format Strings</span></a>, consuming any trailing command line arguments
+as field values.  This lets a single log message carry both a
+human-readable rendering and a set of structured, named fields:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>  <span class="o">%</span> <span class="n">xo</span><span class="o">-</span><span class="n">logger</span> <span class="s1">&#39;Disk {:disk} is at {:percent/</span><span class="si">%d</span><span class="s1">}%</span><span class="se">\\</span><span class="s1">n&#39;</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">da0</span> <span class="mi">97</span>
+
+<span class="n">syslog</span><span class="p">:</span>
+  <span class="o">&lt;</span><span class="mi">13</span><span class="o">&gt;</span><span class="mi">1</span> <span class="mi">2026</span><span class="o">-</span><span class="mi">08</span><span class="o">-</span><span class="mi">31</span><span class="n">T10</span><span class="p">:</span><span class="mi">22</span><span class="p">:</span><span class="mf">03.512</span><span class="o">-</span><span class="mi">0400</span> <span class="n">myhost</span> <span class="n">phil</span> <span class="mi">4207</span> <span class="o">-</span> \\
+      <span class="p">[</span><span class="o">-</span> <span class="n">disk</span><span class="o">=</span><span class="s2">&quot;/dev/da0&quot;</span> <span class="n">percent</span><span class="o">=</span><span class="s2">&quot;97&quot;</span><span class="p">]</span> <span class="n">Disk</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">da0</span> <span class="ow">is</span> <span class="n">at</span> <span class="mi">97</span><span class="o">%</span>
+</pre></div>
+</div>
+<p>If no format directives are needed, an ordinary string works fine, as
+in the first example above; <code class="code docutils literal notranslate"><span class="pre">xo-logger</span></code> does not require the caller
+to opt into the extended syntax.</p>
+<p>If a <code class="code docutils literal notranslate"><span class="pre">message</span></code> argument is given on the command line, it takes
+precedence over <code class="code docutils literal notranslate"><span class="pre">--filename</span></code>/<code class="code docutils literal notranslate"><span class="pre">-f</span></code>; if neither is given, <code class="code docutils literal notranslate"><span class="pre">xo-logger</span></code>
+reads lines from its standard input, one log message per line.  This
+matches the way <code class="code docutils literal notranslate"><span class="pre">logger(1)</span></code> chooses among its three input sources,
+except that <code class="code docutils literal notranslate"><span class="pre">logger(1)</span></code> favors <code class="code docutils literal notranslate"><span class="pre">-f</span></code> over a message argument, while
+<code class="code docutils literal notranslate"><span class="pre">xo-logger</span></code> favors the message argument, since a format string with
+field values on the command line is otherwise indistinguishable from
+plain text.</p>
+</section>
+<section id="input-sources">
+<h2>Input Sources<a class="headerlink" href="#input-sources" title="Link to this heading">¶</a></h2>
+<p id="index-1"><code class="code docutils literal notranslate"><span class="pre">--filename</span></code>/<code class="code docutils literal notranslate"><span class="pre">-f</span></code> reads the message from a file, instead of the
+command line, sending one log message per line:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">%</span> <span class="n">xo</span><span class="o">-</span><span class="n">logger</span> <span class="o">--</span><span class="n">filename</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">log</span><span class="o">/</span><span class="n">build</span><span class="o">-</span><span class="n">errors</span><span class="o">.</span><span class="n">txt</span> <span class="o">--</span><span class="n">tag</span> <span class="n">builder</span>
+</pre></div>
+</div>
+<p>Each line of the file becomes an independent syslog message; none of
+the libxo field-descriptor handling is applied to file input, since
+there are no further command line arguments to supply field values.</p>
+<p>When neither a <code class="code docutils literal notranslate"><span class="pre">message</span></code> argument nor <code class="code docutils literal notranslate"><span class="pre">--filename</span></code> is given,
+<code class="code docutils literal notranslate"><span class="pre">xo-logger</span></code> reads from its standard input instead, again treating
+each line as a separate message:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">%</span> <span class="n">tail</span> <span class="o">-</span><span class="n">F</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">log</span><span class="o">/</span><span class="n">build</span><span class="o">.</span><span class="n">log</span> <span class="o">|</span> <span class="n">xo</span><span class="o">-</span><span class="n">logger</span> <span class="o">--</span><span class="n">tag</span> <span class="n">builder</span>
+</pre></div>
+</div>
+</section>
+<section id="priority-facility-and-severity">
+<h2>Priority: Facility and Severity<a class="headerlink" href="#priority-facility-and-severity" title="Link to this heading">¶</a></h2>
+<p id="index-2"><code class="code docutils literal notranslate"><span class="pre">--priority</span></code>/<code class="code docutils literal notranslate"><span class="pre">-p</span></code> sets the facility and/or severity of the message,
+given together as a single <code class="code docutils literal notranslate"><span class="pre">facility.severity</span></code> pair:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">%</span> <span class="n">xo</span><span class="o">-</span><span class="n">logger</span> <span class="o">--</span><span class="n">priority</span> <span class="n">local0</span><span class="o">.</span><span class="n">error</span> \\
+    <span class="s1">&#39;Disk {:disk} is at {:percent/</span><span class="si">%d</span><span class="s1">}%</span><span class="se">\\</span><span class="s1">n&#39;</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">da0</span> <span class="mi">97</span>
+</pre></div>
+</div>
+<p>Either half of the pair may be omitted, in which case it defaults
+independently; <code class="code docutils literal notranslate"><span class="pre">local0</span></code> alone sets just the facility, while <code class="code docutils literal notranslate"><span class="pre">.error</span></code>
+alone sets just the severity.  With neither half given, <code class="code docutils literal notranslate"><span class="pre">xo-logger</span></code>
+defaults to <code class="code docutils literal notranslate"><span class="pre">user.notice</span></code>, the same default <code class="code docutils literal notranslate"><span class="pre">logger(1)</span></code> uses.  A
+purely numeric priority is also accepted, as is generated by the
+<code class="code docutils literal notranslate"><span class="pre">LOG_MAKEPRI()</span></code> macro.</p>
+<p>The complete set of recognized facility and severity names can be
+listed with <code class="code docutils literal notranslate"><span class="pre">--list-facilities</span></code> and <code class="code docutils literal notranslate"><span class="pre">--list-severities</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">%</span> <span class="n">xo</span><span class="o">-</span><span class="n">logger</span> <span class="o">--</span><span class="nb">list</span><span class="o">-</span><span class="n">facilities</span>
+<span class="n">auth</span>
+<span class="n">authpriv</span>
+<span class="n">cron</span>
+<span class="o">...</span>
+<span class="o">%</span> <span class="n">xo</span><span class="o">-</span><span class="n">logger</span> <span class="o">--</span><span class="nb">list</span><span class="o">-</span><span class="n">severities</span>
+<span class="n">emerg</span>
+<span class="n">alert</span>
+<span class="n">crit</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+</section>
+<section id="message-identity">
+<h2>Message Identity<a class="headerlink" href="#message-identity" title="Link to this heading">¶</a></h2>
+<p id="index-3"><code class="code docutils literal notranslate"><span class="pre">--tag</span></code>/<code class="code docutils literal notranslate"><span class="pre">-t</span></code> marks every message with the given tag, which appears in
+the syslog output as the message’s APP-NAME:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">%</span> <span class="n">xo</span><span class="o">-</span><span class="n">logger</span> <span class="o">--</span><span class="n">tag</span> <span class="n">backup</span><span class="o">-</span><span class="n">cron</span> <span class="s1">&#39;nightly backup finished&#39;</span>
+</pre></div>
+</div>
+<p>If <code class="code docutils literal notranslate"><span class="pre">--tag</span></code> is not given, <code class="code docutils literal notranslate"><span class="pre">xo-logger</span></code> defaults to the invoking user’s
+login name, falling back to “-” if that cannot be determined.</p>
+<p id="index-4"><code class="code docutils literal notranslate"><span class="pre">--hostname</span></code>/<code class="code docutils literal notranslate"><span class="pre">-H</span></code> overrides the HOSTNAME field of the message, which
+otherwise defaults to the local host’s name.  This is useful when
+<code class="code docutils literal notranslate"><span class="pre">xo-logger</span></code> is being used to relay messages on behalf of some other
+system:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">%</span> <span class="n">xo</span><span class="o">-</span><span class="n">logger</span> <span class="o">--</span><span class="n">hostname</span> <span class="n">sensor</span><span class="o">-</span><span class="mf">42.</span><span class="n">example</span><span class="o">.</span><span class="n">com</span> \\
+    <span class="s1">&#39;Temperature {:temp/</span><span class="si">%d</span><span class="s1">} out of range&#39;</span> <span class="mi">105</span>
+</pre></div>
+</div>
+<p><code class="code docutils literal notranslate"><span class="pre">-i</span></code> is accepted, for compatibility with <code class="code docutils literal notranslate"><span class="pre">logger(1)</span></code>’s <code class="code docutils literal notranslate"><span class="pre">-i</span></code> flag, but
+has no effect; the messages <code class="code docutils literal notranslate"><span class="pre">xo-logger</span></code> generates always include a
+process ID in the PROCID field, so there is nothing extra for <code class="code docutils literal notranslate"><span class="pre">-i</span></code> to
+turn on.</p>
+</section>
+<section id="echoing-to-standard-error">
+<h2>Echoing to Standard Error<a class="headerlink" href="#echoing-to-standard-error" title="Link to this heading">¶</a></h2>
+<p id="index-5"><code class="code docutils literal notranslate"><span class="pre">--print</span></code>/<code class="code docutils literal notranslate"><span class="pre">-s</span></code>, in addition to the system log, prints the message to
+standard error, prefixed with the message’s tag, the same way
+<code class="code docutils literal notranslate"><span class="pre">logger(1)</span></code>’s <code class="code docutils literal notranslate"><span class="pre">-s</span></code> does:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">%</span> <span class="n">xo</span><span class="o">-</span><span class="n">logger</span> <span class="o">--</span><span class="nb">print</span> <span class="o">--</span><span class="n">tag</span> <span class="n">build</span> <span class="s1">&#39;compile failed&#39;</span>
+<span class="n">build</span><span class="p">:</span> <span class="nb">compile</span> <span class="n">failed</span>
+</pre></div>
+</div>
+<p>This is handy for interactive use, or when a script wants both
+a system log entry and immediate console feedback.</p>
+</section>
+<section id="remote-delivery">
+<h2>Remote Delivery<a class="headerlink" href="#remote-delivery" title="Link to this heading">¶</a></h2>
+<p>By default, <code class="code docutils literal notranslate"><span class="pre">xo-logger</span></code> writes to the local system log socket, just
+like <code class="code docutils literal notranslate"><span class="pre">logger(1)</span></code>.</p>
+<p id="index-6">Giving <code class="code docutils literal notranslate"><span class="pre">--host</span></code>/<code class="code docutils literal notranslate"><span class="pre">-h</span></code> instead sends the message via UDP to that host:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">%</span> <span class="n">xo</span><span class="o">-</span><span class="n">logger</span> <span class="o">--</span><span class="n">host</span> <span class="n">loghost</span> <span class="o">--</span><span class="n">tag</span> <span class="n">backup</span> <span class="s1">&#39;Backup complete&#39;</span>
+</pre></div>
+</div>
+<p id="index-7"><code class="code docutils literal notranslate"><span class="pre">--host</span></code> accepts either a hostname or an address, resolving a
+hostname to whichever address family responds; <code class="code docutils literal notranslate"><span class="pre">--inet4</span></code>/<code class="code docutils literal notranslate"><span class="pre">-4</span></code> and
+<code class="code docutils literal notranslate"><span class="pre">--inet6</span></code>/<code class="code docutils literal notranslate"><span class="pre">-6</span></code> restrict that resolution to IPv4 or IPv6 addresses
+only:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">%</span> <span class="n">xo</span><span class="o">-</span><span class="n">logger</span> <span class="o">--</span><span class="n">inet6</span> <span class="o">--</span><span class="n">host</span> <span class="n">loghost</span><span class="o">.</span><span class="n">example</span><span class="o">.</span><span class="n">com</span> <span class="s1">&#39;started&#39;</span>
+</pre></div>
+</div>
+<p id="index-8">A hostname may resolve to more than one address.  By default only the
+first is used; <code class="code docutils literal notranslate"><span class="pre">--all-addresses</span></code>/<code class="code docutils literal notranslate"><span class="pre">-A</span></code> sends the message to every
+address the host resolves to:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">%</span> <span class="n">xo</span><span class="o">-</span><span class="n">logger</span> <span class="o">--</span><span class="nb">all</span><span class="o">-</span><span class="n">addresses</span> <span class="o">--</span><span class="n">host</span> <span class="n">loghost</span><span class="o">-</span><span class="n">cluster</span><span class="o">.</span><span class="n">example</span><span class="o">.</span><span class="n">com</span> \\
+    <span class="s1">&#39;cluster event&#39;</span>
+</pre></div>
+</div>
+<p id="index-9"><code class="code docutils literal notranslate"><span class="pre">--port</span></code>/<code class="code docutils literal notranslate"><span class="pre">-P</span></code> selects the destination port on <code class="code docutils literal notranslate"><span class="pre">--host</span></code>, given as
+either a service name or a number, defaulting to 514, the standard
+syslog port:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">%</span> <span class="n">xo</span><span class="o">-</span><span class="n">logger</span> <span class="o">--</span><span class="n">host</span> <span class="n">loghost</span> <span class="o">--</span><span class="n">port</span> <span class="mi">1514</span> <span class="s1">&#39;started on alternate port&#39;</span>
+</pre></div>
+</div>
+<p>An unrecognized service name falls back to 514, with a warning.</p>
+<p id="index-10"><code class="code docutils literal notranslate"><span class="pre">--source</span></code>/<code class="code docutils literal notranslate"><span class="pre">-S</span></code> binds the outgoing socket to a specific local address
+and port before sending, which is useful on multi-homed hosts where
+the log server expects traffic from a particular interface:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">%</span> <span class="n">xo</span><span class="o">-</span><span class="n">logger</span> <span class="o">--</span><span class="n">host</span> <span class="n">loghost</span> <span class="o">--</span><span class="n">source</span> <span class="mf">192.0.2.10</span><span class="p">:</span><span class="mi">0</span> <span class="s1">&#39;started&#39;</span>
+</pre></div>
+</div>
+<p>IPv6 source addresses must be bracketed, e.g. <code class="code docutils literal notranslate"><span class="pre">[::1]:1514</span></code>.</p>
+<p>A <code class="code docutils literal notranslate"><span class="pre">--host</span></code> value that begins with <code class="code docutils literal notranslate"><span class="pre">/</span></code> is treated instead as a
+filesystem path to an <code class="code docutils literal notranslate"><span class="pre">AF_LOCAL</span></code> socket, such as <code class="code docutils literal notranslate"><span class="pre">/var/run/log</span></code>,
+letting <code class="code docutils literal notranslate"><span class="pre">xo-logger</span></code> target a non-default local socket the same way it
+targets a remote one:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">%</span> <span class="n">xo</span><span class="o">-</span><span class="n">logger</span> <span class="o">--</span><span class="n">host</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">log</span><span class="o">.</span><span class="n">otherjail</span> <span class="s1">&#39;jail-local message&#39;</span>
+</pre></div>
+</div>
+<p>This remote delivery support is implemented as a family of
+<code class="code docutils literal notranslate"><span class="pre">xo_log_set_*</span></code> functions in the libxo library itself, documented in
+<a class="reference internal" href="api.html#api"><span class="std std-ref">Handles</span></a>, so other logging clients can be built on the same
+functionality without re-implementing DNS resolution or socket
+management.</p>
+</section>
+<section id="command-line-options">
+<h2>Command Line Options<a class="headerlink" href="#command-line-options" title="Link to this heading">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Usage</span><span class="p">:</span> <span class="n">xo</span><span class="o">-</span><span class="n">logger</span> <span class="p">[</span><span class="n">options</span><span class="p">]</span> <span class="p">[</span><span class="n">message</span> <span class="p">[</span><span class="n">arguments</span><span class="o">...</span><span class="p">]]</span>
+  <span class="o">--</span><span class="n">inet4</span> <span class="n">OR</span> <span class="o">-</span><span class="mi">4</span>         <span class="n">Resolve</span> <span class="o">--</span><span class="n">host</span> <span class="n">to</span> <span class="n">IPv4</span> <span class="n">addresses</span> <span class="n">only</span>
+  <span class="o">--</span><span class="n">inet6</span> <span class="n">OR</span> <span class="o">-</span><span class="mi">6</span>         <span class="n">Resolve</span> <span class="o">--</span><span class="n">host</span> <span class="n">to</span> <span class="n">IPv6</span> <span class="n">addresses</span> <span class="n">only</span>
+  <span class="o">--</span><span class="nb">all</span><span class="o">-</span><span class="n">addresses</span> <span class="n">OR</span> <span class="o">-</span><span class="n">A</span> <span class="n">Send</span> <span class="n">to</span> <span class="n">every</span> <span class="n">address</span> <span class="o">--</span><span class="n">host</span> <span class="n">resolves</span> <span class="n">to</span>
+  <span class="o">--</span><span class="n">filename</span> <span class="o">&lt;</span><span class="n">file</span><span class="o">&gt;</span> <span class="n">OR</span> <span class="o">-</span><span class="n">f</span> <span class="o">&lt;</span><span class="n">file</span><span class="o">&gt;</span>
+                        <span class="n">Read</span> <span class="n">the</span> <span class="n">message</span> <span class="kn">from</span><span class="w"> </span><span class="o">&lt;</span><span class="n">file</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">one</span> <span class="n">log</span> <span class="n">message</span>
+                        <span class="n">per</span> <span class="n">line</span><span class="p">;</span> <span class="n">ignored</span> <span class="k">if</span> <span class="n">a</span> <span class="n">message</span> <span class="n">argument</span> <span class="ow">is</span> <span class="n">given</span>
+  <span class="o">--</span><span class="n">hostname</span> <span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span> <span class="n">OR</span> <span class="o">-</span><span class="n">H</span> <span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span>
+                        <span class="n">Use</span> <span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span> <span class="k">for</span> <span class="n">the</span> <span class="n">message</span><span class="s1">&#39;s HOSTNAME field</span>
+  <span class="o">--</span><span class="n">host</span> <span class="o">&lt;</span><span class="n">host</span><span class="o">&gt;</span> <span class="n">OR</span> <span class="o">-</span><span class="n">h</span> <span class="o">&lt;</span><span class="n">host</span><span class="o">&gt;</span>
+                        <span class="n">Send</span> <span class="n">the</span> <span class="n">message</span> <span class="n">to</span> <span class="o">&lt;</span><span class="n">host</span><span class="o">&gt;</span> <span class="n">via</span> <span class="n">UDP</span><span class="p">,</span> <span class="n">instead</span> <span class="n">of</span>
+                        <span class="n">the</span> <span class="n">local</span> <span class="n">system</span> <span class="n">log</span> <span class="n">socket</span><span class="p">;</span> <span class="o">&lt;</span><span class="n">host</span><span class="o">&gt;</span> <span class="n">may</span> <span class="n">also</span> <span class="n">be</span>
+                        <span class="n">a</span> <span class="n">filesystem</span> <span class="n">path</span> <span class="n">to</span> <span class="n">an</span> <span class="n">AF_LOCAL</span> <span class="n">socket</span>
+  <span class="o">-</span><span class="n">i</span>                    <span class="n">Accepted</span> <span class="k">for</span> <span class="n">compatibility</span><span class="p">;</span> <span class="n">has</span> <span class="n">no</span> <span class="n">effect</span>
+  <span class="o">--</span><span class="n">port</span> <span class="o">&lt;</span><span class="n">port</span><span class="o">&gt;</span> <span class="n">OR</span> <span class="o">-</span><span class="n">P</span> <span class="o">&lt;</span><span class="n">port</span><span class="o">&gt;</span>
+                        <span class="n">Send</span> <span class="n">to</span> <span class="o">&lt;</span><span class="n">port</span><span class="o">&gt;</span> <span class="n">on</span> <span class="o">--</span><span class="n">host</span> <span class="p">(</span><span class="n">service</span> <span class="n">name</span> <span class="ow">or</span>
+                        <span class="n">number</span><span class="p">);</span> <span class="n">defaults</span> <span class="n">to</span> <span class="mi">514</span>
+  <span class="o">--</span><span class="n">priority</span> <span class="o">&lt;</span><span class="n">fac</span><span class="o">.</span><span class="n">sev</span><span class="o">&gt;</span> <span class="n">OR</span> <span class="o">-</span><span class="n">p</span> <span class="o">&lt;</span><span class="n">fac</span><span class="o">.</span><span class="n">sev</span><span class="o">&gt;</span>
+                        <span class="n">Set</span> <span class="n">facility</span> <span class="ow">and</span><span class="o">/</span><span class="ow">or</span> <span class="n">severity</span> <span class="n">of</span> <span class="n">the</span> <span class="n">message</span><span class="p">;</span>
+                        <span class="n">defaults</span> <span class="n">to</span> <span class="s1">&#39;user.notice&#39;</span>
+  <span class="o">--</span><span class="nb">print</span> <span class="n">OR</span> <span class="o">-</span><span class="n">s</span>         <span class="n">Also</span> <span class="nb">print</span> <span class="n">the</span> <span class="n">message</span> <span class="n">to</span> <span class="n">standard</span> <span class="n">error</span>
+  <span class="o">--</span><span class="n">source</span> <span class="o">&lt;</span><span class="n">addr</span><span class="p">:</span><span class="n">port</span><span class="o">&gt;</span> <span class="n">OR</span> <span class="o">-</span><span class="n">S</span> <span class="o">&lt;</span><span class="n">addr</span><span class="p">:</span><span class="n">port</span><span class="o">&gt;</span>
+                        <span class="n">Bind</span> <span class="n">the</span> <span class="n">outgoing</span> <span class="n">socket</span> <span class="n">to</span> <span class="n">the</span> <span class="n">given</span> <span class="n">local</span>
+                        <span class="n">address</span> <span class="ow">and</span> <span class="n">port</span> <span class="n">before</span> <span class="n">sending</span>
+  <span class="o">--</span><span class="n">tag</span> <span class="o">&lt;</span><span class="n">tag</span><span class="o">&gt;</span> <span class="n">OR</span> <span class="o">-</span><span class="n">t</span> <span class="o">&lt;</span><span class="n">tag</span><span class="o">&gt;</span>
+                        <span class="n">Mark</span> <span class="n">every</span> <span class="n">message</span> <span class="k">with</span> <span class="n">the</span> <span class="n">given</span> <span class="n">tag</span><span class="p">;</span> <span class="n">defaults</span>
+                        <span class="n">to</span> <span class="n">the</span> <span class="n">invoking</span> <span class="n">user</span><span class="s1">&#39;s login name</span>
+  <span class="o">--</span><span class="nb">list</span><span class="o">-</span><span class="n">facilities</span>     <span class="n">List</span> <span class="nb">all</span> <span class="n">valid</span> <span class="n">logging</span> <span class="n">facility</span> <span class="n">names</span>
+  <span class="o">--</span><span class="nb">list</span><span class="o">-</span><span class="n">severities</span>     <span class="n">List</span> <span class="nb">all</span> <span class="n">valid</span> <span class="n">logging</span> <span class="n">severity</span> <span class="p">(</span><span class="n">level</span><span class="p">)</span> <span class="n">names</span>
+  <span class="o">--</span><span class="n">help</span>                <span class="n">Display</span> <span class="n">this</span> <span class="n">help</span> <span class="n">text</span>
+  <span class="o">--</span><span class="n">version</span>             <span class="n">Display</span> <span class="n">version</span> <span class="n">information</span>
+</pre></div>
+</div>
+</section>
+<section id="example">
+<h2>Example<a class="headerlink" href="#example" title="Link to this heading">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">%</span> <span class="n">xo</span><span class="o">-</span><span class="n">logger</span> <span class="s1">&#39;Disk {:disk} is at {:percent/</span><span class="si">%d</span><span class="s1">}%</span><span class="se">\\</span><span class="s1">n&#39;</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">da0</span> <span class="mi">97</span>
+
+<span class="o">%</span> <span class="n">xo</span><span class="o">-</span><span class="n">logger</span> <span class="o">-</span><span class="n">p</span> <span class="n">local0</span><span class="o">.</span><span class="n">error</span> <span class="o">-</span><span class="n">t</span> <span class="n">diskmon</span> \\
+    <span class="s1">&#39;Disk {:disk} is at {:percent/</span><span class="si">%d</span><span class="s1">}%</span><span class="se">\\</span><span class="s1">n&#39;</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">da0</span> <span class="mi">97</span>
+
+<span class="o">%</span> <span class="n">xo</span><span class="o">-</span><span class="n">logger</span> <span class="o">-</span><span class="n">h</span> <span class="n">loghost</span> <span class="o">-</span><span class="n">P</span> <span class="mi">514</span> <span class="o">-</span><span class="n">t</span> <span class="n">backup</span> <span class="s1">&#39;Backup complete&#39;</span>
+
+<span class="o">%</span> <span class="n">logger_input</span><span class="o">.</span><span class="n">sh</span> <span class="o">|</span> <span class="n">xo</span><span class="o">-</span><span class="n">logger</span> <span class="o">-</span><span class="n">t</span> <span class="n">backup</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">On This Page</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">The “xo-logger” Utility</a><ul>
+<li><a class="reference internal" href="#message-format-and-arguments">Message Format and Arguments</a></li>
+<li><a class="reference internal" href="#input-sources">Input Sources</a></li>
+<li><a class="reference internal" href="#priority-facility-and-severity">Priority: Facility and Severity</a></li>
+<li><a class="reference internal" href="#message-identity">Message Identity</a></li>
+<li><a class="reference internal" href="#echoing-to-standard-error">Echoing to Standard Error</a></li>
+<li><a class="reference internal" href="#remote-delivery">Remote Delivery</a></li>
+<li><a class="reference internal" href="#command-line-options">Command Line Options</a></li>
+<li><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3><a href="index.html">Full Documentation</a></h3>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="xo.html"
+                          title="previous chapter">The “xo” Utility</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="xolint.html"
+                          title="next chapter">xolint</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/xo-logger.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="xolint.html" title="xolint"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="xo.html" title="The “xo” Utility"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">libxo 
+ documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">The “xo-logger” Utility</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2017-2019, Juniper Networks Inc.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>
