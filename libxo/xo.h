@@ -90,7 +90,7 @@ typedef unsigned long long xo_xof_flags_t;
 #define XOF_NO_TOP	XOF_BIT(16) /** Don't emit the top braces in JSON */
 #define XOF_RESV17	XOF_BIT(17) /* Unused  */
 #define XOF_UNITS	XOF_BIT(18) /** Encode units in XML */
-#define XOF_RESV19	XOF_BIT(19) /* Unused */
+#define XOF_DENSE	XOF_BIT(19) /** Use dense (tabular) form (RTOON) */
 
 #define XOF_UNDERSCORES	XOF_BIT(20) /** Replace dashes with underscores (JSON)*/
 #define XOF_COLUMNS	XOF_BIT(21) /** xo_emit should return a column count */
@@ -168,6 +168,7 @@ typedef uint64_t xo_xff_flags_t;
 #define XFF_UNITS_ATTR  (1<<27)	/* Units only appear in attribute */
 #define XFF_FIRST_CAP	(1<<28)	/* First letter get capitalized (toupper) */
 #define XFF_INT_GROUP	(1<<29) /* Integer group: an int that wants grouping */
+#define XFF_DENSE	(1<<30) /* Use dense (tabular) form (RTOON) */
 
 /* Flags to turn off when we don't want i18n processing */
 #define XFF_GT_FLAGS (XFF_GT_FIELD | XFF_GT_PLURAL)
@@ -265,7 +266,7 @@ xo_set_writer (xo_handle_t *xop, void *opaque, xo_write_func_t write_func,
 void
 xo_set_allocator (xo_realloc_func_t realloc_func, xo_free_func_t free_func);
 
-void
+int
 xo_set_style (xo_handle_t *xop, xo_style_t style);
 
 xo_style_t
