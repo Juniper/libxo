@@ -16,7 +16,7 @@ non-data line types, at any depth:
   doesn't count when you're looking at "what's the next line under
   this parent."
 - A line whose first non-whitespace character is `@` is an
-  **operation**, not data - a directive to the decoder, not part of
+  **instruction**, not data - a directive to the decoder, not part of
   the object/array structure. Only one is defined so far: a document
   normally starts with `@version 1.0.0`, a forward-compatibility marker
   (this format's own version) - just note it and move on; it doesn't
