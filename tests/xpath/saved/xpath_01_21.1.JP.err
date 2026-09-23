@@ -232,7 +232,7 @@ main: status: track
 main: input '- statistics'
 main: status: track
 main: input ''
-main: input '## 's' flag: full match text (pmatch[0]) — truthy when digits found in path'
+main: input '## 's' flag: full match text (pmatch[0]) - truthy when digits found in path'
 main: input 'r'
 main: status: zero
 main: input '? socket[rematch("[0-9]+", path, "s")]'
@@ -284,7 +284,7 @@ main: status: track
 main: input '- statistics'
 main: status: track
 main: input ''
-main: input '## 'm' flag: first capture group (pmatch[1]) — match port number after ":"'
+main: input '## 'm' flag: first capture group (pmatch[1]) - match port number after ":"'
 main: input 'r'
 main: status: zero
 main: input '? socket[rematch(":([0-9]+)", address, "m")]'
