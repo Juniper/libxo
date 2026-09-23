@@ -1,4 +1,5 @@
 /*
+ * SPDX-License-Identifier: BSD-2-Clause
  * Copyright (c) 2015, Juniper Networks, Inc.
  * All rights reserved.
  * This SOFTWARE is licensed under the LICENSE provided in the
@@ -17,6 +18,10 @@
 
 #ifndef XO_ENCODER_H
 #define XO_ENCODER_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 #include <string.h>
 
@@ -102,10 +107,41 @@ typedef int (*xo_whiteboard_func_t)(XO_WHITEBOARD_FUNC_ARGS);
 typedef struct xo_encoder_init_args_s {
     unsigned xei_version;	   /* Current version */
     xo_encoder_func_t xei_handler; /* Encoding handler */
-    xo_whiteboard_func_t xei_wb_marker; /* Whiteboard marker function (v2) */
+    xo_whiteboard_func_t xei_wb_marker; /* unused; kept for ABI (v2) */
+    xo_xof_flags_t xei_flags;	   /* Encoder capability flags (v3) */
 } xo_encoder_init_args_t;
 
-#define XO_ENCODER_VERSION	2 /* Current version */
+/*
+ * xei_flags: set by an encoder's xo_encoder_init() at registration
+ * time, before returning, e.g. "arg->xei_flags |= XEIF_FILTER_AWARE;".
+ * libxo copies these onto the handle's xo_eflags (mapping XEIF_* to
+ * XOEF_*) right after the encoder's init function returns.  An old,
+ * already-compiled encoder that never sets these fields has them read
+ * as zero (from the caller's bzero'd xo_encoder_init_args_t), which
+ * means "does not support filters" -- exactly today's behavior.
+ *
+ * These are two distinct, independent capabilities:
+ *
+ * XEIF_FILTER_AWARE: the encoder is willing to be used while filters
+ * are active at all.  This is the gate libxo checks (in xo_add_filter()
+ * and when a filter is already active and an encoder is installed) to
+ * decide whether the combination of "this encoder" + "filters on" is
+ * even allowed.  An encoder that only ever sees content libxo has
+ * already decided is real (e.g. because it lets libxo's generic
+ * skip-before-emit logic hold back anything tentative) can set just
+ * this flag and nothing else.
+ *
+ * XEIF_FILTER_NOTIFY_DEADEND: the encoder additionally wants tentative
+ * (not-yet-confirmed) container/list/instance content pushed to it as
+ * it happens, and wants the XO_OP_DEADEND notification when that
+ * tentative region is discarded so it can roll back whatever it
+ * accumulated.  This is strictly more demanding than plain
+ * XEIF_FILTER_AWARE, and encoders that set it should normally set both.
+ */
+#define XEIF_FILTER_AWARE	   XOF_BIT(0) /* may be used with filters */
+#define XEIF_FILTER_NOTIFY_DEADEND XOF_BIT(1) /* wants tentative fields + DEADEND */
+
+#define XO_ENCODER_VERSION	3 /* Current version (doc marker; xei_flags added) */
 
 #define XO_ENCODER_INIT_ARGS \
     xo_encoder_init_args_t *arg XO_UNUSED
@@ -140,12 +176,9 @@ xo_set_private (xo_handle_t *xop, void *opaque);
 xo_encoder_func_t
 xo_get_encoder (xo_handle_t *xop);
 
-xo_whiteboard_func_t
-xo_get_wb_marker (xo_handle_t *xop);
-
 void
 xo_set_encoder (xo_handle_t *xop, xo_encoder_func_t encoder,
-		xo_whiteboard_func_t wb_marker);
+		xo_xof_flags_t xei_flags);
 
 int
 xo_encoder_init (xo_handle_t *xop, const char *name);
@@ -156,10 +189,6 @@ xo_encoder_create (const char *name, xo_xof_flags_t flags);
 int
 xo_encoder_handle (xo_handle_t *xop, xo_encoder_op_t op, xo_buffer_t *bufp,
 		   const char *name, const char *value, xo_xff_flags_t flags);
-
-int
-xo_encoder_wb_marker (xo_handle_t *xop, xo_whiteboard_op_t op,
-		      xo_buffer_t *wbp, xo_off_t *offp);
 
 void
 xo_encoders_clean (void);
@@ -183,5 +212,9 @@ xo_failure (xo_handle_t *xop, const char *fmt, ...);
  */
 void
 xo_failure_filter (xo_handle_t *xop, const char *fmt, ...);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* XO_ENCODER_H */

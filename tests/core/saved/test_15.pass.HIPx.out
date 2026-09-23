@@ -1,0 +1,56 @@
+<div class="line">
+  <div class="text">plain int </div>
+  <div class="data" data-tag="count" data-xpath="/data/count">1234567</div>
+</div>
+<div class="line">
+  <div class="text">unsigned </div>
+  <div class="data" data-tag="count" data-xpath="/data/count">7654321</div>
+</div>
+<div class="line">
+  <div class="text">negative </div>
+  <div class="data" data-tag="count" data-xpath="/data/count">-1234567</div>
+</div>
+<div class="line">
+  <div class="text">precision </div>
+  <div class="data" data-tag="count" data-xpath="/data/count">0000000042</div>
+</div>
+<div class="line">
+  <div class="text">long </div>
+  <div class="data" data-tag="count" data-xpath="/data/count">1234567890</div>
+</div>
+<div class="line">
+  <div class="text">long long </div>
+  <div class="data" data-tag="count" data-xpath="/data/count">123456789012345</div>
+</div>
+<div class="line">
+  <div class="text">star width </div>
+  <div class="data" data-tag="count" data-xpath="/data/count">             1234567</div>
+</div>
+<div class="line">
+  <div class="text">bit-width 64 </div>
+  <div class="data" data-tag="count" data-xpath="/data/count">9876543210</div>
+</div>
+<div class="line">
+  <div class="text">small </div>
+  <div class="data" data-tag="count" data-xpath="/data/count">42</div>
+</div>
+<div class="line">
+  <div class="text">zero </div>
+  <div class="data" data-tag="count" data-xpath="/data/count">0</div>
+</div>
+<div class="line">
+  <div class="text">field forced, short </div>
+  <div class="data" data-tag="count" data-xpath="/data/count">3,456,789</div>
+</div>
+<div class="line">
+  <div class="text">field forced, long </div>
+  <div class="data" data-tag="count" data-xpath="/data/count">4,567,890</div>
+</div>
+<div class="line">
+  <div class="text">hex unaffected </div>
+  <div class="data" data-tag="count" data-xpath="/data/count">abcdef</div>
+</div>
+<div class="line">
+  <div class="text">octal unaffected </div>
+  <div class="data" data-tag="count" data-xpath="/data/count">12345670</div>
+</div>

@@ -1,0 +1,7 @@
+../../../tests/core/test_15.c:43:13: warning: libxo: 'int-group|i' set on field with leading zeroes: '{i:count/%d}'
+   43 |     xo_emit("field forced, short {i:count/%d}\n", 3456789);
+      |             ^
+../../../tests/core/test_15.c:44:13: warning: libxo: 'int-group|i' set on field with leading zeroes: '{,int-group:count/%d}'
+   44 |     xo_emit("field forced, long {,int-group:count/%d}\n", 4567890);
+      |             ^
+2 warnings generated.

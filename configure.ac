@@ -12,7 +12,7 @@
 #
 
 AC_PREREQ([2.69])
-AC_INIT([libxo],[2.0.0],[phil@juniper.net])
+AC_INIT([libxo],[2.3.0],[phil@juniper.net])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign -Wno-portability])
 
 # Support silent build rules.  Requires at least automake-1.11.
@@ -38,7 +38,15 @@ AC_PATH_PROG(MKDIR, mkdir, /bin/mkdir)
 AC_PATH_PROG(MV, mv, /bin/mv)
 AC_PATH_PROG(RM, rm, /bin/rm)
 AC_PATH_PROG(SED, sed, /bin/sed)
-AC_CHECK_PROGS(YACC, [byacc yacc 'bison -y'], )
+AC_CHECK_PROGS(YACC, [byacc yacc], )
+
+dnl The XPath grammar relies on byacc extensions (a reentrant parser
+dnl exposing yystate and byacc-generated tables) that GNU bison does not
+dnl provide, so require byacc instead of silently using an incompatible bison.
+AS_IF([test -z "$YACC"],
+  [AC_MSG_ERROR([byacc is required to build the XPath filter; please install byacc])])
+AS_IF([$YACC --version 2>/dev/null | grep -qi bison],
+  [AC_MSG_ERROR([byacc is required to build the XPath filter; the detected yacc is GNU bison, which is not compatible. Please install byacc])])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_INLINE
@@ -73,6 +81,7 @@ AC_CHECK_FUNCS([strspn])
 AC_CHECK_FUNCS([sysctlbyname])
 AC_CHECK_FUNCS([uexterr_gettext])
 
+AC_CHECK_HEADERS([bsd/string.h])
 AC_CHECK_HEADERS([ctype.h])
 AC_CHECK_HEADERS([dlfcn.h])
 AC_CHECK_HEADERS([dlfcn.h])
@@ -87,11 +96,19 @@ AC_CHECK_HEADERS([stdtime/tzfile.h])
 AC_CHECK_HEADERS([string.h])
 AC_CHECK_HEADERS([sys/exterrvar.h])
 AC_CHECK_HEADERS([sys/param.h])
+AC_CHECK_HEADERS([sys/queue.h], , [AC_MSG_ERROR([Could not find <sys/queue.h>])])
 AC_CHECK_HEADERS([sys/sysctl.h])
 AC_CHECK_HEADERS([sys/time.h])
 AC_CHECK_HEADERS([threads.h])
 AC_CHECK_HEADERS([tzfile.h])
 AC_CHECK_HEADERS([unistd.h ])
+
+dnl
+dnl Some packages need to be checked against version numbers so we
+dnl define a function here for later use
+dnl
+AC_DEFUN([VERSION_TO_NUMBER],
+[`$1 | sed -e 's/lib.* //' | awk 'BEGIN { FS = "."; } { printf "%d", ([$]1 * 1000 + [$]2) * 1000 + [$]3;}'`])
 
 dnl humanize_number(3) is a great function, but it's not standard.
 dnl Note Macosx has the function in libutil.a but doesn't ship the
@@ -111,6 +128,11 @@ fi
 
 AM_CONDITIONAL([HAVE_HUMANIZE_NUMBER], [test "$HAVE_HUMANIZE_NUMBER" = "yes"])
 
+AC_CHECK_LIB([bsd], [strlcpy],
+     [HAVE_LIBBSD=yes],
+     [HAVE_LIBBSD=no])
+AM_CONDITIONAL([HAVE_LIBBSD], [test "$HAVE_LIBBSD" = "yes"])
+
 AC_MSG_CHECKING([exterr results])
 
 if test "$ac_cv_header_exterr_h" = "yes" -a "$ac_cv_func_uexterr_gettext" = "yes"; then
@@ -125,11 +147,11 @@ AM_CONDITIONAL([HAVE_EXTERR], [test "$HAVE_EXTERR" = "yes"])
 AC_ARG_WITH(llvm-config,
         [  --with-llvm-config=[PFX]        Specify location of llvm-config],
         [LLVM_CONFIG=$withval],
-	[LLVM_CONFIG="none"])
+	[LLVM_CONFIG="no"])
 
 AC_MSG_CHECKING([llvm-config])
-if test ${LLVM_CONFIG} = "none"; then
-    AC_MSG_RESULT([no llvm-config, so validate plugin is disabled])
+if test ${LLVM_CONFIG} = "no"; then
+    AC_MSG_RESULT([no llvm-config, so llvm-plugins are disabled])
 elif ! test -x ${LLVM_CONFIG} ; then
     AC_MSG_FAILURE("could not find llvm-config tool")
 else
@@ -138,6 +160,48 @@ else
     LLVM_CLANG=${LLVM_BINDIR}/clang
     LLVM_CMAKE_DIR=`${LLVM_CONFIG} --cmakedir 2>/dev/null`
     CLANG_CMAKE_DIR=`dirname ${LLVM_CMAKE_DIR}`/clang
+
+    AC_MSG_CHECKING([for Clang cmake config])
+    if test -f "${CLANG_CMAKE_DIR}/ClangConfig.cmake"; then
+        AC_MSG_RESULT([${CLANG_CMAKE_DIR}])
+    else
+        AC_MSG_RESULT([not found])
+        LLVM_PREFIX_DIR=`dirname ${LLVM_BINDIR}`
+        LLVM_VER=`basename ${LLVM_PREFIX_DIR} | sed 's/^llvm-//'`
+        case ${LLVM_PREFIX_DIR} in
+          /opt/local/libexec/llvm-*)
+            AC_MSG_FAILURE([
+Clang's cmake package config was not found at:
+    ${CLANG_CMAKE_DIR}/ClangConfig.cmake
+
+llvm-${LLVM_VER} is installed via MacPorts, but its companion clang-${LLVM_VER}
+package (which provides ClangConfig.cmake) is not installed.  Install it
+with:
+
+    sudo port install clang-${LLVM_VER}
+
+and re-run configure.])
+            ;;
+          *)
+            AC_MSG_FAILURE([
+Clang's cmake package config was not found at:
+    ${CLANG_CMAKE_DIR}/ClangConfig.cmake
+
+llvm-config (${LLVM_CONFIG}) reports its cmake directory as
+${LLVM_CMAKE_DIR}, but the sibling "clang" cmake directory is missing or
+incomplete.  Install the Clang development/cmake package matching your
+LLVM installation (on MacPorts this is the "clang-<version>" port; on
+other systems it may be "libclang-dev", "clang-cmake", or similar), then
+re-run configure.])
+            ;;
+        esac
+    fi
+
+    CLANG_VERSION=`${LLVM_CONFIG} --version 2>/dev/null`
+    CLANG_VERSION_NUMBER=VERSION_TO_NUMBER(echo $CLANG_VERSION)
+
+    AC_DEFINE_UNQUOTED(CLANG_VERSION_NUMBER, [$CLANG_VERSION_NUMBER], [clang version as a number])
+
     AC_PATH_PROG([CMAKE_COMMAND], [cmake], [cmake])
     HAVE_VALIDATE=yes
 fi
@@ -149,6 +213,8 @@ AC_SUBST(LLVM_CLANG)
 AC_SUBST(LLVM_CMAKE_DIR)
 AC_SUBST(CLANG_CMAKE_DIR)
 AC_SUBST(CMAKE_COMMAND)
+AC_SUBST(CLANG_VERSION)
+AC_SUBST(CLANG_VERSION_NUMBER)
 
 dnl On macOS the cmake plugin build must match the libxo build architecture.
 dnl Derive this from host_cpu so the right -DCMAKE_OSX_ARCHITECTURES flag is
@@ -209,25 +275,33 @@ HAVE_GETTEXT=no
 
 if test "$GETTEXT_ENABLE" != "no"; then
 
+  dnl glibc provides gettext in libc; only link -lintl when a separate
+  dnl libintl is required (e.g. macOS, *BSD), so detection also works on glibc.
+  GETTEXT_INTL=-lintl
+  AC_LINK_IFELSE([AC_LANG_SOURCE([[#include <libintl.h>]
+             [#include <stddef.h>]
+             [int main() {char *cp = dgettext(NULL, "xx"); return 0; }]])],
+                 [GETTEXT_INTL=])
+
   AC_MSG_CHECKING([gettext in ${GETTEXT_PREFIX}])
 
   _save_cflags="$CFLAGS"
-  CFLAGS="$CFLAGS -I${GETTEXT_PREFIX}/include -L${GETTEXT_PREFIX}/lib -Werror -lintl"
+  CFLAGS="$CFLAGS -I${GETTEXT_PREFIX}/include -L${GETTEXT_PREFIX}/lib -Werror ${GETTEXT_INTL}"
   AC_LINK_IFELSE([AC_LANG_SOURCE([[#include <libintl.h>]
+             [#include <stddef.h>]
              [int main() {char *cp = dgettext(NULL, "xx"); return 0; }]])],
              [HAVE_GETTEXT=yes],
              [HAVE_GETTEXT=no])
   CFLAGS="$_save_cflags"
-
-  AC_MSG_RESULT([$HAVE_GETTEXT])
 
   if test "$HAVE_GETTEXT" != "yes"; then
       GETTEXT_PREFIX=/opt/local
       AC_MSG_CHECKING([gettext in ${GETTEXT_PREFIX}])
 
       _save_cflags="$CFLAGS"
-      CFLAGS="$CFLAGS -I${GETTEXT_PREFIX}/include -L${GETTEXT_PREFIX}/lib -Werror -lintl"
+      CFLAGS="$CFLAGS -I${GETTEXT_PREFIX}/include -L${GETTEXT_PREFIX}/lib -Werror ${GETTEXT_INTL}"
       AC_LINK_IFELSE([AC_LANG_SOURCE([[#include <libintl.h>]
+             [#include <stddef.h>]
                  [int main() {char *cp = dgettext(NULL, "xx"); return 0; }]])],
                  [HAVE_GETTEXT=yes],
                  [HAVE_GETTEXT=no])
@@ -241,8 +315,9 @@ if test "$GETTEXT_ENABLE" != "no"; then
       AC_MSG_CHECKING([gettext in ${GETTEXT_PREFIX}])
 
       _save_cflags="$CFLAGS"
-      CFLAGS="$CFLAGS -I${GETTEXT_PREFIX}/include -L${GETTEXT_PREFIX}/lib -Werror -lintl"
+      CFLAGS="$CFLAGS -I${GETTEXT_PREFIX}/include -L${GETTEXT_PREFIX}/lib -Werror ${GETTEXT_INTL}"
       AC_LINK_IFELSE([AC_LANG_SOURCE([[#include <libintl.h>]
+             [#include <stddef.h>]
                  [int main() {char *cp = dgettext(NULL, "xx"); return 0; }]])],
                  [HAVE_GETTEXT=yes],
                  [HAVE_GETTEXT=no])
@@ -255,7 +330,7 @@ fi
 if test "$HAVE_GETTEXT" = "yes"; then
     AC_DEFINE([HAVE_GETTEXT], [1], [gettext(3)])
     GETTEXT_CFLAGS="-I${GETTEXT_PREFIX}/include"
-    GETTEXT_LIBS="-L${GETTEXT_PREFIX}/lib -lintl"
+    GETTEXT_LIBS="-L${GETTEXT_PREFIX}/lib ${GETTEXT_INTL}"
 else
     GETTEXT_PREFIX=none
     GETTEXT_CFLAGS=
@@ -266,15 +341,21 @@ AC_SUBST(GETTEXT_LIBS)
 
 GETTEXT_LIBDIR=${GETTEXT_PREFIX}/lib
 AC_SUBST(GETTEXT_LIBDIR)
-if test -x ${GETTEXT_PREFIX}/bin/msgfmt ; then
+if test "$HAVE_GETTEXT" != "yes"; then
+    GETTEXT_BINDIR=
+elif test -x ${GETTEXT_PREFIX}/bin/msgfmt ; then
     GETTEXT_BINDIR=${GETTEXT_PREFIX}/bin
 elif test -x ${GETTEXT_PREFIX}/local/bin/msgfmt ; then
     GETTEXT_BINDIR=${GETTEXT_PREFIX}/local/bin
 else
-    AC_MSG_FAILURE("could not find msgfmt tool")
-    # Use a (bad) fall back value
-    GETTEXT_BINDIR=${GETTEXT_PREFIX}/bin
+    dnl gettext may live in libc (glibc); msgfmt can be elsewhere on PATH
+    AC_PATH_PROG([MSGFMT], [msgfmt])
+    AS_IF([test -n "$MSGFMT"], [GETTEXT_BINDIR=`AS_DIRNAME([$MSGFMT])`],
+          [HAVE_GETTEXT=no])
 fi
+
+AC_MSG_CHECKING([final result for gettext])
+AC_MSG_RESULT([$HAVE_GETTEXT])
 AC_SUBST(GETTEXT_BINDIR)
 
 AM_CONDITIONAL([HAVE_GETTEXT], [test "$HAVE_GETTEXT" = "yes"])
@@ -329,13 +410,6 @@ AC_CHECK_MEMBER([struct sockaddr_un.sun_len],
 
 AC_CHECK_DECLS([__isthreaded], [], [], [#include <stdio.h>])
 HAVE_ISTHREADED=${ac_cv_have_decl___isthreaded}
-
-dnl
-dnl Some packages need to be checked against version numbers so we
-dnl define a function here for later use
-dnl
-AC_DEFUN([VERSION_TO_NUMBER],
-[`$1 | sed -e 's/lib.* //' | awk 'BEGIN { FS = "."; } { printf "%d", ([$]1 * 1000 + [$]2) * 1000 + [$]3;}'`])
 
 AC_MSG_CHECKING([whether to build with warnings])
 AC_ARG_ENABLE([warnings],
@@ -394,6 +468,20 @@ if test "${CC}" != ""; then
 fi
 AC_MSG_RESULT([$HAVE_GCC])
 AM_CONDITIONAL([HAVE_GCC], [test "$HAVE_GCC" = "yes"])
+AC_SUBST(HAVE_GCC)
+
+AC_MSG_CHECKING([compiler for clang])
+HAVE_CLANG=no
+if test "${CC}" != ""; then
+    HAVE_CLANG=`${CC} cc --help 2>&1 | head -1 | grep -i clang`
+    if test "${HAVE_CLANG}" != ""; then
+        HAVE_CLANG=yes
+    else
+        HAVE_CLANG=no
+    fi
+fi
+AC_MSG_RESULT([$HAVE_CLANG])
+AM_CONDITIONAL([HAVE_CLANG], [test "$HAVE_CLANG" = "yes"])
 
 AC_MSG_CHECKING([whether to build with printflike])
 AC_ARG_ENABLE([printflike],
@@ -452,11 +540,13 @@ XO_CFLAGS="${CFLAGS}"
 
 AC_SUBST(XO_LIBS)
 AC_SUBST(XO_SRCDIR)
-AC_SUBST(XO_LIBDIR)
 AC_SUBST(XO_BINDIR)
 AC_SUBST(XO_INCLUDEDIR)
 AC_SUBST(XO_LIBEXT)
 AC_SUBST(XO_CFLAGS)
+
+AC_SUBST(XO_LIBDIR)
+XO_LIBDIR=`echo $XO_LIBDIR | sed "s;\\${exec_prefix};$prefix;"`
 
 AC_ARG_WITH(encoder-dir,
         [  --with-encoder-dir=[DIR]           Specify location of encoder libraries],
@@ -479,6 +569,9 @@ AC_ARG_WITH(share-dir,
 )
 XO_SHAREDIR=`echo $XO_SHAREDIR | sed "s;\\${prefix};$prefix;"`
 AC_SUBST(XO_SHAREDIR)
+
+XO_LLVMDIR=`echo $XO_LIBDIR | sed "s;\\${exec_prefix};$prefix;"`/libxo
+AC_SUBST(XO_LLVMDIR)
 
 dnl for the spec file
 RELDATE=`date +'%Y-%m-%d%n'`
@@ -513,7 +606,7 @@ AC_CONFIG_HEADERS([libxo/xo_config.h])
 
 AC_CONFIG_FILES([
      Makefile
-     libxo-config
+     libxo-config.sh
      xohtml/xohtml.sh
      libxo/Makefile
      filter/Makefile
@@ -525,9 +618,12 @@ AC_CONFIG_FILES([
      encoder/csv/Makefile
      encoder/fdr/Makefile
      encoder/fullpath/Makefile
+     encoder/rtoon/Makefile
      encoder/test/Makefile
      llvm-plugins/Makefile
+     llvm-plugins/xocc.sh
      xo/Makefile
+     xo-logger/Makefile
      xolint/Makefile
      xohtml/Makefile
      xopo/Makefile
@@ -539,6 +635,7 @@ AC_CONFIG_FILES([
      tests/core/Makefile
      tests/gettext/Makefile
      tests/xo/Makefile
+     tests/xo-logger/Makefile
      tests/xpath/Makefile
      tests/utf8/Makefile
      tests/llvm-plugins/Makefile
@@ -560,7 +657,7 @@ AC_MSG_NOTICE([summary of build options:
   extensions dir:   ${XO_ENCODERDIR}
   filter dir:       ${XO_FILTERDIR}
 
-  compiler:         ${CC} (${HAVE_GCC:-no})
+  compiler:         ${CC} (gcc: ${HAVE_GCC:-no}) (clang: ${HAVE_CLANG:-no})
   compiler flags:   ${CFLAGS}
   library types:    Shared=${enable_shared}, Static=${enable_static}
 
@@ -576,6 +673,7 @@ AC_MSG_NOTICE([summary of build options:
   have exterr:      ${HAVE_EXTERR:-no}
   yacc:             ${YACC}
   filters:          ${LIBXO_NEED_FILTERS}
+  clang version:    ${CLANG_VERSION:-none}:${CLANG_VERSION_NUMBER:-none}
   validate:         ${LLVM_CONFIG}:${LLVM_BINDIR:-none}:${LLVM_CMAKE_DIR:-none}
   sdk path:         ${SDK_PATH:-none}
 ])

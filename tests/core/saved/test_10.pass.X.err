@@ -1,0 +1,4 @@
+test_10.pass-test: duplicate sibling name: 'data'
+test_10.pass-test: duplicate sibling name: 'item'
+test_10.pass-test: duplicate sibling name: 'data'
+test_10.pass-test: duplicate sibling name: 'cost'

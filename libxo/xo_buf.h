@@ -1,4 +1,5 @@
 /*
+ * SPDX-License-Identifier: BSD-2-Clause
  * Copyright (c) 2015, Juniper Networks, Inc.
  * All rights reserved.
  * This SOFTWARE is licensed under the LICENSE provided in the
@@ -298,5 +299,15 @@ xo_buf_force_nul (xo_buffer_t *dst)
     if (xo_buf_append_val(dst, "", 1))
 	dst->xb_curp -= 1;
 }
+
+/*
+ * Insert the locale's thousands separator into a just-rendered decimal
+ * integer field; see the implementation in libxo.c for details.  Exposed
+ * here so that other translation units (e.g. xo/xo_cli_helpers.h) that
+ * render their own decimal fields can apply grouping directly.
+ */
+xo_off_t
+xo_grouping_fixup (xo_handle_t *xop, xo_buffer_t *xbp,
+		    xo_off_t start_off, xo_off_t rc);
 
 #endif /* XO_BUF_H */

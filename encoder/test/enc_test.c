@@ -1,4 +1,5 @@
 /*
+ * SPDX-License-Identifier: BSD-2-Clause
  * Copyright (c) 2015, Juniper Networks, Inc.
  * All rights reserved.
  * This SOFTWARE is licensed under the LICENSE provided in the
@@ -43,20 +44,17 @@ test_handler (XO_ENCODER_HANDLER_ARGS)
     return 0;
 }
 
-static int
-test_wb_marker (XO_WHITEBOARD_FUNC_ARGS)
-{
-    printf("marker %s\n", xo_whiteboard_op_name(op));
-
-    return 0;
-}
-
 int
 xo_encoder_library_init (XO_ENCODER_INIT_ARGS)
 {
+    /* Caller's version is older than we need; report ours and fail */
+    if (arg->xei_version < XO_ENCODER_VERSION) {
+	arg->xei_version = XO_ENCODER_VERSION;
+	return -1;
+    }
+
     arg->xei_version = XO_ENCODER_VERSION;
     arg->xei_handler = test_handler;
-    arg->xei_wb_marker = test_wb_marker;
 
     return 0;
 }

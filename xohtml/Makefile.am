@@ -8,11 +8,6 @@
 
 man_MANS = xohtml.1
 
-EXTERNAL_FILES = \
-    external/jquery.js \
-    external/jquery.qtip.css \
-    external/jquery.qtip.js
-
 INTERNAL_FILES = \
     xohtml.js \
     xohtml.css
@@ -20,21 +15,17 @@ INTERNAL_FILES = \
 EXTRA_DIST = \
     xohtml.1 \
     xohtml.sh.in \
-    ${INTERNAL_FILES} \
-    ${EXTERNAL_FILES}
+    ${INTERNAL_FILES}
 
 install-exec-hook:
 	install xohtml.sh ${DESTDIR}${bindir}/xohtml
-	mkdir -p ${DESTDIR}${XO_SHAREDIR}/external
+	mkdir -p ${DESTDIR}${XO_SHAREDIR}
 	for file in ${INTERNAL_FILES}; do \
 	    install ${srcdir}/$$file ${DESTDIR}${XO_SHAREDIR} ; done
-	for file in ${EXTERNAL_FILES}; do \
-	    install ${srcdir}/$$file ${DESTDIR}${XO_SHAREDIR}/external ; done
 
 uninstall-hook:
-	for file in ${INTERNAL_FILES} ${EXTERNAL_FILES}; do \
+	for file in ${INTERNAL_FILES}; do \
 	    rm ${DESTDIR}${XO_SHAREDIR}/$$file ; done
-	rmdir ${DESTDIR}${XO_SHAREDIR}/external
 	rm -f ${DESTDIR}${bindir}/xohtml
 
 install-data-hook:

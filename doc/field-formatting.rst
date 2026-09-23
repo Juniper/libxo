@@ -19,7 +19,7 @@ is matched by one or more arguments to the xo_emit function.
 
 The format string has the form::
 
-  '%' format-modifier * format-character
+  '%' format-modifier* format-character
 
 The format-modifier can be:
 
@@ -37,10 +37,42 @@ The format-modifier can be:
   positive numbers.
 - a '+' character, indicating sign should emitted before any number.
 - a field-width indication as described under :ref:`field-widths`.
+- a '!' character followed by the number of bits in the integer
+  argument (8, 16, 32, or 64).  See `integer-size_` below.
 
 Note that 'q', 'D', 'O', and 'U' are considered deprecated and will be
 removed eventually.  They are supported for compatibility with
 :manpage:`printf(3)` strings.
+
+.. _integer-sizes:
+
+Integer Sizes
+~~~~~~~~~~~~~
+
+Use the integer size indicator to convey the size of the argument in
+bytes, easing the burden of the mismatch between the fixed size types
+in <stdint.h> and the implementation-dependent sizes in `printf(3)`,
+e.g "%lld", "%ld", and "%d".  Having defined a `uint64_t`, you can use
+"%!64x" to print it without worrying about portability issues or
+resorting to using casts, not to mention "PRIu64".
+
+::
+
+   uint64_t count, code;
+   ...
+   xo_emit("Count: {:count/%!64u}, Code {:code/%#.12!64x}\n",
+            count, code);
+
+The integer size indicator consists of a '!' character followed by
+"64", "32", "16" or "8" to indicate the number of bits in the argument
+type and can use "d", "u", or "x" as the format-character.  Using the
+"8" and "16" values is optional, since these types are guaranteed to be the
+same size of smaller than "int", which is the minimal size for
+variadic arguments, but their presence allow a one-to-one matching
+between the type name (uint16_t) and the format ("%!16d").
+
+As a mnemonic, consider that '!' looks like an upside down "i" for
+integer.
 
 .. _field-widths:
 

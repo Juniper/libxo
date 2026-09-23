@@ -1,0 +1,14 @@
+plain int 1:23:45:67
+unsigned 7:65:43:21
+negative -1:23:45:67
+precision 0000000042
+long 12:34:56:78:90
+long long 1:23:45:67:89:01:23:45
+star width              1:23:45:67
+bit-width 64 98:76:54:32:10
+small 42
+zero 0
+field forced, short 3:45:67:89
+field forced, long 4:56:78:90
+hex unaffected abcdef
+octal unaffected 12345670

@@ -1,0 +1,3 @@
+test_16.validate-test: key field emitted after normal value field: 'name'
+test_16.validate-test: key field emitted after normal value field: 'bkey'
+test_16.validate-test: duplicate sibling name: 'val'

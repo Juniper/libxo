@@ -1,28 +1,39 @@
 set top_src=`pwd`
 alias Zautoreconf "(cd $top_src ; autoreconf --install)"
 
-set ROOT_DIR=${HOME}/work/root
+setenv ROOT_DIR ${HOME}/work/root
 
 set ZENV=""
 
-switch ( `uname` )
+set llvm_topdir=/usr/local
+set llvm_vers=llvm19
+set llvm_path=bin/llvm-config
+
+switch ( `uname`-`uname -r` )
     case FreeBSD*:
        set ZENV="MAKE=gmake "
-       set llvmconfig='--with-llvm-config=/usr/local/llvm19/bin/llvm-config'
+       breaksw
+    case Darwin-25*:
+       set llvm_topdir=/opt/local/libexec
+       set llvm_vers=llvm-21
        breaksw
     case Darwin*:
-       set llvmconfig='--with-llvm-config=/opt/local/libexec/llvm-19/bin/llvm-config'
+       set llvm_topdir=/opt/local/libexec
+       set llvm_vers=llvm-19
        breaksw
 endsw
+
+set llvm_config="${llvm_topdir}/${llvm_vers}/${llvm_path}"
+setenv LLVMCONFIG "--with-llvm-config=${llvm_config}"
 
 set mycflags="-g -O0 -DXO_XPARSE_DEBUG -DLIBXO_DEBUG -DSLAX_DEBUG"
 
 if ( -x /opt/local/bin/msgfmt ) then
-    set gettext='--with-gettext=/opt/local'
+    setenv GETTEXT '--with-gettext=/opt/local'
 else if ( -x /usr/local/bin/msgfmt ) then
-     set gettext='--with-gettext=/usr/local'
+     setenv GETTEXT '--with-gettext=/usr/local'
 else
-     set gettext=''
+     setenv GETTEXT ''
 endif
 
 set opts=' \
@@ -31,8 +42,8 @@ set opts=' \
 --enable-warnings \
 --enable-printflike \
 --prefix ${ROOT_DIR} \
-${gettext} \
-${llvmconfig} \
+${GETTEXT} \
+${LLVMCONFIG} \
 '
 set opts=`echo $opts`
 

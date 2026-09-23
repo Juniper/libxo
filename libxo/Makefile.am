@@ -42,6 +42,7 @@ noinst_HEADERS = \
      xo_format.h \
      xo_humanize.h \
      xo_private.h \
+     xo_string.h \
      xo_utf8.h \
      xo_wcwidth.h
 
@@ -89,7 +90,6 @@ man5_files = \
 man7_files = \
     libxo.7 \
     xo_csv.7 \
-    xo_filter.7 \
     xo_options.7
 
 man_MANS = ${man3_files} ${man5_files} ${man7_files}

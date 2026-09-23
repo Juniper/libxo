@@ -1,0 +1,22 @@
+{
+  "cached": {
+    "name": "hello",
+    "name": "world",
+    "count": 3,
+    "total": 10,
+    "enc": "enc-val",
+    "vis": "vis-val",
+    "addr": "0x0",
+    "port": 80
+  },
+  "fallback": {
+    "name": "hello",
+    "name": "world",
+    "count": 3,
+    "total": 10,
+    "enc": "enc-val",
+    "vis": "vis-val",
+    "addr": "0x0",
+    "port": 80
+  }
+}
