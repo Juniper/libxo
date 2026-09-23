@@ -23,12 +23,9 @@
 
 #include "xo_config.h"
 
-#ifdef HAVE_GCC
-#include <bsd/string.h>
-#endif /* HAVE_GCC */
-
 #include "xo.h"
 #include "xo_encoder.h"
+#include "xo_string.h"
 
 int
 main (int argc, char **argv)
