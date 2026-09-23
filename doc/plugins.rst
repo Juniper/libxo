@@ -8,12 +8,12 @@ LLVM/clang Plugins
 libxo ships two optional LLVM/clang plugins that operate on
 :func:`xo_emit`-family calls at compile time:
 
-- **xo_validate** — a clang AST plugin that checks `libxo` format
+- **xo_validate** - a clang AST plugin that checks `libxo` format
   strings for syntax errors and checks each format string's field
   descriptors against the types and count of the arguments actually
   passed, much like `-Wformat` does for `printf()`.
 
-- **xo_precompile** — an LLVM IR pass that finds `libxo` calls whose
+- **xo_precompile** - an LLVM IR pass that finds `libxo` calls whose
   format string is a compile-time constant, parses that format string
   during the build, and rewrites the call to `xo_emit_cached()`, passing
   a pre-parsed field table as a constant.  This removes the runtime cost
@@ -26,7 +26,7 @@ understanding of field syntax never drifts from the library's own.
 
 These plugins are entirely optional.  Code built without them runs
 exactly as it always has, parsing format strings at run time.  Neither
-plugin changes libxo's public behavior or output — `xo_precompile`
+plugin changes libxo's public behavior or output - `xo_precompile`
 specifically only ever changes *when* a format string is parsed, never
 *what* it means.
 
@@ -74,7 +74,7 @@ their subdirectory::
 This produces `validate/xo_validate.so` and `precompile/xo_precompile.so`.
 Both are `cmake`-driven subprojects; `configure` seeds each one's cmake
 cache with the right `LLVM_DIR`, `Clang_DIR`, target architecture, and
-install prefix, so plain `make` in that directory is sufficient — there
+install prefix, so plain `make` in that directory is sufficient - there
 is no separate `cmake configure` step to run by hand.
 
 xo_validate: format-string checking
@@ -87,14 +87,14 @@ variants (`xo_emit_h`, `xo_emit_hf`, `xo_emit_hvf`, the `_p` wrappers,
 etc.) whose format string is a compile-time string constant.  For each
 one it checks:
 
-1. **Syntax** — malformed field descriptors, such as an unclosed `{`.
-2. **Argument count** — too few or too many arguments for the fields
+1. **Syntax** - malformed field descriptors, such as an unclosed `{`.
+2. **Argument count** - too few or too many arguments for the fields
    in the format string.
-3. **Argument type** — the type each field's display format expects
+3. **Argument type** - the type each field's display format expects
    (following the same length-modifier rules as `printf`, e.g. `%ld`
    expects `long`, `%zu` expects `size_t`) is compared against the
    actual argument's type, after the usual varargs promotions.
-4. **Style** — a number of `xolint`-style checks on field naming and
+4. **Style** - a number of `xolint`-style checks on field naming and
    anchor usage.  Leading digits, stray `%` characters, and anchor
    width/format mismatches are always checked; underscores (instead of
    hyphens), upper-case letters, and names shorter than the minimum
@@ -113,7 +113,7 @@ Tuning diagnostics
 
 Two `-mllvm` flags control how `xo_validate` reports problems:
 
-- **`-mllvm -xo-validate-errors-as-warnings`** — by default, syntax,
+- **`-mllvm -xo-validate-errors-as-warnings`** - by default, syntax,
   argument count, and argument type problems (checks 1-3 above) are
   reported as **errors**, so a build with the plugin loaded fails on
   them.  This is deliberate: these are almost always real bugs, and a
@@ -124,7 +124,7 @@ Two `-mllvm` flags control how `xo_validate` reports problems:
   positive gets sorted out upstream.  Style diagnostics (check 4) are
   always warnings and are unaffected by this flag.
 
-- **`-mllvm -xo-validate-lint`** — enables the additional cosmetic
+- **`-mllvm -xo-validate-lint`** - enables the additional cosmetic
   naming checks described under **Style** above (underscores, upper
   case, short names).  These are off by default since they're closer
   to style preference than correctness; the always-on style checks
@@ -188,14 +188,14 @@ For each such call it will:
 2. emit those tables as `private constant` LLVM globals in the
    module.
 3. rewrite the call to the matching `xo_emit_cached*()` entry point
-   (`xo_emit` → `xo_emit_cached`, `xo_emit_hf` → `xo_emit_cached_hf`,
+   (`xo_emit` -> `xo_emit_cached`, `xo_emit_hf` -> `xo_emit_cached_hf`,
    and so on), passing a pointer to the generated table ahead of the
    format string and value arguments.
 
 At run time, `xo_emit_cached()` skips straight to formatting using the
 supplied table instead of first scanning the format string to build
 one.  Output is byte-for-byte identical to what `xo_emit()` would have
-produced from the same format string and arguments — the pass changes
+produced from the same format string and arguments - the pass changes
 only when the format string gets parsed, never the result.
 
 If precompiling it isn't possible or safe, calls are left untouched,
@@ -212,7 +212,7 @@ time.  This is needed when:
 Because the rewrite happens at the IR level, it works regardless of
 what source-level macros or wrappers were used to reach `xo_emit()`, as
 long as the call and its format-string argument survive to IR in a form
-the pass can see. It does *not* require any source changes — the same
+the pass can see. It does *not* require any source changes - the same
 `.c` file compiles correctly whether or not the pass is loaded, just
 faster when it is.
 
@@ -242,8 +242,8 @@ globals and the `xo_emit_cached` call::
         myprogram.c -o - | grep -A2 xo_fcache
 
 `xo_validate` and `xo_precompile` are independent but can be used
-together — one checks correctness at the AST level, the other rewrites
-at the IR level — so both flags are normally passed on the same
+together - one checks correctness at the AST level, the other rewrites
+at the IR level - so both flags are normally passed on the same
 command line::
 
     clang -c \
@@ -272,7 +272,7 @@ Caveats and known limitations
   version changes when `PipelineStart` callbacks run at `-O0`, building
   the precompiled translation units at `-O1` or higher is the fallback.
 - Both plugins are LLVM/clang-specific; there is no equivalent for GCC.
-  Code is fully portable either way — without the plugins it just
+  Code is fully portable either way - without the plugins it just
   behaves like ordinary, unmodified libxo.
 - The plugins are versioned against `xo_field_info_t`'s in-memory
   layout via `XO_EMIT_CACHE_VERSION` (in `xo.h`) and a set of
