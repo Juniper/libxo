@@ -8,8 +8,8 @@
  *
  * test_cached.c: verify xo_emit_cached() produces identical output to
  * xo_emit().  Two structural blocks are emitted:
- *   "cached"   — uses xo_emit_cached() with a valid xo_format_cache_t
- *   "fallback" — uses xo_emit_cached() with a NULL cache (falls back to
+ *   "cached"   - uses xo_emit_cached() with a valid xo_format_cache_t
+ *   "fallback" - uses xo_emit_cached() with a NULL cache (falls back to
  *                xo_do_emit, identical to xo_emit)
  *
  * Phil: when accepting the baseline, verify that the "cached" and
@@ -78,7 +78,7 @@ free_cache (xo_format_cache_t *fcp, xo_fspec_t *fspecs)
 /*
  * Test format strings.  Cover the main xo_field_info_t code paths:
  *   fmt1: plain %s format string
- *   fmt2: default format (no explicit format → XO_FOFF_DEFAULT → "%s")
+ *   fmt2: default format (no explicit format - XO_FOFF_DEFAULT - "%s")
  *   fmt3: label/text role (content in format string; no va_arg)
  *   fmt4: two integer fields
  *   fmt5: encode-only field + regular field (xfi_encoding path)
@@ -119,12 +119,12 @@ main (int argc, char **argv)
     xo_format_cache_t *c5 = make_cache(fmt5, &s5);
     xo_format_cache_t *c6 = make_cache(fmt6, &s6);
 
-    /* Block 1: valid cache — exercises the cached code path */
+    /* Block 1: valid cache - exercises the cached code path */
     xo_open_container("cached");
     emit_all(c1, c2, c3, c4, c5, c6);
     xo_close_container("cached");
 
-    /* Block 2: NULL cache — falls back to xo_do_emit; must match block 1 */
+    /* Block 2: NULL cache - falls back to xo_do_emit; must match block 1 */
     xo_open_container("fallback");
     emit_all(NULL, NULL, NULL, NULL, NULL, NULL);
     xo_close_container("fallback");
