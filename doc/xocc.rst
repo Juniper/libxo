@@ -66,7 +66,7 @@ Drop the SDK flag, or drop precompilation, the same way::
     make CC='xocc full-precompile'
     make CC='xocc full-sdk+errors'
 
-Or build a verb up from nothing instead of trimming `full` down — these
+Or build a verb up from nothing instead of trimming `full` down - these
 two are equivalent::
 
     make CC='xocc validate+precompile'
@@ -79,7 +79,7 @@ automatically, since there's nothing to actually compile::
     make CC='xocc lint'
 
 Word and letter forms can be mixed freely, but tokens must be joined
-with `+`/`-` — letters can't just be run together.  `v+l+p` is `full`
+with `+`/`-` - letters can't just be run together.  `v+l+p` is `full`
 spelled out; `vlp`, with no separators, is an error.
 
 At least one of `validate`, `lint`, `errors`, or `precompile` has to
@@ -88,7 +88,7 @@ bare compiler flag or `.c` file (meaning the verb was left off
 entirely), are both errors too, rather than a silent compile without
 libxo's flags.
 
-Add `echo` to see exactly what `xocc` is about to run — often the
+Add `echo` to see exactly what `xocc` is about to run - often the
 fastest way to check a verb combination did what you expected::
 
     make CC='xocc full+echo'
@@ -100,7 +100,7 @@ specified using the `XO_REAL_CC`, environment variable:
 
 `xocc` also inspects the rest of its arguments to tell a compile stage
 (`-c`, `-E`, or `-S` present) from a link stage.  The `-L${libdir}
--lxo` from the `ldflags` token is only ever added at the link stage —
+-lxo` from the `ldflags` token is only ever added at the link stage -
 `xocc` suppresses it automatically for a compile-only invocation even
 if `ldflags` is on, since there's nothing to link yet::
 
@@ -108,6 +108,6 @@ if `ldflags` is on, since there's nothing to link yet::
     xocc full myprogram.o -o myprogram
 
 Both plugin flags, the SDK `-isysroot`, and the link flags come from
-values baked in when libxo itself was configured — `xocc` needs no
+values baked in when libxo itself was configured - `xocc` needs no
 `-I`/`-L` flags pointing back at the libxo tree, beyond whatever the
 project's own build already passes for libxo's headers.
