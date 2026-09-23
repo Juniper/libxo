@@ -14,9 +14,9 @@
 #include <wchar.h>
 
 #include "xo_config.h"
+#include "xo_string.h"
 #include "xo.h"
 #include "xo_encoder.h"
-#include "xo_string.h"
 
 #ifdef LIBXO_WCWIDTH
 #include "xo_wcwidth.h"
