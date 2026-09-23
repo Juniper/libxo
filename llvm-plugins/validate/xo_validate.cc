@@ -14,7 +14,7 @@
  * Checks performed:
  *   1. Format string syntax (malformed field descriptors)
  *   2. Argument count (too few or too many va_args)
- *   3. Argument type: precise — length modifier checked (%ld expects long,
+ *   3. Argument type: precise - length modifier checked (%ld expects long,
  *      %zu expects size_t, etc.) via ASTContext canonical types.  Falls back
  *      to coarse category (integer/float/pointer/string) for conversion
  *      characters not covered by the precise path.
@@ -23,7 +23,7 @@
  *   - Only public ASTContext/QualType/Expr APIs are used; no internal
  *     clang headers that change across LLVM versions.
  *   - Varargs promotion is handled by using arg->getType() (which already
- *     reflects the promotion: char/short→int, float→double) for type
+ *     reflects the promotion: char/short->int, float->double) for type
  *     matching.  arg->IgnoreImpCasts()->getType() is used only in the
  *     error message to show the programmer's source type.
  *   - %h/%hh modifiers map to int/unsigned int (the promoted types) so
@@ -64,7 +64,7 @@ using namespace clang;
 /*
  * Table of libxo emit functions: name and the 0-based index of the
  * format-string argument.  Functions taking a va_list (xo_emit_hv) are
- * omitted — we can validate the format string but cannot inspect the
+ * omitted - we can validate the format string but cannot inspect the
  * argument list at compile time.
  */
 struct XoEmitEntry {
@@ -118,7 +118,7 @@ parse_fmt_expect (const char *fmt, unsigned fmtlen)
                 p++;
     }
 
-    /* length modifiers — skip for coarse check */
+    /* length modifiers - skip for coarse check */
     while (p < end && (*p == 'l' || *p == 'h' || *p == 'L' ||
                         *p == 'z' || *p == 't' || *p == 'j' || *p == 'q'))
         p++;
@@ -175,16 +175,16 @@ expect_name (FmtExpect e)
 }
 
 /*
- * Precise type mapping: format spec → ASTContext QualType.
+ * Precise type mapping: format spec -> ASTContext QualType.
  */
 
 enum LenMod {
     LM_NONE,
-    LM_H,       /* h  — maps to int/unsigned int (varargs-promoted) */
-    LM_HH,      /* hh — maps to int/unsigned int (varargs-promoted) */
+    LM_H,       /* h  - maps to int/unsigned int (varargs-promoted) */
+    LM_HH,      /* hh - maps to int/unsigned int (varargs-promoted) */
     LM_L,       /* l  */
     LM_LL,      /* ll */
-    LM_L_BIG,   /* L  — only for floating-point */
+    LM_L_BIG,   /* L  - only for floating-point */
     LM_Z,       /* z  */
     LM_T,       /* t  */
     LM_J,       /* j  */
@@ -311,7 +311,7 @@ fmt_expected_type (ASTContext &C, const char *spec, unsigned len)
 /*
  * Return true if the actual argument type is compatible with the expected type.
  * Uses arg->getType() (the promoted type seen by the callee) for matching so
- * that varargs promotions (char→int, float→double) are already applied.
+ * that varargs promotions (char->int, float->double) are already applied.
  *
  * Matching rules:
  *  - Integer: same bit width, sign ignored (long == unsigned long long
@@ -321,7 +321,7 @@ fmt_expected_type (ASTContext &C, const char *spec, unsigned len)
  *    platforms (unsigned long on FreeBSD/Linux, unsigned long long on
  *    macOS), and a libxo format string that is correct on one platform
  *    must not warn on another.
- *  - Float:   exact canonical type (long double ≠ double even if same size).
+ *  - Float:   exact canonical type (long double != double even if same size).
  *  - %s:      any char pointer.
  *  - %p:      any pointer.
  */
@@ -372,7 +372,7 @@ type_matches (ASTContext &ctxt, QualType expected, const Expr *arg)
         if (ap == ep)
             return true;
 
-        /* %s/%hs: any char kind (char *, unsigned char *, char[N], …) */
+        /* %s/%hs: any char kind (char *, unsigned char *, char[N], ...) */
         if (ep->isCharType() && ap->isCharType())
             return true;
 
