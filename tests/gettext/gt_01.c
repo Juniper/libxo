@@ -23,9 +23,9 @@
 
 #include "xo_config.h"
 
-#ifdef HAVE_GCC
+#ifdef HAVE_BSD_STRING_H
 #include <bsd/string.h>
-#endif /* HAVE_GCC */
+#endif /* HAVE_BSD_STRING_H */
 
 #include "xo.h"
 #include "xo_encoder.h"
