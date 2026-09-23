@@ -68,7 +68,7 @@ struct EmitTarget {
     const char *cached_name; /* replacement function name */
     unsigned    fmt_idx;     /* which arg index holds the format string */
     /*
-     * All args before fmt_idx are passed through unchanged (handle, flags, …).
+     * All args before fmt_idx are passed through unchanged (handle, flags, ...).
      * The cache pointer is inserted at fmt_idx; fmt and value args follow.
      */
 };
@@ -406,7 +406,7 @@ struct XoPrecompile : PassInfoMixin<XoPrecompile> {
 
             /*
              * Build the FunctionType for the cached replacement:
-             *   [ param types before fmt_idx ]  (handle, flags, …)
+             *   [ param types before fmt_idx ]  (handle, flags, ...)
              *   + ptr  (cache)
              *   + [ param types from fmt_idx ]   (fmt + fixed typed params)
              *   + vararg flag inherited from original
@@ -429,7 +429,7 @@ struct XoPrecompile : PassInfoMixin<XoPrecompile> {
 
             /* Build the replacement argument list */
             SmallVector<Value *, 16> Args;
-            /* prefix args before fmt (handle, flags, …) */
+            /* prefix args before fmt (handle, flags, ...) */
             for (unsigned i = 0; i < Target.fmt_idx; ++i)
                 Args.push_back(CI->getArgOperand(i));
             /* cache */
