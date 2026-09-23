@@ -327,7 +327,7 @@ fully rendered before `libxo` knows that the field is not present.
 Sub-container Content
 +++++++++++++++++++++
 
-When an instance is matched, all of its content is emitted — including
+When an instance is matched, all of its content is emitted - including
 fields inside nested containers (child containers opened with
 `xo_open_container` inside the instance).  In the example above, the
 `local` and `remote` containers and their fields are included in
@@ -339,8 +339,8 @@ that you cannot use subelements of `local` or `remote` in a predicate.
 Content in nested containers that appear before the predicate field is
 buffered along with the top-level fields.  If the predicate resolves
 true, the nested container content is committed as part of the
-instance.  If the predicate resolves false, the entire instance —
-including nested content — is discarded.
+instance.  If the predicate resolves false, the entire instance -
+including nested content - is discarded.
 
 .. index:: Filter functions
 
@@ -436,7 +436,7 @@ The `flags` string contains zero or more of the following flags:
   '$'    Does not match at end of string (REG_NOTEOL)
   's'    Return full match text as a string
   'm'    Return first capture group as string
-  'mN'   Return capture group N as string (N: 0–9)
+  'mN'   Return capture group N as string (N: 0-9)
   'p'    REG_POSIX (platform-specific; ignored if unavailable)
 ======= ====================================================================
 
