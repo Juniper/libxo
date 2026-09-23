@@ -41,7 +41,7 @@ int xo_shim_parse(const char *fmt, xo_shim_error_t error, void *data);
 /*
  * Argument descriptor: called once per va_arg the format string consumes.
  *
- * fmt / fmtlen  — the printf format spec ("%s", "%ld", etc.),
+ * fmt / fmtlen  - the printf format spec ("%s", "%ld", etc.),
  *                 NOT NUL-terminated.  fmtlen > 0 in all cases.
  *
  * Special case: when a field uses the 'a' (XFF_ARGUMENT) modifier the
