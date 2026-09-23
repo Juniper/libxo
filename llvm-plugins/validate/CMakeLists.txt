@@ -55,7 +55,7 @@ if(APPLE)
 endif()
 
 # Suppress the .dylib/.so suffix that cmake adds to MODULE targets on some
-# platforms — clang's -fplugin= accepts the path as-is.
+# platforms - clang's -fplugin= accepts the path as-is.
 set_target_properties(xo_validate PROPERTIES PREFIX "")
 
 install(TARGETS xo_validate DESTINATION lib/libxo)
