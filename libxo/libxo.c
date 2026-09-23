@@ -3979,7 +3979,7 @@ xo_flush_literal (xo_handle_t *xop, xo_buffer_t *xbp, xo_xff_flags_t flags,
 }
 
 /*
- * A fast integer formatter — avoids vsnprintf/localeconv/lock
+ * A fast integer formatter - avoids vsnprintf/localeconv/lock
  * overhead.  Handles %d/%i/%u/%o/%x/%X with optional l/ll, width,
  * precision, '#', '0'.  We pull the integer from xop->xo_vap and write
  * ASCII directly into xbp.  The caller already knows it took this path
@@ -4082,7 +4082,7 @@ xo_format_int_text (xo_handle_t *xop, xo_buffer_t *xbp, xo_fspec_t *xfp)
     }
     ssize_t dlen = dep - dcp;
 
-    /* Precision: minimum digit count (e.g. %.8d → at least 8 digits) */
+    /* Precision: minimum digit count (e.g. %.8d means at least 8 digits) */
     ssize_t precision = (xfp->xf_dots > 0 && xfp->xf_width[XF_WIDTH_SIZE] >= 0)
 	? xfp->xf_width[XF_WIDTH_SIZE] : -1;
     ssize_t prec_zeros = (precision > dlen) ? precision - dlen : 0;
@@ -4252,7 +4252,7 @@ xo_emit_field_value (xo_handle_t *xop, xo_buffer_t *xbp,
     } else {
 	ssize_t columns;
 
-	/* Use the fast path for integer formats — no vsnprintf/localeconv */
+	/* Use the fast path for integer formats - no vsnprintf/localeconv */
 	if (xo_use_format_int(xop, style, xfp)) {
 	    rc = columns = xo_format_int_text(xop, xbp, xfp);
 	    *consumedp = 1;
@@ -5099,7 +5099,7 @@ xo_build_predicate (xo_handle_t *xop, const char *name, ssize_t nlen,
     char *vs = pbp->xb_bufp + val_off;
 
     if (memchr(vs, '\'', vlen) == NULL) {
-	/* Common case: no single quotes — close the single-quoted form */
+	/* Common case: no single quotes - close the single-quoted form */
 	xo_buf_append(pbp, "']", 2);
 
     } else if (memmem(vs, vlen, "&quot;", XO_LEN_QUOT) == NULL
@@ -6063,7 +6063,7 @@ typedef struct xo_compact_result_s {
 } xo_compact_result_t;
 
 /*
- * Walk ancestor frames [first, end) — 'end' is exclusive — compacting
+ * Walk ancestor frames [first, end) - 'end' is exclusive - compacting
  * each one down to its opening tag plus any key fields.  Non-key
  * sibling content accumulated while the frame was TRACK is discarded
  * via memmove.  The JSON leading-comma invariant is handled here: if
@@ -6355,7 +6355,7 @@ xo_filt_commit_compact (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED,
      * comma.  Only do this when cur itself had pending (un-committed)
      * content: if cur's xs_rb_off was already CLEAR it was committed with
      * genuine content and NOT_FIRST must be preserved.
-     * Also skip when cur kept key fields — those legitimately set NOT_FIRST.
+     * Also skip when cur kept key fields - those legitimately set NOT_FIRST.
      */
     if (cur_was_pending && !r.xcr_prev_had_key
 	    && XOEF_ISSET(xop, XOEF_RB_CLEAR_ON_COMPACT))
@@ -8452,9 +8452,9 @@ xo_do_emit_fields (xo_handle_t *xop, const xo_field_info_t *fields,
 
     /*
      * Two bases for offset resolution:
-     *   base — for xfi_content, xfi_start, xfi_next (switches to
+     *   base - for xfi_content, xfi_start, xfi_next (switches to
      *       new_fmt on gettext)
-     *   base_fmt — for xfi_format, xfi_encoding (stays as original
+     *   base_fmt - for xfi_format, xfi_encoding (stays as original
      *       fmt; format offsets copied from old_fields in the
      *       gettext combine step remain relative to the
      *       original fmt)
@@ -9660,7 +9660,7 @@ xo_do_close_container (xo_handle_t *xop, const char *name)
 	 * Roll back if this container was tentatively captured (xs_rb_off set)
 	 * and is the top of the tentative region (parent's xs_rb_off is clear).
 	 * Nested containers inside a still-tracked instance must not be rolled
-	 * back independently — the enclosing instance handles that on close.
+	 * back independently - the enclosing instance handles that on close.
 	 */
 	if (XOF_ISSET(xop, XOF_FILTER) && xsp->xs_rb_off != XS_OFFSET_CLEAR) {
 	    xo_filt_rollback(xop, xsp, old_fstatus, fstatus);
@@ -9798,7 +9798,7 @@ xo_do_open_list (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
      * When the parent frame is committed (FULL), its xs_rb_off is CLEAR but
      * the list frame we are about to push will carry a live starting_offset.
      * If a tty or high-water flush fires before the first FULL item triggers
-     * commit_compact, that offset becomes meaningless — commit_compact would
+     * commit_compact, that offset becomes meaningless - commit_compact would
      * use it to set xb_curp to a position that no longer corresponds to the
      * ancestor content in the buffer, corrupting output.  Keep
      * XOIF_FILTERING set so xo_avoid_flushing() suppresses any such flush
@@ -10146,7 +10146,7 @@ xo_do_open_instance (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
     /*
      * Set XOIF_FILTERING so xs_rb_off is preserved by xo_depth_change:
      *
-     * PRED: key/non-key predicate pending — buffer tentatively until resolved.
+     * PRED: key/non-key predicate pending - buffer tentatively until resolved.
      *
      * TRACK after FULL: positional predicate already matched (old_fstatus==FULL);
      *   subsequent siblings are TRACK and must be buffered so their whiteboard
