@@ -28,7 +28,7 @@
 
 /*
  * Return a printable version of str, escaping control characters.
- * Uses a rotating set of static buffers — no allocation, no free.
+ * Uses a rotating set of static buffers - no allocation, no free.
  * Only used for error-message formatting.
  */
 const char *
@@ -370,7 +370,7 @@ xo_parse_format_spec (xo_parse_t *xpp, xo_fspec_t *xfp,
 
 /*
  * Parse one "%..." conversion starting at 'cp' (which points at the '%').
- * Pure parser: no handle, no va_list, no style/skip decisions — those are
+ * Pure parser: no handle, no va_list, no style/skip decisions - those are
  * per-call and stay in libxo.c's xo_do_format_field().  Fills in *xfp,
  * including xf_start/xf_len (byte offsets relative to 'fmt', covering the
  * '%' through and including the conversion character), and returns a
