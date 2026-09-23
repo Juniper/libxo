@@ -36,7 +36,7 @@
 #endif /* XO_MAX_SPECS */
 
 /*
- * Simple name→value table used for role and modifier lookup.
+ * Simple name to value table used for role and modifier lookup.
  * Kept here so callers (e.g. xo_set_options) can define their own tables
  * and reuse xo_name_lookup().
  */
@@ -137,7 +137,7 @@ typedef struct xo_fspec_s {
 
 /*
  * Parsed representation of one field descriptor from a libxo format string.
- * All string members are xo_format_offset_t values — byte offsets into the
+ * All string members are xo_format_offset_t values - byte offsets into the
  * "base" format string from which the field was parsed.  Use xo_foff(base, off)
  * to recover a const char *.  XO_FOFF_NONE (-1) means absent; xfi_format may
  * additionally take XO_FOFF_DEFAULT (-2) to indicate the default "%s" format.
@@ -208,15 +208,15 @@ typedef void (*xo_parse_error_func_t)(void *data, const char *fmt, ...);
 typedef uint32_t xo_parse_flags_t; /* XPF_* */
 
 typedef struct xo_parse_s {
-    xo_realloc_func_t xp_realloc;	/* Allocator (NULL → realloc) */
-    xo_free_func_t xp_free;		/* Free (NULL → free) */
-    xo_parse_error_func_t xp_error;	/* Error reporter (NULL → silent) */
+    xo_realloc_func_t xp_realloc;	/* Allocator (NULL == realloc) */
+    xo_free_func_t xp_free;		/* Free (NULL == free) */
+    xo_parse_error_func_t xp_error;	/* Error reporter (NULL == silent) */
     void *xp_error_data;		/* Opaque data passed to xp_error */
-    xo_parse_error_func_t xp_warn;	/* Warning reporter (NULL → silent) */
+    xo_parse_error_func_t xp_warn;	/* Warning reporter (NULL == silent) */
     void *xp_warn_data;			/* Opaque data passed to xp_warn */
     xo_parse_flags_t xp_flags;		/* XPF_* flags */
 
-    /* Output — filled in by xo_parse_format() */
+    /* Output - filled in by xo_parse_format() */
     xo_field_info_t *xp_fields;	/* Allocated, zero-terminated field array */
     unsigned xp_num_fields;	/* Number of valid entries */
     xo_fspec_t *xp_fspecs;	/* Allocated, zero-terminated fspec array */
