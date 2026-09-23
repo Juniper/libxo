@@ -27,7 +27,7 @@ $ id 3
 }item
 -clients
 
-# Multi-step wildcard: top/*/leaf — middle container can be anything.
+# Multi-step wildcard: top/*/leaf - middle container can be anything.
 r
 ?top/*/leaf[val = 'x']
 +top
