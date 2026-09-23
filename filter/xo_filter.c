@@ -1,5 +1,5 @@
 /*
- * SPDX-License-Identifier: BSD-2-Clause
+ * License-Identifier: BSD-2-Clause
  * Copyright (c) 2023, Juniper Networks, Inc.
  * All rights reserved.
  * This SOFTWARE is licensed under the LICENSE provided in the
@@ -616,9 +616,9 @@ xo_tframe_child_qualified_position (xo_tframe_t *parent, xo_trie_id_t c)
  * NOT the first predicate (meaning there are leading key/test
  * predicates before it).
  *
- * foo[2]           → FALSE (C_INDEX is first, use open-time position)
- * foo[x=1][2]      → TRUE  (C_INDEX is trailing, must use qualified position)
- * foo[2][x=1]      → FALSE (C_INDEX is first)
+ * foo[2]           - FALSE (C_INDEX is first, use open-time position)
+ * foo[x=1][2]      - TRUE  (C_INDEX is trailing, must use qualified position)
+ * foo[2][x=1]      - FALSE (C_INDEX is first)
  */
 static int
 xo_pred_has_trailing_cindex (xo_filter_t *xfp, xo_xparse_node_id_t pred_id)
@@ -1017,7 +1017,7 @@ xo_filter_op_close_instance (xo_handle_t *xop, xo_filter_t *xfp,
     /*
      * If the instance is still in PRED state at close time, the predicate
      * field was never seen.  Force-resolve treating absent fields as empty
-     * string (XPath: absent node → empty nodeset → string("")).
+     * string (XPath: absent node means empty nodeset or string("")).
      */
     if (xfp != NULL && xfp->xf_trie != NULL
 	    && xfp->xf_status == XO_STATUS_PRED)
@@ -2442,7 +2442,7 @@ xo_eval_func_string_length (XO_EVAL_NODE_ARGS)
 }
 
 /*
- * sum(a, b, ...) — sum all arguments converted to numbers.
+ * sum(a, b, ...) - sum all arguments converted to numbers.
  */
 static xo_eval_value_t
 xo_eval_func_sum (XO_EVAL_NODE_ARGS)
@@ -2466,7 +2466,7 @@ xo_eval_func_sum (XO_EVAL_NODE_ARGS)
 }
 
 /*
- * translate(string, from, to) — replace each char in string that appears
+ * translate(string, from, to) - replace each char in string that appears
  * in from with the corresponding char in to; delete chars with no mapping.
  */
 static xo_eval_value_t
@@ -2507,7 +2507,7 @@ xo_eval_func_translate (XO_EVAL_NODE_ARGS)
 	    size_t idx = found - from;
 	    if (idx < to_len)
 		*q++ = to[idx];	/* replacement char */
-	    /* else: no mapping — delete the character */
+	    /* else: no mapping - delete the character */
 	}
     }
     *q = '\0';
@@ -2522,21 +2522,21 @@ xo_eval_func_translate (XO_EVAL_NODE_ARGS)
 }
 
 /*
- * rematch(pattern, input, options?) — POSIX regex match.
+ * rematch(pattern, input, options?) - POSIX regex match.
  *
  * Options (each is a single character in the options string):
  *   'b'    Use basic RE (BRE) instead of the default extended RE (ERE)
- *   'i'    REG_ICASE — case-insensitive matching
- *   'n'    REG_NEWLINE — newline-sensitive matching
- *   '^'    REG_NOTBOL — '^' does not match at start of string
- *   '$'    REG_NOTEOL — '$' does not match at end of string
+ *   'i'    REG_ICASE - case-insensitive matching
+ *   'n'    REG_NEWLINE - newline-sensitive matching
+ *   '^'    REG_NOTBOL - '^' does not match at start of string
+ *   '$'    REG_NOTEOL - '$' does not match at end of string
  *   's'    Return full match text (pmatch[0]) as C_DSTRING
  *   'm'    Return first capture group (pmatch[1]) as C_DSTRING;
  *   'mN'   Return capture group N (pmatch[N]) as C_DSTRING (N: 0–9)
  *   'p'    REG_POSIX (platform-specific; ignored if unavailable)
  *
  * Default (no 's' or 'm'): returns C_BOOLEAN true/false.
- * With 's' or 'm'/'mN': returns C_DSTRING — empty string if no match
+ * With 's' or 'm'/'mN': returns C_DSTRING - empty string if no match
  * or the requested group did not participate.
  *
  * Don't call it a regex, though I don't know what it is...
@@ -2565,7 +2565,7 @@ xo_eval_func_rematch (XO_EVAL_NODE_ARGS)
     char *pattern = xo_eval_cast_string(xop, fn_argv[0]);
     char *input   = xo_eval_cast_string(xop, fn_argv[1]);
 
-    /* Third arg is optional; absent slot is XEVF_INVALID — treat as "" */
+    /* Third arg is optional; absent slot is XEVF_INVALID - treat as "" */
     char *opts;
 
     if (fn_argc >= 3)
@@ -2643,7 +2643,7 @@ xo_eval_func_rematch (XO_EVAL_NODE_ARGS)
 		int mlen = (int)(m->rm_eo - m->rm_so);
 		result.xev_str = strndup(input + m->rm_so, mlen);
 	    }
-	    /* else: group didn't participate — leave empty string */
+	    /* else: group didn't participate - leave empty string */
 	}
     }
 
@@ -2993,7 +2993,7 @@ xo_filter_pred_eval (xo_handle_t *xop, xo_filter_t *xfp,
 			   "xo_filter_pred_eval: working");
 
 	if (pv.xev_flags & XEVF_MISSING) {
-	    /* Key not yet seen — can't resolve this predicate yet */
+	    /* Key not yet seen - can't resolve this predicate yet */
 	    have_missing = TRUE;
 	    xo_eval_value_free(pv);
 	    continue;
@@ -3124,7 +3124,7 @@ xo_tmatch_slot_position (xo_handle_t *xop, xo_filter_t *xfp,
     if (framep->xtf_flags[slot] & XTFF_QUAL_COUNTED)
 	return framep->xtf_qual_position[slot];
 
-    /* No trailing C_INDEX → use normal open-time position */
+    /* No trailing C_INDEX: use normal open-time position */
     if (!xo_pred_has_trailing_cindex(xfp, pred_id))
 	return framep->xtf_position[slot];
 
