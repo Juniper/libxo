@@ -108,7 +108,7 @@ unescaped control byte never appears inside a quoted token.
 `\uXXXX` also covers non-ASCII characters: any character in the Basic
 Multilingual Plane (U+0080-U+D7FF, U+E000-U+FFFF) that rtoon quotes
 comes out as `\uXXXX`, not literal UTF-8 - e.g. an accented letter
-shows up as `é`, not as its raw UTF-8 bytes. The one exception is
+shows up as `\u00e9`, not as its raw UTF-8 bytes. The one exception is
 a supplementary-plane character (above U+FFFF, e.g. most emoji) -
 those have no `\uXXXX` form (a decoder must reject a surrogate-pair
 escape standing in for one), so they appear as literal UTF-8 bytes
