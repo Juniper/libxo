@@ -39,7 +39,7 @@
  *   offset 24: int16_t  xfi_clen     (i16)
  *   offset 26: int16_t  xfi_flen     (i16)
  *   offset 28: int16_t  xfi_elen     (i16)
- *   [2-byte pad at offset 30 — inserted by compiler to align xfi_fnum]
+ *   [2-byte pad at offset 30 - inserted by compiler to align xfi_fnum]
  *   offset 32: uint32_t xfi_fnum     (i32)
  *   offset 36: uint32_t xfi_renum    (i32)
  *   offset 40: pointer xfi_cachep    (pointer)
@@ -87,7 +87,7 @@ _Static_assert(offsetof(xo_field_info_t, xfi_num_fspecs) == 40 + sizeof(void *),
  * Same protection for xo_fspec_t, mirrored in xo_precompile.cc's FspecTy.
  * Expected layout (LP64):
  *   offset  0: uint8_t xf_fc .. xf_stars (8 flag bytes, then leading_zero,
- *              dots, alt, stars — 12 individual uint8_t members)
+ *              dots, alt, stars - 12 individual uint8_t members)
  *   offset 12: uint8_t xf_star[3]
  *   offset 15: uint8_t xf_at_stars
  *   offset 16: int16_t xf_width[3]
@@ -230,7 +230,7 @@ scan_format_args (const char *field_fmt, unsigned flen,
 
         /*
          * Groups 2 and 3 of libxo's three width groups are both '.'-prefixed:
-         *   %*.*.*s → width(*), columns(.*), bytes(.*), value
+         *   %*.*.*s -> width(*), columns(.*), bytes(.*), value
          * The loop handles any number of '.' groups, each with optional '*'.
          */
         while (p < end && *p == '.') {
@@ -268,10 +268,10 @@ scan_format_args (const char *field_fmt, unsigned flen,
  * Return non-zero if this field consumes a va_arg for its value.
  *
  * Rule:
- *   V (value) — the content field is the key name; VALUE always from va_arg.
- *   C/D/E/L/N/P/T/U/W — content IS the display text; va_arg only when
+ *   V (value) - the content field is the key name; VALUE always from va_arg.
+ *   C/D/E/L/N/P/T/U/W - content IS the display text; va_arg only when
  *                        content is absent (xfi_clen == 0) and format present.
- *   G / [ / ] / TEXT / NEWLINE / EBRACE — never consume va_arg (G is
+ *   G / [ / ] / TEXT / NEWLINE / EBRACE - never consume va_arg (G is
  *                        forbidden from having a format by XO_LINT_ROLES_NO_FORMAT).
  */
 static int
