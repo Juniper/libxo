@@ -1,0 +1,279 @@
+<div class="line">
+  <div class="data" data-tag="leaf">value</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="name" data-ident="3">sda</div>
+  <div class="data" data-tag="size" data-ident="3">100</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="name" data-ident="4">sdb</div>
+  <div class="data" data-tag="size" data-ident="4">200</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="name" data-ident="5">sdc</div>
+  <div class="data" data-tag="size" data-ident="5">300</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="dest" data-ident="7">10.0.0.0</div>
+  <div class="data" data-tag="prefix-len" data-ident="7">24</div>
+  <div class="data" data-tag="protocol" data-ident="7">static</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="dest" data-ident="8">10.0.1.0</div>
+  <div class="data" data-tag="prefix-len" data-ident="8">24</div>
+  <div class="data" data-tag="protocol" data-ident="8">static</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="dest" data-ident="9">0.0.0.0</div>
+  <div class="data" data-tag="prefix-len" data-ident="9">0</div>
+  <div class="data" data-tag="protocol" data-ident="9">default</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="name" data-ident="11">alpha</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="name" data-ident="12">beta</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="up-time" data-ident="12">100</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="num" data-ident="14">0</div>
+  <div class="data" data-tag="load" data-ident="14">0</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="num" data-ident="15">1</div>
+  <div class="data" data-tag="load" data-ident="15">7</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="num" data-ident="16">2</div>
+  <div class="data" data-tag="load" data-ident="16">14</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="dest" data-ident="18">10.0.0.0</div>
+  <div class="data" data-tag="prefix-len" data-ident="18">24</div>
+  <div class="data" data-tag="protocol" data-ident="18">static</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="dest" data-ident="19">10.0.1.0</div>
+  <div class="data" data-tag="prefix-len" data-ident="19">25</div>
+  <div class="data" data-tag="protocol" data-ident="19">static</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="sku" data-ident="21">WIDGET1</div>
+  <div class="data" data-tag="qty" data-ident="21">10</div>
+  <div class="data" data-tag="price" data-ident="21">9.99</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="sku" data-ident="22">WIDGET2</div>
+  <div class="data" data-tag="qty" data-ident="22">5</div>
+  <div class="data" data-tag="price" data-ident="22">4.50</div>
+  <div class="data" data-tag="cost" data-ident="22">2.00</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="sku" data-ident="23">WIDGET3</div>
+  <div class="data" data-tag="qty" data-ident="23">0</div>
+  <div class="data" data-tag="price" data-ident="23"></div>
+  <div class="data" data-tag="cost" data-ident="23">1.00</div>
+  <div class="data" data-tag="sell-by" data-ident="23">2026-01-01</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="tag">a</div>
+  <div class="data" data-tag="tag"></div>
+  <div class="data" data-tag="tag">c</div>
+  <div class="data" data-tag="tag"></div>
+  <div class="data" data-tag="tag">needs,quote</div>
+  <div class="data" data-tag="tag">red</div>
+  <div class="data" data-tag="tag"></div>
+  <div class="data" data-tag="tag">red</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="num" data-ident="25">1</div>
+  <div class="data" data-tag="name" data-ident="25">one</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="num" data-ident="27">1</div>
+  <div class="data" data-tag="name" data-ident="27">one</div>
+  <div class="data" data-tag="score" data-ident="27">42</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="num" data-ident="28">2</div>
+  <div class="data" data-tag="name" data-ident="28">two</div>
+  <div class="data" data-tag="score" data-ident="28">43</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="num" data-ident="30">1</div>
+  <div class="data" data-tag="name" data-ident="30">one</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="leaf">value</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="destination" data-ident="32">10.0.0.0/24</div>
+  <div class="data" data-tag="protocol" data-ident="32">direct</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="destination" data-ident="33">10.0.1.0/24</div>
+  <div class="data" data-tag="protocol" data-ident="33">static</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="interface" data-ident="33">eth0</div>
+  <div class="data" data-tag="source-address" data-ident="33">10.0.1.1</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="name" data-ident="35">one</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="val" data-ident="37">1</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="count">42</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="active"></div>
+</div>
+<div class="line">
+  <div class="data" data-tag="disabled">false</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="raw-null">null</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="code">42</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="label">true</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="mid">null</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="num" data-ident="39">1</div>
+  <div class="data" data-tag="aval" data-ident="39">10</div>
+  <div class="data" data-tag="bval" data-ident="39">20</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="num" data-ident="40">2</div>
+  <div class="data" data-tag="aval" data-ident="40">30</div>
+  <div class="data" data-tag="bval" data-ident="40">40</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="pre" data-ident="42">before</div>
+  <div class="data" data-tag="name" data-ident="42">n1</div>
+  <div class="data" data-tag="post" data-ident="42">after</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="akey" data-ident="44">ka</div>
+  <div class="data" data-tag="mid" data-ident="44">middata</div>
+  <div class="data" data-tag="bkey" data-ident="44">kb</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="name" data-ident="46">r1</div>
+  <div class="data" data-tag="aval" data-ident="46">1</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="name" data-ident="47">r2</div>
+  <div class="data" data-tag="aval" data-ident="47">2</div>
+  <div class="data" data-tag="bval" data-ident="47">20</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="name" data-ident="48">r3</div>
+  <div class="data" data-tag="aval" data-ident="48">3</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="name" data-ident="50">dup</div>
+  <div class="data" data-tag="val" data-ident="50">1</div>
+  <div class="data" data-tag="val" data-ident="50">2</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="name" data-ident="52">parent1</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="iname" data-ident="54">c1</div>
+  <div class="data" data-tag="ival" data-ident="54">1</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="iname" data-ident="55">c2</div>
+  <div class="data" data-tag="ival" data-ident="55">2</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="name" data-ident="57">wrap</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="kid" data-ident="59">k1</div>
+  <div class="data" data-tag="kval" data-ident="59">1</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="kid" data-ident="60">k2</div>
+  <div class="data" data-tag="kval" data-ident="60">2</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="before">x</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="tag">r</div>
+  <div class="data" data-tag="tag">g</div>
+  <div class="data" data-tag="between">y</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="tag">b</div>
+  <div class="data" data-tag="color2">cyan</div>
+  <div class="data" data-tag="color2">magenta</div>
+  <div class="data" data-tag="xval">1</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="name" data-ident="62">b1</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="name" data-ident="64">one-a</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="name" data-ident="66">two-a</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="detail" data-ident="68">d1</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="name" data-ident="68">after-container</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="disp-only">should-not-appear</div>
+</div>
+<div class="line">
+</div>
+<div class="line">
+  <div class="data" data-tag="normal">always-appears</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="name" data-ident="70">solo</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="name" data-ident="72">solo</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="name" data-ident="75">second</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="name" data-ident="78">later</div>
+  <div class="data" data-tag="val" data-ident="78">99</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="msg">line1
+line2
+line3	tabbed</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="msg">ctrlherenext</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="tag">needs,quote
+and-newline</div>
+  <div class="data" data-tag="num" data-ident="83">1</div>
+  <div class="data" data-tag="note" data-ident="83">tab	here</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="msg">café</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="msg">😀hi</div>
+</div>

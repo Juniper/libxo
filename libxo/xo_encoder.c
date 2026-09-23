@@ -1,4 +1,5 @@
 /*
+ * SPDX-License-Identifier: BSD-2-Clause
  * Copyright (c) 2015, Juniper Networks, Inc.
  * All rights reserved.
  * This SOFTWARE is licensed under the LICENSE provided in the
@@ -22,6 +23,7 @@
 #include <sys/param.h>
 
 #include "xo_config.h"
+#define XO_WANT_FILTER_FLAG	/* We're part of libxo itself, not a plugin */
 #include "xo.h"
 #include "xo_private.h"
 #include "xo_encoder.h"
@@ -103,7 +105,7 @@ typedef struct xo_encoder_node_s {
     TAILQ_ENTRY(xo_encoder_node_s) xe_link; /* Next session */
     char *xe_name;			/* Name for this encoder */
     xo_encoder_func_t xe_handler;	/* Callback function */
-    xo_whiteboard_func_t xe_wb_marker;	/* Whiteboard marker function */
+    xo_xof_flags_t xe_flags;		/* Encoder capability flags (XEIF_*) */
     void *xe_dlhandle;			/* dlopen handle */
 } xo_encoder_node_t;
 
@@ -138,6 +140,7 @@ xo_encoder_list_add (const char *name)
 	}
 
 	memcpy(xep->xe_name, name, len);
+	xep->xe_flags = 0;
 
 	TAILQ_INSERT_TAIL(&xo_encoders, xep, xe_link);
     }
@@ -198,7 +201,7 @@ xo_encoder_find (const char *name)
 }
 
 static xo_encoder_node_t *
-xo_encoder_discover (const char *name)
+xo_encoder_discover (xo_handle_t *xop, const char *name)
 {
     void *dlp = NULL;
     xo_string_node_t *xsp;
@@ -225,14 +228,56 @@ xo_encoder_discover (const char *name)
 
 	    bzero(&xei, sizeof(xei));
 
+	    /*
+	     * We hand the encoder our version number.  If the encoder
+	     * needs newer features than we (this build of libxo)
+	     * provide, it overwrites xei_version with the version it
+	     * needs and returns -1: nothing more we can do.  If it
+	     * returns 0, it's usable, but it may have overwritten
+	     * xei_version with its own (older) version number, meaning
+	     * it predates some capability we might rely on; we decide
+	     * below whether that mismatch actually matters here.
+	     */
 	    xei.xei_version = XO_ENCODER_VERSION;
 	    ssize_t rc = func(&xei);
-	    if (rc == 0 && xei.xei_handler) {
-		xep = xo_encoder_list_add(name);
-		if (xep) {
-		    xep->xe_handler = xei.xei_handler;
-		    xep->xe_wb_marker = xei.xei_wb_marker;
-		    xep->xe_dlhandle = dlp;
+
+	    if (rc == -1) {
+		xo_failure(xop, "encoder '%s' requires xo_encoder api "
+			   "version %u, but this libxo only provides "
+			   "version %u", name, xei.xei_version,
+			   XO_ENCODER_VERSION);
+
+	    } else if (rc == 0 && xei.xei_handler) {
+		if (xei.xei_version != XO_ENCODER_VERSION) {
+		    /*
+		     * The one version-gated capability we know of today
+		     * is filter-awareness (xei_flags, added in version
+		     * 3): an encoder reporting an older version never
+		     * set xei_flags, so it can't have claimed
+		     * XEIF_FILTER_AWARE.  That only matters if filters
+		     * are already in use on this handle.
+		     */
+		    if (xei.xei_version < 3
+			&& xo_isset_flags(xop, XOF_FILTER)) {
+			xo_failure(xop, "encoder '%s' (api version %u) "
+				   "does not support filtering, which is "
+				   "already in use on this handle",
+				   name, xei.xei_version);
+			rc = -1;
+		    } else {
+			xo_dbg(xop, "encoder '%s' reports xo_encoder api "
+			       "version %u; this libxo provides version %u",
+			       name, xei.xei_version, XO_ENCODER_VERSION);
+		    }
+		}
+
+		if (rc == 0) {
+		    xep = xo_encoder_list_add(name);
+		    if (xep) {
+			xep->xe_handler = xei.xei_handler;
+			xep->xe_flags = xei.xei_flags;
+			xep->xe_dlhandle = dlp;
+		    }
 		}
 	    }
 	}
@@ -317,14 +362,14 @@ xo_encoder_init (xo_handle_t *xop, const char *name)
      */
     xo_encoder_node_t *xep = xo_encoder_find(name);
     if (xep == NULL) {
-	xep = xo_encoder_discover(name);
+	xep = xo_encoder_discover(xop, name);
 	if (xep == NULL) {
 	    xo_failure(xop, "encoder not found: %s", name);
 	    return -1;
 	}
     }
 
-    xo_set_encoder(xop, xep->xe_handler, xep->xe_wb_marker);
+    xo_set_encoder(xop, xep->xe_handler, xep->xe_flags);
 
     int rc = xo_encoder_handle(xop, XO_OP_CREATE, NULL, name, NULL, 0);
     if (rc == 0 && opts != NULL) {

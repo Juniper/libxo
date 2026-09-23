@@ -65,6 +65,7 @@ added filter: 0
                 000003: type 52 (T_FUNCTION_NAME), str 8 [false], contents 0, next 0, prev 0 
 main: status: zero
 main: input '{item'
+xpath_01: duplicate sibling name: 'item'
 main: filter: rc: 14
 main: status: zero
 main: input '<item'

@@ -1,0 +1,46 @@
+<div class="line">
+  <div class="data" data-tag="name" data-xpath="/cached/name">hello</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="name" data-xpath="/cached/name">world</div>
+</div>
+<div class="line">
+  <div class="label">static label</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="count" data-xpath="/cached/count">3</div>
+  <div class="text"> of </div>
+  <div class="data" data-tag="total" data-xpath="/cached/total">10</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="vis" data-xpath="/cached/vis">vis-val</div>
+</div>
+  <div class="padding">         </div>
+<div class="line">
+  <div class="data" data-tag="addr" data-xpath="/cached/addr">0x0</div>
+  <div class="text">..</div>
+  <div class="data" data-tag="port" data-xpath="/cached/port">80</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="name" data-xpath="/fallback/name">hello</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="name" data-xpath="/fallback/name">world</div>
+</div>
+<div class="line">
+  <div class="label">static label</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="count" data-xpath="/fallback/count">3</div>
+  <div class="text"> of </div>
+  <div class="data" data-tag="total" data-xpath="/fallback/total">10</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="vis" data-xpath="/fallback/vis">vis-val</div>
+</div>
+  <div class="padding">         </div>
+<div class="line">
+  <div class="data" data-tag="addr" data-xpath="/fallback/addr">0x0</div>
+  <div class="text">..</div>
+  <div class="data" data-tag="port" data-xpath="/fallback/port">80</div>
+</div>

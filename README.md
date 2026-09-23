@@ -3,6 +3,8 @@ libxo
 
 libxo - A Library for Generating Text, XML, JSON, and HTML Output
 
+[![C/C++ CI](https://github.com/Juniper/libxo/actions/workflows/c-cpp.yml/badge.svg)](https://github.com/Juniper/libxo/actions/workflows/c-cpp.yml)
+
 The libxo library allows an application to generate text, XML, JSON,
 and HTML output using a common set of function calls.  The application
 decides at run time which output style should be produced.  The

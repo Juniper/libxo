@@ -21,6 +21,19 @@ AM_CFLAGS = \
     -I${top_srcdir}/libxo \
     ${WARNINGS}
 
+if LIBXO_TEXT_ONLY
+TEST_CASES_COLOR =
+else
+TEST_CASES_COLOR = \
+test_10.c \
+test_11.c \
+test_12.c
+
+test_10_test_SOURCES = test_10.c
+test_11_test_SOURCES = test_11.c
+test_12_test_SOURCES = test_12.c
+endif
+
 # Ick: maintained by hand!
 TEST_CASES = \
 test_01.c \
@@ -32,11 +45,11 @@ test_06.c \
 test_07.c \
 test_08.c \
 test_09.c \
-test_10.c \
-test_11.c \
-test_12.c \
+${TEST_CASES_COLOR} \
 test_13.c \
-test_14.c
+test_14.c \
+test_15.c \
+test_16.c
 
 test_01_test_SOURCES = test_01.c
 test_02_test_SOURCES = test_02.c
@@ -47,11 +60,10 @@ test_06_test_SOURCES = test_06.c
 test_07_test_SOURCES = test_07.c
 test_08_test_SOURCES = test_08.c
 test_09_test_SOURCES = test_09.c
-test_10_test_SOURCES = test_10.c
-test_11_test_SOURCES = test_11.c
-test_12_test_SOURCES = test_12.c
 test_13_test_SOURCES = test_13.c
 test_14_test_SOURCES = test_14.c
+test_15_test_SOURCES = test_15.c
+test_16_test_SOURCES = test_16.c
 
 base_tests = ${TEST_CASES:.c=.test}
 
@@ -69,50 +81,96 @@ if HAVE_HUMANIZE_NUMBER
 LDADD += -lutil
 endif
 
+if HAVE_LIBBSD
+LDADD += -lbsd
+endif
+
+if HAVE_VALIDATE
+LLVM_PASSES = validate-test pass-test
+ALL_PASSES = . .validate. .pass.
+else
+LLVM_PASSES =
+ALL_PASSES = .
+endif
+
+if HAVE_GETTEXT
+GTEXT_EXT = Gjson Gt2 Gt3 Gt4 Gt5 Gtext
+else
+GTEXT_EXT = 
+endif
+
+CSV_EXT = Ecsv1 Ecsv2 Ecsv3
+PMAP_EXT = JPmap  XPmap
+RTOON_EXT = Ertoon
+
+STYLES = T XP JP JPu HP X J H HIPx E
+
+TEST_OUTPUT_FILES = \
+$(foreach file, ${TEST_CASES}, \
+    $(foreach pass, ${LLVM_PASSES}, \
+        $(foreach fd, out err, \
+            $(addprefix saved/, ${file:.c=.${pass}.make.${fd}}))) \
+    $(foreach pass, ${ALL_PASSES}, \
+        $(foreach ext, ${STYLES}, \
+            $(foreach fd, out err, \
+                $(addprefix saved/, ${file:.c=${pass}${ext}.${fd}})))))
+
+TEST_OUTPUT_FILES += \
+$(foreach file, test_15.c, \
+    $(foreach pass, ${ALL_PASSES}, \
+        $(foreach ext, ${GTEXT_EXT}, \
+            $(foreach fd, out err, \
+                $(addprefix saved/, ${file:.c=${pass}${ext}.${fd}})))))
+
+TEST_OUTPUT_FILES += \
+$(foreach file, test_01.c, \
+    $(foreach pass, ${ALL_PASSES}, \
+        $(foreach ext, ${CSV_EXT}, \
+            $(foreach fd, out err, \
+                $(addprefix saved/, ${file:.c=${pass}${ext}.${fd}})))))
+
+TEST_OUTPUT_FILES += \
+$(foreach file, test_12.c, \
+    $(foreach pass, ${ALL_PASSES}, \
+        $(foreach ext, ${PMAP_EXT}, \
+            $(foreach fd, out err, \
+                $(addprefix saved/, ${file:.c=${pass}${ext}.${fd}})))))
+
+TEST_OUTPUT_FILES += \
+$(foreach file, test_04.c test_16.c, \
+    $(foreach pass, ${ALL_PASSES}, \
+        $(foreach ext, ${RTOON_EXT}, \
+            $(foreach fd, out err, \
+                $(addprefix saved/, ${file:.c=${pass}${ext}.${fd}})))))
+
+sayit:
+	echo ${TEST_OUTPUT_FILES}
+
 EXTRA_DIST = \
     ${TEST_CASES} \
     test_01.fmts \
+    test_04.fmts \
     test_12.fmts \
-    ${addprefix saved/, ${TEST_CASES:.c=.E.err}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.E.out}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.H.err}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.H.out}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.HIPx.err}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.HIPx.out}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.HP.err}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.HP.out}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.J.err}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.J.out}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.JP.err}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.JP.out}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.JPu.err}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.JPu.out}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.T.err}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.T.out}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.X.err}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.X.out}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.XP.err}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.XP.out}} \
-    ${addprefix saved/, test_01.Ecsv1.out} \
-    ${addprefix saved/, test_01.Ecsv1.err} \
-    ${addprefix saved/, test_01.Ecsv2.out} \
-    ${addprefix saved/, test_01.Ecsv2.err} \
-    ${addprefix saved/, test_01.Ecsv3.out} \
-    ${addprefix saved/, test_01.Ecsv3.err} \
-    ${addprefix saved/, test_12.XPmap.out} \
-    ${addprefix saved/, test_12.XPmap.err} \
-    ${addprefix saved/, test_12.JPmap.out} \
-    ${addprefix saved/, test_12.JPmap.err}
+    test_12.fmts \
+    test_15.fmts \
+    test_16.fmts \
+    test_12.map \
+    ${TEST_OUTPUT_FILES}
 
 # ---------------------------------------------------------------------------
 # Test runner
 # ---------------------------------------------------------------------------
 
-RUN_TESTS_SH = ${srcdir}/../run-tests.sh
-RUN_TESTS_CMD = ${BASH} ${RUN_TESTS_SH} -d ${srcdir}
-
 # Standard formats; per-test extras live in test_NN.fmts sidecar files.
+if LIBXO_TEXT_ONLY
+TEST_FORMATS = T
+else
 TEST_FORMATS = T XP JP JPu HP X J H HIPx E=warn,encoder=test
+EXTRA_FMTS = -X
+endif
+
+RUN_TESTS_SH = ${srcdir}/../run-tests.sh
+RUN_TESTS_CMD = ${BASH} ${RUN_TESTS_SH} -d ${srcdir} ${EXTRA_FMTS}
 
 all:
 
@@ -145,7 +203,7 @@ test tests: ${noinst_PROGRAMS} run-plain-tests ${PLUGIN_TESTS}
 
 run-plain-tests:
 	@${MKDIR} -p out
-	${RUN_TESTS_CMD} -T "${TEST_FORMATS}" run-bin ${TEST_CASES:.c=.test}
+	@${RUN_TESTS_CMD} -T "${TEST_FORMATS}" run-bin ${TEST_CASES:.c=.test}
 
 if HAVE_VALIDATE
 
@@ -162,11 +220,11 @@ $(validate_tests): %.validate-test: $(srcdir)/%.c \
 	    LD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${LD_LIBRARY_PATH}" \
 	    ${LLVM_CLANG} ${CFLAGS} \
 	    -fplugin=${VALIDATE_BUILD}/xo_validate.so \
-	    -mllvm -xo-validate-errors-as-warnings \
+	    -mllvm -xo-validate-errors-as-warnings -mllvm -xo-validate-lint \
 	    -I${top_srcdir}/libxo -I${top_builddir}/libxo -I${INCLUDEDIR} ${SYSROOT_FLAG} \
 	    -c $< -o $*.validate-test.o > out/$@.make.out 2> out/$@.make.err
 	@$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link \
-	    ${LLVM_CLANG} ${CFLAGS} ${SYSROOT_FLAG} \
+	    ${LLVM_CLANG} ${CFLAGS} ${LDADD} ${SYSROOT_FLAG} \
 	    $*.validate-test.o ${LIBXO_LA} \
 	    -o $@
 
@@ -181,7 +239,7 @@ $(pass_tests): %.pass-test: $(srcdir)/%.c \
 	    -I${top_srcdir}/libxo -I${top_builddir}/libxo -I${INCLUDEDIR} ${SYSROOT_FLAG} \
 	    -c $< -o $*.pass-test.o > out/$@.make.out 2> out/$@.make.err
 	@$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link \
-	    ${LLVM_CLANG} ${CFLAGS} ${SYSROOT_FLAG} \
+	    ${LLVM_CLANG} ${CFLAGS} ${LDADD} ${SYSROOT_FLAG} \
 	    $*.pass-test.o ${LIBXO_LA} \
 	    -o $@
 
@@ -205,7 +263,7 @@ run-pass-tests: $(pass_tests)
 	    diff -Nu ${srcdir}/saved/$$tc.pass-test.make.err \
 	        out/$$tc.pass-test.make.err ; \
 	done
-	DYLD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${DYLD_LIBRARY_PATH}" \
+	@DYLD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${DYLD_LIBRARY_PATH}" \
 	    LD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${LD_LIBRARY_PATH}" \
 	    ${RUN_TESTS_CMD} -T "${TEST_FORMATS}" -m pass run-bin ${TEST_CASES:.c=.test}
 
@@ -218,7 +276,7 @@ endif
 # Run a single test/format for quick iteration:
 #   make one TEST_BIN=test_01.test TEST_FMT=JP
 one:
-	${RUN_TESTS_CMD} -T "${TEST_FMT:-T}" run-bin ${TEST_BIN:-test_01.test}
+	@${RUN_TESTS_CMD} -T "${TEST_FMT:-T}" run-bin ${TEST_BIN:-test_01.test}
 
 accept:
 	@${MKDIR} -p ${srcdir}/saved
@@ -233,6 +291,20 @@ accept:
 	    cp out/$$tc.pass-test.make.err \
 	        ${srcdir}/saved/$$tc.pass-test.make.err 2>/dev/null ; \
 	done
+	-@for tc in ${TEST_CASES:.c=}; do \
+	    cp out/$$tc.validate-test.make.out \
+		${srcdir}/saved/$$tc.validate-test.make.out ; \
+	    cp out/$$tc.validate-test.make.err  \
+	    	${srcdir}/saved/$$tc.validate-test.make.err ; \
+	done
+	-@for tc in ${TEST_CASES:.c=}; do \
+	    cp out/$$tc.pass-test.make.out \
+	    	${srcdir}/saved/$$tc.pass-test.make.out ; \
+	    cp out/$$tc.pass-test.make.err \
+	    	${srcdir}/saved/$$tc.pass-test.make.err ; \
+	done
+	-@${RUN_TESTS_CMD} -T "${TEST_FORMATS}" -m validate accept-bin ${TEST_CASES:.c=.test}
+	-@${RUN_TESTS_CMD} -T "${TEST_FORMATS}" -m pass accept-bin ${TEST_CASES:.c=.test}
 
 .c.test:
 	$(AM_V_CC)$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -o $@ $<

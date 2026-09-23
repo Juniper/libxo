@@ -1,0 +1,377 @@
+{
+  "rtoon_test": {
+    "s01_empty_container": {
+
+    },
+    "s02_empty_list": [
+    ],
+    "s03_a": {
+      "s03_b": {
+        "s03_c": {
+          "leaf": "value"
+        }
+      }
+    },
+    "s04_disk": [
+      {
+        "name": "sda",
+        "size": 100
+      },
+      {
+        "name": "sdb",
+        "size": 200
+      },
+      {
+        "name": "sdc",
+        "size": 300
+      }
+    ],
+    "s05_route": [
+      {
+        "dest": "10.0.0.0",
+        "prefix_len": 24,
+        "protocol": "static"
+      },
+      {
+        "dest": "10.0.1.0",
+        "prefix_len": 24,
+        "protocol": "static"
+      },
+      {
+        "dest": "0.0.0.0",
+        "prefix_len": 0,
+        "protocol": "default"
+      }
+    ],
+    "s06_host": [
+      {
+        "name": "alpha"
+      },
+      {
+        "name": "beta",
+        "stats": {
+          "up_time": 100
+        }
+      }
+    ],
+    "s07_cpu": [
+      {
+        "num": 0,
+        "load": 0
+      },
+      {
+        "num": 1,
+        "load": 7
+      },
+      {
+        "num": 2,
+        "load": 14
+      }
+    ],
+    "s08_route2": [
+      {
+        "dest": "10.0.0.0",
+        "prefix_len": 24,
+        "protocol": "static"
+      },
+      {
+        "dest": "10.0.1.0",
+        "prefix_len": 25,
+        "protocol": "static"
+      }
+    ],
+    "s09_item": [
+      {
+        "sku": "WIDGET1",
+        "qty": 10,
+        "price": "9.99"
+      },
+      {
+        "sku": "WIDGET2",
+        "qty": 5,
+        "price": "4.50",
+        "cost": "2.00"
+      },
+      {
+        "sku": "WIDGET3",
+        "qty": 0,
+        "price": "",
+        "cost": "1.00",
+        "sell_by": "2026-01-01"
+      }
+    ],
+    "s10_colors": {
+      "tag": [
+        "a",
+        "",
+        "c",
+        "",
+        "needs,quote"
+      ]
+    },
+    "s11a_tags": {
+      "tag": [
+        "red"
+      ]
+    },
+    "s11b_tags": {
+      "tag": [
+        ""
+      ]
+    },
+    "s12_plain": {
+      "tag": "red"
+    },
+    "s13a_entry": [
+      {
+        "num": 1,
+        "name": "one"
+      }
+    ],
+    "s13b_entry": [
+      {
+        "num": 1,
+        "name": "one",
+        "score": 42
+      },
+      {
+        "num": 2,
+        "name": "two",
+        "score": 43
+      }
+    ],
+    "s13c_entry": [
+      {
+        "num": 1,
+        "name": "one"
+      }
+    ],
+    "s14_thing": {
+      "leaf": "value"
+    },
+    "s15_route_entry": [
+      {
+        "destination": "10.0.0.0/24",
+        "protocol": "direct"
+      },
+      {
+        "destination": "10.0.1.0/24",
+        "protocol": "static",
+        "via": {
+          "interface": "eth0",
+          "source_address": "10.0.1.1"
+        }
+      }
+    ],
+    "s15b_entry": [
+      {
+        "name": "one",
+        "sub": [
+          {
+            "val": "1"
+          }
+        ]
+      }
+    ],
+    "s16_types": {
+      "count": 42,
+      "active": true,
+      "disabled": false,
+      "raw_null": null,
+      "code": "42",
+      "label": "true",
+      "mid": "null"
+    },
+    "s17_split": [
+      {
+        "num": 1,
+        "aval": 10,
+        "bval": 20
+      },
+      {
+        "num": 2,
+        "aval": 30,
+        "bval": 40
+      }
+    ],
+    "s18_order": [
+      {
+        "pre": "before",
+        "name": "n1",
+        "post": "after"
+      }
+    ],
+    "s19_twokeys": [
+      {
+        "akey": "ka",
+        "mid": "middata",
+        "bkey": "kb"
+      }
+    ],
+    "s20_narrow": [
+      {
+        "name": "r1",
+        "aval": 1
+      },
+      {
+        "name": "r2",
+        "aval": 2,
+        "bval": 20
+      },
+      {
+        "name": "r3",
+        "aval": 3
+      }
+    ],
+    "s21_dupfield": [
+      {
+        "name": "dup",
+        "val": 1,
+        "val": 2
+      }
+    ],
+    "s22_outer_sparse": [
+      {
+        "name": "parent1",
+        "inner": [
+          {
+            "iname": "c1",
+            "ival": 1
+          },
+          {
+            "iname": "c2",
+            "ival": 2
+          }
+        ]
+      }
+    ],
+    "s23_mixed": [
+      {
+        "name": "wrap",
+        "holder": {
+          "densekids": [
+            {
+              "kid": "k1",
+              "kval": 1
+            },
+            {
+              "kid": "k2",
+              "kval": 2
+            }
+          ]
+        }
+      }
+    ],
+    "s24_leafmix": {
+      "before": "x",
+      "tag": [
+        "r",
+        "g"
+      ],
+      "between": "y",
+      "tag": [
+        "b"
+      ],
+      "color2": [
+        "cyan",
+        "magenta"
+      ]
+    },
+    "s25_sib_a": {
+      "xval": "1"
+    },
+    "s25_sib_b": [
+      {
+        "name": "b1"
+      }
+    ],
+    "s26_twolists": {
+      "listone": [
+        {
+          "name": "one-a"
+        }
+      ],
+      "listtwo": [
+        {
+          "name": "two-a"
+        }
+      ]
+    },
+    "s27_firstcontainer": [
+      {
+        "info": {
+          "detail": "d1"
+        },
+        "name": "after-container"
+      }
+    ],
+    "s28_dispenc": {
+      "enc_only": "should-appear",
+      "normal": "always-appears"
+    },
+    "s29_keyonly_dense": [
+      {
+        "name": "solo"
+      }
+    ],
+    "s29_keyonly_sparse": [
+      {
+        "name": "solo"
+      }
+    ],
+    "s30_sparse_empty": [
+      {
+
+      },
+      {
+        "name": "second"
+      }
+    ],
+    "s31_emptyfirst": [
+      {
+
+      },
+      {
+        "name": "later",
+        "val": 99
+      }
+    ],
+    "s32_alwaysempty": [
+      {
+
+      },
+      {
+
+      }
+    ],
+    "s33a_newlines": {
+      "msg": "line1\nline2\r\nline3\ttabbed"
+    },
+    "s33b_nonmnemonic": {
+      "msg": "ctrl\u0001here\u001fnext"
+    },
+    "s33c_colors": {
+      "tag": [
+        "needs,quote\nand-newline"
+      ]
+    },
+    "s33d_row": [
+      {
+        "num": 1,
+        "note": "tab\there"
+      }
+    ],
+    "s33e_odd	name": {
+
+    },
+    "s34a_bmp": {
+      "msg": "café"
+    },
+    "s34b_supplementary": {
+      "msg": "😀hi"
+    },
+    "s34c_café": {
+
+    }
+  }
+}

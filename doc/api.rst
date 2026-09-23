@@ -8,6 +8,7 @@ them, and the actions they perform.
 
 .. index:: Handles
 .. _handles:
+.. _api:
 
 Handles
 -------
@@ -1731,6 +1732,113 @@ Each software development organization that defines a set of syslog
 messages should register their own EID and use that value in their
 software to ensure that messages can be uniquely identified by the
 combination of EID + message name.
+
+.. _syslog-networking:
+
+Remote Syslog Delivery
+~~~~~~~~~~~~~~~~~~~~~~
+
+The following functions configure `xo_syslog`/`xo_vsyslog` to deliver
+messages to a remote syslog server over UDP, instead of (or via
+override of specific fields from) the local syslog socket.  They form
+the library-level support used by the `xo-logger` command
+(:ref:`xo-logger`) to implement its `-h`, `-4`, `-6`, `-A`, `-S`,
+`-P`, and `-H` options, but are available to any application.
+
+None of these functions perform hostname or service-name resolution;
+that is the caller's responsibility (e.g. via :manpage:`gethostbyname(3)`,
+:manpage:`gethostbyname2(3)`, or :manpage:`getservbyname(3)`).  This keeps
+`libxo` free of DNS/NSS dependencies and lets the caller control and
+report resolution failures itself.
+
+.. index:: xo_log_set_hostname
+
+xo_log_set_hostname
+++++++++++++++++++++
+
+.. c:function:: void xo_log_set_hostname (const char *hostname)
+
+  :param hostname: literal hostname
+  :type hostname: const char *
+  :returns: void
+
+  Overrides the HOSTNAME field normally filled in via
+  :manpage:`gethostname(3)`, using the given literal string instead.
+
+.. index:: xo_log_set_host
+
+xo_log_set_host
+++++++++++++++++
+
+.. c:function:: void xo_log_set_host (struct hostent *hp)
+
+  :param hp: resolved host, as returned by gethostbyname(3)/gethostbyname2(3)
+  :type hp: struct hostent *
+  :returns: void
+
+  Directs subsequent syslog messages to the address(es) in `hp`
+  instead of the local syslog socket, using UDP.  By default, only the
+  first address is used; see `xo_log_set_all_addresses` to send to
+  every address in the list.
+
+.. index:: xo_log_set_host_path
+
+xo_log_set_host_path
+++++++++++++++++++++++
+
+.. c:function:: void xo_log_set_host_path (const char *path)
+
+  :param path: filesystem path to an AF_LOCAL syslog socket
+  :type path: const char *
+  :returns: void
+
+  An alternative to `xo_log_set_host`, for the case where the target
+  is a local (AF_LOCAL/AF_UNIX) socket path rather than a network
+  host, e.g. `/var/run/log`.
+
+.. index:: xo_log_set_port
+
+xo_log_set_port
+++++++++++++++++
+
+.. c:function:: void xo_log_set_port (int port)
+
+  :param int port: destination UDP port number, host byte order
+  :returns: void
+
+  Sets the destination port used when sending to the address(es)
+  given via `xo_log_set_host`.  The caller is responsible for
+  resolving a service name (e.g. via :manpage:`getservbyname(3)`) to a
+  port number before calling this function.
+
+.. index:: xo_log_set_source
+
+xo_log_set_source
+++++++++++++++++++
+
+.. c:function:: void xo_log_set_source (struct sockaddr *sa, unsigned salen)
+
+  :param sa: local source address/port to bind before sending
+  :type sa: struct sockaddr *
+  :param unsigned salen: length of `sa`
+  :returns: void
+
+  Binds the outgoing UDP socket to the given local address and port
+  before sending remote syslog messages.
+
+.. index:: xo_log_set_all_addresses
+
+xo_log_set_all_addresses
++++++++++++++++++++++++++
+
+.. c:function:: void xo_log_set_all_addresses (int value)
+
+  :param int value: non-zero to send to all resolved addresses
+  :returns: void
+
+  Controls whether remote syslog messages are sent to only the first
+  address given to `xo_log_set_host` (the default) or to every
+  address in the list.
 
 Creating Custom Encoders
 ------------------------

@@ -1,4 +1,5 @@
 /*
+ * SPDX-License-Identifier: BSD-2-Clause
  * Copyright (c) 2025, Juniper Networks, Inc.
  * All rights reserved.
  * This SOFTWARE is licensed under the LICENSE provided in the
@@ -41,24 +42,84 @@
  *   [2-byte pad at offset 30 — inserted by compiler to align xfi_fnum]
  *   offset 32: uint32_t xfi_fnum     (i32)
  *   offset 36: uint32_t xfi_renum    (i32)
- *   total: 40 bytes
+ *   offset 40: pointer xfi_cachep    (pointer)
+ *   total: 48 bytes (for a 64-bit pointer
  */
-_Static_assert(sizeof(xo_xff_flags_t)    == 8,  "xo_xff_flags_t must be 8 bytes");
-_Static_assert(sizeof(xo_format_offset_t) == 2, "xo_format_offset_t must be 2 bytes");
-_Static_assert(sizeof(xo_field_info_t)   == 40, "xo_field_info_t size mismatch; update xo_precompile.cc FieldTy");
-_Static_assert(offsetof(xo_field_info_t, xfi_flags)    ==  0, "xfi_flags offset");
-_Static_assert(offsetof(xo_field_info_t, xfi_ftype)    ==  8, "xfi_ftype offset");
-_Static_assert(offsetof(xo_field_info_t, xfi_start)    == 12, "xfi_start offset");
-_Static_assert(offsetof(xo_field_info_t, xfi_content)  == 14, "xfi_content offset");
-_Static_assert(offsetof(xo_field_info_t, xfi_format)   == 16, "xfi_format offset");
-_Static_assert(offsetof(xo_field_info_t, xfi_encoding) == 18, "xfi_encoding offset");
-_Static_assert(offsetof(xo_field_info_t, xfi_next)     == 20, "xfi_next offset");
-_Static_assert(offsetof(xo_field_info_t, xfi_len)      == 22, "xfi_len offset");
-_Static_assert(offsetof(xo_field_info_t, xfi_clen)     == 24, "xfi_clen offset");
-_Static_assert(offsetof(xo_field_info_t, xfi_flen)     == 26, "xfi_flen offset");
-_Static_assert(offsetof(xo_field_info_t, xfi_elen)     == 28, "xfi_elen offset");
-_Static_assert(offsetof(xo_field_info_t, xfi_fnum)     == 32, "xfi_fnum offset");
-_Static_assert(offsetof(xo_field_info_t, xfi_renum)    == 36, "xfi_renum offset");
+_Static_assert(sizeof(xo_xff_flags_t)    == 8,
+	       "xo_xff_flags_t must be 8 bytes");
+_Static_assert(sizeof(xo_format_offset_t) == 2,
+	       "xo_format_offset_t must be 2 bytes");
+_Static_assert(sizeof(xo_field_info_t)   == 48 + sizeof(void *),
+       "xo_field_info_t size mismatch; update xo_precompile.cc FieldTy");
+
+_Static_assert(offsetof(xo_field_info_t, xfi_flags)    ==  0,
+	       "xfi_flags offset");
+_Static_assert(offsetof(xo_field_info_t, xfi_ftype)    ==  8,
+	       "xfi_ftype offset");
+_Static_assert(offsetof(xo_field_info_t, xfi_start)    == 12,
+	       "xfi_start offset");
+_Static_assert(offsetof(xo_field_info_t, xfi_content)  == 14,
+	       "xfi_content offset");
+_Static_assert(offsetof(xo_field_info_t, xfi_format)   == 16,
+	       "xfi_format offset");
+_Static_assert(offsetof(xo_field_info_t, xfi_encoding) == 18,
+	       "xfi_encoding offset");
+_Static_assert(offsetof(xo_field_info_t, xfi_next)     == 20,
+	       "xfi_next offset");
+_Static_assert(offsetof(xo_field_info_t, xfi_len)      == 22,
+	       "xfi_len offset");
+_Static_assert(offsetof(xo_field_info_t, xfi_clen)     == 24,
+	       "xfi_clen offset");
+_Static_assert(offsetof(xo_field_info_t, xfi_flen)     == 26,
+	       "xfi_flen offset");
+_Static_assert(offsetof(xo_field_info_t, xfi_elen)     == 28,
+	       "xfi_elen offset");
+_Static_assert(offsetof(xo_field_info_t, xfi_fnum)     == 32,
+	       "xfi_fnum offset");
+_Static_assert(offsetof(xo_field_info_t, xfi_renum)    == 36,
+	       "xfi_renum offset");
+_Static_assert(offsetof(xo_field_info_t, xfi_fspecs)   == 40,
+	       "xfi_fspecs offset");
+_Static_assert(offsetof(xo_field_info_t, xfi_num_fspecs) == 40 + sizeof(void *),
+	       "xfi_num_fspecs offset");
+
+/*
+ * Same protection for xo_fspec_t, mirrored in xo_precompile.cc's FspecTy.
+ * Expected layout (LP64):
+ *   offset  0: uint8_t xf_fc .. xf_stars (8 flag bytes, then leading_zero,
+ *              dots, alt, stars — 12 individual uint8_t members)
+ *   offset 12: uint8_t xf_star[3]
+ *   offset 15: uint8_t xf_at_stars
+ *   offset 16: int16_t xf_width[3]
+ *   offset 22: uint16_t xf_start
+ *   offset 24: uint16_t xf_len
+ *   offset 26: uint16_t xf_prefix_len
+ *   offset 28: uint16_t xf_num_bits, padding
+ *   offset 30: uint32_t xf_extflags
+ *   total: 34 bytes
+ */
+_Static_assert(sizeof(xo_fspec_t) == 36,
+	       "xo_fspec_t size mismatch; update xo_precompile.cc FspecTy");
+_Static_assert(offsetof(xo_fspec_t, xf_fc)           ==  0, "xf_fc offset");
+_Static_assert(offsetof(xo_fspec_t, xf_lflag)        ==  1, "xf_lflag offset");
+_Static_assert(offsetof(xo_fspec_t, xf_hflag)        ==  2, "xf_hflag offset");
+_Static_assert(offsetof(xo_fspec_t, xf_jflag)        ==  3, "xf_jflag offset");
+_Static_assert(offsetof(xo_fspec_t, xf_tflag)        ==  4, "xf_tflag offset");
+_Static_assert(offsetof(xo_fspec_t, xf_zflag)        ==  5, "xf_zflag offset");
+_Static_assert(offsetof(xo_fspec_t, xf_qflag)        ==  6, "xf_qflag offset");
+_Static_assert(offsetof(xo_fspec_t, xf_seen_minus)   ==  7, "xf_seen_minus offset");
+_Static_assert(offsetof(xo_fspec_t, xf_leading_zero) ==  8, "xf_leading_zero offset");
+_Static_assert(offsetof(xo_fspec_t, xf_dots)         ==  9, "xf_dots offset");
+_Static_assert(offsetof(xo_fspec_t, xf_alt)          == 10, "xf_alt offset");
+_Static_assert(offsetof(xo_fspec_t, xf_stars)        == 11, "xf_stars offset");
+_Static_assert(offsetof(xo_fspec_t, xf_star)         == 12, "xf_star offset");
+_Static_assert(offsetof(xo_fspec_t, xf_at_stars)     == 15, "xf_at_stars offset");
+_Static_assert(offsetof(xo_fspec_t, xf_width)        == 16, "xf_width offset");
+_Static_assert(offsetof(xo_fspec_t, xf_start)        == 22, "xf_start offset");
+_Static_assert(offsetof(xo_fspec_t, xf_len)          == 24, "xf_len offset");
+_Static_assert(offsetof(xo_fspec_t, xf_prefix_len)   == 26, "xf_prefix_len offset");
+_Static_assert(offsetof(xo_fspec_t, xf_num_bits  )   == 28, "xf_num_bits offset");
+_Static_assert(offsetof(xo_fspec_t, xf_extflags  )   == 32, "xf_extflags offset");
 
 struct xo_shim_state {
     xo_shim_error_t error;
@@ -96,11 +157,11 @@ xo_shim_parse (const char *fmt, xo_shim_error_t error, void *data)
 {
     struct xo_shim_state ss = { error, data };
     xo_parse_t xpp = { 0 };
-    xpp.xp_error      = shim_error_cb;
+    xpp.xp_error = shim_error_cb;
     xpp.xp_error_data = &ss;
-    xpp.xp_warn       = shim_warn_cb;
+    xpp.xp_warn = shim_warn_cb;
     xpp.xp_warn_data = &ss;
-    xpp.xp_flags      = XPF_STRICT;
+    xpp.xp_flags = XPF_STRICT;
 
     int rc = xo_parse_format(&xpp, fmt);
     xo_parse_release(&xpp);
@@ -134,6 +195,23 @@ scan_format_args (const char *field_fmt, unsigned flen,
 	    p += 1;
 	    continue;
 	}
+
+        /*
+         * "%@...@" is an XO-specific prefix: each '*' between the two
+         * '@'s marks an int arg that must be consumed and discarded
+         * before the real conversion's own args are pulled (see
+         * xo_parse_one_format() in xo_format.c).  Record one int arg
+         * per '*', then treat the closing '@' as the pseudo '%' and
+         * keep parsing the rest of the spec from there.
+         */
+        if (*p == '@') {
+            for (p += 1; p < end && *p != '@'; p++) {
+                if (*p == '*')
+                    arg_cb(arg_data, "%d", 2);
+            }
+            if (p < end)
+                p += 1;  /* skip the closing '@' (pseudo '%') */
+        }
 
         /* flags */
         while (p < end && (*p == '-' || *p == '+' || *p == ' '
@@ -253,7 +331,8 @@ int
 xo_shim_parse_args (const char *fmt,
                      xo_shim_error_t error_cb, void *error_data,
                      xo_shim_error_t warn_cb,  void *warn_data,
-                     xo_shim_arg_cb_t arg_cb,  void *arg_data)
+                     xo_shim_arg_cb_t arg_cb,  void *arg_data,
+                     xo_parse_flags_t flags)
 {
     struct xo_shim_state ss_err  = { error_cb, error_data };
     struct xo_shim_state ss_warn = { warn_cb, warn_data };
@@ -262,7 +341,7 @@ xo_shim_parse_args (const char *fmt,
     xpp.xp_error_data = &ss_err;
     xpp.xp_warn       = shim_warn_cb;
     xpp.xp_warn_data  = &ss_warn;
-    xpp.xp_flags      = XPF_STRICT;
+    xpp.xp_flags      = flags;
 
     if (xo_parse_format(&xpp, fmt) < 0) {
         xo_parse_release(&xpp);
@@ -280,13 +359,26 @@ xo_shim_parse_args (const char *fmt,
             arg_cb(arg_data, NULL, 0);
 
 	else {
+	    int no_name = (xfip->xfi_flags & XFF_DISPLAY_ONLY) != 0;
+	    const char use_instead[] = "use 'F'/format role instead";
+
 	    /* Enforce name/format restrictions */
-	    if (strchr(XO_LINT_ROLES_NEEDING_NAME, ftype)
-			&& xfip->xfi_clen == 0)
-		ss_err.error(ss_err.data,
-			     "field role ('%c') requires a non-empty name: "
-			     "'%s'",
-			     ftype, xo_printable2(str, slen, 1));
+	    if ((flags & XPF_LINT) && strchr(XO_LINT_ROLES_NEEDING_NAME, ftype)
+			&& xfip->xfi_clen == 0) {
+		const char *role_name = xo_lookup_role_name(ftype);
+		if (no_name)
+		    ss_err.error(ss_err.data,
+				 "value field ('%c'%s%s) has empty name, but "
+				 "has the 'display' flag set; %s: '%s'",
+				 ftype, role_name ? "/" : "", role_name ?: "",
+				 use_instead, xo_printable2(str, slen, 1));
+		else 
+		    ss_err.error(ss_err.data,
+				 "field role ('%c'%s%s) requires a non-empty "
+				 "name: '%s'",
+				 ftype, role_name ? "/" : "", role_name ?: "",
+				 xo_printable2(str, slen, 1));
+	    }
 
 	    /*
 	     * xfi_format >= 0 means an explicit format was written in the
@@ -295,11 +387,14 @@ xo_shim_parse_args (const char *fmt,
 	     * Only error when the user wrote neither content nor format.
 	     */
 	    if (strchr(XO_LINT_ROLES_NEEDING_NAME_OR_FORMAT, ftype)
-		&& xfip->xfi_clen == 0 && xfip->xfi_format < 0)
+		    && xfip->xfi_clen == 0 && xfip->xfi_format < 0) {
+		const char *role_name = xo_lookup_role_name(ftype);
 		ss_err.error(ss_err.data,
-			     "field role ('%c') requires a name or format: "
+			     "field role ('%c'%s%s) requires a name or format: "
 			     "'%s'",
-			     ftype, xo_printable2(str, slen, 1));
+			     ftype, role_name ? "/" : "", role_name ?: "",
+			     xo_printable2(str, slen, 1));
+	    }
 
 	    if (strchr(XO_LINT_ROLES_NO_FORMAT, ftype)
 			&& xfip->xfi_format != XO_FOFF_NONE)
@@ -369,7 +464,8 @@ xo_shim_parse_args (const char *fmt,
 int
 xo_shim_parse_fields (const char *fmt,
                        xo_shim_error_t error_cb, void *error_data,
-                       xo_shim_field_cb_t field_cb, void *field_data)
+                       xo_shim_field_cb_t field_cb, void *field_data,
+                       xo_shim_fspec_cb_t fspec_cb, void *fspec_data)
 {
     struct xo_shim_state ss = { error_cb, error_data };
     xo_parse_t xpp = { 0 };
@@ -384,20 +480,57 @@ xo_shim_parse_fields (const char *fmt,
     for (unsigned i = 0; i < xpp.xp_num_fields; i++) {
         const xo_field_info_t *xfip = &xpp.xp_fields[i];
         xo_shim_field_t f;
-        f.xsf_flags    = xfip->xfi_flags;
-        f.xsf_ftype    = xfip->xfi_ftype;
-        f.xsf_start    = xfip->xfi_start;
-        f.xsf_content  = xfip->xfi_content;
-        f.xsf_format   = xfip->xfi_format;
-        f.xsf_encoding = xfip->xfi_encoding;
-        f.xsf_next     = xfip->xfi_next;
-        f.xsf_len      = xfip->xfi_len;
-        f.xsf_clen     = xfip->xfi_clen;
-        f.xsf_flen     = xfip->xfi_flen;
-        f.xsf_elen     = xfip->xfi_elen;
-        f.xsf_fnum     = xfip->xfi_fnum;
-        f.xsf_renum    = xfip->xfi_renum;
+        f.xsf_flags       = xfip->xfi_flags;
+        f.xsf_ftype       = xfip->xfi_ftype;
+        f.xsf_start       = xfip->xfi_start;
+        f.xsf_content     = xfip->xfi_content;
+        f.xsf_format      = xfip->xfi_format;
+        f.xsf_encoding    = xfip->xfi_encoding;
+        f.xsf_next        = xfip->xfi_next;
+        f.xsf_len         = xfip->xfi_len;
+        f.xsf_clen        = xfip->xfi_clen;
+        f.xsf_flen        = xfip->xfi_flen;
+        f.xsf_elen        = xfip->xfi_elen;
+        f.xsf_fnum        = xfip->xfi_fnum;
+        f.xsf_renum       = xfip->xfi_renum;
+        f.xsf_num_fspecs  = xfip->xfi_fspecs ? xfip->xfi_num_fspecs : 0;
         field_cb(field_data, &f);
+
+        if (fspec_cb == NULL)
+            continue;
+
+        for (unsigned j = 0; j < f.xsf_num_fspecs; j++) {
+            const xo_fspec_t *xfp = &xfip->xfi_fspecs[j];
+            xo_shim_fspec_t sf;
+            sf.xsp_fc           = xfp->xf_fc;
+            sf.xsp_lflag        = xfp->xf_lflag;
+            sf.xsp_hflag        = xfp->xf_hflag;
+            sf.xsp_jflag        = xfp->xf_jflag;
+            sf.xsp_tflag        = xfp->xf_tflag;
+            sf.xsp_zflag        = xfp->xf_zflag;
+            sf.xsp_qflag        = xfp->xf_qflag;
+            sf.xsp_seen_minus   = xfp->xf_seen_minus;
+            sf.xsp_leading_zero = xfp->xf_leading_zero;
+            sf.xsp_dots         = xfp->xf_dots;
+            sf.xsp_alt          = xfp->xf_alt;
+            sf.xsp_stars        = xfp->xf_stars;
+            sf.xsp_star[0]      = xfp->xf_star[0];
+            sf.xsp_star[1]      = xfp->xf_star[1];
+            sf.xsp_star[2]      = xfp->xf_star[2];
+            sf.xsp_at_stars     = xfp->xf_at_stars;
+            sf.xsp_width[0]     = xfp->xf_width[0];
+            sf.xsp_width[1]     = xfp->xf_width[1];
+            sf.xsp_width[2]     = xfp->xf_width[2];
+            sf.xsp_start        = xfp->xf_start;
+            sf.xsp_len          = xfp->xf_len;
+            sf.xsp_prefix_len   = xfp->xf_prefix_len;
+            sf.xsp_num_bits     = xfp->xf_num_bits;
+            sf.xsp_padding[0]   = xfp->xf_padding[0];
+            sf.xsp_padding[1]   = xfp->xf_padding[1];
+            sf.xsp_padding[2]   = xfp->xf_padding[2];
+            sf.xsp_extflags      = xfp->xf_extflags;
+            fspec_cb(fspec_data, &sf);
+        }
     }
 
     xo_parse_release(&xpp);

@@ -24,7 +24,7 @@ AM_CFLAGS = \
     ${WARNINGS}
 
 LIBNAME = libxo_format
-pkglib_LTLIBRARIES = libxo_format.la
+lib_LTLIBRARIES = libxo_format.la
 #LIBS = \
 #    -L${top_builddir}/libxo -lxo
 

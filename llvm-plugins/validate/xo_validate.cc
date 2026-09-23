@@ -52,6 +52,11 @@ static llvm::cl::opt<bool> ErrorsAsWarnings(
     llvm::cl::desc("Treat xo_validate errors as warnings (do not fail compilation)"),
     llvm::cl::init(false));
 
+static llvm::cl::opt<bool> LintWarnings(
+    "xo-validate-lint",
+    llvm::cl::desc("xo_validate should give lint errors (minor, non-fatal)"),
+    llvm::cl::init(false));
+
 #include "xo_parse_shim.h"
 
 using namespace clang;
@@ -304,25 +309,18 @@ fmt_expected_type (ASTContext &C, const char *spec, unsigned len)
 }
 
 /*
- * Normalise an integer type to its unsigned equivalent, preserving
- * kind.  int→unsigned int, long→unsigned long, long long→unsigned
- * long long, etc.  This lets us test "same integer kind ignoring
- * signedness" by comparing the normalised forms of two types.
- */
-static QualType
-to_unsigned (ASTContext &C, QualType t)
-{
-    return t->isSignedIntegerType() ? C.getCorrespondingUnsignedType(t) : t;
-}
-
-/*
  * Return true if the actual argument type is compatible with the expected type.
  * Uses arg->getType() (the promoted type seen by the callee) for matching so
  * that varargs promotions (char→int, float→double) are already applied.
  *
- * Matching rules mirror clang's own -Wformat:
- *  - Integer: exact kind match, sign may differ (int↔unsigned int OK, but
- *    unsigned long ≠ unsigned long long even when both are 64-bit).
+ * Matching rules:
+ *  - Integer: same bit width, sign ignored (long == unsigned long long
+ *    when both are 64-bit).  This is looser than clang's own -Wformat
+ *    (which requires exact kind match) by design: fixed-width typedefs
+ *    like uint64_t/int64_t alias different builtin kinds across
+ *    platforms (unsigned long on FreeBSD/Linux, unsigned long long on
+ *    macOS), and a libxo format string that is correct on one platform
+ *    must not warn on another.
  *  - Float:   exact canonical type (long double ≠ double even if same size).
  *  - %s:      any char pointer.
  *  - %p:      any pointer.
@@ -345,14 +343,13 @@ type_matches (ASTContext &ctxt, QualType expected, const Expr *arg)
         return true;
 
     /*
-     * Integers of the same kind, where signed-ness may differ (int
-     * .vs. unsigned int, etc.).  Cross-kind is rejected even when
-     * sizes are equal on this platform (unsigned long != unsigned
-     * long long on macOS even though both are 64-bit).  This matches
-     * clang's own -Wformat behaviour.
+     * Integers: same bit width, sign ignored (int vs unsigned int is
+     * fine, as is unsigned long vs unsigned long long when both are
+     * 64-bit).  See the note above type_matches() for why cross-kind
+     * matches are accepted here.
      */
     if (exp->isIntegerType() && act->isIntegerType())
-        return to_unsigned(ctxt, act) == to_unsigned(ctxt, exp);
+        return ctxt.getTypeSize(act) == ctxt.getTypeSize(exp);
 
     /*
      * Also handle array-to-pointer conversion (T[N] for T*).  Arrays
@@ -497,10 +494,15 @@ public:
         DiagCb dc_warn { &Diags, WarnDiagID,   SL->getBeginLoc() };
         ArgCollector ac;
 
+	xo_parse_flags_t flags = XPF_STRICT;
+	if (LintWarnings)
+	    flags |= XPF_LINT;
+
         int rc = xo_shim_parse_args(fmt.c_str(),
-                                     emit_diag, &dc_err,
-                                     emit_diag, &dc_warn,
-                                     ArgCollector::callback, &ac);
+				    emit_diag, &dc_err,
+				    emit_diag, &dc_warn,
+				    ArgCollector::callback, &ac,
+				    flags);
         if (rc < 0)
             return true;    /* parse error already reported */
 
@@ -526,7 +528,16 @@ public:
             QualType exp_type = fmt_expected_type(*Ctx_, spec, speclen);
             if (!exp_type.isNull()) {
                 if (!type_matches(*Ctx_, exp_type, arg)) {
-                    std::string exp_str = exp_type.getAsString(PP);
+                    /*
+                     * Newer clang (LLVM 21+, https://github.com/llvm/llvm-project/pull/143653)
+                     * made getSizeType()/getPointerDiffType() return a
+                     * PredefinedSugarType ("__size_t"/"__ptrdiff_t") instead
+                     * of the canonical builtin.  Desugar explicitly so the
+                     * printed name (e.g. "unsigned long") is stable across
+                     * clang versions.
+                     */
+                    std::string exp_str = exp_type.getCanonicalType()
+                                                   .getAsString(PP);
                     std::string act_str = arg->IgnoreImpCasts()->getType()
                                              .getAsString(PP);
                     Diags.Report(arg->getBeginLoc(), TypePreciseDiagID)

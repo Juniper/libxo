@@ -96,6 +96,7 @@ added filter: 0
                     000013: type 53 (T_NUMBER), str 37 [3], contents 0, next 0, prev 3 
 main: status: zero
 main: input '{item'
+xpath_01: duplicate sibling name: 'item'
 main: filter: rc: 14
 main: status: zero
 main: input '<item'

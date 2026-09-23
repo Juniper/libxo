@@ -18,13 +18,19 @@
  * New PM, PipelineStart EP callbacks do fire.
  */
 
+#include "xo_config.h"
+
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/GlobalVariable.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/Module.h"
 #include "llvm/Passes/PassBuilder.h"
+#if CLANG_VERSION_NUMBER >= 22000000
+#include "llvm/Plugins/PassPlugin.h"
+#else /* CLANG_VERSION_NUMBER >= 22000000 */
 #include "llvm/Passes/PassPlugin.h"
+#endif /* ACLANG_VERSION_NUMBER >= 22000000 */
 #include "llvm/Support/raw_ostream.h"
 
 #include "../validate/xo_parse_shim.h"
@@ -126,7 +132,20 @@ static bool extractCString(GlobalVariable *GV, std::string &out)
 {
     if (!GV || !GV->isConstant() || !GV->hasDefinitiveInitializer())
         return false;
-    auto *CDA = dyn_cast<ConstantDataArray>(GV->getInitializer());
+    Constant *Init = GV->getInitializer();
+
+    /*
+     * LLVM canonicalizes an all-zero constant array (e.g. the "\0" behind
+     * a "" literal) to ConstantAggregateZero instead of ConstantDataArray,
+     * regardless of length.  Its first byte is a NUL, so it's the empty
+     * string.
+     */
+    if (isa<ConstantAggregateZero>(Init)) {
+        out.clear();
+        return true;
+    }
+
+    auto *CDA = dyn_cast<ConstantDataArray>(Init);
     if (!CDA || !CDA->isCString())
         return false;
     out = CDA->getAsCString().str();
@@ -149,21 +168,48 @@ struct XoPrecompile : PassInfoMixin<XoPrecompile> {
         Type *i64 = Type::getInt64Ty(Ctx);
         Type *i32 = Type::getInt32Ty(Ctx);
         Type *i16 = Type::getInt16Ty(Ctx);
+        Type *PtrTy = voidPtrTy(Ctx);
 
         /*
-         * LLVM StructType mirroring xo_field_info_t (13 logical members).
+         * LLVM StructType mirroring xo_field_info_t (17 logical members).
          * The DataLayout inserts the 2-byte pad between xfi_elen and xfi_fnum
-         * automatically (same target as the C compiler).
+         * automatically (same target as the C compiler).  xfi_fspecs points
+         * into a per-call-site constant xo_fspec_t[] global (built below)
+         * so xo_do_format_field() can skip re-scanning the display format
+         * at every call; a field with no display format (xfi_num_fspecs==0)
+         * gets a null xfi_fspecs, which xo_do_format_field() already treats
+         * as a safe "re-parse at runtime" signal.
          */
         StructType *FieldTy = StructType::get(Ctx, {
-            i64,                                /* xfi_flags */
-            i32,                                /* xfi_ftype */
-            i16, i16, i16, i16, i16,           /* start, content, format, encoding, next */
-            i16, i16, i16, i16,                 /* len, clen, flen, elen */
-            i32, i32                            /* fnum, renum */
+            i64,                             /* xfi_flags */
+            i32,                             /* xfi_ftype */
+            i16, i16, i16, i16, i16,         /* start, content, format, encoding, next */
+            i16, i16, i16, i16,              /* len, clen, flen, elen */
+            i32, i32,                        /* fnum, renum */
+            PtrTy,                           /* xfi_fspecs */
+            i16,                             /* xfi_num_fspecs */
+            ArrayType::get(i16, 3)           /* xfi_padding[3] */
         });
 
-        Type *PtrTy = voidPtrTy(Ctx);
+        Type *i8 = Type::getInt8Ty(Ctx);
+
+        /*
+         * LLVM StructType mirroring xo_fspec_t (18 logical members).  Layout
+         * is protected at shim-build time by the _Static_assert block in
+         * xo_parse_shim.c; keep the two in sync.
+         */
+        StructType *FspecTy = StructType::get(Ctx, {
+            i8, i8, i8, i8, i8, i8, i8, i8,  /* fc,lflag,hflag,jflag,tflag,zflag,qflag,seen_minus */
+            i8,                              /* leading_zero (signed) */
+            i8, i8, i8,                      /* dots, alt, stars */
+            ArrayType::get(i8, 3),           /* xf_star[3] */
+            i8,                              /* at_stars */
+            ArrayType::get(i16, 3),          /* xf_width[3] (signed) */
+            i16, i16, i16,                   /* start, len, prefix_len */
+	    i8, 			     /* num_bits, padding */
+            ArrayType::get(i8, 3),           /* padding[3] */
+	    i32,			     /* extflags */
+        });
 
         /* StructType matching xo_format_cache_t: { version, num_fields, *fields } */
         StructType *CacheTy = StructType::get(Ctx, {i32, i32, PtrTy});
@@ -210,9 +256,11 @@ struct XoPrecompile : PassInfoMixin<XoPrecompile> {
             std::string FmtStr;
             if (!extractCString(FmtGV, FmtStr)) continue;
 
-            /* Parse fields via the C shim */
+            /* Parse fields (and each field's fspecs) via the C shim */
             struct ParseCtx {
                 SmallVector<xo_shim_field_t, 8> fields;
+                SmallVector<unsigned, 8> fspec_start; /* per-field index into fspecs */
+                SmallVector<xo_shim_fspec_t, 16> fspecs;
                 bool error = false;
             } PCtx;
 
@@ -221,7 +269,13 @@ struct XoPrecompile : PassInfoMixin<XoPrecompile> {
                 parse_error_cb,
                 &PCtx.error,
                 [](void *d, const xo_shim_field_t *f) {
-                    static_cast<ParseCtx *>(d)->fields.push_back(*f);
+                    auto *ctx = static_cast<ParseCtx *>(d);
+                    ctx->fspec_start.push_back((unsigned) ctx->fspecs.size());
+                    ctx->fields.push_back(*f);
+                },
+		&PCtx,
+                [](void *d, const xo_shim_fspec_t *f) {
+                    static_cast<ParseCtx *>(d)->fspecs.push_back(*f);
                 },
                 &PCtx);
 
@@ -231,9 +285,75 @@ struct XoPrecompile : PassInfoMixin<XoPrecompile> {
             std::string Suffix = "." + ModSlug + "." + std::to_string(Counter++);
             unsigned N = (unsigned) PCtx.fields.size();
 
+            /*
+             * Build the shared const xo_fspec_t[] global for this call site,
+             * if any field has a pre-parsed display format.  Skipped entirely
+             * when every field is default/name-only, so simple format
+             * strings don't pay for an unused global.
+             */
+            GlobalVariable *FspecsGV = nullptr;
+            if (!PCtx.fspecs.empty()) {
+                SmallVector<Constant *, 16> FspecElems;
+                for (auto &sf : PCtx.fspecs) {
+                    FspecElems.push_back(ConstantStruct::get(FspecTy, {
+                        ConstantInt::get(i8, sf.xsp_fc),
+                        ConstantInt::get(i8, sf.xsp_lflag),
+                        ConstantInt::get(i8, sf.xsp_hflag),
+                        ConstantInt::get(i8, sf.xsp_jflag),
+                        ConstantInt::get(i8, sf.xsp_tflag),
+                        ConstantInt::get(i8, sf.xsp_zflag),
+                        ConstantInt::get(i8, sf.xsp_qflag),
+                        ConstantInt::get(i8, sf.xsp_seen_minus),
+                        ConstantInt::getSigned(i8, sf.xsp_leading_zero),
+                        ConstantInt::get(i8, sf.xsp_dots),
+                        ConstantInt::get(i8, sf.xsp_alt),
+                        ConstantInt::get(i8, sf.xsp_stars),
+                        ConstantArray::get(ArrayType::get(i8, 3), {
+                            ConstantInt::get(i8, sf.xsp_star[0]),
+                            ConstantInt::get(i8, sf.xsp_star[1]),
+                            ConstantInt::get(i8, sf.xsp_star[2]),
+                        }),
+                        ConstantInt::get(i8, sf.xsp_at_stars),
+                        ConstantArray::get(ArrayType::get(i16, 3), {
+                            ConstantInt::getSigned(i16, sf.xsp_width[0]),
+                            ConstantInt::getSigned(i16, sf.xsp_width[1]),
+                            ConstantInt::getSigned(i16, sf.xsp_width[2]),
+                        }),
+                        ConstantInt::get(i16, sf.xsp_start),
+                        ConstantInt::get(i16, sf.xsp_len),
+                        ConstantInt::get(i16, sf.xsp_prefix_len),
+                        ConstantInt::get(i8, sf.xsp_num_bits),
+			Constant::getNullValue(
+			    ArrayType::get(i8, 3)), /* xf_padding */
+                        ConstantInt::get(i32, sf.xsp_extflags),
+		    }));
+                }
+
+                ArrayType *FspecArrTy = ArrayType::get(FspecTy,
+                                             (unsigned) PCtx.fspecs.size());
+                FspecsGV = new GlobalVariable(M, FspecArrTy, /*isConst*/ true,
+                    GlobalValue::PrivateLinkage,
+                    ConstantArray::get(FspecArrTy, FspecElems),
+                    ".xo_fspecs" + Suffix);
+                FspecsGV->setUnnamedAddr(GlobalValue::UnnamedAddr::Global);
+            }
+
             /* Build const xo_field_info_t[] global */
             SmallVector<Constant *, 32> Elems;
-            for (auto &f : PCtx.fields) {
+            for (unsigned i = 0; i < N; ++i) {
+                xo_shim_field_t &f = PCtx.fields[i];
+
+                Constant *FspecsPtr = Constant::getNullValue(PtrTy);
+                if (f.xsf_num_fspecs > 0) {
+                    Constant *Idx[] = {
+                        ConstantInt::get(i32, 0),
+                        ConstantInt::get(i32, PCtx.fspec_start[i]),
+                    };
+                    Constant *GEP = ConstantExpr::getInBoundsGetElementPtr(
+                        FspecsGV->getValueType(), FspecsGV, Idx);
+                    FspecsPtr = toVoidPtr(GEP, PtrTy);
+                }
+
                 Elems.push_back(ConstantStruct::get(FieldTy, {
                     ConstantInt::get(i64, f.xsf_flags),
                     ConstantInt::get(i32, f.xsf_ftype),
@@ -248,10 +368,24 @@ struct XoPrecompile : PassInfoMixin<XoPrecompile> {
                     ConstantInt::getSigned(i16, f.xsf_elen),
                     ConstantInt::get(i32, f.xsf_fnum),
                     ConstantInt::get(i32, f.xsf_renum),
-                }));
+                    FspecsPtr,                             /* xfi_fspecs */
+                    ConstantInt::get(i16, f.xsf_num_fspecs), /* xfi_num_fspecs */
+                    Constant::getNullValue(
+                        ArrayType::get(i16, 3)),           /* xfi_padding */
+		}));
             }
 
-            ArrayType *ArrTy = ArrayType::get(FieldTy, N);
+            /*
+             * Append a zeroed terminator entry (xfi_ftype == 0) after the
+             * real N fields, matching the convention hand-built caches rely
+             * on (see tests/core/test_14.c's make_cache()).  Several gettext
+             * helpers walk a fields array bounded only by xfi_ftype == 0,
+             * with no separate count, so the array must be self-terminating
+             * even though xfc_num_fields only counts the real N entries.
+             */
+            Elems.push_back(Constant::getNullValue(FieldTy));
+
+            ArrayType *ArrTy = ArrayType::get(FieldTy, N + 1);
             auto *FieldsGV = new GlobalVariable(M, ArrTy, /*isConst*/ true,
                 GlobalValue::PrivateLinkage,
                 ConstantArray::get(ArrTy, Elems),

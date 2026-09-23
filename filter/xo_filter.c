@@ -1,4 +1,5 @@
 /*
+ * SPDX-License-Identifier: BSD-2-Clause
  * Copyright (c) 2023, Juniper Networks, Inc.
  * All rights reserved.
  * This SOFTWARE is licensed under the LICENSE provided in the
@@ -581,19 +582,6 @@ struct xo_filter_s {		 /* Forward/typdef decl in xo_private.h */
 /* Flags for xf_flags */
 #define XFSF_BLOCK		(1<<0)	/* Block emitting data */
 #define XFSF_FORCE_RESOLVE	(1<<1)	/* Missing fields are "" at close */
-
-int
-xo_encoder_wb_marker (xo_handle_t *xop, xo_whiteboard_op_t op,
-		      xo_buffer_t *wbp, xo_off_t *offp)
-{
-    xo_whiteboard_func_t func = xo_get_wb_marker(xop);
-
-    if (func == NULL)
-	return -1;
-
-    void *private = xo_get_private(xop);
-    return func(xop, op, wbp, offp, private);
-}
 
 /*
  * Create and initialize a filter, attaching it to a handle

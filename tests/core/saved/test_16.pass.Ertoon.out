@@ -1,0 +1,168 @@
+@version 1.0.0
+rtoon-test
+  s01-empty-container
+  s02-empty-list
+    -
+  s03-a
+    s03-b
+      s03-c
+        leaf value
+  s04-disk
+    - name=sda
+      size 100
+    - name=sdb
+      size 200
+    - name=sdc
+      size 300
+  s05-route
+    - dest=10.0.0.0
+      prefix-len=24
+      protocol static
+    - dest=10.0.1.0
+      prefix-len=24
+      protocol static
+    - dest=0.0.0.0
+      prefix-len=0
+      protocol default
+  s06-host
+    - name=alpha
+    - name=beta
+      stats
+        up-time 100
+  s07-cpu
+    {num=,load}
+    0,0
+    1,7
+    2,14
+  s08-route2
+    {dest=,prefix-len=,protocol}
+    10.0.0.0,24,static
+    10.0.1.0,25,static
+  s09-item
+    {sku=,qty,price}
+    WIDGET1,10,"9.99"
+    {sku=,qty,price,cost}
+    WIDGET2,5,"4.50","2.00"
+    {sku=,qty,price,cost,sell-by}
+    WIDGET3,0,,"1.00",2026-01-01
+  s10-colors
+    tag a,,c,,"needs,quote",
+  s11a-tags
+    tag red,
+  s11b-tags
+    tag "",
+  s12-plain
+    tag red
+  s13a-entry
+    {num=,name}
+    1,one
+  s13b-entry
+    {num=,name,score}
+    1,one,42
+    2,two,43
+  s13c-entry
+    - num=1
+      name one
+  s14-thing
+    leaf value
+  s15-route-entry
+    {destination=,protocol}
+    10.0.0.0/24,direct
+    {destination=,protocol,via/interface,via/source-address}
+    10.0.1.0/24,static,eth0,10.0.1.1
+  s15b-entry
+    {name}
+    one
+  s16-types
+    count 42
+    active true
+    disabled false
+    raw-null null
+    code "42"
+    label "true"
+    mid "null"
+  s17-split
+    {num=,aval,bval}
+    1,10,20
+    2,30,40
+  s18-order
+    {pre,name=,post}
+    before,n1,after
+  s19-twokeys
+    {akey=,mid,bkey=}
+    ka,middata,kb
+  s20-narrow
+    {name=,aval}
+    r1,1
+    {name=,aval,bval}
+    r2,2,20
+    r3,3,
+  s21-dupfield
+    {name=,val}
+    dup,1
+  s22-outer-sparse
+    - name=parent1
+      inner
+        - iname=c1
+          ival 1
+        - iname=c2
+          ival 2
+  s23-mixed
+    - name=wrap
+      holder
+        densekids
+          {kid=,kval}
+          k1,1
+          k2,2
+  s24-leafmix
+    before x
+    tag r,g,
+    between y
+    tag b,
+    color2 cyan,magenta,
+  s25-sib-a
+    xval "1"
+  s25-sib-b
+    - name=b1
+  s26-twolists
+    listone
+      - name=one-a
+    listtwo
+      - name=two-a
+  s27-firstcontainer
+    - info
+        detail d1
+      name=after-container
+  s28-dispenc
+    enc-only should-appear
+    normal always-appears
+  s29-keyonly-dense
+    {name=}
+    solo
+  s29-keyonly-sparse
+    - name=solo
+  s30-sparse-empty
+    - ""
+    - name=second
+  s31-emptyfirst
+    
+    {name=,val}
+    later,99
+  s32-alwaysempty
+    
+    
+  s33a-newlines
+    msg "line1\nline2\r\nline3\ttabbed"
+  s33b-nonmnemonic
+    msg "ctrl\u0001here\u001fnext"
+  s33c-colors
+    tag "needs,quote\nand-newline",
+  s33d-row
+    {num=,note}
+    1,"tab\there"
+  "s33e-odd\tname"
+  s34a-bmp
+    msg "caf\u00e9"
+  s34b-supplementary
+    msg "😀hi"
+  "s34c-caf\u00e9"

@@ -43,7 +43,11 @@ if HAVE_HUMANIZE_NUMBER
 LDADD += -lutil
 endif
 
-EXTRA_DIST = \
+if HAVE_LIBBSD
+LDADD += -lbsd
+endif
+
+no_ship_EXTRA_DIST = \
     ${TEST_CASES} \
     ${addprefix saved/, ${TEST_CASES:.c=.T.err}} \
     ${addprefix saved/, ${TEST_CASES:.c=.T.out}}
@@ -57,6 +61,9 @@ RUN_TESTS_CMD = ${BASH} ${RUN_TESTS_SH} -d ${srcdir}
 
 TEST_FILE = ${srcdir}/data_01.txt
 TEST_FORMATS = T
+
+accept:
+	@-true
 
 .PHONY: run-plain-tests run-validate-tests run-pass-tests
 
@@ -83,13 +90,22 @@ all:
 
 test tests:
 
+BM_TEST=bm_01.test
+PASS_TEST=bm_01.pass-test
+
 benchmark bm:
 	${MKDIR_P} out
 	DYLD_LIBRARY_PATH=${top_builddir}/libxo/.libs \
 		./.libs/${BM_TEST} ${BM_ARGS} \
-		> out/bm_01.out 2> out/bm_01.err
+		> out/${BM_TEST}.out 2> out/${BM_TEST}.err
 
-BM_COUNT=100
+bm.pass:
+	${MKDIR_P} out
+	DYLD_LIBRARY_PATH=${top_builddir}/libxo/.libs \
+		./.libs/${PASS_TEST} ${BM_ARGS} \
+		> out/${PASS_TEST}.out 2> out/${PASS_TEST}.err
+
+BM_COUNT=1000
 BM_ARGS=text count ${BM_COUNT} discard
 SAMPLE=sample
 SAMPLE_ARGS=
@@ -97,8 +113,6 @@ SAMPLE_ARGS=
 # The sleep 0.3 gives the process time to get into its hot loop before
 # sample attaches. sample $BG_PID 8 samples for 8 seconds at the
 # default 1 ms interval.
-
-BM_TEST=bm_01.test
 
 sample:
 	${MKDIR_P} out
@@ -109,8 +123,6 @@ sample:
 		SAMPLE=${SAMPLE} \
 		SAMPLE_ARGS="${SAMPLE_ARGS}" \
 		sh ${srcdir}/run-bm.sh
-
-PASS_TEST=bm_01.pass-test
 
 sample.pass:
 	${MKDIR_P} out
@@ -139,11 +151,11 @@ $(validate_tests): %.validate-test: $(srcdir)/%.c \
 	    LD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${LD_LIBRARY_PATH}" \
 	    ${LLVM_CLANG} ${CFLAGS} \
 	    -fplugin=${VALIDATE_BUILD}/xo_validate.so \
-	    -mllvm -xo-validate-errors-as-warnings \
+	    -mllvm -xo-validate-errors-as-warnings -mllvm -xo-validate-lint \
 	    -I${top_srcdir}/libxo -I${top_builddir}/libxo -I${INCLUDEDIR} ${SYSROOT_FLAG} \
 	    -c $< -o $*.validate-test.o > out/$@.make.out 2> out/$@.make.err
 	@$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link \
-	    ${LLVM_CLANG} ${CFLAGS} ${SYSROOT_FLAG} \
+	    ${LLVM_CLANG} ${CFLAGS} ${LDADD} ${SYSROOT_FLAG} \
 	    $*.validate-test.o ${LIBXO_LA} \
 	    -o $@
 
@@ -158,7 +170,7 @@ $(pass_tests): %.pass-test: $(srcdir)/%.c \
 	    -I${top_srcdir}/libxo -I${top_builddir}/libxo -I${INCLUDEDIR} ${SYSROOT_FLAG} \
 	    -c $< -o $*.pass-test.o > out/$@.make.out 2> out/$@.make.err
 	@$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link \
-	    ${LLVM_CLANG} ${CFLAGS} ${SYSROOT_FLAG} \
+	    ${LLVM_CLANG} ${CFLAGS} ${LDADD} ${SYSROOT_FLAG} \
 	    $*.pass-test.o ${LIBXO_LA} \
 	    -o $@
 

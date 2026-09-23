@@ -2,11 +2,11 @@
 .\" # Copyright (c) 2014, Juniper Networks, Inc.
 .\" # All rights reserved.
 .\" # This SOFTWARE is licensed under the LICENSE provided in the
-.\" # ../Copyright file. By downloading, installing, copying, or 
+.\" # ../Copyright file. By downloading, installing, copying, or
 .\" # using the SOFTWARE, you agree to be bound by the terms of that
 .\" # LICENSE.
 .\" # Phil Shafer, July 2014
-.\" 
+.\"
 .Dd December 4, 2014
 .Dt LIBXO 3
 .Os
@@ -144,7 +144,8 @@ function using the ""l"" modifier:
 .Pp
 The name of the field must match the name of the leaf list.
 .Pp
-In JSON, leaf lists are rendered as arrays of values.  In XML, they
+In JSON, leaf lists are rendered as arrays of values.
+In XML, they
 are rendered as multiple leaf elements.
 .Bd -literal -offset indent -compact
     JSON:
@@ -154,15 +155,15 @@ are rendered as multiple leaf elements.
         <item>nail</item>
 .Ed
 .Sh SEE ALSO
-.Xr xo_emit 3 ,
-.Xr libxo 3
+.Xr libxo 3 ,
+.Xr xo_emit 3
 .Sh HISTORY
 The
 .Nm libxo
 library first appeared in
 .Fx 11.0 .
 .Sh AUTHORS
+The
 .Nm libxo
-was written by
+library was written by
 .An Phil Shafer Aq Mt phil@freebsd.org .
-

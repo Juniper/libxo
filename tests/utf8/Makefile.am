@@ -47,10 +47,35 @@ if HAVE_HUMANIZE_NUMBER
 LDADD += -lutil
 endif
 
+if HAVE_LIBBSD
+LDADD += -lbsd
+endif
+
+
+if HAVE_VALIDATE
+LLVM_PASSES = validate-test pass-test
+ALL_PASSES = . .validate. .pass.
+else
+LLVM_PASSES =
+ALL_PASSES = .
+endif
+
+STYLES = T
+
+TEST_OUTPUT_FILES = \
+$(foreach file, ${TEST_CASES}, \
+    $(foreach pass, ${LLVM_PASSES}, \
+        $(foreach fd, out err, \
+            $(addprefix saved/, ${file:.c=.${pass}.make.${fd}}))) \
+    $(foreach pass, ${ALL_PASSES}, \
+        $(foreach ext, ${STYLES}, \
+            $(foreach fd, out err, \
+                $(addprefix saved/, ${file:.c=${pass}${ext}.${fd}})))))
+
 EXTRA_DIST = \
+    data_01.txt \
     ${TEST_CASES} \
-    ${addprefix saved/, ${TEST_CASES:.c=.T.err}} \
-    ${addprefix saved/, ${TEST_CASES:.c=.T.out}}
+    ${TEST_OUTPUT_FILES}
 
 # ---------------------------------------------------------------------------
 # Test runner
@@ -93,7 +118,7 @@ test tests: ${noinst_PROGRAMS} run-plain-tests ${PLUGIN_TESTS}
 
 run-plain-tests:
 	@${MKDIR} -p out
-	${RUN_TESTS_CMD} -T "${TEST_FORMATS}" -a "file ${TEST_FILE}" \
+	@${RUN_TESTS_CMD} -T "${TEST_FORMATS}" -a "file ${TEST_FILE}" \
 	    run-bin ${TEST_CASES:.c=.test}
 
 if HAVE_VALIDATE
@@ -108,11 +133,11 @@ $(validate_tests): %.validate-test: $(srcdir)/%.c \
 	    LD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${LD_LIBRARY_PATH}" \
 	    ${LLVM_CLANG} ${CFLAGS} \
 	    -fplugin=${VALIDATE_BUILD}/xo_validate.so \
-	    -mllvm -xo-validate-errors-as-warnings \
+	    -mllvm -xo-validate-errors-as-warnings -mllvm -xo-validate-lint \
 	    -I${top_srcdir}/libxo -I${top_builddir}/libxo -I${INCLUDEDIR} ${SYSROOT_FLAG} \
 	    -c $< -o $*.validate-test.o > out/$@.make.out 2> out/$@.make.err
 	@$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link \
-	    ${LLVM_CLANG} ${CFLAGS} ${SYSROOT_FLAG} \
+	    ${LLVM_CLANG} ${CFLAGS} ${LDADD} ${SYSROOT_FLAG} \
 	    $*.validate-test.o ${LIBXO_LA} \
 	    -o $@
 
@@ -127,7 +152,7 @@ $(pass_tests): %.pass-test: $(srcdir)/%.c \
 	    -I${top_srcdir}/libxo -I${top_builddir}/libxo -I${INCLUDEDIR} ${SYSROOT_FLAG} \
 	    -c $< -o $*.pass-test.o > out/$@.make.out 2> out/$@.make.err
 	@$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link \
-	    ${LLVM_CLANG} ${CFLAGS} ${SYSROOT_FLAG} \
+	    ${LLVM_CLANG} ${CFLAGS} ${LDADD} ${SYSROOT_FLAG} \
 	    $*.pass-test.o ${LIBXO_LA} \
 	    -o $@
 
@@ -172,6 +197,8 @@ one:
 accept:
 	@${MKDIR} -p ${srcdir}/saved
 	${RUN_TESTS_CMD} -T "${TEST_FORMATS}" accept-bin ${TEST_CASES:.c=.test}
+	${RUN_TESTS_CMD} -m validate -T "${TEST_FORMATS}" accept-bin ${TEST_CASES:.c=.test}
+	${RUN_TESTS_CMD} -m pass -T "${TEST_FORMATS}" accept-bin ${TEST_CASES:.c=.test}
 	-@test -z "${LLVM_CLANG}" || for tc in ${TEST_CASES:.c=}; do \
 	    cp out/$$tc.validate-test.make.out \
 	        ${srcdir}/saved/$$tc.validate-test.make.out 2>/dev/null ; \

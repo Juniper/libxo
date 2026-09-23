@@ -126,6 +126,7 @@ main: status: full
 main: input '-six'
 main: status: track
 main: input '+two'
+xpath_01: duplicate sibling name: 'two'
 main: filter: rc: 15
 main: status: predicate
 main: input '$three 9'

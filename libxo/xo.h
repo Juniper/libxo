@@ -1,4 +1,5 @@
 /*
+ * SPDX-License-Identifier: BSD-2-Clause
  * Copyright (c) 2014-2018, Juniper Networks, Inc.
  * All rights reserved.
  * This SOFTWARE is licensed under the LICENSE provided in the
@@ -19,6 +20,10 @@
 
 #ifndef INCLUDE_XO_H
 #define INCLUDE_XO_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -85,7 +90,7 @@ typedef unsigned long long xo_xof_flags_t;
 #define XOF_NO_TOP	XOF_BIT(16) /** Don't emit the top braces in JSON */
 #define XOF_RESV17	XOF_BIT(17) /* Unused  */
 #define XOF_UNITS	XOF_BIT(18) /** Encode units in XML */
-#define XOF_RESV19	XOF_BIT(19) /* Unused */
+#define XOF_DENSE	XOF_BIT(19) /** Use dense (tabular) form (RTOON) */
 
 #define XOF_UNDERSCORES	XOF_BIT(20) /** Replace dashes with underscores (JSON)*/
 #define XOF_COLUMNS	XOF_BIT(21) /** xo_emit should return a column count */
@@ -112,6 +117,8 @@ typedef unsigned long long xo_xof_flags_t;
 
 #define XOF_NO_TOP_LEVEL XOF_BIT(36) /** Don't make a fake top-level tag */
 #define XOF_FILTER_WARN	XOF_BIT(37)  /** Warn about runtime errors w/ filters */
+#define XOF_GROUP	XOF_BIT(38)  /** Insert locale thousands separators */
+#define XOF_LINT	XOF_BIT(39)  /** Warn about lint issues */
 
 typedef unsigned xo_emit_flags_t; /* Flags to xo_emit() and friends */
 #define XOEF_RETAIN	0	  /* Deprecated: retain feature removed */
@@ -130,7 +137,7 @@ typedef uint64_t xo_xff_flags_t;
 #define XFF_ENCODE_ONLY	(1<<3)	/* Only emit for encoding styles (XML, JSON) */
 
 #define XFF_QUOTE	(1<<4)	/* Force quotes */
-#define XFF_NOQUOTE	(1<<5)	/* Force no quotes */
+#define XFF_NO_QUOTE	(1<<5)	/* Force no quotes */
 #define XFF_DISPLAY_ONLY (1<<6)	/* Only emit for display styles (text, html) */
 #define XFF_KEY		(1<<7)	/* Field is a key (for XPath) */
 
@@ -155,9 +162,18 @@ typedef uint64_t xo_xff_flags_t;
 #define XFF_ESC_SQUARE	(1<<23)	/* Escape XML control chars to UTF8 square */
 
 #define XFF_ESC_PRIVATE (1<<24)	/* Escape XML ctrl chars as private (0xe000) */
+#define XFF_SKIP	(1<<25)	/* Skip this field (runtime state, not
+				   parse data; never cached) */
+#define XFF_NO_UNESCAPE (1<<26) /* Ignore XFF_UNESCAPE */
+#define XFF_UNITS_ATTR  (1<<27)	/* Units only appear in attribute */
+#define XFF_FIRST_CAP	(1<<28)	/* First letter get capitalized (toupper) */
+#define XFF_INT_GROUP	(1<<29) /* Integer group: an int that wants grouping */
+#define XFF_DENSE	(1<<30) /* Use dense (tabular) form (RTOON) */
 
 /* Flags to turn off when we don't want i18n processing */
 #define XFF_GT_FLAGS (XFF_GT_FIELD | XFF_GT_PLURAL)
+
+#define XFF_NOQUOTE XFF_NO_QUOTE /* Backwards compatible with bad name */
 
 /*
  * xo_format_offset_t: signed byte offset into a format string.
@@ -192,33 +208,6 @@ xo_foff (const char *base, xo_format_offset_t off)
     if (off == XO_FOFF_DEFAULT) return xo_default_format;
     return NULL;                /* XO_FOFF_NONE */
 }
-
-/*
- * Parsed representation of one field descriptor from a libxo format string.
- * All string members are xo_format_offset_t values — byte offsets into the
- * "base" format string from which the field was parsed.  Use xo_foff(base, off)
- * to recover a const char *.  XO_FOFF_NONE (-1) means absent; xfi_format may
- * additionally take XO_FOFF_DEFAULT (-2) to indicate the default "%s" format.
- *
- * This struct is exposed publicly so callers can populate pre-built const
- * field tables for xo_emit_cached().  The layout is stable within a given
- * XO_EMIT_CACHE_VERSION; bump the version whenever the layout changes.
- */
-typedef struct xo_field_info_s {
-    xo_xff_flags_t xfi_flags;		/* Modifier flags (XFF_*) */
-    uint32_t xfi_ftype;			/* Role character ('V','L','G', XO_ROLE_*) */
-    xo_format_offset_t xfi_start;	/* Offset of field start in base string */
-    xo_format_offset_t xfi_content;	/* Offset of content (name) */
-    xo_format_offset_t xfi_format;	/* Offset of display format (or XO_FOFF_DEFAULT) */
-    xo_format_offset_t xfi_encoding;	/* Offset of encoding format */
-    xo_format_offset_t xfi_next;	/* Offset just past this field */
-    xo_format_offset_t xfi_len;		/* Length of whole field descriptor */
-    xo_format_offset_t xfi_clen;	/* Length of content */
-    xo_format_offset_t xfi_flen;	/* Length of format */
-    xo_format_offset_t xfi_elen;	/* Length of encoding */
-    uint32_t xfi_fnum;			/* Field number (0 = unset) */
-    uint32_t xfi_renum;			/* Reordered field number (0 = none) */
-} xo_field_info_t;
 
 /*
  * The xo_info_t structure provides a mapping between names and
@@ -277,7 +266,7 @@ xo_set_writer (xo_handle_t *xop, void *opaque, xo_write_func_t write_func,
 void
 xo_set_allocator (xo_realloc_func_t realloc_func, xo_free_func_t free_func);
 
-void
+int
 xo_set_style (xo_handle_t *xop, xo_style_t style);
 
 xo_style_t
@@ -338,28 +327,8 @@ xo_emit_hf (xo_handle_t *xop, xo_emit_flags_t flags, const char *fmt, ...);
 xo_ssize_t
 xo_emit_f (xo_emit_flags_t flags, const char *fmt, ...);
 
-/*
- * Build-time pre-parsed format string cache.
- *
- * xo_emit_cached() is the target of the LLVM IR pass: it takes a pointer to
- * a pre-built xo_format_cache_t (holding a const xo_field_info_t[] parsed at
- * compile time) plus the original format string (kept for the gettext path
- * and as a version-mismatch fallback).
- *
- * If the cache version does not match XO_EMIT_CACHE_VERSION, or if the cache
- * pointer is NULL, the call silently falls back to parsing fmt at runtime.
- *
- * xo_field_info_t is defined above; callers may populate xfc_fields[] directly
- * (e.g. as a static const array) using the XFF_* flags, XO_FOFF_* sentinels,
- * and XO_ROLE_* constants defined above.
- */
-#define XO_EMIT_CACHE_VERSION 1  /* bump on any xo_field_info_t layout change */
-
-typedef struct xo_format_cache_s {
-    unsigned xfc_version;		/* == XO_EMIT_CACHE_VERSION */
-    unsigned xfc_num_fields;
-    const xo_field_info_t *xfc_fields;	/* const xo_field_info_t[] */
-} xo_format_cache_t;
+struct xo_format_cache_s;
+typedef struct xo_format_cache_s xo_format_cache_t;
 
 xo_ssize_t
 xo_emit_cached_h (xo_handle_t *xop, const xo_format_cache_t *fcp,
@@ -900,6 +869,43 @@ xo_set_syslog_handler (xo_syslog_open_t open_func, xo_syslog_send_t send_func,
 void
 xo_set_syslog_enterprise_id (unsigned short eid);
 
+void
+xo_syslog_set_pid (pid_t pid);
+
+typedef void (*xo_syslog_setup_t)(xo_handle_t *xop, unsigned op);
+#define XSUP_INIT	1
+#define XSUP_REINIT	2
+
+void
+xo_syslog_set_setup (xo_syslog_setup_t func);
+
+/*
+ * Networking support for remote syslog delivery (e.g. the "xo-logger"
+ * command's -h/-4/-6/-A/-S/-P/-H options).  All name/service resolution
+ * (gethostbyname(3), getservbyname(3), etc.) is the caller's
+ * responsibility; these functions only accept already-resolved values.
+ */
+struct hostent;
+struct sockaddr;
+
+void
+xo_log_set_hostname (const char *hostname);
+
+void
+xo_log_set_host (struct hostent *hp);
+
+void
+xo_log_set_host_path (const char *path);
+
+void
+xo_log_set_port (int port);
+
+void
+xo_log_set_source (struct sockaddr *sa, unsigned salen);
+
+void
+xo_log_set_all_addresses (int value);
+
 typedef void (*xo_simplify_field_func_t)(const char *, unsigned, int);
 
 char *
@@ -954,5 +960,12 @@ xo_is_emitting_h (xo_handle_t *xop);
 
 int
 xo_is_emitting (void);
+
+void
+xo_set_no_cache (int value);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* INCLUDE_XO_H */

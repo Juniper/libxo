@@ -1,0 +1,3 @@
+test_07.pass-test: duplicate sibling name: 'columns'
+test_07.pass-test: duplicate sibling name: 'v1'
+test_07.pass-test: duplicate sibling name: 'v2'

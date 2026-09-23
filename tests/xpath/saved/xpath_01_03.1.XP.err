@@ -401,7 +401,7 @@ xpath_01: test: filter expression feature is unsupported: plus sign ('+')
 main: status: zero
 main: input '?item[a[b] = 1]'
 adding filter: 'item[a[b] = 1]'
-xpath_01: 0.000000ilter expression feature is unsupported: predicates inside predicates
+xpath_01: filter expression feature is unsupported: predicates inside predicates
 xpath_01: could not add the requested filter
 added filter: -1
 xpath_01: test: filter expression feature is unsupported: descendant child (e.g. 'one//two')
