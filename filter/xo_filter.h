@@ -199,6 +199,11 @@ int xo_filter_walk_close (xo_handle_t *xop, xo_filter_t *xfp,
 int xo_filter_walk_key (xo_handle_t *xop, xo_filter_t *xfp,
 			 const char *tag, ssize_t tlen,
 			 const char *value, ssize_t vlen);
+int xo_filter_walk_attr (xo_handle_t *xop, xo_filter_t *xfp,
+			  const char *tag, ssize_t tlen,
+			  const char *value, ssize_t vlen);
+xo_filter_t *xo_filter_create_standalone (void);
+void xo_filter_destroy_standalone (xo_filter_t *xfp);
 xo_filter_status_t xo_filter_walk_status (xo_handle_t *xop, xo_filter_t *xfp);
 int xo_filter_walk_add (xo_handle_t *xop, xo_filter_t *xfp, const char *xpath);
 
