@@ -71,7 +71,7 @@ main: status: track
 main: input '-clients'
 main: status: track
 main: input ''
-main: input '# Multi-step wildcard: top/*/leaf — middle container can be anything.'
+main: input '# Multi-step wildcard: top/*/leaf - middle container can be anything.'
 main: input 'r'
 main: status: zero
 main: input '?top/*/leaf[val = 'x']'
