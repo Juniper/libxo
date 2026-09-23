@@ -76,7 +76,7 @@ r
 } socket
 - statistics
 
-## 's' flag: full match text (pmatch[0]) — truthy when digits found in path
+## 's' flag: full match text (pmatch[0]) - truthy when digits found in path
 r
 ? socket[rematch("[0-9]+", path, "s")]
 + statistics
@@ -93,7 +93,7 @@ r
 } socket
 - statistics
 
-## 'm' flag: first capture group (pmatch[1]) — match port number after ":"
+## 'm' flag: first capture group (pmatch[1]) - match port number after ":"
 r
 ? socket[rematch(":([0-9]+)", address, "m")]
 + statistics
