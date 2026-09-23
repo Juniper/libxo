@@ -641,6 +641,47 @@ xo_filter_create_with_data (xo_handle_t *xop, xo_filter_data_t *dp,
 }
 
 /*
+ * Create a standalone filter not attached to any xo_handle_t.
+ * Uses the default (built-in) data ops.  Intended for per-BIA_IF
+ * condition evaluation where no custom name-intern or value-of is needed.
+ */
+xo_filter_t *
+xo_filter_create_standalone (void)
+{
+    xo_filter_t *xfp = xo_realloc(NULL, sizeof(*xfp));
+    if (xfp == NULL)
+	return NULL;
+
+    bzero(xfp, sizeof(*xfp));
+    xo_xparse_init(&xfp->xf_xd);
+
+    xfp->xf_def_data.xfd_xdp = &xfp->xf_xd;
+    xfp->xf_data = &xfp->xf_def_data;
+    xfp->xf_ops  = &xo_filter_data_ops_default;
+
+    return xfp;
+}
+
+/*
+ * Destroy a standalone filter created by xo_filter_create_standalone.
+ */
+void
+xo_filter_destroy_standalone (xo_filter_t *xfp)
+{
+    if (xfp == NULL)
+	return;
+    xo_xparse_clean(&xfp->xf_xd);
+    xo_tmatch_cleanup(&xfp->xf_tmatch);
+    xo_trie_free(xfp->xf_trie);
+    xfp->xf_trie = NULL;
+    if (xfp->xf_path_actions) {
+	free(xfp->xf_path_actions);
+	xfp->xf_path_actions = NULL;
+    }
+    xo_free(xfp);
+}
+
+/*
  * The filter code is layered on top of the xpath parsing code, but
  * sometimes we need to pull out the xparse data structure, mostly for
  * our test jigs.
@@ -3451,6 +3492,14 @@ xo_filter_op_attribute (xo_handle_t *xop, xo_filter_t *xfp,
 	   xo_filt_status_name(xfp->xf_status));
 
     return rc;
+}
+
+int
+xo_filter_walk_attr (xo_handle_t *xop, xo_filter_t *xfp,
+		     const char *tag, xo_ssize_t tlen,
+		     const char *value, xo_ssize_t vlen)
+{
+    return xo_filter_op_attribute(xop, xfp, tag, tlen, value, vlen);
 }
 
 /*
