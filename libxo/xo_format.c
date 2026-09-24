@@ -38,35 +38,35 @@ xo_printable2 (const char *str, int len, int bracesp)
     static THREAD_LOCAL(int) bufnum = 0;
 
     if (str == NULL)
-	return "";
+        return "";
 
     if (++bufnum == XO_NUMBUFS)
-	bufnum = 0;
+        bufnum = 0;
 
     char *res = bufset[bufnum], *cp, *ep;
     const char *str_end = str + len;
 
     cp = res;
     if (bracesp)
-	*cp++ = '{';
+        *cp++ = '{';
 
     for (ep = res + XO_SMBUFSZ - 2;
-	     str < str_end && *str && cp < ep; cp++, str++) {
-	if (*str == '\n') {
-	    *cp++ = '\\';
-	    *cp = 'n';
-	} else if (*str == '\r') {
-	    *cp++ = '\\';
-	    *cp = 'r';
-	} else if (*str == '\"') {
-	    *cp++ = '\\';
-	    *cp = '"';
-	} else
-	    *cp = *str;
+             str < str_end && *str && cp < ep; cp++, str++) {
+        if (*str == '\n') {
+            *cp++ = '\\';
+            *cp = 'n';
+        } else if (*str == '\r') {
+            *cp++ = '\\';
+            *cp = 'r';
+        } else if (*str == '\"') {
+            *cp++ = '\\';
+            *cp = '"';
+        } else
+            *cp = *str;
     }
 
     if (bracesp && cp < ep)
-	*cp++ = '}';
+        *cp++ = '}';
 
     *cp = '\0';
     return res;
@@ -80,13 +80,12 @@ xo_printable (const char *str)
 
 /* Error reporting */
 
-
 XO_PRINTFLIKE(2, 3)
 static void
 xo_parse_error (xo_parse_t *xpp, const char *fmt, ...)
 {
     if (xpp == NULL || xpp->xp_error == NULL)
-	return;
+        return;
 
     char buf[512];
     va_list vap;
@@ -101,7 +100,7 @@ static void
 xo_parse_warning (xo_parse_t *xpp, const char *fmt, ...)
 {
     if (xpp == NULL || xpp->xp_warn == NULL)
-	return;
+        return;
 
     char buf[512];
     va_list vap;
@@ -118,7 +117,7 @@ xo_parse_alloc (xo_parse_t *xpp, size_t sz)
 {
     xo_realloc_func_t fn = xpp ? xpp->xp_realloc : NULL;
     if (fn == NULL)
-	fn = realloc;
+        fn = realloc;
 
     return fn(NULL, sz);
 }
@@ -128,7 +127,7 @@ xo_parse_free (xo_parse_t *xpp, void *ptr)
 {
     xo_free_func_t fn = xpp ? xpp->xp_free : NULL;
     if (fn == NULL)
-	fn = free;
+        fn = free;
     fn(ptr);
 }
 
@@ -139,27 +138,27 @@ xo_xff_flags_t
 xo_name_lookup (xo_flag_mapping_t *map, const char *value, ssize_t len)
 {
     if (len == 0)
-	return 0;
+        return 0;
 
     if (len < 0)
-	len = strlen(value);
+        len = strlen(value);
 
     while (isspace((int) *value)) {
-	value += 1;
-	len -= 1;
+        value += 1;
+        len -= 1;
     }
 
     while (len > 0 && isspace((int) value[len - 1]))
-	len -= 1;
+        len -= 1;
 
     if (*value == '\0')
-	return 0;
+        return 0;
 
     for ( ; map->xm_name; map++) {
-	if (len < (ssize_t) strlen(map->xm_name))
-	    continue;
-	if (strncmp(map->xm_name, value, len) == 0)
-	    return map->xm_value;
+        if (len < (ssize_t) strlen(map->xm_name))
+            continue;
+        if (strncmp(map->xm_name, value, len) == 0)
+            return map->xm_value;
     }
 
     return 0;
@@ -169,11 +168,11 @@ static const char *
 xo_value_lookup (xo_flag_mapping_t *map, xo_xff_flags_t value)
 {
     if (value == 0)
-	return NULL;
+        return NULL;
 
     for ( ; map->xm_name; map++)
-	if (map->xm_value == value)
-	    return map->xm_name;
+        if (map->xm_value == value)
+            return map->xm_name;
 
     return NULL;
 }
@@ -249,7 +248,7 @@ xo_role_wants_default_format (int ftype)
     case 'G':
     case '[':
     case ']':
-	return 0;
+        return 0;
     }
     return 1;
 }
@@ -276,93 +275,93 @@ xo_bump_width (xo_fspec_t *xfp, int digit)
  */
 const char *
 xo_parse_format_spec (xo_parse_t *xpp, xo_fspec_t *xfp,
-		      const char *cp, const char *ep, const char *fmt)
+                      const char *cp, const char *ep, const char *fmt)
 {
     const char *start = cp;
 
     for (cp += 1; cp < ep; cp++) {
-	if (*cp == 'l')
-	    xfp->xf_lflag += 1;
-	else if (*cp == 'h')
-	    xfp->xf_hflag += 1;
-	else if (*cp == 'j')
-	    xfp->xf_jflag += 1;
-	else if (*cp == 't')
-	    xfp->xf_tflag += 1;
-	else if (*cp == 'z')
-	    xfp->xf_zflag += 1;
-	else if (*cp == 'q')
-	    xfp->xf_qflag += 1;
-	else if (*cp == '.') {
-	    if (xfp->xf_dots + 1 >= XF_WIDTH_NUM) {
-		xo_parse_error(xpp, "Too many dots in format: '%s'", fmt);
-		return NULL;
-	    }
+        if (*cp == 'l')
+            xfp->xf_lflag += 1;
+        else if (*cp == 'h')
+            xfp->xf_hflag += 1;
+        else if (*cp == 'j')
+            xfp->xf_jflag += 1;
+        else if (*cp == 't')
+            xfp->xf_tflag += 1;
+        else if (*cp == 'z')
+            xfp->xf_zflag += 1;
+        else if (*cp == 'q')
+            xfp->xf_qflag += 1;
+        else if (*cp == '.') {
+            if (xfp->xf_dots + 1 >= XF_WIDTH_NUM) {
+                xo_parse_error(xpp, "Too many dots in format: '%s'", fmt);
+                return NULL;
+            }
 
-	    xfp->xf_dots += 1;	/* Increment it (after check) */
+            xfp->xf_dots += 1;  /* Increment it (after check) */
 
-	} else if (*cp == '-')
-	    xfp->xf_seen_minus = 1;
+        } else if (*cp == '-')
+            xfp->xf_seen_minus = 1;
 
-	else if (*cp == '#')
-	    xfp->xf_alt = 1;
+        else if (*cp == '#')
+            xfp->xf_alt = 1;
 
-	else if (*cp == '!') {
-	    /* "%!NNd" is a NN-bit signed value */
-	    const char *sp = cp + 1;
-	    const char *np = sp;
-	    uint64_t num_bits = 0;
+        else if (*cp == '!') {
+            /* "%!NNd" is a NN-bit signed value */
+            const char *sp = cp + 1;
+            const char *np = sp;
+            uint64_t num_bits = 0;
 
-	    for (; np < ep; np++) {
-		if (!isdigit((int) *np))
-		    break;
-		num_bits = num_bits * 10 + (*np - '0');
-	    }
+            for (; np < ep; np++) {
+                if (!isdigit((int) *np))
+                    break;
+                num_bits = num_bits * 10 + (*np - '0');
+            }
 
-	    cp += np - sp;	/* Move pointer along */
+            cp += np - sp;      /* Move pointer along */
 
-	    /* Report errors, which leave xf_num_bits as 0, ignoring the "!" */
-	    if (np == sp)
-		xo_parse_error(xpp, "missing integer size: '%s'",
-			       xo_printable2(start, ep - start, TRUE));
-	    else if (num_bits != 8 && num_bits != 16
-		     && num_bits != 32 && num_bits != 64)
-		xo_parse_error(xpp, "invalid integer size: '%s'",
-			       xo_printable2(start, ep - start, TRUE));
-	    else
-		xfp->xf_num_bits = num_bits;
+            /* Report errors, which leave xf_num_bits as 0, ignoring the "!" */
+            if (np == sp)
+                xo_parse_error(xpp, "missing integer size: '%s'",
+                               xo_printable2(start, ep - start, TRUE));
+            else if (num_bits != 8 && num_bits != 16
+                     && num_bits != 32 && num_bits != 64)
+                xo_parse_error(xpp, "invalid integer size: '%s'",
+                               xo_printable2(start, ep - start, TRUE));
+            else
+                xfp->xf_num_bits = num_bits;
 
-	} else if (*cp == 'J') {
-	    switch (cp[1]) {
-	    case 'N':
-		xfp->xf_extflags |= XXF_NULL_AS_EMPTY;
-		break;
+        } else if (*cp == 'J') {
+            switch (cp[1]) {
+            case 'N':
+                xfp->xf_extflags |= XXF_NULL_AS_EMPTY;
+                break;
 
-	    default:
-		xo_parse_error(xpp, "unknown 'J' flag: '%s'",
-			       xo_printable2(start, ep - start, TRUE));		
-	    }
+            default:
+                xo_parse_error(xpp, "unknown 'J' flag: '%s'",
+                               xo_printable2(start, ep - start, TRUE));         
+            }
 
-	} else if (isdigit((int) *cp)) {
-	    if (xfp->xf_leading_zero < 0)
-		xfp->xf_leading_zero = (*cp == '0');
-	    xo_bump_width(xfp, *cp - '0');
+        } else if (isdigit((int) *cp)) {
+            if (xfp->xf_leading_zero < 0)
+                xfp->xf_leading_zero = (*cp == '0');
+            xo_bump_width(xfp, *cp - '0');
 
-	} else if (*cp == '*') {
-	    xfp->xf_stars += 1;
-	    xfp->xf_star[xfp->xf_dots] = 1;
+        } else if (*cp == '*') {
+            xfp->xf_stars += 1;
+            xfp->xf_star[xfp->xf_dots] = 1;
 
-	} else if (strchr("diouxXDOUeEfFgGaAcCsSpm", *cp) != NULL)
-	    break;
+        } else if (strchr("diouxXDOUeEfFgGaAcCsSpm", *cp) != NULL)
+            break;
 
-	else if (*cp == 'n' || *cp == 'v') {
-	    xo_parse_error(xpp, "unsupported format: '%s'", fmt);
-	    return NULL;
-	}
+        else if (*cp == 'n' || *cp == 'v') {
+            xo_parse_error(xpp, "unsupported format: '%s'", fmt);
+            return NULL;
+        }
     }
 
     if (cp == ep)
-	xo_parse_error(xpp, "field format missing format character: %s", fmt);
+        xo_parse_error(xpp, "field format missing format character: %s", fmt);
 
     xfp->xf_fc = *cp;
     return cp;
@@ -986,14 +985,6 @@ xo_parse_fields (xo_parse_t *xpp, const char *fmt, size_t fmt_len)
 	    const char *np = xo_foff(fmt, xfip->xfi_content);
 	    unsigned nlen = (unsigned)xfip->xfi_clen;
 	    unsigned ni;
-
-#if 0
-	    if (nlen == 0 && !(xfip->xfi_flags & XFF_ARGUMENT)) {
-		xo_parse_error(xpp, "field must have a name: '%s'",
-			       xo_printable2(str, slen, TRUE));
-		return -1;
-	    }
-#endif
 
 	    if (np && nlen) {
 		if (isdigit((unsigned char) np[0])) {
