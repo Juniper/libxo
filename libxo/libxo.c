@@ -58,15 +58,15 @@
 #define UEXTERROR_MAXLEN 256    /* A reasonable guess */
 #endif /* HAVE_SYS_EXTERRVAR_H */
 #else /* HAVE_EXTERR */
-#define UEXTERROR_MAXLEN 1	/* Fake size for exterr buffer */
+#define UEXTERROR_MAXLEN 1      /* Fake size for exterr buffer */
 #endif /* HAVE_EXTERR */
 
-#ifdef LIBXO_TEXT_ONLY		/* Turn off unneeded features */
-#undef LIBXO_NEED_MAP		/* No tag maps in text mode */
-#undef LIBXO_NEED_FILTERS	/* No filters in text mode */
+#ifdef LIBXO_TEXT_ONLY          /* Turn off unneeded features */
+#undef LIBXO_NEED_MAP           /* No tag maps in text mode */
+#undef LIBXO_NEED_FILTERS       /* No filters in text mode */
 #else  /* LIBXO_TEXT_ONLY */
 /* We don't want the overhead of tag maps when in text-only mode */
-#define LIBXO_NEED_MAP		/* Map tags to new names */
+#define LIBXO_NEED_MAP          /* Map tags to new names */
 #endif /* LIBXO_TEXT_ONLY */
 
 #define XO_WANT_FILTER_FLAG
@@ -141,7 +141,7 @@
  * criminally large default which the build environment can override.
  */
 #ifndef XO_MAX_FIELDS
-#define XO_MAX_FIELDS (8*1024)	/* Suitably large limit */
+#define XO_MAX_FIELDS (8*1024)  /* Suitably large limit */
 #endif /* XO_MAX_FIELDS */
 
 /* Make our own version for older versions of GCC that don't have this */
@@ -182,32 +182,32 @@ const char xo_version_extra[] = LIBXO_VERSION_EXTRA;
 static unsigned xo_no_cache; /* Ignore cached data (aka XO_OPT_NO_CACHE) */
 
 #ifndef LIBXO_TEXT_ONLY
-#define XO_MAP_INCR 128		/* Must be even */
+#define XO_MAP_INCR 128         /* Must be even */
 
 #ifndef XO_MAPDIR
 #define XO_MAPDIR XO_SHAREDIR "/map"
 #endif /* XO_MAPDIR */
 #endif /* LIBXO_TEXT_ONLY */
 
-#define XO_INDENT_BY 2	/* Amount to indent when pretty printing */
-#define XO_DEPTH	128	 /* Default stack depth */
+#define XO_INDENT_BY 2  /* Amount to indent when pretty printing */
+#define XO_DEPTH        128      /* Default stack depth */
 #define XO_MAX_ANCHOR_WIDTH (8*1024) /* Anything wider is just silly */
 
-#define XO_FAILURE_NAME	"failure"
+#define XO_FAILURE_NAME "failure"
 
 /* Flags for the stack frame */
 typedef unsigned xo_xsf_flags_t; /* XSF_* flags */
-#define XSF_NOT_FIRST	(1<<0)	/* Not the first element */
-#define XSF_LIST	(1<<1)	/* Frame is a list */
-#define XSF_INSTANCE	(1<<2)	/* Frame is an instance */
-#define XSF_DTRT	(1<<3)	/* Save the name for DTRT mode */
+#define XSF_NOT_FIRST   (1<<0)  /* Not the first element */
+#define XSF_LIST        (1<<1)  /* Frame is a list */
+#define XSF_INSTANCE    (1<<2)  /* Frame is an instance */
+#define XSF_DTRT        (1<<3)  /* Save the name for DTRT mode */
 
-#define XSF_CONTENT	(1<<4)	/* Some content has been emitted */
-#define XSF_EMIT	(1<<5)	/* Some field has been emitted */
-#define XSF_EMIT_KEY	(1<<6)	/* A key has been emitted */
+#define XSF_CONTENT     (1<<4)  /* Some content has been emitted */
+#define XSF_EMIT        (1<<5)  /* Some field has been emitted */
+#define XSF_EMIT_KEY    (1<<6)  /* A key has been emitted */
 #define XSF_EMIT_LEAF_LIST (1<<7) /* A leaf-list field has been emitted */
 
-#define XSF_FILTER	(1<<8)	/* Process any filtering */
+#define XSF_FILTER      (1<<8)  /* Process any filtering */
 
 /* These are the flags we propagate between markers and their parents */
 #define XSF_MARKER_FLAGS \
@@ -220,7 +220,7 @@ typedef unsigned xo_xsf_flags_t; /* XSF_* flags */
  */
 #define XSF_RB_BITS (XSF_NOT_FIRST | XSF_CONTENT)
 
-typedef uint32_t xo_ident_t;	/* Identifier for lists/instances/etc */
+typedef uint32_t xo_ident_t;    /* Identifier for lists/instances/etc */
 
 /*
  * Turn the transition between two states into a number suitable for
@@ -229,18 +229,18 @@ typedef uint32_t xo_ident_t;	/* Identifier for lists/instances/etc */
 #define XSS_TRANSITION(_old, _new) ((_old) << 8 | (_new))
 
 /* Options used by name, but not "real": not saved in xo handle */
-#define XO_OPT_NO_COLOR		1 /* Ignore colors */
-#define XO_OPT_INDENT		2 /* Indent by given number */
-#define XO_OPT_ENCODER		3 /* Use a specific encoder */
-#define XO_OPT_MAP		4 /* Map field names */
-#define XO_OPT_MAP_FILE		5 /* Use file full of field names mappings */
-#define XO_OPT_FILTER		6 /* Filter output using path */
-#define XO_EXTERR_BRIEF		7 /* Display brief extended error info */
-#define XO_EXTERR_VERBOSE	8 /* Display verbose exterr info */
-#define XO_OPT_NO_CACHE		9 /* Ignore cached field and fspec data */
-#define XO_OPT_GROUPING		10 /* Give specific locale.grouping info */
+#define XO_OPT_NO_COLOR         1 /* Ignore colors */
+#define XO_OPT_INDENT           2 /* Indent by given number */
+#define XO_OPT_ENCODER          3 /* Use a specific encoder */
+#define XO_OPT_MAP              4 /* Map field names */
+#define XO_OPT_MAP_FILE         5 /* Use file full of field names mappings */
+#define XO_OPT_FILTER           6 /* Filter output using path */
+#define XO_EXTERR_BRIEF         7 /* Display brief extended error info */
+#define XO_EXTERR_VERBOSE       8 /* Display verbose exterr info */
+#define XO_OPT_NO_CACHE         9 /* Ignore cached field and fspec data */
+#define XO_OPT_GROUPING         10 /* Give specific locale.grouping info */
 
-#define XO_XS_NAMESIZE	64	/* Size of stack's built-in name buffer */
+#define XO_XS_NAMESIZE  64      /* Size of stack's built-in name buffer */
 
 /*
  * xo_stack_t: As we open and close containers and levels, we
@@ -248,24 +248,24 @@ typedef uint32_t xo_ident_t;	/* Identifier for lists/instances/etc */
  * XOF_WARN and XOF_XPATH.
  */
 typedef struct xo_stack_s {
-    xo_xsf_flags_t xs_flags;	/* Flags for this frame */
-    xo_state_t xs_state;	/* State for this stack frame */
+    xo_xsf_flags_t xs_flags;    /* Flags for this frame */
+    xo_state_t xs_state;        /* State for this stack frame */
     xo_filter_status_t xs_fstatus; /* Filter status */
-    xo_off_t xs_rb_off;		/* Offset of buffer before this level */
-    xo_off_t xs_tag_end;	/* Offset just after this level's opening tag */
-    xo_off_t xs_key_off;	/* Offset of end of last key renderer */
+    xo_off_t xs_rb_off;         /* Offset of buffer before this level */
+    xo_off_t xs_tag_end;        /* Offset just after this level's opening tag */
+    xo_off_t xs_key_off;        /* Offset of end of last key renderer */
     xo_xsf_flags_t xs_rb_flags; /* Parent XSF_RB_BITS  at rb-marker time */
-    char *xs_name;		/* Name (for XPath value) */
-    char *xs_keys;		/* XPath predicate for any key fields */
-    char *xs_sibnames;		/* NUL-separated names used by this
-				   frame's container/list/value children
-				   so far; only populated when XOF_WARN
-				   is set (see xo_sibling_add) */
+    char *xs_name;              /* Name (for XPath value) */
+    char *xs_keys;              /* XPath predicate for any key fields */
+    char *xs_sibnames;          /* NUL-separated names used by this
+                                   frame's container/list/value children
+                                   so far; only populated when XOF_WARN
+                                   is set (see xo_sibling_add) */
     char xs_namebuf[XO_XS_NAMESIZE]; /* Buffer for small xs_names */
-    xo_ident_t xs_ident;	/* HTML: id for list/instances */
+    xo_ident_t xs_ident;        /* HTML: id for list/instances */
 } xo_stack_t;
 
-#define XS_OFFSET_CLEAR -1	/* Used to make a "not in use" offset */
+#define XS_OFFSET_CLEAR -1      /* Used to make a "not in use" offset */
 
 /*
  * libxo supports colors and effects, for those who like them.
@@ -273,17 +273,17 @@ typedef struct xo_stack_s {
  * ("effects") are bits since we need to maintain state.
  */
 typedef uint8_t xo_color_t;
-#define XO_COL_DEFAULT		0
-#define XO_COL_BLACK		1
-#define XO_COL_RED		2
-#define XO_COL_GREEN		3
-#define XO_COL_YELLOW		4
-#define XO_COL_BLUE		5
-#define XO_COL_MAGENTA		6
-#define XO_COL_CYAN		7
-#define XO_COL_WHITE		8
+#define XO_COL_DEFAULT          0
+#define XO_COL_BLACK            1
+#define XO_COL_RED              2
+#define XO_COL_GREEN            3
+#define XO_COL_YELLOW           4
+#define XO_COL_BLUE             5
+#define XO_COL_MAGENTA          6
+#define XO_COL_CYAN             7
+#define XO_COL_WHITE            8
 
-#define XO_NUM_COLORS		9
+#define XO_NUM_COLORS           9
 
 /*
  * Yes, there's no blink.  We're civilized.  We like users.  Blink
@@ -299,19 +299,19 @@ typedef uint8_t xo_color_t;
  * It's formalizing wrongness in the wrong way.  And we're just too
  * civilized to do that.  Hhhmph!
  */
-#define XO_EFF_RESET		(1<<0)
-#define XO_EFF_NORMAL		(1<<1)
-#define XO_EFF_BOLD		(1<<2)
-#define XO_EFF_UNDERLINE	(1<<3)
-#define XO_EFF_INVERSE		(1<<4)
+#define XO_EFF_RESET            (1<<0)
+#define XO_EFF_NORMAL           (1<<1)
+#define XO_EFF_BOLD             (1<<2)
+#define XO_EFF_UNDERLINE        (1<<3)
+#define XO_EFF_INVERSE          (1<<4)
 
 #define XO_EFF_CLEAR_BITS XO_EFF_RESET /* Reset gets reset, surprisingly */
 
 typedef uint8_t xo_effect_t;
 typedef struct xo_colors_s {
-    xo_effect_t xoc_effects;	/* Current effect set */
-    xo_color_t xoc_col_fg;	/* Foreground color */
-    xo_color_t xoc_col_bg;	/* Background color */
+    xo_effect_t xoc_effects;    /* Current effect set */
+    xo_color_t xoc_col_fg;      /* Foreground color */
+    xo_color_t xoc_col_bg;      /* Background color */
 } xo_colors_t;
 
 /*
@@ -320,63 +320,63 @@ typedef struct xo_colors_s {
  * of other information.
  */
 struct xo_handle_s {
-    xo_xof_flags_t xo_flags;	/* Flags (XOF_*) from the user*/
-    xo_xof_flags_t xo_iflags;	/* Internal flags (XOIF_*) */
-    xo_xof_flags_t xo_eflags;	/* Internal "encoding" flags (XOEF_*) */
-    xo_style_t xo_style;	/* XO_STYLE_* value */
-    unsigned short xo_indent;	/* Indent level (if pretty) */
+    xo_xof_flags_t xo_flags;    /* Flags (XOF_*) from the user*/
+    xo_xof_flags_t xo_iflags;   /* Internal flags (XOIF_*) */
+    xo_xof_flags_t xo_eflags;   /* Internal "encoding" flags (XOEF_*) */
+    xo_style_t xo_style;        /* XO_STYLE_* value */
+    unsigned short xo_indent;   /* Indent level (if pretty) */
     unsigned short xo_indent_by; /* Indent amount (tab stop) */
-    xo_write_func_t xo_write;	/* Write callback */
-    xo_close_func_t xo_close;	/* Close callback */
-    xo_flush_func_t xo_flush;	/* Flush callback */
+    xo_write_func_t xo_write;   /* Write callback */
+    xo_close_func_t xo_close;   /* Close callback */
+    xo_flush_func_t xo_flush;   /* Flush callback */
     xo_formatter_t xo_formatter; /* Custom formating function */
     xo_checkpointer_t xo_checkpointer; /* Custom formating support function */
-    void *xo_opaque;		/* Opaque data for write function */
-    xo_buffer_t xo_data;	/* Output data */
-    xo_buffer_t xo_fmt;	   	/* Work area for building format strings */
-    xo_buffer_t xo_attrs;	/* Work area for building XML attributes */
-    xo_buffer_t xo_predicate;	/* Work area for building XPath predicates */
-    xo_stack_t *xo_stack;	/* Stack pointer */
-    int xo_depth;		/* Depth of stack */
-    int xo_stack_size;		/* Size of the stack */
-    xo_info_t *xo_info;		/* Info fields for all elements */
-    int xo_info_count;		/* Number of info entries */
-    va_list xo_vap;		/* Variable arguments (stdargs) */
-    char *xo_leading_xpath;	/* A leading XPath expression */
-    mbstate_t xo_mbstate;	/* Multi-byte character conversion state */
-    ssize_t xo_anchor_offset;	/* Start of anchored text */
-    ssize_t xo_anchor_columns;	/* Number of columns since the start anchor */
+    void *xo_opaque;            /* Opaque data for write function */
+    xo_buffer_t xo_data;        /* Output data */
+    xo_buffer_t xo_fmt;         /* Work area for building format strings */
+    xo_buffer_t xo_attrs;       /* Work area for building XML attributes */
+    xo_buffer_t xo_predicate;   /* Work area for building XPath predicates */
+    xo_stack_t *xo_stack;       /* Stack pointer */
+    int xo_depth;               /* Depth of stack */
+    int xo_stack_size;          /* Size of the stack */
+    xo_info_t *xo_info;         /* Info fields for all elements */
+    int xo_info_count;          /* Number of info entries */
+    va_list xo_vap;             /* Variable arguments (stdargs) */
+    char *xo_leading_xpath;     /* A leading XPath expression */
+    mbstate_t xo_mbstate;       /* Multi-byte character conversion state */
+    ssize_t xo_anchor_offset;   /* Start of anchored text */
+    ssize_t xo_anchor_columns;  /* Number of columns since the start anchor */
     ssize_t xo_anchor_min_width; /* Desired width of anchored text */
-    ssize_t xo_units_offset;	/* Start of units insertion point */
-    ssize_t xo_columns;	/* Columns emitted during this xo_emit call */
+    ssize_t xo_units_offset;    /* Start of units insertion point */
+    ssize_t xo_columns; /* Columns emitted during this xo_emit call */
 #ifndef LIBXO_TEXT_ONLY
     xo_color_t xo_color_map_fg[XO_NUM_COLORS]; /* Foreground color mappings */
     xo_color_t xo_color_map_bg[XO_NUM_COLORS]; /* Background color mappings */
 #endif /* LIBXO_TEXT_ONLY */
-    xo_colors_t xo_colors;	/* Current color and effect values */
-    xo_buffer_t xo_color_buf;	/* HTML: buffer of colors and effects */
-    char *xo_version;		/* Version string */
-    int xo_errno;		/* Saved errno for "%m" */
-    char *xo_gt_domain;		/* Gettext domain, suitable for dgettext(3) */
+    xo_colors_t xo_colors;      /* Current color and effect values */
+    xo_buffer_t xo_color_buf;   /* HTML: buffer of colors and effects */
+    char *xo_version;           /* Version string */
+    int xo_errno;               /* Saved errno for "%m" */
+    char *xo_gt_domain;         /* Gettext domain, suitable for dgettext(3) */
     xo_encoder_func_t xo_encoder; /* Encoding function */
-    void *xo_private;		/* Private data for external encoders */
+    void *xo_private;           /* Private data for external encoders */
 #ifdef LIBXO_NEED_MAP
-    char **xo_map;		/* Name mapping array */
-    int xo_map_size;		/* Size (count) of xo_map[] */
-    int xo_map_len;		/* Current length (count) of xo_map[] */
-    xo_buffer_t xo_map_data;	/* Data values for name mapping */
+    char **xo_map;              /* Name mapping array */
+    int xo_map_size;            /* Size (count) of xo_map[] */
+    int xo_map_len;             /* Current length (count) of xo_map[] */
+    xo_buffer_t xo_map_data;    /* Data values for name mapping */
 #endif /* LIBXO_NEED_MAP */
 #ifdef LIBXO_NEED_FILTERS
     struct xo_filter_s *xo_filters; /* Opaque data pointer */
 #endif /* LIBXO_NEED_FILTERS */
-    xo_xsf_flags_t xo_rb_snap;	/* Transient: parent XSF_RB_BITS before open */
+    xo_xsf_flags_t xo_rb_snap;  /* Transient: parent XSF_RB_BITS before open */
     xo_ident_t xo_ident;        /* HTML: id for lists and instances*/
 };
 
 /* Flag operations */
-#define XOF_BIT_ISSET(_flag, _bit)	(((_flag) & (_bit)) ? 1 : 0)
-#define XOF_BIT_SET(_flag, _bit)	do { (_flag) |= (_bit); } while (0)
-#define XOF_BIT_CLEAR(_flag, _bit)	do { (_flag) &= ~(_bit); } while (0)
+#define XOF_BIT_ISSET(_flag, _bit)      (((_flag) & (_bit)) ? 1 : 0)
+#define XOF_BIT_SET(_flag, _bit)        do { (_flag) |= (_bit); } while (0)
+#define XOF_BIT_CLEAR(_flag, _bit)      do { (_flag) &= ~(_bit); } while (0)
 
 #define XOF_ISSET(_xop, _bit) XOF_BIT_ISSET(_xop->xo_flags, _bit)
 #define XOF_SET(_xop, _bit) XOF_BIT_SET(_xop->xo_flags, _bit)
@@ -391,18 +391,18 @@ struct xo_handle_s {
 #define XOEF_CLEAR(_xop, _bit) XOF_BIT_CLEAR(_xop->xo_eflags, _bit)
 
 /* Internal flags */
-#define XOIF_REORDER	XOF_BIT(0) /* Reordering fields; record field info */
-#define XOIF_DIV_OPEN	XOF_BIT(1) /* A <div> is open */
+#define XOIF_REORDER    XOF_BIT(0) /* Reordering fields; record field info */
+#define XOIF_DIV_OPEN   XOF_BIT(1) /* A <div> is open */
 #define XOIF_TOP_EMITTED XOF_BIT(2) /* The top JSON braces have been emitted */
-#define XOIF_ANCHOR	XOF_BIT(3) /* An anchor is in place  */
+#define XOIF_ANCHOR     XOF_BIT(3) /* An anchor is in place  */
 
 #define XOIF_UNITS_PENDING XOF_BIT(4) /* We have a units-insertion pending */
 #define XOIF_INIT_IN_PROGRESS XOF_BIT(5) /* Init of handle is in progress */
-#define XOIF_MADE_OUTPUT XOF_BIT(6)	 /* Have already made output */
+#define XOIF_MADE_OUTPUT XOF_BIT(6)      /* Have already made output */
 #ifdef LIBXO_NEED_FILTERS
-#define XOIF_FILTERING	XOF_BIT(7)	 /* Actively filtering (XOF_FILTER) */
+#define XOIF_FILTERING  XOF_BIT(7)       /* Actively filtering (XOF_FILTER) */
 #else  /* LIBXO_NEED_FILTERS */
-#define XOIF_FILTERING 0	/* Allow the compiler to trim filter code */
+#define XOIF_FILTERING 0        /* Allow the compiler to trim filter code */
 #endif /* LIBXO_NEED_FILTERS */
 
 /*
@@ -431,12 +431,12 @@ static THREAD_LOCAL(xo_handle_t) xo_default_handle;
 static THREAD_LOCAL(int) xo_default_inited;
 static int xo_locale_inited;
 static const char *xo_program;
-static int xo_codeset_is_utf8;	/* Is stdout UTF-8? */
+static int xo_codeset_is_utf8;  /* Is stdout UTF-8? */
 static int filter_lib_loaded;
 
 static char *xo_group_sep;      /* Copy of locale's thousands separator */
 static int xo_group_sep_len;    /* strlen(xo_group_sep) */
-static uint64_t xo_group_map;	/* Precomputed grouping-shape map */
+static uint64_t xo_group_map;   /* Precomputed grouping-shape map */
 
 #define XO_DEFAULT_GROUP_MAP 0x33333333 /* 3s all the way */
 
@@ -450,18 +450,18 @@ xo_free_func_t xo_free = free;
 /* Forward declarations */
 static ssize_t
 xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
-	       xo_state_t new_state);
+               xo_state_t new_state);
 
 static int
 xo_color_find (const char *str);
 
 static void
 xo_buf_append_div (xo_handle_t *xop, const xo_field_info_t *xfip,
-		   const char *class, xo_xff_flags_t flags,
-		   const char *name, ssize_t nlen,
-		   const char *value, ssize_t vlen,
-		   const char *fmt, ssize_t flen,
-		   const char *encoding, ssize_t elen);
+                   const char *class, xo_xff_flags_t flags,
+                   const char *name, ssize_t nlen,
+                   const char *value, ssize_t vlen,
+                   const char *fmt, ssize_t flen,
+                   const char *encoding, ssize_t elen);
 
 static void
 xo_anchor_clear (xo_handle_t *xop);
@@ -553,20 +553,20 @@ xo_depth_check (xo_handle_t *xop, int depth)
     xo_stack_t *xsp;
 
     if (depth >= xop->xo_stack_size) {
-	depth += XO_DEPTH;	/* Extra room */
+        depth += XO_DEPTH;      /* Extra room */
 
-	xsp = xo_realloc(xop->xo_stack, sizeof(xop->xo_stack[0]) * depth);
-	if (xsp == NULL) {
-	    xo_failure(xop, "xo_depth_check: out of memory (%d)", depth);
-	    return -1;
-	}
+        xsp = xo_realloc(xop->xo_stack, sizeof(xop->xo_stack[0]) * depth);
+        if (xsp == NULL) {
+            xo_failure(xop, "xo_depth_check: out of memory (%d)", depth);
+            return -1;
+        }
 
-	int old_size = xop->xo_stack_size;
-	int count = depth - old_size;
+        int old_size = xop->xo_stack_size;
+        int count = depth - old_size;
 
-	bzero(xsp + old_size, count * sizeof(*xsp));
-	xop->xo_stack_size = depth;
-	xop->xo_stack = xsp;
+        bzero(xsp + old_size, count * sizeof(*xsp));
+        xop->xo_stack_size = depth;
+        xop->xo_stack = xsp;
     }
 
     return 0;
@@ -575,7 +575,7 @@ xo_depth_check (xo_handle_t *xop, int depth)
 void
 xo_no_setlocale (void)
 {
-    xo_locale_inited = 1;	/* Skip initialization */
+    xo_locale_inited = 1;       /* Skip initialization */
 }
 
 /*
@@ -615,48 +615,48 @@ xo_is_line_buffered (FILE *stream)
 {
 #if HAVE___FLBF
     if (__flbf(stream))
-	return 1;
+        return 1;
 #else /* HAVE___FLBF */
     if (isatty(fileno(stream)))
-	return 1;
+        return 1;
 #endif /* HAVE___FLBF */
     return 0;
 }
 
-xo_filter_ops_t xo_filter_ops;	/* The global set of filter operations */
+xo_filter_ops_t xo_filter_ops;  /* The global set of filter operations */
 
 #ifdef LIBXO_NEED_FILTERS
 static int
 xo_load_filter_lib (xo_handle_t *xop UNUSED)
 {
     if (filter_lib_loaded)
-	return 0;
+        return 0;
 
     xo_filter_init_func_t func;
     const char *reason = NULL;
 
     void *dlp = xo_dyld_open(XO_FILTERDIR, "xo_filter", "lib");
     if (dlp == NULL)
-	reason = "library not found";
+        reason = "library not found";
     else {
-	func = (xo_filter_init_func_t) xo_dyld_func(dlp, XO_FILTER_INIT_FUNC);
+        func = (xo_filter_init_func_t) xo_dyld_func(dlp, XO_FILTER_INIT_FUNC);
 
-	if (func == NULL)
-	    reason = "no init function";
+        if (func == NULL)
+            reason = "no init function";
 
-	else {
-	    int rc = func(XO_FILTER_OPS_VERSION, &xo_filter_ops);
+        else {
+            int rc = func(XO_FILTER_OPS_VERSION, &xo_filter_ops);
 
-	    if (rc == -1)
-		reason = "init failed";
-	    else if (rc != XO_FILTER_OPS_VERSION)
-		reason = "version mismatch";
-	}
+            if (rc == -1)
+                reason = "init failed";
+            else if (rc != XO_FILTER_OPS_VERSION)
+                reason = "version mismatch";
+        }
     }
 
     if (reason) {
-	xo_warnx("could not load filter library: %s", reason);
-	return -1;
+        xo_warnx("could not load filter library: %s", reason);
+        return -1;
     }
 
     filter_lib_loaded = TRUE;
@@ -671,8 +671,8 @@ void
 xo_setup_filter_lib_test (int version, xo_filter_ops_t *ops)
 {
     if (version == XO_FILTER_OPS_VERSION) {
-	memcpy(&xo_filter_ops, ops, sizeof(*ops));
-	filter_lib_loaded = TRUE;
+        memcpy(&xo_filter_ops, ops, sizeof(*ops));
+        filter_lib_loaded = TRUE;
     }
 }
 
@@ -696,18 +696,18 @@ xo_group_map_build (const char *grouping)
     int idx = 0, covered = 0;
 
     while (idx < 16 && covered < 20) {
-	if (cur == 0 || cur == (unsigned char) CHAR_MAX)
-	    break;			/* "no more grouping": leave 0s */
+        if (cur == 0 || cur == (unsigned char) CHAR_MAX)
+            break;                      /* "no more grouping": leave 0s */
 
-	map |= ((uint64_t) cur) << (4 * idx);
-	covered += cur;
-	idx++;
+        map |= ((uint64_t) cur) << (4 * idx);
+        covered += cur;
+        idx++;
 
-	if (gp[1] != '\0') {		/* more explicit bytes remain */
-	    gp++;
-	    cur = *gp;
-	}
-	/* else: gp[1] == '\0' means repeat `cur` forever -- leave it alone */
+        if (gp[1] != '\0') {            /* more explicit bytes remain */
+            gp++;
+            cur = *gp;
+        }
+        /* else: gp[1] == '\0' means repeat `cur` forever -- leave it alone */
     }
 
     return map;
@@ -743,56 +743,56 @@ xo_set_grouping (xo_handle_t *xop UNUSED, const char *value)
     memcpy(buf, value, len + 1);
 
     char *cp = buf;
-    char *sep = buf;		/* Starts with the thousands_sep */
+    char *sep = buf;            /* Starts with the thousands_sep */
 
     while (*cp && *cp != '+')
-	cp += 1;
-    if (*cp != '+')		/* no "+n1..." portion given */
-	return -1;
+        cp += 1;
+    if (*cp != '+')             /* no "+n1..." portion given */
+        return -1;
 
     int sep_len = cp - buf;
     *cp++ = '\0';
 
     if (sep_len == 0) {
-	/* No separator given (e.g. "grouping=+3+2"): default to "," */
-	xo_free(xo_group_sep);
-	xo_group_sep = NULL;
-	xo_group_sep_len = 0;
+        /* No separator given (e.g. "grouping=+3+2"): default to "," */
+        xo_free(xo_group_sep);
+        xo_group_sep = NULL;
+        xo_group_sep_len = 0;
 
     } else {
-	char *new_sep = xo_realloc(xo_group_sep, sep_len + 1);
-	if (new_sep == NULL)
-	    return -1;
+        char *new_sep = xo_realloc(xo_group_sep, sep_len + 1);
+        if (new_sep == NULL)
+            return -1;
 
-	xo_group_sep = new_sep;
-	memcpy(xo_group_sep, sep, sep_len + 1);
-	xo_group_sep_len = sep_len;
+        xo_group_sep = new_sep;
+        memcpy(xo_group_sep, sep, sep_len + 1);
+        xo_group_sep_len = sep_len;
     }
 
     if (*cp && *cp != '0' && *cp != '-') { /* All "none" indicators */
-	char grouping[len + 1], *gp = grouping;
-	for (; *cp; cp++) {
-	    if (cp[0] == '-' && cp[1] == '1') {
-		*gp++ = CHAR_MAX;
-		break;
-	    }
+        char grouping[len + 1], *gp = grouping;
+        for (; *cp; cp++) {
+            if (cp[0] == '-' && cp[1] == '1') {
+                *gp++ = CHAR_MAX;
+                break;
+            }
 
-	    if (!isdigit((unsigned char) *cp))
-		return -1;
+            if (!isdigit((unsigned char) *cp))
+                return -1;
 
-	    *gp++ = (char) (*cp - '0');
-	    if (cp[1] != '+' && cp[1] != ';' && cp[1] != ':' && cp[1] != '\0')
-		return -1;
+            *gp++ = (char) (*cp - '0');
+            if (cp[1] != '+' && cp[1] != ';' && cp[1] != ':' && cp[1] != '\0')
+                return -1;
 
-	    if (cp[1] == '+' || cp[1] == ';' || cp[1] == ':')
-		cp += 1; /* Skip the sep; the loop's cp++ covers the digit */
-	}
+            if (cp[1] == '+' || cp[1] == ';' || cp[1] == ':')
+                cp += 1; /* Skip the sep; the loop's cp++ covers the digit */
+        }
 
-	*gp++ = '\0';
-	xo_group_map = xo_group_map_build(grouping);
+        *gp++ = '\0';
+        xo_group_map = xo_group_map_build(grouping);
 
     } else {
-	xo_group_map = XO_DEFAULT_GROUP_MAP;
+        xo_group_map = XO_DEFAULT_GROUP_MAP;
     }
 
     return 0;
@@ -823,7 +823,7 @@ xo_init_handle (xo_handle_t *xop)
     xop->xo_flush = xo_flush_file;
 
     if (xo_is_line_buffered(stdout))
-	XOF_SET(xop, XOF_FLUSH_LINE);
+        XOF_SET(xop, XOF_FLUSH_LINE);
 
     /*
      * We need to initialize the locale, which isn't really pretty.
@@ -832,51 +832,51 @@ xo_init_handle (xo_handle_t *xop)
      * this, because well, they won't.  Trust me.
      */
     if (!xo_locale_inited) {
-	xo_locale_inited = 1;	/* Only do this once */
+        xo_locale_inited = 1;   /* Only do this once */
 
-#ifdef __FreeBSD__		/* Who does The Right Thing */
-	const char *cp = "";
+#ifdef __FreeBSD__              /* Who does The Right Thing */
+        const char *cp = "";
 #else /* __FreeBSD__ */
-	const char *cp = getenv("LC_ALL");
-	if (cp == NULL)
-	    cp = getenv("LC_CTYPE");
-	if (cp == NULL)
-	    cp = getenv("LANG");
-	if (cp == NULL)
-	    cp = "C";		/* Default for C programs */
+        const char *cp = getenv("LC_ALL");
+        if (cp == NULL)
+            cp = getenv("LC_CTYPE");
+        if (cp == NULL)
+            cp = getenv("LANG");
+        if (cp == NULL)
+            cp = "C";           /* Default for C programs */
 #endif /* __FreeBSD__ */
 
-	(void) setlocale(LC_CTYPE, cp);
-	(void) setlocale(LC_NUMERIC, cp);
+        (void) setlocale(LC_CTYPE, cp);
+        (void) setlocale(LC_NUMERIC, cp);
 
 #ifdef CODESET
-	/* Now that locale is set, determine if our stdout output is UTF-8 */
-	const char *codeset = nl_langinfo(CODESET);
-	if (codeset && xo_streq(codeset, "UTF-8"))
-	    xo_codeset_is_utf8 = TRUE;
+        /* Now that locale is set, determine if our stdout output is UTF-8 */
+        const char *codeset = nl_langinfo(CODESET);
+        if (codeset && xo_streq(codeset, "UTF-8"))
+            xo_codeset_is_utf8 = TRUE;
 #endif /* CODESET */
 
-	/* Cache the grouping separator and precompute the grouping map */
-	struct lconv *lcp = localeconv();
-	if (lcp->thousands_sep && *lcp->thousands_sep) {
-	    int glen = strlen(lcp->thousands_sep);
-	    xo_group_sep = xo_realloc(xo_group_sep, glen + 1);
-	    if (xo_group_sep) {
-		memcpy(xo_group_sep, lcp->thousands_sep, glen + 1);
-		xo_group_sep_len = glen;
-	    }
-	} else {
-	    if (xo_group_sep) {
-		xo_free(xo_group_sep);
-		xo_group_sep = NULL;
-		xo_group_sep_len = 0;
-	    }
-	}
+        /* Cache the grouping separator and precompute the grouping map */
+        struct lconv *lcp = localeconv();
+        if (lcp->thousands_sep && *lcp->thousands_sep) {
+            int glen = strlen(lcp->thousands_sep);
+            xo_group_sep = xo_realloc(xo_group_sep, glen + 1);
+            if (xo_group_sep) {
+                memcpy(xo_group_sep, lcp->thousands_sep, glen + 1);
+                xo_group_sep_len = glen;
+            }
+        } else {
+            if (xo_group_sep) {
+                xo_free(xo_group_sep);
+                xo_group_sep = NULL;
+                xo_group_sep_len = 0;
+            }
+        }
 
-	if (lcp->grouping)
-	    xo_group_map = xo_group_map_build(lcp->grouping);
-	else
-	    xo_group_map = XO_DEFAULT_GROUP_MAP;
+        if (lcp->grouping)
+            xo_group_map = xo_group_map_build(lcp->grouping);
+        else
+            xo_group_map = XO_DEFAULT_GROUP_MAP;
     }
 
     /*
@@ -887,7 +887,7 @@ xo_init_handle (xo_handle_t *xop)
     xo_buf_init(&xop->xo_fmt);
 
     if (XOIF_ISSET(xop, XOIF_INIT_IN_PROGRESS))
-	return;
+        return;
     XOIF_SET(xop, XOIF_INIT_IN_PROGRESS);
 
     xop->xo_indent_by = XO_INDENT_BY;
@@ -924,10 +924,10 @@ static int
 xo_style_is_encoding (xo_handle_t *xop)
 {
     if (xo_style(xop) == XO_STYLE_JSON
-	|| xo_style(xop) == XO_STYLE_XML
-	|| xo_style(xop) == XO_STYLE_SDPARAMS
-	|| xo_style(xop) == XO_STYLE_ENCODER)
-	return TRUE;
+        || xo_style(xop) == XO_STYLE_XML
+        || xo_style(xop) == XO_STYLE_SDPARAMS
+        || xo_style(xop) == XO_STYLE_ENCODER)
+        return TRUE;
     return FALSE;
 }
 
@@ -938,7 +938,7 @@ static inline int
 xo_is_style_text_utf8 (xo_handle_t *xop)
 {
     if (xo_style(xop) == XO_STYLE_TEXT)
-	return XOF_ISSET(xop, XOF_UTF8);
+        return XOF_ISSET(xop, XOF_UTF8);
 
     return FALSE;
 }
@@ -953,9 +953,9 @@ static xo_handle_t *
 xo_default (xo_handle_t *xop)
 {
     if (xop == NULL) {
-	if (xo_default_inited == 0)
-	    xo_default_init();
-	xop = &xo_default_handle;
+        if (xo_default_inited == 0)
+            xo_default_init();
+        xop = &xo_default_handle;
     }
 
     return xop;
@@ -972,7 +972,7 @@ xo_dbg_v (xo_handle_t *xop UNUSED, const char *fmt UNUSED, va_list vap UNUSED)
     xop = xo_default(xop);
 
     if (xop == NULL || !XOF_ISSET(xop, XOF_DEBUG))
-	return;
+        return;
 
     size_t len = strlen(fmt);
     char *new_fmt = alloca(len + 2);
@@ -991,7 +991,7 @@ xo_dbg (xo_handle_t *xop UNUSED, const char *fmt UNUSED, ...)
     xop = xo_default(xop);
 
     if (xop == NULL || !XOF_ISSET(xop, XOF_DEBUG))
-	return;
+        return;
 
     va_list vap;
 
@@ -1013,9 +1013,9 @@ xo_indent (xo_handle_t *xop)
     xop = xo_default(xop);
 
     if (XOF_ISSET(xop, XOF_PRETTY)) {
-	rc = xop->xo_indent * xop->xo_indent_by;
-	if (XOIF_ISSET(xop, XOIF_TOP_EMITTED))
-	    rc += xop->xo_indent_by;
+        rc = xop->xo_indent * xop->xo_indent_by;
+        if (XOIF_ISSET(xop, XOIF_TOP_EMITTED))
+            rc += xop->xo_indent_by;
     }
 
     return (rc > 0) ? rc : 0;
@@ -1029,7 +1029,7 @@ static int
 xo_check_for_room (xo_handle_t *xop, xo_buffer_t *xbp, int bytes)
 {
     if (xo_buf_has_room(xbp, bytes))
-	return 0;
+        return 0;
 
     xo_failure(xop, "buffer cannot be expanded for %d bytes", bytes);
     return -1;
@@ -1044,24 +1044,24 @@ xo_check_for_room (xo_handle_t *xop, xo_buffer_t *xbp, int bytes)
 static int
 xo_group_segments (uint64_t locale_map, int ndigits, uint64_t *segs_out)
 {
-    uint64_t map = locale_map;		/* local copy: peeling is destructive */
+    uint64_t map = locale_map;          /* local copy: peeling is destructive */
     uint64_t segs = 0;
     int nsegs = 0;
 
     while (ndigits > 0 && nsegs < 16) {
-	int mine = map & 0xF;
-	map >>= 4;
+        int mine = map & 0xF;
+        map >>= 4;
 
-	if (mine == 0 || mine > ndigits)
-	    mine = ndigits;		/* map exhausted / CHAR_MAX reached:
-					   everything left is one final
-					   segment */
-	if (mine > 15)
-	    mine = 15;			/* must still fit in a nibble */
+        if (mine == 0 || mine > ndigits)
+            mine = ndigits;             /* map exhausted / CHAR_MAX reached:
+                                           everything left is one final
+                                           segment */
+        if (mine > 15)
+            mine = 15;                  /* must still fit in a nibble */
 
-	segs |= ((uint64_t) mine) << (4 * nsegs);
-	nsegs++;
-	ndigits -= mine;
+        segs |= ((uint64_t) mine) << (4 * nsegs);
+        nsegs++;
+        ndigits -= mine;
     }
 
     *segs_out = segs;
@@ -1081,28 +1081,28 @@ xo_group_segments (uint64_t locale_map, int ndigits, uint64_t *segs_out)
  */
 xo_off_t
 xo_grouping_fixup (xo_handle_t *xop, xo_buffer_t *xbp,
-		    xo_off_t start_off, xo_off_t rc)
+                    xo_off_t start_off, xo_off_t rc)
 {
     char *field_start = xbp->xb_bufp + start_off;
     char *end = field_start + rc;
     char *p = field_start;
 
-    while (p < end && *p == ' ')	/* right-justify width padding */
-	p++;
-    if (p < end && *p == '-')		/* sign */
-	p++;
+    while (p < end && *p == ' ')        /* right-justify width padding */
+        p++;
+    if (p < end && *p == '-')           /* sign */
+        p++;
 
     char *digit_start = p;
     while (p < end && isdigit((unsigned char) *p))
-	p++;
+        p++;
     char *digit_end = p;
 
     int ndigits = digit_end - digit_start;
     if (ndigits < 2)
-	return rc;
+        return rc;
 
-    if (*digit_start == '0')	/* leading zero: zero-padded, not grouped */
-	return rc;
+    if (*digit_start == '0')    /* leading zero: zero-padded, not grouped */
+        return rc;
 
     uint64_t segs;
     int nsegs = xo_group_segments(xo_group_map, ndigits, &segs);
@@ -1110,14 +1110,14 @@ xo_grouping_fixup (xo_handle_t *xop, xo_buffer_t *xbp,
     int seplen = xo_group_sep_len ?: 1;
     xo_off_t extra = (xo_off_t) (nsegs - 1) * seplen;
     if (extra <= 0)
-	return rc;
+        return rc;
 
     /* Capture offsets now: xo_check_for_room() below may call realloc()
      * and move xbp->xb_bufp, invalidating field_start/end/digit_end. */
     xo_off_t tail_len = end - digit_end;
 
     if (xo_check_for_room(xop, xbp, rc + extra))
-	return rc;
+        return rc;
 
     field_start = xbp->xb_bufp + start_off;
     char *old_end = field_start + rc;
@@ -1125,7 +1125,7 @@ xo_grouping_fixup (xo_handle_t *xop, xo_buffer_t *xbp,
 
     /* 1. shift any trailing content (left-justify padding) right */
     if (tail_len > 0)
-	memmove(old_end + extra - tail_len, old_end - tail_len, tail_len);
+        memmove(old_end + extra - tail_len, old_end - tail_len, tail_len);
 
     /* 2. peel segments off the right, moving each into place and writing
      *    one separator to its left -- except before the leftmost segment */
@@ -1133,17 +1133,17 @@ xo_grouping_fixup (xo_handle_t *xop, xo_buffer_t *xbp,
     char *rp = old_end - tail_len;
 
     for (int i = 0; i < nsegs; i++) {
-	int seglen = segs & 0xF;
-	segs >>= 4;
+        int seglen = segs & 0xF;
+        segs >>= 4;
 
-	memmove(wp - seglen, rp - seglen, seglen);
-	wp -= seglen;
-	rp -= seglen;
+        memmove(wp - seglen, rp - seglen, seglen);
+        wp -= seglen;
+        rp -= seglen;
 
-	if (i + 1 < nsegs) {		/* not the leftmost segment */
-	    wp -= seplen;
-	    memcpy(wp, xo_group_sep ?: ",", seplen);
-	}
+        if (i + 1 < nsegs) {            /* not the leftmost segment */
+            wp -= seplen;
+            memcpy(wp, xo_group_sep ?: ",", seplen);
+        }
     }
 
     return rc + extra;
@@ -1155,10 +1155,10 @@ xo_buf_indent (xo_handle_t *xop, int indent)
     xo_buffer_t *xbp = &xop->xo_data;
 
     if (indent <= 0)
-	indent = xo_indent(xop);
+        indent = xo_indent(xop);
 
     if (xo_check_for_room(xop, xbp, indent))
-	return;
+        return;
 
     memset(xbp->xb_curp, ' ', indent);
     xbp->xb_curp += indent;
@@ -1168,7 +1168,7 @@ static char xo_xml_amp[] = "&amp;";
 static char xo_xml_lt[] = "&lt;";
 static char xo_xml_gt[] = "&gt;";
 static char xo_xml_quot[] = "&quot;";
-#define XO_LEN_QUOT 6		/* strlen("&quot;") */
+#define XO_LEN_QUOT 6           /* strlen("&quot;") */
 static char xo_xml_square[] = { 0xE2, 0x96, 0xA1, 0 };
 
 #define XO_XML_ESCAPE_BINARY_UNICODE_BASE 0xe000
@@ -1178,7 +1178,7 @@ static char xo_xml_square[] = { 0xE2, 0x96, 0xA1, 0 };
 
 static ssize_t
 xo_escape_xml (xo_handle_t *xop, xo_buffer_t *xbp,
-	       ssize_t len, xo_xff_flags_t flags)
+               ssize_t len, xo_xff_flags_t flags)
 {
     ssize_t slen;
     ssize_t delta = 0;
@@ -1188,101 +1188,101 @@ xo_escape_xml (xo_handle_t *xop, xo_buffer_t *xbp,
     unsigned char ch;
 
     for (cp = xbp->xb_curp, ep = cp + len; cp < ep; cp++) {
-	ch = *cp;
+        ch = *cp;
 
-	/* We're subtracting 2: 1 for the NUL, 1 for the char we replace */
-	if (ch == '<')
-	    delta += sizeof(xo_xml_lt) - 2;
-	else if (ch == '>')
-	    delta += sizeof(xo_xml_gt) - 2;
-	else if (ch == '&')
-	    delta += sizeof(xo_xml_amp) - 2;
-	else if (attr && ch == '"')
-	    delta += sizeof(xo_xml_quot) - 2;
+        /* We're subtracting 2: 1 for the NUL, 1 for the char we replace */
+        if (ch == '<')
+            delta += sizeof(xo_xml_lt) - 2;
+        else if (ch == '>')
+            delta += sizeof(xo_xml_gt) - 2;
+        else if (ch == '&')
+            delta += sizeof(xo_xml_amp) - 2;
+        else if (attr && ch == '"')
+            delta += sizeof(xo_xml_quot) - 2;
 
-	else if ((unsigned) ch >= 0x20) /* Beware of types here */
-	    continue;
+        else if ((unsigned) ch >= 0x20) /* Beware of types here */
+            continue;
 
-	else {
-	    switch (ch) {
-	    case '\n':
-	    case '\r':
-	    case '\t':
-		break;
+        else {
+            switch (ch) {
+            case '\n':
+            case '\r':
+            case '\t':
+                break;
 
-	    default:
-		lost += 1;
-	    }
-	}
+            default:
+                lost += 1;
+            }
+        }
     }
 
     if (delta == 0 && lost == 0) /* Nothing to escape; bail */
-	return len;
+        return len;
 
     int square = !lost ? 0 : (flags & XFF_ESC_SQUARE) ? 1 : 0;
     if (square)
-	delta += lost * (sizeof(xo_xml_square) - 2);
+        delta += lost * (sizeof(xo_xml_square) - 2);
     int private = !lost ? 0 : (flags & XFF_ESC_PRIVATE) ? 1 : 0;
 
     if (private)
-	delta += lost * (XO_XML_ESCAPE_BINARY_UNICODE_SIZE - 1);
+        delta += lost * (XO_XML_ESCAPE_BINARY_UNICODE_SIZE - 1);
     char private_buffer[XO_XML_ESCAPE_BINARY_UNICODE_SIZE + 1];
 
     /* No room?  Bail, but don't append */
     if (xo_check_for_room(xop, xbp, delta))
-	return 0;
+        return 0;
 
     ep = xbp->xb_curp;
     cp = ep + len;
     ip = cp + delta;
     do {
-	cp -= 1;
-	ip -= 1;
-	const char *sp = NULL;
-	ch = *cp;
+        cp -= 1;
+        ip -= 1;
+        const char *sp = NULL;
+        ch = *cp;
 
-	if (ch == '<')
-	    sp = xo_xml_lt;
-	else if (ch == '>')
-	    sp = xo_xml_gt;
-	else if (ch == '&')
-	    sp = xo_xml_amp;
-	else if (attr && ch == '"')
-	    sp = xo_xml_quot;
-	else if ((unsigned) ch >= 0x20) /* Beware of types here */
-	    *ip = ch;
+        if (ch == '<')
+            sp = xo_xml_lt;
+        else if (ch == '>')
+            sp = xo_xml_gt;
+        else if (ch == '&')
+            sp = xo_xml_amp;
+        else if (attr && ch == '"')
+            sp = xo_xml_quot;
+        else if ((unsigned) ch >= 0x20) /* Beware of types here */
+            *ip = ch;
 
-	else {
-	    char ih = 0;
+        else {
+            char ih = 0;
 
-	    switch (ch) {
-	    case '\n':
-	    case '\r':
-	    case '\t':
-		ih = ch;
-		break;
+            switch (ch) {
+            case '\n':
+            case '\r':
+            case '\t':
+                ih = ch;
+                break;
 
-	    default:
-		if (square)
-		    sp = xo_xml_square;
-		else if (private) {
-		    snprintf(private_buffer, sizeof(private_buffer),
-			     XO_XML_ESCAPE_BINARY_UNICODE, (unsigned) ch);
-		    sp = private_buffer;
-		} else
-		    ih = ' ';
-	    }
+            default:
+                if (square)
+                    sp = xo_xml_square;
+                else if (private) {
+                    snprintf(private_buffer, sizeof(private_buffer),
+                             XO_XML_ESCAPE_BINARY_UNICODE, (unsigned) ch);
+                    sp = private_buffer;
+                } else
+                    ih = ' ';
+            }
 
-	    if (ih)
-		*ip = ih;
-	}
+            if (ih)
+                *ip = ih;
+        }
 
-	if (sp) {
-	    slen = strlen(sp);
-	    ip -= slen - 1;
-	    memcpy(ip, sp, slen);
-	}
-	
+        if (sp) {
+            slen = strlen(sp);
+            ip -= slen - 1;
+            memcpy(ip, sp, slen);
+        }
+        
     } while (cp > ep && cp != ip);
 
     return len + delta;
@@ -1304,110 +1304,110 @@ xo_escape_xml (xo_handle_t *xop, xo_buffer_t *xbp,
  */
 static ssize_t
 xo_escape_json (xo_handle_t *xop, xo_buffer_t *xbp,
-		ssize_t len, xo_xff_flags_t flags)
+                ssize_t len, xo_xff_flags_t flags)
 {
     ssize_t delta = 0;
     char *cp, *ep, *ip;
 
     for (cp = xbp->xb_curp, ep = cp + len; cp < ep; cp++) {
-	char ch = *cp;
+        char ch = *cp;
 
-	if (ch == '\\' || ch == '"')
-	    delta += 1;
-	else if (ch == '/' && (flags & XFF_ESC_SLASH))
-	    delta += 1;
-	else if ((unsigned) ch >= 0x20) { /* Beware of types here */
-	    /* nothing */
+        if (ch == '\\' || ch == '"')
+            delta += 1;
+        else if (ch == '/' && (flags & XFF_ESC_SLASH))
+            delta += 1;
+        else if ((unsigned) ch >= 0x20) { /* Beware of types here */
+            /* nothing */
 
-	} else {
-	    switch (ch) {
-	    case '\b':
-	    case '\f':
-	    case '\n':
-	    case '\r':
-	    case '\t':
-		delta += 1;
-		break;
+        } else {
+            switch (ch) {
+            case '\b':
+            case '\f':
+            case '\n':
+            case '\r':
+            case '\t':
+                delta += 1;
+                break;
 
-	    default:
-		delta += 5;
-	    }
-	}
+            default:
+                delta += 5;
+            }
+        }
     }
 
-    if (delta == 0)		/* Nothing to escape; bail */
-	return len;
+    if (delta == 0)             /* Nothing to escape; bail */
+        return len;
 
     /* No room?  Bail, but don't append */
     if (xo_check_for_room(xop, xbp, delta))
-	return 0;
+        return 0;
 
     ep = xbp->xb_curp;
     cp = ep + len;
     ip = cp + delta;
     do {
-	cp -= 1;
-	ip -= 1;
+        cp -= 1;
+        ip -= 1;
 
-	unsigned char ch = *cp;
+        unsigned char ch = *cp;
 
-	if (ch == '\\' || ch == '"') {
-	    *ip-- = *cp;
-	    *ip = '\\';
+        if (ch == '\\' || ch == '"') {
+            *ip-- = *cp;
+            *ip = '\\';
 
-	} else if (ch == '/' && (flags & XFF_ESC_SLASH)) {
-	    *ip-- = *cp;
-	    *ip = '\\';
+        } else if (ch == '/' && (flags & XFF_ESC_SLASH)) {
+            *ip-- = *cp;
+            *ip = '\\';
 
-	} else if ((unsigned) ch >= 0x20) { /* Beware of types here */
-	    *ip = *cp;
+        } else if ((unsigned) ch >= 0x20) { /* Beware of types here */
+            *ip = *cp;
 
-	} else {
-	    char ih = 0;
+        } else {
+            char ih = 0;
 
-	    switch (ch) {
-	    case '\b':
-		ih = 'b';
-		break;
+            switch (ch) {
+            case '\b':
+                ih = 'b';
+                break;
 
-	    case '\f':
-		ih = 'f';
-		break;
+            case '\f':
+                ih = 'f';
+                break;
 
-	    case '\n':
-		ih = 'n';
-		break;
+            case '\n':
+                ih = 'n';
+                break;
 
-	    case '\r':
-		ih = 'r';
-		break;
+            case '\r':
+                ih = 'r';
+                break;
 
-	    case '\t':
-		ih = 't';
-		break;
+            case '\t':
+                ih = 't';
+                break;
 
-	    case '\0':
-		ip += 1;	/* Undo the move */
-		continue;
+            case '\0':
+                ip += 1;        /* Undo the move */
+                continue;
 
-	    default:
-		{
-		    static const char hexstr[] = "0123456789abcdef";
-		    *ip-- = hexstr[ch & 0x0F];
-		    *ip-- = hexstr[(ch >> 4) & 0x0F];
-		    *ip-- = '0';
-		    *ip-- = '0';
-		    *ip-- = 'u';
-		    *ip = '\\';
-		}
-	    }
+            default:
+                {
+                    static const char hexstr[] = "0123456789abcdef";
+                    *ip-- = hexstr[ch & 0x0F];
+                    *ip-- = hexstr[(ch >> 4) & 0x0F];
+                    *ip-- = '0';
+                    *ip-- = '0';
+                    *ip-- = 'u';
+                    *ip = '\\';
+                }
+            }
 
-	    if (ih) {
-		*ip-- = ih;
-		*ip = '\\';
-	    }
-	}
-	
+            if (ih) {
+                *ip-- = ih;
+                *ip = '\\';
+            }
+        }
+        
     } while (cp > ep && cp != ip);
 
     return len + delta;
@@ -1419,36 +1419,36 @@ xo_escape_json (xo_handle_t *xop, xo_buffer_t *xbp,
  */
 static ssize_t
 xo_escape_sdparams (xo_handle_t *xop, xo_buffer_t *xbp,
-		    ssize_t len, xo_xff_flags_t flags UNUSED)
+                    ssize_t len, xo_xff_flags_t flags UNUSED)
 {
     ssize_t delta = 0;
     char *cp, *ep, *ip;
 
     for (cp = xbp->xb_curp, ep = cp + len; cp < ep; cp++) {
-	if (*cp == '\\' || *cp == '"' || *cp == ']')
-	    delta += 1;
+        if (*cp == '\\' || *cp == '"' || *cp == ']')
+            delta += 1;
     }
 
-    if (delta == 0)		/* Nothing to escape; bail */
-	return len;
+    if (delta == 0)             /* Nothing to escape; bail */
+        return len;
 
     if (xo_check_for_room(xop, xbp, delta)) /* No room; bail, but don't append */
-	return 0;
+        return 0;
 
     ep = xbp->xb_curp;
     cp = ep + len;
     ip = cp + delta;
     do {
-	cp -= 1;
-	ip -= 1;
+        cp -= 1;
+        ip -= 1;
 
-	if (*cp == '\\' || *cp == '"' || *cp == ']') {
-	    *ip-- = *cp;
-	    *ip = '\\';
-	} else {
-	    *ip = *cp;
-	}
-	
+        if (*cp == '\\' || *cp == '"' || *cp == ']') {
+            *ip-- = *cp;
+            *ip = '\\';
+        } else {
+            *ip = *cp;
+        }
+        
     } while (cp > ep && cp != ip);
 
     return len + delta;
@@ -1456,26 +1456,26 @@ xo_escape_sdparams (xo_handle_t *xop, xo_buffer_t *xbp,
 
 static void
 xo_buf_escape (xo_handle_t *xop, xo_buffer_t *xbp,
-	       const char *str, ssize_t len, xo_xff_flags_t flags)
+               const char *str, ssize_t len, xo_xff_flags_t flags)
 {
     if (xo_check_for_room(xop, xbp, len))
-	return;
+        return;
 
     memcpy(xbp->xb_curp, str, len);
 
     switch (xo_style(xop)) {
     case XO_STYLE_XML:
     case XO_STYLE_HTML:
-	len = xo_escape_xml(xop, xbp, len, flags);
-	break;
+        len = xo_escape_xml(xop, xbp, len, flags);
+        break;
 
     case XO_STYLE_JSON:
-	len = xo_escape_json(xop, xbp, len, flags);
-	break;
+        len = xo_escape_json(xop, xbp, len, flags);
+        break;
 
     case XO_STYLE_SDPARAMS:
-	len = xo_escape_sdparams(xop, xbp, len, flags);
-	break;
+        len = xo_escape_sdparams(xop, xbp, len, flags);
+        break;
     }
 
     xbp->xb_curp += len;
@@ -1492,15 +1492,15 @@ xo_write (xo_handle_t *xop)
     xo_buffer_t *xbp = &xop->xo_data;
 
     if (xbp->xb_curp != xbp->xb_bufp) {
-	xo_buf_append(xbp, "", 1); /* Append ending NUL */
-	xo_anchor_clear(xop);
-	if (xop->xo_write)
-	    rc = xop->xo_write(xop->xo_opaque, xbp->xb_bufp);
+        xo_buf_append(xbp, "", 1); /* Append ending NUL */
+        xo_anchor_clear(xop);
+        if (xop->xo_write)
+            rc = xop->xo_write(xop->xo_opaque, xbp->xb_bufp);
 
-	xo_buf_reset(xbp);
+        xo_buf_reset(xbp);
 
-	/* We have now official made output */
-	XOIF_SET(xop, XOIF_MADE_OUTPUT);
+        /* We have now official made output */
+        XOIF_SET(xop, XOIF_MADE_OUTPUT);
     }
 
     /* Turn off the flags that don't survive across writes */
@@ -1523,32 +1523,32 @@ xo_vsnprintf (xo_handle_t *xop, xo_buffer_t *xbp, const char *fmt, va_list vap)
     va_copy(va_local, vap);
 
     if (xop->xo_formatter)
-	rc = xop->xo_formatter(xop, xbp->xb_curp, left, fmt, va_local);
+        rc = xop->xo_formatter(xop, xbp->xb_curp, left, fmt, va_local);
     else
-	rc = vsnprintf(xbp->xb_curp, left, fmt, va_local);
+        rc = vsnprintf(xbp->xb_curp, left, fmt, va_local);
 
     if (rc >= left) {
-	if (xo_check_for_room(xop, xbp, rc)) {
-	    va_end(va_local);
-	    return -1;
-	}
+        if (xo_check_for_room(xop, xbp, rc)) {
+            va_end(va_local);
+            return -1;
+        }
 
-	/*
-	 * After we call vsnprintf(), the stage of vap is not defined.
-	 * We need to copy it before we pass.  Then we have to do our
-	 * own logic below to move it along.  This is because the
-	 * implementation can have va_list be a pointer (bsd) or a
-	 * structure (macosx) or anything in between.
-	 */
+        /*
+         * After we call vsnprintf(), the stage of vap is not defined.
+         * We need to copy it before we pass.  Then we have to do our
+         * own logic below to move it along.  This is because the
+         * implementation can have va_list be a pointer (bsd) or a
+         * structure (macosx) or anything in between.
+         */
 
-	va_end(va_local);	/* Reset vap to the start */
-	va_copy(va_local, vap);
+        va_end(va_local);       /* Reset vap to the start */
+        va_copy(va_local, vap);
 
-	left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
-	if (xop->xo_formatter)
-	    rc = xop->xo_formatter(xop, xbp->xb_curp, left, fmt, va_local);
-	else
-	    rc = vsnprintf(xbp->xb_curp, left, fmt, va_local);
+        left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
+        if (xop->xo_formatter)
+            rc = xop->xo_formatter(xop, xbp->xb_curp, left, fmt, va_local);
+        else
+            rc = vsnprintf(xbp->xb_curp, left, fmt, va_local);
     }
     va_end(va_local);
 
@@ -1571,22 +1571,22 @@ xo_printf_v (xo_handle_t *xop, const char *fmt, va_list vap)
     rc = vsnprintf(xbp->xb_curp, left, fmt, va_local);
 
     if (rc >= left) {
-	if (xo_check_for_room(xop, xbp, rc)) {
-	    va_end(va_local);
-	    return -1;
-	}
+        if (xo_check_for_room(xop, xbp, rc)) {
+            va_end(va_local);
+            return -1;
+        }
 
-	va_end(va_local);	/* Reset vap to the start */
-	va_copy(va_local, vap);
+        va_end(va_local);       /* Reset vap to the start */
+        va_copy(va_local, vap);
 
-	left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
-	rc = vsnprintf(xbp->xb_curp, left, fmt, va_local);
+        left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
+        rc = vsnprintf(xbp->xb_curp, left, fmt, va_local);
     }
 
     va_end(va_local);
 
     if (rc > 0)
-	xbp->xb_curp += rc;
+        xbp->xb_curp += rc;
 
     return rc;
 }
@@ -1614,13 +1614,13 @@ xo_buf_utf8_len (xo_handle_t *xop, const char *buf, ssize_t bufsiz)
     len = xo_utf8_rlen(*buf);
     if (len < 0) {
         xo_failure(xop, "invalid UTF-8 data: %02hhx", b);
-	return -1;
+        return -1;
     }
 
     if (len > bufsiz) {
         xo_failure(xop, "invalid UTF-8 data (short): %02hhx (%d/%d)",
-		   b, len, bufsiz);
-	return -1;
+                   b, len, bufsiz);
+        return -1;
     }
 
     return len;
@@ -1633,7 +1633,7 @@ xo_buf_utf8_len (xo_handle_t *xop, const char *buf, ssize_t bufsiz)
  */
 static ssize_t
 xo_buf_append_locale_from_utf8 (xo_handle_t *xop, xo_buffer_t *xbp,
-				const char *ibuf, ssize_t ilen)
+                                const char *ibuf, ssize_t ilen)
 {
     xo_codepoint_t wc;
     ssize_t len;
@@ -1645,30 +1645,30 @@ xo_buf_append_locale_from_utf8 (xo_handle_t *xop, xo_buffer_t *xbp,
      */
     wc = xo_utf8_codepoint(ibuf, ilen, ilen, 0);
     if (xo_utf8_iserror(wc)) {
-	xo_failure(xop, "invalid UTF-8 byte sequence");
-	return 0;
+        xo_failure(xop, "invalid UTF-8 byte sequence");
+        return 0;
     }
 
     if (XOF_ISSET(xop, XOF_NO_LOCALE)) {
-	if (xo_check_for_room(xop, xbp, ilen))
-	    return 0;
+        if (xo_check_for_room(xop, xbp, ilen))
+            return 0;
 
-	memcpy(xbp->xb_curp, ibuf, ilen);
-	xbp->xb_curp += ilen;
+        memcpy(xbp->xb_curp, ibuf, ilen);
+        xbp->xb_curp += ilen;
 
     } else {
-	if (xo_check_for_room(xop, xbp, MB_LEN_MAX + 1))
-	    return 0;
+        if (xo_check_for_room(xop, xbp, MB_LEN_MAX + 1))
+            return 0;
 
-	bzero(&xop->xo_mbstate, sizeof(xop->xo_mbstate));
-	len = wcrtomb(xbp->xb_curp, wc, &xop->xo_mbstate);
+        bzero(&xop->xo_mbstate, sizeof(xop->xo_mbstate));
+        len = wcrtomb(xbp->xb_curp, wc, &xop->xo_mbstate);
 
-	if (len <= 0) {
-	    xo_failure(xop, "could not convert wide char: %lx",
-		       (unsigned long) wc);
-	    return 0;
-	}
-	xbp->xb_curp += len;
+        if (len <= 0) {
+            xo_failure(xop, "could not convert wide char: %lx",
+                       (unsigned long) wc);
+            return 0;
+        }
+        xbp->xb_curp += len;
     }
 
     return xo_wcwidth(wc);
@@ -1679,7 +1679,7 @@ xo_buf_append_locale_from_utf8 (xo_handle_t *xop, xo_buffer_t *xbp,
  */
 static void
 xo_buf_append_locale (xo_handle_t *xop, xo_buffer_t *xbp,
-		      const char *cp, ssize_t len)
+                      const char *cp, ssize_t len)
 {
     const char *sp = cp, *ep = cp + len;
     ssize_t save_off = xbp->xb_bufp - xbp->xb_curp;
@@ -1687,46 +1687,46 @@ xo_buf_append_locale (xo_handle_t *xop, xo_buffer_t *xbp,
     int cols = 0;
 
     for ( ; cp < ep; cp++) {
-	if (!xo_is_utf8_byte(*cp)) {
-	    cols += 1;
-	    continue;
-	}
+        if (!xo_is_utf8_byte(*cp)) {
+            cols += 1;
+            continue;
+        }
 
-	/*
-	 * We're looking at a non-ascii UTF-8 character.
-	 * First we copy the previous data.
-	 * Then we need find the length and validate it.
-	 * Then we turn it into a wide string.
-	 * Then we turn it into a localized string.
-	 * Then we repeat.  Isn't i18n fun?
-	 */
-	if (sp != cp)
-	    xo_buf_append(xbp, sp, cp - sp); /* Append previous data */
+        /*
+         * We're looking at a non-ascii UTF-8 character.
+         * First we copy the previous data.
+         * Then we need find the length and validate it.
+         * Then we turn it into a wide string.
+         * Then we turn it into a localized string.
+         * Then we repeat.  Isn't i18n fun?
+         */
+        if (sp != cp)
+            xo_buf_append(xbp, sp, cp - sp); /* Append previous data */
 
-	slen = xo_buf_utf8_len(xop, cp, ep - cp);
-	if (slen <= 0) {
-	    /* Bad data; back it all out */
-	    xo_buf_set_offset(xbp, save_off);
-	    return;
-	}
+        slen = xo_buf_utf8_len(xop, cp, ep - cp);
+        if (slen <= 0) {
+            /* Bad data; back it all out */
+            xo_buf_set_offset(xbp, save_off);
+            return;
+        }
 
-	cols += xo_buf_append_locale_from_utf8(xop, xbp, cp, slen);
+        cols += xo_buf_append_locale_from_utf8(xop, xbp, cp, slen);
 
-	/* Next time through, we'll start at the next character */
-	cp += slen - 1;
-	sp = cp + 1;
+        /* Next time through, we'll start at the next character */
+        cp += slen - 1;
+        sp = cp + 1;
     }
 
     /* Update column values */
     if (XOF_ISSET(xop, XOF_COLUMNS))
-	xop->xo_columns += cols;
+        xop->xo_columns += cols;
     if (XOIF_ISSET(xop, XOIF_ANCHOR))
-	xop->xo_anchor_columns += cols;
+        xop->xo_anchor_columns += cols;
 
     /* Before we fall into the basic logic below, we need reset len */
     len = ep - sp;
     if (len != 0) /* Append trailing data */
-	xo_buf_append(xbp, sp, len);
+        xo_buf_append(xbp, sp, len);
 }
 
 /*
@@ -1758,7 +1758,7 @@ static void
 xo_data_escape_attr (xo_handle_t *xop, const char *str, ssize_t len)
 {
     if (len == -1)
-	len = strlen(str);
+        len = strlen(str);
 
     xo_buf_escape(xop, &xop->xo_data, str, len, XFF_ATTR);
 }
@@ -1794,9 +1794,9 @@ xo_retain_get_hits (void)
 
 /* Flags for xo_warn_hcfv() */
 typedef unsigned xo_warn_flags_t;
-#define XO_XWF_CHECK_WARN	(1<<0) /* Check for warning flag */
-#define XO_XWF_NO_EXTERR	(1<<1) /* Don't report extended error */
-#define XO_XWF_CHECK_FILT	(1<<2) /* Check for filter warning flag */
+#define XO_XWF_CHECK_WARN       (1<<0) /* Check for warning flag */
+#define XO_XWF_NO_EXTERR        (1<<1) /* Don't report extended error */
+#define XO_XWF_CHECK_FILT       (1<<2) /* Check for filter warning flag */
 
 /*
  * Generate a warning.  Normally, this is a text message written to
@@ -1805,24 +1805,24 @@ typedef unsigned xo_warn_flags_t;
  */
 static void
 xo_warn_hcfv (xo_handle_t *xop, int code, xo_warn_flags_t flags,
-	     const char *fmt, va_list vap)
+             const char *fmt, va_list vap)
 {
     xop = xo_default(xop);
     if ((flags & XO_XWF_CHECK_WARN) && !XOF_ISSET(xop, XOF_WARN))
-	return;
+        return;
 
     if ((flags & XO_XWF_CHECK_FILT) && !XOF_ISSET(xop, XOF_FILTER_WARN))
-	return;
+        return;
 
     if (fmt == NULL)
-	return;
+        return;
 
     char exterr[UEXTERROR_MAXLEN] XO_UNUSED; /* The optimizer will remove */
     int extstatus = -1;
 
 #ifdef HAVE_EXTERR
     if (!(flags & XO_XWF_NO_EXTERR))
-	extstatus = uexterr_gettext(exterr, sizeof(exterr));
+        extstatus = uexterr_gettext(exterr, sizeof(exterr));
 #endif /* HAVE_EXTERR */
     
 
@@ -1831,80 +1831,80 @@ xo_warn_hcfv (xo_handle_t *xop, int code, xo_warn_flags_t flags,
     char *newfmt = alloca(len + 1 + plen + 2); /* NUL, and ": " */
 
     if (plen) {
-	memcpy(newfmt, xo_program, plen);
-	newfmt[plen++] = ':';
-	newfmt[plen++] = ' ';
+        memcpy(newfmt, xo_program, plen);
+        newfmt[plen++] = ':';
+        newfmt[plen++] = ' ';
     }
 
     memcpy(newfmt + plen, fmt, len);
     newfmt[len + plen] = '\0';
 
     if (XOF_ISSET(xop, XOF_WARN_XML)) {
-	static char err_open[] = "<error>";
-	static char err_close[] = "</error>";
-	static char msg_open[] = "<message>";
-	static char msg_close[] = "</message>";
+        static char err_open[] = "<error>";
+        static char err_close[] = "</error>";
+        static char msg_open[] = "<message>";
+        static char msg_close[] = "</message>";
 
-	xo_buffer_t *xbp = &xop->xo_data;
+        xo_buffer_t *xbp = &xop->xo_data;
 
-	xo_buf_append(xbp, err_open, sizeof(err_open) - 1);
-	xo_buf_append(xbp, msg_open, sizeof(msg_open) - 1);
+        xo_buf_append(xbp, err_open, sizeof(err_open) - 1);
+        xo_buf_append(xbp, msg_open, sizeof(msg_open) - 1);
 
-	va_list va_local;
-	va_copy(va_local, vap);
+        va_list va_local;
+        va_copy(va_local, vap);
 
-	ssize_t left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
-	ssize_t rc = vsnprintf(xbp->xb_curp, left, newfmt, vap);
+        ssize_t left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
+        ssize_t rc = vsnprintf(xbp->xb_curp, left, newfmt, vap);
 
-	if (rc >= left) {
-	    if (xo_check_for_room(xop, xbp, rc)) {
-		va_end(va_local);
-		return;
-	    }
+        if (rc >= left) {
+            if (xo_check_for_room(xop, xbp, rc)) {
+                va_end(va_local);
+                return;
+            }
 
-	    va_end(vap);	/* Reset vap to the start */
-	    va_copy(vap, va_local);
+            va_end(vap);        /* Reset vap to the start */
+            va_copy(vap, va_local);
 
-	    left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
-	    rc = vsnprintf(xbp->xb_curp, left, fmt, vap);
-	}
+            left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
+            rc = vsnprintf(xbp->xb_curp, left, fmt, vap);
+        }
 
-	va_end(va_local);
+        va_end(va_local);
 
-	rc = xo_escape_xml(xop, xbp, rc, 1);
-	xbp->xb_curp += rc;
+        rc = xo_escape_xml(xop, xbp, rc, 1);
+        xbp->xb_curp += rc;
 
-	xo_buf_append(xbp, msg_close, sizeof(msg_close) - 1);
-	xo_buf_append(xbp, err_close, sizeof(err_close) - 1);
+        xo_buf_append(xbp, msg_close, sizeof(msg_close) - 1);
+        xo_buf_append(xbp, err_close, sizeof(err_close) - 1);
 
-	if (code >= 0) {
-	    const char *msg = strerror(code);
+        if (code >= 0) {
+            const char *msg = strerror(code);
 
-	    if (msg) {
-		xo_buf_append(xbp, ": ", 2);
-		xo_buf_append(xbp, msg, strlen(msg));
-	    }
+            if (msg) {
+                xo_buf_append(xbp, ": ", 2);
+                xo_buf_append(xbp, msg, strlen(msg));
+            }
 
-	    if (extstatus == 0 && exterr[0] != '\0')
-		xo_buf_append(xbp, exterr, strlen(exterr));
-	}
+            if (extstatus == 0 && exterr[0] != '\0')
+                xo_buf_append(xbp, exterr, strlen(exterr));
+        }
 
-	xo_buf_append(xbp, "\n", 1); /* Append newline and NUL to string */
-	(void) xo_write(xop);
+        xo_buf_append(xbp, "\n", 1); /* Append newline and NUL to string */
+        (void) xo_write(xop);
 
     } else {
-	vfprintf(stderr, newfmt, vap);
-	if (code >= 0) {
-	    const char *msg = strerror(code);
+        vfprintf(stderr, newfmt, vap);
+        if (code >= 0) {
+            const char *msg = strerror(code);
 
-	    if (msg)
-		fprintf(stderr, ": %s", msg);
+            if (msg)
+                fprintf(stderr, ": %s", msg);
 
-	    if (extstatus == 0 && exterr[0] != '\0')
-		fprintf(stderr, " (%s)", exterr);
-	}
+            if (extstatus == 0 && exterr[0] != '\0')
+                fprintf(stderr, " (%s)", exterr);
+        }
 
-	fprintf(stderr, "\n");
+        fprintf(stderr, "\n");
     }
 }
 
@@ -1915,7 +1915,7 @@ xo_warn_hcfv (xo_handle_t *xop, int code, xo_warn_flags_t flags,
  */
 void
 xo_warn_hcv (xo_handle_t *xop, int code, int check_warn,
-	     const char *fmt, va_list vap)
+             const char *fmt, va_list vap)
 {
     xo_warn_hcfv(xop, code, check_warn, fmt, vap);
 }
@@ -2015,142 +2015,142 @@ xo_message_hcv (xo_handle_t *xop, int code, const char *fmt, va_list vap)
     xop = xo_default(xop);
 
     if (fmt == NULL || *fmt == '\0')
-	return;
+        return;
 
     int need_nl = (fmt[strlen(fmt) - 1] != '\n');
 
     switch (xo_style(xop)) {
     case XO_STYLE_XML:
-	xbp = &xop->xo_data;
-	if (XOF_ISSET(xop, XOF_PRETTY))
-	    xo_buf_indent(xop, xop->xo_indent_by);
-	xo_buf_append(xbp, msg_open, sizeof(msg_open) - 1);
+        xbp = &xop->xo_data;
+        if (XOF_ISSET(xop, XOF_PRETTY))
+            xo_buf_indent(xop, xop->xo_indent_by);
+        xo_buf_append(xbp, msg_open, sizeof(msg_open) - 1);
 
-	va_copy(va_local, vap);
+        va_copy(va_local, vap);
 
-	ssize_t left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
+        ssize_t left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
 
-	rc = vsnprintf(xbp->xb_curp, left, fmt, vap);
-	if (rc >= left) {
-	    if (xo_check_for_room(xop, xbp, rc)) {
-		va_end(va_local);
-		return;
-	    }
+        rc = vsnprintf(xbp->xb_curp, left, fmt, vap);
+        if (rc >= left) {
+            if (xo_check_for_room(xop, xbp, rc)) {
+                va_end(va_local);
+                return;
+            }
 
-	    va_end(vap);	/* Reset vap to the start */
-	    va_copy(vap, va_local);
+            va_end(vap);        /* Reset vap to the start */
+            va_copy(vap, va_local);
 
-	    left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
-	    rc = vsnprintf(xbp->xb_curp, left, fmt, vap);
-	}
+            left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
+            rc = vsnprintf(xbp->xb_curp, left, fmt, vap);
+        }
 
-	va_end(va_local);
+        va_end(va_local);
 
-	rc = xo_escape_xml(xop, xbp, rc, 0);
-	xbp->xb_curp += rc;
+        rc = xo_escape_xml(xop, xbp, rc, 0);
+        xbp->xb_curp += rc;
 
-	if (need_nl && code > 0) {
-	    const char *msg = strerror(code);
+        if (need_nl && code > 0) {
+            const char *msg = strerror(code);
 
-	    if (msg) {
-		xo_buf_append(xbp, ": ", 2);
-		xo_buf_append(xbp, msg, strlen(msg));
-	    }
-	}
+            if (msg) {
+                xo_buf_append(xbp, ": ", 2);
+                xo_buf_append(xbp, msg, strlen(msg));
+            }
+        }
 
-	if (need_nl)
-	    xo_buf_append(xbp, "\n", 1); /* Append newline and NUL to string */
+        if (need_nl)
+            xo_buf_append(xbp, "\n", 1); /* Append newline and NUL to string */
 
-	xo_buf_append(xbp, msg_close, sizeof(msg_close) - 1);
+        xo_buf_append(xbp, msg_close, sizeof(msg_close) - 1);
 
-	if (XOF_ISSET(xop, XOF_PRETTY))
-	    xo_buf_append(xbp, "\n", 1); /* Append newline and NUL to string */
+        if (XOF_ISSET(xop, XOF_PRETTY))
+            xo_buf_append(xbp, "\n", 1); /* Append newline and NUL to string */
 
-	(void) xo_write(xop);
-	break;
+        (void) xo_write(xop);
+        break;
 
     case XO_STYLE_HTML:
-	{
-	    char buf[BUFSIZ], *bp = buf, *cp;
-	    ssize_t bufsiz = sizeof(buf);
-	    ssize_t rc2;
+        {
+            char buf[BUFSIZ], *bp = buf, *cp;
+            ssize_t bufsiz = sizeof(buf);
+            ssize_t rc2;
 
-	    va_copy(va_local, vap);
+            va_copy(va_local, vap);
 
-	    rc = vsnprintf(bp, bufsiz, fmt, va_local);
-	    if (rc >= bufsiz) {
-		bufsiz = rc + BUFSIZ;
-		bp = xo_realloc(NULL, bufsiz);
-		if (bp == NULL)
-		    return;
+            rc = vsnprintf(bp, bufsiz, fmt, va_local);
+            if (rc >= bufsiz) {
+                bufsiz = rc + BUFSIZ;
+                bp = xo_realloc(NULL, bufsiz);
+                if (bp == NULL)
+                    return;
 
-		va_end(va_local);
-		va_copy(va_local, vap);
-		rc = vsnprintf(bp, bufsiz, fmt, va_local);
-	    }
+                va_end(va_local);
+                va_copy(va_local, vap);
+                rc = vsnprintf(bp, bufsiz, fmt, va_local);
+            }
 
-	    va_end(va_local);
-	    cp = bp + rc;
+            va_end(va_local);
+            cp = bp + rc;
 
-	    if (need_nl) {
-		rc2 = snprintf(cp, bufsiz - rc, "%s%s\n",
-			       (code > 0) ? ": " : "",
-			       (code > 0) ? strerror(code) : "");
-		if (rc2 > 0)
-		    rc += rc2;
-	    }
+            if (need_nl) {
+                rc2 = snprintf(cp, bufsiz - rc, "%s%s\n",
+                               (code > 0) ? ": " : "",
+                               (code > 0) ? strerror(code) : "");
+                if (rc2 > 0)
+                    rc += rc2;
+            }
 
-	    xo_buf_append_div(xop, NULL, "message", 0, NULL, 0, bp, rc,
-			      NULL, 0, NULL, 0);
+            xo_buf_append_div(xop, NULL, "message", 0, NULL, 0, bp, rc,
+                              NULL, 0, NULL, 0);
 
-	    if (bp != buf)
-		xo_free(bp);
-	}
-	break;
+            if (bp != buf)
+                xo_free(bp);
+        }
+        break;
 
     case XO_STYLE_JSON:
     case XO_STYLE_SDPARAMS:
     case XO_STYLE_ENCODER:
-	/* No means of representing messages */
-	return;
+        /* No means of representing messages */
+        return;
 
     case XO_STYLE_TEXT:
-	rc = xo_printf_v(xop, fmt, vap);
-	/*
-	 * XXX need to handle UTF-8 widths
-	 */
-	if (rc > 0) {
-	    if (XOF_ISSET(xop, XOF_COLUMNS))
-		xop->xo_columns += rc;
-	    if (XOIF_ISSET(xop, XOIF_ANCHOR))
-		xop->xo_anchor_columns += rc;
-	}
+        rc = xo_printf_v(xop, fmt, vap);
+        /*
+         * XXX need to handle UTF-8 widths
+         */
+        if (rc > 0) {
+            if (XOF_ISSET(xop, XOF_COLUMNS))
+                xop->xo_columns += rc;
+            if (XOIF_ISSET(xop, XOIF_ANCHOR))
+                xop->xo_anchor_columns += rc;
+        }
 
-	if (need_nl && code > 0) {
-	    const char *msg = strerror(code);
+        if (need_nl && code > 0) {
+            const char *msg = strerror(code);
 
-	    if (msg) {
-		xo_printf(xop, ": %s", msg);
-	    }
-	}
-	if (need_nl)
-	    xo_printf(xop, "\n");
+            if (msg) {
+                xo_printf(xop, ": %s", msg);
+            }
+        }
+        if (need_nl)
+            xo_printf(xop, "\n");
 
-	break;
+        break;
     }
 
     switch (xo_style(xop)) {
     case XO_STYLE_HTML:
-	if (XOIF_ISSET(xop, XOIF_DIV_OPEN)) {
-	    static char div_close[] = "</div>";
+        if (XOIF_ISSET(xop, XOIF_DIV_OPEN)) {
+            static char div_close[] = "</div>";
 
-	    XOIF_CLEAR(xop, XOIF_DIV_OPEN);
-	    xo_data_append(xop, div_close, sizeof(div_close) - 1);
+            XOIF_CLEAR(xop, XOIF_DIV_OPEN);
+            xo_data_append(xop, div_close, sizeof(div_close) - 1);
 
-	    if (XOF_ISSET(xop, XOF_PRETTY))
-		xo_data_append(xop, "\n", 1);
-	}
-	break;
+            if (XOF_ISSET(xop, XOF_PRETTY))
+                xo_data_append(xop, "\n", 1);
+        }
+        break;
     }
 
     (void) xo_flush_h(xop);
@@ -2201,7 +2201,7 @@ void
 xo_failure (xo_handle_t *xop, const char *fmt, ...)
 {
     if (!XOF_ISSET(xop, XOF_WARN))
-	return;
+        return;
 
     va_list vap;
 
@@ -2214,7 +2214,7 @@ void
 xo_failure_filter (xo_handle_t *xop, const char *fmt, ...)
 {
     if (!XOF_ISSET(xop, XOF_FILTER_WARN))
-	return;
+        return;
 
     va_list vap;
 
@@ -2231,10 +2231,10 @@ xo_parse_fail_cb (void *data, const char *fmt, ...)
 {
     xo_handle_t *xop = data;
     if (XOF_ISSET(xop, XOF_WARN)) {
-	va_list vap;
-	va_start(vap, fmt);
-	xo_warn_hcfv(xop, -1, XO_XWF_CHECK_WARN | XO_XWF_NO_EXTERR, fmt, vap);
-	va_end(vap);
+        va_list vap;
+        va_start(vap, fmt);
+        xo_warn_hcfv(xop, -1, XO_XWF_CHECK_WARN | XO_XWF_NO_EXTERR, fmt, vap);
+        va_end(vap);
     }
 }
 
@@ -2251,7 +2251,7 @@ xo_parse_for_handle (xo_handle_t *xop, xo_parse_t *xpp)
     xpp->xp_warn_data = xop;
 
     if (XOF_ISSET(xop, XOF_LINT))
-	xpp->xp_flags |= XPF_STRICT;
+        xpp->xp_flags |= XPF_STRICT;
 }
 
 /*
@@ -2265,21 +2265,21 @@ static void
 xo_set_flags_for_style (xo_handle_t *xop, xo_style_t style)
 {
     XOEF_CLEAR(xop, XOEF_RB_STRIP_LEAD_SEP | XOEF_RB_CLEAR_TOP_EMITTED
-	       | XOEF_RB_CLEAR_ON_COMPACT | XOEF_TENTATIVE);
+               | XOEF_RB_CLEAR_ON_COMPACT | XOEF_TENTATIVE);
 
     switch (style) {
     case XO_STYLE_JSON:
-	XOEF_SET(xop, XOEF_RB_STRIP_LEAD_SEP | XOEF_RB_CLEAR_TOP_EMITTED
-		 | XOEF_RB_CLEAR_ON_COMPACT | XOEF_TENTATIVE);
-	break;
+        XOEF_SET(xop, XOEF_RB_STRIP_LEAD_SEP | XOEF_RB_CLEAR_TOP_EMITTED
+                 | XOEF_RB_CLEAR_ON_COMPACT | XOEF_TENTATIVE);
+        break;
 
     case XO_STYLE_XML:
     case XO_STYLE_HTML:
-	XOEF_SET(xop, XOEF_TENTATIVE);
-	break;
+        XOEF_SET(xop, XOEF_TENTATIVE);
+        break;
 
     default:
-	break;
+        break;
     }
 }
 
@@ -2300,13 +2300,13 @@ xo_create (xo_style_t style, xo_xof_flags_t flags)
     xo_handle_t *xop = xo_realloc(NULL, sizeof(*xop));
 
     if (xop) {
-	bzero(xop, sizeof(*xop));
+        bzero(xop, sizeof(*xop));
 
-	xop->xo_style = style;
-	XOF_SET(xop, flags);
-	xo_init_handle(xop);
-	xop->xo_style = style;	/* Reset style (see LIBXO_OPTIONS) */
-	xo_set_flags_for_style(xop, xop->xo_style);
+        xop->xo_style = style;
+        XOF_SET(xop, flags);
+        xo_init_handle(xop);
+        xop->xo_style = style;  /* Reset style (see LIBXO_OPTIONS) */
+        xo_set_flags_for_style(xop, xop->xo_style);
     }
 
     return xop;
@@ -2328,10 +2328,10 @@ xo_create_to_file (FILE *fp, xo_style_t style, xo_xof_flags_t flags)
     xo_handle_t *xop = xo_create(style, flags);
 
     if (xop) {
-	xop->xo_opaque = fp;
-	xop->xo_write = xo_write_to_file;
-	xop->xo_close = xo_close_file;
-	xop->xo_flush = xo_flush_file;
+        xop->xo_opaque = fp;
+        xop->xo_write = xo_write_to_file;
+        xop->xo_close = xo_close_file;
+        xop->xo_flush = xo_flush_file;
     }
 
     return xop;
@@ -2350,8 +2350,8 @@ xo_set_file_h (xo_handle_t *xop, FILE *fp)
     xop = xo_default(xop);
 
     if (fp == NULL) {
-	xo_failure(xop, "xo_set_file: NULL fp");
-	return -1;
+        xo_failure(xop, "xo_set_file: NULL fp");
+        return -1;
     }
 
     xop->xo_opaque = fp;
@@ -2387,7 +2387,7 @@ xo_destroy (xo_handle_t *xop_arg)
     xo_flush_h(xop);
 
     if (xop->xo_close && XOF_ISSET(xop, XOF_CLOSE_FP))
-	xop->xo_close(xop->xo_opaque);
+        xop->xo_close(xop->xo_opaque);
 
     xo_free(xop->xo_stack);
     xo_buf_cleanup(&xop->xo_data);
@@ -2397,13 +2397,13 @@ xo_destroy (xo_handle_t *xop_arg)
     xo_buf_cleanup(&xop->xo_color_buf);
 
     if (xop->xo_version)
-	xo_free(xop->xo_version);
+        xo_free(xop->xo_version);
 
     if (xop_arg == NULL) {
-	bzero(&xo_default_handle, sizeof(xo_default_handle));
-	xo_default_inited = 0;
+        bzero(&xo_default_handle, sizeof(xo_default_handle));
+        xo_default_inited = 0;
     } else
-	xo_free(xop);
+        xo_free(xop);
 }
 
 /**
@@ -2434,9 +2434,9 @@ xo_set_style (xo_handle_t *xop, xo_style_t style)
     xo_set_flags_for_style(xop, style);
 
     if (style == XO_STYLE_ENCODER && XOF_ISSET(xop, XOF_FILTER)
-	    && !XOEF_ISSET(xop, XOEF_FILTER_AWARE)) {
-	xo_failure(xop, "filters require a filter-aware encoder");
-	return -1;
+            && !XOEF_ISSET(xop, XOEF_FILTER_AWARE)) {
+        xo_failure(xop, "filters require a filter-aware encoder");
+        return -1;
     }
 
     return 0;
@@ -2465,17 +2465,17 @@ static int
 xo_name_to_style (const char *name)
 {
     if (xo_streq(name, "xml"))
-	return XO_STYLE_XML;
+        return XO_STYLE_XML;
     else if (xo_streq(name, "json"))
-	return XO_STYLE_JSON;
+        return XO_STYLE_JSON;
     else if (xo_streq(name, "encoder"))
-	return XO_STYLE_ENCODER;
+        return XO_STYLE_ENCODER;
     else if (xo_streq(name, "text"))
-	return XO_STYLE_TEXT;
+        return XO_STYLE_TEXT;
     else if (xo_streq(name, "html"))
-	return XO_STYLE_HTML;
+        return XO_STYLE_HTML;
     else if (xo_streq(name, "sdparams"))
-	return XO_STYLE_SDPARAMS;
+        return XO_STYLE_SDPARAMS;
 
     return -1;
 }
@@ -2498,12 +2498,12 @@ static xo_flag_mapping_t xo_xof_names[] = {
     { XOF_LOG_SYSLOG, "log-syslog" },
     { XOF_NO_HUMANIZE, "no-humanize" },
     { XOF_NO_LOCALE, "no-locale" },
-    { 0, "no-retain" },		/* Deprecated: retain feature removed */
+    { 0, "no-retain" },         /* Deprecated: retain feature removed */
     { XOF_NO_TOP, "no-top" },
     { XOF_NO_TOP_LEVEL, "no-top-level" },
     { XOF_NOT_FIRST, "not-first" },
     { XOF_PRETTY, "pretty" },
-    { 0, "retain" },		/* Deprecated, so use zero */
+    { 0, "retain" },            /* Deprecated, so use zero */
     { XOF_UNDERSCORES, "underscores" },
     { XOF_UNITS, "units" },
     { XOF_UTF8, "utf8" },
@@ -2549,31 +2549,31 @@ int
 xo_set_style_name (xo_handle_t *xop, const char *name)
 {
     if (name == NULL)
-	return -1;
+        return -1;
 
     int style = xo_name_to_style(name);
 
     if (style < 0) {
-	/* Might be a dynamically-loaded one ("csv") */
+        /* Might be a dynamically-loaded one ("csv") */
 
-	if (*name == '@')
-	    name += 1;		/* Allow the "@foo" shorthand */
+        if (*name == '@')
+            name += 1;          /* Allow the "@foo" shorthand */
 
-	int rc = xo_encoder_init(xop, name);
-	if (rc) {
-	    xo_warnx("unknown style or encoder: '%s'", name);
-	    return -1;
-	}
+        int rc = xo_encoder_init(xop, name);
+        if (rc) {
+            xo_warnx("unknown style or encoder: '%s'", name);
+            return -1;
+        }
 
-	/*
-	 * The style should already be set by the encoder library,
-	 * when it calls xo_set_encoder() during initialization.  If
-	 * it hasn't, then something might be wrong.  Worth a warning....
-	 */
-	if (xop->xo_style != XO_STYLE_ENCODER) {
-	    xo_warnx("encoder style has not fully initialized");
-	    return -1;
-	}
+        /*
+         * The style should already be set by the encoder library,
+         * when it calls xo_set_encoder() during initialization.  If
+         * it hasn't, then something might be wrong.  Worth a warning....
+         */
+        if (xop->xo_style != XO_STYLE_ENCODER) {
+            xo_warnx("encoder style has not fully initialized");
+            return -1;
+        }
     }
 
     xo_set_style(xop, style);
@@ -2589,40 +2589,40 @@ xo_set_color_map (xo_handle_t *xop UNUSED, char *value UNUSED)
 {
 #ifndef LIBXO_TEXT_ONLY
     if (xo_text_only())
-	return;
+        return;
 
     char *cp, *ep, *vp, *np;
     ssize_t len = value ? strlen(value) + 1 : 0;
     int num = 1, fg, bg;
 
     for (cp = value, ep = cp + len - 1; cp && cp < ep && *cp; cp = np) {
-	np = strchr(cp, '+');
-	if (np)
-	    *np++ = '\0';
+        np = strchr(cp, '+');
+        if (np)
+            *np++ = '\0';
 
-	vp = strchr(cp, '/');
-	if (vp)
-	    *vp++ = '\0';
+        vp = strchr(cp, '/');
+        if (vp)
+            *vp++ = '\0';
 
-	fg = *cp ? xo_color_find(cp) : -1;
-	bg = (vp && *vp) ? xo_color_find(vp) : -1;
+        fg = *cp ? xo_color_find(cp) : -1;
+        bg = (vp && *vp) ? xo_color_find(vp) : -1;
 
-	xop->xo_color_map_fg[num] = (fg < 0) ? num : fg;
-	xop->xo_color_map_bg[num] = (bg < 0) ? num : bg;
+        xop->xo_color_map_fg[num] = (fg < 0) ? num : fg;
+        xop->xo_color_map_bg[num] = (bg < 0) ? num : bg;
 
-	if (++num >= XO_NUM_COLORS)
-	    break;
+        if (++num >= XO_NUM_COLORS)
+            break;
     }
 
     /* If no color initialization happened, then we don't need the map */
     if (num > 1)
-	XOF_SET(xop, XOF_COLOR_MAP);
+        XOF_SET(xop, XOF_COLOR_MAP);
     else
-	XOF_CLEAR(xop, XOF_COLOR_MAP);
+        XOF_CLEAR(xop, XOF_COLOR_MAP);
 
     /* Fill in the rest of the colors with the defaults */
     for ( ; num < XO_NUM_COLORS; num++)
-	xop->xo_color_map_fg[num] = xop->xo_color_map_bg[num] = num;
+        xop->xo_color_map_fg[num] = xop->xo_color_map_bg[num] = num;
 #endif /* LIBXO_TEXT_ONLY */
 }
 
@@ -2635,7 +2635,7 @@ xo_options_to_argv_count (xo_handle_t *xop UNUSED, char *buf)
 {
     int count = 1;
     for (char *cp = buf; cp && *cp; cp = strchr(cp + 1, ','))
-	count += 1;
+        count += 1;
 
     return count;
 }
@@ -2646,38 +2646,38 @@ xo_options_to_argv_count (xo_handle_t *xop UNUSED, char *buf)
  */
 static int
 xo_options_to_argv (xo_handle_t *xop UNUSED, char *input,
-		    int max_argc, char **argv)
+                    int max_argc, char **argv)
 {
     int ac = 0;
     char *cp, *fp, *sp;
 
-    max_argc -= 1;		/* Save room for the NULL terminator */
+    max_argc -= 1;              /* Save room for the NULL terminator */
 
     for (cp = fp = sp = input; cp && *cp; cp++, fp++) {
-	char ch = *cp;
-	switch (ch) {
+        char ch = *cp;
+        switch (ch) {
 
-	case '\\':
-	    ch = *++cp;
-	    break;
+        case '\\':
+            ch = *++cp;
+            break;
 
-	case ',':
-	    if (ac < max_argc)
-		argv[ac++] = sp; /* Record the argument */
+        case ',':
+            if (ac < max_argc)
+                argv[ac++] = sp; /* Record the argument */
 
-	    ch = '\0';	/* Terminate it */
-	    sp = fp + 1;		/* This is the start of the next one */
-	    break;
-	}
+            ch = '\0';  /* Terminate it */
+            sp = fp + 1;                /* This is the start of the next one */
+            break;
+        }
 
-	if (cp != fp || ch == '\0')
-	    *fp = ch;	/* Copy data if needed */
+        if (cp != fp || ch == '\0')
+            *fp = ch;   /* Copy data if needed */
     }
 
-    *fp = '\0';	/* Force termination */
+    *fp = '\0'; /* Force termination */
 
     if (sp != NULL)
-	argv[ac++] = sp;
+        argv[ac++] = sp;
     argv[ac] = NULL;
     return ac;
 }
@@ -2692,87 +2692,87 @@ xo_set_options_single (xo_handle_t *xop, const char *input, int *results)
     int rc = 0;
 
     for (input++ ; *input && *input != ','; input++) {
-	switch (*input) {
-	case 'c':
-	    XOF_SET(xop, XOF_COLOR_ALLOWED);
-	    break;
+        switch (*input) {
+        case 'c':
+            XOF_SET(xop, XOF_COLOR_ALLOWED);
+            break;
 
-	case 'f':
-	    XOF_SET(xop, XOF_FLUSH);
-	    break;
+        case 'f':
+            XOF_SET(xop, XOF_FLUSH);
+            break;
 
-	case 'F':
-	    XOF_SET(xop, XOF_FLUSH_LINE);
-	    break;
+        case 'F':
+            XOF_SET(xop, XOF_FLUSH_LINE);
+            break;
 
-	case 'g':
-	    XOF_SET(xop, XOF_LOG_GETTEXT);
-	    break;
+        case 'g':
+            XOF_SET(xop, XOF_LOG_GETTEXT);
+            break;
 
-	case 'G':
-	    XOF_SET(xop, XOF_GROUP);
-	    break;
+        case 'G':
+            XOF_SET(xop, XOF_GROUP);
+            break;
 
-	case 'H':
-	    xop->xo_style = XO_STYLE_HTML;
-	    break;
+        case 'H':
+            xop->xo_style = XO_STYLE_HTML;
+            break;
 
-	case 'I':
-	    XOF_SET(xop, XOF_INFO);
-	    break;
+        case 'I':
+            XOF_SET(xop, XOF_INFO);
+            break;
 
-	case 'i':
-	    sz = strspn(input + 1, "0123456789");
-	    if (sz > 0) {
-		xop->xo_indent_by = atoi(input + 1);
-		input += sz;	/* Skip value */
-	    }
-	    break;
+        case 'i':
+            sz = strspn(input + 1, "0123456789");
+            if (sz > 0) {
+                xop->xo_indent_by = atoi(input + 1);
+                input += sz;    /* Skip value */
+            }
+            break;
 
-	case 'J':
-	    xop->xo_style = XO_STYLE_JSON;
-	    break;
+        case 'J':
+            xop->xo_style = XO_STYLE_JSON;
+            break;
 
-	case 'k':
-	    XOF_SET(xop, XOF_KEYS);
-	    break;
+        case 'k':
+            XOF_SET(xop, XOF_KEYS);
+            break;
 
-	case 'n':
-	    XOF_SET(xop, XOF_NO_HUMANIZE);
-	    break;
+        case 'n':
+            XOF_SET(xop, XOF_NO_HUMANIZE);
+            break;
 
-	case 'P':
-	    XOF_SET(xop, XOF_PRETTY);
-	    break;
+        case 'P':
+            XOF_SET(xop, XOF_PRETTY);
+            break;
 
-	case 'T':
-	    xop->xo_style = XO_STYLE_TEXT;
-	    break;
+        case 'T':
+            xop->xo_style = XO_STYLE_TEXT;
+            break;
 
-	case 'U':
-	    XOF_SET(xop, XOF_UNITS);
-	    break;
+        case 'U':
+            XOF_SET(xop, XOF_UNITS);
+            break;
 
-	case 'u':
-	    XOF_SET(xop, XOF_UNDERSCORES);
-	    break;
+        case 'u':
+            XOF_SET(xop, XOF_UNDERSCORES);
+            break;
 
-	case 'W':
-	    XOF_SET(xop, XOF_WARN);
-	    break;
+        case 'W':
+            XOF_SET(xop, XOF_WARN);
+            break;
 
-	case 'X':
-	    xop->xo_style = XO_STYLE_XML;
-	    break;
+        case 'X':
+            xop->xo_style = XO_STYLE_XML;
+            break;
 
-	case 'x':
-	    XOF_SET(xop, XOF_XPATH);
-	    break;
+        case 'x':
+            XOF_SET(xop, XOF_XPATH);
+            break;
 
-	default:
-	    xo_warnx("unknown option: '%s'", input);
-	    rc = -1;
-	}
+        default:
+            xo_warnx("unknown option: '%s'", input);
+            rc = -1;
+        }
     }
 
     *results = rc;
@@ -2792,145 +2792,145 @@ xo_set_options_words (xo_handle_t *xop, int argc, char **argv)
     char *pending_encoder = NULL;
 
     for (int i = 0; i < argc; i++) {
-	if (rc)
-	    final_rc = rc;
+        if (rc)
+            final_rc = rc;
 
-	cp = argv[i];
+        cp = argv[i];
 
-	/*
-	 * "@foo" is a shorthand for "encoder=foo".  This is driven
-	 * chiefly by a desire to make pluggable encoders not appear
-	 * so distinct from built-in encoders.
-	 */
-	if (*cp == '@') {
-	    vp = cp + 1;
+        /*
+         * "@foo" is a shorthand for "encoder=foo".  This is driven
+         * chiefly by a desire to make pluggable encoders not appear
+         * so distinct from built-in encoders.
+         */
+        if (*cp == '@') {
+            vp = cp + 1;
 
-	    if (*vp == '\0') {
-		xo_warnx("missing value for encoder option");
-		rc = -1;
-	    } else
-		pending_encoder = vp; /* Applied once the winner is known */
+            if (*vp == '\0') {
+                xo_warnx("missing value for encoder option");
+                rc = -1;
+            } else
+                pending_encoder = vp; /* Applied once the winner is known */
 
-	    continue;
-	}
+            continue;
+        }
 
-	/* We allow either '=' or ':' to separate the keyword from the value */
-	vp = strchr(cp, '=');
-	zp = strchr(cp, ':');
-	if (zp != NULL && (vp == NULL || zp < vp))
-	    vp = zp;
-	if (vp)
-	    *vp++ = '\0';
+        /* We allow either '=' or ':' to separate the keyword from the value */
+        vp = strchr(cp, '=');
+        zp = strchr(cp, ':');
+        if (zp != NULL && (vp == NULL || zp < vp))
+            vp = zp;
+        if (vp)
+            *vp++ = '\0';
 
-	if (xo_streq("colors", cp)) {
-	    xo_set_color_map(xop, vp);
-	    continue;
-	}
+        if (xo_streq("colors", cp)) {
+            xo_set_color_map(xop, vp);
+            continue;
+        }
 
-	/*
-	 * For options, we don't allow "encoder" since we want to
-	 * handle it explicitly below as "encoder=xxx".
-	 */
-	new_style = xo_name_to_style(cp);
-	if (new_style >= 0 && new_style != XO_STYLE_ENCODER) {
-	    if (style >= 0)
-		xo_warnx("ignoring multiple styles: '%s'", cp);
-	    else
-		style = new_style;
-	    continue;
-	}
+        /*
+         * For options, we don't allow "encoder" since we want to
+         * handle it explicitly below as "encoder=xxx".
+         */
+        new_style = xo_name_to_style(cp);
+        if (new_style >= 0 && new_style != XO_STYLE_ENCODER) {
+            if (style >= 0)
+                xo_warnx("ignoring multiple styles: '%s'", cp);
+            else
+                style = new_style;
+            continue;
+        }
 
-	new_flag = xo_name_to_flag(cp);
-	if (new_flag != 0) {
-	    XOF_SET(xop, new_flag);
-	    continue;
-	}
+        new_flag = xo_name_to_flag(cp);
+        if (new_flag != 0) {
+            XOF_SET(xop, new_flag);
+            continue;
+        }
 
-	xo_xof_flags_t opt = xo_name_lookup(xo_option_names, cp, -1);
+        xo_xof_flags_t opt = xo_name_lookup(xo_option_names, cp, -1);
 
-	switch (opt) {
-	case XO_OPT_NO_COLOR: /* Ignore colors */
-	    XOF_CLEAR(xop, XOF_COLOR_ALLOWED);
-	    continue;
+        switch (opt) {
+        case XO_OPT_NO_COLOR: /* Ignore colors */
+            XOF_CLEAR(xop, XOF_COLOR_ALLOWED);
+            continue;
 
-	case XO_OPT_INDENT:	/* Indent by given number */
-	    if (vp)
-		xop->xo_indent_by = atoi(vp);
-	    else {
-		xo_warnx("missing value for indent option");
-		rc = -1;
-	    }
-	    continue;
+        case XO_OPT_INDENT:     /* Indent by given number */
+            if (vp)
+                xop->xo_indent_by = atoi(vp);
+            else {
+                xo_warnx("missing value for indent option");
+                rc = -1;
+            }
+            continue;
 
-	case XO_OPT_ENCODER: /* Use a specific encoder */
-	    if (vp == NULL) {
-		xo_warnx("missing value for encoder option");
-		rc = -1;
-	    } else
-		pending_encoder = vp; /* Applied once the winner is known */
-	    continue;
+        case XO_OPT_ENCODER: /* Use a specific encoder */
+            if (vp == NULL) {
+                xo_warnx("missing value for encoder option");
+                rc = -1;
+            } else
+                pending_encoder = vp; /* Applied once the winner is known */
+            continue;
 
-	case XO_OPT_NO_CACHE:
-	    xo_no_cache = 1;
-	    continue;
+        case XO_OPT_NO_CACHE:
+            xo_no_cache = 1;
+            continue;
 
-	case XO_OPT_MAP: /* Map field names */
-	    if (vp == NULL) {
-		xo_warnx("missing value for map option");
-		rc = -1;
-	    } else {
-		rc = xo_map_option(xop, vp);
-		if (rc)
-		    xo_warnx("error initializing map: '%s'", vp);
-	    }
-	    continue;
+        case XO_OPT_MAP: /* Map field names */
+            if (vp == NULL) {
+                xo_warnx("missing value for map option");
+                rc = -1;
+            } else {
+                rc = xo_map_option(xop, vp);
+                if (rc)
+                    xo_warnx("error initializing map: '%s'", vp);
+            }
+            continue;
 
-	case XO_OPT_MAP_FILE: /* Use file full of field names mappings */
-	    if (vp == NULL) {
-		xo_warnx("missing value for map-file option");
-		rc = -1;
-	    } else {
-		rc = xo_map_add_file(xop, vp);
-		if (rc)
-		    xo_warnx("error initializing map-file: '%s'", vp);
-	    }
-	    continue;
+        case XO_OPT_MAP_FILE: /* Use file full of field names mappings */
+            if (vp == NULL) {
+                xo_warnx("missing value for map-file option");
+                rc = -1;
+            } else {
+                rc = xo_map_add_file(xop, vp);
+                if (rc)
+                    xo_warnx("error initializing map-file: '%s'", vp);
+            }
+            continue;
 
-	case XO_OPT_FILTER:	/* Filter output using path */
-	    if (vp == NULL) {
-		xo_warnx("missing value for filter option");
-		rc = -1;
-	    } else
-		rc = xo_add_filter(xop, vp); /* Reports its own errors */
-	    continue;
+        case XO_OPT_FILTER:     /* Filter output using path */
+            if (vp == NULL) {
+                xo_warnx("missing value for filter option");
+                rc = -1;
+            } else
+                rc = xo_add_filter(xop, vp); /* Reports its own errors */
+            continue;
 
-	case XO_OPT_GROUPING: /* Give specific locale.grouping info */
-	    if (vp == NULL) {
-		xo_warnx("missing value for grouping option");
-		rc = -1;
-	    } else {
-		rc = xo_set_grouping(xop, vp);
-		if (rc)
-		    xo_warnx("error parsing grouping value: '%s'", vp);
-	    }
-	    continue;
+        case XO_OPT_GROUPING: /* Give specific locale.grouping info */
+            if (vp == NULL) {
+                xo_warnx("missing value for grouping option");
+                rc = -1;
+            } else {
+                rc = xo_set_grouping(xop, vp);
+                if (rc)
+                    xo_warnx("error parsing grouping value: '%s'", vp);
+            }
+            continue;
 
-	case XO_EXTERR_BRIEF: /* Display brief extended error info */
-	    setenv("EXTERROR_VERBOSE", "brief", 1);
-	    continue;
+        case XO_EXTERR_BRIEF: /* Display brief extended error info */
+            setenv("EXTERROR_VERBOSE", "brief", 1);
+            continue;
 
-	case XO_EXTERR_VERBOSE: /* Display verbose exterr info */
-	    setenv("EXTERROR_VERBOSE", "verbose", 1);
-	    continue;
+        case XO_EXTERR_VERBOSE: /* Display verbose exterr info */
+            setenv("EXTERROR_VERBOSE", "verbose", 1);
+            continue;
 
-	default:
-	    xo_warnx("unknown libxo option value: '%s'", cp);
-	    rc = -1;
-	}
+        default:
+            xo_warnx("unknown libxo option value: '%s'", cp);
+            rc = -1;
+        }
     }
 
     if (rc)
-	final_rc = rc;
+        final_rc = rc;
     rc = 0;
 
     /*
@@ -2949,17 +2949,17 @@ xo_set_options_words (xo_handle_t *xop, int argc, char **argv)
      * condition here to fold the failure into our own return value.
      */
     if (style >= 0)
-	xop->xo_style= style;
+        xop->xo_style= style;
 
     if (pending_encoder != NULL) {
-	rc = xo_encoder_init(xop, pending_encoder);
-	if (rc)
-	    xo_warnx("error initializing encoder: %s", pending_encoder);
-	else if (XOF_ISSET(xop, XOF_FILTER)
-		 && !XOEF_ISSET(xop, XOEF_FILTER_AWARE))
-	    rc = -1;		/* xo_set_style() already reported this */
-	if (rc)
-	    final_rc = rc;
+        rc = xo_encoder_init(xop, pending_encoder);
+        if (rc)
+            xo_warnx("error initializing encoder: %s", pending_encoder);
+        else if (XOF_ISSET(xop, XOF_FILTER)
+                 && !XOEF_ISSET(xop, XOEF_FILTER_AWARE))
+            rc = -1;            /* xo_set_style() already reported this */
+        if (rc)
+            final_rc = rc;
     }
 
     return final_rc ?: rc;
@@ -2980,7 +2980,7 @@ xo_set_options (xo_handle_t *xop, const char *input)
     int rc = 0;
 
     if (input == NULL)
-	return 0;
+        return 0;
 
     xop = xo_default(xop);
 
@@ -2995,17 +2995,17 @@ xo_set_options (xo_handle_t *xop, const char *input)
      * ideal for lazy people, such as myself.
      */
     if (*input == ':') {
-	input = xo_set_options_single(xop, input, &rc);
+        input = xo_set_options_single(xop, input, &rc);
 
-	/*
-	 * Allow ',' to switch into word-style options ("--libxo:XPW,debug")
-	 */
-	if (*input != ',') {
-	    xo_set_flags_for_style(xop, xop->xo_style);
-	    return rc;
-	}
+        /*
+         * Allow ',' to switch into word-style options ("--libxo:XPW,debug")
+         */
+        if (*input != ',') {
+            xo_set_flags_for_style(xop, xop->xo_style);
+            return rc;
+        }
 
-	input += 1;
+        input += 1;
     }
 
     ssize_t len = strlen(input) + 1;
@@ -3015,16 +3015,16 @@ xo_set_options (xo_handle_t *xop, const char *input)
     int argc = xo_options_to_argv_count(xop, bp);
     char **argv = xo_realloc(NULL, sizeof(argv[0]) * (argc + 1));
     if (argv == NULL) {
-	xo_warnx("xo_set_options ran out of memory");
-	xo_set_flags_for_style(xop, xop->xo_style);
-	return -1;
+        xo_warnx("xo_set_options ran out of memory");
+        xo_set_flags_for_style(xop, xop->xo_style);
+        return -1;
     }
 
     argc = xo_options_to_argv(xop, bp, argc, argv);
     if (argc < 0) {
-	xo_free(argv);
-	xo_set_flags_for_style(xop, xop->xo_style);
-	return argc;
+        xo_free(argv);
+        xo_set_flags_for_style(xop, xop->xo_style);
+        return argc;
     }
 
     rc = xo_set_options_words(xop, argc, argv);
@@ -3085,12 +3085,12 @@ static char *
 xo_strndup (const char *str, ssize_t len)
 {
     if (len < 0)
-	len = strlen(str);
+        len = strlen(str);
 
     char *cp = xo_realloc(NULL, len + 1);
     if (cp) {
-	memcpy(cp, str, len);
-	cp[len] = '\0';
+        memcpy(cp, str, len);
+        cp[len] = '\0';
     }
 
     return cp;
@@ -3110,12 +3110,12 @@ xo_set_leading_xpath (xo_handle_t *xop, const char *path)
     xop = xo_default(xop);
 
     if (xop->xo_leading_xpath) {
-	xo_free(xop->xo_leading_xpath);
-	xop->xo_leading_xpath = NULL;
+        xo_free(xop->xo_leading_xpath);
+        xop->xo_leading_xpath = NULL;
     }
 
     if (path == NULL)
-	return;
+        return;
 
     xop->xo_leading_xpath = xo_strndup(path, -1);
 }
@@ -3133,10 +3133,10 @@ xo_set_info (xo_handle_t *xop, xo_info_t *infop, int count)
     xop = xo_default(xop);
 
     if (count < 0 && infop) {
-	xo_info_t *xip;
+        xo_info_t *xip;
 
-	for (xip = infop, count = 0; xip->xi_name; xip++, count++)
-	    continue;
+        for (xip = infop, count = 0; xip->xi_name; xip++, count++)
+            continue;
     }
 
     xop->xo_info = infop;
@@ -3150,7 +3150,7 @@ xo_set_info (xo_handle_t *xop, xo_info_t *infop, int count)
  */
 void
 xo_set_formatter (xo_handle_t *xop, xo_formatter_t func,
-		  xo_checkpointer_t cfunc)
+                  xo_checkpointer_t cfunc)
 {
     xop = xo_default(xop);
 
@@ -3177,25 +3177,25 @@ static const char *
 xo_state_name (xo_state_t state)
 {
     static const char *names[] = {
-	"init",
-	"open_container",
-	"close_container",
-	"open_list",
-	"close_list",
-	"open_instance",
-	"close_instance",
-	"open_leaf_list",
-	"close_leaf_list",
-	"discarding",
-	"marker",
-	"emit",
-	"emit_leaf_list",
-	"finish",
-	NULL
+        "init",
+        "open_container",
+        "close_container",
+        "open_list",
+        "close_list",
+        "open_instance",
+        "close_instance",
+        "open_leaf_list",
+        "close_leaf_list",
+        "discarding",
+        "marker",
+        "emit",
+        "emit_leaf_list",
+        "finish",
+        NULL
     };
 
     if (state < (sizeof(names) / sizeof(names[0])))
-	return names[state];
+        return names[state];
 
     return "unknown";
 }
@@ -3207,25 +3207,25 @@ xo_line_ensure_open (xo_handle_t *xop, xo_xff_flags_t flags UNUSED)
     static char div_open_blank[] = "<div class=\"blank-line\">";
 
     if (XOF_ISSET(xop, XOF_CONTINUATION)) {
-	XOF_CLEAR(xop, XOF_CONTINUATION);
-	XOIF_SET(xop, XOIF_DIV_OPEN);
-	return;
+        XOF_CLEAR(xop, XOF_CONTINUATION);
+        XOIF_SET(xop, XOIF_DIV_OPEN);
+        return;
     }
 
     if (XOIF_ISSET(xop, XOIF_DIV_OPEN))
-	return;
+        return;
 
     if (xo_style(xop) != XO_STYLE_HTML)
-	return;
+        return;
 
     XOIF_SET(xop, XOIF_DIV_OPEN);
     if (flags & XFF_BLANK_LINE)
-	xo_data_append(xop, div_open_blank, sizeof(div_open_blank) - 1);
+        xo_data_append(xop, div_open_blank, sizeof(div_open_blank) - 1);
     else
-	xo_data_append(xop, div_open, sizeof(div_open) - 1);
+        xo_data_append(xop, div_open, sizeof(div_open) - 1);
 
     if (XOF_ISSET(xop, XOF_PRETTY))
-	xo_data_append(xop, "\n", 1);
+        xo_data_append(xop, "\n", 1);
 }
 
 static void
@@ -3235,19 +3235,19 @@ xo_line_close (xo_handle_t *xop)
 
     switch (xo_style(xop)) {
     case XO_STYLE_HTML:
-	if (!XOIF_ISSET(xop, XOIF_DIV_OPEN))
-	    xo_line_ensure_open(xop, 0);
+        if (!XOIF_ISSET(xop, XOIF_DIV_OPEN))
+            xo_line_ensure_open(xop, 0);
 
-	XOIF_CLEAR(xop, XOIF_DIV_OPEN);
-	xo_data_append(xop, div_close, sizeof(div_close) - 1);
+        XOIF_CLEAR(xop, XOIF_DIV_OPEN);
+        xo_data_append(xop, div_close, sizeof(div_close) - 1);
 
-	if (XOF_ISSET(xop, XOF_PRETTY))
-	    xo_data_append(xop, "\n", 1);
-	break;
+        if (XOF_ISSET(xop, XOF_PRETTY))
+            xo_data_append(xop, "\n", 1);
+        break;
 
     case XO_STYLE_TEXT:
-	xo_data_append(xop, "\n", 1);
-	break;
+        xo_data_append(xop, "\n", 1);
+        break;
     }
 }
 
@@ -3271,7 +3271,7 @@ xo_info_find (xo_handle_t *xop, const char *name, ssize_t nlen)
     cp[nlen] = '\0';
 
     xip = bsearch(cp, xop->xo_info, xop->xo_info_count,
-		  sizeof(xop->xo_info[0]), xo_info_compare);
+                  sizeof(xop->xo_info[0]), xo_info_compare);
     return xip;
 }
 
@@ -3290,20 +3290,20 @@ xo_check_conversion (xo_handle_t *xop, int have_enc, int need_enc)
     case CONVERT(XF_ENC_WIDE, XF_ENC_LOCALE):
     case CONVERT(XF_ENC_LOCALE, XF_ENC_LOCALE):
     case CONVERT(XF_ENC_LOCALE, XF_ENC_UTF8):
-	return 0;
+        return 0;
 
     default:
-	xo_failure(xop, "invalid conversion (%c:%c)", have_enc, need_enc);
-	return 1;
+        xo_failure(xop, "invalid conversion (%c:%c)", have_enc, need_enc);
+        return 1;
     }
 }
 
 static int
 xo_format_string_direct (xo_handle_t *xop, xo_buffer_t *xbp,
-			 xo_xff_flags_t flags,
-			 const wchar_t *wcp, const char *cp,
-			 ssize_t len, int max,
-			 int need_enc, int have_enc)
+                         xo_xff_flags_t flags,
+                         const wchar_t *wcp, const char *cp,
+                         ssize_t len, int max,
+                         int need_enc, int have_enc)
 {
     int cols = 0;
     xo_codepoint_t wc = 0;
@@ -3313,211 +3313,211 @@ xo_format_string_direct (xo_handle_t *xop, xo_buffer_t *xbp,
     const char *sp;
 
     if (len > 0 && xo_check_for_room(xop, xbp, len))
-	return 0;
+        return 0;
 
     /*
      * If we have the "right" encoding for text, then our job is
      * simpler.  We can skim over the string and process it quickly.
      */
     if (cp && len > 0 && xo_is_style_text_utf8(xop) && need_enc == have_enc) {
-	const char *np, *ep;
-	ssize_t clen = len < 0 ? (ssize_t) strlen(cp) : len;
-	for (np = cp, ep = cp + clen; np < ep && *np; np++)
-	    if (xo_is_utf8_byte(*np) || *np == '\\' || *np == '%'
-		|| *np == '{' || *np == '}')
-		break;
+        const char *np, *ep;
+        ssize_t clen = len < 0 ? (ssize_t) strlen(cp) : len;
+        for (np = cp, ep = cp + clen; np < ep && *np; np++)
+            if (xo_is_utf8_byte(*np) || *np == '\\' || *np == '%'
+                || *np == '{' || *np == '}')
+                break;
 
-	/* If we found no non-ascii characters, we're golden */
-	if (np == ep) {
-	    if (xo_check_for_room(xop, xbp, clen))
-		return -1;
+        /* If we found no non-ascii characters, we're golden */
+        if (np == ep) {
+            if (xo_check_for_room(xop, xbp, clen))
+                return -1;
 
-	    memcpy(xbp->xb_curp, cp, clen);
-	    xbp->xb_curp += clen;
-	    return clen;		/* Len is the number of columns */
-	}
+            memcpy(xbp->xb_curp, cp, clen);
+            xbp->xb_curp += clen;
+            return clen;                /* Len is the number of columns */
+        }
     }
 
     for (;;) {
-	if (len == 0)
-	    break;
+        if (len == 0)
+            break;
 
-	if (cp) {
-	    if (*cp == '\0')
-		break;
-	    if ((flags & XFF_UNESCAPE) && (*cp == '\\' || *cp == '%')) {
-		cp += 1;
-		len -= 1;
-		if (len == 0 || *cp == '\0')
-		    break;
-	    }
-	}
+        if (cp) {
+            if (*cp == '\0')
+                break;
+            if ((flags & XFF_UNESCAPE) && (*cp == '\\' || *cp == '%')) {
+                cp += 1;
+                len -= 1;
+                if (len == 0 || *cp == '\0')
+                    break;
+            }
+        }
 
-	if (wcp && *wcp == L'\0')
-	    break;
+        if (wcp && *wcp == L'\0')
+            break;
 
-	ilen = 0;
+        ilen = 0;
 
-	switch (have_enc) {
-	case XF_ENC_WIDE:		/* Wide character */
-	    wc = *wcp++;
-	    ilen = 1;
-	    break;
+        switch (have_enc) {
+        case XF_ENC_WIDE:               /* Wide character */
+            wc = *wcp++;
+            ilen = 1;
+            break;
 
-	case XF_ENC_UTF8:		/* UTF-8 */
-	    /* Optimize the simple case: this is a traditional ASCII c */
-	    if (!xo_is_utf8_byte(*cp)) {
-		wc = (unsigned char) *cp++;
-		ilen = 1;
-		break;
-	    }
+        case XF_ENC_UTF8:               /* UTF-8 */
+            /* Optimize the simple case: this is a traditional ASCII c */
+            if (!xo_is_utf8_byte(*cp)) {
+                wc = (unsigned char) *cp++;
+                ilen = 1;
+                break;
+            }
 
-	    ilen = xo_utf8_rlen(*cp);
-	    if (ilen < 0) {
-		xo_failure(xop, "invalid UTF-8 character: %02hhx", *cp);
-		return -1;	/* Can't continue; we can't find the end */
-	    }
+            ilen = xo_utf8_rlen(*cp);
+            if (ilen < 0) {
+                xo_failure(xop, "invalid UTF-8 character: %02hhx", *cp);
+                return -1;      /* Can't continue; we can't find the end */
+            }
 
-	    if (len > 0 && len < ilen) {
-		len = 0;	/* Break out of the loop */
-		continue;
-	    }
+            if (len > 0 && len < ilen) {
+                len = 0;        /* Break out of the loop */
+                continue;
+            }
 
-	    wc = xo_utf8_codepoint(cp, ilen, ilen, 0);
-	    if (xo_utf8_iserror(wc)) {
-		xo_failure(xop, "invalid UTF-8 character: %02hhx/%d",
-			   *cp, ilen);
-		return -1;	/* Can't continue; we can't find the end */
-	    }
-	    cp += ilen;
-	    break;
+            wc = xo_utf8_codepoint(cp, ilen, ilen, 0);
+            if (xo_utf8_iserror(wc)) {
+                xo_failure(xop, "invalid UTF-8 character: %02hhx/%d",
+                           *cp, ilen);
+                return -1;      /* Can't continue; we can't find the end */
+            }
+            cp += ilen;
+            break;
 
-	case XF_ENC_LOCALE:;		/* Native locale */
-	    wchar_t twc;
-	    ilen = (len > 0) ? len : MB_LEN_MAX;
-	    ilen = mbrtowc(&twc, cp, ilen, &xop->xo_mbstate);
-	    wc = (xo_codepoint_t) twc;
-	    if (ilen < 0) {		/* Invalid data; skip */
-		xo_failure(xop, "invalid mbs char: %02hhx", *cp);
-		wc = L'?';
-		ilen = 1;
-	    }
+        case XF_ENC_LOCALE:;            /* Native locale */
+            wchar_t twc;
+            ilen = (len > 0) ? len : MB_LEN_MAX;
+            ilen = mbrtowc(&twc, cp, ilen, &xop->xo_mbstate);
+            wc = (xo_codepoint_t) twc;
+            if (ilen < 0) {             /* Invalid data; skip */
+                xo_failure(xop, "invalid mbs char: %02hhx", *cp);
+                wc = L'?';
+                ilen = 1;
+            }
 
-	    if (ilen == 0) {		/* Hit a wide NUL character */
-		len = 0;
-		continue;
-	    }
+            if (ilen == 0) {            /* Hit a wide NUL character */
+                len = 0;
+                continue;
+            }
 
-	    cp += ilen;
-	    break;
-	}
+            cp += ilen;
+            break;
+        }
 
-	/* Reduce len, but not below zero */
-	if (len > 0) {
-	    len -= ilen;
-	    if (len < 0)
-		len = 0;
-	}
+        /* Reduce len, but not below zero */
+        if (len > 0) {
+            len -= ilen;
+            if (len < 0)
+                len = 0;
+        }
 
-	/*
-	 * Find the width-in-columns of this character, which must be done
-	 * in wide characters, since we lack a mbswidth() function.
-	 */
-	width = xo_wcwidth(wc);
-	if (width < 0)
-	    width = iswcntrl(wc) ? 0 : 1;
+        /*
+         * Find the width-in-columns of this character, which must be done
+         * in wide characters, since we lack a mbswidth() function.
+         */
+        width = xo_wcwidth(wc);
+        if (width < 0)
+            width = iswcntrl(wc) ? 0 : 1;
 
-	if (xo_style(xop) == XO_STYLE_TEXT || xo_style(xop) == XO_STYLE_HTML) {
-	    if (max > 0 && cols + width > max)
-		break;
-	}
+        if (xo_style(xop) == XO_STYLE_TEXT || xo_style(xop) == XO_STYLE_HTML) {
+            if (max > 0 && cols + width > max)
+                break;
+        }
 
-	switch (need_enc) {
-	case XF_ENC_UTF8:
+        switch (need_enc) {
+        case XF_ENC_UTF8:
 
-	    /* Output in UTF-8 needs to be escaped, based on the style */
-	    switch (xo_style(xop)) {
-	    case XO_STYLE_XML:
-	    case XO_STYLE_HTML:
-		if (wc == '<')
-		    sp = xo_xml_lt;
-		else if (wc == '>')
-		    sp = xo_xml_gt;
-		else if (wc == '&')
-		    sp = xo_xml_amp;
-		else if (attr && wc == '"')
-		    sp = xo_xml_quot;
-		else
-		    break;
+            /* Output in UTF-8 needs to be escaped, based on the style */
+            switch (xo_style(xop)) {
+            case XO_STYLE_XML:
+            case XO_STYLE_HTML:
+                if (wc == '<')
+                    sp = xo_xml_lt;
+                else if (wc == '>')
+                    sp = xo_xml_gt;
+                else if (wc == '&')
+                    sp = xo_xml_amp;
+                else if (attr && wc == '"')
+                    sp = xo_xml_quot;
+                else
+                    break;
 
-		ssize_t slen = strlen(sp);
-		if (xo_check_for_room(xop, xbp, slen - 1))
-		    return -1;
+                ssize_t slen = strlen(sp);
+                if (xo_check_for_room(xop, xbp, slen - 1))
+                    return -1;
 
-		memcpy(xbp->xb_curp, sp, slen);
-		xbp->xb_curp += slen;
-		goto done_with_encoding; /* Need multi-level 'break' */
+                memcpy(xbp->xb_curp, sp, slen);
+                xbp->xb_curp += slen;
+                goto done_with_encoding; /* Need multi-level 'break' */
 
-	    case XO_STYLE_JSON:
-		if (wc != '\\' && wc != '"' && wc != '\n' && wc != '\r')
-		    break;
+            case XO_STYLE_JSON:
+                if (wc != '\\' && wc != '"' && wc != '\n' && wc != '\r')
+                    break;
 
-		if (xo_check_for_room(xop, xbp, 2))
-		    return -1;
+                if (xo_check_for_room(xop, xbp, 2))
+                    return -1;
 
-		*xbp->xb_curp++ = '\\';
-		if (wc == '\n')
-		    wc = 'n';
-		else if (wc == '\r')
-		    wc = 'r';
-		else wc = wc & 0x7f;
+                *xbp->xb_curp++ = '\\';
+                if (wc == '\n')
+                    wc = 'n';
+                else if (wc == '\r')
+                    wc = 'r';
+                else wc = wc & 0x7f;
 
-		*xbp->xb_curp++ = wc;
-		goto done_with_encoding;
+                *xbp->xb_curp++ = wc;
+                goto done_with_encoding;
 
-	    case XO_STYLE_SDPARAMS:
-		if (wc != '\\' && wc != '"' && wc != ']')
-		    break;
+            case XO_STYLE_SDPARAMS:
+                if (wc != '\\' && wc != '"' && wc != ']')
+                    break;
 
-		if (xo_check_for_room(xop, xbp, 2))
-		    return -1;
+                if (xo_check_for_room(xop, xbp, 2))
+                    return -1;
 
-		*xbp->xb_curp++ = '\\';
-		wc = wc & 0x7f;
-		*xbp->xb_curp++ = wc;
-		goto done_with_encoding;
-	    }
+                *xbp->xb_curp++ = '\\';
+                wc = wc & 0x7f;
+                *xbp->xb_curp++ = wc;
+                goto done_with_encoding;
+            }
 
-	    olen = xo_utf8_to_len(wc);
-	    if (olen < 0) {
-		xo_failure(xop, "ignoring bad length");
-		continue;
-	    }
+            olen = xo_utf8_to_len(wc);
+            if (olen < 0) {
+                xo_failure(xop, "ignoring bad length");
+                continue;
+            }
 
-	    if (xo_check_for_room(xop, xbp, olen))
-		return -1;
+            if (xo_check_for_room(xop, xbp, olen))
+                return -1;
 
-	    xo_utf8_emit_char(xbp->xb_curp, olen, wc);
-	    xbp->xb_curp += olen;
-	    break;
+            xo_utf8_emit_char(xbp->xb_curp, olen, wc);
+            xbp->xb_curp += olen;
+            break;
 
-	case XF_ENC_LOCALE:
-	    if (xo_check_for_room(xop, xbp, MB_LEN_MAX + 1))
-		return -1;
+        case XF_ENC_LOCALE:
+            if (xo_check_for_room(xop, xbp, MB_LEN_MAX + 1))
+                return -1;
 
-	    olen = wcrtomb(xbp->xb_curp, wc, &xop->xo_mbstate);
-	    if (olen <= 0) {
-		xo_failure(xop, "could not convert wide char: %lx",
-			   (unsigned long) wc);
-		width = 1;
-		*xbp->xb_curp++ = '?';
-	    } else
-		xbp->xb_curp += olen;
-	    break;
-	}
+            olen = wcrtomb(xbp->xb_curp, wc, &xop->xo_mbstate);
+            if (olen <= 0) {
+                xo_failure(xop, "could not convert wide char: %lx",
+                           (unsigned long) wc);
+                width = 1;
+                *xbp->xb_curp++ = '?';
+            } else
+                xbp->xb_curp += olen;
+            break;
+        }
 
     done_with_encoding:
-	cols += width;
+        cols += width;
     }
 
     return cols;
@@ -3527,14 +3527,14 @@ static int
 xo_needed_encoding (xo_handle_t *xop)
 {
     if (XOF_ISSET(xop, XOF_UTF8)) /* Check the override flag */
-	return XF_ENC_UTF8;
+        return XF_ENC_UTF8;
 
-    return XF_ENC_UTF8;		/* Otherwise, we love UTF-8 */
+    return XF_ENC_UTF8;         /* Otherwise, we love UTF-8 */
 }
 
 static ssize_t
 xo_format_string (xo_handle_t *xop, xo_fspec_t *xfp, xo_buffer_t *xbp,
-		  xo_xff_flags_t flags, int enc)
+                  xo_xff_flags_t flags, int enc)
 {
     int null_as_empty = (xfp->xf_extflags & XXF_NULL_AS_EMPTY) ? 1 : 0;
     const char *null = null_as_empty ? "" : "(null)";
@@ -3548,78 +3548,78 @@ xo_format_string (xo_handle_t *xop, xo_fspec_t *xfp, xo_buffer_t *xbp,
     int need_enc = xo_needed_encoding(xop);
 
     if (xo_check_conversion(xop, enc, need_enc))
-	return 0;
+        return 0;
 
     len = xfp->xf_width[XF_WIDTH_SIZE];
 
     if (xfp->xf_fc == 'm') {
-	cp = strerror(xop->xo_errno);
-	if (len < 0)
-	    len = cp ? strlen(cp) : 0;
-	goto normal_string;
+        cp = strerror(xop->xo_errno);
+        if (len < 0)
+            len = cp ? strlen(cp) : 0;
+        goto normal_string;
 
     } else if (enc == XF_ENC_WIDE) {
-	wcp = va_arg(xop->xo_vap, wchar_t *);
-	if (flags & XFF_SKIP)
-	    return 0;
+        wcp = va_arg(xop->xo_vap, wchar_t *);
+        if (flags & XFF_SKIP)
+            return 0;
 
-	/*
-	 * Dont' deref NULL; use the traditional "(null)" instead
-	 * of the more accurate "who's been a naughty boy, then?".
-	 */
-	if (wcp == NULL) {
-	    cp = null;
-	    len = (xfp->xf_extflags & XXF_NULL_AS_EMPTY) ? 0 : strlen(cp);
-	}
+        /*
+         * Dont' deref NULL; use the traditional "(null)" instead
+         * of the more accurate "who's been a naughty boy, then?".
+         */
+        if (wcp == NULL) {
+            cp = null;
+            len = (xfp->xf_extflags & XXF_NULL_AS_EMPTY) ? 0 : strlen(cp);
+        }
 
     } else {
-	cp = va_arg(xop->xo_vap, char *); /* UTF-8 or native */
+        cp = va_arg(xop->xo_vap, char *); /* UTF-8 or native */
 
     normal_string:
-	if (flags & XFF_SKIP)
-	    return 0;
+        if (flags & XFF_SKIP)
+            return 0;
 
-	/* Echo "Dont' deref NULL" logic */
-	if (cp == NULL) {
-	    if ((flags & XFF_NO_QUOTE) && xo_style_is_encoding(xop))
-		cp = null_no_quotes;
-	    else
-		cp = null;
-	
-	    len = null_as_empty ? 0 : strlen(cp);
-	}
+        /* Echo "Dont' deref NULL" logic */
+        if (cp == NULL) {
+            if ((flags & XFF_NO_QUOTE) && xo_style_is_encoding(xop))
+                cp = null_no_quotes;
+            else
+                cp = null;
+        
+            len = null_as_empty ? 0 : strlen(cp);
+        }
 
-	/*
-	 * Optimize the most common case, which is "%s".  We just
-	 * need to copy the complete string to the output buffer.
-	 */
-	if (enc == need_enc
-		&& xfp->xf_width[XF_WIDTH_MIN] < 0
-		&& xfp->xf_width[XF_WIDTH_SIZE] < 0
-		&& xfp->xf_width[XF_WIDTH_MAX] < 0
-	        && !(XOIF_ISSET(xop, XOIF_ANCHOR)
-		     || XOF_ISSET(xop, XOF_COLUMNS))) {
-	    len = strlen(cp);
-	    xo_buf_escape(xop, xbp, cp, len, flags);
+        /*
+         * Optimize the most common case, which is "%s".  We just
+         * need to copy the complete string to the output buffer.
+         */
+        if (enc == need_enc
+                && xfp->xf_width[XF_WIDTH_MIN] < 0
+                && xfp->xf_width[XF_WIDTH_SIZE] < 0
+                && xfp->xf_width[XF_WIDTH_MAX] < 0
+                && !(XOIF_ISSET(xop, XOIF_ANCHOR)
+                     || XOF_ISSET(xop, XOF_COLUMNS))) {
+            len = strlen(cp);
+            xo_buf_escape(xop, xbp, cp, len, flags);
 
-	    /*
-	     * Our caller expects xb_curp left untouched, so we have
-	     * to reset it and return the number of bytes written to
-	     * the buffer.
-	     */
-	    off2 = xbp->xb_curp - xbp->xb_bufp;
-	    rc = off2 - off;
-	    xo_buf_set_offset(xbp, off);
+            /*
+             * Our caller expects xb_curp left untouched, so we have
+             * to reset it and return the number of bytes written to
+             * the buffer.
+             */
+            off2 = xbp->xb_curp - xbp->xb_bufp;
+            rc = off2 - off;
+            xo_buf_set_offset(xbp, off);
 
-	    return rc;
-	}
+            return rc;
+        }
     }
 
     cols = xo_format_string_direct(xop, xbp, flags, wcp, cp, len,
-				   xfp->xf_width[XF_WIDTH_MAX],
-				   need_enc, enc);
+                                   xfp->xf_width[XF_WIDTH_MAX],
+                                   need_enc, enc);
     if (cols < 0)
-	goto bail;
+        goto bail;
 
     /*
      * xo_buf_append* will move xb_curp, so we save/restore it.
@@ -3629,39 +3629,39 @@ xo_format_string (xo_handle_t *xop, xo_fspec_t *xfp, xo_buffer_t *xbp,
     xo_buf_set_offset(xbp, off);
 
     if (cols < xfp->xf_width[XF_WIDTH_MIN]) {
-	/*
-	 * Find the number of columns needed to display the string.
-	 * If we have the original wide string, we just call wcswidth,
-	 * but if we did the work ourselves, then we need to do it.
-	 */
-	int delta = xfp->xf_width[XF_WIDTH_MIN] - cols;
-	if (xo_check_for_room(xop, xbp, xfp->xf_width[XF_WIDTH_MIN]))
-	    goto bail;
+        /*
+         * Find the number of columns needed to display the string.
+         * If we have the original wide string, we just call wcswidth,
+         * but if we did the work ourselves, then we need to do it.
+         */
+        int delta = xfp->xf_width[XF_WIDTH_MIN] - cols;
+        if (xo_check_for_room(xop, xbp, xfp->xf_width[XF_WIDTH_MIN]))
+            goto bail;
 
-	/*
-	 * If seen_minus, then pad on the right; otherwise move it so
-	 * we can pad on the left.
-	 */
-	char *np;
-	if (xfp->xf_seen_minus) {
-	    np = xbp->xb_curp + rc;
-	} else {
-	    np = xbp->xb_curp;
-	    memmove(xbp->xb_curp + delta, xbp->xb_curp, rc);
-	}
+        /*
+         * If seen_minus, then pad on the right; otherwise move it so
+         * we can pad on the left.
+         */
+        char *np;
+        if (xfp->xf_seen_minus) {
+            np = xbp->xb_curp + rc;
+        } else {
+            np = xbp->xb_curp;
+            memmove(xbp->xb_curp + delta, xbp->xb_curp, rc);
+        }
 
-	/* Set the padding */
-	memset(np, (xfp->xf_leading_zero > 0) ? '0' : ' ', delta);
-	rc += delta;
-	cols += delta;
+        /* Set the padding */
+        memset(np, (xfp->xf_leading_zero > 0) ? '0' : ' ', delta);
+        rc += delta;
+        cols += delta;
     }
 
     /* skip if scratch buffer (predicate, color) */
     if (xo_should_update_columns(xop, xbp)) {
-	if (XOF_ISSET(xop, XOF_COLUMNS))
-	    xop->xo_columns += cols;
-	if (XOIF_ISSET(xop, XOIF_ANCHOR))
-	    xop->xo_anchor_columns += cols;
+        if (XOF_ISSET(xop, XOF_COLUMNS))
+            xop->xo_columns += cols;
+        if (XOIF_ISSET(xop, XOIF_ANCHOR))
+            xop->xo_anchor_columns += cols;
     }
 
     return rc;
@@ -3677,28 +3677,28 @@ xo_format_string (xo_handle_t *xop, xo_fspec_t *xfp, xo_buffer_t *xbp,
 static int
 xo_buf_find_last_number (xo_buffer_t *xbp, ssize_t start_offset)
 {
-    int rc = 0;			/* Fail with zero */
+    int rc = 0;                 /* Fail with zero */
     int digit = 1;
     char *sp = xbp->xb_bufp;
     char *cp = sp + start_offset;
 
     for (;;) {
-	if (cp == sp)
-	    break;
-	cp -= 1;
-	if (isdigit((int) *cp))
-	    break;
+        if (cp == sp)
+            break;
+        cp -= 1;
+        if (isdigit((int) *cp))
+            break;
     }
 
     for ( ; cp >= sp; cp--) {
-	if (!isdigit((int) *cp))
-	    break;
-	if (rc >= INT_MAX / 100) /* Don't even get close to the limit */
-	    break;
-	rc += (*cp - '0') * digit;
-	digit *= 10;
-	if (cp == sp)		/* Avoid "cp--" */
-	    break;
+        if (!isdigit((int) *cp))
+            break;
+        if (rc >= INT_MAX / 100) /* Don't even get close to the limit */
+            break;
+        rc += (*cp - '0') * digit;
+        digit *= 10;
+        if (cp == sp)           /* Avoid "cp--" */
+            break;
     }
 
     return rc;
@@ -3713,28 +3713,28 @@ xo_count_utf8_cols (const char *str, ssize_t len)
     const char *ep = str + len;
 
     while (str < ep) {
-	tlen = xo_utf8_rlen(*str);
-	if (tlen < 0)		/* Broken input is very bad */
-	    return cols;
+        tlen = xo_utf8_rlen(*str);
+        if (tlen < 0)           /* Broken input is very bad */
+            return cols;
 
-	wc = xo_utf8_codepoint(str, tlen, tlen, 0);
-	if (xo_utf8_iserror(wc))
-	    return cols;
+        wc = xo_utf8_codepoint(str, tlen, tlen, 0);
+        if (xo_utf8_iserror(wc))
+            return cols;
 
-	/* We only print printable characters */
-	if (iswprint((wint_t) wc)) {
-	    /*
-	     * Find the width-in-columns of this character, which must be done
-	     * in wide characters, since we lack a mbswidth() function.
-	     */
-	    ssize_t width = xo_wcwidth(wc);
-	    if (width < 0)
-		width = iswcntrl(wc) ? 0 : 1;
+        /* We only print printable characters */
+        if (iswprint((wint_t) wc)) {
+            /*
+             * Find the width-in-columns of this character, which must be done
+             * in wide characters, since we lack a mbswidth() function.
+             */
+            ssize_t width = xo_wcwidth(wc);
+            if (width < 0)
+                width = iswcntrl(wc) ? 0 : 1;
 
-	    cols += width;
-	}
+            cols += width;
+        }
 
-	str += tlen;
+        str += tlen;
     }
 
     return cols;
@@ -3750,28 +3750,28 @@ xo_dgettext (xo_handle_t *xop, const char *str)
     res = dgettext(domainname, str);
 
     if (XOF_ISSET(xop, XOF_LOG_GETTEXT))
-	fprintf(stderr, "xo: gettext: %s%s%smsgid \"%s\" returns \"%s\"\n",
-		domainname ? "domain \"" : "", xo_printable(domainname),
-		domainname ? "\", " : "", xo_printable(str), xo_printable(res));
+        fprintf(stderr, "xo: gettext: %s%s%smsgid \"%s\" returns \"%s\"\n",
+                domainname ? "domain \"" : "", xo_printable(domainname),
+                domainname ? "\", " : "", xo_printable(str), xo_printable(res));
 
     return res;
 }
 
 static inline const char *
 xo_dngettext (xo_handle_t *xop, const char *sing, const char *plural,
-	      unsigned long int n)
+              unsigned long int n)
 {
     const char *domainname = xop->xo_gt_domain;
     const char *res;
 
     res = dngettext(domainname, sing, plural, n);
     if (XOF_ISSET(xop, XOF_LOG_GETTEXT))
-	fprintf(stderr, "xo: gettext: %s%s%s"
-		"msgid \"%s\", msgid_plural \"%s\" (%lu) returns \"%s\"\n",
-		domainname ? "domain \"" : "", 
-		xo_printable(domainname), domainname ? "\", " : "",
-		xo_printable(sing),
-		xo_printable(plural), n, xo_printable(res));
+        fprintf(stderr, "xo: gettext: %s%s%s"
+                "msgid \"%s\", msgid_plural \"%s\" (%lu) returns \"%s\"\n",
+                domainname ? "domain \"" : "", 
+                xo_printable(domainname), domainname ? "\", " : "",
+                xo_printable(sing),
+                xo_printable(plural), n, xo_printable(res));
 
     return res;
 }
@@ -3784,7 +3784,7 @@ xo_dgettext (xo_handle_t *xop UNUSED, const char *str)
 
 static inline const char *
 xo_dngettext (xo_handle_t *xop UNUSED, const char *singular,
-	      const char *plural, unsigned long int n)
+              const char *plural, unsigned long int n)
 {
     return (n == 1) ? singular : plural;
 }
@@ -3800,12 +3800,12 @@ xo_dngettext (xo_handle_t *xop UNUSED, const char *singular,
  */
 static ssize_t
 xo_format_gettext (xo_handle_t *xop, xo_xff_flags_t flags,
-		   ssize_t start_offset, ssize_t cols, int need_enc)
+                   ssize_t start_offset, ssize_t cols, int need_enc)
 {
     xo_buffer_t *xbp = &xop->xo_data;
 
     if (xo_check_for_room(xop, xbp, 1))
-	return cols;
+        return cols;
 
     xbp->xb_curp[0] = '\0'; /* NUL-terminate the input string */
     
@@ -3818,56 +3818,56 @@ xo_format_gettext (xo_handle_t *xop, xo_xff_flags_t flags,
      * value rendered and disect the string into two pieces.
      */
     if (flags & XFF_GT_PLURAL) {
-	int n = xo_buf_find_last_number(xbp, start_offset);
-	char *two = memchr(cp, (int) ',', len);
-	if (two == NULL) {
-	    xo_failure(xop, "no comma in plural gettext field: '%s'", cp);
-	    return cols;
-	}
+        int n = xo_buf_find_last_number(xbp, start_offset);
+        char *two = memchr(cp, (int) ',', len);
+        if (two == NULL) {
+            xo_failure(xop, "no comma in plural gettext field: '%s'", cp);
+            return cols;
+        }
 
-	if (two == cp) {
-	    xo_failure(xop, "nothing before comma in plural gettext "
-		       "field: '%s'", cp);
-	    return cols;
-	}
+        if (two == cp) {
+            xo_failure(xop, "nothing before comma in plural gettext "
+                       "field: '%s'", cp);
+            return cols;
+        }
 
-	if (two == xbp->xb_curp) {
-	    xo_failure(xop, "nothing after comma in plural gettext "
-		       "field: '%s'", cp);
-	    return cols;
-	}
+        if (two == xbp->xb_curp) {
+            xo_failure(xop, "nothing after comma in plural gettext "
+                       "field: '%s'", cp);
+            return cols;
+        }
 
-	*two++ = '\0';
-	if (flags & XFF_GT_FIELD) {
-	    newstr = xo_dngettext(xop, cp, two, n);
-	} else {
-	    /* Don't do a gettext() look up, just get the plural form */
-	    newstr = (n == 1) ? cp : two;
-	}
+        *two++ = '\0';
+        if (flags & XFF_GT_FIELD) {
+            newstr = xo_dngettext(xop, cp, two, n);
+        } else {
+            /* Don't do a gettext() look up, just get the plural form */
+            newstr = (n == 1) ? cp : two;
+        }
 
-	/*
-	 * If we returned the first string, optimize a bit by
-	 * backing up over comma
-	 */
-	if (newstr == cp) {
-	    xbp->xb_curp = two - 1; /* One for comma */
-	    /*
-	     * If the caller wanted UTF8, we're done; nothing changed,
-	     * but we need to count the columns used.
-	     */
-	    if (need_enc == XF_ENC_UTF8)
-		return xo_count_utf8_cols(cp, xbp->xb_curp - cp);
-	}
+        /*
+         * If we returned the first string, optimize a bit by
+         * backing up over comma
+         */
+        if (newstr == cp) {
+            xbp->xb_curp = two - 1; /* One for comma */
+            /*
+             * If the caller wanted UTF8, we're done; nothing changed,
+             * but we need to count the columns used.
+             */
+            if (need_enc == XF_ENC_UTF8)
+                return xo_count_utf8_cols(cp, xbp->xb_curp - cp);
+        }
 
     } else {
-	/* The simple case (singular) */
-	newstr = xo_dgettext(xop, cp);
+        /* The simple case (singular) */
+        newstr = xo_dgettext(xop, cp);
 
-	if (newstr == cp) {
-	    /* If the caller wanted UTF8, we're done; nothing changed */
-	    if (need_enc == XF_ENC_UTF8)
-		return cols;
-	}
+        if (newstr == cp) {
+            /* If the caller wanted UTF8, we're done; nothing changed */
+            if (need_enc == XF_ENC_UTF8)
+                return cols;
+        }
     }
 
     /*
@@ -3880,12 +3880,12 @@ xo_format_gettext (xo_handle_t *xop, xo_xff_flags_t flags,
 
     xo_buf_set_offset(xbp, start_offset); /* Reset the buffer */
     return xo_format_string_direct(xop, xbp, flags, NULL, newcopy, nlen, 0,
-				   need_enc, XF_ENC_UTF8);
+                                   need_enc, XF_ENC_UTF8);
 }
 
 static void
 xo_data_append_content (xo_handle_t *xop, const char *str, ssize_t len,
-			xo_xff_flags_t flags)
+                        xo_xff_flags_t flags)
 {
     int cols;
     int need_enc = xo_needed_encoding(xop);
@@ -3894,18 +3894,18 @@ xo_data_append_content (xo_handle_t *xop, const char *str, ssize_t len,
 
     xo_xff_flags_t sub_flags = flags;
     if (!(flags & XFF_NO_UNESCAPE))
-	sub_flags |= XFF_UNESCAPE;
+        sub_flags |= XFF_UNESCAPE;
 
     cols = xo_format_string_direct(xop, &xop->xo_data, sub_flags,
-				   NULL, str, len, -1,
-				   need_enc, XF_ENC_UTF8);
+                                   NULL, str, len, -1,
+                                   need_enc, XF_ENC_UTF8);
     if (flags & XFF_GT_FLAGS)
-	cols = xo_format_gettext(xop, flags, start_offset, cols, need_enc);
+        cols = xo_format_gettext(xop, flags, start_offset, cols, need_enc);
 
     if (XOF_ISSET(xop, XOF_COLUMNS))
-	xop->xo_columns += cols;
+        xop->xo_columns += cols;
     if (XOIF_ISSET(xop, XOIF_ANCHOR))
-	xop->xo_anchor_columns += cols;
+        xop->xo_anchor_columns += cols;
 }
 
 static ssize_t
@@ -3916,26 +3916,26 @@ xo_trim_ws (xo_buffer_t *xbp, ssize_t len)
 
     /* First trim leading space */
     for (cp = sp = xbp->xb_curp, ep = cp + len; cp < ep; cp++) {
-	if (!isblank((int) *cp))
-	    break;
+        if (!isblank((int) *cp))
+            break;
     }
 
     delta = cp - sp;
     if (delta) {
-	len -= delta;
-	memmove(sp, cp, len);
+        len -= delta;
+        memmove(sp, cp, len);
     }
 
     /* Then trim off the end */
     for (cp = xbp->xb_curp, sp = ep = cp + len; cp < ep; ep--) {
-	if (!isblank((int) ep[-1]))
-	    break;
+        if (!isblank((int) ep[-1]))
+            break;
     }
 
     delta = sp - ep;
     if (delta) {
-	len -= delta;
-	cp[len] = '\0';
+        len -= delta;
+        cp[len] = '\0';
     }
 
     return len;
@@ -3959,20 +3959,20 @@ xo_safe_va_arg_long_double (xo_handle_t *xop)
  */
 static ssize_t
 xo_flush_literal (xo_handle_t *xop, xo_buffer_t *xbp, xo_xff_flags_t flags,
-		  int make_output, int need_enc, const char *xp, ssize_t len)
+                  int make_output, int need_enc, const char *xp, ssize_t len)
 {
     if (!make_output)
-	return 0;
+        return 0;
 
     ssize_t cols = xo_format_string_direct(xop, xbp, flags | XFF_UNESCAPE,
-					   NULL, xp, len, -1,
-					   need_enc, XF_ENC_UTF8);
+                                           NULL, xp, len, -1,
+                                           need_enc, XF_ENC_UTF8);
     /* skip if scratch buffer (predicate, color) */
     if (cols > 0 && xbp == &xop->xo_data) {
-	if (XOF_ISSET(xop, XOF_COLUMNS))
-	    xop->xo_columns += cols;
-	if (XOIF_ISSET(xop, XOIF_ANCHOR))
-	    xop->xo_anchor_columns += cols;
+        if (XOF_ISSET(xop, XOF_COLUMNS))
+            xop->xo_columns += cols;
+        if (XOIF_ISSET(xop, XOIF_ANCHOR))
+            xop->xo_anchor_columns += cols;
     }
 
     return cols;
@@ -8507,8 +8507,9 @@ xo_do_emit_fields (xo_handle_t *xop, const xo_field_info_t *fields,
 	     * but as a UTF-8 string ('const char *') argument in xo_vap.
 	     */
             if (clen)
-                xo_failure(xop, "invalid content value for 'a' modifier: '%.*s'",
-                            clen, content);
+                xo_failure(xop,
+			   "invalid content value for 'a' modifier: '%.*s'",
+			   clen, content);
 	    content = va_arg(xop->xo_vap, char *);
 	    clen = content ? strlen(content) : 0;
 	}
@@ -9892,7 +9893,8 @@ xo_do_close_list (xo_handle_t *xop, const char *name)
 	break;
 
     case XO_STYLE_ENCODER:
-	if (XOF_ISSET(xop, XOF_FILTER) && XOEF_ISSET(xop, XOEF_FILTER_NOTIFY_DEADEND)
+	if (XOF_ISSET(xop, XOF_FILTER)
+	        && XOEF_ISSET(xop, XOEF_FILTER_NOTIFY_DEADEND)
 		&& xsp->xs_rb_off != XS_OFFSET_CLEAR) {
 	    xo_filt_rollback(xop, xsp, xsp->xs_fstatus, xsp->xs_fstatus);
 	    xo_depth_change(xop, name, -1, 0, XSS_CLOSE_LIST, XSF_LIST, 0, 0);
@@ -10026,7 +10028,8 @@ xo_do_close_leaf_list (xo_handle_t *xop, const char *name)
 
 	if (XOF_ISSET(xop, XOF_FILTER) && xsp->xs_rb_off != XS_OFFSET_CLEAR) {
 	    xo_filt_rollback(xop, xsp, xsp->xs_fstatus, xsp->xs_fstatus);
-	    xo_depth_change(xop, name, -1, -1, XSS_CLOSE_LEAF_LIST, XSF_LIST, 0, 0);
+	    xo_depth_change(xop, name, -1, -1,
+			    XSS_CLOSE_LEAF_LIST, XSF_LIST, 0, 0);
 	    break;
 	}
 
@@ -10049,10 +10052,12 @@ xo_do_close_leaf_list (xo_handle_t *xop, const char *name)
 	break;
 
     case XO_STYLE_ENCODER:
-	if (XOF_ISSET(xop, XOF_FILTER) && XOEF_ISSET(xop, XOEF_FILTER_NOTIFY_DEADEND)
+	if (XOF_ISSET(xop, XOF_FILTER)
+	        && XOEF_ISSET(xop, XOEF_FILTER_NOTIFY_DEADEND)
 		&& xsp->xs_rb_off != XS_OFFSET_CLEAR) {
 	    xo_filt_rollback(xop, xsp, xsp->xs_fstatus, xsp->xs_fstatus);
-	    xo_depth_change(xop, name, -1, 0, XSS_CLOSE_LEAF_LIST, XSF_LIST, 0, 0);
+	    xo_depth_change(xop, name, -1, 0,
+			    XSS_CLOSE_LEAF_LIST, XSF_LIST, 0, 0);
 	    xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
 	    break;
 	}
@@ -10148,9 +10153,9 @@ xo_do_open_instance (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
      *
      * PRED: key/non-key predicate pending - buffer tentatively until resolved.
      *
-     * TRACK after FULL: positional predicate already matched (old_fstatus==FULL);
-     *   subsequent siblings are TRACK and must be buffered so their whiteboard
-     *   can be discarded on close.
+     * TRACK after FULL: positional predicate already matched
+     * (old_fstatus==FULL); subsequent siblings are TRACK and must be
+     * buffered so their whiteboard can be discarded on close.
      */
     if (XOF_ISSET(xop, XOF_FILTER)) {
 	if (fstatus == XO_STATUS_PRED)
@@ -10282,7 +10287,8 @@ xo_do_close_instance (xo_handle_t *xop, const char *name)
 	break;
 
     case XO_STYLE_ENCODER:
-	if (XOF_ISSET(xop, XOF_FILTER) && XOEF_ISSET(xop, XOEF_FILTER_NOTIFY_DEADEND)
+	if (XOF_ISSET(xop, XOF_FILTER)
+	        && XOEF_ISSET(xop, XOEF_FILTER_NOTIFY_DEADEND)
 		&& xsp->xs_rb_off != XS_OFFSET_CLEAR) {
 	    xo_filt_rollback(xop, xsp, old_fstatus, fstatus);
 	    xo_depth_change(xop, name, -1, 0, XSS_CLOSE_INSTANCE, 0, 0, 0);
