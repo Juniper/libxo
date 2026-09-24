@@ -211,8 +211,8 @@ typedef struct xo_parse_s {
     xo_realloc_func_t xp_realloc;	/* Allocator (NULL == realloc) */
     xo_free_func_t xp_free;		/* Free (NULL == free) */
     xo_parse_error_func_t xp_error;	/* Error reporter (NULL == silent) */
-    void *xp_error_data;		/* Opaque data passed to xp_error */
-    xo_parse_error_func_t xp_warn;	/* Warning reporter (NULL == silent) */
+    void *xp_error_data;                /* Opaque data passed to xp_error */
+    xo_parse_error_func_t xp_warn;      /* Warning reporter (NULL == silent) */
     void *xp_warn_data;			/* Opaque data passed to xp_warn */
     xo_parse_flags_t xp_flags;		/* XPF_* flags */
 
@@ -357,7 +357,5 @@ xo_is_format_char (char ch, int numeric_only)
     const char *cp = numeric_only ? "DEFGOUdefgiou" : "ACDEFGOSUXacdefgimopsux";
     return strchr(cp, ch) != NULL;
 }
-
-
 
 #endif /* XO_FORMAT_H */
