@@ -200,6 +200,21 @@ from the arguments.
 
    xo_emit("{G:libc}Service unavailable in restricted mode\\n");
 
+When a format is used, it consumes arguments like any other field,
+so "{G:/%s}" takes one argument and "{G:/%s_%s}" takes two.  The
+formatted value becomes the domain name and is not emitted as
+output.  If the field has content, the format is ignored.
+
+   xo_emit("{G:/%s}Service unavailable\\n", domain);
+
+Each {G:} field discards any previously set domain name.  A {G:}
+field with neither content nor a format ("{G:}") resets the domain,
+so subsequent gettext calls use the default domain, as set by
+textdomain(3).  This form does not consume an argument; there is
+no default "%s" format for the {G:} role.
+
+   xo_emit("{G:libc}Permission denied: {G:}{g:reason}\\n", reason);
+
 See :ref:`i18n` for additional details.
 
 .. index:: Field Roles; Label
