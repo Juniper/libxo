@@ -148,20 +148,18 @@ split the output mid-token and corrupt the surrounding line -
 something a purely comma/quote-oriented escape set doesn't protect
 against. No escape syntax beyond TOON's own is introduced.
 
-rtoon also makes a policy choice where TOON leaves the encoder free to
-pick: every non-ASCII Basic Multilingual Plane codepoint (U+0080
-through U+D7FF and U+E000 through U+FFFF) is `\uXXXX`-escaped rather
-than written out as literal UTF-8, even though TOON's table only says
-an encoder MAY do this (its default is SHOULD emit literal UTF-8).
-rtoon always takes the `\uXXXX` option here, so a quoted token's bytes
-are all plain ASCII except for the one case that has no `\uXXXX` form
-at all: a supplementary-plane codepoint (U+10000-U+10FFFF, encoded as
-4 UTF-8 bytes) is written out as literal UTF-8, unescaped, because a
-decoder MUST reject a surrogate-pair `\uXXXX` escape standing in for
-one (Section 7.1's table again). This choice keeps the encoder's
-output byte-for-byte predictable without a UTF-8-aware tokenizer for
-the overwhelming majority of non-ASCII input, at the cost of not being
-purely ASCII for the rare supplementary-plane character.
+Non-ASCII text follows TOON's default (SHOULD emit literal UTF-8):
+printable characters are written as literal UTF-8 and do not by
+themselves force a token to be quoted. rtoon `\uXXXX`-escapes (and so
+quotes) only a small set of BMP codepoints that are invisible or that a
+decoder might mistake for whitespace: the C1 controls and NBSP
+(U+0080-U+00A0), U+1680, U+2000-U+200F (Unicode spaces, zero-width
+characters, directional marks), U+2028-U+202F (line/paragraph
+separators, bidi controls, narrow NBSP), U+205F-U+206F, U+3000, U+FEFF,
+U+FFF9-U+FFFB, and U+FFFE/U+FFFF. Supplementary-plane codepoints
+(U+10000-U+10FFFF) are always literal, since a decoder MUST reject a
+surrogate-pair `\uXXXX` escape standing in for one (Section 7.1's table
+again), as are byte sequences that are not valid UTF-8.
 
 **Keys** (the first token of a line, or a field name inside a `{...}`
 fields-line) MUST be quoted if any of:
@@ -176,9 +174,8 @@ fields-line) MUST be quoted if any of:
   quoting whether or not it happens to satisfy `isspace()`) or an
   unquoted comma,
 - it contains an unquoted `"` or `\`,
-- it contains any non-ASCII byte (>= U+0080), since that byte is
-  subject to the `\uXXXX`/literal-UTF-8 policy above and escaping only
-  happens inside quotes,
+- it contains a non-ASCII character from the `\uXXXX`-escaped set
+  above (escaping only happens inside quotes),
 - it is empty.
 
 **Values** (a data-value's or key-value's value; a leaf-list or dense
@@ -189,9 +186,9 @@ row cell) MUST be quoted if any of:
 - (leaf-list / dense row cell only) it contains the active delimiter
   (`,`) unquoted,
 - it contains an unquoted `"`, `\`, any C0 control character
-  (U+0000-U+001F) - including LF/CR/HTAB - or any non-ASCII byte
-  (>= U+0080), since any of those is subject to the escaping/`\uXXXX`
-  policy above and escaping only happens inside quotes,
+  (U+0000-U+001F) - including LF/CR/HTAB - or a non-ASCII character
+  from the `\uXXXX`-escaped set above (escaping only happens inside
+  quotes),
 - (data-value / key-value only) it is empty - an empty scalar value
   MUST be spelled `""`, never bare nothing. This is the one quoting
   rule that exists purely for structural disambiguation rather than
@@ -727,11 +724,9 @@ keep it from decoding as the number 42.
   real TOON's tabular eligibility requires uniform, purely-scalar
   objects; it has no mechanism for absorbing a nested object's fields
   into the parent row at all.
-- Always `\uXXXX`-escaping non-ASCII BMP codepoints (Section 2.2) -
-  real TOON's Section 7.1 table leaves this as an encoder's own choice
-  (SHOULD emit literal UTF-8, MAY emit `\uXXXX`); rtoon commits to the
-  `\uXXXX` option everywhere it applies, rather than leaving it
-  unspecified per-encoder.
+- Additionally `\uXXXX`-escaping (and so quoting) invisible and
+  whitespace-like non-ASCII BMP codepoints (Section 2.2), where TOON
+  would leave them literal.
 
 Scalar typing (Section 2.3 - unquoted `true`/`false`/`null`/numbers
 decode as their typed values, quoting is what forces a string reading)
