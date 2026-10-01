@@ -58,4 +58,10 @@ endif()
 # platforms - clang's -fplugin= accepts the path as-is.
 set_target_properties(xo_validate PROPERTIES PREFIX "")
 
-install(TARGETS xo_validate DESTINATION lib/libxo)
+# Where the plugin is installed.  This must be the directory that xocc
+# and libxo-config load plugins from (configure's XO_LLVMDIR, which
+# follows --libdir), so the build passes it in; "lib" is not the libdir
+# on multilib systems that use lib64.
+set(XO_LLVMDIR "lib/libxo" CACHE PATH "libxo plugin install directory")
+
+install(TARGETS xo_validate DESTINATION "${XO_LLVMDIR}")
