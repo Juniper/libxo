@@ -103,11 +103,6 @@ get-gh-pages:
 	git clone https://github.com/Juniper/${PACKAGE_NAME}.git \
 		gh-pages -b gh-pages
 
-UPDATE_PACKAGE_FILE = \
-    -e "s;__SHA1__;$$SHA1;" \
-    -e "s;__SHA256__;SHA256 (textproc/${PACKAGE_FILE}) = $$SHA256;" \
-    -e "s;__SIZE__;SIZE (textproc/${PACKAGE_FILE}) = $$SIZE;"
-
 GH_PACKAGING_DIR = ${PACKAGE_VERSION}/packaging
 GH_PAGES_PACKAGE_DIR = ${GH_PAGES_DIR}/${GH_PACKAGING_DIR}
 
@@ -115,20 +110,18 @@ packages:
 	@-[ -d ${GH_PAGES_DIR} ] && set -x \
 		&& echo "Updating packages on gh-pages ..." \
                 && mkdir -p ${GH_PAGES_DIR}/${GH_PACKAGING_DIR} \
-		&& SHA1="`openssl sha1 ${PACKAGE_FILE} | awk '{print $$2}'`" \
-		&& SHA256="`openssl sha256 ${PACKAGE_FILE} | awk '{print $$2}'`" \
-		&& SIZE="`ls -l ${PACKAGE_FILE} | awk '{print $$5}'`" \
-		&& echo "... ${GH_PAGES_PACKAGE_DIR}/${PACKAGE_NAME}.rb ..." \
-		&& sed ${UPDATE_PACKAGE_FILE} \
-			packaging/${PACKAGE_NAME}.rb.base \
-			> ${GH_PAGES_PACKAGE_DIR}/${PACKAGE_NAME}.rb \
 		&& echo "... ${GH_PAGES_PACKAGE_DIR}/${PACKAGE_NAME}.spec ..." \
 		&& cp packaging/${PACKAGE_NAME}.spec \
 			${GH_PAGES_PACKAGE_DIR}/${PACKAGE_NAME}.spec \
+		&& echo "... ${GH_PAGES_PACKAGE_DIR}/${PACKAGE_FILE}.sha256 ..." \
+		&& SHA256="`openssl sha256 ${PACKAGE_FILE} | awk '{print $$NF}'`" \
+		&& test -n "$$SHA256" \
+		&& echo "$$SHA256  ${PACKAGE_FILE}" \
+			> ${GH_PAGES_PACKAGE_DIR}/${PACKAGE_FILE}.sha256 \
 		&& (cd ${GH_PAGES_DIR} \
 			&& git add ${GH_PACKAGING_DIR} \
-			&& git add ${GH_PACKAGING_DIR}/libxo.rb \
-                                   ${GH_PACKAGING_DIR}/libxo.spec \
+			&& git add ${GH_PACKAGING_DIR}/libxo.spec \
+                                   ${GH_PACKAGING_DIR}/${PACKAGE_FILE}.sha256 \
 			&& git commit -m 'new packaging data' \
                                ${GH_PACKAGING_DIR} \
 			&& git push origin gh-pages ) ; true
