@@ -277,3 +277,6 @@ and-newline</div>
 <div class="line">
   <div class="data" data-tag="msg">😀hi</div>
 </div>
+<div class="line">
+  <div class="data" data-tag="msg">a b</div>
+</div>
