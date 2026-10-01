@@ -308,6 +308,70 @@ rtoon_is_typed_literal (const char *value)
 	|| xo_streq(value, "null") || rtoon_is_number(value);
 }
 
+/*
+ * Decode the UTF-8 sequence at cp (remaining bytes available).  Returns
+ * the number of bytes to consume; *wcp is the codepoint, or an error
+ * value (xo_utf8_iserror) for an invalid or truncated sequence.
+ */
+static int
+rtoon_utf8_decode (const char *cp, size_t remaining, xo_codepoint_t *wcp)
+{
+    int rlen = xo_utf8_rlen((unsigned char) *cp);
+
+    if (rlen < 1 || (size_t) rlen > remaining) {
+        *wcp = XO_UTF8_ERR_BAD_LEN;
+        return (rlen < 1) ? 1 : (int) remaining;
+    }
+
+    *wcp = xo_utf8_codepoint(cp, remaining, rlen, XO_UTF8_ERR_BAD_LEN);
+    return rlen;
+}
+
+/*
+ * Should this codepoint be written as \uXXXX rather than literal UTF-8?
+ * Printable BMP characters stay literal; we escape only ones that are
+ * invisible, control-like, or a kind of whitespace a decoder might split
+ * on (C1 controls, Unicode spaces, zero-width and bidi controls, line/
+ * paragraph separators, BOM, noncharacters).  Everything else - letters,
+ * symbols, private-use, supplementary plane - goes out as-is.
+ */
+static int
+rtoon_cp_must_escape (xo_codepoint_t wc)
+{
+    if (wc < 0x80 || wc > 0xffff)
+        return 0;
+    return (wc <= 0xa0)
+        || wc == 0x1680
+        || (wc >= 0x2000 && wc <= 0x200f)
+        || (wc >= 0x2028 && wc <= 0x202f)
+        || (wc >= 0x205f && wc <= 0x206f)
+        || wc == 0x3000 || wc == 0xfeff
+        || (wc >= 0xfff9 && wc <= 0xfffb)
+        || wc == 0xfffe || wc == 0xffff;
+}
+
+/* Does the string contain a non-ASCII character that must be escaped? */
+static int
+rtoon_has_escapable_utf8 (const char *str)
+{
+    size_t total = strlen(str);
+
+    for (const char *cp = str; *cp; ) {
+        if ((unsigned char) *cp < 0x80) {
+            cp++;
+            continue;
+        }
+
+        xo_codepoint_t wc;
+        int len = rtoon_utf8_decode(cp, total - (size_t) (cp - str), &wc);
+        if (!xo_utf8_iserror(wc) && rtoon_cp_must_escape(wc))
+            return 1;
+        cp += len;
+    }
+
+    return 0;
+}
+
 static int
 rtoon_key_needs_quote (const char *name)
 {
@@ -316,14 +380,16 @@ rtoon_key_needs_quote (const char *name)
     if (name[0] == '{' || name[0] == '-')
 	return 1;
 
+    int high_bit = 0;
+
     for (const char *cp = name; *cp; cp++) {
 	unsigned char ch = (unsigned char) *cp;
-	if (ch == '=' || ch == ',' || ch == '"' || ch == '\\' || ch <= 0x20
-	    || ch >= 0x80)
+        if (ch == '=' || ch == ',' || ch == '"' || ch == '\\' || ch <= 0x20)
 	    return 1;
+        high_bit |= ch & 0x80;
     }
 
-    return 0;
+    return high_bit && rtoon_has_escapable_utf8(name);
 }
 
 /*
@@ -347,11 +413,17 @@ rtoon_value_needs_quote (const char *value, int in_delimited, int is_string,
     if (value[0] == '{')
 	return 1;
 
+    int high_bit = 0;
+
     for (const char *cp = value; *cp; cp++) {
 	unsigned char ch = (unsigned char) *cp;
-	if (ch == ',' || ch == '"' || ch == '\\' || ch <= 0x1f || ch >= 0x80)
+        if (ch == ',' || ch == '"' || ch == '\\' || ch <= 0x1f)
 	    return 1;
+        high_bit |= ch & 0x80;
     }
+
+    if (high_bit && rtoon_has_escapable_utf8(value))
+        return 1;
 
     if (!in_delimited && value[0] == '\0')
 	return 1;
@@ -371,16 +443,13 @@ rtoon_value_needs_quote (const char *value, int in_delimited, int is_string,
  * is line-oriented, so an unescaped LF/CR would otherwise split the
  * output mid-value and corrupt the surrounding line structure.
  *
- * Beyond that table, rtoon also \uXXXX-escapes every non-ASCII BMP
- * codepoint (U+0080-U+D7FF, U+E000-U+FFFF) it can decode, rather than
- * writing it out as literal UTF-8 -- TOON's table leaves that choice
- * to the encoder (SHOULD emit literal, MAY emit \uXXXX), and rtoon
- * takes the \uXXXX option everywhere it can, so a quoted token is
- * plain ASCII outside of the small set of characters that have no
- * BMP escape. Supplementary-plane codepoints (U+10000-U+10FFFF) have
- * no such escape -- a decoder MUST reject a surrogate-pair \uXXXX
- * pair standing in for one -- so those, and any byte sequence that
- * doesn't decode as valid UTF-8 at all, are copied through unchanged.
+ * Beyond that table, non-ASCII characters are written as literal UTF-8
+ * (TOON's SHOULD) and cost no quoting, except for a small set of BMP
+ * codepoints that are invisible or whitespace-like (see
+ * rtoon_cp_must_escape()), which get a \uXXXX escape. Supplementary-
+ * plane codepoints have no \uXXXX form - a decoder MUST reject a
+ * surrogate-pair escape standing in for one - so they are always
+ * literal, as are byte sequences that don't decode as valid UTF-8.
  */
 static void
 rtoon_write_escaped (xo_buffer_t *xbp, const char *value)
@@ -419,27 +488,18 @@ rtoon_write_escaped (xo_buffer_t *xbp, const char *value)
 	    cp += 1;
 
 	} else {
-	    size_t remaining = total - (size_t) (cp - value);
-	    int rlen = xo_utf8_rlen(ch);
-	    xo_codepoint_t wc = (rlen < 1 || (size_t) rlen > remaining)
-		? XO_UTF8_ERR_BAD_LEN
-		: xo_utf8_codepoint(cp, remaining, rlen, XO_UTF8_ERR_BAD_LEN);
+            xo_codepoint_t wc;
+            int len = rtoon_utf8_decode(cp, total - (size_t) (cp - value), &wc);
 
-	    if (xo_utf8_iserror(wc) || wc > 0xffff) {
-		/* Invalid UTF-8, or a supplementary-plane codepoint: copy
-		 * the raw byte(s) through rather than mangling them. */
-		int copy = (rlen < 1) ? 1
-		    : ((size_t) rlen > remaining) ? (int) remaining : rlen;
-		xo_buf_append(xbp, cp, copy);
-		cp += copy;
-
-	    } else {
+            if (!xo_utf8_iserror(wc) && rtoon_cp_must_escape(wc)) {
 		char buf[6] = { '\\', 'u',
 				 hex[(wc >> 12) & 0xf], hex[(wc >> 8) & 0xf],
 				 hex[(wc >> 4) & 0xf], hex[wc & 0xf] };
 		xo_buf_append(xbp, buf, sizeof(buf));
-		cp += rlen;
+            } else {
+                xo_buf_append(xbp, cp, len);
 	    }
+            cp += len;
 	}
     }
 }
