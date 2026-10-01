@@ -140,10 +140,10 @@
 ../../../tests/llvm-plugins/validate_02.c:209:30: warning: libxo: argument 1: format specifies type 'unsigned long long' but the argument has type 'unsigned int'
   209 |     xo_emit("{:val/%llu}\n", u_val);
       |                              ^
-../../../tests/llvm-plugins/validate_02.c:238:29: warning: libxo: argument 1: format specifies type 'unsigned long' but the argument has type 'int'
+../../../tests/llvm-plugins/validate_02.c:238:29: warning: libxo: argument 1: format specifies type 'size_t' but the argument has type 'int'
   238 |     xo_emit("{:val/%zu}\n", i_val);
       |                             ^
-../../../tests/llvm-plugins/validate_02.c:250:29: warning: libxo: argument 1: format specifies type 'long' but the argument has type 'int'
+../../../tests/llvm-plugins/validate_02.c:250:29: warning: libxo: argument 1: format specifies type 'ptrdiff_t' but the argument has type 'int'
   250 |     xo_emit("{:val/%td}\n", i_val);
       |                             ^
 ../../../tests/llvm-plugins/validate_02.c:282:28: warning: libxo: argument 1: format specifies type 'double' but the argument has type 'int'
@@ -200,22 +200,34 @@
 ../../../tests/llvm-plugins/validate_02.c:516:13: warning: libxo: display and encoding formats consume different argument(s): '{:val/%d/%s}'
   516 |     xo_emit("{:val/%d/%s}\n", i_val);
       |             ^
-../../../tests/llvm-plugins/validate_02.c:526:13: warning: libxo: unknown keyword ignored: 'humanization'
-  526 |     xo_emit("{,humanization:size/%d}\n", 1024);
+../../../tests/llvm-plugins/validate_02.c:519:13: warning: libxo: display and encoding formats consume different argument(s): '{:val/%ld/%d}'
+  519 |     xo_emit("{:val/%ld/%d}\n", l_val);
       |             ^
-../../../tests/llvm-plugins/validate_02.c:528:13: warning: libxo: zero length encoding format, ignored
-  528 |     xo_emit("{:missing-encoding/%d/}\n", 1024);
+../../../tests/llvm-plugins/validate_02.c:533:18: warning: libxo: format expects 2 argument(s) but 1 provided
+  533 |     xo_emit_f(0, "{:name/%s} {:age/%d}\n", cs_val);
+      |                  ^
+../../../tests/llvm-plugins/validate_02.c:539:25: warning: libxo: format expects 2 argument(s) but 1 provided
+  539 |     xo_emit_hf(NULL, 0, "{:name/%s} {:age/%d}\n", cs_val);
+      |                         ^
+../../../tests/llvm-plugins/validate_02.c:549:13: warning: libxo: unknown keyword ignored: 'humanization'
+  549 |     xo_emit("{,humanization:size/%d}\n", 1024);
       |             ^
-../../../tests/llvm-plugins/validate_02.c:530:13: warning: libxo: value field ('V'/value) has empty name, but has the 'display' flag set; use 'F'/format role instead: '{d:/this should be %s}'
-  530 |     xo_emit("{d:/this should be %s}\n", "text");
+../../../tests/llvm-plugins/validate_02.c:551:13: warning: libxo: zero length encoding format, ignored
+  551 |     xo_emit("{:missing-encoding/%d/}\n", 1024);
       |             ^
-../../../tests/llvm-plugins/validate_02.c:533:13: warning: libxo: unknown 'J' flag: '{%JZs}'
-  533 |     xo_emit("works: [{:works/%JNs}], fail: [{:fails/%JZs}]n", NULL, NULL);
+../../../tests/llvm-plugins/validate_02.c:553:13: warning: libxo: value field ('V'/value) has empty name, but has the 'display' flag set; use 'F'/format role instead: '{d:/this should be %s}'
+  553 |     xo_emit("{d:/this should be %s}\n", "text");
       |             ^
-../../../tests/llvm-plugins/validate_02.c:535:13: warning: libxo: 'int-group|i' set on field with leading zeroes: '{i:fail/%05d}'
-  535 |     xo_emit("i:leading zero: {i:fail/%05d}\n", 50);
+../../../tests/llvm-plugins/validate_02.c:556:13: warning: libxo: unknown 'J' flag: '{%JZs}'
+  556 |     xo_emit("works: [{:works/%JNs}], fail: [{:fails/%JZs}]n", NULL, (void *) 0);
       |             ^
-../../../tests/llvm-plugins/validate_02.c:536:13: warning: libxo: 'int-group|i' set on field with invalid type (s; must be d|i|u): '{i:fail2/%s}'
-  536 |     xo_emit("i:bad type: {i:fail2/%s}\n", "bad");
+../../../tests/llvm-plugins/validate_02.c:556:69: warning: libxo: argument 2: format specifies type 'char *' but the argument has type 'void *'
+  556 |     xo_emit("works: [{:works/%JNs}], fail: [{:fails/%JZs}]n", NULL, (void *) 0);
+      |                                                                     ^
+../../../tests/llvm-plugins/validate_02.c:558:13: warning: libxo: 'int-group|i' set on field with leading zeroes: '{i:fail/%05d}'
+  558 |     xo_emit("i:leading zero: {i:fail/%05d}\n", 50);
       |             ^
-66 warnings generated.
+../../../tests/llvm-plugins/validate_02.c:559:13: warning: libxo: 'int-group|i' set on field with invalid type (s; must be d|i|u): '{i:fail2/%s}'
+  559 |     xo_emit("i:bad type: {i:fail2/%s}\n", "bad");
+      |             ^
+70 warnings generated.
