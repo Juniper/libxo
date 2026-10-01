@@ -1,0 +1,4 @@
+../../../tests/core/test_13.c:261:11: warning: libxo: use hyphens, not underscores, in field name: '{e:mode_octal/%03o}'
+  261 |         xo_emitr("{t:mode/%s}{e:mode_octal/%03o} {t:links/%*ju} {t:user/%-*s}  {t:group/%-*s}  ",
+      |                  ^
+1 warning generated.
