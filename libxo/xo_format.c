@@ -280,7 +280,7 @@ xo_parse_format_spec (xo_parse_t *xpp, xo_fspec_t *xfp,
     const char *start = cp;
 
     for (cp += 1; cp < ep; cp++) {
-        if (*cp == 'l')
+        if (*cp == 'l' || *cp == 'L')   /* 'L' is "long double" */
             xfp->xf_lflag += 1;
         else if (*cp == 'h')
             xfp->xf_hflag += 1;
@@ -367,6 +367,71 @@ xo_parse_format_spec (xo_parse_t *xpp, xo_fspec_t *xfp,
     return cp;
 }
 
+uint8_t
+xo_fspec_arg_type (const xo_fspec_t *xfp)
+{
+    switch (xfp->xf_fc) {
+    case 'd':
+    case 'i':
+    case 'o':
+    case 'u':
+    case 'x':
+    case 'X':
+    case 'D':
+    case 'O':
+    case 'U':
+        /*
+         * xo_advance_vap() pops the value with this type after
+         * vsnprintf() has formatted it from a copy of the va_list,
+         * and xo_format_int_text() pulls it directly, so all three
+         * must agree on the type.
+         */
+        if (xfp->xf_num_bits)
+            return (xfp->xf_num_bits == 64) ? XO_AT_INT64 : XO_AT_INT;
+        if (xfp->xf_hflag)
+            return XO_AT_INT;   /* 'h' and "hh" are promoted to int */
+        if (xfp->xf_lflag > 1)
+            return XO_AT_LONG_LONG;
+        if (xfp->xf_lflag)
+            return XO_AT_LONG;
+        if (xfp->xf_jflag)
+            return XO_AT_INTMAX;
+        if (xfp->xf_tflag)
+            return XO_AT_PTRDIFF;
+        if (xfp->xf_zflag)
+            return XO_AT_SIZE;
+        if (xfp->xf_qflag)
+            return XO_AT_QUAD;
+        return XO_AT_INT;
+
+    case 'e':
+    case 'E':
+    case 'f':
+    case 'F':
+    case 'g':
+    case 'G':
+    case 'a':
+    case 'A':
+        return xfp->xf_lflag ? XO_AT_LONG_DOUBLE : XO_AT_DOUBLE;
+
+    case 'c':
+        return xfp->xf_lflag ? XO_AT_WINT : XO_AT_INT;
+
+    case 'C':
+        return XO_AT_WINT;
+
+    case 's':
+    case 'S':
+        return XO_AT_STRING;
+
+    case 'p':
+        return XO_AT_POINTER;
+
+    default:
+        return XO_AT_NONE;      /* "%m" and literal text take no arg */
+    }
+}
+
 /*
  * Parse one "%..." conversion starting at 'cp' (which points at the '%').
  * Pure parser: no handle, no va_list, no style/skip decisions - those are
@@ -415,6 +480,9 @@ xo_parse_one_format (xo_parse_t *xpp, xo_fspec_t *xfp, const char *cp,
 
     if (xfp->xf_fc == 'D' || xfp->xf_fc == 'O' || xfp->xf_fc == 'U')
 	xfp->xf_lflag = 1;
+
+    /* Must follow the D/O/U fixup, since that changes the type */
+    xfp->xf_arg_type = xo_fspec_arg_type(xfp);
 
     xfp->xf_start = (uint16_t)(start - fmt);
     xfp->xf_len   = (uint16_t)(cp - start + 1);
@@ -954,7 +1022,7 @@ xo_parse_fields (xo_parse_t *xpp, const char *fmt, size_t fmt_len)
 	/*
 	 * Populate: pre-parse the display format into fspec entries so
 	 * the emit path can walk them instead of rescanning.  Encoding
-	 * formats are out of scope for now (Phase 1 decision); that path
+	 * formats are out of scope for now (XXX); that path
 	 * still re-parses at call time.
 	 */
 	if (xfip->xfi_format != XO_FOFF_NONE) {
@@ -1052,7 +1120,7 @@ xo_parse_fields (xo_parse_t *xpp, const char *fmt, size_t fmt_len)
 				   "'int-group|i' set on field with invalid "
 				   "type (%c; must be d|i|u): '%s'", fc,
 				   xo_printable2(str, slen, 1));
-		    else if (xfp->xf_leading_zero)
+                    else if (xfp->xf_leading_zero > 0)
 			xo_parse_error(xpp,
 				   "'int-group|i' set on field with "
 				   "leading zeroes: '%s'",
