@@ -515,6 +515,29 @@ main (int argc, char **argv)
     /* WARN: encoding uses %s but display uses %d (different types) */
     xo_emit("{:val/%d/%s}\n", i_val);
 
+    /* WARN: display %ld (long) vs encoding %d (int) - real width mismatch */
+    xo_emit("{:val/%ld/%d}\n", l_val);
+
+    /* OK: display %04x vs encoding %u - both plain unsigned int */
+    xo_emit("{:val/%04x/%u}\n", u_val);
+
+    /*
+     * Fixed-arg emit variants other than xo_emit/xo_emit_h are validated
+     * the same way, since none of them take a va_list.
+     */
+
+    /* OK: xo_emit_f, correct arg count */
+    xo_emit_f(0, "{:name/%s} {:age/%d}\n", cs_val, i_val);
+
+    /* WARN: xo_emit_f, expects 2 but given 1 */
+    xo_emit_f(0, "{:name/%s} {:age/%d}\n", cs_val);
+
+    /* OK: xo_emit_hf, correct arg count */
+    xo_emit_hf(NULL, 0, "{:name/%s} {:age/%d}\n", cs_val, i_val);
+
+    /* WARN: xo_emit_hf, expects 2 but given 1 */
+    xo_emit_hf(NULL, 0, "{:name/%s} {:age/%d}\n", cs_val);
+
     /*
      * Long-form role names
      */
@@ -530,7 +553,7 @@ main (int argc, char **argv)
     xo_emit("{d:/this should be %s}\n", "text");
     xo_emit("{F:/this should be %s}\n", "text");
 
-    xo_emit("works: [{:works/%JNs}], fail: [{:fails/%JZs}]n", NULL, NULL);
+    xo_emit("works: [{:works/%JNs}], fail: [{:fails/%JZs}]n", NULL, (void *) 0);
 
     xo_emit("i:leading zero: {i:fail/%05d}\n", 50);
     xo_emit("i:bad type: {i:fail2/%s}\n", "bad");
