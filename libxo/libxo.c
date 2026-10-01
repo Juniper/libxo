@@ -4345,78 +4345,77 @@ xo_advance_vap (xo_handle_t *xop, xo_xff_flags_t flags, int consumed,
     if (consumed)
 	return;
 
-    if (xfp->xf_fc == 's' || xfp->xf_fc == 'S') {
-	/*
-	 * The 'S' and 's' formats are normally handled in
-	 * xo_format_string, but if we skipped it, then we
-	 * need to pop it.
-	 */
-	if (flags & XFF_SKIP)
-	    va_arg(xop->xo_vap, char *);
+    switch (xfp->xf_arg_type) {
+    case XO_AT_NONE:
+        return;
 
-    } else if (xfp->xf_fc == 'm') {
-	/* Nothing on the stack for "%m" */
+    case XO_AT_STRING:
+        /*
+         * Strings (and their '*' widths) are normally consumed by
+         * xo_format_string(); we only pop the value if it was skipped.
+         */
+        if (flags & XFF_SKIP)
+            va_arg(xop->xo_vap, char *);
+        return;
 
-    } else {
-	int s;
-	for (s = 0; s < XF_WIDTH_NUM; s++) {
-	    if (xfp->xf_star[s])
-		va_arg(xop->xo_vap, int);
-	}
+    default:
+        break;
+    }
 
-	if (strchr("diouxXDOU", xfp->xf_fc) != NULL) {
+    int s;
+    for (s = 0; s < XF_WIDTH_NUM; s++) {
+        if (xfp->xf_star[s])
+            va_arg(xop->xo_vap, int);
+    }
 
-	    if (xfp->xf_num_bits) {
-		if (xfp->xf_num_bits == 64)
-		    va_arg(xop->xo_vap, uint64_t);
+    switch (xfp->xf_arg_type) {
+    case XO_AT_INT:
+        va_arg(xop->xo_vap, int);
+        break;
 
-		else if (xfp->xf_num_bits == 32)
-		    va_arg(xop->xo_vap, uint32_t);
+    case XO_AT_LONG:
+        va_arg(xop->xo_vap, long);
+        break;
 
-		else
-		    va_arg(xop->xo_vap, unsigned);
+    case XO_AT_LONG_LONG:
+        va_arg(xop->xo_vap, long long);
+        break;
 
-	    } else if (xfp->xf_hflag > 1) {
-		va_arg(xop->xo_vap, int);
+    case XO_AT_INTMAX:
+        va_arg(xop->xo_vap, intmax_t);
+        break;
 
-	    } else if (xfp->xf_hflag > 0) {
-		va_arg(xop->xo_vap, int);
+    case XO_AT_PTRDIFF:
+        va_arg(xop->xo_vap, ptrdiff_t);
+        break;
 
-	    } else if (xfp->xf_lflag > 1) {
-		va_arg(xop->xo_vap, unsigned long long);
+    case XO_AT_SIZE:
+        va_arg(xop->xo_vap, size_t);
+        break;
 
-	    } else if (xfp->xf_lflag > 0) {
-		va_arg(xop->xo_vap, unsigned long);
+    case XO_AT_QUAD:
+        va_arg(xop->xo_vap, quad_t);
+        break;
 
-	    } else if (xfp->xf_jflag > 0) {
-		va_arg(xop->xo_vap, intmax_t);
+    case XO_AT_INT64:
+        va_arg(xop->xo_vap, int64_t);
+        break;
 
-	    } else if (xfp->xf_tflag > 0) {
-		va_arg(xop->xo_vap, ptrdiff_t);
+    case XO_AT_DOUBLE:
+        va_arg(xop->xo_vap, double);
+        break;
 
-	    } else if (xfp->xf_zflag > 0) {
-		va_arg(xop->xo_vap, size_t);
+    case XO_AT_LONG_DOUBLE:
+        xo_safe_va_arg_long_double(xop);
+        break;
 
-	    } else if (xfp->xf_qflag > 0) {
-		va_arg(xop->xo_vap, quad_t);
+    case XO_AT_WINT:
+        va_arg(xop->xo_vap, wint_t);
+        break;
 
-	    } else {
-		va_arg(xop->xo_vap, int);
-	    }
-	} else if (strchr("eEfFgGaA", xfp->xf_fc) != NULL)
-	    if (xfp->xf_lflag)
-		xo_safe_va_arg_long_double(xop);
-	    else
-		va_arg(xop->xo_vap, double);
-
-	else if (xfp->xf_fc == 'C' || (xfp->xf_fc == 'c' && xfp->xf_lflag))
-	    va_arg(xop->xo_vap, wint_t);
-
-	else if (xfp->xf_fc == 'c')
-	    va_arg(xop->xo_vap, int);
-
-	else if (xfp->xf_fc == 'p')
-	    va_arg(xop->xo_vap, void *);
+    case XO_AT_POINTER:
+        va_arg(xop->xo_vap, void *);
+        break;
     }
 }
 
@@ -5392,6 +5391,7 @@ xo_format_text (xo_handle_t *xop, const xo_field_info_t *xfip,
 static xo_fspec_t xo_default_fspecs[1] = {
     {
 	.xf_fc = 's',
+        .xf_arg_type = XO_AT_STRING,
 	.xf_leading_zero = -1,
 	.xf_width = { -1, -1, -1 },
 	.xf_start = 0,
