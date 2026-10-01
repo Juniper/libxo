@@ -640,7 +640,6 @@ AC_CONFIG_FILES([
      tests/utf8/Makefile
      tests/llvm-plugins/Makefile
      packaging/libxo.spec
-     packaging/libxo.rb.base
 ])
 AC_OUTPUT
 
