@@ -127,13 +127,37 @@ typedef struct xo_fspec_s {
      */
     uint16_t xf_prefix_len;
     uint8_t xf_num_bits;  /* '!' Number of bits in a number (signed/unsigned) */
-    uint8_t xf_padding[3];
+    uint8_t xf_arg_type;  /* Type of the va_arg for the value (XO_AT_*) */
+    uint8_t xf_padding[2];
 
     uint32_t xf_extflags;		/* "%J" "extended" flags (XXF_*) */
 } xo_fspec_t;
 
 /* Flags for xf_extflags */
 #define XXF_NULL_AS_EMPTY	(1<<0) /* Render a NULL "%s" value as "" */
+
+/*
+ * Values for xf_arg_type: the type the value's va_arg is pulled as,
+ * after default argument promotion.  Two specs with the same type
+ * consume the same argument, regardless of which conversion
+ * character or length modifier produced it ("%04x" and "%u" both
+ * pull an int; "%ld" pulls a long).  Arguments consumed for '*'s
+ * (xf_star[] and xf_at_stars) are always ints and are not included.
+ */
+#define XO_AT_NONE            0  /* No argument ("%m", literal text) */
+#define XO_AT_INT             1  /* int (includes 'h', "%c", "!8"-"!32") */
+#define XO_AT_LONG            2  /* long ('l') */
+#define XO_AT_LONG_LONG       3  /* long long ("ll") */
+#define XO_AT_INTMAX          4  /* intmax_t ('j') */
+#define XO_AT_PTRDIFF         5  /* ptrdiff_t ('t') */
+#define XO_AT_SIZE            6  /* size_t ('z') */
+#define XO_AT_QUAD            7  /* quad_t ('q') */
+#define XO_AT_INT64           8  /* 64-bit integer ("!64") */
+#define XO_AT_DOUBLE          9  /* double (float is promoted) */
+#define XO_AT_LONG_DOUBLE     10 /* long double ('l' with a float conv) */
+#define XO_AT_WINT            11 /* wint_t ("%C", "%lc") */
+#define XO_AT_STRING          12 /* char * or wchar_t * ("%s", "%S") */
+#define XO_AT_POINTER         13 /* void * ("%p") */
 
 /*
  * Parsed representation of one field descriptor from a libxo format string.
@@ -180,7 +204,7 @@ typedef struct xo_field_info_s {
  * (e.g. as a static const array) using the XFF_* flags, XO_FOFF_* sentinels,
  * and XO_ROLE_* constants defined above.
  */
-#define XO_EMIT_CACHE_VERSION 1  /* bump on any xo_field_info_t layout change */
+#define XO_EMIT_CACHE_VERSION 3  /* bump on any xo_field_info_t layout change */
 
 struct xo_format_cache_s {
     unsigned xfc_version;		/* == XO_EMIT_CACHE_VERSION */
@@ -321,7 +345,14 @@ xo_printable2 (const char *str, int len, int bracesp);
 #define XO_LINT_ROLES_NEEDING_NAME_OR_FORMAT "DEFLNPTUW" /* One or the other */
 #define XO_LINT_ROLES_OPTIONAL_NAME "CG"      /* Might have empty name */
 #define XO_LINT_ROLES_DEC_NAME_OR_FORMAT "[]"	       /* ":XX" or "/%d"" */
-#define XO_LINT_ROLES_NO_FORMAT "G"	       /* Can't have a format (/XX) */
+#define XO_LINT_ROLES_FORMAT_IGNORED_WITH_CONTENT "G" /* format unused if
+                                                          content is given */
+
+/*
+ * No role currently forbids a format outright.  Defining
+ * XO_LINT_ROLES_NO_FORMAT as a string of role characters enables a
+ * lint error for any field with one of those roles that has a format.
+ */
 
 #define XO_LINT_MIN_NAME 3	/* Lint: no names less than this length  */
 
@@ -350,6 +381,15 @@ xo_parse_format_spec (xo_parse_t *xpp, xo_fspec_t *xfp,
  */
 int
 xo_parse_fspecs (xo_parse_t *xpp, const char *fmt, const char *ep);
+
+/*
+ * Return the XO_AT_* type of the va_arg consumed by a parsed fspec's
+ * value.  The parser records this in xf_arg_type, so callers holding
+ * a parsed fspec should use that field; this is for fspecs built by
+ * hand.
+ */
+uint8_t
+xo_fspec_arg_type (const xo_fspec_t *xfp);
 
 static inline int
 xo_is_format_char (char ch, int numeric_only)
