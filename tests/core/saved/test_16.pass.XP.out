@@ -290,4 +290,7 @@ and-newline</tag>
   </s34b-supplementary>
   <s34c-café>
   </s34c-café>
+  <s34d-nbsp>
+    <msg>a b</msg>
+  </s34d-nbsp>
 </rtoon-test>
