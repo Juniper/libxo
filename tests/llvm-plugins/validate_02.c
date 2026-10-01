@@ -558,6 +558,32 @@ main (int argc, char **argv)
     xo_emit("i:leading zero: {i:fail/%05d}\n", 50);
     xo_emit("i:bad type: {i:fail2/%s}\n", "bad");
 
+    /*
+     * {G:} takes its domain from the content or, with a format, from the
+     * arguments; an empty {G:} resets the domain and takes no argument.
+     */
+
+    /* OK: static domain, then reset */
+    xo_emit("{G:libc}Permission denied: {G:}{g:reason}\n", cs_val);
+
+    /* OK: domain from one argument */
+    xo_emit("{G:/%s}Service unavailable\n", cs_val);
+
+    /* OK: domain built from two arguments */
+    xo_emit("{G:/%s_%s}Service unavailable\n", cs_val, cs_val);
+
+    /* WARN: domain format needs an argument */
+    xo_emit("{G:/%s}Service unavailable\n");
+
+    /* WARN: domain argument has the wrong type */
+    xo_emit("{G:/%s}Service unavailable\n", i_val);
+
+    /* WARN: empty {G:} takes no argument */
+    xo_emit("{G:}Service unavailable\n", cs_val);
+
+    /* The format is ignored when content names the domain */
+    xo_emit("{G:libc/%s}Service unavailable\n");
+
     fclose(dev_null);
 
     return 0;
