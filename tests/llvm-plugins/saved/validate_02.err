@@ -230,4 +230,16 @@
 ../../../tests/llvm-plugins/validate_02.c:559:13: warning: libxo: 'int-group|i' set on field with invalid type (s; must be d|i|u): '{i:fail2/%s}'
   559 |     xo_emit("i:bad type: {i:fail2/%s}\n", "bad");
       |             ^
-70 warnings generated.
+../../../tests/llvm-plugins/validate_02.c:576:13: warning: libxo: format expects 1 argument(s) but 0 provided
+  576 |     xo_emit("{G:/%s}Service unavailable\n");
+      |             ^
+../../../tests/llvm-plugins/validate_02.c:579:45: warning: libxo: argument 1: format specifies type 'char *' but the argument has type 'int'
+  579 |     xo_emit("{G:/%s}Service unavailable\n", i_val);
+      |                                             ^
+../../../tests/llvm-plugins/validate_02.c:582:13: warning: libxo: format expects 0 argument(s) but 1 provided
+  582 |     xo_emit("{G:}Service unavailable\n", cs_val);
+      |             ^
+../../../tests/llvm-plugins/validate_02.c:585:13: warning: libxo: field role ('G') has both content and a format; the format is ignored: '{G:libc/%s}'
+  585 |     xo_emit("{G:libc/%s}Service unavailable\n");
+      |             ^
+74 warnings generated.
