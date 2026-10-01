@@ -19,7 +19,7 @@ switch ( `uname`-`uname -r` )
        breaksw
     case Darwin*:
        set llvm_topdir=/opt/local/libexec
-       set llvm_vers=llvm-19
+       set llvm_vers=llvm-22
        breaksw
 endsw
 
