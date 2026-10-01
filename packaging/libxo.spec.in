@@ -1,44 +1,95 @@
+#
+# RPM spec file for libxo
+#
+# Build options:
+#   --without filters   do not build the XPath filter library (needs byacc)
+#   --with llvm         build the clang plugins and xocc (needs LLVM and cmake)
+#
+%bcond_without filters
+%bcond_with llvm
+
 Name:        @PACKAGE_NAME@
 Version:     @PACKAGE_VERSION@
 Release:     1%{?dist}
-Summary:     The libxo library
+Summary:     Library for generating text, XML, JSON, and HTML output
 
-Prefix:      /usr
-
-Vendor:      Juniper Networks, Inc.
-Packager:    Phil Shafer <phil@juniper.net>
-License:     BSD
-
-Group:       Development/Libraries
+License:     BSD-2-Clause
 URL:         https://github.com/Juniper/libxo
-Source0:     https://github.com/Juniper/@PACKAGE_NAME@/releases/@PACKAGE_VERSION@/@PACKAGE_NAME@-@PACKAGE_VERSION@.tar.gz
+Source0:     https://github.com/Juniper/%{name}/releases/download/%{version}/%{name}-%{version}.tar.gz
 
+BuildRequires: gcc
+BuildRequires: make
+BuildRequires: libtool
+BuildRequires: gettext
+BuildRequires: perl-interpreter
+%if %{with filters}
+BuildRequires: byacc
+%endif
+%if %{with llvm}
+BuildRequires: gcc-c++
+BuildRequires: cmake
+BuildRequires: llvm-devel
+BuildRequires: clang
+BuildRequires: clang-devel
+%endif
 
 %description
-Welcome to libxo, a library that generates text, XML, JSON, and HTML
-from a single source code path.
+The libxo library allows an application to generate text, XML, JSON,
+and HTML output using a common set of function calls.  The application
+decides at run time which output style should be produced.
+
+This package holds the library, its encoders, the header files and
+manual pages, and the xo, xo-logger, xohtml, xolint, and xopo commands.
+%if %{with llvm}
+It also holds xocc and the clang plugins that validate and precompile
+libxo format strings.
+%endif
 
 %prep
 %setup -q
 
 %build
-%configure
-make %{?_smp_mflags}
+%configure --disable-static \
+    %{?with_filters:--enable-filters} \
+    %{?with_llvm:--with-llvm-config=%{_bindir}/llvm-config}
+%make_build
 
 %install
-rm -rf $RPM_BUILD_ROOT
 %make_install
 
-%clean
-rm -rf $RPM_BUILD_ROOT
+# Libtool archives are of no use once installed, and the license is
+# packaged with %%license below.
+find %{buildroot} -name '*.la' -delete
+rm -rf %{buildroot}%{_datadir}/doc/%{name}
 
-%post -p /sbin/ldconfig
+%ldconfig_scriptlets
 
 %files
-%{_bindir}/*
-%{_includedir}/libxo/*
-%{_libdir}/*
-%{_datadir}/doc/libxo/*
-%docdir %{_datadir}/doc/libxo/*
-%{_mandir}/*/*
-%docdir %{_mandir}/*/*
+%license Copyright
+%doc README.md
+%{_bindir}/libxo-config
+%{_bindir}/xo
+%{_bindir}/xo-logger
+%{_bindir}/xohtml
+%{_bindir}/xolint
+%{_bindir}/xopo
+%{_includedir}/libxo/
+%{_libdir}/libxo.so*
+%{_libdir}/libxo_format.so*
+%{_libdir}/pkgconfig/libxo.pc
+%dir %{_libdir}/libxo
+%{_libdir}/libxo/encoder/
+%if %{with filters}
+%{_libdir}/libxo/libxo_filter.so*
+%{_libdir}/libxo/xo_filter.lib
+%endif
+%if %{with llvm}
+%{_bindir}/xocc
+%{_libdir}/libxo/xo_validate.so
+%{_libdir}/libxo/xo_precompile.so
+%endif
+%{_datadir}/libxo/
+%{_mandir}/man1/*
+%{_mandir}/man3/*
+%{_mandir}/man5/*
+%{_mandir}/man7/*
