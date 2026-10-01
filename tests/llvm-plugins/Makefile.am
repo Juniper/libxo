@@ -68,7 +68,9 @@ TEST_CASES = \
     validate_02
 
 PRECOMPILE_TEST_CASES = \
-    precompile_01
+    precompile_01 \
+    precompile_02 \
+    precompile_03
 
 EXTRA_DIST = \
     ${addsuffix .c, ${TEST_CASES}} \
@@ -99,7 +101,7 @@ test tests: test-validate test-precompile
 
 test-validate: ${VALIDATE_PLUGIN}
 	@${MKDIR} -p out
-	-@(for tc in ${TEST_CASES}; do \
+	@for tc in ${TEST_CASES}; do \
 	    echo "... $$tc ..."; \
 	    ${CLANG_CMD} ${srcdir}/$$tc.c \
 	        > out/$$tc.out 2> out/$$tc.err.raw ; \
@@ -108,7 +110,7 @@ test-validate: ${VALIDATE_PLUGIN}
 		> out/$$tc.err ; \
 	    ${DIFF} -Nu ${srcdir}/saved/$$tc.out out/$$tc.out ; \
 	    ${DIFF} -Nu ${srcdir}/saved/$$tc.err out/$$tc.err ; \
-	done)
+	done ; true
 
 #
 # Precompile (IR pass) tests.
@@ -124,7 +126,7 @@ test-validate: ${VALIDATE_PLUGIN}
 #
 test-precompile: ${PRECOMPILE_PLUGIN}
 	@${MKDIR} -p out
-	-@(for tc in ${PRECOMPILE_TEST_CASES}; do \
+	@for tc in ${PRECOMPILE_TEST_CASES}; do \
 	    echo "... precompile build $$tc ..."; \
 	    ${CLANG_PLAIN} ${LDADD} ${srcdir}/$$tc.c -L${LIBDIR} -Wl,-rpath,${LIBDIR} -lxo \
 	        -o out/$$tc.plain \
@@ -140,16 +142,20 @@ test-precompile: ${PRECOMPILE_PLUGIN}
 	    for fmt in ${PRECOMPILE_FORMATS}; do \
 	        LC_ALL=en_US.UTF-8 out/$$tc.plain --libxo:W$$fmt \
 	            > out/$$tc.plain.$$fmt.out 2> out/$$tc.plain.$$fmt.err ; \
+	        plain_rc=$$? ; \
 	        ${DIFF} -Nu ${srcdir}/saved/$$tc.plain.$$fmt.out out/$$tc.plain.$$fmt.out ; \
 	        ${DIFF} -Nu ${srcdir}/saved/$$tc.plain.$$fmt.err out/$$tc.plain.$$fmt.err ; \
 	        LC_ALL=en_US.UTF-8 out/$$tc.pass  --libxo:W$$fmt \
 	            > out/$$tc.pass.$$fmt.out  2> out/$$tc.pass.$$fmt.err ; \
+	        pass_rc=$$? ; \
 	        ${DIFF} -Nu ${srcdir}/saved/$$tc.pass.$$fmt.out  out/$$tc.pass.$$fmt.out  ; \
 	        ${DIFF} -Nu ${srcdir}/saved/$$tc.pass.$$fmt.err  out/$$tc.pass.$$fmt.err  ; \
 	        ${DIFF} out/$$tc.plain.$$fmt.out out/$$tc.pass.$$fmt.out \
-	            || echo "FAIL: round-trip mismatch $$tc $$fmt stdout" ; \
+	            || { echo "FAIL: round-trip mismatch $$tc $$fmt stdout" ; } ; \
 	        ${DIFF} out/$$tc.plain.$$fmt.err out/$$tc.pass.$$fmt.err \
-	            || echo "FAIL: round-trip mismatch $$tc $$fmt stderr" ; \
+	            || { echo "FAIL: round-trip mismatch $$tc $$fmt stderr" ; } ; \
+	        [ "$$plain_rc" = "$$pass_rc" ] \
+	            || { echo "FAIL: round-trip mismatch $$tc $$fmt exit status ($$plain_rc vs $$pass_rc)" ; } ; \
 	    done ; \
 	    echo "... precompile ir $$tc ..."; \
 	    ${CLANG_PASS} -c ${srcdir}/$$tc.c \
@@ -160,7 +166,7 @@ test-precompile: ${PRECOMPILE_PLUGIN}
 	    nm out/$$tc.pass.o | grep xo_emit_cached | sed -e 's/_xo/xo/' | sort -u \
 	        > out/$$tc.nm ; \
 	    ${DIFF} -Nu ${srcdir}/saved/$$tc.nm out/$$tc.nm ; \
-	done)
+	done ; true
 
 accept: ${VALIDATE_PLUGIN} ${PRECOMPILE_PLUGIN}
 	@${MKDIR} -p out ${srcdir}/saved
