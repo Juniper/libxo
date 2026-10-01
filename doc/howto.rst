@@ -385,7 +385,8 @@ use by calling :manpage:`ngettext(3)`.
 
 If a domain name is needed, it can be supplied as the content of the
 {G:} role.  Domain names remain in use throughout the format string
-until cleared with another domain name::
+until replaced by another domain name or reset to the default domain
+by an empty "{G:}" field::
 
     printf(dgettext("dns", "Host %s not found: %d(%s)\\n"),
         name, errno, dgettext("strerror", strerror(errno)));
