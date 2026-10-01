@@ -37,9 +37,6 @@
 
 using namespace llvm;
 
-/* Keep in sync with xo.h XO_EMIT_CACHE_VERSION */
-#define XO_EMIT_CACHE_VERSION 1
-
 /* ---------- compatibility helpers ---------------------------------------- */
 
 /*
@@ -78,8 +75,14 @@ struct EmitTarget {
  * fmt_idx encodes the position: args[0..fmt_idx-1] are kept, then cache is
  * inserted, then args[fmt_idx..] (fmt + value args) are appended.
  *
- * The _p inline wrappers in xo.h normally expand to xo_emit_hv / xo_emit_hvf
- * calls, but may appear under their own names at -O0; both names are listed.
+ * The _p inline wrappers in xo.h (xo_emit_p, xo_emit_hp, xo_emit_fp,
+ * xo_emit_hvp, xo_emit_hfp, xo_emit_hvfp) are deliberately NOT listed here.
+ * Their "cached" counterparts (xo_emit_cached_p and friends) exist only as
+ * static inline wrappers in xo.h, not as real exported libxo symbols, so
+ * targeting one here would fabricate an external declaration that can never
+ * link. Leaving _p calls out of this table means the pass simply skips them,
+ * which is safe: they're header sugar, not perf-critical, and callers who
+ * need the precompile optimization can use the non-_p forms.
  */
 static const struct {
     const char *name;
@@ -88,19 +91,13 @@ static const struct {
     /* no prefix args */
     {"xo_emit",       {"xo_emit_cached",       0}},
     {"xo_emitr",      {"xo_emit_cachedr",      0}},
-    {"xo_emit_p",     {"xo_emit_cached_p",     0}},
     /* one prefix arg (handle or flags) */
     {"xo_emit_h",     {"xo_emit_cached_h",     1}},
     {"xo_emit_hv",    {"xo_emit_cached_hv",    1}},
     {"xo_emit_f",     {"xo_emit_cached_f",     1}},
-    {"xo_emit_hvp",   {"xo_emit_cached_hvp",   1}},
-    {"xo_emit_hp",    {"xo_emit_cached_hp",    1}},
-    {"xo_emit_fp",    {"xo_emit_cached_fp",    1}},
     /* two prefix args (handle + flags) */
     {"xo_emit_hf",    {"xo_emit_cached_hf",    2}},
     {"xo_emit_hvf",   {"xo_emit_cached_hvf",   2}},
-    {"xo_emit_hfp",   {"xo_emit_cached_hfp",   2}},
-    {"xo_emit_hvfp",  {"xo_emit_cached_hvfp",  2}},
 };
 
 static const EmitTarget *lookupEmitTarget(StringRef name)
@@ -206,9 +203,9 @@ struct XoPrecompile : PassInfoMixin<XoPrecompile> {
             i8,                              /* at_stars */
             ArrayType::get(i16, 3),          /* xf_width[3] (signed) */
             i16, i16, i16,                   /* start, len, prefix_len */
-	    i8, 			     /* num_bits, padding */
-            ArrayType::get(i8, 3),           /* padding[3] */
-	    i32,			     /* extflags */
+            i8, i8,                          /* num_bits, arg_type */
+            ArrayType::get(i8, 2),           /* padding[2] */
+            i32,                             /* extflags */
         });
 
         /* StructType matching xo_format_cache_t: { version, num_fields, *fields } */
@@ -235,6 +232,13 @@ struct XoPrecompile : PassInfoMixin<XoPrecompile> {
                     if (!CI) continue;
                     Function *Callee = CI->getCalledFunction();
                     if (!Callee) continue;
+                    /*
+                     * Real libxo emit functions are never defined in the
+                     * user's translation unit; requiring a declaration here
+                     * avoids rewriting an unrelated local/static function
+                     * that merely happens to share a libxo emit name.
+                     */
+                    if (!Callee->isDeclaration()) continue;
                     const EmitTarget *T = lookupEmitTarget(Callee->getName());
                     if (!T) continue;
                     if (CI->arg_size() <= T->fmt_idx) continue;
@@ -323,8 +327,9 @@ struct XoPrecompile : PassInfoMixin<XoPrecompile> {
                         ConstantInt::get(i16, sf.xsp_len),
                         ConstantInt::get(i16, sf.xsp_prefix_len),
                         ConstantInt::get(i8, sf.xsp_num_bits),
-			Constant::getNullValue(
-			    ArrayType::get(i8, 3)), /* xf_padding */
+                        ConstantInt::get(i8, sf.xsp_arg_type),
+                        Constant::getNullValue(
+                            ArrayType::get(i8, 2)), /* xf_padding */
                         ConstantInt::get(i32, sf.xsp_extflags),
 		    }));
                 }
