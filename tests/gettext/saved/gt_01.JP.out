@@ -30,6 +30,10 @@
     "from": "foop",
     "port": 4321,
     "time": 32,
+    "ldns-count": 5,
+    "default-count": 5,
+    "default-size": 5,
+    "ldns-size": 5,
     "marzlevanes": 3,
     "version": "1.2.3",
     "__warning": {
