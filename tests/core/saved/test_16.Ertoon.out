@@ -162,7 +162,9 @@ rtoon-test
     1,"tab\there"
   "s33e-odd\tname"
   s34a-bmp
-    msg "caf\u00e9"
+    msg café
   s34b-supplementary
-    msg "😀hi"
-  "s34c-caf\u00e9"
+    msg 😀hi
+  s34c-café
+  s34d-nbsp
+    msg "a\u00a0b"
