@@ -39,17 +39,20 @@ typedef void (*xo_shim_error_t)(void *data, const char *fmt, ...);
 int xo_shim_parse(const char *fmt, xo_shim_error_t error, void *data);
 
 /*
- * Argument descriptor: called once per va_arg the format string consumes.
+ * Argument descriptor: called once per va_arg the format string consumes,
+ * in the order they are consumed at emit time.
  *
- * fmt / fmtlen  - the printf format spec ("%s", "%ld", etc.),
- *                 NOT NUL-terminated.  fmtlen > 0 in all cases.
+ * xfp - the parsed fspec for the argument.  xfp->xf_arg_type gives the
+ *       va_arg's type (XO_AT_*, never XO_AT_NONE); the remaining fields
+ *       (xf_fc, xf_lflag, etc.) give the details.  An int consumed by a
+ *       '*' (a width, precision, or "%@...@" prefix) is reported as an
+ *       fspec for "%d".
  *
  * Special case: when a field uses the 'a' (XFF_ARGUMENT) modifier the
  * field name itself comes from va_arg as a const char *.  That arg is
- * reported with fmt == NULL / fmtlen == 0 BEFORE any value arg for the
- * same field.
+ * reported with xfp == NULL BEFORE any value arg for the same field.
  */
-typedef void (*xo_shim_arg_cb_t)(void *data, const char *fmt, unsigned fmtlen);
+typedef void (*xo_shim_arg_cb_t)(void *data, const xo_fspec_t *xfp);
 
 /*
  * Parse fmt, calling error_cb for hard errors, warn_cb for style warnings
@@ -114,9 +117,10 @@ typedef struct xo_shim_fspec_s {
     uint16_t xsp_start;         /* xf_start */
     uint16_t xsp_len;           /* xf_len */
     uint16_t xsp_prefix_len;    /* xf_prefix_len */
-    uint8_t  xsp_num_bits;	/* xf_num_bits */
-    uint8_t  xsp_padding[3];	/* xf_padding */
-    uint32_t xsp_extflags;	/* xf_extflags */
+    uint8_t  xsp_num_bits;      /* xf_num_bits */
+    uint8_t  xsp_arg_type;      /* xf_arg_type */
+    uint8_t  xsp_padding[2];    /* xf_padding */
+    uint32_t xsp_extflags;      /* xf_extflags */
 } xo_shim_fspec_t;
 
 typedef void (*xo_shim_fspec_cb_t)(void *data, const xo_shim_fspec_t *f);
