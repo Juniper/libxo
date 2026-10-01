@@ -255,8 +255,8 @@ main (int argc, char **argv)
 
 	xo_emitr("{ke:name/%hs}", name);
 
-	xo_emitr("{t:inode/%*ju} ", 3, 12);
-	xo_emitr("{t:blocks/%*jd} ", 4, 1234);
+	xo_emitr("{t:inode/%*ju} ", 3, (uintmax_t) 12);
+	xo_emitr("{t:blocks/%*jd} ", 4, (intmax_t) 1234);
 
 	xo_emitr("{t:mode/%s}{e:mode_octal/%03o} {t:links/%*ju} {t:user/%-*s}  {t:group/%-*s}  ",
 		"mode", 0660, 2, (uintmax_t) 12,
