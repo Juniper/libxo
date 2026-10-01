@@ -106,6 +106,13 @@ main (int argc, char **argv)
 	    "from {:from/%s}#{:port/%d} in {:time/%d} ms\n",
 	    "ldns", (size_t) 1234, "foop", 4321, 32);
 
+    /* A domain change in mid-string affects only the fields after it */
+    xo_emit("{G:ldns}{:ldns-count/%d} {Ngp:byte,bytes}, "
+	    "{G:}{:default-count/%d} {Ngp:byte,bytes}\n", 5, 5);
+
+    xo_emit("{G:}{:default-size/%d} {Ngp:byte,bytes}, "
+	    "{G:/%s}{:ldns-size/%d} {Ngp:byte,bytes}\n", 5, "ldns", 5);
+
     struct timeval tv;
     tv.tv_sec = 1435085229;
     tv.tv_usec = 123456;
