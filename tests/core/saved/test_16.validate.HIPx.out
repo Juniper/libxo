@@ -277,3 +277,6 @@ and-newline</div>
 <div class="line">
   <div class="data" data-tag="msg" data-xpath="/rtoon-test/s34b-supplementary/msg">😀hi</div>
 </div>
+<div class="line">
+  <div class="data" data-tag="msg" data-xpath="/rtoon-test/s34d-nbsp/msg">a b</div>
+</div>
