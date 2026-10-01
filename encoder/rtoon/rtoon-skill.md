@@ -105,14 +105,11 @@ has no `\uXXXX`-only fallback rule the same way, and JSON permits a
 few escapes, like `\/`, that never appear in rtoon output). A raw,
 unescaped control byte never appears inside a quoted token.
 
-`\uXXXX` also covers non-ASCII characters: any character in the Basic
-Multilingual Plane (U+0080-U+D7FF, U+E000-U+FFFF) that rtoon quotes
-comes out as `\uXXXX`, not literal UTF-8 - e.g. an accented letter
-shows up as `\u00e9`, not as its raw UTF-8 bytes. The one exception is
-a supplementary-plane character (above U+FFFF, e.g. most emoji) -
-those have no `\uXXXX` form (a decoder must reject a surrogate-pair
-escape standing in for one), so they appear as literal UTF-8 bytes
-inside the quotes instead. When you see a quoted token, unescape it
+Non-ASCII text is normally literal UTF-8 and needs no quoting. Only
+invisible or whitespace-like BMP characters (e.g. NBSP U+00A0, zero-width
+characters, U+2028/2029, BOM) come out as `\uXXXX` inside quotes.
+Supplementary-plane characters (above U+FFFF, e.g. most emoji) are always
+literal - a decoder must reject a surrogate-pair escape for one. When you see a quoted token, unescape it
 per that table and use the result - the quoting itself carries no
 meaning beyond "take this literally, don't apply the structural rules
 above to its contents." A quoted token is always a string, no matter
