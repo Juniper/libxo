@@ -58,34 +58,51 @@ man_MANS = ${man1_files} ${man7_files}
 EXTRA_DIST += \
     ${man_MANS}
 
+# The plugins are installed by cmake, but xocc and libxo-config load them
+# from XO_LLVMDIR, which follows configure's --libdir.  The cmake caches
+# depend on Makefile so that a re-run of configure (a new libdir, prefix,
+# or LLVM) reaches cmake, and the install checks that the plugins landed
+# where xocc will look for them.
+XO_LLVMDIR = @XO_LLVMDIR@
+
 all: ${VALIDATE_PLUGIN} ${PRECOMPILE_PLUGIN}
 
 ${VALIDATE_PLUGIN}: ${VALIDATE_DIR}/CMakeCache.txt ${VALIDATE_SRCS}
 	${MAKE} -C ${VALIDATE_DIR}
 
-${VALIDATE_DIR}/CMakeCache.txt:
+${VALIDATE_DIR}/CMakeCache.txt: Makefile
 	${MKDIR} -p ${VALIDATE_DIR}
 	${CMAKE_COMMAND} -S ${top_srcdir}/llvm-plugins/validate -B ${VALIDATE_DIR} \
 	    -DLLVM_DIR="${LLVM_CMAKE_DIR}" \
 	    -DClang_DIR="${CLANG_CMAKE_DIR}" \
 	    -DCMAKE_OSX_ARCHITECTURES="${CMAKE_OSX_ARCHITECTURES}" \
 	    -DCMAKE_INSTALL_PREFIX="${prefix}" \
+	    -DXO_LLVMDIR="${XO_LLVMDIR}" \
 	    -DXO_BUILDDIR="$(CURDIR)/${top_builddir}"
+	touch $@
 
 ${PRECOMPILE_PLUGIN}: ${PRECOMPILE_DIR}/CMakeCache.txt ${PRECOMPILE_SRCS}
 	${MAKE} -C ${PRECOMPILE_DIR}
 
-${PRECOMPILE_DIR}/CMakeCache.txt:
+${PRECOMPILE_DIR}/CMakeCache.txt: Makefile
 	${MKDIR} -p ${PRECOMPILE_DIR}
 	${CMAKE_COMMAND} -S ${top_srcdir}/llvm-plugins/precompile -B ${PRECOMPILE_DIR} \
 	    -DLLVM_DIR="${LLVM_CMAKE_DIR}" \
 	    -DCMAKE_OSX_ARCHITECTURES="${CMAKE_OSX_ARCHITECTURES}" \
 	    -DCMAKE_INSTALL_PREFIX="${prefix}" \
+	    -DXO_LLVMDIR="${XO_LLVMDIR}" \
 	    -DXO_BUILDDIR="$(CURDIR)/${top_builddir}"
+	touch $@
 
 install-exec-local:
-	${CMAKE_COMMAND} --install ${VALIDATE_DIR}
-	${CMAKE_COMMAND} --install ${PRECOMPILE_DIR}
+	DESTDIR="${DESTDIR}" ${CMAKE_COMMAND} --install ${VALIDATE_DIR}
+	DESTDIR="${DESTDIR}" ${CMAKE_COMMAND} --install ${PRECOMPILE_DIR}
+	@for plugin in ${VALIDATE_NAME} ${PRECOMPILE_NAME}; do \
+	    if test ! -f "${DESTDIR}${XO_LLVMDIR}/$$plugin"; then \
+	        echo "error: $$plugin was not installed in ${XO_LLVMDIR}" 1>&2; \
+	        exit 1; \
+	    fi; \
+	done
 	mkdir -p ${DESTDIR}${bindir}
 	install xocc.sh ${DESTDIR}${bindir}/xocc
 
