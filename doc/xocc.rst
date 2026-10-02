@@ -27,8 +27,8 @@ joined with `+` (enabled) or `-` (disabled):
   (--xo-validate-lint); implies `validate`.  (default: disabled)
 
 - **errors** - Report the syntactic and semantic problems found by
-  xo_validate as errors instead of warnings.  (default: disabled -
-  i.e. warnings by default)
+  xo_validate as errors instead of warnings; implies `validate`.
+  (default: disabled - i.e. warnings by default)
 
 - **precompile** - Add the xo_precompile plugin to the compiler
   invocation.  (default: disabled)
@@ -56,7 +56,7 @@ To turn warnings into hard errors, use `errors`:
 
     make CC='xocc full'
 
-Adding `+errors` will turn warnings into hard errors::n
+Adding `+errors` will turn warnings into hard errors::
 
     make CC='xocc full+errors'
 
