@@ -68,6 +68,17 @@ as errors instead of warnings; implies
 Add the
 .Nm xo_precompile
 plugin to the compiler invocation.
+Precompiled calls skip the runtime parser, and with it the format
+string checks made under
+.Dq --libxo warn ,
+so the plugin makes those checks at build time and reports them as
+.Fl Wbackend-plugin
+warnings.
+When
+.Cm validate
+is also given, the reports come from
+.Nm xo_validate
+instead.
 (default: disabled)
 .It Cm sdk
 Add any configured SDK flags to the compiler invocation.
