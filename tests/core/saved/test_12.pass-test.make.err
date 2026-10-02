@@ -1,0 +1,3 @@
+warning: ../../../tests/core/test_12.c:94: libxo format string: field name cannot start with a digit: '{:4x4}' [-Wbackend-plugin]
+warning: ../../../tests/core/test_12.c:94: libxo format string: field name cannot start with a digit: '{:2morrow}' [-Wbackend-plugin]
+2 warnings generated.
