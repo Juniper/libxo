@@ -31,7 +31,11 @@ joined with `+` (enabled) or `-` (disabled):
   (default: disabled - i.e. warnings by default)
 
 - **precompile** - Add the xo_precompile plugin to the compiler
-  invocation.  (default: disabled)
+  invocation.  Precompiled calls skip the runtime parser, and with it
+  the format string checks made under "--libxo warn", so the plugin
+  makes those checks at build time and reports them as
+  `-Wbackend-plugin` warnings.  When `validate` is also given, the
+  reports come from xo_validate instead.  (default: disabled)
 
 - **sdk** - Add any configured SDK flags to the compiler invocation.
   (default: enabled if the operating system needs it)
