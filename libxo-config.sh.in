@@ -175,7 +175,7 @@ while test $# -gt 0; do
 	;;
 
     --llvm-cflags-validate|--llvm_cflags_validate)
-	echo ${XO_PRECOMPILE_OPTS}
+	echo ${XO_VALIDATE_OPTS}
 	;;
 
     --llvm-clang|--llvm_clang)
