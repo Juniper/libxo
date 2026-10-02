@@ -216,18 +216,44 @@ parse_verb () {
         dbg "need_echo[$need_echo]"
     fi
 
-    XO_OPTIONS="${syntax} ${validate} ${lint} ${errors} ${precompile} ${sdk}"
+    XO_PLUGIN_OPTIONS="${syntax} ${validate} ${lint} ${errors} ${precompile}"
 }
 
+#
+# Report which stages the compiler will run for these arguments:
+#   cc:   compile only; nothing is linked
+#   ld:   link only; there are no source files to compile
+#   both: compile and link in one step
+#
 find_stage () {
-    local stage=ld
+    local compile_only=0
+    local sources=0
+
     while [ ! -z "$1" ]; do
-	if [ "$1" = "-c" -o "$1" = "-E" -o "$1" = "-S" ]; then
-	    stage=cc
-	fi
+	case "$1" in
+	    -c|-E|-S|-M|-MM|-fsyntax-only)
+		compile_only=1
+		;;
+	    -o)
+		# The output file is never a source, whatever its name
+		shift
+		;;
+	    -*)
+		;;
+	    *.c|*.i|*.m|*.mi|*.cc|*.cpp|*.cxx|*.C|*.ii|*.mm)
+		sources=1
+		;;
+	esac
 	shift
     done
-    echo $stage
+
+    if [ "$compile_only" = 1 ]; then
+	echo cc
+    elif [ "$sources" = 1 ]; then
+	echo both
+    else
+	echo ld
+    fi
 }
 
 XO_STAGE=`find_stage "$@"`
@@ -256,14 +282,21 @@ fi
 
 parse_verb "$verb"
 
-if [ "${XO_STAGE}" != "ld" ]; then
+if [ "${XO_STAGE}" = "cc" ]; then
     ldflags=""
+fi
+
+# The plugins only apply when something is compiled; passing their
+# options to a link-only command draws "argument unused" warnings,
+# which -Werror turns into a failed link.
+if [ "${XO_STAGE}" = "ld" ]; then
+    XO_PLUGIN_OPTIONS=""
 fi
 
 # The plugins need to be able to find libxo_format
 export LD_LIBRARY_PATH=${XO_LIBDIR}:${LD_LIBRARY_PATH}
 
-COMPILER="${COMPILER} ${XO_OPTIONS}"
+COMPILER="${COMPILER} ${XO_PLUGIN_OPTIONS} ${sdk}"
 
 if [ "$need_echo" = 1 ]; then
     set -x
