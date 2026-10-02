@@ -63,12 +63,20 @@ EXTRA_DIST = \
     ${addprefix saved/, ${TEST_CASES:.c=.HIPx.err}} \
     ${addprefix saved/, ${TEST_CASES:.c=.HIPx.out}}
 
+EXTRA_DIST += \
+    ${foreach lang,${TEST_LANGUAGES},${foreach fmt,${TEST_FORMATS}, \
+        ${addprefix saved/, ${TEST_CASES:.c=.${lang}.${fmt}.err}} \
+        ${addprefix saved/, ${TEST_CASES:.c=.${lang}.${fmt}.out}}}}
+
 POT_FILES = \
     gt_01.pot \
     ldns.pot \
     strerror.pot
 
 PO_FILES = \
+    po/es/gt_01.po \
+    po/es/ldns.po \
+    po/es/strerror.po \
     po/pig_latin/gt_01.po \
     po/pig_latin/ldns.po \
     po/pig_latin/strerror.po
@@ -93,6 +101,27 @@ TEST_ONE = \
 
 TEST_FORMATS = T XP JP HP X J H HIPx
 
+#
+# The default run uses the "en_US" locale, which build-mo-files links
+# to the pig_latin catalogs.  Each language listed here gets a second
+# run under its own locale, with baselines saved as base.lang.fmt.*.
+#
+TEST_LANGUAGES = es
+TEST_LOCALE_es = es_ES.UTF-8
+
+TEST_ONE_LANG = \
+      ${CHECKER} ./$$base.test --libxo:W$$fmt ${TEST_OPTS} lang $$locale \
+      > out/$$base.$$lang.$$fmt.out 2> out/$$base.$$lang.$$fmt.err ; \
+ ${DIFF} -Nu ${srcdir}/saved/$$base.$$lang.$$fmt.out \
+      out/$$base.$$lang.$$fmt.out ${S2O} ; \
+ ${DIFF} -Nu ${srcdir}/saved/$$base.$$lang.$$fmt.err \
+      out/$$base.$$lang.$$fmt.err ${S2O}
+
+TEST_LOCALE = \
+    case $$lang in \
+    ${foreach lang,${TEST_LANGUAGES},${lang}) locale=${TEST_LOCALE_${lang}} ;;} \
+    esac
+
 test tests: ${bin_PROGRAMS} build-mo-files
 	@${MKDIR} -p out
 	-@ ${TEST_TRACE} (for test in ${TEST_CASES} ; do \
@@ -101,7 +130,15 @@ test tests: ${bin_PROGRAMS} build-mo-files
 	        echo "... $$test ... $$fmt ..."; \
 	        ${TEST_ONE}; \
                 true; \
-            done) \
+            done) ; \
+	    (for lang in ${TEST_LANGUAGES} ; do \
+		${TEST_LOCALE} ; \
+		for fmt in ${TEST_FORMATS}; do \
+		    echo "... $$test ... $$lang ... $$fmt ..."; \
+		    ${TEST_ONE_LANG}; \
+		    true; \
+		done ; \
+	    done) \
 	done)
 
 one:
@@ -114,6 +151,15 @@ accept:
 	        echo "... $$test ... $$fmt ..."; \
 	        ${CP} out/$$base.$$fmt.out ${srcdir}/saved/$$base.$$fmt.out ; \
 	        ${CP} out/$$base.$$fmt.err ${srcdir}/saved/$$base.$$fmt.err ; \
+	    done) ; \
+	    (for lang in ${TEST_LANGUAGES} ; do \
+		for fmt in ${TEST_FORMATS}; do \
+		    echo "... $$test ... $$lang ... $$fmt ..."; \
+		    ${CP} out/$$base.$$lang.$$fmt.out \
+			${srcdir}/saved/$$base.$$lang.$$fmt.out ; \
+		    ${CP} out/$$base.$$lang.$$fmt.err \
+			${srcdir}/saved/$$base.$$lang.$$fmt.err ; \
+		done ; \
 	    done) \
 	done)
 
