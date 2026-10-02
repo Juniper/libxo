@@ -63,4 +63,13 @@ set_target_properties(xo_precompile PROPERTIES PREFIX "")
 # on multilib systems that use lib64.
 set(XO_LLVMDIR "lib/libxo" CACHE PATH "libxo plugin install directory")
 
+# The plugin needs libxo_format at load time, and a plain
+# "clang -fplugin=..." gives it no library path, so record the libxo
+# library directory in the installed module.  The build tree copy keeps
+# the build path that cmake adds on its own.
+set(XO_LIBDIR "" CACHE PATH "libxo library install directory")
+if(XO_LIBDIR)
+    set_target_properties(xo_precompile PROPERTIES INSTALL_RPATH "${XO_LIBDIR}")
+endif()
+
 install(TARGETS xo_precompile DESTINATION "${XO_LLVMDIR}")
