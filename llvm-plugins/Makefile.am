@@ -65,7 +65,7 @@ EXTRA_DIST += \
 # where xocc will look for them.
 XO_LLVMDIR = @XO_LLVMDIR@
 
-all: ${VALIDATE_PLUGIN} ${PRECOMPILE_PLUGIN}
+all: ${VALIDATE_PLUGIN} ${PRECOMPILE_PLUGIN} xocc.sh
 
 ${VALIDATE_PLUGIN}: ${VALIDATE_DIR}/CMakeCache.txt ${VALIDATE_SRCS}
 	${MAKE} -C ${VALIDATE_DIR}
@@ -96,7 +96,7 @@ ${PRECOMPILE_DIR}/CMakeCache.txt: Makefile
 	    -DXO_BUILDDIR="$(CURDIR)/${top_builddir}"
 	touch $@
 
-install-exec-local:
+install-exec-local: xocc.sh
 	DESTDIR="${DESTDIR}" ${CMAKE_COMMAND} --install ${VALIDATE_DIR}
 	DESTDIR="${DESTDIR}" ${CMAKE_COMMAND} --install ${PRECOMPILE_DIR}
 	@for plugin in ${VALIDATE_NAME} ${PRECOMPILE_NAME}; do \
