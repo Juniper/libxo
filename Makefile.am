@@ -126,7 +126,11 @@ packages:
                                ${GH_PACKAGING_DIR} \
 			&& git push origin gh-pages ) ; true
 
-install-exec-local:
+# config.status rewrites libxo-config.sh when libxo-config.sh.in changes;
+# it is installed below as "libxo-config"
+all-local: libxo-config.sh
+
+install-exec-local: libxo-config.sh
 	mkdir -p ${DESTDIR}${bindir}
 	install libxo-config.sh ${DESTDIR}${bindir}/libxo-config
 
