@@ -183,16 +183,18 @@ parse_verb () {
 	syntax="-fsyntax-only"
     fi
 
-    if [ "$need_lint" = 1 ]; then
-	lint="-mllvm -xo-validate-lint"
-	need_validate=1
-    fi
-    if [ "$need_errors" != 1 ]; then
-	errors="-mllvm -xo-validate-errors-as-warnings"
+    # "lint" and "errors" only adjust the validator, so they imply it
+    if [ "$need_lint" = 1 -o "$need_errors" = 1 ]; then
 	need_validate=1
     fi
     if [ "$need_validate" = 1 ]; then
 	validate="${XO_VALIDATE_OPTS}"
+	if [ "$need_lint" = 1 ]; then
+	    lint="-mllvm -xo-validate-lint"
+	fi
+	if [ "$need_errors" != 1 ]; then
+	    errors="-mllvm -xo-validate-errors-as-warnings"
+	fi
     fi
     if [ "$need_precompile" = 1 ]; then
 	precompile="${XO_PRECOMPILE_OPTS}"
