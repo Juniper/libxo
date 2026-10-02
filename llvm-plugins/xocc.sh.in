@@ -293,8 +293,10 @@ if [ "${XO_STAGE}" = "ld" ]; then
     XO_PLUGIN_OPTIONS=""
 fi
 
-# The plugins need to be able to find libxo_format
-export LD_LIBRARY_PATH=${XO_LIBDIR}:${LD_LIBRARY_PATH}
+# The plugins need to be able to find libxo_format.  Add the colon only
+# when there is a path to append to: an empty entry makes the loader
+# search the current directory.
+export LD_LIBRARY_PATH="${XO_LIBDIR}${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
 
 COMPILER="${COMPILER} ${XO_PLUGIN_OPTIONS} ${sdk}"
 
