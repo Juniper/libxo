@@ -21,6 +21,9 @@
 #include "xo_config.h"
 
 #include "llvm/IR/Constants.h"
+#include "llvm/IR/DebugInfoMetadata.h"
+#include "llvm/IR/DiagnosticInfo.h"
+#include "llvm/IR/DiagnosticPrinter.h"
 #include "llvm/IR/GlobalVariable.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/Instructions.h"
@@ -31,7 +34,10 @@
 #else /* CLANG_VERSION_NUMBER >= 22000000 */
 #include "llvm/Passes/PassPlugin.h"
 #endif /* ACLANG_VERSION_NUMBER >= 22000000 */
+#include "llvm/Support/CommandLine.h"
 #include "llvm/Support/raw_ostream.h"
+
+#include <cstdarg>
 
 #include "../validate/xo_parse_shim.h"
 
@@ -155,6 +161,70 @@ parse_error_cb (void *data, const char *, ...)
     *static_cast<bool *>(data) = true;
 }
 
+/* ---------- format string diagnostics ------------------------------------ */
+
+/*
+ * A call rewritten to xo_emit_cached() never reaches the runtime parser,
+ * so the checks that "--libxo warn" would have made on its format string
+ * are lost.  The pass makes them itself, at build time, and reports them
+ * as backend warnings (-Wbackend-plugin).
+ */
+struct XoFormatDiagnostic : DiagnosticInfo {
+    static int kind () {
+        static int k = getNextAvailablePluginDiagnosticKind();
+        return k;
+    }
+
+    std::string Msg;
+
+    XoFormatDiagnostic (std::string M)
+        : DiagnosticInfo(kind(), DS_Warning), Msg(std::move(M)) {}
+
+    void print (DiagnosticPrinter &DP) const override { DP << Msg; }
+};
+
+/*
+ * The xo_validate plugin makes the same checks with better source
+ * locations, so when it is loaded into this compiler we stay quiet
+ * rather than report each problem twice.  Its command line option is
+ * the one trace it leaves that is visible from here.
+ */
+static bool validateIsLoaded()
+{
+    return cl::getRegisteredOptions().count("xo-validate-lint") != 0;
+}
+
+struct FormatDiagCtx {
+    LLVMContext *Ctx;
+    CallInst    *CI;
+};
+
+static void
+format_diag_cb (void *data, const char *fmt, ...)
+{
+    auto *fdc = static_cast<FormatDiagCtx *>(data);
+    char buf[512];
+    va_list vap;
+
+    va_start(vap, fmt);
+    vsnprintf(buf, sizeof(buf), fmt, vap);
+    va_end(vap);
+
+    /*
+     * The IR only carries a source location when compiled with -g;
+     * otherwise the enclosing function is the best we can offer.
+     */
+    std::string Msg;
+    raw_string_ostream OS(Msg);
+    if (const DebugLoc &DL = fdc->CI->getDebugLoc())
+        OS << DL->getFilename() << ":" << DL.getLine() << ": ";
+    else
+        OS << "in function '" << fdc->CI->getFunction()->getName() << "': ";
+    OS << "libxo format string: " << buf;
+
+    fdc->Ctx->diagnose(XoFormatDiagnostic(OS.str()));
+}
+
 /* ---------- the pass ----------------------------------------------------- */
 
 struct XoPrecompile : PassInfoMixin<XoPrecompile> {
@@ -252,6 +322,7 @@ struct XoPrecompile : PassInfoMixin<XoPrecompile> {
 
         bool Changed = false;
         unsigned Counter = 0;
+        bool CheckFormats = !validateIsLoaded();
 
         for (auto &[CI, Target] : ToRewrite) {
             /* Resolve the format string to a C string */
@@ -259,6 +330,11 @@ struct XoPrecompile : PassInfoMixin<XoPrecompile> {
             GlobalVariable *FmtGV = resolveStringGlobal(FmtArg);
             std::string FmtStr;
             if (!extractCString(FmtGV, FmtStr)) continue;
+
+            if (CheckFormats) {
+                FormatDiagCtx FDC = { &Ctx, CI };
+                (void) xo_shim_parse(FmtStr.c_str(), format_diag_cb, &FDC);
+            }
 
             /* Parse fields (and each field's fspecs) via the C shim */
             struct ParseCtx {
