@@ -269,9 +269,11 @@ if [ "$need_echo" = 1 ]; then
     set -x
 fi
 
+# Libraries follow the user's inputs: a static libxo only supplies
+# symbols to objects that precede it on the command line.
 if [ "$need_dry" = 1 ]; then
-    echo ${COMPILER} ${ldflags} "$@"
+    echo ${COMPILER} "$@" ${ldflags}
     exit 0
 fi
 
-exec ${COMPILER} ${ldflags} "$@"
+exec ${COMPILER} "$@" ${ldflags}
