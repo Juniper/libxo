@@ -78,6 +78,7 @@ ${VALIDATE_DIR}/CMakeCache.txt: Makefile
 	    -DCMAKE_OSX_ARCHITECTURES="${CMAKE_OSX_ARCHITECTURES}" \
 	    -DCMAKE_INSTALL_PREFIX="${prefix}" \
 	    -DXO_LLVMDIR="${XO_LLVMDIR}" \
+	    -DXO_LIBDIR="${libdir}" \
 	    -DXO_BUILDDIR="$(CURDIR)/${top_builddir}"
 	touch $@
 
@@ -91,6 +92,7 @@ ${PRECOMPILE_DIR}/CMakeCache.txt: Makefile
 	    -DCMAKE_OSX_ARCHITECTURES="${CMAKE_OSX_ARCHITECTURES}" \
 	    -DCMAKE_INSTALL_PREFIX="${prefix}" \
 	    -DXO_LLVMDIR="${XO_LLVMDIR}" \
+	    -DXO_LIBDIR="${libdir}" \
 	    -DXO_BUILDDIR="$(CURDIR)/${top_builddir}"
 	touch $@
 
