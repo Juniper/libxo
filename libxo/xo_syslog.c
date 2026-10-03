@@ -678,8 +678,14 @@ xo_snprintf (char *out, ssize_t outsize, const char *fmt, ...)
             *out = 0;     /* handle it in the safest way possible if it does */
             retval = 0;
         } else {
+            /*
+             * On truncation vsnprintf returns the length it wanted,
+             * but only wrote outsize - 1 bytes before the NUL.  Callers
+             * advance their pointer by our return value, so it must
+             * stop on that NUL, not past it.
+             */
             retval = status;
-            retval = retval > outsize ? outsize : retval;
+            retval = retval >= outsize ? outsize - 1 : retval;
         }
         va_end(ap);
     }
@@ -693,6 +699,10 @@ xo_syslog_handle_write (void *opaque, const char *data)
     xo_buffer_t *xbp = opaque;
     int len = strlen(data);
     int left = xo_buf_left(xbp);
+
+    /* The message is truncated once the buffer fills; keep the NUL */
+    if (left <= 1)
+	return 0;
 
     if (len > left - 1)
 	len = left - 1;
