@@ -9377,15 +9377,15 @@ xo_depth_change (xo_handle_t *xop, const char *name,
 	 * Optimization: we use a small buffer in the stack for names if
 	 * they fit.  Avoids alloc/free overhead in most common cases.
 	 */
-	size_t len = strlen(name) + 1;
-	if (len < sizeof(xsp->xs_namebuf)) {
+	size_t len = strlen(name) + 1; /* Includes the NUL */
+	if (len <= sizeof(xsp->xs_namebuf)) {
 	    xsp->xs_name = xsp->xs_namebuf;
-	    memcpy(xsp->xs_name, name, len + 1);
+	    memcpy(xsp->xs_name, name, len);
 
 	} else {
 	    xsp->xs_name = xo_realloc(NULL, len);
 	    if (xsp->xs_name)
-		memcpy(xsp->xs_name, name, len + 1);
+		memcpy(xsp->xs_name, name, len);
 	}
 
     } else {			/* Pop operation */
