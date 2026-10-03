@@ -2078,21 +2078,25 @@ xo_eval_func_ends_with (XO_EVAL_NODE_ARGS)
     xo_eval_value_t value = XO_EVAL_VALUE_BOOLEAN_FALSE;
 
     char *base = xo_eval_cast_string(xop, argv[0]);
-    char *start = xo_eval_cast_string(xop, argv[1]);
-    XO_DBG(xop, "ends_with: '%s' '%s'", base ?: "", start ?: "");
+    char *endp = xo_eval_cast_string(xop, argv[1]);
+    XO_DBG(xop, "ends_with: '%s' '%s'", base ?: "", endp ?: "");
 
-    if (base && start) {
-	int blen = strlen(base);
-	int slen = strlen(start);
+    if (base && endp) {
+	size_t blen = strlen(base);
+	size_t elen = strlen(endp);
 
-	if (strncmp(base + blen - slen, start, strlen(start)) == 0)
+	/*
+	 * A suffix longer than the string can't match, and would
+	 * index before the start of base
+	 */
+	if (elen <= blen && memcmp(base + blen - elen, endp, elen) == 0)
 	    value.xev_int64 = TRUE;
     }
 
     if (base)
 	xo_free(base);
-    if (start)
-	xo_free(start);
+    if (endp)
+	xo_free(endp);
 
     return value;
 }
