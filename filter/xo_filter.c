@@ -1140,6 +1140,7 @@ typedef struct xo_eval_value_s {
 #define XEVF_MISSING	(1<<1) /* A referenced element is missing  */
 #define XEVF_UNSUPPORTED (1<<2) /* Token type is not supported */
 #define XEVF_FINAL	(1<<3)  /* This is the final answer */
+#define XEVF_NODE	(1<<4)  /* Value is from a node that exists */
 
 /* C_DSTRING: a C_STRING whose xev_str is malloc'd and owned by this value */
 #define C_DSTRING	83
@@ -1373,12 +1374,49 @@ xo_eval_attribute (XO_EVAL_NODE_ARGS)
     const char *str = xo_xparse_str(&xfp->xf_xd, xnp->xn_str);
     const char *aval = xo_filter_attr_find(xfp, framep, str);
     if (aval) {
-	value = xo_eval_value_make(C_STRING, 0, 0);
+	value = xo_eval_value_make(C_STRING, XEVF_NODE, 0);
 	value.xev_str = aval;
     } else {
 	value.xev_flags |= XEVF_MISSING;
     }
     return value;
+}
+
+/*
+ * Find the value of a child element (or attribute) of the current
+ * frame.  A value we find is marked XEVF_NODE, since XPath tests a
+ * node for existence, not content: foo[name] is true for any "name",
+ * even an empty or zero one.
+ */
+static xo_eval_value_t
+xo_eval_node_value (xo_filter_t *xfp, xo_tframe_t *framep,
+		    const char *str, int is_attr)
+{
+    xo_eval_value_t value = { .xev_flags = 0 };
+    const char *sval = is_attr
+	? xo_filter_attr_find(xfp, framep, str)
+	: xo_filter_key_find(xfp, framep, str);
+
+    if (sval) {
+	value = xo_eval_value_make(C_STRING, XEVF_NODE, 0);
+	value.xev_str = sval;
+    } else if (xfp->xf_flags & XFSF_FORCE_RESOLVE) {
+	/* Absent field = empty string per XPath semantics */
+	value = xo_eval_value_make(C_STRING, 0, 0);
+	value.xev_str = "";
+    } else {
+	value.xev_flags |= XEVF_MISSING;
+    }
+
+    return value;
+}
+
+static xo_eval_value_t
+xo_eval_element (XO_EVAL_NODE_ARGS)
+{
+    const char *str = xo_xparse_str(&xfp->xf_xd, xnp->xn_str);
+
+    return xo_eval_node_value(xfp, framep, str, FALSE);
 }
 
 static xo_eval_value_t
@@ -1415,21 +1453,8 @@ xo_eval_path (XO_EVAL_NODE_ARGS)
 	return value;
 
     const char *str = xo_xparse_str(&xfp->xf_xd, elt->xn_str);
-    const char *sval = is_attr
-	? xo_filter_attr_find(xfp, framep, str)
-	: xo_filter_key_find(xfp, framep, str);
-    if (sval) {
-	value = xo_eval_value_make(C_STRING, 0, 0);
-	value.xev_str = sval;
-    } else if (xfp->xf_flags & XFSF_FORCE_RESOLVE) {
-	/* Absent field = empty string per XPath semantics */
-	value = xo_eval_value_make(C_STRING, 0, 0);
-	value.xev_str = "";
-    } else {
-	value.xev_flags |= XEVF_MISSING;
-    }
 
-    return value;
+    return xo_eval_node_value(xfp, framep, str, is_attr);
 }
 
 static xo_eval_value_t
@@ -1439,7 +1464,7 @@ xo_eval_dot (XO_EVAL_NODE_ARGS)
 
     /* '.' is the context node: this frame's own value */
     if (framep->xtf_self) {
-	value = xo_eval_value_make(C_STRING, 0, 0);
+	value = xo_eval_value_make(C_STRING, XEVF_NODE, 0);
 	value.xev_str = framep->xtf_self;
     } else if (xfp->xf_flags & XFSF_FORCE_RESOLVE) {
 	/* Absent value = empty string per XPath semantics */
@@ -1472,6 +1497,22 @@ xo_eval_cast_boolean (xo_handle_t *xop, xo_eval_value_t value)
     default:
 	return value.xev_int64 != 0;
     }
+}
+
+/*
+ * Decide a predicate from its value.  A predicate that is just a node,
+ * like foo[name], asks if the node exists, whatever its content.
+ * Anything else is cast as usual; functions like if() and choose2()
+ * depend on that cast seeing a zero-valued node as false, which is why
+ * the existence rule lives here and not in xo_eval_cast_boolean.
+ */
+static int
+xo_eval_pred_passes (xo_handle_t *xop, xo_eval_value_t value)
+{
+    if (value.xev_flags & XEVF_NODE)
+	return 1;
+
+    return xo_eval_cast_boolean(xop, value);
 }
 
 static xo_float_t
@@ -1621,7 +1662,7 @@ xo_eval_dump_value (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED,
 
     const char *type UNUSED = xo_xparse_fancy_token_name(value.xev_type) ?: "";
 
-    XO_DBG(xop, "%*s%s: type '%s' (%u), flags %#x(%s%s%s%s), "
+    XO_DBG(xop, "%*s%s: type '%s' (%u), flags %#x(%s%s%s%s%s), "
 	   "node %lu, val '%s'",
 	   indent, "", title ?: "",
 	   type, value.xev_type, value.xev_flags,
@@ -1629,10 +1670,32 @@ xo_eval_dump_value (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED,
 	   (value.xev_flags & XEVF_MISSING) ? "+missing" : "",
 	   (value.xev_flags & XEVF_UNSUPPORTED) ? "+unsupported" : "",
 	   (value.xev_flags & XEVF_FINAL) ? "+final" : "",
+	   (value.xev_flags & XEVF_NODE) ? "+node" : "",
 	   value.xev_node, bp);
 }
 
 #define TYPE_CMP(_a, _b) (((_a) << 16) | (_b))
+
+/*
+ * XPath's boolean() for a comparison operand.  Strings are true when
+ * non-empty, so they can't go thru xo_eval_cast_boolean, which parses
+ * them as numbers.
+ */
+static int
+xo_eval_truth (xo_eval_value_t value)
+{
+    switch (value.xev_type) {
+    case C_STRING:
+    case C_DSTRING:
+	return value.xev_str != NULL && value.xev_str[0] != '\0';
+
+    case C_FLOAT:
+	return value.xev_float != 0 && !isnan(value.xev_float);
+
+    default:
+	return value.xev_int64 != 0;
+    }
+}
 
 static xo_eval_value_t
 xo_eval_compare (XO_EVAL_OP_ARGS)
@@ -1640,6 +1703,7 @@ xo_eval_compare (XO_EVAL_OP_ARGS)
     xo_eval_value_t value = XO_EVAL_VALUE_ZERO;
     int rc = 0;
     xo_float_t fval;
+    int lbool, rbool;
 
     xo_eval_dump_value(xop, xfp, left, indent, "compare: left");
     xo_eval_dump_value(xop, xfp, right, indent, "compare: right");
@@ -1734,13 +1798,19 @@ xo_eval_compare (XO_EVAL_OP_ARGS)
     case TYPE_CMP(C_BOOLEAN, C_BOOLEAN):
     case TYPE_CMP(C_INT64, C_BOOLEAN):
     case TYPE_CMP(C_BOOLEAN, C_INT64):
-    case TYPE_CMP(C_UINT64, C_BOOLEAN): /* Cheating a bit, but we only ... */
-    case TYPE_CMP(C_BOOLEAN, C_UINT64): /* ... care about non-zero and zero */
-	if (left.xev_int64 == 0) {
-	    rc = (right.xev_int64 == 0) ? 0 : 1;
-	} else {
-	    rc = (right.xev_int64 == 0) ? -1 : 0;
-	}
+    case TYPE_CMP(C_UINT64, C_BOOLEAN):
+    case TYPE_CMP(C_BOOLEAN, C_UINT64):
+    case TYPE_CMP(C_FLOAT, C_BOOLEAN):
+    case TYPE_CMP(C_BOOLEAN, C_FLOAT):
+    case TYPE_CMP(C_STRING, C_BOOLEAN):
+    case TYPE_CMP(C_BOOLEAN, C_STRING):
+	/*
+	 * XPath converts the other operand to a boolean when either
+	 * one is a boolean; false orders before true.
+	 */
+	lbool = xo_eval_truth(left);
+	rbool = xo_eval_truth(right);
+	rc = (lbool == rbool) ? 0 : lbool ? 1 : -1;
 	break;
 
     default:
@@ -1813,64 +1883,68 @@ xo_eval_op_or (XO_EVAL_OP_ARGS)
     return value;
 }
 
+/*
+ * Turn a comparison into a boolean result.  xo_eval_compare's invalid
+ * value has an xev_int64 of zero, which would read as "equal", so an
+ * unsupported comparison is false whatever the operator.
+ */
+static xo_eval_value_t
+xo_eval_compare_result (xo_eval_value_t cmp, int result)
+{
+    xo_eval_value_t value = XO_EVAL_VALUE_BOOLEAN_FALSE;
+
+    if (!(cmp.xev_flags & XEVF_INVALID))
+	value.xev_int64 = result ? 1 : 0;
+
+    return value;
+}
+
 static xo_eval_value_t
 xo_eval_op_equals (XO_EVAL_OP_ARGS)
 {
-    xo_eval_value_t value = xo_eval_compare(XO_EVAL_OP_PASS);
+    xo_eval_value_t cmp = xo_eval_compare(XO_EVAL_OP_PASS);
 
-    value.xev_type = C_BOOLEAN;
-    value.xev_int64 = (value.xev_int64 == 0) ? 1 : 0;
-    return value;
+    return xo_eval_compare_result(cmp, cmp.xev_int64 == 0);
 }
 
 static xo_eval_value_t
 xo_eval_op_notequals (XO_EVAL_OP_ARGS)
 {
-    xo_eval_value_t value = xo_eval_compare(XO_EVAL_OP_PASS);
+    xo_eval_value_t cmp = xo_eval_compare(XO_EVAL_OP_PASS);
 
-    value.xev_type = C_BOOLEAN;
-    value.xev_int64 = (value.xev_int64 == 0) ? 0 : 1;
-    return value;
+    return xo_eval_compare_result(cmp, cmp.xev_int64 != 0);
 }
 
 static xo_eval_value_t
 xo_eval_op_lt (XO_EVAL_OP_ARGS)
 {
-    xo_eval_value_t value = xo_eval_compare(XO_EVAL_OP_PASS);
+    xo_eval_value_t cmp = xo_eval_compare(XO_EVAL_OP_PASS);
 
-    value.xev_type = C_BOOLEAN;
-    value.xev_int64 = (value.xev_int64 < 0) ? 1 : 0;
-    return value;
+    return xo_eval_compare_result(cmp, cmp.xev_int64 < 0);
 }
 
 static xo_eval_value_t
 xo_eval_op_le (XO_EVAL_OP_ARGS)
 {
-    xo_eval_value_t value = xo_eval_compare(XO_EVAL_OP_PASS);
+    xo_eval_value_t cmp = xo_eval_compare(XO_EVAL_OP_PASS);
 
-    value.xev_type = C_BOOLEAN;
-    value.xev_int64 = (value.xev_int64 <= 0) ? 1 : 0;
-    return value;
+    return xo_eval_compare_result(cmp, cmp.xev_int64 <= 0);
 }
 
 static xo_eval_value_t
 xo_eval_op_gt (XO_EVAL_OP_ARGS)
 {
-    xo_eval_value_t value = xo_eval_compare(XO_EVAL_OP_PASS);
+    xo_eval_value_t cmp = xo_eval_compare(XO_EVAL_OP_PASS);
 
-    value.xev_type = C_BOOLEAN;
-    value.xev_int64 = (value.xev_int64 > 0) ? 1 : 0;
-    return value;
+    return xo_eval_compare_result(cmp, cmp.xev_int64 > 0);
 }
 
 static xo_eval_value_t
 xo_eval_op_ge (XO_EVAL_OP_ARGS)
 {
-    xo_eval_value_t value = xo_eval_compare(XO_EVAL_OP_PASS);
+    xo_eval_value_t cmp = xo_eval_compare(XO_EVAL_OP_PASS);
 
-    value.xev_type = C_BOOLEAN;
-    value.xev_int64 = (value.xev_int64 >= 0) ? 1 : 0;
-    return value;
+    return xo_eval_compare_result(cmp, cmp.xev_int64 >= 0);
 }
 
 static xo_eval_value_t
@@ -2669,6 +2743,40 @@ xo_eval_func_rematch (XO_EVAL_NODE_ARGS)
 typedef uint32_t xo_eval_func_flags_t;
 
 #define XEFF_NO_EVAL	(1<<0)	/* Function evaluates its own args (no infra) */
+#define XEFF_NODE	(1<<1)	/* Function can return a node */
+
+/*
+ * Functions that return nodes:
+ *
+ * A value marked XEVF_NODE is a node that exists, and a predicate that
+ * is just such a value (foo[name]) is an existence test, true whatever
+ * the node's content.  Most functions compute a new value, but some
+ * hand back one of their arguments as-is (choose2() returns its first
+ * argument's own value), and an argument that was a node would carry
+ * its mark out with it, turning foo[choose2(a, b)] into an existence
+ * test of "a".  So xo_eval_function strips the mark from every result
+ * unless the function's table entry has XEFF_NODE.
+ *
+ * A function that really does return a node must:
+ * - have XEFF_NODE in its xo_eval_functions entry
+ * - set XEVF_NODE itself on the value when it has a node to return
+ * - return a value without XEVF_NODE (an empty string) when it finds
+ *   no node, so the predicate is false, as it is for an absent element
+ * - leave XEVF_NODE off anything it returns that is not a node, since
+ *   XEFF_NODE means its results are trusted as marked
+ *
+ * Issues:
+ * - A value holds a single string, so XEVF_NODE means "one node, and
+ *   it exists".  There is no value type for a real nodeset of several
+ *   nodes; a function that needs to return one needs a new type and
+ *   the comparison rules that go with it (true if any member matches).
+ * - Only the predicate's own result is tested for existence (see
+ *   xo_eval_pred_passes).  A node passed to not(), "and", "or", if()
+ *   or choose2() is still cast by content, so not(fn()) asks if the
+ *   node's value is zero, not if the node is absent.
+ * - Operators always strip the mark (see xo_eval), so "fn() + 1" and
+ *   "fn() = 'x'" are computed values and never existence tests.
+ */
 
 typedef struct xo_eval_func_map_s {
     xo_eval_node_fn_t xfm_func;	/* The function that implements the logic */
@@ -2770,6 +2878,13 @@ xo_eval_function (XO_EVAL_NODE_ARGS)
 	xo_free(fn_argv);
     }
 
+    /*
+     * Only a function that says it returns nodes gets to keep the
+     * mark; for the rest it leaked in from an argument.
+     */
+    if (!(entry->xfm_flags & XEFF_NODE))
+	value.xev_flags &= ~XEVF_NODE;
+
     xo_eval_dump_value(xop, xfp, value, indent, str);
 
     return value;
@@ -2805,6 +2920,10 @@ xo_eval (xo_handle_t *xop, xo_filter_t *xfp, xo_tframe_t *framep,
 
 	case C_PATH:
 	    node_fn = xo_eval_path;
+	    break;
+
+	case C_ELEMENT:
+	    node_fn = xo_eval_element;
 	    break;
 
 	case L_DOT:
@@ -2910,6 +3029,15 @@ xo_eval (xo_handle_t *xop, xo_filter_t *xfp, xo_tframe_t *framep,
 	    value = xo_eval(xop, xfp, framep, cname, indent + XO_INDENT,
 			    xnp->xn_contents, nested_op_fn);
 
+	/*
+	 * Operators and not() hand back computed values, even when
+	 * they build them from an operand that was a node.  Functions
+	 * are handled in xo_eval_function, which knows which ones
+	 * return nodes.
+	 */
+	if (xnp->xn_type == C_NOT || nested_op_fn)
+	    value.xev_flags &= ~XEVF_NODE;
+
 	if (first) {
 	    first = 0;
 	    last = value;
@@ -2931,6 +3059,7 @@ xo_eval (xo_handle_t *xop, xo_filter_t *xfp, xo_tframe_t *framep,
 		xo_eval_value_free(last);
 		xo_eval_value_free(value);
 		value = result;
+		value.xev_flags &= ~XEVF_NODE;
 	    }
 	}
 
@@ -3003,7 +3132,7 @@ xo_filter_pred_eval (xo_handle_t *xop, xo_filter_t *xfp,
 	    continue;
 	}
 
-	int passes = xo_eval_cast_boolean(xop, pv);
+	int passes = xo_eval_pred_passes(xop, pv);
 	xo_eval_value_free(pv);
 
 	if (!passes) {
@@ -3140,7 +3269,7 @@ xo_tmatch_slot_position (xo_handle_t *xop, xo_filter_t *xfp,
 	xo_eval_value_free(lv);
 	return framep->xtf_position[slot]; /* not yet decidable */
     }
-    int passes = xo_eval_cast_boolean(xop, lv);
+    int passes = xo_eval_pred_passes(xop, lv);
     xo_eval_value_free(lv);
 
     if (!passes)
