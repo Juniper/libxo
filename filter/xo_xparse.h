@@ -140,7 +140,8 @@ xo_xparse_node_new (xo_xparse_data_t *xdp)
     xo_buffer_t *xbp = &xdp->xd_node_buf;
     xo_off_t off = new_node * sizeof(xo_xparse_node_t);
 
-    if (!xo_buf_has_room(xbp, off))
+    /* xb_curp stays at the start, so room must reach the node's end */
+    if (!xo_buf_has_room(xbp, off + sizeof(xo_xparse_node_t)))
 	return 0;
 
     /* We don't need to move xb_cur along since our test new_node * sz */
