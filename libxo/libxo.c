@@ -361,7 +361,7 @@ struct xo_handle_s {
     xo_encoder_func_t xo_encoder; /* Encoding function */
     void *xo_private;           /* Private data for external encoders */
 #ifdef LIBXO_NEED_MAP
-    char **xo_map;              /* Name mapping array */
+    xo_off_t *xo_map;           /* Name mapping array (offsets in xo_map_data) */
     int xo_map_size;            /* Size (count) of xo_map[] */
     int xo_map_len;             /* Current length (count) of xo_map[] */
     xo_buffer_t xo_map_data;    /* Data values for name mapping */
@@ -2395,6 +2395,10 @@ xo_destroy (xo_handle_t *xop_arg)
     xo_buf_cleanup(&xop->xo_predicate);
     xo_buf_cleanup(&xop->xo_attrs);
     xo_buf_cleanup(&xop->xo_color_buf);
+#ifdef LIBXO_NEED_MAP
+    xo_free(xop->xo_map);
+    xo_buf_cleanup(&xop->xo_map_data);
+#endif /* LIBXO_NEED_MAP */
 
     if (xop->xo_version)
         xo_free(xop->xo_version);
@@ -5637,11 +5641,21 @@ xo_arg (xo_handle_t *xop)
  * the handle, one for the array, and one for the string buffer.
  */
 #ifdef LIBXO_NEED_MAP
+/*
+ * xo_map[] holds offsets rather than pointers, since xo_map_data is
+ * realloc'd as it grows, which would leave pointers dangling.
+ */
+static inline const char *
+xo_map_str (xo_handle_t *xop, int idx)
+{
+    return xo_buf_data(&xop->xo_map_data, xop->xo_map[idx]);
+}
+
 static int
 xo_map_find (xo_handle_t *xop, const char *name, size_t len)
 {
     for (int i = 0; i < xop->xo_map_len; i += 2) {
-	if (strncmp(xop->xo_map[i], name, len) == 0)
+	if (strncmp(xo_map_str(xop, i), name, len) == 0)
 	    return i;
     }
 
@@ -5672,8 +5686,8 @@ xo_map_name (xo_handle_t *xop UNUSED, const char *name)
 
     size_t len = strlen(name);
     for (int i = 0; i < xop->xo_map_len; i += 2) {
-	if (strncmp(xop->xo_map[i], name, len) == 0)
-	    return xop->xo_map[i + 1];
+	if (strncmp(xo_map_str(xop, i), name, len) == 0)
+	    return xo_map_str(xop, i + 1);
     }
 #endif /* LIBXO_NEED_MAP */
 
@@ -5691,50 +5705,54 @@ xo_map_add (xo_handle_t *xop UNUSED, const char *from UNUSED,
 #ifdef LIBXO_NEED_MAP
     xop = xo_default(xop);
 
+    xo_buffer_t *xbp = &xop->xo_map_data;
+    xo_off_t to_off;
+
     int val = xo_map_find(xop, from, flen);
     if (val >= 0) {
 	/* We hit a "from" value that's already there; replace the "to" */
-	char *newp = xo_buf_append_val(&xop->xo_map_data, to, tlen);
-	if (newp == NULL)
+	to_off = xo_buf_offset(xbp);
+	if (!xo_buf_append_val(xbp, to, tlen))
 	    return -1;
 
 	/* NUL terminate the string */
-	if (!xo_buf_append_val(&xop->xo_map_data, "", 1))
+	if (!xo_buf_append_val(xbp, "", 1))
 	    return -1;
 
-	xop->xo_map[val + 1] = newp;
+	xop->xo_map[val + 1] = to_off;
 
 	return 0;
     }
 
     if (xop->xo_map_len >= xop->xo_map_size) {
-	char **newp = xo_realloc(xop->xo_map, xop->xo_map_size + XO_MAP_INCR);
+	int new_size = xop->xo_map_size + XO_MAP_INCR;
+	xo_off_t *newp = xo_realloc(xop->xo_map, new_size * sizeof(*newp));
 	if (newp == NULL)
 	    return -1;
 	xop->xo_map = newp;
-	xop->xo_map_size += XO_MAP_INCR;
+	xop->xo_map_size = new_size;
     }
 
-    char *new_from = xo_buf_append_val(&xop->xo_map_data, from, flen);
-    if (new_from == NULL)
+    xo_off_t from_off = xo_buf_offset(xbp);
+    if (!xo_buf_append_val(xbp, from, flen))
 	return -1;
 
     /* NUL terminate the new string */
-    if (!xo_buf_append_val(&xop->xo_map_data, "", 1))
+    if (!xo_buf_append_val(xbp, "", 1))
 	return -1;
 
-    char *new_to = xo_buf_append_val(&xop->xo_map_data, to, tlen);
-    if (new_to == NULL)
+    to_off = xo_buf_offset(xbp);
+    if (!xo_buf_append_val(xbp, to, tlen))
 	return -1;
 
     /* NUL terminate the new string */
-    if (!xo_buf_append_val(&xop->xo_map_data, "", 1))
+    if (!xo_buf_append_val(xbp, "", 1))
 	return -1;
 
     val = xop->xo_map_len;	/* Use next slot */
 
-    xop->xo_map[val] = new_from;
-    xop->xo_map[val + 1] = new_to;
+    xop->xo_map[val] = from_off;
+    xop->xo_map[val + 1] = to_off;
 
     xop->xo_map_len += 2;	/* Consume the slot */
 #endif /* LIBXO_NEED_MAP */
