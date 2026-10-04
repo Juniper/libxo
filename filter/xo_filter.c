@@ -2610,7 +2610,7 @@ xo_eval_func_translate (XO_EVAL_NODE_ARGS)
  *   '$'    REG_NOTEOL - '$' does not match at end of string
  *   's'    Return full match text (pmatch[0]) as C_DSTRING
  *   'm'    Return first capture group (pmatch[1]) as C_DSTRING;
- *   'mN'   Return capture group N (pmatch[N]) as C_DSTRING (N: 0–9)
+ *   'mN'   Return capture group N (pmatch[N]) as C_DSTRING (N: 0-9)
  *   'p'    REG_POSIX (platform-specific; ignored if unavailable)
  *
  * Default (no 's' or 'm'): returns C_BOOLEAN true/false.
