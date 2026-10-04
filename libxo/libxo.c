@@ -2484,6 +2484,18 @@ xo_name_to_style (const char *name)
     return -1;
 }
 
+/*
+ * Return the XO_STYLE_* value if the name is one of the built-in
+ * styles, which "encoder" (a style with no encoder named) is not.
+ */
+static int
+xo_name_to_builtin_style (const char *name)
+{
+    int style = xo_name_to_style(name);
+
+    return (style == XO_STYLE_ENCODER) ? -1 : style;
+}
+
 static xo_flag_mapping_t xo_xof_names[] = {
     { XOF_COLOR_ALLOWED, "color" },
     { XOF_COLOR, "color-force" },
@@ -2555,13 +2567,15 @@ xo_set_style_name (xo_handle_t *xop, const char *name)
     if (name == NULL)
         return -1;
 
-    int style = xo_name_to_style(name);
+    xop = xo_default(xop);
+
+    if (*name == '@')
+        name += 1;              /* Allow the "@foo" shorthand */
+
+    int style = xo_name_to_builtin_style(name);
 
     if (style < 0) {
         /* Might be a dynamically-loaded one ("csv") */
-
-        if (*name == '@')
-            name += 1;          /* Allow the "@foo" shorthand */
 
         int rc = xo_encoder_init(xop, name);
         if (rc) {
@@ -2578,6 +2592,8 @@ xo_set_style_name (xo_handle_t *xop, const char *name)
             xo_warnx("encoder style has not fully initialized");
             return -1;
         }
+
+        return 0;               /* The encoder has set the style */
     }
 
     xo_set_style(xop, style);
@@ -2812,10 +2828,20 @@ xo_set_options_words (xo_handle_t *xop, int argc, char **argv)
             if (*vp == '\0') {
                 xo_warnx("missing value for encoder option");
                 rc = -1;
-            } else
-                pending_encoder = vp; /* Applied once the winner is known */
+                continue;
+            }
 
-            continue;
+            /*
+             * The user shouldn't need to know which styles are
+             * built-in and which are pluggable, so "@json" is just
+             * "json"; drop the '@' and treat it as any other word.
+             */
+            if (xo_name_to_builtin_style(vp) < 0) {
+                pending_encoder = vp; /* Applied once the winner is known */
+                continue;
+            }
+
+            cp = vp;
         }
 
         /* We allow either '=' or ':' to separate the keyword from the value */
@@ -2835,12 +2861,16 @@ xo_set_options_words (xo_handle_t *xop, int argc, char **argv)
          * For options, we don't allow "encoder" since we want to
          * handle it explicitly below as "encoder=xxx".
          */
-        new_style = xo_name_to_style(cp);
-        if (new_style >= 0 && new_style != XO_STYLE_ENCODER) {
-            if (style >= 0)
-                xo_warnx("ignoring multiple styles: '%s'", cp);
-            else
-                style = new_style;
+        /*
+         * Styles and encoders are both answers to the same question,
+         * so the last one given wins, whichever kind it is: a style
+         * word cancels an encoder named before it, just as an encoder
+         * overrides a style named before it.
+         */
+        new_style = xo_name_to_builtin_style(cp);
+        if (new_style >= 0) {
+            style = new_style;
+            pending_encoder = NULL;
             continue;
         }
 
@@ -2870,6 +2900,10 @@ xo_set_options_words (xo_handle_t *xop, int argc, char **argv)
             if (vp == NULL) {
                 xo_warnx("missing value for encoder option");
                 rc = -1;
+            } else if ((new_style = xo_name_to_builtin_style(vp)) >= 0) {
+                /* "encoder=json" is just "json", as "@json" is */
+                style = new_style;
+                pending_encoder = NULL;
             } else
                 pending_encoder = vp; /* Applied once the winner is known */
             continue;
