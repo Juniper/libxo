@@ -10,7 +10,8 @@
 #
 
 GOODDIR=${SRCDIR}/saved
-S2O="sed 1,/@@/d"
+# Filter for diff output; "make test S2O=cat" keeps the diff headers
+S2O="${S2O:-sed 1,/@@/d}"
 ECHO=/bin/echo
 FILES_BASE=files.txt
 FILES=out/$FILES_BASE
