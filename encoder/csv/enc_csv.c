@@ -46,7 +46,7 @@
  * which we only do with the "dos" option.  Strange that we still live
  * in a DOS-friendly world, but then again, we make spaceships based
  * on the horse butts (http://www.astrodigital.org/space/stshorse.html
- * though the "built by English expatriates” bit is rubbish; better to
+ * though the "built by English expatriates" bit is rubbish; better to
  * say the first engines used in America were built by Englishmen.)
  */
 
