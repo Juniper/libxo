@@ -1,0 +1,154 @@
+valid ascii: -1 valid 0 [61 62 63]
+valid two-byte: -1 valid 0 [c3 a9]
+valid three-byte: -1 valid 0 [e2 82 ac]
+valid four-byte: -1 valid 0 [f0 9f 98 80]
+valid last-codepoint: -1 valid 0 [f4 8f bf bf]
+valid before-surrogates: -1 valid 0 [ed 9f bf]
+valid after-surrogates: -1 valid 0 [ee 80 80]
+valid bad-first-ff: 0 incorrect length bits in first byte 1 [3f]
+valid bad-first-f8: 1 incorrect length bits in first byte 1 [61 3f 7a]
+valid lone-secondary: 0 secondary byte seen; missing first byte 1 [3f]
+valid surrogate: 0 surrogate codepoint is not valid in UTF-8 3 [3f 3f 3f]
+valid beyond-10ffff: 0 codepoint is beyond U+10FFFF 4 [3f 3f 3f 3f]
+valid non-shortest: 0 representation is not the shortest possible form 2 [3f 3f]
+valid truncated: 2 missing trailing bytes (truncated input) 2 [61 62 3f 3f]
+valid bad-trailing: 0 incorrect high bits in secondary bytes 1 [3f 41 42]
+encode 0x41: 1 0x41 [41]
+encode 0x7f: 1 0x7f [7f]
+encode 0x80: 2 0x80 [c2 80]
+encode 0xe9: 2 0xe9 [c3 a9]
+encode 0x7ff: 2 0x7ff [df bf]
+encode 0x800: 3 0x800 [e0 a0 80]
+encode 0x20ac: 3 0x20ac [e2 82 ac]
+encode 0xffff: 3 0xffff [ef bf bf]
+encode 0x10000: 4 0x10000 [f0 90 80 80]
+encode 0x1f600: 4 0x1f600 [f0 9f 98 80]
+encode 0x10ffff: 4 0x10ffff [f4 8f bf bf]
+length empty: 0 0 0
+length ascii: 3 3 3
+length mixed: 14 14 21
+length limit-ascii: 3 6 6
+length limit-whole: 2 3 5
+length limit-splits: 3 3 5
+length invalid: 4 4 4
+search ascii: 2 18 2 2 18 2
+search two-byte: 3 19 3 3 19 3
+search three-byte: 6 6 6 6 6 6
+search four-byte: 11 11 11 11 11 11
+search absent: -1 -1 21 -1 -1 21
+search surrogate: -1 -1 21 -1 -1 21
+search too-big: -1 -1 21 -1 -1 21
+span ascii: 4 0 0
+span multi-byte: 7 0 0
+span shared-bytes: 0 2 2
+span none: 0 3 -1
+span all: 3 0 0
+span empty-set: 0 3 -1
+span invalid: 1 0 0
+span late: 0 6 6
+find ascii: 6 6 6
+find multi-byte: 6 6 6
+find second: 0 0 0
+find case-ascii: -1 -1 6
+find case-multi: -1 -1 0
+find limit-short: -1 6 6
+find limit-exact: 6 6 6
+find empty-little: 0 0 0
+find empty-big: -1 -1 -1
+find longer-little: -1 -1 -1
+find absent: -1 -1 -1
+find partial-tail: -1 -1 -1
+compare equal: 0 0
+compare case-ascii: 0 0
+compare case-multi: 0 0
+compare less: -1 1
+compare greater: 1 -1
+compare prefix: -1 1
+compare longer: 1 -1
+compare ascii-vs-multi: -1 1
+compare invalid: 0 0
+compare empty: 0 0
+copy ascii:
+  ncpy 1 # [61 62 63 64 65 66]
+  stpncpy 6 # [61 62 63 64 65 66]
+  lcpy 6 # [61 62 63 64 65]
+  ndup 6 [61 62 63 64 65 66]
+copy ascii-short:
+  ncpy 1 # [61 62 63]
+  stpncpy 3 # [61 62 63]
+  lcpy 6 # [61 62]
+  ndup 3 [61 62 63]
+copy whole:
+  ncpy 1 # [61 e2 82 ac 62]
+  stpncpy 5 # [61 e2 82 ac 62]
+  lcpy 5 # [61 e2 82 ac]
+  ndup 5 [61 e2 82 ac 62]
+copy fits-exactly:
+  ncpy 1 # [61 e2 82 ac]
+  stpncpy 4 # [61 e2 82 ac]
+  lcpy 5 # [61]
+  ndup 4 [61 e2 82 ac]
+copy splits:
+  ncpy 1 # [61]
+  stpncpy 1 # [61]
+  lcpy 5 # [61]
+  ndup 1 [61]
+copy splits-early:
+  ncpy 1 # [61]
+  stpncpy 1 # [61]
+  lcpy 5 # [61]
+  ndup 1 [61]
+copy four-byte:
+  ncpy 1 # [f0 9f 98 80]
+  stpncpy 4 # [f0 9f 98 80]
+  lcpy 5 # []
+  ndup 4 [f0 9f 98 80]
+copy four-byte-split:
+  ncpy 1 # []
+  stpncpy 0 # []
+  lcpy 5 # []
+  ndup 0 []
+copy invalid:
+  ncpy 1 # [61 20 62 20 63]
+  stpncpy 5 # [61 20 62 20 63]
+  lcpy 5 # [61 20 62 20]
+  ndup 5 [61 ff 62 80 63]
+copy truncated-input:
+  ncpy 1 # [61 62]
+  stpncpy 2 # [61 62]
+  lcpy 4 # [61 62]
+  ndup 4 [61 62 e2 82]
+copy empty:
+  ncpy 1 # []
+  stpncpy 0 # []
+  lcpy 0 # []
+  ndup 0 []
+copy zero:
+  ncpy 1 # []
+  stpncpy 0 # []
+  lcpy 3 # []
+  ndup 0 []
+cpy 1
+stpcpy 21
+dup 1
+concat room: 5 # [61 62 63 c3 a9]
+  lcat 5 # [61 62 63 c3 a9]
+concat fits-exactly: 5 # [61 62 63 c3 a9]
+  lcat 5 # [61 62 63 c3 a9]
+concat splits: 5 # [61 62 63]
+  lcat 5 # [61 62 63]
+concat ascii-truncated: 8 # [61 62 63 64 65]
+  lcat 8 # [61 62 63 64 65]
+concat count-limits: 5 # [61 62 63 64 65]
+  lcat 8 # [61 62 63 64 65 66 67 68]
+concat count-splits: 5 # [61 62 63]
+  lcat 7 # [61 62 63 e2 82 ac 78]
+concat count-beyond: 5 # [61 62 63 64 65]
+  lcat 5 # [61 62 63 64 65]
+concat invalid: 6 # [61 62 63 78 20 79]
+  lcat 6 # [61 62 63 78 20 79]
+concat full: 7 # [61 62 63 64 65]
+  lcat 7 # [61 62 63 64 65]
+concat empty-dst: 5 # [f0 9f 98 80 21]
+  lcat 5 # [f0 9f 98 80 21]
+concat no-nul: 7 #
