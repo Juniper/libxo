@@ -108,8 +108,8 @@ cbor_memdump (FILE *fp, const char *title, const char *data,
 #define CBOR_SEMANTIC	CBOR_MAJOR_VAL(6) /* 0xc0 */
 #define CBOR_SPECIAL	CBOR_MAJOR_VAL(7) /* 0xe0 */
 
-#define CBOR_ULIMIT	24	/* Largest unsigned value */
-#define CBOR_NLIMIT	23	/* Largest negative value */
+#define CBOR_SMALL_MAX	23	/* Largest value held in the first byte */
+#define CBOR_HEADER_MAX	9	/* First byte plus a 64-bit value */
 
 #define CBOR_BREAK	0xFF
 #define CBOR_INDEF	0x1F
@@ -131,25 +131,31 @@ typedef struct cbor_private_s {
     unsigned c_open_leaf_list;	/* Open leaf list construct? */
 } cbor_private_t;
 
+/*
+ * Encode a value into the header whose first byte (the major type) the
+ * caller has already placed at xb_curp.  The caller must have made
+ * room for CBOR_HEADER_MAX bytes.  Each test is against the first
+ * value that does _not_ fit in the smaller form.
+ */
 static void
-cbor_encode_uint (xo_buffer_t *xbp, uint64_t minor, unsigned limit)
+cbor_encode_uint (xo_buffer_t *xbp, uint64_t minor)
 {
     char *bp = xbp->xb_curp;
     int i, m;
 
-    if (minor > (1ULL << 32)) {
+    if (minor >= (1ULL << 32)) {
 	*bp++ |= CBOR_LEN64;
 	m = 64;
 
-    } else if (minor > (1<<16)) {
+    } else if (minor >= (1 << 16)) {
 	*bp++ |= CBOR_LEN32;
 	m = 32;
 
-    } else if (minor > (1<<8)) {
+    } else if (minor >= (1 << 8)) {
 	*bp++ |= CBOR_LEN16;
 	m = 16;
 
-    } else if (minor > limit) {
+    } else if (minor > CBOR_SMALL_MAX) {
 	*bp++ |= CBOR_LEN8;
 	m = 8;
     } else {
@@ -167,15 +173,15 @@ cbor_encode_uint (xo_buffer_t *xbp, uint64_t minor, unsigned limit)
 
 static void
 cbor_append (xo_handle_t *xop, cbor_private_t *cbor, xo_buffer_t *xbp,
-	     unsigned major, unsigned minor, const char *data)
+	     unsigned major, size_t minor, const char *data)
 {
-    if (!xo_buf_has_room(xbp, minor + 2))
+    if (!xo_buf_has_room(xbp, minor + CBOR_HEADER_MAX))
 	return;
 
     unsigned offset = xo_buf_offset(xbp);
 
     *xbp->xb_curp = major;
-    cbor_encode_uint(xbp, minor, CBOR_ULIMIT);
+    cbor_encode_uint(xbp, minor);
     if (data)
 	xo_buf_append(xbp, data, minor);
 
@@ -215,22 +221,43 @@ cbor_content (xo_handle_t *xop, cbor_private_t *cbor, xo_buffer_t *xbp,
     else if (xo_streq(value, "false"))
 	cbor_append(xop, cbor, &cbor->c_data, CBOR_FALSE, 0, NULL);
     else {
+	const char *digits = value;
 	int negative = 0;
-	if (*value == '-') {
-	    value += 1;
+	if (*digits == '-') {
+	    digits += 1;
 	    negative = 1;
 	}
 
-	char *ep;
-	unsigned long long ival;
-	ival = strtoull(value, &ep, 0);
-	if (ival == ULLONG_MAX)	/* Sometimes a string is just a string */
+	/*
+	 * strtoull skips white space and takes its own sign, which
+	 * would let "- 5" and "--5" thru as numbers, so the digits
+	 * must start right here.
+	 */
+	char *ep = NULL;
+	unsigned long long ival = 0;
+	int is_number = isdigit((unsigned char) *digits);
+	if (is_number) {
+	    ival = strtoull(digits, &ep, 0);
+	    if (*ep != '\0' || ival == ULLONG_MAX)
+		is_number = 0;
+	}
+
+	if (!is_number) {
+	    /* Sometimes a string is just a string */
 	    cbor_append(xop, cbor, xbp, CBOR_STRING, strlen(value), value);
-	else {
+
+	} else if (xo_buf_has_room(xbp, CBOR_HEADER_MAX)) {
+	    /*
+	     * A negative is encoded as (-1 - n), so there's no
+	     * negative zero to waste; "-0" is just zero.
+	     */
+	    if (negative && ival == 0)
+		negative = 0;
+
 	    *xbp->xb_curp = negative ? CBOR_NEGATIVE : CBOR_UNSIGNED;
 	    if (negative)
-		ival -= 1;	/* Don't waste a negative zero */
-	    cbor_encode_uint(xbp, ival, negative ? CBOR_NLIMIT : CBOR_ULIMIT);
+		ival -= 1;
+	    cbor_encode_uint(xbp, ival);
 	}
     }
 
@@ -342,9 +369,15 @@ cbor_handler (XO_ENCODER_HANDLER_ARGS)
 	    if (rc > 0)
 		rc = 0;
 	}
+
+	/* What we've written is done; don't write it again next time */
+	xo_buf_reset(xbp);
 	break;
 
     case XO_OP_DESTROY:		   /* Clean up function */
+	xo_buf_cleanup(xbp);
+	xo_free(cbor);
+	xo_set_private(xop, NULL);
 	break;
 
     case XO_OP_ATTRIBUTE:	   /* Attribute name/value */
