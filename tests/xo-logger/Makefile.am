@@ -17,7 +17,8 @@ EXTRA_DIST = \
     ${addprefix saved/, ${TEST_CASES:.sh=.out}} \
     ${addprefix saved/, ${TEST_CASES:.sh=.err}}
 
-S2O = | ${SED} '1,/@@/d'
+# Filter for diff output; "make test S2O=cat" keeps the diff headers
+S2O = ${SED} '1,/@@/d'
 
 all:
 
@@ -26,8 +27,8 @@ XO_LOGGER=../../xo-logger/xo-logger
 TEST_ONE = \
       ${CHECKER} sh ${srcdir}/$$base.sh "${XO_LOGGER}" ${TEST_OPTS} \
       > out/$$base.out 2> out/$$base.err ; \
- ${DIFF} -Nu ${srcdir}/saved/$$base.out out/$$base.out ${S2O} ; \
- ${DIFF} -Nu ${srcdir}/saved/$$base.err out/$$base.err ${S2O}
+ ${DIFF} -Nu ${srcdir}/saved/$$base.out out/$$base.out | ${S2O} ; \
+ ${DIFF} -Nu ${srcdir}/saved/$$base.err out/$$base.err | ${S2O}
 
 test tests: ${bin_PROGRAMS}
 	@${MKDIR} -p out
