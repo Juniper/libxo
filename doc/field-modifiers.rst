@@ -170,7 +170,7 @@ The escape-square Modifier
 .. index:: Field Modifiers; escape-square
 
 The escape-square modifier causes control characters in a field value
-to be replaced with the Unicode WHITE SQUARE character (U+25A1, \☐).
+to be replaced with the Unicode WHITE SQUARE character (U+25A1).
 A control character is any byte value less than 0x20, except for
 newline, carriage return, and tab.
 
