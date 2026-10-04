@@ -239,6 +239,7 @@ typedef uint32_t xo_ident_t;    /* Identifier for lists/instances/etc */
 #define XO_EXTERR_VERBOSE       8 /* Display verbose exterr info */
 #define XO_OPT_NO_CACHE         9 /* Ignore cached field and fspec data */
 #define XO_OPT_GROUPING         10 /* Give specific locale.grouping info */
+#define XO_OPT_DEPRECATED       11 /* Accepted but ignored */
 
 #define XO_XS_NAMESIZE  64      /* Size of stack's built-in name buffer */
 
@@ -2519,12 +2520,10 @@ static xo_flag_mapping_t xo_xof_names[] = {
     { XOF_LOG_SYSLOG, "log-syslog" },
     { XOF_NO_HUMANIZE, "no-humanize" },
     { XOF_NO_LOCALE, "no-locale" },
-    { 0, "no-retain" },         /* Deprecated: retain feature removed */
     { XOF_NO_TOP, "no-top" },
     { XOF_NO_TOP_LEVEL, "no-top-level" },
     { XOF_NOT_FIRST, "not-first" },
     { XOF_PRETTY, "pretty" },
-    { 0, "retain" },            /* Deprecated, so use zero */
     { XOF_UNDERSCORES, "underscores" },
     { XOF_UNITS, "units" },
     { XOF_UTF8, "utf8" },
@@ -2543,6 +2542,8 @@ static xo_flag_mapping_t xo_option_names[] = {
     { XO_OPT_MAP_FILE, "map-file" },
     { XO_OPT_NO_CACHE, "no-cache" },
     { XO_OPT_NO_COLOR, "no-color" },
+    { XO_OPT_DEPRECATED, "no-retain" }, /* Retain feature removed */
+    { XO_OPT_DEPRECATED, "retain" },    /* Retain feature removed */
     { XO_EXTERR_BRIEF, "exterr" },
     { XO_EXTERR_BRIEF, "exterr-brief" },
     { XO_EXTERR_VERBOSE, "exterr-verbose" },
@@ -2956,6 +2957,9 @@ xo_set_options_words (xo_handle_t *xop, int argc, char **argv)
                 if (rc)
                     xo_warnx("error parsing grouping value: '%s'", vp);
             }
+            continue;
+
+        case XO_OPT_DEPRECATED: /* Accepted for compatibility; ignored */
             continue;
 
         case XO_EXTERR_BRIEF: /* Display brief extended error info */
