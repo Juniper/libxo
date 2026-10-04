@@ -339,3 +339,9 @@ For brevity, the string "@" can be used in place of the string
 "encoder=".
 
     df --libxo @csv:no-header
+
+The "@" form also accepts the built-in styles ("text", "xml", "json",
+and "html"), so there is no need to know which styles are built into
+libxo and which are loaded as encoders::
+
+    df --libxo @json,pretty
