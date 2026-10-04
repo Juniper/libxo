@@ -1282,8 +1282,13 @@ xo_escape_xml (xo_handle_t *xop, xo_buffer_t *xbp,
             ip -= slen - 1;
             memcpy(ip, sp, slen);
         }
-        
-    } while (cp > ep && cp != ip);
+
+        /*
+         * We can't stop when cp meets ip, since a control character
+         * that becomes a space is replaced in place and adds no
+         * growth; every byte must be visited.
+         */
+    } while (cp > ep);
 
     return len + delta;
 }
