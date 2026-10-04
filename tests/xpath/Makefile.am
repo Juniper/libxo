@@ -240,7 +240,8 @@ EXTRA_DIST = \
     xpath_01_23.inc \
     ${addprefix saved/, ${TEST_FILES}}
 
-S2O = | ${SED} '1,/@@/d'
+# Filter for diff output; "make test S2O=cat" keeps the diff headers
+S2O = ${SED} '1,/@@/d'
 
 all:
 
@@ -253,8 +254,8 @@ valgrind:
 TEST_JIG = \
       ${CHECKER} ./$$base.test --libxo$$xoopts ${TEST_OPTS} \
       > out/$$base.$$fmt.out 2> out/$$base.$$fmt.err ; \
- ${DIFF} -Nu ${srcdir}/saved/$$base.$$fmt.out out/$$base.$$fmt.out ${S2O} ; \
- ${DIFF} -Nu ${srcdir}/saved/$$base.$$fmt.err out/$$base.$$fmt.err ${S2O}
+ ${DIFF} -Nu ${srcdir}/saved/$$base.$$fmt.out out/$$base.$$fmt.out | ${S2O} ; \
+ ${DIFF} -Nu ${srcdir}/saved/$$base.$$fmt.err out/$$base.$$fmt.err | ${S2O}
 
 TEST_JIG2 = \
 echo "... $$test ... $$fmt ..."; \
