@@ -25,11 +25,13 @@ AM_CFLAGS = \
 TEST_CASES = \
 utf8_01.c \
 utf8_02.c \
-utf8_03.c
+utf8_03.c \
+utf8_04.c
 
 utf8_01_test_SOURCES = utf8_01.c
 utf8_02_test_SOURCES = utf8_02.c
 utf8_03_test_SOURCES = utf8_03.c
+utf8_04_test_SOURCES = utf8_04.c
 
 base_tests = ${TEST_CASES:.c=.test}
 
