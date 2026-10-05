@@ -16,19 +16,19 @@
 .Sh LIBRARY
 .Lb libxo
 .Sh SYNOPSIS
-.In libxo/xo_utf.h
-.Ft wchar_t
-.Fn xo_utf8_wtolower "wchar_t wc"
-.Ft wchar_t
-.Fn xo_utf8_wtoupper "wchar_t wc"
+.In libxo/xo_utf8.h
+.Ft xo_codepoint_t
+.Fn xo_utf8_wtolower "xo_codepoint_t wc"
+.Ft xo_codepoint_t
+.Fn xo_utf8_wtoupper "xo_codepoint_t wc"
 .Ft int
 .Fn xo_utf8_len "char ch"
-.Ft wchar_t
-.Fn xo_utf8_codepoint "const char *buf, size_t bufsiz, int len, wchar_t on_err"
+.Ft xo_codepoint_t
+.Fn xo_utf8_codepoint "const char *buf, size_t bufsiz, int len, xo_codepoint_t on_err"
 .Ft int
-.Fn xo_utf8_wchar_is_err "wchar_t wc"
+.Fn xo_utf8_iserror "xo_codepoint_t wc"
 .Ft const char *
-.Fn xo_utf8_wchar_errmsg "wchar_t wc"
+.Fn xo_utf8_wchar_errmsg "xo_codepoint_t wc"
 .Ft char *
 .Fn xo_utf8_nvalid "char *str, size_t len"
 .Ft char *
@@ -37,14 +37,10 @@
 .Fn xo_utf8_nmakevalid "char *str, size_t len, char replacement"
 .Ft int
 .Fn xo_utf8_makevalid "char *str, char replacement"
-.Ft wchar_t
-.Fn xo_utf8_wtolower "wchar_t wc"
-.Ft wchar_t
-.Fn xo_utf8_wtoupper "wchar_t wc"
 .Ft int
-.Fn xo_utf8_wislower "wchar_t wc"
+.Fn xo_utf8_wislower "xo_codepoint_t wc"
 .Ft int
-.Fn xo_utf8_wisupper "wchar_t wc"
+.Fn xo_utf8_wisupper "xo_codepoint_t wc"
 .Ft int
 .Fn xo_utf8_nislower "char *str, size_t len"
 .Ft int
@@ -64,11 +60,11 @@
 .Ft void
 .Fn xo_utf8_tolower "char *str"
 .Ft void
-.Fn xo_utf8_ntoupper "char * restrict str, size_t len"
+.Fn xo_utf8_ntoupper "char *str, size_t len"
 .Ft void
 .Fn xo_utf8_toupper "char *str"
 .Ft int
-.Fn xo_ustrncasecmp const char *s1, size_t s1_len, const char *s2, size_t s2_len"
+.Fn xo_ustrncasecmp "const char *s1, size_t s1_len, const char *s2, size_t s2_len"
 .Ft int
 .Fn xo_ustrcasecmp "const char *s1, const char *s2"
 .Ft size_t
@@ -77,12 +73,45 @@
 .Fn xo_ustrlncat "char * restrict dst, const char * restrict append, size_t dstsize, size_t count"
 .Ft size_t
 .Fn xo_ustrlcat "char * restrict dst, const char * restrict append, size_t dstsize"
-.\"
-.\"  Add more functions here....
-.\"
+.Ft size_t
+.Fn xo_ustrlcpy "char * restrict dst, const char * restrict src, size_t dstsize"
+.Ft char *
+.Fn xo_ustpncpy "char * restrict dst, const char * restrict src, size_t len"
+.Ft char *
+.Fn xo_ustpcpy "char * restrict dst, const char * restrict src"
+.Ft char *
+.Fn xo_ustrncpy "char * restrict dst, const char * restrict src, size_t len"
+.Ft char *
+.Fn xo_ustrcpy "char * restrict dst, const char * restrict src"
+.Ft char *
+.Fn xo_ustrndup "const char *str, size_t len"
+.Ft char *
+.Fn xo_ustrdup "const char *str"
+.Ft size_t
+.Fn xo_ustrnlen "const char *str, size_t maxlen"
+.Ft size_t
+.Fn xo_ustrlen "const char *str"
+.Ft char *
+.Fn xo_ustrchr "const char *str, xo_codepoint_t c"
+.Ft char *
+.Fn xo_ustrrchr "const char *str, xo_codepoint_t c"
+.Ft char *
+.Fn xo_ustrchrnul "char *str, xo_codepoint_t c"
+.Ft size_t
+.Fn xo_ustrspn "const char *str, const char *charset"
+.Ft size_t
+.Fn xo_ustrcspn "const char *str, const char *charset"
+.Ft char *
+.Fn xo_ustrpbrk "const char *str, const char *charset"
+.Ft char *
+.Fn xo_ustrnstr "const char *big, const char *little, size_t len"
+.Ft char *
+.Fn xo_ustrstr "const char *big, const char *little"
+.Ft char *
+.Fn xo_ustrcasestr "const char *big, const char *little"
 .Sh DESCRIPTION
 These functions operate on Unicode character code points,
-either as "wide" characters ("wchar_t") or as characters encoded as
+either as codepoints ("xo_codepoint_t") or as characters encoded as
 bytes in NUL-terminated strings.
 .Pp
 The
@@ -134,7 +163,7 @@ The
 function ensures that a string is valid UTF-8
 by replacing any invalid bytes with the replacement byte
 given in the
-.Fn replacement
+.Fa replacement
 parameter.
 If the replacement character is NUL (0),
 then replacement will terminate with the first replacement.
@@ -144,88 +173,228 @@ The
 function performs the same task for a NUL-terminated string.
 .Pp
 The
-.Fn xo_utf8_wtolower
-function ....
-.Pp
-The
-.Fn xo_utf8_wtoupper
-function ....
-.Pp
-The
 .Fn xo_utf8_wislower
-function ....
-.Pp
-The
+and
 .Fn xo_utf8_wisupper
-function ....
-.Pp
+functions return non-zero if the codepoint is a lower case or upper
+case character, meaning one that has a mapping to the other case.
 The
 .Fn xo_utf8_nislower
-function ....
-.Pp
-The
-.Fn xo_utf8_islower
-function ....
-.Pp
-The
+and
 .Fn xo_utf8_nisupper
-function ....
-.Pp
-The
+functions perform the same test on the first character of a string of
+.Fa len
+bytes, while
+.Fn xo_utf8_islower
+and
 .Fn xo_utf8_isupper
-function ....
+do so for a NUL-terminated string.
 .Pp
 The
 .Fn xo_utf8_nnext
-function ....
-.Pp
+function returns a pointer to the character following the first one in
+.Fa str ,
+inspecting at most
+.Fa len
+bytes.
+An invalid byte is stepped over as a single byte.
+NULL is returned at the end of the string.
 The
 .Fn xo_utf8_next
-function ....
-.Pp
+function does the same for a NUL-terminated string.
 The
 .Fn xo_utf8_prev
-function ....
+function returns a pointer to the character that precedes
+.Fa cur ,
+or NULL when
+.Fa start
+is reached.
 .Pp
 The
 .Fn xo_utf8_ntolower
-function ....
-.Pp
+and
+.Fn xo_utf8_ntoupper
+functions convert the first
+.Fa len
+bytes of a string to lower or upper case, in place.
+A character whose other case has a different encoded length is left
+unchanged, as are invalid bytes.
 The
 .Fn xo_utf8_tolower
-function ....
-.Pp
-The
-.Fn xo_utf8_ntoupper
-function ....
-.Pp
-The
+and
 .Fn xo_utf8_toupper
-function ....
+functions do the same for a NUL-terminated string.
 .Pp
 The
-.Fn xo_ustrncasecmp const char *s1, size_t s1_len, const char *s2, size_t s2_le
-function ....
-.Pp
+.Fn xo_ustrncasecmp
+function compares two strings of the given lengths without regard to
+case, returning a value less than, equal to, or greater than zero.
+Both strings are folded to lower case one character at a time, an
+invalid byte compares as U+FFFD, and when one string is a prefix of the
+other the shorter one sorts first.
 The
 .Fn xo_ustrcasecmp
-function ....
+function does the same for NUL-terminated strings.
 .Pp
 The
 .Fn xo_utrunc
-function ....
+function truncates a valid UTF-8 string to at most
+.Fa len
+bytes, backing up as needed so that a character is not split.
+The new length is returned.
+.Pp
+The remaining functions follow the
+.Xr string 3
+function they are named after, with these differences.
+None of them will split a multi-byte character; a character that does
+not fit is dropped whole.
+The functions that copy replace each invalid byte with one space, so
+the destination is always valid UTF-8, and they always NUL terminate
+the destination.
 .Pp
 The
 .Fn xo_ustrlncat
-function ....
-.Pp
+function appends at most
+.Fa count
+bytes of
+.Fa append
+to
+.Fa dst ,
+whose full size is
+.Fa dstsize .
+Like
+.Xr strlcat 3 ,
+it returns the length of the string it tried to create, so a value of
+.Fa dstsize
+or more means the result was truncated.
+If
+.Fa dst
+has no NUL in its first
+.Fa dstsize
+bytes, it is left untouched.
 The
 .Fn xo_ustrlcat
-function ....
+function appends all of
+.Fa append .
+The
+.Fn xo_ustrlcpy
+function copies
+.Fa src
+into a buffer of
+.Fa dstsize
+bytes and returns the length of
+.Fa src .
+.Pp
+The
+.Fn xo_ustrncpy
+and
+.Fn xo_ustpncpy
+functions copy at most
+.Fa len
+bytes of
+.Fa src .
+Unlike
+.Xr strncpy 3
+and
+.Xr stpncpy 3 ,
+the result is always NUL terminated and is not padded, so
+.Fa dst
+must have room for
+.Fa len
++ 1 bytes.
+.Fn xo_ustrncpy
+returns
+.Fa dst ,
+and
+.Fn xo_ustpncpy
+returns a pointer to the terminating NUL.
+The
+.Fn xo_ustrcpy
+and
+.Fn xo_ustpcpy
+functions copy the whole string.
+.Pp
+The
+.Fn xo_ustrndup
+function returns a copy of at most
+.Fa len
+bytes of
+.Fa str
+in memory obtained from
+.Xr malloc 3 ,
+which the caller must release with
+.Xr free 3 .
+The bytes are not otherwise inspected or changed.
+NULL is returned if memory is not available.
+The
+.Fn xo_ustrdup
+function duplicates the whole string.
+.Pp
+The
+.Fn xo_ustrnlen
+function returns the number of characters, not bytes, in the first
+.Fa maxlen
+bytes of a string, with each invalid byte counted as one character.
+The
+.Fn xo_ustrlen
+function does the same for a NUL-terminated string.
+.Pp
+The
+.Fn xo_ustrchr
+and
+.Fn xo_ustrrchr
+functions return a pointer to the first or last occurrence of the
+codepoint
+.Fa c
+in a string, or NULL if it does not appear.
+The
+.Fn xo_ustrchrnul
+function returns a pointer to the terminating NUL instead of NULL.
+.Pp
+The
+.Fn xo_ustrspn
+function returns the length of the initial part of
+.Fa str
+made only of characters in
+.Fa charset ,
+and
+.Fn xo_ustrcspn
+returns the length of the initial part made only of characters not in
+.Fa charset .
+Both return a count of bytes, not characters, so the value can be used
+as an offset into the string.
+The
+.Fn xo_ustrpbrk
+function returns a pointer to the first character of
+.Fa str
+that is in
+.Fa charset ,
+or NULL.
+.Pp
+The
+.Fn xo_ustrnstr
+function finds the first occurrence of
+.Fa little
+within the first
+.Fa len
+bytes of
+.Fa big ,
+and
+.Fn xo_ustrstr
+searches all of
+.Fa big .
+The
+.Fn xo_ustrcasestr
+function does the same without regard to case.
+Each returns NULL if there is no match, and
+.Fa big
+if
+.Fa little
+is empty.
 .Sh EXAMPLES
 Find the upper case character for a given lower case one:
 .Bd  -literal -offset indent
-    wchar_t upper_case_wc = xo_utf8_wtoupper(lower_case_wc);
+    xo_codepoint_t upper_case_wc = xo_utf8_wtoupper(lower_case_wc);
 .Ed
 .Sh UNICODE NOTES
 These functions is only the "simple" mappings given by
