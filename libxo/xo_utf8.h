@@ -12,7 +12,7 @@
 /**
  * libxo needs to ensure that it's not emitting invalid utf-8.  There are
  * two reasons for this: first, it's just good behavior, and second, the
- * Unicode TR-35 tags this as a security concern:
+ * Unicode TR-36 tags this as a security concern:
  *     https://unicode.org/reports/tr36/
  * So for good hygiene and the internet security, we'll ensure that only
  * valid UTF-8 strings are emitted by libxo.
@@ -62,10 +62,32 @@ typedef uint32_t xo_codepoint_t;
  */
 #define XO_UTF8_ERR_SECONDARY	((xo_codepoint_t) -5)
 
+/**
+ * The bytes decode to a surrogate (U+D800 thru U+DFFF).  Surrogates
+ * are a UTF-16 mechanism and are not valid in UTF-8.
+ */
+#define XO_UTF8_ERR_SURROGATE	((xo_codepoint_t) -6)
+
+/**
+ * The bytes decode to a value above U+10FFFF, the last codepoint.
+ */
+#define XO_UTF8_ERR_RANGE	((xo_codepoint_t) -7)
+
 static inline int
 xo_utf8_iserror (xo_codepoint_t wc)
 {
     return (wc > 0x10ffff);
+}
+
+/*
+ * The string(3) search functions take a const string and return a
+ * non-const pointer into it; this lets ours do the same without
+ * tripping -Wcast-qual.
+ */
+static inline char *
+xo_utf8_unconst (const char *cp)
+{
+    return (char *) (uintptr_t) cp;
 }
 
 /**
@@ -211,7 +233,7 @@ xo_utf8_to_bytes (char *buf, ssize_t len, xo_codepoint_t wc)
 
     switch (len) {
     case 4:
-	buf[i++] = (char)(0x80 | ((wc >> 18) & 0x03));
+	buf[i++] = (char)(0x80 | ((wc >> 18) & 0x07));
 	/* fallthru */
     case 3:
 	buf[i++] = (char)(0x80 | ((wc >> 12) & 0x3f));
@@ -477,7 +499,10 @@ xo_ustrcasecmp (const char *s1, const char *s2)
 }
 
 /**
- * UTF-8 version of strncat(3)
+ * UTF-8 version of strncat(3) with strlcat(3) safety.  At most
+ * 'count' bytes of 'append' are used and a character is never split.
+ * Returns the length of the string it tried to create; 'dstsize' or
+ * more means the result was truncated.
  */
 size_t
 xo_ustrlncat (char * restrict dst, const char * restrict append,
@@ -493,13 +518,16 @@ xo_ustrlcat (char * restrict dst, const char * restrict append, size_t dstsize)
 }
 
 /**
- * UTF-8 version of strpncpy(3)
+ * UTF-8 version of stpncpy(3).  Unlike stpncpy, the result is always
+ * NUL terminated and is not padded, so 'dst' must have room for
+ * 'len' + 1 bytes.  A character is never split.  Returns a pointer
+ * to the NUL.
  */
 char *
 xo_ustpncpy (char * restrict dst, const char * restrict src, size_t len);
 
 /**
- * UTF-8 version of strpcpy(3)
+ * UTF-8 version of stpcpy(3)
  */
 static inline char *
 xo_ustpcpy (char * restrict dst, const char * restrict src)
@@ -508,7 +536,9 @@ xo_ustpcpy (char * restrict dst, const char * restrict src)
 }
 
 /**
- * UTF-8 version of strncpy(3)
+ * UTF-8 version of strncpy(3).  Unlike strncpy, the result is always
+ * NUL terminated and is not padded, so 'dst' must have room for
+ * 'len' + 1 bytes.  A character is never split.
  */
 char *
 xo_ustrncpy (char * restrict dst, const char * restrict src, size_t len);
@@ -565,19 +595,23 @@ xo_ustrchrnul (char *str, xo_codepoint_t c)
 }
 
 /**
- * UTF-8 version of strspn(3)
+ * UTF-8 version of strspn(3).  Returns a count of bytes, not
+ * characters, so the value can be used as an offset into the string.
  */
 size_t
 xo_ustrspn (const char *str, const char *charset);
 
 /**
- * UTF-8 version of strcspn(3)
+ * UTF-8 version of strcspn(3).  Returns a count of bytes, not
+ * characters, so the value can be used as an offset into the string.
  */
 size_t
 xo_ustrcspn (const char *str, const char *charset);
 
 /**
- * UTF-8 version of strndup(3)
+ * UTF-8 version of strndup(3).  At most 'len' bytes are duplicated,
+ * less if that would split a character.  The caller must free(3) the
+ * result.
  */
 char *
 xo_ustrndup (const char *str, size_t len);
@@ -592,13 +626,14 @@ xo_ustrdup (const char *str)
 }
 
 /**
- * UTF-8 version of strnlen(3)
+ * UTF-8 version of strnlen(3): the number of characters (not bytes)
+ * in the first 'maxlen' bytes of the string.
  */
 size_t
 xo_ustrnlen (const char *str, size_t maxlen);
 
 /**
- * UTF-8 version of strlen(3)
+ * UTF-8 version of strlen(3): the number of characters (not bytes)
  */
 static inline size_t
 xo_ustrlen (const char *str)
@@ -634,16 +669,12 @@ char *
 xo_ustrcasestr (const char *big, const char *little);
 
 /**
- * UTF-8 version of strlcat(3)
+ * UTF-8 version of strlcpy(3).  'dstsize' is the size of 'dst'.
+ * Returns the length of 'src'; 'dstsize' or more means the result was
+ * truncated.  A character is never split.
  */
 size_t
-xo_ustrlcat (char * restrict str, const char * restrict append, size_t len);
-
-/**
- * UTF-8 version of strlcpy(3)
- */
-size_t
-xo_ustrlcpy (char * restrict dst, const char * restrict src, size_t len);
+xo_ustrlcpy (char * restrict dst, const char * restrict src, size_t dstsize);
 
 /**
  * Truncate a string at the given length while keeping the string
