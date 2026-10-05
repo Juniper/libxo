@@ -53,7 +53,19 @@ libxo_la_SOURCES = \
     xo_syslog.c \
     xo_tolower.c \
     xo_toupper.c \
-    xo_utf8.c
+    xo_utf8.c \
+    xo_utf8_chr.c \
+    xo_utf8_copy.c \
+    xo_utf8_fold.c \
+    xo_utf8_nmakevalid.c \
+    xo_utf8_ntolower.c \
+    xo_utf8_ntoupper.c \
+    xo_utf8_nvalid.c \
+    xo_utf8_span.c \
+    xo_utf8_strndup.c \
+    xo_utf8_strnlen.c \
+    xo_utf8_strnstr.c \
+    xo_utf8_trunc.c
 
 man3_files = \
     libxo.3 \
