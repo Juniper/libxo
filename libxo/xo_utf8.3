@@ -87,6 +87,10 @@
 .Fn xo_ustrndup "const char *str, size_t len"
 .Ft char *
 .Fn xo_ustrdup "const char *str"
+.Ft ssize_t
+.Fn xo_utf8_buf_clen "const char *buf, ssize_t len"
+.Ft ssize_t
+.Fn xo_utf8_clen "const char *buf"
 .Ft size_t
 .Fn xo_ustrnlen "const char *str, size_t maxlen"
 .Ft size_t
@@ -103,6 +107,10 @@
 .Fn xo_ustrcspn "const char *str, const char *charset"
 .Ft char *
 .Fn xo_ustrpbrk "const char *str, const char *charset"
+.Ft char *
+.Fn xo_ustrsep "char **stringp, const char *delim"
+.Ft int
+.Fn xo_ustrncmp "const char *s1, const char *s2, size_t len"
 .Ft char *
 .Fn xo_ustrnstr "const char *big, const char *little, size_t len"
 .Ft char *
@@ -312,7 +320,8 @@ The
 .Fn xo_ustrcpy
 and
 .Fn xo_ustpcpy
-functions copy the whole string.
+functions copy the whole string, less any incomplete character at its
+end.
 .Pp
 The
 .Fn xo_ustrndup
@@ -324,6 +333,10 @@ in memory obtained from
 .Xr malloc 3 ,
 which the caller must release with
 .Xr free 3 .
+The copy never ends with part of a character; an incomplete one is
+dropped, whether
+.Fa len
+lands inside it or the string itself stops short.
 The bytes are not otherwise inspected or changed.
 NULL is returned if memory is not available.
 The
@@ -370,6 +383,46 @@ function returns a pointer to the first character of
 that is in
 .Fa charset ,
 or NULL.
+The
+.Fn xo_ustrsep
+function follows
+.Xr strsep 3 :
+it ends the token at
+.Fa *stringp
+by overwriting the first delimiter character with a NUL, moves
+.Fa *stringp
+past that character, and returns the token.
+Each character of
+.Fa delim
+is a delimiter and may be multi-byte.
+.Fa *stringp
+is set to NULL after the last token.
+.Pp
+The
+.Fn xo_utf8_buf_clen
+function returns the number of characters, not bytes, in a string,
+looking at no more than
+.Fa len
+bytes and stopping at a NUL.
+A negative
+.Fa len
+means the NUL is the only limit.
+Each invalid byte counts as one character.
+The
+.Fn xo_utf8_clen
+function returns the number of characters in a NUL-terminated string.
+.Pp
+The
+.Fn xo_ustrncmp
+function compares two strings as
+.Xr strncmp 3
+does, except that when
+.Fa len
+lands inside a character, that character is compared whole.
+Up to three bytes past
+.Fa len
+may be read, but never past a NUL, so both arguments must be
+NUL-terminated strings.
 .Pp
 The
 .Fn xo_ustrnstr
