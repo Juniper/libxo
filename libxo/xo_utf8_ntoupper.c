@@ -23,6 +23,13 @@ xo_utf8_ntoupper (char *str, size_t len)
 
     char *cp = str, *ep = cp + len;
     for ( ; cp < ep; cp += ulen) {
+	if (!xo_is_utf8_byte(*cp)) {
+	    if (*cp >= 'a' && *cp <= 'z')
+		*cp -= 0x20;	/* ASCII needs no decoding */
+	    ulen = 1;
+	    continue;
+	}
+
 	ulen = xo_utf8_len(*cp);
 	xo_codepoint_t wc = xo_utf8_codepoint(cp, ep - cp, ulen, ' ');
 	xo_codepoint_t uc = xo_utf8_wtoupper(wc);
