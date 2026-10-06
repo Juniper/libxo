@@ -33,7 +33,7 @@ xo_utrunc (char *str, size_t len)
      * bits set, while 2nd, 3rd, and 4th characters have only the high
      * bit set.
      */
-    while ((ch & 0xc0) == 0x80 && ep > str) {
+    while (xo_is_utf8_secondary_byte(ch) && ep > str) {
 	ep -= 1;
 	ch = *ep;
 	*ep = '\0';
