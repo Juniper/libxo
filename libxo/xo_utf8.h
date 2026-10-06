@@ -129,12 +129,25 @@ xo_is_utf8_byte (char ch)
 }
 
 /**
- * Return non-zero if the byte is part of a UTF-8 character sequence
+ * Return non-zero if the byte is the first byte of a multi-byte UTF-8
+ * character, the one whose high bits give the character's length
+ * (0b11xxxxxx).
  */
 static inline int
 xo_is_utf8_len_byte (char ch)
 {
     return (ch & 0xc0) == 0xc0;
+}
+
+/**
+ * Return non-zero if the byte is a secondary byte, one of the bytes
+ * that follow the first byte of a multi-byte UTF-8 character
+ * (0b10xxxxxx).
+ */
+static inline int
+xo_is_utf8_secondary_byte (char ch)
+{
+    return ((ch & 0xc0) == 0x80);
 }
 
 /**
@@ -439,13 +452,13 @@ xo_utf8_prev (char *start, char *cur)
 	return NULL;
 
     for (cp = cur - 1;; cp--) {
-	if ((*cp & 0x80) == 0)	  /* 0b0.* means ASCII */
+	if (!xo_is_utf8_byte(*cp)) /* ASCII */
 	    return cp;		  /* The simple case */
 
-	if ((*cp & 0xc0) == 0xc0) /* 0b11.* means a length (first) byte */
+	if (xo_is_utf8_len_byte(*cp))
 	    return cp;		  /* Success */
 
-	if ((*cp & 0xc0) != 0x80) /* 0b10.* means a non-first byte */
+	if (!xo_is_utf8_secondary_byte(*cp))
 	    return cp;		  /* Invalid utf-8 character */
 
 	if (cp == start)	  /* Hit the start of string */
