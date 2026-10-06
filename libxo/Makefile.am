@@ -55,6 +55,7 @@ libxo_la_SOURCES = \
     xo_toupper.c \
     xo_utf8.c \
     xo_utf8_chr.c \
+    xo_utf8_clen.c \
     xo_utf8_copy.c \
     xo_utf8_fold.c \
     xo_utf8_nmakevalid.c \
@@ -62,6 +63,7 @@ libxo_la_SOURCES = \
     xo_utf8_ntoupper.c \
     xo_utf8_nvalid.c \
     xo_utf8_span.c \
+    xo_utf8_strncmp.c \
     xo_utf8_strndup.c \
     xo_utf8_strnlen.c \
     xo_utf8_strnstr.c \
