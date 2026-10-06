@@ -170,10 +170,20 @@ test_length (void)
 	xo_emit("length {k:name}: {:nlen/%zu} {:len/%zu} {:bytes/%zu}\n",
 		tests[i].name, xo_ustrnlen(tests[i].data, tests[i].maxlen),
 		xo_ustrlen(tests[i].data), strlen(tests[i].data));
+	xo_emit("  clen {:clen/%zd} {:buf-clen/%zd}\n",
+		xo_utf8_clen(tests[i].data),
+		xo_utf8_buf_clen(tests[i].data, tests[i].maxlen));
 	xo_close_instance("length");
     }
 
     xo_close_list("length");
+
+    /* A NUL always stops the count; a negative length means no limit */
+    xo_emit("clen nul {:clen-nul/%zd} {:clen-half/%zd}\n",
+	    xo_utf8_buf_clen("a\0" EURO, 6),
+	    xo_utf8_buf_clen("ab\xf0\x9f", -1));
+    xo_emit("clen none {:clen-null/%zd} {:clen-negative/%zd}\n",
+	    xo_utf8_buf_clen(NULL, 4), xo_utf8_buf_clen("abc", -1));
 }
 
 static void
@@ -324,6 +334,81 @@ test_compare (void)
     }
 
     xo_close_list("compare");
+
+    /* "limit-splits" and "limit-split-same" are where strncmp differs */
+    static struct {
+	const char *name;
+	const char *s1;
+	const char *s2;
+	size_t len;
+    } ntests[] = {
+	{ "equal", "abc", "abc", 3 },
+	{ "limit-hides", "abcx", "abcy", 3 },
+	{ "limit-shows", "abcx", "abcy", 4 },
+	{ "limit-beyond", "abc", "abc", 10 },
+	{ "shorter", "ab", "abc", 3 },
+	{ "limit-splits", "a" E_ACUTE, "a\xc3\xb1", 2 },
+	{ "limit-split-same", "a" EURO "x", "a" EURO "y", 2 },
+	{ "limit-whole", E_ACUTE "x", E_ACUTE "y", 2 },
+	{ "ascii-vs-multi", "abc", "ab" EURO, 3 },
+	{ "zero", "abc", "xyz", 0 },
+	{ NULL, NULL, NULL, 0 }
+    };
+
+    xo_open_list("ncompare");
+
+    for (int i = 0; ntests[i].name; i++) {
+	xo_open_instance("ncompare");
+	xo_emit("ncompare {k:name}: {:forward/%d} {:backward/%d} "
+		"{:strncmp/%d}\n", ntests[i].name,
+		xo_ustrncmp(ntests[i].s1, ntests[i].s2, ntests[i].len),
+		xo_ustrncmp(ntests[i].s2, ntests[i].s1, ntests[i].len),
+		strncmp(ntests[i].s1, ntests[i].s2, ntests[i].len) != 0);
+	xo_close_instance("ncompare");
+    }
+
+    xo_close_list("ncompare");
+}
+
+static void
+test_sep (void)
+{
+    static struct {
+	const char *name;
+	const char *data;
+	const char *delim;
+    } tests[] = {
+	{ "ascii", "a,b,c", "," },
+	{ "multi-byte", "one" EURO "two" SMILE "three", EURO SMILE },
+	{ "shared-bytes", "x\xc3\xa8y" E_ACUTE "z", E_ACUTE },
+	{ "empty-fields", ",a,,b,", "," },
+	{ "no-delimiter", "abc", "," },
+	{ "empty-string", "", "," },
+	{ "empty-delim", "a,b", "" },
+	{ NULL, NULL, NULL }
+    };
+    char buf[64], out[128];
+
+    xo_open_list("sep");
+
+    for (int i = 0; tests[i].name; i++) {
+	char *next = buf, *tok, *cp = out;
+	int count = 0;
+
+	xo_ustrlcpy(buf, tests[i].data, sizeof(buf));
+
+	while ((tok = xo_ustrsep(&next, tests[i].delim)) != NULL) {
+	    cp += snprintf(cp, out + sizeof(out) - cp, "[%s]", tok);
+	    count += 1;
+	}
+
+	xo_open_instance("sep");
+	xo_emit("sep {k:name}: {:count/%d} {:tokens}\n",
+		tests[i].name, count, out);
+	xo_close_instance("sep");
+    }
+
+    xo_close_list("sep");
 }
 
 /*
@@ -409,6 +494,26 @@ test_copy (void)
 	xo_emit("dup {:dup-equal/%d}\n", strcmp(dup, sample) == 0);
 	free(dup);
     }
+
+    /* A source that stops inside a character must not leave half of it */
+    static const char half[] = "ab\xf0\x9f\x98";
+
+    memset(buf, GUARD, sizeof(buf));
+    xo_ustrcpy(buf, half);
+    xo_emit("half cpy");
+    emit_hex("half-cpy", buf);
+
+    memset(buf, GUARD, sizeof(buf));
+    xo_emit("half stpcpy {:half-stpcpy-offset/%ld}",
+	    offset(buf, xo_ustpcpy(buf, half)));
+    emit_hex("half-stpcpy", buf);
+
+    dup = xo_ustrdup(half);
+    if (dup) {
+	xo_emit("half dup");
+	emit_hex("half-dup", dup);
+	free(dup);
+    }
 }
 
 static void
@@ -431,6 +536,7 @@ test_concat (void)
 	{ "invalid", "abc", "x\xff" "y", 32, 3 },
 	{ "full", "abcde", "xy", 6, 2 },
 	{ "empty-dst", "", SMILE "!", 32, 5 },
+	{ "half-append", "abc", "x\xe2\x82", 32, 3 },
 	{ NULL, NULL, NULL, 0, 0 }
     };
     char buf[64];
@@ -485,6 +591,7 @@ main (int argc, char **argv)
     test_span();
     test_find();
     test_compare();
+    test_sep();
     test_copy();
     test_concat();
 
