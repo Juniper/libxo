@@ -561,7 +561,7 @@ xo_ustrchr_long (const char *str, xo_codepoint_t c);
 static inline char *
 xo_ustrchr (const char *str, xo_codepoint_t c)
 {
-    if ((c & 0x7f) == c)
+    if (c < 0x80)
 	return strchr(str, c);
     return xo_ustrchr_long(str, c);
 }
@@ -575,7 +575,7 @@ xo_ustrrchr_long (const char *str, xo_codepoint_t c);
 static inline char *
 xo_ustrrchr (const char *str, xo_codepoint_t c)
 {
-    if ((c & 0x7f) == c)
+    if (c < 0x80)
 	return strrchr(str, c);
     return xo_ustrrchr_long(str, c);
 }
@@ -589,7 +589,7 @@ xo_ustrchrnul_long (const char *str, xo_codepoint_t c);
 static inline char *
 xo_ustrchrnul (char *str, xo_codepoint_t c)
 {
-    if ((c & 0x7f) == c)
+    if (c < 0x80)
 	return xo_strchrnul(str, c);
     return xo_ustrchrnul_long(str, c);
 }
@@ -610,7 +610,7 @@ xo_ustrcspn (const char *str, const char *charset);
 
 /**
  * UTF-8 version of strndup(3).  At most 'len' bytes are duplicated,
- * less if that would split a character.  The caller must free(3) the
+ * less if the copy would end with part of a character.  The caller must free(3) the
  * result.
  */
 char *
@@ -626,6 +626,23 @@ xo_ustrdup (const char *str)
 }
 
 /**
+ * Return the number of characters (not bytes) in a string, looking
+ * at no more than 'len' bytes; a negative 'len' means the string's
+ * NUL is the only limit.  Each invalid byte counts as one character.
+ */
+ssize_t
+xo_utf8_buf_clen (const char *buf, ssize_t len);
+
+/**
+ * Return the number of characters (not bytes) in a string
+ */
+static inline ssize_t
+xo_utf8_clen (const char *buf)
+{
+    return xo_utf8_buf_clen(buf, -1);
+}
+
+/**
  * UTF-8 version of strnlen(3): the number of characters (not bytes)
  * in the first 'maxlen' bytes of the string.
  */
@@ -638,7 +655,7 @@ xo_ustrnlen (const char *str, size_t maxlen);
 static inline size_t
 xo_ustrlen (const char *str)
 {
-    return xo_ustrnlen(str, strlen(str));
+    return xo_utf8_buf_clen(str, -1);
 }
 
 /**
@@ -646,6 +663,21 @@ xo_ustrlen (const char *str)
  */
 char *
 xo_ustrpbrk (const char *str, const char *charset);
+
+/**
+ * UTF-8 version of strsep(3).  Each character of 'delim' is a
+ * delimiter and may be multi-byte.
+ */
+char *
+xo_ustrsep (char **stringp, const char *delim);
+
+/**
+ * UTF-8 version of strncmp(3).  A character that 'len' lands inside
+ * is compared whole, so up to three bytes past 'len' may be read
+ * (never past a NUL).
+ */
+int
+xo_ustrncmp (const char *s1, const char *s2, size_t len);
 
 /**
  * UTF-8 version of strnstr(3)
