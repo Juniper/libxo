@@ -44,13 +44,19 @@ xo_utf8_span (const char *str, const char *charset, int want)
     xo_codepoint_t wc;
 
     for ( ; cp < ep; cp += ulen) {
-	ulen = xo_utf8_len(*cp);
-	wc = xo_utf8_codepoint(cp, ep - cp, ulen, 0);
-	if (xo_utf8_iserror(wc)) {
+	if (!xo_is_utf8_byte(*cp)) {
+	    /* ASCII needs no decoding, and can't match part of a character */
 	    ulen = 1;
-	    found = 0;
-	} else
-	    found = xo_utf8_in_charset(wc, charset);
+	    found = (strchr(charset, *cp) != NULL);
+	} else {
+	    ulen = xo_utf8_len(*cp);
+	    wc = xo_utf8_codepoint(cp, ep - cp, ulen, 0);
+	    if (xo_utf8_iserror(wc)) {
+		ulen = 1;
+		found = 0;
+	    } else
+		found = xo_utf8_in_charset(wc, charset);
+	}
 
 	if (found != want)
 	    break;
@@ -88,4 +94,29 @@ xo_ustrpbrk (const char *str, const char *charset)
     const char *cp = str + xo_utf8_span(str, charset, 0);
 
     return *cp ? xo_utf8_unconst(cp) : NULL;
+}
+
+/**
+ * UTF-8 version of strsep(3).  Each character of 'delim' is a
+ * delimiter, and may be multi-byte; the whole delimiter character is
+ * removed, where strsep would cut it apart.
+ */
+char *
+xo_ustrsep (char **stringp, const char *delim)
+{
+    char *str = *stringp;
+
+    if (str == NULL)
+	return NULL;
+
+    char *cp = str + xo_utf8_span(str, delim, 0);
+
+    if (*cp == '\0') {
+	*stringp = NULL;	/* No delimiter; this is the last token */
+    } else {
+	*stringp = cp + xo_utf8_len(*cp);
+	*cp = '\0';
+    }
+
+    return str;
 }
