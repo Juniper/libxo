@@ -9,6 +9,8 @@
  * Phil Shafer, October 2022
  */
 
+#include <limits.h>
+
 #include "xo_config.h"
 #include "xo.h"
 #include "xo_utf8.h"
@@ -21,15 +23,6 @@
 size_t
 xo_ustrnlen (const char *str, size_t maxlen)
 {
-    const char *cp = str, *ep = str + strnlen(str, maxlen);
-    size_t count = 0;
-    int ulen;
-
-    for ( ; cp < ep; cp += ulen, count++) {
-	ulen = xo_utf8_len(*cp);
-	if (xo_utf8_iserror(xo_utf8_codepoint(cp, ep - cp, ulen, 0)))
-	    ulen = 1;
-    }
-
-    return count;
+    /* A count too large for ssize_t is no limit at all */
+    return xo_utf8_buf_clen(str, (maxlen > SSIZE_MAX) ? -1 : (ssize_t) maxlen);
 }
