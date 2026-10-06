@@ -31,7 +31,7 @@ xo_utf8_codepoint (const char *buf, size_t bufsiz, int len,
 	return on_err ?: XO_UTF8_ERR_TRUNCATED;
 
     /* Are we looking at a secondary byte? */
-    if (xo_utf8_is_secondary_byte(b1))
+    if (xo_is_utf8_secondary_byte(b1))
 	return on_err ?: XO_UTF8_ERR_SECONDARY;
 
     /*
