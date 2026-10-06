@@ -33,6 +33,11 @@ xo_utf8_nmakevalid (char *str, size_t len, char replacement)
      * it.
      */
     for (cp = str, ep = cp + len; cp < ep; cp += len) {
+	if (!xo_is_utf8_byte(*cp)) {
+	    len = 1;		/* ASCII is always valid */
+	    continue;
+	}
+
 	len = xo_utf8_len(*cp);
 	wc = xo_utf8_codepoint(cp, ep - cp, len, 0);
 	if (!xo_utf8_iserror(wc))
