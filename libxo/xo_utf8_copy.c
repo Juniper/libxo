@@ -27,7 +27,6 @@ xo_utf8_copy (char *dst, size_t room, const char *src, size_t srclen)
     const char *sp = src, *sep = src + strnlen(src, srclen);
     char *cp = dst, *ep = dst + room;
     int ulen;
-    ssize_t wlen;
     xo_codepoint_t wc;
 
     while (cp < ep && sp < sep) {
@@ -42,16 +41,17 @@ xo_utf8_copy (char *dst, size_t room, const char *src, size_t srclen)
 	    break;
 
 	if (xo_utf8_iserror(wc)) {
-	    wc = ' ';
-	    ulen = 1;		/* We only consume one byte */
+	    *cp++ = ' ';
+	    sp += 1;		/* We only consume one byte */
+	    continue;
 	}
 
-	wlen = xo_utf8_to_len(wc);
-	if (wlen > ep - cp)	/* No room for the whole character */
+	if (ulen > ep - cp)	/* No room for the whole character */
 	    break;
 
-	xo_utf8_to_bytes(cp, wlen, wc);
-	cp += wlen;
+	/* A valid character's own bytes are what we'd make from it */
+	memcpy(cp, sp, ulen);
+	cp += ulen;
 	sp += ulen;
     }
 
