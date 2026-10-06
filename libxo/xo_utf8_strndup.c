@@ -17,18 +17,30 @@
 
 /**
  * UTF-8 version of strndup(3).  At most 'len' bytes are duplicated,
- * less if that would split a character.  The bytes are not otherwise
- * inspected.  The caller must free(3) the result.
+ * less if the copy would end with part of a character, whether
+ * 'len' lands inside one or the string itself stops short.  The
+ * bytes are not otherwise inspected.  The caller must free(3) the
+ * result.
  */
 char *
 xo_ustrndup (const char *str, size_t len)
 {
-    size_t n = strnlen(str, len);
+    size_t n = strnlen(str, len), i = n;
     char *res;
 
-    /* If we stopped on a secondary byte, back up over the character */
-    while (n > 0 && (str[n] & 0xc0) == 0x80)
-	n -= 1;
+    /*
+     * Find the first byte of the last character; if that byte asks
+     * for more bytes than we have, the character is incomplete and
+     * we drop it.
+     */
+    while (i > 0 && n - i < 3 && xo_is_utf8_secondary_byte(str[i - 1]))
+	i -= 1;
+
+    if (i > 0 && xo_is_utf8_len_byte(str[i - 1])) {
+	i -= 1;
+	if ((size_t) xo_utf8_len(str[i]) > n - i)
+	    n = i;
+    }
 
     res = malloc(n + 1);
     if (res) {
