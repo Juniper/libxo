@@ -42,7 +42,8 @@ xo_ustrncmp (const char *s1, const char *s2, size_t len)
      * Everything matched up to the limit.  A secondary byte here
      * means the limit split a character, so keep going to its end.
      */
-    for ( ; (u1[i] & 0xc0) == 0x80 || (u2[i] & 0xc0) == 0x80; i++)
+    for ( ; xo_is_utf8_secondary_byte(s1[i])
+	      || xo_is_utf8_secondary_byte(s2[i]); i++)
 	if (u1[i] != u2[i])
 	    return u1[i] - u2[i];
 
