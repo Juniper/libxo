@@ -23,6 +23,13 @@ xo_utf8_ntolower (char *str, size_t len)
 
     char *cp = str, *ep = cp + len;
     for ( ; cp < ep; cp += ulen) {
+	if (!xo_is_utf8_byte(*cp)) {
+	    if (*cp >= 'A' && *cp <= 'Z')
+		*cp += 0x20;	/* ASCII needs no decoding */
+	    ulen = 1;
+	    continue;
+	}
+
 	ulen = xo_utf8_len(*cp);
 	xo_codepoint_t wc = xo_utf8_codepoint(cp, ep - cp, ulen, ' ');
 	xo_codepoint_t lc = xo_utf8_wtolower(wc);
