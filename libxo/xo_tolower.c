@@ -23,6 +23,12 @@
 xo_codepoint_t
 xo_utf8_wtolower (xo_codepoint_t wc)
 {
+    /*
+     * ASCII is by far the most common input, so answer it here and
+     * skip the long chain of tests below.
+     */
+    if (wc < 0x80)
+	return (wc >= 'A' && wc <= 'Z') ? wc + 0x20 : wc;
 
     if ((0x0100 <= wc && wc <= 0x012e)
             || (0x0132 <= wc && wc <= 0x0136)
