@@ -22,6 +22,13 @@
 static xo_codepoint_t
 xo_utf8_fold_next (const char *str, size_t len, size_t *ulenp)
 {
+    /* ASCII needs no decoding; 'len' is never zero here */
+    if (!xo_is_utf8_byte(*str)) {
+	*ulenp = 1;
+	xo_codepoint_t ch = (unsigned char) *str;
+	return (ch >= 'A' && ch <= 'Z') ? ch + 0x20 : ch;
+    }
+
     int ulen = xo_utf8_len(*str);
     xo_codepoint_t wc = xo_utf8_codepoint(str, len, ulen, 0);
 
