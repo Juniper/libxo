@@ -23,7 +23,7 @@ typedef struct fullpath_private_s {
     xo_buffer_t fp_data;
     xo_buffer_t fp_leader;
     xo_off_t *fp_stack;
-    xo_off_t *fp_stackp;
+    xo_off_t *fp_stack_cur;
     uint32_t fp_stack_size;
 } fullpath_private_t;
 
@@ -51,7 +51,7 @@ fullpath_create (xo_handle_t *xop)
     xo_buf_append_val(&fpp->fp_leader, "/", 1); /* Start with leading '/' */
 
     xo_off_t *sp = xo_realloc(NULL, XO_FP_DEFAULT_STACK_SIZE * sizeof(*sp));
-    fpp->fp_stackp = fpp->fp_stack = sp;
+    fpp->fp_stack_cur = fpp->fp_stack = sp;
     if (sp)
 	fpp->fp_stack_size = XO_FP_DEFAULT_STACK_SIZE;
 
@@ -63,20 +63,20 @@ fullpath_create (xo_handle_t *xop)
 static void
 fullpath_stack_push (fullpath_private_t *fpp, xo_off_t off)
 {
-    if (fpp->fp_stackp - fpp->fp_stack >= fpp->fp_stack_size) {
+    if (fpp->fp_stack_cur - fpp->fp_stack >= fpp->fp_stack_size) {
 	uint32_t new_size = fpp->fp_stack_size * 2;
 	xo_off_t *sp = xo_realloc(fpp->fp_stack, new_size * sizeof(*sp));
 	if (sp == NULL)
 	    return;
-	fpp->fp_stackp = fpp->fp_stackp - fpp->fp_stackp + sp;
+	fpp->fp_stack_cur = fpp->fp_stack_cur - fpp->fp_stack + sp;
 	fpp->fp_stack = sp;
 	fpp->fp_stack_size = new_size;
     }
 
     xo_dbg(NULL, "fullpath_stack_push: pushing %u (%u)",
-	   off, fpp->fp_stackp - fpp->fp_stack);
+	   off, fpp->fp_stack_cur - fpp->fp_stack);
 
-    *fpp->fp_stackp++ = off;
+    *fpp->fp_stack_cur++ = off;
 }
 
 static xo_off_t
@@ -84,11 +84,11 @@ fullpath_stack_pop (fullpath_private_t *fpp)
 {
     xo_off_t off = 0;
 
-    if (fpp->fp_stackp != fpp->fp_stack)
-	off = *--fpp->fp_stackp;
+    if (fpp->fp_stack_cur != fpp->fp_stack)
+	off = *--fpp->fp_stack_cur;
 
     xo_dbg(NULL, "fullpath_stack_pop: popping %u (%u)",
-	   off, fpp->fp_stackp - fpp->fp_stack);
+	   off, fpp->fp_stack_cur - fpp->fp_stack);
 
     return off;
 }
