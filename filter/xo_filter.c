@@ -631,13 +631,39 @@ xo_filter_data_default_name_eq (xo_filter_data_t *dp,
     return xo_streqn(nm, tag, tlen);
 }
 
+static void
+xo_filter_data_default_error (xo_filter_data_t *dp, const char *fmt,
+			       va_list vap)
+{
+    xo_failure_filter_v(dp->xfd_xop, fmt, vap);
+}
+
 xo_filter_data_ops_t xo_filter_data_ops_default = {
     .xfdo_version     = XO_FILTER_DATA_OPS_VERSION,
     .xfdo_realloc     = xo_filter_data_default_realloc,
     .xfdo_free        = xo_filter_data_default_free,
     .xfdo_name_intern = NULL,   /* optional; NULL wraps xparse str_id directly */
     .xfdo_name_eq     = xo_filter_data_default_name_eq,
+    .xfdo_error       = xo_filter_data_default_error,
 };
+
+/*
+ * Dispatches a compile-time or evaluation-time error through the data
+ * context's xfdo_error, if the backend set one.  dp/ops always travel
+ * together since xo_filter_data_t carries no back-pointer to its own
+ * ops.  xo_eval_fail() below is the only caller today, reaching both
+ * via xfp->xf_data / xfp->xf_ops; xo_eval_compile() will become a
+ * second caller once it gains its own (dp, ops) parameters.
+ */
+static void
+xo_filter_data_verror (xo_filter_data_t *dp, xo_filter_data_ops_t *ops,
+			const char *fmt, va_list vap)
+{
+    if (ops->xfdo_error == NULL)
+	return;
+
+    ops->xfdo_error(dp, fmt, vap);
+}
 
 struct xo_filter_s {		 /* Forward/typdef decl in xo_private.h */
     struct xo_xparse_data_s xf_xd; /* Main parsing structure */
@@ -1509,6 +1535,23 @@ typedef xo_eval_value_t (*xo_eval_fn_t)(XO_EVAL_ARGS);
 
 typedef xo_eval_value_t (*xo_eval_calc_fn_t)(XO_EVAL_CALC_ARGS);
 
+/*
+ * Reports an evaluation-time error through xfp's data context, the same
+ * path xo_eval_compile() will use for compile-time errors.  Replaces a
+ * direct xo_failure_filter(xop, ...) call so these errors also reach a
+ * non-libxo backend (e.g. libpin) when it is running the same eval code.
+ */
+XO_PRINTFLIKE(2, 3)
+static void
+xo_eval_fail (xo_filter_t *xfp, const char *fmt, ...)
+{
+    va_list vap;
+
+    va_start(vap, fmt);
+    xo_filter_data_verror(xfp->xf_data, xfp->xf_ops, fmt, vap);
+    va_end(vap);
+}
+
 static inline xo_eval_value_t
 xo_eval_value_make (unsigned type, unsigned flags, xo_xparse_node_id_t id)
 {
@@ -1635,7 +1678,12 @@ xo_eval_make_number (xo_handle_t *xop, const char *str)
 	return value;
     }
 
-    /* We can't give an error, so we just return 0 */
+    /*
+     * No xfp here (xo_eval_cast_boolean/float/int64 pass only xop down
+     * this chain, and widening them is out of proportion to one rare,
+     * best-effort diagnostic), so this stays on the handle-based path
+     * rather than xo_eval_fail().
+     */
     xo_failure_filter(xop, "invalid number value: '%s'", str);
     value = xo_eval_value_make(C_INT64, 0, 0);
     return value;
@@ -1765,8 +1813,8 @@ xo_eval_path (XO_EVAL_ARGS)
 	} else if (xnp->xn_type == C_ABSOLUTE) {
 	    /* skip */
 	} else {
-	    xo_failure_filter(xop, "filter: non-element path member (%s)",
-			      xo_xparse_fancy_token_name(xnp->xn_type));
+	    xo_eval_fail(xfp, "filter: non-element path member (%s)",
+			 xo_xparse_fancy_token_name(xnp->xn_type));
 	}
     }
 
@@ -2114,9 +2162,9 @@ xo_eval_compare (XO_EVAL_ARGS)
 	    static const char unk[] = "(unknown)";
 	    const char *lname = xo_xparse_token_name(left.xev_type) ?: unk;
 	    const char *rname = xo_xparse_token_name(right.xev_type) ?: unk;
-	    xo_failure_filter(xop,
-		       "filter: eval: unsupported type comparison (%s/%s)",
-		       lname, rname);
+	    xo_eval_fail(xfp,
+			 "filter: eval: unsupported type comparison (%s/%s)",
+			 lname, rname);
 	}
 
 	return xo_eval_value_invalid();
@@ -2351,19 +2399,11 @@ xo_eval_op_mod (XO_EVAL_ARGS)
 static xo_eval_value_t
 xo_eval_not (XO_EVAL_ARGS)
 {
-    xo_eval_value_t value;
+    if (argv[0].xev_flags & XEVF_MISSING)
+	return xo_eval_value_missing();
 
-    /* We only support a single element in the path, which must be a key */
-    value = xo_eval(xop, xfp, framep, "arguments", indent,
-                       xnp->xn_contents, NULL);
-    xo_eval_dump_value(xop, xfp, value, indent, "xo_eval_not");
-
-    if (value.xev_flags & XEVF_MISSING)
-	return value;
-
-    int bool_val = xo_eval_cast_boolean(xop, value);
-    xo_eval_value_free(value);
-    value.xev_type = C_BOOLEAN;
+    int bool_val = xo_eval_cast_boolean(xop, argv[0]);
+    xo_eval_value_t value = xo_eval_value_make(C_BOOLEAN, 0, 0);
     value.xev_int64 = bool_val ? 0 : 1; /* Perform the 'not' */
     return value;
 }
@@ -2566,34 +2606,24 @@ xo_eval_func_floor (XO_EVAL_ARGS)
 static xo_eval_value_t
 xo_eval_func_substring (XO_EVAL_ARGS)
 {
-    int fn_argc = xo_eval_argument_count(XO_EVAL_PASS);
-    if (fn_argc < 2 || fn_argc > 3) {
-	xo_failure_filter(xop, "substring() requires 2 or 3 arguments, got %d",
-			  fn_argc);
+    if (argc < 2 || argc > 3) {
+	xo_eval_fail(xfp, "substring() requires 2 or 3 arguments, got %d",
+		     argc);
 	return xo_eval_value_invalid();
     }
 
-    xo_eval_value_t fn_argv[3];
-    xo_eval_arguments(XO_EVAL_PASS, 3, fn_argv);
-
     /* Defer if arguments aren't resolved yet (field not yet seen) */
-    if ((fn_argv[0].xev_flags & XEVF_MISSING)
-  	    || (fn_argv[1].xev_flags & XEVF_MISSING)
-  	    || (fn_argv[2].xev_flags & XEVF_MISSING)) {
-	xo_eval_arguments_free(xop, xfp, framep, xnp, indent, 3, fn_argv);
-	return xo_eval_value_missing();
-    }
+    for (int i = 0; i < argc; i++)
+	if (argv[i].xev_flags & XEVF_MISSING)
+	    return xo_eval_value_missing();
 
     xo_eval_value_t value = xo_eval_value_make(C_STRING, 0, 0);
 
-    char *str = xo_eval_cast_string(xop, fn_argv[0]);
+    char *str = xo_eval_cast_string(xop, argv[0]);
     int64_t slen = strlen(str);
 
-    int64_t pos = xo_eval_cast_int64(xop, fn_argv[1]);
-    int64_t len = fn_argc == 2 ? slen : xo_eval_cast_int64(xop, fn_argv[2]);
-
-    /* Release our arguments */
-    xo_eval_arguments_free(xop, xfp, framep, xnp, indent, 3, fn_argv);
+    int64_t pos = xo_eval_cast_int64(xop, argv[1]);
+    int64_t len = argc == 2 ? slen : xo_eval_cast_int64(xop, argv[2]);
 
     /*
      * Strings a 1-origin, not 0.  Also the spec says:
@@ -2727,38 +2757,27 @@ xo_eval_func_choose2 (XO_EVAL_ARGS)
 static xo_eval_value_t
 xo_eval_func_concat (XO_EVAL_ARGS)
 {
+    for (int i = 0; i < argc; i++)
+	if (argv[i].xev_flags & XEVF_MISSING)
+	    return xo_eval_value_missing();
+
+    if (argc < 2) {
+	xo_eval_fail(xfp, "function 'concat' requires "
+		     "at least 2 arguments, got %d",
+		     argc);
+	xo_eval_value_t false_val = XO_EVAL_VALUE_BOOLEAN_FALSE;
+	return false_val;
+    }
+
     xo_buffer_t buf;
     xo_buf_init(&buf);
 
-    xo_xparse_node_id_t id;
-    int count = 0;
-
-    for (id = xnp->xn_contents; id; id = xnp->xn_next) {
-	xnp = xo_xparse_node(&xfp->xf_xd, id);
-	count += 1;
-
-	xo_eval_value_t value = xo_eval(xop, xfp, framep, "concat-arg",
-					indent + XO_INDENT, id, NULL);
-	if (value.xev_flags & XEVF_MISSING) {
-	    xo_eval_value_free(value);
-	    xo_buf_cleanup(&buf);
-	    return xo_eval_value_missing();
-	}
-	char *str = xo_eval_cast_string(xop, value);
+    for (int i = 0; i < argc; i++) {
+	char *str = xo_eval_cast_string(xop, argv[i]);
 	if (str) {
 	    xo_buf_append(&buf, str, strlen(str));
 	    xo_free(str);
 	}
-	xo_eval_value_free(value);
-    }
-
-    if (count < 2) {
-	xo_failure_filter(xop, "function 'concat' requires "
-			  "at least 2 arguments, got %d",
-			  count);
-	xo_buf_cleanup(&buf);
-	xo_eval_value_t false_val = XO_EVAL_VALUE_BOOLEAN_FALSE;
-	return false_val;
     }
 
     xo_buf_append(&buf, "", 1);	/* null terminator */
@@ -2817,20 +2836,14 @@ xo_eval_func_string_length (XO_EVAL_ARGS)
 static xo_eval_value_t
 xo_eval_func_sum (XO_EVAL_ARGS)
 {
+    for (int i = 0; i < argc; i++)
+	if (argv[i].xev_flags & XEVF_MISSING)
+	    return xo_eval_value_missing();
+
     xo_float_t total = 0;
 
-    for (xo_xparse_node_id_t id = xnp->xn_contents; id; id = xnp->xn_next) {
-	xnp = xo_xparse_node(&xfp->xf_xd, id);
-
-	xo_eval_value_t value = xo_eval(xop, xfp, framep, "sum-arg",
-					indent + XO_INDENT, id, NULL);
-	if (value.xev_flags & XEVF_MISSING) {
-	    xo_eval_value_free(value);
-	    return xo_eval_value_missing();
-	}
-	total += xo_eval_cast_float(xop, value);
-	xo_eval_value_free(value);
-    }
+    for (int i = 0; i < argc; i++)
+	total += xo_eval_cast_float(xop, argv[i]);
 
     return xo_eval_value_float(0, total);
 }
@@ -2914,36 +2927,22 @@ xo_eval_func_translate (XO_EVAL_ARGS)
 static xo_eval_value_t
 xo_eval_func_rematch (XO_EVAL_ARGS)
 {
-    int fn_argc = xo_eval_argument_count(XO_EVAL_PASS);
-    if (fn_argc < 2 || fn_argc > 3) {
-	xo_failure_filter(xop, "rematch() requires 2 or 3 arguments, got %d",
-			  fn_argc);
+    if (argc < 2 || argc > 3) {
+	xo_eval_fail(xfp, "rematch() requires 2 or 3 arguments, got %d",
+		     argc);
 	return xo_eval_value_invalid();
     }
 
-    xo_eval_value_t fn_argv[3];
-    xo_eval_arguments(XO_EVAL_PASS, 3, fn_argv);
-
     /* Defer if arguments aren't resolved yet (field not yet seen) */
-    if ((fn_argv[0].xev_flags & XEVF_MISSING)
-  	    || (fn_argv[1].xev_flags & XEVF_MISSING)
-  	    || (fn_argv[2].xev_flags & XEVF_MISSING)) {
-	xo_eval_arguments_free(xop, xfp, framep, xnp, indent, 3, fn_argv);
-	return xo_eval_value_missing();
-    }
+    for (int i = 0; i < argc; i++)
+	if (argv[i].xev_flags & XEVF_MISSING)
+	    return xo_eval_value_missing();
 
-    char *pattern = xo_eval_cast_string(xop, fn_argv[0]);
-    char *input   = xo_eval_cast_string(xop, fn_argv[1]);
+    char *pattern = xo_eval_cast_string(xop, argv[0]);
+    char *input   = xo_eval_cast_string(xop, argv[1]);
 
-    /* Third arg is optional; absent slot is XEVF_INVALID — treat as "" */
-    char *opts;
-
-    if (fn_argc >= 3)
-	opts = xo_eval_cast_string(xop, fn_argv[2]);
-    else
-	opts = strdup("");
-
-    xo_eval_arguments_free(xop, xfp, framep, xnp, indent, 3, fn_argv);
+    /* Third arg is optional; absent means "" */
+    char *opts = (argc >= 3) ? xo_eval_cast_string(xop, argv[2]) : strdup("");
 
     /* want_group: -1 = boolean; 0 = 's' (pmatch[0]); 1+ = 'm'/'mN' */
     int rflags = REG_EXTENDED;
@@ -2971,7 +2970,7 @@ xo_eval_func_rematch (XO_EVAL_ARGS)
 	    break;
 
 	default:
-	    xo_failure_filter(xop, "unknown rematch() flag: '%c'", *op);
+	    xo_eval_fail(xfp, "unknown rematch() flag: '%c'", *op);
 	}
     }
 
@@ -2993,7 +2992,7 @@ xo_eval_func_rematch (XO_EVAL_ARGS)
     int rc = regcomp(&re, pattern, rflags);
     if (rc != 0) {
 	regerror(rc, &re, errbuf, sizeof(errbuf));
-	xo_failure_filter(xop, "rematch: bad pattern '%s': %s", pattern, errbuf);
+	xo_eval_fail(xfp, "rematch: bad pattern '%s': %s", pattern, errbuf);
 	goto rematch_done;
     }
 
@@ -3048,7 +3047,7 @@ xo_eval_func_map_t xo_eval_functions[] = {
     { xo_eval_func_ceiling, "ceiling", 0, 1 },
     { xo_eval_func_choose, "choose", XEFF_NO_EVAL, 3 },
     { xo_eval_func_choose2, "choose2", XEFF_NO_EVAL, 2 },
-    { xo_eval_func_concat, "concat", XEFF_NO_EVAL, -1 },
+    { xo_eval_func_concat, "concat", 0, -1 },
     { xo_eval_func_contains, "contains", 0, 2 },
     { xo_eval_func_ends_with, "ends-with", 0, 2 },
     { xo_eval_func_false, "false", 0, 0 },
@@ -3056,15 +3055,15 @@ xo_eval_func_map_t xo_eval_functions[] = {
     { xo_eval_func_normalize_space, "normalize-space", 0, 1 },
     { xo_eval_func_not, "not", 0, 1 },
     { xo_eval_func_number, "number", 0, 1 },
-    { xo_eval_func_rematch, "rematch", XEFF_NO_EVAL, -1 },
+    { xo_eval_func_rematch, "rematch", 0, -1 },
     { xo_eval_func_round, "round", 0, 1 },
     { xo_eval_func_starts_with, "starts-with", 0, 2 },
     { xo_eval_func_string, "string", 0, 1 },
     { xo_eval_func_string_length, "string-length", 0, 1 },
-    { xo_eval_func_substring, "substring", XEFF_NO_EVAL, -1 },
+    { xo_eval_func_substring, "substring", 0, -1 },
     { xo_eval_func_substring_after, "substring-after", 0, 2 },
     { xo_eval_func_substring_before, "substring-before", 0, 2 },
-    { xo_eval_func_sum, "sum", XEFF_NO_EVAL, -1 },
+    { xo_eval_func_sum, "sum", 0, -1 },
     { xo_eval_func_translate, "translate", 0, 3 },
     { xo_eval_func_true, "true", 0, 0 },
 
@@ -3086,22 +3085,22 @@ xo_eval_function (XO_EVAL_ARGS)
 {
     const char *str = xo_xparse_str(&xfp->xf_xd, xnp->xn_str);
     if (str == NULL) {
-	xo_failure_filter(xop, "unknown function in filter expression");
+	xo_eval_fail(xfp, "unknown function in filter expression");
 	return xo_eval_value_invalid();
     }
 
     xo_eval_func_map_t *entry = xo_eval_find_func(xo_eval_functions, str);
     if (entry == NULL) {
-	xo_failure_filter(xop, "unknown function in filter expression: '%s'",
-			  str);
+	xo_eval_fail(xfp, "unknown function in filter expression: '%s'",
+		     str);
 	return xo_eval_value_invalid();
     }
 
     int fn_argc = xo_eval_argument_count(XO_EVAL_PASS);
 
     if (entry->xfm_nargs >= 0 && fn_argc != entry->xfm_nargs) {
-	xo_failure_filter(xop, "function '%s' requires %d argument(s), got %d",
-			  str, entry->xfm_nargs, fn_argc);
+	xo_eval_fail(xfp, "function '%s' requires %d argument(s), got %d",
+		     str, entry->xfm_nargs, fn_argc);
 	xo_eval_value_t false_val = XO_EVAL_VALUE_BOOLEAN_FALSE;
 	return false_val;
     }
@@ -3153,6 +3152,7 @@ xo_eval (xo_handle_t *xop, xo_filter_t *xfp, xo_tframe_t *framep,
     xo_xparse_node_t *xnp;
     xo_eval_fn_t node_fn = NULL;
     xo_eval_fn_t nested_op_fn = NULL;
+    xo_eval_fn_t unary_op_fn = NULL;
 
     for (; id; id = xnp->xn_next) {
 	xo_xparse_dump_one_node(&xfp->xf_xd, id, indent, "eval (loop): ");
@@ -3162,6 +3162,7 @@ xo_eval (xo_handle_t *xop, xo_filter_t *xfp, xo_tframe_t *framep,
 
 	node_fn = NULL;
 	nested_op_fn = NULL;
+	unary_op_fn = NULL;
 
 	switch (xnp->xn_type) {
 
@@ -3226,7 +3227,7 @@ xo_eval (xo_handle_t *xop, xo_filter_t *xfp, xo_tframe_t *framep,
 	    break;
 
 	case C_NOT:
-	    node_fn = xo_eval_not;
+	    unary_op_fn = xo_eval_not;
 	    break;
 
 	case L_NOTEQUALS:
@@ -3260,8 +3261,8 @@ xo_eval (xo_handle_t *xop, xo_filter_t *xfp, xo_tframe_t *framep,
 	    break;
 
 	default:		/* For now; should be XEVF_UNSUPPORTED */
-	    xo_failure_filter(xop, "filter: unhandle type: '%s'",
-			      xo_xparse_fancy_token_name(xnp->xn_type));
+	    xo_eval_fail(xfp, "filter: unhandle type: '%s'",
+			 xo_xparse_fancy_token_name(xnp->xn_type));
 
 #if 1
 	    /*
@@ -3279,6 +3280,14 @@ xo_eval (xo_handle_t *xop, xo_filter_t *xfp, xo_tframe_t *framep,
 	else if (nested_op_fn)
 	    value = xo_eval(xop, xfp, framep, cname, indent + XO_INDENT,
 			    xnp->xn_contents, nested_op_fn);
+	else if (unary_op_fn) {
+	    xo_eval_value_t operand = xo_eval(xop, xfp, framep, cname,
+					      indent + XO_INDENT,
+					      xnp->xn_contents, NULL);
+	    value = unary_op_fn(xop, xfp, framep, xnp, indent + XO_INDENT,
+				1, &operand);
+	    xo_eval_value_free(operand);
+	}
 
 	if (first) {
 	    first = 0;
@@ -3342,6 +3351,338 @@ xo_eval (xo_handle_t *xop, xo_filter_t *xfp, xo_tframe_t *framep,
  * means we don't have to think about the case where multiple "x"s and
  * "y"s can appear and the predicate is true if any "x" matches any "y".
  */
+
+/*
+ * A compiled XPath predicate: a flat, stack-machine instruction list
+ * produced once by xo_eval_compile() and then replayed cheaply by the
+ * runner for every node under test, instead of re-walking the AST
+ * every time.
+ */
+typedef struct xo_eval_instr_s {
+	xo_eval_fn_t		xei_fn;		/* Operation to perform */
+	xo_xparse_node_id_t	xei_node;	/* Source AST node */
+	uint8_t			xei_argc;	/* Number of values this op consumes */
+	uint16_t		xei_jump;	/* Short-circuit target; 0 means none */
+} xo_eval_instr_t;
+
+typedef struct xo_eval_prog_s {
+	xo_eval_instr_t	*xep_instr;	/* Flat instruction array */
+	uint32_t	 xep_count;	/* Number of instructions emitted */
+	uint32_t	 xep_max;	/* Allocated size of xep_instr */
+} xo_eval_prog_t;
+
+/* Forward decls; these two are meant to be called once Step 5 wires them in */
+xo_eval_prog_t *
+xo_eval_compile (xo_xparse_data_t *xdp, xo_xparse_node_id_t root);
+
+void
+xo_eval_prog_destroy (xo_eval_prog_t *prog);
+
+/*
+ * Append one instruction to 'prog', growing the array as needed.
+ * Returns the new instruction's index, or -1 on allocation failure.
+ */
+static int
+xo_eval_prog_emit (xo_eval_prog_t *prog, xo_eval_fn_t fn,
+		    xo_xparse_node_id_t node, int argc)
+{
+    if (prog->xep_count >= prog->xep_max) {
+	uint32_t new_max = prog->xep_max ? prog->xep_max * 2 : 16;
+	xo_eval_instr_t *new_instr
+	    = xo_realloc(prog->xep_instr, new_max * sizeof(*new_instr));
+	if (new_instr == NULL)
+	    return -1;
+
+	prog->xep_instr = new_instr;
+	prog->xep_max = new_max;
+    }
+
+    xo_eval_instr_t *xip = &prog->xep_instr[prog->xep_count];
+
+    xip->xei_fn = fn;
+    xip->xei_node = node;
+    xip->xei_argc = argc;
+    xip->xei_jump = 0;
+
+    return prog->xep_count++;
+}
+
+/*
+ * Count the nodes in an xn_next-linked operand chain.  Used to size
+ * the backpatch array for short-circuiting K_AND/K_OR chains before
+ * we know how many combine instructions the chain will emit.
+ */
+static int
+xo_eval_count_chain (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
+{
+    int count = 0;
+
+    for ( ; id; ) {
+	xo_xparse_node_t *xnp = xo_xparse_node(xdp, id);
+
+	count += 1;
+	id = xnp->xn_next;
+    }
+
+    return count;
+}
+
+static int
+xo_eval_compile_node (xo_eval_prog_t *prog, xo_xparse_data_t *xdp,
+		       xo_xparse_node_id_t id);
+
+/*
+ * Compile an xn_next-linked chain of operands under a binary
+ * operator, emitting 'combine_fn' between each pair.  For K_AND/K_OR
+ * (shortcircuit is TRUE), every combine instruction's xei_jump is
+ * backpatched to the instruction past the end of the chain, so the
+ * runner can bail out of the rest of the chain the moment a combine
+ * sets XEVF_FINAL, matching xo_eval()'s own short-circuit behavior.
+ */
+static int
+xo_eval_compile_chain (xo_eval_prog_t *prog, xo_xparse_data_t *xdp,
+			xo_xparse_node_id_t id, xo_eval_fn_t combine_fn,
+			int shortcircuit)
+{
+    int nops = xo_eval_count_chain(xdp, id);
+    if (nops < 2)
+	return -1;
+
+    int ncombines = nops - 1;
+    uint32_t *combine_idx = NULL;
+
+    if (shortcircuit) {
+	combine_idx = xo_realloc(NULL, ncombines * sizeof(*combine_idx));
+	if (combine_idx == NULL)
+	    return -1;
+    }
+
+    int first = 1;
+    int ci = 0;
+
+    for ( ; id; ) {
+	xo_xparse_node_t *xnp = xo_xparse_node(xdp, id);
+
+	if (xo_eval_compile_node(prog, xdp, id) < 0) {
+	    if (combine_idx)
+		xo_free(combine_idx);
+	    return -1;
+	}
+
+	if (first) {
+	    first = 0;
+
+	} else {
+	    int idx = xo_eval_prog_emit(prog, combine_fn, id, 2);
+	    if (idx < 0) {
+		if (combine_idx)
+		    xo_free(combine_idx);
+		return -1;
+	    }
+
+	    if (shortcircuit)
+		combine_idx[ci++] = idx;
+	}
+
+	id = xnp->xn_next;
+    }
+
+    if (shortcircuit) {
+	uint16_t end_pc = prog->xep_count;
+
+	for (int i = 0; i < ncombines; i++)
+	    prog->xep_instr[combine_idx[i]].xei_jump = end_pc;
+
+	xo_free(combine_idx);
+    }
+
+    return 0;
+}
+
+/*
+ * Compile a function call.  XEFF_NO_EVAL functions (choose/choose2)
+ * manage their own lazy argument evaluation and still depend on the
+ * old recursive xo_eval(), so they compile to a self-managing leaf
+ * instruction; every other function compiles each argument first and
+ * then emits one instruction with a static argc, matching the
+ * argv[]-based convention the rest of the operations already use.
+ */
+static int
+xo_eval_compile_function (xo_eval_prog_t *prog, xo_xparse_data_t *xdp,
+			   xo_xparse_node_id_t id, xo_xparse_node_t *xnp)
+{
+    const char *str = xo_xparse_str(xdp, xnp->xn_str);
+    if (str == NULL)
+	return -1;
+
+    xo_eval_func_map_t *entry = xo_eval_find_func(xo_eval_functions, str);
+    if (entry == NULL)
+	return -1;
+
+    if (entry->xfm_flags & XEFF_NO_EVAL)
+	return xo_eval_prog_emit(prog, entry->xfm_func, id, 0) >= 0 ? 0 : -1;
+
+    int argc = 0;
+    xo_xparse_node_id_t aid = xnp->xn_contents;
+
+    for ( ; aid; ) {
+	xo_xparse_node_t *anp = xo_xparse_node(xdp, aid);
+
+	if (xo_eval_compile_node(prog, xdp, aid) < 0)
+	    return -1;
+
+	argc += 1;
+	aid = anp->xn_next;
+    }
+
+    return xo_eval_prog_emit(prog, entry->xfm_func, id, argc) >= 0 ? 0 : -1;
+}
+
+/*
+ * Compile a single expression node, mirroring the dispatch switch in
+ * xo_eval().  Unlike xo_eval(), this never combines across an
+ * xn_next chain itself; chains are handled explicitly by the
+ * operators (and function arguments) that walk them.
+ */
+static int
+xo_eval_compile_node (xo_eval_prog_t *prog, xo_xparse_data_t *xdp,
+		       xo_xparse_node_id_t id)
+{
+    xo_xparse_node_t *xnp = xo_xparse_node(xdp, id);
+
+    switch (xnp->xn_type) {
+
+    case C_ATTRIBUTE:
+	return xo_eval_prog_emit(prog, xo_eval_attribute, id, 0) >= 0 ? 0 : -1;
+
+    case C_PATH:
+	return xo_eval_prog_emit(prog, xo_eval_path, id, 0) >= 0 ? 0 : -1;
+
+    case L_DOT:
+	return xo_eval_prog_emit(prog, xo_eval_dot, id, 0) >= 0 ? 0 : -1;
+
+    case C_INDEX:
+	return xo_eval_prog_emit(prog, xo_eval_position, id, 0) >= 0 ? 0 : -1;
+
+    case T_NUMBER:
+	return xo_eval_prog_emit(prog, xo_eval_number, id, 0) >= 0 ? 0 : -1;
+
+    case T_QUOTED:
+	return xo_eval_prog_emit(prog, xo_eval_quoted, id, 0) >= 0 ? 0 : -1;
+
+    case T_VAR:
+	return xo_eval_prog_emit(prog, xo_eval_variable, id, 0) >= 0 ? 0 : -1;
+
+    case C_NOT:
+	if (xo_eval_compile_node(prog, xdp, xnp->xn_contents) < 0)
+	    return -1;
+	return xo_eval_prog_emit(prog, xo_eval_not, id, 1) >= 0 ? 0 : -1;
+
+    case K_AND:
+	return xo_eval_compile_chain(prog, xdp, xnp->xn_contents,
+				      xo_eval_op_and, TRUE);
+
+    case K_OR:
+	return xo_eval_compile_chain(prog, xdp, xnp->xn_contents,
+				      xo_eval_op_or, TRUE);
+
+    case L_EQUALS:
+	return xo_eval_compile_chain(prog, xdp, xnp->xn_contents,
+				      xo_eval_op_equals, FALSE);
+
+    case L_NOTEQUALS:
+	return xo_eval_compile_chain(prog, xdp, xnp->xn_contents,
+				      xo_eval_op_notequals, FALSE);
+
+    case L_GRTR:
+	return xo_eval_compile_chain(prog, xdp, xnp->xn_contents,
+				      xo_eval_op_gt, FALSE);
+
+    case L_GRTREQ:
+	return xo_eval_compile_chain(prog, xdp, xnp->xn_contents,
+				      xo_eval_op_ge, FALSE);
+
+    case L_LESS:
+	return xo_eval_compile_chain(prog, xdp, xnp->xn_contents,
+				      xo_eval_op_lt, FALSE);
+
+    case L_LESSEQ:
+	return xo_eval_compile_chain(prog, xdp, xnp->xn_contents,
+				      xo_eval_op_le, FALSE);
+
+    case L_PLUS:
+	return xo_eval_compile_chain(prog, xdp, xnp->xn_contents,
+				      xo_eval_op_plus, FALSE);
+
+    case L_MINUS:
+	return xo_eval_compile_chain(prog, xdp, xnp->xn_contents,
+				      xo_eval_op_minus, FALSE);
+
+    case L_STAR:
+	return xo_eval_compile_chain(prog, xdp, xnp->xn_contents,
+				      xo_eval_op_mul, FALSE);
+
+    case K_DIV:
+	return xo_eval_compile_chain(prog, xdp, xnp->xn_contents,
+				      xo_eval_op_div, FALSE);
+
+    case K_MOD:
+	return xo_eval_compile_chain(prog, xdp, xnp->xn_contents,
+				      xo_eval_op_mod, FALSE);
+
+    case T_FUNCTION_NAME:
+	return xo_eval_compile_function(prog, xdp, id, xnp);
+
+    case C_EXPR:
+	if (xnp->xn_contents)
+	    return xo_eval_compile_node(prog, xdp, xnp->xn_contents);
+	return -1;
+
+    default:
+	if (xnp->xn_contents)
+	    return xo_eval_compile_node(prog, xdp, xnp->xn_contents);
+	return -1;
+    }
+}
+
+void
+xo_eval_prog_destroy (xo_eval_prog_t *prog)
+{
+    if (prog == NULL)
+	return;
+
+    if (prog->xep_instr)
+	xo_free(prog->xep_instr);
+
+    xo_free(prog);
+}
+
+/*
+ * Compile the XPath expression rooted at 'root' into a flat program
+ * that can be replayed by the runner without re-walking the AST.
+ * Returns NULL on any compile failure (unknown function, unsupported
+ * node type); the caller is responsible for its own error reporting,
+ * since xo_eval_compile() has no xo_handle_t to report through.
+ */
+xo_eval_prog_t *
+xo_eval_compile (xo_xparse_data_t *xdp, xo_xparse_node_id_t root)
+{
+    xo_eval_prog_t *prog = xo_realloc(NULL, sizeof(*prog));
+    if (prog == NULL)
+	return NULL;
+
+    prog->xep_instr = NULL;
+    prog->xep_count = 0;
+    prog->xep_max = 0;
+
+    if (xo_eval_compile_node(prog, xdp, root) < 0) {
+	xo_eval_prog_destroy(prog);
+	return NULL;
+    }
+
+    return prog;
+}
+
 static xo_eval_value_t
 xo_filter_pred_eval (xo_handle_t *xop, xo_filter_t *xfp,
 		     xo_tframe_t *framep, xo_xparse_node_id_t pred_id)
