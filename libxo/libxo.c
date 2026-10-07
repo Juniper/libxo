@@ -3544,7 +3544,7 @@ xo_format_string_direct (xo_handle_t *xop, xo_buffer_t *xbp,
             if (xo_check_for_room(xop, xbp, olen))
                 return -1;
 
-            xo_utf8_emit_char(xbp->xb_curp, olen, wc);
+            xo_utf8_to_bytes(xbp->xb_curp, olen, wc);
             xbp->xb_curp += olen;
             break;
 
