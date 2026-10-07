@@ -47,7 +47,7 @@ self_help () {
 	| awk -F@ '{ printf("        %-16s%s\n", $1, $2); }' | sort
 
     echo " "
-    echo "  verbs can be combine using '+' or removed using '-'"
+    echo "  verbs can be combined using '+' or removed using '-'"
     echo "     e.g. xocc full+errors+sdk-ldflags ..."
 }
 
@@ -228,20 +228,49 @@ parse_verb () {
 find_stage () {
     local compile_only=0
     local sources=0
+    local lang=""
 
-    while [ ! -z "$1" ]; do
+    while [ $# -gt 0 ]; do
 	case "$1" in
 	    -c|-E|-S|-M|-MM|-fsyntax-only)
 		compile_only=1
 		;;
-	    -o)
-		# The output file is never a source, whatever its name
-		shift
+	    -x)
+		# "-x c" makes a source of any file that follows, whatever
+		# its name; "-x none" goes back to using the suffix.
+		lang="$2"
+		[ $# -gt 1 ] && shift
+		;;
+	    -xnone)
+		lang="none"
+		;;
+	    -x*)
+		lang="$1"
+		;;
+	    -o|-include|-imacros|-I|-D|-U|-F|-L|-l|-B|-T|-u|-e|-z)
+		# These options take the next argument, which must not
+		# be classified by its name: "-include cfg.c" is not a
+		# source file to compile, and neither is "-o prog.c".
+		[ $# -gt 1 ] && shift
+		;;
+	    -isystem|-iquote|-idirafter|-isysroot|-iprefix|-iwithprefix)
+		[ $# -gt 1 ] && shift
+		;;
+	    -iwithprefixbefore|-MF|-MT|-MQ|-arch|-target|-framework)
+		[ $# -gt 1 ] && shift
+		;;
+	    -Xclang|-Xlinker|-Xassembler|-Xpreprocessor|-mllvm|--param)
+		[ $# -gt 1 ] && shift
 		;;
 	    -*)
 		;;
 	    *.c|*.i|*.m|*.mi|*.cc|*.cpp|*.cxx|*.C|*.ii|*.mm)
 		sources=1
+		;;
+	    *)
+		if [ ! -z "$lang" -a "$lang" != "none" ]; then
+		    sources=1
+		fi
 		;;
 	esac
 	shift
@@ -256,8 +285,27 @@ find_stage () {
     fi
 }
 
-XO_STAGE=`find_stage "$@"`
-dbg XO_STAGE is ${XO_STAGE}
+#
+# Echo the arguments as one line that can be pasted back into a shell:
+# an argument holding anything but ordinary characters is put in
+# single quotes.
+#
+quote_args () {
+    local line=""
+    local arg
+
+    for arg in "$@"; do
+	case "$arg" in
+	    ""|*[!A-Za-z0-9_./=:+,@%-]*)
+		arg=`printf '%s\n' "$arg" | sed -e "s/'/'\\\\\\\\''/g"`
+		arg="'$arg'"
+		;;
+	esac
+	line="${line}${line:+ }${arg}"
+    done
+
+    printf '%s\n' "$line"
+}
 
 if [ ! -z "${XO_REAL_CC}" ]; then
     # Explictly set implies the user wants our options
@@ -281,6 +329,11 @@ if [ "$1" = "-v" ]; then
 fi
 
 parse_verb "$verb"
+
+# The stage depends on the verb as well as the arguments: a lint-only
+# verb adds -fsyntax-only, which means nothing will be linked.
+XO_STAGE=`find_stage ${syntax} "$@"`
+dbg XO_STAGE is ${XO_STAGE}
 
 if [ "${XO_STAGE}" = "cc" ]; then
     ldflags=""
@@ -307,7 +360,7 @@ fi
 # Libraries follow the user's inputs: a static libxo only supplies
 # symbols to objects that precede it on the command line.
 if [ "$need_dry" = 1 ]; then
-    echo ${COMPILER} "$@" ${ldflags}
+    quote_args ${COMPILER} "$@" ${ldflags}
     exit 0
 fi
 
