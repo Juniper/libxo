@@ -29,8 +29,17 @@ xo_utf8_fold_next (const char *str, size_t len, size_t *ulenp)
 	return (ch >= 'A' && ch <= 'Z') ? ch + 0x20 : ch;
     }
 
-    int ulen = xo_utf8_len(*str);
-    xo_codepoint_t wc = xo_utf8_codepoint(str, len, ulen, 0);
+    int ulen = xo_utf8_len(*str), avail;
+
+    /*
+     * Find how many of the character's bytes are really there, so
+     * that we never look beyond a NUL when 'len' is only a limit.
+     */
+    for (avail = 1; avail < ulen; avail++)
+	if ((size_t) avail == len || str[avail] == '\0')
+	    break;
+
+    xo_codepoint_t wc = xo_utf8_codepoint(str, avail, ulen, 0);
 
     if (xo_utf8_iserror(wc)) {
 	*ulenp = 1;
@@ -42,7 +51,9 @@ xo_utf8_fold_next (const char *str, size_t len, size_t *ulenp)
 }
 
 /**
- * UTF-8 version of strncasecmp(3), but with two lengths
+ * UTF-8 version of strncasecmp(3), but with two lengths.  A string
+ * ends at its length or at a NUL, whichever comes first, so a caller
+ * with NUL-terminated strings can pass SIZE_MAX and save a strlen().
  */
 int
 xo_ustrncasecmp (const char *s1, size_t s1_len, const char *s2, size_t s2_len)
@@ -50,7 +61,7 @@ xo_ustrncasecmp (const char *s1, size_t s1_len, const char *s2, size_t s2_len)
     xo_codepoint_t s1_wchar, s2_wchar;
     size_t s1_wlen, s2_wlen;
 
-    while (s1_len > 0 && s2_len > 0) {
+    while (s1_len > 0 && s2_len > 0 && *s1 != '\0' && *s2 != '\0') {
 	s1_wchar = xo_utf8_fold_next(s1, s1_len, &s1_wlen);
 	s2_wchar = xo_utf8_fold_next(s2, s2_len, &s2_wlen);
 
@@ -64,7 +75,10 @@ xo_ustrncasecmp (const char *s1, size_t s1_len, const char *s2, size_t s2_len)
     }
 
     /* The shorter string sorts first, as with strcasecmp(3) */
-    return (s2_len > 0 ? -1 : s1_len > 0 ? 1 : 0);
+    int more1 = (s1_len > 0 && *s1 != '\0');
+    int more2 = (s2_len > 0 && *s2 != '\0');
+
+    return more2 ? -1 : more1 ? 1 : 0;
 }
 
 /**
