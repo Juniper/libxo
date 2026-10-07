@@ -213,6 +213,13 @@ xo_failure (xo_handle_t *xop, const char *fmt, ...);
 void
 xo_failure_filter (xo_handle_t *xop, const char *fmt, ...);
 
+/*
+ * va_list-taking variant of xo_failure_filter(), for callers that
+ * already hold a va_list.
+ */
+void
+xo_failure_filter_v (xo_handle_t *xop, const char *fmt, va_list vap);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
