@@ -74,6 +74,12 @@ line that contains the error:
     xolint.c: 16: error: anchor format should be "%d"
     16         xo_emit("{[:/%s}");
 .Ed
+.Sh EXIT STATUS
+The
+.Nm
+utility exits 0 if no errors are reported, and >0 if any error is
+reported or an input file cannot be read.
+Warnings and informational messages do not affect the exit status.
 .Sh SEE ALSO
 .Xr libxo 3 ,
 .Xr xo_emit 3
