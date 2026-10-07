@@ -8510,6 +8510,7 @@ xo_do_emit_fields (xo_handle_t *xop, const xo_field_info_t *fields,
     const xo_field_info_t *xfip;
     unsigned field;
     ssize_t rc = 0;
+    int no_columns = 0;		/* Report zero columns to the caller */
 
     /*
      * Two bases for offset resolution:
@@ -8537,15 +8538,14 @@ xo_do_emit_fields (xo_handle_t *xop, const xo_field_info_t *fields,
      * by gettext are reordered, then we need to record start and end
      * for each field.  We'll go ahead and render the fields in the
      * normal order, but later we can then reconstruct the reordered
-     * fields using these fstart/fend values.
+     * fields using these fstart/fend values.  The arrays are made
+     * only when reordering turns up, since the msgstr decides how
+     * many fields there are and it can hold any number of them.
      */
-    unsigned flimit = max_fields * 2; /* Pessimistic limit */
-    unsigned min_fstart = flimit - 1;
+    unsigned min_fstart = 0;
     unsigned max_fend = 0;	      /* Highest recorded fend[] entry */
-    ssize_t fstart[flimit];
-    bzero(fstart, flimit * sizeof(fstart[0]));
-    ssize_t fend[flimit];
-    bzero(fend, flimit * sizeof(fend[0]));
+    ssize_t *fstart = NULL;
+    ssize_t *fend = NULL;
 
     for (xfip = fields, field = 0; field < max_fields && xfip->xfi_ftype;
 	 xfip++, field++) {
@@ -8577,8 +8577,10 @@ xo_do_emit_fields (xo_handle_t *xop, const xo_field_info_t *fields,
 
 	if (ftype == XO_ROLE_NEWLINE) {
 	    xo_line_close(xop);
-	    if (flush_line && xo_flush_h(xop) < 0)
-		return -1;
+	    if (flush_line && xo_flush_h(xop) < 0) {
+		rc = -1;
+		goto done;
+	    }
 	    goto bottom;
 
 	} else if (ftype == XO_ROLE_EBRACE) {
@@ -8694,6 +8696,14 @@ xo_do_emit_fields (xo_handle_t *xop, const xo_field_info_t *fields,
 					       xo_printable(new_fmt));
 				flush_line = 0; /* Must keep at content */
 				XOIF_SET(xop, XOIF_REORDER);
+
+				/* One slot for each field we can visit */
+				sz = new_max_fields * sizeof(fstart[0]);
+				fstart = alloca(sz);
+				bzero(fstart, sz);
+				fend = alloca(sz);
+				bzero(fend, sz);
+				min_fstart = new_max_fields - 1;
 			    }
 
 			    field = -1; /* Will be incremented at top of loop */
@@ -8747,22 +8757,22 @@ xo_do_emit_fields (xo_handle_t *xop, const xo_field_info_t *fields,
 	has_keys |= (flags & XFF_KEY);
     }
 
-    if (XOIF_ISSET(xop, XOIF_FILTERING)) {
-	/*
-	 * If we're filtering, we can look at the fields to see if we
-	 * have any keys.  If we don't we can bail.
-	 */
-	if (has_keys == 0)
-	    return 0;
-    }
-
     if (gettext_changed && gettext_reordered) {
 	/* Final step: rebuild the content using the rendered fields */
 	xo_gettext_rebuild_content(xop, new_fields + 1, fstart, min_fstart,
 				   fend, max_fend);
     }
 
-    XOIF_CLEAR(xop, XOIF_REORDER);
+    if (XOIF_ISSET(xop, XOIF_FILTERING)) {
+	/*
+	 * If we're filtering, we can look at the fields to see if we
+	 * have any keys.  If we don't we can bail.
+	 */
+	if (has_keys == 0) {
+	    no_columns = 1;
+	    goto done;
+	}
+    }
 
     /*
      * If we've got enough data, flush it.
@@ -8775,6 +8785,13 @@ xo_do_emit_fields (xo_handle_t *xop, const xo_field_info_t *fields,
 	if (xo_flush_h(xop) < 0)
 	    rc = -1;
     }
+
+ done:
+    /*
+     * Every way out comes thru here: the translated format, the
+     * reorder flag and the gettext domain belong to this call only.
+     */
+    XOIF_CLEAR(xop, XOIF_REORDER);
 
     if (new_fmt)
 	xo_free(new_fmt);
@@ -8789,7 +8806,10 @@ xo_do_emit_fields (xo_handle_t *xop, const xo_field_info_t *fields,
 	xop->xo_gt_domain = NULL;
     }
 
-    return (rc < 0) ? rc : xop->xo_columns;
+    if (rc < 0)
+	return rc;
+
+    return no_columns ? 0 : xop->xo_columns;
 }
 
 /*
