@@ -2224,6 +2224,22 @@ xo_failure_filter (xo_handle_t *xop, const char *fmt, ...)
 }
 
 /*
+ * va_list-taking variant of xo_failure_filter(), for callers (e.g. the
+ * xo_filter_data_ops_t default backend) that already hold a va_list and
+ * so cannot use the varargs form.  XO_XWF_CHECK_FILT/XO_XWF_NO_EXTERR are
+ * private to this file, so the gating logic has to live here rather than
+ * being re-derived by the caller.
+ */
+void
+xo_failure_filter_v (xo_handle_t *xop, const char *fmt, va_list vap)
+{
+    if (!XOF_ISSET(xop, XOF_FILTER_WARN))
+	return;
+
+    xo_warn_hcv(xop, -1, XO_XWF_CHECK_FILT | XO_XWF_NO_EXTERR, fmt, vap);
+}
+
+/*
  * Error callback bridging xo_parse_t errors to xo_failure()
  */
 static void
