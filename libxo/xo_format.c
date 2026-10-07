@@ -38,7 +38,7 @@ xo_printable2 (const char *str, int len, int bracesp)
     static THREAD_LOCAL(int) bufnum = 0;
 
     if (str == NULL)
-        return "";
+	return "";
 
     if (++bufnum == XO_NUMBUFS)
         bufnum = 0;
@@ -75,6 +75,9 @@ xo_printable2 (const char *str, int len, int bracesp)
 const char *
 xo_printable (const char *str)
 {
+    if (str == NULL)		/* The gettext domain is often not set */
+	return "";
+
     return xo_printable2(str, strlen(str), 0);
 }
 
