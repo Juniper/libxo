@@ -274,11 +274,10 @@ do_work (xo_handle_t *xop, xo_filter_t *xfp, xo_xparse_data_t *xdp,
 	    xo_filter_destroy(xop, xfp);
 
 	    /* In with the new */
-	    xfp = xo_filter_create(NULL);
+	    xfp = xo_get_filter_data(xop, TRUE);
 	    if (xfp == NULL)
 		xo_errx(1, "allocation of filter failed");
 
-	    xo_set_filter_data(xop, xfp);
 	    xdp = xo_filter_xparse_data(xop, xfp);
 
 	    xo_xparse_init(xdp);
@@ -348,12 +347,11 @@ main (int argc, char **argv)
 
     xo_filter_setup_test();
 
-    xo_filter_t *xfp = xo_filter_create(NULL);
+    xo_handle_t *xop = NULL;	/* Use default output handle */
+    xo_filter_t *xfp = xo_get_filter_data(xop, TRUE);
     if (xfp == NULL)
 	xo_errx(1, "allocation of filter failed");
 
-    xo_handle_t *xop = NULL;	/* Use default output handle */
-    xo_set_filter_data(xop, xfp);
     xo_xparse_data_t *xdp = xo_filter_xparse_data(xop, xfp);
 
     xo_xparse_init(xdp);
