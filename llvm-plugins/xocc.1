@@ -93,6 +93,12 @@ These are only needed (and passed) at the link stage.
 Echo the command line for the underlying compiler
 invocation before execution.
 (default: disabled).
+.It Cm dry
+Print the command line for the underlying compiler invocation
+without executing it.
+Arguments are quoted as needed, so the line can be given back to
+the shell.
+(default: disabled).
 .El
 .Pp
 The token
@@ -181,7 +187,9 @@ also inspects the rest of its arguments to tell a compile stage
 .Fl E ,
 or
 .Fl S
-present
+present, or a verb of
+.Cm lint
+alone
 .Pc
 from a link stage.
 The
