@@ -51,8 +51,8 @@ libxo_la_SOURCES = \
     xo_encoder.c \
     xo_format.c \
     xo_syslog.c \
-    xo_tolower.c \
-    xo_toupper.c \
+    xo_utf8_tolower.c \
+    xo_utf8_toupper.c \
     xo_utf8.c \
     xo_utf8_chr.c \
     xo_utf8_clen.c \
@@ -96,7 +96,8 @@ man3_files = \
     xo_set_syslog_enterprise_id.3 \
     xo_set_version.3 \
     xo_set_writer.3 \
-    xo_syslog.3
+    xo_syslog.3 \
+    xo_utf8.3
 
 man5_files = \
     xo_format.5
