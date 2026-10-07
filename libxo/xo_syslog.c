@@ -890,7 +890,9 @@ xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
     /*
      * Now for the real content.  We make two distinct passes thru the
      * xo_emit engine, first for the SD-PARAMS and then for the text
-     * message.
+     * message.  Both passes read the arguments from 'ap', which works
+     * because xo_emit_hv makes its own copy and leaves ours at the
+     * start; 'ap' must stay live until the second pass is done.
      */
     va_list ap;
     va_copy(ap, vap);
@@ -901,8 +903,6 @@ xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
     errno = saved_errno;	/* Restore saved error value */
     xo_emit_hv(xop, fmt, ap);
     xo_flush_h(xop);
-
-    va_end(ap);
 
     /* Trim trailing space */
     if (xb.xb_curp[-1] == ' ')
@@ -931,6 +931,8 @@ xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
     errno = saved_errno;	/* Restore saved error value */
     xo_emit_hv(xop, fmt, ap);
     xo_flush_h(xop);
+
+    va_end(ap);
 
     /* Remove a trailing newline */
     if (xb.xb_curp[-1] == '\n')
