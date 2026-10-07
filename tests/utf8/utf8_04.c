@@ -36,8 +36,7 @@
 
 #define GUARD '#'		/* Fills buffers to catch overruns */
 
-/* Not const, since xo_ustrchrnul takes a plain "char *" */
-static char sample[] = "caf" E_ACUTE " " EURO "5 " SMILE " caf" E_ACUTE;
+static const char sample[] = "caf" E_ACUTE " " EURO "5 " SMILE " caf" E_ACUTE;
 
 /* Return the offset of a pointer in a string, or -1 for NULL */
 static long
@@ -335,7 +334,7 @@ test_compare (void)
 
     xo_close_list("compare");
 
-    /* "limit-splits" and "limit-split-same" are where strncmp differs */
+    /* The "cut-" tests are where strncmp differs */
     static struct {
 	const char *name;
 	const char *s1;
@@ -352,6 +351,13 @@ test_compare (void)
 	{ "limit-whole", E_ACUTE "x", E_ACUTE "y", 2 },
 	{ "ascii-vs-multi", "abc", "ab" EURO, 3 },
 	{ "zero", "abc", "xyz", 0 },
+	{ "cut-inside", "a" EURO, "a\xe2\x83\xac", 3 },
+	{ "cut-first-bytes", "a" EURO, "a" SMILE, 3 },
+	{ "cut-vs-ascii", "ab", "a" E_ACUTE, 2 },
+	{ "cut-vs-whole", "a" E_ACUTE, "a" EURO, 3 },
+	{ "cut-vs-nul", "a", "a" EURO, 3 },
+	{ "whole-differs", "a" EURO, "a\xe2\x83\xac", 4 },
+	{ "stray-secondary", "a\x82" "b", "a\x83" "b", 2 },
 	{ NULL, NULL, NULL, 0 }
     };
 
@@ -575,6 +581,207 @@ test_concat (void)
 	    rc, buf[5]);
 }
 
+/* Walk a string forward with xo_utf8_next and back with xo_utf8_prev */
+static void
+test_walk (void)
+{
+    static const char *tests[] = {
+	"a" E_ACUTE EURO SMILE "z",
+	"plain",
+	"",
+	"x\xa9" "y",		/* Stray secondary byte */
+	"x" "\xe2\x82",		/* Truncated character at the end */
+	"\x82\xac" "x",		/* Leading secondary bytes */
+	NULL
+    };
+
+    xo_open_list("walk");
+
+    for (int i = 0; tests[i]; i++) {
+	const char *str = tests[i], *cp;
+
+	xo_open_instance("walk");
+	xo_emit("walk {k:test/%d}: next", i);
+
+	for (cp = str; cp && *cp; cp = xo_utf8_next(cp))
+	    xo_emit(" {l:next/%ld}", offset(str, cp));
+	xo_emit(" {:next-end/%ld} prev", offset(str, cp));
+
+	for (cp = str + strlen(str); cp; cp = xo_utf8_prev(str, cp))
+	    xo_emit(" {l:prev/%ld}", offset(str, cp));
+	xo_emit("\n");
+
+	xo_close_instance("walk");
+    }
+
+    xo_close_list("walk");
+
+    /* The n-version must not step beyond its length */
+    const char *str = "a" EURO "z";
+
+    xo_open_list("nnext");
+    for (size_t len = 0; len <= 5; len++) {
+	xo_open_instance("nnext");
+	xo_emit("nnext {k:len/%zu}: {:from-start/%ld} {:from-euro/%ld}\n",
+		len, offset(str, xo_utf8_nnext(str, len)),
+		len ? offset(str, xo_utf8_nnext(str + 1, len - 1)) : -1);
+	xo_close_instance("nnext");
+    }
+    xo_close_list("nnext");
+
+    xo_emit("walk edges: {:next-at-nul/%ld} {:prev-null/%ld} "
+	    "{:prev-at-start/%ld}\n",
+	    offset(str, xo_utf8_next(str + strlen(str))),
+	    offset(str, xo_utf8_prev(str, NULL)),
+	    offset(str, xo_utf8_prev(str, str)));
+}
+
+static void
+test_trunc (void)
+{
+    static const char src[] = "a" E_ACUTE EURO SMILE "z";
+    char buf[32];
+
+    xo_open_list("trunc");
+
+    for (size_t len = 0; len < sizeof(src); len++) {
+	xo_open_instance("trunc");
+
+	strcpy(buf, src);
+	size_t rc = xo_utrunc(buf, len);
+	xo_emit("trunc {k:len/%zu}: {:trunc-rc/%zu} {:valid/%s}",
+		len, rc, xo_utf8_valid(buf) ? "invalid" : "valid");
+	emit_hex("result", buf);
+
+	xo_close_instance("trunc");
+    }
+
+    xo_close_list("trunc");
+}
+
+static void
+test_case (void)
+{
+    static struct {
+	const char *name;
+	xo_codepoint_t wc;
+    } wide[] = {
+	{ "a", 'a' },
+	{ "A", 'A' },
+	{ "digit", '5' },
+	{ "nul", 0 },
+	{ "e-acute", 0xe9 },
+	{ "E-acute", 0xc9 },
+	{ "sharp-s", 0xdf },
+	{ "greek-sigma", 0x3c3 },
+	{ "greek-Sigma", 0x3a3 },
+	{ "cyrillic-zhe", 0x436 },
+	{ "cyrillic-Zhe", 0x416 },
+	{ "euro", 0x20ac },
+	{ "smile", 0x1f600 },
+	{ "deseret-long-i", 0x10428 },
+	{ "deseret-Long-I", 0x10400 },
+	{ "surrogate", 0xd800 },
+	{ "beyond", 0x110000 },
+	{ NULL, 0 }
+    };
+
+    xo_open_list("wide");
+
+    for (int i = 0; wide[i].name; i++) {
+	xo_codepoint_t wc = wide[i].wc;
+
+	xo_open_instance("wide");
+	xo_emit("wide {k:name}: {:lower/%d} {:upper/%d} "
+		"{:to-lower/%#x} {:to-upper/%#x}\n",
+		wide[i].name, xo_utf8_wislower(wc) ? 1 : 0,
+		xo_utf8_wisupper(wc) ? 1 : 0,
+		xo_utf8_wtolower(wc), xo_utf8_wtoupper(wc));
+	xo_close_instance("wide");
+    }
+
+    xo_close_list("wide");
+
+    static const char *strs[] = {
+	"abc", "Abc", E_ACUTE "t" E_ACUTE, E_ACUTE_UP "t" E_ACUTE,
+	EURO, "\xff", "", NULL
+    };
+
+    xo_open_list("first");
+
+    for (int i = 0; strs[i]; i++) {
+	xo_open_instance("first");
+	xo_emit("first {k:test/%d}: {:islower/%d} {:isupper/%d} "
+		"{:nislower-1/%d} {:nisupper-1/%d}\n", i,
+		xo_utf8_islower(strs[i]) ? 1 : 0,
+		xo_utf8_isupper(strs[i]) ? 1 : 0,
+		xo_utf8_nislower(strs[i], 1) ? 1 : 0,
+		xo_utf8_nisupper(strs[i], 1) ? 1 : 0);
+	xo_close_instance("first");
+    }
+
+    xo_close_list("first");
+
+    xo_emit("first null: {:nislower-null/%d} {:nisupper-null/%d} "
+	    "{:nislower-zero/%d} {:nisupper-zero/%d}\n",
+	    xo_utf8_nislower(NULL, 4) ? 1 : 0,
+	    xo_utf8_nisupper(NULL, 4) ? 1 : 0,
+	    xo_utf8_nislower("a", 0) ? 1 : 0,
+	    xo_utf8_nisupper("A", 0) ? 1 : 0);
+}
+
+/*
+ * The n-versions must stay inside their length, even when it falls
+ * short of the NUL or lands inside a character.
+ */
+static void
+test_bounded (void)
+{
+    static const char src[] = "Ab" E_ACUTE_UP "c" E_ACUTE "D" EURO "\xff" "E";
+    char buf[32];
+
+    xo_open_list("bounded");
+
+    for (size_t len = 0; len < sizeof(src); len++) {
+	xo_open_instance("bounded");
+
+	xo_emit("bounded {k:len/%zu}: {:nvalid/%ld}",
+		len, offset(src, xo_utf8_nvalid(src, len)));
+
+	strcpy(buf, src);
+	xo_utf8_ntolower(buf, len);
+	emit_hex("ntolower", buf);
+
+	strcpy(buf, src);
+	xo_utf8_ntoupper(buf, len);
+	xo_emit(" ");
+	emit_hex("ntoupper", buf);
+
+	strcpy(buf, src);
+	int rc = xo_utf8_nmakevalid(buf, len, '?');
+	xo_emit("  {:nmakevalid-rc/%d}", rc);
+	emit_hex("nmakevalid", buf);
+
+	xo_close_instance("bounded");
+    }
+
+    xo_close_list("bounded");
+
+    /* A NUL replacement ends the string at the first bad byte */
+    strcpy(buf, "ab\xff" "cd\xff" "e");
+    int rc = xo_utf8_makevalid(buf, '\0');
+    xo_emit("makevalid nul: {:makevalid-rc/%d}", rc);
+    emit_hex("makevalid", buf);
+
+    /* Case-blind compares must stop at a NUL inside the given length */
+    xo_emit("ncasecmp: {:nul-stops/%d} {:prefix/%d} {:length-stops/%d} "
+	    "{:half/%d}\n",
+	    xo_ustrncasecmp("ABC\0x", 5, "abc\0y", 5),
+	    xo_ustrncasecmp("abc", 100, "ABCD", 100),
+	    xo_ustrncasecmp("abcX", 3, "ABCy", 3),
+	    xo_ustrncasecmp("a\xc3", 100, "A\xc3", 100));
+}
+
 int
 main (int argc, char **argv)
 {
@@ -594,6 +801,10 @@ main (int argc, char **argv)
     test_sep();
     test_copy();
     test_concat();
+    test_walk();
+    test_trunc();
+    test_case();
+    test_bounded();
 
     xo_close_container("top");
     xo_finish();
