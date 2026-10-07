@@ -264,7 +264,7 @@ In the HTML style, the original numeric value is rendered in the
 .. _int-group-modifier:
 
 The Int-Group Modifier ({i:})
-++++++++++++++++++++++++++++
++++++++++++++++++++++++++++++
 
 .. index:: Field Modifiers; Int-Group
 
