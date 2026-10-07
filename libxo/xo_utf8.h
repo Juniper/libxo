@@ -106,14 +106,14 @@ xo_utf8_wchar_errmsg (xo_codepoint_t wc);
 #define xo_strchrnul strchrnul
 #else /* HAVE_STRCHRNUL */
 static inline char *
-xo_strchrnul (char *str, int c)
+xo_strchrnul (const char *str, int c)
 {
     unsigned char ch = (unsigned char) c; /* Trim value */
 
     for ( ; *str && *str != ch; str++)
 	continue;
 
-    return (char *) str;
+    return xo_utf8_unconst(str);
 }
 #endif /* HAVE_STRCHRNUL */
 
@@ -215,7 +215,8 @@ xo_utf8_len (char ch)
 }
 
 /**
- * Determine the number of bytes needed to encode a wide character.
+ * Determine the number of bytes needed to encode a wide character,
+ * or -1 if it has no UTF-8 form.
  */
 static inline ssize_t
 xo_utf8_to_len (xo_codepoint_t wc)
@@ -224,9 +225,20 @@ xo_utf8_to_len (xo_codepoint_t wc)
 	return 1;
     if ((wc & 0x7ff) == wc)
 	return 2;
+
+    /*
+     * Two ranges have no UTF-8 form, though the bit patterns would
+     * hold them.  U+D800 thru U+DFFF are the surrogates, which UTF-16
+     * uses in pairs to build the codepoints above U+FFFF; they are
+     * not characters and must not appear in UTF-8.  And Unicode ends
+     * at U+10FFFF, the most that UTF-16 can reach, so anything above
+     * it is not a codepoint.  xo_utf8_codepoint() rejects both.
+     */
+    if (wc >= 0xd800 && wc <= 0xdfff)
+	return -1;
     if ((wc & 0xffff) == wc)
 	return 3;
-    if ((wc & 0x1fffff) == wc)
+    if (wc <= 0x10ffff)
 	return 4;
     return -1;		/* Invalid input wchar */
 }
@@ -262,30 +274,6 @@ xo_utf8_to_bytes (char *buf, ssize_t len, xo_codepoint_t wc)
 }
 
 /**
- * Emit one wide character into the given buffer
- */
-static inline void
-xo_utf8_emit_char (char *buf, ssize_t len, xo_codepoint_t wc)
-{
-    ssize_t i;
-
-    if (len == 1) { /* Simple case */
-	buf[0] = wc & 0x7f;
-	return;
-    }
-
-    /* Start with the low bits and insert them, six bits at a time */
-    for (i = len - 1; i >= 0; i--) {
-	buf[i] = 0x80 | (wc & 0x3f);
-	wc >>= 6;		/* Drop the low six bits */
-    }
-
-    /* Finish off the first byte with the length bits */
-    buf[0] &= xo_utf8_data_bits(len); /* Clear out the length bits */
-    buf[0] |= xo_utf8_len_bits(len); /* Drop in new length bits */
-}
-
-/**
  * Return the codepoint for a UTF-8 character.  The 'len' is a value
  * returned by xo_utf8_len(), and the buf/bufsiz should be sufficient
  * for this length.  The 'on_err' value is what is returned when an
@@ -304,14 +292,14 @@ xo_utf8_codepoint (const char *buf, size_t bufsiz, int len,
  * start of invalid character.
  */
 char *
-xo_utf8_nvalid (char *str, size_t len);
+xo_utf8_nvalid (const char *str, size_t len);
 
 /**
  * Inspect a string to see if it's valid UTF-8.  Returns either NULL
  * indicating success, or a pointer to the start of invalid character.
  */
 static inline char *
-xo_utf8_valid (char *str)
+xo_utf8_valid (const char *str)
 {
     return xo_utf8_nvalid(str, strlen(str));
 }
@@ -366,9 +354,9 @@ xo_utf8_wisupper (xo_codepoint_t wc)
  * case codepoint.
  */
 static inline int
-xo_utf8_nislower (char *str, size_t len)
+xo_utf8_nislower (const char *str, size_t len)
 {
-    if (len == 0)
+    if (str == NULL || len == 0)
 	return 0;
 
     int ulen = xo_utf8_len(*str);
@@ -381,7 +369,7 @@ xo_utf8_nislower (char *str, size_t len)
  * case codepoint.
  */
 static inline int
-xo_utf8_islower (char *str)
+xo_utf8_islower (const char *str)
 {
     return xo_utf8_nislower(str, strlen(str));
 }
@@ -391,7 +379,7 @@ xo_utf8_islower (char *str)
  * case codepoint.
  */
 static inline int
-xo_utf8_nisupper (char *str, size_t len)
+xo_utf8_nisupper (const char *str, size_t len)
 {
     if (str == NULL || len == 0)
 	return 0;
@@ -405,7 +393,7 @@ xo_utf8_nisupper (char *str, size_t len)
  * Return non-zero if the next UTF-8 character an upper case codepoint
  */
 static inline int
-xo_utf8_isupper (char *str)
+xo_utf8_isupper (const char *str)
 {
     return xo_utf8_nisupper(str, strlen(str));
 }
@@ -416,7 +404,7 @@ xo_utf8_isupper (char *str)
  * is encountered.
  */
 static inline char *
-xo_utf8_nnext (char *str, size_t len)
+xo_utf8_nnext (const char *str, size_t len)
 {
     if (len == 0 || *str == '\0')
 	return NULL;
@@ -426,7 +414,7 @@ xo_utf8_nnext (char *str, size_t len)
     if (xo_utf8_iserror(wc))
 	ulen = 1;		/* Invalid UTF-8 character */
 
-    return str + ulen;
+    return xo_utf8_unconst(str + ulen);
 }
 
 /**
@@ -434,7 +422,7 @@ xo_utf8_nnext (char *str, size_t len)
  * Returns NULL when a NUL byte is encountered.
  */
 static inline char *
-xo_utf8_next (char *str)
+xo_utf8_next (const char *str)
 {
     return xo_utf8_nnext(str, strlen(str));
 }
@@ -444,22 +432,17 @@ xo_utf8_next (char *str)
  * NULL when the start of the string is encountered.
  */
 static inline char *
-xo_utf8_prev (char *start, char *cur)
+xo_utf8_prev (const char *start, const char *cur)
 {
-    char *cp;
+    const char *cp;
 
     if (cur == NULL || start == NULL || cur <= start)
 	return NULL;
 
     for (cp = cur - 1;; cp--) {
-	if (!xo_is_utf8_byte(*cp)) /* ASCII */
-	    return cp;		  /* The simple case */
-
-	if (xo_is_utf8_len_byte(*cp))
-	    return cp;		  /* Success */
-
+	/* Anything but a secondary byte starts a character */
 	if (!xo_is_utf8_secondary_byte(*cp))
-	    return cp;		  /* Invalid utf-8 character */
+	    return xo_utf8_unconst(cp);
 
 	if (cp == start)	  /* Hit the start of string */
 	    return NULL;
@@ -470,7 +453,7 @@ xo_utf8_prev (char *start, char *cur)
  * Convert a string to lower case.
  */
 void
-xo_utf8_ntolower (char * restrict str, size_t len);
+xo_utf8_ntolower (char *str, size_t len);
 
 /**
  * Convert a string to lower case.
@@ -485,7 +468,7 @@ xo_utf8_tolower (char *str)
  * Convert a string to upper case.
  */
 void
-xo_utf8_ntoupper (char * str, size_t len);
+xo_utf8_ntoupper (char *str, size_t len);
 
 /**
  * Convert a string to upper case.
@@ -497,10 +480,11 @@ xo_utf8_toupper (char *str)
 }
 
 /**
- * UTF-8 version of strncasecmp(3)
+ * UTF-8 version of strncasecmp(3), but with a length for each string.
+ * A string ends at its length or at a NUL, whichever comes first.
  */
 int
-xo_ustrncasecmp (const char *s1, size_t s1_len, const char *s2, size_t s2_len );
+xo_ustrncasecmp (const char *s1, size_t s1_len, const char *s2, size_t s2_len);
 
 /**
  * UTF-8 version of strcasecmp(3)
@@ -508,7 +492,7 @@ xo_ustrncasecmp (const char *s1, size_t s1_len, const char *s2, size_t s2_len );
 static inline int
 xo_ustrcasecmp (const char *s1, const char *s2)
 {
-    return xo_ustrncasecmp(s1, strlen(s1), s2, strlen(s2));
+    return xo_ustrncasecmp(s1, SIZE_MAX, s2, SIZE_MAX);
 }
 
 /**
@@ -600,7 +584,7 @@ char *
 xo_ustrchrnul_long (const char *str, xo_codepoint_t c);
 
 static inline char *
-xo_ustrchrnul (char *str, xo_codepoint_t c)
+xo_ustrchrnul (const char *str, xo_codepoint_t c)
 {
     if (c < 0x80)
 	return xo_strchrnul(str, c);
@@ -623,8 +607,8 @@ xo_ustrcspn (const char *str, const char *charset);
 
 /**
  * UTF-8 version of strndup(3).  At most 'len' bytes are duplicated,
- * less if the copy would end with part of a character.  The caller must free(3) the
- * result.
+ * less if the copy would end with part of a character.  The caller
+ * must free(3) the result.
  */
 char *
 xo_ustrndup (const char *str, size_t len);
@@ -685,9 +669,9 @@ char *
 xo_ustrsep (char **stringp, const char *delim);
 
 /**
- * UTF-8 version of strncmp(3).  A character that 'len' lands inside
- * is compared whole, so up to three bytes past 'len' may be read
- * (never past a NUL).
+ * UTF-8 version of strncmp(3).  A character that 'len' cuts short
+ * is discarded, as if its string ended before it.  Nothing at or
+ * beyond 'len' is read.
  */
 int
 xo_ustrncmp (const char *s1, const char *s2, size_t len);
