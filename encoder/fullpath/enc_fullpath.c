@@ -51,9 +51,15 @@ fullpath_create (xo_handle_t *xop)
     xo_buf_append_val(&fpp->fp_leader, "/", 1); /* Start with leading '/' */
 
     xo_off_t *sp = xo_realloc(NULL, XO_FP_DEFAULT_STACK_SIZE * sizeof(*sp));
+    if (sp == NULL) {
+	xo_buf_cleanup(&fpp->fp_data);
+	xo_buf_cleanup(&fpp->fp_leader);
+	xo_free(fpp);
+	return -1;
+    }
+
     fpp->fp_stack_cur = fpp->fp_stack = sp;
-    if (sp)
-	fpp->fp_stack_size = XO_FP_DEFAULT_STACK_SIZE;
+    fpp->fp_stack_size = XO_FP_DEFAULT_STACK_SIZE;
 
     xo_set_private(xop, fpp);
 
@@ -97,11 +103,17 @@ fullpath_stack_pop (fullpath_private_t *fpp)
  * Clean up and release any data in use by this handle
  */
 static void
-fullpath_destroy (xo_handle_t *xop UNUSED, fullpath_private_t *fpp)
+fullpath_destroy (xo_handle_t *xop, fullpath_private_t *fpp)
 {
     /* Clean up */
     xo_buf_cleanup(&fpp->fp_data);
     xo_buf_cleanup(&fpp->fp_leader);
+
+    if (fpp->fp_stack)
+	xo_free(fpp->fp_stack);
+
+    xo_free(fpp);
+    xo_set_private(xop, NULL);
 }
 
 /*
@@ -145,36 +157,41 @@ fullpath_options (xo_handle_t *xop, fullpath_private_t *fpp,
 }
 
 /*
- * Escape a string suitable for adding it to our xpath expression
+ * Append a value to a buffer, escaped so it can sit inside the quotes
+ * of our xpath expression.  Quotes and backslashes get a backslash,
+ * and control characters are spelled out so each value stays on one
+ * line.  Bytes with the high bit set are parts of UTF-8 characters
+ * and pass thru untouched, which is why the tests are made on an
+ * unsigned value.
  */
-static char *
-fullpath_escape (char *buf, xo_ssize_t bufsiz, const char *str)
+static void
+fullpath_append_escaped (xo_buffer_t *xbp, const char *str)
 {
-    const char *cp;
-    char *op, *ep;
-    
+    const char *cp, *sp;	/* 'sp' is the start of the unwritten run */
+    char esc[8];
 
-    for (op = buf, cp = str, ep = buf + bufsiz - 1; *cp && op < ep; cp++) {
-	if (*cp < 26) {
-	    *op++ = '\\';
-	    *op++ = 'a' + *cp;
-	    continue;
-	}
+    for (sp = cp = str; *cp; cp++) {
+	unsigned char ch = (unsigned char) *cp;
 
-	switch (*cp) {
-	case '\'':
-	case '\"':
-	    *op++ = '\\';
-	    *op++ = *cp;
-	    continue;
-	}
-	
-	*op++ = *cp;
+	if (ch == '\\' || ch == '\'' || ch == '"')
+	    snprintf(esc, sizeof(esc), "\\%c", ch);
+	else if (ch == '\n')
+	    snprintf(esc, sizeof(esc), "\\n");
+	else if (ch == '\r')
+	    snprintf(esc, sizeof(esc), "\\r");
+	else if (ch == '\t')
+	    snprintf(esc, sizeof(esc), "\\t");
+	else if (ch < 0x20 || ch == 0x7f)
+	    snprintf(esc, sizeof(esc), "\\u%04x", ch);
+	else
+	    continue;		/* Nothing to escape; extend the run */
+
+	xo_buf_append(xbp, sp, cp - sp);
+	xo_buf_append_str(xbp, esc);
+	sp = cp + 1;
     }
 
-    *op = '\0';
-
-    return buf;
+    xo_buf_append(xbp, sp, cp - sp);
 }
 
 static int
@@ -240,9 +257,6 @@ fullpath_handler (XO_ENCODER_HANDLER_ARGS)
 
 	int is_pretty = xo_isset_flags(xop, XOF_PRETTY);
 
-	xo_ssize_t esc_size = 2 * strlen(value);
-	char *esc_value = fullpath_escape(alloca(esc_size), esc_size, value);
-
 	if (flags & XFF_KEY) {	 /* Keys turn into predicates */
 	    const char *equals = (fpp->fp_flags & FPF_SLAX)
 		? (is_pretty ? " == '" : "=='")
@@ -252,7 +266,7 @@ fullpath_handler (XO_ENCODER_HANDLER_ARGS)
 	    xo_buf_append_val(leader, "[", 1);
 	    xo_buf_append_str(leader, name);
 	    xo_buf_append_str(leader, equals);
-	    xo_buf_append_str(leader, esc_value);
+	    fullpath_append_escaped(leader, value);
 	    xo_buf_append_str(leader, "']/");
 	    xo_buf_force_nul(leader);
 	    break;
@@ -262,7 +276,7 @@ fullpath_handler (XO_ENCODER_HANDLER_ARGS)
 	xo_buf_append_buf(xbp, leader); /* Start with our leading string */
 	xo_buf_append_str(xbp, name);
 	xo_buf_append_str(xbp, is_pretty ? " = '" : "='");
-	xo_buf_append_str(xbp, esc_value);
+	fullpath_append_escaped(xbp, value);
 	xo_buf_append_str(xbp, "'\n");
 
 	if (!(fpp->fp_flags & FPF_FLUSH))
@@ -283,6 +297,7 @@ fullpath_handler (XO_ENCODER_HANDLER_ARGS)
 
     case XO_OP_DESTROY:		   /* Clean up function */
 	fullpath_destroy(xop, fpp);
+	leader = NULL;		/* It lived in the data we just freed */
 	break;
 
     case XO_OP_ATTRIBUTE:	   /* Attribute name/value */
