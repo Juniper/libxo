@@ -13,13 +13,34 @@
 #include "xo.h"
 #include "xo_utf8.h"
 
+/*
+ * Return non-zero if the character holding str[off] is one that
+ * 'len' cuts short.  The first byte of a character is at most three
+ * bytes back, and says how long the character is.  Only bytes inside
+ * 'len' are examined.
+ */
+static inline int
+xo_utf8_inside_char (const char *str, size_t off, size_t len)
+{
+    size_t start = off;
+
+    while (start > 0 && off - start < 3
+	   && xo_is_utf8_secondary_byte(str[start]))
+	start -= 1;
+
+    if (!xo_is_utf8_len_byte(str[start]))
+	return 0;		/* ASCII, or a stray secondary byte */
+
+    return (start + xo_utf8_len(str[start]) > len);
+}
+
 /**
  * UTF-8 version of strncmp(3).  The strings are compared as bytes,
  * which for UTF-8 is also codepoint order.  The difference lies at
- * the limit: when 'len' lands inside a character, strncmp sees only
- * the bytes the two characters share and calls them equal.  We
- * finish comparing that character, so up to three bytes past 'len'
- * may be read, but never past a NUL.
+ * the limit: a character that 'len' cuts short is discarded, as if
+ * its string ended before it, where strncmp would compare the bytes
+ * of it that fall inside 'len'.  Nothing at or beyond 'len' is read,
+ * so the strings need not be NUL-terminated.
  */
 int
 xo_ustrncmp (const char *s1, const char *s2, size_t len)
@@ -28,24 +49,27 @@ xo_ustrncmp (const char *s1, const char *s2, size_t len)
     const unsigned char *u2 = (const unsigned char *) s2;
     size_t i;
 
-    if (len == 0)
-	return 0;
-
     for (i = 0; i < len; i++) {
-	if (u1[i] != u2[i])
-	    return u1[i] - u2[i];
+	if (u1[i] != u2[i]) {
+	    /*
+	     * A string whose character is cut short ends here.  When
+	     * the bytes differ inside one character, both are cut and
+	     * the strings are equal; when they differ at the start of
+	     * a character, either side may be the one that is cut.
+	     */
+	    int c1 = xo_utf8_inside_char(s1, i, len) ? 0 : u1[i];
+	    int c2 = xo_utf8_inside_char(s2, i, len) ? 0 : u2[i];
+
+	    return c1 - c2;
+	}
+
 	if (u1[i] == '\0')
-	    return 0;
+	    break;
     }
 
     /*
-     * Everything matched up to the limit.  A secondary byte here
-     * means the limit split a character, so keep going to its end.
+     * Everything matched.  If the last character is cut short, it is
+     * cut the same way in both strings, so they are still equal.
      */
-    for ( ; xo_is_utf8_secondary_byte(s1[i])
-	      || xo_is_utf8_secondary_byte(s2[i]); i++)
-	if (u1[i] != u2[i])
-	    return u1[i] - u2[i];
-
     return 0;
 }
