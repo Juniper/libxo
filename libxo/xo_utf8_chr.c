@@ -23,16 +23,7 @@ xo_utf8_encode (char *buf, xo_codepoint_t wc)
 {
     ssize_t len = xo_utf8_to_len(wc);
 
-    /*
-     * Two ranges have no UTF-8 form, though the bit patterns would
-     * hold them.  Unicode ends at U+10FFFF, the most that UTF-16 can
-     * reach, so anything above it is not a codepoint.  U+D800 thru
-     * U+DFFF are the surrogates, which UTF-16 uses in pairs to build
-     * the codepoints above U+FFFF; they are not characters and must
-     * not appear in UTF-8.  xo_utf8_codepoint() rejects both, so no
-     * valid string can hold either one and there is nothing to find.
-     */
-    if (len <= 0 || wc > 0x10ffff || (wc >= 0xd800 && wc <= 0xdfff))
+    if (len <= 0)		/* No UTF-8 form, so nothing to find */
 	return -1;
 
     xo_utf8_to_bytes(buf, len, wc);
