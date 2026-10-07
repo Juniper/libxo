@@ -9758,6 +9758,11 @@ xo_do_close_container (xo_handle_t *xop, const char *name)
 	break;
 
     case XO_STYLE_SDPARAMS:
+	/*
+	 * There is nothing to write, but the open pushed a frame (and
+	 * an indent) that has to come off again.
+	 */
+	xo_depth_change(xop, name, -1, -1, XSS_CLOSE_CONTAINER, 0, 0, 0);
 	break;
 
     case XO_STYLE_ENCODER:
@@ -10345,6 +10350,11 @@ xo_do_close_instance (xo_handle_t *xop, const char *name)
 	break;
 
     case XO_STYLE_SDPARAMS:
+	/*
+	 * There is nothing to write, but the open pushed a frame (and
+	 * an indent) that has to come off again.
+	 */
+	xo_depth_change(xop, name, -1, -1, XSS_CLOSE_INSTANCE, 0, 0, 0);
 	break;
 
     case XO_STYLE_ENCODER:
