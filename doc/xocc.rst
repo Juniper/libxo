@@ -47,6 +47,10 @@ joined with `+` (enabled) or `-` (disabled):
 - **echo** - Echo the command line for the underlying compiler
   invocation before execution.  (default: disabled).
 
+- **dry** - Print the command line for the underlying compiler
+  invocation without executing it.  Arguments are quoted as needed,
+  so the line can be given back to the shell.  (default: disabled).
+
 The token full is a shorthand for turning on validate, lint, and
 precompile together.  It is a provided since this is the typical use
 case::
@@ -103,7 +107,8 @@ specified using the `XO_REAL_CC`, environment variable:
        XO_REAL_CC=/usr/local/bin/clang-19 make CC='xocc full'
 
 `xocc` also inspects the rest of its arguments to tell a compile stage
-(`-c`, `-E`, or `-S` present) from a link stage.  The `-L${libdir}
+(`-c`, `-E`, or `-S` present, or a verb of `lint` alone) from a link
+stage.  The `-L${libdir}
 -lxo` from the `ldflags` token is only ever added at the link stage -
 `xocc` suppresses it automatically for a compile-only invocation even
 if `ldflags` is on, since there's nothing to link yet::
