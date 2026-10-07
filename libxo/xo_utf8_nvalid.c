@@ -18,10 +18,10 @@
  * indicating success, or a pointer to the start of invalid character.
  */
 char *
-xo_utf8_nvalid (char *str, size_t len)
+xo_utf8_nvalid (const char *str, size_t len)
 {
-    char *cp;
-    char *ep;
+    const char *cp;
+    const char *ep;
     xo_codepoint_t wc;
 
     /*
@@ -38,7 +38,7 @@ xo_utf8_nvalid (char *str, size_t len)
 	len = xo_utf8_len(*cp);
 	wc = xo_utf8_codepoint(cp, ep - cp, len, 0);
 	if (xo_utf8_iserror(wc))
-	    return cp;
+	    return xo_utf8_unconst(cp);
     }
 
     return NULL;
