@@ -14,6 +14,7 @@
 # Yes, that's a long way to go for a pun.
 
 %vocabulary = ();
+$total_errors = 0;
 
 sub main {
     while ($ARGV[0] =~ /^-/) {
@@ -60,6 +61,9 @@ sub main {
 	    print $name, "\n";
 	}
     }
+
+    # Let a makefile know that we found something
+    exit(1) if $total_errors;
 }
 
 sub extract_samples {
@@ -130,14 +134,15 @@ sub parse_file {
 	die "no such file" unless -f $file;
 	open INPUT, "cpp $opt_cflags $file |";
     } else {
-	open INPUT, $file || die "cannot open input file '$file'";
+	open(INPUT, "<", $file)
+	    || die "xolint: cannot open input file '$file': $!\n";
     }
     local @input = <INPUT>;
     close INPUT;
 
     local $ln, $rln, $line, $replay;
 
-    for ($ln = 0; $ln < $#input; $ln++) {
+    for ($ln = 0; $ln <= $#input; $ln++) {
 	$line = $input[$ln];
 	$curln += 1;
 
@@ -147,16 +152,25 @@ sub parse_file {
 	    next;
 	}
 
-	next unless $line =~ /xo_emit\(/;
+	# All the xo_emit variants, like xo_emit_h and xo_emit_warn, take
+	# a format string.  xo_emit_field does not; its strings are the
+	# pieces of a single field.
+	next unless $line =~ /xo_emit(?:r|_(?!field)\w+)?\(/;
 
 	@tokens = parse_tokens();
 	print "token:\n    '" . join("'\n    '", @tokens) . "'\n"
 	    if $opt_debug;
-	check_format($tokens[0]);
+
+	# The format follows any handle, flags or exit code arguments,
+	# so it is the first argument that is a string
+	my($format) = grep { /^".*"$/ } @tokens;
+	check_format($format);
     }
 
     print $file . ": $errors errors, $warnings warnings, $info info\n"
 	unless $opt_vocabulary;
+
+    $total_errors += $errors;
 }
 
 sub parse_tokens {
@@ -223,7 +237,7 @@ sub parse_tokens {
 }
 
 sub get_tokens {
-    if ($ln + 1 < $#input) {
+    if ($ln + 1 <= $#input) {
 	$line = $input[++$ln];
 	$curln += 1;
 	$replay .= $curln . "     " . $line;
@@ -277,6 +291,13 @@ sub check_format {
 	    }
 
 	} else {
+	    if ($ch eq "{" && $data[$off] eq "{") {
+		# "{{" is an escaped brace, not the start of a field
+		$off += 1;
+		$build[0] .= $ch;
+		next;
+	    }
+
 	    if ($ch eq "{") {
 		check_text($build[0]) if length($build[0]);
 		$braces = 1;
@@ -317,6 +338,7 @@ sub check_text {
     "color" => "C",
     "decoration" => "D",
     "error" => "E",
+    "format" => "F",
     "label" => "L",
     "note" => "N",
     "padding" => "P",
@@ -326,20 +348,34 @@ sub check_text {
     "warning" => "W",
     "start-anchor" => "[",
     "stop-anchor" => "]",
-    # Modifiers
+    # Modifiers; "@" marks one that has no short version
+    "argument" => "a",
     "colon" => "c",
+    "comma" => "@",
+    "dense" => "@",
     "display" => "d",
     "encoding" => "e",
+    "escape-private" => "@",
+    "escape-slash" => "@",
+    "escape-square" => "@",
+    "first-cap" => "f",
+    "gettext" => "g",
     "hn" => "h",
     "hn-decimal" => "@",
     "hn-space" => "@",
     "hn-1000" => "@",
     "humanize" => "h",
+    "int-group" => "i",
     "key" => "k",
     "leaf-list" => "l",
+    "list" => "l",
+    "no-quote" => "n",
     "no-quotes" => "n",
+    "plural" => "p",
+    "quote" => "q",
     "quotes" => "q",
     "trim" => "t",
+    "units-attr" => "@",
     "white" => "w",
  );
 
@@ -390,20 +426,20 @@ sub check_field {
 	if $last =~ /[DELNPTUVW\[\]]/ && $field[0] !~ /[DELNPTUVW\[\]]/;
 
     #@ Encoding format uses different number of arguments
-    #@     xo_emit("{:name/%6.6s %%04d/%s}", name, number);
+    #@     xo_emit("{:name/%6.6s %04d/%s}", name, number);
     #@ Should be:
     #@     xo_emit("{:name/%6.6s %04d/%s-%d}", name, number);
     #@ Both format should consume the same number of arguments off the stack
     my $cf = count_args($field[2]);
     my $ce = count_args($field[3]);
-    warn("encoding format uses different number of arguments ($cf/$ce)")
+    warning("encoding format uses different number of arguments ($cf/$ce)")
 	if $ce >= 0 && $cf >= 0 && $ce != $cf;
 
     #@ Only one field role can be used
     #@     xo_emit("{LT:Max}");
     #@ Should be:
     #@     xo_emit("{T:Max}");
-    my(@roles) = ($field[0] !~ /([DELNPTUVW\[\]]).*([DELNPTUVW\[\]])/);
+    my(@roles) = ($field[0] =~ /[CDEFGLNPTUVW\[\]]/g);
     error("only one field role can be used (" . join(", ", @roles) . ")")
 	if $#roles > 0;
 
@@ -451,7 +487,7 @@ sub check_field {
 	    grep { s/^\s*//; s/\s*$//; } @sub;
 
 	    for $val (@sub) {
-		if ($val =~ /^(default,black,red,green,yellow,blue,magenta,cyan,white)$/) {
+		if ($val =~ /^(default|black|red|green|yellow|blue|magenta|cyan|white)$/) {
 
 		    #@ Field has color without fg- or bg- (role: C)
 		    #@   xo_emit("{C:green}{:foo}{C:}", x);
@@ -512,8 +548,10 @@ sub check_field {
 	}
     }
 
-    # A value field
-    if (length($field[0]) == 0 || $field[0] =~ /V/) {
+    # A value field, which is what a field with no other role is.  With
+    # the argument modifier the name is not in the format string, so
+    # there is nothing for us to check.
+    if ($field[0] !~ /[CDEFGLNPTUW\[\]]/ && $field[0] !~ /a/) {
 
 	#@ Value field must have a name (as content)")
 	#@     xo_emit("{:/%s}", "value");
@@ -522,8 +560,9 @@ sub check_field {
 	#@ The field name is used for XML and JSON encodings.  These
 	#@ tags names are static and must appear directly in the
 	#@ field descriptor.
+	# A display-only field is never encoded, so it needs no name
 	error("value field must have a name (as content)")
-	    unless $field[1];
+	    unless $field[1] || $field[0] =~ /d/;
 
 	#@ Use hyphens, not underscores, for value field name
 	#@     xo_emit("{:no_under_scores}", "bad");
@@ -564,7 +603,7 @@ sub check_field {
 	#@ is placed after the colon ("{:T/%20s}"), instead of before
 	#@ it ("{T:/20s}").
 	error("value field name should be longer than two characters")
-	    if $field[1] =~ /[A-Z]/;
+	    if $field[1] && length($field[1]) <= 2;
 
 	#@ Value field name contains invalid character
 	#@     xo_emit("{:cost-in-$$/%u}", 15);
@@ -588,7 +627,7 @@ sub check_field {
 	#@ fields are meant to hold punctuation and other characters used
 	#@ to decorate the content, typically to make it more readable
 	#@ to human readers.
-	warn("decoration field contains invalid character")
+	warning("decoration field contains invalid character")
 	    unless $field[1] =~ m:^[~!\@\#\$%^&\*\(\);\:\[\]\{\} ]+$:;
     }
 
@@ -632,6 +671,7 @@ sub count_args {
     return -1 unless $format;
 
     my $in;
+    my $count = 0;
     my($text, $ff, $fc, $rest);
     for ($in = $format; $in; $in = $rest) {
 	($text, $ff, $fc, $rest) =
@@ -650,9 +690,12 @@ sub count_args {
 
 	check_text($text);
 	check_field_format($ff, $fc);
+
+	# Each "*" takes its width or precision from an argument
+	$count += 1 + ($ff =~ tr/*//);
     }
 
-    return 0;
+    return $count;
 }
 
 sub check_field_format {
@@ -682,7 +725,7 @@ sub error {
     $errors += 1;
 }
 
-sub warn {
+sub warning {
     return if $opt_vocabulary;
     print STDERR $curfile . ": " .$curln . ": warning: " . join(" ", @_) . "\n";
     print STDERR $replay . "\n" if $opt_print;
