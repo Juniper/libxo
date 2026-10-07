@@ -82,11 +82,18 @@ ncompare limit-hides: 0 0 0
 ncompare limit-shows: -1 1 1
 ncompare limit-beyond: 0 0 0
 ncompare shorter: -99 99 1
-ncompare limit-splits: -8 8 0
+ncompare limit-splits: 0 0 0
 ncompare limit-split-same: 0 0 0
 ncompare limit-whole: 0 0 0
-ncompare ascii-vs-multi: -127 127 1
+ncompare ascii-vs-multi: 99 -99 1
 ncompare zero: 0 0 0
+ncompare cut-inside: 0 0 1
+ncompare cut-first-bytes: 0 0 1
+ncompare cut-vs-ascii: 98 -98 1
+ncompare cut-vs-whole: 195 -195 1
+ncompare cut-vs-nul: 0 0 1
+ncompare whole-differs: -1 1 1
+ncompare stray-secondary: -1 1 1
 sep ascii: 3 [a][b][c]
 sep multi-byte: 3 [one][two][three]
 sep shared-bytes: 2 [xèy][z]
@@ -183,3 +190,97 @@ concat empty-dst: 5 # [f0 9f 98 80 21]
 concat half-append: 6 # [61 62 63 78]
   lcat 6 # [61 62 63 78]
 concat no-nul: 7 #
+walk 0: next 0 1 3 6 10 11 prev 11 10 6 3 1 0
+walk 1: next 0 1 2 3 4 5 prev 5 4 3 2 1 0
+walk 2: next 0 prev 0
+walk 3: next 0 1 2 3 prev 3 2 0
+walk 4: next 0 1 2 3 prev 3 1 0
+walk 5: next 0 1 2 3 prev 3 2
+nnext 0: -1 -1
+nnext 1: 1 -1
+nnext 2: 1 2
+nnext 3: 1 2
+nnext 4: 1 4
+nnext 5: 1 4
+walk edges: -1 -1 -1
+trunc 0: 0 valid []
+trunc 1: 1 valid [61]
+trunc 2: 1 valid [61]
+trunc 3: 3 valid [61 c3 a9]
+trunc 4: 3 valid [61 c3 a9]
+trunc 5: 3 valid [61 c3 a9]
+trunc 6: 6 valid [61 c3 a9 e2 82 ac]
+trunc 7: 6 valid [61 c3 a9 e2 82 ac]
+trunc 8: 6 valid [61 c3 a9 e2 82 ac]
+trunc 9: 6 valid [61 c3 a9 e2 82 ac]
+trunc 10: 10 valid [61 c3 a9 e2 82 ac f0 9f 98 80]
+trunc 11: 11 valid [61 c3 a9 e2 82 ac f0 9f 98 80 7a]
+wide a: 1 0 0x61 0x41
+wide A: 0 1 0x61 0x41
+wide digit: 0 0 0x35 0x35
+wide nul: 0 0 0 0
+wide e-acute: 1 0 0xe9 0xc9
+wide E-acute: 0 1 0xe9 0xc9
+wide sharp-s: 0 0 0xdf 0xdf
+wide greek-sigma: 1 0 0x3c3 0x3a3
+wide greek-Sigma: 0 1 0x3c3 0x3a3
+wide cyrillic-zhe: 1 0 0x436 0x416
+wide cyrillic-Zhe: 0 1 0x436 0x416
+wide euro: 0 0 0x20ac 0x20ac
+wide smile: 0 0 0x1f600 0x1f600
+wide deseret-long-i: 1 0 0x10428 0x10400
+wide deseret-Long-I: 0 1 0x10428 0x10400
+wide surrogate: 0 0 0xd800 0xd800
+wide beyond: 0 0 0x110000 0x110000
+first 0: 1 0 1 0
+first 1: 0 1 0 1
+first 2: 1 0 0 0
+first 3: 0 1 0 0
+first 4: 0 0 0 0
+first 5: 0 0 0 0
+first 6: 0 0 0 0
+first null: 0 0 0 0
+bounded 0: -1 [41 62 c3 89 63 c3 a9 44 e2 82 ac ff 45]
+  [41 62 c3 89 63 c3 a9 44 e2 82 ac ff 45]
+  0 [41 62 c3 89 63 c3 a9 44 e2 82 ac ff 45]
+bounded 1: -1 [61 62 c3 89 63 c3 a9 44 e2 82 ac ff 45]
+  [41 62 c3 89 63 c3 a9 44 e2 82 ac ff 45]
+  0 [41 62 c3 89 63 c3 a9 44 e2 82 ac ff 45]
+bounded 2: -1 [61 62 c3 89 63 c3 a9 44 e2 82 ac ff 45]
+  [41 42 c3 89 63 c3 a9 44 e2 82 ac ff 45]
+  0 [41 62 c3 89 63 c3 a9 44 e2 82 ac ff 45]
+bounded 3: 2 [61 62 c3 89 63 c3 a9 44 e2 82 ac ff 45]
+  [41 42 c3 89 63 c3 a9 44 e2 82 ac ff 45]
+  1 [41 62 3f 89 63 c3 a9 44 e2 82 ac ff 45]
+bounded 4: -1 [61 62 c3 a9 63 c3 a9 44 e2 82 ac ff 45]
+  [41 42 c3 89 63 c3 a9 44 e2 82 ac ff 45]
+  0 [41 62 c3 89 63 c3 a9 44 e2 82 ac ff 45]
+bounded 5: -1 [61 62 c3 a9 63 c3 a9 44 e2 82 ac ff 45]
+  [41 42 c3 89 43 c3 a9 44 e2 82 ac ff 45]
+  0 [41 62 c3 89 63 c3 a9 44 e2 82 ac ff 45]
+bounded 6: 5 [61 62 c3 a9 63 c3 a9 44 e2 82 ac ff 45]
+  [41 42 c3 89 43 c3 a9 44 e2 82 ac ff 45]
+  1 [41 62 c3 89 63 3f a9 44 e2 82 ac ff 45]
+bounded 7: -1 [61 62 c3 a9 63 c3 a9 44 e2 82 ac ff 45]
+  [41 42 c3 89 43 c3 89 44 e2 82 ac ff 45]
+  0 [41 62 c3 89 63 c3 a9 44 e2 82 ac ff 45]
+bounded 8: -1 [61 62 c3 a9 63 c3 a9 64 e2 82 ac ff 45]
+  [41 42 c3 89 43 c3 89 44 e2 82 ac ff 45]
+  0 [41 62 c3 89 63 c3 a9 44 e2 82 ac ff 45]
+bounded 9: 8 [61 62 c3 a9 63 c3 a9 64 e2 82 ac ff 45]
+  [41 42 c3 89 43 c3 89 44 e2 82 ac ff 45]
+  1 [41 62 c3 89 63 c3 a9 44 3f 82 ac ff 45]
+bounded 10: 8 [61 62 c3 a9 63 c3 a9 64 e2 82 ac ff 45]
+  [41 42 c3 89 43 c3 89 44 e2 82 ac ff 45]
+  2 [41 62 c3 89 63 c3 a9 44 3f 3f ac ff 45]
+bounded 11: -1 [61 62 c3 a9 63 c3 a9 64 e2 82 ac ff 45]
+  [41 42 c3 89 43 c3 89 44 e2 82 ac ff 45]
+  0 [41 62 c3 89 63 c3 a9 44 e2 82 ac ff 45]
+bounded 12: 11 [61 62 c3 a9 63 c3 a9 64 e2 82 ac ff 45]
+  [41 42 c3 89 43 c3 89 44 e2 82 ac ff 45]
+  1 [41 62 c3 89 63 c3 a9 44 e2 82 ac 3f 45]
+bounded 13: 11 [61 62 c3 a9 63 c3 a9 64 e2 82 ac ff 65]
+  [41 42 c3 89 43 c3 89 44 e2 82 ac ff 45]
+  1 [41 62 c3 89 63 c3 a9 44 e2 82 ac 3f 45]
+makevalid nul: 1 [61 62]
+ncasecmp: 0 -1 0 0
