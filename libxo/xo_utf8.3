@@ -30,9 +30,9 @@
 .Ft const char *
 .Fn xo_utf8_wchar_errmsg "xo_codepoint_t wc"
 .Ft char *
-.Fn xo_utf8_nvalid "char *str, size_t len"
+.Fn xo_utf8_nvalid "const char *str, size_t len"
 .Ft char *
-.Fn xo_utf8_valid "char *str"
+.Fn xo_utf8_valid "const char *str"
 .Ft int
 .Fn xo_utf8_nmakevalid "char *str, size_t len, char replacement"
 .Ft int
@@ -42,25 +42,25 @@
 .Ft int
 .Fn xo_utf8_wisupper "xo_codepoint_t wc"
 .Ft int
-.Fn xo_utf8_nislower "char *str, size_t len"
+.Fn xo_utf8_nislower "const char *str, size_t len"
 .Ft int
-.Fn xo_utf8_islower "char *str"
+.Fn xo_utf8_islower "const char *str"
 .Ft int
-.Fn xo_utf8_nisupper "char *str, size_t len"
+.Fn xo_utf8_nisupper "const char *str, size_t len"
 .Ft int
-.Fn xo_utf8_isupper "char *str"
+.Fn xo_utf8_isupper "const char *str"
 .Ft char *
-.Fn xo_utf8_nnext "char *str, size_t len"
+.Fn xo_utf8_nnext "const char *str, size_t len"
 .Ft char *
-.Fn xo_utf8_next "char *str"
+.Fn xo_utf8_next "const char *str"
 .Ft char *
-.Fn xo_utf8_prev "char *start, char *cur"
+.Fn xo_utf8_prev "const char *start, const char *cur"
 .Ft void
 .Fn xo_utf8_ntolower "char * restrict str, size_t len"
 .Ft void
 .Fn xo_utf8_tolower "char *str"
 .Ft void
-.Fn xo_utf8_ntoupper "char *str, size_t len"
+.Fn xo_utf8_ntoupper "char * restrict str, size_t len"
 .Ft void
 .Fn xo_utf8_toupper "char *str"
 .Ft int
@@ -100,7 +100,7 @@
 .Ft char *
 .Fn xo_ustrrchr "const char *str, xo_codepoint_t c"
 .Ft char *
-.Fn xo_ustrchrnul "char *str, xo_codepoint_t c"
+.Fn xo_ustrchrnul "const char *str, xo_codepoint_t c"
 .Ft size_t
 .Fn xo_ustrspn "const char *str, const char *charset"
 .Ft size_t
@@ -235,8 +235,8 @@ functions do the same for a NUL-terminated string.
 .Pp
 The
 .Fn xo_ustrncasecmp
-function compares two strings of the given lengths without regard to
-case, returning a value less than, equal to, or greater than zero.
+function compares two strings without regard to case, each ending at
+its given length or at a NUL, whichever comes first, returning a value less than, equal to, or greater than zero.
 Both strings are folded to lower case one character at a time, an
 invalid byte compares as U+FFFD, and when one string is a prefix of the
 other the shorter one sorts first.
@@ -416,13 +416,12 @@ The
 .Fn xo_ustrncmp
 function compares two strings as
 .Xr strncmp 3
-does, except that when
+does, except that a character which
 .Fa len
-lands inside a character, that character is compared whole.
-Up to three bytes past
+cuts short is discarded, as if its string ended before it.
+Nothing at or beyond
 .Fa len
-may be read, but never past a NUL, so both arguments must be
-NUL-terminated strings.
+is read, so the arguments need not be NUL-terminated.
 .Pp
 The
 .Fn xo_ustrnstr
