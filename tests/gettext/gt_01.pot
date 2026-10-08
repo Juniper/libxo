@@ -103,3 +103,7 @@ msgstr ""
 
 msgid "couch"
 msgstr ""
+
+#: gt_01.c:141
+msgid "{:first} before {:second}\n"
+msgstr ""
