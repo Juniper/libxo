@@ -1,0 +1,101 @@
+<div class="line">
+  <div class="text">[</div>
+  <div class="padding">         </div>
+  <div class="data" data-tag="right" data-xpath="/top/anchor-width/right">abc</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="left" data-xpath="/top/anchor-width/left">abc</div>
+  <div class="padding">         </div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="mapped-0" data-xpath="/top/map-growth/mapped-0">0</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="mapped-15" data-xpath="/top/map-growth/mapped-15">15</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="mapped-16" data-xpath="/top/map-growth/mapped-16">16</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="mapped-17" data-xpath="/top/map-growth/mapped-17">17</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="mapped-39" data-xpath="/top/map-growth/mapped-39">39</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="src-40" data-xpath="/top/map-growth/src-40">40</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="length" data-xpath="/top/long-names/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/length">62</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="length" data-xpath="/top/long-names/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb/length">63</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="length" data-xpath="/top/long-names/cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc/length">64</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="length" data-xpath="/top/long-names/ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd/length">65</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="length" data-xpath="/top/long-names/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee/length">130</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="interior" data-xpath="/top/control-chars/interior">a b c</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="trailing" data-xpath="/top/control-chars/trailing">a b </div>
+</div>
+<div class="line">
+  <div class="data" data-tag="before-escape" data-xpath="/top/control-chars/before-escape">a b&lt;c d&amp;e</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="after-escape" data-xpath="/top/control-chars/after-escape">a&lt;b c&amp;d </div>
+</div>
+<div class="line">
+  <div class="data" data-tag="only" data-xpath="/top/control-chars/only">   </div>
+</div>
+<div class="line">
+  <div class="data" data-tag="retain" data-xpath="/top/deprecated-options/retain">0</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="no-retain" data-xpath="/top/deprecated-options/no-retain">0</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="first" data-xpath="/top/encoder-names/first">unknown</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="last" data-xpath="/top/encoder-names/last">deadend</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="beyond" data-xpath="/top/encoder-names/beyond">unknown</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="far-beyond" data-xpath="/top/encoder-names/far-beyond">unknown</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="wb-last" data-xpath="/top/encoder-names/wb-last">clean</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="wb-beyond" data-xpath="/top/encoder-names/wb-beyond">unknown</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="registered" data-xpath="/top/encoder-names/registered">done</div>
+</div>
+before="one" name="gum" count="0" name="rope" count="1" name="ladder" count="2" after="two" 
+syslog send: full 305, header no, text 305
+  full ends 'xxxxxxxxxxxxxxxxxxxxtail'
+  text ends 'xxxxxxxxxxxxxxxxxxxxtail'
+syslog send: full 2047, header no, text 2047
+  full ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+  text ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+syslog send: full 2047, header no, text 2047
+  full ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+  text ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+syslog send: full 2047, header no, text 2047
+  full ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+  text ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+syslog send: full 2047, header no, text 2047
+  full ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+  text ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+syslog send: full 2047, header no, text 2047
+  full ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+  text ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
