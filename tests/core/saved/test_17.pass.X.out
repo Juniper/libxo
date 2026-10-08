@@ -1,0 +1,19 @@
+<top><anchor-width><right>abc</right><left>abc</left></anchor-width><map-growth><mapped-0>0</mapped-0><mapped-15>15</mapped-15><mapped-16>16</mapped-16><mapped-17>17</mapped-17><mapped-39>39</mapped-39><src-40>40</src-40></map-growth><long-names><aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa><length>62</length></aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa><bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb><length>63</length></bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb><cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc><length>64</length></cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc><ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd><length>65</length></ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd><eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee><length>130</length></eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee></long-names><control-chars><interior>a b c</interior><trailing>a b </trailing><before-escape>a b&lt;c d&amp;e</before-escape><after-escape>a&lt;b c&amp;d </after-escape><only>   </only></control-chars><deprecated-options><retain>0</retain><no-retain>0</no-retain></deprecated-options><encoder-names><first>unknown</first><last>deadend</last><beyond>unknown</beyond><far-beyond>unknown</far-beyond><wb-last>clean</wb-last><wb-beyond>unknown</wb-beyond><registered>done</registered></encoder-names></top>before="one" name="gum" count="0" name="rope" count="1" name="ladder" count="2" after="two" 
+syslog send: full 305, header no, text 305
+  full ends 'xxxxxxxxxxxxxxxxxxxxtail'
+  text ends 'xxxxxxxxxxxxxxxxxxxxtail'
+syslog send: full 2047, header no, text 2047
+  full ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+  text ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+syslog send: full 2047, header no, text 2047
+  full ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+  text ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+syslog send: full 2047, header no, text 2047
+  full ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+  text ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+syslog send: full 2047, header no, text 2047
+  full ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+  text ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+syslog send: full 2047, header no, text 2047
+  full ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+  text ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
