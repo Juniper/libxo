@@ -1,0 +1,7 @@
+../../../tests/core/test_17.c:33:13: warning: libxo: anchor format must be '%d' or '%u: '{[:/%20000d}'
+   33 |     xo_emit("[{[:/%20000d}{:right/%s}{]:}]\n", 12, "abc");
+      |             ^
+../../../tests/core/test_17.c:34:13: warning: libxo: anchor format must be '%d' or '%u: '{[:/%20000d}'
+   34 |     xo_emit("[{[:/%20000d}{:left/%s}{]:}]\n", -12, "abc");
+      |             ^
+2 warnings generated.
