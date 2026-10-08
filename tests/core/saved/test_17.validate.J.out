@@ -1,0 +1,20 @@
+{"top": {"anchor-width": {"right":"abc","left":"abc"}, "map-growth": {"mapped-0":0,"mapped-15":15,"mapped-16":16,"mapped-17":17,"mapped-39":39,"src-40":40}, "long-names": {"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": {"length":62}, "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb": {"length":63}, "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc": {"length":64}, "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd": {"length":65}, "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee": {"length":130}}, "control-chars": {"interior":"a\u0001b\u0002c","trailing":"a\u0001b\u0002","before-escape":"a\u0001b<c\u0002d&e","after-escape":"a<b\u0001c&d\u0002","only":"\u0001\u0002\u0003"}, "deprecated-options": {"retain":0,"no-retain":0}, "encoder-names": {"first":"unknown","last":"deadend","beyond":"unknown","far-beyond":"unknown","wb-last":"clean","wb-beyond":"unknown","registered":"done"}}}
+before="one" name="gum" count="0" name="rope" count="1" name="ladder" count="2" after="two" 
+syslog send: full 305, header no, text 305
+  full ends 'xxxxxxxxxxxxxxxxxxxxtail'
+  text ends 'xxxxxxxxxxxxxxxxxxxxtail'
+syslog send: full 2047, header no, text 2047
+  full ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+  text ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+syslog send: full 2047, header no, text 2047
+  full ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+  text ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+syslog send: full 2047, header no, text 2047
+  full ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+  text ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+syslog send: full 2047, header no, text 2047
+  full ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+  text ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+syslog send: full 2047, header no, text 2047
+  full ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+  text ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
