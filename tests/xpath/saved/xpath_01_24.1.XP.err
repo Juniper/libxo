@@ -1,0 +1,1096 @@
+main: input '# Test 1: existence of a non-key child: only the items with a sku'
+main: input '?top/item[sku]'
+adding filter: 'top/item[sku]'
+added filter: 0
+--- 0: 9
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [top], contents 0, next 3, prev 0 
+        000003: type 70 (C_ELEMENT), str 7 [item], contents 4, next 0, prev 1 
+            000004: type 75 (C_PREDICATE), str 0 [], contents 7, next 0, prev 0 
+                000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
+                    000005: type 70 (C_ELEMENT), str 14 [sku], contents 0, next 0, prev 0 
+main: status: zero
+main: input '+ top'
+main: filter: rc: 6
+main: status: track
+main: input '{ item'
+main: status: track
+main: input '< item'
+main: filter: rc: 9
+main: status: predicate
+main: input '$ name gum'
+main: key: 'name'='gum'
+main: status: predicate
+main: input '= sku GRO-000-415'
+main: field: 'sku'='GRO-000-415'
+main: status: full
+main: input '= sold 1412'
+main: field: 'sold'='1412'
+main: status: full
+main: input '> item'
+main: filter: rc: 10
+main: status: track
+main: input '< item'
+main: filter: rc: 9
+main: status: predicate
+main: input '$ name rope'
+main: key: 'name'='rope'
+main: status: predicate
+main: input '= sold 85'
+main: field: 'sold'='85'
+main: status: predicate
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 9
+main: status: predicate
+main: input '$ name ladder'
+main: key: 'name'='ladder'
+main: status: predicate
+main: input '= sku HRD-000-212'
+main: field: 'sku'='HRD-000-212'
+main: status: full
+main: input '= sold 0'
+main: field: 'sold'='0'
+main: status: full
+main: input '> item'
+main: filter: rc: 10
+main: status: track
+main: input '< item'
+main: filter: rc: 9
+main: status: predicate
+main: input '$ name bubblegum'
+main: key: 'name'='bubblegum'
+main: status: predicate
+main: input '= sold 17'
+main: field: 'sold'='17'
+main: status: predicate
+main: input '> item'
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- top'
+main: status: track
+main: input ''
+main: input '# Test 2: existence of the key: every item'
+main: input 'r'
+main: status: zero
+main: input '?top/item[name]'
+adding filter: 'top/item[name]'
+added filter: 0
+--- 0: 9
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [top], contents 0, next 3, prev 0 
+        000003: type 70 (C_ELEMENT), str 7 [item], contents 4, next 0, prev 1 
+            000004: type 75 (C_PREDICATE), str 0 [], contents 7, next 0, prev 0 
+                000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
+                    000005: type 70 (C_ELEMENT), str 14 [name], contents 0, next 0, prev 0 
+main: status: zero
+main: input '+ top'
+xpath_01: duplicate sibling name: 'top'
+main: filter: rc: 6
+main: status: track
+main: input '{ item'
+main: status: track
+main: input '< item'
+main: filter: rc: 9
+main: status: predicate
+main: input '$ name gum'
+main: key: 'name'='gum'
+main: status: full
+main: input '= sku GRO-000-415'
+main: field: 'sku'='GRO-000-415'
+main: status: full
+main: input '= sold 1412'
+main: field: 'sold'='1412'
+main: status: full
+main: input '> item'
+main: filter: rc: 10
+main: status: track
+main: input '< item'
+main: filter: rc: 9
+main: status: predicate
+main: input '$ name rope'
+main: key: 'name'='rope'
+main: status: full
+main: input '= sold 85'
+main: field: 'sold'='85'
+main: status: full
+main: input '> item'
+main: filter: rc: 10
+main: status: track
+main: input '< item'
+main: filter: rc: 9
+main: status: predicate
+main: input '$ name ladder'
+main: key: 'name'='ladder'
+main: status: full
+main: input '= sku HRD-000-212'
+main: field: 'sku'='HRD-000-212'
+main: status: full
+main: input '= sold 0'
+main: field: 'sold'='0'
+main: status: full
+main: input '> item'
+main: filter: rc: 10
+main: status: track
+main: input '< item'
+main: filter: rc: 9
+main: status: predicate
+main: input '$ name bubblegum'
+main: key: 'name'='bubblegum'
+main: status: full
+main: input '= sold 17'
+main: field: 'sold'='17'
+main: status: full
+main: input '> item'
+main: filter: rc: 10
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- top'
+main: status: track
+main: input ''
+main: input '# Test 3: existence of a child no item has: nothing'
+main: input 'r'
+main: status: zero
+main: input '?top/item[color]'
+adding filter: 'top/item[color]'
+added filter: 0
+--- 0: 9
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [top], contents 0, next 3, prev 0 
+        000003: type 70 (C_ELEMENT), str 7 [item], contents 4, next 0, prev 1 
+            000004: type 75 (C_PREDICATE), str 0 [], contents 7, next 0, prev 0 
+                000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
+                    000005: type 70 (C_ELEMENT), str 14 [color], contents 0, next 0, prev 0 
+main: status: zero
+main: input '+ top'
+main: filter: rc: 6
+main: status: track
+main: input '{ item'
+main: status: track
+main: input '< item'
+main: filter: rc: 9
+main: status: predicate
+main: input '$ name gum'
+main: key: 'name'='gum'
+main: status: predicate
+main: input '= sku GRO-000-415'
+main: field: 'sku'='GRO-000-415'
+main: status: predicate
+main: input '= sold 1412'
+main: field: 'sold'='1412'
+main: status: predicate
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 9
+main: status: predicate
+main: input '$ name rope'
+main: key: 'name'='rope'
+main: status: predicate
+main: input '= sold 85'
+main: field: 'sold'='85'
+main: status: predicate
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 9
+main: status: predicate
+main: input '$ name ladder'
+main: key: 'name'='ladder'
+main: status: predicate
+main: input '= sku HRD-000-212'
+main: field: 'sku'='HRD-000-212'
+main: status: predicate
+main: input '= sold 0'
+main: field: 'sold'='0'
+main: status: predicate
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 9
+main: status: predicate
+main: input '$ name bubblegum'
+main: key: 'name'='bubblegum'
+main: status: predicate
+main: input '= sold 17'
+main: field: 'sold'='17'
+main: status: predicate
+main: input '> item'
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- top'
+main: status: track
+main: input ''
+main: input '# Test 4: a string against a boolean uses the string's truth, not 'equal''
+main: input 'r'
+main: status: zero
+main: input '?top/item[name = true()]'
+adding filter: 'top/item[name = true()]'
+added filter: 0
+--- 0: 14
+    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [top], contents 0, next 3, prev 0 
+        000003: type 70 (C_ELEMENT), str 7 [item], contents 4, next 0, prev 1 
+            000004: type 75 (C_PREDICATE), str 0 [], contents 6, next 0, prev 0 
+                000006: type 14 (L_EQUALS), str 19 [=], contents 7, next 0, prev 0 
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
+                        000005: type 70 (C_ELEMENT), str 14 [name], contents 0, next 0, prev 0 
+                    000008: type 52 (T_FUNCTION_NAME), str 21 [true], contents 0, next 0, prev 7 
+main: status: zero
+main: input '+ top'
+main: filter: rc: 6
+main: status: track
+main: input '{ item'
+main: status: track
+main: input '< item'
+main: filter: rc: 9
+main: status: predicate
+main: input '$ name gum'
+main: key: 'name'='gum'
+main: status: full
+main: input '= sku GRO-000-415'
+main: field: 'sku'='GRO-000-415'
+main: status: full
+main: input '= sold 1412'
+main: field: 'sold'='1412'
+main: status: full
+main: input '> item'
+main: filter: rc: 10
+main: status: track
+main: input '< item'
+main: filter: rc: 9
+main: status: predicate
+main: input '$ name rope'
+main: key: 'name'='rope'
+main: status: full
+main: input '= sold 85'
+main: field: 'sold'='85'
+main: status: full
+main: input '> item'
+main: filter: rc: 10
+main: status: track
+main: input '< item'
+main: filter: rc: 9
+main: status: predicate
+main: input '$ name ladder'
+main: key: 'name'='ladder'
+main: status: full
+main: input '= sku HRD-000-212'
+main: field: 'sku'='HRD-000-212'
+main: status: full
+main: input '= sold 0'
+main: field: 'sold'='0'
+main: status: full
+main: input '> item'
+main: filter: rc: 10
+main: status: track
+main: input '< item'
+main: filter: rc: 9
+main: status: predicate
+main: input '$ name bubblegum'
+main: key: 'name'='bubblegum'
+main: status: full
+main: input '= sold 17'
+main: field: 'sold'='17'
+main: status: full
+main: input '> item'
+main: filter: rc: 10
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- top'
+main: status: track
+main: input ''
+main: input '# Test 5: the same compare against false(): nothing'
+main: input 'r'
+main: status: zero
+main: input '?top/item[name = false()]'
+adding filter: 'top/item[name = false()]'
+added filter: 0
+--- 0: 14
+    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [top], contents 0, next 3, prev 0 
+        000003: type 70 (C_ELEMENT), str 7 [item], contents 4, next 0, prev 1 
+            000004: type 75 (C_PREDICATE), str 0 [], contents 6, next 0, prev 0 
+                000006: type 14 (L_EQUALS), str 19 [=], contents 7, next 0, prev 0 
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
+                        000005: type 70 (C_ELEMENT), str 14 [name], contents 0, next 0, prev 0 
+                    000008: type 52 (T_FUNCTION_NAME), str 21 [false], contents 0, next 0, prev 7 
+main: status: zero
+main: input '+ top'
+main: filter: rc: 6
+main: status: track
+main: input '{ item'
+main: status: track
+main: input '< item'
+main: filter: rc: 9
+main: status: predicate
+main: input '$ name gum'
+main: key: 'name'='gum'
+main: status: track
+main: input '= sku GRO-000-415'
+main: field: 'sku'='GRO-000-415'
+main: status: track
+main: input '= sold 1412'
+main: field: 'sold'='1412'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 9
+main: status: predicate
+main: input '$ name rope'
+main: key: 'name'='rope'
+main: status: track
+main: input '= sold 85'
+main: field: 'sold'='85'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 9
+main: status: predicate
+main: input '$ name ladder'
+main: key: 'name'='ladder'
+main: status: track
+main: input '= sku HRD-000-212'
+main: field: 'sku'='HRD-000-212'
+main: status: track
+main: input '= sold 0'
+main: field: 'sold'='0'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 9
+main: status: predicate
+main: input '$ name bubblegum'
+main: key: 'name'='bubblegum'
+main: status: track
+main: input '= sold 17'
+main: field: 'sold'='17'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- top'
+main: status: track
+main: input ''
+main: input '# Test 6: values are strings, so even "0" is true: nothing'
+main: input 'r'
+main: status: zero
+main: input '?top/item[sold = false()]'
+adding filter: 'top/item[sold = false()]'
+added filter: 0
+--- 0: 14
+    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [top], contents 0, next 3, prev 0 
+        000003: type 70 (C_ELEMENT), str 7 [item], contents 4, next 0, prev 1 
+            000004: type 75 (C_PREDICATE), str 0 [], contents 6, next 0, prev 0 
+                000006: type 14 (L_EQUALS), str 19 [=], contents 7, next 0, prev 0 
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
+                        000005: type 70 (C_ELEMENT), str 14 [sold], contents 0, next 0, prev 0 
+                    000008: type 52 (T_FUNCTION_NAME), str 21 [false], contents 0, next 0, prev 7 
+main: status: zero
+main: input '+ top'
+main: filter: rc: 6
+main: status: track
+main: input '{ item'
+main: status: track
+main: input '< item'
+main: filter: rc: 9
+main: status: predicate
+main: input '$ name gum'
+main: key: 'name'='gum'
+main: status: predicate
+main: input '= sku GRO-000-415'
+main: field: 'sku'='GRO-000-415'
+main: status: predicate
+main: input '= sold 1412'
+main: field: 'sold'='1412'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 9
+main: status: predicate
+main: input '$ name rope'
+main: key: 'name'='rope'
+main: status: predicate
+main: input '= sold 85'
+main: field: 'sold'='85'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 9
+main: status: predicate
+main: input '$ name ladder'
+main: key: 'name'='ladder'
+main: status: predicate
+main: input '= sku HRD-000-212'
+main: field: 'sku'='HRD-000-212'
+main: status: predicate
+main: input '= sold 0'
+main: field: 'sold'='0'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 9
+main: status: predicate
+main: input '$ name bubblegum'
+main: key: 'name'='bubblegum'
+main: status: predicate
+main: input '= sold 17'
+main: field: 'sold'='17'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- top'
+main: status: track
+main: input ''
+main: input '# Test 7: ends-with with a suffix longer than every value but one'
+main: input 'r'
+main: status: zero
+main: input '?top/item[ends-with(name, "bblegum")]'
+adding filter: 'top/item[ends-with(name, "bblegum")]'
+added filter: 0
+--- 0: 16
+    000016: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [top], contents 0, next 3, prev 0 
+        000003: type 70 (C_ELEMENT), str 7 [item], contents 4, next 0, prev 1 
+            000004: type 75 (C_PREDICATE), str 0 [], contents 5, next 0, prev 0 
+                000005: type 52 (T_FUNCTION_NAME), str 14 [ends-with], contents 9, next 0, prev 0 
+                    000009: type 74 (C_PATH), str 0 [], contents 7, next 10, prev 0 
+                        000007: type 70 (C_ELEMENT), str 26 [name], contents 0, next 0, prev 0 
+                    000010: type 54 (T_QUOTED), str 33 [bblegum], contents 0, next 0, prev 9 
+main: status: zero
+main: input '+ top'
+main: filter: rc: 6
+main: status: track
+main: input '{ item'
+main: status: track
+main: input '< item'
+main: filter: rc: 9
+main: status: predicate
+main: input '$ name gum'
+main: key: 'name'='gum'
+main: status: track
+main: input '= sku GRO-000-415'
+main: field: 'sku'='GRO-000-415'
+main: status: track
+main: input '= sold 1412'
+main: field: 'sold'='1412'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 9
+main: status: predicate
+main: input '$ name rope'
+main: key: 'name'='rope'
+main: status: track
+main: input '= sold 85'
+main: field: 'sold'='85'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 9
+main: status: predicate
+main: input '$ name ladder'
+main: key: 'name'='ladder'
+main: status: track
+main: input '= sku HRD-000-212'
+main: field: 'sku'='HRD-000-212'
+main: status: track
+main: input '= sold 0'
+main: field: 'sold'='0'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 9
+main: status: predicate
+main: input '$ name bubblegum'
+main: key: 'name'='bubblegum'
+main: status: full
+main: input '= sold 17'
+main: field: 'sold'='17'
+main: status: full
+main: input '> item'
+main: filter: rc: 10
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- top'
+main: status: track
+main: input ''
+main: input '# Test 8: ends-with with a suffix longer than all the values: nothing'
+main: input 'r'
+main: status: zero
+main: input '?top/item[ends-with(name, "xxxxxxxxxxxxxxxxxxxxxxxxgum")]'
+adding filter: 'top/item[ends-with(name, "xxxxxxxxxxxxxxxxxxxxxxxxgum")]'
+added filter: 0
+--- 0: 16
+    000016: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [top], contents 0, next 3, prev 0 
+        000003: type 70 (C_ELEMENT), str 7 [item], contents 4, next 0, prev 1 
+            000004: type 75 (C_PREDICATE), str 0 [], contents 5, next 0, prev 0 
+                000005: type 52 (T_FUNCTION_NAME), str 14 [ends-with], contents 9, next 0, prev 0 
+                    000009: type 74 (C_PATH), str 0 [], contents 7, next 10, prev 0 
+                        000007: type 70 (C_ELEMENT), str 26 [name], contents 0, next 0, prev 0 
+                    000010: type 54 (T_QUOTED), str 33 [xxxxxxxxxxxxxxxxxxxxxxxxgum], contents 0, next 0, prev 9 
+main: status: zero
+main: input '+ top'
+main: filter: rc: 6
+main: status: track
+main: input '{ item'
+main: status: track
+main: input '< item'
+main: filter: rc: 9
+main: status: predicate
+main: input '$ name gum'
+main: key: 'name'='gum'
+main: status: track
+main: input '= sku GRO-000-415'
+main: field: 'sku'='GRO-000-415'
+main: status: track
+main: input '= sold 1412'
+main: field: 'sold'='1412'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 9
+main: status: predicate
+main: input '$ name rope'
+main: key: 'name'='rope'
+main: status: track
+main: input '= sold 85'
+main: field: 'sold'='85'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 9
+main: status: predicate
+main: input '$ name ladder'
+main: key: 'name'='ladder'
+main: status: track
+main: input '= sku HRD-000-212'
+main: field: 'sku'='HRD-000-212'
+main: status: track
+main: input '= sold 0'
+main: field: 'sold'='0'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 9
+main: status: predicate
+main: input '$ name bubblegum'
+main: key: 'name'='bubblegum'
+main: status: track
+main: input '= sold 17'
+main: field: 'sold'='17'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- top'
+main: status: track
+main: input ''
+main: input '# Test 9: ends-with with the whole value as the suffix'
+main: input 'r'
+main: status: zero
+main: input '?top/item[ends-with(name, "rope")]'
+adding filter: 'top/item[ends-with(name, "rope")]'
+added filter: 0
+--- 0: 16
+    000016: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [top], contents 0, next 3, prev 0 
+        000003: type 70 (C_ELEMENT), str 7 [item], contents 4, next 0, prev 1 
+            000004: type 75 (C_PREDICATE), str 0 [], contents 5, next 0, prev 0 
+                000005: type 52 (T_FUNCTION_NAME), str 14 [ends-with], contents 9, next 0, prev 0 
+                    000009: type 74 (C_PATH), str 0 [], contents 7, next 10, prev 0 
+                        000007: type 70 (C_ELEMENT), str 26 [name], contents 0, next 0, prev 0 
+                    000010: type 54 (T_QUOTED), str 33 [rope], contents 0, next 0, prev 9 
+main: status: zero
+main: input '+ top'
+main: filter: rc: 6
+main: status: track
+main: input '{ item'
+main: status: track
+main: input '< item'
+main: filter: rc: 9
+main: status: predicate
+main: input '$ name gum'
+main: key: 'name'='gum'
+main: status: track
+main: input '= sku GRO-000-415'
+main: field: 'sku'='GRO-000-415'
+main: status: track
+main: input '= sold 1412'
+main: field: 'sold'='1412'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 9
+main: status: predicate
+main: input '$ name rope'
+main: key: 'name'='rope'
+main: status: full
+main: input '= sold 85'
+main: field: 'sold'='85'
+main: status: full
+main: input '> item'
+main: filter: rc: 10
+main: status: track
+main: input '< item'
+main: filter: rc: 9
+main: status: predicate
+main: input '$ name ladder'
+main: key: 'name'='ladder'
+main: status: track
+main: input '= sku HRD-000-212'
+main: field: 'sku'='HRD-000-212'
+main: status: track
+main: input '= sold 0'
+main: field: 'sold'='0'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 9
+main: status: predicate
+main: input '$ name bubblegum'
+main: key: 'name'='bubblegum'
+main: status: track
+main: input '= sold 17'
+main: field: 'sold'='17'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- top'
+main: status: track
+main: input ''
+main: input '# Test 10: enough terms to outgrow the parser's first node buffer'
+main: input 'r'
+main: status: zero
+main: input '?top/item[name="n0" or name="n1" or name="n2" or name="n3" or name="n4" or name="n5" or name="n6" or name="n7" or name="n8" or name="n9" or name="n10" or name="n11" or name="n12" or name="n13" or name="n14" or name="n15" or name="n16" or name="n17" or name="n18" or name="n19" or name="n20" or name="n21" or name="n22" or name="n23" or name="n24" or name="n25" or name="n26" or name="n27" or name="n28" or name="n29" or name="n30" or name="n31" or name="n32" or name="n33" or name="n34" or name="n35" or name="n36" or name="n37" or name="n38" or name="n39" or name="n40" or name="n41" or name="n42" or name="n43" or name="n44" or name="n45" or name="n46" or name="n47" or name="n48" or name="n49" or name="n50" or name="n51" or name="n52" or name="n53" or name="n54" or name="n55" or name="n56" or name="n57" or name="n58" or name="n59" or name="ladder"]'
+adding filter: 'top/item[name="n0" or name="n1" or name="n2" or name="n3" or name="n4" or name="n5" or name="n6" or name="n7" or name="n8" or name="n9" or name="n10" or name="n11" or name="n12" or name="n13" or name="n14" or name="n15" or name="n16" or name="n17" or name="n18" or name="n19" or name="n20" or name="n21" or name="n22" or name="n23" or name="n24" or name="n25" or name="n26" or name="n27" or name="n28" or name="n29" or name="n30" or name="n31" or name="n32" or name="n33" or name="n34" or name="n35" or name="n36" or name="n37" or name="n38" or name="n39" or name="n40" or name="n41" or name="n42" or name="n43" or name="n44" or name="n45" or name="n46" or name="n47" or name="n48" or name="n49" or name="n50" or name="n51" or name="n52" or name="n53" or name="n54" or name="n55" or name="n56" or name="n57" or name="n58" or name="n59" or name="ladder"]'
+added filter: 0
+--- 0: 372
+    000372: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [top], contents 0, next 3, prev 0 
+        000003: type 70 (C_ELEMENT), str 7 [item], contents 4, next 0, prev 1 
+            000004: type 75 (C_PREDICATE), str 0 [], contents 363, next 0, prev 0 
+                000363: type 43 ('+'), str 841 [or], contents 357, next 0, prev 0 
+                    000357: type 43 ('+'), str 827 [or], contents 351, next 366, prev 0 
+                        000351: type 43 ('+'), str 813 [or], contents 345, next 360, prev 0 
+                            000345: type 43 ('+'), str 799 [or], contents 339, next 354, prev 0 
+                                000339: type 43 ('+'), str 785 [or], contents 333, next 348, prev 0 
+                                    000333: type 43 ('+'), str 771 [or], contents 327, next 342, prev 0 
+                                        000327: type 43 ('+'), str 757 [or], contents 321, next 336, prev 0 
+                                            000321: type 43 ('+'), str 743 [or], contents 315, next 330, prev 0 
+                                                000315: type 43 ('+'), str 729 [or], contents 309, next 324, prev 0 
+                                                    000309: type 43 ('+'), str 715 [or], contents 303, next 318, prev 0 
+                                                        000303: type 43 ('+'), str 701 [or], contents 297, next 312, prev 0 
+                                                            000297: type 43 ('+'), str 687 [or], contents 291, next 306, prev 0 
+                                                                000291: type 43 ('+'), str 673 [or], contents 285, next 300, prev 0 
+                                                                    000285: type 43 ('+'), str 659 [or], contents 279, next 294, prev 0 
+                                                                        000279: type 43 ('+'), str 645 [or], contents 273, next 288, prev 0 
+                                                                            000273: type 43 ('+'), str 631 [or], contents 267, next 282, prev 0 
+                                                                                000267: type 43 ('+'), str 617 [or], contents 261, next 276, prev 0 
+                                                                                    000261: type 43 ('+'), str 603 [or], contents 255, next 270, prev 0 
+                                                                                        000255: type 43 ('+'), str 589 [or], contents 249, next 264, prev 0 
+                                                                                            000249: type 43 ('+'), str 575 [or], contents 243, next 258, prev 0 
+                                                                                                000243: type 43 ('+'), str 561 [or], contents 237, next 252, prev 0 
+                                                                                                    000237: type 43 ('+'), str 547 [or], contents 231, next 246, prev 0 
+                                                                                                        000231: type 43 ('+'), str 533 [or], contents 225, next 240, prev 0 
+                                                                                                            000225: type 43 ('+'), str 519 [or], contents 219, next 234, prev 0 
+                                                                                                                000219: type 43 ('+'), str 505 [or], contents 213, next 228, prev 0 
+                                                                                                                    000213: type 43 ('+'), str 491 [or], contents 207, next 222, prev 0 
+                                                                                                                        000207: type 43 ('+'), str 477 [or], contents 201, next 216, prev 0 
+                                                                                                                            000201: type 43 ('+'), str 463 [or], contents 195, next 210, prev 0 
+                                                                                                                                000195: type 43 ('+'), str 449 [or], contents 189, next 204, prev 0 
+                                                                                                                                    000189: type 43 ('+'), str 435 [or], contents 183, next 198, prev 0 
+                                                                                                                                        000183: type 43 ('+'), str 421 [or], contents 177, next 192, prev 0 
+                                                                                                                                            000177: type 43 ('+'), str 407 [or], contents 171, next 186, prev 0 
+                                                                                                                                                000171: type 43 ('+'), str 393 [or], contents 165, next 180, prev 0 
+                                                                                                                                                    000165: type 43 ('+'), str 379 [or], contents 159, next 174, prev 0 
+                                                                                                                                                        000159: type 43 ('+'), str 365 [or], contents 153, next 168, prev 0 
+                                                                                                                                                            000153: type 43 ('+'), str 351 [or], contents 147, next 162, prev 0 
+                                                                                                                                                                000147: type 43 ('+'), str 337 [or], contents 141, next 156, prev 0 
+                                                                                                                                                                    000141: type 43 ('+'), str 323 [or], contents 135, next 150, prev 0 
+                                                                                                                                                                        000135: type 43 ('+'), str 309 [or], contents 129, next 144, prev 0 
+                                                                                                                                                                            000129: type 43 ('+'), str 295 [or], contents 123, next 138, prev 0 
+                                                                                                                                                                                000123: type 43 ('+'), str 281 [or], contents 117, next 132, prev 0 
+                                                                                                                                                                                    000117: type 43 ('+'), str 267 [or], contents 111, next 126, prev 0 
+                                                                                                                                                                                        000111: type 43 ('+'), str 253 [or], contents 105, next 120, prev 0 
+                                                                                                                                                                                            000105: type 43 ('+'), str 239 [or], contents 99, next 114, prev 0 
+                                                                                                                                                                                                000099: type 43 ('+'), str 225 [or], contents 93, next 108, prev 0 
+                                                                                                                                                                                                    000093: type 43 ('+'), str 211 [or], contents 87, next 102, prev 0 
+                                                                                                                                                                                                        000087: type 43 ('+'), str 197 [or], contents 81, next 96, prev 0 
+                                                                                                                                                                                                            000081: type 43 ('+'), str 183 [or], contents 75, next 90, prev 0 
+                                                                                                                                                                                                                000075: type 43 ('+'), str 169 [or], contents 69, next 84, prev 0 
+                                                                                                                                                                                                                    000069: type 43 ('+'), str 155 [or], contents 63, next 78, prev 0 
+                                                                                                                                                                                                                        000063: type 43 ('+'), str 141 [or], contents 57, next 72, prev 0 
+                                                                                                                                                                                                                            000057: type 43 ('+'), str 128 [or], contents 51, next 66, prev 0 
+                                                                                                                                                                                                                                000051: type 43 ('+'), str 115 [or], contents 45, next 60, prev 0 
+                                                                                                                                                                                                                                    000045: type 43 ('+'), str 102 [or], contents 39, next 54, prev 0 
+                                                                                                                                                                                                                                        000039: type 43 ('+'), str 89 [or], contents 33, next 48, prev 0 
+                                                                                                                                                                                                                                            000033: type 43 ('+'), str 76 [or], contents 27, next 42, prev 0 
+                                                                                                                                                                                                                                                000027: type 43 ('+'), str 63 [or], contents 21, next 36, prev 0 
+                                                                                                                                                                                                                                                    000021: type 43 ('+'), str 50 [or], contents 15, next 30, prev 0 
+                                                                                                                                                                                                                                                        000015: type 43 ('+'), str 37 [or], contents 9, next 24, prev 0 
+                                                                                                                                                                                                                                                            000009: type 43 ('+'), str 24 [or], contents 6, next 18, prev 0 
+                                                                                                                                                                                                                                                                000006: type 14 (L_EQUALS), str 19 [=], contents 7, next 12, prev 0 
+                                                                                                                                                                                                                                                                    000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
+                                                                                                                                                                                                                                                                        000005: type 70 (C_ELEMENT), str 14 [name], contents 0, next 0, prev 0 
+                                                                                                                                                                                                                                                                    000008: type 54 (T_QUOTED), str 21 [n0], contents 0, next 0, prev 7 
+                                                                                                                                                                                                                                                                000012: type 14 (L_EQUALS), str 32 [=], contents 13, next 0, prev 6 
+                                                                                                                                                                                                                                                                    000013: type 74 (C_PATH), str 0 [], contents 11, next 14, prev 0 
+                                                                                                                                                                                                                                                                        000011: type 70 (C_ELEMENT), str 27 [name], contents 0, next 0, prev 0 
+                                                                                                                                                                                                                                                                    000014: type 54 (T_QUOTED), str 34 [n1], contents 0, next 0, prev 13 
+                                                                                                                                                                                                                                                            000018: type 14 (L_EQUALS), str 45 [=], contents 19, next 0, prev 9 
+                                                                                                                                                                                                                                                                000019: type 74 (C_PATH), str 0 [], contents 17, next 20, prev 0 
+                                                                                                                                                                                                                                                                    000017: type 70 (C_ELEMENT), str 40 [name], contents 0, next 0, prev 0 
+                                                                                                                                                                                                                                                                000020: type 54 (T_QUOTED), str 47 [n2], contents 0, next 0, prev 19 
+                                                                                                                                                                                                                                                        000024: type 14 (L_EQUALS), str 58 [=], contents 25, next 0, prev 15 
+                                                                                                                                                                                                                                                            000025: type 74 (C_PATH), str 0 [], contents 23, next 26, prev 0 
+                                                                                                                                                                                                                                                                000023: type 70 (C_ELEMENT), str 53 [name], contents 0, next 0, prev 0 
+                                                                                                                                                                                                                                                            000026: type 54 (T_QUOTED), str 60 [n3], contents 0, next 0, prev 25 
+                                                                                                                                                                                                                                                    000030: type 14 (L_EQUALS), str 71 [=], contents 31, next 0, prev 21 
+                                                                                                                                                                                                                                                        000031: type 74 (C_PATH), str 0 [], contents 29, next 32, prev 0 
+                                                                                                                                                                                                                                                            000029: type 70 (C_ELEMENT), str 66 [name], contents 0, next 0, prev 0 
+                                                                                                                                                                                                                                                        000032: type 54 (T_QUOTED), str 73 [n4], contents 0, next 0, prev 31 
+                                                                                                                                                                                                                                                000036: type 14 (L_EQUALS), str 84 [=], contents 37, next 0, prev 27 
+                                                                                                                                                                                                                                                    000037: type 74 (C_PATH), str 0 [], contents 35, next 38, prev 0 
+                                                                                                                                                                                                                                                        000035: type 70 (C_ELEMENT), str 79 [name], contents 0, next 0, prev 0 
+                                                                                                                                                                                                                                                    000038: type 54 (T_QUOTED), str 86 [n5], contents 0, next 0, prev 37 
+                                                                                                                                                                                                                                            000042: type 14 (L_EQUALS), str 97 [=], contents 43, next 0, prev 33 
+                                                                                                                                                                                                                                                000043: type 74 (C_PATH), str 0 [], contents 41, next 44, prev 0 
+                                                                                                                                                                                                                                                    000041: type 70 (C_ELEMENT), str 92 [name], contents 0, next 0, prev 0 
+                                                                                                                                                                                                                                                000044: type 54 (T_QUOTED), str 99 [n6], contents 0, next 0, prev 43 
+                                                                                                                                                                                                                                        000048: type 14 (L_EQUALS), str 110 [=], contents 49, next 0, prev 39 
+                                                                                                                                                                                                                                            000049: type 74 (C_PATH), str 0 [], contents 47, next 50, prev 0 
+                                                                                                                                                                                                                                                000047: type 70 (C_ELEMENT), str 105 [name], contents 0, next 0, prev 0 
+                                                                                                                                                                                                                                            000050: type 54 (T_QUOTED), str 112 [n7], contents 0, next 0, prev 49 
+                                                                                                                                                                                                                                    000054: type 14 (L_EQUALS), str 123 [=], contents 55, next 0, prev 45 
+                                                                                                                                                                                                                                        000055: type 74 (C_PATH), str 0 [], contents 53, next 56, prev 0 
+                                                                                                                                                                                                                                            000053: type 70 (C_ELEMENT), str 118 [name], contents 0, next 0, prev 0 
+                                                                                                                                                                                                                                        000056: type 54 (T_QUOTED), str 125 [n8], contents 0, next 0, prev 55 
+                                                                                                                                                                                                                                000060: type 14 (L_EQUALS), str 136 [=], contents 61, next 0, prev 51 
+                                                                                                                                                                                                                                    000061: type 74 (C_PATH), str 0 [], contents 59, next 62, prev 0 
+                                                                                                                                                                                                                                        000059: type 70 (C_ELEMENT), str 131 [name], contents 0, next 0, prev 0 
+                                                                                                                                                                                                                                    000062: type 54 (T_QUOTED), str 138 [n9], contents 0, next 0, prev 61 
+                                                                                                                                                                                                                            000066: type 14 (L_EQUALS), str 149 [=], contents 67, next 0, prev 57 
+                                                                                                                                                                                                                                000067: type 74 (C_PATH), str 0 [], contents 65, next 68, prev 0 
+                                                                                                                                                                                                                                    000065: type 70 (C_ELEMENT), str 144 [name], contents 0, next 0, prev 0 
+                                                                                                                                                                                                                                000068: type 54 (T_QUOTED), str 151 [n10], contents 0, next 0, prev 67 
+                                                                                                                                                                                                                        000072: type 14 (L_EQUALS), str 163 [=], contents 73, next 0, prev 63 
+                                                                                                                                                                                                                            000073: type 74 (C_PATH), str 0 [], contents 71, next 74, prev 0 
+                                                                                                                                                                                                                                000071: type 70 (C_ELEMENT), str 158 [name], contents 0, next 0, prev 0 
+                                                                                                                                                                                                                            000074: type 54 (T_QUOTED), str 165 [n11], contents 0, next 0, prev 73 
+                                                                                                                                                                                                                    000078: type 14 (L_EQUALS), str 177 [=], contents 79, next 0, prev 69 
+                                                                                                                                                                                                                        000079: type 74 (C_PATH), str 0 [], contents 77, next 80, prev 0 
+                                                                                                                                                                                                                            000077: type 70 (C_ELEMENT), str 172 [name], contents 0, next 0, prev 0 
+                                                                                                                                                                                                                        000080: type 54 (T_QUOTED), str 179 [n12], contents 0, next 0, prev 79 
+                                                                                                                                                                                                                000084: type 14 (L_EQUALS), str 191 [=], contents 85, next 0, prev 75 
+                                                                                                                                                                                                                    000085: type 74 (C_PATH), str 0 [], contents 83, next 86, prev 0 
+                                                                                                                                                                                                                        000083: type 70 (C_ELEMENT), str 186 [name], contents 0, next 0, prev 0 
+                                                                                                                                                                                                                    000086: type 54 (T_QUOTED), str 193 [n13], contents 0, next 0, prev 85 
+                                                                                                                                                                                                            000090: type 14 (L_EQUALS), str 205 [=], contents 91, next 0, prev 81 
+                                                                                                                                                                                                                000091: type 74 (C_PATH), str 0 [], contents 89, next 92, prev 0 
+                                                                                                                                                                                                                    000089: type 70 (C_ELEMENT), str 200 [name], contents 0, next 0, prev 0 
+                                                                                                                                                                                                                000092: type 54 (T_QUOTED), str 207 [n14], contents 0, next 0, prev 91 
+                                                                                                                                                                                                        000096: type 14 (L_EQUALS), str 219 [=], contents 97, next 0, prev 87 
+                                                                                                                                                                                                            000097: type 74 (C_PATH), str 0 [], contents 95, next 98, prev 0 
+                                                                                                                                                                                                                000095: type 70 (C_ELEMENT), str 214 [name], contents 0, next 0, prev 0 
+                                                                                                                                                                                                            000098: type 54 (T_QUOTED), str 221 [n15], contents 0, next 0, prev 97 
+                                                                                                                                                                                                    000102: type 14 (L_EQUALS), str 233 [=], contents 103, next 0, prev 93 
+                                                                                                                                                                                                        000103: type 74 (C_PATH), str 0 [], contents 101, next 104, prev 0 
+                                                                                                                                                                                                            000101: type 70 (C_ELEMENT), str 228 [name], contents 0, next 0, prev 0 
+                                                                                                                                                                                                        000104: type 54 (T_QUOTED), str 235 [n16], contents 0, next 0, prev 103 
+                                                                                                                                                                                                000108: type 14 (L_EQUALS), str 247 [=], contents 109, next 0, prev 99 
+                                                                                                                                                                                                    000109: type 74 (C_PATH), str 0 [], contents 107, next 110, prev 0 
+                                                                                                                                                                                                        000107: type 70 (C_ELEMENT), str 242 [name], contents 0, next 0, prev 0 
+                                                                                                                                                                                                    000110: type 54 (T_QUOTED), str 249 [n17], contents 0, next 0, prev 109 
+                                                                                                                                                                                            000114: type 14 (L_EQUALS), str 261 [=], contents 115, next 0, prev 105 
+                                                                                                                                                                                                000115: type 74 (C_PATH), str 0 [], contents 113, next 116, prev 0 
+                                                                                                                                                                                                    000113: type 70 (C_ELEMENT), str 256 [name], contents 0, next 0, prev 0 
+                                                                                                                                                                                                000116: type 54 (T_QUOTED), str 263 [n18], contents 0, next 0, prev 115 
+                                                                                                                                                                                        000120: type 14 (L_EQUALS), str 275 [=], contents 121, next 0, prev 111 
+                                                                                                                                                                                            000121: type 74 (C_PATH), str 0 [], contents 119, next 122, prev 0 
+                                                                                                                                                                                                000119: type 70 (C_ELEMENT), str 270 [name], contents 0, next 0, prev 0 
+                                                                                                                                                                                            000122: type 54 (T_QUOTED), str 277 [n19], contents 0, next 0, prev 121 
+                                                                                                                                                                                    000126: type 14 (L_EQUALS), str 289 [=], contents 127, next 0, prev 117 
+                                                                                                                                                                                        000127: type 74 (C_PATH), str 0 [], contents 125, next 128, prev 0 
+                                                                                                                                                                                            000125: type 70 (C_ELEMENT), str 284 [name], contents 0, next 0, prev 0 
+                                                                                                                                                                                        000128: type 54 (T_QUOTED), str 291 [n20], contents 0, next 0, prev 127 
+                                                                                                                                                                                000132: type 14 (L_EQUALS), str 303 [=], contents 133, next 0, prev 123 
+                                                                                                                                                                                    000133: type 74 (C_PATH), str 0 [], contents 131, next 134, prev 0 
+                                                                                                                                                                                        000131: type 70 (C_ELEMENT), str 298 [name], contents 0, next 0, prev 0 
+                                                                                                                                                                                    000134: type 54 (T_QUOTED), str 305 [n21], contents 0, next 0, prev 133 
+                                                                                                                                                                            000138: type 14 (L_EQUALS), str 317 [=], contents 139, next 0, prev 129 
+                                                                                                                                                                                000139: type 74 (C_PATH), str 0 [], contents 137, next 140, prev 0 
+                                                                                                                                                                                    000137: type 70 (C_ELEMENT), str 312 [name], contents 0, next 0, prev 0 
+                                                                                                                                                                                000140: type 54 (T_QUOTED), str 319 [n22], contents 0, next 0, prev 139 
+                                                                                                                                                                        000144: type 14 (L_EQUALS), str 331 [=], contents 145, next 0, prev 135 
+                                                                                                                                                                            000145: type 74 (C_PATH), str 0 [], contents 143, next 146, prev 0 
+                                                                                                                                                                                000143: type 70 (C_ELEMENT), str 326 [name], contents 0, next 0, prev 0 
+                                                                                                                                                                            000146: type 54 (T_QUOTED), str 333 [n23], contents 0, next 0, prev 145 
+                                                                                                                                                                    000150: type 14 (L_EQUALS), str 345 [=], contents 151, next 0, prev 141 
+                                                                                                                                                                        000151: type 74 (C_PATH), str 0 [], contents 149, next 152, prev 0 
+                                                                                                                                                                            000149: type 70 (C_ELEMENT), str 340 [name], contents 0, next 0, prev 0 
+                                                                                                                                                                        000152: type 54 (T_QUOTED), str 347 [n24], contents 0, next 0, prev 151 
+                                                                                                                                                                000156: type 14 (L_EQUALS), str 359 [=], contents 157, next 0, prev 147 
+                                                                                                                                                                    000157: type 74 (C_PATH), str 0 [], contents 155, next 158, prev 0 
+                                                                                                                                                                        000155: type 70 (C_ELEMENT), str 354 [name], contents 0, next 0, prev 0 
+                                                                                                                                                                    000158: type 54 (T_QUOTED), str 361 [n25], contents 0, next 0, prev 157 
+                                                                                                                                                            000162: type 14 (L_EQUALS), str 373 [=], contents 163, next 0, prev 153 
+                                                                                                                                                                000163: type 74 (C_PATH), str 0 [], contents 161, next 164, prev 0 
+                                                                                                                                                                    000161: type 70 (C_ELEMENT), str 368 [name], contents 0, next 0, prev 0 
+                                                                                                                                                                000164: type 54 (T_QUOTED), str 375 [n26], contents 0, next 0, prev 163 
+                                                                                                                                                        000168: type 14 (L_EQUALS), str 387 [=], contents 169, next 0, prev 159 
+                                                                                                                                                            000169: type 74 (C_PATH), str 0 [], contents 167, next 170, prev 0 
+                                                                                                                                                                000167: type 70 (C_ELEMENT), str 382 [name], contents 0, next 0, prev 0 
+                                                                                                                                                            000170: type 54 (T_QUOTED), str 389 [n27], contents 0, next 0, prev 169 
+                                                                                                                                                    000174: type 14 (L_EQUALS), str 401 [=], contents 175, next 0, prev 165 
+                                                                                                                                                        000175: type 74 (C_PATH), str 0 [], contents 173, next 176, prev 0 
+                                                                                                                                                            000173: type 70 (C_ELEMENT), str 396 [name], contents 0, next 0, prev 0 
+                                                                                                                                                        000176: type 54 (T_QUOTED), str 403 [n28], contents 0, next 0, prev 175 
+                                                                                                                                                000180: type 14 (L_EQUALS), str 415 [=], contents 181, next 0, prev 171 
+                                                                                                                                                    000181: type 74 (C_PATH), str 0 [], contents 179, next 182, prev 0 
+                                                                                                                                                        000179: type 70 (C_ELEMENT), str 410 [name], contents 0, next 0, prev 0 
+                                                                                                                                                    000182: type 54 (T_QUOTED), str 417 [n29], contents 0, next 0, prev 181 
+                                                                                                                                            000186: type 14 (L_EQUALS), str 429 [=], contents 187, next 0, prev 177 
+                                                                                                                                                000187: type 74 (C_PATH), str 0 [], contents 185, next 188, prev 0 
+                                                                                                                                                    000185: type 70 (C_ELEMENT), str 424 [name], contents 0, next 0, prev 0 
+                                                                                                                                                000188: type 54 (T_QUOTED), str 431 [n30], contents 0, next 0, prev 187 
+                                                                                                                                        000192: type 14 (L_EQUALS), str 443 [=], contents 193, next 0, prev 183 
+                                                                                                                                            000193: type 74 (C_PATH), str 0 [], contents 191, next 194, prev 0 
+                                                                                                                                                000191: type 70 (C_ELEMENT), str 438 [name], contents 0, next 0, prev 0 
+                                                                                                                                            000194: type 54 (T_QUOTED), str 445 [n31], contents 0, next 0, prev 193 
+                                                                                                                                    000198: type 14 (L_EQUALS), str 457 [=], contents 199, next 0, prev 189 
+                                                                                                                                        000199: type 74 (C_PATH), str 0 [], contents 197, next 200, prev 0 
+                                                                                                                                            000197: type 70 (C_ELEMENT), str 452 [name], contents 0, next 0, prev 0 
+                                                                                                                                        000200: type 54 (T_QUOTED), str 459 [n32], contents 0, next 0, prev 199 
+                                                                                                                                000204: type 14 (L_EQUALS), str 471 [=], contents 205, next 0, prev 195 
+                                                                                                                                    000205: type 74 (C_PATH), str 0 [], contents 203, next 206, prev 0 
+                                                                                                                                        000203: type 70 (C_ELEMENT), str 466 [name], contents 0, next 0, prev 0 
+                                                                                                                                    000206: type 54 (T_QUOTED), str 473 [n33], contents 0, next 0, prev 205 
+                                                                                                                            000210: type 14 (L_EQUALS), str 485 [=], contents 211, next 0, prev 201 
+                                                                                                                                000211: type 74 (C_PATH), str 0 [], contents 209, next 212, prev 0 
+                                                                                                                                    000209: type 70 (C_ELEMENT), str 480 [name], contents 0, next 0, prev 0 
+                                                                                                                                000212: type 54 (T_QUOTED), str 487 [n34], contents 0, next 0, prev 211 
+                                                                                                                        000216: type 14 (L_EQUALS), str 499 [=], contents 217, next 0, prev 207 
+                                                                                                                            000217: type 74 (C_PATH), str 0 [], contents 215, next 218, prev 0 
+                                                                                                                                000215: type 70 (C_ELEMENT), str 494 [name], contents 0, next 0, prev 0 
+                                                                                                                            000218: type 54 (T_QUOTED), str 501 [n35], contents 0, next 0, prev 217 
+                                                                                                                    000222: type 14 (L_EQUALS), str 513 [=], contents 223, next 0, prev 213 
+                                                                                                                        000223: type 74 (C_PATH), str 0 [], contents 221, next 224, prev 0 
+                                                                                                                            000221: type 70 (C_ELEMENT), str 508 [name], contents 0, next 0, prev 0 
+                                                                                                                        000224: type 54 (T_QUOTED), str 515 [n36], contents 0, next 0, prev 223 
+                                                                                                                000228: type 14 (L_EQUALS), str 527 [=], contents 229, next 0, prev 219 
+                                                                                                                    000229: type 74 (C_PATH), str 0 [], contents 227, next 230, prev 0 
+                                                                                                                        000227: type 70 (C_ELEMENT), str 522 [name], contents 0, next 0, prev 0 
+                                                                                                                    000230: type 54 (T_QUOTED), str 529 [n37], contents 0, next 0, prev 229 
+                                                                                                            000234: type 14 (L_EQUALS), str 541 [=], contents 235, next 0, prev 225 
+                                                                                                                000235: type 74 (C_PATH), str 0 [], contents 233, next 236, prev 0 
+                                                                                                                    000233: type 70 (C_ELEMENT), str 536 [name], contents 0, next 0, prev 0 
+                                                                                                                000236: type 54 (T_QUOTED), str 543 [n38], contents 0, next 0, prev 235 
+                                                                                                        000240: type 14 (L_EQUALS), str 555 [=], contents 241, next 0, prev 231 
+                                                                                                            000241: type 74 (C_PATH), str 0 [], contents 239, next 242, prev 0 
+                                                                                                                000239: type 70 (C_ELEMENT), str 550 [name], contents 0, next 0, prev 0 
+                                                                                                            000242: type 54 (T_QUOTED), str 557 [n39], contents 0, next 0, prev 241 
+                                                                                                    000246: type 14 (L_EQUALS), str 569 [=], contents 247, next 0, prev 237 
+                                                                                                        000247: type 74 (C_PATH), str 0 [], contents 245, next 248, prev 0 
+                                                                                                            000245: type 70 (C_ELEMENT), str 564 [name], contents 0, next 0, prev 0 
+                                                                                                        000248: type 54 (T_QUOTED), str 571 [n40], contents 0, next 0, prev 247 
+                                                                                                000252: type 14 (L_EQUALS), str 583 [=], contents 253, next 0, prev 243 
+                                                                                                    000253: type 74 (C_PATH), str 0 [], contents 251, next 254, prev 0 
+                                                                                                        000251: type 70 (C_ELEMENT), str 578 [name], contents 0, next 0, prev 0 
+                                                                                                    000254: type 54 (T_QUOTED), str 585 [n41], contents 0, next 0, prev 253 
+                                                                                            000258: type 14 (L_EQUALS), str 597 [=], contents 259, next 0, prev 249 
+                                                                                                000259: type 74 (C_PATH), str 0 [], contents 257, next 260, prev 0 
+                                                                                                    000257: type 70 (C_ELEMENT), str 592 [name], contents 0, next 0, prev 0 
+                                                                                                000260: type 54 (T_QUOTED), str 599 [n42], contents 0, next 0, prev 259 
+                                                                                        000264: type 14 (L_EQUALS), str 611 [=], contents 265, next 0, prev 255 
+                                                                                            000265: type 74 (C_PATH), str 0 [], contents 263, next 266, prev 0 
+                                                                                                000263: type 70 (C_ELEMENT), str 606 [name], contents 0, next 0, prev 0 
+                                                                                            000266: type 54 (T_QUOTED), str 613 [n43], contents 0, next 0, prev 265 
+                                                                                    000270: type 14 (L_EQUALS), str 625 [=], contents 271, next 0, prev 261 
+                                                                                        000271: type 74 (C_PATH), str 0 [], contents 269, next 272, prev 0 
+                                                                                            000269: type 70 (C_ELEMENT), str 620 [name], contents 0, next 0, prev 0 
+                                                                                        000272: type 54 (T_QUOTED), str 627 [n44], contents 0, next 0, prev 271 
+                                                                                000276: type 14 (L_EQUALS), str 639 [=], contents 277, next 0, prev 267 
+                                                                                    000277: type 74 (C_PATH), str 0 [], contents 275, next 278, prev 0 
+                                                                                        000275: type 70 (C_ELEMENT), str 634 [name], contents 0, next 0, prev 0 
+                                                                                    000278: type 54 (T_QUOTED), str 641 [n45], contents 0, next 0, prev 277 
+                                                                            000282: type 14 (L_EQUALS), str 653 [=], contents 283, next 0, prev 273 
+                                                                                000283: type 74 (C_PATH), str 0 [], contents 281, next 284, prev 0 
+                                                                                    000281: type 70 (C_ELEMENT), str 648 [name], contents 0, next 0, prev 0 
+                                                                                000284: type 54 (T_QUOTED), str 655 [n46], contents 0, next 0, prev 283 
+                                                                        000288: type 14 (L_EQUALS), str 667 [=], contents 289, next 0, prev 279 
+                                                                            000289: type 74 (C_PATH), str 0 [], contents 287, next 290, prev 0 
+                                                                                000287: type 70 (C_ELEMENT), str 662 [name], contents 0, next 0, prev 0 
+                                                                            000290: type 54 (T_QUOTED), str 669 [n47], contents 0, next 0, prev 289 
+                                                                    000294: type 14 (L_EQUALS), str 681 [=], contents 295, next 0, prev 285 
+                                                                        000295: type 74 (C_PATH), str 0 [], contents 293, next 296, prev 0 
+                                                                            000293: type 70 (C_ELEMENT), str 676 [name], contents 0, next 0, prev 0 
+                                                                        000296: type 54 (T_QUOTED), str 683 [n48], contents 0, next 0, prev 295 
+                                                                000300: type 14 (L_EQUALS), str 695 [=], contents 301, next 0, prev 291 
+                                                                    000301: type 74 (C_PATH), str 0 [], contents 299, next 302, prev 0 
+                                                                        000299: type 70 (C_ELEMENT), str 690 [name], contents 0, next 0, prev 0 
+                                                                    000302: type 54 (T_QUOTED), str 697 [n49], contents 0, next 0, prev 301 
+                                                            000306: type 14 (L_EQUALS), str 709 [=], contents 307, next 0, prev 297 
+                                                                000307: type 74 (C_PATH), str 0 [], contents 305, next 308, prev 0 
+                                                                    000305: type 70 (C_ELEMENT), str 704 [name], contents 0, next 0, prev 0 
+                                                                000308: type 54 (T_QUOTED), str 711 [n50], contents 0, next 0, prev 307 
+                                                        000312: type 14 (L_EQUALS), str 723 [=], contents 313, next 0, prev 303 
+                                                            000313: type 74 (C_PATH), str 0 [], contents 311, next 314, prev 0 
+                                                                000311: type 70 (C_ELEMENT), str 718 [name], contents 0, next 0, prev 0 
+                                                            000314: type 54 (T_QUOTED), str 725 [n51], contents 0, next 0, prev 313 
+                                                    000318: type 14 (L_EQUALS), str 737 [=], contents 319, next 0, prev 309 
+                                                        000319: type 74 (C_PATH), str 0 [], contents 317, next 320, prev 0 
+                                                            000317: type 70 (C_ELEMENT), str 732 [name], contents 0, next 0, prev 0 
+                                                        000320: type 54 (T_QUOTED), str 739 [n52], contents 0, next 0, prev 319 
+                                                000324: type 14 (L_EQUALS), str 751 [=], contents 325, next 0, prev 315 
+                                                    000325: type 74 (C_PATH), str 0 [], contents 323, next 326, prev 0 
+                                                        000323: type 70 (C_ELEMENT), str 746 [name], contents 0, next 0, prev 0 
+                                                    000326: type 54 (T_QUOTED), str 753 [n53], contents 0, next 0, prev 325 
+                                            000330: type 14 (L_EQUALS), str 765 [=], contents 331, next 0, prev 321 
+                                                000331: type 74 (C_PATH), str 0 [], contents 329, next 332, prev 0 
+                                                    000329: type 70 (C_ELEMENT), str 760 [name], contents 0, next 0, prev 0 
+                                                000332: type 54 (T_QUOTED), str 767 [n54], contents 0, next 0, prev 331 
+                                        000336: type 14 (L_EQUALS), str 779 [=], contents 337, next 0, prev 327 
+                                            000337: type 74 (C_PATH), str 0 [], contents 335, next 338, prev 0 
+                                                000335: type 70 (C_ELEMENT), str 774 [name], contents 0, next 0, prev 0 
+                                            000338: type 54 (T_QUOTED), str 781 [n55], contents 0, next 0, prev 337 
+                                    000342: type 14 (L_EQUALS), str 793 [=], contents 343, next 0, prev 333 
+                                        000343: type 74 (C_PATH), str 0 [], contents 341, next 344, prev 0 
+                                            000341: type 70 (C_ELEMENT), str 788 [name], contents 0, next 0, prev 0 
+                                        000344: type 54 (T_QUOTED), str 795 [n56], contents 0, next 0, prev 343 
+                                000348: type 14 (L_EQUALS), str 807 [=], contents 349, next 0, prev 339 
+                                    000349: type 74 (C_PATH), str 0 [], contents 347, next 350, prev 0 
+                                        000347: type 70 (C_ELEMENT), str 802 [name], contents 0, next 0, prev 0 
+                                    000350: type 54 (T_QUOTED), str 809 [n57], contents 0, next 0, prev 349 
+                            000354: type 14 (L_EQUALS), str 821 [=], contents 355, next 0, prev 345 
+                                000355: type 74 (C_PATH), str 0 [], contents 353, next 356, prev 0 
+                                    000353: type 70 (C_ELEMENT), str 816 [name], contents 0, next 0, prev 0 
+                                000356: type 54 (T_QUOTED), str 823 [n58], contents 0, next 0, prev 355 
+                        000360: type 14 (L_EQUALS), str 835 [=], contents 361, next 0, prev 351 
+                            000361: type 74 (C_PATH), str 0 [], contents 359, next 362, prev 0 
+                                000359: type 70 (C_ELEMENT), str 830 [name], contents 0, next 0, prev 0 
+                            000362: type 54 (T_QUOTED), str 837 [n59], contents 0, next 0, prev 361 
+                    000366: type 14 (L_EQUALS), str 849 [=], contents 367, next 0, prev 357 
+                        000367: type 74 (C_PATH), str 0 [], contents 365, next 368, prev 0 
+                            000365: type 70 (C_ELEMENT), str 844 [name], contents 0, next 0, prev 0 
+                        000368: type 54 (T_QUOTED), str 851 [ladder], contents 0, next 0, prev 367 
+main: status: zero
+main: input '+ top'
+main: filter: rc: 6
+main: status: track
+main: input '{ item'
+main: status: track
+main: input '< item'
+main: filter: rc: 9
+main: status: predicate
+main: input '$ name gum'
+main: key: 'name'='gum'
+main: status: track
+main: input '= sku GRO-000-415'
+main: field: 'sku'='GRO-000-415'
+main: status: track
+main: input '= sold 1412'
+main: field: 'sold'='1412'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 9
+main: status: predicate
+main: input '$ name rope'
+main: key: 'name'='rope'
+main: status: track
+main: input '= sold 85'
+main: field: 'sold'='85'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '< item'
+main: filter: rc: 9
+main: status: predicate
+main: input '$ name ladder'
+main: key: 'name'='ladder'
+main: status: full
+main: input '= sku HRD-000-212'
+main: field: 'sku'='HRD-000-212'
+main: status: full
+main: input '= sold 0'
+main: field: 'sold'='0'
+main: status: full
+main: input '> item'
+main: filter: rc: 10
+main: status: track
+main: input '< item'
+main: filter: rc: 9
+main: status: predicate
+main: input '$ name bubblegum'
+main: key: 'name'='bubblegum'
+main: status: track
+main: input '= sold 17'
+main: field: 'sold'='17'
+main: status: track
+main: input '> item'
+main: status: track
+main: input '} item'
+main: status: track
+main: input '- top'
+main: status: track
+main: input ''
+main: input '# Test 11: values the fullpath encoder has to escape'
+main: input 'r'
+main: status: zero
+main: input '? escape'
+adding filter: 'escape'
+added filter: 0
+--- 0: 3
+    000003: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [escape], contents 0, next 0, prev 0 
+main: status: zero
+main: input '+ escape'
+main: filter: rc: 9
+main: status: full
+main: input '= tab left	right'
+main: field: 'tab'='left	right'
+main: status: full
+main: input '= quotes say "hi" and 'bye''
+main: field: 'quotes'='say "hi" and 'bye''
+main: status: full
+main: input '= backslash c:\dir\file'
+main: field: 'backslash'='c:\dir\file'
+main: status: full
+main: input '= accents café naïve 日本'
+main: field: 'accents'='café naïve 日本'
+main: status: full
+main: input '= control sohanddel'
+main: field: 'control'='sohanddel'
+main: status: full
+main: input '- escape'
+main: status: track
