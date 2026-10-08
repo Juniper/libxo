@@ -96,6 +96,8 @@ TEST_FILES= \
     xpath_01_22.1.fullpath_slax_pretty.err \
     xpath_01_23.1.fullpath_slax_pretty.out \
     xpath_01_23.1.fullpath_slax_pretty.err \
+    xpath_01_24.1.fullpath_slax_pretty.out \
+    xpath_01_24.1.fullpath_slax_pretty.err \
     xpath_01_01.1.fullpath.out \
     xpath_01_01.1.fullpath.err \
     xpath_01_02.1.fullpath.out \
@@ -142,6 +144,8 @@ TEST_FILES= \
     xpath_01_22.1.fullpath.err \
     xpath_01_23.1.fullpath.out \
     xpath_01_23.1.fullpath.err \
+    xpath_01_24.1.fullpath.out \
+    xpath_01_24.1.fullpath.err \
     xpath_01_01.1.XP.out \
     xpath_01_01.1.XP.err \
     xpath_01_02.1.XP.out \
@@ -188,6 +192,8 @@ TEST_FILES= \
     xpath_01_22.1.XP.err \
     xpath_01_23.1.XP.out \
     xpath_01_23.1.XP.err \
+    xpath_01_24.1.XP.out \
+    xpath_01_24.1.XP.err \
     xpath_01_01.1.JP.out \
     xpath_01_01.1.JP.err \
     xpath_01_02.1.JP.out \
@@ -233,7 +239,9 @@ TEST_FILES= \
     xpath_01_22.1.JP.out \
     xpath_01_22.1.JP.err \
     xpath_01_23.1.JP.out \
-    xpath_01_23.1.JP.err
+    xpath_01_23.1.JP.err \
+    xpath_01_24.1.JP.out \
+    xpath_01_24.1.JP.err
 
 EXTRA_DIST = \
     ${TEST_CASES} \
