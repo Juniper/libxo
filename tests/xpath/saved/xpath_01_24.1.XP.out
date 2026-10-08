@@ -1,0 +1,78 @@
+<top>
+  <item>
+    <name>gum</name>
+    <sku>GRO-000-415</sku>
+    <sold>1412</sold>
+  </item>
+  <item>
+    <name>ladder</name>
+    <sku>HRD-000-212</sku>
+    <sold>0</sold>
+  </item>
+</top>
+<top>
+  <item>
+    <name>gum</name>
+    <sku>GRO-000-415</sku>
+    <sold>1412</sold>
+  </item>
+  <item>
+    <name>rope</name>
+    <sold>85</sold>
+  </item>
+  <item>
+    <name>ladder</name>
+    <sku>HRD-000-212</sku>
+    <sold>0</sold>
+  </item>
+  <item>
+    <name>bubblegum</name>
+    <sold>17</sold>
+  </item>
+</top>
+<top>
+  <item>
+    <name>gum</name>
+    <sku>GRO-000-415</sku>
+    <sold>1412</sold>
+  </item>
+  <item>
+    <name>rope</name>
+    <sold>85</sold>
+  </item>
+  <item>
+    <name>ladder</name>
+    <sku>HRD-000-212</sku>
+    <sold>0</sold>
+  </item>
+  <item>
+    <name>bubblegum</name>
+    <sold>17</sold>
+  </item>
+</top>
+<top>
+  <item>
+    <name>bubblegum</name>
+    <sold>17</sold>
+  </item>
+</top>
+<top>
+  <item>
+    <name>rope</name>
+    <sold>85</sold>
+  </item>
+</top>
+<top>
+  <item>
+    <name>ladder</name>
+    <sku>HRD-000-212</sku>
+    <sold>0</sold>
+  </item>
+</top>
+<escape>
+  <tab>left	right</tab>
+  <quotes>say "hi" and 'bye'</quotes>
+  <backslash>c:\dir\file</backslash>
+  <accents>café naïve 日本</accents>
+  <control>soh anddel</control>
+</escape>
