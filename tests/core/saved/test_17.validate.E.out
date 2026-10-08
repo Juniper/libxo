@@ -49,10 +49,16 @@ op string: [wb-last] [clean] [0]
 op string: [wb-beyond] [unknown] [0]
 op string: [registered] [done] [0]
 op close_container: [encoder-names] [] [0]
+op open_container: [attributes] [] [0x10]
+op attr: [quoted] [say "hi" & <go>] [0]
+op attr: [bad name<&"] [value] [0]
+op content: [escaped] [1] [0]
+op close_container: [attributes] [] [0]
 op close_container: [top] [] [0]
 op finish: [] [] [0]
 op flush: [] [] [0]
 before="one" name="gum" count="0" name="rope" count="1" name="ladder" count="2" after="two" 
+long values wrote 20068 bytes
 syslog send: full 305, header no, text 305
   full ends 'xxxxxxxxxxxxxxxxxxxxtail'
   text ends 'xxxxxxxxxxxxxxxxxxxxtail'
