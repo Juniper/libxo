@@ -133,6 +133,13 @@ main (int argc, char **argv)
 
     xo_emit("{G:}{Lwcg:Windings}{g:windings}\n", "lotus-o-delta");
 
+    /*
+     * The translation of this one puts the fields in the other order
+     * and has many more pieces than the original, so the reordering
+     * code has to cope with a format that is larger than ours.
+     */
+    xo_emit("{G:}{:first/%s} before {:second/%d}\n", "one", 2);
+
     xo_close_container("top");
     xo_finish();
 
