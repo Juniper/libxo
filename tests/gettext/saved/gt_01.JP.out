@@ -51,6 +51,8 @@
       "error": "Ermissionpay eniedday"
     },
     "marzlevanes": 6,
-    "windings": "otuslay-oyay-eltayay"
+    "windings": "otuslay-oyay-eltayay",
+    "first": "one",
+    "second": 2
   }
 }
