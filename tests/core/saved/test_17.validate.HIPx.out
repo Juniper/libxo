@@ -80,7 +80,11 @@
 <div class="line">
   <div class="data" data-tag="registered" data-xpath="/top/encoder-names/registered">done</div>
 </div>
+<div class="line">
+  <div class="data" data-tag="escaped" data-xpath="/top/attributes/escaped">1</div>
+</div>
 before="one" name="gum" count="0" name="rope" count="1" name="ladder" count="2" after="two" 
+long values wrote 20068 bytes
 syslog send: full 305, header no, text 305
   full ends 'xxxxxxxxxxxxxxxxxxxxtail'
   text ends 'xxxxxxxxxxxxxxxxxxxxtail'
