@@ -48,10 +48,14 @@
       "wb_last": "clean",
       "wb_beyond": "unknown",
       "registered": "done"
+    },
+    "attributes": {
+      "escaped": 1
     }
   }
 }
 before="one" name="gum" count="0" name="rope" count="1" name="ladder" count="2" after="two" 
+long values wrote 20068 bytes
 syslog send: full 305, header no, text 305
   full ends 'xxxxxxxxxxxxxxxxxxxxtail'
   text ends 'xxxxxxxxxxxxxxxxxxxxtail'
