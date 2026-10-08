@@ -7864,7 +7864,6 @@ xo_find_width (xo_handle_t *xop, const char *base,
 	    int anchor_was_set = FALSE;
 	    xo_buffer_t *xbp = &xop->xo_data;
 	    ssize_t start_offset = xo_buf_offset(xbp);
-	    bp = xo_buf_cur(xbp);	/* Save start of the string */
 	    cp = NULL;
 
 	    if (XOIF_ISSET(xop, XOIF_ANCHOR)) {
@@ -7875,6 +7874,12 @@ xo_find_width (xo_handle_t *xop, const char *base,
 	    ssize_t rc = xo_do_format_field(xop, xfip, xbp, fmt, flen, 0);
 	    if (rc >= 0) {
 		xo_buf_append(xbp, "", 1); /* Append a NUL */
+
+		/*
+		 * Find the string only now, from its offset: formatting
+		 * (or the NUL) can make the buffer grow, which moves it.
+		 */
+		bp = xo_buf_data(xbp, start_offset);
 
 		width = strtol(bp, &cp, 0);
 		if (width == LONG_MIN || width == LONG_MAX
