@@ -176,6 +176,64 @@ test_sdparams (void)
     printf("\n");
 }
 
+/* Count what a handle writes, since the output is too long to show */
+static xo_ssize_t
+test_count_writer (void *opaque, const char *data)
+{
+    size_t *countp = opaque;
+
+    *countp += strlen(data);
+    return strlen(data);
+}
+
+/* Attribute names and values are escaped; a missing name is refused */
+static void
+test_attributes (void)
+{
+    xo_open_container("attributes");
+
+    xo_attr("quoted", "%s", "say \"hi\" & <go>");
+    xo_attr("bad name<&\"", "%s", "value");
+    xo_attr(NULL, "%s", "no-name");
+    xo_attr("", "%s", "empty-name");
+    xo_emit("{:escaped/%d}\n", 1);
+
+    xo_close_container("attributes");
+}
+
+/*
+ * A value that grows when escaped needs room for all of it.  These
+ * use a new handle so the buffers are still at their first size: a
+ * string of 2500 "<" fits, and so does its growth, but not the two
+ * together.
+ */
+static void
+test_long_escapes (void)
+{
+    char big[2501];
+    size_t count = 0;
+
+    xo_handle_t *xop = xo_create(XO_STYLE_XML, 0);
+    if (xop == NULL)
+	return;
+
+    xo_set_writer(xop, &count, test_count_writer, NULL, NULL);
+
+    memset(big, '<', sizeof(big) - 1);
+    big[sizeof(big) - 1] = '\0';
+
+    xo_open_container_h(xop, "top");
+    xo_emit_h(xop, "{:value}", big);
+    xo_attr_h(xop, "long", "%s", big);
+    xo_emit_h(xop, "{:with-attribute/%d}", 1);
+    xo_close_container_h(xop, "top");
+
+    xo_finish_h(xop);
+    xo_destroy(xop);
+
+    printf("long values wrote %zu bytes\n", count);
+}
+
 static void
 test_syslog_open (void)
 {
@@ -241,12 +299,14 @@ main (int argc, char **argv)
     test_control_chars();
     test_deprecated_options();
     test_encoder_names();
+    test_attributes();
 
     xo_close_container("top");
     xo_finish();
 
-    /* These two write on their own, so they come after the document */
+    /* These write on their own, so they come after the document */
     test_sdparams();
+    test_long_escapes();
     test_syslog_long();
 
     return 0;
