@@ -1,0 +1,3 @@
+warning: ../../../tests/core/test_17.c:33: libxo format string: anchor format must be '%d' or '%u: '{[:/%20000d}' [-Wbackend-plugin]
+warning: ../../../tests/core/test_17.c:34: libxo format string: anchor format must be '%d' or '%u: '{[:/%20000d}' [-Wbackend-plugin]
+2 warnings generated.
