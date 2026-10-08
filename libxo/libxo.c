@@ -1229,8 +1229,12 @@ xo_escape_xml (xo_handle_t *xop, xo_buffer_t *xbp,
         delta += lost * (XO_XML_ESCAPE_BINARY_UNICODE_SIZE - 1);
     char private_buffer[XO_XML_ESCAPE_BINARY_UNICODE_SIZE + 1];
 
-    /* No room?  Bail, but don't append */
-    if (xo_check_for_room(xop, xbp, delta))
+    /*
+     * The data sits beyond the buffer's current point, so the room
+     * we need is all of it plus the growth.  No room?  Bail, but
+     * don't append.
+     */
+    if (xo_check_for_room(xop, xbp, len + delta))
         return 0;
 
     ep = xbp->xb_curp;
@@ -1344,8 +1348,12 @@ xo_escape_json (xo_handle_t *xop, xo_buffer_t *xbp,
     if (delta == 0)             /* Nothing to escape; bail */
         return len;
 
-    /* No room?  Bail, but don't append */
-    if (xo_check_for_room(xop, xbp, delta))
+    /*
+     * The data sits beyond the buffer's current point, so the room
+     * we need is all of it plus the growth.  No room?  Bail, but
+     * don't append.
+     */
+    if (xo_check_for_room(xop, xbp, len + delta))
         return 0;
 
     ep = xbp->xb_curp;
@@ -1438,7 +1446,12 @@ xo_escape_sdparams (xo_handle_t *xop, xo_buffer_t *xbp,
     if (delta == 0)             /* Nothing to escape; bail */
         return len;
 
-    if (xo_check_for_room(xop, xbp, delta)) /* No room; bail, but don't append */
+    /*
+     * The data sits beyond the buffer's current point, so the room
+     * we need is all of it plus the growth.  No room?  Bail, but
+     * don't append.
+     */
+    if (xo_check_for_room(xop, xbp, len + delta))
         return 0;
 
     ep = xbp->xb_curp;
@@ -9286,42 +9299,72 @@ xo_emit_field (const char *rolmod, const char *contents,
 xo_ssize_t
 xo_attr_hv (xo_handle_t *xop, const char *name, const char *fmt, va_list vap)
 {
-    const ssize_t extra = 5; 	/* space, equals, quote, quote, and nul */
+    /* leader, space, equals, quote, quote, and nul */
+    const ssize_t extra = 6;
     xop = xo_default(xop);
+
+    if (name == NULL || *name == '\0' || fmt == NULL) {
+	xo_failure(xop, "attribute needs a name and a format");
+	return -1;
+    }
 
     ssize_t rc = 0;
     ssize_t nlen = strlen(name);
     xo_buffer_t *xbp = &xop->xo_attrs;
+    ssize_t start_offset = xo_buf_offset(xbp);
     ssize_t name_offset, value_offset;
+    const char *leader;
 
     switch (xo_style(xop)) {
     case XO_STYLE_XML:
+	leader = xo_xml_leader_len(xop, name, nlen);
+
 	if (xo_check_for_room(xop, xbp, nlen + extra))
 	    return -1;
 
 	*xbp->xb_curp++ = ' ';
+	if (*leader)
+	    *xbp->xb_curp++ = *leader;
+
+	/*
+	 * The name is escaped where it lies, as the value is below.
+	 * This doesn't turn a bad name into a good one, but it does
+	 * keep the name from ending the tag or starting another.
+	 */
 	memcpy(xbp->xb_curp, name, nlen);
-	xbp->xb_curp += nlen;
-	*xbp->xb_curp++ = '=';
-	*xbp->xb_curp++ = '"';
-
-	rc = xo_vsnprintf(xop, xbp, fmt, vap);
-
-	if (rc >= 0) {
-	    if (XOF_ISSET(xop, XOF_FILTER))
-		xo_filter_attribute(xop, xo_filters(xop),
-				    name, nlen, xbp->xb_curp, rc);
-	    rc = xo_escape_xml(xop, xbp, rc, 1);
+	rc = xo_escape_xml(xop, xbp, nlen, XFF_ATTR);
+	if (rc > 0 && xo_check_for_room(xop, xbp, rc + extra) == 0) {
 	    xbp->xb_curp += rc;
+	    *xbp->xb_curp++ = '=';
+	    *xbp->xb_curp++ = '"';
+
+	    rc = xo_vsnprintf(xop, xbp, fmt, vap);
+	} else
+	    rc = -1;
+
+	/* Half an attribute is worse than none, so take it back out */
+	if (rc < 0) {
+	    xo_buf_set_offset(xbp, start_offset);
+	    return -1;
 	}
 
-	if (xo_check_for_room(xop, xbp, 2))
+	if (XOF_ISSET(xop, XOF_FILTER))
+	    xo_filter_attribute(xop, xo_filters(xop),
+				name, nlen, xbp->xb_curp, rc);
+
+	rc = xo_escape_xml(xop, xbp, rc, XFF_ATTR);
+	xbp->xb_curp += rc;
+
+	if (xo_check_for_room(xop, xbp, 2)) {
+	    xo_buf_set_offset(xbp, start_offset);
 	    return -1;
+	}
 
 	*xbp->xb_curp++ = '"';
 	*xbp->xb_curp = '\0';
 
-	rc += nlen + extra;
+	/* What we added, with the NUL counted as it always has been */
+	rc = xo_buf_offset(xbp) - start_offset + 1;
 	break;
 
     case XO_STYLE_ENCODER:
@@ -9338,6 +9381,12 @@ xo_attr_hv (xo_handle_t *xop, const char *name, const char *fmt, va_list vap)
 				   xo_buf_data(xbp, name_offset),
 				   xo_buf_data(xbp, value_offset), 0);
 	}
+
+	/*
+	 * The encoder has seen the strings, and nothing else reads
+	 * this buffer in this style, so it is only scratch space.
+	 */
+	xo_buf_set_offset(xbp, start_offset);
 	break;
 
     default:
