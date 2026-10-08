@@ -51,6 +51,8 @@
       "error": "Permiso denegado"
     },
     "marzlevanes": 6,
-    "windings": "loto-o-delta"
+    "windings": "loto-o-delta",
+    "first": "one",
+    "second": 2
   }
 }
