@@ -7105,11 +7105,21 @@ xo_format_value (xo_handle_t *xop, const xo_field_info_t *xfip,
 		xop->xo_stack[xop->xo_depth].xs_flags |= XSF_EMIT_LEAF_LIST;
 	}
 
+	/*
+	 * The value goes out under the name of the open leaf-list (or
+	 * list), which is beneath any markers; a marker's name is not
+	 * the name of anything in the output.
+	 */
 	xsp = xo_stack_cur(xop);
+	while (xsp > xop->xo_stack && xsp->xs_state == XSS_MARKER)
+	    xsp -= 1;
+
 	if (xsp->xs_name) {
 	    name = xsp->xs_name;
 	    nlen = strlen(name);
 	}
+
+	xsp = xo_stack_cur(xop);
 
     } else if (flags & XFF_KEY) {
 	/* Emitting a 'k' (key) field */
@@ -7129,8 +7139,12 @@ xo_format_value (xo_handle_t *xop, const xo_field_info_t *xfip,
 	    else
 		xop->xo_stack[xop->xo_depth].xs_flags |= XSF_EMIT_KEY;
 
+	    /*
+	     * A refused field must leave no trace: a flag set on a
+	     * marker's frame is handed to the frame beneath when the
+	     * marker closes, which then looks as if it holds a field.
+	     */
 	    xsp = xo_stack_cur(xop);
-	    xsp->xs_flags |= XSF_EMIT_KEY;
 	}
 
     } else {
@@ -7147,8 +7161,8 @@ xo_format_value (xo_handle_t *xop, const xo_field_info_t *xfip,
 	    else
 		xop->xo_stack[xop->xo_depth].xs_flags |= XSF_EMIT;
 
+	    /* As for keys: a refused field leaves no flag behind */
 	    xsp = xo_stack_cur(xop);
-	    xsp->xs_flags |= XSF_EMIT;
 	}
     }
 
@@ -10501,6 +10515,11 @@ xo_do_close_all (xo_handle_t *xop, xo_stack_t *limit)
 	    rc = xo_do_close_leaf_list(xop, NULL);
 	    break;
 
+	case XSS_DISCARDING:
+	    xo_depth_change(xop, NULL, -1, 0, XSS_DISCARDING, 0, 0, 0);
+	    rc = 0;
+	    break;
+
 	case XSS_MARKER:
 	    flags = xsp->xs_flags & XSF_MARKER_FLAGS;
 	    xo_depth_change(xop, xsp->xs_name, -1, 0, XSS_MARKER, 0, 0, 0);
@@ -10595,6 +10614,129 @@ xo_marker_prevents_close (xo_handle_t *xop, int old_state, int new_state)
     return -1;
 }
 
+/*
+ * An open has arrived that we cannot place: a marker keeps us from
+ * closing the list beneath it, and a list cannot hold what is being
+ * opened.  A frame goes on the stack to stand in for it, so that the
+ * caller's matching close has something to close, and whatever is
+ * emitted or opened in the meantime is dropped.  The marker's promise
+ * is kept and the output stays well-formed; the cost is the content.
+ */
+static ssize_t
+xo_discard_open (xo_handle_t *xop, const char *name,
+		 int old_state, int new_state)
+{
+    xo_failure(xop, "marker '%s' prevents transition from %s to %s; "
+	       "discarding '%s'",
+	       xop->xo_stack[xop->xo_depth].xs_name,
+	       xo_state_name(old_state), xo_state_name(new_state),
+	       name ?: XO_FAILURE_NAME);
+
+    xo_depth_change(xop, name, 1, 0, XSS_DISCARDING, 0, 0, 0);
+
+    return -1;
+}
+
+/*
+ * We are inside something that is being discarded.  Opens are stacked
+ * up so their closes can be matched, closes take them off again, and
+ * fields are refused.  The complaint was made when discarding began,
+ * so we stay quiet here unless a close matches nothing.
+ */
+static ssize_t
+xo_transition_discarding (xo_handle_t *xop, const char *name,
+			  xo_state_t new_state)
+{
+    xo_stack_t *xsp, *limit = NULL;
+
+    switch (new_state) {
+    case XSS_OPEN_CONTAINER:
+    case XSS_OPEN_LIST:
+    case XSS_OPEN_INSTANCE:
+    case XSS_OPEN_LEAF_LIST:
+	xo_depth_change(xop, name, 1, 0, XSS_DISCARDING, 0, 0, 0);
+	return -1;
+
+    case XSS_CLOSE_CONTAINER:
+    case XSS_CLOSE_LIST:
+    case XSS_CLOSE_INSTANCE:
+    case XSS_CLOSE_LEAF_LIST:
+	/*
+	 * Only discarded frames can be closed from here; the first
+	 * frame of any other sort is a marker or the frame that the
+	 * marker protects.
+	 */
+	for (xsp = xo_stack_cur(xop); xsp > xop->xo_stack; xsp--) {
+	    if (xsp->xs_state != XSS_DISCARDING)
+		break;
+
+	    if (name && xsp->xs_name && !xo_streq(name, xsp->xs_name))
+		continue;
+
+	    limit = xsp;
+	    break;
+	}
+
+	if (limit == NULL) {
+	    xo_failure(xop, "xo_%s can't find match for '%s' "
+		       "while discarding",
+		       xo_state_name(new_state), name ?: "(unknown)");
+	    return -1;
+	}
+
+	while (xo_stack_cur(xop) >= limit)
+	    xo_depth_change(xop, NULL, -1, 0, XSS_DISCARDING, 0, 0, 0);
+
+	return 0;
+    }
+
+    return -1;			/* Fields have nowhere to go */
+}
+
+/*
+ * Close the open leaf-list, even when markers sit on top of it.  A
+ * leaf-list is opened and closed by its fields and never by the
+ * caller, so no one can be counting on it staying open and a marker's
+ * promise does not cover it.  The markers move down to sit on the
+ * leaf-list's parent.
+ */
+static void
+xo_close_implied_leaf_list (xo_handle_t *xop)
+{
+    xo_stack_t *xsp = xo_stack_cur(xop);
+    int markers = 0, i;
+
+    for ( ; xsp > xop->xo_stack && xsp->xs_state == XSS_MARKER; xsp--)
+	markers += 1;
+
+    if (xsp->xs_state != XSS_OPEN_LEAF_LIST)
+	return;
+
+    xop->xo_depth -= markers;	/* Uncover the leaf-list */
+    (void) xo_do_close_leaf_list(xop, NULL);
+
+    if (markers == 0)
+	return;
+
+    /*
+     * The leaf-list's frame is free now, so the markers drop into it.
+     * A short name lives inside its own frame and has to be pointed
+     * at the frame's new home.  The markers also carried the
+     * leaf-list's flags, which are replaced with the parent's.
+     */
+    xo_xsf_flags_t flags = xsp[-1].xs_flags & XSF_MARKER_FLAGS;
+
+    memmove(xsp, xsp + 1, markers * sizeof(*xsp));
+    for (i = 0; i < markers; i++) {
+	if (xsp[i].xs_name == xsp[i + 1].xs_namebuf)
+	    xsp[i].xs_name = xsp[i].xs_namebuf;
+	xsp[i].xs_flags = (xsp[i].xs_flags & ~XSF_MARKER_FLAGS) | flags;
+    }
+
+    bzero(&xsp[markers], sizeof(*xsp));
+    xop->xo_depth += markers;
+}
+
 static ssize_t
 xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
 	       xo_state_t new_state)
@@ -10620,7 +10762,17 @@ xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
      * At this point, the list of possible states are:
      *   XSS_INIT, XSS_OPEN_CONTAINER, XSS_OPEN_LIST,
      *   XSS_OPEN_INSTANCE, XSS_OPEN_LEAF_LIST, XSS_DISCARDING
+     *
+     * Where something has to be closed before we can do what was
+     * asked, the close is our own bookkeeping: its result is not
+     * the caller's concern and must not stop the thing they asked
+     * for.  A marker keeps us from closing the caller's list that
+     * lies beneath it, so what was to be opened is discarded; a
+     * leaf-list is never the caller's and is closed regardless.
      */
+    if (old_state == XSS_DISCARDING)
+	return xo_transition_discarding(xop, name, new_state);
+
     switch (XSS_TRANSITION(old_state, new_state)) {
 
     case XSS_TRANSITION(XSS_INIT, XSS_OPEN_CONTAINER):
@@ -10630,12 +10782,15 @@ xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
        break;
 
     case XSS_TRANSITION(XSS_OPEN_LIST, XSS_OPEN_CONTAINER):
-    case XSS_TRANSITION(XSS_OPEN_LEAF_LIST, XSS_OPEN_CONTAINER):
 	if (on_marker)
-	    return xo_marker_prevents_close(xop, old_state, new_state);
-	rc = xo_do_close_leaf_list(xop, NULL);
-	if (rc >= 0)
-	    rc = xo_do_open_container(xop, flags, name);
+	    return xo_discard_open(xop, name, old_state, new_state);
+	(void) xo_do_close_list(xop, NULL);
+	rc = xo_do_open_container(xop, flags, name);
+	break;
+
+    case XSS_TRANSITION(XSS_OPEN_LEAF_LIST, XSS_OPEN_CONTAINER):
+	xo_close_implied_leaf_list(xop);
+	rc = xo_do_open_container(xop, flags, name);
 	break;
 
     case XSS_TRANSITION(XSS_INIT, XSS_CLOSE_CONTAINER):
@@ -10654,9 +10809,8 @@ xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
     case XSS_TRANSITION(XSS_OPEN_LEAF_LIST, XSS_CLOSE_CONTAINER):
 	if (on_marker)
 	    return xo_marker_prevents_close(xop, old_state, new_state);
-	rc = xo_do_close_leaf_list(xop, NULL);
-	if (rc >= 0)
-	    rc = xo_do_close(xop, name, new_state);
+	(void) xo_do_close_leaf_list(xop, NULL);
+	rc = xo_do_close(xop, name, new_state);
 	break;
 
     case XSS_TRANSITION(XSS_INIT, XSS_OPEN_LIST):
@@ -10667,18 +10821,14 @@ xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
 
     case XSS_TRANSITION(XSS_OPEN_LIST, XSS_OPEN_LIST):
 	if (on_marker)
-	    return xo_marker_prevents_close(xop, old_state, new_state);
-	rc = xo_do_close_list(xop, NULL);
-	if (rc >= 0)
-	    rc = xo_do_open_list(xop, flags, name);
+	    return xo_discard_open(xop, name, old_state, new_state);
+	(void) xo_do_close_list(xop, NULL);
+	rc = xo_do_open_list(xop, flags, name);
 	break;
 
     case XSS_TRANSITION(XSS_OPEN_LEAF_LIST, XSS_OPEN_LIST):
-	if (on_marker)
-	    return xo_marker_prevents_close(xop, old_state, new_state);
-	rc = xo_do_close_leaf_list(xop, NULL);
-	if (rc >= 0)
-	    rc = xo_do_open_list(xop, flags, name);
+	xo_close_implied_leaf_list(xop);
+	rc = xo_do_open_list(xop, flags, name);
 	break;
 
     case XSS_TRANSITION(XSS_OPEN_LIST, XSS_CLOSE_LIST):
@@ -10709,16 +10859,20 @@ xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
 	if (on_marker) {
 	    rc = xo_do_open_list(xop, flags, name);
 	} else {
-	    rc = xo_do_close_instance(xop, NULL);
+	    (void) xo_do_close_instance(xop, NULL);
 	}
 	if (rc >= 0)
 	    rc = xo_do_open_instance(xop, flags, name);
 	break;
 
     case XSS_TRANSITION(XSS_OPEN_LEAF_LIST, XSS_OPEN_INSTANCE):
-	if (on_marker)
-	    return xo_marker_prevents_close(xop, old_state, new_state);
-	rc = xo_do_close_leaf_list(xop, NULL);
+	/*
+	 * With the leaf-list gone we are in its parent, where an
+	 * instance needs a list to live in, as it does when it is
+	 * opened straight from a container.
+	 */
+	xo_close_implied_leaf_list(xop);
+	rc = xo_do_open_list(xop, flags, name);
 	if (rc >= 0)
 	    rc = xo_do_open_instance(xop, flags, name);
 	break;
@@ -10745,9 +10899,8 @@ xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
     case XSS_TRANSITION(XSS_OPEN_LEAF_LIST, XSS_CLOSE_INSTANCE):
 	if (on_marker)
 	    return xo_marker_prevents_close(xop, old_state, new_state);
-	rc = xo_do_close_leaf_list(xop, NULL);
-	if (rc >= 0)
-	    rc = xo_do_close(xop, name, new_state);
+	(void) xo_do_close_leaf_list(xop, NULL);
+	rc = xo_do_close(xop, name, new_state);
 	break;
 
     case XSS_TRANSITION(XSS_OPEN_CONTAINER, XSS_OPEN_LEAF_LIST):
@@ -10757,12 +10910,15 @@ xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
 	break;
 
     case XSS_TRANSITION(XSS_OPEN_LIST, XSS_OPEN_LEAF_LIST):
-    case XSS_TRANSITION(XSS_OPEN_LEAF_LIST, XSS_OPEN_LEAF_LIST):
 	if (on_marker)
-	    return xo_marker_prevents_close(xop, old_state, new_state);
-	rc = xo_do_close_list(xop, NULL);
-	if (rc >= 0)
-	    rc = xo_do_open_leaf_list(xop, flags, name);
+	    return xo_discard_open(xop, name, old_state, new_state);
+	(void) xo_do_close_list(xop, NULL);
+	rc = xo_do_open_leaf_list(xop, flags, name);
+	break;
+
+    case XSS_TRANSITION(XSS_OPEN_LEAF_LIST, XSS_OPEN_LEAF_LIST):
+	xo_close_implied_leaf_list(xop);
+	rc = xo_do_open_leaf_list(xop, flags, name);
 	break;
 
     case XSS_TRANSITION(XSS_OPEN_LEAF_LIST, XSS_CLOSE_LEAF_LIST):
@@ -10804,9 +10960,7 @@ xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
 	break;
 
     case XSS_TRANSITION(XSS_OPEN_LEAF_LIST, XSS_EMIT):
-	if (on_marker)
-	    return xo_marker_prevents_close(xop, old_state, new_state);
-	rc = xo_do_close_leaf_list(xop, NULL);
+	xo_close_implied_leaf_list(xop);
 	break;
 
     case XSS_TRANSITION(XSS_INIT, XSS_EMIT_LEAF_LIST):
@@ -10824,11 +10978,8 @@ xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
 	 */
 	if (name != NULL && xsp->xs_name != NULL
 	    && !xo_streq(name, xsp->xs_name)) {
-	    if (on_marker)
-		return xo_marker_prevents_close(xop, old_state, new_state);
-	    rc = xo_do_close_leaf_list(xop, NULL);
-	    if (rc >= 0)
-		rc = xo_do_open_leaf_list(xop, flags, name);
+	    xo_close_implied_leaf_list(xop);
+	    rc = xo_do_open_leaf_list(xop, flags, name);
 	}
 	break;
 
@@ -10842,8 +10993,10 @@ xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
 	break;
 
     default:
+	/* Nothing was done, so the caller must not be told it worked */
 	xo_failure(xop, "unknown transition: (%u -> %u)",
-		   xsp->xs_state, new_state);
+		   old_state, new_state);
+	rc = -1;
     }
 
     /*
