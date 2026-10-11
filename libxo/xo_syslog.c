@@ -354,10 +354,10 @@ static char xo_syslog_enterprise_id[12];
  * applications to customize their syslog message set, when needed. 
  */
 void
-xo_set_syslog_enterprise_id (unsigned short eid)
+xo_set_syslog_enterprise_id (xo_enterprise_id_t eid)
 {
     snprintf(xo_syslog_enterprise_id, sizeof(xo_syslog_enterprise_id),
-	     "%u", eid);
+	     "%" XO_PRIu64, (uint64_t) eid);
 }
 
 /* xo_set_logmask -- set the log mask level */
