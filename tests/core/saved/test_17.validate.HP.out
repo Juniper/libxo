@@ -167,6 +167,11 @@
 <div class="line">
   <div class="data" data-tag="after">3</div>
 </div>
+<div class="line">
+  <div class="data" data-tag="after-domain">1</div>
+  <div class="label">label</div>
+  <div class="data" data-tag="quoted">value</div>
+</div>
 before="one" name="gum" count="0" name="rope" count="1" name="ladder" count="2" after="two" 
 long values wrote 20068 bytes
 warning 10: 78 bytes, '<error><message>test_17' ... 'xxxxxxxxxx&lt;10&gt;</message></error>'
