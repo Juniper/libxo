@@ -111,7 +111,7 @@ TEST_LANGUAGES = es
 TEST_LOCALE_es = es_ES.UTF-8
 
 TEST_ONE_LANG = \
-      ${CHECKER} ./$$base.test --libxo:W$$fmt ${TEST_OPTS} lang $$locale \
+      ${CHECKER} ./$$base.test --libxo:W$$fmt ${TEST_OPTS} \
       > out/$$base.$$lang.$$fmt.out 2> out/$$base.$$lang.$$fmt.err ; \
  ${DIFF} -Nu ${srcdir}/saved/$$base.$$lang.$$fmt.out \
       out/$$base.$$lang.$$fmt.out | ${S2O} ; \
@@ -131,13 +131,14 @@ test tests: ${bin_PROGRAMS}
 	    base=`${BASENAME} $$test .c` ; \
             (for fmt in ${TEST_FORMATS}; do \
 	        echo "... $$test ... $$fmt ..."; \
+	        ( cd po ; ${RM} -f en_US ; ${LN_S} -f pig_latin en_US ); \
 	        ${TEST_ONE}; \
                 true; \
             done) ; \
 	    (for lang in ${TEST_LANGUAGES} ; do \
-		${TEST_LOCALE} ; \
 		for fmt in ${TEST_FORMATS}; do \
 		    echo "... $$test ... $$lang ... $$fmt ..."; \
+		    ( cd po ; ${RM} -f en_US ; ${LN_S} -f $$lang en_US ); \
 		    ${TEST_ONE_LANG}; \
 		    true; \
 		done ; \
@@ -285,5 +286,4 @@ mo build-mo-files:
 			${srcdir}/po/$$lang/$$base.po 2>&1 | sed 's:^:... :' ;) \
                 fi ; \
 	    done ; \
-	    ( cd po ; ${RM} -f en_US ; ${LN_S} -f pig_latin en_US ); \
 	done)
