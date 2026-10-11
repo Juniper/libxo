@@ -167,6 +167,11 @@
 <div class="line">
   <div class="data" data-tag="after" data-xpath="/top/markers/leaf-instance/after">3</div>
 </div>
+<div class="line">
+  <div class="data" data-tag="after-domain" data-xpath="/top/emit-field/after-domain">1</div>
+  <div class="label">label</div>
+  <div class="data" data-tag="quoted" data-xpath="/top/emit-field/quoted">value</div>
+</div>
 before="one" name="gum" count="0" name="rope" count="1" name="ladder" count="2" after="two" 
 long values wrote 20068 bytes
 warning 10: 74 bytes, '<error><message>test_17' ... 'xxxxxxxxxx&lt;10&gt;</message></error>'
