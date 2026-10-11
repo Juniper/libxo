@@ -9199,15 +9199,21 @@ xo_emit_field_hvf (xo_handle_t *xop, xo_emit_flags_t flags UNUSED,
     if (rolmod == NULL)
 	rolmod = "V";
 
-    xo_field_info_t xfi;
+    /*
+     * The second entry stays zero: code that walks an array of
+     * fields (the gettext code does, for a "G" role) stops at an
+     * entry with no type, as it would at the end of a parsed format.
+     */
+    xo_field_info_t fields[2];
+    xo_field_info_t *xfip = fields;
 
-    bzero(&xfi, sizeof(xfi));
+    bzero(fields, sizeof(fields));
 
     xo_parse_t xpp;
     xo_parse_for_handle(xop, &xpp);
 
     const char *cp;
-    cp = xo_parse_roles(&xpp, rolmod, rolmod, &xfi);
+    cp = xo_parse_roles(&xpp, rolmod, rolmod, xfip);
     if (cp == NULL)
 	return -1;
 
@@ -9215,7 +9221,7 @@ xo_emit_field_hvf (xo_handle_t *xop, xo_emit_flags_t flags UNUSED,
     ssize_t flen = fmt ? (ssize_t) strlen(fmt) : 0;
     ssize_t elen = efmt ? (ssize_t) strlen(efmt) : 0;
     int want_default = (contents && fmt == NULL
-		&& xo_role_wants_default_format(xfi.xfi_ftype));
+		&& xo_role_wants_default_format(xfip->xfi_ftype));
 
     /*
      * Build a scratch base buffer packing [contents\0][fmt\0][efmt\0] so
@@ -9258,18 +9264,18 @@ xo_emit_field_hvf (xo_handle_t *xop, xo_emit_flags_t flags UNUSED,
 	bp += elen + 1;
     }
 
-    xfi.xfi_start    = (contents || fmt) ? 0 : XO_FOFF_NONE;
-    xfi.xfi_content  = c_off;
-    xfi.xfi_clen     = (xo_format_offset_t)clen;
-    xfi.xfi_format   = f_off;
-    xfi.xfi_flen     = (xo_format_offset_t)flen;
-    xfi.xfi_encoding = e_off;
-    xfi.xfi_elen     = (xo_format_offset_t)elen;
-    xfi.xfi_next     = (xo_format_offset_t)(bp - xfi_base);
+    xfip->xfi_start    = (contents || fmt) ? 0 : XO_FOFF_NONE;
+    xfip->xfi_content  = c_off;
+    xfip->xfi_clen     = (xo_format_offset_t)clen;
+    xfip->xfi_format   = f_off;
+    xfip->xfi_flen     = (xo_format_offset_t)flen;
+    xfip->xfi_encoding = e_off;
+    xfip->xfi_elen     = (xo_format_offset_t)elen;
+    xfip->xfi_next     = (xo_format_offset_t)(bp - xfi_base);
 
     va_copy(xop->xo_vap, vap);
 
-    rc = xo_do_emit_fields(xop, &xfi, 1, xfi_base);
+    rc = xo_do_emit_fields(xop, fields, 2, xfi_base);
 
     va_end(xop->xo_vap);
 
