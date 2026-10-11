@@ -51,6 +51,64 @@
   <attributes>
     <escaped quoted="say &quot;hi&quot; &amp; &lt;go&gt;" bad name&lt;&amp;&quot;="value">1</escaped>
   </attributes>
+  <implied-close>
+    <after-list>
+      <one>1</one>
+    </after-list>
+    <leaf-then-container>2</leaf-then-container>
+    <after-leaf>
+      <two>2</two>
+    </after-leaf>
+    <leaf-then-leaf>3</leaf-then-leaf>
+    <second-leaf>4</second-leaf>
+  </implied-close>
+  <markers>
+    <list-container>
+      <item>
+        <kept>1</kept>
+      </item>
+      <after>2</after>
+    </list-container>
+    <list-list>
+      <after>2</after>
+    </list-list>
+    <list-field>
+      <after>2</after>
+    </list-field>
+    <stray-close>
+      <after>2</after>
+    </stray-close>
+    <leaf-container>
+      <leaf>1</leaf>
+      <kept>
+        <value>2</value>
+      </kept>
+      <after>3</after>
+    </leaf-container>
+    <leaf-leaf>
+      <leaf>1</leaf>
+      <other>2</other>
+      <other>3</other>
+      <after>4</after>
+    </leaf-leaf>
+    <leaf-field>
+      <leaf>1</leaf>
+      <kept>2</kept>
+      <after>3</after>
+    </leaf-field>
+    <leaf-same>
+      <leaf>1</leaf>
+      <leaf>2</leaf>
+      <leaf>3</leaf>
+    </leaf-same>
+    <leaf-instance>
+      <leaf>1</leaf>
+      <item>
+        <value>2</value>
+      </item>
+      <after>3</after>
+    </leaf-instance>
+  </markers>
 </top>
 before="one" name="gum" count="0" name="rope" count="1" name="ladder" count="2" after="two" 
 long values wrote 20068 bytes
