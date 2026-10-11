@@ -67,9 +67,8 @@ main (int argc, char **argv)
     xo_open_list("memory");
     xo_open_instance("memory");
 
-#define PRIu64 "llu"
 #define TO_ULL(_x) ((unsigned long long) _x)
-    xo_emit("{k:type/%13s} {:in-use/%5" PRIu64 "} "
+    xo_emit("{k:type/%13s} {:in-use/%5" XO_PRIu64 "} "
 	    "{:memory-use/%5" PRIu64 "}{U:K} {:high-use/%7s} "
 	    "{:requests/%8" PRIu64 "}  ",
 	    "name", TO_ULL(12345), TO_ULL(54321), "-", TO_ULL(32145));
