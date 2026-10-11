@@ -11,6 +11,8 @@
 #ifndef XO_PRIVATE_H
 #define XO_PRIVATE_H
 
+#include <inttypes.h>
+
 /* Thread-local storage macros */
 
 #define THREAD_LOCAL_before 1
@@ -26,6 +28,18 @@
 #elif HAVE_THREAD_LOCAL == THREAD_LOCAL_declspec
 #define THREAD_LOCAL(_x) __declspec(_x)
 #endif
+
+#ifdef PRId64
+#define XO_PRId64 PRId64
+#else
+#define XO_PRId64 "lld"
+#endif /* PRId64 */
+
+#ifdef PRIu64
+#define XO_PRIu64 PRIu64
+#else
+#define XO_PRIu64 "lld"
+#endif /* PRIu64 */
 
 /*
  * Expose libxo's memory allocation functions
