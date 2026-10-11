@@ -83,6 +83,90 @@
 <div class="line">
   <div class="data" data-tag="escaped" data-xpath="/top/attributes/escaped">1</div>
 </div>
+<div class="line">
+  <div class="data" data-tag="one" data-xpath="/top/implied-close/after-list/one">1</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="leaf-then-container" data-xpath="/top/implied-close/leaf-then-container">2</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="two" data-xpath="/top/implied-close/after-leaf/two">2</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="leaf-then-leaf" data-xpath="/top/implied-close/leaf-then-leaf">3</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="second-leaf" data-xpath="/top/implied-close/second-leaf">4</div>
+</div>
+<div class="line">
+</div>
+<div class="line">
+  <div class="data" data-tag="kept" data-ident="5" data-xpath="/top/markers/list-container/m1/item/kept">1</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="after" data-xpath="/top/markers/list-container/after">2</div>
+</div>
+<div class="line">
+</div>
+<div class="line">
+  <div class="data" data-tag="after" data-xpath="/top/markers/list-list/after">2</div>
+</div>
+<div class="line">
+</div>
+<div class="line">
+  <div class="data" data-tag="after" data-xpath="/top/markers/list-field/after">2</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="after" data-xpath="/top/markers/stray-close/after">2</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="leaf" data-xpath="/top/markers/leaf-container/leaf">1</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="value" data-xpath="/top/markers/leaf-container/m1/kept/value">2</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="after" data-xpath="/top/markers/leaf-container/after">3</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="leaf" data-xpath="/top/markers/leaf-leaf/leaf">1</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="other" data-xpath="/top/markers/leaf-leaf/m1/m2/other">2</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="other" data-xpath="/top/markers/leaf-leaf/m1/m2/other">3</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="after" data-xpath="/top/markers/leaf-leaf/after">4</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="leaf" data-xpath="/top/markers/leaf-field/leaf">1</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="kept" data-xpath="/top/markers/leaf-field/m1/kept">2</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="after" data-xpath="/top/markers/leaf-field/after">3</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="leaf" data-xpath="/top/markers/leaf-same/leaf">1</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="leaf" data-xpath="/top/markers/leaf-same/m1/leaf">2</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="leaf" data-xpath="/top/markers/leaf-same/leaf">3</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="leaf" data-xpath="/top/markers/leaf-instance/leaf">1</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="value" data-ident="10" data-xpath="/top/markers/leaf-instance/item/value">2</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="after" data-xpath="/top/markers/leaf-instance/after">3</div>
+</div>
 before="one" name="gum" count="0" name="rope" count="1" name="ladder" count="2" after="two" 
 long values wrote 20068 bytes
 syslog send: full 305, header no, text 305
