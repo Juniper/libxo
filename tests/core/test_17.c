@@ -324,6 +324,36 @@ test_markers (void)
     xo_close_container("markers");
 }
 
+/* Leave something other than zeros where the next call's locals go */
+static void
+test_dirty_stack (void)
+{
+    volatile char junk[8192];
+    size_t i;
+
+    for (i = 0; i < sizeof(junk); i++)
+	junk[i] = 'V';
+}
+
+/*
+ * xo_emit_field() makes one field, and the gettext code that a "G"
+ * role calls on walks the fields until it finds the end of them.
+ */
+static void
+test_emit_field (void)
+{
+    xo_open_container("emit-field");
+
+    test_dirty_stack();
+    xo_emit_field("G", "test-domain", NULL, NULL);
+    xo_emit_field("V", "after-domain", "%d", NULL, 1);
+    xo_emit_field("L", "label", NULL, NULL);
+    xo_emit_field("Vq", "quoted", "%s", NULL, "value");
+    xo_emit("\n");
+
+    xo_close_container("emit-field");
+}
+
 /* Count what a handle writes, since the output is too long to show */
 static xo_ssize_t
 test_count_writer (void *opaque, const char *data)
@@ -536,6 +566,7 @@ main (int argc, char **argv)
     test_attributes();
     test_implied_close();
     test_markers();
+    test_emit_field();
 
     xo_close_container("top");
     xo_finish();
