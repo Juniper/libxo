@@ -1709,7 +1709,7 @@ xo_set_logmask
 xo_set_syslog_enterprise_id
 +++++++++++++++++++++++++++
 
-.. c:function:: void xo_set_syslog_enterprise_id (unsigned short eid)
+.. c:function:: void xo_set_syslog_enterprise_id (xo_enterprise_id_t eid)
 
   Use the `xo_set_syslog_enterprise_id` to supply a platform- or
   application-specific enterprise id.  This value is used in any future
