@@ -143,6 +143,10 @@
         ],
         "after": 3
       }
+    },
+    "emit-field": {
+      "after-domain": 1,
+      "quoted": "value"
     }
   }
 }
