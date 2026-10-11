@@ -83,6 +83,90 @@
 <div class="line">
   <div class="data" data-tag="escaped">1</div>
 </div>
+<div class="line">
+  <div class="data" data-tag="one">1</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="leaf-then-container">2</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="two">2</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="leaf-then-leaf">3</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="second-leaf">4</div>
+</div>
+<div class="line">
+</div>
+<div class="line">
+  <div class="data" data-tag="kept" data-ident="5">1</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="after">2</div>
+</div>
+<div class="line">
+</div>
+<div class="line">
+  <div class="data" data-tag="after">2</div>
+</div>
+<div class="line">
+</div>
+<div class="line">
+  <div class="data" data-tag="after">2</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="after">2</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="leaf">1</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="value">2</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="after">3</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="leaf">1</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="other">2</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="other">3</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="after">4</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="leaf">1</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="kept">2</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="after">3</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="leaf">1</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="leaf">2</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="leaf">3</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="leaf">1</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="value" data-ident="10">2</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="after">3</div>
+</div>
 before="one" name="gum" count="0" name="rope" count="1" name="ladder" count="2" after="two" 
 long values wrote 20068 bytes
 syslog send: full 305, header no, text 305
