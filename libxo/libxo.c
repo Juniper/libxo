@@ -1869,29 +1869,34 @@ xo_warn_hcfv (xo_handle_t *xop, int code, xo_warn_flags_t flags,
         xo_buf_append(xbp, err_open, sizeof(err_open) - 1);
         xo_buf_append(xbp, msg_open, sizeof(msg_open) - 1);
 
+        /*
+         * The first try uses a copy of the arguments, so the caller's
+         * list is untouched if the message does not fit and has to be
+         * formatted again.  Both tries use the format with the program
+         * name on it.
+         */
         va_list va_local;
         va_copy(va_local, vap);
 
         ssize_t left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
-        ssize_t rc = vsnprintf(xbp->xb_curp, left, newfmt, vap);
-
-        if (rc >= left) {
-            if (xo_check_for_room(xop, xbp, rc)) {
-                va_end(va_local);
-                return;
-            }
-
-            va_end(vap);        /* Reset vap to the start */
-            va_copy(vap, va_local);
-
-            left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
-            rc = vsnprintf(xbp->xb_curp, left, fmt, vap);
-        }
+        ssize_t rc = vsnprintf(xbp->xb_curp, left, newfmt, va_local);
 
         va_end(va_local);
 
-        rc = xo_escape_xml(xop, xbp, rc, 1);
-        xbp->xb_curp += rc;
+        if (rc >= left) {
+            if (xo_check_for_room(xop, xbp, rc))
+                rc = -1;
+            else {
+                left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
+                rc = vsnprintf(xbp->xb_curp, left, newfmt, vap);
+            }
+        }
+
+        /* A message that cannot be made still gets its close tags */
+        if (rc > 0) {
+            rc = xo_escape_xml(xop, xbp, rc, 0);
+            xbp->xb_curp += rc;
+        }
 
         xo_buf_append(xbp, msg_close, sizeof(msg_close) - 1);
         xo_buf_append(xbp, err_close, sizeof(err_close) - 1);
@@ -2045,28 +2050,31 @@ xo_message_hcv (xo_handle_t *xop, int code, const char *fmt, va_list vap)
             xo_buf_indent(xop, xop->xo_indent_by);
         xo_buf_append(xbp, msg_open, sizeof(msg_open) - 1);
 
+        /*
+         * The first try uses a copy of the arguments, so the caller's
+         * list is untouched if the message has to be formatted again.
+         */
         va_copy(va_local, vap);
 
         ssize_t left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
 
-        rc = vsnprintf(xbp->xb_curp, left, fmt, vap);
-        if (rc >= left) {
-            if (xo_check_for_room(xop, xbp, rc)) {
-                va_end(va_local);
-                return;
-            }
-
-            va_end(vap);        /* Reset vap to the start */
-            va_copy(vap, va_local);
-
-            left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
-            rc = vsnprintf(xbp->xb_curp, left, fmt, vap);
-        }
-
+        rc = vsnprintf(xbp->xb_curp, left, fmt, va_local);
         va_end(va_local);
 
-        rc = xo_escape_xml(xop, xbp, rc, 0);
-        xbp->xb_curp += rc;
+        if (rc >= left) {
+            if (xo_check_for_room(xop, xbp, rc))
+                rc = -1;
+            else {
+                left = xbp->xb_size - (xbp->xb_curp - xbp->xb_bufp);
+                rc = vsnprintf(xbp->xb_curp, left, fmt, vap);
+            }
+        }
+
+        /* A message that cannot be made still gets its close tag */
+        if (rc > 0) {
+            rc = xo_escape_xml(xop, xbp, rc, 0);
+            xbp->xb_curp += rc;
+        }
 
         if (need_nl && code > 0) {
             const char *msg = strerror(code);
@@ -2094,27 +2102,37 @@ xo_message_hcv (xo_handle_t *xop, int code, const char *fmt, va_list vap)
             ssize_t bufsiz = sizeof(buf);
             ssize_t rc2;
 
-            va_copy(va_local, vap);
+            const char *emsg = (code > 0) ? strerror(code) : NULL;
 
+            /*
+             * The buffer has to hold what we add after the message
+             * (": ", the error string, a newline and the NUL) as well
+             * as the message, or the length we pass along would
+             * count bytes that were never written.
+             */
+            ssize_t extra = (emsg ? strlen(emsg) + 2 : 0) + 2;
+
+            va_copy(va_local, vap);
             rc = vsnprintf(bp, bufsiz, fmt, va_local);
-            if (rc >= bufsiz) {
-                bufsiz = rc + BUFSIZ;
+            va_end(va_local);
+
+            if (rc < 0)
+                return;
+
+            if (rc + extra > bufsiz) {
+                bufsiz = rc + extra;
                 bp = xo_realloc(NULL, bufsiz);
                 if (bp == NULL)
                     return;
 
-                va_end(va_local);
-                va_copy(va_local, vap);
-                rc = vsnprintf(bp, bufsiz, fmt, va_local);
+                rc = vsnprintf(bp, bufsiz, fmt, vap);
             }
 
-            va_end(va_local);
             cp = bp + rc;
 
             if (need_nl) {
                 rc2 = snprintf(cp, bufsiz - rc, "%s%s\n",
-                               (code > 0) ? ": " : "",
-                               (code > 0) ? strerror(code) : "");
+                               emsg ? ": " : "", emsg ?: "");
                 if (rc2 > 0)
                     rc += rc2;
             }
