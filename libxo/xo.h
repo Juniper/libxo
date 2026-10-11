@@ -33,8 +33,14 @@ extern "C" {
 #include <stdlib.h>
 #include <errno.h>
 
+/*
+ * __dead2 comes from <sys/cdefs.h> on the BSDs and macOS; glibc has
+ * no such macro, so there we ask the compiler directly.
+ */
 #ifdef __dead2
 #define XO_NORETURN __dead2
+#elif defined(__GNUC__) || defined(__clang__)
+#define XO_NORETURN __attribute__((__noreturn__))
 #else
 #define XO_NORETURN
 #endif /* __dead2 */
