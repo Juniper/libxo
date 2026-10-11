@@ -80,7 +80,7 @@ fullpath_stack_push (fullpath_private_t *fpp, xo_off_t off)
     }
 
     xo_dbg(NULL, "fullpath_stack_push: pushing %u (%u)",
-	   off, fpp->fp_stack_cur - fpp->fp_stack);
+	   (unsigned) off, (unsigned) (fpp->fp_stack_cur - fpp->fp_stack));
 
     *fpp->fp_stack_cur++ = off;
 }
@@ -94,7 +94,7 @@ fullpath_stack_pop (fullpath_private_t *fpp)
 	off = *--fpp->fp_stack_cur;
 
     xo_dbg(NULL, "fullpath_stack_pop: popping %u (%u)",
-	   off, fpp->fp_stack_cur - fpp->fp_stack);
+	   (unsigned) off, (unsigned) (fpp->fp_stack_cur - fpp->fp_stack));
 
     return off;
 }
