@@ -377,7 +377,8 @@ static int
 xo_xparse_move_cur (xo_xparse_data_t *xdp)
 {
     XO_DBG(xdp->xd_xop, "xo_xplex: move:- %u/%u/%u",
-	   xdp->xd_start, xdp->xd_cur, xdp->xd_len);
+	   (unsigned) xdp->xd_start, (unsigned) xdp->xd_cur,
+	   (unsigned) xdp->xd_len);
 
     int moved;
 
@@ -389,7 +390,8 @@ xo_xparse_move_cur (xo_xparse_data_t *xdp)
     if (xdp->xd_cur == xdp->xd_len) {
        if (xo_xparse_get_input(xdp, 0)) {
            XO_DBG(xdp->xd_xop, "xo_xplex: move:! %u/%u/%u",
-                   xdp->xd_start, xdp->xd_cur, xdp->xd_len);
+                   (unsigned) xdp->xd_start, (unsigned) xdp->xd_cur,
+                   (unsigned) xdp->xd_len);
 	   if (moved)
 	       xdp->xd_cur -= 1;
            return -1;
@@ -397,7 +399,8 @@ xo_xparse_move_cur (xo_xparse_data_t *xdp)
     }
 
     XO_DBG(xdp->xd_xop, "xo_xplex: move:+ %u/%u/%u",
-	   xdp->xd_start, xdp->xd_cur, xdp->xd_len);
+	   (unsigned) xdp->xd_start, (unsigned) xdp->xd_cur,
+	   (unsigned) xdp->xd_len);
     return 0;
 }
 
@@ -1314,7 +1317,7 @@ xo_xpath_yylex (xo_xparse_data_t *xdp, xo_xparse_node_id_t *yylvalp)
 	xnp->xn_str = xo_xparse_str_new(xdp, rc);
 
     XO_DBG(xdp->xd_xop, "xo_xplex: lex: '%.*s' -> %d/%s %s",
-	   xdp->xd_cur - xdp->xd_start,
+	   (int) (xdp->xd_cur - xdp->xd_start),
 	   xdp->xd_buf + xdp->xd_start,
 	   rc, (rc > 0) ? xo_xparse_token_name(rc) : "",
 	   xnp->xn_str ? xo_xparse_str(xdp, xnp->xn_str) : "");
