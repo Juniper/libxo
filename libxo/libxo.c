@@ -5131,8 +5131,13 @@ xo_sibling_check (xo_stack_t *xsp, const char *name, ssize_t nlen)
 	= { "error", "__error", "__warning", "message", NULL };
 
     /* If the name is in our "safe" list, ignore it */
+    /*
+     * The name is nlen bytes of a format string, with no NUL after
+     * it, so we check for the end of our own string to keep a name
+     * like "err" from matching "error".
+     */
     for (const char **sdp = safe_dups; *sdp; sdp++)
-	if (strncmp(*sdp, name, nlen) == 0)
+	if (strncmp(*sdp, name, nlen) == 0 && (*sdp)[nlen] == '\0')
 	    return FALSE;
 
     ssize_t elen;
@@ -5777,8 +5782,15 @@ xo_map_str (xo_handle_t *xop, int idx)
 static int
 xo_map_find (xo_handle_t *xop, const char *name, size_t len)
 {
+    /*
+     * The name is len bytes of an option string or a line of a file,
+     * with no NUL after it, so we check for the end of the mapped
+     * name to keep "src" from matching "src-1".
+     */
     for (int i = 0; i < xop->xo_map_len; i += 2) {
-	if (strncmp(xo_map_str(xop, i), name, len) == 0)
+	const char *cp = xo_map_str(xop, i);
+
+	if (strncmp(cp, name, len) == 0 && cp[len] == '\0')
 	    return i;
     }
 
@@ -5807,9 +5819,8 @@ xo_map_name (xo_handle_t *xop UNUSED, const char *name)
     if (name == NULL)
 	return NULL;
 
-    size_t len = strlen(name);
     for (int i = 0; i < xop->xo_map_len; i += 2) {
-	if (strncmp(xo_map_str(xop, i), name, len) == 0)
+	if (xo_streq(xo_map_str(xop, i), name))
 	    return xo_map_str(xop, i + 1);
     }
 #endif /* LIBXO_NEED_MAP */
