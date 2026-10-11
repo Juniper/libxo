@@ -28,8 +28,9 @@
 #ifdef MY_GNU_SOURCE
 #undef _GNU_SOURCE
 #endif /* MY_GNU_SOURCE */
+
 #ifdef MY__USE_GNU
-#undef ___USE_GNU
+#undef __USE_GNU
 #endif /* MY__USE_GNU */
 
 #ifdef HAVE_BSD_STRING_H
