@@ -1,6 +1,24 @@
 {"top": {"anchor-width": {"right":"abc","left":"abc"}, "map-growth": {"mapped-0":0,"mapped-15":15,"mapped-16":16,"mapped-17":17,"mapped-39":39,"src-40":40}, "long-names": {"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": {"length":62}, "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb": {"length":63}, "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc": {"length":64}, "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd": {"length":65}, "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee": {"length":130}}, "control-chars": {"interior":"a\u0001b\u0002c","trailing":"a\u0001b\u0002","before-escape":"a\u0001b<c\u0002d&e","after-escape":"a<b\u0001c&d\u0002","only":"\u0001\u0002\u0003"}, "deprecated-options": {"retain":0,"no-retain":0}, "encoder-names": {"first":"unknown","last":"deadend","beyond":"unknown","far-beyond":"unknown","wb-last":"clean","wb-beyond":"unknown","registered":"done"}, "attributes": {"escaped":1}, "implied-close": {"list-then-container": [], "after-list": {"one":1}, "leaf-then-container": [2], "after-leaf": {"two":2}, "leaf-then-leaf": [3], "second-leaf": [4], "list-after-leaf": [], "list-after-list": []}, "markers": {"list-container": {"item": [{"kept":1}],"after":2}, "list-list": {"item": [],"after":2}, "list-field": {"item": [],"after":2}, "stray-close": {"item": [],"after":2}, "leaf-container": {"leaf": [1], "kept": {"value":2},"after":3}, "leaf-leaf": {"leaf": [1], "other": [2,3],"after":4}, "leaf-field": {"leaf": [1],"kept":2,"after":3}, "leaf-same": {"leaf": [1,2,3]}, "leaf-instance": {"leaf": [1], "item": [{"value":2}],"after":3}}}}
 before="one" name="gum" count="0" name="rope" count="1" name="ladder" count="2" after="two" 
 long values wrote 20068 bytes
+warning 10: 64 bytes, '<error><message>test_17' ... 'xxxxxxxxxx&lt;10&gt;</message></error>'
+xml message 10: 67 bytes, '<message>xxxxxxxxxx&lt;' ... ';: No such file or directory'
+html message 10: 99 bytes, '<div class="line"><div ' ... ' No such file or directory'
+warning 1000: 1056 bytes, '<error><message>test_17' ... 'xxxxxxxx&lt;1000&gt;</message></error>'
+xml message 1000: 1059 bytes, '<message>xxxxxxxxxxxxxx' ... ';: No such file or directory'
+html message 1000: 1091 bytes, '<div class="line"><div ' ... ' No such file or directory'
+warning 1015: 1071 bytes, '<error><message>test_17' ... 'xxxxxxxx&lt;1015&gt;</message></error>'
+xml message 1015: 1074 bytes, '<message>xxxxxxxxxxxxxx' ... ';: No such file or directory'
+html message 1015: 1106 bytes, '<div class="line"><div ' ... ' No such file or directory'
+warning 1030: 1086 bytes, '<error><message>test_17' ... 'xxxxxxxx&lt;1030&gt;</message></error>'
+xml message 1030: 1089 bytes, '<message>xxxxxxxxxxxxxx' ... ';: No such file or directory'
+html message 1030: 1121 bytes, '<div class="line"><div ' ... ' No such file or directory'
+warning 8170: 8226 bytes, '<error><message>test_17' ... 'xxxxxxxx&lt;8170&gt;</message></error>'
+xml message 8170: 8229 bytes, '<message>xxxxxxxxxxxxxx' ... ';: No such file or directory'
+html message 8170: 8261 bytes, '<div class="line"><div ' ... ' No such file or directory'
+warning 9000: 9056 bytes, '<error><message>test_17' ... 'xxxxxxxx&lt;9000&gt;</message></error>'
+xml message 9000: 9059 bytes, '<message>xxxxxxxxxxxxxx' ... ';: No such file or directory'
+html message 9000: 9091 bytes, '<div class="line"><div ' ... ' No such file or directory'
 syslog send: full 305, header no, text 305
   full ends 'xxxxxxxxxxxxxxxxxxxxtail'
   text ends 'xxxxxxxxxxxxxxxxxxxxtail'
