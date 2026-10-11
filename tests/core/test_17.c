@@ -412,6 +412,70 @@ test_long_escapes (void)
     printf("long values wrote %zu bytes\n", count);
 }
 
+/*
+ * The stack moves when it grows past its first size, and each frame
+ * that keeps its name inside itself has to move its name with it.
+ * Then a handle is destroyed with frames still open, where there are
+ * names too long to live in the frame, keys and leaf-list members to
+ * be released.
+ */
+static void
+test_deep_stack (void)
+{
+    char name[100];
+    size_t count = 0;
+    int i;
+
+    xo_handle_t *xop = xo_create(XO_STYLE_JSON, XOF_WARN);
+    if (xop == NULL)
+	return;
+
+    xo_set_writer(xop, &count, test_count_writer, NULL, NULL);
+
+    for (i = 0; i < 600; i++) {
+	snprintf(name, sizeof(name), "level-%d", i);
+	xo_open_container_h(xop, name);
+    }
+
+    xo_emit_h(xop, "{:bottom/%d}", 1);
+
+    for (i = 600 - 1; i >= 0; i--) {
+	snprintf(name, sizeof(name), "level-%d", i);
+	xo_close_container_h(xop, name);
+    }
+
+    xo_finish_h(xop);
+    xo_destroy(xop);
+
+    printf("deep stack wrote %zu bytes\n", count);
+
+    count = 0;
+    xop = xo_create(XO_STYLE_JSON, XOF_WARN);
+    if (xop == NULL)
+	return;
+
+    xo_set_writer(xop, &count, test_count_writer, NULL, NULL);
+
+    /* Depth is relative: this one would put us above the top */
+    xo_set_depth(xop, -3);
+
+    xo_set_depth(xop, 700);
+    xo_set_depth(xop, -700);
+
+    memset(name, 'n', sizeof(name) - 1);
+    name[sizeof(name) - 1] = '\0';
+
+    xo_open_container_h(xop, name);
+    xo_open_list_h(xop, "item");
+    xo_open_instance_h(xop, "item");
+    xo_emit_h(xop, "{k:name}{k:other}{l:member}{l:member}", "one", "two",
+	      "three", "four");
+
+    xo_destroy(xop);
+
+    printf("open frames wrote %zu bytes\n", count);
+}
+
 /* Keep the two ends of what a handle writes, and count the rest */
 typedef struct test_ends_s {
     size_t te_count;		/* Number of bytes written */
@@ -575,6 +639,7 @@ main (int argc, char **argv)
     test_sdparams();
     test_long_escapes();
     test_long_messages();
+    test_deep_stack();
     test_syslog_long();
 
     return 0;
