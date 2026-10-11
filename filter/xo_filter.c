@@ -698,7 +698,7 @@ xo_tmatch_open (xo_handle_t *xop, xo_filter_t *xfp,
     bzero(frame, sizeof(*frame));
 
     xo_dbg(xop, "xo_tmatch_open: depth %u tag '%.*s'",
-	   xtmp->xtm_depth, tlen, tag);
+	   xtmp->xtm_depth, (int) tlen, tag);
 
     /* Descend from every LIVE parent slot */
     for (uint32_t i = 0; i < parent->xtf_count; i++) {
@@ -929,7 +929,7 @@ xo_filter_change_status (xo_handle_t *xop UNUSED, xo_filter_t *xfp,
 
     XO_DBG(xop, "xo_filter_update_status (%s%s%.*s) returns %s/%d "
 	   "why: %s (was %s/%d)",
-	   op, tlen ? " " : "", tlen, tag,
+	   op, tlen ? " " : "", (int) tlen, tag,
 	   xo_filt_status_name(rc), rc, why,
 	   xo_filt_status_name(xfp->xf_status), xfp->xf_status);
 
@@ -949,7 +949,7 @@ xo_filter_open (xo_handle_t *xop, xo_filter_t *xfp,
     if (xfp == NULL || xfp->xf_trie == NULL)
 	return 0;
 
-    XO_DBG(xop, "filter: open %s: '%.*s'", type, tlen, tag);
+    XO_DBG(xop, "filter: open %s: '%.*s'", type, (int) tlen, tag);
 
     xfp->xf_total_depth += 1;
 
@@ -994,7 +994,7 @@ xo_filter_close (xo_handle_t *xop, xo_filter_t *xfp,
     if (xfp->xf_total_depth > 0)
 	xfp->xf_total_depth -= 1;
 
-    XO_DBG(xop, "filter: close %s: '%.*s'", type, tlen, tag);
+    XO_DBG(xop, "filter: close %s: '%.*s'", type, (int) tlen, tag);
 
     xo_tmatch_close(xop, xfp, &xfp->xf_tmatch, tag, tlen);
 
@@ -3343,7 +3343,8 @@ xo_filter_op_key (XO_FILTER_KEY_SIGNATURE)
     if (xfp == NULL || xfp->xf_trie == NULL)
 	return 0;
 
-    XO_DBG(xop, "xo_filter_key: '%.*s' = '%.*s'", tlen, tag, vlen, value);
+    XO_DBG(xop, "xo_filter_key: '%.*s' = '%.*s'",
+	   (int) tlen, tag, (int) vlen, value);
 
     xo_filter_status_t rc = xo_tmatch_key(xop, xfp, &xfp->xf_tmatch,
 					   tag, tlen, value, vlen);
@@ -3351,7 +3352,7 @@ xo_filter_op_key (XO_FILTER_KEY_SIGNATURE)
     xo_filter_change_status(xop, xfp, "key", tag, tlen);
 
     XO_DBG(xop, "xo_filter_key: '%.*s' = '%.*s' --> status %s",
-	   tlen, tag, vlen, value,
+	   (int) tlen, tag, (int) vlen, value,
 	   xo_filt_status_name(xfp->xf_status));
 
     return rc;
@@ -3411,7 +3412,7 @@ xo_filter_op_attribute (xo_handle_t *xop, xo_filter_t *xfp,
 	return 0;
 
     XO_DBG(xop, "xo_filter_attribute: '@%.*s' = '%.*s'",
-	   tlen, tag, vlen, value);
+	   (int) tlen, tag, (int) vlen, value);
 
     xo_filter_status_t rc = xo_tmatch_attr(xop, xfp, &xfp->xf_tmatch,
 					    tag, tlen, value, vlen);
@@ -3419,7 +3420,7 @@ xo_filter_op_attribute (xo_handle_t *xop, xo_filter_t *xfp,
     xo_filter_change_status(xop, xfp, "attr", tag, tlen);
 
     XO_DBG(xop, "xo_filter_attribute: '@%.*s' = '%.*s' --> status %s",
-	   tlen, tag, vlen, value,
+	   (int) tlen, tag, (int) vlen, value,
 	   xo_filt_status_name(xfp->xf_status));
 
     return rc;
