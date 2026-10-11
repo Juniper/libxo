@@ -21,6 +21,23 @@ xml message 9000: 9059 bytes, '<message>xxxxxxxxxxxxxx' ... ';: No such file or 
 html message 9000: 9091 bytes, '<div class="line"><div ' ... ' No such file or directory'
 deep stack wrote 8903 bytes
 open frames wrote 167 bytes
+<prefix-names>
+  <long-name>1</long-name>
+  <pre>2</pre>
+  <pref>3</pref>
+</prefix-names>
+<prefix-added>
+  <long-name>4</long-name>
+  <short-name>5</short-name>
+</prefix-added>
+<siblings>
+  <err>1</err>
+  <err>2</err>
+  <mes>1</mes>
+  <mes>2</mes>
+  <error>1</error>
+  <error>2</error>
+</siblings>
 syslog send: full 305, header no, text 305
   full ends 'xxxxxxxxxxxxxxxxxxxxtail'
   text ends 'xxxxxxxxxxxxxxxxxxxxtail'
