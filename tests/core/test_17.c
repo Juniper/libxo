@@ -58,6 +58,41 @@ test_map_growth (void)
     xo_close_container("map-growth");
 }
 
+/*
+ * A name that is the start of another is a name of its own: "pre"
+ * is neither the mapped "prefix" nor the excused "error", and adding
+ * a map for "pre" must not replace the one for "prefix".
+ */
+static void
+test_prefix_names (void)
+{
+    xo_handle_t *xop = xo_create(XO_STYLE_XML, XOF_WARN | XOF_PRETTY);
+    if (xop == NULL)
+	return;
+
+    xo_map_add(xop, "prefix", 6, "long-name", 9);
+
+    xo_open_container_h(xop, "prefix-names");
+    xo_emit_h(xop, "{:prefix/%d}{:pre/%d}{:pref/%d}", 1, 2, 3);
+    xo_close_container_h(xop, "prefix-names");
+
+    xo_map_add(xop, "pre", 3, "short-name", 10);
+
+    xo_open_container_h(xop, "prefix-added");
+    xo_emit_h(xop, "{:prefix/%d}{:pre/%d}", 4, 5);
+    xo_close_container_h(xop, "prefix-added");
+
+    /* The first two warn once each; only the last is an excused name */
+    xo_open_container_h(xop, "siblings");
+    xo_emit_h(xop, "{:err/%d}{:err/%d}", 1, 2);
+    xo_emit_h(xop, "{:mes/%d}{:mes/%d}", 1, 2);
+    xo_emit_h(xop, "{:error/%d}{:error/%d}", 1, 2);
+    xo_close_container_h(xop, "siblings");
+
+    xo_finish_h(xop);
+    xo_destroy(xop);
+}
+
 /* Names on either side of the size of a stack frame's own name buffer */
 static void
 test_long_names (void)
@@ -640,6 +675,7 @@ main (int argc, char **argv)
     test_long_escapes();
     test_long_messages();
     test_deep_stack();
+    test_prefix_names();
     test_syslog_long();
 
     return 0;
