@@ -203,7 +203,7 @@ csv_create (xo_handle_t *xop)
  * Clean up and release any data in use by this handle
  */
 static void
-csv_destroy (xo_handle_t *xop UNUSED, csv_private_t *csv)
+csv_destroy (xo_handle_t *xop, csv_private_t *csv)
 {
     /* Clean up */
     xo_buf_cleanup(&csv->c_data);
@@ -217,6 +217,15 @@ csv_destroy (xo_handle_t *xop UNUSED, csv_private_t *csv)
 	xo_free(csv->c_leaf);
     if (csv->c_path_buf)
 	xo_free(csv->c_path_buf);
+    if (csv->c_path)
+	xo_free(csv->c_path);
+
+    /*
+     * The private data itself was allocated by csv_create, so it goes
+     * too.  Clear the handle's pointer so nothing can find it again.
+     */
+    xo_set_private(xop, NULL);
+    xo_free(csv);
 }
 
 /*
