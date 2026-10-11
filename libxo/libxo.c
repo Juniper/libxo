@@ -556,6 +556,8 @@ xo_depth_check (xo_handle_t *xop, int depth)
     if (depth >= xop->xo_stack_size) {
         depth += XO_DEPTH;      /* Extra room */
 
+        uintptr_t old_base = (uintptr_t) xop->xo_stack;
+
         xsp = xo_realloc(xop->xo_stack, sizeof(xop->xo_stack[0]) * depth);
         if (xsp == NULL) {
             xo_failure(xop, "xo_depth_check: out of memory (%d)", depth);
@@ -564,6 +566,20 @@ xo_depth_check (xo_handle_t *xop, int depth)
 
         int old_size = xop->xo_stack_size;
         int count = depth - old_size;
+
+        /*
+         * A short name lives in its own frame, so a frame that has
+         * moved must point at the buffer it has now and not at the
+         * one it had.
+         */
+        uintptr_t new_base = (uintptr_t) xsp;
+        for (int i = 0; i < old_size; i++) {
+            uintptr_t was = (uintptr_t) xsp[i].xs_namebuf
+                - new_base + old_base;
+
+            if ((uintptr_t) xsp[i].xs_name == was)
+                xsp[i].xs_name = xsp[i].xs_namebuf;
+        }
 
         bzero(xsp + old_size, count * sizeof(*xsp));
         xop->xo_stack_size = depth;
@@ -2426,6 +2442,35 @@ xo_destroy (xo_handle_t *xop_arg)
     if (xop->xo_close && XOF_ISSET(xop, XOF_CLOSE_FP))
         xop->xo_close(xop->xo_opaque);
 
+    /*
+     * An encoder keeps its own data behind xo_private and only it
+     * knows how to release it.  This goes straight to the encoder:
+     * a filter has no interest in the end of the handle.
+     */
+    if (xop->xo_encoder)
+        (void) xop->xo_encoder(xop, XO_OP_DESTROY, NULL, NULL, NULL,
+                               xop->xo_private, 0);
+
+#ifdef LIBXO_NEED_FILTERS
+    if (xop->xo_filters)
+        xo_filter_destroy(xop, xop->xo_filters);
+#endif /* LIBXO_NEED_FILTERS */
+
+    /*
+     * Frames that were never closed still own their strings.  A
+     * frame that was closed, or never used, holds only NULLs.
+     */
+    for (int depth = 0; depth < xop->xo_stack_size; depth++) {
+        xo_stack_t *xsp = &xop->xo_stack[depth];
+
+        if (xsp->xs_name && xsp->xs_name != xsp->xs_namebuf)
+            xo_free(xsp->xs_name);
+        if (xsp->xs_keys)
+            xo_free(xsp->xs_keys);
+        if (xsp->xs_sibnames)
+            xo_free(xsp->xs_sibnames);
+    }
+
     xo_free(xop->xo_stack);
     xo_buf_cleanup(&xop->xo_data);
     xo_buf_cleanup(&xop->xo_fmt);
@@ -2439,6 +2484,10 @@ xo_destroy (xo_handle_t *xop_arg)
 
     if (xop->xo_version)
         xo_free(xop->xo_version);
+    if (xop->xo_leading_xpath)
+        xo_free(xop->xo_leading_xpath);
+    if (xop->xo_gt_domain)
+        xo_free(xop->xo_gt_domain);
 
     if (xop_arg == NULL) {
         bzero(&xo_default_handle, sizeof(xo_default_handle));
@@ -9600,7 +9649,17 @@ xo_set_depth (xo_handle_t *xop, int depth)
 {
     xop = xo_default(xop);
 
-    if (xo_depth_check(xop, depth))
+    /*
+     * "depth" is added to where we are, so that sum is what the
+     * stack has to hold, and it cannot go beneath the first frame.
+     */
+    if (xop->xo_depth + depth < 0) {
+	xo_failure(xop, "xo_set_depth: depth %d is beneath the top (%d)",
+		   depth, xop->xo_depth);
+	return;
+    }
+
+    if (xo_depth_check(xop, xop->xo_depth + depth))
 	return;
 
     xop->xo_depth += depth;
@@ -10515,6 +10574,7 @@ xo_do_close_all (xo_handle_t *xop, xo_stack_t *limit)
 {
     xo_stack_t *xsp;
     ssize_t rc = 0;
+    int failed = 0;
     xo_xsf_flags_t flags;
 
     for (xsp = xo_stack_cur(xop); xsp >= limit; xsp--) {
@@ -10553,11 +10613,17 @@ xo_do_close_all (xo_handle_t *xop, xo_stack_t *limit)
 	    break;
 	}
 
-	if (rc < 0)
+	/*
+	 * A close that fails does not stop the rest: the frames above
+	 * the limit all have to go.  But our caller hears about it.
+	 */
+	if (rc < 0) {
 	    xo_failure(xop, "close %d failed: %d", xsp->xs_state, (int) rc);
+	    failed = 1;
+	}
     }
 
-    return 0;
+    return failed ? -1 : 0;
 }
 
 /*
