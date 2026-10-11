@@ -591,7 +591,7 @@ xo_xml_leader_len (xo_handle_t *xop, const char *name, xo_ssize_t nlen)
     if (name == NULL || name[0] == '\0' || isalpha(name[0]) || name[0] == '_')
         return "";
 
-    xo_failure(xop, "invalid XML tag name: '%.*s'", nlen, name);
+    xo_failure(xop, "invalid XML tag name: '%.*s'", (int) nlen, name);
     return "_";
 }
 
@@ -1638,7 +1638,7 @@ xo_buf_utf8_len (xo_handle_t *xop, const char *buf, ssize_t bufsiz)
 
     if (len > bufsiz) {
         xo_failure(xop, "invalid UTF-8 data (short): %02hhx (%d/%d)",
-                   b, len, bufsiz);
+                   b, (int) len, (int) bufsiz);
         return -1;
     }
 
@@ -3464,7 +3464,7 @@ xo_format_string_direct (xo_handle_t *xop, xo_buffer_t *xbp,
             wc = xo_utf8_codepoint(cp, ilen, ilen, 0);
             if (xo_utf8_iserror(wc)) {
                 xo_failure(xop, "invalid UTF-8 character: %02hhx/%d",
-                           *cp, ilen);
+                           *cp, (int) ilen);
                 return -1;      /* Can't continue; we can't find the end */
             }
             cp += ilen;
@@ -6136,7 +6136,8 @@ xo_filt_dump (xo_handle_t *xop, const char *tag)
 	       xsp->xs_state, xo_state_name(xsp->xs_state),
 	       xsp->xs_fstatus, xo_filt_status_name(xsp->xs_fstatus),
 	       xsp->xs_flags,
-	       (int) xsp->xs_rb_off, (int) xsp->xs_key_off, xsp->xs_keys);
+	       (int) xsp->xs_rb_off, (int) xsp->xs_key_off,
+	       xsp->xs_rb_flags, xsp->xs_keys);
 
 	if (xsp->xs_rb_off != XS_OFFSET_CLEAR)
 	    xo_filt_dump_context(xop, &xop->xo_data, xsp->xs_rb_off, 0);
@@ -6484,8 +6485,8 @@ xo_filt_rollback (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED,
 
     XO_DBG(xop, "xo_filt_rollback: wiping %p (%d/depth %d) at %u, "
 	   "status %u=%s",
-	   cur, cur - xop->xo_stack, xop->xo_depth, cur->xs_rb_off,
-	   fstatus, xo_filt_status_name(fstatus));
+	   cur, (int) (cur - xop->xo_stack), xop->xo_depth,
+	   (unsigned) cur->xs_rb_off, fstatus, xo_filt_status_name(fstatus));
     xo_filt_dump(xop, "rollback before");
 
     /*
@@ -6510,7 +6511,7 @@ xo_filt_rollback (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED,
 
 	    if (cur_off < max_off) { /* Sanity check */
 		XO_DBG(xop, "xo_filt_rollback: rolling back to %u, depth %d",
-		       cur_off, xop->xo_depth);
+		       (unsigned) cur_off, xop->xo_depth);
 		xo_buf_set_offset(xbp, cur_off);
 
 		if (cur_off == 0) {
@@ -6632,7 +6633,7 @@ xo_filt_is_skippable (xo_handle_t *xop, xo_xff_flags_t flags,
     if (name) {
 	int rc = xo_filter_needs_nonkey_field(xop, xo_filters(xop), name, nlen);
 	XO_DBG(xop, "xo_filt_is_skippable: '%.*s' needs_nonkey_field -> %s",
-	       nlen, name, rc ? "true" : "false");
+	       (int) nlen, name, rc ? "true" : "false");
 	if (rc)
 	    return FALSE;
     }
@@ -6649,7 +6650,7 @@ xo_filt_skip (xo_handle_t *xop, xo_xff_flags_t flags,
     int rc = xo_filt_is_skippable(xop, flags, name, nlen, fstatus);
 
     XO_DBG(xop, "xo_filt_skip: '%.*s' %sdepth %d, status %u=%s -> %s",
-	   nlen, name, (flags &XFF_KEY) ? "key " : "", xop->xo_depth,
+	   (int) nlen, name, (flags &XFF_KEY) ? "key " : "", xop->xo_depth,
 	   fstatus, xo_filt_status_name(fstatus),
 	   rc ? "true" : "false");
 
@@ -7144,7 +7145,7 @@ xo_format_value (xo_handle_t *xop, const xo_field_info_t *xfip,
 	if ((xsp->xs_flags & XSF_EMIT) && !(flags & XFF_DISPLAY_ONLY)) {
 	    xo_failure(xop,
 		       "key field emitted after normal value field: '%.*s'",
-		       nlen, name);
+		       (int) nlen, name);
 
 	} else if (!(xsp->xs_flags & XSF_EMIT_KEY)) {
 	    char nbuf[nlen + 1];
@@ -8620,7 +8621,7 @@ xo_do_emit_fields (xo_handle_t *xop, const xo_field_info_t *fields,
             if (clen)
                 xo_failure(xop,
 			   "invalid content value for 'a' modifier: '%.*s'",
-			   clen, content);
+			   (int) clen, content);
 	    content = va_arg(xop->xo_vap, char *);
 	    clen = content ? strlen(content) : 0;
 	}
@@ -10547,7 +10548,7 @@ xo_do_close_all (xo_handle_t *xop, xo_stack_t *limit)
 	}
 
 	if (rc < 0)
-	    xo_failure(xop, "close %d failed: %d", xsp->xs_state, rc);
+	    xo_failure(xop, "close %d failed: %d", xsp->xs_state, (int) rc);
     }
 
     return 0;
