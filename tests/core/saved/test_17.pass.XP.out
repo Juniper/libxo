@@ -109,6 +109,10 @@
       <after>3</after>
     </leaf-instance>
   </markers>
+  <emit-field>
+    <after-domain>1</after-domain>
+    <quoted>value</quoted>
+  </emit-field>
 </top>
 before="one" name="gum" count="0" name="rope" count="1" name="ladder" count="2" after="two" 
 long values wrote 20068 bytes
