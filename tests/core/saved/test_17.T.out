@@ -71,6 +71,8 @@ html message 8170: 8261 bytes, '<div class="line"><div ' ... ' No such file or d
 warning 9000: 9056 bytes, '<error><message>test_17' ... 'xxxxxxxx&lt;9000&gt;</message></error>'
 xml message 9000: 9059 bytes, '<message>xxxxxxxxxxxxxx' ... ';: No such file or directory'
 html message 9000: 9091 bytes, '<div class="line"><div ' ... ' No such file or directory'
+deep stack wrote 8903 bytes
+open frames wrote 167 bytes
 syslog send: full 305, header no, text 305
   full ends 'xxxxxxxxxxxxxxxxxxxxtail'
   text ends 'xxxxxxxxxxxxxxxxxxxxtail'
