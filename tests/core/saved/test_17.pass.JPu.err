@@ -1,3 +1,8 @@
 test_17.pass-test: attribute needs a name and a format
 test_17.pass-test: attribute needs a name and a format
+test_17.pass-test: marker 'm1' prevents transition from open_list to open_container; discarding 'lost'
+test_17.pass-test: marker 'm1' prevents transition from open_list to open_list; discarding 'lost'
+test_17.pass-test: marker 'm1' prevents transition from open_list to emit
+test_17.pass-test: marker 'm1' prevents transition from open_list to open_container; discarding 'lost'
+test_17.pass-test: xo_close_container can't find match for 'stray' while discarding
 test_17.pass-test: close with empty stack: 'extra'
