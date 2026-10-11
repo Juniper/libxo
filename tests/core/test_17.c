@@ -13,6 +13,7 @@
  */
 
 #include <stdio.h>
+#include <errno.h>
 #include <string.h>
 #include <syslog.h>
 
@@ -381,6 +382,92 @@ test_long_escapes (void)
     printf("long values wrote %zu bytes\n", count);
 }
 
+/* Keep the two ends of what a handle writes, and count the rest */
+typedef struct test_ends_s {
+    size_t te_count;		/* Number of bytes written */
+    char te_head[24];		/* First bytes written */
+    char te_tail[40];		/* Last bytes of the last write */
+} test_ends_t;
+
+static xo_ssize_t
+test_ends_writer (void *opaque, const char *data)
+{
+    test_ends_t *tep = opaque;
+    size_t len = strlen(data);
+
+    if (tep->te_count == 0)
+	snprintf(tep->te_head, sizeof(tep->te_head), "%s", data);
+
+    size_t off = (len < sizeof(tep->te_tail)) ? 0
+	: len - (sizeof(tep->te_tail) - 1);
+    snprintf(tep->te_tail, sizeof(tep->te_tail), "%s", data + off);
+
+    /* Leave the trailing newline out of what we show */
+    char *cp = strchr(tep->te_tail, '\n');
+    if (cp)
+	*cp = '\0';
+
+    tep->te_count += len;
+    return len;
+}
+
+/*
+ * A warning or message that does not fit the buffer is formatted a
+ * second time; it must come out the same as one that fit, with the
+ * program name in front and the error string behind.
+ */
+static void
+test_long_messages (void)
+{
+    static int sizes[] = { 10, 1000, 1015, 1030, 8170, 9000, 0 };
+    char big[9001];
+    test_ends_t ends;
+    xo_handle_t *xop;
+    int i;
+
+    for (i = 0; sizes[i]; i++) {
+	memset(big, 'x', sizes[i]);
+	big[sizes[i]] = '\0';
+
+	bzero(&ends, sizeof(ends));
+	xop = xo_create(XO_STYLE_XML, XOF_WARN | XOF_WARN_XML);
+	if (xop == NULL)
+	    return;
+
+	xo_set_writer(xop, &ends, test_ends_writer, NULL, NULL);
+	xo_warn_hc(xop, -1, "%s<%d>", big, sizes[i]);
+	xo_destroy(xop);
+
+	printf("warning %d: %zu bytes, '%s' ... '%s'\n",
+	       sizes[i], ends.te_count, ends.te_head, ends.te_tail);
+
+	bzero(&ends, sizeof(ends));
+	xop = xo_create(XO_STYLE_XML, 0);
+	if (xop == NULL)
+	    return;
+
+	xo_set_writer(xop, &ends, test_ends_writer, NULL, NULL);
+	xo_message_hc(xop, ENOENT, "%s<%d>", big, sizes[i]);
+	xo_destroy(xop);
+
+	printf("xml message %d: %zu bytes, '%s' ... '%s'\n",
+	       sizes[i], ends.te_count, ends.te_head, ends.te_tail);
+
+	bzero(&ends, sizeof(ends));
+	xop = xo_create(XO_STYLE_HTML, 0);
+	if (xop == NULL)
+	    return;
+
+	xo_set_writer(xop, &ends, test_ends_writer, NULL, NULL);
+	xo_message_hc(xop, ENOENT, "%s<%d>", big, sizes[i]);
+	xo_flush_h(xop);
+	xo_destroy(xop);
+
+	printf("html message %d: %zu bytes, '%s' ... '%s'\n",
+	       sizes[i], ends.te_count, ends.te_head, ends.te_tail);
+    }
+}
+
 static void
 test_syslog_open (void)
 {
@@ -456,6 +543,7 @@ main (int argc, char **argv)
     /* These write on their own, so they come after the document */
     test_sdparams();
     test_long_escapes();
+    test_long_messages();
     test_syslog_long();
 
     return 0;
