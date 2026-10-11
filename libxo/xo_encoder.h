@@ -203,7 +203,7 @@ xo_whiteboard_op_name (xo_whiteboard_op_t op);
  * xo_failure is used to announce internal failures, when "warn" is on
  */
 void
-xo_failure (xo_handle_t *xop, const char *fmt, ...);
+xo_failure (xo_handle_t *xop, const char *fmt, ...) XO_PRINTFLIKE(2, 3);
 
 /*
  * Similar to xo_failure, but used in filter code, which, depending on
@@ -211,7 +211,7 @@ xo_failure (xo_handle_t *xop, const char *fmt, ...);
  * flag ("--libxo filter-warn").
  */
 void
-xo_failure_filter (xo_handle_t *xop, const char *fmt, ...);
+xo_failure_filter (xo_handle_t *xop, const char *fmt, ...) XO_PRINTFLIKE(2, 3);
 
 #ifdef __cplusplus
 }
