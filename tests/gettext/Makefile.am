@@ -123,7 +123,9 @@ TEST_LOCALE = \
     ${foreach lang,${TEST_LANGUAGES},${lang}) locale=${TEST_LOCALE_${lang}} ;;} \
     esac
 
-test tests: ${bin_PROGRAMS} build-mo-files
+all: build-mo-files
+
+test tests: ${bin_PROGRAMS}
 	@${MKDIR} -p out
 	-@ ${TEST_TRACE} (for test in ${TEST_CASES} ; do \
 	    base=`${BASENAME} $$test .c` ; \
@@ -273,12 +275,14 @@ mo build-mo-files:
 	@(${TEST_TRACE} for base in ${MO_BASE_FILES} ; do \
 	    for lang in ${LANGUAGES} ; do \
 	 	if [ -f po/$$lang/$$base.po ] ; then \
+		    echo "... GEN $$lang/$$base.mo ..."; \
 		    (${DB} ${MSGFMT} -o po/$$lang/LC_MESSAGES/$$base.mo \
-				po/$$lang/$$base.po 2>&1 ); \
+				po/$$lang/$$base.po 2>&1 | sed 's:^:... :' ); \
 		elif [ -f ${srcdir}/po/$$lang/$$base.po ]; then \
+		    echo "... GEN $$lang/$$base.mo ..."; \
 		    ${MKDIR} -p po/$$lang/LC_MESSAGES ; \
 		    (${DB} ${MSGFMT} -o po/$$lang/LC_MESSAGES/$$base.mo \
-			${srcdir}/po/$$lang/$$base.po 2>&1 ;) \
+			${srcdir}/po/$$lang/$$base.po 2>&1 | sed 's:^:... :' ;) \
                 fi ; \
 	    done ; \
 	    ( cd po ; ${RM} -f en_US ; ${LN_S} -f pig_latin en_US ); \
