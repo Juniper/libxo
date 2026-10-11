@@ -1456,7 +1456,10 @@ xo_xparse_clean (xo_xparse_data_t *xdp)
     if (xdp) {
 	xo_buf_cleanup(&xdp->xd_node_buf);
 	xo_buf_cleanup(&xdp->xd_str_buf);
-	xo_free(xdp->xd_buf);
+	if (xdp->xd_buf)
+	    xo_free(xdp->xd_buf);
+	if (xdp->xd_paths)
+	    xo_free(xdp->xd_paths);
 	bzero(xdp, sizeof(*xdp));
     }
 }
