@@ -176,6 +176,153 @@ test_sdparams (void)
     printf("\n");
 }
 
+/*
+ * Opens that arrive while a list or a leaf-list is still open close
+ * it on their own, and the close has to be of the same kind as the
+ * open.  The encoder output is the one that shows which was used.
+ */
+static void
+test_implied_close (void)
+{
+    xo_open_container("implied-close");
+
+    xo_open_list("list-then-container");
+    xo_open_container("after-list");
+    xo_emit("{:one/%d}\n", 1);
+    xo_close_container("after-list");
+
+    xo_emit("{l:leaf-then-container/%d}\n", 2);
+    xo_open_container("after-leaf");
+    xo_emit("{:two/%d}\n", 2);
+    xo_close_container("after-leaf");
+
+    xo_emit("{l:leaf-then-leaf/%d}\n", 3);
+    xo_emit("{l:second-leaf/%d}\n", 4);
+
+    xo_open_list("list-after-leaf");
+    xo_open_list("list-after-list");
+
+    xo_close_container("implied-close");
+}
+
+/*
+ * A marker keeps what is beneath it from being closed.  When that is
+ * a list, an open that is not an instance has nowhere to go: it is
+ * discarded, with all that is inside it, and its closes are matched
+ * so the stack comes out even.  A leaf-list is never the caller's,
+ * so it is closed even with a marker on top of it.
+ */
+static void
+test_markers (void)
+{
+    xo_open_container("markers");
+
+    /* A container in a list is discarded, and what follows is not */
+    xo_open_container("list-container");
+    xo_open_list("item");
+    xo_open_marker("m1");
+    xo_open_container("lost");
+    xo_open_list("inner");
+    xo_open_instance("inner");
+    xo_emit("{k:name}{:value/%d}{l:tags}\n", "lost", 1, "lost");
+    xo_open_marker("m2");
+    xo_open_container("deeper");
+    xo_close_marker("m2");
+    xo_close_instance("inner");
+    xo_close_list("inner");
+    xo_close_container("lost");
+    xo_open_instance("item");
+    xo_emit("{:kept/%d}\n", 1);
+    xo_close_instance("item");
+    xo_close_marker("m1");
+    xo_close_list("item");
+    xo_emit("{:after/%d}\n", 2);
+    xo_close_container("list-container");
+
+    /* A list in a list is discarded, as is the instance meant for it */
+    xo_open_container("list-list");
+    xo_open_list("item");
+    xo_open_marker("m1");
+    xo_open_list("lost");
+    xo_open_instance("lost");
+    xo_emit("{:value/%d}\n", 1);
+    xo_close_instance("lost");
+    xo_close_list("lost");
+    xo_close_marker("m1");
+    xo_emit("{:after/%d}\n", 2);
+    xo_close_container("list-list");
+
+    /* A refused field leaves the list able to close afterward */
+    xo_open_container("list-field");
+    xo_open_list("item");
+    xo_open_marker("m1");
+    xo_emit("{:lost/%d}\n", 1);
+    xo_close_marker("m1");
+    xo_emit("{:after/%d}\n", 2);
+    xo_close_container("list-field");
+
+    /* A close that matches nothing discarded is refused */
+    xo_open_container("stray-close");
+    xo_open_list("item");
+    xo_open_marker("m1");
+    xo_open_container("lost");
+    xo_close_container("stray");
+    xo_close_container("lost");
+    xo_close_marker("m1");
+    xo_emit("{:after/%d}\n", 2);
+    xo_close_container("stray-close");
+
+    /* A leaf-list beneath a marker closes for whatever comes next */
+    xo_open_container("leaf-container");
+    xo_emit("{l:leaf/%d}\n", 1);
+    xo_open_marker("m1");
+    xo_open_container("kept");
+    xo_emit("{:value/%d}\n", 2);
+    xo_close_container("kept");
+    xo_close_marker("m1");
+    xo_emit("{:after/%d}\n", 3);
+    xo_close_container("leaf-container");
+
+    xo_open_container("leaf-leaf");
+    xo_emit("{l:leaf/%d}\n", 1);
+    xo_open_marker("m1");
+    xo_open_marker("m2");
+    xo_emit("{l:other/%d}\n", 2);
+    xo_emit("{l:other/%d}\n", 3);
+    xo_close_marker("m2");
+    xo_close_marker("m1");
+    xo_emit("{:after/%d}\n", 4);
+    xo_close_container("leaf-leaf");
+
+    xo_open_container("leaf-field");
+    xo_emit("{l:leaf/%d}\n", 1);
+    xo_open_marker("m1");
+    xo_emit("{:kept/%d}\n", 2);
+    xo_close_marker("m1");
+    xo_emit("{:after/%d}\n", 3);
+    xo_close_container("leaf-field");
+
+    /* The same leaf-list carries on across a marker */
+    xo_open_container("leaf-same");
+    xo_emit("{l:leaf/%d}\n", 1);
+    xo_open_marker("m1");
+    xo_emit("{l:leaf/%d}\n", 2);
+    xo_close_marker("m1");
+    xo_emit("{l:leaf/%d}\n", 3);
+    xo_close_container("leaf-same");
+
+    /* An instance after a leaf-list gets a list of its own */
+    xo_open_container("leaf-instance");
+    xo_emit("{l:leaf/%d}\n", 1);
+    xo_open_instance("item");
+    xo_emit("{:value/%d}\n", 2);
+    xo_close_instance("item");
+    xo_emit("{:after/%d}\n", 3);
+    xo_close_container("leaf-instance");
+
+    xo_close_container("markers");
+}
+
 /* Count what a handle writes, since the output is too long to show */
 static xo_ssize_t
 test_count_writer (void *opaque, const char *data)
@@ -300,6 +447,8 @@ main (int argc, char **argv)
     test_deprecated_options();
     test_encoder_names();
     test_attributes();
+    test_implied_close();
+    test_markers();
 
     xo_close_container("top");
     xo_finish();
