@@ -62,11 +62,6 @@
 #define HN_GETSCALE		0x10
 #define HN_AUTOSCALE		0x20
 
-#ifdef PRId64
-#define XO_PRId64 PRId64
-#else
-#define XO_PRId64 "lld"
-#endif /* PRId64 */
 
 static int
 xo_humanize_number (char *buf, size_t len, int64_t quotient,
