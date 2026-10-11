@@ -51,6 +51,98 @@
     },
     "attributes": {
       "escaped": 1
+    },
+    "implied_close": {
+      "list_then_container": [
+      ],
+      "after_list": {
+        "one": 1
+      },
+      "leaf-then-container": [
+        2
+      ],
+      "after_leaf": {
+        "two": 2
+      },
+      "leaf-then-leaf": [
+        3
+      ],
+      "second-leaf": [
+        4
+      ],
+      "list_after_leaf": [
+      ],
+      "list_after_list": [
+      ]
+    },
+    "markers": {
+      "list_container": {
+        "item": [
+          {
+            "kept": 1
+          }
+        ],
+        "after": 2
+      },
+      "list_list": {
+        "item": [
+        ],
+        "after": 2
+      },
+      "list_field": {
+        "item": [
+        ],
+        "after": 2
+      },
+      "stray_close": {
+        "item": [
+        ],
+        "after": 2
+      },
+      "leaf_container": {
+        "leaf": [
+          1
+        ],
+        "kept": {
+          "value": 2
+        },
+        "after": 3
+      },
+      "leaf_leaf": {
+        "leaf": [
+          1
+        ],
+        "other": [
+          2,
+          3
+        ],
+        "after": 4
+      },
+      "leaf_field": {
+        "leaf": [
+          1
+        ],
+        "kept": 2,
+        "after": 3
+      },
+      "leaf_same": {
+        "leaf": [
+          1,
+          2,
+          3
+        ]
+      },
+      "leaf_instance": {
+        "leaf": [
+          1
+        ],
+        "item": [
+          {
+            "value": 2
+          }
+        ],
+        "after": 3
+      }
     }
   }
 }
