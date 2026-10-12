@@ -172,6 +172,43 @@
   <div class="label">label</div>
   <div class="data" data-tag="quoted" data-xpath="/top/emit-field/quoted">value</div>
 </div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="plus" data-xpath="/top/format-flags/plus">+5</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="space" data-xpath="/top/format-flags/space"> 5</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="wide" data-xpath="/top/format-flags/wide">   +5</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="zero" data-xpath="/top/format-flags/zero"> 0005</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="long" data-xpath="/top/format-flags/long">+7</div>
+  <div class="text">]</div>
+</div>
+huge width wrote 32767 bytes
+missing conversions wrote 0 bytes
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="negative" data-xpath="/top/format-flags/negative">-3</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="blank" data-xpath="/top/format-flags/blank">-3</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="unsigned" data-xpath="/top/format-flags/unsigned">5</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="hex" data-xpath="/top/format-flags/hex">ff</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="left" data-xpath="/top/format-flags/left">+5   </div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="both" data-xpath="/top/format-flags/both">+5</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="precise" data-xpath="/top/format-flags/precise">+005</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="left-zero" data-xpath="/top/format-flags/left-zero">42   </div>
+  <div class="text">]</div>
+</div>
 before="one" name="gum" count="0" name="rope" count="1" name="ladder" count="2" after="two" 
 long values wrote 20068 bytes
 warning 10: 74 bytes, '<error><message>test_17' ... 'xxxxxxxxxx&lt;10&gt;</message></error>'
