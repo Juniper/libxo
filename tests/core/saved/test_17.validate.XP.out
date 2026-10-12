@@ -1,3 +1,5 @@
+huge width wrote 32767 bytes
+missing conversions wrote 0 bytes
 <top>
   <anchor-width>
     <right>abc</right>
@@ -113,6 +115,21 @@
     <after-domain>1</after-domain>
     <quoted>value</quoted>
   </emit-field>
+  <format-flags>
+    <plus>5</plus>
+    <space>5</space>
+    <wide>5</wide>
+    <zero>5</zero>
+    <long>7</long>
+    <negative>-3</negative>
+    <blank>-3</blank>
+    <unsigned>5</unsigned>
+    <hex>ff</hex>
+    <left>5</left>
+    <both>5</both>
+    <precise>5</precise>
+    <left-zero>42</left-zero>
+  </format-flags>
 </top>
 before="one" name="gum" count="0" name="rope" count="1" name="ladder" count="2" after="two" 
 long values wrote 20068 bytes
