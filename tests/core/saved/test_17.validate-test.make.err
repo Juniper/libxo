@@ -4,4 +4,14 @@
 ../../../tests/core/test_17.c:35:13: warning: libxo: anchor format must be '%d' or '%u: '{[:/%20000d}'
    35 |     xo_emit("[{[:/%20000d}{:left/%s}{]:}]\n", -12, "abc");
       |             ^
-2 warnings generated.
+../../../tests/core/test_17.c:436:20: warning: libxo: field format missing format character: %l
+  436 |     xo_emit_h(xop, "[{:length/%l}]", 1L);
+      |                    ^
+../../../tests/core/test_17.c:437:20: warning: libxo: field format missing format character: %-
+  437 |     xo_emit_h(xop, "[{:minus/%-}]", 2);
+      |                    ^
+../../../tests/core/test_17.c:438:20: warning: libxo: unknown 'J' flag: '{%J}'
+  438 |     xo_emit_h(xop, "[{:extended/%J}]", 3);
+      |                    ^
+../../../tests/core/test_17.c:438:20: warning: libxo: field format missing format character: %J
+6 warnings generated.
