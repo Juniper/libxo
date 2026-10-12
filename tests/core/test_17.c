@@ -418,6 +418,14 @@ test_format_flags (void)
     xo_emit("[{:left/%+-5d/%d}] [{:both/%+ d/%d}] [{:precise/%+.3d/%d}] "
 	    "[{:left-zero/%-05d/%d}]\n", 5, 5, 5, 42);
 
+    /*
+     * With one format for all styles, JSON has to lose the '+', by
+     * either path (ours or vsnprintf); a quoted value can keep it.
+     */
+    xo_emit("[{:json-plus/%+d}] [{:json-wide/%+5d}] [{:json-size/%+zd}] "
+	    "[{:json-float/%+.2f}] [{q:json-quoted/%+d}]\n",
+	    5, 5, (ssize_t) 5, 1.5, 5);
+
     xo_close_container("format-flags");
 
     /* A width too big to hold is the biggest we can hold */
