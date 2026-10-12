@@ -1,7 +1,7 @@
 warning: ../../../tests/core/test_17.c:34: libxo format string: anchor format must be '%d' or '%u: '{[:/%20000d}' [-Wbackend-plugin]
 warning: ../../../tests/core/test_17.c:35: libxo format string: anchor format must be '%d' or '%u: '{[:/%20000d}' [-Wbackend-plugin]
-warning: ../../../tests/core/test_17.c:436: libxo format string: field format missing format character: %l [-Wbackend-plugin]
-warning: ../../../tests/core/test_17.c:437: libxo format string: field format missing format character: %- [-Wbackend-plugin]
-warning: ../../../tests/core/test_17.c:438: libxo format string: unknown 'J' flag: '{%J}' [-Wbackend-plugin]
-warning: ../../../tests/core/test_17.c:438: libxo format string: field format missing format character: %J [-Wbackend-plugin]
+warning: ../../../tests/core/test_17.c:444: libxo format string: field format missing format character: %l [-Wbackend-plugin]
+warning: ../../../tests/core/test_17.c:445: libxo format string: field format missing format character: %- [-Wbackend-plugin]
+warning: ../../../tests/core/test_17.c:446: libxo format string: unknown 'J' flag: '{%J}' [-Wbackend-plugin]
+warning: ../../../tests/core/test_17.c:446: libxo format string: field format missing format character: %J [-Wbackend-plugin]
 6 warnings generated.
