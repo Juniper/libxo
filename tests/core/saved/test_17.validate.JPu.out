@@ -163,7 +163,12 @@ missing conversions wrote 0 bytes
       "left": 5,
       "both": 5,
       "precise": 5,
-      "left_zero": 42
+      "left_zero": 42,
+      "json_plus": 5,
+      "json_wide":    5,
+      "json_size": 5,
+      "json_float": 1.50,
+      "json_quoted": "+5"
     }
   }
 }
