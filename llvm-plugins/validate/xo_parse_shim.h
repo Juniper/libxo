@@ -119,7 +119,8 @@ typedef struct xo_shim_fspec_s {
     uint16_t xsp_prefix_len;    /* xf_prefix_len */
     uint8_t  xsp_num_bits;      /* xf_num_bits */
     uint8_t  xsp_arg_type;      /* xf_arg_type */
-    uint8_t  xsp_padding[2];    /* xf_padding */
+    uint8_t  xsp_plus;          /* xf_plus */
+    uint8_t  xsp_space;         /* xf_space */
     uint32_t xsp_extflags;      /* xf_extflags */
 } xo_shim_fspec_t;
 
