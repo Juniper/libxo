@@ -209,6 +209,19 @@ missing conversions wrote 0 bytes
   <div class="data" data-tag="left-zero" data-xpath="/top/format-flags/left-zero">42   </div>
   <div class="text">]</div>
 </div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="json-plus" data-xpath="/top/format-flags/json-plus">+5</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="json-wide" data-xpath="/top/format-flags/json-wide">   +5</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="json-size" data-xpath="/top/format-flags/json-size">+5</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="json-float" data-xpath="/top/format-flags/json-float">+1.50</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="json-quoted" data-xpath="/top/format-flags/json-quoted">+5</div>
+  <div class="text">]</div>
+</div>
 before="one" name="gum" count="0" name="rope" count="1" name="ladder" count="2" after="two" 
 long values wrote 20068 bytes
 warning 10: 64 bytes, '<error><message>test_17' ... 'xxxxxxxxxx&lt;10&gt;</message></error>'
