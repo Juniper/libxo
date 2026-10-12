@@ -33,12 +33,12 @@
 #undef __USE_GNU
 #endif /* MY__USE_GNU */
 
-#ifdef HAVE_BSD_STRING_H
-#include <bsd/string.h>
-#endif /* HAVE_BSD_STRING_H */
-
 #else /* HAVE_GCC */
 #include <string.h>		/* So simple, eh? */
 #endif /* HAVE_GCC */
+
+#ifdef HAVE_BSD_STRING_H
+#include <bsd/string.h>
+#endif /* HAVE_BSD_STRING_H */
 
 #endif /* LIBXO_XO_STRING_H */
