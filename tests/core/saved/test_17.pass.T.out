@@ -1,3 +1,5 @@
+huge width wrote 32767 bytes
+missing conversions wrote 0 bytes
 [         abc]
 [abc         ]
 0 15 16 17 39 40
@@ -51,6 +53,9 @@ done
 2
 3
 1labelvalue
+[+5] [ 5] [   +5] [ 0005] [+7]
+[-3] [-3] [5] [ff]
+[+5   ] [+5] [+005] [42   ]
 before="one" name="gum" count="0" name="rope" count="1" name="ladder" count="2" after="two" 
 long values wrote 20068 bytes
 warning 10: 74 bytes, '<error><message>test_17' ... 'xxxxxxxxxx&lt;10&gt;</message></error>'
