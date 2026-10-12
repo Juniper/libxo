@@ -4432,6 +4432,25 @@ xo_emit_field_value (xo_handle_t *xop, xo_buffer_t *xbp,
 	    case XO_STYLE_JSON:
 		if (flags & XFF_TRIM_WS)
 		    columns = rc = xo_trim_ws(xbp, rc);
+
+		/*
+		 * JSON numbers cannot carry a leading '+' (RFC 8259
+		 * allows only '-'), so the '+' flag is dropped for
+		 * values that go out unquoted.  The sign may follow
+		 * blanks when the format has a width.
+		 */
+		if (xfp->xf_plus && xfp->xf_fc != 'c'
+		        && !(flags & XFF_QUOTE)) {
+		    char *vp = xbp->xb_curp, *vep = vp + rc;
+
+		    while (vp < vep && *vp == ' ')
+			vp += 1;
+		    if (vp < vep && *vp == '+') {
+			memmove(vp, vp + 1, vep - (vp + 1));
+			columns = rc -= 1;
+		    }
+		}
+
 		rc = xo_escape_json(xop, xbp, rc, flags);
 		break;
 
