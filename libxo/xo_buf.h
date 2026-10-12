@@ -48,14 +48,18 @@ xo_buf_zero (xo_buffer_t *xbp)
 }
 
 /*
- * Initialize the contents of an xo_buffer_t.
+ * Initialize the contents of an xo_buffer_t.  If the allocation
+ * fails, the buffer is left empty (as xo_buf_zero would leave it)
+ * rather than claiming space it does not have, so the next call to
+ * xo_buf_has_room() will try the allocation again and report the
+ * failure to a caller that can act on it.
  */
 static inline void
 xo_buf_init (xo_buffer_t *xbp)
 {
-    xbp->xb_size = XO_BUFSIZ;
-    xbp->xb_bufp = xo_realloc(NULL, xbp->xb_size);
+    xbp->xb_bufp = xo_realloc(NULL, XO_BUFSIZ);
     xbp->xb_curp = xbp->xb_bufp;
+    xbp->xb_size = xbp->xb_bufp ? XO_BUFSIZ : 0;
 }
 
 /*
@@ -169,18 +173,28 @@ xo_buf_trim (xo_buffer_t *xbp, xo_ssize_t len)
 static inline int
 xo_buf_has_some_room (xo_buffer_t *xbp, ssize_t len, ssize_t bufsiz)
 {
-    if (xbp->xb_curp + len >= xbp->xb_bufp + xbp->xb_size) {
+    /*
+     * Work with offsets, not pointers: a buffer that has not been
+     * used yet has NULL pointers, and pointer arithmetic on NULL is
+     * undefined even when the result is never dereferenced.
+     */
+    ssize_t off = xbp->xb_bufp ? (xbp->xb_curp - xbp->xb_bufp) : 0;
+
+    if (off + len >= xbp->xb_size) {
 	/*
-	 * Find out how much new space we need, round it up to bufsiz
+	 * Find out how much new space we need, round it up to bufsiz.
+	 * The test above wants the new size to be strictly greater
+	 * than what is needed, so an exact multiple of bufsiz (which
+	 * includes zero) moves up to the next one.
 	 */
-	ssize_t sz = (xbp->xb_curp + len) - xbp->xb_bufp;
-	sz = (sz + bufsiz - 1) & ~(bufsiz - 1);
+	ssize_t sz = off + len;
+	sz = (sz + bufsiz) & ~(bufsiz - 1);
 
 	char *bp = xo_realloc(xbp->xb_bufp, sz);
 	if (bp == NULL)
 	    return 0;
 
-	xbp->xb_curp = bp + (xbp->xb_curp - xbp->xb_bufp);
+	xbp->xb_curp = bp + off;
 	xbp->xb_bufp = bp;
 	xbp->xb_size = sz;
     }
