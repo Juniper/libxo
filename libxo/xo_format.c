@@ -265,8 +265,14 @@ static void
 xo_bump_width (xo_fspec_t *xfp, int digit)
 {
     int16_t *ip = &xfp->xf_width[xfp->xf_dots];
+    int val = ((*ip > 0) ? *ip : 0) * 10 + digit;
 
-    *ip = ((*ip > 0) ? *ip : 0) * 10 + digit;
+    /*
+     * The widths are 16 bits, and a number that does not fit would
+     * wrap into some other width, or a negative one.  Nothing is
+     * that wide, so the most we can hold is what such a number gets.
+     */
+    *ip = (val > INT16_MAX) ? INT16_MAX : val;
 }
 
 /*
@@ -306,6 +312,12 @@ xo_parse_format_spec (xo_parse_t *xpp, xo_fspec_t *xfp,
         } else if (*cp == '-')
             xfp->xf_seen_minus = 1;
 
+        else if (*cp == '+')
+            xfp->xf_plus = 1;
+
+        else if (*cp == ' ')
+            xfp->xf_space = 1;
+
         else if (*cp == '#')
             xfp->xf_alt = 1;
 
@@ -335,7 +347,8 @@ xo_parse_format_spec (xo_parse_t *xpp, xo_fspec_t *xfp,
                 xfp->xf_num_bits = num_bits;
 
         } else if (*cp == 'J') {
-            switch (cp[1]) {
+            /* The flag's letter has to be inside the format too */
+            switch ((cp + 1 < ep) ? cp[1] : '\0') {
             case 'N':
                 xfp->xf_extflags |= XXF_NULL_AS_EMPTY;
                 break;
@@ -363,8 +376,16 @@ xo_parse_format_spec (xo_parse_t *xpp, xo_fspec_t *xfp,
         }
     }
 
-    if (cp == ep)
-        xo_parse_error(xpp, "field format missing format character: %s", fmt);
+    /*
+     * With no conversion character there is nothing at 'cp' that is
+     * ours to read: 'ep' is the end of this format, not of a string,
+     * which is also why the message is told how much to print.
+     */
+    if (cp >= ep) {
+        xo_parse_error(xpp, "field format missing format character: %.*s",
+                       (int) (ep - start), start);
+        return NULL;
+    }
 
     xfp->xf_fc = *cp;
     return cp;
