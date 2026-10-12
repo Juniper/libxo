@@ -1,3 +1,5 @@
+huge width wrote 32767 bytes
+missing conversions wrote 0 bytes
 {
   "top": {
     "anchor-width": {
@@ -147,6 +149,21 @@
     "emit-field": {
       "after-domain": 1,
       "quoted": "value"
+    },
+    "format-flags": {
+      "plus": 5,
+      "space": 5,
+      "wide": 5,
+      "zero": 5,
+      "long": 7,
+      "negative": -3,
+      "blank": -3,
+      "unsigned": 5,
+      "hex": "ff",
+      "left": 5,
+      "both": 5,
+      "precise": 5,
+      "left-zero": 42
     }
   }
 }
