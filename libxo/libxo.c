@@ -4229,7 +4229,13 @@ xo_format_int_text (xo_handle_t *xop, xo_buffer_t *xbp, xo_fspec_t *xfp)
 	}
     }
 
-    char sign = negative ? '-' : '\0';
+    /*
+     * Only a signed conversion has a sign; '+' asks for one on every
+     * value and ' ' asks for a blank in its place, with '+' winning
+     * when both are given.
+     */
+    char sign = negative ? '-' : !is_signed ? '\0'
+	: xfp->xf_plus ? '+' : xfp->xf_space ? ' ' : '\0';
     ssize_t sign_len = sign ? 1 : 0;
     ssize_t content_len = sign_len + prefix_len + prec_zeros + dlen;
 
@@ -4238,8 +4244,14 @@ xo_format_int_text (xo_handle_t *xop, xo_buffer_t *xbp, xo_fspec_t *xfp)
 	? xfp->xf_width[XF_WIDTH_MIN] : 0;
     ssize_t pad = (content_len < min_width) ? min_width - content_len : 0;
 
-    /* Zero-fill flag applies to width, but is ignored when precision is set */
-    int zero_fill = (xfp->xf_leading_zero > 0) && (precision < 0);
+    /*
+     * Zero-fill flag applies to width, but is ignored when precision
+     * is set and when '-' puts the padding on the other side; without
+     * the latter we would pad on both sides and write more than the
+     * room we asked for.
+     */
+    int zero_fill = (xfp->xf_leading_zero > 0) && (precision < 0)
+	&& !xfp->xf_seen_minus;
 
     ssize_t total = content_len + pad;
     if (xo_check_for_room(xop, xbp, total))
