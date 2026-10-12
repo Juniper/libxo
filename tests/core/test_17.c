@@ -399,6 +399,49 @@ test_count_writer (void *opaque, const char *data)
     return strlen(data);
 }
 
+/*
+ * The '+' and ' ' flags put a sign, or the room for one, on a signed
+ * number, as printf does.  The second format of each field keeps the
+ * sign out of the encoding styles, where "+5" is not a number.
+ */
+static void
+test_format_flags (void)
+{
+    size_t count = 0;
+
+    xo_open_container("format-flags");
+
+    xo_emit("[{:plus/%+d/%d}] [{:space/% d/%d}] [{:wide/%+5d/%d}] "
+	    "[{:zero/% 05d/%d}] [{:long/%+ld/%ld}]\n", 5, 5, 5, 5, 7L);
+    xo_emit("[{:negative/%+d/%d}] [{:blank/% d/%d}] [{:unsigned/%+u/%u}] "
+	    "[{:hex/%+x/%x}]\n", -3, -3, 5u, 255);
+    xo_emit("[{:left/%+-5d/%d}] [{:both/%+ d/%d}] [{:precise/%+.3d/%d}] "
+	    "[{:left-zero/%-05d/%d}]\n", 5, 5, 5, 42);
+
+    xo_close_container("format-flags");
+
+    /* A width too big to hold is the biggest we can hold */
+    xo_handle_t *xop = xo_create(XO_STYLE_TEXT, XOF_WARN);
+    if (xop == NULL)
+	return;
+
+    xo_set_writer(xop, &count, test_count_writer, NULL, NULL);
+    xo_open_container_h(xop, "top");
+    xo_emit_h(xop, "{:huge/%70000d}", 1);
+    xo_flush_h(xop);
+    printf("huge width wrote %zu bytes\n", count);
+
+    /* These have no conversion character, and so make no output */
+    count = 0;
+    xo_emit_h(xop, "[{:length/%l}]", 1L);
+    xo_emit_h(xop, "[{:minus/%-}]", 2);
+    xo_emit_h(xop, "[{:extended/%J}]", 3);
+    xo_finish_h(xop);
+    xo_destroy(xop);
+
+    printf("missing conversions wrote %zu bytes\n", count);
+}
+
 /* Attribute names and values are escaped; a missing name is refused */
 static void
 test_attributes (void)
@@ -666,6 +709,7 @@ main (int argc, char **argv)
     test_implied_close();
     test_markers();
     test_emit_field();
+    test_format_flags();
 
     xo_close_container("top");
     xo_finish();
