@@ -261,7 +261,7 @@ struct XoPrecompile : PassInfoMixin<XoPrecompile> {
         Type *i8 = Type::getInt8Ty(Ctx);
 
         /*
-         * LLVM StructType mirroring xo_fspec_t (18 logical members).  Layout
+         * LLVM StructType mirroring xo_fspec_t (23 logical members).  Layout
          * is protected at shim-build time by the _Static_assert block in
          * xo_parse_shim.c; keep the two in sync.
          */
@@ -274,7 +274,7 @@ struct XoPrecompile : PassInfoMixin<XoPrecompile> {
             ArrayType::get(i16, 3),          /* xf_width[3] (signed) */
             i16, i16, i16,                   /* start, len, prefix_len */
             i8, i8,                          /* num_bits, arg_type */
-            ArrayType::get(i8, 2),           /* padding[2] */
+            i8, i8,                          /* plus, space */
             i32,                             /* extflags */
         });
 
@@ -404,8 +404,8 @@ struct XoPrecompile : PassInfoMixin<XoPrecompile> {
                         ConstantInt::get(i16, sf.xsp_prefix_len),
                         ConstantInt::get(i8, sf.xsp_num_bits),
                         ConstantInt::get(i8, sf.xsp_arg_type),
-                        Constant::getNullValue(
-                            ArrayType::get(i8, 2)), /* xf_padding */
+                        ConstantInt::get(i8, sf.xsp_plus),
+                        ConstantInt::get(i8, sf.xsp_space),
                         ConstantInt::get(i32, sf.xsp_extflags),
 		    }));
                 }
