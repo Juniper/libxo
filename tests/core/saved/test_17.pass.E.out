@@ -164,6 +164,11 @@ op content: [left] [5] [0]
 op content: [both] [5] [0]
 op content: [precise] [5] [0]
 op content: [left-zero] [42] [0]
+op content: [json-plus] [+5] [0]
+op content: [json-wide] [   +5] [0]
+op content: [json-size] [+5] [0]
+op content: [json-float] [+1.50] [0]
+op string: [json-quoted] [+5] [0x10]
 op close_container: [format-flags] [] [0]
 huge width wrote 32767 bytes
 missing conversions wrote 0 bytes
