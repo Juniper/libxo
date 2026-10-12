@@ -1,3 +1,5 @@
+huge width wrote 32767 bytes
+missing conversions wrote 0 bytes
 <div class="line">
   <div class="text">[</div>
   <div class="padding">         </div>
@@ -171,6 +173,41 @@
   <div class="data" data-tag="after-domain">1</div>
   <div class="label">label</div>
   <div class="data" data-tag="quoted">value</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="plus">+5</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="space"> 5</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="wide">   +5</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="zero"> 0005</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="long">+7</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="negative">-3</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="blank">-3</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="unsigned">5</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="hex">ff</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="left">+5   </div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="both">+5</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="precise">+005</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="left-zero">42   </div>
+  <div class="text">]</div>
 </div>
 before="one" name="gum" count="0" name="rope" count="1" name="ladder" count="2" after="two" 
 long values wrote 20068 bytes
