@@ -96,7 +96,8 @@ _Static_assert(offsetof(xo_field_info_t, xfi_num_fspecs) == 40 + sizeof(void *),
  *   offset 26: uint16_t xf_prefix_len
  *   offset 28: uint8_t xf_num_bits
  *   offset 29: uint8_t xf_arg_type
- *   offset 30: uint8_t xf_padding[2]
+ *   offset 30: uint8_t xf_plus
+ *   offset 31: uint8_t xf_space
  *   offset 32: uint32_t xf_extflags
  *   total: 36 bytes
  */
@@ -122,6 +123,8 @@ _Static_assert(offsetof(xo_fspec_t, xf_len)          == 24, "xf_len offset");
 _Static_assert(offsetof(xo_fspec_t, xf_prefix_len)   == 26, "xf_prefix_len offset");
 _Static_assert(offsetof(xo_fspec_t, xf_num_bits)     == 28, "xf_num_bits offset");
 _Static_assert(offsetof(xo_fspec_t, xf_arg_type)     == 29, "xf_arg_type offset");
+_Static_assert(offsetof(xo_fspec_t, xf_plus)         == 30, "xf_plus offset");
+_Static_assert(offsetof(xo_fspec_t, xf_space)        == 31, "xf_space offset");
 _Static_assert(offsetof(xo_fspec_t, xf_extflags)     == 32, "xf_extflags offset");
 
 struct xo_shim_state {
@@ -531,8 +534,8 @@ xo_shim_parse_fields (const char *fmt,
             sf.xsp_prefix_len   = xfp->xf_prefix_len;
             sf.xsp_num_bits     = xfp->xf_num_bits;
             sf.xsp_arg_type     = xfp->xf_arg_type;
-            sf.xsp_padding[0]   = xfp->xf_padding[0];
-            sf.xsp_padding[1]   = xfp->xf_padding[1];
+            sf.xsp_plus         = xfp->xf_plus;
+            sf.xsp_space        = xfp->xf_space;
             sf.xsp_extflags     = xfp->xf_extflags;
             fspec_cb(fspec_data, &sf);
         }
