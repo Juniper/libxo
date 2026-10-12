@@ -24,7 +24,7 @@
 #define INCLUDE_XO_UTF8_H
 
 #include <stdint.h>
-#include <string.h>
+#include <libxo/xo_string.h>
 
 typedef uint32_t xo_codepoint_t;
 
