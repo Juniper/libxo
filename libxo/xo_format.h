@@ -128,7 +128,8 @@ typedef struct xo_fspec_s {
     uint16_t xf_prefix_len;
     uint8_t xf_num_bits;  /* '!' Number of bits in a number (signed/unsigned) */
     uint8_t xf_arg_type;  /* Type of the va_arg for the value (XO_AT_*) */
-    uint8_t xf_padding[2];
+    uint8_t xf_plus;	  /* '+' flag: a sign on every signed number */
+    uint8_t xf_space;	  /* ' ' flag: a blank where a '+' would go */
 
     uint32_t xf_extflags;		/* "%J" "extended" flags (XXF_*) */
 } xo_fspec_t;
