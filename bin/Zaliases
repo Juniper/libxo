@@ -21,10 +21,17 @@ switch ( `uname`-`uname -r` )
        set llvm_topdir=/opt/local/libexec
        set llvm_vers=llvm-22
        breaksw
+    case Linux*:
+       unset llvm_topdir
+       breaksw
 endsw
 
-set llvm_config="${llvm_topdir}/${llvm_vers}/${llvm_path}"
-setenv LLVMCONFIG "--with-llvm-config=${llvm_config}"
+if ( $?llvm_topdir ) then
+    set llvm_config="${llvm_topdir}/${llvm_vers}/${llvm_path}"
+    setenv LLVMCONFIG "--with-llvm-config=${llvm_config}"
+else
+    setenv LLVMCONFIG ""
+endif
 
 set mycflags="-g -O0 -DXO_XPARSE_DEBUG -DLIBXO_DEBUG -DSLAX_DEBUG"
 
