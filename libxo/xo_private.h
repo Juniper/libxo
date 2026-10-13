@@ -38,7 +38,7 @@
 #ifdef PRIu64
 #define XO_PRIu64 PRIu64
 #else
-#define XO_PRIu64 "lld"
+#define XO_PRIu64 "llu"
 #endif /* PRIu64 */
 
 /*
