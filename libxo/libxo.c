@@ -4809,12 +4809,13 @@ xo_color_append_html (xo_handle_t *xop)
  * the rudder, so xo_humanize fixes part of the problem.
  */
 static ssize_t
-xo_humanize (char *buf, ssize_t len, uint64_t value, int flags)
+xo_humanize (char *buf, ssize_t len, int64_t value, int flags)
 {
     int scale = 0;
 
     if (value) {
-	uint64_t left = value;
+	/* The scale depends on the size of the value, not on its sign */
+	uint64_t left = (value < 0) ? -(uint64_t) value : (uint64_t) value;
 
 	if (flags & HN_DIVISOR_1000) {
 	    for ( ; left; scale++)
@@ -4861,14 +4862,41 @@ xo_format_humanize (xo_handle_t *xop, xo_buffer_t *xbp,
      * humanize it, which means turning it back into a number
      * and calling xo_humanize_number on it.
      */
-    uint64_t value;
+    int64_t value;
     char *ep;
 
     xo_buf_append(xbp, "", 1); /* NUL-terminate it */
 
-    value = strtoull(xbp->xb_bufp + savep->xhs_offset, &ep, 0);
-    if (!(value == ULLONG_MAX && errno == ERANGE)
-	&& (ep != xbp->xb_bufp + savep->xhs_offset)) {
+    /*
+     * humanize_number() takes a signed value, so that is what we
+     * parse; an unsigned value too big for one is out of range and
+     * is left as it was formatted.  The whole string must be the
+     * number (trailing blanks aside), since what follows the number
+     * would be lost.  errno is ours only for the call.
+     */
+    char *str = xbp->xb_bufp + savep->xhs_offset;
+    int save_errno = errno;
+
+    errno = 0;
+    value = strtoll(str, &ep, 0);
+    int out_of_range = (errno == ERANGE);
+    errno = save_errno;
+
+    int is_number = (ep != str) && !out_of_range;
+    if (is_number) {
+	while (*ep == ' ')
+	    ep += 1;
+	if (*ep != '\0')
+	    is_number = FALSE;
+    }
+
+    /*
+     * Whatever happens next, the NUL we added is not part of the
+     * value; drop it, so a value we cannot humanize is left intact.
+     */
+    xo_buf_set_offset(xbp, end_offset);
+
+    if (is_number) {
 	/*
 	 * There are few values where humanize_number needs
 	 * more bytes than the original value.  I've used
