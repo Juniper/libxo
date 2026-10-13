@@ -48,6 +48,24 @@ extern xo_realloc_func_t xo_realloc;
 extern xo_free_func_t xo_free;
 
 /*
+ * strdup() by way of xo_realloc, so the result can be given to
+ * xo_free().  The two allocators differ once the application calls
+ * xo_set_allocator(), and then a string from strdup() cannot be
+ * released with xo_free().
+ */
+static inline char *
+xo_strdup (const char *str)
+{
+    size_t len = strlen(str) + 1;
+    char *cp = xo_realloc(NULL, len);
+
+    if (cp)
+	memcpy(cp, str, len);
+
+    return cp;
+}
+
+/*
  * Simple string comparison function (without the temptation
  * to forget the "== 0").
  */
