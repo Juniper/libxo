@@ -457,3 +457,154 @@ main: input '>item'
 main: status: track
 main: input '}item'
 main: status: track
+main: input ''
+main: input '# a cast to a string keeps every digit of a wide integer'
+main: input 'r'
+main: status: zero
+main: input '?item[concat(1234567890123456789, '') = '1234567890123456789']'
+adding filter: 'item[concat(1234567890123456789, '') = '1234567890123456789']'
+added filter: 0
+--- 0: 17
+    000017: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 11, next 0, prev 0 
+                000011: type 14 (L_EQUALS), str 42 [=], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [concat], contents 5, next 13, prev 0 
+                        000005: type 53 (T_NUMBER), str 17 [1234567890123456789], contents 0, next 8, prev 0 
+                        000008: type 54 (T_QUOTED), str 39 [], contents 0, next 0, prev 5 
+                    000013: type 54 (T_QUOTED), str 44 [1234567890123456789], contents 0, next 0, prev 3 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: full
+main: input '$ name wide'
+main: key: 'name'='wide'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# a cast to a string keeps every digit of a wide float'
+main: input 'r'
+main: status: zero
+main: input '?item[concat(12345678901234.5, 'x') = '12345678901234.500000x']'
+adding filter: 'item[concat(12345678901234.5, 'x') = '12345678901234.500000x']'
+added filter: 0
+--- 0: 17
+    000017: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 11, next 0, prev 0 
+                000011: type 14 (L_EQUALS), str 40 [=], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [concat], contents 5, next 13, prev 0 
+                        000005: type 53 (T_NUMBER), str 17 [12345678901234.5], contents 0, next 8, prev 0 
+                        000008: type 54 (T_QUOTED), str 36 [x], contents 0, next 0, prev 5 
+                    000013: type 54 (T_QUOTED), str 42 [12345678901234.500000x], contents 0, next 0, prev 3 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: full
+main: input '$ name float'
+main: key: 'name'='float'
+main: status: full
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# unary minus negates a number, and an integer stays an integer'
+main: input 'r'
+main: status: zero
+main: input '?item[concat(-5, '') = '-5']'
+adding filter: 'item[concat(-5, '') = '-5']'
+added filter: 0
+--- 0: 18
+    000018: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 12, next 0, prev 0 
+                000012: type 14 (L_EQUALS), str 26 [=], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [concat], contents 5, next 14, prev 0 
+                        000005: type 86 (C_UNI_MINUS), str 17 [-], contents 6, next 9, prev 0 
+                            000006: type 53 (T_NUMBER), str 19 [5], contents 0, next 0, prev 0 
+                        000009: type 54 (T_QUOTED), str 23 [], contents 0, next 0, prev 5 
+                    000014: type 54 (T_QUOTED), str 28 [-5], contents 0, next 0, prev 3 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: full
+main: input '$ name negative'
+main: key: 'name'='negative'
+main: status: full
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# unary minus on a field, twice over, and next to a subtraction'
+main: input 'r'
+main: status: zero
+main: input '?item[-val = -4 and - -val = 4 and 1 - -val = 5]'
+adding filter: 'item[-val = -4 and - -val = 4 and 1 - -val = 5]'
+added filter: 0
+--- 0: 30
+    000030: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 17, next 0, prev 0 
+                000017: type 40 ('('), str 36 [and], contents 9, next 0, prev 0 
+                    000009: type 40 ('('), str 20 [and], contents 5, next 24, prev 0 
+                        000005: type 14 (L_EQUALS), str 14 [=], contents 3, next 14, prev 0 
+                            000003: type 86 (C_UNI_MINUS), str 8 [-], contents 6, next 7, prev 0 
+                                000006: type 74 (C_PATH), str 0 [], contents 4, next 0, prev 0 
+                                    000004: type 70 (C_ELEMENT), str 10 [val], contents 0, next 0, prev 0 
+                            000007: type 86 (C_UNI_MINUS), str 16 [-], contents 8, next 0, prev 3 
+                                000008: type 53 (T_NUMBER), str 18 [4], contents 0, next 0, prev 0 
+                        000014: type 14 (L_EQUALS), str 32 [=], contents 11, next 0, prev 5 
+                            000011: type 86 (C_UNI_MINUS), str 24 [-], contents 12, next 16, prev 0 
+                                000012: type 86 (C_UNI_MINUS), str 26 [-], contents 15, next 0, prev 0 
+                                    000015: type 74 (C_PATH), str 0 [], contents 13, next 0, prev 0 
+                                        000013: type 70 (C_ELEMENT), str 28 [val], contents 0, next 0, prev 0 
+                            000016: type 53 (T_NUMBER), str 34 [4], contents 0, next 0, prev 11 
+                    000024: type 14 (L_EQUALS), str 50 [=], contents 20, next 0, prev 9 
+                        000020: type 19 (L_MINUS), str 42 [-], contents 19, next 26, prev 0 
+                            000019: type 53 (T_NUMBER), str 40 [1], contents 0, next 22, prev 0 
+                            000022: type 86 (C_UNI_MINUS), str 44 [-], contents 25, next 0, prev 19 
+                                000025: type 74 (C_PATH), str 0 [], contents 23, next 0, prev 0 
+                                    000023: type 70 (C_ELEMENT), str 46 [val], contents 0, next 0, prev 0 
+                        000026: type 53 (T_NUMBER), str 52 [5], contents 0, next 0, prev 20 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '$ name three'
+main: key: 'name'='three'
+main: status: predicate
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name four'
+main: key: 'name'='four'
+main: status: predicate
+main: input '= val 4'
+main: field: 'val'='4'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
