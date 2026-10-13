@@ -57,6 +57,9 @@ done
 [-3] [-3] [5] [ff]
 [+5   ] [+5] [+005] [42   ]
 [+5] [   +5] [+5] [+1.50] [+5]
+[-5] [-5K] [-5M] [-1.5K] [-5k]
+[-8E] [-8E] [8E] [18446744073709551615]
+[abc] [12abc] [4K] [4K]
 before="one" name="gum" count="0" name="rope" count="1" name="ladder" count="2" after="two" 
 long values wrote 20068 bytes
 warning 10: 74 bytes, '<error><message>test_17' ... 'xxxxxxxxxx&lt;10&gt;</message></error>'
