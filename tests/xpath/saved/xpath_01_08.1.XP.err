@@ -27,7 +27,7 @@ added filter: 0
             000032: type 17 (L_LESS), str 65 [<], contents 33, next 0, prev 0 
                 000033: type 74 (C_PATH), str 0 [], contents 31, next 34, prev 0 
                     000031: type 70 (C_ELEMENT), str 63 [c], contents 0, next 0, prev 0 
-                000034: type 19 (L_MINUS), str 67 [-], contents 35, next 0, prev 33 
+                000034: type 86 (C_UNI_MINUS), str 67 [-], contents 35, next 0, prev 33 
                     000035: type 53 (T_NUMBER), str 69 [4], contents 0, next 0, prev 0 
     000039: type 70 (C_ELEMENT), str 75 [four], contents 0, next 0, prev 29 
 main: status: zero
@@ -61,7 +61,7 @@ xpath_01: test: filter expression feature is unsupported: plus sign ('+')
             000032: type 17 (L_LESS), str 65 [<], contents 33, next 0, prev 0 
                 000033: type 74 (C_PATH), str 0 [], contents 31, next 34, prev 0 
                     000031: type 70 (C_ELEMENT), str 63 [c], contents 0, next 0, prev 0 
-                000034: type 19 (L_MINUS), str 67 [-], contents 35, next 0, prev 33 
+                000034: type 86 (C_UNI_MINUS), str 67 [-], contents 35, next 0, prev 33 
                     000035: type 53 (T_NUMBER), str 69 [4], contents 0, next 0, prev 0 
     000039: type 70 (C_ELEMENT), str 75 [four], contents 0, next 0, prev 29 
 --- 1: 42
@@ -72,7 +72,7 @@ xpath_01: test: filter expression feature is unsupported: plus sign ('+')
                 000047: type 74 (C_PATH), str 0 [], contents 45, next 50, prev 0 
                     000045: type 70 (C_ELEMENT), str 88 [a], contents 0, next 0, prev 0 
                 000050: type 25 (L_PLUS), str 96 [+], contents 48, next 0, prev 47 
-                    000048: type 19 (L_MINUS), str 92 [-], contents 49, next 53, prev 0 
+                    000048: type 86 (C_UNI_MINUS), str 92 [-], contents 49, next 53, prev 0 
                         000049: type 53 (T_NUMBER), str 94 [3], contents 0, next 0, prev 0 
                     000053: type 41 (K_DIV), str 100 [div], contents 52, next 0, prev 48 
                         000052: type 53 (T_NUMBER), str 98 [5], contents 0, next 55, prev 0 
@@ -224,7 +224,7 @@ xpath_01: test: filter expression feature is unsupported: plus sign ('+')
             000032: type 17 (L_LESS), str 65 [<], contents 33, next 0, prev 0 
                 000033: type 74 (C_PATH), str 0 [], contents 31, next 34, prev 0 
                     000031: type 70 (C_ELEMENT), str 63 [c], contents 0, next 0, prev 0 
-                000034: type 19 (L_MINUS), str 67 [-], contents 35, next 0, prev 33 
+                000034: type 86 (C_UNI_MINUS), str 67 [-], contents 35, next 0, prev 33 
                     000035: type 53 (T_NUMBER), str 69 [4], contents 0, next 0, prev 0 
     000039: type 70 (C_ELEMENT), str 75 [four], contents 0, next 0, prev 29 
 --- 1: 42
@@ -235,7 +235,7 @@ xpath_01: test: filter expression feature is unsupported: plus sign ('+')
                 000047: type 74 (C_PATH), str 0 [], contents 45, next 50, prev 0 
                     000045: type 70 (C_ELEMENT), str 88 [a], contents 0, next 0, prev 0 
                 000050: type 25 (L_PLUS), str 96 [+], contents 48, next 0, prev 47 
-                    000048: type 19 (L_MINUS), str 92 [-], contents 49, next 53, prev 0 
+                    000048: type 86 (C_UNI_MINUS), str 92 [-], contents 49, next 53, prev 0 
                         000049: type 53 (T_NUMBER), str 94 [3], contents 0, next 0, prev 0 
                     000053: type 41 (K_DIV), str 100 [div], contents 52, next 0, prev 48 
                         000052: type 53 (T_NUMBER), str 98 [5], contents 0, next 55, prev 0 
