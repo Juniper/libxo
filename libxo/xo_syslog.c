@@ -179,8 +179,9 @@ xo_log_remote_active (void)
 void
 xo_log_set_hostname (const char *hostname)
 {
-    free(xo_log_hostname_override);
-    xo_log_hostname_override = hostname ? strdup(hostname) : NULL;
+    if (xo_log_hostname_override)
+	xo_free(xo_log_hostname_override);
+    xo_log_hostname_override = hostname ? xo_strdup(hostname) : NULL;
 }
 
 void
@@ -189,7 +190,8 @@ xo_log_set_host (struct hostent *hp)
     int i;
 
     xo_log_remote_naddrs = 0;
-    free(xo_log_remote_path);
+    if (xo_log_remote_path)
+	xo_free(xo_log_remote_path);
     xo_log_remote_path = NULL;
 
     if (hp == NULL)
@@ -226,8 +228,9 @@ xo_log_set_host_path (const char *path)
 {
     xo_log_remote_naddrs = 0;
 
-    free(xo_log_remote_path);
-    xo_log_remote_path = path ? strdup(path) : NULL;
+    if (xo_log_remote_path)
+	xo_free(xo_log_remote_path);
+    xo_log_remote_path = path ? xo_strdup(path) : NULL;
 }
 
 void
