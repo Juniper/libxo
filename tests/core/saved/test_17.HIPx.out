@@ -222,6 +222,41 @@ missing conversions wrote 0 bytes
   <div class="data" data-tag="json-quoted" data-xpath="/top/format-flags/json-quoted">+5</div>
   <div class="text">]</div>
 </div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="small" data-xpath="/top/humanize-signs/small" data-number="-5">-5</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="kilo" data-xpath="/top/humanize-signs/kilo" data-number="-5000">-5K</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="mega" data-xpath="/top/humanize-signs/mega" data-number="-5000000">-5M</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="fraction" data-xpath="/top/humanize-signs/fraction" data-number="-1500">-1.5K</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="metric" data-xpath="/top/humanize-signs/metric" data-number="-5000">-5k</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="lowest" data-xpath="/top/humanize-signs/lowest" data-number="-9223372036854775808">-8E</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="next-lowest" data-xpath="/top/humanize-signs/next-lowest" data-number="-9223372036854775807">-8E</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="highest" data-xpath="/top/humanize-signs/highest" data-number="9223372036854775807">8E</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="too-high" data-xpath="/top/humanize-signs/too-high" data-number="18446744073709551615">18446744073709551615</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="word" data-xpath="/top/humanize-signs/word" data-number="abc">abc</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="mixed" data-xpath="/top/humanize-signs/mixed" data-number="12abc">12abc</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="padded" data-xpath="/top/humanize-signs/padded" data-number="4096  ">4K</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="after" data-xpath="/top/humanize-signs/after" data-number="4096">4K</div>
+  <div class="text">]</div>
+</div>
 before="one" name="gum" count="0" name="rope" count="1" name="ladder" count="2" after="two" 
 long values wrote 20068 bytes
 warning 10: 64 bytes, '<error><message>test_17' ... 'xxxxxxxxxx&lt;10&gt;</message></error>'
