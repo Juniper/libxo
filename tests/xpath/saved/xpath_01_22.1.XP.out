@@ -29,3 +29,69 @@
   <thing>three</thing>
   <thing>four</thing>
 </data>
+<top>
+  <a>
+    <val>a</val>
+  </a>
+  <b>
+    <val>b</val>
+  </b>
+  <c>
+    <val>c</val>
+  </c>
+  <d>
+    <val>d</val>
+  </d>
+  <e>
+    <val>e</val>
+  </e>
+  <f>
+    <val>f</val>
+  </f>
+  <g>
+    <val>g</val>
+  </g>
+  <h>
+    <val>h</val>
+  </h>
+  <item>
+    <val>2</val>
+  </item>
+</top>
+<x>
+  <x>
+    <x>
+      <x>
+        <x>
+          <x>
+            <x>
+              <x>
+                <x>
+                  <x>
+                    <x>
+                      <x>
+                        <x>
+                          <x>
+                            <x>
+                              <x>
+                                <x>
+                                  <want>
+                                    <val>yes</val>
+                                  </want>
+                                </x>
+                              </x>
+                            </x>
+                          </x>
+                        </x>
+                      </x>
+                    </x>
+                  </x>
+                </x>
+              </x>
+            </x>
+          </x>
+        </x>
+      </x>
+    </x>
+  </x>
+</x>
