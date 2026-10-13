@@ -70,25 +70,28 @@ xo_humanize_number (char *buf, size_t len, int64_t quotient,
 	const int maxscale = 6;
 
 	const char *prefixes, *sep;
-	int	i, r, remainder, s1, s2, sign;
+	const char *sign;
+	int	i, r, remainder, s1, s2;
 	int	divisordeccut;
 	int64_t	divisor, max;
+	uint64_t magnitude, rounded;
 	size_t	baselen;
+
+	/* validate args */
+	if (buf == NULL || suffix == NULL)
+		return -1;
 
 	/* Since so many callers don't check -1, NUL terminate the buffer */
 	if (len > 0)
 		buf[0] = '\0';
 
-	/* validate args */
-	if (buf == NULL || suffix == NULL)
-		return (-1);
 	if (scale < 0)
-		return (-1);
+		return -1;
 	else if (scale > maxscale &&
 	    ((scale & ~(HN_AUTOSCALE|HN_GETSCALE)) != 0))
-		return (-1);
+		return -1;
 	if ((flags & HN_DIVISOR_1000) && (flags & HN_IEC_PREFIXES))
-		return (-1);
+		return -1;
 
 	/* setup parameters */
 	remainder = 0;
@@ -131,12 +134,19 @@ xo_humanize_number (char *buf, size_t len, int64_t quotient,
 
 #define	SCALE2PREFIX(scale)	(&prefixes[(scale) * 3])
 
+	/*
+	 * The magnitude is kept unsigned, since the negation of
+	 * INT64_MIN does not fit in an int64_t, and the sign is kept
+	 * as a string, so it is not lost when the scaled value is zero
+	 * before the decimal point ("-0.5K").
+	 */
 	if (quotient < 0) {
-		sign = -1;
-		quotient = -quotient;
+		sign = "-";
+		magnitude = -(uint64_t) quotient;
 		baselen += 2;		/* sign, digit */
 	} else {
-		sign = 1;
+		sign = "";
+		magnitude = quotient;
 		baselen += 1;		/* digit */
 	}
 	if (flags & HN_NOSPACE)
@@ -149,7 +159,7 @@ xo_humanize_number (char *buf, size_t len, int64_t quotient,
 
 	/* Check if enough room for `x y' + suffix + `\0' */
 	if (len < baselen + 1)
-		return (-1);
+		return -1;
 
 	if (scale & (HN_AUTOSCALE | HN_GETSCALE)) {
 		/* See if there is additional columns can be used. */
@@ -162,19 +172,20 @@ xo_humanize_number (char *buf, size_t len, int64_t quotient,
 		 * divide once more.
 		 */
 		for (i = 0;
-		    (quotient >= max || (quotient == max - 1 &&
+		    (magnitude >= (uint64_t) max
+		    || (magnitude == (uint64_t) max - 1 &&
 		    (remainder >= divisordeccut || remainder >=
 		    divisor / 2))) && i < maxscale; i++) {
-			remainder = quotient % divisor;
-			quotient /= divisor;
+			remainder = magnitude % divisor;
+			magnitude /= divisor;
 		}
 
 		if (scale & HN_GETSCALE)
-			return (i);
+			return i;
 	} else {
 		for (i = 0; i < scale && i < maxscale; i++) {
-			remainder = quotient % divisor;
-			quotient /= divisor;
+			remainder = magnitude % divisor;
+			magnitude /= divisor;
 		}
 	}
 
@@ -183,18 +194,21 @@ xo_humanize_number (char *buf, size_t len, int64_t quotient,
 	 * XXX - should we make sure there is enough space for the decimal
 	 * place and if not, don't do HN_DECIMAL?
 	 */
-	if (((quotient == 9 && remainder < divisordeccut) || quotient < 9) &&
+	if (((magnitude == 9 && remainder < divisordeccut) || magnitude < 9) &&
 	    i > 0 && flags & HN_DECIMAL) {
-		s1 = (int)quotient + ((remainder * 10 + divisor / 2) /
+		s1 = (int)magnitude + ((remainder * 10 + divisor / 2) /
 		    divisor / 10);
 		s2 = ((remainder * 10 + divisor / 2) / divisor) % 10;
-		r = snprintf(buf, len, "%d%s%d%s%s%s",
-		    sign * s1, localeconv()->decimal_point, s2,
+		r = snprintf(buf, len, "%s%d%s%d%s%s%s",
+		    (s1 || s2) ? sign : "", s1,
+		    localeconv()->decimal_point, s2,
 		    sep, SCALE2PREFIX(i), suffix);
-	} else
-		r = snprintf(buf, len, "%" XO_PRId64 "%s%s%s",
-		    sign * (quotient + (remainder + divisor / 2) / divisor),
+	} else {
+		rounded = magnitude + (remainder + divisor / 2) / divisor;
+		r = snprintf(buf, len, "%s%" XO_PRIu64 "%s%s%s",
+		    rounded ? sign : "", rounded,
 		    sep, SCALE2PREFIX(i), suffix);
+	}
 
-	return (r);
+	return r;
 }
