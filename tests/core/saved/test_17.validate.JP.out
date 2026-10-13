@@ -169,6 +169,21 @@ missing conversions wrote 0 bytes
       "json-size": 5,
       "json-float": 1.50,
       "json-quoted": "+5"
+    },
+    "humanize-signs": {
+      "small": -5,
+      "kilo": -5000,
+      "mega": -5000000,
+      "fraction": -1500,
+      "metric": -5000,
+      "lowest": -9223372036854775808,
+      "next-lowest": -9223372036854775807,
+      "highest": 9223372036854775807,
+      "too-high": 18446744073709551615,
+      "word": "abc",
+      "mixed": "12abc",
+      "padded": 4096,
+      "after": 4096
     }
   }
 }
