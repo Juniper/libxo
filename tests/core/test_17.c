@@ -14,6 +14,7 @@
 
 #include <stdio.h>
 #include <errno.h>
+#include <limits.h>
 #include <string.h>
 #include <syslog.h>
 
@@ -450,6 +451,28 @@ test_format_flags (void)
     printf("missing conversions wrote %zu bytes\n", count);
 }
 
+/*
+ * The humanize modifier keeps the sign of a negative value, copes
+ * with the most negative one, and leaves alone a value that is not
+ * wholly a number or that does not fit in a signed 64-bit value.
+ */
+static void
+test_humanize_signs (void)
+{
+    xo_open_container("humanize-signs");
+
+    xo_emit("[{h:small/%lld}] [{h:kilo/%lld}] [{h:mega/%lld}] "
+	    "[{h,hn-decimal:fraction/%lld}] [{h,hn-1000:metric/%lld}]\n",
+	    -5LL, -5000LL, -5000000LL, -1500LL, -5000LL);
+    xo_emit("[{h:lowest/%lld}] [{h:next-lowest/%lld}] "
+	    "[{h:highest/%lld}] [{h:too-high/%llu}]\n",
+	    LLONG_MIN, LLONG_MIN + 1, LLONG_MAX, ULLONG_MAX);
+    xo_emit("[{h:word/%s}] [{h:mixed/%s}] [{h:padded/%-6d}] "
+	    "[{h:after/%d}]\n", "abc", "12abc", 4096, 4096);
+
+    xo_close_container("humanize-signs");
+}
+
 /* Attribute names and values are escaped; a missing name is refused */
 static void
 test_attributes (void)
@@ -718,6 +741,7 @@ main (int argc, char **argv)
     test_markers();
     test_emit_field();
     test_format_flags();
+    test_humanize_signs();
 
     xo_close_container("top");
     xo_finish();
