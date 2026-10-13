@@ -138,6 +138,7 @@ typedef struct xo_tframe_s {
 typedef struct xo_tmatch_s {
     xo_trie_t *xtm_trie;	        /* The compiled trie */
     uint32_t xtm_depth;	        /* Current stack depth */
+    uint32_t xtm_skipped;	/* Opens with no frame (see xo_tmatch_open) */
     uint32_t xtm_cap;	        /* Allocated frame count */
     xo_tframe_t *xtm_stack;	/* Frame stack [0..xtm_depth] */
     uint32_t xtm_allow;          /* Active allow-match count */
@@ -429,6 +430,17 @@ xo_tframe_free_attrs (xo_tframe_t *frame)
     }
 }
 
+/*
+ * Does the node we are in have a frame of its own?  Not at the top,
+ * and not beneath an open that xo_tmatch_open had to skip, where the
+ * top of the stack belongs to an ancestor.
+ */
+static inline int
+xo_tmatch_has_frame (xo_tmatch_t *xtmp)
+{
+    return xtmp->xtm_depth != 0 && xtmp->xtm_skipped == 0;
+}
+
 static int
 xo_tmatch_init (xo_handle_t *xop UNUSED, xo_tmatch_t *xtmp, xo_trie_t *trie)
 {
@@ -471,6 +483,7 @@ xo_tmatch_cleanup (xo_tmatch_t *xtmp)
 	for (uint32_t d = 0; d <= xtmp->xtm_depth; d++) {
 	    xo_tframe_free_keys(&xtmp->xtm_stack[d]);
 	    xo_tframe_free_attrs(&xtmp->xtm_stack[d]);
+	    xo_tframe_free_self(&xtmp->xtm_stack[d]);
 	}
 	xo_free(xtmp->xtm_stack);
 	xtmp->xtm_stack = NULL;
@@ -682,11 +695,25 @@ xo_tmatch_open (xo_handle_t *xop, xo_filter_t *xfp,
     xo_trie_t *xtp = xtmp->xtm_trie;
     xo_xparse_data_t *xdp = xtp->xt_xd;
 
+    /*
+     * If we cannot grow the stack, this open gets no frame, and the
+     * close that pairs with it must not pop someone else's.  So we
+     * count the opens we skip, and everything beneath one is skipped
+     * as well (even if memory returns), since a frame pushed there
+     * would sit on the wrong parent.
+     */
+    if (xtmp->xtm_skipped) {
+	xtmp->xtm_skipped += 1;
+	return;
+    }
+
     if (xtmp->xtm_depth + 1 >= xtmp->xtm_cap) {
 	uint32_t cap = xtmp->xtm_cap * 2;
 	xo_tframe_t *p = xo_realloc(xtmp->xtm_stack, cap * sizeof(*p));
-	if (p == NULL)
+	if (p == NULL) {
+	    xtmp->xtm_skipped = 1;
 	    return;
+	}
 	bzero(p + xtmp->xtm_cap, (cap - xtmp->xtm_cap) * sizeof(*p));
 	xtmp->xtm_stack = p;
 	xtmp->xtm_cap = cap;
@@ -780,6 +807,12 @@ static void
 xo_tmatch_close (xo_handle_t *xop, xo_filter_t *xfp UNUSED,
 		 xo_tmatch_t *xtmp, const char *tag UNUSED, ssize_t tlen UNUSED)
 {
+    /* An open that pushed no frame has nothing to pop */
+    if (xtmp->xtm_skipped) {
+	xtmp->xtm_skipped -= 1;
+	return;
+    }
+
     if (xtmp->xtm_depth == 0)
 	return;
 
@@ -908,7 +941,7 @@ xo_filter_change_status (xo_handle_t *xop UNUSED, xo_filter_t *xfp,
 	 * kept tentatively.
 	 */
 	xo_tmatch_t *xtmp = &xfp->xf_tmatch;
-	if (xtmp->xtm_depth > 0) {
+	if (xo_tmatch_has_frame(xtmp)) {
 	    xo_tframe_t *frame = &xtmp->xtm_stack[xtmp->xtm_depth];
 	    for (uint32_t i = 0; i < frame->xtf_count; i++) {
 		if (frame->xtf_state[i] == XTFS_PRED) {
@@ -3340,7 +3373,7 @@ xo_tmatch_key (xo_handle_t *xop, xo_filter_t *xfp, xo_tmatch_t *xtmp,
 	       const char *tag, xo_ssize_t tlen,
 	       const char *value, xo_ssize_t vlen)
 {
-    if (xtmp->xtm_depth == 0)
+    if (!xo_tmatch_has_frame(xtmp))
 	return xfp->xf_status;
 
     xo_trie_t *xtp = xtmp->xtm_trie;
@@ -3406,7 +3439,7 @@ xo_tmatch_attr (xo_handle_t *xop, xo_filter_t *xfp, xo_tmatch_t *xtmp,
 		const char *tag, xo_ssize_t tlen,
 		const char *value, xo_ssize_t vlen)
 {
-    if (xtmp->xtm_depth == 0)
+    if (!xo_tmatch_has_frame(xtmp))
 	return xfp->xf_status;
 
     xo_trie_t *xtp = xtmp->xtm_trie;
@@ -3538,7 +3571,7 @@ xo_filter_op_needs_nonkey_field (XO_FILTER_NEEDS_NONKEY_FIELD_SIGNATURE)
 	return FALSE;
 
     xo_tmatch_t *xtmp = &xfp->xf_tmatch;
-    if (xtmp->xtm_depth == 0)
+    if (!xo_tmatch_has_frame(xtmp))
 	return FALSE;
 
     xo_trie_t *xtp = xtmp->xtm_trie;
@@ -3567,7 +3600,7 @@ xo_filter_force_resolve_pred (xo_handle_t *xop, xo_filter_t *xfp,
 			      const char *tag)
 {
     xo_tmatch_t *xtmp = &xfp->xf_tmatch;
-    if (xtmp->xtm_depth == 0)
+    if (!xo_tmatch_has_frame(xtmp))
 	return;
 
     xo_tframe_t *framep = &xtmp->xtm_stack[xtmp->xtm_depth];
