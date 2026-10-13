@@ -39,3 +39,19 @@
   <d>z</d>
   <val>1</val>
 </item>
+<item>
+  <name>wide</name>
+  <val>1</val>
+</item>
+<item>
+  <name>float</name>
+  <val>2</val>
+</item>
+<item>
+  <name>negative</name>
+  <val>3</val>
+</item>
+<item>
+  <name>four</name>
+  <val>4</val>
+</item>
