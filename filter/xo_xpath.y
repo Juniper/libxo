@@ -136,6 +136,8 @@
 %token C_DSTRING	    83 /* String value that is dynamically allocated */
 %token C_NESTED_PREDICATES  84 /* Predicates inside predicates: a[b[c]] */
 %token C_PREDICATE_PATHS    85 /* Multi-element paths in predicates a[b/c] */
+%token C_UNI_MINUS	    86 /* Unary minus */
+
 /* Note: Add new names to xo_xparse_ttname_map[] in xo_xparse.c */
 
 /*
@@ -559,6 +561,7 @@ xp_unary_expr :
 		{
 		    xo_xparse_node_set_contents(xparse_data, $1, $2);
 		    $$ = xo_xparse_yyval(xparse_data, $1);
+		    xo_xparse_node_ok(xparse_data, $$)->xn_type = C_UNI_MINUS;
 		}
 	;
 
@@ -965,5 +968,5 @@ xo_xparse_expecting_error (xo_xparse_data_t *xdp, const char *token,
 	}
     }
 
-    return strdup(buf);
+    return xo_strdup(buf);
 }
