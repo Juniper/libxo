@@ -281,8 +281,6 @@ do_work (xo_handle_t *xop, xo_filter_t *xfp, xo_xparse_data_t *xdp,
 	    xo_set_filter_data(xop, xfp);
 	    xdp = xo_filter_xparse_data(xop, xfp);
 
-	    xo_xparse_init(xdp);
-
 	    rc = 0;
 	    break;
 
@@ -355,8 +353,6 @@ main (int argc, char **argv)
     xo_handle_t *xop = NULL;	/* Use default output handle */
     xo_set_filter_data(xop, xfp);
     xo_xparse_data_t *xdp = xo_filter_xparse_data(xop, xfp);
-
-    xo_xparse_init(xdp);
 
     FILE *in = opt_input ? fopen(opt_input, "r") : stdin;
     if (in == NULL)
