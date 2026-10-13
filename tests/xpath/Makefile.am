@@ -338,3 +338,7 @@ clean-local:
 
 echo:
 	echo ${${VAR}}
+
+##
+## (for c in 8 9; do DYLD_LIBRARY_PATH=/Users/phil/work/root/xo/lib leaks --atExit -- tests/xpath/.libs/xpath_01.test --libxo:XP input ../tests/xpath/xpath_01_22.in case $c quiet 2>&1 ; done)  > /tmp/2
+##
