@@ -1577,10 +1577,18 @@ xo_eval_cast_int64 (xo_handle_t *xop, xo_eval_value_t value)
     }
 }
 
+/*
+ * Room for any number we turn into a string.  The integers need at
+ * most 21 bytes, but "%lf" writes every digit of a double, and the
+ * largest has 309 of them before the decimal point, plus the sign,
+ * the point, six more digits and the NUL.
+ */
+#define XO_EVAL_NUMBUF	320
+
 static char *
 xo_eval_cast_string (xo_handle_t *xop UNUSED, xo_eval_value_t value)
 {
-    char buf[16];
+    char buf[XO_EVAL_NUMBUF];
     const char *bp UNUSED = buf;
 
     switch (value.xev_type) {
@@ -1614,7 +1622,7 @@ xo_eval_cast_string (xo_handle_t *xop UNUSED, xo_eval_value_t value)
 	bp = "(unknown)";
     }
 
-    return strdup(bp);
+    return xo_strdup(bp);
 }
 
 static inline xo_eval_value_t
@@ -1629,7 +1637,7 @@ xo_eval_dump_value (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED,
 		     xo_eval_value_t value,
 		     int indent UNUSED, const char *title UNUSED)
 {
-    char buf[16];
+    char buf[XO_EVAL_NUMBUF];
     const char *bp UNUSED = buf;
 
     switch (value.xev_type) {
@@ -2073,6 +2081,36 @@ xo_eval_not (XO_EVAL_NODE_ARGS)
 }
 
 /*
+ * Unary minus: the grammar gives us a C_UNI_MINUS node, whose
+ * contents are the single operand.  An integer stays an integer, so
+ * "-5" is still "5" with a sign when it becomes a string; everything
+ * else is negated as a number.
+ */
+static xo_eval_value_t
+xo_eval_negate (XO_EVAL_NODE_ARGS)
+{
+    xo_eval_value_t value;
+
+    value = xo_eval(xop, xfp, framep, "arguments", indent,
+                       xnp->xn_contents, NULL);
+    xo_eval_dump_value(xop, xfp, value, indent, "xo_eval_negate");
+
+    if (value.xev_flags & XEVF_MISSING)
+	return value;
+
+    /* The most negative integer has no positive twin; use a float */
+    if (value.xev_type == C_INT64 && value.xev_int64 != INT64_MIN) {
+	value.xev_int64 = -value.xev_int64;
+	return value;
+    }
+
+    xo_float_t fval = xo_eval_cast_float(xop, value);
+    xo_eval_value_free(value);
+
+    return xo_eval_value_float(0, -fval);
+}
+
+/*
  * Look at a arguments to a function and return the count
  */
 static int UNUSED
@@ -2216,7 +2254,7 @@ xo_eval_func_normalize_space (XO_EVAL_NODE_ARGS)
     if (out == NULL) {
 	xo_free(str);
 	xo_eval_value_t result = xo_eval_value_make(C_DSTRING, 0, 0);
-	result.xev_str = strdup("");
+	result.xev_str = xo_strdup("");
 	return result;
     }
 
@@ -2378,7 +2416,7 @@ xo_eval_func_substring_after (XO_EVAL_NODE_ARGS)
     if (found) {
 	const char *after = found + strlen(needle);
 	value.xev_type = C_DSTRING;
-	value.xev_str = strdup(after);
+	value.xev_str = xo_strdup(after);
     } else {
 	value.xev_str = "";
     }
@@ -2471,7 +2509,7 @@ xo_eval_func_concat (XO_EVAL_NODE_ARGS)
 
     xo_buf_append(&buf, "", 1);	/* null terminator */
     xo_eval_value_t result = xo_eval_value_make(C_DSTRING, 0, 0);
-    result.xev_str = strdup(xo_buf_data(&buf, 0));
+    result.xev_str = xo_strdup(xo_buf_data(&buf, 0));
     xo_buf_cleanup(&buf);
     return result;
 }
@@ -2559,7 +2597,7 @@ xo_eval_func_translate (XO_EVAL_NODE_ARGS)
 	xo_free(from);
 	xo_free(to);
 	xo_eval_value_t result = xo_eval_value_make(C_DSTRING, 0, 0);
-	result.xev_str = strdup("");
+	result.xev_str = xo_strdup("");
 	return result;
     }
 
@@ -2572,7 +2610,7 @@ xo_eval_func_translate (XO_EVAL_NODE_ARGS)
 	xo_free(from);
 	xo_free(to);
 	xo_eval_value_t result = xo_eval_value_make(C_DSTRING, 0, 0);
-	result.xev_str = strdup("");
+	result.xev_str = xo_strdup("");
 	return result;
     }
 
@@ -2649,7 +2687,7 @@ xo_eval_func_rematch (XO_EVAL_NODE_ARGS)
     if (fn_argc >= 3)
 	opts = xo_eval_cast_string(xop, fn_argv[2]);
     else
-	opts = strdup("");
+	opts = xo_strdup("");
 
     xo_eval_arguments_free(xop, xfp, framep, xnp, indent, 3, fn_argv);
 
@@ -2731,7 +2769,7 @@ xo_eval_func_rematch (XO_EVAL_NODE_ARGS)
     xo_free(opts);
 
     if (result.xev_type == C_DSTRING && result.xev_str == NULL)
-	result.xev_str = strdup(""); /* default value */
+	result.xev_str = xo_strdup(""); /* default value */
 
     return result;
 }
@@ -2978,6 +3016,10 @@ xo_eval (xo_handle_t *xop, xo_filter_t *xfp, xo_tframe_t *framep,
 	    nested_op_fn = xo_eval_op_minus;
 	    break;
 
+	case C_UNI_MINUS:
+	    node_fn = xo_eval_negate;
+	    break;
+
 	case C_NOT:
 	    node_fn = xo_eval_not;
 	    break;
@@ -3035,7 +3077,8 @@ xo_eval (xo_handle_t *xop, xo_filter_t *xfp, xo_tframe_t *framep,
 	 * are handled in xo_eval_function, which knows which ones
 	 * return nodes.
 	 */
-	if (xnp->xn_type == C_NOT || nested_op_fn)
+	if (xnp->xn_type == C_NOT || xnp->xn_type == C_UNI_MINUS
+	        || nested_op_fn)
 	    value.xev_flags &= ~XEVF_NODE;
 
 	if (first) {
