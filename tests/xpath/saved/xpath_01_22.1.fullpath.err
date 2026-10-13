@@ -302,3 +302,407 @@ main: field: 'thing'='four'
 main: status: track
 main: input '- data'
 main: status: track
+main: input ''
+main: input '# test 8: nine paths that start with the same element, so that'
+main: input '# nine trie nodes are active at once; the last is positional'
+main: input 'r'
+main: status: zero
+main: input '?top/a'
+adding filter: 'top/a'
+added filter: 0
+--- 0: 5
+    000005: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [top], contents 0, next 3, prev 0 
+        000003: type 70 (C_ELEMENT), str 7 [a], contents 0, next 0, prev 1 
+main: status: zero
+main: input '?top/b'
+adding filter: 'top/b'
+added filter: 0
+--- 0: 5
+    000005: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [top], contents 0, next 3, prev 0 
+        000003: type 70 (C_ELEMENT), str 7 [a], contents 0, next 0, prev 1 
+--- 1: 10
+    000010: type 74 (C_PATH), str 0 [], contents 6, next 0, prev 0 
+        000006: type 70 (C_ELEMENT), str 9 [top], contents 0, next 8, prev 0 
+        000008: type 70 (C_ELEMENT), str 15 [b], contents 0, next 0, prev 6 
+main: status: zero
+main: input '?top/c'
+adding filter: 'top/c'
+added filter: 0
+--- 0: 5
+    000005: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [top], contents 0, next 3, prev 0 
+        000003: type 70 (C_ELEMENT), str 7 [a], contents 0, next 0, prev 1 
+--- 1: 10
+    000010: type 74 (C_PATH), str 0 [], contents 6, next 0, prev 0 
+        000006: type 70 (C_ELEMENT), str 9 [top], contents 0, next 8, prev 0 
+        000008: type 70 (C_ELEMENT), str 15 [b], contents 0, next 0, prev 6 
+--- 2: 15
+    000015: type 74 (C_PATH), str 0 [], contents 11, next 0, prev 0 
+        000011: type 70 (C_ELEMENT), str 17 [top], contents 0, next 13, prev 0 
+        000013: type 70 (C_ELEMENT), str 23 [c], contents 0, next 0, prev 11 
+main: status: zero
+main: input '?top/d'
+adding filter: 'top/d'
+added filter: 0
+--- 0: 5
+    000005: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [top], contents 0, next 3, prev 0 
+        000003: type 70 (C_ELEMENT), str 7 [a], contents 0, next 0, prev 1 
+--- 1: 10
+    000010: type 74 (C_PATH), str 0 [], contents 6, next 0, prev 0 
+        000006: type 70 (C_ELEMENT), str 9 [top], contents 0, next 8, prev 0 
+        000008: type 70 (C_ELEMENT), str 15 [b], contents 0, next 0, prev 6 
+--- 2: 15
+    000015: type 74 (C_PATH), str 0 [], contents 11, next 0, prev 0 
+        000011: type 70 (C_ELEMENT), str 17 [top], contents 0, next 13, prev 0 
+        000013: type 70 (C_ELEMENT), str 23 [c], contents 0, next 0, prev 11 
+--- 3: 20
+    000020: type 74 (C_PATH), str 0 [], contents 16, next 0, prev 0 
+        000016: type 70 (C_ELEMENT), str 25 [top], contents 0, next 18, prev 0 
+        000018: type 70 (C_ELEMENT), str 31 [d], contents 0, next 0, prev 16 
+main: status: zero
+main: input '?top/e'
+adding filter: 'top/e'
+added filter: 0
+--- 0: 5
+    000005: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [top], contents 0, next 3, prev 0 
+        000003: type 70 (C_ELEMENT), str 7 [a], contents 0, next 0, prev 1 
+--- 1: 10
+    000010: type 74 (C_PATH), str 0 [], contents 6, next 0, prev 0 
+        000006: type 70 (C_ELEMENT), str 9 [top], contents 0, next 8, prev 0 
+        000008: type 70 (C_ELEMENT), str 15 [b], contents 0, next 0, prev 6 
+--- 2: 15
+    000015: type 74 (C_PATH), str 0 [], contents 11, next 0, prev 0 
+        000011: type 70 (C_ELEMENT), str 17 [top], contents 0, next 13, prev 0 
+        000013: type 70 (C_ELEMENT), str 23 [c], contents 0, next 0, prev 11 
+--- 3: 20
+    000020: type 74 (C_PATH), str 0 [], contents 16, next 0, prev 0 
+        000016: type 70 (C_ELEMENT), str 25 [top], contents 0, next 18, prev 0 
+        000018: type 70 (C_ELEMENT), str 31 [d], contents 0, next 0, prev 16 
+--- 4: 25
+    000025: type 74 (C_PATH), str 0 [], contents 21, next 0, prev 0 
+        000021: type 70 (C_ELEMENT), str 33 [top], contents 0, next 23, prev 0 
+        000023: type 70 (C_ELEMENT), str 39 [e], contents 0, next 0, prev 21 
+main: status: zero
+main: input '?top/f'
+adding filter: 'top/f'
+added filter: 0
+--- 0: 5
+    000005: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [top], contents 0, next 3, prev 0 
+        000003: type 70 (C_ELEMENT), str 7 [a], contents 0, next 0, prev 1 
+--- 1: 10
+    000010: type 74 (C_PATH), str 0 [], contents 6, next 0, prev 0 
+        000006: type 70 (C_ELEMENT), str 9 [top], contents 0, next 8, prev 0 
+        000008: type 70 (C_ELEMENT), str 15 [b], contents 0, next 0, prev 6 
+--- 2: 15
+    000015: type 74 (C_PATH), str 0 [], contents 11, next 0, prev 0 
+        000011: type 70 (C_ELEMENT), str 17 [top], contents 0, next 13, prev 0 
+        000013: type 70 (C_ELEMENT), str 23 [c], contents 0, next 0, prev 11 
+--- 3: 20
+    000020: type 74 (C_PATH), str 0 [], contents 16, next 0, prev 0 
+        000016: type 70 (C_ELEMENT), str 25 [top], contents 0, next 18, prev 0 
+        000018: type 70 (C_ELEMENT), str 31 [d], contents 0, next 0, prev 16 
+--- 4: 25
+    000025: type 74 (C_PATH), str 0 [], contents 21, next 0, prev 0 
+        000021: type 70 (C_ELEMENT), str 33 [top], contents 0, next 23, prev 0 
+        000023: type 70 (C_ELEMENT), str 39 [e], contents 0, next 0, prev 21 
+--- 5: 30
+    000030: type 74 (C_PATH), str 0 [], contents 26, next 0, prev 0 
+        000026: type 70 (C_ELEMENT), str 41 [top], contents 0, next 28, prev 0 
+        000028: type 70 (C_ELEMENT), str 47 [f], contents 0, next 0, prev 26 
+main: status: zero
+main: input '?top/g'
+adding filter: 'top/g'
+added filter: 0
+--- 0: 5
+    000005: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [top], contents 0, next 3, prev 0 
+        000003: type 70 (C_ELEMENT), str 7 [a], contents 0, next 0, prev 1 
+--- 1: 10
+    000010: type 74 (C_PATH), str 0 [], contents 6, next 0, prev 0 
+        000006: type 70 (C_ELEMENT), str 9 [top], contents 0, next 8, prev 0 
+        000008: type 70 (C_ELEMENT), str 15 [b], contents 0, next 0, prev 6 
+--- 2: 15
+    000015: type 74 (C_PATH), str 0 [], contents 11, next 0, prev 0 
+        000011: type 70 (C_ELEMENT), str 17 [top], contents 0, next 13, prev 0 
+        000013: type 70 (C_ELEMENT), str 23 [c], contents 0, next 0, prev 11 
+--- 3: 20
+    000020: type 74 (C_PATH), str 0 [], contents 16, next 0, prev 0 
+        000016: type 70 (C_ELEMENT), str 25 [top], contents 0, next 18, prev 0 
+        000018: type 70 (C_ELEMENT), str 31 [d], contents 0, next 0, prev 16 
+--- 4: 25
+    000025: type 74 (C_PATH), str 0 [], contents 21, next 0, prev 0 
+        000021: type 70 (C_ELEMENT), str 33 [top], contents 0, next 23, prev 0 
+        000023: type 70 (C_ELEMENT), str 39 [e], contents 0, next 0, prev 21 
+--- 5: 30
+    000030: type 74 (C_PATH), str 0 [], contents 26, next 0, prev 0 
+        000026: type 70 (C_ELEMENT), str 41 [top], contents 0, next 28, prev 0 
+        000028: type 70 (C_ELEMENT), str 47 [f], contents 0, next 0, prev 26 
+--- 6: 35
+    000035: type 74 (C_PATH), str 0 [], contents 31, next 0, prev 0 
+        000031: type 70 (C_ELEMENT), str 49 [top], contents 0, next 33, prev 0 
+        000033: type 70 (C_ELEMENT), str 55 [g], contents 0, next 0, prev 31 
+main: status: zero
+main: input '?top/h'
+adding filter: 'top/h'
+added filter: 0
+--- 0: 5
+    000005: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [top], contents 0, next 3, prev 0 
+        000003: type 70 (C_ELEMENT), str 7 [a], contents 0, next 0, prev 1 
+--- 1: 10
+    000010: type 74 (C_PATH), str 0 [], contents 6, next 0, prev 0 
+        000006: type 70 (C_ELEMENT), str 9 [top], contents 0, next 8, prev 0 
+        000008: type 70 (C_ELEMENT), str 15 [b], contents 0, next 0, prev 6 
+--- 2: 15
+    000015: type 74 (C_PATH), str 0 [], contents 11, next 0, prev 0 
+        000011: type 70 (C_ELEMENT), str 17 [top], contents 0, next 13, prev 0 
+        000013: type 70 (C_ELEMENT), str 23 [c], contents 0, next 0, prev 11 
+--- 3: 20
+    000020: type 74 (C_PATH), str 0 [], contents 16, next 0, prev 0 
+        000016: type 70 (C_ELEMENT), str 25 [top], contents 0, next 18, prev 0 
+        000018: type 70 (C_ELEMENT), str 31 [d], contents 0, next 0, prev 16 
+--- 4: 25
+    000025: type 74 (C_PATH), str 0 [], contents 21, next 0, prev 0 
+        000021: type 70 (C_ELEMENT), str 33 [top], contents 0, next 23, prev 0 
+        000023: type 70 (C_ELEMENT), str 39 [e], contents 0, next 0, prev 21 
+--- 5: 30
+    000030: type 74 (C_PATH), str 0 [], contents 26, next 0, prev 0 
+        000026: type 70 (C_ELEMENT), str 41 [top], contents 0, next 28, prev 0 
+        000028: type 70 (C_ELEMENT), str 47 [f], contents 0, next 0, prev 26 
+--- 6: 35
+    000035: type 74 (C_PATH), str 0 [], contents 31, next 0, prev 0 
+        000031: type 70 (C_ELEMENT), str 49 [top], contents 0, next 33, prev 0 
+        000033: type 70 (C_ELEMENT), str 55 [g], contents 0, next 0, prev 31 
+--- 7: 40
+    000040: type 74 (C_PATH), str 0 [], contents 36, next 0, prev 0 
+        000036: type 70 (C_ELEMENT), str 57 [top], contents 0, next 38, prev 0 
+        000038: type 70 (C_ELEMENT), str 63 [h], contents 0, next 0, prev 36 
+main: status: zero
+main: input '?top/item[2]'
+adding filter: 'top/item[2]'
+added filter: 0
+--- 0: 5
+    000005: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [top], contents 0, next 3, prev 0 
+        000003: type 70 (C_ELEMENT), str 7 [a], contents 0, next 0, prev 1 
+--- 1: 10
+    000010: type 74 (C_PATH), str 0 [], contents 6, next 0, prev 0 
+        000006: type 70 (C_ELEMENT), str 9 [top], contents 0, next 8, prev 0 
+        000008: type 70 (C_ELEMENT), str 15 [b], contents 0, next 0, prev 6 
+--- 2: 15
+    000015: type 74 (C_PATH), str 0 [], contents 11, next 0, prev 0 
+        000011: type 70 (C_ELEMENT), str 17 [top], contents 0, next 13, prev 0 
+        000013: type 70 (C_ELEMENT), str 23 [c], contents 0, next 0, prev 11 
+--- 3: 20
+    000020: type 74 (C_PATH), str 0 [], contents 16, next 0, prev 0 
+        000016: type 70 (C_ELEMENT), str 25 [top], contents 0, next 18, prev 0 
+        000018: type 70 (C_ELEMENT), str 31 [d], contents 0, next 0, prev 16 
+--- 4: 25
+    000025: type 74 (C_PATH), str 0 [], contents 21, next 0, prev 0 
+        000021: type 70 (C_ELEMENT), str 33 [top], contents 0, next 23, prev 0 
+        000023: type 70 (C_ELEMENT), str 39 [e], contents 0, next 0, prev 21 
+--- 5: 30
+    000030: type 74 (C_PATH), str 0 [], contents 26, next 0, prev 0 
+        000026: type 70 (C_ELEMENT), str 41 [top], contents 0, next 28, prev 0 
+        000028: type 70 (C_ELEMENT), str 47 [f], contents 0, next 0, prev 26 
+--- 6: 35
+    000035: type 74 (C_PATH), str 0 [], contents 31, next 0, prev 0 
+        000031: type 70 (C_ELEMENT), str 49 [top], contents 0, next 33, prev 0 
+        000033: type 70 (C_ELEMENT), str 55 [g], contents 0, next 0, prev 31 
+--- 7: 40
+    000040: type 74 (C_PATH), str 0 [], contents 36, next 0, prev 0 
+        000036: type 70 (C_ELEMENT), str 57 [top], contents 0, next 38, prev 0 
+        000038: type 70 (C_ELEMENT), str 63 [h], contents 0, next 0, prev 36 
+--- 8: 49
+    000049: type 74 (C_PATH), str 0 [], contents 41, next 0, prev 0 
+        000041: type 70 (C_ELEMENT), str 65 [top], contents 0, next 43, prev 0 
+        000043: type 70 (C_ELEMENT), str 71 [item], contents 44, next 0, prev 41 
+            000044: type 75 (C_PREDICATE), str 0 [], contents 45, next 0, prev 0 
+                000045: type 72 (C_INDEX), str 78 [2], contents 0, next 0, prev 0 
+main: status: zero
+main: input '+top'
+main: status: track
+main: input '+a'
+main: status: full
+main: input '= val a'
+main: field: 'val'='a'
+main: status: full
+main: input '-a'
+main: status: track
+main: input '+b'
+main: status: full
+main: input '= val b'
+main: field: 'val'='b'
+main: status: full
+main: input '-b'
+main: status: track
+main: input '+c'
+main: status: full
+main: input '= val c'
+main: field: 'val'='c'
+main: status: full
+main: input '-c'
+main: status: track
+main: input '+d'
+main: status: full
+main: input '= val d'
+main: field: 'val'='d'
+main: status: full
+main: input '-d'
+main: status: track
+main: input '+e'
+main: status: full
+main: input '= val e'
+main: field: 'val'='e'
+main: status: full
+main: input '-e'
+main: status: track
+main: input '+f'
+main: status: full
+main: input '= val f'
+main: field: 'val'='f'
+main: status: full
+main: input '-f'
+main: status: track
+main: input '+g'
+main: status: full
+main: input '= val g'
+main: field: 'val'='g'
+main: status: full
+main: input '-g'
+main: status: track
+main: input '+h'
+main: status: full
+main: input '= val h'
+main: field: 'val'='h'
+main: status: full
+main: input '-h'
+main: status: track
+main: input '{item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: full
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input '-top'
+main: status: track
+main: input ''
+main: input '# test 9: a path of nine like-named steps, matched deep in the'
+main: input '# tree, where every frame tracks nine partial matches'
+main: input 'r'
+main: status: zero
+main: input '?x/x/x/x/x/x/x/x/x/want'
+adding filter: 'x/x/x/x/x/x/x/x/x/want'
+added filter: 0
+--- 0: 21
+    000021: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [x], contents 0, next 3, prev 0 
+        000003: type 70 (C_ELEMENT), str 5 [x], contents 0, next 5, prev 1 
+        000005: type 70 (C_ELEMENT), str 9 [x], contents 0, next 7, prev 3 
+        000007: type 70 (C_ELEMENT), str 13 [x], contents 0, next 9, prev 5 
+        000009: type 70 (C_ELEMENT), str 17 [x], contents 0, next 11, prev 7 
+        000011: type 70 (C_ELEMENT), str 21 [x], contents 0, next 13, prev 9 
+        000013: type 70 (C_ELEMENT), str 25 [x], contents 0, next 15, prev 11 
+        000015: type 70 (C_ELEMENT), str 29 [x], contents 0, next 17, prev 13 
+        000017: type 70 (C_ELEMENT), str 33 [x], contents 0, next 19, prev 15 
+        000019: type 70 (C_ELEMENT), str 37 [want], contents 0, next 0, prev 17 
+main: status: zero
+main: input '+x'
+main: status: track
+main: input '+x'
+main: status: track
+main: input '+x'
+main: status: track
+main: input '+x'
+main: status: track
+main: input '+x'
+main: status: track
+main: input '+x'
+main: status: track
+main: input '+x'
+main: status: track
+main: input '+x'
+main: status: track
+main: input '+x'
+main: status: track
+main: input '+x'
+main: status: track
+main: input '+x'
+main: status: track
+main: input '+x'
+main: status: track
+main: input '+x'
+main: status: track
+main: input '+x'
+main: status: track
+main: input '+x'
+main: status: track
+main: input '+x'
+main: status: track
+main: input '+x'
+main: status: track
+main: input '+want'
+main: status: full
+main: input '= val yes'
+main: field: 'val'='yes'
+main: status: full
+main: input '-want'
+main: status: track
+main: input '-x'
+main: status: track
+main: input '-x'
+main: status: track
+main: input '-x'
+main: status: track
+main: input '-x'
+main: status: track
+main: input '-x'
+main: status: track
+main: input '-x'
+main: status: track
+main: input '-x'
+main: status: track
+main: input '-x'
+main: status: track
+main: input '-x'
+main: status: track
+main: input '-x'
+main: status: track
+main: input '-x'
+main: status: track
+main: input '-x'
+main: status: track
+main: input '-x'
+main: status: track
+main: input '-x'
+main: status: track
+main: input '-x'
+main: status: track
+main: input '-x'
+main: status: track
+main: input '-x'
+main: status: track
