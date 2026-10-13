@@ -216,6 +216,7 @@ xo_xparse_ttname_map_t xo_xparse_ttname_map[] = {
     { C_DSTRING,		"string value that is dynamically allocated" },
     { C_NESTED_PREDICATES,      "predicates inside predicates" },
     { C_PREDICATE_PATHS,        "Multi-element paths in predicates" },
+    { C_UNI_MINUS,		"Unary minus" },
     { M_ERROR,                  "invalid xpath expression" },
     { 0, NULL }
 };
@@ -1344,10 +1345,10 @@ xo_xparse_syntax_error (xo_xparse_data_t *xdp, const char *token,
      */
     if (yystate == 1) {
 	if (yychar == -1)
-	    return strdup("unexpected end-of-file found (empty input)");
+	    return xo_strdup("unexpected end-of-file found (empty input)");
 
 	if (yychar == L_LESS)
-	    return strdup("unexpected '<'; file may be XML/XSLT");
+	    return xo_strdup("unexpected '<'; file may be XML/XSLT");
 
 	SNPRINTF(cp, ep, "missing 'version' statement");
 	if (token)
@@ -1366,7 +1367,7 @@ xo_xparse_syntax_error (xo_xparse_data_t *xdp, const char *token,
 	    SNPRINTF(cp, ep, ": %s", token);
     }
 
-    return strdup(buf);
+    return xo_strdup(buf);
 }
 
 /**
