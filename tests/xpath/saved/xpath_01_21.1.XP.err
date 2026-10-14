@@ -280,6 +280,7 @@ main: input '- statistics'
 main: status: track
 main: input ''
 main: input '## 'm' flag: first capture group (pmatch[1]) - match port number after ":"'
+main: input '## The capture is a non-empty string, so port "0" is true as well.'
 main: input 'r'
 main: status: zero
 main: input '? socket[rematch(":([0-9]+)", address, "m")]'
@@ -314,8 +315,9 @@ main: filter: rc: 11
 main: status: predicate
 main: input '= address 127.0.0.1:0'
 main: field: 'address'='127.0.0.1:0'
-main: status: track
+main: status: full
 main: input '> socket'
+main: filter: rc: 12
 main: status: track
 main: input '< socket'
 main: filter: rc: 11
