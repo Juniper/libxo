@@ -48,7 +48,9 @@ typedef struct xo_xparse_data_s {
     unsigned xd_line;           /* Line number */
     unsigned xd_col;		/* Column number */
     unsigned xd_col_start;	/* First column of current line */
-    xo_xparse_token_t xd_last;	/* Last token returned */
+    int xd_last;		/* Last token returned (-1 at end-of-input);
+				   wider than xo_xparse_token_t so EOF's -1
+				   survives instead of wrapping to 65535 */
     xo_xparse_token_t xd_ttype;	/* Magic token to return */
 
     xo_xparse_node_id_t *xd_paths;  /* Root of each parse tree */
@@ -140,7 +142,7 @@ xo_xparse_node_new (xo_xparse_data_t *xdp)
     xo_buffer_t *xbp = &xdp->xd_node_buf;
     xo_off_t off = new_node * sizeof(xo_xparse_node_t);
 
-    if (!xo_buf_has_room(xbp, off))
+    if (!xo_buf_has_room(xbp, off + sizeof(xo_xparse_node_t)))
 	return 0;
 
     /* We don't need to move xb_cur along since our test new_node * sz */
@@ -200,7 +202,7 @@ xo_xparse_token_translate (xo_xparse_token_t ttype);
  */
 char *
 xo_xparse_expecting_error (xo_xparse_data_t *xdp, const char *token,
-			   int yystate, int yychar);
+			   int yystate, const char *lead);
 
 /*
  * Is the given character valid inside variable names (T_VAR)?
