@@ -94,6 +94,7 @@ r
 - statistics
 
 ## 'm' flag: first capture group (pmatch[1]) - match port number after ":"
+## The capture is a non-empty string, so port "0" is true as well.
 r
 ? socket[rematch(":([0-9]+)", address, "m")]
 + statistics
