@@ -811,7 +811,7 @@ main: status: zero
 main: input '##broken: empty predicate'
 main: input '?item['
 adding filter: 'item['
-xpath_01: filter expression error: unexpected input; expected attribute axis ('@'), minus sign ('-'), not sign ('!'), open parentheses ('('), slash ('/'), asterisk ('*'), etc.
+xpath_01: filter expression error: unexpected end-of-expression; expected attribute axis ('@'), minus sign ('-'), not sign ('!'), open parentheses ('('), slash ('/'), asterisk ('*'), etc.
 xpath_01: could not add the requested filter
 added filter: -1
 xpath_01: test: filter expression feature is unsupported: descendant child (e.g. 'one//two')
@@ -1230,7 +1230,7 @@ xpath_01: test: filter expression feature is unsupported: plus sign ('+')
 main: status: zero
 main: input '?one[two(three(foo'
 adding filter: 'one[two(three(foo'
-xpath_01: filter expression error: unexpected input; expected comma (','), colon (':'), logical AND operator ('&&'), equality operator ('=='), logical OR operator ('||'), equal sign ('='), etc.
+xpath_01: filter expression error: unexpected end-of-expression; expected comma (','), colon (':'), logical AND operator ('&&'), equality operator ('=='), logical OR operator ('||'), equal sign ('='), etc.
 xpath_01: could not add the requested filter
 added filter: -1
 xpath_01: test: filter expression feature is unsupported: descendant child (e.g. 'one//two')
@@ -2070,7 +2070,7 @@ xpath_01: test: filter expression feature is unsupported: plus sign ('+')
 main: status: zero
 main: input '?seven[starts-with(")]'
 adding filter: 'seven[starts-with(")]'
-xpath_01: filter expression error: unexpected input; expected attribute axis ('@'), minus sign ('-'), not sign ('!'), open parentheses ('('), slash ('/'), asterisk ('*'), etc.
+xpath_01: filter expression error: unexpected end-of-expression; expected attribute axis ('@'), minus sign ('-'), not sign ('!'), open parentheses ('('), slash ('/'), asterisk ('*'), etc.
 xpath_01: could not add the requested filter
 added filter: -1
 xpath_01: test: filter expression feature is unsupported: descendant child (e.g. 'one//two')
@@ -2800,7 +2800,7 @@ xpath_01: test: filter expression feature is unsupported: plus sign ('+')
 main: status: zero
 main: input '? item[number('
 adding filter: 'item[number('
-xpath_01: filter expression error: unexpected input; expected attribute axis ('@'), minus sign ('-'), not sign ('!'), open parentheses ('('), slash ('/'), asterisk ('*'), etc.
+xpath_01: filter expression error: unexpected end-of-expression; expected attribute axis ('@'), minus sign ('-'), not sign ('!'), open parentheses ('('), slash ('/'), asterisk ('*'), etc.
 xpath_01: could not add the requested filter
 added filter: -1
 xpath_01: test: filter expression feature is unsupported: descendant child (e.g. 'one//two')
