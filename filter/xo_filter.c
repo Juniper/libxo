@@ -1381,13 +1381,23 @@ xo_eval (xo_handle_t *xop, xo_filter_t *xfp, xo_tframe_t *framep,
 	 const char *pname, int indent,
 	 xo_xparse_node_id_t id, xo_eval_op_fn_t op_fn);
 
+/*
+ * Turn a string into a number, if it is one from end to end: hex,
+ * then anything strtoll() takes, then anything strtod() takes.  We
+ * return the number, or an invalid value (XEVF_INVALID) if the string
+ * is not a number or there is no string at all.  An empty string
+ * counts as a number, zero.
+ */
 static xo_eval_value_t
-xo_eval_make_number (xo_handle_t *xop, const char *str)
+xo_eval_parse_number (const char *str)
 {
-    xo_eval_value_t value = XO_EVAL_VALUE_ZERO;
+    xo_eval_value_t value;
     char *ep;
 
-    if (str && str[0] == '0' && str[1] == 'x') {
+    if (str == NULL)
+	return xo_eval_value_invalid();
+
+    if (str[0] == '0' && str[1] == 'x') {
 	uint64_t uval = strtoull(str, &ep, 16);
 	if (ep && *ep == '\0') {
 	    value = xo_eval_value_make(C_UINT64, 0, 0);
@@ -1410,9 +1420,20 @@ xo_eval_make_number (xo_handle_t *xop, const char *str)
 	return value;
     }
 
+    return xo_eval_value_invalid();
+}
+
+static xo_eval_value_t
+xo_eval_make_number (xo_handle_t *xop, const char *str)
+{
+    xo_eval_value_t value = xo_eval_parse_number(str);
+
     /* We can't give an error, so we just return 0 */
-    xo_failure_filter(xop, "invalid number value: '%s'", str);
-    value = xo_eval_value_make(C_INT64, 0, 0);
+    if (value.xev_flags & XEVF_INVALID) {
+	xo_failure_filter(xop, "invalid number value: '%s'", str ?: "");
+	value = xo_eval_value_make(C_INT64, 0, 0);
+    }
+
     return value;
 }
 
@@ -1577,42 +1598,36 @@ xo_eval_dot (XO_EVAL_NODE_ARGS)
     return value;
 }
 
-static int
-xo_eval_cast_boolean (xo_handle_t *xop, xo_eval_value_t value)
-{
-    if (value.xev_type == C_STRING || value.xev_type == C_DSTRING)
-	value = xo_eval_make_number_from_value(xop, value);
-
-    switch (value.xev_type) {
-    case C_DSTRING:
-    case C_STRING:;
-	const char *str = value.xev_str;
-	char *ep;
-	int64_t ival = strtoll(str, &ep, 0);
-	return (ep == NULL || *ep != '\0') ? 0 : ival ? 1 : 0;
-
-    case C_FLOAT:
-	return (int64_t) value.xev_float != 0;
-
-    default:
-	return value.xev_int64 != 0;
-    }
-}
-
 /*
- * Decide a predicate from its value.  A predicate that is just a node,
- * like foo[name], asks if the node exists, whatever its content.
- * Anything else is cast as usual; functions like if() and choose2()
- * depend on that cast seeing a zero-valued node as false, which is why
- * the existence rule lives here and not in xo_eval_cast_boolean.
+ * Cast a value to a boolean, as XPath's boolean() does.  A node is
+ * true because it exists, whatever its content, so foo[name] and
+ * not(name) ask if "name" is there, even when its value is "0".
+ * Other strings are true unless they are empty, and numbers are true
+ * unless they are zero or NaN (a float is not truncated first, so 0.5
+ * is true).  Nothing parses a string as a number here; a filter that
+ * wants a field's value judged as a number says so, with number(name)
+ * or name != 0.
  */
 static int
-xo_eval_pred_passes (xo_handle_t *xop, xo_eval_value_t value)
+xo_eval_cast_boolean (xo_handle_t *xop UNUSED, xo_eval_value_t value)
 {
     if (value.xev_flags & XEVF_NODE)
 	return 1;
 
-    return xo_eval_cast_boolean(xop, value);
+    switch (value.xev_type) {
+    case C_STRING:
+    case C_DSTRING:
+	return value.xev_str != NULL && value.xev_str[0] != '\0';
+
+    case C_FLOAT:
+	return value.xev_float != 0 && !isnan(value.xev_float);
+
+    case C_UINT64:
+	return value.xev_uint64 != 0;
+
+    default:
+	return value.xev_int64 != 0;
+    }
 }
 
 static xo_float_t
@@ -1784,27 +1799,6 @@ xo_eval_dump_value (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED,
 
 #define TYPE_CMP(_a, _b) (((_a) << 16) | (_b))
 
-/*
- * XPath's boolean() for a comparison operand.  Strings are true when
- * non-empty, so they can't go thru xo_eval_cast_boolean, which parses
- * them as numbers.
- */
-static int
-xo_eval_truth (xo_eval_value_t value)
-{
-    switch (value.xev_type) {
-    case C_STRING:
-    case C_DSTRING:
-	return value.xev_str != NULL && value.xev_str[0] != '\0';
-
-    case C_FLOAT:
-	return value.xev_float != 0 && !isnan(value.xev_float);
-
-    default:
-	return value.xev_int64 != 0;
-    }
-}
-
 static xo_eval_value_t
 xo_eval_compare (XO_EVAL_OP_ARGS)
 {
@@ -1916,8 +1910,8 @@ xo_eval_compare (XO_EVAL_OP_ARGS)
 	 * XPath converts the other operand to a boolean when either
 	 * one is a boolean; false orders before true.
 	 */
-	lbool = xo_eval_truth(left);
-	rbool = xo_eval_truth(right);
+	lbool = xo_eval_cast_boolean(xop, left);
+	rbool = xo_eval_cast_boolean(xop, right);
 	rc = (lbool == rbool) ? 0 : lbool ? 1 : -1;
 	break;
 
@@ -2658,6 +2652,27 @@ xo_eval_func_string_length (XO_EVAL_NODE_ARGS)
 }
 
 /*
+ * isempty(x) is true when every node in x is empty.  Since a field
+ * exists, x[name] can't ask if it has content, and string-length()
+ * takes a number back to compare, so this is the direct test.  A
+ * value holds at most one node, so "every node" is just the one; an
+ * absent field is an empty nodeset, and so is empty as well.  That
+ * comes for free: until the instance closes, a missing argument
+ * leaves the predicate undecided (xo_eval_function returns missing),
+ * and at close it resolves to "", which is empty.
+ */
+static xo_eval_value_t
+xo_eval_func_isempty (XO_EVAL_NODE_ARGS)
+{
+    char *str = xo_eval_cast_string(xop, argv[0]);
+    xo_eval_value_t value = XO_EVAL_VALUE_BOOLEAN_FALSE;
+
+    value.xev_int64 = (str == NULL || *str == '\0') ? 1 : 0;
+    xo_free(str);
+    return value;
+}
+
+/*
  * sum(a, b, ...) - sum all arguments converted to numbers.
  */
 static xo_eval_value_t
@@ -2908,10 +2923,6 @@ typedef uint32_t xo_eval_func_flags_t;
  *   it exists".  There is no value type for a real nodeset of several
  *   nodes; a function that needs to return one needs a new type and
  *   the comparison rules that go with it (true if any member matches).
- * - Only the predicate's own result is tested for existence (see
- *   xo_eval_pred_passes).  A node passed to not(), "and", "or", if()
- *   or choose2() is still cast by content, so not(fn()) asks if the
- *   node's value is zero, not if the node is absent.
  * - Operators always strip the mark (see xo_eval), so "fn() + 1" and
  *   "fn() = 'x'" are computed values and never existence tests.
  */
@@ -2933,6 +2944,7 @@ xo_eval_func_map_t xo_eval_functions[] = {
     { xo_eval_func_ends_with, "ends-with", 0, 2 },
     { xo_eval_func_false, "false", 0, 0 },
     { xo_eval_func_floor, "floor", 0, 1 },
+    { xo_eval_func_isempty, "isempty", 0, 1 },
     { xo_eval_func_normalize_space, "normalize-space", 0, 1 },
     { xo_eval_func_not, "not", 0, 1 },
     { xo_eval_func_number, "number", 0, 1 },
@@ -3275,7 +3287,7 @@ xo_filter_pred_eval (xo_handle_t *xop, xo_filter_t *xfp,
 	    continue;
 	}
 
-	int passes = xo_eval_pred_passes(xop, pv);
+	int passes = xo_eval_cast_boolean(xop, pv);
 	xo_eval_value_free(pv);
 
 	if (!passes) {
@@ -3414,7 +3426,7 @@ xo_tmatch_slot_position (xo_handle_t *xop, xo_filter_t *xfp,
 	xo_eval_value_free(lv);
 	return slotp->xts_position; /* not yet decidable */
     }
-    int passes = xo_eval_pred_passes(xop, lv);
+    int passes = xo_eval_cast_boolean(xop, lv);
     xo_eval_value_free(lv);
 
     if (!passes)
