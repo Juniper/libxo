@@ -1261,3 +1261,859 @@ main: input '>item'
 main: status: track
 main: input '}item'
 main: status: track
+main: input ''
+main: input '# a field is true if it exists, even when its value is 0: all items pass'
+main: input 'r'
+main: status: zero
+main: input '?item[boolean(name)]'
+adding filter: 'item[boolean(name)]'
+added filter: 0
+--- 0: 11
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [boolean], contents 7, next 0, prev 0 
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
+                        000005: type 70 (C_ELEMENT), str 18 [name], contents 0, next 0, prev 0 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '$ name alpha'
+main: key: 'name'='alpha'
+main: status: full
+main: input '$ rate 0.5'
+main: key: 'rate'='0.5'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name 0'
+main: key: 'name'='0'
+main: status: full
+main: input '$ rate 0'
+main: key: 'rate'='0'
+main: status: full
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name 12'
+main: key: 'name'='12'
+main: status: full
+main: input '$ rate 0.0'
+main: key: 'rate'='0.0'
+main: status: full
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# and its not() is false: no items pass'
+main: input 'r'
+main: status: zero
+main: input '?item[not(name)]'
+adding filter: 'item[not(name)]'
+added filter: 0
+--- 0: 11
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [not], contents 7, next 0, prev 0 
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
+                        000005: type 70 (C_ELEMENT), str 14 [name], contents 0, next 0, prev 0 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '$ name alpha'
+main: key: 'name'='alpha'
+main: status: track
+main: input '$ rate 0.5'
+main: key: 'rate'='0.5'
+main: status: track
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name 0'
+main: key: 'name'='0'
+main: status: track
+main: input '$ rate 0'
+main: key: 'rate'='0'
+main: status: track
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name 12'
+main: key: 'name'='12'
+main: status: track
+main: input '$ rate 0.0'
+main: key: 'rate'='0.0'
+main: status: track
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# a field that is not there is false: all items pass'
+main: input 'r'
+main: status: zero
+main: input '?item[not(missing)]'
+adding filter: 'item[not(missing)]'
+added filter: 0
+--- 0: 11
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [not], contents 7, next 0, prev 0 
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
+                        000005: type 70 (C_ELEMENT), str 14 [missing], contents 0, next 0, prev 0 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '$ name alpha'
+main: key: 'name'='alpha'
+main: status: predicate
+main: input '$ rate 0.5'
+main: key: 'rate'='0.5'
+main: status: predicate
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: predicate
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name 0'
+main: key: 'name'='0'
+main: status: predicate
+main: input '$ rate 0'
+main: key: 'rate'='0'
+main: status: predicate
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: predicate
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name 12'
+main: key: 'name'='12'
+main: status: predicate
+main: input '$ rate 0.0'
+main: key: 'rate'='0.0'
+main: status: predicate
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: predicate
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# to test a value, make it a number; a float is not truncated,'
+main: input '# so 0.5 is true: only item 1 passes'
+main: input 'r'
+main: status: zero
+main: input '?item[boolean(number(rate))]'
+adding filter: 'item[boolean(number(rate))]'
+added filter: 0
+--- 0: 15
+    000015: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [boolean], contents 5, next 0, prev 0 
+                    000005: type 52 (T_FUNCTION_NAME), str 18 [number], contents 9, next 0, prev 0 
+                        000009: type 74 (C_PATH), str 0 [], contents 7, next 0, prev 0 
+                            000007: type 70 (C_ELEMENT), str 27 [rate], contents 0, next 0, prev 0 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '$ name alpha'
+main: key: 'name'='alpha'
+main: status: predicate
+main: input '$ rate 0.5'
+main: key: 'rate'='0.5'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name 0'
+main: key: 'name'='0'
+main: status: predicate
+main: input '$ rate 0'
+main: key: 'rate'='0'
+main: status: track
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name 12'
+main: key: 'name'='12'
+main: status: predicate
+main: input '$ rate 0.0'
+main: key: 'rate'='0.0'
+main: status: track
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# a float literal less than one is true: all items pass'
+main: input 'r'
+main: status: zero
+main: input '?item[boolean(0.5)]'
+adding filter: 'item[boolean(0.5)]'
+added filter: 0
+--- 0: 11
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [boolean], contents 5, next 0, prev 0 
+                    000005: type 53 (T_NUMBER), str 18 [0.5], contents 0, next 0, prev 0 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: full
+main: input '$ name alpha'
+main: key: 'name'='alpha'
+main: status: full
+main: input '$ rate 0.5'
+main: key: 'rate'='0.5'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: full
+main: input '$ name 0'
+main: key: 'name'='0'
+main: status: full
+main: input '$ rate 0'
+main: key: 'rate'='0'
+main: status: full
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: full
+main: input '$ name 12'
+main: key: 'name'='12'
+main: status: full
+main: input '$ rate 0.0'
+main: key: 'rate'='0.0'
+main: status: full
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# 'and' casts both sides the same way: only item 1 passes'
+main: input 'r'
+main: status: zero
+main: input '?item[name and number(rate)]'
+adding filter: 'item[name and number(rate)]'
+added filter: 0
+--- 0: 14
+    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
+                000004: type 40 ('('), str 13 [and], contents 5, next 0, prev 0 
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0 
+                        000003: type 70 (C_ELEMENT), str 8 [name], contents 0, next 0, prev 0 
+                    000006: type 52 (T_FUNCTION_NAME), str 17 [number], contents 10, next 0, prev 5 
+                        000010: type 74 (C_PATH), str 0 [], contents 8, next 0, prev 0 
+                            000008: type 70 (C_ELEMENT), str 26 [rate], contents 0, next 0, prev 0 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '$ name alpha'
+main: key: 'name'='alpha'
+main: status: predicate
+main: input '$ rate 0.5'
+main: key: 'rate'='0.5'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name 0'
+main: key: 'name'='0'
+main: status: predicate
+main: input '$ rate 0'
+main: key: 'rate'='0'
+main: status: track
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name 12'
+main: key: 'name'='12'
+main: status: predicate
+main: input '$ rate 0.0'
+main: key: 'rate'='0.0'
+main: status: track
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# a string literal is true unless empty, even '0': all items pass'
+main: input 'r'
+main: status: zero
+main: input '?item[boolean('0')]'
+adding filter: 'item[boolean('0')]'
+added filter: 0
+--- 0: 11
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [boolean], contents 5, next 0, prev 0 
+                    000005: type 54 (T_QUOTED), str 18 [0], contents 0, next 0, prev 0 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: full
+main: input '$ name alpha'
+main: key: 'name'='alpha'
+main: status: full
+main: input '$ rate 0.5'
+main: key: 'rate'='0.5'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: full
+main: input '$ name 0'
+main: key: 'name'='0'
+main: status: full
+main: input '$ rate 0'
+main: key: 'rate'='0'
+main: status: full
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: full
+main: input '$ name 12'
+main: key: 'name'='12'
+main: status: full
+main: input '$ rate 0.0'
+main: key: 'rate'='0.0'
+main: status: full
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# the empty string is false: no items pass'
+main: input 'r'
+main: status: zero
+main: input '?item[boolean('')]'
+adding filter: 'item[boolean('')]'
+added filter: 0
+--- 0: 11
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [boolean], contents 5, next 0, prev 0 
+                    000005: type 54 (T_QUOTED), str 18 [], contents 0, next 0, prev 0 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: track
+main: input '$ name alpha'
+main: key: 'name'='alpha'
+main: status: track
+main: input '$ rate 0.5'
+main: key: 'rate'='0.5'
+main: status: track
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ name 0'
+main: key: 'name'='0'
+main: status: track
+main: input '$ rate 0'
+main: key: 'rate'='0'
+main: status: track
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ name 12'
+main: key: 'name'='12'
+main: status: track
+main: input '$ rate 0.0'
+main: key: 'rate'='0.0'
+main: status: track
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# isempty(): an empty field is empty, and so is an absent one (an'
+main: input '# empty nodeset); "0" is not empty.  Items 2 and 3 pass.'
+main: input 'r'
+main: status: zero
+main: input '?item[isempty(name)]'
+adding filter: 'item[isempty(name)]'
+added filter: 0
+--- 0: 11
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [isempty], contents 7, next 0, prev 0 
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
+                        000005: type 70 (C_ELEMENT), str 18 [name], contents 0, next 0, prev 0 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '$ name alpha'
+main: key: 'name'='alpha'
+main: status: track
+main: input '= note hello'
+main: field: 'note'='hello'
+main: status: track
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name ""'
+main: key: 'name'=''
+main: status: full
+main: input '= note ""'
+main: field: 'note'=''
+main: status: full
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: predicate
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name 0'
+main: key: 'name'='0'
+main: status: track
+main: input '= note 0'
+main: field: 'note'='0'
+main: status: track
+main: input '= val 4'
+main: field: 'val'='4'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# The same, with a non-key field: items 2 and 3 pass.'
+main: input 'r'
+main: status: zero
+main: input '?item[isempty(note)]'
+adding filter: 'item[isempty(note)]'
+added filter: 0
+--- 0: 11
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [isempty], contents 7, next 0, prev 0 
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
+                        000005: type 70 (C_ELEMENT), str 18 [note], contents 0, next 0, prev 0 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '$ name alpha'
+main: key: 'name'='alpha'
+main: status: predicate
+main: input '= note hello'
+main: field: 'note'='hello'
+main: status: track
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name ""'
+main: key: 'name'=''
+main: status: predicate
+main: input '= note ""'
+main: field: 'note'=''
+main: status: predicate
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: predicate
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: predicate
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name 0'
+main: key: 'name'='0'
+main: status: predicate
+main: input '= note 0'
+main: field: 'note'='0'
+main: status: track
+main: input '= val 4'
+main: field: 'val'='4'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# !isempty() asks for content: items 1 and 4 pass.'
+main: input 'r'
+main: status: zero
+main: input '?item[!isempty(name)]'
+adding filter: 'item[!isempty(name)]'
+added filter: 0
+--- 0: 11
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 73 (C_NOT), str 8 [!], contents 4, next 0, prev 0 
+                    000004: type 52 (T_FUNCTION_NAME), str 10 [isempty], contents 8, next 0, prev 0 
+                        000008: type 74 (C_PATH), str 0 [], contents 6, next 0, prev 0 
+                            000006: type 70 (C_ELEMENT), str 20 [name], contents 0, next 0, prev 0 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '$ name alpha'
+main: key: 'name'='alpha'
+main: status: full
+main: input '= note hello'
+main: field: 'note'='hello'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name ""'
+main: key: 'name'=''
+main: status: track
+main: input '= note ""'
+main: field: 'note'=''
+main: status: track
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: predicate
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name 0'
+main: key: 'name'='0'
+main: status: full
+main: input '= note 0'
+main: field: 'note'='0'
+main: status: full
+main: input '= val 4'
+main: field: 'val'='4'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# A field is true when it exists, even when empty: items 1, 2 and 4.'
+main: input 'r'
+main: status: zero
+main: input '?item[name]'
+adding filter: 'item[name]'
+added filter: 0
+--- 0: 7
+    000007: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 5, next 0, prev 0 
+                000005: type 74 (C_PATH), str 0 [], contents 3, next 0, prev 0 
+                    000003: type 70 (C_ELEMENT), str 8 [name], contents 0, next 0, prev 0 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '$ name alpha'
+main: key: 'name'='alpha'
+main: status: full
+main: input '= note hello'
+main: field: 'note'='hello'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name ""'
+main: key: 'name'=''
+main: status: full
+main: input '= note ""'
+main: field: 'note'=''
+main: status: full
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: predicate
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name 0'
+main: key: 'name'='0'
+main: status: full
+main: input '= note 0'
+main: field: 'note'='0'
+main: status: full
+main: input '= val 4'
+main: field: 'val'='4'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# As a string, the empty field is false: items 1 and 4 pass.'
+main: input 'r'
+main: status: zero
+main: input '?item[string(name)]'
+adding filter: 'item[string(name)]'
+added filter: 0
+--- 0: 11
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [string], contents 7, next 0, prev 0 
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
+                        000005: type 70 (C_ELEMENT), str 17 [name], contents 0, next 0, prev 0 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '$ name alpha'
+main: key: 'name'='alpha'
+main: status: full
+main: input '= note hello'
+main: field: 'note'='hello'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name ""'
+main: key: 'name'=''
+main: status: track
+main: input '= note ""'
+main: field: 'note'=''
+main: status: track
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: predicate
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name 0'
+main: key: 'name'='0'
+main: status: full
+main: input '= note 0'
+main: field: 'note'='0'
+main: status: full
+main: input '= val 4'
+main: field: 'val'='4'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# An empty literal is empty, so all items pass.'
+main: input 'r'
+main: status: zero
+main: input '?item[isempty('')]'
+adding filter: 'item[isempty('')]'
+added filter: 0
+--- 0: 11
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [isempty], contents 5, next 0, prev 0 
+                    000005: type 54 (T_QUOTED), str 18 [], contents 0, next 0, prev 0 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: full
+main: input '$ name alpha'
+main: key: 'name'='alpha'
+main: status: full
+main: input '= note hello'
+main: field: 'note'='hello'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: full
+main: input '$ name ""'
+main: key: 'name'=''
+main: status: full
+main: input '= note ""'
+main: field: 'note'=''
+main: status: full
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: full
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: full
+main: input '$ name 0'
+main: key: 'name'='0'
+main: status: full
+main: input '= note 0'
+main: field: 'note'='0'
+main: status: full
+main: input '= val 4'
+main: field: 'val'='4'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
