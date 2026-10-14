@@ -73,6 +73,17 @@ clean_token (char *cp)
     return cp;
 }
 
+/*
+ * A line with no value is skipped, so an empty value is written as
+ * "", as in '$ name ""', to make a field that exists but has no
+ * content.
+ */
+static char *
+empty_token (char *cp)
+{
+    return (cp[0] == '"' && cp[1] == '"' && cp[2] == '\0') ? cp + 2 : cp;
+}
+
 static int
 do_add_filter (xo_handle_t *xop, xo_xparse_data_t *xdp, const char *filter)
 {
@@ -206,6 +217,7 @@ do_work (xo_handle_t *xop, xo_filter_t *xfp, xo_xparse_data_t *xdp,
 	    value = clean_token(field);
 	    if (!*field || !*value)
 		break;
+	    value = empty_token(value);
 
 	    if (!opt_quiet)
 		fprintf(stderr, "main: field: '%s'='%s'\n", field, value);
@@ -218,6 +230,7 @@ do_work (xo_handle_t *xop, xo_filter_t *xfp, xo_xparse_data_t *xdp,
 	    value = clean_token(field);
 	    if (!*field || !*value)
 		break;
+	    value = empty_token(value);
 
 	    if (!opt_quiet)
 		fprintf(stderr, "main: key: '%s'='%s'\n", field, value);
