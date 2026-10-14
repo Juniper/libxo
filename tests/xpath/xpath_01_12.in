@@ -450,3 +450,317 @@ $ name nodot
 = val 4
 >item
 }item
+
+# a field is true if it exists, even when its value is 0: all items pass
+r
+?item[boolean(name)]
+{item
+<item
+$ name alpha
+$ rate 0.5
+= val 1
+>item
+<item
+$ name 0
+$ rate 0
+= val 2
+>item
+<item
+$ name 12
+$ rate 0.0
+= val 3
+>item
+}item
+
+# and its not() is false: no items pass
+r
+?item[not(name)]
+{item
+<item
+$ name alpha
+$ rate 0.5
+= val 1
+>item
+<item
+$ name 0
+$ rate 0
+= val 2
+>item
+<item
+$ name 12
+$ rate 0.0
+= val 3
+>item
+}item
+
+# a field that is not there is false: all items pass
+r
+?item[not(missing)]
+{item
+<item
+$ name alpha
+$ rate 0.5
+= val 1
+>item
+<item
+$ name 0
+$ rate 0
+= val 2
+>item
+<item
+$ name 12
+$ rate 0.0
+= val 3
+>item
+}item
+
+# to test a value, make it a number; a float is not truncated,
+# so 0.5 is true: only item 1 passes
+r
+?item[boolean(number(rate))]
+{item
+<item
+$ name alpha
+$ rate 0.5
+= val 1
+>item
+<item
+$ name 0
+$ rate 0
+= val 2
+>item
+<item
+$ name 12
+$ rate 0.0
+= val 3
+>item
+}item
+
+# a float literal less than one is true: all items pass
+r
+?item[boolean(0.5)]
+{item
+<item
+$ name alpha
+$ rate 0.5
+= val 1
+>item
+<item
+$ name 0
+$ rate 0
+= val 2
+>item
+<item
+$ name 12
+$ rate 0.0
+= val 3
+>item
+}item
+
+# 'and' casts both sides the same way: only item 1 passes
+r
+?item[name and number(rate)]
+{item
+<item
+$ name alpha
+$ rate 0.5
+= val 1
+>item
+<item
+$ name 0
+$ rate 0
+= val 2
+>item
+<item
+$ name 12
+$ rate 0.0
+= val 3
+>item
+}item
+
+# a string literal is true unless empty, even '0': all items pass
+r
+?item[boolean('0')]
+{item
+<item
+$ name alpha
+$ rate 0.5
+= val 1
+>item
+<item
+$ name 0
+$ rate 0
+= val 2
+>item
+<item
+$ name 12
+$ rate 0.0
+= val 3
+>item
+}item
+
+# the empty string is false: no items pass
+r
+?item[boolean('')]
+{item
+<item
+$ name alpha
+$ rate 0.5
+= val 1
+>item
+<item
+$ name 0
+$ rate 0
+= val 2
+>item
+<item
+$ name 12
+$ rate 0.0
+= val 3
+>item
+}item
+
+# isempty(): an empty field is empty, and so is an absent one (an
+# empty nodeset); "0" is not empty.  Items 2 and 3 pass.
+r
+?item[isempty(name)]
+{item
+<item
+$ name alpha
+= note hello
+= val 1
+>item
+<item
+$ name ""
+= note ""
+= val 2
+>item
+<item
+= val 3
+>item
+<item
+$ name 0
+= note 0
+= val 4
+>item
+}item
+
+# The same, with a non-key field: items 2 and 3 pass.
+r
+?item[isempty(note)]
+{item
+<item
+$ name alpha
+= note hello
+= val 1
+>item
+<item
+$ name ""
+= note ""
+= val 2
+>item
+<item
+= val 3
+>item
+<item
+$ name 0
+= note 0
+= val 4
+>item
+}item
+
+# !isempty() asks for content: items 1 and 4 pass.
+r
+?item[!isempty(name)]
+{item
+<item
+$ name alpha
+= note hello
+= val 1
+>item
+<item
+$ name ""
+= note ""
+= val 2
+>item
+<item
+= val 3
+>item
+<item
+$ name 0
+= note 0
+= val 4
+>item
+}item
+
+# A field is true when it exists, even when empty: items 1, 2 and 4.
+r
+?item[name]
+{item
+<item
+$ name alpha
+= note hello
+= val 1
+>item
+<item
+$ name ""
+= note ""
+= val 2
+>item
+<item
+= val 3
+>item
+<item
+$ name 0
+= note 0
+= val 4
+>item
+}item
+
+# As a string, the empty field is false: items 1 and 4 pass.
+r
+?item[string(name)]
+{item
+<item
+$ name alpha
+= note hello
+= val 1
+>item
+<item
+$ name ""
+= note ""
+= val 2
+>item
+<item
+= val 3
+>item
+<item
+$ name 0
+= note 0
+= val 4
+>item
+}item
+
+# An empty literal is empty, so all items pass.
+r
+?item[isempty('')]
+{item
+<item
+$ name alpha
+= note hello
+= val 1
+>item
+<item
+$ name ""
+= note ""
+= val 2
+>item
+<item
+= val 3
+>item
+<item
+$ name 0
+= note 0
+= val 4
+>item
+}item
