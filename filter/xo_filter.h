@@ -18,6 +18,40 @@
 #define XO_FILTER_MISS	1	/* Missing information, might work later */
 #define XO_FILTER_FAIL	2	/* Test failed; will never succeed */
 
+/*
+ * Feature ids for xo_filter_set_unsupported_features().  These are stable,
+ * hand-assigned ids for optional bits of XPath grammar that a filter
+ * consumer may choose to reject at compile time.  They are independent of
+ * (and much smaller than) the internal, bison-generated token numbers in
+ * xo_xpath.tab.h, which is a build-private header not exposed here; the
+ * translation from one of these ids to the matching internal token is done
+ * inside xo_filter.c.
+ *
+ * libxo's own default list (xo_filter_unsupported_tokens, in xo_filter.c)
+ * rejects all of these.  A caller like libpin, which drives its own
+ * xo_eval-compiled-program evaluation rather than libxo's trie matcher, can
+ * support a different subset (e.g. allow XO_XPF_PREDICATE_PATHS) by
+ * building its own zero-terminated array of these ids and passing it to
+ * xo_filter_set_unsupported_features().
+ */
+#define XO_XPF_DOTDOT			1 /* parent axis ('..') */
+#define XO_XPF_DOTDOTDOT		2 /* sequence operator ('...') */
+#define XO_XPF_COMMENT			3 /* 'comment()' node test */
+#define XO_XPF_ID			4 /* 'id()' function */
+#define XO_XPF_KEY			5 /* 'key()' function */
+#define XO_XPF_NODE			6 /* 'node()' node test */
+#define XO_XPF_PROCESSING_INSTRUCTION	7 /* 'processing-instruction()' */
+#define XO_XPF_TEXT			8 /* 'text()' node test */
+#define XO_XPF_DSLASH			9 /* descendant operator ('//') */
+#define XO_XPF_AXIS_NAME		10 /* built-in axis name ('child::') */
+#define XO_XPF_VAR			11 /* variable reference ('$name') */
+#define XO_XPF_SEQUENCE			12 /* sequence (comma) expressions */
+#define XO_XPF_DESCENDANT		13 /* descendant child ('one//two') */
+#define XO_XPF_TEST			14 /* node test (e.g. 'node()') */
+#define XO_XPF_UNION			15 /* union of two paths ('one|two') */
+#define XO_XPF_NESTED_PREDICATES	16 /* predicates inside predicates */
+#define XO_XPF_PREDICATE_PATHS		17 /* multi-element paths in predicates */
+
 struct xo_xparse_data_s;
 
 /*
@@ -282,5 +316,18 @@ int xo_filter_walk_add_with_action_priority (xo_handle_t *xop, xo_filter_t *xfp,
  * XO_STATUS_FULL.  Returns 0 if no action was attached to the matched node.
  */
 uint32_t xo_filter_walk_get_action (xo_handle_t *xop, xo_filter_t *xfp);
+
+/*
+ * Override the set of XPath grammar features this filter rejects at
+ * compile time, replacing the library's own default list
+ * (xo_filter_unsupported_tokens).  'features' is a zero-terminated array of
+ * XO_XPF_* ids (see above); pass NULL to restore the default list.  Must be
+ * called before xo_filter_walk_add() / xo_filter_walk_add_with_action[_priority]()
+ * to affect that call's compile.  Returns 0 on success, -1 on an unknown
+ * feature id or allocation failure (the previous setting, if any, is left
+ * in place on failure).
+ */
+int xo_filter_set_unsupported_features (xo_filter_t *xfp,
+					  const int *features);
 
 #endif /* XO_FILTER_H */
