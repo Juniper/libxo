@@ -1350,15 +1350,21 @@ xo_xparse_syntax_error (xo_xparse_data_t *xdp, const char *token,
 	if (token)
 	    SNPRINTF(cp, ep, "; %s is not legal", token);
 
-    } else if (yychar == -1) {
-	SNPRINTF(cp, ep, "unexpected end-of-expression");
-
     } else {
-	char *msg = xo_xparse_expecting_error(xdp, token, yystate, yychar);
+	/*
+	 * yychar == -1 means the parser hit end-of-input while still
+	 * wanting more, rather than choking on a specific bad token.
+	 * The expected-token list comes entirely from yystate, though
+	 * (xo_xparse_expecting_error() never looks at yychar), so it's
+	 * just as meaningful here; only the lead-in text changes.
+	 */
+	const char *lead = (yychar == -1) ? "unexpected end-of-expression"
+	    : "unexpected input";
+	char *msg = xo_xparse_expecting_error(xdp, token, yystate, lead);
 	if (msg)
 	    return msg;
 
-	SNPRINTF(cp, ep, "unexpected input");
+	SNPRINTF(cp, ep, "%s", lead);
 	if (token)
 	    SNPRINTF(cp, ep, ": %s", token);
     }
@@ -1390,7 +1396,16 @@ xo_xpath_yyerror (xo_xparse_data_t *xdp, const char *str, int yystate)
     if (strncmp(str, leader2, sizeof(leader2) - 1) != 0)
 	xdp->xd_errors += 1;
 
-    token = xo_xparse_token_name_fancy[xo_xparse_token_translate(xdp->xd_last)];
+    /*
+     * xdp->xd_last is -1 at end-of-input; xo_xparse_fancy_token_name()
+     * takes an xo_xparse_token_t (uint16_t), so passing -1 straight
+     * through would wrap to 65535 and come back as the uninformative
+     * "unknown" rather than a real token name.  Guard it here so the
+     * yychar == -1 cases below (xo_xparse_syntax_error()) get a
+     * proper end-of-input message instead.
+     */
+    token = (xdp->xd_last == -1) ? NULL
+	: xo_xparse_fancy_token_name(xdp->xd_last);
 
     buf[0] = '\0';
 
@@ -1413,7 +1428,8 @@ xo_xpath_yyerror (xo_xparse_data_t *xdp, const char *str, int yystate)
 
     xo_xparse_warn(xdp, "%sfilter expression error: %s%s%s%s%s",
 		   xo_xparse_location(xdp), str,
-		   token ? " before " : "", token, token ? ": " : "", buf);
+		   token ? " before " : "", token ? token : "",
+		   token ? ": " : "", buf);
 
     return 0;
 }
