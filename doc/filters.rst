@@ -385,6 +385,7 @@ Boolean functions:
 ========================== ==================================================
  boolean(val)               Converts a value to a boolean
  false()                    Always returns false
+ isempty(node)              True when *node* is empty or absent
  not(expr)                  Negates the expression
  true()                     Always returns true
 ========================== ==================================================
@@ -392,6 +393,12 @@ Boolean functions:
 Note that `true()` and `true` are annoyingly different.  The former
 returns the boolean value true while the latter returns the value of
 an element named `true`, which is likely non-existent.
+
+A field is true because it exists, even when its value is empty or
+"0", so `item[name]` cannot tell an empty `name` from one with
+content.  `isempty(name)` is true when `name` is empty, and also when
+it is absent, since an absent field is an empty node set.  To ask
+for a `name` with content, use `item[!isempty(name)]`.
 
 Examples::
 
