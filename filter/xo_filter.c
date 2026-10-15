@@ -3226,34 +3226,38 @@ typedef struct xo_eval_func_map_s {
     const char *xfm_name;	/* Name (e.g. "plus") */
     xo_eval_func_flags_t xfm_flags; /* Flags (XEFF_*) */
     int xfm_nargs;		/* Required arg count; -1 means don't checks */
+    int xfm_min_args;		/* Minimum argc, checked at compile time
+				   when xfm_nargs == -1; 0 means not
+				   checked here, left to the function's
+				   own runtime check */
 } xo_eval_func_map_t;
 
 xo_eval_func_map_t xo_eval_functions[] = {
-    { xo_eval_func_boolean, "boolean", 0, 1 },
-    { xo_eval_func_ceiling, "ceiling", 0, 1 },
-    { xo_eval_func_choose, "choose", XEFF_NO_EVAL, 3 },
-    { xo_eval_func_choose2, "choose2", XEFF_NO_EVAL, 2 },
-    { xo_eval_func_concat, "concat", 0, -1 },
-    { xo_eval_func_contains, "contains", 0, 2 },
-    { xo_eval_func_ends_with, "ends-with", 0, 2 },
-    { xo_eval_func_false, "false", 0, 0 },
-    { xo_eval_func_floor, "floor", 0, 1 },
-    { xo_eval_func_normalize_space, "normalize-space", 0, 1 },
-    { xo_eval_func_not, "not", 0, 1 },
-    { xo_eval_func_number, "number", 0, 1 },
-    { xo_eval_func_rematch, "rematch", 0, -1 },
-    { xo_eval_func_round, "round", 0, 1 },
-    { xo_eval_func_starts_with, "starts-with", 0, 2 },
-    { xo_eval_func_string, "string", 0, 1 },
-    { xo_eval_func_string_length, "string-length", 0, 1 },
-    { xo_eval_func_substring, "substring", 0, -1 },
-    { xo_eval_func_substring_after, "substring-after", 0, 2 },
-    { xo_eval_func_substring_before, "substring-before", 0, 2 },
-    { xo_eval_func_sum, "sum", 0, -1 },
-    { xo_eval_func_translate, "translate", 0, 3 },
-    { xo_eval_func_true, "true", 0, 0 },
+    { xo_eval_func_boolean, "boolean", 0, 1, 0 },
+    { xo_eval_func_ceiling, "ceiling", 0, 1, 0 },
+    { xo_eval_func_choose, "choose", XEFF_NO_EVAL, 3, 0 },
+    { xo_eval_func_choose2, "choose2", XEFF_NO_EVAL, 2, 0 },
+    { xo_eval_func_concat, "concat", 0, -1, 2 },
+    { xo_eval_func_contains, "contains", 0, 2, 0 },
+    { xo_eval_func_ends_with, "ends-with", 0, 2, 0 },
+    { xo_eval_func_false, "false", 0, 0, 0 },
+    { xo_eval_func_floor, "floor", 0, 1, 0 },
+    { xo_eval_func_normalize_space, "normalize-space", 0, 1, 0 },
+    { xo_eval_func_not, "not", 0, 1, 0 },
+    { xo_eval_func_number, "number", 0, 1, 0 },
+    { xo_eval_func_rematch, "rematch", 0, -1, 2 },
+    { xo_eval_func_round, "round", 0, 1, 0 },
+    { xo_eval_func_starts_with, "starts-with", 0, 2, 0 },
+    { xo_eval_func_string, "string", 0, 1, 0 },
+    { xo_eval_func_string_length, "string-length", 0, 1, 0 },
+    { xo_eval_func_substring, "substring", 0, -1, 2 },
+    { xo_eval_func_substring_after, "substring-after", 0, 2, 0 },
+    { xo_eval_func_substring_before, "substring-before", 0, 2, 0 },
+    { xo_eval_func_sum, "sum", 0, -1, 1 },
+    { xo_eval_func_translate, "translate", 0, 3, 0 },
+    { xo_eval_func_true, "true", 0, 0, 0 },
 
-    { NULL, NULL, 0, 0 }
+    { NULL, NULL, 0, 0, 0 }
 };
 
 static xo_eval_func_map_t *
@@ -3768,6 +3772,22 @@ xo_eval_compile_function (xo_eval_prog_t *prog, xo_xparse_data_t *xdp,
 	xo_eval_compile_fail(dp, ops,
 			      "function '%s' requires %d argument(s), got %d",
 			      str, entry->xfm_nargs, argc);
+	return -1;
+    }
+
+    /*
+     * Variable-arity functions (xfm_nargs == -1) normally defer their
+     * own arity checking to runtime. concat()/rematch()/substring()/
+     * sum() each have a compile-time-knowable minimum below which no
+     * amount of data will ever make the call valid, so they set
+     * xfm_min_args to catch that here.
+     */
+    if (entry->xfm_nargs < 0 && entry->xfm_min_args > 0
+	&& argc < entry->xfm_min_args) {
+	xo_eval_compile_fail(dp, ops,
+			      "function '%s' requires at least %d "
+			      "arguments, got %d",
+			      str, entry->xfm_min_args, argc);
 	return -1;
     }
 
