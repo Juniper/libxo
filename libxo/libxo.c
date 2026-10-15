@@ -3206,24 +3206,6 @@ xo_get_flags (xo_handle_t *xop)
 }
 
 /**
- * strndup with a twist: len < 0 means len = strlen(str)
- */
-static char *
-xo_strndup (const char *str, ssize_t len)
-{
-    if (len < 0)
-        len = strlen(str);
-
-    char *cp = xo_realloc(NULL, len + 1);
-    if (cp) {
-        memcpy(cp, str, len);
-        cp[len] = '\0';
-    }
-
-    return cp;
-}
-
-/**
  * Record a leading prefix for the XPath we generate.  This allows the
  * generated data to be placed within an XML hierarchy but still have
  * accurate XPath expressions.
