@@ -700,19 +700,21 @@ xo_xpath_feature_warn_since (const char *tag, xo_xparse_data_t *xdp,
     bzero(map, len * sizeof(map[0]));
 
     if (tokens) {
-	for (int i = 0; tokens[i] && i < len; i++)
-	    if (tokens[i])
+	for (int i = 0; tokens[i]; i++)
+	    if (tokens[i] > 0 && tokens[i] < len)
 		map[tokens[i]] = 1;
     }
 
     if (bytes) {
-	for (int i = 0; bytes[i] && i < len; i++)
-	    if (bytes[i]) {
-		int num = bytes[i];
-		    int val = xo_single_wide[num];
-		if (val >= 0 && val <= len)
-		    map[val] = 1;
-	    }
+	for (int i = 0; bytes[i]; i++) {
+	    unsigned num = (unsigned char) bytes[i];
+	    if (num >= XO_MAX_CHAR)
+		continue;
+
+	    int val = xo_single_wide[num];
+	    if (val > 0 && val < len)
+		map[val] = 1;
+	}
     }
 
     uint32_t i;
