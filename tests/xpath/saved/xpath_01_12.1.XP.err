@@ -2313,3 +2313,786 @@ main: filter: rc: 8
 main: status: track
 main: input '}item'
 main: status: track
+main: input ''
+main: input '# substring() keeps positions >= round(pos) and < round(pos) + round(len),'
+main: input '# so positions 0, 1 and 2 give "12": item 1 passes.'
+main: input 'r'
+main: status: zero
+main: input '?item[substring(s, 0, 3) = '12']'
+adding filter: 'item[substring(s, 0, 3) = '12']'
+added filter: 0
+--- 0: 20
+    000020: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 14, next 0, prev 0 
+                000014: type 14 (L_EQUALS), str 32 [=], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring], contents 7, next 16, prev 0 
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
+                            000005: type 70 (C_ELEMENT), str 20 [s], contents 0, next 0, prev 0 
+                        000008: type 53 (T_NUMBER), str 24 [0], contents 0, next 11, prev 7 
+                        000011: type 53 (T_NUMBER), str 28 [3], contents 0, next 0, prev 8 
+                    000016: type 54 (T_QUOTED), str 34 [12], contents 0, next 0, prev 3 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: filter: rc: 7
+main: status: predicate
+main: input '$ s 12345'
+main: key: 's'='12345'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: filter: rc: 8
+main: status: track
+main: input '<item'
+main: filter: rc: 7
+main: status: predicate
+main: input '$ s héllo'
+main: key: 's'='héllo'
+main: status: track
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: filter: rc: 7
+main: status: predicate
+main: input '$ s abc'
+main: key: 's'='abc'
+main: status: track
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# Positions are rounded: round(1.5) is 2 and round(2.6) is 3, so this'
+main: input '# is positions 2-4, "234": item 1 passes.'
+main: input 'r'
+main: status: zero
+main: input '?item[substring(s, 1.5, 2.6) = '234']'
+adding filter: 'item[substring(s, 1.5, 2.6) = '234']'
+added filter: 0
+--- 0: 20
+    000020: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 14, next 0, prev 0 
+                000014: type 14 (L_EQUALS), str 36 [=], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring], contents 7, next 16, prev 0 
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
+                            000005: type 70 (C_ELEMENT), str 20 [s], contents 0, next 0, prev 0 
+                        000008: type 53 (T_NUMBER), str 24 [1.5], contents 0, next 11, prev 7 
+                        000011: type 53 (T_NUMBER), str 30 [2.6], contents 0, next 0, prev 8 
+                    000016: type 54 (T_QUOTED), str 38 [234], contents 0, next 0, prev 3 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: filter: rc: 7
+main: status: predicate
+main: input '$ s 12345'
+main: key: 's'='12345'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: filter: rc: 8
+main: status: track
+main: input '<item'
+main: filter: rc: 7
+main: status: predicate
+main: input '$ s héllo'
+main: key: 's'='héllo'
+main: status: track
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: filter: rc: 7
+main: status: predicate
+main: input '$ s abc'
+main: key: 's'='abc'
+main: status: track
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# A negative start still counts toward the length: positions -1, 0 and'
+main: input '# 1 give "1" (and "a" for abc): item 1 passes.'
+main: input 'r'
+main: status: zero
+main: input '?item[substring(s, -1, 3) = '1']'
+adding filter: 'item[substring(s, -1, 3) = '1']'
+added filter: 0
+--- 0: 21
+    000021: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 15, next 0, prev 0 
+                000015: type 14 (L_EQUALS), str 34 [=], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring], contents 7, next 17, prev 0 
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
+                            000005: type 70 (C_ELEMENT), str 20 [s], contents 0, next 0, prev 0 
+                        000008: type 86 (C_UNI_MINUS), str 24 [-], contents 9, next 12, prev 7 
+                            000009: type 53 (T_NUMBER), str 26 [1], contents 0, next 0, prev 0 
+                        000012: type 53 (T_NUMBER), str 30 [3], contents 0, next 0, prev 8 
+                    000017: type 54 (T_QUOTED), str 36 [1], contents 0, next 0, prev 3 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: filter: rc: 7
+main: status: predicate
+main: input '$ s 12345'
+main: key: 's'='12345'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: filter: rc: 8
+main: status: track
+main: input '<item'
+main: filter: rc: 7
+main: status: predicate
+main: input '$ s héllo'
+main: key: 's'='héllo'
+main: status: track
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: filter: rc: 7
+main: status: predicate
+main: input '$ s abc'
+main: key: 's'='abc'
+main: status: track
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# A length past the end stops at the end: item 1 passes.'
+main: input 'r'
+main: status: zero
+main: input '?item[substring(s, 4, 10) = '45']'
+adding filter: 'item[substring(s, 4, 10) = '45']'
+added filter: 0
+--- 0: 20
+    000020: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 14, next 0, prev 0 
+                000014: type 14 (L_EQUALS), str 33 [=], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring], contents 7, next 16, prev 0 
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
+                            000005: type 70 (C_ELEMENT), str 20 [s], contents 0, next 0, prev 0 
+                        000008: type 53 (T_NUMBER), str 24 [4], contents 0, next 11, prev 7 
+                        000011: type 53 (T_NUMBER), str 28 [10], contents 0, next 0, prev 8 
+                    000016: type 54 (T_QUOTED), str 35 [45], contents 0, next 0, prev 3 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: filter: rc: 7
+main: status: predicate
+main: input '$ s 12345'
+main: key: 's'='12345'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: filter: rc: 8
+main: status: track
+main: input '<item'
+main: filter: rc: 7
+main: status: predicate
+main: input '$ s héllo'
+main: key: 's'='héllo'
+main: status: track
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: filter: rc: 7
+main: status: predicate
+main: input '$ s abc'
+main: key: 's'='abc'
+main: status: track
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# Positions count characters, not bytes: item 2 passes.'
+main: input 'r'
+main: status: zero
+main: input '?item[substring(s, 2) = 'éllo']'
+adding filter: 'item[substring(s, 2) = 'éllo']'
+added filter: 0
+--- 0: 17
+    000017: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 11, next 0, prev 0 
+                000011: type 14 (L_EQUALS), str 28 [=], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring], contents 7, next 13, prev 0 
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
+                            000005: type 70 (C_ELEMENT), str 20 [s], contents 0, next 0, prev 0 
+                        000008: type 53 (T_NUMBER), str 24 [2], contents 0, next 0, prev 7 
+                    000013: type 54 (T_QUOTED), str 30 [éllo], contents 0, next 0, prev 3 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: filter: rc: 7
+main: status: predicate
+main: input '$ s 12345'
+main: key: 's'='12345'
+main: status: track
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: filter: rc: 7
+main: status: predicate
+main: input '$ s héllo'
+main: key: 's'='héllo'
+main: status: full
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: full
+main: input '>item'
+main: filter: rc: 8
+main: status: track
+main: input '<item'
+main: filter: rc: 7
+main: status: predicate
+main: input '$ s abc'
+main: key: 's'='abc'
+main: status: track
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# The same with a length: item 2 passes.'
+main: input 'r'
+main: status: zero
+main: input '?item[substring(s, 2, 2) = 'él']'
+adding filter: 'item[substring(s, 2, 2) = 'él']'
+added filter: 0
+--- 0: 20
+    000020: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 14, next 0, prev 0 
+                000014: type 14 (L_EQUALS), str 32 [=], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring], contents 7, next 16, prev 0 
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
+                            000005: type 70 (C_ELEMENT), str 20 [s], contents 0, next 0, prev 0 
+                        000008: type 53 (T_NUMBER), str 24 [2], contents 0, next 11, prev 7 
+                        000011: type 53 (T_NUMBER), str 28 [2], contents 0, next 0, prev 8 
+                    000016: type 54 (T_QUOTED), str 34 [él], contents 0, next 0, prev 3 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: filter: rc: 7
+main: status: predicate
+main: input '$ s 12345'
+main: key: 's'='12345'
+main: status: track
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: filter: rc: 7
+main: status: predicate
+main: input '$ s héllo'
+main: key: 's'='héllo'
+main: status: full
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: full
+main: input '>item'
+main: filter: rc: 8
+main: status: track
+main: input '<item'
+main: filter: rc: 7
+main: status: predicate
+main: input '$ s abc'
+main: key: 's'='abc'
+main: status: track
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# string-length() counts characters; héllo is 5 characters but 6'
+main: input '# bytes: items 1 and 2 pass.'
+main: input 'r'
+main: status: zero
+main: input '?item[string-length(s) = 5]'
+adding filter: 'item[string-length(s) = 5]'
+added filter: 0
+--- 0: 14
+    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0 
+                000008: type 14 (L_EQUALS), str 28 [=], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [string-length], contents 7, next 10, prev 0 
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
+                            000005: type 70 (C_ELEMENT), str 24 [s], contents 0, next 0, prev 0 
+                    000010: type 53 (T_NUMBER), str 30 [5], contents 0, next 0, prev 3 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: filter: rc: 7
+main: status: predicate
+main: input '$ s 12345'
+main: key: 's'='12345'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: filter: rc: 8
+main: status: track
+main: input '<item'
+main: filter: rc: 7
+main: status: predicate
+main: input '$ s héllo'
+main: key: 's'='héllo'
+main: status: full
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: full
+main: input '>item'
+main: filter: rc: 8
+main: status: track
+main: input '<item'
+main: filter: rc: 7
+main: status: predicate
+main: input '$ s abc'
+main: key: 's'='abc'
+main: status: track
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# mod takes the sign of the dividend: all items pass.'
+main: input 'r'
+main: status: zero
+main: input '?item[(-7 mod 3) = -1]'
+adding filter: 'item[(-7 mod 3) = -1]'
+added filter: 0
+--- 0: 18
+    000018: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 11, next 0, prev 0 
+                000011: type 14 (L_EQUALS), str 22 [=], contents 3, next 0, prev 0 
+                    000003: type 71 (C_EXPR), str 8 [(], contents 6, next 13, prev 0 
+                        000006: type 42 ('*'), str 14 [mod], contents 4, next 0, prev 0 
+                            000004: type 86 (C_UNI_MINUS), str 10 [-], contents 5, next 8, prev 0 
+                                000005: type 53 (T_NUMBER), str 12 [7], contents 0, next 0, prev 0 
+                            000008: type 53 (T_NUMBER), str 18 [3], contents 0, next 0, prev 4 
+                    000013: type 86 (C_UNI_MINUS), str 24 [-], contents 14, next 0, prev 3 
+                        000014: type 53 (T_NUMBER), str 26 [1], contents 0, next 0, prev 0 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: filter: rc: 7
+main: status: full
+main: input '$ s 12345'
+main: key: 's'='12345'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: filter: rc: 8
+main: status: track
+main: input '<item'
+main: filter: rc: 7
+main: status: full
+main: input '$ s héllo'
+main: key: 's'='héllo'
+main: status: full
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: full
+main: input '>item'
+main: filter: rc: 8
+main: status: track
+main: input '<item'
+main: filter: rc: 7
+main: status: full
+main: input '$ s abc'
+main: key: 's'='abc'
+main: status: full
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: full
+main: input '>item'
+main: filter: rc: 8
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# mod works on fractions: all items pass.'
+main: input 'r'
+main: status: zero
+main: input '?item[(7.5 mod 2) = 1.5]'
+adding filter: 'item[(7.5 mod 2) = 1.5]'
+added filter: 0
+--- 0: 16
+    000016: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 10, next 0, prev 0 
+                000010: type 14 (L_EQUALS), str 22 [=], contents 3, next 0, prev 0 
+                    000003: type 71 (C_EXPR), str 8 [(], contents 5, next 12, prev 0 
+                        000005: type 42 ('*'), str 14 [mod], contents 4, next 0, prev 0 
+                            000004: type 53 (T_NUMBER), str 10 [7.5], contents 0, next 7, prev 0 
+                            000007: type 53 (T_NUMBER), str 18 [2], contents 0, next 0, prev 4 
+                    000012: type 53 (T_NUMBER), str 24 [1.5], contents 0, next 0, prev 3 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: filter: rc: 7
+main: status: full
+main: input '$ s 12345'
+main: key: 's'='12345'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: filter: rc: 8
+main: status: track
+main: input '<item'
+main: filter: rc: 7
+main: status: full
+main: input '$ s héllo'
+main: key: 's'='héllo'
+main: status: full
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: full
+main: input '>item'
+main: filter: rc: 8
+main: status: track
+main: input '<item'
+main: filter: rc: 7
+main: status: full
+main: input '$ s abc'
+main: key: 's'='abc'
+main: status: full
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: full
+main: input '>item'
+main: filter: rc: 8
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# An integer literal past 2^63 is read as a float, not clamped to'
+main: input '# INT64_MAX, and mod works at that size: all items pass.'
+main: input 'r'
+main: status: zero
+main: input '?item[(10000000000000000000 mod 7) = 3]'
+adding filter: 'item[(10000000000000000000 mod 7) = 3]'
+added filter: 0
+--- 0: 16
+    000016: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 10, next 0, prev 0 
+                000010: type 14 (L_EQUALS), str 39 [=], contents 3, next 0, prev 0 
+                    000003: type 71 (C_EXPR), str 8 [(], contents 5, next 12, prev 0 
+                        000005: type 42 ('*'), str 31 [mod], contents 4, next 0, prev 0 
+                            000004: type 53 (T_NUMBER), str 10 [10000000000000000000], contents 0, next 7, prev 0 
+                            000007: type 53 (T_NUMBER), str 35 [7], contents 0, next 0, prev 4 
+                    000012: type 53 (T_NUMBER), str 41 [3], contents 0, next 0, prev 3 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: filter: rc: 7
+main: status: full
+main: input '$ s 12345'
+main: key: 's'='12345'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: filter: rc: 8
+main: status: track
+main: input '<item'
+main: filter: rc: 7
+main: status: full
+main: input '$ s héllo'
+main: key: 's'='héllo'
+main: status: full
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: full
+main: input '>item'
+main: filter: rc: 8
+main: status: track
+main: input '<item'
+main: filter: rc: 7
+main: status: full
+main: input '$ s abc'
+main: key: 's'='abc'
+main: status: full
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: full
+main: input '>item'
+main: filter: rc: 8
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# The same past 2^64: all items pass.'
+main: input 'r'
+main: status: zero
+main: input '?item[(100000000000000000000.0 mod 7) = 2]'
+adding filter: 'item[(100000000000000000000.0 mod 7) = 2]'
+added filter: 0
+--- 0: 16
+    000016: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 10, next 0, prev 0 
+                000010: type 14 (L_EQUALS), str 42 [=], contents 3, next 0, prev 0 
+                    000003: type 71 (C_EXPR), str 8 [(], contents 5, next 12, prev 0 
+                        000005: type 42 ('*'), str 34 [mod], contents 4, next 0, prev 0 
+                            000004: type 53 (T_NUMBER), str 10 [100000000000000000000.0], contents 0, next 7, prev 0 
+                            000007: type 53 (T_NUMBER), str 38 [7], contents 0, next 0, prev 4 
+                    000012: type 53 (T_NUMBER), str 44 [2], contents 0, next 0, prev 3 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: filter: rc: 7
+main: status: full
+main: input '$ s 12345'
+main: key: 's'='12345'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: filter: rc: 8
+main: status: track
+main: input '<item'
+main: filter: rc: 7
+main: status: full
+main: input '$ s héllo'
+main: key: 's'='héllo'
+main: status: full
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: full
+main: input '>item'
+main: filter: rc: 8
+main: status: track
+main: input '<item'
+main: filter: rc: 7
+main: status: full
+main: input '$ s abc'
+main: key: 's'='abc'
+main: status: full
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: full
+main: input '>item'
+main: filter: rc: 8
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# Positions beyond int64_t take the floating point path: the range is'
+main: input '# [-1e20, 1e20), which holds the whole string: both items pass.'
+main: input 'r'
+main: status: zero
+main: input '?item[substring(s, -100000000000000000000.0, 200000000000000000000.0) = s]'
+adding filter: 'item[substring(s, -100000000000000000000.0, 200000000000000000000.0) = s]'
+added filter: 0
+--- 0: 21
+    000021: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 15, next 0, prev 0 
+                000015: type 14 (L_EQUALS), str 78 [=], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring], contents 7, next 19, prev 0 
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
+                            000005: type 70 (C_ELEMENT), str 20 [s], contents 0, next 0, prev 0 
+                        000008: type 86 (C_UNI_MINUS), str 24 [-], contents 9, next 12, prev 7 
+                            000009: type 53 (T_NUMBER), str 26 [100000000000000000000.0], contents 0, next 0, prev 0 
+                        000012: type 53 (T_NUMBER), str 52 [200000000000000000000.0], contents 0, next 0, prev 8 
+                    000019: type 74 (C_PATH), str 0 [], contents 17, next 0, prev 3 
+                        000017: type 70 (C_ELEMENT), str 80 [s], contents 0, next 0, prev 0 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: filter: rc: 7
+main: status: predicate
+main: input '$ s 12345'
+main: key: 's'='12345'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: filter: rc: 8
+main: status: track
+main: input '<item'
+main: filter: rc: 7
+main: status: predicate
+main: input '$ s abc'
+main: key: 's'='abc'
+main: status: full
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: full
+main: input '>item'
+main: filter: rc: 8
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# An integer start + len past int64_t saturates, and the range is'
+main: input '# empty: both items pass.'
+main: input 'r'
+main: status: zero
+main: input '?item[substring(s, 9223372036854775807, 2) = '']'
+adding filter: 'item[substring(s, 9223372036854775807, 2) = '']'
+added filter: 0
+--- 0: 20
+    000020: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 14, next 0, prev 0 
+                000014: type 14 (L_EQUALS), str 50 [=], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring], contents 7, next 16, prev 0 
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
+                            000005: type 70 (C_ELEMENT), str 20 [s], contents 0, next 0, prev 0 
+                        000008: type 53 (T_NUMBER), str 24 [9223372036854775807], contents 0, next 11, prev 7 
+                        000011: type 53 (T_NUMBER), str 46 [2], contents 0, next 0, prev 8 
+                    000016: type 54 (T_QUOTED), str 52 [], contents 0, next 0, prev 3 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: filter: rc: 7
+main: status: predicate
+main: input '$ s 12345'
+main: key: 's'='12345'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: filter: rc: 8
+main: status: track
+main: input '<item'
+main: filter: rc: 7
+main: status: predicate
+main: input '$ s abc'
+main: key: 's'='abc'
+main: status: full
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: full
+main: input '>item'
+main: filter: rc: 8
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# Halves round up: round(-0.5) is 0, so positions 0 and 1 give "1"'
+main: input '# (and "a" for abc): item 1 passes.'
+main: input 'r'
+main: status: zero
+main: input '?item[substring(s, -0.5, 2) = '1']'
+adding filter: 'item[substring(s, -0.5, 2) = '1']'
+added filter: 0
+--- 0: 21
+    000021: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 15, next 0, prev 0 
+                000015: type 14 (L_EQUALS), str 36 [=], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring], contents 7, next 17, prev 0 
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
+                            000005: type 70 (C_ELEMENT), str 20 [s], contents 0, next 0, prev 0 
+                        000008: type 86 (C_UNI_MINUS), str 24 [-], contents 9, next 12, prev 7 
+                            000009: type 53 (T_NUMBER), str 26 [0.5], contents 0, next 0, prev 0 
+                        000012: type 53 (T_NUMBER), str 32 [2], contents 0, next 0, prev 8 
+                    000017: type 54 (T_QUOTED), str 38 [1], contents 0, next 0, prev 3 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: filter: rc: 7
+main: status: predicate
+main: input '$ s 12345'
+main: key: 's'='12345'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: filter: rc: 8
+main: status: track
+main: input '<item'
+main: filter: rc: 7
+main: status: predicate
+main: input '$ s abc'
+main: key: 's'='abc'
+main: status: track
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
