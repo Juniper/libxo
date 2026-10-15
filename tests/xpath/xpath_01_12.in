@@ -764,3 +764,251 @@ $ name 0
 = val 4
 >item
 }item
+
+# substring() keeps positions >= round(pos) and < round(pos) + round(len),
+# so positions 0, 1 and 2 give "12": item 1 passes.
+r
+?item[substring(s, 0, 3) = '12']
+{item
+<item
+$ s 12345
+= val 1
+>item
+<item
+$ s héllo
+= val 2
+>item
+<item
+$ s abc
+= val 3
+>item
+}item
+
+# Positions are rounded: round(1.5) is 2 and round(2.6) is 3, so this
+# is positions 2-4, "234": item 1 passes.
+r
+?item[substring(s, 1.5, 2.6) = '234']
+{item
+<item
+$ s 12345
+= val 1
+>item
+<item
+$ s héllo
+= val 2
+>item
+<item
+$ s abc
+= val 3
+>item
+}item
+
+# A negative start still counts toward the length: positions -1, 0 and
+# 1 give "1" (and "a" for abc): item 1 passes.
+r
+?item[substring(s, -1, 3) = '1']
+{item
+<item
+$ s 12345
+= val 1
+>item
+<item
+$ s héllo
+= val 2
+>item
+<item
+$ s abc
+= val 3
+>item
+}item
+
+# A length past the end stops at the end: item 1 passes.
+r
+?item[substring(s, 4, 10) = '45']
+{item
+<item
+$ s 12345
+= val 1
+>item
+<item
+$ s héllo
+= val 2
+>item
+<item
+$ s abc
+= val 3
+>item
+}item
+
+# Positions count characters, not bytes: item 2 passes.
+r
+?item[substring(s, 2) = 'éllo']
+{item
+<item
+$ s 12345
+= val 1
+>item
+<item
+$ s héllo
+= val 2
+>item
+<item
+$ s abc
+= val 3
+>item
+}item
+
+# The same with a length: item 2 passes.
+r
+?item[substring(s, 2, 2) = 'él']
+{item
+<item
+$ s 12345
+= val 1
+>item
+<item
+$ s héllo
+= val 2
+>item
+<item
+$ s abc
+= val 3
+>item
+}item
+
+# string-length() counts characters; héllo is 5 characters but 6
+# bytes: items 1 and 2 pass.
+r
+?item[string-length(s) = 5]
+{item
+<item
+$ s 12345
+= val 1
+>item
+<item
+$ s héllo
+= val 2
+>item
+<item
+$ s abc
+= val 3
+>item
+}item
+
+# mod takes the sign of the dividend: all items pass.
+r
+?item[(-7 mod 3) = -1]
+{item
+<item
+$ s 12345
+= val 1
+>item
+<item
+$ s héllo
+= val 2
+>item
+<item
+$ s abc
+= val 3
+>item
+}item
+
+# mod works on fractions: all items pass.
+r
+?item[(7.5 mod 2) = 1.5]
+{item
+<item
+$ s 12345
+= val 1
+>item
+<item
+$ s héllo
+= val 2
+>item
+<item
+$ s abc
+= val 3
+>item
+}item
+
+# An integer literal past 2^63 is read as a float, not clamped to
+# INT64_MAX, and mod works at that size: all items pass.
+r
+?item[(10000000000000000000 mod 7) = 3]
+{item
+<item
+$ s 12345
+= val 1
+>item
+<item
+$ s héllo
+= val 2
+>item
+<item
+$ s abc
+= val 3
+>item
+}item
+
+# The same past 2^64: all items pass.
+r
+?item[(100000000000000000000.0 mod 7) = 2]
+{item
+<item
+$ s 12345
+= val 1
+>item
+<item
+$ s héllo
+= val 2
+>item
+<item
+$ s abc
+= val 3
+>item
+}item
+
+# Positions beyond int64_t take the floating point path: the range is
+# [-1e20, 1e20), which holds the whole string: both items pass.
+r
+?item[substring(s, -100000000000000000000.0, 200000000000000000000.0) = s]
+{item
+<item
+$ s 12345
+= val 1
+>item
+<item
+$ s abc
+= val 2
+>item
+}item
+
+# An integer start + len past int64_t saturates, and the range is
+# empty: both items pass.
+r
+?item[substring(s, 9223372036854775807, 2) = '']
+{item
+<item
+$ s 12345
+= val 1
+>item
+<item
+$ s abc
+= val 2
+>item
+}item
+
+# Halves round up: round(-0.5) is 0, so positions 0 and 1 give "1"
+# (and "a" for abc): item 1 passes.
+r
+?item[substring(s, -0.5, 2) = '1']
+{item
+<item
+$ s 12345
+= val 1
+>item
+<item
+$ s abc
+= val 2
+>item
+}item
