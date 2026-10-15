@@ -66,6 +66,26 @@ xo_strdup (const char *str)
 }
 
 /*
+ * strndup() by way of xo_realloc, for the same reason, with a twist:
+ * len < 0 means len = strlen(str).
+ */
+static inline char *
+xo_strndup (const char *str, ssize_t len)
+{
+    if (len < 0)
+	len = strlen(str);
+
+    char *cp = xo_realloc(NULL, len + 1);
+
+    if (cp) {
+	memcpy(cp, str, len);
+	cp[len] = '\0';
+    }
+
+    return cp;
+}
+
+/*
  * Simple string comparison function (without the temptation
  * to forget the "== 0").
  */
