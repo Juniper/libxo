@@ -400,6 +400,11 @@ xp_not_expr :
 	xp_path_expr 
 		{ 
 		    xo_xparse_node_id_t id = xo_xparse_node_new(xparse_data);
+		    if (id == 0) {
+			yyerror("out of memory");
+			YYABORT;
+		    }
+
 		    xo_xparse_node_t *xnp = xo_xparse_node(xparse_data, $1);
 		    if (xnp->xn_type == C_ELEMENT) {
 			xnp = xo_xparse_node(xparse_data, id);
