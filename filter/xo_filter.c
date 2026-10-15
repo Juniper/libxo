@@ -15,6 +15,7 @@
 #include <stdint.h>
 #include <inttypes.h>
 #include <string.h>
+#include <errno.h>
 #include <regex.h>
 #include <sys/param.h>
 #include <math.h>
@@ -31,6 +32,7 @@
 #include "xo.h"
 #include "xo_private.h"
 #include "xo_buf.h"
+#include "xo_utf8.h"
 #include "xo_encoder.h"
 #include "xo_xpath.tab.h"
 
@@ -1397,17 +1399,24 @@ xo_eval_parse_number (const char *str)
     if (str == NULL)
 	return xo_eval_value_invalid();
 
+    /*
+     * An integer too big for its type comes back from strtoll() and
+     * strtoull() clamped, with ERANGE, so we let strtod() have it
+     * rather than use the wrong number.
+     */
     if (str[0] == '0' && str[1] == 'x') {
+	errno = 0;
 	uint64_t uval = strtoull(str, &ep, 16);
-	if (ep && *ep == '\0') {
+	if (ep && *ep == '\0' && errno != ERANGE) {
 	    value = xo_eval_value_make(C_UINT64, 0, 0);
 	    value.xev_uint64 = uval;
 	    return value;
 	}
     }
 
+    errno = 0;
     int64_t ival = strtoll(str, &ep, 0);
-    if (ep && *ep == '\0') {
+    if (ep && *ep == '\0' && errno != ERANGE) {
 	value = xo_eval_value_make(C_INT64, 0, 0);
 	value.xev_int64 = ival;
 	return value;
@@ -1658,37 +1667,6 @@ xo_eval_cast_float (xo_handle_t *xop, xo_eval_value_t value)
     case C_INT64:
     default:
 	return (xo_float_t) value.xev_int64;
-    }
-}
-
-static int64_t
-xo_eval_cast_int64 (xo_handle_t *xop, xo_eval_value_t value)
-{
-    xo_float_t fval = 0;
-
-    if (value.xev_type == C_STRING || value.xev_type == C_DSTRING)
-	value = xo_eval_make_number_from_value(xop, value);
-
-    switch (value.xev_type) {
-    case C_DSTRING:
-    case C_STRING:;
-	const char *str = value.xev_str; /* Should not occur */
-	char *ep;
-	fval = strtod(str, &ep);
-	return (ep && *ep == '\0') ? fval: 0;
-
-    case C_FLOAT:
-	return (int64_t) value.xev_float;
-
-    case C_BOOLEAN:
-	return value.xev_int64 ? 1 : 0;
-
-    case C_UINT64:
-	return (int64_t) value.xev_uint64;
-
-    case C_INT64:
-    default:
-	return value.xev_int64;
     }
 }
 
@@ -2134,10 +2112,12 @@ xo_fmod (xo_float_t x, xo_float_t y)
     if (y == 0)
 	return 0;
 
-    int64_t i = (int64_t)(x / y);
-    xo_float_t n = y * (xo_float_t) i;
-
-    return x - (xo_float_t) n;
+    /*
+     * XPath's mod takes the sign of the dividend, as C's fmod() does,
+     * and fmod() works at any magnitude, where casting x / y to an
+     * integer type is undefined past that type's range.
+     */
+    return fmod(x, y);
 }
 
 static xo_eval_value_t
@@ -2403,6 +2383,57 @@ xo_eval_func_floor (XO_EVAL_NODE_ARGS)
     return xo_eval_value_float(0, fval);
 }
 
+/*
+ * Round a value as XPath's round() does, keeping to integers when we
+ * can.  Most arguments are integers already (a literal, or a field
+ * that xo_eval_parse_number reads as one), and those come back as
+ * C_INT64 without touching floating point.  Only a real C_FLOAT is
+ * rounded, by floor(x + 0.5), since XPath rounds a half up, toward
+ * positive infinity (round(-2.5) is -2, where C's round() gives -3).
+ * A result that fits comes back as C_INT64 too; NaN, the infinities
+ * and anything else beyond int64_t stay C_FLOAT, for the caller's
+ * floating point path.
+ */
+static xo_eval_value_t
+xo_eval_cast_round (xo_handle_t *xop, xo_eval_value_t value)
+{
+    value = xo_eval_make_number_from_value(xop, value);
+
+    switch (value.xev_type) {
+    case C_INT64:
+	return value;
+
+    case C_UINT64:
+	if (value.xev_uint64 <= INT64_MAX) {
+	    int64_t ival = (int64_t) value.xev_uint64;
+	    value = xo_eval_value_make(C_INT64, 0, 0);
+	    value.xev_int64 = ival;
+	} else {
+	    xo_float_t fval = (xo_float_t) value.xev_uint64;
+	    value = xo_eval_value_float(0, fval);
+	}
+	return value;
+
+    case C_FLOAT:;
+	xo_float_t fval = floor(value.xev_float + 0.5);
+
+	/* 2^63 is exact as a double; NaN fails both tests */
+	if (fval >= -9223372036854775808.0 && fval < 9223372036854775808.0) {
+	    value = xo_eval_value_make(C_INT64, 0, 0);
+	    value.xev_int64 = (int64_t) fval;
+	} else {
+	    value = xo_eval_value_float(0, fval);
+	}
+	return value;
+
+    case C_BOOLEAN:
+    default:
+	value.xev_int64 = value.xev_int64 ? 1 : 0;
+	value.xev_type = C_INT64;
+	return value;
+    }
+}
+
 static xo_eval_value_t
 xo_eval_func_substring (XO_EVAL_NODE_ARGS)
 {
@@ -2425,52 +2456,101 @@ xo_eval_func_substring (XO_EVAL_NODE_ARGS)
     }
 
     xo_eval_value_t value = xo_eval_value_make(C_STRING, 0, 0);
+    value.xev_str = "";
 
     char *str = xo_eval_cast_string(xop, fn_argv[0]);
-    int64_t slen = strlen(str);
 
-    int64_t pos = xo_eval_cast_int64(xop, fn_argv[1]);
-    int64_t len = fn_argc == 2 ? slen : xo_eval_cast_int64(xop, fn_argv[2]);
+    /*
+     * The spec says the result holds the characters whose position
+     * is at least round(pos) and, with a third argument, less than
+     * round(pos) + round(len), with IEEE 754 comparisons, which gives
+     * these odd cases:
+     *
+     *   substring("12345", 0, 3)              "12"
+     *   substring("12345", 1.5, 2.6)          "234"
+     *   substring("12345", 0 div 0, 3)        ""      (NaN)
+     *   substring("12345", -42, 1 div 0)      "12345"
+     *   substring("12345", -1 div 0, 1 div 0) ""      (-inf + inf is NaN)
+     *
+     * We clamp [start, limit) to the string's own positions,
+     * [1, nchars + 1), and take what's left, if anything.  Positions
+     * are in characters, not bytes.
+     */
+    xo_eval_value_t pv = xo_eval_cast_round(xop, fn_argv[1]);
+    xo_eval_value_t lv = XO_EVAL_VALUE_ZERO;
+    if (fn_argc == 3)
+	lv = xo_eval_cast_round(xop, fn_argv[2]);
 
     /* Release our arguments */
     xo_eval_arguments_free(xop, xfp, framep, xnp, indent, 3, fn_argv);
 
-    /*
-     * Strings a 1-origin, not 0.  Also the spec says:
-     *
-     * The returned substring contains those characters for which the
-     * position of the character is greater than or equal to the
-     * rounded value of the second argument and, if the third argument
-     * is specified, less than the sum of the rounded value of the
-     * second argument and the rounded value of the third argument;
-     * the comparisons and addition used for the above follow the
-     * standard IEEE 754 rules; rounding is done as if by a call to
-     * the round function. The following examples illustrate various
-     * unusual cases:
-     */
-    const char *cp = str;
-    if (pos > 1) {
-	if (pos <= slen) {
-	    cp += pos - 1;
-	    slen -= pos - 1;
-	} else {
-	    cp = "";
-	    slen = 0;
+    if (str == NULL)
+	return value;
+
+    int64_t nchars = xo_ustrlen(str);
+    int64_t first = 1, last = 0;
+
+    if (pv.xev_type == C_INT64 && lv.xev_type == C_INT64) {
+	/*
+	 * The common case, all in integers.  A sum past int64_t
+	 * saturates, which leaves the clamping below unchanged.
+	 */
+	int64_t start = pv.xev_int64, len = lv.xev_int64, limit;
+
+	if (fn_argc == 2)
+	    limit = INT64_MAX;
+	else if (len > 0 && start > INT64_MAX - len)
+	    limit = INT64_MAX;
+	else if (len < 0 && start < INT64_MIN - len)
+	    limit = INT64_MIN;
+	else
+	    limit = start + len;
+
+	first = (start < 1) ? 1 : start;
+	last = (limit > nchars + 1) ? nchars + 1 : limit;
+
+    } else {
+	/*
+	 * NaN, an infinity, or something too big for int64_t.  Since
+	 * every comparison with NaN is false, a NaN start or limit
+	 * survives the clamping and fails "ffirst < flast", giving
+	 * the empty string.
+	 */
+	xo_float_t start = xo_eval_cast_float(xop, pv);
+	xo_float_t limit = (fn_argc == 2) ? INFINITY
+	    : start + xo_eval_cast_float(xop, lv);
+	xo_float_t ffirst = (start < 1) ? 1 : start;
+	xo_float_t flast = (limit > nchars + 1) ? nchars + 1 : limit;
+
+	/* Both are now finite, within [1, nchars + 1] */
+	if (ffirst < flast) {
+	    first = (int64_t) ffirst;
+	    last = (int64_t) flast;
 	}
     }
 
-    if (len < 0)
-	len = 0;
-    else {
-	if (len > slen)
-	    len = slen;
-    }
+    if (first < last) {
+	/*
+	 * Walk to the first character we keep and then past the last,
+	 * using xo_utf8_nnext so an invalid byte counts as one
+	 * character, as it does in xo_ustrlen.  Both are within
+	 * [1, nchars + 1], so we never step past the NUL.
+	 */
+	const char *strend = str + strlen(str);
+	const char *cp = str, *ep;
+	int64_t i;
 
-    if (len > 0) {
-	value.xev_type = C_DSTRING;
-	value.xev_str = strndup(cp, len);
-    } else {
-	value.xev_str = "";
+	for (i = 1; i < first; i++)
+	    cp = xo_utf8_nnext(cp, strend - cp);
+	for (ep = cp; i < last; i++)
+	    ep = xo_utf8_nnext(ep, strend - ep);
+
+	char *sub = xo_strndup(cp, ep - cp);
+
+	if (sub) {
+	    value.xev_type = C_DSTRING;
+	    value.xev_str = sub;
+	}
     }
 
     xo_free(str);
@@ -2488,7 +2568,7 @@ xo_eval_func_substring_before (XO_EVAL_NODE_ARGS)
 
     if (found) {
 	value.xev_type = C_DSTRING;
-	value.xev_str = strndup(haystack, found - haystack);
+	value.xev_str = xo_strndup(haystack, found - haystack);
     } else {
 	value.xev_str = "";
     }
@@ -2646,7 +2726,7 @@ static xo_eval_value_t
 xo_eval_func_string_length (XO_EVAL_NODE_ARGS)
 {
     char *str = xo_eval_cast_string(xop, argv[0]);
-    xo_float_t len = str ? strlen(str) : 0;
+    xo_float_t len = str ? xo_ustrlen(str) : 0;
     xo_free(str);
     return xo_eval_value_float(0, len);
 }
@@ -2872,7 +2952,7 @@ xo_eval_func_rematch (XO_EVAL_NODE_ARGS)
 	    regmatch_t *m = &pmatch[want_group];
 	    if (m->rm_so >= 0) {
 		int mlen = (int)(m->rm_eo - m->rm_so);
-		result.xev_str = strndup(input + m->rm_so, mlen);
+		result.xev_str = xo_strndup(input + m->rm_so, mlen);
 	    }
 	    /* else: group didn't participate - leave empty string */
 	}
@@ -3007,6 +3087,10 @@ xo_eval_function (XO_EVAL_NODE_ARGS)
 	/* Infra: allocate, evaluate all args, call, then free */
 	xo_eval_value_t *fn_argv = fn_argc
 	    ? xo_realloc(NULL, fn_argc * sizeof(*fn_argv)) : NULL;
+	if (fn_argc && fn_argv == NULL) {
+	    xo_failure_filter(xop, "function '%s': out of memory", str);
+	    return xo_eval_value_invalid();
+	}
 
 	xo_eval_arguments(XO_EVAL_NODE_PASS, fn_argc, fn_argv);
 
