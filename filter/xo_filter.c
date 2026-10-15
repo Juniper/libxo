@@ -581,8 +581,6 @@ typedef unsigned xo_xsf_flags_t;   /* Type for XFSF_* flag fields */
 struct xo_filter_s {		 /* Forward/typdef decl in xo_private.h */
     struct xo_xparse_data_s xf_xd; /* Main parsing structure */
     xo_filter_status_t xf_status; /* Current status: (see XO_STATUS_*) */
-    uint32_t xf_depth;		 /* Depth of hierarchy seen (zero == top) */
-    uint32_t xf_total_depth;	 /* Total depth ('opens' minus 'closes') */
     xo_xsf_flags_t xf_flags;	 /* Flags (XFSF_*) */
     xo_trie_t *xf_trie;	 /* Compiled trie (NULL until first filter added) */
     xo_tmatch_t xf_tmatch;	 /* Runtime trie-matching state */
@@ -1053,8 +1051,6 @@ xo_filter_open (xo_handle_t *xop, xo_filter_t *xfp,
 
     XO_DBG(xop, "filter: open %s: '%.*s'", type, (int) tlen, tag);
 
-    xfp->xf_total_depth += 1;
-
     xo_tmatch_open(xop, xfp, &xfp->xf_tmatch, tag, tlen, value, vlen);
 
     xo_filter_change_status(xop, xfp, "open", tag, tlen);
@@ -1090,11 +1086,6 @@ xo_filter_close (xo_handle_t *xop, xo_filter_t *xfp,
 {
     if (xfp == NULL || xfp->xf_trie == NULL)
 	return 0;
-
-    if (xfp->xf_depth > 0)
-	xfp->xf_depth -= 1;
-    if (xfp->xf_total_depth > 0)
-	xfp->xf_total_depth -= 1;
 
     XO_DBG(xop, "filter: close %s: '%.*s'", type, (int) tlen, tag);
 
