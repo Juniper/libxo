@@ -510,11 +510,14 @@ xo_xparse_str_new (xo_xparse_data_t *xdp, xo_xparse_token_t type)
 
     xo_off_t cur = xbp->xb_curp - xbp->xb_bufp;
     char *newp = xo_buf_append_val(xbp, start, len + 1);
+    if (newp == NULL)
+	return 0;
+
     newp[len] = '\0';
 
     xdp->xd_last_str = cur;
 
-    return newp ? cur : 0;
+    return cur;
 }
 
 void
@@ -1245,6 +1248,18 @@ xo_xpath_yylex (xo_xparse_data_t *xdp, xo_xparse_node_id_t *yylvalp)
     xo_xparse_node_t *xnp = xo_xparse_node(xdp, id);
     *yylvalp = id;
 
+    /*
+     * Don't return -1 here: yacc takes any negative token as EOF,
+     * and would accept the expression lexed so far as if it were
+     * the whole thing.  M_ERROR matches no rule, so the parse fails.
+     */
+    if (xnp == NULL) {
+	xo_xparse_warn(xdp, "%sfilter expression error: out of memory",
+		       xo_xparse_location(xdp));
+	xdp->xd_last = M_ERROR;
+        return M_ERROR;
+    }
+
     bzero(xnp, sizeof(*xnp));
 
     /*
@@ -1314,8 +1329,16 @@ xo_xpath_yylex (xo_xparse_data_t *xdp, xo_xparse_node_id_t *yylvalp)
     }
 
     xnp->xn_type = rc;
-    if (rc > 0)
+    if (rc > 0) {
 	xnp->xn_str = xo_xparse_str_new(xdp, rc);
+
+	/* Offset zero is reserved by xo_xparse_init, so zero is failure */
+	if (xnp->xn_str == 0) {
+	    xo_xparse_warn(xdp, "%sfilter expression error: out of memory",
+			   xo_xparse_location(xdp));
+	    xnp->xn_type = xdp->xd_last = rc = M_ERROR;
+	}
+    }
 
     XO_DBG(xdp->xd_xop, "xo_xplex: lex: '%.*s' -> %d/%s %s",
 	   (int) (xdp->xd_cur - xdp->xd_start),
