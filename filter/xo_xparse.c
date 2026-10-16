@@ -842,9 +842,10 @@ xo_xparse_yyval (xo_xparse_data_t *xdp UNUSED, xo_xparse_node_id_t id)
 }
 
 /*
- * Return a new match struct, allocating a new one if needed
+ * Append a parse tree root to xd_paths[], growing it if needed.
+ * Returns -1 if the array can't be grown.
  */
-static void
+static int
 xo_xparse_result_add (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
 {
     if (xdp->xd_paths_cur >= xdp->xd_paths_max) {
@@ -853,40 +854,47 @@ xo_xparse_result_add (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
 	xo_xparse_node_id_t *pp;
 	pp = xo_realloc(xdp->xd_paths, new_max * sizeof(*pp));
 	if (pp == NULL)
-	    return;
+	    return -1;
 
 	xdp->xd_paths = pp;
 	xdp->xd_paths_max = new_max;
     }
 
     xdp->xd_paths[xdp->xd_paths_cur++] = id;
+    return 0;
 }
 
 /*
  * Add the final results of a parsing to the data.  The real work here
  * is rewriting patterns (like unions) into more easily handled forms.
+ * Returns -1 on allocation failure, in which case none of this
+ * expression's paths are kept: a union that only half made it into
+ * xd_paths[] would filter differently than the user asked.
  */
-void
+int
 xo_xparse_results (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
 {
     xo_xparse_node_t *xnp = xo_xparse_node(xdp, id);
     xo_xparse_node_id_t next;
+    uint32_t start = xdp->xd_paths_cur;
 
     if (xnp == NULL) {
 	/* nothing; error? */
 
     } else if (xnp->xn_type == C_UNION) {
 	for (id = xnp->xn_contents; id; id = next) {
-	    xnp = xo_xparse_node(xdp, id);
-	    xo_xparse_result_add(xdp, id);
+	    if (xo_xparse_result_add(xdp, id) < 0)
+		goto fail;
 
 	    /* Break off this node from the chain */
+	    xnp = xo_xparse_node(xdp, id);
 	    next = xnp->xn_next;
 	    xnp->xn_next = xnp->xn_prev = 0;
 	}
 
     } else {
-	xo_xparse_result_add(xdp, id);
+	if (xo_xparse_result_add(xdp, id) < 0)
+	    goto fail;
     }
 
     uint32_t deny_count = 0, abs_count = 0;
@@ -934,6 +942,11 @@ xo_xparse_results (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
 
     XO_DBG(xdp->xd_xop, "xo: parse results: %u paths%s%s",
 	   cur, all_nots, all_abs);
+    return 0;
+
+ fail:
+    xdp->xd_paths_cur = start;
+    return -1;
 }
 
 int
