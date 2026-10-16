@@ -536,8 +536,13 @@ csv_leaf_num (xo_handle_t *xop UNUSED, csv_private_t *csv,
 	if (lp == NULL)
 	    return -1;			/* No luck; bail */
 
-	/* Zero out the new portion */
-	bzero(&lp[csv->c_leaf_max], csv->c_leaf_max * sizeof(*lp));
+	/*
+	 * Zero out the new portion.  On the first allocation c_leaf_max
+	 * is zero, so this covers the whole array; realloc(NULL) does
+	 * not zero it, and f_flags is OR'd into below.
+	 */
+	bzero(&lp[csv->c_leaf_max],
+	      (new_max - csv->c_leaf_max) * sizeof(*lp));
 
 	/* Update csv data */
 	csv->c_leaf = lp;
