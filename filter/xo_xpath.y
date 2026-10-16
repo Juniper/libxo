@@ -137,15 +137,13 @@
 %token C_NESTED_PREDICATES  84 /* Predicates inside predicates: a[b[c]] */
 %token C_PREDICATE_PATHS    85 /* Multi-element paths in predicates a[b/c] */
 %token C_UNI_MINUS	    86 /* Unary minus */
-
 /* Note: Add new names to xo_xparse_ttname_map[] in xo_xparse.c */
 
 /*
- * Use a "%pure-parser" for reentracy
-%define api.pure full
+ * Use a pure (reentrant) parser
  */
+%define api.pure full
 %token-table
-%pure-parser
 
 %{
 
@@ -290,7 +288,8 @@ and_operator :
 
 	| L_DAMPER
 		{
-		    xo_xparse_node_ok(xparse_data, $$)->xn_type = K_AND;
+		    xo_xparse_node_set_type(xparse_data, $1, K_AND);
+		    $$ = xo_xparse_yyval(xparse_data, $1);
 		}
 	;
 
@@ -300,7 +299,8 @@ or_operator :
 
 	| L_DVBAR
 		{
-		    xo_xparse_node_ok(xparse_data, $$)->xn_type = K_OR;
+		    xo_xparse_node_set_type(xparse_data, $1, K_OR);
+		    $$ = xo_xparse_yyval(xparse_data, $1);
 		}
 	;
 
@@ -310,7 +310,8 @@ equals_operator :
 
 	| L_DEQUALS
 		{
-		    xo_xparse_node_ok(xparse_data, $$)->xn_type = L_EQUALS;
+		    xo_xparse_node_set_type(xparse_data, $1, L_EQUALS);
+		    $$ = xo_xparse_yyval(xparse_data, $1);
 		}
 	;
 
@@ -397,22 +398,22 @@ xp_union_expr :
 	;
 
 xp_not_expr :
-	xp_path_expr 
-		{ 
-		    xo_xparse_node_id_t id = xo_xparse_node_new(xparse_data);
-		    if (id == 0) {
-			yyerror("out of memory");
-			YYABORT;
+	xp_path_expr
+		{
+		    xo_xparse_node_id_t id = $1;
+
+		    /* Only a bare element step needs a C_PATH wrapper */
+		    if (xo_xparse_node_type(xparse_data, $1) == C_ELEMENT) {
+			id = xo_xparse_node_new(xparse_data);
+			if (id == 0) {
+			    yyerror("out of memory");
+			    YYABORT;
+			}
+
+			xo_xparse_node_set_type(xparse_data, id, C_PATH);
+			xo_xparse_node_set_contents(xparse_data, id, $1);
 		    }
 
-		    xo_xparse_node_t *xnp = xo_xparse_node(xparse_data, $1);
-		    if (xnp->xn_type == C_ELEMENT) {
-			xnp = xo_xparse_node(xparse_data, id);
-			xnp->xn_type = C_PATH;
-			xo_xparse_node_set_contents(xparse_data, id, $1);
-		    } else {
-			id = $1;
-		    }
 		    $$ = xo_xparse_yyval(xparse_data, id);
 		}
 
@@ -564,9 +565,9 @@ xp_unary_expr :
 
 	| L_MINUS xp_unary_expr
 		{
+		    xo_xparse_node_set_type(xparse_data, $1, C_UNI_MINUS);
 		    xo_xparse_node_set_contents(xparse_data, $1, $2);
 		    $$ = xo_xparse_yyval(xparse_data, $1);
-		    xo_xparse_node_ok(xparse_data, $$)->xn_type = C_UNI_MINUS;
 		}
 	;
 
