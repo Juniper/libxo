@@ -62,6 +62,20 @@ struct xo_filter_s;
 typedef struct xo_filter_s xo_filter_t;
 
 /*
+ * Opaque compiled-expression program and trie-walk frame, both defined
+ * inside xo_filter.c.  A non-libxo backend (e.g. libpin) that compiles
+ * its own select=/test= expressions against the xo_eval engine (see
+ * xo_eval_compile() / xo_eval_prog_run_simple() below) holds an
+ * xo_eval_prog_t * but never looks inside it.  xo_tframe_t only matters
+ * to libxo's own trie walk; a caller with no trie frame (e.g. libpin,
+ * evaluating a standalone scalar expression) always passes NULL for it.
+ */
+struct xo_eval_prog_s;
+typedef struct xo_eval_prog_s xo_eval_prog_t;
+struct xo_tframe_s;
+typedef struct xo_tframe_s xo_tframe_t;
+
+/*
  * Opaque data context: only the implementation outside xo_filter.so knows
  * the real layout.  libxo's own implementation (using heap + xparse string
  * table) defines struct xo_filter_data_s inside filter/xo_filter.c.
@@ -329,5 +343,62 @@ uint32_t xo_filter_walk_get_action (xo_handle_t *xop, xo_filter_t *xfp);
  */
 int xo_filter_set_unsupported_features (xo_filter_t *xfp,
 					  const int *features);
+
+/*
+ * xo_eval_compile() / xo_eval_prog_destroy() / xo_eval_prog_run_simple():
+ * the xo_eval engine's entry points for a non-libxo backend (e.g. libpin)
+ * that wants to compile and run its own select=/test= scalar expressions
+ * against the same XPath evaluator libxo's own predicate matcher uses,
+ * without going through the trie/filter-walk machinery above.
+ *
+ * xo_eval_compile:
+ *   Compile the expression rooted at 'root' (as produced by
+ *   xo_xparse_parse_string(), declared in xo_xparse.h) into a flat,
+ *   replayable program.  Returns NULL on a compile failure (unknown
+ *   function, wrong arity, unsupported node type).  'dp'/'ops' are the
+ *   same data-context pair passed to xo_filter_create_with_data(); a
+ *   failure specific enough to explain is reported through ops->xfdo_error
+ *   (if non-NULL), the same way evaluation-time errors are.  Pass NULL
+ *   for both if there's no data context to report through (compile still
+ *   fails the same way; it's just silent).  'root' is declared here as a
+ *   plain ssize_t to avoid requiring "xo_xparse.h" in this header; it is
+ *   numerically an xo_xparse_node_id_t (itself just a typedef of
+ *   xo_off_t/ssize_t), as returned by xo_xparse_parse_string() — a caller
+ *   compiling its own expressions includes "xo_xparse.h" for that
+ *   function and passes its result straight through.
+ *
+ * xo_eval_prog_destroy:
+ *   Free a program returned by xo_eval_compile().  NULL-safe.
+ *
+ * xo_eval_prog_run_simple:
+ *   Run a compiled program against 'xfp' (the filter whose data context
+ *   supplies xfdo_value_of / xfdo_variable_of) and reduce its result to
+ *   plain C types, so the caller never needs the internal xo_eval_value_t
+ *   layout:
+ *     - If the result is missing/invalid/unsupported (e.g. an unbound
+ *       variable), returns NULL and sets *is_missingp (if non-NULL).
+ *     - If the result is a native boolean (e.g. from a comparison or a
+ *       boolean-returning function), returns NULL and sets *is_booleanp
+ *       and *bool_valuep (if non-NULL), so a caller applying XPath
+ *       truthiness (rather than "string is non-empty") can tell the two
+ *       apart.
+ *     - Otherwise returns a malloc'd, NUL-terminated string holding the
+ *       XPath string-value of the result; the caller must free() it.
+ *   'framep' is almost always NULL for a non-libxo backend; it only
+ *   matters to expressions evaluated during libxo's own trie walk.
+ */
+xo_eval_prog_t *
+xo_eval_compile (struct xo_xparse_data_s *xdp, ssize_t root,
+		  xo_filter_data_t *dp, xo_filter_data_ops_t *ops);
+
+void
+xo_eval_prog_destroy (xo_eval_prog_t *prog);
+
+char *
+xo_eval_prog_run_simple (xo_handle_t *xop, xo_filter_t *xfp,
+			  xo_tframe_t *framep, struct xo_xparse_data_s *xdp,
+			  xo_eval_prog_t *prog,
+			  int *is_booleanp, int *bool_valuep,
+			  int *is_missingp);
 
 #endif /* XO_FILTER_H */
