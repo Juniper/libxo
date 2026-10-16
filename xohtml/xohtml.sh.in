@@ -11,10 +11,10 @@
 
 VERSION=@LIBXO_VERSION@
 LOCAL=@XO_SHAREDIR@
-WEB=http://juniper.github.io/libxo/${VERSION}/xohtml
+WEB=https://juniper.github.io/libxo/${VERSION}/xohtml
 MODE=internal
 BASE=
-CMD=cat
+CMD=
 DONE=
 KEEP=
 FILE=
@@ -24,7 +24,7 @@ do_help () {
     echo "Usage: xohtml [options] [command [arguments]]"
     echo "Valid options are:"
     echo "    -b --base <basepath>        Use a different base location for js/css files"
-    echo "    -c | --command <command>    Execute the given command"
+    echo "    -c | --command <command>    Execute the given shell command"
     echo "    -f | --file <output-file>   Write all output to the given file "
     echo "    -i | --internal             js/css files are written directly into the output"
     echo "    -k | --keep                 Keep the output file (no auto-delete)"
@@ -36,7 +36,7 @@ do_help () {
 
 XOPTS=html,xpath,info
 
-while [ -z "$DONE" -a ! -z "$1" ]; do
+while [ -z "$DONE" -a $# -gt 0 ]; do
     case "$1" in
         -b|--base)
             shift;
@@ -82,24 +82,45 @@ while [ -z "$DONE" -a ! -z "$1" ]; do
 	    ;;
 	*)
 	    DONE=1;
-	    XX=$1;
-	    shift;
-	    CMD="$XX --libxo=$XOPTS $@"
 	    ;;
     esac
 done
 
-if [ "$CMD" = "cat" -a -t 0 ]; then
+# There are three ways to get our input.  Remaining arguments are a
+# command and its arguments, which we keep in "$@" so that arguments
+# with spaces or glob characters reach the command intact.  "-c"
+# gives a shell command string, which may hold pipes and redirects;
+# it is run as given, so it must carry its own --libxo option (see
+# xohtml(1)).  Otherwise we wrap stdin.
+if [ $# -gt 0 ]; then
+    XX="$1"
+    shift
+    set -- "$XX" "--libxo=$XOPTS" "$@"
+    SHOW="$*"
+elif [ -n "$CMD" ]; then
+    SHOW="$CMD"
+elif [ -t 0 ]; then
     do_help
+else
+    SHOW=cat
 fi
 
-# Default output goes to an auto-named file under /tmp, which we then
+# Default output goes to an auto-named file under $TMPDIR, which we then
 # open in a browser.  "-f" opts out of both: the caller gets exactly
 # the file they asked for and nothing gets opened for them.
 OPEN=
 if [ -z "$FILE" ]; then
-    DIR="/tmp/${USER}.xohtml"
-    mkdir -p "$DIR"
+    # This name is predictable, so before writing or removing anything
+    # in it, make sure it is a real directory (not a symlink) that we
+    # own, and that no one else can write to it.
+    DIR="${TMPDIR:-/tmp}"
+    DIR="${DIR%/}/${USER:-`id -un`}.xohtml"
+    mkdir -m 700 "$DIR" 2>/dev/null
+    if [ -L "$DIR" -o ! -d "$DIR" -o ! -O "$DIR" ]; then
+        echo "xohtml: $DIR is not a directory owned by you" 1>&2
+        exit 1
+    fi
+    chmod 700 "$DIR" || exit 1
 
     # Sweep old plain runs.  Files saved with -k/--keep use a
     # different prefix (xohtml-keep.*) and are never touched here.
@@ -131,18 +152,24 @@ if [ "$MODE" = internal ]; then
     cat "${LOCAL}/xohtml.js"
     echo '</script>'
 else
-    echo '<link rel="stylesheet" href="'$BASE'/xohtml.css">'
-    echo '<script src="'$BASE'/xohtml.js"></script>'
+    echo '<link rel="stylesheet" href="'"$(esc "$BASE")"'/xohtml.css">'
+    echo '<script src="'"$(esc "$BASE")"'/xohtml.js"></script>'
 fi
 echo '</head>'
 echo '<body>'
 echo '<div id="xohtml-header">'
-echo '<span class="xohtml-cmd">'"$(esc "$CMD")"'</span>'
+echo '<span class="xohtml-cmd">'"$(esc "$SHOW")"'</span>'
 echo '<span class="xohtml-time">'"$(/bin/date)"'</span>'
 echo '</div>'
 echo '<div id="xohtml-content">'
 
-$CMD
+if [ $# -gt 0 ]; then
+    "$@"
+elif [ -n "$CMD" ]; then
+    eval "$CMD"
+else
+    cat
+fi
 
 echo '</div>'
 echo '</body>'
