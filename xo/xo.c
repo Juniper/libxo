@@ -130,7 +130,13 @@ main (int argc UNUSED, char **argv)
     if (argc < 0)
 	return 1;
 
-    while ((rc = getopt_long(argc, argv, "Cc:HI:Jl:O:o:ps:TXW",
+    /*
+     * The leading "+" stops option parsing at the first non-option
+     * (the format), so the field values that follow it are never
+     * taken as options, even when they look like one ("-5", "-W").
+     * Without it, getopt_long() permutes argv and scans everything.
+     */
+    while ((rc = getopt_long(argc, argv, "+Cc:HI:Jl:O:o:ps:TXW",
 				long_opts, NULL)) != -1) {
 
 	switch (rc) {
