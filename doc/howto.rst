@@ -45,7 +45,6 @@ options, which include the following::
   --enable-debug         Turn on debugging
   --enable-text-only     Turn on text-only rendering
   --enable-printflike    Enable use of GCC __printflike attribute
-  --disable-libxo-options  Turn off support for LIBXO_OPTIONS
   --with-gettext=PFX     Specify location of gettext installation
   --with-libslax-prefix=PFX  Specify location of libslax config
 
