@@ -3,8 +3,8 @@ main: status: zero
 main: input '? socket[!contains(path, "/var/run/")]'
 adding filter: 'socket[!contains(path, "/var/run/")]'
 added filter: 0
---- 0: 14
-    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 13
+    000013: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [socket], contents 2, next 0, prev 0 
             000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
                 000003: type 73 (C_NOT), str 10 [!], contents 4, next 0, prev 0 
