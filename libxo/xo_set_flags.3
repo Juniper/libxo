@@ -58,9 +58,7 @@ string lookup
 Log (via stderr) each syslog message (via
 .Xr xo_syslog 3 )
 .It Dv XOF_NO_ENV
-Do not use the
-.Ev LIBXO_OPTIONS
-environment variable.
+Has no effect; it is kept so that existing callers still compile.
 .It Dv XOF_PRETTY
 Make 'pretty printed' output, with the
 addition of indentation and newlines to enhance the readability of
