@@ -3,8 +3,8 @@ main: input ''
 main: input '?interface[2]'
 adding filter: 'interface[2]'
 added filter: 0
---- 0: 7
-    000007: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 6
+    000006: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [interface], contents 2, next 0, prev 0 
             000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
                 000003: type 72 (C_INDEX), str 13 [2], contents 0, next 0, prev 0 
@@ -55,8 +55,8 @@ main: status: zero
 main: input '?interface[1]'
 adding filter: 'interface[1]'
 added filter: 0
---- 0: 7
-    000007: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 6
+    000006: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [interface], contents 2, next 0, prev 0 
             000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
                 000003: type 72 (C_INDEX), str 13 [1], contents 0, next 0, prev 0 
@@ -97,16 +97,16 @@ main: status: zero
 main: input '?socket[2 and protocol='tcp4']'
 adding filter: 'socket[2 and protocol='tcp4']'
 added filter: 0
---- 0: 13
-    000013: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 11
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [socket], contents 2, next 0, prev 0 
             000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
                 000004: type 40 ('('), str 12 [and], contents 3, next 0, prev 0 
-                    000003: type 53 (T_NUMBER), str 10 [2], contents 0, next 7, prev 0 
-                    000007: type 14 (L_EQUALS), str 25 [=], contents 8, next 0, prev 3 
-                        000008: type 74 (C_PATH), str 0 [], contents 6, next 9, prev 0 
-                            000006: type 70 (C_ELEMENT), str 16 [protocol], contents 0, next 0, prev 0 
-                        000009: type 54 (T_QUOTED), str 27 [tcp4], contents 0, next 0, prev 8 
+                    000003: type 53 (T_NUMBER), str 10 [2], contents 0, next 6, prev 0 
+                    000006: type 14 (L_EQUALS), str 25 [=], contents 7, next 0, prev 3 
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
+                            000005: type 70 (C_ELEMENT), str 16 [protocol], contents 0, next 0, prev 0 
+                        000008: type 54 (T_QUOTED), str 27 [tcp4], contents 0, next 0, prev 7 
 main: status: zero
 main: input '{socket'
 main: filter: rc: 16
@@ -155,16 +155,16 @@ main: status: zero
 main: input '?socket[2][protocol='tcp4']'
 adding filter: 'socket[2][protocol='tcp4']'
 added filter: 0
---- 0: 14
-    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 12
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [socket], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 6, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 5, prev 0 
                 000003: type 72 (C_INDEX), str 10 [2], contents 0, next 0, prev 0 
-            000006: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 2 
-                000008: type 14 (L_EQUALS), str 25 [=], contents 9, next 0, prev 0 
-                    000009: type 74 (C_PATH), str 0 [], contents 7, next 10, prev 0 
-                        000007: type 70 (C_ELEMENT), str 16 [protocol], contents 0, next 0, prev 0 
-                    000010: type 54 (T_QUOTED), str 27 [tcp4], contents 0, next 0, prev 9 
+            000005: type 75 (C_PREDICATE), str 0 [], contents 7, next 0, prev 2 
+                000007: type 14 (L_EQUALS), str 25 [=], contents 8, next 0, prev 0 
+                    000008: type 74 (C_PATH), str 0 [], contents 6, next 9, prev 0 
+                        000006: type 70 (C_ELEMENT), str 16 [protocol], contents 0, next 0, prev 0 
+                    000009: type 54 (T_QUOTED), str 27 [tcp4], contents 0, next 0, prev 8 
 main: status: zero
 main: input '{socket'
 xpath_01: duplicate sibling name: 'socket'
@@ -214,16 +214,16 @@ main: status: zero
 main: input '?socket[protocol='tcp4'][2]'
 adding filter: 'socket[protocol='tcp4'][2]'
 added filter: 0
---- 0: 14
-    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 12
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [socket], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 9, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 8, prev 0 
                 000004: type 14 (L_EQUALS), str 19 [=], contents 5, next 0, prev 0 
                     000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0 
                         000003: type 70 (C_ELEMENT), str 10 [protocol], contents 0, next 0, prev 0 
                     000006: type 54 (T_QUOTED), str 21 [tcp4], contents 0, next 0, prev 5 
-            000009: type 75 (C_PREDICATE), str 0 [], contents 10, next 0, prev 2 
-                000010: type 72 (C_INDEX), str 30 [2], contents 0, next 0, prev 0 
+            000008: type 75 (C_PREDICATE), str 0 [], contents 9, next 0, prev 2 
+                000009: type 72 (C_INDEX), str 30 [2], contents 0, next 0, prev 0 
 main: status: zero
 main: input '{socket'
 main: filter: rc: 16
@@ -545,8 +545,8 @@ added filter: 0
     000040: type 74 (C_PATH), str 0 [], contents 36, next 0, prev 0 
         000036: type 70 (C_ELEMENT), str 57 [top], contents 0, next 38, prev 0 
         000038: type 70 (C_ELEMENT), str 63 [h], contents 0, next 0, prev 36 
---- 8: 49
-    000049: type 74 (C_PATH), str 0 [], contents 41, next 0, prev 0 
+--- 8: 48
+    000048: type 74 (C_PATH), str 0 [], contents 41, next 0, prev 0 
         000041: type 70 (C_ELEMENT), str 65 [top], contents 0, next 43, prev 0 
         000043: type 70 (C_ELEMENT), str 71 [item], contents 44, next 0, prev 41 
             000044: type 75 (C_PREDICATE), str 0 [], contents 45, next 0, prev 0 
