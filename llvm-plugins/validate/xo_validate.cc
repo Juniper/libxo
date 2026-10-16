@@ -62,23 +62,83 @@ static llvm::cl::opt<bool> LintWarnings(
 using namespace clang;
 
 /*
- * Table of libxo emit functions: name and the 0-based index of the
- * format-string argument.  Functions taking a va_list (xo_emit_hv,
- * xo_emit_hvf) are omitted - we can validate the format string but
- * cannot inspect the argument list at compile time.
+ * Table of libxo emit functions: name, the 0-based index of the
+ * format-string argument, and XEF_* flags:
+ *
+ * XEF_VA_LIST: the values come in a va_list.  We can still check the
+ *   format string's syntax, but not the argument count or types.
+ *
+ * XEF_PRINTFLIKE: the _p forms, which are static inline wrappers in
+ *   xo.h.  A call to one is still a CallExpr in the caller's source,
+ *   with the caller's literal and arguments, so we check syntax and
+ *   count.  But they are XO_PRINTFLIKE, so clang's -Wformat already
+ *   checks the argument types, and we skip that to avoid reporting
+ *   each bad type twice.  (The wrapper bodies pass "fmt" along as a
+ *   variable, which we skip.)
+ *
+ * The xo_emit_field family takes its format pieces separately and
+ * is not covered here.
  */
+#define XEF_VA_LIST	(1<<0)
+#define XEF_PRINTFLIKE	(1<<1)
+
 struct XoEmitEntry {
     const char *name;
     unsigned    fmt_arg;
+    unsigned    flags;		/* XEF_* flags */
 };
 
 static const XoEmitEntry xo_emit_table[] = {
-    { "xo_emit",        0 },
-    { "xo_emitr",       0 },
-    { "xo_emit_h",      1 },
-    { "xo_emit_f",      1 },
-    { "xo_emit_hf",     2 },
-    { nullptr,          0 },
+    { "xo_emit",               0, 0 },
+    { "xo_emitr",              0, 0 },
+    { "xo_emit_h",             1, 0 },
+    { "xo_emit_hv",            1, XEF_VA_LIST },
+    { "xo_emit_f",             1, 0 },
+    { "xo_emit_hf",            2, 0 },
+    { "xo_emit_hvf",           2, XEF_VA_LIST },
+
+    { "xo_emit_p",             0, XEF_PRINTFLIKE },
+    { "xo_emit_hp",            1, XEF_PRINTFLIKE },
+    { "xo_emit_hvp",           1, XEF_VA_LIST | XEF_PRINTFLIKE },
+    { "xo_emit_fp",            1, XEF_PRINTFLIKE },
+    { "xo_emit_hfp",           2, XEF_PRINTFLIKE },
+    { "xo_emit_hvfp",          2, XEF_VA_LIST | XEF_PRINTFLIKE },
+
+    { "xo_emit_cached",        1, 0 },
+    { "xo_emit_cachedr",       1, 0 },
+    { "xo_emit_cached_h",      2, 0 },
+    { "xo_emit_cached_hv",     2, XEF_VA_LIST },
+    { "xo_emit_cached_f",      2, 0 },
+    { "xo_emit_cached_hf",     3, 0 },
+    { "xo_emit_cached_hvf",    3, XEF_VA_LIST },
+
+    { "xo_emit_cached_p",      1, XEF_PRINTFLIKE },
+    { "xo_emit_cached_hp",     2, XEF_PRINTFLIKE },
+    { "xo_emit_cached_hvp",    2, XEF_VA_LIST | XEF_PRINTFLIKE },
+    { "xo_emit_cached_fp",     2, XEF_PRINTFLIKE },
+    { "xo_emit_cached_hfp",    3, XEF_PRINTFLIKE },
+    { "xo_emit_cached_hvfp",   3, XEF_VA_LIST | XEF_PRINTFLIKE },
+
+    { "xo_emit_warn",          0, 0 },
+    { "xo_emit_warnx",         0, 0 },
+    { "xo_emit_warn_c",        1, 0 },
+    { "xo_emit_warn_hc",       2, 0 },
+    { "xo_emit_warn_hcv",      3, XEF_VA_LIST },
+    { "xo_emit_err",           1, 0 },
+    { "xo_emit_errx",          1, 0 },
+    { "xo_emit_errc",          2, 0 },
+    { "xo_emit_err_v",         2, XEF_VA_LIST },
+
+    { "xo_emit_warn_p",        0, XEF_PRINTFLIKE },
+    { "xo_emit_warnx_p",       0, XEF_PRINTFLIKE },
+    { "xo_emit_warn_cp",       1, XEF_PRINTFLIKE },
+    { "xo_emit_warn_hcp",      2, XEF_PRINTFLIKE },
+    { "xo_emit_warn_hcvp",     3, XEF_VA_LIST | XEF_PRINTFLIKE },
+    { "xo_emit_err_p",         1, XEF_PRINTFLIKE },
+    { "xo_emit_errx_p",        1, XEF_PRINTFLIKE },
+    { "xo_emit_errc_p",        2, XEF_PRINTFLIKE },
+
+    { nullptr,                 0, 0 },
 };
 
 /*
@@ -385,9 +445,11 @@ public:
 
         StringRef name = FD->getName();
         unsigned fmt_arg = UINT_MAX;
+        unsigned eflags = 0;
         for (const XoEmitEntry *e = xo_emit_table; e->name; e++) {
             if (name == e->name) {
                 fmt_arg = e->fmt_arg;
+                eflags = e->flags;
                 break;
             }
         }
@@ -416,6 +478,9 @@ public:
         if (rc < 0)
             return true;    /* parse error already reported */
 
+        if (eflags & XEF_VA_LIST)
+            return true;    /* values are not visible to us */
+
         unsigned expected = (unsigned) ac.args.size();
         unsigned actual   = CE->getNumArgs() - fmt_arg - 1;
 
@@ -423,6 +488,9 @@ public:
             Diags.Report(SL->getBeginLoc(), CountDiagID) << expected << actual;
             return true;
         }
+
+        if (eflags & XEF_PRINTFLIKE)
+            return true;    /* -Wformat checks the types */
 
         if (!Ctx_)
             return true;
