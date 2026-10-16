@@ -673,7 +673,12 @@ static void
 xo_filter_data_verror (xo_filter_data_t *dp, xo_filter_data_ops_t *ops,
 			const char *fmt, va_list vap)
 {
-    if (ops->xfdo_error == NULL)
+    /*
+     * ops (and dp) may be NULL: xo_eval_compile()'s own doc comment
+     * documents passing NULL for both when the caller has no data
+     * context to report through, in which case the failure is silent.
+     */
+    if (ops == NULL || ops->xfdo_error == NULL)
 	return;
 
     ops->xfdo_error(dp, fmt, vap);
@@ -1916,10 +1921,29 @@ xo_eval_attribute (XO_EVAL_ARGS)
     xo_eval_value_t value = { .xev_flags = 0 };
     const char *str = xo_xparse_str(&xfp->xf_xd, xnp->xn_str);
     const char *aval;
-    if (xfp->xf_ops && xfp->xf_ops->xfdo_value_of)
-	aval = xfp->xf_ops->xfdo_value_of(xfp->xf_data, str, -1);
-    else
+    if (xfp->xf_ops && xfp->xf_ops->xfdo_value_of) {
+	/*
+	 * Mark this as a bare attribute reference (vs a compound element
+	 * path, which xo_eval_path builds and passes unmarked) by
+	 * prefixing '@', matching the convention xfdo_value_of backends
+	 * are documented against (see pin_filter_data_value_of_tree's
+	 * "trailing @x" doc comment in libpin).  Without this, a backend
+	 * whose xfdo_value_of has no other way to tell "@foo" apart from
+	 * a child-element path named "foo" has no choice but to guess.
+	 */
+	char buf[256];
+	ssize_t slen = (ssize_t) strlen(str);
+	if (slen + 1 < (ssize_t) sizeof(buf)) {
+	    buf[0] = '@';
+	    memcpy(buf + 1, str, (size_t) slen);
+	    buf[1 + slen] = '\0';
+	    aval = xfp->xf_ops->xfdo_value_of(xfp->xf_data, buf, slen + 1);
+	} else {
+	    aval = NULL;
+	}
+    } else {
 	aval = xo_filter_attr_find(xfp, framep, str);
+    }
     if (aval) {
 	value = xo_eval_value_make(C_STRING, 0, 0);
 	value.xev_str = aval;
@@ -1961,6 +1985,12 @@ xo_eval_path (XO_EVAL_ARGS)
     int step_count = 0;
     int last_is_attr = FALSE;
     xo_xparse_node_id_t id;
+    /*
+     * Only xfdo_value_of backends use the '@'-marker convention (see
+     * xo_eval_attribute); the generic framep-based lookups below
+     * (xo_filter_attr_find/xo_filter_key_find) key on the bare name.
+     */
+    int use_at_marker = (xfp->xf_ops && xfp->xf_ops->xfdo_value_of) ? TRUE : FALSE;
 
     /* Collect all C_ELEMENT / C_ATTRIBUTE steps into a compound key string */
     for (id = xnp->xn_contents; id; id = xnp->xn_next) {
@@ -1972,6 +2002,17 @@ xo_eval_path (XO_EVAL_ARGS)
 		if (path_len + 1 >= (ssize_t) sizeof(path_buf) - 1)
 		    return xo_eval_value_invalid();
 		path_buf[path_len++] = '/';
+	    }
+	    /*
+	     * Mark an attribute step with a leading '@' (e.g. "a/b/@x" or
+	     * bare "@x"), matching xo_eval_attribute's convention, so a
+	     * backend's xfdo_value_of can tell an attribute step apart
+	     * from a child-element step of the same name.
+	     */
+	    if (use_at_marker && xnp->xn_type == C_ATTRIBUTE) {
+		if (path_len + 1 >= (ssize_t) sizeof(path_buf) - 1)
+		    return xo_eval_value_invalid();
+		path_buf[path_len++] = '@';
 	    }
 	    if (path_len + slen >= (ssize_t) sizeof(path_buf) - 1)
 		return xo_eval_value_invalid();
@@ -2121,7 +2162,7 @@ xo_eval_cast_int64 (xo_handle_t *xop, xo_eval_value_t value)
 static char *
 xo_eval_cast_string (xo_handle_t *xop UNUSED, xo_eval_value_t value)
 {
-    char buf[16];
+    char buf[64];
     const char *bp UNUSED = buf;
 
     switch (value.xev_type) {
@@ -2144,7 +2185,22 @@ xo_eval_cast_string (xo_handle_t *xop UNUSED, xo_eval_value_t value)
 	break;
 
     case C_FLOAT:
-	snprintf(buf, sizeof(buf), "%lf", value.xev_float);
+	/*
+	 * XPath's number-to-string conversion (4.2): integral values are
+	 * rendered with no decimal point ("2", not "2.000000"); "%lf"
+	 * always emits 6 decimal digits, which is wrong for the common
+	 * case of integral arithmetic results (e.g. "$n - 1").
+	 */
+	if (isnan(value.xev_float)) {
+	    bp = "NaN";
+	} else if (isinf(value.xev_float)) {
+	    bp = (value.xev_float < 0) ? "-Infinity" : "Infinity";
+	} else if (value.xev_float == (double) (int64_t) value.xev_float
+		   && fabs(value.xev_float) < 1e18) {
+	    snprintf(buf, sizeof(buf), "%" PRId64, (int64_t) value.xev_float);
+	} else {
+	    snprintf(buf, sizeof(buf), "%.17g", value.xev_float);
+	}
 	break;
 
     case M_ERROR:
@@ -4045,6 +4101,49 @@ xo_eval_prog_run (xo_handle_t *xop, xo_filter_t *xfp, xo_tframe_t *framep,
     }
 
     return stack[0];
+}
+
+/*
+ * Public wrapper around xo_eval_prog_run() for non-libxo backends (e.g.
+ * libpin) that don't know xo_eval_value_t's layout: reduce the result to
+ * plain C types instead.  See the declaration in xo_filter.h.
+ */
+char *
+xo_eval_prog_run_simple (xo_handle_t *xop, xo_filter_t *xfp,
+			  xo_tframe_t *framep, xo_xparse_data_t *xdp,
+			  xo_eval_prog_t *prog,
+			  int *is_booleanp, int *bool_valuep,
+			  int *is_missingp)
+{
+    if (is_booleanp)
+	*is_booleanp = 0;
+    if (bool_valuep)
+	*bool_valuep = 0;
+    if (is_missingp)
+	*is_missingp = 0;
+
+    xo_eval_value_t value
+	= xo_eval_prog_run(xop, xfp, framep, xdp, prog, XO_INDENT);
+
+    if (value.xev_flags & (XEVF_MISSING | XEVF_INVALID | XEVF_UNSUPPORTED)) {
+	xo_eval_value_free(value);
+	if (is_missingp)
+	    *is_missingp = 1;
+	return NULL;
+    }
+
+    if (value.xev_type == C_BOOLEAN) {
+	if (is_booleanp)
+	    *is_booleanp = 1;
+	if (bool_valuep)
+	    *bool_valuep = xo_eval_cast_boolean(xop, value);
+	xo_eval_value_free(value);
+	return NULL;
+    }
+
+    char *str = xo_eval_cast_string(xop, value);
+    xo_eval_value_free(value);
+    return str;
 }
 
 /*
