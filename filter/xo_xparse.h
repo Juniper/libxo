@@ -361,7 +361,7 @@ xo_xparse_node_is_attr_axis (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
     return xo_streq(str, "attribute");
 }
 
-void
+int
 xo_xparse_results (xo_xparse_data_t *xdp, xo_xparse_node_id_t id);
 
 void
