@@ -18,6 +18,7 @@
 #include <assert.h>
 #include <sys/param.h>
 
+#include "xo_config.h"
 #include "xo.h"
 #include "xo_encoder.h"
 #include "xo_buf.h"
@@ -149,7 +150,6 @@ typedef struct xo_xparse_ttname_map_s {
 xo_xparse_ttname_map_t xo_xparse_ttname_map[] = {
     { L_AT,			"attribute axis ('@')" },
     { L_CBRACE,			"close brace ('}')" },
-    { L_OBRACK,			"close bracket (']')" },
     { L_COLON,			"colon (':')" },
     { L_COMMA,			"comma (',')" },
     { L_DAMPER,			"logical AND operator ('&&')" },
@@ -544,6 +544,7 @@ xo_xparse_set_input (xo_xparse_data_t *xdp, const char *buf, xo_ssize_t len)
     xdp->xd_start = 0;
 
     xdp->xd_errors = 0;
+    xdp->xd_flags &= ~XDF_LEX_ERROR;
     xdp->xd_col = 0;
     xdp->xd_col_start = 0;
 }
@@ -1101,12 +1102,12 @@ xo_xparse_lexer (xo_xparse_data_t *xdp)
 	     * need to read some more, if the string is long.
 	     */
 	    if (xo_xparse_move_cur(xdp)) /* Move past the first quote */
-		return -1;
+		goto unterminated;
 
 	    for (;;) {
 		if (xdp->xd_cur == xdp->xd_len)
 		    if (xo_xparse_get_input(xdp, 0))
-			return -1;
+			goto unterminated;
 
 		if ((uint8_t) xdp->xd_buf[xdp->xd_cur] == ch1)
 		    break;
@@ -1114,7 +1115,7 @@ xo_xparse_lexer (xo_xparse_data_t *xdp)
 		int bump = (xdp->xd_buf[xdp->xd_cur] == '\\') ? 1 : 0;
 
 		if (xo_xparse_move_cur(xdp))
-		    return -1;
+		    goto unterminated;
 
 		if (bump && xdp->xd_cur < xdp->xd_len)
 		    xdp->xd_cur += bump;
@@ -1226,6 +1227,16 @@ xo_xparse_lexer (xo_xparse_data_t *xdp)
     }
 
     return T_BARE;
+
+ unterminated:
+    /*
+     * Returning EOF here would leave yacc to report a generic
+     * "unexpected input", with no hint that the quote was the cause.
+     */
+    xo_xparse_warn(xdp, "%sfilter expression error: missing close quote "
+		   "(%c) for string", xo_xparse_location(xdp), ch1);
+    xdp->xd_flags |= XDF_LEX_ERROR;
+    return M_ERROR;
 }
 
 /**
@@ -1258,6 +1269,7 @@ xo_xpath_yylex (xo_xparse_data_t *xdp, xo_xparse_node_id_t *yylvalp)
     if (xnp == NULL) {
 	xo_xparse_warn(xdp, "%sfilter expression error: out of memory",
 		       xo_xparse_location(xdp));
+	xdp->xd_flags |= XDF_LEX_ERROR;
 	xdp->xd_last = M_ERROR;
         return M_ERROR;
     }
@@ -1338,6 +1350,7 @@ xo_xpath_yylex (xo_xparse_data_t *xdp, xo_xparse_node_id_t *yylvalp)
 	if (xnp->xn_str == 0) {
 	    xo_xparse_warn(xdp, "%sfilter expression error: out of memory",
 			   xo_xparse_location(xdp));
+	    xdp->xd_flags |= XDF_LEX_ERROR;
 	    xnp->xn_type = xdp->xd_last = rc = M_ERROR;
 	}
     }
@@ -1354,6 +1367,20 @@ xo_xpath_yylex (xo_xparse_data_t *xdp, xo_xparse_node_id_t *yylvalp)
 }
 
 /*
+ * The parser's initial state number, so we can tell when an error
+ * arrives before any valid input.  byacc starts in state 0.  When
+ * the day comes that we need to support bison, this needs to be
+ * checked against bison's state numbering, along with the other
+ * byacc-isms (the yysindex/yyrindex tables used by
+ * xo_xparse_expecting_error and the yyparse rename in Makefile.am).
+ */
+#if HAVE_BYACC
+#define YY_INITIAL_STATE 0
+#else /* HAVE_BYACC */
+#error "YY_INITIAL_STATE is not known for this parser generator"
+#endif /* HAVE_BYACC */
+
+/*
  * Return a better class of error message
  * @returns freshly allocated string containing error message
  */
@@ -1363,34 +1390,17 @@ xo_xparse_syntax_error (xo_xparse_data_t *xdp, const char *token,
 {
     char buf[BUFSIZ], *cp = buf, *ep = buf + sizeof(buf);
 
-    /*
-     * If yystate is 1, then we're in our initial state and have
-     * not seen any valid input.  We handle this state specifically
-     * to give better error messages.
-     */
-    if (yystate == 1) {
-	if (yychar == -1)
-	    return xo_strdup("unexpected end-of-file found (empty input)");
+    /* EOF in the initial state means there was no input */
+    if (yystate == YY_INITIAL_STATE && yychar < 0)
+	return xo_strdup("empty expression");
 
-	if (yychar == L_LESS)
-	    return xo_strdup("unexpected '<'; file may be XML/XSLT");
+    char *msg = xo_xparse_expecting_error(xdp, token, yystate, yychar);
+    if (msg)
+	return msg;
 
-	SNPRINTF(cp, ep, "missing 'version' statement");
-	if (token)
-	    SNPRINTF(cp, ep, "; %s is not legal", token);
-
-    } else if (yychar == -1) {
-	SNPRINTF(cp, ep, "unexpected end-of-expression");
-
-    } else {
-	char *msg = xo_xparse_expecting_error(xdp, token, yystate, yychar);
-	if (msg)
-	    return msg;
-
-	SNPRINTF(cp, ep, "unexpected input");
-	if (token)
-	    SNPRINTF(cp, ep, ": %s", token);
-    }
+    SNPRINTF(cp, ep, "unexpected input");
+    if (token)
+	SNPRINTF(cp, ep, ": %s", token);
 
     return xo_strdup(buf);
 }
@@ -1414,14 +1424,22 @@ xo_xpath_yyerror (xo_xparse_data_t *xdp, const char *str, int yystate)
     
     static const char leader2[] = "error recovery ignores input";
     const char *token;
-    char buf[BUFSIZ * 4];
 
     if (strncmp(str, leader2, sizeof(leader2) - 1) != 0)
 	xdp->xd_errors += 1;
 
-    token = xo_xparse_token_name_fancy[xo_xparse_token_translate(xdp->xd_last)];
+    /* The lexer has said what went wrong; yacc's echo adds nothing */
+    if (xdp->xd_flags & XDF_LEX_ERROR)
+	return 0;
 
-    buf[0] = '\0';
+    /*
+     * Use the bounds-checked lookup; indexing the table directly
+     * read past its end for out-of-range values.
+     */
+    if (xdp->xd_last < 0)
+	token = "end of expression";
+    else
+	token = xo_xparse_fancy_token_name(xdp->xd_last);
 
     /*
      * Two possibilities: generic "syntax error" or some
@@ -1440,9 +1458,9 @@ xo_xpath_yyerror (xo_xparse_data_t *xdp, const char *str, int yystate)
 	}
     }
 
-    xo_xparse_warn(xdp, "%sfilter expression error: %s%s%s%s%s",
+    xo_xparse_warn(xdp, "%sfilter expression error: %s%s%s",
 		   xo_xparse_location(xdp), str,
-		   token ? " before " : "", token, token ? ": " : "", buf);
+		   token ? " before " : "", token ?: "");
 
     return 0;
 }
