@@ -6,17 +6,17 @@ main: status: zero
 main: input '?item[choose2(override, base-id) = '42']'
 adding filter: 'item[choose2(override, base-id) = '42']'
 added filter: 0
---- 0: 17
-    000017: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 15
+    000015: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
             000002: type 75 (C_PREDICATE), str 0 [], contents 11, next 0, prev 0 
                 000011: type 14 (L_EQUALS), str 39 [=], contents 3, next 0, prev 0 
-                    000003: type 52 (T_FUNCTION_NAME), str 8 [choose2], contents 7, next 13, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [choose2], contents 7, next 12, prev 0 
                         000007: type 74 (C_PATH), str 0 [], contents 5, next 10, prev 0 
                             000005: type 70 (C_ELEMENT), str 18 [override], contents 0, next 0, prev 0 
                         000010: type 74 (C_PATH), str 0 [], contents 8, next 0, prev 7 
                             000008: type 70 (C_ELEMENT), str 29 [base-id], contents 0, next 0, prev 0 
-                    000013: type 54 (T_QUOTED), str 41 [42], contents 0, next 0, prev 3 
+                    000012: type 54 (T_QUOTED), str 41 [42], contents 0, next 0, prev 3 
 main: status: zero
 main: input '{item'
 main: status: zero
@@ -76,17 +76,17 @@ main: status: zero
 main: input '?item[choose2(override, val) > 3]'
 adding filter: 'item[choose2(override, val) > 3]'
 added filter: 0
---- 0: 17
-    000017: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 15
+    000015: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
             000002: type 75 (C_PREDICATE), str 0 [], contents 11, next 0, prev 0 
                 000011: type 15 (L_GRTR), str 35 [>], contents 3, next 0, prev 0 
-                    000003: type 52 (T_FUNCTION_NAME), str 8 [choose2], contents 7, next 13, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [choose2], contents 7, next 12, prev 0 
                         000007: type 74 (C_PATH), str 0 [], contents 5, next 10, prev 0 
                             000005: type 70 (C_ELEMENT), str 18 [override], contents 0, next 0, prev 0 
                         000010: type 74 (C_PATH), str 0 [], contents 8, next 0, prev 7 
                             000008: type 70 (C_ELEMENT), str 29 [val], contents 0, next 0, prev 0 
-                    000013: type 53 (T_NUMBER), str 37 [3], contents 0, next 0, prev 3 
+                    000012: type 53 (T_NUMBER), str 37 [3], contents 0, next 0, prev 3 
 main: status: zero
 main: input '{item'
 xpath_01: duplicate sibling name: 'item'
@@ -150,18 +150,18 @@ main: status: zero
 main: input '?item[(score ?: default_score) > 10]'
 adding filter: 'item[(score ?: default_score) > 10]'
 added filter: 0
---- 0: 17
-    000017: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 15
+    000015: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
             000002: type 75 (C_PREDICATE), str 0 [], contents 11, next 0, prev 0 
                 000011: type 15 (L_GRTR), str 44 [>], contents 3, next 0, prev 0 
-                    000003: type 71 (C_EXPR), str 8 [(], contents 5, next 13, prev 0 
+                    000003: type 71 (C_EXPR), str 8 [(], contents 5, next 12, prev 0 
                         000005: type 52 (T_FUNCTION_NAME), str 36 [choose2], contents 6, next 0, prev 0 
                             000006: type 74 (C_PATH), str 0 [], contents 4, next 10, prev 0 
                                 000004: type 70 (C_ELEMENT), str 10 [score], contents 0, next 0, prev 0 
                             000010: type 74 (C_PATH), str 0 [], contents 8, next 0, prev 6 
                                 000008: type 70 (C_ELEMENT), str 20 [default_score], contents 0, next 0, prev 0 
-                    000013: type 53 (T_NUMBER), str 46 [10], contents 0, next 0, prev 3 
+                    000012: type 53 (T_NUMBER), str 46 [10], contents 0, next 0, prev 3 
 main: status: zero
 main: input '{item'
 main: status: zero
@@ -224,19 +224,19 @@ main: status: zero
 main: input '?item[(number(score) ?: default_score) > 10]'
 adding filter: 'item[(number(score) ?: default_score) > 10]'
 added filter: 0
---- 0: 21
-    000021: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 18
+    000018: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 15, next 0, prev 0 
-                000015: type 15 (L_GRTR), str 55 [>], contents 3, next 0, prev 0 
-                    000003: type 71 (C_EXPR), str 8 [(], contents 9, next 17, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 14, next 0, prev 0 
+                000014: type 15 (L_GRTR), str 55 [>], contents 3, next 0, prev 0 
+                    000003: type 71 (C_EXPR), str 8 [(], contents 9, next 15, prev 0 
                         000009: type 52 (T_FUNCTION_NAME), str 47 [choose2], contents 4, next 0, prev 0 
-                            000004: type 52 (T_FUNCTION_NAME), str 10 [number], contents 8, next 14, prev 0 
+                            000004: type 52 (T_FUNCTION_NAME), str 10 [number], contents 8, next 13, prev 0 
                                 000008: type 74 (C_PATH), str 0 [], contents 6, next 0, prev 0 
                                     000006: type 70 (C_ELEMENT), str 19 [score], contents 0, next 0, prev 0 
-                            000014: type 74 (C_PATH), str 0 [], contents 12, next 0, prev 4 
-                                000012: type 70 (C_ELEMENT), str 31 [default_score], contents 0, next 0, prev 0 
-                    000017: type 53 (T_NUMBER), str 57 [10], contents 0, next 0, prev 3 
+                            000013: type 74 (C_PATH), str 0 [], contents 11, next 0, prev 4 
+                                000011: type 70 (C_ELEMENT), str 31 [default_score], contents 0, next 0, prev 0 
+                    000015: type 53 (T_NUMBER), str 57 [10], contents 0, next 0, prev 3 
 main: status: zero
 main: input '{item'
 main: status: zero
@@ -298,22 +298,22 @@ main: status: zero
 main: input '?item[(score > 0 ? score : default_score) > 10]'
 adding filter: 'item[(score > 0 ? score : default_score) > 10]'
 added filter: 0
---- 0: 22
-    000022: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 19
+    000019: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 16, next 0, prev 0 
-                000016: type 15 (L_GRTR), str 53 [>], contents 3, next 0, prev 0 
-                    000003: type 71 (C_EXPR), str 8 [(], contents 8, next 18, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 15, next 0, prev 0 
+                000015: type 15 (L_GRTR), str 53 [>], contents 3, next 0, prev 0 
+                    000003: type 71 (C_EXPR), str 8 [(], contents 8, next 16, prev 0 
                         000008: type 52 (T_FUNCTION_NAME), str 46 [choose], contents 5, next 0, prev 0 
-                            000005: type 15 (L_GRTR), str 16 [>], contents 6, next 12, prev 0 
+                            000005: type 15 (L_GRTR), str 16 [>], contents 6, next 11, prev 0 
                                 000006: type 74 (C_PATH), str 0 [], contents 4, next 7, prev 0 
                                     000004: type 70 (C_ELEMENT), str 10 [score], contents 0, next 0, prev 0 
                                 000007: type 53 (T_NUMBER), str 18 [0], contents 0, next 0, prev 6 
-                            000012: type 74 (C_PATH), str 0 [], contents 10, next 15, prev 5 
-                                000010: type 70 (C_ELEMENT), str 22 [score], contents 0, next 0, prev 0 
-                            000015: type 74 (C_PATH), str 0 [], contents 13, next 0, prev 12 
-                                000013: type 70 (C_ELEMENT), str 30 [default_score], contents 0, next 0, prev 0 
-                    000018: type 53 (T_NUMBER), str 55 [10], contents 0, next 0, prev 3 
+                            000011: type 74 (C_PATH), str 0 [], contents 9, next 14, prev 5 
+                                000009: type 70 (C_ELEMENT), str 22 [score], contents 0, next 0, prev 0 
+                            000014: type 74 (C_PATH), str 0 [], contents 12, next 0, prev 11 
+                                000012: type 70 (C_ELEMENT), str 30 [default_score], contents 0, next 0, prev 0 
+                    000016: type 53 (T_NUMBER), str 55 [10], contents 0, next 0, prev 3 
 main: status: zero
 main: input '{item'
 main: status: zero
@@ -377,12 +377,12 @@ main: status: zero
 main: input '?item[(a ?: b ?: c) = '7']'
 adding filter: 'item[(a ?: b ?: c) = '7']'
 added filter: 0
---- 0: 21
-    000021: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 19
+    000019: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
             000002: type 75 (C_PREDICATE), str 0 [], contents 15, next 0, prev 0 
                 000015: type 14 (L_EQUALS), str 42 [=], contents 3, next 0, prev 0 
-                    000003: type 71 (C_EXPR), str 8 [(], contents 5, next 17, prev 0 
+                    000003: type 71 (C_EXPR), str 8 [(], contents 5, next 16, prev 0 
                         000005: type 52 (T_FUNCTION_NAME), str 34 [choose2], contents 6, next 0, prev 0 
                             000006: type 74 (C_PATH), str 0 [], contents 4, next 9, prev 0 
                                 000004: type 70 (C_ELEMENT), str 10 [a], contents 0, next 0, prev 0 
@@ -391,7 +391,7 @@ added filter: 0
                                     000008: type 70 (C_ELEMENT), str 16 [b], contents 0, next 0, prev 0 
                                 000014: type 74 (C_PATH), str 0 [], contents 12, next 0, prev 10 
                                     000012: type 70 (C_ELEMENT), str 22 [c], contents 0, next 0, prev 0 
-                    000017: type 54 (T_QUOTED), str 44 [7], contents 0, next 0, prev 3 
+                    000016: type 54 (T_QUOTED), str 44 [7], contents 0, next 0, prev 3 
 main: status: zero
 main: input '{item'
 main: status: zero
@@ -459,23 +459,23 @@ main: status: zero
 main: input '?item[(number(a) ?: number(b) ?: c) = '7']'
 adding filter: 'item[(number(a) ?: number(b) ?: c) = '7']'
 added filter: 0
---- 0: 29
-    000029: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 25
+    000025: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 23, next 0, prev 0 
-                000023: type 14 (L_EQUALS), str 64 [=], contents 3, next 0, prev 0 
-                    000003: type 71 (C_EXPR), str 8 [(], contents 9, next 25, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 21, next 0, prev 0 
+                000021: type 14 (L_EQUALS), str 64 [=], contents 3, next 0, prev 0 
+                    000003: type 71 (C_EXPR), str 8 [(], contents 9, next 22, prev 0 
                         000009: type 52 (T_FUNCTION_NAME), str 56 [choose2], contents 4, next 0, prev 0 
-                            000004: type 52 (T_FUNCTION_NAME), str 10 [number], contents 8, next 17, prev 0 
+                            000004: type 52 (T_FUNCTION_NAME), str 10 [number], contents 8, next 16, prev 0 
                                 000008: type 74 (C_PATH), str 0 [], contents 6, next 0, prev 0 
                                     000006: type 70 (C_ELEMENT), str 19 [a], contents 0, next 0, prev 0 
-                            000017: type 52 (T_FUNCTION_NAME), str 48 [choose2], contents 12, next 0, prev 4 
-                                000012: type 52 (T_FUNCTION_NAME), str 27 [number], contents 16, next 22, prev 0 
-                                    000016: type 74 (C_PATH), str 0 [], contents 14, next 0, prev 0 
-                                        000014: type 70 (C_ELEMENT), str 36 [b], contents 0, next 0, prev 0 
-                                000022: type 74 (C_PATH), str 0 [], contents 20, next 0, prev 12 
-                                    000020: type 70 (C_ELEMENT), str 44 [c], contents 0, next 0, prev 0 
-                    000025: type 54 (T_QUOTED), str 66 [7], contents 0, next 0, prev 3 
+                            000016: type 52 (T_FUNCTION_NAME), str 48 [choose2], contents 11, next 0, prev 4 
+                                000011: type 52 (T_FUNCTION_NAME), str 27 [number], contents 15, next 20, prev 0 
+                                    000015: type 74 (C_PATH), str 0 [], contents 13, next 0, prev 0 
+                                        000013: type 70 (C_ELEMENT), str 36 [b], contents 0, next 0, prev 0 
+                                000020: type 74 (C_PATH), str 0 [], contents 18, next 0, prev 11 
+                                    000018: type 70 (C_ELEMENT), str 44 [c], contents 0, next 0, prev 0 
+                    000022: type 54 (T_QUOTED), str 66 [7], contents 0, next 0, prev 3 
 main: status: zero
 main: input '{item'
 main: status: zero
@@ -544,15 +544,15 @@ main: status: zero
 main: input '?item[normalize-space(text) = 'hello world']'
 adding filter: 'item[normalize-space(text) = 'hello world']'
 added filter: 0
---- 0: 14
-    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 12
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
             000002: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0 
                 000008: type 14 (L_EQUALS), str 33 [=], contents 3, next 0, prev 0 
-                    000003: type 52 (T_FUNCTION_NAME), str 8 [normalize-space], contents 7, next 10, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [normalize-space], contents 7, next 9, prev 0 
                         000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
                             000005: type 70 (C_ELEMENT), str 26 [text], contents 0, next 0, prev 0 
-                    000010: type 54 (T_QUOTED), str 35 [hello world], contents 0, next 0, prev 3 
+                    000009: type 54 (T_QUOTED), str 35 [hello world], contents 0, next 0, prev 3 
 main: status: zero
 main: input '{item'
 main: status: zero
@@ -596,15 +596,15 @@ main: status: zero
 main: input '?item[contains(normalize-space(text), 'foo bar')]'
 adding filter: 'item[contains(normalize-space(text), 'foo bar')]'
 added filter: 0
---- 0: 18
-    000018: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 15
+    000015: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
             000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
                 000003: type 52 (T_FUNCTION_NAME), str 8 [contains], contents 5, next 0, prev 0 
-                    000005: type 52 (T_FUNCTION_NAME), str 19 [normalize-space], contents 9, next 12, prev 0 
+                    000005: type 52 (T_FUNCTION_NAME), str 19 [normalize-space], contents 9, next 11, prev 0 
                         000009: type 74 (C_PATH), str 0 [], contents 7, next 0, prev 0 
                             000007: type 70 (C_ELEMENT), str 37 [text], contents 0, next 0, prev 0 
-                    000012: type 54 (T_QUOTED), str 46 [foo bar], contents 0, next 0, prev 5 
+                    000011: type 54 (T_QUOTED), str 46 [foo bar], contents 0, next 0, prev 5 
 main: status: zero
 main: input '{item'
 main: status: zero
