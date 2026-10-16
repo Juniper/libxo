@@ -1,8 +1,8 @@
 main: input '?one/two[three == "4"]'
 adding filter: 'one/two[three == "4"]'
 added filter: 0
---- 0: 12
-    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 11
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [one], contents 0, next 3, prev 0 
         000003: type 70 (C_ELEMENT), str 7 [two], contents 4, next 0, prev 1 
             000004: type 75 (C_PREDICATE), str 0 [], contents 6, next 0, prev 0 
