@@ -57,6 +57,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <limits.h>
+#include <errno.h>
 
 #include "xo.h"
 #include "xo_encoder.h"
@@ -631,6 +632,10 @@ csv_record_path (xo_handle_t *xop, csv_private_t *csv, const char *path_raw)
     char *cp, *ep, *np;
     ssize_t len = strlen(path_raw);
     char *path_buf = xo_realloc(NULL, len + 1);
+    if (path_buf == NULL) {
+	xo_failure(xop, "allocation failure for path '%s'", path_raw);
+	return -1;
+    }
 
     memcpy(path_buf, path_raw, len + 1);
 
@@ -645,7 +650,8 @@ csv_record_path (xo_handle_t *xop, csv_private_t *csv, const char *path_raw)
 
     path_frame_t *path = xo_realloc(NULL, sizeof(path[0]) * count);
     if (path == NULL) {
-	xo_failure(xop, "allocation failure for path '%s'", path_buf);
+	xo_failure(xop, "allocation failure for path '%s'", path_raw);
+	xo_free(path_buf);
 	return -1;
     }
 
@@ -761,6 +767,35 @@ csv_data (xo_handle_t *xop UNUSED, csv_private_t *csv UNUSED,
 }
 
 /*
+ * Write out the data buffer.  write() can return a short count (a pipe
+ * or a signal can cut it off), so we loop until it's all out, instead
+ * of silently dropping the tail.  The buffer is reset even on error,
+ * since keeping the data would only replay it on the next flush.
+ */
+static int
+csv_flush (xo_buffer_t *xbp)
+{
+    const char *cp = xbp->xb_bufp;
+    const char *ep = xbp->xb_curp;
+    int rc = 0;
+
+    while (cp < ep) {
+	ssize_t len = write(1, cp, ep - cp);
+	if (len < 0) {
+	    if (errno == EINTR)
+		continue;
+	    rc = -1;
+	    break;
+	}
+
+	cp += len;
+    }
+
+    xo_buf_reset(xbp);
+    return rc;
+}
+
+/*
  * The callback from libxo, passing us operations/events as they
  * happen.
  */
@@ -820,11 +855,7 @@ csv_handler (XO_ENCODER_HANDLER_ARGS)
 	break;
 
     case XO_OP_FLUSH:		   /* Clean up function */
-	rc = write(1, xbp->xb_bufp, xbp->xb_curp - xbp->xb_bufp);
-	if (rc > 0)
-	    rc = 0;
-
-	xo_buf_reset(xbp);
+	rc = csv_flush(xbp);
 	break;
 
     case XO_OP_DESTROY:		   /* Clean up function */
