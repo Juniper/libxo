@@ -255,7 +255,10 @@ start :
         xpath_union_expression
 		{
 		    $$ = xo_xparse_yyval(xparse_data, $1);
-		    xo_xparse_results(xparse_data, $1);
+		    if (xo_xparse_results(xparse_data, $1) < 0) {
+			yyerror("out of memory");
+			YYABORT;
+		    }
 		    xparse_data->xd_errors = yynerrs;
 		}
 	;
