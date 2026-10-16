@@ -47,6 +47,7 @@ AS_IF([test -z "$YACC"],
   [AC_MSG_ERROR([byacc is required to build the XPath filter; please install byacc])])
 AS_IF([$YACC --version 2>/dev/null | grep -qi bison],
   [AC_MSG_ERROR([byacc is required to build the XPath filter; the detected yacc is GNU bison, which is not compatible. Please install byacc])])
+AC_DEFINE([HAVE_BYACC], [1], [Define to 1 if the parser is built with byacc])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_INLINE
