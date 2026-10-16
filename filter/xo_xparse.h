@@ -48,7 +48,7 @@ typedef struct xo_xparse_data_s {
     unsigned xd_line;           /* Line number */
     unsigned xd_col;		/* Column number */
     unsigned xd_col_start;	/* First column of current line */
-    xo_xparse_token_t xd_last;	/* Last token returned */
+    int xd_last;		/* Last token returned (-1 for EOF) */
     xo_xparse_token_t xd_ttype;	/* Magic token to return */
 
     xo_xparse_node_id_t *xd_paths;  /* Root of each parse tree */
@@ -80,6 +80,7 @@ typedef struct xo_xparse_data_s {
 
 #define XDF_ALL_NOTS		(1<<4)	/* All the paths are "not"s */
 #define XDF_ALL_ABS		(1<<5)	/* All the paths are absolute paths */
+#define XDF_LEX_ERROR		(1<<6)	/* Lexer has reported an error */
 
 extern const int xo_xparse_num_tokens;
 extern const char *xo_xparse_keyword_string[];
