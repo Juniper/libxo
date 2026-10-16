@@ -290,11 +290,16 @@ csv_quote_flags (xo_handle_t *xop UNUSED, csv_private_t *csv UNUSED,
     size_t len = strlen(value);
     uint32_t rc = 0;
 
+    /*
+     * Leading or trailing whitespace needs quotes.  An empty value has
+     * neither, and value[len - 1] would read before the string.  The
+     * ctype functions need an unsigned char value; a plain char cast
+     * to int is negative for UTF-8 bytes, which is undefined behavior.
+     */
     if (strcspn(value, quoted) != len)
 	rc |= QF_NEEDS_QUOTES;
-    else if (isspace((int) value[0]))	/* Leading whitespace */
-	rc |= QF_NEEDS_QUOTES;
-    else if (isspace((int) value[len - 1])) /* Trailing whitespace */
+    else if (len != 0 && (isspace((unsigned char) value[0])
+			  || isspace((unsigned char) value[len - 1])))
 	rc |= QF_NEEDS_QUOTES;
 
     if (strcspn(value, escaped) != len)
