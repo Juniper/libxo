@@ -3,33 +3,33 @@ adding filter: '/one[a>4.5 && a <6.5]/two[b>=5 div 2]/three[c<-4]/four'
 added filter: 0
 --- 0: 1
     000001: type 67 (C_ABSOLUTE), str 1 [/], contents 0, next 2, prev 0 
-    000002: type 70 (C_ELEMENT), str 3 [one], contents 3, next 17, prev 1 
+    000002: type 70 (C_ELEMENT), str 3 [one], contents 3, next 15, prev 1 
         000003: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0 
             000008: type 40 ('('), str 17 [&&], contents 5, next 0, prev 0 
-                000005: type 15 (L_GRTR), str 11 [>], contents 6, next 11, prev 0 
+                000005: type 15 (L_GRTR), str 11 [>], contents 6, next 10, prev 0 
                     000006: type 74 (C_PATH), str 0 [], contents 4, next 7, prev 0 
                         000004: type 70 (C_ELEMENT), str 9 [a], contents 0, next 0, prev 0 
                     000007: type 53 (T_NUMBER), str 13 [4.5], contents 0, next 0, prev 6 
-                000011: type 17 (L_LESS), str 22 [<], contents 12, next 0, prev 5 
-                    000012: type 74 (C_PATH), str 0 [], contents 10, next 13, prev 0 
-                        000010: type 70 (C_ELEMENT), str 20 [a], contents 0, next 0, prev 0 
-                    000013: type 53 (T_NUMBER), str 24 [6.5], contents 0, next 0, prev 12 
-    000017: type 70 (C_ELEMENT), str 32 [two], contents 18, next 29, prev 2 
-        000018: type 75 (C_PREDICATE), str 0 [], contents 20, next 0, prev 0 
-            000020: type 16 (L_GRTREQ), str 40 [>=], contents 21, next 0, prev 0 
-                000021: type 74 (C_PATH), str 0 [], contents 19, next 23, prev 0 
-                    000019: type 70 (C_ELEMENT), str 38 [b], contents 0, next 0, prev 0 
-                000023: type 41 (K_DIV), str 45 [div], contents 22, next 0, prev 21 
-                    000022: type 53 (T_NUMBER), str 43 [5], contents 0, next 25, prev 0 
-                    000025: type 53 (T_NUMBER), str 49 [2], contents 0, next 0, prev 22 
-    000029: type 70 (C_ELEMENT), str 55 [three], contents 30, next 39, prev 17 
-        000030: type 75 (C_PREDICATE), str 0 [], contents 32, next 0, prev 0 
-            000032: type 17 (L_LESS), str 65 [<], contents 33, next 0, prev 0 
-                000033: type 74 (C_PATH), str 0 [], contents 31, next 34, prev 0 
-                    000031: type 70 (C_ELEMENT), str 63 [c], contents 0, next 0, prev 0 
-                000034: type 86 (C_UNI_MINUS), str 67 [-], contents 35, next 0, prev 33 
-                    000035: type 53 (T_NUMBER), str 69 [4], contents 0, next 0, prev 0 
-    000039: type 70 (C_ELEMENT), str 75 [four], contents 0, next 0, prev 29 
+                000010: type 17 (L_LESS), str 22 [<], contents 11, next 0, prev 5 
+                    000011: type 74 (C_PATH), str 0 [], contents 9, next 12, prev 0 
+                        000009: type 70 (C_ELEMENT), str 20 [a], contents 0, next 0, prev 0 
+                    000012: type 53 (T_NUMBER), str 24 [6.5], contents 0, next 0, prev 11 
+    000015: type 70 (C_ELEMENT), str 32 [two], contents 16, next 25, prev 2 
+        000016: type 75 (C_PREDICATE), str 0 [], contents 18, next 0, prev 0 
+            000018: type 16 (L_GRTREQ), str 40 [>=], contents 19, next 0, prev 0 
+                000019: type 74 (C_PATH), str 0 [], contents 17, next 21, prev 0 
+                    000017: type 70 (C_ELEMENT), str 38 [b], contents 0, next 0, prev 0 
+                000021: type 41 (K_DIV), str 45 [div], contents 20, next 0, prev 19 
+                    000020: type 53 (T_NUMBER), str 43 [5], contents 0, next 22, prev 0 
+                    000022: type 53 (T_NUMBER), str 49 [2], contents 0, next 0, prev 20 
+    000025: type 70 (C_ELEMENT), str 55 [three], contents 26, next 34, prev 15 
+        000026: type 75 (C_PREDICATE), str 0 [], contents 28, next 0, prev 0 
+            000028: type 17 (L_LESS), str 65 [<], contents 29, next 0, prev 0 
+                000029: type 74 (C_PATH), str 0 [], contents 27, next 30, prev 0 
+                    000027: type 70 (C_ELEMENT), str 63 [c], contents 0, next 0, prev 0 
+                000030: type 86 (C_UNI_MINUS), str 67 [-], contents 31, next 0, prev 29 
+                    000031: type 53 (T_NUMBER), str 69 [4], contents 0, next 0, prev 0 
+    000034: type 70 (C_ELEMENT), str 75 [four], contents 0, next 0, prev 25 
 main: status: zero
 main: input '?/uno[a<-3 + 5 div 2]/dos[3+5 == 2+6]/tres'
 adding filter: '/uno[a<-3 + 5 div 2]/dos[3+5 == 2+6]/tres'
@@ -37,56 +37,56 @@ added filter: 0
 xpath_01: test: filter expression feature is unsupported: plus sign ('+')
 --- 0: 1
     000001: type 67 (C_ABSOLUTE), str 1 [/], contents 0, next 2, prev 0 
-    000002: type 70 (C_ELEMENT), str 3 [one], contents 3, next 17, prev 1 
+    000002: type 70 (C_ELEMENT), str 3 [one], contents 3, next 15, prev 1 
         000003: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0 
             000008: type 40 ('('), str 17 [&&], contents 5, next 0, prev 0 
-                000005: type 15 (L_GRTR), str 11 [>], contents 6, next 11, prev 0 
+                000005: type 15 (L_GRTR), str 11 [>], contents 6, next 10, prev 0 
                     000006: type 74 (C_PATH), str 0 [], contents 4, next 7, prev 0 
                         000004: type 70 (C_ELEMENT), str 9 [a], contents 0, next 0, prev 0 
                     000007: type 53 (T_NUMBER), str 13 [4.5], contents 0, next 0, prev 6 
-                000011: type 17 (L_LESS), str 22 [<], contents 12, next 0, prev 5 
-                    000012: type 74 (C_PATH), str 0 [], contents 10, next 13, prev 0 
-                        000010: type 70 (C_ELEMENT), str 20 [a], contents 0, next 0, prev 0 
-                    000013: type 53 (T_NUMBER), str 24 [6.5], contents 0, next 0, prev 12 
-    000017: type 70 (C_ELEMENT), str 32 [two], contents 18, next 29, prev 2 
-        000018: type 75 (C_PREDICATE), str 0 [], contents 20, next 0, prev 0 
-            000020: type 16 (L_GRTREQ), str 40 [>=], contents 21, next 0, prev 0 
-                000021: type 74 (C_PATH), str 0 [], contents 19, next 23, prev 0 
-                    000019: type 70 (C_ELEMENT), str 38 [b], contents 0, next 0, prev 0 
-                000023: type 41 (K_DIV), str 45 [div], contents 22, next 0, prev 21 
-                    000022: type 53 (T_NUMBER), str 43 [5], contents 0, next 25, prev 0 
-                    000025: type 53 (T_NUMBER), str 49 [2], contents 0, next 0, prev 22 
-    000029: type 70 (C_ELEMENT), str 55 [three], contents 30, next 39, prev 17 
-        000030: type 75 (C_PREDICATE), str 0 [], contents 32, next 0, prev 0 
-            000032: type 17 (L_LESS), str 65 [<], contents 33, next 0, prev 0 
-                000033: type 74 (C_PATH), str 0 [], contents 31, next 34, prev 0 
-                    000031: type 70 (C_ELEMENT), str 63 [c], contents 0, next 0, prev 0 
-                000034: type 86 (C_UNI_MINUS), str 67 [-], contents 35, next 0, prev 33 
-                    000035: type 53 (T_NUMBER), str 69 [4], contents 0, next 0, prev 0 
-    000039: type 70 (C_ELEMENT), str 75 [four], contents 0, next 0, prev 29 
---- 1: 42
-    000042: type 67 (C_ABSOLUTE), str 80 [/], contents 0, next 43, prev 0 
-    000043: type 70 (C_ELEMENT), str 82 [uno], contents 44, next 59, prev 42 
-        000044: type 75 (C_PREDICATE), str 0 [], contents 46, next 0, prev 0 
-            000046: type 17 (L_LESS), str 90 [<], contents 47, next 0, prev 0 
-                000047: type 74 (C_PATH), str 0 [], contents 45, next 50, prev 0 
-                    000045: type 70 (C_ELEMENT), str 88 [a], contents 0, next 0, prev 0 
-                000050: type 25 (L_PLUS), str 96 [+], contents 48, next 0, prev 47 
-                    000048: type 86 (C_UNI_MINUS), str 92 [-], contents 49, next 53, prev 0 
-                        000049: type 53 (T_NUMBER), str 94 [3], contents 0, next 0, prev 0 
-                    000053: type 41 (K_DIV), str 100 [div], contents 52, next 0, prev 48 
-                        000052: type 53 (T_NUMBER), str 98 [5], contents 0, next 55, prev 0 
-                        000055: type 53 (T_NUMBER), str 104 [2], contents 0, next 0, prev 52 
-    000059: type 70 (C_ELEMENT), str 110 [dos], contents 60, next 74, prev 43 
-        000060: type 75 (C_PREDICATE), str 0 [], contents 65, next 0, prev 0 
-            000065: type 14 (L_EQUALS), str 122 [==], contents 62, next 0, prev 0 
-                000062: type 25 (L_PLUS), str 118 [+], contents 61, next 68, prev 0 
-                    000061: type 53 (T_NUMBER), str 116 [3], contents 0, next 64, prev 0 
-                    000064: type 53 (T_NUMBER), str 120 [5], contents 0, next 0, prev 61 
-                000068: type 25 (L_PLUS), str 127 [+], contents 67, next 0, prev 62 
-                    000067: type 53 (T_NUMBER), str 125 [2], contents 0, next 70, prev 0 
-                    000070: type 53 (T_NUMBER), str 129 [6], contents 0, next 0, prev 67 
-    000074: type 70 (C_ELEMENT), str 135 [tres], contents 0, next 0, prev 59 
+                000010: type 17 (L_LESS), str 22 [<], contents 11, next 0, prev 5 
+                    000011: type 74 (C_PATH), str 0 [], contents 9, next 12, prev 0 
+                        000009: type 70 (C_ELEMENT), str 20 [a], contents 0, next 0, prev 0 
+                    000012: type 53 (T_NUMBER), str 24 [6.5], contents 0, next 0, prev 11 
+    000015: type 70 (C_ELEMENT), str 32 [two], contents 16, next 25, prev 2 
+        000016: type 75 (C_PREDICATE), str 0 [], contents 18, next 0, prev 0 
+            000018: type 16 (L_GRTREQ), str 40 [>=], contents 19, next 0, prev 0 
+                000019: type 74 (C_PATH), str 0 [], contents 17, next 21, prev 0 
+                    000017: type 70 (C_ELEMENT), str 38 [b], contents 0, next 0, prev 0 
+                000021: type 41 (K_DIV), str 45 [div], contents 20, next 0, prev 19 
+                    000020: type 53 (T_NUMBER), str 43 [5], contents 0, next 22, prev 0 
+                    000022: type 53 (T_NUMBER), str 49 [2], contents 0, next 0, prev 20 
+    000025: type 70 (C_ELEMENT), str 55 [three], contents 26, next 34, prev 15 
+        000026: type 75 (C_PREDICATE), str 0 [], contents 28, next 0, prev 0 
+            000028: type 17 (L_LESS), str 65 [<], contents 29, next 0, prev 0 
+                000029: type 74 (C_PATH), str 0 [], contents 27, next 30, prev 0 
+                    000027: type 70 (C_ELEMENT), str 63 [c], contents 0, next 0, prev 0 
+                000030: type 86 (C_UNI_MINUS), str 67 [-], contents 31, next 0, prev 29 
+                    000031: type 53 (T_NUMBER), str 69 [4], contents 0, next 0, prev 0 
+    000034: type 70 (C_ELEMENT), str 75 [four], contents 0, next 0, prev 25 
+--- 1: 36
+    000036: type 67 (C_ABSOLUTE), str 80 [/], contents 0, next 37, prev 0 
+    000037: type 70 (C_ELEMENT), str 82 [uno], contents 38, next 50, prev 36 
+        000038: type 75 (C_PREDICATE), str 0 [], contents 40, next 0, prev 0 
+            000040: type 17 (L_LESS), str 90 [<], contents 41, next 0, prev 0 
+                000041: type 74 (C_PATH), str 0 [], contents 39, next 44, prev 0 
+                    000039: type 70 (C_ELEMENT), str 88 [a], contents 0, next 0, prev 0 
+                000044: type 25 (L_PLUS), str 96 [+], contents 42, next 0, prev 41 
+                    000042: type 86 (C_UNI_MINUS), str 92 [-], contents 43, next 46, prev 0 
+                        000043: type 53 (T_NUMBER), str 94 [3], contents 0, next 0, prev 0 
+                    000046: type 41 (K_DIV), str 100 [div], contents 45, next 0, prev 42 
+                        000045: type 53 (T_NUMBER), str 98 [5], contents 0, next 47, prev 0 
+                        000047: type 53 (T_NUMBER), str 104 [2], contents 0, next 0, prev 45 
+    000050: type 70 (C_ELEMENT), str 110 [dos], contents 51, next 61, prev 37 
+        000051: type 75 (C_PREDICATE), str 0 [], contents 55, next 0, prev 0 
+            000055: type 14 (L_EQUALS), str 122 [==], contents 53, next 0, prev 0 
+                000053: type 25 (L_PLUS), str 118 [+], contents 52, next 57, prev 0 
+                    000052: type 53 (T_NUMBER), str 116 [3], contents 0, next 54, prev 0 
+                    000054: type 53 (T_NUMBER), str 120 [5], contents 0, next 0, prev 52 
+                000057: type 25 (L_PLUS), str 127 [+], contents 56, next 0, prev 53 
+                    000056: type 53 (T_NUMBER), str 125 [2], contents 0, next 58, prev 0 
+                    000058: type 53 (T_NUMBER), str 129 [6], contents 0, next 0, prev 56 
+    000061: type 70 (C_ELEMENT), str 135 [tres], contents 0, next 0, prev 50 
 main: status: zero
 main: input '+one'
 main: filter: rc: 6
@@ -200,59 +200,59 @@ added filter: 0
 xpath_01: test: filter expression feature is unsupported: plus sign ('+')
 --- 0: 1
     000001: type 67 (C_ABSOLUTE), str 1 [/], contents 0, next 2, prev 0 
-    000002: type 70 (C_ELEMENT), str 3 [one], contents 3, next 17, prev 1 
+    000002: type 70 (C_ELEMENT), str 3 [one], contents 3, next 15, prev 1 
         000003: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0 
             000008: type 40 ('('), str 17 [&&], contents 5, next 0, prev 0 
-                000005: type 15 (L_GRTR), str 11 [>], contents 6, next 11, prev 0 
+                000005: type 15 (L_GRTR), str 11 [>], contents 6, next 10, prev 0 
                     000006: type 74 (C_PATH), str 0 [], contents 4, next 7, prev 0 
                         000004: type 70 (C_ELEMENT), str 9 [a], contents 0, next 0, prev 0 
                     000007: type 53 (T_NUMBER), str 13 [4.5], contents 0, next 0, prev 6 
-                000011: type 17 (L_LESS), str 22 [<], contents 12, next 0, prev 5 
-                    000012: type 74 (C_PATH), str 0 [], contents 10, next 13, prev 0 
-                        000010: type 70 (C_ELEMENT), str 20 [a], contents 0, next 0, prev 0 
-                    000013: type 53 (T_NUMBER), str 24 [6.5], contents 0, next 0, prev 12 
-    000017: type 70 (C_ELEMENT), str 32 [two], contents 18, next 29, prev 2 
-        000018: type 75 (C_PREDICATE), str 0 [], contents 20, next 0, prev 0 
-            000020: type 16 (L_GRTREQ), str 40 [>=], contents 21, next 0, prev 0 
-                000021: type 74 (C_PATH), str 0 [], contents 19, next 23, prev 0 
-                    000019: type 70 (C_ELEMENT), str 38 [b], contents 0, next 0, prev 0 
-                000023: type 41 (K_DIV), str 45 [div], contents 22, next 0, prev 21 
-                    000022: type 53 (T_NUMBER), str 43 [5], contents 0, next 25, prev 0 
-                    000025: type 53 (T_NUMBER), str 49 [2], contents 0, next 0, prev 22 
-    000029: type 70 (C_ELEMENT), str 55 [three], contents 30, next 39, prev 17 
-        000030: type 75 (C_PREDICATE), str 0 [], contents 32, next 0, prev 0 
-            000032: type 17 (L_LESS), str 65 [<], contents 33, next 0, prev 0 
-                000033: type 74 (C_PATH), str 0 [], contents 31, next 34, prev 0 
-                    000031: type 70 (C_ELEMENT), str 63 [c], contents 0, next 0, prev 0 
-                000034: type 86 (C_UNI_MINUS), str 67 [-], contents 35, next 0, prev 33 
-                    000035: type 53 (T_NUMBER), str 69 [4], contents 0, next 0, prev 0 
-    000039: type 70 (C_ELEMENT), str 75 [four], contents 0, next 0, prev 29 
---- 1: 42
-    000042: type 67 (C_ABSOLUTE), str 80 [/], contents 0, next 43, prev 0 
-    000043: type 70 (C_ELEMENT), str 82 [uno], contents 44, next 59, prev 42 
-        000044: type 75 (C_PREDICATE), str 0 [], contents 46, next 0, prev 0 
-            000046: type 17 (L_LESS), str 90 [<], contents 47, next 0, prev 0 
-                000047: type 74 (C_PATH), str 0 [], contents 45, next 50, prev 0 
-                    000045: type 70 (C_ELEMENT), str 88 [a], contents 0, next 0, prev 0 
-                000050: type 25 (L_PLUS), str 96 [+], contents 48, next 0, prev 47 
-                    000048: type 86 (C_UNI_MINUS), str 92 [-], contents 49, next 53, prev 0 
-                        000049: type 53 (T_NUMBER), str 94 [3], contents 0, next 0, prev 0 
-                    000053: type 41 (K_DIV), str 100 [div], contents 52, next 0, prev 48 
-                        000052: type 53 (T_NUMBER), str 98 [5], contents 0, next 55, prev 0 
-                        000055: type 53 (T_NUMBER), str 104 [2], contents 0, next 0, prev 52 
-    000059: type 70 (C_ELEMENT), str 110 [dos], contents 60, next 74, prev 43 
-        000060: type 75 (C_PREDICATE), str 0 [], contents 65, next 0, prev 0 
-            000065: type 14 (L_EQUALS), str 122 [==], contents 62, next 0, prev 0 
-                000062: type 25 (L_PLUS), str 118 [+], contents 61, next 68, prev 0 
-                    000061: type 53 (T_NUMBER), str 116 [3], contents 0, next 64, prev 0 
-                    000064: type 53 (T_NUMBER), str 120 [5], contents 0, next 0, prev 61 
-                000068: type 25 (L_PLUS), str 127 [+], contents 67, next 0, prev 62 
-                    000067: type 53 (T_NUMBER), str 125 [2], contents 0, next 70, prev 0 
-                    000070: type 53 (T_NUMBER), str 129 [6], contents 0, next 0, prev 67 
-    000074: type 70 (C_ELEMENT), str 135 [tres], contents 0, next 0, prev 59 
---- 2: 79
-    000079: type 74 (C_PATH), str 0 [], contents 77, next 0, prev 0 
-        000077: type 70 (C_ELEMENT), str 140 [one], contents 0, next 0, prev 0 
+                000010: type 17 (L_LESS), str 22 [<], contents 11, next 0, prev 5 
+                    000011: type 74 (C_PATH), str 0 [], contents 9, next 12, prev 0 
+                        000009: type 70 (C_ELEMENT), str 20 [a], contents 0, next 0, prev 0 
+                    000012: type 53 (T_NUMBER), str 24 [6.5], contents 0, next 0, prev 11 
+    000015: type 70 (C_ELEMENT), str 32 [two], contents 16, next 25, prev 2 
+        000016: type 75 (C_PREDICATE), str 0 [], contents 18, next 0, prev 0 
+            000018: type 16 (L_GRTREQ), str 40 [>=], contents 19, next 0, prev 0 
+                000019: type 74 (C_PATH), str 0 [], contents 17, next 21, prev 0 
+                    000017: type 70 (C_ELEMENT), str 38 [b], contents 0, next 0, prev 0 
+                000021: type 41 (K_DIV), str 45 [div], contents 20, next 0, prev 19 
+                    000020: type 53 (T_NUMBER), str 43 [5], contents 0, next 22, prev 0 
+                    000022: type 53 (T_NUMBER), str 49 [2], contents 0, next 0, prev 20 
+    000025: type 70 (C_ELEMENT), str 55 [three], contents 26, next 34, prev 15 
+        000026: type 75 (C_PREDICATE), str 0 [], contents 28, next 0, prev 0 
+            000028: type 17 (L_LESS), str 65 [<], contents 29, next 0, prev 0 
+                000029: type 74 (C_PATH), str 0 [], contents 27, next 30, prev 0 
+                    000027: type 70 (C_ELEMENT), str 63 [c], contents 0, next 0, prev 0 
+                000030: type 86 (C_UNI_MINUS), str 67 [-], contents 31, next 0, prev 29 
+                    000031: type 53 (T_NUMBER), str 69 [4], contents 0, next 0, prev 0 
+    000034: type 70 (C_ELEMENT), str 75 [four], contents 0, next 0, prev 25 
+--- 1: 36
+    000036: type 67 (C_ABSOLUTE), str 80 [/], contents 0, next 37, prev 0 
+    000037: type 70 (C_ELEMENT), str 82 [uno], contents 38, next 50, prev 36 
+        000038: type 75 (C_PREDICATE), str 0 [], contents 40, next 0, prev 0 
+            000040: type 17 (L_LESS), str 90 [<], contents 41, next 0, prev 0 
+                000041: type 74 (C_PATH), str 0 [], contents 39, next 44, prev 0 
+                    000039: type 70 (C_ELEMENT), str 88 [a], contents 0, next 0, prev 0 
+                000044: type 25 (L_PLUS), str 96 [+], contents 42, next 0, prev 41 
+                    000042: type 86 (C_UNI_MINUS), str 92 [-], contents 43, next 46, prev 0 
+                        000043: type 53 (T_NUMBER), str 94 [3], contents 0, next 0, prev 0 
+                    000046: type 41 (K_DIV), str 100 [div], contents 45, next 0, prev 42 
+                        000045: type 53 (T_NUMBER), str 98 [5], contents 0, next 47, prev 0 
+                        000047: type 53 (T_NUMBER), str 104 [2], contents 0, next 0, prev 45 
+    000050: type 70 (C_ELEMENT), str 110 [dos], contents 51, next 61, prev 37 
+        000051: type 75 (C_PREDICATE), str 0 [], contents 55, next 0, prev 0 
+            000055: type 14 (L_EQUALS), str 122 [==], contents 53, next 0, prev 0 
+                000053: type 25 (L_PLUS), str 118 [+], contents 52, next 57, prev 0 
+                    000052: type 53 (T_NUMBER), str 116 [3], contents 0, next 54, prev 0 
+                    000054: type 53 (T_NUMBER), str 120 [5], contents 0, next 0, prev 52 
+                000057: type 25 (L_PLUS), str 127 [+], contents 56, next 0, prev 53 
+                    000056: type 53 (T_NUMBER), str 125 [2], contents 0, next 58, prev 0 
+                    000058: type 53 (T_NUMBER), str 129 [6], contents 0, next 0, prev 56 
+    000061: type 70 (C_ELEMENT), str 135 [tres], contents 0, next 0, prev 50 
+--- 2: 65
+    000065: type 74 (C_PATH), str 0 [], contents 63, next 0, prev 0 
+        000063: type 70 (C_ELEMENT), str 140 [one], contents 0, next 0, prev 0 
 main: status: track
 main: input '+a'
 main: filter: rc: 4
