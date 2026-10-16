@@ -1012,7 +1012,7 @@ xo_xparse_node_set_contents (xo_xparse_data_t *xdp, xo_xparse_node_id_t id,
  * We inspect the input buffer, finding the first token and returning
  * it's token type.
  *
- * @param xdp main slax data structure
+ * @param xdp parser data structure
  * @return token type
  */
 static int
@@ -1408,7 +1408,7 @@ xo_xparse_syntax_error (xo_xparse_data_t *xdp, const char *token,
 /**
  * Callback from yacc when an error is detected.
  *
- * @param xdp main slax data structure
+ * @param xdp parser data structure
  * @param str error message
  * @param value stack entry from bison's lexical stack
  * @return zero
