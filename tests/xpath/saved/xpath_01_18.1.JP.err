@@ -87,8 +87,8 @@ main: status: zero
 main: input '?top/*/leaf[val = 'x']'
 adding filter: 'top/*/leaf[val = 'x']'
 added filter: 0
---- 0: 14
-    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 13
+    000013: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [top], contents 0, next 3, prev 0 
         000003: type 46 (L_ASTERISK), str 7 [*], contents 0, next 5, prev 1 
         000005: type 70 (C_ELEMENT), str 11 [leaf], contents 6, next 0, prev 3 
