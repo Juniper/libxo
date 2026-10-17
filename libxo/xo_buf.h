@@ -57,7 +57,11 @@ xo_buf_zero (xo_buffer_t *xbp)
 static inline void
 xo_buf_init (xo_buffer_t *xbp)
 {
-    xbp->xb_bufp = xo_realloc(NULL, XO_BUFSIZ);
+    /*
+     * void * is the universal type, so this cast is not needed for C,
+     * but this file is included in C++ code, where the cast is required.
+     */
+    xbp->xb_bufp = (char *) xo_realloc(NULL, XO_BUFSIZ);
     xbp->xb_curp = xbp->xb_bufp;
     xbp->xb_size = xbp->xb_bufp ? XO_BUFSIZ : 0;
 }
@@ -190,7 +194,11 @@ xo_buf_has_some_room (xo_buffer_t *xbp, ssize_t len, ssize_t bufsiz)
 	ssize_t sz = off + len;
 	sz = (sz + bufsiz) & ~(bufsiz - 1);
 
-	char *bp = xo_realloc(xbp->xb_bufp, sz);
+        /*
+         * void * is the universal type, so this cast is not needed for C,
+         * but this file is included in C++ code, where the cast is required.
+         */
+	char *bp = (char *) xo_realloc(xbp->xb_bufp, sz);
 	if (bp == NULL)
 	    return 0;
 
@@ -225,7 +233,11 @@ xo_buf_make_some_room (xo_buffer_t *xbp, ssize_t size, ssize_t bufsiz)
 	ssize_t sz = (xbp->xb_curp + size) - xbp->xb_bufp;
 	sz = (sz + bufsiz - 1) & ~(bufsiz - 1);
 
-	char *bp = xo_realloc(xbp->xb_bufp, sz);
+        /*
+         * void * is the universal type, so this cast is not needed for C,
+         * but this file is included in C++ code, where the cast is required.
+         */
+	char *bp = (char *) xo_realloc(xbp->xb_bufp, sz);
 	if (bp == NULL)
 	    return 0;
 
