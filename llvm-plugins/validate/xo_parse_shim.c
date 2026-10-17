@@ -22,113 +22,97 @@
 #include "xo_parse_shim.h"
 
 /*
- * Compile-time verification that xo_field_info_t has the layout the IR pass
- * hardcodes in its LLVM StructType.  If anyone changes the struct (adds a
- * member, changes a type, reorders) without updating xo_precompile.cc, one
- * of these assertions will fire at shim build time.
+ * The IR pass hardcodes the member lists of xo_field_info_t and
+ * xo_fspec_t in its LLVM StructTypes (FieldTy and FspecTy in
+ * xo_precompile.cc).  Offsets and padding aren't hardcoded: the pass
+ * gets them from the target's DataLayout.  To check the member lists,
+ * xo_shim_layout() reports the C offsets of every member as compiled on
+ * the build host, along with the host facts the pass needs to lay out
+ * its StructTypes for the host and compare.  So if anyone changes either
+ * struct (adds a member, changes a type, reorders) without updating
+ * xo_precompile.cc, the pass notices and leaves calls uncached.
  *
- * Expected layout (LP64, same target as the C compiler and LLVM DataLayout):
- *   offset  0: uint64_t xfi_flags    (i64)
- *   offset  8: uint32_t xfi_ftype    (i32)
- *   offset 12: int16_t  xfi_start    (i16)
- *   offset 14: int16_t  xfi_content  (i16)
- *   offset 16: int16_t  xfi_format   (i16)
- *   offset 18: int16_t  xfi_encoding (i16)
- *   offset 20: int16_t  xfi_next     (i16)
- *   offset 22: int16_t  xfi_len      (i16)
- *   offset 24: int16_t  xfi_clen     (i16)
- *   offset 26: int16_t  xfi_flen     (i16)
- *   offset 28: int16_t  xfi_elen     (i16)
- *   [2-byte pad at offset 30 - inserted by compiler to align xfi_fnum]
- *   offset 32: uint32_t xfi_fnum     (i32)
- *   offset 36: uint32_t xfi_renum    (i32)
- *   offset 40: pointer  xfi_fspecs   (pointer)
- *   offset 40+P: uint16_t xfi_num_fspecs (i16)
- *   offset 42+P: uint16_t xfi_padding[3] (3 x i16)
- *   total: 48+P bytes, where P is the pointer size (56 on LP64)
+ * These widths are the same on every target, and FieldTy relies on them.
  */
 _Static_assert(sizeof(xo_xff_flags_t)    == 8,
 	       "xo_xff_flags_t must be 8 bytes");
 _Static_assert(sizeof(xo_format_offset_t) == 2,
 	       "xo_format_offset_t must be 2 bytes");
-_Static_assert(sizeof(xo_field_info_t)   == 48 + sizeof(void *),
-       "xo_field_info_t size mismatch; update xo_precompile.cc FieldTy");
-
-_Static_assert(offsetof(xo_field_info_t, xfi_flags)    ==  0,
-	       "xfi_flags offset");
-_Static_assert(offsetof(xo_field_info_t, xfi_ftype)    ==  8,
-	       "xfi_ftype offset");
-_Static_assert(offsetof(xo_field_info_t, xfi_start)    == 12,
-	       "xfi_start offset");
-_Static_assert(offsetof(xo_field_info_t, xfi_content)  == 14,
-	       "xfi_content offset");
-_Static_assert(offsetof(xo_field_info_t, xfi_format)   == 16,
-	       "xfi_format offset");
-_Static_assert(offsetof(xo_field_info_t, xfi_encoding) == 18,
-	       "xfi_encoding offset");
-_Static_assert(offsetof(xo_field_info_t, xfi_next)     == 20,
-	       "xfi_next offset");
-_Static_assert(offsetof(xo_field_info_t, xfi_len)      == 22,
-	       "xfi_len offset");
-_Static_assert(offsetof(xo_field_info_t, xfi_clen)     == 24,
-	       "xfi_clen offset");
-_Static_assert(offsetof(xo_field_info_t, xfi_flen)     == 26,
-	       "xfi_flen offset");
-_Static_assert(offsetof(xo_field_info_t, xfi_elen)     == 28,
-	       "xfi_elen offset");
-_Static_assert(offsetof(xo_field_info_t, xfi_fnum)     == 32,
-	       "xfi_fnum offset");
-_Static_assert(offsetof(xo_field_info_t, xfi_renum)    == 36,
-	       "xfi_renum offset");
-_Static_assert(offsetof(xo_field_info_t, xfi_fspecs)   == 40,
-	       "xfi_fspecs offset");
-_Static_assert(offsetof(xo_field_info_t, xfi_num_fspecs) == 40 + sizeof(void *),
-	       "xfi_num_fspecs offset");
 
 /*
- * Same protection for xo_fspec_t, mirrored in xo_precompile.cc's FspecTy.
- * Expected layout (LP64):
- *   offset  0: uint8_t xf_fc .. xf_stars (8 flag bytes, then leading_zero,
- *              dots, alt, stars - 12 one-byte members; xf_leading_zero
- *              is int8_t, the rest uint8_t)
- *   offset 12: uint8_t xf_star[3]
- *   offset 15: uint8_t xf_at_stars
- *   offset 16: int16_t xf_width[3]
- *   offset 22: uint16_t xf_start
- *   offset 24: uint16_t xf_len
- *   offset 26: uint16_t xf_prefix_len
- *   offset 28: uint8_t xf_num_bits
- *   offset 29: uint8_t xf_arg_type
- *   offset 30: uint8_t xf_plus
- *   offset 31: uint8_t xf_space
- *   offset 32: uint32_t xf_extflags
- *   total: 36 bytes
+ * The alignment a struct member really gets, which can be less than
+ * _Alignof (see xo_pcv_align64_s).  C23 doesn't allow defining the
+ * struct inside offsetof(), so each type gets a named one.
  */
-_Static_assert(sizeof(xo_fspec_t) == 36,
-	       "xo_fspec_t size mismatch; update xo_precompile.cc FspecTy");
-_Static_assert(offsetof(xo_fspec_t, xf_fc)           ==  0, "xf_fc offset");
-_Static_assert(offsetof(xo_fspec_t, xf_lflag)        ==  1, "xf_lflag offset");
-_Static_assert(offsetof(xo_fspec_t, xf_hflag)        ==  2, "xf_hflag offset");
-_Static_assert(offsetof(xo_fspec_t, xf_jflag)        ==  3, "xf_jflag offset");
-_Static_assert(offsetof(xo_fspec_t, xf_tflag)        ==  4, "xf_tflag offset");
-_Static_assert(offsetof(xo_fspec_t, xf_zflag)        ==  5, "xf_zflag offset");
-_Static_assert(offsetof(xo_fspec_t, xf_qflag)        ==  6, "xf_qflag offset");
-_Static_assert(offsetof(xo_fspec_t, xf_seen_minus)   ==  7, "xf_seen_minus offset");
-_Static_assert(offsetof(xo_fspec_t, xf_leading_zero) ==  8, "xf_leading_zero offset");
-_Static_assert(offsetof(xo_fspec_t, xf_dots)         ==  9, "xf_dots offset");
-_Static_assert(offsetof(xo_fspec_t, xf_alt)          == 10, "xf_alt offset");
-_Static_assert(offsetof(xo_fspec_t, xf_stars)        == 11, "xf_stars offset");
-_Static_assert(offsetof(xo_fspec_t, xf_star)         == 12, "xf_star offset");
-_Static_assert(offsetof(xo_fspec_t, xf_at_stars)     == 15, "xf_at_stars offset");
-_Static_assert(offsetof(xo_fspec_t, xf_width)        == 16, "xf_width offset");
-_Static_assert(offsetof(xo_fspec_t, xf_start)        == 22, "xf_start offset");
-_Static_assert(offsetof(xo_fspec_t, xf_len)          == 24, "xf_len offset");
-_Static_assert(offsetof(xo_fspec_t, xf_prefix_len)   == 26, "xf_prefix_len offset");
-_Static_assert(offsetof(xo_fspec_t, xf_num_bits)     == 28, "xf_num_bits offset");
-_Static_assert(offsetof(xo_fspec_t, xf_arg_type)     == 29, "xf_arg_type offset");
-_Static_assert(offsetof(xo_fspec_t, xf_plus)         == 30, "xf_plus offset");
-_Static_assert(offsetof(xo_fspec_t, xf_space)        == 31, "xf_space offset");
-_Static_assert(offsetof(xo_fspec_t, xf_extflags)     == 32, "xf_extflags offset");
+struct xo_shim_align_ptr_s { char xa_pad; void *xa_value; };
+struct xo_shim_align_i64_s { char xa_pad; uint64_t xa_value; };
+struct xo_shim_align_i32_s { char xa_pad; uint32_t xa_value; };
+struct xo_shim_align_i16_s { char xa_pad; uint16_t xa_value; };
+
+#define XO_SHIM_ALIGN(_name) offsetof(struct xo_shim_align_ ## _name ## _s, \
+				      xa_value)
+
+void
+xo_shim_layout (xo_shim_layout_t *xslp)
+{
+    static const uint32_t field_offsets[XO_SHIM_FIELD_MEMBERS] = {
+	offsetof(xo_field_info_t, xfi_flags),
+	offsetof(xo_field_info_t, xfi_ftype),
+	offsetof(xo_field_info_t, xfi_start),
+	offsetof(xo_field_info_t, xfi_content),
+	offsetof(xo_field_info_t, xfi_format),
+	offsetof(xo_field_info_t, xfi_encoding),
+	offsetof(xo_field_info_t, xfi_next),
+	offsetof(xo_field_info_t, xfi_len),
+	offsetof(xo_field_info_t, xfi_clen),
+	offsetof(xo_field_info_t, xfi_flen),
+	offsetof(xo_field_info_t, xfi_elen),
+	offsetof(xo_field_info_t, xfi_fnum),
+	offsetof(xo_field_info_t, xfi_renum),
+	offsetof(xo_field_info_t, xfi_fspecs),
+	offsetof(xo_field_info_t, xfi_num_fspecs),
+	offsetof(xo_field_info_t, xfi_padding),
+    };
+    static const uint32_t fspec_offsets[XO_SHIM_FSPEC_MEMBERS] = {
+	offsetof(xo_fspec_t, xf_fc),
+	offsetof(xo_fspec_t, xf_lflag),
+	offsetof(xo_fspec_t, xf_hflag),
+	offsetof(xo_fspec_t, xf_jflag),
+	offsetof(xo_fspec_t, xf_tflag),
+	offsetof(xo_fspec_t, xf_zflag),
+	offsetof(xo_fspec_t, xf_qflag),
+	offsetof(xo_fspec_t, xf_seen_minus),
+	offsetof(xo_fspec_t, xf_leading_zero),
+	offsetof(xo_fspec_t, xf_dots),
+	offsetof(xo_fspec_t, xf_alt),
+	offsetof(xo_fspec_t, xf_stars),
+	offsetof(xo_fspec_t, xf_star),
+	offsetof(xo_fspec_t, xf_at_stars),
+	offsetof(xo_fspec_t, xf_width),
+	offsetof(xo_fspec_t, xf_start),
+	offsetof(xo_fspec_t, xf_len),
+	offsetof(xo_fspec_t, xf_prefix_len),
+	offsetof(xo_fspec_t, xf_num_bits),
+	offsetof(xo_fspec_t, xf_arg_type),
+	offsetof(xo_fspec_t, xf_plus),
+	offsetof(xo_fspec_t, xf_space),
+	offsetof(xo_fspec_t, xf_extflags),
+    };
+    const uint16_t one = 1;
+
+    bzero(xslp, sizeof(*xslp));
+    xslp->xsl_big_endian = (*(const uint8_t *) &one == 0);
+    xslp->xsl_ptr_size = sizeof(void *);
+    xslp->xsl_ptr_align = XO_SHIM_ALIGN(ptr);
+    xslp->xsl_i64_align = XO_SHIM_ALIGN(i64);
+    xslp->xsl_i32_align = XO_SHIM_ALIGN(i32);
+    xslp->xsl_i16_align = XO_SHIM_ALIGN(i16);
+
+    xslp->xsl_field_size = sizeof(xo_field_info_t);
+    memcpy(xslp->xsl_field_offsets, field_offsets, sizeof(field_offsets));
+    xslp->xsl_fspec_size = sizeof(xo_fspec_t);
+    memcpy(xslp->xsl_fspec_offsets, fspec_offsets, sizeof(fspec_offsets));
+}
 
 struct xo_shim_state {
     xo_shim_error_t error;
