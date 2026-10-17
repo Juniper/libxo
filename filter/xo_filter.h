@@ -130,8 +130,37 @@ typedef uint32_t xo_filter_status_t;
  *     Called to report a compile-time or evaluation-time error for the
  *     expression owned by this data context ('fmt'/'vap' are a printf-style
  *     message).  When NULL, no error is reported for that data context.
+ *
+ * xfdo_find_function (optional, may be NULL):
+ *     Called by xo_eval_compile_function() when 'name' (the literal token
+ *     text, e.g. "slax:printf") does not match any built-in in
+ *     xo_eval_functions[].  A backend that supports dynamically-loaded
+ *     extension functions resolves the prefix, loads the extension if
+ *     needed, looks up 'name', and returns an xo_eval_ext_fn_t ready to
+ *     call, along with the function's arity ('*nargs', '*min_args', using
+ *     the same -1/min_args convention as xo_eval_func_map_t).  Returns NULL
+ *     if nothing resolves the name (compile then fails exactly as it does
+ *     today).  When NULL, no such fallback is attempted.
  */
-#define XO_FILTER_DATA_OPS_VERSION 5
+typedef uint32_t xo_eval_ext_vtype_t;
+#define XO_EVAL_EXT_STRING  0
+#define XO_EVAL_EXT_NUMBER  1
+#define XO_EVAL_EXT_BOOLEAN 2
+#define XO_EVAL_EXT_MISSING 3
+
+typedef struct xo_eval_ext_value_s {
+    xo_eval_ext_vtype_t xev_type;
+    union {
+        const char *xev_str;
+        double      xev_num;
+        int         xev_bool;
+    };
+} xo_eval_ext_value_t;
+
+typedef xo_eval_ext_value_t
+    (*xo_eval_ext_fn_t)(xo_filter_data_t *dp, int argc, const char **argv);
+
+#define XO_FILTER_DATA_OPS_VERSION 6
 
 typedef struct xo_filter_data_ops_s {
     uint32_t       xfdo_version;
@@ -183,6 +212,9 @@ typedef struct xo_filter_data_ops_s {
      */
     void (*xfdo_destroy)(xo_filter_data_t *);
     void (*xfdo_error)(xo_filter_data_t *, const char *fmt, va_list vap);
+    xo_eval_ext_fn_t (*xfdo_find_function)(xo_filter_data_t *,
+                                            const char *name,
+                                            int *nargs, int *min_args);
 } xo_filter_data_ops_t;
 
 /* Default data ops: heap allocation + xparse string-table name resolution */
