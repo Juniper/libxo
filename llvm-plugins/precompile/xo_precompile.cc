@@ -156,7 +156,7 @@ static bool extractCString(GlobalVariable *GV, std::string &out)
 }
 
 static void
-parse_error_cb (void *data, const char *, ...)
+parse_error_cb (void *data, int, const char *, ...)
 {
     *static_cast<bool *>(data) = true;
 }
@@ -199,16 +199,29 @@ struct FormatDiagCtx {
     CallInst    *CI;
 };
 
+/*
+ * The field offset is ignored: the IR has no source location for the
+ * bytes inside a string constant, only for the call.
+ */
 static void
-format_diag_cb (void *data, const char *fmt, ...)
+format_diag_cb (void *data, int /* offset */, const char *fmt, ...)
 {
     auto *fdc = static_cast<FormatDiagCtx *>(data);
-    char buf[512];
     va_list vap;
 
+    /* Messages often quote the whole format string; don't truncate */
     va_start(vap, fmt);
-    vsnprintf(buf, sizeof(buf), fmt, vap);
+    int len = vsnprintf(nullptr, 0, fmt, vap);
     va_end(vap);
+
+    if (len < 0)
+        return;
+
+    std::string buf(len + 1, '\0');
+    va_start(vap, fmt);
+    vsnprintf(&buf[0], buf.size(), fmt, vap);
+    va_end(vap);
+    buf.resize(len);
 
     /*
      * The IR only carries a source location when compiled with -g;
