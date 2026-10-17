@@ -57,7 +57,8 @@ static inline char *
 xo_strdup (const char *str)
 {
     size_t len = strlen(str) + 1;
-    char *cp = xo_realloc(NULL, len);
+    /* Sadly, c++ needs this cast and we are included by c++ */
+    char *cp = (char *) xo_realloc(NULL, len);
 
     if (cp)
 	memcpy(cp, str, len);
@@ -75,7 +76,8 @@ xo_strndup (const char *str, ssize_t len)
     if (len < 0)
 	len = strlen(str);
 
-    char *cp = xo_realloc(NULL, len + 1);
+    /* Sadly, c++ needs this cast and we are included by c++ */
+    char *cp = (char *) xo_realloc(NULL, len + 1);
 
     if (cp) {
 	memcpy(cp, str, len);
@@ -144,7 +146,8 @@ xo_streqn (const char *one, const char *two, ssize_t len_of_two)
 static inline void *
 xo_memrchr (void *data, int c, xo_ssize_t len)
 {
-    unsigned char *cp = data;
+    /* Sadly, c++ needs this cast and we are included by c++ */
+    unsigned char *cp = (unsigned char *) data;
 
     for (cp += len; len > 0; len--) {
 	if (*--cp == (unsigned char) c)
