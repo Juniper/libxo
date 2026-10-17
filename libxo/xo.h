@@ -343,6 +343,32 @@ xo_emit_f (xo_emit_flags_t flags, const char *fmt, ...);
 struct xo_format_cache_s;
 typedef struct xo_format_cache_s xo_format_cache_t;
 
+/*
+ * Identifies the layout of a precompiled cache, including the target
+ * facts it depends on (see XO_PRECOMPILED_VERSION in xo_format.h).
+ * It's 64 bits wide since no ABI widens a 64-bit argument, so the IR
+ * pass can pass it without knowing the target's sign- or zero-extension
+ * rules for narrower types.
+ */
+typedef uint64_t xo_precomp_version_t;
+
+xo_ssize_t
+xo_emit_precompiled (xo_precomp_version_t vers, const xo_format_cache_t *fcp,
+		     const char *fmt, ...);
+
+xo_ssize_t
+xo_emit_precompiled_h (xo_handle_t *xop, xo_precomp_version_t vers,
+		       const xo_format_cache_t *fcp, const char *fmt, ...);
+
+xo_ssize_t
+xo_emit_precompiled_v (xo_precomp_version_t vers, const xo_format_cache_t *fcp,
+		       const char *fmt, va_list vap);
+
+xo_ssize_t
+xo_emit_precompiled_hv (xo_handle_t *xop, xo_precomp_version_t vers,
+			const xo_format_cache_t *fcp, const char *fmt,
+			va_list vap);
+
 xo_ssize_t
 xo_emit_cached_h (xo_handle_t *xop, const xo_format_cache_t *fcp,
 		  const char *fmt, ...);
