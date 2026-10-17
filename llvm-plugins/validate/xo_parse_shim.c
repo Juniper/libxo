@@ -130,42 +130,58 @@ _Static_assert(offsetof(xo_fspec_t, xf_extflags)     == 32, "xf_extflags offset"
 struct xo_shim_state {
     xo_shim_error_t error;
     void           *data;
+    const xo_parse_t *xpp;	/* Source of xp_err_offset */
 };
 
+/*
+ * Forward a libxo parse error or warning, adding the offset of the
+ * field libxo was parsing.  Messages often quote the whole format
+ * string, so size the buffer to fit rather than truncating.
+ */
 static void
 shim_error_cb (void *data, const char *fmt, ...)
 {
     struct xo_shim_state *ss = data;
-    char buf[512];
-    va_list vap;
-    va_start(vap, fmt);
-    vsnprintf(buf, sizeof(buf), fmt, vap);
-    va_end(vap);
-    ss->error(ss->data, "%s", buf);
-}
-
-static void
-shim_warn_cb (void *data, const char *fmt, ...)
-{
-    struct xo_shim_state *ss = data;
     if (ss->error == NULL)
         return;
-    char buf[512];
+
     va_list vap;
+    va_start(vap, fmt);
+    int len = vsnprintf(NULL, 0, fmt, vap);
+    va_end(vap);
+
+    if (len < 0)
+	return;
+
+    char buf[len + 1];
     va_start(vap, fmt);
     vsnprintf(buf, sizeof(buf), fmt, vap);
     va_end(vap);
-    ss->error(ss->data, "%s", buf);
+
+    ss->error(ss->data, ss->xpp->xp_err_offset, "%s", buf);
+}
+
+/*
+ * The offset of a field for diagnostics: its '{', when it has one.
+ */
+static int
+shim_field_offset (const char *fmt, const xo_field_info_t *xfip)
+{
+    int off = xfip->xfi_start;
+
+    if (off > 0 && fmt[off - 1] == '{')
+	off -= 1;
+    return off;
 }
 
 int
 xo_shim_parse (const char *fmt, xo_shim_error_t error, void *data)
 {
-    struct xo_shim_state ss = { error, data };
     xo_parse_t xpp = { 0 };
+    struct xo_shim_state ss = { error, data, &xpp };
     xpp.xp_error = shim_error_cb;
     xpp.xp_error_data = &ss;
-    xpp.xp_warn = shim_warn_cb;
+    xpp.xp_warn = shim_error_cb;
     xpp.xp_warn_data = &ss;
     xpp.xp_flags = XPF_STRICT;
 
@@ -335,12 +351,12 @@ xo_shim_parse_args (const char *fmt,
                      xo_shim_arg_cb_t arg_cb,  void *arg_data,
                      xo_parse_flags_t flags)
 {
-    struct xo_shim_state ss_err  = { error_cb, error_data };
-    struct xo_shim_state ss_warn = { warn_cb, warn_data };
     xo_parse_t xpp = { 0 };
+    struct xo_shim_state ss_err  = { error_cb, error_data, &xpp };
+    struct xo_shim_state ss_warn = { warn_cb, warn_data, &xpp };
     xpp.xp_error      = shim_error_cb;
     xpp.xp_error_data = &ss_err;
-    xpp.xp_warn       = shim_warn_cb;
+    xpp.xp_warn       = shim_error_cb;
     xpp.xp_warn_data  = &ss_warn;
     xpp.xp_flags      = flags;
 
@@ -354,6 +370,7 @@ xo_shim_parse_args (const char *fmt,
         int ftype = (int) xfip->xfi_ftype;
 	int slen = (xfip->xfi_len > 0) ? xfip->xfi_len : 0;
 	const char *str = xo_foff(fmt, xfip->xfi_start);
+	int off = shim_field_offset(fmt, xfip);
 
         /* XFF_ARGUMENT: field name/content comes from va_arg as const char * */
         if (xfip->xfi_flags & XFF_ARGUMENT)
@@ -368,17 +385,18 @@ xo_shim_parse_args (const char *fmt,
 			&& xfip->xfi_clen == 0) {
 		const char *role_name = xo_lookup_role_name(ftype);
 		if (no_name)
-		    ss_err.error(ss_err.data,
+		    ss_err.error(ss_err.data, off,
 				 "value field ('%c'%s%s) has empty name, but "
 				 "has the 'display' flag set; %s: '%s'",
 				 ftype, role_name ? "/" : "", role_name ?: "",
-				 use_instead, xo_printable2(str, slen, 1));
+				 use_instead,
+				 xo_parse_printable(&xpp, str, slen, 1));
 		else 
-		    ss_err.error(ss_err.data,
+		    ss_err.error(ss_err.data, off,
 				 "field role ('%c'%s%s) requires a non-empty "
 				 "name: '%s'",
 				 ftype, role_name ? "/" : "", role_name ?: "",
-				 xo_printable2(str, slen, 1));
+				 xo_parse_printable(&xpp, str, slen, 1));
 	    }
 
 	    /*
@@ -390,20 +408,20 @@ xo_shim_parse_args (const char *fmt,
 	    if (strchr(XO_LINT_ROLES_NEEDING_NAME_OR_FORMAT, ftype)
 		    && xfip->xfi_clen == 0 && xfip->xfi_format < 0) {
 		const char *role_name = xo_lookup_role_name(ftype);
-		ss_err.error(ss_err.data,
+		ss_err.error(ss_err.data, off,
 			     "field role ('%c'%s%s) requires a name or format: "
 			     "'%s'",
 			     ftype, role_name ? "/" : "", role_name ?: "",
-			     xo_printable2(str, slen, 1));
+			     xo_parse_printable(&xpp, str, slen, 1));
 	    }
 
 #ifdef XO_LINT_ROLES_NO_FORMAT
 	    if (strchr(XO_LINT_ROLES_NO_FORMAT, ftype)
 			&& xfip->xfi_format != XO_FOFF_NONE)
-		ss_err.error(ss_err.data,
+		ss_err.error(ss_err.data, off,
 			     "field role ('%c') cannot have a "
 			     "format specifier: '%s'",
-			     ftype, xo_printable2(str, slen, 1));
+			     ftype, xo_parse_printable(&xpp, str, slen, 1));
 #endif /* XO_LINT_ROLES_NO_FORMAT */
 
             /*
@@ -415,10 +433,10 @@ xo_shim_parse_args (const char *fmt,
             if (strchr(XO_LINT_ROLES_FORMAT_IGNORED_WITH_CONTENT, ftype)
                         && xfip->xfi_clen != 0
                         && xfip->xfi_format != XO_FOFF_NONE)
-                ss_warn.error(ss_warn.data,
+                ss_warn.error(ss_warn.data, off,
                              "field role ('%c') has both content and a "
                              "format; the format is ignored: '%s'",
-                             ftype, xo_printable2(str, slen, 1));
+                             ftype, xo_parse_printable(&xpp, str, slen, 1));
 	}
 
         /*
@@ -448,17 +466,17 @@ xo_shim_parse_args (const char *fmt,
                                           xo_shim_record_arg_type, &eargs);
 
             if (dargs.xsat_num != eargs.xsat_num)
-                ss_err.error(ss_err.data,
+                ss_err.error(ss_err.data, off,
                              "display and encoding formats consume "
                              "%u vs %u argument(s): '%s'",
                              dargs.xsat_num, eargs.xsat_num,
-                             xo_printable2(str, slen, 1));
+                             xo_parse_printable(&xpp, str, slen, 1));
             else if (memcmp(dargs.xsat_types, eargs.xsat_types,
                             sizeof(dargs.xsat_types)) != 0)
-                ss_err.error(ss_err.data,
+                ss_err.error(ss_err.data, off,
                              "display and encoding formats consume "
                              "different argument(s): '%s'",
-                             xo_printable2(str, slen, 1));
+                             xo_parse_printable(&xpp, str, slen, 1));
         }
 
         if (!skip_value && field_consumes_varg(xfip))
@@ -475,8 +493,8 @@ xo_shim_parse_fields (const char *fmt,
                        xo_shim_field_cb_t field_cb, void *field_data,
                        xo_shim_fspec_cb_t fspec_cb, void *fspec_data)
 {
-    struct xo_shim_state ss = { error_cb, error_data };
     xo_parse_t xpp = { 0 };
+    struct xo_shim_state ss = { error_cb, error_data, &xpp };
     xpp.xp_error      = shim_error_cb;
     xpp.xp_error_data = &ss;
 
