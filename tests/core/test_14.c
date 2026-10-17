@@ -39,6 +39,7 @@ make_cache (const char *fmt, xo_fspec_t **fspecsp)
 
     if (xo_parse_format(&xpp, fmt) < 0) {
 	fprintf(stderr, "make_cache: parse failed for: %s\n", fmt);
+	xo_parse_release(&xpp);
 	return NULL;
     }
 
