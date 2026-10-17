@@ -141,6 +141,31 @@ int xo_shim_parse_fields(const char *fmt,
                           xo_shim_field_cb_t field_cb, void *field_data,
                           xo_shim_fspec_cb_t fspec_cb, void *fspec_data);
 
+/*
+ * The build host's layout of xo_field_info_t and xo_fspec_t: the
+ * offset of each member, in declaration order, plus the facts needed
+ * to describe the host as an LLVM DataLayout.  The precompile pass lays
+ * out its copies of the structs under that DataLayout and compares, to
+ * check that its member lists still match the C structs.
+ */
+#define XO_SHIM_FIELD_MEMBERS	16 /* Members of xo_field_info_t */
+#define XO_SHIM_FSPEC_MEMBERS	23 /* Members of xo_fspec_t */
+
+typedef struct xo_shim_layout_s {
+    uint8_t  xsl_big_endian;	/* Non-zero if the host is big endian */
+    uint8_t  xsl_ptr_size;	/* sizeof(void *) */
+    uint8_t  xsl_ptr_align;	/* Alignment of a pointer member */
+    uint8_t  xsl_i64_align;	/* Alignment of a uint64_t member */
+    uint8_t  xsl_i32_align;	/* Alignment of a uint32_t member */
+    uint8_t  xsl_i16_align;	/* Alignment of a uint16_t member */
+    uint32_t xsl_field_size;	/* sizeof(xo_field_info_t) */
+    uint32_t xsl_field_offsets[XO_SHIM_FIELD_MEMBERS];
+    uint32_t xsl_fspec_size;	/* sizeof(xo_fspec_t) */
+    uint32_t xsl_fspec_offsets[XO_SHIM_FSPEC_MEMBERS];
+} xo_shim_layout_t;
+
+void xo_shim_layout(xo_shim_layout_t *xslp);
+
 #ifdef __cplusplus
 }
 #endif
