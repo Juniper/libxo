@@ -3386,6 +3386,66 @@ xo_eval_function (XO_EVAL_ARGS)
     return value;
 }
 
+/*
+ * Runtime op for a function call resolved at compile time by a
+ * dynamic-load backend's xfdo_find_function hook (e.g. libslax's
+ * "slax:" extension functions; see xo_eval_compile_function() below).
+ * Re-derives the function's name from the AST node and re-calls the
+ * hook here, rather than caching the resolved xo_eval_ext_fn_t in
+ * xo_eval_instr_t: these calls are rare next to the built-in XPath
+ * functions, so paying for the lookup again is cheaper than widening
+ * every instruction to carry a backend-specific pointer.
+ */
+static xo_eval_value_t
+xo_eval_func_external (XO_EVAL_ARGS)
+{
+    xo_filter_data_t *dp = xfp->xf_data;
+    xo_filter_data_ops_t *ops = xfp->xf_ops;
+
+    if (ops == NULL || ops->xfdo_find_function == NULL)
+	return xo_eval_value_invalid();
+
+    const char *str = xo_xparse_str(&xfp->xf_xd, xnp->xn_str);
+    if (str == NULL)
+	return xo_eval_value_invalid();
+
+    int nargs, min_args;
+    xo_eval_ext_fn_t fn = ops->xfdo_find_function(dp, str, &nargs, &min_args);
+    if (fn == NULL) {
+	xo_eval_fail(xfp, "unknown function in filter expression: '%s'", str);
+	return xo_eval_value_invalid();
+    }
+
+    const char **args = alloca(argc * sizeof(*args));
+    for (int i = 0; i < argc; i++)
+	args[i] = xo_eval_cast_string(xop, argv[i]);
+
+    xo_eval_ext_value_t rv = fn(dp, argc, args);
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
+    for (int i = 0; i < argc; i++)
+	xo_free((char *) args[i]);
+#pragma GCC diagnostic pop
+
+    switch (rv.xee_type) {
+    case XO_EVAL_EXT_NUMBER:
+	return xo_eval_value_float(0, rv.xee_num);
+
+    case XO_EVAL_EXT_BOOLEAN:
+	return rv.xee_bool ? xo_eval_value_boolean_true()
+			    : xo_eval_value_boolean_false();
+
+    case XO_EVAL_EXT_MISSING:
+	return xo_eval_value_missing();
+
+    case XO_EVAL_EXT_STRING:
+    default:
+	return xo_eval_value_string(C_DSTRING, 0,
+				     strdup(rv.xee_str ? rv.xee_str : ""));
+    }
+}
+
 static xo_eval_value_t
 xo_eval (xo_handle_t *xop, xo_filter_t *xfp, xo_tframe_t *framep,
 	 const char *pname, int indent,
@@ -3773,36 +3833,17 @@ xo_eval_compile_chain (xo_eval_prog_t *prog, xo_xparse_data_t *xdp,
 }
 
 /*
- * Compile a function call.  XEFF_NO_EVAL functions (choose/choose2)
- * manage their own lazy argument evaluation and still depend on the
- * old recursive xo_eval(), so they compile to a self-managing leaf
- * instruction; every other function compiles each argument first and
- * then emits one instruction with a static argc, matching the
- * argv[]-based convention the rest of the operations already use.
+ * Compile the xn_next-linked argument list under a function-call node,
+ * emitting each argument's instructions in order.  Shared by the
+ * built-in and xfdo_find_function fallback paths in
+ * xo_eval_compile_function() below.  Returns the argument count, or -1
+ * on a compile failure (already reported by the recursive call).
  */
 static int
-xo_eval_compile_function (xo_eval_prog_t *prog, xo_xparse_data_t *xdp,
-			   xo_xparse_node_id_t id, xo_xparse_node_t *xnp,
-			   xo_filter_data_t *dp, xo_filter_data_ops_t *ops)
+xo_eval_compile_function_args (xo_eval_prog_t *prog, xo_xparse_data_t *xdp,
+				xo_xparse_node_t *xnp,
+				xo_filter_data_t *dp, xo_filter_data_ops_t *ops)
 {
-    const char *str = xo_xparse_str(xdp, xnp->xn_str);
-    if (str == NULL) {
-	xo_eval_compile_fail(dp, ops, "unknown function in filter expression");
-	return -1;
-    }
-
-    xo_eval_func_map_t *entry = xo_eval_find_func(xo_eval_functions, str);
-    if (entry == NULL) {
-	xo_eval_compile_fail(dp, ops,
-			      "unknown function in filter expression: '%s'",
-			      str);
-	return -1;
-    }
-
-    if (entry->xfm_flags & XEFF_NO_EVAL)
-	return xo_eval_prog_emit(prog, entry->xfm_func, id, 0, 0) >= 0
-	    ? 0 : -1;
-
     int argc = 0;
     xo_xparse_node_id_t aid = xnp->xn_contents;
 
@@ -3816,48 +3857,128 @@ xo_eval_compile_function (xo_eval_prog_t *prog, xo_xparse_data_t *xdp,
 	aid = anp->xn_next;
     }
 
-    /*
-     * Reject wrong-arity calls at compile time, matching
-     * xo_eval_function()'s own runtime "entry->xfm_nargs >= 0" check.
-     * Without this, a call like not() or contains(name) would silently
-     * compile and run with the wrong argc.  Report the same informative
-     * message the runtime check uses, rather than letting the caller
-     * fall back to a generic "failed to compile" message.
-     */
-    if (entry->xfm_nargs >= 0 && argc != entry->xfm_nargs) {
+    return argc;
+}
+
+/*
+ * Reject wrong-arity calls at compile time, matching
+ * xo_eval_function()'s own runtime "nargs >= 0" check.  Without this, a
+ * call like not() or contains(name) would silently compile and run
+ * with the wrong argc.  Shared by the built-in and xfdo_find_function
+ * fallback paths, which pass xfm_nargs/xfm_min_args and the hook's
+ * nargs/min_args outputs respectively -- same -1/min_args convention
+ * either way.
+ */
+static int
+xo_eval_compile_check_arity (xo_filter_data_t *dp, xo_filter_data_ops_t *ops,
+			      const char *str, int argc,
+			      int nargs, int min_args)
+{
+    if (nargs >= 0 && argc != nargs) {
 	xo_eval_compile_fail(dp, ops,
 			      "function '%s' requires %d argument(s), got %d",
-			      str, entry->xfm_nargs, argc);
+			      str, nargs, argc);
 	return -1;
     }
 
     /*
-     * Variable-arity functions (xfm_nargs == -1) normally defer their
-     * own arity checking to runtime. concat()/rematch()/substring()/
-     * sum() each have a compile-time-knowable minimum below which no
-     * amount of data will ever make the call valid, so they set
-     * xfm_min_args to catch that here.
+     * Variable-arity functions (nargs == -1) normally defer their own
+     * arity checking to runtime. concat()/rematch()/substring()/sum()
+     * each have a compile-time-knowable minimum below which no amount
+     * of data will ever make the call valid, so they set min_args to
+     * catch that here.
      */
-    if (entry->xfm_nargs < 0 && entry->xfm_min_args > 0
-	&& argc < entry->xfm_min_args) {
+    if (nargs < 0 && min_args > 0 && argc < min_args) {
 	xo_eval_compile_fail(dp, ops,
 			      "function '%s' requires at least %d "
 			      "arguments, got %d",
-			      str, entry->xfm_min_args, argc);
+			      str, min_args, argc);
 	return -1;
     }
 
-    /*
-     * Fixed-arity functions get the same missing-check short-circuit as
-     * binary combine ops, matching xo_eval_function()'s own "entry->
-     * xfm_nargs > 0" check.  Variable-arity functions (xfm_nargs == -1,
-     * e.g. concat()/substring()) check XEVF_MISSING on their own argv
-     * where it matters, since not every argument position is required.
-     */
-    int flags = (entry->xfm_nargs >= 0) ? XEIF_CHECK_MISSING : 0;
+    return 0;
+}
 
-    return xo_eval_prog_emit(prog, entry->xfm_func, id, argc, flags)
-	>= 0 ? 0 : -1;
+/*
+ * Compile a function call.  XEFF_NO_EVAL functions (choose/choose2)
+ * manage their own lazy argument evaluation and still depend on the
+ * old recursive xo_eval(), so they compile to a self-managing leaf
+ * instruction; every other function compiles each argument first and
+ * then emits one instruction with a static argc, matching the
+ * argv[]-based convention the rest of the operations already use.
+ *
+ * A name that matches no built-in falls back to ops->xfdo_find_function,
+ * giving a dynamic-load backend (e.g. libslax's "slax:" namespace
+ * functions) a chance to resolve it; see that hook's doc comment in
+ * xo_filter.h and xo_eval_func_external()'s above.  Only the arity
+ * (returned by the hook itself) is used at compile time -- the
+ * resolved xo_eval_ext_fn_t is not cached and is looked up again at
+ * runtime.
+ */
+static int
+xo_eval_compile_function (xo_eval_prog_t *prog, xo_xparse_data_t *xdp,
+			   xo_xparse_node_id_t id, xo_xparse_node_t *xnp,
+			   xo_filter_data_t *dp, xo_filter_data_ops_t *ops)
+{
+    const char *str = xo_xparse_str(xdp, xnp->xn_str);
+    if (str == NULL) {
+	xo_eval_compile_fail(dp, ops, "unknown function in filter expression");
+	return -1;
+    }
+
+    xo_eval_func_map_t *entry = xo_eval_find_func(xo_eval_functions, str);
+    if (entry != NULL) {
+	if (entry->xfm_flags & XEFF_NO_EVAL)
+	    return xo_eval_prog_emit(prog, entry->xfm_func, id, 0, 0) >= 0
+		? 0 : -1;
+
+	int argc = xo_eval_compile_function_args(prog, xdp, xnp, dp, ops);
+	if (argc < 0)
+	    return -1;
+
+	if (xo_eval_compile_check_arity(dp, ops, str, argc,
+					 entry->xfm_nargs,
+					 entry->xfm_min_args) < 0)
+	    return -1;
+
+	/*
+	 * Fixed-arity functions get the same missing-check short-circuit
+	 * as binary combine ops, matching xo_eval_function()'s own
+	 * "entry->xfm_nargs > 0" check.  Variable-arity functions
+	 * (xfm_nargs == -1, e.g. concat()/substring()) check
+	 * XEVF_MISSING on their own argv where it matters, since not
+	 * every argument position is required.
+	 */
+	int flags = (entry->xfm_nargs >= 0) ? XEIF_CHECK_MISSING : 0;
+
+	return xo_eval_prog_emit(prog, entry->xfm_func, id, argc, flags)
+	    >= 0 ? 0 : -1;
+    }
+
+    if (ops != NULL && ops->xfdo_find_function != NULL) {
+	int nargs, min_args;
+	xo_eval_ext_fn_t fn = ops->xfdo_find_function(dp, str,
+						       &nargs, &min_args);
+	if (fn != NULL) {
+	    int argc = xo_eval_compile_function_args(prog, xdp, xnp, dp, ops);
+	    if (argc < 0)
+		return -1;
+
+	    if (xo_eval_compile_check_arity(dp, ops, str, argc,
+					     nargs, min_args) < 0)
+		return -1;
+
+	    int flags = (nargs >= 0) ? XEIF_CHECK_MISSING : 0;
+
+	    return xo_eval_prog_emit(prog, xo_eval_func_external, id,
+				      argc, flags) >= 0 ? 0 : -1;
+	}
+    }
+
+    xo_eval_compile_fail(dp, ops,
+			  "unknown function in filter expression: '%s'",
+			  str);
+    return -1;
 }
 
 /*
