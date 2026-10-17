@@ -4615,6 +4615,7 @@ xo_do_format_field (xo_handle_t *xop, const xo_field_info_t *xfip,
         xpp.xp_num_fspecs = max_fspecs;
 
         int n = xo_parse_fspecs(&xpp, fmt, fmt + flen);
+        xo_parse_release_printable(&xpp); /* Our arrays are on the stack */
         if (n < 0)
             return -1;
 
@@ -8819,7 +8820,10 @@ xo_do_emit_fields (xo_handle_t *xop, const xo_field_info_t *fields,
 		    nxpp.xp_fspecs = nxpp.xp_cur_fspec = new_fspecs;
 		    nxpp.xp_num_fspecs = new_max_fspecs;
 
-		    if (!xo_parse_fields(&nxpp, new_fmt, new_fmt_len)) {
+		    int prc = xo_parse_fields(&nxpp, new_fmt, new_fmt_len);
+		    xo_parse_release_printable(&nxpp);
+
+		    if (prc == 0) {
 			gettext_reordered = 0;
 
 			/*
@@ -8995,7 +8999,9 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
     xpp.xp_fspecs = xpp.xp_cur_fspec = fspecs;
     xpp.xp_num_fspecs = max_fspecs;
 
-    if (xo_parse_fields(&xpp, fmt, fmt_len))
+    int rc = xo_parse_fields(&xpp, fmt, fmt_len);
+    xo_parse_release_printable(&xpp); /* Our arrays are on the stack */
+    if (rc)
 	return -1;		/* Warning already displayed */
 
     return xo_do_emit_fields(xop, fields, max_fields, fmt);
@@ -9165,7 +9171,9 @@ xo_simplify_format (xo_handle_t *xop, const char *fmt, int with_numbers,
     xpp.xp_fspecs = xpp.xp_cur_fspec = fspecs;
     xpp.xp_num_fspecs = max_fspecs;
 
-    if (xo_parse_fields(&xpp, fmt, fmt_len))
+    int rc = xo_parse_fields(&xpp, fmt, fmt_len);
+    xo_parse_release_printable(&xpp); /* Our arrays are on the stack */
+    if (rc)
 	return NULL;		/* Warning already displayed */
 
     xo_buffer_t xb;
@@ -9315,6 +9323,7 @@ xo_emit_field_hvf (xo_handle_t *xop, xo_emit_flags_t flags UNUSED,
 
     const char *cp;
     cp = xo_parse_roles(&xpp, rolmod, rolmod, xfip);
+    xo_parse_release_printable(&xpp); /* Our fields are on the stack */
     if (cp == NULL)
 	return -1;
 
