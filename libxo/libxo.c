@@ -441,13 +441,6 @@ static uint64_t xo_group_map;   /* Precomputed grouping-shape map */
 
 #define XO_DEFAULT_GROUP_MAP 0x33333333 /* 3s all the way */
 
-/*
- * To allow libxo to be used in diverse environment, we allow the
- * caller to give callbacks for memory allocation.
- */
-xo_realloc_func_t xo_realloc = realloc;
-xo_free_func_t xo_free = free;
-
 /* Forward declarations */
 static ssize_t
 xo_transition (xo_handle_t *xop, xo_xof_flags_t flags, const char *name,
@@ -11210,13 +11203,6 @@ xo_set_writer (xo_handle_t *xop, void *opaque, xo_write_func_t write_func,
     xop->xo_write = write_func;
     xop->xo_close = close_func;
     xop->xo_flush = flush_func;
-}
-
-void
-xo_set_allocator (xo_realloc_func_t realloc_func, xo_free_func_t free_func)
-{
-    xo_realloc = realloc_func;
-    xo_free = free_func;
 }
 
 xo_ssize_t
