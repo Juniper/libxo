@@ -104,6 +104,11 @@ static const XoEmitEntry xo_emit_table[] = {
     { "xo_emit_hfp",           2, XEF_PRINTFLIKE },
     { "xo_emit_hvfp",          2, XEF_VA_LIST | XEF_PRINTFLIKE },
 
+    { "xo_emit_precompiled",   2, 0 },
+    { "xo_emit_precompiled_h", 3, 0 },
+    { "xo_emit_precompiled_v", 2, XEF_VA_LIST },
+    { "xo_emit_precompiled_hv", 3, XEF_VA_LIST },
+
     { "xo_emit_cached",        1, 0 },
     { "xo_emit_cachedr",       1, 0 },
     { "xo_emit_cached_h",      2, 0 },
