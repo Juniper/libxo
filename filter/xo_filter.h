@@ -149,11 +149,11 @@ typedef uint32_t xo_eval_ext_vtype_t;
 #define XO_EVAL_EXT_MISSING 3
 
 typedef struct xo_eval_ext_value_s {
-    xo_eval_ext_vtype_t xev_type;
+    xo_eval_ext_vtype_t xee_type;
     union {
-        const char *xev_str;
-        double      xev_num;
-        int         xev_bool;
+        const char *xee_str;
+        double      xee_num;
+        int         xee_bool;
     };
 } xo_eval_ext_value_t;
 
