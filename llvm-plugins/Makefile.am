@@ -52,7 +52,7 @@ EXTRA_DIST += \
 # where xocc will look for them.
 XO_LLVMDIR = @XO_LLVMDIR@
 
-all: ${VALIDATE_PLUGIN} ${PRECOMPILE_PLUGIN} xocc.sh
+all-local: ${VALIDATE_PLUGIN} ${PRECOMPILE_PLUGIN} xocc.sh
 
 # cmake records each object's real header dependencies (in its .o.d
 # depfiles), so always descend and let cmake decide what to rebuild,
