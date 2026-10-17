@@ -121,7 +121,7 @@ test-validate: ${VALIDATE_PLUGIN}
 #   - Cross-check: diff plain vs pass for each format (round-trip sanity)
 #   - Compile with the pass; dump the object's xo_* symbols (addresses
 #     stripped, sorted) and diff against saved/ to confirm the expected
-#     calls/globals (xo_emit_cached, .xo_fcache, .xo_fields, .xo_fspecs)
+#     calls/globals (xo_emit_precompiled, .xo_fcache, .xo_fields, .xo_fspecs)
 #     are present, without depending on LLVM-IR-text-level detail
 #
 test-precompile: ${PRECOMPILE_PLUGIN}
@@ -163,7 +163,7 @@ test-precompile: ${PRECOMPILE_PLUGIN}
 	        > out/$$tc.ir.out 2> out/$$tc.ir.err ; \
 	    ${DIFF} -Nu ${srcdir}/saved/$$tc.ir.out  out/$$tc.ir.out ; \
 	    ${DIFF} -Nu ${srcdir}/saved/$$tc.ir.err  out/$$tc.ir.err ; \
-	    nm out/$$tc.pass.o | grep xo_emit_cached | sed -e 's/_xo/xo/' | sort -u \
+	    nm out/$$tc.pass.o | grep 'xo_emit_\(cached\|precompiled\)' | sed -e 's/_xo/xo/' | sort -u \
 	        > out/$$tc.nm ; \
 	    ${DIFF} -Nu ${srcdir}/saved/$$tc.nm out/$$tc.nm ; \
 	done ; true
