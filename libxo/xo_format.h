@@ -194,13 +194,16 @@ typedef struct xo_field_info_s {
 /*
  * Build-time pre-parsed format string cache.
  *
- * xo_emit_cached() is the target of the LLVM IR pass: it takes a pointer to
- * a pre-built xo_format_cache_t (holding a const xo_field_info_t[] parsed at
- * compile time) plus the original format string (kept for the gettext path
- * and as a version-mismatch fallback).
+ * xo_emit_precompiled() is the target of the LLVM IR pass: it takes a
+ * pointer to a pre-built xo_format_cache_t (holding a const
+ * xo_field_info_t[] parsed at compile time), the XO_PRECOMPILED_VERSION
+ * the cache was built for, plus the original format string (kept for the
+ * gettext path and as a version-mismatch fallback).  xo_emit_cached() is
+ * the older entry point, which has no version argument.
  *
- * If the cache version does not match XO_EMIT_CACHE_VERSION, or if the cache
- * pointer is NULL, the call silently falls back to parsing fmt at runtime.
+ * If the version argument does not match XO_PRECOMPILED_VERSION, the cache
+ * version does not match XO_EMIT_CACHE_VERSION, or the cache pointer is
+ * NULL, the call silently falls back to parsing fmt at runtime.
  *
  * xo_field_info_t is defined above; callers may populate xfc_fields[] directly
  * (e.g. as a static const array) using the XFF_* flags, XO_FOFF_* sentinels,
@@ -213,6 +216,62 @@ struct xo_format_cache_s {
     unsigned xfc_num_fields;
     const xo_field_info_t *xfc_fields;	/* const xo_field_info_t[] */
 };
+
+/*
+ * XO_PRECOMPILED_VERSION packs XO_EMIT_CACHE_VERSION with the target
+ * facts the cache's layout depends on: byte order, pointer size, the
+ * alignment of a uint64_t struct member, and the sizes of
+ * xo_field_info_t and xo_fspec_t.  The precompile pass builds the value
+ * from the target's DataLayout; libxo builds it from its own compile.
+ * A cache built for a different target (or a different libxo) won't
+ * match, so it is ignored rather than misread.
+ *
+ * Bits:  0-15 layout (XO_EMIT_CACHE_VERSION)
+ *       16-19 byte order (XO_PCV_ENDIAN_*)
+ *       20-23 pointer size, in bytes
+ *       24-27 alignment of a uint64_t struct member, in bytes
+ *       28-39 sizeof(xo_field_info_t)
+ *       40-51 sizeof(xo_fspec_t)
+ */
+#define XO_PCV_ENDIAN_UNKNOWN	0 /* Never built by the pass */
+#define XO_PCV_ENDIAN_LITTLE	1
+#define XO_PCV_ENDIAN_BIG	2
+
+#define XO_PCV_MAKE(_layout, _endian, _ptr, _align64, _fsize, _ssize) \
+    ((((xo_precomp_version_t) (_layout) & 0xffff) << 0)		\
+     | (((xo_precomp_version_t) (_endian) & 0xf) << 16)		\
+     | (((xo_precomp_version_t) (_ptr) & 0xf) << 20)		\
+     | (((xo_precomp_version_t) (_align64) & 0xf) << 24)	\
+     | (((xo_precomp_version_t) (_fsize) & 0xfff) << 28)	\
+     | (((xo_precomp_version_t) (_ssize) & 0xfff) << 40))
+
+/*
+ * Without __BYTE_ORDER__ we can't tell, and an unknown byte order
+ * never matches what the pass builds, so caches are just ignored.
+ */
+#if defined(__BYTE_ORDER__) && defined(__ORDER_BIG_ENDIAN__) \
+    && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#define XO_PCV_ENDIAN XO_PCV_ENDIAN_BIG
+#elif defined(__BYTE_ORDER__) && defined(__ORDER_LITTLE_ENDIAN__) \
+    && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#define XO_PCV_ENDIAN XO_PCV_ENDIAN_LITTLE
+#else
+#define XO_PCV_ENDIAN XO_PCV_ENDIAN_UNKNOWN
+#endif
+
+/*
+ * The member offset gives the alignment a struct really uses, which
+ * can be less than _Alignof (e.g. 4 for uint64_t on i386).
+ */
+struct xo_pcv_align64_s {
+    char xpa_pad;
+    uint64_t xpa_value;
+};
+
+#define XO_PRECOMPILED_VERSION						\
+    XO_PCV_MAKE(XO_EMIT_CACHE_VERSION, XO_PCV_ENDIAN, sizeof(void *),	\
+		offsetof(struct xo_pcv_align64_s, xpa_value),		\
+		sizeof(xo_field_info_t), sizeof(xo_fspec_t))
 
 /*
  * Error callback.  Called when xo_parse_format() encounters a problem.
