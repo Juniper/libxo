@@ -5074,3 +5074,9 @@ xo_filter_get_data_ptr (xo_filter_t *xfp)
 {
     return xfp ? xfp->xf_data : NULL;
 }
+
+xo_filter_data_ops_t *
+xo_filter_get_data_ops (xo_filter_t *xfp)
+{
+    return xfp ? xfp->xf_ops : NULL;
+}
