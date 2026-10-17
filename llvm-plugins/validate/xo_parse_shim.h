@@ -28,9 +28,11 @@ extern "C" {
 
 /*
  * Error callback: receives a fully-formatted message (the va_list has
- * already been consumed by the shim).
+ * already been consumed by the shim).  "offset" is the byte offset in
+ * the format string of the field at fault, or -1 when the problem is
+ * not tied to a single field.
  */
-typedef void (*xo_shim_error_t)(void *data, const char *fmt, ...);
+typedef void (*xo_shim_error_t)(void *data, int offset, const char *fmt, ...);
 
 /*
  * Parse fmt for syntax errors only.  Calls error(data, msg) for each
