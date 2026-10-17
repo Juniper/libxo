@@ -269,6 +269,10 @@ xo_filter_xparse_data (xo_handle_t *xop, xo_filter_t *xfp);
 xo_filter_data_t *
 xo_filter_get_data_ptr (xo_filter_t *xfp);
 
+/* Return the ops vtable set by xo_filter_create_with_data. */
+xo_filter_data_ops_t *
+xo_filter_get_data_ops (xo_filter_t *xfp);
+
 #ifdef LIBXO_NEED_FILTERS
 #define XO_FILTER_INIT_RETURN_TYPE int
 #define XO_FILTER_INIT_SIGNATURE int version UNUSED, xo_filter_ops_t *ops UNUSED
