@@ -132,6 +132,22 @@ xo_parse_warning (xo_parse_t *xpp, const char *fmt, ...)
     va_end(vap);
 }
 
+/*
+ * To allow libxo to be used in diverse environment, we allow the
+ * caller to give callbacks for memory allocation.  These live here,
+ * not in libxo.c, since this file is compiled into both libxo.a and
+ * libxo_format.a (used by the llvm-plugins).
+ */
+xo_realloc_func_t xo_realloc = realloc;
+xo_free_func_t xo_free = free;
+
+void
+xo_set_allocator (xo_realloc_func_t realloc_func, xo_free_func_t free_func)
+{
+    xo_realloc = realloc_func;
+    xo_free = free_func;
+}
+
 /* Allocator helper functions */
 
 static void *
