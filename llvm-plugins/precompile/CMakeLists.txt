@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.13)
 project(xo_precompile CXX C)
 
 # LLVM New-PM module pass: rewrites xo_emit() calls with constant format
-# strings into xo_emit_cached() calls backed by pre-parsed field tables.
+# strings into xo_emit_precompiled() calls backed by pre-parsed field tables.
 # Load at compile time with:  clang -fpass-plugin=/path/to/xo_precompile.so
 
 set(CMAKE_CXX_STANDARD 17)
