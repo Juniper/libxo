@@ -22,6 +22,7 @@
 #include <sys/types.h>
 
 #include "xo.h"
+#include "xo_buf.h"
 
 /*
  * Maximum number of fields in a format string.  Override at compile
@@ -215,7 +216,9 @@ struct xo_format_cache_s {
 
 /*
  * Error callback.  Called when xo_parse_format() encounters a problem.
- * The fmt/... are a printf-style message.
+ * The fmt/... are a printf-style message.  While the callback runs,
+ * xp_err_offset holds the byte offset in the format string of the field
+ * being parsed, or -1 when the problem is not tied to a single field.
  */
 typedef void (*xo_parse_error_func_t)(void *data, const char *fmt, ...);
 
@@ -250,6 +253,8 @@ typedef struct xo_parse_s {
     /* Working: these fields hold the current values during parsing */
     xo_field_info_t *xp_cur_field; /* Current item in xp_fields */
     xo_fspec_t *xp_cur_fspec;	   /* Current item in xp_fspecs */
+    int xp_err_offset;		   /* Offset of the field being parsed */
+    xo_buffer_t xp_printable;	   /* Reused by xo_parse_printable() */
 
 } xo_parse_t;
 
@@ -268,9 +273,27 @@ extern const char xo_default_format[];
 int xo_parse_format(xo_parse_t *xpp, const char *fmt);
 
 /*
- * Free xpp->xp_fields (using xpp->xp_free) and zero the output fields.
+ * Free xpp->xp_fields and the xp_printable buffer (using xpp->xp_free)
+ * and zero the output fields.
  */
 void xo_parse_release(xo_parse_t *xpp);
+
+/*
+ * Free only the xp_printable buffer.  For callers that hand
+ * xo_parse_fields() their own (stack) arrays and so cannot call
+ * xo_parse_release().
+ */
+void xo_parse_release_printable(xo_parse_t *xpp);
+
+/*
+ * Return a printable copy of str for an error message, with newlines,
+ * returns and double quotes escaped, wrapped in braces if bracesp is
+ * set.  A negative len means str is NUL-terminated.  The copy lives in
+ * xpp->xp_printable, which is reused, so it is valid only until the
+ * next call or until xpp is released.
+ */
+const char *xo_parse_printable(xo_parse_t *xpp, const char *str,
+			       ssize_t len, int bracesp);
 
 /*
  * Parse role and modifier characters from the prefix of a single field
