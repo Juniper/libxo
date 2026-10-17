@@ -25,15 +25,6 @@ VALIDATE_RELPATH = ${VALIDATE_DIR}/${VALIDATE_NAME}
 VALIDATE_BUILD = ${top_builddir}/llvm-plugins/${VALIDATE_DIR}
 VALIDATE_PLUGIN = ${VALIDATE_BUILD}/${VALIDATE_NAME}
 
-VALIDATE_SRCS = \
-    ${top_builddir}/libxo/xo_config.h \
-    ${top_srcdir}/libxo/xo.h \
-    ${top_srcdir}/libxo/xo_format.h \
-    ${top_srcdir}/llvm-plugins/validate/CMakeLists.txt \
-    ${top_srcdir}/llvm-plugins/validate/xo_validate.cc \
-    ${top_srcdir}/llvm-plugins/validate/xo_parse_shim.c \
-    ${top_srcdir}/llvm-plugins/validate/xo_parse_shim.h
-
 PRECOMPILE_NAME = xo_precompile.so
 PRECOMPILE_DIR = precompile
 PRECOMPILE_RELPATH = ${PRECOMPILE_DIR}/${PRECOMPILE_NAME}
@@ -41,13 +32,9 @@ PRECOMPILE_RELPATH = ${PRECOMPILE_DIR}/${PRECOMPILE_NAME}
 PRECOMPILE_BUILD = ${top_builddir}/llvm-plugins/${PRECOMPILE_DIR}
 PRECOMPILE_PLUGIN = ${PRECOMPILE_BUILD}/${PRECOMPILE_NAME}
 
-PRECOMPILE_SRCS = \
-    ${top_srcdir}/llvm-plugins/precompile/CMakeLists.txt \
-    ${top_srcdir}/llvm-plugins/precompile/xo_precompile.cc
-
 EXTRA_DIST = xocc.sh.in xocc.1
 
-.PHONY: validate validate-clean precompile precompile-clean
+.PHONY: validate validate-clean precompile precompile-clean FORCE
 
 man1_files = xocc.1
 
@@ -67,7 +54,13 @@ XO_LLVMDIR = @XO_LLVMDIR@
 
 all: ${VALIDATE_PLUGIN} ${PRECOMPILE_PLUGIN} xocc.sh
 
-${VALIDATE_PLUGIN}: ${VALIDATE_DIR}/CMakeCache.txt ${VALIDATE_SRCS}
+# cmake records each object's real header dependencies (in its .o.d
+# depfiles), so always descend and let cmake decide what to rebuild,
+# rather than guessing the dependencies here.  cmake only touches a
+# plugin when it relinks it, so a no-op descent leaves it current.
+FORCE:
+
+${VALIDATE_PLUGIN}: ${VALIDATE_DIR}/CMakeCache.txt FORCE
 	${MAKE} -C ${VALIDATE_DIR}
 
 ${VALIDATE_DIR}/CMakeCache.txt: Makefile
@@ -82,7 +75,7 @@ ${VALIDATE_DIR}/CMakeCache.txt: Makefile
 	    -DXO_BUILDDIR="$(CURDIR)/${top_builddir}"
 	touch $@
 
-${PRECOMPILE_PLUGIN}: ${PRECOMPILE_DIR}/CMakeCache.txt ${PRECOMPILE_SRCS}
+${PRECOMPILE_PLUGIN}: ${PRECOMPILE_DIR}/CMakeCache.txt FORCE
 	${MAKE} -C ${PRECOMPILE_DIR}
 
 ${PRECOMPILE_DIR}/CMakeCache.txt: Makefile
