@@ -1,58 +1,74 @@
-../../../tests/core/test_01.c:121:13: warning: libxo: field name contains percent sign: '{a:%s}'
+../../../tests/core/test_01.c:121:21: warning: libxo: field name contains percent sign: '{a:%s}'
   121 |     xo_emit("other: {a:%s}\n", "thing2", "two"); /* invalid content */
-      |             ^
-../../../tests/core/test_01.c:122:13: warning: libxo: field name contains percent sign: '{a:%s/%s}'
+      |                     ^
+../../../tests/core/test_01.c:122:21: warning: libxo: field name contains percent sign: '{a:%s/%s}'
   122 |     xo_emit("other: {a:%s/%s}\n", "thing3", "three");  /* same */
-      |             ^
-../../../tests/core/test_01.c:123:13: warning: libxo: field name contains percent sign: '{a:xxx%s/%s}'
+      |                     ^
+../../../tests/core/test_01.c:123:21: warning: libxo: field name contains percent sign: '{a:xxx%s/%s}'
   123 |     xo_emit("other: {a:xxx%s/%s}\n", "thing4", "four"); /* same */
-      |             ^
-../../../tests/core/test_01.c:152:13: warning: libxo: use hyphens, not underscores, in field name: '{e:kve_start/%#jx}'
+      |                     ^
+../../../tests/core/test_01.c:152:14: warning: libxo: use hyphens, not underscores, in field name: '{e:kve_start/%#jx}'
   152 |     xo_emit("{e:kve_start/%#jx}", (uintmax_t) 0xdeadbeef);
-      |             ^
-../../../tests/core/test_01.c:153:13: warning: libxo: use hyphens, not underscores, in field name: '{e:kve_end/%#jx}'
+      |              ^
+../../../tests/core/test_01.c:153:14: warning: libxo: use hyphens, not underscores, in field name: '{e:kve_end/%#jx}'
   153 |     xo_emit("{e:kve_end/%#jx}", (uintmax_t) 0xcabb1e);
-      |             ^
-../../../tests/core/test_01.c:298:13: warning: libxo: field role ('P'/padding) requires a name or format: '{P:}'
+      |              ^
+../../../tests/core/test_01.c:298:15: warning: libxo: field role ('P'/padding) requires a name or format: '{P:}'
+  298 |     xo_emit("X{P:}X", "epic fail");
+      |               ^
+../../../tests/core/test_01.c:298:13: warning: libxo: format expects 0 argument(s) but 1 provided
   298 |     xo_emit("X{P:}X", "epic fail");
       |             ^
-../../../tests/core/test_01.c:298:13: warning: libxo: format expects 0 argument(s) but 1 provided
-../../../tests/core/test_01.c:299:13: warning: libxo: field role ('T'/title) requires a name or format: '{T:}'
+../../../tests/core/test_01.c:299:15: warning: libxo: field role ('T'/title) requires a name or format: '{T:}'
+  299 |     xo_emit("X{T:}X", "epic fail");
+      |               ^
+../../../tests/core/test_01.c:299:13: warning: libxo: format expects 0 argument(s) but 1 provided
   299 |     xo_emit("X{T:}X", "epic fail");
       |             ^
-../../../tests/core/test_01.c:299:13: warning: libxo: format expects 0 argument(s) but 1 provided
-../../../tests/core/test_01.c:300:13: warning: libxo: field role ('N'/note) requires a name or format: '{N:}'
+../../../tests/core/test_01.c:300:15: warning: libxo: field role ('N'/note) requires a name or format: '{N:}'
+  300 |     xo_emit("X{N:}X", "epic fail");
+      |               ^
+../../../tests/core/test_01.c:300:13: warning: libxo: format expects 0 argument(s) but 1 provided
   300 |     xo_emit("X{N:}X", "epic fail");
       |             ^
-../../../tests/core/test_01.c:300:13: warning: libxo: format expects 0 argument(s) but 1 provided
-../../../tests/core/test_01.c:301:13: warning: libxo: field role ('L'/label) requires a name or format: '{L:}'
+../../../tests/core/test_01.c:301:15: warning: libxo: field role ('L'/label) requires a name or format: '{L:}'
+  301 |     xo_emit("X{L:}X\n", "epic fail");
+      |               ^
+../../../tests/core/test_01.c:301:13: warning: libxo: format expects 0 argument(s) but 1 provided
   301 |     xo_emit("X{L:}X\n", "epic fail");
       |             ^
-../../../tests/core/test_01.c:301:13: warning: libxo: format expects 0 argument(s) but 1 provided
-../../../tests/core/test_01.c:306:13: warning: libxo: use hyphens, not underscores, in field name: '{e:mode_octal/%s}'
+../../../tests/core/test_01.c:306:25: warning: libxo: use hyphens, not underscores, in field name: '{e:mode_octal/%s}'
+  306 |     xo_emit("{e:mode/%s}{e:mode_octal/%s} {t:links/%s} "
+      |                         ^
+../../../tests/core/test_01.c:306:13: warning: libxo: format expects 5 argument(s) but 8 provided
   306 |     xo_emit("{e:mode/%s}{e:mode_octal/%s} {t:links/%s} "
       |             ^
-../../../tests/core/test_01.c:306:13: warning: libxo: format expects 5 argument(s) but 8 provided
-../../../tests/core/test_01.c:313:13: warning: libxo: use hyphens, not underscores, in field name: '{e:mode_octal/%03o}'
+../../../tests/core/test_01.c:313:25: warning: libxo: use hyphens, not underscores, in field name: '{e:mode_octal/%03o}'
   313 |     xo_emit("{t:mode/%s}{e:mode_octal/%03o} {t:links/%*u} "
-      |             ^
-../../../tests/core/test_01.c:330:13: warning: libxo: field name should not be less than 3 characters long: '{:i8/%!8d}'
-  330 |     xo_emit("i64 {:i64/%!64d}, i32 {:i32/%!32d}, i16 {:i16/%!16d}, "
-      |             ^
-../../../tests/core/test_01.c:334:13: warning: libxo: field name should not be less than 3 characters long: '{:u8/%!8u}'
-  334 |     xo_emit("u64 {:u64/%!64u}, u32 {:u32/%!32u}, u16 {:u16/%!16u}, "
-      |             ^
-../../../tests/core/test_01.c:338:13: warning: libxo: invalid integer size: '{%!0u}'
-  338 |     xo_emit("u64 {:u64/%8.8!64u}, u32 {:u32/%*.*!32u}, u64 {:u64-hex/%#!64x}, "
-      |             ^
-../../../tests/core/test_01.c:338:13: warning: libxo: field name should not be less than 3 characters long: '{:u0/%!0u}'
-../../../tests/core/test_01.c:342:13: warning: libxo: invalid integer size: '{%!31u}'
+      |                         ^
+../../../tests/core/test_01.c:331:10: warning: libxo: field name should not be less than 3 characters long: '{:i8/%!8d}'
+  331 |             "i8 {:i8/%!8d}\n",
+      |                 ^
+../../../tests/core/test_01.c:335:10: warning: libxo: field name should not be less than 3 characters long: '{:u8/%!8u}'
+  335 |             "u8 {:u8/%!8u}\n",
+      |                 ^
+../../../tests/core/test_01.c:339:10: warning: libxo: invalid integer size: '{%!0u}'
+  339 |             "u0 {:u0/%!0u}\n",
+      |                 ^
+../../../tests/core/test_01.c:339:10: warning: libxo: field name should not be less than 3 characters long: '{:u0/%!0u}'
+../../../tests/core/test_01.c:342:18: warning: libxo: invalid integer size: '{%!31u}'
   342 |     xo_emit("u31 {:u31/%!31u}, u33 {:u33/%!33u}, u32s {:u32s/%!32s}, "
-      |             ^
-../../../tests/core/test_01.c:342:13: warning: libxo: invalid integer size: '{%!33u}'
-../../../tests/core/test_01.c:342:13: warning: libxo: missing integer size: '{%!u}'
-../../../tests/core/test_01.c:349:13: warning: libxo: field role ('F'/format) requires a name or format: '{F:}'
+      |                  ^
+../../../tests/core/test_01.c:342:36: warning: libxo: invalid integer size: '{%!33u}'
+  342 |     xo_emit("u31 {:u31/%!31u}, u33 {:u33/%!33u}, u32s {:u32s/%!32s}, "
+      |                                    ^
+../../../tests/core/test_01.c:343:16: warning: libxo: missing integer size: '{%!u}'
+  343 |             "unothing {:unothing/%!u}\n",
+      |                       ^
+../../../tests/core/test_01.c:349:15: warning: libxo: field role ('F'/format) requires a name or format: '{F:}'
+  349 |     xo_emit("X{F:}X\n", "empty");
+      |               ^
+../../../tests/core/test_01.c:349:13: warning: libxo: format expects 0 argument(s) but 1 provided
   349 |     xo_emit("X{F:}X\n", "empty");
       |             ^
-../../../tests/core/test_01.c:349:13: warning: libxo: format expects 0 argument(s) but 1 provided
 25 warnings generated.
