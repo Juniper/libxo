@@ -162,7 +162,12 @@ For each one it checks:
 .It
 .Sy Syntax
 \(en malformed field descriptors, such as an unclosed
-.Sq { .
+.Sq { ,
+and fields that cannot produce meaningful output, such as a value
+with no name
+.Pq Li {:/%d}
+or a title with neither content nor format
+.Pq Li {T:} .
 .It
 .Sy Argument count
 \(en too few or too many arguments for the fields in the format
@@ -189,9 +194,12 @@ checks on field naming and anchor usage.
 Leading digits, stray
 .Sq %
 characters, and anchor width/format mismatches are always checked;
-underscores (instead of hyphens), upper-case letters, and names
-shorter than the minimum length are checked only when lint mode is
-enabled
+underscores (instead of hyphens), upper-case letters, names shorter
+than the minimum length, and an empty name on a value with the
+.Sq d
+(display) flag (use the
+.Sq F
+role instead) are checked only when lint mode is enabled
 .Pq see below .
 .El
 .Pp
@@ -228,7 +236,8 @@ are always warnings and are unaffected by this flag.
 .It Fl mllvm Fl xo\-validate\-lint
 Enables the additional cosmetic naming checks described under
 .Sy Style
-above (underscores, upper case, short names).
+above (underscores, upper case, short names, empty display-only
+value names).
 These are off by default since they're closer to style preference
 than correctness; the always-on style checks (leading digits, anchor
 mismatches) still run either way.
