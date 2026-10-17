@@ -9001,20 +9001,22 @@ xo_do_emit (xo_handle_t *xop, const char *fmt)
 }
 
 /*
- * Core of xo_emit_cached: use a pre-parsed const field table when valid.
- * xo_do_emit_fields() takes fields as const and only ever mutates a
- * private local copy on the (cold) gettext path, so the cached table is
- * passed straight through with no copy.  Precompiled/hand-built tables
- * are required to carry a zeroed xfi_ftype terminator entry just past
- * xfc_num_fields real entries (see xo_precompile.cc and test_14.c's
- * make_cache()).  Falls back to xo_do_emit() on version mismatch or null
- * cache.
+ * Core of xo_emit_precompiled: use a pre-parsed const field table when
+ * valid.  xo_do_emit_fields() takes fields as const and only ever
+ * mutates a private local copy on the (cold) gettext path, so the
+ * cached table is passed straight through with no copy.
+ * Precompiled/hand-built tables are required to carry a zeroed
+ * xfi_ftype terminator entry just past xfc_num_fields real entries (see
+ * xo_precompile.cc and test_14.c's make_cache()).  Falls back to
+ * xo_do_emit() on a null cache or a mismatch in either version: "vers"
+ * is the target the cache was built for, and xfc_version is the layout.
  */
 static int
-xo_do_emit_cached (xo_handle_t *xop, const xo_format_cache_t *fcp,
-		   const char *fmt)
+xo_do_emit_precompiled (xo_handle_t *xop, xo_precomp_version_t vers,
+			const xo_format_cache_t *fcp, const char *fmt)
 {
     if (fcp == NULL || xo_no_cache || fcp->xfc_fields == NULL
+	    || vers != XO_PRECOMPILED_VERSION
 	    || fcp->xfc_version != XO_EMIT_CACHE_VERSION)
 	return xo_do_emit(xop, fmt);	/* safe fallback: parse at runtime */
 
@@ -9033,6 +9035,72 @@ xo_do_emit_cached (xo_handle_t *xop, const xo_format_cache_t *fcp,
 }
 
 xo_ssize_t
+xo_emit_precompiled (xo_precomp_version_t vers, const xo_format_cache_t *fcp,
+		     const char *fmt, ...)
+{
+    xo_handle_t *xop = xo_default(NULL);
+    ssize_t rc;
+
+    va_start(xop->xo_vap, fmt);
+    rc = xo_do_emit_precompiled(xop, vers, fcp, fmt);
+    va_end(xop->xo_vap);
+    bzero(&xop->xo_vap, sizeof(xop->xo_vap));
+
+    return rc;
+}
+
+xo_ssize_t
+xo_emit_precompiled_h (xo_handle_t *xop, xo_precomp_version_t vers,
+		       const xo_format_cache_t *fcp, const char *fmt, ...)
+{
+    ssize_t rc;
+
+    xop = xo_default(xop);
+    va_start(xop->xo_vap, fmt);
+    rc = xo_do_emit_precompiled(xop, vers, fcp, fmt);
+    va_end(xop->xo_vap);
+    bzero(&xop->xo_vap, sizeof(xop->xo_vap));
+
+    return rc;
+}
+
+xo_ssize_t
+xo_emit_precompiled_v (xo_precomp_version_t vers, const xo_format_cache_t *fcp,
+		       const char *fmt, va_list vap)
+{
+    xo_handle_t *xop = xo_default(NULL);
+    ssize_t rc;
+
+    va_copy(xop->xo_vap, vap);
+    rc = xo_do_emit_precompiled(xop, vers, fcp, fmt);
+    va_end(xop->xo_vap);
+    bzero(&xop->xo_vap, sizeof(xop->xo_vap));
+
+    return rc;
+}
+
+xo_ssize_t
+xo_emit_precompiled_hv (xo_handle_t *xop, xo_precomp_version_t vers,
+			const xo_format_cache_t *fcp, const char *fmt,
+			va_list vap)
+{
+    ssize_t rc;
+
+    xop = xo_default(xop);
+    va_copy(xop->xo_vap, vap);
+    rc = xo_do_emit_precompiled(xop, vers, fcp, fmt);
+    va_end(xop->xo_vap);
+    bzero(&xop->xo_vap, sizeof(xop->xo_vap));
+
+    return rc;
+}
+
+/*
+ * The xo_emit_cached*() functions predate the version argument; they
+ * are kept for existing callers and assume the current version, so only
+ * xfc_version protects them.
+ */
+xo_ssize_t
 xo_emit_cached_h (xo_handle_t *xop, const xo_format_cache_t *fcp,
 		  const char *fmt, ...)
 {
@@ -9040,7 +9108,7 @@ xo_emit_cached_h (xo_handle_t *xop, const xo_format_cache_t *fcp,
 
     xop = xo_default(xop);
     va_start(xop->xo_vap, fmt);
-    rc = xo_do_emit_cached(xop, fcp, fmt);
+    rc = xo_do_emit_precompiled(xop, XO_PRECOMPILED_VERSION, fcp, fmt);
     va_end(xop->xo_vap);
     bzero(&xop->xo_vap, sizeof(xop->xo_vap));
 
@@ -9054,7 +9122,7 @@ xo_emit_cached (const xo_format_cache_t *fcp, const char *fmt, ...)
     ssize_t rc;
 
     va_start(xop->xo_vap, fmt);
-    rc = xo_do_emit_cached(xop, fcp, fmt);
+    rc = xo_do_emit_precompiled(xop, XO_PRECOMPILED_VERSION, fcp, fmt);
     va_end(xop->xo_vap);
     bzero(&xop->xo_vap, sizeof(xop->xo_vap));
 
@@ -9069,7 +9137,7 @@ xo_emit_cachedr (const xo_format_cache_t *fcp, const char *fmt, ...)
     ssize_t rc;
 
     va_start(xop->xo_vap, fmt);
-    rc = xo_do_emit_cached(xop, fcp, fmt);
+    rc = xo_do_emit_precompiled(xop, XO_PRECOMPILED_VERSION, fcp, fmt);
     va_end(xop->xo_vap);
     bzero(&xop->xo_vap, sizeof(xop->xo_vap));
 
@@ -9084,7 +9152,7 @@ xo_emit_cached_hv (xo_handle_t *xop, const xo_format_cache_t *fcp,
 
     xop = xo_default(xop);
     va_copy(xop->xo_vap, vap);
-    rc = xo_do_emit_cached(xop, fcp, fmt);
+    rc = xo_do_emit_precompiled(xop, XO_PRECOMPILED_VERSION, fcp, fmt);
     va_end(xop->xo_vap);
     bzero(&xop->xo_vap, sizeof(xop->xo_vap));
 
@@ -9099,7 +9167,7 @@ xo_emit_cached_hvf (xo_handle_t *xop, xo_emit_flags_t flags UNUSED,
 
     xop = xo_default(xop);
     va_copy(xop->xo_vap, vap);
-    rc = xo_do_emit_cached(xop, fcp, fmt);
+    rc = xo_do_emit_precompiled(xop, XO_PRECOMPILED_VERSION, fcp, fmt);
     va_end(xop->xo_vap);
     bzero(&xop->xo_vap, sizeof(xop->xo_vap));
 
@@ -9114,7 +9182,7 @@ xo_emit_cached_hf (xo_handle_t *xop, xo_emit_flags_t flags UNUSED,
 
     xop = xo_default(xop);
     va_start(xop->xo_vap, fmt);
-    rc = xo_do_emit_cached(xop, fcp, fmt);
+    rc = xo_do_emit_precompiled(xop, XO_PRECOMPILED_VERSION, fcp, fmt);
     va_end(xop->xo_vap);
     bzero(&xop->xo_vap, sizeof(xop->xo_vap));
 
@@ -9129,7 +9197,7 @@ xo_emit_cached_f (xo_emit_flags_t flags UNUSED, const xo_format_cache_t *fcp,
     ssize_t rc;
 
     va_start(xop->xo_vap, fmt);
-    rc = xo_do_emit_cached(xop, fcp, fmt);
+    rc = xo_do_emit_precompiled(xop, XO_PRECOMPILED_VERSION, fcp, fmt);
     va_end(xop->xo_vap);
     bzero(&xop->xo_vap, sizeof(xop->xo_vap));
 
