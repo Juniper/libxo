@@ -363,7 +363,9 @@ const char *
 xo_printable2 (const char *str, int len, int bracesp);
 
 /*
- * Some roles need a name, some don't
+ * Some roles need a name, some don't.  The XO_LINT_ prefix reflects
+ * that these rules came from xolint.pl; most are real errors, not
+ * lint-only (XPF_LINT) style checks.
  */
 #define XO_LINT_ROLES_NEEDING_NAME "V" /* Can't have empty name (:XX)*/
 #define XO_LINT_ROLES_NEEDING_NAME_OR_FORMAT "DEFLNPTUW" /* One or the other */
