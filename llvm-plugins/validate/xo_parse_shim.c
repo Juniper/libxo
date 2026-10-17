@@ -380,22 +380,28 @@ xo_shim_parse_args (const char *fmt,
 	    int no_name = (xfip->xfi_flags & XFF_DISPLAY_ONLY) != 0;
 	    const char use_instead[] = "use 'F'/format role instead";
 
-	    /* Enforce name/format restrictions */
-	    if ((flags & XPF_LINT) && strchr(XO_LINT_ROLES_NEEDING_NAME, ftype)
+	    /*
+	     * Enforce name/format restrictions.  A value with no name
+	     * has nothing to be encoded under, so that is an error.
+	     * With the 'display' flag the value is never encoded, so
+	     * the empty name is harmless; it is common practice, but
+	     * 'F' is the proper role, so it is only a lint warning.
+	     */
+	    if (strchr(XO_LINT_ROLES_NEEDING_NAME, ftype)
 			&& xfip->xfi_clen == 0) {
 		const char *role_name = xo_lookup_role_name(ftype);
-		if (no_name)
-		    ss_err.error(ss_err.data, off,
-				 "value field ('%c'%s%s) has empty name, but "
-				 "has the 'display' flag set; %s: '%s'",
-				 ftype, role_name ? "/" : "", role_name ?: "",
-				 use_instead,
-				 xo_parse_printable(&xpp, str, slen, 1));
-		else 
+		if (!no_name)
 		    ss_err.error(ss_err.data, off,
 				 "field role ('%c'%s%s) requires a non-empty "
 				 "name: '%s'",
 				 ftype, role_name ? "/" : "", role_name ?: "",
+				 xo_parse_printable(&xpp, str, slen, 1));
+		else if (flags & XPF_LINT)
+		    ss_warn.error(ss_warn.data, off,
+				 "value field ('%c'%s%s) has empty name, but "
+				 "has the 'display' flag set; %s: '%s'",
+				 ftype, role_name ? "/" : "", role_name ?: "",
+				 use_instead,
 				 xo_parse_printable(&xpp, str, slen, 1));
 	    }
 
