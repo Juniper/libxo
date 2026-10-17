@@ -15,9 +15,9 @@ libxo ships two optional LLVM/clang plugins that operate on
 
 - **xo_precompile** - an LLVM IR pass that finds `libxo` calls whose
   format string is a compile-time constant, parses that format string
-  during the build, and rewrites the call to `xo_emit_cached()`, passing
-  a pre-parsed field table as a constant.  This removes the runtime cost
-  of parsing the format string on every call.
+  during the build, and rewrites the call to `xo_emit_precompiled()`,
+  passing a pre-parsed field table as a constant.  This removes the
+  runtime cost of parsing the format string on every call.
 
 Both plugins share a single format-string parser (the same one libxo
 uses internally, reached through a small C shim so the C++ plugin code
@@ -192,12 +192,16 @@ For each such call it will:
    on every call.
 2. emit those tables as `private constant` LLVM globals in the
    module.
-3. rewrite the call to the matching `xo_emit_cached*()` entry point
-   (`xo_emit` -> `xo_emit_cached`, `xo_emit_hf` -> `xo_emit_cached_hf`,
-   and so on), passing a pointer to the generated table ahead of the
-   format string and value arguments.
+3. rewrite the call to `xo_emit_precompiled()` (for `xo_emit`,
+   `xo_emitr`, and `xo_emit_f`) or `xo_emit_precompiled_h()` (for
+   `xo_emit_h` and `xo_emit_hf`) or `xo_emit_precompiled_hv()` (for
+   `xo_emit_hv` and `xo_emit_hvf`), passing the
+   `XO_PRECOMPILED_VERSION` the generated table was built for and a
+   pointer to that table, after the handle (if any) and ahead of the
+   format string and value arguments.  The flags argument of the
+   `_f` forms is dropped, since libxo ignores it.
 
-At run time, `xo_emit_cached()` skips straight to formatting using the
+At run time, `xo_emit_precompiled()` skips straight to formatting using the
 supplied table instead of first scanning the format string to build
 one.  Output is byte-for-byte identical to what `xo_emit()` would have
 produced from the same format string and arguments - the pass changes
@@ -211,8 +215,8 @@ time.  This is needed when:
   run time, or came from a variable),
 - the shim reports a parse error for it (the ordinary runtime path will
   report the same error, so nothing is silently swallowed), or
-- the callee isn't one of the known `xo_emit*()` names, or is called
-  indirectly through a function pointer.
+- the callee isn't one of the known `xo_emit*()` names above, or is
+  called indirectly through a function pointer.
 
 Because the rewrite happens at the IR level, it works regardless of
 what source-level macros or wrappers were used to reach `xo_emit()`, as
@@ -227,8 +231,8 @@ Invoking `xo_precompile`
 Invoke the precompile module by passing the `-fpass-plugin=` option on
 a normal compile; nothing else about the command line changes, and the
 resulting object file links against the same `libxo` as an unmodified
-build (`xo_emit_cached()` and friends are ordinary exported libxo
-symbols, not something the plugin invents)::
+build (`xo_emit_precompiled()` and friends are ordinary exported
+libxo symbols, not something the plugin invents)::
 
     clang -c \
         -fpass-plugin=/path/to/xo_precompile.so \
@@ -239,7 +243,7 @@ symbols, not something the plugin invents)::
 
 To see the effect directly, dump LLVM IR instead of an object file and
 look for the generated `.xo_fields.*` / `.xo_fspecs.*` / `.xo_fcache.*`
-globals and the `xo_emit_cached` call::
+globals and the `xo_emit_precompiled` call::
 
     clang -S -emit-llvm \
         -fpass-plugin=/path/to/xo_precompile.so \
@@ -279,9 +283,16 @@ Caveats and known limitations
 - Both plugins are LLVM/clang-specific; there is no equivalent for GCC.
   Code is fully portable either way - without the plugins it just
   behaves like ordinary, unmodified libxo.
-- The plugins are versioned against `xo_field_info_t`'s in-memory
-  layout via `XO_EMIT_CACHE_VERSION` (in `xo.h`) and a set of
-  `_Static_assert` layout checks in the shared C shim
-  (`llvm-plugins/validate/xo_parse_shim.c`). A libxo built with a
-  mismatched header will refuse the precompiled table at run time and
-  fall back to normal parsing rather than misinterpreting it.
+- Each precompiled call passes an `XO_PRECOMPILED_VERSION` value (in
+  `xo_format.h`), which the pass builds from the target's data
+  layout.  It packs `XO_EMIT_CACHE_VERSION` with the target's byte
+  order, pointer size, `uint64_t` alignment, and the sizes of
+  `xo_field_info_t` and `xo_fspec_t`.  libxo builds the same value
+  from its own compile, and ignores a table whose value differs,
+  falling back to normal parsing rather than misinterpreting it.  So
+  cross builds are safe: the tables are laid out for the target, and
+  a table built for some other target or libxo is never used.
+- The pass checks its own copy of the struct layouts against the
+  offsets the shared C shim (`llvm-plugins/validate/xo_parse_shim.c`)
+  was compiled with.  If they disagree, it warns once and leaves all
+  calls untouched.
