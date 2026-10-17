@@ -1,16 +1,22 @@
-../../../tests/core/test_02.c:57:13: warning: libxo: value field ('V'/value) has empty name, but has the 'display' flag set; use 'F'/format role instead: '{d:/%-*.*s}'
+../../../tests/core/test_02.c:57:14: warning: libxo: value field ('V'/value) has empty name, but has the 'display' flag set; use 'F'/format role instead: '{d:/%-*.*s}'
    57 |     xo_emit("{d:/%-*.*s}{tek:name}{eq:flags/0x%x}",
-      |             ^
-../../../tests/core/test_02.c:72:13: warning: libxo: field name should not be less than 3 characters long: '{:fd/%d}'
+      |              ^
+../../../tests/core/test_02.c:72:20: warning: libxo: field name should not be less than 3 characters long: '{:fd/%d}'
    72 |     xo_emit("close {:fd/%d} returned {:error/%m} {:test}\n", -1, "good");
-      |             ^
-../../../tests/core/test_02.c:74:13: warning: libxo: field name should not be less than 3 characters long: '{:fd/%d}'
+      |                    ^
+../../../tests/core/test_02.c:74:20: warning: libxo: field name should not be less than 3 characters long: '{:fd/%d}'
    74 |     xo_emit("close {:fd/%d} returned {:error/%6.6m} {:test}\n", -1, "good");
-      |             ^
-../../../tests/core/test_02.c:135:13: warning: libxo: field name should not be less than 3 characters long: '{qt:t1/%*d}'
+      |                    ^
+../../../tests/core/test_02.c:135:16: warning: libxo: field name should not be less than 3 characters long: '{qt:t1/%*d}'
   135 |     xo_emit("1:{qt:t1/%*d} 2:{qt:t2/test%-*u} "
-      |             ^
-../../../tests/core/test_02.c:135:13: warning: libxo: field name should not be less than 3 characters long: '{qt:t2/test%-*u}'
-../../../tests/core/test_02.c:135:13: warning: libxo: field name should not be less than 3 characters long: '{qt:t3/%10sx}'
-../../../tests/core/test_02.c:135:13: warning: libxo: field name should not be less than 3 characters long: '{qt:t4/x%-*.*s}'
+      |                ^
+../../../tests/core/test_02.c:135:30: warning: libxo: field name should not be less than 3 characters long: '{qt:t2/test%-*u}'
+  135 |     xo_emit("1:{qt:t1/%*d} 2:{qt:t2/test%-*u} "
+      |                              ^
+../../../tests/core/test_02.c:136:9: warning: libxo: field name should not be less than 3 characters long: '{qt:t3/%10sx}'
+  136 |             "3:{qt:t3/%10sx} 4:{qt:t4/x%-*.*s}\n",
+      |                ^
+../../../tests/core/test_02.c:136:25: warning: libxo: field name should not be less than 3 characters long: '{qt:t4/x%-*.*s}'
+  136 |             "3:{qt:t3/%10sx} 4:{qt:t4/x%-*.*s}\n",
+      |                                ^
 7 warnings generated.
