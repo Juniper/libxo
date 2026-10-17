@@ -54,8 +54,9 @@ if(APPLE)
     target_link_options(xo_validate PRIVATE -undefined dynamic_lookup)
 endif()
 
-# Suppress the .dylib/.so suffix that cmake adds to MODULE targets on some
-# platforms - clang's -fplugin= accepts the path as-is.
+# A MODULE is named "lib<name>.so" (".so" even on macOS); clear the
+# "lib" prefix so the plugin is <name>.so, the name xocc and
+# libxo-config pass to clang.
 set_target_properties(xo_validate PROPERTIES PREFIX "")
 
 # Where the plugin is installed.  This must be the directory that xocc
