@@ -384,21 +384,44 @@ struct ArgCollector {
 };
 
 struct DiagCb {
-    DiagnosticsEngine *diags;
-    unsigned           id;
-    SourceLocation     loc;
+    DiagnosticsEngine   *diags;
+    unsigned             id;
+    const StringLiteral *sl;
+    const ASTContext    *ctx;
 };
 
 static void
-emit_diag (void *data, const char *fmt, ...)
+emit_diag (void *data, int offset, const char *fmt, ...)
 {
     auto *dc = static_cast<DiagCb *>(data);
-    char buf[512];
+
+    /* Messages often quote the whole format string; don't truncate */
     va_list vap;
     va_start(vap, fmt);
-    vsnprintf(buf, sizeof(buf), fmt, vap);
+    int len = vsnprintf(nullptr, 0, fmt, vap);
     va_end(vap);
-    dc->diags->Report(dc->loc, dc->id) << buf;
+
+    if (len < 0)
+        return;
+
+    std::string msg(len + 1, '\0');
+    va_start(vap, fmt);
+    vsnprintf(&msg[0], msg.size(), fmt, vap);
+    va_end(vap);
+    msg.resize(len);
+
+    /*
+     * Point at the field itself.  getLocationOfByte() understands
+     * escapes and concatenated literals, so the offset into the
+     * evaluated string maps back to the right column.
+     */
+    SourceLocation loc = dc->sl->getBeginLoc();
+    if (offset >= 0 && (unsigned) offset < dc->sl->getByteLength())
+        loc = dc->sl->getLocationOfByte(offset, dc->ctx->getSourceManager(),
+                                        dc->ctx->getLangOpts(),
+                                        dc->ctx->getTargetInfo());
+
+    dc->diags->Report(loc, dc->id) << msg;
 }
 
 class XoValidateVisitor : public RecursiveASTVisitor<XoValidateVisitor> {
@@ -461,9 +484,17 @@ public:
         if (!SL)
             return true;    /* non-literal format strings: skip */
 
+        /*
+         * getString() asserts on wide literals (L"", u"", U"").  libxo
+         * formats are char strings, so -Wformat or the type checker
+         * will already complain about those.
+         */
+        if (SL->getCharByteWidth() != 1 || !Ctx_)
+            return true;
+
         std::string fmt = SL->getString().str();
-        DiagCb dc_err  { &Diags, SyntaxDiagID, SL->getBeginLoc() };
-        DiagCb dc_warn { &Diags, WarnDiagID,   SL->getBeginLoc() };
+        DiagCb dc_err  { &Diags, SyntaxDiagID, SL, Ctx_ };
+        DiagCb dc_warn { &Diags, WarnDiagID,   SL, Ctx_ };
         ArgCollector ac;
 
 	xo_parse_flags_t flags = XPF_STRICT;
@@ -491,9 +522,6 @@ public:
 
         if (eflags & XEF_PRINTFLIKE)
             return true;    /* -Wformat checks the types */
-
-        if (!Ctx_)
-            return true;
 
         PrintingPolicy PP = Ctx_->getPrintingPolicy();
 
