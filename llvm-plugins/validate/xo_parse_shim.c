@@ -42,8 +42,10 @@
  *   [2-byte pad at offset 30 - inserted by compiler to align xfi_fnum]
  *   offset 32: uint32_t xfi_fnum     (i32)
  *   offset 36: uint32_t xfi_renum    (i32)
- *   offset 40: pointer xfi_cachep    (pointer)
- *   total: 48 bytes (for a 64-bit pointer
+ *   offset 40: pointer  xfi_fspecs   (pointer)
+ *   offset 40+P: uint16_t xfi_num_fspecs (i16)
+ *   offset 42+P: uint16_t xfi_padding[3] (3 x i16)
+ *   total: 48+P bytes, where P is the pointer size (56 on LP64)
  */
 _Static_assert(sizeof(xo_xff_flags_t)    == 8,
 	       "xo_xff_flags_t must be 8 bytes");
@@ -87,7 +89,8 @@ _Static_assert(offsetof(xo_field_info_t, xfi_num_fspecs) == 40 + sizeof(void *),
  * Same protection for xo_fspec_t, mirrored in xo_precompile.cc's FspecTy.
  * Expected layout (LP64):
  *   offset  0: uint8_t xf_fc .. xf_stars (8 flag bytes, then leading_zero,
- *              dots, alt, stars - 12 individual uint8_t members)
+ *              dots, alt, stars - 12 one-byte members; xf_leading_zero
+ *              is int8_t, the rest uint8_t)
  *   offset 12: uint8_t xf_star[3]
  *   offset 15: uint8_t xf_at_stars
  *   offset 16: int16_t xf_width[3]
@@ -162,6 +165,18 @@ shim_error_cb (void *data, const char *fmt, ...)
 }
 
 /*
+ * Stands in for a NULL error or warning callback, so the checks in
+ * xo_shim_parse_args() can report without testing for one each time.
+ */
+static void
+shim_ignore_cb (void *data, int offset, const char *fmt, ...)
+{
+    (void) data;
+    (void) offset;
+    (void) fmt;
+}
+
+/*
  * The offset of a field for diagnostics: its '{', when it has one.
  */
 static int
@@ -233,20 +248,26 @@ xo_shim_visit_args (const xo_fspec_t *xfp, int num,
 
 /*
  * Parse the format [ffmt, ffmt + flen) and call arg_cb for each va_arg
- * it consumes.  Parse errors are reported through xpp.
+ * it consumes.  Parse errors are reported through xpp.  Returns the
+ * number of fspecs, or < 0 when the format could not be parsed.
  */
-static void
+static int
 xo_shim_parse_args_format (xo_parse_t *xpp, const char *ffmt, unsigned flen,
                            xo_shim_arg_cb_t arg_cb, void *arg_data)
 {
     /*
      * Every fspec (conversion or literal run) covers at least one
      * byte, so flen entries plus a terminator can never run out.
+     * flen can reach 32K, making this about 1 MB, so it comes from
+     * the heap, not the stack.
      */
     unsigned max_fspecs = flen + 1;
-    xo_fspec_t fspecs[max_fspecs];
+    size_t sz = max_fspecs * sizeof(xo_fspec_t);
+    xo_fspec_t *fspecs = xo_realloc(NULL, sz);
 
-    bzero(fspecs, sizeof(fspecs));
+    if (fspecs == NULL)
+	return -1;
+    bzero(fspecs, sz);
 
     xo_fspec_t *save_fspecs = xpp->xp_fspecs;
     xo_fspec_t *save_cur = xpp->xp_cur_fspec;
@@ -263,6 +284,9 @@ xo_shim_parse_args_format (xo_parse_t *xpp, const char *ffmt, unsigned flen,
 
     if (num > 0)
         xo_shim_visit_args(fspecs, num, arg_cb, arg_data);
+
+    xo_free(fspecs);
+    return num;
 }
 
 /*
@@ -352,8 +376,10 @@ xo_shim_parse_args (const char *fmt,
                      xo_parse_flags_t flags)
 {
     xo_parse_t xpp = { 0 };
-    struct xo_shim_state ss_err  = { error_cb, error_data, &xpp };
-    struct xo_shim_state ss_warn = { warn_cb, warn_data, &xpp };
+    struct xo_shim_state ss_err  = { error_cb ?: shim_ignore_cb,
+				     error_data, &xpp };
+    struct xo_shim_state ss_warn = { warn_cb ?: shim_ignore_cb,
+				     warn_data, &xpp };
     xpp.xp_error      = shim_error_cb;
     xpp.xp_error_data = &ss_err;
     xpp.xp_warn       = shim_error_cb;
@@ -456,22 +482,32 @@ xo_shim_parse_args (const char *fmt,
         /* Check that display and encoding formats consume the same args */
         if (!skip_value && xfip->xfi_encoding != XO_FOFF_NONE) {
             xo_shim_arg_types_t dargs = { 0 }, eargs = { 0 };
+	    int erc;
 
             if (xfip->xfi_format != XO_FOFF_NONE)
                 xo_shim_field_args(&xpp, fmt, xfip,
                                    xo_shim_record_arg_type, &dargs);
 
+	    /*
+	     * xo_parse_format() does not parse encoding formats, so
+	     * their errors come from here; point them at this field.
+	     * A bad one has been reported, and its count means nothing.
+	     */
+	    xpp.xp_err_offset = off;
             if (xfip->xfi_encoding >= 0)
-                xo_shim_parse_args_format(&xpp,
+                erc = xo_shim_parse_args_format(&xpp,
                                           xo_foff(fmt, xfip->xfi_encoding),
                                           (unsigned) xfip->xfi_elen,
                                           xo_shim_record_arg_type, &eargs);
             else
-                xo_shim_parse_args_format(&xpp, xo_default_format,
+                erc = xo_shim_parse_args_format(&xpp, xo_default_format,
                                           (unsigned) strlen(xo_default_format),
                                           xo_shim_record_arg_type, &eargs);
+	    xpp.xp_err_offset = -1;
 
-            if (dargs.xsat_num != eargs.xsat_num)
+	    if (erc < 0) {
+		/* Already reported */
+	    } else if (dargs.xsat_num != eargs.xsat_num)
                 ss_err.error(ss_err.data, off,
                              "display and encoding formats consume "
                              "%u vs %u argument(s): '%s'",
