@@ -33,7 +33,7 @@ an LLVM IR pass that finds
 .Nm libxo
 calls whose format string is a compile-time constant, parses that
 format string during the build, and rewrites the call to
-.Fn xo_emit_cached ,
+.Fn xo_emit_precompiled ,
 passing a pre-parsed field table as a constant.
 This removes the runtime cost of parsing the format string on every
 call.
@@ -319,24 +319,39 @@ emit those tables as
 .Li private constant
 LLVM globals in the module.
 .It
-rewrite the call to the matching
-.Li xo_emit_cached*()
-entry point
-.Po
-.Fn xo_emit
-becomes
-.Fn xo_emit_cached ,
-.Fn xo_emit_hf
-becomes
-.Fn xo_emit_cached_hf ,
-and so on
-.Pc ,
-passing a pointer to the generated table ahead of the format string
-and value arguments.
+rewrite the call to
+.Fn xo_emit_precompiled
+(for
+.Fn xo_emit ,
+.Fn xo_emitr ,
+and
+.Fn xo_emit_f )
+or
+.Fn xo_emit_precompiled_h
+(for
+.Fn xo_emit_h
+and
+.Fn xo_emit_hf )
+or
+.Fn xo_emit_precompiled_hv
+(for
+.Fn xo_emit_hv
+and
+.Fn xo_emit_hvf ) ,
+passing the
+.Dv XO_PRECOMPILED_VERSION
+the generated table was built for and a pointer to that table,
+after the handle (if any) and ahead of the format string and value
+arguments.
+The flags argument of the
+.Li _f
+forms is dropped, since
+.Nm libxo
+ignores it.
 .El
 .Pp
 At run time,
-.Fn xo_emit_cached
+.Fn xo_emit_precompiled
 skips straight to formatting using the supplied table instead of
 first scanning the format string to build one.
 Output is byte-for-byte identical to what
@@ -360,7 +375,7 @@ report the same error, so nothing is silently swallowed), or
 .It
 the callee isn't one of the known
 .Fn xo_emit
-names, or is called indirectly through a function pointer.
+names above, or is called indirectly through a function pointer.
 .El
 .Pp
 Because the rewrite happens at the IR level, it works regardless of
@@ -382,7 +397,7 @@ changes, and the resulting object file links against the same
 .Nm libxo
 as an unmodified build
 .Po
-.Fn xo_emit_cached
+.Fn xo_emit_precompiled
 and friends are ordinary exported
 .Nm libxo
 symbols, not something the plugin invents
@@ -400,7 +415,7 @@ To see the effect directly, dump LLVM IR instead of an object file and
 look for the generated
 .Li .xo_fields.* / .xo_fspecs.* / .xo_fcache.*
 globals and the
-.Fn xo_emit_cached
+.Fn xo_emit_precompiled
 call:
 .Bd -literal -offset indent
 clang \-S \-emit\-llvm \e
@@ -463,21 +478,33 @@ Code is fully portable either way \(en without the plugins it just
 behaves like ordinary, unmodified
 .Nm libxo .
 .It
-The plugins are versioned against
-.Vt xo_field_info_t Ns 's
-in-memory layout via
+Each precompiled call passes an
+.Dv XO_PRECOMPILED_VERSION
+value (in
+.In xo_format.h ) ,
+which the pass builds from the target's data layout.
+It packs
 .Dv XO_EMIT_CACHE_VERSION
-(in
-.In xo.h )
-and a set of
-.Li _Static_assert
-layout checks in the shared C shim
-.Pq Pa llvm\-plugins/validate/xo_parse_shim.c .
-A
+with the target's byte order, pointer size,
+.Vt uint64_t
+alignment, and the sizes of
+.Vt xo_field_info_t
+and
+.Vt xo_fspec_t .
 .Nm libxo
-built with a mismatched header will refuse the precompiled table at
-run time and fall back to normal parsing rather than misinterpreting
-it.
+builds the same value from its own compile, and ignores a table whose
+value differs, falling back to normal parsing rather than
+misinterpreting it.
+So cross builds are safe: the tables are laid out for the target, and
+a table built for some other target or
+.Nm libxo
+is never used.
+.It
+The pass checks its own copy of the struct layouts against the offsets
+the shared C shim
+.Pq Pa llvm\-plugins/validate/xo_parse_shim.c
+was compiled with.
+If they disagree, it warns once and leaves all calls untouched.
 .El
 .Sh SEE ALSO
 .Xr xocc 1 ,
