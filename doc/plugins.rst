@@ -87,7 +87,10 @@ variants (`xo_emit_h`, `xo_emit_hf`, `xo_emit_hvf`, the `_p` wrappers,
 etc.) whose format string is a compile-time string constant.  For each
 one it checks:
 
-1. **Syntax** - malformed field descriptors, such as an unclosed `{`.
+1. **Syntax** - malformed field descriptors, such as an unclosed `{`,
+   and fields that cannot produce meaningful output, such as a value
+   with no name (`{:/%d}`) or a title with neither content nor format
+   (`{T:}`).
 2. **Argument count** - too few or too many arguments for the fields
    in the format string.
 3. **Argument type** - the type each field's display format expects
@@ -97,8 +100,10 @@ one it checks:
 4. **Style** - a number of `xolint`-style checks on field naming and
    anchor usage.  Leading digits, stray `%` characters, and anchor
    width/format mismatches are always checked; underscores (instead of
-   hyphens), upper-case letters, and names shorter than the minimum
-   length are checked only when lint mode is enabled (see below).
+   hyphens), upper-case letters, names shorter than the minimum
+   length, and an empty name on a value with the `d` (display) flag
+   (use the `F` role instead) are checked only when lint mode is
+   enabled (see below).
 
 Diagnostics are reported through clang's normal diagnostic engine, so
 they appear exactly like any other compiler diagnostic, with source
@@ -126,7 +131,7 @@ Two `-mllvm` flags control how `xo_validate` reports problems:
 
 - **`-mllvm -xo-validate-lint`** - enables the additional cosmetic
   naming checks described under **Style** above (underscores, upper
-  case, short names).  These are off by default since they're closer
+  case, short names, empty display-only value names).  These are off by default since they're closer
   to style preference than correctness; the always-on style checks
   (leading digits, anchor mismatches) still run either way.
 
