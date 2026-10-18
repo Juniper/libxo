@@ -46,9 +46,6 @@ EXTRA_DIST = \
 test tests:
 	@(cd tests ; ${MAKE} test)
 
-errors:
-	@(cd tests/errors ; ${MAKE} test)
-
 docs:
 	@(cd doc ; ${MAKE} docs)
 
@@ -139,7 +136,9 @@ uninstall-local:
 
 
 ANALYZE_DIR = ~/trash/libxo
-ANALYZE_CMD = scan-build-mp-3.6
+# Override to pick a specific clang's analyzer, e.g.
+# "make analyze ANALYZE_CMD=scan-build-mp-22"
+ANALYZE_CMD = scan-build
 
 analyze:
 	${MAKE} clean
