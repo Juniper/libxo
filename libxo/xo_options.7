@@ -8,13 +8,12 @@
 .\" # Phil Shafer, July 2014
 .\"
 .Dd May 11, 2017
-.Dt LIBXO 3
+.Dt XO_OPTIONS 7
 .Os
 .Sh NAME
 .Nm xo_options
 .Nd common options for libxo\-based commands
 .Sh DESCRIPTION
-.Pp
 .Nm libxo
 allows the rendering of data into
 various output styles, including
@@ -38,57 +37,61 @@ Options are recognised in three forms:
 The first two forms accept a comma\-separated set of words, detailed
 below, while the third form accepts a set of letters, also below.
 The triggered functionality is identical.
-.Bl -column "Token2341234"
-.It Sy "Option     " "Action"
-.It "color      " "Enable colors/effects for display styles (TEXT, HTML)"
-.It "filter=expr" "Filter output using an XPath\-like expression"
-.It "filter\-warn" "Warn about runtime filter expression errors"
-.It "flush      " "Flush after each emit call"
-.It "flush\-line " "Flush each line of output"
-.It "html       " "Emit HTML output"
-.It "indent=xx  " "Set the indentation level"
-.It "info       " "Add info attributes (HTML)"
-.It "json       " "Emit JSON output"
-.It "keys       " "Emit the key attribute for keys (XML)"
-.It "log\-gettext" "Log (via stderr) each gettext(3) string lookup"
-.It "log\-syslog " "Log (via stderr) each syslog message (via xo_syslog)"
-.It "map        " "Map between tag names"
-.It "map\-file   " "Use a file to specify mapping between tag names"
-.It "no\-cache   " "Ignore precompiled/cached format data; always parse"
-.It "no\-humanize" "Ignore the {h:} modifier (TEXT, HTML)"
-.It "no\-locale  " "Do not initialize the locale setting"
-.It "no\-retain  " "Deprecated; accepted but ignored"
-.It "pretty     " "Emit pretty\-printed output"
-.It "retain     " "Deprecated; accepted but ignored"
-.It "text       " "Emit TEXT output"
-.It "underscores" "Replace XML\-friendly dashes with JSON\-friendly underscores"
-.It "units      " "Add the 'units' (XML) or 'data\-units (HTML) attribute"
-.It "warn       " "Emit warnings when libxo detects bad calls"
-.It "warn\-xml   " "Emit warnings in XML"
-.It "xml        " "Emit XML output"
-.It "xpath      " "Add XPath expressions (HTML)"
+.Bl -column "Token2341234" "Action"
+.It Sy Option Ta Sy Action
+.It color Ta "Enable colors/effects for display styles (TEXT, HTML)"
+.It filter=expr Ta "Filter output using an XPath\-like expression"
+.It filter\-warn Ta "Warn about runtime filter expression errors"
+.It flush Ta "Flush after each emit call"
+.It flush\-line Ta "Flush each line of output"
+.It group Ta "Insert thousands separators into decimal integers"
+.It grouping=xxxx Ta "Set the thousands separator and digit grouping"
+.It html Ta "Emit HTML output"
+.It indent=xx Ta "Set the indentation level"
+.It info Ta "Add info attributes (HTML)"
+.It json Ta "Emit JSON output"
+.It keys Ta "Emit the key attribute for keys (XML)"
+.It log\-gettext Ta "Log (via stderr) each gettext(3) string lookup"
+.It log\-syslog Ta "Log (via stderr) each syslog message (via xo_syslog)"
+.It map Ta "Map between tag names"
+.It map\-file Ta "Use a file to specify mapping between tag names"
+.It no\-cache Ta "Ignore precompiled/cached format data; always parse"
+.It no\-humanize Ta "Ignore the {h:} modifier (TEXT, HTML)"
+.It no\-locale Ta "Do not initialize the locale setting"
+.It no\-retain Ta "Deprecated; accepted but ignored"
+.It pretty Ta "Emit pretty\-printed output"
+.It retain Ta "Deprecated; accepted but ignored"
+.It text Ta "Emit TEXT output"
+.It underscores Ta "Replace XML\-friendly dashes with JSON\-friendly underscores"
+.It units Ta "Add the 'units' (XML) or 'data\-units (HTML) attribute"
+.It warn Ta "Emit warnings when libxo detects bad calls"
+.It warn\-xml Ta "Emit warnings in XML"
+.It xml Ta "Emit XML output"
+.It xpath Ta "Add XPath expressions (HTML)"
 .El
 .Pp
 The brief options are a set of single\-letter aliases for the longer
 terms, used as a single string:
-.Bl -column "Value" "Equivalent Token"
-.It Sy "Value" "Equivalent Token"
-.It "c
-.It "f     " "flush"
-.It "F     " "flush\-line"
-.It "H     " "html"
-.It "I     " "info"
-.It "i<num>" "indent=<num>"
-.It "J     " "json"
-.It "k     " "keys"
-.It "n     " "no\-humanize"
-.It "P     " "pretty"
-.It "T     " "text"
-.It "U     " "units"
-.It "u     " "underscore
-.It "W     " "warn"
-.It "X     " "xml"
-.It "x     " "xpath"
+.Bl -column "i<num>" "Equivalent Token"
+.It Sy Value Ta Sy "Equivalent Token"
+.It "c" Ta "color"
+.It "f" Ta "flush"
+.It "F" Ta "flush\-line"
+.It "g" Ta "log\-gettext"
+.It "G" Ta "group"
+.It "H" Ta "html"
+.It "I" Ta "info"
+.It "i<num>" Ta "indent=<num>"
+.It "J" Ta "json"
+.It "k" Ta "keys"
+.It "n" Ta "no\-humanize"
+.It "P" Ta "pretty"
+.It "T" Ta "text"
+.It "U" Ta "units"
+.It "u" Ta "underscores"
+.It "W" Ta "warn"
+.It "X" Ta "xml"
+.It "x" Ta "xpath"
 .El
 .Pp
 Most of these option are simple and direct, but some require
@@ -97,6 +100,12 @@ additional details:
 .Fa "flush\-line"
 performs line buffering, even when the output is not directed to
 a TTY device.
+.Pp
+.Fa group
+inserts the locale's thousands separator into decimal integers, and
+.Fa grouping
+replaces the locale's separator and digit grouping; both are described
+below.
 .Pp
 .Fa info
 generates additional data for HTML, encoded in attributes using
@@ -144,9 +153,82 @@ name with underscores.
 allows
 .Nm libxo
 to emit warnings on stderr when application code make incorrect calls.
-.Fa warn\-xml causes those warnings to be placed in
+.Fa warn\-xml
+causes those warnings to be placed in
 .Em XML
 inside the output.
+.Sh Integer Grouping
+Integer grouping makes large numbers easier to read by placing a
+separator between groups of digits, giving "331,449,281" instead of
+"331449281".
+The
+.Fa group
+option (brief form "G") groups every suitable field, while the
+.Ql {i:}
+field modifier (see
+.Xr xo_format 5 )
+lets a program group particular fields without the option.
+Since
+.Fa group
+applies to every decimal integer, it can also group numbers that
+should not be grouped, such as model numbers or years.
+.Pp
+A suitable field is a decimal integer, using the "%d", "%i", or "%u"
+conversion with any length modifier.
+Hexadecimal, octal, and floating\-point values are never grouped, nor
+are fields that request leading zeros (such as "%08d").
+Separators are added after any field width has been applied, so a
+grouped field is wider than its width by the number of separators.
+.Pp
+Grouping is done only for the TEXT and HTML styles.
+XML, JSON, and encoder output always carry the plain digits, since a
+separator would make the value something other than a number.
+.Pp
+The separator and the size of each group of digits come from the
+current locale.
+The C and POSIX locales do no grouping, so
+.Fa group
+has no visible effect there unless
+.Fa grouping
+is also given.
+Some locales use groups of different sizes; for example, en_IN
+renders 1234567890 as "1,23,45,67,890".
+.Pp
+The
+.Fa grouping
+option replaces the locale's values.
+Its value is the separator, followed by the size of each group, each
+preceded by a plus sign ("+"), starting with the group nearest the
+right\-hand side:
+.Bd -literal -offset indent
+grouping=x+n1+n2...
+.Ed
+.Pp
+Each size is a single digit.
+The last size repeats for any further digits, unless the list ends
+with "\-1", which stops grouping and leaves the remaining digits as
+one group.
+The separator can be any string, including a multibyte UTF\-8
+character.
+If it is left out, so the value starts with "+", the separator is a
+comma; this avoids having to escape a comma, which would otherwise
+end the option.
+The
+.Fa grouping
+option only sets the shape; grouping must still be turned on, by
+either the
+.Fa group
+option or the
+.Ql {i:}
+modifier.
+.Bl -column "grouping=.+3+2" "1234567890" -offset indent
+.It Sy Value Ta Sy Output
+.It "grouping=+3" Ta "1,234,567,890"
+.It "grouping=.+3" Ta "1.234.567.890"
+.It "grouping=+3+2" Ta "1,23,45,67,890"
+.It "grouping=:+4" Ta "12:3456:7890"
+.It "grouping=.+3+\-1" Ta "1234567.890"
+.El
 .Sh Color Mapping
 The
 .Fa colors
@@ -172,7 +254,7 @@ pairs or single colors.
 .Pp
 For example consider the following xo_emit call:
 .Bd -literal -offset indent
-    xo_emit("{C:fg-red,bg-green}Merry XMas!!{C:}\n");
+    xo_emit("{C:fg-red,bg-green}Merry XMas!!{C:}\en");
 .Ed
 .Pp
 To turn all colored output to red-on-blue, use eight pairs of
@@ -197,7 +279,6 @@ with bare plus signs ("+"):
 .Bd -literal -offset indent
     --libxo colors=++++yellow/yellow
 .Ed
-.Pp
 .Sh Tag Mapping
 .Nm libxo
 supports mapping between tag names, for scenarios where the tags
@@ -217,7 +298,8 @@ simple one-to-one replacement is required.
 Mapping can be specified using the
 .Fa map
 and
-.Fa map-file options.
+.Fa map-file
+options.
 The
 .Fa map
 option accepts one or more mapping, in the format "old=new",
@@ -339,7 +421,6 @@ For brevity, the string "@" can be used in place of the string
 .Bd -literal -offset indent
     df --libxo @csv:no-header
 .Ed
-.Pp
 .Sh EXAMPLES
 The following are three example invocations of
 .Xr ps 1 :
@@ -351,8 +432,8 @@ The following are three example invocations of
       ps \-\-libxo:Hxc 1
 .Ed
 .Sh SEE ALSO
-.Xr xo_add_filter 3 ,
 .Xr libxo 3 ,
+.Xr xo_add_filter 3 ,
 .Xr xo_format 5 ,
 .Xr xo_filter 7
 .Sh HISTORY
