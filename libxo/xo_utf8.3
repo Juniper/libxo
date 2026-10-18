@@ -2,11 +2,11 @@
 .\" # Copyright (c) 2023, Juniper Networks, Inc.
 .\" # All rights reserved.
 .\" # This SOFTWARE is licensed under the LICENSE provided in the
-.\" # ../Copyright file. By downloading, installing, copying, or 
+.\" # ../Copyright file. By downloading, installing, copying, or
 .\" # using the SOFTWARE, you agree to be bound by the terms of that
 .\" # LICENSE.
 .\" # Phil Shafer, May 2023
-.\" 
+.\"
 .Dd May 22, 2023
 .Dt LIBXO 3
 .Os
@@ -24,99 +24,99 @@
 .Ft int
 .Fn xo_utf8_len "char ch"
 .Ft xo_codepoint_t
-.Fn xo_utf8_codepoint "const char *buf, size_t bufsiz, int len, xo_codepoint_t on_err"
+.Fn xo_utf8_codepoint "const char *buf" "size_t bufsiz" "int len" "xo_codepoint_t on_err"
 .Ft int
 .Fn xo_utf8_iserror "xo_codepoint_t wc"
 .Ft const char *
 .Fn xo_utf8_wchar_errmsg "xo_codepoint_t wc"
 .Ft char *
-.Fn xo_utf8_nvalid "const char *str, size_t len"
+.Fn xo_utf8_nvalid "const char *str" "size_t len"
 .Ft char *
 .Fn xo_utf8_valid "const char *str"
 .Ft int
-.Fn xo_utf8_nmakevalid "char *str, size_t len, char replacement"
+.Fn xo_utf8_nmakevalid "char *str" "size_t len" "char replacement"
 .Ft int
-.Fn xo_utf8_makevalid "char *str, char replacement"
+.Fn xo_utf8_makevalid "char *str" "char replacement"
 .Ft int
 .Fn xo_utf8_wislower "xo_codepoint_t wc"
 .Ft int
 .Fn xo_utf8_wisupper "xo_codepoint_t wc"
 .Ft int
-.Fn xo_utf8_nislower "const char *str, size_t len"
+.Fn xo_utf8_nislower "const char *str" "size_t len"
 .Ft int
 .Fn xo_utf8_islower "const char *str"
 .Ft int
-.Fn xo_utf8_nisupper "const char *str, size_t len"
+.Fn xo_utf8_nisupper "const char *str" "size_t len"
 .Ft int
 .Fn xo_utf8_isupper "const char *str"
 .Ft char *
-.Fn xo_utf8_nnext "const char *str, size_t len"
+.Fn xo_utf8_nnext "const char *str" "size_t len"
 .Ft char *
 .Fn xo_utf8_next "const char *str"
 .Ft char *
-.Fn xo_utf8_prev "const char *start, const char *cur"
+.Fn xo_utf8_prev "const char *start" "const char *cur"
 .Ft void
-.Fn xo_utf8_ntolower "char * restrict str, size_t len"
+.Fn xo_utf8_ntolower "char * restrict str" "size_t len"
 .Ft void
 .Fn xo_utf8_tolower "char *str"
 .Ft void
-.Fn xo_utf8_ntoupper "char * restrict str, size_t len"
+.Fn xo_utf8_ntoupper "char * restrict str" "size_t len"
 .Ft void
 .Fn xo_utf8_toupper "char *str"
 .Ft int
-.Fn xo_ustrncasecmp "const char *s1, size_t s1_len, const char *s2, size_t s2_len"
+.Fn xo_ustrncasecmp "const char *s1" "size_t s1_len" "const char *s2" "size_t s2_len"
 .Ft int
-.Fn xo_ustrcasecmp "const char *s1, const char *s2"
+.Fn xo_ustrcasecmp "const char *s1" "const char *s2"
 .Ft size_t
-.Fn xo_utrunc "char *str, size_t len"
+.Fn xo_utrunc "char *str" "size_t len"
 .Ft size_t
-.Fn xo_ustrlncat "char * restrict dst, const char * restrict append, size_t dstsize, size_t count"
+.Fn xo_ustrlncat "char * restrict dst" "const char * restrict append" "size_t dstsize" "size_t count"
 .Ft size_t
-.Fn xo_ustrlcat "char * restrict dst, const char * restrict append, size_t dstsize"
+.Fn xo_ustrlcat "char * restrict dst" "const char * restrict append" "size_t dstsize"
 .Ft size_t
-.Fn xo_ustrlcpy "char * restrict dst, const char * restrict src, size_t dstsize"
+.Fn xo_ustrlcpy "char * restrict dst" "const char * restrict src" "size_t dstsize"
 .Ft char *
-.Fn xo_ustpncpy "char * restrict dst, const char * restrict src, size_t len"
+.Fn xo_ustpncpy "char * restrict dst" "const char * restrict src" "size_t len"
 .Ft char *
-.Fn xo_ustpcpy "char * restrict dst, const char * restrict src"
+.Fn xo_ustpcpy "char * restrict dst" "const char * restrict src"
 .Ft char *
-.Fn xo_ustrncpy "char * restrict dst, const char * restrict src, size_t len"
+.Fn xo_ustrncpy "char * restrict dst" "const char * restrict src" "size_t len"
 .Ft char *
-.Fn xo_ustrcpy "char * restrict dst, const char * restrict src"
+.Fn xo_ustrcpy "char * restrict dst" "const char * restrict src"
 .Ft char *
-.Fn xo_ustrndup "const char *str, size_t len"
+.Fn xo_ustrndup "const char *str" "size_t len"
 .Ft char *
 .Fn xo_ustrdup "const char *str"
 .Ft ssize_t
-.Fn xo_utf8_buf_clen "const char *buf, ssize_t len"
+.Fn xo_utf8_buf_clen "const char *buf" "ssize_t len"
 .Ft ssize_t
 .Fn xo_utf8_clen "const char *buf"
 .Ft size_t
-.Fn xo_ustrnlen "const char *str, size_t maxlen"
+.Fn xo_ustrnlen "const char *str" "size_t maxlen"
 .Ft size_t
 .Fn xo_ustrlen "const char *str"
 .Ft char *
-.Fn xo_ustrchr "const char *str, xo_codepoint_t c"
+.Fn xo_ustrchr "const char *str" "xo_codepoint_t c"
 .Ft char *
-.Fn xo_ustrrchr "const char *str, xo_codepoint_t c"
+.Fn xo_ustrrchr "const char *str" "xo_codepoint_t c"
 .Ft char *
-.Fn xo_ustrchrnul "const char *str, xo_codepoint_t c"
+.Fn xo_ustrchrnul "const char *str" "xo_codepoint_t c"
 .Ft size_t
-.Fn xo_ustrspn "const char *str, const char *charset"
+.Fn xo_ustrspn "const char *str" "const char *charset"
 .Ft size_t
-.Fn xo_ustrcspn "const char *str, const char *charset"
+.Fn xo_ustrcspn "const char *str" "const char *charset"
 .Ft char *
-.Fn xo_ustrpbrk "const char *str, const char *charset"
+.Fn xo_ustrpbrk "const char *str" "const char *charset"
 .Ft char *
-.Fn xo_ustrsep "char **stringp, const char *delim"
+.Fn xo_ustrsep "char **stringp" "const char *delim"
 .Ft int
-.Fn xo_ustrncmp "const char *s1, const char *s2, size_t len"
+.Fn xo_ustrncmp "const char *s1" "const char *s2" "size_t len"
 .Ft char *
-.Fn xo_ustrnstr "const char *big, const char *little, size_t len"
+.Fn xo_ustrnstr "const char *big" "const char *little" "size_t len"
 .Ft char *
-.Fn xo_ustrstr "const char *big, const char *little"
+.Fn xo_ustrstr "const char *big" "const char *little"
 .Ft char *
-.Fn xo_ustrcasestr "const char *big, const char *little"
+.Fn xo_ustrcasestr "const char *big" "const char *little"
 .Sh DESCRIPTION
 These functions operate on Unicode character code points,
 either as codepoints ("xo_codepoint_t") or as characters encoded as
@@ -236,7 +236,8 @@ functions do the same for a NUL-terminated string.
 The
 .Fn xo_ustrncasecmp
 function compares two strings without regard to case, each ending at
-its given length or at a NUL, whichever comes first, returning a value less than, equal to, or greater than zero.
+its given length or at a NUL, whichever comes first, returning a value
+less than, equal to, or greater than zero.
 Both strings are folded to lower case one character at a time, an
 invalid byte compares as U+FFFD, and when one string is a prefix of the
 other the shorter one sorts first.
@@ -457,13 +458,11 @@ listed in SpecialCasing.txt:
    https://unicode.org/Public/UNIDATA/SpecialCasing.txt
 .Ed
 .Sh RETURN CODE
-Returns codes vary by function.
+Return codes vary by function.
 See above for details.
-.Pp
-
 .Sh SEE ALSO
+.Xr libxo 3 ,
 .Xr xo_emit 3 ,
-.Xr libxo 3
 .Xr libxo 7
 .Sh HISTORY
 The
