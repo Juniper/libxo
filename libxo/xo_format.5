@@ -8,13 +8,12 @@
 .\" # Phil Shafer, July 2014
 .\"
 .Dd December 4, 2014
-.Dt LIBXO 3
+.Dt XO_FORMAT 5
 .Os
 .Sh NAME
 .Nm xo_format
 .Nd content of format descriptors for xo_emit
 .Sh DESCRIPTION
-.Pp
 .Nm libxo
 uses format strings to control the rendering of data into
 various output styles, including
@@ -93,21 +92,21 @@ single\-character values:
 Field roles are optional, and indicate the role and formatting of the
 content.
 The roles are listed below; only one role is permitted:
-.Bl -column "M" "Name12341234"
-.It Sy "M" "Name        " "Description"
-.It C "color       " "Field is a color or effect"
-.It D "decoration  " "Field is non\-text (e.g. colon, comma)"
-.It E "error       " "Field is an error message"
-.It F "format      " "Field is a formatted text string, not encoded"
-.It L "label       " "Field is text that prefixes a value"
-.It N "note        " "Field is text that follows a value"
-.It P "padding     " "Field is spaces needed for vertical alignment"
-.It T "title       " "Field is a title value for headings"
-.It U "units       " "Field is the units for the previous value field"
-.It V "value       " "Field is the name of field (the default)"
-.It W "warning     " "Field is a warning message"
-.It \&[ "start\-anchor" "Begin a section of anchored variable\-width text"
-.It \&] "stop\-anchor " "End a section of anchored variable\-width text"
+.Bl -column "M" "Name12341234" "Description"
+.It Sy M Ta Sy Name Ta Sy Description
+.It C Ta color Ta "Field is a color or effect"
+.It D Ta decoration Ta "Field is non\-text (e.g. colon, comma)"
+.It E Ta error Ta "Field is an error message"
+.It F Ta format Ta "Field is a formatted text string, not encoded"
+.It L Ta label Ta "Field is text that prefixes a value"
+.It N Ta note Ta "Field is text that follows a value"
+.It P Ta padding Ta "Field is spaces needed for vertical alignment"
+.It T Ta title Ta "Field is a title value for headings"
+.It U Ta units Ta "Field is the units for the previous value field"
+.It V Ta value Ta "Field is the name of field (the default)"
+.It W Ta warning Ta "Field is a warning message"
+.It \&[ Ta start\-anchor Ta "Begin a section of anchored variable\-width text"
+.It \&] Ta stop\-anchor Ta "End a section of anchored variable\-width text"
 .El
 .Bd -literal -offset indent
    EXAMPLE:
@@ -165,23 +164,23 @@ foreground and background colors, respectively.
 .Ed
 .Pp
 The following table lists the supported effects:
-.Bl -column "no\-underline"
-.It Sy "Name         " "Description"
-.It "bg\-xxxxx     " "Change background color"
-.It "bold         " "Start bold text effect"
-.It "fg\-xxxxx     " "Change foreground color"
-.It "inverse      " "Start inverse (aka reverse) text effect"
-.It "no\-bold      " "Stop bold text effect"
-.It "no\-inverse   " "Stop inverse (aka reverse) text effect"
-.It "no\-underline " "Stop underline text effect"
-.It "normal       " "Reset effects (only)"
-.It "reset        " "Reset colors and effects (restore defaults)"
-.It "underline    " "Start underline text effect"
+.Bl -column "no\-underline" "Description"
+.It Sy Name Ta Sy Description
+.It bg\-xxxxx Ta "Change background color"
+.It bold Ta "Start bold text effect"
+.It fg\-xxxxx Ta "Change foreground color"
+.It inverse Ta "Start inverse (aka reverse) text effect"
+.It no\-bold Ta "Stop bold text effect"
+.It no\-inverse Ta "Stop inverse (aka reverse) text effect"
+.It no\-underline Ta "Stop underline text effect"
+.It normal Ta "Reset effects (only)"
+.It reset Ta "Reset colors and effects (restore defaults)"
+.It underline Ta "Start underline text effect"
 .El
 .Pp
 The following color names are supported:
 .Bl -column "no\-underline"
-.It Sy "Name"
+.It Sy Name
 .It black
 .It blue
 .It cyan
@@ -414,25 +413,26 @@ is set, a warning will be generated.
 .Ss "Field Modifiers"
 Field modifiers are flags which modify the way content emitted for
 particular output styles:
-.Bl -column M "Name123456789"
-.It Sy M "Name          " "Description"
-.It a "argument      " "The content appears as a ""const char *"" argument"
-.It c "colon         " "A colon ("":"") is appended after the label"
-.It d "display       " "Only emit field for display styles (text/HTML)"
-.It e "encoding      " "Only emit for encoding styles (XML/JSON)"
-.It " " "escape\-private" "Escape control chars as Unicode private\-use refs (XML/HTML)"
-.It " " "escape\-slash  " "Escape forward slashes (JSON)"
-.It " " "escape\-square " "Escape control chars as U+25A1 WHITE SQUARE (XML/HTML)"
-.It h "humanize (hn) " "Format large numbers in human\-readable style"
-.It " " "hn\-space     " "Humanize: Place space between numeric and unit"
-.It " " "hn\-decimal   " "Humanize: Add a decimal digit, if number < 10"
-.It " " "hn\-1000      " "Humanize: Use 1000 as divisor instead of 1024"
-.It k "key           " "Field is a key, suitable for XPath predicates"
-.It l "leaf\-list    " "Field is a leaf\-list, a list of leaf values"
-.It n "no\-quotes    " "Do not quote the field when using JSON style"
-.It q "quotes        " "Quote the field when using JSON style"
-.It t "trim          " "Trim leading and trailing whitespace"
-.It w "white space   " "A blank ("" "") is appended after the label"
+.Bl -column M "Name123456789" "Description"
+.It Sy M Ta Sy Name Ta Sy Description
+.It a Ta argument Ta "The content appears as a ""const char *"" argument"
+.It c Ta colon Ta "A colon ("":"") is appended after the label"
+.It d Ta display Ta "Only emit field for display styles (text/HTML)"
+.It e Ta encoding Ta "Only emit for encoding styles (XML/JSON)"
+.It \& Ta escape\-private Ta "Escape control chars as Unicode private\-use refs (XML/HTML)"
+.It \& Ta escape\-slash Ta "Escape forward slashes (JSON)"
+.It \& Ta escape\-square Ta "Escape control chars as U+25A1 WHITE SQUARE (XML/HTML)"
+.It h Ta "humanize (hn)" Ta "Format large numbers in human\-readable style"
+.It \& Ta hn\-space Ta "Humanize: Place space between numeric and unit"
+.It \& Ta hn\-decimal Ta "Humanize: Add a decimal digit, if number < 10"
+.It \& Ta hn\-1000 Ta "Humanize: Use 1000 as divisor instead of 1024"
+.It i Ta int\-group Ta "Insert thousands separators (TEXT/HTML)"
+.It k Ta key Ta "Field is a key, suitable for XPath predicates"
+.It l Ta leaf\-list Ta "Field is a leaf\-list, a list of leaf values"
+.It n Ta no\-quotes Ta "Do not quote the field when using JSON style"
+.It q Ta quotes Ta "Quote the field when using JSON style"
+.It t Ta trim Ta "Trim leading and trailing whitespace"
+.It w Ta "white space" Ta "A blank ("" "") is appended after the label"
 .El
 .Pp
 For example, the modifier string "Lwc" means the field has a label
@@ -520,12 +520,12 @@ A control character with byte value
 .Em b
 (0x00\-0x1F, excluding newline, carriage return, and tab) is replaced
 with the XML character reference
-.Ql &#xE0bb; ,
+.Ql &#xE0bb\&; ,
 where
 .Em bb
 is the hexadecimal byte value.
 For example, byte 0x01 becomes
-.Ql &#xE001; .
+.Ql &#xE001\&; .
 .Pp
 This substitution is reversible: the original byte value can be
 recovered by subtracting 0xE000 from the Unicode code point.
@@ -563,7 +563,7 @@ UTF\-8 data is also handled, using
 built-in upper case
 UTF\-8 formatting code.
 .Bd -literal -offset indent
-    xo_emit("Condition is {f:status}\n", "true");
+    xo_emit("Condition is {f:status}\en", "true");
 .Ed
 .Ss "The Gettext Modifier ({g:})"
 The gettext modifier is used to translate individual fields using the
@@ -618,6 +618,36 @@ In the HTML style, the original numeric value is rendered in the
     <div class="data" data\-tag="errors"
          data\-number="100663296">96M</div>
 .Ed
+.Ss "The Int\-Group Modifier ({i:})"
+The int\-group modifier inserts thousands separators into a single
+decimal integer field, for programs that want only some of their
+numbers grouped, rather than everything that the
+.Fa group
+option (see
+.Xr xo_options 7 )
+would group:
+.Bd -literal -offset indent
+    EXAMPLE:
+        xo_emit("{i:count/%u}\en", 1234567);
+    TEXT:
+        1,234,567
+.Ed
+.Pp
+The field must hold a single "d", "i", or "u" conversion (with any
+length modifier) and must not request leading zeros (as "%08d" does).
+The separator and the size of each group of digits come from the
+locale; the C and POSIX locales do no grouping, so in those locales
+the modifier has no effect unless the
+.Fa grouping
+option supplies a shape.
+.Pp
+As with the
+.Fa group
+option, separators appear only in the TEXT and HTML styles.
+XML, JSON, and encoder output always carry the plain digits, since a
+separator would make the value something other than a number.
+Separators are added after any field width has been applied, so a
+grouped field is wider than its width by the number of separators.
 .Ss "The Key Modifier ({k:})"
 The key modifier is used to indicate that a particular field helps
 uniquely identify an instance of list data.
@@ -707,7 +737,6 @@ needed, but often this needs to be controlled by the caller.
     JSON:
       "year": "2014"
 .Ed
-
 .Ss "The units-attr modifier ({U,units-attr:})"
 The \(aqunits-attr\(aq applies only to fields with the \(aqunits\(aq roles, and
 causes the units value to appear only in the XML \(aqunits=XX\(aq attribute
@@ -805,32 +834,32 @@ argument (8, 16, 32, or 64).
 See the INTEGER SIZES section below.
 .El
 .Pp
-Note that \(aqq\(aq, \(aqD\(aq, \(aqO\(aq, and \(aqU\(aq are considered deprecated and will be
-removed eventually.
+Note that \(aqq\(aq, \(aqD\(aq, \(aqO\(aq, and \(aqU\(aq are considered
+deprecated and will be removed eventually.
 .Sh INTEGER SIZES
 Use the integer size indicator to convey the size of the argument in
 bytes, easing the burden of the mismatch between the fixed size types
 in <stdint.h> and the implementation-dependent sizes in
 .Xr printf 3 ,
-e.g "%lld", "%ld", and "%d".  Having defined a \(aquint64_t\(aq, you can use
+e.g. "%lld", "%ld", and "%d".
+Having defined a \(aquint64_t\(aq, you can use
 "%!64x" to print it without worrying about portability issues or
 resorting to using casts, not to mention "PRIu64".
 .Bd -literal -offset indent
 uint64_t count, code;
-...
-xo_emit("Count: {:count/%!64u}, Code {:code/%#.12!64x}\n", count, code);
+\&...
+xo_emit("Count: {:count/%!64u}, Code {:code/%#.12!64x}\en", count, code);
 .Ed
 The integer size indicator consists of a '!' character followed by
 "64", "32", "16" or "8" to indicate the number of bits in the argument
-type and can use "d", "u", or "x" as the format-character.  Using the "8"
-and "16" values is optional, since these types are guaranteed to be
-smaller than "int", which is the minimal size for variadic arguments,
-but their presence allow a one-to-one matching between the type
-name (uint16_t) and the format ("%!16d").
+type and can use "d", "u", or "x" as the format-character.
+Using the "8" and "16" values is optional, since these types are
+guaranteed to be smaller than "int", which is the minimal size for
+variadic arguments, but their presence allow a one-to-one matching
+between the type name (uint16_t) and the format ("%!16d").
 .Pp
 As a mnemonic, consider that '!' looks like an upside down 'i' for
 integer.
-.Pp
 .Sh FIELD WIDTHS
 Field widths are included in the format modifier using an optional set
 of up to three groups of one or more digits ('0' - '9'), separated by
@@ -889,44 +918,44 @@ xo_emit("[{:name/%.*.*s}]\\n", 8, 20, name);  /* "[goodname]" */
 .Ed
 .Sh FORMAT CHARACTER
 The format character is described in the following table:
-.Bl -column C "Argument Type12"
-.It Sy "C" "Argument Type  " "Format"
-.It d "int            " "base 10 (decimal)"
-.It i "int            " "base 10 (decimal)"
-.It o "int            " "base 8 (octal)"
-.It u "unsigned       " "base 10 (decimal)"
-.It x "unsigned       " "base 16 (hex)"
-.It X "unsigned long  " "base 16 (hex)"
-.It D "long           " "base 10 (decimal)"
-.It O "unsigned long  " "base 8 (octal)"
-.It U "unsigned long  " "base 10 (decimal)"
-.It e "double         " "[\-]d.ddde+\-dd"
-.It E "double         " "[\-]d.dddE+\-dd"
-.It f "double         " "[\-]ddd.ddd"
-.It F "double         " "[\-]ddd.ddd"
-.It g "double         " "as \(aqe\(aq or \(aqf\(aq"
-.It G "double         " "as \(aqE\(aq or \(aqF\(aq"
-.It a "double         " "[\-]0xh.hhhp[+\-]d"
-.It A "double         " "[\-]0Xh.hhhp[+\-]d"
-.It c "unsigned char  " "a character"
-.It C "wint_t         " "a character"
-.It s "char *         " "a UTF\-8 string"
-.It S "wchar_t *      " "a unicode/WCS string"
-.It p "void *         " "\(aq%#lx\(aq"
+.Bl -column C "Argument Type12" "Format"
+.It Sy C Ta Sy "Argument Type" Ta Sy Format
+.It d Ta int Ta "base 10 (decimal)"
+.It i Ta int Ta "base 10 (decimal)"
+.It o Ta int Ta "base 8 (octal)"
+.It u Ta unsigned Ta "base 10 (decimal)"
+.It x Ta unsigned Ta "base 16 (hex)"
+.It X Ta "unsigned long" Ta "base 16 (hex)"
+.It D Ta long Ta "base 10 (decimal)"
+.It O Ta "unsigned long" Ta "base 8 (octal)"
+.It U Ta "unsigned long" Ta "base 10 (decimal)"
+.It e Ta double Ta [\-]d.ddde+\-dd
+.It E Ta double Ta [\-]d.dddE+\-dd
+.It f Ta double Ta [\-]ddd.ddd
+.It F Ta double Ta [\-]ddd.ddd
+.It g Ta double Ta "as \(aqe\(aq or \(aqf\(aq"
+.It G Ta double Ta "as \(aqE\(aq or \(aqF\(aq"
+.It a Ta double Ta [\-]0xh.hhhp[+\-]d
+.It A Ta double Ta [\-]0Xh.hhhp[+\-]d
+.It c Ta "unsigned char" Ta "a character"
+.It C Ta wint_t Ta "a character"
+.It s Ta "char *" Ta "a UTF\-8 string"
+.It S Ta "wchar_t *" Ta "a unicode/WCS string"
+.It p Ta "void *" Ta \(aq%#lx\(aq
 .El
 .Pp
 The \(aqh\(aq and \(aql\(aq modifiers affect the size and treatment of the
 argument:
 .Bl -column "Mod" "d, i         " "o, u, x, X         "
-.It Sy "Mod" "d, i        " "o, u, x, X"
-.It "hh " "signed char " "unsigned char"
-.It "h  " "short       " "unsigned short"
-.It "l  " "long        " "unsigned long"
-.It "ll " "long long   " "unsigned long long"
-.It "j  " "intmax_t    " "uintmax_t"
-.It "t  " "ptrdiff_t   " "ptrdiff_t"
-.It "z  " "size_t      " "size_t"
-.It "q  " "quad_t      " "u_quad_t"
+.It Sy Mod Ta Sy "d, i" Ta Sy "o, u, x, X"
+.It hh Ta "signed char" Ta "unsigned char"
+.It h Ta short Ta "unsigned short"
+.It l Ta long Ta "unsigned long"
+.It ll Ta "long long" Ta "unsigned long long"
+.It j Ta intmax_t Ta uintmax_t
+.It t Ta ptrdiff_t Ta ptrdiff_t
+.It z Ta size_t Ta size_t
+.It q Ta quad_t Ta u_quad_t
 .El
 .Ss "UTF\-8 and Locale Strings"
 All strings for
@@ -1049,7 +1078,7 @@ for JSON and XML.
 If not provided, it defaults to the primary format
 with any minimum width removed.
 If the primary is not given, both default to "%s".
-.Sh EXAMPLE
+.Sh EXAMPLES
 In this example, the value for the number of items in stock is emitted:
 .Bd -literal -offset indent
         xo_emit("{P:   }{Lwc:In stock}{:in\-stock/%u}\\n",
