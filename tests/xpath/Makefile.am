@@ -280,8 +280,6 @@ test tests: ${bin_PROGRAMS}
 	@${MKDIR} -p out
 	@${RUN_TESTS_CMD} -l warn,filter-warn run ${TEST_CASES:.c=.test}
 
-one:
-
 accept:
 	@${MKDIR} -p ${srcdir}/saved
 	@${RUN_TESTS_CMD} accept ${TEST_CASES}
