@@ -127,47 +127,57 @@ additional details:
 Integer Grouping
 ----------------
 
-Integer grouping allows numbers to be displaying using separators to
-enhance readability (e.g. "331,449,281" instead of "331449281").
+Integer grouping makes large numbers easier to read by placing a
+separator between groups of digits, giving "331,449,281" instead of
+"331449281".  The "group" option (brief form "G") groups every
+suitable field, while the '{i:}' field modifier (aka "{,int-group:}",
+see :ref:`int-group-modifier`) lets a program group particular fields
+without the option.  Since "group" applies to every decimal integer,
+it can also group numbers that should not be grouped, such as model
+numbers or years.
 
-Integer groupings are only performed in the "display" styles (TEXT and
-HTML).  Full numbers are always generated for the "encoding" styles
-(XML, JSON, etc).
+A suitable field is a decimal integer, using the "%d", "%i", or "%u"
+conversion with any length modifier.  Hexadecimal, octal, and
+floating-point values are never grouped, nor are fields that request
+leading zeros (such as "%08d").  Separators are added after any field
+width has been applied, so a grouped field is wider than its width by
+the number of separators.
 
-Integer groupings are only performed on decimal integer values,
-meaning those with "%d", "%u" or "%i" formats, and does not work on
-any hexadecimal format ("%x" or "%X").  Additionally is does not work
-for fields that have requested leading zeroes (e.g. "%05d".
+Grouping is done only for the "display" styles (TEXT and HTML).  XML,
+JSON, and encoder output always carry the plain digits, since a
+separator would make the value something other than a number.
 
-Grouping relies on four items:
+The separator and the size of each group of digits come from the
+current locale.  The C and POSIX locales do no grouping, so "group"
+has no visible effect there unless "grouping" is also given.  Some
+locales use groups of different sizes; for example, en_IN renders
+1234567890 as "1,23,45,67,890".
 
-- The separator is the character placed between the groups of digits
-  (e.g. the comma in the example about).
+The "grouping" option replaces the locale's values.  Its value is the
+separator, followed by the size of each group, each preceded by a
+plus sign ("+"), starting with the group nearest the right-hand
+side::
 
-- The digits grouping is the size of each group of digits, with the
-  right-most grouping listed first, followed by a series of numbers for
-  each group.  If the grouping ends with "-1", not further groups are
-  needed, otherwise the last size given applies for any additional
-  groups.  The most common groupings are "3", "3:2", and "4".
+    grouping=x+n1+n2...
 
-- The '{i:}' modifier (aka "{:,int-group}") allows the developer to
-  flag a particular field as wanting integer groupings.
+Each size is a single digit.  The last size repeats for any further
+digits, unless the list ends with "-1", which stops grouping and
+leaves the remaining digits as one group.  The separator can be any
+string, including a multibyte UTF-8 character.  If it is left out, so
+the value starts with "+", the separator is a comma; this avoids
+having to escape a comma, which would otherwise end the option.  The
+"grouping" option only sets the shape; grouping must still be turned
+on, by either the "group" option or the '{i:}' modifier.
 
-- The "--libxo group" option instructs `libxo` to perform integer
-  grouping on any suitable integer.  In this situation, `libxo` may
-  perform groupings on fields that are not specifically integers (e.g
-  model numbers), and may be used on fields that are monetary units,
-  which may have distinct separators or digit group sizes.
-
-`libxo` gains the separator and digit groupings from the locale, if
-available, or defaults to using comma as the separator and "3" as the
-digit grouping.
-
-In addition, the "--libxo grouping=" option allows these value to be
-specified directly.  The value for this option is the separator
-character followed by digit groupings, each separated with a plus
-("+").  For example, "--libxo groupings=:+3" would generate number
-like "1:234:567".
+  ================= ================
+   Value             Output
+  ================= ================
+   grouping=+3       1,234,567,890
+   grouping=.+3      1.234.567.890
+   grouping=+3+2     1,23,45,67,890
+   grouping=:+4      12:3456:7890
+   grouping=.+3+-1   1234567.890
+  ================= ================
 
 Brief Options
 -------------
