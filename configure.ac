@@ -38,16 +38,6 @@ AC_PATH_PROG(MKDIR, mkdir, /bin/mkdir)
 AC_PATH_PROG(MV, mv, /bin/mv)
 AC_PATH_PROG(RM, rm, /bin/rm)
 AC_PATH_PROG(SED, sed, /bin/sed)
-AC_CHECK_PROGS(YACC, [byacc yacc], )
-
-dnl The XPath grammar relies on byacc extensions (a reentrant parser
-dnl exposing yystate and byacc-generated tables) that GNU bison does not
-dnl provide, so require byacc instead of silently using an incompatible bison.
-AS_IF([test -z "$YACC"],
-  [AC_MSG_ERROR([byacc is required to build the XPath filter; please install byacc])])
-AS_IF([$YACC --version 2>/dev/null | grep -qi bison],
-  [AC_MSG_ERROR([byacc is required to build the XPath filter; the detected yacc is GNU bison, which is not compatible. Please install byacc])])
-AC_DEFINE([HAVE_BYACC], [1], [Define to 1 if the parser is built with byacc])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_INLINE
@@ -509,6 +499,20 @@ AC_ARG_ENABLE([filters],
 AC_MSG_RESULT([$LIBXO_NEED_FILTERS])
 AM_CONDITIONAL([LIBXO_NEED_FILTERS], [test "$LIBXO_NEED_FILTERS" != "no"])
 AC_SUBST(LIBXO_NEED_FILTERS)
+
+dnl The XPath grammar relies on byacc extensions (a reentrant parser
+dnl exposing yystate and byacc-generated tables) that GNU bison does not
+dnl provide, so require byacc instead of silently using an incompatible bison.
+dnl Only the filter library is built from a grammar, so a build without
+dnl filters needs no yacc at all.
+AS_IF([test "$LIBXO_NEED_FILTERS" != "no"], [
+  AC_CHECK_PROGS(YACC, [byacc yacc], )
+  AS_IF([test -z "$YACC"],
+    [AC_MSG_ERROR([byacc is required to build the XPath filter; please install byacc])])
+  AS_IF([$YACC --version 2>/dev/null | grep -qi bison],
+    [AC_MSG_ERROR([byacc is required to build the XPath filter; the detected yacc is GNU bison, which is not compatible. Please install byacc])])
+  AC_DEFINE([HAVE_BYACC], [1], [Define to 1 if the parser is built with byacc])
+])
 
 case $host_os in
      darwin*)
