@@ -413,24 +413,33 @@ AM_CONDITIONAL([LIBXO_WARNINGS_HIGH], [test "$LIBXO_WARNINGS" != "no"])
 AC_MSG_CHECKING([whether to build with debugging])
 AC_ARG_ENABLE([debug],
     [  --enable-debug    Turn on debugging],
-    [LIBXO_DEBUG=yes; AC_DEFINE([LIBXO_DEBUG], [1], [Enable debugging])],
+    [LIBXO_DEBUG=$enableval],
     [LIBXO_DEBUG=no])
 AC_MSG_RESULT([$LIBXO_DEBUG])
+dnl AC_ARG_ENABLE's action-if-given also runs for --disable-FOO, so
+dnl the --enable options here define their macros from the value, not
+dnl from the option's presence.
+AS_IF([test "$LIBXO_DEBUG" != "no"],
+  [AC_DEFINE([LIBXO_DEBUG], [1], [Enable debugging])])
 AM_CONDITIONAL([LIBXO_DEBUG], [test "$LIBXO_DEBUG" != "no"])
 
 AC_MSG_CHECKING([whether to use int return codes])
 AC_ARG_ENABLE([int-return-codes],
     [  --enable-int-return-codes    Use int return codes (instead of ssize_t)],
-    [USE_INT_RETURN_CODES=yes; AC_DEFINE([USE_INT_RETURN_CODES], [1], [Use int return codes])],
+    [USE_INT_RETURN_CODES=$enableval],
     [USE_INT_RETURN_CODES=no])
 AC_MSG_RESULT([$USE_INT_RETURN_CODES])
+AS_IF([test "$USE_INT_RETURN_CODES" != "no"],
+  [AC_DEFINE([USE_INT_RETURN_CODES], [1], [Use int return codes])])
 
 AC_MSG_CHECKING([whether to build with text-only rendering])
 AC_ARG_ENABLE([text-only],
     [  --enable-text-only    Turn on text-only rendering],
-    [LIBXO_TEXT_ONLY=yes; AC_DEFINE([LIBXO_TEXT_ONLY], [1], [Enable text-only rendering])],
+    [LIBXO_TEXT_ONLY=$enableval],
     [LIBXO_TEXT_ONLY=no])
 AC_MSG_RESULT([$LIBXO_TEXT_ONLY])
+AS_IF([test "$LIBXO_TEXT_ONLY" != "no"],
+  [AC_DEFINE([LIBXO_TEXT_ONLY], [1], [Enable text-only rendering])])
 AM_CONDITIONAL([LIBXO_TEXT_ONLY], [test "$LIBXO_TEXT_ONLY" != "no"])
 
 AC_MSG_CHECKING([whether to build with local wcwidth implementation])
@@ -477,11 +486,12 @@ AM_CONDITIONAL([HAVE_CLANG], [test "$HAVE_CLANG" = "yes"])
 AC_MSG_CHECKING([whether to build with printflike])
 AC_ARG_ENABLE([printflike],
     [  --enable-printflike    Enable use of GCC __printflike attribute],
-    [HAVE_PRINTFLIKE=yes;
-           AC_DEFINE([HAVE_PRINTFLIKE], [1], [Support printflike])],
+    [HAVE_PRINTFLIKE=$enableval],
     [HAVE_PRINTFLIKE=no])
 AC_MSG_RESULT([$HAVE_PRINTFLIKE])
-AM_CONDITIONAL([HAVE_PRINTFLIKE], [test "$HAVE_PRINTFLIKE" != ""])
+AS_IF([test "$HAVE_PRINTFLIKE" != "no"],
+  [AC_DEFINE([HAVE_PRINTFLIKE], [1], [Support printflike])])
+AM_CONDITIONAL([HAVE_PRINTFLIKE], [test "$HAVE_PRINTFLIKE" != "no"])
 
 AC_MSG_CHECKING([whether to build with LIBXO_OPTIONS])
 AC_ARG_ENABLE([libxo-options],
@@ -497,8 +507,6 @@ AC_ARG_ENABLE([filters],
     [LIBXO_NEED_FILTERS=$enableval],
     [LIBXO_NEED_FILTERS=no])
 AC_MSG_RESULT([$LIBXO_NEED_FILTERS])
-dnl The action-if-given above also runs for --disable-filters, so
-dnl define the macro from the value, not from the option's presence.
 AS_IF([test "$LIBXO_NEED_FILTERS" != "no"],
   [AC_DEFINE([LIBXO_NEED_FILTERS], [1], [Enable xpath-like filters])])
 AM_CONDITIONAL([LIBXO_NEED_FILTERS], [test "$LIBXO_NEED_FILTERS" != "no"])
