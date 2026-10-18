@@ -17,16 +17,13 @@
 .Lb libxo
 .Sh SYNOPSIS
 .In libxo/xo.h
+.Bd -literal
+typedef xo_ssize_t (*xo_write_func_t)(void *, const char *);
+typedef void (*xo_close_func_t)(void *);
+typedef int (*xo_flush_func_t)(void *);
+.Ed
 .Ft void
-.Sy typedef xo_ssize_t (*xo_write_func_t)(void *, const char *);
-.Pp
-.Sy typedef void (*xo_close_func_t)(void *);
-.Pp
-.Sy typedef int (*xo_flush_func_t)(void *);
-.Fn xo_set_writer "xo_handle_t *handle" "void *opaque"
-                        "xo_write_func_t write_func"
-                        "xo_close_func_t close_func"
-                        "xo_flush_func_t flush_func"
+.Fn xo_set_writer "xo_handle_t *handle" "void *opaque" "xo_write_func_t write_func" "xo_close_func_t close_func" "xo_flush_func_t flush_func"
 .Sh DESCRIPTION
 The
 .Fn xo_set_writer
