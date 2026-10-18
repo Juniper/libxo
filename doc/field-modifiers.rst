@@ -269,9 +269,10 @@ The Int-Group Modifier ({i:})
 .. index:: Field Modifiers; Int-Group
 
 The int-group modifier inserts a thousands separator into a decimal
-integer field (``%d``, ``%i``, ``%u``, with any length modifier), (see
-:ref:`integer-grouping`) to be set.  It is useful when only a specific
-field, rather than an entire program's output, should be grouped::
+integer field (``%d``, ``%i``, ``%u``, with any length modifier),
+without requiring the "`group`" option (see :ref:`integer-grouping`)
+to be set.  It is useful when only a specific field, rather than an
+entire program's output, should be grouped::
 
     EXAMPLE:
         xo_emit("{i:count/%u}\n", 1234567);
