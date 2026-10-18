@@ -52,7 +52,7 @@ joined with `+` (enabled) or `-` (disabled):
   so the line can be given back to the shell.  (default: disabled).
 
 The token full is a shorthand for turning on validate, lint, and
-precompile together.  It is a provided since this is the typical use
+precompile together.  It is provided since this is the typical use
 case::
 
     make CC='xocc full'
