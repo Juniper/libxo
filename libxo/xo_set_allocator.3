@@ -17,9 +17,10 @@
 .Lb libxo
 .Sh SYNOPSIS
 .In libxo/xo.h
-.Sy typedef void *(*xo_realloc_func_t)(void *, size_t);
-.Pp
-.Sy typedef void (*xo_free_func_t)(void *);
+.Bd -literal
+typedef void *(*xo_realloc_func_t)(void *, size_t);
+typedef void (*xo_free_func_t)(void *);
+.Ed
 .Ft void
 .Fn xo_set_allocator "xo_realloc_func_t realloc_func" "xo_free_func_t free_func"
 .Sh DESCRIPTION
