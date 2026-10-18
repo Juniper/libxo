@@ -494,9 +494,13 @@ AM_CONDITIONAL([NO_LIBXO_OPTIONS], [test "$LIBXO_OPTS" != "yes"])
 AC_MSG_CHECKING([whether to support filters])
 AC_ARG_ENABLE([filters],
     [  --enable-filters      Support xpath-like filters],
-    [LIBXO_NEED_FILTERS=$enableval; AC_DEFINE([LIBXO_NEED_FILTERS], [1], [Enable xpath-like filters])],
+    [LIBXO_NEED_FILTERS=$enableval],
     [LIBXO_NEED_FILTERS=no])
 AC_MSG_RESULT([$LIBXO_NEED_FILTERS])
+dnl The action-if-given above also runs for --disable-filters, so
+dnl define the macro from the value, not from the option's presence.
+AS_IF([test "$LIBXO_NEED_FILTERS" != "no"],
+  [AC_DEFINE([LIBXO_NEED_FILTERS], [1], [Enable xpath-like filters])])
 AM_CONDITIONAL([LIBXO_NEED_FILTERS], [test "$LIBXO_NEED_FILTERS" != "no"])
 AC_SUBST(LIBXO_NEED_FILTERS)
 
