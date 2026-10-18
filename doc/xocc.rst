@@ -60,10 +60,6 @@ case::
 Examples
 --------
 
-To turn warnings into hard errors, use `errors`:
-
-    make CC='xocc full'
-
 Adding `+errors` will turn warnings into hard errors::
 
     make CC='xocc full+errors'
@@ -102,9 +98,9 @@ fastest way to check a verb combination did what you expected::
     make CC='xocc full+echo'
 
 `xocc` picks which compiler to invoke, but an explicit compiler can be
-specified using the `XO_REAL_CC`, environment variable:
+specified using the `XO_REAL_CC` environment variable::
 
-       XO_REAL_CC=/usr/local/bin/clang-19 make CC='xocc full'
+    XO_REAL_CC=/usr/local/bin/clang-19 make CC='xocc full'
 
 `xocc` also inspects the rest of its arguments to tell a compile stage
 (`-c`, `-E`, or `-S` present, or a verb of `lint` alone) from a link
