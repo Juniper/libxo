@@ -169,7 +169,7 @@
 #elif HAVE_THREAD_LOCAL == THREAD_LOCAL_after
 #define THREAD_LOCAL(_x) _x __thread
 #elif HAVE_THREAD_LOCAL == THREAD_LOCAL_declspec
-#define THREAD_LOCAL(_x) __declspec(_x)
+#define THREAD_LOCAL(_x) __declspec(thread) _x
 #else
 #error unknown thread-local setting
 #endif /* HAVE_THREADS_H */
