@@ -89,8 +89,7 @@ browser (see
 .Nm libxo
 uses command line options to trigger rendering behavior.
 The following options are recognised:
-.Pp
-.Bl -tag -width "--libxo"
+.Bl -item -offset indent -compact
 .It
 \-\^\-libxo <options>
 .It
@@ -101,11 +100,15 @@ The following options are recognised:
 .Pp
 Options is a comma-separated list of tokens that correspond to output
 styles, flags, or features:
-.Pp
 .Bl -tag -width "log-gettext"
 .It Sy "Token        Action"
 .It Dv dtrt
 Enable "Do The Right Thing" mode
+.It Dv group
+Insert thousands separators into decimal integers (TEXT, HTML)
+.It Dv grouping=xxxx
+Set the thousands separator and digit grouping (see
+.Xr xo_options 7 )
 .It Dv html
 Emit HTML output
 .It Dv indent=xx
