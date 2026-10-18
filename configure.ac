@@ -28,7 +28,6 @@ AC_PROG_LN_S
 LT_INIT([dlopen shared])
 
 AC_PATH_PROG(BASENAME, basename, /usr/bin/basename)
-AC_PATH_PROG(BISON, bison, /usr/bin/bison)
 AC_PATH_PROG(BASH, bash, /bin/bash)
 AC_PATH_PROG(CAT, cat, /bin/cat)
 AC_PATH_PROG(CHMOD, chmod, /bin/chmod)
@@ -74,7 +73,6 @@ AC_CHECK_FUNCS([uexterr_gettext])
 
 AC_CHECK_HEADERS([bsd/string.h])
 AC_CHECK_HEADERS([ctype.h])
-AC_CHECK_HEADERS([dlfcn.h])
 AC_CHECK_HEADERS([dlfcn.h])
 AC_CHECK_HEADERS([errno.h])
 AC_CHECK_HEADERS([exterr.h])
@@ -379,7 +377,7 @@ fi
 
 if test "$THREAD_LOCAL" = "unknown"; then
     AC_LINK_IFELSE([AC_LANG_SOURCE([[]
-           [__declspec(int) foo; int main() { foo++; return foo; }]])],
+           [__declspec(thread) int foo; int main() { foo++; return foo; }]])],
            [THREAD_LOCAL=declspec],
            [THREAD_LOCAL=unknown])
     AC_MSG_RESULT([$THREAD_LOCAL])
@@ -390,14 +388,10 @@ if test "$THREAD_LOCAL" != "unknown"; then
               THREAD_LOCAL_${THREAD_LOCAL}, [thread-local setting])
 fi
 
-dnl Looking for libcrypto....
-AC_CHECK_LIB([crypto], [MD5_Init])
-AM_CONDITIONAL([HAVE_LIBCRYPTO], [test "$HAVE_LIBCRYPTO" != "no"])
-
 AC_CHECK_MEMBER([struct sockaddr_un.sun_len],
     [HAVE_SUN_LEN=yes ;
         AC_DEFINE([HAVE_SUN_LEN], [1], [Have struct sockaddr_un.sun_len])],
-    [HAS_SUN_LEN=no], [[#include <sys/un.h>]])
+    [HAVE_SUN_LEN=no], [[#include <sys/un.h>]])
 
 AC_CHECK_DECLS([__isthreaded], [], [], [#include <stdio.h>])
 HAVE_ISTHREADED=${ac_cv_have_decl___isthreaded}
@@ -452,8 +446,11 @@ if test "${LIBXO_WCWIDTH}" != "no"; then
   AC_DEFINE([LIBXO_WCWIDTH], [1], [Enable local wcwidth implementation])
 fi
 
+dnl The filter's XPath ceiling() and floor() need libm.  AC_CHECK_LIB
+dnl adds -lm to LIBS but sets no shell variable of its own, so the
+dnl conditional tests its cache variable.
 AC_CHECK_LIB([m], [lrint])
-AM_CONDITIONAL([HAVE_LIBM], [test "$HAVE_LIBM" != "no"])
+AM_CONDITIONAL([HAVE_LIBM], [test "$ac_cv_lib_m_lrint" = "yes"])
 
 AC_MSG_CHECKING([compiler for gcc])
 HAVE_GCC=no
@@ -473,7 +470,7 @@ AC_SUBST(HAVE_GCC)
 AC_MSG_CHECKING([compiler for clang])
 HAVE_CLANG=no
 if test "${CC}" != ""; then
-    HAVE_CLANG=`${CC} cc --help 2>&1 | head -1 | grep -i clang`
+    HAVE_CLANG=`${CC} --help 2>&1 | head -1 | grep -i clang`
     if test "${HAVE_CLANG}" != ""; then
         HAVE_CLANG=yes
     else
@@ -526,6 +523,11 @@ AS_IF([test "$LIBXO_NEED_FILTERS" != "no"], [
   AC_DEFINE([HAVE_BYACC], [1], [Define to 1 if the parser is built with byacc])
 ])
 
+dnl libxo dlopen()s encoders and the filter library.  Older glibc keeps
+dnl dlopen() in libdl, which goes in LIBS (after the objects) rather than
+dnl LDFLAGS; elsewhere it's in libc and this adds nothing.
+AC_SEARCH_LIBS([dlopen], [dl])
+
 case $host_os in
      darwin*)
         LIBTOOL=glibtool
@@ -533,12 +535,11 @@ case $host_os in
 	;;
      Linux*|linux*)
         CFLAGS="-D_GNU_SOURCE $CFLAGS"
-	LDFLAGS=-ldl
 	XO_LIBEXT=so
 	;;
      cygwin*|CYGWIN*)
-	LDFLAGS=-no-undefined
-	XO_LIBEXT=ddl
+	LDFLAGS="$LDFLAGS -no-undefined"
+	XO_LIBEXT=dll
 	;;
 esac
 
@@ -597,7 +598,7 @@ AC_SUBST(RELDATE)
 AC_MSG_RESULT(Using configure dir $ac_abs_confdir)
 
 if test -d $ac_abs_confdir/.git ; then
-  extra=`git branch | awk '/\*/ { print $2 }'`
+  extra=`(cd $ac_abs_confdir && git branch) | awk '/\*/ { print $2 }'`
   if test "$extra" != "" -a "$extra" != "master"
   then
       LIBXO_VERSION_EXTRA="-git-$extra"
