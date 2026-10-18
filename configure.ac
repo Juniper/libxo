@@ -591,6 +591,15 @@ AC_SUBST(XO_SHAREDIR)
 XO_LLVMDIR=`echo $XO_LIBDIR | sed "s;\\${exec_prefix};$prefix;"`/libxo
 AC_SUBST(XO_LLVMDIR)
 
+dnl libxo.pc only advertises llvmdir when the plugins are built, so
+dnl "pkg-config --variable=llvmdir libxo" is empty when nothing is there.
+if test "${HAVE_VALIDATE}" = "yes"; then
+    XO_PC_LLVMDIR='llvmdir=${libdir}/libxo'
+else
+    XO_PC_LLVMDIR=
+fi
+AC_SUBST(XO_PC_LLVMDIR)
+
 dnl for the spec file
 RELDATE=`date +'%Y-%m-%d%n'`
 AC_SUBST(RELDATE)
