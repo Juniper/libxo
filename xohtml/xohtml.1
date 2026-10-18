@@ -108,7 +108,6 @@ fetching it from the official
 .Nm libxo
 website, which is the default source.
 .El
-.Pp
 .Sh EXAMPLES
 The following command line will run "du --libxo=html ~/src", write the
 result to an automatically named file under $TMPDIR, and open it in a
@@ -134,7 +133,6 @@ the output to /tmp/src.html:
 .Bd -literal -offset indent
     xohtml -c "du --libxo=html,warn ~/src" -f /tmp/src.html
 .Ed
-.Pp
 .Sh SEE ALSO
 .Xr libxo 3 ,
 .Xr xo_emit 3 ,
