@@ -6464,17 +6464,26 @@ xo_filt_commit_field (xo_handle_t *xop UNUSED, xo_off_t field_start UNUSED,
     xo_filt_compact_range(xop, xop->xo_stack + 1, cur + 1, fstatus, &r);
 
     /*
-     * In JSON the matched leaf carries a leading 2-byte separator (", " or
-     * ",\n") since siblings preceded it.  Now that those siblings are gone and
-     * the leaf becomes the first member after the parent's freshly-kept '{',
-     * strip that separator.  Only do this when the parent was compacted here
-     * (not already committed) and kept no key ahead of the leaf.
+     * In JSON the matched leaf carries a leading separator since siblings
+     * preceded it.  Now that those siblings are gone and the leaf becomes
+     * the first member after the parent's freshly-kept '{', strip that
+     * separator.  Only do this when the parent was compacted here (not
+     * already committed) and kept no key ahead of the leaf.
+     *
+     * Unlike a container's 2-byte separator, a field's (from
+     * xo_format_prep) is "," alone, with "\n" after it only when
+     * pretty and not a leaf-list.  A field's own text never starts
+     * with a newline or space, so take the "," plus either one.
      */
     if (XOEF_ISSET(xop, XOEF_RB_STRIP_LEAD_SEP)
 	    && !r.xcr_last_clear && !r.xcr_prev_had_key
-	    && item_len >= 2 && xbp->xb_bufp[item_start] == ',') {
-	item_start += 2;
-	item_len -= 2;
+	    && item_len >= 1 && xbp->xb_bufp[item_start] == ',') {
+	ssize_t sep_len = 1;
+	if (item_len >= 2 && (xbp->xb_bufp[item_start + 1] == '\n'
+			      || xbp->xb_bufp[item_start + 1] == ' '))
+	    sep_len = 2;
+	item_start += sep_len;
+	item_len -= sep_len;
     }
 
     /* Move the matched leaf to follow the compacted ancestor tags */
@@ -6776,10 +6785,12 @@ xo_filt_do_open_field (xo_handle_t *xop, const char *name, xo_ssize_t nlen,
 	    return fstatus;
 
     } else if ((fstatus == XO_STATUS_TRACK || fstatus == XO_STATUS_PRED)
-	       && value && vlen > 0) {
+	       && value && !(flags & XFF_DISPLAY_ONLY)) {
 	/*
 	 * Non-key field: buffer its value if a pending predicate
-	 * references it
+	 * references it.  An empty value is still a value, but a
+	 * display-only field (which reaches here from the JSON path
+	 * with no rendered bytes) is not in the output at all.
 	 */
 	fstatus = xo_filter_pred_field(xop, xfp, name, nlen, value, vlen);
 	xo_filt_handle_open_status(xop, fstatus);
