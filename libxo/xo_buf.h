@@ -329,8 +329,10 @@ xo_buf_force_nul (xo_buffer_t *dst)
 /*
  * Insert the locale's thousands separator into a just-rendered decimal
  * integer field; see the implementation in libxo.c for details.  Exposed
- * here so that other translation units (e.g. xo/xo_cli_helpers.h) that
- * render their own decimal fields can apply grouping directly.
+ * here so that other translation units that render their own decimal
+ * fields can apply grouping directly.  A formatter set by
+ * xo_set_formatter() must not call it, since libxo groups the
+ * formatter's output itself.
  */
 xo_off_t
 xo_grouping_fixup (xo_handle_t *xop, xo_buffer_t *xbp,
