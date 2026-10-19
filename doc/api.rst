@@ -268,7 +268,7 @@ The set of valid flags include:
    XOF_FILTER_WARN     Warn about runtime filter errors
    XOF_INFO            Display info data attributes (HTML)
    XOF_KEYS            Emit the key attribute (XML)
-   XOF_NO_ENV          No effect (kept for compatibility)
+   XOF_NO_ENV          Deprecated; no effect
    XOF_NO_HUMANIZE     Display humanization (TEXT, HTML)
    XOF_PRETTY          Make "pretty printed" output
    XOF_UNDERSCORES     Replaces hyphens with underscores
