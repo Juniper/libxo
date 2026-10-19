@@ -1,0 +1,14 @@
+<div class="line">
+  <div class="data" data-tag="one" data-xpath="/top/cached/one">1</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="one" data-xpath="/top/precompiled/one">1</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="one" data-xpath="/top/target/one">1</div>
+  <div class="data" data-tag="two" data-xpath="/top/target/two">2</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="one" data-xpath="/top/layout/one">1</div>
+  <div class="data" data-tag="two" data-xpath="/top/layout/two">2</div>
+</div>
