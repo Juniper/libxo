@@ -18,19 +18,20 @@ Invoking "xocc"
 
 `xocc` requires a verb as its first argument that describe and adjusts
 the actions and behaviors requested.  A verb is one or more tokens
-joined with `+` (enabled) or `-` (disabled):
+joined with `+` (enabled) or `-` (disabled).  The four main tokens
+also have one-letter forms, shown in parentheses:
 
-- **validate** - Add the xo_validate plugin to the compiler
+- **validate** (v) - Add the xo_validate plugin to the compiler
   invocation.  (default: disabled)
 
-- **lint** - Add the extra xo_validate style checks
+- **lint** (l) - Add the extra xo_validate style checks
   (--xo-validate-lint); implies `validate`.  (default: disabled)
 
-- **errors** - Report the syntactic and semantic problems found by
+- **errors** (e) - Report the syntactic and semantic problems found by
   xo_validate as errors instead of warnings; implies `validate`.
   (default: disabled - i.e. warnings by default)
 
-- **precompile** - Add the xo_precompile plugin to the compiler
+- **precompile** (p) - Add the xo_precompile plugin to the compiler
   invocation.  Precompiled calls skip the runtime parser, and with it
   the format string checks made under "--libxo warn", so the plugin
   makes those checks at build time and reports them as
@@ -53,9 +54,24 @@ joined with `+` (enabled) or `-` (disabled):
 
 The token full is a shorthand for turning on validate, lint, and
 precompile together.  It is provided since this is the typical use
-case::
+case.  `all` is a synonym for `full`::
 
     make CC='xocc full'
+
+Two verbs stand alone, and make `xocc` exit without compiling
+anything:
+
+- **version** - Print the libxo version that `xocc` was built with.
+  `--version` is also accepted.
+
+- **help** - Print a summary of the verbs.  Running `xocc` with no
+  arguments prints the same summary.
+
+If the first argument is `debug`, `xocc` traces its own execution
+(using "set -x") and prints its internal settings, then handles the
+verb that follows as usual::
+
+    xocc debug full+echo -c myprogram.c
 
 Examples
 --------
