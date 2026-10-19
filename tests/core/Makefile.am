@@ -50,7 +50,8 @@ test_13.c \
 test_14.c \
 test_15.c \
 test_16.c \
-test_17.c
+test_17.c \
+test_18.c
 
 test_01_test_SOURCES = test_01.c
 test_02_test_SOURCES = test_02.c
@@ -66,6 +67,7 @@ test_14_test_SOURCES = test_14.c
 test_15_test_SOURCES = test_15.c
 test_16_test_SOURCES = test_16.c
 test_17_test_SOURCES = test_17.c
+test_18_test_SOURCES = test_18.c
 
 base_tests = ${TEST_CASES:.c=.test}
 
