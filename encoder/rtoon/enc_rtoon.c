@@ -143,6 +143,7 @@ typedef struct rtoon_private_s {
 #define RTF_NO_VERSION	(1 << 0) /* User asked us to skip @version */
 #define RTF_VERSION_DONE (1 << 1) /* @version already resolved/written */
 #define RTF_NOMEM	(1 << 2) /* An allocation failed; output is unusable */
+#define RTF_LL_OPEN	(1 << 3) /* A leaf-list is open (values in rt_ll_vals) */
 
 /*
  * Record an allocation failure.  Once anything is lost, the frame
@@ -896,11 +897,18 @@ rtoon_emit_field (rtoon_private_t *priv, const char *name, const char *value,
  */
 
 static void
-rtoon_open_leaf_list (rtoon_private_t *priv)
+rtoon_ll_discard (rtoon_private_t *priv)
 {
     for (unsigned i = 0; i < priv->rt_ll_count; i++)
 	xo_free(priv->rt_ll_vals[i].val);
     priv->rt_ll_count = 0;
+}
+
+static void
+rtoon_open_leaf_list (rtoon_private_t *priv)
+{
+    rtoon_ll_discard(priv);
+    priv->rt_flags |= RTF_LL_OPEN;
 }
 
 static void
@@ -953,9 +961,8 @@ rtoon_close_leaf_list (rtoon_private_t *priv, const char *name,
 
     rtoon_emit_field(priv, name, xo_buf_data(scratch, 0), flags, 0, 1);
 
-    for (unsigned i = 0; i < priv->rt_ll_count; i++)
-	xo_free(priv->rt_ll_vals[i].val);
-    priv->rt_ll_count = 0;
+    rtoon_ll_discard(priv);
+    priv->rt_flags &= ~RTF_LL_OPEN;
 }
 
 /*
@@ -1171,6 +1178,19 @@ rtoon_close_instance (rtoon_private_t *priv)
 static void
 rtoon_deadend (rtoon_private_t *priv)
 {
+    /*
+     * libxo has a frame for an open leaf-list, so its DEADEND comes
+     * first.  We push no frame for one (nothing is written until the
+     * close), so just drop the buffered values; popping here would
+     * take the instance, and the instance's own DEADEND would then
+     * take its list.
+     */
+    if (priv->rt_flags & RTF_LL_OPEN) {
+	rtoon_ll_discard(priv);
+	priv->rt_flags &= ~RTF_LL_OPEN;
+	return;
+    }
+
     int idx = rtoon_top_idx(priv);
     if (idx < 0)
 	return;
