@@ -490,13 +490,11 @@ AS_IF([test "$HAVE_PRINTFLIKE" != "no"],
   [AC_DEFINE([HAVE_PRINTFLIKE], [1], [Support printflike])])
 AM_CONDITIONAL([HAVE_PRINTFLIKE], [test "$HAVE_PRINTFLIKE" != "no"])
 
-AC_MSG_CHECKING([whether to build with LIBXO_OPTIONS])
+dnl LIBXO_OPTIONS is deprecated: libxo no longer reads it, so
+dnl the option is accepted (for existing build scripts) but ignored.
 AC_ARG_ENABLE([libxo-options],
-    [  --disable-libxo-options  Turn off support for LIBXO_OPTIONS],
-    [LIBXO_OPTS=$enableval],
-    [LIBXO_OPTS=yes])
-AC_MSG_RESULT([$LIBXO_OPTS])
-AM_CONDITIONAL([NO_LIBXO_OPTIONS], [test "$LIBXO_OPTS" != "yes"])
+    [  --disable-libxo-options  Deprecated; has no effect],
+    [AC_MSG_WARN([--enable/disable-libxo-options is deprecated and has no effect])])
 
 AC_MSG_CHECKING([whether to support filters])
 AC_ARG_ENABLE([filters],
@@ -690,7 +688,6 @@ AC_MSG_NOTICE([summary of build options:
   warnings:         ${LIBXO_WARNINGS:-no}
   debug:            ${LIBXO_DEBUG:-no}
   printf-like:      ${HAVE_PRINTFLIKE:-no}
-  libxo-options:    ${LIBXO_OPTS:-no}
   text-only:        ${LIBXO_TEXT_ONLY:-no}
   gettext:          ${HAVE_GETTEXT:-no} (${GETTEXT_PREFIX})
   isthreaded:       ${HAVE_ISTHREADED:-no}
