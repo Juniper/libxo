@@ -15,8 +15,11 @@
 .Nd compiler wrapper for libxo's LLVM/clang plugins
 .Sh SYNOPSIS
 .Nm xocc
+.Op Cm debug
 .Ar verb
 .Ar compiler-args ...
+.Nm xocc
+.Cm version | help
 .Sh DESCRIPTION
 .Nm
 is a small shell wrapper to aid with invoking the C compiler with
@@ -42,14 +45,15 @@ A verb is one or more tokens joined with
 .Sq +
 (enabled) or
 .Sq \-
-(disabled):
+(disabled).
+The four main tokens also have one-letter forms, shown below:
 .Bl -tag -width "precompile"
-.It Cm validate
+.It Cm validate , v
 Add the
 .Nm xo_validate
 plugin to the compiler invocation.
 (default: disabled)
-.It Cm lint
+.It Cm lint , l
 Add the extra
 .Nm xo_validate
 style checks
@@ -57,13 +61,13 @@ style checks
 implies
 .Cm validate .
 (default: disabled)
-.It Cm errors
+.It Cm errors , e
 Report the syntactic and semantic problems found by
 .Nm xo_validate
 as errors instead of warnings; implies
 .Cm validate .
 (default: disabled \(en i.e. warnings by default)
-.It Cm precompile
+.It Cm precompile , p
 Add the
 .Nm xo_precompile
 plugin to the compiler invocation.
@@ -109,10 +113,58 @@ and
 .Cm precompile
 together.
 It is provided since this is the typical use case.
+.Cm all
+is a synonym for
+.Cm full .
 .Bd -literal -offset indent
 make CC='xocc full'
 .Ed
-Trailing "+token" / "-token" pairs adjust that starting point.
+.Pp
+Trailing
+.Dq +token
+and
+.Dq \-token
+pairs adjust that starting point.
+Word and letter forms can be mixed, but tokens must be joined with
+.Sq +
+or
+.Sq \- ;
+.Dq v+l+p
+is
+.Cm full
+spelled out, while
+.Dq vlp
+is an error.
+.Pp
+Two verbs stand alone, and make
+.Nm
+exit without compiling anything:
+.Bl -tag -width "precompile"
+.It Cm version
+Print the
+.Nm libxo
+version that
+.Nm
+was built with.
+.Fl \-version
+is also accepted.
+.It Cm help
+Print a summary of the verbs.
+Running
+.Nm
+with no arguments prints the same summary.
+.El
+.Pp
+If the first argument is
+.Cm debug ,
+.Nm
+traces its own execution
+.Pq using Dq set \-x
+and prints its internal settings, then handles the verb that follows
+as usual:
+.Bd -literal -offset indent
+xocc debug full+echo \-c myprogram.c
+.Ed
 .Sh ENVIRONMENT
 .Bl -tag -width XO_REAL_CC
 .It Ev XO_REAL_CC
