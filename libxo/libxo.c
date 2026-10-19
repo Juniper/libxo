@@ -4380,7 +4380,8 @@ xo_emit_field_value (xo_handle_t *xop, xo_buffer_t *xbp,
 	        && (XOF_ISSET(xop, XOF_GROUP) || (flags & XFF_INT_GROUP))
 	        && (style == XO_STYLE_TEXT || style == XO_STYLE_HTML)
 	        && (xfp->xf_fc == 'd' || xfp->xf_fc == 'i'
-		    || xfp->xf_fc == 'u')) {
+		    || xfp->xf_fc == 'u' || xfp->xf_fc == 'D'
+		    || xfp->xf_fc == 'U')) {
 	    xo_off_t start_off = xbp->xb_curp - xbp->xb_bufp;
 	    columns = rc = xo_grouping_fixup(xop, xbp, start_off, rc);
 	}
