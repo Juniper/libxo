@@ -1,0 +1,8 @@
+SOURCE:28:14: warning: libxo: field name should not be less than 3 characters long: '{e:id/%d}'
+   28 |     xo_emit("{e:id/%d}{:label/%s}\n", 7, "item");
+      |              ^
+1 warning generated.
+SOURCE:28:14: warning: libxo: field name should not be less than 3 characters long: '{e:id/%d}'
+   28 |     xo_emit("{e:id/%d}{:label/%s}\n", 7, "item");
+      |              ^
+1 warning generated.
