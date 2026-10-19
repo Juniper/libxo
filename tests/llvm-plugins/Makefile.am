@@ -11,6 +11,7 @@
 #
 # Targets:
 #   tests / test  -- run all tests; diff outputs against saved/
+#   test-validate, test-precompile, test-xocc -- run one group
 #   accept        -- overwrite saved/ with current output (after inspection)
 #
 
@@ -65,17 +66,30 @@ PRECOMPILE_FORMATS = T XP JP JPu HP
 
 TEST_CASES = \
     validate_01 \
-    validate_02
+    validate_02 \
+    validate_03
+
+# Same as TEST_CASES, but C++ (".cc") sources
+TEST_CASES_CXX = \
+    validate_04
 
 PRECOMPILE_TEST_CASES = \
     precompile_01 \
     precompile_02 \
     precompile_03
 
+XOCC = ${top_builddir}/llvm-plugins/xocc.sh
+XOCC_TEST_CASES = xocc_01
+XOCC_SOURCE = ${srcdir}/precompile_01.c
+
 EXTRA_DIST = \
     ${addsuffix .c, ${TEST_CASES}} \
-    ${addprefix saved/, ${addsuffix .out, ${TEST_CASES}}} \
-    ${addprefix saved/, ${addsuffix .err, ${TEST_CASES}}} \
+    ${addsuffix .cc, ${TEST_CASES_CXX}} \
+    ${addprefix saved/, ${addsuffix .out, ${TEST_CASES} ${TEST_CASES_CXX}}} \
+    ${addprefix saved/, ${addsuffix .err, ${TEST_CASES} ${TEST_CASES_CXX}}} \
+    ${addsuffix .sh, ${XOCC_TEST_CASES}} \
+    ${addprefix saved/, ${addsuffix .out, ${XOCC_TEST_CASES}}} \
+    ${addprefix saved/, ${addsuffix .err, ${XOCC_TEST_CASES}}} \
     ${addsuffix .c, ${PRECOMPILE_TEST_CASES}} \
     ${addprefix saved/, ${addsuffix .plain.build.out, ${PRECOMPILE_TEST_CASES}}} \
     ${addprefix saved/, ${addsuffix .plain.build.err, ${PRECOMPILE_TEST_CASES}}} \
@@ -92,18 +106,20 @@ EXTRA_DIST = \
 
 all:
 
-.PHONY: test tests test-validate test-precompile accept
+.PHONY: test tests test-validate test-precompile test-xocc accept
 
 #
 # Validate (AST plugin) tests: check plugin diagnostics against saved baselines.
 #
-test tests: test-validate test-precompile
+test tests: test-validate test-precompile test-xocc
 
 test-validate: ${VALIDATE_PLUGIN}
 	@${MKDIR} -p out
-	@for tc in ${TEST_CASES}; do \
+	@for tc in ${TEST_CASES} ${TEST_CASES_CXX}; do \
 	    echo "... $$tc ..."; \
-	    ${CLANG_CMD} ${srcdir}/$$tc.c \
+	    src=${srcdir}/$$tc.c ; \
+	    [ -f $$src ] || src=${srcdir}/$$tc.cc ; \
+	    ${CLANG_CMD} $$src \
 	        > out/$$tc.out 2> out/$$tc.err.raw ; \
 	    ${SED} -e "s/ (aka '[^']*')//" < out/$$tc.err.raw \
 		| ${SED} -E -e "s/              %l+[ud]/             %XXX/" \
@@ -168,9 +184,38 @@ test-precompile: ${PRECOMPILE_PLUGIN}
 	    ${DIFF} -Nu ${srcdir}/saved/$$tc.nm out/$$tc.nm ; \
 	done ; true
 
+#
+# xocc wrapper tests.  The script shows the command lines xocc builds
+# (using its "dry" verb), the LD_LIBRARY_PATH it exports, and does real
+# compile-only, link-only, and one-step builds.  Paths and flags that
+# depend on the machine are replaced with names.
+#
+XOCC_COMPILE_ARGS = ${strip ${CFLAGS} -I${INCLUDEDIR}}
+XOCC_LINK_ARGS = ${strip ${LDADD} -Wl,-rpath,${LIBDIR}}
+
+test-xocc: ${XOCC}
+	@${MKDIR} -p out
+	@for tc in ${XOCC_TEST_CASES}; do \
+	    echo "... $$tc ..."; \
+	    sh ${srcdir}/$$tc.sh ${XOCC} ${XOCC_SOURCE} out \
+	        "${XOCC_COMPILE_ARGS}" "${XOCC_LINK_ARGS}" \
+	        > out/$$tc.out.raw 2> out/$$tc.err.raw ; \
+	    for fd in out err; do \
+	        ${SED} -e "s|${XOCC_COMPILE_ARGS}|CFLAGS|g" \
+	            -e "s|${XOCC_LINK_ARGS}|LDFLAGS|g" \
+	            -e "s|${XOCC}|XOCC|g" \
+	            -e "s|${XOCC_SOURCE}|SOURCE|g" \
+	            -e "s|${LLVM_CLANG}|CLANG|g" \
+	            $(if ${SDK_PATH},-e "s|${SDK_PATH}|SDK|g",) \
+	            -e "s|${prefix}|PREFIX|g" \
+	            < out/$$tc.$$fd.raw > out/$$tc.$$fd ; \
+	        ${DIFF} -Nu ${srcdir}/saved/$$tc.$$fd out/$$tc.$$fd ; \
+	    done ; \
+	done ; true
+
 accept: ${VALIDATE_PLUGIN} ${PRECOMPILE_PLUGIN}
 	@${MKDIR} -p out ${srcdir}/saved
-	@(for tc in ${TEST_CASES}; do \
+	@(for tc in ${TEST_CASES} ${TEST_CASES_CXX} ${XOCC_TEST_CASES}; do \
 	    echo "... $$tc ..."; \
 	    ${CP} out/$$tc.out ${srcdir}/saved/$$tc.out ; \
 	    ${CP} out/$$tc.err ${srcdir}/saved/$$tc.err ; \
