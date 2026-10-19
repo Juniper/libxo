@@ -306,7 +306,20 @@ checkLayout (StructType *FieldTy, StructType *FspecTy, std::string &why)
 
 /* ---------- the pass ----------------------------------------------------- */
 
-struct XoPrecompile : PassInfoMixin<XoPrecompile> {
+/*
+ * LLVM 23 added RequiredPassInfoMixin and OptionalPassInfoMixin, and
+ * LLVM 24 moved PassInfoMixin into the "detail" namespace, so passes
+ * must pick one.  The pass is optional: if it is skipped (opt-bisect,
+ * optnone), the calls are left as plain xo_emit calls, which is the
+ * same behavior the old PassInfoMixin default (isRequired() false) gave.
+ */
+#if LLVM_VERSION_MAJOR >= 23
+#define XO_PASS_INFO_MIXIN OptionalPassInfoMixin
+#else /* LLVM_VERSION_MAJOR >= 23 */
+#define XO_PASS_INFO_MIXIN PassInfoMixin
+#endif /* LLVM_VERSION_MAJOR >= 23 */
+
+struct XoPrecompile : XO_PASS_INFO_MIXIN<XoPrecompile> {
     PreservedAnalyses run(Module &M, ModuleAnalysisManager &)
     {
         LLVMContext &Ctx = M.getContext();
