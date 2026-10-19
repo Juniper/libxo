@@ -1012,3 +1012,92 @@ $ s abc
 = val 2
 >item
 }item
+
+# R72: an empty non-key field in a container is a value, so each of
+# these predicates selects the container.
+r
+?item[note = '']
++item
+= note ""
+= val 1
+-item
+
+r
+?item[starts-with(note, '')]
++item
+= note ""
+= val 1
+-item
+
+r
+?item[ends-with(note, '')]
++item
+= note ""
+= val 1
+-item
+
+r
+?item[string-length(note) = 0]
++item
+= note ""
+= val 1
+-item
+
+# ... and these select nothing
+r
+?item[note = 'x']
++item
+= note ""
+= val 1
+-item
+
+r
+?item[string-length(note) = 1]
++item
+= note ""
+= val 1
+-item
+
+# ends-with(): items 1 and 3 pass; every string ends with '', so all
+# four pass the second filter.
+r
+?item[ends-with(name, '.eth1')]
+{item
+<item
+$ name lo.eth1
+= val 1
+>item
+<item
+$ name eth1x
+= val 2
+>item
+<item
+$ name .eth1
+= val 3
+>item
+<item
+$ name ""
+= val 4
+>item
+}item
+
+r
+?item[ends-with(name, '')]
+{item
+<item
+$ name lo.eth1
+= val 1
+>item
+<item
+$ name eth1x
+= val 2
+>item
+<item
+$ name .eth1
+= val 3
+>item
+<item
+$ name ""
+= val 4
+>item
+}item
