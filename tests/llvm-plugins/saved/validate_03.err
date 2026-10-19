@@ -1,0 +1,16 @@
+../../../tests/llvm-plugins/validate_03.c:40:32: warning: libxo: argument 1: format specifies type 'uint64_t' but the argument has type 'char[6]'
+   40 |     xo_emit("{:bits/%!64u}\n", "wrong");
+      |                                ^
+../../../tests/llvm-plugins/validate_03.c:53:35: warning: libxo: argument 2: format specifies type 'char *' but the argument has type 'int'
+   53 |     xo_emit("{:name/%@*@s}\n", 1, 5);
+      |                                   ^
+../../../tests/llvm-plugins/validate_03.c:56:13: warning: libxo: format expects 2 argument(s) but 1 provided
+   56 |     xo_emit("{:name/%@*@s}\n", cs_val);
+      |             ^
+../../../tests/llvm-plugins/validate_03.c:72:14: warning: libxo: 'int-group|i' set on field with leading zeroes: '{i:count/%010u}'
+   72 |     xo_emit("{i:count/%010u}\n", u_val);
+      |              ^
+../../../tests/llvm-plugins/validate_03.c:75:14: warning: libxo: 'int-group|i' set on field with invalid type (s; must be d|i|u): '{i:count/%s}'
+   75 |     xo_emit("{i:count/%s}\n", cs_val);
+      |              ^
+5 warnings generated.
