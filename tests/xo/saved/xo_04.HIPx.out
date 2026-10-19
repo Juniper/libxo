@@ -1,0 +1,57 @@
+<div class="line">
+  <div class="data" data-tag="repeat" data-xpath="/top/repeat">1,234,567,890</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="uneven" data-xpath="/top/uneven">1,23,45,67,890</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="stop" data-xpath="/top/stop">1234567.890</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="stop2" data-xpath="/top/stop2">1912276.171</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="wide" data-xpath="/top/wide">1234::5678::9012</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="d" data-xpath="/top/d">1,234,567</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="i" data-xpath="/top/i">1,234,567</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="u" data-xpath="/top/u">1,234,567</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="ld" data-xpath="/top/ld">1,234,567</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="D" data-xpath="/top/D">1,234,567</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="U" data-xpath="/top/U">1,234,567</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="x" data-xpath="/top/x">12d687</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="o" data-xpath="/top/o">4553207</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="f" data-xpath="/top/f">1234567.5</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="neg" data-xpath="/top/neg">-1,234,567</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="right" data-xpath="/top/right">   1,234,567</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="left" data-xpath="/top/left">1,234,567   </div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="zero" data-xpath="/top/zero">0001234567</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="short" data-xpath="/top/short">999</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="edge" data-xpath="/top/edge">1,000</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="one" data-xpath="/top/one">1,234,567</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="other" data-xpath="/top/other">1234567</div>
+</div>
