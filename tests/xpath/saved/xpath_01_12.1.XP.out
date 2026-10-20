@@ -458,3 +458,47 @@
   </sub>
   <size>10</size>
 </item>
+<item>
+  <name>b</name>
+  <sub>
+    <x>2</x>
+  </sub>
+</item>
+<item>
+  <name>b</name>
+</item>
+<item>
+  <name>a</name>
+  <sub>
+    <x>1</x>
+  </sub>
+</item>
+<item>
+  <note>n1</note>
+  <name>a</name>
+  <note>n2</note>
+</item>
+<item>
+  <name>a</name>
+  <sub>
+    <v>v2</v>
+    <k>2</k>
+  </sub>
+</item>
+<item>
+  <name>b</name>
+  <sub>
+    <x>2</x>
+  </sub>
+</item>
+<item>
+  <name>a</name>
+  <sub>
+    <x>1</x>
+  </sub>
+</item>
+<item>
+  <name>a</name>
+  <tag>t1</tag>
+  <tag>t2</tag>
+</item>
