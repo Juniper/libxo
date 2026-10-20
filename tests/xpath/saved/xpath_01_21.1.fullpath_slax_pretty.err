@@ -376,23 +376,23 @@ main: input '= send-bytes-waiting 1'
 main: field: 'send-bytes-waiting'='1'
 main: status: predicate
 main: input '+ local'
-main: status: track
+main: status: conditional
 main: input '= address 172.16.188.131'
 main: field: 'address'='172.16.188.131'
-main: status: track
+main: status: conditional
 main: input '= port ssh'
 main: field: 'port'='ssh'
-main: status: track
+main: status: conditional
 main: input '- local'
 main: status: predicate
 main: input '+ remote'
-main: status: track
+main: status: conditional
 main: input '= address 172.16.188.1'
 main: field: 'address'='172.16.188.1'
-main: status: track
+main: status: conditional
 main: input '= port 63510'
 main: field: 'port'='63510'
-main: status: track
+main: status: conditional
 main: input '- remote'
 main: status: predicate
 main: input '= tcp-state ESTABLISHED'
