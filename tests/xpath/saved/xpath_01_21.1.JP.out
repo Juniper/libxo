@@ -74,6 +74,14 @@
         "protocol": "tcp4",
         "receive-bytes-waiting": "1111",
         "send-bytes-waiting": "1",
+        "local": {
+          "address": "172.16.188.131",
+          "port": "ssh"
+        },
+        "remote": {
+          "address": "172.16.188.1",
+          "port": "63510"
+        },
         "tcp-state": "ESTABLISHED"
       },
       {
