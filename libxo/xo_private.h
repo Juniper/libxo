@@ -178,6 +178,8 @@ typedef uint32_t xo_filter_status_t;
 #define XO_STATUS_TRACK	2	/* Track open/close/key paths, but no data */
 #define XO_STATUS_PRED	3	/* Looking for a predicate */
 #define XO_STATUS_DEAD	4	/* Nope, it's dead under this hierarchy */
+#define XO_STATUS_COND	5	/* FULL, if a pending predicate passes */
+#define XO_STATUS_LIVE	6	/* A pending predicate passed (return only) */
 
 const char *
 xo_filt_status_name (xo_filter_status_t fstatus);
