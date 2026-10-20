@@ -34,6 +34,8 @@ typedef struct xo_xparse_node_s {
     xo_xparse_node_id_t xn_contents; /* Child node (main) (in xd_node_buf) */
     xo_xparse_node_id_t xn_next; /* Next node (in xd_node_buf) */
     xo_xparse_node_id_t xn_prev; /* Previous node (in xd_node_buf) */
+    unsigned xn_line;		/* 1-based source line of this token */
+    unsigned xn_col;		/* 1-based source column of this token */
 } xo_xparse_node_t;
 
 /* Flags for xn_flags */
