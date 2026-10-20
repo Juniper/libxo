@@ -58,7 +58,11 @@ string lookup
 Log (via stderr) each syslog message (via
 .Xr xo_syslog 3 )
 .It Dv XOF_NO_ENV
-Has no effect; it is kept so that existing callers still compile.
+Deprecated.
+It once kept libxo from reading the
+.Ev LIBXO_OPTIONS
+environment variable, which libxo no longer reads.
+It has no effect, and is kept so that existing callers still compile.
 .It Dv XOF_PRETTY
 Make 'pretty printed' output, with the
 addition of indentation and newlines to enhance the readability of
