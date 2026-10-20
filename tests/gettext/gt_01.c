@@ -57,7 +57,7 @@ main (int argc, char **argv)
     }
 
     if (path[0] == 0) {
-	getcwd(path, sizeof(path));
+	(void) getcwd(path, sizeof(path));
 	strlcat(path, "/po", sizeof(path));
     }
 
