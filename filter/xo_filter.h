@@ -427,6 +427,18 @@ xo_eval_prog_t *
 xo_eval_compile (struct xo_xparse_data_s *xdp, ssize_t root,
 		  xo_filter_data_t *dp, xo_filter_data_ops_t *ops);
 
+/*
+ * Line/col (1-based; 0 means unknown) of the AST node a failed
+ * xo_eval_compile() call most recently blamed, stashed internally by
+ * xo_eval_compile_fail() regardless of whether ops->xfdo_error is set.
+ * For a caller (e.g. libpin) that invokes xo_eval_compile() directly
+ * and gets only a bare failure return, this is the only way to recover
+ * *where* in the source expression the failure points; call it
+ * immediately after a failing xo_eval_compile() returns NULL.
+ */
+void
+xo_eval_compile_fail_location (unsigned *linep, unsigned *colp);
+
 void
 xo_eval_prog_destroy (xo_eval_prog_t *prog);
 
