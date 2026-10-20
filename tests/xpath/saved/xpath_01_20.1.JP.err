@@ -36,30 +36,30 @@ main: field: 'send-bytes-waiting'='0'
 main: status: predicate
 main: input '+ local'
 main: filter: rc: 21
-main: status: track
+main: status: conditional
 main: input '@ type inet'
 main: attr: 'type'='inet'
-main: status: track
+main: status: conditional
 main: input '= address 172.16.188.131'
 main: field: 'address'='172.16.188.131'
-main: status: track
+main: status: conditional
 main: input '= port ssh'
 main: field: 'port'='ssh'
-main: status: track
+main: status: conditional
 main: input '- local'
 main: status: predicate
 main: input '+ remote'
 main: filter: rc: 22
-main: status: track
+main: status: conditional
 main: input '@ type inet'
 main: attr: 'type'='inet'
-main: status: track
+main: status: conditional
 main: input '= address 172.16.188.1'
 main: field: 'address'='172.16.188.1'
-main: status: track
+main: status: conditional
 main: input '= port 63510'
 main: field: 'port'='63510'
-main: status: track
+main: status: conditional
 main: input '- remote'
 main: status: predicate
 main: input '= tcp-state ESTABLISHED'
