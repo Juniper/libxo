@@ -208,6 +208,7 @@ typedef unsigned xo_xsf_flags_t; /* XSF_* flags */
 #define XSF_EMIT_LEAF_LIST (1<<7) /* A leaf-list field has been emitted */
 
 #define XSF_FILTER      (1<<8)  /* Process any filtering */
+#define XSF_COND_KEPT   (1<<9)  /* Holds content kept conditionally */
 
 /* These are the flags we propagate between markers and their parents */
 #define XSF_MARKER_FLAGS \
@@ -821,9 +822,7 @@ xo_should_update_columns (xo_handle_t *xop, xo_buffer_t *xbp)
 }
 
 /*
- * Initialize an xo_handle_t, using both static defaults and
- * the global settings from the LIBXO_OPTIONS environment
- * variable.
+ * Initialize an xo_handle_t with static defaults
  */
 static void
 xo_init_handle (xo_handle_t *xop)
@@ -2351,7 +2350,6 @@ xo_create (xo_style_t style, xo_xof_flags_t flags)
         xop->xo_style = style;
         XOF_SET(xop, flags);
         xo_init_handle(xop);
-        xop->xo_style = style;  /* Reset style (see LIBXO_OPTIONS) */
         xo_set_flags_for_style(xop, xop->xo_style);
     }
 
@@ -6085,7 +6083,9 @@ xo_filt_status_name (xo_filter_status_t fstatus)
         (fstatus == XO_STATUS_TRACK) ? "track" :
         (fstatus == XO_STATUS_FULL) ? "full" :
         (fstatus == XO_STATUS_PRED) ? "predicate" :
-        (fstatus == XO_STATUS_DEAD) ? "dead" : "unknown";
+        (fstatus == XO_STATUS_DEAD) ? "dead" :
+        (fstatus == XO_STATUS_COND) ? "conditional" :
+        (fstatus == XO_STATUS_LIVE) ? "live" : "unknown";
 }
 
 int
@@ -6498,24 +6498,55 @@ xo_filt_commit_field (xo_handle_t *xop UNUSED, xo_off_t field_start UNUSED,
 }
 
 
-static void
+/*
+ * Act on the status returned when a key or predicate field is seen,
+ * returning the status to use from here on (LIVE is not a lasting
+ * status).
+ */
+static xo_filter_status_t
 xo_filt_handle_open_status (xo_handle_t *xop, xo_filter_status_t fstatus)
 {
     xo_stack_t *xsp = xo_stack_cur(xop);
     
     if (fstatus == XO_STATUS_FULL) {
 	xo_filt_commit(xop, xsp, fstatus);
-	return;
+	return fstatus;
+    }
+
+    if (fstatus == XO_STATUS_LIVE) {
+	/*
+	 * The predicate passed, but on a path that continues below
+	 * this instance (e.g. "item[size = 10]/sub").  If content
+	 * that matches the rest of the path was kept conditionally,
+	 * it's wanted now, so commit it, along with the instance's
+	 * tag and keys.  Otherwise there's nothing yet to show, and
+	 * later content will be matched normally.
+	 */
+	if (xsp && (xsp->xs_flags & XSF_COND_KEPT)) {
+	    xsp->xs_flags &= ~XSF_COND_KEPT;
+	    xo_filt_commit(xop, xsp, XO_STATUS_FULL);
+	    return XO_STATUS_FULL;
+	}
+
+	fstatus = XO_STATUS_TRACK;
+	if (xsp && xsp->xs_fstatus == XO_STATUS_PRED)
+	    xsp->xs_fstatus = XO_STATUS_TRACK;
+	return fstatus;
     }
 
     if (fstatus == XO_STATUS_TRACK || fstatus == XO_STATUS_DEAD) {
 	/*
 	 * Predicate resolved FALSE; deactivate PRED bypass
-	 * on instance frame
+	 * on instance frame, and drop anything kept conditionally
+	 * on it.
 	 */
-	if (xsp && xsp->xs_fstatus == XO_STATUS_PRED)
+	if (xsp && xsp->xs_fstatus == XO_STATUS_PRED) {
 	    xsp->xs_fstatus = XO_STATUS_TRACK;
+	    xsp->xs_flags &= ~XSF_COND_KEPT;
+	}
     }
+
+    return fstatus;
 }
 
 /*
@@ -6660,6 +6691,67 @@ xo_filt_rollback (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED,
 #endif /* LIBXO_NEED_FILTERS */
 }
 
+/*
+ * Is 'xsp' or any frame above it still waiting on a predicate, with
+ * its content held tentatively?
+ */
+static int
+xo_filt_pending (xo_handle_t *xop, xo_stack_t *xsp)
+{
+    for ( ; xsp >= xop->xo_stack; xsp--) {
+	if (xsp->xs_fstatus == XO_STATUS_PRED
+	        && xsp->xs_rb_off != XS_OFFSET_CLEAR)
+	    return TRUE;
+    }
+
+    return FALSE;
+}
+
+/*
+ * A closing frame that holds content kept conditionally passes that
+ * fact up to its parent, so the frame waiting on the predicate knows
+ * it has something to commit.  (xo_filt_want_rollback does this too,
+ * but not every close path calls it.)
+ */
+static void
+xo_filt_pass_cond_kept (xo_handle_t *xop, xo_stack_t *cur)
+{
+    if (XOF_ISSET(xop, XOF_FILTER) && cur > xop->xo_stack
+	    && (cur->xs_flags & XSF_COND_KEPT))
+	cur[-1].xs_flags |= XSF_COND_KEPT;
+}
+
+/*
+ * Should the tentative content of the closing frame 'cur' be rolled
+ * back?  If an enclosing frame is still waiting on a predicate
+ * (e.g. "item[size = 10]/sub" with "size" not yet seen), the child's
+ * bytes sit inside that frame's whiteboard, and the frame's own
+ * resolution (commit or rollback) decides their fate.  We keep the
+ * child if it holds content that will be wanted should the predicate
+ * pass (XSF_COND_KEPT, which we pass up to the parent), and roll it
+ * back otherwise.
+ */
+static int
+xo_filt_want_rollback (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED)
+{
+#ifdef LIBXO_NEED_FILTERS
+    if (!XOF_ISSET(xop, XOF_FILTER) || cur->xs_rb_off == XS_OFFSET_CLEAR)
+	return FALSE;
+
+    if (cur > xop->xo_stack && xo_filt_pending(xop, cur - 1)) {
+	if (!(cur->xs_flags & XSF_COND_KEPT))
+	    return TRUE;
+
+	cur[-1].xs_flags |= XSF_COND_KEPT;
+	return FALSE;
+    }
+
+    return TRUE;
+#else /* LIBXO_NEED_FILTERS */
+    return FALSE;
+#endif /* LIBXO_NEED_FILTERS */
+}
+
 static inline int
 xo_filt_want_output (xo_handle_t *xop UNUSED, xo_filter_status_t fstatus UNUSED)
 {
@@ -6715,6 +6807,17 @@ xo_filt_is_skippable (xo_handle_t *xop, xo_xff_flags_t flags,
 	return TRUE;
 
     /*
+     * Beneath a pending predicate, keep only what will be wanted if
+     * it passes (COND); the rest would be tossed then anyway.  This
+     * needs rollback, which an encoder only has with DEADEND.
+     */
+    int can_rollback = (xo_style(xop) != XO_STYLE_ENCODER
+			|| XOEF_ISSET(xop, XOEF_FILTER_NOTIFY_DEADEND));
+
+    if (can_rollback && xo_filt_pending(xop, xo_stack_cur(xop)))
+	return (fstatus != XO_STATUS_COND);
+
+    /*
      * If we're inside a capture for a PRED instance, buffer all
      * sibling/nested content tentatively (styles/encoders that
      * cannot be rolled back are excluded, unless an encoder has opted
@@ -6725,9 +6828,7 @@ xo_filt_is_skippable (xo_handle_t *xop, xo_xff_flags_t flags,
      * container, but fields at that level are individually skippable
      * and must not be suppressed here.
      */
-    if (XOIF_ISSET(xop, XOIF_FILTERING)
-	    && (xo_style(xop) != XO_STYLE_ENCODER
-		|| XOEF_ISSET(xop, XOEF_FILTER_NOTIFY_DEADEND))
+    if (XOIF_ISSET(xop, XOIF_FILTERING) && can_rollback
 	    && xo_stack_cur(xop)->xs_rb_off != XS_OFFSET_CLEAR)
 	return FALSE;
 
@@ -6754,6 +6855,10 @@ xo_filt_skip (xo_handle_t *xop, xo_xff_flags_t flags,
 
     int rc = xo_filt_is_skippable(xop, flags, name, nlen, fstatus);
 
+    /* Note that this frame now holds content kept conditionally */
+    if (!rc && fstatus == XO_STATUS_COND)
+	xo_stack_cur(xop)->xs_flags |= XSF_COND_KEPT;
+
     XO_DBG(xop, "xo_filt_skip: '%.*s' %sdepth %d, status %u=%s -> %s",
 	   (int) nlen, name, (flags &XFF_KEY) ? "key " : "", xop->xo_depth,
 	   fstatus, xo_filt_status_name(fstatus),
@@ -6778,7 +6883,7 @@ xo_filt_do_open_field (xo_handle_t *xop, const char *name, xo_ssize_t nlen,
 
     if (flags & XFF_KEY) {
 	fstatus = xo_filter_key(xop, xfp, name, nlen, value, vlen);
-	xo_filt_handle_open_status(xop, fstatus);
+	fstatus = xo_filt_handle_open_status(xop, fstatus);
 
 	/* The caller doesn't want us calling open/close_field */
 	if (!pass_field)
@@ -6902,7 +7007,7 @@ xo_format_value_encoder (xo_handle_t *xop, const xo_field_info_t *xfip,
     /* Always call open and close, since they may change the status */
     if (XOF_ISSET(xop, XOF_FILTER))
 	xo_filt_do_open_field(xop, name, nlen, data, dlen, XS_OFFSET_CLEAR,
-			      FALSE, flags);
+			      TRUE, flags);
 
 
     if (!(XOF_ISSET(xop, XOF_FILTER) && xo_filt_skip(xop, flags, name, nlen))) {
@@ -6911,7 +7016,7 @@ xo_format_value_encoder (xo_handle_t *xop, const xo_field_info_t *xfip,
     }
 
     if (XOF_ISSET(xop, XOF_FILTER))
-	xo_filt_do_close_field(xop, name, nlen, FALSE, flags);
+	xo_filt_do_close_field(xop, name, nlen, TRUE, flags);
 
     /* Reset our buffer, since we've sent the data to the encoder */
     xo_buf_reset(&xop->xo_data);
@@ -9941,7 +10046,7 @@ xo_do_open_container (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
      * guard used in xo_do_open_instance().
      */
     if (XOF_ISSET(xop, XOF_FILTER)) {
-	if (fstatus == XO_STATUS_PRED)
+	if (fstatus == XO_STATUS_PRED || fstatus == XO_STATUS_COND)
 	    XOIF_SET(xop, XOIF_FILTERING);
 	else if (fstatus == XO_STATUS_TRACK && old_fstatus == XO_STATUS_FULL)
 	    XOIF_SET(xop, XOIF_FILTERING);
@@ -9949,6 +10054,10 @@ xo_do_open_container (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
 
     xo_depth_change(xop, name, 1, 1, XSS_OPEN_CONTAINER,
 		    xo_stack_flags(flags), fstatus, starting_offset);
+
+    /* A conditional match is kept, pending its enclosing predicate */
+    if (fstatus == XO_STATUS_COND)
+	xo_stack_cur(xop)->xs_flags |= XSF_COND_KEPT;
 
     xo_stack_cur(xop)->xs_tag_end = xo_buf_offset(&xop->xo_data);
 
@@ -10025,12 +10134,11 @@ xo_do_close_container (xo_handle_t *xop, const char *name)
     switch (xo_style(xop)) {
     case XO_STYLE_XML:
 	/*
-	 * Roll back if this container was tentatively captured (xs_rb_off set)
-	 * and is the top of the tentative region (parent's xs_rb_off is clear).
-	 * Nested containers inside a still-tracked instance must not be rolled
-	 * back independently - the enclosing instance handles that on close.
+	 * Roll back if this container was tentatively captured (xs_rb_off
+	 * set), unless an enclosing instance is still waiting on its
+	 * predicate; that instance handles our bytes when it resolves.
 	 */
-	if (XOF_ISSET(xop, XOF_FILTER) && xsp->xs_rb_off != XS_OFFSET_CLEAR) {
+	if (xo_filt_want_rollback(xop, xsp)) {
 	    xo_filt_rollback(xop, xsp, old_fstatus, fstatus);
 	    xo_depth_change(xop, name, -1, -1, XSS_CLOSE_CONTAINER,
 			    XSF_FILTER, fstatus, 0);
@@ -10048,7 +10156,7 @@ xo_do_close_container (xo_handle_t *xop, const char *name)
 	pre_nl = XOF_ISSET(xop, XOF_PRETTY) ? "\n" : "";
 	ppn = "";
 
-	if (XOF_ISSET(xop, XOF_FILTER) && xsp->xs_rb_off != XS_OFFSET_CLEAR) {
+	if (xo_filt_want_rollback(xop, xsp)) {
 	    xo_filt_rollback(xop, xsp, old_fstatus, fstatus);
 	    xo_depth_change(xop, name, -1, -1, XSS_CLOSE_CONTAINER, 0, 0, 0);
 	    break;
@@ -10073,7 +10181,7 @@ xo_do_close_container (xo_handle_t *xop, const char *name)
 
     case XO_STYLE_ENCODER:
 	if (XOF_ISSET(xop, XOF_FILTER) && XOEF_ISSET(xop, XOEF_FILTER_NOTIFY_DEADEND)
-		&& xsp->xs_rb_off != XS_OFFSET_CLEAR) {
+		&& xo_filt_want_rollback(xop, xsp)) {
 	    xo_filt_rollback(xop, xsp, old_fstatus, fstatus);
 	    xo_depth_change(xop, name, -1, 0, XSS_CLOSE_CONTAINER, 0, 0, 0);
 	    break;
@@ -10247,13 +10355,16 @@ xo_do_close_list (xo_handle_t *xop, const char *name)
 
     xo_stack_t *xsp = xo_stack_cur(xop);
 
+    /* Lists have no XML tags, but must pass up what they kept */
+    xo_filt_pass_cond_kept(xop, xsp);
+
     switch (xo_style(xop)) {
     case XO_STYLE_JSON:
 	if (xop->xo_stack[xop->xo_depth].xs_flags & XSF_NOT_FIRST)
 	    pre_nl = XOF_ISSET(xop, XOF_PRETTY) ? "\n" : "";
 	xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
 
-	if (XOF_ISSET(xop, XOF_FILTER) && xsp->xs_rb_off != XS_OFFSET_CLEAR) {
+	if (xo_filt_want_rollback(xop, xsp)) {
 	    xo_filt_rollback(xop, xsp, xsp->xs_fstatus, xsp->xs_fstatus);
 	    xo_depth_change(xop, name, -1, -1, XSS_CLOSE_LIST, XSF_LIST, 0, 0);
 	    break;
@@ -10267,7 +10378,7 @@ xo_do_close_list (xo_handle_t *xop, const char *name)
     case XO_STYLE_ENCODER:
 	if (XOF_ISSET(xop, XOF_FILTER)
 	        && XOEF_ISSET(xop, XOEF_FILTER_NOTIFY_DEADEND)
-		&& xsp->xs_rb_off != XS_OFFSET_CLEAR) {
+		&& xo_filt_want_rollback(xop, xsp)) {
 	    xo_filt_rollback(xop, xsp, xsp->xs_fstatus, xsp->xs_fstatus);
 	    xo_depth_change(xop, name, -1, 0, XSS_CLOSE_LIST, XSF_LIST, 0, 0);
 	    break;
@@ -10392,13 +10503,16 @@ xo_do_close_leaf_list (xo_handle_t *xop, const char *name)
 
     xo_stack_t *xsp = xo_stack_cur(xop);
 
+    /* Leaf-lists have no XML tags, but must pass up what they kept */
+    xo_filt_pass_cond_kept(xop, xsp);
+
     switch (xo_style(xop)) {
     case XO_STYLE_JSON:
 	if (xop->xo_stack[xop->xo_depth].xs_flags & XSF_NOT_FIRST)
 	    pre_nl = XOF_ISSET(xop, XOF_PRETTY) ? "\n" : "";
 	xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
 
-	if (XOF_ISSET(xop, XOF_FILTER) && xsp->xs_rb_off != XS_OFFSET_CLEAR) {
+	if (xo_filt_want_rollback(xop, xsp)) {
 	    xo_filt_rollback(xop, xsp, xsp->xs_fstatus, xsp->xs_fstatus);
 	    xo_depth_change(xop, name, -1, -1,
 			    XSS_CLOSE_LEAF_LIST, XSF_LIST, 0, 0);
@@ -10417,7 +10531,7 @@ xo_do_close_leaf_list (xo_handle_t *xop, const char *name)
 	 * back on close if the list never matched, just as the JSON path
 	 * (and xo_do_close_container/instance) do.
 	 */
-	if (XOF_ISSET(xop, XOF_FILTER) && xsp->xs_rb_off != XS_OFFSET_CLEAR)
+	if (xo_filt_want_rollback(xop, xsp))
 	    xo_filt_rollback(xop, xsp, xsp->xs_fstatus, xsp->xs_fstatus);
 	xo_depth_change(xop, name, -1, 0, XSS_CLOSE_LEAF_LIST, XSF_LIST, 0, 0);
 	xop->xo_stack[xop->xo_depth].xs_flags |= XSF_NOT_FIRST;
@@ -10426,7 +10540,7 @@ xo_do_close_leaf_list (xo_handle_t *xop, const char *name)
     case XO_STYLE_ENCODER:
 	if (XOF_ISSET(xop, XOF_FILTER)
 	        && XOEF_ISSET(xop, XOEF_FILTER_NOTIFY_DEADEND)
-		&& xsp->xs_rb_off != XS_OFFSET_CLEAR) {
+		&& xo_filt_want_rollback(xop, xsp)) {
 	    xo_filt_rollback(xop, xsp, xsp->xs_fstatus, xsp->xs_fstatus);
 	    xo_depth_change(xop, name, -1, 0,
 			    XSS_CLOSE_LEAF_LIST, XSF_LIST, 0, 0);
@@ -10530,7 +10644,7 @@ xo_do_open_instance (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
      * buffered so their whiteboard can be discarded on close.
      */
     if (XOF_ISSET(xop, XOF_FILTER)) {
-	if (fstatus == XO_STATUS_PRED)
+	if (fstatus == XO_STATUS_PRED || fstatus == XO_STATUS_COND)
 	    XOIF_SET(xop, XOIF_FILTERING);
 	else if (fstatus == XO_STATUS_TRACK && old_fstatus == XO_STATUS_FULL)
 	    XOIF_SET(xop, XOIF_FILTERING);
@@ -10538,6 +10652,10 @@ xo_do_open_instance (xo_handle_t *xop, xo_xof_flags_t flags, const char *name)
 
     xo_depth_change(xop, name, 1, 1, XSS_OPEN_INSTANCE,
 		    xo_stack_flags(flags), fstatus, start_offset);
+
+    /* A conditional match is kept, pending its enclosing predicate */
+    if (fstatus == XO_STATUS_COND)
+	xo_stack_cur(xop)->xs_flags |= XSF_COND_KEPT;
 
     xo_stack_cur(xop)->xs_tag_end = xo_buf_offset(&xop->xo_data);
 
@@ -10622,24 +10740,52 @@ xo_do_close_instance (xo_handle_t *xop, const char *name)
 	old_fstatus = XO_STATUS_FULL;
     }
 
+    /*
+     * Likewise, if it passed a predicate on a path that continues
+     * below us, commit what we kept conditionally (if anything).
+     */
+    if (fstatus == XO_STATUS_LIVE) {
+	fstatus = XO_STATUS_TRACK;
+	if (XOF_ISSET(xop, XOF_FILTER) && old_fstatus == XO_STATUS_PRED) {
+	    if (xsp->xs_flags & XSF_COND_KEPT) {
+		xsp->xs_flags &= ~XSF_COND_KEPT;
+		xo_filt_commit(xop, xsp, XO_STATUS_FULL);
+		old_fstatus = XO_STATUS_FULL;
+	    } else {
+		xsp->xs_fstatus = XO_STATUS_TRACK;
+	    }
+	}
+    }
+
     switch (xo_style(xop)) {
-    case XO_STYLE_XML:
+    case XO_STYLE_XML: {
+	/*
+	 * A tentatively-buffered instance inside an enclosing instance
+	 * whose predicate is pending is kept (close tag and all); the
+	 * enclosing instance decides its fate when it resolves.
+	 */
+	int keep = FALSE;
 	if (XOF_ISSET(xop, XOF_FILTER)) {
-	    xo_filt_rollback(xop, xsp, old_fstatus, fstatus);
+	    if (xsp->xs_rb_off != XS_OFFSET_CLEAR
+		    && !xo_filt_want_rollback(xop, xsp))
+		keep = TRUE;
+	    else
+		xo_filt_rollback(xop, xsp, old_fstatus, fstatus);
 	}
 
 	xo_depth_change(xop, name, -1, -1, XSS_CLOSE_INSTANCE, 0, fstatus, 0);
 
-	if (!XOF_ISSET(xop, XOF_FILTER)
+	if (!XOF_ISSET(xop, XOF_FILTER) || keep
 	        || xo_filt_want_output(xop, old_fstatus))
 	    rc = xo_printf(xop, "%*s</%s%s>%s", xo_indent(xop), "",
 			   leader, name, ppn);
 	break;
+    }
 
     case XO_STYLE_JSON:
 	pre_nl = XOF_ISSET(xop, XOF_PRETTY) ? "\n" : "";
 
-	if (XOF_ISSET(xop, XOF_FILTER) && xsp->xs_rb_off != XS_OFFSET_CLEAR) {
+	if (xo_filt_want_rollback(xop, xsp)) {
 	    xo_filt_rollback(xop, xsp, old_fstatus, fstatus);
 	    xo_depth_change(xop, name, -1, -1, XSS_CLOSE_INSTANCE, 0, 0, 0);
 	    break;
@@ -10666,7 +10812,7 @@ xo_do_close_instance (xo_handle_t *xop, const char *name)
     case XO_STYLE_ENCODER:
 	if (XOF_ISSET(xop, XOF_FILTER)
 	        && XOEF_ISSET(xop, XOEF_FILTER_NOTIFY_DEADEND)
-		&& xsp->xs_rb_off != XS_OFFSET_CLEAR) {
+		&& xo_filt_want_rollback(xop, xsp)) {
 	    xo_filt_rollback(xop, xsp, old_fstatus, fstatus);
 	    xo_depth_change(xop, name, -1, 0, XSS_CLOSE_INSTANCE, 0, 0, 0);
 	    break;
