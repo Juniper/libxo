@@ -1252,6 +1252,8 @@ xo_xpath_yylex (xo_xparse_data_t *xdp, xo_xparse_node_id_t *yylvalp)
 	xdp->xd_ttype = 0;
 
 	xnp->xn_type = rc;
+	xnp->xn_line = xdp->xd_line;
+	xnp->xn_col = xdp->xd_col + 1;
 
 	return rc;
     }
@@ -1310,6 +1312,8 @@ xo_xpath_yylex (xo_xparse_data_t *xdp, xo_xparse_node_id_t *yylvalp)
     }
 
     xnp->xn_type = rc;
+    xnp->xn_line = xdp->xd_line;
+    xnp->xn_col = xdp->xd_col + 1;
     if (rc > 0)
 	xnp->xn_str = xo_xparse_str_new(xdp, rc);
 
