@@ -1101,3 +1101,89 @@ $ name ""
 = val 4
 >item
 }item
+r
+?item[size = 10]
+{item
+<item
+$ name a
+[tag
+= tag x
+= tag y
+]tag
+= size 0
+>item
+<item
+$ name b
+[tag
+= tag x
+= tag y
+]tag
+= size 10
+>item
+}item
+r
+?item[size = 10]
+{item
+<item
+$ name a
++sub
+= x 1
+-sub
+= size 0
+>item
+<item
+$ name b
++sub
+= x 2
+-sub
+= size 10
+>item
+}item
+r
+?item[size = 10]
+{item
+<item
+$ name a
+{sub
+<sub
+$ k 1
+= v p
+>sub
+}sub
+= size 0
+>item
+<item
+$ name b
+{sub
+<sub
+$ k 2
+= v q
+>sub
+}sub
+= size 10
+>item
+}item
+r
+?item[size = 99]
+{item
+<item
+$ name a
+{sub
+<sub
+$ k 1
+= v p
+>sub
+}sub
+= size 0
+>item
+<item
+$ name b
+{sub
+<sub
+$ k 2
+= v q
+>sub
+}sub
+= size 10
+>item
+}item
