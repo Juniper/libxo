@@ -1711,20 +1711,61 @@ xo_eval_fail (xo_filter_t *xfp, const char *fmt, ...)
 }
 
 /*
+ * Line/column of the node passed to the most recent xo_eval_compile_fail()
+ * call, so a caller with no (dp, ops)-reachable error channel (e.g. libpin,
+ * which runs compile-time checks with ops->xfdo_error unset) can still
+ * recover *where* a failed xo_eval_compile() pointed, via
+ * xo_eval_compile_fail_location() below.  0 means "no node"/unknown.
+ */
+static unsigned xo_eval_compile_fail_line;
+static unsigned xo_eval_compile_fail_col;
+
+/*
  * The compile-time twin of xo_eval_fail(): xo_eval_compile() and its
  * helpers only ever see the (dp, ops) pair, not a full xo_filter_t, so
  * they report through xo_filter_data_verror() directly instead.
+ *
+ * xdp/id identify the AST node the failure is attributed to, so its
+ * line/col (stamped by the lexer; see xo_xparse_node_t) can be stashed
+ * for xo_eval_compile_fail_location() regardless of whether ops has an
+ * xfdo_error to report through.
  */
-XO_PRINTFLIKE(3, 4)
+XO_PRINTFLIKE(5, 6)
 static void
 xo_eval_compile_fail (xo_filter_data_t *dp, xo_filter_data_ops_t *ops,
+		       xo_xparse_data_t *xdp, xo_xparse_node_id_t id,
 		       const char *fmt, ...)
 {
     va_list vap;
 
+    if (xdp != NULL) {
+	xo_xparse_node_t *xnp = xo_xparse_node(xdp, id);
+	xo_eval_compile_fail_line = xnp ? xnp->xn_line : 0;
+	xo_eval_compile_fail_col = xnp ? xnp->xn_col : 0;
+    } else {
+	xo_eval_compile_fail_line = 0;
+	xo_eval_compile_fail_col = 0;
+    }
+
     va_start(vap, fmt);
     xo_filter_data_verror(dp, ops, fmt, vap);
     va_end(vap);
+}
+
+/*
+ * Returns the line/col stashed by the most recent xo_eval_compile_fail()
+ * call (0/0 if none or unknown).  See xo_filter.h for the public
+ * declaration; used by callers (e.g. libpin) that invoke xo_eval_compile()
+ * directly with no xfdo_error set, and so get no other way to recover
+ * *where* a compile failure occurred.
+ */
+void
+xo_eval_compile_fail_location (unsigned *linep, unsigned *colp)
+{
+    if (linep)
+	*linep = xo_eval_compile_fail_line;
+    if (colp)
+	*colp = xo_eval_compile_fail_col;
 }
 
 static inline xo_eval_value_t
@@ -3871,11 +3912,12 @@ xo_eval_compile_function_args (xo_eval_prog_t *prog, xo_xparse_data_t *xdp,
  */
 static int
 xo_eval_compile_check_arity (xo_filter_data_t *dp, xo_filter_data_ops_t *ops,
+			      xo_xparse_data_t *xdp, xo_xparse_node_id_t id,
 			      const char *str, int argc,
 			      int nargs, int min_args)
 {
     if (nargs >= 0 && argc != nargs) {
-	xo_eval_compile_fail(dp, ops,
+	xo_eval_compile_fail(dp, ops, xdp, id,
 			      "function '%s' requires %d argument(s), got %d",
 			      str, nargs, argc);
 	return -1;
@@ -3889,7 +3931,7 @@ xo_eval_compile_check_arity (xo_filter_data_t *dp, xo_filter_data_ops_t *ops,
      * catch that here.
      */
     if (nargs < 0 && min_args > 0 && argc < min_args) {
-	xo_eval_compile_fail(dp, ops,
+	xo_eval_compile_fail(dp, ops, xdp, id,
 			      "function '%s' requires at least %d "
 			      "arguments, got %d",
 			      str, min_args, argc);
@@ -3922,7 +3964,8 @@ xo_eval_compile_function (xo_eval_prog_t *prog, xo_xparse_data_t *xdp,
 {
     const char *str = xo_xparse_str(xdp, xnp->xn_str);
     if (str == NULL) {
-	xo_eval_compile_fail(dp, ops, "unknown function in filter expression");
+	xo_eval_compile_fail(dp, ops, xdp, id,
+			      "unknown function in filter expression");
 	return -1;
     }
 
@@ -3936,7 +3979,7 @@ xo_eval_compile_function (xo_eval_prog_t *prog, xo_xparse_data_t *xdp,
 	if (argc < 0)
 	    return -1;
 
-	if (xo_eval_compile_check_arity(dp, ops, str, argc,
+	if (xo_eval_compile_check_arity(dp, ops, xdp, id, str, argc,
 					 entry->xfm_nargs,
 					 entry->xfm_min_args) < 0)
 	    return -1;
@@ -3964,7 +4007,7 @@ xo_eval_compile_function (xo_eval_prog_t *prog, xo_xparse_data_t *xdp,
 	    if (argc < 0)
 		return -1;
 
-	    if (xo_eval_compile_check_arity(dp, ops, str, argc,
+	    if (xo_eval_compile_check_arity(dp, ops, xdp, id, str, argc,
 					     nargs, min_args) < 0)
 		return -1;
 
@@ -3975,7 +4018,7 @@ xo_eval_compile_function (xo_eval_prog_t *prog, xo_xparse_data_t *xdp,
 	}
     }
 
-    xo_eval_compile_fail(dp, ops,
+    xo_eval_compile_fail(dp, ops, xdp, id,
 			  "unknown function in filter expression: '%s'",
 			  str);
     return -1;
