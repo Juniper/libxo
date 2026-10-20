@@ -116,3 +116,5 @@
 /item[name == 'b']/size = '10'
 /item[name == 'b']/size = '10'
 /item[name == 'b']/size = '10'
+/item[name == 'a']/note = 'n2'
+/item[name == 'b']/sub/x = '2'
