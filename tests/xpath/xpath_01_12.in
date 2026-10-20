@@ -1187,3 +1187,139 @@ $ k 2
 = size 10
 >item
 }item
+r
+?item[size = 10]/sub
+{item
+<item
+$ name a
++sub
+= x 1
+-sub
+= size 0
+>item
+<item
+$ name b
++sub
+= x 2
+-sub
+= size 10
+>item
+}item
+r
+?item[size = 10]/name
+{item
+<item
+$ name a
+= size 0
+>item
+<item
+$ name b
+= size 10
+>item
+}item
+r
+?item[size = 10]/sub/x
+{item
+<item
+$ name a
+= other o1
++sub
+= x 1
+= y 1
+-sub
+= size 10
+>item
+<item
+$ name b
++sub
+= y 2
+-sub
+= size 10
+>item
+<item
+$ name c
++sub
+= x 3
+-sub
+= size 9
+>item
+}item
+r
+?item[size = 10]/note
+{item
+<item
+= note n1
+$ name a
+= other o
+= size 10
+= note n2
+>item
+<item
+= note n3
+= size 3
+>item
+}item
+r
+?item[size = 10]/sub[k = 2]/v
+{item
+<item
+$ name a
+{sub
+<sub
+= v v1
+$ k 1
+>sub
+<sub
+= v v2
+$ k 2
+>sub
+<sub
+$ k 2
+= w w3
+>sub
+}sub
+= size 10
+>item
+}item
+r
+?item[size = 10]/sub
+{item
+<item
+$ name a
++sub
+= x 1
+-sub
+>item
+<item
+$ name b
+= size 10
++sub
+= x 2
+-sub
++other
+= z 1
+-other
+>item
+}item
+r
+?item[size = ""]/sub
+{item
+<item
+$ name a
++sub
+= x 1
+-sub
+>item
+}item
+r
+?item[size = 10]/tag
+{item
+<item
+$ name a
+[tag
+= tag t1
+= tag t2
+]tag
+= size 10
+>item
+}item
