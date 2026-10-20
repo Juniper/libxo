@@ -397,3 +397,64 @@
   <s>12345</s>
   <val>1</val>
 </item>
+<item>
+  <note></note>
+  <val>1</val>
+</item>
+<item>
+  <note></note>
+  <val>1</val>
+</item>
+<item>
+  <note></note>
+  <val>1</val>
+</item>
+<item>
+  <note></note>
+  <val>1</val>
+</item>
+<item>
+  <name>lo.eth1</name>
+  <val>1</val>
+</item>
+<item>
+  <name>.eth1</name>
+  <val>3</val>
+</item>
+<item>
+  <name>lo.eth1</name>
+  <val>1</val>
+</item>
+<item>
+  <name>eth1x</name>
+  <val>2</val>
+</item>
+<item>
+  <name>.eth1</name>
+  <val>3</val>
+</item>
+<item>
+  <name></name>
+  <val>4</val>
+</item>
+<item>
+  <name>b</name>
+  <tag>x</tag>
+  <tag>y</tag>
+  <size>10</size>
+</item>
+<item>
+  <name>b</name>
+  <sub>
+    <x>2</x>
+  </sub>
+  <size>10</size>
+</item>
+<item>
+  <name>b</name>
+  <sub>
+    <k>2</k>
+    <v>q</v>
+  </sub>
+  <size>10</size>
+</item>
