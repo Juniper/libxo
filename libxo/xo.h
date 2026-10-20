@@ -83,7 +83,7 @@ typedef unsigned long long xo_xof_flags_t;
 #define XOF_INFO	XOF_BIT(6) /** Emit additional info fields (HTML) */
 #define XOF_WARN_XML	XOF_BIT(7) /** Emit warnings in XML (on stdout) */
 
-#define XOF_NO_ENV	XOF_BIT(8) /** Don't look at LIBXO_OPTIONS env var */
+#define XOF_NO_ENV	XOF_BIT(8) /** Deprecated; no effect (was LIBXO_OPTIONS) */
 #define XOF_NO_VA_ARG	XOF_BIT(9) /** Don't advance va_list w/ va_arg() */
 #define XOF_DTRT	XOF_BIT(10) /** Enable "do the right thing" mode */
 #define XOF_KEYS	XOF_BIT(11) /** Flag 'key' fields for xml and json */
