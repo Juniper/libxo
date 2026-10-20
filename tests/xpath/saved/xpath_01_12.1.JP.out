@@ -489,5 +489,80 @@
       "s": "12345",
       "val": "1"
     }
+  ],
+  "item": {
+    "note": "",
+    "val": "1"
+  },
+  "item": {
+    "note": "",
+    "val": "1"
+  },
+  "item": {
+    "note": "",
+    "val": "1"
+  },
+  "item": {
+    "note": "",
+    "val": "1"
+  },
+  "item": [
+    {
+      "name": "lo.eth1",
+      "val": "1"
+    },
+    {
+      "name": ".eth1",
+      "val": "3"
+    }
+  ],
+  "item": [
+    {
+      "name": "lo.eth1",
+      "val": "1"
+    },
+    {
+      "name": "eth1x",
+      "val": "2"
+    },
+    {
+      "name": ".eth1",
+      "val": "3"
+    },
+    {
+      "name": "",
+      "val": "4"
+    }
+  ],
+  "item": [
+    {
+      "name": "b",
+      "tag": [
+        "x",
+        "y"
+      ],
+      "size": "10"
+    }
+  ],
+  "item": [
+    {
+      "name": "b",
+      "sub": {
+        "x": "2"
+      },
+      "size": "10"
+    }
+  ],
+  "item": [
+    {
+      "name": "b",
+      "sub": [
+        {
+          "k": "2",
+          "v": "q"
+        }
+      ],
+      "size": "10"
+    }
   ]
 }
