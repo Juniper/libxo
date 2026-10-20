@@ -127,6 +127,7 @@ typedef struct xo_tframe_s {
     xo_tslot_t *xtf_slots;	/* Active slots (and start of the block) */
     int32_t xtf_allow_delta;	/* allow contribution to undo on pop */
     int32_t xtf_deny_delta;	/* deny contribution to undo on pop */
+    int32_t xtf_cond_delta;	/* cond contribution to undo on pop */
     char *xtf_keys;		/* buffered "k\0v\0k2\0v2\0\0" pairs */
     ssize_t xtf_keys_len;
     char *xtf_attrs;		/* buffered "@k\0v\0..." pairs (attributes) */
@@ -148,12 +149,42 @@ typedef struct xo_tframe_s {
 
 /* Per-slot flags (xts_flags) */
 #define XTFF_QUAL_COUNTED  (1 << 0)  /* leading-pred qualified position counted */
+#define XTFF_COND_COUNTED  (1 << 1)  /* slot is counted in xtm_cond */
 
 /* Per-slot states */
 #define XTFS_SEEK	0	/* Waiting for this node's element name */
 #define XTFS_PRED	1	/* Name matched; evaluating predicates */
 #define XTFS_LIVE	2	/* Fully matched (name + predicates) */
 #define XTFS_DEAD	3	/* Predicate failed; ignore sub-tree */
+#define XTFS_COND	4	/* Matched, if an enclosing predicate passes */
+#define XTFS_CPRED	5	/* Like PRED, but beneath a pending predicate */
+
+/*
+ * A path step beneath a slot whose predicate is still pending (PRED,
+ * CPRED, or COND) can only match conditionally: for "item[size =
+ * 10]/sub", a "sub" that precedes "size" in the output matches only
+ * if "size" later turns out to be 10.  Such a slot is COND (or CPRED,
+ * while its own predicate is pending), and a terminal one counts in
+ * xtm_cond, which makes the filter report XO_STATUS_COND so libxo
+ * keeps that content tentatively until the predicate resolves.  A
+ * terminal PRED slot counts as well, since its content is likewise
+ * kept or tossed with the instance.
+ *
+ * LIVE/PRED and COND/CPREF are pairs that both differ in the same
+ * way. Each slot depends on two things: its own predicate (decided or
+ * not) and the predicates of its ancestors (all decided, or at least one
+ * still pending).
+ *
+ *                         own predicate      own predicate
+ *                        decided/none       pending
+ *   ancestors decided     LIVE               PRED
+ *   ancestor pending      COND               CPRED
+ *
+ * So PRED and CPRED are both waiting on their own predicate. With
+ * PRED, everything above the slot is already settled, so a pass makes
+ * the slot a real match. With CPRED, something above it is still
+ * pending, so even a pass leaves the slot conditional.
+ */
 
 /*
  * Runtime matching state: a stack of frames driven by open/close events.
@@ -167,6 +198,7 @@ typedef struct xo_tmatch_s {
     xo_tframe_t *xtm_stack;	/* Frame stack [0..xtm_depth] */
     uint32_t xtm_allow;          /* Active allow-match count */
     uint32_t xtm_deny;           /* Active deny-match count */
+    uint32_t xtm_cond;           /* Active conditional-match count */
 } xo_tmatch_t;
 
 /*
@@ -571,8 +603,7 @@ static void xo_tmatch_open(xo_handle_t *, xo_filter_t *, xo_tmatch_t *,
 static void xo_tmatch_close(xo_handle_t *, xo_filter_t *, xo_tmatch_t *,
 			    const char *, ssize_t);
 static int xo_tmatch_try_eager(xo_handle_t *, xo_filter_t *, xo_tframe_t *,
-			       xo_xparse_node_id_t, xo_tnode_t *,
-			       xo_tmatch_t *);
+			       xo_xparse_node_id_t);
 static void xo_filter_force_resolve_pred(xo_handle_t *, xo_filter_t *,
 					 const char *);
 
@@ -589,6 +620,7 @@ struct xo_filter_s {		 /* Forward/typdef decl in xo_private.h */
 /* Flags for xf_flags */
 #define XFSF_BLOCK		(1<<0)	/* Block emitting data */
 #define XFSF_FORCE_RESOLVE	(1<<1)	/* Missing fields are "" at close */
+#define XFSF_PROMOTED		(1<<2)	/* Pending pred passed, not terminal */
 
 /*
  * Create and initialize a filter, attaching it to a handle
@@ -648,6 +680,70 @@ xo_tmatch_record_live (xo_tmatch_t *xtmp, xo_tframe_t *frame, xo_tnode_t *tn)
 	xtmp->xtm_allow += 1;
 	frame->xtf_allow_delta += 1;
     }
+}
+
+/*
+ * Count a conditional (or pending) terminal slot in xtm_cond, so its
+ * content is kept tentatively.  Deny paths are not conditional.
+ */
+static void
+xo_tmatch_record_cond (xo_tmatch_t *xtmp, xo_tframe_t *frame,
+		       xo_tslot_t *slotp, xo_tnode_t *tn)
+{
+    if (!(tn->xtn_flags & XTNF_TERMINAL) || (tn->xtn_flags & XTNF_NOT))
+	return;
+    if (slotp->xts_flags & XTFF_COND_COUNTED)
+	return;
+
+    slotp->xts_flags |= XTFF_COND_COUNTED;
+    xtmp->xtm_cond += 1;
+    frame->xtf_cond_delta += 1;
+}
+
+static void
+xo_tmatch_uncount_cond (xo_tmatch_t *xtmp, xo_tframe_t *frame,
+			xo_tslot_t *slotp)
+{
+    if (!(slotp->xts_flags & XTFF_COND_COUNTED))
+	return;
+
+    slotp->xts_flags &= ~XTFF_COND_COUNTED;
+    xtmp->xtm_cond -= 1;
+    frame->xtf_cond_delta -= 1;
+}
+
+/*
+ * A pending (PRED or CPRED) slot's predicate has been decided.  A
+ * PRED slot becomes LIVE or DEAD; a CPRED slot becomes COND or DEAD,
+ * since it still hangs on its enclosing predicate.  When a PRED slot
+ * passes but is not terminal, nothing becomes FULL, but content kept
+ * conditionally beneath it is now wanted, so we flag the promotion
+ * for the op to report as XO_STATUS_LIVE.
+ */
+static void
+xo_tmatch_resolve (xo_filter_t *xfp, xo_tmatch_t *xtmp, xo_tframe_t *frame,
+		   xo_tslot_t *slotp, xo_tnode_t *tn, int live)
+{
+    if (!live) {
+	slotp->xts_state = XTFS_DEAD;
+	xo_tmatch_uncount_cond(xtmp, frame, slotp);
+
+    } else if (slotp->xts_state == XTFS_CPRED) {
+	slotp->xts_state = XTFS_COND;
+
+    } else {
+	slotp->xts_state = XTFS_LIVE;
+	xo_tmatch_uncount_cond(xtmp, frame, slotp);
+	xo_tmatch_record_live(xtmp, frame, tn);
+	if (!(tn->xtn_flags & XTNF_TERMINAL))
+	    xfp->xf_flags |= XFSF_PROMOTED;
+    }
+}
+
+static inline int
+xo_tslot_is_pending (xo_tslot_t *slotp)
+{
+    return slotp->xts_state == XTFS_PRED || slotp->xts_state == XTFS_CPRED;
 }
 
 /*
@@ -750,6 +846,41 @@ xo_tmatch_note_pred (xo_filter_t *xfp, xo_tframe_t *frame,
     }
 }
 
+/*
+ * Set the initial state of a new slot 's' in 'frame' for trie node
+ * 'tn'.  'cond' means the parent slot is itself conditional or
+ * pending, making any match here conditional on it.
+ */
+static void
+xo_tmatch_slot_init (xo_handle_t *xop, xo_filter_t *xfp, xo_tmatch_t *xtmp,
+		     xo_tframe_t *frame, uint32_t s, xo_tnode_t *tn,
+		     uint32_t position, int cond,
+		     const char *value, ssize_t vlen)
+{
+    xo_tslot_t *slotp = &frame->xtf_slots[s];
+    int state = XTFS_LIVE;
+
+    if (tn->xtn_pred) {
+	xo_tmatch_note_pred(xfp, frame, tn->xtn_pred, value, vlen);
+	frame->xtf_position_cur = position;
+	state = xo_tmatch_try_eager(xop, xfp, frame, tn->xtn_pred);
+    }
+
+    if (cond) {
+	if (state == XTFS_LIVE)
+	    state = XTFS_COND;
+	else if (state == XTFS_PRED)
+	    state = XTFS_CPRED;
+    }
+
+    slotp->xts_state = state;
+
+    if (state == XTFS_LIVE)
+	xo_tmatch_record_live(xtmp, frame, tn);
+    else if (state != XTFS_DEAD)
+	xo_tmatch_record_cond(xtmp, frame, slotp, tn);
+}
+
 static void
 xo_tmatch_open (xo_handle_t *xop, xo_filter_t *xfp,
 		xo_tmatch_t *xtmp, const char *tag, ssize_t tlen,
@@ -795,10 +926,15 @@ xo_tmatch_open (xo_handle_t *xop, xo_filter_t *xfp,
     xo_dbg(xop, "xo_tmatch_open: depth %u tag '%.*s'",
 	   xtmp->xtm_depth, (int) tlen, tag);
 
-    /* Descend from every LIVE parent slot */
+    /*
+     * Descend from every LIVE parent slot, and conditionally from
+     * every slot that is waiting on a predicate (see XTFS_COND).
+     */
     for (uint32_t i = 0; i < parent->xtf_slots_count; i++) {
-	if (parent->xtf_slots[i].xts_state != XTFS_LIVE)
+	int pstate = parent->xtf_slots[i].xts_state;
+	if (pstate == XTFS_SEEK || pstate == XTFS_DEAD)
 	    continue;
+	int cond = (pstate != XTFS_LIVE);
 	xo_tnode_t *ptn = &xtp->xt_nodes[parent->xtf_slots[i].xts_node];
 	for (xo_trie_id_t c = ptn->xtn_child; c;
 		     c = xtp->xt_nodes[c].xtn_sibling) {
@@ -813,16 +949,8 @@ xo_tmatch_open (xo_handle_t *xop, xo_filter_t *xfp,
 	    frame->xtf_slots[s].xts_node = c;
 	    frame->xtf_slots[s].xts_position = position;
 
-	    if (tn->xtn_pred) {
-		xo_tmatch_note_pred(xfp, frame, tn->xtn_pred, value, vlen);
-		frame->xtf_position_cur = position;
-		frame->xtf_slots[s].xts_state =
-		    xo_tmatch_try_eager(xop, xfp, frame, tn->xtn_pred,
-					tn, xtmp);
-	    } else {
-		frame->xtf_slots[s].xts_state = XTFS_LIVE;
-		xo_tmatch_record_live(xtmp, frame, tn);
-	    }
+	    xo_tmatch_slot_init(xop, xfp, xtmp, frame, s, tn, position,
+				cond, value, vlen);
 	}
     }
 
@@ -855,19 +983,13 @@ xo_tmatch_open (xo_handle_t *xop, xo_filter_t *xfp,
 	frame->xtf_slots[s].xts_node = r;
 	frame->xtf_slots[s].xts_position = position;
 
-	if (tn->xtn_pred) {
-	    xo_tmatch_note_pred(xfp, frame, tn->xtn_pred, value, vlen);
-	    frame->xtf_position_cur = position;
-	    frame->xtf_slots[s].xts_state =
-		xo_tmatch_try_eager(xop, xfp, frame, tn->xtn_pred, tn, xtmp);
-	} else {
-	    frame->xtf_slots[s].xts_state = XTFS_LIVE;
-	    xo_tmatch_record_live(xtmp, frame, tn);
-	}
+	xo_tmatch_slot_init(xop, xfp, xtmp, frame, s, tn, position,
+			    FALSE, value, vlen);
     }
 
-    xo_dbg(xop, "xo_tmatch_open: frame %u active [allow %u/deny %u]",
-	   frame->xtf_slots_count, xtmp->xtm_allow, xtmp->xtm_deny);
+    xo_dbg(xop, "xo_tmatch_open: frame %u active [allow %u/deny %u/cond %u]",
+	   frame->xtf_slots_count, xtmp->xtm_allow, xtmp->xtm_deny,
+	   xtmp->xtm_cond);
 }
 
 static void
@@ -886,12 +1008,13 @@ xo_tmatch_close (xo_handle_t *xop, xo_filter_t *xfp UNUSED,
     xo_tframe_t *frame = &xtmp->xtm_stack[xtmp->xtm_depth];
     xtmp->xtm_allow -= frame->xtf_allow_delta;
     xtmp->xtm_deny  -= frame->xtf_deny_delta;
+    xtmp->xtm_cond  -= frame->xtf_cond_delta;
     xo_tframe_free_keys(frame);
     xo_tframe_free_attrs(frame);
     xo_tframe_free_self(frame);
 
-    xo_dbg(xop, "xo_tmatch_close: depth %u [allow %u/deny %u]",
-	   xtmp->xtm_depth, xtmp->xtm_allow, xtmp->xtm_deny);
+    xo_dbg(xop, "xo_tmatch_close: depth %u [allow %u/deny %u/cond %u]",
+	   xtmp->xtm_depth, xtmp->xtm_allow, xtmp->xtm_deny, xtmp->xtm_cond);
 
     xtmp->xtm_depth -= 1;
 }
@@ -1004,23 +1127,39 @@ xo_filter_change_status (xo_handle_t *xop UNUSED, xo_filter_t *xfp,
 	 * No active matches mean we're tracking; never DEAD in trie
 	 * mode since the trie always re-probes root nodes on each
 	 * open.  If any slot in the current frame is waiting for a
-	 * non-key predicate field, use PRED so all sibling content is
-	 * kept tentatively.
+	 * predicate, use PRED so content is kept tentatively until
+	 * it resolves.  If we're beneath a pending predicate and
+	 * would match should it pass, use COND.  A slot that might
+	 * match deeper down (a COND slot that isn't terminal) also
+	 * uses PRED: it's tentative, kept only if something beneath
+	 * it turns out to be wanted.
 	 */
 	xo_tmatch_t *xtmp = &xfp->xf_tmatch;
+	int cond_slot = FALSE;
+
 	if (xo_tmatch_has_frame(xtmp)) {
 	    xo_tframe_t *frame = &xtmp->xtm_stack[xtmp->xtm_depth];
 	    for (uint32_t i = 0; i < frame->xtf_slots_count; i++) {
-		if (frame->xtf_slots[i].xts_state == XTFS_PRED) {
+		if (xo_tslot_is_pending(&frame->xtf_slots[i])) {
 		    why = "pred-pending";
 		    rc = XO_STATUS_PRED;
 		    goto done_status;
 		}
+		if (frame->xtf_slots[i].xts_state == XTFS_COND)
+		    cond_slot = TRUE;
 	    }
 	}
 
-	why = "default-to-no";
-	rc = XO_STATUS_TRACK;
+	if (xtmp->xtm_cond) {
+	    why = "cond-full";
+	    rc = XO_STATUS_COND;
+	} else if (cond_slot) {
+	    why = "cond-pending";
+	    rc = XO_STATUS_PRED;
+	} else {
+	    why = "default-to-no";
+	    rc = XO_STATUS_TRACK;
+	}
     done_status:;
     }
 
@@ -1112,19 +1251,29 @@ xo_filter_op_close_instance (xo_handle_t *xop, xo_filter_t *xfp,
      * field was never seen.  Force-resolve treating absent fields as empty
      * string (XPath: absent node means empty nodeset or string("")).
      */
+    int promoted = FALSE;
     if (xfp != NULL && xfp->xf_trie != NULL
-	    && xfp->xf_status == XO_STATUS_PRED)
+	    && xfp->xf_status == XO_STATUS_PRED) {
+	xfp->xf_flags &= ~XFSF_PROMOTED;
 	xo_filter_force_resolve_pred(xop, xfp, tag);
+	promoted = (xfp->xf_flags & XFSF_PROMOTED) ? TRUE : FALSE;
+	xfp->xf_flags &= ~XFSF_PROMOTED;
+    }
 
     xo_filter_status_t pre_close = xfp ? xfp->xf_status : XO_STATUS_ZERO;
     xo_filter_close(xop, xfp, tag, strlen(tag), "instance");
 
     /*
      * If force-resolve promoted us to FULL, return FULL even though the
-     * frame pop has now decremented xtm_allow back.
+     * frame pop has now decremented xtm_allow back.  If it passed a
+     * predicate on a path that continues below us, return LIVE so
+     * content kept conditionally can be committed.
      */
-    return (pre_close == XO_STATUS_FULL) ? XO_STATUS_FULL
-	: (xfp ? xfp->xf_status : XO_STATUS_ZERO);
+    if (pre_close == XO_STATUS_FULL)
+	return XO_STATUS_FULL;
+    if (promoted && pre_close != XO_STATUS_COND)
+	return XO_STATUS_LIVE;
+    return xfp ? xfp->xf_status : XO_STATUS_ZERO;
 }
 
 static int
@@ -3419,11 +3568,11 @@ xo_filter_pred_needs (xo_xparse_data_t *xdp, xo_filter_t *xfp,
 /*
  * Eagerly evaluate a predicate at instance-open time with no keys yet.
  * Returns XTFS_LIVE, XTFS_DEAD, or XTFS_PRED (predicate needs key data).
+ * The caller records the match.
  */
 static int
 xo_tmatch_try_eager (xo_handle_t *xop, xo_filter_t *xfp,
-		     xo_tframe_t *framep, xo_xparse_node_id_t pred,
-		     xo_tnode_t *tn, xo_tmatch_t *xtmp)
+		     xo_tframe_t *framep, xo_xparse_node_id_t pred)
 {
     /*
      * For foo[A][N] (trailing C_INDEX after leading predicates) we cannot
@@ -3439,11 +3588,7 @@ xo_tmatch_try_eager (xo_handle_t *xop, xo_filter_t *xfp,
 	return XTFS_PRED;
     int live = xo_eval_cast_boolean(xop, result);
     xo_eval_value_free(result);
-    if (live) {
-	xo_tmatch_record_live(xtmp, framep, tn);
-	return XTFS_LIVE;
-    }
-    return XTFS_DEAD;
+    return live ? XTFS_LIVE : XTFS_DEAD;
 }
 
 /*
@@ -3536,7 +3681,7 @@ xo_tmatch_key (xo_handle_t *xop, xo_filter_t *xfp, xo_tmatch_t *xtmp,
     xo_tframe_t *framep = &xtmp->xtm_stack[xtmp->xtm_depth];
 
     for (uint32_t i = 0; i < framep->xtf_slots_count; i++) {
-	if (framep->xtf_slots[i].xts_state != XTFS_PRED)
+	if (!xo_tslot_is_pending(&framep->xtf_slots[i]))
 	    continue;
 
 	xo_tnode_t *tn = &xtp->xt_nodes[framep->xtf_slots[i].xts_node];
@@ -3558,15 +3703,30 @@ xo_tmatch_key (xo_handle_t *xop, xo_filter_t *xfp, xo_tmatch_t *xtmp,
 
 	int live = xo_eval_cast_boolean(xop, result);
 	xo_eval_value_free(result);
-	if (live) {
-	    framep->xtf_slots[i].xts_state = XTFS_LIVE;
-	    xo_tmatch_record_live(xtmp, framep, tn);
-	} else {
-	    framep->xtf_slots[i].xts_state = XTFS_DEAD;
-	}
+	xo_tmatch_resolve(xfp, xtmp, framep, &framep->xtf_slots[i], tn, live);
     }
 
     return xfp->xf_status;
+}
+
+/*
+ * If resolving a key or field just passed a predicate on a path step
+ * that isn't the last (so nothing became FULL), report XO_STATUS_LIVE
+ * instead of 'rc', telling libxo that content it kept conditionally
+ * beneath this instance is wanted.  LIVE is only a return value; it's
+ * never recorded as xf_status.
+ */
+static xo_filter_status_t
+xo_filter_promoted (xo_filter_t *xfp, xo_filter_status_t rc)
+{
+    int promoted = (xfp->xf_flags & XFSF_PROMOTED) ? TRUE : FALSE;
+
+    xfp->xf_flags &= ~XFSF_PROMOTED;
+    if (promoted && xfp->xf_status != XO_STATUS_FULL
+	    && xfp->xf_status != XO_STATUS_COND)
+	return XO_STATUS_LIVE;
+
+    return rc;
 }
 
 static int
@@ -3578,10 +3738,16 @@ xo_filter_op_key (XO_FILTER_KEY_SIGNATURE)
     XO_DBG(xop, "xo_filter_key: '%.*s' = '%.*s'",
 	   (int) tlen, tag, (int) vlen, value);
 
-    xo_filter_status_t rc = xo_tmatch_key(xop, xfp, &xfp->xf_tmatch,
-					   tag, tlen, value, vlen);
+    xfp->xf_flags &= ~XFSF_PROMOTED;
+    xo_tmatch_key(xop, xfp, &xfp->xf_tmatch, tag, tlen, value, vlen);
 
     xo_filter_change_status(xop, xfp, "key", tag, tlen);
+
+    /*
+     * Return the status as it stands after this key, so libxo sees
+     * a predicate that just failed (or passed; see above).
+     */
+    xo_filter_status_t rc = xo_filter_promoted(xfp, xfp->xf_status);
 
     XO_DBG(xop, "xo_filter_key: '%.*s' = '%.*s' --> status %s",
 	   (int) tlen, tag, (int) vlen, value,
@@ -3602,7 +3768,7 @@ xo_tmatch_attr (xo_handle_t *xop, xo_filter_t *xfp, xo_tmatch_t *xtmp,
     xo_tframe_t *framep = &xtmp->xtm_stack[xtmp->xtm_depth];
 
     for (uint32_t i = 0; i < framep->xtf_slots_count; i++) {
-	if (framep->xtf_slots[i].xts_state != XTFS_PRED)
+	if (!xo_tslot_is_pending(&framep->xtf_slots[i]))
 	    continue;
 
 	xo_tnode_t *tn = &xtp->xt_nodes[framep->xtf_slots[i].xts_node];
@@ -3624,12 +3790,7 @@ xo_tmatch_attr (xo_handle_t *xop, xo_filter_t *xfp, xo_tmatch_t *xtmp,
 
 	int live = xo_eval_cast_boolean(xop, result);
 	xo_eval_value_free(result);
-	if (live) {
-	    framep->xtf_slots[i].xts_state = XTFS_LIVE;
-	    xo_tmatch_record_live(xtmp, framep, tn);
-	} else {
-	    framep->xtf_slots[i].xts_state = XTFS_DEAD;
-	}
+	xo_tmatch_resolve(xfp, xtmp, framep, &framep->xtf_slots[i], tn, live);
     }
 
     return xfp->xf_status;
@@ -3734,7 +3895,7 @@ xo_filter_op_needs_nonkey_field (XO_FILTER_NEEDS_NONKEY_FIELD_SIGNATURE)
     xo_tframe_t *framep = &xtmp->xtm_stack[xtmp->xtm_depth];
 
     for (uint32_t i = 0; i < framep->xtf_slots_count; i++) {
-	if (framep->xtf_slots[i].xts_state != XTFS_PRED)
+	if (!xo_tslot_is_pending(&framep->xtf_slots[i]))
 	    continue;
 	xo_tnode_t *tn = &xtp->xt_nodes[framep->xtf_slots[i].xts_node];
 	if (xo_filter_pred_needs(&xfp->xf_xd, xfp, tn->xtn_pred,
@@ -3763,15 +3924,14 @@ xo_filter_force_resolve_pred (xo_handle_t *xop, xo_filter_t *xfp,
     xfp->xf_flags |= XFSF_FORCE_RESOLVE;
 
     for (uint32_t i = 0; i < framep->xtf_slots_count; i++) {
-	if (framep->xtf_slots[i].xts_state != XTFS_PRED)
+	xo_tslot_t *slotp = &framep->xtf_slots[i];
+	if (!xo_tslot_is_pending(slotp))
 	    continue;
-	xo_tnode_t *tn = &xtmp->xtm_trie->xt_nodes[framep->xtf_slots[i].xts_node];
+	xo_tnode_t *tn = &xtmp->xtm_trie->xt_nodes[slotp->xts_node];
 	if (tn->xtn_pred == 0) {
-	    framep->xtf_slots[i].xts_state = XTFS_LIVE;
-	    xo_tmatch_record_live(xtmp, framep, tn);
+	    xo_tmatch_resolve(xfp, xtmp, framep, slotp, tn, TRUE);
 	    continue;
 	}
-	xo_tslot_t *slotp = &framep->xtf_slots[i];
 	framep->xtf_position_cur = (slotp->xts_flags & XTFF_QUAL_COUNTED)
 	    ? slotp->xts_qual_position : slotp->xts_position;
 	xo_eval_value_t result =
@@ -3779,12 +3939,7 @@ xo_filter_force_resolve_pred (xo_handle_t *xop, xo_filter_t *xfp,
 	if (!(result.xev_flags & XEVF_MISSING)) {
 	    int live = xo_eval_cast_boolean(xop, result);
 	    xo_eval_value_free(result);
-	    if (live) {
-		framep->xtf_slots[i].xts_state = XTFS_LIVE;
-		xo_tmatch_record_live(xtmp, framep, tn);
-	    } else {
-		framep->xtf_slots[i].xts_state = XTFS_DEAD;
-	    }
+	    xo_tmatch_resolve(xfp, xtmp, framep, slotp, tn, live);
 	}
     }
 
@@ -3806,11 +3961,12 @@ xo_filter_op_pred_field (XO_FILTER_PRED_FIELD_SIGNATURE)
     if (xfp->xf_status != XO_STATUS_TRACK && xfp->xf_status != XO_STATUS_PRED)
 	return xfp->xf_status;
 
+    xfp->xf_flags &= ~XFSF_PROMOTED;
     xo_tmatch_key(xop, xfp, &xfp->xf_tmatch, tag, tlen, value, vlen);
 
     xo_filter_change_status(xop, xfp, "pred-field", tag, tlen);
 
-    return xfp->xf_status;
+    return xo_filter_promoted(xfp, xfp->xf_status);
 }
 
 static xo_filter_ops_t xo_filter_ops_local = {
