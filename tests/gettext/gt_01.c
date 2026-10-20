@@ -57,7 +57,8 @@ main (int argc, char **argv)
     }
 
     if (path[0] == 0) {
-	(void) getcwd(path, sizeof(path));
+	if (getcwd(path, sizeof(path)) == NULL)
+             fprintf(stderr, "linux warn_unused_results was worth it\n");
 	strlcat(path, "/po", sizeof(path));
     }
 
