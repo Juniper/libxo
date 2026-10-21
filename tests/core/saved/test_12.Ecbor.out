@@ -1,0 +1,527 @@
+op create: [cbor] []
+ [append] @ 0 (1/1)
+ bf                                                    .
+    op open_container: [top] []
+ [append] @ 1 (4/4)
+ 63 74 6f 70                                           ctop
+ [append] @ 5 (1/1)
+ bf                                                    .
+      op open_container: [data] []
+   [append] @ 6 (5/5)
+   64 64 61 74  61                                       ddata
+   [append] @ 11 (1/1)
+   bf                                                    .
+        op string: [animal] [fish]
+     [append] @ 12 (7/7)
+     66 61 6e 69  6d 61 6c                                 fanimal
+     [append] @ 19 (5/5)
+     64 66 69 73  68                                       dfish
+        op string: [animal] [fish]
+     [append] @ 24 (7/7)
+     66 61 6e 69  6d 61 6c                                 fanimal
+     [append] @ 31 (5/5)
+     64 66 69 73  68                                       dfish
+        op open_list: [thing] []
+     [append] @ 36 (6/6)
+     65 74 68 69  6e 67                                    ething
+     [append] @ 42 (1/1)
+     9f                                                    .
+          op open_instance: [thing] []
+       [append] @ 43 (1/1)
+       bf                                                    .
+            op string: [name] [thing]
+         [append] @ 44 (5/5)
+         64 6e 61 6d  65                                       dname
+         [append] @ 49 (6/6)
+         65 74 68 69  6e 67                                    ething
+            op string: [color] [green]
+         [append] @ 55 (6/6)
+         65 63 6f 6c  6f 72                                    ecolor
+         [append] @ 61 (6/6)
+         65 67 72 65  65 6e                                    egreen
+            op content: [time] [2:15]
+         [append] @ 67 (5/5)
+         64 74 69 6d  65                                       dtime
+         [append] @ 72 (5/5)
+         64 32 3a 31  35                                       d2:15
+         [content] @ 72 (5/5)
+         64 32 3a 31  35                                       d2:15
+            op string: [hand] [left]
+         [append] @ 77 (5/5)
+         64 68 61 6e  64                                       dhand
+         [append] @ 82 (5/5)
+         64 6c 65 66  74                                       dleft
+            op string: [color] [blue]
+         [append] @ 87 (6/6)
+         65 63 6f 6c  6f 72                                    ecolor
+         [append] @ 93 (5/5)
+         64 62 6c 75  65                                       dblue
+            op content: [time] [3:45]
+         [append] @ 98 (5/5)
+         64 74 69 6d  65                                       dtime
+         [append] @ 103 (5/5)
+         64 33 3a 34  35                                       d3:45
+         [content] @ 103 (5/5)
+         64 33 3a 34  35                                       d3:45
+            op close_instance: [thing] []
+         [append] @ 108 (1/1)
+         ff                                                    .
+          op open_instance: [thing] []
+       [append] @ 109 (1/1)
+       bf                                                    .
+            op string: [name] [thing]
+         [append] @ 110 (5/5)
+         64 6e 61 6d  65                                       dname
+         [append] @ 115 (6/6)
+         65 74 68 69  6e 67                                    ething
+            op string: [color] [green]
+         [append] @ 121 (6/6)
+         65 63 6f 6c  6f 72                                    ecolor
+         [append] @ 127 (6/6)
+         65 67 72 65  65 6e                                    egreen
+            op content: [time] [2:15]
+         [append] @ 133 (5/5)
+         64 74 69 6d  65                                       dtime
+         [append] @ 138 (5/5)
+         64 32 3a 31  35                                       d2:15
+         [content] @ 138 (5/5)
+         64 32 3a 31  35                                       d2:15
+            op string: [hand] [left]
+         [append] @ 143 (5/5)
+         64 68 61 6e  64                                       dhand
+         [append] @ 148 (5/5)
+         64 6c 65 66  74                                       dleft
+            op string: [color] [blue]
+         [append] @ 153 (6/6)
+         65 63 6f 6c  6f 72                                    ecolor
+         [append] @ 159 (5/5)
+         64 62 6c 75  65                                       dblue
+            op content: [time] [3:45]
+         [append] @ 164 (5/5)
+         64 74 69 6d  65                                       dtime
+         [append] @ 169 (5/5)
+         64 33 3a 34  35                                       d3:45
+         [content] @ 169 (5/5)
+         64 33 3a 34  35                                       d3:45
+            op close_instance: [thing] []
+         [append] @ 174 (1/1)
+         ff                                                    .
+          op open_instance: [thing] []
+       [append] @ 175 (1/1)
+       bf                                                    .
+            op string: [name] [thing]
+         [append] @ 176 (5/5)
+         64 6e 61 6d  65                                       dname
+         [append] @ 181 (6/6)
+         65 74 68 69  6e 67                                    ething
+            op string: [color] [green]
+         [append] @ 187 (6/6)
+         65 63 6f 6c  6f 72                                    ecolor
+         [append] @ 193 (6/6)
+         65 67 72 65  65 6e                                    egreen
+            op content: [time] [2:15]
+         [append] @ 199 (5/5)
+         64 74 69 6d  65                                       dtime
+         [append] @ 204 (5/5)
+         64 32 3a 31  35                                       d2:15
+         [content] @ 204 (5/5)
+         64 32 3a 31  35                                       d2:15
+            op string: [hand] [left]
+         [append] @ 209 (5/5)
+         64 68 61 6e  64                                       dhand
+         [append] @ 214 (5/5)
+         64 6c 65 66  74                                       dleft
+            op string: [color] [blue]
+         [append] @ 219 (6/6)
+         65 63 6f 6c  6f 72                                    ecolor
+         [append] @ 225 (5/5)
+         64 62 6c 75  65                                       dblue
+            op content: [time] [3:45]
+         [append] @ 230 (5/5)
+         64 74 69 6d  65                                       dtime
+         [append] @ 235 (5/5)
+         64 33 3a 34  35                                       d3:45
+         [content] @ 235 (5/5)
+         64 33 3a 34  35                                       d3:45
+            op close_instance: [thing] []
+         [append] @ 240 (1/1)
+         ff                                                    .
+          op open_instance: [thing] []
+       [append] @ 241 (1/1)
+       bf                                                    .
+            op string: [name] [thing]
+         [append] @ 242 (5/5)
+         64 6e 61 6d  65                                       dname
+         [append] @ 247 (6/6)
+         65 74 68 69  6e 67                                    ething
+            op string: [color] [green]
+         [append] @ 253 (6/6)
+         65 63 6f 6c  6f 72                                    ecolor
+         [append] @ 259 (6/6)
+         65 67 72 65  65 6e                                    egreen
+            op content: [time] [2:15]
+         [append] @ 265 (5/5)
+         64 74 69 6d  65                                       dtime
+         [append] @ 270 (5/5)
+         64 32 3a 31  35                                       d2:15
+         [content] @ 270 (5/5)
+         64 32 3a 31  35                                       d2:15
+            op string: [hand] [left]
+         [append] @ 275 (5/5)
+         64 68 61 6e  64                                       dhand
+         [append] @ 280 (5/5)
+         64 6c 65 66  74                                       dleft
+            op string: [color] [blue]
+         [append] @ 285 (6/6)
+         65 63 6f 6c  6f 72                                    ecolor
+         [append] @ 291 (5/5)
+         64 62 6c 75  65                                       dblue
+            op content: [time] [3:45]
+         [append] @ 296 (5/5)
+         64 74 69 6d  65                                       dtime
+         [append] @ 301 (5/5)
+         64 33 3a 34  35                                       d3:45
+         [content] @ 301 (5/5)
+         64 33 3a 34  35                                       d3:45
+            op close_instance: [thing] []
+         [append] @ 306 (1/1)
+         ff                                                    .
+          op open_instance: [thing] []
+       [append] @ 307 (1/1)
+       bf                                                    .
+            op string: [name] [thing]
+         [append] @ 308 (5/5)
+         64 6e 61 6d  65                                       dname
+         [append] @ 313 (6/6)
+         65 74 68 69  6e 67                                    ething
+            op string: [color] [green]
+         [append] @ 319 (6/6)
+         65 63 6f 6c  6f 72                                    ecolor
+         [append] @ 325 (6/6)
+         65 67 72 65  65 6e                                    egreen
+            op content: [time] [2:15]
+         [append] @ 331 (5/5)
+         64 74 69 6d  65                                       dtime
+         [append] @ 336 (5/5)
+         64 32 3a 31  35                                       d2:15
+         [content] @ 336 (5/5)
+         64 32 3a 31  35                                       d2:15
+            op string: [hand] [left]
+         [append] @ 341 (5/5)
+         64 68 61 6e  64                                       dhand
+         [append] @ 346 (5/5)
+         64 6c 65 66  74                                       dleft
+            op string: [color] [blue]
+         [append] @ 351 (6/6)
+         65 63 6f 6c  6f 72                                    ecolor
+         [append] @ 357 (5/5)
+         64 62 6c 75  65                                       dblue
+            op content: [time] [3:45]
+         [append] @ 362 (5/5)
+         64 74 69 6d  65                                       dtime
+         [append] @ 367 (5/5)
+         64 33 3a 34  35                                       d3:45
+         [content] @ 367 (5/5)
+         64 33 3a 34  35                                       d3:45
+            op close_instance: [thing] []
+         [append] @ 372 (1/1)
+         ff                                                    .
+          op open_instance: [thing] []
+       [append] @ 373 (1/1)
+       bf                                                    .
+            op string: [name] [thing]
+         [append] @ 374 (5/5)
+         64 6e 61 6d  65                                       dname
+         [append] @ 379 (6/6)
+         65 74 68 69  6e 67                                    ething
+            op string: [color] [green]
+         [append] @ 385 (6/6)
+         65 63 6f 6c  6f 72                                    ecolor
+         [append] @ 391 (6/6)
+         65 67 72 65  65 6e                                    egreen
+            op content: [time] [2:15]
+         [append] @ 397 (5/5)
+         64 74 69 6d  65                                       dtime
+         [append] @ 402 (5/5)
+         64 32 3a 31  35                                       d2:15
+         [content] @ 402 (5/5)
+         64 32 3a 31  35                                       d2:15
+            op string: [hand] [left]
+         [append] @ 407 (5/5)
+         64 68 61 6e  64                                       dhand
+         [append] @ 412 (5/5)
+         64 6c 65 66  74                                       dleft
+            op string: [color] [blue]
+         [append] @ 417 (6/6)
+         65 63 6f 6c  6f 72                                    ecolor
+         [append] @ 423 (5/5)
+         64 62 6c 75  65                                       dblue
+            op content: [time] [3:45]
+         [append] @ 428 (5/5)
+         64 74 69 6d  65                                       dtime
+         [append] @ 433 (5/5)
+         64 33 3a 34  35                                       d3:45
+         [content] @ 433 (5/5)
+         64 33 3a 34  35                                       d3:45
+            op close_instance: [thing] []
+         [append] @ 438 (1/1)
+         ff                                                    .
+          op open_instance: [thing] []
+       [append] @ 439 (1/1)
+       bf                                                    .
+            op string: [name] [thing]
+         [append] @ 440 (5/5)
+         64 6e 61 6d  65                                       dname
+         [append] @ 445 (6/6)
+         65 74 68 69  6e 67                                    ething
+            op string: [color] [green]
+         [append] @ 451 (6/6)
+         65 63 6f 6c  6f 72                                    ecolor
+         [append] @ 457 (6/6)
+         65 67 72 65  65 6e                                    egreen
+            op content: [time] [2:15]
+         [append] @ 463 (5/5)
+         64 74 69 6d  65                                       dtime
+         [append] @ 468 (5/5)
+         64 32 3a 31  35                                       d2:15
+         [content] @ 468 (5/5)
+         64 32 3a 31  35                                       d2:15
+            op string: [hand] [left]
+         [append] @ 473 (5/5)
+         64 68 61 6e  64                                       dhand
+         [append] @ 478 (5/5)
+         64 6c 65 66  74                                       dleft
+            op string: [color] [blue]
+         [append] @ 483 (6/6)
+         65 63 6f 6c  6f 72                                    ecolor
+         [append] @ 489 (5/5)
+         64 62 6c 75  65                                       dblue
+            op content: [time] [3:45]
+         [append] @ 494 (5/5)
+         64 74 69 6d  65                                       dtime
+         [append] @ 499 (5/5)
+         64 33 3a 34  35                                       d3:45
+         [content] @ 499 (5/5)
+         64 33 3a 34  35                                       d3:45
+            op close_instance: [thing] []
+         [append] @ 504 (1/1)
+         ff                                                    .
+          op open_instance: [thing] []
+       [append] @ 505 (1/1)
+       bf                                                    .
+            op string: [name] [thing]
+         [append] @ 506 (5/5)
+         64 6e 61 6d  65                                       dname
+         [append] @ 511 (6/6)
+         65 74 68 69  6e 67                                    ething
+            op string: [color] [green]
+         [append] @ 517 (6/6)
+         65 63 6f 6c  6f 72                                    ecolor
+         [append] @ 523 (6/6)
+         65 67 72 65  65 6e                                    egreen
+            op content: [time] [2:15]
+         [append] @ 529 (5/5)
+         64 74 69 6d  65                                       dtime
+         [append] @ 534 (5/5)
+         64 32 3a 31  35                                       d2:15
+         [content] @ 534 (5/5)
+         64 32 3a 31  35                                       d2:15
+            op string: [hand] [left]
+         [append] @ 539 (5/5)
+         64 68 61 6e  64                                       dhand
+         [append] @ 544 (5/5)
+         64 6c 65 66  74                                       dleft
+            op string: [color] [blue]
+         [append] @ 549 (6/6)
+         65 63 6f 6c  6f 72                                    ecolor
+         [append] @ 555 (5/5)
+         64 62 6c 75  65                                       dblue
+            op content: [time] [3:45]
+         [append] @ 560 (5/5)
+         64 74 69 6d  65                                       dtime
+         [append] @ 565 (5/5)
+         64 33 3a 34  35                                       d3:45
+         [content] @ 565 (5/5)
+         64 33 3a 34  35                                       d3:45
+            op close_instance: [thing] []
+         [append] @ 570 (1/1)
+         ff                                                    .
+          op open_instance: [thing] []
+       [append] @ 571 (1/1)
+       bf                                                    .
+            op string: [name] [thing]
+         [append] @ 572 (5/5)
+         64 6e 61 6d  65                                       dname
+         [append] @ 577 (6/6)
+         65 74 68 69  6e 67                                    ething
+            op string: [color] [green]
+         [append] @ 583 (6/6)
+         65 63 6f 6c  6f 72                                    ecolor
+         [append] @ 589 (6/6)
+         65 67 72 65  65 6e                                    egreen
+            op content: [time] [2:15]
+         [append] @ 595 (5/5)
+         64 74 69 6d  65                                       dtime
+         [append] @ 600 (5/5)
+         64 32 3a 31  35                                       d2:15
+         [content] @ 600 (5/5)
+         64 32 3a 31  35                                       d2:15
+            op string: [hand] [left]
+         [append] @ 605 (5/5)
+         64 68 61 6e  64                                       dhand
+         [append] @ 610 (5/5)
+         64 6c 65 66  74                                       dleft
+            op string: [color] [blue]
+         [append] @ 615 (6/6)
+         65 63 6f 6c  6f 72                                    ecolor
+         [append] @ 621 (5/5)
+         64 62 6c 75  65                                       dblue
+            op content: [time] [3:45]
+         [append] @ 626 (5/5)
+         64 74 69 6d  65                                       dtime
+         [append] @ 631 (5/5)
+         64 33 3a 34  35                                       d3:45
+         [content] @ 631 (5/5)
+         64 33 3a 34  35                                       d3:45
+            op close_instance: [thing] []
+         [append] @ 636 (1/1)
+         ff                                                    .
+          op open_instance: [thing] []
+       [append] @ 637 (1/1)
+       bf                                                    .
+            op string: [name] [thing]
+         [append] @ 638 (5/5)
+         64 6e 61 6d  65                                       dname
+         [append] @ 643 (6/6)
+         65 74 68 69  6e 67                                    ething
+            op string: [color] [green]
+         [append] @ 649 (6/6)
+         65 63 6f 6c  6f 72                                    ecolor
+         [append] @ 655 (6/6)
+         65 67 72 65  65 6e                                    egreen
+            op content: [time] [2:15]
+         [append] @ 661 (5/5)
+         64 74 69 6d  65                                       dtime
+         [append] @ 666 (5/5)
+         64 32 3a 31  35                                       d2:15
+         [content] @ 666 (5/5)
+         64 32 3a 31  35                                       d2:15
+            op string: [hand] [left]
+         [append] @ 671 (5/5)
+         64 68 61 6e  64                                       dhand
+         [append] @ 676 (5/5)
+         64 6c 65 66  74                                       dleft
+            op string: [color] [blue]
+         [append] @ 681 (6/6)
+         65 63 6f 6c  6f 72                                    ecolor
+         [append] @ 687 (5/5)
+         64 62 6c 75  65                                       dblue
+            op content: [time] [3:45]
+         [append] @ 692 (5/5)
+         64 74 69 6d  65                                       dtime
+         [append] @ 697 (5/5)
+         64 33 3a 34  35                                       d3:45
+         [content] @ 697 (5/5)
+         64 33 3a 34  35                                       d3:45
+            op close_instance: [thing] []
+         [append] @ 702 (1/1)
+         ff                                                    .
+          op close_list: [thing] []
+       [append] @ 703 (1/1)
+       ff                                                    .
+        op open_container: [2by4] []
+     [append] @ 704 (5/5)
+     64 32 62 79  34                                       d2by4
+     [append] @ 709 (1/1)
+     bf                                                    .
+          op string: [4x4] [truck]
+       [append] @ 710 (4/4)
+       63 34 78 34                                           c4x4
+       [append] @ 714 (6/6)
+       65 74 72 75  63 6b                                    etruck
+          op string: [2morrow] [tomorrow]
+       [append] @ 720 (8/8)
+       67 32 6d 6f  72 72 6f 77                              g2morrow
+       [append] @ 728 (9/9)
+       68 74 6f 6d  6f 72 72 6f  - 77                        htomorrow
+          op close_container: [2by4] []
+       [append] @ 737 (1/1)
+       ff                                                    .
+        op open_container: [tagÜÖÄ] []
+     [append] @ 738 (a/10)
+     69 74 61 67  c3 9c c3 96  - c3 84                     itag......
+     [append] @ 748 (1/1)
+     bf                                                    .
+          op string: [cölor] [blue]
+       [append] @ 749 (7/7)
+       66 63 c3 b6  6c 6f 72                                 fc..lor
+       [append] @ 756 (5/5)
+       64 62 6c 75  65                                       dblue
+          op string: [säfe] [yes]
+       [append] @ 761 (6/6)
+       65 73 c3 a4  66 65                                    es..fe
+       [append] @ 767 (4/4)
+       63 79 65 73                                           cyes
+          op close_container: [tagÜÖÄ] []
+       [append] @ 771 (1/1)
+       ff                                                    .
+        op close_container: [data] []
+     [append] @ 772 (1/1)
+     ff                                                    .
+      op close_container: [top] []
+   [append] @ 773 (1/1)
+   ff                                                    .
+    op finish: [] []
+ [append] @ 774 (1/1)
+ ff                                                    .
+  op flush: [] []
+>[cbor] @ 0 (307/775)
+>bf 63 74 6f  70 bf 64 64  - 61 74 61 bf  66 61 6e 69  .ctop.ddata.fani
+>6d 61 6c 64  66 69 73 68  - 66 61 6e 69  6d 61 6c 64  maldfishfanimald
+>66 69 73 68  65 74 68 69  - 6e 67 9f bf  64 6e 61 6d  fishething..dnam
+>65 65 74 68  69 6e 67 65  - 63 6f 6c 6f  72 65 67 72  eethingecoloregr
+>65 65 6e 64  74 69 6d 65  - 64 32 3a 31  35 64 68 61  eendtimed2:15dha
+>6e 64 64 6c  65 66 74 65  - 63 6f 6c 6f  72 64 62 6c  nddleftecolordbl
+>75 65 64 74  69 6d 65 64  - 33 3a 34 35  ff bf 64 6e  uedtimed3:45..dn
+>61 6d 65 65  74 68 69 6e  - 67 65 63 6f  6c 6f 72 65  ameethingecolore
+>67 72 65 65  6e 64 74 69  - 6d 65 64 32  3a 31 35 64  greendtimed2:15d
+>68 61 6e 64  64 6c 65 66  - 74 65 63 6f  6c 6f 72 64  handdleftecolord
+>62 6c 75 65  64 74 69 6d  - 65 64 33 3a  34 35 ff bf  bluedtimed3:45..
+>64 6e 61 6d  65 65 74 68  - 69 6e 67 65  63 6f 6c 6f  dnameethingecolo
+>72 65 67 72  65 65 6e 64  - 74 69 6d 65  64 32 3a 31  regreendtimed2:1
+>35 64 68 61  6e 64 64 6c  - 65 66 74 65  63 6f 6c 6f  5dhanddleftecolo
+>72 64 62 6c  75 65 64 74  - 69 6d 65 64  33 3a 34 35  rdbluedtimed3:45
+>ff bf 64 6e  61 6d 65 65  - 74 68 69 6e  67 65 63 6f  ..dnameethingeco
+>6c 6f 72 65  67 72 65 65  - 6e 64 74 69  6d 65 64 32  loregreendtimed2
+>3a 31 35 64  68 61 6e 64  - 64 6c 65 66  74 65 63 6f  :15dhanddlefteco
+>6c 6f 72 64  62 6c 75 65  - 64 74 69 6d  65 64 33 3a  lordbluedtimed3:
+>34 35 ff bf  64 6e 61 6d  - 65 65 74 68  69 6e 67 65  45..dnameethinge
+>63 6f 6c 6f  72 65 67 72  - 65 65 6e 64  74 69 6d 65  coloregreendtime
+>64 32 3a 31  35 64 68 61  - 6e 64 64 6c  65 66 74 65  d2:15dhanddlefte
+>63 6f 6c 6f  72 64 62 6c  - 75 65 64 74  69 6d 65 64  colordbluedtimed
+>33 3a 34 35  ff bf 64 6e  - 61 6d 65 65  74 68 69 6e  3:45..dnameethin
+>67 65 63 6f  6c 6f 72 65  - 67 72 65 65  6e 64 74 69  gecoloregreendti
+>6d 65 64 32  3a 31 35 64  - 68 61 6e 64  64 6c 65 66  med2:15dhanddlef
+>74 65 63 6f  6c 6f 72 64  - 62 6c 75 65  64 74 69 6d  tecolordbluedtim
+>65 64 33 3a  34 35 ff bf  - 64 6e 61 6d  65 65 74 68  ed3:45..dnameeth
+>69 6e 67 65  63 6f 6c 6f  - 72 65 67 72  65 65 6e 64  ingecoloregreend
+>74 69 6d 65  64 32 3a 31  - 35 64 68 61  6e 64 64 6c  timed2:15dhanddl
+>65 66 74 65  63 6f 6c 6f  - 72 64 62 6c  75 65 64 74  eftecolordbluedt
+>69 6d 65 64  33 3a 34 35  - ff bf 64 6e  61 6d 65 65  imed3:45..dnamee
+>74 68 69 6e  67 65 63 6f  - 6c 6f 72 65  67 72 65 65  thingecoloregree
+>6e 64 74 69  6d 65 64 32  - 3a 31 35 64  68 61 6e 64  ndtimed2:15dhand
+>64 6c 65 66  74 65 63 6f  - 6c 6f 72 64  62 6c 75 65  dleftecolordblue
+>64 74 69 6d  65 64 33 3a  - 34 35 ff bf  64 6e 61 6d  dtimed3:45..dnam
+>65 65 74 68  69 6e 67 65  - 63 6f 6c 6f  72 65 67 72  eethingecoloregr
+>65 65 6e 64  74 69 6d 65  - 64 32 3a 31  35 64 68 61  eendtimed2:15dha
+>6e 64 64 6c  65 66 74 65  - 63 6f 6c 6f  72 64 62 6c  nddleftecolordbl
+>75 65 64 74  69 6d 65 64  - 33 3a 34 35  ff bf 64 6e  uedtimed3:45..dn
+>61 6d 65 65  74 68 69 6e  - 67 65 63 6f  6c 6f 72 65  ameethingecolore
+>67 72 65 65  6e 64 74 69  - 6d 65 64 32  3a 31 35 64  greendtimed2:15d
+>68 61 6e 64  64 6c 65 66  - 74 65 63 6f  6c 6f 72 64  handdleftecolord
+>62 6c 75 65  64 74 69 6d  - 65 64 33 3a  34 35 ff ff  bluedtimed3:45..
+>64 32 62 79  34 bf 63 34  - 78 34 65 74  72 75 63 6b  d2by4.c4x4etruck
+>67 32 6d 6f  72 72 6f 77  - 68 74 6f 6d  6f 72 72 6f  g2morrowhtomorro
+>77 ff 69 74  61 67 c3 9c  - c3 96 c3 84  bf 66 63 c3  w.itag.......fc.
+>b6 6c 6f 72  64 62 6c 75  - 65 65 73 c3  a4 66 65 63  .lordbluees..fec
+>79 65 73 ff  ff ff ff                                 yes....
