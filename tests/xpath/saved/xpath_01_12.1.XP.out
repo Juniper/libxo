@@ -493,12 +493,61 @@
 </item>
 <item>
   <name>a</name>
+  <tag>t1</tag>
+  <tag>t2</tag>
+</item>
+<item>
+  <id>2</id>
+  <name></name>
+</item>
+<item>
+  <id>1</id>
+  <name>gum</name>
+  <size>5</size>
+</item>
+<item>
+  <id>3</id>
+</item>
+<item>
+  <id>2</id>
+  <name></name>
+</item>
+<item>
+  <id>3</id>
+</item>
+<item>
+  <id>3</id>
+</item>
+<item>
+  <id>1</id>
+  <name>gum</name>
+  <size>5</size>
+</item>
+<item>
+  <id>2</id>
+  <name></name>
+</item>
+<item>
+  <id>3</id>
+</item>
+<item>
+  <name>a</name>
   <sub>
     <x>1</x>
   </sub>
 </item>
-<item>
-  <name>a</name>
-  <tag>t1</tag>
-  <tag>t2</tag>
-</item>
+<top>
+  <item>
+    <sub>
+      <x>1</x>
+    </sub>
+    <size>3</size>
+  </item>
+</top>
+<top>
+  <item>
+    <sub>
+      <x>1</x>
+    </sub>
+  </item>
+</top>
