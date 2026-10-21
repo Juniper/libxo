@@ -1,0 +1,410 @@
+op create: [cbor] []
+ [append] @ 0 (1/1)
+ bf                                                    .
+    op open_container: [employees] []
+ [append] @ 1 (a/10)
+ 69 65 6d 70  6c 6f 79 65  - 65 73                     iemployees
+ [append] @ 11 (1/1)
+ bf                                                    .
+      op open_list: [test] []
+   [append] @ 12 (5/5)
+   64 74 65 73  74                                       dtest
+   [append] @ 17 (1/1)
+   9f                                                    .
+        op open_instance: [test] []
+     [append] @ 18 (1/1)
+     bf                                                    .
+          op string: [filename] [(null)]
+       [append] @ 19 (9/9)
+       68 66 69 6c  65 6e 61 6d  - 65                        hfilename
+       [append] @ 28 (7/7)
+       66 28 6e 75  6c 6c 29                                 f(null)
+          op close_instance: [test] []
+       [append] @ 35 (1/1)
+       ff                                                    .
+        op close_list: [test] []
+     [append] @ 36 (1/1)
+     ff                                                    .
+      op string: [v1] [γιγνώσκειν]
+   [append] @ 37 (3/3)
+   62 76 31                                              bv1
+   [append] @ 40 (16/22)
+   75 ce b3 ce  b9 ce b3 ce  - bd e1 bd bd  cf 83 ce ba  u...............
+   ce b5 ce b9  ce bd                                    ......
+      op string: [v2] [ὦ ἄνδρες ᾿Αθηναῖοι]
+   [append] @ 62 (3/3)
+   62 76 32                                              bv2
+   [append] @ 65 (28/40)
+   78 26 e1 bd  a6 20 e1 bc  - 84 ce bd ce  b4 cf 81 ce  x&... ..........
+   b5 cf 82 20  e1 be bf ce  - 91 ce b8 ce  b7 ce bd ce  ... ............
+   b1 e1 bf 96  ce bf ce b9                              ........
+      op content: [columns] [28]
+   [append] @ 105 (8/8)
+   67 63 6f 6c  75 6d 6e 73                              gcolumns
+   [content] @ 113 (2/2)
+   18 1c                                                 ..
+      op content: [columns] [2]
+   [append] @ 115 (8/8)
+   67 63 6f 6c  75 6d 6e 73                              gcolumns
+   [content] @ 123 (1/1)
+   02                                                    .
+      op string: [v1] [ახლავე გაიაროთ რეგისტრაცია]
+   [append] @ 124 (3/3)
+   62 76 31                                              bv1
+   [append] @ 127 (4c/76)
+   78 4a e1 83  90 e1 83 ae  - e1 83 9a e1  83 90 e1 83  xJ..............
+   95 e1 83 94  20 e1 83 92  - e1 83 90 e1  83 98 e1 83  .... ...........
+   90 e1 83 a0  e1 83 9d e1  - 83 97 20 e1  83 a0 e1 83  .......... .....
+   94 e1 83 92  e1 83 98 e1  - 83 a1 e1 83  a2 e1 83 a0  ................
+   e1 83 90 e1  83 aa e1 83  - 98 e1 83 90               ............
+      op string: [v2] [Unicode-ის მეათე საერთაშორისო]
+   [append] @ 203 (3/3)
+   62 76 32                                              bv2
+   [append] @ 206 (45/69)
+   78 43 55 6e  69 63 6f 64  - 65 2d e1 83  98 e1 83 a1  xCUnicode-......
+   20 e1 83 9b  e1 83 94 e1  - 83 90 e1 83  97 e1 83 94   ...............
+   20 e1 83 a1  e1 83 90 e1  - 83 94 e1 83  a0 e1 83 97   ...............
+   e1 83 90 e1  83 a8 e1 83  - 9d e1 83 a0  e1 83 98 e1  ................
+   83 a1 e1 83  9d                                       .....
+      op content: [columns] [55]
+   [append] @ 275 (8/8)
+   67 63 6f 6c  75 6d 6e 73                              gcolumns
+   [content] @ 283 (2/2)
+   18 37                                                 .7
+      op content: [columns] [0]
+   [append] @ 285 (8/8)
+   67 63 6f 6c  75 6d 6e 73                              gcolumns
+   [content] @ 293 (1/1)
+   00                                                    .
+      op open_list: [employee] []
+   [append] @ 294 (9/9)
+   68 65 6d 70  6c 6f 79 65  - 65                        hemployee
+   [append] @ 303 (1/1)
+   9f                                                    .
+        op open_instance: [employee] []
+     [append] @ 304 (1/1)
+     bf                                                    .
+          op string: [first-name] [Jim]
+       [append] @ 305 (b/11)
+       6a 66 69 72  73 74 2d 6e  - 61 6d 65                  jfirst-name
+       [append] @ 316 (4/4)
+       63 4a 69 6d                                           cJim
+          op string: [nic-name] ["რეგტ"]
+       [append] @ 320 (9/9)
+       68 6e 69 63  2d 6e 61 6d  - 65                        hnic-name
+       [append] @ 329 (f/15)
+       6e 22 e1 83  a0 e1 83 94  - e1 83 92 e1  83 a2 22     n"............"
+          op string: [last-name] [გთხოვთ ახ]
+       [append] @ 344 (a/10)
+       69 6c 61 73  74 2d 6e 61  - 6d 65                     ilast-name
+       [append] @ 354 (1b/27)
+       78 19 e1 83  92 e1 83 97  - e1 83 ae e1  83 9d e1 83  x...............
+       95 e1 83 97  20 e1 83 90  - e1 83 ae                  .... ......
+          op content: [department] [431]
+       [append] @ 381 (b/11)
+       6a 64 65 70  61 72 74 6d  - 65 6e 74                  jdepartment
+       [content] @ 392 (3/3)
+       19 01 af                                              ...
+          op content: [percent-time] [90]
+       [append] @ 395 (d/13)
+       6c 70 65 72  63 65 6e 74  - 2d 74 69 6d  65           lpercent-time
+       [content] @ 408 (2/2)
+       18 5a                                                 .Z
+          op content: [columns] [23]
+       [append] @ 410 (8/8)
+       67 63 6f 6c  75 6d 6e 73                              gcolumns
+       [content] @ 418 (1/1)
+       17                                                    .
+          op attr: [full-time] [honest & for true]
+          op string: [benefits] [full]
+       [append] @ 419 (9/9)
+       68 62 65 6e  65 66 69 74  - 73                        hbenefits
+       [append] @ 428 (5/5)
+       64 66 75 6c  6c                                       dfull
+          op close_instance: [employee] []
+       [append] @ 433 (1/1)
+       ff                                                    .
+        op open_instance: [employee] []
+     [append] @ 434 (1/1)
+     bf                                                    .
+          op string: [first-name] [Terry]
+       [append] @ 435 (b/11)
+       6a 66 69 72  73 74 2d 6e  - 61 6d 65                  jfirst-name
+       [append] @ 446 (6/6)
+       65 54 65 72  72 79                                    eTerry
+          op string: [nic-name] ["<one"]
+       [append] @ 452 (9/9)
+       68 6e 69 63  2d 6e 61 6d  - 65                        hnic-name
+       [append] @ 461 (7/7)
+       66 22 3c 6f  6e 65 22                                 f"<one"
+          op string: [last-name] [Οὐχὶ ταὐτὰ παρίσταταί μοι Jones]
+       [append] @ 468 (a/10)
+       69 6c 61 73  74 2d 6e 61  - 6d 65                     ilast-name
+       [append] @ 478 (3d/61)
+       78 3b ce 9f  e1 bd 90 cf  - 87 e1 bd b6  20 cf 84 ce  x;.......... ...
+       b1 e1 bd 90  cf 84 e1 bd  - b0 20 cf 80  ce b1 cf 81  ......... ......
+       e1 bd b7 cf  83 cf 84 ce  - b1 cf 84 ce  b1 e1 bd b7  ................
+       20 ce bc ce  bf ce b9 20  - 4a 6f 6e 65  73            ...... Jones
+          op content: [department] [660]
+       [append] @ 539 (b/11)
+       6a 64 65 70  61 72 74 6d  - 65 6e 74                  jdepartment
+       [content] @ 550 (3/3)
+       19 02 94                                              ...
+          op content: [percent-time] [90]
+       [append] @ 553 (d/13)
+       6c 70 65 72  63 65 6e 74  - 2d 74 69 6d  65           lpercent-time
+       [content] @ 566 (2/2)
+       18 5a                                                 .Z
+          op content: [columns] [47]
+       [append] @ 568 (8/8)
+       67 63 6f 6c  75 6d 6e 73                              gcolumns
+       [content] @ 576 (2/2)
+       18 2f                                                 ./
+          op attr: [full-time] [honest & for true]
+          op string: [benefits] [full]
+       [append] @ 578 (9/9)
+       68 62 65 6e  65 66 69 74  - 73                        hbenefits
+       [append] @ 587 (5/5)
+       64 66 75 6c  6c                                       dfull
+          op close_instance: [employee] []
+       [append] @ 592 (1/1)
+       ff                                                    .
+        op open_instance: [employee] []
+     [append] @ 593 (1/1)
+     bf                                                    .
+          op string: [first-name] [Leslie]
+       [append] @ 594 (b/11)
+       6a 66 69 72  73 74 2d 6e  - 61 6d 65                  jfirst-name
+       [append] @ 605 (7/7)
+       66 4c 65 73  6c 69 65                                 fLeslie
+          op string: [nic-name] ["Les"]
+       [append] @ 612 (9/9)
+       68 6e 69 63  2d 6e 61 6d  - 65                        hnic-name
+       [append] @ 621 (6/6)
+       65 22 4c 65  73 22                                    e"Les"
+          op string: [last-name] [Patterson]
+       [append] @ 627 (a/10)
+       69 6c 61 73  74 2d 6e 61  - 6d 65                     ilast-name
+       [append] @ 637 (a/10)
+       69 50 61 74  74 65 72 73  - 6f 6e                     iPatterson
+          op content: [department] [341]
+       [append] @ 647 (b/11)
+       6a 64 65 70  61 72 74 6d  - 65 6e 74                  jdepartment
+       [content] @ 658 (3/3)
+       19 01 55                                              ..U
+          op content: [percent-time] [60]
+       [append] @ 661 (d/13)
+       6c 70 65 72  63 65 6e 74  - 2d 74 69 6d  65           lpercent-time
+       [content] @ 674 (2/2)
+       18 3c                                                 .<
+          op content: [columns] [25]
+       [append] @ 676 (8/8)
+       67 63 6f 6c  75 6d 6e 73                              gcolumns
+       [content] @ 684 (2/2)
+       18 19                                                 ..
+          op attr: [full-time] [honest & for true]
+          op string: [benefits] [full]
+       [append] @ 686 (9/9)
+       68 62 65 6e  65 66 69 74  - 73                        hbenefits
+       [append] @ 695 (5/5)
+       64 66 75 6c  6c                                       dfull
+          op close_instance: [employee] []
+       [append] @ 700 (1/1)
+       ff                                                    .
+        op open_instance: [employee] []
+     [append] @ 701 (1/1)
+     bf                                                    .
+          op string: [first-name] [Ashley]
+       [append] @ 702 (b/11)
+       6a 66 69 72  73 74 2d 6e  - 61 6d 65                  jfirst-name
+       [append] @ 713 (7/7)
+       66 41 73 68  6c 65 79                                 fAshley
+          op string: [nic-name] ["Ash"]
+       [append] @ 720 (9/9)
+       68 6e 69 63  2d 6e 61 6d  - 65                        hnic-name
+       [append] @ 729 (6/6)
+       65 22 41 73  68 22                                    e"Ash"
+          op string: [last-name] [Meter & Smith]
+       [append] @ 735 (a/10)
+       69 6c 61 73  74 2d 6e 61  - 6d 65                     ilast-name
+       [append] @ 745 (e/14)
+       6d 4d 65 74  65 72 20 26  - 20 53 6d 69  74 68        mMeter & Smith
+          op content: [department] [1440]
+       [append] @ 759 (b/11)
+       6a 64 65 70  61 72 74 6d  - 65 6e 74                  jdepartment
+       [content] @ 770 (3/3)
+       19 05 a0                                              ...
+          op content: [percent-time] [40]
+       [append] @ 773 (d/13)
+       6c 70 65 72  63 65 6e 74  - 2d 74 69 6d  65           lpercent-time
+       [content] @ 786 (2/2)
+       18 28                                                 .(
+          op content: [columns] [30]
+       [append] @ 788 (8/8)
+       67 63 6f 6c  75 6d 6e 73                              gcolumns
+       [content] @ 796 (2/2)
+       18 1e                                                 ..
+          op close_instance: [employee] []
+       [append] @ 798 (1/1)
+       ff                                                    .
+        op open_instance: [employee] []
+     [append] @ 799 (1/1)
+     bf                                                    .
+          op string: [first-name] [0123456789]
+       [append] @ 800 (b/11)
+       6a 66 69 72  73 74 2d 6e  - 61 6d 65                  jfirst-name
+       [append] @ 811 (b/11)
+       6a 30 31 32  33 34 35 36  - 37 38 39                  j0123456789
+          op string: [nic-name] ["0123456789"]
+       [append] @ 822 (9/9)
+       68 6e 69 63  2d 6e 61 6d  - 65                        hnic-name
+       [append] @ 831 (d/13)
+       6c 22 30 31  32 33 34 35  - 36 37 38 39  22           l"0123456789"
+          op string: [last-name] [012345678901234567890]
+       [append] @ 844 (a/10)
+       69 6c 61 73  74 2d 6e 61  - 6d 65                     ilast-name
+       [append] @ 854 (16/22)
+       75 30 31 32  33 34 35 36  - 37 38 39 30  31 32 33 34  u012345678901234
+       35 36 37 38  39 30                                    567890
+          op content: [department] [1440]
+       [append] @ 876 (b/11)
+       6a 64 65 70  61 72 74 6d  - 65 6e 74                  jdepartment
+       [content] @ 887 (3/3)
+       19 05 a0                                              ...
+          op content: [percent-time] [40]
+       [append] @ 890 (d/13)
+       6c 70 65 72  63 65 6e 74  - 2d 74 69 6d  65           lpercent-time
+       [content] @ 903 (2/2)
+       18 28                                                 .(
+          op content: [columns] [49]
+       [append] @ 905 (8/8)
+       67 63 6f 6c  75 6d 6e 73                              gcolumns
+       [content] @ 913 (2/2)
+       18 31                                                 .1
+          op close_instance: [employee] []
+       [append] @ 915 (1/1)
+       ff                                                    .
+        op open_instance: [employee] []
+     [append] @ 916 (1/1)
+     bf                                                    .
+          op string: [first-name] [ახლა]
+       [append] @ 917 (b/11)
+       6a 66 69 72  73 74 2d 6e  - 61 6d 65                  jfirst-name
+       [append] @ 928 (d/13)
+       6c e1 83 90  e1 83 ae e1  - 83 9a e1 83  90           l............
+          op string: [nic-name] ["გაიარო"]
+       [append] @ 941 (9/9)
+       68 6e 69 63  2d 6e 61 6d  - 65                        hnic-name
+       [append] @ 950 (15/21)
+       74 22 e1 83  92 e1 83 90  - e1 83 98 e1  83 90 e1 83  t"..............
+       a0 e1 83 9d  22                                       ...."
+          op string: [last-name] [საერთაშორისო]
+       [append] @ 971 (a/10)
+       69 6c 61 73  74 2d 6e 61  - 6d 65                     ilast-name
+       [append] @ 981 (26/38)
+       78 24 e1 83  a1 e1 83 90  - e1 83 94 e1  83 a0 e1 83  x$..............
+       97 e1 83 90  e1 83 a8 e1  - 83 9d e1 83  a0 e1 83 98  ................
+       e1 83 a1 e1  83 9d                                    ......
+          op content: [department] [123]
+       [append] @ 1019 (b/11)
+       6a 64 65 70  61 72 74 6d  - 65 6e 74                  jdepartment
+       [content] @ 1030 (2/2)
+       18 7b                                                 .{
+          op content: [percent-time] [90]
+       [append] @ 1032 (d/13)
+       6c 70 65 72  63 65 6e 74  - 2d 74 69 6d  65           lpercent-time
+       [content] @ 1045 (2/2)
+       18 5a                                                 .Z
+          op content: [columns] [29]
+       [append] @ 1047 (8/8)
+       67 63 6f 6c  75 6d 6e 73                              gcolumns
+       [content] @ 1055 (2/2)
+       18 1d                                                 ..
+          op attr: [full-time] [honest & for true]
+          op string: [benefits] [full]
+       [append] @ 1057 (9/9)
+       68 62 65 6e  65 66 69 74  - 73                        hbenefits
+       [append] @ 1066 (5/5)
+       64 66 75 6c  6c                                       dfull
+          op close_instance: [employee] []
+       [append] @ 1071 (1/1)
+       ff                                                    .
+        op close_list: [employee] []
+     [append] @ 1072 (1/1)
+     ff                                                    .
+      op close_container: [employees] []
+   [append] @ 1073 (1/1)
+   ff                                                    .
+    op finish: [] []
+ [append] @ 1074 (1/1)
+ ff                                                    .
+  op flush: [] []
+>[cbor] @ 0 (433/1075)
+>bf 69 65 6d  70 6c 6f 79  - 65 65 73 bf  64 74 65 73  .iemployees.dtes
+>74 9f bf 68  66 69 6c 65  - 6e 61 6d 65  66 28 6e 75  t..hfilenamef(nu
+>6c 6c 29 ff  ff 62 76 31  - 75 ce b3 ce  b9 ce b3 ce  ll)..bv1u.......
+>bd e1 bd bd  cf 83 ce ba  - ce b5 ce b9  ce bd 62 76  ..............bv
+>32 78 26 e1  bd a6 20 e1  - bc 84 ce bd  ce b4 cf 81  2x&... .........
+>ce b5 cf 82  20 e1 be bf  - ce 91 ce b8  ce b7 ce bd  .... ...........
+>ce b1 e1 bf  96 ce bf ce  - b9 67 63 6f  6c 75 6d 6e  .........gcolumn
+>73 18 1c 67  63 6f 6c 75  - 6d 6e 73 02  62 76 31 78  s..gcolumns.bv1x
+>4a e1 83 90  e1 83 ae e1  - 83 9a e1 83  90 e1 83 95  J...............
+>e1 83 94 20  e1 83 92 e1  - 83 90 e1 83  98 e1 83 90  ... ............
+>e1 83 a0 e1  83 9d e1 83  - 97 20 e1 83  a0 e1 83 94  ......... ......
+>e1 83 92 e1  83 98 e1 83  - a1 e1 83 a2  e1 83 a0 e1  ................
+>83 90 e1 83  aa e1 83 98  - e1 83 90 62  76 32 78 43  ...........bv2xC
+>55 6e 69 63  6f 64 65 2d  - e1 83 98 e1  83 a1 20 e1  Unicode-...... .
+>83 9b e1 83  94 e1 83 90  - e1 83 97 e1  83 94 20 e1  .............. .
+>83 a1 e1 83  90 e1 83 94  - e1 83 a0 e1  83 97 e1 83  ................
+>90 e1 83 a8  e1 83 9d e1  - 83 a0 e1 83  98 e1 83 a1  ................
+>e1 83 9d 67  63 6f 6c 75  - 6d 6e 73 18  37 67 63 6f  ...gcolumns.7gco
+>6c 75 6d 6e  73 00 68 65  - 6d 70 6c 6f  79 65 65 9f  lumns.hemployee.
+>bf 6a 66 69  72 73 74 2d  - 6e 61 6d 65  63 4a 69 6d  .jfirst-namecJim
+>68 6e 69 63  2d 6e 61 6d  - 65 6e 22 e1  83 a0 e1 83  hnic-namen".....
+>94 e1 83 92  e1 83 a2 22  - 69 6c 61 73  74 2d 6e 61  ......."ilast-na
+>6d 65 78 19  e1 83 92 e1  - 83 97 e1 83  ae e1 83 9d  mex.............
+>e1 83 95 e1  83 97 20 e1  - 83 90 e1 83  ae 6a 64 65  ...... ......jde
+>70 61 72 74  6d 65 6e 74  - 19 01 af 6c  70 65 72 63  partment...lperc
+>65 6e 74 2d  74 69 6d 65  - 18 5a 67 63  6f 6c 75 6d  ent-time.Zgcolum
+>6e 73 17 68  62 65 6e 65  - 66 69 74 73  64 66 75 6c  ns.hbenefitsdful
+>6c ff bf 6a  66 69 72 73  - 74 2d 6e 61  6d 65 65 54  l..jfirst-nameeT
+>65 72 72 79  68 6e 69 63  - 2d 6e 61 6d  65 66 22 3c  erryhnic-namef"<
+>6f 6e 65 22  69 6c 61 73  - 74 2d 6e 61  6d 65 78 3b  one"ilast-namex;
+>ce 9f e1 bd  90 cf 87 e1  - bd b6 20 cf  84 ce b1 e1  .......... .....
+>bd 90 cf 84  e1 bd b0 20  - cf 80 ce b1  cf 81 e1 bd  ....... ........
+>b7 cf 83 cf  84 ce b1 cf  - 84 ce b1 e1  bd b7 20 ce  .............. .
+>bc ce bf ce  b9 20 4a 6f  - 6e 65 73 6a  64 65 70 61  ..... Jonesjdepa
+>72 74 6d 65  6e 74 19 02  - 94 6c 70 65  72 63 65 6e  rtment...lpercen
+>74 2d 74 69  6d 65 18 5a  - 67 63 6f 6c  75 6d 6e 73  t-time.Zgcolumns
+>18 2f 68 62  65 6e 65 66  - 69 74 73 64  66 75 6c 6c  ./hbenefitsdfull
+>ff bf 6a 66  69 72 73 74  - 2d 6e 61 6d  65 66 4c 65  ..jfirst-namefLe
+>73 6c 69 65  68 6e 69 63  - 2d 6e 61 6d  65 65 22 4c  sliehnic-namee"L
+>65 73 22 69  6c 61 73 74  - 2d 6e 61 6d  65 69 50 61  es"ilast-nameiPa
+>74 74 65 72  73 6f 6e 6a  - 64 65 70 61  72 74 6d 65  ttersonjdepartme
+>6e 74 19 01  55 6c 70 65  - 72 63 65 6e  74 2d 74 69  nt..Ulpercent-ti
+>6d 65 18 3c  67 63 6f 6c  - 75 6d 6e 73  18 19 68 62  me.<gcolumns..hb
+>65 6e 65 66  69 74 73 64  - 66 75 6c 6c  ff bf 6a 66  enefitsdfull..jf
+>69 72 73 74  2d 6e 61 6d  - 65 66 41 73  68 6c 65 79  irst-namefAshley
+>68 6e 69 63  2d 6e 61 6d  - 65 65 22 41  73 68 22 69  hnic-namee"Ash"i
+>6c 61 73 74  2d 6e 61 6d  - 65 6d 4d 65  74 65 72 20  last-namemMeter 
+>26 20 53 6d  69 74 68 6a  - 64 65 70 61  72 74 6d 65  & Smithjdepartme
+>6e 74 19 05  a0 6c 70 65  - 72 63 65 6e  74 2d 74 69  nt...lpercent-ti
+>6d 65 18 28  67 63 6f 6c  - 75 6d 6e 73  18 1e ff bf  me.(gcolumns....
+>6a 66 69 72  73 74 2d 6e  - 61 6d 65 6a  30 31 32 33  jfirst-namej0123
+>34 35 36 37  38 39 68 6e  - 69 63 2d 6e  61 6d 65 6c  456789hnic-namel
+>22 30 31 32  33 34 35 36  - 37 38 39 22  69 6c 61 73  "0123456789"ilas
+>74 2d 6e 61  6d 65 75 30  - 31 32 33 34  35 36 37 38  t-nameu012345678
+>39 30 31 32  33 34 35 36  - 37 38 39 30  6a 64 65 70  901234567890jdep
+>61 72 74 6d  65 6e 74 19  - 05 a0 6c 70  65 72 63 65  artment...lperce
+>6e 74 2d 74  69 6d 65 18  - 28 67 63 6f  6c 75 6d 6e  nt-time.(gcolumn
+>73 18 31 ff  bf 6a 66 69  - 72 73 74 2d  6e 61 6d 65  s.1..jfirst-name
+>6c e1 83 90  e1 83 ae e1  - 83 9a e1 83  90 68 6e 69  l............hni
+>63 2d 6e 61  6d 65 74 22  - e1 83 92 e1  83 90 e1 83  c-namet"........
+>98 e1 83 90  e1 83 a0 e1  - 83 9d 22 69  6c 61 73 74  .........."ilast
+>2d 6e 61 6d  65 78 24 e1  - 83 a1 e1 83  90 e1 83 94  -namex$.........
+>e1 83 a0 e1  83 97 e1 83  - 90 e1 83 a8  e1 83 9d e1  ................
+>83 a0 e1 83  98 e1 83 a1  - e1 83 9d 6a  64 65 70 61  ...........jdepa
+>72 74 6d 65  6e 74 18 7b  - 6c 70 65 72  63 65 6e 74  rtment.{lpercent
+>2d 74 69 6d  65 18 5a 67  - 63 6f 6c 75  6d 6e 73 18  -time.Zgcolumns.
+>1d 68 62 65  6e 65 66 69  - 74 73 64 66  75 6c 6c ff  .hbenefitsdfull.
+>ff ff ff                                              ...
