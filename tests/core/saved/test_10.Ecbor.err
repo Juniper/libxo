@@ -1,0 +1,4 @@
+test_10: duplicate sibling name: 'data'
+test_10: duplicate sibling name: 'item'
+test_10: duplicate sibling name: 'data'
+test_10: duplicate sibling name: 'cost'
