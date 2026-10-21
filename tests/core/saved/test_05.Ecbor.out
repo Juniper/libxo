@@ -1,0 +1,884 @@
+op create: [cbor] []
+ [append] @ 0 (1/1)
+ bf                                                    .
+    op open_container: [indian-languages] []
+ [append] @ 1 (11/17)
+ 70 69 6e 64  69 61 6e 2d  - 6c 61 6e 67  75 61 67 65  pindian-language
+ 73                                                    s
+ [append] @ 18 (1/1)
+ bf                                                    .
+      op string: [gurmukhi] [ਲਹੌਰ ਪਾਕਿਸਤਾਨੀ ਪੰਜਾਬ ਦੀ ਰਾਜਧਾਨੀ ਹੈ । ਲੋਕ ਗਿਣਤੀ ਦੇ ਨਾਲ ਕਰਾਚੀ ਤੋਂ ਬਾਅਦ ਲਹੌਰ ਦੂਜਾ ਸਭ ਤੋਂ ਵੱਡਾ ਸ਼ਹਿਰ ਹੈ । ਲਹੌਰ ਪਾਕਿਸਤਾਨ ਦਾ ਸਿਆਸੀ, ਰਹਤਲੀ ਤੇ ਪੜ੍ਹਾਈ ਦਾ ਗੜ੍ਹ ਹੈ ਅਤੇ ਇਸ ਲਈ ਇਹਨੂੰ ਪਾਕਿਸਤਾਨ ਦਾ ਦਿਲ ਵੀ ਕਿਹਾ ਜਾਂਦਾ ਹੈ । ਲਹੌਰ ਦਰਿਆ-ਏ-ਰਾਵੀ ਦੇ ਕੰਢੇ ਤੇ ਵਸਦਾ ਹੈ ਤੇ ਇਸਦੀ ਲੋਕ ਗਿਣਤੀ ਇੱਕ ਕਰੋੜ ਦੇ ਨੇੜੇ ਹੈ ।]
+   [append] @ 19 (9/9)
+   68 67 75 72  6d 75 6b 68  - 69                        hgurmukhi
+   [append] @ 28 (2ca/714)
+   79 02 c7 e0  a8 b2 e0 a8  - b9 e0 a9 8c  e0 a8 b0 20  y.............. 
+   e0 a8 aa e0  a8 be e0 a8  - 95 e0 a8 bf  e0 a8 b8 e0  ................
+   a8 a4 e0 a8  be e0 a8 a8  - e0 a9 80 20  e0 a8 aa e0  ........... ....
+   a9 b0 e0 a8  9c e0 a8 be  - e0 a8 ac 20  e0 a8 a6 e0  ........... ....
+   a9 80 20 e0  a8 b0 e0 a8  - be e0 a8 9c  e0 a8 a7 e0  .. .............
+   a8 be e0 a8  a8 e0 a9 80  - 20 e0 a8 b9  e0 a9 88 20  ........ ...... 
+   e0 a5 a4 20  e0 a8 b2 e0  - a9 8b e0 a8  95 20 e0 a8  ... ......... ..
+   97 e0 a8 bf  e0 a8 a3 e0  - a8 a4 e0 a9  80 20 e0 a8  ............. ..
+   a6 e0 a9 87  20 e0 a8 a8  - e0 a8 be e0  a8 b2 20 e0  .... ......... .
+   a8 95 e0 a8  b0 e0 a8 be  - e0 a8 9a e0  a9 80 20 e0  .............. .
+   a8 a4 e0 a9  8b e0 a8 82  - 20 e0 a8 ac  e0 a8 be e0  ........ .......
+   a8 85 e0 a8  a6 20 e0 a8  - b2 e0 a8 b9  e0 a9 8c e0  ..... ..........
+   a8 b0 20 e0  a8 a6 e0 a9  - 82 e0 a8 9c  e0 a8 be 20  .. ............ 
+   e0 a8 b8 e0  a8 ad 20 e0  - a8 a4 e0 a9  8b e0 a8 82  ...... .........
+   20 e0 a8 b5  e0 a9 b1 e0  - a8 a1 e0 a8  be 20 e0 a8   ............ ..
+   b8 e0 a8 bc  e0 a8 b9 e0  - a8 bf e0 a8  b0 20 e0 a8  ............. ..
+   b9 e0 a9 88  20 e0 a5 a4  - 20 e0 a8 b2  e0 a8 b9 e0  .... ... .......
+   a9 8c e0 a8  b0 20 e0 a8  - aa e0 a8 be  e0 a8 95 e0  ..... ..........
+   a8 bf e0 a8  b8 e0 a8 a4  - e0 a8 be e0  a8 a8 20 e0  .............. .
+   a8 a6 e0 a8  be 20 e0 a8  - b8 e0 a8 bf  e0 a8 86 e0  ..... ..........
+   a8 b8 e0 a9  80 2c 20 e0  - a8 b0 e0 a8  b9 e0 a8 a4  ....., .........
+   e0 a8 b2 e0  a9 80 20 e0  - a8 a4 e0 a9  87 20 e0 a8  ...... ...... ..
+   aa e0 a9 9c  e0 a9 8d e0  - a8 b9 e0 a8  be e0 a8 88  ................
+   20 e0 a8 a6  e0 a8 be 20  - e0 a8 97 e0  a9 9c e0 a9   ...... ........
+   8d e0 a8 b9  20 e0 a8 b9  - e0 a9 88 20  e0 a8 85 e0  .... ...... ....
+   a8 a4 e0 a9  87 20 e0 a8  - 87 e0 a8 b8  20 e0 a8 b2  ..... ...... ...
+   e0 a8 88 20  e0 a8 87 e0  - a8 b9 e0 a8  a8 e0 a9 82  ... ............
+   e0 a9 b0 20  e0 a8 aa e0  - a8 be e0 a8  95 e0 a8 bf  ... ............
+   e0 a8 b8 e0  a8 a4 e0 a8  - be e0 a8 a8  20 e0 a8 a6  ............ ...
+   e0 a8 be 20  e0 a8 a6 e0  - a8 bf e0 a8  b2 20 e0 a8  ... ......... ..
+   b5 e0 a9 80  20 e0 a8 95  - e0 a8 bf e0  a8 b9 e0 a8  .... ...........
+   be 20 e0 a8  9c e0 a8 be  - e0 a8 82 e0  a8 a6 e0 a8  . ..............
+   be 20 e0 a8  b9 e0 a9 88  - 20 e0 a5 a4  20 e0 a8 b2  . ...... ... ...
+   e0 a8 b9 e0  a9 8c e0 a8  - b0 20 e0 a8  a6 e0 a8 b0  ......... ......
+   e0 a8 bf e0  a8 86 2d e0  - a8 8f 2d e0  a8 b0 e0 a8  ......-...-.....
+   be e0 a8 b5  e0 a9 80 20  - e0 a8 a6 e0  a9 87 20 e0  ....... ...... .
+   a8 95 e0 a9  b0 e0 a8 a2  - e0 a9 87 20  e0 a8 a4 e0  ........... ....
+   a9 87 20 e0  a8 b5 e0 a8  - b8 e0 a8 a6  e0 a8 be 20  .. ............ 
+   e0 a8 b9 e0  a9 88 20 e0  - a8 a4 e0 a9  87 20 e0 a8  ...... ...... ..
+   87 e0 a8 b8  e0 a8 a6 e0  - a9 80 20 e0  a8 b2 e0 a9  .......... .....
+   8b e0 a8 95  20 e0 a8 97  - e0 a8 bf e0  a8 a3 e0 a8  .... ...........
+   a4 e0 a9 80  20 e0 a8 87  - e0 a9 b1 e0  a8 95 20 e0  .... ......... .
+   a8 95 e0 a8  b0 e0 a9 8b  - e0 a9 9c 20  e0 a8 a6 e0  ........... ....
+   a9 87 20 e0  a8 a8 e0 a9  - 87 e0 a9 9c  e0 a9 87 20  .. ............ 
+   e0 a8 b9 e0  a9 88 20 e0  - a5 a4                     ...... ...
+      op string: [shahmukhi] [لہور پاکستانی پنجاب دا دارالحکومت اے۔ لوک گنتی دے نال کراچی توں بعد لہور دوجا سبھ توں وڈا شہر اے۔ لہور پاکستان دا سیاسی، رہتلی تے پڑھائی دا گڑھ اے تے اس لئی ایھنوں پاکستان دا دل وی کیھا جاندا اے۔ لہور دریاۓ راوی دے کنڈھے تے وسدا اے اسدی لوک گنتی اک کروڑ دے نیڑے اے ۔]
+   [append] @ 742 (a/10)
+   69 73 68 61  68 6d 75 6b  - 68 69                     ishahmukhi
+   [append] @ 752 (1de/478)
+   79 01 db d9  84 db 81 d9  - 88 d8 b1 20  d9 be d8 a7  y.......... ....
+   da a9 d8 b3  d8 aa d8 a7  - d9 86 db 8c  20 d9 be d9  ............ ...
+   86 d8 ac d8  a7 d8 a8 20  - d8 af d8 a7  20 d8 af d8  ....... .... ...
+   a7 d8 b1 d8  a7 d9 84 d8  - ad da a9 d9  88 d9 85 d8  ................
+   aa 20 d8 a7  db 92 db 94  - 20 d9 84 d9  88 da a9 20  . ...... ...... 
+   da af d9 86  d8 aa db 8c  - 20 d8 af db  92 20 d9 86  ........ .... ..
+   d8 a7 d9 84  20 da a9 d8  - b1 d8 a7 da  86 db 8c 20  .... .......... 
+   d8 aa d9 88  da ba 20 d8  - a8 d8 b9 d8  af 20 d9 84  ...... ...... ..
+   db 81 d9 88  d8 b1 20 d8  - af d9 88 d8  ac d8 a7 20  ...... ........ 
+   d8 b3 d8 a8  da be 20 d8  - aa d9 88 da  ba 20 d9 88  ...... ...... ..
+   da 88 d8 a7  20 d8 b4 db  - 81 d8 b1 20  d8 a7 db 92  .... ...... ....
+   db 94 20 d9  84 db 81 d9  - 88 d8 b1 20  d9 be d8 a7  .. ........ ....
+   da a9 d8 b3  d8 aa d8 a7  - d9 86 20 d8  af d8 a7 20  .......... .... 
+   d8 b3 db 8c  d8 a7 d8 b3  - db 8c d8 8c  20 d8 b1 db  ............ ...
+   81 d8 aa d9  84 db 8c 20  - d8 aa db 92  20 d9 be da  ....... .... ...
+   91 da be d8  a7 d8 a6 db  - 8c 20 d8 af  d8 a7 20 da  ......... .... .
+   af da 91 da  be 20 d8 a7  - db 92 20 d8  aa db 92 20  ..... .... .... 
+   d8 a7 d8 b3  20 d9 84 d8  - a6 db 8c 20  d8 a7 db 8c  .... ...... ....
+   da be d9 86  d9 88 da ba  - 20 d9 be d8  a7 da a9 d8  ........ .......
+   b3 d8 aa d8  a7 d9 86 20  - d8 af d8 a7  20 d8 af d9  ....... .... ...
+   84 20 d9 88  db 8c 20 da  - a9 db 8c da  be d8 a7 20  . .... ........ 
+   d8 ac d8 a7  d9 86 d8 af  - d8 a7 20 d8  a7 db 92 db  .......... .....
+   94 20 d9 84  db 81 d9 88  - d8 b1 20 d8  af d8 b1 db  . ........ .....
+   8c d8 a7 db  93 20 d8 b1  - d8 a7 d9 88  db 8c 20 d8  ..... ........ .
+   af db 92 20  da a9 d9 86  - da 88 da be  db 92 20 d8  ... .......... .
+   aa db 92 20  d9 88 d8 b3  - d8 af d8 a7  20 d8 a7 db  ... ........ ...
+   92 20 d8 a7  d8 b3 d8 af  - db 8c 20 d9  84 d9 88 da  . ........ .....
+   a9 20 da af  d9 86 d8 aa  - db 8c 20 d8  a7 da a9 20  . ........ .... 
+   da a9 d8 b1  d9 88 da 91  - 20 d8 af db  92 20 d9 86  ........ .... ..
+   db 8c da 91  db 92 20 d8  - a7 db 92 20  db 94        ...... .... ..
+      op string: [tranliteration] [lahor pākistān panjāb dā dārul hakūmat ē. lōk giṇtī dē nāḷ karācī tō᷈ bāad lahor dūjā sab tō᷈ vaḍḍā shahr ē. lahor pākistān dā siāsī, rahtalī tē paṛā̀ī dā gā́ṛ ē tē is laī ihnū᷈ pākistān dā dil vī kehā jāndā ē. lahor dariāē rāvī dē kanḍē tē vasdā ē. isdī lōk giṇtī ikk karōṛ dē nēṛē ē.]
+   [append] @ 1230 (f/15)
+   6e 74 72 61  6e 6c 69 74  - 65 72 61 74  69 6f 6e     ntranliteration
+   [append] @ 1245 (178/376)
+   79 01 75 6c  61 68 6f 72  - 20 70 c4 81  6b 69 73 74  y.ulahor p..kist
+   c4 81 6e 20  70 61 6e 6a  - c4 81 62 20  64 c4 81 20  ..n panj..b d.. 
+   64 c4 81 72  75 6c 20 68  - 61 6b c5 ab  6d 61 74 20  d..rul hak..mat 
+   c4 93 2e 20  6c c5 8d 6b  - 20 67 69 e1  b9 87 74 c4  ... l..k gi...t.
+   ab 20 64 c4  93 20 6e c4  - 81 e1 b8 b7  20 6b 61 72  . d.. n..... kar
+   c4 81 63 c4  ab 20 74 c5  - 8d e1 b7 88  20 62 c4 81  ..c.. t..... b..
+   61 64 20 6c  61 68 6f 72  - 20 64 c5 ab  6a c4 81 20  ad lahor d..j.. 
+   73 61 62 20  74 c5 8d e1  - b7 88 20 76  61 e1 b8 8d  sab t..... va...
+   e1 b8 8d c4  81 20 73 68  - 61 68 72 20  c4 93 2e 20  ..... shahr ... 
+   6c 61 68 6f  72 20 70 c4  - 81 6b 69 73  74 c4 81 6e  lahor p..kist..n
+   20 64 c4 81  20 73 69 c4  - 81 73 c4 ab  2c 20 72 61   d.. si..s.., ra
+   68 74 61 6c  c4 ab 20 74  - c4 93 20 70  61 e1 b9 9b  htal.. t.. pa...
+   c4 81 cc 80  c4 ab 20 64  - c4 81 20 67  c4 81 cc 81  ...... d.. g....
+   e1 b9 9b 20  c4 93 20 74  - c4 93 20 69  73 20 6c 61  ... .. t.. is la
+   c4 ab 20 69  68 6e c5 ab  - e1 b7 88 20  70 c4 81 6b  .. ihn..... p..k
+   69 73 74 c4  81 6e 20 64  - c4 81 20 64  69 6c 20 76  ist..n d.. dil v
+   c4 ab 20 6b  65 68 c4 81  - 20 6a c4 81  6e 64 c4 81  .. keh.. j..nd..
+   20 c4 93 2e  20 6c 61 68  - 6f 72 20 64  61 72 69 c4   ... lahor dari.
+   81 c4 93 20  72 c4 81 76  - c4 ab 20 64  c4 93 20 6b  ... r..v.. d.. k
+   61 6e e1 b8  8d c4 93 20  - 74 c4 93 20  76 61 73 64  an..... t.. vasd
+   c4 81 20 c4  93 2e 20 69  - 73 64 c4 ab  20 6c c5 8d  .. ... isd.. l..
+   6b 20 67 69  e1 b9 87 74  - c4 ab 20 69  6b 6b 20 6b  k gi...t.. ikk k
+   61 72 c5 8d  e1 b9 9b 20  - 64 c4 93 20  6e c4 93 e1  ar..... d.. n...
+   b9 9b c4 93  20 c4 93 2e                              .... ...
+      op close_container: [indian-languages] []
+   [append] @ 1621 (1/1)
+   ff                                                    .
+    op open_container: [employees] []
+ [append] @ 1622 (a/10)
+ 69 65 6d 70  6c 6f 79 65  - 65 73                     iemployees
+ [append] @ 1632 (1/1)
+ bf                                                    .
+      op open_leaf_list: [wc] []
+   [append] @ 1633 (3/3)
+   62 77 63                                              bwc
+   [append] @ 1636 (1/1)
+   9f                                                    .
+        op string: [wc] [෴ - 0xdf4 - 1]
+     [append] @ 1637 (10/16)
+     6f e0 b7 b4  20 2d 20 30  - 78 64 66 34  20 2d 20 31  o... - 0xdf4 - 1
+        op string: [wc] [ණ - 0xdab - 1]
+     [append] @ 1653 (10/16)
+     6f e0 b6 ab  20 2d 20 30  - 78 64 61 62  20 2d 20 31  o... - 0xdab - 1
+        op string: [wc] [් - 0xdca - 0]
+     [append] @ 1669 (10/16)
+     6f e0 b7 8a  20 2d 20 30  - 78 64 63 61  20 2d 20 30  o... - 0xdca - 0
+        op string: [wc] [ණ - 0xdab - 1]
+     [append] @ 1685 (10/16)
+     6f e0 b6 ab  20 2d 20 30  - 78 64 61 62  20 2d 20 31  o... - 0xdab - 1
+        op string: [wc] [្ - 0x17d2 - 0]
+     [append] @ 1701 (11/17)
+     70 e1 9f 92  20 2d 20 30  - 78 31 37 64  32 20 2d 20  p... - 0x17d2 - 
+     30                                                    0
+        op string: [wc] [෴ - 0xdf4 - 1]
+     [append] @ 1718 (10/16)
+     6f e0 b7 b4  20 2d 20 30  - 78 64 66 34  20 2d 20 31  o... - 0xdf4 - 1
+        op string: [wc] [1 - 0x31 - 1]
+     [append] @ 1734 (d/13)
+     6c 31 20 2d  20 30 78 33  - 31 20 2d 20  31           l1 - 0x31 - 1
+        op string: [wc] [͏ - 0x34f - 0]
+     [append] @ 1747 (f/15)
+     6e cd 8f 20  2d 20 30 78  - 33 34 66 20  2d 20 30     n.. - 0x34f - 0
+        op string: [wc] [2 - 0x32 - 1]
+     [append] @ 1762 (d/13)
+     6c 32 20 2d  20 30 78 33  - 32 20 2d 20  31           l2 - 0x32 - 1
+        op string: [wc] [⃝ - 0x20dd - 0]
+     [append] @ 1775 (11/17)
+     70 e2 83 9d  20 2d 20 30  - 78 32 30 64  64 20 2d 20  p... - 0x20dd - 
+     30                                                    0
+        op close_leaf_list: [wc] []
+     [append] @ 1792 (1/1)
+     ff                                                    .
+      op string: [fancy] [1͏2⃝]
+   [append] @ 1793 (6/6)
+   65 66 61 6e  63 79                                    efancy
+   [append] @ 1799 (8/8)
+   67 31 cd 8f  32 e2 83 9d                              g1..2...
+      op string: [v1] [γιγνώσκειν]
+   [append] @ 1807 (3/3)
+   62 76 31                                              bv1
+   [append] @ 1810 (16/22)
+   75 ce b3 ce  b9 ce b3 ce  - bd e1 bd bd  cf 83 ce ba  u...............
+   ce b5 ce b9  ce bd                                    ......
+      op string: [v2] [ὦ ἄνδρες ᾿Αθηναῖοι]
+   [append] @ 1832 (3/3)
+   62 76 32                                              bv2
+   [append] @ 1835 (28/40)
+   78 26 e1 bd  a6 20 e1 bc  - 84 ce bd ce  b4 cf 81 ce  x&... ..........
+   b5 cf 82 20  e1 be bf ce  - 91 ce b8 ce  b7 ce bd ce  ... ............
+   b1 e1 bf 96  ce bf ce b9                              ........
+      op string: [v1] [ახლავე გაიაროთ რეგისტრაცია]
+   [append] @ 1875 (3/3)
+   62 76 31                                              bv1
+   [append] @ 1878 (4c/76)
+   78 4a e1 83  90 e1 83 ae  - e1 83 9a e1  83 90 e1 83  xJ..............
+   95 e1 83 94  20 e1 83 92  - e1 83 90 e1  83 98 e1 83  .... ...........
+   90 e1 83 a0  e1 83 9d e1  - 83 97 20 e1  83 a0 e1 83  .......... .....
+   94 e1 83 92  e1 83 98 e1  - 83 a1 e1 83  a2 e1 83 a0  ................
+   e1 83 90 e1  83 aa e1 83  - 98 e1 83 90               ............
+      op string: [v2] [Unicode-ის მეათე საერთაშორისო]
+   [append] @ 1954 (3/3)
+   62 76 32                                              bv2
+   [append] @ 1957 (45/69)
+   78 43 55 6e  69 63 6f 64  - 65 2d e1 83  98 e1 83 a1  xCUnicode-......
+   20 e1 83 9b  e1 83 94 e1  - 83 90 e1 83  97 e1 83 94   ...............
+   20 e1 83 a1  e1 83 90 e1  - 83 94 e1 83  a0 e1 83 97   ...............
+   e1 83 90 e1  83 a8 e1 83  - 9d e1 83 a0  e1 83 98 e1  ................
+   83 a1 e1 83  9d                                       .....
+      op content: [width] [55]
+   [append] @ 2026 (6/6)
+   65 77 69 64  74 68                                    ewidth
+   [content] @ 2032 (2/2)
+   18 37                                                 .7
+      op string: [sinhala] [෴ණ්ණ෴]
+   [append] @ 2034 (8/8)
+   67 73 69 6e  68 61 6c 61                              gsinhala
+   [append] @ 2042 (10/16)
+   6f e0 b7 b4  e0 b6 ab e0  - b7 8a e0 b6  ab e0 b7 b4  o...............
+      op content: [width] [4]
+   [append] @ 2058 (6/6)
+   65 77 69 64  74 68                                    ewidth
+   [content] @ 2064 (1/1)
+   04                                                    .
+      op string: [sinhala] [෴]
+   [append] @ 2065 (8/8)
+   67 73 69 6e  68 61 6c 61                              gsinhala
+   [append] @ 2073 (4/4)
+   63 e0 b7 b4                                           c...
+      op content: [width] [1]
+   [append] @ 2077 (6/6)
+   65 77 69 64  74 68                                    ewidth
+   [content] @ 2083 (1/1)
+   01                                                    .
+      op string: [sinhala] [෴ණ්ණ෴෴ණ්ණ෴]
+   [append] @ 2084 (8/8)
+   67 73 69 6e  68 61 6c 61                              gsinhala
+   [append] @ 2092 (20/32)
+   78 1e e0 b7  b4 e0 b6 ab  - e0 b7 8a e0  b6 ab e0 b7  x...............
+   b4 e0 b7 b4  e0 b6 ab e0  - b7 8a e0 b6  ab e0 b7 b4  ................
+      op content: [width] [8]
+   [append] @ 2124 (6/6)
+   65 77 69 64  74 68                                    ewidth
+   [content] @ 2130 (1/1)
+   08                                                    .
+      op string: [not-sinhala] [123456]
+   [append] @ 2131 (c/12)
+   6b 6e 6f 74  2d 73 69 6e  - 68 61 6c 61               knot-sinhala
+   [append] @ 2143 (7/7)
+   66 31 32 33  34 35 36                                 f123456
+      op string: [tag] [ර්‍ඝ]
+   [append] @ 2150 (4/4)
+   63 74 61 67                                           ctag
+   [append] @ 2154 (d/13)
+   6c e0 b6 bb  e0 b7 8a e2  - 80 8d e0 b6  9d           l............
+      op content: [width] [2]
+   [append] @ 2167 (6/6)
+   65 77 69 64  74 68                                    ewidth
+   [content] @ 2173 (1/1)
+   02                                                    .
+      op open_list: [employee] []
+   [append] @ 2174 (9/9)
+   68 65 6d 70  6c 6f 79 65  - 65                        hemployee
+   [append] @ 2183 (1/1)
+   9f                                                    .
+        op open_instance: [employee] []
+     [append] @ 2184 (1/1)
+     bf                                                    .
+          op string: [first-name] [Jim]
+       [append] @ 2185 (b/11)
+       6a 66 69 72  73 74 2d 6e  - 61 6d 65                  jfirst-name
+       [append] @ 2196 (4/4)
+       63 4a 69 6d                                           cJim
+          op string: [nic-name] ["რეგტ"]
+       [append] @ 2200 (9/9)
+       68 6e 69 63  2d 6e 61 6d  - 65                        hnic-name
+       [append] @ 2209 (f/15)
+       6e 22 e1 83  a0 e1 83 94  - e1 83 92 e1  83 a2 22     n"............"
+          op string: [last-name] [გთხოვთ ახ]
+       [append] @ 2224 (a/10)
+       69 6c 61 73  74 2d 6e 61  - 6d 65                     ilast-name
+       [append] @ 2234 (1b/27)
+       78 19 e1 83  92 e1 83 97  - e1 83 ae e1  83 9d e1 83  x...............
+       95 e1 83 97  20 e1 83 90  - e1 83 ae                  .... ......
+          op content: [department] [431]
+       [append] @ 2261 (b/11)
+       6a 64 65 70  61 72 74 6d  - 65 6e 74                  jdepartment
+       [content] @ 2272 (3/3)
+       19 01 af                                              ...
+          op content: [percent-time] [90]
+       [append] @ 2275 (d/13)
+       6c 70 65 72  63 65 6e 74  - 2d 74 69 6d  65           lpercent-time
+       [content] @ 2288 (2/2)
+       18 5a                                                 .Z
+          op attr: [full-time] [honest & for true]
+          op string: [benefits] [full]
+       [append] @ 2290 (9/9)
+       68 62 65 6e  65 66 69 74  - 73                        hbenefits
+       [append] @ 2299 (5/5)
+       64 66 75 6c  6c                                       dfull
+          op close_instance: [employee] []
+       [append] @ 2304 (1/1)
+       ff                                                    .
+        op open_instance: [employee] []
+     [append] @ 2305 (1/1)
+     bf                                                    .
+          op string: [first-name] [Terry]
+       [append] @ 2306 (b/11)
+       6a 66 69 72  73 74 2d 6e  - 61 6d 65                  jfirst-name
+       [append] @ 2317 (6/6)
+       65 54 65 72  72 79                                    eTerry
+          op string: [nic-name] ["<one"]
+       [append] @ 2323 (9/9)
+       68 6e 69 63  2d 6e 61 6d  - 65                        hnic-name
+       [append] @ 2332 (7/7)
+       66 22 3c 6f  6e 65 22                                 f"<one"
+          op string: [last-name] [Οὐχὶ ταὐτὰ παρίσταταί μοι Jones]
+       [append] @ 2339 (a/10)
+       69 6c 61 73  74 2d 6e 61  - 6d 65                     ilast-name
+       [append] @ 2349 (3d/61)
+       78 3b ce 9f  e1 bd 90 cf  - 87 e1 bd b6  20 cf 84 ce  x;.......... ...
+       b1 e1 bd 90  cf 84 e1 bd  - b0 20 cf 80  ce b1 cf 81  ......... ......
+       e1 bd b7 cf  83 cf 84 ce  - b1 cf 84 ce  b1 e1 bd b7  ................
+       20 ce bc ce  bf ce b9 20  - 4a 6f 6e 65  73            ...... Jones
+          op content: [department] [660]
+       [append] @ 2410 (b/11)
+       6a 64 65 70  61 72 74 6d  - 65 6e 74                  jdepartment
+       [content] @ 2421 (3/3)
+       19 02 94                                              ...
+          op content: [percent-time] [90]
+       [append] @ 2424 (d/13)
+       6c 70 65 72  63 65 6e 74  - 2d 74 69 6d  65           lpercent-time
+       [content] @ 2437 (2/2)
+       18 5a                                                 .Z
+          op attr: [full-time] [honest & for true]
+          op string: [benefits] [full]
+       [append] @ 2439 (9/9)
+       68 62 65 6e  65 66 69 74  - 73                        hbenefits
+       [append] @ 2448 (5/5)
+       64 66 75 6c  6c                                       dfull
+          op close_instance: [employee] []
+       [append] @ 2453 (1/1)
+       ff                                                    .
+        op open_instance: [employee] []
+     [append] @ 2454 (1/1)
+     bf                                                    .
+          op string: [first-name] [Leslie]
+       [append] @ 2455 (b/11)
+       6a 66 69 72  73 74 2d 6e  - 61 6d 65                  jfirst-name
+       [append] @ 2466 (7/7)
+       66 4c 65 73  6c 69 65                                 fLeslie
+          op string: [nic-name] ["Les"]
+       [append] @ 2473 (9/9)
+       68 6e 69 63  2d 6e 61 6d  - 65                        hnic-name
+       [append] @ 2482 (6/6)
+       65 22 4c 65  73 22                                    e"Les"
+          op string: [last-name] [Patterson]
+       [append] @ 2488 (a/10)
+       69 6c 61 73  74 2d 6e 61  - 6d 65                     ilast-name
+       [append] @ 2498 (a/10)
+       69 50 61 74  74 65 72 73  - 6f 6e                     iPatterson
+          op content: [department] [341]
+       [append] @ 2508 (b/11)
+       6a 64 65 70  61 72 74 6d  - 65 6e 74                  jdepartment
+       [content] @ 2519 (3/3)
+       19 01 55                                              ..U
+          op content: [percent-time] [60]
+       [append] @ 2522 (d/13)
+       6c 70 65 72  63 65 6e 74  - 2d 74 69 6d  65           lpercent-time
+       [content] @ 2535 (2/2)
+       18 3c                                                 .<
+          op attr: [full-time] [honest & for true]
+          op string: [benefits] [full]
+       [append] @ 2537 (9/9)
+       68 62 65 6e  65 66 69 74  - 73                        hbenefits
+       [append] @ 2546 (5/5)
+       64 66 75 6c  6c                                       dfull
+          op close_instance: [employee] []
+       [append] @ 2551 (1/1)
+       ff                                                    .
+        op open_instance: [employee] []
+     [append] @ 2552 (1/1)
+     bf                                                    .
+          op string: [first-name] [Ashley]
+       [append] @ 2553 (b/11)
+       6a 66 69 72  73 74 2d 6e  - 61 6d 65                  jfirst-name
+       [append] @ 2564 (7/7)
+       66 41 73 68  6c 65 79                                 fAshley
+          op string: [nic-name] ["Ash"]
+       [append] @ 2571 (9/9)
+       68 6e 69 63  2d 6e 61 6d  - 65                        hnic-name
+       [append] @ 2580 (6/6)
+       65 22 41 73  68 22                                    e"Ash"
+          op string: [last-name] [Meter & Smith]
+       [append] @ 2586 (a/10)
+       69 6c 61 73  74 2d 6e 61  - 6d 65                     ilast-name
+       [append] @ 2596 (e/14)
+       6d 4d 65 74  65 72 20 26  - 20 53 6d 69  74 68        mMeter & Smith
+          op content: [department] [1440]
+       [append] @ 2610 (b/11)
+       6a 64 65 70  61 72 74 6d  - 65 6e 74                  jdepartment
+       [content] @ 2621 (3/3)
+       19 05 a0                                              ...
+          op content: [percent-time] [40]
+       [append] @ 2624 (d/13)
+       6c 70 65 72  63 65 6e 74  - 2d 74 69 6d  65           lpercent-time
+       [content] @ 2637 (2/2)
+       18 28                                                 .(
+          op close_instance: [employee] []
+       [append] @ 2639 (1/1)
+       ff                                                    .
+        op open_instance: [employee] []
+     [append] @ 2640 (1/1)
+     bf                                                    .
+          op string: [first-name] [0123456789]
+       [append] @ 2641 (b/11)
+       6a 66 69 72  73 74 2d 6e  - 61 6d 65                  jfirst-name
+       [append] @ 2652 (b/11)
+       6a 30 31 32  33 34 35 36  - 37 38 39                  j0123456789
+          op string: [nic-name] ["0123456789"]
+       [append] @ 2663 (9/9)
+       68 6e 69 63  2d 6e 61 6d  - 65                        hnic-name
+       [append] @ 2672 (d/13)
+       6c 22 30 31  32 33 34 35  - 36 37 38 39  22           l"0123456789"
+          op string: [last-name] [012345678901234567890]
+       [append] @ 2685 (a/10)
+       69 6c 61 73  74 2d 6e 61  - 6d 65                     ilast-name
+       [append] @ 2695 (16/22)
+       75 30 31 32  33 34 35 36  - 37 38 39 30  31 32 33 34  u012345678901234
+       35 36 37 38  39 30                                    567890
+          op content: [department] [1440]
+       [append] @ 2717 (b/11)
+       6a 64 65 70  61 72 74 6d  - 65 6e 74                  jdepartment
+       [content] @ 2728 (3/3)
+       19 05 a0                                              ...
+          op content: [percent-time] [40]
+       [append] @ 2731 (d/13)
+       6c 70 65 72  63 65 6e 74  - 2d 74 69 6d  65           lpercent-time
+       [content] @ 2744 (2/2)
+       18 28                                                 .(
+          op close_instance: [employee] []
+       [append] @ 2746 (1/1)
+       ff                                                    .
+        op open_instance: [employee] []
+     [append] @ 2747 (1/1)
+     bf                                                    .
+          op string: [first-name] [ახლა]
+       [append] @ 2748 (b/11)
+       6a 66 69 72  73 74 2d 6e  - 61 6d 65                  jfirst-name
+       [append] @ 2759 (d/13)
+       6c e1 83 90  e1 83 ae e1  - 83 9a e1 83  90           l............
+          op string: [nic-name] ["გაიარო"]
+       [append] @ 2772 (9/9)
+       68 6e 69 63  2d 6e 61 6d  - 65                        hnic-name
+       [append] @ 2781 (15/21)
+       74 22 e1 83  92 e1 83 90  - e1 83 98 e1  83 90 e1 83  t"..............
+       a0 e1 83 9d  22                                       ...."
+          op string: [last-name] [საერთაშორისო]
+       [append] @ 2802 (a/10)
+       69 6c 61 73  74 2d 6e 61  - 6d 65                     ilast-name
+       [append] @ 2812 (26/38)
+       78 24 e1 83  a1 e1 83 90  - e1 83 94 e1  83 a0 e1 83  x$..............
+       97 e1 83 90  e1 83 a8 e1  - 83 9d e1 83  a0 e1 83 98  ................
+       e1 83 a1 e1  83 9d                                    ......
+          op content: [department] [123]
+       [append] @ 2850 (b/11)
+       6a 64 65 70  61 72 74 6d  - 65 6e 74                  jdepartment
+       [content] @ 2861 (2/2)
+       18 7b                                                 .{
+          op content: [percent-time] [90]
+       [append] @ 2863 (d/13)
+       6c 70 65 72  63 65 6e 74  - 2d 74 69 6d  65           lpercent-time
+       [content] @ 2876 (2/2)
+       18 5a                                                 .Z
+          op attr: [full-time] [honest & for true]
+          op string: [benefits] [full]
+       [append] @ 2878 (9/9)
+       68 62 65 6e  65 66 69 74  - 73                        hbenefits
+       [append] @ 2887 (5/5)
+       64 66 75 6c  6c                                       dfull
+          op close_instance: [employee] []
+       [append] @ 2892 (1/1)
+       ff                                                    .
+        op open_instance: [employee] []
+     [append] @ 2893 (1/1)
+     bf                                                    .
+          op string: [first-name] [෴ණ්ණ෴෴ණ්ණ෴]
+       [append] @ 2894 (b/11)
+       6a 66 69 72  73 74 2d 6e  - 61 6d 65                  jfirst-name
+       [append] @ 2905 (20/32)
+       78 1e e0 b7  b4 e0 b6 ab  - e0 b7 8a e0  b6 ab e0 b7  x...............
+       b4 e0 b7 b4  e0 b6 ab e0  - b7 8a e0 b6  ab e0 b7 b4  ................
+          op string: [nic-name] ["Mick"]
+       [append] @ 2937 (9/9)
+       68 6e 69 63  2d 6e 61 6d  - 65                        hnic-name
+       [append] @ 2946 (7/7)
+       66 22 4d 69  63 6b 22                                 f"Mick"
+          op string: [last-name] [෴ණ්ණ෴෴ණ්ණ෴෴ණ්ණ෴෴෴]
+       [append] @ 2953 (a/10)
+       69 6c 61 73  74 2d 6e 61  - 6d 65                     ilast-name
+       [append] @ 2963 (35/53)
+       78 33 e0 b7  b4 e0 b6 ab  - e0 b7 8a e0  b6 ab e0 b7  x3..............
+       b4 e0 b7 b4  e0 b6 ab e0  - b7 8a e0 b6  ab e0 b7 b4  ................
+       e0 b7 b4 e0  b6 ab e0 b7  - 8a e0 b6 ab  e0 b7 b4 e0  ................
+       b7 b4 e0 b7  b4                                       .....
+          op content: [department] [110]
+       [append] @ 3016 (b/11)
+       6a 64 65 70  61 72 74 6d  - 65 6e 74                  jdepartment
+       [content] @ 3027 (2/2)
+       18 6e                                                 .n
+          op content: [percent-time] [20]
+       [append] @ 3029 (d/13)
+       6c 70 65 72  63 65 6e 74  - 2d 74 69 6d  65           lpercent-time
+       [content] @ 3042 (1/1)
+       14                                                    .
+          op close_instance: [employee] []
+       [append] @ 3043 (1/1)
+       ff                                                    .
+        op close_list: [employee] []
+     [append] @ 3044 (1/1)
+     ff                                                    .
+      op open_list: [employee] []
+   [append] @ 3045 (9/9)
+   68 65 6d 70  6c 6f 79 65  - 65                        hemployee
+   [append] @ 3054 (1/1)
+   9f                                                    .
+        op open_instance: [employee] []
+     [append] @ 3055 (1/1)
+     bf                                                    .
+          op string: [first-name] [Jim]
+       [append] @ 3056 (b/11)
+       6a 66 69 72  73 74 2d 6e  - 61 6d 65                  jfirst-name
+       [append] @ 3067 (4/4)
+       63 4a 69 6d                                           cJim
+          op string: [nic-name] ["რეგტ"]
+       [append] @ 3071 (9/9)
+       68 6e 69 63  2d 6e 61 6d  - 65                        hnic-name
+       [append] @ 3080 (f/15)
+       6e 22 e1 83  a0 e1 83 94  - e1 83 92 e1  83 a2 22     n"............"
+          op attr: [full-time] [honest & for true]
+          op string: [benefits] [full]
+       [append] @ 3095 (9/9)
+       68 62 65 6e  65 66 69 74  - 73                        hbenefits
+       [append] @ 3104 (5/5)
+       64 66 75 6c  6c                                       dfull
+          op close_instance: [employee] []
+       [append] @ 3109 (1/1)
+       ff                                                    .
+        op open_instance: [employee] []
+     [append] @ 3110 (1/1)
+     bf                                                    .
+          op string: [first-name] [Terry]
+       [append] @ 3111 (b/11)
+       6a 66 69 72  73 74 2d 6e  - 61 6d 65                  jfirst-name
+       [append] @ 3122 (6/6)
+       65 54 65 72  72 79                                    eTerry
+          op string: [nic-name] ["<one"]
+       [append] @ 3128 (9/9)
+       68 6e 69 63  2d 6e 61 6d  - 65                        hnic-name
+       [append] @ 3137 (7/7)
+       66 22 3c 6f  6e 65 22                                 f"<one"
+          op attr: [full-time] [honest & for true]
+          op string: [benefits] [full]
+       [append] @ 3144 (9/9)
+       68 62 65 6e  65 66 69 74  - 73                        hbenefits
+       [append] @ 3153 (5/5)
+       64 66 75 6c  6c                                       dfull
+          op close_instance: [employee] []
+       [append] @ 3158 (1/1)
+       ff                                                    .
+        op open_instance: [employee] []
+     [append] @ 3159 (1/1)
+     bf                                                    .
+          op string: [first-name] [Leslie]
+       [append] @ 3160 (b/11)
+       6a 66 69 72  73 74 2d 6e  - 61 6d 65                  jfirst-name
+       [append] @ 3171 (7/7)
+       66 4c 65 73  6c 69 65                                 fLeslie
+          op string: [nic-name] ["Les"]
+       [append] @ 3178 (9/9)
+       68 6e 69 63  2d 6e 61 6d  - 65                        hnic-name
+       [append] @ 3187 (6/6)
+       65 22 4c 65  73 22                                    e"Les"
+          op attr: [full-time] [honest & for true]
+          op string: [benefits] [full]
+       [append] @ 3193 (9/9)
+       68 62 65 6e  65 66 69 74  - 73                        hbenefits
+       [append] @ 3202 (5/5)
+       64 66 75 6c  6c                                       dfull
+          op close_instance: [employee] []
+       [append] @ 3207 (1/1)
+       ff                                                    .
+        op open_instance: [employee] []
+     [append] @ 3208 (1/1)
+     bf                                                    .
+          op string: [first-name] [Ashley]
+       [append] @ 3209 (b/11)
+       6a 66 69 72  73 74 2d 6e  - 61 6d 65                  jfirst-name
+       [append] @ 3220 (7/7)
+       66 41 73 68  6c 65 79                                 fAshley
+          op string: [nic-name] ["Ash"]
+       [append] @ 3227 (9/9)
+       68 6e 69 63  2d 6e 61 6d  - 65                        hnic-name
+       [append] @ 3236 (6/6)
+       65 22 41 73  68 22                                    e"Ash"
+          op close_instance: [employee] []
+       [append] @ 3242 (1/1)
+       ff                                                    .
+        op open_instance: [employee] []
+     [append] @ 3243 (1/1)
+     bf                                                    .
+          op string: [first-name] [0123456789]
+       [append] @ 3244 (b/11)
+       6a 66 69 72  73 74 2d 6e  - 61 6d 65                  jfirst-name
+       [append] @ 3255 (b/11)
+       6a 30 31 32  33 34 35 36  - 37 38 39                  j0123456789
+          op string: [nic-name] ["0123456789"]
+       [append] @ 3266 (9/9)
+       68 6e 69 63  2d 6e 61 6d  - 65                        hnic-name
+       [append] @ 3275 (d/13)
+       6c 22 30 31  32 33 34 35  - 36 37 38 39  22           l"0123456789"
+          op close_instance: [employee] []
+       [append] @ 3288 (1/1)
+       ff                                                    .
+        op open_instance: [employee] []
+     [append] @ 3289 (1/1)
+     bf                                                    .
+          op string: [first-name] [ახლა]
+       [append] @ 3290 (b/11)
+       6a 66 69 72  73 74 2d 6e  - 61 6d 65                  jfirst-name
+       [append] @ 3301 (d/13)
+       6c e1 83 90  e1 83 ae e1  - 83 9a e1 83  90           l............
+          op string: [nic-name] ["გაიარო"]
+       [append] @ 3314 (9/9)
+       68 6e 69 63  2d 6e 61 6d  - 65                        hnic-name
+       [append] @ 3323 (15/21)
+       74 22 e1 83  92 e1 83 90  - e1 83 98 e1  83 90 e1 83  t"..............
+       a0 e1 83 9d  22                                       ...."
+          op attr: [full-time] [honest & for true]
+          op string: [benefits] [full]
+       [append] @ 3344 (9/9)
+       68 62 65 6e  65 66 69 74  - 73                        hbenefits
+       [append] @ 3353 (5/5)
+       64 66 75 6c  6c                                       dfull
+          op close_instance: [employee] []
+       [append] @ 3358 (1/1)
+       ff                                                    .
+        op open_instance: [employee] []
+     [append] @ 3359 (1/1)
+     bf                                                    .
+          op string: [first-name] [෴ණ්ණ෴෴ණ්ණ෴]
+       [append] @ 3360 (b/11)
+       6a 66 69 72  73 74 2d 6e  - 61 6d 65                  jfirst-name
+       [append] @ 3371 (20/32)
+       78 1e e0 b7  b4 e0 b6 ab  - e0 b7 8a e0  b6 ab e0 b7  x...............
+       b4 e0 b7 b4  e0 b6 ab e0  - b7 8a e0 b6  ab e0 b7 b4  ................
+          op string: [nic-name] ["Mick"]
+       [append] @ 3403 (9/9)
+       68 6e 69 63  2d 6e 61 6d  - 65                        hnic-name
+       [append] @ 3412 (7/7)
+       66 22 4d 69  63 6b 22                                 f"Mick"
+          op close_instance: [employee] []
+       [append] @ 3419 (1/1)
+       ff                                                    .
+        op close_list: [employee] []
+     [append] @ 3420 (1/1)
+     ff                                                    .
+      op close_container: [employees] []
+   [append] @ 3421 (1/1)
+   ff                                                    .
+    op finish: [] []
+ [append] @ 3422 (1/1)
+ ff                                                    .
+  op flush: [] []
+>[cbor] @ 0 (d5f/3423)
+>bf 70 69 6e  64 69 61 6e  - 2d 6c 61 6e  67 75 61 67  .pindian-languag
+>65 73 bf 68  67 75 72 6d  - 75 6b 68 69  79 02 c7 e0  es.hgurmukhiy...
+>a8 b2 e0 a8  b9 e0 a9 8c  - e0 a8 b0 20  e0 a8 aa e0  ........... ....
+>a8 be e0 a8  95 e0 a8 bf  - e0 a8 b8 e0  a8 a4 e0 a8  ................
+>be e0 a8 a8  e0 a9 80 20  - e0 a8 aa e0  a9 b0 e0 a8  ....... ........
+>9c e0 a8 be  e0 a8 ac 20  - e0 a8 a6 e0  a9 80 20 e0  ....... ...... .
+>a8 b0 e0 a8  be e0 a8 9c  - e0 a8 a7 e0  a8 be e0 a8  ................
+>a8 e0 a9 80  20 e0 a8 b9  - e0 a9 88 20  e0 a5 a4 20  .... ...... ... 
+>e0 a8 b2 e0  a9 8b e0 a8  - 95 20 e0 a8  97 e0 a8 bf  ......... ......
+>e0 a8 a3 e0  a8 a4 e0 a9  - 80 20 e0 a8  a6 e0 a9 87  ......... ......
+>20 e0 a8 a8  e0 a8 be e0  - a8 b2 20 e0  a8 95 e0 a8   ......... .....
+>b0 e0 a8 be  e0 a8 9a e0  - a9 80 20 e0  a8 a4 e0 a9  .......... .....
+>8b e0 a8 82  20 e0 a8 ac  - e0 a8 be e0  a8 85 e0 a8  .... ...........
+>a6 20 e0 a8  b2 e0 a8 b9  - e0 a9 8c e0  a8 b0 20 e0  . ............ .
+>a8 a6 e0 a9  82 e0 a8 9c  - e0 a8 be 20  e0 a8 b8 e0  ........... ....
+>a8 ad 20 e0  a8 a4 e0 a9  - 8b e0 a8 82  20 e0 a8 b5  .. ......... ...
+>e0 a9 b1 e0  a8 a1 e0 a8  - be 20 e0 a8  b8 e0 a8 bc  ......... ......
+>e0 a8 b9 e0  a8 bf e0 a8  - b0 20 e0 a8  b9 e0 a9 88  ......... ......
+>20 e0 a5 a4  20 e0 a8 b2  - e0 a8 b9 e0  a9 8c e0 a8   ... ...........
+>b0 20 e0 a8  aa e0 a8 be  - e0 a8 95 e0  a8 bf e0 a8  . ..............
+>b8 e0 a8 a4  e0 a8 be e0  - a8 a8 20 e0  a8 a6 e0 a8  .......... .....
+>be 20 e0 a8  b8 e0 a8 bf  - e0 a8 86 e0  a8 b8 e0 a9  . ..............
+>80 2c 20 e0  a8 b0 e0 a8  - b9 e0 a8 a4  e0 a8 b2 e0  ., .............
+>a9 80 20 e0  a8 a4 e0 a9  - 87 20 e0 a8  aa e0 a9 9c  .. ...... ......
+>e0 a9 8d e0  a8 b9 e0 a8  - be e0 a8 88  20 e0 a8 a6  ............ ...
+>e0 a8 be 20  e0 a8 97 e0  - a9 9c e0 a9  8d e0 a8 b9  ... ............
+>20 e0 a8 b9  e0 a9 88 20  - e0 a8 85 e0  a8 a4 e0 a9   ...... ........
+>87 20 e0 a8  87 e0 a8 b8  - 20 e0 a8 b2  e0 a8 88 20  . ...... ...... 
+>e0 a8 87 e0  a8 b9 e0 a8  - a8 e0 a9 82  e0 a9 b0 20  ............... 
+>e0 a8 aa e0  a8 be e0 a8  - 95 e0 a8 bf  e0 a8 b8 e0  ................
+>a8 a4 e0 a8  be e0 a8 a8  - 20 e0 a8 a6  e0 a8 be 20  ........ ...... 
+>e0 a8 a6 e0  a8 bf e0 a8  - b2 20 e0 a8  b5 e0 a9 80  ......... ......
+>20 e0 a8 95  e0 a8 bf e0  - a8 b9 e0 a8  be 20 e0 a8   ............ ..
+>9c e0 a8 be  e0 a8 82 e0  - a8 a6 e0 a8  be 20 e0 a8  ............. ..
+>b9 e0 a9 88  20 e0 a5 a4  - 20 e0 a8 b2  e0 a8 b9 e0  .... ... .......
+>a9 8c e0 a8  b0 20 e0 a8  - a6 e0 a8 b0  e0 a8 bf e0  ..... ..........
+>a8 86 2d e0  a8 8f 2d e0  - a8 b0 e0 a8  be e0 a8 b5  ..-...-.........
+>e0 a9 80 20  e0 a8 a6 e0  - a9 87 20 e0  a8 95 e0 a9  ... ...... .....
+>b0 e0 a8 a2  e0 a9 87 20  - e0 a8 a4 e0  a9 87 20 e0  ....... ...... .
+>a8 b5 e0 a8  b8 e0 a8 a6  - e0 a8 be 20  e0 a8 b9 e0  ........... ....
+>a9 88 20 e0  a8 a4 e0 a9  - 87 20 e0 a8  87 e0 a8 b8  .. ...... ......
+>e0 a8 a6 e0  a9 80 20 e0  - a8 b2 e0 a9  8b e0 a8 95  ...... .........
+>20 e0 a8 97  e0 a8 bf e0  - a8 a3 e0 a8  a4 e0 a9 80   ...............
+>20 e0 a8 87  e0 a9 b1 e0  - a8 95 20 e0  a8 95 e0 a8   ......... .....
+>b0 e0 a9 8b  e0 a9 9c 20  - e0 a8 a6 e0  a9 87 20 e0  ....... ...... .
+>a8 a8 e0 a9  87 e0 a9 9c  - e0 a9 87 20  e0 a8 b9 e0  ........... ....
+>a9 88 20 e0  a5 a4 69 73  - 68 61 68 6d  75 6b 68 69  .. ...ishahmukhi
+>79 01 db d9  84 db 81 d9  - 88 d8 b1 20  d9 be d8 a7  y.......... ....
+>da a9 d8 b3  d8 aa d8 a7  - d9 86 db 8c  20 d9 be d9  ............ ...
+>86 d8 ac d8  a7 d8 a8 20  - d8 af d8 a7  20 d8 af d8  ....... .... ...
+>a7 d8 b1 d8  a7 d9 84 d8  - ad da a9 d9  88 d9 85 d8  ................
+>aa 20 d8 a7  db 92 db 94  - 20 d9 84 d9  88 da a9 20  . ...... ...... 
+>da af d9 86  d8 aa db 8c  - 20 d8 af db  92 20 d9 86  ........ .... ..
+>d8 a7 d9 84  20 da a9 d8  - b1 d8 a7 da  86 db 8c 20  .... .......... 
+>d8 aa d9 88  da ba 20 d8  - a8 d8 b9 d8  af 20 d9 84  ...... ...... ..
+>db 81 d9 88  d8 b1 20 d8  - af d9 88 d8  ac d8 a7 20  ...... ........ 
+>d8 b3 d8 a8  da be 20 d8  - aa d9 88 da  ba 20 d9 88  ...... ...... ..
+>da 88 d8 a7  20 d8 b4 db  - 81 d8 b1 20  d8 a7 db 92  .... ...... ....
+>db 94 20 d9  84 db 81 d9  - 88 d8 b1 20  d9 be d8 a7  .. ........ ....
+>da a9 d8 b3  d8 aa d8 a7  - d9 86 20 d8  af d8 a7 20  .......... .... 
+>d8 b3 db 8c  d8 a7 d8 b3  - db 8c d8 8c  20 d8 b1 db  ............ ...
+>81 d8 aa d9  84 db 8c 20  - d8 aa db 92  20 d9 be da  ....... .... ...
+>91 da be d8  a7 d8 a6 db  - 8c 20 d8 af  d8 a7 20 da  ......... .... .
+>af da 91 da  be 20 d8 a7  - db 92 20 d8  aa db 92 20  ..... .... .... 
+>d8 a7 d8 b3  20 d9 84 d8  - a6 db 8c 20  d8 a7 db 8c  .... ...... ....
+>da be d9 86  d9 88 da ba  - 20 d9 be d8  a7 da a9 d8  ........ .......
+>b3 d8 aa d8  a7 d9 86 20  - d8 af d8 a7  20 d8 af d9  ....... .... ...
+>84 20 d9 88  db 8c 20 da  - a9 db 8c da  be d8 a7 20  . .... ........ 
+>d8 ac d8 a7  d9 86 d8 af  - d8 a7 20 d8  a7 db 92 db  .......... .....
+>94 20 d9 84  db 81 d9 88  - d8 b1 20 d8  af d8 b1 db  . ........ .....
+>8c d8 a7 db  93 20 d8 b1  - d8 a7 d9 88  db 8c 20 d8  ..... ........ .
+>af db 92 20  da a9 d9 86  - da 88 da be  db 92 20 d8  ... .......... .
+>aa db 92 20  d9 88 d8 b3  - d8 af d8 a7  20 d8 a7 db  ... ........ ...
+>92 20 d8 a7  d8 b3 d8 af  - db 8c 20 d9  84 d9 88 da  . ........ .....
+>a9 20 da af  d9 86 d8 aa  - db 8c 20 d8  a7 da a9 20  . ........ .... 
+>da a9 d8 b1  d9 88 da 91  - 20 d8 af db  92 20 d9 86  ........ .... ..
+>db 8c da 91  db 92 20 d8  - a7 db 92 20  db 94 6e 74  ...... .... ..nt
+>72 61 6e 6c  69 74 65 72  - 61 74 69 6f  6e 79 01 75  ranliterationy.u
+>6c 61 68 6f  72 20 70 c4  - 81 6b 69 73  74 c4 81 6e  lahor p..kist..n
+>20 70 61 6e  6a c4 81 62  - 20 64 c4 81  20 64 c4 81   panj..b d.. d..
+>72 75 6c 20  68 61 6b c5  - ab 6d 61 74  20 c4 93 2e  rul hak..mat ...
+>20 6c c5 8d  6b 20 67 69  - e1 b9 87 74  c4 ab 20 64   l..k gi...t.. d
+>c4 93 20 6e  c4 81 e1 b8  - b7 20 6b 61  72 c4 81 63  .. n..... kar..c
+>c4 ab 20 74  c5 8d e1 b7  - 88 20 62 c4  81 61 64 20  .. t..... b..ad 
+>6c 61 68 6f  72 20 64 c5  - ab 6a c4 81  20 73 61 62  lahor d..j.. sab
+>20 74 c5 8d  e1 b7 88 20  - 76 61 e1 b8  8d e1 b8 8d   t..... va......
+>c4 81 20 73  68 61 68 72  - 20 c4 93 2e  20 6c 61 68  .. shahr ... lah
+>6f 72 20 70  c4 81 6b 69  - 73 74 c4 81  6e 20 64 c4  or p..kist..n d.
+>81 20 73 69  c4 81 73 c4  - ab 2c 20 72  61 68 74 61  . si..s.., rahta
+>6c c4 ab 20  74 c4 93 20  - 70 61 e1 b9  9b c4 81 cc  l.. t.. pa......
+>80 c4 ab 20  64 c4 81 20  - 67 c4 81 cc  81 e1 b9 9b  ... d.. g.......
+>20 c4 93 20  74 c4 93 20  - 69 73 20 6c  61 c4 ab 20   .. t.. is la.. 
+>69 68 6e c5  ab e1 b7 88  - 20 70 c4 81  6b 69 73 74  ihn..... p..kist
+>c4 81 6e 20  64 c4 81 20  - 64 69 6c 20  76 c4 ab 20  ..n d.. dil v.. 
+>6b 65 68 c4  81 20 6a c4  - 81 6e 64 c4  81 20 c4 93  keh.. j..nd.. ..
+>2e 20 6c 61  68 6f 72 20  - 64 61 72 69  c4 81 c4 93  . lahor dari....
+>20 72 c4 81  76 c4 ab 20  - 64 c4 93 20  6b 61 6e e1   r..v.. d.. kan.
+>b8 8d c4 93  20 74 c4 93  - 20 76 61 73  64 c4 81 20  .... t.. vasd.. 
+>c4 93 2e 20  69 73 64 c4  - ab 20 6c c5  8d 6b 20 67  ... isd.. l..k g
+>69 e1 b9 87  74 c4 ab 20  - 69 6b 6b 20  6b 61 72 c5  i...t.. ikk kar.
+>8d e1 b9 9b  20 64 c4 93  - 20 6e c4 93  e1 b9 9b c4  .... d.. n......
+>93 20 c4 93  2e ff 69 65  - 6d 70 6c 6f  79 65 65 73  . ....iemployees
+>bf 62 77 63  9f 6f e0 b7  - b4 20 2d 20  30 78 64 66  .bwc.o... - 0xdf
+>34 20 2d 20  31 6f e0 b6  - ab 20 2d 20  30 78 64 61  4 - 1o... - 0xda
+>62 20 2d 20  31 6f e0 b7  - 8a 20 2d 20  30 78 64 63  b - 1o... - 0xdc
+>61 20 2d 20  30 6f e0 b6  - ab 20 2d 20  30 78 64 61  a - 0o... - 0xda
+>62 20 2d 20  31 70 e1 9f  - 92 20 2d 20  30 78 31 37  b - 1p... - 0x17
+>64 32 20 2d  20 30 6f e0  - b7 b4 20 2d  20 30 78 64  d2 - 0o... - 0xd
+>66 34 20 2d  20 31 6c 31  - 20 2d 20 30  78 33 31 20  f4 - 1l1 - 0x31 
+>2d 20 31 6e  cd 8f 20 2d  - 20 30 78 33  34 66 20 2d  - 1n.. - 0x34f -
+>20 30 6c 32  20 2d 20 30  - 78 33 32 20  2d 20 31 70   0l2 - 0x32 - 1p
+>e2 83 9d 20  2d 20 30 78  - 32 30 64 64  20 2d 20 30  ... - 0x20dd - 0
+>ff 65 66 61  6e 63 79 67  - 31 cd 8f 32  e2 83 9d 62  .efancyg1..2...b
+>76 31 75 ce  b3 ce b9 ce  - b3 ce bd e1  bd bd cf 83  v1u.............
+>ce ba ce b5  ce b9 ce bd  - 62 76 32 78  26 e1 bd a6  ........bv2x&...
+>20 e1 bc 84  ce bd ce b4  - cf 81 ce b5  cf 82 20 e1   ............. .
+>be bf ce 91  ce b8 ce b7  - ce bd ce b1  e1 bf 96 ce  ................
+>bf ce b9 62  76 31 78 4a  - e1 83 90 e1  83 ae e1 83  ...bv1xJ........
+>9a e1 83 90  e1 83 95 e1  - 83 94 20 e1  83 92 e1 83  .......... .....
+>90 e1 83 98  e1 83 90 e1  - 83 a0 e1 83  9d e1 83 97  ................
+>20 e1 83 a0  e1 83 94 e1  - 83 92 e1 83  98 e1 83 a1   ...............
+>e1 83 a2 e1  83 a0 e1 83  - 90 e1 83 aa  e1 83 98 e1  ................
+>83 90 62 76  32 78 43 55  - 6e 69 63 6f  64 65 2d e1  ..bv2xCUnicode-.
+>83 98 e1 83  a1 20 e1 83  - 9b e1 83 94  e1 83 90 e1  ..... ..........
+>83 97 e1 83  94 20 e1 83  - a1 e1 83 90  e1 83 94 e1  ..... ..........
+>83 a0 e1 83  97 e1 83 90  - e1 83 a8 e1  83 9d e1 83  ................
+>a0 e1 83 98  e1 83 a1 e1  - 83 9d 65 77  69 64 74 68  ..........ewidth
+>18 37 67 73  69 6e 68 61  - 6c 61 6f e0  b7 b4 e0 b6  .7gsinhalao.....
+>ab e0 b7 8a  e0 b6 ab e0  - b7 b4 65 77  69 64 74 68  ..........ewidth
+>04 67 73 69  6e 68 61 6c  - 61 63 e0 b7  b4 65 77 69  .gsinhalac...ewi
+>64 74 68 01  67 73 69 6e  - 68 61 6c 61  78 1e e0 b7  dth.gsinhalax...
+>b4 e0 b6 ab  e0 b7 8a e0  - b6 ab e0 b7  b4 e0 b7 b4  ................
+>e0 b6 ab e0  b7 8a e0 b6  - ab e0 b7 b4  65 77 69 64  ............ewid
+>74 68 08 6b  6e 6f 74 2d  - 73 69 6e 68  61 6c 61 66  th.knot-sinhalaf
+>31 32 33 34  35 36 63 74  - 61 67 6c e0  b6 bb e0 b7  123456ctagl.....
+>8a e2 80 8d  e0 b6 9d 65  - 77 69 64 74  68 02 68 65  .......ewidth.he
+>6d 70 6c 6f  79 65 65 9f  - bf 6a 66 69  72 73 74 2d  mployee..jfirst-
+>6e 61 6d 65  63 4a 69 6d  - 68 6e 69 63  2d 6e 61 6d  namecJimhnic-nam
+>65 6e 22 e1  83 a0 e1 83  - 94 e1 83 92  e1 83 a2 22  en"............"
+>69 6c 61 73  74 2d 6e 61  - 6d 65 78 19  e1 83 92 e1  ilast-namex.....
+>83 97 e1 83  ae e1 83 9d  - e1 83 95 e1  83 97 20 e1  .............. .
+>83 90 e1 83  ae 6a 64 65  - 70 61 72 74  6d 65 6e 74  .....jdepartment
+>19 01 af 6c  70 65 72 63  - 65 6e 74 2d  74 69 6d 65  ...lpercent-time
+>18 5a 68 62  65 6e 65 66  - 69 74 73 64  66 75 6c 6c  .Zhbenefitsdfull
+>ff bf 6a 66  69 72 73 74  - 2d 6e 61 6d  65 65 54 65  ..jfirst-nameeTe
+>72 72 79 68  6e 69 63 2d  - 6e 61 6d 65  66 22 3c 6f  rryhnic-namef"<o
+>6e 65 22 69  6c 61 73 74  - 2d 6e 61 6d  65 78 3b ce  ne"ilast-namex;.
+>9f e1 bd 90  cf 87 e1 bd  - b6 20 cf 84  ce b1 e1 bd  ......... ......
+>90 cf 84 e1  bd b0 20 cf  - 80 ce b1 cf  81 e1 bd b7  ...... .........
+>cf 83 cf 84  ce b1 cf 84  - ce b1 e1 bd  b7 20 ce bc  ............. ..
+>ce bf ce b9  20 4a 6f 6e  - 65 73 6a 64  65 70 61 72  .... Jonesjdepar
+>74 6d 65 6e  74 19 02 94  - 6c 70 65 72  63 65 6e 74  tment...lpercent
+>2d 74 69 6d  65 18 5a 68  - 62 65 6e 65  66 69 74 73  -time.Zhbenefits
+>64 66 75 6c  6c ff bf 6a  - 66 69 72 73  74 2d 6e 61  dfull..jfirst-na
+>6d 65 66 4c  65 73 6c 69  - 65 68 6e 69  63 2d 6e 61  mefLesliehnic-na
+>6d 65 65 22  4c 65 73 22  - 69 6c 61 73  74 2d 6e 61  mee"Les"ilast-na
+>6d 65 69 50  61 74 74 65  - 72 73 6f 6e  6a 64 65 70  meiPattersonjdep
+>61 72 74 6d  65 6e 74 19  - 01 55 6c 70  65 72 63 65  artment..Ulperce
+>6e 74 2d 74  69 6d 65 18  - 3c 68 62 65  6e 65 66 69  nt-time.<hbenefi
+>74 73 64 66  75 6c 6c ff  - bf 6a 66 69  72 73 74 2d  tsdfull..jfirst-
+>6e 61 6d 65  66 41 73 68  - 6c 65 79 68  6e 69 63 2d  namefAshleyhnic-
+>6e 61 6d 65  65 22 41 73  - 68 22 69 6c  61 73 74 2d  namee"Ash"ilast-
+>6e 61 6d 65  6d 4d 65 74  - 65 72 20 26  20 53 6d 69  namemMeter & Smi
+>74 68 6a 64  65 70 61 72  - 74 6d 65 6e  74 19 05 a0  thjdepartment...
+>6c 70 65 72  63 65 6e 74  - 2d 74 69 6d  65 18 28 ff  lpercent-time.(.
+>bf 6a 66 69  72 73 74 2d  - 6e 61 6d 65  6a 30 31 32  .jfirst-namej012
+>33 34 35 36  37 38 39 68  - 6e 69 63 2d  6e 61 6d 65  3456789hnic-name
+>6c 22 30 31  32 33 34 35  - 36 37 38 39  22 69 6c 61  l"0123456789"ila
+>73 74 2d 6e  61 6d 65 75  - 30 31 32 33  34 35 36 37  st-nameu01234567
+>38 39 30 31  32 33 34 35  - 36 37 38 39  30 6a 64 65  8901234567890jde
+>70 61 72 74  6d 65 6e 74  - 19 05 a0 6c  70 65 72 63  partment...lperc
+>65 6e 74 2d  74 69 6d 65  - 18 28 ff bf  6a 66 69 72  ent-time.(..jfir
+>73 74 2d 6e  61 6d 65 6c  - e1 83 90 e1  83 ae e1 83  st-namel........
+>9a e1 83 90  68 6e 69 63  - 2d 6e 61 6d  65 74 22 e1  ....hnic-namet".
+>83 92 e1 83  90 e1 83 98  - e1 83 90 e1  83 a0 e1 83  ................
+>9d 22 69 6c  61 73 74 2d  - 6e 61 6d 65  78 24 e1 83  ."ilast-namex$..
+>a1 e1 83 90  e1 83 94 e1  - 83 a0 e1 83  97 e1 83 90  ................
+>e1 83 a8 e1  83 9d e1 83  - a0 e1 83 98  e1 83 a1 e1  ................
+>83 9d 6a 64  65 70 61 72  - 74 6d 65 6e  74 18 7b 6c  ..jdepartment.{l
+>70 65 72 63  65 6e 74 2d  - 74 69 6d 65  18 5a 68 62  percent-time.Zhb
+>65 6e 65 66  69 74 73 64  - 66 75 6c 6c  ff bf 6a 66  enefitsdfull..jf
+>69 72 73 74  2d 6e 61 6d  - 65 78 1e e0  b7 b4 e0 b6  irst-namex......
+>ab e0 b7 8a  e0 b6 ab e0  - b7 b4 e0 b7  b4 e0 b6 ab  ................
+>e0 b7 8a e0  b6 ab e0 b7  - b4 68 6e 69  63 2d 6e 61  .........hnic-na
+>6d 65 66 22  4d 69 63 6b  - 22 69 6c 61  73 74 2d 6e  mef"Mick"ilast-n
+>61 6d 65 78  33 e0 b7 b4  - e0 b6 ab e0  b7 8a e0 b6  amex3...........
+>ab e0 b7 b4  e0 b7 b4 e0  - b6 ab e0 b7  8a e0 b6 ab  ................
+>e0 b7 b4 e0  b7 b4 e0 b6  - ab e0 b7 8a  e0 b6 ab e0  ................
+>b7 b4 e0 b7  b4 e0 b7 b4  - 6a 64 65 70  61 72 74 6d  ........jdepartm
+>65 6e 74 18  6e 6c 70 65  - 72 63 65 6e  74 2d 74 69  ent.nlpercent-ti
+>6d 65 14 ff  ff 68 65 6d  - 70 6c 6f 79  65 65 9f bf  me...hemployee..
+>6a 66 69 72  73 74 2d 6e  - 61 6d 65 63  4a 69 6d 68  jfirst-namecJimh
+>6e 69 63 2d  6e 61 6d 65  - 6e 22 e1 83  a0 e1 83 94  nic-namen"......
+>e1 83 92 e1  83 a2 22 68  - 62 65 6e 65  66 69 74 73  ......"hbenefits
+>64 66 75 6c  6c ff bf 6a  - 66 69 72 73  74 2d 6e 61  dfull..jfirst-na
+>6d 65 65 54  65 72 72 79  - 68 6e 69 63  2d 6e 61 6d  meeTerryhnic-nam
+>65 66 22 3c  6f 6e 65 22  - 68 62 65 6e  65 66 69 74  ef"<one"hbenefit
+>73 64 66 75  6c 6c ff bf  - 6a 66 69 72  73 74 2d 6e  sdfull..jfirst-n
+>61 6d 65 66  4c 65 73 6c  - 69 65 68 6e  69 63 2d 6e  amefLesliehnic-n
+>61 6d 65 65  22 4c 65 73  - 22 68 62 65  6e 65 66 69  amee"Les"hbenefi
+>74 73 64 66  75 6c 6c ff  - bf 6a 66 69  72 73 74 2d  tsdfull..jfirst-
+>6e 61 6d 65  66 41 73 68  - 6c 65 79 68  6e 69 63 2d  namefAshleyhnic-
+>6e 61 6d 65  65 22 41 73  - 68 22 ff bf  6a 66 69 72  namee"Ash"..jfir
+>73 74 2d 6e  61 6d 65 6a  - 30 31 32 33  34 35 36 37  st-namej01234567
+>38 39 68 6e  69 63 2d 6e  - 61 6d 65 6c  22 30 31 32  89hnic-namel"012
+>33 34 35 36  37 38 39 22  - ff bf 6a 66  69 72 73 74  3456789"..jfirst
+>2d 6e 61 6d  65 6c e1 83  - 90 e1 83 ae  e1 83 9a e1  -namel..........
+>83 90 68 6e  69 63 2d 6e  - 61 6d 65 74  22 e1 83 92  ..hnic-namet"...
+>e1 83 90 e1  83 98 e1 83  - 90 e1 83 a0  e1 83 9d 22  ..............."
+>68 62 65 6e  65 66 69 74  - 73 64 66 75  6c 6c ff bf  hbenefitsdfull..
+>6a 66 69 72  73 74 2d 6e  - 61 6d 65 78  1e e0 b7 b4  jfirst-namex....
+>e0 b6 ab e0  b7 8a e0 b6  - ab e0 b7 b4  e0 b7 b4 e0  ................
+>b6 ab e0 b7  8a e0 b6 ab  - e0 b7 b4 68  6e 69 63 2d  ...........hnic-
+>6e 61 6d 65  66 22 4d 69  - 63 6b 22 ff  ff ff ff     namef"Mick"....
