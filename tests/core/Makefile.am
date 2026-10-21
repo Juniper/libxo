@@ -109,6 +109,14 @@ RTOON_EXT = Ertoon
 
 STYLES = T XP JP JPu HP X J H HIPx E
 
+# Styles run only for the plain binaries; the validate and pass
+# binaries emit the same calls, so there's nothing more to learn
+if LIBXO_TEXT_ONLY
+PLAIN_STYLES =
+else
+PLAIN_STYLES = Ecbor
+endif
+
 TEST_OUTPUT_FILES = \
 $(foreach file, ${TEST_CASES}, \
     $(foreach pass, ${LLVM_PASSES}, \
@@ -117,7 +125,10 @@ $(foreach file, ${TEST_CASES}, \
     $(foreach pass, ${ALL_PASSES}, \
         $(foreach ext, ${STYLES}, \
             $(foreach fd, out err, \
-                $(addprefix saved/, ${file:.c=${pass}${ext}.${fd}})))))
+                $(addprefix saved/, ${file:.c=${pass}${ext}.${fd}})))) \
+    $(foreach ext, ${PLAIN_STYLES}, \
+        $(foreach fd, out err, \
+            $(addprefix saved/, ${file:.c=.${ext}.${fd}}))))
 
 TEST_OUTPUT_FILES += \
 $(foreach file, test_15.c, \
@@ -173,6 +184,14 @@ TEST_FORMATS = T XP JP JPu HP X J H HIPx E=warn,encoder=test
 EXTRA_FMTS = -X
 endif
 
+# Formats for the plain binaries only (see PLAIN_STYLES); "pretty"
+# makes the cbor encoder write a hex dump instead of binary
+if LIBXO_TEXT_ONLY
+PLAIN_FORMATS =
+else
+PLAIN_FORMATS = Ecbor=warn,pretty,encoder=cbor
+endif
+
 RUN_TESTS_SH = ${srcdir}/../run-tests.sh
 RUN_TESTS_CMD = ${BASH} ${RUN_TESTS_SH} -d ${srcdir} ${EXTRA_FMTS}
 
@@ -207,7 +226,8 @@ test tests: ${noinst_PROGRAMS} run-plain-tests ${PLUGIN_TESTS}
 
 run-plain-tests:
 	@${MKDIR} -p out
-	@${RUN_TESTS_CMD} -T "${TEST_FORMATS}" run-bin ${TEST_CASES:.c=.test}
+	@${RUN_TESTS_CMD} -T "${TEST_FORMATS} ${PLAIN_FORMATS}" \
+	    run-bin ${TEST_CASES:.c=.test}
 
 if HAVE_VALIDATE
 
@@ -286,7 +306,8 @@ one:
 
 accept:
 	@${MKDIR} -p ${srcdir}/saved
-	${RUN_TESTS_CMD} -T "${TEST_FORMATS}" accept-bin ${TEST_CASES:.c=.test}
+	${RUN_TESTS_CMD} -T "${TEST_FORMATS} ${PLAIN_FORMATS}" \
+	    accept-bin ${TEST_CASES:.c=.test}
 	-@test -z "${LLVM_CLANG}" || for tc in ${TEST_CASES:.c=}; do \
 	    cp out/$$tc.validate-test.make.out \
 	        ${srcdir}/saved/$$tc.validate-test.make.out 2>/dev/null ; \
