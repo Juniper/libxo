@@ -1,0 +1,439 @@
+op create: [cbor] []
+ [append] @ 0 (1/1)
+ bf                                                    .
+    op open_container: [top] []
+ [append] @ 1 (4/4)
+ 63 74 6f 70                                           ctop
+ [append] @ 5 (1/1)
+ bf                                                    .
+      op open_container: [data] []
+   [append] @ 6 (5/5)
+   64 64 61 74  61                                       ddata
+   [append] @ 11 (1/1)
+   bf                                                    .
+        op string: [name] [em0]
+     [append] @ 12 (5/5)
+     64 6e 61 6d  65                                       dname
+     [append] @ 17 (4/4)
+     63 65 6d 30                                           cem0
+        op string: [flags] [0x8843]
+     [append] @ 21 (6/6)
+     65 66 6c 61  67 73                                    eflags
+     [append] @ 27 (7/7)
+     66 30 78 38  38 34 33                                 f0x8843
+        op string: [name] [em0]
+     [append] @ 34 (5/5)
+     64 6e 61 6d  65                                       dname
+     [append] @ 39 (4/4)
+     63 65 6d 30                                           cem0
+        op string: [flags] [0x8843]
+     [append] @ 43 (6/6)
+     65 66 6c 61  67 73                                    eflags
+     [append] @ 49 (7/7)
+     66 30 78 38  38 34 33                                 f0x8843
+        op string: [what] [braces]
+     [append] @ 56 (5/5)
+     64 77 68 61  74                                       dwhat
+     [append] @ 61 (7/7)
+     66 62 72 61  63 65 73                                 fbraces
+        op string: [length] [abcdef]
+     [append] @ 68 (7/7)
+     66 6c 65 6e  67 74 68                                 flength
+     [append] @ 75 (7/7)
+     66 61 62 63  64 65 66                                 fabcdef
+        op content: [fd] [-1]
+     [append] @ 82 (3/3)
+     62 66 64                                              bfd
+     [content] @ 85 (1/1)
+     20                                                     
+        op string: [error] [Bad file descriptor]
+     [append] @ 86 (6/6)
+     65 65 72 72  6f 72                                    eerror
+     [append] @ 92 (14/20)
+     73 42 61 64  20 66 69 6c  - 65 20 64 65  73 63 72 69  sBad file descri
+     70 74 6f 72                                           ptor
+        op string: [test] [good]
+     [append] @ 112 (5/5)
+     64 74 65 73  74                                       dtest
+     [append] @ 117 (5/5)
+     64 67 6f 6f  64                                       dgood
+        op content: [fd] [-1]
+     [append] @ 122 (3/3)
+     62 66 64                                              bfd
+     [content] @ 125 (1/1)
+     20                                                     
+        op string: [error] [Bad fi]
+     [append] @ 126 (6/6)
+     65 65 72 72  6f 72                                    eerror
+     [append] @ 132 (7/7)
+     66 42 61 64  20 66 69                                 fBad fi
+        op string: [test] [good]
+     [append] @ 139 (5/5)
+     64 74 65 73  74                                       dtest
+     [append] @ 144 (5/5)
+     64 67 6f 6f  64                                       dgood
+        op content: [lines] [20]
+     [append] @ 149 (6/6)
+     65 6c 69 6e  65 73                                    elines
+     [content] @ 155 (1/1)
+     14                                                    .
+        op content: [words] [30]
+     [append] @ 156 (6/6)
+     65 77 6f 72  64 73                                    ewords
+     [content] @ 162 (2/2)
+     18 1e                                                 ..
+        op content: [characters] [40]
+     [append] @ 164 (b/11)
+     6a 63 68 61  72 61 63 74  - 65 72 73                  jcharacters
+     [content] @ 175 (2/2)
+     18 28                                                 .(
+        op open_leaf_list: [bytes] []
+     [append] @ 177 (6/6)
+     65 62 79 74  65 73                                    ebytes
+     [append] @ 183 (1/1)
+     9f                                                    .
+          op content: [bytes] [0]
+       [content] @ 184 (1/1)
+       00                                                    .
+          op content: [bytes] [1]
+       [content] @ 185 (1/1)
+       01                                                    .
+          op content: [bytes] [2]
+       [content] @ 186 (1/1)
+       02                                                    .
+          op content: [bytes] [3]
+       [content] @ 187 (1/1)
+       03                                                    .
+          op content: [bytes] [4]
+       [content] @ 188 (1/1)
+       04                                                    .
+          op close_leaf_list: [bytes] []
+       [append] @ 189 (1/1)
+       ff                                                    .
+        op content: [granularity-lw] [155]
+     [append] @ 190 (f/15)
+     6e 67 72 61  6e 75 6c 61  - 72 69 74 79  2d 6c 77     ngranularity-lw
+     [content] @ 205 (2/2)
+     18 9b                                                 ..
+        op content: [mbuf-current] [10]
+     [append] @ 207 (d/13)
+     6c 6d 62 75  66 2d 63 75  - 72 72 65 6e  74           lmbuf-current
+     [content] @ 220 (1/1)
+     0a                                                    .
+        op content: [mbuf-cache] [20]
+     [append] @ 221 (b/11)
+     6a 6d 62 75  66 2d 63 61  - 63 68 65                  jmbuf-cache
+     [content] @ 232 (1/1)
+     14                                                    .
+        op content: [mbuf-total] [30]
+     [append] @ 233 (b/11)
+     6a 6d 62 75  66 2d 74 6f  - 74 61 6c                  jmbuf-total
+     [content] @ 244 (2/2)
+     18 1e                                                 ..
+        op content: [distance] [50]
+     [append] @ 246 (9/9)
+     68 64 69 73  74 61 6e 63  - 65                        hdistance
+     [content] @ 255 (2/2)
+     18 32                                                 .2
+        op string: [location] [Boston]
+     [append] @ 257 (9/9)
+     68 6c 6f 63  61 74 69 6f  - 6e                        hlocation
+     [append] @ 266 (7/7)
+     66 42 6f 73  74 6f 6e                                 fBoston
+        op content: [memory] [64]
+     [append] @ 273 (7/7)
+     66 6d 65 6d  6f 72 79                                 fmemory
+     [content] @ 280 (2/2)
+     18 40                                                 .@
+        op content: [total] [640]
+     [append] @ 282 (6/6)
+     65 74 6f 74  61 6c                                    etotal
+     [content] @ 288 (3/3)
+     19 02 80                                              ...
+        op content: [memory] [64]
+     [append] @ 291 (7/7)
+     66 6d 65 6d  6f 72 79                                 fmemory
+     [content] @ 298 (2/2)
+     18 40                                                 .@
+        op content: [total] [640]
+     [append] @ 300 (6/6)
+     65 74 6f 74  61 6c                                    etotal
+     [content] @ 306 (3/3)
+     19 02 80                                              ...
+        op content: [ten] [10]
+     [append] @ 309 (4/4)
+     63 74 65 6e                                           cten
+     [content] @ 313 (1/1)
+     0a                                                    .
+        op content: [eleven] [11]
+     [append] @ 314 (7/7)
+     66 65 6c 65  76 65 6e                                 feleven
+     [content] @ 321 (1/1)
+     0b                                                    .
+        op content: [unknown] [1010]
+     [append] @ 322 (8/8)
+     67 75 6e 6b  6e 6f 77 6e                              gunknown
+     [content] @ 330 (3/3)
+     19 03 f2                                              ...
+        op content: [unknown] [1010]
+     [append] @ 333 (8/8)
+     67 75 6e 6b  6e 6f 77 6e                              gunknown
+     [content] @ 341 (3/3)
+     19 03 f2                                              ...
+        op content: [min] [15]
+     [append] @ 344 (4/4)
+     63 6d 69 6e                                           cmin
+     [content] @ 348 (1/1)
+     0f                                                    .
+        op content: [cur] [20]
+     [append] @ 349 (4/4)
+     63 63 75 72                                           ccur
+     [content] @ 353 (1/1)
+     14                                                    .
+        op content: [max] [125]
+     [append] @ 354 (4/4)
+     63 6d 61 78                                           cmax
+     [content] @ 358 (2/2)
+     18 7d                                                 .}
+        op content: [min] [15]
+     [append] @ 360 (4/4)
+     63 6d 69 6e                                           cmin
+     [content] @ 364 (1/1)
+     0f                                                    .
+        op content: [cur] [20]
+     [append] @ 365 (4/4)
+     63 63 75 72                                           ccur
+     [content] @ 369 (1/1)
+     14                                                    .
+        op content: [max] [125]
+     [append] @ 370 (4/4)
+     63 6d 61 78                                           cmax
+     [content] @ 374 (2/2)
+     18 7d                                                 .}
+        op content: [min] [15]
+     [append] @ 376 (4/4)
+     63 6d 69 6e                                           cmin
+     [content] @ 380 (1/1)
+     0f                                                    .
+        op content: [cur] [20]
+     [append] @ 381 (4/4)
+     63 63 75 72                                           ccur
+     [content] @ 385 (1/1)
+     14                                                    .
+        op content: [max] [125]
+     [append] @ 386 (4/4)
+     63 6d 61 78                                           cmax
+     [content] @ 390 (2/2)
+     18 7d                                                 .}
+        op content: [min] [15]
+     [append] @ 392 (4/4)
+     63 6d 69 6e                                           cmin
+     [content] @ 396 (1/1)
+     0f                                                    .
+        op content: [cur] [20]
+     [append] @ 397 (4/4)
+     63 63 75 72                                           ccur
+     [content] @ 401 (1/1)
+     14                                                    .
+        op content: [max] [125]
+     [append] @ 402 (4/4)
+     63 6d 61 78                                           cmax
+     [content] @ 406 (2/2)
+     18 7d                                                 .}
+        op content: [val1] [21]
+     [append] @ 408 (5/5)
+     64 76 61 6c  31                                       dval1
+     [content] @ 413 (1/1)
+     15                                                    .
+        op content: [val2] [58368]
+     [append] @ 414 (5/5)
+     64 76 61 6c  32                                       dval2
+     [content] @ 419 (3/3)
+     19 e4 00                                              ...
+        op content: [val3] [100663296]
+     [append] @ 422 (5/5)
+     64 76 61 6c  33                                       dval3
+     [content] @ 427 (5/5)
+     1a 06 00 00  00                                       .....
+        op content: [val4] [44470272]
+     [append] @ 432 (5/5)
+     64 76 61 6c  34                                       dval4
+     [content] @ 437 (5/5)
+     1a 02 a6 90  00                                       .....
+        op content: [val5] [1342172800]
+     [append] @ 442 (5/5)
+     64 76 61 6c  35                                       dval5
+     [content] @ 447 (5/5)
+     1a 4f ff ee  80                                       .O...
+        op open_list: [flag] []
+     [append] @ 452 (5/5)
+     64 66 6c 61  67                                       dflag
+     [append] @ 457 (1/1)
+     9f                                                    .
+          op string: [flag] [one]
+       [append] @ 458 (5/5)
+       64 66 6c 61  67                                       dflag
+       [append] @ 463 (4/4)
+       63 6f 6e 65                                           cone
+          op string: [flag] [two]
+       [append] @ 467 (5/5)
+       64 66 6c 61  67                                       dflag
+       [append] @ 472 (4/4)
+       63 74 77 6f                                           ctwo
+          op string: [flag] [three]
+       [append] @ 476 (5/5)
+       64 66 6c 61  67                                       dflag
+       [append] @ 481 (6/6)
+       65 74 68 72  65 65                                    ethree
+          op close_list: [flag] []
+       [append] @ 487 (1/1)
+       ff                                                    .
+        op content: [works] [null]
+     [append] @ 488 (6/6)
+     65 77 6f 72  6b 73                                    eworks
+     [append] @ 494 (5/5)
+     64 6e 75 6c  6c                                       dnull
+     [content] @ 494 (5/5)
+     64 6e 75 6c  6c                                       dnull
+        op content: [empty-tag] [true]
+     [append] @ 499 (a/10)
+     69 65 6d 70  74 79 2d 74  - 61 67                     iempty-tag
+     [append] @ 509 (1/1)
+     f5                                                    .
+     [content] @ 509 (1/1)
+     f5                                                    .
+        op string: [t1] [1000]
+     [append] @ 510 (3/3)
+     62 74 31                                              bt1
+     [append] @ 513 (5/5)
+     64 31 30 30  30                                       d1000
+        op string: [t2] [test5000]
+     [append] @ 518 (3/3)
+     62 74 32                                              bt2
+     [append] @ 521 (9/9)
+     68 74 65 73  74 35 30 30  - 30                        htest5000
+        op string: [t3] [ten-longx]
+     [append] @ 530 (3/3)
+     62 74 33                                              bt3
+     [append] @ 533 (a/10)
+     69 74 65 6e  2d 6c 6f 6e  - 67 78                     iten-longx
+        op string: [t4] [xtest]
+     [append] @ 543 (3/3)
+     62 74 34                                              bt4
+     [append] @ 546 (6/6)
+     65 78 74 65  73 74                                    extest
+        op content: [count] [10]
+     [append] @ 552 (6/6)
+     65 63 6f 75  6e 74                                    ecount
+     [content] @ 558 (1/1)
+     0a                                                    .
+        op open_container: [long-long-test] []
+     [append] @ 559 (f/15)
+     6e 6c 6f 6e  67 2d 6c 6f  - 6e 67 2d 74  65 73 74     nlong-long-test
+     [append] @ 574 (1/1)
+     bf                                                    .
+          op content: [lsize] [8]
+       [append] @ 575 (6/6)
+       65 6c 73 69  7a 65                                    elsize
+       [content] @ 581 (1/1)
+       08                                                    .
+          op content: [lval] [-45]
+       [append] @ 582 (5/5)
+       64 6c 76 61  6c                                       dlval
+       [content] @ 587 (2/2)
+       38 2c                                                 8,
+          op content: [usize] [8]
+       [append] @ 589 (6/6)
+       65 75 73 69  7a 65                                    eusize
+       [content] @ 595 (1/1)
+       08                                                    .
+          op content: [uval] [45]
+       [append] @ 596 (5/5)
+       64 75 76 61  6c                                       duval
+       [content] @ 601 (2/2)
+       18 2d                                                 .-
+          op content: [lsize] [8]
+       [append] @ 603 (6/6)
+       65 6c 73 69  7a 65                                    elsize
+       [content] @ 609 (1/1)
+       08                                                    .
+          op content: [lval] [-45]
+       [append] @ 610 (5/5)
+       64 6c 76 61  6c                                       dlval
+       [content] @ 615 (2/2)
+       38 2c                                                 8,
+          op content: [usize] [8]
+       [append] @ 617 (6/6)
+       65 75 73 69  7a 65                                    eusize
+       [content] @ 623 (1/1)
+       08                                                    .
+          op content: [uval] [45]
+       [append] @ 624 (5/5)
+       64 75 76 61  6c                                       duval
+       [content] @ 629 (2/2)
+       18 2d                                                 .-
+          op close_container: [long-long-test] []
+       [append] @ 631 (1/1)
+       ff                                                    .
+        op content: [value] [123412341234]
+     [append] @ 632 (6/6)
+     65 76 61 6c  75 65                                    evalue
+     [content] @ 638 (9/9)
+     1b 00 00 00  1c bb f2 e1  - f2                        .........
+        op content: [test] [4]
+     [append] @ 647 (5/5)
+     64 74 65 73  74                                       dtest
+     [content] @ 652 (1/1)
+     04                                                    .
+        op close_container: [data] []
+     [append] @ 653 (1/1)
+     ff                                                    .
+      op close_container: [top] []
+   [append] @ 654 (1/1)
+   ff                                                    .
+    op finish: [] []
+ [append] @ 655 (1/1)
+ ff                                                    .
+  op flush: [] []
+>[cbor] @ 0 (290/656)
+>bf 63 74 6f  70 bf 64 64  - 61 74 61 bf  64 6e 61 6d  .ctop.ddata.dnam
+>65 63 65 6d  30 65 66 6c  - 61 67 73 66  30 78 38 38  ecem0eflagsf0x88
+>34 33 64 6e  61 6d 65 63  - 65 6d 30 65  66 6c 61 67  43dnamecem0eflag
+>73 66 30 78  38 38 34 33  - 64 77 68 61  74 66 62 72  sf0x8843dwhatfbr
+>61 63 65 73  66 6c 65 6e  - 67 74 68 66  61 62 63 64  acesflengthfabcd
+>65 66 62 66  64 20 65 65  - 72 72 6f 72  73 42 61 64  efbfd eerrorsBad
+>20 66 69 6c  65 20 64 65  - 73 63 72 69  70 74 6f 72   file descriptor
+>64 74 65 73  74 64 67 6f  - 6f 64 62 66  64 20 65 65  dtestdgoodbfd ee
+>72 72 6f 72  66 42 61 64  - 20 66 69 64  74 65 73 74  rrorfBad fidtest
+>64 67 6f 6f  64 65 6c 69  - 6e 65 73 14  65 77 6f 72  dgoodelines.ewor
+>64 73 18 1e  6a 63 68 61  - 72 61 63 74  65 72 73 18  ds..jcharacters.
+>28 65 62 79  74 65 73 9f  - 00 01 02 03  04 ff 6e 67  (ebytes.......ng
+>72 61 6e 75  6c 61 72 69  - 74 79 2d 6c  77 18 9b 6c  ranularity-lw..l
+>6d 62 75 66  2d 63 75 72  - 72 65 6e 74  0a 6a 6d 62  mbuf-current.jmb
+>75 66 2d 63  61 63 68 65  - 14 6a 6d 62  75 66 2d 74  uf-cache.jmbuf-t
+>6f 74 61 6c  18 1e 68 64  - 69 73 74 61  6e 63 65 18  otal..hdistance.
+>32 68 6c 6f  63 61 74 69  - 6f 6e 66 42  6f 73 74 6f  2hlocationfBosto
+>6e 66 6d 65  6d 6f 72 79  - 18 40 65 74  6f 74 61 6c  nfmemory.@etotal
+>19 02 80 66  6d 65 6d 6f  - 72 79 18 40  65 74 6f 74  ...fmemory.@etot
+>61 6c 19 02  80 63 74 65  - 6e 0a 66 65  6c 65 76 65  al...cten.feleve
+>6e 0b 67 75  6e 6b 6e 6f  - 77 6e 19 03  f2 67 75 6e  n.gunknown...gun
+>6b 6e 6f 77  6e 19 03 f2  - 63 6d 69 6e  0f 63 63 75  known...cmin.ccu
+>72 14 63 6d  61 78 18 7d  - 63 6d 69 6e  0f 63 63 75  r.cmax.}cmin.ccu
+>72 14 63 6d  61 78 18 7d  - 63 6d 69 6e  0f 63 63 75  r.cmax.}cmin.ccu
+>72 14 63 6d  61 78 18 7d  - 63 6d 69 6e  0f 63 63 75  r.cmax.}cmin.ccu
+>72 14 63 6d  61 78 18 7d  - 64 76 61 6c  31 15 64 76  r.cmax.}dval1.dv
+>61 6c 32 19  e4 00 64 76  - 61 6c 33 1a  06 00 00 00  al2...dval3.....
+>64 76 61 6c  34 1a 02 a6  - 90 00 64 76  61 6c 35 1a  dval4.....dval5.
+>4f ff ee 80  64 66 6c 61  - 67 9f 64 66  6c 61 67 63  O...dflag.dflagc
+>6f 6e 65 64  66 6c 61 67  - 63 74 77 6f  64 66 6c 61  onedflagctwodfla
+>67 65 74 68  72 65 65 ff  - 65 77 6f 72  6b 73 64 6e  gethree.eworksdn
+>75 6c 6c 69  65 6d 70 74  - 79 2d 74 61  67 f5 62 74  ulliempty-tag.bt
+>31 64 31 30  30 30 62 74  - 32 68 74 65  73 74 35 30  1d1000bt2htest50
+>30 30 62 74  33 69 74 65  - 6e 2d 6c 6f  6e 67 78 62  00bt3iten-longxb
+>74 34 65 78  74 65 73 74  - 65 63 6f 75  6e 74 0a 6e  t4extestecount.n
+>6c 6f 6e 67  2d 6c 6f 6e  - 67 2d 74 65  73 74 bf 65  long-long-test.e
+>6c 73 69 7a  65 08 64 6c  - 76 61 6c 38  2c 65 75 73  lsize.dlval8,eus
+>69 7a 65 08  64 75 76 61  - 6c 18 2d 65  6c 73 69 7a  ize.duval.-elsiz
+>65 08 64 6c  76 61 6c 38  - 2c 65 75 73  69 7a 65 08  e.dlval8,eusize.
+>64 75 76 61  6c 18 2d ff  - 65 76 61 6c  75 65 1b 00  duval.-.evalue..
+>00 00 1c bb  f2 e1 f2 64  - 74 65 73 74  04 ff ff ff  .......dtest....
