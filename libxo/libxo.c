@@ -1279,8 +1279,17 @@ xo_escape_xml (xo_handle_t *xop, xo_buffer_t *xbp,
                 if (square)
                     sp = xo_xml_square;
                 else if (private) {
+                    /*
+                     * XML 1.1 allows a reference to the control
+                     * character itself; XML 1.0 forbids it, so we
+                     * use the private-use mapping.  HTML is XML
+                     * encoded too, so "xml1.1" covers both.
+                     */
+                    unsigned uch = ch;
+                    if (!XOF_ISSET(xop, XOF_XML11))
+                        uch += XO_XML_ESCAPE_BINARY_UNICODE_BASE;
                     snprintf(private_buffer, sizeof(private_buffer),
-                             XO_XML_ESCAPE_BINARY_UNICODE, (unsigned) ch);
+                             XO_XML_ESCAPE_BINARY_UNICODE, uch);
                     sp = private_buffer;
                 } else
                     ih = ' ';
@@ -2600,6 +2609,7 @@ static xo_flag_mapping_t xo_xof_names[] = {
     { XOF_UTF8, "utf8" },
     { XOF_WARN, "warn" },
     { XOF_WARN_XML, "warn-xml" },
+    { XOF_XML11, "xml1.1" },
     { XOF_XPATH, "xpath" },
     { 0, NULL }
 };
@@ -4400,7 +4410,9 @@ xo_emit_field_value (xo_handle_t *xop, xo_buffer_t *xbp,
 		break;
 
 	    case XO_STYLE_HTML:
-		rc = xo_escape_xml(xop, xbp, rc, (flags & XFF_ATTR));
+		/* No trimming for HTML, but keep the escape modifiers */
+		rc = xo_escape_xml(xop, xbp, rc, flags & (XFF_ATTR
+				   | XFF_ESC_SQUARE | XFF_ESC_PRIVATE));
 		break;
 
 	    case XO_STYLE_JSON:
