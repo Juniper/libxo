@@ -118,3 +118,8 @@
 /item[name='b']/size='10'
 /item[name='a']/note='n2'
 /item[name='b']/sub/x='2'
+/item/name=''
+/item/name='gum'
+/item/size='5'
+/item/name=''
+/item/size='5'
