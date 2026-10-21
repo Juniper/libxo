@@ -1242,15 +1242,15 @@ xo_filter_op_close_field (xo_handle_t *xop, xo_filter_t *xfp,
     return xo_filter_close(xop, xfp, tag, tlen, "field");
 }
 
+/*
+ * Close an instance or container that may still be waiting on a
+ * predicate (PRED): the fields it tests were never seen, so
+ * force-resolve, treating them as absent (see xo_eval_node_value).
+ */
 static int
-xo_filter_op_close_instance (xo_handle_t *xop, xo_filter_t *xfp,
-			  const char *tag)
+xo_filter_close_pending (xo_handle_t *xop, xo_filter_t *xfp,
+			 const char *tag, const char *type)
 {
-    /*
-     * If the instance is still in PRED state at close time, the predicate
-     * field was never seen.  Force-resolve treating absent fields as empty
-     * string (XPath: absent node means empty nodeset or string("")).
-     */
     int promoted = FALSE;
     if (xfp != NULL && xfp->xf_trie != NULL
 	    && xfp->xf_status == XO_STATUS_PRED) {
@@ -1261,7 +1261,7 @@ xo_filter_op_close_instance (xo_handle_t *xop, xo_filter_t *xfp,
     }
 
     xo_filter_status_t pre_close = xfp ? xfp->xf_status : XO_STATUS_ZERO;
-    xo_filter_close(xop, xfp, tag, strlen(tag), "instance");
+    xo_filter_close(xop, xfp, tag, strlen(tag), type);
 
     /*
      * If force-resolve promoted us to FULL, return FULL even though the
@@ -1277,9 +1277,25 @@ xo_filter_op_close_instance (xo_handle_t *xop, xo_filter_t *xfp,
 }
 
 static int
-xo_filter_op_close_container (xo_handle_t *xop UNUSED, xo_filter_t *xfp,
+xo_filter_op_close_instance (xo_handle_t *xop, xo_filter_t *xfp,
+			  const char *tag)
+{
+    return xo_filter_close_pending(xop, xfp, tag, "instance");
+}
+
+/*
+ * A container is resolved at close like an instance, but only when
+ * it's still pending; one that's simply FULL reports the status after
+ * the pop, as it always has.
+ */
+static int
+xo_filter_op_close_container (xo_handle_t *xop, xo_filter_t *xfp,
 			   const char *tag)
 {
+    if (xfp != NULL && xfp->xf_trie != NULL
+	    && xfp->xf_status == XO_STATUS_PRED)
+	return xo_filter_close_pending(xop, xfp, tag, "container");
+
     return xo_filter_close(xop, xfp, tag, strlen(tag), "container");
 }
 
@@ -1383,6 +1399,7 @@ typedef struct xo_eval_value_s {
 #define XEVF_UNSUPPORTED (1<<2) /* Token type is not supported */
 #define XEVF_FINAL	(1<<3)  /* This is the final answer */
 #define XEVF_NODE	(1<<4)  /* Value is from a node that exists */
+#define XEVF_EMPTYSET	(1<<5)  /* Value is from a node that's absent */
 
 /* C_DSTRING: a C_STRING whose xev_str is malloc'd and owned by this value */
 #define C_DSTRING	83
@@ -1671,8 +1688,12 @@ xo_eval_node_value (xo_filter_t *xfp, xo_tframe_t *framep,
 	value = xo_eval_value_make(C_STRING, XEVF_NODE, 0);
 	value.xev_str = sval;
     } else if (xfp->xf_flags & XFSF_FORCE_RESOLVE) {
-	/* Absent field = empty string per XPath semantics */
-	value = xo_eval_value_make(C_STRING, 0, 0);
+	/*
+	 * The field is absent: an empty node-set, whose string value
+	 * is "", but which compares false to everything (see
+	 * xo_eval_compare).
+	 */
+	value = xo_eval_value_make(C_STRING, XEVF_EMPTYSET, 0);
 	value.xev_str = "";
     } else {
 	value.xev_flags |= XEVF_MISSING;
@@ -1903,7 +1924,7 @@ xo_eval_dump_value (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED,
 
     const char *type UNUSED = xo_xparse_fancy_token_name(value.xev_type) ?: "";
 
-    XO_DBG(xop, "%*s%s: type '%s' (%u), flags %#x(%s%s%s%s%s), "
+    XO_DBG(xop, "%*s%s: type '%s' (%u), flags %#x(%s%s%s%s%s%s), "
 	   "node %lu, val '%s'",
 	   indent, "", title ?: "",
 	   type, value.xev_type, value.xev_flags,
@@ -1912,6 +1933,7 @@ xo_eval_dump_value (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED,
 	   (value.xev_flags & XEVF_UNSUPPORTED) ? "+unsupported" : "",
 	   (value.xev_flags & XEVF_FINAL) ? "+final" : "",
 	   (value.xev_flags & XEVF_NODE) ? "+node" : "",
+	   (value.xev_flags & XEVF_EMPTYSET) ? "+emptyset" : "",
 	   value.xev_node, bp);
 }
 
@@ -1932,6 +1954,17 @@ xo_eval_compare (XO_EVAL_OP_ARGS)
 	= (left.xev_type == C_DSTRING) ? C_STRING : left.xev_type;
     unsigned right_type
 	= (right.xev_type == C_DSTRING) ? C_STRING : right.xev_type;
+
+    /*
+     * XPath compares a node-set by its members: true if any one of
+     * them compares true.  An absent field is an empty node-set, so
+     * name = '' and name != '' are both false when there's no name.
+     * Against a boolean, a node-set compares as boolean(), which is
+     * false for an empty one, so the boolean case below handles it.
+     */
+    if (((left.xev_flags | right.xev_flags) & XEVF_EMPTYSET)
+	    && left_type != C_BOOLEAN && right_type != C_BOOLEAN)
+	return xo_eval_value_invalid();
 
     switch (TYPE_CMP(left_type, right_type)) {
     case TYPE_CMP(C_STRING, C_STRING):
@@ -3257,7 +3290,7 @@ xo_eval_function (XO_EVAL_NODE_ARGS)
      * mark; for the rest it leaked in from an argument.
      */
     if (!(entry->xfm_flags & XEFF_NODE))
-	value.xev_flags &= ~XEVF_NODE;
+	value.xev_flags &= ~(XEVF_NODE | XEVF_EMPTYSET);
 
     xo_eval_dump_value(xop, xfp, value, indent, str);
 
@@ -3415,7 +3448,7 @@ xo_eval (xo_handle_t *xop, xo_filter_t *xfp, xo_tframe_t *framep,
 	 */
 	if (xnp->xn_type == C_NOT || xnp->xn_type == C_UNI_MINUS
 	        || nested_op_fn)
-	    value.xev_flags &= ~XEVF_NODE;
+	    value.xev_flags &= ~(XEVF_NODE | XEVF_EMPTYSET);
 
 	if (first) {
 	    first = 0;
@@ -3438,7 +3471,7 @@ xo_eval (xo_handle_t *xop, xo_filter_t *xfp, xo_tframe_t *framep,
 		xo_eval_value_free(last);
 		xo_eval_value_free(value);
 		value = result;
-		value.xev_flags &= ~XEVF_NODE;
+		value.xev_flags &= ~(XEVF_NODE | XEVF_EMPTYSET);
 	    }
 	}
 
@@ -3908,9 +3941,9 @@ xo_filter_op_needs_nonkey_field (XO_FILTER_NEEDS_NONKEY_FIELD_SIGNATURE)
 
 /*
  * Force-evaluate all XTFS_PRED slots in the current trie frame, treating
- * any missing (never-seen) field as empty string per XPath semantics.
- * Called from xo_filter_op_close_instance when the predicate field was
- * never emitted inside this instance.
+ * any missing (never-seen) field as an empty node-set, as XPath does.
+ * Called from xo_filter_close_pending when the predicate field was
+ * never emitted inside this instance or container.
  */
 static void
 xo_filter_force_resolve_pred (xo_handle_t *xop, xo_filter_t *xfp,
