@@ -25,6 +25,8 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <limits.h>
+#include <errno.h>
+#include <math.h>
 
 #include "xo.h"
 #include "xo_encoder.h"
@@ -37,7 +39,7 @@
 XX XX XX XX  XX XX XX XX - XX XX XX XX  XX XX XX XX abcdefghijklmnop
  */
 static void
-cbor_memdump (FILE *fp, const char *title, const char *data,
+cbor_memdump (FILE *fp, const char *title, const char *data, size_t offset,
          size_t len, const char *tag, int indent)
 {
     enum { MAX_PER_LINE = 16 };
@@ -55,8 +57,10 @@ cbor_memdump (FILE *fp, const char *title, const char *data,
     if (tag == NULL)
 	tag = "";
 
-    fprintf(fp, "%*s[%s] @ %p (%lx/%lu)\n", indent + 1, tag,
-            title, data, (unsigned long) len, (unsigned long) len);
+    /* The offset, not the address, so the output is repeatable */
+    fprintf(fp, "%*s[%s] @ %lu (%lx/%lu)\n", indent + 1, tag,
+            title, (unsigned long) offset, (unsigned long) len,
+	    (unsigned long) len);
 
     while (len > 0) {
         bp = buf;
@@ -125,6 +129,10 @@ cbor_memdump (FILE *fp, const char *title, const char *data,
 #define CBOR_LEN64	0x1b	/* 27 - 64-bit value */
 #define CBOR_LEN128	0x1c	/* 28 - 128-bit value */
 
+#define CBOR_FLOAT16	0xF9	/* Major type 7 with a 16-bit value */
+#define CBOR_FLOAT32	0xFA	/* ... with a 32-bit value */
+#define CBOR_FLOAT64	0xFB	/* ... with a 64-bit value */
+
 typedef struct cbor_private_s {
     xo_buffer_t c_data;		/* Our data buffer */
     unsigned c_indent;		/* Indent level */
@@ -171,6 +179,116 @@ cbor_encode_uint (xo_buffer_t *xbp, uint64_t minor)
     xbp->xb_curp = bp;
 }
 
+/*
+ * Return the IEEE half-precision bits for a float, or -1 if a half
+ * can't hold it exactly.  The caller has already handled zero.
+ */
+static int
+cbor_float_to_half (float fval)
+{
+    uint32_t u;
+    memcpy(&u, &fval, sizeof(u));
+
+    unsigned sign = (u >> 16) & 0x8000;
+    int exp = (int) ((u >> 23) & 0xff) - 127;
+    uint32_t sig = (u & 0x7fffff) | 0x800000; /* With the hidden bit */
+
+    if ((u & 0x7f800000) == 0 || exp > 15)
+	return -1;		/* Float subnormal, or too big */
+
+    if (exp >= -14) {		/* Normal half: 10 bits of mantissa */
+	if (sig & 0x1fff)
+	    return -1;
+	return sign | ((exp + 15) << 10) | ((sig >> 13) & 0x3ff);
+    }
+
+    /* Subnormal half: the value is (bits * 2^-24) */
+    int shift = -exp - 1;
+    if (shift > 23 || (sig & ((1U << shift) - 1)))
+	return -1;
+    return sign | (sig >> shift);
+}
+
+/*
+ * Encode a floating point value in the smallest of the 16, 32 and
+ * 64-bit forms that holds it exactly, which is RFC 8949's "preferred
+ * serialization".  The caller must have made room for
+ * CBOR_HEADER_MAX bytes.
+ */
+static void
+cbor_encode_float (xo_buffer_t *xbp, double dval)
+{
+    char *bp = xbp->xb_curp;
+    float fval = (float) dval;
+    uint64_t bits;
+    int i, m, half;
+
+    if (dval == 0) {
+	*bp++ = CBOR_FLOAT16;
+	bits = signbit(dval) ? 0x8000 : 0;
+	m = 16;
+
+    } else if ((double) fval != dval) {
+	*bp++ = CBOR_FLOAT64;
+	memcpy(&bits, &dval, sizeof(bits));
+	m = 64;
+
+    } else if ((half = cbor_float_to_half(fval)) >= 0) {
+	*bp++ = CBOR_FLOAT16;
+	bits = half;
+	m = 16;
+
+    } else {
+	uint32_t u;
+	memcpy(&u, &fval, sizeof(u));
+	*bp++ = CBOR_FLOAT32;
+	bits = u;
+	m = 32;
+    }
+
+    for (i = m - 8; i >= 0; i -= 8)
+	*bp++ = bits >> i;
+
+    xbp->xb_curp = bp;
+}
+
+/*
+ * Is this content a decimal floating point number?  We want plain
+ * decimal notation ("1.5", "-2e10", ".25"), not the hex, "inf" and
+ * "nan" forms strtod also takes, and values out of range for a double
+ * are left as strings rather than becoming infinity or zero.
+ */
+static int
+cbor_parse_float (const char *value, double *dp)
+{
+    const char *cp = value;
+    int saw_point = 0;
+
+    if (*cp == '-')
+	cp += 1;
+    if (!isdigit((unsigned char) *cp)
+	    && !(*cp == '.' && isdigit((unsigned char) cp[1])))
+	return 0;
+
+    for (; *cp; cp++) {
+	if (*cp == '.' || *cp == 'e' || *cp == 'E')
+	    saw_point = 1;
+	else if (!isdigit((unsigned char) *cp) && *cp != '-' && *cp != '+')
+	    return 0;
+    }
+
+    if (!saw_point)		/* Integers are handled elsewhere */
+	return 0;
+
+    char *ep = NULL;
+    errno = 0;
+    *dp = strtod(value, &ep);
+    if (*ep != '\0' || errno == ERANGE)
+	return 0;
+
+    return 1;
+}
+
 static void
 cbor_append (xo_handle_t *xop, cbor_private_t *cbor, xo_buffer_t *xbp,
 	     unsigned major, size_t minor, const char *data)
@@ -186,7 +304,7 @@ cbor_append (xo_handle_t *xop, cbor_private_t *cbor, xo_buffer_t *xbp,
 	xo_buf_append(xbp, data, minor);
 
     if (xo_get_flags(xop) & XOF_PRETTY)
-	cbor_memdump(stdout, "append", xo_buf_data(xbp, offset),
+	cbor_memdump(stdout, "append", xo_buf_data(xbp, offset), offset,
 		     xbp->xb_curp - xbp->xb_bufp - offset, "",
 		     cbor->c_indent * 2);
 }
@@ -235,14 +353,21 @@ cbor_content (xo_handle_t *xop, cbor_private_t *cbor, xo_buffer_t *xbp,
 	 */
 	char *ep = NULL;
 	unsigned long long ival = 0;
+	double dval = 0;
 	int is_number = isdigit((unsigned char) *digits);
 	if (is_number) {
-	    ival = strtoull(digits, &ep, 0);
-	    if (*ep != '\0' || ival == ULLONG_MAX)
+	    /* Base 10, so a zero-padded "010" isn't read as octal */
+	    errno = 0;
+	    ival = strtoull(digits, &ep, 10);
+	    if (*ep != '\0' || errno == ERANGE)
 		is_number = 0;
 	}
 
-	if (!is_number) {
+	if (!is_number && cbor_parse_float(value, &dval)) {
+	    if (xo_buf_has_room(xbp, CBOR_HEADER_MAX))
+		cbor_encode_float(xbp, dval);
+
+	} else if (!is_number) {
 	    /* Sometimes a string is just a string */
 	    cbor_append(xop, cbor, xbp, CBOR_STRING, strlen(value), value);
 
@@ -262,7 +387,7 @@ cbor_content (xo_handle_t *xop, cbor_private_t *cbor, xo_buffer_t *xbp,
     }
 
     if (xo_get_flags(xop) & XOF_PRETTY)
-	cbor_memdump(stdout, "content", xo_buf_data(xbp, offset),
+	cbor_memdump(stdout, "content", xo_buf_data(xbp, offset), offset,
 		     xbp->xb_curp - xbp->xb_bufp - offset, "",
 		     cbor->c_indent * 2);
 
@@ -278,7 +403,7 @@ cbor_handler (XO_ENCODER_HANDLER_ARGS)
 
     if (xo_get_flags(xop) & XOF_PRETTY) {
 	printf("%*sop %s: [%s] [%s]\n", cbor ? cbor->c_indent * 2 + 4 : 0, "",
-	       xo_encoder_op_name(op), name, value);
+	       xo_encoder_op_name(op), name ?: "", value ?: "");
 	fflush(stdout);
     }
 
@@ -362,7 +487,7 @@ cbor_handler (XO_ENCODER_HANDLER_ARGS)
     case XO_OP_FLUSH:		   /* Clean up function */
 	if (xo_get_flags(xop) & XOF_PRETTY)
 	    cbor_memdump(stdout, "cbor",
-			xbp->xb_bufp, xbp->xb_curp - xbp->xb_bufp,
+			xbp->xb_bufp, 0, xbp->xb_curp - xbp->xb_bufp,
 			">", 0);
 	else {
 	    rc = write(1, xbp->xb_bufp, xbp->xb_curp - xbp->xb_bufp);
