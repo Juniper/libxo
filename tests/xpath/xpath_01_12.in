@@ -1323,3 +1323,172 @@ $ name a
 = size 10
 >item
 }item
+r
+?item[name = '']
+{item
+<item
+= id 1
+= name gum
+= size 5
+>item
+<item
+= id 2
+= name ""
+>item
+<item
+= id 3
+>item
+}item
+r
+?item[name != '']
+{item
+<item
+= id 1
+= name gum
+= size 5
+>item
+<item
+= id 2
+= name ""
+>item
+<item
+= id 3
+>item
+}item
+r
+?item[not(name)]
+{item
+<item
+= id 1
+= name gum
+= size 5
+>item
+<item
+= id 2
+= name ""
+>item
+<item
+= id 3
+>item
+}item
+r
+?item[string(name) = '']
+{item
+<item
+= id 1
+= name gum
+= size 5
+>item
+<item
+= id 2
+= name ""
+>item
+<item
+= id 3
+>item
+}item
+r
+?item[name = false()]
+{item
+<item
+= id 1
+= name gum
+= size 5
+>item
+<item
+= id 2
+= name ""
+>item
+<item
+= id 3
+>item
+}item
+r
+?item[size != 3]
+{item
+<item
+= id 1
+= name gum
+= size 5
+>item
+<item
+= id 2
+= name ""
+>item
+<item
+= id 3
+>item
+}item
+r
+?item[not(size)]
+{item
+<item
+= id 1
+= name gum
+= size 5
+>item
+<item
+= id 2
+= name ""
+>item
+<item
+= id 3
+>item
+}item
+r
+?item[not(size)]/sub
+{item
+<item
+$ name a
++sub
+= x 1
+-sub
+>item
+<item
+$ name b
++sub
+= x 2
+-sub
+= size 1
+>item
+}item
+r
+?top/item[not(name)]
++top
++item
++sub
+= x 1
+-sub
+= size 3
+-item
+-top
+r
+?top/item[name = '']
++top
++item
++sub
+= x 1
+-sub
+= size 3
+-item
+-top
+r
+?top/item[name != 'x']
++top
++item
++sub
+= x 1
+-sub
+= size 3
+-item
+-top
+r
+?top/item[not(name)]/sub
++top
++item
++sub
+= x 1
+-sub
+= size 3
+-item
+-top
