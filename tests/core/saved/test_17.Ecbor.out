@@ -1,0 +1,1014 @@
+op create: [cbor] []
+ [append] @ 0 (1/1)
+ bf                                                    .
+    op open_container: [top] []
+ [append] @ 1 (4/4)
+ 63 74 6f 70                                           ctop
+ [append] @ 5 (1/1)
+ bf                                                    .
+      op open_container: [anchor-width] []
+   [append] @ 6 (d/13)
+   6c 61 6e 63  68 6f 72 2d  - 77 69 64 74  68           lanchor-width
+   [append] @ 19 (1/1)
+   bf                                                    .
+        op string: [right] [abc]
+     [append] @ 20 (6/6)
+     65 72 69 67  68 74                                    eright
+     [append] @ 26 (4/4)
+     63 61 62 63                                           cabc
+        op string: [left] [abc]
+     [append] @ 30 (5/5)
+     64 6c 65 66  74                                       dleft
+     [append] @ 35 (4/4)
+     63 61 62 63                                           cabc
+        op close_container: [anchor-width] []
+     [append] @ 39 (1/1)
+     ff                                                    .
+      op open_container: [map-growth] []
+   [append] @ 40 (b/11)
+   6a 6d 61 70  2d 67 72 6f  - 77 74 68                  jmap-growth
+   [append] @ 51 (1/1)
+   bf                                                    .
+        op content: [mapped-0] [0]
+     [append] @ 52 (9/9)
+     68 6d 61 70  70 65 64 2d  - 30                        hmapped-0
+     [content] @ 61 (1/1)
+     00                                                    .
+        op content: [mapped-15] [15]
+     [append] @ 62 (a/10)
+     69 6d 61 70  70 65 64 2d  - 31 35                     imapped-15
+     [content] @ 72 (1/1)
+     0f                                                    .
+        op content: [mapped-16] [16]
+     [append] @ 73 (a/10)
+     69 6d 61 70  70 65 64 2d  - 31 36                     imapped-16
+     [content] @ 83 (1/1)
+     10                                                    .
+        op content: [mapped-17] [17]
+     [append] @ 84 (a/10)
+     69 6d 61 70  70 65 64 2d  - 31 37                     imapped-17
+     [content] @ 94 (1/1)
+     11                                                    .
+        op content: [mapped-39] [39]
+     [append] @ 95 (a/10)
+     69 6d 61 70  70 65 64 2d  - 33 39                     imapped-39
+     [content] @ 105 (2/2)
+     18 27                                                 .'
+        op content: [src-40] [40]
+     [append] @ 107 (7/7)
+     66 73 72 63  2d 34 30                                 fsrc-40
+     [content] @ 114 (2/2)
+     18 28                                                 .(
+        op close_container: [map-growth] []
+     [append] @ 116 (1/1)
+     ff                                                    .
+      op open_container: [long-names] []
+   [append] @ 117 (b/11)
+   6a 6c 6f 6e  67 2d 6e 61  - 6d 65 73                  jlong-names
+   [append] @ 128 (1/1)
+   bf                                                    .
+        op open_container: [aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa] []
+     [append] @ 129 (40/64)
+     78 3e 61 61  61 61 61 61  - 61 61 61 61  61 61 61 61  x>aaaaaaaaaaaaaa
+     61 61 61 61  61 61 61 61  - 61 61 61 61  61 61 61 61  aaaaaaaaaaaaaaaa
+     61 61 61 61  61 61 61 61  - 61 61 61 61  61 61 61 61  aaaaaaaaaaaaaaaa
+     61 61 61 61  61 61 61 61  - 61 61 61 61  61 61 61 61  aaaaaaaaaaaaaaaa
+     [append] @ 193 (1/1)
+     bf                                                    .
+          op content: [length] [62]
+       [append] @ 194 (7/7)
+       66 6c 65 6e  67 74 68                                 flength
+       [content] @ 201 (2/2)
+       18 3e                                                 .>
+          op close_container: [aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa] []
+       [append] @ 203 (1/1)
+       ff                                                    .
+        op open_container: [bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb] []
+     [append] @ 204 (41/65)
+     78 3f 62 62  62 62 62 62  - 62 62 62 62  62 62 62 62  x?bbbbbbbbbbbbbb
+     62 62 62 62  62 62 62 62  - 62 62 62 62  62 62 62 62  bbbbbbbbbbbbbbbb
+     62 62 62 62  62 62 62 62  - 62 62 62 62  62 62 62 62  bbbbbbbbbbbbbbbb
+     62 62 62 62  62 62 62 62  - 62 62 62 62  62 62 62 62  bbbbbbbbbbbbbbbb
+     62                                                    b
+     [append] @ 269 (1/1)
+     bf                                                    .
+          op content: [length] [63]
+       [append] @ 270 (7/7)
+       66 6c 65 6e  67 74 68                                 flength
+       [content] @ 277 (2/2)
+       18 3f                                                 .?
+          op close_container: [bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb] []
+       [append] @ 279 (1/1)
+       ff                                                    .
+        op open_container: [cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc] []
+     [append] @ 280 (42/66)
+     78 40 63 63  63 63 63 63  - 63 63 63 63  63 63 63 63  x@cccccccccccccc
+     63 63 63 63  63 63 63 63  - 63 63 63 63  63 63 63 63  cccccccccccccccc
+     63 63 63 63  63 63 63 63  - 63 63 63 63  63 63 63 63  cccccccccccccccc
+     63 63 63 63  63 63 63 63  - 63 63 63 63  63 63 63 63  cccccccccccccccc
+     63 63                                                 cc
+     [append] @ 346 (1/1)
+     bf                                                    .
+          op content: [length] [64]
+       [append] @ 347 (7/7)
+       66 6c 65 6e  67 74 68                                 flength
+       [content] @ 354 (2/2)
+       18 40                                                 .@
+          op close_container: [cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc] []
+       [append] @ 356 (1/1)
+       ff                                                    .
+        op open_container: [ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd] []
+     [append] @ 357 (43/67)
+     78 41 64 64  64 64 64 64  - 64 64 64 64  64 64 64 64  xAdddddddddddddd
+     64 64 64 64  64 64 64 64  - 64 64 64 64  64 64 64 64  dddddddddddddddd
+     64 64 64 64  64 64 64 64  - 64 64 64 64  64 64 64 64  dddddddddddddddd
+     64 64 64 64  64 64 64 64  - 64 64 64 64  64 64 64 64  dddddddddddddddd
+     64 64 64                                              ddd
+     [append] @ 424 (1/1)
+     bf                                                    .
+          op content: [length] [65]
+       [append] @ 425 (7/7)
+       66 6c 65 6e  67 74 68                                 flength
+       [content] @ 432 (2/2)
+       18 41                                                 .A
+          op close_container: [ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd] []
+       [append] @ 434 (1/1)
+       ff                                                    .
+        op open_container: [eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee] []
+     [append] @ 435 (84/132)
+     78 82 65 65  65 65 65 65  - 65 65 65 65  65 65 65 65  x.eeeeeeeeeeeeee
+     65 65 65 65  65 65 65 65  - 65 65 65 65  65 65 65 65  eeeeeeeeeeeeeeee
+     65 65 65 65  65 65 65 65  - 65 65 65 65  65 65 65 65  eeeeeeeeeeeeeeee
+     65 65 65 65  65 65 65 65  - 65 65 65 65  65 65 65 65  eeeeeeeeeeeeeeee
+     65 65 65 65  65 65 65 65  - 65 65 65 65  65 65 65 65  eeeeeeeeeeeeeeee
+     65 65 65 65  65 65 65 65  - 65 65 65 65  65 65 65 65  eeeeeeeeeeeeeeee
+     65 65 65 65  65 65 65 65  - 65 65 65 65  65 65 65 65  eeeeeeeeeeeeeeee
+     65 65 65 65  65 65 65 65  - 65 65 65 65  65 65 65 65  eeeeeeeeeeeeeeee
+     65 65 65 65                                           eeee
+     [append] @ 567 (1/1)
+     bf                                                    .
+          op content: [length] [130]
+       [append] @ 568 (7/7)
+       66 6c 65 6e  67 74 68                                 flength
+       [content] @ 575 (2/2)
+       18 82                                                 ..
+          op close_container: [eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee] []
+       [append] @ 577 (1/1)
+       ff                                                    .
+        op close_container: [long-names] []
+     [append] @ 578 (1/1)
+     ff                                                    .
+      op open_container: [control-chars] []
+   [append] @ 579 (e/14)
+   6d 63 6f 6e  74 72 6f 6c  - 2d 63 68 61  72 73        mcontrol-chars
+   [append] @ 593 (1/1)
+   bf                                                    .
+        op string: [interior] [abc]
+     [append] @ 594 (9/9)
+     68 69 6e 74  65 72 69 6f  - 72                        hinterior
+     [append] @ 603 (6/6)
+     65 61 01 62  02 63                                    ea.b.c
+        op string: [trailing] [ab]
+     [append] @ 609 (9/9)
+     68 74 72 61  69 6c 69 6e  - 67                        htrailing
+     [append] @ 618 (5/5)
+     64 61 01 62  02                                       da.b.
+        op string: [before-escape] [ab<cd&e]
+     [append] @ 623 (e/14)
+     6d 62 65 66  6f 72 65 2d  - 65 73 63 61  70 65        mbefore-escape
+     [append] @ 637 (a/10)
+     69 61 01 62  3c 63 02 64  - 26 65                     ia.b<c.d&e
+        op string: [after-escape] [a<bc&d]
+     [append] @ 647 (d/13)
+     6c 61 66 74  65 72 2d 65  - 73 63 61 70  65           lafter-escape
+     [append] @ 660 (9/9)
+     68 61 3c 62  01 63 26 64  - 02                        ha<b.c&d.
+        op string: [only] []
+     [append] @ 669 (5/5)
+     64 6f 6e 6c  79                                       donly
+     [append] @ 674 (4/4)
+     63 01 02 03                                           c...
+        op close_container: [control-chars] []
+     [append] @ 678 (1/1)
+     ff                                                    .
+      op open_container: [deprecated-options] []
+   [append] @ 679 (13/19)
+   72 64 65 70  72 65 63 61  - 74 65 64 2d  6f 70 74 69  rdeprecated-opti
+   6f 6e 73                                              ons
+   [append] @ 698 (1/1)
+   bf                                                    .
+        op content: [retain] [0]
+     [append] @ 699 (7/7)
+     66 72 65 74  61 69 6e                                 fretain
+     [content] @ 706 (1/1)
+     00                                                    .
+        op content: [no-retain] [0]
+     [append] @ 707 (a/10)
+     69 6e 6f 2d  72 65 74 61  - 69 6e                     ino-retain
+     [content] @ 717 (1/1)
+     00                                                    .
+        op close_container: [deprecated-options] []
+     [append] @ 718 (1/1)
+     ff                                                    .
+      op open_container: [encoder-names] []
+   [append] @ 719 (e/14)
+   6d 65 6e 63  6f 64 65 72  - 2d 6e 61 6d  65 73        mencoder-names
+   [append] @ 733 (1/1)
+   bf                                                    .
+        op string: [first] [unknown]
+     [append] @ 734 (6/6)
+     65 66 69 72  73 74                                    efirst
+     [append] @ 740 (8/8)
+     67 75 6e 6b  6e 6f 77 6e                              gunknown
+        op string: [last] [deadend]
+     [append] @ 748 (5/5)
+     64 6c 61 73  74                                       dlast
+     [append] @ 753 (8/8)
+     67 64 65 61  64 65 6e 64                              gdeadend
+        op string: [beyond] [unknown]
+     [append] @ 761 (7/7)
+     66 62 65 79  6f 6e 64                                 fbeyond
+     [append] @ 768 (8/8)
+     67 75 6e 6b  6e 6f 77 6e                              gunknown
+        op string: [far-beyond] [unknown]
+     [append] @ 776 (b/11)
+     6a 66 61 72  2d 62 65 79  - 6f 6e 64                  jfar-beyond
+     [append] @ 787 (8/8)
+     67 75 6e 6b  6e 6f 77 6e                              gunknown
+        op string: [wb-last] [clean]
+     [append] @ 795 (8/8)
+     67 77 62 2d  6c 61 73 74                              gwb-last
+     [append] @ 803 (6/6)
+     65 63 6c 65  61 6e                                    eclean
+        op string: [wb-beyond] [unknown]
+     [append] @ 809 (a/10)
+     69 77 62 2d  62 65 79 6f  - 6e 64                     iwb-beyond
+     [append] @ 819 (8/8)
+     67 75 6e 6b  6e 6f 77 6e                              gunknown
+        op string: [registered] [done]
+     [append] @ 827 (b/11)
+     6a 72 65 67  69 73 74 65  - 72 65 64                  jregistered
+     [append] @ 838 (5/5)
+     64 64 6f 6e  65                                       ddone
+        op close_container: [encoder-names] []
+     [append] @ 843 (1/1)
+     ff                                                    .
+      op open_container: [attributes] []
+   [append] @ 844 (b/11)
+   6a 61 74 74  72 69 62 75  - 74 65 73                  jattributes
+   [append] @ 855 (1/1)
+   bf                                                    .
+        op attr: [quoted] [say "hi" & <go>]
+        op attr: [bad name<&"] [value]
+        op content: [escaped] [1]
+     [append] @ 856 (8/8)
+     67 65 73 63  61 70 65 64                              gescaped
+     [content] @ 864 (1/1)
+     01                                                    .
+        op close_container: [attributes] []
+     [append] @ 865 (1/1)
+     ff                                                    .
+      op open_container: [implied-close] []
+   [append] @ 866 (e/14)
+   6d 69 6d 70  6c 69 65 64  - 2d 63 6c 6f  73 65        mimplied-close
+   [append] @ 880 (1/1)
+   bf                                                    .
+        op open_list: [list-then-container] []
+     [append] @ 881 (14/20)
+     73 6c 69 73  74 2d 74 68  - 65 6e 2d 63  6f 6e 74 61  slist-then-conta
+     69 6e 65 72                                           iner
+     [append] @ 901 (1/1)
+     9f                                                    .
+          op close_list: [list-then-container] []
+       [append] @ 902 (1/1)
+       ff                                                    .
+        op open_container: [after-list] []
+     [append] @ 903 (b/11)
+     6a 61 66 74  65 72 2d 6c  - 69 73 74                  jafter-list
+     [append] @ 914 (1/1)
+     bf                                                    .
+          op content: [one] [1]
+       [append] @ 915 (4/4)
+       63 6f 6e 65                                           cone
+       [content] @ 919 (1/1)
+       01                                                    .
+          op close_container: [after-list] []
+       [append] @ 920 (1/1)
+       ff                                                    .
+        op open_leaf_list: [leaf-then-container] []
+     [append] @ 921 (14/20)
+     73 6c 65 61  66 2d 74 68  - 65 6e 2d 63  6f 6e 74 61  sleaf-then-conta
+     69 6e 65 72                                           iner
+     [append] @ 941 (1/1)
+     9f                                                    .
+          op content: [leaf-then-container] [2]
+       [content] @ 942 (1/1)
+       02                                                    .
+          op close_leaf_list: [leaf-then-container] []
+       [append] @ 943 (1/1)
+       ff                                                    .
+        op open_container: [after-leaf] []
+     [append] @ 944 (b/11)
+     6a 61 66 74  65 72 2d 6c  - 65 61 66                  jafter-leaf
+     [append] @ 955 (1/1)
+     bf                                                    .
+          op content: [two] [2]
+       [append] @ 956 (4/4)
+       63 74 77 6f                                           ctwo
+       [content] @ 960 (1/1)
+       02                                                    .
+          op close_container: [after-leaf] []
+       [append] @ 961 (1/1)
+       ff                                                    .
+        op open_leaf_list: [leaf-then-leaf] []
+     [append] @ 962 (f/15)
+     6e 6c 65 61  66 2d 74 68  - 65 6e 2d 6c  65 61 66     nleaf-then-leaf
+     [append] @ 977 (1/1)
+     9f                                                    .
+          op content: [leaf-then-leaf] [3]
+       [content] @ 978 (1/1)
+       03                                                    .
+          op close_leaf_list: [leaf-then-leaf] []
+       [append] @ 979 (1/1)
+       ff                                                    .
+        op open_leaf_list: [second-leaf] []
+     [append] @ 980 (c/12)
+     6b 73 65 63  6f 6e 64 2d  - 6c 65 61 66               ksecond-leaf
+     [append] @ 992 (1/1)
+     9f                                                    .
+          op content: [second-leaf] [4]
+       [content] @ 993 (1/1)
+       04                                                    .
+          op close_leaf_list: [second-leaf] []
+       [append] @ 994 (1/1)
+       ff                                                    .
+        op open_list: [list-after-leaf] []
+     [append] @ 995 (10/16)
+     6f 6c 69 73  74 2d 61 66  - 74 65 72 2d  6c 65 61 66  olist-after-leaf
+     [append] @ 1011 (1/1)
+     9f                                                    .
+          op close_list: [list-after-leaf] []
+       [append] @ 1012 (1/1)
+       ff                                                    .
+        op open_list: [list-after-list] []
+     [append] @ 1013 (10/16)
+     6f 6c 69 73  74 2d 61 66  - 74 65 72 2d  6c 69 73 74  olist-after-list
+     [append] @ 1029 (1/1)
+     9f                                                    .
+          op close_list: [list-after-list] []
+       [append] @ 1030 (1/1)
+       ff                                                    .
+        op close_container: [implied-close] []
+     [append] @ 1031 (1/1)
+     ff                                                    .
+      op open_container: [markers] []
+   [append] @ 1032 (8/8)
+   67 6d 61 72  6b 65 72 73                              gmarkers
+   [append] @ 1040 (1/1)
+   bf                                                    .
+        op open_container: [list-container] []
+     [append] @ 1041 (f/15)
+     6e 6c 69 73  74 2d 63 6f  - 6e 74 61 69  6e 65 72     nlist-container
+     [append] @ 1056 (1/1)
+     bf                                                    .
+          op open_list: [item] []
+       [append] @ 1057 (5/5)
+       64 69 74 65  6d                                       ditem
+       [append] @ 1062 (1/1)
+       9f                                                    .
+            op open_instance: [item] []
+         [append] @ 1063 (1/1)
+         bf                                                    .
+              op content: [kept] [1]
+           [append] @ 1064 (5/5)
+           64 6b 65 70  74                                       dkept
+           [content] @ 1069 (1/1)
+           01                                                    .
+              op close_instance: [item] []
+           [append] @ 1070 (1/1)
+           ff                                                    .
+            op close_list: [item] []
+         [append] @ 1071 (1/1)
+         ff                                                    .
+          op content: [after] [2]
+       [append] @ 1072 (6/6)
+       65 61 66 74  65 72                                    eafter
+       [content] @ 1078 (1/1)
+       02                                                    .
+          op close_container: [list-container] []
+       [append] @ 1079 (1/1)
+       ff                                                    .
+        op open_container: [list-list] []
+     [append] @ 1080 (a/10)
+     69 6c 69 73  74 2d 6c 69  - 73 74                     ilist-list
+     [append] @ 1090 (1/1)
+     bf                                                    .
+          op open_list: [item] []
+       [append] @ 1091 (5/5)
+       64 69 74 65  6d                                       ditem
+       [append] @ 1096 (1/1)
+       9f                                                    .
+            op close_list: [item] []
+         [append] @ 1097 (1/1)
+         ff                                                    .
+          op content: [after] [2]
+       [append] @ 1098 (6/6)
+       65 61 66 74  65 72                                    eafter
+       [content] @ 1104 (1/1)
+       02                                                    .
+          op close_container: [list-list] []
+       [append] @ 1105 (1/1)
+       ff                                                    .
+        op open_container: [list-field] []
+     [append] @ 1106 (b/11)
+     6a 6c 69 73  74 2d 66 69  - 65 6c 64                  jlist-field
+     [append] @ 1117 (1/1)
+     bf                                                    .
+          op open_list: [item] []
+       [append] @ 1118 (5/5)
+       64 69 74 65  6d                                       ditem
+       [append] @ 1123 (1/1)
+       9f                                                    .
+            op close_list: [item] []
+         [append] @ 1124 (1/1)
+         ff                                                    .
+          op content: [after] [2]
+       [append] @ 1125 (6/6)
+       65 61 66 74  65 72                                    eafter
+       [content] @ 1131 (1/1)
+       02                                                    .
+          op close_container: [list-field] []
+       [append] @ 1132 (1/1)
+       ff                                                    .
+        op open_container: [stray-close] []
+     [append] @ 1133 (c/12)
+     6b 73 74 72  61 79 2d 63  - 6c 6f 73 65               kstray-close
+     [append] @ 1145 (1/1)
+     bf                                                    .
+          op open_list: [item] []
+       [append] @ 1146 (5/5)
+       64 69 74 65  6d                                       ditem
+       [append] @ 1151 (1/1)
+       9f                                                    .
+            op close_list: [item] []
+         [append] @ 1152 (1/1)
+         ff                                                    .
+          op content: [after] [2]
+       [append] @ 1153 (6/6)
+       65 61 66 74  65 72                                    eafter
+       [content] @ 1159 (1/1)
+       02                                                    .
+          op close_container: [stray-close] []
+       [append] @ 1160 (1/1)
+       ff                                                    .
+        op open_container: [leaf-container] []
+     [append] @ 1161 (f/15)
+     6e 6c 65 61  66 2d 63 6f  - 6e 74 61 69  6e 65 72     nleaf-container
+     [append] @ 1176 (1/1)
+     bf                                                    .
+          op open_leaf_list: [leaf] []
+       [append] @ 1177 (5/5)
+       64 6c 65 61  66                                       dleaf
+       [append] @ 1182 (1/1)
+       9f                                                    .
+            op content: [leaf] [1]
+         [content] @ 1183 (1/1)
+         01                                                    .
+            op close_leaf_list: [leaf] []
+         [append] @ 1184 (1/1)
+         ff                                                    .
+          op open_container: [kept] []
+       [append] @ 1185 (5/5)
+       64 6b 65 70  74                                       dkept
+       [append] @ 1190 (1/1)
+       bf                                                    .
+            op content: [value] [2]
+         [append] @ 1191 (6/6)
+         65 76 61 6c  75 65                                    evalue
+         [content] @ 1197 (1/1)
+         02                                                    .
+            op close_container: [kept] []
+         [append] @ 1198 (1/1)
+         ff                                                    .
+          op content: [after] [3]
+       [append] @ 1199 (6/6)
+       65 61 66 74  65 72                                    eafter
+       [content] @ 1205 (1/1)
+       03                                                    .
+          op close_container: [leaf-container] []
+       [append] @ 1206 (1/1)
+       ff                                                    .
+        op open_container: [leaf-leaf] []
+     [append] @ 1207 (a/10)
+     69 6c 65 61  66 2d 6c 65  - 61 66                     ileaf-leaf
+     [append] @ 1217 (1/1)
+     bf                                                    .
+          op open_leaf_list: [leaf] []
+       [append] @ 1218 (5/5)
+       64 6c 65 61  66                                       dleaf
+       [append] @ 1223 (1/1)
+       9f                                                    .
+            op content: [leaf] [1]
+         [content] @ 1224 (1/1)
+         01                                                    .
+            op close_leaf_list: [leaf] []
+         [append] @ 1225 (1/1)
+         ff                                                    .
+          op open_leaf_list: [other] []
+       [append] @ 1226 (6/6)
+       65 6f 74 68  65 72                                    eother
+       [append] @ 1232 (1/1)
+       9f                                                    .
+            op content: [other] [2]
+         [content] @ 1233 (1/1)
+         02                                                    .
+            op content: [other] [3]
+         [content] @ 1234 (1/1)
+         03                                                    .
+            op close_leaf_list: [other] []
+         [append] @ 1235 (1/1)
+         ff                                                    .
+          op content: [after] [4]
+       [append] @ 1236 (6/6)
+       65 61 66 74  65 72                                    eafter
+       [content] @ 1242 (1/1)
+       04                                                    .
+          op close_container: [leaf-leaf] []
+       [append] @ 1243 (1/1)
+       ff                                                    .
+        op open_container: [leaf-field] []
+     [append] @ 1244 (b/11)
+     6a 6c 65 61  66 2d 66 69  - 65 6c 64                  jleaf-field
+     [append] @ 1255 (1/1)
+     bf                                                    .
+          op open_leaf_list: [leaf] []
+       [append] @ 1256 (5/5)
+       64 6c 65 61  66                                       dleaf
+       [append] @ 1261 (1/1)
+       9f                                                    .
+            op content: [leaf] [1]
+         [content] @ 1262 (1/1)
+         01                                                    .
+            op close_leaf_list: [leaf] []
+         [append] @ 1263 (1/1)
+         ff                                                    .
+          op content: [kept] [2]
+       [append] @ 1264 (5/5)
+       64 6b 65 70  74                                       dkept
+       [content] @ 1269 (1/1)
+       02                                                    .
+          op content: [after] [3]
+       [append] @ 1270 (6/6)
+       65 61 66 74  65 72                                    eafter
+       [content] @ 1276 (1/1)
+       03                                                    .
+          op close_container: [leaf-field] []
+       [append] @ 1277 (1/1)
+       ff                                                    .
+        op open_container: [leaf-same] []
+     [append] @ 1278 (a/10)
+     69 6c 65 61  66 2d 73 61  - 6d 65                     ileaf-same
+     [append] @ 1288 (1/1)
+     bf                                                    .
+          op open_leaf_list: [leaf] []
+       [append] @ 1289 (5/5)
+       64 6c 65 61  66                                       dleaf
+       [append] @ 1294 (1/1)
+       9f                                                    .
+            op content: [leaf] [1]
+         [content] @ 1295 (1/1)
+         01                                                    .
+            op content: [leaf] [2]
+         [content] @ 1296 (1/1)
+         02                                                    .
+            op content: [leaf] [3]
+         [content] @ 1297 (1/1)
+         03                                                    .
+            op close_leaf_list: [leaf] []
+         [append] @ 1298 (1/1)
+         ff                                                    .
+          op close_container: [leaf-same] []
+       [append] @ 1299 (1/1)
+       ff                                                    .
+        op open_container: [leaf-instance] []
+     [append] @ 1300 (e/14)
+     6d 6c 65 61  66 2d 69 6e  - 73 74 61 6e  63 65        mleaf-instance
+     [append] @ 1314 (1/1)
+     bf                                                    .
+          op open_leaf_list: [leaf] []
+       [append] @ 1315 (5/5)
+       64 6c 65 61  66                                       dleaf
+       [append] @ 1320 (1/1)
+       9f                                                    .
+            op content: [leaf] [1]
+         [content] @ 1321 (1/1)
+         01                                                    .
+            op close_leaf_list: [leaf] []
+         [append] @ 1322 (1/1)
+         ff                                                    .
+          op open_list: [item] []
+       [append] @ 1323 (5/5)
+       64 69 74 65  6d                                       ditem
+       [append] @ 1328 (1/1)
+       9f                                                    .
+            op open_instance: [item] []
+         [append] @ 1329 (1/1)
+         bf                                                    .
+              op content: [value] [2]
+           [append] @ 1330 (6/6)
+           65 76 61 6c  75 65                                    evalue
+           [content] @ 1336 (1/1)
+           02                                                    .
+              op close_instance: [item] []
+           [append] @ 1337 (1/1)
+           ff                                                    .
+            op close_list: [item] []
+         [append] @ 1338 (1/1)
+         ff                                                    .
+          op content: [after] [3]
+       [append] @ 1339 (6/6)
+       65 61 66 74  65 72                                    eafter
+       [content] @ 1345 (1/1)
+       03                                                    .
+          op close_container: [leaf-instance] []
+       [append] @ 1346 (1/1)
+       ff                                                    .
+        op close_container: [markers] []
+     [append] @ 1347 (1/1)
+     ff                                                    .
+      op open_container: [emit-field] []
+   [append] @ 1348 (b/11)
+   6a 65 6d 69  74 2d 66 69  - 65 6c 64                  jemit-field
+   [append] @ 1359 (1/1)
+   bf                                                    .
+        op content: [after-domain] [1]
+     [append] @ 1360 (d/13)
+     6c 61 66 74  65 72 2d 64  - 6f 6d 61 69  6e           lafter-domain
+     [content] @ 1373 (1/1)
+     01                                                    .
+        op string: [quoted] [value]
+     [append] @ 1374 (7/7)
+     66 71 75 6f  74 65 64                                 fquoted
+     [append] @ 1381 (6/6)
+     65 76 61 6c  75 65                                    evalue
+        op close_container: [emit-field] []
+     [append] @ 1387 (1/1)
+     ff                                                    .
+      op open_container: [format-flags] []
+   [append] @ 1388 (d/13)
+   6c 66 6f 72  6d 61 74 2d  - 66 6c 61 67  73           lformat-flags
+   [append] @ 1401 (1/1)
+   bf                                                    .
+        op content: [plus] [5]
+     [append] @ 1402 (5/5)
+     64 70 6c 75  73                                       dplus
+     [content] @ 1407 (1/1)
+     05                                                    .
+        op content: [space] [5]
+     [append] @ 1408 (6/6)
+     65 73 70 61  63 65                                    espace
+     [content] @ 1414 (1/1)
+     05                                                    .
+        op content: [wide] [5]
+     [append] @ 1415 (5/5)
+     64 77 69 64  65                                       dwide
+     [content] @ 1420 (1/1)
+     05                                                    .
+        op content: [zero] [5]
+     [append] @ 1421 (5/5)
+     64 7a 65 72  6f                                       dzero
+     [content] @ 1426 (1/1)
+     05                                                    .
+        op content: [long] [7]
+     [append] @ 1427 (5/5)
+     64 6c 6f 6e  67                                       dlong
+     [content] @ 1432 (1/1)
+     07                                                    .
+        op content: [negative] [-3]
+     [append] @ 1433 (9/9)
+     68 6e 65 67  61 74 69 76  - 65                        hnegative
+     [content] @ 1442 (1/1)
+     22                                                    "
+        op content: [blank] [-3]
+     [append] @ 1443 (6/6)
+     65 62 6c 61  6e 6b                                    eblank
+     [content] @ 1449 (1/1)
+     22                                                    "
+        op content: [unsigned] [5]
+     [append] @ 1450 (9/9)
+     68 75 6e 73  69 67 6e 65  - 64                        hunsigned
+     [content] @ 1459 (1/1)
+     05                                                    .
+        op content: [hex] [ff]
+     [append] @ 1460 (4/4)
+     63 68 65 78                                           chex
+     [append] @ 1464 (3/3)
+     62 66 66                                              bff
+     [content] @ 1464 (3/3)
+     62 66 66                                              bff
+        op content: [left] [5]
+     [append] @ 1467 (5/5)
+     64 6c 65 66  74                                       dleft
+     [content] @ 1472 (1/1)
+     05                                                    .
+        op content: [both] [5]
+     [append] @ 1473 (5/5)
+     64 62 6f 74  68                                       dboth
+     [content] @ 1478 (1/1)
+     05                                                    .
+        op content: [precise] [5]
+     [append] @ 1479 (8/8)
+     67 70 72 65  63 69 73 65                              gprecise
+     [content] @ 1487 (1/1)
+     05                                                    .
+        op content: [left-zero] [42]
+     [append] @ 1488 (a/10)
+     69 6c 65 66  74 2d 7a 65  - 72 6f                     ileft-zero
+     [content] @ 1498 (2/2)
+     18 2a                                                 .*
+        op content: [json-plus] [+5]
+     [append] @ 1500 (a/10)
+     69 6a 73 6f  6e 2d 70 6c  - 75 73                     ijson-plus
+     [append] @ 1510 (3/3)
+     62 2b 35                                              b+5
+     [content] @ 1510 (3/3)
+     62 2b 35                                              b+5
+        op content: [json-wide] [   +5]
+     [append] @ 1513 (a/10)
+     69 6a 73 6f  6e 2d 77 69  - 64 65                     ijson-wide
+     [append] @ 1523 (6/6)
+     65 20 20 20  2b 35                                    e   +5
+     [content] @ 1523 (6/6)
+     65 20 20 20  2b 35                                    e   +5
+        op content: [json-size] [+5]
+     [append] @ 1529 (a/10)
+     69 6a 73 6f  6e 2d 73 69  - 7a 65                     ijson-size
+     [append] @ 1539 (3/3)
+     62 2b 35                                              b+5
+     [content] @ 1539 (3/3)
+     62 2b 35                                              b+5
+        op content: [json-float] [+1.50]
+     [append] @ 1542 (b/11)
+     6a 6a 73 6f  6e 2d 66 6c  - 6f 61 74                  jjson-float
+     [append] @ 1553 (6/6)
+     65 2b 31 2e  35 30                                    e+1.50
+     [content] @ 1553 (6/6)
+     65 2b 31 2e  35 30                                    e+1.50
+        op string: [json-quoted] [+5]
+     [append] @ 1559 (c/12)
+     6b 6a 73 6f  6e 2d 71 75  - 6f 74 65 64               kjson-quoted
+     [append] @ 1571 (3/3)
+     62 2b 35                                              b+5
+        op close_container: [format-flags] []
+     [append] @ 1574 (1/1)
+     ff                                                    .
+huge width wrote 32767 bytes
+missing conversions wrote 0 bytes
+      op open_container: [humanize-signs] []
+   [append] @ 1575 (f/15)
+   6e 68 75 6d  61 6e 69 7a  - 65 2d 73 69  67 6e 73     nhumanize-signs
+   [append] @ 1590 (1/1)
+   bf                                                    .
+        op content: [small] [-5]
+     [append] @ 1591 (6/6)
+     65 73 6d 61  6c 6c                                    esmall
+     [content] @ 1597 (1/1)
+     24                                                    $
+        op content: [kilo] [-5000]
+     [append] @ 1598 (5/5)
+     64 6b 69 6c  6f                                       dkilo
+     [content] @ 1603 (3/3)
+     39 13 87                                              9..
+        op content: [mega] [-5000000]
+     [append] @ 1606 (5/5)
+     64 6d 65 67  61                                       dmega
+     [content] @ 1611 (5/5)
+     3a 00 4c 4b  3f                                       :.LK?
+        op content: [fraction] [-1500]
+     [append] @ 1616 (9/9)
+     68 66 72 61  63 74 69 6f  - 6e                        hfraction
+     [content] @ 1625 (3/3)
+     39 05 db                                              9..
+        op content: [metric] [-5000]
+     [append] @ 1628 (7/7)
+     66 6d 65 74  72 69 63                                 fmetric
+     [content] @ 1635 (3/3)
+     39 13 87                                              9..
+        op content: [lowest] [-9223372036854775808]
+     [append] @ 1638 (7/7)
+     66 6c 6f 77  65 73 74                                 flowest
+     [content] @ 1645 (9/9)
+     3b 7f ff ff  ff ff ff ff  - ff                        ;........
+        op content: [next-lowest] [-9223372036854775807]
+     [append] @ 1654 (c/12)
+     6b 6e 65 78  74 2d 6c 6f  - 77 65 73 74               knext-lowest
+     [content] @ 1666 (9/9)
+     3b 7f ff ff  ff ff ff ff  - fe                        ;........
+        op content: [highest] [9223372036854775807]
+     [append] @ 1675 (8/8)
+     67 68 69 67  68 65 73 74                              ghighest
+     [content] @ 1683 (9/9)
+     1b 7f ff ff  ff ff ff ff  - ff                        .........
+        op content: [too-high] [18446744073709551615]
+     [append] @ 1692 (9/9)
+     68 74 6f 6f  2d 68 69 67  - 68                        htoo-high
+     [content] @ 1701 (9/9)
+     1b ff ff ff  ff ff ff ff  - ff                        .........
+        op string: [word] [abc]
+     [append] @ 1710 (5/5)
+     64 77 6f 72  64                                       dword
+     [append] @ 1715 (4/4)
+     63 61 62 63                                           cabc
+        op string: [mixed] [12abc]
+     [append] @ 1719 (6/6)
+     65 6d 69 78  65 64                                    emixed
+     [append] @ 1725 (6/6)
+     65 31 32 61  62 63                                    e12abc
+        op content: [padded] [4096]
+     [append] @ 1731 (7/7)
+     66 70 61 64  64 65 64                                 fpadded
+     [content] @ 1738 (3/3)
+     19 10 00                                              ...
+        op content: [after] [4096]
+     [append] @ 1741 (6/6)
+     65 61 66 74  65 72                                    eafter
+     [content] @ 1747 (3/3)
+     19 10 00                                              ...
+        op close_container: [humanize-signs] []
+     [append] @ 1750 (1/1)
+     ff                                                    .
+      op close_container: [top] []
+   [append] @ 1751 (1/1)
+   ff                                                    .
+    op finish: [] []
+ [append] @ 1752 (1/1)
+ ff                                                    .
+  op flush: [] []
+>[cbor] @ 0 (6d9/1753)
+>bf 63 74 6f  70 bf 6c 61  - 6e 63 68 6f  72 2d 77 69  .ctop.lanchor-wi
+>64 74 68 bf  65 72 69 67  - 68 74 63 61  62 63 64 6c  dth.erightcabcdl
+>65 66 74 63  61 62 63 ff  - 6a 6d 61 70  2d 67 72 6f  eftcabc.jmap-gro
+>77 74 68 bf  68 6d 61 70  - 70 65 64 2d  30 00 69 6d  wth.hmapped-0.im
+>61 70 70 65  64 2d 31 35  - 0f 69 6d 61  70 70 65 64  apped-15.imapped
+>2d 31 36 10  69 6d 61 70  - 70 65 64 2d  31 37 11 69  -16.imapped-17.i
+>6d 61 70 70  65 64 2d 33  - 39 18 27 66  73 72 63 2d  mapped-39.'fsrc-
+>34 30 18 28  ff 6a 6c 6f  - 6e 67 2d 6e  61 6d 65 73  40.(.jlong-names
+>bf 78 3e 61  61 61 61 61  - 61 61 61 61  61 61 61 61  .x>aaaaaaaaaaaaa
+>61 61 61 61  61 61 61 61  - 61 61 61 61  61 61 61 61  aaaaaaaaaaaaaaaa
+>61 61 61 61  61 61 61 61  - 61 61 61 61  61 61 61 61  aaaaaaaaaaaaaaaa
+>61 61 61 61  61 61 61 61  - 61 61 61 61  61 61 61 61  aaaaaaaaaaaaaaaa
+>61 bf 66 6c  65 6e 67 74  - 68 18 3e ff  78 3f 62 62  a.flength.>.x?bb
+>62 62 62 62  62 62 62 62  - 62 62 62 62  62 62 62 62  bbbbbbbbbbbbbbbb
+>62 62 62 62  62 62 62 62  - 62 62 62 62  62 62 62 62  bbbbbbbbbbbbbbbb
+>62 62 62 62  62 62 62 62  - 62 62 62 62  62 62 62 62  bbbbbbbbbbbbbbbb
+>62 62 62 62  62 62 62 62  - 62 62 62 62  62 bf 66 6c  bbbbbbbbbbbbb.fl
+>65 6e 67 74  68 18 3f ff  - 78 40 63 63  63 63 63 63  ength.?.x@cccccc
+>63 63 63 63  63 63 63 63  - 63 63 63 63  63 63 63 63  cccccccccccccccc
+>63 63 63 63  63 63 63 63  - 63 63 63 63  63 63 63 63  cccccccccccccccc
+>63 63 63 63  63 63 63 63  - 63 63 63 63  63 63 63 63  cccccccccccccccc
+>63 63 63 63  63 63 63 63  - 63 63 bf 66  6c 65 6e 67  cccccccccc.fleng
+>74 68 18 40  ff 78 41 64  - 64 64 64 64  64 64 64 64  th.@.xAddddddddd
+>64 64 64 64  64 64 64 64  - 64 64 64 64  64 64 64 64  dddddddddddddddd
+>64 64 64 64  64 64 64 64  - 64 64 64 64  64 64 64 64  dddddddddddddddd
+>64 64 64 64  64 64 64 64  - 64 64 64 64  64 64 64 64  dddddddddddddddd
+>64 64 64 64  64 64 64 64  - bf 66 6c 65  6e 67 74 68  dddddddd.flength
+>18 41 ff 78  82 65 65 65  - 65 65 65 65  65 65 65 65  .A.x.eeeeeeeeeee
+>65 65 65 65  65 65 65 65  - 65 65 65 65  65 65 65 65  eeeeeeeeeeeeeeee
+>65 65 65 65  65 65 65 65  - 65 65 65 65  65 65 65 65  eeeeeeeeeeeeeeee
+>65 65 65 65  65 65 65 65  - 65 65 65 65  65 65 65 65  eeeeeeeeeeeeeeee
+>65 65 65 65  65 65 65 65  - 65 65 65 65  65 65 65 65  eeeeeeeeeeeeeeee
+>65 65 65 65  65 65 65 65  - 65 65 65 65  65 65 65 65  eeeeeeeeeeeeeeee
+>65 65 65 65  65 65 65 65  - 65 65 65 65  65 65 65 65  eeeeeeeeeeeeeeee
+>65 65 65 65  65 65 65 65  - 65 65 65 65  65 65 65 65  eeeeeeeeeeeeeeee
+>65 65 65 65  65 65 65 bf  - 66 6c 65 6e  67 74 68 18  eeeeeee.flength.
+>82 ff ff 6d  63 6f 6e 74  - 72 6f 6c 2d  63 68 61 72  ...mcontrol-char
+>73 bf 68 69  6e 74 65 72  - 69 6f 72 65  61 01 62 02  s.hinteriorea.b.
+>63 68 74 72  61 69 6c 69  - 6e 67 64 61  01 62 02 6d  chtrailingda.b.m
+>62 65 66 6f  72 65 2d 65  - 73 63 61 70  65 69 61 01  before-escapeia.
+>62 3c 63 02  64 26 65 6c  - 61 66 74 65  72 2d 65 73  b<c.d&elafter-es
+>63 61 70 65  68 61 3c 62  - 01 63 26 64  02 64 6f 6e  capeha<b.c&d.don
+>6c 79 63 01  02 03 ff 72  - 64 65 70 72  65 63 61 74  lyc....rdeprecat
+>65 64 2d 6f  70 74 69 6f  - 6e 73 bf 66  72 65 74 61  ed-options.freta
+>69 6e 00 69  6e 6f 2d 72  - 65 74 61 69  6e 00 ff 6d  in.ino-retain..m
+>65 6e 63 6f  64 65 72 2d  - 6e 61 6d 65  73 bf 65 66  encoder-names.ef
+>69 72 73 74  67 75 6e 6b  - 6e 6f 77 6e  64 6c 61 73  irstgunknowndlas
+>74 67 64 65  61 64 65 6e  - 64 66 62 65  79 6f 6e 64  tgdeadendfbeyond
+>67 75 6e 6b  6e 6f 77 6e  - 6a 66 61 72  2d 62 65 79  gunknownjfar-bey
+>6f 6e 64 67  75 6e 6b 6e  - 6f 77 6e 67  77 62 2d 6c  ondgunknowngwb-l
+>61 73 74 65  63 6c 65 61  - 6e 69 77 62  2d 62 65 79  astecleaniwb-bey
+>6f 6e 64 67  75 6e 6b 6e  - 6f 77 6e 6a  72 65 67 69  ondgunknownjregi
+>73 74 65 72  65 64 64 64  - 6f 6e 65 ff  6a 61 74 74  steredddone.jatt
+>72 69 62 75  74 65 73 bf  - 67 65 73 63  61 70 65 64  ributes.gescaped
+>01 ff 6d 69  6d 70 6c 69  - 65 64 2d 63  6c 6f 73 65  ..mimplied-close
+>bf 73 6c 69  73 74 2d 74  - 68 65 6e 2d  63 6f 6e 74  .slist-then-cont
+>61 69 6e 65  72 9f ff 6a  - 61 66 74 65  72 2d 6c 69  ainer..jafter-li
+>73 74 bf 63  6f 6e 65 01  - ff 73 6c 65  61 66 2d 74  st.cone..sleaf-t
+>68 65 6e 2d  63 6f 6e 74  - 61 69 6e 65  72 9f 02 ff  hen-container...
+>6a 61 66 74  65 72 2d 6c  - 65 61 66 bf  63 74 77 6f  jafter-leaf.ctwo
+>02 ff 6e 6c  65 61 66 2d  - 74 68 65 6e  2d 6c 65 61  ..nleaf-then-lea
+>66 9f 03 ff  6b 73 65 63  - 6f 6e 64 2d  6c 65 61 66  f...ksecond-leaf
+>9f 04 ff 6f  6c 69 73 74  - 2d 61 66 74  65 72 2d 6c  ...olist-after-l
+>65 61 66 9f  ff 6f 6c 69  - 73 74 2d 61  66 74 65 72  eaf..olist-after
+>2d 6c 69 73  74 9f ff ff  - 67 6d 61 72  6b 65 72 73  -list...gmarkers
+>bf 6e 6c 69  73 74 2d 63  - 6f 6e 74 61  69 6e 65 72  .nlist-container
+>bf 64 69 74  65 6d 9f bf  - 64 6b 65 70  74 01 ff ff  .ditem..dkept...
+>65 61 66 74  65 72 02 ff  - 69 6c 69 73  74 2d 6c 69  eafter..ilist-li
+>73 74 bf 64  69 74 65 6d  - 9f ff 65 61  66 74 65 72  st.ditem..eafter
+>02 ff 6a 6c  69 73 74 2d  - 66 69 65 6c  64 bf 64 69  ..jlist-field.di
+>74 65 6d 9f  ff 65 61 66  - 74 65 72 02  ff 6b 73 74  tem..eafter..kst
+>72 61 79 2d  63 6c 6f 73  - 65 bf 64 69  74 65 6d 9f  ray-close.ditem.
+>ff 65 61 66  74 65 72 02  - ff 6e 6c 65  61 66 2d 63  .eafter..nleaf-c
+>6f 6e 74 61  69 6e 65 72  - bf 64 6c 65  61 66 9f 01  ontainer.dleaf..
+>ff 64 6b 65  70 74 bf 65  - 76 61 6c 75  65 02 ff 65  .dkept.evalue..e
+>61 66 74 65  72 03 ff 69  - 6c 65 61 66  2d 6c 65 61  after..ileaf-lea
+>66 bf 64 6c  65 61 66 9f  - 01 ff 65 6f  74 68 65 72  f.dleaf...eother
+>9f 02 03 ff  65 61 66 74  - 65 72 04 ff  6a 6c 65 61  ....eafter..jlea
+>66 2d 66 69  65 6c 64 bf  - 64 6c 65 61  66 9f 01 ff  f-field.dleaf...
+>64 6b 65 70  74 02 65 61  - 66 74 65 72  03 ff 69 6c  dkept.eafter..il
+>65 61 66 2d  73 61 6d 65  - bf 64 6c 65  61 66 9f 01  eaf-same.dleaf..
+>02 03 ff ff  6d 6c 65 61  - 66 2d 69 6e  73 74 61 6e  ....mleaf-instan
+>63 65 bf 64  6c 65 61 66  - 9f 01 ff 64  69 74 65 6d  ce.dleaf...ditem
+>9f bf 65 76  61 6c 75 65  - 02 ff ff 65  61 66 74 65  ..evalue...eafte
+>72 03 ff ff  6a 65 6d 69  - 74 2d 66 69  65 6c 64 bf  r...jemit-field.
+>6c 61 66 74  65 72 2d 64  - 6f 6d 61 69  6e 01 66 71  lafter-domain.fq
+>75 6f 74 65  64 65 76 61  - 6c 75 65 ff  6c 66 6f 72  uotedevalue.lfor
+>6d 61 74 2d  66 6c 61 67  - 73 bf 64 70  6c 75 73 05  mat-flags.dplus.
+>65 73 70 61  63 65 05 64  - 77 69 64 65  05 64 7a 65  espace.dwide.dze
+>72 6f 05 64  6c 6f 6e 67  - 07 68 6e 65  67 61 74 69  ro.dlong.hnegati
+>76 65 22 65  62 6c 61 6e  - 6b 22 68 75  6e 73 69 67  ve"eblank"hunsig
+>6e 65 64 05  63 68 65 78  - 62 66 66 64  6c 65 66 74  ned.chexbffdleft
+>05 64 62 6f  74 68 05 67  - 70 72 65 63  69 73 65 05  .dboth.gprecise.
+>69 6c 65 66  74 2d 7a 65  - 72 6f 18 2a  69 6a 73 6f  ileft-zero.*ijso
+>6e 2d 70 6c  75 73 62 2b  - 35 69 6a 73  6f 6e 2d 77  n-plusb+5ijson-w
+>69 64 65 65  20 20 20 2b  - 35 69 6a 73  6f 6e 2d 73  idee   +5ijson-s
+>69 7a 65 62  2b 35 6a 6a  - 73 6f 6e 2d  66 6c 6f 61  izeb+5jjson-floa
+>74 65 2b 31  2e 35 30 6b  - 6a 73 6f 6e  2d 71 75 6f  te+1.50kjson-quo
+>74 65 64 62  2b 35 ff 6e  - 68 75 6d 61  6e 69 7a 65  tedb+5.nhumanize
+>2d 73 69 67  6e 73 bf 65  - 73 6d 61 6c  6c 24 64 6b  -signs.esmall$dk
+>69 6c 6f 39  13 87 64 6d  - 65 67 61 3a  00 4c 4b 3f  ilo9..dmega:.LK?
+>68 66 72 61  63 74 69 6f  - 6e 39 05 db  66 6d 65 74  hfraction9..fmet
+>72 69 63 39  13 87 66 6c  - 6f 77 65 73  74 3b 7f ff  ric9..flowest;..
+>ff ff ff ff  ff ff 6b 6e  - 65 78 74 2d  6c 6f 77 65  ......knext-lowe
+>73 74 3b 7f  ff ff ff ff  - ff ff fe 67  68 69 67 68  st;........ghigh
+>65 73 74 1b  7f ff ff ff  - ff ff ff ff  68 74 6f 6f  est.........htoo
+>2d 68 69 67  68 1b ff ff  - ff ff ff ff  ff ff 64 77  -high.........dw
+>6f 72 64 63  61 62 63 65  - 6d 69 78 65  64 65 31 32  ordcabcemixede12
+>61 62 63 66  70 61 64 64  - 65 64 19 10  00 65 61 66  abcfpadded...eaf
+>74 65 72 19  10 00 ff ff  - ff                        ter......
+before="one" name="gum" count="0" name="rope" count="1" name="ladder" count="2" after="two" 
+long values wrote 20068 bytes
+warning 10: 64 bytes, '<error><message>test_17' ... 'xxxxxxxxxx&lt;10&gt;</message></error>'
+xml message 10: 67 bytes, '<message>xxxxxxxxxx&lt;' ... ';: No such file or directory'
+html message 10: 99 bytes, '<div class="line"><div ' ... ' No such file or directory'
+warning 1000: 1056 bytes, '<error><message>test_17' ... 'xxxxxxxx&lt;1000&gt;</message></error>'
+xml message 1000: 1059 bytes, '<message>xxxxxxxxxxxxxx' ... ';: No such file or directory'
+html message 1000: 1091 bytes, '<div class="line"><div ' ... ' No such file or directory'
+warning 1015: 1071 bytes, '<error><message>test_17' ... 'xxxxxxxx&lt;1015&gt;</message></error>'
+xml message 1015: 1074 bytes, '<message>xxxxxxxxxxxxxx' ... ';: No such file or directory'
+html message 1015: 1106 bytes, '<div class="line"><div ' ... ' No such file or directory'
+warning 1030: 1086 bytes, '<error><message>test_17' ... 'xxxxxxxx&lt;1030&gt;</message></error>'
+xml message 1030: 1089 bytes, '<message>xxxxxxxxxxxxxx' ... ';: No such file or directory'
+html message 1030: 1121 bytes, '<div class="line"><div ' ... ' No such file or directory'
+warning 8170: 8226 bytes, '<error><message>test_17' ... 'xxxxxxxx&lt;8170&gt;</message></error>'
+xml message 8170: 8229 bytes, '<message>xxxxxxxxxxxxxx' ... ';: No such file or directory'
+html message 8170: 8261 bytes, '<div class="line"><div ' ... ' No such file or directory'
+warning 9000: 9056 bytes, '<error><message>test_17' ... 'xxxxxxxx&lt;9000&gt;</message></error>'
+xml message 9000: 9059 bytes, '<message>xxxxxxxxxxxxxx' ... ';: No such file or directory'
+html message 9000: 9091 bytes, '<div class="line"><div ' ... ' No such file or directory'
+deep stack wrote 8903 bytes
+open frames wrote 167 bytes
+<prefix-names>
+  <long-name>1</long-name>
+  <pre>2</pre>
+  <pref>3</pref>
+</prefix-names>
+<prefix-added>
+  <long-name>4</long-name>
+  <short-name>5</short-name>
+</prefix-added>
+<siblings>
+  <err>1</err>
+  <err>2</err>
+  <mes>1</mes>
+  <mes>2</mes>
+  <error>1</error>
+  <error>2</error>
+</siblings>
+syslog send: full 305, header no, text 305
+  full ends 'xxxxxxxxxxxxxxxxxxxxtail'
+  text ends 'xxxxxxxxxxxxxxxxxxxxtail'
+syslog send: full 2047, header no, text 2047
+  full ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+  text ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+syslog send: full 2047, header no, text 2047
+  full ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+  text ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+syslog send: full 2047, header no, text 2047
+  full ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+  text ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+syslog send: full 2047, header no, text 2047
+  full ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+  text ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+syslog send: full 2047, header no, text 2047
+  full ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+  text ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
