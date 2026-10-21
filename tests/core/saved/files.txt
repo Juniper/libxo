@@ -270,6 +270,8 @@ test_13.pass.HIPx.out
 test_13.pass.HIPx.err
 test_13.pass.E.out
 test_13.pass.E.err
+test_13.pass.XPx11.out
+test_13.pass.XPx11.err
 test_14.pass.T.out
 test_14.pass.T.err
 test_14.pass.XP.out
