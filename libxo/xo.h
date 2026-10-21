@@ -125,6 +125,7 @@ typedef unsigned long long xo_xof_flags_t;
 #define XOF_FILTER_WARN	XOF_BIT(37)  /** Warn about runtime errors w/ filters */
 #define XOF_GROUP	XOF_BIT(38)  /** Insert locale thousands separators */
 #define XOF_LINT	XOF_BIT(39)  /** Warn about lint issues */
+#define XOF_XML11	XOF_BIT(40)  /** XML 1.1: allow control char refs */
 
 typedef unsigned xo_emit_flags_t; /* Flags to xo_emit() and friends */
 #define XOEF_RETAIN	0	  /* Deprecated: retain feature removed */
