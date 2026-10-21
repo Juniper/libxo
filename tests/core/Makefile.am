@@ -106,6 +106,7 @@ endif
 CSV_EXT = Ecsv1 Ecsv2 Ecsv3
 PMAP_EXT = JPmap  XPmap
 RTOON_EXT = Ertoon
+XML11_EXT = XPx11
 
 STYLES = T XP JP JPu HP X J H HIPx E
 
@@ -158,6 +159,13 @@ $(foreach file, test_04.c test_16.c, \
             $(foreach fd, out err, \
                 $(addprefix saved/, ${file:.c=${pass}${ext}.${fd}})))))
 
+TEST_OUTPUT_FILES += \
+$(foreach file, test_13.c, \
+    $(foreach pass, ${ALL_PASSES}, \
+        $(foreach ext, ${XML11_EXT}, \
+            $(foreach fd, out err, \
+                $(addprefix saved/, ${file:.c=${pass}${ext}.${fd}})))))
+
 sayit:
 	echo ${TEST_OUTPUT_FILES}
 
@@ -167,6 +175,7 @@ EXTRA_DIST = \
     test_04.fmts \
     test_12.fmts \
     test_12.fmts \
+    test_13.fmts \
     test_15.fmts \
     test_16.fmts \
     test_12.map \
