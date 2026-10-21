@@ -131,6 +131,8 @@ the encoding output styles, XML and JSON::
 The encoding modifier is the opposite of the display modifier, and
 they are often used to give to distinct views of the underlying data.
 
+.. _escape-private-modifier:
+
 The escape-private Modifier
 +++++++++++++++++++++++++++
 
@@ -149,6 +151,15 @@ recovered by subtracting 0xE000 from the Unicode code point.
 
 The escape-private modifier only affects XML and HTML output styles.
 Without this modifier, control characters are replaced with spaces.
+
+XML 1.0 forbids a reference to a control character, which is why
+the private-use area is used.  XML 1.1 allows one, so with the
+"xml1.1" option (see :ref:`options`), output refers to the control
+character itself: byte 0x01 becomes ``&#x0001;``.  The option does
+not imply "xml"; HTML output is XML encoded as well, so it applies
+to both the XML and HTML styles.  Note that libxo does not emit an
+XML declaration; a document that uses these references needs one
+that says ``version="1.1"``.
 
 The escape-slash Modifier
 +++++++++++++++++++++++++
