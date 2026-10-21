@@ -1,0 +1,83 @@
+op create: [cbor] []
+ [append] @ 0 (1/1)
+ bf                                                    .
+    op open_container: [top] []
+ [append] @ 1 (4/4)
+ 63 74 6f 70                                           ctop
+ [append] @ 5 (1/1)
+ bf                                                    .
+      op open_container: [cached] []
+   [append] @ 6 (7/7)
+   66 63 61 63  68 65 64                                 fcached
+   [append] @ 13 (1/1)
+   bf                                                    .
+        op content: [one] [1]
+     [append] @ 14 (4/4)
+     63 6f 6e 65                                           cone
+     [content] @ 18 (1/1)
+     01                                                    .
+        op close_container: [cached] []
+     [append] @ 19 (1/1)
+     ff                                                    .
+      op open_container: [precompiled] []
+   [append] @ 20 (c/12)
+   6b 70 72 65  63 6f 6d 70  - 69 6c 65 64               kprecompiled
+   [append] @ 32 (1/1)
+   bf                                                    .
+        op content: [one] [1]
+     [append] @ 33 (4/4)
+     63 6f 6e 65                                           cone
+     [content] @ 37 (1/1)
+     01                                                    .
+        op close_container: [precompiled] []
+     [append] @ 38 (1/1)
+     ff                                                    .
+      op open_container: [target] []
+   [append] @ 39 (7/7)
+   66 74 61 72  67 65 74                                 ftarget
+   [append] @ 46 (1/1)
+   bf                                                    .
+        op content: [one] [1]
+     [append] @ 47 (4/4)
+     63 6f 6e 65                                           cone
+     [content] @ 51 (1/1)
+     01                                                    .
+        op content: [two] [2]
+     [append] @ 52 (4/4)
+     63 74 77 6f                                           ctwo
+     [content] @ 56 (1/1)
+     02                                                    .
+        op close_container: [target] []
+     [append] @ 57 (1/1)
+     ff                                                    .
+      op open_container: [layout] []
+   [append] @ 58 (7/7)
+   66 6c 61 79  6f 75 74                                 flayout
+   [append] @ 65 (1/1)
+   bf                                                    .
+        op content: [one] [1]
+     [append] @ 66 (4/4)
+     63 6f 6e 65                                           cone
+     [content] @ 70 (1/1)
+     01                                                    .
+        op content: [two] [2]
+     [append] @ 71 (4/4)
+     63 74 77 6f                                           ctwo
+     [content] @ 75 (1/1)
+     02                                                    .
+        op close_container: [layout] []
+     [append] @ 76 (1/1)
+     ff                                                    .
+      op close_container: [top] []
+   [append] @ 77 (1/1)
+   ff                                                    .
+    op finish: [] []
+ [append] @ 78 (1/1)
+ ff                                                    .
+  op flush: [] []
+>[cbor] @ 0 (4f/79)
+>bf 63 74 6f  70 bf 66 63  - 61 63 68 65  64 bf 63 6f  .ctop.fcached.co
+>6e 65 01 ff  6b 70 72 65  - 63 6f 6d 70  69 6c 65 64  ne..kprecompiled
+>bf 63 6f 6e  65 01 ff 66  - 74 61 72 67  65 74 bf 63  .cone..ftarget.c
+>6f 6e 65 01  63 74 77 6f  - 02 ff 66 6c  61 79 6f 75  one.ctwo..flayou
+>74 bf 63 6f  6e 65 01 63  - 74 77 6f 02  ff ff ff     t.cone.ctwo....
