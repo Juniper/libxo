@@ -1,0 +1,560 @@
+op create: [cbor] []
+ [append] @ 0 (1/1)
+ bf                                                    .
+    op version: [] [3.1.4]
+    op open_container: [top] []
+ [append] @ 1 (4/4)
+ 63 74 6f 70                                           ctop
+ [append] @ 5 (1/1)
+ bf                                                    .
+      op attr: [test] [value]
+      op open_container: [data] []
+   [append] @ 6 (5/5)
+   64 64 61 74  61                                       ddata
+   [append] @ 11 (1/1)
+   bf                                                    .
+        op open_list: [item] []
+     [append] @ 12 (5/5)
+     64 69 74 65  6d                                       ditem
+     [append] @ 17 (1/1)
+     9f                                                    .
+          op attr: [test2] [value2]
+          op close_list: [item] []
+       [append] @ 18 (1/1)
+       ff                                                    .
+        op string: [data] [bold]
+     [append] @ 19 (5/5)
+     64 64 61 74  61                                       ddata
+     [append] @ 24 (5/5)
+     64 62 6f 6c  64                                       dbold
+        op string: [data] [bold-ul]
+     [append] @ 29 (5/5)
+     64 64 61 74  61                                       ddata
+     [append] @ 34 (8/8)
+     67 62 6f 6c  64 2d 75 6c                              gbold-ul
+        op string: [data] [triple]
+     [append] @ 42 (5/5)
+     64 64 61 74  61                                       ddata
+     [append] @ 47 (7/7)
+     66 74 72 69  70 6c 65                                 ftriple
+        op string: [data] [inv-ul]
+     [append] @ 54 (5/5)
+     64 64 61 74  61                                       ddata
+     [append] @ 59 (7/7)
+     66 69 6e 76  2d 75 6c                                 finv-ul
+        op string: [data] [underline]
+     [append] @ 66 (5/5)
+     64 64 61 74  61                                       ddata
+     [append] @ 71 (a/10)
+     69 75 6e 64  65 72 6c 69  - 6e 65                     iunderline
+        op string: [data] [plain]
+     [append] @ 81 (5/5)
+     64 64 61 74  61                                       ddata
+     [append] @ 86 (6/6)
+     65 70 6c 61  69 6e                                    eplain
+        op open_list: [item] []
+     [append] @ 92 (5/5)
+     64 69 74 65  6d                                       ditem
+     [append] @ 97 (1/1)
+     9f                                                    .
+          op open_instance: [item] []
+       [append] @ 98 (1/1)
+       bf                                                    .
+            op attr: [test3] [value3]
+            op string: [sku] [GRO-000-415]
+         [append] @ 99 (4/4)
+         63 73 6b 75                                           csku
+         [append] @ 103 (c/12)
+         6b 47 52 4f  2d 30 30 30  - 2d 34 31 35               kGRO-000-415
+            op string: [name] [gum]
+         [append] @ 115 (5/5)
+         64 6e 61 6d  65                                       dname
+         [append] @ 120 (4/4)
+         63 67 75 6d                                           cgum
+            op content: [sold] [1412]
+         [append] @ 124 (5/5)
+         64 73 6f 6c  64                                       dsold
+         [content] @ 129 (3/3)
+         19 05 84                                              ...
+            op content: [in-stock] [54]
+         [append] @ 132 (9/9)
+         68 69 6e 2d  73 74 6f 63  - 6b                        hin-stock
+         [content] @ 141 (2/2)
+         18 36                                                 .6
+            op content: [on-order] [10]
+         [append] @ 143 (9/9)
+         68 6f 6e 2d  6f 72 64 65  - 72                        hon-order
+         [content] @ 152 (1/1)
+         0a                                                    .
+            op close_instance: [item] []
+         [append] @ 153 (1/1)
+         ff                                                    .
+          op open_instance: [item] []
+       [append] @ 154 (1/1)
+       bf                                                    .
+            op attr: [test3] [value3]
+            op string: [sku] [HRD-000-212]
+         [append] @ 155 (4/4)
+         63 73 6b 75                                           csku
+         [append] @ 159 (c/12)
+         6b 48 52 44  2d 30 30 30  - 2d 32 31 32               kHRD-000-212
+            op string: [name] [rope]
+         [append] @ 171 (5/5)
+         64 6e 61 6d  65                                       dname
+         [append] @ 176 (5/5)
+         64 72 6f 70  65                                       drope
+            op content: [sold] [85]
+         [append] @ 181 (5/5)
+         64 73 6f 6c  64                                       dsold
+         [content] @ 186 (2/2)
+         18 55                                                 .U
+            op content: [in-stock] [4]
+         [append] @ 188 (9/9)
+         68 69 6e 2d  73 74 6f 63  - 6b                        hin-stock
+         [content] @ 197 (1/1)
+         04                                                    .
+            op content: [on-order] [2]
+         [append] @ 198 (9/9)
+         68 6f 6e 2d  6f 72 64 65  - 72                        hon-order
+         [content] @ 207 (1/1)
+         02                                                    .
+            op close_instance: [item] []
+         [append] @ 208 (1/1)
+         ff                                                    .
+          op open_instance: [item] []
+       [append] @ 209 (1/1)
+       bf                                                    .
+            op attr: [test3] [value3]
+            op string: [sku] [HRD-000-517]
+         [append] @ 210 (4/4)
+         63 73 6b 75                                           csku
+         [append] @ 214 (c/12)
+         6b 48 52 44  2d 30 30 30  - 2d 35 31 37               kHRD-000-517
+            op string: [name] [ladder]
+         [append] @ 226 (5/5)
+         64 6e 61 6d  65                                       dname
+         [append] @ 231 (7/7)
+         66 6c 61 64  64 65 72                                 fladder
+            op content: [sold] [0]
+         [append] @ 238 (5/5)
+         64 73 6f 6c  64                                       dsold
+         [content] @ 243 (1/1)
+         00                                                    .
+            op content: [in-stock] [2]
+         [append] @ 244 (9/9)
+         68 69 6e 2d  73 74 6f 63  - 6b                        hin-stock
+         [content] @ 253 (1/1)
+         02                                                    .
+            op content: [on-order] [1]
+         [append] @ 254 (9/9)
+         68 6f 6e 2d  6f 72 64 65  - 72                        hon-order
+         [content] @ 263 (1/1)
+         01                                                    .
+            op close_instance: [item] []
+         [append] @ 264 (1/1)
+         ff                                                    .
+          op open_instance: [item] []
+       [append] @ 265 (1/1)
+       bf                                                    .
+            op attr: [test3] [value3]
+            op string: [sku] [HRD-000-632]
+         [append] @ 266 (4/4)
+         63 73 6b 75                                           csku
+         [append] @ 270 (c/12)
+         6b 48 52 44  2d 30 30 30  - 2d 36 33 32               kHRD-000-632
+            op string: [name] [bolt]
+         [append] @ 282 (5/5)
+         64 6e 61 6d  65                                       dname
+         [append] @ 287 (5/5)
+         64 62 6f 6c  74                                       dbolt
+            op content: [sold] [4123]
+         [append] @ 292 (5/5)
+         64 73 6f 6c  64                                       dsold
+         [content] @ 297 (3/3)
+         19 10 1b                                              ...
+            op content: [in-stock] [144]
+         [append] @ 300 (9/9)
+         68 69 6e 2d  73 74 6f 63  - 6b                        hin-stock
+         [content] @ 309 (2/2)
+         18 90                                                 ..
+            op content: [on-order] [42]
+         [append] @ 311 (9/9)
+         68 6f 6e 2d  6f 72 64 65  - 72                        hon-order
+         [content] @ 320 (2/2)
+         18 2a                                                 .*
+            op close_instance: [item] []
+         [append] @ 322 (1/1)
+         ff                                                    .
+          op open_instance: [item] []
+       [append] @ 323 (1/1)
+       bf                                                    .
+            op attr: [test3] [value3]
+            op string: [sku] [GRO-000-2331]
+         [append] @ 324 (4/4)
+         63 73 6b 75                                           csku
+         [append] @ 328 (d/13)
+         6c 47 52 4f  2d 30 30 30  - 2d 32 33 33  31           lGRO-000-2331
+            op string: [name] [water]
+         [append] @ 341 (5/5)
+         64 6e 61 6d  65                                       dname
+         [append] @ 346 (6/6)
+         65 77 61 74  65 72                                    ewater
+            op content: [sold] [17]
+         [append] @ 352 (5/5)
+         64 73 6f 6c  64                                       dsold
+         [content] @ 357 (1/1)
+         11                                                    .
+            op content: [in-stock] [14]
+         [append] @ 358 (9/9)
+         68 69 6e 2d  73 74 6f 63  - 6b                        hin-stock
+         [content] @ 367 (1/1)
+         0e                                                    .
+            op content: [on-order] [2]
+         [append] @ 368 (9/9)
+         68 6f 6e 2d  6f 72 64 65  - 72                        hon-order
+         [content] @ 377 (1/1)
+         02                                                    .
+            op close_instance: [item] []
+         [append] @ 378 (1/1)
+         ff                                                    .
+          op close_list: [item] []
+       [append] @ 379 (1/1)
+       ff                                                    .
+        op close_container: [data] []
+     [append] @ 380 (1/1)
+     ff                                                    .
+      op open_container: [data] []
+   [append] @ 381 (5/5)
+   64 64 61 74  61                                       ddata
+   [append] @ 386 (1/1)
+   bf                                                    .
+        op open_list: [item] []
+     [append] @ 387 (5/5)
+     64 69 74 65  6d                                       ditem
+     [append] @ 392 (1/1)
+     9f                                                    .
+          op open_instance: [item] []
+       [append] @ 393 (1/1)
+       bf                                                    .
+            op string: [sku] [GRO-000-415]
+         [append] @ 394 (4/4)
+         63 73 6b 75                                           csku
+         [append] @ 398 (c/12)
+         6b 47 52 4f  2d 30 30 30  - 2d 34 31 35               kGRO-000-415
+            op string: [name] [gum]
+         [append] @ 410 (5/5)
+         64 6e 61 6d  65                                       dname
+         [append] @ 415 (4/4)
+         63 67 75 6d                                           cgum
+            op content: [sold] [1412.0]
+         [append] @ 419 (5/5)
+         64 73 6f 6c  64                                       dsold
+         [content] @ 424 (3/3)
+         f9 65 84                                              .e.
+            op content: [in-stock] [54]
+         [append] @ 427 (9/9)
+         68 69 6e 2d  73 74 6f 63  - 6b                        hin-stock
+         [content] @ 436 (2/2)
+         18 36                                                 .6
+            op content: [on-order] [10]
+         [append] @ 438 (9/9)
+         68 6f 6e 2d  6f 72 64 65  - 72                        hon-order
+         [content] @ 447 (1/1)
+         0a                                                    .
+            op close_instance: [item] []
+         [append] @ 448 (1/1)
+         ff                                                    .
+          op open_instance: [item] []
+       [append] @ 449 (1/1)
+       bf                                                    .
+            op string: [sku] [HRD-000-212]
+         [append] @ 450 (4/4)
+         63 73 6b 75                                           csku
+         [append] @ 454 (c/12)
+         6b 48 52 44  2d 30 30 30  - 2d 32 31 32               kHRD-000-212
+            op string: [name] [rope]
+         [append] @ 466 (5/5)
+         64 6e 61 6d  65                                       dname
+         [append] @ 471 (5/5)
+         64 72 6f 70  65                                       drope
+            op content: [sold] [85.0]
+         [append] @ 476 (5/5)
+         64 73 6f 6c  64                                       dsold
+         [content] @ 481 (3/3)
+         f9 55 50                                              .UP
+            op content: [in-stock] [4]
+         [append] @ 484 (9/9)
+         68 69 6e 2d  73 74 6f 63  - 6b                        hin-stock
+         [content] @ 493 (1/1)
+         04                                                    .
+            op content: [on-order] [2]
+         [append] @ 494 (9/9)
+         68 6f 6e 2d  6f 72 64 65  - 72                        hon-order
+         [content] @ 503 (1/1)
+         02                                                    .
+            op close_instance: [item] []
+         [append] @ 504 (1/1)
+         ff                                                    .
+          op open_instance: [item] []
+       [append] @ 505 (1/1)
+       bf                                                    .
+            op string: [sku] [HRD-000-517]
+         [append] @ 506 (4/4)
+         63 73 6b 75                                           csku
+         [append] @ 510 (c/12)
+         6b 48 52 44  2d 30 30 30  - 2d 35 31 37               kHRD-000-517
+            op string: [name] [ladder]
+         [append] @ 522 (5/5)
+         64 6e 61 6d  65                                       dname
+         [append] @ 527 (7/7)
+         66 6c 61 64  64 65 72                                 fladder
+            op content: [sold] [0]
+         [append] @ 534 (5/5)
+         64 73 6f 6c  64                                       dsold
+         [content] @ 539 (1/1)
+         00                                                    .
+            op content: [in-stock] [2]
+         [append] @ 540 (9/9)
+         68 69 6e 2d  73 74 6f 63  - 6b                        hin-stock
+         [content] @ 549 (1/1)
+         02                                                    .
+            op content: [on-order] [1]
+         [append] @ 550 (9/9)
+         68 6f 6e 2d  6f 72 64 65  - 72                        hon-order
+         [content] @ 559 (1/1)
+         01                                                    .
+            op close_instance: [item] []
+         [append] @ 560 (1/1)
+         ff                                                    .
+          op open_instance: [item] []
+       [append] @ 561 (1/1)
+       bf                                                    .
+            op string: [sku] [HRD-000-632]
+         [append] @ 562 (4/4)
+         63 73 6b 75                                           csku
+         [append] @ 566 (c/12)
+         6b 48 52 44  2d 30 30 30  - 2d 36 33 32               kHRD-000-632
+            op string: [name] [bolt]
+         [append] @ 578 (5/5)
+         64 6e 61 6d  65                                       dname
+         [append] @ 583 (5/5)
+         64 62 6f 6c  74                                       dbolt
+            op content: [sold] [4123.0]
+         [append] @ 588 (5/5)
+         64 73 6f 6c  64                                       dsold
+         [content] @ 593 (5/5)
+         fa 45 80 d8  00                                       .E...
+            op content: [in-stock] [144]
+         [append] @ 598 (9/9)
+         68 69 6e 2d  73 74 6f 63  - 6b                        hin-stock
+         [content] @ 607 (2/2)
+         18 90                                                 ..
+            op content: [on-order] [42]
+         [append] @ 609 (9/9)
+         68 6f 6e 2d  6f 72 64 65  - 72                        hon-order
+         [content] @ 618 (2/2)
+         18 2a                                                 .*
+            op close_instance: [item] []
+         [append] @ 620 (1/1)
+         ff                                                    .
+          op open_instance: [item] []
+       [append] @ 621 (1/1)
+       bf                                                    .
+            op string: [sku] [GRO-000-2331]
+         [append] @ 622 (4/4)
+         63 73 6b 75                                           csku
+         [append] @ 626 (d/13)
+         6c 47 52 4f  2d 30 30 30  - 2d 32 33 33  31           lGRO-000-2331
+            op string: [name] [water]
+         [append] @ 639 (5/5)
+         64 6e 61 6d  65                                       dname
+         [append] @ 644 (6/6)
+         65 77 61 74  65 72                                    ewater
+            op content: [sold] [17.0]
+         [append] @ 650 (5/5)
+         64 73 6f 6c  64                                       dsold
+         [content] @ 655 (3/3)
+         f9 4c 40                                              .L@
+            op content: [in-stock] [14]
+         [append] @ 658 (9/9)
+         68 69 6e 2d  73 74 6f 63  - 6b                        hin-stock
+         [content] @ 667 (1/1)
+         0e                                                    .
+            op content: [on-order] [2]
+         [append] @ 668 (9/9)
+         68 6f 6e 2d  6f 72 64 65  - 72                        hon-order
+         [content] @ 677 (1/1)
+         02                                                    .
+            op close_instance: [item] []
+         [append] @ 678 (1/1)
+         ff                                                    .
+          op close_list: [item] []
+       [append] @ 679 (1/1)
+       ff                                                    .
+        op close_container: [data] []
+     [append] @ 680 (1/1)
+     ff                                                    .
+      op open_container: [data] []
+   [append] @ 681 (5/5)
+   64 64 61 74  61                                       ddata
+   [append] @ 686 (1/1)
+   bf                                                    .
+        op open_list: [item] []
+     [append] @ 687 (5/5)
+     64 69 74 65  6d                                       ditem
+     [append] @ 692 (1/1)
+     9f                                                    .
+          op open_instance: [item] []
+       [append] @ 693 (1/1)
+       bf                                                    .
+            op string: [sku] [GRO-000-533]
+         [append] @ 694 (4/4)
+         63 73 6b 75                                           csku
+         [append] @ 698 (c/12)
+         6b 47 52 4f  2d 30 30 30  - 2d 35 33 33               kGRO-000-533
+            op string: [name] [fish]
+         [append] @ 710 (5/5)
+         64 6e 61 6d  65                                       dname
+         [append] @ 715 (5/5)
+         64 66 69 73  68                                       dfish
+            op content: [sold] [1321.0]
+         [append] @ 720 (5/5)
+         64 73 6f 6c  64                                       dsold
+         [content] @ 725 (3/3)
+         f9 65 29                                              .e)
+            op content: [in-stock] [45]
+         [append] @ 728 (9/9)
+         68 69 6e 2d  73 74 6f 63  - 6b                        hin-stock
+         [content] @ 737 (2/2)
+         18 2d                                                 .-
+            op content: [on-order] [1]
+         [append] @ 739 (9/9)
+         68 6f 6e 2d  6f 72 64 65  - 72                        hon-order
+         [content] @ 748 (1/1)
+         01                                                    .
+            op close_instance: [item] []
+         [append] @ 749 (1/1)
+         ff                                                    .
+          op close_list: [item] []
+       [append] @ 750 (1/1)
+       ff                                                    .
+        op close_container: [data] []
+     [append] @ 751 (1/1)
+     ff                                                    .
+      op open_container: [data] []
+   [append] @ 752 (5/5)
+   64 64 61 74  61                                       ddata
+   [append] @ 757 (1/1)
+   bf                                                    .
+        op open_list: [item] []
+     [append] @ 758 (5/5)
+     64 69 74 65  6d                                       ditem
+     [append] @ 763 (1/1)
+     9f                                                    .
+          op attr: [test4] [value4]
+          op string: [item] [gum]
+       [append] @ 764 (5/5)
+       64 69 74 65  6d                                       ditem
+       [append] @ 769 (4/4)
+       63 67 75 6d                                           cgum
+          op attr: [test4] [value4]
+          op string: [item] [rope]
+       [append] @ 773 (5/5)
+       64 69 74 65  6d                                       ditem
+       [append] @ 778 (5/5)
+       64 72 6f 70  65                                       drope
+          op attr: [test4] [value4]
+          op string: [item] [ladder]
+       [append] @ 783 (5/5)
+       64 69 74 65  6d                                       ditem
+       [append] @ 788 (7/7)
+       66 6c 61 64  64 65 72                                 fladder
+          op attr: [test4] [value4]
+          op string: [item] [bolt]
+       [append] @ 795 (5/5)
+       64 69 74 65  6d                                       ditem
+       [append] @ 800 (5/5)
+       64 62 6f 6c  74                                       dbolt
+          op attr: [test4] [value4]
+          op string: [item] [water]
+       [append] @ 805 (5/5)
+       64 69 74 65  6d                                       ditem
+       [append] @ 810 (6/6)
+       65 77 61 74  65 72                                    ewater
+          op close_list: [item] []
+       [append] @ 816 (1/1)
+       ff                                                    .
+        op close_container: [data] []
+     [append] @ 817 (1/1)
+     ff                                                    .
+      op content: [cost] [425]
+   [append] @ 818 (5/5)
+   64 63 6f 73  74                                       dcost
+   [content] @ 823 (3/3)
+   19 01 a9                                              ...
+      op content: [cost] [455]
+   [append] @ 826 (5/5)
+   64 63 6f 73  74                                       dcost
+   [content] @ 831 (3/3)
+   19 01 c7                                              ...
+      op close_container: [top] []
+   [append] @ 834 (1/1)
+   ff                                                    .
+    op finish: [] []
+ [append] @ 835 (1/1)
+ ff                                                    .
+  op flush: [] []
+>[cbor] @ 0 (344/836)
+>bf 63 74 6f  70 bf 64 64  - 61 74 61 bf  64 69 74 65  .ctop.ddata.dite
+>6d 9f ff 64  64 61 74 61  - 64 62 6f 6c  64 64 64 61  m..ddatadbolddda
+>74 61 67 62  6f 6c 64 2d  - 75 6c 64 64  61 74 61 66  tagbold-ulddataf
+>74 72 69 70  6c 65 64 64  - 61 74 61 66  69 6e 76 2d  tripleddatafinv-
+>75 6c 64 64  61 74 61 69  - 75 6e 64 65  72 6c 69 6e  ulddataiunderlin
+>65 64 64 61  74 61 65 70  - 6c 61 69 6e  64 69 74 65  eddataeplaindite
+>6d 9f bf 63  73 6b 75 6b  - 47 52 4f 2d  30 30 30 2d  m..cskukGRO-000-
+>34 31 35 64  6e 61 6d 65  - 63 67 75 6d  64 73 6f 6c  415dnamecgumdsol
+>64 19 05 84  68 69 6e 2d  - 73 74 6f 63  6b 18 36 68  d...hin-stock.6h
+>6f 6e 2d 6f  72 64 65 72  - 0a ff bf 63  73 6b 75 6b  on-order...cskuk
+>48 52 44 2d  30 30 30 2d  - 32 31 32 64  6e 61 6d 65  HRD-000-212dname
+>64 72 6f 70  65 64 73 6f  - 6c 64 18 55  68 69 6e 2d  dropedsold.Uhin-
+>73 74 6f 63  6b 04 68 6f  - 6e 2d 6f 72  64 65 72 02  stock.hon-order.
+>ff bf 63 73  6b 75 6b 48  - 52 44 2d 30  30 30 2d 35  ..cskukHRD-000-5
+>31 37 64 6e  61 6d 65 66  - 6c 61 64 64  65 72 64 73  17dnamefladderds
+>6f 6c 64 00  68 69 6e 2d  - 73 74 6f 63  6b 02 68 6f  old.hin-stock.ho
+>6e 2d 6f 72  64 65 72 01  - ff bf 63 73  6b 75 6b 48  n-order...cskukH
+>52 44 2d 30  30 30 2d 36  - 33 32 64 6e  61 6d 65 64  RD-000-632dnamed
+>62 6f 6c 74  64 73 6f 6c  - 64 19 10 1b  68 69 6e 2d  boltdsold...hin-
+>73 74 6f 63  6b 18 90 68  - 6f 6e 2d 6f  72 64 65 72  stock..hon-order
+>18 2a ff bf  63 73 6b 75  - 6c 47 52 4f  2d 30 30 30  .*..cskulGRO-000
+>2d 32 33 33  31 64 6e 61  - 6d 65 65 77  61 74 65 72  -2331dnameewater
+>64 73 6f 6c  64 11 68 69  - 6e 2d 73 74  6f 63 6b 0e  dsold.hin-stock.
+>68 6f 6e 2d  6f 72 64 65  - 72 02 ff ff  ff 64 64 61  hon-order....dda
+>74 61 bf 64  69 74 65 6d  - 9f bf 63 73  6b 75 6b 47  ta.ditem..cskukG
+>52 4f 2d 30  30 30 2d 34  - 31 35 64 6e  61 6d 65 63  RO-000-415dnamec
+>67 75 6d 64  73 6f 6c 64  - f9 65 84 68  69 6e 2d 73  gumdsold.e.hin-s
+>74 6f 63 6b  18 36 68 6f  - 6e 2d 6f 72  64 65 72 0a  tock.6hon-order.
+>ff bf 63 73  6b 75 6b 48  - 52 44 2d 30  30 30 2d 32  ..cskukHRD-000-2
+>31 32 64 6e  61 6d 65 64  - 72 6f 70 65  64 73 6f 6c  12dnamedropedsol
+>64 f9 55 50  68 69 6e 2d  - 73 74 6f 63  6b 04 68 6f  d.UPhin-stock.ho
+>6e 2d 6f 72  64 65 72 02  - ff bf 63 73  6b 75 6b 48  n-order...cskukH
+>52 44 2d 30  30 30 2d 35  - 31 37 64 6e  61 6d 65 66  RD-000-517dnamef
+>6c 61 64 64  65 72 64 73  - 6f 6c 64 00  68 69 6e 2d  ladderdsold.hin-
+>73 74 6f 63  6b 02 68 6f  - 6e 2d 6f 72  64 65 72 01  stock.hon-order.
+>ff bf 63 73  6b 75 6b 48  - 52 44 2d 30  30 30 2d 36  ..cskukHRD-000-6
+>33 32 64 6e  61 6d 65 64  - 62 6f 6c 74  64 73 6f 6c  32dnamedboltdsol
+>64 fa 45 80  d8 00 68 69  - 6e 2d 73 74  6f 63 6b 18  d.E...hin-stock.
+>90 68 6f 6e  2d 6f 72 64  - 65 72 18 2a  ff bf 63 73  .hon-order.*..cs
+>6b 75 6c 47  52 4f 2d 30  - 30 30 2d 32  33 33 31 64  kulGRO-000-2331d
+>6e 61 6d 65  65 77 61 74  - 65 72 64 73  6f 6c 64 f9  nameewaterdsold.
+>4c 40 68 69  6e 2d 73 74  - 6f 63 6b 0e  68 6f 6e 2d  L@hin-stock.hon-
+>6f 72 64 65  72 02 ff ff  - ff 64 64 61  74 61 bf 64  order....ddata.d
+>69 74 65 6d  9f bf 63 73  - 6b 75 6b 47  52 4f 2d 30  item..cskukGRO-0
+>30 30 2d 35  33 33 64 6e  - 61 6d 65 64  66 69 73 68  00-533dnamedfish
+>64 73 6f 6c  64 f9 65 29  - 68 69 6e 2d  73 74 6f 63  dsold.e)hin-stoc
+>6b 18 2d 68  6f 6e 2d 6f  - 72 64 65 72  01 ff ff ff  k.-hon-order....
+>64 64 61 74  61 bf 64 69  - 74 65 6d 9f  64 69 74 65  ddata.ditem.dite
+>6d 63 67 75  6d 64 69 74  - 65 6d 64 72  6f 70 65 64  mcgumditemdroped
+>69 74 65 6d  66 6c 61 64  - 64 65 72 64  69 74 65 6d  itemfladderditem
+>64 62 6f 6c  74 64 69 74  - 65 6d 65 77  61 74 65 72  dboltditemewater
+>ff ff 64 63  6f 73 74 19  - 01 a9 64 63  6f 73 74 19  ..dcost...dcost.
+>01 c7 ff ff                                           ....
