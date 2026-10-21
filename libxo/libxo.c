@@ -10131,6 +10131,30 @@ xo_do_close_container (xo_handle_t *xop, const char *name)
     xo_filter_status_t fstatus;
     fstatus = xo_filter_close_container(xop, xo_filters(xop), name);
 
+    /*
+     * As with an instance (see xo_do_close_instance), a predicate
+     * the container was still waiting on is decided at close, with
+     * its absent fields treated as empty node-sets.
+     */
+    if (XOF_ISSET(xop, XOF_FILTER) && old_fstatus == XO_STATUS_PRED) {
+	if (fstatus == XO_STATUS_FULL) {
+	    xo_filt_commit(xop, xsp, XO_STATUS_FULL);
+	    old_fstatus = XO_STATUS_FULL;
+
+	} else if (fstatus == XO_STATUS_LIVE) {
+	    fstatus = XO_STATUS_TRACK;
+	    if (xsp->xs_flags & XSF_COND_KEPT) {
+		xsp->xs_flags &= ~XSF_COND_KEPT;
+		xo_filt_commit(xop, xsp, XO_STATUS_FULL);
+		old_fstatus = XO_STATUS_FULL;
+	    } else {
+		xsp->xs_fstatus = XO_STATUS_TRACK;
+	    }
+	}
+    }
+    if (fstatus == XO_STATUS_LIVE)
+	fstatus = XO_STATUS_TRACK;
+
     switch (xo_style(xop)) {
     case XO_STYLE_XML:
 	/*
