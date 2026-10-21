@@ -73,6 +73,7 @@ correspond to output styles, flags, or features:
   warn            Emit warnings when libxo detects bad calls
   warn-xml        Emit warnings in XML
   xml             Emit XML output
+  xml1.1          Use XML 1.1 references for control chars (XML, HTML)
   xpath           Add XPath expressions (HTML)
   =============== =======================================================
 
@@ -121,6 +122,11 @@ additional details:
   make incorrect calls.
 - "warn-xml" causes those warnings to be placed in XML inside the
   output.
+- "xml1.1" changes the escape-private modifier: a control character
+  becomes a reference to itself (``&#x0001;``), which XML 1.1
+  allows, instead of a private-use character (``&#xe001;``).  It
+  does not imply "xml"; HTML output is XML encoded as well, so the
+  option applies to both styles.  See :ref:`escape-private-modifier`.
 
 .. _integer-grouping:
 
