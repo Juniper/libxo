@@ -280,55 +280,41 @@ test tests: ${bin_PROGRAMS}
 	@${MKDIR} -p out
 	@${RUN_TESTS_CMD} -l warn,filter-warn run ${TEST_CASES:.c=.test}
 
+# Run each test under leaks(1) (macOS).  ./xpath_01.test is a libtool
+# wrapper script, so we run the real binary from .libs, with the
+# installed libraries.  The leaks report lands in the .out files, so
+# expect diffs; read them for "leaks for" lines.
+#LEAKS_CMD = DYLD_LIBRARY_PATH=${libdir} leaks --atExit --
+LEAKS_CMD = ${LIBTOOL} --mode=execute leaks --atExit --
+
+test-leaks: codesign.tstamp
+	@${MKDIR} -p out
+	@${RUN_TESTS_CMD} -l warn,filter-warn -c "${LEAKS_CMD}" \
+	    run ${TEST_CASES:%.c=.libs/%.test}
+
+# leaks(1) needs the get-task-allow entitlement, which the linker's
+# ad-hoc signature lacks.  Re-sign only when a program is relinked.
+GTA_PLIST = ${top_srcdir}/packaging/libxo.gta.plist
+
+codesign.tstamp: ${noinst_PROGRAMS} ${GTA_PLIST}
+	@for p in ${noinst_PROGRAMS}; do \
+	    codesign -s - -f --entitlements ${GTA_PLIST} .libs/$$p \
+	        || exit 1; \
+	done
+	@touch codesign.tstamp
+
+codesign: codesign.tstamp
+
+.PHONY: test-leaks codesign
+
 accept:
 	@${MKDIR} -p ${srcdir}/saved
 	@${RUN_TESTS_CMD} accept ${TEST_CASES}
 
-old-test old-tests: ${bin_PROGRAMS}
-	@${MKDIR} -p out
-	-@ ${TEST_TRACE} (for test in ${TEST_CASES} ; do \
-	    base=`${BASENAME} $$test .c` ; \
-            (for fmt in ${TEST_FORMATS}; do \
-	        echo "... $$test ... $$fmt ..."; \
-                xoopts=:W$$fmt ; \
-	        ${TEST_JIG}; \
-                true; \
-            done) ; \
-            (for fmt in E; do \
-	        echo "... $$test ... $$fmt ..."; \
-                xoopts==warn,encoder=test ; \
-	        ${TEST_JIG}; \
-                true; \
-            done) \
-	done)
-
-one:
-	-@(test=${TEST_CASE}; data=${TEST_DATA}; ${TEST_ONE} ; true)
-
-old-accept:
-	-@(for test in ${TEST_CASES} ; do \
-	    base=`${BASENAME} $$test .c` ; \
-            (for fmt in ${TEST_FORMATS} E ; do \
-	        echo "... $$test ... $$fmt ..."; \
-	        ${CP} out/$$base.$$fmt.out ${srcdir}/saved/$$base.$$fmt.out ; \
-	        ${CP} out/$$base.$$fmt.err ${srcdir}/saved/$$base.$$fmt.err ; \
-	    done) \
-	done)
-	-@(test=test_01.c; base=test_01; for fmt in Ecsv1 Ecsv2 Ecsv3 ; do \
-	        echo "... $$test ... $$fmt ..."; \
-	        ${CP} out/$$base.$$fmt.out ${srcdir}/saved/$$base.$$fmt.out ; \
-	        ${CP} out/$$base.$$fmt.err ${srcdir}/saved/$$base.$$fmt.err ; \
-	done)
-	-@(test=test_01.c; base=test_12; for fmt in XPmap JPmap ; do \
-	        echo "... $$test ... $$fmt ..."; \
-	        ${CP} out/$$base.$$fmt.out ${srcdir}/saved/$$base.$$fmt.out ; \
-	        ${CP} out/$$base.$$fmt.err ${srcdir}/saved/$$base.$$fmt.err ; \
-	done)
-
 .c.test:
 	$(AM_V_CC)$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -o $@ $<
 
-CLEANFILES = ${TEST_CASES:.c=.test}
+CLEANFILES = ${TEST_CASES:.c=.test} codesign.tstamp
 CLEANDIRS = out
 
 clean-local:
