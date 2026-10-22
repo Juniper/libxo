@@ -76,7 +76,7 @@ typedef int (*xo_encoder_func_t)(XO_ENCODER_HANDLER_ARGS);
  * content must be preserved outside the normal output buffering.
  *
  * We use the "whiteboard" to allow this tentative output generation.
- * We can create whiteboards for each actve "match" and write content
+ * We can create whiteboards for each active "match" and write content
  * into it, recording offsets for each container/list/instance using
  * our stack.  When we pop items off the stack, the encoder can zero
  * out the byte for each frame's offset, clearing the trailing bits of
@@ -86,7 +86,7 @@ typedef int (*xo_encoder_func_t)(XO_ENCODER_HANDLER_ARGS);
  * any sort of opaque data that is needed.
  */
 
-/* Operatons for whiteboards */
+/* Operations for whiteboards */
 #define XO_WB_INIT		1 /* Initialize the whiteboard */
 #define XO_WB_RECORD		2 /* Record the current offset */
 #define XO_WB_ALLOW		3 /* Allow output */

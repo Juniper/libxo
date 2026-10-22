@@ -272,7 +272,7 @@ The set of valid flags include:
    XOF_NO_HUMANIZE     Display humanization (TEXT, HTML)
    XOF_PRETTY          Make "pretty printed" output
    XOF_UNDERSCORES     Replaces hyphens with underscores
-   XOF_UNITS           Display units (XML, HMTL)
+   XOF_UNITS           Display units (XML, HTML)
    XOF_WARN            Generate warnings for broken calls
    XOF_WARN_XML        Generate warnings in XML on stdout
    XOF_XPATH           Emit XPath expressions (HTML)
@@ -1845,7 +1845,7 @@ Creating Custom Encoders
 
 The number of encoding schemes in current use is staggering, with new
 and distinct schemes appearing daily.  While libxo provide XML, JSON,
-HMTL, and text natively, there are requirements for other encodings.
+HTML, and text natively, there are requirements for other encodings.
 
 Rather than bake support for all possible encoders into libxo, the API
 allows them to be defined externally.  libxo can then interfaces with

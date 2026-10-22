@@ -232,7 +232,7 @@ more meaningful.
 
 "hn" can be used as an alias for "humanize".
 
-The humanize modifier only affects display styles (TEXT and HMTL).
+The humanize modifier only affects display styles (TEXT and HTML).
 The "`no-humanize`" option (See :ref:`options`) will block
 the function of the humanize modifier.
 

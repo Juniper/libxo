@@ -27,7 +27,7 @@ BIN_EXTRA_ARGS=
 # trap trap_fail SIGABRT
 
 trap_fail () {
-    echo "SIGABRT receieved; exitting..."
+    echo "SIGABRT received; exiting..."
     exit 1;
 }
 

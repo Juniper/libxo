@@ -43,7 +43,7 @@ typedef double xo_float_t;	/* Our floating point type */
 
 /*
  * We extensively return aggregates (structures) in the file, under the
- * contraint that they are less than 128 bits and can be returned via
+ * constraint that they are less than 128 bits and can be returned via
  * registers without impacting performance.  So we turn off warnings
  * for aggregate returns.
  */

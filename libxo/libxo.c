@@ -23,7 +23,7 @@
  * - xo_do_emit() -- parse and emit a set of fields
  * - xo_do_emit_fields -- the central function of the library
  * - xo_do_format_field() -- handles formatting a single field
- * - xo_transiton() -- the state machine that keeps things sane
+ * - xo_transition() -- the state machine that keeps things sane
  * and of course the "xo_handle_t" data structure, which carries all
  * configuration and state.
  */
@@ -329,8 +329,8 @@ struct xo_handle_s {
     xo_write_func_t xo_write;	/* Write callback */
     xo_close_func_t xo_close;	/* Close callback */
     xo_flush_func_t xo_flush;	/* Flush callback */
-    xo_formatter_t xo_formatter; /* Custom formating function */
-    xo_checkpointer_t xo_checkpointer; /* Custom formating support function */
+    xo_formatter_t xo_formatter; /* Custom formatting function */
+    xo_checkpointer_t xo_checkpointer; /* Custom formatting support function */
     void *xo_opaque;		/* Opaque data for write function */
     xo_buffer_t xo_data;	/* Output data */
     xo_buffer_t xo_fmt;	   	/* Work area for building format strings */
@@ -3125,7 +3125,7 @@ xo_set_leading_xpath (xo_handle_t *xop, const char *path)
  *
  * @param xop XO handle to alter (or NULL for default handle)
  * @param info Info data (xo_info_t) to be recorded (or NULL) (MUST BE SORTED)
- * @pararm count Number of entries in info (or -1 to count them ourselves)
+ * @param count Number of entries in info (or -1 to count them ourselves)
  */
 void
 xo_set_info (xo_handle_t *xop, xo_info_t *infop, int count)
@@ -4775,7 +4775,7 @@ xo_format_first_cap (xo_handle_t *xop, xo_buffer_t *xbp,
     }
 
     int rlen = xo_utf8_rlen(ch);
-    if (rlen > cur_off - save_off) /* Not enought data in the buffer? */
+    if (rlen > cur_off - save_off) /* Not enough data in the buffer? */
 	return;			   /* non-utf8 data was written in buffer */
 
     xo_codepoint_t wc = xo_utf8_codepoint(cp, rlen, rlen, XO_UTF8_ERR_BAD_LEN);
@@ -7486,7 +7486,7 @@ xo_colors_handle_text (xo_handle_t *xop, xo_colors_t *newp)
      * invented, when standards were more what you'd call "guidelines"
      * than actual rules.  Anyway we can't depend on them to operate
      * correctly.  So when display attributes are changed, we punt,
-     * reseting them all and turning back on the ones we want to keep.
+     * resetting them all and turning back on the ones we want to keep.
      * Longer, but should be completely reliable.  Savvy?
      */
     if (oldp->xoc_effects != (newp->xoc_effects & oldp->xoc_effects)) {
@@ -8300,7 +8300,7 @@ xo_gettext_combine_formats (xo_handle_t *xop, const char *fmt,
  * string, since that means changing a flag would mean a
  * labor-intensive re-translation expense.  Instead we build a
  * simplified form with a reduced level of detail, perform a lookup on
- * that string and then re-insert the formating info.
+ * that string and then re-insert the formatting info.
  *
  * So something like:
  *   xo_emit("{G:}close {:fd/%ld} returned {g:error/%m} {:test/%6.6s}\n", ...)
@@ -9385,12 +9385,12 @@ xo_depth_change (xo_handle_t *xop, const char *name,
 		return;
 	    } 
 	    if ((xsp->xs_flags & XSF_LIST) != (flags & XSF_LIST)) {
-		xo_failure(xop, "list close on list confict: '%s'",
+		xo_failure(xop, "list close on list conflict: '%s'",
 			      name);
 		return;
 	    }
 	    if ((xsp->xs_flags & XSF_INSTANCE) != (flags & XSF_INSTANCE)) {
-		xo_failure(xop, "list close on instance confict: '%s'",
+		xo_failure(xop, "list close on instance conflict: '%s'",
 			      name);
 		return;
 	    }
