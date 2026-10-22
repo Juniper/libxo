@@ -232,7 +232,7 @@ XO_STAGE=`find_stage "$@"`
 dbg XO_STAGE is ${XO_STAGE}
 
 if [ ! -z "${XO_REAL_CC}" ]; then
-    # Explictly set implies the user wants our options
+    # Explicitly set implies the user wants our options
     COMPILER="${XO_REAL_CC}"
 elif [ ! -z "${XO_LLVM_CLANG}" ]; then
     COMPILER="${XO_LLVM_CLANG}"

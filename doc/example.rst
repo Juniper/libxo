@@ -241,7 +241,7 @@ XML output::
       </data>
     </top>
 
-HMTL output::
+HTML output::
 
     % ./testxo --libxo pretty,html
     <div class="line">

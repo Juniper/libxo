@@ -15,7 +15,7 @@ are multiple conventions for passing options, all using the
   --libxo=<options>
   --libxo:<brief-options>
 
-The *brief-options* is a series of single letter abbrevations, where
+The *brief-options* is a series of single letter abbreviations, where
 the *options* is a comma-separated list of words.  Both provide access
 to identical functionality.  The following invocations are all
 identical in outcome::

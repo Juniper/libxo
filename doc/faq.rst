@@ -32,7 +32,7 @@ emitted with knowledge of the consumer of that XML, yielding an API
 that have no incremental cost or feature delay.
 
 libxo is an effort to mix the best aspects of the JUNOS strategy into
-FreeBSD in a seemless way, allowing commands to make printf-like
+FreeBSD in a seamless way, allowing commands to make printf-like
 output calls with a single code path.
 
 Did the complex semantics of format strings evolve over time?

@@ -152,7 +152,7 @@ main (int argc, char **argv)
 	    if (ulen > len)
 		break;
 
-	    len -= ulen;	/* Substract last time's length */
+	    len -= ulen;	/* Subtract last time's length */
 
 	    ulen = xo_utf8_len(*cp);
 	    xo_codepoint_t wc = xo_utf8_codepoint(cp, len, ulen, 0);
