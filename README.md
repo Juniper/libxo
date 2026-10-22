@@ -8,7 +8,7 @@ libxo - A Library for Generating Text, XML, JSON, and HTML Output
 The libxo library allows an application to generate text, XML, JSON,
 and HTML output using a common set of function calls.  The application
 decides at run time which output style should be produced.  The
-application calls a function "xo_emit" to product output that is
+application calls a function "xo_emit" to produce output that is
 described in a format string.  A "field descriptor" tells libxo what
 the field is and what it means.
 
@@ -21,7 +21,7 @@ xo_emit call:
             line_count, word_count, char_count, file);
 ```
 
-Output can then be generated in various style, using the "--libxo"
+Output can then be generated in various styles, using the "--libxo"
 option: 
 
 ```

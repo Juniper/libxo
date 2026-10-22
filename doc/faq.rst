@@ -29,7 +29,7 @@ generate XML that is rendered by the CLI (think: login shell) into
 human-readable text.  This allows the API to use the same plumbing as
 the CLI, and ensures that all components emit XML, and that it is
 emitted with knowledge of the consumer of that XML, yielding an API
-that have no incremental cost or feature delay.
+that has no incremental cost or feature delay.
 
 libxo is an effort to mix the best aspects of the JUNOS strategy into
 FreeBSD in a seamless way, allowing commands to make printf-like
@@ -41,8 +41,8 @@ Did the complex semantics of format strings evolve over time?
 The history is both long and short: libxo's functionality is based
 on what JUNOS does in a data modeling language called ODL (output
 definition language).  In JUNOS, all subcomponents generate XML,
-which is feed to the CLI, where data from the ODL files tell is
-how to render that XML into text.  ODL might had a set of tags
+which is fed to the CLI, where data from the ODL files tell it
+how to render that XML into text.  ODL might have a set of tags
 like::
 
      tag docsis-state {
@@ -104,7 +104,7 @@ also supports other means of defining output.
 
 The roles and modifiers describe these details.
 
-In moving these ideas to bsd, two things had to happen: the
+In moving these ideas to BSD, two things had to happen: the
 formatting had to happen at the source since BSD won't have
 a JUNOS-like CLI to do the rendering, and we can't depend on
 external data models like ODL, which was seen as too hard a
@@ -185,7 +185,7 @@ Don't use an arbitrary number postfix
 Be consistent, uniform, unsurprising, and predictable
   Think of your field vocabulary as an API.  You want it useful,
   expressive, meaningful, direct, and obvious.  You want the client
-  application's programmer to move between without the need to
+  application's programmer to move between applications without the need to
   understand a variety of opinions on how fields are named.  They
   should see the system as a single cohesive whole, not a sack of
   cats.

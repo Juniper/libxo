@@ -4,12 +4,12 @@ Howtos: Focused Directions
 
 This section provides task-oriented instructions for selected tasks.
 If you have a task that needs instructions, please open a request as
-an enhancement issue on github.
+an enhancement issue on GitHub.
 
 Howto: Report bugs
 ------------------
 
-libxo uses github to track bugs or request enhancements.  Please use
+libxo uses GitHub to track bugs or request enhancements.  Please use
 the following URL:
 
   https://github.com/Juniper/libxo/issues
@@ -18,7 +18,7 @@ Howto: Install libxo
 --------------------
 
 libxo is open source, under a new BSD license.  Source code is
-available on github, as are recent releases.  To get the most
+available on GitHub, as are recent releases.  To get the most
 current release, please visit:
 
   https://github.com/Juniper/libxo/releases
@@ -49,7 +49,7 @@ options, which include the following::
   --with-gettext=PFX     Specify location of gettext installation
   --with-libslax-prefix=PFX  Specify location of libslax config
 
-Compiler warnings are a very good thing, but recent compiler version
+Compiler warnings are a very good thing, but recent compiler versions
 have added some very pedantic checks.  While every attempt is made to
 keep libxo code warning-free, warnings are now optional.  If you are
 doing development work on libxo, it is required that you
@@ -81,8 +81,8 @@ Howto: Convert command line applications
 
 Common question: How do I convert an existing command line application?
 
-There are four basic steps for converting command line application to
-use libxo::
+There are four basic steps for converting a command line application to
+use libxo:
 
 - Setting up the context
 - Converting printf calls
@@ -97,9 +97,9 @@ source code files::
 
     #include <libxo/xo.h>
 
-In your main() function, you'll need to call xo_parse_args to handling
+In your main() function, you'll need to call xo_parse_args to handle
 argument parsing (:ref:`xo_parse_args`).  This function removes
-libxo-specific arguments the program's argv and returns either the
+libxo-specific arguments from the program's argv and returns either the
 number of remaining arguments or -1 to indicate an error::
 
     int
@@ -146,11 +146,11 @@ useful.  The "note" and "label" roles allow HTML output to recognize
 the relationship between text and the associated values, allowing
 appropriate "hover" and "onclick" behavior.  Using the "units" role
 allows the presentation layer to perform conversions when needed.  The
-"warning" and "error" roles allows use of color and font to draw
+"warning" and "error" roles allow use of color and font to draw
 attention to warnings.  The "padding" role makes the use of vital
 whitespace more clear (:ref:`padding-role`).
 
-The "*title*" role indicates the headings of table and sections.  This
+The "*title*" role indicates the headings of tables and sections.  This
 allows HTML output to use CSS to make this relationship more obvious::
 
   OLD::
@@ -159,7 +159,7 @@ allows HTML output to use CSS to make this relationship more obvious::
   NEW::
     xo_emit("{T:Statistics}:\\n");
 
-The "*color*" roles controls foreground and background colors, as well
+The "*color*" role controls foreground and background colors, as well
 as effects like bold and underline (see :ref:`color-role`)::
 
   NEW::
@@ -173,7 +173,7 @@ padding over multiple fields (see :ref:`anchor-role`)::
     printf("%30s", buf);
 
   NEW::
-    xo_emit("{[:30}({:minimum/%u}/{:average/%u}/{:maximum/%u}{]:}",
+    xo_emit("{[:30}({:minimum/%u}/{:average/%u}/{:maximum/%u}){]:}",
             min, ave, max);
 
 Creating Hierarchy
@@ -181,7 +181,7 @@ Creating Hierarchy
 
 Text output doesn't have any sort of hierarchy, but XML and JSON
 require this.  Typically applications use indentation to represent
-these relationship::
+these relationships::
 
   OLD::
     printf("table %d\\n", tnum);
@@ -202,13 +202,13 @@ these relationship::
 
 The open and close list functions are used before and after the list,
 and the open and close instance functions are used before and after
-each instance with in the list.
+each instance within the list.
 
-Typically these developer looks for a "for" loop as an indication of
+Typically the developer looks for a "for" loop as an indication of
 where to put these calls.
 
 In addition, the open and close container functions allow for
-organization levels of hierarchy::
+organizational levels of hierarchy::
 
   OLD::
     printf("Paging information:\\n");
@@ -244,9 +244,9 @@ style::
 Call xo_finish
 ~~~~~~~~~~~~~~
 
-One important item: call `xo_finish` at the end of your program so
+One important item: call `xo_finish` at the end of your program to
 ensure that all buffered data is written out.  You can call it
-explicitly call it, or use :manpage:`atexit(3)` to have
+explicitly, or use :manpage:`atexit(3)` to have
 `xo_finish_atexit` called implicitly on exit::
 
   OLD::
@@ -274,7 +274,7 @@ Howto: Internationalization (i18n)
 
     How do I use libxo to support internationalization?
 
-libxo allows format and field strings to be used a keys into message
+libxo allows format and field strings to be used as keys into message
 catalogs to enable translation into a user's native language by
 invoking the standard :manpage:`gettext(3)` functions.
 
@@ -329,7 +329,7 @@ translated using the `xopo -f $input -o $output` command::
 
         # Install the .mo file
         sudo cp po/my_lang/LC_MESSAGES/foo.mo \\
-                /opt/local/share/locale/my_lang/LC_MESSAGE/
+                /opt/local/share/locale/my_lang/LC_MESSAGES/
 
 Once these steps are complete, you can use the `gettext` command to
 test the message catalog::
@@ -339,13 +339,13 @@ test the message catalog::
 i18n and xo_emit
 ~~~~~~~~~~~~~~~~
 
-There are three features used in libxo used to support i18n:
+There are three features in libxo used to support i18n:
 
 - The "{G:}" role looks for a translation of the format string.
 - The "{g:}" modifier looks for a translation of the field.
 - The "{p:}" modifier looks for a pluralized version of the field.
 
-Together these three flags allows a single function call to give
+Together these three flags allow a single function call to give
 native language support, as well as libxo's normal XML, JSON, and HTML
 support::
 
