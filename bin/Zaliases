@@ -1,17 +1,39 @@
 set top_src=`pwd`
 alias Zautoreconf "(cd $top_src ; autoreconf --install)"
 
-setenv ROOT_DIR ${HOME}/work/root
+set opts=' \
+--enable-debug \
+--enable-filters \
+--enable-warnings \
+--enable-printflike \
+--prefix ${ROOT_DIR} \
+${GETTEXT} \
+${LLVMCONFIG} \
+'
+set opts=`echo $opts`
 
-set ZENV=""
+setenv CONFIGURE_OPTS "$opts"
+
+setenv ROOT_DIR ${HOME}/work/root
 
 set llvm_topdir=/usr/local
 set llvm_vers=llvm19
 set llvm_path=bin/llvm-config
 
+set make_vers=`make --version`
+switch ( "$make_vers" )
+    case GNU*:
+        set gmake_opts=""
+        set zmake=make
+        breaksw
+    case *:
+        set gmake_opts="env MAKE=gmake"
+        set zmake=gmake
+        breaksw
+endsw
+
 switch ( `uname`-`uname -r` )
     case FreeBSD*:
-       set ZENV="MAKE=gmake "
        breaksw
     case Darwin-25*:
        set llvm_topdir=/opt/local/libexec
@@ -43,37 +65,16 @@ else
      setenv GETTEXT ''
 endif
 
-set opts=' \
---enable-debug \
---enable-filters \
---enable-warnings \
---enable-printflike \
---prefix ${ROOT_DIR} \
-${GETTEXT} \
-${LLVMCONFIG} \
-'
-set opts=`echo $opts`
-
 setenv CONFIGURE_OPTS "$opts"
 setenv ADB_PATH $top_src/build/libxo/.libs
 
-alias Zconfigure "(cd $top_src/build; env $ZENV ../configure $opts)"
-alias Zbuild "(cd $top_src/build; make \!* )"
-alias mi "(cd $top_src/build; make && make install); ."
+alias Zconfigure "(cd $top_src/build; env $gmake_opts ../configure $opts)"
+alias Zbuild "(cd $top_src/build; $zmake \!* )"
+alias mi "(cd $top_src/build; $zmake && $zmake install); ."
 alias mk "make CFLAGS='$mycflags' all install"
+
+alias mm "(cd $top_src/build; $zmake CFLAGS='$mycflags'); ."
+alias mmi "(cd $top_src/build; $zmake CFLAGS='$mycflags' && $zmake install); ."
 
 mkdir -p build
 cd build
-
-if ( -e root ) then
-    set ROOT_DIR=`readlink root`
-else
-    ln -s ${ROOT_DIR} root
-endif
-
-
-alias xx 'cc -I.. -W -Wall -Wstrict-prototypes -Wmissing-prototypes -Wpointer-arith -Werror -Waggregate-return -Wcast-align -Wcast-qual -Wchar-subscripts -Wcomment -Wformat -Wimplicit -Wmissing-declarations -Wnested-externs -Wparentheses -Wreturn-type -Wshadow -Wswitch -Wtrigraphs -Wuninitialized -Wunused -Wwrite-strings -fno-inline-functions-called-once -g -O2 -o xtest -DUNIT_TEST libxo.c'
-
-alias mm "make CFLAGS='$mycflags'"
-
-alias mmi 'mm && mi'
