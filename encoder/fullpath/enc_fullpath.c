@@ -18,12 +18,21 @@
 
 #define FALLTHRU __attribute__((__fallthrough__))
 
+/*
+ * One frame per open container/instance: the leader length to restore
+ * on close, and the fp_data length to truncate back to on DEADEND.
+ */
+typedef struct fullpath_frame_s {
+    xo_off_t ff_leader_off;	/* Length of fp_leader before the open */
+    xo_off_t ff_data_off;	/* Length of fp_data before the open */
+} fullpath_frame_t;
+
 typedef struct fullpath_private_s {
     uint32_t fp_flags;		/* Flags for the structure (FPF_*) */
     xo_buffer_t fp_data;
     xo_buffer_t fp_leader;
-    xo_off_t *fp_stack;
-    xo_off_t *fp_stackp;
+    fullpath_frame_t *fp_stack;
+    fullpath_frame_t *fp_stackp;
     uint32_t fp_stack_size;
 } fullpath_private_t;
 
@@ -50,7 +59,8 @@ fullpath_create (xo_handle_t *xop)
 
     xo_buf_append_val(&fpp->fp_leader, "/", 1); /* Start with leading '/' */
 
-    xo_off_t *sp = xo_realloc(NULL, XO_FP_DEFAULT_STACK_SIZE * sizeof(*sp));
+    fullpath_frame_t *sp = xo_realloc(NULL,
+				      XO_FP_DEFAULT_STACK_SIZE * sizeof(*sp));
     fpp->fp_stackp = fpp->fp_stack = sp;
     if (sp)
 	fpp->fp_stack_size = XO_FP_DEFAULT_STACK_SIZE;
@@ -61,36 +71,41 @@ fullpath_create (xo_handle_t *xop)
 }
 
 static void
-fullpath_stack_push (fullpath_private_t *fpp, xo_off_t off)
+fullpath_stack_push (fullpath_private_t *fpp, xo_off_t leader_off,
+		     xo_off_t data_off)
 {
     if (fpp->fp_stackp - fpp->fp_stack >= fpp->fp_stack_size) {
 	uint32_t new_size = fpp->fp_stack_size * 2;
-	xo_off_t *sp = xo_realloc(fpp->fp_stack, new_size * sizeof(*sp));
+	fullpath_frame_t *sp = xo_realloc(fpp->fp_stack,
+					  new_size * sizeof(*sp));
 	if (sp == NULL)
 	    return;
-	fpp->fp_stackp = fpp->fp_stackp - fpp->fp_stackp + sp;
+	fpp->fp_stackp = fpp->fp_stackp - fpp->fp_stack + sp;
 	fpp->fp_stack = sp;
 	fpp->fp_stack_size = new_size;
     }
 
-    xo_dbg(NULL, "fullpath_stack_push: pushing %u (%u)",
-	   off, fpp->fp_stackp - fpp->fp_stack);
+    xo_dbg(NULL, "fullpath_stack_push: pushing %u/%u (%u)",
+	   leader_off, data_off, fpp->fp_stackp - fpp->fp_stack);
 
-    *fpp->fp_stackp++ = off;
+    fpp->fp_stackp->ff_leader_off = leader_off;
+    fpp->fp_stackp->ff_data_off = data_off;
+    fpp->fp_stackp += 1;
 }
 
-static xo_off_t
+static fullpath_frame_t
 fullpath_stack_pop (fullpath_private_t *fpp)
 {
-    xo_off_t off = 0;
+    fullpath_frame_t frame = { 0, 0 };
 
     if (fpp->fp_stackp != fpp->fp_stack)
-	off = *--fpp->fp_stackp;
+	frame = *--fpp->fp_stackp;
 
-    xo_dbg(NULL, "fullpath_stack_pop: popping %u (%u)",
-	   off, fpp->fp_stackp - fpp->fp_stack);
+    xo_dbg(NULL, "fullpath_stack_pop: popping %u/%u (%u)",
+	   frame.ff_leader_off, frame.ff_data_off,
+	   fpp->fp_stackp - fpp->fp_stack);
 
-    return off;
+    return frame;
 }
 
 /*
@@ -213,14 +228,22 @@ fullpath_handler (XO_ENCODER_HANDLER_ARGS)
 	break;
 
     case XO_OP_OPEN_LIST:
-    case XO_OP_CLOSE_LIST:
     case XO_OP_OPEN_LEAF_LIST:
+	/*
+	 * Lists add nothing to the leader, but libxo can DEADEND them,
+	 * so they need a frame of their own to pop.
+	 */
+	fullpath_stack_push(fpp, xo_buf_len(leader), xo_buf_len(fp_xbp));
+	break;
+
+    case XO_OP_CLOSE_LIST:
     case XO_OP_CLOSE_LEAF_LIST:
-	break;				/* Ignore these ops */
+	fullpath_stack_pop(fpp);
+	break;
 
     case XO_OP_OPEN_CONTAINER:
     case XO_OP_OPEN_INSTANCE:
-	fullpath_stack_push(fpp, xo_buf_len(leader));
+	fullpath_stack_push(fpp, xo_buf_len(leader), xo_buf_len(fp_xbp));
 	xo_buf_append_str(leader, name);
 	xo_buf_append_val(leader, "/", 1);
 	xo_buf_force_nul(leader);
@@ -228,10 +251,25 @@ fullpath_handler (XO_ENCODER_HANDLER_ARGS)
 
     case XO_OP_CLOSE_CONTAINER:
     case XO_OP_CLOSE_INSTANCE:
-	xo_buf_set_len(leader, fullpath_stack_pop(fpp));
+	xo_buf_set_len(leader, fullpath_stack_pop(fpp).ff_leader_off);
 	xo_buf_force_nul(leader);
 	xo_dbg(xop, "fullpath: new leader '%s'", leader->xb_bufp);
 	break;
+
+    case XO_OP_DEADEND: {
+	/*
+	 * The scope being closed was tentative and its filter failed.
+	 * DEADEND replaces the close, so pop our frame and drop every
+	 * line written since the matching open.
+	 */
+	fullpath_frame_t frame = fullpath_stack_pop(fpp);
+	xo_buf_set_len(leader, frame.ff_leader_off);
+	xo_buf_force_nul(leader);
+	if (frame.ff_data_off < xo_buf_len(fp_xbp))
+	    xo_buf_set_len(fp_xbp, frame.ff_data_off);
+	xo_dbg(xop, "fullpath: deadend: leader '%s'", leader->xb_bufp);
+	break;
+    }
 
     case XO_OP_STRING:		   /* Quoted UTF-8 string */
     case XO_OP_CONTENT:		   /* Other content */
@@ -276,6 +314,13 @@ fullpath_handler (XO_ENCODER_HANDLER_ARGS)
 	    rc = 0;
 
 	xo_buf_reset(fp_xbp);
+
+	/*
+	 * What's written is gone; a later DEADEND can only drop what
+	 * came after this point, so open frames now start at zero.
+	 */
+	for (fullpath_frame_t *ffp = fpp->fp_stack; ffp < fpp->fp_stackp; ffp++)
+	    ffp->ff_data_off = 0;
 	break;
 
     case XO_OP_FINISH:		   /* Clean up function */
@@ -289,9 +334,6 @@ fullpath_handler (XO_ENCODER_HANDLER_ARGS)
 	break;
 
     case XO_OP_VERSION:		/* Version string */
-	break;
-
-    case XO_OP_DEADEND:
 	break;
 
     }
@@ -316,15 +358,13 @@ xo_encoder_library_init (XO_ENCODER_INIT_ARGS)
     arg->xei_handler = fullpath_handler;
 
     /*
-     * We support filters, but don't need XO_OP_DEADEND: our
-     * OPEN/CLOSE_CONTAINER and OPEN/CLOSE_INSTANCE bookkeeping only
-     * pushes/pops our own "leader" buffer (trivially reversible), and
-     * our real output (STRING/CONTENT) is only ever reached for
-     * fields libxo's generic filtering has already decided are real,
-     * since it holds tentative fields back rather than pushing them
-     * to us.  So we never accumulate anything that needs rolling back.
+     * We want tentative content and XO_OP_DEADEND: without it, libxo
+     * can only drop fields emitted before a predicate resolves (e.g.
+     * "protocol" ahead of "path" in socket[!contains(path, ...)]).
+     * Our output sits in fp_data until FLUSH, and each frame records
+     * where it started, so a DEADEND just truncates back to it.
      */
-    arg->xei_flags |= XEIF_FILTER_AWARE;
+    arg->xei_flags |= XEIF_FILTER_AWARE | XEIF_FILTER_NOTIFY_DEADEND;
 
     return 0;
 }
