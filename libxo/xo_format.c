@@ -298,6 +298,7 @@ xo_flag_mapping_t xo_role_names[] = {
     { 'D', "decoration" },
     { 'E', "error" },
     { 'F', "format" },
+    /* { 'G', (none) }, */
     { 'L', "label" },
     { 'N', "note" },
     { 'P', "padding" },
