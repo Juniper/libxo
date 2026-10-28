@@ -15,7 +15,7 @@ content.  The roles are listed below; only one role is permitted:
   D   decoration     Field is non-text (e.g., colon, comma)
   E   error          Field is an error message
   F   format         Field for formatting text content
-  G   gettext        Call gettext(3) on the format string
+  G   (none)         Call gettext(3) on the format string
   L   label          Field is text that prefixes a value
   N   note           Field is text that follows a value
   P   padding        Field is spaces needed for vertical alignment
