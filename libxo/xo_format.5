@@ -92,12 +92,13 @@ single\-character values:
 Field roles are optional, and indicate the role and formatting of the
 content.
 The roles are listed below; only one role is permitted:
-.Bl -column "M" "Name12341234" "Description"
+.Bl -column "M" "start-anchor" "Description"
 .It Sy M Ta Sy Name Ta Sy Description
 .It C Ta color Ta "Field is a color or effect"
 .It D Ta decoration Ta "Field is non\-text (e.g. colon, comma)"
 .It E Ta error Ta "Field is an error message"
 .It F Ta format Ta "Field is a formatted text string, not encoded"
+.It G Ta (none) Ta "Call gettext(3) on the format string"
 .It L Ta label Ta "Field is text that prefixes a value"
 .It N Ta note Ta "Field is text that follows a value"
 .It P Ta padding Ta "Field is spaces needed for vertical alignment"
@@ -237,6 +238,7 @@ supports internationalization (i18n) through its use of
 Use the "{G:}" role to request that the remaining part of
 the format string, following the "{G:}" field, be handled using
 .Fn gettext .
+.Pp
 Since
 .Fn gettext
 uses the string as the key into the message catalog,
