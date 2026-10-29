@@ -11,6 +11,8 @@
  */
 
 #include <stdio.h>
+#include <ctype.h>
+#include <errno.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <inttypes.h>
@@ -156,6 +158,10 @@ typedef struct xo_tmatch_s {
     uint32_t xtm_allow;          /* Active allow-match count */
     uint32_t xtm_deny;           /* Active deny-match count */
     uint32_t xtm_cur_action;     /* xtn_action from last matched TERMINAL node */
+    uint32_t xtm_event;		/* Bumped per open/key/attr/resolve */
+    uint32_t xtm_cur_event;	/* xtm_event when xtm_cur_action was set */
+    int16_t xtm_cur_import_prec; /* import precedence of xtm_cur_action */
+    double xtm_cur_priority;	/* priority of xtm_cur_action */
 } xo_tmatch_t;
 
 /*
@@ -183,19 +189,55 @@ xo_trie_alloc_node (xo_trie_t *xtp)
 }
 
 /*
- * Return (or create) the wildcard child of `parent`.
- * parent==0 means the root sibling list.
+ * Return (or create) the child of `parent` for one step of a pattern.
+ * parent==0 means the root sibling list.  `flags` holds XTNF_WILDCARD
+ * for a '*' step (name_id is then ignored) and XTNF_ABSOLUTE for the
+ * first step of an absolute path; `pred` is the step's predicate (0
+ * for none).
+ *
+ * Two steps share a node only when they are the same step: same name
+ * (or both wildcards), and, at the root, both absolute or both
+ * relative.  A relative "one" must not land on an absolute "/one",
+ * or it inherits the anchor (and "a/one" stops matching).
+ *
+ * Predicates: two different predicates never share a node, since a
+ * node holds only one; sharing would silently drop the earlier one.
+ * A plain step and a predicated step of the same name do share, with
+ * the node keeping the predicate.  libpin relies on this: it waits
+ * for the predicate before dispatching, and its Patricia fallback
+ * handles the plain pattern when the predicate fails (see the
+ * terminal-conflict comment in xo_trie_insert).  libxo's default
+ * backend names nodes by string-table offset, which is never shared,
+ * so none of this merging happens there.
  */
 static xo_trie_id_t
-xo_trie_get_wildcard_child (xo_trie_t *xtp, xo_trie_id_t parent)
+xo_trie_get_child (xo_trie_t *xtp, xo_trie_id_t parent, xo_name_id_t name_id,
+		   uint16_t flags, xo_xparse_node_id_t pred)
 {
+    const uint16_t match_flags = XTNF_WILDCARD | XTNF_ABSOLUTE;
     xo_trie_id_t *listp = parent
 	? &xtp->xt_nodes[parent].xtn_child
 	: &xtp->xt_root;
 
-    for (xo_trie_id_t s = *listp; s; s = xtp->xt_nodes[s].xtn_sibling)
-	if (xtp->xt_nodes[s].xtn_flags & XTNF_WILDCARD)
-	    return s;
+    if (parent)
+	flags &= ~XTNF_ABSOLUTE;
+    flags &= match_flags;
+
+    for (xo_trie_id_t s = *listp; s; s = xtp->xt_nodes[s].xtn_sibling) {
+	xo_tnode_t *tn = &xtp->xt_nodes[s];
+
+	if ((tn->xtn_flags & match_flags) != flags)
+	    continue;
+	if (!(flags & XTNF_WILDCARD) && tn->xtn_name.ni_id != name_id.ni_id)
+	    continue;
+	if (pred && tn->xtn_pred && pred != tn->xtn_pred)
+	    continue;
+
+	/* Only ever SET xtn_pred, never clear it (see above) */
+	if (pred)
+	    tn->xtn_pred = pred;
+	return s;
+    }
 
     xo_trie_id_t id = xo_trie_alloc_node(xtp);
     if (id == 0)
@@ -204,37 +246,12 @@ xo_trie_get_wildcard_child (xo_trie_t *xtp, xo_trie_id_t parent)
     /* xo_trie_alloc_node may have realloced xt_nodes; recalculate listp */
     listp = parent ? &xtp->xt_nodes[parent].xtn_child : &xtp->xt_root;
 
-    xtp->xt_nodes[id].xtn_flags |= XTNF_WILDCARD;
-    xtp->xt_nodes[id].xtn_sibling = *listp;
-    *listp = id;
-
-    return id;
-}
-
-/*
- * Return (or create) the child of `parent` with name `name_id`.
- * parent==0 means the root sibling list.
- */
-static xo_trie_id_t
-xo_trie_get_child (xo_trie_t *xtp, xo_trie_id_t parent, xo_name_id_t name_id)
-{
-    xo_trie_id_t *listp = parent
-	? &xtp->xt_nodes[parent].xtn_child
-	: &xtp->xt_root;
-
-    for (xo_trie_id_t s = *listp; s; s = xtp->xt_nodes[s].xtn_sibling)
-	if (xtp->xt_nodes[s].xtn_name.ni_id == name_id.ni_id)
-	    return s;
-
-    xo_trie_id_t id = xo_trie_alloc_node(xtp);
-    if (id == 0)
-	return 0;
-
-    /* xo_trie_alloc_node may have realloced xt_nodes; recalculate listp */
-    listp = parent ? &xtp->xt_nodes[parent].xtn_child : &xtp->xt_root;
-
-    xtp->xt_nodes[id].xtn_name = name_id;
-    xtp->xt_nodes[id].xtn_sibling = *listp;
+    xo_tnode_t *tn = &xtp->xt_nodes[id];
+    if (!(flags & XTNF_WILDCARD))
+	tn->xtn_name = name_id;
+    tn->xtn_flags |= flags;
+    tn->xtn_pred = pred;
+    tn->xtn_sibling = *listp;
     *listp = id;
 
     return id;
@@ -255,11 +272,13 @@ xo_trie_insert (xo_trie_t *xtp, xo_xparse_data_t *xdp,
 	    continue;
 	}
 
-	xo_trie_id_t tid;
+	xo_name_id_t nid = { 0 };
+	uint16_t step_flags;
+
 	if (xnp->xn_type == L_ASTERISK) {
-	    tid = xo_trie_get_wildcard_child(xtp, parent);
+	    step_flags = XTNF_WILDCARD;
 	} else if (xnp->xn_type == C_ELEMENT) {
-	    xo_name_id_t nid;
+	    step_flags = 0;
 	    if (xtp->xt_ops->xfdo_name_intern) {
 		const char *nm = xo_xparse_str(xdp, xnp->xn_str);
 		nid = xtp->xt_ops->xfdo_name_intern(xtp->xt_data, nm,
@@ -267,37 +286,35 @@ xo_trie_insert (xo_trie_t *xtp, xo_xparse_data_t *xdp,
 	    } else {
 		nid.ni_id = (uint32_t) xnp->xn_str;
 	    }
-	    tid = xo_trie_get_child(xtp, parent, nid);
 	} else {
 	    continue;
 	}
-	if (tid == 0)
-	    return;
 
 	/*
 	 * XTNF_ABSOLUTE means the path starts at root.  The check in
 	 * xo_tmatch_open runs on root-level trie nodes, so the flag
 	 * must live on the first element of the path (parent == 0),
-	 * not on the terminal node.
+	 * not on the terminal node.  xo_trie_get_child drops it for
+	 * non-root steps.
 	 */
-	if (parent == 0 && (flags & XTNF_ABSOLUTE))
-	    xtp->xt_nodes[tid].xtn_flags |= XTNF_ABSOLUTE;
+	step_flags |= flags & XTNF_ABSOLUTE;
 
-	/*
-	 * Attach predicate if present among this element's children.  Only
-	 * ever SET xtn_pred, never clear it: a later pattern that shares
-	 * this trie position but has no predicate of its own (e.g. plain
-	 * "author" inserted after "author[life-span/born]") must not erase
-	 * the predicate an earlier, more specific pattern attached here.
-	 */
+	/* Find this element's predicate (if any) among its children */
+	xo_xparse_node_id_t pred = 0;
 	for (xo_xparse_node_id_t cid = xnp->xn_contents; cid; ) {
 	    xo_xparse_node_t *cp = xo_xparse_node(xdp, cid);
 	    if (cp->xn_type == C_PREDICATE) {
-		xtp->xt_nodes[tid].xtn_pred = cid;
+		pred = cid;
 		break;
 	    }
 	    cid = cp->xn_next;
 	}
+
+	xo_trie_id_t tid = xo_trie_get_child(xtp, parent, nid,
+					     step_flags, pred);
+	if (tid == 0)
+	    return;
+
 	parent = tid;
     }
 
@@ -550,7 +567,8 @@ xo_tmatch_init (xo_handle_t *xop UNUSED, xo_tmatch_t *xtmp, xo_trie_t *trie)
      * (e.g. "d/one" would match when "one" is opened directly).
      */
 #if defined(XO_DEBUG)
-    if (XOIF_ISSET(xop, XOF_DEBUG)) {
+    /* xo_get_flags handles the NULL xop that walk API callers pass */
+    if (xo_get_flags(xop) & XOF_DEBUG) {
 	xo_trie_t *xtp = trie;
 	uint32_t root_count = 0;
 	for (xo_trie_id_t r = xtp->xt_root; r; r = xtp->xt_nodes[r].xtn_sibling)
@@ -592,7 +610,7 @@ static int xo_tmatch_try_eager(xo_handle_t *, xo_filter_t *, xo_tframe_t *,
 			       xo_xparse_node_id_t, xo_tnode_t *,
 			       xo_tmatch_t *);
 static void xo_filter_force_resolve_pred(xo_handle_t *, xo_filter_t *,
-					 const char *);
+					 const char *, ssize_t);
 
 /*
  * xo_eval_prog_s is fully defined much further down, with the rest of
@@ -933,7 +951,27 @@ xo_tmatch_record_live (xo_tmatch_t *xtmp, xo_tframe_t *frame, xo_tnode_t *tn)
     } else {
 	xtmp->xtm_allow += 1;
 	frame->xtf_allow_delta += 1;
+
+	/*
+	 * Several terminal nodes can match during one event (e.g.
+	 * "item[a]" and "item[b]" resolving on the same key).  Pick
+	 * the action the way xo_trie_insert does for a shared node:
+	 * higher import precedence, then higher priority; on a full
+	 * tie, the first one recorded stays.  A match from a later
+	 * event always replaces the current action.
+	 */
+	if (xtmp->xtm_cur_event == xtmp->xtm_event) {
+	    if (tn->xtn_import_prec != xtmp->xtm_cur_import_prec) {
+		if (tn->xtn_import_prec < xtmp->xtm_cur_import_prec)
+		    return;
+	    } else if (tn->xtn_priority <= xtmp->xtm_cur_priority)
+		return;
+	}
+
 	xtmp->xtm_cur_action = tn->xtn_action;
+	xtmp->xtm_cur_event = xtmp->xtm_event;
+	xtmp->xtm_cur_import_prec = tn->xtn_import_prec;
+	xtmp->xtm_cur_priority = tn->xtn_priority;
     }
 }
 
@@ -1062,6 +1100,7 @@ xo_tmatch_open (xo_handle_t *xop, xo_filter_t *xfp,
 
     xo_tframe_t *parent = &xtmp->xtm_stack[xtmp->xtm_depth];
     xtmp->xtm_depth += 1;
+    xtmp->xtm_event += 1;
     xo_tframe_t *frame = &xtmp->xtm_stack[xtmp->xtm_depth];
     bzero(frame, sizeof(*frame));
     xo_tframe_set_tag(frame, tag, tlen);
@@ -1391,6 +1430,19 @@ xo_filter_op_get_status (xo_handle_t *xop UNUSED, xo_filter_t *xfp)
  * This isn't a cheap activity, so calls should be limited to avoid
  * performance issues (one reason why we cache the status).
  */
+/*
+ * Return TRUE if any slot in this frame is waiting on a predicate
+ */
+static int
+xo_tframe_has_pred (xo_tframe_t *framep)
+{
+    for (uint32_t i = 0; i < framep->xtf_count; i++)
+	if (framep->xtf_state[i] == XTFS_PRED)
+	    return TRUE;
+
+    return FALSE;
+}
+
 static xo_filter_status_t
 xo_filter_change_status (xo_handle_t *xop UNUSED, xo_filter_t *xfp,
 			 const char *op UNUSED,
@@ -1421,19 +1473,18 @@ xo_filter_change_status (xo_handle_t *xop UNUSED, xo_filter_t *xfp,
 	/*
 	 * No active matches mean we're tracking; never DEAD in trie
 	 * mode since the trie always re-probes root nodes on each
-	 * open.  If any slot in the current frame is waiting for a
-	 * non-key predicate field, use PRED so all sibling content is
-	 * kept tentatively.
+	 * open.  If any slot in the current frame, or in any frame
+	 * above it, is waiting for a non-key predicate field, use PRED
+	 * so all content under it (siblings and nested containers,
+	 * e.g. "local" inside a pending "socket") is kept tentatively.
 	 */
 	xo_tmatch_t *xtmp = &xfp->xf_tmatch;
-	if (xtmp->xtm_depth > 0) {
-	    xo_tframe_t *frame = &xtmp->xtm_stack[xtmp->xtm_depth];
-	    for (uint32_t i = 0; i < frame->xtf_count; i++) {
-		if (frame->xtf_state[i] == XTFS_PRED) {
-		    why = "pred-pending";
-		    rc = XO_STATUS_PRED;
-		    goto done_status;
-		}
+	for (uint32_t d = xtmp->xtm_depth; d > 0; d--) {
+	    if (xo_tframe_has_pred(&xtmp->xtm_stack[d])) {
+		why = (d == xtmp->xtm_depth) ? "pred-pending"
+		    : "ancestor-pred-pending";
+		rc = XO_STATUS_PRED;
+		goto done_status;
 	    }
 	}
 
@@ -1494,7 +1545,21 @@ xo_filter_op_open_instance (xo_handle_t *xop, xo_filter_t *xfp, const char *tag)
 static int
 xo_filter_op_open_field (XO_FILTER_OPEN_FIELD_SIGNATURE)
 {
-    return xo_filter_open(xop, xfp, tag, tlen, "field", value, vlen);
+    int rc = xo_filter_open(xop, xfp, tag, tlen, "field", value, vlen);
+
+    /*
+     * A field is a leaf: no child can arrive to satisfy a pending
+     * predicate (e.g. a leaf-list member "item" against
+     * "item[starts-with(sku, 'GRO')]"), so resolve it now, treating
+     * missing fields as empty, as close_instance does.  Otherwise
+     * PRED status makes the field unskippable and encoders see it.
+     */
+    if (rc == XO_STATUS_PRED) {
+	xo_filter_force_resolve_pred(xop, xfp, tag, tlen);
+	rc = xfp->xf_status;
+    }
+
+    return rc;
 }
 
 /*
@@ -1528,21 +1593,23 @@ xo_filter_op_close_field (xo_handle_t *xop, xo_filter_t *xfp,
     return xo_filter_close(xop, xfp, tag, tlen, "field");
 }
 
+/*
+ * Close an instance or container.  If it's still in PRED state at
+ * close time, a field the predicate needs was never seen, and won't
+ * be now.  Force-resolve, treating absent fields as empty strings
+ * (XPath: absent node -> empty nodeset -> string("")), so "foo[not(a)]"
+ * and "foo[a + 1 = 1]" get answers.
+ */
 static int
-xo_filter_op_close_instance (xo_handle_t *xop, xo_filter_t *xfp,
-			  const char *tag)
+xo_filter_close_resolve (xo_handle_t *xop, xo_filter_t *xfp,
+			 const char *tag, const char *what)
 {
-    /*
-     * If the instance is still in PRED state at close time, the predicate
-     * field was never seen.  Force-resolve treating absent fields as empty
-     * string (XPath: absent node → empty nodeset → string("")).
-     */
     if (xfp != NULL && xfp->xf_trie != NULL
 	    && xfp->xf_status == XO_STATUS_PRED)
-	xo_filter_force_resolve_pred(xop, xfp, tag);
+	xo_filter_force_resolve_pred(xop, xfp, tag, strlen(tag));
 
     xo_filter_status_t pre_close = xfp ? xfp->xf_status : XO_STATUS_ZERO;
-    xo_filter_close(xop, xfp, tag, strlen(tag), "instance");
+    xo_filter_close(xop, xfp, tag, strlen(tag), what);
 
     /*
      * If force-resolve promoted us to FULL, return FULL even though the
@@ -1553,10 +1620,17 @@ xo_filter_op_close_instance (xo_handle_t *xop, xo_filter_t *xfp,
 }
 
 static int
-xo_filter_op_close_container (xo_handle_t *xop UNUSED, xo_filter_t *xfp,
+xo_filter_op_close_instance (xo_handle_t *xop, xo_filter_t *xfp,
+			  const char *tag)
+{
+    return xo_filter_close_resolve(xop, xfp, tag, "instance");
+}
+
+static int
+xo_filter_op_close_container (xo_handle_t *xop, xo_filter_t *xfp,
 			   const char *tag)
 {
-    return xo_filter_close(xop, xfp, tag, strlen(tag), "container");
+    return xo_filter_close_resolve(xop, xfp, tag, "container");
 }
 
 /*
@@ -1641,7 +1715,7 @@ typedef struct xo_eval_value_s {
     union {			    /* Data value (based on xev_type) */
 	int64_t xevd_int64;	    /* If C_INT64 */
 	uint64_t xevd_uint64;	    /* If C_UINT64 or C_INDEX or C_BOOLEAN */
-	xo_float_t xevd_float;	    /* If C_FLOAT */
+	xo_float_t xevd_float;	    /* If C_FLOAT (never NaN; see C_NAN) */
 	const char *xevd_str;	    /* If C_STRING or C_DSTRING */
     } xev_data;
 } xo_eval_value_t;
@@ -1791,10 +1865,24 @@ xo_eval_value_free (xo_eval_value_t val)
     }
 }
 
+/*
+ * NaN gets its own type (C_NAN, with no data) rather than living in a
+ * C_FLOAT, so it can be detected by type alone.  xo_eval_value_float
+ * makes sure a C_FLOAT never holds NaN.
+ */
+static inline xo_eval_value_t
+xo_eval_value_nan (unsigned flags)
+{
+    return xo_eval_value_make(C_NAN, flags, 0);
+}
+
 static inline xo_eval_value_t
 xo_eval_value_float (unsigned flags, xo_float_t val)
 {
     xo_eval_value_t value = XO_EVAL_VALUE_ZERO;
+
+    if (isnan(val))
+	return xo_eval_value_nan(flags);
 
     value.xev_type = C_FLOAT;
     value.xev_flags = flags;
@@ -1865,43 +1953,101 @@ xo_eval (xo_handle_t *xop, xo_filter_t *xfp, xo_tframe_t *framep,
 	 const char *pname, int indent,
 	 xo_xparse_node_id_t id, xo_eval_fn_t op_fn);
 
-static xo_eval_value_t
-xo_eval_make_number (xo_handle_t *xop, const char *str)
+/*
+ * True if only whitespace remains after a number
+ */
+static int
+xo_eval_number_end (const char *cp)
 {
-    xo_eval_value_t value = XO_EVAL_VALUE_ZERO;
+    while (isspace((unsigned char) *cp))
+	cp += 1;
+
+    return (*cp == '\0');
+}
+
+/*
+ * Turn a string into a number, as XPath's number() does, but keep it
+ * as strongly typed as we can: C_INT64, then C_UINT64 (for "0x" hex
+ * or values past INT64_MAX), and C_FLOAT only when there's no other
+ * choice, since floats are expensive and lose precision for large
+ * integers.  Anything else (including the empty string we get for a
+ * missing field) is XPath's NaN, which we return as C_NAN.  Leading
+ * and trailing whitespace is allowed.  This doesn't complain; in
+ * XPath, a non-numeric string is a normal value.
+ */
+static xo_eval_value_t
+xo_eval_parse_number (const char *str)
+{
+    xo_eval_value_t value;
     char *ep;
 
-    if (str && str[0] == '0' && str[1] == 'x') {
+    if (str == NULL)
+	return xo_eval_value_nan(0);
+
+    while (isspace((unsigned char) *str))
+	str += 1;
+
+    /* XPath numbers are digits, '.', and '-'; no "inf", "nan", or '+' */
+    if (!isdigit((unsigned char) *str) && *str != '.' && *str != '-')
+	return xo_eval_value_nan(0);
+
+    if (str[0] == '0' && (str[1] == 'x' || str[1] == 'X')) {
+	errno = 0;
 	uint64_t uval = strtoull(str, &ep, 16);
-	if (ep && *ep == '\0') {
-	    value = xo_eval_value_make(C_UINT64, 0, 0);
-	    value.xev_uint64 = uval;
+	if (errno != 0 || ep == str + 2 || !xo_eval_number_end(ep))
+	    return xo_eval_value_nan(0);
+
+	value = xo_eval_value_make(C_UINT64, 0, 0);
+	value.xev_uint64 = uval;
+	return value;
+    }
+
+    /* Base 10, since XPath has no octal ("010" is ten) */
+    errno = 0;
+    int64_t ival = strtoll(str, &ep, 10);
+    if (ep != str && xo_eval_number_end(ep)) {
+	if (errno == 0) {
+	    value = xo_eval_value_make(C_INT64, 0, 0);
+	    value.xev_int64 = ival;
 	    return value;
+	}
+
+	if (*str != '-') {	/* Too big for int64; try uint64 */
+	    errno = 0;
+	    uint64_t uval = strtoull(str, &ep, 10);
+	    if (errno == 0) {
+		value = xo_eval_value_make(C_UINT64, 0, 0);
+		value.xev_uint64 = uval;
+		return value;
+	    }
 	}
     }
 
-    int64_t ival = strtoll(str, &ep, 0);
-    if (ep && *ep == '\0') {
-	value = xo_eval_value_make(C_INT64, 0, 0);
-	value.xev_int64 = ival;
-	return value;
-    }
-
     xo_float_t fval = strtod(str, &ep);
-    if (ep && *ep == '\0') {
-	value = xo_eval_value_make(C_FLOAT, 0, 0);
-	value.xev_float = fval;
-	return value;
-    }
+    if (ep != str && xo_eval_number_end(ep))
+	return xo_eval_value_float(0, fval);
 
-    /*
-     * No xfp here (xo_eval_cast_boolean/float/int64 pass only xop down
-     * this chain, and widening them is out of proportion to one rare,
-     * best-effort diagnostic), so this stays on the handle-based path
-     * rather than xo_eval_fail().
-     */
-    xo_failure_filter(xop, "invalid number value: '%s'", str);
-    value = xo_eval_value_make(C_INT64, 0, 0);
+    return xo_eval_value_nan(0);
+}
+
+/*
+ * Like xo_eval_parse_number, but complains about a string that isn't
+ * a number.  Blank strings (missing fields) are NaN without complaint.
+ */
+static xo_eval_value_t
+xo_eval_make_number (xo_handle_t *xop, const char *str)
+{
+    xo_eval_value_t value = xo_eval_parse_number(str);
+
+    if (value.xev_type == C_NAN && str != NULL && !xo_eval_number_end(str))
+	/*
+	 * No xfp here (xo_eval_cast_boolean/float/int64 pass only xop
+	 * down this chain, and widening them is out of proportion to
+	 * one rare, best-effort diagnostic), so this stays on the
+	 * handle-based path rather than xo_eval_fail().
+	 */
+	xo_failure_filter(xop, "invalid number value: '%s'", str);
+
     return value;
 }
 
@@ -1913,6 +2059,7 @@ xo_eval_make_number_from_value (xo_handle_t *xop, xo_eval_value_t value)
     case C_STRING:;
 	return xo_eval_make_number(xop, value.xev_str);
 
+    case C_NAN:
     case C_FLOAT:
     case C_BOOLEAN:
     case C_UINT64:
@@ -2082,7 +2229,19 @@ xo_eval_path (XO_EVAL_ARGS)
 	sval = xo_filter_key_find(xfp, framep, path_buf);
     }
 
-    if (sval) {
+    if (sval && xfp->xf_ops && xfp->xf_ops->xfdo_value_of) {
+	/*
+	 * xfdo_value_of's result is only good until the next call, and
+	 * an expression like concat(a, b) holds both values at once,
+	 * so we need our own copy.
+	 */
+	char *copy = strdup(sval);
+	if (copy == NULL)
+	    return xo_eval_value_invalid();
+	value = xo_eval_value_make(C_DSTRING, 0, 0);
+	value.xev_str = copy;
+    } else if (sval) {
+	/* Frame-buffered keys/attrs stay put for the whole eval */
 	value = xo_eval_value_make(C_STRING, 0, 0);
 	value.xev_str = sval;
     } else if (xfp->xf_flags & XFSF_FORCE_RESOLVE) {
@@ -2130,8 +2289,11 @@ xo_eval_cast_boolean (xo_handle_t *xop, xo_eval_value_t value)
 	int64_t ival = strtoll(str, &ep, 0);
 	return (ep == NULL || *ep != '\0') ? 0 : ival ? 1 : 0;
 
+    case C_NAN:			/* XPath: NaN is false */
+	return 0;
+
     case C_FLOAT:
-	return (int64_t) value.xev_float != 0;
+	return value.xev_float != 0;
 
     default:
 	return value.xev_int64 != 0;
@@ -2153,6 +2315,9 @@ xo_eval_cast_float (xo_handle_t *xop, xo_eval_value_t value)
 	char *ep;
 	fval = strtod(str, &ep);
 	return (ep && *ep == '\0') ? fval: 0;
+
+    case C_NAN:
+	return NAN;
 
     case C_FLOAT:
 	return value.xev_float;
@@ -2184,6 +2349,9 @@ xo_eval_cast_int64 (xo_handle_t *xop, xo_eval_value_t value)
 	char *ep;
 	fval = strtod(str, &ep);
 	return (ep && *ep == '\0') ? fval: 0;
+
+    case C_NAN:			/* No integer NaN */
+	return 0;
 
     case C_FLOAT:
 	return (int64_t) value.xev_float;
@@ -2232,9 +2400,7 @@ xo_eval_cast_string (xo_handle_t *xop UNUSED, xo_eval_value_t value)
 	 * always emits 6 decimal digits, which is wrong for the common
 	 * case of integral arithmetic results (e.g. "$n - 1").
 	 */
-	if (isnan(value.xev_float)) {
-	    bp = "NaN";
-	} else if (isinf(value.xev_float)) {
+	if (isinf(value.xev_float)) {
 	    bp = (value.xev_float < 0) ? "-Infinity" : "Infinity";
 	} else if (value.xev_float == (double) (int64_t) value.xev_float
 		   && fabs(value.xev_float) < 1e18) {
@@ -2242,6 +2408,10 @@ xo_eval_cast_string (xo_handle_t *xop UNUSED, xo_eval_value_t value)
 	} else {
 	    snprintf(buf, sizeof(buf), "%.17g", value.xev_float);
 	}
+	break;
+
+    case C_NAN:
+	bp = "NaN";
 	break;
 
     case M_ERROR:
@@ -2253,13 +2423,6 @@ xo_eval_cast_string (xo_handle_t *xop UNUSED, xo_eval_value_t value)
     }
 
     return strdup(bp);
-}
-
-static inline xo_eval_value_t
-xo_eval_cast_float_value (xo_handle_t *xop, xo_eval_value_t old)
-{
-    xo_float_t new = xo_eval_cast_float(xop, old);
-    return xo_eval_value_float(0, new);
 }
 
 static void
@@ -2294,6 +2457,10 @@ xo_eval_dump_value (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED,
 	snprintf(buf, sizeof(buf), "%lf", value.xev_float);
 	break;
 
+    case C_NAN:
+	bp = "NaN";
+	break;
+
     default:
 	bp = "(unknown)";
     }
@@ -2313,6 +2480,33 @@ xo_eval_dump_value (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED,
 
 #define TYPE_CMP(_a, _b) (((_a) << 16) | (_b))
 
+#define XO_REL_NAN	2	/* xo_eval_compare: comparison is NaN */
+
+static inline int
+xo_eval_is_number_type (unsigned type)
+{
+    return (type == C_INT64 || type == C_UINT64 || type == C_FLOAT
+	    || type == C_NAN);
+}
+
+/*
+ * Compare two floats.  C_FLOAT never holds NaN (that's C_NAN), so
+ * this is a simple three-way compare.
+ */
+static inline int
+xo_eval_fcmp (xo_float_t left, xo_float_t right)
+{
+    return (left > right) ? 1 : (left < right) ? -1 : 0;
+}
+
+/*
+ * Three-way compare of two values, giving -1, 0, or 1 as a C_INT64.
+ * NaN is unordered (not equal to, less than, or greater than anything,
+ * itself included), which we report as XO_REL_NAN.  A string compared
+ * with a number is turned into a number (XPath 1.0, section 3.4),
+ * keeping both as strongly typed as we can, so integers are compared
+ * as integers, not floats.
+ */
 static xo_eval_value_t
 xo_eval_compare (XO_EVAL_ARGS)
 {
@@ -2320,7 +2514,6 @@ xo_eval_compare (XO_EVAL_ARGS)
     xo_eval_value_t right = argv[1];
     xo_eval_value_t value = XO_EVAL_VALUE_ZERO;
     int rc = 0;
-    xo_float_t fval;
 
     xo_eval_dump_value(xop, xfp, left, indent, "compare: left");
     xo_eval_dump_value(xop, xfp, right, indent, "compare: right");
@@ -2329,6 +2522,23 @@ xo_eval_compare (XO_EVAL_ARGS)
 	= (left.xev_type == C_DSTRING) ? C_STRING : left.xev_type;
     unsigned right_type
 	= (right.xev_type == C_DSTRING) ? C_STRING : right.xev_type;
+
+    /* The converted strings are numbers, so there's nothing to free */
+    if (left_type == C_STRING && xo_eval_is_number_type(right_type)) {
+	left = xo_eval_make_number(xop, left.xev_str);
+	left_type = left.xev_type;
+    } else if (right_type == C_STRING && xo_eval_is_number_type(left_type)) {
+	right = xo_eval_make_number(xop, right.xev_str);
+	right_type = right.xev_type;
+    }
+
+    /* Against a boolean, NaN is false (handled below); else unordered */
+    if ((left_type == C_NAN && right_type != C_BOOLEAN)
+	    || (right_type == C_NAN && left_type != C_BOOLEAN)) {
+	value.xev_int64 = XO_REL_NAN;
+	xo_eval_dump_value(xop, xfp, value, indent, "compare: results");
+	return value;
+    }
 
     switch (TYPE_CMP(left_type, right_type)) {
     case TYPE_CMP(C_STRING, C_STRING):
@@ -2346,70 +2556,37 @@ xo_eval_compare (XO_EVAL_ARGS)
 	break;
 
     case TYPE_CMP(C_INT64, C_UINT64):
-       if (left.xev_int64 < 0)
-           rc = -1;
-       else {
-           uint64_t lval = (uint64_t) left.xev_int64;
-           rc = (lval > right.xev_uint64) ? 1
-               : (lval < right.xev_uint64) ? -1 : 0;
-       }
-       break;
+	if (left.xev_int64 < 0)
+	    rc = -1;
+	else {
+	    uint64_t lval = (uint64_t) left.xev_int64;
+	    rc = (lval > right.xev_uint64) ? 1
+		: (lval < right.xev_uint64) ? -1 : 0;
+	}
+	break;
 
     case TYPE_CMP(C_UINT64, C_INT64):
-       if (right.xev_int64 < 0)
-           rc = 1;
-       else {
-           uint64_t rval = (uint64_t) right.xev_int64;
-           rc = (left.xev_uint64 > rval) ? 1
-               : (left.xev_uint64 < rval) ? -1 : 0;
-       }
-       break;
+	if (right.xev_int64 < 0)
+	    rc = 1;
+	else {
+	    uint64_t rval = (uint64_t) right.xev_int64;
+	    rc = (left.xev_uint64 > rval) ? 1
+		: (left.xev_uint64 < rval) ? -1 : 0;
+	}
+	break;
 
     case TYPE_CMP(C_FLOAT, C_FLOAT):
-	rc = (left.xev_float > right.xev_float) ? 1
-	    : (left.xev_float < right.xev_float) ? -1 : 0;
-	break;
-
-    case TYPE_CMP(C_STRING, C_INT64):
-	fval = xo_eval_cast_float(xop, left);
-	rc = (fval > right.xev_int64) ? 1 : (fval < right.xev_int64) ? -1 : 0;
-	break;
-
-    case TYPE_CMP(C_INT64, C_STRING):
-	fval = xo_eval_cast_float(xop, right);
-	rc = (left.xev_int64 > fval) ? 1 : (left.xev_int64 < fval) ? -1 : 0;
-	break;
-
-    case TYPE_CMP(C_STRING, C_UINT64):
-	fval = xo_eval_cast_float(xop, left);
-	rc = (fval > right.xev_uint64) ? 1 : (fval < right.xev_uint64) ? -1 : 0;
-	break;
-
-    case TYPE_CMP(C_UINT64, C_STRING):
-	fval = xo_eval_cast_float(xop, right);
-	rc = (left.xev_uint64 > fval) ? 1 : (left.xev_uint64 < fval) ? -1 : 0;
-	break;
-
-    case TYPE_CMP(C_STRING, C_FLOAT):
-	fval = xo_eval_cast_float(xop, left);
-	rc = (fval > right.xev_float) ? 1 : (fval < right.xev_float) ? -1 : 0;
-	break;
-
-    case TYPE_CMP(C_FLOAT, C_STRING):
-	fval = xo_eval_cast_float(xop, right);
-	rc = (left.xev_float > fval) ? 1 : (left.xev_float < fval) ? -1 : 0;
+	rc = xo_eval_fcmp(left.xev_float, right.xev_float);
 	break;
 
     case TYPE_CMP(C_INT64, C_FLOAT):
     case TYPE_CMP(C_UINT64, C_FLOAT):
-	fval = xo_eval_cast_float(xop, left);
-	rc = (fval > right.xev_float) ? 1 : (fval < right.xev_float) ? -1 : 0;
+	rc = xo_eval_fcmp(xo_eval_cast_float(xop, left), right.xev_float);
 	break;
 
     case TYPE_CMP(C_FLOAT, C_INT64):
     case TYPE_CMP(C_FLOAT, C_UINT64):
-	fval = xo_eval_cast_float(xop, right);
-	rc = (left.xev_float > fval) ? 1 : (left.xev_float < fval) ? -1 : 0;
+	rc = xo_eval_fcmp(left.xev_float, xo_eval_cast_float(xop, right));
 	break;
 
     case TYPE_CMP(C_BOOLEAN, C_BOOLEAN):
@@ -2417,6 +2594,8 @@ xo_eval_compare (XO_EVAL_ARGS)
     case TYPE_CMP(C_BOOLEAN, C_INT64):
     case TYPE_CMP(C_UINT64, C_BOOLEAN): /* Cheating a bit, but we only ... */
     case TYPE_CMP(C_BOOLEAN, C_UINT64): /* ... care about non-zero and zero */
+    case TYPE_CMP(C_NAN, C_BOOLEAN):	/* C_NAN's xev_int64 is zero */
+    case TYPE_CMP(C_BOOLEAN, C_NAN):
 	if (left.xev_int64 == 0) {
 	    rc = (right.xev_int64 == 0) ? 0 : 1;
 	} else {
@@ -2503,6 +2682,7 @@ xo_eval_op_equals (XO_EVAL_ARGS)
 {
     xo_eval_value_t value = xo_eval_compare(XO_EVAL_PASS);
 
+    /* NaN (XO_REL_NAN) is not equal to anything */
     value.xev_type = C_BOOLEAN;
     value.xev_int64 = (value.xev_int64 == 0) ? 1 : 0;
     return value;
@@ -2518,57 +2698,271 @@ xo_eval_op_notequals (XO_EVAL_ARGS)
     return value;
 }
 
+/*
+ * Compare for the relational operators (<, <=, >, >=).  XPath 1.0
+ * (section 3.4) compares two strings with these operators by first
+ * converting both to numbers, not as strings, so "42" > "144" is
+ * false.  We convert with xo_eval_parse_number, which keeps them as
+ * strongly typed as it can and makes a non-number C_NAN, so
+ * xo_eval_compare does the rest (and reports NaN as XO_REL_NAN).  No
+ * complaints: in XPath, a non-numeric string is a normal value.
+ */
+static xo_eval_value_t
+xo_eval_relational (XO_EVAL_ARGS)
+{
+    xo_eval_value_t left = argv[0];
+    xo_eval_value_t right = argv[1];
+    int left_str = (left.xev_type == C_STRING || left.xev_type == C_DSTRING);
+    int right_str = (right.xev_type == C_STRING
+		     || right.xev_type == C_DSTRING);
+
+    if (!left_str || !right_str)
+	return xo_eval_compare(XO_EVAL_PASS);
+
+    /* Numbers own no memory; argv still owns (and frees) the strings */
+    xo_eval_value_t nums[2] = {
+	xo_eval_parse_number(left.xev_str),
+	xo_eval_parse_number(right.xev_str),
+    };
+
+    return xo_eval_compare(xop, xfp, framep, xnp, indent, 2, nums);
+}
+
 static xo_eval_value_t
 xo_eval_op_lt (XO_EVAL_ARGS)
 {
-    xo_eval_value_t value = xo_eval_compare(XO_EVAL_PASS);
+    xo_eval_value_t value = xo_eval_relational(XO_EVAL_PASS);
 
+    value.xev_int64 = (value.xev_int64 == XO_REL_NAN) ? 0
+	: (value.xev_int64 < 0) ? 1 : 0;
     value.xev_type = C_BOOLEAN;
-    value.xev_int64 = (value.xev_int64 < 0) ? 1 : 0;
     return value;
 }
 
 static xo_eval_value_t
 xo_eval_op_le (XO_EVAL_ARGS)
 {
-    xo_eval_value_t value = xo_eval_compare(XO_EVAL_PASS);
+    xo_eval_value_t value = xo_eval_relational(XO_EVAL_PASS);
 
+    value.xev_int64 = (value.xev_int64 == XO_REL_NAN) ? 0
+	: (value.xev_int64 <= 0) ? 1 : 0;
     value.xev_type = C_BOOLEAN;
-    value.xev_int64 = (value.xev_int64 <= 0) ? 1 : 0;
     return value;
 }
 
 static xo_eval_value_t
 xo_eval_op_gt (XO_EVAL_ARGS)
 {
-    xo_eval_value_t value = xo_eval_compare(XO_EVAL_PASS);
+    xo_eval_value_t value = xo_eval_relational(XO_EVAL_PASS);
 
+    value.xev_int64 = (value.xev_int64 == XO_REL_NAN) ? 0
+	: (value.xev_int64 > 0) ? 1 : 0;
     value.xev_type = C_BOOLEAN;
-    value.xev_int64 = (value.xev_int64 > 0) ? 1 : 0;
     return value;
 }
 
 static xo_eval_value_t
 xo_eval_op_ge (XO_EVAL_ARGS)
 {
-    xo_eval_value_t value = xo_eval_compare(XO_EVAL_PASS);
+    xo_eval_value_t value = xo_eval_relational(XO_EVAL_PASS);
 
+    value.xev_int64 = (value.xev_int64 == XO_REL_NAN) ? 0
+	: (value.xev_int64 >= 0) ? 1 : 0;
     value.xev_type = C_BOOLEAN;
-    value.xev_int64 = (value.xev_int64 >= 0) ? 1 : 0;
     return value;
 }
 
+/*
+ * XPath does all its math in floats, but floats are expensive and
+ * lose precision past 2^53, so we keep integer math in C_INT64 or
+ * C_UINT64 as long as the result fits, and fall back to C_FLOAT only
+ * when it doesn't.  These helpers return TRUE if the result fits and
+ * FALSE on overflow.
+ */
+static int
+xo_int64_add (int64_t left, int64_t right, int64_t *resp)
+{
+    if ((right > 0 && left > INT64_MAX - right)
+	    || (right < 0 && left < INT64_MIN - right))
+	return FALSE;
+
+    *resp = left + right;
+    return TRUE;
+}
+
+static int
+xo_int64_sub (int64_t left, int64_t right, int64_t *resp)
+{
+    if ((right < 0 && left > INT64_MAX + right)
+	    || (right > 0 && left < INT64_MIN + right))
+	return FALSE;
+
+    *resp = left - right;
+    return TRUE;
+}
+
+static int
+xo_int64_mul (int64_t left, int64_t right, int64_t *resp)
+{
+    if (left > 0) {
+	if (right > 0 ? left > INT64_MAX / right : right < INT64_MIN / left)
+	    return FALSE;
+    } else if (left < 0) {
+	if (right > 0 ? left < INT64_MIN / right
+		: right != 0 && left < INT64_MAX / right)
+	    return FALSE;
+    }
+
+    *resp = left * right;
+    return TRUE;
+}
+
+static int
+xo_uint64_add (uint64_t left, uint64_t right, uint64_t *resp)
+{
+    if (left > UINT64_MAX - right)
+	return FALSE;
+
+    *resp = left + right;
+    return TRUE;
+}
+
+static int
+xo_uint64_sub (uint64_t left, uint64_t right, uint64_t *resp)
+{
+    if (left < right)
+	return FALSE;
+
+    *resp = left - right;
+    return TRUE;
+}
+
+static int
+xo_uint64_mul (uint64_t left, uint64_t right, uint64_t *resp)
+{
+    if (right != 0 && left > UINT64_MAX / right)
+	return FALSE;
+
+    *resp = left * right;
+    return TRUE;
+}
+
+/* The magnitude of a negative int64 (safe for INT64_MIN) */
+static inline uint64_t
+xo_int64_mag (int64_t val)
+{
+    return (uint64_t) -(val + 1) + 1;
+}
+
+static inline xo_eval_value_t
+xo_eval_value_int64 (int64_t ival)
+{
+    xo_eval_value_t value = xo_eval_value_make(C_INT64, 0, 0);
+
+    value.xev_int64 = ival;
+    return value;
+}
+
+/* Results that fit are C_INT64, matching xo_eval_parse_number */
+static inline xo_eval_value_t
+xo_eval_value_uint64 (uint64_t uval)
+{
+    if (uval <= INT64_MAX)
+	return xo_eval_value_int64((int64_t) uval);
+
+    xo_eval_value_t value = xo_eval_value_make(C_UINT64, 0, 0);
+
+    value.xev_uint64 = uval;
+    return value;
+}
+
+/* Get an integer value as an int64, if it fits */
+static inline int
+xo_eval_get_int64 (xo_eval_value_t value, int64_t *valp)
+{
+    if (value.xev_type == C_INT64) {
+	*valp = value.xev_int64;
+	return TRUE;
+    }
+
+    if (value.xev_type == C_UINT64 && value.xev_uint64 <= INT64_MAX) {
+	*valp = (int64_t) value.xev_uint64;
+	return TRUE;
+    }
+
+    return FALSE;
+}
+
+/* Get an integer value as a uint64, if it fits */
+static inline int
+xo_eval_get_uint64 (xo_eval_value_t value, uint64_t *valp)
+{
+    if (value.xev_type == C_UINT64) {
+	*valp = value.xev_uint64;
+	return TRUE;
+    }
+
+    if (value.xev_type == C_INT64 && value.xev_int64 >= 0) {
+	*valp = (uint64_t) value.xev_int64;
+	return TRUE;
+    }
+
+    return FALSE;
+}
+
+/* True for a negative int64 paired with a uint64 past INT64_MAX */
+static inline int
+xo_eval_neg_big (xo_eval_value_t neg, xo_eval_value_t big)
+{
+    return (neg.xev_type == C_INT64 && neg.xev_int64 < 0
+	    && big.xev_type == C_UINT64 && big.xev_uint64 > INT64_MAX);
+}
+
+/*
+ * Turn an operand into a number for arithmetic, keeping it as
+ * strongly typed as we can: strings are parsed, booleans are 0 or 1.
+ */
+static xo_eval_value_t
+xo_eval_to_number (xo_handle_t *xop, xo_eval_value_t value)
+{
+    switch (value.xev_type) {
+    case C_DSTRING:
+    case C_STRING:
+	return xo_eval_make_number(xop, value.xev_str);
+
+    case C_INT64:
+    case C_UINT64:
+    case C_FLOAT:
+    case C_NAN:
+	return value;
+
+    case C_BOOLEAN:
+	return xo_eval_value_int64(value.xev_int64 ? 1 : 0);
+
+    default:
+	return xo_eval_value_int64(value.xev_int64);
+    }
+}
+
+/*
+ * Run a binary arithmetic operator.  The calc_fn gets two numbers
+ * (from xo_eval_to_number), neither of them NaN; NaN in is NaN out.
+ */
 static xo_eval_value_t
 xo_eval_calc (XO_EVAL_ARGS, const char *name, xo_eval_calc_fn_t calc_fn)
 {
-    xo_eval_value_t lfloat = xo_eval_cast_float_value(xop, argv[0]);
-    xo_eval_value_t rfloat = xo_eval_cast_float_value(xop, argv[1]);
+    xo_eval_value_t left = xo_eval_to_number(xop, argv[0]);
+    xo_eval_value_t right = xo_eval_to_number(xop, argv[1]);
+    xo_eval_value_t result;
 
-    xo_eval_value_t result = calc_fn(xop, xfp, lfloat, rfloat);
+    if (left.xev_type == C_NAN || right.xev_type == C_NAN)
+	result = xo_eval_value_nan(0);
+    else
+	result = calc_fn(xop, xfp, left, right);
 
     if (XO_HAS_DEBUG(xop)) {
-	xo_eval_dump_value(xop, xfp, lfloat, indent, "eval_calc: left");
-	xo_eval_dump_value(xop, xfp, rfloat, indent, "eval_calc: right");
+	xo_eval_dump_value(xop, xfp, left, indent, "eval_calc: left");
+	xo_eval_dump_value(xop, xfp, right, indent, "eval_calc: right");
 	char nbuf[128];
 	snprintf(nbuf, sizeof(nbuf), "eval_calc: %s", name);
 
@@ -2581,8 +2975,27 @@ xo_eval_calc (XO_EVAL_ARGS, const char *name, xo_eval_calc_fn_t calc_fn)
 static xo_eval_value_t
 xo_eval_calc_plus (XO_EVAL_CALC_ARGS)
 {
-    left.xev_float += right.xev_float;
-    return left;
+    int64_t li, ri, ival;
+    uint64_t lu, ru, uval;
+
+    if (xo_eval_get_int64(left, &li) && xo_eval_get_int64(right, &ri)
+	    && xo_int64_add(li, ri, &ival))
+	return xo_eval_value_int64(ival);
+
+    if (xo_eval_get_uint64(left, &lu) && xo_eval_get_uint64(right, &ru)
+	    && xo_uint64_add(lu, ru, &uval))
+	return xo_eval_value_uint64(uval);
+
+    /* A negative int64 plus a uint64 past INT64_MAX always fits */
+    if (xo_eval_neg_big(left, right))
+	return xo_eval_value_uint64(right.xev_uint64
+				    - xo_int64_mag(left.xev_int64));
+    if (xo_eval_neg_big(right, left))
+	return xo_eval_value_uint64(left.xev_uint64
+				    - xo_int64_mag(right.xev_int64));
+
+    return xo_eval_value_float(0, xo_eval_cast_float(xop, left)
+			       + xo_eval_cast_float(xop, right));
 }
 
 static xo_eval_value_t
@@ -2595,8 +3008,25 @@ xo_eval_op_plus (XO_EVAL_ARGS)
 static xo_eval_value_t
 xo_eval_calc_minus (XO_EVAL_CALC_ARGS)
 {
-    left.xev_float -= right.xev_float;
-    return left;
+    int64_t li, ri, ival;
+    uint64_t lu, ru, uval;
+
+    if (xo_eval_get_int64(left, &li) && xo_eval_get_int64(right, &ri)
+	    && xo_int64_sub(li, ri, &ival))
+	return xo_eval_value_int64(ival);
+
+    if (xo_eval_get_uint64(left, &lu) && xo_eval_get_uint64(right, &ru)
+	    && xo_uint64_sub(lu, ru, &uval))
+	return xo_eval_value_uint64(uval);
+
+    /* A uint64 past INT64_MAX minus a negative int64 */
+    if (xo_eval_neg_big(right, left)
+	    && xo_uint64_add(left.xev_uint64,
+			     xo_int64_mag(right.xev_int64), &uval))
+	return xo_eval_value_uint64(uval);
+
+    return xo_eval_value_float(0, xo_eval_cast_float(xop, left)
+			       - xo_eval_cast_float(xop, right));
 }
 
 static xo_eval_value_t
@@ -2614,19 +3044,52 @@ xo_eval_op_minus (XO_EVAL_ARGS)
 static xo_eval_value_t
 xo_eval_op_negate (XO_EVAL_ARGS)
 {
-    xo_eval_value_t value = xo_eval_cast_float_value(xop, argv[0]);
-    value.xev_float = -value.xev_float;
-    return value;
+    xo_eval_value_t value = xo_eval_to_number(xop, argv[0]);
+
+    switch (value.xev_type) {
+    case C_INT64:
+	if (value.xev_int64 != INT64_MIN)
+	    return xo_eval_value_int64(-value.xev_int64);
+	return xo_eval_value_uint64(xo_int64_mag(value.xev_int64));
+
+    case C_UINT64:
+	if (value.xev_uint64 <= INT64_MAX)
+	    return xo_eval_value_int64(-(int64_t) value.xev_uint64);
+	if (value.xev_uint64 == xo_int64_mag(INT64_MIN))
+	    return xo_eval_value_int64(INT64_MIN);
+	return xo_eval_value_float(0, -(xo_float_t) value.xev_uint64);
+
+    case C_FLOAT:
+	return xo_eval_value_float(0, -value.xev_float);
+
+    default:			/* C_NAN */
+	return value;
+    }
 }
 
+/*
+ * XPath's "div" is float division, but when integers divide evenly,
+ * the result is still an integer.
+ */
 static xo_eval_value_t
 xo_eval_calc_div (XO_EVAL_CALC_ARGS)
 {
-    if (right.xev_float == 0)
+    int64_t li, ri;
+    uint64_t lu, ru;
+
+    if (xo_eval_cast_float(xop, right) == 0)
 	return xo_eval_value_invalid();
 
-    left.xev_float /= right.xev_float;
-    return left;
+    if (xo_eval_get_int64(left, &li) && xo_eval_get_int64(right, &ri)
+	    && !(li == INT64_MIN && ri == -1) && li % ri == 0)
+	return xo_eval_value_int64(li / ri);
+
+    if (xo_eval_get_uint64(left, &lu) && xo_eval_get_uint64(right, &ru)
+	    && lu % ru == 0)
+	return xo_eval_value_uint64(lu / ru);
+
+    return xo_eval_value_float(0, xo_eval_cast_float(xop, left)
+			       / xo_eval_cast_float(xop, right));
 }
 
 static xo_eval_value_t
@@ -2639,8 +3102,19 @@ xo_eval_op_div (XO_EVAL_ARGS)
 static xo_eval_value_t
 xo_eval_calc_mul (XO_EVAL_CALC_ARGS)
 {
-    left.xev_float *= right.xev_float;
-    return left;
+    int64_t li, ri, ival;
+    uint64_t lu, ru, uval;
+
+    if (xo_eval_get_int64(left, &li) && xo_eval_get_int64(right, &ri)
+	    && xo_int64_mul(li, ri, &ival))
+	return xo_eval_value_int64(ival);
+
+    if (xo_eval_get_uint64(left, &lu) && xo_eval_get_uint64(right, &ru)
+	    && xo_uint64_mul(lu, ru, &uval))
+	return xo_eval_value_uint64(uval);
+
+    return xo_eval_value_float(0, xo_eval_cast_float(xop, left)
+			       * xo_eval_cast_float(xop, right));
 }
 
 static xo_eval_value_t
@@ -2662,11 +3136,33 @@ xo_fmod (xo_float_t x, xo_float_t y)
     return x - (xo_float_t) n;
 }
 
+/*
+ * XPath's "mod" truncates, like C's '%', so the result has the sign
+ * of the dividend.  As with xo_fmod, "mod 0" gives zero.
+ */
 static xo_eval_value_t
 xo_eval_calc_mod (XO_EVAL_CALC_ARGS)
 {
-    left.xev_float = xo_fmod(left.xev_float, right.xev_float);
-    return left;
+    int64_t li, ri;
+    uint64_t lu, ru;
+
+    if (xo_eval_get_int64(left, &li) && xo_eval_get_int64(right, &ri))
+	return xo_eval_value_int64((ri == 0 || ri == -1) ? 0 : li % ri);
+
+    if (xo_eval_get_uint64(left, &lu) && xo_eval_get_uint64(right, &ru))
+	return xo_eval_value_uint64((ru == 0) ? 0 : lu % ru);
+
+    /* A negative int64 is smaller than any uint64 past INT64_MAX */
+    if (xo_eval_neg_big(left, right))
+	return (xo_int64_mag(left.xev_int64) == right.xev_uint64)
+	    ? xo_eval_value_int64(0) : left;
+
+    if (xo_eval_neg_big(right, left))
+	return xo_eval_value_uint64(left.xev_uint64
+				    % xo_int64_mag(right.xev_int64));
+
+    return xo_eval_value_float(0, xo_fmod(xo_eval_cast_float(xop, left),
+					  xo_eval_cast_float(xop, right)));
 }
 
 static xo_eval_value_t
@@ -2870,20 +3366,38 @@ xo_eval_func_not (XO_EVAL_ARGS)
     return value;
 }
 
+/*
+ * ceiling(), floor(), and round(): integers (and NaN) are already
+ * their own answer.  A float's integral result is a C_INT64 when it
+ * fits.
+ */
+static xo_eval_value_t
+xo_eval_round_common (XO_EVAL_ARGS, xo_float_t (*round_fn)(xo_float_t))
+{
+    xo_eval_value_t value = xo_eval_to_number(xop, argv[0]);
+
+    if (value.xev_type != C_FLOAT)
+	return value;
+
+    xo_float_t fval = round_fn(value.xev_float);
+
+    /* -2^63 and 2^63 are exact as doubles; INT64_MAX isn't */
+    if (fval >= (xo_float_t) INT64_MIN && fval < -(xo_float_t) INT64_MIN)
+	return xo_eval_value_int64((int64_t) fval);
+
+    return xo_eval_value_float(0, fval);
+}
+
 static xo_eval_value_t
 xo_eval_func_ceiling (XO_EVAL_ARGS)
 {
-    xo_float_t fval = xo_eval_cast_float(xop, argv[0]);
-    fval = ceil(fval);
-    return xo_eval_value_float(0, fval);
+    return xo_eval_round_common(XO_EVAL_PASS, ceil);
 }
 
 static xo_eval_value_t
 xo_eval_func_floor (XO_EVAL_ARGS)
 {
-    xo_float_t fval = xo_eval_cast_float(xop, argv[0]);
-    fval = floor(fval);
-    return xo_eval_value_float(0, fval);
+    return xo_eval_round_common(XO_EVAL_PASS, floor);
 }
 
 static xo_eval_value_t
@@ -3099,18 +3613,16 @@ xo_eval_func_number (XO_EVAL_ARGS)
 static xo_eval_value_t
 xo_eval_func_round (XO_EVAL_ARGS)
 {
-    xo_float_t fval = xo_eval_cast_float(xop, argv[0]);
-    fval = round(fval);
-    return xo_eval_value_float(0, fval);
+    return xo_eval_round_common(XO_EVAL_PASS, round);
 }
 
 static xo_eval_value_t
 xo_eval_func_string_length (XO_EVAL_ARGS)
 {
     char *str = xo_eval_cast_string(xop, argv[0]);
-    xo_float_t len = str ? strlen(str) : 0;
+    int64_t len = str ? (int64_t) strlen(str) : 0;
     xo_free(str);
-    return xo_eval_value_float(0, len);
+    return xo_eval_value_int64(len);
 }
 
 /*
@@ -3123,12 +3635,18 @@ xo_eval_func_sum (XO_EVAL_ARGS)
 	if (argv[i].xev_flags & XEVF_MISSING)
 	    return xo_eval_value_missing();
 
-    xo_float_t total = 0;
+    /* Same rules as '+': integers as long as they fit, and NaN wins */
+    xo_eval_value_t total = xo_eval_value_int64(0);
 
-    for (int i = 0; i < argc; i++)
-	total += xo_eval_cast_float(xop, argv[i]);
+    for (int i = 0; i < argc; i++) {
+	xo_eval_value_t value = xo_eval_to_number(xop, argv[i]);
+	if (value.xev_type == C_NAN)
+	    return value;
 
-    return xo_eval_value_float(0, total);
+	total = xo_eval_calc_plus(xop, xfp, total, value);
+    }
+
+    return total;
 }
 
 /*
@@ -4708,6 +5226,8 @@ xo_tmatch_key (xo_handle_t *xop, xo_filter_t *xfp, xo_tmatch_t *xtmp,
     xo_trie_t *xtp = xtmp->xtm_trie;
     xo_tframe_t *framep = &xtmp->xtm_stack[xtmp->xtm_depth];
 
+    xtmp->xtm_event += 1;
+
     for (uint32_t i = 0; i < framep->xtf_count; i++) {
 	if (framep->xtf_state[i] != XTFS_PRED)
 	    continue;
@@ -4776,6 +5296,8 @@ xo_tmatch_attr (xo_handle_t *xop, xo_filter_t *xfp, xo_tmatch_t *xtmp,
     xo_trie_t *xtp = xtmp->xtm_trie;
     xo_tframe_t *framep = &xtmp->xtm_stack[xtmp->xtm_depth];
 
+    xtmp->xtm_event += 1;
+
     for (uint32_t i = 0; i < framep->xtf_count; i++) {
 	if (framep->xtf_state[i] != XTFS_PRED)
 	    continue;
@@ -4838,6 +5360,11 @@ xo_filter_walk_attr (xo_handle_t *xop, xo_filter_t *xfp,
 		     const char *tag, xo_ssize_t tlen,
 		     const char *value, xo_ssize_t vlen)
 {
+    /* Like walk_open/close, a negative length means "use strlen" */
+    if (tlen < 0)
+	tlen = (xo_ssize_t) strlen(tag);
+    if (value && vlen < 0)
+	vlen = (xo_ssize_t) strlen(value);
     return xo_filter_op_attribute(xop, xfp, tag, tlen, value, vlen);
 }
 
@@ -4934,14 +5461,20 @@ xo_filter_op_needs_nonkey_field (XO_FILTER_NEEDS_NONKEY_FIELD_SIGNATURE)
  */
 static void
 xo_filter_force_resolve_pred (xo_handle_t *xop, xo_filter_t *xfp,
-			      const char *tag)
+			      const char *tag, ssize_t tlen)
 {
     xo_tmatch_t *xtmp = &xfp->xf_tmatch;
     if (xtmp->xtm_depth == 0)
 	return;
 
     xo_tframe_t *framep = &xtmp->xtm_stack[xtmp->xtm_depth];
+
+    /* PRED status may come from an ancestor; nothing to resolve here */
+    if (!xo_tframe_has_pred(framep))
+	return;
+
     xfp->xf_flags |= XFSF_FORCE_RESOLVE;
+    xtmp->xtm_event += 1;
 
     for (uint32_t i = 0; i < framep->xtf_count; i++) {
 	if (framep->xtf_state[i] != XTFS_PRED)
@@ -4952,8 +5485,17 @@ xo_filter_force_resolve_pred (xo_handle_t *xop, xo_filter_t *xfp,
 	    xo_tmatch_record_live(xtmp, framep, tn);
 	    continue;
 	}
-	framep->xtf_position_cur = (framep->xtf_flags[i] & XTFF_QUAL_COUNTED)
-	    ? framep->xtf_qual_position[i] : framep->xtf_position[i];
+
+	/*
+	 * For "foo[A][N]", N counts only siblings where A passed.  A
+	 * backend that never calls walk_key (e.g. one that answers
+	 * value_of from a buffered tree) reaches here without that
+	 * count having been taken, so take it now.  XFSF_FORCE_RESOLVE
+	 * is already set, so A can't come back MISSING.
+	 */
+	framep->xtf_position_cur = xo_tmatch_slot_position(xop, xfp, xtmp,
+							    framep, i,
+							    tn->xtn_pred);
 	xo_eval_value_t result =
 	    xo_filter_pred_eval(xop, xfp, framep, tn->xtn_pred);
 	if (!(result.xev_flags & XEVF_MISSING)) {
@@ -4969,7 +5511,7 @@ xo_filter_force_resolve_pred (xo_handle_t *xop, xo_filter_t *xfp,
     }
 
     xfp->xf_flags &= ~XFSF_FORCE_RESOLVE;
-    xo_filter_change_status(xop, xfp, "close-instance-pred", tag, strlen(tag));
+    xo_filter_change_status(xop, xfp, "force-resolve-pred", tag, tlen);
 }
 
 /*
@@ -5055,7 +5597,7 @@ xo_filter_walk_close (xo_handle_t *xop, xo_filter_t *xfp,
      * string("")), so xo_filter_walk_status() reflects the real outcome.
      */
     if (xfp != NULL && xfp->xf_trie != NULL && xfp->xf_status == XO_STATUS_PRED)
-	xo_filter_force_resolve_pred(xop, xfp, tag);
+	xo_filter_force_resolve_pred(xop, xfp, tag, tlen);
 
     xo_filter_status_t pre_close = xfp ? xfp->xf_status : XO_STATUS_ZERO;
     xo_filter_close(xop, xfp, tag, tlen, "container");
@@ -5069,6 +5611,11 @@ xo_filter_walk_key (xo_handle_t *xop, xo_filter_t *xfp,
 		    const char *tag, ssize_t tlen,
 		    const char *value, ssize_t vlen)
 {
+    /* Like walk_open/close, a negative length means "use strlen" */
+    if (tlen < 0)
+	tlen = (ssize_t) strlen(tag);
+    if (value && vlen < 0)
+	vlen = (ssize_t) strlen(value);
     return xo_filter_op_key(xop, xfp, tag, tlen, value, vlen);
 }
 
