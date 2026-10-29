@@ -216,6 +216,7 @@ xo_xparse_ttname_map_t xo_xparse_ttname_map[] = {
     { C_DSTRING,		"string value that is dynamically allocated" },
     { C_NESTED_PREDICATES,      "predicates inside predicates" },
     { C_PREDICATE_PATHS,        "Multi-element paths in predicates" },
+    { C_NAN,			"not a number (NaN)" },
     { M_ERROR,                  "invalid xpath expression" },
     { 0, NULL }
 };
