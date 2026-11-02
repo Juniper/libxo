@@ -296,6 +296,10 @@ list
     job worker
 ```
 
+Keys are optional. `name Phil` is a plain data-value, so the instances
+above are unkeyed; a list keyed on `name` would write `name=Phil` and
+`name=Jim` (Section 4.2).
+
 Lexically, a list's opening line is identical to a container's - a bare
 name, nothing else. A decoder tells them apart the same way it decides
 "empty or not" for a container: by looking at the first line at depth+1
@@ -347,17 +351,17 @@ list's child depth, when it is the *only* content the list body ever
 has, is always the empty-list marker - never a one-instance list whose
 instance happens to carry no fields. (An instance with zero fields
 isn't a case libxo's own emit calls produce in practice - every
-instance opens with at least a key. Treated as **open** below.)
+instance carries at least one field. Treated as **open** below.)
 
 ### 4.2 List-instance
 
 ```
 - key-name=key-value
-  key1-name=key2-value
+  key2-name=key2-value
   data value
   more-data more-value
 - key-name=second-instance-key-value
-  key1-name=second-instance-key2-value
+  key2-name=second-instance-key2-value
   data value-for-instance2
   more-data more-value-for-instance2
 ```
@@ -370,6 +374,21 @@ indentation as that first field (i.e., depth+1 relative to the list,
 the same column the content after `- ` started at) belong to the same
 instance, until either another `- ` line appears at that depth (next
 instance) or indentation decreases (list ends).
+
+**Keys.** A field written as a key-value (`name=value`) is a key of the
+instance; a field written as a data-value (`name value`) is not. A list
+need not have any keys (Section 4's example has none), and may have
+more than one (a composite key, as above). Key status belongs to the
+list, not to a single instance: if `name` is a key, every instance in
+that list MUST carry `name`, and MUST carry it as a key-value. An
+instance that omits a key field, or writes it as a data-value, is
+malformed, and a strict decoder SHOULD reject it. Conversely, a field
+that is not a key MUST NOT be written as a key-value on any instance.
+
+Key fields need not come first. An encoder writes fields in the order
+the application emits them (libxo applications conventionally emit
+keys first), and a decoder MUST NOT depend on key fields appearing
+before data fields.
 
 This is exactly why the fixed 2-space indent step matters: `- ` is also
 two characters, so it occupies exactly one indent level's width, and
@@ -405,8 +424,9 @@ list
 string," the same way any other single-value instance would look
 (`- somevalue`); a bare `-` would instead read as a truncated or
 malformed line. libxo's own `xo_emit()` calls never produce an empty
-instance in practice - every instance carries at least a key - but the
-encoding stays well-formed for one either way.
+instance in practice - every instance carries at least one field - but
+the encoding stays well-formed for one either way. Since an empty
+instance carries no key fields, it can only appear in an unkeyed list.
 
 ## 5. Leaf-list
 
@@ -492,6 +512,9 @@ only way an unquoted `=` can appear in a field-name token at all is as
 this trailing marker. A field name with no trailing `=` is an ordinary
 (non-key) field, exactly as before this section was added.
 
+The sparse form's consistency rule (Section 4.2) applies here too:
+every row MUST supply a value for each key field.
+
 ### 6.2 Widening
 
 Each fields-line's field set MUST be a superset of the previous one's
@@ -540,16 +563,15 @@ can't be put directly into one. Three options, in order of preference:
 
 Since dense rows are emitted as they close and can't be retroactively
 rewritten once a later record turns out to need nesting, **this spec
-does not attempt a mid-stream downgrade from dense to sparse.** Unlike
-an earlier draft of this design, the choice of dense vs. sparse is not
-something the encoder infers by inspecting field shapes ahead of time -
-static analysis can't settle it without buffering, which streaming
-RTOON output does not do. Instead it's an explicit, upfront signal the
-developer gives at the API level (the `dense` field modifier, or the
-`XOF_DENSE` flag to `xo_open_list_hf()` - see `build/rtoon-plan.md`
-Section 4); the encoder commits to dense or sparse mode as soon as that
-signal is seen (or defaults to sparse if it never is), never by
-inspecting the data itself.
+does not attempt a mid-stream downgrade from dense to sparse.** The
+producer chooses a list's form before it writes the list's first row,
+and that choice holds for the rest of the list. It is not something to
+settle by inspecting field shapes ahead of time - that can't be done
+without buffering, which streaming RTOON output does not do.
+
+A decoder MUST accept either form for any list, and MUST NOT assume a
+list's form can be predicted from its data: the same data may arrive
+sparse in one document and dense in another.
 
 ### 6.6 Flattening
 
@@ -738,18 +760,13 @@ decode rules essentially verbatim, not a deviation.
 - ~~Section 5's leaf-list-of-one collapse~~ RESOLVED: fixed by Section 5's
   mandatory trailing comma, not accepted as an ambiguity - `tags red` and
   `tags red,` are now distinct and unambiguous.
-- ~~Section 6.5's dense/sparse commitment policy~~ RESOLVED: not an
-  encoder-side static-analysis decision at all (static analysis can't
-  settle it without buffering). Dense-vs-sparse is an explicit, upfront
-  signal the developer gives at the API level - see Section 6.5 and
-  `build/rtoon-plan.md` Section 4.
+- ~~Section 6.5's dense/sparse commitment policy~~ RESOLVED: the
+  producer commits to a list's form before writing its first row and
+  never switches mid-list; a decoder accepts either form and can't
+  predict it from the data (Section 6.5).
 - ~~Section 4.1's degenerate "instance with zero fields" case~~ RESOLVED:
   every list instance has at least one field, always - not merely
   assumed, but taken as a hard invariant this spec relies on.
-- ~~Whether a document-level way to force sparse-vs-dense is worth
-  adding~~ RESOLVED: superseded by the per-list, per-developer `dense`
-  field modifier / `XOF_DENSE` open-list flag (Section 6.5) - no separate
-  document- or command-line-level option is needed or planned.
 - Whether comma-only (no tab/pipe alternate delimiter) ever becomes a
   problem for values that are themselves comma-heavy (e.g. large
   numbers with thousands separators) - still open; no evidence yet that
