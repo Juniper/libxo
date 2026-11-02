@@ -1,0 +1,708 @@
+op create: [cbor] []
+ [append] @ 0 (1/1)
+ bf                                                    .
+    op open_container: [dense-test] []
+ [append] @ 1 (b/11)
+ 6a 64 65 6e  73 65 2d 74  - 65 73 74                  jdense-test
+ [append] @ 12 (1/1)
+ bf                                                    .
+      op open_container: [a-flat] []
+   [append] @ 13 (7/7)
+   66 61 2d 66  6c 61 74                                 fa-flat
+   [append] @ 20 (1/1)
+   bf                                                    .
+        op open_list: [a-disk] []
+     [append] @ 21 (7/7)
+     66 61 2d 64  69 73 6b                                 fa-disk
+     [append] @ 28 (1/1)
+     9f                                                    .
+          op open_instance: [a-disk] []
+       [append] @ 29 (1/1)
+       bf                                                    .
+            op string: [name] [sda]
+         [append] @ 30 (5/5)
+         64 6e 61 6d  65                                       dname
+         [append] @ 35 (4/4)
+         63 73 64 61                                           csda
+            op content: [size] [100]
+         [append] @ 39 (5/5)
+         64 73 69 7a  65                                       dsize
+         [content] @ 44 (2/2)
+         18 64                                                 .d
+            op string: [note] [ok]
+         [append] @ 46 (5/5)
+         64 6e 6f 74  65                                       dnote
+         [append] @ 51 (3/3)
+         62 6f 6b                                              bok
+            op open_leaf_list: [tag] []
+         [append] @ 54 (4/4)
+         63 74 61 67                                           ctag
+         [append] @ 58 (1/1)
+         9f                                                    .
+              op string: [tag] [x]
+           [append] @ 59 (2/2)
+           61 78                                                 ax
+              op string: [tag] [y]
+           [append] @ 61 (2/2)
+           61 79                                                 ay
+              op close_leaf_list: [tag] []
+           [append] @ 63 (1/1)
+           ff                                                    .
+            op close_instance: [a-disk] []
+         [append] @ 64 (1/1)
+         ff                                                    .
+          op open_instance: [a-disk] []
+       [append] @ 65 (1/1)
+       bf                                                    .
+            op string: [name] [sdb]
+         [append] @ 66 (5/5)
+         64 6e 61 6d  65                                       dname
+         [append] @ 71 (4/4)
+         63 73 64 62                                           csdb
+            op content: [size] [200]
+         [append] @ 75 (5/5)
+         64 73 69 7a  65                                       dsize
+         [content] @ 80 (2/2)
+         18 c8                                                 ..
+            op string: [note] [true]
+         [append] @ 82 (5/5)
+         64 6e 6f 74  65                                       dnote
+         [append] @ 87 (5/5)
+         64 74 72 75  65                                       dtrue
+            op open_leaf_list: [tag] []
+         [append] @ 92 (4/4)
+         63 74 61 67                                           ctag
+         [append] @ 96 (1/1)
+         9f                                                    .
+              op string: [tag] [x]
+           [append] @ 97 (2/2)
+           61 78                                                 ax
+              op string: [tag] [y]
+           [append] @ 99 (2/2)
+           61 79                                                 ay
+              op close_leaf_list: [tag] []
+           [append] @ 101 (1/1)
+           ff                                                    .
+            op close_instance: [a-disk] []
+         [append] @ 102 (1/1)
+         ff                                                    .
+          op open_instance: [a-disk] []
+       [append] @ 103 (1/1)
+       bf                                                    .
+            op string: [name] [sdc]
+         [append] @ 104 (5/5)
+         64 6e 61 6d  65                                       dname
+         [append] @ 109 (4/4)
+         63 73 64 63                                           csdc
+            op content: [size] [300]
+         [append] @ 113 (5/5)
+         64 73 69 7a  65                                       dsize
+         [content] @ 118 (3/3)
+         19 01 2c                                              ..,
+            op string: [note] [ok]
+         [append] @ 121 (5/5)
+         64 6e 6f 74  65                                       dnote
+         [append] @ 126 (3/3)
+         62 6f 6b                                              bok
+            op open_leaf_list: [tag] []
+         [append] @ 129 (4/4)
+         63 74 61 67                                           ctag
+         [append] @ 133 (1/1)
+         9f                                                    .
+              op string: [tag] [x]
+           [append] @ 134 (2/2)
+           61 78                                                 ax
+              op string: [tag] [z,w]
+           [append] @ 136 (4/4)
+           63 7a 2c 77                                           cz,w
+              op close_leaf_list: [tag] []
+           [append] @ 140 (1/1)
+           ff                                                    .
+            op close_instance: [a-disk] []
+         [append] @ 141 (1/1)
+         ff                                                    .
+          op close_list: [a-disk] []
+       [append] @ 142 (1/1)
+       ff                                                    .
+        op close_container: [a-flat] []
+     [append] @ 143 (1/1)
+     ff                                                    .
+      op open_container: [b-nested-container] []
+   [append] @ 144 (13/19)
+   72 62 2d 6e  65 73 74 65  - 64 2d 63 6f  6e 74 61 69  rb-nested-contai
+   6e 65 72                                              ner
+   [append] @ 163 (1/1)
+   bf                                                    .
+        op open_list: [b-route] []
+     [append] @ 164 (8/8)
+     67 62 2d 72  6f 75 74 65                              gb-route
+     [append] @ 172 (1/1)
+     9f                                                    .
+          op open_instance: [b-route] []
+       [append] @ 173 (1/1)
+       bf                                                    .
+            op string: [dest] [10.0.0.0/24]
+         [append] @ 174 (5/5)
+         64 64 65 73  74                                       ddest
+         [append] @ 179 (c/12)
+         6b 31 30 2e  30 2e 30 2e  - 30 2f 32 34               k10.0.0.0/24
+            op string: [proto] [static]
+         [append] @ 191 (6/6)
+         65 70 72 6f  74 6f                                    eproto
+         [append] @ 197 (7/7)
+         66 73 74 61  74 69 63                                 fstatic
+            op open_container: [via] []
+         [append] @ 204 (4/4)
+         63 76 69 61                                           cvia
+         [append] @ 208 (1/1)
+         bf                                                    .
+              op string: [interface] [eth0]
+           [append] @ 209 (a/10)
+           69 69 6e 74  65 72 66 61  - 63 65                     iinterface
+           [append] @ 219 (5/5)
+           64 65 74 68  30                                       deth0
+              op string: [gateway] [10.0.0.1]
+           [append] @ 224 (8/8)
+           67 67 61 74  65 77 61 79                              ggateway
+           [append] @ 232 (9/9)
+           68 31 30 2e  30 2e 30 2e  - 31                        h10.0.0.1
+              op close_container: [via] []
+           [append] @ 241 (1/1)
+           ff                                                    .
+            op close_instance: [b-route] []
+         [append] @ 242 (1/1)
+         ff                                                    .
+          op open_instance: [b-route] []
+       [append] @ 243 (1/1)
+       bf                                                    .
+            op string: [dest] [10.0.1.0/24]
+         [append] @ 244 (5/5)
+         64 64 65 73  74                                       ddest
+         [append] @ 249 (c/12)
+         6b 31 30 2e  30 2e 31 2e  - 30 2f 32 34               k10.0.1.0/24
+            op string: [proto] [direct]
+         [append] @ 261 (6/6)
+         65 70 72 6f  74 6f                                    eproto
+         [append] @ 267 (7/7)
+         66 64 69 72  65 63 74                                 fdirect
+            op open_container: [via] []
+         [append] @ 274 (4/4)
+         63 76 69 61                                           cvia
+         [append] @ 278 (1/1)
+         bf                                                    .
+              op string: [interface] [eth1]
+           [append] @ 279 (a/10)
+           69 69 6e 74  65 72 66 61  - 63 65                     iinterface
+           [append] @ 289 (5/5)
+           64 65 74 68  31                                       deth1
+              op string: [gateway] [10.0.1.1]
+           [append] @ 294 (8/8)
+           67 67 61 74  65 77 61 79                              ggateway
+           [append] @ 302 (9/9)
+           68 31 30 2e  30 2e 31 2e  - 31                        h10.0.1.1
+              op close_container: [via] []
+           [append] @ 311 (1/1)
+           ff                                                    .
+            op close_instance: [b-route] []
+         [append] @ 312 (1/1)
+         ff                                                    .
+          op close_list: [b-route] []
+       [append] @ 313 (1/1)
+       ff                                                    .
+        op close_container: [b-nested-container] []
+     [append] @ 314 (1/1)
+     ff                                                    .
+      op open_container: [f-late-nested] []
+   [append] @ 315 (e/14)
+   6d 66 2d 6c  61 74 65 2d  - 6e 65 73 74  65 64        mf-late-nested
+   [append] @ 329 (1/1)
+   bf                                                    .
+        op open_list: [f-user] []
+     [append] @ 330 (7/7)
+     66 66 2d 75  73 65 72                                 ff-user
+     [append] @ 337 (1/1)
+     9f                                                    .
+          op open_instance: [f-user] []
+       [append] @ 338 (1/1)
+       bf                                                    .
+            op string: [name] [root]
+         [append] @ 339 (5/5)
+         64 6e 61 6d  65                                       dname
+         [append] @ 344 (5/5)
+         64 72 6f 6f  74                                       droot
+            op content: [uid] [0]
+         [append] @ 349 (4/4)
+         63 75 69 64                                           cuid
+         [content] @ 353 (1/1)
+         00                                                    .
+            op close_instance: [f-user] []
+         [append] @ 354 (1/1)
+         ff                                                    .
+          op open_instance: [f-user] []
+       [append] @ 355 (1/1)
+       bf                                                    .
+            op string: [name] [phil]
+         [append] @ 356 (5/5)
+         64 6e 61 6d  65                                       dname
+         [append] @ 361 (5/5)
+         64 70 68 69  6c                                       dphil
+            op content: [uid] [1001]
+         [append] @ 366 (4/4)
+         63 75 69 64                                           cuid
+         [content] @ 370 (3/3)
+         19 03 e9                                              ...
+            op open_list: [f-group] []
+         [append] @ 373 (8/8)
+         67 66 2d 67  72 6f 75 70                              gf-group
+         [append] @ 381 (1/1)
+         9f                                                    .
+              op open_instance: [f-group] []
+           [append] @ 382 (1/1)
+           bf                                                    .
+                op string: [gname] [wheel]
+             [append] @ 383 (6/6)
+             65 67 6e 61  6d 65                                    egname
+             [append] @ 389 (6/6)
+             65 77 68 65  65 6c                                    ewheel
+                op close_instance: [f-group] []
+             [append] @ 395 (1/1)
+             ff                                                    .
+              op close_list: [f-group] []
+           [append] @ 396 (1/1)
+           ff                                                    .
+            op close_instance: [f-user] []
+         [append] @ 397 (1/1)
+         ff                                                    .
+          op close_list: [f-user] []
+       [append] @ 398 (1/1)
+       ff                                                    .
+        op close_container: [f-late-nested] []
+     [append] @ 399 (1/1)
+     ff                                                    .
+      op open_container: [c-nested-list] []
+   [append] @ 400 (e/14)
+   6d 63 2d 6e  65 73 74 65  - 64 2d 6c 69  73 74        mc-nested-list
+   [append] @ 414 (1/1)
+   bf                                                    .
+        op open_list: [c-host] []
+     [append] @ 415 (7/7)
+     66 63 2d 68  6f 73 74                                 fc-host
+     [append] @ 422 (1/1)
+     9f                                                    .
+          op open_instance: [c-host] []
+       [append] @ 423 (1/1)
+       bf                                                    .
+            op string: [host] [alpha]
+         [append] @ 424 (5/5)
+         64 68 6f 73  74                                       dhost
+         [append] @ 429 (6/6)
+         65 61 6c 70  68 61                                    ealpha
+            op string: [state] [up]
+         [append] @ 435 (6/6)
+         65 73 74 61  74 65                                    estate
+         [append] @ 441 (3/3)
+         62 75 70                                              bup
+            op open_list: [c-port] []
+         [append] @ 444 (7/7)
+         66 63 2d 70  6f 72 74                                 fc-port
+         [append] @ 451 (1/1)
+         9f                                                    .
+              op open_instance: [c-port] []
+           [append] @ 452 (1/1)
+           bf                                                    .
+                op content: [port] [20]
+             [append] @ 453 (5/5)
+             64 70 6f 72  74                                       dport
+             [content] @ 458 (1/1)
+             14                                                    .
+                op string: [proto] [tcp]
+             [append] @ 459 (6/6)
+             65 70 72 6f  74 6f                                    eproto
+             [append] @ 465 (4/4)
+             63 74 63 70                                           ctcp
+                op close_instance: [c-port] []
+             [append] @ 469 (1/1)
+             ff                                                    .
+              op open_instance: [c-port] []
+           [append] @ 470 (1/1)
+           bf                                                    .
+                op content: [port] [21]
+             [append] @ 471 (5/5)
+             64 70 6f 72  74                                       dport
+             [content] @ 476 (1/1)
+             15                                                    .
+                op string: [proto] [udp]
+             [append] @ 477 (6/6)
+             65 70 72 6f  74 6f                                    eproto
+             [append] @ 483 (4/4)
+             63 75 64 70                                           cudp
+                op open_list: [c-conn] []
+             [append] @ 487 (7/7)
+             66 63 2d 63  6f 6e 6e                                 fc-conn
+             [append] @ 494 (1/1)
+             9f                                                    .
+                  op open_instance: [c-conn] []
+               [append] @ 495 (1/1)
+               bf                                                    .
+                    op string: [peer] [10.9.9.9]
+                 [append] @ 496 (5/5)
+                 64 70 65 65  72                                       dpeer
+                 [append] @ 501 (9/9)
+                 68 31 30 2e  39 2e 39 2e  - 39                        h10.9.9.9
+                    op close_instance: [c-conn] []
+                 [append] @ 510 (1/1)
+                 ff                                                    .
+                  op close_list: [c-conn] []
+               [append] @ 511 (1/1)
+               ff                                                    .
+                op close_instance: [c-port] []
+             [append] @ 512 (1/1)
+             ff                                                    .
+              op close_list: [c-port] []
+           [append] @ 513 (1/1)
+           ff                                                    .
+            op close_instance: [c-host] []
+         [append] @ 514 (1/1)
+         ff                                                    .
+          op open_instance: [c-host] []
+       [append] @ 515 (1/1)
+       bf                                                    .
+            op string: [host] [beta]
+         [append] @ 516 (5/5)
+         64 68 6f 73  74                                       dhost
+         [append] @ 521 (5/5)
+         64 62 65 74  61                                       dbeta
+            op string: [state] [down]
+         [append] @ 526 (6/6)
+         65 73 74 61  74 65                                    estate
+         [append] @ 532 (5/5)
+         64 64 6f 77  6e                                       ddown
+            op open_list: [c-port] []
+         [append] @ 537 (7/7)
+         66 63 2d 70  6f 72 74                                 fc-port
+         [append] @ 544 (1/1)
+         9f                                                    .
+              op open_instance: [c-port] []
+           [append] @ 545 (1/1)
+           bf                                                    .
+                op content: [port] [120]
+             [append] @ 546 (5/5)
+             64 70 6f 72  74                                       dport
+             [content] @ 551 (2/2)
+             18 78                                                 .x
+                op string: [proto] [tcp]
+             [append] @ 553 (6/6)
+             65 70 72 6f  74 6f                                    eproto
+             [append] @ 559 (4/4)
+             63 74 63 70                                           ctcp
+                op close_instance: [c-port] []
+             [append] @ 563 (1/1)
+             ff                                                    .
+              op open_instance: [c-port] []
+           [append] @ 564 (1/1)
+           bf                                                    .
+                op content: [port] [121]
+             [append] @ 565 (5/5)
+             64 70 6f 72  74                                       dport
+             [content] @ 570 (2/2)
+             18 79                                                 .y
+                op string: [proto] [udp]
+             [append] @ 572 (6/6)
+             65 70 72 6f  74 6f                                    eproto
+             [append] @ 578 (4/4)
+             63 75 64 70                                           cudp
+                op close_instance: [c-port] []
+             [append] @ 582 (1/1)
+             ff                                                    .
+              op close_list: [c-port] []
+           [append] @ 583 (1/1)
+           ff                                                    .
+            op close_instance: [c-host] []
+         [append] @ 584 (1/1)
+         ff                                                    .
+          op open_instance: [c-host] []
+       [append] @ 585 (1/1)
+       bf                                                    .
+            op string: [host] [gamma]
+         [append] @ 586 (5/5)
+         64 68 6f 73  74                                       dhost
+         [append] @ 591 (6/6)
+         65 67 61 6d  6d 61                                    egamma
+            op string: [state] [up]
+         [append] @ 597 (6/6)
+         65 73 74 61  74 65                                    estate
+         [append] @ 603 (3/3)
+         62 75 70                                              bup
+            op open_list: [c-port] []
+         [append] @ 606 (7/7)
+         66 63 2d 70  6f 72 74                                 fc-port
+         [append] @ 613 (1/1)
+         9f                                                    .
+              op open_instance: [c-port] []
+           [append] @ 614 (1/1)
+           bf                                                    .
+                op content: [port] [220]
+             [append] @ 615 (5/5)
+             64 70 6f 72  74                                       dport
+             [content] @ 620 (2/2)
+             18 dc                                                 ..
+                op string: [proto] [tcp]
+             [append] @ 622 (6/6)
+             65 70 72 6f  74 6f                                    eproto
+             [append] @ 628 (4/4)
+             63 74 63 70                                           ctcp
+                op close_instance: [c-port] []
+             [append] @ 632 (1/1)
+             ff                                                    .
+              op open_instance: [c-port] []
+           [append] @ 633 (1/1)
+           bf                                                    .
+                op content: [port] [221]
+             [append] @ 634 (5/5)
+             64 70 6f 72  74                                       dport
+             [content] @ 639 (2/2)
+             18 dd                                                 ..
+                op string: [proto] [udp]
+             [append] @ 641 (6/6)
+             65 70 72 6f  74 6f                                    eproto
+             [append] @ 647 (4/4)
+             63 75 64 70                                           cudp
+                op close_instance: [c-port] []
+             [append] @ 651 (1/1)
+             ff                                                    .
+              op close_list: [c-port] []
+           [append] @ 652 (1/1)
+           ff                                                    .
+            op close_instance: [c-host] []
+         [append] @ 653 (1/1)
+         ff                                                    .
+          op close_list: [c-host] []
+       [append] @ 654 (1/1)
+       ff                                                    .
+        op close_container: [c-nested-list] []
+     [append] @ 655 (1/1)
+     ff                                                    .
+      op open_container: [d-modifier] []
+   [append] @ 656 (b/11)
+   6a 64 2d 6d  6f 64 69 66  - 69 65 72                  jd-modifier
+   [append] @ 667 (1/1)
+   bf                                                    .
+        op open_list: [d-cpu] []
+     [append] @ 668 (6/6)
+     65 64 2d 63  70 75                                    ed-cpu
+     [append] @ 674 (1/1)
+     9f                                                    .
+          op open_instance: [d-cpu] []
+       [append] @ 675 (1/1)
+       bf                                                    .
+            op content: [num] [0]
+         [append] @ 676 (4/4)
+         63 6e 75 6d                                           cnum
+         [content] @ 680 (1/1)
+         00                                                    .
+            op content: [load] [0]
+         [append] @ 681 (5/5)
+         64 6c 6f 61  64                                       dload
+         [content] @ 686 (1/1)
+         00                                                    .
+            op close_instance: [d-cpu] []
+         [append] @ 687 (1/1)
+         ff                                                    .
+          op open_instance: [d-cpu] []
+       [append] @ 688 (1/1)
+       bf                                                    .
+            op content: [num] [1]
+         [append] @ 689 (4/4)
+         63 6e 75 6d                                           cnum
+         [content] @ 693 (1/1)
+         01                                                    .
+            op content: [load] [7]
+         [append] @ 694 (5/5)
+         64 6c 6f 61  64                                       dload
+         [content] @ 699 (1/1)
+         07                                                    .
+            op close_instance: [d-cpu] []
+         [append] @ 700 (1/1)
+         ff                                                    .
+          op open_instance: [d-cpu] []
+       [append] @ 701 (1/1)
+       bf                                                    .
+            op content: [num] [2]
+         [append] @ 702 (4/4)
+         63 6e 75 6d                                           cnum
+         [content] @ 706 (1/1)
+         02                                                    .
+            op content: [load] [14]
+         [append] @ 707 (5/5)
+         64 6c 6f 61  64                                       dload
+         [content] @ 712 (1/1)
+         0e                                                    .
+            op close_instance: [d-cpu] []
+         [append] @ 713 (1/1)
+         ff                                                    .
+          op close_list: [d-cpu] []
+       [append] @ 714 (1/1)
+       ff                                                    .
+        op close_container: [d-modifier] []
+     [append] @ 715 (1/1)
+     ff                                                    .
+      op open_container: [e-xof-dense] []
+   [append] @ 716 (c/12)
+   6b 65 2d 78  6f 66 2d 64  - 65 6e 73 65               ke-xof-dense
+   [append] @ 728 (1/1)
+   bf                                                    .
+        op open_list: [e-item] []
+     [append] @ 729 (7/7)
+     66 65 2d 69  74 65 6d                                 fe-item
+     [append] @ 736 (1/1)
+     9f                                                    .
+          op open_instance: [e-item] []
+       [append] @ 737 (1/1)
+       bf                                                    .
+            op string: [sku] [A1]
+         [append] @ 738 (4/4)
+         63 73 6b 75                                           csku
+         [append] @ 742 (3/3)
+         62 41 31                                              bA1
+            op content: [qty] [2]
+         [append] @ 745 (4/4)
+         63 71 74 79                                           cqty
+         [content] @ 749 (1/1)
+         02                                                    .
+            op close_instance: [e-item] []
+         [append] @ 750 (1/1)
+         ff                                                    .
+          op open_instance: [e-item] []
+       [append] @ 751 (1/1)
+       bf                                                    .
+            op string: [sku] [B2]
+         [append] @ 752 (4/4)
+         63 73 6b 75                                           csku
+         [append] @ 756 (3/3)
+         62 42 32                                              bB2
+            op content: [qty] [1]
+         [append] @ 759 (4/4)
+         63 71 74 79                                           cqty
+         [content] @ 763 (1/1)
+         01                                                    .
+            op open_list: [e-part] []
+         [append] @ 764 (7/7)
+         66 65 2d 70  61 72 74                                 fe-part
+         [append] @ 771 (1/1)
+         9f                                                    .
+              op open_instance: [e-part] []
+           [append] @ 772 (1/1)
+           bf                                                    .
+                op string: [part] [bolt]
+             [append] @ 773 (5/5)
+             64 70 61 72  74                                       dpart
+             [append] @ 778 (5/5)
+             64 62 6f 6c  74                                       dbolt
+                op close_instance: [e-part] []
+             [append] @ 783 (1/1)
+             ff                                                    .
+              op close_list: [e-part] []
+           [append] @ 784 (1/1)
+           ff                                                    .
+            op close_instance: [e-item] []
+         [append] @ 785 (1/1)
+         ff                                                    .
+          op close_list: [e-item] []
+       [append] @ 786 (1/1)
+       ff                                                    .
+        op close_container: [e-xof-dense] []
+     [append] @ 787 (1/1)
+     ff                                                    .
+      op open_container: [g-empty-first] []
+   [append] @ 788 (e/14)
+   6d 67 2d 65  6d 70 74 79  - 2d 66 69 72  73 74        mg-empty-first
+   [append] @ 802 (1/1)
+   bf                                                    .
+        op open_list: [g-entry] []
+     [append] @ 803 (8/8)
+     67 67 2d 65  6e 74 72 79                              gg-entry
+     [append] @ 811 (1/1)
+     9f                                                    .
+          op open_instance: [g-entry] []
+       [append] @ 812 (1/1)
+       bf                                                    .
+            op close_instance: [g-entry] []
+         [append] @ 813 (1/1)
+         ff                                                    .
+          op open_instance: [g-entry] []
+       [append] @ 814 (1/1)
+       bf                                                    .
+            op string: [name] [second]
+         [append] @ 815 (5/5)
+         64 6e 61 6d  65                                       dname
+         [append] @ 820 (7/7)
+         66 73 65 63  6f 6e 64                                 fsecond
+            op close_instance: [g-entry] []
+         [append] @ 827 (1/1)
+         ff                                                    .
+          op close_list: [g-entry] []
+       [append] @ 828 (1/1)
+       ff                                                    .
+        op close_container: [g-empty-first] []
+     [append] @ 829 (1/1)
+     ff                                                    .
+      op close_container: [dense-test] []
+   [append] @ 830 (1/1)
+   ff                                                    .
+    op finish: [] []
+ [append] @ 831 (1/1)
+ ff                                                    .
+  op flush: [] []
+>[cbor] @ 0 (340/832)
+>bf 6a 64 65  6e 73 65 2d  - 74 65 73 74  bf 66 61 2d  .jdense-test.fa-
+>66 6c 61 74  bf 66 61 2d  - 64 69 73 6b  9f bf 64 6e  flat.fa-disk..dn
+>61 6d 65 63  73 64 61 64  - 73 69 7a 65  18 64 64 6e  amecsdadsize.ddn
+>6f 74 65 62  6f 6b 63 74  - 61 67 9f 61  78 61 79 ff  otebokctag.axay.
+>ff bf 64 6e  61 6d 65 63  - 73 64 62 64  73 69 7a 65  ..dnamecsdbdsize
+>18 c8 64 6e  6f 74 65 64  - 74 72 75 65  63 74 61 67  ..dnotedtruectag
+>9f 61 78 61  79 ff ff bf  - 64 6e 61 6d  65 63 73 64  .axay...dnamecsd
+>63 64 73 69  7a 65 19 01  - 2c 64 6e 6f  74 65 62 6f  cdsize..,dnotebo
+>6b 63 74 61  67 9f 61 78  - 63 7a 2c 77  ff ff ff ff  kctag.axcz,w....
+>72 62 2d 6e  65 73 74 65  - 64 2d 63 6f  6e 74 61 69  rb-nested-contai
+>6e 65 72 bf  67 62 2d 72  - 6f 75 74 65  9f bf 64 64  ner.gb-route..dd
+>65 73 74 6b  31 30 2e 30  - 2e 30 2e 30  2f 32 34 65  estk10.0.0.0/24e
+>70 72 6f 74  6f 66 73 74  - 61 74 69 63  63 76 69 61  protofstaticcvia
+>bf 69 69 6e  74 65 72 66  - 61 63 65 64  65 74 68 30  .iinterfacedeth0
+>67 67 61 74  65 77 61 79  - 68 31 30 2e  30 2e 30 2e  ggatewayh10.0.0.
+>31 ff ff bf  64 64 65 73  - 74 6b 31 30  2e 30 2e 31  1...ddestk10.0.1
+>2e 30 2f 32  34 65 70 72  - 6f 74 6f 66  64 69 72 65  .0/24eprotofdire
+>63 74 63 76  69 61 bf 69  - 69 6e 74 65  72 66 61 63  ctcvia.iinterfac
+>65 64 65 74  68 31 67 67  - 61 74 65 77  61 79 68 31  edeth1ggatewayh1
+>30 2e 30 2e  31 2e 31 ff  - ff ff ff 6d  66 2d 6c 61  0.0.1.1....mf-la
+>74 65 2d 6e  65 73 74 65  - 64 bf 66 66  2d 75 73 65  te-nested.ff-use
+>72 9f bf 64  6e 61 6d 65  - 64 72 6f 6f  74 63 75 69  r..dnamedrootcui
+>64 00 ff bf  64 6e 61 6d  - 65 64 70 68  69 6c 63 75  d...dnamedphilcu
+>69 64 19 03  e9 67 66 2d  - 67 72 6f 75  70 9f bf 65  id...gf-group..e
+>67 6e 61 6d  65 65 77 68  - 65 65 6c ff  ff ff ff ff  gnameewheel.....
+>6d 63 2d 6e  65 73 74 65  - 64 2d 6c 69  73 74 bf 66  mc-nested-list.f
+>63 2d 68 6f  73 74 9f bf  - 64 68 6f 73  74 65 61 6c  c-host..dhosteal
+>70 68 61 65  73 74 61 74  - 65 62 75 70  66 63 2d 70  phaestatebupfc-p
+>6f 72 74 9f  bf 64 70 6f  - 72 74 14 65  70 72 6f 74  ort..dport.eprot
+>6f 63 74 63  70 ff bf 64  - 70 6f 72 74  15 65 70 72  octcp..dport.epr
+>6f 74 6f 63  75 64 70 66  - 63 2d 63 6f  6e 6e 9f bf  otocudpfc-conn..
+>64 70 65 65  72 68 31 30  - 2e 39 2e 39  2e 39 ff ff  dpeerh10.9.9.9..
+>ff ff ff bf  64 68 6f 73  - 74 64 62 65  74 61 65 73  ....dhostdbetaes
+>74 61 74 65  64 64 6f 77  - 6e 66 63 2d  70 6f 72 74  tateddownfc-port
+>9f bf 64 70  6f 72 74 18  - 78 65 70 72  6f 74 6f 63  ..dport.xeprotoc
+>74 63 70 ff  bf 64 70 6f  - 72 74 18 79  65 70 72 6f  tcp..dport.yepro
+>74 6f 63 75  64 70 ff ff  - ff bf 64 68  6f 73 74 65  tocudp....dhoste
+>67 61 6d 6d  61 65 73 74  - 61 74 65 62  75 70 66 63  gammaestatebupfc
+>2d 70 6f 72  74 9f bf 64  - 70 6f 72 74  18 dc 65 70  -port..dport..ep
+>72 6f 74 6f  63 74 63 70  - ff bf 64 70  6f 72 74 18  rotoctcp..dport.
+>dd 65 70 72  6f 74 6f 63  - 75 64 70 ff  ff ff ff ff  .eprotocudp.....
+>6a 64 2d 6d  6f 64 69 66  - 69 65 72 bf  65 64 2d 63  jd-modifier.ed-c
+>70 75 9f bf  63 6e 75 6d  - 00 64 6c 6f  61 64 00 ff  pu..cnum.dload..
+>bf 63 6e 75  6d 01 64 6c  - 6f 61 64 07  ff bf 63 6e  .cnum.dload...cn
+>75 6d 02 64  6c 6f 61 64  - 0e ff ff ff  6b 65 2d 78  um.dload....ke-x
+>6f 66 2d 64  65 6e 73 65  - bf 66 65 2d  69 74 65 6d  of-dense.fe-item
+>9f bf 63 73  6b 75 62 41  - 31 63 71 74  79 02 ff bf  ..cskubA1cqty...
+>63 73 6b 75  62 42 32 63  - 71 74 79 01  66 65 2d 70  cskubB2cqty.fe-p
+>61 72 74 9f  bf 64 70 61  - 72 74 64 62  6f 6c 74 ff  art..dpartdbolt.
+>ff ff ff ff  6d 67 2d 65  - 6d 70 74 79  2d 66 69 72  ....mg-empty-fir
+>73 74 bf 67  67 2d 65 6e  - 74 72 79 9f  bf ff bf 64  st.gg-entry....d
+>6e 61 6d 65  66 73 65 63  - 6f 6e 64 ff  ff ff ff ff  namefsecond.....
