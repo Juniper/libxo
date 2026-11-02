@@ -80,7 +80,7 @@
  *     for future features (under CSV_STACK_IS_NEEDED).
  *
  * - The leafs record the current set of leaf
- *   - A key from the parent list counts as a leaf (unless CF_NO_KEYS)
+ *   - A key from the parent list counts as a leaf
  *   - Once the path is matched, all other leafs at that level are leafs
  *   - Leafs are recorded to get the header comment accurately recorded
  *   - Once the first line is emited, the set of leafs _cannot_ change
@@ -147,8 +147,8 @@ typedef struct csv_private_s {
 /* Flags for this structure */
 #define CF_HEADER_DONE	(1<<0)	/* Have already written the header */
 #define CF_NO_HEADER	(1<<1)	/* Do not generate header */
-#define CF_NO_KEYS	(1<<2)	/* Do not generate excess keys */
-#define CF_VALUE_ONLY	(1<<3)	/* Only generate the value */
+#define CF_RES2 	(1<<2)	/* Do not generate excess keys */
+#define CF_RES3		(1<<3)	/* Only generate the value */
 
 #define CF_DOS_NEWLINE	(1<<4)	/* Generate CR-NL, just like MS-DOS */
 #define CF_LEAFS_DONE	(1<<5)	/* Leafs are already been recorded */
@@ -719,12 +719,8 @@ csv_options (xo_handle_t *xop, csv_private_t *csv,
 	    if (vp != NULL && csv_record_leafs(xop, csv, vp))
   		return -1;
 
-	} else if (xo_streq(cp, "no-keys")) {
-	    csv->c_flags |= CF_NO_KEYS;
 	} else if (xo_streq(cp, "no-header")) {
 	    csv->c_flags |= CF_NO_HEADER;
-	} else if (xo_streq(cp, "value-only")) {
-	    csv->c_flags |= CF_VALUE_ONLY;
 	} else if (xo_streq(cp, "dos")) {
 	    csv->c_flags |= CF_DOS_NEWLINE;
 	} else if (xo_streq(cp, "no-quotes")) {
