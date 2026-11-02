@@ -106,7 +106,7 @@ man5_files = \
 
 man7_files = \
     libxo.7 \
-    xo_csv.7 \
+    xo_encoders.7 \
     xo_options.7
 
 man_MANS = ${man3_files} ${man5_files} ${man7_files}
