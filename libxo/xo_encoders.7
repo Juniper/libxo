@@ -1,0 +1,641 @@
+.\" #
+.\" # Copyright (c) 2021-2026, Juniper Networks, Inc.
+.\" # All rights reserved.
+.\" # This SOFTWARE is licensed under the LICENSE provided in the
+.\" # ../Copyright file. By downloading, installing, copying, or
+.\" # using the SOFTWARE, you agree to be bound by the terms of that
+.\" # LICENSE.
+.\" # Phil Shafer, May 2021
+.\"
+.Dd November 2, 2026
+.Dt XO_ENCODERS 7
+.Os
+.Sh NAME
+.Nm xo_encoders
+.Nd pluggable output encoders for libxo\-based commands
+.Sh SYNOPSIS
+.Ar command
+.Fl \-libxo
+.Cm encoder= Ns Ar name Ns Oo Cm + Ns Ar option Oc Ns ...
+.Pp
+.Ar command
+.Fl \-libxo
+.Cm @ Ns Ar name Ns Oo Cm \&: Ns Ar option Oc Ns ...
+.Sh DESCRIPTION
+The
+.Nm libxo
+library contains software to generate four
+.Dq built-in
+formats: text, XML, JSON, and HTML.
+These formats are common and useful, but there are other common and
+useful formats that users will want, and including them all in the
+libxo software would be difficult and cumbersome.
+.Pp
+To allow support for additional encodings, libxo includes a
+.Dq pluggable
+extension mechanism for dynamically loading new encoders.
+.Nm libxo Ns -based
+applications can automatically use any installed encoder.
+.Pp
+Use the
+.Dq encoder=XXX
+option to access encoders.
+The following example uses the
+.Dq cbor
+encoder, saving the output into a file:
+.Bd -literal -offset indent
+df --libxo encoder=cbor > df-output.cbor
+.Ed
+.Pp
+The string
+.Dq @
+can be used in place of the string
+.Dq encoder= :
+.Bd -literal -offset indent
+df --libxo @csv
+.Ed
+.Pp
+The
+.Dq @
+form also accepts the built-in styles
+.Pf ( Dq text ,
+.Dq xml ,
+.Dq json ,
+and
+.Dq html ) ,
+so there is no need to know which styles are built into libxo and
+which are loaded as encoders:
+.Bd -literal -offset indent
+df --libxo @json,pretty
+.Ed
+.Pp
+The encoders described in this page are shipped with libxo.
+The
+.Dq fdr
+and
+.Dq fullpath
+encoders are only present when libxo is built with filter support.
+If the named encoder cannot be found or fails to start, the command
+reports
+.Dq error initializing encoder
+and produces no output.
+.Ss Encoder Options
+Encoders can support specific options that can be accessed by
+following the encoder name with a colon (':') or a plus sign ('+') and
+one or more options, separated by the same character:
+.Bd -literal -offset indent
+df --libxo encoder=csv+path=filesystem+leaf=name+no-header
+df --libxo encoder=csv:path=filesystem:leaf=name:no-header
+.Ed
+.Pp
+These examples instruct libxo to load the
+.Dq csv
+encoder and pass the following options:
+.Bd -literal -offset indent
+path=filesystem
+leaf=name
+no-header
+.Ed
+.Pp
+Each of these options is interpreted by the encoder, and all option
+names and semantics are specific to the particular encoder.
+An option the encoder does not recognize is reported as an
+.Dq unknown encoder option value
+and the encoder fails to start.
+.Pp
+The handling of command-line options can be confusing, since there are
+three levels in use, but the rules are:
+.Bl -bullet
+.It
+commas separate
+.Nm libxo
+options:
+.Bd -literal -offset indent
+--libxo json,pretty,warn
+.Ed
+.It
+plus signs (or colons) separate encoder options:
+.Bd -literal -offset indent
+--libxo @csv+dos+no-header,warn
+.Ed
+.It
+periods separate the names within an encoder option's value:
+.Bd -literal -offset indent
+--libxo @csv+leafs=name.used.free+dos,warn
+.Ed
+.El
+.Pp
+The examples in the following sections use a command named
+.Dq list-items ,
+whose XML output is:
+.Bd -literal -offset indent
+% list-items --libxo xml,pretty
+<top>
+  <data>
+    <item>
+      <sku key="key">GRO-000-415</sku>
+      <name key="key">gum</name>
+      <sold>1412</sold>
+      <in-stock>54</in-stock>
+      <on-order>10</on-order>
+    </item>
+    <item>
+      <sku key="key">HRD-000-212</sku>
+      <name key="key">rope</name>
+      <sold>85</sold>
+      <in-stock>4</in-stock>
+      <on-order>2</on-order>
+    </item>
+    <item>
+      <sku key="key">HRD-000-517</sku>
+      <name key="key">ladder</name>
+      <sold>0</sold>
+      <in-stock>2</in-stock>
+      <on-order>1</on-order>
+    </item>
+  </data>
+</top>
+.Ed
+.Pp
+This output is a list of
+.Em instances
+(named
+.Dq item ) ,
+each containing a set of
+.Em leafs
+.Pf ( Dq sku ,
+.Dq name ,
+etc).
+The
+.Dq sku
+and
+.Dq name
+leafs are
+.Em keys ,
+which identify each instance.
+.Sh THE CBOR ENCODER
+The
+.Dq cbor
+encoder emits the output as CBOR (Concise Binary Object
+Representation, RFC 8949), a compact binary format with the same data
+model as JSON.
+Containers and list instances become CBOR maps, lists and leaf-lists
+become CBOR arrays, and the entire output is wrapped in a single
+top-level map.
+Values that look like integers or floating point numbers are encoded
+as CBOR numbers,
+.Dq true
+and
+.Dq false
+are encoded as CBOR booleans, and all other values are encoded as
+strings.
+.Pp
+The output is binary and should be redirected to a file or a pipe:
+.Bd -literal -offset indent
+% list-items --libxo @cbor > items.cbor
+.Ed
+.Pp
+The
+.Dq cbor
+encoder has no options.
+If the
+.Dq pretty
+.Nm libxo
+option is given, a hex dump of the encoded data is written to the
+standard output along with the data, which is useful for debugging
+but makes the output unusable as CBOR.
+.Sh THE CSV ENCODER
+The
+.Dq csv
+encoder emits the output as CSV (comma separated values), a common
+format that can be loaded directly into spreadsheets or similar
+applications.
+.Pp
+A standard for CSV files is provided in RFC 4180, but since the
+format predates that standard by decades, there are many minor
+differences in CSV file consumers and their expectations.
+The CSV encoder has a number of options to tailor output to those
+expectations.
+.Pp
+The CSV encoder emits the leaf values of each list instance as
+.Em fields
+inside a CSV
+.Em record ,
+which is a line containing a set of comma-separated values.
+A header line naming the fields comes first:
+.Bd -literal -offset indent
+% list-items --libxo @csv
+sku,name,sold,in-stock,on-order
+GRO-000-415,gum,1412,54,10
+HRD-000-212,rope,85,4,2
+HRD-000-517,ladder,0,2,1
+.Ed
+.Pp
+Fields containing commas, double quotes, line breaks, or leading or
+trailing white space are enclosed in double quotes, and a double
+quote inside a field is written as two double quotes.
+.Pp
+Since the CSV encoder looks for list instances, output that has no
+lists produces no records.
+When used with
+.Xr xo 1 ,
+the
+.Fl \-instance
+option will be needed:
+.Bd -literal -offset indent
+% xo --libxo @csv --instance foo \e
+      'The {:product} is {:status}\en' stereo "in route"
+product,status
+stereo,in route
+.Ed
+.Pp
+The CSV encoder supports the following options:
+.Bl -tag -width "no-header"
+.It Cm path= Ns Ar path
+By default, the CSV encoder will emit every list instance generated
+by the application.
+In some cases, this may be unacceptable, and a specific list may be
+desired.
+The
+.Cm path
+option limits the output to a specific hierarchy.
+The
+.Ar path
+is one or more names of containers or lists, separated by slashes:
+.Bd -literal -offset indent
+% list-items --libxo @csv:path=top/data/item
+sku,name,sold,in-stock,on-order
+GRO-000-415,gum,1412,54,10
+HRD-000-212,rope,85,4,2
+HRD-000-517,ladder,0,2,1
+.Ed
+.Pp
+Paths are
+.Dq relative ,
+meaning they need not be a complete set of names to the list, so
+.Dq path=item
+is sufficient for the above example.
+.It Cm leafs= Ns Ar leaf Ns Op . Ns Ar leaf Ns ...
+The CSV format requires that all records have the same number of
+fields in the same order.
+In contrast, XML and JSON allow any order (though libxo forces key
+leafs to appear before other leafs).
+.Pp
+To keep the set of fields consistent, the same set of leafs must be
+selected from each list instance.
+By default, the CSV encoder records the set of leafs that appear in
+the first list instance it processes, and extracts only those leafs
+from later instances.
+If the first instance is missing a leaf that is desired by the
+consumer, the
+.Cm leafs
+option can be used to ensure that an empty value is recorded for
+instances that lack that leaf.
+.Pp
+The
+.Cm leafs
+option can also be used to exclude leafs, limiting the output to only
+those leafs named.
+In addition, the order of the output fields follows the order in
+which the leafs are named;
+.Dq leafs=one.two
+and
+.Dq leafs=two.one
+give distinct output.
+So the
+.Cm leafs
+option can be used to expand, limit, and order the set of fields.
+.Pp
+The value is one or more leaf names, separated by periods:
+.Bd -literal -offset indent
+% list-items --libxo @csv:leafs=sku.on-order
+sku,on-order
+GRO-000-415,10
+HRD-000-212,2
+HRD-000-517,1
+% list-items --libxo @csv:leafs=on-order.sku
+on-order,sku
+10,GRO-000-415
+2,HRD-000-212
+1,HRD-000-517
+.Ed
+.Pp
+Since libxo uses terminology from YANG (RFC 7950), the data modeling
+language for NETCONF (RFC 6241), which uses
+.Dq leafs
+as the plural form of
+.Dq leaf ,
+libxo follows that convention.
+The spellings
+.Cm leaf
+and
+.Cm leaves
+are also accepted.
+.It Cm no-header
+CSV files typically begin with a line that names the fields included
+in the file, in an attempt to make the contents self-defining.
+There is no reliable mechanism for determining whether this header
+line is present, so the consumer must make an assumption.
+The CSV encoder produces the header line by default; the
+.Cm no-header
+option omits it:
+.Bd -literal -offset indent
+% list-items --libxo @csv:leafs=name.sold:no-header
+gum,1412
+rope,85
+ladder,0
+.Ed
+.It Cm no-quotes
+RFC 4180 specifies that fields containing spaces should be quoted,
+but many CSV consumers do not handle quotes.
+The
+.Cm no-quotes
+option tells the CSV encoder never to use quotes.
+.It Cm dos
+RFC 4180 defines the end-of-line marker as a carriage return followed
+by a newline.
+This
+.Dq CRLF
+convention dates from the distant past, but its use was anchored in
+the 1980s by the DOS operating system.
+The CSV encoder defaults to the standard Unix end-of-line marker, a
+simple newline.
+The
+.Cm dos
+option uses the
+.Dq CRLF
+convention instead.
+.El
+.Sh THE FDR ENCODER
+The
+.Dq fdr
+.Pq Dq Filter Data Recorder
+encoder is a diagnostic tool.
+It records the field data and the open and close events of the output
+in a simple line-oriented format, allowing libxo developers to debug
+formatting and filtering problems without access to the program's
+source code or development environment.
+FDR data is written to the standard output and can be saved for
+later posting as part of a bug report or feature request.
+It is particularly useful for problems related to filtering.
+.Pp
+Each line begins with a character giving the kind of event, followed
+by a name and, for fields, a value:
+.Bl -tag -width "XX" -offset indent -compact
+.It Li +
+open a container
+.It Li -
+close a container
+.It Li {
+open a list
+.It Li }
+close a list
+.It Li <
+open a list instance
+.It Li >
+close a list instance
+.It Li \&[
+open a leaf-list
+.It Li \&]
+close a leaf-list
+.It Li $
+a key field
+.It Li =
+a non-key field
+.It Li @
+an attribute
+.El
+.Pp
+The first line,
+.Dq r ,
+marks the start of the recording.
+.Bd -literal -offset indent
+% list-items --libxo @fdr
+r
++ top
++ data
+{ item
+< item
+$ sku GRO-000-415
+$ name gum
+= sold 1412
+= in-stock 54
+= on-order 10
+> item
+\&...
+} item
+- data
+- top
+.Ed
+.Pp
+The
+.Dq fdr
+encoder has no options.
+.Pp
+Inspect FDR data for any sensitive or private information before
+posting or sharing it with anyone.
+.Sh THE FULLPATH ENCODER
+The
+.Dq fullpath
+encoder writes each non-key field on a line of its own, preceded by
+the full path to that field in an XPath-like notation.
+The keys of each list instance appear as predicates in the path, so
+every line stands alone:
+.Bd -literal -offset indent
+% list-items --libxo @fullpath
+/top/data/item[sku='GRO-000-415'][name='gum']/sold='1412'
+/top/data/item[sku='GRO-000-415'][name='gum']/in-stock='54'
+/top/data/item[sku='GRO-000-415'][name='gum']/on-order='10'
+/top/data/item[sku='HRD-000-212'][name='rope']/sold='85'
+\&...
+.Ed
+.Pp
+This form is well suited to tools like
+.Xr grep 1
+and
+.Xr diff 1 ,
+since each value carries its complete context.
+Quotes, backslashes, and control characters inside values are
+escaped with a backslash, so each value stays on one line.
+Fields marked for display only are not written.
+If the
+.Dq pretty
+.Nm libxo
+option is given, spaces are placed around the equal signs.
+.Pp
+The
+.Dq fullpath
+encoder supports the following options:
+.Bl -tag -width "flush"
+.It Cm slax
+Use
+.Dq ==
+instead of
+.Dq =
+in key predicates, matching the syntax of the SLAX language:
+.Bd -literal -offset indent
+/top/data/item[sku=='GRO-000-415'][name=='gum']/sold='1412'
+.Ed
+.It Cm flush
+Write each line as soon as it is generated, rather than when the
+output is flushed.
+This is useful when watching the output of a long-running command.
+.El
+.Sh THE RTOON ENCODER
+The
+.Dq rtoon
+encoder emits the output in RTOON, a compact, line-oriented,
+indentation-based text format derived from TOON (Token-Oriented Object
+Notation).
+RTOON carries the same data as the XML and JSON output styles, with
+far less punctuation, making it well suited for input to large
+language models and other consumers where size matters.
+.Pp
+The output begins with an
+.Dq @version
+line.
+Each container's name appears on a line of its own, with its contents
+indented beneath it.
+Key fields are written as
+.Dq name=value
+and other fields as
+.Dq name value .
+Each list instance begins with a dash:
+.Bd -literal -offset indent
+% list-items --libxo @rtoon
+@version 1.0.0
+top
+  data
+    item
+      - sku=GRO-000-415
+        name=gum
+        sold 1412
+        in-stock 54
+        on-order 10
+      - sku=HRD-000-212
+        name=rope
+        sold 85
+        in-stock 4
+        on-order 2
+      \&...
+.Ed
+.Pp
+A string value that could be mistaken for a number, a boolean, or
+other syntax is enclosed in double quotes.
+Leaf-list values are joined with commas, with a trailing comma.
+.Pp
+A list can also be written in a
+.Em dense
+form, where the field names appear once, in braces, and each instance
+becomes a single row of comma-separated values:
+.Bd -literal -offset indent
+% list-items --libxo @rtoon+dense
+@version 1.0.0
+top
+  data
+    item
+      {sku=,name=,sold,in-stock,on-order}
+      GRO-000-415,gum,1412,54,10
+      HRD-000-212,rope,85,4,2
+      HRD-000-517,ladder,0,2,1
+.Ed
+.Pp
+A list is dense when the application asks for it; otherwise, lists
+are written in the indented form unless the
+.Cm dense
+option is given.
+.Pp
+The
+.Dq rtoon
+encoder supports the following options:
+.Bl -tag -width "dense=auto"
+.It Cm no-version
+Omit the
+.Dq @version
+line.
+.It Cm dense
+The same as
+.Cm dense=auto .
+.It Cm dense=auto
+Write a list in dense form when its first instance contains at least
+one field and no nested containers or lists.
+Other lists are written in the indented form.
+If a later instance of such a list contains a nested list, that
+nested list cannot be represented and is discarded.
+.It Cm dense= Ns Ar N
+Write every list nested
+.Ar N
+or more lists deep in dense form, where a top-level list has depth 1.
+Containers inside these lists are flattened into the row, with
+field names such as
+.Dq via/interface .
+Lists inside these lists cannot be represented and are discarded,
+along with their contents.
+The following keeps top-level lists in the indented form while
+writing the lists nested beneath them densely:
+.Bd -literal -offset indent
+df --libxo @rtoon+dense=2
+.Ed
+.El
+.Pp
+When the
+.Cm dense
+option causes a list to be discarded, a single warning naming the
+first such list is written to the standard error; later discards are
+not reported.
+Any value of
+.Cm dense
+other than
+.Dq auto
+or a whole number of 1 or more is an error, and the encoder fails to
+start.
+If the option is given more than once, the last one wins.
+The
+.Cm dense
+option only adds dense lists; lists the application makes dense are
+always dense.
+.Sh SEE ALSO
+.Xr xo 1 ,
+.Xr libxo 3 ,
+.Xr xo_options 7,
+.Xr xo_filter 7
+.Sh STANDARDS
+.Rs
+.%A C. Bormann
+.%A P. Hoffman
+.%T Concise Binary Object Representation (CBOR)
+.%R RFC 8949
+.%D December 2020
+.Re
+.Pp
+.Rs
+.%A Y. Shafranovich
+.%T Common Format and MIME Type for Comma-Separated Values (CSV) Files
+.%R RFC 4180
+.%D October 2005
+.Re
+.Sh HISTORY
+The
+.Nm libxo
+library first appeared in
+.Fx 11.0 .
+The
+.Dq cbor
+and
+.Dq test
+encoders first appeared in libxo 0.4.0, the
+.Dq csv
+encoder in libxo 1.1.0
+.Pq and Fx 13.0 ,
+the
+.Dq fullpath
+encoder in libxo 1.7.0, the
+.Dq fdr
+encoder in libxo 2.0.0, and the
+.Dq rtoon
+encoder in libxo 2.2.0.
+.Sh AUTHORS
+The
+.Nm libxo
+library was written by
+.An Phil Shafer Aq Mt phil@freebsd.org .
