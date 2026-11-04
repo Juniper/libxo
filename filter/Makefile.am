@@ -36,9 +36,13 @@ libxo_filter_la_SOURCES = \
     xo_xparse.c \
     xo_xpath.c
 
-noinst_HEADERS = \
+pkgincludedir = ${includedir}/libxo
+
+pkginclude_HEADERS = \
      xo_filter.h \
-     xo_filter_ops.h \
+     xo_filter_ops.h
+
+noinst_HEADERS = \
      xo_xparse.h
 
 man7_files = xo_filter.7
