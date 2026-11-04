@@ -76,7 +76,7 @@ typedef uint32_t xo_filter_status_t;
  *     this resolves the string-table offset and calls xo_streqn; for a
  *     pin backend it interns the tag and compares atoms.
  */
-#define XO_FILTER_DATA_OPS_VERSION 1
+#define XO_FILTER_DATA_OPS_VERSION 4
 
 typedef struct xo_filter_data_ops_s {
     uint32_t       xfdo_version;
@@ -89,13 +89,44 @@ typedef struct xo_filter_data_ops_s {
     /*
      * xfdo_value_of (optional, may be NULL):
      *     Called by xo_eval_attribute / xo_eval_path to look up the value
-     *     of a named field in the current element context.  'name' is the
-     *     XPath attribute or element name being tested; returns a
-     *     NUL-terminated string valid until the next xfdo_value_of call,
-     *     or NULL if the field is not present.  When NULL, the core falls
-     *     back to xo_filter_attr_find / xo_filter_key_find (xtf_keys buffer).
+     *     of a named field in the current element context.  'name' may be
+     *     a single name or a '/'-separated compound path (e.g. "life-span/born").
+     *     Returns a NUL-terminated string valid until the next xfdo_value_of
+     *     call, or NULL if the field is not present.  When NULL, the core
+     *     falls back to xo_filter_attr_find / xo_filter_key_find (xtf_keys).
      */
     const char *(*xfdo_value_of)(xo_filter_data_t *, const char *, ssize_t);
+    /*
+     * xfdo_variable_of (optional, may be NULL):
+     *     Called by xo_eval_variable to resolve an XPath variable reference
+     *     ($name) to its current string value.  'name' is the variable name
+     *     with the leading '$' already stripped.  Returns a NUL-terminated
+     *     string valid until the next xfdo_variable_of call, or NULL if the
+     *     variable is unbound.  When NULL (the default backend has no
+     *     notion of variables), a $name reference always evaluates as
+     *     missing.
+     */
+    const char *(*xfdo_variable_of)(xo_filter_data_t *, const char *, ssize_t);
+    /*
+     * xfdo_event_open / xfdo_event_close (optional, may be NULL):
+     *     Called by xo_filter immediately after pushing / popping a frame,
+     *     with the same tag and tlen that triggered the event.  The backend
+     *     can maintain a parallel depth-tracking stack so xfdo_value_of
+     *     knows which retained node is current.  Both are NULL-checked before
+     *     calling; existing backends that do not set them are unaffected.
+     */
+    void (*xfdo_event_open)(xo_filter_data_t *, const char *, ssize_t);
+    void (*xfdo_event_close)(xo_filter_data_t *, const char *, ssize_t);
+    /*
+     * xfdo_destroy (optional, may be NULL):
+     *     Called with the data context once, when the owning filter is
+     *     destroyed (xo_filter_destroy_standalone / the "destroy" op),
+     *     after the trie and all other filter-owned state have already
+     *     been freed.  Lets a backend release whatever heap state it
+     *     keeps inside its xo_filter_data_t (and, if it allocated the
+     *     struct itself, the struct too).  See xo_filter_create_with_data.
+     */
+    void (*xfdo_destroy)(xo_filter_data_t *);
 } xo_filter_data_ops_t;
 
 /* Default data ops: heap allocation + xparse string-table name resolution */
@@ -134,7 +165,10 @@ xo_filter_create (xo_handle_t *xop);
  * Create a filter with a caller-supplied data context and ops vtable.
  * Used by non-libxo consumers (e.g. libpin) that want to plug in their
  * own name interning and trie storage.  The caller owns the data struct
- * and ops; neither is freed when the filter is destroyed.
+ * and ops; the filter never frees either directly, though it does call
+ * ops->xfdo_destroy(dp), if set, when the filter itself is destroyed, so
+ * the backend can release heap state it keeps inside the data struct
+ * (and free the struct itself, if the backend allocated it).
  */
 xo_filter_t *
 xo_filter_create_with_data (xo_handle_t *xop, xo_filter_data_t *dp,
@@ -217,6 +251,22 @@ int xo_filter_walk_add (xo_handle_t *xop, xo_filter_t *xfp, const char *xpath);
  */
 int xo_filter_walk_add_with_action (xo_handle_t *xop, xo_filter_t *xfp,
 				     const char *xpath, uint32_t action);
+
+/*
+ * Like xo_filter_walk_add_with_action but also records the XSLT priority and
+ * import precedence of this pattern.  When two patterns registered into the
+ * same filter collide on the same trie node (same tag name/position, e.g.
+ * "author" and "author[life-span/born]", or the same pattern redefined by
+ * an importing stylesheet), XSLT's conflict-resolution rule decides which
+ * one's action/predicate wins the node: higher import_prec wins outright;
+ * only when import_prec ties does priority decide.  The loser still matches
+ * structurally, so a caller that also keeps a separate by-name fallback (as
+ * libpin's Patricia tree does) can still dispatch it when the winner's
+ * predicate resolves false.
+ */
+int xo_filter_walk_add_with_action_priority (xo_handle_t *xop, xo_filter_t *xfp,
+					     const char *xpath, uint32_t action,
+					     double priority, int16_t import_prec);
 
 /*
  * Return the action id recorded when the last XO_STATUS_FULL status was
