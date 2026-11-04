@@ -11,6 +11,8 @@
 #ifndef XO_FILTER_H
 #define XO_FILTER_H
 
+#include <stdarg.h>
+
 #define XO_FILTER_OPS_VERSION 2	/* Current API version number */
 
 #define XO_FILTER_MISS	1	/* Missing information, might work later */
@@ -75,8 +77,13 @@ typedef uint32_t xo_filter_status_t;
  *     xo_name_id_t against an incoming tag string.  For the default backend
  *     this resolves the string-table offset and calls xo_streqn; for a
  *     pin backend it interns the tag and compares atoms.
+ *
+ * xfdo_error (optional, may be NULL):
+ *     Called to report a compile-time or evaluation-time error for the
+ *     expression owned by this data context ('fmt'/'vap' are a printf-style
+ *     message).  When NULL, no error is reported for that data context.
  */
-#define XO_FILTER_DATA_OPS_VERSION 4
+#define XO_FILTER_DATA_OPS_VERSION 5
 
 typedef struct xo_filter_data_ops_s {
     uint32_t       xfdo_version;
@@ -127,6 +134,7 @@ typedef struct xo_filter_data_ops_s {
      *     struct itself, the struct too).  See xo_filter_create_with_data.
      */
     void (*xfdo_destroy)(xo_filter_data_t *);
+    void (*xfdo_error)(xo_filter_data_t *, const char *fmt, va_list vap);
 } xo_filter_data_ops_t;
 
 /* Default data ops: heap allocation + xparse string-table name resolution */
