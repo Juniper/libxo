@@ -106,6 +106,8 @@ typedef uint32_t xo_filter_status_t;
 #define XO_STATUS_TRACK 2   /* tracking path, no data output yet */
 #define XO_STATUS_PRED  3   /* matched path; waiting for predicate data */
 #define XO_STATUS_DEAD  4   /* no match possible under this subtree */
+#define XO_STATUS_COND  5   /* FULL, if a pending predicate passes */
+#define XO_STATUS_LIVE  6   /* a pending predicate passed (return only) */
 #endif /* XO_STATUS_ZERO */
 
 /*
@@ -303,11 +305,20 @@ xo_filter_setup_test (void);
  * xo_filter_walk_open / xo_filter_walk_close:
  *   Must be called in exact sync with the element stream (every open needs
  *   a matching close) to keep the filter's frame-stack depth correct.
+ *   xo_filter_walk_close force-resolves a predicate still pending on the
+ *   closing element and returns FULL if it matched, or XO_STATUS_LIVE if
+ *   it passed a predicate on a path that continues below the element.
  *
  * xo_filter_walk_key:
  *   Feed a key/attribute name+value so predicates can be evaluated when
  *   xfdo_value_of is NULL.  When xfdo_value_of is set, the backend handles
  *   value lookup directly and xo_filter_walk_key need not be called.
+ *   Returns the status after the key, or XO_STATUS_LIVE as for
+ *   xo_filter_walk_close.
+ *
+ * XO_STATUS_LIVE (a return value only, never the status) means content
+ * seen under the element while its predicate was pending (status COND)
+ * is now wanted.
  *
  * xo_filter_walk_status:
  *   Query the current match status after xo_filter_walk_open.
@@ -315,6 +326,7 @@ xo_filter_setup_test (void);
  *   XO_STATUS_TRACK → on a partial path; continue tracking.
  *   XO_STATUS_PRED  → path matched; waiting for predicate data.
  *   XO_STATUS_DEAD  → no match possible; discard the subtree.
+ *   XO_STATUS_COND  -> matched, if an enclosing pending predicate passes.
  *
  * xo_filter_walk_add:
  *   Parse and compile an XPath match expression into the filter.
