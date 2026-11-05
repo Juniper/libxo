@@ -3836,12 +3836,25 @@ xo_eval_func_floor (XO_EVAL_ARGS)
 }
 
 /*
+ * XPath rounds a half up, toward positive infinity (round(-2.5) is
+ * -2, where C's round() gives -3).  We don't use floor(x + 0.5),
+ * since the addition itself can round (0.49999999999999994 + 0.5 is
+ * 1.0); x - floor(x) is exact.  The infinities and NaN pass through.
+ */
+static xo_float_t
+xo_round_half_up (xo_float_t fval)
+{
+    xo_float_t fl = floor(fval);
+
+    return (fval - fl >= 0.5) ? fl + 1 : fl;
+}
+
+/*
  * Round a value as XPath's round() does, keeping to integers when we
  * can.  Most arguments are integers already (a literal, or a field
  * that xo_eval_parse_number reads as one), and those come back as
  * C_INT64 without touching floating point.  Only a real C_FLOAT is
- * rounded, by floor(x + 0.5), since XPath rounds a half up, toward
- * positive infinity (round(-2.5) is -2, where C's round() gives -3).
+ * rounded, by xo_round_half_up.
  * A result that fits comes back as C_INT64 too; the infinities and
  * anything else beyond int64_t stay C_FLOAT, and NaN stays C_NAN, for
  * the caller's floating point path.
@@ -3867,7 +3880,7 @@ xo_eval_cast_round (xo_handle_t *xop, xo_eval_value_t value)
 	return value;
 
     case C_FLOAT:;
-	xo_float_t fval = floor(value.xev_float + 0.5);
+	xo_float_t fval = xo_round_half_up(value.xev_float);
 
 	/* 2^63 is exact as a double */
 	if (fval >= -9223372036854775808.0 && fval < 9223372036854775808.0) {
@@ -4151,7 +4164,7 @@ xo_eval_func_number (XO_EVAL_ARGS)
 static xo_eval_value_t
 xo_eval_func_round (XO_EVAL_ARGS)
 {
-    return xo_eval_round_common(XO_EVAL_PASS, round);
+    return xo_eval_round_common(XO_EVAL_PASS, xo_round_half_up);
 }
 
 static xo_eval_value_t
