@@ -592,13 +592,18 @@ start.
 If the option is given more than once, the last one wins.
 The
 .Cm dense
-option only adds dense lists; lists the application makes dense are
-always dense.
+option only adds dense lists; lists the application makes dense,
+using the
+.Dq dense
+field modifier described in
+.Xr xo_format 5 ,
+are always dense.
 .Sh SEE ALSO
 .Xr xo 1 ,
 .Xr libxo 3 ,
-.Xr xo_options 7,
-.Xr xo_filter 7
+.Xr xo_format 5 ,
+.Xr xo_filter 7 ,
+.Xr xo_options 7
 .Sh STANDARDS
 .Rs
 .%A C. Bormann
