@@ -245,10 +245,10 @@ of values.  A decoder accepts either form.
 
     df --libxo @rtoon
 
-By default, a list is dense only when the developer asked for it,
-either by using the "dense" field modifier or by opening the list with
-the `XOF_DENSE` flag.  All other lists are sparse.  The options below
-let the user ask for dense output without changing the program.
+By default, a list is dense only when the developer asked for it by
+using the "dense" field modifier (see :ref:`dense-modifier`).  All
+other lists are sparse.  The options below let the user ask for dense
+output without changing the program.
 
 The `no-version` Option
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -299,10 +299,9 @@ error, and the encoder fails to initialize.  If the option appears
 more than once, the last one wins.
 
 The "dense" option only adds dense lists; it never removes them.  The
-developer's "dense" field modifier and the `XOF_DENSE` flag are always
-honored, whatever the option's value.  A nested list inside a list
-the developer made dense is still an error, reported as it would be
-without the option.
+developer's "dense" field modifier is always honored, whatever the
+option's value.  A nested list inside a list the developer made dense
+is still an error, reported as it would be without the option.
 
 .. _fdr_encoder:
 
