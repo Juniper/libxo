@@ -564,10 +564,10 @@ xo_xparse_dump_one_node (xo_xparse_data_t *xdp, xo_xparse_node_id_t id,
     xo_xparse_node_t *prev = xo_xparse_node(xdp, xnp->xn_prev);
 
     xo_dbg(xdp->xd_xop, "%*s%s%06ld: type %u (%s), str %ld [%s], "
-	   "contents %ld, next %ld%s, prev %ld %s",
+	   "contents %ld, next %ld%s, prev %ld%s",
 	   indent, "", title ?: "", id,
 	   xnp->xn_type, xo_xparse_token_name(xnp->xn_type),
-	   xnp->xn_str, str ?: "", xnp->xn_contents, 
+	   xnp->xn_str, str ?: "", xnp->xn_contents,
 	   xnp->xn_next, (next && next->xn_prev != id) ? " BAD" : "",
 	   xnp->xn_prev, (prev && prev->xn_next != id) ? " BAD" : "");
 }
