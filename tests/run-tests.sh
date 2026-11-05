@@ -10,7 +10,8 @@
 #
 
 GOODDIR=${SRCDIR}/saved
-S2O="sed 1,/@@/d"
+# Filter for diff output; "make test S2O=cat" keeps the diff headers
+S2O="${S2O:-sed 1,/@@/d}"
 ECHO=/bin/echo
 FILES_BASE=files.txt
 FILES=out/$FILES_BASE
@@ -23,6 +24,10 @@ RUN_MODE=plain
 
 # Extra arguments appended to every binary invocation (e.g. "file data.txt")
 BIN_EXTRA_ARGS=
+
+# Command placed in front of every test invocation (e.g. "valgrind -q");
+# taken from the environment, or set with "-c"
+CHECKER="${CHECKER}"
 
 # trap trap_fail SIGABRT
 
@@ -73,7 +78,7 @@ run_tests () {
     out=out/$oname
     mecho "... $test ... $fmt ... $name ... $ds ..."
     set_fmt_option
-    run "$test $LIBXOPTS $opt $data input $input > $out.out 2> $out.err"
+    run "${CHECKER} $test $LIBXOPTS $opt $data input $input > $out.out 2> $out.err"
 
     echo "$oname.out" >> $FILES
     echo "$oname.err" >> $FILES
@@ -95,7 +100,7 @@ do_run_one_command () {
     mecho "... $test ... $fmt ... $name ... $ds ..."
 
     set_fmt_option $fmt
-    run "$test $LIBXOPTS $opt $* input $input > $out.out 2> $out.err"
+    run "${CHECKER} $test $LIBXOPTS $opt $* input $input > $out.out 2> $out.err"
 
     echo "$oname.out" >> $FILES
     echo "$oname.err" >> $FILES
@@ -380,6 +385,7 @@ do
     -l) LIBXOPTS="$LIBXOPTS --libxo '$2'"; shift;;
     -m) RUN_MODE=$2; shift;;
     -a) BIN_EXTRA_ARGS=$2; shift;;
+    -c) CHECKER=$2; shift;;
     -T) TEST_FORMATS=$2; shift;;
     -v) S2O=cat;;
     -X) EXTRA_FMTS=1;;

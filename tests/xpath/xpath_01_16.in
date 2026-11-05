@@ -50,7 +50,9 @@ $ val 1
 }item
 
 # '?:' is the short-form ternary: syntax for choose2().
-# Non-zero numeric values are truthy; zero and missing fall through.
+# As in XPath, a field is true if it exists, even when its value is 0,
+# so only a missing score falls through: item a passes, and b does
+# not, since its score is 0.
 # Parens required when comparing the result (precedence lower than '>').
 r
 ?item[(score ?: default_score) > 10]
@@ -76,9 +78,89 @@ $ default_score 50
 >item
 }item
 
+# To have a zero score fall through as well, test it as a number:
+# items a and b pass.
+r
+?item[(number(score) ?: default_score) > 10]
+{item
+<item
+$ score 15
+$ default_score 5
+= val a
+>item
+<item
+$ score 0
+$ default_score 20
+= val b
+>item
+<item
+$ default_score 8
+= val c
+>item
+<item
+$ score 5
+$ default_score 50
+= val d
+>item
+}item
+
+# The same, spelled out with the full ternary: items a and b pass.
+r
+?item[(score > 0 ? score : default_score) > 10]
+{item
+<item
+$ score 15
+$ default_score 5
+= val a
+>item
+<item
+$ score 0
+$ default_score 20
+= val b
+>item
+<item
+$ default_score 8
+= val c
+>item
+<item
+$ score 5
+$ default_score 50
+= val d
+>item
+}item
+
 # '?:' is right-recursive: a ?: b ?: c  parses as  a ?: (b ?: c).
+# Fields that exist are taken, even when they are 0: only item 1
+# passes.
 r
 ?item[(a ?: b ?: c) = '7']
+{item
+<item
+$ a 7
+$ b 3
+$ c 9
+= val 1
+>item
+<item
+$ a 0
+$ b 7
+$ c 9
+= val 2
+>item
+<item
+$ b 0
+$ c 7
+= val 3
+>item
+<item
+$ c 3
+= val 4
+>item
+}item
+
+# With number(), zero values fall through: items 1, 2 and 3 pass.
+r
+?item[(number(a) ?: number(b) ?: c) = '7']
 {item
 <item
 $ a 7

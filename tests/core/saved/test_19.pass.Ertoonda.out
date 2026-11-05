@@ -1,0 +1,60 @@
+@version 1.0.0
+dense-test
+  a-flat
+    a-disk
+      {name=,size,note,tag}
+      sda,100,ok,x,y,
+      sdb,200,"true",x,y,
+      sdc,300,ok,x,"z,w",
+  b-nested-container
+    b-route
+      - dest=10.0.0.0/24
+        proto static
+        via
+          interface eth0
+          gateway 10.0.0.1
+      - dest=10.0.1.0/24
+        proto direct
+        via
+          interface eth1
+          gateway 10.0.1.1
+  f-late-nested
+    f-user
+      {name=,uid}
+      root,0
+      phil,1001
+  c-nested-list
+    c-host
+      - host=alpha
+        state up
+        c-port
+          {port=,proto}
+          20,tcp
+          21,udp
+      - host=beta
+        state down
+        c-port
+          {port=,proto}
+          120,tcp
+          121,udp
+      - host=gamma
+        state up
+        c-port
+          {port=,proto}
+          220,tcp
+          221,udp
+  d-modifier
+    d-cpu
+      {num=,load}
+      0,0
+      1,7
+      2,14
+  e-xof-dense
+    e-item
+      {sku=,qty}
+      A1,2
+      B2,1
+  g-empty-first
+    g-entry
+      - ""
+      - name=second

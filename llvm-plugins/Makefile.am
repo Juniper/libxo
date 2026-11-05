@@ -25,15 +25,6 @@ VALIDATE_RELPATH = ${VALIDATE_DIR}/${VALIDATE_NAME}
 VALIDATE_BUILD = ${top_builddir}/llvm-plugins/${VALIDATE_DIR}
 VALIDATE_PLUGIN = ${VALIDATE_BUILD}/${VALIDATE_NAME}
 
-VALIDATE_SRCS = \
-    ${top_builddir}/libxo/xo_config.h \
-    ${top_srcdir}/libxo/xo.h \
-    ${top_srcdir}/libxo/xo_format.h \
-    ${top_srcdir}/llvm-plugins/validate/CMakeLists.txt \
-    ${top_srcdir}/llvm-plugins/validate/xo_validate.cc \
-    ${top_srcdir}/llvm-plugins/validate/xo_parse_shim.c \
-    ${top_srcdir}/llvm-plugins/validate/xo_parse_shim.h
-
 PRECOMPILE_NAME = xo_precompile.so
 PRECOMPILE_DIR = precompile
 PRECOMPILE_RELPATH = ${PRECOMPILE_DIR}/${PRECOMPILE_NAME}
@@ -41,13 +32,9 @@ PRECOMPILE_RELPATH = ${PRECOMPILE_DIR}/${PRECOMPILE_NAME}
 PRECOMPILE_BUILD = ${top_builddir}/llvm-plugins/${PRECOMPILE_DIR}
 PRECOMPILE_PLUGIN = ${PRECOMPILE_BUILD}/${PRECOMPILE_NAME}
 
-PRECOMPILE_SRCS = \
-    ${top_srcdir}/llvm-plugins/precompile/CMakeLists.txt \
-    ${top_srcdir}/llvm-plugins/precompile/xo_precompile.cc
-
 EXTRA_DIST = xocc.sh.in xocc.1
 
-.PHONY: validate validate-clean precompile precompile-clean
+.PHONY: validate validate-clean precompile precompile-clean FORCE
 
 man1_files = xocc.1
 
@@ -58,34 +45,59 @@ man_MANS = ${man1_files} ${man7_files}
 EXTRA_DIST += \
     ${man_MANS}
 
-all: ${VALIDATE_PLUGIN} ${PRECOMPILE_PLUGIN}
+# The plugins are installed by cmake, but xocc and libxo-config load them
+# from XO_LLVMDIR, which follows configure's --libdir.  The cmake caches
+# depend on Makefile so that a re-run of configure (a new libdir, prefix,
+# or LLVM) reaches cmake, and the install checks that the plugins landed
+# where xocc will look for them.
+XO_LLVMDIR = @XO_LLVMDIR@
 
-${VALIDATE_PLUGIN}: ${VALIDATE_DIR}/CMakeCache.txt ${VALIDATE_SRCS}
+all-local: ${VALIDATE_PLUGIN} ${PRECOMPILE_PLUGIN} xocc.sh
+
+# cmake records each object's real header dependencies (in its .o.d
+# depfiles), so always descend and let cmake decide what to rebuild,
+# rather than guessing the dependencies here.  cmake only touches a
+# plugin when it relinks it, so a no-op descent leaves it current.
+FORCE:
+
+${VALIDATE_PLUGIN}: ${VALIDATE_DIR}/CMakeCache.txt FORCE
 	${MAKE} -C ${VALIDATE_DIR}
 
-${VALIDATE_DIR}/CMakeCache.txt:
+${VALIDATE_DIR}/CMakeCache.txt: Makefile
 	${MKDIR} -p ${VALIDATE_DIR}
 	${CMAKE_COMMAND} -S ${top_srcdir}/llvm-plugins/validate -B ${VALIDATE_DIR} \
 	    -DLLVM_DIR="${LLVM_CMAKE_DIR}" \
 	    -DClang_DIR="${CLANG_CMAKE_DIR}" \
 	    -DCMAKE_OSX_ARCHITECTURES="${CMAKE_OSX_ARCHITECTURES}" \
 	    -DCMAKE_INSTALL_PREFIX="${prefix}" \
+	    -DXO_LLVMDIR="${XO_LLVMDIR}" \
+	    -DXO_LIBDIR="${libdir}" \
 	    -DXO_BUILDDIR="$(CURDIR)/${top_builddir}"
+	touch $@
 
-${PRECOMPILE_PLUGIN}: ${PRECOMPILE_DIR}/CMakeCache.txt ${PRECOMPILE_SRCS}
+${PRECOMPILE_PLUGIN}: ${PRECOMPILE_DIR}/CMakeCache.txt FORCE
 	${MAKE} -C ${PRECOMPILE_DIR}
 
-${PRECOMPILE_DIR}/CMakeCache.txt:
+${PRECOMPILE_DIR}/CMakeCache.txt: Makefile
 	${MKDIR} -p ${PRECOMPILE_DIR}
 	${CMAKE_COMMAND} -S ${top_srcdir}/llvm-plugins/precompile -B ${PRECOMPILE_DIR} \
 	    -DLLVM_DIR="${LLVM_CMAKE_DIR}" \
 	    -DCMAKE_OSX_ARCHITECTURES="${CMAKE_OSX_ARCHITECTURES}" \
 	    -DCMAKE_INSTALL_PREFIX="${prefix}" \
+	    -DXO_LLVMDIR="${XO_LLVMDIR}" \
+	    -DXO_LIBDIR="${libdir}" \
 	    -DXO_BUILDDIR="$(CURDIR)/${top_builddir}"
+	touch $@
 
-install-exec-local:
-	${CMAKE_COMMAND} --install ${VALIDATE_DIR}
-	${CMAKE_COMMAND} --install ${PRECOMPILE_DIR}
+install-exec-local: xocc.sh
+	DESTDIR="${DESTDIR}" ${CMAKE_COMMAND} --install ${VALIDATE_DIR}
+	DESTDIR="${DESTDIR}" ${CMAKE_COMMAND} --install ${PRECOMPILE_DIR}
+	@for plugin in ${VALIDATE_NAME} ${PRECOMPILE_NAME}; do \
+	    if test ! -f "${DESTDIR}${XO_LLVMDIR}/$$plugin"; then \
+	        echo "error: $$plugin was not installed in ${XO_LLVMDIR}" 1>&2; \
+	        exit 1; \
+	    fi; \
+	done
 	mkdir -p ${DESTDIR}${bindir}
 	install xocc.sh ${DESTDIR}${bindir}/xocc
 

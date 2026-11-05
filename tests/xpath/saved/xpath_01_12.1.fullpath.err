@@ -4,8 +4,8 @@ main: status: zero
 main: input '?item[true()]'
 adding filter: 'item[true()]'
 added filter: 0
---- 0: 9
-    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 8
+    000008: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
             000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
                 000003: type 52 (T_FUNCTION_NAME), str 8 [true], contents 0, next 0, prev 0 
@@ -51,8 +51,8 @@ main: status: zero
 main: input '?item[false()]'
 adding filter: 'item[false()]'
 added filter: 0
---- 0: 9
-    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 8
+    000008: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
             000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
                 000003: type 52 (T_FUNCTION_NAME), str 8 [false], contents 0, next 0, prev 0 
@@ -99,8 +99,8 @@ main: status: zero
 main: input '?item[not(color='red')]'
 adding filter: 'item[not(color='red')]'
 added filter: 0
---- 0: 14
-    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 12
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
             000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
                 000003: type 52 (T_FUNCTION_NAME), str 8 [not], contents 6, next 0, prev 0 
@@ -160,8 +160,8 @@ main: status: zero
 main: input '?item[not(true())]'
 adding filter: 'item[not(true())]'
 added filter: 0
---- 0: 13
-    000013: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 11
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
             000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
                 000003: type 52 (T_FUNCTION_NAME), str 8 [not], contents 5, next 0, prev 0 
@@ -198,8 +198,8 @@ main: status: zero
 main: input '?item[not(false())]'
 adding filter: 'item[not(false())]'
 added filter: 0
---- 0: 13
-    000013: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 11
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
             000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
                 000003: type 52 (T_FUNCTION_NAME), str 8 [not], contents 5, next 0, prev 0 
@@ -236,8 +236,8 @@ main: status: zero
 main: input '?item[not(not(color='red'))]'
 adding filter: 'item[not(not(color='red'))]'
 added filter: 0
---- 0: 18
-    000018: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 15
+    000015: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
             000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
                 000003: type 52 (T_FUNCTION_NAME), str 8 [not], contents 5, next 0, prev 0 
@@ -288,8 +288,8 @@ main: status: zero
 main: input '?item[boolean(1)]'
 adding filter: 'item[boolean(1)]'
 added filter: 0
---- 0: 11
-    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 9
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
             000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
                 000003: type 52 (T_FUNCTION_NAME), str 8 [boolean], contents 5, next 0, prev 0 
@@ -325,8 +325,8 @@ main: status: zero
 main: input '?item[boolean(0)]'
 adding filter: 'item[boolean(0)]'
 added filter: 0
---- 0: 11
-    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 9
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
             000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
                 000003: type 52 (T_FUNCTION_NAME), str 8 [boolean], contents 5, next 0, prev 0 
@@ -363,8 +363,8 @@ main: status: zero
 main: input '?item[boolean(color='red')]'
 adding filter: 'item[boolean(color='red')]'
 added filter: 0
---- 0: 14
-    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 12
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
             000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
                 000003: type 52 (T_FUNCTION_NAME), str 8 [boolean], contents 6, next 0, prev 0 
@@ -414,15 +414,15 @@ main: status: zero
 main: input '?item[ceiling(price) > 3]'
 adding filter: 'item[ceiling(price) > 3]'
 added filter: 0
---- 0: 14
-    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 12
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
             000002: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0 
                 000008: type 15 (L_GRTR), str 26 [>], contents 3, next 0, prev 0 
-                    000003: type 52 (T_FUNCTION_NAME), str 8 [ceiling], contents 7, next 10, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [ceiling], contents 7, next 9, prev 0 
                         000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
                             000005: type 70 (C_ELEMENT), str 18 [price], contents 0, next 0, prev 0 
-                    000010: type 53 (T_NUMBER), str 28 [3], contents 0, next 0, prev 3 
+                    000009: type 53 (T_NUMBER), str 28 [3], contents 0, next 0, prev 3 
 main: status: zero
 main: input '{item'
 main: status: zero
@@ -475,15 +475,15 @@ main: status: zero
 main: input '?item[floor(price) >= 3]'
 adding filter: 'item[floor(price) >= 3]'
 added filter: 0
---- 0: 14
-    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 12
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
             000002: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0 
                 000008: type 16 (L_GRTREQ), str 24 [>=], contents 3, next 0, prev 0 
-                    000003: type 52 (T_FUNCTION_NAME), str 8 [floor], contents 7, next 10, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [floor], contents 7, next 9, prev 0 
                         000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
                             000005: type 70 (C_ELEMENT), str 16 [price], contents 0, next 0, prev 0 
-                    000010: type 53 (T_NUMBER), str 27 [3], contents 0, next 0, prev 3 
+                    000009: type 53 (T_NUMBER), str 27 [3], contents 0, next 0, prev 3 
 main: status: zero
 main: input '{item'
 main: status: zero
@@ -536,17 +536,17 @@ main: status: zero
 main: input '?item[ceiling(price) == floor(price)]'
 adding filter: 'item[ceiling(price) == floor(price)]'
 added filter: 0
---- 0: 18
-    000018: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 16
+    000016: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
             000002: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0 
                 000008: type 14 (L_EQUALS), str 26 [==], contents 3, next 0, prev 0 
-                    000003: type 52 (T_FUNCTION_NAME), str 8 [ceiling], contents 7, next 10, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [ceiling], contents 7, next 9, prev 0 
                         000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
                             000005: type 70 (C_ELEMENT), str 18 [price], contents 0, next 0, prev 0 
-                    000010: type 52 (T_FUNCTION_NAME), str 29 [floor], contents 14, next 0, prev 3 
-                        000014: type 74 (C_PATH), str 0 [], contents 12, next 0, prev 0 
-                            000012: type 70 (C_ELEMENT), str 37 [price], contents 0, next 0, prev 0 
+                    000009: type 52 (T_FUNCTION_NAME), str 29 [floor], contents 13, next 0, prev 3 
+                        000013: type 74 (C_PATH), str 0 [], contents 11, next 0, prev 0 
+                            000011: type 70 (C_ELEMENT), str 37 [price], contents 0, next 0, prev 0 
 main: status: zero
 main: input '{item'
 main: status: zero
@@ -599,15 +599,15 @@ main: status: zero
 main: input '?item[number(price) == 2]'
 adding filter: 'item[number(price) == 2]'
 added filter: 0
---- 0: 14
-    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 12
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
             000002: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0 
                 000008: type 14 (L_EQUALS), str 25 [==], contents 3, next 0, prev 0 
-                    000003: type 52 (T_FUNCTION_NAME), str 8 [number], contents 7, next 10, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [number], contents 7, next 9, prev 0 
                         000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
                             000005: type 70 (C_ELEMENT), str 17 [price], contents 0, next 0, prev 0 
-                    000010: type 53 (T_NUMBER), str 28 [2], contents 0, next 0, prev 3 
+                    000009: type 53 (T_NUMBER), str 28 [2], contents 0, next 0, prev 3 
 main: status: zero
 main: input '{item'
 main: status: zero
@@ -662,8 +662,8 @@ main: status: zero
 main: input '?item[contains(label, 'eth')]'
 adding filter: 'item[contains(label, 'eth')]'
 added filter: 0
---- 0: 14
-    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 12
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
             000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
                 000003: type 52 (T_FUNCTION_NAME), str 8 [contains], contents 7, next 0, prev 0 
@@ -722,8 +722,8 @@ main: status: zero
 main: input '?item[contains(name, 'oo')]'
 adding filter: 'item[contains(name, 'oo')]'
 added filter: 0
---- 0: 14
-    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 12
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
             000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
                 000003: type 52 (T_FUNCTION_NAME), str 8 [contains], contents 7, next 0, prev 0 
@@ -782,8 +782,8 @@ main: status: zero
 main: input '?item[not(contains(label, 'eth'))]'
 adding filter: 'item[not(contains(label, 'eth'))]'
 added filter: 0
---- 0: 18
-    000018: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 15
+    000015: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
             000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
                 000003: type 52 (T_FUNCTION_NAME), str 8 [not], contents 5, next 0, prev 0 
@@ -843,17 +843,17 @@ main: status: zero
 main: input '?item[substring(iface, 2, 3) = 'th0']'
 adding filter: 'item[substring(iface, 2, 3) = 'th0']'
 added filter: 0
---- 0: 20
-    000020: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 16
+    000016: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 14, next 0, prev 0 
-                000014: type 14 (L_EQUALS), str 36 [=], contents 3, next 0, prev 0 
-                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring], contents 7, next 16, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 12, next 0, prev 0 
+                000012: type 14 (L_EQUALS), str 36 [=], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring], contents 7, next 13, prev 0 
                         000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
                             000005: type 70 (C_ELEMENT), str 20 [iface], contents 0, next 0, prev 0 
-                        000008: type 53 (T_NUMBER), str 28 [2], contents 0, next 11, prev 7 
-                        000011: type 53 (T_NUMBER), str 32 [3], contents 0, next 0, prev 8 
-                    000016: type 54 (T_QUOTED), str 38 [th0], contents 0, next 0, prev 3 
+                        000008: type 53 (T_NUMBER), str 28 [2], contents 0, next 10, prev 7 
+                        000010: type 53 (T_NUMBER), str 32 [3], contents 0, next 0, prev 8 
+                    000013: type 54 (T_QUOTED), str 38 [th0], contents 0, next 0, prev 3 
 main: status: zero
 main: input '{item'
 main: status: zero
@@ -906,16 +906,16 @@ main: status: zero
 main: input '?item[substring(name, 5) = 'c']'
 adding filter: 'item[substring(name, 5) = 'c']'
 added filter: 0
---- 0: 17
-    000017: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 14
+    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 11, next 0, prev 0 
-                000011: type 14 (L_EQUALS), str 31 [=], contents 3, next 0, prev 0 
-                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring], contents 7, next 13, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 10, next 0, prev 0 
+                000010: type 14 (L_EQUALS), str 31 [=], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring], contents 7, next 11, prev 0 
                         000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
                             000005: type 70 (C_ELEMENT), str 20 [name], contents 0, next 0, prev 0 
                         000008: type 53 (T_NUMBER), str 27 [5], contents 0, next 0, prev 7 
-                    000013: type 54 (T_QUOTED), str 33 [c], contents 0, next 0, prev 3 
+                    000011: type 54 (T_QUOTED), str 33 [c], contents 0, next 0, prev 3 
 main: status: zero
 main: input '{item'
 main: status: zero
@@ -968,16 +968,16 @@ main: status: zero
 main: input '?item[substring-before(iface, '.') = 'eth0']'
 adding filter: 'item[substring-before(iface, '.') = 'eth0']'
 added filter: 0
---- 0: 17
-    000017: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 14
+    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 11, next 0, prev 0 
-                000011: type 14 (L_EQUALS), str 39 [=], contents 3, next 0, prev 0 
-                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring-before], contents 7, next 13, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 10, next 0, prev 0 
+                000010: type 14 (L_EQUALS), str 39 [=], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring-before], contents 7, next 11, prev 0 
                         000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
                             000005: type 70 (C_ELEMENT), str 27 [iface], contents 0, next 0, prev 0 
                         000008: type 54 (T_QUOTED), str 35 [.], contents 0, next 0, prev 7 
-                    000013: type 54 (T_QUOTED), str 41 [eth0], contents 0, next 0, prev 3 
+                    000011: type 54 (T_QUOTED), str 41 [eth0], contents 0, next 0, prev 3 
 main: status: zero
 main: input '{item'
 main: status: zero
@@ -1030,16 +1030,16 @@ main: status: zero
 main: input '?item[substring-before(name, '-') = 'pkg']'
 adding filter: 'item[substring-before(name, '-') = 'pkg']'
 added filter: 0
---- 0: 17
-    000017: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 14
+    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 11, next 0, prev 0 
-                000011: type 14 (L_EQUALS), str 38 [=], contents 3, next 0, prev 0 
-                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring-before], contents 7, next 13, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 10, next 0, prev 0 
+                000010: type 14 (L_EQUALS), str 38 [=], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring-before], contents 7, next 11, prev 0 
                         000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
                             000005: type 70 (C_ELEMENT), str 27 [name], contents 0, next 0, prev 0 
                         000008: type 54 (T_QUOTED), str 34 [-], contents 0, next 0, prev 7 
-                    000013: type 54 (T_QUOTED), str 40 [pkg], contents 0, next 0, prev 3 
+                    000011: type 54 (T_QUOTED), str 40 [pkg], contents 0, next 0, prev 3 
 main: status: zero
 main: input '{item'
 main: status: zero
@@ -1092,16 +1092,16 @@ main: status: zero
 main: input '?item[substring-after(version, '-') = '2']'
 adding filter: 'item[substring-after(version, '-') = '2']'
 added filter: 0
---- 0: 17
-    000017: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 14
+    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 11, next 0, prev 0 
-                000011: type 14 (L_EQUALS), str 40 [=], contents 3, next 0, prev 0 
-                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring-after], contents 7, next 13, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 10, next 0, prev 0 
+                000010: type 14 (L_EQUALS), str 40 [=], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring-after], contents 7, next 11, prev 0 
                         000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
                             000005: type 70 (C_ELEMENT), str 26 [version], contents 0, next 0, prev 0 
                         000008: type 54 (T_QUOTED), str 36 [-], contents 0, next 0, prev 7 
-                    000013: type 54 (T_QUOTED), str 42 [2], contents 0, next 0, prev 3 
+                    000011: type 54 (T_QUOTED), str 42 [2], contents 0, next 0, prev 3 
 main: status: zero
 main: input '{item'
 main: status: zero
@@ -1154,16 +1154,16 @@ main: status: zero
 main: input '?item[substring-after(path, '/') = 'usr']'
 adding filter: 'item[substring-after(path, '/') = 'usr']'
 added filter: 0
---- 0: 17
-    000017: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 14
+    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 11, next 0, prev 0 
-                000011: type 14 (L_EQUALS), str 37 [=], contents 3, next 0, prev 0 
-                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring-after], contents 7, next 13, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 10, next 0, prev 0 
+                000010: type 14 (L_EQUALS), str 37 [=], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring-after], contents 7, next 11, prev 0 
                         000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
                             000005: type 70 (C_ELEMENT), str 26 [path], contents 0, next 0, prev 0 
                         000008: type 54 (T_QUOTED), str 33 [/], contents 0, next 0, prev 7 
-                    000013: type 54 (T_QUOTED), str 39 [usr], contents 0, next 0, prev 3 
+                    000011: type 54 (T_QUOTED), str 39 [usr], contents 0, next 0, prev 3 
 main: status: zero
 main: input '{item'
 main: status: zero
@@ -1206,16 +1206,16 @@ main: status: zero
 main: input '?item[starts-with(substring-after(name, '.'), 'e')]'
 adding filter: 'item[starts-with(substring-after(name, '.'), 'e')]'
 added filter: 0
---- 0: 21
-    000021: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 17
+    000017: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
             000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
                 000003: type 52 (T_FUNCTION_NAME), str 8 [starts-with], contents 5, next 0, prev 0 
-                    000005: type 52 (T_FUNCTION_NAME), str 22 [substring-after], contents 9, next 15, prev 0 
+                    000005: type 52 (T_FUNCTION_NAME), str 22 [substring-after], contents 9, next 13, prev 0 
                         000009: type 74 (C_PATH), str 0 [], contents 7, next 10, prev 0 
                             000007: type 70 (C_ELEMENT), str 40 [name], contents 0, next 0, prev 0 
                         000010: type 54 (T_QUOTED), str 47 [.], contents 0, next 0, prev 9 
-                    000015: type 54 (T_QUOTED), str 53 [e], contents 0, next 0, prev 5 
+                    000013: type 54 (T_QUOTED), str 53 [e], contents 0, next 0, prev 5 
 main: status: zero
 main: input '{item'
 main: status: zero
@@ -1260,4 +1260,3037 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '}item'
+main: status: track
+main: input ''
+main: input '# a field is true if it exists, even when its value is 0: all items pass'
+main: input 'r'
+main: status: zero
+main: input '?item[boolean(name)]'
+adding filter: 'item[boolean(name)]'
+added filter: 0
+--- 0: 10
+    000010: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [boolean], contents 7, next 0, prev 0 
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
+                        000005: type 70 (C_ELEMENT), str 18 [name], contents 0, next 0, prev 0 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '$ name alpha'
+main: key: 'name'='alpha'
+main: status: full
+main: input '$ rate 0.5'
+main: key: 'rate'='0.5'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name 0'
+main: key: 'name'='0'
+main: status: full
+main: input '$ rate 0'
+main: key: 'rate'='0'
+main: status: full
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name 12'
+main: key: 'name'='12'
+main: status: full
+main: input '$ rate 0.0'
+main: key: 'rate'='0.0'
+main: status: full
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# and its not() is false: no items pass'
+main: input 'r'
+main: status: zero
+main: input '?item[not(name)]'
+adding filter: 'item[not(name)]'
+added filter: 0
+--- 0: 10
+    000010: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [not], contents 7, next 0, prev 0 
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
+                        000005: type 70 (C_ELEMENT), str 14 [name], contents 0, next 0, prev 0 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '$ name alpha'
+main: key: 'name'='alpha'
+main: status: track
+main: input '$ rate 0.5'
+main: key: 'rate'='0.5'
+main: status: track
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name 0'
+main: key: 'name'='0'
+main: status: track
+main: input '$ rate 0'
+main: key: 'rate'='0'
+main: status: track
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name 12'
+main: key: 'name'='12'
+main: status: track
+main: input '$ rate 0.0'
+main: key: 'rate'='0.0'
+main: status: track
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# a field that is not there is false: all items pass'
+main: input 'r'
+main: status: zero
+main: input '?item[not(missing)]'
+adding filter: 'item[not(missing)]'
+added filter: 0
+--- 0: 10
+    000010: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [not], contents 7, next 0, prev 0 
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
+                        000005: type 70 (C_ELEMENT), str 14 [missing], contents 0, next 0, prev 0 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '$ name alpha'
+main: key: 'name'='alpha'
+main: status: predicate
+main: input '$ rate 0.5'
+main: key: 'rate'='0.5'
+main: status: predicate
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: predicate
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name 0'
+main: key: 'name'='0'
+main: status: predicate
+main: input '$ rate 0'
+main: key: 'rate'='0'
+main: status: predicate
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: predicate
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name 12'
+main: key: 'name'='12'
+main: status: predicate
+main: input '$ rate 0.0'
+main: key: 'rate'='0.0'
+main: status: predicate
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: predicate
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# to test a value, make it a number; a float is not truncated,'
+main: input '# so 0.5 is true: only item 1 passes'
+main: input 'r'
+main: status: zero
+main: input '?item[boolean(number(rate))]'
+adding filter: 'item[boolean(number(rate))]'
+added filter: 0
+--- 0: 13
+    000013: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [boolean], contents 5, next 0, prev 0 
+                    000005: type 52 (T_FUNCTION_NAME), str 18 [number], contents 9, next 0, prev 0 
+                        000009: type 74 (C_PATH), str 0 [], contents 7, next 0, prev 0 
+                            000007: type 70 (C_ELEMENT), str 27 [rate], contents 0, next 0, prev 0 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '$ name alpha'
+main: key: 'name'='alpha'
+main: status: predicate
+main: input '$ rate 0.5'
+main: key: 'rate'='0.5'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name 0'
+main: key: 'name'='0'
+main: status: predicate
+main: input '$ rate 0'
+main: key: 'rate'='0'
+main: status: track
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name 12'
+main: key: 'name'='12'
+main: status: predicate
+main: input '$ rate 0.0'
+main: key: 'rate'='0.0'
+main: status: track
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# a float literal less than one is true: all items pass'
+main: input 'r'
+main: status: zero
+main: input '?item[boolean(0.5)]'
+adding filter: 'item[boolean(0.5)]'
+added filter: 0
+--- 0: 9
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [boolean], contents 5, next 0, prev 0 
+                    000005: type 53 (T_NUMBER), str 18 [0.5], contents 0, next 0, prev 0 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: full
+main: input '$ name alpha'
+main: key: 'name'='alpha'
+main: status: full
+main: input '$ rate 0.5'
+main: key: 'rate'='0.5'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: full
+main: input '$ name 0'
+main: key: 'name'='0'
+main: status: full
+main: input '$ rate 0'
+main: key: 'rate'='0'
+main: status: full
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: full
+main: input '$ name 12'
+main: key: 'name'='12'
+main: status: full
+main: input '$ rate 0.0'
+main: key: 'rate'='0.0'
+main: status: full
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# 'and' casts both sides the same way: only item 1 passes'
+main: input 'r'
+main: status: zero
+main: input '?item[name and number(rate)]'
+adding filter: 'item[name and number(rate)]'
+added filter: 0
+--- 0: 13
+    000013: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
+                000004: type 40 ('('), str 13 [and], contents 5, next 0, prev 0 
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0 
+                        000003: type 70 (C_ELEMENT), str 8 [name], contents 0, next 0, prev 0 
+                    000006: type 52 (T_FUNCTION_NAME), str 17 [number], contents 10, next 0, prev 5 
+                        000010: type 74 (C_PATH), str 0 [], contents 8, next 0, prev 0 
+                            000008: type 70 (C_ELEMENT), str 26 [rate], contents 0, next 0, prev 0 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '$ name alpha'
+main: key: 'name'='alpha'
+main: status: predicate
+main: input '$ rate 0.5'
+main: key: 'rate'='0.5'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name 0'
+main: key: 'name'='0'
+main: status: predicate
+main: input '$ rate 0'
+main: key: 'rate'='0'
+main: status: track
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name 12'
+main: key: 'name'='12'
+main: status: predicate
+main: input '$ rate 0.0'
+main: key: 'rate'='0.0'
+main: status: track
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# a string literal is true unless empty, even '0': all items pass'
+main: input 'r'
+main: status: zero
+main: input '?item[boolean('0')]'
+adding filter: 'item[boolean('0')]'
+added filter: 0
+--- 0: 9
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [boolean], contents 5, next 0, prev 0 
+                    000005: type 54 (T_QUOTED), str 18 [0], contents 0, next 0, prev 0 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: full
+main: input '$ name alpha'
+main: key: 'name'='alpha'
+main: status: full
+main: input '$ rate 0.5'
+main: key: 'rate'='0.5'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: full
+main: input '$ name 0'
+main: key: 'name'='0'
+main: status: full
+main: input '$ rate 0'
+main: key: 'rate'='0'
+main: status: full
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: full
+main: input '$ name 12'
+main: key: 'name'='12'
+main: status: full
+main: input '$ rate 0.0'
+main: key: 'rate'='0.0'
+main: status: full
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# the empty string is false: no items pass'
+main: input 'r'
+main: status: zero
+main: input '?item[boolean('')]'
+adding filter: 'item[boolean('')]'
+added filter: 0
+--- 0: 9
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [boolean], contents 5, next 0, prev 0 
+                    000005: type 54 (T_QUOTED), str 18 [], contents 0, next 0, prev 0 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: track
+main: input '$ name alpha'
+main: key: 'name'='alpha'
+main: status: track
+main: input '$ rate 0.5'
+main: key: 'rate'='0.5'
+main: status: track
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ name 0'
+main: key: 'name'='0'
+main: status: track
+main: input '$ rate 0'
+main: key: 'rate'='0'
+main: status: track
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: track
+main: input '$ name 12'
+main: key: 'name'='12'
+main: status: track
+main: input '$ rate 0.0'
+main: key: 'rate'='0.0'
+main: status: track
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# isempty(): an empty field is empty, and so is an absent one (an'
+main: input '# empty nodeset); "0" is not empty.  Items 2 and 3 pass.'
+main: input 'r'
+main: status: zero
+main: input '?item[isempty(name)]'
+adding filter: 'item[isempty(name)]'
+added filter: 0
+--- 0: 10
+    000010: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [isempty], contents 7, next 0, prev 0 
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
+                        000005: type 70 (C_ELEMENT), str 18 [name], contents 0, next 0, prev 0 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '$ name alpha'
+main: key: 'name'='alpha'
+main: status: track
+main: input '= note hello'
+main: field: 'note'='hello'
+main: status: track
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name ""'
+main: key: 'name'=''
+main: status: full
+main: input '= note ""'
+main: field: 'note'=''
+main: status: full
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: predicate
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name 0'
+main: key: 'name'='0'
+main: status: track
+main: input '= note 0'
+main: field: 'note'='0'
+main: status: track
+main: input '= val 4'
+main: field: 'val'='4'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# The same, with a non-key field: items 2 and 3 pass.'
+main: input 'r'
+main: status: zero
+main: input '?item[isempty(note)]'
+adding filter: 'item[isempty(note)]'
+added filter: 0
+--- 0: 10
+    000010: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [isempty], contents 7, next 0, prev 0 
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
+                        000005: type 70 (C_ELEMENT), str 18 [note], contents 0, next 0, prev 0 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '$ name alpha'
+main: key: 'name'='alpha'
+main: status: predicate
+main: input '= note hello'
+main: field: 'note'='hello'
+main: status: track
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name ""'
+main: key: 'name'=''
+main: status: predicate
+main: input '= note ""'
+main: field: 'note'=''
+main: status: full
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: predicate
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name 0'
+main: key: 'name'='0'
+main: status: predicate
+main: input '= note 0'
+main: field: 'note'='0'
+main: status: track
+main: input '= val 4'
+main: field: 'val'='4'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# !isempty() asks for content: items 1 and 4 pass.'
+main: input 'r'
+main: status: zero
+main: input '?item[!isempty(name)]'
+adding filter: 'item[!isempty(name)]'
+added filter: 0
+--- 0: 11
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 73 (C_NOT), str 8 [!], contents 4, next 0, prev 0 
+                    000004: type 52 (T_FUNCTION_NAME), str 10 [isempty], contents 8, next 0, prev 0 
+                        000008: type 74 (C_PATH), str 0 [], contents 6, next 0, prev 0 
+                            000006: type 70 (C_ELEMENT), str 20 [name], contents 0, next 0, prev 0 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '$ name alpha'
+main: key: 'name'='alpha'
+main: status: full
+main: input '= note hello'
+main: field: 'note'='hello'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name ""'
+main: key: 'name'=''
+main: status: track
+main: input '= note ""'
+main: field: 'note'=''
+main: status: track
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: predicate
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name 0'
+main: key: 'name'='0'
+main: status: full
+main: input '= note 0'
+main: field: 'note'='0'
+main: status: full
+main: input '= val 4'
+main: field: 'val'='4'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# A field is true when it exists, even when empty: items 1, 2 and 4.'
+main: input 'r'
+main: status: zero
+main: input '?item[name]'
+adding filter: 'item[name]'
+added filter: 0
+--- 0: 7
+    000007: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 5, next 0, prev 0 
+                000005: type 74 (C_PATH), str 0 [], contents 3, next 0, prev 0 
+                    000003: type 70 (C_ELEMENT), str 8 [name], contents 0, next 0, prev 0 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '$ name alpha'
+main: key: 'name'='alpha'
+main: status: full
+main: input '= note hello'
+main: field: 'note'='hello'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name ""'
+main: key: 'name'=''
+main: status: full
+main: input '= note ""'
+main: field: 'note'=''
+main: status: full
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: predicate
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name 0'
+main: key: 'name'='0'
+main: status: full
+main: input '= note 0'
+main: field: 'note'='0'
+main: status: full
+main: input '= val 4'
+main: field: 'val'='4'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# As a string, the empty field is false: items 1 and 4 pass.'
+main: input 'r'
+main: status: zero
+main: input '?item[string(name)]'
+adding filter: 'item[string(name)]'
+added filter: 0
+--- 0: 10
+    000010: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [string], contents 7, next 0, prev 0 
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
+                        000005: type 70 (C_ELEMENT), str 17 [name], contents 0, next 0, prev 0 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '$ name alpha'
+main: key: 'name'='alpha'
+main: status: full
+main: input '= note hello'
+main: field: 'note'='hello'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name ""'
+main: key: 'name'=''
+main: status: track
+main: input '= note ""'
+main: field: 'note'=''
+main: status: track
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: predicate
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name 0'
+main: key: 'name'='0'
+main: status: full
+main: input '= note 0'
+main: field: 'note'='0'
+main: status: full
+main: input '= val 4'
+main: field: 'val'='4'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# An empty literal is empty, so all items pass.'
+main: input 'r'
+main: status: zero
+main: input '?item[isempty('')]'
+adding filter: 'item[isempty('')]'
+added filter: 0
+--- 0: 9
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [isempty], contents 5, next 0, prev 0 
+                    000005: type 54 (T_QUOTED), str 18 [], contents 0, next 0, prev 0 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: full
+main: input '$ name alpha'
+main: key: 'name'='alpha'
+main: status: full
+main: input '= note hello'
+main: field: 'note'='hello'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: full
+main: input '$ name ""'
+main: key: 'name'=''
+main: status: full
+main: input '= note ""'
+main: field: 'note'=''
+main: status: full
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: full
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: full
+main: input '$ name 0'
+main: key: 'name'='0'
+main: status: full
+main: input '= note 0'
+main: field: 'note'='0'
+main: status: full
+main: input '= val 4'
+main: field: 'val'='4'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# substring() keeps positions >= round(pos) and < round(pos) + round(len),'
+main: input '# so positions 0, 1 and 2 give "12": item 1 passes.'
+main: input 'r'
+main: status: zero
+main: input '?item[substring(s, 0, 3) = '12']'
+adding filter: 'item[substring(s, 0, 3) = '12']'
+added filter: 0
+--- 0: 16
+    000016: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 12, next 0, prev 0 
+                000012: type 14 (L_EQUALS), str 32 [=], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring], contents 7, next 13, prev 0 
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
+                            000005: type 70 (C_ELEMENT), str 20 [s], contents 0, next 0, prev 0 
+                        000008: type 53 (T_NUMBER), str 24 [0], contents 0, next 10, prev 7 
+                        000010: type 53 (T_NUMBER), str 28 [3], contents 0, next 0, prev 8 
+                    000013: type 54 (T_QUOTED), str 34 [12], contents 0, next 0, prev 3 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '$ s 12345'
+main: key: 's'='12345'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ s héllo'
+main: key: 's'='héllo'
+main: status: track
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ s abc'
+main: key: 's'='abc'
+main: status: track
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# Positions are rounded: round(1.5) is 2 and round(2.6) is 3, so this'
+main: input '# is positions 2-4, "234": item 1 passes.'
+main: input 'r'
+main: status: zero
+main: input '?item[substring(s, 1.5, 2.6) = '234']'
+adding filter: 'item[substring(s, 1.5, 2.6) = '234']'
+added filter: 0
+--- 0: 16
+    000016: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 12, next 0, prev 0 
+                000012: type 14 (L_EQUALS), str 36 [=], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring], contents 7, next 13, prev 0 
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
+                            000005: type 70 (C_ELEMENT), str 20 [s], contents 0, next 0, prev 0 
+                        000008: type 53 (T_NUMBER), str 24 [1.5], contents 0, next 10, prev 7 
+                        000010: type 53 (T_NUMBER), str 30 [2.6], contents 0, next 0, prev 8 
+                    000013: type 54 (T_QUOTED), str 38 [234], contents 0, next 0, prev 3 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '$ s 12345'
+main: key: 's'='12345'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ s héllo'
+main: key: 's'='héllo'
+main: status: track
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ s abc'
+main: key: 's'='abc'
+main: status: track
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# A negative start still counts toward the length: positions -1, 0 and'
+main: input '# 1 give "1" (and "a" for abc): item 1 passes.'
+main: input 'r'
+main: status: zero
+main: input '?item[substring(s, -1, 3) = '1']'
+adding filter: 'item[substring(s, -1, 3) = '1']'
+added filter: 0
+--- 0: 17
+    000017: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 13, next 0, prev 0 
+                000013: type 14 (L_EQUALS), str 34 [=], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring], contents 7, next 14, prev 0 
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
+                            000005: type 70 (C_ELEMENT), str 20 [s], contents 0, next 0, prev 0 
+                        000008: type 86 (C_UNI_MINUS), str 24 [-], contents 9, next 11, prev 7 
+                            000009: type 53 (T_NUMBER), str 26 [1], contents 0, next 0, prev 0 
+                        000011: type 53 (T_NUMBER), str 30 [3], contents 0, next 0, prev 8 
+                    000014: type 54 (T_QUOTED), str 36 [1], contents 0, next 0, prev 3 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '$ s 12345'
+main: key: 's'='12345'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ s héllo'
+main: key: 's'='héllo'
+main: status: track
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ s abc'
+main: key: 's'='abc'
+main: status: track
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# A length past the end stops at the end: item 1 passes.'
+main: input 'r'
+main: status: zero
+main: input '?item[substring(s, 4, 10) = '45']'
+adding filter: 'item[substring(s, 4, 10) = '45']'
+added filter: 0
+--- 0: 16
+    000016: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 12, next 0, prev 0 
+                000012: type 14 (L_EQUALS), str 33 [=], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring], contents 7, next 13, prev 0 
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
+                            000005: type 70 (C_ELEMENT), str 20 [s], contents 0, next 0, prev 0 
+                        000008: type 53 (T_NUMBER), str 24 [4], contents 0, next 10, prev 7 
+                        000010: type 53 (T_NUMBER), str 28 [10], contents 0, next 0, prev 8 
+                    000013: type 54 (T_QUOTED), str 35 [45], contents 0, next 0, prev 3 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '$ s 12345'
+main: key: 's'='12345'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ s héllo'
+main: key: 's'='héllo'
+main: status: track
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ s abc'
+main: key: 's'='abc'
+main: status: track
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# Positions count characters, not bytes: item 2 passes.'
+main: input 'r'
+main: status: zero
+main: input '?item[substring(s, 2) = 'éllo']'
+adding filter: 'item[substring(s, 2) = 'éllo']'
+added filter: 0
+--- 0: 14
+    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 10, next 0, prev 0 
+                000010: type 14 (L_EQUALS), str 28 [=], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring], contents 7, next 11, prev 0 
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
+                            000005: type 70 (C_ELEMENT), str 20 [s], contents 0, next 0, prev 0 
+                        000008: type 53 (T_NUMBER), str 24 [2], contents 0, next 0, prev 7 
+                    000011: type 54 (T_QUOTED), str 30 [éllo], contents 0, next 0, prev 3 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '$ s 12345'
+main: key: 's'='12345'
+main: status: track
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ s héllo'
+main: key: 's'='héllo'
+main: status: full
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ s abc'
+main: key: 's'='abc'
+main: status: track
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# The same with a length: item 2 passes.'
+main: input 'r'
+main: status: zero
+main: input '?item[substring(s, 2, 2) = 'él']'
+adding filter: 'item[substring(s, 2, 2) = 'él']'
+added filter: 0
+--- 0: 16
+    000016: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 12, next 0, prev 0 
+                000012: type 14 (L_EQUALS), str 32 [=], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring], contents 7, next 13, prev 0 
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
+                            000005: type 70 (C_ELEMENT), str 20 [s], contents 0, next 0, prev 0 
+                        000008: type 53 (T_NUMBER), str 24 [2], contents 0, next 10, prev 7 
+                        000010: type 53 (T_NUMBER), str 28 [2], contents 0, next 0, prev 8 
+                    000013: type 54 (T_QUOTED), str 34 [él], contents 0, next 0, prev 3 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '$ s 12345'
+main: key: 's'='12345'
+main: status: track
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ s héllo'
+main: key: 's'='héllo'
+main: status: full
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ s abc'
+main: key: 's'='abc'
+main: status: track
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# string-length() counts characters; héllo is 5 characters but 6'
+main: input '# bytes: items 1 and 2 pass.'
+main: input 'r'
+main: status: zero
+main: input '?item[string-length(s) = 5]'
+adding filter: 'item[string-length(s) = 5]'
+added filter: 0
+--- 0: 12
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0 
+                000008: type 14 (L_EQUALS), str 28 [=], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [string-length], contents 7, next 9, prev 0 
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
+                            000005: type 70 (C_ELEMENT), str 24 [s], contents 0, next 0, prev 0 
+                    000009: type 53 (T_NUMBER), str 30 [5], contents 0, next 0, prev 3 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '$ s 12345'
+main: key: 's'='12345'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ s héllo'
+main: key: 's'='héllo'
+main: status: full
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ s abc'
+main: key: 's'='abc'
+main: status: track
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# mod takes the sign of the dividend: all items pass.'
+main: input 'r'
+main: status: zero
+main: input '?item[(-7 mod 3) = -1]'
+adding filter: 'item[(-7 mod 3) = -1]'
+added filter: 0
+--- 0: 14
+    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 9, next 0, prev 0 
+                000009: type 14 (L_EQUALS), str 22 [=], contents 3, next 0, prev 0 
+                    000003: type 71 (C_EXPR), str 8 [(], contents 6, next 10, prev 0 
+                        000006: type 42 ('*'), str 14 [mod], contents 4, next 0, prev 0 
+                            000004: type 86 (C_UNI_MINUS), str 10 [-], contents 5, next 7, prev 0 
+                                000005: type 53 (T_NUMBER), str 12 [7], contents 0, next 0, prev 0 
+                            000007: type 53 (T_NUMBER), str 18 [3], contents 0, next 0, prev 4 
+                    000010: type 86 (C_UNI_MINUS), str 24 [-], contents 11, next 0, prev 3 
+                        000011: type 53 (T_NUMBER), str 26 [1], contents 0, next 0, prev 0 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: full
+main: input '$ s 12345'
+main: key: 's'='12345'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: full
+main: input '$ s héllo'
+main: key: 's'='héllo'
+main: status: full
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: full
+main: input '$ s abc'
+main: key: 's'='abc'
+main: status: full
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# mod works on fractions: all items pass.'
+main: input 'r'
+main: status: zero
+main: input '?item[(7.5 mod 2) = 1.5]'
+adding filter: 'item[(7.5 mod 2) = 1.5]'
+added filter: 0
+--- 0: 12
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0 
+                000008: type 14 (L_EQUALS), str 22 [=], contents 3, next 0, prev 0 
+                    000003: type 71 (C_EXPR), str 8 [(], contents 5, next 9, prev 0 
+                        000005: type 42 ('*'), str 14 [mod], contents 4, next 0, prev 0 
+                            000004: type 53 (T_NUMBER), str 10 [7.5], contents 0, next 6, prev 0 
+                            000006: type 53 (T_NUMBER), str 18 [2], contents 0, next 0, prev 4 
+                    000009: type 53 (T_NUMBER), str 24 [1.5], contents 0, next 0, prev 3 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: full
+main: input '$ s 12345'
+main: key: 's'='12345'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: full
+main: input '$ s héllo'
+main: key: 's'='héllo'
+main: status: full
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: full
+main: input '$ s abc'
+main: key: 's'='abc'
+main: status: full
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# An integer literal past 2^63 is read as a float, not clamped to'
+main: input '# INT64_MAX, and mod works at that size: all items pass.'
+main: input 'r'
+main: status: zero
+main: input '?item[(10000000000000000000 mod 7) = 3]'
+adding filter: 'item[(10000000000000000000 mod 7) = 3]'
+added filter: 0
+--- 0: 12
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0 
+                000008: type 14 (L_EQUALS), str 39 [=], contents 3, next 0, prev 0 
+                    000003: type 71 (C_EXPR), str 8 [(], contents 5, next 9, prev 0 
+                        000005: type 42 ('*'), str 31 [mod], contents 4, next 0, prev 0 
+                            000004: type 53 (T_NUMBER), str 10 [10000000000000000000], contents 0, next 6, prev 0 
+                            000006: type 53 (T_NUMBER), str 35 [7], contents 0, next 0, prev 4 
+                    000009: type 53 (T_NUMBER), str 41 [3], contents 0, next 0, prev 3 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: full
+main: input '$ s 12345'
+main: key: 's'='12345'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: full
+main: input '$ s héllo'
+main: key: 's'='héllo'
+main: status: full
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: full
+main: input '$ s abc'
+main: key: 's'='abc'
+main: status: full
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# The same past 2^64: all items pass.'
+main: input 'r'
+main: status: zero
+main: input '?item[(100000000000000000000.0 mod 7) = 2]'
+adding filter: 'item[(100000000000000000000.0 mod 7) = 2]'
+added filter: 0
+--- 0: 12
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0 
+                000008: type 14 (L_EQUALS), str 42 [=], contents 3, next 0, prev 0 
+                    000003: type 71 (C_EXPR), str 8 [(], contents 5, next 9, prev 0 
+                        000005: type 42 ('*'), str 34 [mod], contents 4, next 0, prev 0 
+                            000004: type 53 (T_NUMBER), str 10 [100000000000000000000.0], contents 0, next 6, prev 0 
+                            000006: type 53 (T_NUMBER), str 38 [7], contents 0, next 0, prev 4 
+                    000009: type 53 (T_NUMBER), str 44 [2], contents 0, next 0, prev 3 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: full
+main: input '$ s 12345'
+main: key: 's'='12345'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: full
+main: input '$ s héllo'
+main: key: 's'='héllo'
+main: status: full
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: full
+main: input '$ s abc'
+main: key: 's'='abc'
+main: status: full
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# Positions beyond int64_t take the floating point path: the range is'
+main: input '# [-1e20, 1e20), which holds the whole string: both items pass.'
+main: input 'r'
+main: status: zero
+main: input '?item[substring(s, -100000000000000000000.0, 200000000000000000000.0) = s]'
+adding filter: 'item[substring(s, -100000000000000000000.0, 200000000000000000000.0) = s]'
+added filter: 0
+--- 0: 18
+    000018: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 13, next 0, prev 0 
+                000013: type 14 (L_EQUALS), str 78 [=], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring], contents 7, next 16, prev 0 
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
+                            000005: type 70 (C_ELEMENT), str 20 [s], contents 0, next 0, prev 0 
+                        000008: type 86 (C_UNI_MINUS), str 24 [-], contents 9, next 11, prev 7 
+                            000009: type 53 (T_NUMBER), str 26 [100000000000000000000.0], contents 0, next 0, prev 0 
+                        000011: type 53 (T_NUMBER), str 52 [200000000000000000000.0], contents 0, next 0, prev 8 
+                    000016: type 74 (C_PATH), str 0 [], contents 14, next 0, prev 3 
+                        000014: type 70 (C_ELEMENT), str 80 [s], contents 0, next 0, prev 0 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '$ s 12345'
+main: key: 's'='12345'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ s abc'
+main: key: 's'='abc'
+main: status: full
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# An integer start + len past int64_t saturates, and the range is'
+main: input '# empty: both items pass.'
+main: input 'r'
+main: status: zero
+main: input '?item[substring(s, 9223372036854775807, 2) = '']'
+adding filter: 'item[substring(s, 9223372036854775807, 2) = '']'
+added filter: 0
+--- 0: 16
+    000016: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 12, next 0, prev 0 
+                000012: type 14 (L_EQUALS), str 50 [=], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring], contents 7, next 13, prev 0 
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
+                            000005: type 70 (C_ELEMENT), str 20 [s], contents 0, next 0, prev 0 
+                        000008: type 53 (T_NUMBER), str 24 [9223372036854775807], contents 0, next 10, prev 7 
+                        000010: type 53 (T_NUMBER), str 46 [2], contents 0, next 0, prev 8 
+                    000013: type 54 (T_QUOTED), str 52 [], contents 0, next 0, prev 3 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '$ s 12345'
+main: key: 's'='12345'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ s abc'
+main: key: 's'='abc'
+main: status: full
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# Halves round up: round(-0.5) is 0, so positions 0 and 1 give "1"'
+main: input '# (and "a" for abc): item 1 passes.'
+main: input 'r'
+main: status: zero
+main: input '?item[substring(s, -0.5, 2) = '1']'
+adding filter: 'item[substring(s, -0.5, 2) = '1']'
+added filter: 0
+--- 0: 17
+    000017: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 13, next 0, prev 0 
+                000013: type 14 (L_EQUALS), str 36 [=], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring], contents 7, next 14, prev 0 
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
+                            000005: type 70 (C_ELEMENT), str 20 [s], contents 0, next 0, prev 0 
+                        000008: type 86 (C_UNI_MINUS), str 24 [-], contents 9, next 11, prev 7 
+                            000009: type 53 (T_NUMBER), str 26 [0.5], contents 0, next 0, prev 0 
+                        000011: type 53 (T_NUMBER), str 32 [2], contents 0, next 0, prev 8 
+                    000014: type 54 (T_QUOTED), str 38 [1], contents 0, next 0, prev 3 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '$ s 12345'
+main: key: 's'='12345'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ s abc'
+main: key: 's'='abc'
+main: status: track
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# R72: an empty non-key field in a container is a value, so each of'
+main: input '# these predicates selects the container.'
+main: input 'r'
+main: status: zero
+main: input '?item[note = '']'
+adding filter: 'item[note = '']'
+added filter: 0
+--- 0: 9
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
+                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0 
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0 
+                        000003: type 70 (C_ELEMENT), str 8 [note], contents 0, next 0, prev 0 
+                    000006: type 54 (T_QUOTED), str 15 [], contents 0, next 0, prev 5 
+main: status: zero
+main: input '+item'
+main: status: predicate
+main: input '= note ""'
+main: field: 'note'=''
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '-item'
+main: status: track
+main: input ''
+main: input 'r'
+main: status: zero
+main: input '?item[starts-with(note, '')]'
+adding filter: 'item[starts-with(note, '')]'
+added filter: 0
+--- 0: 12
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [starts-with], contents 7, next 0, prev 0 
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
+                        000005: type 70 (C_ELEMENT), str 22 [note], contents 0, next 0, prev 0 
+                    000008: type 54 (T_QUOTED), str 29 [], contents 0, next 0, prev 7 
+main: status: zero
+main: input '+item'
+main: status: predicate
+main: input '= note ""'
+main: field: 'note'=''
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '-item'
+main: status: track
+main: input ''
+main: input 'r'
+main: status: zero
+main: input '?item[ends-with(note, '')]'
+adding filter: 'item[ends-with(note, '')]'
+added filter: 0
+--- 0: 12
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [ends-with], contents 7, next 0, prev 0 
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
+                        000005: type 70 (C_ELEMENT), str 20 [note], contents 0, next 0, prev 0 
+                    000008: type 54 (T_QUOTED), str 27 [], contents 0, next 0, prev 7 
+main: status: zero
+main: input '+item'
+main: status: predicate
+main: input '= note ""'
+main: field: 'note'=''
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '-item'
+main: status: track
+main: input ''
+main: input 'r'
+main: status: zero
+main: input '?item[string-length(note) = 0]'
+adding filter: 'item[string-length(note) = 0]'
+added filter: 0
+--- 0: 12
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0 
+                000008: type 14 (L_EQUALS), str 31 [=], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [string-length], contents 7, next 9, prev 0 
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
+                            000005: type 70 (C_ELEMENT), str 24 [note], contents 0, next 0, prev 0 
+                    000009: type 53 (T_NUMBER), str 33 [0], contents 0, next 0, prev 3 
+main: status: zero
+main: input '+item'
+main: status: predicate
+main: input '= note ""'
+main: field: 'note'=''
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '-item'
+main: status: track
+main: input ''
+main: input '# ... and these select nothing'
+main: input 'r'
+main: status: zero
+main: input '?item[note = 'x']'
+adding filter: 'item[note = 'x']'
+added filter: 0
+--- 0: 9
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
+                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0 
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0 
+                        000003: type 70 (C_ELEMENT), str 8 [note], contents 0, next 0, prev 0 
+                    000006: type 54 (T_QUOTED), str 15 [x], contents 0, next 0, prev 5 
+main: status: zero
+main: input '+item'
+main: status: predicate
+main: input '= note ""'
+main: field: 'note'=''
+main: status: track
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: track
+main: input '-item'
+main: status: track
+main: input ''
+main: input 'r'
+main: status: zero
+main: input '?item[string-length(note) = 1]'
+adding filter: 'item[string-length(note) = 1]'
+added filter: 0
+--- 0: 12
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0 
+                000008: type 14 (L_EQUALS), str 31 [=], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [string-length], contents 7, next 9, prev 0 
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
+                            000005: type 70 (C_ELEMENT), str 24 [note], contents 0, next 0, prev 0 
+                    000009: type 53 (T_NUMBER), str 33 [1], contents 0, next 0, prev 3 
+main: status: zero
+main: input '+item'
+main: status: predicate
+main: input '= note ""'
+main: field: 'note'=''
+main: status: track
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: track
+main: input '-item'
+main: status: track
+main: input ''
+main: input '# ends-with(): items 1 and 3 pass; every string ends with '', so all'
+main: input '# four pass the second filter.'
+main: input 'r'
+main: status: zero
+main: input '?item[ends-with(name, '.eth1')]'
+adding filter: 'item[ends-with(name, '.eth1')]'
+added filter: 0
+--- 0: 12
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [ends-with], contents 7, next 0, prev 0 
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
+                        000005: type 70 (C_ELEMENT), str 20 [name], contents 0, next 0, prev 0 
+                    000008: type 54 (T_QUOTED), str 27 [.eth1], contents 0, next 0, prev 7 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '$ name lo.eth1'
+main: key: 'name'='lo.eth1'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name eth1x'
+main: key: 'name'='eth1x'
+main: status: track
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name .eth1'
+main: key: 'name'='.eth1'
+main: status: full
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name ""'
+main: key: 'name'=''
+main: status: track
+main: input '= val 4'
+main: field: 'val'='4'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input 'r'
+main: status: zero
+main: input '?item[ends-with(name, '')]'
+adding filter: 'item[ends-with(name, '')]'
+added filter: 0
+--- 0: 12
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [ends-with], contents 7, next 0, prev 0 
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
+                        000005: type 70 (C_ELEMENT), str 20 [name], contents 0, next 0, prev 0 
+                    000008: type 54 (T_QUOTED), str 27 [], contents 0, next 0, prev 7 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '$ name lo.eth1'
+main: key: 'name'='lo.eth1'
+main: status: full
+main: input '= val 1'
+main: field: 'val'='1'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name eth1x'
+main: key: 'name'='eth1x'
+main: status: full
+main: input '= val 2'
+main: field: 'val'='2'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name .eth1'
+main: key: 'name'='.eth1'
+main: status: full
+main: input '= val 3'
+main: field: 'val'='3'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name ""'
+main: key: 'name'=''
+main: status: full
+main: input '= val 4'
+main: field: 'val'='4'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input 'r'
+main: status: zero
+main: input '?item[size = 10]'
+adding filter: 'item[size = 10]'
+added filter: 0
+--- 0: 9
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
+                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0 
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0 
+                        000003: type 70 (C_ELEMENT), str 8 [size], contents 0, next 0, prev 0 
+                    000006: type 53 (T_NUMBER), str 15 [10], contents 0, next 0, prev 5 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '$ name a'
+main: key: 'name'='a'
+main: status: predicate
+main: input '[tag'
+main: open leaf list: 'tag'
+main: status: predicate
+main: input '= tag x'
+main: field: 'tag'='x'
+main: status: predicate
+main: input '= tag y'
+main: field: 'tag'='y'
+main: status: predicate
+main: input ']tag'
+main: close leaf list: 'tag'
+main: status: predicate
+main: input '= size 0'
+main: field: 'size'='0'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name b'
+main: key: 'name'='b'
+main: status: predicate
+main: input '[tag'
+main: open leaf list: 'tag'
+main: status: predicate
+main: input '= tag x'
+main: field: 'tag'='x'
+main: status: predicate
+main: input '= tag y'
+main: field: 'tag'='y'
+main: status: predicate
+main: input ']tag'
+main: close leaf list: 'tag'
+main: status: predicate
+main: input '= size 10'
+main: field: 'size'='10'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input 'r'
+main: status: zero
+main: input '?item[size = 10]'
+adding filter: 'item[size = 10]'
+added filter: 0
+--- 0: 9
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
+                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0 
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0 
+                        000003: type 70 (C_ELEMENT), str 8 [size], contents 0, next 0, prev 0 
+                    000006: type 53 (T_NUMBER), str 15 [10], contents 0, next 0, prev 5 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '$ name a'
+main: key: 'name'='a'
+main: status: predicate
+main: input '+sub'
+main: status: conditional
+main: input '= x 1'
+main: field: 'x'='1'
+main: status: conditional
+main: input '-sub'
+main: status: predicate
+main: input '= size 0'
+main: field: 'size'='0'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name b'
+main: key: 'name'='b'
+main: status: predicate
+main: input '+sub'
+main: status: conditional
+main: input '= x 2'
+main: field: 'x'='2'
+main: status: conditional
+main: input '-sub'
+main: status: predicate
+main: input '= size 10'
+main: field: 'size'='10'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input 'r'
+main: status: zero
+main: input '?item[size = 10]'
+adding filter: 'item[size = 10]'
+added filter: 0
+--- 0: 9
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
+                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0 
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0 
+                        000003: type 70 (C_ELEMENT), str 8 [size], contents 0, next 0, prev 0 
+                    000006: type 53 (T_NUMBER), str 15 [10], contents 0, next 0, prev 5 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '$ name a'
+main: key: 'name'='a'
+main: status: predicate
+main: input '{sub'
+main: status: predicate
+main: input '<sub'
+main: status: conditional
+main: input '$ k 1'
+main: key: 'k'='1'
+main: status: conditional
+main: input '= v p'
+main: field: 'v'='p'
+main: status: conditional
+main: input '>sub'
+main: status: predicate
+main: input '}sub'
+main: status: predicate
+main: input '= size 0'
+main: field: 'size'='0'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name b'
+main: key: 'name'='b'
+main: status: predicate
+main: input '{sub'
+main: status: predicate
+main: input '<sub'
+main: status: conditional
+main: input '$ k 2'
+main: key: 'k'='2'
+main: status: conditional
+main: input '= v q'
+main: field: 'v'='q'
+main: status: conditional
+main: input '>sub'
+main: status: predicate
+main: input '}sub'
+main: status: predicate
+main: input '= size 10'
+main: field: 'size'='10'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input 'r'
+main: status: zero
+main: input '?item[size = 99]'
+adding filter: 'item[size = 99]'
+added filter: 0
+--- 0: 9
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
+                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0 
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0 
+                        000003: type 70 (C_ELEMENT), str 8 [size], contents 0, next 0, prev 0 
+                    000006: type 53 (T_NUMBER), str 15 [99], contents 0, next 0, prev 5 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '$ name a'
+main: key: 'name'='a'
+main: status: predicate
+main: input '{sub'
+main: status: predicate
+main: input '<sub'
+main: status: conditional
+main: input '$ k 1'
+main: key: 'k'='1'
+main: status: conditional
+main: input '= v p'
+main: field: 'v'='p'
+main: status: conditional
+main: input '>sub'
+main: status: predicate
+main: input '}sub'
+main: status: predicate
+main: input '= size 0'
+main: field: 'size'='0'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name b'
+main: key: 'name'='b'
+main: status: predicate
+main: input '{sub'
+main: status: predicate
+main: input '<sub'
+main: status: conditional
+main: input '$ k 2'
+main: key: 'k'='2'
+main: status: conditional
+main: input '= v q'
+main: field: 'v'='q'
+main: status: conditional
+main: input '>sub'
+main: status: predicate
+main: input '}sub'
+main: status: predicate
+main: input '= size 10'
+main: field: 'size'='10'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input 'r'
+main: status: zero
+main: input '?item[size = 10]/sub'
+adding filter: 'item[size = 10]/sub'
+added filter: 0
+--- 0: 11
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 9, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
+                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0 
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0 
+                        000003: type 70 (C_ELEMENT), str 8 [size], contents 0, next 0, prev 0 
+                    000006: type 53 (T_NUMBER), str 15 [10], contents 0, next 0, prev 5 
+        000009: type 70 (C_ELEMENT), str 22 [sub], contents 0, next 0, prev 1 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '$ name a'
+main: key: 'name'='a'
+main: status: predicate
+main: input '+sub'
+main: status: conditional
+main: input '= x 1'
+main: field: 'x'='1'
+main: status: conditional
+main: input '-sub'
+main: status: predicate
+main: input '= size 0'
+main: field: 'size'='0'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name b'
+main: key: 'name'='b'
+main: status: predicate
+main: input '+sub'
+main: status: conditional
+main: input '= x 2'
+main: field: 'x'='2'
+main: status: conditional
+main: input '-sub'
+main: status: predicate
+main: input '= size 10'
+main: field: 'size'='10'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input 'r'
+main: status: zero
+main: input '?item[size = 10]/name'
+adding filter: 'item[size = 10]/name'
+added filter: 0
+--- 0: 11
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 9, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
+                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0 
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0 
+                        000003: type 70 (C_ELEMENT), str 8 [size], contents 0, next 0, prev 0 
+                    000006: type 53 (T_NUMBER), str 15 [10], contents 0, next 0, prev 5 
+        000009: type 70 (C_ELEMENT), str 22 [name], contents 0, next 0, prev 1 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '$ name a'
+main: key: 'name'='a'
+main: status: predicate
+main: input '= size 0'
+main: field: 'size'='0'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name b'
+main: key: 'name'='b'
+main: status: predicate
+main: input '= size 10'
+main: field: 'size'='10'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input 'r'
+main: status: zero
+main: input '?item[size = 10]/sub/x'
+adding filter: 'item[size = 10]/sub/x'
+added filter: 0
+--- 0: 13
+    000013: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 9, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
+                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0 
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0 
+                        000003: type 70 (C_ELEMENT), str 8 [size], contents 0, next 0, prev 0 
+                    000006: type 53 (T_NUMBER), str 15 [10], contents 0, next 0, prev 5 
+        000009: type 70 (C_ELEMENT), str 22 [sub], contents 0, next 11, prev 1 
+        000011: type 70 (C_ELEMENT), str 28 [x], contents 0, next 0, prev 9 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '$ name a'
+main: key: 'name'='a'
+main: status: predicate
+main: input '= other o1'
+main: field: 'other'='o1'
+main: status: predicate
+main: input '+sub'
+main: status: predicate
+main: input '= x 1'
+main: field: 'x'='1'
+main: status: predicate
+main: input '= y 1'
+main: field: 'y'='1'
+main: status: predicate
+main: input '-sub'
+main: status: predicate
+main: input '= size 10'
+main: field: 'size'='10'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name b'
+main: key: 'name'='b'
+main: status: predicate
+main: input '+sub'
+main: status: predicate
+main: input '= y 2'
+main: field: 'y'='2'
+main: status: predicate
+main: input '-sub'
+main: status: predicate
+main: input '= size 10'
+main: field: 'size'='10'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name c'
+main: key: 'name'='c'
+main: status: predicate
+main: input '+sub'
+main: status: predicate
+main: input '= x 3'
+main: field: 'x'='3'
+main: status: predicate
+main: input '-sub'
+main: status: predicate
+main: input '= size 9'
+main: field: 'size'='9'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input 'r'
+main: status: zero
+main: input '?item[size = 10]/note'
+adding filter: 'item[size = 10]/note'
+added filter: 0
+--- 0: 11
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 9, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
+                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0 
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0 
+                        000003: type 70 (C_ELEMENT), str 8 [size], contents 0, next 0, prev 0 
+                    000006: type 53 (T_NUMBER), str 15 [10], contents 0, next 0, prev 5 
+        000009: type 70 (C_ELEMENT), str 22 [note], contents 0, next 0, prev 1 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '= note n1'
+main: field: 'note'='n1'
+main: status: predicate
+main: input '$ name a'
+main: key: 'name'='a'
+xpath_01: key field emitted after normal value field: 'name'
+main: status: predicate
+main: input '= other o'
+main: field: 'other'='o'
+main: status: predicate
+main: input '= size 10'
+main: field: 'size'='10'
+main: status: track
+main: input '= note n2'
+main: field: 'note'='n2'
+xpath_01: duplicate sibling name: 'note'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '= note n3'
+main: field: 'note'='n3'
+main: status: predicate
+main: input '= size 3'
+main: field: 'size'='3'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input 'r'
+main: status: zero
+main: input '?item[size = 10]/sub[k = 2]/v'
+adding filter: 'item[size = 10]/sub[k = 2]/v'
+added filter: 0
+--- 0: 19
+    000019: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 9, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
+                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0 
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0 
+                        000003: type 70 (C_ELEMENT), str 8 [size], contents 0, next 0, prev 0 
+                    000006: type 53 (T_NUMBER), str 15 [10], contents 0, next 0, prev 5 
+        000009: type 70 (C_ELEMENT), str 22 [sub], contents 10, next 17, prev 1 
+            000010: type 75 (C_PREDICATE), str 0 [], contents 12, next 0, prev 0 
+                000012: type 14 (L_EQUALS), str 30 [=], contents 13, next 0, prev 0 
+                    000013: type 74 (C_PATH), str 0 [], contents 11, next 14, prev 0 
+                        000011: type 70 (C_ELEMENT), str 28 [k], contents 0, next 0, prev 0 
+                    000014: type 53 (T_NUMBER), str 32 [2], contents 0, next 0, prev 13 
+        000017: type 70 (C_ELEMENT), str 38 [v], contents 0, next 0, prev 9 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '$ name a'
+main: key: 'name'='a'
+main: status: predicate
+main: input '{sub'
+main: status: predicate
+main: input '<sub'
+main: status: predicate
+main: input '= v v1'
+main: field: 'v'='v1'
+main: status: predicate
+main: input '$ k 1'
+main: key: 'k'='1'
+xpath_01: key field emitted after normal value field: 'k'
+main: status: track
+main: input '>sub'
+main: status: predicate
+main: input '<sub'
+main: status: predicate
+main: input '= v v2'
+main: field: 'v'='v2'
+main: status: predicate
+main: input '$ k 2'
+main: key: 'k'='2'
+xpath_01: key field emitted after normal value field: 'k'
+main: status: predicate
+main: input '>sub'
+main: status: predicate
+main: input '<sub'
+main: status: predicate
+main: input '$ k 2'
+main: key: 'k'='2'
+main: status: predicate
+main: input '= w w3'
+main: field: 'w'='w3'
+main: status: predicate
+main: input '>sub'
+main: status: predicate
+main: input '}sub'
+main: status: predicate
+main: input '= size 10'
+main: field: 'size'='10'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input 'r'
+main: status: zero
+main: input '?item[size = 10]/sub'
+adding filter: 'item[size = 10]/sub'
+added filter: 0
+--- 0: 11
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 9, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
+                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0 
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0 
+                        000003: type 70 (C_ELEMENT), str 8 [size], contents 0, next 0, prev 0 
+                    000006: type 53 (T_NUMBER), str 15 [10], contents 0, next 0, prev 5 
+        000009: type 70 (C_ELEMENT), str 22 [sub], contents 0, next 0, prev 1 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '$ name a'
+main: key: 'name'='a'
+main: status: predicate
+main: input '+sub'
+main: status: conditional
+main: input '= x 1'
+main: field: 'x'='1'
+main: status: conditional
+main: input '-sub'
+main: status: predicate
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name b'
+main: key: 'name'='b'
+main: status: predicate
+main: input '= size 10'
+main: field: 'size'='10'
+main: status: track
+main: input '+sub'
+main: status: full
+main: input '= x 2'
+main: field: 'x'='2'
+main: status: full
+main: input '-sub'
+main: status: track
+main: input '+other'
+main: status: track
+main: input '= z 1'
+main: field: 'z'='1'
+main: status: track
+main: input '-other'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input 'r'
+main: status: zero
+main: input '?item[size = ""]/sub'
+adding filter: 'item[size = ""]/sub'
+added filter: 0
+--- 0: 11
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 9, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
+                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0 
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0 
+                        000003: type 70 (C_ELEMENT), str 8 [size], contents 0, next 0, prev 0 
+                    000006: type 54 (T_QUOTED), str 15 [], contents 0, next 0, prev 5 
+        000009: type 70 (C_ELEMENT), str 20 [sub], contents 0, next 0, prev 1 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '$ name a'
+main: key: 'name'='a'
+main: status: predicate
+main: input '+sub'
+main: status: conditional
+main: input '= x 1'
+main: field: 'x'='1'
+main: status: conditional
+main: input '-sub'
+main: status: predicate
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input 'r'
+main: status: zero
+main: input '?item[size = 10]/tag'
+adding filter: 'item[size = 10]/tag'
+added filter: 0
+--- 0: 11
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 9, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
+                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0 
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0 
+                        000003: type 70 (C_ELEMENT), str 8 [size], contents 0, next 0, prev 0 
+                    000006: type 53 (T_NUMBER), str 15 [10], contents 0, next 0, prev 5 
+        000009: type 70 (C_ELEMENT), str 22 [tag], contents 0, next 0, prev 1 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '$ name a'
+main: key: 'name'='a'
+main: status: predicate
+main: input '[tag'
+main: open leaf list: 'tag'
+main: status: predicate
+main: input '= tag t1'
+main: field: 'tag'='t1'
+main: status: predicate
+main: input '= tag t2'
+main: field: 'tag'='t2'
+main: status: predicate
+main: input ']tag'
+main: close leaf list: 'tag'
+main: status: predicate
+main: input '= size 10'
+main: field: 'size'='10'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input 'r'
+main: status: zero
+main: input '?item[name = '']'
+adding filter: 'item[name = '']'
+added filter: 0
+--- 0: 9
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
+                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0 
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0 
+                        000003: type 70 (C_ELEMENT), str 8 [name], contents 0, next 0, prev 0 
+                    000006: type 54 (T_QUOTED), str 15 [], contents 0, next 0, prev 5 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '= id 1'
+main: field: 'id'='1'
+main: status: predicate
+main: input '= name gum'
+main: field: 'name'='gum'
+main: status: track
+main: input '= size 5'
+main: field: 'size'='5'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '= id 2'
+main: field: 'id'='2'
+main: status: predicate
+main: input '= name ""'
+main: field: 'name'=''
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '= id 3'
+main: field: 'id'='3'
+main: status: predicate
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input 'r'
+main: status: zero
+main: input '?item[name != '']'
+adding filter: 'item[name != '']'
+added filter: 0
+--- 0: 9
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
+                000004: type 21 (L_NOTEQUALS), str 13 [!=], contents 5, next 0, prev 0 
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0 
+                        000003: type 70 (C_ELEMENT), str 8 [name], contents 0, next 0, prev 0 
+                    000006: type 54 (T_QUOTED), str 16 [], contents 0, next 0, prev 5 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '= id 1'
+main: field: 'id'='1'
+main: status: predicate
+main: input '= name gum'
+main: field: 'name'='gum'
+main: status: full
+main: input '= size 5'
+main: field: 'size'='5'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '= id 2'
+main: field: 'id'='2'
+main: status: predicate
+main: input '= name ""'
+main: field: 'name'=''
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '= id 3'
+main: field: 'id'='3'
+main: status: predicate
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input 'r'
+main: status: zero
+main: input '?item[not(name)]'
+adding filter: 'item[not(name)]'
+added filter: 0
+--- 0: 10
+    000010: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [not], contents 7, next 0, prev 0 
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
+                        000005: type 70 (C_ELEMENT), str 14 [name], contents 0, next 0, prev 0 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '= id 1'
+main: field: 'id'='1'
+main: status: predicate
+main: input '= name gum'
+main: field: 'name'='gum'
+main: status: track
+main: input '= size 5'
+main: field: 'size'='5'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '= id 2'
+main: field: 'id'='2'
+main: status: predicate
+main: input '= name ""'
+main: field: 'name'=''
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '= id 3'
+main: field: 'id'='3'
+main: status: predicate
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input 'r'
+main: status: zero
+main: input '?item[string(name) = '']'
+adding filter: 'item[string(name) = '']'
+added filter: 0
+--- 0: 12
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0 
+                000008: type 14 (L_EQUALS), str 24 [=], contents 3, next 0, prev 0 
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [string], contents 7, next 9, prev 0 
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
+                            000005: type 70 (C_ELEMENT), str 17 [name], contents 0, next 0, prev 0 
+                    000009: type 54 (T_QUOTED), str 26 [], contents 0, next 0, prev 3 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '= id 1'
+main: field: 'id'='1'
+main: status: predicate
+main: input '= name gum'
+main: field: 'name'='gum'
+main: status: track
+main: input '= size 5'
+main: field: 'size'='5'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '= id 2'
+main: field: 'id'='2'
+main: status: predicate
+main: input '= name ""'
+main: field: 'name'=''
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '= id 3'
+main: field: 'id'='3'
+main: status: predicate
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input 'r'
+main: status: zero
+main: input '?item[name = false()]'
+adding filter: 'item[name = false()]'
+added filter: 0
+--- 0: 11
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
+                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0 
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0 
+                        000003: type 70 (C_ELEMENT), str 8 [name], contents 0, next 0, prev 0 
+                    000006: type 52 (T_FUNCTION_NAME), str 15 [false], contents 0, next 0, prev 5 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '= id 1'
+main: field: 'id'='1'
+main: status: predicate
+main: input '= name gum'
+main: field: 'name'='gum'
+main: status: track
+main: input '= size 5'
+main: field: 'size'='5'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '= id 2'
+main: field: 'id'='2'
+main: status: predicate
+main: input '= name ""'
+main: field: 'name'=''
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '= id 3'
+main: field: 'id'='3'
+main: status: predicate
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input 'r'
+main: status: zero
+main: input '?item[size != 3]'
+adding filter: 'item[size != 3]'
+added filter: 0
+--- 0: 9
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
+                000004: type 21 (L_NOTEQUALS), str 13 [!=], contents 5, next 0, prev 0 
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0 
+                        000003: type 70 (C_ELEMENT), str 8 [size], contents 0, next 0, prev 0 
+                    000006: type 53 (T_NUMBER), str 16 [3], contents 0, next 0, prev 5 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '= id 1'
+main: field: 'id'='1'
+main: status: predicate
+main: input '= name gum'
+main: field: 'name'='gum'
+main: status: predicate
+main: input '= size 5'
+main: field: 'size'='5'
+main: status: full
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '= id 2'
+main: field: 'id'='2'
+main: status: predicate
+main: input '= name ""'
+main: field: 'name'=''
+main: status: predicate
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '= id 3'
+main: field: 'id'='3'
+main: status: predicate
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input 'r'
+main: status: zero
+main: input '?item[not(size)]'
+adding filter: 'item[not(size)]'
+added filter: 0
+--- 0: 10
+    000010: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [not], contents 7, next 0, prev 0 
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
+                        000005: type 70 (C_ELEMENT), str 14 [size], contents 0, next 0, prev 0 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '= id 1'
+main: field: 'id'='1'
+main: status: predicate
+main: input '= name gum'
+main: field: 'name'='gum'
+main: status: predicate
+main: input '= size 5'
+main: field: 'size'='5'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '= id 2'
+main: field: 'id'='2'
+main: status: predicate
+main: input '= name ""'
+main: field: 'name'=''
+main: status: predicate
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '= id 3'
+main: field: 'id'='3'
+main: status: predicate
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input 'r'
+main: status: zero
+main: input '?item[not(size)]/sub'
+adding filter: 'item[not(size)]/sub'
+added filter: 0
+--- 0: 12
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 10, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
+                000003: type 52 (T_FUNCTION_NAME), str 8 [not], contents 7, next 0, prev 0 
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
+                        000005: type 70 (C_ELEMENT), str 14 [size], contents 0, next 0, prev 0 
+        000010: type 70 (C_ELEMENT), str 25 [sub], contents 0, next 0, prev 1 
+main: status: zero
+main: input '{item'
+main: status: zero
+main: input '<item'
+main: status: predicate
+main: input '$ name a'
+main: key: 'name'='a'
+main: status: predicate
+main: input '+sub'
+main: status: conditional
+main: input '= x 1'
+main: field: 'x'='1'
+main: status: conditional
+main: input '-sub'
+main: status: predicate
+main: input '>item'
+main: status: track
+main: input '<item'
+main: status: predicate
+main: input '$ name b'
+main: key: 'name'='b'
+main: status: predicate
+main: input '+sub'
+main: status: conditional
+main: input '= x 2'
+main: field: 'x'='2'
+main: status: conditional
+main: input '-sub'
+main: status: predicate
+main: input '= size 1'
+main: field: 'size'='1'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input 'r'
+main: status: zero
+main: input '?top/item[not(name)]'
+adding filter: 'top/item[not(name)]'
+added filter: 0
+--- 0: 12
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [top], contents 0, next 3, prev 0 
+        000003: type 70 (C_ELEMENT), str 7 [item], contents 4, next 0, prev 1 
+            000004: type 75 (C_PREDICATE), str 0 [], contents 5, next 0, prev 0 
+                000005: type 52 (T_FUNCTION_NAME), str 14 [not], contents 9, next 0, prev 0 
+                    000009: type 74 (C_PATH), str 0 [], contents 7, next 0, prev 0 
+                        000007: type 70 (C_ELEMENT), str 20 [name], contents 0, next 0, prev 0 
+main: status: zero
+main: input '+top'
+main: status: track
+main: input '+item'
+main: status: predicate
+main: input '+sub'
+main: status: conditional
+main: input '= x 1'
+main: field: 'x'='1'
+main: status: conditional
+main: input '-sub'
+main: status: predicate
+main: input '= size 3'
+main: field: 'size'='3'
+main: status: predicate
+main: input '-item'
+main: status: track
+main: input '-top'
+main: status: track
+main: input 'r'
+main: status: zero
+main: input '?top/item[name = '']'
+adding filter: 'top/item[name = '']'
+added filter: 0
+--- 0: 11
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [top], contents 0, next 3, prev 0 
+        000003: type 70 (C_ELEMENT), str 7 [item], contents 4, next 0, prev 1 
+            000004: type 75 (C_PREDICATE), str 0 [], contents 6, next 0, prev 0 
+                000006: type 14 (L_EQUALS), str 19 [=], contents 7, next 0, prev 0 
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
+                        000005: type 70 (C_ELEMENT), str 14 [name], contents 0, next 0, prev 0 
+                    000008: type 54 (T_QUOTED), str 21 [], contents 0, next 0, prev 7 
+main: status: zero
+main: input '+top'
+xpath_01: duplicate sibling name: 'top'
+main: status: track
+main: input '+item'
+main: status: predicate
+main: input '+sub'
+main: status: conditional
+main: input '= x 1'
+main: field: 'x'='1'
+main: status: conditional
+main: input '-sub'
+main: status: predicate
+main: input '= size 3'
+main: field: 'size'='3'
+main: status: predicate
+main: input '-item'
+main: status: track
+main: input '-top'
+main: status: track
+main: input 'r'
+main: status: zero
+main: input '?top/item[name != 'x']'
+adding filter: 'top/item[name != 'x']'
+added filter: 0
+--- 0: 11
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [top], contents 0, next 3, prev 0 
+        000003: type 70 (C_ELEMENT), str 7 [item], contents 4, next 0, prev 1 
+            000004: type 75 (C_PREDICATE), str 0 [], contents 6, next 0, prev 0 
+                000006: type 21 (L_NOTEQUALS), str 19 [!=], contents 7, next 0, prev 0 
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
+                        000005: type 70 (C_ELEMENT), str 14 [name], contents 0, next 0, prev 0 
+                    000008: type 54 (T_QUOTED), str 22 [x], contents 0, next 0, prev 7 
+main: status: zero
+main: input '+top'
+main: status: track
+main: input '+item'
+main: status: predicate
+main: input '+sub'
+main: status: conditional
+main: input '= x 1'
+main: field: 'x'='1'
+main: status: conditional
+main: input '-sub'
+main: status: predicate
+main: input '= size 3'
+main: field: 'size'='3'
+main: status: predicate
+main: input '-item'
+main: status: track
+main: input '-top'
+main: status: track
+main: input 'r'
+main: status: zero
+main: input '?top/item[not(name)]/sub'
+adding filter: 'top/item[not(name)]/sub'
+added filter: 0
+--- 0: 14
+    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+        000001: type 70 (C_ELEMENT), str 1 [top], contents 0, next 3, prev 0 
+        000003: type 70 (C_ELEMENT), str 7 [item], contents 4, next 12, prev 1 
+            000004: type 75 (C_PREDICATE), str 0 [], contents 5, next 0, prev 0 
+                000005: type 52 (T_FUNCTION_NAME), str 14 [not], contents 9, next 0, prev 0 
+                    000009: type 74 (C_PATH), str 0 [], contents 7, next 0, prev 0 
+                        000007: type 70 (C_ELEMENT), str 20 [name], contents 0, next 0, prev 0 
+        000012: type 70 (C_ELEMENT), str 31 [sub], contents 0, next 0, prev 3 
+main: status: zero
+main: input '+top'
+main: status: track
+main: input '+item'
+main: status: predicate
+main: input '+sub'
+main: status: conditional
+main: input '= x 1'
+main: field: 'x'='1'
+main: status: conditional
+main: input '-sub'
+main: status: predicate
+main: input '= size 3'
+main: field: 'size'='3'
+main: status: predicate
+main: input '-item'
+main: status: track
+main: input '-top'
 main: status: track

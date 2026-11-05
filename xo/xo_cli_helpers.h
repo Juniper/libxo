@@ -29,8 +29,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+#include <stdint.h>
 
-#include "xo_buf.h"
+#include "xo_utf8.h"
 
 #ifndef UNUSED
 #define UNUSED __attribute__ ((__unused__))
@@ -40,50 +41,6 @@ static int opt_warn;		/* Enable warnings */
 
 static char **save_argv;
 static char **checkpoint_argv;
-
-/*
- * Scratch buffer used to render decimal integer fields when grouping is
- * enabled, since xo_grouping_fixup() needs a real xo_realloc-managed
- * xo_buffer_t (with a valid xb_bufp) to grow into, which the "buf"/
- * "bufsiz" pair handed to formatter() by xo_vsnprintf() is not -- it
- * points into the middle of xop's own output buffer.
- */
-static xo_buffer_t grouping_buf;
-
-/*
- * Render a decimal integer field via "_snprintf_expr" (an expression
- * that must call snprintf() with a destination of "grouping_curp" and a
- * size of "grouping_left" -- it may be evaluated more than once, if more
- * room is needed) into our private, growable scratch buffer, apply
- * locale grouping, and copy the result (truncated to fit, per the usual
- * snprintf contract) into "_buf"/"_bufsiz".  Sets "_rc" to the field's
- * true length, same as snprintf()/vsnprintf() would.
- */
-#define XO_CLI_GROUPED_SNPRINTF(_xop, _buf, _bufsiz, _rc, _snprintf_expr) \
-    do { \
-	if (grouping_buf.xb_bufp == NULL) \
-	    xo_buf_init(&grouping_buf); \
-	xo_buf_reset(&grouping_buf); \
-	\
-	for (;;) { \
-	    xo_ssize_t grouping_left UNUSED = xo_buf_left(&grouping_buf); \
-	    char *grouping_curp UNUSED = grouping_buf.xb_curp; \
-	    (_rc) = (_snprintf_expr); \
-	    if ((_rc) < grouping_left) \
-		break; \
-	    if (!xo_buf_has_room(&grouping_buf, (_rc))) \
-		break; \
-	} \
-	\
-	(_rc) = xo_grouping_fixup((_xop), &grouping_buf, 0, (_rc)); \
-	\
-	if ((_rc) > 0 && (_bufsiz) > 0) { \
-	    xo_ssize_t _copy = ((_rc) < (_bufsiz)) ? (_rc) : (_bufsiz) - 1; \
-	    if (_copy > 0) \
-		memcpy((_buf), grouping_buf.xb_bufp, _copy); \
-	    (_buf)[_copy] = '\0'; \
-	} \
-    } while (0)
 
 static inline char *
 next_arg (void)
@@ -115,6 +72,12 @@ prep_arg (char *fmt)
 	if (*cp != '\\') {
 	    if (cp != fp)
 		*fp = *cp;
+	    continue;
+	}
+
+	/* A trailing backslash has nothing to escape; keep it as is */
+	if (cp[1] == '\0') {
+	    *fp = '\\';
 	    continue;
 	}
 
@@ -153,6 +116,32 @@ checkpoint (xo_handle_t *xop UNUSED, va_list vap UNUSED, int restore)
 }
 
 /*
+ * Rewrite the single conversion in "fmt" (ending at "convp") into "dst"
+ * so that it matches the argument we really pass.  Our values come from
+ * command line strings, which we convert to the widest type for each
+ * family (long long, unsigned long long, double, char *), so the user's
+ * length modifiers are dropped and replaced by "mods", and the
+ * conversion character becomes "conv".  Trailing text is copied as is.
+ * "dst" needs room for strlen(fmt) + 3 bytes.
+ */
+static inline void
+fmt_rewrite (char *dst, const char *fmt, const char *convp,
+	     const char *mods, char conv)
+{
+    const char *cp;
+
+    for (cp = fmt; cp < convp; cp++)
+	if (strchr("hljtzqL", *cp) == NULL)
+	    *dst++ = *cp;
+
+    while (*mods)
+	*dst++ = *mods++;
+
+    *dst++ = conv;
+    strcpy(dst, convp + 1);
+}
+
+/*
  * Our custom formatter is responsible for combining format string pieces
  * with our command line arguments to build strings.  This involves faking
  * some printf-style logic.
@@ -161,8 +150,11 @@ static inline xo_ssize_t
 formatter (xo_handle_t *xop, char *buf, xo_ssize_t bufsiz,
 	   const char *fmt, va_list vap UNUSED)
 {
-    /* printf-style formatting flags, currently ignored */
-    int lflag UNUSED = 0, hflag UNUSED = 0, jflag UNUSED = 0,
+    /*
+     * printf-style length modifiers.  Only "h" matters, since we pass
+     * the widest type and fmt_rewrite() drops the rest.
+     */
+    int lflag UNUSED = 0, hflag = 0, jflag UNUSED = 0,
 	tflag UNUSED = 0, zflag UNUSED = 0, qflag UNUSED = 0;
     int star1 = 0, star2 = 0;
     int rc = 0;
@@ -197,47 +189,62 @@ formatter (xo_handle_t *xop, char *buf, xo_ssize_t bufsiz,
     }
 
     char fc = *cp;
+    if (fc == '\0')		/* No conversion character */
+	return 0;
 
     /* Handle "%*.*s" */
     if (star1)
 	w1 = strtol(next_arg(), NULL, 0);
-    if (star2 > 1)
+    if (star2)
 	w2 = strtol(next_arg(), NULL, 0);
 
-    if (fc == 'D' || fc == 'O' || fc == 'U')
-	lflag = 1;
-
-    int style = xo_get_style(xop);
-    int grouping = (xo_get_flags(xop) & XOF_GROUP)
-	&& (style == XO_STYLE_TEXT || style == XO_STYLE_HTML)
-	&& strchr("diDuU", fc) != NULL;
+    char nfmt[strlen(fmt) + 3];	/* See fmt_rewrite() */
 
     if (strchr("diD", fc) != NULL) {
 	long long value = strtoll(next_arg(), NULL, 0);
-	if (grouping)
-	    XO_CLI_GROUPED_SNPRINTF(xop, buf, bufsiz, rc,
-		star1 && star2
-		    ? snprintf(grouping_curp, grouping_left, fmt, w1, w2, value)
-		    : star1
-		    ? snprintf(grouping_curp, grouping_left, fmt, w1, value)
-		    : snprintf(grouping_curp, grouping_left, fmt, value));
-	else if (star1 && star2)
+
+	/* "h" and "hh" truncate; we do it here since we pass a long long */
+	if (hflag == 1)
+	    value = (short) value;
+	else if (hflag > 1)
+	    value = (signed char) value;
+
+	fmt_rewrite(nfmt, fmt, cp, "ll", (fc == 'D') ? 'd' : fc);
+	fmt = nfmt;
+
+	if (star1 && star2)
 	    rc = snprintf(buf, bufsiz, fmt, w1, w2, value);
 	else if (star1)
 	    rc = snprintf(buf, bufsiz, fmt, w1, value);
 	else
 	    rc = snprintf(buf, bufsiz, fmt, value);
 
-    } else if (strchr("ouxXOUp", fc) != NULL) {
+    } else if (strchr("ouxXOU", fc) != NULL) {
 	unsigned long long value = strtoull(next_arg(), NULL, 0);
-	if (grouping)
-	    XO_CLI_GROUPED_SNPRINTF(xop, buf, bufsiz, rc,
-		star1 && star2
-		    ? snprintf(grouping_curp, grouping_left, fmt, w1, w2, value)
-		    : star1
-		    ? snprintf(grouping_curp, grouping_left, fmt, w1, value)
-		    : snprintf(grouping_curp, grouping_left, fmt, value));
-	else if (star1 && star2)
+
+	if (hflag == 1)
+	    value = (unsigned short) value;
+	else if (hflag > 1)
+	    value = (unsigned char) value;
+
+	fmt_rewrite(nfmt, fmt, cp, "ll",
+		    (fc == 'O') ? 'o' : (fc == 'U') ? 'u' : fc);
+	fmt = nfmt;
+
+	if (star1 && star2)
+	    rc = snprintf(buf, bufsiz, fmt, w1, w2, value);
+	else if (star1)
+	    rc = snprintf(buf, bufsiz, fmt, w1, value);
+	else
+	    rc = snprintf(buf, bufsiz, fmt, value);
+
+    } else if (fc == 'p') {
+	void *value = (void *) (uintptr_t) strtoull(next_arg(), NULL, 0);
+
+	fmt_rewrite(nfmt, fmt, cp, "", 'p');
+	fmt = nfmt;
+
+	if (star1 && star2)
 	    rc = snprintf(buf, bufsiz, fmt, w1, w2, value);
 	else if (star1)
 	    rc = snprintf(buf, bufsiz, fmt, w1, value);
@@ -245,7 +252,11 @@ formatter (xo_handle_t *xop, char *buf, xo_ssize_t bufsiz,
 	    rc = snprintf(buf, bufsiz, fmt, value);
 
     } else if (strchr("eEfFgGaA", fc) != NULL) {
-	double value = strtold(next_arg(), NULL);
+	double value = strtod(next_arg(), NULL);
+
+	fmt_rewrite(nfmt, fmt, cp, "", fc); /* Drops "L" (long double) */
+	fmt = nfmt;
+
 	if (star1 && star2)
 	    rc = snprintf(buf, bufsiz, fmt, w1, w2, value);
 	else if (star1)
@@ -254,7 +265,26 @@ formatter (xo_handle_t *xop, char *buf, xo_ssize_t bufsiz,
 	    rc = snprintf(buf, bufsiz, fmt, value);
 
     } else if (fc == 'C' || fc == 'c' || fc == 'S' || fc == 's') {
+	/*
+	 * Our arguments are UTF-8 strings, never an int, wint_t or
+	 * wchar_t *, so every one of these becomes "%s".  For %c/%C we
+	 * pass just the first (possibly multi-byte) character.
+	 */
 	char *value = next_arg();
+	char cbuf[5];
+
+	if (fc == 'c' || fc == 'C') {
+	    size_t len = xo_utf8_len(value[0]);
+	    size_t slen = strnlen(value, len);
+
+	    memcpy(cbuf, value, slen);
+	    cbuf[slen] = '\0';
+	    value = cbuf;
+	}
+
+	fmt_rewrite(nfmt, fmt, cp, "", 's');
+	fmt = nfmt;
+
 	if (star1 && star2)
 	    rc = snprintf(buf, bufsiz, fmt, w1, w2, value);
 	else if (star1)

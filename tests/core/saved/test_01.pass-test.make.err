@@ -1,0 +1,8 @@
+warning: ../../../tests/core/test_01.c:121: libxo format string: field name contains percent sign: '{a:%s}' [-Wbackend-plugin]
+warning: ../../../tests/core/test_01.c:122: libxo format string: field name contains percent sign: '{a:%s/%s}' [-Wbackend-plugin]
+warning: ../../../tests/core/test_01.c:123: libxo format string: field name contains percent sign: '{a:xxx%s/%s}' [-Wbackend-plugin]
+warning: ../../../tests/core/test_01.c:338: libxo format string: invalid integer size: '{%!0u}' [-Wbackend-plugin]
+warning: ../../../tests/core/test_01.c:342: libxo format string: invalid integer size: '{%!31u}' [-Wbackend-plugin]
+warning: ../../../tests/core/test_01.c:342: libxo format string: invalid integer size: '{%!33u}' [-Wbackend-plugin]
+warning: ../../../tests/core/test_01.c:342: libxo format string: missing integer size: '{%!u}' [-Wbackend-plugin]
+7 warnings generated.

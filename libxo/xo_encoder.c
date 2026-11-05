@@ -132,6 +132,13 @@ xo_encoder_list_add (const char *name)
 
     xo_encoder_node_t *xep = xo_realloc(NULL, sizeof(*xep));
     if (xep) {
+	/*
+	 * Callers fill in only the fields they have: a registered
+	 * encoder has no dlopen handle, and a stale one would be
+	 * handed to dlclose() when the node is freed.
+	 */
+	bzero(xep, sizeof(*xep));
+
 	ssize_t len = strlen(name) + 1;
 	xep->xe_name = xo_realloc(NULL, len);
 	if (xep->xe_name == NULL) {
@@ -140,12 +147,26 @@ xo_encoder_list_add (const char *name)
 	}
 
 	memcpy(xep->xe_name, name, len);
-	xep->xe_flags = 0;
 
 	TAILQ_INSERT_TAIL(&xo_encoders, xep, xe_link);
     }
 
     return xep;
+}
+
+/*
+ * Take an encoder off the list and release everything it holds
+ */
+static void
+xo_encoder_list_remove (xo_encoder_node_t *xep)
+{
+    TAILQ_REMOVE(&xo_encoders, xep, xe_link);
+
+    if (xep->xe_dlhandle)
+	dlclose(xep->xe_dlhandle);
+
+    xo_free(xep->xe_name);
+    xo_free(xep);
 }
 
 void
@@ -160,12 +181,7 @@ xo_encoders_clean (void)
         if (xep == NULL)
             break;
 
-        TAILQ_REMOVE(&xo_encoders, xep, xe_link);
-
-	if (xep->xe_dlhandle)
-	    dlclose(xep->xe_dlhandle);
-
-	xo_free(xep);
+	xo_encoder_list_remove(xep);
     }
 
     xo_string_list_clean(&xo_encoder_path);
@@ -310,10 +326,8 @@ xo_encoder_unregister (const char *name)
     xo_encoder_setup();
 
     xo_encoder_node_t *xep = xo_encoder_find(name);
-    if (xep) {
-	TAILQ_REMOVE(&xo_encoders, xep, xe_link);
-	xo_free(xep);
-    }
+    if (xep)
+	xo_encoder_list_remove(xep);
 }
 
 int
@@ -430,7 +444,7 @@ xo_encoder_op_name (xo_encoder_op_t op)
 	/* 19 */ "deadend",
     };
 
-    if (op > sizeof(names) / sizeof(names[0]))
+    if (op >= sizeof(names) / sizeof(names[0]))
 	return "unknown";
 
     return names[op];
@@ -448,7 +462,7 @@ xo_whiteboard_op_name (xo_whiteboard_op_t op)
 	/*  5 */ "clean",
     };
 
-    if (op > sizeof(names) / sizeof(names[0]))
+    if (op >= sizeof(names) / sizeof(names[0]))
 	return "unknown";
 
     return names[op];

@@ -19,6 +19,7 @@ include ${top_srcdir}/warnings.mk
 enc_rtoonincdir = ${includedir}/libxo
 
 AM_CFLAGS = \
+    -I${top_srcdir} \
     -I${top_srcdir}/libxo \
     -I${top_builddir}/libxo \
     ${WARNINGS}

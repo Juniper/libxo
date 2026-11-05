@@ -51,9 +51,23 @@ libxo_la_SOURCES = \
     xo_encoder.c \
     xo_format.c \
     xo_syslog.c \
-    xo_tolower.c \
-    xo_toupper.c \
-    xo_utf8.c
+    xo_utf8_tolower.c \
+    xo_utf8_toupper.c \
+    xo_utf8.c \
+    xo_utf8_chr.c \
+    xo_utf8_clen.c \
+    xo_utf8_copy.c \
+    xo_utf8_fold.c \
+    xo_utf8_nmakevalid.c \
+    xo_utf8_ntolower.c \
+    xo_utf8_ntoupper.c \
+    xo_utf8_nvalid.c \
+    xo_utf8_span.c \
+    xo_utf8_strncmp.c \
+    xo_utf8_strndup.c \
+    xo_utf8_strnlen.c \
+    xo_utf8_strnstr.c \
+    xo_utf8_trunc.c
 
 man3_files = \
     libxo.3 \
@@ -62,6 +76,8 @@ man3_files = \
     xo_create.3 \
     xo_emit.3 \
     xo_emit_err.3 \
+    xo_emit_f.3 \
+    xo_emit_field.3 \
     xo_err.3 \
     xo_error.3 \
     xo_finish.3 \
@@ -82,14 +98,15 @@ man3_files = \
     xo_set_syslog_enterprise_id.3 \
     xo_set_version.3 \
     xo_set_writer.3 \
-    xo_syslog.3
+    xo_syslog.3 \
+    xo_utf8.3
 
 man5_files = \
     xo_format.5
 
 man7_files = \
     libxo.7 \
-    xo_csv.7 \
+    xo_encoders.7 \
     xo_options.7
 
 man_MANS = ${man3_files} ${man5_files} ${man7_files}

@@ -1,0 +1,2 @@
+test_19: rtoon: discarding list 'f-group': lists nested inside an auto-dense list are dropped (further drops not reported)
+test_19: rtoon: nested list not permitted inside a dense list instance ('e-part')

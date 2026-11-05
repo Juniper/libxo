@@ -11,8 +11,7 @@ HTML using the same commands that emit text output.
 The style of output can be selected using a specific option: "-X" for
 XML, "-J" for JSON, "-H" for HTML, or "-T" for TEXT, which is the
 default.  The "--style <style>" option can also be used.  The standard
-set of "--libxo" options are available (see :ref:`options`), as well
-as the :ref:`LIBXO_OPTIONS <libxo-options>` environment variable.
+set of "--libxo" options are available (see :ref:`options`).
 
 The `xo` utility accepts a format string suitable for `xo_emit` and
 a set of zero or more arguments used to supply data for that string::

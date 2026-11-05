@@ -33,8 +33,14 @@ extern "C" {
 #include <stdlib.h>
 #include <errno.h>
 
+/*
+ * __dead2 comes from <sys/cdefs.h> on the BSDs and macOS; glibc has
+ * no such macro, so there we ask the compiler directly.
+ */
 #ifdef __dead2
 #define XO_NORETURN __dead2
+#elif defined(__GNUC__) || defined(__clang__)
+#define XO_NORETURN __attribute__((__noreturn__))
 #else
 #define XO_NORETURN
 #endif /* __dead2 */
@@ -77,7 +83,7 @@ typedef unsigned long long xo_xof_flags_t;
 #define XOF_INFO	XOF_BIT(6) /** Emit additional info fields (HTML) */
 #define XOF_WARN_XML	XOF_BIT(7) /** Emit warnings in XML (on stdout) */
 
-#define XOF_NO_ENV	XOF_BIT(8) /** Don't look at LIBXO_OPTIONS env var */
+#define XOF_NO_ENV	XOF_BIT(8) /** Deprecated; no effect (was LIBXO_OPTIONS) */
 #define XOF_NO_VA_ARG	XOF_BIT(9) /** Don't advance va_list w/ va_arg() */
 #define XOF_DTRT	XOF_BIT(10) /** Enable "do the right thing" mode */
 #define XOF_KEYS	XOF_BIT(11) /** Flag 'key' fields for xml and json */
@@ -119,6 +125,7 @@ typedef unsigned long long xo_xof_flags_t;
 #define XOF_FILTER_WARN	XOF_BIT(37)  /** Warn about runtime errors w/ filters */
 #define XOF_GROUP	XOF_BIT(38)  /** Insert locale thousands separators */
 #define XOF_LINT	XOF_BIT(39)  /** Warn about lint issues */
+#define XOF_XML11	XOF_BIT(40)  /** XML 1.1: allow control char refs */
 
 typedef unsigned xo_emit_flags_t; /* Flags to xo_emit() and friends */
 #define XOEF_RETAIN	0	  /* Deprecated: retain feature removed */
@@ -130,45 +137,52 @@ typedef unsigned xo_emit_flags_t; /* Flags to xo_emit() and friends */
  * plugin API (xo_encoder.h).  This structure is not public and should
  * not be used by API client code.
  */
+/*
+ * A plain "1" is an int, and shifting it gives an int no matter how
+ * wide the type that holds the result.  Flags of a 64-bit type are
+ * built from a 64-bit one instead.
+ */
+#define XO_64B1 ((uint64_t) 1)
+
 typedef uint64_t xo_xff_flags_t;
-#define XFF_COLON	(1<<0)	/* Append a ":" */
-#define XFF_COMMA	(1<<1)	/* Append a "," iff there's more output */
-#define XFF_WS		(1<<2)	/* Append a blank */
-#define XFF_ENCODE_ONLY	(1<<3)	/* Only emit for encoding styles (XML, JSON) */
+#define XFF_COLON	(XO_64B1 << 0)	/* Append a ":" */
+#define XFF_COMMA	(XO_64B1 << 1)	/* Append "," iff more output */
+#define XFF_WS		(XO_64B1 << 2)	/* Append a blank */
+#define XFF_ENCODE_ONLY	(XO_64B1 << 3)	/* Encoding styles only (XML, JSON) */
 
-#define XFF_QUOTE	(1<<4)	/* Force quotes */
-#define XFF_NO_QUOTE	(1<<5)	/* Force no quotes */
-#define XFF_DISPLAY_ONLY (1<<6)	/* Only emit for display styles (text, html) */
-#define XFF_KEY		(1<<7)	/* Field is a key (for XPath) */
+#define XFF_QUOTE	(XO_64B1 << 4)	/* Force quotes */
+#define XFF_NO_QUOTE	(XO_64B1 << 5)	/* Force no quotes */
+#define XFF_DISPLAY_ONLY (XO_64B1 << 6)	/* Display styles only (text, html) */
+#define XFF_KEY		(XO_64B1 << 7)	/* Field is a key (for XPath) */
 
-#define XFF_XML		(1<<8)	/* Force XML encoding style (for XPath) */
-#define XFF_ATTR	(1<<9)	/* Escape value using attribute rules (XML) */
-#define XFF_BLANK_LINE	(1<<10)	/* Emit a blank line */
-#define XFF_NO_OUTPUT	(1<<11)	/* Do not make any output */
+#define XFF_XML		(XO_64B1 << 8)	/* Force XML encoding style (XPath) */
+#define XFF_ATTR	(XO_64B1 << 9)	/* Escape by attribute rules (XML) */
+#define XFF_BLANK_LINE	(XO_64B1 << 10)	/* Emit a blank line */
+#define XFF_NO_OUTPUT	(XO_64B1 << 11)	/* Do not make any output */
 
-#define XFF_TRIM_WS	(1<<12)	/* Trim whitespace off encoded values */
-#define XFF_LEAF_LIST	(1<<13)	/* A leaf-list (list of values) */
-#define XFF_UNESCAPE	(1<<14)	/* Need to printf-style unescape the value */
-#define XFF_HUMANIZE	(1<<15)	/* Humanize the value (for display styles) */
+#define XFF_TRIM_WS	(XO_64B1 << 12)	/* Trim whitespace off encoded value */
+#define XFF_LEAF_LIST	(XO_64B1 << 13)	/* A leaf-list (list of values) */
+#define XFF_UNESCAPE	(XO_64B1 << 14)	/* Need to printf-style unescape */
+#define XFF_HUMANIZE	(XO_64B1 << 15)	/* Humanize value (display styles) */
 
-#define XFF_HN_SPACE	(1<<16)	/* Humanize: put space before suffix */
-#define XFF_HN_DECIMAL	(1<<17)	/* Humanize: add one decimal place if <10 */
-#define XFF_HN_1000	(1<<18)	/* Humanize: use 1000, not 1024 */
-#define XFF_GT_FIELD	(1<<19) /* Call gettext() on a field */
+#define XFF_HN_SPACE	(XO_64B1 << 16)	/* Humanize: put space before suffix */
+#define XFF_HN_DECIMAL	(XO_64B1 << 17)	/* Humanize: one decimal if <10 */
+#define XFF_HN_1000	(XO_64B1 << 18)	/* Humanize: use 1000, not 1024 */
+#define XFF_GT_FIELD	(XO_64B1 << 19) /* Call gettext() on a field */
 
-#define XFF_GT_PLURAL	(1<<20)	/* Call dngettext to find plural form */
-#define XFF_ARGUMENT	(1<<21)	/* Content provided via argument */
-#define XFF_ESC_SLASH	(1<<22)	/* Escape a forward slash in a JSON string */
-#define XFF_ESC_SQUARE	(1<<23)	/* Escape XML control chars to UTF8 square */
+#define XFF_GT_PLURAL	(XO_64B1 << 20)	/* Call dngettext to find plural */
+#define XFF_ARGUMENT	(XO_64B1 << 21)	/* Content provided via argument */
+#define XFF_ESC_SLASH	(XO_64B1 << 22)	/* Escape a forward slash in JSON */
+#define XFF_ESC_SQUARE	(XO_64B1 << 23)	/* Escape XML ctrl as UTF8 square */
 
-#define XFF_ESC_PRIVATE (1<<24)	/* Escape XML ctrl chars as private (0xe000) */
-#define XFF_SKIP	(1<<25)	/* Skip this field (runtime state, not
+#define XFF_ESC_PRIVATE (XO_64B1 << 24)	/* Escape XML ctrl chars as private */
+#define XFF_SKIP	(XO_64B1 << 25)	/* Skip this field (runtime state, not
 				   parse data; never cached) */
-#define XFF_NO_UNESCAPE (1<<26) /* Ignore XFF_UNESCAPE */
-#define XFF_UNITS_ATTR  (1<<27)	/* Units only appear in attribute */
-#define XFF_FIRST_CAP	(1<<28)	/* First letter get capitalized (toupper) */
-#define XFF_INT_GROUP	(1<<29) /* Integer group: an int that wants grouping */
-#define XFF_DENSE	(1<<30) /* Use dense (tabular) form (RTOON) */
+#define XFF_NO_UNESCAPE (XO_64B1 << 26) /* Ignore XFF_UNESCAPE */
+#define XFF_UNITS_ATTR  (XO_64B1 << 27)	/* Units only appear in attribute */
+#define XFF_FIRST_CAP	(XO_64B1 << 28)	/* First letter gets capitalized */
+#define XFF_INT_GROUP	(XO_64B1 << 29) /* An int that wants grouping */
+#define XFF_DENSE	(XO_64B1 << 30) /* Use dense (tabular) form (RTOON) */
 
 /* Flags to turn off when we don't want i18n processing */
 #define XFF_GT_FLAGS (XFF_GT_FIELD | XFF_GT_PLURAL)
@@ -329,6 +343,32 @@ xo_emit_f (xo_emit_flags_t flags, const char *fmt, ...);
 
 struct xo_format_cache_s;
 typedef struct xo_format_cache_s xo_format_cache_t;
+
+/*
+ * Identifies the layout of a precompiled cache, including the target
+ * facts it depends on (see XO_PRECOMPILED_VERSION in xo_format.h).
+ * It's 64 bits wide since no ABI widens a 64-bit argument, so the IR
+ * pass can pass it without knowing the target's sign- or zero-extension
+ * rules for narrower types.
+ */
+typedef uint64_t xo_precomp_version_t;
+
+xo_ssize_t
+xo_emit_precompiled (xo_precomp_version_t vers, const xo_format_cache_t *fcp,
+		     const char *fmt, ...);
+
+xo_ssize_t
+xo_emit_precompiled_h (xo_handle_t *xop, xo_precomp_version_t vers,
+		       const xo_format_cache_t *fcp, const char *fmt, ...);
+
+xo_ssize_t
+xo_emit_precompiled_v (xo_precomp_version_t vers, const xo_format_cache_t *fcp,
+		       const char *fmt, va_list vap);
+
+xo_ssize_t
+xo_emit_precompiled_hv (xo_handle_t *xop, xo_precomp_version_t vers,
+			const xo_format_cache_t *fcp, const char *fmt,
+			va_list vap);
 
 xo_ssize_t
 xo_emit_cached_h (xo_handle_t *xop, const xo_format_cache_t *fcp,
@@ -746,7 +786,7 @@ xo_emit_err_p (int eval, const char *fmt, ...)
     exit(eval);
 }
 
-XO_PRINTFLIKE(2, 3)
+XO_NORETURN XO_PRINTFLIKE(2, 3)
 static inline void
 xo_emit_errx_p (int eval, const char *fmt, ...)
 {
@@ -757,7 +797,7 @@ xo_emit_errx_p (int eval, const char *fmt, ...)
     exit(eval);
 }
 
-XO_PRINTFLIKE(3, 4)
+XO_NORETURN XO_PRINTFLIKE(3, 4)
 static inline void
 xo_emit_errc_p (int eval, int code, const char *fmt, ...)
 {
@@ -784,7 +824,7 @@ xo_no_setlocale (void);
  * "--libxo".  A full description of these arguments is in the base
  * documentation.
  * @param[in] argc Number of arguments (ala #main())
- * @param[in] argc Array of argument strings (ala #main())
+ * @param[in] argv Array of argument strings (ala #main())
  * @return New number of arguments, or -1 for failure.
  */
 int
@@ -866,8 +906,14 @@ void
 xo_set_syslog_handler (xo_syslog_open_t open_func, xo_syslog_send_t send_func,
 		       xo_syslog_close_t close_func);
 
+/*
+ * An enterprise ID is an IANA Private Enterprise Number, and those
+ * are well past what sixteen bits can hold.
+ */
+typedef uint32_t xo_enterprise_id_t;
+
 void
-xo_set_syslog_enterprise_id (unsigned short eid);
+xo_set_syslog_enterprise_id (xo_enterprise_id_t eid);
 
 void
 xo_syslog_set_pid (pid_t pid);

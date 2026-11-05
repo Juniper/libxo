@@ -11,6 +11,8 @@
 #ifndef XO_PRIVATE_H
 #define XO_PRIVATE_H
 
+#include <inttypes.h>
+
 /* Thread-local storage macros */
 
 #define THREAD_LOCAL_before 1
@@ -27,11 +29,63 @@
 #define THREAD_LOCAL(_x) __declspec(_x)
 #endif
 
+#ifdef PRId64
+#define XO_PRId64 PRId64
+#else
+#define XO_PRId64 "lld"
+#endif /* PRId64 */
+
+#ifdef PRIu64
+#define XO_PRIu64 PRIu64
+#else
+#define XO_PRIu64 "llu"
+#endif /* PRIu64 */
+
 /*
  * Expose libxo's memory allocation functions
  */
 extern xo_realloc_func_t xo_realloc;
 extern xo_free_func_t xo_free;
+
+/*
+ * strdup() by way of xo_realloc, so the result can be given to
+ * xo_free().  The two allocators differ once the application calls
+ * xo_set_allocator(), and then a string from strdup() cannot be
+ * released with xo_free().
+ */
+static inline char *
+xo_strdup (const char *str)
+{
+    size_t len = strlen(str) + 1;
+    /* Sadly, c++ needs this cast and we are included by c++ */
+    char *cp = (char *) xo_realloc(NULL, len);
+
+    if (cp)
+	memcpy(cp, str, len);
+
+    return cp;
+}
+
+/*
+ * strndup() by way of xo_realloc, for the same reason, with a twist:
+ * len < 0 means len = strlen(str).
+ */
+static inline char *
+xo_strndup (const char *str, ssize_t len)
+{
+    if (len < 0)
+	len = strlen(str);
+
+    /* Sadly, c++ needs this cast and we are included by c++ */
+    char *cp = (char *) xo_realloc(NULL, len + 1);
+
+    if (cp) {
+	memcpy(cp, str, len);
+	cp[len] = '\0';
+    }
+
+    return cp;
+}
 
 /*
  * Simple string comparison function (without the temptation
@@ -92,7 +146,8 @@ xo_streqn (const char *one, const char *two, ssize_t len_of_two)
 static inline void *
 xo_memrchr (void *data, int c, xo_ssize_t len)
 {
-    unsigned char *cp = data;
+    /* Sadly, c++ needs this cast and we are included by c++ */
+    unsigned char *cp = (unsigned char *) data;
 
     for (cp += len; len > 0; len--) {
 	if (*--cp == (unsigned char) c)
@@ -104,7 +159,7 @@ xo_memrchr (void *data, int c, xo_ssize_t len)
 #endif /* HAVE_MEMRCHR */
 
 void
-xo_dbg (xo_handle_t *xop, const char *fmt, ...);
+xo_dbg (xo_handle_t *xop, const char *fmt, ...) XO_PRINTFLIKE(2, 3);
 
 void
 xo_dbg_v (xo_handle_t *xop UNUSED, const char *fmt UNUSED, va_list vap UNUSED);
@@ -123,6 +178,8 @@ typedef uint32_t xo_filter_status_t;
 #define XO_STATUS_TRACK	2	/* Track open/close/key paths, but no data */
 #define XO_STATUS_PRED	3	/* Looking for a predicate */
 #define XO_STATUS_DEAD	4	/* Nope, it's dead under this hierarchy */
+#define XO_STATUS_COND	5	/* FULL, if a pending predicate passes */
+#define XO_STATUS_LIVE	6	/* A pending predicate passed (return only) */
 
 const char *
 xo_filt_status_name (xo_filter_status_t fstatus);

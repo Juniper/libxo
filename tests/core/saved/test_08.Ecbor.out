@@ -1,0 +1,798 @@
+op create: [cbor] []
+ [append] @ 0 (1/1)
+ bf                                                    .
+    op open_container: [top] []
+ [append] @ 1 (4/4)
+ 63 74 6f 70                                           ctop
+ [append] @ 5 (1/1)
+ bf                                                    .
+      op open_container: [data] []
+   [append] @ 6 (5/5)
+   64 64 61 74  61                                       ddata
+   [append] @ 11 (1/1)
+   bf                                                    .
+        op open_container: [contents] []
+     [append] @ 12 (9/9)
+     68 63 6f 6e  74 65 6e 74  - 73                        hcontents
+     [append] @ 21 (1/1)
+     bf                                                    .
+          op open_list: [item] []
+       [append] @ 22 (5/5)
+       64 69 74 65  6d                                       ditem
+       [append] @ 27 (1/1)
+       9f                                                    .
+            op open_instance: [item] []
+         [append] @ 28 (1/1)
+         bf                                                    .
+              op string: [name] [gum]
+           [append] @ 29 (5/5)
+           64 6e 61 6d  65                                       dname
+           [append] @ 34 (4/4)
+           63 67 75 6d                                           cgum
+              op content: [count] [1412]
+           [append] @ 38 (6/6)
+           65 63 6f 75  6e 74                                    ecount
+           [content] @ 44 (3/3)
+           19 05 84                                              ...
+              op close_instance: [item] []
+           [append] @ 47 (1/1)
+           ff                                                    .
+            op open_instance: [item] []
+         [append] @ 48 (1/1)
+         bf                                                    .
+              op string: [name] [rope]
+           [append] @ 49 (5/5)
+           64 6e 61 6d  65                                       dname
+           [append] @ 54 (5/5)
+           64 72 6f 70  65                                       drope
+              op content: [count] [85]
+           [append] @ 59 (6/6)
+           65 63 6f 75  6e 74                                    ecount
+           [content] @ 65 (2/2)
+           18 55                                                 .U
+              op close_instance: [item] []
+           [append] @ 67 (1/1)
+           ff                                                    .
+            op open_instance: [item] []
+         [append] @ 68 (1/1)
+         bf                                                    .
+              op string: [name] [ladder]
+           [append] @ 69 (5/5)
+           64 6e 61 6d  65                                       dname
+           [append] @ 74 (7/7)
+           66 6c 61 64  64 65 72                                 fladder
+              op content: [count] [0]
+           [append] @ 81 (6/6)
+           65 63 6f 75  6e 74                                    ecount
+           [content] @ 87 (1/1)
+           00                                                    .
+              op close_instance: [item] []
+           [append] @ 88 (1/1)
+           ff                                                    .
+            op open_instance: [item] []
+         [append] @ 89 (1/1)
+         bf                                                    .
+              op string: [name] [bolt]
+           [append] @ 90 (5/5)
+           64 6e 61 6d  65                                       dname
+           [append] @ 95 (5/5)
+           64 62 6f 6c  74                                       dbolt
+              op content: [count] [4123]
+           [append] @ 100 (6/6)
+           65 63 6f 75  6e 74                                    ecount
+           [content] @ 106 (3/3)
+           19 10 1b                                              ...
+              op close_instance: [item] []
+           [append] @ 109 (1/1)
+           ff                                                    .
+            op open_instance: [item] []
+         [append] @ 110 (1/1)
+         bf                                                    .
+              op string: [name] [water]
+           [append] @ 111 (5/5)
+           64 6e 61 6d  65                                       dname
+           [append] @ 116 (6/6)
+           65 77 61 74  65 72                                    ewater
+              op content: [count] [17]
+           [append] @ 122 (6/6)
+           65 63 6f 75  6e 74                                    ecount
+           [content] @ 128 (1/1)
+           11                                                    .
+              op close_instance: [item] []
+           [append] @ 129 (1/1)
+           ff                                                    .
+            op close_list: [item] []
+         [append] @ 130 (1/1)
+         ff                                                    .
+          op close_container: [contents] []
+       [append] @ 131 (1/1)
+       ff                                                    .
+        op close_container: [data] []
+     [append] @ 132 (1/1)
+     ff                                                    .
+      op open_container: [data2] []
+   [append] @ 133 (6/6)
+   65 64 61 74  61 32                                    edata2
+   [append] @ 139 (1/1)
+   bf                                                    .
+        op open_container: [contents] []
+     [append] @ 140 (9/9)
+     68 63 6f 6e  74 65 6e 74  - 73                        hcontents
+     [append] @ 149 (1/1)
+     bf                                                    .
+          op open_list: [item] []
+       [append] @ 150 (5/5)
+       64 69 74 65  6d                                       ditem
+       [append] @ 155 (1/1)
+       9f                                                    .
+            op open_instance: [item] []
+         [append] @ 156 (1/1)
+         bf                                                    .
+              op string: [name] [gum]
+           [append] @ 157 (5/5)
+           64 6e 61 6d  65                                       dname
+           [append] @ 162 (4/4)
+           63 67 75 6d                                           cgum
+              op content: [count] [1412]
+           [append] @ 166 (6/6)
+           65 63 6f 75  6e 74                                    ecount
+           [content] @ 172 (3/3)
+           19 05 84                                              ...
+              op close_instance: [item] []
+           [append] @ 175 (1/1)
+           ff                                                    .
+            op open_instance: [item] []
+         [append] @ 176 (1/1)
+         bf                                                    .
+              op string: [name] [rope]
+           [append] @ 177 (5/5)
+           64 6e 61 6d  65                                       dname
+           [append] @ 182 (5/5)
+           64 72 6f 70  65                                       drope
+              op content: [count] [85]
+           [append] @ 187 (6/6)
+           65 63 6f 75  6e 74                                    ecount
+           [content] @ 193 (2/2)
+           18 55                                                 .U
+              op close_instance: [item] []
+           [append] @ 195 (1/1)
+           ff                                                    .
+            op open_instance: [item] []
+         [append] @ 196 (1/1)
+         bf                                                    .
+              op string: [name] [ladder]
+           [append] @ 197 (5/5)
+           64 6e 61 6d  65                                       dname
+           [append] @ 202 (7/7)
+           66 6c 61 64  64 65 72                                 fladder
+              op content: [count] [0]
+           [append] @ 209 (6/6)
+           65 63 6f 75  6e 74                                    ecount
+           [content] @ 215 (1/1)
+           00                                                    .
+              op close_instance: [item] []
+           [append] @ 216 (1/1)
+           ff                                                    .
+            op open_instance: [item] []
+         [append] @ 217 (1/1)
+         bf                                                    .
+              op string: [name] [bolt]
+           [append] @ 218 (5/5)
+           64 6e 61 6d  65                                       dname
+           [append] @ 223 (5/5)
+           64 62 6f 6c  74                                       dbolt
+              op content: [count] [4123]
+           [append] @ 228 (6/6)
+           65 63 6f 75  6e 74                                    ecount
+           [content] @ 234 (3/3)
+           19 10 1b                                              ...
+              op close_instance: [item] []
+           [append] @ 237 (1/1)
+           ff                                                    .
+            op open_instance: [item] []
+         [append] @ 238 (1/1)
+         bf                                                    .
+              op string: [name] [water]
+           [append] @ 239 (5/5)
+           64 6e 61 6d  65                                       dname
+           [append] @ 244 (6/6)
+           65 77 61 74  65 72                                    ewater
+              op content: [count] [17]
+           [append] @ 250 (6/6)
+           65 63 6f 75  6e 74                                    ecount
+           [content] @ 256 (1/1)
+           11                                                    .
+              op close_instance: [item] []
+           [append] @ 257 (1/1)
+           ff                                                    .
+            op close_list: [item] []
+         [append] @ 258 (1/1)
+         ff                                                    .
+          op close_container: [contents] []
+       [append] @ 259 (1/1)
+       ff                                                    .
+        op close_container: [data2] []
+     [append] @ 260 (1/1)
+     ff                                                    .
+      op open_container: [data3] []
+   [append] @ 261 (6/6)
+   65 64 61 74  61 33                                    edata3
+   [append] @ 267 (1/1)
+   bf                                                    .
+        op open_container: [contents] []
+     [append] @ 268 (9/9)
+     68 63 6f 6e  74 65 6e 74  - 73                        hcontents
+     [append] @ 277 (1/1)
+     bf                                                    .
+          op open_list: [item] []
+       [append] @ 278 (5/5)
+       64 69 74 65  6d                                       ditem
+       [append] @ 283 (1/1)
+       9f                                                    .
+            op open_instance: [item] []
+         [append] @ 284 (1/1)
+         bf                                                    .
+              op string: [name] [gum]
+           [append] @ 285 (5/5)
+           64 6e 61 6d  65                                       dname
+           [append] @ 290 (4/4)
+           63 67 75 6d                                           cgum
+              op content: [count] [1412]
+           [append] @ 294 (6/6)
+           65 63 6f 75  6e 74                                    ecount
+           [content] @ 300 (3/3)
+           19 05 84                                              ...
+              op close_instance: [item] []
+           [append] @ 303 (1/1)
+           ff                                                    .
+            op open_instance: [item] []
+         [append] @ 304 (1/1)
+         bf                                                    .
+              op string: [name] [rope]
+           [append] @ 305 (5/5)
+           64 6e 61 6d  65                                       dname
+           [append] @ 310 (5/5)
+           64 72 6f 70  65                                       drope
+              op content: [count] [85]
+           [append] @ 315 (6/6)
+           65 63 6f 75  6e 74                                    ecount
+           [content] @ 321 (2/2)
+           18 55                                                 .U
+              op close_instance: [item] []
+           [append] @ 323 (1/1)
+           ff                                                    .
+            op open_instance: [item] []
+         [append] @ 324 (1/1)
+         bf                                                    .
+              op string: [name] [ladder]
+           [append] @ 325 (5/5)
+           64 6e 61 6d  65                                       dname
+           [append] @ 330 (7/7)
+           66 6c 61 64  64 65 72                                 fladder
+              op content: [count] [0]
+           [append] @ 337 (6/6)
+           65 63 6f 75  6e 74                                    ecount
+           [content] @ 343 (1/1)
+           00                                                    .
+              op close_instance: [item] []
+           [append] @ 344 (1/1)
+           ff                                                    .
+            op open_instance: [item] []
+         [append] @ 345 (1/1)
+         bf                                                    .
+              op string: [name] [bolt]
+           [append] @ 346 (5/5)
+           64 6e 61 6d  65                                       dname
+           [append] @ 351 (5/5)
+           64 62 6f 6c  74                                       dbolt
+              op content: [count] [4123]
+           [append] @ 356 (6/6)
+           65 63 6f 75  6e 74                                    ecount
+           [content] @ 362 (3/3)
+           19 10 1b                                              ...
+              op close_instance: [item] []
+           [append] @ 365 (1/1)
+           ff                                                    .
+            op open_instance: [item] []
+         [append] @ 366 (1/1)
+         bf                                                    .
+              op string: [name] [water]
+           [append] @ 367 (5/5)
+           64 6e 61 6d  65                                       dname
+           [append] @ 372 (6/6)
+           65 77 61 74  65 72                                    ewater
+              op content: [count] [17]
+           [append] @ 378 (6/6)
+           65 63 6f 75  6e 74                                    ecount
+           [content] @ 384 (1/1)
+           11                                                    .
+              op string: [test] [one]
+           [append] @ 385 (5/5)
+           64 74 65 73  74                                       dtest
+           [append] @ 390 (4/4)
+           63 6f 6e 65                                           cone
+              op close_instance: [item] []
+           [append] @ 394 (1/1)
+           ff                                                    .
+            op close_list: [item] []
+         [append] @ 395 (1/1)
+         ff                                                    .
+          op close_container: [contents] []
+       [append] @ 396 (1/1)
+       ff                                                    .
+        op close_container: [data3] []
+     [append] @ 397 (1/1)
+     ff                                                    .
+      op open_container: [data4] []
+   [append] @ 398 (6/6)
+   65 64 61 74  61 34                                    edata4
+   [append] @ 404 (1/1)
+   bf                                                    .
+        op open_container: [contents] []
+     [append] @ 405 (9/9)
+     68 63 6f 6e  74 65 6e 74  - 73                        hcontents
+     [append] @ 414 (1/1)
+     bf                                                    .
+          op open_list: [item] []
+       [append] @ 415 (5/5)
+       64 69 74 65  6d                                       ditem
+       [append] @ 420 (1/1)
+       9f                                                    .
+            op open_instance: [item] []
+         [append] @ 421 (1/1)
+         bf                                                    .
+              op string: [name] [gum]
+           [append] @ 422 (5/5)
+           64 6e 61 6d  65                                       dname
+           [append] @ 427 (4/4)
+           63 67 75 6d                                           cgum
+              op content: [count] [1412]
+           [append] @ 431 (6/6)
+           65 63 6f 75  6e 74                                    ecount
+           [content] @ 437 (3/3)
+           19 05 84                                              ...
+              op open_list: [sub] []
+           [append] @ 440 (4/4)
+           63 73 75 62                                           csub
+           [append] @ 444 (1/1)
+           9f                                                    .
+                op open_instance: [sub] []
+             [append] @ 445 (1/1)
+             bf                                                    .
+                  op content: [name] [0]
+               [append] @ 446 (5/5)
+               64 6e 61 6d  65                                       dname
+               [content] @ 451 (1/1)
+               00                                                    .
+                  op content: [next] [1]
+               [append] @ 452 (5/5)
+               64 6e 65 78  74                                       dnext
+               [content] @ 457 (1/1)
+               01                                                    .
+                  op close_instance: [sub] []
+               [append] @ 458 (1/1)
+               ff                                                    .
+                op open_instance: [sub] []
+             [append] @ 459 (1/1)
+             bf                                                    .
+                  op content: [name] [1]
+               [append] @ 460 (5/5)
+               64 6e 61 6d  65                                       dname
+               [content] @ 465 (1/1)
+               01                                                    .
+                  op content: [next] [2]
+               [append] @ 466 (5/5)
+               64 6e 65 78  74                                       dnext
+               [content] @ 471 (1/1)
+               02                                                    .
+                  op close_instance: [sub] []
+               [append] @ 472 (1/1)
+               ff                                                    .
+                op open_instance: [sub] []
+             [append] @ 473 (1/1)
+             bf                                                    .
+                  op content: [name] [2]
+               [append] @ 474 (5/5)
+               64 6e 61 6d  65                                       dname
+               [content] @ 479 (1/1)
+               02                                                    .
+                  op content: [next] [3]
+               [append] @ 480 (5/5)
+               64 6e 65 78  74                                       dnext
+               [content] @ 485 (1/1)
+               03                                                    .
+                  op close_instance: [sub] []
+               [append] @ 486 (1/1)
+               ff                                                    .
+                op close_list: [sub] []
+             [append] @ 487 (1/1)
+             ff                                                    .
+              op content: [last] [3]
+           [append] @ 488 (5/5)
+           64 6c 61 73  74                                       dlast
+           [content] @ 493 (1/1)
+           03                                                    .
+              op close_instance: [item] []
+           [append] @ 494 (1/1)
+           ff                                                    .
+            op open_instance: [item] []
+         [append] @ 495 (1/1)
+         bf                                                    .
+              op string: [name] [rope]
+           [append] @ 496 (5/5)
+           64 6e 61 6d  65                                       dname
+           [append] @ 501 (5/5)
+           64 72 6f 70  65                                       drope
+              op content: [count] [85]
+           [append] @ 506 (6/6)
+           65 63 6f 75  6e 74                                    ecount
+           [content] @ 512 (2/2)
+           18 55                                                 .U
+              op open_list: [sub] []
+           [append] @ 514 (4/4)
+           63 73 75 62                                           csub
+           [append] @ 518 (1/1)
+           9f                                                    .
+                op open_instance: [sub] []
+             [append] @ 519 (1/1)
+             bf                                                    .
+                  op content: [name] [0]
+               [append] @ 520 (5/5)
+               64 6e 61 6d  65                                       dname
+               [content] @ 525 (1/1)
+               00                                                    .
+                  op content: [next] [1]
+               [append] @ 526 (5/5)
+               64 6e 65 78  74                                       dnext
+               [content] @ 531 (1/1)
+               01                                                    .
+                  op close_instance: [sub] []
+               [append] @ 532 (1/1)
+               ff                                                    .
+                op open_instance: [sub] []
+             [append] @ 533 (1/1)
+             bf                                                    .
+                  op content: [name] [1]
+               [append] @ 534 (5/5)
+               64 6e 61 6d  65                                       dname
+               [content] @ 539 (1/1)
+               01                                                    .
+                  op content: [next] [2]
+               [append] @ 540 (5/5)
+               64 6e 65 78  74                                       dnext
+               [content] @ 545 (1/1)
+               02                                                    .
+                  op close_instance: [sub] []
+               [append] @ 546 (1/1)
+               ff                                                    .
+                op open_instance: [sub] []
+             [append] @ 547 (1/1)
+             bf                                                    .
+                  op content: [name] [2]
+               [append] @ 548 (5/5)
+               64 6e 61 6d  65                                       dname
+               [content] @ 553 (1/1)
+               02                                                    .
+                  op content: [next] [3]
+               [append] @ 554 (5/5)
+               64 6e 65 78  74                                       dnext
+               [content] @ 559 (1/1)
+               03                                                    .
+                  op close_instance: [sub] []
+               [append] @ 560 (1/1)
+               ff                                                    .
+                op close_list: [sub] []
+             [append] @ 561 (1/1)
+             ff                                                    .
+              op content: [last] [3]
+           [append] @ 562 (5/5)
+           64 6c 61 73  74                                       dlast
+           [content] @ 567 (1/1)
+           03                                                    .
+              op close_instance: [item] []
+           [append] @ 568 (1/1)
+           ff                                                    .
+            op open_instance: [item] []
+         [append] @ 569 (1/1)
+         bf                                                    .
+              op string: [name] [ladder]
+           [append] @ 570 (5/5)
+           64 6e 61 6d  65                                       dname
+           [append] @ 575 (7/7)
+           66 6c 61 64  64 65 72                                 fladder
+              op content: [count] [0]
+           [append] @ 582 (6/6)
+           65 63 6f 75  6e 74                                    ecount
+           [content] @ 588 (1/1)
+           00                                                    .
+              op open_list: [sub] []
+           [append] @ 589 (4/4)
+           63 73 75 62                                           csub
+           [append] @ 593 (1/1)
+           9f                                                    .
+                op open_instance: [sub] []
+             [append] @ 594 (1/1)
+             bf                                                    .
+                  op content: [name] [0]
+               [append] @ 595 (5/5)
+               64 6e 61 6d  65                                       dname
+               [content] @ 600 (1/1)
+               00                                                    .
+                  op content: [next] [1]
+               [append] @ 601 (5/5)
+               64 6e 65 78  74                                       dnext
+               [content] @ 606 (1/1)
+               01                                                    .
+                  op close_instance: [sub] []
+               [append] @ 607 (1/1)
+               ff                                                    .
+                op open_instance: [sub] []
+             [append] @ 608 (1/1)
+             bf                                                    .
+                  op content: [name] [1]
+               [append] @ 609 (5/5)
+               64 6e 61 6d  65                                       dname
+               [content] @ 614 (1/1)
+               01                                                    .
+                  op content: [next] [2]
+               [append] @ 615 (5/5)
+               64 6e 65 78  74                                       dnext
+               [content] @ 620 (1/1)
+               02                                                    .
+                  op close_instance: [sub] []
+               [append] @ 621 (1/1)
+               ff                                                    .
+                op open_instance: [sub] []
+             [append] @ 622 (1/1)
+             bf                                                    .
+                  op content: [name] [2]
+               [append] @ 623 (5/5)
+               64 6e 61 6d  65                                       dname
+               [content] @ 628 (1/1)
+               02                                                    .
+                  op content: [next] [3]
+               [append] @ 629 (5/5)
+               64 6e 65 78  74                                       dnext
+               [content] @ 634 (1/1)
+               03                                                    .
+                  op close_instance: [sub] []
+               [append] @ 635 (1/1)
+               ff                                                    .
+                op close_list: [sub] []
+             [append] @ 636 (1/1)
+             ff                                                    .
+              op content: [last] [3]
+           [append] @ 637 (5/5)
+           64 6c 61 73  74                                       dlast
+           [content] @ 642 (1/1)
+           03                                                    .
+              op close_instance: [item] []
+           [append] @ 643 (1/1)
+           ff                                                    .
+            op open_instance: [item] []
+         [append] @ 644 (1/1)
+         bf                                                    .
+              op string: [name] [bolt]
+           [append] @ 645 (5/5)
+           64 6e 61 6d  65                                       dname
+           [append] @ 650 (5/5)
+           64 62 6f 6c  74                                       dbolt
+              op content: [count] [4123]
+           [append] @ 655 (6/6)
+           65 63 6f 75  6e 74                                    ecount
+           [content] @ 661 (3/3)
+           19 10 1b                                              ...
+              op open_list: [sub] []
+           [append] @ 664 (4/4)
+           63 73 75 62                                           csub
+           [append] @ 668 (1/1)
+           9f                                                    .
+                op open_instance: [sub] []
+             [append] @ 669 (1/1)
+             bf                                                    .
+                  op content: [name] [0]
+               [append] @ 670 (5/5)
+               64 6e 61 6d  65                                       dname
+               [content] @ 675 (1/1)
+               00                                                    .
+                  op content: [next] [1]
+               [append] @ 676 (5/5)
+               64 6e 65 78  74                                       dnext
+               [content] @ 681 (1/1)
+               01                                                    .
+                  op close_instance: [sub] []
+               [append] @ 682 (1/1)
+               ff                                                    .
+                op open_instance: [sub] []
+             [append] @ 683 (1/1)
+             bf                                                    .
+                  op content: [name] [1]
+               [append] @ 684 (5/5)
+               64 6e 61 6d  65                                       dname
+               [content] @ 689 (1/1)
+               01                                                    .
+                  op content: [next] [2]
+               [append] @ 690 (5/5)
+               64 6e 65 78  74                                       dnext
+               [content] @ 695 (1/1)
+               02                                                    .
+                  op close_instance: [sub] []
+               [append] @ 696 (1/1)
+               ff                                                    .
+                op open_instance: [sub] []
+             [append] @ 697 (1/1)
+             bf                                                    .
+                  op content: [name] [2]
+               [append] @ 698 (5/5)
+               64 6e 61 6d  65                                       dname
+               [content] @ 703 (1/1)
+               02                                                    .
+                  op content: [next] [3]
+               [append] @ 704 (5/5)
+               64 6e 65 78  74                                       dnext
+               [content] @ 709 (1/1)
+               03                                                    .
+                  op close_instance: [sub] []
+               [append] @ 710 (1/1)
+               ff                                                    .
+                op close_list: [sub] []
+             [append] @ 711 (1/1)
+             ff                                                    .
+              op content: [last] [3]
+           [append] @ 712 (5/5)
+           64 6c 61 73  74                                       dlast
+           [content] @ 717 (1/1)
+           03                                                    .
+              op close_instance: [item] []
+           [append] @ 718 (1/1)
+           ff                                                    .
+            op open_instance: [item] []
+         [append] @ 719 (1/1)
+         bf                                                    .
+              op string: [name] [water]
+           [append] @ 720 (5/5)
+           64 6e 61 6d  65                                       dname
+           [append] @ 725 (6/6)
+           65 77 61 74  65 72                                    ewater
+              op content: [count] [17]
+           [append] @ 731 (6/6)
+           65 63 6f 75  6e 74                                    ecount
+           [content] @ 737 (1/1)
+           11                                                    .
+              op open_list: [sub] []
+           [append] @ 738 (4/4)
+           63 73 75 62                                           csub
+           [append] @ 742 (1/1)
+           9f                                                    .
+                op open_instance: [sub] []
+             [append] @ 743 (1/1)
+             bf                                                    .
+                  op content: [name] [0]
+               [append] @ 744 (5/5)
+               64 6e 61 6d  65                                       dname
+               [content] @ 749 (1/1)
+               00                                                    .
+                  op content: [next] [1]
+               [append] @ 750 (5/5)
+               64 6e 65 78  74                                       dnext
+               [content] @ 755 (1/1)
+               01                                                    .
+                  op close_instance: [sub] []
+               [append] @ 756 (1/1)
+               ff                                                    .
+                op open_instance: [sub] []
+             [append] @ 757 (1/1)
+             bf                                                    .
+                  op content: [name] [1]
+               [append] @ 758 (5/5)
+               64 6e 61 6d  65                                       dname
+               [content] @ 763 (1/1)
+               01                                                    .
+                  op content: [next] [2]
+               [append] @ 764 (5/5)
+               64 6e 65 78  74                                       dnext
+               [content] @ 769 (1/1)
+               02                                                    .
+                  op close_instance: [sub] []
+               [append] @ 770 (1/1)
+               ff                                                    .
+                op open_instance: [sub] []
+             [append] @ 771 (1/1)
+             bf                                                    .
+                  op content: [name] [2]
+               [append] @ 772 (5/5)
+               64 6e 61 6d  65                                       dname
+               [content] @ 777 (1/1)
+               02                                                    .
+                  op content: [next] [3]
+               [append] @ 778 (5/5)
+               64 6e 65 78  74                                       dnext
+               [content] @ 783 (1/1)
+               03                                                    .
+                  op close_instance: [sub] []
+               [append] @ 784 (1/1)
+               ff                                                    .
+                op close_list: [sub] []
+             [append] @ 785 (1/1)
+             ff                                                    .
+              op content: [last] [3]
+           [append] @ 786 (5/5)
+           64 6c 61 73  74                                       dlast
+           [content] @ 791 (1/1)
+           03                                                    .
+              op string: [test] [one]
+           [append] @ 792 (5/5)
+           64 74 65 73  74                                       dtest
+           [append] @ 797 (4/4)
+           63 6f 6e 65                                           cone
+              op close_instance: [item] []
+           [append] @ 801 (1/1)
+           ff                                                    .
+            op close_list: [item] []
+         [append] @ 802 (1/1)
+         ff                                                    .
+          op close_container: [contents] []
+       [append] @ 803 (1/1)
+       ff                                                    .
+        op close_container: [data4] []
+     [append] @ 804 (1/1)
+     ff                                                    .
+      op close_container: [top] []
+   [append] @ 805 (1/1)
+   ff                                                    .
+    op finish: [] []
+ [append] @ 806 (1/1)
+ ff                                                    .
+  op flush: [] []
+>[cbor] @ 0 (327/807)
+>bf 63 74 6f  70 bf 64 64  - 61 74 61 bf  68 63 6f 6e  .ctop.ddata.hcon
+>74 65 6e 74  73 bf 64 69  - 74 65 6d 9f  bf 64 6e 61  tents.ditem..dna
+>6d 65 63 67  75 6d 65 63  - 6f 75 6e 74  19 05 84 ff  mecgumecount....
+>bf 64 6e 61  6d 65 64 72  - 6f 70 65 65  63 6f 75 6e  .dnamedropeecoun
+>74 18 55 ff  bf 64 6e 61  - 6d 65 66 6c  61 64 64 65  t.U..dnamefladde
+>72 65 63 6f  75 6e 74 00  - ff bf 64 6e  61 6d 65 64  recount...dnamed
+>62 6f 6c 74  65 63 6f 75  - 6e 74 19 10  1b ff bf 64  boltecount.....d
+>6e 61 6d 65  65 77 61 74  - 65 72 65 63  6f 75 6e 74  nameewaterecount
+>11 ff ff ff  ff 65 64 61  - 74 61 32 bf  68 63 6f 6e  .....edata2.hcon
+>74 65 6e 74  73 bf 64 69  - 74 65 6d 9f  bf 64 6e 61  tents.ditem..dna
+>6d 65 63 67  75 6d 65 63  - 6f 75 6e 74  19 05 84 ff  mecgumecount....
+>bf 64 6e 61  6d 65 64 72  - 6f 70 65 65  63 6f 75 6e  .dnamedropeecoun
+>74 18 55 ff  bf 64 6e 61  - 6d 65 66 6c  61 64 64 65  t.U..dnamefladde
+>72 65 63 6f  75 6e 74 00  - ff bf 64 6e  61 6d 65 64  recount...dnamed
+>62 6f 6c 74  65 63 6f 75  - 6e 74 19 10  1b ff bf 64  boltecount.....d
+>6e 61 6d 65  65 77 61 74  - 65 72 65 63  6f 75 6e 74  nameewaterecount
+>11 ff ff ff  ff 65 64 61  - 74 61 33 bf  68 63 6f 6e  .....edata3.hcon
+>74 65 6e 74  73 bf 64 69  - 74 65 6d 9f  bf 64 6e 61  tents.ditem..dna
+>6d 65 63 67  75 6d 65 63  - 6f 75 6e 74  19 05 84 ff  mecgumecount....
+>bf 64 6e 61  6d 65 64 72  - 6f 70 65 65  63 6f 75 6e  .dnamedropeecoun
+>74 18 55 ff  bf 64 6e 61  - 6d 65 66 6c  61 64 64 65  t.U..dnamefladde
+>72 65 63 6f  75 6e 74 00  - ff bf 64 6e  61 6d 65 64  recount...dnamed
+>62 6f 6c 74  65 63 6f 75  - 6e 74 19 10  1b ff bf 64  boltecount.....d
+>6e 61 6d 65  65 77 61 74  - 65 72 65 63  6f 75 6e 74  nameewaterecount
+>11 64 74 65  73 74 63 6f  - 6e 65 ff ff  ff ff 65 64  .dtestcone....ed
+>61 74 61 34  bf 68 63 6f  - 6e 74 65 6e  74 73 bf 64  ata4.hcontents.d
+>69 74 65 6d  9f bf 64 6e  - 61 6d 65 63  67 75 6d 65  item..dnamecgume
+>63 6f 75 6e  74 19 05 84  - 63 73 75 62  9f bf 64 6e  count...csub..dn
+>61 6d 65 00  64 6e 65 78  - 74 01 ff bf  64 6e 61 6d  ame.dnext...dnam
+>65 01 64 6e  65 78 74 02  - ff bf 64 6e  61 6d 65 02  e.dnext...dname.
+>64 6e 65 78  74 03 ff ff  - 64 6c 61 73  74 03 ff bf  dnext...dlast...
+>64 6e 61 6d  65 64 72 6f  - 70 65 65 63  6f 75 6e 74  dnamedropeecount
+>18 55 63 73  75 62 9f bf  - 64 6e 61 6d  65 00 64 6e  .Ucsub..dname.dn
+>65 78 74 01  ff bf 64 6e  - 61 6d 65 01  64 6e 65 78  ext...dname.dnex
+>74 02 ff bf  64 6e 61 6d  - 65 02 64 6e  65 78 74 03  t...dname.dnext.
+>ff ff 64 6c  61 73 74 03  - ff bf 64 6e  61 6d 65 66  ..dlast...dnamef
+>6c 61 64 64  65 72 65 63  - 6f 75 6e 74  00 63 73 75  ladderecount.csu
+>62 9f bf 64  6e 61 6d 65  - 00 64 6e 65  78 74 01 ff  b..dname.dnext..
+>bf 64 6e 61  6d 65 01 64  - 6e 65 78 74  02 ff bf 64  .dname.dnext...d
+>6e 61 6d 65  02 64 6e 65  - 78 74 03 ff  ff 64 6c 61  name.dnext...dla
+>73 74 03 ff  bf 64 6e 61  - 6d 65 64 62  6f 6c 74 65  st...dnamedbolte
+>63 6f 75 6e  74 19 10 1b  - 63 73 75 62  9f bf 64 6e  count...csub..dn
+>61 6d 65 00  64 6e 65 78  - 74 01 ff bf  64 6e 61 6d  ame.dnext...dnam
+>65 01 64 6e  65 78 74 02  - ff bf 64 6e  61 6d 65 02  e.dnext...dname.
+>64 6e 65 78  74 03 ff ff  - 64 6c 61 73  74 03 ff bf  dnext...dlast...
+>64 6e 61 6d  65 65 77 61  - 74 65 72 65  63 6f 75 6e  dnameewaterecoun
+>74 11 63 73  75 62 9f bf  - 64 6e 61 6d  65 00 64 6e  t.csub..dname.dn
+>65 78 74 01  ff bf 64 6e  - 61 6d 65 01  64 6e 65 78  ext...dname.dnex
+>74 02 ff bf  64 6e 61 6d  - 65 02 64 6e  65 78 74 03  t...dname.dnext.
+>ff ff 64 6c  61 73 74 03  - 64 74 65 73  74 63 6f 6e  ..dlast.dtestcon
+>65 ff ff ff  ff ff ff                                 e......

@@ -1,0 +1,166 @@
+{
+  "dense_test": {
+    "a_flat": {
+      "a_disk": [
+        {
+          "name": "sda",
+          "size": 100,
+          "note": "ok",
+          "tag": [
+            "x",
+            "y"
+          ]
+        },
+        {
+          "name": "sdb",
+          "size": 200,
+          "note": "true",
+          "tag": [
+            "x",
+            "y"
+          ]
+        },
+        {
+          "name": "sdc",
+          "size": 300,
+          "note": "ok",
+          "tag": [
+            "x",
+            "z,w"
+          ]
+        }
+      ]
+    },
+    "b_nested_container": {
+      "b_route": [
+        {
+          "dest": "10.0.0.0/24",
+          "proto": "static",
+          "via": {
+            "interface": "eth0",
+            "gateway": "10.0.0.1"
+          }
+        },
+        {
+          "dest": "10.0.1.0/24",
+          "proto": "direct",
+          "via": {
+            "interface": "eth1",
+            "gateway": "10.0.1.1"
+          }
+        }
+      ]
+    },
+    "f_late_nested": {
+      "f_user": [
+        {
+          "name": "root",
+          "uid": 0
+        },
+        {
+          "name": "phil",
+          "uid": 1001,
+          "f_group": [
+            {
+              "gname": "wheel"
+            }
+          ]
+        }
+      ]
+    },
+    "c_nested_list": {
+      "c_host": [
+        {
+          "host": "alpha",
+          "state": "up",
+          "c_port": [
+            {
+              "port": 20,
+              "proto": "tcp"
+            },
+            {
+              "port": 21,
+              "proto": "udp",
+              "c_conn": [
+                {
+                  "peer": "10.9.9.9"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "host": "beta",
+          "state": "down",
+          "c_port": [
+            {
+              "port": 120,
+              "proto": "tcp"
+            },
+            {
+              "port": 121,
+              "proto": "udp"
+            }
+          ]
+        },
+        {
+          "host": "gamma",
+          "state": "up",
+          "c_port": [
+            {
+              "port": 220,
+              "proto": "tcp"
+            },
+            {
+              "port": 221,
+              "proto": "udp"
+            }
+          ]
+        }
+      ]
+    },
+    "d_modifier": {
+      "d_cpu": [
+        {
+          "num": 0,
+          "load": 0
+        },
+        {
+          "num": 1,
+          "load": 7
+        },
+        {
+          "num": 2,
+          "load": 14
+        }
+      ]
+    },
+    "e_xof_dense": {
+      "e_item": [
+        {
+          "sku": "A1",
+          "qty": 2
+        },
+        {
+          "sku": "B2",
+          "qty": 1,
+          "e_part": [
+            {
+              "part": "bolt"
+            }
+          ]
+        }
+      ]
+    },
+    "g_empty_first": {
+      "g_entry": [
+        {
+
+        },
+        {
+          "name": "second"
+        }
+      ]
+    }
+  }
+}

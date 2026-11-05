@@ -19,6 +19,7 @@ include ${top_srcdir}/warnings.mk
 enc_csvincdir = ${includedir}/libxo
 
 AM_CFLAGS = \
+    -I${top_srcdir} \
     -I${top_srcdir}/libxo \
     -I${top_builddir}/libxo \
     ${WARNINGS}
@@ -56,14 +57,24 @@ SED_OPTS=\
 -e '/int yyparse (void .YYPARSE_PARAM);/d' \
 -e 's/yyparse (void .YYPARSE_PARAM)/xo_xpath_yyparse (xo_xparse_data_t *xparse_data)/'
 
-xo_xpath.c xo_xpath.tab.h: xo_xpath.y
+#
+# The redirection creates its file even when sed fails, and an empty
+# xo_xpath.c would look up to date, so sed writes a temporary file
+# that is renamed only after sed succeeds.
+#
+xo_xpath.c: xo_xpath.y
 	@echo "  YACC     xo_xpath.y ..."
 	@${YACC} ${YACC_OPTS} -o xo_xpath.tab.c ${srcdir}/xo_xpath.y
 	@echo "  GEN      xo_xpath.c ..."
-	@${SED} ${SED_OPTS} < xo_xpath.tab.c > xo_xpath.c
+	@${SED} ${SED_OPTS} < xo_xpath.tab.c > xo_xpath.c.tmp
+	@mv xo_xpath.c.tmp xo_xpath.c
+
+xo_xpath.tab.h: xo_xpath.c
+	@test -f $@ || { rm -f xo_xpath.c; ${MAKE} ${AM_MAKEFLAGS} xo_xpath.c; }
 
 CLEANFILES = \
     xo_xpath.c \
+    xo_xpath.c.tmp \
     xo_xpath.tab.c \
     xo_xpath.tab.c.orig \
     xo_xpath.tab.h \

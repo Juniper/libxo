@@ -1,0 +1,119 @@
+op create: [cbor] []
+ [append] @ 0 (1/1)
+ bf                                                    .
+    op open_container: [cached] []
+ [append] @ 1 (7/7)
+ 66 63 61 63  68 65 64                                 fcached
+ [append] @ 8 (1/1)
+ bf                                                    .
+      op string: [name] [hello]
+   [append] @ 9 (5/5)
+   64 6e 61 6d  65                                       dname
+   [append] @ 14 (6/6)
+   65 68 65 6c  6c 6f                                    ehello
+      op string: [name] [world]
+   [append] @ 20 (5/5)
+   64 6e 61 6d  65                                       dname
+   [append] @ 25 (6/6)
+   65 77 6f 72  6c 64                                    eworld
+      op content: [count] [3]
+   [append] @ 31 (6/6)
+   65 63 6f 75  6e 74                                    ecount
+   [content] @ 37 (1/1)
+   03                                                    .
+      op content: [total] [10]
+   [append] @ 38 (6/6)
+   65 74 6f 74  61 6c                                    etotal
+   [content] @ 44 (1/1)
+   0a                                                    .
+      op string: [enc] [enc-val]
+   [append] @ 45 (4/4)
+   63 65 6e 63                                           cenc
+   [append] @ 49 (8/8)
+   67 65 6e 63  2d 76 61 6c                              genc-val
+      op string: [vis] [vis-val]
+   [append] @ 57 (4/4)
+   63 76 69 73                                           cvis
+   [append] @ 61 (8/8)
+   67 76 69 73  2d 76 61 6c                              gvis-val
+      op content: [addr] [0x0]
+   [append] @ 69 (5/5)
+   64 61 64 64  72                                       daddr
+   [append] @ 74 (4/4)
+   63 30 78 30                                           c0x0
+   [content] @ 74 (4/4)
+   63 30 78 30                                           c0x0
+      op content: [port] [80]
+   [append] @ 78 (5/5)
+   64 70 6f 72  74                                       dport
+   [content] @ 83 (2/2)
+   18 50                                                 .P
+      op close_container: [cached] []
+   [append] @ 85 (1/1)
+   ff                                                    .
+    op open_container: [fallback] []
+ [append] @ 86 (9/9)
+ 68 66 61 6c  6c 62 61 63  - 6b                        hfallback
+ [append] @ 95 (1/1)
+ bf                                                    .
+      op string: [name] [hello]
+   [append] @ 96 (5/5)
+   64 6e 61 6d  65                                       dname
+   [append] @ 101 (6/6)
+   65 68 65 6c  6c 6f                                    ehello
+      op string: [name] [world]
+   [append] @ 107 (5/5)
+   64 6e 61 6d  65                                       dname
+   [append] @ 112 (6/6)
+   65 77 6f 72  6c 64                                    eworld
+      op content: [count] [3]
+   [append] @ 118 (6/6)
+   65 63 6f 75  6e 74                                    ecount
+   [content] @ 124 (1/1)
+   03                                                    .
+      op content: [total] [10]
+   [append] @ 125 (6/6)
+   65 74 6f 74  61 6c                                    etotal
+   [content] @ 131 (1/1)
+   0a                                                    .
+      op string: [enc] [enc-val]
+   [append] @ 132 (4/4)
+   63 65 6e 63                                           cenc
+   [append] @ 136 (8/8)
+   67 65 6e 63  2d 76 61 6c                              genc-val
+      op string: [vis] [vis-val]
+   [append] @ 144 (4/4)
+   63 76 69 73                                           cvis
+   [append] @ 148 (8/8)
+   67 76 69 73  2d 76 61 6c                              gvis-val
+      op content: [addr] [0x0]
+   [append] @ 156 (5/5)
+   64 61 64 64  72                                       daddr
+   [append] @ 161 (4/4)
+   63 30 78 30                                           c0x0
+   [content] @ 161 (4/4)
+   63 30 78 30                                           c0x0
+      op content: [port] [80]
+   [append] @ 165 (5/5)
+   64 70 6f 72  74                                       dport
+   [content] @ 170 (2/2)
+   18 50                                                 .P
+      op close_container: [fallback] []
+   [append] @ 172 (1/1)
+   ff                                                    .
+    op finish: [] []
+ [append] @ 173 (1/1)
+ ff                                                    .
+  op flush: [] []
+>[cbor] @ 0 (ae/174)
+>bf 66 63 61  63 68 65 64  - bf 64 6e 61  6d 65 65 68  .fcached.dnameeh
+>65 6c 6c 6f  64 6e 61 6d  - 65 65 77 6f  72 6c 64 65  ellodnameeworlde
+>63 6f 75 6e  74 03 65 74  - 6f 74 61 6c  0a 63 65 6e  count.etotal.cen
+>63 67 65 6e  63 2d 76 61  - 6c 63 76 69  73 67 76 69  cgenc-valcvisgvi
+>73 2d 76 61  6c 64 61 64  - 64 72 63 30  78 30 64 70  s-valdaddrc0x0dp
+>6f 72 74 18  50 ff 68 66  - 61 6c 6c 62  61 63 6b bf  ort.P.hfallback.
+>64 6e 61 6d  65 65 68 65  - 6c 6c 6f 64  6e 61 6d 65  dnameehellodname
+>65 77 6f 72  6c 64 65 63  - 6f 75 6e 74  03 65 74 6f  eworldecount.eto
+>74 61 6c 0a  63 65 6e 63  - 67 65 6e 63  2d 76 61 6c  tal.cencgenc-val
+>63 76 69 73  67 76 69 73  - 2d 76 61 6c  64 61 64 64  cvisgvis-valdadd
+>72 63 30 78  30 64 70 6f  - 72 74 18 50  ff ff        rc0x0dport.P..

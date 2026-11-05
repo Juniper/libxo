@@ -586,12 +586,9 @@ main (int argc, char **argv)
     xo_close_container("s33e-odd\tname");
 
     /*
-     * 34. Escaping of non-ASCII UTF-8 (added alongside the fix that
-     * taught rtoon_write_escaped()/rtoon_value_needs_quote()/
-     * rtoon_key_needs_quote() to decode UTF-8: a BMP codepoint now
-     * gets a \uXXXX escape rather than going out as literal UTF-8,
-     * while a supplementary-plane codepoint (above U+FFFF, which has
-     * no \uXXXX form a decoder can accept) stays literal.
+     * 34. Non-ASCII UTF-8: printable characters (BMP or supplementary)
+     * go out literal and unquoted; only invisible/whitespace-like BMP
+     * codepoints (e.g. NBSP) get a \uXXXX escape and quotes.
      */
 
     /* 34a: a BMP non-ASCII character ('e' with acute accent, U+00E9) */
@@ -607,6 +604,11 @@ main (int argc, char **argv)
     /* 34c: a container name (key position) carrying a BMP character */
     xo_open_container("s34c-caf\xc3\xa9");
     xo_close_container("s34c-caf\xc3\xa9");
+
+    /* 34d: a non-breaking space (U+00A0) - escaped and quoted */
+    xo_open_container("s34d-nbsp");
+    xo_emit("{:msg}\n", "a\xc2\xa0" "b");
+    xo_close_container("s34d-nbsp");
 
     xo_close_container("rtoon-test");
 

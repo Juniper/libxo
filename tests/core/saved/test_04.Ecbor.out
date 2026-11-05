@@ -1,0 +1,99 @@
+op create: [cbor] []
+ [append] @ 0 (1/1)
+ bf                                                    .
+    op open_container: [employees] []
+ [append] @ 1 (a/10)
+ 69 65 6d 70  6c 6f 79 65  - 65 73                     iemployees
+ [append] @ 11 (1/1)
+ bf                                                    .
+      op open_list: [employee] []
+   [append] @ 12 (9/9)
+   68 65 6d 70  6c 6f 79 65  - 65                        hemployee
+   [append] @ 21 (1/1)
+   9f                                                    .
+        op open_instance: [employee] []
+     [append] @ 22 (1/1)
+     bf                                                    .
+          op string: [first-name] [Terry]
+       [append] @ 23 (b/11)
+       6a 66 69 72  73 74 2d 6e  - 61 6d 65                  jfirst-name
+       [append] @ 34 (6/6)
+       65 54 65 72  72 79                                    eTerry
+          op string: [last-name] [Jones]
+       [append] @ 40 (a/10)
+       69 6c 61 73  74 2d 6e 61  - 6d 65                     ilast-name
+       [append] @ 50 (6/6)
+       65 4a 6f 6e  65 73                                    eJones
+          op content: [department] [660]
+       [append] @ 56 (b/11)
+       6a 64 65 70  61 72 74 6d  - 65 6e 74                  jdepartment
+       [content] @ 67 (3/3)
+       19 02 94                                              ...
+          op close_instance: [employee] []
+       [append] @ 70 (1/1)
+       ff                                                    .
+        op open_instance: [employee] []
+     [append] @ 71 (1/1)
+     bf                                                    .
+          op string: [first-name] [Leslie]
+       [append] @ 72 (b/11)
+       6a 66 69 72  73 74 2d 6e  - 61 6d 65                  jfirst-name
+       [append] @ 83 (7/7)
+       66 4c 65 73  6c 69 65                                 fLeslie
+          op string: [last-name] [Patterson]
+       [append] @ 90 (a/10)
+       69 6c 61 73  74 2d 6e 61  - 6d 65                     ilast-name
+       [append] @ 100 (a/10)
+       69 50 61 74  74 65 72 73  - 6f 6e                     iPatterson
+          op content: [department] [341]
+       [append] @ 110 (b/11)
+       6a 64 65 70  61 72 74 6d  - 65 6e 74                  jdepartment
+       [content] @ 121 (3/3)
+       19 01 55                                              ..U
+          op close_instance: [employee] []
+       [append] @ 124 (1/1)
+       ff                                                    .
+        op open_instance: [employee] []
+     [append] @ 125 (1/1)
+     bf                                                    .
+          op string: [first-name] [Ashley]
+       [append] @ 126 (b/11)
+       6a 66 69 72  73 74 2d 6e  - 61 6d 65                  jfirst-name
+       [append] @ 137 (7/7)
+       66 41 73 68  6c 65 79                                 fAshley
+          op string: [last-name] [Smith]
+       [append] @ 144 (a/10)
+       69 6c 61 73  74 2d 6e 61  - 6d 65                     ilast-name
+       [append] @ 154 (6/6)
+       65 53 6d 69  74 68                                    eSmith
+          op content: [department] [1440]
+       [append] @ 160 (b/11)
+       6a 64 65 70  61 72 74 6d  - 65 6e 74                  jdepartment
+       [content] @ 171 (3/3)
+       19 05 a0                                              ...
+          op close_instance: [employee] []
+       [append] @ 174 (1/1)
+       ff                                                    .
+        op close_list: [employee] []
+     [append] @ 175 (1/1)
+     ff                                                    .
+      op close_container: [employees] []
+   [append] @ 176 (1/1)
+   ff                                                    .
+    op finish: [] []
+ [append] @ 177 (1/1)
+ ff                                                    .
+  op flush: [] []
+>[cbor] @ 0 (b2/178)
+>bf 69 65 6d  70 6c 6f 79  - 65 65 73 bf  68 65 6d 70  .iemployees.hemp
+>6c 6f 79 65  65 9f bf 6a  - 66 69 72 73  74 2d 6e 61  loyee..jfirst-na
+>6d 65 65 54  65 72 72 79  - 69 6c 61 73  74 2d 6e 61  meeTerryilast-na
+>6d 65 65 4a  6f 6e 65 73  - 6a 64 65 70  61 72 74 6d  meeJonesjdepartm
+>65 6e 74 19  02 94 ff bf  - 6a 66 69 72  73 74 2d 6e  ent.....jfirst-n
+>61 6d 65 66  4c 65 73 6c  - 69 65 69 6c  61 73 74 2d  amefLeslieilast-
+>6e 61 6d 65  69 50 61 74  - 74 65 72 73  6f 6e 6a 64  nameiPattersonjd
+>65 70 61 72  74 6d 65 6e  - 74 19 01 55  ff bf 6a 66  epartment..U..jf
+>69 72 73 74  2d 6e 61 6d  - 65 66 41 73  68 6c 65 79  irst-namefAshley
+>69 6c 61 73  74 2d 6e 61  - 6d 65 65 53  6d 69 74 68  ilast-nameeSmith
+>6a 64 65 70  61 72 74 6d  - 65 6e 74 19  05 a0 ff ff  jdepartment.....
+>ff ff                                                 ..

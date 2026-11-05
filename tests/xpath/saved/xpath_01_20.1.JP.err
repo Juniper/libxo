@@ -3,8 +3,8 @@ main: status: zero
 main: input '? socket[!contains(path, "/var/run/")]'
 adding filter: 'socket[!contains(path, "/var/run/")]'
 added filter: 0
---- 0: 14
-    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 13
+    000013: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [socket], contents 2, next 0, prev 0 
             000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
                 000003: type 73 (C_NOT), str 10 [!], contents 4, next 0, prev 0 
@@ -36,30 +36,30 @@ main: field: 'send-bytes-waiting'='0'
 main: status: predicate
 main: input '+ local'
 main: filter: rc: 21
-main: status: track
+main: status: conditional
 main: input '@ type inet'
 main: attr: 'type'='inet'
-main: status: track
+main: status: conditional
 main: input '= address 172.16.188.131'
 main: field: 'address'='172.16.188.131'
-main: status: track
+main: status: conditional
 main: input '= port ssh'
 main: field: 'port'='ssh'
-main: status: track
+main: status: conditional
 main: input '- local'
 main: status: predicate
 main: input '+ remote'
 main: filter: rc: 22
-main: status: track
+main: status: conditional
 main: input '@ type inet'
 main: attr: 'type'='inet'
-main: status: track
+main: status: conditional
 main: input '= address 172.16.188.1'
 main: field: 'address'='172.16.188.1'
-main: status: track
+main: status: conditional
 main: input '= port 63510'
 main: field: 'port'='63510'
-main: status: track
+main: status: conditional
 main: input '- remote'
 main: status: predicate
 main: input '= tcp-state ESTABLISHED'

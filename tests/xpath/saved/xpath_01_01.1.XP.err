@@ -35,8 +35,8 @@ main: status: zero
 main: input '?one[two == 4]'
 adding filter: 'one[two == 4]'
 added filter: 0
---- 0: 10
-    000010: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 9
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [one], contents 2, next 0, prev 0 
             000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
                 000004: type 14 (L_EQUALS), str 11 [==], contents 5, next 0, prev 0 
@@ -59,8 +59,8 @@ main: status: zero
 main: input '?one[two == 4]'
 adding filter: 'one[two == 4]'
 added filter: 0
---- 0: 10
-    000010: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 9
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [one], contents 2, next 0, prev 0 
             000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
                 000004: type 14 (L_EQUALS), str 11 [==], contents 5, next 0, prev 0 

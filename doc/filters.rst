@@ -327,7 +327,7 @@ fully rendered before `libxo` knows that the field is not present.
 Sub-container Content
 +++++++++++++++++++++
 
-When an instance is matched, all of its content is emitted — including
+When an instance is matched, all of its content is emitted - including
 fields inside nested containers (child containers opened with
 `xo_open_container` inside the instance).  In the example above, the
 `local` and `remote` containers and their fields are included in
@@ -339,8 +339,8 @@ that you cannot use subelements of `local` or `remote` in a predicate.
 Content in nested containers that appear before the predicate field is
 buffered along with the top-level fields.  If the predicate resolves
 true, the nested container content is committed as part of the
-instance.  If the predicate resolves false, the entire instance —
-including nested content — is discarded.
+instance.  If the predicate resolves false, the entire instance -
+including nested content - is discarded.
 
 .. index:: Filter functions
 
@@ -385,6 +385,7 @@ Boolean functions:
 ========================== ==================================================
  boolean(val)               Converts a value to a boolean
  false()                    Always returns false
+ isempty(node)              True when *node* is empty or absent
  not(expr)                  Negates the expression
  true()                     Always returns true
 ========================== ==================================================
@@ -392,6 +393,12 @@ Boolean functions:
 Note that `true()` and `true` are annoyingly different.  The former
 returns the boolean value true while the latter returns the value of
 an element named `true`, which is likely non-existent.
+
+A field is true because it exists, even when its value is empty or
+"0", so `item[name]` cannot tell an empty `name` from one with
+content.  `isempty(name)` is true when `name` is empty, and also when
+it is absent, since an absent field is an empty node set.  To ask
+for a `name` with content, use `item[!isempty(name)]`.
 
 Examples::
 
@@ -436,7 +443,7 @@ The `flags` string contains zero or more of the following flags:
   '$'    Does not match at end of string (REG_NOTEOL)
   's'    Return full match text as a string
   'm'    Return first capture group as string
-  'mN'   Return capture group N as string (N: 0–9)
+  'mN'   Return capture group N as string (N: 0-9)
   'p'    REG_POSIX (platform-specific; ignored if unavailable)
 ======= ====================================================================
 

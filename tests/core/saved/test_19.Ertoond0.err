@@ -1,0 +1,2 @@
+test_19: invalid value for encoder option 'dense': '0' (use 'auto' or a list depth >= 1)
+test_19: error initializing encoder: rtoon:dense=0

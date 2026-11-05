@@ -1,0 +1,316 @@
+<div class="line">
+  <div class="text">[</div>
+  <div class="padding">         </div>
+  <div class="data" data-tag="right" data-xpath="/top/anchor-width/right">abc</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="left" data-xpath="/top/anchor-width/left">abc</div>
+  <div class="padding">         </div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="mapped-0" data-xpath="/top/map-growth/mapped-0">0</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="mapped-15" data-xpath="/top/map-growth/mapped-15">15</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="mapped-16" data-xpath="/top/map-growth/mapped-16">16</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="mapped-17" data-xpath="/top/map-growth/mapped-17">17</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="mapped-39" data-xpath="/top/map-growth/mapped-39">39</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="src-40" data-xpath="/top/map-growth/src-40">40</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="length" data-xpath="/top/long-names/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/length">62</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="length" data-xpath="/top/long-names/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb/length">63</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="length" data-xpath="/top/long-names/cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc/length">64</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="length" data-xpath="/top/long-names/ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd/length">65</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="length" data-xpath="/top/long-names/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee/length">130</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="interior" data-xpath="/top/control-chars/interior">a b c</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="trailing" data-xpath="/top/control-chars/trailing">a b </div>
+</div>
+<div class="line">
+  <div class="data" data-tag="before-escape" data-xpath="/top/control-chars/before-escape">a b&lt;c d&amp;e</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="after-escape" data-xpath="/top/control-chars/after-escape">a&lt;b c&amp;d </div>
+</div>
+<div class="line">
+  <div class="data" data-tag="only" data-xpath="/top/control-chars/only">   </div>
+</div>
+<div class="line">
+  <div class="data" data-tag="retain" data-xpath="/top/deprecated-options/retain">0</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="no-retain" data-xpath="/top/deprecated-options/no-retain">0</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="first" data-xpath="/top/encoder-names/first">unknown</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="last" data-xpath="/top/encoder-names/last">deadend</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="beyond" data-xpath="/top/encoder-names/beyond">unknown</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="far-beyond" data-xpath="/top/encoder-names/far-beyond">unknown</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="wb-last" data-xpath="/top/encoder-names/wb-last">clean</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="wb-beyond" data-xpath="/top/encoder-names/wb-beyond">unknown</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="registered" data-xpath="/top/encoder-names/registered">done</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="escaped" data-xpath="/top/attributes/escaped">1</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="one" data-xpath="/top/implied-close/after-list/one">1</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="leaf-then-container" data-xpath="/top/implied-close/leaf-then-container">2</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="two" data-xpath="/top/implied-close/after-leaf/two">2</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="leaf-then-leaf" data-xpath="/top/implied-close/leaf-then-leaf">3</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="second-leaf" data-xpath="/top/implied-close/second-leaf">4</div>
+</div>
+<div class="line">
+</div>
+<div class="line">
+  <div class="data" data-tag="kept" data-ident="5" data-xpath="/top/markers/list-container/m1/item/kept">1</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="after" data-xpath="/top/markers/list-container/after">2</div>
+</div>
+<div class="line">
+</div>
+<div class="line">
+  <div class="data" data-tag="after" data-xpath="/top/markers/list-list/after">2</div>
+</div>
+<div class="line">
+</div>
+<div class="line">
+  <div class="data" data-tag="after" data-xpath="/top/markers/list-field/after">2</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="after" data-xpath="/top/markers/stray-close/after">2</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="leaf" data-xpath="/top/markers/leaf-container/leaf">1</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="value" data-xpath="/top/markers/leaf-container/m1/kept/value">2</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="after" data-xpath="/top/markers/leaf-container/after">3</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="leaf" data-xpath="/top/markers/leaf-leaf/leaf">1</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="other" data-xpath="/top/markers/leaf-leaf/m1/m2/other">2</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="other" data-xpath="/top/markers/leaf-leaf/m1/m2/other">3</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="after" data-xpath="/top/markers/leaf-leaf/after">4</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="leaf" data-xpath="/top/markers/leaf-field/leaf">1</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="kept" data-xpath="/top/markers/leaf-field/m1/kept">2</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="after" data-xpath="/top/markers/leaf-field/after">3</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="leaf" data-xpath="/top/markers/leaf-same/leaf">1</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="leaf" data-xpath="/top/markers/leaf-same/m1/leaf">2</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="leaf" data-xpath="/top/markers/leaf-same/leaf">3</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="leaf" data-xpath="/top/markers/leaf-instance/leaf">1</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="value" data-ident="10" data-xpath="/top/markers/leaf-instance/item/value">2</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="after" data-xpath="/top/markers/leaf-instance/after">3</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="after-domain" data-xpath="/top/emit-field/after-domain">1</div>
+  <div class="label">label</div>
+  <div class="data" data-tag="quoted" data-xpath="/top/emit-field/quoted">value</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="plus" data-xpath="/top/format-flags/plus">+5</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="space" data-xpath="/top/format-flags/space"> 5</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="wide" data-xpath="/top/format-flags/wide">   +5</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="zero" data-xpath="/top/format-flags/zero"> 0005</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="long" data-xpath="/top/format-flags/long">+7</div>
+  <div class="text">]</div>
+</div>
+huge width wrote 32767 bytes
+missing conversions wrote 0 bytes
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="negative" data-xpath="/top/format-flags/negative">-3</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="blank" data-xpath="/top/format-flags/blank">-3</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="unsigned" data-xpath="/top/format-flags/unsigned">5</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="hex" data-xpath="/top/format-flags/hex">ff</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="left" data-xpath="/top/format-flags/left">+5   </div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="both" data-xpath="/top/format-flags/both">+5</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="precise" data-xpath="/top/format-flags/precise">+005</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="left-zero" data-xpath="/top/format-flags/left-zero">42   </div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="json-plus" data-xpath="/top/format-flags/json-plus">+5</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="json-wide" data-xpath="/top/format-flags/json-wide">   +5</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="json-size" data-xpath="/top/format-flags/json-size">+5</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="json-float" data-xpath="/top/format-flags/json-float">+1.50</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="json-quoted" data-xpath="/top/format-flags/json-quoted">+5</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="small" data-xpath="/top/humanize-signs/small" data-number="-5">-5</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="kilo" data-xpath="/top/humanize-signs/kilo" data-number="-5000">-5K</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="mega" data-xpath="/top/humanize-signs/mega" data-number="-5000000">-5M</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="fraction" data-xpath="/top/humanize-signs/fraction" data-number="-1500">-1.5K</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="metric" data-xpath="/top/humanize-signs/metric" data-number="-5000">-5k</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="lowest" data-xpath="/top/humanize-signs/lowest" data-number="-9223372036854775808">-8E</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="next-lowest" data-xpath="/top/humanize-signs/next-lowest" data-number="-9223372036854775807">-8E</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="highest" data-xpath="/top/humanize-signs/highest" data-number="9223372036854775807">8E</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="too-high" data-xpath="/top/humanize-signs/too-high" data-number="18446744073709551615">18446744073709551615</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="word" data-xpath="/top/humanize-signs/word" data-number="abc">abc</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="mixed" data-xpath="/top/humanize-signs/mixed" data-number="12abc">12abc</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="padded" data-xpath="/top/humanize-signs/padded" data-number="4096  ">4K</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="after" data-xpath="/top/humanize-signs/after" data-number="4096">4K</div>
+  <div class="text">]</div>
+</div>
+before="one" name="gum" count="0" name="rope" count="1" name="ladder" count="2" after="two" 
+long values wrote 20068 bytes
+warning 10: 78 bytes, '<error><message>test_17' ... 'xxxxxxxxxx&lt;10&gt;</message></error>'
+xml message 10: 67 bytes, '<message>xxxxxxxxxx&lt;' ... ';: No such file or directory'
+html message 10: 99 bytes, '<div class="line"><div ' ... ' No such file or directory'
+warning 1000: 1070 bytes, '<error><message>test_17' ... 'xxxxxxxx&lt;1000&gt;</message></error>'
+xml message 1000: 1059 bytes, '<message>xxxxxxxxxxxxxx' ... ';: No such file or directory'
+html message 1000: 1091 bytes, '<div class="line"><div ' ... ' No such file or directory'
+warning 1015: 1085 bytes, '<error><message>test_17' ... 'xxxxxxxx&lt;1015&gt;</message></error>'
+xml message 1015: 1074 bytes, '<message>xxxxxxxxxxxxxx' ... ';: No such file or directory'
+html message 1015: 1106 bytes, '<div class="line"><div ' ... ' No such file or directory'
+warning 1030: 1100 bytes, '<error><message>test_17' ... 'xxxxxxxx&lt;1030&gt;</message></error>'
+xml message 1030: 1089 bytes, '<message>xxxxxxxxxxxxxx' ... ';: No such file or directory'
+html message 1030: 1121 bytes, '<div class="line"><div ' ... ' No such file or directory'
+warning 8170: 8240 bytes, '<error><message>test_17' ... 'xxxxxxxx&lt;8170&gt;</message></error>'
+xml message 8170: 8229 bytes, '<message>xxxxxxxxxxxxxx' ... ';: No such file or directory'
+html message 8170: 8261 bytes, '<div class="line"><div ' ... ' No such file or directory'
+warning 9000: 9070 bytes, '<error><message>test_17' ... 'xxxxxxxx&lt;9000&gt;</message></error>'
+xml message 9000: 9059 bytes, '<message>xxxxxxxxxxxxxx' ... ';: No such file or directory'
+html message 9000: 9091 bytes, '<div class="line"><div ' ... ' No such file or directory'
+deep stack wrote 8903 bytes
+open frames wrote 167 bytes
+<prefix-names>
+  <long-name>1</long-name>
+  <pre>2</pre>
+  <pref>3</pref>
+</prefix-names>
+<prefix-added>
+  <long-name>4</long-name>
+  <short-name>5</short-name>
+</prefix-added>
+<siblings>
+  <err>1</err>
+  <err>2</err>
+  <mes>1</mes>
+  <mes>2</mes>
+  <error>1</error>
+  <error>2</error>
+</siblings>
+syslog send: full 305, header no, text 305
+  full ends 'xxxxxxxxxxxxxxxxxxxxtail'
+  text ends 'xxxxxxxxxxxxxxxxxxxxtail'
+syslog send: full 2047, header no, text 2047
+  full ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+  text ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+syslog send: full 2047, header no, text 2047
+  full ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+  text ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+syslog send: full 2047, header no, text 2047
+  full ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+  text ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+syslog send: full 2047, header no, text 2047
+  full ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+  text ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+syslog send: full 2047, header no, text 2047
+  full ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+  text ends 'xxxxxxxxxxxxxxxxxxxxxxxx'

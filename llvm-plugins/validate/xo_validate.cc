@@ -14,7 +14,7 @@
  * Checks performed:
  *   1. Format string syntax (malformed field descriptors)
  *   2. Argument count (too few or too many va_args)
- *   3. Argument type: precise — length modifier checked (%ld expects long,
+ *   3. Argument type: precise - length modifier checked (%ld expects long,
  *      %zu expects size_t, etc.) via ASTContext canonical types.  Falls back
  *      to coarse category (integer/float/pointer/string) for conversion
  *      characters not covered by the precise path.
@@ -23,7 +23,7 @@
  *   - Only public ASTContext/QualType/Expr APIs are used; no internal
  *     clang headers that change across LLVM versions.
  *   - Varargs promotion is handled by using arg->getType() (which already
- *     reflects the promotion: char/short→int, float→double) for type
+ *     reflects the promotion: char/short->int, float->double) for type
  *     matching.  arg->IgnoreImpCasts()->getType() is used only in the
  *     error message to show the programmer's source type.
  *   - %h/%hh modifiers map to int/unsigned int (the promoted types) so
@@ -62,256 +62,207 @@ static llvm::cl::opt<bool> LintWarnings(
 using namespace clang;
 
 /*
- * Table of libxo emit functions: name and the 0-based index of the
- * format-string argument.  Functions taking a va_list (xo_emit_hv) are
- * omitted — we can validate the format string but cannot inspect the
- * argument list at compile time.
+ * Table of libxo emit functions: name, the 0-based index of the
+ * format-string argument, and XEF_* flags:
+ *
+ * XEF_VA_LIST: the values come in a va_list.  We can still check the
+ *   format string's syntax, but not the argument count or types.
+ *
+ * XEF_PRINTFLIKE: the _p forms, which are static inline wrappers in
+ *   xo.h.  A call to one is still a CallExpr in the caller's source,
+ *   with the caller's literal and arguments, so we check syntax and
+ *   count.  But they are XO_PRINTFLIKE, so clang's -Wformat already
+ *   checks the argument types, and we skip that to avoid reporting
+ *   each bad type twice.  (The wrapper bodies pass "fmt" along as a
+ *   variable, which we skip.)
+ *
+ * The xo_emit_field family takes its format pieces separately and
+ * is not covered here.
  */
+#define XEF_VA_LIST	(1<<0)
+#define XEF_PRINTFLIKE	(1<<1)
+
 struct XoEmitEntry {
     const char *name;
     unsigned    fmt_arg;
+    unsigned    flags;		/* XEF_* flags */
 };
 
 static const XoEmitEntry xo_emit_table[] = {
-    { "xo_emit",        0 },
-    { "xo_emit_h",      1 },
-    { nullptr,          0 },
+    { "xo_emit",               0, 0 },
+    { "xo_emitr",              0, 0 },
+    { "xo_emit_h",             1, 0 },
+    { "xo_emit_hv",            1, XEF_VA_LIST },
+    { "xo_emit_f",             1, 0 },
+    { "xo_emit_hf",            2, 0 },
+    { "xo_emit_hvf",           2, XEF_VA_LIST },
+
+    { "xo_emit_p",             0, XEF_PRINTFLIKE },
+    { "xo_emit_hp",            1, XEF_PRINTFLIKE },
+    { "xo_emit_hvp",           1, XEF_VA_LIST | XEF_PRINTFLIKE },
+    { "xo_emit_fp",            1, XEF_PRINTFLIKE },
+    { "xo_emit_hfp",           2, XEF_PRINTFLIKE },
+    { "xo_emit_hvfp",          2, XEF_VA_LIST | XEF_PRINTFLIKE },
+
+    { "xo_emit_precompiled",   2, 0 },
+    { "xo_emit_precompiled_h", 3, 0 },
+    { "xo_emit_precompiled_v", 2, XEF_VA_LIST },
+    { "xo_emit_precompiled_hv", 3, XEF_VA_LIST },
+
+    { "xo_emit_cached",        1, 0 },
+    { "xo_emit_cachedr",       1, 0 },
+    { "xo_emit_cached_h",      2, 0 },
+    { "xo_emit_cached_hv",     2, XEF_VA_LIST },
+    { "xo_emit_cached_f",      2, 0 },
+    { "xo_emit_cached_hf",     3, 0 },
+    { "xo_emit_cached_hvf",    3, XEF_VA_LIST },
+
+    { "xo_emit_cached_p",      1, XEF_PRINTFLIKE },
+    { "xo_emit_cached_hp",     2, XEF_PRINTFLIKE },
+    { "xo_emit_cached_hvp",    2, XEF_VA_LIST | XEF_PRINTFLIKE },
+    { "xo_emit_cached_fp",     2, XEF_PRINTFLIKE },
+    { "xo_emit_cached_hfp",    3, XEF_PRINTFLIKE },
+    { "xo_emit_cached_hvfp",   3, XEF_VA_LIST | XEF_PRINTFLIKE },
+
+    { "xo_emit_warn",          0, 0 },
+    { "xo_emit_warnx",         0, 0 },
+    { "xo_emit_warn_c",        1, 0 },
+    { "xo_emit_warn_hc",       2, 0 },
+    { "xo_emit_warn_hcv",      3, XEF_VA_LIST },
+    { "xo_emit_err",           1, 0 },
+    { "xo_emit_errx",          1, 0 },
+    { "xo_emit_errc",          2, 0 },
+    { "xo_emit_err_v",         2, XEF_VA_LIST },
+
+    { "xo_emit_warn_p",        0, XEF_PRINTFLIKE },
+    { "xo_emit_warnx_p",       0, XEF_PRINTFLIKE },
+    { "xo_emit_warn_cp",       1, XEF_PRINTFLIKE },
+    { "xo_emit_warn_hcp",      2, XEF_PRINTFLIKE },
+    { "xo_emit_warn_hcvp",     3, XEF_VA_LIST | XEF_PRINTFLIKE },
+    { "xo_emit_err_p",         1, XEF_PRINTFLIKE },
+    { "xo_emit_errx_p",        1, XEF_PRINTFLIKE },
+    { "xo_emit_errc_p",        2, XEF_PRINTFLIKE },
+
+    { nullptr,                 0, 0 },
 };
 
 /*
- * Coarse type category (kept as fallback for conversions not in the
- * precise path and for the XFF_ARGUMENT name-slot check).
+ * Return the QualType the va_arg must have (after varargs promotion) for
+ * a parsed fspec.  xf_arg_type says which argument libxo pulls; the
+ * conversion character only picks the signedness shown in diagnostics,
+ * since type_matches() ignores sign.  Returns a null QualType for an
+ * fspec that consumes no argument.
  */
-
-enum class FmtExpect { String, Integer, Float, Pointer, Name, Unknown };
-
-static FmtExpect
-parse_fmt_expect (const char *fmt, unsigned fmtlen)
-{
-    if (!fmt || fmtlen == 0)
-        return FmtExpect::Name;
-
-    const char *p = fmt, *end = fmt + fmtlen;
-    if (*p != '%')
-        return FmtExpect::Unknown;
-    p++;
-
-    /* flags */
-    while (p < end && (*p == '-' || *p == '+' || *p == ' ' ||
-                        *p == '0' || *p == '#' || *p == '\''))
-        p++;
-
-    /* width */
-    if (p < end && *p == '*')
-        p++;
-    else
-        while (p < end && isdigit((unsigned char) *p))
-            p++;
-
-    /* precision groups */
-    while (p < end && *p == '.') {
-        p++;
-        if (p < end && *p == '*')
-            p++;
-        else
-            while (p < end && isdigit((unsigned char) *p))
-                p++;
-    }
-
-    /* length modifiers — skip for coarse check */
-    while (p < end && (*p == 'l' || *p == 'h' || *p == 'L' ||
-                        *p == 'z' || *p == 't' || *p == 'j' || *p == 'q'))
-        p++;
-
-    if (p >= end)
-        return FmtExpect::Unknown;
-
-    switch (*p) {
-    case 's':
-        return FmtExpect::String;
-    case 'd': case 'i': case 'u': case 'c':
-    case 'x': case 'X': case 'o': case 'b':
-        return FmtExpect::Integer;
-    case 'f': case 'F': case 'e': case 'E': case 'g': case 'G':
-        return FmtExpect::Float;
-    case 'p':
-        return FmtExpect::Pointer;
-    default:
-        return FmtExpect::Unknown;
-    }
-}
-
 static bool
-arg_type_ok (const Expr *arg, FmtExpect expect)
+fmt_is_signed (const xo_fspec_t *xfp)
 {
-    QualType qt = arg->getType().getCanonicalType();
+    int fc = xfp->xf_fc;
 
-    switch (expect) {
-    case FmtExpect::Name:
-    case FmtExpect::String:
-    case FmtExpect::Pointer:
-        return qt->isPointerType();
-    case FmtExpect::Integer:
-        return qt->isIntegerType();
-    case FmtExpect::Float:
-        return qt->isFloatingType();
-    case FmtExpect::Unknown:
-        return true;
-    }
-    return true;
+    return fc == 'd' || fc == 'i' || fc == 'D' || fc == 'c';
 }
 
-static const char *
-expect_name (FmtExpect e)
-{
-    switch (e) {
-    case FmtExpect::Name:
-    case FmtExpect::String:  return "string (char *)";
-    case FmtExpect::Integer: return "integer";
-    case FmtExpect::Float:   return "floating-point";
-    case FmtExpect::Pointer: return "pointer";
-    default:                 return "unknown";
-    }
-}
-
-/*
- * Precise type mapping: format spec → ASTContext QualType.
- */
-
-enum LenMod {
-    LM_NONE,
-    LM_H,       /* h  — maps to int/unsigned int (varargs-promoted) */
-    LM_HH,      /* hh — maps to int/unsigned int (varargs-promoted) */
-    LM_L,       /* l  */
-    LM_LL,      /* ll */
-    LM_L_BIG,   /* L  — only for floating-point */
-    LM_Z,       /* z  */
-    LM_T,       /* t  */
-    LM_J,       /* j  */
-};
-
-/*
- * Return the QualType the va_arg must have (after varargs promotion) for the
- * given printf-style format spec.  Returns a null QualType for specs that
- * need no type check (%m, %n, unknown) or are not yet handled.
- */
 static QualType
-fmt_expected_type (ASTContext &C, const char *spec, unsigned len)
+fmt_expected_type (ASTContext &C, const xo_fspec_t *xfp)
 {
-    if (!spec || len == 0)
-        return QualType();
+    int fc = xfp->xf_fc;
+    bool is_signed = fmt_is_signed(xfp);
 
-    const char *p = spec, *end = spec + len;
-    if (p >= end || *p != '%')
-        return QualType();
-    p++;
+    switch (xfp->xf_arg_type) {
+    case XO_AT_INT:
+        return is_signed ? C.IntTy : C.UnsignedIntTy;
 
-    /* flags */
-    while (p < end && (*p == '-' || *p == '+' || *p == ' ' ||
-                        *p == '0' || *p == '#' || *p == '\''))
-        p++;
-    /* width (already split as a separate "%d" by scan_format_args) */
-    if (p < end && *p == '*')
-        p++;
-    else
-        while (p < end && isdigit((unsigned char) *p))
-            p++;
-    /* precision groups (libxo allows %.*.*s) */
-    while (p < end && *p == '.') {
-        p++;
-        if (p < end && *p == '*')
-            p++;
-        else
-            while (p < end && isdigit((unsigned char) *p))
-                p++;
-    }
+    case XO_AT_LONG:
+        return is_signed ? C.LongTy : C.UnsignedLongTy;
 
-    /* length modifier */
-    LenMod lm = LM_NONE;
-    if (p < end) {
-        switch (*p) {
-        case 'h':
-            p++;
-            if (p < end && *p == 'h') {
-                lm = LM_HH;
-                p++;
-            } else {
-                lm = LM_H;
-            }
-            break;
-        case 'l':
-            p++;
-            if (p < end && *p == 'l') {
-                lm = LM_LL;
-                p++;
-            } else {
-                lm = LM_L;
-            }
-            break;
-        case 'L': lm = LM_L_BIG; p++; break;
-        case 'z': lm = LM_Z;     p++; break;
-        case 't': lm = LM_T;     p++; break;
-        case 'j': lm = LM_J;     p++; break;
-        case 'q': lm = LM_LL;    p++; break;   /* BSD %q = long long */
-        default:  break;
-        }
-    }
+    case XO_AT_LONG_LONG:
+    case XO_AT_QUAD:
+        return is_signed ? C.LongLongTy : C.UnsignedLongLongTy;
 
-    if (p >= end)
-        return QualType();
+    case XO_AT_INT64:
+        return C.getIntTypeForBitwidth(64, is_signed);
 
-    switch (*p) {
-    case 'd': case 'i':
-        switch (lm) {
-        case LM_NONE: case LM_H: case LM_HH:
-            return C.IntTy;
-        case LM_L:
-            return C.LongTy;
-        case LM_LL:
-            return C.LongLongTy;
-        case LM_Z: case LM_T:
-            return C.getPointerDiffType();
-        case LM_J:
-            return C.getIntMaxType();
-        default:
-            return QualType();
-        }
-    case 'u': case 'x': case 'X': case 'o': case 'b':
-        switch (lm) {
-        case LM_NONE: case LM_H: case LM_HH:
-            return C.UnsignedIntTy;
-        case LM_L:
-            return C.UnsignedLongTy;
-        case LM_LL:
-            return C.UnsignedLongLongTy;
-        case LM_Z:
-            return C.getSizeType();
-        case LM_J:
-            return C.getUIntMaxType();
-        default:
-            return QualType();
-        }
-    case 'c':
-        return C.IntTy;     /* char/short promote to int in varargs */
-    case 'f': case 'F': case 'e': case 'E': case 'g': case 'G':
-        if (lm == LM_L_BIG)
-            return C.LongDoubleTy;
-        return C.DoubleTy;  /* float promotes to double in varargs */
-    case 's':
-        if (lm == LM_L)
+    case XO_AT_INTMAX:
+        return is_signed ? C.getIntMaxType() : C.getUIntMaxType();
+
+    case XO_AT_PTRDIFF:
+        return C.getPointerDiffType();
+
+    case XO_AT_SIZE:
+        return is_signed ? C.getSignedSizeType() : C.getSizeType();
+
+    case XO_AT_DOUBLE:
+        return C.DoubleTy;      /* float promotes to double in varargs */
+
+    case XO_AT_LONG_DOUBLE:
+        return C.LongDoubleTy;
+
+    case XO_AT_WINT:
+        return C.getWIntType();
+
+    case XO_AT_STRING:
+        if (xfp->xf_lflag || fc == 'S')
             return C.getPointerType(C.WCharTy);
         return C.getPointerType(C.CharTy);
-    case 'p':
+
+    case XO_AT_POINTER:
         return C.VoidPtrTy;
+
     default:
         return QualType();
     }
+}
+
+/*
+ * Return the typedef name the C library uses for an fspec's type, or
+ * nullptr if the builtin type name is already the natural one.
+ * fmt_expected_type() returns canonical builtin types (intmax_t is
+ * just "long"), so without this a "%jd" diagnostic would name a type
+ * the format never mentions.
+ */
+static const char *
+fmt_expected_name (const xo_fspec_t *xfp)
+{
+    bool is_signed = fmt_is_signed(xfp);
+
+    switch (xfp->xf_arg_type) {
+    case XO_AT_INT64:
+        return is_signed ? "int64_t" : "uint64_t";
+
+    case XO_AT_INTMAX:
+        return is_signed ? "intmax_t" : "uintmax_t";
+
+    case XO_AT_PTRDIFF:
+        return "ptrdiff_t";
+
+    case XO_AT_SIZE:
+        return is_signed ? "ssize_t" : "size_t";
+
+    case XO_AT_WINT:
+        return "wint_t";
+
+    default:
+        return nullptr;
+    }
+}
+
+/*
+ * Describe a type the way clang's own -Wformat does: the written name,
+ * followed by the underlying type when they differ ("'uintmax_t' (aka
+ * 'unsigned long')").
+ */
+static std::string
+type_desc (const std::string &name, const std::string &canon)
+{
+    if (name == canon)
+        return "'" + name + "'";
+
+    return "'" + name + "' (aka '" + canon + "')";
 }
 
 /*
  * Return true if the actual argument type is compatible with the expected type.
  * Uses arg->getType() (the promoted type seen by the callee) for matching so
- * that varargs promotions (char→int, float→double) are already applied.
+ * that varargs promotions (char->int, float->double) are already applied.
  *
  * Matching rules:
  *  - Integer: same bit width, sign ignored (long == unsigned long long
@@ -321,12 +272,15 @@ fmt_expected_type (ASTContext &C, const char *spec, unsigned len)
  *    platforms (unsigned long on FreeBSD/Linux, unsigned long long on
  *    macOS), and a libxo format string that is correct on one platform
  *    must not warn on another.
- *  - Float:   exact canonical type (long double ≠ double even if same size).
+ *  - Float:   exact canonical type (long double != double even if same size).
  *  - %s:      any char pointer.
  *  - %p:      any pointer.
+ *  - NULL:    only when null_ok is set, since clang's -Wformat rejects
+ *             a NULL "%s" and libxo only defines it for "%JNs".
  */
 static bool
-type_matches (ASTContext &ctxt, QualType expected, const Expr *arg)
+type_matches (ASTContext &ctxt, QualType expected, const Expr *arg,
+              bool null_ok)
 {
     QualType act = arg->getType().getCanonicalType().getUnqualifiedType();
     QualType exp = expected.getCanonicalType().getUnqualifiedType();
@@ -356,6 +310,10 @@ type_matches (ASTContext &ctxt, QualType expected, const Expr *arg)
      * may not be converted to pointers.
      */
     if (exp->isPointerType()) {
+        if (null_ok && arg->isNullPointerConstant(ctxt,
+                                       Expr::NPC_ValueDependentIsNotNull))
+            return true;
+
         /* Unwrap pointer types */
         QualType ap;
         if (act->isPointerType())
@@ -372,7 +330,7 @@ type_matches (ASTContext &ctxt, QualType expected, const Expr *arg)
         if (ap == ep)
             return true;
 
-        /* %s/%hs: any char kind (char *, unsigned char *, char[N], …) */
+        /* %s/%hs: any char kind (char *, unsigned char *, char[N], ...) */
         if (ep->isCharType() && ap->isCharType())
             return true;
 
@@ -408,32 +366,67 @@ type_matches (ASTContext &ctxt, QualType expected, const Expr *arg)
  * Diagnostic callbacks and visitor.
  */
 
+/*
+ * Collects a copy of each argument's fspec, since the shim's fspecs
+ * don't outlive the parse.  The name of an XFF_ARGUMENT field (a NULL
+ * fspec) is a string, so it's recorded as "%s".
+ */
 struct ArgCollector {
-    std::vector<std::pair<std::string, unsigned>> args; /* (spec, speclen) */
+    std::vector<xo_fspec_t> args;
 
-    static void callback(void *data, const char *fmt, unsigned fmtlen) {
+    static void callback(void *data, const xo_fspec_t *xfp) {
         auto *ac = static_cast<ArgCollector *>(data);
-        ac->args.emplace_back(fmt ? std::string(fmt, fmtlen) : std::string(),
-                               fmtlen);
+
+        if (xfp) {
+            ac->args.push_back(*xfp);
+        } else {
+            xo_fspec_t name = {};
+            name.xf_fc = 's';
+            name.xf_arg_type = XO_AT_STRING;
+            ac->args.push_back(name);
+        }
     }
 };
 
 struct DiagCb {
-    DiagnosticsEngine *diags;
-    unsigned           id;
-    SourceLocation     loc;
+    DiagnosticsEngine   *diags;
+    unsigned             id;
+    const StringLiteral *sl;
+    const ASTContext    *ctx;
 };
 
 static void
-emit_diag (void *data, const char *fmt, ...)
+emit_diag (void *data, int offset, const char *fmt, ...)
 {
     auto *dc = static_cast<DiagCb *>(data);
-    char buf[512];
+
+    /* Messages often quote the whole format string; don't truncate */
     va_list vap;
     va_start(vap, fmt);
-    vsnprintf(buf, sizeof(buf), fmt, vap);
+    int len = vsnprintf(nullptr, 0, fmt, vap);
     va_end(vap);
-    dc->diags->Report(dc->loc, dc->id) << buf;
+
+    if (len < 0)
+        return;
+
+    std::string msg(len + 1, '\0');
+    va_start(vap, fmt);
+    vsnprintf(&msg[0], msg.size(), fmt, vap);
+    va_end(vap);
+    msg.resize(len);
+
+    /*
+     * Point at the field itself.  getLocationOfByte() understands
+     * escapes and concatenated literals, so the offset into the
+     * evaluated string maps back to the right column.
+     */
+    SourceLocation loc = dc->sl->getBeginLoc();
+    if (offset >= 0 && (unsigned) offset < dc->sl->getByteLength())
+        loc = dc->sl->getLocationOfByte(offset, dc->ctx->getSourceManager(),
+                                        dc->ctx->getLangOpts(),
+                                        dc->ctx->getTargetInfo());
+
+    dc->diags->Report(loc, dc->id) << msg;
 }
 
 class XoValidateVisitor : public RecursiveASTVisitor<XoValidateVisitor> {
@@ -441,8 +434,7 @@ class XoValidateVisitor : public RecursiveASTVisitor<XoValidateVisitor> {
     ASTContext        *Ctx_;          /* set by setContext() before traversal */
     unsigned           SyntaxDiagID;
     unsigned           CountDiagID;
-    unsigned           TypeDiagID;    /* coarse fallback */
-    unsigned           TypePreciseDiagID;
+    unsigned           TypeDiagID;
     unsigned           WarnDiagID;
 
 public:
@@ -457,10 +449,8 @@ public:
         CountDiagID  = Diags.getCustomDiagID(errLevel,
                            "libxo: format expects %0 argument(s) but %1 provided");
         TypeDiagID   = Diags.getCustomDiagID(errLevel,
-                           "libxo: argument %0 type mismatch: format expects %1");
-        TypePreciseDiagID = Diags.getCustomDiagID(errLevel,
-                           "libxo: argument %0: format specifies type '%1'"
-                           " but the argument has type '%2'");
+                           "libxo: argument %0: format specifies type %1"
+                           " but the argument has type %2");
         WarnDiagID   = Diags.getCustomDiagID(DiagnosticsEngine::Warning,
                            "libxo: %0");
     }
@@ -473,11 +463,21 @@ public:
         if (!FD)
             return true;
 
+        /*
+         * getName() asserts the callee's DeclarationName is a simple
+         * identifier; operator overloads, conversion functions, etc.
+         * are not, and none of them can ever be a libxo emit call.
+         */
+        if (!FD->getIdentifier())
+            return true;
+
         StringRef name = FD->getName();
         unsigned fmt_arg = UINT_MAX;
+        unsigned eflags = 0;
         for (const XoEmitEntry *e = xo_emit_table; e->name; e++) {
             if (name == e->name) {
                 fmt_arg = e->fmt_arg;
+                eflags = e->flags;
                 break;
             }
         }
@@ -489,9 +489,17 @@ public:
         if (!SL)
             return true;    /* non-literal format strings: skip */
 
+        /*
+         * getString() asserts on wide literals (L"", u"", U"").  libxo
+         * formats are char strings, so -Wformat or the type checker
+         * will already complain about those.
+         */
+        if (SL->getCharByteWidth() != 1 || !Ctx_)
+            return true;
+
         std::string fmt = SL->getString().str();
-        DiagCb dc_err  { &Diags, SyntaxDiagID, SL->getBeginLoc() };
-        DiagCb dc_warn { &Diags, WarnDiagID,   SL->getBeginLoc() };
+        DiagCb dc_err  { &Diags, SyntaxDiagID, SL, Ctx_ };
+        DiagCb dc_warn { &Diags, WarnDiagID,   SL, Ctx_ };
         ArgCollector ac;
 
 	xo_parse_flags_t flags = XPF_STRICT;
@@ -506,6 +514,9 @@ public:
         if (rc < 0)
             return true;    /* parse error already reported */
 
+        if (eflags & XEF_VA_LIST)
+            return true;    /* values are not visible to us */
+
         unsigned expected = (unsigned) ac.args.size();
         unsigned actual   = CE->getNumArgs() - fmt_arg - 1;
 
@@ -514,20 +525,20 @@ public:
             return true;
         }
 
-        if (!Ctx_)
-            return true;
+        if (eflags & XEF_PRINTFLIKE)
+            return true;    /* -Wformat checks the types */
 
         PrintingPolicy PP = Ctx_->getPrintingPolicy();
 
         for (unsigned i = 0; i < expected; i++) {
-            const auto &a    = ac.args[i];
-            const char *spec = a.first.empty() ? nullptr : a.first.c_str();
-            unsigned speclen = a.second;
-            const Expr *arg  = CE->getArg(fmt_arg + 1 + i);
+            const Expr *arg = CE->getArg(fmt_arg + 1 + i);
 
-            QualType exp_type = fmt_expected_type(*Ctx_, spec, speclen);
+            const xo_fspec_t *xfp = &ac.args[i];
+            QualType exp_type = fmt_expected_type(*Ctx_, xfp);
+            bool null_ok = (xfp->xf_extflags & XXF_NULL_AS_EMPTY) != 0;
+
             if (!exp_type.isNull()) {
-                if (!type_matches(*Ctx_, exp_type, arg)) {
+                if (!type_matches(*Ctx_, exp_type, arg, null_ok)) {
                     /*
                      * Newer clang (LLVM 21+, https://github.com/llvm/llvm-project/pull/143653)
                      * made getSizeType()/getPointerDiffType() return a
@@ -536,18 +547,18 @@ public:
                      * printed name (e.g. "unsigned long") is stable across
                      * clang versions.
                      */
-                    std::string exp_str = exp_type.getCanonicalType()
+                    std::string exp_canon = exp_type.getCanonicalType()
                                                    .getAsString(PP);
-                    std::string act_str = arg->IgnoreImpCasts()->getType()
-                                             .getAsString(PP);
-                    Diags.Report(arg->getBeginLoc(), TypePreciseDiagID)
-                        << (i + 1) << exp_str << act_str;
-                }
-            } else {
-                FmtExpect expect = parse_fmt_expect(spec, speclen);
-                if (!arg_type_ok(arg, expect)) {
+                    const char *exp_name = fmt_expected_name(xfp);
+                    std::string exp_str = type_desc(exp_name ? exp_name
+                                                    : exp_canon, exp_canon);
+
+                    QualType act_type = arg->IgnoreImpCasts()->getType();
+                    std::string act_str = type_desc(act_type.getAsString(PP),
+                                    act_type.getCanonicalType().getAsString(PP));
+
                     Diags.Report(arg->getBeginLoc(), TypeDiagID)
-                        << (i + 1) << expect_name(expect);
+                        << (i + 1) << exp_str << act_str;
                 }
             }
         }

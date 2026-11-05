@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.13)
 project(xo_precompile CXX C)
 
 # LLVM New-PM module pass: rewrites xo_emit() calls with constant format
-# strings into xo_emit_cached() calls backed by pre-parsed field tables.
+# strings into xo_emit_precompiled() calls backed by pre-parsed field tables.
 # Load at compile time with:  clang -fpass-plugin=/path/to/xo_precompile.so
 
 set(CMAKE_CXX_STANDARD 17)
@@ -54,7 +54,24 @@ if(APPLE)
     target_link_options(xo_precompile PRIVATE -undefined dynamic_lookup)
 endif()
 
-# Drop the .dylib/.so prefix so -fpass-plugin= can use the path as-is.
+# A MODULE is named "lib<name>.so" (".so" even on macOS); clear the
+# "lib" prefix so the plugin is <name>.so, the name xocc and
+# libxo-config pass to clang.
 set_target_properties(xo_precompile PROPERTIES PREFIX "")
 
-install(TARGETS xo_precompile DESTINATION lib/libxo)
+# Where the plugin is installed.  This must be the directory that xocc
+# and libxo-config load plugins from (configure's XO_LLVMDIR, which
+# follows --libdir), so the build passes it in; "lib" is not the libdir
+# on multilib systems that use lib64.
+set(XO_LLVMDIR "lib/libxo" CACHE PATH "libxo plugin install directory")
+
+# The plugin needs libxo_format at load time, and a plain
+# "clang -fplugin=..." gives it no library path, so record the libxo
+# library directory in the installed module.  The build tree copy keeps
+# the build path that cmake adds on its own.
+set(XO_LIBDIR "" CACHE PATH "libxo library install directory")
+if(XO_LIBDIR)
+    set_target_properties(xo_precompile PROPERTIES INSTALL_RPATH "${XO_LIBDIR}")
+endif()
+
+install(TARGETS xo_precompile DESTINATION "${XO_LLVMDIR}")

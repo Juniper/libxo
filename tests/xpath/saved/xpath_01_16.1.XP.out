@@ -22,9 +22,30 @@
   <val>a</val>
 </item>
 <item>
+  <score>15</score>
+  <default_score>5</default_score>
+  <val>a</val>
+</item>
+<item>
   <score>0</score>
   <default_score>20</default_score>
   <val>b</val>
+</item>
+<item>
+  <score>15</score>
+  <default_score>5</default_score>
+  <val>a</val>
+</item>
+<item>
+  <score>0</score>
+  <default_score>20</default_score>
+  <val>b</val>
+</item>
+<item>
+  <a>7</a>
+  <b>3</b>
+  <c>9</c>
+  <val>1</val>
 </item>
 <item>
   <a>7</a>

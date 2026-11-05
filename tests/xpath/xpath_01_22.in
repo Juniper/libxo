@@ -106,3 +106,95 @@ r
 = thing three
 = thing four
 - data
+
+# test 8: nine paths that start with the same element, so that
+# nine trie nodes are active at once; the last is positional
+r
+?top/a
+?top/b
+?top/c
+?top/d
+?top/e
+?top/f
+?top/g
+?top/h
+?top/item[2]
++top
++a
+= val a
+-a
++b
+= val b
+-b
++c
+= val c
+-c
++d
+= val d
+-d
++e
+= val e
+-e
++f
+= val f
+-f
++g
+= val g
+-g
++h
+= val h
+-h
+{item
+<item
+= val 1
+>item
+<item
+= val 2
+>item
+<item
+= val 3
+>item
+}item
+-top
+
+# test 9: a path of nine like-named steps, matched deep in the
+# tree, where every frame tracks nine partial matches
+r
+?x/x/x/x/x/x/x/x/x/want
++x
++x
++x
++x
++x
++x
++x
++x
++x
++x
++x
++x
++x
++x
++x
++x
++x
++want
+= val yes
+-want
+-x
+-x
+-x
+-x
+-x
+-x
+-x
+-x
+-x
+-x
+-x
+-x
+-x
+-x
+-x
+-x
+-x

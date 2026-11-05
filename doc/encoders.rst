@@ -47,6 +47,12 @@ The string "@" can be used in place of the string "encoder=".
 
     df --libxo @csv:no-header
 
+The "@" form also accepts the built-in styles ("text", "xml", "json",
+and "html"), so there is no need to know which styles are built into
+libxo and which are loaded as encoders::
+
+    df --libxo @json,pretty
+
 .. _csv_encoder:
 
 CSV - Comma Separated Values
@@ -224,6 +230,79 @@ system.
 The CSV encoder defaults to using the standard Unix end-of-line
 marker, a simple newline.  Use the "dos" option to use the `CRLF`
 convention.
+
+.. _rtoon_encoder:
+
+RTOON - libxo's TOON Variant
+----------------------------
+
+libxo ships with an encoder for "RTOON", libxo's own compact,
+line-oriented format derived from TOON.  Lists of instances can be
+written in one of two forms: "sparse", where each instance is written
+as a block of "name=value" lines, or "dense", where the field names
+are written once as a header and each instance becomes a single row
+of values.  A decoder accepts either form.
+
+    df --libxo @rtoon
+
+By default, a list is dense only when the developer asked for it,
+either by using the "dense" field modifier or by opening the list with
+the `XOF_DENSE` flag.  All other lists are sparse.  The options below
+let the user ask for dense output without changing the program.
+
+The `no-version` Option
+~~~~~~~~~~~~~~~~~~~~~~~
+
+The RTOON encoder normally begins its output with an "@version" line.
+Use the "no-version" option to omit it.
+
+    df --libxo @rtoon:no-version
+
+The `dense` Option
+~~~~~~~~~~~~~~~~~~
+
+The "dense" option asks the encoder to write lists in the dense form.
+It takes one of the following values:
+
+=============== ======================================================
+ Value           Meaning
+=============== ======================================================
+ (none)          Same as "auto"
+ auto            Make a list dense when its first instance is flat
+ N (1 or more)   Make every list nested N or more deep dense
+=============== ======================================================
+
+In "auto" mode, the encoder looks at the first instance of each list.
+If that instance has at least one field and holds no containers or
+lists, the list is written in dense form; otherwise it is written in
+sparse form.  If a later instance of an automatically dense list opens
+a nested list, that nested list is discarded, since a dense row cannot
+hold it.
+
+    df --libxo @rtoon+dense
+
+In depth mode ("dense=N"), every list nested N or more lists deep is
+written in dense form, where a top-level list has depth 1.  Nested
+containers inside such a list are flattened into its rows.  Nested
+lists cannot be flattened, so any list below depth N is discarded
+along with its contents.  The following makes lists at depth 2 and
+deeper dense, while keeping top-level lists sparse:
+
+    df --libxo @rtoon+dense=2
+
+When the "dense" option causes a list to be discarded, the encoder
+issues a single warning on stderr, naming the first list dropped.
+Further drops are not reported.  The output is otherwise unaffected.
+
+Any value other than "auto" or a whole number of 1 or more is an
+error, and the encoder fails to initialize.  If the option appears
+more than once, the last one wins.
+
+The "dense" option only adds dense lists; it never removes them.  The
+developer's "dense" field modifier and the `XOF_DENSE` flag are always
+honored, whatever the option's value.  A nested list inside a list
+the developer made dense is still an error, reported as it would be
+without the option.
 
 .. _fdr_encoder:
 

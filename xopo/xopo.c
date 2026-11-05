@@ -87,9 +87,10 @@ print_help (void)
     fprintf(stderr,
 "Usage: xopo [options] format [fields]\n"
 "    --help                Display this help text\n"
-"    --option <opts> -or -O <opts> Give formatting options\n"
-"    --output <file> -or -o <file> Use file as output destination\n"
-"    --po <file> or -f <file> Generate new msgid's for a po file\n"
+"    --number OR -n        Number the fields in the simplified format\n"
+"    --option <opts> OR -O <opts> Give formatting options\n"
+"    --output <file> OR -o <file> Use file as output destination\n"
+"    --po <file> OR -f <file> Generate new msgid's for a po file\n"
 "    --simplify <text> OR -s <text> Show simplified form of the format string\n"
 "    --version             Display version information\n"
 "    --warn OR -W          Display warnings in text on stderr\n"
@@ -107,7 +108,8 @@ static struct option long_opts[] = {
     { "option", required_argument, NULL, 'O' },
     { "output", required_argument, NULL, 'o' },
     { "po", required_argument, NULL, 'f' },
-    { "simplify", no_argument, NULL, 'S' },
+    { "simplify", required_argument, NULL, 's' },
+    { "version", no_argument, &opts.o_version, 1 },
     { "warn", no_argument, NULL, 'W' },
     { NULL, 0, NULL, 0 }
 };
@@ -195,7 +197,9 @@ main (int argc UNUSED, char **argv)
 	    xo_emit("{:format}\n", fmt);
 	    free(fmt);
 	}
-	exit(0);
+
+	xo_finish();		/* Our output is not written until this */
+	return 0;
     }
 
     static char msgid[] = "msgid ";
@@ -207,7 +211,7 @@ main (int argc UNUSED, char **argv)
     if (opt_input) {
 	infile = fopen(opt_input, "r");
 	if (infile == NULL)
-	    xo_emit_err(1, "count not open input file: '{:filename}'",
+	    xo_emit_err(1, "could not open input file: '{:filename}'",
 			opt_input);
     } else
 	infile = stdin;
@@ -216,7 +220,7 @@ main (int argc UNUSED, char **argv)
 	unlink(opt_output);
 	outfile = fopen(opt_output, "w");
 	if (outfile == NULL)
-	    xo_emit_err(1, "count not open output file: '{:filename}'",
+	    xo_emit_err(1, "could not open output file: '{:filename}'",
 			opt_output);
     } else
 	outfile = stdout;
@@ -237,7 +241,7 @@ main (int argc UNUSED, char **argv)
 	    continue;
 	}
 
-	for (cp = buf + sizeof(msgid); *cp; cp++)
+	for (cp = buf + sizeof(msgid) - 1; *cp; cp++)
 	    if (!isspace((int) *cp))
 		break;
 
@@ -251,8 +255,9 @@ main (int argc UNUSED, char **argv)
 	while (isspace((int) *ep) && ep > cp)
 	    ep -= 1;
 
-	if (*ep != '"')
-	    *ep += 1;
+	/* Without a closing quote, keep the last character */
+	if (*ep != '"' && *ep != '\0')
+	    ep += 1;
 
 	*ep = '\0';
 

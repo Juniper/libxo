@@ -1,0 +1,156 @@
+op create: [cbor] []
+ [append] @ 0 (1/1)
+ bf                                                    .
+    op open_container: [employees] []
+ [append] @ 1 (a/10)
+ 69 65 6d 70  6c 6f 79 65  - 65 73                     iemployees
+ [append] @ 11 (1/1)
+ bf                                                    .
+      op open_list: [employee] []
+   [append] @ 12 (9/9)
+   68 65 6d 70  6c 6f 79 65  - 65                        hemployee
+   [append] @ 21 (1/1)
+   9f                                                    .
+        op close_list: [employee] []
+     [append] @ 22 (1/1)
+     ff                                                    .
+      op string: [extra] []
+   [append] @ 23 (6/6)
+   65 65 78 74  72 61                                    eextra
+   [append] @ 29 (1/1)
+   60                                                    `
+      op open_list: [memory] []
+   [append] @ 30 (7/7)
+   66 6d 65 6d  6f 72 79                                 fmemory
+   [append] @ 37 (1/1)
+   9f                                                    .
+        op open_instance: [memory] []
+     [append] @ 38 (1/1)
+     bf                                                    .
+          op string: [type] [name]
+       [append] @ 39 (5/5)
+       64 74 79 70  65                                       dtype
+       [append] @ 44 (5/5)
+       64 6e 61 6d  65                                       dname
+          op content: [in-use] [12345]
+       [append] @ 49 (7/7)
+       66 69 6e 2d  75 73 65                                 fin-use
+       [content] @ 56 (3/3)
+       19 30 39                                              .09
+          op content: [memory-use] [54321]
+       [append] @ 59 (b/11)
+       6a 6d 65 6d  6f 72 79 2d  - 75 73 65                  jmemory-use
+       [content] @ 70 (3/3)
+       19 d4 31                                              ..1
+          op string: [high-use] [-]
+       [append] @ 73 (9/9)
+       68 68 69 67  68 2d 75 73  - 65                        hhigh-use
+       [append] @ 82 (2/2)
+       61 2d                                                 a-
+          op content: [requests] [32145]
+       [append] @ 84 (9/9)
+       68 72 65 71  75 65 73 74  - 73                        hrequests
+       [content] @ 93 (3/3)
+       19 7d 91                                              .}.
+          op close_instance: [memory] []
+       [append] @ 96 (1/1)
+       ff                                                    .
+        op close_list: [memory] []
+     [append] @ 97 (1/1)
+     ff                                                    .
+      op open_list: [employee] []
+   [append] @ 98 (9/9)
+   68 65 6d 70  6c 6f 79 65  - 65                        hemployee
+   [append] @ 107 (1/1)
+   9f                                                    .
+        op open_instance: [employee] []
+     [append] @ 108 (1/1)
+     bf                                                    .
+          op string: [first-name] [Terry]
+       [append] @ 109 (b/11)
+       6a 66 69 72  73 74 2d 6e  - 61 6d 65                  jfirst-name
+       [append] @ 120 (6/6)
+       65 54 65 72  72 79                                    eTerry
+          op string: [last-name] [Jones]
+       [append] @ 126 (a/10)
+       69 6c 61 73  74 2d 6e 61  - 6d 65                     ilast-name
+       [append] @ 136 (6/6)
+       65 4a 6f 6e  65 73                                    eJones
+          op content: [department] [660]
+       [append] @ 142 (b/11)
+       6a 64 65 70  61 72 74 6d  - 65 6e 74                  jdepartment
+       [content] @ 153 (3/3)
+       19 02 94                                              ...
+          op close_instance: [employee] []
+       [append] @ 156 (1/1)
+       ff                                                    .
+        op open_instance: [employee] []
+     [append] @ 157 (1/1)
+     bf                                                    .
+          op string: [first-name] [Leslie]
+       [append] @ 158 (b/11)
+       6a 66 69 72  73 74 2d 6e  - 61 6d 65                  jfirst-name
+       [append] @ 169 (7/7)
+       66 4c 65 73  6c 69 65                                 fLeslie
+          op string: [last-name] [Patterson]
+       [append] @ 176 (a/10)
+       69 6c 61 73  74 2d 6e 61  - 6d 65                     ilast-name
+       [append] @ 186 (a/10)
+       69 50 61 74  74 65 72 73  - 6f 6e                     iPatterson
+          op content: [department] [341]
+       [append] @ 196 (b/11)
+       6a 64 65 70  61 72 74 6d  - 65 6e 74                  jdepartment
+       [content] @ 207 (3/3)
+       19 01 55                                              ..U
+          op close_instance: [employee] []
+       [append] @ 210 (1/1)
+       ff                                                    .
+        op open_instance: [employee] []
+     [append] @ 211 (1/1)
+     bf                                                    .
+          op string: [first-name] [Ashley]
+       [append] @ 212 (b/11)
+       6a 66 69 72  73 74 2d 6e  - 61 6d 65                  jfirst-name
+       [append] @ 223 (7/7)
+       66 41 73 68  6c 65 79                                 fAshley
+          op string: [last-name] [Smith]
+       [append] @ 230 (a/10)
+       69 6c 61 73  74 2d 6e 61  - 6d 65                     ilast-name
+       [append] @ 240 (6/6)
+       65 53 6d 69  74 68                                    eSmith
+          op content: [department] [1440]
+       [append] @ 246 (b/11)
+       6a 64 65 70  61 72 74 6d  - 65 6e 74                  jdepartment
+       [content] @ 257 (3/3)
+       19 05 a0                                              ...
+          op close_instance: [employee] []
+       [append] @ 260 (1/1)
+       ff                                                    .
+        op close_list: [employee] []
+     [append] @ 261 (1/1)
+     ff                                                    .
+      op close_container: [employees] []
+   [append] @ 262 (1/1)
+   ff                                                    .
+    op finish: [] []
+ [append] @ 263 (1/1)
+ ff                                                    .
+  op flush: [] []
+>[cbor] @ 0 (108/264)
+>bf 69 65 6d  70 6c 6f 79  - 65 65 73 bf  68 65 6d 70  .iemployees.hemp
+>6c 6f 79 65  65 9f ff 65  - 65 78 74 72  61 60 66 6d  loyee..eextra`fm
+>65 6d 6f 72  79 9f bf 64  - 74 79 70 65  64 6e 61 6d  emory..dtypednam
+>65 66 69 6e  2d 75 73 65  - 19 30 39 6a  6d 65 6d 6f  efin-use.09jmemo
+>72 79 2d 75  73 65 19 d4  - 31 68 68 69  67 68 2d 75  ry-use..1hhigh-u
+>73 65 61 2d  68 72 65 71  - 75 65 73 74  73 19 7d 91  sea-hrequests.}.
+>ff ff 68 65  6d 70 6c 6f  - 79 65 65 9f  bf 6a 66 69  ..hemployee..jfi
+>72 73 74 2d  6e 61 6d 65  - 65 54 65 72  72 79 69 6c  rst-nameeTerryil
+>61 73 74 2d  6e 61 6d 65  - 65 4a 6f 6e  65 73 6a 64  ast-nameeJonesjd
+>65 70 61 72  74 6d 65 6e  - 74 19 02 94  ff bf 6a 66  epartment.....jf
+>69 72 73 74  2d 6e 61 6d  - 65 66 4c 65  73 6c 69 65  irst-namefLeslie
+>69 6c 61 73  74 2d 6e 61  - 6d 65 69 50  61 74 74 65  ilast-nameiPatte
+>72 73 6f 6e  6a 64 65 70  - 61 72 74 6d  65 6e 74 19  rsonjdepartment.
+>01 55 ff bf  6a 66 69 72  - 73 74 2d 6e  61 6d 65 66  .U..jfirst-namef
+>41 73 68 6c  65 79 69 6c  - 61 73 74 2d  6e 61 6d 65  Ashleyilast-name
+>65 53 6d 69  74 68 6a 64  - 65 70 61 72  74 6d 65 6e  eSmithjdepartmen
+>74 19 05 a0  ff ff ff ff                              t.......

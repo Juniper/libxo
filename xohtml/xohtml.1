@@ -60,7 +60,12 @@ Unless
 is given,
 .Nm
 writes its output to an automatically named file under
+.Pa $TMPDIR/$USER.xohtml
+(or
 .Pa /tmp/$USER.xohtml
+if
+.Ev TMPDIR
+is not set)
 and opens it in a browser
 (using
 .Xr open 1
@@ -86,6 +91,7 @@ Use the given command instead of one on the command line.
 This command should be quoted if it consists of multiple tokens, and
 should contain the "--libxo=html" option or equivalent, since the
 command is used directly.
+It is run by the shell, so it may contain pipes and redirections.
 .It Fl f Ar file | Fl -file Ar file
 Output is saved to the given file, rather than to an automatically
 named file, and no browser is opened.
@@ -102,10 +108,9 @@ fetching it from the official
 .Nm libxo
 website, which is the default source.
 .El
-.Pp
 .Sh EXAMPLES
 The following command line will run "du --libxo=html ~/src", write the
-result to an automatically named file under /tmp, and open it in a
+result to an automatically named file under $TMPDIR, and open it in a
 browser:
 .Bd -literal -offset indent
     xohtml du ~/src
@@ -114,7 +119,7 @@ browser:
 The following command line will run "du --libxo=html ~/src" and save
 the output to /tmp/src.html without opening a browser:
 .Bd -literal -offset indent
-    xohtml du ~/src -f /tmp/src.html
+    xohtml -f /tmp/src.html du ~/src
 .Ed
 .Pp
 The following command line will run "du --libxo=html,warn ~/src" and save
@@ -128,7 +133,6 @@ the output to /tmp/src.html:
 .Bd -literal -offset indent
     xohtml -c "du --libxo=html,warn ~/src" -f /tmp/src.html
 .Ed
-.Pp
 .Sh SEE ALSO
 .Xr libxo 3 ,
 .Xr xo_emit 3 ,

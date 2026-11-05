@@ -28,7 +28,7 @@
 
 /*
  * Return a printable version of str, escaping control characters.
- * Uses a rotating set of static buffers — no allocation, no free.
+ * Uses a rotating set of static buffers - no allocation, no free.
  * Only used for error-message formatting.
  */
 const char *
@@ -41,32 +41,32 @@ xo_printable2 (const char *str, int len, int bracesp)
 	return "";
 
     if (++bufnum == XO_NUMBUFS)
-	bufnum = 0;
+        bufnum = 0;
 
     char *res = bufset[bufnum], *cp, *ep;
     const char *str_end = str + len;
 
     cp = res;
     if (bracesp)
-	*cp++ = '{';
+        *cp++ = '{';
 
     for (ep = res + XO_SMBUFSZ - 2;
-	     str < str_end && *str && cp < ep; cp++, str++) {
-	if (*str == '\n') {
-	    *cp++ = '\\';
-	    *cp = 'n';
-	} else if (*str == '\r') {
-	    *cp++ = '\\';
-	    *cp = 'r';
-	} else if (*str == '\"') {
-	    *cp++ = '\\';
-	    *cp = '"';
-	} else
-	    *cp = *str;
+             str < str_end && *str && cp < ep; cp++, str++) {
+        if (*str == '\n') {
+            *cp++ = '\\';
+            *cp = 'n';
+        } else if (*str == '\r') {
+            *cp++ = '\\';
+            *cp = 'r';
+        } else if (*str == '\"') {
+            *cp++ = '\\';
+            *cp = '"';
+        } else
+            *cp = *str;
     }
 
     if (bracesp && cp < ep)
-	*cp++ = '}';
+        *cp++ = '}';
 
     *cp = '\0';
     return res;
@@ -75,25 +75,48 @@ xo_printable2 (const char *str, int len, int bracesp)
 const char *
 xo_printable (const char *str)
 {
+    if (str == NULL)		/* The gettext domain is often not set */
+	return "";
+
     return xo_printable2(str, strlen(str), 0);
 }
 
 /* Error reporting */
 
+/*
+ * The callbacks take "...", so we can't hand them our va_list; render
+ * the message first.  Messages often quote the whole format string, so
+ * size the buffer to fit rather than truncating.
+ */
+static void
+xo_parse_report (xo_parse_error_func_t func, void *data,
+		 const char *fmt, va_list vap)
+{
+    va_list va_local;
+
+    va_copy(va_local, vap);
+    int len = vsnprintf(NULL, 0, fmt, va_local);
+    va_end(va_local);
+
+    if (len < 0)
+	return;
+
+    char buf[len + 1];
+    vsnprintf(buf, sizeof(buf), fmt, vap);
+    func(data, "%s", buf);
+}
 
 XO_PRINTFLIKE(2, 3)
 static void
 xo_parse_error (xo_parse_t *xpp, const char *fmt, ...)
 {
     if (xpp == NULL || xpp->xp_error == NULL)
-	return;
+        return;
 
-    char buf[512];
     va_list vap;
     va_start(vap, fmt);
-    vsnprintf(buf, sizeof(buf), fmt, vap);
+    xo_parse_report(xpp->xp_error, xpp->xp_error_data, fmt, vap);
     va_end(vap);
-    xpp->xp_error(xpp->xp_error_data, "%s", buf);
 }
 
 XO_PRINTFLIKE(2, 3)
@@ -101,14 +124,28 @@ static void
 xo_parse_warning (xo_parse_t *xpp, const char *fmt, ...)
 {
     if (xpp == NULL || xpp->xp_warn == NULL)
-	return;
+        return;
 
-    char buf[512];
     va_list vap;
     va_start(vap, fmt);
-    vsnprintf(buf, sizeof(buf), fmt, vap);
+    xo_parse_report(xpp->xp_warn, xpp->xp_warn_data, fmt, vap);
     va_end(vap);
-    xpp->xp_warn(xpp->xp_warn_data, "%s", buf);
+}
+
+/*
+ * To allow libxo to be used in diverse environment, we allow the
+ * caller to give callbacks for memory allocation.  These live here,
+ * not in libxo.c, since this file is compiled into both libxo.a and
+ * libxo_format.a (used by the llvm-plugins).
+ */
+xo_realloc_func_t xo_realloc = realloc;
+xo_free_func_t xo_free = free;
+
+void
+xo_set_allocator (xo_realloc_func_t realloc_func, xo_free_func_t free_func)
+{
+    xo_realloc = realloc_func;
+    xo_free = free_func;
 }
 
 /* Allocator helper functions */
@@ -118,7 +155,7 @@ xo_parse_alloc (xo_parse_t *xpp, size_t sz)
 {
     xo_realloc_func_t fn = xpp ? xpp->xp_realloc : NULL;
     if (fn == NULL)
-	fn = realloc;
+        fn = realloc;
 
     return fn(NULL, sz);
 }
@@ -128,8 +165,83 @@ xo_parse_free (xo_parse_t *xpp, void *ptr)
 {
     xo_free_func_t fn = xpp ? xpp->xp_free : NULL;
     if (fn == NULL)
-	fn = free;
+        fn = free;
     fn(ptr);
+}
+
+static void *
+xo_parse_realloc (xo_parse_t *xpp, void *ptr, size_t sz)
+{
+    xo_realloc_func_t fn = xpp ? xpp->xp_realloc : NULL;
+    if (fn == NULL)
+        fn = realloc;
+
+    return fn(ptr, sz);
+}
+
+/*
+ * xo_buf.h grows buffers with libxo's global allocator, which
+ * libxo_format does not have, so we size xp_printable ourselves.
+ */
+const char *
+xo_parse_printable (xo_parse_t *xpp, const char *str, ssize_t len,
+		    int bracesp)
+{
+    if (xpp == NULL || str == NULL)
+	return "";
+
+    len = (len < 0) ? (ssize_t) strlen(str) : (ssize_t) strnlen(str, len);
+
+    /* Worst case: every byte escaped, plus the braces and the NUL */
+    xo_buffer_t *xbp = &xpp->xp_printable;
+    ssize_t need = len * 2 + 3;
+
+    if (xbp->xb_size < need) {
+	char *bp = xo_parse_realloc(xpp, xbp->xb_bufp, need);
+	if (bp == NULL)
+	    return "";
+	xbp->xb_bufp = bp;
+	xbp->xb_size = need;
+    }
+
+    char *cp = xbp->xb_bufp;
+    const char *ep = str + len;
+
+    if (bracesp)
+	*cp++ = '{';
+
+    for (; str < ep; str++) {
+	if (*str == '\n') {
+	    *cp++ = '\\';
+	    *cp++ = 'n';
+	} else if (*str == '\r') {
+	    *cp++ = '\\';
+	    *cp++ = 'r';
+	} else if (*str == '\"') {
+	    *cp++ = '\\';
+	    *cp++ = '"';
+	} else
+	    *cp++ = *str;
+    }
+
+    if (bracesp)
+	*cp++ = '}';
+
+    *cp = '\0';
+    xbp->xb_curp = cp;
+
+    return xbp->xb_bufp;
+}
+
+void
+xo_parse_release_printable (xo_parse_t *xpp)
+{
+    if (xpp == NULL)
+	return;
+
+    if (xpp->xp_printable.xb_bufp)
+	xo_parse_free(xpp, xpp->xp_printable.xb_bufp);
+    xo_buf_zero(&xpp->xp_printable);
 }
 
 /*
@@ -139,27 +251,27 @@ xo_xff_flags_t
 xo_name_lookup (xo_flag_mapping_t *map, const char *value, ssize_t len)
 {
     if (len == 0)
-	return 0;
+        return 0;
 
     if (len < 0)
-	len = strlen(value);
+        len = strlen(value);
 
     while (isspace((int) *value)) {
-	value += 1;
-	len -= 1;
+        value += 1;
+        len -= 1;
     }
 
     while (len > 0 && isspace((int) value[len - 1]))
-	len -= 1;
+        len -= 1;
 
     if (*value == '\0')
-	return 0;
+        return 0;
 
     for ( ; map->xm_name; map++) {
-	if (len < (ssize_t) strlen(map->xm_name))
-	    continue;
-	if (strncmp(map->xm_name, value, len) == 0)
-	    return map->xm_value;
+        if (len < (ssize_t) strlen(map->xm_name))
+            continue;
+        if (strncmp(map->xm_name, value, len) == 0)
+            return map->xm_value;
     }
 
     return 0;
@@ -169,11 +281,11 @@ static const char *
 xo_value_lookup (xo_flag_mapping_t *map, xo_xff_flags_t value)
 {
     if (value == 0)
-	return NULL;
+        return NULL;
 
     for ( ; map->xm_name; map++)
-	if (map->xm_value == value)
-	    return map->xm_name;
+        if (map->xm_value == value)
+            return map->xm_name;
 
     return NULL;
 }
@@ -186,6 +298,7 @@ xo_flag_mapping_t xo_role_names[] = {
     { 'D', "decoration" },
     { 'E', "error" },
     { 'F', "format" },
+    /* { 'G', (none) }, */
     { 'L', "label" },
     { 'N', "note" },
     { 'P', "padding" },
@@ -249,7 +362,7 @@ xo_role_wants_default_format (int ftype)
     case 'G':
     case '[':
     case ']':
-	return 0;
+        return 0;
     }
     return 1;
 }
@@ -263,8 +376,14 @@ static void
 xo_bump_width (xo_fspec_t *xfp, int digit)
 {
     int16_t *ip = &xfp->xf_width[xfp->xf_dots];
+    int val = ((*ip > 0) ? *ip : 0) * 10 + digit;
 
-    *ip = ((*ip > 0) ? *ip : 0) * 10 + digit;
+    /*
+     * The widths are 16 bits, and a number that does not fit would
+     * wrap into some other width, or a negative one.  Nothing is
+     * that wide, so the most we can hold is what such a number gets.
+     */
+    *ip = (val > INT16_MAX) ? INT16_MAX : val;
 }
 
 /*
@@ -276,101 +395,184 @@ xo_bump_width (xo_fspec_t *xfp, int digit)
  */
 const char *
 xo_parse_format_spec (xo_parse_t *xpp, xo_fspec_t *xfp,
-		      const char *cp, const char *ep, const char *fmt)
+                      const char *cp, const char *ep, const char *fmt)
 {
     const char *start = cp;
 
     for (cp += 1; cp < ep; cp++) {
-	if (*cp == 'l')
-	    xfp->xf_lflag += 1;
-	else if (*cp == 'h')
-	    xfp->xf_hflag += 1;
-	else if (*cp == 'j')
-	    xfp->xf_jflag += 1;
-	else if (*cp == 't')
-	    xfp->xf_tflag += 1;
-	else if (*cp == 'z')
-	    xfp->xf_zflag += 1;
-	else if (*cp == 'q')
-	    xfp->xf_qflag += 1;
-	else if (*cp == '.') {
-	    if (xfp->xf_dots + 1 >= XF_WIDTH_NUM) {
-		xo_parse_error(xpp, "Too many dots in format: '%s'", fmt);
-		return NULL;
-	    }
+        if (*cp == 'l' || *cp == 'L')   /* 'L' is "long double" */
+            xfp->xf_lflag += 1;
+        else if (*cp == 'h')
+            xfp->xf_hflag += 1;
+        else if (*cp == 'j')
+            xfp->xf_jflag += 1;
+        else if (*cp == 't')
+            xfp->xf_tflag += 1;
+        else if (*cp == 'z')
+            xfp->xf_zflag += 1;
+        else if (*cp == 'q')
+            xfp->xf_qflag += 1;
+        else if (*cp == '.') {
+            if (xfp->xf_dots + 1 >= XF_WIDTH_NUM) {
+                xo_parse_error(xpp, "Too many dots in format: '%s'", fmt);
+                return NULL;
+            }
 
-	    xfp->xf_dots += 1;	/* Increment it (after check) */
+            xfp->xf_dots += 1;  /* Increment it (after check) */
 
-	} else if (*cp == '-')
-	    xfp->xf_seen_minus = 1;
+        } else if (*cp == '-')
+            xfp->xf_seen_minus = 1;
 
-	else if (*cp == '#')
-	    xfp->xf_alt = 1;
+        else if (*cp == '+')
+            xfp->xf_plus = 1;
 
-	else if (*cp == '!') {
-	    /* "%!NNd" is a NN-bit signed value */
-	    const char *sp = cp + 1;
-	    const char *np = sp;
-	    uint64_t num_bits = 0;
+        else if (*cp == ' ')
+            xfp->xf_space = 1;
 
-	    for (; np < ep; np++) {
-		if (!isdigit((int) *np))
-		    break;
-		num_bits = num_bits * 10 + (*np - '0');
-	    }
+        else if (*cp == '#')
+            xfp->xf_alt = 1;
 
-	    cp += np - sp;	/* Move pointer along */
+        else if (*cp == '!') {
+            /* "%!NNd" is a NN-bit signed value */
+            const char *sp = cp + 1;
+            const char *np = sp;
+            uint64_t num_bits = 0;
 
-	    /* Report errors, which leave xf_num_bits as 0, ignoring the "!" */
-	    if (np == sp)
-		xo_parse_error(xpp, "missing integer size: '%s'",
-			       xo_printable2(start, ep - start, TRUE));
-	    else if (num_bits != 8 && num_bits != 16
-		     && num_bits != 32 && num_bits != 64)
-		xo_parse_error(xpp, "invalid integer size: '%s'",
-			       xo_printable2(start, ep - start, TRUE));
-	    else
-		xfp->xf_num_bits = num_bits;
+            for (; np < ep; np++) {
+                if (!isdigit((int) *np))
+                    break;
+                num_bits = num_bits * 10 + (*np - '0');
+            }
 
-	} else if (*cp == 'J') {
-	    switch (cp[1]) {
-	    case 'N':
-		xfp->xf_extflags |= XXF_NULL_AS_EMPTY;
-		break;
+            cp += np - sp;      /* Move pointer along */
 
-	    default:
-		xo_parse_error(xpp, "unknown 'J' flag: '%s'",
-			       xo_printable2(start, ep - start, TRUE));		
-	    }
+            /* Report errors, which leave xf_num_bits as 0, ignoring the "!" */
+            if (np == sp)
+                xo_parse_error(xpp, "missing integer size: '%s'",
+                               xo_parse_printable(xpp, start,
+                                                  ep - start, TRUE));
+            else if (num_bits != 8 && num_bits != 16
+                     && num_bits != 32 && num_bits != 64)
+                xo_parse_error(xpp, "invalid integer size: '%s'",
+                               xo_parse_printable(xpp, start,
+                                                  ep - start, TRUE));
+            else
+                xfp->xf_num_bits = num_bits;
 
-	} else if (isdigit((int) *cp)) {
-	    if (xfp->xf_leading_zero < 0)
-		xfp->xf_leading_zero = (*cp == '0');
-	    xo_bump_width(xfp, *cp - '0');
+        } else if (*cp == 'J') {
+            /* The flag's letter has to be inside the format too */
+            switch ((cp + 1 < ep) ? cp[1] : '\0') {
+            case 'N':
+                xfp->xf_extflags |= XXF_NULL_AS_EMPTY;
+                break;
 
-	} else if (*cp == '*') {
-	    xfp->xf_stars += 1;
-	    xfp->xf_star[xfp->xf_dots] = 1;
+            default:
+                xo_parse_error(xpp, "unknown 'J' flag: '%s'",
+                               xo_parse_printable(xpp, start,
+                                                  ep - start, TRUE));
+            }
 
-	} else if (strchr("diouxXDOUeEfFgGaAcCsSpm", *cp) != NULL)
-	    break;
+        } else if (isdigit((int) *cp)) {
+            if (xfp->xf_leading_zero < 0)
+                xfp->xf_leading_zero = (*cp == '0');
+            xo_bump_width(xfp, *cp - '0');
 
-	else if (*cp == 'n' || *cp == 'v') {
-	    xo_parse_error(xpp, "unsupported format: '%s'", fmt);
-	    return NULL;
-	}
+        } else if (*cp == '*') {
+            xfp->xf_stars += 1;
+            xfp->xf_star[xfp->xf_dots] = 1;
+
+        } else if (strchr("diouxXDOUeEfFgGaAcCsSpm", *cp) != NULL)
+            break;
+
+        else if (*cp == 'n' || *cp == 'v') {
+            xo_parse_error(xpp, "unsupported format: '%s'", fmt);
+            return NULL;
+        }
     }
 
-    if (cp == ep)
-	xo_parse_error(xpp, "field format missing format character: %s", fmt);
+    /*
+     * With no conversion character there is nothing at 'cp' that is
+     * ours to read: 'ep' is the end of this format, not of a string,
+     * which is also why the message is told how much to print.
+     */
+    if (cp >= ep) {
+        xo_parse_error(xpp, "field format missing format character: %.*s",
+                       (int) (ep - start), start);
+        return NULL;
+    }
 
     xfp->xf_fc = *cp;
     return cp;
 }
 
+uint8_t
+xo_fspec_arg_type (const xo_fspec_t *xfp)
+{
+    switch (xfp->xf_fc) {
+    case 'd':
+    case 'i':
+    case 'o':
+    case 'u':
+    case 'x':
+    case 'X':
+    case 'D':
+    case 'O':
+    case 'U':
+        /*
+         * xo_advance_vap() pops the value with this type after
+         * vsnprintf() has formatted it from a copy of the va_list,
+         * and xo_format_int_text() pulls it directly, so all three
+         * must agree on the type.
+         */
+        if (xfp->xf_num_bits)
+            return (xfp->xf_num_bits == 64) ? XO_AT_INT64 : XO_AT_INT;
+        if (xfp->xf_hflag)
+            return XO_AT_INT;   /* 'h' and "hh" are promoted to int */
+        if (xfp->xf_lflag > 1)
+            return XO_AT_LONG_LONG;
+        if (xfp->xf_lflag)
+            return XO_AT_LONG;
+        if (xfp->xf_jflag)
+            return XO_AT_INTMAX;
+        if (xfp->xf_tflag)
+            return XO_AT_PTRDIFF;
+        if (xfp->xf_zflag)
+            return XO_AT_SIZE;
+        if (xfp->xf_qflag)
+            return XO_AT_QUAD;
+        return XO_AT_INT;
+
+    case 'e':
+    case 'E':
+    case 'f':
+    case 'F':
+    case 'g':
+    case 'G':
+    case 'a':
+    case 'A':
+        return xfp->xf_lflag ? XO_AT_LONG_DOUBLE : XO_AT_DOUBLE;
+
+    case 'c':
+        return xfp->xf_lflag ? XO_AT_WINT : XO_AT_INT;
+
+    case 'C':
+        return XO_AT_WINT;
+
+    case 's':
+    case 'S':
+        return XO_AT_STRING;
+
+    case 'p':
+        return XO_AT_POINTER;
+
+    default:
+        return XO_AT_NONE;      /* "%m" and literal text take no arg */
+    }
+}
+
 /*
  * Parse one "%..." conversion starting at 'cp' (which points at the '%').
- * Pure parser: no handle, no va_list, no style/skip decisions — those are
+ * Pure parser: no handle, no va_list, no style/skip decisions - those are
  * per-call and stay in libxo.c's xo_do_format_field().  Fills in *xfp,
  * including xf_start/xf_len (byte offsets relative to 'fmt', covering the
  * '%' through and including the conversion character), and returns a
@@ -416,6 +618,9 @@ xo_parse_one_format (xo_parse_t *xpp, xo_fspec_t *xfp, const char *cp,
 
     if (xfp->xf_fc == 'D' || xfp->xf_fc == 'O' || xfp->xf_fc == 'U')
 	xfp->xf_lflag = 1;
+
+    /* Must follow the D/O/U fixup, since that changes the type */
+    xfp->xf_arg_type = xo_fspec_arg_type(xfp);
 
     xfp->xf_start = (uint16_t)(start - fmt);
     xfp->xf_len   = (uint16_t)(cp - start + 1);
@@ -610,7 +815,7 @@ xo_parse_roles (xo_parse_t *xpp, const char *fmt,
 	    if (ftype != 0) {
 		xo_parse_error(xpp,
 			       "field descriptor uses multiple types: '%s'",
-			       xo_printable(fmt));
+			       xo_parse_printable(xpp, fmt, -1, FALSE));
 		return NULL;
 	    }
 	    ftype = *sp;
@@ -640,14 +845,14 @@ xo_parse_roles (xo_parse_t *xpp, const char *fmt,
 	default:
 	    xo_parse_error(xpp,
 			   "field descriptor uses unknown modifier: '%s'",
-			   xo_printable(fmt));
+			   xo_parse_printable(xpp, fmt, -1, FALSE));
 	}
 
 	if (ftype == 'N' || ftype == 'U') {
 	    if (flags & XFF_COLON) {
 		xo_parse_error(xpp,
 		       "colon modifier on 'N' or 'U' field ignored: '%s'",
-		       xo_printable(fmt));
+		       xo_parse_printable(xpp, fmt, -1, FALSE));
 		flags &= ~XFF_COLON;
 	    }
 	}
@@ -678,7 +883,7 @@ xo_parse_field_numbers (xo_parse_t *xpp, const char *fmt,
 	else if (xfip->xfi_fnum > num_fields) {
 	    xo_parse_error(xpp,
 			   "field number exceeds number of fields: '%s'",
-			   xo_printable(fmt));
+			   xo_parse_printable(xpp, fmt, -1, FALSE));
 	    return -1;
 	}
 
@@ -686,7 +891,8 @@ xo_parse_field_numbers (xo_parse_t *xpp, const char *fmt,
 	if (fnum < 64) {
 	    if (bits & (one << fnum)) {
 		xo_parse_error(xpp, "field number reused: #%u in '%s'",
-			       xfip->xfi_fnum, xo_printable(fmt));
+			       xfip->xfi_fnum,
+			       xo_parse_printable(xpp, fmt, -1, FALSE));
 		return -1;
 	    }
 	    bits |= one << fnum;
@@ -739,6 +945,8 @@ xo_parse_fields (xo_parse_t *xpp, const char *fmt, size_t fmt_len)
     xo_field_info_t *xfip = xpp->xp_cur_field;
     unsigned seen_fnum = 0;
 
+    xpp->xp_err_offset = -1;
+
     /* Reject oversized format strings (int16_t offset range) */
     if (fmt_len > XO_FORMAT_MAX) {
 	xo_parse_error(xpp, "format string too long (max %zu bytes, len %zu)",
@@ -756,6 +964,7 @@ xo_parse_fields (xo_parse_t *xpp, const char *fmt, size_t fmt_len)
 	xfip->xfi_padding[0] = xfip->xfi_padding[1] = xfip->xfi_padding[2] = 0;
 
 	xfip->xfi_start = (xo_format_offset_t)(cp - fmt);
+	xpp->xp_err_offset = xfip->xfi_start;
 
 	if (*cp == '\n') {
 	    /*
@@ -809,7 +1018,7 @@ xo_parse_fields (xo_parse_t *xpp, const char *fmt, size_t fmt_len)
 
 	    if (*sp == '\0') {
 		xo_parse_error(xpp, "missing closing '}}': '%s'",
-			       xo_printable(fmt));
+			       xo_parse_printable(xpp, fmt, -1, FALSE));
 		return -1;
 	    }
 
@@ -865,7 +1074,7 @@ xo_parse_fields (xo_parse_t *xpp, const char *fmt, size_t fmt_len)
 	    }
 	} else {
 	    xo_parse_error(xpp, "missing content (':'): '%s'",
-			   xo_printable(fmt));
+			   xo_parse_printable(xpp, fmt, -1, FALSE));
 	    return -1;
 	}
 
@@ -914,7 +1123,7 @@ xo_parse_fields (xo_parse_t *xpp, const char *fmt, size_t fmt_len)
 
 	if (*sp != '}') {
 	    xo_parse_error(xpp, "missing closing '}': %s",
-			   xo_printable(fmt));
+			   xo_parse_printable(xpp, fmt, -1, FALSE));
 	    return -1;
 	}
 
@@ -955,7 +1164,7 @@ xo_parse_fields (xo_parse_t *xpp, const char *fmt, size_t fmt_len)
 	/*
 	 * Populate: pre-parse the display format into fspec entries so
 	 * the emit path can walk them instead of rescanning.  Encoding
-	 * formats are out of scope for now (Phase 1 decision); that path
+	 * formats are out of scope for now (XXX); that path
 	 * still re-parses at call time.
 	 */
 	if (xfip->xfi_format != XO_FOFF_NONE) {
@@ -987,19 +1196,11 @@ xo_parse_fields (xo_parse_t *xpp, const char *fmt, size_t fmt_len)
 	    unsigned nlen = (unsigned)xfip->xfi_clen;
 	    unsigned ni;
 
-#if 0
-	    if (nlen == 0 && !(xfip->xfi_flags & XFF_ARGUMENT)) {
-		xo_parse_error(xpp, "field must have a name: '%s'",
-			       xo_printable2(str, slen, TRUE));
-		return -1;
-	    }
-#endif
-
 	    if (np && nlen) {
 		if (isdigit((unsigned char) np[0])) {
 		    xo_parse_warning(xpp,
 			   "field name cannot start with a digit: '%s'",
-				     xo_printable2(str, slen, TRUE));
+				     xo_parse_printable(xpp, str, slen, TRUE));
 		}
 
 		struct reported_errors {
@@ -1015,7 +1216,7 @@ xo_parse_fields (xo_parse_t *xpp, const char *fmt, size_t fmt_len)
 		    if (!re.re_percent && nc == '%') {
 			xo_parse_warning(xpp,
 			       "field name contains percent sign: '%s'",
-					 xo_printable2(str, slen, TRUE));
+			       xo_parse_printable(xpp, str, slen, TRUE));
 			re.re_percent = 1;
 			continue;
 		    }
@@ -1023,15 +1224,15 @@ xo_parse_fields (xo_parse_t *xpp, const char *fmt, size_t fmt_len)
 		    if (XO_IS_LINT(xpp) && !re.re_under && nc == '_') {
 			xo_parse_warning(xpp,
 			       "use hyphens, not underscores, "
-				       "in field name: '%s'",
-					 xo_printable2(str, slen, TRUE));
+			       "in field name: '%s'",
+			       xo_parse_printable(xpp, str, slen, TRUE));
 			re.re_under = 1;
 		    }
 
 		    if (XO_IS_LINT(xpp) && !re.re_upper && isupper(nc)) {
 			xo_parse_warning(xpp,
 			       "field name should be lower case: '%s'",
-					 xo_printable2(str, slen, TRUE));
+			       xo_parse_printable(xpp, str, slen, TRUE));
 			re.re_upper = 1;
 		    }
 		}
@@ -1042,7 +1243,7 @@ xo_parse_fields (xo_parse_t *xpp, const char *fmt, size_t fmt_len)
 				     "field name should not be less than "
 				     "%d characters long: '%s'",
 				     XO_LINT_MIN_NAME,
-				     xo_printable2(str, slen, TRUE));
+				     xo_parse_printable(xpp, str, slen, TRUE));
 		}
 	    }
 
@@ -1051,7 +1252,7 @@ xo_parse_fields (xo_parse_t *xpp, const char *fmt, size_t fmt_len)
 		    xo_parse_error(xpp,
 				   "'int-group|i' set on field with invalid "
 				   "format: '%s'",
-				   xo_printable2(str, slen, 1));
+				   xo_parse_printable(xpp, str, slen, 1));
 		} else {
 		    xo_fspec_t *xfp = &xfip->xfi_fspecs[0]; /* Only one */
 		    int fc = xfp->xf_fc;
@@ -1060,12 +1261,12 @@ xo_parse_fields (xo_parse_t *xpp, const char *fmt, size_t fmt_len)
 			xo_parse_error(xpp,
 				   "'int-group|i' set on field with invalid "
 				   "type (%c; must be d|i|u): '%s'", fc,
-				   xo_printable2(str, slen, 1));
-		    else if (xfp->xf_leading_zero)
+				   xo_parse_printable(xpp, str, slen, 1));
+                    else if (xfp->xf_leading_zero > 0)
 			xo_parse_error(xpp,
 				   "'int-group|i' set on field with "
 				   "leading zeroes: '%s'",
-				   xo_printable2(str, slen, 1));
+				   xo_parse_printable(xpp, str, slen, 1));
 		}
 	    }
 	}
@@ -1079,7 +1280,7 @@ xo_parse_fields (xo_parse_t *xpp, const char *fmt, size_t fmt_len)
 		    if (!isdigit((unsigned char) np[ni])) {
 			xo_parse_error(xpp,
 			       "anchor content must be a decimal width: '%s'",
-				       xo_printable2(str, slen, TRUE));
+			       xo_parse_printable(xpp, str, slen, TRUE));
 			break;
 		    }
 		}
@@ -1087,7 +1288,7 @@ xo_parse_fields (xo_parse_t *xpp, const char *fmt, size_t fmt_len)
 		    xo_parse_error(xpp,
 			   "anchor cannot have both static "
 				   "width and format: '%s'",
-				   xo_printable2(str, slen, TRUE));
+				   xo_parse_printable(xpp, str, slen, TRUE));
 		}
 	    }
 	    if (format && flen > 0) {
@@ -1099,7 +1300,7 @@ xo_parse_fields (xo_parse_t *xpp, const char *fmt, size_t fmt_len)
 		    if (aep != format + flen)
 			xo_parse_error(xpp,
 			       "anchor format must be '%%d' or '%%u: '%s'",
-				       xo_printable2(str, slen, TRUE));
+			       xo_parse_printable(xpp, str, slen, TRUE));
 		}
 	    }
 	}
@@ -1107,7 +1308,7 @@ xo_parse_fields (xo_parse_t *xpp, const char *fmt, size_t fmt_len)
 	if ((xfip->xfi_flags & XFF_HUMANIZE) && !format) {
 	    xo_parse_error(xpp,
 		   "humanize modifier ('h') requires a format string: '%s'",
-		   xo_printable(fmt));
+		   xo_parse_printable(xpp, fmt, -1, FALSE));
 	    return -1;
 	}
 
@@ -1126,6 +1327,7 @@ next_field:
     if (field < num_fields)
 	bzero(xfip, sizeof(*xfip));
     xpp->xp_cur_field = xfip;
+    xpp->xp_err_offset = -1;
 
     if (seen_fnum)
 	return xo_parse_field_numbers(xpp, fmt, fields, field);
@@ -1157,6 +1359,8 @@ xo_parse_release (xo_parse_t *xpp)
 
     xpp->xp_cur_field = NULL;
     xpp->xp_cur_fspec = NULL;
+
+    xo_parse_release_printable(xpp);
 }
 
 int
@@ -1166,6 +1370,7 @@ xo_parse_format (xo_parse_t *xpp, const char *fmt)
 	return -1;
 
     xo_parse_release(xpp);
+    xpp->xp_err_offset = -1;
 
     size_t fmt_len;
     unsigned max_fields, max_fspecs;

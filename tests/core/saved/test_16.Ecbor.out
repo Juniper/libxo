@@ -1,0 +1,1663 @@
+op create: [cbor] []
+ [append] @ 0 (1/1)
+ bf                                                    .
+    op open_container: [rtoon-test] []
+ [append] @ 1 (b/11)
+ 6a 72 74 6f  6f 6e 2d 74  - 65 73 74                  jrtoon-test
+ [append] @ 12 (1/1)
+ bf                                                    .
+      op open_container: [s01-empty-container] []
+   [append] @ 13 (14/20)
+   73 73 30 31  2d 65 6d 70  - 74 79 2d 63  6f 6e 74 61  ss01-empty-conta
+   69 6e 65 72                                           iner
+   [append] @ 33 (1/1)
+   bf                                                    .
+        op close_container: [s01-empty-container] []
+     [append] @ 34 (1/1)
+     ff                                                    .
+      op open_list: [s02-empty-list] []
+   [append] @ 35 (f/15)
+   6e 73 30 32  2d 65 6d 70  - 74 79 2d 6c  69 73 74     ns02-empty-list
+   [append] @ 50 (1/1)
+   9f                                                    .
+        op close_list: [s02-empty-list] []
+     [append] @ 51 (1/1)
+     ff                                                    .
+      op open_container: [s03-a] []
+   [append] @ 52 (6/6)
+   65 73 30 33  2d 61                                    es03-a
+   [append] @ 58 (1/1)
+   bf                                                    .
+        op open_container: [s03-b] []
+     [append] @ 59 (6/6)
+     65 73 30 33  2d 62                                    es03-b
+     [append] @ 65 (1/1)
+     bf                                                    .
+          op open_container: [s03-c] []
+       [append] @ 66 (6/6)
+       65 73 30 33  2d 63                                    es03-c
+       [append] @ 72 (1/1)
+       bf                                                    .
+            op string: [leaf] [value]
+         [append] @ 73 (5/5)
+         64 6c 65 61  66                                       dleaf
+         [append] @ 78 (6/6)
+         65 76 61 6c  75 65                                    evalue
+            op close_container: [s03-c] []
+         [append] @ 84 (1/1)
+         ff                                                    .
+          op close_container: [s03-b] []
+       [append] @ 85 (1/1)
+       ff                                                    .
+        op close_container: [s03-a] []
+     [append] @ 86 (1/1)
+     ff                                                    .
+      op open_list: [s04-disk] []
+   [append] @ 87 (9/9)
+   68 73 30 34  2d 64 69 73  - 6b                        hs04-disk
+   [append] @ 96 (1/1)
+   9f                                                    .
+        op open_instance: [s04-disk] []
+     [append] @ 97 (1/1)
+     bf                                                    .
+          op string: [name] [sda]
+       [append] @ 98 (5/5)
+       64 6e 61 6d  65                                       dname
+       [append] @ 103 (4/4)
+       63 73 64 61                                           csda
+          op content: [size] [100]
+       [append] @ 107 (5/5)
+       64 73 69 7a  65                                       dsize
+       [content] @ 112 (2/2)
+       18 64                                                 .d
+          op close_instance: [s04-disk] []
+       [append] @ 114 (1/1)
+       ff                                                    .
+        op open_instance: [s04-disk] []
+     [append] @ 115 (1/1)
+     bf                                                    .
+          op string: [name] [sdb]
+       [append] @ 116 (5/5)
+       64 6e 61 6d  65                                       dname
+       [append] @ 121 (4/4)
+       63 73 64 62                                           csdb
+          op content: [size] [200]
+       [append] @ 125 (5/5)
+       64 73 69 7a  65                                       dsize
+       [content] @ 130 (2/2)
+       18 c8                                                 ..
+          op close_instance: [s04-disk] []
+       [append] @ 132 (1/1)
+       ff                                                    .
+        op open_instance: [s04-disk] []
+     [append] @ 133 (1/1)
+     bf                                                    .
+          op string: [name] [sdc]
+       [append] @ 134 (5/5)
+       64 6e 61 6d  65                                       dname
+       [append] @ 139 (4/4)
+       63 73 64 63                                           csdc
+          op content: [size] [300]
+       [append] @ 143 (5/5)
+       64 73 69 7a  65                                       dsize
+       [content] @ 148 (3/3)
+       19 01 2c                                              ..,
+          op close_instance: [s04-disk] []
+       [append] @ 151 (1/1)
+       ff                                                    .
+        op close_list: [s04-disk] []
+     [append] @ 152 (1/1)
+     ff                                                    .
+      op open_list: [s05-route] []
+   [append] @ 153 (a/10)
+   69 73 30 35  2d 72 6f 75  - 74 65                     is05-route
+   [append] @ 163 (1/1)
+   9f                                                    .
+        op open_instance: [s05-route] []
+     [append] @ 164 (1/1)
+     bf                                                    .
+          op string: [dest] [10.0.0.0]
+       [append] @ 165 (5/5)
+       64 64 65 73  74                                       ddest
+       [append] @ 170 (9/9)
+       68 31 30 2e  30 2e 30 2e  - 30                        h10.0.0.0
+          op content: [prefix-len] [24]
+       [append] @ 179 (b/11)
+       6a 70 72 65  66 69 78 2d  - 6c 65 6e                  jprefix-len
+       [content] @ 190 (2/2)
+       18 18                                                 ..
+          op string: [protocol] [static]
+       [append] @ 192 (9/9)
+       68 70 72 6f  74 6f 63 6f  - 6c                        hprotocol
+       [append] @ 201 (7/7)
+       66 73 74 61  74 69 63                                 fstatic
+          op close_instance: [s05-route] []
+       [append] @ 208 (1/1)
+       ff                                                    .
+        op open_instance: [s05-route] []
+     [append] @ 209 (1/1)
+     bf                                                    .
+          op string: [dest] [10.0.1.0]
+       [append] @ 210 (5/5)
+       64 64 65 73  74                                       ddest
+       [append] @ 215 (9/9)
+       68 31 30 2e  30 2e 31 2e  - 30                        h10.0.1.0
+          op content: [prefix-len] [24]
+       [append] @ 224 (b/11)
+       6a 70 72 65  66 69 78 2d  - 6c 65 6e                  jprefix-len
+       [content] @ 235 (2/2)
+       18 18                                                 ..
+          op string: [protocol] [static]
+       [append] @ 237 (9/9)
+       68 70 72 6f  74 6f 63 6f  - 6c                        hprotocol
+       [append] @ 246 (7/7)
+       66 73 74 61  74 69 63                                 fstatic
+          op close_instance: [s05-route] []
+       [append] @ 253 (1/1)
+       ff                                                    .
+        op open_instance: [s05-route] []
+     [append] @ 254 (1/1)
+     bf                                                    .
+          op string: [dest] [0.0.0.0]
+       [append] @ 255 (5/5)
+       64 64 65 73  74                                       ddest
+       [append] @ 260 (8/8)
+       67 30 2e 30  2e 30 2e 30                              g0.0.0.0
+          op content: [prefix-len] [0]
+       [append] @ 268 (b/11)
+       6a 70 72 65  66 69 78 2d  - 6c 65 6e                  jprefix-len
+       [content] @ 279 (1/1)
+       00                                                    .
+          op string: [protocol] [default]
+       [append] @ 280 (9/9)
+       68 70 72 6f  74 6f 63 6f  - 6c                        hprotocol
+       [append] @ 289 (8/8)
+       67 64 65 66  61 75 6c 74                              gdefault
+          op close_instance: [s05-route] []
+       [append] @ 297 (1/1)
+       ff                                                    .
+        op close_list: [s05-route] []
+     [append] @ 298 (1/1)
+     ff                                                    .
+      op open_list: [s06-host] []
+   [append] @ 299 (9/9)
+   68 73 30 36  2d 68 6f 73  - 74                        hs06-host
+   [append] @ 308 (1/1)
+   9f                                                    .
+        op open_instance: [s06-host] []
+     [append] @ 309 (1/1)
+     bf                                                    .
+          op string: [name] [alpha]
+       [append] @ 310 (5/5)
+       64 6e 61 6d  65                                       dname
+       [append] @ 315 (6/6)
+       65 61 6c 70  68 61                                    ealpha
+          op close_instance: [s06-host] []
+       [append] @ 321 (1/1)
+       ff                                                    .
+        op open_instance: [s06-host] []
+     [append] @ 322 (1/1)
+     bf                                                    .
+          op string: [name] [beta]
+       [append] @ 323 (5/5)
+       64 6e 61 6d  65                                       dname
+       [append] @ 328 (5/5)
+       64 62 65 74  61                                       dbeta
+          op open_container: [stats] []
+       [append] @ 333 (6/6)
+       65 73 74 61  74 73                                    estats
+       [append] @ 339 (1/1)
+       bf                                                    .
+            op content: [up-time] [100]
+         [append] @ 340 (8/8)
+         67 75 70 2d  74 69 6d 65                              gup-time
+         [content] @ 348 (2/2)
+         18 64                                                 .d
+            op close_container: [stats] []
+         [append] @ 350 (1/1)
+         ff                                                    .
+          op close_instance: [s06-host] []
+       [append] @ 351 (1/1)
+       ff                                                    .
+        op close_list: [s06-host] []
+     [append] @ 352 (1/1)
+     ff                                                    .
+      op open_list: [s07-cpu] []
+   [append] @ 353 (8/8)
+   67 73 30 37  2d 63 70 75                              gs07-cpu
+   [append] @ 361 (1/1)
+   9f                                                    .
+        op open_instance: [s07-cpu] []
+     [append] @ 362 (1/1)
+     bf                                                    .
+          op content: [num] [0]
+       [append] @ 363 (4/4)
+       63 6e 75 6d                                           cnum
+       [content] @ 367 (1/1)
+       00                                                    .
+          op content: [load] [0]
+       [append] @ 368 (5/5)
+       64 6c 6f 61  64                                       dload
+       [content] @ 373 (1/1)
+       00                                                    .
+          op close_instance: [s07-cpu] []
+       [append] @ 374 (1/1)
+       ff                                                    .
+        op open_instance: [s07-cpu] []
+     [append] @ 375 (1/1)
+     bf                                                    .
+          op content: [num] [1]
+       [append] @ 376 (4/4)
+       63 6e 75 6d                                           cnum
+       [content] @ 380 (1/1)
+       01                                                    .
+          op content: [load] [7]
+       [append] @ 381 (5/5)
+       64 6c 6f 61  64                                       dload
+       [content] @ 386 (1/1)
+       07                                                    .
+          op close_instance: [s07-cpu] []
+       [append] @ 387 (1/1)
+       ff                                                    .
+        op open_instance: [s07-cpu] []
+     [append] @ 388 (1/1)
+     bf                                                    .
+          op content: [num] [2]
+       [append] @ 389 (4/4)
+       63 6e 75 6d                                           cnum
+       [content] @ 393 (1/1)
+       02                                                    .
+          op content: [load] [14]
+       [append] @ 394 (5/5)
+       64 6c 6f 61  64                                       dload
+       [content] @ 399 (1/1)
+       0e                                                    .
+          op close_instance: [s07-cpu] []
+       [append] @ 400 (1/1)
+       ff                                                    .
+        op close_list: [s07-cpu] []
+     [append] @ 401 (1/1)
+     ff                                                    .
+      op open_list: [s08-route2] []
+   [append] @ 402 (b/11)
+   6a 73 30 38  2d 72 6f 75  - 74 65 32                  js08-route2
+   [append] @ 413 (1/1)
+   9f                                                    .
+        op open_instance: [s08-route2] []
+     [append] @ 414 (1/1)
+     bf                                                    .
+          op string: [dest] [10.0.0.0]
+       [append] @ 415 (5/5)
+       64 64 65 73  74                                       ddest
+       [append] @ 420 (9/9)
+       68 31 30 2e  30 2e 30 2e  - 30                        h10.0.0.0
+          op content: [prefix-len] [24]
+       [append] @ 429 (b/11)
+       6a 70 72 65  66 69 78 2d  - 6c 65 6e                  jprefix-len
+       [content] @ 440 (2/2)
+       18 18                                                 ..
+          op string: [protocol] [static]
+       [append] @ 442 (9/9)
+       68 70 72 6f  74 6f 63 6f  - 6c                        hprotocol
+       [append] @ 451 (7/7)
+       66 73 74 61  74 69 63                                 fstatic
+          op close_instance: [s08-route2] []
+       [append] @ 458 (1/1)
+       ff                                                    .
+        op open_instance: [s08-route2] []
+     [append] @ 459 (1/1)
+     bf                                                    .
+          op string: [dest] [10.0.1.0]
+       [append] @ 460 (5/5)
+       64 64 65 73  74                                       ddest
+       [append] @ 465 (9/9)
+       68 31 30 2e  30 2e 31 2e  - 30                        h10.0.1.0
+          op content: [prefix-len] [25]
+       [append] @ 474 (b/11)
+       6a 70 72 65  66 69 78 2d  - 6c 65 6e                  jprefix-len
+       [content] @ 485 (2/2)
+       18 19                                                 ..
+          op string: [protocol] [static]
+       [append] @ 487 (9/9)
+       68 70 72 6f  74 6f 63 6f  - 6c                        hprotocol
+       [append] @ 496 (7/7)
+       66 73 74 61  74 69 63                                 fstatic
+          op close_instance: [s08-route2] []
+       [append] @ 503 (1/1)
+       ff                                                    .
+        op close_list: [s08-route2] []
+     [append] @ 504 (1/1)
+     ff                                                    .
+      op open_list: [s09-item] []
+   [append] @ 505 (9/9)
+   68 73 30 39  2d 69 74 65  - 6d                        hs09-item
+   [append] @ 514 (1/1)
+   9f                                                    .
+        op open_instance: [s09-item] []
+     [append] @ 515 (1/1)
+     bf                                                    .
+          op string: [sku] [WIDGET1]
+       [append] @ 516 (4/4)
+       63 73 6b 75                                           csku
+       [append] @ 520 (8/8)
+       67 57 49 44  47 45 54 31                              gWIDGET1
+          op content: [qty] [10]
+       [append] @ 528 (4/4)
+       63 71 74 79                                           cqty
+       [content] @ 532 (1/1)
+       0a                                                    .
+          op string: [price] [9.99]
+       [append] @ 533 (6/6)
+       65 70 72 69  63 65                                    eprice
+       [append] @ 539 (5/5)
+       64 39 2e 39  39                                       d9.99
+          op close_instance: [s09-item] []
+       [append] @ 544 (1/1)
+       ff                                                    .
+        op open_instance: [s09-item] []
+     [append] @ 545 (1/1)
+     bf                                                    .
+          op string: [sku] [WIDGET2]
+       [append] @ 546 (4/4)
+       63 73 6b 75                                           csku
+       [append] @ 550 (8/8)
+       67 57 49 44  47 45 54 32                              gWIDGET2
+          op content: [qty] [5]
+       [append] @ 558 (4/4)
+       63 71 74 79                                           cqty
+       [content] @ 562 (1/1)
+       05                                                    .
+          op string: [price] [4.50]
+       [append] @ 563 (6/6)
+       65 70 72 69  63 65                                    eprice
+       [append] @ 569 (5/5)
+       64 34 2e 35  30                                       d4.50
+          op string: [cost] [2.00]
+       [append] @ 574 (5/5)
+       64 63 6f 73  74                                       dcost
+       [append] @ 579 (5/5)
+       64 32 2e 30  30                                       d2.00
+          op close_instance: [s09-item] []
+       [append] @ 584 (1/1)
+       ff                                                    .
+        op open_instance: [s09-item] []
+     [append] @ 585 (1/1)
+     bf                                                    .
+          op string: [sku] [WIDGET3]
+       [append] @ 586 (4/4)
+       63 73 6b 75                                           csku
+       [append] @ 590 (8/8)
+       67 57 49 44  47 45 54 33                              gWIDGET3
+          op content: [qty] [0]
+       [append] @ 598 (4/4)
+       63 71 74 79                                           cqty
+       [content] @ 602 (1/1)
+       00                                                    .
+          op string: [price] []
+       [append] @ 603 (6/6)
+       65 70 72 69  63 65                                    eprice
+       [append] @ 609 (1/1)
+       60                                                    `
+          op string: [cost] [1.00]
+       [append] @ 610 (5/5)
+       64 63 6f 73  74                                       dcost
+       [append] @ 615 (5/5)
+       64 31 2e 30  30                                       d1.00
+          op string: [sell-by] [2026-01-01]
+       [append] @ 620 (8/8)
+       67 73 65 6c  6c 2d 62 79                              gsell-by
+       [append] @ 628 (b/11)
+       6a 32 30 32  36 2d 30 31  - 2d 30 31                  j2026-01-01
+          op close_instance: [s09-item] []
+       [append] @ 639 (1/1)
+       ff                                                    .
+        op close_list: [s09-item] []
+     [append] @ 640 (1/1)
+     ff                                                    .
+      op open_container: [s10-colors] []
+   [append] @ 641 (b/11)
+   6a 73 31 30  2d 63 6f 6c  - 6f 72 73                  js10-colors
+   [append] @ 652 (1/1)
+   bf                                                    .
+        op open_leaf_list: [tag] []
+     [append] @ 653 (4/4)
+     63 74 61 67                                           ctag
+     [append] @ 657 (1/1)
+     9f                                                    .
+          op string: [tag] [a]
+       [append] @ 658 (2/2)
+       61 61                                                 aa
+          op string: [tag] []
+       [append] @ 660 (1/1)
+       60                                                    `
+          op string: [tag] [c]
+       [append] @ 661 (2/2)
+       61 63                                                 ac
+          op string: [tag] []
+       [append] @ 663 (1/1)
+       60                                                    `
+          op string: [tag] [needs,quote]
+       [append] @ 664 (c/12)
+       6b 6e 65 65  64 73 2c 71  - 75 6f 74 65               kneeds,quote
+          op close_leaf_list: [tag] []
+       [append] @ 676 (1/1)
+       ff                                                    .
+        op close_container: [s10-colors] []
+     [append] @ 677 (1/1)
+     ff                                                    .
+      op open_container: [s11a-tags] []
+   [append] @ 678 (a/10)
+   69 73 31 31  61 2d 74 61  - 67 73                     is11a-tags
+   [append] @ 688 (1/1)
+   bf                                                    .
+        op open_leaf_list: [tag] []
+     [append] @ 689 (4/4)
+     63 74 61 67                                           ctag
+     [append] @ 693 (1/1)
+     9f                                                    .
+          op string: [tag] [red]
+       [append] @ 694 (4/4)
+       63 72 65 64                                           cred
+          op close_leaf_list: [tag] []
+       [append] @ 698 (1/1)
+       ff                                                    .
+        op close_container: [s11a-tags] []
+     [append] @ 699 (1/1)
+     ff                                                    .
+      op open_container: [s11b-tags] []
+   [append] @ 700 (a/10)
+   69 73 31 31  62 2d 74 61  - 67 73                     is11b-tags
+   [append] @ 710 (1/1)
+   bf                                                    .
+        op open_leaf_list: [tag] []
+     [append] @ 711 (4/4)
+     63 74 61 67                                           ctag
+     [append] @ 715 (1/1)
+     9f                                                    .
+          op string: [tag] []
+       [append] @ 716 (1/1)
+       60                                                    `
+          op close_leaf_list: [tag] []
+       [append] @ 717 (1/1)
+       ff                                                    .
+        op close_container: [s11b-tags] []
+     [append] @ 718 (1/1)
+     ff                                                    .
+      op open_container: [s12-plain] []
+   [append] @ 719 (a/10)
+   69 73 31 32  2d 70 6c 61  - 69 6e                     is12-plain
+   [append] @ 729 (1/1)
+   bf                                                    .
+        op string: [tag] [red]
+     [append] @ 730 (4/4)
+     63 74 61 67                                           ctag
+     [append] @ 734 (4/4)
+     63 72 65 64                                           cred
+        op close_container: [s12-plain] []
+     [append] @ 738 (1/1)
+     ff                                                    .
+      op open_list: [s13a-entry] []
+   [append] @ 739 (b/11)
+   6a 73 31 33  61 2d 65 6e  - 74 72 79                  js13a-entry
+   [append] @ 750 (1/1)
+   9f                                                    .
+        op open_instance: [s13a-entry] []
+     [append] @ 751 (1/1)
+     bf                                                    .
+          op content: [num] [1]
+       [append] @ 752 (4/4)
+       63 6e 75 6d                                           cnum
+       [content] @ 756 (1/1)
+       01                                                    .
+          op string: [name] [one]
+       [append] @ 757 (5/5)
+       64 6e 61 6d  65                                       dname
+       [append] @ 762 (4/4)
+       63 6f 6e 65                                           cone
+          op close_instance: [s13a-entry] []
+       [append] @ 766 (1/1)
+       ff                                                    .
+        op close_list: [s13a-entry] []
+     [append] @ 767 (1/1)
+     ff                                                    .
+      op open_list: [s13b-entry] []
+   [append] @ 768 (b/11)
+   6a 73 31 33  62 2d 65 6e  - 74 72 79                  js13b-entry
+   [append] @ 779 (1/1)
+   9f                                                    .
+        op open_instance: [s13b-entry] []
+     [append] @ 780 (1/1)
+     bf                                                    .
+          op content: [num] [1]
+       [append] @ 781 (4/4)
+       63 6e 75 6d                                           cnum
+       [content] @ 785 (1/1)
+       01                                                    .
+          op string: [name] [one]
+       [append] @ 786 (5/5)
+       64 6e 61 6d  65                                       dname
+       [append] @ 791 (4/4)
+       63 6f 6e 65                                           cone
+          op content: [score] [42]
+       [append] @ 795 (6/6)
+       65 73 63 6f  72 65                                    escore
+       [content] @ 801 (2/2)
+       18 2a                                                 .*
+          op close_instance: [s13b-entry] []
+       [append] @ 803 (1/1)
+       ff                                                    .
+        op open_instance: [s13b-entry] []
+     [append] @ 804 (1/1)
+     bf                                                    .
+          op content: [num] [2]
+       [append] @ 805 (4/4)
+       63 6e 75 6d                                           cnum
+       [content] @ 809 (1/1)
+       02                                                    .
+          op string: [name] [two]
+       [append] @ 810 (5/5)
+       64 6e 61 6d  65                                       dname
+       [append] @ 815 (4/4)
+       63 74 77 6f                                           ctwo
+          op content: [score] [43]
+       [append] @ 819 (6/6)
+       65 73 63 6f  72 65                                    escore
+       [content] @ 825 (2/2)
+       18 2b                                                 .+
+          op close_instance: [s13b-entry] []
+       [append] @ 827 (1/1)
+       ff                                                    .
+        op close_list: [s13b-entry] []
+     [append] @ 828 (1/1)
+     ff                                                    .
+      op open_list: [s13c-entry] []
+   [append] @ 829 (b/11)
+   6a 73 31 33  63 2d 65 6e  - 74 72 79                  js13c-entry
+   [append] @ 840 (1/1)
+   9f                                                    .
+        op open_instance: [s13c-entry] []
+     [append] @ 841 (1/1)
+     bf                                                    .
+          op content: [num] [1]
+       [append] @ 842 (4/4)
+       63 6e 75 6d                                           cnum
+       [content] @ 846 (1/1)
+       01                                                    .
+          op string: [name] [one]
+       [append] @ 847 (5/5)
+       64 6e 61 6d  65                                       dname
+       [append] @ 852 (4/4)
+       63 6f 6e 65                                           cone
+          op close_instance: [s13c-entry] []
+       [append] @ 856 (1/1)
+       ff                                                    .
+        op close_list: [s13c-entry] []
+     [append] @ 857 (1/1)
+     ff                                                    .
+      op open_container: [s14-thing] []
+   [append] @ 858 (a/10)
+   69 73 31 34  2d 74 68 69  - 6e 67                     is14-thing
+   [append] @ 868 (1/1)
+   bf                                                    .
+        op attr: [attr1] [should-not-appear]
+        op string: [leaf] [value]
+     [append] @ 869 (5/5)
+     64 6c 65 61  66                                       dleaf
+     [append] @ 874 (6/6)
+     65 76 61 6c  75 65                                    evalue
+        op close_container: [s14-thing] []
+     [append] @ 880 (1/1)
+     ff                                                    .
+      op open_list: [s15-route-entry] []
+   [append] @ 881 (10/16)
+   6f 73 31 35  2d 72 6f 75  - 74 65 2d 65  6e 74 72 79  os15-route-entry
+   [append] @ 897 (1/1)
+   9f                                                    .
+        op open_instance: [s15-route-entry] []
+     [append] @ 898 (1/1)
+     bf                                                    .
+          op string: [destination] [10.0.0.0/24]
+       [append] @ 899 (c/12)
+       6b 64 65 73  74 69 6e 61  - 74 69 6f 6e               kdestination
+       [append] @ 911 (c/12)
+       6b 31 30 2e  30 2e 30 2e  - 30 2f 32 34               k10.0.0.0/24
+          op string: [protocol] [direct]
+       [append] @ 923 (9/9)
+       68 70 72 6f  74 6f 63 6f  - 6c                        hprotocol
+       [append] @ 932 (7/7)
+       66 64 69 72  65 63 74                                 fdirect
+          op close_instance: [s15-route-entry] []
+       [append] @ 939 (1/1)
+       ff                                                    .
+        op open_instance: [s15-route-entry] []
+     [append] @ 940 (1/1)
+     bf                                                    .
+          op string: [destination] [10.0.1.0/24]
+       [append] @ 941 (c/12)
+       6b 64 65 73  74 69 6e 61  - 74 69 6f 6e               kdestination
+       [append] @ 953 (c/12)
+       6b 31 30 2e  30 2e 31 2e  - 30 2f 32 34               k10.0.1.0/24
+          op string: [protocol] [static]
+       [append] @ 965 (9/9)
+       68 70 72 6f  74 6f 63 6f  - 6c                        hprotocol
+       [append] @ 974 (7/7)
+       66 73 74 61  74 69 63                                 fstatic
+          op open_container: [via] []
+       [append] @ 981 (4/4)
+       63 76 69 61                                           cvia
+       [append] @ 985 (1/1)
+       bf                                                    .
+            op string: [interface] [eth0]
+         [append] @ 986 (a/10)
+         69 69 6e 74  65 72 66 61  - 63 65                     iinterface
+         [append] @ 996 (5/5)
+         64 65 74 68  30                                       deth0
+            op string: [source-address] [10.0.1.1]
+         [append] @ 1001 (f/15)
+         6e 73 6f 75  72 63 65 2d  - 61 64 64 72  65 73 73     nsource-address
+         [append] @ 1016 (9/9)
+         68 31 30 2e  30 2e 31 2e  - 31                        h10.0.1.1
+            op close_container: [via] []
+         [append] @ 1025 (1/1)
+         ff                                                    .
+          op close_instance: [s15-route-entry] []
+       [append] @ 1026 (1/1)
+       ff                                                    .
+        op close_list: [s15-route-entry] []
+     [append] @ 1027 (1/1)
+     ff                                                    .
+      op open_list: [s15b-entry] []
+   [append] @ 1028 (b/11)
+   6a 73 31 35  62 2d 65 6e  - 74 72 79                  js15b-entry
+   [append] @ 1039 (1/1)
+   9f                                                    .
+        op open_instance: [s15b-entry] []
+     [append] @ 1040 (1/1)
+     bf                                                    .
+          op string: [name] [one]
+       [append] @ 1041 (5/5)
+       64 6e 61 6d  65                                       dname
+       [append] @ 1046 (4/4)
+       63 6f 6e 65                                           cone
+          op open_list: [sub] []
+       [append] @ 1050 (4/4)
+       63 73 75 62                                           csub
+       [append] @ 1054 (1/1)
+       9f                                                    .
+            op open_instance: [sub] []
+         [append] @ 1055 (1/1)
+         bf                                                    .
+              op string: [val] [1]
+           [append] @ 1056 (4/4)
+           63 76 61 6c                                           cval
+           [append] @ 1060 (2/2)
+           61 31                                                 a1
+              op close_instance: [sub] []
+           [append] @ 1062 (1/1)
+           ff                                                    .
+            op close_list: [sub] []
+         [append] @ 1063 (1/1)
+         ff                                                    .
+          op close_instance: [s15b-entry] []
+       [append] @ 1064 (1/1)
+       ff                                                    .
+        op close_list: [s15b-entry] []
+     [append] @ 1065 (1/1)
+     ff                                                    .
+      op open_container: [s16-types] []
+   [append] @ 1066 (a/10)
+   69 73 31 36  2d 74 79 70  - 65 73                     is16-types
+   [append] @ 1076 (1/1)
+   bf                                                    .
+        op content: [count] [42]
+     [append] @ 1077 (6/6)
+     65 63 6f 75  6e 74                                    ecount
+     [content] @ 1083 (2/2)
+     18 2a                                                 .*
+        op content: [active] [true]
+     [append] @ 1085 (7/7)
+     66 61 63 74  69 76 65                                 factive
+     [append] @ 1092 (1/1)
+     f5                                                    .
+     [content] @ 1092 (1/1)
+     f5                                                    .
+        op content: [disabled] [false]
+     [append] @ 1093 (9/9)
+     68 64 69 73  61 62 6c 65  - 64                        hdisabled
+     [append] @ 1102 (1/1)
+     f4                                                    .
+     [content] @ 1102 (1/1)
+     f4                                                    .
+        op content: [raw-null] [null]
+     [append] @ 1103 (9/9)
+     68 72 61 77  2d 6e 75 6c  - 6c                        hraw-null
+     [append] @ 1112 (5/5)
+     64 6e 75 6c  6c                                       dnull
+     [content] @ 1112 (5/5)
+     64 6e 75 6c  6c                                       dnull
+        op string: [code] [42]
+     [append] @ 1117 (5/5)
+     64 63 6f 64  65                                       dcode
+     [append] @ 1122 (3/3)
+     62 34 32                                              b42
+        op string: [label] [true]
+     [append] @ 1125 (6/6)
+     65 6c 61 62  65 6c                                    elabel
+     [append] @ 1131 (5/5)
+     64 74 72 75  65                                       dtrue
+        op string: [mid] [null]
+     [append] @ 1136 (4/4)
+     63 6d 69 64                                           cmid
+     [append] @ 1140 (5/5)
+     64 6e 75 6c  6c                                       dnull
+        op close_container: [s16-types] []
+     [append] @ 1145 (1/1)
+     ff                                                    .
+      op open_list: [s17-split] []
+   [append] @ 1146 (a/10)
+   69 73 31 37  2d 73 70 6c  - 69 74                     is17-split
+   [append] @ 1156 (1/1)
+   9f                                                    .
+        op open_instance: [s17-split] []
+     [append] @ 1157 (1/1)
+     bf                                                    .
+          op content: [num] [1]
+       [append] @ 1158 (4/4)
+       63 6e 75 6d                                           cnum
+       [content] @ 1162 (1/1)
+       01                                                    .
+          op content: [aval] [10]
+       [append] @ 1163 (5/5)
+       64 61 76 61  6c                                       daval
+       [content] @ 1168 (1/1)
+       0a                                                    .
+          op content: [bval] [20]
+       [append] @ 1169 (5/5)
+       64 62 76 61  6c                                       dbval
+       [content] @ 1174 (1/1)
+       14                                                    .
+          op close_instance: [s17-split] []
+       [append] @ 1175 (1/1)
+       ff                                                    .
+        op open_instance: [s17-split] []
+     [append] @ 1176 (1/1)
+     bf                                                    .
+          op content: [num] [2]
+       [append] @ 1177 (4/4)
+       63 6e 75 6d                                           cnum
+       [content] @ 1181 (1/1)
+       02                                                    .
+          op content: [aval] [30]
+       [append] @ 1182 (5/5)
+       64 61 76 61  6c                                       daval
+       [content] @ 1187 (2/2)
+       18 1e                                                 ..
+          op content: [bval] [40]
+       [append] @ 1189 (5/5)
+       64 62 76 61  6c                                       dbval
+       [content] @ 1194 (2/2)
+       18 28                                                 .(
+          op close_instance: [s17-split] []
+       [append] @ 1196 (1/1)
+       ff                                                    .
+        op close_list: [s17-split] []
+     [append] @ 1197 (1/1)
+     ff                                                    .
+      op open_list: [s18-order] []
+   [append] @ 1198 (a/10)
+   69 73 31 38  2d 6f 72 64  - 65 72                     is18-order
+   [append] @ 1208 (1/1)
+   9f                                                    .
+        op open_instance: [s18-order] []
+     [append] @ 1209 (1/1)
+     bf                                                    .
+          op string: [pre] [before]
+       [append] @ 1210 (4/4)
+       63 70 72 65                                           cpre
+       [append] @ 1214 (7/7)
+       66 62 65 66  6f 72 65                                 fbefore
+          op string: [name] [n1]
+       [append] @ 1221 (5/5)
+       64 6e 61 6d  65                                       dname
+       [append] @ 1226 (3/3)
+       62 6e 31                                              bn1
+          op string: [post] [after]
+       [append] @ 1229 (5/5)
+       64 70 6f 73  74                                       dpost
+       [append] @ 1234 (6/6)
+       65 61 66 74  65 72                                    eafter
+          op close_instance: [s18-order] []
+       [append] @ 1240 (1/1)
+       ff                                                    .
+        op close_list: [s18-order] []
+     [append] @ 1241 (1/1)
+     ff                                                    .
+      op open_list: [s19-twokeys] []
+   [append] @ 1242 (c/12)
+   6b 73 31 39  2d 74 77 6f  - 6b 65 79 73               ks19-twokeys
+   [append] @ 1254 (1/1)
+   9f                                                    .
+        op open_instance: [s19-twokeys] []
+     [append] @ 1255 (1/1)
+     bf                                                    .
+          op string: [akey] [ka]
+       [append] @ 1256 (5/5)
+       64 61 6b 65  79                                       dakey
+       [append] @ 1261 (3/3)
+       62 6b 61                                              bka
+          op string: [mid] [middata]
+       [append] @ 1264 (4/4)
+       63 6d 69 64                                           cmid
+       [append] @ 1268 (8/8)
+       67 6d 69 64  64 61 74 61                              gmiddata
+          op string: [bkey] [kb]
+       [append] @ 1276 (5/5)
+       64 62 6b 65  79                                       dbkey
+       [append] @ 1281 (3/3)
+       62 6b 62                                              bkb
+          op close_instance: [s19-twokeys] []
+       [append] @ 1284 (1/1)
+       ff                                                    .
+        op close_list: [s19-twokeys] []
+     [append] @ 1285 (1/1)
+     ff                                                    .
+      op open_list: [s20-narrow] []
+   [append] @ 1286 (b/11)
+   6a 73 32 30  2d 6e 61 72  - 72 6f 77                  js20-narrow
+   [append] @ 1297 (1/1)
+   9f                                                    .
+        op open_instance: [s20-narrow] []
+     [append] @ 1298 (1/1)
+     bf                                                    .
+          op string: [name] [r1]
+       [append] @ 1299 (5/5)
+       64 6e 61 6d  65                                       dname
+       [append] @ 1304 (3/3)
+       62 72 31                                              br1
+          op content: [aval] [1]
+       [append] @ 1307 (5/5)
+       64 61 76 61  6c                                       daval
+       [content] @ 1312 (1/1)
+       01                                                    .
+          op close_instance: [s20-narrow] []
+       [append] @ 1313 (1/1)
+       ff                                                    .
+        op open_instance: [s20-narrow] []
+     [append] @ 1314 (1/1)
+     bf                                                    .
+          op string: [name] [r2]
+       [append] @ 1315 (5/5)
+       64 6e 61 6d  65                                       dname
+       [append] @ 1320 (3/3)
+       62 72 32                                              br2
+          op content: [aval] [2]
+       [append] @ 1323 (5/5)
+       64 61 76 61  6c                                       daval
+       [content] @ 1328 (1/1)
+       02                                                    .
+          op content: [bval] [20]
+       [append] @ 1329 (5/5)
+       64 62 76 61  6c                                       dbval
+       [content] @ 1334 (1/1)
+       14                                                    .
+          op close_instance: [s20-narrow] []
+       [append] @ 1335 (1/1)
+       ff                                                    .
+        op open_instance: [s20-narrow] []
+     [append] @ 1336 (1/1)
+     bf                                                    .
+          op string: [name] [r3]
+       [append] @ 1337 (5/5)
+       64 6e 61 6d  65                                       dname
+       [append] @ 1342 (3/3)
+       62 72 33                                              br3
+          op content: [aval] [3]
+       [append] @ 1345 (5/5)
+       64 61 76 61  6c                                       daval
+       [content] @ 1350 (1/1)
+       03                                                    .
+          op close_instance: [s20-narrow] []
+       [append] @ 1351 (1/1)
+       ff                                                    .
+        op close_list: [s20-narrow] []
+     [append] @ 1352 (1/1)
+     ff                                                    .
+      op open_list: [s21-dupfield] []
+   [append] @ 1353 (d/13)
+   6c 73 32 31  2d 64 75 70  - 66 69 65 6c  64           ls21-dupfield
+   [append] @ 1366 (1/1)
+   9f                                                    .
+        op open_instance: [s21-dupfield] []
+     [append] @ 1367 (1/1)
+     bf                                                    .
+          op string: [name] [dup]
+       [append] @ 1368 (5/5)
+       64 6e 61 6d  65                                       dname
+       [append] @ 1373 (4/4)
+       63 64 75 70                                           cdup
+          op content: [val] [1]
+       [append] @ 1377 (4/4)
+       63 76 61 6c                                           cval
+       [content] @ 1381 (1/1)
+       01                                                    .
+          op content: [val] [2]
+       [append] @ 1382 (4/4)
+       63 76 61 6c                                           cval
+       [content] @ 1386 (1/1)
+       02                                                    .
+          op close_instance: [s21-dupfield] []
+       [append] @ 1387 (1/1)
+       ff                                                    .
+        op close_list: [s21-dupfield] []
+     [append] @ 1388 (1/1)
+     ff                                                    .
+      op open_list: [s22-outer-sparse] []
+   [append] @ 1389 (11/17)
+   70 73 32 32  2d 6f 75 74  - 65 72 2d 73  70 61 72 73  ps22-outer-spars
+   65                                                    e
+   [append] @ 1406 (1/1)
+   9f                                                    .
+        op open_instance: [s22-outer-sparse] []
+     [append] @ 1407 (1/1)
+     bf                                                    .
+          op string: [name] [parent1]
+       [append] @ 1408 (5/5)
+       64 6e 61 6d  65                                       dname
+       [append] @ 1413 (8/8)
+       67 70 61 72  65 6e 74 31                              gparent1
+          op open_list: [inner] []
+       [append] @ 1421 (6/6)
+       65 69 6e 6e  65 72                                    einner
+       [append] @ 1427 (1/1)
+       9f                                                    .
+            op open_instance: [inner] []
+         [append] @ 1428 (1/1)
+         bf                                                    .
+              op string: [iname] [c1]
+           [append] @ 1429 (6/6)
+           65 69 6e 61  6d 65                                    einame
+           [append] @ 1435 (3/3)
+           62 63 31                                              bc1
+              op content: [ival] [1]
+           [append] @ 1438 (5/5)
+           64 69 76 61  6c                                       dival
+           [content] @ 1443 (1/1)
+           01                                                    .
+              op close_instance: [inner] []
+           [append] @ 1444 (1/1)
+           ff                                                    .
+            op open_instance: [inner] []
+         [append] @ 1445 (1/1)
+         bf                                                    .
+              op string: [iname] [c2]
+           [append] @ 1446 (6/6)
+           65 69 6e 61  6d 65                                    einame
+           [append] @ 1452 (3/3)
+           62 63 32                                              bc2
+              op content: [ival] [2]
+           [append] @ 1455 (5/5)
+           64 69 76 61  6c                                       dival
+           [content] @ 1460 (1/1)
+           02                                                    .
+              op close_instance: [inner] []
+           [append] @ 1461 (1/1)
+           ff                                                    .
+            op close_list: [inner] []
+         [append] @ 1462 (1/1)
+         ff                                                    .
+          op close_instance: [s22-outer-sparse] []
+       [append] @ 1463 (1/1)
+       ff                                                    .
+        op close_list: [s22-outer-sparse] []
+     [append] @ 1464 (1/1)
+     ff                                                    .
+      op open_list: [s23-mixed] []
+   [append] @ 1465 (a/10)
+   69 73 32 33  2d 6d 69 78  - 65 64                     is23-mixed
+   [append] @ 1475 (1/1)
+   9f                                                    .
+        op open_instance: [s23-mixed] []
+     [append] @ 1476 (1/1)
+     bf                                                    .
+          op string: [name] [wrap]
+       [append] @ 1477 (5/5)
+       64 6e 61 6d  65                                       dname
+       [append] @ 1482 (5/5)
+       64 77 72 61  70                                       dwrap
+          op open_container: [holder] []
+       [append] @ 1487 (7/7)
+       66 68 6f 6c  64 65 72                                 fholder
+       [append] @ 1494 (1/1)
+       bf                                                    .
+            op open_list: [densekids] []
+         [append] @ 1495 (a/10)
+         69 64 65 6e  73 65 6b 69  - 64 73                     idensekids
+         [append] @ 1505 (1/1)
+         9f                                                    .
+              op open_instance: [densekids] []
+           [append] @ 1506 (1/1)
+           bf                                                    .
+                op string: [kid] [k1]
+             [append] @ 1507 (4/4)
+             63 6b 69 64                                           ckid
+             [append] @ 1511 (3/3)
+             62 6b 31                                              bk1
+                op content: [kval] [1]
+             [append] @ 1514 (5/5)
+             64 6b 76 61  6c                                       dkval
+             [content] @ 1519 (1/1)
+             01                                                    .
+                op close_instance: [densekids] []
+             [append] @ 1520 (1/1)
+             ff                                                    .
+              op open_instance: [densekids] []
+           [append] @ 1521 (1/1)
+           bf                                                    .
+                op string: [kid] [k2]
+             [append] @ 1522 (4/4)
+             63 6b 69 64                                           ckid
+             [append] @ 1526 (3/3)
+             62 6b 32                                              bk2
+                op content: [kval] [2]
+             [append] @ 1529 (5/5)
+             64 6b 76 61  6c                                       dkval
+             [content] @ 1534 (1/1)
+             02                                                    .
+                op close_instance: [densekids] []
+             [append] @ 1535 (1/1)
+             ff                                                    .
+              op close_list: [densekids] []
+           [append] @ 1536 (1/1)
+           ff                                                    .
+            op close_container: [holder] []
+         [append] @ 1537 (1/1)
+         ff                                                    .
+          op close_instance: [s23-mixed] []
+       [append] @ 1538 (1/1)
+       ff                                                    .
+        op close_list: [s23-mixed] []
+     [append] @ 1539 (1/1)
+     ff                                                    .
+      op open_container: [s24-leafmix] []
+   [append] @ 1540 (c/12)
+   6b 73 32 34  2d 6c 65 61  - 66 6d 69 78               ks24-leafmix
+   [append] @ 1552 (1/1)
+   bf                                                    .
+        op string: [before] [x]
+     [append] @ 1553 (7/7)
+     66 62 65 66  6f 72 65                                 fbefore
+     [append] @ 1560 (2/2)
+     61 78                                                 ax
+        op open_leaf_list: [tag] []
+     [append] @ 1562 (4/4)
+     63 74 61 67                                           ctag
+     [append] @ 1566 (1/1)
+     9f                                                    .
+          op string: [tag] [r]
+       [append] @ 1567 (2/2)
+       61 72                                                 ar
+          op string: [tag] [g]
+       [append] @ 1569 (2/2)
+       61 67                                                 ag
+          op close_leaf_list: [tag] []
+       [append] @ 1571 (1/1)
+       ff                                                    .
+        op string: [between] [y]
+     [append] @ 1572 (8/8)
+     67 62 65 74  77 65 65 6e                              gbetween
+     [append] @ 1580 (2/2)
+     61 79                                                 ay
+        op open_leaf_list: [tag] []
+     [append] @ 1582 (4/4)
+     63 74 61 67                                           ctag
+     [append] @ 1586 (1/1)
+     9f                                                    .
+          op string: [tag] [b]
+       [append] @ 1587 (2/2)
+       61 62                                                 ab
+          op close_leaf_list: [tag] []
+       [append] @ 1589 (1/1)
+       ff                                                    .
+        op open_leaf_list: [color2] []
+     [append] @ 1590 (7/7)
+     66 63 6f 6c  6f 72 32                                 fcolor2
+     [append] @ 1597 (1/1)
+     9f                                                    .
+          op string: [color2] [cyan]
+       [append] @ 1598 (5/5)
+       64 63 79 61  6e                                       dcyan
+          op string: [color2] [magenta]
+       [append] @ 1603 (8/8)
+       67 6d 61 67  65 6e 74 61                              gmagenta
+          op close_leaf_list: [color2] []
+       [append] @ 1611 (1/1)
+       ff                                                    .
+        op close_container: [s24-leafmix] []
+     [append] @ 1612 (1/1)
+     ff                                                    .
+      op open_container: [s25-sib-a] []
+   [append] @ 1613 (a/10)
+   69 73 32 35  2d 73 69 62  - 2d 61                     is25-sib-a
+   [append] @ 1623 (1/1)
+   bf                                                    .
+        op string: [xval] [1]
+     [append] @ 1624 (5/5)
+     64 78 76 61  6c                                       dxval
+     [append] @ 1629 (2/2)
+     61 31                                                 a1
+        op close_container: [s25-sib-a] []
+     [append] @ 1631 (1/1)
+     ff                                                    .
+      op open_list: [s25-sib-b] []
+   [append] @ 1632 (a/10)
+   69 73 32 35  2d 73 69 62  - 2d 62                     is25-sib-b
+   [append] @ 1642 (1/1)
+   9f                                                    .
+        op open_instance: [s25-sib-b] []
+     [append] @ 1643 (1/1)
+     bf                                                    .
+          op string: [name] [b1]
+       [append] @ 1644 (5/5)
+       64 6e 61 6d  65                                       dname
+       [append] @ 1649 (3/3)
+       62 62 31                                              bb1
+          op close_instance: [s25-sib-b] []
+       [append] @ 1652 (1/1)
+       ff                                                    .
+        op close_list: [s25-sib-b] []
+     [append] @ 1653 (1/1)
+     ff                                                    .
+      op open_container: [s26-twolists] []
+   [append] @ 1654 (d/13)
+   6c 73 32 36  2d 74 77 6f  - 6c 69 73 74  73           ls26-twolists
+   [append] @ 1667 (1/1)
+   bf                                                    .
+        op open_list: [listone] []
+     [append] @ 1668 (8/8)
+     67 6c 69 73  74 6f 6e 65                              glistone
+     [append] @ 1676 (1/1)
+     9f                                                    .
+          op open_instance: [listone] []
+       [append] @ 1677 (1/1)
+       bf                                                    .
+            op string: [name] [one-a]
+         [append] @ 1678 (5/5)
+         64 6e 61 6d  65                                       dname
+         [append] @ 1683 (6/6)
+         65 6f 6e 65  2d 61                                    eone-a
+            op close_instance: [listone] []
+         [append] @ 1689 (1/1)
+         ff                                                    .
+          op close_list: [listone] []
+       [append] @ 1690 (1/1)
+       ff                                                    .
+        op open_list: [listtwo] []
+     [append] @ 1691 (8/8)
+     67 6c 69 73  74 74 77 6f                              glisttwo
+     [append] @ 1699 (1/1)
+     9f                                                    .
+          op open_instance: [listtwo] []
+       [append] @ 1700 (1/1)
+       bf                                                    .
+            op string: [name] [two-a]
+         [append] @ 1701 (5/5)
+         64 6e 61 6d  65                                       dname
+         [append] @ 1706 (6/6)
+         65 74 77 6f  2d 61                                    etwo-a
+            op close_instance: [listtwo] []
+         [append] @ 1712 (1/1)
+         ff                                                    .
+          op close_list: [listtwo] []
+       [append] @ 1713 (1/1)
+       ff                                                    .
+        op close_container: [s26-twolists] []
+     [append] @ 1714 (1/1)
+     ff                                                    .
+      op open_list: [s27-firstcontainer] []
+   [append] @ 1715 (13/19)
+   72 73 32 37  2d 66 69 72  - 73 74 63 6f  6e 74 61 69  rs27-firstcontai
+   6e 65 72                                              ner
+   [append] @ 1734 (1/1)
+   9f                                                    .
+        op open_instance: [s27-firstcontainer] []
+     [append] @ 1735 (1/1)
+     bf                                                    .
+          op open_container: [info] []
+       [append] @ 1736 (5/5)
+       64 69 6e 66  6f                                       dinfo
+       [append] @ 1741 (1/1)
+       bf                                                    .
+            op string: [detail] [d1]
+         [append] @ 1742 (7/7)
+         66 64 65 74  61 69 6c                                 fdetail
+         [append] @ 1749 (3/3)
+         62 64 31                                              bd1
+            op close_container: [info] []
+         [append] @ 1752 (1/1)
+         ff                                                    .
+          op string: [name] [after-container]
+       [append] @ 1753 (5/5)
+       64 6e 61 6d  65                                       dname
+       [append] @ 1758 (10/16)
+       6f 61 66 74  65 72 2d 63  - 6f 6e 74 61  69 6e 65 72  oafter-container
+          op close_instance: [s27-firstcontainer] []
+       [append] @ 1774 (1/1)
+       ff                                                    .
+        op close_list: [s27-firstcontainer] []
+     [append] @ 1775 (1/1)
+     ff                                                    .
+      op open_container: [s28-dispenc] []
+   [append] @ 1776 (c/12)
+   6b 73 32 38  2d 64 69 73  - 70 65 6e 63               ks28-dispenc
+   [append] @ 1788 (1/1)
+   bf                                                    .
+        op string: [enc-only] [should-appear]
+     [append] @ 1789 (9/9)
+     68 65 6e 63  2d 6f 6e 6c  - 79                        henc-only
+     [append] @ 1798 (e/14)
+     6d 73 68 6f  75 6c 64 2d  - 61 70 70 65  61 72        mshould-appear
+        op string: [normal] [always-appears]
+     [append] @ 1812 (7/7)
+     66 6e 6f 72  6d 61 6c                                 fnormal
+     [append] @ 1819 (f/15)
+     6e 61 6c 77  61 79 73 2d  - 61 70 70 65  61 72 73     nalways-appears
+        op close_container: [s28-dispenc] []
+     [append] @ 1834 (1/1)
+     ff                                                    .
+      op open_list: [s29-keyonly-dense] []
+   [append] @ 1835 (12/18)
+   71 73 32 39  2d 6b 65 79  - 6f 6e 6c 79  2d 64 65 6e  qs29-keyonly-den
+   73 65                                                 se
+   [append] @ 1853 (1/1)
+   9f                                                    .
+        op open_instance: [s29-keyonly-dense] []
+     [append] @ 1854 (1/1)
+     bf                                                    .
+          op string: [name] [solo]
+       [append] @ 1855 (5/5)
+       64 6e 61 6d  65                                       dname
+       [append] @ 1860 (5/5)
+       64 73 6f 6c  6f                                       dsolo
+          op close_instance: [s29-keyonly-dense] []
+       [append] @ 1865 (1/1)
+       ff                                                    .
+        op close_list: [s29-keyonly-dense] []
+     [append] @ 1866 (1/1)
+     ff                                                    .
+      op open_list: [s29-keyonly-sparse] []
+   [append] @ 1867 (13/19)
+   72 73 32 39  2d 6b 65 79  - 6f 6e 6c 79  2d 73 70 61  rs29-keyonly-spa
+   72 73 65                                              rse
+   [append] @ 1886 (1/1)
+   9f                                                    .
+        op open_instance: [s29-keyonly-sparse] []
+     [append] @ 1887 (1/1)
+     bf                                                    .
+          op string: [name] [solo]
+       [append] @ 1888 (5/5)
+       64 6e 61 6d  65                                       dname
+       [append] @ 1893 (5/5)
+       64 73 6f 6c  6f                                       dsolo
+          op close_instance: [s29-keyonly-sparse] []
+       [append] @ 1898 (1/1)
+       ff                                                    .
+        op close_list: [s29-keyonly-sparse] []
+     [append] @ 1899 (1/1)
+     ff                                                    .
+      op open_list: [s30-sparse-empty] []
+   [append] @ 1900 (11/17)
+   70 73 33 30  2d 73 70 61  - 72 73 65 2d  65 6d 70 74  ps30-sparse-empt
+   79                                                    y
+   [append] @ 1917 (1/1)
+   9f                                                    .
+        op open_instance: [s30-sparse-empty] []
+     [append] @ 1918 (1/1)
+     bf                                                    .
+          op close_instance: [s30-sparse-empty] []
+       [append] @ 1919 (1/1)
+       ff                                                    .
+        op open_instance: [s30-sparse-empty] []
+     [append] @ 1920 (1/1)
+     bf                                                    .
+          op string: [name] [second]
+       [append] @ 1921 (5/5)
+       64 6e 61 6d  65                                       dname
+       [append] @ 1926 (7/7)
+       66 73 65 63  6f 6e 64                                 fsecond
+          op close_instance: [s30-sparse-empty] []
+       [append] @ 1933 (1/1)
+       ff                                                    .
+        op close_list: [s30-sparse-empty] []
+     [append] @ 1934 (1/1)
+     ff                                                    .
+      op open_list: [s31-emptyfirst] []
+   [append] @ 1935 (f/15)
+   6e 73 33 31  2d 65 6d 70  - 74 79 66 69  72 73 74     ns31-emptyfirst
+   [append] @ 1950 (1/1)
+   9f                                                    .
+        op open_instance: [s31-emptyfirst] []
+     [append] @ 1951 (1/1)
+     bf                                                    .
+          op close_instance: [s31-emptyfirst] []
+       [append] @ 1952 (1/1)
+       ff                                                    .
+        op open_instance: [s31-emptyfirst] []
+     [append] @ 1953 (1/1)
+     bf                                                    .
+          op string: [name] [later]
+       [append] @ 1954 (5/5)
+       64 6e 61 6d  65                                       dname
+       [append] @ 1959 (6/6)
+       65 6c 61 74  65 72                                    elater
+          op content: [val] [99]
+       [append] @ 1965 (4/4)
+       63 76 61 6c                                           cval
+       [content] @ 1969 (2/2)
+       18 63                                                 .c
+          op close_instance: [s31-emptyfirst] []
+       [append] @ 1971 (1/1)
+       ff                                                    .
+        op close_list: [s31-emptyfirst] []
+     [append] @ 1972 (1/1)
+     ff                                                    .
+      op open_list: [s32-alwaysempty] []
+   [append] @ 1973 (10/16)
+   6f 73 33 32  2d 61 6c 77  - 61 79 73 65  6d 70 74 79  os32-alwaysempty
+   [append] @ 1989 (1/1)
+   9f                                                    .
+        op open_instance: [s32-alwaysempty] []
+     [append] @ 1990 (1/1)
+     bf                                                    .
+          op close_instance: [s32-alwaysempty] []
+       [append] @ 1991 (1/1)
+       ff                                                    .
+        op open_instance: [s32-alwaysempty] []
+     [append] @ 1992 (1/1)
+     bf                                                    .
+          op close_instance: [s32-alwaysempty] []
+       [append] @ 1993 (1/1)
+       ff                                                    .
+        op close_list: [s32-alwaysempty] []
+     [append] @ 1994 (1/1)
+     ff                                                    .
+      op open_container: [s33a-newlines] []
+   [append] @ 1995 (e/14)
+   6d 73 33 33  61 2d 6e 65  - 77 6c 69 6e  65 73        ms33a-newlines
+   [append] @ 2009 (1/1)
+   bf                                                    .
+        op string: [msg] [line1
+line2
+line3	tabbed]
+     [append] @ 2010 (4/4)
+     63 6d 73 67                                           cmsg
+     [append] @ 2014 (1b/27)
+     78 19 6c 69  6e 65 31 0a  - 6c 69 6e 65  32 0d 0a 6c  x.line1.line2..l
+     69 6e 65 33  09 74 61 62  - 62 65 64                  ine3.tabbed
+        op close_container: [s33a-newlines] []
+     [append] @ 2041 (1/1)
+     ff                                                    .
+      op open_container: [s33b-nonmnemonic] []
+   [append] @ 2042 (11/17)
+   70 73 33 33  62 2d 6e 6f  - 6e 6d 6e 65  6d 6f 6e 69  ps33b-nonmnemoni
+   63                                                    c
+   [append] @ 2059 (1/1)
+   bf                                                    .
+        op string: [msg] [ctrlherenext]
+     [append] @ 2060 (4/4)
+     63 6d 73 67                                           cmsg
+     [append] @ 2064 (f/15)
+     6e 63 74 72  6c 01 68 65  - 72 65 1f 6e  65 78 74     nctrl.here.next
+        op close_container: [s33b-nonmnemonic] []
+     [append] @ 2079 (1/1)
+     ff                                                    .
+      op open_container: [s33c-colors] []
+   [append] @ 2080 (c/12)
+   6b 73 33 33  63 2d 63 6f  - 6c 6f 72 73               ks33c-colors
+   [append] @ 2092 (1/1)
+   bf                                                    .
+        op open_leaf_list: [tag] []
+     [append] @ 2093 (4/4)
+     63 74 61 67                                           ctag
+     [append] @ 2097 (1/1)
+     9f                                                    .
+          op string: [tag] [needs,quote
+and-newline]
+       [append] @ 2098 (18/24)
+       77 6e 65 65  64 73 2c 71  - 75 6f 74 65  0a 61 6e 64  wneeds,quote.and
+       2d 6e 65 77  6c 69 6e 65                              -newline
+          op close_leaf_list: [tag] []
+       [append] @ 2122 (1/1)
+       ff                                                    .
+        op close_container: [s33c-colors] []
+     [append] @ 2123 (1/1)
+     ff                                                    .
+      op open_list: [s33d-row] []
+   [append] @ 2124 (9/9)
+   68 73 33 33  64 2d 72 6f  - 77                        hs33d-row
+   [append] @ 2133 (1/1)
+   9f                                                    .
+        op open_instance: [s33d-row] []
+     [append] @ 2134 (1/1)
+     bf                                                    .
+          op content: [num] [1]
+       [append] @ 2135 (4/4)
+       63 6e 75 6d                                           cnum
+       [content] @ 2139 (1/1)
+       01                                                    .
+          op string: [note] [tab	here]
+       [append] @ 2140 (5/5)
+       64 6e 6f 74  65                                       dnote
+       [append] @ 2145 (9/9)
+       68 74 61 62  09 68 65 72  - 65                        htab.here
+          op close_instance: [s33d-row] []
+       [append] @ 2154 (1/1)
+       ff                                                    .
+        op close_list: [s33d-row] []
+     [append] @ 2155 (1/1)
+     ff                                                    .
+      op open_container: [s33e-odd	name] []
+   [append] @ 2156 (e/14)
+   6d 73 33 33  65 2d 6f 64  - 64 09 6e 61  6d 65        ms33e-odd.name
+   [append] @ 2170 (1/1)
+   bf                                                    .
+        op close_container: [s33e-odd	name] []
+     [append] @ 2171 (1/1)
+     ff                                                    .
+      op open_container: [s34a-bmp] []
+   [append] @ 2172 (9/9)
+   68 73 33 34  61 2d 62 6d  - 70                        hs34a-bmp
+   [append] @ 2181 (1/1)
+   bf                                                    .
+        op string: [msg] [café]
+     [append] @ 2182 (4/4)
+     63 6d 73 67                                           cmsg
+     [append] @ 2186 (6/6)
+     65 63 61 66  c3 a9                                    ecaf..
+        op close_container: [s34a-bmp] []
+     [append] @ 2192 (1/1)
+     ff                                                    .
+      op open_container: [s34b-supplementary] []
+   [append] @ 2193 (13/19)
+   72 73 33 34  62 2d 73 75  - 70 70 6c 65  6d 65 6e 74  rs34b-supplement
+   61 72 79                                              ary
+   [append] @ 2212 (1/1)
+   bf                                                    .
+        op string: [msg] [😀hi]
+     [append] @ 2213 (4/4)
+     63 6d 73 67                                           cmsg
+     [append] @ 2217 (7/7)
+     66 f0 9f 98  80 68 69                                 f....hi
+        op close_container: [s34b-supplementary] []
+     [append] @ 2224 (1/1)
+     ff                                                    .
+      op open_container: [s34c-café] []
+   [append] @ 2225 (b/11)
+   6a 73 33 34  63 2d 63 61  - 66 c3 a9                  js34c-caf..
+   [append] @ 2236 (1/1)
+   bf                                                    .
+        op close_container: [s34c-café] []
+     [append] @ 2237 (1/1)
+     ff                                                    .
+      op open_container: [s34d-nbsp] []
+   [append] @ 2238 (a/10)
+   69 73 33 34  64 2d 6e 62  - 73 70                     is34d-nbsp
+   [append] @ 2248 (1/1)
+   bf                                                    .
+        op string: [msg] [a b]
+     [append] @ 2249 (4/4)
+     63 6d 73 67                                           cmsg
+     [append] @ 2253 (5/5)
+     64 61 c2 a0  62                                       da..b
+        op close_container: [s34d-nbsp] []
+     [append] @ 2258 (1/1)
+     ff                                                    .
+      op close_container: [rtoon-test] []
+   [append] @ 2259 (1/1)
+   ff                                                    .
+    op finish: [] []
+ [append] @ 2260 (1/1)
+ ff                                                    .
+  op flush: [] []
+>[cbor] @ 0 (8d5/2261)
+>bf 6a 72 74  6f 6f 6e 2d  - 74 65 73 74  bf 73 73 30  .jrtoon-test.ss0
+>31 2d 65 6d  70 74 79 2d  - 63 6f 6e 74  61 69 6e 65  1-empty-containe
+>72 bf ff 6e  73 30 32 2d  - 65 6d 70 74  79 2d 6c 69  r..ns02-empty-li
+>73 74 9f ff  65 73 30 33  - 2d 61 bf 65  73 30 33 2d  st..es03-a.es03-
+>62 bf 65 73  30 33 2d 63  - bf 64 6c 65  61 66 65 76  b.es03-c.dleafev
+>61 6c 75 65  ff ff ff 68  - 73 30 34 2d  64 69 73 6b  alue...hs04-disk
+>9f bf 64 6e  61 6d 65 63  - 73 64 61 64  73 69 7a 65  ..dnamecsdadsize
+>18 64 ff bf  64 6e 61 6d  - 65 63 73 64  62 64 73 69  .d..dnamecsdbdsi
+>7a 65 18 c8  ff bf 64 6e  - 61 6d 65 63  73 64 63 64  ze....dnamecsdcd
+>73 69 7a 65  19 01 2c ff  - ff 69 73 30  35 2d 72 6f  size..,..is05-ro
+>75 74 65 9f  bf 64 64 65  - 73 74 68 31  30 2e 30 2e  ute..ddesth10.0.
+>30 2e 30 6a  70 72 65 66  - 69 78 2d 6c  65 6e 18 18  0.0jprefix-len..
+>68 70 72 6f  74 6f 63 6f  - 6c 66 73 74  61 74 69 63  hprotocolfstatic
+>ff bf 64 64  65 73 74 68  - 31 30 2e 30  2e 31 2e 30  ..ddesth10.0.1.0
+>6a 70 72 65  66 69 78 2d  - 6c 65 6e 18  18 68 70 72  jprefix-len..hpr
+>6f 74 6f 63  6f 6c 66 73  - 74 61 74 69  63 ff bf 64  otocolfstatic..d
+>64 65 73 74  67 30 2e 30  - 2e 30 2e 30  6a 70 72 65  destg0.0.0.0jpre
+>66 69 78 2d  6c 65 6e 00  - 68 70 72 6f  74 6f 63 6f  fix-len.hprotoco
+>6c 67 64 65  66 61 75 6c  - 74 ff ff 68  73 30 36 2d  lgdefault..hs06-
+>68 6f 73 74  9f bf 64 6e  - 61 6d 65 65  61 6c 70 68  host..dnameealph
+>61 ff bf 64  6e 61 6d 65  - 64 62 65 74  61 65 73 74  a..dnamedbetaest
+>61 74 73 bf  67 75 70 2d  - 74 69 6d 65  18 64 ff ff  ats.gup-time.d..
+>ff 67 73 30  37 2d 63 70  - 75 9f bf 63  6e 75 6d 00  .gs07-cpu..cnum.
+>64 6c 6f 61  64 00 ff bf  - 63 6e 75 6d  01 64 6c 6f  dload...cnum.dlo
+>61 64 07 ff  bf 63 6e 75  - 6d 02 64 6c  6f 61 64 0e  ad...cnum.dload.
+>ff ff 6a 73  30 38 2d 72  - 6f 75 74 65  32 9f bf 64  ..js08-route2..d
+>64 65 73 74  68 31 30 2e  - 30 2e 30 2e  30 6a 70 72  desth10.0.0.0jpr
+>65 66 69 78  2d 6c 65 6e  - 18 18 68 70  72 6f 74 6f  efix-len..hproto
+>63 6f 6c 66  73 74 61 74  - 69 63 ff bf  64 64 65 73  colfstatic..ddes
+>74 68 31 30  2e 30 2e 31  - 2e 30 6a 70  72 65 66 69  th10.0.1.0jprefi
+>78 2d 6c 65  6e 18 19 68  - 70 72 6f 74  6f 63 6f 6c  x-len..hprotocol
+>66 73 74 61  74 69 63 ff  - ff 68 73 30  39 2d 69 74  fstatic..hs09-it
+>65 6d 9f bf  63 73 6b 75  - 67 57 49 44  47 45 54 31  em..cskugWIDGET1
+>63 71 74 79  0a 65 70 72  - 69 63 65 64  39 2e 39 39  cqty.epriced9.99
+>ff bf 63 73  6b 75 67 57  - 49 44 47 45  54 32 63 71  ..cskugWIDGET2cq
+>74 79 05 65  70 72 69 63  - 65 64 34 2e  35 30 64 63  ty.epriced4.50dc
+>6f 73 74 64  32 2e 30 30  - ff bf 63 73  6b 75 67 57  ostd2.00..cskugW
+>49 44 47 45  54 33 63 71  - 74 79 00 65  70 72 69 63  IDGET3cqty.epric
+>65 60 64 63  6f 73 74 64  - 31 2e 30 30  67 73 65 6c  e`dcostd1.00gsel
+>6c 2d 62 79  6a 32 30 32  - 36 2d 30 31  2d 30 31 ff  l-byj2026-01-01.
+>ff 6a 73 31  30 2d 63 6f  - 6c 6f 72 73  bf 63 74 61  .js10-colors.cta
+>67 9f 61 61  60 61 63 60  - 6b 6e 65 65  64 73 2c 71  g.aa`ac`kneeds,q
+>75 6f 74 65  ff ff 69 73  - 31 31 61 2d  74 61 67 73  uote..is11a-tags
+>bf 63 74 61  67 9f 63 72  - 65 64 ff ff  69 73 31 31  .ctag.cred..is11
+>62 2d 74 61  67 73 bf 63  - 74 61 67 9f  60 ff ff 69  b-tags.ctag.`..i
+>73 31 32 2d  70 6c 61 69  - 6e bf 63 74  61 67 63 72  s12-plain.ctagcr
+>65 64 ff 6a  73 31 33 61  - 2d 65 6e 74  72 79 9f bf  ed.js13a-entry..
+>63 6e 75 6d  01 64 6e 61  - 6d 65 63 6f  6e 65 ff ff  cnum.dnamecone..
+>6a 73 31 33  62 2d 65 6e  - 74 72 79 9f  bf 63 6e 75  js13b-entry..cnu
+>6d 01 64 6e  61 6d 65 63  - 6f 6e 65 65  73 63 6f 72  m.dnameconeescor
+>65 18 2a ff  bf 63 6e 75  - 6d 02 64 6e  61 6d 65 63  e.*..cnum.dnamec
+>74 77 6f 65  73 63 6f 72  - 65 18 2b ff  ff 6a 73 31  twoescore.+..js1
+>33 63 2d 65  6e 74 72 79  - 9f bf 63 6e  75 6d 01 64  3c-entry..cnum.d
+>6e 61 6d 65  63 6f 6e 65  - ff ff 69 73  31 34 2d 74  namecone..is14-t
+>68 69 6e 67  bf 64 6c 65  - 61 66 65 76  61 6c 75 65  hing.dleafevalue
+>ff 6f 73 31  35 2d 72 6f  - 75 74 65 2d  65 6e 74 72  .os15-route-entr
+>79 9f bf 6b  64 65 73 74  - 69 6e 61 74  69 6f 6e 6b  y..kdestinationk
+>31 30 2e 30  2e 30 2e 30  - 2f 32 34 68  70 72 6f 74  10.0.0.0/24hprot
+>6f 63 6f 6c  66 64 69 72  - 65 63 74 ff  bf 6b 64 65  ocolfdirect..kde
+>73 74 69 6e  61 74 69 6f  - 6e 6b 31 30  2e 30 2e 31  stinationk10.0.1
+>2e 30 2f 32  34 68 70 72  - 6f 74 6f 63  6f 6c 66 73  .0/24hprotocolfs
+>74 61 74 69  63 63 76 69  - 61 bf 69 69  6e 74 65 72  taticcvia.iinter
+>66 61 63 65  64 65 74 68  - 30 6e 73 6f  75 72 63 65  facedeth0nsource
+>2d 61 64 64  72 65 73 73  - 68 31 30 2e  30 2e 31 2e  -addressh10.0.1.
+>31 ff ff ff  6a 73 31 35  - 62 2d 65 6e  74 72 79 9f  1...js15b-entry.
+>bf 64 6e 61  6d 65 63 6f  - 6e 65 63 73  75 62 9f bf  .dnameconecsub..
+>63 76 61 6c  61 31 ff ff  - ff ff 69 73  31 36 2d 74  cvala1....is16-t
+>79 70 65 73  bf 65 63 6f  - 75 6e 74 18  2a 66 61 63  ypes.ecount.*fac
+>74 69 76 65  f5 68 64 69  - 73 61 62 6c  65 64 f4 68  tive.hdisabled.h
+>72 61 77 2d  6e 75 6c 6c  - 64 6e 75 6c  6c 64 63 6f  raw-nulldnulldco
+>64 65 62 34  32 65 6c 61  - 62 65 6c 64  74 72 75 65  deb42elabeldtrue
+>63 6d 69 64  64 6e 75 6c  - 6c ff 69 73  31 37 2d 73  cmiddnull.is17-s
+>70 6c 69 74  9f bf 63 6e  - 75 6d 01 64  61 76 61 6c  plit..cnum.daval
+>0a 64 62 76  61 6c 14 ff  - bf 63 6e 75  6d 02 64 61  .dbval...cnum.da
+>76 61 6c 18  1e 64 62 76  - 61 6c 18 28  ff ff 69 73  val..dbval.(..is
+>31 38 2d 6f  72 64 65 72  - 9f bf 63 70  72 65 66 62  18-order..cprefb
+>65 66 6f 72  65 64 6e 61  - 6d 65 62 6e  31 64 70 6f  eforednamebn1dpo
+>73 74 65 61  66 74 65 72  - ff ff 6b 73  31 39 2d 74  steafter..ks19-t
+>77 6f 6b 65  79 73 9f bf  - 64 61 6b 65  79 62 6b 61  wokeys..dakeybka
+>63 6d 69 64  67 6d 69 64  - 64 61 74 61  64 62 6b 65  cmidgmiddatadbke
+>79 62 6b 62  ff ff 6a 73  - 32 30 2d 6e  61 72 72 6f  ybkb..js20-narro
+>77 9f bf 64  6e 61 6d 65  - 62 72 31 64  61 76 61 6c  w..dnamebr1daval
+>01 ff bf 64  6e 61 6d 65  - 62 72 32 64  61 76 61 6c  ...dnamebr2daval
+>02 64 62 76  61 6c 14 ff  - bf 64 6e 61  6d 65 62 72  .dbval...dnamebr
+>33 64 61 76  61 6c 03 ff  - ff 6c 73 32  31 2d 64 75  3daval...ls21-du
+>70 66 69 65  6c 64 9f bf  - 64 6e 61 6d  65 63 64 75  pfield..dnamecdu
+>70 63 76 61  6c 01 63 76  - 61 6c 02 ff  ff 70 73 32  pcval.cval...ps2
+>32 2d 6f 75  74 65 72 2d  - 73 70 61 72  73 65 9f bf  2-outer-sparse..
+>64 6e 61 6d  65 67 70 61  - 72 65 6e 74  31 65 69 6e  dnamegparent1ein
+>6e 65 72 9f  bf 65 69 6e  - 61 6d 65 62  63 31 64 69  ner..einamebc1di
+>76 61 6c 01  ff bf 65 69  - 6e 61 6d 65  62 63 32 64  val...einamebc2d
+>69 76 61 6c  02 ff ff ff  - ff 69 73 32  33 2d 6d 69  ival.....is23-mi
+>78 65 64 9f  bf 64 6e 61  - 6d 65 64 77  72 61 70 66  xed..dnamedwrapf
+>68 6f 6c 64  65 72 bf 69  - 64 65 6e 73  65 6b 69 64  holder.idensekid
+>73 9f bf 63  6b 69 64 62  - 6b 31 64 6b  76 61 6c 01  s..ckidbk1dkval.
+>ff bf 63 6b  69 64 62 6b  - 32 64 6b 76  61 6c 02 ff  ..ckidbk2dkval..
+>ff ff ff ff  6b 73 32 34  - 2d 6c 65 61  66 6d 69 78  ....ks24-leafmix
+>bf 66 62 65  66 6f 72 65  - 61 78 63 74  61 67 9f 61  .fbeforeaxctag.a
+>72 61 67 ff  67 62 65 74  - 77 65 65 6e  61 79 63 74  rag.gbetweenayct
+>61 67 9f 61  62 ff 66 63  - 6f 6c 6f 72  32 9f 64 63  ag.ab.fcolor2.dc
+>79 61 6e 67  6d 61 67 65  - 6e 74 61 ff  ff 69 73 32  yangmagenta..is2
+>35 2d 73 69  62 2d 61 bf  - 64 78 76 61  6c 61 31 ff  5-sib-a.dxvala1.
+>69 73 32 35  2d 73 69 62  - 2d 62 9f bf  64 6e 61 6d  is25-sib-b..dnam
+>65 62 62 31  ff ff 6c 73  - 32 36 2d 74  77 6f 6c 69  ebb1..ls26-twoli
+>73 74 73 bf  67 6c 69 73  - 74 6f 6e 65  9f bf 64 6e  sts.glistone..dn
+>61 6d 65 65  6f 6e 65 2d  - 61 ff ff 67  6c 69 73 74  ameeone-a..glist
+>74 77 6f 9f  bf 64 6e 61  - 6d 65 65 74  77 6f 2d 61  two..dnameetwo-a
+>ff ff ff 72  73 32 37 2d  - 66 69 72 73  74 63 6f 6e  ...rs27-firstcon
+>74 61 69 6e  65 72 9f bf  - 64 69 6e 66  6f bf 66 64  tainer..dinfo.fd
+>65 74 61 69  6c 62 64 31  - ff 64 6e 61  6d 65 6f 61  etailbd1.dnameoa
+>66 74 65 72  2d 63 6f 6e  - 74 61 69 6e  65 72 ff ff  fter-container..
+>6b 73 32 38  2d 64 69 73  - 70 65 6e 63  bf 68 65 6e  ks28-dispenc.hen
+>63 2d 6f 6e  6c 79 6d 73  - 68 6f 75 6c  64 2d 61 70  c-onlymshould-ap
+>70 65 61 72  66 6e 6f 72  - 6d 61 6c 6e  61 6c 77 61  pearfnormalnalwa
+>79 73 2d 61  70 70 65 61  - 72 73 ff 71  73 32 39 2d  ys-appears.qs29-
+>6b 65 79 6f  6e 6c 79 2d  - 64 65 6e 73  65 9f bf 64  keyonly-dense..d
+>6e 61 6d 65  64 73 6f 6c  - 6f ff ff 72  73 32 39 2d  namedsolo..rs29-
+>6b 65 79 6f  6e 6c 79 2d  - 73 70 61 72  73 65 9f bf  keyonly-sparse..
+>64 6e 61 6d  65 64 73 6f  - 6c 6f ff ff  70 73 33 30  dnamedsolo..ps30
+>2d 73 70 61  72 73 65 2d  - 65 6d 70 74  79 9f bf ff  -sparse-empty...
+>bf 64 6e 61  6d 65 66 73  - 65 63 6f 6e  64 ff ff 6e  .dnamefsecond..n
+>73 33 31 2d  65 6d 70 74  - 79 66 69 72  73 74 9f bf  s31-emptyfirst..
+>ff bf 64 6e  61 6d 65 65  - 6c 61 74 65  72 63 76 61  ..dnameelatercva
+>6c 18 63 ff  ff 6f 73 33  - 32 2d 61 6c  77 61 79 73  l.c..os32-always
+>65 6d 70 74  79 9f bf ff  - bf ff ff 6d  73 33 33 61  empty......ms33a
+>2d 6e 65 77  6c 69 6e 65  - 73 bf 63 6d  73 67 78 19  -newlines.cmsgx.
+>6c 69 6e 65  31 0a 6c 69  - 6e 65 32 0d  0a 6c 69 6e  line1.line2..lin
+>65 33 09 74  61 62 62 65  - 64 ff 70 73  33 33 62 2d  e3.tabbed.ps33b-
+>6e 6f 6e 6d  6e 65 6d 6f  - 6e 69 63 bf  63 6d 73 67  nonmnemonic.cmsg
+>6e 63 74 72  6c 01 68 65  - 72 65 1f 6e  65 78 74 ff  nctrl.here.next.
+>6b 73 33 33  63 2d 63 6f  - 6c 6f 72 73  bf 63 74 61  ks33c-colors.cta
+>67 9f 77 6e  65 65 64 73  - 2c 71 75 6f  74 65 0a 61  g.wneeds,quote.a
+>6e 64 2d 6e  65 77 6c 69  - 6e 65 ff ff  68 73 33 33  nd-newline..hs33
+>64 2d 72 6f  77 9f bf 63  - 6e 75 6d 01  64 6e 6f 74  d-row..cnum.dnot
+>65 68 74 61  62 09 68 65  - 72 65 ff ff  6d 73 33 33  ehtab.here..ms33
+>65 2d 6f 64  64 09 6e 61  - 6d 65 bf ff  68 73 33 34  e-odd.name..hs34
+>61 2d 62 6d  70 bf 63 6d  - 73 67 65 63  61 66 c3 a9  a-bmp.cmsgecaf..
+>ff 72 73 33  34 62 2d 73  - 75 70 70 6c  65 6d 65 6e  .rs34b-supplemen
+>74 61 72 79  bf 63 6d 73  - 67 66 f0 9f  98 80 68 69  tary.cmsgf....hi
+>ff 6a 73 33  34 63 2d 63  - 61 66 c3 a9  bf ff 69 73  .js34c-caf....is
+>33 34 64 2d  6e 62 73 70  - bf 63 6d 73  67 64 61 c2  34d-nbsp.cmsgda.
+>a0 62 ff ff  ff                                       .b...

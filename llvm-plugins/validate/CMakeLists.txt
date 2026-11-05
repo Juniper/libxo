@@ -54,8 +54,24 @@ if(APPLE)
     target_link_options(xo_validate PRIVATE -undefined dynamic_lookup)
 endif()
 
-# Suppress the .dylib/.so suffix that cmake adds to MODULE targets on some
-# platforms — clang's -fplugin= accepts the path as-is.
+# A MODULE is named "lib<name>.so" (".so" even on macOS); clear the
+# "lib" prefix so the plugin is <name>.so, the name xocc and
+# libxo-config pass to clang.
 set_target_properties(xo_validate PROPERTIES PREFIX "")
 
-install(TARGETS xo_validate DESTINATION lib/libxo)
+# Where the plugin is installed.  This must be the directory that xocc
+# and libxo-config load plugins from (configure's XO_LLVMDIR, which
+# follows --libdir), so the build passes it in; "lib" is not the libdir
+# on multilib systems that use lib64.
+set(XO_LLVMDIR "lib/libxo" CACHE PATH "libxo plugin install directory")
+
+# The plugin needs libxo_format at load time, and a plain
+# "clang -fplugin=..." gives it no library path, so record the libxo
+# library directory in the installed module.  The build tree copy keeps
+# the build path that cmake adds on its own.
+set(XO_LIBDIR "" CACHE PATH "libxo library install directory")
+if(XO_LIBDIR)
+    set_target_properties(xo_validate PROPERTIES INSTALL_RPATH "${XO_LIBDIR}")
+endif()
+
+install(TARGETS xo_validate DESTINATION "${XO_LLVMDIR}")

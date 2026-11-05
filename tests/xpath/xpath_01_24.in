@@ -1,0 +1,269 @@
+# Test 1: existence of a non-key child: only the items with a sku
+?top/item[sku]
++ top
+{ item
+< item
+$ name gum
+= sku GRO-000-415
+= sold 1412
+> item
+< item
+$ name rope
+= sold 85
+> item
+< item
+$ name ladder
+= sku HRD-000-212
+= sold 0
+> item
+< item
+$ name bubblegum
+= sold 17
+> item
+} item
+- top
+
+# Test 2: existence of the key: every item
+r
+?top/item[name]
++ top
+{ item
+< item
+$ name gum
+= sku GRO-000-415
+= sold 1412
+> item
+< item
+$ name rope
+= sold 85
+> item
+< item
+$ name ladder
+= sku HRD-000-212
+= sold 0
+> item
+< item
+$ name bubblegum
+= sold 17
+> item
+} item
+- top
+
+# Test 3: existence of a child no item has: nothing
+r
+?top/item[color]
++ top
+{ item
+< item
+$ name gum
+= sku GRO-000-415
+= sold 1412
+> item
+< item
+$ name rope
+= sold 85
+> item
+< item
+$ name ladder
+= sku HRD-000-212
+= sold 0
+> item
+< item
+$ name bubblegum
+= sold 17
+> item
+} item
+- top
+
+# Test 4: a string against a boolean uses the string's truth, not 'equal'
+r
+?top/item[name = true()]
++ top
+{ item
+< item
+$ name gum
+= sku GRO-000-415
+= sold 1412
+> item
+< item
+$ name rope
+= sold 85
+> item
+< item
+$ name ladder
+= sku HRD-000-212
+= sold 0
+> item
+< item
+$ name bubblegum
+= sold 17
+> item
+} item
+- top
+
+# Test 5: the same compare against false(): nothing
+r
+?top/item[name = false()]
++ top
+{ item
+< item
+$ name gum
+= sku GRO-000-415
+= sold 1412
+> item
+< item
+$ name rope
+= sold 85
+> item
+< item
+$ name ladder
+= sku HRD-000-212
+= sold 0
+> item
+< item
+$ name bubblegum
+= sold 17
+> item
+} item
+- top
+
+# Test 6: values are strings, so even "0" is true: nothing
+r
+?top/item[sold = false()]
++ top
+{ item
+< item
+$ name gum
+= sku GRO-000-415
+= sold 1412
+> item
+< item
+$ name rope
+= sold 85
+> item
+< item
+$ name ladder
+= sku HRD-000-212
+= sold 0
+> item
+< item
+$ name bubblegum
+= sold 17
+> item
+} item
+- top
+
+# Test 7: ends-with with a suffix longer than every value but one
+r
+?top/item[ends-with(name, "bblegum")]
++ top
+{ item
+< item
+$ name gum
+= sku GRO-000-415
+= sold 1412
+> item
+< item
+$ name rope
+= sold 85
+> item
+< item
+$ name ladder
+= sku HRD-000-212
+= sold 0
+> item
+< item
+$ name bubblegum
+= sold 17
+> item
+} item
+- top
+
+# Test 8: ends-with with a suffix longer than all the values: nothing
+r
+?top/item[ends-with(name, "xxxxxxxxxxxxxxxxxxxxxxxxgum")]
++ top
+{ item
+< item
+$ name gum
+= sku GRO-000-415
+= sold 1412
+> item
+< item
+$ name rope
+= sold 85
+> item
+< item
+$ name ladder
+= sku HRD-000-212
+= sold 0
+> item
+< item
+$ name bubblegum
+= sold 17
+> item
+} item
+- top
+
+# Test 9: ends-with with the whole value as the suffix
+r
+?top/item[ends-with(name, "rope")]
++ top
+{ item
+< item
+$ name gum
+= sku GRO-000-415
+= sold 1412
+> item
+< item
+$ name rope
+= sold 85
+> item
+< item
+$ name ladder
+= sku HRD-000-212
+= sold 0
+> item
+< item
+$ name bubblegum
+= sold 17
+> item
+} item
+- top
+
+# Test 10: enough terms to outgrow the parser's first node buffer
+r
+?top/item[name="n0" or name="n1" or name="n2" or name="n3" or name="n4" or name="n5" or name="n6" or name="n7" or name="n8" or name="n9" or name="n10" or name="n11" or name="n12" or name="n13" or name="n14" or name="n15" or name="n16" or name="n17" or name="n18" or name="n19" or name="n20" or name="n21" or name="n22" or name="n23" or name="n24" or name="n25" or name="n26" or name="n27" or name="n28" or name="n29" or name="n30" or name="n31" or name="n32" or name="n33" or name="n34" or name="n35" or name="n36" or name="n37" or name="n38" or name="n39" or name="n40" or name="n41" or name="n42" or name="n43" or name="n44" or name="n45" or name="n46" or name="n47" or name="n48" or name="n49" or name="n50" or name="n51" or name="n52" or name="n53" or name="n54" or name="n55" or name="n56" or name="n57" or name="n58" or name="n59" or name="ladder"]
++ top
+{ item
+< item
+$ name gum
+= sku GRO-000-415
+= sold 1412
+> item
+< item
+$ name rope
+= sold 85
+> item
+< item
+$ name ladder
+= sku HRD-000-212
+= sold 0
+> item
+< item
+$ name bubblegum
+= sold 17
+> item
+} item
+- top
+
+# Test 11: values the fullpath encoder has to escape
+r
+? escape
++ escape
+= tab left	right
+= quotes say "hi" and 'bye'
+= backslash c:\dir\file
+= accents café naïve 日本
+= control sohanddel
+- escape

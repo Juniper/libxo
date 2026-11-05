@@ -28,7 +28,6 @@ AC_PROG_LN_S
 LT_INIT([dlopen shared])
 
 AC_PATH_PROG(BASENAME, basename, /usr/bin/basename)
-AC_PATH_PROG(BISON, bison, /usr/bin/bison)
 AC_PATH_PROG(BASH, bash, /bin/bash)
 AC_PATH_PROG(CAT, cat, /bin/cat)
 AC_PATH_PROG(CHMOD, chmod, /bin/chmod)
@@ -38,15 +37,6 @@ AC_PATH_PROG(MKDIR, mkdir, /bin/mkdir)
 AC_PATH_PROG(MV, mv, /bin/mv)
 AC_PATH_PROG(RM, rm, /bin/rm)
 AC_PATH_PROG(SED, sed, /bin/sed)
-AC_CHECK_PROGS(YACC, [byacc yacc], )
-
-dnl The XPath grammar relies on byacc extensions (a reentrant parser
-dnl exposing yystate and byacc-generated tables) that GNU bison does not
-dnl provide, so require byacc instead of silently using an incompatible bison.
-AS_IF([test -z "$YACC"],
-  [AC_MSG_ERROR([byacc is required to build the XPath filter; please install byacc])])
-AS_IF([$YACC --version 2>/dev/null | grep -qi bison],
-  [AC_MSG_ERROR([byacc is required to build the XPath filter; the detected yacc is GNU bison, which is not compatible. Please install byacc])])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_INLINE
@@ -83,7 +73,6 @@ AC_CHECK_FUNCS([uexterr_gettext])
 
 AC_CHECK_HEADERS([bsd/string.h])
 AC_CHECK_HEADERS([ctype.h])
-AC_CHECK_HEADERS([dlfcn.h])
 AC_CHECK_HEADERS([dlfcn.h])
 AC_CHECK_HEADERS([errno.h])
 AC_CHECK_HEADERS([exterr.h])
@@ -388,7 +377,7 @@ fi
 
 if test "$THREAD_LOCAL" = "unknown"; then
     AC_LINK_IFELSE([AC_LANG_SOURCE([[]
-           [__declspec(int) foo; int main() { foo++; return foo; }]])],
+           [__declspec(thread) int foo; int main() { foo++; return foo; }]])],
            [THREAD_LOCAL=declspec],
            [THREAD_LOCAL=unknown])
     AC_MSG_RESULT([$THREAD_LOCAL])
@@ -399,14 +388,10 @@ if test "$THREAD_LOCAL" != "unknown"; then
               THREAD_LOCAL_${THREAD_LOCAL}, [thread-local setting])
 fi
 
-dnl Looking for libcrypto....
-AC_CHECK_LIB([crypto], [MD5_Init])
-AM_CONDITIONAL([HAVE_LIBCRYPTO], [test "$HAVE_LIBCRYPTO" != "no"])
-
 AC_CHECK_MEMBER([struct sockaddr_un.sun_len],
     [HAVE_SUN_LEN=yes ;
         AC_DEFINE([HAVE_SUN_LEN], [1], [Have struct sockaddr_un.sun_len])],
-    [HAS_SUN_LEN=no], [[#include <sys/un.h>]])
+    [HAVE_SUN_LEN=no], [[#include <sys/un.h>]])
 
 AC_CHECK_DECLS([__isthreaded], [], [], [#include <stdio.h>])
 HAVE_ISTHREADED=${ac_cv_have_decl___isthreaded}
@@ -422,24 +407,33 @@ AM_CONDITIONAL([LIBXO_WARNINGS_HIGH], [test "$LIBXO_WARNINGS" != "no"])
 AC_MSG_CHECKING([whether to build with debugging])
 AC_ARG_ENABLE([debug],
     [  --enable-debug    Turn on debugging],
-    [LIBXO_DEBUG=yes; AC_DEFINE([LIBXO_DEBUG], [1], [Enable debugging])],
+    [LIBXO_DEBUG=$enableval],
     [LIBXO_DEBUG=no])
 AC_MSG_RESULT([$LIBXO_DEBUG])
+dnl AC_ARG_ENABLE's action-if-given also runs for --disable-FOO, so
+dnl the --enable options here define their macros from the value, not
+dnl from the option's presence.
+AS_IF([test "$LIBXO_DEBUG" != "no"],
+  [AC_DEFINE([LIBXO_DEBUG], [1], [Enable debugging])])
 AM_CONDITIONAL([LIBXO_DEBUG], [test "$LIBXO_DEBUG" != "no"])
 
 AC_MSG_CHECKING([whether to use int return codes])
 AC_ARG_ENABLE([int-return-codes],
     [  --enable-int-return-codes    Use int return codes (instead of ssize_t)],
-    [USE_INT_RETURN_CODES=yes; AC_DEFINE([USE_INT_RETURN_CODES], [1], [Use int return codes])],
+    [USE_INT_RETURN_CODES=$enableval],
     [USE_INT_RETURN_CODES=no])
 AC_MSG_RESULT([$USE_INT_RETURN_CODES])
+AS_IF([test "$USE_INT_RETURN_CODES" != "no"],
+  [AC_DEFINE([USE_INT_RETURN_CODES], [1], [Use int return codes])])
 
 AC_MSG_CHECKING([whether to build with text-only rendering])
 AC_ARG_ENABLE([text-only],
     [  --enable-text-only    Turn on text-only rendering],
-    [LIBXO_TEXT_ONLY=yes; AC_DEFINE([LIBXO_TEXT_ONLY], [1], [Enable text-only rendering])],
+    [LIBXO_TEXT_ONLY=$enableval],
     [LIBXO_TEXT_ONLY=no])
 AC_MSG_RESULT([$LIBXO_TEXT_ONLY])
+AS_IF([test "$LIBXO_TEXT_ONLY" != "no"],
+  [AC_DEFINE([LIBXO_TEXT_ONLY], [1], [Enable text-only rendering])])
 AM_CONDITIONAL([LIBXO_TEXT_ONLY], [test "$LIBXO_TEXT_ONLY" != "no"])
 
 AC_MSG_CHECKING([whether to build with local wcwidth implementation])
@@ -452,8 +446,11 @@ if test "${LIBXO_WCWIDTH}" != "no"; then
   AC_DEFINE([LIBXO_WCWIDTH], [1], [Enable local wcwidth implementation])
 fi
 
+dnl The filter's XPath ceiling() and floor() need libm.  AC_CHECK_LIB
+dnl adds -lm to LIBS but sets no shell variable of its own, so the
+dnl conditional tests its cache variable.
 AC_CHECK_LIB([m], [lrint])
-AM_CONDITIONAL([HAVE_LIBM], [test "$HAVE_LIBM" != "no"])
+AM_CONDITIONAL([HAVE_LIBM], [test "$ac_cv_lib_m_lrint" = "yes"])
 
 AC_MSG_CHECKING([compiler for gcc])
 HAVE_GCC=no
@@ -473,7 +470,7 @@ AC_SUBST(HAVE_GCC)
 AC_MSG_CHECKING([compiler for clang])
 HAVE_CLANG=no
 if test "${CC}" != ""; then
-    HAVE_CLANG=`${CC} cc --help 2>&1 | head -1 | grep -i clang`
+    HAVE_CLANG=`${CC} --help 2>&1 | head -1 | grep -i clang`
     if test "${HAVE_CLANG}" != ""; then
         HAVE_CLANG=yes
     else
@@ -486,28 +483,48 @@ AM_CONDITIONAL([HAVE_CLANG], [test "$HAVE_CLANG" = "yes"])
 AC_MSG_CHECKING([whether to build with printflike])
 AC_ARG_ENABLE([printflike],
     [  --enable-printflike    Enable use of GCC __printflike attribute],
-    [HAVE_PRINTFLIKE=yes;
-           AC_DEFINE([HAVE_PRINTFLIKE], [1], [Support printflike])],
+    [HAVE_PRINTFLIKE=$enableval],
     [HAVE_PRINTFLIKE=no])
 AC_MSG_RESULT([$HAVE_PRINTFLIKE])
-AM_CONDITIONAL([HAVE_PRINTFLIKE], [test "$HAVE_PRINTFLIKE" != ""])
+AS_IF([test "$HAVE_PRINTFLIKE" != "no"],
+  [AC_DEFINE([HAVE_PRINTFLIKE], [1], [Support printflike])])
+AM_CONDITIONAL([HAVE_PRINTFLIKE], [test "$HAVE_PRINTFLIKE" != "no"])
 
-AC_MSG_CHECKING([whether to build with LIBXO_OPTIONS])
+dnl LIBXO_OPTIONS is deprecated: libxo no longer reads it, so
+dnl the option is accepted (for existing build scripts) but ignored.
 AC_ARG_ENABLE([libxo-options],
-    [  --disable-libxo-options  Turn off support for LIBXO_OPTIONS],
-    [LIBXO_OPTS=$enableval],
-    [LIBXO_OPTS=yes])
-AC_MSG_RESULT([$LIBXO_OPTS])
-AM_CONDITIONAL([NO_LIBXO_OPTIONS], [test "$LIBXO_OPTS" != "yes"])
+    [  --disable-libxo-options  Deprecated; has no effect],
+    [AC_MSG_WARN([--enable/disable-libxo-options is deprecated and has no effect])])
 
 AC_MSG_CHECKING([whether to support filters])
 AC_ARG_ENABLE([filters],
     [  --enable-filters      Support xpath-like filters],
-    [LIBXO_NEED_FILTERS=$enableval; AC_DEFINE([LIBXO_NEED_FILTERS], [1], [Enable xpath-like filters])],
+    [LIBXO_NEED_FILTERS=$enableval],
     [LIBXO_NEED_FILTERS=no])
 AC_MSG_RESULT([$LIBXO_NEED_FILTERS])
+AS_IF([test "$LIBXO_NEED_FILTERS" != "no"],
+  [AC_DEFINE([LIBXO_NEED_FILTERS], [1], [Enable xpath-like filters])])
 AM_CONDITIONAL([LIBXO_NEED_FILTERS], [test "$LIBXO_NEED_FILTERS" != "no"])
 AC_SUBST(LIBXO_NEED_FILTERS)
+
+dnl The XPath grammar relies on byacc extensions (a reentrant parser
+dnl exposing yystate and byacc-generated tables) that GNU bison does not
+dnl provide, so require byacc instead of silently using an incompatible bison.
+dnl Only the filter library is built from a grammar, so a build without
+dnl filters needs no yacc at all.
+AS_IF([test "$LIBXO_NEED_FILTERS" != "no"], [
+  AC_CHECK_PROGS(YACC, [byacc yacc], )
+  AS_IF([test -z "$YACC"],
+    [AC_MSG_ERROR([byacc is required to build the XPath filter; please install byacc])])
+  AS_IF([$YACC --version 2>/dev/null | grep -qi bison],
+    [AC_MSG_ERROR([byacc is required to build the XPath filter; the detected yacc is GNU bison, which is not compatible. Please install byacc])])
+  AC_DEFINE([HAVE_BYACC], [1], [Define to 1 if the parser is built with byacc])
+])
+
+dnl libxo dlopen()s encoders and the filter library.  Older glibc keeps
+dnl dlopen() in libdl, which goes in LIBS (after the objects) rather than
+dnl LDFLAGS; elsewhere it's in libc and this adds nothing.
+AC_SEARCH_LIBS([dlopen], [dl])
 
 case $host_os in
      darwin*)
@@ -516,12 +533,11 @@ case $host_os in
 	;;
      Linux*|linux*)
         CFLAGS="-D_GNU_SOURCE $CFLAGS"
-	LDFLAGS=-ldl
 	XO_LIBEXT=so
 	;;
      cygwin*|CYGWIN*)
-	LDFLAGS=-no-undefined
-	XO_LIBEXT=ddl
+	LDFLAGS="$LDFLAGS -no-undefined"
+	XO_LIBEXT=dll
 	;;
 esac
 
@@ -573,6 +589,15 @@ AC_SUBST(XO_SHAREDIR)
 XO_LLVMDIR=`echo $XO_LIBDIR | sed "s;\\${exec_prefix};$prefix;"`/libxo
 AC_SUBST(XO_LLVMDIR)
 
+dnl libxo.pc only advertises llvmdir when the plugins are built, so
+dnl "pkg-config --variable=llvmdir libxo" is empty when nothing is there.
+if test "${HAVE_VALIDATE}" = "yes"; then
+    XO_PC_LLVMDIR='llvmdir=${libdir}/libxo'
+else
+    XO_PC_LLVMDIR=
+fi
+AC_SUBST(XO_PC_LLVMDIR)
+
 dnl for the spec file
 RELDATE=`date +'%Y-%m-%d%n'`
 AC_SUBST(RELDATE)
@@ -580,7 +605,7 @@ AC_SUBST(RELDATE)
 AC_MSG_RESULT(Using configure dir $ac_abs_confdir)
 
 if test -d $ac_abs_confdir/.git ; then
-  extra=`git branch | awk '/\*/ { print $2 }'`
+  extra=`(cd $ac_abs_confdir && git branch) | awk '/\*/ { print $2 }'`
   if test "$extra" != "" -a "$extra" != "master"
   then
       LIBXO_VERSION_EXTRA="-git-$extra"
@@ -640,7 +665,6 @@ AC_CONFIG_FILES([
      tests/utf8/Makefile
      tests/llvm-plugins/Makefile
      packaging/libxo.spec
-     packaging/libxo.rb.base
 ])
 AC_OUTPUT
 
@@ -664,7 +688,6 @@ AC_MSG_NOTICE([summary of build options:
   warnings:         ${LIBXO_WARNINGS:-no}
   debug:            ${LIBXO_DEBUG:-no}
   printf-like:      ${HAVE_PRINTFLIKE:-no}
-  libxo-options:    ${LIBXO_OPTS:-no}
   text-only:        ${LIBXO_TEXT_ONLY:-no}
   gettext:          ${HAVE_GETTEXT:-no} (${GETTEXT_PREFIX})
   isthreaded:       ${HAVE_ISTHREADED:-no}

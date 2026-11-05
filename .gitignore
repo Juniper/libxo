@@ -19,6 +19,7 @@
 #*#
 *~
 *.orig
+*.rej
 .#*
 
 aclocal.m4

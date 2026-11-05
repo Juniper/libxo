@@ -150,3 +150,47 @@ $ d z
 = val 3
 >item
 }item
+
+# a cast to a string keeps every digit of a wide integer
+r
+?item[concat(1234567890123456789, '') = '1234567890123456789']
+{item
+<item
+$ name wide
+= val 1
+>item
+}item
+
+# a cast to a string keeps every digit of a wide float
+r
+?item[concat(12345678901234.5, 'x') = '12345678901234.500000x']
+{item
+<item
+$ name float
+= val 2
+>item
+}item
+
+# unary minus negates a number, and an integer stays an integer
+r
+?item[concat(-5, '') = '-5']
+{item
+<item
+$ name negative
+= val 3
+>item
+}item
+
+# unary minus on a field, twice over, and next to a subtraction
+r
+?item[-val = -4 and - -val = 4 and 1 - -val = 5]
+{item
+<item
+$ name three
+= val 3
+>item
+<item
+$ name four
+= val 4
+>item
+}item

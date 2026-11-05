@@ -107,3 +107,6 @@ msgstr "ymay"
 
 msgid "couch"
 msgstr "ouchcay"
+
+msgid "{:first} before {:second}\n"
+msgstr "{:second} afteryay {{a}} {{b}} {{c}} {{d}} {{e}} {{f}} {{g}} {{h}} {{i}} {{j}} {{k}} {{l}} {{m}} {{n}} {{o}} {{p}} {{q}} {{r}} {{s}} {{t}} {:first}\n"

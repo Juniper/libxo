@@ -47,7 +47,7 @@ self_help () {
 	| awk -F@ '{ printf("        %-16s%s\n", $1, $2); }' | sort
 
     echo " "
-    echo "  verbs can be combine using '+' or removed using '-'"
+    echo "  verbs can be combined using '+' or removed using '-'"
     echo "     e.g. xocc full+errors+sdk-ldflags ..."
 }
 
@@ -183,16 +183,18 @@ parse_verb () {
 	syntax="-fsyntax-only"
     fi
 
-    if [ "$need_lint" = 1 ]; then
-	lint="-mllvm -xo-validate-lint"
-	need_validate=1
-    fi
-    if [ "$need_errors" != 1 ]; then
-	errors="-mllvm -xo-validate-errors-as-warnings"
+    # "lint" and "errors" only adjust the validator, so they imply it
+    if [ "$need_lint" = 1 -o "$need_errors" = 1 ]; then
 	need_validate=1
     fi
     if [ "$need_validate" = 1 ]; then
 	validate="${XO_VALIDATE_OPTS}"
+	if [ "$need_lint" = 1 ]; then
+	    lint="-mllvm -xo-validate-lint"
+	fi
+	if [ "$need_errors" != 1 ]; then
+	    errors="-mllvm -xo-validate-errors-as-warnings"
+	fi
     fi
     if [ "$need_precompile" = 1 ]; then
 	precompile="${XO_PRECOMPILE_OPTS}"
@@ -214,22 +216,96 @@ parse_verb () {
         dbg "need_echo[$need_echo]"
     fi
 
-    XO_OPTIONS="${syntax} ${validate} ${lint} ${errors} ${precompile} ${sdk}"
+    XO_PLUGIN_OPTIONS="${syntax} ${validate} ${lint} ${errors} ${precompile}"
 }
 
+#
+# Report which stages the compiler will run for these arguments:
+#   cc:   compile only; nothing is linked
+#   ld:   link only; there are no source files to compile
+#   both: compile and link in one step
+#
 find_stage () {
-    local stage=ld
-    while [ ! -z "$1" ]; do
-	if [ "$1" = "-c" -o "$1" = "-E" -o "$1" = "-S" ]; then
-	    stage=cc
-	fi
+    local compile_only=0
+    local sources=0
+    local lang=""
+
+    while [ $# -gt 0 ]; do
+	case "$1" in
+	    -c|-E|-S|-M|-MM|-fsyntax-only)
+		compile_only=1
+		;;
+	    -x)
+		# "-x c" makes a source of any file that follows, whatever
+		# its name; "-x none" goes back to using the suffix.
+		lang="$2"
+		[ $# -gt 1 ] && shift
+		;;
+	    -xnone)
+		lang="none"
+		;;
+	    -x*)
+		lang="$1"
+		;;
+	    -o|-include|-imacros|-I|-D|-U|-F|-L|-l|-B|-T|-u|-e|-z)
+		# These options take the next argument, which must not
+		# be classified by its name: "-include cfg.c" is not a
+		# source file to compile, and neither is "-o prog.c".
+		[ $# -gt 1 ] && shift
+		;;
+	    -isystem|-iquote|-idirafter|-isysroot|-iprefix|-iwithprefix)
+		[ $# -gt 1 ] && shift
+		;;
+	    -iwithprefixbefore|-MF|-MT|-MQ|-arch|-target|-framework)
+		[ $# -gt 1 ] && shift
+		;;
+	    -Xclang|-Xlinker|-Xassembler|-Xpreprocessor|-mllvm|--param)
+		[ $# -gt 1 ] && shift
+		;;
+	    -*)
+		;;
+	    *.c|*.i|*.m|*.mi|*.cc|*.cpp|*.cxx|*.C|*.ii|*.mm)
+		sources=1
+		;;
+	    *)
+		if [ ! -z "$lang" -a "$lang" != "none" ]; then
+		    sources=1
+		fi
+		;;
+	esac
 	shift
     done
-    echo $stage
+
+    if [ "$compile_only" = 1 ]; then
+	echo cc
+    elif [ "$sources" = 1 ]; then
+	echo both
+    else
+	echo ld
+    fi
 }
 
-XO_STAGE=`find_stage "$@"`
-dbg XO_STAGE is ${XO_STAGE}
+#
+# Echo the arguments as one line that can be pasted back into a shell:
+# an argument holding anything but ordinary characters is put in
+# single quotes.
+#
+quote_args () {
+    local line=""
+    local arg
+
+    for arg in "$@"; do
+	case "$arg" in
+	    ""|*[!A-Za-z0-9_./=:+,@%-]*)
+		arg=`printf '%s\n' "$arg" | sed -e "s/'/'\\\\\\\\''/g"`
+		arg="'$arg'"
+		;;
+	esac
+	line="${line}${line:+ }${arg}"
+    done
+
+    printf '%s\n' "$line"
+}
 
 if [ ! -z "${XO_REAL_CC}" ]; then
     # Explicitly set implies the user wants our options
@@ -254,22 +330,38 @@ fi
 
 parse_verb "$verb"
 
-if [ "${XO_STAGE}" != "ld" ]; then
+# The stage depends on the verb as well as the arguments: a lint-only
+# verb adds -fsyntax-only, which means nothing will be linked.
+XO_STAGE=`find_stage ${syntax} "$@"`
+dbg XO_STAGE is ${XO_STAGE}
+
+if [ "${XO_STAGE}" = "cc" ]; then
     ldflags=""
 fi
 
-# The plugins need to be able to find libxo_format
-export LD_LIBRARY_PATH=${XO_LIBDIR}:${LD_LIBRARY_PATH}
+# The plugins only apply when something is compiled; passing their
+# options to a link-only command draws "argument unused" warnings,
+# which -Werror turns into a failed link.
+if [ "${XO_STAGE}" = "ld" ]; then
+    XO_PLUGIN_OPTIONS=""
+fi
 
-COMPILER="${COMPILER} ${XO_OPTIONS}"
+# The plugins need to be able to find libxo_format.  Add the colon only
+# when there is a path to append to: an empty entry makes the loader
+# search the current directory.
+export LD_LIBRARY_PATH="${XO_LIBDIR}${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+
+COMPILER="${COMPILER} ${XO_PLUGIN_OPTIONS} ${sdk}"
 
 if [ "$need_echo" = 1 ]; then
     set -x
 fi
 
+# Libraries follow the user's inputs: a static libxo only supplies
+# symbols to objects that precede it on the command line.
 if [ "$need_dry" = 1 ]; then
-    echo ${COMPILER} ${ldflags} "$@"
+    quote_args ${COMPILER} "$@" ${ldflags}
     exit 0
 fi
 
-exec ${COMPILER} ${ldflags} "$@"
+exec ${COMPILER} "$@" ${ldflags}

@@ -1,0 +1,249 @@
+op create: [test] [] [0]
+op open_container: [top] [] [0x10]
+op open_container: [anchor-width] [] [0x10]
+op string: [right] [abc] [0]
+op string: [left] [abc] [0]
+op close_container: [anchor-width] [] [0]
+op open_container: [map-growth] [] [0x10]
+op content: [mapped-0] [0] [0]
+op content: [mapped-15] [15] [0]
+op content: [mapped-16] [16] [0]
+op content: [mapped-17] [17] [0]
+op content: [mapped-39] [39] [0]
+op content: [src-40] [40] [0]
+op close_container: [map-growth] [] [0]
+op open_container: [long-names] [] [0x10]
+op open_container: [aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa] [] [0x10]
+op content: [length] [62] [0]
+op close_container: [aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa] [] [0]
+op open_container: [bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb] [] [0x10]
+op content: [length] [63] [0]
+op close_container: [bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb] [] [0]
+op open_container: [cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc] [] [0x10]
+op content: [length] [64] [0]
+op close_container: [cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc] [] [0]
+op open_container: [ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd] [] [0x10]
+op content: [length] [65] [0]
+op close_container: [ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd] [] [0]
+op open_container: [eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee] [] [0x10]
+op content: [length] [130] [0]
+op close_container: [eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee] [] [0]
+op close_container: [long-names] [] [0]
+op open_container: [control-chars] [] [0x10]
+op string: [interior] [a b c] [0]
+op string: [trailing] [a b ] [0]
+op string: [before-escape] [a b<c d&e] [0]
+op string: [after-escape] [a<b c&d ] [0]
+op string: [only] [   ] [0]
+op close_container: [control-chars] [] [0]
+op open_container: [deprecated-options] [] [0x10]
+op content: [retain] [0] [0]
+op content: [no-retain] [0] [0]
+op close_container: [deprecated-options] [] [0]
+op open_container: [encoder-names] [] [0x10]
+op string: [first] [unknown] [0]
+op string: [last] [deadend] [0]
+op string: [beyond] [unknown] [0]
+op string: [far-beyond] [unknown] [0]
+op string: [wb-last] [clean] [0]
+op string: [wb-beyond] [unknown] [0]
+op string: [registered] [done] [0]
+op close_container: [encoder-names] [] [0]
+op open_container: [attributes] [] [0x10]
+op attr: [quoted] [say "hi" & <go>] [0]
+op attr: [bad name<&"] [value] [0]
+op content: [escaped] [1] [0]
+op close_container: [attributes] [] [0]
+op open_container: [implied-close] [] [0x10]
+op open_list: [list-then-container] [] [0]
+op close_list: [list-then-container] [] [0]
+op open_container: [after-list] [] [0x10]
+op content: [one] [1] [0]
+op close_container: [after-list] [] [0]
+op open_leaf_list: [leaf-then-container] [] [0]
+op content: [leaf-then-container] [2] [0x2000]
+op close_leaf_list: [leaf-then-container] [] [0]
+op open_container: [after-leaf] [] [0x10]
+op content: [two] [2] [0]
+op close_container: [after-leaf] [] [0]
+op open_leaf_list: [leaf-then-leaf] [] [0]
+op content: [leaf-then-leaf] [3] [0x2000]
+op close_leaf_list: [leaf-then-leaf] [] [0]
+op open_leaf_list: [second-leaf] [] [0]
+op content: [second-leaf] [4] [0x2000]
+op close_leaf_list: [second-leaf] [] [0]
+op open_list: [list-after-leaf] [] [0]
+op close_list: [list-after-leaf] [] [0]
+op open_list: [list-after-list] [] [0]
+op close_list: [list-after-list] [] [0]
+op close_container: [implied-close] [] [0]
+op open_container: [markers] [] [0x10]
+op open_container: [list-container] [] [0x10]
+op open_list: [item] [] [0]
+op open_instance: [item] [] [0x10]
+op content: [kept] [1] [0]
+op close_instance: [item] [] [0]
+op close_list: [item] [] [0]
+op content: [after] [2] [0]
+op close_container: [list-container] [] [0]
+op open_container: [list-list] [] [0x10]
+op open_list: [item] [] [0]
+op close_list: [item] [] [0]
+op content: [after] [2] [0]
+op close_container: [list-list] [] [0]
+op open_container: [list-field] [] [0x10]
+op open_list: [item] [] [0]
+op close_list: [item] [] [0]
+op content: [after] [2] [0]
+op close_container: [list-field] [] [0]
+op open_container: [stray-close] [] [0x10]
+op open_list: [item] [] [0]
+op close_list: [item] [] [0]
+op content: [after] [2] [0]
+op close_container: [stray-close] [] [0]
+op open_container: [leaf-container] [] [0x10]
+op open_leaf_list: [leaf] [] [0]
+op content: [leaf] [1] [0x2000]
+op close_leaf_list: [leaf] [] [0]
+op open_container: [kept] [] [0x10]
+op content: [value] [2] [0]
+op close_container: [kept] [] [0]
+op content: [after] [3] [0]
+op close_container: [leaf-container] [] [0]
+op open_container: [leaf-leaf] [] [0x10]
+op open_leaf_list: [leaf] [] [0]
+op content: [leaf] [1] [0x2000]
+op close_leaf_list: [leaf] [] [0]
+op open_leaf_list: [other] [] [0]
+op content: [other] [2] [0x2000]
+op content: [other] [3] [0x2000]
+op close_leaf_list: [other] [] [0]
+op content: [after] [4] [0]
+op close_container: [leaf-leaf] [] [0]
+op open_container: [leaf-field] [] [0x10]
+op open_leaf_list: [leaf] [] [0]
+op content: [leaf] [1] [0x2000]
+op close_leaf_list: [leaf] [] [0]
+op content: [kept] [2] [0]
+op content: [after] [3] [0]
+op close_container: [leaf-field] [] [0]
+op open_container: [leaf-same] [] [0x10]
+op open_leaf_list: [leaf] [] [0]
+op content: [leaf] [1] [0x2000]
+op content: [leaf] [2] [0x2000]
+op content: [leaf] [3] [0x2000]
+op close_leaf_list: [leaf] [] [0]
+op close_container: [leaf-same] [] [0]
+op open_container: [leaf-instance] [] [0x10]
+op open_leaf_list: [leaf] [] [0]
+op content: [leaf] [1] [0x2000]
+op close_leaf_list: [leaf] [] [0]
+op open_list: [item] [] [0]
+op open_instance: [item] [] [0x10]
+op content: [value] [2] [0]
+op close_instance: [item] [] [0]
+op close_list: [item] [] [0]
+op content: [after] [3] [0]
+op close_container: [leaf-instance] [] [0]
+op close_container: [markers] [] [0]
+op open_container: [emit-field] [] [0x10]
+op content: [after-domain] [1] [0]
+op string: [quoted] [value] [0x10]
+op close_container: [emit-field] [] [0]
+op open_container: [format-flags] [] [0x10]
+op content: [plus] [5] [0]
+op content: [space] [5] [0]
+op content: [wide] [5] [0]
+op content: [zero] [5] [0]
+op content: [long] [7] [0]
+op content: [negative] [-3] [0]
+op content: [blank] [-3] [0]
+op content: [unsigned] [5] [0]
+op content: [hex] [ff] [0]
+op content: [left] [5] [0]
+op content: [both] [5] [0]
+op content: [precise] [5] [0]
+op content: [left-zero] [42] [0]
+op content: [json-plus] [+5] [0]
+op content: [json-wide] [   +5] [0]
+op content: [json-size] [+5] [0]
+op content: [json-float] [+1.50] [0]
+op string: [json-quoted] [+5] [0x10]
+op close_container: [format-flags] [] [0]
+huge width wrote 32767 bytes
+missing conversions wrote 0 bytes
+op open_container: [humanize-signs] [] [0x10]
+op content: [small] [-5] [0x8000]
+op content: [kilo] [-5000] [0x8000]
+op content: [mega] [-5000000] [0x8000]
+op content: [fraction] [-1500] [0x28000]
+op content: [metric] [-5000] [0x48000]
+op content: [lowest] [-9223372036854775808] [0x8000]
+op content: [next-lowest] [-9223372036854775807] [0x8000]
+op content: [highest] [9223372036854775807] [0x8000]
+op content: [too-high] [18446744073709551615] [0x8000]
+op string: [word] [abc] [0x8000]
+op string: [mixed] [12abc] [0x8000]
+op content: [padded] [4096] [0x8000]
+op content: [after] [4096] [0x8000]
+op close_container: [humanize-signs] [] [0]
+op close_container: [top] [] [0]
+op finish: [] [] [0]
+op flush: [] [] [0]
+before="one" name="gum" count="0" name="rope" count="1" name="ladder" count="2" after="two" 
+long values wrote 20068 bytes
+warning 10: 78 bytes, '<error><message>test_17' ... 'xxxxxxxxxx&lt;10&gt;</message></error>'
+xml message 10: 67 bytes, '<message>xxxxxxxxxx&lt;' ... ';: No such file or directory'
+html message 10: 99 bytes, '<div class="line"><div ' ... ' No such file or directory'
+warning 1000: 1070 bytes, '<error><message>test_17' ... 'xxxxxxxx&lt;1000&gt;</message></error>'
+xml message 1000: 1059 bytes, '<message>xxxxxxxxxxxxxx' ... ';: No such file or directory'
+html message 1000: 1091 bytes, '<div class="line"><div ' ... ' No such file or directory'
+warning 1015: 1085 bytes, '<error><message>test_17' ... 'xxxxxxxx&lt;1015&gt;</message></error>'
+xml message 1015: 1074 bytes, '<message>xxxxxxxxxxxxxx' ... ';: No such file or directory'
+html message 1015: 1106 bytes, '<div class="line"><div ' ... ' No such file or directory'
+warning 1030: 1100 bytes, '<error><message>test_17' ... 'xxxxxxxx&lt;1030&gt;</message></error>'
+xml message 1030: 1089 bytes, '<message>xxxxxxxxxxxxxx' ... ';: No such file or directory'
+html message 1030: 1121 bytes, '<div class="line"><div ' ... ' No such file or directory'
+warning 8170: 8240 bytes, '<error><message>test_17' ... 'xxxxxxxx&lt;8170&gt;</message></error>'
+xml message 8170: 8229 bytes, '<message>xxxxxxxxxxxxxx' ... ';: No such file or directory'
+html message 8170: 8261 bytes, '<div class="line"><div ' ... ' No such file or directory'
+warning 9000: 9070 bytes, '<error><message>test_17' ... 'xxxxxxxx&lt;9000&gt;</message></error>'
+xml message 9000: 9059 bytes, '<message>xxxxxxxxxxxxxx' ... ';: No such file or directory'
+html message 9000: 9091 bytes, '<div class="line"><div ' ... ' No such file or directory'
+deep stack wrote 8903 bytes
+open frames wrote 167 bytes
+<prefix-names>
+  <long-name>1</long-name>
+  <pre>2</pre>
+  <pref>3</pref>
+</prefix-names>
+<prefix-added>
+  <long-name>4</long-name>
+  <short-name>5</short-name>
+</prefix-added>
+<siblings>
+  <err>1</err>
+  <err>2</err>
+  <mes>1</mes>
+  <mes>2</mes>
+  <error>1</error>
+  <error>2</error>
+</siblings>
+syslog send: full 305, header no, text 305
+  full ends 'xxxxxxxxxxxxxxxxxxxxtail'
+  text ends 'xxxxxxxxxxxxxxxxxxxxtail'
+syslog send: full 2047, header no, text 2047
+  full ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+  text ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+syslog send: full 2047, header no, text 2047
+  full ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+  text ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+syslog send: full 2047, header no, text 2047
+  full ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+  text ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+syslog send: full 2047, header no, text 2047
+  full ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+  text ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+syslog send: full 2047, header no, text 2047
+  full ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+  text ends 'xxxxxxxxxxxxxxxxxxxxxxxx'

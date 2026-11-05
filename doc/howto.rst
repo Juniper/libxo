@@ -45,7 +45,6 @@ options, which include the following::
   --enable-debug         Turn on debugging
   --enable-text-only     Turn on text-only rendering
   --enable-printflike    Enable use of GCC __printflike attribute
-  --disable-libxo-options  Turn off support for LIBXO_OPTIONS
   --with-gettext=PFX     Specify location of gettext installation
   --with-libslax-prefix=PFX  Specify location of libslax config
 
@@ -385,7 +384,8 @@ use by calling :manpage:`ngettext(3)`.
 
 If a domain name is needed, it can be supplied as the content of the
 {G:} role.  Domain names remain in use throughout the format string
-until cleared with another domain name::
+until replaced by another domain name or reset to the default domain
+by an empty "{G:}" field::
 
     printf(dgettext("dns", "Host %s not found: %d(%s)\\n"),
         name, errno, dgettext("strerror", strerror(errno)));

@@ -11,7 +11,7 @@
 .Dt LIBXO 3
 .Os
 .Sh NAME
-.Nm xo_err , xo_errc , xo_errx
+.Nm xo_err , xo_errc , xo_errx ,
 .Nm xo_warn , xo_warnx , xo_warn_c , xo_warn_hc
 .Nd emit errors and warnings in multiple output styles
 .Sh LIBRARY
@@ -25,7 +25,7 @@
 .Ft void
 .Fn xo_warn_c "int code" "const char *fmt" "..."
 .Ft void
-.Fn xo_warn_hc "xo_handle_t *xop" "int code, const char *fmt" "..."
+.Fn xo_warn_hc "xo_handle_t *xop" "int code" "const char *fmt" "..."
 .Ft void
 .Fn xo_err "int eval" "const char *fmt" "..."
 .Ft void

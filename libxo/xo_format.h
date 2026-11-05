@@ -22,6 +22,7 @@
 #include <sys/types.h>
 
 #include "xo.h"
+#include "xo_buf.h"
 
 /*
  * Maximum number of fields in a format string.  Override at compile
@@ -36,7 +37,7 @@
 #endif /* XO_MAX_SPECS */
 
 /*
- * Simple name→value table used for role and modifier lookup.
+ * Simple name to value table used for role and modifier lookup.
  * Kept here so callers (e.g. xo_set_options) can define their own tables
  * and reuse xo_name_lookup().
  */
@@ -127,7 +128,9 @@ typedef struct xo_fspec_s {
      */
     uint16_t xf_prefix_len;
     uint8_t xf_num_bits;  /* '!' Number of bits in a number (signed/unsigned) */
-    uint8_t xf_padding[3];
+    uint8_t xf_arg_type;  /* Type of the va_arg for the value (XO_AT_*) */
+    uint8_t xf_plus;	  /* '+' flag: a sign on every signed number */
+    uint8_t xf_space;	  /* ' ' flag: a blank where a '+' would go */
 
     uint32_t xf_extflags;		/* "%J" "extended" flags (XXF_*) */
 } xo_fspec_t;
@@ -136,8 +139,31 @@ typedef struct xo_fspec_s {
 #define XXF_NULL_AS_EMPTY	(1<<0) /* Render a NULL "%s" value as "" */
 
 /*
+ * Values for xf_arg_type: the type the value's va_arg is pulled as,
+ * after default argument promotion.  Two specs with the same type
+ * consume the same argument, regardless of which conversion
+ * character or length modifier produced it ("%04x" and "%u" both
+ * pull an int; "%ld" pulls a long).  Arguments consumed for '*'s
+ * (xf_star[] and xf_at_stars) are always ints and are not included.
+ */
+#define XO_AT_NONE            0  /* No argument ("%m", literal text) */
+#define XO_AT_INT             1  /* int (includes 'h', "%c", "!8"-"!32") */
+#define XO_AT_LONG            2  /* long ('l') */
+#define XO_AT_LONG_LONG       3  /* long long ("ll") */
+#define XO_AT_INTMAX          4  /* intmax_t ('j') */
+#define XO_AT_PTRDIFF         5  /* ptrdiff_t ('t') */
+#define XO_AT_SIZE            6  /* size_t ('z') */
+#define XO_AT_QUAD            7  /* quad_t ('q') */
+#define XO_AT_INT64           8  /* 64-bit integer ("!64") */
+#define XO_AT_DOUBLE          9  /* double (float is promoted) */
+#define XO_AT_LONG_DOUBLE     10 /* long double ('l' with a float conv) */
+#define XO_AT_WINT            11 /* wint_t ("%C", "%lc") */
+#define XO_AT_STRING          12 /* char * or wchar_t * ("%s", "%S") */
+#define XO_AT_POINTER         13 /* void * ("%p") */
+
+/*
  * Parsed representation of one field descriptor from a libxo format string.
- * All string members are xo_format_offset_t values — byte offsets into the
+ * All string members are xo_format_offset_t values - byte offsets into the
  * "base" format string from which the field was parsed.  Use xo_foff(base, off)
  * to recover a const char *.  XO_FOFF_NONE (-1) means absent; xfi_format may
  * additionally take XO_FOFF_DEFAULT (-2) to indicate the default "%s" format.
@@ -168,19 +194,22 @@ typedef struct xo_field_info_s {
 /*
  * Build-time pre-parsed format string cache.
  *
- * xo_emit_cached() is the target of the LLVM IR pass: it takes a pointer to
- * a pre-built xo_format_cache_t (holding a const xo_field_info_t[] parsed at
- * compile time) plus the original format string (kept for the gettext path
- * and as a version-mismatch fallback).
+ * xo_emit_precompiled() is the target of the LLVM IR pass: it takes a
+ * pointer to a pre-built xo_format_cache_t (holding a const
+ * xo_field_info_t[] parsed at compile time), the XO_PRECOMPILED_VERSION
+ * the cache was built for, plus the original format string (kept for the
+ * gettext path and as a version-mismatch fallback).  xo_emit_cached() is
+ * the older entry point, which has no version argument.
  *
- * If the cache version does not match XO_EMIT_CACHE_VERSION, or if the cache
- * pointer is NULL, the call silently falls back to parsing fmt at runtime.
+ * If the version argument does not match XO_PRECOMPILED_VERSION, the cache
+ * version does not match XO_EMIT_CACHE_VERSION, or the cache pointer is
+ * NULL, the call silently falls back to parsing fmt at runtime.
  *
  * xo_field_info_t is defined above; callers may populate xfc_fields[] directly
  * (e.g. as a static const array) using the XFF_* flags, XO_FOFF_* sentinels,
  * and XO_ROLE_* constants defined above.
  */
-#define XO_EMIT_CACHE_VERSION 1  /* bump on any xo_field_info_t layout change */
+#define XO_EMIT_CACHE_VERSION 3  /* bump on any xo_field_info_t layout change */
 
 struct xo_format_cache_s {
     unsigned xfc_version;		/* == XO_EMIT_CACHE_VERSION */
@@ -189,8 +218,66 @@ struct xo_format_cache_s {
 };
 
 /*
+ * XO_PRECOMPILED_VERSION packs XO_EMIT_CACHE_VERSION with the target
+ * facts the cache's layout depends on: byte order, pointer size, the
+ * alignment of a uint64_t struct member, and the sizes of
+ * xo_field_info_t and xo_fspec_t.  The precompile pass builds the value
+ * from the target's DataLayout; libxo builds it from its own compile.
+ * A cache built for a different target (or a different libxo) won't
+ * match, so it is ignored rather than misread.
+ *
+ * Bits:  0-15 layout (XO_EMIT_CACHE_VERSION)
+ *       16-19 byte order (XO_PCV_ENDIAN_*)
+ *       20-23 pointer size, in bytes
+ *       24-27 alignment of a uint64_t struct member, in bytes
+ *       28-39 sizeof(xo_field_info_t)
+ *       40-51 sizeof(xo_fspec_t)
+ */
+#define XO_PCV_ENDIAN_UNKNOWN	0 /* Never built by the pass */
+#define XO_PCV_ENDIAN_LITTLE	1
+#define XO_PCV_ENDIAN_BIG	2
+
+#define XO_PCV_MAKE(_layout, _endian, _ptr, _align64, _fsize, _ssize) \
+    ((((xo_precomp_version_t) (_layout) & 0xffff) << 0)		\
+     | (((xo_precomp_version_t) (_endian) & 0xf) << 16)		\
+     | (((xo_precomp_version_t) (_ptr) & 0xf) << 20)		\
+     | (((xo_precomp_version_t) (_align64) & 0xf) << 24)	\
+     | (((xo_precomp_version_t) (_fsize) & 0xfff) << 28)	\
+     | (((xo_precomp_version_t) (_ssize) & 0xfff) << 40))
+
+/*
+ * Without __BYTE_ORDER__ we can't tell, and an unknown byte order
+ * never matches what the pass builds, so caches are just ignored.
+ */
+#if defined(__BYTE_ORDER__) && defined(__ORDER_BIG_ENDIAN__) \
+    && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#define XO_PCV_ENDIAN XO_PCV_ENDIAN_BIG
+#elif defined(__BYTE_ORDER__) && defined(__ORDER_LITTLE_ENDIAN__) \
+    && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#define XO_PCV_ENDIAN XO_PCV_ENDIAN_LITTLE
+#else
+#define XO_PCV_ENDIAN XO_PCV_ENDIAN_UNKNOWN
+#endif
+
+/*
+ * The member offset gives the alignment a struct really uses, which
+ * can be less than _Alignof (e.g. 4 for uint64_t on i386).
+ */
+struct xo_pcv_align64_s {
+    char xpa_pad;
+    uint64_t xpa_value;
+};
+
+#define XO_PRECOMPILED_VERSION						\
+    XO_PCV_MAKE(XO_EMIT_CACHE_VERSION, XO_PCV_ENDIAN, sizeof(void *),	\
+		offsetof(struct xo_pcv_align64_s, xpa_value),		\
+		sizeof(xo_field_info_t), sizeof(xo_fspec_t))
+
+/*
  * Error callback.  Called when xo_parse_format() encounters a problem.
- * The fmt/... are a printf-style message.
+ * The fmt/... are a printf-style message.  While the callback runs,
+ * xp_err_offset holds the byte offset in the format string of the field
+ * being parsed, or -1 when the problem is not tied to a single field.
  */
 typedef void (*xo_parse_error_func_t)(void *data, const char *fmt, ...);
 
@@ -208,15 +295,15 @@ typedef void (*xo_parse_error_func_t)(void *data, const char *fmt, ...);
 typedef uint32_t xo_parse_flags_t; /* XPF_* */
 
 typedef struct xo_parse_s {
-    xo_realloc_func_t xp_realloc;	/* Allocator (NULL → realloc) */
-    xo_free_func_t xp_free;		/* Free (NULL → free) */
-    xo_parse_error_func_t xp_error;	/* Error reporter (NULL → silent) */
-    void *xp_error_data;		/* Opaque data passed to xp_error */
-    xo_parse_error_func_t xp_warn;	/* Warning reporter (NULL → silent) */
+    xo_realloc_func_t xp_realloc;	/* Allocator (NULL == realloc) */
+    xo_free_func_t xp_free;		/* Free (NULL == free) */
+    xo_parse_error_func_t xp_error;	/* Error reporter (NULL == silent) */
+    void *xp_error_data;                /* Opaque data passed to xp_error */
+    xo_parse_error_func_t xp_warn;      /* Warning reporter (NULL == silent) */
     void *xp_warn_data;			/* Opaque data passed to xp_warn */
     xo_parse_flags_t xp_flags;		/* XPF_* flags */
 
-    /* Output — filled in by xo_parse_format() */
+    /* Output - filled in by xo_parse_format() */
     xo_field_info_t *xp_fields;	/* Allocated, zero-terminated field array */
     unsigned xp_num_fields;	/* Number of valid entries */
     xo_fspec_t *xp_fspecs;	/* Allocated, zero-terminated fspec array */
@@ -225,6 +312,8 @@ typedef struct xo_parse_s {
     /* Working: these fields hold the current values during parsing */
     xo_field_info_t *xp_cur_field; /* Current item in xp_fields */
     xo_fspec_t *xp_cur_fspec;	   /* Current item in xp_fspecs */
+    int xp_err_offset;		   /* Offset of the field being parsed */
+    xo_buffer_t xp_printable;	   /* Reused by xo_parse_printable() */
 
 } xo_parse_t;
 
@@ -243,9 +332,27 @@ extern const char xo_default_format[];
 int xo_parse_format(xo_parse_t *xpp, const char *fmt);
 
 /*
- * Free xpp->xp_fields (using xpp->xp_free) and zero the output fields.
+ * Free xpp->xp_fields and the xp_printable buffer (using xpp->xp_free)
+ * and zero the output fields.
  */
 void xo_parse_release(xo_parse_t *xpp);
+
+/*
+ * Free only the xp_printable buffer.  For callers that hand
+ * xo_parse_fields() their own (stack) arrays and so cannot call
+ * xo_parse_release().
+ */
+void xo_parse_release_printable(xo_parse_t *xpp);
+
+/*
+ * Return a printable copy of str for an error message, with newlines,
+ * returns and double quotes escaped, wrapped in braces if bracesp is
+ * set.  A negative len means str is NUL-terminated.  The copy lives in
+ * xpp->xp_printable, which is reused, so it is valid only until the
+ * next call or until xpp is released.
+ */
+const char *xo_parse_printable(xo_parse_t *xpp, const char *str,
+			       ssize_t len, int bracesp);
 
 /*
  * Parse role and modifier characters from the prefix of a single field
@@ -315,13 +422,22 @@ const char *
 xo_printable2 (const char *str, int len, int bracesp);
 
 /*
- * Some roles need a name, some don't
+ * Some roles need a name, some don't.  The XO_LINT_ prefix reflects
+ * that these rules came from xolint.pl; most are real errors, not
+ * lint-only (XPF_LINT) style checks.
  */
 #define XO_LINT_ROLES_NEEDING_NAME "V" /* Can't have empty name (:XX)*/
 #define XO_LINT_ROLES_NEEDING_NAME_OR_FORMAT "DEFLNPTUW" /* One or the other */
 #define XO_LINT_ROLES_OPTIONAL_NAME "CG"      /* Might have empty name */
 #define XO_LINT_ROLES_DEC_NAME_OR_FORMAT "[]"	       /* ":XX" or "/%d"" */
-#define XO_LINT_ROLES_NO_FORMAT "G"	       /* Can't have a format (/XX) */
+#define XO_LINT_ROLES_FORMAT_IGNORED_WITH_CONTENT "G" /* format unused if
+                                                          content is given */
+
+/*
+ * No role currently forbids a format outright.  Defining
+ * XO_LINT_ROLES_NO_FORMAT as a string of role characters enables a
+ * lint error for any field with one of those roles that has a format.
+ */
 
 #define XO_LINT_MIN_NAME 3	/* Lint: no names less than this length  */
 
@@ -351,13 +467,20 @@ xo_parse_format_spec (xo_parse_t *xpp, xo_fspec_t *xfp,
 int
 xo_parse_fspecs (xo_parse_t *xpp, const char *fmt, const char *ep);
 
+/*
+ * Return the XO_AT_* type of the va_arg consumed by a parsed fspec's
+ * value.  The parser records this in xf_arg_type, so callers holding
+ * a parsed fspec should use that field; this is for fspecs built by
+ * hand.
+ */
+uint8_t
+xo_fspec_arg_type (const xo_fspec_t *xfp);
+
 static inline int
 xo_is_format_char (char ch, int numeric_only)
 {
     const char *cp = numeric_only ? "DEFGOUdefgiou" : "ACDEFGOSUXacdefgimopsux";
     return strchr(cp, ch) != NULL;
 }
-
-
 
 #endif /* XO_FORMAT_H */

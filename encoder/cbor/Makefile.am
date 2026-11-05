@@ -28,6 +28,8 @@ pkglib_LTLIBRARIES = libenc_cbor.la
 LIBS = \
     -L${top_builddir}/libxo -lxo
 
+LIBS += -lm
+
 LDADD = ${top_builddir}/libxo/libxo.la
 
 libenc_cbor_la_SOURCES = \

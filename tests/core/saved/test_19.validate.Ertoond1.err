@@ -1,0 +1,2 @@
+test_19.validate-test: rtoon: discarding list 'f-group': lists nested below dense depth 1 are dropped (further drops not reported)
+test_19.validate-test: rtoon: nested list not permitted inside a dense list instance ('e-part')

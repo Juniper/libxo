@@ -1,0 +1,119 @@
+huge width wrote 32767 bytes
+missing conversions wrote 0 bytes
+[         abc]
+[abc         ]
+0 15 16 17 39 40
+62
+63
+64
+65
+130
+abc
+ab
+ab<cd&e
+a<bc&d
+
+0
+0
+unknown
+deadend
+unknown
+unknown
+clean
+unknown
+done
+1
+1
+2
+2
+3
+4
+
+1
+2
+
+2
+
+2
+2
+1
+2
+3
+1
+2
+3
+4
+1
+2
+3
+1
+2
+3
+1
+2
+3
+1labelvalue
+[+5] [ 5] [   +5] [ 0005] [+7]
+[-3] [-3] [5] [ff]
+[+5   ] [+5] [+005] [42   ]
+[+5] [   +5] [+5] [+1.50] [+5]
+[-5] [-5K] [-5M] [-1.5K] [-5k]
+[-8E] [-8E] [8E] [18446744073709551615]
+[abc] [12abc] [4K] [4K]
+before="one" name="gum" count="0" name="rope" count="1" name="ladder" count="2" after="two" 
+long values wrote 20068 bytes
+warning 10: 78 bytes, '<error><message>test_17' ... 'xxxxxxxxxx&lt;10&gt;</message></error>'
+xml message 10: 67 bytes, '<message>xxxxxxxxxx&lt;' ... ';: No such file or directory'
+html message 10: 99 bytes, '<div class="line"><div ' ... ' No such file or directory'
+warning 1000: 1070 bytes, '<error><message>test_17' ... 'xxxxxxxx&lt;1000&gt;</message></error>'
+xml message 1000: 1059 bytes, '<message>xxxxxxxxxxxxxx' ... ';: No such file or directory'
+html message 1000: 1091 bytes, '<div class="line"><div ' ... ' No such file or directory'
+warning 1015: 1085 bytes, '<error><message>test_17' ... 'xxxxxxxx&lt;1015&gt;</message></error>'
+xml message 1015: 1074 bytes, '<message>xxxxxxxxxxxxxx' ... ';: No such file or directory'
+html message 1015: 1106 bytes, '<div class="line"><div ' ... ' No such file or directory'
+warning 1030: 1100 bytes, '<error><message>test_17' ... 'xxxxxxxx&lt;1030&gt;</message></error>'
+xml message 1030: 1089 bytes, '<message>xxxxxxxxxxxxxx' ... ';: No such file or directory'
+html message 1030: 1121 bytes, '<div class="line"><div ' ... ' No such file or directory'
+warning 8170: 8240 bytes, '<error><message>test_17' ... 'xxxxxxxx&lt;8170&gt;</message></error>'
+xml message 8170: 8229 bytes, '<message>xxxxxxxxxxxxxx' ... ';: No such file or directory'
+html message 8170: 8261 bytes, '<div class="line"><div ' ... ' No such file or directory'
+warning 9000: 9070 bytes, '<error><message>test_17' ... 'xxxxxxxx&lt;9000&gt;</message></error>'
+xml message 9000: 9059 bytes, '<message>xxxxxxxxxxxxxx' ... ';: No such file or directory'
+html message 9000: 9091 bytes, '<div class="line"><div ' ... ' No such file or directory'
+deep stack wrote 8903 bytes
+open frames wrote 167 bytes
+<prefix-names>
+  <long-name>1</long-name>
+  <pre>2</pre>
+  <pref>3</pref>
+</prefix-names>
+<prefix-added>
+  <long-name>4</long-name>
+  <short-name>5</short-name>
+</prefix-added>
+<siblings>
+  <err>1</err>
+  <err>2</err>
+  <mes>1</mes>
+  <mes>2</mes>
+  <error>1</error>
+  <error>2</error>
+</siblings>
+syslog send: full 305, header no, text 305
+  full ends 'xxxxxxxxxxxxxxxxxxxxtail'
+  text ends 'xxxxxxxxxxxxxxxxxxxxtail'
+syslog send: full 2047, header no, text 2047
+  full ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+  text ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+syslog send: full 2047, header no, text 2047
+  full ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+  text ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+syslog send: full 2047, header no, text 2047
+  full ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+  text ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+syslog send: full 2047, header no, text 2047
+  full ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+  text ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+syslog send: full 2047, header no, text 2047
+  full ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+  text ends 'xxxxxxxxxxxxxxxxxxxxxxxx'

@@ -23,12 +23,9 @@
 
 #include "xo_config.h"
 
-#ifdef HAVE_GCC
-#include <bsd/string.h>
-#endif /* HAVE_GCC */
-
 #include "xo.h"
 #include "xo_encoder.h"
+#include "xo_string.h"
 
 int
 main (int argc, char **argv)
@@ -60,7 +57,8 @@ main (int argc, char **argv)
     }
 
     if (path[0] == 0) {
-	getcwd(path, sizeof(path));
+	if (getcwd(path, sizeof(path)) == NULL)
+             fprintf(stderr, "linux warn_unused_results was worth it\n");
 	strlcat(path, "/po", sizeof(path));
     }
 
@@ -109,6 +107,13 @@ main (int argc, char **argv)
 	    "from {:from/%s}#{:port/%d} in {:time/%d} ms\n",
 	    "ldns", (size_t) 1234, "foop", 4321, 32);
 
+    /* A domain change in mid-string affects only the fields after it */
+    xo_emit("{G:ldns}{:ldns-count/%d} {Ngp:byte,bytes}, "
+	    "{G:}{:default-count/%d} {Ngp:byte,bytes}\n", 5, 5);
+
+    xo_emit("{G:}{:default-size/%d} {Ngp:byte,bytes}, "
+	    "{G:/%s}{:ldns-size/%d} {Ngp:byte,bytes}\n", 5, "ldns", 5);
+
     struct timeval tv;
     tv.tv_sec = 1435085229;
     tv.tv_usec = 123456;
@@ -128,6 +133,13 @@ main (int argc, char **argv)
     xo_emit("{G:}{Lwcg:hydrocoptic marzlevanes}{:marzlevanes/%d}\n", 6);
 
     xo_emit("{G:}{Lwcg:Windings}{g:windings}\n", "lotus-o-delta");
+
+    /*
+     * The translation of this one puts the fields in the other order
+     * and has many more pieces than the original, so the reordering
+     * code has to cope with a format that is larger than ours.
+     */
+    xo_emit("{G:}{:first/%s} before {:second/%d}\n", "one", 2);
 
     xo_close_container("top");
     xo_finish();

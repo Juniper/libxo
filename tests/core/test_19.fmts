@@ -1,0 +1,7 @@
+# Extra format specs for test_19: the rtoon encoder's "dense" option.
+Ertoon=warn,encoder=rtoon
+Ertoond=warn,encoder=rtoon:dense
+Ertoonda=warn,encoder=rtoon:dense=auto
+Ertoond1=warn,encoder=rtoon:dense=1
+Ertoond2=warn,encoder=rtoon:dense=2
+Ertoond0=warn,encoder=rtoon:dense=0

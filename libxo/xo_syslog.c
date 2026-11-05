@@ -179,8 +179,9 @@ xo_log_remote_active (void)
 void
 xo_log_set_hostname (const char *hostname)
 {
-    free(xo_log_hostname_override);
-    xo_log_hostname_override = hostname ? strdup(hostname) : NULL;
+    if (xo_log_hostname_override)
+	xo_free(xo_log_hostname_override);
+    xo_log_hostname_override = hostname ? xo_strdup(hostname) : NULL;
 }
 
 void
@@ -189,7 +190,8 @@ xo_log_set_host (struct hostent *hp)
     int i;
 
     xo_log_remote_naddrs = 0;
-    free(xo_log_remote_path);
+    if (xo_log_remote_path)
+	xo_free(xo_log_remote_path);
     xo_log_remote_path = NULL;
 
     if (hp == NULL)
@@ -226,8 +228,9 @@ xo_log_set_host_path (const char *path)
 {
     xo_log_remote_naddrs = 0;
 
-    free(xo_log_remote_path);
-    xo_log_remote_path = path ? strdup(path) : NULL;
+    if (xo_log_remote_path)
+	xo_free(xo_log_remote_path);
+    xo_log_remote_path = path ? xo_strdup(path) : NULL;
 }
 
 void
@@ -354,10 +357,10 @@ static char xo_syslog_enterprise_id[12];
  * applications to customize their syslog message set, when needed. 
  */
 void
-xo_set_syslog_enterprise_id (unsigned short eid)
+xo_set_syslog_enterprise_id (xo_enterprise_id_t eid)
 {
     snprintf(xo_syslog_enterprise_id, sizeof(xo_syslog_enterprise_id),
-	     "%u", eid);
+	     "%" XO_PRIu64, (uint64_t) eid);
 }
 
 /* xo_set_logmask -- set the log mask level */
@@ -678,8 +681,14 @@ xo_snprintf (char *out, ssize_t outsize, const char *fmt, ...)
             *out = 0;     /* handle it in the safest way possible if it does */
             retval = 0;
         } else {
+            /*
+             * On truncation vsnprintf returns the length it wanted,
+             * but only wrote outsize - 1 bytes before the NUL.  Callers
+             * advance their pointer by our return value, so it must
+             * stop on that NUL, not past it.
+             */
             retval = status;
-            retval = retval > outsize ? outsize : retval;
+            retval = retval >= outsize ? outsize - 1 : retval;
         }
         va_end(ap);
     }
@@ -693,6 +702,10 @@ xo_syslog_handle_write (void *opaque, const char *data)
     xo_buffer_t *xbp = opaque;
     int len = strlen(data);
     int left = xo_buf_left(xbp);
+
+    /* The message is truncated once the buffer fills; keep the NUL */
+    if (left <= 1)
+	return 0;
 
     if (len > left - 1)
 	len = left - 1;
@@ -880,7 +893,9 @@ xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
     /*
      * Now for the real content.  We make two distinct passes thru the
      * xo_emit engine, first for the SD-PARAMS and then for the text
-     * message.
+     * message.  Both passes read the arguments from 'ap', which works
+     * because xo_emit_hv makes its own copy and leaves ours at the
+     * start; 'ap' must stay live until the second pass is done.
      */
     va_list ap;
     va_copy(ap, vap);
@@ -891,8 +906,6 @@ xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
     errno = saved_errno;	/* Restore saved error value */
     xo_emit_hv(xop, fmt, ap);
     xo_flush_h(xop);
-
-    va_end(ap);
 
     /* Trim trailing space */
     if (xb.xb_curp[-1] == ' ')
@@ -921,6 +934,8 @@ xo_vsyslog (int pri, const char *name, const char *fmt, va_list vap)
     errno = saved_errno;	/* Restore saved error value */
     xo_emit_hv(xop, fmt, ap);
     xo_flush_h(xop);
+
+    va_end(ap);
 
     /* Remove a trailing newline */
     if (xb.xb_curp[-1] == '\n')

@@ -26,19 +26,29 @@
  *
  * A list's rows can be written sparse (one "- field value" line per
  * field, TOON's usual form) or dense (a tabular "{field,field}" header
- * followed by comma-separated rows). The choice is never inferred from
- * the data -- it's an explicit, upfront signal: either XOF_DENSE on
- * xo_open_list_hf(), or the "dense" field-format modifier (XFF_DENSE)
- * on some field of the list's first instance. If neither ever appears
- * before the first instance closes, the list is sparse.
+ * followed by comma-separated rows). The choice is made before the
+ * list's first row is written and never changes mid-list. It comes
+ * from one of three sources: XOF_DENSE on xo_open_list_hf(), the
+ * "dense" field-format modifier (XFF_DENSE) on some field of the
+ * list's first instance, or the "dense" encoder option. If none of
+ * these applies by the time the first instance closes, the list is
+ * sparse.
+ *
+ * The encoder option has two forms. "dense" (or "dense=auto") makes
+ * any list whose first instance is flat (no nested container or list)
+ * dense. "dense=N" forces every list at list depth N or deeper dense
+ * when it opens; nested lists inside those are discarded, with a
+ * single warning. The developer's own signals are honored either way.
  */
 
 #include <ctype.h>
+#include <limits.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <errno.h>
 
 #include "xo.h"
 #include "xo_encoder.h"
@@ -100,21 +110,29 @@ typedef struct rtoon_frame_s {
     rtoon_field_t *rl_fields;
     unsigned rl_fields_len;
     unsigned rl_fields_size;
-    int rl_fields_dirty;	/* Need a new {...} line before next row */
-    int rl_saw_instance;
+    uint32_t rl_flags;		/* RLF_* flags */
     int rl_child_depth;	/* Depth of "-"/rows/fields-lines */
 
     /* RTOON_FRAME_INSTANCE */
     rtoon_cell_t *ri_cells;
     unsigned ri_cells_len;
     unsigned ri_cells_size;
-    int ri_wrote_dash;		/* Sparse only: dash line already flushed */
+    uint32_t ri_flags;		/* RIF_* flags */
     int ri_dash_depth;		/* == owning list's rl_child_depth */
     int ri_field_depth;	/* Continuation/nested-field depth */
 
     /* RTOON_FRAME_FLATTEN */
     char *rfl_prefix;		/* e.g. "via/" or "via/nested/" */
 } rtoon_frame_t;
+
+/* Flags for rl_flags (RTOON_FRAME_LIST) */
+#define RLF_FIELDS_DIRTY (1 << 0) /* Need a new {...} line before next row */
+#define RLF_SAW_INSTANCE (1 << 1) /* At least one instance was opened */
+#define RLF_FORCED	(1 << 2) /* The "dense" option (not the developer)
+				    made this list dense */
+
+/* Flags for ri_flags (RTOON_FRAME_INSTANCE) */
+#define RIF_WROTE_DASH	(1 << 0) /* Sparse only: dash line already flushed */
 
 typedef struct rtoon_ll_val_s {
     char *val;
@@ -136,11 +154,47 @@ typedef struct rtoon_private_s {
     unsigned rt_ll_count;
     unsigned rt_ll_size;
 
+    int rt_dense;		/* "dense" option: RTOON_DENSE_OFF,
+				   RTOON_DENSE_AUTO, or a list depth >= 1 */
+
     uint32_t rt_flags;
 } rtoon_private_t;
 
+#define RTOON_DENSE_OFF		0  /* No "dense" option */
+#define RTOON_DENSE_AUTO	(-1) /* "dense" or "dense=auto" */
+
 #define RTF_NO_VERSION	(1 << 0) /* User asked us to skip @version */
 #define RTF_VERSION_DONE (1 << 1) /* @version already resolved/written */
+#define RTF_NOMEM	(1 << 2) /* An allocation failed; output is unusable */
+#define RTF_LL_OPEN	(1 << 3) /* A leaf-list is open (values in rt_ll_vals) */
+#define RTF_DROP_WARNED	(1 << 4) /* Warned about an option-dropped list */
+
+/*
+ * Record an allocation failure.  Once anything is lost, the frame
+ * stack and the buffered rows can no longer be trusted to match what
+ * libxo is sending, so rather than emit something subtly wrong, the
+ * handler refuses every later op (see rtoon_handler).
+ */
+static void
+rtoon_nomem (rtoon_private_t *priv)
+{
+    priv->rt_flags |= RTF_NOMEM;
+}
+
+static char *
+rtoon_strdup (rtoon_private_t *priv, const char *str)
+{
+    size_t len = strlen(str) + 1;
+    char *cp = xo_realloc(NULL, len);
+
+    if (cp == NULL) {
+	rtoon_nomem(priv);
+	return NULL;
+    }
+
+    memcpy(cp, str, len);
+    return cp;
+}
 
 /*
  * Frame stack
@@ -152,8 +206,10 @@ rtoon_push_idx (rtoon_private_t *priv, rtoon_frame_type_t type)
     if (priv->rt_stack_len >= priv->rt_stack_size) {
 	int new_size = priv->rt_stack_size ? priv->rt_stack_size * 2 : 16;
 	rtoon_frame_t *sp = xo_realloc(priv->rt_stack, new_size * sizeof(*sp));
-	if (sp == NULL)
-	    return priv->rt_stack_len > 0 ? priv->rt_stack_len - 1 : 0;
+	if (sp == NULL) {
+	    rtoon_nomem(priv);
+	    return -1;
+	}
 
 	priv->rt_stack = sp;
 	priv->rt_stack_size = new_size;
@@ -216,6 +272,11 @@ rtoon_flatten_prefix (rtoon_private_t *priv, int inst_idx)
 	return NULL;
 
     char *buf = xo_realloc(NULL, len + 1);
+    if (buf == NULL) {
+	rtoon_nomem(priv);
+	return NULL;
+    }
+
     buf[0] = '\0';
 
     for (i = inst_idx + 1; i < priv->rt_stack_len; i++)
@@ -308,6 +369,70 @@ rtoon_is_typed_literal (const char *value)
 	|| xo_streq(value, "null") || rtoon_is_number(value);
 }
 
+/*
+ * Decode the UTF-8 sequence at cp (remaining bytes available).  Returns
+ * the number of bytes to consume; *wcp is the codepoint, or an error
+ * value (xo_utf8_iserror) for an invalid or truncated sequence.
+ */
+static int
+rtoon_utf8_decode (const char *cp, size_t remaining, xo_codepoint_t *wcp)
+{
+    int rlen = xo_utf8_rlen((unsigned char) *cp);
+
+    if (rlen < 1 || (size_t) rlen > remaining) {
+        *wcp = XO_UTF8_ERR_BAD_LEN;
+        return (rlen < 1) ? 1 : (int) remaining;
+    }
+
+    *wcp = xo_utf8_codepoint(cp, remaining, rlen, XO_UTF8_ERR_BAD_LEN);
+    return rlen;
+}
+
+/*
+ * Should this codepoint be written as \uXXXX rather than literal UTF-8?
+ * Printable BMP characters stay literal; we escape only ones that are
+ * invisible, control-like, or a kind of whitespace a decoder might split
+ * on (C1 controls, Unicode spaces, zero-width and bidi controls, line/
+ * paragraph separators, BOM, noncharacters).  Everything else - letters,
+ * symbols, private-use, supplementary plane - goes out as-is.
+ */
+static int
+rtoon_cp_must_escape (xo_codepoint_t wc)
+{
+    if (wc < 0x80 || wc > 0xffff)
+        return 0;
+    return (wc <= 0xa0)
+        || wc == 0x1680
+        || (wc >= 0x2000 && wc <= 0x200f)
+        || (wc >= 0x2028 && wc <= 0x202f)
+        || (wc >= 0x205f && wc <= 0x206f)
+        || wc == 0x3000 || wc == 0xfeff
+        || (wc >= 0xfff9 && wc <= 0xfffb)
+        || wc == 0xfffe || wc == 0xffff;
+}
+
+/* Does the string contain a non-ASCII character that must be escaped? */
+static int
+rtoon_has_escapable_utf8 (const char *str)
+{
+    size_t total = strlen(str);
+
+    for (const char *cp = str; *cp; ) {
+        if ((unsigned char) *cp < 0x80) {
+            cp++;
+            continue;
+        }
+
+        xo_codepoint_t wc;
+        int len = rtoon_utf8_decode(cp, total - (size_t) (cp - str), &wc);
+        if (!xo_utf8_iserror(wc) && rtoon_cp_must_escape(wc))
+            return 1;
+        cp += len;
+    }
+
+    return 0;
+}
+
 static int
 rtoon_key_needs_quote (const char *name)
 {
@@ -316,14 +441,16 @@ rtoon_key_needs_quote (const char *name)
     if (name[0] == '{' || name[0] == '-')
 	return 1;
 
+    int high_bit = 0;
+
     for (const char *cp = name; *cp; cp++) {
 	unsigned char ch = (unsigned char) *cp;
-	if (ch == '=' || ch == ',' || ch == '"' || ch == '\\' || ch <= 0x20
-	    || ch >= 0x80)
+        if (ch == '=' || ch == ',' || ch == '"' || ch == '\\' || ch <= 0x20)
 	    return 1;
+        high_bit |= ch & 0x80;
     }
 
-    return 0;
+    return high_bit && rtoon_has_escapable_utf8(name);
 }
 
 /*
@@ -347,11 +474,17 @@ rtoon_value_needs_quote (const char *value, int in_delimited, int is_string,
     if (value[0] == '{')
 	return 1;
 
+    int high_bit = 0;
+
     for (const char *cp = value; *cp; cp++) {
 	unsigned char ch = (unsigned char) *cp;
-	if (ch == ',' || ch == '"' || ch == '\\' || ch <= 0x1f || ch >= 0x80)
+        if (ch == ',' || ch == '"' || ch == '\\' || ch <= 0x1f)
 	    return 1;
+        high_bit |= ch & 0x80;
     }
+
+    if (high_bit && rtoon_has_escapable_utf8(value))
+        return 1;
 
     if (!in_delimited && value[0] == '\0')
 	return 1;
@@ -371,16 +504,13 @@ rtoon_value_needs_quote (const char *value, int in_delimited, int is_string,
  * is line-oriented, so an unescaped LF/CR would otherwise split the
  * output mid-value and corrupt the surrounding line structure.
  *
- * Beyond that table, rtoon also \uXXXX-escapes every non-ASCII BMP
- * codepoint (U+0080-U+D7FF, U+E000-U+FFFF) it can decode, rather than
- * writing it out as literal UTF-8 -- TOON's table leaves that choice
- * to the encoder (SHOULD emit literal, MAY emit \uXXXX), and rtoon
- * takes the \uXXXX option everywhere it can, so a quoted token is
- * plain ASCII outside of the small set of characters that have no
- * BMP escape. Supplementary-plane codepoints (U+10000-U+10FFFF) have
- * no such escape -- a decoder MUST reject a surrogate-pair \uXXXX
- * pair standing in for one -- so those, and any byte sequence that
- * doesn't decode as valid UTF-8 at all, are copied through unchanged.
+ * Beyond that table, non-ASCII characters are written as literal UTF-8
+ * (TOON's SHOULD) and cost no quoting, except for a small set of BMP
+ * codepoints that are invisible or whitespace-like (see
+ * rtoon_cp_must_escape()), which get a \uXXXX escape. Supplementary-
+ * plane codepoints have no \uXXXX form - a decoder MUST reject a
+ * surrogate-pair escape standing in for one - so they are always
+ * literal, as are byte sequences that don't decode as valid UTF-8.
  */
 static void
 rtoon_write_escaped (xo_buffer_t *xbp, const char *value)
@@ -419,27 +549,18 @@ rtoon_write_escaped (xo_buffer_t *xbp, const char *value)
 	    cp += 1;
 
 	} else {
-	    size_t remaining = total - (size_t) (cp - value);
-	    int rlen = xo_utf8_rlen(ch);
-	    xo_codepoint_t wc = (rlen < 1 || (size_t) rlen > remaining)
-		? XO_UTF8_ERR_BAD_LEN
-		: xo_utf8_codepoint(cp, remaining, rlen, XO_UTF8_ERR_BAD_LEN);
+            xo_codepoint_t wc;
+            int len = rtoon_utf8_decode(cp, total - (size_t) (cp - value), &wc);
 
-	    if (xo_utf8_iserror(wc) || wc > 0xffff) {
-		/* Invalid UTF-8, or a supplementary-plane codepoint: copy
-		 * the raw byte(s) through rather than mangling them. */
-		int copy = (rlen < 1) ? 1
-		    : ((size_t) rlen > remaining) ? (int) remaining : rlen;
-		xo_buf_append(xbp, cp, copy);
-		cp += copy;
-
-	    } else {
+            if (!xo_utf8_iserror(wc) && rtoon_cp_must_escape(wc)) {
 		char buf[6] = { '\\', 'u',
 				 hex[(wc >> 12) & 0xf], hex[(wc >> 8) & 0xf],
 				 hex[(wc >> 4) & 0xf], hex[wc & 0xf] };
 		xo_buf_append(xbp, buf, sizeof(buf));
-		cp += rlen;
+            } else {
+                xo_buf_append(xbp, cp, len);
 	    }
+            cp += len;
 	}
     }
 }
@@ -527,7 +648,8 @@ rtoon_field_find (rtoon_frame_t *list, const char *name)
 }
 
 static void
-rtoon_field_widen (rtoon_frame_t *list, const char *name, int is_key)
+rtoon_field_widen (rtoon_private_t *priv, rtoon_frame_t *list,
+		    const char *name, int is_key)
 {
     rtoon_field_t *fp = rtoon_field_find(list, name);
     if (fp != NULL) {
@@ -539,40 +661,53 @@ rtoon_field_widen (rtoon_frame_t *list, const char *name, int is_key)
     if (list->rl_fields_len >= list->rl_fields_size) {
 	unsigned new_size = list->rl_fields_size ? list->rl_fields_size * 2 : 8;
 	rtoon_field_t *np = xo_realloc(list->rl_fields, new_size * sizeof(*np));
-	if (np == NULL)
+	if (np == NULL) {
+	    rtoon_nomem(priv);
 	    return;
+	}
 	list->rl_fields = np;
 	list->rl_fields_size = new_size;
     }
 
+    char *dup = rtoon_strdup(priv, name);
+    if (dup == NULL)
+	return;
+
     fp = &list->rl_fields[list->rl_fields_len++];
-    fp->rf_name = xo_realloc(NULL, strlen(name) + 1);
-    strcpy(fp->rf_name, name);
+    fp->rf_name = dup;
     fp->rf_flags = is_key ? RF_KEY : 0;
 
-    list->rl_fields_dirty = 1;
+    list->rl_flags |= RLF_FIELDS_DIRTY;
 }
 
 static void
-rtoon_cell_push (rtoon_frame_t *inst, const char *name, const char *value,
-		  unsigned flags)
+rtoon_cell_push (rtoon_private_t *priv, rtoon_frame_t *inst,
+		  const char *name, const char *value, unsigned flags)
 {
     if (inst->ri_cells_len >= inst->ri_cells_size) {
 	unsigned new_size = inst->ri_cells_size ? inst->ri_cells_size * 2 : 8;
 	rtoon_cell_t *cp = xo_realloc(inst->ri_cells, new_size * sizeof(*cp));
-	if (cp == NULL)
+	if (cp == NULL) {
+	    rtoon_nomem(priv);
 	    return;
+	}
 	inst->ri_cells = cp;
 	inst->ri_cells_size = new_size;
     }
 
-    rtoon_cell_t *cell = &inst->ri_cells[inst->ri_cells_len++];
-    const char *v = value ? value : "";
+    char *dname = rtoon_strdup(priv, name);
+    char *dvalue = rtoon_strdup(priv, value ? value : "");
+    if (dname == NULL || dvalue == NULL) {
+	if (dname)
+	    xo_free(dname);
+	if (dvalue)
+	    xo_free(dvalue);
+	return;
+    }
 
-    cell->rc_name = xo_realloc(NULL, strlen(name) + 1);
-    strcpy(cell->rc_name, name);
-    cell->rc_value = xo_realloc(NULL, strlen(v) + 1);
-    strcpy(cell->rc_value, v);
+    rtoon_cell_t *cell = &inst->ri_cells[inst->ri_cells_len++];
+    cell->rc_name = dname;
+    cell->rc_value = dvalue;
     cell->rc_flags = flags;
 }
 
@@ -609,7 +744,7 @@ rtoon_flush_sparse_dash (rtoon_private_t *priv, rtoon_frame_t *inst)
 	rtoon_write_line_prefix(priv, inst->ri_dash_depth);
 	xo_buf_append_str(xbp, "- ");
 	priv->rt_mid_line = 1;
-	inst->ri_wrote_dash = 1;
+	inst->ri_flags |= RIF_WROTE_DASH;
 	priv->rt_depth = inst->ri_field_depth;
 	return;
     }
@@ -632,7 +767,7 @@ rtoon_flush_sparse_dash (rtoon_private_t *priv, rtoon_frame_t *inst)
     }
 
     inst->ri_cells_len = 0;
-    inst->ri_wrote_dash = 1;
+    inst->ri_flags |= RIF_WROTE_DASH;
     priv->rt_depth = inst->ri_field_depth;
 }
 
@@ -653,14 +788,14 @@ rtoon_emit_fields_line (rtoon_private_t *priv, rtoon_frame_t *list)
     }
 
     xo_buf_append(xbp, "}\n", 2);
-    list->rl_fields_dirty = 0;
+    list->rl_flags &= ~RLF_FIELDS_DIRTY;
 }
 
 static void
 rtoon_flush_dense_row (rtoon_private_t *priv, rtoon_frame_t *list,
 			rtoon_frame_t *inst)
 {
-    if (list->rl_fields_dirty)
+    if (list->rl_flags & RLF_FIELDS_DIRTY)
 	rtoon_emit_fields_line(priv, list);
 
     xo_buffer_t *xbp = &priv->rt_data;
@@ -694,6 +829,21 @@ rtoon_flush_dense_row (rtoon_private_t *priv, rtoon_frame_t *list,
 }
 
 /*
+ * Switch an undecided list to dense, building its column set from the
+ * fields its first instance has buffered so far.
+ */
+static void
+rtoon_list_go_dense (rtoon_private_t *priv, rtoon_frame_t *list,
+		     rtoon_frame_t *inst)
+{
+    list->rl_mode = RTOON_LIST_DENSE;
+
+    for (unsigned i = 0; i < inst->ri_cells_len; i++)
+	rtoon_field_widen(priv, list, inst->ri_cells[i].rc_name,
+			   (inst->ri_cells[i].rc_flags & RC_KEY) != 0);
+}
+
+/*
  * Handle one field (data-value/key-value, or a leaf-list's
  * already-rendered joined text when raw is set). Top-level and
  * plain-container fields are written immediately; fields inside a
@@ -724,16 +874,25 @@ rtoon_emit_field (rtoon_private_t *priv, const char *name, const char *value,
     rtoon_frame_t *list = &priv->rt_stack[list_idx];
 
     char *prefix = rtoon_flatten_prefix(priv, inst_idx);
+    if (priv->rt_flags & RTF_NOMEM)
+	return;
+
     char *full_name;
     if (prefix != NULL) {
 	size_t plen = strlen(prefix), nlen = strlen(name);
 	full_name = xo_realloc(NULL, plen + nlen + 1);
+	if (full_name == NULL) {
+	    rtoon_nomem(priv);
+	    xo_free(prefix);
+	    return;
+	}
 	memcpy(full_name, prefix, plen);
 	memcpy(full_name + plen, name, nlen + 1);
 	xo_free(prefix);
     } else {
-	full_name = xo_realloc(NULL, strlen(name) + 1);
-	strcpy(full_name, name);
+	full_name = rtoon_strdup(priv, name);
+	if (full_name == NULL)
+	    return;
     }
 
     unsigned cflags = ((flags & XFF_KEY) ? RC_KEY : 0)
@@ -741,21 +900,18 @@ rtoon_emit_field (rtoon_private_t *priv, const char *name, const char *value,
 	| (raw ? RC_RAW : 0);
 
     if (list->rl_mode == RTOON_LIST_DENSE) {
-	rtoon_field_widen(list, full_name, (flags & XFF_KEY) != 0);
-	rtoon_cell_push(inst, full_name, value, cflags);
+	rtoon_field_widen(priv, list, full_name, (flags & XFF_KEY) != 0);
+	rtoon_cell_push(priv, inst, full_name, value, cflags);
 
     } else if (list->rl_mode == RTOON_LIST_UNDECIDED) {
 	if (flags & XFF_DENSE) {
-	    list->rl_mode = RTOON_LIST_DENSE;
-	    for (unsigned i = 0; i < inst->ri_cells_len; i++)
-		rtoon_field_widen(list, inst->ri_cells[i].rc_name,
-				   (inst->ri_cells[i].rc_flags & RC_KEY) != 0);
-	    rtoon_field_widen(list, full_name, (flags & XFF_KEY) != 0);
+	    rtoon_list_go_dense(priv, list, inst);
+	    rtoon_field_widen(priv, list, full_name, (flags & XFF_KEY) != 0);
 	}
-	rtoon_cell_push(inst, full_name, value, cflags);
+	rtoon_cell_push(priv, inst, full_name, value, cflags);
 
     } else { /* RTOON_LIST_SPARSE */
-	if (inst->ri_wrote_dash) {
+	if (inst->ri_flags & RIF_WROTE_DASH) {
 	    rtoon_write_line_prefix(priv, priv->rt_depth);
 	    rtoon_write_key(xbp, full_name);
 	    xo_buf_append(xbp, (flags & XFF_KEY) ? "=" : " ", 1);
@@ -765,7 +921,7 @@ rtoon_emit_field (rtoon_private_t *priv, const char *name, const char *value,
 		rtoon_write_value(xbp, value, 0, is_string, 0);
 	    xo_buf_append(xbp, "\n", 1);
 	} else {
-	    rtoon_cell_push(inst, full_name, value, cflags);
+	    rtoon_cell_push(priv, inst, full_name, value, cflags);
 	}
     }
 
@@ -777,11 +933,18 @@ rtoon_emit_field (rtoon_private_t *priv, const char *name, const char *value,
  */
 
 static void
-rtoon_open_leaf_list (rtoon_private_t *priv)
+rtoon_ll_discard (rtoon_private_t *priv)
 {
     for (unsigned i = 0; i < priv->rt_ll_count; i++)
 	xo_free(priv->rt_ll_vals[i].val);
     priv->rt_ll_count = 0;
+}
+
+static void
+rtoon_open_leaf_list (rtoon_private_t *priv)
+{
+    rtoon_ll_discard(priv);
+    priv->rt_flags |= RTF_LL_OPEN;
 }
 
 static void
@@ -791,17 +954,20 @@ rtoon_ll_add (rtoon_private_t *priv, const char *value, int is_string)
 	unsigned new_size = priv->rt_ll_size ? priv->rt_ll_size * 2 : 8;
 	rtoon_ll_val_t *np = xo_realloc(priv->rt_ll_vals,
 					new_size * sizeof(*np));
-	if (np == NULL)
+	if (np == NULL) {
+	    rtoon_nomem(priv);
 	    return;
+	}
 	priv->rt_ll_vals = np;
 	priv->rt_ll_size = new_size;
     }
 
-    rtoon_ll_val_t *vp = &priv->rt_ll_vals[priv->rt_ll_count++];
-    const char *v = value ? value : "";
+    char *dup = rtoon_strdup(priv, value ? value : "");
+    if (dup == NULL)
+	return;
 
-    vp->val = xo_realloc(NULL, strlen(v) + 1);
-    strcpy(vp->val, v);
+    rtoon_ll_val_t *vp = &priv->rt_ll_vals[priv->rt_ll_count++];
+    vp->val = dup;
     vp->is_string = is_string;
 }
 
@@ -831,9 +997,8 @@ rtoon_close_leaf_list (rtoon_private_t *priv, const char *name,
 
     rtoon_emit_field(priv, name, xo_buf_data(scratch, 0), flags, 0, 1);
 
-    for (unsigned i = 0; i < priv->rt_ll_count; i++)
-	xo_free(priv->rt_ll_vals[i].val);
-    priv->rt_ll_count = 0;
+    rtoon_ll_discard(priv);
+    priv->rt_flags &= ~RTF_LL_OPEN;
 }
 
 /*
@@ -857,21 +1022,29 @@ rtoon_open_container (rtoon_private_t *priv, const char *name)
 	     * dense row as prefixed columns (rtoon-spec.md Section 6.6)
 	     */
 	    int fidx = rtoon_push_idx(priv, RTOON_FRAME_FLATTEN);
+	    if (fidx < 0)
+		return;
+
 	    rtoon_frame_t *fp = &priv->rt_stack[fidx];
 	    size_t len = strlen(name);
 
 	    fp->rfl_prefix = xo_realloc(NULL, len + 2);
+	    if (fp->rfl_prefix == NULL) {
+		rtoon_nomem(priv);
+		return;
+	    }
 	    memcpy(fp->rfl_prefix, name, len);
 	    fp->rfl_prefix[len] = '/';
 	    fp->rfl_prefix[len + 1] = '\0';
 	    return;
 	}
 
-	if (!priv->rt_stack[inst_idx].ri_wrote_dash)
+	if (!(priv->rt_stack[inst_idx].ri_flags & RIF_WROTE_DASH))
 	    rtoon_flush_sparse_dash(priv, &priv->rt_stack[inst_idx]);
     }
 
-    rtoon_push_idx(priv, RTOON_FRAME_CONTAINER);
+    if (rtoon_push_idx(priv, RTOON_FRAME_CONTAINER) < 0)
+	return;
 
     rtoon_write_line_prefix(priv, priv->rt_depth);
     rtoon_write_key(&priv->rt_data, name);
@@ -919,18 +1092,40 @@ rtoon_open_list (xo_handle_t *xop, rtoon_private_t *priv, const char *name,
 	     * can't be flattened (its cardinality varies row to row)
 	     * and we don't attempt a mid-stream dense->sparse
 	     * downgrade -- see rtoon-spec.md Section 6.5.
+	     *
+	     * If the developer asked for dense, every rejection is a
+	     * bug worth reporting. If the "dense" option did it, the
+	     * user accepted the loss; warn once per handle, not once
+	     * per row.
 	     */
-	    xo_failure(xop, "rtoon: nested list not permitted inside a "
-		       "dense list instance ('%s')", name ?: "");
+	    if (!(priv->rt_stack[list_idx].rl_flags & RLF_FORCED)) {
+		xo_failure(xop, "rtoon: nested list not permitted inside a "
+			   "dense list instance ('%s')", name ?: "");
+	    } else if (!(priv->rt_flags & RTF_DROP_WARNED)) {
+		priv->rt_flags |= RTF_DROP_WARNED;
+		if (priv->rt_dense > 0)
+		    xo_warn_hc(xop, -1, "rtoon: discarding list '%s': "
+			       "lists nested below dense depth %d are "
+			       "dropped (further drops not reported)",
+			       name ?: "", priv->rt_dense);
+		else
+		    xo_warn_hc(xop, -1, "rtoon: discarding list '%s': "
+			       "lists nested inside an auto-dense list are "
+			       "dropped (further drops not reported)",
+			       name ?: "");
+	    }
+
 	    rtoon_push_idx(priv, RTOON_FRAME_ERROR);
 	    return;
 	}
 
-	if (!priv->rt_stack[inst_idx].ri_wrote_dash)
+	if (!(priv->rt_stack[inst_idx].ri_flags & RIF_WROTE_DASH))
 	    rtoon_flush_sparse_dash(priv, &priv->rt_stack[inst_idx]);
     }
 
     int lidx = rtoon_push_idx(priv, RTOON_FRAME_LIST);
+    if (lidx < 0)
+	return;
 
     rtoon_write_line_prefix(priv, priv->rt_depth);
     rtoon_write_key(&priv->rt_data, name);
@@ -940,7 +1135,21 @@ rtoon_open_list (xo_handle_t *xop, rtoon_private_t *priv, const char *name,
 
     rtoon_frame_t *fp = &priv->rt_stack[lidx];
     fp->rl_child_depth = priv->rt_depth;
-    fp->rl_mode = (flags & XOF_DENSE) ? RTOON_LIST_DENSE : RTOON_LIST_UNDECIDED;
+
+    /* List depth: the list frames below this one, plus one */
+    int list_depth = 1;
+    for (int i = 0; i < lidx; i++)
+	if (priv->rt_stack[i].rf_type == RTOON_FRAME_LIST)
+	    list_depth += 1;
+
+    if (flags & XOF_DENSE) {
+	fp->rl_mode = RTOON_LIST_DENSE;
+    } else if (priv->rt_dense > 0 && list_depth >= priv->rt_dense) {
+	fp->rl_mode = RTOON_LIST_DENSE;
+	fp->rl_flags |= RLF_FORCED;
+    } else {
+	fp->rl_mode = RTOON_LIST_UNDECIDED;
+    }
 }
 
 static void
@@ -957,7 +1166,7 @@ rtoon_close_list (rtoon_private_t *priv)
 	return;
     }
 
-    if (!fp->rl_saw_instance) {
+    if (!(fp->rl_flags & RLF_SAW_INSTANCE)) {
 	rtoon_write_line_prefix(priv, fp->rl_child_depth);
 	xo_buf_append_str(&priv->rt_data, "-\n");
     }
@@ -976,12 +1185,14 @@ rtoon_open_instance (rtoon_private_t *priv)
 
     int depth = priv->rt_stack[list_idx].rl_child_depth;
     int inst_idx = rtoon_push_idx(priv, RTOON_FRAME_INSTANCE);
+    if (inst_idx < 0)
+	return;
 
     rtoon_frame_t *fp = &priv->rt_stack[inst_idx];
     fp->ri_dash_depth = depth;
     fp->ri_field_depth = depth + 1;
 
-    priv->rt_stack[list_idx].rl_saw_instance = 1;
+    priv->rt_stack[list_idx].rl_flags |= RLF_SAW_INSTANCE;
 }
 
 static void
@@ -995,18 +1206,30 @@ rtoon_close_instance (rtoon_private_t *priv)
     rtoon_frame_t *inst = &priv->rt_stack[inst_idx];
     rtoon_frame_t *list = &priv->rt_stack[list_idx];
 
-    if (list->rl_mode == RTOON_LIST_UNDECIDED)
-	list->rl_mode = RTOON_LIST_SPARSE;
+    if (list->rl_mode == RTOON_LIST_UNDECIDED) {
+	/*
+	 * Auto mode turns a list dense once its first instance closes
+	 * flat (nested content would already have made it sparse).
+	 * An instance with no fields stays sparse: a dense list with
+	 * no columns means nothing.
+	 */
+	if (priv->rt_dense == RTOON_DENSE_AUTO && inst->ri_cells_len > 0) {
+	    rtoon_list_go_dense(priv, list, inst);
+	    list->rl_flags |= RLF_FORCED;
+	} else {
+	    list->rl_mode = RTOON_LIST_SPARSE;
+	}
+    }
 
     if (list->rl_mode == RTOON_LIST_DENSE) {
 	rtoon_flush_dense_row(priv, list, inst);
 
-    } else if (!inst->ri_wrote_dash) {
+    } else if (!(inst->ri_flags & RIF_WROTE_DASH)) {
 	if (inst->ri_cells_len == 0) {
 	    /*
 	     * Pathological: an instance that never received a single
 	     * field. libxo's own emit calls don't produce this (every
-	     * instance carries at least a key), but keep this well
+	     * instance carries at least one field), but keep this well
 	     * formed. We encode it as "- \"\"" -- an instance holding
 	     * a single empty string -- rather than a bare "-": a bare
 	     * dash reads as a truncated/malformed line, while "- \"\""
@@ -1037,6 +1260,19 @@ rtoon_close_instance (rtoon_private_t *priv)
 static void
 rtoon_deadend (rtoon_private_t *priv)
 {
+    /*
+     * libxo has a frame for an open leaf-list, so its DEADEND comes
+     * first.  We push no frame for one (nothing is written until the
+     * close), so just drop the buffered values; popping here would
+     * take the instance, and the instance's own DEADEND would then
+     * take its list.
+     */
+    if (priv->rt_flags & RTF_LL_OPEN) {
+	rtoon_ll_discard(priv);
+	priv->rt_flags &= ~RTF_LL_OPEN;
+	return;
+    }
+
     int idx = rtoon_top_idx(priv);
     if (idx < 0)
 	return;
@@ -1094,6 +1330,12 @@ rtoon_destroy (rtoon_private_t *priv)
  * Extract option values. The format is:
  *    -libxo encoder=rtoon:kw=val:kw=val
  *    -libxo encoder=rtoon+kw=val+kw=val
+ *
+ * Options:
+ *    no-version    Don't write the "@version" line
+ *    dense         Same as dense=auto
+ *    dense=auto    Make lists dense when their first instance is flat
+ *    dense=N       Force lists at list depth N (>= 1) or deeper dense
  */
 static int
 rtoon_options (xo_handle_t *xop, rtoon_private_t *priv,
@@ -1118,6 +1360,26 @@ rtoon_options (xo_handle_t *xop, rtoon_private_t *priv,
 	    continue;
 	} else if (xo_streq(cp, "no-version")) {
 	    priv->rt_flags |= RTF_NO_VERSION;
+	} else if (xo_streq(cp, "dense")) {
+	    if (vp == NULL || xo_streq(vp, "auto")) {
+		priv->rt_dense = RTOON_DENSE_AUTO;
+	    } else {
+		char *endp = NULL;
+		long val = 0;
+
+		if (isdigit((unsigned char) *vp))
+		    val = strtol(vp, &endp, 10);
+
+		if (endp == NULL || *endp != '\0' || val < 1
+			|| val > INT_MAX) {
+		    xo_warn_hc(xop, -1, "invalid value for encoder option "
+			       "'dense': '%s' (use 'auto' or a list depth "
+			       ">= 1)", vp);
+		    return -1;
+		}
+
+		priv->rt_dense = (int) val;
+	    }
 	} else {
 	    xo_warn_hc(xop, -1, "unknown encoder option value: '%s'", cp);
 	    return -1;
@@ -1131,17 +1393,77 @@ rtoon_options (xo_handle_t *xop, rtoon_private_t *priv,
  * Dispatch
  */
 
+/*
+ * RTOON_DEBUG is looked up once, not on every op; the environment
+ * isn't expected to change under a running encoder.
+ */
+static int
+rtoon_debug (void)
+{
+    static int debug = -1;
+
+    if (debug < 0)
+	debug = (getenv("RTOON_DEBUG") != NULL);
+
+    return debug;
+}
+
+/*
+ * Write out rt_data.  Open frames hold rf_save_off offsets into it for
+ * DEADEND, so those are rebased past what we wrote; a frame that
+ * opened before the flush can now only roll back what's still in the
+ * buffer, since the rest is already out.  Short writes are retried.
+ */
+static int
+rtoon_flush (rtoon_private_t *priv)
+{
+    xo_buffer_t *xbp = &priv->rt_data;
+    xo_off_t len = xo_buf_len(xbp);
+    const char *cp = xbp->xb_bufp;
+    int rc = 0;
+
+    for (xo_off_t left = len; left > 0; ) {
+	ssize_t wlen = write(1, cp, left);
+	if (wlen < 0) {
+	    if (errno == EINTR)
+		continue;
+	    rc = -1;
+	    break;
+	}
+
+	cp += wlen;
+	left -= wlen;
+    }
+
+    xo_buf_reset(xbp);
+
+    for (int i = 0; i < priv->rt_stack_len; i++) {
+	rtoon_frame_t *fp = &priv->rt_stack[i];
+
+	fp->rf_save_off = (fp->rf_save_off > len) ? fp->rf_save_off - len : 0;
+    }
+
+    return rc;
+}
+
 static int
 rtoon_handler (XO_ENCODER_HANDLER_ARGS)
 {
     rtoon_private_t *priv = private;
 
-    if (getenv("RTOON_DEBUG"))
+    if (rtoon_debug())
 	fprintf(stderr, "rtoon: op=%d name=%s value=%s flags=%llx\n",
 		op, name ?: "-", value ?: "-", (unsigned long long) flags);
 
     if (priv == NULL && op != XO_OP_CREATE)
 	return -1;
+
+    /* After an allocation failure, only teardown is still honored */
+    if (priv != NULL && (priv->rt_flags & RTF_NOMEM)) {
+	if (op == XO_OP_DESTROY)
+	    rtoon_destroy(priv);
+	return -1;
+    }
 
     if (priv != NULL) {
 	int top_idx = rtoon_top_idx(priv);
@@ -1236,23 +1558,22 @@ rtoon_handler (XO_ENCODER_HANDLER_ARGS)
     case XO_OP_FINISH:
 	break; /* xo_finish_h() always calls xo_flush_h() next */
 
-    case XO_OP_FLUSH: {
-	xo_buffer_t *xbp = &priv->rt_data;
-	xo_ssize_t len = xo_buf_len(xbp);
-	xo_ssize_t rc = (len > 0) ? write(1, xbp->xb_bufp, len) : 0;
-
-	xo_buf_reset(xbp);
-	if (rc < 0)
+    case XO_OP_FLUSH:
+	if (rtoon_flush(priv) < 0)
 	    return -1;
 	break;
-    }
 
     case XO_OP_DESTROY:
 	rtoon_destroy(priv);
-	break;
+	return 0;
 
     default:
 	break;
+    }
+
+    if (priv != NULL && (priv->rt_flags & RTF_NOMEM)) {
+	xo_failure(xop, "rtoon: out of memory; output abandoned");
+	return -1;
     }
 
     return 0;

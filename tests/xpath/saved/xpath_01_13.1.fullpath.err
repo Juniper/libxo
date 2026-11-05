@@ -4,8 +4,8 @@ main: status: zero
 main: input '?item[contains(name)]'
 adding filter: 'item[contains(name)]'
 added filter: 0
---- 0: 11
-    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 10
+    000010: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
             000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
                 000003: type 52 (T_FUNCTION_NAME), str 8 [contains], contents 7, next 0, prev 0 
@@ -45,15 +45,15 @@ main: status: zero
 main: input '?item[starts-with(name, 'foo', 'extra')]'
 adding filter: 'item[starts-with(name, 'foo', 'extra')]'
 added filter: 0
---- 0: 17
-    000017: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 14
+    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
             000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
                 000003: type 52 (T_FUNCTION_NAME), str 8 [starts-with], contents 7, next 0, prev 0 
                     000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
                         000005: type 70 (C_ELEMENT), str 22 [name], contents 0, next 0, prev 0 
-                    000008: type 54 (T_QUOTED), str 29 [foo], contents 0, next 11, prev 7 
-                    000011: type 54 (T_QUOTED), str 35 [extra], contents 0, next 0, prev 8 
+                    000008: type 54 (T_QUOTED), str 29 [foo], contents 0, next 10, prev 7 
+                    000010: type 54 (T_QUOTED), str 35 [extra], contents 0, next 0, prev 8 
 main: status: zero
 main: input '{item'
 xpath_01: duplicate sibling name: 'item'
@@ -89,8 +89,8 @@ main: status: zero
 main: input '?item[not()]'
 adding filter: 'item[not()]'
 added filter: 0
---- 0: 9
-    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 8
+    000008: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
             000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
                 000003: type 52 (T_FUNCTION_NAME), str 8 [not], contents 0, next 0, prev 0 
@@ -128,8 +128,8 @@ main: status: zero
 main: input '?item[true('extra')]'
 adding filter: 'item[true('extra')]'
 added filter: 0
---- 0: 11
-    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 9
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
             000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
                 000003: type 52 (T_FUNCTION_NAME), str 8 [true], contents 5, next 0, prev 0 
@@ -168,8 +168,8 @@ main: status: zero
 main: input '?item[concat('only-one')]'
 adding filter: 'item[concat('only-one')]'
 added filter: 0
---- 0: 11
-    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 9
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
             000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
                 000003: type 52 (T_FUNCTION_NAME), str 8 [concat], contents 5, next 0, prev 0 
@@ -197,8 +197,8 @@ main: status: zero
 main: input '?item[ceiling()]'
 adding filter: 'item[ceiling()]'
 added filter: 0
---- 0: 9
-    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 8
+    000008: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
             000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
                 000003: type 52 (T_FUNCTION_NAME), str 8 [ceiling], contents 0, next 0, prev 0 

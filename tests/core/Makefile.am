@@ -49,7 +49,10 @@ ${TEST_CASES_COLOR} \
 test_13.c \
 test_14.c \
 test_15.c \
-test_16.c
+test_16.c \
+test_17.c \
+test_18.c \
+test_19.c
 
 test_01_test_SOURCES = test_01.c
 test_02_test_SOURCES = test_02.c
@@ -64,6 +67,9 @@ test_13_test_SOURCES = test_13.c
 test_14_test_SOURCES = test_14.c
 test_15_test_SOURCES = test_15.c
 test_16_test_SOURCES = test_16.c
+test_17_test_SOURCES = test_17.c
+test_18_test_SOURCES = test_18.c
+test_19_test_SOURCES = test_19.c
 
 base_tests = ${TEST_CASES:.c=.test}
 
@@ -102,8 +108,18 @@ endif
 CSV_EXT = Ecsv1 Ecsv2 Ecsv3
 PMAP_EXT = JPmap  XPmap
 RTOON_EXT = Ertoon
+RTOON_DENSE_EXT = Ertoon Ertoond Ertoonda Ertoond1 Ertoond2 Ertoond0
+XML11_EXT = XPx11
 
 STYLES = T XP JP JPu HP X J H HIPx E
+
+# Styles run only for the plain binaries; the validate and pass
+# binaries emit the same calls, so there's nothing more to learn
+if LIBXO_TEXT_ONLY
+PLAIN_STYLES =
+else
+PLAIN_STYLES = Ecbor
+endif
 
 TEST_OUTPUT_FILES = \
 $(foreach file, ${TEST_CASES}, \
@@ -113,7 +129,10 @@ $(foreach file, ${TEST_CASES}, \
     $(foreach pass, ${ALL_PASSES}, \
         $(foreach ext, ${STYLES}, \
             $(foreach fd, out err, \
-                $(addprefix saved/, ${file:.c=${pass}${ext}.${fd}})))))
+                $(addprefix saved/, ${file:.c=${pass}${ext}.${fd}})))) \
+    $(foreach ext, ${PLAIN_STYLES}, \
+        $(foreach fd, out err, \
+            $(addprefix saved/, ${file:.c=.${ext}.${fd}}))))
 
 TEST_OUTPUT_FILES += \
 $(foreach file, test_15.c, \
@@ -143,6 +162,20 @@ $(foreach file, test_04.c test_16.c, \
             $(foreach fd, out err, \
                 $(addprefix saved/, ${file:.c=${pass}${ext}.${fd}})))))
 
+TEST_OUTPUT_FILES += \
+$(foreach file, test_19.c, \
+    $(foreach pass, ${ALL_PASSES}, \
+        $(foreach ext, ${RTOON_DENSE_EXT}, \
+            $(foreach fd, out err, \
+                $(addprefix saved/, ${file:.c=${pass}${ext}.${fd}})))))
+
+TEST_OUTPUT_FILES += \
+$(foreach file, test_13.c, \
+    $(foreach pass, ${ALL_PASSES}, \
+        $(foreach ext, ${XML11_EXT}, \
+            $(foreach fd, out err, \
+                $(addprefix saved/, ${file:.c=${pass}${ext}.${fd}})))))
+
 sayit:
 	echo ${TEST_OUTPUT_FILES}
 
@@ -152,8 +185,10 @@ EXTRA_DIST = \
     test_04.fmts \
     test_12.fmts \
     test_12.fmts \
+    test_13.fmts \
     test_15.fmts \
     test_16.fmts \
+    test_19.fmts \
     test_12.map \
     ${TEST_OUTPUT_FILES}
 
@@ -167,6 +202,14 @@ TEST_FORMATS = T
 else
 TEST_FORMATS = T XP JP JPu HP X J H HIPx E=warn,encoder=test
 EXTRA_FMTS = -X
+endif
+
+# Formats for the plain binaries only (see PLAIN_STYLES); "pretty"
+# makes the cbor encoder write a hex dump instead of binary
+if LIBXO_TEXT_ONLY
+PLAIN_FORMATS =
+else
+PLAIN_FORMATS = Ecbor=warn,pretty,encoder=cbor
 endif
 
 RUN_TESTS_SH = ${srcdir}/../run-tests.sh
@@ -203,7 +246,8 @@ test tests: ${noinst_PROGRAMS} run-plain-tests ${PLUGIN_TESTS}
 
 run-plain-tests:
 	@${MKDIR} -p out
-	@${RUN_TESTS_CMD} -T "${TEST_FORMATS}" run-bin ${TEST_CASES:.c=.test}
+	@${RUN_TESTS_CMD} -T "${TEST_FORMATS} ${PLAIN_FORMATS}" \
+	    run-bin ${TEST_CASES:.c=.test}
 
 if HAVE_VALIDATE
 
@@ -221,7 +265,8 @@ $(validate_tests): %.validate-test: $(srcdir)/%.c \
 	    ${LLVM_CLANG} ${CFLAGS} \
 	    -fplugin=${VALIDATE_BUILD}/xo_validate.so \
 	    -mllvm -xo-validate-errors-as-warnings -mllvm -xo-validate-lint \
-	    -I${top_srcdir}/libxo -I${top_builddir}/libxo -I${INCLUDEDIR} ${SYSROOT_FLAG} \
+	    -I${top_srcdir} -I${top_srcdir}/libxo -I${top_builddir}/libxo \
+	    -I${INCLUDEDIR} ${SYSROOT_FLAG} \
 	    -c $< -o $*.validate-test.o > out/$@.make.out 2> out/$@.make.err
 	@$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link \
 	    ${LLVM_CLANG} ${CFLAGS} ${LDADD} ${SYSROOT_FLAG} \
@@ -236,7 +281,8 @@ $(pass_tests): %.pass-test: $(srcdir)/%.c \
 	    LD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${LD_LIBRARY_PATH}" \
 	    ${LLVM_CLANG} ${CFLAGS} \
 	    -fpass-plugin=${PRECOMPILE_BUILD}/xo_precompile.so \
-	    -I${top_srcdir}/libxo -I${top_builddir}/libxo -I${INCLUDEDIR} ${SYSROOT_FLAG} \
+	    -I${top_srcdir} -I${top_srcdir}/libxo -I${top_builddir}/libxo \
+	    -I${INCLUDEDIR} ${SYSROOT_FLAG} \
 	    -c $< -o $*.pass-test.o > out/$@.make.out 2> out/$@.make.err
 	@$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link \
 	    ${LLVM_CLANG} ${CFLAGS} ${LDADD} ${SYSROOT_FLAG} \
@@ -280,7 +326,8 @@ one:
 
 accept:
 	@${MKDIR} -p ${srcdir}/saved
-	${RUN_TESTS_CMD} -T "${TEST_FORMATS}" accept-bin ${TEST_CASES:.c=.test}
+	${RUN_TESTS_CMD} -T "${TEST_FORMATS} ${PLAIN_FORMATS}" \
+	    accept-bin ${TEST_CASES:.c=.test}
 	-@test -z "${LLVM_CLANG}" || for tc in ${TEST_CASES:.c=}; do \
 	    cp out/$$tc.validate-test.make.out \
 	        ${srcdir}/saved/$$tc.validate-test.make.out 2>/dev/null ; \

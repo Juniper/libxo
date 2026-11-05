@@ -1,0 +1,2 @@
+# XML 1.1: escape-private refers to the control character itself
+XPx11=warn,xml,pretty,xml1.1

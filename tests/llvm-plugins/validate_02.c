@@ -4,8 +4,8 @@
  * Each test is annotated with the expected diagnostic.
  * Run via:  make test-validate  (in the top build directory)
  *
- * "OK"   — no diagnostic expected
- * "WARN" — error or warning from the plugin expected (exact text in comment)
+ * "OK"   - no diagnostic expected
+ * "WARN" - error or warning from the plugin expected (exact text in comment)
  *
  * Platform notes (LP64 / macOS ARM):
  *   sizeof(int) = 4, sizeof(long) = sizeof(long long) = 8
@@ -177,19 +177,19 @@ main (int argc, char **argv)
     xo_emit("{:val/%u}\n", u_val);
     fprintf(dev_null, "{:val/%u}\n", u_val);
 
-    /* OK: %u with int — same integer kind, sign differs; clang allows this */
+    /* OK: %u with int - same integer kind, sign differs; clang allows this */
     xo_emit("{:val/%u}\n", i_val);
     fprintf(dev_null, "{:val/%u}\n", i_val);
 
-    /* OK: integer constant "1" — same kind, sign differs */
+    /* OK: integer constant "1" - same kind, sign differs */
     xo_emit("{:val/%u}\n", 1);
     fprintf(dev_null, "{:val/%u}\n", 1);
 
-    /* OK: %d with unsigned int — same integer kind, sign differs; clang allows this */
+    /* OK: %d with unsigned int - same integer kind, sign differs; clang allows this */
     xo_emit("{:val/%d}\n", u_val);
     fprintf(dev_null, "{:val/%d}\n", u_val);
 
-    /* OK: integer constant "42U" — same kind, sign differs */
+    /* OK: integer constant "42U" - same kind, sign differs */
     xo_emit("{:val/%d}\n", 42U);
     fprintf(dev_null, "{:val/%d}\n", 42U);
 
@@ -197,7 +197,7 @@ main (int argc, char **argv)
     xo_emit("{:val/%lu}\n", ul_val);
     fprintf(dev_null, "{:val/%lu}\n", ul_val);
 
-    /* WARN: size — format specifies 'unsigned long' but argument is 'unsigned int' */
+    /* WARN: size - format specifies 'unsigned long' but argument is 'unsigned int' */
     xo_emit("{:val/%lu}\n", u_val);
     fprintf(dev_null, "{:val/%lu}\n", u_val);
 
@@ -205,7 +205,7 @@ main (int argc, char **argv)
     xo_emit("{:val/%llu}\n", ull_val);
     fprintf(dev_null, "{:val/%llu}\n", ull_val);
 
-    /* WARN: size — format specifies 'unsigned long long' but argument is 'unsigned int' */
+    /* WARN: size - format specifies 'unsigned long long' but argument is 'unsigned int' */
     xo_emit("{:val/%llu}\n", u_val);
     fprintf(dev_null, "{:val/%llu}\n", u_val);
 
@@ -213,7 +213,7 @@ main (int argc, char **argv)
     xo_emit("{:val/%x}\n", u_val);
     fprintf(dev_null, "{:val/%x}\n", u_val);
 
-    /* OK: %x with int — same integer kind, sign differs; clang allows this */
+    /* OK: %x with int - same integer kind, sign differs; clang allows this */
     xo_emit("{:val/%x}\n", i_val);
     fprintf(dev_null, "{:val/%x}\n", i_val);
 
@@ -254,7 +254,7 @@ main (int argc, char **argv)
     xo_emit("{:val/%jd}\n", jd_val);
     fprintf(dev_null, "{:val/%jd}\n", jd_val);
 
-    /* OK: %ju with intmax_t — uintmax_t/intmax_t are same kind; clang allows this */
+    /* OK: %ju with intmax_t - uintmax_t/intmax_t are same kind; clang allows this */
     xo_emit("{:val/%ju}\n", jd_val);
     fprintf(dev_null, "{:val/%ju}\n", jd_val);
 
@@ -348,7 +348,7 @@ main (int argc, char **argv)
     fprintf(dev_null, "{:val/%p}\n", i_val);
 
     /*
-     * Width arguments (%*s, %.*s) — width must be int
+     * Width arguments (%*s, %.*s) - width must be int
      */
 
     /* OK: %*s with int width and string value */
@@ -388,11 +388,11 @@ main (int argc, char **argv)
     xo_emit("{:val/%d}\n", i32);
     fprintf(dev_null, "{:val/%d}\n", i32);
 
-    /* OK: uint32_t = unsigned int, %d with unsigned int — same kind */
+    /* OK: uint32_t = unsigned int, %d with unsigned int - same kind */
     xo_emit("{:val/%d}\n", u32);
     fprintf(dev_null, "{:val/%d}\n", u32);
 
-    /* OK: int32_t = int, %u with int — same kind */
+    /* OK: int32_t = int, %u with int - same kind */
     xo_emit("{:val/%u}\n", i32);
     fprintf(dev_null, "{:val/%u}\n", i32);
 
@@ -409,11 +409,11 @@ main (int argc, char **argv)
     /* OK (portable): same reasoning, int64_t vs %ld */
     xo_emit("{:val/%ld}\n", i64);
 
-    /* WARN: size — uint64_t (64-bit) vs %u (32-bit unsigned) */
+    /* WARN: size - uint64_t (64-bit) vs %u (32-bit unsigned) */
     xo_emit("{:val/%u}\n", u64);
     fprintf(dev_null, "{:val/%u}\n", u64);
 
-    /* WARN: size — int64_t (64-bit) vs %d (32-bit signed) */
+    /* WARN: size - int64_t (64-bit) vs %d (32-bit signed) */
     xo_emit("{:val/%d}\n", i64);
     fprintf(dev_null, "{:val/%d}\n", i64);
 
@@ -465,7 +465,7 @@ main (int argc, char **argv)
      * Complex multi-field with correct types
      */
 
-    /* OK: ls-style output — one string and two width+value pairs */
+    /* OK: ls-style output - one string and two width+value pairs */
     xo_emit("{t:mode/%s} {t:links/%*u} {t:user/%-*s}\n",
 	    cs_val, (int) 8, u_val, (int) 12, cs_val);
     fprintf(dev_null, "{t:mode/%s} {t:links/%*u} {t:user/%-*s}\n",
@@ -495,7 +495,7 @@ main (int argc, char **argv)
     fprintf(dev_null, "{:flags/%08x} {:addr/%lx} {:bytes/%zu}\n",
 	    u_val, ul_val, sz_val);
 
-    /* OK: %08x with int — same integer kind, sign differs; clang allows this */
+    /* OK: %08x with int - same integer kind, sign differs; clang allows this */
     xo_emit("{:flags/%08x} {:addr/%lx} {:bytes/%zu}\n",
 	    i_val, ul_val, sz_val);
     fprintf(dev_null, "{:flags/%08x} {:addr/%lx} {:bytes/%zu}\n",
@@ -515,6 +515,29 @@ main (int argc, char **argv)
     /* WARN: encoding uses %s but display uses %d (different types) */
     xo_emit("{:val/%d/%s}\n", i_val);
 
+    /* WARN: display %ld (long) vs encoding %d (int) - real width mismatch */
+    xo_emit("{:val/%ld/%d}\n", l_val);
+
+    /* OK: display %04x vs encoding %u - both plain unsigned int */
+    xo_emit("{:val/%04x/%u}\n", u_val);
+
+    /*
+     * Fixed-arg emit variants other than xo_emit/xo_emit_h are validated
+     * the same way, since none of them take a va_list.
+     */
+
+    /* OK: xo_emit_f, correct arg count */
+    xo_emit_f(0, "{:name/%s} {:age/%d}\n", cs_val, i_val);
+
+    /* WARN: xo_emit_f, expects 2 but given 1 */
+    xo_emit_f(0, "{:name/%s} {:age/%d}\n", cs_val);
+
+    /* OK: xo_emit_hf, correct arg count */
+    xo_emit_hf(NULL, 0, "{:name/%s} {:age/%d}\n", cs_val, i_val);
+
+    /* WARN: xo_emit_hf, expects 2 but given 1 */
+    xo_emit_hf(NULL, 0, "{:name/%s} {:age/%d}\n", cs_val);
+
     /*
      * Long-form role names
      */
@@ -530,10 +553,36 @@ main (int argc, char **argv)
     xo_emit("{d:/this should be %s}\n", "text");
     xo_emit("{F:/this should be %s}\n", "text");
 
-    xo_emit("works: [{:works/%JNs}], fail: [{:fails/%JZs}]n", NULL, NULL);
+    xo_emit("works: [{:works/%JNs}], fail: [{:fails/%JZs}]n", NULL, (void *) 0);
 
     xo_emit("i:leading zero: {i:fail/%05d}\n", 50);
     xo_emit("i:bad type: {i:fail2/%s}\n", "bad");
+
+    /*
+     * {G:} takes its domain from the content or, with a format, from the
+     * arguments; an empty {G:} resets the domain and takes no argument.
+     */
+
+    /* OK: static domain, then reset */
+    xo_emit("{G:libc}Permission denied: {G:}{g:reason}\n", cs_val);
+
+    /* OK: domain from one argument */
+    xo_emit("{G:/%s}Service unavailable\n", cs_val);
+
+    /* OK: domain built from two arguments */
+    xo_emit("{G:/%s_%s}Service unavailable\n", cs_val, cs_val);
+
+    /* WARN: domain format needs an argument */
+    xo_emit("{G:/%s}Service unavailable\n");
+
+    /* WARN: domain argument has the wrong type */
+    xo_emit("{G:/%s}Service unavailable\n", i_val);
+
+    /* WARN: empty {G:} takes no argument */
+    xo_emit("{G:}Service unavailable\n", cs_val);
+
+    /* The format is ignored when content names the domain */
+    xo_emit("{G:libc/%s}Service unavailable\n");
 
     fclose(dev_null);
 

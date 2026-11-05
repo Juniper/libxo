@@ -419,7 +419,7 @@
 
                 ths.forEach(function (other, oi) {
                     other.querySelector(".xohtml-sort-arrow").textContent =
-                        (oi === i) ? (sortDir > 0 ? "▲" : "▼") : "";
+                        (oi === i) ? (sortDir > 0 ? "\u25B2" : "\u25BC") : "";
                 });
 
                 renderBody();

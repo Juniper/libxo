@@ -18,6 +18,7 @@
 #include <assert.h>
 #include <sys/param.h>
 
+#include "xo_config.h"
 #include "xo.h"
 #include "xo_encoder.h"
 #include "xo_buf.h"
@@ -149,7 +150,6 @@ typedef struct xo_xparse_ttname_map_s {
 xo_xparse_ttname_map_t xo_xparse_ttname_map[] = {
     { L_AT,			"attribute axis ('@')" },
     { L_CBRACE,			"close brace ('}')" },
-    { L_OBRACK,			"close bracket (']')" },
     { L_COLON,			"colon (':')" },
     { L_COMMA,			"comma (',')" },
     { L_DAMPER,			"logical AND operator ('&&')" },
@@ -216,6 +216,7 @@ xo_xparse_ttname_map_t xo_xparse_ttname_map[] = {
     { C_DSTRING,		"string value that is dynamically allocated" },
     { C_NESTED_PREDICATES,      "predicates inside predicates" },
     { C_PREDICATE_PATHS,        "Multi-element paths in predicates" },
+    { C_UNI_MINUS,		"Unary minus" },
     { M_ERROR,                  "invalid xpath expression" },
     { 0, NULL }
 };
@@ -377,7 +378,8 @@ static int
 xo_xparse_move_cur (xo_xparse_data_t *xdp)
 {
     XO_DBG(xdp->xd_xop, "xo_xplex: move:- %u/%u/%u",
-	   xdp->xd_start, xdp->xd_cur, xdp->xd_len);
+	   (unsigned) xdp->xd_start, (unsigned) xdp->xd_cur,
+	   (unsigned) xdp->xd_len);
 
     int moved;
 
@@ -389,7 +391,8 @@ xo_xparse_move_cur (xo_xparse_data_t *xdp)
     if (xdp->xd_cur == xdp->xd_len) {
        if (xo_xparse_get_input(xdp, 0)) {
            XO_DBG(xdp->xd_xop, "xo_xplex: move:! %u/%u/%u",
-                   xdp->xd_start, xdp->xd_cur, xdp->xd_len);
+                   (unsigned) xdp->xd_start, (unsigned) xdp->xd_cur,
+                   (unsigned) xdp->xd_len);
 	   if (moved)
 	       xdp->xd_cur -= 1;
            return -1;
@@ -397,7 +400,8 @@ xo_xparse_move_cur (xo_xparse_data_t *xdp)
     }
 
     XO_DBG(xdp->xd_xop, "xo_xplex: move:+ %u/%u/%u",
-	   xdp->xd_start, xdp->xd_cur, xdp->xd_len);
+	   (unsigned) xdp->xd_start, (unsigned) xdp->xd_cur,
+	   (unsigned) xdp->xd_len);
     return 0;
 }
 
@@ -506,11 +510,14 @@ xo_xparse_str_new (xo_xparse_data_t *xdp, xo_xparse_token_t type)
 
     xo_off_t cur = xbp->xb_curp - xbp->xb_bufp;
     char *newp = xo_buf_append_val(xbp, start, len + 1);
+    if (newp == NULL)
+	return 0;
+
     newp[len] = '\0';
 
     xdp->xd_last_str = cur;
 
-    return newp ? cur : 0;
+    return cur;
 }
 
 void
@@ -537,6 +544,7 @@ xo_xparse_set_input (xo_xparse_data_t *xdp, const char *buf, xo_ssize_t len)
     xdp->xd_start = 0;
 
     xdp->xd_errors = 0;
+    xdp->xd_flags &= ~XDF_LEX_ERROR;
     xdp->xd_col = 0;
     xdp->xd_col_start = 0;
 }
@@ -693,19 +701,21 @@ xo_xpath_feature_warn_since (const char *tag, xo_xparse_data_t *xdp,
     bzero(map, len * sizeof(map[0]));
 
     if (tokens) {
-	for (int i = 0; tokens[i] && i < len; i++)
-	    if (tokens[i])
+	for (int i = 0; tokens[i]; i++)
+	    if (tokens[i] > 0 && tokens[i] < len)
 		map[tokens[i]] = 1;
     }
 
     if (bytes) {
-	for (int i = 0; bytes[i] && i < len; i++)
-	    if (bytes[i]) {
-		int num = bytes[i];
-		    int val = xo_single_wide[num];
-		if (val >= 0 && val <= len)
-		    map[val] = 1;
-	    }
+	for (int i = 0; bytes[i]; i++) {
+	    unsigned num = (unsigned char) bytes[i];
+	    if (num >= XO_MAX_CHAR)
+		continue;
+
+	    int val = xo_single_wide[num];
+	    if (val > 0 && val < len)
+		map[val] = 1;
+	}
     }
 
     uint32_t i;
@@ -832,9 +842,10 @@ xo_xparse_yyval (xo_xparse_data_t *xdp UNUSED, xo_xparse_node_id_t id)
 }
 
 /*
- * Return a new match struct, allocating a new one if needed
+ * Append a parse tree root to xd_paths[], growing it if needed.
+ * Returns -1 if the array can't be grown.
  */
-static void
+static int
 xo_xparse_result_add (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
 {
     if (xdp->xd_paths_cur >= xdp->xd_paths_max) {
@@ -843,40 +854,47 @@ xo_xparse_result_add (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
 	xo_xparse_node_id_t *pp;
 	pp = xo_realloc(xdp->xd_paths, new_max * sizeof(*pp));
 	if (pp == NULL)
-	    return;
+	    return -1;
 
 	xdp->xd_paths = pp;
 	xdp->xd_paths_max = new_max;
     }
 
     xdp->xd_paths[xdp->xd_paths_cur++] = id;
+    return 0;
 }
 
 /*
  * Add the final results of a parsing to the data.  The real work here
  * is rewriting patterns (like unions) into more easily handled forms.
+ * Returns -1 on allocation failure, in which case none of this
+ * expression's paths are kept: a union that only half made it into
+ * xd_paths[] would filter differently than the user asked.
  */
-void
+int
 xo_xparse_results (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
 {
     xo_xparse_node_t *xnp = xo_xparse_node(xdp, id);
     xo_xparse_node_id_t next;
+    uint32_t start = xdp->xd_paths_cur;
 
     if (xnp == NULL) {
 	/* nothing; error? */
 
     } else if (xnp->xn_type == C_UNION) {
 	for (id = xnp->xn_contents; id; id = next) {
-	    xnp = xo_xparse_node(xdp, id);
-	    xo_xparse_result_add(xdp, id);
+	    if (xo_xparse_result_add(xdp, id) < 0)
+		goto fail;
 
 	    /* Break off this node from the chain */
+	    xnp = xo_xparse_node(xdp, id);
 	    next = xnp->xn_next;
 	    xnp->xn_next = xnp->xn_prev = 0;
 	}
 
     } else {
-	xo_xparse_result_add(xdp, id);
+	if (xo_xparse_result_add(xdp, id) < 0)
+	    goto fail;
     }
 
     uint32_t deny_count = 0, abs_count = 0;
@@ -924,6 +942,11 @@ xo_xparse_results (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
 
     XO_DBG(xdp->xd_xop, "xo: parse results: %u paths%s%s",
 	   cur, all_nots, all_abs);
+    return 0;
+
+ fail:
+    xdp->xd_paths_cur = start;
+    return -1;
 }
 
 int
@@ -1002,7 +1025,7 @@ xo_xparse_node_set_contents (xo_xparse_data_t *xdp, xo_xparse_node_id_t id,
  * We inspect the input buffer, finding the first token and returning
  * it's token type.
  *
- * @param xdp main slax data structure
+ * @param xdp parser data structure
  * @return token type
  */
 static int
@@ -1092,12 +1115,12 @@ xo_xparse_lexer (xo_xparse_data_t *xdp)
 	     * need to read some more, if the string is long.
 	     */
 	    if (xo_xparse_move_cur(xdp)) /* Move past the first quote */
-		return -1;
+		goto unterminated;
 
 	    for (;;) {
 		if (xdp->xd_cur == xdp->xd_len)
 		    if (xo_xparse_get_input(xdp, 0))
-			return -1;
+			goto unterminated;
 
 		if ((uint8_t) xdp->xd_buf[xdp->xd_cur] == ch1)
 		    break;
@@ -1105,7 +1128,7 @@ xo_xparse_lexer (xo_xparse_data_t *xdp)
 		int bump = (xdp->xd_buf[xdp->xd_cur] == '\\') ? 1 : 0;
 
 		if (xo_xparse_move_cur(xdp))
-		    return -1;
+		    goto unterminated;
 
 		if (bump && xdp->xd_cur < xdp->xd_len)
 		    xdp->xd_cur += bump;
@@ -1217,6 +1240,16 @@ xo_xparse_lexer (xo_xparse_data_t *xdp)
     }
 
     return T_BARE;
+
+ unterminated:
+    /*
+     * Returning EOF here would leave yacc to report a generic
+     * "unexpected input", with no hint that the quote was the cause.
+     */
+    xo_xparse_warn(xdp, "%sfilter expression error: missing close quote "
+		   "(%c) for string", xo_xparse_location(xdp), ch1);
+    xdp->xd_flags |= XDF_LEX_ERROR;
+    return M_ERROR;
 }
 
 /**
@@ -1240,6 +1273,19 @@ xo_xpath_yylex (xo_xparse_data_t *xdp, xo_xparse_node_id_t *yylvalp)
     xo_xparse_node_id_t id = xo_xparse_node_new(xdp);
     xo_xparse_node_t *xnp = xo_xparse_node(xdp, id);
     *yylvalp = id;
+
+    /*
+     * Don't return -1 here: yacc takes any negative token as EOF,
+     * and would accept the expression lexed so far as if it were
+     * the whole thing.  M_ERROR matches no rule, so the parse fails.
+     */
+    if (xnp == NULL) {
+	xo_xparse_warn(xdp, "%sfilter expression error: out of memory",
+		       xo_xparse_location(xdp));
+	xdp->xd_flags |= XDF_LEX_ERROR;
+	xdp->xd_last = M_ERROR;
+        return M_ERROR;
+    }
 
     bzero(xnp, sizeof(*xnp));
 
@@ -1310,11 +1356,20 @@ xo_xpath_yylex (xo_xparse_data_t *xdp, xo_xparse_node_id_t *yylvalp)
     }
 
     xnp->xn_type = rc;
-    if (rc > 0)
+    if (rc > 0) {
 	xnp->xn_str = xo_xparse_str_new(xdp, rc);
 
+	/* Offset zero is reserved by xo_xparse_init, so zero is failure */
+	if (xnp->xn_str == 0) {
+	    xo_xparse_warn(xdp, "%sfilter expression error: out of memory",
+			   xo_xparse_location(xdp));
+	    xdp->xd_flags |= XDF_LEX_ERROR;
+	    xnp->xn_type = xdp->xd_last = rc = M_ERROR;
+	}
+    }
+
     XO_DBG(xdp->xd_xop, "xo_xplex: lex: '%.*s' -> %d/%s %s",
-	   xdp->xd_cur - xdp->xd_start,
+	   (int) (xdp->xd_cur - xdp->xd_start),
 	   xdp->xd_buf + xdp->xd_start,
 	   rc, (rc > 0) ? xo_xparse_token_name(rc) : "",
 	   xnp->xn_str ? xo_xparse_str(xdp, xnp->xn_str) : "");
@@ -1323,6 +1378,20 @@ xo_xpath_yylex (xo_xparse_data_t *xdp, xo_xparse_node_id_t *yylvalp)
 
     return rc;
 }
+
+/*
+ * The parser's initial state number, so we can tell when an error
+ * arrives before any valid input.  byacc starts in state 0.  When
+ * the day comes that we need to support bison, this needs to be
+ * checked against bison's state numbering, along with the other
+ * byacc-isms (the yysindex/yyrindex tables used by
+ * xo_xparse_expecting_error and the yyparse rename in Makefile.am).
+ */
+#if HAVE_BYACC
+#define YY_INITIAL_STATE 0
+#else /* HAVE_BYACC */
+#error "YY_INITIAL_STATE is not known for this parser generator"
+#endif /* HAVE_BYACC */
 
 /*
  * Return a better class of error message
@@ -1334,42 +1403,25 @@ xo_xparse_syntax_error (xo_xparse_data_t *xdp, const char *token,
 {
     char buf[BUFSIZ], *cp = buf, *ep = buf + sizeof(buf);
 
-    /*
-     * If yystate is 1, then we're in our initial state and have
-     * not seen any valid input.  We handle this state specifically
-     * to give better error messages.
-     */
-    if (yystate == 1) {
-	if (yychar == -1)
-	    return strdup("unexpected end-of-file found (empty input)");
+    /* EOF in the initial state means there was no input */
+    if (yystate == YY_INITIAL_STATE && yychar < 0)
+	return xo_strdup("empty expression");
 
-	if (yychar == L_LESS)
-	    return strdup("unexpected '<'; file may be XML/XSLT");
+    char *msg = xo_xparse_expecting_error(xdp, token, yystate, yychar);
+    if (msg)
+	return msg;
 
-	SNPRINTF(cp, ep, "missing 'version' statement");
-	if (token)
-	    SNPRINTF(cp, ep, "; %s is not legal", token);
+    SNPRINTF(cp, ep, "unexpected input");
+    if (token)
+	SNPRINTF(cp, ep, ": %s", token);
 
-    } else if (yychar == -1) {
-	SNPRINTF(cp, ep, "unexpected end-of-expression");
-
-    } else {
-	char *msg = xo_xparse_expecting_error(xdp, token, yystate, yychar);
-	if (msg)
-	    return msg;
-
-	SNPRINTF(cp, ep, "unexpected input");
-	if (token)
-	    SNPRINTF(cp, ep, ": %s", token);
-    }
-
-    return strdup(buf);
+    return xo_strdup(buf);
 }
 
 /**
  * Callback from yacc when an error is detected.
  *
- * @param xdp main slax data structure
+ * @param xdp parser data structure
  * @param str error message
  * @param value stack entry from bison's lexical stack
  * @return zero
@@ -1385,14 +1437,22 @@ xo_xpath_yyerror (xo_xparse_data_t *xdp, const char *str, int yystate)
     
     static const char leader2[] = "error recovery ignores input";
     const char *token;
-    char buf[BUFSIZ * 4];
 
     if (strncmp(str, leader2, sizeof(leader2) - 1) != 0)
 	xdp->xd_errors += 1;
 
-    token = xo_xparse_token_name_fancy[xo_xparse_token_translate(xdp->xd_last)];
+    /* The lexer has said what went wrong; yacc's echo adds nothing */
+    if (xdp->xd_flags & XDF_LEX_ERROR)
+	return 0;
 
-    buf[0] = '\0';
+    /*
+     * Use the bounds-checked lookup; indexing the table directly
+     * read past its end for out-of-range values.
+     */
+    if (xdp->xd_last < 0)
+	token = "end of expression";
+    else
+	token = xo_xparse_fancy_token_name(xdp->xd_last);
 
     /*
      * Two possibilities: generic "syntax error" or some
@@ -1411,9 +1471,9 @@ xo_xpath_yyerror (xo_xparse_data_t *xdp, const char *str, int yystate)
 	}
     }
 
-    xo_xparse_warn(xdp, "%sfilter expression error: %s%s%s%s%s",
+    xo_xparse_warn(xdp, "%sfilter expression error: %s%s%s",
 		   xo_xparse_location(xdp), str,
-		   token ? " before " : "", token, token ? ": " : "", buf);
+		   token ? " before " : "", token ?: "");
 
     return 0;
 }
@@ -1453,7 +1513,10 @@ xo_xparse_clean (xo_xparse_data_t *xdp)
     if (xdp) {
 	xo_buf_cleanup(&xdp->xd_node_buf);
 	xo_buf_cleanup(&xdp->xd_str_buf);
-	xo_free(xdp->xd_buf);
+	if (xdp->xd_buf)
+	    xo_free(xdp->xd_buf);
+	if (xdp->xd_paths)
+	    xo_free(xdp->xd_paths);
 	bzero(xdp, sizeof(*xdp));
     }
 }

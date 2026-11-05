@@ -1,0 +1,7 @@
+../../../tests/llvm-plugins/validate_04.cc:45:28: warning: libxo: argument 1: format specifies type 'int' but the argument has type 'const char[6]'
+   45 |     xo_emit("{:sum/%d}\n", "three");
+      |                            ^
+../../../tests/llvm-plugins/validate_04.cc:48:13: warning: libxo: format expects 2 argument(s) but 1 provided
+   48 |     xo_emit("{:sum/%d} {:conv/%d}\n", sum);
+      |             ^
+2 warnings generated.

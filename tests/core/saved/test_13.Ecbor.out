@@ -1,0 +1,2199 @@
+op create: [cbor] []
+ [append] @ 0 (1/1)
+ bf                                                    .
+    op open_container: [top] []
+ [append] @ 1 (4/4)
+ 63 74 6f 70                                           ctop
+ [append] @ 5 (1/1)
+ bf                                                    .
+      op open_container: [data] []
+   [append] @ 6 (5/5)
+   64 64 61 74  61                                       ddata
+   [append] @ 11 (1/1)
+   bf                                                    .
+        op open_container: [doc-examples] []
+     [append] @ 12 (d/13)
+     6c 64 6f 63  2d 65 78 61  - 6d 70 6c 65  73           ldoc-examples
+     [append] @ 25 (1/1)
+     bf                                                    .
+          op content: [count] [00001234]
+       [append] @ 26 (6/6)
+       65 63 6f 75  6e 74                                    ecount
+       [content] @ 32 (3/3)
+       19 04 d2                                              ...
+          op content: [count] [00001234]
+       [append] @ 35 (6/6)
+       65 63 6f 75  6e 74                                    ecount
+       [content] @ 41 (3/3)
+       19 04 d2                                              ...
+          op string: [name] [goodname]
+       [append] @ 44 (5/5)
+       64 6e 61 6d  65                                       dname
+       [append] @ 49 (9/9)
+       68 67 6f 6f  64 6e 61 6d  - 65                        hgoodname
+          op string: [name] [goodname]
+       [append] @ 58 (5/5)
+       64 6e 61 6d  65                                       dname
+       [append] @ 63 (9/9)
+       68 67 6f 6f  64 6e 61 6d  - 65                        hgoodname
+          op close_container: [doc-examples] []
+       [append] @ 72 (1/1)
+       ff                                                    .
+        op open_container: [json-escape-sequences] []
+     [append] @ 73 (16/22)
+     75 6a 73 6f  6e 2d 65 73  - 63 61 70 65  2d 73 65 71  ujson-escape-seq
+     75 65 6e 63  65 73                                    uences
+     [append] @ 95 (1/1)
+     bf                                                    .
+          op string: [quotation-mark] ["]
+       [append] @ 96 (f/15)
+       6e 71 75 6f  74 61 74 69  - 6f 6e 2d 6d  61 72 6b     nquotation-mark
+       [append] @ 111 (2/2)
+       61 22                                                 a"
+          op string: [backslash] [\]
+       [append] @ 113 (a/10)
+       69 62 61 63  6b 73 6c 61  - 73 68                     ibackslash
+       [append] @ 123 (2/2)
+       61 5c                                                 a\
+          op string: [slash] [/]
+       [append] @ 125 (6/6)
+       65 73 6c 61  73 68                                    eslash
+       [append] @ 131 (2/2)
+       61 2f                                                 a/
+          op string: [slash2] [/]
+       [append] @ 133 (7/7)
+       66 73 6c 61  73 68 32                                 fslash2
+       [append] @ 140 (2/2)
+       61 2f                                                 a/
+          op string: [backspace] []
+       [append] @ 142 (a/10)
+       69 62 61 63  6b 73 70 61  - 63 65                     ibackspace
+       [append] @ 152 (2/2)
+       61 08                                                 a.
+          op string: [form-feed] []
+       [append] @ 154 (a/10)
+       69 66 6f 72  6d 2d 66 65  - 65 64                     iform-feed
+       [append] @ 164 (2/2)
+       61 0c                                                 a.
+          op string: [new-line] [
+]
+       [append] @ 166 (9/9)
+       68 6e 65 77  2d 6c 69 6e  - 65                        hnew-line
+       [append] @ 175 (2/2)
+       61 0a                                                 a.
+          op string: [carriage-return] []
+       [append] @ 177 (10/16)
+       6f 63 61 72  72 69 61 67  - 65 2d 72 65  74 75 72 6e  ocarriage-return
+       [append] @ 193 (2/2)
+       61 0d                                                 a.
+          op string: [horizontal-tab] [	]
+       [append] @ 195 (f/15)
+       6e 68 6f 72  69 7a 6f 6e  - 74 61 6c 2d  74 61 62     nhorizontal-tab
+       [append] @ 210 (2/2)
+       61 09                                                 a.
+          op open_list: [number] []
+       [append] @ 212 (7/7)
+       66 6e 75 6d  62 65 72                                 fnumber
+       [append] @ 219 (1/1)
+       9f                                                    .
+            op open_instance: [number] []
+         [append] @ 220 (1/1)
+         bf                                                    .
+              op content: [num] [1]
+           [append] @ 221 (4/4)
+           63 6e 75 6d                                           cnum
+           [content] @ 225 (1/1)
+           01                                                    .
+              op content: [hex] [1]
+           [append] @ 226 (4/4)
+           63 68 65 78                                           chex
+           [content] @ 230 (1/1)
+           01                                                    .
+              op content: [value] []
+           [append] @ 231 (6/6)
+           65 76 61 6c  75 65                                    evalue
+           [append] @ 237 (2/2)
+           61 01                                                 a.
+           [content] @ 237 (2/2)
+           61 01                                                 a.
+              op content: [pvalue] []
+           [append] @ 239 (7/7)
+           66 70 76 61  6c 75 65                                 fpvalue
+           [append] @ 246 (2/2)
+           61 01                                                 a.
+           [content] @ 246 (2/2)
+           61 01                                                 a.
+              op content: [svalue] []
+           [append] @ 248 (7/7)
+           66 73 76 61  6c 75 65                                 fsvalue
+           [append] @ 255 (2/2)
+           61 01                                                 a.
+           [content] @ 255 (2/2)
+           61 01                                                 a.
+              op close_instance: [number] []
+           [append] @ 257 (1/1)
+           ff                                                    .
+            op open_instance: [number] []
+         [append] @ 258 (1/1)
+         bf                                                    .
+              op content: [num] [2]
+           [append] @ 259 (4/4)
+           63 6e 75 6d                                           cnum
+           [content] @ 263 (1/1)
+           02                                                    .
+              op content: [hex] [2]
+           [append] @ 264 (4/4)
+           63 68 65 78                                           chex
+           [content] @ 268 (1/1)
+           02                                                    .
+              op content: [value] []
+           [append] @ 269 (6/6)
+           65 76 61 6c  75 65                                    evalue
+           [append] @ 275 (2/2)
+           61 02                                                 a.
+           [content] @ 275 (2/2)
+           61 02                                                 a.
+              op content: [pvalue] []
+           [append] @ 277 (7/7)
+           66 70 76 61  6c 75 65                                 fpvalue
+           [append] @ 284 (2/2)
+           61 02                                                 a.
+           [content] @ 284 (2/2)
+           61 02                                                 a.
+              op content: [svalue] []
+           [append] @ 286 (7/7)
+           66 73 76 61  6c 75 65                                 fsvalue
+           [append] @ 293 (2/2)
+           61 02                                                 a.
+           [content] @ 293 (2/2)
+           61 02                                                 a.
+              op close_instance: [number] []
+           [append] @ 295 (1/1)
+           ff                                                    .
+            op open_instance: [number] []
+         [append] @ 296 (1/1)
+         bf                                                    .
+              op content: [num] [3]
+           [append] @ 297 (4/4)
+           63 6e 75 6d                                           cnum
+           [content] @ 301 (1/1)
+           03                                                    .
+              op content: [hex] [3]
+           [append] @ 302 (4/4)
+           63 68 65 78                                           chex
+           [content] @ 306 (1/1)
+           03                                                    .
+              op content: [value] []
+           [append] @ 307 (6/6)
+           65 76 61 6c  75 65                                    evalue
+           [append] @ 313 (2/2)
+           61 03                                                 a.
+           [content] @ 313 (2/2)
+           61 03                                                 a.
+              op content: [pvalue] []
+           [append] @ 315 (7/7)
+           66 70 76 61  6c 75 65                                 fpvalue
+           [append] @ 322 (2/2)
+           61 03                                                 a.
+           [content] @ 322 (2/2)
+           61 03                                                 a.
+              op content: [svalue] []
+           [append] @ 324 (7/7)
+           66 73 76 61  6c 75 65                                 fsvalue
+           [append] @ 331 (2/2)
+           61 03                                                 a.
+           [content] @ 331 (2/2)
+           61 03                                                 a.
+              op close_instance: [number] []
+           [append] @ 333 (1/1)
+           ff                                                    .
+            op open_instance: [number] []
+         [append] @ 334 (1/1)
+         bf                                                    .
+              op content: [num] [4]
+           [append] @ 335 (4/4)
+           63 6e 75 6d                                           cnum
+           [content] @ 339 (1/1)
+           04                                                    .
+              op content: [hex] [4]
+           [append] @ 340 (4/4)
+           63 68 65 78                                           chex
+           [content] @ 344 (1/1)
+           04                                                    .
+              op content: [value] []
+           [append] @ 345 (6/6)
+           65 76 61 6c  75 65                                    evalue
+           [append] @ 351 (2/2)
+           61 04                                                 a.
+           [content] @ 351 (2/2)
+           61 04                                                 a.
+              op content: [pvalue] []
+           [append] @ 353 (7/7)
+           66 70 76 61  6c 75 65                                 fpvalue
+           [append] @ 360 (2/2)
+           61 04                                                 a.
+           [content] @ 360 (2/2)
+           61 04                                                 a.
+              op content: [svalue] []
+           [append] @ 362 (7/7)
+           66 73 76 61  6c 75 65                                 fsvalue
+           [append] @ 369 (2/2)
+           61 04                                                 a.
+           [content] @ 369 (2/2)
+           61 04                                                 a.
+              op close_instance: [number] []
+           [append] @ 371 (1/1)
+           ff                                                    .
+            op open_instance: [number] []
+         [append] @ 372 (1/1)
+         bf                                                    .
+              op content: [num] [5]
+           [append] @ 373 (4/4)
+           63 6e 75 6d                                           cnum
+           [content] @ 377 (1/1)
+           05                                                    .
+              op content: [hex] [5]
+           [append] @ 378 (4/4)
+           63 68 65 78                                           chex
+           [content] @ 382 (1/1)
+           05                                                    .
+              op content: [value] []
+           [append] @ 383 (6/6)
+           65 76 61 6c  75 65                                    evalue
+           [append] @ 389 (2/2)
+           61 05                                                 a.
+           [content] @ 389 (2/2)
+           61 05                                                 a.
+              op content: [pvalue] []
+           [append] @ 391 (7/7)
+           66 70 76 61  6c 75 65                                 fpvalue
+           [append] @ 398 (2/2)
+           61 05                                                 a.
+           [content] @ 398 (2/2)
+           61 05                                                 a.
+              op content: [svalue] []
+           [append] @ 400 (7/7)
+           66 73 76 61  6c 75 65                                 fsvalue
+           [append] @ 407 (2/2)
+           61 05                                                 a.
+           [content] @ 407 (2/2)
+           61 05                                                 a.
+              op close_instance: [number] []
+           [append] @ 409 (1/1)
+           ff                                                    .
+            op open_instance: [number] []
+         [append] @ 410 (1/1)
+         bf                                                    .
+              op content: [num] [6]
+           [append] @ 411 (4/4)
+           63 6e 75 6d                                           cnum
+           [content] @ 415 (1/1)
+           06                                                    .
+              op content: [hex] [6]
+           [append] @ 416 (4/4)
+           63 68 65 78                                           chex
+           [content] @ 420 (1/1)
+           06                                                    .
+              op content: [value] []
+           [append] @ 421 (6/6)
+           65 76 61 6c  75 65                                    evalue
+           [append] @ 427 (2/2)
+           61 06                                                 a.
+           [content] @ 427 (2/2)
+           61 06                                                 a.
+              op content: [pvalue] []
+           [append] @ 429 (7/7)
+           66 70 76 61  6c 75 65                                 fpvalue
+           [append] @ 436 (2/2)
+           61 06                                                 a.
+           [content] @ 436 (2/2)
+           61 06                                                 a.
+              op content: [svalue] []
+           [append] @ 438 (7/7)
+           66 73 76 61  6c 75 65                                 fsvalue
+           [append] @ 445 (2/2)
+           61 06                                                 a.
+           [content] @ 445 (2/2)
+           61 06                                                 a.
+              op close_instance: [number] []
+           [append] @ 447 (1/1)
+           ff                                                    .
+            op open_instance: [number] []
+         [append] @ 448 (1/1)
+         bf                                                    .
+              op content: [num] [7]
+           [append] @ 449 (4/4)
+           63 6e 75 6d                                           cnum
+           [content] @ 453 (1/1)
+           07                                                    .
+              op content: [hex] [7]
+           [append] @ 454 (4/4)
+           63 68 65 78                                           chex
+           [content] @ 458 (1/1)
+           07                                                    .
+              op content: [value] []
+           [append] @ 459 (6/6)
+           65 76 61 6c  75 65                                    evalue
+           [append] @ 465 (2/2)
+           61 07                                                 a.
+           [content] @ 465 (2/2)
+           61 07                                                 a.
+              op content: [pvalue] []
+           [append] @ 467 (7/7)
+           66 70 76 61  6c 75 65                                 fpvalue
+           [append] @ 474 (2/2)
+           61 07                                                 a.
+           [content] @ 474 (2/2)
+           61 07                                                 a.
+              op content: [svalue] []
+           [append] @ 476 (7/7)
+           66 73 76 61  6c 75 65                                 fsvalue
+           [append] @ 483 (2/2)
+           61 07                                                 a.
+           [content] @ 483 (2/2)
+           61 07                                                 a.
+              op close_instance: [number] []
+           [append] @ 485 (1/1)
+           ff                                                    .
+            op open_instance: [number] []
+         [append] @ 486 (1/1)
+         bf                                                    .
+              op content: [num] [8]
+           [append] @ 487 (4/4)
+           63 6e 75 6d                                           cnum
+           [content] @ 491 (1/1)
+           08                                                    .
+              op content: [hex] [8]
+           [append] @ 492 (4/4)
+           63 68 65 78                                           chex
+           [content] @ 496 (1/1)
+           08                                                    .
+              op content: [value] []
+           [append] @ 497 (6/6)
+           65 76 61 6c  75 65                                    evalue
+           [append] @ 503 (2/2)
+           61 08                                                 a.
+           [content] @ 503 (2/2)
+           61 08                                                 a.
+              op content: [pvalue] []
+           [append] @ 505 (7/7)
+           66 70 76 61  6c 75 65                                 fpvalue
+           [append] @ 512 (2/2)
+           61 08                                                 a.
+           [content] @ 512 (2/2)
+           61 08                                                 a.
+              op content: [svalue] []
+           [append] @ 514 (7/7)
+           66 73 76 61  6c 75 65                                 fsvalue
+           [append] @ 521 (2/2)
+           61 08                                                 a.
+           [content] @ 521 (2/2)
+           61 08                                                 a.
+              op close_instance: [number] []
+           [append] @ 523 (1/1)
+           ff                                                    .
+            op open_instance: [number] []
+         [append] @ 524 (1/1)
+         bf                                                    .
+              op content: [num] [9]
+           [append] @ 525 (4/4)
+           63 6e 75 6d                                           cnum
+           [content] @ 529 (1/1)
+           09                                                    .
+              op content: [hex] [9]
+           [append] @ 530 (4/4)
+           63 68 65 78                                           chex
+           [content] @ 534 (1/1)
+           09                                                    .
+              op content: [value] [	]
+           [append] @ 535 (6/6)
+           65 76 61 6c  75 65                                    evalue
+           [append] @ 541 (2/2)
+           61 09                                                 a.
+           [content] @ 541 (2/2)
+           61 09                                                 a.
+              op content: [pvalue] [	]
+           [append] @ 543 (7/7)
+           66 70 76 61  6c 75 65                                 fpvalue
+           [append] @ 550 (2/2)
+           61 09                                                 a.
+           [content] @ 550 (2/2)
+           61 09                                                 a.
+              op content: [svalue] [	]
+           [append] @ 552 (7/7)
+           66 73 76 61  6c 75 65                                 fsvalue
+           [append] @ 559 (2/2)
+           61 09                                                 a.
+           [content] @ 559 (2/2)
+           61 09                                                 a.
+              op close_instance: [number] []
+           [append] @ 561 (1/1)
+           ff                                                    .
+            op open_instance: [number] []
+         [append] @ 562 (1/1)
+         bf                                                    .
+              op content: [num] [10]
+           [append] @ 563 (4/4)
+           63 6e 75 6d                                           cnum
+           [content] @ 567 (1/1)
+           0a                                                    .
+              op content: [hex] [a]
+           [append] @ 568 (4/4)
+           63 68 65 78                                           chex
+           [append] @ 572 (2/2)
+           61 61                                                 aa
+           [content] @ 572 (2/2)
+           61 61                                                 aa
+              op content: [value] [
+]
+           [append] @ 574 (6/6)
+           65 76 61 6c  75 65                                    evalue
+           [append] @ 580 (2/2)
+           61 0a                                                 a.
+           [content] @ 580 (2/2)
+           61 0a                                                 a.
+              op content: [pvalue] [
+]
+           [append] @ 582 (7/7)
+           66 70 76 61  6c 75 65                                 fpvalue
+           [append] @ 589 (2/2)
+           61 0a                                                 a.
+           [content] @ 589 (2/2)
+           61 0a                                                 a.
+              op content: [svalue] [
+]
+           [append] @ 591 (7/7)
+           66 73 76 61  6c 75 65                                 fsvalue
+           [append] @ 598 (2/2)
+           61 0a                                                 a.
+           [content] @ 598 (2/2)
+           61 0a                                                 a.
+              op close_instance: [number] []
+           [append] @ 600 (1/1)
+           ff                                                    .
+            op open_instance: [number] []
+         [append] @ 601 (1/1)
+         bf                                                    .
+              op content: [num] [11]
+           [append] @ 602 (4/4)
+           63 6e 75 6d                                           cnum
+           [content] @ 606 (1/1)
+           0b                                                    .
+              op content: [hex] [b]
+           [append] @ 607 (4/4)
+           63 68 65 78                                           chex
+           [append] @ 611 (2/2)
+           61 62                                                 ab
+           [content] @ 611 (2/2)
+           61 62                                                 ab
+              op content: [value] []
+           [append] @ 613 (6/6)
+           65 76 61 6c  75 65                                    evalue
+           [append] @ 619 (2/2)
+           61 0b                                                 a.
+           [content] @ 619 (2/2)
+           61 0b                                                 a.
+              op content: [pvalue] []
+           [append] @ 621 (7/7)
+           66 70 76 61  6c 75 65                                 fpvalue
+           [append] @ 628 (2/2)
+           61 0b                                                 a.
+           [content] @ 628 (2/2)
+           61 0b                                                 a.
+              op content: [svalue] []
+           [append] @ 630 (7/7)
+           66 73 76 61  6c 75 65                                 fsvalue
+           [append] @ 637 (2/2)
+           61 0b                                                 a.
+           [content] @ 637 (2/2)
+           61 0b                                                 a.
+              op close_instance: [number] []
+           [append] @ 639 (1/1)
+           ff                                                    .
+            op open_instance: [number] []
+         [append] @ 640 (1/1)
+         bf                                                    .
+              op content: [num] [12]
+           [append] @ 641 (4/4)
+           63 6e 75 6d                                           cnum
+           [content] @ 645 (1/1)
+           0c                                                    .
+              op content: [hex] [c]
+           [append] @ 646 (4/4)
+           63 68 65 78                                           chex
+           [append] @ 650 (2/2)
+           61 63                                                 ac
+           [content] @ 650 (2/2)
+           61 63                                                 ac
+              op content: [value] []
+           [append] @ 652 (6/6)
+           65 76 61 6c  75 65                                    evalue
+           [append] @ 658 (2/2)
+           61 0c                                                 a.
+           [content] @ 658 (2/2)
+           61 0c                                                 a.
+              op content: [pvalue] []
+           [append] @ 660 (7/7)
+           66 70 76 61  6c 75 65                                 fpvalue
+           [append] @ 667 (2/2)
+           61 0c                                                 a.
+           [content] @ 667 (2/2)
+           61 0c                                                 a.
+              op content: [svalue] []
+           [append] @ 669 (7/7)
+           66 73 76 61  6c 75 65                                 fsvalue
+           [append] @ 676 (2/2)
+           61 0c                                                 a.
+           [content] @ 676 (2/2)
+           61 0c                                                 a.
+              op close_instance: [number] []
+           [append] @ 678 (1/1)
+           ff                                                    .
+            op open_instance: [number] []
+         [append] @ 679 (1/1)
+         bf                                                    .
+              op content: [num] [13]
+           [append] @ 680 (4/4)
+           63 6e 75 6d                                           cnum
+           [content] @ 684 (1/1)
+           0d                                                    .
+              op content: [hex] [d]
+           [append] @ 685 (4/4)
+           63 68 65 78                                           chex
+           [append] @ 689 (2/2)
+           61 64                                                 ad
+           [content] @ 689 (2/2)
+           61 64                                                 ad
+              op content: [value] []
+           [append] @ 691 (6/6)
+           65 76 61 6c  75 65                                    evalue
+           [append] @ 697 (2/2)
+           61 0d                                                 a.
+           [content] @ 697 (2/2)
+           61 0d                                                 a.
+              op content: [pvalue] []
+           [append] @ 699 (7/7)
+           66 70 76 61  6c 75 65                                 fpvalue
+           [append] @ 706 (2/2)
+           61 0d                                                 a.
+           [content] @ 706 (2/2)
+           61 0d                                                 a.
+              op content: [svalue] []
+           [append] @ 708 (7/7)
+           66 73 76 61  6c 75 65                                 fsvalue
+           [append] @ 715 (2/2)
+           61 0d                                                 a.
+           [content] @ 715 (2/2)
+           61 0d                                                 a.
+              op close_instance: [number] []
+           [append] @ 717 (1/1)
+           ff                                                    .
+            op open_instance: [number] []
+         [append] @ 718 (1/1)
+         bf                                                    .
+              op content: [num] [14]
+           [append] @ 719 (4/4)
+           63 6e 75 6d                                           cnum
+           [content] @ 723 (1/1)
+           0e                                                    .
+              op content: [hex] [e]
+           [append] @ 724 (4/4)
+           63 68 65 78                                           chex
+           [append] @ 728 (2/2)
+           61 65                                                 ae
+           [content] @ 728 (2/2)
+           61 65                                                 ae
+              op content: [value] []
+           [append] @ 730 (6/6)
+           65 76 61 6c  75 65                                    evalue
+           [append] @ 736 (2/2)
+           61 0e                                                 a.
+           [content] @ 736 (2/2)
+           61 0e                                                 a.
+              op content: [pvalue] []
+           [append] @ 738 (7/7)
+           66 70 76 61  6c 75 65                                 fpvalue
+           [append] @ 745 (2/2)
+           61 0e                                                 a.
+           [content] @ 745 (2/2)
+           61 0e                                                 a.
+              op content: [svalue] []
+           [append] @ 747 (7/7)
+           66 73 76 61  6c 75 65                                 fsvalue
+           [append] @ 754 (2/2)
+           61 0e                                                 a.
+           [content] @ 754 (2/2)
+           61 0e                                                 a.
+              op close_instance: [number] []
+           [append] @ 756 (1/1)
+           ff                                                    .
+            op open_instance: [number] []
+         [append] @ 757 (1/1)
+         bf                                                    .
+              op content: [num] [15]
+           [append] @ 758 (4/4)
+           63 6e 75 6d                                           cnum
+           [content] @ 762 (1/1)
+           0f                                                    .
+              op content: [hex] [f]
+           [append] @ 763 (4/4)
+           63 68 65 78                                           chex
+           [append] @ 767 (2/2)
+           61 66                                                 af
+           [content] @ 767 (2/2)
+           61 66                                                 af
+              op content: [value] []
+           [append] @ 769 (6/6)
+           65 76 61 6c  75 65                                    evalue
+           [append] @ 775 (2/2)
+           61 0f                                                 a.
+           [content] @ 775 (2/2)
+           61 0f                                                 a.
+              op content: [pvalue] []
+           [append] @ 777 (7/7)
+           66 70 76 61  6c 75 65                                 fpvalue
+           [append] @ 784 (2/2)
+           61 0f                                                 a.
+           [content] @ 784 (2/2)
+           61 0f                                                 a.
+              op content: [svalue] []
+           [append] @ 786 (7/7)
+           66 73 76 61  6c 75 65                                 fsvalue
+           [append] @ 793 (2/2)
+           61 0f                                                 a.
+           [content] @ 793 (2/2)
+           61 0f                                                 a.
+              op close_instance: [number] []
+           [append] @ 795 (1/1)
+           ff                                                    .
+            op open_instance: [number] []
+         [append] @ 796 (1/1)
+         bf                                                    .
+              op content: [num] [16]
+           [append] @ 797 (4/4)
+           63 6e 75 6d                                           cnum
+           [content] @ 801 (1/1)
+           10                                                    .
+              op content: [hex] [10]
+           [append] @ 802 (4/4)
+           63 68 65 78                                           chex
+           [content] @ 806 (1/1)
+           0a                                                    .
+              op content: [value] []
+           [append] @ 807 (6/6)
+           65 76 61 6c  75 65                                    evalue
+           [append] @ 813 (2/2)
+           61 10                                                 a.
+           [content] @ 813 (2/2)
+           61 10                                                 a.
+              op content: [pvalue] []
+           [append] @ 815 (7/7)
+           66 70 76 61  6c 75 65                                 fpvalue
+           [append] @ 822 (2/2)
+           61 10                                                 a.
+           [content] @ 822 (2/2)
+           61 10                                                 a.
+              op content: [svalue] []
+           [append] @ 824 (7/7)
+           66 73 76 61  6c 75 65                                 fsvalue
+           [append] @ 831 (2/2)
+           61 10                                                 a.
+           [content] @ 831 (2/2)
+           61 10                                                 a.
+              op close_instance: [number] []
+           [append] @ 833 (1/1)
+           ff                                                    .
+            op open_instance: [number] []
+         [append] @ 834 (1/1)
+         bf                                                    .
+              op content: [num] [17]
+           [append] @ 835 (4/4)
+           63 6e 75 6d                                           cnum
+           [content] @ 839 (1/1)
+           11                                                    .
+              op content: [hex] [11]
+           [append] @ 840 (4/4)
+           63 68 65 78                                           chex
+           [content] @ 844 (1/1)
+           0b                                                    .
+              op content: [value] []
+           [append] @ 845 (6/6)
+           65 76 61 6c  75 65                                    evalue
+           [append] @ 851 (2/2)
+           61 11                                                 a.
+           [content] @ 851 (2/2)
+           61 11                                                 a.
+              op content: [pvalue] []
+           [append] @ 853 (7/7)
+           66 70 76 61  6c 75 65                                 fpvalue
+           [append] @ 860 (2/2)
+           61 11                                                 a.
+           [content] @ 860 (2/2)
+           61 11                                                 a.
+              op content: [svalue] []
+           [append] @ 862 (7/7)
+           66 73 76 61  6c 75 65                                 fsvalue
+           [append] @ 869 (2/2)
+           61 11                                                 a.
+           [content] @ 869 (2/2)
+           61 11                                                 a.
+              op close_instance: [number] []
+           [append] @ 871 (1/1)
+           ff                                                    .
+            op open_instance: [number] []
+         [append] @ 872 (1/1)
+         bf                                                    .
+              op content: [num] [18]
+           [append] @ 873 (4/4)
+           63 6e 75 6d                                           cnum
+           [content] @ 877 (1/1)
+           12                                                    .
+              op content: [hex] [12]
+           [append] @ 878 (4/4)
+           63 68 65 78                                           chex
+           [content] @ 882 (1/1)
+           0c                                                    .
+              op content: [value] []
+           [append] @ 883 (6/6)
+           65 76 61 6c  75 65                                    evalue
+           [append] @ 889 (2/2)
+           61 12                                                 a.
+           [content] @ 889 (2/2)
+           61 12                                                 a.
+              op content: [pvalue] []
+           [append] @ 891 (7/7)
+           66 70 76 61  6c 75 65                                 fpvalue
+           [append] @ 898 (2/2)
+           61 12                                                 a.
+           [content] @ 898 (2/2)
+           61 12                                                 a.
+              op content: [svalue] []
+           [append] @ 900 (7/7)
+           66 73 76 61  6c 75 65                                 fsvalue
+           [append] @ 907 (2/2)
+           61 12                                                 a.
+           [content] @ 907 (2/2)
+           61 12                                                 a.
+              op close_instance: [number] []
+           [append] @ 909 (1/1)
+           ff                                                    .
+            op open_instance: [number] []
+         [append] @ 910 (1/1)
+         bf                                                    .
+              op content: [num] [19]
+           [append] @ 911 (4/4)
+           63 6e 75 6d                                           cnum
+           [content] @ 915 (1/1)
+           13                                                    .
+              op content: [hex] [13]
+           [append] @ 916 (4/4)
+           63 68 65 78                                           chex
+           [content] @ 920 (1/1)
+           0d                                                    .
+              op content: [value] []
+           [append] @ 921 (6/6)
+           65 76 61 6c  75 65                                    evalue
+           [append] @ 927 (2/2)
+           61 13                                                 a.
+           [content] @ 927 (2/2)
+           61 13                                                 a.
+              op content: [pvalue] []
+           [append] @ 929 (7/7)
+           66 70 76 61  6c 75 65                                 fpvalue
+           [append] @ 936 (2/2)
+           61 13                                                 a.
+           [content] @ 936 (2/2)
+           61 13                                                 a.
+              op content: [svalue] []
+           [append] @ 938 (7/7)
+           66 73 76 61  6c 75 65                                 fsvalue
+           [append] @ 945 (2/2)
+           61 13                                                 a.
+           [content] @ 945 (2/2)
+           61 13                                                 a.
+              op close_instance: [number] []
+           [append] @ 947 (1/1)
+           ff                                                    .
+            op open_instance: [number] []
+         [append] @ 948 (1/1)
+         bf                                                    .
+              op content: [num] [20]
+           [append] @ 949 (4/4)
+           63 6e 75 6d                                           cnum
+           [content] @ 953 (1/1)
+           14                                                    .
+              op content: [hex] [14]
+           [append] @ 954 (4/4)
+           63 68 65 78                                           chex
+           [content] @ 958 (1/1)
+           0e                                                    .
+              op content: [value] []
+           [append] @ 959 (6/6)
+           65 76 61 6c  75 65                                    evalue
+           [append] @ 965 (2/2)
+           61 14                                                 a.
+           [content] @ 965 (2/2)
+           61 14                                                 a.
+              op content: [pvalue] []
+           [append] @ 967 (7/7)
+           66 70 76 61  6c 75 65                                 fpvalue
+           [append] @ 974 (2/2)
+           61 14                                                 a.
+           [content] @ 974 (2/2)
+           61 14                                                 a.
+              op content: [svalue] []
+           [append] @ 976 (7/7)
+           66 73 76 61  6c 75 65                                 fsvalue
+           [append] @ 983 (2/2)
+           61 14                                                 a.
+           [content] @ 983 (2/2)
+           61 14                                                 a.
+              op close_instance: [number] []
+           [append] @ 985 (1/1)
+           ff                                                    .
+            op open_instance: [number] []
+         [append] @ 986 (1/1)
+         bf                                                    .
+              op content: [num] [21]
+           [append] @ 987 (4/4)
+           63 6e 75 6d                                           cnum
+           [content] @ 991 (1/1)
+           15                                                    .
+              op content: [hex] [15]
+           [append] @ 992 (4/4)
+           63 68 65 78                                           chex
+           [content] @ 996 (1/1)
+           0f                                                    .
+              op content: [value] []
+           [append] @ 997 (6/6)
+           65 76 61 6c  75 65                                    evalue
+           [append] @ 1003 (2/2)
+           61 15                                                 a.
+           [content] @ 1003 (2/2)
+           61 15                                                 a.
+              op content: [pvalue] []
+           [append] @ 1005 (7/7)
+           66 70 76 61  6c 75 65                                 fpvalue
+           [append] @ 1012 (2/2)
+           61 15                                                 a.
+           [content] @ 1012 (2/2)
+           61 15                                                 a.
+              op content: [svalue] []
+           [append] @ 1014 (7/7)
+           66 73 76 61  6c 75 65                                 fsvalue
+           [append] @ 1021 (2/2)
+           61 15                                                 a.
+           [content] @ 1021 (2/2)
+           61 15                                                 a.
+              op close_instance: [number] []
+           [append] @ 1023 (1/1)
+           ff                                                    .
+            op open_instance: [number] []
+         [append] @ 1024 (1/1)
+         bf                                                    .
+              op content: [num] [22]
+           [append] @ 1025 (4/4)
+           63 6e 75 6d                                           cnum
+           [content] @ 1029 (1/1)
+           16                                                    .
+              op content: [hex] [16]
+           [append] @ 1030 (4/4)
+           63 68 65 78                                           chex
+           [content] @ 1034 (1/1)
+           10                                                    .
+              op content: [value] []
+           [append] @ 1035 (6/6)
+           65 76 61 6c  75 65                                    evalue
+           [append] @ 1041 (2/2)
+           61 16                                                 a.
+           [content] @ 1041 (2/2)
+           61 16                                                 a.
+              op content: [pvalue] []
+           [append] @ 1043 (7/7)
+           66 70 76 61  6c 75 65                                 fpvalue
+           [append] @ 1050 (2/2)
+           61 16                                                 a.
+           [content] @ 1050 (2/2)
+           61 16                                                 a.
+              op content: [svalue] []
+           [append] @ 1052 (7/7)
+           66 73 76 61  6c 75 65                                 fsvalue
+           [append] @ 1059 (2/2)
+           61 16                                                 a.
+           [content] @ 1059 (2/2)
+           61 16                                                 a.
+              op close_instance: [number] []
+           [append] @ 1061 (1/1)
+           ff                                                    .
+            op open_instance: [number] []
+         [append] @ 1062 (1/1)
+         bf                                                    .
+              op content: [num] [23]
+           [append] @ 1063 (4/4)
+           63 6e 75 6d                                           cnum
+           [content] @ 1067 (1/1)
+           17                                                    .
+              op content: [hex] [17]
+           [append] @ 1068 (4/4)
+           63 68 65 78                                           chex
+           [content] @ 1072 (1/1)
+           11                                                    .
+              op content: [value] []
+           [append] @ 1073 (6/6)
+           65 76 61 6c  75 65                                    evalue
+           [append] @ 1079 (2/2)
+           61 17                                                 a.
+           [content] @ 1079 (2/2)
+           61 17                                                 a.
+              op content: [pvalue] []
+           [append] @ 1081 (7/7)
+           66 70 76 61  6c 75 65                                 fpvalue
+           [append] @ 1088 (2/2)
+           61 17                                                 a.
+           [content] @ 1088 (2/2)
+           61 17                                                 a.
+              op content: [svalue] []
+           [append] @ 1090 (7/7)
+           66 73 76 61  6c 75 65                                 fsvalue
+           [append] @ 1097 (2/2)
+           61 17                                                 a.
+           [content] @ 1097 (2/2)
+           61 17                                                 a.
+              op close_instance: [number] []
+           [append] @ 1099 (1/1)
+           ff                                                    .
+            op open_instance: [number] []
+         [append] @ 1100 (1/1)
+         bf                                                    .
+              op content: [num] [24]
+           [append] @ 1101 (4/4)
+           63 6e 75 6d                                           cnum
+           [content] @ 1105 (2/2)
+           18 18                                                 ..
+              op content: [hex] [18]
+           [append] @ 1107 (4/4)
+           63 68 65 78                                           chex
+           [content] @ 1111 (1/1)
+           12                                                    .
+              op content: [value] []
+           [append] @ 1112 (6/6)
+           65 76 61 6c  75 65                                    evalue
+           [append] @ 1118 (2/2)
+           61 18                                                 a.
+           [content] @ 1118 (2/2)
+           61 18                                                 a.
+              op content: [pvalue] []
+           [append] @ 1120 (7/7)
+           66 70 76 61  6c 75 65                                 fpvalue
+           [append] @ 1127 (2/2)
+           61 18                                                 a.
+           [content] @ 1127 (2/2)
+           61 18                                                 a.
+              op content: [svalue] []
+           [append] @ 1129 (7/7)
+           66 73 76 61  6c 75 65                                 fsvalue
+           [append] @ 1136 (2/2)
+           61 18                                                 a.
+           [content] @ 1136 (2/2)
+           61 18                                                 a.
+              op close_instance: [number] []
+           [append] @ 1138 (1/1)
+           ff                                                    .
+            op open_instance: [number] []
+         [append] @ 1139 (1/1)
+         bf                                                    .
+              op content: [num] [25]
+           [append] @ 1140 (4/4)
+           63 6e 75 6d                                           cnum
+           [content] @ 1144 (2/2)
+           18 19                                                 ..
+              op content: [hex] [19]
+           [append] @ 1146 (4/4)
+           63 68 65 78                                           chex
+           [content] @ 1150 (1/1)
+           13                                                    .
+              op content: [value] []
+           [append] @ 1151 (6/6)
+           65 76 61 6c  75 65                                    evalue
+           [append] @ 1157 (2/2)
+           61 19                                                 a.
+           [content] @ 1157 (2/2)
+           61 19                                                 a.
+              op content: [pvalue] []
+           [append] @ 1159 (7/7)
+           66 70 76 61  6c 75 65                                 fpvalue
+           [append] @ 1166 (2/2)
+           61 19                                                 a.
+           [content] @ 1166 (2/2)
+           61 19                                                 a.
+              op content: [svalue] []
+           [append] @ 1168 (7/7)
+           66 73 76 61  6c 75 65                                 fsvalue
+           [append] @ 1175 (2/2)
+           61 19                                                 a.
+           [content] @ 1175 (2/2)
+           61 19                                                 a.
+              op close_instance: [number] []
+           [append] @ 1177 (1/1)
+           ff                                                    .
+            op open_instance: [number] []
+         [append] @ 1178 (1/1)
+         bf                                                    .
+              op content: [num] [26]
+           [append] @ 1179 (4/4)
+           63 6e 75 6d                                           cnum
+           [content] @ 1183 (2/2)
+           18 1a                                                 ..
+              op content: [hex] [1a]
+           [append] @ 1185 (4/4)
+           63 68 65 78                                           chex
+           [append] @ 1189 (3/3)
+           62 31 61                                              b1a
+           [content] @ 1189 (3/3)
+           62 31 61                                              b1a
+              op content: [value] []
+           [append] @ 1192 (6/6)
+           65 76 61 6c  75 65                                    evalue
+           [append] @ 1198 (2/2)
+           61 1a                                                 a.
+           [content] @ 1198 (2/2)
+           61 1a                                                 a.
+              op content: [pvalue] []
+           [append] @ 1200 (7/7)
+           66 70 76 61  6c 75 65                                 fpvalue
+           [append] @ 1207 (2/2)
+           61 1a                                                 a.
+           [content] @ 1207 (2/2)
+           61 1a                                                 a.
+              op content: [svalue] []
+           [append] @ 1209 (7/7)
+           66 73 76 61  6c 75 65                                 fsvalue
+           [append] @ 1216 (2/2)
+           61 1a                                                 a.
+           [content] @ 1216 (2/2)
+           61 1a                                                 a.
+              op close_instance: [number] []
+           [append] @ 1218 (1/1)
+           ff                                                    .
+            op open_instance: [number] []
+         [append] @ 1219 (1/1)
+         bf                                                    .
+              op content: [num] [27]
+           [append] @ 1220 (4/4)
+           63 6e 75 6d                                           cnum
+           [content] @ 1224 (2/2)
+           18 1b                                                 ..
+              op content: [hex] [1b]
+           [append] @ 1226 (4/4)
+           63 68 65 78                                           chex
+           [append] @ 1230 (3/3)
+           62 31 62                                              b1b
+           [content] @ 1230 (3/3)
+           62 31 62                                              b1b
+              op content: [value] []
+           [append] @ 1233 (6/6)
+           65 76 61 6c  75 65                                    evalue
+           [append] @ 1239 (2/2)
+           61 1b                                                 a.
+           [content] @ 1239 (2/2)
+           61 1b                                                 a.
+              op content: [pvalue] []
+           [append] @ 1241 (7/7)
+           66 70 76 61  6c 75 65                                 fpvalue
+           [append] @ 1248 (2/2)
+           61 1b                                                 a.
+           [content] @ 1248 (2/2)
+           61 1b                                                 a.
+              op content: [svalue] []
+           [append] @ 1250 (7/7)
+           66 73 76 61  6c 75 65                                 fsvalue
+           [append] @ 1257 (2/2)
+           61 1b                                                 a.
+           [content] @ 1257 (2/2)
+           61 1b                                                 a.
+              op close_instance: [number] []
+           [append] @ 1259 (1/1)
+           ff                                                    .
+            op open_instance: [number] []
+         [append] @ 1260 (1/1)
+         bf                                                    .
+              op content: [num] [28]
+           [append] @ 1261 (4/4)
+           63 6e 75 6d                                           cnum
+           [content] @ 1265 (2/2)
+           18 1c                                                 ..
+              op content: [hex] [1c]
+           [append] @ 1267 (4/4)
+           63 68 65 78                                           chex
+           [append] @ 1271 (3/3)
+           62 31 63                                              b1c
+           [content] @ 1271 (3/3)
+           62 31 63                                              b1c
+              op content: [value] []
+           [append] @ 1274 (6/6)
+           65 76 61 6c  75 65                                    evalue
+           [append] @ 1280 (2/2)
+           61 1c                                                 a.
+           [content] @ 1280 (2/2)
+           61 1c                                                 a.
+              op content: [pvalue] []
+           [append] @ 1282 (7/7)
+           66 70 76 61  6c 75 65                                 fpvalue
+           [append] @ 1289 (2/2)
+           61 1c                                                 a.
+           [content] @ 1289 (2/2)
+           61 1c                                                 a.
+              op content: [svalue] []
+           [append] @ 1291 (7/7)
+           66 73 76 61  6c 75 65                                 fsvalue
+           [append] @ 1298 (2/2)
+           61 1c                                                 a.
+           [content] @ 1298 (2/2)
+           61 1c                                                 a.
+              op close_instance: [number] []
+           [append] @ 1300 (1/1)
+           ff                                                    .
+            op open_instance: [number] []
+         [append] @ 1301 (1/1)
+         bf                                                    .
+              op content: [num] [29]
+           [append] @ 1302 (4/4)
+           63 6e 75 6d                                           cnum
+           [content] @ 1306 (2/2)
+           18 1d                                                 ..
+              op content: [hex] [1d]
+           [append] @ 1308 (4/4)
+           63 68 65 78                                           chex
+           [append] @ 1312 (3/3)
+           62 31 64                                              b1d
+           [content] @ 1312 (3/3)
+           62 31 64                                              b1d
+              op content: [value] []
+           [append] @ 1315 (6/6)
+           65 76 61 6c  75 65                                    evalue
+           [append] @ 1321 (2/2)
+           61 1d                                                 a.
+           [content] @ 1321 (2/2)
+           61 1d                                                 a.
+              op content: [pvalue] []
+           [append] @ 1323 (7/7)
+           66 70 76 61  6c 75 65                                 fpvalue
+           [append] @ 1330 (2/2)
+           61 1d                                                 a.
+           [content] @ 1330 (2/2)
+           61 1d                                                 a.
+              op content: [svalue] []
+           [append] @ 1332 (7/7)
+           66 73 76 61  6c 75 65                                 fsvalue
+           [append] @ 1339 (2/2)
+           61 1d                                                 a.
+           [content] @ 1339 (2/2)
+           61 1d                                                 a.
+              op close_instance: [number] []
+           [append] @ 1341 (1/1)
+           ff                                                    .
+            op open_instance: [number] []
+         [append] @ 1342 (1/1)
+         bf                                                    .
+              op content: [num] [30]
+           [append] @ 1343 (4/4)
+           63 6e 75 6d                                           cnum
+           [content] @ 1347 (2/2)
+           18 1e                                                 ..
+              op content: [hex] [1e]
+           [append] @ 1349 (4/4)
+           63 68 65 78                                           chex
+           [append] @ 1353 (3/3)
+           62 31 65                                              b1e
+           [content] @ 1353 (3/3)
+           62 31 65                                              b1e
+              op content: [value] []
+           [append] @ 1356 (6/6)
+           65 76 61 6c  75 65                                    evalue
+           [append] @ 1362 (2/2)
+           61 1e                                                 a.
+           [content] @ 1362 (2/2)
+           61 1e                                                 a.
+              op content: [pvalue] []
+           [append] @ 1364 (7/7)
+           66 70 76 61  6c 75 65                                 fpvalue
+           [append] @ 1371 (2/2)
+           61 1e                                                 a.
+           [content] @ 1371 (2/2)
+           61 1e                                                 a.
+              op content: [svalue] []
+           [append] @ 1373 (7/7)
+           66 73 76 61  6c 75 65                                 fsvalue
+           [append] @ 1380 (2/2)
+           61 1e                                                 a.
+           [content] @ 1380 (2/2)
+           61 1e                                                 a.
+              op close_instance: [number] []
+           [append] @ 1382 (1/1)
+           ff                                                    .
+            op open_instance: [number] []
+         [append] @ 1383 (1/1)
+         bf                                                    .
+              op content: [num] [31]
+           [append] @ 1384 (4/4)
+           63 6e 75 6d                                           cnum
+           [content] @ 1388 (2/2)
+           18 1f                                                 ..
+              op content: [hex] [1f]
+           [append] @ 1390 (4/4)
+           63 68 65 78                                           chex
+           [append] @ 1394 (3/3)
+           62 31 66                                              b1f
+           [content] @ 1394 (3/3)
+           62 31 66                                              b1f
+              op content: [value] []
+           [append] @ 1397 (6/6)
+           65 76 61 6c  75 65                                    evalue
+           [append] @ 1403 (2/2)
+           61 1f                                                 a.
+           [content] @ 1403 (2/2)
+           61 1f                                                 a.
+              op content: [pvalue] []
+           [append] @ 1405 (7/7)
+           66 70 76 61  6c 75 65                                 fpvalue
+           [append] @ 1412 (2/2)
+           61 1f                                                 a.
+           [content] @ 1412 (2/2)
+           61 1f                                                 a.
+              op content: [svalue] []
+           [append] @ 1414 (7/7)
+           66 73 76 61  6c 75 65                                 fsvalue
+           [append] @ 1421 (2/2)
+           61 1f                                                 a.
+           [content] @ 1421 (2/2)
+           61 1f                                                 a.
+              op close_instance: [number] []
+           [append] @ 1423 (1/1)
+           ff                                                    .
+            op close_list: [number] []
+         [append] @ 1424 (1/1)
+         ff                                                    .
+          op close_container: [json-escape-sequences] []
+       [append] @ 1425 (1/1)
+       ff                                                    .
+        op open_list: [entry] []
+     [append] @ 1426 (6/6)
+     65 65 6e 74  72 79                                    eentry
+     [append] @ 1432 (1/1)
+     9f                                                    .
+          op open_instance: [entry] []
+       [append] @ 1433 (1/1)
+       bf                                                    .
+            op string: [name] [xx-00000000]
+         [append] @ 1434 (5/5)
+         64 6e 61 6d  65                                       dname
+         [append] @ 1439 (c/12)
+         6b 78 78 2d  30 30 30 30  - 30 30 30 30               kxx-00000000
+            op content: [inode] [12]
+         [append] @ 1451 (6/6)
+         65 69 6e 6f  64 65                                    einode
+         [content] @ 1457 (1/1)
+         0c                                                    .
+            op content: [blocks] [1234]
+         [append] @ 1458 (7/7)
+         66 62 6c 6f  63 6b 73                                 fblocks
+         [content] @ 1465 (3/3)
+         19 04 d2                                              ...
+            op string: [mode] [mode]
+         [append] @ 1468 (5/5)
+         64 6d 6f 64  65                                       dmode
+         [append] @ 1473 (5/5)
+         64 6d 6f 64  65                                       dmode
+            op content: [mode_octal] [660]
+         [append] @ 1478 (b/11)
+         6a 6d 6f 64  65 5f 6f 63  - 74 61 6c                  jmode_octal
+         [content] @ 1489 (3/3)
+         19 02 94                                              ...
+            op content: [links] [12]
+         [append] @ 1492 (6/6)
+         65 6c 69 6e  6b 73                                    elinks
+         [content] @ 1498 (1/1)
+         0c                                                    .
+            op string: [user] [phil]
+         [append] @ 1499 (5/5)
+         64 75 73 65  72                                       duser
+         [append] @ 1504 (5/5)
+         64 70 68 69  6c                                       dphil
+            op string: [group] [phil]
+         [append] @ 1509 (6/6)
+         65 67 72 6f  75 70                                    egroup
+         [append] @ 1515 (5/5)
+         64 70 68 69  6c                                       dphil
+            op string: [type] [regular]
+         [append] @ 1520 (5/5)
+         64 74 79 70  65                                       dtype
+         [append] @ 1525 (8/8)
+         67 72 65 67  75 6c 61 72                              gregular
+            op string: [flags] [123]
+         [append] @ 1533 (6/6)
+         65 66 6c 61  67 73                                    eflags
+         [append] @ 1539 (4/4)
+         63 31 32 33                                           c123
+            op string: [label] [1234]
+         [append] @ 1543 (6/6)
+         65 6c 61 62  65 6c                                    elabel
+         [append] @ 1549 (5/5)
+         64 31 32 33  34                                       d1234
+            op content: [size] [12345]
+         [append] @ 1554 (5/5)
+         64 73 69 7a  65                                       dsize
+         [content] @ 1559 (3/3)
+         19 30 39                                              .09
+            op attr: [value] [1644355825]
+            op content: [modify-time] [1644355825]
+         [append] @ 1562 (c/12)
+         6b 6d 6f 64  69 66 79 2d  - 74 69 6d 65               kmodify-time
+         [content] @ 1574 (5/5)
+         1a 62 02 e0  f1                                       .b...
+            op close_instance: [entry] []
+         [append] @ 1579 (1/1)
+         ff                                                    .
+          op open_instance: [entry] []
+       [append] @ 1580 (1/1)
+       bf                                                    .
+            op string: [name] [xx-00000001]
+         [append] @ 1581 (5/5)
+         64 6e 61 6d  65                                       dname
+         [append] @ 1586 (c/12)
+         6b 78 78 2d  30 30 30 30  - 30 30 30 31               kxx-00000001
+            op content: [inode] [12]
+         [append] @ 1598 (6/6)
+         65 69 6e 6f  64 65                                    einode
+         [content] @ 1604 (1/1)
+         0c                                                    .
+            op content: [blocks] [1234]
+         [append] @ 1605 (7/7)
+         66 62 6c 6f  63 6b 73                                 fblocks
+         [content] @ 1612 (3/3)
+         19 04 d2                                              ...
+            op string: [mode] [mode]
+         [append] @ 1615 (5/5)
+         64 6d 6f 64  65                                       dmode
+         [append] @ 1620 (5/5)
+         64 6d 6f 64  65                                       dmode
+            op content: [mode_octal] [660]
+         [append] @ 1625 (b/11)
+         6a 6d 6f 64  65 5f 6f 63  - 74 61 6c                  jmode_octal
+         [content] @ 1636 (3/3)
+         19 02 94                                              ...
+            op content: [links] [12]
+         [append] @ 1639 (6/6)
+         65 6c 69 6e  6b 73                                    elinks
+         [content] @ 1645 (1/1)
+         0c                                                    .
+            op string: [user] [phil]
+         [append] @ 1646 (5/5)
+         64 75 73 65  72                                       duser
+         [append] @ 1651 (5/5)
+         64 70 68 69  6c                                       dphil
+            op string: [group] [phil]
+         [append] @ 1656 (6/6)
+         65 67 72 6f  75 70                                    egroup
+         [append] @ 1662 (5/5)
+         64 70 68 69  6c                                       dphil
+            op string: [type] [regular]
+         [append] @ 1667 (5/5)
+         64 74 79 70  65                                       dtype
+         [append] @ 1672 (8/8)
+         67 72 65 67  75 6c 61 72                              gregular
+            op string: [flags] [123]
+         [append] @ 1680 (6/6)
+         65 66 6c 61  67 73                                    eflags
+         [append] @ 1686 (4/4)
+         63 31 32 33                                           c123
+            op string: [label] [1234]
+         [append] @ 1690 (6/6)
+         65 6c 61 62  65 6c                                    elabel
+         [append] @ 1696 (5/5)
+         64 31 32 33  34                                       d1234
+            op content: [size] [12345]
+         [append] @ 1701 (5/5)
+         64 73 69 7a  65                                       dsize
+         [content] @ 1706 (3/3)
+         19 30 39                                              .09
+            op attr: [value] [1644355825]
+            op content: [modify-time] [1644355825]
+         [append] @ 1709 (c/12)
+         6b 6d 6f 64  69 66 79 2d  - 74 69 6d 65               kmodify-time
+         [content] @ 1721 (5/5)
+         1a 62 02 e0  f1                                       .b...
+            op close_instance: [entry] []
+         [append] @ 1726 (1/1)
+         ff                                                    .
+          op open_instance: [entry] []
+       [append] @ 1727 (1/1)
+       bf                                                    .
+            op string: [name] [xx-00000002]
+         [append] @ 1728 (5/5)
+         64 6e 61 6d  65                                       dname
+         [append] @ 1733 (c/12)
+         6b 78 78 2d  30 30 30 30  - 30 30 30 32               kxx-00000002
+            op content: [inode] [12]
+         [append] @ 1745 (6/6)
+         65 69 6e 6f  64 65                                    einode
+         [content] @ 1751 (1/1)
+         0c                                                    .
+            op content: [blocks] [1234]
+         [append] @ 1752 (7/7)
+         66 62 6c 6f  63 6b 73                                 fblocks
+         [content] @ 1759 (3/3)
+         19 04 d2                                              ...
+            op string: [mode] [mode]
+         [append] @ 1762 (5/5)
+         64 6d 6f 64  65                                       dmode
+         [append] @ 1767 (5/5)
+         64 6d 6f 64  65                                       dmode
+            op content: [mode_octal] [660]
+         [append] @ 1772 (b/11)
+         6a 6d 6f 64  65 5f 6f 63  - 74 61 6c                  jmode_octal
+         [content] @ 1783 (3/3)
+         19 02 94                                              ...
+            op content: [links] [12]
+         [append] @ 1786 (6/6)
+         65 6c 69 6e  6b 73                                    elinks
+         [content] @ 1792 (1/1)
+         0c                                                    .
+            op string: [user] [phil]
+         [append] @ 1793 (5/5)
+         64 75 73 65  72                                       duser
+         [append] @ 1798 (5/5)
+         64 70 68 69  6c                                       dphil
+            op string: [group] [phil]
+         [append] @ 1803 (6/6)
+         65 67 72 6f  75 70                                    egroup
+         [append] @ 1809 (5/5)
+         64 70 68 69  6c                                       dphil
+            op string: [type] [regular]
+         [append] @ 1814 (5/5)
+         64 74 79 70  65                                       dtype
+         [append] @ 1819 (8/8)
+         67 72 65 67  75 6c 61 72                              gregular
+            op string: [flags] [123]
+         [append] @ 1827 (6/6)
+         65 66 6c 61  67 73                                    eflags
+         [append] @ 1833 (4/4)
+         63 31 32 33                                           c123
+            op string: [label] [1234]
+         [append] @ 1837 (6/6)
+         65 6c 61 62  65 6c                                    elabel
+         [append] @ 1843 (5/5)
+         64 31 32 33  34                                       d1234
+            op content: [size] [12345]
+         [append] @ 1848 (5/5)
+         64 73 69 7a  65                                       dsize
+         [content] @ 1853 (3/3)
+         19 30 39                                              .09
+            op attr: [value] [1644355825]
+            op content: [modify-time] [1644355825]
+         [append] @ 1856 (c/12)
+         6b 6d 6f 64  69 66 79 2d  - 74 69 6d 65               kmodify-time
+         [content] @ 1868 (5/5)
+         1a 62 02 e0  f1                                       .b...
+            op close_instance: [entry] []
+         [append] @ 1873 (1/1)
+         ff                                                    .
+          op open_instance: [entry] []
+       [append] @ 1874 (1/1)
+       bf                                                    .
+            op string: [name] [xx-00000003]
+         [append] @ 1875 (5/5)
+         64 6e 61 6d  65                                       dname
+         [append] @ 1880 (c/12)
+         6b 78 78 2d  30 30 30 30  - 30 30 30 33               kxx-00000003
+            op content: [inode] [12]
+         [append] @ 1892 (6/6)
+         65 69 6e 6f  64 65                                    einode
+         [content] @ 1898 (1/1)
+         0c                                                    .
+            op content: [blocks] [1234]
+         [append] @ 1899 (7/7)
+         66 62 6c 6f  63 6b 73                                 fblocks
+         [content] @ 1906 (3/3)
+         19 04 d2                                              ...
+            op string: [mode] [mode]
+         [append] @ 1909 (5/5)
+         64 6d 6f 64  65                                       dmode
+         [append] @ 1914 (5/5)
+         64 6d 6f 64  65                                       dmode
+            op content: [mode_octal] [660]
+         [append] @ 1919 (b/11)
+         6a 6d 6f 64  65 5f 6f 63  - 74 61 6c                  jmode_octal
+         [content] @ 1930 (3/3)
+         19 02 94                                              ...
+            op content: [links] [12]
+         [append] @ 1933 (6/6)
+         65 6c 69 6e  6b 73                                    elinks
+         [content] @ 1939 (1/1)
+         0c                                                    .
+            op string: [user] [phil]
+         [append] @ 1940 (5/5)
+         64 75 73 65  72                                       duser
+         [append] @ 1945 (5/5)
+         64 70 68 69  6c                                       dphil
+            op string: [group] [phil]
+         [append] @ 1950 (6/6)
+         65 67 72 6f  75 70                                    egroup
+         [append] @ 1956 (5/5)
+         64 70 68 69  6c                                       dphil
+            op string: [type] [regular]
+         [append] @ 1961 (5/5)
+         64 74 79 70  65                                       dtype
+         [append] @ 1966 (8/8)
+         67 72 65 67  75 6c 61 72                              gregular
+            op string: [flags] [123]
+         [append] @ 1974 (6/6)
+         65 66 6c 61  67 73                                    eflags
+         [append] @ 1980 (4/4)
+         63 31 32 33                                           c123
+            op string: [label] [1234]
+         [append] @ 1984 (6/6)
+         65 6c 61 62  65 6c                                    elabel
+         [append] @ 1990 (5/5)
+         64 31 32 33  34                                       d1234
+            op content: [size] [12345]
+         [append] @ 1995 (5/5)
+         64 73 69 7a  65                                       dsize
+         [content] @ 2000 (3/3)
+         19 30 39                                              .09
+            op attr: [value] [1644355825]
+            op content: [modify-time] [1644355825]
+         [append] @ 2003 (c/12)
+         6b 6d 6f 64  69 66 79 2d  - 74 69 6d 65               kmodify-time
+         [content] @ 2015 (5/5)
+         1a 62 02 e0  f1                                       .b...
+            op close_instance: [entry] []
+         [append] @ 2020 (1/1)
+         ff                                                    .
+          op open_instance: [entry] []
+       [append] @ 2021 (1/1)
+       bf                                                    .
+            op string: [name] [xx-00000004]
+         [append] @ 2022 (5/5)
+         64 6e 61 6d  65                                       dname
+         [append] @ 2027 (c/12)
+         6b 78 78 2d  30 30 30 30  - 30 30 30 34               kxx-00000004
+            op content: [inode] [12]
+         [append] @ 2039 (6/6)
+         65 69 6e 6f  64 65                                    einode
+         [content] @ 2045 (1/1)
+         0c                                                    .
+            op content: [blocks] [1234]
+         [append] @ 2046 (7/7)
+         66 62 6c 6f  63 6b 73                                 fblocks
+         [content] @ 2053 (3/3)
+         19 04 d2                                              ...
+            op string: [mode] [mode]
+         [append] @ 2056 (5/5)
+         64 6d 6f 64  65                                       dmode
+         [append] @ 2061 (5/5)
+         64 6d 6f 64  65                                       dmode
+            op content: [mode_octal] [660]
+         [append] @ 2066 (b/11)
+         6a 6d 6f 64  65 5f 6f 63  - 74 61 6c                  jmode_octal
+         [content] @ 2077 (3/3)
+         19 02 94                                              ...
+            op content: [links] [12]
+         [append] @ 2080 (6/6)
+         65 6c 69 6e  6b 73                                    elinks
+         [content] @ 2086 (1/1)
+         0c                                                    .
+            op string: [user] [phil]
+         [append] @ 2087 (5/5)
+         64 75 73 65  72                                       duser
+         [append] @ 2092 (5/5)
+         64 70 68 69  6c                                       dphil
+            op string: [group] [phil]
+         [append] @ 2097 (6/6)
+         65 67 72 6f  75 70                                    egroup
+         [append] @ 2103 (5/5)
+         64 70 68 69  6c                                       dphil
+            op string: [type] [regular]
+         [append] @ 2108 (5/5)
+         64 74 79 70  65                                       dtype
+         [append] @ 2113 (8/8)
+         67 72 65 67  75 6c 61 72                              gregular
+            op string: [flags] [123]
+         [append] @ 2121 (6/6)
+         65 66 6c 61  67 73                                    eflags
+         [append] @ 2127 (4/4)
+         63 31 32 33                                           c123
+            op string: [label] [1234]
+         [append] @ 2131 (6/6)
+         65 6c 61 62  65 6c                                    elabel
+         [append] @ 2137 (5/5)
+         64 31 32 33  34                                       d1234
+            op content: [size] [12345]
+         [append] @ 2142 (5/5)
+         64 73 69 7a  65                                       dsize
+         [content] @ 2147 (3/3)
+         19 30 39                                              .09
+            op attr: [value] [1644355825]
+            op content: [modify-time] [1644355825]
+         [append] @ 2150 (c/12)
+         6b 6d 6f 64  69 66 79 2d  - 74 69 6d 65               kmodify-time
+         [content] @ 2162 (5/5)
+         1a 62 02 e0  f1                                       .b...
+            op close_instance: [entry] []
+         [append] @ 2167 (1/1)
+         ff                                                    .
+          op open_instance: [entry] []
+       [append] @ 2168 (1/1)
+       bf                                                    .
+            op string: [name] [xx-00000005]
+         [append] @ 2169 (5/5)
+         64 6e 61 6d  65                                       dname
+         [append] @ 2174 (c/12)
+         6b 78 78 2d  30 30 30 30  - 30 30 30 35               kxx-00000005
+            op content: [inode] [12]
+         [append] @ 2186 (6/6)
+         65 69 6e 6f  64 65                                    einode
+         [content] @ 2192 (1/1)
+         0c                                                    .
+            op content: [blocks] [1234]
+         [append] @ 2193 (7/7)
+         66 62 6c 6f  63 6b 73                                 fblocks
+         [content] @ 2200 (3/3)
+         19 04 d2                                              ...
+            op string: [mode] [mode]
+         [append] @ 2203 (5/5)
+         64 6d 6f 64  65                                       dmode
+         [append] @ 2208 (5/5)
+         64 6d 6f 64  65                                       dmode
+            op content: [mode_octal] [660]
+         [append] @ 2213 (b/11)
+         6a 6d 6f 64  65 5f 6f 63  - 74 61 6c                  jmode_octal
+         [content] @ 2224 (3/3)
+         19 02 94                                              ...
+            op content: [links] [12]
+         [append] @ 2227 (6/6)
+         65 6c 69 6e  6b 73                                    elinks
+         [content] @ 2233 (1/1)
+         0c                                                    .
+            op string: [user] [phil]
+         [append] @ 2234 (5/5)
+         64 75 73 65  72                                       duser
+         [append] @ 2239 (5/5)
+         64 70 68 69  6c                                       dphil
+            op string: [group] [phil]
+         [append] @ 2244 (6/6)
+         65 67 72 6f  75 70                                    egroup
+         [append] @ 2250 (5/5)
+         64 70 68 69  6c                                       dphil
+            op string: [type] [regular]
+         [append] @ 2255 (5/5)
+         64 74 79 70  65                                       dtype
+         [append] @ 2260 (8/8)
+         67 72 65 67  75 6c 61 72                              gregular
+            op string: [flags] [123]
+         [append] @ 2268 (6/6)
+         65 66 6c 61  67 73                                    eflags
+         [append] @ 2274 (4/4)
+         63 31 32 33                                           c123
+            op string: [label] [1234]
+         [append] @ 2278 (6/6)
+         65 6c 61 62  65 6c                                    elabel
+         [append] @ 2284 (5/5)
+         64 31 32 33  34                                       d1234
+            op content: [size] [12345]
+         [append] @ 2289 (5/5)
+         64 73 69 7a  65                                       dsize
+         [content] @ 2294 (3/3)
+         19 30 39                                              .09
+            op attr: [value] [1644355825]
+            op content: [modify-time] [1644355825]
+         [append] @ 2297 (c/12)
+         6b 6d 6f 64  69 66 79 2d  - 74 69 6d 65               kmodify-time
+         [content] @ 2309 (5/5)
+         1a 62 02 e0  f1                                       .b...
+            op close_instance: [entry] []
+         [append] @ 2314 (1/1)
+         ff                                                    .
+          op open_instance: [entry] []
+       [append] @ 2315 (1/1)
+       bf                                                    .
+            op string: [name] [xx-00000006]
+         [append] @ 2316 (5/5)
+         64 6e 61 6d  65                                       dname
+         [append] @ 2321 (c/12)
+         6b 78 78 2d  30 30 30 30  - 30 30 30 36               kxx-00000006
+            op content: [inode] [12]
+         [append] @ 2333 (6/6)
+         65 69 6e 6f  64 65                                    einode
+         [content] @ 2339 (1/1)
+         0c                                                    .
+            op content: [blocks] [1234]
+         [append] @ 2340 (7/7)
+         66 62 6c 6f  63 6b 73                                 fblocks
+         [content] @ 2347 (3/3)
+         19 04 d2                                              ...
+            op string: [mode] [mode]
+         [append] @ 2350 (5/5)
+         64 6d 6f 64  65                                       dmode
+         [append] @ 2355 (5/5)
+         64 6d 6f 64  65                                       dmode
+            op content: [mode_octal] [660]
+         [append] @ 2360 (b/11)
+         6a 6d 6f 64  65 5f 6f 63  - 74 61 6c                  jmode_octal
+         [content] @ 2371 (3/3)
+         19 02 94                                              ...
+            op content: [links] [12]
+         [append] @ 2374 (6/6)
+         65 6c 69 6e  6b 73                                    elinks
+         [content] @ 2380 (1/1)
+         0c                                                    .
+            op string: [user] [phil]
+         [append] @ 2381 (5/5)
+         64 75 73 65  72                                       duser
+         [append] @ 2386 (5/5)
+         64 70 68 69  6c                                       dphil
+            op string: [group] [phil]
+         [append] @ 2391 (6/6)
+         65 67 72 6f  75 70                                    egroup
+         [append] @ 2397 (5/5)
+         64 70 68 69  6c                                       dphil
+            op string: [type] [regular]
+         [append] @ 2402 (5/5)
+         64 74 79 70  65                                       dtype
+         [append] @ 2407 (8/8)
+         67 72 65 67  75 6c 61 72                              gregular
+            op string: [flags] [123]
+         [append] @ 2415 (6/6)
+         65 66 6c 61  67 73                                    eflags
+         [append] @ 2421 (4/4)
+         63 31 32 33                                           c123
+            op string: [label] [1234]
+         [append] @ 2425 (6/6)
+         65 6c 61 62  65 6c                                    elabel
+         [append] @ 2431 (5/5)
+         64 31 32 33  34                                       d1234
+            op content: [size] [12345]
+         [append] @ 2436 (5/5)
+         64 73 69 7a  65                                       dsize
+         [content] @ 2441 (3/3)
+         19 30 39                                              .09
+            op attr: [value] [1644355825]
+            op content: [modify-time] [1644355825]
+         [append] @ 2444 (c/12)
+         6b 6d 6f 64  69 66 79 2d  - 74 69 6d 65               kmodify-time
+         [content] @ 2456 (5/5)
+         1a 62 02 e0  f1                                       .b...
+            op close_instance: [entry] []
+         [append] @ 2461 (1/1)
+         ff                                                    .
+          op open_instance: [entry] []
+       [append] @ 2462 (1/1)
+       bf                                                    .
+            op string: [name] [xx-00000007]
+         [append] @ 2463 (5/5)
+         64 6e 61 6d  65                                       dname
+         [append] @ 2468 (c/12)
+         6b 78 78 2d  30 30 30 30  - 30 30 30 37               kxx-00000007
+            op content: [inode] [12]
+         [append] @ 2480 (6/6)
+         65 69 6e 6f  64 65                                    einode
+         [content] @ 2486 (1/1)
+         0c                                                    .
+            op content: [blocks] [1234]
+         [append] @ 2487 (7/7)
+         66 62 6c 6f  63 6b 73                                 fblocks
+         [content] @ 2494 (3/3)
+         19 04 d2                                              ...
+            op string: [mode] [mode]
+         [append] @ 2497 (5/5)
+         64 6d 6f 64  65                                       dmode
+         [append] @ 2502 (5/5)
+         64 6d 6f 64  65                                       dmode
+            op content: [mode_octal] [660]
+         [append] @ 2507 (b/11)
+         6a 6d 6f 64  65 5f 6f 63  - 74 61 6c                  jmode_octal
+         [content] @ 2518 (3/3)
+         19 02 94                                              ...
+            op content: [links] [12]
+         [append] @ 2521 (6/6)
+         65 6c 69 6e  6b 73                                    elinks
+         [content] @ 2527 (1/1)
+         0c                                                    .
+            op string: [user] [phil]
+         [append] @ 2528 (5/5)
+         64 75 73 65  72                                       duser
+         [append] @ 2533 (5/5)
+         64 70 68 69  6c                                       dphil
+            op string: [group] [phil]
+         [append] @ 2538 (6/6)
+         65 67 72 6f  75 70                                    egroup
+         [append] @ 2544 (5/5)
+         64 70 68 69  6c                                       dphil
+            op string: [type] [regular]
+         [append] @ 2549 (5/5)
+         64 74 79 70  65                                       dtype
+         [append] @ 2554 (8/8)
+         67 72 65 67  75 6c 61 72                              gregular
+            op string: [flags] [123]
+         [append] @ 2562 (6/6)
+         65 66 6c 61  67 73                                    eflags
+         [append] @ 2568 (4/4)
+         63 31 32 33                                           c123
+            op string: [label] [1234]
+         [append] @ 2572 (6/6)
+         65 6c 61 62  65 6c                                    elabel
+         [append] @ 2578 (5/5)
+         64 31 32 33  34                                       d1234
+            op content: [size] [12345]
+         [append] @ 2583 (5/5)
+         64 73 69 7a  65                                       dsize
+         [content] @ 2588 (3/3)
+         19 30 39                                              .09
+            op attr: [value] [1644355825]
+            op content: [modify-time] [1644355825]
+         [append] @ 2591 (c/12)
+         6b 6d 6f 64  69 66 79 2d  - 74 69 6d 65               kmodify-time
+         [content] @ 2603 (5/5)
+         1a 62 02 e0  f1                                       .b...
+            op close_instance: [entry] []
+         [append] @ 2608 (1/1)
+         ff                                                    .
+          op open_instance: [entry] []
+       [append] @ 2609 (1/1)
+       bf                                                    .
+            op string: [name] [xx-00000008]
+         [append] @ 2610 (5/5)
+         64 6e 61 6d  65                                       dname
+         [append] @ 2615 (c/12)
+         6b 78 78 2d  30 30 30 30  - 30 30 30 38               kxx-00000008
+            op content: [inode] [12]
+         [append] @ 2627 (6/6)
+         65 69 6e 6f  64 65                                    einode
+         [content] @ 2633 (1/1)
+         0c                                                    .
+            op content: [blocks] [1234]
+         [append] @ 2634 (7/7)
+         66 62 6c 6f  63 6b 73                                 fblocks
+         [content] @ 2641 (3/3)
+         19 04 d2                                              ...
+            op string: [mode] [mode]
+         [append] @ 2644 (5/5)
+         64 6d 6f 64  65                                       dmode
+         [append] @ 2649 (5/5)
+         64 6d 6f 64  65                                       dmode
+            op content: [mode_octal] [660]
+         [append] @ 2654 (b/11)
+         6a 6d 6f 64  65 5f 6f 63  - 74 61 6c                  jmode_octal
+         [content] @ 2665 (3/3)
+         19 02 94                                              ...
+            op content: [links] [12]
+         [append] @ 2668 (6/6)
+         65 6c 69 6e  6b 73                                    elinks
+         [content] @ 2674 (1/1)
+         0c                                                    .
+            op string: [user] [phil]
+         [append] @ 2675 (5/5)
+         64 75 73 65  72                                       duser
+         [append] @ 2680 (5/5)
+         64 70 68 69  6c                                       dphil
+            op string: [group] [phil]
+         [append] @ 2685 (6/6)
+         65 67 72 6f  75 70                                    egroup
+         [append] @ 2691 (5/5)
+         64 70 68 69  6c                                       dphil
+            op string: [type] [regular]
+         [append] @ 2696 (5/5)
+         64 74 79 70  65                                       dtype
+         [append] @ 2701 (8/8)
+         67 72 65 67  75 6c 61 72                              gregular
+            op string: [flags] [123]
+         [append] @ 2709 (6/6)
+         65 66 6c 61  67 73                                    eflags
+         [append] @ 2715 (4/4)
+         63 31 32 33                                           c123
+            op string: [label] [1234]
+         [append] @ 2719 (6/6)
+         65 6c 61 62  65 6c                                    elabel
+         [append] @ 2725 (5/5)
+         64 31 32 33  34                                       d1234
+            op content: [size] [12345]
+         [append] @ 2730 (5/5)
+         64 73 69 7a  65                                       dsize
+         [content] @ 2735 (3/3)
+         19 30 39                                              .09
+            op attr: [value] [1644355825]
+            op content: [modify-time] [1644355825]
+         [append] @ 2738 (c/12)
+         6b 6d 6f 64  69 66 79 2d  - 74 69 6d 65               kmodify-time
+         [content] @ 2750 (5/5)
+         1a 62 02 e0  f1                                       .b...
+            op close_instance: [entry] []
+         [append] @ 2755 (1/1)
+         ff                                                    .
+          op open_instance: [entry] []
+       [append] @ 2756 (1/1)
+       bf                                                    .
+            op string: [name] [xx-00000009]
+         [append] @ 2757 (5/5)
+         64 6e 61 6d  65                                       dname
+         [append] @ 2762 (c/12)
+         6b 78 78 2d  30 30 30 30  - 30 30 30 39               kxx-00000009
+            op content: [inode] [12]
+         [append] @ 2774 (6/6)
+         65 69 6e 6f  64 65                                    einode
+         [content] @ 2780 (1/1)
+         0c                                                    .
+            op content: [blocks] [1234]
+         [append] @ 2781 (7/7)
+         66 62 6c 6f  63 6b 73                                 fblocks
+         [content] @ 2788 (3/3)
+         19 04 d2                                              ...
+            op string: [mode] [mode]
+         [append] @ 2791 (5/5)
+         64 6d 6f 64  65                                       dmode
+         [append] @ 2796 (5/5)
+         64 6d 6f 64  65                                       dmode
+            op content: [mode_octal] [660]
+         [append] @ 2801 (b/11)
+         6a 6d 6f 64  65 5f 6f 63  - 74 61 6c                  jmode_octal
+         [content] @ 2812 (3/3)
+         19 02 94                                              ...
+            op content: [links] [12]
+         [append] @ 2815 (6/6)
+         65 6c 69 6e  6b 73                                    elinks
+         [content] @ 2821 (1/1)
+         0c                                                    .
+            op string: [user] [phil]
+         [append] @ 2822 (5/5)
+         64 75 73 65  72                                       duser
+         [append] @ 2827 (5/5)
+         64 70 68 69  6c                                       dphil
+            op string: [group] [phil]
+         [append] @ 2832 (6/6)
+         65 67 72 6f  75 70                                    egroup
+         [append] @ 2838 (5/5)
+         64 70 68 69  6c                                       dphil
+            op string: [type] [regular]
+         [append] @ 2843 (5/5)
+         64 74 79 70  65                                       dtype
+         [append] @ 2848 (8/8)
+         67 72 65 67  75 6c 61 72                              gregular
+            op string: [flags] [123]
+         [append] @ 2856 (6/6)
+         65 66 6c 61  67 73                                    eflags
+         [append] @ 2862 (4/4)
+         63 31 32 33                                           c123
+            op string: [label] [1234]
+         [append] @ 2866 (6/6)
+         65 6c 61 62  65 6c                                    elabel
+         [append] @ 2872 (5/5)
+         64 31 32 33  34                                       d1234
+            op content: [size] [12345]
+         [append] @ 2877 (5/5)
+         64 73 69 7a  65                                       dsize
+         [content] @ 2882 (3/3)
+         19 30 39                                              .09
+            op attr: [value] [1644355825]
+            op content: [modify-time] [1644355825]
+         [append] @ 2885 (c/12)
+         6b 6d 6f 64  69 66 79 2d  - 74 69 6d 65               kmodify-time
+         [content] @ 2897 (5/5)
+         1a 62 02 e0  f1                                       .b...
+            op close_instance: [entry] []
+         [append] @ 2902 (1/1)
+         ff                                                    .
+          op close_list: [entry] []
+       [append] @ 2903 (1/1)
+       ff                                                    .
+        op close_container: [data] []
+     [append] @ 2904 (1/1)
+     ff                                                    .
+      op close_container: [top] []
+   [append] @ 2905 (1/1)
+   ff                                                    .
+    op finish: [] []
+ [append] @ 2906 (1/1)
+ ff                                                    .
+  op flush: [] []
+>[cbor] @ 0 (b5b/2907)
+>bf 63 74 6f  70 bf 64 64  - 61 74 61 bf  6c 64 6f 63  .ctop.ddata.ldoc
+>2d 65 78 61  6d 70 6c 65  - 73 bf 65 63  6f 75 6e 74  -examples.ecount
+>19 04 d2 65  63 6f 75 6e  - 74 19 04 d2  64 6e 61 6d  ...ecount...dnam
+>65 68 67 6f  6f 64 6e 61  - 6d 65 64 6e  61 6d 65 68  ehgoodnamednameh
+>67 6f 6f 64  6e 61 6d 65  - ff 75 6a 73  6f 6e 2d 65  goodname.ujson-e
+>73 63 61 70  65 2d 73 65  - 71 75 65 6e  63 65 73 bf  scape-sequences.
+>6e 71 75 6f  74 61 74 69  - 6f 6e 2d 6d  61 72 6b 61  nquotation-marka
+>22 69 62 61  63 6b 73 6c  - 61 73 68 61  5c 65 73 6c  "ibackslasha\esl
+>61 73 68 61  2f 66 73 6c  - 61 73 68 32  61 2f 69 62  asha/fslash2a/ib
+>61 63 6b 73  70 61 63 65  - 61 08 69 66  6f 72 6d 2d  ackspacea.iform-
+>66 65 65 64  61 0c 68 6e  - 65 77 2d 6c  69 6e 65 61  feeda.hnew-linea
+>0a 6f 63 61  72 72 69 61  - 67 65 2d 72  65 74 75 72  .ocarriage-retur
+>6e 61 0d 6e  68 6f 72 69  - 7a 6f 6e 74  61 6c 2d 74  na.nhorizontal-t
+>61 62 61 09  66 6e 75 6d  - 62 65 72 9f  bf 63 6e 75  aba.fnumber..cnu
+>6d 01 63 68  65 78 01 65  - 76 61 6c 75  65 61 01 66  m.chex.evaluea.f
+>70 76 61 6c  75 65 61 01  - 66 73 76 61  6c 75 65 61  pvaluea.fsvaluea
+>01 ff bf 63  6e 75 6d 02  - 63 68 65 78  02 65 76 61  ...cnum.chex.eva
+>6c 75 65 61  02 66 70 76  - 61 6c 75 65  61 02 66 73  luea.fpvaluea.fs
+>76 61 6c 75  65 61 02 ff  - bf 63 6e 75  6d 03 63 68  valuea...cnum.ch
+>65 78 03 65  76 61 6c 75  - 65 61 03 66  70 76 61 6c  ex.evaluea.fpval
+>75 65 61 03  66 73 76 61  - 6c 75 65 61  03 ff bf 63  uea.fsvaluea...c
+>6e 75 6d 04  63 68 65 78  - 04 65 76 61  6c 75 65 61  num.chex.evaluea
+>04 66 70 76  61 6c 75 65  - 61 04 66 73  76 61 6c 75  .fpvaluea.fsvalu
+>65 61 04 ff  bf 63 6e 75  - 6d 05 63 68  65 78 05 65  ea...cnum.chex.e
+>76 61 6c 75  65 61 05 66  - 70 76 61 6c  75 65 61 05  valuea.fpvaluea.
+>66 73 76 61  6c 75 65 61  - 05 ff bf 63  6e 75 6d 06  fsvaluea...cnum.
+>63 68 65 78  06 65 76 61  - 6c 75 65 61  06 66 70 76  chex.evaluea.fpv
+>61 6c 75 65  61 06 66 73  - 76 61 6c 75  65 61 06 ff  aluea.fsvaluea..
+>bf 63 6e 75  6d 07 63 68  - 65 78 07 65  76 61 6c 75  .cnum.chex.evalu
+>65 61 07 66  70 76 61 6c  - 75 65 61 07  66 73 76 61  ea.fpvaluea.fsva
+>6c 75 65 61  07 ff bf 63  - 6e 75 6d 08  63 68 65 78  luea...cnum.chex
+>08 65 76 61  6c 75 65 61  - 08 66 70 76  61 6c 75 65  .evaluea.fpvalue
+>61 08 66 73  76 61 6c 75  - 65 61 08 ff  bf 63 6e 75  a.fsvaluea...cnu
+>6d 09 63 68  65 78 09 65  - 76 61 6c 75  65 61 09 66  m.chex.evaluea.f
+>70 76 61 6c  75 65 61 09  - 66 73 76 61  6c 75 65 61  pvaluea.fsvaluea
+>09 ff bf 63  6e 75 6d 0a  - 63 68 65 78  61 61 65 76  ...cnum.chexaaev
+>61 6c 75 65  61 0a 66 70  - 76 61 6c 75  65 61 0a 66  aluea.fpvaluea.f
+>73 76 61 6c  75 65 61 0a  - ff bf 63 6e  75 6d 0b 63  svaluea...cnum.c
+>68 65 78 61  62 65 76 61  - 6c 75 65 61  0b 66 70 76  hexabevaluea.fpv
+>61 6c 75 65  61 0b 66 73  - 76 61 6c 75  65 61 0b ff  aluea.fsvaluea..
+>bf 63 6e 75  6d 0c 63 68  - 65 78 61 63  65 76 61 6c  .cnum.chexaceval
+>75 65 61 0c  66 70 76 61  - 6c 75 65 61  0c 66 73 76  uea.fpvaluea.fsv
+>61 6c 75 65  61 0c ff bf  - 63 6e 75 6d  0d 63 68 65  aluea...cnum.che
+>78 61 64 65  76 61 6c 75  - 65 61 0d 66  70 76 61 6c  xadevaluea.fpval
+>75 65 61 0d  66 73 76 61  - 6c 75 65 61  0d ff bf 63  uea.fsvaluea...c
+>6e 75 6d 0e  63 68 65 78  - 61 65 65 76  61 6c 75 65  num.chexaeevalue
+>61 0e 66 70  76 61 6c 75  - 65 61 0e 66  73 76 61 6c  a.fpvaluea.fsval
+>75 65 61 0e  ff bf 63 6e  - 75 6d 0f 63  68 65 78 61  uea...cnum.chexa
+>66 65 76 61  6c 75 65 61  - 0f 66 70 76  61 6c 75 65  fevaluea.fpvalue
+>61 0f 66 73  76 61 6c 75  - 65 61 0f ff  bf 63 6e 75  a.fsvaluea...cnu
+>6d 10 63 68  65 78 0a 65  - 76 61 6c 75  65 61 10 66  m.chex.evaluea.f
+>70 76 61 6c  75 65 61 10  - 66 73 76 61  6c 75 65 61  pvaluea.fsvaluea
+>10 ff bf 63  6e 75 6d 11  - 63 68 65 78  0b 65 76 61  ...cnum.chex.eva
+>6c 75 65 61  11 66 70 76  - 61 6c 75 65  61 11 66 73  luea.fpvaluea.fs
+>76 61 6c 75  65 61 11 ff  - bf 63 6e 75  6d 12 63 68  valuea...cnum.ch
+>65 78 0c 65  76 61 6c 75  - 65 61 12 66  70 76 61 6c  ex.evaluea.fpval
+>75 65 61 12  66 73 76 61  - 6c 75 65 61  12 ff bf 63  uea.fsvaluea...c
+>6e 75 6d 13  63 68 65 78  - 0d 65 76 61  6c 75 65 61  num.chex.evaluea
+>13 66 70 76  61 6c 75 65  - 61 13 66 73  76 61 6c 75  .fpvaluea.fsvalu
+>65 61 13 ff  bf 63 6e 75  - 6d 14 63 68  65 78 0e 65  ea...cnum.chex.e
+>76 61 6c 75  65 61 14 66  - 70 76 61 6c  75 65 61 14  valuea.fpvaluea.
+>66 73 76 61  6c 75 65 61  - 14 ff bf 63  6e 75 6d 15  fsvaluea...cnum.
+>63 68 65 78  0f 65 76 61  - 6c 75 65 61  15 66 70 76  chex.evaluea.fpv
+>61 6c 75 65  61 15 66 73  - 76 61 6c 75  65 61 15 ff  aluea.fsvaluea..
+>bf 63 6e 75  6d 16 63 68  - 65 78 10 65  76 61 6c 75  .cnum.chex.evalu
+>65 61 16 66  70 76 61 6c  - 75 65 61 16  66 73 76 61  ea.fpvaluea.fsva
+>6c 75 65 61  16 ff bf 63  - 6e 75 6d 17  63 68 65 78  luea...cnum.chex
+>11 65 76 61  6c 75 65 61  - 17 66 70 76  61 6c 75 65  .evaluea.fpvalue
+>61 17 66 73  76 61 6c 75  - 65 61 17 ff  bf 63 6e 75  a.fsvaluea...cnu
+>6d 18 18 63  68 65 78 12  - 65 76 61 6c  75 65 61 18  m..chex.evaluea.
+>66 70 76 61  6c 75 65 61  - 18 66 73 76  61 6c 75 65  fpvaluea.fsvalue
+>61 18 ff bf  63 6e 75 6d  - 18 19 63 68  65 78 13 65  a...cnum..chex.e
+>76 61 6c 75  65 61 19 66  - 70 76 61 6c  75 65 61 19  valuea.fpvaluea.
+>66 73 76 61  6c 75 65 61  - 19 ff bf 63  6e 75 6d 18  fsvaluea...cnum.
+>1a 63 68 65  78 62 31 61  - 65 76 61 6c  75 65 61 1a  .chexb1aevaluea.
+>66 70 76 61  6c 75 65 61  - 1a 66 73 76  61 6c 75 65  fpvaluea.fsvalue
+>61 1a ff bf  63 6e 75 6d  - 18 1b 63 68  65 78 62 31  a...cnum..chexb1
+>62 65 76 61  6c 75 65 61  - 1b 66 70 76  61 6c 75 65  bevaluea.fpvalue
+>61 1b 66 73  76 61 6c 75  - 65 61 1b ff  bf 63 6e 75  a.fsvaluea...cnu
+>6d 18 1c 63  68 65 78 62  - 31 63 65 76  61 6c 75 65  m..chexb1cevalue
+>61 1c 66 70  76 61 6c 75  - 65 61 1c 66  73 76 61 6c  a.fpvaluea.fsval
+>75 65 61 1c  ff bf 63 6e  - 75 6d 18 1d  63 68 65 78  uea...cnum..chex
+>62 31 64 65  76 61 6c 75  - 65 61 1d 66  70 76 61 6c  b1devaluea.fpval
+>75 65 61 1d  66 73 76 61  - 6c 75 65 61  1d ff bf 63  uea.fsvaluea...c
+>6e 75 6d 18  1e 63 68 65  - 78 62 31 65  65 76 61 6c  num..chexb1eeval
+>75 65 61 1e  66 70 76 61  - 6c 75 65 61  1e 66 73 76  uea.fpvaluea.fsv
+>61 6c 75 65  61 1e ff bf  - 63 6e 75 6d  18 1f 63 68  aluea...cnum..ch
+>65 78 62 31  66 65 76 61  - 6c 75 65 61  1f 66 70 76  exb1fevaluea.fpv
+>61 6c 75 65  61 1f 66 73  - 76 61 6c 75  65 61 1f ff  aluea.fsvaluea..
+>ff ff 65 65  6e 74 72 79  - 9f bf 64 6e  61 6d 65 6b  ..eentry..dnamek
+>78 78 2d 30  30 30 30 30  - 30 30 30 65  69 6e 6f 64  xx-00000000einod
+>65 0c 66 62  6c 6f 63 6b  - 73 19 04 d2  64 6d 6f 64  e.fblocks...dmod
+>65 64 6d 6f  64 65 6a 6d  - 6f 64 65 5f  6f 63 74 61  edmodejmode_octa
+>6c 19 02 94  65 6c 69 6e  - 6b 73 0c 64  75 73 65 72  l...elinks.duser
+>64 70 68 69  6c 65 67 72  - 6f 75 70 64  70 68 69 6c  dphilegroupdphil
+>64 74 79 70  65 67 72 65  - 67 75 6c 61  72 65 66 6c  dtypegregularefl
+>61 67 73 63  31 32 33 65  - 6c 61 62 65  6c 64 31 32  agsc123elabeld12
+>33 34 64 73  69 7a 65 19  - 30 39 6b 6d  6f 64 69 66  34dsize.09kmodif
+>79 2d 74 69  6d 65 1a 62  - 02 e0 f1 ff  bf 64 6e 61  y-time.b.....dna
+>6d 65 6b 78  78 2d 30 30  - 30 30 30 30  30 31 65 69  mekxx-00000001ei
+>6e 6f 64 65  0c 66 62 6c  - 6f 63 6b 73  19 04 d2 64  node.fblocks...d
+>6d 6f 64 65  64 6d 6f 64  - 65 6a 6d 6f  64 65 5f 6f  modedmodejmode_o
+>63 74 61 6c  19 02 94 65  - 6c 69 6e 6b  73 0c 64 75  ctal...elinks.du
+>73 65 72 64  70 68 69 6c  - 65 67 72 6f  75 70 64 70  serdphilegroupdp
+>68 69 6c 64  74 79 70 65  - 67 72 65 67  75 6c 61 72  hildtypegregular
+>65 66 6c 61  67 73 63 31  - 32 33 65 6c  61 62 65 6c  eflagsc123elabel
+>64 31 32 33  34 64 73 69  - 7a 65 19 30  39 6b 6d 6f  d1234dsize.09kmo
+>64 69 66 79  2d 74 69 6d  - 65 1a 62 02  e0 f1 ff bf  dify-time.b.....
+>64 6e 61 6d  65 6b 78 78  - 2d 30 30 30  30 30 30 30  dnamekxx-0000000
+>32 65 69 6e  6f 64 65 0c  - 66 62 6c 6f  63 6b 73 19  2einode.fblocks.
+>04 d2 64 6d  6f 64 65 64  - 6d 6f 64 65  6a 6d 6f 64  ..dmodedmodejmod
+>65 5f 6f 63  74 61 6c 19  - 02 94 65 6c  69 6e 6b 73  e_octal...elinks
+>0c 64 75 73  65 72 64 70  - 68 69 6c 65  67 72 6f 75  .duserdphilegrou
+>70 64 70 68  69 6c 64 74  - 79 70 65 67  72 65 67 75  pdphildtypegregu
+>6c 61 72 65  66 6c 61 67  - 73 63 31 32  33 65 6c 61  lareflagsc123ela
+>62 65 6c 64  31 32 33 34  - 64 73 69 7a  65 19 30 39  beld1234dsize.09
+>6b 6d 6f 64  69 66 79 2d  - 74 69 6d 65  1a 62 02 e0  kmodify-time.b..
+>f1 ff bf 64  6e 61 6d 65  - 6b 78 78 2d  30 30 30 30  ...dnamekxx-0000
+>30 30 30 33  65 69 6e 6f  - 64 65 0c 66  62 6c 6f 63  0003einode.fbloc
+>6b 73 19 04  d2 64 6d 6f  - 64 65 64 6d  6f 64 65 6a  ks...dmodedmodej
+>6d 6f 64 65  5f 6f 63 74  - 61 6c 19 02  94 65 6c 69  mode_octal...eli
+>6e 6b 73 0c  64 75 73 65  - 72 64 70 68  69 6c 65 67  nks.duserdphileg
+>72 6f 75 70  64 70 68 69  - 6c 64 74 79  70 65 67 72  roupdphildtypegr
+>65 67 75 6c  61 72 65 66  - 6c 61 67 73  63 31 32 33  egulareflagsc123
+>65 6c 61 62  65 6c 64 31  - 32 33 34 64  73 69 7a 65  elabeld1234dsize
+>19 30 39 6b  6d 6f 64 69  - 66 79 2d 74  69 6d 65 1a  .09kmodify-time.
+>62 02 e0 f1  ff bf 64 6e  - 61 6d 65 6b  78 78 2d 30  b.....dnamekxx-0
+>30 30 30 30  30 30 34 65  - 69 6e 6f 64  65 0c 66 62  0000004einode.fb
+>6c 6f 63 6b  73 19 04 d2  - 64 6d 6f 64  65 64 6d 6f  locks...dmodedmo
+>64 65 6a 6d  6f 64 65 5f  - 6f 63 74 61  6c 19 02 94  dejmode_octal...
+>65 6c 69 6e  6b 73 0c 64  - 75 73 65 72  64 70 68 69  elinks.duserdphi
+>6c 65 67 72  6f 75 70 64  - 70 68 69 6c  64 74 79 70  legroupdphildtyp
+>65 67 72 65  67 75 6c 61  - 72 65 66 6c  61 67 73 63  egregulareflagsc
+>31 32 33 65  6c 61 62 65  - 6c 64 31 32  33 34 64 73  123elabeld1234ds
+>69 7a 65 19  30 39 6b 6d  - 6f 64 69 66  79 2d 74 69  ize.09kmodify-ti
+>6d 65 1a 62  02 e0 f1 ff  - bf 64 6e 61  6d 65 6b 78  me.b.....dnamekx
+>78 2d 30 30  30 30 30 30  - 30 35 65 69  6e 6f 64 65  x-00000005einode
+>0c 66 62 6c  6f 63 6b 73  - 19 04 d2 64  6d 6f 64 65  .fblocks...dmode
+>64 6d 6f 64  65 6a 6d 6f  - 64 65 5f 6f  63 74 61 6c  dmodejmode_octal
+>19 02 94 65  6c 69 6e 6b  - 73 0c 64 75  73 65 72 64  ...elinks.duserd
+>70 68 69 6c  65 67 72 6f  - 75 70 64 70  68 69 6c 64  philegroupdphild
+>74 79 70 65  67 72 65 67  - 75 6c 61 72  65 66 6c 61  typegregularefla
+>67 73 63 31  32 33 65 6c  - 61 62 65 6c  64 31 32 33  gsc123elabeld123
+>34 64 73 69  7a 65 19 30  - 39 6b 6d 6f  64 69 66 79  4dsize.09kmodify
+>2d 74 69 6d  65 1a 62 02  - e0 f1 ff bf  64 6e 61 6d  -time.b.....dnam
+>65 6b 78 78  2d 30 30 30  - 30 30 30 30  36 65 69 6e  ekxx-00000006ein
+>6f 64 65 0c  66 62 6c 6f  - 63 6b 73 19  04 d2 64 6d  ode.fblocks...dm
+>6f 64 65 64  6d 6f 64 65  - 6a 6d 6f 64  65 5f 6f 63  odedmodejmode_oc
+>74 61 6c 19  02 94 65 6c  - 69 6e 6b 73  0c 64 75 73  tal...elinks.dus
+>65 72 64 70  68 69 6c 65  - 67 72 6f 75  70 64 70 68  erdphilegroupdph
+>69 6c 64 74  79 70 65 67  - 72 65 67 75  6c 61 72 65  ildtypegregulare
+>66 6c 61 67  73 63 31 32  - 33 65 6c 61  62 65 6c 64  flagsc123elabeld
+>31 32 33 34  64 73 69 7a  - 65 19 30 39  6b 6d 6f 64  1234dsize.09kmod
+>69 66 79 2d  74 69 6d 65  - 1a 62 02 e0  f1 ff bf 64  ify-time.b.....d
+>6e 61 6d 65  6b 78 78 2d  - 30 30 30 30  30 30 30 37  namekxx-00000007
+>65 69 6e 6f  64 65 0c 66  - 62 6c 6f 63  6b 73 19 04  einode.fblocks..
+>d2 64 6d 6f  64 65 64 6d  - 6f 64 65 6a  6d 6f 64 65  .dmodedmodejmode
+>5f 6f 63 74  61 6c 19 02  - 94 65 6c 69  6e 6b 73 0c  _octal...elinks.
+>64 75 73 65  72 64 70 68  - 69 6c 65 67  72 6f 75 70  duserdphilegroup
+>64 70 68 69  6c 64 74 79  - 70 65 67 72  65 67 75 6c  dphildtypegregul
+>61 72 65 66  6c 61 67 73  - 63 31 32 33  65 6c 61 62  areflagsc123elab
+>65 6c 64 31  32 33 34 64  - 73 69 7a 65  19 30 39 6b  eld1234dsize.09k
+>6d 6f 64 69  66 79 2d 74  - 69 6d 65 1a  62 02 e0 f1  modify-time.b...
+>ff bf 64 6e  61 6d 65 6b  - 78 78 2d 30  30 30 30 30  ..dnamekxx-00000
+>30 30 38 65  69 6e 6f 64  - 65 0c 66 62  6c 6f 63 6b  008einode.fblock
+>73 19 04 d2  64 6d 6f 64  - 65 64 6d 6f  64 65 6a 6d  s...dmodedmodejm
+>6f 64 65 5f  6f 63 74 61  - 6c 19 02 94  65 6c 69 6e  ode_octal...elin
+>6b 73 0c 64  75 73 65 72  - 64 70 68 69  6c 65 67 72  ks.duserdphilegr
+>6f 75 70 64  70 68 69 6c  - 64 74 79 70  65 67 72 65  oupdphildtypegre
+>67 75 6c 61  72 65 66 6c  - 61 67 73 63  31 32 33 65  gulareflagsc123e
+>6c 61 62 65  6c 64 31 32  - 33 34 64 73  69 7a 65 19  labeld1234dsize.
+>30 39 6b 6d  6f 64 69 66  - 79 2d 74 69  6d 65 1a 62  09kmodify-time.b
+>02 e0 f1 ff  bf 64 6e 61  - 6d 65 6b 78  78 2d 30 30  .....dnamekxx-00
+>30 30 30 30  30 39 65 69  - 6e 6f 64 65  0c 66 62 6c  000009einode.fbl
+>6f 63 6b 73  19 04 d2 64  - 6d 6f 64 65  64 6d 6f 64  ocks...dmodedmod
+>65 6a 6d 6f  64 65 5f 6f  - 63 74 61 6c  19 02 94 65  ejmode_octal...e
+>6c 69 6e 6b  73 0c 64 75  - 73 65 72 64  70 68 69 6c  links.duserdphil
+>65 67 72 6f  75 70 64 70  - 68 69 6c 64  74 79 70 65  egroupdphildtype
+>67 72 65 67  75 6c 61 72  - 65 66 6c 61  67 73 63 31  gregulareflagsc1
+>32 33 65 6c  61 62 65 6c  - 64 31 32 33  34 64 73 69  23elabeld1234dsi
+>7a 65 19 30  39 6b 6d 6f  - 64 69 66 79  2d 74 69 6d  ze.09kmodify-tim
+>65 1a 62 02  e0 f1 ff ff  - ff ff ff                  e.b........

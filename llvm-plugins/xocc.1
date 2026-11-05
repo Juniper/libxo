@@ -15,8 +15,11 @@
 .Nd compiler wrapper for libxo's LLVM/clang plugins
 .Sh SYNOPSIS
 .Nm xocc
+.Op Cm debug
 .Ar verb
 .Ar compiler-args ...
+.Nm xocc
+.Cm version | help
 .Sh DESCRIPTION
 .Nm
 is a small shell wrapper to aid with invoking the C compiler with
@@ -34,7 +37,6 @@ plugin flags as needed.
 includes LLVM/clang plugins, described in
 .Xr xo_plugins 7
 and xocc handles some of the details needed to invoke them properly.
-.Pp
 .Sh INVOKING XOCC
 .Nm
 requires a verb as its first argument that describe and adjusts the
@@ -43,14 +45,15 @@ A verb is one or more tokens joined with
 .Sq +
 (enabled) or
 .Sq \-
-(disabled):
+(disabled).
+The four main tokens also have one-letter forms, shown below:
 .Bl -tag -width "precompile"
-.It Cm validate
+.It Cm validate , v
 Add the
 .Nm xo_validate
 plugin to the compiler invocation.
 (default: disabled)
-.It Cm lint
+.It Cm lint , l
 Add the extra
 .Nm xo_validate
 style checks
@@ -58,15 +61,27 @@ style checks
 implies
 .Cm validate .
 (default: disabled)
-.It Cm errors
+.It Cm errors , e
 Report the syntactic and semantic problems found by
 .Nm xo_validate
-as errors instead of warnings.
+as errors instead of warnings; implies
+.Cm validate .
 (default: disabled \(en i.e. warnings by default)
-.It Cm precompile
+.It Cm precompile , p
 Add the
 .Nm xo_precompile
 plugin to the compiler invocation.
+Precompiled calls skip the runtime parser, and with it the format
+string checks made under
+.Dq --libxo warn ,
+so the plugin makes those checks at build time and reports them as
+.Fl Wbackend-plugin
+warnings.
+When
+.Cm validate
+is also given, the reports come from
+.Nm xo_validate
+instead.
 (default: disabled)
 .It Cm sdk
 Add any configured SDK flags to the compiler invocation.
@@ -81,6 +96,12 @@ These are only needed (and passed) at the link stage.
 Echo the command line for the underlying compiler
 invocation before execution.
 (default: disabled).
+.It Cm dry
+Print the command line for the underlying compiler invocation
+without executing it.
+Arguments are quoted as needed, so the line can be given back to
+the shell.
+(default: disabled).
 .El
 .Pp
 The token
@@ -91,13 +112,69 @@ is a shorthand for turning on
 and
 .Cm precompile
 together.
-It is a provided since this is the typical use case.
+It is provided since this is the typical use case.
+.Cm all
+is a synonym for
+.Cm full .
 .Bd -literal -offset indent
 make CC='xocc full'
 .Ed
-Trailing "+token" / "-token" pairs adjust that starting point.
-.Sh EXAMPLES
 .Pp
+Trailing
+.Dq +token
+and
+.Dq \-token
+pairs adjust that starting point.
+Word and letter forms can be mixed, but tokens must be joined with
+.Sq +
+or
+.Sq \- ;
+.Dq v+l+p
+is
+.Cm full
+spelled out, while
+.Dq vlp
+is an error.
+.Pp
+Two verbs stand alone, and make
+.Nm
+exit without compiling anything:
+.Bl -tag -width "precompile"
+.It Cm version
+Print the
+.Nm libxo
+version that
+.Nm
+was built with.
+.Fl \-version
+is also accepted.
+.It Cm help
+Print a summary of the verbs.
+Running
+.Nm
+with no arguments prints the same summary.
+.El
+.Pp
+If the first argument is
+.Cm debug ,
+.Nm
+traces its own execution
+.Pq using Dq set \-x
+and prints its internal settings, then handles the verb that follows
+as usual:
+.Bd -literal -offset indent
+xocc debug full+echo \-c myprogram.c
+.Ed
+.Sh ENVIRONMENT
+.Bl -tag -width XO_REAL_CC
+.It Ev XO_REAL_CC
+Overrides the real compiler
+.Nm
+invokes, taking priority over the LLVM clang detected at
+.Nm libxo Ns 's
+configure time.
+.El
+.Sh EXAMPLES
 To turn warnings into hard errors, use
 .Cm errors :
 .Bd -literal -offset indent
@@ -155,8 +232,8 @@ make CC='xocc full+echo'
 .Pp
 .Nm
 picks which real compiler to invoke, but an explicit compiler can be
-specified using the 
-.Ev XO_REAL_CC ,
+specified using the
+.Ev XO_REAL_CC
 environment variable:
 .Bd -literal -offset indent
 XO_REAL_CC=/usr/local/bin/clang\-19 make CC='xocc full'
@@ -169,7 +246,9 @@ also inspects the rest of its arguments to tell a compile stage
 .Fl E ,
 or
 .Fl S
-present
+present, or a verb of
+.Cm lint
+alone
 .Pc
 from a link stage.
 The
@@ -202,15 +281,6 @@ flags pointing back at the
 tree, beyond whatever the project's own build already passes for
 .Nm libxo Ns 's
 headers.
-.Sh ENVIRONMENT
-.Bl -tag -width XO_REAL_CC
-.It Ev XO_REAL_CC
-Overrides the real compiler
-.Nm
-invokes, taking priority over the LLVM clang detected at
-.Nm libxo Ns 's
-configure time.
-.El
 .Sh SEE ALSO
 .Xr libxo 3 ,
 .Xr xo_emit 3 ,

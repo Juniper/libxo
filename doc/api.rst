@@ -268,7 +268,7 @@ The set of valid flags include:
    XOF_FILTER_WARN     Warn about runtime filter errors
    XOF_INFO            Display info data attributes (HTML)
    XOF_KEYS            Emit the key attribute (XML)
-   XOF_NO_ENV          Do not use the :ref:`libxo-options` env var
+   XOF_NO_ENV          Deprecated; no effect
    XOF_NO_HUMANIZE     Display humanization (TEXT, HTML)
    XOF_PRETTY          Make "pretty printed" output
    XOF_UNDERSCORES     Replaces hyphens with underscores
@@ -1319,34 +1319,6 @@ environments where the standard :manpage:`realloc(3)` and
 By default, the standard :manpage:`realloc(3)` and :manpage:`free(3)`
 functions are used.
 
-.. index:: --libxo
-
-.. _libxo-options:
-
-LIBXO_OPTIONS
-~~~~~~~~~~~~~
-
-The environment variable "LIBXO_OPTIONS" can be set to a subset of
-libxo options, including:
-
-- color
-- flush
-- flush-line
-- no-color
-- no-humanize
-- no-locale
-- pretty
-- underscores
-- warn
-
-For example, warnings can be enabled by::
-
-    % env LIBXO_OPTIONS=warn my-app
-
-Since environment variables are inherited, child processes will have
-the same options, which may be undesirable, making the use of the
-"`--libxo`" command-line option preferable in most situations.
-
 .. index:: xo_warn
 .. index:: xo_err
 .. index:: xo_errx
@@ -1709,7 +1681,7 @@ xo_set_logmask
 xo_set_syslog_enterprise_id
 +++++++++++++++++++++++++++
 
-.. c:function:: void xo_set_syslog_enterprise_id (unsigned short eid)
+.. c:function:: void xo_set_syslog_enterprise_id (xo_enterprise_id_t eid)
 
   Use the `xo_set_syslog_enterprise_id` to supply a platform- or
   application-specific enterprise id.  This value is used in any future

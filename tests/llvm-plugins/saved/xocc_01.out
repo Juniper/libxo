@@ -1,0 +1,63 @@
+### dry runs
+== sh XOCC full-sdk+dry -c foo.c -o foo.o
+CLANG -fplugin=PREFIX/lib/libxo/xo_validate.so -mllvm -xo-validate-lint -mllvm -xo-validate-errors-as-warnings -fpass-plugin=PREFIX/lib/libxo/xo_precompile.so -c foo.c -o foo.o
+rc=0
+== sh XOCC full-sdk+dry foo.o bar.o -o foo
+CLANG foo.o bar.o -o foo -LPREFIX/lib -lxo
+rc=0
+== sh XOCC full-sdk+dry -Werror foo.o -o foo
+CLANG -Werror foo.o -o foo -LPREFIX/lib -lxo
+rc=0
+== sh XOCC full-sdk+dry foo.c -o foo
+CLANG -fplugin=PREFIX/lib/libxo/xo_validate.so -mllvm -xo-validate-lint -mllvm -xo-validate-errors-as-warnings -fpass-plugin=PREFIX/lib/libxo/xo_precompile.so foo.c -o foo -LPREFIX/lib -lxo
+rc=0
+== sh XOCC full-sdk+dry -include cfg.c foo.o -o foo
+CLANG -include cfg.c foo.o -o foo -LPREFIX/lib -lxo
+rc=0
+== sh XOCC full-sdk+dry -o foo.c foo.o
+CLANG -o foo.c foo.o -LPREFIX/lib -lxo
+rc=0
+== sh XOCC full-sdk+dry -x c foo.src -o foo
+CLANG -fplugin=PREFIX/lib/libxo/xo_validate.so -mllvm -xo-validate-lint -mllvm -xo-validate-errors-as-warnings -fpass-plugin=PREFIX/lib/libxo/xo_precompile.so -x c foo.src -o foo -LPREFIX/lib -lxo
+rc=0
+== sh XOCC errors-sdk+dry -c foo.c
+CLANG -fplugin=PREFIX/lib/libxo/xo_validate.so -c foo.c
+rc=0
+== sh XOCC precompile-sdk+dry -c foo.c
+CLANG -fpass-plugin=PREFIX/lib/libxo/xo_precompile.so -c foo.c
+rc=0
+== sh XOCC lint-sdk+dry foo.c
+CLANG -fsyntax-only -fplugin=PREFIX/lib/libxo/xo_validate.so -mllvm -xo-validate-lint -mllvm -xo-validate-errors-as-warnings foo.c
+rc=0
+== sh XOCC full-p-sdk+dry -c foo.c
+CLANG -fplugin=PREFIX/lib/libxo/xo_validate.so -mllvm -xo-validate-lint -mllvm -xo-validate-errors-as-warnings -c foo.c
+rc=0
+== sh XOCC full-ldflags-sdk+dry foo.o -o foo
+CLANG foo.o -o foo
+rc=0
+### LD_LIBRARY_PATH
+== unset
+LD_LIBRARY_PATH=[PREFIX/lib]
+== inherited
+LD_LIBRARY_PATH=[PREFIX/lib:/inherited]
+### builds
+== sh XOCC full CFLAGS -c SOURCE -o out/xocc_01.o
+rc=0
+== sh XOCC full -Werror out/xocc_01.o LDFLAGS -o out/xocc_01.ld
+rc=0
+== out/xocc_01.ld --libxo:T
+alice
+42
+john doe
+item
+              padded
+rc=0
+== sh XOCC full CFLAGS SOURCE LDFLAGS -o out/xocc_01.both
+rc=0
+== out/xocc_01.both --libxo:T
+alice
+42
+john doe
+item
+              padded
+rc=0

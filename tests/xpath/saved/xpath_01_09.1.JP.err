@@ -1,8 +1,8 @@
 main: input '?two[starts-with(three, "n")]'
 adding filter: 'two[starts-with(three, "n")]'
 added filter: 0
---- 0: 14
-    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 12
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [two], contents 2, next 0, prev 0 
             000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
                 000003: type 52 (T_FUNCTION_NAME), str 7 [starts-with], contents 7, next 0, prev 0 
@@ -67,24 +67,24 @@ main: input '?two[(three + 3) div 4 == (10 - 2) mod 5]'
 adding filter: 'two[(three + 3) div 4 == (10 - 2) mod 5]'
 added filter: 0
 xpath_01: test: filter expression feature is unsupported: plus sign ('+')
---- 0: 28
-    000028: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
+--- 0: 21
+    000021: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
         000001: type 70 (C_ELEMENT), str 1 [two], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 13, next 0, prev 0 
-                000013: type 14 (L_EQUALS), str 27 [==], contents 10, next 0, prev 0 
-                    000010: type 41 (K_DIV), str 21 [div], contents 3, next 22, prev 0 
-                        000003: type 71 (C_EXPR), str 7 [(], contents 5, next 12, prev 0 
+            000002: type 75 (C_PREDICATE), str 0 [], contents 11, next 0, prev 0 
+                000011: type 14 (L_EQUALS), str 27 [==], contents 9, next 0, prev 0 
+                    000009: type 41 (K_DIV), str 21 [div], contents 3, next 17, prev 0 
+                        000003: type 71 (C_EXPR), str 7 [(], contents 5, next 10, prev 0 
                             000005: type 25 (L_PLUS), str 15 [+], contents 6, next 0, prev 0 
                                 000006: type 74 (C_PATH), str 0 [], contents 4, next 7, prev 0 
                                     000004: type 70 (C_ELEMENT), str 9 [three], contents 0, next 0, prev 0 
                                 000007: type 53 (T_NUMBER), str 17 [3], contents 0, next 0, prev 6 
-                        000012: type 53 (T_NUMBER), str 25 [4], contents 0, next 0, prev 3 
-                    000022: type 42 ('*'), str 41 [mod], contents 15, next 0, prev 10 
-                        000015: type 71 (C_EXPR), str 30 [(], contents 17, next 24, prev 0 
-                            000017: type 19 (L_MINUS), str 35 [-], contents 16, next 0, prev 0 
-                                000016: type 53 (T_NUMBER), str 32 [10], contents 0, next 19, prev 0 
-                                000019: type 53 (T_NUMBER), str 37 [2], contents 0, next 0, prev 16 
-                        000024: type 53 (T_NUMBER), str 45 [5], contents 0, next 0, prev 15 
+                        000010: type 53 (T_NUMBER), str 25 [4], contents 0, next 0, prev 3 
+                    000017: type 42 ('*'), str 41 [mod], contents 12, next 0, prev 9 
+                        000012: type 71 (C_EXPR), str 30 [(], contents 14, next 18, prev 0 
+                            000014: type 19 (L_MINUS), str 35 [-], contents 13, next 0, prev 0 
+                                000013: type 53 (T_NUMBER), str 32 [10], contents 0, next 15, prev 0 
+                                000015: type 53 (T_NUMBER), str 37 [2], contents 0, next 0, prev 13 
+                        000018: type 53 (T_NUMBER), str 45 [5], contents 0, next 0, prev 12 
 main: status: zero
 main: input '+two'
 main: filter: rc: 13

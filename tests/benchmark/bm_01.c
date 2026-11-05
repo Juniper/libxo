@@ -102,14 +102,14 @@ time_fn (void (*fn)(int), int arg)
 
 /* ---------- workloads ---------- */
 
-/* empty format string — absolute floor: xo_do_emit entry + exit */
+/* empty format string - absolute floor: xo_do_emit entry + exit */
 static void
 bench_empty (int n XO_UNUSED) {
     for (int i = 0; i < N_INNER; i++)
         xo_emit_h(g_xo, "");
 }
 
-/* pure literal, no fields — tests parse + output cost with 0 fields */
+/* pure literal, no fields - tests parse + output cost with 0 fields */
 static void
 bench_literal (int n XO_UNUSED) {
     for (int i = 0; i < N_INNER; i++)
@@ -168,7 +168,7 @@ bench_8f (int n XO_UNUSED)
             "gum", 1412, 54, "GRO", "rope", 85, 4, "HRD");
 }
 
-/* container open+close — tests state machine / stack overhead */
+/* container open+close - tests state machine / stack overhead */
 static void
 bench_container (int n XO_UNUSED)
 {

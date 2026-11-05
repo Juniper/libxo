@@ -131,6 +131,8 @@ the encoding output styles, XML and JSON::
 The encoding modifier is the opposite of the display modifier, and
 they are often used to give to distinct views of the underlying data.
 
+.. _escape-private-modifier:
+
 The escape-private Modifier
 +++++++++++++++++++++++++++
 
@@ -149,6 +151,15 @@ recovered by subtracting 0xE000 from the Unicode code point.
 
 The escape-private modifier only affects XML and HTML output styles.
 Without this modifier, control characters are replaced with spaces.
+
+XML 1.0 forbids a reference to a control character, which is why
+the private-use area is used.  XML 1.1 allows one, so with the
+"xml1.1" option (see :ref:`options`), output refers to the control
+character itself: byte 0x01 becomes ``&#x0001;``.  The option does
+not imply "xml"; HTML output is XML encoded as well, so it applies
+to both the XML and HTML styles.  Note that libxo does not emit an
+XML declaration; a document that uses these references needs one
+that says ``version="1.1"``.
 
 The escape-slash Modifier
 +++++++++++++++++++++++++
@@ -170,7 +181,7 @@ The escape-square Modifier
 .. index:: Field Modifiers; escape-square
 
 The escape-square modifier causes control characters in a field value
-to be replaced with the Unicode WHITE SQUARE character (U+25A1, \☐).
+to be replaced with the Unicode WHITE SQUARE character (U+25A1).
 A control character is any byte value less than 0x20, except for
 newline, carriage return, and tab.
 
@@ -264,14 +275,15 @@ In the HTML style, the original numeric value is rendered in the
 .. _int-group-modifier:
 
 The Int-Group Modifier ({i:})
-++++++++++++++++++++++++++++
++++++++++++++++++++++++++++++
 
 .. index:: Field Modifiers; Int-Group
 
 The int-group modifier inserts a thousands separator into a decimal
-integer field (``%d``, ``%i``, ``%u``, with any length modifier), (see
-:ref:`integer-grouping`) to be set.  It is useful when only a specific
-field, rather than an entire program's output, should be grouped::
+integer field (``%d``, ``%i``, ``%u``, with any length modifier),
+without requiring the "`group`" option (see :ref:`integer-grouping`)
+to be set.  It is useful when only a specific field, rather than an
+entire program's output, should be grouped::
 
     EXAMPLE:
         xo_emit("{i:count/%u}\n", 1234567);

@@ -130,7 +130,13 @@ main (int argc UNUSED, char **argv)
     if (argc < 0)
 	return 1;
 
-    while ((rc = getopt_long(argc, argv, "Cc:HI:Jl:O:o:ps:TXW",
+    /*
+     * The leading "+" stops option parsing at the first non-option
+     * (the format), so the field values that follow it are never
+     * taken as options, even when they look like one ("-5", "-W").
+     * Without it, getopt_long() permutes argv and scans everything.
+     */
+    while ((rc = getopt_long(argc, argv, "+Cc:HI:Jl:O:o:ps:TXW",
 				long_opts, NULL)) != -1) {
 
 	switch (rc) {
@@ -374,8 +380,14 @@ main (int argc UNUSED, char **argv)
 	    opt_wrapper = NULL;
     }
 
-    /* Remember to undo the depth before calling xo_finish() */
-    opt_depth = (opt_closer && opt_top_wrap) ? -1 : 0;
+    /*
+     * Remember to undo the depth before calling xo_finish().  Only
+     * JSON was given the extra level for the top wrapper (above), so
+     * only JSON has one to give back; the other styles are already
+     * at the top once the closing path is closed.
+     */
+    opt_depth = (opt_closer && opt_top_wrap
+		 && xo_get_style(NULL) == XO_STYLE_JSON) ? -1 : 0;
 
     /* If there's an closing hierarchy, close each element's container */
     while (opt_closer) {

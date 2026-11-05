@@ -28,9 +28,11 @@ extern "C" {
 
 /*
  * Error callback: receives a fully-formatted message (the va_list has
- * already been consumed by the shim).
+ * already been consumed by the shim).  "offset" is the byte offset in
+ * the format string of the field at fault, or -1 when the problem is
+ * not tied to a single field.
  */
-typedef void (*xo_shim_error_t)(void *data, const char *fmt, ...);
+typedef void (*xo_shim_error_t)(void *data, int offset, const char *fmt, ...);
 
 /*
  * Parse fmt for syntax errors only.  Calls error(data, msg) for each
@@ -39,17 +41,20 @@ typedef void (*xo_shim_error_t)(void *data, const char *fmt, ...);
 int xo_shim_parse(const char *fmt, xo_shim_error_t error, void *data);
 
 /*
- * Argument descriptor: called once per va_arg the format string consumes.
+ * Argument descriptor: called once per va_arg the format string consumes,
+ * in the order they are consumed at emit time.
  *
- * fmt / fmtlen  — the printf format spec ("%s", "%ld", etc.),
- *                 NOT NUL-terminated.  fmtlen > 0 in all cases.
+ * xfp - the parsed fspec for the argument.  xfp->xf_arg_type gives the
+ *       va_arg's type (XO_AT_*, never XO_AT_NONE); the remaining fields
+ *       (xf_fc, xf_lflag, etc.) give the details.  An int consumed by a
+ *       '*' (a width, precision, or "%@...@" prefix) is reported as an
+ *       fspec for "%d".
  *
  * Special case: when a field uses the 'a' (XFF_ARGUMENT) modifier the
  * field name itself comes from va_arg as a const char *.  That arg is
- * reported with fmt == NULL / fmtlen == 0 BEFORE any value arg for the
- * same field.
+ * reported with xfp == NULL BEFORE any value arg for the same field.
  */
-typedef void (*xo_shim_arg_cb_t)(void *data, const char *fmt, unsigned fmtlen);
+typedef void (*xo_shim_arg_cb_t)(void *data, const xo_fspec_t *xfp);
 
 /*
  * Parse fmt, calling error_cb for hard errors, warn_cb for style warnings
@@ -114,9 +119,11 @@ typedef struct xo_shim_fspec_s {
     uint16_t xsp_start;         /* xf_start */
     uint16_t xsp_len;           /* xf_len */
     uint16_t xsp_prefix_len;    /* xf_prefix_len */
-    uint8_t  xsp_num_bits;	/* xf_num_bits */
-    uint8_t  xsp_padding[3];	/* xf_padding */
-    uint32_t xsp_extflags;	/* xf_extflags */
+    uint8_t  xsp_num_bits;      /* xf_num_bits */
+    uint8_t  xsp_arg_type;      /* xf_arg_type */
+    uint8_t  xsp_plus;          /* xf_plus */
+    uint8_t  xsp_space;         /* xf_space */
+    uint32_t xsp_extflags;      /* xf_extflags */
 } xo_shim_fspec_t;
 
 typedef void (*xo_shim_fspec_cb_t)(void *data, const xo_shim_fspec_t *f);
@@ -133,6 +140,31 @@ int xo_shim_parse_fields(const char *fmt,
                           xo_shim_error_t error_cb, void *error_data,
                           xo_shim_field_cb_t field_cb, void *field_data,
                           xo_shim_fspec_cb_t fspec_cb, void *fspec_data);
+
+/*
+ * The build host's layout of xo_field_info_t and xo_fspec_t: the
+ * offset of each member, in declaration order, plus the facts needed
+ * to describe the host as an LLVM DataLayout.  The precompile pass lays
+ * out its copies of the structs under that DataLayout and compares, to
+ * check that its member lists still match the C structs.
+ */
+#define XO_SHIM_FIELD_MEMBERS	16 /* Members of xo_field_info_t */
+#define XO_SHIM_FSPEC_MEMBERS	23 /* Members of xo_fspec_t */
+
+typedef struct xo_shim_layout_s {
+    uint8_t  xsl_big_endian;	/* Non-zero if the host is big endian */
+    uint8_t  xsl_ptr_size;	/* sizeof(void *) */
+    uint8_t  xsl_ptr_align;	/* Alignment of a pointer member */
+    uint8_t  xsl_i64_align;	/* Alignment of a uint64_t member */
+    uint8_t  xsl_i32_align;	/* Alignment of a uint32_t member */
+    uint8_t  xsl_i16_align;	/* Alignment of a uint16_t member */
+    uint32_t xsl_field_size;	/* sizeof(xo_field_info_t) */
+    uint32_t xsl_field_offsets[XO_SHIM_FIELD_MEMBERS];
+    uint32_t xsl_fspec_size;	/* sizeof(xo_fspec_t) */
+    uint32_t xsl_fspec_offsets[XO_SHIM_FSPEC_MEMBERS];
+} xo_shim_layout_t;
+
+void xo_shim_layout(xo_shim_layout_t *xslp);
 
 #ifdef __cplusplus
 }

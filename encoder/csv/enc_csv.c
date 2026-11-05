@@ -46,7 +46,7 @@
  * which we only do with the "dos" option.  Strange that we still live
  * in a DOS-friendly world, but then again, we make spaceships based
  * on the horse butts (http://www.astrodigital.org/space/stshorse.html
- * though the "built by English expatriates” bit is rubbish; better to
+ * though the "built by English expatriates" bit is rubbish; better to
  * say the first engines used in America were built by Englishmen.)
  */
 
@@ -57,6 +57,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <limits.h>
+#include <errno.h>
 
 #include "xo.h"
 #include "xo_encoder.h"
@@ -79,7 +80,7 @@
  *     for future features (under CSV_STACK_IS_NEEDED).
  *
  * - The leafs record the current set of leaf
- *   - A key from the parent list counts as a leaf (unless CF_NO_KEYS)
+ *   - A key from the parent list counts as a leaf
  *   - Once the path is matched, all other leafs at that level are leafs
  *   - Leafs are recorded to get the header comment accurately recorded
  *   - Once the first line is emitted, the set of leafs _cannot_ change
@@ -146,8 +147,8 @@ typedef struct csv_private_s {
 /* Flags for this structure */
 #define CF_HEADER_DONE	(1<<0)	/* Have already written the header */
 #define CF_NO_HEADER	(1<<1)	/* Do not generate header */
-#define CF_NO_KEYS	(1<<2)	/* Do not generate excess keys */
-#define CF_VALUE_ONLY	(1<<3)	/* Only generate the value */
+#define CF_RES2 	(1<<2)	/* Do not generate excess keys */
+#define CF_RES3		(1<<3)	/* Only generate the value */
 
 #define CF_DOS_NEWLINE	(1<<4)	/* Generate CR-NL, just like MS-DOS */
 #define CF_LEAFS_DONE	(1<<5)	/* Leafs are already been recorded */
@@ -203,7 +204,7 @@ csv_create (xo_handle_t *xop)
  * Clean up and release any data in use by this handle
  */
 static void
-csv_destroy (xo_handle_t *xop UNUSED, csv_private_t *csv)
+csv_destroy (xo_handle_t *xop, csv_private_t *csv)
 {
     /* Clean up */
     xo_buf_cleanup(&csv->c_data);
@@ -217,6 +218,15 @@ csv_destroy (xo_handle_t *xop UNUSED, csv_private_t *csv)
 	xo_free(csv->c_leaf);
     if (csv->c_path_buf)
 	xo_free(csv->c_path_buf);
+    if (csv->c_path)
+	xo_free(csv->c_path);
+
+    /*
+     * The private data itself was allocated by csv_create, so it goes
+     * too.  Clear the handle's pointer so nothing can find it again.
+     */
+    xo_set_private(xop, NULL);
+    xo_free(csv);
 }
 
 /*
@@ -281,11 +291,16 @@ csv_quote_flags (xo_handle_t *xop UNUSED, csv_private_t *csv UNUSED,
     size_t len = strlen(value);
     uint32_t rc = 0;
 
+    /*
+     * Leading or trailing whitespace needs quotes.  An empty value has
+     * neither, and value[len - 1] would read before the string.  The
+     * ctype functions need an unsigned char value; a plain char cast
+     * to int is negative for UTF-8 bytes, which is undefined behavior.
+     */
     if (strcspn(value, quoted) != len)
 	rc |= QF_NEEDS_QUOTES;
-    else if (isspace((int) value[0]))	/* Leading whitespace */
-	rc |= QF_NEEDS_QUOTES;
-    else if (isspace((int) value[len - 1])) /* Trailing whitespace */
+    else if (len != 0 && (isspace((unsigned char) value[0])
+			  || isspace((unsigned char) value[len - 1])))
 	rc |= QF_NEEDS_QUOTES;
 
     if (strcspn(value, escaped) != len)
@@ -522,8 +537,13 @@ csv_leaf_num (xo_handle_t *xop UNUSED, csv_private_t *csv,
 	if (lp == NULL)
 	    return -1;			/* No luck; bail */
 
-	/* Zero out the new portion */
-	bzero(&lp[csv->c_leaf_max], csv->c_leaf_max * sizeof(*lp));
+	/*
+	 * Zero out the new portion.  On the first allocation c_leaf_max
+	 * is zero, so this covers the whole array; realloc(NULL) does
+	 * not zero it, and f_flags is OR'd into below.
+	 */
+	bzero(&lp[csv->c_leaf_max],
+	      (new_max - csv->c_leaf_max) * sizeof(*lp));
 
 	/* Update csv data */
 	csv->c_leaf = lp;
@@ -612,6 +632,10 @@ csv_record_path (xo_handle_t *xop, csv_private_t *csv, const char *path_raw)
     char *cp, *ep, *np;
     ssize_t len = strlen(path_raw);
     char *path_buf = xo_realloc(NULL, len + 1);
+    if (path_buf == NULL) {
+	xo_failure(xop, "allocation failure for path '%s'", path_raw);
+	return -1;
+    }
 
     memcpy(path_buf, path_raw, len + 1);
 
@@ -626,7 +650,8 @@ csv_record_path (xo_handle_t *xop, csv_private_t *csv, const char *path_raw)
 
     path_frame_t *path = xo_realloc(NULL, sizeof(path[0]) * count);
     if (path == NULL) {
-	xo_failure(xop, "allocation failure for path '%s'", path_buf);
+	xo_failure(xop, "allocation failure for path '%s'", path_raw);
+	xo_free(path_buf);
 	return -1;
     }
 
@@ -694,12 +719,8 @@ csv_options (xo_handle_t *xop, csv_private_t *csv,
 	    if (vp != NULL && csv_record_leafs(xop, csv, vp))
   		return -1;
 
-	} else if (xo_streq(cp, "no-keys")) {
-	    csv->c_flags |= CF_NO_KEYS;
 	} else if (xo_streq(cp, "no-header")) {
 	    csv->c_flags |= CF_NO_HEADER;
-	} else if (xo_streq(cp, "value-only")) {
-	    csv->c_flags |= CF_VALUE_ONLY;
 	} else if (xo_streq(cp, "dos")) {
 	    csv->c_flags |= CF_DOS_NEWLINE;
 	} else if (xo_streq(cp, "no-quotes")) {
@@ -739,6 +760,35 @@ csv_data (xo_handle_t *xop UNUSED, csv_private_t *csv UNUSED,
     csv_leaf_set(xop, csv, lp, value);
 
     return 0;
+}
+
+/*
+ * Write out the data buffer.  write() can return a short count (a pipe
+ * or a signal can cut it off), so we loop until it's all out, instead
+ * of silently dropping the tail.  The buffer is reset even on error,
+ * since keeping the data would only replay it on the next flush.
+ */
+static int
+csv_flush (xo_buffer_t *xbp)
+{
+    const char *cp = xbp->xb_bufp;
+    const char *ep = xbp->xb_curp;
+    int rc = 0;
+
+    while (cp < ep) {
+	ssize_t len = write(1, cp, ep - cp);
+	if (len < 0) {
+	    if (errno == EINTR)
+		continue;
+	    rc = -1;
+	    break;
+	}
+
+	cp += len;
+    }
+
+    xo_buf_reset(xbp);
+    return rc;
 }
 
 /*
@@ -801,11 +851,7 @@ csv_handler (XO_ENCODER_HANDLER_ARGS)
 	break;
 
     case XO_OP_FLUSH:		   /* Clean up function */
-	rc = write(1, xbp->xb_bufp, xbp->xb_curp - xbp->xb_bufp);
-	if (rc > 0)
-	    rc = 0;
-
-	xo_buf_reset(xbp);
+	rc = csv_flush(xbp);
 	break;
 
     case XO_OP_DESTROY:		   /* Clean up function */

@@ -1,0 +1,246 @@
+huge width wrote 32767 bytes
+missing conversions wrote 0 bytes
+{
+  "top": {
+    "anchor_width": {
+      "right": "abc",
+      "left": "abc"
+    },
+    "map_growth": {
+      "mapped_0": 0,
+      "mapped_15": 15,
+      "mapped_16": 16,
+      "mapped_17": 17,
+      "mapped_39": 39,
+      "src_40": 40
+    },
+    "long_names": {
+      "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": {
+        "length": 62
+      },
+      "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb": {
+        "length": 63
+      },
+      "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc": {
+        "length": 64
+      },
+      "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd": {
+        "length": 65
+      },
+      "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee": {
+        "length": 130
+      }
+    },
+    "control_chars": {
+      "interior": "a\u0001b\u0002c",
+      "trailing": "a\u0001b\u0002",
+      "before_escape": "a\u0001b<c\u0002d&e",
+      "after_escape": "a<b\u0001c&d\u0002",
+      "only": "\u0001\u0002\u0003"
+    },
+    "deprecated_options": {
+      "retain": 0,
+      "no_retain": 0
+    },
+    "encoder_names": {
+      "first": "unknown",
+      "last": "deadend",
+      "beyond": "unknown",
+      "far_beyond": "unknown",
+      "wb_last": "clean",
+      "wb_beyond": "unknown",
+      "registered": "done"
+    },
+    "attributes": {
+      "escaped": 1
+    },
+    "implied_close": {
+      "list_then_container": [
+      ],
+      "after_list": {
+        "one": 1
+      },
+      "leaf-then-container": [
+        2
+      ],
+      "after_leaf": {
+        "two": 2
+      },
+      "leaf-then-leaf": [
+        3
+      ],
+      "second-leaf": [
+        4
+      ],
+      "list_after_leaf": [
+      ],
+      "list_after_list": [
+      ]
+    },
+    "markers": {
+      "list_container": {
+        "item": [
+          {
+            "kept": 1
+          }
+        ],
+        "after": 2
+      },
+      "list_list": {
+        "item": [
+        ],
+        "after": 2
+      },
+      "list_field": {
+        "item": [
+        ],
+        "after": 2
+      },
+      "stray_close": {
+        "item": [
+        ],
+        "after": 2
+      },
+      "leaf_container": {
+        "leaf": [
+          1
+        ],
+        "kept": {
+          "value": 2
+        },
+        "after": 3
+      },
+      "leaf_leaf": {
+        "leaf": [
+          1
+        ],
+        "other": [
+          2,
+          3
+        ],
+        "after": 4
+      },
+      "leaf_field": {
+        "leaf": [
+          1
+        ],
+        "kept": 2,
+        "after": 3
+      },
+      "leaf_same": {
+        "leaf": [
+          1,
+          2,
+          3
+        ]
+      },
+      "leaf_instance": {
+        "leaf": [
+          1
+        ],
+        "item": [
+          {
+            "value": 2
+          }
+        ],
+        "after": 3
+      }
+    },
+    "emit_field": {
+      "after_domain": 1,
+      "quoted": "value"
+    },
+    "format_flags": {
+      "plus": 5,
+      "space": 5,
+      "wide": 5,
+      "zero": 5,
+      "long": 7,
+      "negative": -3,
+      "blank": -3,
+      "unsigned": 5,
+      "hex": "ff",
+      "left": 5,
+      "both": 5,
+      "precise": 5,
+      "left_zero": 42,
+      "json_plus": 5,
+      "json_wide":    5,
+      "json_size": 5,
+      "json_float": 1.50,
+      "json_quoted": "+5"
+    },
+    "humanize_signs": {
+      "small": -5,
+      "kilo": -5000,
+      "mega": -5000000,
+      "fraction": -1500,
+      "metric": -5000,
+      "lowest": -9223372036854775808,
+      "next_lowest": -9223372036854775807,
+      "highest": 9223372036854775807,
+      "too_high": 18446744073709551615,
+      "word": "abc",
+      "mixed": "12abc",
+      "padded": 4096,
+      "after": 4096
+    }
+  }
+}
+before="one" name="gum" count="0" name="rope" count="1" name="ladder" count="2" after="two" 
+long values wrote 20068 bytes
+warning 10: 64 bytes, '<error><message>test_17' ... 'xxxxxxxxxx&lt;10&gt;</message></error>'
+xml message 10: 67 bytes, '<message>xxxxxxxxxx&lt;' ... ';: No such file or directory'
+html message 10: 99 bytes, '<div class="line"><div ' ... ' No such file or directory'
+warning 1000: 1056 bytes, '<error><message>test_17' ... 'xxxxxxxx&lt;1000&gt;</message></error>'
+xml message 1000: 1059 bytes, '<message>xxxxxxxxxxxxxx' ... ';: No such file or directory'
+html message 1000: 1091 bytes, '<div class="line"><div ' ... ' No such file or directory'
+warning 1015: 1071 bytes, '<error><message>test_17' ... 'xxxxxxxx&lt;1015&gt;</message></error>'
+xml message 1015: 1074 bytes, '<message>xxxxxxxxxxxxxx' ... ';: No such file or directory'
+html message 1015: 1106 bytes, '<div class="line"><div ' ... ' No such file or directory'
+warning 1030: 1086 bytes, '<error><message>test_17' ... 'xxxxxxxx&lt;1030&gt;</message></error>'
+xml message 1030: 1089 bytes, '<message>xxxxxxxxxxxxxx' ... ';: No such file or directory'
+html message 1030: 1121 bytes, '<div class="line"><div ' ... ' No such file or directory'
+warning 8170: 8226 bytes, '<error><message>test_17' ... 'xxxxxxxx&lt;8170&gt;</message></error>'
+xml message 8170: 8229 bytes, '<message>xxxxxxxxxxxxxx' ... ';: No such file or directory'
+html message 8170: 8261 bytes, '<div class="line"><div ' ... ' No such file or directory'
+warning 9000: 9056 bytes, '<error><message>test_17' ... 'xxxxxxxx&lt;9000&gt;</message></error>'
+xml message 9000: 9059 bytes, '<message>xxxxxxxxxxxxxx' ... ';: No such file or directory'
+html message 9000: 9091 bytes, '<div class="line"><div ' ... ' No such file or directory'
+deep stack wrote 8903 bytes
+open frames wrote 167 bytes
+<prefix-names>
+  <long-name>1</long-name>
+  <pre>2</pre>
+  <pref>3</pref>
+</prefix-names>
+<prefix-added>
+  <long-name>4</long-name>
+  <short-name>5</short-name>
+</prefix-added>
+<siblings>
+  <err>1</err>
+  <err>2</err>
+  <mes>1</mes>
+  <mes>2</mes>
+  <error>1</error>
+  <error>2</error>
+</siblings>
+syslog send: full 305, header no, text 305
+  full ends 'xxxxxxxxxxxxxxxxxxxxtail'
+  text ends 'xxxxxxxxxxxxxxxxxxxxtail'
+syslog send: full 2047, header no, text 2047
+  full ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+  text ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+syslog send: full 2047, header no, text 2047
+  full ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+  text ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+syslog send: full 2047, header no, text 2047
+  full ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+  text ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+syslog send: full 2047, header no, text 2047
+  full ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+  text ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+syslog send: full 2047, header no, text 2047
+  full ends 'xxxxxxxxxxxxxxxxxxxxxxxx'
+  text ends 'xxxxxxxxxxxxxxxxxxxxxxxx'

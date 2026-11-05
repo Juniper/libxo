@@ -450,3 +450,1045 @@ $ name nodot
 = val 4
 >item
 }item
+
+# a field is true if it exists, even when its value is 0: all items pass
+r
+?item[boolean(name)]
+{item
+<item
+$ name alpha
+$ rate 0.5
+= val 1
+>item
+<item
+$ name 0
+$ rate 0
+= val 2
+>item
+<item
+$ name 12
+$ rate 0.0
+= val 3
+>item
+}item
+
+# and its not() is false: no items pass
+r
+?item[not(name)]
+{item
+<item
+$ name alpha
+$ rate 0.5
+= val 1
+>item
+<item
+$ name 0
+$ rate 0
+= val 2
+>item
+<item
+$ name 12
+$ rate 0.0
+= val 3
+>item
+}item
+
+# a field that is not there is false: all items pass
+r
+?item[not(missing)]
+{item
+<item
+$ name alpha
+$ rate 0.5
+= val 1
+>item
+<item
+$ name 0
+$ rate 0
+= val 2
+>item
+<item
+$ name 12
+$ rate 0.0
+= val 3
+>item
+}item
+
+# to test a value, make it a number; a float is not truncated,
+# so 0.5 is true: only item 1 passes
+r
+?item[boolean(number(rate))]
+{item
+<item
+$ name alpha
+$ rate 0.5
+= val 1
+>item
+<item
+$ name 0
+$ rate 0
+= val 2
+>item
+<item
+$ name 12
+$ rate 0.0
+= val 3
+>item
+}item
+
+# a float literal less than one is true: all items pass
+r
+?item[boolean(0.5)]
+{item
+<item
+$ name alpha
+$ rate 0.5
+= val 1
+>item
+<item
+$ name 0
+$ rate 0
+= val 2
+>item
+<item
+$ name 12
+$ rate 0.0
+= val 3
+>item
+}item
+
+# 'and' casts both sides the same way: only item 1 passes
+r
+?item[name and number(rate)]
+{item
+<item
+$ name alpha
+$ rate 0.5
+= val 1
+>item
+<item
+$ name 0
+$ rate 0
+= val 2
+>item
+<item
+$ name 12
+$ rate 0.0
+= val 3
+>item
+}item
+
+# a string literal is true unless empty, even '0': all items pass
+r
+?item[boolean('0')]
+{item
+<item
+$ name alpha
+$ rate 0.5
+= val 1
+>item
+<item
+$ name 0
+$ rate 0
+= val 2
+>item
+<item
+$ name 12
+$ rate 0.0
+= val 3
+>item
+}item
+
+# the empty string is false: no items pass
+r
+?item[boolean('')]
+{item
+<item
+$ name alpha
+$ rate 0.5
+= val 1
+>item
+<item
+$ name 0
+$ rate 0
+= val 2
+>item
+<item
+$ name 12
+$ rate 0.0
+= val 3
+>item
+}item
+
+# isempty(): an empty field is empty, and so is an absent one (an
+# empty nodeset); "0" is not empty.  Items 2 and 3 pass.
+r
+?item[isempty(name)]
+{item
+<item
+$ name alpha
+= note hello
+= val 1
+>item
+<item
+$ name ""
+= note ""
+= val 2
+>item
+<item
+= val 3
+>item
+<item
+$ name 0
+= note 0
+= val 4
+>item
+}item
+
+# The same, with a non-key field: items 2 and 3 pass.
+r
+?item[isempty(note)]
+{item
+<item
+$ name alpha
+= note hello
+= val 1
+>item
+<item
+$ name ""
+= note ""
+= val 2
+>item
+<item
+= val 3
+>item
+<item
+$ name 0
+= note 0
+= val 4
+>item
+}item
+
+# !isempty() asks for content: items 1 and 4 pass.
+r
+?item[!isempty(name)]
+{item
+<item
+$ name alpha
+= note hello
+= val 1
+>item
+<item
+$ name ""
+= note ""
+= val 2
+>item
+<item
+= val 3
+>item
+<item
+$ name 0
+= note 0
+= val 4
+>item
+}item
+
+# A field is true when it exists, even when empty: items 1, 2 and 4.
+r
+?item[name]
+{item
+<item
+$ name alpha
+= note hello
+= val 1
+>item
+<item
+$ name ""
+= note ""
+= val 2
+>item
+<item
+= val 3
+>item
+<item
+$ name 0
+= note 0
+= val 4
+>item
+}item
+
+# As a string, the empty field is false: items 1 and 4 pass.
+r
+?item[string(name)]
+{item
+<item
+$ name alpha
+= note hello
+= val 1
+>item
+<item
+$ name ""
+= note ""
+= val 2
+>item
+<item
+= val 3
+>item
+<item
+$ name 0
+= note 0
+= val 4
+>item
+}item
+
+# An empty literal is empty, so all items pass.
+r
+?item[isempty('')]
+{item
+<item
+$ name alpha
+= note hello
+= val 1
+>item
+<item
+$ name ""
+= note ""
+= val 2
+>item
+<item
+= val 3
+>item
+<item
+$ name 0
+= note 0
+= val 4
+>item
+}item
+
+# substring() keeps positions >= round(pos) and < round(pos) + round(len),
+# so positions 0, 1 and 2 give "12": item 1 passes.
+r
+?item[substring(s, 0, 3) = '12']
+{item
+<item
+$ s 12345
+= val 1
+>item
+<item
+$ s héllo
+= val 2
+>item
+<item
+$ s abc
+= val 3
+>item
+}item
+
+# Positions are rounded: round(1.5) is 2 and round(2.6) is 3, so this
+# is positions 2-4, "234": item 1 passes.
+r
+?item[substring(s, 1.5, 2.6) = '234']
+{item
+<item
+$ s 12345
+= val 1
+>item
+<item
+$ s héllo
+= val 2
+>item
+<item
+$ s abc
+= val 3
+>item
+}item
+
+# A negative start still counts toward the length: positions -1, 0 and
+# 1 give "1" (and "a" for abc): item 1 passes.
+r
+?item[substring(s, -1, 3) = '1']
+{item
+<item
+$ s 12345
+= val 1
+>item
+<item
+$ s héllo
+= val 2
+>item
+<item
+$ s abc
+= val 3
+>item
+}item
+
+# A length past the end stops at the end: item 1 passes.
+r
+?item[substring(s, 4, 10) = '45']
+{item
+<item
+$ s 12345
+= val 1
+>item
+<item
+$ s héllo
+= val 2
+>item
+<item
+$ s abc
+= val 3
+>item
+}item
+
+# Positions count characters, not bytes: item 2 passes.
+r
+?item[substring(s, 2) = 'éllo']
+{item
+<item
+$ s 12345
+= val 1
+>item
+<item
+$ s héllo
+= val 2
+>item
+<item
+$ s abc
+= val 3
+>item
+}item
+
+# The same with a length: item 2 passes.
+r
+?item[substring(s, 2, 2) = 'él']
+{item
+<item
+$ s 12345
+= val 1
+>item
+<item
+$ s héllo
+= val 2
+>item
+<item
+$ s abc
+= val 3
+>item
+}item
+
+# string-length() counts characters; héllo is 5 characters but 6
+# bytes: items 1 and 2 pass.
+r
+?item[string-length(s) = 5]
+{item
+<item
+$ s 12345
+= val 1
+>item
+<item
+$ s héllo
+= val 2
+>item
+<item
+$ s abc
+= val 3
+>item
+}item
+
+# mod takes the sign of the dividend: all items pass.
+r
+?item[(-7 mod 3) = -1]
+{item
+<item
+$ s 12345
+= val 1
+>item
+<item
+$ s héllo
+= val 2
+>item
+<item
+$ s abc
+= val 3
+>item
+}item
+
+# mod works on fractions: all items pass.
+r
+?item[(7.5 mod 2) = 1.5]
+{item
+<item
+$ s 12345
+= val 1
+>item
+<item
+$ s héllo
+= val 2
+>item
+<item
+$ s abc
+= val 3
+>item
+}item
+
+# An integer literal past 2^63 is read as a float, not clamped to
+# INT64_MAX, and mod works at that size: all items pass.
+r
+?item[(10000000000000000000 mod 7) = 3]
+{item
+<item
+$ s 12345
+= val 1
+>item
+<item
+$ s héllo
+= val 2
+>item
+<item
+$ s abc
+= val 3
+>item
+}item
+
+# The same past 2^64: all items pass.
+r
+?item[(100000000000000000000.0 mod 7) = 2]
+{item
+<item
+$ s 12345
+= val 1
+>item
+<item
+$ s héllo
+= val 2
+>item
+<item
+$ s abc
+= val 3
+>item
+}item
+
+# Positions beyond int64_t take the floating point path: the range is
+# [-1e20, 1e20), which holds the whole string: both items pass.
+r
+?item[substring(s, -100000000000000000000.0, 200000000000000000000.0) = s]
+{item
+<item
+$ s 12345
+= val 1
+>item
+<item
+$ s abc
+= val 2
+>item
+}item
+
+# An integer start + len past int64_t saturates, and the range is
+# empty: both items pass.
+r
+?item[substring(s, 9223372036854775807, 2) = '']
+{item
+<item
+$ s 12345
+= val 1
+>item
+<item
+$ s abc
+= val 2
+>item
+}item
+
+# Halves round up: round(-0.5) is 0, so positions 0 and 1 give "1"
+# (and "a" for abc): item 1 passes.
+r
+?item[substring(s, -0.5, 2) = '1']
+{item
+<item
+$ s 12345
+= val 1
+>item
+<item
+$ s abc
+= val 2
+>item
+}item
+
+# R72: an empty non-key field in a container is a value, so each of
+# these predicates selects the container.
+r
+?item[note = '']
++item
+= note ""
+= val 1
+-item
+
+r
+?item[starts-with(note, '')]
++item
+= note ""
+= val 1
+-item
+
+r
+?item[ends-with(note, '')]
++item
+= note ""
+= val 1
+-item
+
+r
+?item[string-length(note) = 0]
++item
+= note ""
+= val 1
+-item
+
+# ... and these select nothing
+r
+?item[note = 'x']
++item
+= note ""
+= val 1
+-item
+
+r
+?item[string-length(note) = 1]
++item
+= note ""
+= val 1
+-item
+
+# ends-with(): items 1 and 3 pass; every string ends with '', so all
+# four pass the second filter.
+r
+?item[ends-with(name, '.eth1')]
+{item
+<item
+$ name lo.eth1
+= val 1
+>item
+<item
+$ name eth1x
+= val 2
+>item
+<item
+$ name .eth1
+= val 3
+>item
+<item
+$ name ""
+= val 4
+>item
+}item
+
+r
+?item[ends-with(name, '')]
+{item
+<item
+$ name lo.eth1
+= val 1
+>item
+<item
+$ name eth1x
+= val 2
+>item
+<item
+$ name .eth1
+= val 3
+>item
+<item
+$ name ""
+= val 4
+>item
+}item
+r
+?item[size = 10]
+{item
+<item
+$ name a
+[tag
+= tag x
+= tag y
+]tag
+= size 0
+>item
+<item
+$ name b
+[tag
+= tag x
+= tag y
+]tag
+= size 10
+>item
+}item
+r
+?item[size = 10]
+{item
+<item
+$ name a
++sub
+= x 1
+-sub
+= size 0
+>item
+<item
+$ name b
++sub
+= x 2
+-sub
+= size 10
+>item
+}item
+r
+?item[size = 10]
+{item
+<item
+$ name a
+{sub
+<sub
+$ k 1
+= v p
+>sub
+}sub
+= size 0
+>item
+<item
+$ name b
+{sub
+<sub
+$ k 2
+= v q
+>sub
+}sub
+= size 10
+>item
+}item
+r
+?item[size = 99]
+{item
+<item
+$ name a
+{sub
+<sub
+$ k 1
+= v p
+>sub
+}sub
+= size 0
+>item
+<item
+$ name b
+{sub
+<sub
+$ k 2
+= v q
+>sub
+}sub
+= size 10
+>item
+}item
+r
+?item[size = 10]/sub
+{item
+<item
+$ name a
++sub
+= x 1
+-sub
+= size 0
+>item
+<item
+$ name b
++sub
+= x 2
+-sub
+= size 10
+>item
+}item
+r
+?item[size = 10]/name
+{item
+<item
+$ name a
+= size 0
+>item
+<item
+$ name b
+= size 10
+>item
+}item
+r
+?item[size = 10]/sub/x
+{item
+<item
+$ name a
+= other o1
++sub
+= x 1
+= y 1
+-sub
+= size 10
+>item
+<item
+$ name b
++sub
+= y 2
+-sub
+= size 10
+>item
+<item
+$ name c
++sub
+= x 3
+-sub
+= size 9
+>item
+}item
+r
+?item[size = 10]/note
+{item
+<item
+= note n1
+$ name a
+= other o
+= size 10
+= note n2
+>item
+<item
+= note n3
+= size 3
+>item
+}item
+r
+?item[size = 10]/sub[k = 2]/v
+{item
+<item
+$ name a
+{sub
+<sub
+= v v1
+$ k 1
+>sub
+<sub
+= v v2
+$ k 2
+>sub
+<sub
+$ k 2
+= w w3
+>sub
+}sub
+= size 10
+>item
+}item
+r
+?item[size = 10]/sub
+{item
+<item
+$ name a
++sub
+= x 1
+-sub
+>item
+<item
+$ name b
+= size 10
++sub
+= x 2
+-sub
++other
+= z 1
+-other
+>item
+}item
+r
+?item[size = ""]/sub
+{item
+<item
+$ name a
++sub
+= x 1
+-sub
+>item
+}item
+r
+?item[size = 10]/tag
+{item
+<item
+$ name a
+[tag
+= tag t1
+= tag t2
+]tag
+= size 10
+>item
+}item
+r
+?item[name = '']
+{item
+<item
+= id 1
+= name gum
+= size 5
+>item
+<item
+= id 2
+= name ""
+>item
+<item
+= id 3
+>item
+}item
+r
+?item[name != '']
+{item
+<item
+= id 1
+= name gum
+= size 5
+>item
+<item
+= id 2
+= name ""
+>item
+<item
+= id 3
+>item
+}item
+r
+?item[not(name)]
+{item
+<item
+= id 1
+= name gum
+= size 5
+>item
+<item
+= id 2
+= name ""
+>item
+<item
+= id 3
+>item
+}item
+r
+?item[string(name) = '']
+{item
+<item
+= id 1
+= name gum
+= size 5
+>item
+<item
+= id 2
+= name ""
+>item
+<item
+= id 3
+>item
+}item
+r
+?item[name = false()]
+{item
+<item
+= id 1
+= name gum
+= size 5
+>item
+<item
+= id 2
+= name ""
+>item
+<item
+= id 3
+>item
+}item
+r
+?item[size != 3]
+{item
+<item
+= id 1
+= name gum
+= size 5
+>item
+<item
+= id 2
+= name ""
+>item
+<item
+= id 3
+>item
+}item
+r
+?item[not(size)]
+{item
+<item
+= id 1
+= name gum
+= size 5
+>item
+<item
+= id 2
+= name ""
+>item
+<item
+= id 3
+>item
+}item
+r
+?item[not(size)]/sub
+{item
+<item
+$ name a
++sub
+= x 1
+-sub
+>item
+<item
+$ name b
++sub
+= x 2
+-sub
+= size 1
+>item
+}item
+r
+?top/item[not(name)]
++top
++item
++sub
+= x 1
+-sub
+= size 3
+-item
+-top
+r
+?top/item[name = '']
++top
++item
++sub
+= x 1
+-sub
+= size 3
+-item
+-top
+r
+?top/item[name != 'x']
++top
++item
++sub
+= x 1
+-sub
+= size 3
+-item
+-top
+r
+?top/item[not(name)]/sub
++top
++item
++sub
+= x 1
+-sub
+= size 3
+-item
+-top
