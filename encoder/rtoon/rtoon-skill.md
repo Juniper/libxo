@@ -48,7 +48,11 @@ this order when classifying a line:
    columns instead of dropping to sparse form. Every column name
    sharing the same `xxx/` prefix belongs to one reconstructed
    sub-object named `xxx`, keyed by the part after the slash; group them
-   back together when building the decoded object. A flattened
+   back together when building the decoded object. A name may have
+   several slashes (`via/nested/hop`): split at every `/` and build one
+   sub-object per level, so `{a/b,a/c}` gives one child `a` holding
+   `b` and `c`. A cell is always a scalar; a quoted cell is a string
+   even if its text looks like RTOON. A flattened
    sub-object's own fields can't carry a key marker of their own (only
    the full `xxx/yyy` column name can end in `=`), so don't expect
    "which field of `via` was the key" to be recoverable.
@@ -104,6 +108,13 @@ U+0020 - this is TOON's own Section 7.1 escape table, not JSON's (JSON
 has no `\uXXXX`-only fallback rule the same way, and JSON permits a
 few escapes, like `\/`, that never appear in rtoon output). A raw,
 unescaped control byte never appears inside a quoted token.
+The encoder also quotes any value that contains a comma (in every
+position, not just leaf-lists and rows) and any value that begins or
+ends with a space, since unquoted values are trimmed: `" x"` keeps its
+leading space, while `in ner` needs no quotes.
+
+Names should not repeat within one container or record. If one does,
+the last value wins.
 
 Non-ASCII text is normally literal UTF-8 and needs no quoting. Only
 invisible or whitespace-like BMP characters (e.g. NBSP U+00A0, zero-width
