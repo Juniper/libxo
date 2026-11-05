@@ -98,6 +98,12 @@ TEST_FILES= \
     xpath_01_23.1.fullpath_slax_pretty.err \
     xpath_01_24.1.fullpath_slax_pretty.out \
     xpath_01_24.1.fullpath_slax_pretty.err \
+    xpath_01_25.1.fullpath_slax_pretty.out \
+    xpath_01_25.1.fullpath_slax_pretty.err \
+    xpath_01_26.1.fullpath_slax_pretty.out \
+    xpath_01_26.1.fullpath_slax_pretty.err \
+    xpath_01_27.1.fullpath_slax_pretty.out \
+    xpath_01_27.1.fullpath_slax_pretty.err \
     xpath_01_01.1.fullpath.out \
     xpath_01_01.1.fullpath.err \
     xpath_01_02.1.fullpath.out \
@@ -146,6 +152,12 @@ TEST_FILES= \
     xpath_01_23.1.fullpath.err \
     xpath_01_24.1.fullpath.out \
     xpath_01_24.1.fullpath.err \
+    xpath_01_25.1.fullpath.out \
+    xpath_01_25.1.fullpath.err \
+    xpath_01_26.1.fullpath.out \
+    xpath_01_26.1.fullpath.err \
+    xpath_01_27.1.fullpath.out \
+    xpath_01_27.1.fullpath.err \
     xpath_01_01.1.XP.out \
     xpath_01_01.1.XP.err \
     xpath_01_02.1.XP.out \
@@ -194,6 +206,12 @@ TEST_FILES= \
     xpath_01_23.1.XP.err \
     xpath_01_24.1.XP.out \
     xpath_01_24.1.XP.err \
+    xpath_01_25.1.XP.out \
+    xpath_01_25.1.XP.err \
+    xpath_01_26.1.XP.out \
+    xpath_01_26.1.XP.err \
+    xpath_01_27.1.XP.out \
+    xpath_01_27.1.XP.err \
     xpath_01_01.1.JP.out \
     xpath_01_01.1.JP.err \
     xpath_01_02.1.JP.out \
@@ -241,7 +259,13 @@ TEST_FILES= \
     xpath_01_23.1.JP.out \
     xpath_01_23.1.JP.err \
     xpath_01_24.1.JP.out \
-    xpath_01_24.1.JP.err
+    xpath_01_24.1.JP.err \
+    xpath_01_25.1.JP.out \
+    xpath_01_25.1.JP.err \
+    xpath_01_26.1.JP.out \
+    xpath_01_26.1.JP.err \
+    xpath_01_27.1.JP.out \
+    xpath_01_27.1.JP.err
 
 EXTRA_DIST = \
     ${TEST_CASES} \
@@ -306,6 +330,37 @@ codesign.tstamp: ${noinst_PROGRAMS} ${GTA_PLIST}
 codesign: codesign.tstamp
 
 .PHONY: test-leaks codesign
+
+#
+# xpath_02 replays the xpath_01 inputs through the filter "walk" API
+# (the API libpin uses) and prints fullpath-style lines.  "test-walk"
+# diffs each backend's output against xpath_01's fullpath output, so
+# run "make tests" first.  WALK_SKIP lists inputs with known, expected
+# differences.
+#
+noinst_PROGRAMS += xpath_02.test
+xpath_02_test_SOURCES = xpath_02.c
+EXTRA_DIST += xpath_02.c
+
+WALK_BACKENDS = tree stream
+
+# 23 (cases 11-12): '.' predicates on leaves need a leaf value,
+# which xo_filter_walk_open can't pass.
+WALK_SKIP = xpath_01_23
+
+test-walk: xpath_02.test
+	@${MKDIR} -p out
+	-@(for f in ${srcdir}/xpath_01_*.in ; do \
+	    base=`${BASENAME} $$f .in` ; \
+	    case " ${WALK_SKIP} " in *" $$base "*) continue ;; esac ; \
+	    for be in ${WALK_BACKENDS} ; do \
+		echo "... $$base ... $$be ..." ; \
+		./xpath_02.test input $$f quiet $$be \
+		    > out/$$base.walk.$$be.out 2> out/$$base.walk.$$be.err ; \
+		${DIFF} -u out/$$base.1.fullpath.out \
+		    out/$$base.walk.$$be.out ; \
+	    done ; \
+	done ; true)
 
 accept:
 	@${MKDIR} -p ${srcdir}/saved

@@ -1,0 +1,175 @@
+#
+# Predicates on containers: at close, a predicate still waiting on
+# a field that never appeared is force-resolved with that field
+# as "", just as for list instances
+#
+
+# Test 1: not() of a missing field (expect: data)
+?data[not(missing)]
++top
++data
+= big 5
++inner
+= x 1
+-inner
+-data
++other
+= y 2
+-other
+-top
+
+# Test 2: missing field is the empty string (expect: data)
+r
+?data[missing = ""]
++top
++data
+= big 5
++inner
+= x 1
+-inner
+-data
++other
+= y 2
+-other
+-top
+
+# Test 3: not() of a NaN comparison (expect: data)
+r
+?data[not(missing + 1 = 1)]
++top
++data
+= big 5
++inner
+= x 1
+-inner
+-data
++other
+= y 2
+-other
+-top
+
+# Test 4: NaN comparison (expect: none)
+r
+?data[missing + 1 = 1]
++top
++data
+= big 5
++inner
+= x 1
+-inner
+-data
++other
+= y 2
+-other
+-top
+
+# Test 5: present field matches (expect: data)
+r
+?data[big = 5]
++top
++data
+= big 5
++inner
+= x 1
+-inner
+-data
++other
+= y 2
+-other
+-top
+
+# Test 6: present field fails (expect: none)
+r
+?data[big = 6]
++top
++data
+= big 5
++inner
+= x 1
+-inner
+-data
++other
+= y 2
+-other
+-top
+
+# Test 7: not() of a present field (expect: none)
+r
+?data[not(big)]
++top
++data
+= big 5
++inner
+= x 1
+-inner
+-data
++other
+= y 2
+-other
+-top
+
+# Test 8: missing and present fields (expect: data)
+r
+?data[big = 5 and not(missing)]
++top
++data
+= big 5
++inner
+= x 1
+-inner
+-data
++other
+= y 2
+-other
+-top
+
+# Test 9: missing or present fields (expect: none)
+r
+?data[missing or big = 6]
++top
++data
+= big 5
++inner
+= x 1
+-inner
+-data
++other
+= y 2
+-other
+-top
+
+# Test 10: field after a nested container (expect: data)
+r
+?data[big = 5]
++top
++data
++inner
+= x 1
+-inner
+= big 5
+-data
+-top
+
+# Test 11: field after a nested container fails (expect: none)
+r
+?data[big = 6]
++top
++data
++inner
+= x 1
+-inner
+= big 5
+-data
+-top
+
+# Test 12: missing field after a nested container (expect: data)
+r
+?data[not(missing)]
++top
++data
++inner
+= x 1
+-inner
+= big 5
+-data
+-top

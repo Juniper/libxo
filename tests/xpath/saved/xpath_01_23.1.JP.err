@@ -5593,12 +5593,11 @@ main: field: 'in-stock'='144'
 main: status: predicate
 main: input '= on-order 42'
 main: field: 'on-order'='42'
-main: status: full
+main: status: track
 main: input '> item'
-main: filter: rc: 12
 main: status: track
 main: input '< item'
-main: filter: rc: 14
+main: filter: rc: 12
 main: status: predicate
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
@@ -5617,9 +5616,8 @@ main: field: 'in-stock'='14'
 main: status: predicate
 main: input '= on-order 2'
 main: field: 'on-order'='2'
-main: status: full
+main: status: track
 main: input '> item'
-main: filter: rc: 12
 main: status: track
 main: input '} item'
 main: status: track
@@ -5708,12 +5706,11 @@ main: field: 'in-stock'='144'
 main: status: predicate
 main: input '= on-order 42'
 main: field: 'on-order'='42'
-main: status: full
+main: status: track
 main: input '> item'
-main: filter: rc: 12
 main: status: track
 main: input '< item'
-main: filter: rc: 14
+main: filter: rc: 12
 main: status: predicate
 main: input '$ sku GRO-000-2331'
 main: key: 'sku'='GRO-000-2331'
@@ -5729,9 +5726,8 @@ main: field: 'in-stock'='14'
 main: status: predicate
 main: input '= on-order 2'
 main: field: 'on-order'='2'
-main: status: full
+main: status: track
 main: input '> item'
-main: filter: rc: 12
 main: status: track
 main: input '} item'
 main: status: track
@@ -5917,12 +5913,11 @@ main: field: 'on-order'='42'
 main: status: predicate
 main: input '= in-stock 144'
 main: field: 'in-stock'='144'
-main: status: full
+main: status: track
 main: input '> item'
-main: filter: rc: 12
 main: status: track
 main: input '< item'
-main: filter: rc: 14
+main: filter: rc: 12
 main: status: predicate
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
@@ -5944,9 +5939,8 @@ main: field: 'on-order'='2'
 main: status: predicate
 main: input '= in-stock 14'
 main: field: 'in-stock'='14'
-main: status: full
+main: status: track
 main: input '> item'
-main: filter: rc: 12
 main: status: track
 main: input '} item'
 main: status: track

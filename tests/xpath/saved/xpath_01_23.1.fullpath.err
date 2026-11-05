@@ -5325,7 +5325,7 @@ main: field: 'in-stock'='144'
 main: status: predicate
 main: input '= on-order 42'
 main: field: 'on-order'='42'
-main: status: full
+main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
@@ -5347,7 +5347,7 @@ main: field: 'in-stock'='14'
 main: status: predicate
 main: input '= on-order 2'
 main: field: 'on-order'='2'
-main: status: full
+main: status: track
 main: input '> item'
 main: status: track
 main: input '} item'
@@ -5431,7 +5431,7 @@ main: field: 'in-stock'='144'
 main: status: predicate
 main: input '= on-order 42'
 main: field: 'on-order'='42'
-main: status: full
+main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
@@ -5450,7 +5450,7 @@ main: field: 'in-stock'='14'
 main: status: predicate
 main: input '= on-order 2'
 main: field: 'on-order'='2'
-main: status: full
+main: status: track
 main: input '> item'
 main: status: track
 main: input '} item'
@@ -5626,7 +5626,7 @@ main: field: 'on-order'='42'
 main: status: predicate
 main: input '= in-stock 144'
 main: field: 'in-stock'='144'
-main: status: full
+main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
@@ -5651,7 +5651,7 @@ main: field: 'on-order'='2'
 main: status: predicate
 main: input '= in-stock 14'
 main: field: 'in-stock'='14'
-main: status: full
+main: status: track
 main: input '> item'
 main: status: track
 main: input '} item'
