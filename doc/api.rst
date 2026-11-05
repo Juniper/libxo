@@ -344,7 +344,7 @@ the value "key"::
 .. index:: xo_clear_flags
 
 xo_clear_flags
-++++++++++++++
+~~~~~~~~~~~~~~
 
 .. c:function:: void xo_clear_flags (xo_handle_t *xop, xo_xof_flags_t flags)
 
@@ -359,7 +359,7 @@ xo_clear_flags
 .. index:: xo_set_options
 
 xo_set_options
-++++++++++++++
+~~~~~~~~~~~~~~
 
 .. c:function:: int xo_set_options (xo_handle_t *xop, const char *input)
 
@@ -379,7 +379,7 @@ xo_set_options
 .. _xo_add_filter:
 
 xo_add_filter
-+++++++++++++
+~~~~~~~~~~~~~
 
 .. c:function:: int xo_add_filter (xo_handle_t *xop, const char *expr)
 
@@ -411,7 +411,7 @@ xo_add_filter
 .. index:: xo_destroy
 
 xo_destroy
-++++++++++
+~~~~~~~~~~
 
 .. c:function:: void xo_destroy(xo_handle_t *xop)
 
@@ -427,7 +427,7 @@ xo_destroy
 .. _xo_map_add:
 
 xo_map_add
-++++++++++
+~~~~~~~~~~
 
 .. c:function:: int xo_map_add (xo_handle_t *xop, const char *from, size_t flen, const char *to, size_t tlen)
 
@@ -465,7 +465,7 @@ xo_map_add
 .. _xo_map_add_file:
 
 xo_map_add_file
-+++++++++++++++
+~~~~~~~~~~~~~~~
 
 .. c:function:: int xo_map_add_file (xo_handle_t *xop, const char *fname)
 
