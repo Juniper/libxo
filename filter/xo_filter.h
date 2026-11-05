@@ -309,6 +309,12 @@ xo_filter_setup_test (void);
  *   closing element and returns FULL if it matched, or XO_STATUS_LIVE if
  *   it passed a predicate on a path that continues below the element.
  *
+ * xo_filter_walk_open_field:
+ *   Like xo_filter_walk_open, for a leaf element with its value, so a
+ *   predicate on the leaf itself (e.g. "cost[. > 450]") can be decided;
+ *   one still pending is resolved at once.  Close it with
+ *   xo_filter_walk_close.
+ *
  * xo_filter_walk_key:
  *   Feed a key/attribute name+value so predicates can be evaluated when
  *   xfdo_value_of is NULL.  When xfdo_value_of is set, the backend handles
@@ -334,6 +340,9 @@ xo_filter_setup_test (void);
  */
 int xo_filter_walk_open (xo_handle_t *xop, xo_filter_t *xfp,
 			  const char *tag, ssize_t tlen);
+int xo_filter_walk_open_field (xo_handle_t *xop, xo_filter_t *xfp,
+				const char *tag, ssize_t tlen,
+				const char *value, ssize_t vlen);
 int xo_filter_walk_close (xo_handle_t *xop, xo_filter_t *xfp,
 			   const char *tag, ssize_t tlen);
 int xo_filter_walk_key (xo_handle_t *xop, xo_filter_t *xfp,
