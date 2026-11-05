@@ -25,7 +25,10 @@
  *
  * Fields are walked as leaf frames (walk_open/walk_close).  A field's
  * line is kept if its frame is FULL, or if any frame that was PRED
- * when the line was made later resolves to FULL.
+ * when the line was made later resolves to FULL.  A frame whose
+ * predicate passes on a path that continues below it (walk_key or
+ * walk_close returns LIVE, as for "item[size = 10]/sub") keeps only
+ * the lines that were COND, i.e. that matched the rest of the path.
  */
 
 #include <stdint.h>
@@ -592,30 +595,49 @@ escape (const char *str)
     return buf;
 }
 
+/*
+ * Record how a frame's pending predicate resolved: FULL keeps every
+ * line made under it, while LIVE (passed, on a path that continues
+ * below the frame) keeps only the lines that were COND.  DEAD (failed
+ * on a key, as libxo drops XSF_COND_KEPT) drops the lines made under
+ * it, whatever an enclosing frame decides.
+ */
 static void
-walk_resolve (walker_t *wp, int id)
+walk_resolve (walker_t *wp, int id, xo_filter_status_t how)
 {
     wp->w_resolved = grow(wp->w_resolved, &wp->w_resolved_max, id, 1);
-    wp->w_resolved[id] = 1;
+    if (wp->w_resolved[id] != XO_STATUS_FULL)
+	wp->w_resolved[id] = how;
 }
 
-/* Record the status of the top frame after a key/attr/field event */
+/*
+ * Record the status of the top frame after a key/attr/field event;
+ * 'rc' is the event's return value, which may be LIVE.
+ */
 static void
-walk_note (walker_t *wp, const char *what, const char *name)
+walk_note (walker_t *wp, const char *what, const char *name,
+	   xo_filter_status_t rc)
 {
     xo_filter_status_t st = xo_filter_walk_status(NULL, wp->w_xfp);
 
     if (opt_debug)
-	fprintf(stderr, "xpath_02: %s '%s': status %s\n",
-		what, name, status_name(st));
+	fprintf(stderr, "xpath_02: %s '%s': rc %s, status %s\n",
+		what, name, status_name(rc), status_name(st));
 
     if (wp->w_frames_count == 0)
 	return;
 
     frame_t *fp = &wp->w_frames[wp->w_frames_count - 1];
+    xo_filter_status_t old = fp->f_status;
+
     fp->f_status = st;
     if (st == XO_STATUS_FULL)
-	walk_resolve(wp, fp->f_id);
+	walk_resolve(wp, fp->f_id, XO_STATUS_FULL);
+    else if (rc == XO_STATUS_LIVE)
+	walk_resolve(wp, fp->f_id, XO_STATUS_LIVE);
+    else if (old == XO_STATUS_PRED
+	     && (st == XO_STATUS_TRACK || st == XO_STATUS_DEAD))
+	walk_resolve(wp, fp->f_id, XO_STATUS_DEAD);
 }
 
 static frame_t *
@@ -648,8 +670,8 @@ walk_pop (walker_t *wp, node_t *np)
 	fprintf(stderr, "xpath_02: close '%s' (%d): rc %s\n",
 		np->n_tag, fp->f_id, status_name(rc));
 
-    if (rc == XO_STATUS_FULL)
-	walk_resolve(wp, fp->f_id);
+    if (rc == XO_STATUS_FULL || rc == XO_STATUS_LIVE)
+	walk_resolve(wp, fp->f_id, rc);
 
     xo_buf_set_len(&wp->w_leader, fp->f_leader);
     xo_buf_force_nul(&wp->w_leader);
@@ -715,10 +737,10 @@ walk_node (walker_t *wp, node_t *np)
 	switch (ip->it_kind) {
 	case IT_KEY:
 	    if (!opt_tree) {
-		xo_filter_walk_key(NULL, wp->w_xfp, ip->it_name,
-				   strlen(ip->it_name), ip->it_value,
-				   strlen(ip->it_value));
-		walk_note(wp, "key", ip->it_name);
+		st = xo_filter_walk_key(NULL, wp->w_xfp, ip->it_name,
+					strlen(ip->it_name), ip->it_value,
+					strlen(ip->it_value));
+		walk_note(wp, "key", ip->it_name, st);
 	    }
 
 	    /* Keys turn into predicates in the leader */
@@ -738,20 +760,20 @@ walk_node (walker_t *wp, node_t *np)
 	    break;
 
 	case IT_ATTR:
-	    xo_filter_walk_attr(NULL, wp->w_xfp, ip->it_name,
-				strlen(ip->it_name), ip->it_value,
-				strlen(ip->it_value));
-	    walk_note(wp, "attr", ip->it_name);
+	    st = xo_filter_walk_attr(NULL, wp->w_xfp, ip->it_name,
+				     strlen(ip->it_name), ip->it_value,
+				     strlen(ip->it_value));
+	    walk_note(wp, "attr", ip->it_name, st);
 	    break;
 
 	case IT_FIELD:
 	    st = xo_filter_walk_status(NULL, wp->w_xfp);
 	    if (!opt_tree
 		    && (st == XO_STATUS_TRACK || st == XO_STATUS_PRED)) {
-		xo_filter_walk_key(NULL, wp->w_xfp, cp->n_tag,
-				   strlen(cp->n_tag), cp->n_value,
-				   strlen(cp->n_value));
-		walk_note(wp, "field", cp->n_tag);
+		st = xo_filter_walk_key(NULL, wp->w_xfp, cp->n_tag,
+					strlen(cp->n_tag), cp->n_value,
+					strlen(cp->n_value));
+		walk_note(wp, "field", cp->n_tag, st);
 	    }
 
 	    walk_push(wp, cp);
@@ -778,13 +800,22 @@ line_kept (walker_t *wp, line_t *lp)
     if (lp->l_status == XO_STATUS_FULL || lp->l_status == XO_STATUS_ZERO)
 	return TRUE;
 
+    int kept = FALSE;
+
     for (int i = 0; i < lp->l_pend_count; i++) {
 	int id = lp->l_pend[i];
-	if (id < wp->w_resolved_max && wp->w_resolved[id])
-	    return TRUE;
+	if (id >= wp->w_resolved_max)
+	    continue;
+	if (wp->w_resolved[id] == XO_STATUS_DEAD)
+	    return FALSE;
+	if (wp->w_resolved[id] == XO_STATUS_FULL)
+	    kept = TRUE;
+	else if (wp->w_resolved[id] == XO_STATUS_LIVE
+		&& lp->l_status == XO_STATUS_COND)
+	    kept = TRUE;
     }
 
-    return FALSE;
+    return kept;
 }
 
 static void
