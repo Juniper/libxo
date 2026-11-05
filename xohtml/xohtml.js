@@ -456,7 +456,13 @@
         return table;
     }
 
-    function addToggle (table, lines, anchor, place) {
+    /*
+     * "hidden" lists elements to blank out (visibility, not display)
+     * while the table is shown, so they keep their space and the
+     * toggle button doesn't move.  The titled groups use this for the
+     * original title divs, which the table's header row replaces.
+     */
+    function addToggle (table, lines, anchor, place, hidden) {
         var toggle = document.createElement("button");
         toggle.type = "button";
         toggle.className = "xohtml-view-toggle";
@@ -467,6 +473,9 @@
             table.style.display = on ? "table" : "none";
             lines.forEach(function (line) {
                 line.style.display = on ? "none" : "";
+            });
+            (hidden || []).forEach(function (el) {
+                el.style.visibility = on ? "hidden" : "";
             });
             toggle.textContent = on ? "Line view" : "Table view";
         });
@@ -494,7 +503,8 @@
             table.style.display = "none";
             group.header.insertAdjacentElement("afterend", table);
 
-            addToggle(table, group.rows, group.header, "append");
+            var titles = Array.prototype.slice.call(group.header.children);
+            addToggle(table, group.rows, group.header, "append", titles);
         });
     }
 
