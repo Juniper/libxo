@@ -419,11 +419,14 @@ particular output styles:
 .It Sy M Ta Sy Name Ta Sy Description
 .It a Ta argument Ta "The content appears as a ""const char *"" argument"
 .It c Ta colon Ta "A colon ("":"") is appended after the label"
+.It \& Ta dense Ta "Write the field\(aqs list in dense form (RTOON)"
 .It d Ta display Ta "Only emit field for display styles (text/HTML)"
 .It e Ta encoding Ta "Only emit for encoding styles (XML/JSON)"
 .It \& Ta escape\-private Ta "Escape control chars as Unicode private\-use refs (XML/HTML)"
 .It \& Ta escape\-slash Ta "Escape forward slashes (JSON)"
 .It \& Ta escape\-square Ta "Escape control chars as U+25A1 WHITE SQUARE (XML/HTML)"
+.It f Ta first\-cap Ta "Capitalize the first character in the rendered data"
+.It g Ta gettext Ta "Call gettext on the field\(aqs rendered content"
 .It h Ta "humanize (hn)" Ta "Format large numbers in human\-readable style"
 .It \& Ta hn\-space Ta "Humanize: Place space between numeric and unit"
 .It \& Ta hn\-decimal Ta "Humanize: Add a decimal digit, if number < 10"
@@ -432,8 +435,10 @@ particular output styles:
 .It k Ta key Ta "Field is a key, suitable for XPath predicates"
 .It l Ta leaf\-list Ta "Field is a leaf\-list, a list of leaf values"
 .It n Ta no\-quotes Ta "Do not quote the field when using JSON style"
+.It p Ta plural Ta "Gettext: Use comma\-separated plural form"
 .It q Ta quotes Ta "Quote the field when using JSON style"
 .It t Ta trim Ta "Trim leading and trailing whitespace"
+.It \& Ta units\-attr Ta "This {U:} value appears in attributes only (XML/HTML)"
 .It w Ta "white space" Ta "A blank ("" "") is appended after the label"
 .El
 .Pp
@@ -486,6 +491,49 @@ The colon modifier is only used for the TEXT and HTML output
 styles.
 It is commonly combined with the space modifier (\(aq{w:}\(aq).
 It is purely a convenience feature.
+.Ss "The Dense Modifier ({,dense:})"
+The dense modifier asks that the list containing the field be written
+in
+.Dq dense
+(tabular) form by encoders that support it.
+The modifier has no single\-letter form, and is given on any field
+in the list\(aqs first instance.
+Currently only the
+.Em rtoon
+encoder uses it (see
+.Xr xo_encoders 7 ) ;
+all other output styles ignore it.
+.Bd -literal -offset indent
+    EXAMPLE:
+      xo_open_list("user");
+      for (i = 0; i < num_users; i++) {
+          xo_open_instance("user");
+          xo_emit("{k:name} {,dense:uid/%d}\\n",
+                  user[i].u_name, user[i].u_uid);
+          xo_close_instance("user");
+      }
+      xo_close_list("user");
+    RTOON:
+      user
+        {name=,uid}
+        phil,1001
+        pallavi,1002
+.Ed
+.Pp
+Without the modifier, the
+.Em rtoon
+encoder writes each instance as a block of lines:
+.Bd -literal -offset indent
+    RTOON:
+      user
+        - name=phil
+          uid 1001
+        - name=pallavi
+          uid 1002
+.Ed
+.Pp
+Since a dense row holds only simple values, instances of a dense list
+should not contain nested containers or lists.
 .Ss "The Display Modifier ({d:})"
 The display modifier indicated the field should only be generated for
 the display output styles, TEXT and HTML.
@@ -1255,7 +1303,8 @@ names to make that difference more obvious.
 .Sh SEE ALSO
 .Xr xolint 1 ,
 .Xr libxo 3 ,
-.Xr xo_emit 3
+.Xr xo_emit 3 ,
+.Xr xo_encoders 7
 .Sh HISTORY
 The
 .Nm libxo
