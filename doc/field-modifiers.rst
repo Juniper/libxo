@@ -13,6 +13,7 @@ particular output styles:
   === =============== ===================================================
    a   argument        The content appears as a 'const char \*' argument
    c   colon           A colon (":") is appended after the label
+  \    dense           Write the field's list in dense form (RTOON)
    d   display         Only emit field for display styles (text/HTML)
    e   encoding        Only emit for encoding styles (XML/JSON)
   \    escape-private  Escape control chars as Unicode private-use refs (XML/HTML)
@@ -88,6 +89,47 @@ The colon modifier appends a single colon to the data value::
 The colon modifier is only used for the TEXT and HTML output
 styles. It is commonly combined with the space modifier ('{w:}').
 It is purely a convenience feature.
+
+.. index:: Field Modifiers; Dense
+.. _dense-modifier:
+
+The Dense Modifier ({,dense:})
+++++++++++++++++++++++++++++++
+
+.. index:: Field Modifiers; Dense
+
+The dense modifier asks that the list containing the field be written
+in "dense" (tabular) form by encoders that support it.  The modifier
+has no single-letter form, and is given on any field in the list's
+first instance.  Currently only the RTOON encoder uses it (see
+:ref:`rtoon_encoder`); all other output styles ignore it::
+
+    EXAMPLE:
+        xo_open_list("user");
+        for (i = 0; i < num_users; i++) {
+            xo_open_instance("user");
+            xo_emit("{k:name} {,dense:uid/%d}\\n",
+                    user[i].u_name, user[i].u_uid);
+            xo_close_instance("user");
+        }
+        xo_close_list("user");
+    RTOON:
+        user
+          {name=,uid}
+          phil,1001
+          pallavi,1002
+
+Without the modifier, RTOON writes each instance as a block of lines::
+
+    RTOON:
+        user
+          - name=phil
+            uid 1001
+          - name=pallavi
+            uid 1002
+
+Since a dense row holds only simple values, instances of a dense list
+should not contain nested containers or lists.
 
 .. index:: Field Modifiers; Display
 .. _display-modifier:
