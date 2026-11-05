@@ -610,6 +610,38 @@ main (int argc, char **argv)
     xo_emit("{:msg}\n", "a\xc2\xa0" "b");
     xo_close_container("s34d-nbsp");
 
+    /*
+     * 35. Leading and trailing spaces: a decoder trims unquoted
+     * values, so a value with a space at either edge is quoted, in
+     * every value position.  Inner spaces alone need no quotes.
+     * A comma in a data-value is quoted too (rtoon-spec.md 2.2).
+     */
+    xo_open_container("s35-edge-spaces");
+    xo_emit("{:lead}\n", " lead");
+    xo_emit("{:trail}\n", "trail ");
+    xo_emit("{:both}\n", "  both  ");
+    xo_emit("{:inner}\n", "in ner");
+    xo_emit("{:comma}\n", "a,b");
+    xo_emit("{l:tag}", " x");
+    xo_emit("{l:tag}", "y ");
+    xo_emit("{l:tag}", "z");
+    xo_close_container("s35-edge-spaces");
+
+    xo_open_list("s35-sparse");
+    xo_open_instance("s35-sparse");
+    xo_emit("{k:name}{:val}\n", " k1", "v1 ");
+    xo_close_instance("s35-sparse");
+    xo_close_list("s35-sparse");
+
+    xo_open_list_hf(NULL, XOF_DENSE, "s35-dense");
+    xo_open_instance("s35-dense");
+    xo_emit("{k:name}{:val}\n", "k1 ", " v1");
+    xo_close_instance("s35-dense");
+    xo_open_instance("s35-dense");
+    xo_emit("{k:name}{:val}\n", "k2", "v 2");
+    xo_close_instance("s35-dense");
+    xo_close_list("s35-dense");
+
     xo_close_container("rtoon-test");
 
     xo_finish();
