@@ -344,13 +344,14 @@ EXTRA_DIST += xpath_02.c
 
 WALK_BACKENDS = tree stream
 
-# 23 (cases 11-12): '.' predicates on leaves need a leaf value,
-# which xo_filter_walk_open can't pass.
-WALK_SKIP = xpath_01_23
+# Inputs to leave out of test-walk, e.g. "WALK_SKIP = xpath_01_23"
+WALK_SKIP =
+
+TEST_NUM = *
 
 test-walk: xpath_02.test
 	@${MKDIR} -p out
-	-@(for f in ${srcdir}/xpath_01_*.in ; do \
+	-@(for f in ${srcdir}/xpath_01_${TEST_NUM}.in ; do \
 	    base=`${BASENAME} $$f .in` ; \
 	    case " ${WALK_SKIP} " in *" $$base "*) continue ;; esac ; \
 	    for be in ${WALK_BACKENDS} ; do \
