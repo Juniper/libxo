@@ -202,7 +202,7 @@ xo_xparse_token_translate (xo_xparse_token_t ttype);
  */
 char *
 xo_xparse_expecting_error (xo_xparse_data_t *xdp, const char *token,
-			   int yystate, int yychar);
+			   int yystate, const char *lead);
 
 /*
  * Is the given character valid inside variable names (T_VAR)?

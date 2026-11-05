@@ -1407,7 +1407,8 @@ xo_xparse_syntax_error (xo_xparse_data_t *xdp, const char *token,
     if (yystate == YY_INITIAL_STATE && yychar < 0)
 	return xo_strdup("empty expression");
 
-    char *msg = xo_xparse_expecting_error(xdp, token, yystate, yychar);
+    char *msg = xo_xparse_expecting_error(xdp, token, yystate,
+					  "unexpected input");
     if (msg)
 	return msg;
 

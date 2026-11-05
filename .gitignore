@@ -57,3 +57,6 @@ cscope.files
 cscope.out
 trash
 .coderlm
+
+# clangd's cache directory
+.cache
