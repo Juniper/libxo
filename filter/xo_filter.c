@@ -6222,6 +6222,24 @@ xo_filter_walk_open (xo_handle_t *xop, xo_filter_t *xfp,
     return xo_filter_open(xop, xfp, tag, tlen, "container", NULL, 0);
 }
 
+/*
+ * Open a leaf element with its value, so a predicate on the leaf
+ * itself (e.g. "cost[. > 450]") can be decided.  As for libxo's
+ * fields, a predicate still pending is resolved now, since no child
+ * can arrive to satisfy it.  Close it with xo_filter_walk_close.
+ */
+int
+xo_filter_walk_open_field (xo_handle_t *xop, xo_filter_t *xfp,
+			   const char *tag, ssize_t tlen,
+			   const char *value, ssize_t vlen)
+{
+    if (tlen < 0)
+	tlen = (ssize_t) strlen(tag);
+    if (value && vlen < 0)
+	vlen = (ssize_t) strlen(value);
+    return xo_filter_op_open_field(xop, xfp, tag, tlen, value, vlen);
+}
+
 int
 xo_filter_walk_close (xo_handle_t *xop, xo_filter_t *xfp,
 		      const char *tag, ssize_t tlen)
