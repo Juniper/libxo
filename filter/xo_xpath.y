@@ -137,6 +137,7 @@
 %token C_NESTED_PREDICATES  84 /* Predicates inside predicates: a[b[c]] */
 %token C_PREDICATE_PATHS    85 /* Multi-element paths in predicates a[b/c] */
 %token C_UNI_MINUS	    86 /* Unary minus */
+%token C_NAN		    87 /* Not a number (XPath's NaN) */
 /* Note: Add new names to xo_xparse_ttname_map[] in xo_xparse.c */
 
 /*
@@ -920,10 +921,14 @@ xo_xparse_is_unsupported_token (xo_xparse_data_t *xdp, int token)
  *
  * (and likewise via yyrindex for reductions).  Returns NULL when nothing
  * useful can be said, so the caller can fall back to a generic message.
+ * This is driven entirely by yystate, not by the actual lookahead token,
+ * so it's just as meaningful when the caller hit end-of-input as when it
+ * choked on a real token; 'lead' is the lead-in phrase the caller wants
+ * ("unexpected input" / "unexpected end-of-expression" / etc).
  */
 char *
 xo_xparse_expecting_error (xo_xparse_data_t *xdp, const char *token,
-			   int yystate, int yychar UNUSED)
+			   int yystate, const char *lead)
 {
 #define MAX_EXPECT 5
     char buf[BUFSIZ], *cp = buf, *ep = buf + sizeof(buf);
@@ -943,7 +948,7 @@ xo_xparse_expecting_error (xo_xparse_data_t *xdp, const char *token,
 		  && yycheck[idx] == (YYINT) i);
 	}
 
-	if (!ok || xo_xparse_token_name_fancy[i] == NULL)
+	if (!ok || i >= YYNTOKENS || xo_xparse_token_name_fancy[i] == NULL)
 	    continue;
 
 	if (xo_xparse_is_unsupported_token(xdp, i))
@@ -960,7 +965,7 @@ xo_xparse_expecting_error (xo_xparse_data_t *xdp, const char *token,
     if (expect > MAX_EXPECT)
 	expect += 1;
 
-    SNPRINTF(cp, ep, "unexpected input");
+    SNPRINTF(cp, ep, "%s", lead);
     if (token)
 	SNPRINTF(cp, ep, ": %s", token);
 

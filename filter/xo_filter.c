@@ -11,10 +11,13 @@
  */
 
 #include <stdio.h>
+#include <ctype.h>
+#include <errno.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <inttypes.h>
 #include <string.h>
+#include <ctype.h>
 #include <errno.h>
 #include <regex.h>
 #include <sys/param.h>
@@ -68,11 +71,20 @@ typedef uint32_t xo_trie_id_t;	/* Index trie node array (1-based; 0=none) */
  * index 0 means "none".
  */
 typedef struct xo_tnode_s {
-    xo_off_t xtn_name;          /* Element name offset in xparse string table */
+    xo_name_id_t xtn_name;      /* Interned element name (backend-opaque id) */
     xo_xparse_node_id_t xtn_pred; /* Predicate subtree root (0=none) */
     xo_trie_id_t xtn_child;	/* First child trie node (0 = leaf) */
     xo_trie_id_t xtn_sibling;	/* Next sibling at this level */
     uint16_t xtn_flags;		/* XTNF_* flags */
+    int16_t xtn_import_prec;	/* import precedence of the pattern that set
+				   xtn_action; higher wins regardless of
+				   priority (XSLT import precedence outranks
+				   priority in conflict resolution) */
+    uint32_t xtn_action;	/* backend-opaque action id (XTNF_TERMINAL only) */
+    double xtn_priority;	/* priority of the pattern that set xtn_action;
+				   used to arbitrate when a later insert wants
+				   this same node as its own terminal, after
+				   import precedence has been compared */
 } xo_tnode_t;
 
 #define XTNF_TERMINAL	(1<<0)	/* A complete expression ends here */
@@ -89,6 +101,8 @@ typedef struct xo_trie_s {
     xo_trie_id_t xt_nodes_max;	/* Allocated capacity */
     xo_trie_id_t xt_root;	/* First root-level sibling */
     xo_xparse_data_t *xt_xd;	/* Parse data (for string lookup) */
+    xo_filter_data_t *xt_data;	/* Data context (opaque to core) */
+    xo_filter_data_ops_t *xt_ops; /* Data vtable for alloc and name ops */
 } xo_trie_t;
 
 /*
@@ -128,6 +142,8 @@ typedef struct xo_tframe_s {
     int32_t xtf_allow_delta;	/* allow contribution to undo on pop */
     int32_t xtf_deny_delta;	/* deny contribution to undo on pop */
     int32_t xtf_cond_delta;	/* cond contribution to undo on pop */
+    char *xtf_tag;		/* element name that opened this frame */
+    ssize_t xtf_tag_len;
     char *xtf_keys;		/* buffered "k\0v\0k2\0v2\0\0" pairs */
     ssize_t xtf_keys_len;
     char *xtf_attrs;		/* buffered "@k\0v\0..." pairs (attributes) */
@@ -199,6 +215,11 @@ typedef struct xo_tmatch_s {
     uint32_t xtm_allow;          /* Active allow-match count */
     uint32_t xtm_deny;           /* Active deny-match count */
     uint32_t xtm_cond;           /* Active conditional-match count */
+    uint32_t xtm_cur_action;     /* xtn_action from last matched TERMINAL node */
+    uint32_t xtm_event;		/* Bumped per open/key/attr/resolve */
+    uint32_t xtm_cur_event;	/* xtm_event when xtm_cur_action was set */
+    int16_t xtm_cur_import_prec; /* import precedence of xtm_cur_action */
+    double xtm_cur_priority;	/* priority of xtm_cur_action */
 } xo_tmatch_t;
 
 /*
@@ -209,7 +230,9 @@ xo_trie_alloc_node (xo_trie_t *xtp)
 {
     if (xtp->xt_nodes_count + 1 >= xtp->xt_nodes_max) {
 	xo_trie_id_t cap = xtp->xt_nodes_max ? xtp->xt_nodes_max * 2 : 16;
-	xo_tnode_t *p = xo_realloc(xtp->xt_nodes, cap * sizeof(*p));
+	xo_tnode_t *p = xtp->xt_ops->xfdo_realloc(xtp->xt_data,
+						    xtp->xt_nodes,
+						    cap * sizeof(*p));
 	if (p == NULL)
 	    return 0;
 
@@ -224,19 +247,55 @@ xo_trie_alloc_node (xo_trie_t *xtp)
 }
 
 /*
- * Return (or create) the wildcard child of `parent`.
- * parent==0 means the root sibling list.
+ * Return (or create) the child of `parent` for one step of a pattern.
+ * parent==0 means the root sibling list.  `flags` holds XTNF_WILDCARD
+ * for a '*' step (name_id is then ignored) and XTNF_ABSOLUTE for the
+ * first step of an absolute path; `pred` is the step's predicate (0
+ * for none).
+ *
+ * Two steps share a node only when they are the same step: same name
+ * (or both wildcards), and, at the root, both absolute or both
+ * relative.  A relative "one" must not land on an absolute "/one",
+ * or it inherits the anchor (and "a/one" stops matching).
+ *
+ * Predicates: two different predicates never share a node, since a
+ * node holds only one; sharing would silently drop the earlier one.
+ * A plain step and a predicated step of the same name do share, with
+ * the node keeping the predicate.  libpin relies on this: it waits
+ * for the predicate before dispatching, and its Patricia fallback
+ * handles the plain pattern when the predicate fails (see the
+ * terminal-conflict comment in xo_trie_insert).  libxo's default
+ * backend names nodes by string-table offset, which is never shared,
+ * so none of this merging happens there.
  */
 static xo_trie_id_t
-xo_trie_get_wildcard_child (xo_trie_t *xtp, xo_trie_id_t parent)
+xo_trie_get_child (xo_trie_t *xtp, xo_trie_id_t parent, xo_name_id_t name_id,
+		   uint16_t flags, xo_xparse_node_id_t pred)
 {
+    const uint16_t match_flags = XTNF_WILDCARD | XTNF_ABSOLUTE;
     xo_trie_id_t *listp = parent
 	? &xtp->xt_nodes[parent].xtn_child
 	: &xtp->xt_root;
 
-    for (xo_trie_id_t s = *listp; s; s = xtp->xt_nodes[s].xtn_sibling)
-	if (xtp->xt_nodes[s].xtn_flags & XTNF_WILDCARD)
-	    return s;
+    if (parent)
+	flags &= ~XTNF_ABSOLUTE;
+    flags &= match_flags;
+
+    for (xo_trie_id_t s = *listp; s; s = xtp->xt_nodes[s].xtn_sibling) {
+	xo_tnode_t *tn = &xtp->xt_nodes[s];
+
+	if ((tn->xtn_flags & match_flags) != flags)
+	    continue;
+	if (!(flags & XTNF_WILDCARD) && tn->xtn_name.ni_id != name_id.ni_id)
+	    continue;
+	if (pred && tn->xtn_pred && pred != tn->xtn_pred)
+	    continue;
+
+	/* Only ever SET xtn_pred, never clear it (see above) */
+	if (pred)
+	    tn->xtn_pred = pred;
+	return s;
+    }
 
     xo_trie_id_t id = xo_trie_alloc_node(xtp);
     if (id == 0)
@@ -245,37 +304,12 @@ xo_trie_get_wildcard_child (xo_trie_t *xtp, xo_trie_id_t parent)
     /* xo_trie_alloc_node may have realloced xt_nodes; recalculate listp */
     listp = parent ? &xtp->xt_nodes[parent].xtn_child : &xtp->xt_root;
 
-    xtp->xt_nodes[id].xtn_flags |= XTNF_WILDCARD;
-    xtp->xt_nodes[id].xtn_sibling = *listp;
-    *listp = id;
-
-    return id;
-}
-
-/*
- * Return (or create) the child of `parent` with name `name_id`.
- * parent==0 means the root sibling list.
- */
-static xo_trie_id_t
-xo_trie_get_child (xo_trie_t *xtp, xo_trie_id_t parent, xo_off_t name_id)
-{
-    xo_trie_id_t *listp = parent
-	? &xtp->xt_nodes[parent].xtn_child
-	: &xtp->xt_root;
-
-    for (xo_trie_id_t s = *listp; s; s = xtp->xt_nodes[s].xtn_sibling)
-	if (xtp->xt_nodes[s].xtn_name == name_id)
-	    return s;
-
-    xo_trie_id_t id = xo_trie_alloc_node(xtp);
-    if (id == 0)
-	return 0;
-
-    /* xo_trie_alloc_node may have realloced xt_nodes; recalculate listp */
-    listp = parent ? &xtp->xt_nodes[parent].xtn_child : &xtp->xt_root;
-
-    xtp->xt_nodes[id].xtn_name = name_id;
-    xtp->xt_nodes[id].xtn_sibling = *listp;
+    xo_tnode_t *tn = &xtp->xt_nodes[id];
+    if (!(flags & XTNF_WILDCARD))
+	tn->xtn_name = name_id;
+    tn->xtn_flags |= flags;
+    tn->xtn_pred = pred;
+    tn->xtn_sibling = *listp;
     *listp = id;
 
     return id;
@@ -283,7 +317,8 @@ xo_trie_get_child (xo_trie_t *xtp, xo_trie_id_t parent, xo_off_t name_id)
 
 static void
 xo_trie_insert (xo_trie_t *xtp, xo_xparse_data_t *xdp,
-		xo_xparse_node_id_t first_elem, uint16_t flags)
+		xo_xparse_node_id_t first_elem, uint16_t flags, uint32_t action,
+		double priority, int16_t import_prec)
 {
     xo_trie_id_t parent = 0;
     xo_xparse_node_t *xnp;
@@ -295,52 +330,104 @@ xo_trie_insert (xo_trie_t *xtp, xo_xparse_data_t *xdp,
 	    continue;
 	}
 
-	xo_trie_id_t tid;
+	xo_name_id_t nid = { 0 };
+	uint16_t step_flags;
+
 	if (xnp->xn_type == L_ASTERISK) {
-	    tid = xo_trie_get_wildcard_child(xtp, parent);
+	    step_flags = XTNF_WILDCARD;
 	} else if (xnp->xn_type == C_ELEMENT) {
-	    tid = xo_trie_get_child(xtp, parent, xnp->xn_str);
+	    step_flags = 0;
+	    if (xtp->xt_ops->xfdo_name_intern) {
+		const char *nm = xo_xparse_str(xdp, xnp->xn_str);
+		nid = xtp->xt_ops->xfdo_name_intern(xtp->xt_data, nm,
+						     nm ? (ssize_t) strlen(nm) : 0);
+	    } else {
+		nid.ni_id = (uint32_t) xnp->xn_str;
+	    }
 	} else {
 	    continue;
 	}
-	if (tid == 0)
-	    return;
 
 	/*
 	 * XTNF_ABSOLUTE means the path starts at root.  The check in
 	 * xo_tmatch_open runs on root-level trie nodes, so the flag
 	 * must live on the first element of the path (parent == 0),
-	 * not on the terminal node.
+	 * not on the terminal node.  xo_trie_get_child drops it for
+	 * non-root steps.
 	 */
-	if (parent == 0 && (flags & XTNF_ABSOLUTE))
-	    xtp->xt_nodes[tid].xtn_flags |= XTNF_ABSOLUTE;
+	step_flags |= flags & XTNF_ABSOLUTE;
 
-	/* Attach predicate if present among this element's children */
+	/* Find this element's predicate (if any) among its children */
+	xo_xparse_node_id_t pred = 0;
 	for (xo_xparse_node_id_t cid = xnp->xn_contents; cid; ) {
 	    xo_xparse_node_t *cp = xo_xparse_node(xdp, cid);
 	    if (cp->xn_type == C_PREDICATE) {
-		xtp->xt_nodes[tid].xtn_pred = cid;
+		pred = cid;
 		break;
 	    }
 	    cid = cp->xn_next;
 	}
+
+	xo_trie_id_t tid = xo_trie_get_child(xtp, parent, nid,
+					     step_flags, pred);
+	if (tid == 0)
+	    return;
+
 	parent = tid;
     }
 
-    if (parent)
-	xtp->xt_nodes[parent].xtn_flags |=
-	    XTNF_TERMINAL | (flags & ~XTNF_ABSOLUTE);
+    if (parent) {
+	/*
+	 * Two match patterns can legitimately terminate on the very same
+	 * trie node (same tag name, same position) when pin_compile.c
+	 * registers both a bare name and a predicate-qualified pattern for
+	 * it (e.g. "author" and "author[life-span/born]"), or when an
+	 * importing stylesheet overrides a same-named pattern from an
+	 * xsl:import'd one -- the shared filter holds every match pattern,
+	 * not just the "hard" ones.  A node has room for only one
+	 * (predicate, action) pair, so when two patterns collide here,
+	 * XSLT's own conflict-resolution rule (XSLT 1.0 SS5.5) decides which
+	 * one the node keeps, in the same order pin_rulebook_apply_add uses
+	 * for its Patricia-tree entries: higher import precedence wins
+	 * outright; only when import precedence ties does priority decide;
+	 * a full tie keeps whichever was inserted last.  The losing pattern
+	 * still matches structurally, so libpin's Patricia fallback path is
+	 * what ends up dispatching it when this node's winning predicate
+	 * resolves false.
+	 */
+	int new_wins;
+	if (!(xtp->xt_nodes[parent].xtn_flags & XTNF_TERMINAL))
+	    new_wins = 1;
+	else if (import_prec != xtp->xt_nodes[parent].xtn_import_prec)
+	    new_wins = (import_prec > xtp->xt_nodes[parent].xtn_import_prec);
+	else if (priority != xtp->xt_nodes[parent].xtn_priority)
+	    new_wins = (priority > xtp->xt_nodes[parent].xtn_priority);
+	else
+	    new_wins = 1;
+
+	if (new_wins) {
+	    xtp->xt_nodes[parent].xtn_flags |=
+		XTNF_TERMINAL | (flags & ~XTNF_ABSOLUTE);
+	    xtp->xt_nodes[parent].xtn_action = action;
+	    xtp->xt_nodes[parent].xtn_priority = priority;
+	    xtp->xt_nodes[parent].xtn_import_prec = import_prec;
+	}
+    }
 }
 
 static xo_trie_t *
-xo_trie_compile (xo_handle_t *xop UNUSED, xo_xparse_data_t *xdp)
+xo_trie_compile (xo_handle_t *xop UNUSED, xo_xparse_data_t *xdp,
+		 xo_filter_data_t *dp, xo_filter_data_ops_t *ops,
+		 uint32_t *actions, double *priorities, int16_t *import_precs)
 {
-    xo_trie_t *xtp = xo_realloc(NULL, sizeof(*xtp));
+    xo_trie_t *xtp = ops->xfdo_realloc(dp, NULL, sizeof(*xtp));
     if (xtp == NULL)
 	return NULL;
 
     bzero(xtp, sizeof(*xtp));
     xtp->xt_xd = xdp;
+    xtp->xt_data = dp;
+    xtp->xt_ops = ops;
 
     xo_xparse_node_id_t *paths = xdp->xd_paths;
     for (uint32_t i = 0; i < xdp->xd_paths_cur; i++, paths++) {
@@ -372,7 +459,10 @@ xo_trie_compile (xo_handle_t *xop UNUSED, xo_xparse_data_t *xdp)
 	default:
 	    continue;
 	}
-	xo_trie_insert(xtp, xdp, elem, flags);
+	uint32_t action = (actions != NULL) ? actions[i] : 0;
+	double priority = (priorities != NULL) ? priorities[i] : 0.0;
+	int16_t import_prec = (import_precs != NULL) ? import_precs[i] : 0;
+	xo_trie_insert(xtp, xdp, elem, flags, action, priority, import_prec);
     }
 
     return xtp;
@@ -382,8 +472,10 @@ static void
 xo_trie_free (xo_trie_t *xtp)
 {
     if (xtp) {
-	xo_free(xtp->xt_nodes);
-	xo_free(xtp);
+	xo_filter_data_t *dp = xtp->xt_data;
+	xo_filter_data_ops_t *ops = xtp->xt_ops;
+	ops->xfdo_free(dp, xtp->xt_nodes);
+	ops->xfdo_free(dp, xtp);
     }
 }
 
@@ -410,6 +502,31 @@ xo_tframe_key_add (xo_tframe_t *frame,
 
     frame->xtf_keys_len += new_len - 1; /* exclude the final extra NUL */
     frame->xtf_keys = newp;
+}
+
+static void
+xo_tframe_free_tag (xo_tframe_t *frame)
+{
+    if (frame->xtf_tag) {
+	xo_free(frame->xtf_tag);
+	frame->xtf_tag = NULL;
+	frame->xtf_tag_len = 0;
+    }
+}
+
+static void
+xo_tframe_set_tag (xo_tframe_t *frame, const char *tag, ssize_t tlen)
+{
+    xo_tframe_free_tag(frame);
+    if (tlen < 0)
+	tlen = strlen(tag);
+    char *p = xo_realloc(NULL, tlen + 1);
+    if (p) {
+	memcpy(p, tag, tlen);
+	p[tlen] = '\0';
+	frame->xtf_tag = p;
+	frame->xtf_tag_len = tlen;
+    }
 }
 
 static void
@@ -557,7 +674,8 @@ xo_tmatch_init (xo_handle_t *xop UNUSED, xo_tmatch_t *xtmp, xo_trie_t *trie)
      * (e.g. "d/one" would match when "one" is opened directly).
      */
 #if defined(XO_DEBUG)
-    if (XOIF_ISSET(xop, XOF_DEBUG)) {
+    /* xo_get_flags handles the NULL xop that walk API callers pass */
+    if (xo_get_flags(xop) & XOF_DEBUG) {
 	xo_trie_t *xtp = trie;
 	uint32_t root_count = 0;
 	for (xo_trie_id_t r = xtp->xt_root; r; r = xtp->xt_nodes[r].xtn_sibling)
@@ -575,6 +693,7 @@ xo_tmatch_cleanup (xo_tmatch_t *xtmp)
 {
     if (xtmp->xtm_stack) {
 	for (uint32_t d = 0; d <= xtmp->xtm_depth; d++) {
+	    xo_tframe_free_tag(&xtmp->xtm_stack[d]);
 	    xo_tframe_free_keys(&xtmp->xtm_stack[d]);
 	    xo_tframe_free_attrs(&xtmp->xtm_stack[d]);
 	    xo_tframe_free_self(&xtmp->xtm_stack[d]);
@@ -605,9 +724,106 @@ static void xo_tmatch_close(xo_handle_t *, xo_filter_t *, xo_tmatch_t *,
 static int xo_tmatch_try_eager(xo_handle_t *, xo_filter_t *, xo_tframe_t *,
 			       xo_xparse_node_id_t);
 static void xo_filter_force_resolve_pred(xo_handle_t *, xo_filter_t *,
-					 const char *);
+					 const char *, ssize_t);
+
+/*
+ * xo_eval_prog_s is fully defined much further down, with the rest of
+ * the eval infrastructure; xo_filter_s only needs the pointer type here,
+ * for its compiled-predicate cache.
+ */
+typedef struct xo_eval_prog_s xo_eval_prog_t;
+
+/*
+ * Defined with the rest of the eval infrastructure, but needed here
+ * already by xo_filter_destroy_standalone/xo_filter_op_destroy to free
+ * the predicate-program cache.
+ */
+void xo_eval_prog_destroy(xo_eval_prog_t *);
 
 typedef unsigned xo_xsf_flags_t;   /* Type for XFSF_* flag fields */
+
+/*
+ * Default data backend: heap allocation + xparse string table.
+ * This is the real definition of xo_filter_data_t used within this .so.
+ * Alternative backends (e.g. libpin) define their own struct in their
+ * own translation unit; the core only ever sees the forward declaration.
+ */
+struct xo_filter_data_s {
+    xo_handle_t *xfd_xop;	 /* libxo handle (for xo_dbg calls) */
+    xo_xparse_data_t *xfd_xdp;	 /* xparse data (for string-table lookup) */
+};
+
+static void *
+xo_filter_data_default_realloc (xo_filter_data_t *dp UNUSED,
+				 void *ptr, size_t sz)
+{
+    return xo_realloc(ptr, sz);
+}
+
+static void
+xo_filter_data_default_free (xo_filter_data_t *dp UNUSED, void *ptr)
+{
+    xo_free(ptr);
+}
+
+static int
+xo_filter_data_default_name_eq (xo_filter_data_t *dp,
+				 xo_name_id_t id,
+				 const char *tag, ssize_t tlen)
+{
+    const char *nm = xo_xparse_str(dp->xfd_xdp, (xo_xparse_str_id_t) id.ni_id);
+    if (nm == NULL)
+	return 0;
+    return xo_streqn(nm, tag, tlen);
+}
+
+static void
+xo_filter_data_default_error (xo_filter_data_t *dp, const char *fmt,
+			       va_list vap)
+{
+    xo_failure_filter_v(dp->xfd_xop, fmt, vap);
+}
+
+xo_filter_data_ops_t xo_filter_data_ops_default = {
+    .xfdo_version     = XO_FILTER_DATA_OPS_VERSION,
+    .xfdo_realloc     = xo_filter_data_default_realloc,
+    .xfdo_free        = xo_filter_data_default_free,
+    .xfdo_name_intern = NULL,   /* optional; NULL wraps xparse str_id directly */
+    .xfdo_name_eq     = xo_filter_data_default_name_eq,
+    .xfdo_error       = xo_filter_data_default_error,
+};
+
+/*
+ * Dispatches a compile-time or evaluation-time error through the data
+ * context's xfdo_error, if the backend set one.  dp/ops always travel
+ * together since xo_filter_data_t carries no back-pointer to its own
+ * ops.  xo_eval_fail() below is the only caller today, reaching both
+ * via xfp->xf_data / xfp->xf_ops; xo_eval_compile() will become a
+ * second caller once it gains its own (dp, ops) parameters.
+ */
+static void
+xo_filter_data_verror (xo_filter_data_t *dp, xo_filter_data_ops_t *ops,
+			const char *fmt, va_list vap)
+{
+    /*
+     * ops (and dp) may be NULL: xo_eval_compile()'s own doc comment
+     * documents passing NULL for both when the caller has no data
+     * context to report through, in which case the failure is silent.
+     */
+    if (ops == NULL || ops->xfdo_error == NULL)
+	return;
+
+    ops->xfdo_error(dp, fmt, vap);
+}
+
+/*
+ * One entry in the packed xf_pred_progs[] cache; see its declaration
+ * in struct xo_filter_s for details.
+ */
+typedef struct xo_filter_pred_entry_s {
+    xo_xparse_node_id_t xpe_node_id;	/* predicate root node id (key) */
+    xo_eval_prog_t *xpe_prog;		/* compiled program for that node */
+} xo_filter_pred_entry_t;
 
 struct xo_filter_s {		 /* Forward/typdef decl in xo_private.h */
     struct xo_xparse_data_s xf_xd; /* Main parsing structure */
@@ -615,12 +831,59 @@ struct xo_filter_s {		 /* Forward/typdef decl in xo_private.h */
     xo_xsf_flags_t xf_flags;	 /* Flags (XFSF_*) */
     xo_trie_t *xf_trie;	 /* Compiled trie (NULL until first filter added) */
     xo_tmatch_t xf_tmatch;	 /* Runtime trie-matching state */
+    xo_filter_data_t *xf_data;	 /* Data context (opaque to core) */
+    xo_filter_data_ops_t *xf_ops; /* Data vtable */
+    xo_filter_data_t xf_def_data; /* Embedded default data context (avoids extra alloc) */
+    uint32_t *xf_path_actions;	 /* per-path action ids (parallel to xf_xd.xd_paths[]) */
+    uint32_t xf_path_actions_cap; /* allocated capacity of xf_path_actions[] */
+    double *xf_path_priorities;  /* per-path priorities (parallel to xf_path_actions[]) */
+    uint32_t xf_path_priorities_cap; /* allocated capacity of xf_path_priorities[] */
+    int16_t *xf_path_import_precs; /* per-path import precedence (parallel) */
+    uint32_t xf_path_import_precs_cap; /* allocated capacity of xf_path_import_precs[] */
+    uint32_t xf_cur_action;	 /* action from the last XO_STATUS_FULL transition */
+    xo_filter_pred_entry_t *xf_pred_progs; /* compiled predicate cache: a
+					packed array of {node id, compiled
+					program} pairs, kept sorted by node
+					id (the predicate's root expression,
+					a C_PREDICATE node's xn_contents) and
+					searched/inserted via binary search
+					in xo_filter_pred_prog(); sized by the
+					number of distinct predicates, not by
+					the (much larger, sparse) AST node id
+					space */
+    uint32_t xf_pred_progs_count; /* number of entries in use in xf_pred_progs[] */
+    uint32_t xf_pred_progs_max;	 /* allocated capacity (entries) of xf_pred_progs[] */
+    int *xf_unsupported_tokens;	 /* set by xo_filter_set_unsupported_features;
+					    every create installs the library
+					    default
+					    (xo_filter_default_unsupported_features) */
 };
 
 /* Flags for xf_flags */
 #define XFSF_BLOCK		(1<<0)	/* Block emitting data */
 #define XFSF_FORCE_RESOLVE	(1<<1)	/* Missing fields are "" at close */
 #define XFSF_PROMOTED		(1<<2)	/* Pending pred passed, not terminal */
+
+/*
+ * The feature set every filter rejects by default, as installed by
+ * xo_filter_op_create (the --libxo filter=/select= machinery),
+ * xo_filter_create_with_data and xo_filter_create_standalone; this is
+ * the Phase 1 grammar restriction (no predicates involving descendant-
+ * or-self, union, variables, axis steps, or nested predicates) that used
+ * to be hard-coded as a raw token list and applied implicitly to every
+ * filter.  It is now just an ordinary XO_XPF_* array passed through
+ * xo_filter_set_unsupported_features() like any caller (e.g. libpin)
+ * would pass its own.
+ */
+static const int xo_filter_default_unsupported_features[] = {
+    XO_XPF_DOTDOT, XO_XPF_DOTDOTDOT,
+    XO_XPF_COMMENT, XO_XPF_ID, XO_XPF_KEY, XO_XPF_NODE,
+    XO_XPF_PROCESSING_INSTRUCTION, XO_XPF_TEXT, XO_XPF_DSLASH,
+    XO_XPF_AXIS_NAME, XO_XPF_VAR, XO_XPF_SEQUENCE, XO_XPF_DESCENDANT,
+    XO_XPF_TEST, XO_XPF_UNION, XO_XPF_NESTED_PREDICATES,
+    XO_XPF_PREDICATE_PATHS,
+    0
+};
 
 /*
  * Create and initialize a filter, attaching it to a handle
@@ -636,9 +899,117 @@ xo_filter_op_create (xo_handle_t *xop)
 
     xo_xparse_init(&xfp->xf_xd);
 
+    /* Use embedded default data context; point xfd_xdp at our own xparse data */
+    xfp->xf_def_data.xfd_xop = xop;
+    xfp->xf_def_data.xfd_xdp = &xfp->xf_xd;
+    xfp->xf_data = &xfp->xf_def_data;
+    xfp->xf_ops  = &xo_filter_data_ops_default;
+
+    if (xo_filter_set_unsupported_features(xfp, NULL) < 0) {
+	xo_xparse_clean(&xfp->xf_xd);
+	xo_free(xfp);
+	return NULL;
+    }
+
     xo_set_filter_data(xop, xfp);
 
     return xfp;
+}
+
+xo_filter_t *
+xo_filter_create_with_data (xo_handle_t *xop, xo_filter_data_t *dp,
+			     xo_filter_data_ops_t *ops)
+{
+    xo_filter_t *xfp = xo_realloc(NULL, sizeof(*xfp));
+    if (xfp == NULL)
+	return NULL;
+
+    bzero(xfp, sizeof(*xfp));
+
+    xo_xparse_init(&xfp->xf_xd);
+
+    xfp->xf_data = dp;
+    xfp->xf_ops  = ops;
+
+    if (xo_filter_set_unsupported_features(xfp, NULL) < 0) {
+	xo_xparse_clean(&xfp->xf_xd);
+	xo_free(xfp);
+	return NULL;
+    }
+
+    xo_set_filter_data(xop, xfp);
+
+    return xfp;
+}
+
+/*
+ * Create a standalone filter not attached to any xo_handle_t.
+ * Uses the default (built-in) data ops.  Intended for per-BIA_IF
+ * condition evaluation where no custom name-intern or value-of is needed.
+ */
+xo_filter_t *
+xo_filter_create_standalone (void)
+{
+    xo_filter_t *xfp = xo_realloc(NULL, sizeof(*xfp));
+    if (xfp == NULL)
+	return NULL;
+
+    bzero(xfp, sizeof(*xfp));
+    xo_xparse_init(&xfp->xf_xd);
+
+    xfp->xf_def_data.xfd_xdp = &xfp->xf_xd;
+    xfp->xf_data = &xfp->xf_def_data;
+    xfp->xf_ops  = &xo_filter_data_ops_default;
+
+    if (xo_filter_set_unsupported_features(xfp, NULL) < 0) {
+	xo_xparse_clean(&xfp->xf_xd);
+	xo_free(xfp);
+	return NULL;
+    }
+
+    return xfp;
+}
+
+/*
+ * Destroy a standalone filter created by xo_filter_create_standalone.
+ */
+void
+xo_filter_destroy_standalone (xo_filter_t *xfp)
+{
+    if (xfp == NULL)
+	return;
+    xo_xparse_clean(&xfp->xf_xd);
+    xo_tmatch_cleanup(&xfp->xf_tmatch);
+    xo_trie_free(xfp->xf_trie);
+    xfp->xf_trie = NULL;
+    if (xfp->xf_path_actions) {
+	free(xfp->xf_path_actions);
+	xfp->xf_path_actions = NULL;
+    }
+    if (xfp->xf_path_priorities) {
+	free(xfp->xf_path_priorities);
+	xfp->xf_path_priorities = NULL;
+    }
+    if (xfp->xf_path_import_precs) {
+	free(xfp->xf_path_import_precs);
+	xfp->xf_path_import_precs = NULL;
+    }
+    if (xfp->xf_pred_progs) {
+	for (uint32_t i = 0; i < xfp->xf_pred_progs_count; i++)
+	    xo_eval_prog_destroy(xfp->xf_pred_progs[i].xpe_prog);
+	free(xfp->xf_pred_progs);
+	xfp->xf_pred_progs = NULL;
+	xfp->xf_pred_progs_count = xfp->xf_pred_progs_max = 0;
+    }
+    if (xfp->xf_unsupported_tokens) {
+	free(xfp->xf_unsupported_tokens);
+	xfp->xf_unsupported_tokens = NULL;
+    }
+
+    if (xfp->xf_ops != NULL && xfp->xf_ops->xfdo_destroy != NULL)
+	xfp->xf_ops->xfdo_destroy(xfp->xf_data);
+
+    xo_free(xfp);
 }
 
 /*
@@ -663,6 +1034,33 @@ xo_filter_op_destroy (xo_handle_t *xop, xo_filter_t *xfp)
     xo_trie_free(xfp->xf_trie);
     xfp->xf_trie = NULL;
 
+    if (xfp->xf_path_actions) {
+	free(xfp->xf_path_actions);
+	xfp->xf_path_actions = NULL;
+    }
+    if (xfp->xf_path_priorities) {
+	free(xfp->xf_path_priorities);
+	xfp->xf_path_priorities = NULL;
+    }
+    if (xfp->xf_path_import_precs) {
+	free(xfp->xf_path_import_precs);
+	xfp->xf_path_import_precs = NULL;
+    }
+    if (xfp->xf_pred_progs) {
+	for (uint32_t i = 0; i < xfp->xf_pred_progs_count; i++)
+	    xo_eval_prog_destroy(xfp->xf_pred_progs[i].xpe_prog);
+	free(xfp->xf_pred_progs);
+	xfp->xf_pred_progs = NULL;
+	xfp->xf_pred_progs_count = xfp->xf_pred_progs_max = 0;
+    }
+    if (xfp->xf_unsupported_tokens) {
+	free(xfp->xf_unsupported_tokens);
+	xfp->xf_unsupported_tokens = NULL;
+    }
+
+    if (xfp->xf_ops != NULL && xfp->xf_ops->xfdo_destroy != NULL)
+	xfp->xf_ops->xfdo_destroy(xfp->xf_data);
+
     xo_set_filter_data(xop, NULL);
     xo_free(xfp);
 }
@@ -679,6 +1077,27 @@ xo_tmatch_record_live (xo_tmatch_t *xtmp, xo_tframe_t *frame, xo_tnode_t *tn)
     } else {
 	xtmp->xtm_allow += 1;
 	frame->xtf_allow_delta += 1;
+
+	/*
+	 * Several terminal nodes can match during one event (e.g.
+	 * "item[a]" and "item[b]" resolving on the same key).  Pick
+	 * the action the way xo_trie_insert does for a shared node:
+	 * higher import precedence, then higher priority; on a full
+	 * tie, the first one recorded stays.  A match from a later
+	 * event always replaces the current action.
+	 */
+	if (xtmp->xtm_cur_event == xtmp->xtm_event) {
+	    if (tn->xtn_import_prec != xtmp->xtm_cur_import_prec) {
+		if (tn->xtn_import_prec < xtmp->xtm_cur_import_prec)
+		    return;
+	    } else if (tn->xtn_priority <= xtmp->xtm_cur_priority)
+		return;
+	}
+
+	xtmp->xtm_cur_action = tn->xtn_action;
+	xtmp->xtm_cur_event = xtmp->xtm_event;
+	xtmp->xtm_cur_import_prec = tn->xtn_import_prec;
+	xtmp->xtm_cur_priority = tn->xtn_priority;
     }
 }
 
@@ -744,6 +1163,19 @@ static inline int
 xo_tslot_is_pending (xo_tslot_t *slotp)
 {
     return slotp->xts_state == XTFS_PRED || slotp->xts_state == XTFS_CPRED;
+}
+
+/*
+ * Return TRUE if any slot in this frame is waiting on a predicate
+ */
+static int
+xo_tframe_has_pred (xo_tframe_t *framep)
+{
+    for (uint32_t i = 0; i < framep->xtf_slots_count; i++)
+	if (xo_tslot_is_pending(&framep->xtf_slots[i]))
+	    return TRUE;
+
+    return FALSE;
 }
 
 /*
@@ -887,7 +1319,8 @@ xo_tmatch_open (xo_handle_t *xop, xo_filter_t *xfp,
 		const char *value, ssize_t vlen)
 {
     xo_trie_t *xtp = xtmp->xtm_trie;
-    xo_xparse_data_t *xdp = xtp->xt_xd;
+    xo_filter_data_t *dp = xtp->xt_data;
+    xo_filter_data_ops_t *ops = xtp->xt_ops;
 
     /*
      * If we cannot grow the stack (or get the arrays for a new
@@ -922,9 +1355,14 @@ xo_tmatch_open (xo_handle_t *xop, xo_filter_t *xfp,
     }
 
     xtmp->xtm_depth += 1;
+    xtmp->xtm_event += 1;
+    xo_tframe_set_tag(frame, tag, tlen);
 
     xo_dbg(xop, "xo_tmatch_open: depth %u tag '%.*s'",
 	   xtmp->xtm_depth, (int) tlen, tag);
+
+    if (ops->xfdo_event_open)
+	ops->xfdo_event_open(dp, tag, tlen);
 
     /*
      * Descend from every LIVE parent slot, and conditionally from
@@ -939,9 +1377,8 @@ xo_tmatch_open (xo_handle_t *xop, xo_filter_t *xfp,
 	for (xo_trie_id_t c = ptn->xtn_child; c;
 		     c = xtp->xt_nodes[c].xtn_sibling) {
 	    xo_tnode_t *tn = &xtp->xt_nodes[c];
-	    const char *nm = xo_xparse_str(xdp, tn->xtn_name);
 	    if (!(tn->xtn_flags & XTNF_WILDCARD) &&
-		    (nm == NULL || !xo_streqn(nm, tag, tlen)))
+		    !ops->xfdo_name_eq(dp, tn->xtn_name, tag, tlen))
 		continue;
 
 	    uint32_t position = xo_tframe_child_position(parent, c);
@@ -961,9 +1398,8 @@ xo_tmatch_open (xo_handle_t *xop, xo_filter_t *xfp,
 	if ((tn->xtn_flags & XTNF_ABSOLUTE) && xtmp->xtm_depth != 1)
 	    continue;
 
-	const char *nm = xo_xparse_str(xdp, tn->xtn_name);
 	if (!(tn->xtn_flags & XTNF_WILDCARD) &&
-		(nm == NULL || !xo_streqn(nm, tag, tlen)))
+		!ops->xfdo_name_eq(dp, tn->xtn_name, tag, tlen))
 	    continue;
 
 	/* Avoid duplicating a node already added via parent descent */
@@ -993,8 +1429,8 @@ xo_tmatch_open (xo_handle_t *xop, xo_filter_t *xfp,
 }
 
 static void
-xo_tmatch_close (xo_handle_t *xop, xo_filter_t *xfp UNUSED,
-		 xo_tmatch_t *xtmp, const char *tag UNUSED, ssize_t tlen UNUSED)
+xo_tmatch_close (xo_handle_t *xop, xo_filter_t *xfp,
+		 xo_tmatch_t *xtmp, const char *tag, ssize_t tlen)
 {
     /* An open that pushed no frame has nothing to pop */
     if (xtmp->xtm_skipped) {
@@ -1009,9 +1445,13 @@ xo_tmatch_close (xo_handle_t *xop, xo_filter_t *xfp UNUSED,
     xtmp->xtm_allow -= frame->xtf_allow_delta;
     xtmp->xtm_deny  -= frame->xtf_deny_delta;
     xtmp->xtm_cond  -= frame->xtf_cond_delta;
+    xo_tframe_free_tag(frame);
     xo_tframe_free_keys(frame);
     xo_tframe_free_attrs(frame);
     xo_tframe_free_self(frame);
+
+    if (xfp->xf_ops && xfp->xf_ops->xfdo_event_close)
+	xfp->xf_ops->xfdo_event_close(xfp->xf_data, tag, tlen);
 
     xo_dbg(xop, "xo_tmatch_close: depth %u [allow %u/deny %u/cond %u]",
 	   xtmp->xtm_depth, xtmp->xtm_allow, xtmp->xtm_deny, xtmp->xtm_cond);
@@ -1031,44 +1471,158 @@ static xo_filter_status_t xo_tmatch_attr(xo_handle_t *, xo_filter_t *,
 					  xo_ssize_t, const char *, xo_ssize_t);
 
 /*
- * Add a filter (xpath) to our filtering mechanism
+ * Maps the public XO_XPF_* feature ids (xo_filter.h) to the private,
+ * bison-generated token numbers (xo_xpath.tab.h) used internally by
+ * xo_xparse/xo_xpath.  Adding a new gatable grammar feature means adding
+ * one line here (and a matching %token in xo_xpath.y, if it's not already
+ * there) plus a new XO_XPF_* define in xo_filter.h.
  */
-static int
-xo_filter_op_add_one (xo_handle_t *xop, const char *input)
-{
-    static int unsupported_tokens[] = {
-	L_DOTDOT, L_DOTDOTDOT,
-	K_COMMENT, K_ID, K_KEY, K_NODE,
-	K_PROCESSING_INSTRUCTION, K_TEXT, L_DSLASH,
-	T_AXIS_NAME, T_VAR, M_SEQUENCE, C_DESCENDANT,
-	C_TEST, C_UNION, C_NESTED_PREDICATES, C_PREDICATE_PATHS,
-	0
-    };
+static const struct {
+    int xftm_feature;		/* XO_XPF_* id, from xo_filter.h */
+    int xftm_token;		/* internal token number, from xo_xpath.tab.h */
+} xo_filter_feature_tokens[] = {
+    { XO_XPF_DOTDOT,			L_DOTDOT },
+    { XO_XPF_DOTDOTDOT,			L_DOTDOTDOT },
+    { XO_XPF_COMMENT,			K_COMMENT },
+    { XO_XPF_ID,			K_ID },
+    { XO_XPF_KEY,			K_KEY },
+    { XO_XPF_NODE,			K_NODE },
+    { XO_XPF_PROCESSING_INSTRUCTION,	K_PROCESSING_INSTRUCTION },
+    { XO_XPF_TEXT,			K_TEXT },
+    { XO_XPF_DSLASH,			L_DSLASH },
+    { XO_XPF_AXIS_NAME,			T_AXIS_NAME },
+    { XO_XPF_VAR,			T_VAR },
+    { XO_XPF_SEQUENCE,			M_SEQUENCE },
+    { XO_XPF_DESCENDANT,		C_DESCENDANT },
+    { XO_XPF_TEST,			C_TEST },
+    { XO_XPF_UNION,			C_UNION },
+    { XO_XPF_NESTED_PREDICATES,		C_NESTED_PREDICATES },
+    { XO_XPF_PREDICATE_PATHS,		C_PREDICATE_PATHS },
+    { 0, 0 }
+};
 
-    xo_filter_t *xfp = xo_get_filter_data(xop, TRUE);
-    if (xfp == NULL)
+/*
+ * See xo_filter.h for the full description.  Translates 'features' (a
+ * zero-terminated array of XO_XPF_* ids) into the private token numbers
+ * xo_xparse/xo_xpath actually use, and stores the result on xfp so that
+ * xo_filter_compile_xpath_action_priority() picks it up on the next call.
+ * features == NULL restores xo_filter_default_unsupported_features; an
+ * empty list ({ 0 }) means no grammar restriction at all.  The new list
+ * is built before the old one is freed, so a failure leaves the
+ * previous setting in place.
+ */
+int
+xo_filter_set_unsupported_features (xo_filter_t *xfp, const int *features)
+{
+    if (features == NULL)
+	features = xo_filter_default_unsupported_features;
+
+    int count = 0;
+    while (features[count])
+	count += 1;
+
+    int *tokens = malloc((count + 1) * sizeof(*tokens));
+    if (tokens == NULL)
 	return -1;
 
-    xo_xparse_data_t *xdp = xo_filter_xparse_data(xop, xfp);
-    int start = xdp->xd_paths_cur;
+    for (int i = 0; i < count; i++) {
+	int j;
+	for (j = 0; xo_filter_feature_tokens[j].xftm_feature; j++)
+	    if (xo_filter_feature_tokens[j].xftm_feature == features[i])
+		break;
 
-    xo_xparse_set_unsupported_tokens(xdp, unsupported_tokens);
+	if (xo_filter_feature_tokens[j].xftm_feature == 0) {
+	    free(tokens);
+	    return -1;		/* unknown feature id */
+	}
+
+	tokens[i] = xo_filter_feature_tokens[j].xftm_token;
+    }
+    tokens[count] = 0;
+
+    if (xfp->xf_unsupported_tokens)
+	free(xfp->xf_unsupported_tokens);
+    xfp->xf_unsupported_tokens = tokens;
+    return 0;
+}
+
+/*
+ * Core implementation: parse an XPath expression string and recompile the
+ * trie for the given filter.  Called by both xo_filter_op_add_one (which
+ * looks up xfp from xop) and xo_filter_walk_add (which already has xfp).
+ */
+static int
+xo_filter_compile_xpath_action_priority (xo_handle_t *xop, xo_filter_t *xfp,
+					 const char *input, uint32_t action,
+					 double priority, int16_t import_prec)
+{
+    xo_xparse_data_t *xdp = xo_filter_xparse_data(xop, xfp);
+    if (xdp == NULL)
+	return -1;
+
+    int *unsupported = xfp->xf_unsupported_tokens;
+
+    int start = xdp->xd_paths_cur;
+    xo_xparse_set_unsupported_tokens(xdp, unsupported);
 
     int rc = xo_xparse_parse_string(xop, xdp, input);
-
-    if (rc == 0) {
-	rc = xo_xpath_feature_warn_since(NULL, xdp, start,
-					 unsupported_tokens, "");
-    }
-
+    if (rc == 0)
+	rc = xo_xpath_feature_warn_since(NULL, xdp, start, unsupported, "");
     if (rc)
 	return -1;
 
-    /* Recompile the trie from all expressions accumulated so far */
+    /* Grow xf_path_actions to cover the new capacity if needed */
+    if (xdp->xd_paths_max > xfp->xf_path_actions_cap) {
+	uint32_t *newp = realloc(xfp->xf_path_actions,
+				  xdp->xd_paths_max * sizeof(*newp));
+	if (newp == NULL)
+	    return -1;
+	/* zero-init the newly allocated slots */
+	bzero(newp + xfp->xf_path_actions_cap,
+	      (xdp->xd_paths_max - xfp->xf_path_actions_cap) * sizeof(*newp));
+	xfp->xf_path_actions = newp;
+	xfp->xf_path_actions_cap = xdp->xd_paths_max;
+    }
+
+    /* Grow xf_path_priorities to cover the new capacity if needed */
+    if (xdp->xd_paths_max > xfp->xf_path_priorities_cap) {
+	double *newp = realloc(xfp->xf_path_priorities,
+				xdp->xd_paths_max * sizeof(*newp));
+	if (newp == NULL)
+	    return -1;
+	/* zero-init the newly allocated slots */
+	bzero(newp + xfp->xf_path_priorities_cap,
+	      (xdp->xd_paths_max - xfp->xf_path_priorities_cap) * sizeof(*newp));
+	xfp->xf_path_priorities = newp;
+	xfp->xf_path_priorities_cap = xdp->xd_paths_max;
+    }
+
+    /* Grow xf_path_import_precs to cover the new capacity if needed */
+    if (xdp->xd_paths_max > xfp->xf_path_import_precs_cap) {
+	int16_t *newp = realloc(xfp->xf_path_import_precs,
+				 xdp->xd_paths_max * sizeof(*newp));
+	if (newp == NULL)
+	    return -1;
+	bzero(newp + xfp->xf_path_import_precs_cap,
+	      (xdp->xd_paths_max - xfp->xf_path_import_precs_cap)
+	      * sizeof(*newp));
+	xfp->xf_path_import_precs = newp;
+	xfp->xf_path_import_precs_cap = xdp->xd_paths_max;
+    }
+
+    /* Record the action/priority/import-precedence for each new path */
+    for (uint32_t i = (uint32_t) start; i < xdp->xd_paths_cur; i++) {
+	xfp->xf_path_actions[i] = action;
+	xfp->xf_path_priorities[i] = priority;
+	xfp->xf_path_import_precs[i] = import_prec;
+    }
+
     xo_trie_free(xfp->xf_trie);
     xo_tmatch_cleanup(&xfp->xf_tmatch);
 
-    xfp->xf_trie = xo_trie_compile(xop, xdp);
+    xfp->xf_trie = xo_trie_compile(xop, xdp, xfp->xf_data, xfp->xf_ops,
+				    xfp->xf_path_actions, xfp->xf_path_priorities,
+				    xfp->xf_path_import_precs);
     if (xfp->xf_trie == NULL)
 	return -1;
 
@@ -1079,6 +1633,33 @@ xo_filter_op_add_one (xo_handle_t *xop, const char *input)
     }
 
     return 0;
+}
+
+static int
+xo_filter_compile_xpath_action (xo_handle_t *xop, xo_filter_t *xfp,
+				 const char *input, uint32_t action)
+{
+    return xo_filter_compile_xpath_action_priority(xop, xfp, input, action,
+						   0.0, 0);
+}
+
+static int
+xo_filter_compile_xpath (xo_handle_t *xop, xo_filter_t *xfp, const char *input)
+{
+    return xo_filter_compile_xpath_action(xop, xfp, input, 0);
+}
+
+/*
+ * Add a filter (xpath) to our filtering mechanism
+ */
+static int
+xo_filter_op_add_one (xo_handle_t *xop, const char *input)
+{
+    xo_filter_t *xfp = xo_get_filter_data(xop, TRUE);
+    if (xfp == NULL)
+	return -1;
+
+    return xo_filter_compile_xpath(xop, xfp, input);
 }
 
 static xo_filter_status_t
@@ -1117,6 +1698,7 @@ xo_filter_change_status (xo_handle_t *xop UNUSED, xo_filter_t *xfp,
     } else if (xfp->xf_tmatch.xtm_allow) {
 	why = "allow-is-set";
 	rc = XO_STATUS_FULL;
+	xfp->xf_cur_action = xfp->xf_tmatch.xtm_cur_action;
 
     } else if (xfp->xf_xd.xd_flags & XDF_ALL_NOTS) {
 	why = "all-nots";
@@ -1213,7 +1795,21 @@ xo_filter_op_open_instance (xo_handle_t *xop, xo_filter_t *xfp, const char *tag)
 static int
 xo_filter_op_open_field (XO_FILTER_OPEN_FIELD_SIGNATURE)
 {
-    return xo_filter_open(xop, xfp, tag, tlen, "field", value, vlen);
+    int rc = xo_filter_open(xop, xfp, tag, tlen, "field", value, vlen);
+
+    /*
+     * A field is a leaf: no child can arrive to satisfy a pending
+     * predicate (e.g. a leaf-list member "item" against
+     * "item[starts-with(sku, 'GRO')]"), so resolve it now, treating
+     * missing fields as empty, as close_instance does.  Otherwise
+     * PRED status makes the field unskippable and encoders see it.
+     */
+    if (rc == XO_STATUS_PRED) {
+	xo_filter_force_resolve_pred(xop, xfp, tag, tlen);
+	rc = xfp->xf_status;
+    }
+
+    return rc;
 }
 
 /*
@@ -1249,19 +1845,19 @@ xo_filter_op_close_field (xo_handle_t *xop, xo_filter_t *xfp,
  */
 static int
 xo_filter_close_pending (xo_handle_t *xop, xo_filter_t *xfp,
-			 const char *tag, const char *type)
+			 const char *tag, ssize_t tlen, const char *type)
 {
     int promoted = FALSE;
     if (xfp != NULL && xfp->xf_trie != NULL
 	    && xfp->xf_status == XO_STATUS_PRED) {
 	xfp->xf_flags &= ~XFSF_PROMOTED;
-	xo_filter_force_resolve_pred(xop, xfp, tag);
+	xo_filter_force_resolve_pred(xop, xfp, tag, tlen);
 	promoted = (xfp->xf_flags & XFSF_PROMOTED) ? TRUE : FALSE;
 	xfp->xf_flags &= ~XFSF_PROMOTED;
     }
 
     xo_filter_status_t pre_close = xfp ? xfp->xf_status : XO_STATUS_ZERO;
-    xo_filter_close(xop, xfp, tag, strlen(tag), type);
+    xo_filter_close(xop, xfp, tag, tlen, type);
 
     /*
      * If force-resolve promoted us to FULL, return FULL even though the
@@ -1280,7 +1876,7 @@ static int
 xo_filter_op_close_instance (xo_handle_t *xop, xo_filter_t *xfp,
 			  const char *tag)
 {
-    return xo_filter_close_pending(xop, xfp, tag, "instance");
+    return xo_filter_close_pending(xop, xfp, tag, strlen(tag), "instance");
 }
 
 /*
@@ -1294,7 +1890,8 @@ xo_filter_op_close_container (xo_handle_t *xop, xo_filter_t *xfp,
 {
     if (xfp != NULL && xfp->xf_trie != NULL
 	    && xfp->xf_status == XO_STATUS_PRED)
-	return xo_filter_close_pending(xop, xfp, tag, "container");
+	return xo_filter_close_pending(xop, xfp, tag, strlen(tag),
+				       "container");
 
     return xo_filter_close(xop, xfp, tag, strlen(tag), "container");
 }
@@ -1358,8 +1955,6 @@ xo_filter_attr_find (xo_filter_t *xfp UNUSED,
     return match;
 }
 
-/* ------------------------------------------------------------- */
-
 /*
  * This is the 'key' and 'predicate' processing code.
  */
@@ -1383,7 +1978,7 @@ typedef struct xo_eval_value_s {
     union {			    /* Data value (based on xev_type) */
 	int64_t xevd_int64;	    /* If C_INT64 */
 	uint64_t xevd_uint64;	    /* If C_UINT64 or C_INDEX or C_BOOLEAN */
-	xo_float_t xevd_float;	    /* If C_FLOAT */
+	xo_float_t xevd_float;	    /* If C_FLOAT (never NaN; see C_NAN) */
 	const char *xevd_str;	    /* If C_STRING or C_DSTRING */
     } xev_data;
 } xo_eval_value_t;
@@ -1416,32 +2011,101 @@ static xo_eval_value_t xo_filter_pred_eval(xo_handle_t *, xo_filter_t *,
 					   xo_tframe_t *, xo_xparse_node_id_t);
 static int xo_eval_cast_boolean(xo_handle_t *, xo_eval_value_t);
 
-#define XO_EVAL_OP_ARGS \
-    xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED, \
-	xo_tframe_t *framep UNUSED, \
-	xo_xparse_node_t *xnp UNUSED, const char *name UNUSED, \
-        int indent UNUSED, \
-	xo_eval_value_t left UNUSED, xo_eval_value_t right UNUSED
-
-#define XO_EVAL_OP_PASS \
-    xop, xfp, framep, xnp, name, indent, left, right
-
-typedef xo_eval_value_t (*xo_eval_op_fn_t)(XO_EVAL_OP_ARGS);
-
-#define XO_EVAL_NODE_ARGS \
+/*
+ * One calling convention for every XPath operation, leaf or binary: a
+ * leaf/unary construct runs with argc == 0 (or 1), a binary operator
+ * runs with argc == 2 and reads its operands from argv[0]/argv[1].
+ * This keeps "one function per operation" as the only extension point.
+ */
+#define XO_EVAL_ARGS \
     xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED, \
 	xo_tframe_t *framep UNUSED, \
 	xo_xparse_node_t *xnp UNUSED, int indent UNUSED, \
 	int argc UNUSED, xo_eval_value_t *argv UNUSED
-#define XO_EVAL_NODE_PASS xop, xfp, framep, xnp, indent, argc, argv
+#define XO_EVAL_PASS xop, xfp, framep, xnp, indent, argc, argv
 
-typedef xo_eval_value_t (*xo_eval_node_fn_t)(XO_EVAL_NODE_ARGS);
+typedef xo_eval_value_t (*xo_eval_fn_t)(XO_EVAL_ARGS);
 
 #define XO_EVAL_CALC_ARGS \
     xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED, \
 	xo_eval_value_t left UNUSED, xo_eval_value_t right UNUSED
 
 typedef xo_eval_value_t (*xo_eval_calc_fn_t)(XO_EVAL_CALC_ARGS);
+
+/*
+ * Reports an evaluation-time error through xfp's data context, the same
+ * path xo_eval_compile() will use for compile-time errors.  Replaces a
+ * direct xo_failure_filter(xop, ...) call so these errors also reach a
+ * non-libxo backend (e.g. libpin) when it is running the same eval code.
+ */
+XO_PRINTFLIKE(2, 3)
+static void
+xo_eval_fail (xo_filter_t *xfp, const char *fmt, ...)
+{
+    va_list vap;
+
+    va_start(vap, fmt);
+    xo_filter_data_verror(xfp->xf_data, xfp->xf_ops, fmt, vap);
+    va_end(vap);
+}
+
+/*
+ * Line/column of the node passed to the most recent xo_eval_compile_fail()
+ * call, so a caller with no (dp, ops)-reachable error channel (e.g. libpin,
+ * which runs compile-time checks with ops->xfdo_error unset) can still
+ * recover *where* a failed xo_eval_compile() pointed, via
+ * xo_eval_compile_fail_location() below.  0 means "no node"/unknown.
+ */
+static unsigned xo_eval_compile_fail_line;
+static unsigned xo_eval_compile_fail_col;
+
+/*
+ * The compile-time twin of xo_eval_fail(): xo_eval_compile() and its
+ * helpers only ever see the (dp, ops) pair, not a full xo_filter_t, so
+ * they report through xo_filter_data_verror() directly instead.
+ *
+ * xdp/id identify the AST node the failure is attributed to, so its
+ * line/col (stamped by the lexer; see xo_xparse_node_t) can be stashed
+ * for xo_eval_compile_fail_location() regardless of whether ops has an
+ * xfdo_error to report through.
+ */
+XO_PRINTFLIKE(5, 6)
+static void
+xo_eval_compile_fail (xo_filter_data_t *dp, xo_filter_data_ops_t *ops,
+		       xo_xparse_data_t *xdp, xo_xparse_node_id_t id,
+		       const char *fmt, ...)
+{
+    va_list vap;
+
+    if (xdp != NULL) {
+	xo_xparse_node_t *xnp = xo_xparse_node(xdp, id);
+	xo_eval_compile_fail_line = xnp ? xnp->xn_line : 0;
+	xo_eval_compile_fail_col = xnp ? xnp->xn_col : 0;
+    } else {
+	xo_eval_compile_fail_line = 0;
+	xo_eval_compile_fail_col = 0;
+    }
+
+    va_start(vap, fmt);
+    xo_filter_data_verror(dp, ops, fmt, vap);
+    va_end(vap);
+}
+
+/*
+ * Returns the line/col stashed by the most recent xo_eval_compile_fail()
+ * call (0/0 if none or unknown).  See xo_filter.h for the public
+ * declaration; used by callers (e.g. libpin) that invoke xo_eval_compile()
+ * directly with no xfdo_error set, and so get no other way to recover
+ * *where* a compile failure occurred.
+ */
+void
+xo_eval_compile_fail_location (unsigned *linep, unsigned *colp)
+{
+    if (linep)
+	*linep = xo_eval_compile_fail_line;
+    if (colp)
+	*colp = xo_eval_compile_fail_col;
+}
 
 static inline xo_eval_value_t
 xo_eval_value_make (unsigned type, unsigned flags, xo_xparse_node_id_t id)
@@ -1466,10 +2130,24 @@ xo_eval_value_free (xo_eval_value_t val)
     }
 }
 
+/*
+ * NaN gets its own type (C_NAN, with no data) rather than living in a
+ * C_FLOAT, so it can be detected by type alone.  xo_eval_value_float
+ * makes sure a C_FLOAT never holds NaN.
+ */
+static inline xo_eval_value_t
+xo_eval_value_nan (unsigned flags)
+{
+    return xo_eval_value_make(C_NAN, flags, 0);
+}
+
 static inline xo_eval_value_t
 xo_eval_value_float (unsigned flags, xo_float_t val)
 {
     xo_eval_value_t value = XO_EVAL_VALUE_ZERO;
+
+    if (isnan(val))
+	return xo_eval_value_nan(flags);
 
     value.xev_type = C_FLOAT;
     value.xev_flags = flags;
@@ -1538,14 +2216,29 @@ xo_eval_value_unsupported (void)
 static xo_eval_value_t
 xo_eval (xo_handle_t *xop, xo_filter_t *xfp, xo_tframe_t *framep,
 	 const char *pname, int indent,
-	 xo_xparse_node_id_t id, xo_eval_op_fn_t op_fn);
+	 xo_xparse_node_id_t id, xo_eval_fn_t op_fn);
 
 /*
- * Turn a string into a number, if it is one from end to end: hex,
- * then anything strtoll() takes, then anything strtod() takes.  We
- * return the number, or an invalid value (XEVF_INVALID) if the string
- * is not a number or there is no string at all.  An empty string
- * counts as a number, zero.
+ * True if only whitespace remains after a number
+ */
+static int
+xo_eval_number_end (const char *cp)
+{
+    while (isspace((unsigned char) *cp))
+	cp += 1;
+
+    return (*cp == '\0');
+}
+
+/*
+ * Turn a string into a number, as XPath's number() does, but keep it
+ * as strongly typed as we can: C_INT64, then C_UINT64 (for "0x" hex
+ * or values past INT64_MAX), and C_FLOAT only when there's no other
+ * choice, since floats are expensive and lose precision for large
+ * integers.  Anything else (including the empty string we get for a
+ * missing field) is XPath's NaN, which we return as C_NAN.  Leading
+ * and trailing whitespace is allowed.  This doesn't complain; in
+ * XPath, a non-numeric string is a normal value.
  */
 static xo_eval_value_t
 xo_eval_parse_number (const char *str)
@@ -1554,51 +2247,71 @@ xo_eval_parse_number (const char *str)
     char *ep;
 
     if (str == NULL)
-	return xo_eval_value_invalid();
+	return xo_eval_value_nan(0);
 
-    /*
-     * An integer too big for its type comes back from strtoll() and
-     * strtoull() clamped, with ERANGE, so we let strtod() have it
-     * rather than use the wrong number.
-     */
-    if (str[0] == '0' && str[1] == 'x') {
+    while (isspace((unsigned char) *str))
+	str += 1;
+
+    /* XPath numbers are digits, '.', and '-'; no "inf", "nan", or '+' */
+    if (!isdigit((unsigned char) *str) && *str != '.' && *str != '-')
+	return xo_eval_value_nan(0);
+
+    if (str[0] == '0' && (str[1] == 'x' || str[1] == 'X')) {
 	errno = 0;
 	uint64_t uval = strtoull(str, &ep, 16);
-	if (ep && *ep == '\0' && errno != ERANGE) {
-	    value = xo_eval_value_make(C_UINT64, 0, 0);
-	    value.xev_uint64 = uval;
+	if (errno != 0 || ep == str + 2 || !xo_eval_number_end(ep))
+	    return xo_eval_value_nan(0);
+
+	value = xo_eval_value_make(C_UINT64, 0, 0);
+	value.xev_uint64 = uval;
+	return value;
+    }
+
+    /* Base 10, since XPath has no octal ("010" is ten) */
+    errno = 0;
+    int64_t ival = strtoll(str, &ep, 10);
+    if (ep != str && xo_eval_number_end(ep)) {
+	if (errno == 0) {
+	    value = xo_eval_value_make(C_INT64, 0, 0);
+	    value.xev_int64 = ival;
 	    return value;
+	}
+
+	if (*str != '-') {	/* Too big for int64; try uint64 */
+	    errno = 0;
+	    uint64_t uval = strtoull(str, &ep, 10);
+	    if (errno == 0) {
+		value = xo_eval_value_make(C_UINT64, 0, 0);
+		value.xev_uint64 = uval;
+		return value;
+	    }
 	}
     }
 
-    errno = 0;
-    int64_t ival = strtoll(str, &ep, 0);
-    if (ep && *ep == '\0' && errno != ERANGE) {
-	value = xo_eval_value_make(C_INT64, 0, 0);
-	value.xev_int64 = ival;
-	return value;
-    }
-
     xo_float_t fval = strtod(str, &ep);
-    if (ep && *ep == '\0') {
-	value = xo_eval_value_make(C_FLOAT, 0, 0);
-	value.xev_float = fval;
-	return value;
-    }
+    if (ep != str && xo_eval_number_end(ep))
+	return xo_eval_value_float(0, fval);
 
-    return xo_eval_value_invalid();
+    return xo_eval_value_nan(0);
 }
 
+/*
+ * Like xo_eval_parse_number, but complains about a string that isn't
+ * a number.  Blank strings (missing fields) are NaN without complaint.
+ */
 static xo_eval_value_t
 xo_eval_make_number (xo_handle_t *xop, const char *str)
 {
     xo_eval_value_t value = xo_eval_parse_number(str);
 
-    /* We can't give an error, so we just return 0 */
-    if (value.xev_flags & XEVF_INVALID) {
-	xo_failure_filter(xop, "invalid number value: '%s'", str ?: "");
-	value = xo_eval_value_make(C_INT64, 0, 0);
-    }
+    if (value.xev_type == C_NAN && str != NULL && !xo_eval_number_end(str))
+	/*
+	 * No xfp here (xo_eval_cast_boolean/float/int64 pass only xop
+	 * down this chain, and widening them is out of proportion to
+	 * one rare, best-effort diagnostic), so this stays on the
+	 * handle-based path rather than xo_eval_fail().
+	 */
+	xo_failure_filter(xop, "invalid number value: '%s'", str);
 
     return value;
 }
@@ -1611,6 +2324,7 @@ xo_eval_make_number_from_value (xo_handle_t *xop, xo_eval_value_t value)
     case C_STRING:;
 	return xo_eval_make_number(xop, value.xev_str);
 
+    case C_NAN:
     case C_FLOAT:
     case C_BOOLEAN:
     case C_UINT64:
@@ -1621,7 +2335,7 @@ xo_eval_make_number_from_value (xo_handle_t *xop, xo_eval_value_t value)
 }
 
 static xo_eval_value_t
-xo_eval_position (XO_EVAL_NODE_ARGS)
+xo_eval_position (XO_EVAL_ARGS)
 {
     const char *str = xo_xparse_str(&xfp->xf_xd, xnp->xn_str);
     uint64_t idx = str ? (uint64_t) strtoul(str, NULL, 10) : 0;
@@ -1632,14 +2346,14 @@ xo_eval_position (XO_EVAL_NODE_ARGS)
 }
 
 static xo_eval_value_t
-xo_eval_number (XO_EVAL_NODE_ARGS)
+xo_eval_number (XO_EVAL_ARGS)
 {
     const char *str = xo_xparse_str(&xfp->xf_xd, xnp->xn_str);
     return xo_eval_make_number(xop, str);
 }
 
 static xo_eval_value_t
-xo_eval_quoted (XO_EVAL_NODE_ARGS)
+xo_eval_quoted (XO_EVAL_ARGS)
 {
     xo_eval_value_t value = { .xev_flags = 0 };
     const char *str = xo_xparse_str(&xfp->xf_xd, xnp->xn_str);
@@ -1655,11 +2369,32 @@ xo_eval_quoted (XO_EVAL_NODE_ARGS)
 }
 
 static xo_eval_value_t
-xo_eval_attribute (XO_EVAL_NODE_ARGS)
+xo_eval_attribute (XO_EVAL_ARGS)
 {
     xo_eval_value_t value = { .xev_flags = 0 };
     const char *str = xo_xparse_str(&xfp->xf_xd, xnp->xn_str);
-    const char *aval = xo_filter_attr_find(xfp, framep, str);
+    const char *aval;
+    if (xfp->xf_ops && xfp->xf_ops->xfdo_value_of) {
+	/*
+	 * Mark this as a bare attribute reference (vs a compound element
+	 * path, which xo_eval_path builds and passes unmarked) by
+	 * prefixing '@', matching the convention xfdo_value_of backends
+	 * are documented against (see pin_filter_data_value_of_tree's
+	 * "trailing @x" doc comment in libpin).  Without this, a backend
+	 * whose xfdo_value_of has no other way to tell "@foo" apart from
+	 * a child-element path named "foo" has no choice but to guess.
+	 */
+	size_t slen = strlen(str) + 1; /* Length of "@" + str */
+	char buf[slen + 1];
+
+	buf[0] = '@';
+	memcpy(buf + 1, str, slen - 1);
+	buf[slen] = '\0';
+	aval = xfp->xf_ops->xfdo_value_of(xfp->xf_data, buf,
+					    (ssize_t) slen);
+    } else {
+	aval = xo_filter_attr_find(xfp, framep, str);
+    }
     if (aval) {
 	value = xo_eval_value_make(C_STRING, XEVF_NODE, 0);
 	value.xev_str = aval;
@@ -1680,11 +2415,33 @@ xo_eval_node_value (xo_filter_t *xfp, xo_tframe_t *framep,
 		    const char *str, int is_attr)
 {
     xo_eval_value_t value = { .xev_flags = 0 };
-    const char *sval = is_attr
-	? xo_filter_attr_find(xfp, framep, str)
-	: xo_filter_key_find(xfp, framep, str);
+    const char *sval;
 
-    if (sval) {
+    /*
+     * A walk backend with xfdo_value_of does its own lookup and
+     * doesn't feed keys via xo_filter_walk_key, so xtf_keys is empty
+     * and the find functions would see nothing.
+     */
+    if (xfp->xf_ops && xfp->xf_ops->xfdo_value_of)
+	sval = xfp->xf_ops->xfdo_value_of(xfp->xf_data, str, -1);
+    else
+	sval = is_attr
+	    ? xo_filter_attr_find(xfp, framep, str)
+	    : xo_filter_key_find(xfp, framep, str);
+
+    if (sval && xfp->xf_ops && xfp->xf_ops->xfdo_value_of) {
+	/*
+	 * xfdo_value_of's result is only good until the next call, and
+	 * an expression like concat(a, b) holds both values at once,
+	 * so we need our own copy.
+	 */
+	char *copy = xo_strdup(sval);
+	if (copy == NULL)
+	    return xo_eval_value_invalid();
+	value = xo_eval_value_make(C_DSTRING, XEVF_NODE, 0);
+	value.xev_str = copy;
+    } else if (sval) {
+	/* Frame-buffered keys/attrs stay put for the whole eval */
 	value = xo_eval_value_make(C_STRING, XEVF_NODE, 0);
 	value.xev_str = sval;
     } else if (xfp->xf_flags & XFSF_FORCE_RESOLVE) {
@@ -1703,7 +2460,7 @@ xo_eval_node_value (xo_filter_t *xfp, xo_tframe_t *framep,
 }
 
 static xo_eval_value_t
-xo_eval_element (XO_EVAL_NODE_ARGS)
+xo_eval_element (XO_EVAL_ARGS)
 {
     const char *str = xo_xparse_str(&xfp->xf_xd, xnp->xn_str);
 
@@ -1711,45 +2468,92 @@ xo_eval_element (XO_EVAL_NODE_ARGS)
 }
 
 static xo_eval_value_t
-xo_eval_path (XO_EVAL_NODE_ARGS)
+xo_eval_variable (XO_EVAL_ARGS)
 {
     xo_eval_value_t value = { .xev_flags = 0 };
-    xo_xparse_node_t *elt = NULL;
-    int is_attr = FALSE;
-    xo_xparse_node_id_t id;
+    const char *str = xo_xparse_str(&xfp->xf_xd, xnp->xn_str);
+    const char *vval = NULL;
 
-    /* We only support a single element or attribute in the path */
-    for (id = xnp->xn_contents; id; id = xnp->xn_next) {
-	xnp = xo_xparse_node(&xfp->xf_xd, id);
-	if (xnp->xn_type == C_ELEMENT) {
-	    if (elt == NULL) {
-		elt = xnp;
-		is_attr = FALSE;
-	    } else return xo_eval_value_invalid();
-	} else if (xnp->xn_type == C_ATTRIBUTE) {
-	    if (elt == NULL) {
-		elt = xnp;
-		is_attr = TRUE;
-	    } else return xo_eval_value_invalid();
-	} else if (xnp->xn_type == C_ABSOLUTE) {
-	    /* skip */
-	} else {
-	    xo_failure_filter(xop, "filter: non-element path member (%s)",
-			      xo_xparse_fancy_token_name(xnp->xn_type));
-	    continue;
-	}
+    if (str && str[0] == '$')
+	str += 1;
+
+    if (str && xfp->xf_ops && xfp->xf_ops->xfdo_variable_of)
+	vval = xfp->xf_ops->xfdo_variable_of(xfp->xf_data, str, -1);
+
+    if (vval) {
+	value = xo_eval_value_make(C_STRING, 0, 0);
+	value.xev_str = vval;
+    } else {
+	value.xev_flags |= XEVF_MISSING;
     }
 
-    if (elt == NULL)
-	return value;
-
-    const char *str = xo_xparse_str(&xfp->xf_xd, elt->xn_str);
-
-    return xo_eval_node_value(xfp, framep, str, is_attr);
+    return value;
 }
 
 static xo_eval_value_t
-xo_eval_dot (XO_EVAL_NODE_ARGS)
+xo_eval_path (XO_EVAL_ARGS)
+{
+    xo_eval_value_t value = { .xev_flags = 0 };
+    char path_buf[256];
+    ssize_t path_len = 0;
+    int step_count = 0;
+    int last_is_attr = FALSE;
+    xo_xparse_node_id_t id;
+    /*
+     * Only xfdo_value_of backends use the '@'-marker convention (see
+     * xo_eval_attribute); the generic framep-based lookups below
+     * (xo_filter_attr_find/xo_filter_key_find) key on the bare name.
+     */
+    int use_at_marker = (xfp->xf_ops && xfp->xf_ops->xfdo_value_of) ? TRUE : FALSE;
+
+    /* Collect all C_ELEMENT / C_ATTRIBUTE steps into a compound key string */
+    for (id = xnp->xn_contents; id; id = xnp->xn_next) {
+	xnp = xo_xparse_node(&xfp->xf_xd, id);
+	if (xnp->xn_type == C_ELEMENT || xnp->xn_type == C_ATTRIBUTE) {
+	    const char *str = xo_xparse_str(&xfp->xf_xd, xnp->xn_str);
+	    ssize_t slen = strlen(str);
+	    if (step_count > 0) {
+		if (path_len + 1 >= (ssize_t) sizeof(path_buf) - 1)
+		    return xo_eval_value_invalid();
+		path_buf[path_len++] = '/';
+	    }
+	    /*
+	     * Mark an attribute step with a leading '@' (e.g. "a/b/@x" or
+	     * bare "@x"), matching xo_eval_attribute's convention, so a
+	     * backend's xfdo_value_of can tell an attribute step apart
+	     * from a child-element step of the same name.
+	     */
+	    if (use_at_marker && xnp->xn_type == C_ATTRIBUTE) {
+		if (path_len + 1 >= (ssize_t) sizeof(path_buf) - 1)
+		    return xo_eval_value_invalid();
+		path_buf[path_len++] = '@';
+	    }
+	    if (path_len + slen >= (ssize_t) sizeof(path_buf) - 1)
+		return xo_eval_value_invalid();
+	    memcpy(path_buf + path_len, str, slen);
+	    path_len += slen;
+	    path_buf[path_len] = '\0';
+	    last_is_attr = (xnp->xn_type == C_ATTRIBUTE);
+	    step_count += 1;
+	} else if (xnp->xn_type == C_ABSOLUTE) {
+	    /* skip */
+	} else {
+	    xo_eval_fail(xfp, "filter: non-element path member (%s)",
+			 xo_xparse_fancy_token_name(xnp->xn_type));
+	}
+    }
+
+    if (step_count == 0)
+	return value;
+
+    /* A compound path is always a key lookup; only a lone @attr isn't */
+    int is_attr = (last_is_attr && step_count == 1);
+
+    return xo_eval_node_value(xfp, framep, path_buf, is_attr);
+}
+
+static xo_eval_value_t
+xo_eval_dot (XO_EVAL_ARGS)
 {
     xo_eval_value_t value = { .xev_flags = 0 };
 
@@ -1789,8 +2593,11 @@ xo_eval_cast_boolean (xo_handle_t *xop UNUSED, xo_eval_value_t value)
     case C_DSTRING:
 	return value.xev_str != NULL && value.xev_str[0] != '\0';
 
+    case C_NAN:			/* XPath: NaN is false */
+	return 0;
+
     case C_FLOAT:
-	return value.xev_float != 0 && !isnan(value.xev_float);
+	return value.xev_float != 0;
 
     case C_UINT64:
 	return value.xev_uint64 != 0;
@@ -1816,6 +2623,9 @@ xo_eval_cast_float (xo_handle_t *xop, xo_eval_value_t value)
 	fval = strtod(str, &ep);
 	return (ep && *ep == '\0') ? fval: 0;
 
+    case C_NAN:
+	return NAN;
+
     case C_FLOAT:
 	return value.xev_float;
 
@@ -1833,11 +2643,91 @@ xo_eval_cast_float (xo_handle_t *xop, xo_eval_value_t value)
 
 /*
  * Room for any number we turn into a string.  The integers need at
- * most 21 bytes, but "%lf" writes every digit of a double, and the
- * largest has 309 of them before the decimal point, plus the sign,
- * the point, six more digits and the NUL.
+ * most 21 bytes, but XPath never uses an exponent, so a double is
+ * written out in full.  The largest has 309 digits before the decimal
+ * point; the smallest (denormal) needs "0.", 323 zeros and 17
+ * significant digits.  With the sign and the NUL, that's 344.
  */
-#define XO_EVAL_NUMBUF	320
+#define XO_EVAL_NUMBUF	352
+
+/*
+ * Format a finite, non-integral (or very large) double the way
+ * XPath's number-to-string conversion (4.2) wants it: the fewest
+ * significant digits that read back as the same value, and no
+ * exponent ("0.1", not "0.10000000000000001" or "1e-01").  We use
+ * "%.*e" to get the digits and the exponent, find the shortest
+ * precision that round-trips through strtod, then place the decimal
+ * point ourselves.  Digits are picked out with isdigit, so a locale
+ * that uses ',' for the decimal point doesn't confuse us.
+ */
+static void
+xo_eval_format_float (char *buf, size_t bufsiz, xo_float_t val)
+{
+    char tmp[64];
+    char digits[24];
+    int ndigits = 0;
+    int exp10 = 0;
+    int prec;
+
+    for (prec = 1; prec <= 17; prec++) {
+	snprintf(tmp, sizeof(tmp), "%.*e", prec - 1, val);
+	if (strtod(tmp, NULL) == val)
+	    break;
+    }
+
+    /* tmp looks like "-d.ddde+XX"; pull out the digits and exponent */
+    const char *cp = tmp;
+    if (*cp == '-')
+	cp += 1;
+
+    for (; *cp && *cp != 'e' && *cp != 'E'; cp++)
+	if (isdigit((unsigned char) *cp) && ndigits < (int) sizeof(digits) - 1)
+	    digits[ndigits++] = *cp;
+
+    if (*cp)
+	exp10 = atoi(cp + 1);
+
+    /* Trailing zeros carry no information */
+    while (ndigits > 1 && digits[ndigits - 1] == '0')
+	ndigits -= 1;
+
+    /* 'point' is how many digits come before the decimal point */
+    int point = exp10 + 1;
+    char *op = buf, *ep = buf + bufsiz - 1;
+
+    if (val < 0 && op < ep)
+	*op++ = '-';
+
+    if (point <= 0) {
+	/* "0.000ddd" */
+	if (op < ep)
+	    *op++ = '0';
+	if (op < ep)
+	    *op++ = '.';
+	for (int i = point; i < 0 && op < ep; i++)
+	    *op++ = '0';
+	for (int i = 0; i < ndigits && op < ep; i++)
+	    *op++ = digits[i];
+
+    } else if (point >= ndigits) {
+	/* "ddd000", no decimal point */
+	for (int i = 0; i < ndigits && op < ep; i++)
+	    *op++ = digits[i];
+	for (int i = ndigits; i < point && op < ep; i++)
+	    *op++ = '0';
+
+    } else {
+	/* "dd.ddd" */
+	for (int i = 0; i < ndigits && op < ep; i++) {
+	    if (i == point)
+		*op++ = '.';
+	    if (op < ep)
+		*op++ = digits[i];
+	}
+    }
+
+    *op = '\0';
+}
 
 static char *
 xo_eval_cast_string (xo_handle_t *xop UNUSED, xo_eval_value_t value)
@@ -1865,7 +2755,27 @@ xo_eval_cast_string (xo_handle_t *xop UNUSED, xo_eval_value_t value)
 	break;
 
     case C_FLOAT:
-	snprintf(buf, sizeof(buf), "%lf", value.xev_float);
+	/*
+	 * XPath's number-to-string conversion (4.2): integral values are
+	 * rendered with no decimal point ("2", not "2.000000"); "%lf"
+	 * always emits 6 decimal digits, which is wrong for the common
+	 * case of integral arithmetic results (e.g. "$n - 1").  Test the
+	 * magnitude before the cast, since casting a double outside
+	 * int64_t's range is undefined.  Everything else goes through
+	 * xo_eval_format_float.
+	 */
+	if (isinf(value.xev_float)) {
+	    bp = (value.xev_float < 0) ? "-Infinity" : "Infinity";
+	} else if (fabs(value.xev_float) < 1e18
+		   && value.xev_float == (double) (int64_t) value.xev_float) {
+	    snprintf(buf, sizeof(buf), "%" PRId64, (int64_t) value.xev_float);
+	} else {
+	    xo_eval_format_float(buf, sizeof(buf), value.xev_float);
+	}
+	break;
+
+    case C_NAN:
+	bp = "NaN";
 	break;
 
     case M_ERROR:
@@ -1877,13 +2787,6 @@ xo_eval_cast_string (xo_handle_t *xop UNUSED, xo_eval_value_t value)
     }
 
     return xo_strdup(bp);
-}
-
-static inline xo_eval_value_t
-xo_eval_cast_float_value (xo_handle_t *xop, xo_eval_value_t old)
-{
-    xo_float_t new = xo_eval_cast_float(xop, old);
-    return xo_eval_value_float(0, new);
 }
 
 static void
@@ -1918,6 +2821,10 @@ xo_eval_dump_value (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED,
 	snprintf(buf, sizeof(buf), "%lf", value.xev_float);
 	break;
 
+    case C_NAN:
+	bp = "NaN";
+	break;
+
     default:
 	bp = "(unknown)";
     }
@@ -1939,12 +2846,40 @@ xo_eval_dump_value (xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED,
 
 #define TYPE_CMP(_a, _b) (((_a) << 16) | (_b))
 
-static xo_eval_value_t
-xo_eval_compare (XO_EVAL_OP_ARGS)
+#define XO_REL_NAN	2	/* xo_eval_compare: comparison is NaN */
+
+static inline int
+xo_eval_is_number_type (unsigned type)
 {
+    return (type == C_INT64 || type == C_UINT64 || type == C_FLOAT
+	    || type == C_NAN);
+}
+
+/*
+ * Compare two floats.  C_FLOAT never holds NaN (that's C_NAN), so
+ * this is a simple three-way compare.
+ */
+static inline int
+xo_eval_fcmp (xo_float_t left, xo_float_t right)
+{
+    return (left > right) ? 1 : (left < right) ? -1 : 0;
+}
+
+/*
+ * Three-way compare of two values, giving -1, 0, or 1 as a C_INT64.
+ * NaN is unordered (not equal to, less than, or greater than anything,
+ * itself included), which we report as XO_REL_NAN.  A string compared
+ * with a number is turned into a number (XPath 1.0, section 3.4),
+ * keeping both as strongly typed as we can, so integers are compared
+ * as integers, not floats.
+ */
+static xo_eval_value_t
+xo_eval_compare (XO_EVAL_ARGS)
+{
+    xo_eval_value_t left = argv[0];
+    xo_eval_value_t right = argv[1];
     xo_eval_value_t value = XO_EVAL_VALUE_ZERO;
     int rc = 0;
-    xo_float_t fval;
     int lbool, rbool;
 
     xo_eval_dump_value(xop, xfp, left, indent, "compare: left");
@@ -1966,6 +2901,23 @@ xo_eval_compare (XO_EVAL_OP_ARGS)
 	    && left_type != C_BOOLEAN && right_type != C_BOOLEAN)
 	return xo_eval_value_invalid();
 
+    /* The converted strings are numbers, so there's nothing to free */
+    if (left_type == C_STRING && xo_eval_is_number_type(right_type)) {
+	left = xo_eval_make_number(xop, left.xev_str);
+	left_type = left.xev_type;
+    } else if (right_type == C_STRING && xo_eval_is_number_type(left_type)) {
+	right = xo_eval_make_number(xop, right.xev_str);
+	right_type = right.xev_type;
+    }
+
+    /* Against a boolean, NaN is false (handled below); else unordered */
+    if ((left_type == C_NAN && right_type != C_BOOLEAN)
+	    || (right_type == C_NAN && left_type != C_BOOLEAN)) {
+	value.xev_int64 = XO_REL_NAN;
+	xo_eval_dump_value(xop, xfp, value, indent, "compare: results");
+	return value;
+    }
+
     switch (TYPE_CMP(left_type, right_type)) {
     case TYPE_CMP(C_STRING, C_STRING):
 	rc = strcmp(left.xev_str, right.xev_str);
@@ -1982,70 +2934,37 @@ xo_eval_compare (XO_EVAL_OP_ARGS)
 	break;
 
     case TYPE_CMP(C_INT64, C_UINT64):
-       if (left.xev_int64 < 0)
-           rc = -1;
-       else {
-           uint64_t lval = (uint64_t) left.xev_int64;
-           rc = (lval > right.xev_uint64) ? 1
-               : (lval < right.xev_uint64) ? -1 : 0;
-       }
-       break;
+	if (left.xev_int64 < 0)
+	    rc = -1;
+	else {
+	    uint64_t lval = (uint64_t) left.xev_int64;
+	    rc = (lval > right.xev_uint64) ? 1
+		: (lval < right.xev_uint64) ? -1 : 0;
+	}
+	break;
 
     case TYPE_CMP(C_UINT64, C_INT64):
-       if (right.xev_int64 < 0)
-           rc = 1;
-       else {
-           uint64_t rval = (uint64_t) right.xev_int64;
-           rc = (left.xev_uint64 > rval) ? 1
-               : (left.xev_uint64 < rval) ? -1 : 0;
-       }
-       break;
+	if (right.xev_int64 < 0)
+	    rc = 1;
+	else {
+	    uint64_t rval = (uint64_t) right.xev_int64;
+	    rc = (left.xev_uint64 > rval) ? 1
+		: (left.xev_uint64 < rval) ? -1 : 0;
+	}
+	break;
 
     case TYPE_CMP(C_FLOAT, C_FLOAT):
-	rc = (left.xev_float > right.xev_float) ? 1
-	    : (left.xev_float < right.xev_float) ? -1 : 0;
-	break;
-
-    case TYPE_CMP(C_STRING, C_INT64):
-	fval = xo_eval_cast_float(xop, left);
-	rc = (fval > right.xev_int64) ? 1 : (fval < right.xev_int64) ? -1 : 0;
-	break;
-
-    case TYPE_CMP(C_INT64, C_STRING):
-	fval = xo_eval_cast_float(xop, right);
-	rc = (left.xev_int64 > fval) ? 1 : (left.xev_int64 < fval) ? -1 : 0;
-	break;
-
-    case TYPE_CMP(C_STRING, C_UINT64):
-	fval = xo_eval_cast_float(xop, left);
-	rc = (fval > right.xev_uint64) ? 1 : (fval < right.xev_uint64) ? -1 : 0;
-	break;
-
-    case TYPE_CMP(C_UINT64, C_STRING):
-	fval = xo_eval_cast_float(xop, right);
-	rc = (left.xev_uint64 > fval) ? 1 : (left.xev_uint64 < fval) ? -1 : 0;
-	break;
-
-    case TYPE_CMP(C_STRING, C_FLOAT):
-	fval = xo_eval_cast_float(xop, left);
-	rc = (fval > right.xev_float) ? 1 : (fval < right.xev_float) ? -1 : 0;
-	break;
-
-    case TYPE_CMP(C_FLOAT, C_STRING):
-	fval = xo_eval_cast_float(xop, right);
-	rc = (left.xev_float > fval) ? 1 : (left.xev_float < fval) ? -1 : 0;
+	rc = xo_eval_fcmp(left.xev_float, right.xev_float);
 	break;
 
     case TYPE_CMP(C_INT64, C_FLOAT):
     case TYPE_CMP(C_UINT64, C_FLOAT):
-	fval = xo_eval_cast_float(xop, left);
-	rc = (fval > right.xev_float) ? 1 : (fval < right.xev_float) ? -1 : 0;
+	rc = xo_eval_fcmp(xo_eval_cast_float(xop, left), right.xev_float);
 	break;
 
     case TYPE_CMP(C_FLOAT, C_INT64):
     case TYPE_CMP(C_FLOAT, C_UINT64):
-	fval = xo_eval_cast_float(xop, right);
-	rc = (left.xev_float > fval) ? 1 : (left.xev_float < fval) ? -1 : 0;
+	rc = xo_eval_fcmp(left.xev_float, xo_eval_cast_float(xop, right));
 	break;
 
     case TYPE_CMP(C_BOOLEAN, C_BOOLEAN):
@@ -2057,6 +2976,8 @@ xo_eval_compare (XO_EVAL_OP_ARGS)
     case TYPE_CMP(C_BOOLEAN, C_FLOAT):
     case TYPE_CMP(C_STRING, C_BOOLEAN):
     case TYPE_CMP(C_BOOLEAN, C_STRING):
+    case TYPE_CMP(C_NAN, C_BOOLEAN):
+    case TYPE_CMP(C_BOOLEAN, C_NAN):
 	/*
 	 * XPath converts the other operand to a boolean when either
 	 * one is a boolean; false orders before true.
@@ -2071,9 +2992,9 @@ xo_eval_compare (XO_EVAL_OP_ARGS)
 	    static const char unk[] = "(unknown)";
 	    const char *lname = xo_xparse_token_name(left.xev_type) ?: unk;
 	    const char *rname = xo_xparse_token_name(right.xev_type) ?: unk;
-	    xo_failure_filter(xop,
-		       "filter: eval: unsupported type comparison (%s/%s)",
-		       lname, rname);
+	    xo_eval_fail(xfp,
+			 "filter: eval: unsupported type comparison (%s/%s)",
+			 lname, rname);
 	}
 
 	return xo_eval_value_invalid();
@@ -2087,8 +3008,10 @@ xo_eval_compare (XO_EVAL_OP_ARGS)
 }
 
 static xo_eval_value_t
-xo_eval_op_and (XO_EVAL_OP_ARGS)
+xo_eval_op_and (XO_EVAL_ARGS)
 {
+    xo_eval_value_t left = argv[0];
+    xo_eval_value_t right = argv[1];
     xo_eval_value_t value = xo_eval_value_make(C_BOOLEAN, 0, 0);
 
     int bool_val = xo_eval_cast_boolean(xop, left);
@@ -2112,8 +3035,10 @@ xo_eval_op_and (XO_EVAL_OP_ARGS)
 }
 
 static xo_eval_value_t
-xo_eval_op_or (XO_EVAL_OP_ARGS)
+xo_eval_op_or (XO_EVAL_ARGS)
 {
+    xo_eval_value_t left = argv[0];
+    xo_eval_value_t right = argv[1];
     xo_eval_value_t value = xo_eval_value_make(C_BOOLEAN, 0, 0);
 
     int bool_val = xo_eval_cast_boolean(xop, left);
@@ -2153,64 +3078,272 @@ xo_eval_compare_result (xo_eval_value_t cmp, int result)
 }
 
 static xo_eval_value_t
-xo_eval_op_equals (XO_EVAL_OP_ARGS)
+xo_eval_op_equals (XO_EVAL_ARGS)
 {
-    xo_eval_value_t cmp = xo_eval_compare(XO_EVAL_OP_PASS);
+    xo_eval_value_t cmp = xo_eval_compare(XO_EVAL_PASS);
 
     return xo_eval_compare_result(cmp, cmp.xev_int64 == 0);
 }
 
 static xo_eval_value_t
-xo_eval_op_notequals (XO_EVAL_OP_ARGS)
+xo_eval_op_notequals (XO_EVAL_ARGS)
 {
-    xo_eval_value_t cmp = xo_eval_compare(XO_EVAL_OP_PASS);
+    xo_eval_value_t cmp = xo_eval_compare(XO_EVAL_PASS);
 
     return xo_eval_compare_result(cmp, cmp.xev_int64 != 0);
 }
 
+/*
+ * Compare for the relational operators (<, <=, >, >=).  XPath 1.0
+ * (section 3.4) compares two strings with these operators by first
+ * converting both to numbers, not as strings, so "42" > "144" is
+ * false.  We convert with xo_eval_parse_number, which keeps them as
+ * strongly typed as it can and makes a non-number C_NAN, so
+ * xo_eval_compare does the rest (and reports NaN as XO_REL_NAN).  No
+ * complaints: in XPath, a non-numeric string is a normal value.
+ */
 static xo_eval_value_t
-xo_eval_op_lt (XO_EVAL_OP_ARGS)
+xo_eval_relational (XO_EVAL_ARGS)
 {
-    xo_eval_value_t cmp = xo_eval_compare(XO_EVAL_OP_PASS);
+    xo_eval_value_t left = argv[0];
+    xo_eval_value_t right = argv[1];
+    int left_str = (left.xev_type == C_STRING || left.xev_type == C_DSTRING);
+    int right_str = (right.xev_type == C_STRING
+		     || right.xev_type == C_DSTRING);
 
-    return xo_eval_compare_result(cmp, cmp.xev_int64 < 0);
+    if (!left_str || !right_str)
+	return xo_eval_compare(XO_EVAL_PASS);
+
+    /* Numbers own no memory; argv still owns (and frees) the strings */
+    xo_eval_value_t nums[2] = {
+	xo_eval_parse_number(left.xev_str),
+	xo_eval_parse_number(right.xev_str),
+    };
+
+    return xo_eval_compare(xop, xfp, framep, xnp, indent, 2, nums);
 }
 
 static xo_eval_value_t
-xo_eval_op_le (XO_EVAL_OP_ARGS)
+xo_eval_op_lt (XO_EVAL_ARGS)
 {
-    xo_eval_value_t cmp = xo_eval_compare(XO_EVAL_OP_PASS);
+    xo_eval_value_t cmp = xo_eval_relational(XO_EVAL_PASS);
 
-    return xo_eval_compare_result(cmp, cmp.xev_int64 <= 0);
+    return xo_eval_compare_result(cmp, cmp.xev_int64 != XO_REL_NAN
+				  && cmp.xev_int64 < 0);
 }
 
 static xo_eval_value_t
-xo_eval_op_gt (XO_EVAL_OP_ARGS)
+xo_eval_op_le (XO_EVAL_ARGS)
 {
-    xo_eval_value_t cmp = xo_eval_compare(XO_EVAL_OP_PASS);
+    xo_eval_value_t cmp = xo_eval_relational(XO_EVAL_PASS);
 
-    return xo_eval_compare_result(cmp, cmp.xev_int64 > 0);
+    return xo_eval_compare_result(cmp, cmp.xev_int64 != XO_REL_NAN
+				  && cmp.xev_int64 <= 0);
 }
 
 static xo_eval_value_t
-xo_eval_op_ge (XO_EVAL_OP_ARGS)
+xo_eval_op_gt (XO_EVAL_ARGS)
 {
-    xo_eval_value_t cmp = xo_eval_compare(XO_EVAL_OP_PASS);
+    xo_eval_value_t cmp = xo_eval_relational(XO_EVAL_PASS);
 
-    return xo_eval_compare_result(cmp, cmp.xev_int64 >= 0);
+    return xo_eval_compare_result(cmp, cmp.xev_int64 != XO_REL_NAN
+				  && cmp.xev_int64 > 0);
 }
 
 static xo_eval_value_t
-xo_eval_calc (XO_EVAL_OP_ARGS, xo_eval_calc_fn_t calc_fn)
+xo_eval_op_ge (XO_EVAL_ARGS)
 {
-    xo_eval_value_t lfloat = xo_eval_cast_float_value(xop, left);
-    xo_eval_value_t rfloat = xo_eval_cast_float_value(xop, right);
+    xo_eval_value_t cmp = xo_eval_relational(XO_EVAL_PASS);
 
-    xo_eval_value_t result = calc_fn(xop, xfp, lfloat, rfloat);
+    return xo_eval_compare_result(cmp, cmp.xev_int64 != XO_REL_NAN
+				  && cmp.xev_int64 >= 0);
+}
+
+/* The magnitude of a negative int64 (safe for INT64_MIN) */
+static inline uint64_t
+xo_int64_mag (int64_t val)
+{
+    return (uint64_t) -(val + 1) + 1;
+}
+
+static inline xo_eval_value_t
+xo_eval_value_int64 (int64_t ival)
+{
+    xo_eval_value_t value = xo_eval_value_make(C_INT64, 0, 0);
+
+    value.xev_int64 = ival;
+    return value;
+}
+
+/* Results that fit are C_INT64, matching xo_eval_parse_number */
+static inline xo_eval_value_t
+xo_eval_value_uint64 (uint64_t uval)
+{
+    if (uval <= INT64_MAX)
+	return xo_eval_value_int64((int64_t) uval);
+
+    xo_eval_value_t value = xo_eval_value_make(C_UINT64, 0, 0);
+
+    value.xev_uint64 = uval;
+    return value;
+}
+
+/*
+ * XPath does all its math in floats, but floats are expensive and
+ * lose precision past 2^53, so we keep integer math in C_INT64 or
+ * C_UINT64 as long as the result fits, and fall back to C_FLOAT only
+ * when it doesn't.  These helpers return the result, or an invalid
+ * value (XEVF_INVALID) on overflow.
+ */
+static xo_eval_value_t
+xo_int64_add (int64_t left, int64_t right)
+{
+    if ((right > 0 && left > INT64_MAX - right)
+	    || (right < 0 && left < INT64_MIN - right))
+	return xo_eval_value_invalid();
+
+    return xo_eval_value_int64(left + right);
+}
+
+static xo_eval_value_t
+xo_int64_sub (int64_t left, int64_t right)
+{
+    if ((right < 0 && left > INT64_MAX + right)
+	    || (right > 0 && left < INT64_MIN + right))
+	return xo_eval_value_invalid();
+
+    return xo_eval_value_int64(left - right);
+}
+
+static xo_eval_value_t
+xo_int64_mul (int64_t left, int64_t right)
+{
+    if (left > 0) {
+	if (right > 0 ? left > INT64_MAX / right : right < INT64_MIN / left)
+	    return xo_eval_value_invalid();
+    } else if (left < 0) {
+	if (right > 0 ? left < INT64_MIN / right
+		: right != 0 && left < INT64_MAX / right)
+	    return xo_eval_value_invalid();
+    }
+
+    return xo_eval_value_int64(left * right);
+}
+
+static xo_eval_value_t
+xo_uint64_add (uint64_t left, uint64_t right)
+{
+    if (left > UINT64_MAX - right)
+	return xo_eval_value_invalid();
+
+    return xo_eval_value_uint64(left + right);
+}
+
+static xo_eval_value_t
+xo_uint64_sub (uint64_t left, uint64_t right)
+{
+    if (left < right)
+	return xo_eval_value_invalid();
+
+    return xo_eval_value_uint64(left - right);
+}
+
+static xo_eval_value_t
+xo_uint64_mul (uint64_t left, uint64_t right)
+{
+    if (right != 0 && left > UINT64_MAX / right)
+	return xo_eval_value_invalid();
+
+    return xo_eval_value_uint64(left * right);
+}
+
+/* Get an integer value as an int64, if it fits */
+static inline int
+xo_eval_get_int64 (xo_eval_value_t value, int64_t *valp)
+{
+    if (value.xev_type == C_INT64) {
+	*valp = value.xev_int64;
+	return TRUE;
+    }
+
+    if (value.xev_type == C_UINT64 && value.xev_uint64 <= INT64_MAX) {
+	*valp = (int64_t) value.xev_uint64;
+	return TRUE;
+    }
+
+    return FALSE;
+}
+
+/* Get an integer value as a uint64, if it fits */
+static inline int
+xo_eval_get_uint64 (xo_eval_value_t value, uint64_t *valp)
+{
+    if (value.xev_type == C_UINT64) {
+	*valp = value.xev_uint64;
+	return TRUE;
+    }
+
+    if (value.xev_type == C_INT64 && value.xev_int64 >= 0) {
+	*valp = (uint64_t) value.xev_int64;
+	return TRUE;
+    }
+
+    return FALSE;
+}
+
+/* True for a negative int64 paired with a uint64 past INT64_MAX */
+static inline int
+xo_eval_neg_big (xo_eval_value_t neg, xo_eval_value_t big)
+{
+    return (neg.xev_type == C_INT64 && neg.xev_int64 < 0
+	    && big.xev_type == C_UINT64 && big.xev_uint64 > INT64_MAX);
+}
+
+/*
+ * Turn an operand into a number for arithmetic, keeping it as
+ * strongly typed as we can: strings are parsed, booleans are 0 or 1.
+ */
+static xo_eval_value_t
+xo_eval_to_number (xo_handle_t *xop, xo_eval_value_t value)
+{
+    switch (value.xev_type) {
+    case C_DSTRING:
+    case C_STRING:
+	return xo_eval_make_number(xop, value.xev_str);
+
+    case C_INT64:
+    case C_UINT64:
+    case C_FLOAT:
+    case C_NAN:
+	return value;
+
+    case C_BOOLEAN:
+	return xo_eval_value_int64(value.xev_int64 ? 1 : 0);
+
+    default:
+	return xo_eval_value_int64(value.xev_int64);
+    }
+}
+
+/*
+ * Run a binary arithmetic operator.  The calc_fn gets two numbers
+ * (from xo_eval_to_number), neither of them NaN; NaN in is NaN out.
+ */
+static xo_eval_value_t
+xo_eval_calc (XO_EVAL_ARGS, const char *name, xo_eval_calc_fn_t calc_fn)
+{
+    xo_eval_value_t left = xo_eval_to_number(xop, argv[0]);
+    xo_eval_value_t right = xo_eval_to_number(xop, argv[1]);
+    xo_eval_value_t result;
+
+    if (left.xev_type == C_NAN || right.xev_type == C_NAN)
+	result = xo_eval_value_nan(0);
+    else
+	result = calc_fn(xop, xfp, left, right);
 
     if (XO_HAS_DEBUG(xop)) {
-	xo_eval_dump_value(xop, xfp, lfloat, indent, "eval_calc: left");
-	xo_eval_dump_value(xop, xfp, rfloat, indent, "eval_calc: right");
+	xo_eval_dump_value(xop, xfp, left, indent, "eval_calc: left");
+	xo_eval_dump_value(xop, xfp, right, indent, "eval_calc: right");
 	char nbuf[128];
 	snprintf(nbuf, sizeof(nbuf), "eval_calc: %s", name);
 
@@ -2223,59 +3356,171 @@ xo_eval_calc (XO_EVAL_OP_ARGS, xo_eval_calc_fn_t calc_fn)
 static xo_eval_value_t
 xo_eval_calc_plus (XO_EVAL_CALC_ARGS)
 {
-    left.xev_float += right.xev_float;
-    return left;
+    int64_t li, ri;
+    uint64_t lu, ru;
+    xo_eval_value_t result;
+
+    if (xo_eval_get_int64(left, &li) && xo_eval_get_int64(right, &ri)) {
+	result = xo_int64_add(li, ri);
+	if (!(result.xev_flags & XEVF_INVALID))
+	    return result;
+    }
+
+    if (xo_eval_get_uint64(left, &lu) && xo_eval_get_uint64(right, &ru)) {
+	result = xo_uint64_add(lu, ru);
+	if (!(result.xev_flags & XEVF_INVALID))
+	    return result;
+    }
+
+    /* A negative int64 plus a uint64 past INT64_MAX always fits */
+    if (xo_eval_neg_big(left, right))
+	return xo_eval_value_uint64(right.xev_uint64
+				    - xo_int64_mag(left.xev_int64));
+    if (xo_eval_neg_big(right, left))
+	return xo_eval_value_uint64(left.xev_uint64
+				    - xo_int64_mag(right.xev_int64));
+
+    return xo_eval_value_float(0, xo_eval_cast_float(xop, left)
+			       + xo_eval_cast_float(xop, right));
 }
 
 static xo_eval_value_t
-xo_eval_op_plus (XO_EVAL_OP_ARGS)
+xo_eval_op_plus (XO_EVAL_ARGS)
 {
-    return xo_eval_calc(XO_EVAL_OP_PASS,
+    return xo_eval_calc(XO_EVAL_PASS, "plus",
 			       xo_eval_calc_plus);
 }
 
 static xo_eval_value_t
 xo_eval_calc_minus (XO_EVAL_CALC_ARGS)
 {
-    left.xev_float -= right.xev_float;
-    return left;
+    int64_t li, ri;
+    uint64_t lu, ru;
+    xo_eval_value_t result;
+
+    if (xo_eval_get_int64(left, &li) && xo_eval_get_int64(right, &ri)) {
+	result = xo_int64_sub(li, ri);
+	if (!(result.xev_flags & XEVF_INVALID))
+	    return result;
+    }
+
+    if (xo_eval_get_uint64(left, &lu) && xo_eval_get_uint64(right, &ru)) {
+	result = xo_uint64_sub(lu, ru);
+	if (!(result.xev_flags & XEVF_INVALID))
+	    return result;
+    }
+
+    /* A uint64 past INT64_MAX minus a negative int64 */
+    if (xo_eval_neg_big(right, left)) {
+	result = xo_uint64_add(left.xev_uint64,
+			       xo_int64_mag(right.xev_int64));
+	if (!(result.xev_flags & XEVF_INVALID))
+	    return result;
+    }
+
+    return xo_eval_value_float(0, xo_eval_cast_float(xop, left)
+			       - xo_eval_cast_float(xop, right));
 }
 
 static xo_eval_value_t
-xo_eval_op_minus (XO_EVAL_OP_ARGS)
+xo_eval_op_minus (XO_EVAL_ARGS)
 {
-    return xo_eval_calc(XO_EVAL_OP_PASS,
+    return xo_eval_calc(XO_EVAL_PASS, "minus",
 			       xo_eval_calc_minus);
 }
 
+/*
+ * Unary minus (negation), the compiled form of a C_UNI_MINUS node
+ * (e.g. "-4"), as opposed to xo_eval_op_minus() above, which combines
+ * two operands ("a - b").  Same semantics as xo_eval_negate(): an
+ * integer stays an integer; everything else is negated as a number.
+ * The runner frees argv[0], so we always return a fresh value.
+ */
+static xo_eval_value_t
+xo_eval_op_negate (XO_EVAL_ARGS)
+{
+    xo_eval_value_t value = xo_eval_to_number(xop, argv[0]);
+
+    switch (value.xev_type) {
+    case C_INT64:
+	if (value.xev_int64 != INT64_MIN)
+	    return xo_eval_value_int64(-value.xev_int64);
+	return xo_eval_value_uint64(xo_int64_mag(value.xev_int64));
+
+    case C_UINT64:
+	if (value.xev_uint64 <= INT64_MAX)
+	    return xo_eval_value_int64(-(int64_t) value.xev_uint64);
+	if (value.xev_uint64 == xo_int64_mag(INT64_MIN))
+	    return xo_eval_value_int64(INT64_MIN);
+	return xo_eval_value_float(0, -(xo_float_t) value.xev_uint64);
+
+    case C_FLOAT:
+	return xo_eval_value_float(0, -value.xev_float);
+
+    default:			/* C_NAN */
+	return value;
+    }
+}
+
+/*
+ * XPath's "div" is float division, but when integers divide evenly,
+ * the result is still an integer.
+ */
 static xo_eval_value_t
 xo_eval_calc_div (XO_EVAL_CALC_ARGS)
 {
-    if (right.xev_float == 0)
+    int64_t li, ri;
+    uint64_t lu, ru;
+
+    if (xo_eval_cast_float(xop, right) == 0)
 	return xo_eval_value_invalid();
 
-    left.xev_float /= right.xev_float;
-    return left;
+    if (xo_eval_get_int64(left, &li) && xo_eval_get_int64(right, &ri)
+	    && !(li == INT64_MIN && ri == -1) && li % ri == 0)
+	return xo_eval_value_int64(li / ri);
+
+    if (xo_eval_get_uint64(left, &lu) && xo_eval_get_uint64(right, &ru)
+	    && lu % ru == 0)
+	return xo_eval_value_uint64(lu / ru);
+
+    return xo_eval_value_float(0, xo_eval_cast_float(xop, left)
+			       / xo_eval_cast_float(xop, right));
 }
 
 static xo_eval_value_t
-xo_eval_op_div (XO_EVAL_OP_ARGS)
+xo_eval_op_div (XO_EVAL_ARGS)
 {
-    return xo_eval_calc(XO_EVAL_OP_PASS,
+    return xo_eval_calc(XO_EVAL_PASS, "div",
 			       xo_eval_calc_div);
 }
 
 static xo_eval_value_t
 xo_eval_calc_mul (XO_EVAL_CALC_ARGS)
 {
-    left.xev_float *= right.xev_float;
-    return left;
+    int64_t li, ri;
+    uint64_t lu, ru;
+    xo_eval_value_t result;
+
+    if (xo_eval_get_int64(left, &li) && xo_eval_get_int64(right, &ri)) {
+	result = xo_int64_mul(li, ri);
+	if (!(result.xev_flags & XEVF_INVALID))
+	    return result;
+    }
+
+    if (xo_eval_get_uint64(left, &lu) && xo_eval_get_uint64(right, &ru)) {
+	result = xo_uint64_mul(lu, ru);
+	if (!(result.xev_flags & XEVF_INVALID))
+	    return result;
+    }
+
+    return xo_eval_value_float(0, xo_eval_cast_float(xop, left)
+			       * xo_eval_cast_float(xop, right));
 }
 
 static xo_eval_value_t
-xo_eval_op_mul (XO_EVAL_OP_ARGS)
+xo_eval_op_mul (XO_EVAL_ARGS)
 {
-    return xo_eval_calc(XO_EVAL_OP_PASS,
+    return xo_eval_calc(XO_EVAL_PASS, "mul",
 			       xo_eval_calc_mul);
 }
 
@@ -2293,36 +3538,50 @@ xo_fmod (xo_float_t x, xo_float_t y)
     return fmod(x, y);
 }
 
+/*
+ * XPath's "mod" truncates, like C's '%', so the result has the sign
+ * of the dividend.  As with xo_fmod, "mod 0" gives zero.
+ */
 static xo_eval_value_t
 xo_eval_calc_mod (XO_EVAL_CALC_ARGS)
 {
-    left.xev_float = xo_fmod(left.xev_float, right.xev_float);
-    return left;
+    int64_t li, ri;
+    uint64_t lu, ru;
+
+    if (xo_eval_get_int64(left, &li) && xo_eval_get_int64(right, &ri))
+	return xo_eval_value_int64((ri == 0 || ri == -1) ? 0 : li % ri);
+
+    if (xo_eval_get_uint64(left, &lu) && xo_eval_get_uint64(right, &ru))
+	return xo_eval_value_uint64((ru == 0) ? 0 : lu % ru);
+
+    /* A negative int64 is smaller than any uint64 past INT64_MAX */
+    if (xo_eval_neg_big(left, right))
+	return (xo_int64_mag(left.xev_int64) == right.xev_uint64)
+	    ? xo_eval_value_int64(0) : left;
+
+    if (xo_eval_neg_big(right, left))
+	return xo_eval_value_uint64(left.xev_uint64
+				    % xo_int64_mag(right.xev_int64));
+
+    return xo_eval_value_float(0, xo_fmod(xo_eval_cast_float(xop, left),
+					  xo_eval_cast_float(xop, right)));
 }
 
 static xo_eval_value_t
-xo_eval_op_mod (XO_EVAL_OP_ARGS)
+xo_eval_op_mod (XO_EVAL_ARGS)
 {
-    return xo_eval_calc(XO_EVAL_OP_PASS,
+    return xo_eval_calc(XO_EVAL_PASS, "mod",
 			       xo_eval_calc_mod);
 }
 
 static xo_eval_value_t
-xo_eval_not (XO_EVAL_NODE_ARGS)
+xo_eval_not (XO_EVAL_ARGS)
 {
-    xo_eval_value_t value;
+    if (argv[0].xev_flags & XEVF_MISSING)
+	return xo_eval_value_missing();
 
-    /* We only support a single element in the path, which must be a key */
-    value = xo_eval(xop, xfp, framep, "arguments", indent,
-                       xnp->xn_contents, NULL);
-    xo_eval_dump_value(xop, xfp, value, indent, "xo_eval_not");
-
-    if (value.xev_flags & XEVF_MISSING)
-	return value;
-
-    int bool_val = xo_eval_cast_boolean(xop, value);
-    xo_eval_value_free(value);
-    value.xev_type = C_BOOLEAN;
+    int bool_val = xo_eval_cast_boolean(xop, argv[0]);
+    xo_eval_value_t value = xo_eval_value_make(C_BOOLEAN, 0, 0);
     value.xev_int64 = bool_val ? 0 : 1; /* Perform the 'not' */
     return value;
 }
@@ -2334,7 +3593,7 @@ xo_eval_not (XO_EVAL_NODE_ARGS)
  * else is negated as a number.
  */
 static xo_eval_value_t
-xo_eval_negate (XO_EVAL_NODE_ARGS)
+xo_eval_negate (XO_EVAL_ARGS)
 {
     xo_eval_value_t value;
 
@@ -2361,7 +3620,7 @@ xo_eval_negate (XO_EVAL_NODE_ARGS)
  * Look at a arguments to a function and return the count
  */
 static int UNUSED
-xo_eval_argument_count (XO_EVAL_NODE_ARGS)
+xo_eval_argument_count (XO_EVAL_ARGS)
 {
     xo_xparse_node_id_t id;
     int count = 0;
@@ -2379,7 +3638,7 @@ xo_eval_argument_count (XO_EVAL_NODE_ARGS)
  * their values.
  */
 static int
-xo_eval_arguments (XO_EVAL_NODE_ARGS,
+xo_eval_arguments (XO_EVAL_ARGS,
 		   int nargs, xo_eval_value_t *argp)
 {
     xo_xparse_node_id_t id;
@@ -2405,14 +3664,14 @@ xo_eval_arguments (XO_EVAL_NODE_ARGS,
 }
 
 static void
-xo_eval_arguments_free (XO_EVAL_NODE_ARGS)
+xo_eval_arguments_free (XO_EVAL_ARGS)
 {
     for (int i = 0; i < argc; i++)
 	xo_eval_value_free(argv[i]);
 }
 
 static xo_eval_value_t
-xo_eval_func_starts_with (XO_EVAL_NODE_ARGS)
+xo_eval_func_starts_with (XO_EVAL_ARGS)
 {
     xo_eval_value_t value = XO_EVAL_VALUE_BOOLEAN_FALSE;
 
@@ -2432,7 +3691,7 @@ xo_eval_func_starts_with (XO_EVAL_NODE_ARGS)
 }
 
 static xo_eval_value_t
-xo_eval_func_ends_with (XO_EVAL_NODE_ARGS)
+xo_eval_func_ends_with (XO_EVAL_ARGS)
 {
     xo_eval_value_t value = XO_EVAL_VALUE_BOOLEAN_FALSE;
 
@@ -2461,21 +3720,21 @@ xo_eval_func_ends_with (XO_EVAL_NODE_ARGS)
 }
 
 static xo_eval_value_t
-xo_eval_func_true (XO_EVAL_NODE_ARGS)
+xo_eval_func_true (XO_EVAL_ARGS)
 {
     xo_eval_value_t value = XO_EVAL_VALUE_BOOLEAN_TRUE;
     return value;
 }
 
 static xo_eval_value_t
-xo_eval_func_false (XO_EVAL_NODE_ARGS)
+xo_eval_func_false (XO_EVAL_ARGS)
 {
     xo_eval_value_t value = XO_EVAL_VALUE_BOOLEAN_FALSE;
     return value;
 }
 
 static xo_eval_value_t
-xo_eval_func_boolean (XO_EVAL_NODE_ARGS)
+xo_eval_func_boolean (XO_EVAL_ARGS)
 {
     int bool_val = xo_eval_cast_boolean(xop, argv[0]);
 
@@ -2485,14 +3744,14 @@ xo_eval_func_boolean (XO_EVAL_NODE_ARGS)
 }
 
 static xo_eval_value_t
-xo_eval_func_string (XO_EVAL_NODE_ARGS)
+xo_eval_func_string (XO_EVAL_ARGS)
 {
     char *str = xo_eval_cast_string(xop, argv[0]);
     return xo_eval_value_string(C_DSTRING, 0, str);
 }
 
 static xo_eval_value_t
-xo_eval_func_normalize_space (XO_EVAL_NODE_ARGS)
+xo_eval_func_normalize_space (XO_EVAL_ARGS)
 {
     char *str = xo_eval_cast_string(xop, argv[0]);
     const char *p = str ?: "";
@@ -2532,28 +3791,63 @@ xo_eval_func_normalize_space (XO_EVAL_NODE_ARGS)
 }
 
 static xo_eval_value_t
-xo_eval_func_not (XO_EVAL_NODE_ARGS)
+xo_eval_func_not (XO_EVAL_ARGS)
 {
+    if (argc < 1)
+	return xo_eval_value_invalid();
+
     int bool_val = xo_eval_cast_boolean(xop, argv[0]);
     xo_eval_value_t value = XO_EVAL_VALUE_BOOLEAN_FALSE;
     value.xev_int64 = bool_val ? 0 : 1;
     return value;
 }
 
+/*
+ * ceiling(), floor(), and round(): integers (and NaN) are already
+ * their own answer.  A float's integral result is a C_INT64 when it
+ * fits.
+ */
 static xo_eval_value_t
-xo_eval_func_ceiling (XO_EVAL_NODE_ARGS)
+xo_eval_round_common (XO_EVAL_ARGS, xo_float_t (*round_fn)(xo_float_t))
 {
-    xo_float_t fval = xo_eval_cast_float(xop, argv[0]);
-    fval = ceil(fval);
+    xo_eval_value_t value = xo_eval_to_number(xop, argv[0]);
+
+    if (value.xev_type != C_FLOAT)
+	return value;
+
+    xo_float_t fval = round_fn(value.xev_float);
+
+    /* -2^63 and 2^63 are exact as doubles; INT64_MAX isn't */
+    if (fval >= (xo_float_t) INT64_MIN && fval < -(xo_float_t) INT64_MIN)
+	return xo_eval_value_int64((int64_t) fval);
+
     return xo_eval_value_float(0, fval);
 }
 
 static xo_eval_value_t
-xo_eval_func_floor (XO_EVAL_NODE_ARGS)
+xo_eval_func_ceiling (XO_EVAL_ARGS)
 {
-    xo_float_t fval = xo_eval_cast_float(xop, argv[0]);
-    fval = floor(fval);
-    return xo_eval_value_float(0, fval);
+    return xo_eval_round_common(XO_EVAL_PASS, ceil);
+}
+
+static xo_eval_value_t
+xo_eval_func_floor (XO_EVAL_ARGS)
+{
+    return xo_eval_round_common(XO_EVAL_PASS, floor);
+}
+
+/*
+ * XPath rounds a half up, toward positive infinity (round(-2.5) is
+ * -2, where C's round() gives -3).  We don't use floor(x + 0.5),
+ * since the addition itself can round (0.49999999999999994 + 0.5 is
+ * 1.0); x - floor(x) is exact.  The infinities and NaN pass through.
+ */
+static xo_float_t
+xo_round_half_up (xo_float_t fval)
+{
+    xo_float_t fl = floor(fval);
+
+    return (fval - fl >= 0.5) ? fl + 1 : fl;
 }
 
 /*
@@ -2561,11 +3855,10 @@ xo_eval_func_floor (XO_EVAL_NODE_ARGS)
  * can.  Most arguments are integers already (a literal, or a field
  * that xo_eval_parse_number reads as one), and those come back as
  * C_INT64 without touching floating point.  Only a real C_FLOAT is
- * rounded, by floor(x + 0.5), since XPath rounds a half up, toward
- * positive infinity (round(-2.5) is -2, where C's round() gives -3).
- * A result that fits comes back as C_INT64 too; NaN, the infinities
- * and anything else beyond int64_t stay C_FLOAT, for the caller's
- * floating point path.
+ * rounded, by xo_round_half_up.
+ * A result that fits comes back as C_INT64 too; the infinities and
+ * anything else beyond int64_t stay C_FLOAT, and NaN stays C_NAN, for
+ * the caller's floating point path.
  */
 static xo_eval_value_t
 xo_eval_cast_round (xo_handle_t *xop, xo_eval_value_t value)
@@ -2588,15 +3881,18 @@ xo_eval_cast_round (xo_handle_t *xop, xo_eval_value_t value)
 	return value;
 
     case C_FLOAT:;
-	xo_float_t fval = floor(value.xev_float + 0.5);
+	xo_float_t fval = xo_round_half_up(value.xev_float);
 
-	/* 2^63 is exact as a double; NaN fails both tests */
+	/* 2^63 is exact as a double */
 	if (fval >= -9223372036854775808.0 && fval < 9223372036854775808.0) {
 	    value = xo_eval_value_make(C_INT64, 0, 0);
 	    value.xev_int64 = (int64_t) fval;
 	} else {
 	    value = xo_eval_value_float(0, fval);
 	}
+	return value;
+
+    case C_NAN:			/* Not zero; xo_eval_cast_float gives NAN */
 	return value;
 
     case C_BOOLEAN:
@@ -2608,30 +3904,23 @@ xo_eval_cast_round (xo_handle_t *xop, xo_eval_value_t value)
 }
 
 static xo_eval_value_t
-xo_eval_func_substring (XO_EVAL_NODE_ARGS)
+xo_eval_func_substring (XO_EVAL_ARGS)
 {
-    int fn_argc = xo_eval_argument_count(XO_EVAL_NODE_PASS);
-    if (fn_argc < 2 || fn_argc > 3) {
-	xo_failure_filter(xop, "substring() requires 2 or 3 arguments, got %d",
-			  fn_argc);
+    if (argc < 2 || argc > 3) {
+	xo_eval_fail(xfp, "substring() requires 2 or 3 arguments, got %d",
+		     argc);
 	return xo_eval_value_invalid();
     }
 
-    xo_eval_value_t fn_argv[3];
-    xo_eval_arguments(XO_EVAL_NODE_PASS, 3, fn_argv);
-
     /* Defer if arguments aren't resolved yet (field not yet seen) */
-    if ((fn_argv[0].xev_flags & XEVF_MISSING)
-  	    || (fn_argv[1].xev_flags & XEVF_MISSING)
-  	    || (fn_argv[2].xev_flags & XEVF_MISSING)) {
-	xo_eval_arguments_free(xop, xfp, framep, xnp, indent, 3, fn_argv);
-	return xo_eval_value_missing();
-    }
+    for (int i = 0; i < argc; i++)
+	if (argv[i].xev_flags & XEVF_MISSING)
+	    return xo_eval_value_missing();
 
     xo_eval_value_t value = xo_eval_value_make(C_STRING, 0, 0);
     value.xev_str = "";
 
-    char *str = xo_eval_cast_string(xop, fn_argv[0]);
+    char *str = xo_eval_cast_string(xop, argv[0]);
 
     /*
      * The spec says the result holds the characters whose position
@@ -2649,13 +3938,10 @@ xo_eval_func_substring (XO_EVAL_NODE_ARGS)
      * [1, nchars + 1), and take what's left, if anything.  Positions
      * are in characters, not bytes.
      */
-    xo_eval_value_t pv = xo_eval_cast_round(xop, fn_argv[1]);
+    xo_eval_value_t pv = xo_eval_cast_round(xop, argv[1]);
     xo_eval_value_t lv = XO_EVAL_VALUE_ZERO;
-    if (fn_argc == 3)
-	lv = xo_eval_cast_round(xop, fn_argv[2]);
-
-    /* Release our arguments */
-    xo_eval_arguments_free(xop, xfp, framep, xnp, indent, 3, fn_argv);
+    if (argc == 3)
+	lv = xo_eval_cast_round(xop, argv[2]);
 
     if (str == NULL)
 	return value;
@@ -2670,7 +3956,7 @@ xo_eval_func_substring (XO_EVAL_NODE_ARGS)
 	 */
 	int64_t start = pv.xev_int64, len = lv.xev_int64, limit;
 
-	if (fn_argc == 2)
+	if (argc == 2)
 	    limit = INT64_MAX;
 	else if (len > 0 && start > INT64_MAX - len)
 	    limit = INT64_MAX;
@@ -2690,7 +3976,7 @@ xo_eval_func_substring (XO_EVAL_NODE_ARGS)
 	 * the empty string.
 	 */
 	xo_float_t start = xo_eval_cast_float(xop, pv);
-	xo_float_t limit = (fn_argc == 2) ? INFINITY
+	xo_float_t limit = (argc == 2) ? INFINITY
 	    : start + xo_eval_cast_float(xop, lv);
 	xo_float_t ffirst = (start < 1) ? 1 : start;
 	xo_float_t flast = (limit > nchars + 1) ? nchars + 1 : limit;
@@ -2731,7 +4017,7 @@ xo_eval_func_substring (XO_EVAL_NODE_ARGS)
 }
 
 static xo_eval_value_t
-xo_eval_func_substring_before (XO_EVAL_NODE_ARGS)
+xo_eval_func_substring_before (XO_EVAL_ARGS)
 {
     xo_eval_value_t value = xo_eval_value_make(C_STRING, 0, 0);
 
@@ -2752,7 +4038,7 @@ xo_eval_func_substring_before (XO_EVAL_NODE_ARGS)
 }
 
 static xo_eval_value_t
-xo_eval_func_substring_after (XO_EVAL_NODE_ARGS)
+xo_eval_func_substring_after (XO_EVAL_ARGS)
 {
     xo_eval_value_t value = xo_eval_value_make(C_STRING, 0, 0);
 
@@ -2774,7 +4060,7 @@ xo_eval_func_substring_after (XO_EVAL_NODE_ARGS)
 }
 
 static xo_eval_value_t
-xo_eval_func_choose (XO_EVAL_NODE_ARGS)
+xo_eval_func_choose (XO_EVAL_ARGS)
 {
     /* Evaluate the condition (first arg) */
     xo_xparse_node_id_t cond_id = xnp->xn_contents;
@@ -2801,7 +4087,7 @@ xo_eval_func_choose (XO_EVAL_NODE_ARGS)
 }
 
 static xo_eval_value_t
-xo_eval_func_choose2 (XO_EVAL_NODE_ARGS)
+xo_eval_func_choose2 (XO_EVAL_ARGS)
 {
     xo_xparse_node_id_t first_id = xnp->xn_contents;
     xnp = xo_xparse_node(&xfp->xf_xd, first_id);
@@ -2818,40 +4104,29 @@ xo_eval_func_choose2 (XO_EVAL_NODE_ARGS)
 }
 
 static xo_eval_value_t
-xo_eval_func_concat (XO_EVAL_NODE_ARGS)
+xo_eval_func_concat (XO_EVAL_ARGS)
 {
+    for (int i = 0; i < argc; i++)
+	if (argv[i].xev_flags & XEVF_MISSING)
+	    return xo_eval_value_missing();
+
+    if (argc < 2) {
+	xo_eval_fail(xfp, "function 'concat' requires "
+		     "at least 2 arguments, got %d",
+		     argc);
+	xo_eval_value_t false_val = XO_EVAL_VALUE_BOOLEAN_FALSE;
+	return false_val;
+    }
+
     xo_buffer_t buf;
     xo_buf_init(&buf);
 
-    xo_xparse_node_id_t id;
-    int count = 0;
-
-    for (id = xnp->xn_contents; id; id = xnp->xn_next) {
-	xnp = xo_xparse_node(&xfp->xf_xd, id);
-	count += 1;
-
-	xo_eval_value_t value = xo_eval(xop, xfp, framep, "concat-arg",
-					indent + XO_INDENT, id, NULL);
-	if (value.xev_flags & XEVF_MISSING) {
-	    xo_eval_value_free(value);
-	    xo_buf_cleanup(&buf);
-	    return xo_eval_value_missing();
-	}
-	char *str = xo_eval_cast_string(xop, value);
+    for (int i = 0; i < argc; i++) {
+	char *str = xo_eval_cast_string(xop, argv[i]);
 	if (str) {
 	    xo_buf_append(&buf, str, strlen(str));
 	    xo_free(str);
 	}
-	xo_eval_value_free(value);
-    }
-
-    if (count < 2) {
-	xo_failure_filter(xop, "function 'concat' requires "
-			  "at least 2 arguments, got %d",
-			  count);
-	xo_buf_cleanup(&buf);
-	xo_eval_value_t false_val = XO_EVAL_VALUE_BOOLEAN_FALSE;
-	return false_val;
     }
 
     xo_buf_append(&buf, "", 1);	/* null terminator */
@@ -2862,7 +4137,7 @@ xo_eval_func_concat (XO_EVAL_NODE_ARGS)
 }
 
 static xo_eval_value_t
-xo_eval_func_contains (XO_EVAL_NODE_ARGS)
+xo_eval_func_contains (XO_EVAL_ARGS)
 {
     xo_eval_value_t value = XO_EVAL_VALUE_BOOLEAN_FALSE;
 
@@ -2882,26 +4157,24 @@ xo_eval_func_contains (XO_EVAL_NODE_ARGS)
 }
 
 static xo_eval_value_t
-xo_eval_func_number (XO_EVAL_NODE_ARGS)
+xo_eval_func_number (XO_EVAL_ARGS)
 {
     return xo_eval_make_number_from_value(xop, argv[0]);
 }
 
 static xo_eval_value_t
-xo_eval_func_round (XO_EVAL_NODE_ARGS)
+xo_eval_func_round (XO_EVAL_ARGS)
 {
-    xo_float_t fval = xo_eval_cast_float(xop, argv[0]);
-    fval = round(fval);
-    return xo_eval_value_float(0, fval);
+    return xo_eval_round_common(XO_EVAL_PASS, xo_round_half_up);
 }
 
 static xo_eval_value_t
-xo_eval_func_string_length (XO_EVAL_NODE_ARGS)
+xo_eval_func_string_length (XO_EVAL_ARGS)
 {
     char *str = xo_eval_cast_string(xop, argv[0]);
-    xo_float_t len = str ? xo_ustrlen(str) : 0;
+    int64_t len = str ? (int64_t) xo_ustrlen(str) : 0;
     xo_free(str);
-    return xo_eval_value_float(0, len);
+    return xo_eval_value_int64(len);
 }
 
 /*
@@ -2915,7 +4188,7 @@ xo_eval_func_string_length (XO_EVAL_NODE_ARGS)
  * and at close it resolves to "", which is empty.
  */
 static xo_eval_value_t
-xo_eval_func_isempty (XO_EVAL_NODE_ARGS)
+xo_eval_func_isempty (XO_EVAL_ARGS)
 {
     char *str = xo_eval_cast_string(xop, argv[0]);
     xo_eval_value_t value = XO_EVAL_VALUE_BOOLEAN_FALSE;
@@ -2929,24 +4202,24 @@ xo_eval_func_isempty (XO_EVAL_NODE_ARGS)
  * sum(a, b, ...) - sum all arguments converted to numbers.
  */
 static xo_eval_value_t
-xo_eval_func_sum (XO_EVAL_NODE_ARGS)
+xo_eval_func_sum (XO_EVAL_ARGS)
 {
-    xo_float_t total = 0;
-
-    for (xo_xparse_node_id_t id = xnp->xn_contents; id; id = xnp->xn_next) {
-	xnp = xo_xparse_node(&xfp->xf_xd, id);
-
-	xo_eval_value_t value = xo_eval(xop, xfp, framep, "sum-arg",
-					indent + XO_INDENT, id, NULL);
-	if (value.xev_flags & XEVF_MISSING) {
-	    xo_eval_value_free(value);
+    for (int i = 0; i < argc; i++)
+	if (argv[i].xev_flags & XEVF_MISSING)
 	    return xo_eval_value_missing();
-	}
-	total += xo_eval_cast_float(xop, value);
-	xo_eval_value_free(value);
+
+    /* Same rules as '+': integers as long as they fit, and NaN wins */
+    xo_eval_value_t total = xo_eval_value_int64(0);
+
+    for (int i = 0; i < argc; i++) {
+	xo_eval_value_t value = xo_eval_to_number(xop, argv[i]);
+	if (value.xev_type == C_NAN)
+	    return value;
+
+	total = xo_eval_calc_plus(xop, xfp, total, value);
     }
 
-    return xo_eval_value_float(0, total);
+    return total;
 }
 
 /*
@@ -2954,7 +4227,7 @@ xo_eval_func_sum (XO_EVAL_NODE_ARGS)
  * in from with the corresponding char in to; delete chars with no mapping.
  */
 static xo_eval_value_t
-xo_eval_func_translate (XO_EVAL_NODE_ARGS)
+xo_eval_func_translate (XO_EVAL_ARGS)
 {
     char *str = xo_eval_cast_string(xop, argv[0]);
     char *from = xo_eval_cast_string(xop, argv[1]);
@@ -3026,38 +4299,25 @@ xo_eval_func_translate (XO_EVAL_NODE_ARGS)
  * Don't call it a regex, though I don't know what it is...
  */
 static xo_eval_value_t
-xo_eval_func_rematch (XO_EVAL_NODE_ARGS)
+xo_eval_func_rematch (XO_EVAL_ARGS)
 {
-    int fn_argc = xo_eval_argument_count(XO_EVAL_NODE_PASS);
-    if (fn_argc < 2 || fn_argc > 3) {
-	xo_failure_filter(xop, "rematch() requires 2 or 3 arguments, got %d",
-			  fn_argc);
+    if (argc < 2 || argc > 3) {
+	xo_eval_fail(xfp, "rematch() requires 2 or 3 arguments, got %d",
+		     argc);
 	return xo_eval_value_invalid();
     }
 
-    xo_eval_value_t fn_argv[3];
-    xo_eval_arguments(XO_EVAL_NODE_PASS, 3, fn_argv);
-
     /* Defer if arguments aren't resolved yet (field not yet seen) */
-    if ((fn_argv[0].xev_flags & XEVF_MISSING)
-  	    || (fn_argv[1].xev_flags & XEVF_MISSING)
-  	    || (fn_argv[2].xev_flags & XEVF_MISSING)) {
-	xo_eval_arguments_free(xop, xfp, framep, xnp, indent, 3, fn_argv);
-	return xo_eval_value_missing();
-    }
+    for (int i = 0; i < argc; i++)
+	if (argv[i].xev_flags & XEVF_MISSING)
+	    return xo_eval_value_missing();
 
-    char *pattern = xo_eval_cast_string(xop, fn_argv[0]);
-    char *input   = xo_eval_cast_string(xop, fn_argv[1]);
+    char *pattern = xo_eval_cast_string(xop, argv[0]);
+    char *input   = xo_eval_cast_string(xop, argv[1]);
 
-    /* Third arg is optional; absent slot is XEVF_INVALID - treat as "" */
-    char *opts;
-
-    if (fn_argc >= 3)
-	opts = xo_eval_cast_string(xop, fn_argv[2]);
-    else
-	opts = xo_strdup("");
-
-    xo_eval_arguments_free(xop, xfp, framep, xnp, indent, 3, fn_argv);
+    /* Third arg is optional; absent means "" */
+    char *opts = (argc >= 3) ? xo_eval_cast_string(xop, argv[2])
+	: xo_strdup("");
 
     /* want_group: -1 = boolean; 0 = 's' (pmatch[0]); 1+ = 'm'/'mN' */
     int rflags = REG_EXTENDED;
@@ -3085,7 +4345,7 @@ xo_eval_func_rematch (XO_EVAL_NODE_ARGS)
 	    break;
 
 	default:
-	    xo_failure_filter(xop, "unknown rematch() flag: '%c'", *op);
+	    xo_eval_fail(xfp, "unknown rematch() flag: '%c'", *op);
 	}
     }
 
@@ -3107,7 +4367,7 @@ xo_eval_func_rematch (XO_EVAL_NODE_ARGS)
     int rc = regcomp(&re, pattern, rflags);
     if (rc != 0) {
 	regerror(rc, &re, errbuf, sizeof(errbuf));
-	xo_failure_filter(xop, "rematch: bad pattern '%s': %s", pattern, errbuf);
+	xo_eval_fail(xfp, "rematch: bad pattern '%s': %s", pattern, errbuf);
 	goto rematch_done;
     }
 
@@ -3181,39 +4441,43 @@ typedef uint32_t xo_eval_func_flags_t;
  */
 
 typedef struct xo_eval_func_map_s {
-    xo_eval_node_fn_t xfm_func;	/* The function that implements the logic */
+    xo_eval_fn_t xfm_func;	/* The function that implements the logic */
     const char *xfm_name;	/* Name (e.g. "plus") */
     xo_eval_func_flags_t xfm_flags; /* Flags (XEFF_*) */
     int xfm_nargs;		/* Required arg count; -1 means don't checks */
+    int xfm_min_args;		/* Minimum argc, checked at compile time
+				   when xfm_nargs == -1; 0 means not
+				   checked here, left to the function's
+				   own runtime check */
 } xo_eval_func_map_t;
 
 xo_eval_func_map_t xo_eval_functions[] = {
-    { xo_eval_func_boolean, "boolean", 0, 1 },
-    { xo_eval_func_ceiling, "ceiling", 0, 1 },
-    { xo_eval_func_choose, "choose", XEFF_NO_EVAL, 3 },
-    { xo_eval_func_choose2, "choose2", XEFF_NO_EVAL, 2 },
-    { xo_eval_func_concat, "concat", XEFF_NO_EVAL, -1 },
-    { xo_eval_func_contains, "contains", 0, 2 },
-    { xo_eval_func_ends_with, "ends-with", 0, 2 },
-    { xo_eval_func_false, "false", 0, 0 },
-    { xo_eval_func_floor, "floor", 0, 1 },
-    { xo_eval_func_isempty, "isempty", 0, 1 },
-    { xo_eval_func_normalize_space, "normalize-space", 0, 1 },
-    { xo_eval_func_not, "not", 0, 1 },
-    { xo_eval_func_number, "number", 0, 1 },
-    { xo_eval_func_rematch, "rematch", XEFF_NO_EVAL, -1 },
-    { xo_eval_func_round, "round", 0, 1 },
-    { xo_eval_func_starts_with, "starts-with", 0, 2 },
-    { xo_eval_func_string, "string", 0, 1 },
-    { xo_eval_func_string_length, "string-length", 0, 1 },
-    { xo_eval_func_substring, "substring", XEFF_NO_EVAL, -1 },
-    { xo_eval_func_substring_after, "substring-after", 0, 2 },
-    { xo_eval_func_substring_before, "substring-before", 0, 2 },
-    { xo_eval_func_sum, "sum", XEFF_NO_EVAL, -1 },
-    { xo_eval_func_translate, "translate", 0, 3 },
-    { xo_eval_func_true, "true", 0, 0 },
+    { xo_eval_func_boolean, "boolean", 0, 1, 0 },
+    { xo_eval_func_ceiling, "ceiling", 0, 1, 0 },
+    { xo_eval_func_choose, "choose", XEFF_NO_EVAL, 3, 0 },
+    { xo_eval_func_choose2, "choose2", XEFF_NO_EVAL, 2, 0 },
+    { xo_eval_func_concat, "concat", 0, -1, 2 },
+    { xo_eval_func_contains, "contains", 0, 2, 0 },
+    { xo_eval_func_ends_with, "ends-with", 0, 2, 0 },
+    { xo_eval_func_false, "false", 0, 0, 0 },
+    { xo_eval_func_floor, "floor", 0, 1, 0 },
+    { xo_eval_func_isempty, "isempty", 0, 1, 0 },
+    { xo_eval_func_normalize_space, "normalize-space", 0, 1, 0 },
+    { xo_eval_func_not, "not", 0, 1, 0 },
+    { xo_eval_func_number, "number", 0, 1, 0 },
+    { xo_eval_func_rematch, "rematch", 0, -1, 2 },
+    { xo_eval_func_round, "round", 0, 1, 0 },
+    { xo_eval_func_starts_with, "starts-with", 0, 2, 0 },
+    { xo_eval_func_string, "string", 0, 1, 0 },
+    { xo_eval_func_string_length, "string-length", 0, 1, 0 },
+    { xo_eval_func_substring, "substring", 0, -1, 2 },
+    { xo_eval_func_substring_after, "substring-after", 0, 2, 0 },
+    { xo_eval_func_substring_before, "substring-before", 0, 2, 0 },
+    { xo_eval_func_sum, "sum", 0, -1, 1 },
+    { xo_eval_func_translate, "translate", 0, 3, 0 },
+    { xo_eval_func_true, "true", 0, 0, 0 },
 
-    { NULL, NULL, 0, 0 }
+    { NULL, NULL, 0, 0, 0 }
 };
 
 static xo_eval_func_map_t *
@@ -3227,26 +4491,26 @@ xo_eval_find_func (xo_eval_func_map_t *map, const char *name)
 }
 
 static xo_eval_value_t
-xo_eval_function (XO_EVAL_NODE_ARGS)
+xo_eval_function (XO_EVAL_ARGS)
 {
     const char *str = xo_xparse_str(&xfp->xf_xd, xnp->xn_str);
     if (str == NULL) {
-	xo_failure_filter(xop, "unknown function in filter expression");
+	xo_eval_fail(xfp, "unknown function in filter expression");
 	return xo_eval_value_invalid();
     }
 
     xo_eval_func_map_t *entry = xo_eval_find_func(xo_eval_functions, str);
     if (entry == NULL) {
-	xo_failure_filter(xop, "unknown function in filter expression: '%s'",
-			  str);
+	xo_eval_fail(xfp, "unknown function in filter expression: '%s'",
+		     str);
 	return xo_eval_value_invalid();
     }
 
-    int fn_argc = xo_eval_argument_count(XO_EVAL_NODE_PASS);
+    int fn_argc = xo_eval_argument_count(XO_EVAL_PASS);
 
     if (entry->xfm_nargs >= 0 && fn_argc != entry->xfm_nargs) {
-	xo_failure_filter(xop, "function '%s' requires %d argument(s), got %d",
-			  str, entry->xfm_nargs, fn_argc);
+	xo_eval_fail(xfp, "function '%s' requires %d argument(s), got %d",
+		     str, entry->xfm_nargs, fn_argc);
 	xo_eval_value_t false_val = XO_EVAL_VALUE_BOOLEAN_FALSE;
 	return false_val;
     }
@@ -3265,7 +4529,7 @@ xo_eval_function (XO_EVAL_NODE_ARGS)
 	    return xo_eval_value_invalid();
 	}
 
-	xo_eval_arguments(XO_EVAL_NODE_PASS, fn_argc, fn_argv);
+	xo_eval_arguments(XO_EVAL_PASS, fn_argc, fn_argv);
 
 	if (entry->xfm_nargs > 0) {
 	    for (int i = 0; i < fn_argc; i++) {
@@ -3297,18 +4561,79 @@ xo_eval_function (XO_EVAL_NODE_ARGS)
     return value;
 }
 
+/*
+ * Runtime op for a function call resolved at compile time by a
+ * dynamic-load backend's xfdo_find_function hook (e.g. libslax's
+ * "slax:" extension functions; see xo_eval_compile_function() below).
+ * Re-derives the function's name from the AST node and re-calls the
+ * hook here, rather than caching the resolved xo_eval_ext_fn_t in
+ * xo_eval_instr_t: these calls are rare next to the built-in XPath
+ * functions, so paying for the lookup again is cheaper than widening
+ * every instruction to carry a backend-specific pointer.
+ */
+static xo_eval_value_t
+xo_eval_func_external (XO_EVAL_ARGS)
+{
+    xo_filter_data_t *dp = xfp->xf_data;
+    xo_filter_data_ops_t *ops = xfp->xf_ops;
+
+    if (ops == NULL || ops->xfdo_find_function == NULL)
+	return xo_eval_value_invalid();
+
+    const char *str = xo_xparse_str(&xfp->xf_xd, xnp->xn_str);
+    if (str == NULL)
+	return xo_eval_value_invalid();
+
+    int nargs, min_args;
+    xo_eval_ext_fn_t fn = ops->xfdo_find_function(dp, str, &nargs, &min_args);
+    if (fn == NULL) {
+	xo_eval_fail(xfp, "unknown function in filter expression: '%s'", str);
+	return xo_eval_value_invalid();
+    }
+
+    const char **args = alloca(argc * sizeof(*args));
+    for (int i = 0; i < argc; i++)
+	args[i] = xo_eval_cast_string(xop, argv[i]);
+
+    xo_eval_ext_value_t rv = fn(dp, argc, args);
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
+    for (int i = 0; i < argc; i++)
+	xo_free((char *) args[i]);
+#pragma GCC diagnostic pop
+
+    switch (rv.xee_type) {
+    case XO_EVAL_EXT_NUMBER:
+	return xo_eval_value_float(0, rv.xee_num);
+
+    case XO_EVAL_EXT_BOOLEAN:
+	return rv.xee_bool ? xo_eval_value_boolean_true()
+			    : xo_eval_value_boolean_false();
+
+    case XO_EVAL_EXT_MISSING:
+	return xo_eval_value_missing();
+
+    case XO_EVAL_EXT_STRING:
+    default:
+	return xo_eval_value_string(C_DSTRING, 0,
+				     strdup(rv.xee_str ? rv.xee_str : ""));
+    }
+}
+
 static xo_eval_value_t
 xo_eval (xo_handle_t *xop, xo_filter_t *xfp, xo_tframe_t *framep,
 	 const char *pname, int indent,
-	 xo_xparse_node_id_t id, xo_eval_op_fn_t op_fn)
+	 xo_xparse_node_id_t id, xo_eval_fn_t op_fn)
 {
     xo_eval_value_t value = xo_eval_value_invalid();
     xo_eval_value_t last = XO_EVAL_VALUE_ZERO;
     int first = 1;
 
     xo_xparse_node_t *xnp;
-    xo_eval_node_fn_t node_fn = NULL;
-    xo_eval_op_fn_t nested_op_fn = NULL;
+    xo_eval_fn_t node_fn = NULL;
+    xo_eval_fn_t nested_op_fn = NULL;
+    xo_eval_fn_t unary_op_fn = NULL;
 
     for (; id; id = xnp->xn_next) {
 	xo_xparse_dump_one_node(&xfp->xf_xd, id, indent, "eval (loop): ");
@@ -3318,6 +4643,7 @@ xo_eval (xo_handle_t *xop, xo_filter_t *xfp, xo_tframe_t *framep,
 
 	node_fn = NULL;
 	nested_op_fn = NULL;
+	unary_op_fn = NULL;
 
 	switch (xnp->xn_type) {
 
@@ -3390,7 +4716,7 @@ xo_eval (xo_handle_t *xop, xo_filter_t *xfp, xo_tframe_t *framep,
 	    break;
 
 	case C_NOT:
-	    node_fn = xo_eval_not;
+	    unary_op_fn = xo_eval_not;
 	    break;
 
 	case L_NOTEQUALS:
@@ -3413,6 +4739,10 @@ xo_eval (xo_handle_t *xop, xo_filter_t *xfp, xo_tframe_t *framep,
 	    node_fn = xo_eval_quoted;
 	    break;
 
+	case T_VAR:
+	    node_fn = xo_eval_variable;
+	    break;
+
 	case C_EXPR:
 	    if (xnp->xn_contents)
 		value = xo_eval(xop, xfp, framep, pname, indent + XO_INDENT,
@@ -3420,8 +4750,8 @@ xo_eval (xo_handle_t *xop, xo_filter_t *xfp, xo_tframe_t *framep,
 	    break;
 
 	default:		/* For now; should be XEVF_UNSUPPORTED */
-	    xo_failure_filter(xop, "filter: unhandle type: '%s'",
-			      xo_xparse_fancy_token_name(xnp->xn_type));
+	    xo_eval_fail(xfp, "filter: unhandle type: '%s'",
+			 xo_xparse_fancy_token_name(xnp->xn_type));
 
 #if 1
 	    /*
@@ -3439,6 +4769,14 @@ xo_eval (xo_handle_t *xop, xo_filter_t *xfp, xo_tframe_t *framep,
 	else if (nested_op_fn)
 	    value = xo_eval(xop, xfp, framep, cname, indent + XO_INDENT,
 			    xnp->xn_contents, nested_op_fn);
+	else if (unary_op_fn) {
+	    xo_eval_value_t operand = xo_eval(xop, xfp, framep, cname,
+					      indent + XO_INDENT,
+					      xnp->xn_contents, NULL);
+	    value = unary_op_fn(xop, xfp, framep, xnp, indent + XO_INDENT,
+				1, &operand);
+	    xo_eval_value_free(operand);
+	}
 
 	/*
 	 * Operators and not() hand back computed values, even when
@@ -3466,8 +4804,9 @@ xo_eval (xo_handle_t *xop, xo_filter_t *xfp, xo_tframe_t *framep,
 		value = xo_eval_value_missing();
 
 	    } else {
-		xo_eval_value_t result = op_fn(xop, xfp, framep, xnp, pname,
-					       indent + XO_INDENT, last, value);
+		xo_eval_value_t op_argv[2] = { last, value };
+		xo_eval_value_t result = op_fn(xop, xfp, framep, xnp,
+					       indent + XO_INDENT, 2, op_argv);
 		xo_eval_value_free(last);
 		xo_eval_value_free(value);
 		value = result;
@@ -3512,6 +4851,695 @@ xo_eval (xo_handle_t *xop, xo_filter_t *xfp, xo_tframe_t *framep,
  * means we don't have to think about the case where multiple "x"s and
  * "y"s can appear and the predicate is true if any "x" matches any "y".
  */
+
+/*
+ * A compiled XPath predicate: a flat, stack-machine instruction list
+ * produced once by xo_eval_compile() and then replayed cheaply by the
+ * runner for every node under test, instead of re-walking the AST
+ * every time.
+ */
+/* Flags for xei_flags */
+#define XEIF_CHECK_MISSING	(1<<0) /* Return MISSING instead of calling xei_fn if any arg is missing */
+
+typedef struct xo_eval_instr_s {
+	xo_eval_fn_t		xei_fn;		/* Operation to perform */
+	xo_xparse_node_id_t	xei_node;	/* Source AST node */
+	uint8_t			xei_argc;	/* Number of values this op consumes */
+	uint8_t			xei_flags;	/* XEIF_* flags */
+	uint16_t		xei_jump;	/* Short-circuit target; 0 means none */
+} xo_eval_instr_t;
+
+typedef struct xo_eval_prog_s {
+	xo_eval_instr_t	*xep_instr;	/* Flat instruction array */
+	uint32_t	 xep_count;	/* Number of instructions emitted */
+	uint32_t	 xep_max;	/* Allocated size of xep_instr */
+} xo_eval_prog_t;
+
+/*
+ * Forward decls.  All three are called from xo_filter_pred_prog() and
+ * xo_filter_pred_eval() below, and are left non-static since they also
+ * serve non-libxo backends (e.g. libpin) that compile their own select=/
+ * test= expressions against this same eval engine.  dp/ops are the same
+ * data-context pair xo_eval_fail() reports evaluation-time errors
+ * through; passing NULL for both is fine and just means compile errors
+ * go unreported, same as before this pair of parameters existed.
+ */
+xo_eval_prog_t *
+xo_eval_compile (xo_xparse_data_t *xdp, xo_xparse_node_id_t root,
+		  xo_filter_data_t *dp, xo_filter_data_ops_t *ops);
+
+void
+xo_eval_prog_destroy (xo_eval_prog_t *prog);
+
+xo_eval_value_t
+xo_eval_prog_run (xo_handle_t *xop, xo_filter_t *xfp, xo_tframe_t *framep,
+		   xo_xparse_data_t *xdp, xo_eval_prog_t *prog, int indent);
+
+/*
+ * Append one instruction to 'prog', growing the array as needed.
+ * Returns the new instruction's index, or -1 on allocation failure.
+ */
+static int
+xo_eval_prog_emit (xo_eval_prog_t *prog, xo_eval_fn_t fn,
+		    xo_xparse_node_id_t node, int argc, int flags)
+{
+    if (prog->xep_count >= prog->xep_max) {
+	uint32_t new_max = prog->xep_max ? prog->xep_max * 2 : 16;
+	xo_eval_instr_t *new_instr
+	    = xo_realloc(prog->xep_instr, new_max * sizeof(*new_instr));
+	if (new_instr == NULL)
+	    return -1;
+
+	prog->xep_instr = new_instr;
+	prog->xep_max = new_max;
+    }
+
+    xo_eval_instr_t *xip = &prog->xep_instr[prog->xep_count];
+
+    xip->xei_fn = fn;
+    xip->xei_node = node;
+    xip->xei_argc = argc;
+    xip->xei_flags = flags;
+    xip->xei_jump = 0;
+
+    return prog->xep_count++;
+}
+
+/*
+ * Count the nodes in an xn_next-linked operand chain.  Used to size
+ * the backpatch array for short-circuiting K_AND/K_OR chains before
+ * we know how many combine instructions the chain will emit.
+ */
+static int
+xo_eval_count_chain (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
+{
+    int count = 0;
+
+    for ( ; id; ) {
+	xo_xparse_node_t *xnp = xo_xparse_node(xdp, id);
+
+	count += 1;
+	id = xnp->xn_next;
+    }
+
+    return count;
+}
+
+static int
+xo_eval_compile_node (xo_eval_prog_t *prog, xo_xparse_data_t *xdp,
+		       xo_xparse_node_id_t id,
+		       xo_filter_data_t *dp, xo_filter_data_ops_t *ops);
+
+/*
+ * Compile an xn_next-linked chain of operands under a binary
+ * operator, emitting 'combine_fn' between each pair.  For K_AND/K_OR
+ * (shortcircuit is TRUE), every combine instruction's xei_jump is
+ * backpatched to the instruction past the end of the chain, so the
+ * runner can bail out of the rest of the chain the moment a combine
+ * sets XEVF_FINAL, matching xo_eval()'s own short-circuit behavior.
+ */
+static int
+xo_eval_compile_chain (xo_eval_prog_t *prog, xo_xparse_data_t *xdp,
+			xo_xparse_node_id_t id, xo_eval_fn_t combine_fn,
+			int shortcircuit,
+			xo_filter_data_t *dp, xo_filter_data_ops_t *ops)
+{
+    int nops = xo_eval_count_chain(xdp, id);
+    if (nops < 2)
+	return -1;
+
+    int ncombines = nops - 1;
+    uint32_t *combine_idx = NULL;
+
+    if (shortcircuit) {
+	combine_idx = xo_realloc(NULL, ncombines * sizeof(*combine_idx));
+	if (combine_idx == NULL)
+	    return -1;
+    }
+
+    int first = 1;
+    int ci = 0;
+
+    for ( ; id; ) {
+	xo_xparse_node_t *xnp = xo_xparse_node(xdp, id);
+
+	if (xo_eval_compile_node(prog, xdp, id, dp, ops) < 0) {
+	    if (combine_idx)
+		xo_free(combine_idx);
+	    return -1;
+	}
+
+	if (first) {
+	    first = 0;
+
+	} else {
+	    /*
+	     * Binary combine ops always require both operands present;
+	     * mirrors the missing-check xo_eval()'s dispatch loop does
+	     * before calling op_fn (it never reaches into xo_eval_compare()
+	     * or the calc ops with a missing operand).
+	     */
+	    int idx = xo_eval_prog_emit(prog, combine_fn, id, 2,
+					 XEIF_CHECK_MISSING);
+	    if (idx < 0) {
+		if (combine_idx)
+		    xo_free(combine_idx);
+		return -1;
+	    }
+
+	    if (shortcircuit)
+		combine_idx[ci++] = idx;
+	}
+
+	id = xnp->xn_next;
+    }
+
+    if (shortcircuit) {
+	uint16_t end_pc = prog->xep_count;
+
+	for (int i = 0; i < ncombines; i++)
+	    prog->xep_instr[combine_idx[i]].xei_jump = end_pc;
+
+	xo_free(combine_idx);
+    }
+
+    return 0;
+}
+
+/*
+ * Compile the xn_next-linked argument list under a function-call node,
+ * emitting each argument's instructions in order.  Shared by the
+ * built-in and xfdo_find_function fallback paths in
+ * xo_eval_compile_function() below.  Returns the argument count, or -1
+ * on a compile failure (already reported by the recursive call).
+ */
+static int
+xo_eval_compile_function_args (xo_eval_prog_t *prog, xo_xparse_data_t *xdp,
+				xo_xparse_node_t *xnp,
+				xo_filter_data_t *dp, xo_filter_data_ops_t *ops)
+{
+    int argc = 0;
+    xo_xparse_node_id_t aid = xnp->xn_contents;
+
+    for ( ; aid; ) {
+	xo_xparse_node_t *anp = xo_xparse_node(xdp, aid);
+
+	if (xo_eval_compile_node(prog, xdp, aid, dp, ops) < 0)
+	    return -1;
+
+	argc += 1;
+	aid = anp->xn_next;
+    }
+
+    return argc;
+}
+
+/*
+ * Reject wrong-arity calls at compile time, matching
+ * xo_eval_function()'s own runtime "nargs >= 0" check.  Without this, a
+ * call like not() or contains(name) would silently compile and run
+ * with the wrong argc.  Shared by the built-in and xfdo_find_function
+ * fallback paths, which pass xfm_nargs/xfm_min_args and the hook's
+ * nargs/min_args outputs respectively -- same -1/min_args convention
+ * either way.
+ */
+static int
+xo_eval_compile_check_arity (xo_filter_data_t *dp, xo_filter_data_ops_t *ops,
+			      xo_xparse_data_t *xdp, xo_xparse_node_id_t id,
+			      const char *str, int argc,
+			      int nargs, int min_args)
+{
+    if (nargs >= 0 && argc != nargs) {
+	xo_eval_compile_fail(dp, ops, xdp, id,
+			      "function '%s' requires %d argument(s), got %d",
+			      str, nargs, argc);
+	return -1;
+    }
+
+    /*
+     * Variable-arity functions (nargs == -1) normally defer their own
+     * arity checking to runtime. concat()/rematch()/substring()/sum()
+     * each have a compile-time-knowable minimum below which no amount
+     * of data will ever make the call valid, so they set min_args to
+     * catch that here.
+     */
+    if (nargs < 0 && min_args > 0 && argc < min_args) {
+	xo_eval_compile_fail(dp, ops, xdp, id,
+			      "function '%s' requires at least %d "
+			      "arguments, got %d",
+			      str, min_args, argc);
+	return -1;
+    }
+
+    return 0;
+}
+
+/*
+ * Compile a function call.  XEFF_NO_EVAL functions (choose/choose2)
+ * manage their own lazy argument evaluation and still depend on the
+ * old recursive xo_eval(), so they compile to a self-managing leaf
+ * instruction; every other function compiles each argument first and
+ * then emits one instruction with a static argc, matching the
+ * argv[]-based convention the rest of the operations already use.
+ *
+ * A name that matches no built-in falls back to ops->xfdo_find_function,
+ * giving a dynamic-load backend (e.g. libslax's "slax:" namespace
+ * functions) a chance to resolve it; see that hook's doc comment in
+ * xo_filter.h and xo_eval_func_external()'s above.  Only the arity
+ * (returned by the hook itself) is used at compile time -- the
+ * resolved xo_eval_ext_fn_t is not cached and is looked up again at
+ * runtime.
+ */
+static int
+xo_eval_compile_function (xo_eval_prog_t *prog, xo_xparse_data_t *xdp,
+			   xo_xparse_node_id_t id, xo_xparse_node_t *xnp,
+			   xo_filter_data_t *dp, xo_filter_data_ops_t *ops)
+{
+    const char *str = xo_xparse_str(xdp, xnp->xn_str);
+    if (str == NULL) {
+	xo_eval_compile_fail(dp, ops, xdp, id,
+			      "unknown function in filter expression");
+	return -1;
+    }
+
+    xo_eval_func_map_t *entry = xo_eval_find_func(xo_eval_functions, str);
+    if (entry != NULL) {
+	if (entry->xfm_flags & XEFF_NO_EVAL)
+	    return xo_eval_prog_emit(prog, entry->xfm_func, id, 0, 0) >= 0
+		? 0 : -1;
+
+	int argc = xo_eval_compile_function_args(prog, xdp, xnp, dp, ops);
+	if (argc < 0)
+	    return -1;
+
+	if (xo_eval_compile_check_arity(dp, ops, xdp, id, str, argc,
+					 entry->xfm_nargs,
+					 entry->xfm_min_args) < 0)
+	    return -1;
+
+	/*
+	 * Fixed-arity functions get the same missing-check short-circuit
+	 * as binary combine ops, matching xo_eval_function()'s own
+	 * "entry->xfm_nargs > 0" check.  Variable-arity functions
+	 * (xfm_nargs == -1, e.g. concat()/substring()) check
+	 * XEVF_MISSING on their own argv where it matters, since not
+	 * every argument position is required.
+	 */
+	int flags = (entry->xfm_nargs >= 0) ? XEIF_CHECK_MISSING : 0;
+
+	return xo_eval_prog_emit(prog, entry->xfm_func, id, argc, flags)
+	    >= 0 ? 0 : -1;
+    }
+
+    if (ops != NULL && ops->xfdo_find_function != NULL) {
+	int nargs, min_args;
+	xo_eval_ext_fn_t fn = ops->xfdo_find_function(dp, str,
+						       &nargs, &min_args);
+	if (fn != NULL) {
+	    int argc = xo_eval_compile_function_args(prog, xdp, xnp, dp, ops);
+	    if (argc < 0)
+		return -1;
+
+	    if (xo_eval_compile_check_arity(dp, ops, xdp, id, str, argc,
+					     nargs, min_args) < 0)
+		return -1;
+
+	    int flags = (nargs >= 0) ? XEIF_CHECK_MISSING : 0;
+
+	    return xo_eval_prog_emit(prog, xo_eval_func_external, id,
+				      argc, flags) >= 0 ? 0 : -1;
+	}
+    }
+
+    xo_eval_compile_fail(dp, ops, xdp, id,
+			  "unknown function in filter expression: '%s'",
+			  str);
+    return -1;
+}
+
+/*
+ * Compile a single expression node, mirroring the dispatch switch in
+ * xo_eval().  Unlike xo_eval(), this never combines across an
+ * xn_next chain itself; chains are handled explicitly by the
+ * operators (and function arguments) that walk them.
+ */
+static int
+xo_eval_compile_node (xo_eval_prog_t *prog, xo_xparse_data_t *xdp,
+		       xo_xparse_node_id_t id,
+		       xo_filter_data_t *dp, xo_filter_data_ops_t *ops)
+{
+    xo_xparse_node_t *xnp = xo_xparse_node(xdp, id);
+
+    switch (xnp->xn_type) {
+
+    case C_ATTRIBUTE:
+	return xo_eval_prog_emit(prog, xo_eval_attribute, id, 0, 0) >= 0
+	    ? 0 : -1;
+
+    case C_PATH:
+	return xo_eval_prog_emit(prog, xo_eval_path, id, 0, 0) >= 0
+	    ? 0 : -1;
+
+    case L_DOT:
+	return xo_eval_prog_emit(prog, xo_eval_dot, id, 0, 0) >= 0
+	    ? 0 : -1;
+
+    case C_INDEX:
+	return xo_eval_prog_emit(prog, xo_eval_position, id, 0, 0) >= 0
+	    ? 0 : -1;
+
+    case T_NUMBER:
+	return xo_eval_prog_emit(prog, xo_eval_number, id, 0, 0) >= 0
+	    ? 0 : -1;
+
+    case T_QUOTED:
+	return xo_eval_prog_emit(prog, xo_eval_quoted, id, 0, 0) >= 0
+	    ? 0 : -1;
+
+    case T_VAR:
+	return xo_eval_prog_emit(prog, xo_eval_variable, id, 0, 0) >= 0
+	    ? 0 : -1;
+
+    case C_NOT:
+	if (xo_eval_compile_node(prog, xdp, xnp->xn_contents, dp, ops) < 0)
+	    return -1;
+	/* xo_eval_not() already returns MISSING on its own if argv[0] is */
+	return xo_eval_prog_emit(prog, xo_eval_not, id, 1, 0) >= 0
+	    ? 0 : -1;
+
+    case K_AND:
+	return xo_eval_compile_chain(prog, xdp, xnp->xn_contents,
+				      xo_eval_op_and, TRUE, dp, ops);
+
+    case K_OR:
+	return xo_eval_compile_chain(prog, xdp, xnp->xn_contents,
+				      xo_eval_op_or, TRUE, dp, ops);
+
+    case L_EQUALS:
+	return xo_eval_compile_chain(prog, xdp, xnp->xn_contents,
+				      xo_eval_op_equals, FALSE, dp, ops);
+
+    case L_NOTEQUALS:
+	return xo_eval_compile_chain(prog, xdp, xnp->xn_contents,
+				      xo_eval_op_notequals, FALSE, dp, ops);
+
+    case L_GRTR:
+	return xo_eval_compile_chain(prog, xdp, xnp->xn_contents,
+				      xo_eval_op_gt, FALSE, dp, ops);
+
+    case L_GRTREQ:
+	return xo_eval_compile_chain(prog, xdp, xnp->xn_contents,
+				      xo_eval_op_ge, FALSE, dp, ops);
+
+    case L_LESS:
+	return xo_eval_compile_chain(prog, xdp, xnp->xn_contents,
+				      xo_eval_op_lt, FALSE, dp, ops);
+
+    case L_LESSEQ:
+	return xo_eval_compile_chain(prog, xdp, xnp->xn_contents,
+				      xo_eval_op_le, FALSE, dp, ops);
+
+    case L_PLUS:
+	return xo_eval_compile_chain(prog, xdp, xnp->xn_contents,
+				      xo_eval_op_plus, FALSE, dp, ops);
+
+    case C_UNI_MINUS:
+	/* Unary minus: "-4", not a binary "a - b" (that's L_MINUS) */
+	if (xo_eval_compile_node(prog, xdp, xnp->xn_contents, dp, ops) < 0)
+	    return -1;
+	return xo_eval_prog_emit(prog, xo_eval_op_negate, id, 1,
+				  XEIF_CHECK_MISSING) >= 0 ? 0 : -1;
+
+    case L_MINUS:
+	return xo_eval_compile_chain(prog, xdp, xnp->xn_contents,
+				      xo_eval_op_minus, FALSE, dp, ops);
+
+    case L_STAR:
+	return xo_eval_compile_chain(prog, xdp, xnp->xn_contents,
+				      xo_eval_op_mul, FALSE, dp, ops);
+
+    case K_DIV:
+	return xo_eval_compile_chain(prog, xdp, xnp->xn_contents,
+				      xo_eval_op_div, FALSE, dp, ops);
+
+    case K_MOD:
+	return xo_eval_compile_chain(prog, xdp, xnp->xn_contents,
+				      xo_eval_op_mod, FALSE, dp, ops);
+
+    case T_FUNCTION_NAME:
+	return xo_eval_compile_function(prog, xdp, id, xnp, dp, ops);
+
+    case C_EXPR:
+	if (xnp->xn_contents)
+	    return xo_eval_compile_node(prog, xdp, xnp->xn_contents, dp, ops);
+	return -1;
+
+    default:
+	if (xnp->xn_contents)
+	    return xo_eval_compile_node(prog, xdp, xnp->xn_contents, dp, ops);
+	return -1;
+    }
+}
+
+void
+xo_eval_prog_destroy (xo_eval_prog_t *prog)
+{
+    if (prog == NULL)
+	return;
+
+    if (prog->xep_instr)
+	xo_free(prog->xep_instr);
+
+    xo_free(prog);
+}
+
+/*
+ * Compile the XPath expression rooted at 'root' into a flat program
+ * that can be replayed by the runner without re-walking the AST.
+ * Returns NULL on any compile failure (unknown function, wrong arity,
+ * unsupported node type); any failure specific enough to explain is
+ * reported through (dp, ops) as it's found, same as xo_eval_fail()
+ * does for evaluation-time errors.  Pass NULL for both if the caller
+ * has no data context to report through (compile still fails the same
+ * way; it's just silent).
+ */
+xo_eval_prog_t *
+xo_eval_compile (xo_xparse_data_t *xdp, xo_xparse_node_id_t root,
+		  xo_filter_data_t *dp, xo_filter_data_ops_t *ops)
+{
+    xo_eval_prog_t *prog = xo_realloc(NULL, sizeof(*prog));
+    if (prog == NULL)
+	return NULL;
+
+    prog->xep_instr = NULL;
+    prog->xep_count = 0;
+    prog->xep_max = 0;
+
+    if (xo_eval_compile_node(prog, xdp, root, dp, ops) < 0) {
+	xo_eval_prog_destroy(prog);
+	return NULL;
+    }
+
+    return prog;
+}
+
+/*
+ * Replay a program produced by xo_eval_compile() without re-walking the
+ * AST: a flat loop over an explicit value stack, sized once since each
+ * instruction's net effect on depth is "push 1, pop xei_argc", so the
+ * stack can never grow past the instruction count.
+ *
+ * Two things need to match xo_eval()'s recursive dispatch exactly, since
+ * that's the behavior this replaces:
+ *
+ * - A combine instruction whose result comes back with XEVF_FINAL set
+ *   (AND/OR short-circuiting) jumps to xei_jump, skipping the rest of
+ *   the chain, instead of folding in the remaining operands.
+ * - An instruction with XEIF_CHECK_MISSING set never runs xei_fn at all if
+ *   any of its args are missing; it produces MISSING directly, the same
+ *   way xo_eval()'s loop short-circuits op_fn for a missing operand
+ *   before combining (xo_eval_compare() and the calc ops don't expect to
+ *   be handed a missing value).  The chain still keeps running afterward,
+ *   again matching xo_eval(): only XEVF_FINAL cuts a chain short.
+ */
+xo_eval_value_t
+xo_eval_prog_run (xo_handle_t *xop, xo_filter_t *xfp, xo_tframe_t *framep,
+		   xo_xparse_data_t *xdp, xo_eval_prog_t *prog, int indent)
+{
+    xo_eval_value_t *stack = alloca(prog->xep_count * sizeof(*stack));
+    uint32_t sp = 0;
+    uint32_t pc = 0;
+
+    while (pc < prog->xep_count) {
+	xo_eval_instr_t *xip = &prog->xep_instr[pc];
+	int argc = xip->xei_argc;
+	xo_eval_value_t *argv = &stack[sp - argc];
+	xo_eval_value_t result;
+
+	if (xip->xei_flags & XEIF_CHECK_MISSING) {
+	    int missing = FALSE;
+
+	    for (int i = 0; i < argc; i++) {
+		if (argv[i].xev_flags & XEVF_MISSING) {
+		    missing = TRUE;
+		    break;
+		}
+	    }
+
+	    if (missing) {
+		for (int i = 0; i < argc; i++)
+		    xo_eval_value_free(argv[i]);
+
+		sp -= argc;
+		stack[sp++] = xo_eval_value_missing();
+		pc += 1;
+		continue;
+	    }
+	}
+
+	xo_xparse_node_t *xnp = xo_xparse_node(xdp, xip->xei_node);
+	result = xip->xei_fn(xop, xfp, framep, xnp, indent, argc, argv);
+
+	for (int i = 0; i < argc; i++)
+	    xo_eval_value_free(argv[i]);
+
+	sp -= argc;
+
+	if (result.xev_flags & XEVF_FINAL) {
+	    result.xev_flags &= ~XEVF_FINAL; /* Not final for our caller */
+	    stack[sp++] = result;
+	    pc = xip->xei_jump;
+	    continue;
+	}
+
+	stack[sp++] = result;
+	pc += 1;
+    }
+
+    return stack[0];
+}
+
+/*
+ * Public wrapper around xo_eval_prog_run() for non-libxo backends (e.g.
+ * libpin) that don't know xo_eval_value_t's layout: reduce the result to
+ * plain C types instead.  See the declaration in xo_filter.h.
+ */
+char *
+xo_eval_prog_run_simple (xo_handle_t *xop, xo_filter_t *xfp,
+			  xo_tframe_t *framep, xo_xparse_data_t *xdp,
+			  xo_eval_prog_t *prog,
+			  int *is_booleanp, int *bool_valuep,
+			  int *is_missingp)
+{
+    if (is_booleanp)
+	*is_booleanp = 0;
+    if (bool_valuep)
+	*bool_valuep = 0;
+    if (is_missingp)
+	*is_missingp = 0;
+
+    xo_eval_value_t value
+	= xo_eval_prog_run(xop, xfp, framep, xdp, prog, XO_INDENT);
+
+    if (value.xev_flags & (XEVF_MISSING | XEVF_INVALID | XEVF_UNSUPPORTED)) {
+	xo_eval_value_free(value);
+	if (is_missingp)
+	    *is_missingp = 1;
+	return NULL;
+    }
+
+    if (value.xev_type == C_BOOLEAN) {
+	if (is_booleanp)
+	    *is_booleanp = 1;
+	if (bool_valuep)
+	    *bool_valuep = xo_eval_cast_boolean(xop, value);
+	xo_eval_value_free(value);
+	return NULL;
+    }
+
+    char *str = xo_eval_cast_string(xop, value);
+    xo_eval_value_free(value);
+    return str;
+}
+
+/*
+ * Find 'root' in the sorted xf_pred_progs[] cache.  Returns the index of
+ * the matching entry if found, or -(insertion point) - 1 if not (so the
+ * caller can recover the insertion point as -(result) - 1 without
+ * confusing "not found at 0" with "found at 0").
+ */
+static int
+xo_filter_pred_prog_find (xo_filter_t *xfp, xo_xparse_node_id_t root)
+{
+    int lo = 0, hi = (int) xfp->xf_pred_progs_count - 1;
+
+    while (lo <= hi) {
+	int mid = (lo + hi) / 2;
+	xo_xparse_node_id_t mid_id = xfp->xf_pred_progs[mid].xpe_node_id;
+
+	if (mid_id == root)
+	    return mid;
+	if (mid_id < root)
+	    lo = mid + 1;
+	else
+	    hi = mid - 1;
+    }
+
+    return -(lo + 1);
+}
+
+/*
+ * Return the compiled program for the expression rooted at 'root',
+ * compiling and caching it on first use.  The cache lives on xfp as a
+ * packed array of {node id, program} pairs kept sorted by node id, so
+ * its size tracks the number of distinct predicates actually seen
+ * (typically tiny) rather than the much larger, sparse AST node id
+ * space that 'root' is drawn from; lookups and inserts use binary
+ * search on that sorted order.  It survives xo_filter_walk_add
+ * rebuilding xfp->xf_trie from scratch to add a new pattern: node ids
+ * in xfp->xf_xd stay stable even though the trie itself does not.
+ * Returns NULL if 'root' is 0 or the expression fails to compile.
+ */
+static xo_eval_prog_t *
+xo_filter_pred_prog (xo_filter_t *xfp, xo_xparse_node_id_t root)
+{
+    if (root == 0)
+	return NULL;
+
+    int slot = xo_filter_pred_prog_find(xfp, root);
+    if (slot >= 0)
+	return xfp->xf_pred_progs[slot].xpe_prog;
+
+    uint32_t insert_at = (uint32_t) (-(slot + 1));
+
+    xo_eval_prog_t *prog = xo_eval_compile(&xfp->xf_xd, root,
+					   xfp->xf_data, xfp->xf_ops);
+    if (prog == NULL)
+	return NULL;
+
+    if (xfp->xf_pred_progs_count >= xfp->xf_pred_progs_max) {
+	uint32_t new_cap = xfp->xf_pred_progs_max
+	    ? xfp->xf_pred_progs_max * 2 : 4;
+	xo_filter_pred_entry_t *newp = realloc(xfp->xf_pred_progs,
+						new_cap * sizeof(*newp));
+	if (newp == NULL) {
+	    xo_eval_prog_destroy(prog);
+	    return NULL;
+	}
+	xfp->xf_pred_progs = newp;
+	xfp->xf_pred_progs_max = new_cap;
+    }
+
+    xo_filter_pred_entry_t *entries = xfp->xf_pred_progs;
+    memmove(entries + insert_at + 1, entries + insert_at,
+	    (xfp->xf_pred_progs_count - insert_at) * sizeof(*entries));
+    entries[insert_at].xpe_node_id = root;
+    entries[insert_at].xpe_prog = prog;
+    xfp->xf_pred_progs_count += 1;
+
+    return prog;
+}
+
 static xo_eval_value_t
 xo_filter_pred_eval (xo_handle_t *xop, xo_filter_t *xfp,
 		     xo_tframe_t *framep, xo_xparse_node_id_t pred_id)
@@ -3532,8 +5560,10 @@ xo_filter_pred_eval (xo_handle_t *xop, xo_filter_t *xfp,
 	if (xnp->xn_type != C_PREDICATE) /* Can't eval anything else */
 	    continue;
 
-	xo_eval_value_t pv = xo_eval(xop, xfp, framep, "top", XO_INDENT,
-				     xnp->xn_contents, NULL);
+	xo_eval_prog_t *prog = xo_filter_pred_prog(xfp, xnp->xn_contents);
+	xo_eval_value_t pv = prog
+	    ? xo_eval_prog_run(xop, xfp, framep, &xfp->xf_xd, prog, XO_INDENT)
+	    : xo_eval_value_invalid();
 	xo_eval_dump_value(xop, xfp, pv, XO_INDENT,
 			   "xo_filter_pred_eval: working");
 
@@ -3642,7 +5672,11 @@ xo_filter_leading_preds_eval (xo_handle_t *xop, xo_filter_t *xfp,
 	xo_xparse_node_id_t cid = xnp->xn_contents;
 	if (cid && xo_xparse_node(&xfp->xf_xd, cid)->xn_type == C_INDEX)
 	    continue;  /* skip positional predicates */
-	value = xo_eval(xop, xfp, framep, "lead-pred", XO_INDENT, cid, NULL);
+
+	xo_eval_prog_t *prog = xo_filter_pred_prog(xfp, cid);
+	value = prog
+	    ? xo_eval_prog_run(xop, xfp, framep, &xfp->xf_xd, prog, XO_INDENT)
+	    : xo_eval_value_invalid();
 	if (value.xev_flags & XEVF_MISSING)
 	    return value;
     }
@@ -3702,6 +5736,112 @@ xo_tmatch_slot_position (xo_handle_t *xop, xo_filter_t *xfp,
     return qpos;
 }
 
+/*
+ * Scan ancestor frames for PRED-state slots that may be waiting for a
+ * compound-path key that just arrived at a deeper level.  For example,
+ * if an ancestor frame has a predicate author[life-span/born] and we
+ * just received key("born", value) inside a "life-span" element, we
+ * reconstruct the compound path "life-span/born" and buffer it in the
+ * ancestor frame so xo_eval_path can find it.
+ *
+ * Maximum ancestor scan depth is bounded by XO_ANCESTOR_SCAN_MAX to
+ * avoid O(n) overhead on deep documents with no multi-step predicates.
+ */
+#define XO_ANCESTOR_SCAN_MAX 8
+
+static void
+xo_tmatch_key_ancestors (xo_handle_t *xop, xo_filter_t *xfp,
+			  xo_tmatch_t *xtmp,
+			  const char *tag, xo_ssize_t tlen,
+			  const char *value, xo_ssize_t vlen)
+{
+    xo_trie_t *xtp = xtmp->xtm_trie;
+    uint32_t cur = xtmp->xtm_depth;
+
+    if (cur < 2)
+	return;
+
+    uint32_t scan_limit = cur - 1;
+    if (scan_limit > XO_ANCESTOR_SCAN_MAX)
+	scan_limit = XO_ANCESTOR_SCAN_MAX;
+
+    for (uint32_t gap = 1; gap <= scan_limit; gap++) {
+	uint32_t anc = cur - gap;
+	xo_tframe_t *ancp = &xtmp->xtm_stack[anc];
+
+	/* Quick check: any PRED slots in this ancestor frame? */
+	int has_pred = FALSE;
+	for (uint32_t s = 0; s < ancp->xtf_slots_count; s++) {
+	    if (xo_tslot_is_pending(&ancp->xtf_slots[s])) {
+		has_pred = TRUE;
+		break;
+	    }
+	}
+	if (!has_pred)
+	    continue;
+
+	/* Build the compound path: stack[anc+1].tag/.../stack[cur].tag/tag */
+	char path_buf[256];
+	ssize_t path_len = 0;
+	int overflow = FALSE;
+
+	for (uint32_t d = anc + 1; d <= cur; d++) {
+	    xo_tframe_t *fp = &xtmp->xtm_stack[d];
+	    if (fp->xtf_tag == NULL)
+		continue;
+	    ssize_t slen = fp->xtf_tag_len;
+	    if (path_len + slen + 1 >= (ssize_t) sizeof(path_buf) - 1) {
+		overflow = TRUE;
+		break;
+	    }
+	    if (path_len > 0)
+		path_buf[path_len++] = '/';
+	    memcpy(path_buf + path_len, fp->xtf_tag, slen);
+	    path_len += slen;
+	    path_buf[path_len] = '\0';
+	}
+	if (overflow)
+	    continue;
+
+	if (path_len + tlen + 1 >= (ssize_t) sizeof(path_buf) - 1)
+	    continue;
+	if (path_len > 0)
+	    path_buf[path_len++] = '/';
+	memcpy(path_buf + path_len, tag, tlen);
+	path_len += tlen;
+	path_buf[path_len] = '\0';
+
+	/* For each PRED slot in ancestor, check if predicate needs the leaf */
+	for (uint32_t i = 0; i < ancp->xtf_slots_count; i++) {
+	    if (!xo_tslot_is_pending(&ancp->xtf_slots[i]))
+		continue;
+
+	    xo_tnode_t *tn = &xtp->xt_nodes[ancp->xtf_slots[i].xts_node];
+
+	    /* Use the single-step check on the leaf tag as a gate */
+	    if (!xo_filter_pred_needs(&xfp->xf_xd, xfp, tn->xtn_pred,
+				      tag, tlen, FALSE))
+		continue;
+
+	    /* Buffer the compound key in the ancestor frame */
+	    xo_tframe_key_add(ancp, path_buf, path_len, value, vlen);
+
+	    ancp->xtf_position_cur = xo_tmatch_slot_position(xop, xfp, xtmp,
+							      ancp, i,
+							      tn->xtn_pred);
+	    xo_eval_value_t result =
+		xo_filter_pred_eval(xop, xfp, ancp, tn->xtn_pred);
+
+	    if (result.xev_flags & XEVF_MISSING)
+		continue;
+
+	    int live = xo_eval_cast_boolean(xop, result);
+	    xo_eval_value_free(result);
+	    xo_tmatch_resolve(xfp, xtmp, ancp, &ancp->xtf_slots[i], tn, live);
+	}
+    }
+}
+
 static xo_filter_status_t
 xo_tmatch_key (xo_handle_t *xop, xo_filter_t *xfp, xo_tmatch_t *xtmp,
 	       const char *tag, xo_ssize_t tlen,
@@ -3712,6 +5852,8 @@ xo_tmatch_key (xo_handle_t *xop, xo_filter_t *xfp, xo_tmatch_t *xtmp,
 
     xo_trie_t *xtp = xtmp->xtm_trie;
     xo_tframe_t *framep = &xtmp->xtm_stack[xtmp->xtm_depth];
+
+    xtmp->xtm_event += 1;
 
     for (uint32_t i = 0; i < framep->xtf_slots_count; i++) {
 	if (!xo_tslot_is_pending(&framep->xtf_slots[i]))
@@ -3738,6 +5880,9 @@ xo_tmatch_key (xo_handle_t *xop, xo_filter_t *xfp, xo_tmatch_t *xtmp,
 	xo_eval_value_free(result);
 	xo_tmatch_resolve(xfp, xtmp, framep, &framep->xtf_slots[i], tn, live);
     }
+
+    /* Check ancestor frames for compound-path predicates */
+    xo_tmatch_key_ancestors(xop, xfp, xtmp, tag, tlen, value, vlen);
 
     return xfp->xf_status;
 }
@@ -3800,6 +5945,8 @@ xo_tmatch_attr (xo_handle_t *xop, xo_filter_t *xfp, xo_tmatch_t *xtmp,
     xo_trie_t *xtp = xtmp->xtm_trie;
     xo_tframe_t *framep = &xtmp->xtm_stack[xtmp->xtm_depth];
 
+    xtmp->xtm_event += 1;
+
     for (uint32_t i = 0; i < framep->xtf_slots_count; i++) {
 	if (!xo_tslot_is_pending(&framep->xtf_slots[i]))
 	    continue;
@@ -3852,7 +5999,18 @@ xo_filter_op_attribute (xo_handle_t *xop, xo_filter_t *xfp,
     return rc;
 }
 
-/* ------------------------------------------------------------- */
+int
+xo_filter_walk_attr (xo_handle_t *xop, xo_filter_t *xfp,
+		     const char *tag, xo_ssize_t tlen,
+		     const char *value, xo_ssize_t vlen)
+{
+    /* Like walk_open/close, a negative length means "use strlen" */
+    if (tlen < 0)
+	tlen = (xo_ssize_t) strlen(tag);
+    if (value && vlen < 0)
+	vlen = (xo_ssize_t) strlen(value);
+    return xo_filter_op_attribute(xop, xfp, tag, tlen, value, vlen);
+}
 
 /*
  * We use the passthru to pass content through to the encoder
@@ -3947,14 +6105,23 @@ xo_filter_op_needs_nonkey_field (XO_FILTER_NEEDS_NONKEY_FIELD_SIGNATURE)
  */
 static void
 xo_filter_force_resolve_pred (xo_handle_t *xop, xo_filter_t *xfp,
-			      const char *tag)
+			      const char *tag, ssize_t tlen)
 {
     xo_tmatch_t *xtmp = &xfp->xf_tmatch;
     if (!xo_tmatch_has_frame(xtmp))
 	return;
 
     xo_tframe_t *framep = &xtmp->xtm_stack[xtmp->xtm_depth];
+
+    /*
+     * PRED status can also come from a COND slot that isn't terminal
+     * (see xo_filter_change_status); there's nothing to resolve then
+     */
+    if (!xo_tframe_has_pred(framep))
+	return;
+
     xfp->xf_flags |= XFSF_FORCE_RESOLVE;
+    xtmp->xtm_event += 1;
 
     for (uint32_t i = 0; i < framep->xtf_slots_count; i++) {
 	xo_tslot_t *slotp = &framep->xtf_slots[i];
@@ -3965,8 +6132,17 @@ xo_filter_force_resolve_pred (xo_handle_t *xop, xo_filter_t *xfp,
 	    xo_tmatch_resolve(xfp, xtmp, framep, slotp, tn, TRUE);
 	    continue;
 	}
-	framep->xtf_position_cur = (slotp->xts_flags & XTFF_QUAL_COUNTED)
-	    ? slotp->xts_qual_position : slotp->xts_position;
+
+	/*
+	 * For "foo[A][N]", N counts only siblings where A passed.  A
+	 * backend that never calls walk_key (e.g. one that answers
+	 * value_of from a buffered tree) reaches here without that
+	 * count having been taken, so take it now.  XFSF_FORCE_RESOLVE
+	 * is already set, so A can't come back MISSING.
+	 */
+	framep->xtf_position_cur = xo_tmatch_slot_position(xop, xfp, xtmp,
+							    framep, i,
+							    tn->xtn_pred);
 	xo_eval_value_t result =
 	    xo_filter_pred_eval(xop, xfp, framep, tn->xtn_pred);
 	if (!(result.xev_flags & XEVF_MISSING)) {
@@ -3977,7 +6153,7 @@ xo_filter_force_resolve_pred (xo_handle_t *xop, xo_filter_t *xfp,
     }
 
     xfp->xf_flags &= ~XFSF_FORCE_RESOLVE;
-    xo_filter_change_status(xop, xfp, "close-instance-pred", tag, strlen(tag));
+    xo_filter_change_status(xop, xfp, "force-resolve-pred", tag, tlen);
 }
 
 /*
@@ -4026,4 +6202,127 @@ xo_filter_setup_test (void)
 {
     xo_setup_filter_lib_test(XO_FILTER_OPS_VERSION, &xo_filter_ops_local);
 
+}
+
+/*
+ * Public direct-call ops for non-libxo callers (e.g. libpin).
+ *
+ * All xo_filter_op_* counterparts above are static; these wrappers
+ * provide external linkage while remaining in the same translation
+ * unit so they can call the static helpers.
+ *
+ * xop may be NULL; it is only used for debug logging.
+ */
+int
+xo_filter_walk_open (xo_handle_t *xop, xo_filter_t *xfp,
+		     const char *tag, ssize_t tlen)
+{
+    if (tlen < 0)
+	tlen = (ssize_t) strlen(tag);
+    return xo_filter_open(xop, xfp, tag, tlen, "container", NULL, 0);
+}
+
+/*
+ * Open a leaf element with its value, so a predicate on the leaf
+ * itself (e.g. "cost[. > 450]") can be decided.  As for libxo's
+ * fields, a predicate still pending is resolved now, since no child
+ * can arrive to satisfy it.  Close it with xo_filter_walk_close.
+ */
+int
+xo_filter_walk_open_field (xo_handle_t *xop, xo_filter_t *xfp,
+			   const char *tag, ssize_t tlen,
+			   const char *value, ssize_t vlen)
+{
+    if (tlen < 0)
+	tlen = (ssize_t) strlen(tag);
+    if (value && vlen < 0)
+	vlen = (ssize_t) strlen(value);
+    return xo_filter_op_open_field(xop, xfp, tag, tlen, value, vlen);
+}
+
+int
+xo_filter_walk_close (xo_handle_t *xop, xo_filter_t *xfp,
+		      const char *tag, ssize_t tlen)
+{
+    if (tlen < 0)
+	tlen = (ssize_t) strlen(tag);
+
+    /*
+     * Callers of the walk_* API (e.g. libpin) drive this FSM one XML
+     * element at a time, and each such element is a potential match
+     * instance (the same "instance" semantics xo_filter_op_close_instance
+     * uses for repeated list items).  If the instance is still in PRED
+     * state at close time, the predicate field was never seen while
+     * walking the subtree; force-resolve it now, treating any absent
+     * field as empty string (XPath: absent node -> empty nodeset ->
+     * string("")), so xo_filter_walk_status() reflects the real outcome.
+     * As for libxo, a predicate passed on a path that continues below
+     * the element returns XO_STATUS_LIVE.
+     */
+    return xo_filter_close_pending(xop, xfp, tag, tlen, "container");
+}
+
+int
+xo_filter_walk_key (xo_handle_t *xop, xo_filter_t *xfp,
+		    const char *tag, ssize_t tlen,
+		    const char *value, ssize_t vlen)
+{
+    /* Like walk_open/close, a negative length means "use strlen" */
+    if (tlen < 0)
+	tlen = (ssize_t) strlen(tag);
+    if (value && vlen < 0)
+	vlen = (ssize_t) strlen(value);
+    return xo_filter_op_key(xop, xfp, tag, tlen, value, vlen);
+}
+
+xo_filter_status_t
+xo_filter_walk_status (xo_handle_t *xop UNUSED, xo_filter_t *xfp)
+{
+    return xfp ? xfp->xf_status : XO_STATUS_ZERO;
+}
+
+int
+xo_filter_walk_add (xo_handle_t *xop, xo_filter_t *xfp, const char *xpath)
+{
+    if (xfp == NULL)
+	return -1;
+    return xo_filter_compile_xpath(xop, xfp, xpath);
+}
+
+int
+xo_filter_walk_add_with_action (xo_handle_t *xop, xo_filter_t *xfp,
+				 const char *xpath, uint32_t action)
+{
+    if (xfp == NULL)
+	return -1;
+    return xo_filter_compile_xpath_action(xop, xfp, xpath, action);
+}
+
+int
+xo_filter_walk_add_with_action_priority (xo_handle_t *xop, xo_filter_t *xfp,
+					 const char *xpath, uint32_t action,
+					 double priority, int16_t import_prec)
+{
+    if (xfp == NULL)
+	return -1;
+    return xo_filter_compile_xpath_action_priority(xop, xfp, xpath, action,
+						    priority, import_prec);
+}
+
+uint32_t
+xo_filter_walk_get_action (xo_handle_t *xop UNUSED, xo_filter_t *xfp)
+{
+    return xfp ? xfp->xf_cur_action : 0;
+}
+
+xo_filter_data_t *
+xo_filter_get_data_ptr (xo_filter_t *xfp)
+{
+    return xfp ? xfp->xf_data : NULL;
+}
+
+xo_filter_data_ops_t *
+xo_filter_get_data_ops (xo_filter_t *xfp)
+{
+    return xfp ? xfp->xf_ops : NULL;
 }

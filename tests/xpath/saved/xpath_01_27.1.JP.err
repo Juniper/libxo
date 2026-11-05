@@ -1,0 +1,827 @@
+main: input '#'
+main: input '# NaN: missing fields and non-numeric strings are NaN (C_NAN),'
+main: input '# which is unordered: every comparison with it is false, except !='
+main: input '#'
+main: input ''
+main: input '# Test 1: missing field in arithmetic (expect: none)'
+main: input '?item[missing + 1 = 1]'
+adding filter: 'item[missing + 1 = 1]'
+added filter: 0
+xpath_01: test: filter expression feature is unsupported: plus sign ('+')
+--- 0: 11
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 7, next 0, prev 0
+                000007: type 14 (L_EQUALS), str 20 [=], contents 4, next 0, prev 0
+                    000004: type 25 (L_PLUS), str 16 [+], contents 5, next 8, prev 0
+                        000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0
+                            000003: type 70 (C_ELEMENT), str 8 [missing], contents 0, next 0, prev 0
+                        000006: type 53 (T_NUMBER), str 18 [1], contents 0, next 0, prev 5
+                    000008: type 53 (T_NUMBER), str 22 [1], contents 0, next 0, prev 4
+main: status: zero
+main: input '{item'
+main: filter: rc: 12
+main: status: zero
+main: input '<item'
+main: filter: rc: 6
+main: status: predicate
+main: input '= name widget'
+main: field: 'name'='widget'
+main: status: predicate
+main: input '= a 42'
+main: field: 'a'='42'
+main: status: predicate
+main: input '= b 144'
+main: field: 'b'='144'
+main: status: predicate
+main: input '= count 3'
+main: field: 'count'='3'
+main: status: predicate
+main: input '>item'
+main: status: track
+main: input '<item'
+main: filter: rc: 6
+main: status: predicate
+main: input '= name gadget'
+main: field: 'name'='gadget'
+main: status: predicate
+main: input '= a 70'
+main: field: 'a'='70'
+main: status: predicate
+main: input '= b 8'
+main: field: 'b'='8'
+main: status: predicate
+main: input '= count lots'
+main: field: 'count'='lots'
+main: status: predicate
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# Test 2: NaN != anything (expect: both)'
+main: input 'r'
+main: status: zero
+main: input '?item[missing + 1 != 1]'
+adding filter: 'item[missing + 1 != 1]'
+added filter: 0
+xpath_01: test: filter expression feature is unsupported: plus sign ('+')
+--- 0: 11
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 7, next 0, prev 0
+                000007: type 21 (L_NOTEQUALS), str 20 [!=], contents 4, next 0, prev 0
+                    000004: type 25 (L_PLUS), str 16 [+], contents 5, next 8, prev 0
+                        000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0
+                            000003: type 70 (C_ELEMENT), str 8 [missing], contents 0, next 0, prev 0
+                        000006: type 53 (T_NUMBER), str 18 [1], contents 0, next 0, prev 5
+                    000008: type 53 (T_NUMBER), str 23 [1], contents 0, next 0, prev 4
+main: status: zero
+main: input '{item'
+xpath_01: duplicate sibling name: 'item'
+main: filter: rc: 12
+main: status: zero
+main: input '<item'
+main: filter: rc: 6
+main: status: predicate
+main: input '= name widget'
+main: field: 'name'='widget'
+main: status: predicate
+main: input '= a 42'
+main: field: 'a'='42'
+main: status: predicate
+main: input '= b 144'
+main: field: 'b'='144'
+main: status: predicate
+main: input '= count 3'
+main: field: 'count'='3'
+main: status: predicate
+main: input '>item'
+main: filter: rc: 6
+main: status: track
+main: input '<item'
+main: filter: rc: 8
+main: status: predicate
+main: input '= name gadget'
+main: field: 'name'='gadget'
+main: status: predicate
+main: input '= a 70'
+main: field: 'a'='70'
+main: status: predicate
+main: input '= b 8'
+main: field: 'b'='8'
+main: status: predicate
+main: input '= count lots'
+main: field: 'count'='lots'
+main: status: predicate
+main: input '>item'
+main: filter: rc: 6
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# Test 3: NaN is not less (expect: none)'
+main: input 'r'
+main: status: zero
+main: input '?item[missing < 1]'
+adding filter: 'item[missing < 1]'
+added filter: 0
+--- 0: 9
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0
+                000004: type 17 (L_LESS), str 16 [<], contents 5, next 0, prev 0
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0
+                        000003: type 70 (C_ELEMENT), str 8 [missing], contents 0, next 0, prev 0
+                    000006: type 53 (T_NUMBER), str 18 [1], contents 0, next 0, prev 5
+main: status: zero
+main: input '{item'
+main: filter: rc: 14
+main: status: zero
+main: input '<item'
+main: filter: rc: 6
+main: status: predicate
+main: input '= name widget'
+main: field: 'name'='widget'
+main: status: predicate
+main: input '= a 42'
+main: field: 'a'='42'
+main: status: predicate
+main: input '= b 144'
+main: field: 'b'='144'
+main: status: predicate
+main: input '= count 3'
+main: field: 'count'='3'
+main: status: predicate
+main: input '>item'
+main: status: track
+main: input '<item'
+main: filter: rc: 6
+main: status: predicate
+main: input '= name gadget'
+main: field: 'name'='gadget'
+main: status: predicate
+main: input '= a 70'
+main: field: 'a'='70'
+main: status: predicate
+main: input '= b 8'
+main: field: 'b'='8'
+main: status: predicate
+main: input '= count lots'
+main: field: 'count'='lots'
+main: status: predicate
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# Test 4: NaN is not greater or equal (expect: none)'
+main: input 'r'
+main: status: zero
+main: input '?item[missing >= 1]'
+adding filter: 'item[missing >= 1]'
+added filter: 0
+--- 0: 9
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0
+                000004: type 16 (L_GRTREQ), str 16 [>=], contents 5, next 0, prev 0
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0
+                        000003: type 70 (C_ELEMENT), str 8 [missing], contents 0, next 0, prev 0
+                    000006: type 53 (T_NUMBER), str 19 [1], contents 0, next 0, prev 5
+main: status: zero
+main: input '{item'
+main: filter: rc: 14
+main: status: zero
+main: input '<item'
+main: filter: rc: 6
+main: status: predicate
+main: input '= name widget'
+main: field: 'name'='widget'
+main: status: predicate
+main: input '= a 42'
+main: field: 'a'='42'
+main: status: predicate
+main: input '= b 144'
+main: field: 'b'='144'
+main: status: predicate
+main: input '= count 3'
+main: field: 'count'='3'
+main: status: predicate
+main: input '>item'
+main: status: track
+main: input '<item'
+main: filter: rc: 6
+main: status: predicate
+main: input '= name gadget'
+main: field: 'name'='gadget'
+main: status: predicate
+main: input '= a 70'
+main: field: 'a'='70'
+main: status: predicate
+main: input '= b 8'
+main: field: 'b'='8'
+main: status: predicate
+main: input '= count lots'
+main: field: 'count'='lots'
+main: status: predicate
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# Test 5: not() of a NaN comparison (expect: both)'
+main: input 'r'
+main: status: zero
+main: input '?item[not(missing + 1 = 1)]'
+adding filter: 'item[not(missing + 1 = 1)]'
+added filter: 0
+xpath_01: test: filter expression feature is unsupported: plus sign ('+')
+--- 0: 14
+    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0
+                000003: type 52 (T_FUNCTION_NAME), str 8 [not], contents 9, next 0, prev 0
+                    000009: type 14 (L_EQUALS), str 26 [=], contents 6, next 0, prev 0
+                        000006: type 25 (L_PLUS), str 22 [+], contents 7, next 10, prev 0
+                            000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0
+                                000005: type 70 (C_ELEMENT), str 14 [missing], contents 0, next 0, prev 0
+                            000008: type 53 (T_NUMBER), str 24 [1], contents 0, next 0, prev 7
+                        000010: type 53 (T_NUMBER), str 28 [1], contents 0, next 0, prev 6
+main: status: zero
+main: input '{item'
+main: filter: rc: 14
+main: status: zero
+main: input '<item'
+main: filter: rc: 6
+main: status: predicate
+main: input '= name widget'
+main: field: 'name'='widget'
+main: status: predicate
+main: input '= a 42'
+main: field: 'a'='42'
+main: status: predicate
+main: input '= b 144'
+main: field: 'b'='144'
+main: status: predicate
+main: input '= count 3'
+main: field: 'count'='3'
+main: status: predicate
+main: input '>item'
+main: filter: rc: 6
+main: status: track
+main: input '<item'
+main: filter: rc: 8
+main: status: predicate
+main: input '= name gadget'
+main: field: 'name'='gadget'
+main: status: predicate
+main: input '= a 70'
+main: field: 'a'='70'
+main: status: predicate
+main: input '= b 8'
+main: field: 'b'='8'
+main: status: predicate
+main: input '= count lots'
+main: field: 'count'='lots'
+main: status: predicate
+main: input '>item'
+main: filter: rc: 6
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# Test 6: non-numeric string vs number (expect: none)'
+main: input 'r'
+main: status: zero
+main: input '?item[name < 5]'
+adding filter: 'item[name < 5]'
+added filter: 0
+--- 0: 9
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0
+                000004: type 17 (L_LESS), str 13 [<], contents 5, next 0, prev 0
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0
+                        000003: type 70 (C_ELEMENT), str 8 [name], contents 0, next 0, prev 0
+                    000006: type 53 (T_NUMBER), str 15 [5], contents 0, next 0, prev 5
+main: status: zero
+main: input '{item'
+main: filter: rc: 14
+main: status: zero
+main: input '<item'
+main: filter: rc: 6
+main: status: predicate
+main: input '= name widget'
+main: field: 'name'='widget'
+xpath_01: invalid number value: 'widget'
+main: status: track
+main: input '= a 42'
+main: field: 'a'='42'
+main: status: track
+main: input '= b 144'
+main: field: 'b'='144'
+main: status: track
+main: input '= count 3'
+main: field: 'count'='3'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: filter: rc: 6
+main: status: predicate
+main: input '= name gadget'
+main: field: 'name'='gadget'
+xpath_01: invalid number value: 'gadget'
+main: status: track
+main: input '= a 70'
+main: field: 'a'='70'
+main: status: track
+main: input '= b 8'
+main: field: 'b'='8'
+main: status: track
+main: input '= count lots'
+main: field: 'count'='lots'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# Test 7: non-numeric string vs number (expect: none)'
+main: input 'r'
+main: status: zero
+main: input '?item[name >= 5]'
+adding filter: 'item[name >= 5]'
+added filter: 0
+--- 0: 9
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0
+                000004: type 16 (L_GRTREQ), str 13 [>=], contents 5, next 0, prev 0
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0
+                        000003: type 70 (C_ELEMENT), str 8 [name], contents 0, next 0, prev 0
+                    000006: type 53 (T_NUMBER), str 16 [5], contents 0, next 0, prev 5
+main: status: zero
+main: input '{item'
+main: filter: rc: 14
+main: status: zero
+main: input '<item'
+main: filter: rc: 6
+main: status: predicate
+main: input '= name widget'
+main: field: 'name'='widget'
+xpath_01: invalid number value: 'widget'
+main: status: track
+main: input '= a 42'
+main: field: 'a'='42'
+main: status: track
+main: input '= b 144'
+main: field: 'b'='144'
+main: status: track
+main: input '= count 3'
+main: field: 'count'='3'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: filter: rc: 6
+main: status: predicate
+main: input '= name gadget'
+main: field: 'name'='gadget'
+xpath_01: invalid number value: 'gadget'
+main: status: track
+main: input '= a 70'
+main: field: 'a'='70'
+main: status: track
+main: input '= b 8'
+main: field: 'b'='8'
+main: status: track
+main: input '= count lots'
+main: field: 'count'='lots'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# Test 8: string relational compares numbers (42 < 144) (expect: widget)'
+main: input 'r'
+main: status: zero
+main: input '?item[a < b]'
+adding filter: 'item[a < b]'
+added filter: 0
+--- 0: 10
+    000010: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0
+                000004: type 17 (L_LESS), str 10 [<], contents 5, next 0, prev 0
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 8, prev 0
+                        000003: type 70 (C_ELEMENT), str 8 [a], contents 0, next 0, prev 0
+                    000008: type 74 (C_PATH), str 0 [], contents 6, next 0, prev 5
+                        000006: type 70 (C_ELEMENT), str 12 [b], contents 0, next 0, prev 0
+main: status: zero
+main: input '{item'
+main: filter: rc: 14
+main: status: zero
+main: input '<item'
+main: filter: rc: 6
+main: status: predicate
+main: input '= name widget'
+main: field: 'name'='widget'
+main: status: predicate
+main: input '= a 42'
+main: field: 'a'='42'
+main: status: predicate
+main: input '= b 144'
+main: field: 'b'='144'
+main: status: full
+main: input '= count 3'
+main: field: 'count'='3'
+main: status: full
+main: input '>item'
+main: filter: rc: 6
+main: status: track
+main: input '<item'
+main: filter: rc: 8
+main: status: predicate
+main: input '= name gadget'
+main: field: 'name'='gadget'
+main: status: predicate
+main: input '= a 70'
+main: field: 'a'='70'
+main: status: predicate
+main: input '= b 8'
+main: field: 'b'='8'
+main: status: track
+main: input '= count lots'
+main: field: 'count'='lots'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# Test 9: string relational compares numbers (70 > 8) (expect: gadget)'
+main: input 'r'
+main: status: zero
+main: input '?item[a > b]'
+adding filter: 'item[a > b]'
+added filter: 0
+--- 0: 10
+    000010: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0
+                000004: type 15 (L_GRTR), str 10 [>], contents 5, next 0, prev 0
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 8, prev 0
+                        000003: type 70 (C_ELEMENT), str 8 [a], contents 0, next 0, prev 0
+                    000008: type 74 (C_PATH), str 0 [], contents 6, next 0, prev 5
+                        000006: type 70 (C_ELEMENT), str 12 [b], contents 0, next 0, prev 0
+main: status: zero
+main: input '{item'
+main: filter: rc: 14
+main: status: zero
+main: input '<item'
+main: filter: rc: 6
+main: status: predicate
+main: input '= name widget'
+main: field: 'name'='widget'
+main: status: predicate
+main: input '= a 42'
+main: field: 'a'='42'
+main: status: predicate
+main: input '= b 144'
+main: field: 'b'='144'
+main: status: track
+main: input '= count 3'
+main: field: 'count'='3'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '<item'
+main: filter: rc: 6
+main: status: predicate
+main: input '= name gadget'
+main: field: 'name'='gadget'
+main: status: predicate
+main: input '= a 70'
+main: field: 'a'='70'
+main: status: predicate
+main: input '= b 8'
+main: field: 'b'='8'
+main: status: full
+main: input '= count lots'
+main: field: 'count'='lots'
+main: status: full
+main: input '>item'
+main: filter: rc: 6
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# Test 10: NaN is not equal to itself (expect: widget)'
+main: input 'r'
+main: status: zero
+main: input '?item[count + 0 = count + 0]'
+adding filter: 'item[count + 0 = count + 0]'
+added filter: 0
+xpath_01: test: filter expression feature is unsupported: plus sign ('+')
+--- 0: 14
+    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 7, next 0, prev 0
+                000007: type 14 (L_EQUALS), str 18 [=], contents 4, next 0, prev 0
+                    000004: type 25 (L_PLUS), str 14 [+], contents 5, next 9, prev 0
+                        000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0
+                            000003: type 70 (C_ELEMENT), str 8 [count], contents 0, next 0, prev 0
+                        000006: type 53 (T_NUMBER), str 16 [0], contents 0, next 0, prev 5
+                    000009: type 25 (L_PLUS), str 26 [+], contents 10, next 0, prev 4
+                        000010: type 74 (C_PATH), str 0 [], contents 8, next 11, prev 0
+                            000008: type 70 (C_ELEMENT), str 20 [count], contents 0, next 0, prev 0
+                        000011: type 53 (T_NUMBER), str 28 [0], contents 0, next 0, prev 10
+main: status: zero
+main: input '{item'
+main: filter: rc: 14
+main: status: zero
+main: input '<item'
+main: filter: rc: 6
+main: status: predicate
+main: input '= name widget'
+main: field: 'name'='widget'
+main: status: predicate
+main: input '= a 42'
+main: field: 'a'='42'
+main: status: predicate
+main: input '= b 144'
+main: field: 'b'='144'
+main: status: predicate
+main: input '= count 3'
+main: field: 'count'='3'
+main: status: full
+main: input '>item'
+main: filter: rc: 6
+main: status: track
+main: input '<item'
+main: filter: rc: 8
+main: status: predicate
+main: input '= name gadget'
+main: field: 'name'='gadget'
+main: status: predicate
+main: input '= a 70'
+main: field: 'a'='70'
+main: status: predicate
+main: input '= b 8'
+main: field: 'b'='8'
+main: status: predicate
+main: input '= count lots'
+main: field: 'count'='lots'
+xpath_01: invalid number value: 'lots'
+xpath_01: invalid number value: 'lots'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# Test 11: NaN arithmetic (expect: widget)'
+main: input 'r'
+main: status: zero
+main: input '?item[count * 2 > 1]'
+adding filter: 'item[count * 2 > 1]'
+added filter: 0
+--- 0: 11
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 7, next 0, prev 0
+                000007: type 15 (L_GRTR), str 18 [>], contents 4, next 0, prev 0
+                    000004: type 29 (L_STAR), str 14 [*], contents 5, next 8, prev 0
+                        000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0
+                            000003: type 70 (C_ELEMENT), str 8 [count], contents 0, next 0, prev 0
+                        000006: type 53 (T_NUMBER), str 16 [2], contents 0, next 0, prev 5
+                    000008: type 53 (T_NUMBER), str 20 [1], contents 0, next 0, prev 4
+main: status: zero
+main: input '{item'
+main: filter: rc: 14
+main: status: zero
+main: input '<item'
+main: filter: rc: 6
+main: status: predicate
+main: input '= name widget'
+main: field: 'name'='widget'
+main: status: predicate
+main: input '= a 42'
+main: field: 'a'='42'
+main: status: predicate
+main: input '= b 144'
+main: field: 'b'='144'
+main: status: predicate
+main: input '= count 3'
+main: field: 'count'='3'
+main: status: full
+main: input '>item'
+main: filter: rc: 6
+main: status: track
+main: input '<item'
+main: filter: rc: 8
+main: status: predicate
+main: input '= name gadget'
+main: field: 'name'='gadget'
+main: status: predicate
+main: input '= a 70'
+main: field: 'a'='70'
+main: status: predicate
+main: input '= b 8'
+main: field: 'b'='8'
+main: status: predicate
+main: input '= count lots'
+main: field: 'count'='lots'
+xpath_01: invalid number value: 'lots'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# Test 12: NaN compared with a boolean is false (expect: both)'
+main: input 'r'
+main: status: zero
+main: input '?item[(missing + 1) = false()]'
+adding filter: 'item[(missing + 1) = false()]'
+added filter: 0
+xpath_01: test: filter expression feature is unsupported: plus sign ('+')
+--- 0: 15
+    000015: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 9, next 0, prev 0
+                000009: type 14 (L_EQUALS), str 24 [=], contents 3, next 0, prev 0
+                    000003: type 71 (C_EXPR), str 8 [(], contents 5, next 10, prev 0
+                        000005: type 25 (L_PLUS), str 18 [+], contents 6, next 0, prev 0
+                            000006: type 74 (C_PATH), str 0 [], contents 4, next 7, prev 0
+                                000004: type 70 (C_ELEMENT), str 10 [missing], contents 0, next 0, prev 0
+                            000007: type 53 (T_NUMBER), str 20 [1], contents 0, next 0, prev 6
+                    000010: type 52 (T_FUNCTION_NAME), str 26 [false], contents 0, next 0, prev 3
+main: status: zero
+main: input '{item'
+main: filter: rc: 14
+main: status: zero
+main: input '<item'
+main: filter: rc: 6
+main: status: predicate
+main: input '= name widget'
+main: field: 'name'='widget'
+main: status: predicate
+main: input '= a 42'
+main: field: 'a'='42'
+main: status: predicate
+main: input '= b 144'
+main: field: 'b'='144'
+main: status: predicate
+main: input '= count 3'
+main: field: 'count'='3'
+main: status: predicate
+main: input '>item'
+main: filter: rc: 6
+main: status: track
+main: input '<item'
+main: filter: rc: 8
+main: status: predicate
+main: input '= name gadget'
+main: field: 'name'='gadget'
+main: status: predicate
+main: input '= a 70'
+main: field: 'a'='70'
+main: status: predicate
+main: input '= b 8'
+main: field: 'b'='8'
+main: status: predicate
+main: input '= count lots'
+main: field: 'count'='lots'
+main: status: predicate
+main: input '>item'
+main: filter: rc: 6
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# Test 13: boolean() of NaN is false (expect: widget)'
+main: input 'r'
+main: status: zero
+main: input '?item[boolean(count + 0)]'
+adding filter: 'item[boolean(count + 0)]'
+added filter: 0
+xpath_01: test: filter expression feature is unsupported: plus sign ('+')
+--- 0: 12
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0
+                000003: type 52 (T_FUNCTION_NAME), str 8 [boolean], contents 6, next 0, prev 0
+                    000006: type 25 (L_PLUS), str 24 [+], contents 7, next 0, prev 0
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0
+                            000005: type 70 (C_ELEMENT), str 18 [count], contents 0, next 0, prev 0
+                        000008: type 53 (T_NUMBER), str 26 [0], contents 0, next 0, prev 7
+main: status: zero
+main: input '{item'
+main: filter: rc: 14
+main: status: zero
+main: input '<item'
+main: filter: rc: 6
+main: status: predicate
+main: input '= name widget'
+main: field: 'name'='widget'
+main: status: predicate
+main: input '= a 42'
+main: field: 'a'='42'
+main: status: predicate
+main: input '= b 144'
+main: field: 'b'='144'
+main: status: predicate
+main: input '= count 3'
+main: field: 'count'='3'
+main: status: full
+main: input '>item'
+main: filter: rc: 6
+main: status: track
+main: input '<item'
+main: filter: rc: 8
+main: status: predicate
+main: input '= name gadget'
+main: field: 'name'='gadget'
+main: status: predicate
+main: input '= a 70'
+main: field: 'a'='70'
+main: status: predicate
+main: input '= b 8'
+main: field: 'b'='8'
+main: status: predicate
+main: input '= count lots'
+main: field: 'count'='lots'
+xpath_01: invalid number value: 'lots'
+main: status: track
+main: input '>item'
+main: status: track
+main: input '}item'
+main: status: track
+main: input ''
+main: input '# Test 14: number() of a non-number (expect: both)'
+main: input 'r'
+main: status: zero
+main: input '?item[number(name) != number(name)]'
+adding filter: 'item[number(name) != number(name)]'
+added filter: 0
+--- 0: 16
+    000016: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0
+                000008: type 21 (L_NOTEQUALS), str 24 [!=], contents 3, next 0, prev 0
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [number], contents 7, next 9, prev 0
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0
+                            000005: type 70 (C_ELEMENT), str 17 [name], contents 0, next 0, prev 0
+                    000009: type 52 (T_FUNCTION_NAME), str 27 [number], contents 13, next 0, prev 3
+                        000013: type 74 (C_PATH), str 0 [], contents 11, next 0, prev 0
+                            000011: type 70 (C_ELEMENT), str 36 [name], contents 0, next 0, prev 0
+main: status: zero
+main: input '{item'
+main: filter: rc: 14
+main: status: zero
+main: input '<item'
+main: filter: rc: 6
+main: status: predicate
+main: input '= name widget'
+main: field: 'name'='widget'
+xpath_01: invalid number value: 'widget'
+xpath_01: invalid number value: 'widget'
+main: status: full
+main: input '= a 42'
+main: field: 'a'='42'
+main: status: full
+main: input '= b 144'
+main: field: 'b'='144'
+main: status: full
+main: input '= count 3'
+main: field: 'count'='3'
+main: status: full
+main: input '>item'
+main: filter: rc: 6
+main: status: track
+main: input '<item'
+main: filter: rc: 8
+main: status: predicate
+main: input '= name gadget'
+main: field: 'name'='gadget'
+xpath_01: invalid number value: 'gadget'
+xpath_01: invalid number value: 'gadget'
+main: status: full
+main: input '= a 70'
+main: field: 'a'='70'
+main: status: full
+main: input '= b 8'
+main: field: 'b'='8'
+main: status: full
+main: input '= count lots'
+main: field: 'count'='lots'
+main: status: full
+main: input '>item'
+main: filter: rc: 6
+main: status: track
+main: input '}item'
+main: status: track

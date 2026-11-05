@@ -1,0 +1,1627 @@
+main: input '#'
+main: input '# Integer math stays in int64/uint64 while results fit; floats'
+main: input '# (which lose precision past 2^53) are the last resort'
+main: input '#'
+main: input ''
+main: input '# Test 1: uint64 add (equal in floats) (expect: one, two)'
+main: input '?num[big + 1 != big]'
+adding filter: 'num[big + 1 != big]'
+added filter: 0
+xpath_01: test: filter expression feature is unsupported: plus sign ('+')
+--- 0: 12
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [num], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 7, next 0, prev 0
+                000007: type 21 (L_NOTEQUALS), str 15 [!=], contents 4, next 0, prev 0
+                    000004: type 25 (L_PLUS), str 11 [+], contents 5, next 10, prev 0
+                        000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0
+                            000003: type 70 (C_ELEMENT), str 7 [big], contents 0, next 0, prev 0
+                        000006: type 53 (T_NUMBER), str 13 [1], contents 0, next 0, prev 5
+                    000010: type 74 (C_PATH), str 0 [], contents 8, next 0, prev 4
+                        000008: type 70 (C_ELEMENT), str 18 [big], contents 0, next 0, prev 0
+main: status: zero
+main: input '{num'
+main: filter: rc: 11
+main: status: zero
+main: input '<num'
+main: filter: rc: 6
+main: status: predicate
+main: input '= id one'
+main: field: 'id'='one'
+main: status: predicate
+main: input '= big 18446744073709551614'
+main: field: 'big'='18446744073709551614'
+main: status: full
+main: input '= max 9223372036854775807'
+main: field: 'max'='9223372036854775807'
+main: status: full
+main: input '= neg -9223372036854775808'
+main: field: 'neg'='-9223372036854775808'
+main: status: full
+main: input '= hex 0x10'
+main: field: 'hex'='0x10'
+main: status: full
+main: input '= octal 010'
+main: field: 'octal'='010'
+main: status: full
+main: input '= half 2.5'
+main: field: 'half'='2.5'
+main: status: full
+main: input '>num'
+main: filter: rc: 6
+main: status: track
+main: input '<num'
+main: filter: rc: 8
+main: status: predicate
+main: input '= id two'
+main: field: 'id'='two'
+main: status: predicate
+main: input '= big 2'
+main: field: 'big'='2'
+main: status: full
+main: input '= max 1'
+main: field: 'max'='1'
+main: status: full
+main: input '= neg -1'
+main: field: 'neg'='-1'
+main: status: full
+main: input '= hex 0x1'
+main: field: 'hex'='0x1'
+main: status: full
+main: input '= octal 07'
+main: field: 'octal'='07'
+main: status: full
+main: input '= half 0.5'
+main: field: 'half'='0.5'
+main: status: full
+main: input '>num'
+main: filter: rc: 6
+main: status: track
+main: input '}num'
+main: status: track
+main: input ''
+main: input '# Test 2: int64 subtract (equal in floats) (expect: one, two)'
+main: input 'r'
+main: status: zero
+main: input '?num[max - 1 != max]'
+adding filter: 'num[max - 1 != max]'
+added filter: 0
+--- 0: 12
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [num], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 7, next 0, prev 0
+                000007: type 21 (L_NOTEQUALS), str 15 [!=], contents 4, next 0, prev 0
+                    000004: type 19 (L_MINUS), str 11 [-], contents 5, next 10, prev 0
+                        000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0
+                            000003: type 70 (C_ELEMENT), str 7 [max], contents 0, next 0, prev 0
+                        000006: type 53 (T_NUMBER), str 13 [1], contents 0, next 0, prev 5
+                    000010: type 74 (C_PATH), str 0 [], contents 8, next 0, prev 4
+                        000008: type 70 (C_ELEMENT), str 18 [max], contents 0, next 0, prev 0
+main: status: zero
+main: input '{num'
+xpath_01: duplicate sibling name: 'num'
+main: filter: rc: 13
+main: status: zero
+main: input '<num'
+main: filter: rc: 6
+main: status: predicate
+main: input '= id one'
+main: field: 'id'='one'
+main: status: predicate
+main: input '= big 18446744073709551614'
+main: field: 'big'='18446744073709551614'
+main: status: predicate
+main: input '= max 9223372036854775807'
+main: field: 'max'='9223372036854775807'
+main: status: full
+main: input '= neg -9223372036854775808'
+main: field: 'neg'='-9223372036854775808'
+main: status: full
+main: input '= hex 0x10'
+main: field: 'hex'='0x10'
+main: status: full
+main: input '= octal 010'
+main: field: 'octal'='010'
+main: status: full
+main: input '= half 2.5'
+main: field: 'half'='2.5'
+main: status: full
+main: input '>num'
+main: filter: rc: 6
+main: status: track
+main: input '<num'
+main: filter: rc: 8
+main: status: predicate
+main: input '= id two'
+main: field: 'id'='two'
+main: status: predicate
+main: input '= big 2'
+main: field: 'big'='2'
+main: status: predicate
+main: input '= max 1'
+main: field: 'max'='1'
+main: status: full
+main: input '= neg -1'
+main: field: 'neg'='-1'
+main: status: full
+main: input '= hex 0x1'
+main: field: 'hex'='0x1'
+main: status: full
+main: input '= octal 07'
+main: field: 'octal'='07'
+main: status: full
+main: input '= half 0.5'
+main: field: 'half'='0.5'
+main: status: full
+main: input '>num'
+main: filter: rc: 6
+main: status: track
+main: input '}num'
+main: status: track
+main: input ''
+main: input '# Test 3: negate INT64_MIN gives uint64 (expect: one)'
+main: input 'r'
+main: status: zero
+main: input '?num[-neg = max + 1]'
+adding filter: 'num[-neg = max + 1]'
+added filter: 0
+xpath_01: test: filter expression feature is unsupported: plus sign ('+')
+--- 0: 13
+    000013: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [num], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 5, next 0, prev 0
+                000005: type 14 (L_EQUALS), str 13 [=], contents 3, next 0, prev 0
+                    000003: type 86 (C_UNI_MINUS), str 7 [-], contents 6, next 8, prev 0
+                        000006: type 74 (C_PATH), str 0 [], contents 4, next 0, prev 0
+                            000004: type 70 (C_ELEMENT), str 9 [neg], contents 0, next 0, prev 0
+                    000008: type 25 (L_PLUS), str 19 [+], contents 9, next 0, prev 3
+                        000009: type 74 (C_PATH), str 0 [], contents 7, next 10, prev 0
+                            000007: type 70 (C_ELEMENT), str 15 [max], contents 0, next 0, prev 0
+                        000010: type 53 (T_NUMBER), str 21 [1], contents 0, next 0, prev 9
+main: status: zero
+main: input '{num'
+main: filter: rc: 13
+main: status: zero
+main: input '<num'
+main: filter: rc: 6
+main: status: predicate
+main: input '= id one'
+main: field: 'id'='one'
+main: status: predicate
+main: input '= big 18446744073709551614'
+main: field: 'big'='18446744073709551614'
+main: status: predicate
+main: input '= max 9223372036854775807'
+main: field: 'max'='9223372036854775807'
+main: status: predicate
+main: input '= neg -9223372036854775808'
+main: field: 'neg'='-9223372036854775808'
+main: status: full
+main: input '= hex 0x10'
+main: field: 'hex'='0x10'
+main: status: full
+main: input '= octal 010'
+main: field: 'octal'='010'
+main: status: full
+main: input '= half 2.5'
+main: field: 'half'='2.5'
+main: status: full
+main: input '>num'
+main: filter: rc: 6
+main: status: track
+main: input '<num'
+main: filter: rc: 8
+main: status: predicate
+main: input '= id two'
+main: field: 'id'='two'
+main: status: predicate
+main: input '= big 2'
+main: field: 'big'='2'
+main: status: predicate
+main: input '= max 1'
+main: field: 'max'='1'
+main: status: predicate
+main: input '= neg -1'
+main: field: 'neg'='-1'
+main: status: track
+main: input '= hex 0x1'
+main: field: 'hex'='0x1'
+main: status: track
+main: input '= octal 07'
+main: field: 'octal'='07'
+main: status: track
+main: input '= half 0.5'
+main: field: 'half'='0.5'
+main: status: track
+main: input '>num'
+main: status: track
+main: input '}num'
+main: status: track
+main: input ''
+main: input '# Test 4: no octal: 010 is ten (expect: one)'
+main: input 'r'
+main: status: zero
+main: input '?num[octal = 10]'
+adding filter: 'num[octal = 10]'
+added filter: 0
+--- 0: 9
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [num], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0
+                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0
+                        000003: type 70 (C_ELEMENT), str 7 [octal], contents 0, next 0, prev 0
+                    000006: type 53 (T_NUMBER), str 15 [10], contents 0, next 0, prev 5
+main: status: zero
+main: input '{num'
+main: filter: rc: 13
+main: status: zero
+main: input '<num'
+main: filter: rc: 6
+main: status: predicate
+main: input '= id one'
+main: field: 'id'='one'
+main: status: predicate
+main: input '= big 18446744073709551614'
+main: field: 'big'='18446744073709551614'
+main: status: predicate
+main: input '= max 9223372036854775807'
+main: field: 'max'='9223372036854775807'
+main: status: predicate
+main: input '= neg -9223372036854775808'
+main: field: 'neg'='-9223372036854775808'
+main: status: predicate
+main: input '= hex 0x10'
+main: field: 'hex'='0x10'
+main: status: predicate
+main: input '= octal 010'
+main: field: 'octal'='010'
+main: status: full
+main: input '= half 2.5'
+main: field: 'half'='2.5'
+main: status: full
+main: input '>num'
+main: filter: rc: 6
+main: status: track
+main: input '<num'
+main: filter: rc: 8
+main: status: predicate
+main: input '= id two'
+main: field: 'id'='two'
+main: status: predicate
+main: input '= big 2'
+main: field: 'big'='2'
+main: status: predicate
+main: input '= max 1'
+main: field: 'max'='1'
+main: status: predicate
+main: input '= neg -1'
+main: field: 'neg'='-1'
+main: status: predicate
+main: input '= hex 0x1'
+main: field: 'hex'='0x1'
+main: status: predicate
+main: input '= octal 07'
+main: field: 'octal'='07'
+main: status: track
+main: input '= half 0.5'
+main: field: 'half'='0.5'
+main: status: track
+main: input '>num'
+main: status: track
+main: input '}num'
+main: status: track
+main: input ''
+main: input '# Test 5: hex is uint64 (expect: one)'
+main: input 'r'
+main: status: zero
+main: input '?num[hex * 2 = 32]'
+adding filter: 'num[hex * 2 = 32]'
+added filter: 0
+--- 0: 11
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [num], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 7, next 0, prev 0
+                000007: type 14 (L_EQUALS), str 15 [=], contents 4, next 0, prev 0
+                    000004: type 29 (L_STAR), str 11 [*], contents 5, next 8, prev 0
+                        000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0
+                            000003: type 70 (C_ELEMENT), str 7 [hex], contents 0, next 0, prev 0
+                        000006: type 53 (T_NUMBER), str 13 [2], contents 0, next 0, prev 5
+                    000008: type 53 (T_NUMBER), str 17 [32], contents 0, next 0, prev 4
+main: status: zero
+main: input '{num'
+main: filter: rc: 13
+main: status: zero
+main: input '<num'
+main: filter: rc: 6
+main: status: predicate
+main: input '= id one'
+main: field: 'id'='one'
+main: status: predicate
+main: input '= big 18446744073709551614'
+main: field: 'big'='18446744073709551614'
+main: status: predicate
+main: input '= max 9223372036854775807'
+main: field: 'max'='9223372036854775807'
+main: status: predicate
+main: input '= neg -9223372036854775808'
+main: field: 'neg'='-9223372036854775808'
+main: status: predicate
+main: input '= hex 0x10'
+main: field: 'hex'='0x10'
+main: status: full
+main: input '= octal 010'
+main: field: 'octal'='010'
+main: status: full
+main: input '= half 2.5'
+main: field: 'half'='2.5'
+main: status: full
+main: input '>num'
+main: filter: rc: 6
+main: status: track
+main: input '<num'
+main: filter: rc: 8
+main: status: predicate
+main: input '= id two'
+main: field: 'id'='two'
+main: status: predicate
+main: input '= big 2'
+main: field: 'big'='2'
+main: status: predicate
+main: input '= max 1'
+main: field: 'max'='1'
+main: status: predicate
+main: input '= neg -1'
+main: field: 'neg'='-1'
+main: status: predicate
+main: input '= hex 0x1'
+main: field: 'hex'='0x1'
+main: status: track
+main: input '= octal 07'
+main: field: 'octal'='07'
+main: status: track
+main: input '= half 0.5'
+main: field: 'half'='0.5'
+main: status: track
+main: input '>num'
+main: status: track
+main: input '}num'
+main: status: track
+main: input ''
+main: input '# Test 6: ceiling of a float (expect: one)'
+main: input 'r'
+main: status: zero
+main: input '?num[ceiling(half) = 3]'
+adding filter: 'num[ceiling(half) = 3]'
+added filter: 0
+--- 0: 12
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [num], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0
+                000008: type 14 (L_EQUALS), str 24 [=], contents 3, next 0, prev 0
+                    000003: type 52 (T_FUNCTION_NAME), str 7 [ceiling], contents 7, next 9, prev 0
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0
+                            000005: type 70 (C_ELEMENT), str 17 [half], contents 0, next 0, prev 0
+                    000009: type 53 (T_NUMBER), str 26 [3], contents 0, next 0, prev 3
+main: status: zero
+main: input '{num'
+main: filter: rc: 13
+main: status: zero
+main: input '<num'
+main: filter: rc: 6
+main: status: predicate
+main: input '= id one'
+main: field: 'id'='one'
+main: status: predicate
+main: input '= big 18446744073709551614'
+main: field: 'big'='18446744073709551614'
+main: status: predicate
+main: input '= max 9223372036854775807'
+main: field: 'max'='9223372036854775807'
+main: status: predicate
+main: input '= neg -9223372036854775808'
+main: field: 'neg'='-9223372036854775808'
+main: status: predicate
+main: input '= hex 0x10'
+main: field: 'hex'='0x10'
+main: status: predicate
+main: input '= octal 010'
+main: field: 'octal'='010'
+main: status: predicate
+main: input '= half 2.5'
+main: field: 'half'='2.5'
+main: status: full
+main: input '>num'
+main: filter: rc: 6
+main: status: track
+main: input '<num'
+main: filter: rc: 8
+main: status: predicate
+main: input '= id two'
+main: field: 'id'='two'
+main: status: predicate
+main: input '= big 2'
+main: field: 'big'='2'
+main: status: predicate
+main: input '= max 1'
+main: field: 'max'='1'
+main: status: predicate
+main: input '= neg -1'
+main: field: 'neg'='-1'
+main: status: predicate
+main: input '= hex 0x1'
+main: field: 'hex'='0x1'
+main: status: predicate
+main: input '= octal 07'
+main: field: 'octal'='07'
+main: status: predicate
+main: input '= half 0.5'
+main: field: 'half'='0.5'
+main: status: track
+main: input '>num'
+main: status: track
+main: input '}num'
+main: status: track
+main: input ''
+main: input '# Test 7: floor of a float (expect: two)'
+main: input 'r'
+main: status: zero
+main: input '?num[floor(half) = 0]'
+adding filter: 'num[floor(half) = 0]'
+added filter: 0
+--- 0: 12
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [num], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0
+                000008: type 14 (L_EQUALS), str 22 [=], contents 3, next 0, prev 0
+                    000003: type 52 (T_FUNCTION_NAME), str 7 [floor], contents 7, next 9, prev 0
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0
+                            000005: type 70 (C_ELEMENT), str 15 [half], contents 0, next 0, prev 0
+                    000009: type 53 (T_NUMBER), str 24 [0], contents 0, next 0, prev 3
+main: status: zero
+main: input '{num'
+main: filter: rc: 13
+main: status: zero
+main: input '<num'
+main: filter: rc: 6
+main: status: predicate
+main: input '= id one'
+main: field: 'id'='one'
+main: status: predicate
+main: input '= big 18446744073709551614'
+main: field: 'big'='18446744073709551614'
+main: status: predicate
+main: input '= max 9223372036854775807'
+main: field: 'max'='9223372036854775807'
+main: status: predicate
+main: input '= neg -9223372036854775808'
+main: field: 'neg'='-9223372036854775808'
+main: status: predicate
+main: input '= hex 0x10'
+main: field: 'hex'='0x10'
+main: status: predicate
+main: input '= octal 010'
+main: field: 'octal'='010'
+main: status: predicate
+main: input '= half 2.5'
+main: field: 'half'='2.5'
+main: status: track
+main: input '>num'
+main: status: track
+main: input '<num'
+main: filter: rc: 6
+main: status: predicate
+main: input '= id two'
+main: field: 'id'='two'
+main: status: predicate
+main: input '= big 2'
+main: field: 'big'='2'
+main: status: predicate
+main: input '= max 1'
+main: field: 'max'='1'
+main: status: predicate
+main: input '= neg -1'
+main: field: 'neg'='-1'
+main: status: predicate
+main: input '= hex 0x1'
+main: field: 'hex'='0x1'
+main: status: predicate
+main: input '= octal 07'
+main: field: 'octal'='07'
+main: status: predicate
+main: input '= half 0.5'
+main: field: 'half'='0.5'
+main: status: full
+main: input '>num'
+main: filter: rc: 6
+main: status: track
+main: input '}num'
+main: status: track
+main: input ''
+main: input '# Test 8: round of a float (expect: one)'
+main: input 'r'
+main: status: zero
+main: input '?num[round(half) = 3]'
+adding filter: 'num[round(half) = 3]'
+added filter: 0
+--- 0: 12
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [num], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0
+                000008: type 14 (L_EQUALS), str 22 [=], contents 3, next 0, prev 0
+                    000003: type 52 (T_FUNCTION_NAME), str 7 [round], contents 7, next 9, prev 0
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0
+                            000005: type 70 (C_ELEMENT), str 15 [half], contents 0, next 0, prev 0
+                    000009: type 53 (T_NUMBER), str 24 [3], contents 0, next 0, prev 3
+main: status: zero
+main: input '{num'
+main: filter: rc: 13
+main: status: zero
+main: input '<num'
+main: filter: rc: 6
+main: status: predicate
+main: input '= id one'
+main: field: 'id'='one'
+main: status: predicate
+main: input '= big 18446744073709551614'
+main: field: 'big'='18446744073709551614'
+main: status: predicate
+main: input '= max 9223372036854775807'
+main: field: 'max'='9223372036854775807'
+main: status: predicate
+main: input '= neg -9223372036854775808'
+main: field: 'neg'='-9223372036854775808'
+main: status: predicate
+main: input '= hex 0x10'
+main: field: 'hex'='0x10'
+main: status: predicate
+main: input '= octal 010'
+main: field: 'octal'='010'
+main: status: predicate
+main: input '= half 2.5'
+main: field: 'half'='2.5'
+main: status: full
+main: input '>num'
+main: filter: rc: 6
+main: status: track
+main: input '<num'
+main: filter: rc: 8
+main: status: predicate
+main: input '= id two'
+main: field: 'id'='two'
+main: status: predicate
+main: input '= big 2'
+main: field: 'big'='2'
+main: status: predicate
+main: input '= max 1'
+main: field: 'max'='1'
+main: status: predicate
+main: input '= neg -1'
+main: field: 'neg'='-1'
+main: status: predicate
+main: input '= hex 0x1'
+main: field: 'hex'='0x1'
+main: status: predicate
+main: input '= octal 07'
+main: field: 'octal'='07'
+main: status: predicate
+main: input '= half 0.5'
+main: field: 'half'='0.5'
+main: status: track
+main: input '>num'
+main: status: track
+main: input '}num'
+main: status: track
+main: input ''
+main: input '# Test 9: float times int (expect: one)'
+main: input 'r'
+main: status: zero
+main: input '?num[half * 2 = 5]'
+adding filter: 'num[half * 2 = 5]'
+added filter: 0
+--- 0: 11
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [num], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 7, next 0, prev 0
+                000007: type 14 (L_EQUALS), str 16 [=], contents 4, next 0, prev 0
+                    000004: type 29 (L_STAR), str 12 [*], contents 5, next 8, prev 0
+                        000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0
+                            000003: type 70 (C_ELEMENT), str 7 [half], contents 0, next 0, prev 0
+                        000006: type 53 (T_NUMBER), str 14 [2], contents 0, next 0, prev 5
+                    000008: type 53 (T_NUMBER), str 18 [5], contents 0, next 0, prev 4
+main: status: zero
+main: input '{num'
+main: filter: rc: 13
+main: status: zero
+main: input '<num'
+main: filter: rc: 6
+main: status: predicate
+main: input '= id one'
+main: field: 'id'='one'
+main: status: predicate
+main: input '= big 18446744073709551614'
+main: field: 'big'='18446744073709551614'
+main: status: predicate
+main: input '= max 9223372036854775807'
+main: field: 'max'='9223372036854775807'
+main: status: predicate
+main: input '= neg -9223372036854775808'
+main: field: 'neg'='-9223372036854775808'
+main: status: predicate
+main: input '= hex 0x10'
+main: field: 'hex'='0x10'
+main: status: predicate
+main: input '= octal 010'
+main: field: 'octal'='010'
+main: status: predicate
+main: input '= half 2.5'
+main: field: 'half'='2.5'
+main: status: full
+main: input '>num'
+main: filter: rc: 6
+main: status: track
+main: input '<num'
+main: filter: rc: 8
+main: status: predicate
+main: input '= id two'
+main: field: 'id'='two'
+main: status: predicate
+main: input '= big 2'
+main: field: 'big'='2'
+main: status: predicate
+main: input '= max 1'
+main: field: 'max'='1'
+main: status: predicate
+main: input '= neg -1'
+main: field: 'neg'='-1'
+main: status: predicate
+main: input '= hex 0x1'
+main: field: 'hex'='0x1'
+main: status: predicate
+main: input '= octal 07'
+main: field: 'octal'='07'
+main: status: predicate
+main: input '= half 0.5'
+main: field: 'half'='0.5'
+main: status: track
+main: input '>num'
+main: status: track
+main: input '}num'
+main: status: track
+main: input ''
+main: input '# Test 10: mod truncates (positive dividend) (expect: one, two)'
+main: input 'r'
+main: status: zero
+main: input '?num[7 mod -2 = 1]'
+adding filter: 'num[7 mod -2 = 1]'
+added filter: 0
+--- 0: 11
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [num], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 7, next 0, prev 0
+                000007: type 14 (L_EQUALS), str 17 [=], contents 4, next 0, prev 0
+                    000004: type 42 ('*'), str 9 [mod], contents 3, next 8, prev 0
+                        000003: type 53 (T_NUMBER), str 7 [7], contents 0, next 5, prev 0
+                        000005: type 86 (C_UNI_MINUS), str 13 [-], contents 6, next 0, prev 3
+                            000006: type 53 (T_NUMBER), str 15 [2], contents 0, next 0, prev 0
+                    000008: type 53 (T_NUMBER), str 19 [1], contents 0, next 0, prev 4
+main: status: zero
+main: input '{num'
+main: filter: rc: 13
+main: status: zero
+main: input '<num'
+main: filter: rc: 6
+main: status: full
+main: input '= id one'
+main: field: 'id'='one'
+main: status: full
+main: input '= big 18446744073709551614'
+main: field: 'big'='18446744073709551614'
+main: status: full
+main: input '= max 9223372036854775807'
+main: field: 'max'='9223372036854775807'
+main: status: full
+main: input '= neg -9223372036854775808'
+main: field: 'neg'='-9223372036854775808'
+main: status: full
+main: input '= hex 0x10'
+main: field: 'hex'='0x10'
+main: status: full
+main: input '= octal 010'
+main: field: 'octal'='010'
+main: status: full
+main: input '= half 2.5'
+main: field: 'half'='2.5'
+main: status: full
+main: input '>num'
+main: filter: rc: 6
+main: status: track
+main: input '<num'
+main: filter: rc: 8
+main: status: full
+main: input '= id two'
+main: field: 'id'='two'
+main: status: full
+main: input '= big 2'
+main: field: 'big'='2'
+main: status: full
+main: input '= max 1'
+main: field: 'max'='1'
+main: status: full
+main: input '= neg -1'
+main: field: 'neg'='-1'
+main: status: full
+main: input '= hex 0x1'
+main: field: 'hex'='0x1'
+main: status: full
+main: input '= octal 07'
+main: field: 'octal'='07'
+main: status: full
+main: input '= half 0.5'
+main: field: 'half'='0.5'
+main: status: full
+main: input '>num'
+main: filter: rc: 6
+main: status: track
+main: input '}num'
+main: status: track
+main: input ''
+main: input '# Test 11: mod truncates (negative dividend) (expect: one, two)'
+main: input 'r'
+main: status: zero
+main: input '?num[-7 mod 2 = -1]'
+adding filter: 'num[-7 mod 2 = -1]'
+added filter: 0
+--- 0: 12
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [num], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 7, next 0, prev 0
+                000007: type 14 (L_EQUALS), str 17 [=], contents 5, next 0, prev 0
+                    000005: type 42 ('*'), str 11 [mod], contents 3, next 8, prev 0
+                        000003: type 86 (C_UNI_MINUS), str 7 [-], contents 4, next 6, prev 0
+                            000004: type 53 (T_NUMBER), str 9 [7], contents 0, next 0, prev 0
+                        000006: type 53 (T_NUMBER), str 15 [2], contents 0, next 0, prev 3
+                    000008: type 86 (C_UNI_MINUS), str 19 [-], contents 9, next 0, prev 5
+                        000009: type 53 (T_NUMBER), str 21 [1], contents 0, next 0, prev 0
+main: status: zero
+main: input '{num'
+main: filter: rc: 13
+main: status: zero
+main: input '<num'
+main: filter: rc: 6
+main: status: full
+main: input '= id one'
+main: field: 'id'='one'
+main: status: full
+main: input '= big 18446744073709551614'
+main: field: 'big'='18446744073709551614'
+main: status: full
+main: input '= max 9223372036854775807'
+main: field: 'max'='9223372036854775807'
+main: status: full
+main: input '= neg -9223372036854775808'
+main: field: 'neg'='-9223372036854775808'
+main: status: full
+main: input '= hex 0x10'
+main: field: 'hex'='0x10'
+main: status: full
+main: input '= octal 010'
+main: field: 'octal'='010'
+main: status: full
+main: input '= half 2.5'
+main: field: 'half'='2.5'
+main: status: full
+main: input '>num'
+main: filter: rc: 6
+main: status: track
+main: input '<num'
+main: filter: rc: 8
+main: status: full
+main: input '= id two'
+main: field: 'id'='two'
+main: status: full
+main: input '= big 2'
+main: field: 'big'='2'
+main: status: full
+main: input '= max 1'
+main: field: 'max'='1'
+main: status: full
+main: input '= neg -1'
+main: field: 'neg'='-1'
+main: status: full
+main: input '= hex 0x1'
+main: field: 'hex'='0x1'
+main: status: full
+main: input '= octal 07'
+main: field: 'octal'='07'
+main: status: full
+main: input '= half 0.5'
+main: field: 'half'='0.5'
+main: status: full
+main: input '>num'
+main: filter: rc: 6
+main: status: track
+main: input '}num'
+main: status: track
+main: input ''
+main: input '# Test 12: uint64 mod (expect: one)'
+main: input 'r'
+main: status: zero
+main: input '?num[big mod 10 = 4]'
+adding filter: 'num[big mod 10 = 4]'
+added filter: 0
+--- 0: 11
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [num], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 7, next 0, prev 0
+                000007: type 14 (L_EQUALS), str 18 [=], contents 4, next 0, prev 0
+                    000004: type 42 ('*'), str 11 [mod], contents 5, next 8, prev 0
+                        000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0
+                            000003: type 70 (C_ELEMENT), str 7 [big], contents 0, next 0, prev 0
+                        000006: type 53 (T_NUMBER), str 15 [10], contents 0, next 0, prev 5
+                    000008: type 53 (T_NUMBER), str 20 [4], contents 0, next 0, prev 4
+main: status: zero
+main: input '{num'
+main: filter: rc: 13
+main: status: zero
+main: input '<num'
+main: filter: rc: 6
+main: status: predicate
+main: input '= id one'
+main: field: 'id'='one'
+main: status: predicate
+main: input '= big 18446744073709551614'
+main: field: 'big'='18446744073709551614'
+main: status: full
+main: input '= max 9223372036854775807'
+main: field: 'max'='9223372036854775807'
+main: status: full
+main: input '= neg -9223372036854775808'
+main: field: 'neg'='-9223372036854775808'
+main: status: full
+main: input '= hex 0x10'
+main: field: 'hex'='0x10'
+main: status: full
+main: input '= octal 010'
+main: field: 'octal'='010'
+main: status: full
+main: input '= half 2.5'
+main: field: 'half'='2.5'
+main: status: full
+main: input '>num'
+main: filter: rc: 6
+main: status: track
+main: input '<num'
+main: filter: rc: 8
+main: status: predicate
+main: input '= id two'
+main: field: 'id'='two'
+main: status: predicate
+main: input '= big 2'
+main: field: 'big'='2'
+main: status: track
+main: input '= max 1'
+main: field: 'max'='1'
+main: status: track
+main: input '= neg -1'
+main: field: 'neg'='-1'
+main: status: track
+main: input '= hex 0x1'
+main: field: 'hex'='0x1'
+main: status: track
+main: input '= octal 07'
+main: field: 'octal'='07'
+main: status: track
+main: input '= half 0.5'
+main: field: 'half'='0.5'
+main: status: track
+main: input '>num'
+main: status: track
+main: input '}num'
+main: status: track
+main: input ''
+main: input '# Test 13: exact div stays integer (expect: one, two)'
+main: input 'r'
+main: status: zero
+main: input '?num[9 div 3 = 3]'
+adding filter: 'num[9 div 3 = 3]'
+added filter: 0
+--- 0: 10
+    000010: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [num], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 6, next 0, prev 0
+                000006: type 14 (L_EQUALS), str 15 [=], contents 4, next 0, prev 0
+                    000004: type 41 (K_DIV), str 9 [div], contents 3, next 7, prev 0
+                        000003: type 53 (T_NUMBER), str 7 [9], contents 0, next 5, prev 0
+                        000005: type 53 (T_NUMBER), str 13 [3], contents 0, next 0, prev 3
+                    000007: type 53 (T_NUMBER), str 17 [3], contents 0, next 0, prev 4
+main: status: zero
+main: input '{num'
+main: filter: rc: 13
+main: status: zero
+main: input '<num'
+main: filter: rc: 6
+main: status: full
+main: input '= id one'
+main: field: 'id'='one'
+main: status: full
+main: input '= big 18446744073709551614'
+main: field: 'big'='18446744073709551614'
+main: status: full
+main: input '= max 9223372036854775807'
+main: field: 'max'='9223372036854775807'
+main: status: full
+main: input '= neg -9223372036854775808'
+main: field: 'neg'='-9223372036854775808'
+main: status: full
+main: input '= hex 0x10'
+main: field: 'hex'='0x10'
+main: status: full
+main: input '= octal 010'
+main: field: 'octal'='010'
+main: status: full
+main: input '= half 2.5'
+main: field: 'half'='2.5'
+main: status: full
+main: input '>num'
+main: filter: rc: 6
+main: status: track
+main: input '<num'
+main: filter: rc: 8
+main: status: full
+main: input '= id two'
+main: field: 'id'='two'
+main: status: full
+main: input '= big 2'
+main: field: 'big'='2'
+main: status: full
+main: input '= max 1'
+main: field: 'max'='1'
+main: status: full
+main: input '= neg -1'
+main: field: 'neg'='-1'
+main: status: full
+main: input '= hex 0x1'
+main: field: 'hex'='0x1'
+main: status: full
+main: input '= octal 07'
+main: field: 'octal'='07'
+main: status: full
+main: input '= half 0.5'
+main: field: 'half'='0.5'
+main: status: full
+main: input '>num'
+main: filter: rc: 6
+main: status: track
+main: input '}num'
+main: status: track
+main: input ''
+main: input '# Test 14: inexact div is float (expect: one, two)'
+main: input 'r'
+main: status: zero
+main: input '?num[7 div 2 = 3.5]'
+adding filter: 'num[7 div 2 = 3.5]'
+added filter: 0
+--- 0: 10
+    000010: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [num], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 6, next 0, prev 0
+                000006: type 14 (L_EQUALS), str 15 [=], contents 4, next 0, prev 0
+                    000004: type 41 (K_DIV), str 9 [div], contents 3, next 7, prev 0
+                        000003: type 53 (T_NUMBER), str 7 [7], contents 0, next 5, prev 0
+                        000005: type 53 (T_NUMBER), str 13 [2], contents 0, next 0, prev 3
+                    000007: type 53 (T_NUMBER), str 17 [3.5], contents 0, next 0, prev 4
+main: status: zero
+main: input '{num'
+main: filter: rc: 13
+main: status: zero
+main: input '<num'
+main: filter: rc: 6
+main: status: full
+main: input '= id one'
+main: field: 'id'='one'
+main: status: full
+main: input '= big 18446744073709551614'
+main: field: 'big'='18446744073709551614'
+main: status: full
+main: input '= max 9223372036854775807'
+main: field: 'max'='9223372036854775807'
+main: status: full
+main: input '= neg -9223372036854775808'
+main: field: 'neg'='-9223372036854775808'
+main: status: full
+main: input '= hex 0x10'
+main: field: 'hex'='0x10'
+main: status: full
+main: input '= octal 010'
+main: field: 'octal'='010'
+main: status: full
+main: input '= half 2.5'
+main: field: 'half'='2.5'
+main: status: full
+main: input '>num'
+main: filter: rc: 6
+main: status: track
+main: input '<num'
+main: filter: rc: 8
+main: status: full
+main: input '= id two'
+main: field: 'id'='two'
+main: status: full
+main: input '= big 2'
+main: field: 'big'='2'
+main: status: full
+main: input '= max 1'
+main: field: 'max'='1'
+main: status: full
+main: input '= neg -1'
+main: field: 'neg'='-1'
+main: status: full
+main: input '= hex 0x1'
+main: field: 'hex'='0x1'
+main: status: full
+main: input '= octal 07'
+main: field: 'octal'='07'
+main: status: full
+main: input '= half 0.5'
+main: field: 'half'='0.5'
+main: status: full
+main: input '>num'
+main: filter: rc: 6
+main: status: track
+main: input '}num'
+main: status: track
+main: input ''
+main: input '# Test 15: string-length (expect: one)'
+main: input 'r'
+main: status: zero
+main: input '?num[string-length(octal) = 3]'
+adding filter: 'num[string-length(octal) = 3]'
+added filter: 0
+--- 0: 12
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [num], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0
+                000008: type 14 (L_EQUALS), str 31 [=], contents 3, next 0, prev 0
+                    000003: type 52 (T_FUNCTION_NAME), str 7 [string-length], contents 7, next 9, prev 0
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0
+                            000005: type 70 (C_ELEMENT), str 23 [octal], contents 0, next 0, prev 0
+                    000009: type 53 (T_NUMBER), str 33 [3], contents 0, next 0, prev 3
+main: status: zero
+main: input '{num'
+main: filter: rc: 13
+main: status: zero
+main: input '<num'
+main: filter: rc: 6
+main: status: predicate
+main: input '= id one'
+main: field: 'id'='one'
+main: status: predicate
+main: input '= big 18446744073709551614'
+main: field: 'big'='18446744073709551614'
+main: status: predicate
+main: input '= max 9223372036854775807'
+main: field: 'max'='9223372036854775807'
+main: status: predicate
+main: input '= neg -9223372036854775808'
+main: field: 'neg'='-9223372036854775808'
+main: status: predicate
+main: input '= hex 0x10'
+main: field: 'hex'='0x10'
+main: status: predicate
+main: input '= octal 010'
+main: field: 'octal'='010'
+main: status: full
+main: input '= half 2.5'
+main: field: 'half'='2.5'
+main: status: full
+main: input '>num'
+main: filter: rc: 6
+main: status: track
+main: input '<num'
+main: filter: rc: 8
+main: status: predicate
+main: input '= id two'
+main: field: 'id'='two'
+main: status: predicate
+main: input '= big 2'
+main: field: 'big'='2'
+main: status: predicate
+main: input '= max 1'
+main: field: 'max'='1'
+main: status: predicate
+main: input '= neg -1'
+main: field: 'neg'='-1'
+main: status: predicate
+main: input '= hex 0x1'
+main: field: 'hex'='0x1'
+main: status: predicate
+main: input '= octal 07'
+main: field: 'octal'='07'
+main: status: track
+main: input '= half 0.5'
+main: field: 'half'='0.5'
+main: status: track
+main: input '>num'
+main: status: track
+main: input '}num'
+main: status: track
+main: input ''
+main: input '# Test 16: uint64 minus int64 (expect: one, two)'
+main: input 'r'
+main: status: zero
+main: input '?num[big - max = max]'
+adding filter: 'num[big - max = max]'
+added filter: 0
+--- 0: 13
+    000013: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [num], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 7, next 0, prev 0
+                000007: type 14 (L_EQUALS), str 17 [=], contents 4, next 0, prev 0
+                    000004: type 19 (L_MINUS), str 11 [-], contents 5, next 11, prev 0
+                        000005: type 74 (C_PATH), str 0 [], contents 3, next 8, prev 0
+                            000003: type 70 (C_ELEMENT), str 7 [big], contents 0, next 0, prev 0
+                        000008: type 74 (C_PATH), str 0 [], contents 6, next 0, prev 5
+                            000006: type 70 (C_ELEMENT), str 13 [max], contents 0, next 0, prev 0
+                    000011: type 74 (C_PATH), str 0 [], contents 9, next 0, prev 4
+                        000009: type 70 (C_ELEMENT), str 19 [max], contents 0, next 0, prev 0
+main: status: zero
+main: input '{num'
+main: filter: rc: 13
+main: status: zero
+main: input '<num'
+main: filter: rc: 6
+main: status: predicate
+main: input '= id one'
+main: field: 'id'='one'
+main: status: predicate
+main: input '= big 18446744073709551614'
+main: field: 'big'='18446744073709551614'
+main: status: predicate
+main: input '= max 9223372036854775807'
+main: field: 'max'='9223372036854775807'
+main: status: full
+main: input '= neg -9223372036854775808'
+main: field: 'neg'='-9223372036854775808'
+main: status: full
+main: input '= hex 0x10'
+main: field: 'hex'='0x10'
+main: status: full
+main: input '= octal 010'
+main: field: 'octal'='010'
+main: status: full
+main: input '= half 2.5'
+main: field: 'half'='2.5'
+main: status: full
+main: input '>num'
+main: filter: rc: 6
+main: status: track
+main: input '<num'
+main: filter: rc: 8
+main: status: predicate
+main: input '= id two'
+main: field: 'id'='two'
+main: status: predicate
+main: input '= big 2'
+main: field: 'big'='2'
+main: status: predicate
+main: input '= max 1'
+main: field: 'max'='1'
+main: status: full
+main: input '= neg -1'
+main: field: 'neg'='-1'
+main: status: full
+main: input '= hex 0x1'
+main: field: 'hex'='0x1'
+main: status: full
+main: input '= octal 07'
+main: field: 'octal'='07'
+main: status: full
+main: input '= half 0.5'
+main: field: 'half'='0.5'
+main: status: full
+main: input '>num'
+main: filter: rc: 6
+main: status: track
+main: input '}num'
+main: status: track
+main: input ''
+main: input '# Test 17: overflow into uint64 (expect: one, two)'
+main: input 'r'
+main: status: zero
+main: input '?num[max * 2 + 1 = big + 1]'
+adding filter: 'num[max * 2 + 1 = big + 1]'
+added filter: 0
+xpath_01: test: filter expression feature is unsupported: plus sign ('+')
+--- 0: 16
+    000016: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [num], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 9, next 0, prev 0
+                000009: type 14 (L_EQUALS), str 19 [=], contents 7, next 0, prev 0
+                    000007: type 25 (L_PLUS), str 15 [+], contents 4, next 11, prev 0
+                        000004: type 29 (L_STAR), str 11 [*], contents 5, next 8, prev 0
+                            000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0
+                                000003: type 70 (C_ELEMENT), str 7 [max], contents 0, next 0, prev 0
+                            000006: type 53 (T_NUMBER), str 13 [2], contents 0, next 0, prev 5
+                        000008: type 53 (T_NUMBER), str 17 [1], contents 0, next 0, prev 4
+                    000011: type 25 (L_PLUS), str 25 [+], contents 12, next 0, prev 7
+                        000012: type 74 (C_PATH), str 0 [], contents 10, next 13, prev 0
+                            000010: type 70 (C_ELEMENT), str 21 [big], contents 0, next 0, prev 0
+                        000013: type 53 (T_NUMBER), str 27 [1], contents 0, next 0, prev 12
+main: status: zero
+main: input '{num'
+main: filter: rc: 13
+main: status: zero
+main: input '<num'
+main: filter: rc: 6
+main: status: predicate
+main: input '= id one'
+main: field: 'id'='one'
+main: status: predicate
+main: input '= big 18446744073709551614'
+main: field: 'big'='18446744073709551614'
+main: status: predicate
+main: input '= max 9223372036854775807'
+main: field: 'max'='9223372036854775807'
+main: status: full
+main: input '= neg -9223372036854775808'
+main: field: 'neg'='-9223372036854775808'
+main: status: full
+main: input '= hex 0x10'
+main: field: 'hex'='0x10'
+main: status: full
+main: input '= octal 010'
+main: field: 'octal'='010'
+main: status: full
+main: input '= half 2.5'
+main: field: 'half'='2.5'
+main: status: full
+main: input '>num'
+main: filter: rc: 6
+main: status: track
+main: input '<num'
+main: filter: rc: 8
+main: status: predicate
+main: input '= id two'
+main: field: 'id'='two'
+main: status: predicate
+main: input '= big 2'
+main: field: 'big'='2'
+main: status: predicate
+main: input '= max 1'
+main: field: 'max'='1'
+main: status: full
+main: input '= neg -1'
+main: field: 'neg'='-1'
+main: status: full
+main: input '= hex 0x1'
+main: field: 'hex'='0x1'
+main: status: full
+main: input '= octal 07'
+main: field: 'octal'='07'
+main: status: full
+main: input '= half 0.5'
+main: field: 'half'='0.5'
+main: status: full
+main: input '>num'
+main: filter: rc: 6
+main: status: track
+main: input '}num'
+main: status: track
+main: input ''
+main: input '# Test 18: negative int64 mod big uint64 (expect: one, two)'
+main: input 'r'
+main: status: zero
+main: input '?num[neg mod big = neg]'
+adding filter: 'num[neg mod big = neg]'
+added filter: 0
+--- 0: 13
+    000013: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [num], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 7, next 0, prev 0
+                000007: type 14 (L_EQUALS), str 19 [=], contents 4, next 0, prev 0
+                    000004: type 42 ('*'), str 11 [mod], contents 5, next 11, prev 0
+                        000005: type 74 (C_PATH), str 0 [], contents 3, next 8, prev 0
+                            000003: type 70 (C_ELEMENT), str 7 [neg], contents 0, next 0, prev 0
+                        000008: type 74 (C_PATH), str 0 [], contents 6, next 0, prev 5
+                            000006: type 70 (C_ELEMENT), str 15 [big], contents 0, next 0, prev 0
+                    000011: type 74 (C_PATH), str 0 [], contents 9, next 0, prev 4
+                        000009: type 70 (C_ELEMENT), str 21 [neg], contents 0, next 0, prev 0
+main: status: zero
+main: input '{num'
+main: filter: rc: 13
+main: status: zero
+main: input '<num'
+main: filter: rc: 6
+main: status: predicate
+main: input '= id one'
+main: field: 'id'='one'
+main: status: predicate
+main: input '= big 18446744073709551614'
+main: field: 'big'='18446744073709551614'
+main: status: predicate
+main: input '= max 9223372036854775807'
+main: field: 'max'='9223372036854775807'
+main: status: predicate
+main: input '= neg -9223372036854775808'
+main: field: 'neg'='-9223372036854775808'
+main: status: full
+main: input '= hex 0x10'
+main: field: 'hex'='0x10'
+main: status: full
+main: input '= octal 010'
+main: field: 'octal'='010'
+main: status: full
+main: input '= half 2.5'
+main: field: 'half'='2.5'
+main: status: full
+main: input '>num'
+main: filter: rc: 6
+main: status: track
+main: input '<num'
+main: filter: rc: 8
+main: status: predicate
+main: input '= id two'
+main: field: 'id'='two'
+main: status: predicate
+main: input '= big 2'
+main: field: 'big'='2'
+main: status: predicate
+main: input '= max 1'
+main: field: 'max'='1'
+main: status: predicate
+main: input '= neg -1'
+main: field: 'neg'='-1'
+main: status: full
+main: input '= hex 0x1'
+main: field: 'hex'='0x1'
+main: status: full
+main: input '= octal 07'
+main: field: 'octal'='07'
+main: status: full
+main: input '= half 0.5'
+main: field: 'half'='0.5'
+main: status: full
+main: input '>num'
+main: filter: rc: 6
+main: status: track
+main: input '}num'
+main: status: track
+main: input ''
+main: input '# Test 19: int64 overflow moves to uint64 (expect: one, two)'
+main: input 'r'
+main: status: zero
+main: input '?num[max + max > max]'
+adding filter: 'num[max + max > max]'
+added filter: 0
+xpath_01: test: filter expression feature is unsupported: plus sign ('+')
+--- 0: 13
+    000013: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [num], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 7, next 0, prev 0
+                000007: type 15 (L_GRTR), str 17 [>], contents 4, next 0, prev 0
+                    000004: type 25 (L_PLUS), str 11 [+], contents 5, next 11, prev 0
+                        000005: type 74 (C_PATH), str 0 [], contents 3, next 8, prev 0
+                            000003: type 70 (C_ELEMENT), str 7 [max], contents 0, next 0, prev 0
+                        000008: type 74 (C_PATH), str 0 [], contents 6, next 0, prev 5
+                            000006: type 70 (C_ELEMENT), str 13 [max], contents 0, next 0, prev 0
+                    000011: type 74 (C_PATH), str 0 [], contents 9, next 0, prev 4
+                        000009: type 70 (C_ELEMENT), str 19 [max], contents 0, next 0, prev 0
+main: status: zero
+main: input '{num'
+main: filter: rc: 13
+main: status: zero
+main: input '<num'
+main: filter: rc: 6
+main: status: predicate
+main: input '= id one'
+main: field: 'id'='one'
+main: status: predicate
+main: input '= big 18446744073709551614'
+main: field: 'big'='18446744073709551614'
+main: status: predicate
+main: input '= max 9223372036854775807'
+main: field: 'max'='9223372036854775807'
+main: status: full
+main: input '= neg -9223372036854775808'
+main: field: 'neg'='-9223372036854775808'
+main: status: full
+main: input '= hex 0x10'
+main: field: 'hex'='0x10'
+main: status: full
+main: input '= octal 010'
+main: field: 'octal'='010'
+main: status: full
+main: input '= half 2.5'
+main: field: 'half'='2.5'
+main: status: full
+main: input '>num'
+main: filter: rc: 6
+main: status: track
+main: input '<num'
+main: filter: rc: 8
+main: status: predicate
+main: input '= id two'
+main: field: 'id'='two'
+main: status: predicate
+main: input '= big 2'
+main: field: 'big'='2'
+main: status: predicate
+main: input '= max 1'
+main: field: 'max'='1'
+main: status: full
+main: input '= neg -1'
+main: field: 'neg'='-1'
+main: status: full
+main: input '= hex 0x1'
+main: field: 'hex'='0x1'
+main: status: full
+main: input '= octal 07'
+main: field: 'octal'='07'
+main: status: full
+main: input '= half 0.5'
+main: field: 'half'='0.5'
+main: status: full
+main: input '>num'
+main: filter: rc: 6
+main: status: track
+main: input '}num'
+main: status: track
+main: input ''
+main: input '# Test 20: uint64 overflow falls back to float (expect: one, two)'
+main: input 'r'
+main: status: zero
+main: input '?num[big + big > big]'
+adding filter: 'num[big + big > big]'
+added filter: 0
+xpath_01: test: filter expression feature is unsupported: plus sign ('+')
+--- 0: 13
+    000013: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [num], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 7, next 0, prev 0
+                000007: type 15 (L_GRTR), str 17 [>], contents 4, next 0, prev 0
+                    000004: type 25 (L_PLUS), str 11 [+], contents 5, next 11, prev 0
+                        000005: type 74 (C_PATH), str 0 [], contents 3, next 8, prev 0
+                            000003: type 70 (C_ELEMENT), str 7 [big], contents 0, next 0, prev 0
+                        000008: type 74 (C_PATH), str 0 [], contents 6, next 0, prev 5
+                            000006: type 70 (C_ELEMENT), str 13 [big], contents 0, next 0, prev 0
+                    000011: type 74 (C_PATH), str 0 [], contents 9, next 0, prev 4
+                        000009: type 70 (C_ELEMENT), str 19 [big], contents 0, next 0, prev 0
+main: status: zero
+main: input '{num'
+main: filter: rc: 13
+main: status: zero
+main: input '<num'
+main: filter: rc: 6
+main: status: predicate
+main: input '= id one'
+main: field: 'id'='one'
+main: status: predicate
+main: input '= big 18446744073709551614'
+main: field: 'big'='18446744073709551614'
+main: status: full
+main: input '= max 9223372036854775807'
+main: field: 'max'='9223372036854775807'
+main: status: full
+main: input '= neg -9223372036854775808'
+main: field: 'neg'='-9223372036854775808'
+main: status: full
+main: input '= hex 0x10'
+main: field: 'hex'='0x10'
+main: status: full
+main: input '= octal 010'
+main: field: 'octal'='010'
+main: status: full
+main: input '= half 2.5'
+main: field: 'half'='2.5'
+main: status: full
+main: input '>num'
+main: filter: rc: 6
+main: status: track
+main: input '<num'
+main: filter: rc: 8
+main: status: predicate
+main: input '= id two'
+main: field: 'id'='two'
+main: status: predicate
+main: input '= big 2'
+main: field: 'big'='2'
+main: status: full
+main: input '= max 1'
+main: field: 'max'='1'
+main: status: full
+main: input '= neg -1'
+main: field: 'neg'='-1'
+main: status: full
+main: input '= hex 0x1'
+main: field: 'hex'='0x1'
+main: status: full
+main: input '= octal 07'
+main: field: 'octal'='07'
+main: status: full
+main: input '= half 0.5'
+main: field: 'half'='0.5'
+main: status: full
+main: input '>num'
+main: filter: rc: 6
+main: status: track
+main: input '}num'
+main: status: track
+main: input ''
+main: input '# Test 21: sum() keeps integers (expect: one, two)'
+main: input 'r'
+main: status: zero
+main: input '?num[sum(big, 1) != big]'
+adding filter: 'num[sum(big, 1) != big]'
+added filter: 0
+--- 0: 15
+    000015: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [num], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 10, next 0, prev 0
+                000010: type 21 (L_NOTEQUALS), str 23 [!=], contents 3, next 0, prev 0
+                    000003: type 52 (T_FUNCTION_NAME), str 7 [sum], contents 7, next 13, prev 0
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0
+                            000005: type 70 (C_ELEMENT), str 13 [big], contents 0, next 0, prev 0
+                        000008: type 53 (T_NUMBER), str 19 [1], contents 0, next 0, prev 7
+                    000013: type 74 (C_PATH), str 0 [], contents 11, next 0, prev 3
+                        000011: type 70 (C_ELEMENT), str 26 [big], contents 0, next 0, prev 0
+main: status: zero
+main: input '{num'
+main: filter: rc: 13
+main: status: zero
+main: input '<num'
+main: filter: rc: 6
+main: status: predicate
+main: input '= id one'
+main: field: 'id'='one'
+main: status: predicate
+main: input '= big 18446744073709551614'
+main: field: 'big'='18446744073709551614'
+main: status: full
+main: input '= max 9223372036854775807'
+main: field: 'max'='9223372036854775807'
+main: status: full
+main: input '= neg -9223372036854775808'
+main: field: 'neg'='-9223372036854775808'
+main: status: full
+main: input '= hex 0x10'
+main: field: 'hex'='0x10'
+main: status: full
+main: input '= octal 010'
+main: field: 'octal'='010'
+main: status: full
+main: input '= half 2.5'
+main: field: 'half'='2.5'
+main: status: full
+main: input '>num'
+main: filter: rc: 6
+main: status: track
+main: input '<num'
+main: filter: rc: 8
+main: status: predicate
+main: input '= id two'
+main: field: 'id'='two'
+main: status: predicate
+main: input '= big 2'
+main: field: 'big'='2'
+main: status: full
+main: input '= max 1'
+main: field: 'max'='1'
+main: status: full
+main: input '= neg -1'
+main: field: 'neg'='-1'
+main: status: full
+main: input '= hex 0x1'
+main: field: 'hex'='0x1'
+main: status: full
+main: input '= octal 07'
+main: field: 'octal'='07'
+main: status: full
+main: input '= half 0.5'
+main: field: 'half'='0.5'
+main: status: full
+main: input '>num'
+main: filter: rc: 6
+main: status: track
+main: input '}num'
+main: status: track

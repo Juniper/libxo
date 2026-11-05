@@ -2267,6 +2267,7 @@ xo_failure (xo_handle_t *xop, const char *fmt, ...)
 void
 xo_failure_filter (xo_handle_t *xop, const char *fmt, ...)
 {
+    xop = xo_default(xop);	/* Walk API callers pass NULL */
     if (!XOF_ISSET(xop, XOF_FILTER_WARN))
         return;
 
@@ -2275,6 +2276,23 @@ xo_failure_filter (xo_handle_t *xop, const char *fmt, ...)
     va_start(vap, fmt);
     xo_warn_hcv(xop, -1, XO_XWF_CHECK_FILT | XO_XWF_NO_EXTERR, fmt, vap);
     va_end(vap);
+}
+
+/*
+ * va_list-taking variant of xo_failure_filter(), for callers (e.g. the
+ * xo_filter_data_ops_t default backend) that already hold a va_list and
+ * so cannot use the varargs form.  XO_XWF_CHECK_FILT/XO_XWF_NO_EXTERR are
+ * private to this file, so the gating logic has to live here rather than
+ * being re-derived by the caller.
+ */
+void
+xo_failure_filter_v (xo_handle_t *xop, const char *fmt, va_list vap)
+{
+    xop = xo_default(xop);	/* Walk API callers pass NULL */
+    if (!XOF_ISSET(xop, XOF_FILTER_WARN))
+	return;
+
+    xo_warn_hcv(xop, -1, XO_XWF_CHECK_FILT | XO_XWF_NO_EXTERR, fmt, vap);
 }
 
 /*
@@ -6831,16 +6849,22 @@ xo_filt_is_skippable (xo_handle_t *xop, xo_xff_flags_t flags,
 
     /*
      * If we're inside a capture for a PRED instance, buffer all
-     * sibling/nested content tentatively (styles/encoders that
-     * cannot be rolled back are excluded, unless an encoder has opted
-     * into DEADEND notification, which is what makes rollback safe).
-     * Only applies when the current frame has an active whiteboard
-     * (xs_rb_off set); after compact commit clears xs_rb_off,
-     * XOIF_FILTERING may still be set by rollback of a sibling
-     * container, but fields at that level are individually skippable
-     * and must not be suppressed here.
+     * sibling/nested content tentatively.  Only applies when the
+     * current frame has an active whiteboard (xs_rb_off set); after
+     * compact commit clears xs_rb_off, XOIF_FILTERING may still be
+     * set by rollback of a sibling container, but fields at that
+     * level are individually skippable and must not be suppressed
+     * here.
+     *
+     * Encoders are excluded, even those that take DEADEND: XML can
+     * write a TRACK field and later trim it out of the byte buffer
+     * when a sibling commits, but anything pushed to an encoder stays
+     * once its scope commits.  Content under a pending predicate was
+     * handled above (COND, for an encoder that takes DEADEND), and a
+     * PRED field (below) is kept.
      */
-    if (XOIF_ISSET(xop, XOIF_FILTERING) && can_rollback
+    if (XOIF_ISSET(xop, XOIF_FILTERING)
+	    && xo_style(xop) != XO_STYLE_ENCODER
 	    && xo_stack_cur(xop)->xs_rb_off != XS_OFFSET_CLEAR)
 	return FALSE;
 
@@ -10216,7 +10240,7 @@ xo_do_close_container (xo_handle_t *xop, const char *name)
 	break;
 
     case XO_STYLE_ENCODER:
-	if (XOF_ISSET(xop, XOF_FILTER) && XOEF_ISSET(xop, XOEF_FILTER_NOTIFY_DEADEND)
+	if (XOEF_ISSET(xop, XOEF_FILTER_NOTIFY_DEADEND)
 		&& xo_filt_want_rollback(xop, xsp)) {
 	    xo_filt_rollback(xop, xsp, old_fstatus, fstatus);
 	    xo_depth_change(xop, name, -1, 0, XSS_CLOSE_CONTAINER, 0, 0, 0);
@@ -10412,8 +10436,7 @@ xo_do_close_list (xo_handle_t *xop, const char *name)
 	break;
 
     case XO_STYLE_ENCODER:
-	if (XOF_ISSET(xop, XOF_FILTER)
-	        && XOEF_ISSET(xop, XOEF_FILTER_NOTIFY_DEADEND)
+	if (XOEF_ISSET(xop, XOEF_FILTER_NOTIFY_DEADEND)
 		&& xo_filt_want_rollback(xop, xsp)) {
 	    xo_filt_rollback(xop, xsp, xsp->xs_fstatus, xsp->xs_fstatus);
 	    xo_depth_change(xop, name, -1, 0, XSS_CLOSE_LIST, XSF_LIST, 0, 0);
@@ -10574,8 +10597,7 @@ xo_do_close_leaf_list (xo_handle_t *xop, const char *name)
 	break;
 
     case XO_STYLE_ENCODER:
-	if (XOF_ISSET(xop, XOF_FILTER)
-	        && XOEF_ISSET(xop, XOEF_FILTER_NOTIFY_DEADEND)
+	if (XOEF_ISSET(xop, XOEF_FILTER_NOTIFY_DEADEND)
 		&& xo_filt_want_rollback(xop, xsp)) {
 	    xo_filt_rollback(xop, xsp, xsp->xs_fstatus, xsp->xs_fstatus);
 	    xo_depth_change(xop, name, -1, 0,
@@ -10846,8 +10868,7 @@ xo_do_close_instance (xo_handle_t *xop, const char *name)
 	break;
 
     case XO_STYLE_ENCODER:
-	if (XOF_ISSET(xop, XOF_FILTER)
-	        && XOEF_ISSET(xop, XOEF_FILTER_NOTIFY_DEADEND)
+	if (XOEF_ISSET(xop, XOEF_FILTER_NOTIFY_DEADEND)
 		&& xo_filt_want_rollback(xop, xsp)) {
 	    xo_filt_rollback(xop, xsp, old_fstatus, fstatus);
 	    xo_depth_change(xop, name, -1, 0, XSS_CLOSE_INSTANCE, 0, 0, 0);

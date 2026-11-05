@@ -163,7 +163,7 @@ $ name wide
 
 # a cast to a string keeps every digit of a wide float
 r
-?item[concat(12345678901234.5, 'x') = '12345678901234.500000x']
+?item[concat(12345678901234.5, 'x') = '12345678901234.5x']
 {item
 <item
 $ name float

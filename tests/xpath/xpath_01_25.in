@@ -1,0 +1,507 @@
+#
+# Integer math stays in int64/uint64 while results fit; floats
+# (which lose precision past 2^53) are the last resort
+#
+
+# Test 1: uint64 add (equal in floats) (expect: one, two)
+?num[big + 1 != big]
+{num
+<num
+= id one
+= big 18446744073709551614
+= max 9223372036854775807
+= neg -9223372036854775808
+= hex 0x10
+= octal 010
+= half 2.5
+>num
+<num
+= id two
+= big 2
+= max 1
+= neg -1
+= hex 0x1
+= octal 07
+= half 0.5
+>num
+}num
+
+# Test 2: int64 subtract (equal in floats) (expect: one, two)
+r
+?num[max - 1 != max]
+{num
+<num
+= id one
+= big 18446744073709551614
+= max 9223372036854775807
+= neg -9223372036854775808
+= hex 0x10
+= octal 010
+= half 2.5
+>num
+<num
+= id two
+= big 2
+= max 1
+= neg -1
+= hex 0x1
+= octal 07
+= half 0.5
+>num
+}num
+
+# Test 3: negate INT64_MIN gives uint64 (expect: one)
+r
+?num[-neg = max + 1]
+{num
+<num
+= id one
+= big 18446744073709551614
+= max 9223372036854775807
+= neg -9223372036854775808
+= hex 0x10
+= octal 010
+= half 2.5
+>num
+<num
+= id two
+= big 2
+= max 1
+= neg -1
+= hex 0x1
+= octal 07
+= half 0.5
+>num
+}num
+
+# Test 4: no octal: 010 is ten (expect: one)
+r
+?num[octal = 10]
+{num
+<num
+= id one
+= big 18446744073709551614
+= max 9223372036854775807
+= neg -9223372036854775808
+= hex 0x10
+= octal 010
+= half 2.5
+>num
+<num
+= id two
+= big 2
+= max 1
+= neg -1
+= hex 0x1
+= octal 07
+= half 0.5
+>num
+}num
+
+# Test 5: hex is uint64 (expect: one)
+r
+?num[hex * 2 = 32]
+{num
+<num
+= id one
+= big 18446744073709551614
+= max 9223372036854775807
+= neg -9223372036854775808
+= hex 0x10
+= octal 010
+= half 2.5
+>num
+<num
+= id two
+= big 2
+= max 1
+= neg -1
+= hex 0x1
+= octal 07
+= half 0.5
+>num
+}num
+
+# Test 6: ceiling of a float (expect: one)
+r
+?num[ceiling(half) = 3]
+{num
+<num
+= id one
+= big 18446744073709551614
+= max 9223372036854775807
+= neg -9223372036854775808
+= hex 0x10
+= octal 010
+= half 2.5
+>num
+<num
+= id two
+= big 2
+= max 1
+= neg -1
+= hex 0x1
+= octal 07
+= half 0.5
+>num
+}num
+
+# Test 7: floor of a float (expect: two)
+r
+?num[floor(half) = 0]
+{num
+<num
+= id one
+= big 18446744073709551614
+= max 9223372036854775807
+= neg -9223372036854775808
+= hex 0x10
+= octal 010
+= half 2.5
+>num
+<num
+= id two
+= big 2
+= max 1
+= neg -1
+= hex 0x1
+= octal 07
+= half 0.5
+>num
+}num
+
+# Test 8: round of a float (expect: one)
+r
+?num[round(half) = 3]
+{num
+<num
+= id one
+= big 18446744073709551614
+= max 9223372036854775807
+= neg -9223372036854775808
+= hex 0x10
+= octal 010
+= half 2.5
+>num
+<num
+= id two
+= big 2
+= max 1
+= neg -1
+= hex 0x1
+= octal 07
+= half 0.5
+>num
+}num
+
+# Test 9: float times int (expect: one)
+r
+?num[half * 2 = 5]
+{num
+<num
+= id one
+= big 18446744073709551614
+= max 9223372036854775807
+= neg -9223372036854775808
+= hex 0x10
+= octal 010
+= half 2.5
+>num
+<num
+= id two
+= big 2
+= max 1
+= neg -1
+= hex 0x1
+= octal 07
+= half 0.5
+>num
+}num
+
+# Test 10: mod truncates (positive dividend) (expect: one, two)
+r
+?num[7 mod -2 = 1]
+{num
+<num
+= id one
+= big 18446744073709551614
+= max 9223372036854775807
+= neg -9223372036854775808
+= hex 0x10
+= octal 010
+= half 2.5
+>num
+<num
+= id two
+= big 2
+= max 1
+= neg -1
+= hex 0x1
+= octal 07
+= half 0.5
+>num
+}num
+
+# Test 11: mod truncates (negative dividend) (expect: one, two)
+r
+?num[-7 mod 2 = -1]
+{num
+<num
+= id one
+= big 18446744073709551614
+= max 9223372036854775807
+= neg -9223372036854775808
+= hex 0x10
+= octal 010
+= half 2.5
+>num
+<num
+= id two
+= big 2
+= max 1
+= neg -1
+= hex 0x1
+= octal 07
+= half 0.5
+>num
+}num
+
+# Test 12: uint64 mod (expect: one)
+r
+?num[big mod 10 = 4]
+{num
+<num
+= id one
+= big 18446744073709551614
+= max 9223372036854775807
+= neg -9223372036854775808
+= hex 0x10
+= octal 010
+= half 2.5
+>num
+<num
+= id two
+= big 2
+= max 1
+= neg -1
+= hex 0x1
+= octal 07
+= half 0.5
+>num
+}num
+
+# Test 13: exact div stays integer (expect: one, two)
+r
+?num[9 div 3 = 3]
+{num
+<num
+= id one
+= big 18446744073709551614
+= max 9223372036854775807
+= neg -9223372036854775808
+= hex 0x10
+= octal 010
+= half 2.5
+>num
+<num
+= id two
+= big 2
+= max 1
+= neg -1
+= hex 0x1
+= octal 07
+= half 0.5
+>num
+}num
+
+# Test 14: inexact div is float (expect: one, two)
+r
+?num[7 div 2 = 3.5]
+{num
+<num
+= id one
+= big 18446744073709551614
+= max 9223372036854775807
+= neg -9223372036854775808
+= hex 0x10
+= octal 010
+= half 2.5
+>num
+<num
+= id two
+= big 2
+= max 1
+= neg -1
+= hex 0x1
+= octal 07
+= half 0.5
+>num
+}num
+
+# Test 15: string-length (expect: one)
+r
+?num[string-length(octal) = 3]
+{num
+<num
+= id one
+= big 18446744073709551614
+= max 9223372036854775807
+= neg -9223372036854775808
+= hex 0x10
+= octal 010
+= half 2.5
+>num
+<num
+= id two
+= big 2
+= max 1
+= neg -1
+= hex 0x1
+= octal 07
+= half 0.5
+>num
+}num
+
+# Test 16: uint64 minus int64 (expect: one, two)
+r
+?num[big - max = max]
+{num
+<num
+= id one
+= big 18446744073709551614
+= max 9223372036854775807
+= neg -9223372036854775808
+= hex 0x10
+= octal 010
+= half 2.5
+>num
+<num
+= id two
+= big 2
+= max 1
+= neg -1
+= hex 0x1
+= octal 07
+= half 0.5
+>num
+}num
+
+# Test 17: overflow into uint64 (expect: one, two)
+r
+?num[max * 2 + 1 = big + 1]
+{num
+<num
+= id one
+= big 18446744073709551614
+= max 9223372036854775807
+= neg -9223372036854775808
+= hex 0x10
+= octal 010
+= half 2.5
+>num
+<num
+= id two
+= big 2
+= max 1
+= neg -1
+= hex 0x1
+= octal 07
+= half 0.5
+>num
+}num
+
+# Test 18: negative int64 mod big uint64 (expect: one, two)
+r
+?num[neg mod big = neg]
+{num
+<num
+= id one
+= big 18446744073709551614
+= max 9223372036854775807
+= neg -9223372036854775808
+= hex 0x10
+= octal 010
+= half 2.5
+>num
+<num
+= id two
+= big 2
+= max 1
+= neg -1
+= hex 0x1
+= octal 07
+= half 0.5
+>num
+}num
+
+# Test 19: int64 overflow moves to uint64 (expect: one, two)
+r
+?num[max + max > max]
+{num
+<num
+= id one
+= big 18446744073709551614
+= max 9223372036854775807
+= neg -9223372036854775808
+= hex 0x10
+= octal 010
+= half 2.5
+>num
+<num
+= id two
+= big 2
+= max 1
+= neg -1
+= hex 0x1
+= octal 07
+= half 0.5
+>num
+}num
+
+# Test 20: uint64 overflow falls back to float (expect: one, two)
+r
+?num[big + big > big]
+{num
+<num
+= id one
+= big 18446744073709551614
+= max 9223372036854775807
+= neg -9223372036854775808
+= hex 0x10
+= octal 010
+= half 2.5
+>num
+<num
+= id two
+= big 2
+= max 1
+= neg -1
+= hex 0x1
+= octal 07
+= half 0.5
+>num
+}num
+
+# Test 21: sum() keeps integers (expect: one, two)
+r
+?num[sum(big, 1) != big]
+{num
+<num
+= id one
+= big 18446744073709551614
+= max 9223372036854775807
+= neg -9223372036854775808
+= hex 0x10
+= octal 010
+= half 2.5
+>num
+<num
+= id two
+= big 2
+= max 1
+= neg -1
+= hex 0x1
+= octal 07
+= half 0.5
+>num
+}num

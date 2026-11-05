@@ -217,6 +217,7 @@ xo_xparse_ttname_map_t xo_xparse_ttname_map[] = {
     { C_NESTED_PREDICATES,      "predicates inside predicates" },
     { C_PREDICATE_PATHS,        "Multi-element paths in predicates" },
     { C_UNI_MINUS,		"Unary minus" },
+    { C_NAN,			"not a number (NaN)" },
     { M_ERROR,                  "invalid xpath expression" },
     { 0, NULL }
 };
@@ -563,10 +564,10 @@ xo_xparse_dump_one_node (xo_xparse_data_t *xdp, xo_xparse_node_id_t id,
     xo_xparse_node_t *prev = xo_xparse_node(xdp, xnp->xn_prev);
 
     xo_dbg(xdp->xd_xop, "%*s%s%06ld: type %u (%s), str %ld [%s], "
-	   "contents %ld, next %ld%s, prev %ld %s",
+	   "contents %ld, next %ld%s, prev %ld%s",
 	   indent, "", title ?: "", id,
 	   xnp->xn_type, xo_xparse_token_name(xnp->xn_type),
-	   xnp->xn_str, str ?: "", xnp->xn_contents, 
+	   xnp->xn_str, str ?: "", xnp->xn_contents,
 	   xnp->xn_next, (next && next->xn_prev != id) ? " BAD" : "",
 	   xnp->xn_prev, (prev && prev->xn_next != id) ? " BAD" : "");
 }
@@ -1298,6 +1299,8 @@ xo_xpath_yylex (xo_xparse_data_t *xdp, xo_xparse_node_id_t *yylvalp)
 	xdp->xd_ttype = 0;
 
 	xnp->xn_type = rc;
+	xnp->xn_line = xdp->xd_line;
+	xnp->xn_col = xdp->xd_col + 1;
 
 	return rc;
     }
@@ -1356,6 +1359,8 @@ xo_xpath_yylex (xo_xparse_data_t *xdp, xo_xparse_node_id_t *yylvalp)
     }
 
     xnp->xn_type = rc;
+    xnp->xn_line = xdp->xd_line;
+    xnp->xn_col = xdp->xd_col + 1;
     if (rc > 0) {
 	xnp->xn_str = xo_xparse_str_new(xdp, rc);
 
@@ -1407,7 +1412,8 @@ xo_xparse_syntax_error (xo_xparse_data_t *xdp, const char *token,
     if (yystate == YY_INITIAL_STATE && yychar < 0)
 	return xo_strdup("empty expression");
 
-    char *msg = xo_xparse_expecting_error(xdp, token, yystate, yychar);
+    char *msg = xo_xparse_expecting_error(xdp, token, yystate,
+					  "unexpected input");
     if (msg)
 	return msg;
 

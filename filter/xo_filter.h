@@ -11,10 +11,47 @@
 #ifndef XO_FILTER_H
 #define XO_FILTER_H
 
+#include <stdarg.h>
+
 #define XO_FILTER_OPS_VERSION 2	/* Current API version number */
 
 #define XO_FILTER_MISS	1	/* Missing information, might work later */
 #define XO_FILTER_FAIL	2	/* Test failed; will never succeed */
+
+/*
+ * Feature ids for xo_filter_set_unsupported_features().  These are stable,
+ * hand-assigned ids for optional bits of XPath grammar that a filter
+ * consumer may choose to reject at compile time.  They are independent of
+ * (and much smaller than) the internal, bison-generated token numbers in
+ * xo_xpath.tab.h, which is a build-private header not exposed here; the
+ * translation from one of these ids to the matching internal token is done
+ * inside xo_filter.c.
+ *
+ * libxo's own default list (xo_filter_default_unsupported_features, in
+ * xo_filter.c), which every filter starts with, rejects all of these.
+ * A caller like libpin, which drives its own
+ * xo_eval-compiled-program evaluation rather than libxo's trie matcher, can
+ * support a different subset (e.g. allow XO_XPF_PREDICATE_PATHS) by
+ * building its own zero-terminated array of these ids and passing it to
+ * xo_filter_set_unsupported_features().
+ */
+#define XO_XPF_DOTDOT			1 /* parent axis ('..') */
+#define XO_XPF_DOTDOTDOT		2 /* sequence operator ('...') */
+#define XO_XPF_COMMENT			3 /* 'comment()' node test */
+#define XO_XPF_ID			4 /* 'id()' function */
+#define XO_XPF_KEY			5 /* 'key()' function */
+#define XO_XPF_NODE			6 /* 'node()' node test */
+#define XO_XPF_PROCESSING_INSTRUCTION	7 /* 'processing-instruction()' */
+#define XO_XPF_TEXT			8 /* 'text()' node test */
+#define XO_XPF_DSLASH			9 /* descendant operator ('//') */
+#define XO_XPF_AXIS_NAME		10 /* built-in axis name ('child::') */
+#define XO_XPF_VAR			11 /* variable reference ('$name') */
+#define XO_XPF_SEQUENCE			12 /* sequence (comma) expressions */
+#define XO_XPF_DESCENDANT		13 /* descendant child ('one//two') */
+#define XO_XPF_TEST			14 /* node test (e.g. 'node()') */
+#define XO_XPF_UNION			15 /* union of two paths ('one|two') */
+#define XO_XPF_NESTED_PREDICATES	16 /* predicates inside predicates */
+#define XO_XPF_PREDICATE_PATHS		17 /* multi-element paths in predicates */
 
 struct xo_xparse_data_s;
 
@@ -25,6 +62,167 @@ struct xo_xparse_data_s;
 struct xo_filter_s;
 typedef struct xo_filter_s xo_filter_t;
 
+/*
+ * Opaque compiled-expression program and trie-walk frame, both defined
+ * inside xo_filter.c.  A non-libxo backend (e.g. libpin) that compiles
+ * its own select=/test= expressions against the xo_eval engine (see
+ * xo_eval_compile() / xo_eval_prog_run_simple() below) holds an
+ * xo_eval_prog_t * but never looks inside it.  xo_tframe_t only matters
+ * to libxo's own trie walk; a caller with no trie frame (e.g. libpin,
+ * evaluating a standalone scalar expression) always passes NULL for it.
+ */
+struct xo_eval_prog_s;
+typedef struct xo_eval_prog_s xo_eval_prog_t;
+struct xo_tframe_s;
+typedef struct xo_tframe_s xo_tframe_t;
+
+/*
+ * Opaque data context: only the implementation outside xo_filter.so knows
+ * the real layout.  libxo's own implementation (using heap + xparse string
+ * table) defines struct xo_filter_data_s inside filter/xo_filter.c.
+ * Alternative backends (e.g. libpin, using parrotdb/paistr atoms) define
+ * their own struct xo_filter_data_s in their own translation unit.
+ */
+struct xo_filter_data_s;
+typedef struct xo_filter_data_s xo_filter_data_t;
+
+/*
+ * Strongly-typed interned name id stored inside trie nodes.  The core
+ * never interprets ni_id; only the data implementation does.  For the
+ * default backend ni_id is an xo_xparse_str_id_t (string-table offset).
+ * For a libpin backend ni_id would be a paistr atom.
+ */
+typedef struct { uint32_t ni_id; } xo_name_id_t;
+
+/*
+ * Filter status type and values.  Also defined in libxo/xo_private.h for
+ * internal use; duplicated here so external consumers (e.g. libpin) can
+ * compare status values without pulling in the private header.
+ */
+#ifndef XO_STATUS_ZERO
+typedef uint32_t xo_filter_status_t;
+#define XO_STATUS_ZERO  0   /* not enabled / no filter loaded */
+#define XO_STATUS_FULL  1   /* fully matched: let output flow */
+#define XO_STATUS_TRACK 2   /* tracking path, no data output yet */
+#define XO_STATUS_PRED  3   /* matched path; waiting for predicate data */
+#define XO_STATUS_DEAD  4   /* no match possible under this subtree */
+#define XO_STATUS_COND  5   /* FULL, if a pending predicate passes */
+#define XO_STATUS_LIVE  6   /* a pending predicate passed (return only) */
+#endif /* XO_STATUS_ZERO */
+
+/*
+ * Data operations vtable — the "inner" ops (filter -> data representation),
+ * complementing the existing "outer" ops (caller -> filter: open/close/status).
+ *
+ * xfdo_realloc / xfdo_free: replace xo_realloc/xo_free for trie storage.
+ *     Routing trie allocation through the data context lets a pin backend
+ *     place the compiled trie in an mmap region for persistence.
+ *
+ * xfdo_name_intern (optional, may be NULL):
+ *     Called once per path step at trie-compile time to convert a name
+ *     string into an xo_name_id_t.  If NULL, the core wraps the raw
+ *     xparse string-table offset directly (correct for the default backend).
+ *
+ * xfdo_name_eq (required):
+ *     Called in the hot path of xo_tmatch_open to compare a stored
+ *     xo_name_id_t against an incoming tag string.  For the default backend
+ *     this resolves the string-table offset and calls xo_streqn; for a
+ *     pin backend it interns the tag and compares atoms.
+ *
+ * xfdo_error (optional, may be NULL):
+ *     Called to report a compile-time or evaluation-time error for the
+ *     expression owned by this data context ('fmt'/'vap' are a printf-style
+ *     message).  When NULL, no error is reported for that data context.
+ *
+ * xfdo_find_function (optional, may be NULL):
+ *     Called by xo_eval_compile_function() when 'name' (the literal token
+ *     text, e.g. "slax:printf") does not match any built-in in
+ *     xo_eval_functions[].  A backend that supports dynamically-loaded
+ *     extension functions resolves the prefix, loads the extension if
+ *     needed, looks up 'name', and returns an xo_eval_ext_fn_t ready to
+ *     call, along with the function's arity ('*nargs', '*min_args', using
+ *     the same -1/min_args convention as xo_eval_func_map_t).  Returns NULL
+ *     if nothing resolves the name (compile then fails exactly as it does
+ *     today).  When NULL, no such fallback is attempted.
+ */
+typedef uint32_t xo_eval_ext_vtype_t;
+#define XO_EVAL_EXT_STRING  0
+#define XO_EVAL_EXT_NUMBER  1
+#define XO_EVAL_EXT_BOOLEAN 2
+#define XO_EVAL_EXT_MISSING 3
+
+typedef struct xo_eval_ext_value_s {
+    xo_eval_ext_vtype_t xee_type;
+    union {
+        const char *xee_str;
+        double      xee_num;
+        int         xee_bool;
+    };
+} xo_eval_ext_value_t;
+
+typedef xo_eval_ext_value_t
+    (*xo_eval_ext_fn_t)(xo_filter_data_t *dp, int argc, const char **argv);
+
+#define XO_FILTER_DATA_OPS_VERSION 6
+
+typedef struct xo_filter_data_ops_s {
+    uint32_t       xfdo_version;
+    void        *(*xfdo_realloc)(xo_filter_data_t *, void *, size_t);
+    void         (*xfdo_free)(xo_filter_data_t *, void *);
+    xo_name_id_t (*xfdo_name_intern)(xo_filter_data_t *,
+				     const char *, ssize_t);	/* optional */
+    int          (*xfdo_name_eq)(xo_filter_data_t *, xo_name_id_t,
+				 const char *, ssize_t);
+    /*
+     * xfdo_value_of (optional, may be NULL):
+     *     Called by xo_eval_attribute / xo_eval_path to look up the value
+     *     of a named field in the current element context.  'name' may be
+     *     a single name or a '/'-separated compound path (e.g. "life-span/born").
+     *     Returns a NUL-terminated string valid until the next xfdo_value_of
+     *     call, or NULL if the field is not present.  When NULL, the core
+     *     falls back to xo_filter_attr_find / xo_filter_key_find (xtf_keys).
+     */
+    const char *(*xfdo_value_of)(xo_filter_data_t *, const char *, ssize_t);
+    /*
+     * xfdo_variable_of (optional, may be NULL):
+     *     Called by xo_eval_variable to resolve an XPath variable reference
+     *     ($name) to its current string value.  'name' is the variable name
+     *     with the leading '$' already stripped.  Returns a NUL-terminated
+     *     string valid until the next xfdo_variable_of call, or NULL if the
+     *     variable is unbound.  When NULL (the default backend has no
+     *     notion of variables), a $name reference always evaluates as
+     *     missing.
+     */
+    const char *(*xfdo_variable_of)(xo_filter_data_t *, const char *, ssize_t);
+    /*
+     * xfdo_event_open / xfdo_event_close (optional, may be NULL):
+     *     Called by xo_filter immediately after pushing / popping a frame,
+     *     with the same tag and tlen that triggered the event.  The backend
+     *     can maintain a parallel depth-tracking stack so xfdo_value_of
+     *     knows which retained node is current.  Both are NULL-checked before
+     *     calling; existing backends that do not set them are unaffected.
+     */
+    void (*xfdo_event_open)(xo_filter_data_t *, const char *, ssize_t);
+    void (*xfdo_event_close)(xo_filter_data_t *, const char *, ssize_t);
+    /*
+     * xfdo_destroy (optional, may be NULL):
+     *     Called with the data context once, when the owning filter is
+     *     destroyed (xo_filter_destroy_standalone / the "destroy" op),
+     *     after the trie and all other filter-owned state have already
+     *     been freed.  Lets a backend release whatever heap state it
+     *     keeps inside its xo_filter_data_t (and, if it allocated the
+     *     struct itself, the struct too).  See xo_filter_create_with_data.
+     */
+    void (*xfdo_destroy)(xo_filter_data_t *);
+    void (*xfdo_error)(xo_filter_data_t *, const char *fmt, va_list vap);
+    xo_eval_ext_fn_t (*xfdo_find_function)(xo_filter_data_t *,
+                                            const char *name,
+                                            int *nargs, int *min_args);
+} xo_filter_data_ops_t;
+
+/* Default data ops: heap allocation + xparse string-table name resolution */
+extern xo_filter_data_ops_t xo_filter_data_ops_default;
+
 #define XO_FILTER_DEFAULT_ARGS xop, xfp
 #define XO_FILTER_DEFAULT_SIGNATURE \
     xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED
@@ -34,7 +232,16 @@ typedef struct xo_filter_s xo_filter_t;
     xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED, \
 	const char *tag UNUSED
 
+/*
+ * The outer ops (caller -> filter: open_container/close/key/get_status/…)
+ * reference internal libxo types (xo_filter_status_t, XO_ENCODER_HANDLER_ARGS)
+ * that are not available to external consumers.  Guard the include so that
+ * code outside xo_filter.so can include this header for the data-ops types
+ * without pulling in the internal ops declarations.
+ */
+#ifdef LIBXO_NEED_FILTERS
 #include "xo_filter_ops.h"
+#endif /* LIBXO_NEED_FILTERS */
 
 void
 xo_set_filter_data (xo_handle_t *xop UNUSED, xo_filter_t *);
@@ -45,9 +252,31 @@ xo_get_filter_data (xo_handle_t *xop, int create);
 xo_filter_t *
 xo_filter_create (xo_handle_t *xop);
 
+/*
+ * Create a filter with a caller-supplied data context and ops vtable.
+ * Used by non-libxo consumers (e.g. libpin) that want to plug in their
+ * own name interning and trie storage.  The caller owns the data struct
+ * and ops; the filter never frees either directly, though it does call
+ * ops->xfdo_destroy(dp), if set, when the filter itself is destroyed, so
+ * the backend can release heap state it keeps inside the data struct
+ * (and free the struct itself, if the backend allocated it).
+ */
+xo_filter_t *
+xo_filter_create_with_data (xo_handle_t *xop, xo_filter_data_t *dp,
+			     xo_filter_data_ops_t *ops);
+
 struct xo_xparse_data_s *
 xo_filter_xparse_data (xo_handle_t *xop, xo_filter_t *xfp);
 
+/* Return the opaque data pointer set by xo_filter_create_with_data. */
+xo_filter_data_t *
+xo_filter_get_data_ptr (xo_filter_t *xfp);
+
+/* Return the ops vtable set by xo_filter_create_with_data. */
+xo_filter_data_ops_t *
+xo_filter_get_data_ops (xo_filter_t *xfp);
+
+#ifdef LIBXO_NEED_FILTERS
 #define XO_FILTER_INIT_RETURN_TYPE int
 #define XO_FILTER_INIT_SIGNATURE int version UNUSED, xo_filter_ops_t *ops UNUSED
 
@@ -64,5 +293,183 @@ xo_setup_filter_lib_test (int version, xo_filter_ops_t *ops);
 
 void
 xo_filter_setup_test (void);
+#endif /* LIBXO_NEED_FILTERS */
+
+/*
+ * Direct-call filter ops for non-libxo callers (e.g. libpin) that hold an
+ * xo_filter_t * from xo_filter_create_with_data() and drive the FSM
+ * themselves rather than going through the dlopen vtable.
+ *
+ * xop may be NULL; it is only used for debug logging inside the filter.
+ *
+ * xo_filter_walk_open / xo_filter_walk_close:
+ *   Must be called in exact sync with the element stream (every open needs
+ *   a matching close) to keep the filter's frame-stack depth correct.
+ *   xo_filter_walk_close force-resolves a predicate still pending on the
+ *   closing element and returns FULL if it matched, or XO_STATUS_LIVE if
+ *   it passed a predicate on a path that continues below the element.
+ *
+ * xo_filter_walk_open_field:
+ *   Like xo_filter_walk_open, for a leaf element with its value, so a
+ *   predicate on the leaf itself (e.g. "cost[. > 450]") can be decided;
+ *   one still pending is resolved at once.  Close it with
+ *   xo_filter_walk_close.
+ *
+ * xo_filter_walk_key:
+ *   Feed a key/attribute name+value so predicates can be evaluated when
+ *   xfdo_value_of is NULL.  When xfdo_value_of is set, the backend handles
+ *   value lookup directly and xo_filter_walk_key need not be called.
+ *   Returns the status after the key, or XO_STATUS_LIVE as for
+ *   xo_filter_walk_close.
+ *
+ * XO_STATUS_LIVE (a return value only, never the status) means content
+ * seen under the element while its predicate was pending (status COND)
+ * is now wanted.
+ *
+ * xo_filter_walk_status:
+ *   Query the current match status after xo_filter_walk_open.
+ *   XO_STATUS_FULL  → subtree matched; keep it.
+ *   XO_STATUS_TRACK → on a partial path; continue tracking.
+ *   XO_STATUS_PRED  → path matched; waiting for predicate data.
+ *   XO_STATUS_DEAD  → no match possible; discard the subtree.
+ *   XO_STATUS_COND  -> matched, if an enclosing pending predicate passes.
+ *
+ * xo_filter_walk_add:
+ *   Parse and compile an XPath match expression into the filter.
+ *   May be called multiple times; each call accumulates another pattern.
+ */
+int xo_filter_walk_open (xo_handle_t *xop, xo_filter_t *xfp,
+			  const char *tag, ssize_t tlen);
+int xo_filter_walk_open_field (xo_handle_t *xop, xo_filter_t *xfp,
+				const char *tag, ssize_t tlen,
+				const char *value, ssize_t vlen);
+int xo_filter_walk_close (xo_handle_t *xop, xo_filter_t *xfp,
+			   const char *tag, ssize_t tlen);
+int xo_filter_walk_key (xo_handle_t *xop, xo_filter_t *xfp,
+			 const char *tag, ssize_t tlen,
+			 const char *value, ssize_t vlen);
+int xo_filter_walk_attr (xo_handle_t *xop, xo_filter_t *xfp,
+			  const char *tag, ssize_t tlen,
+			  const char *value, ssize_t vlen);
+xo_filter_t *xo_filter_create_standalone (void);
+void xo_filter_destroy_standalone (xo_filter_t *xfp);
+xo_filter_status_t xo_filter_walk_status (xo_handle_t *xop, xo_filter_t *xfp);
+int xo_filter_walk_add (xo_handle_t *xop, xo_filter_t *xfp, const char *xpath);
+
+/*
+ * Like xo_filter_walk_add but associates a backend-opaque action id with
+ * the pattern's terminal trie node.  When the filter reports XO_STATUS_FULL,
+ * xo_filter_walk_get_action() returns that id so the caller can dispatch
+ * directly without consulting a secondary rulebook.  action==0 means "no
+ * action attached" (same as xo_filter_walk_add).
+ */
+int xo_filter_walk_add_with_action (xo_handle_t *xop, xo_filter_t *xfp,
+				     const char *xpath, uint32_t action);
+
+/*
+ * Like xo_filter_walk_add_with_action but also records the XSLT priority and
+ * import precedence of this pattern.  When two patterns registered into the
+ * same filter collide on the same trie node (same tag name/position, e.g.
+ * "author" and "author[life-span/born]", or the same pattern redefined by
+ * an importing stylesheet), XSLT's conflict-resolution rule decides which
+ * one's action/predicate wins the node: higher import_prec wins outright;
+ * only when import_prec ties does priority decide.  The loser still matches
+ * structurally, so a caller that also keeps a separate by-name fallback (as
+ * libpin's Patricia tree does) can still dispatch it when the winner's
+ * predicate resolves false.
+ */
+int xo_filter_walk_add_with_action_priority (xo_handle_t *xop, xo_filter_t *xfp,
+					     const char *xpath, uint32_t action,
+					     double priority, int16_t import_prec);
+
+/*
+ * Return the action id recorded when the last XO_STATUS_FULL status was
+ * computed.  Valid to call immediately after xo_filter_walk_status returns
+ * XO_STATUS_FULL.  Returns 0 if no action was attached to the matched node.
+ */
+uint32_t xo_filter_walk_get_action (xo_handle_t *xop, xo_filter_t *xfp);
+
+/*
+ * Override the set of XPath grammar features this filter rejects at
+ * compile time, replacing the library's own default list
+ * (xo_filter_default_unsupported_features).  'features' is a
+ * zero-terminated array of XO_XPF_* ids (see above); pass NULL to restore
+ * the default list, or an empty list ({ 0 }) to reject nothing.  Must be
+ * called before xo_filter_walk_add() / xo_filter_walk_add_with_action[_priority]()
+ * to affect that call's compile.  Returns 0 on success, -1 on an unknown
+ * feature id or allocation failure (the previous setting, if any, is left
+ * in place on failure).
+ */
+int xo_filter_set_unsupported_features (xo_filter_t *xfp,
+					  const int *features);
+
+/*
+ * xo_eval_compile() / xo_eval_prog_destroy() / xo_eval_prog_run_simple():
+ * the xo_eval engine's entry points for a non-libxo backend (e.g. libpin)
+ * that wants to compile and run its own select=/test= scalar expressions
+ * against the same XPath evaluator libxo's own predicate matcher uses,
+ * without going through the trie/filter-walk machinery above.
+ *
+ * xo_eval_compile:
+ *   Compile the expression rooted at 'root' (as produced by
+ *   xo_xparse_parse_string(), declared in xo_xparse.h) into a flat,
+ *   replayable program.  Returns NULL on a compile failure (unknown
+ *   function, wrong arity, unsupported node type).  'dp'/'ops' are the
+ *   same data-context pair passed to xo_filter_create_with_data(); a
+ *   failure specific enough to explain is reported through ops->xfdo_error
+ *   (if non-NULL), the same way evaluation-time errors are.  Pass NULL
+ *   for both if there's no data context to report through (compile still
+ *   fails the same way; it's just silent).  'root' is declared here as a
+ *   plain ssize_t to avoid requiring "xo_xparse.h" in this header; it is
+ *   numerically an xo_xparse_node_id_t (itself just a typedef of
+ *   xo_off_t/ssize_t), as returned by xo_xparse_parse_string() — a caller
+ *   compiling its own expressions includes "xo_xparse.h" for that
+ *   function and passes its result straight through.
+ *
+ * xo_eval_prog_destroy:
+ *   Free a program returned by xo_eval_compile().  NULL-safe.
+ *
+ * xo_eval_prog_run_simple:
+ *   Run a compiled program against 'xfp' (the filter whose data context
+ *   supplies xfdo_value_of / xfdo_variable_of) and reduce its result to
+ *   plain C types, so the caller never needs the internal xo_eval_value_t
+ *   layout:
+ *     - If the result is missing/invalid/unsupported (e.g. an unbound
+ *       variable), returns NULL and sets *is_missingp (if non-NULL).
+ *     - If the result is a native boolean (e.g. from a comparison or a
+ *       boolean-returning function), returns NULL and sets *is_booleanp
+ *       and *bool_valuep (if non-NULL), so a caller applying XPath
+ *       truthiness (rather than "string is non-empty") can tell the two
+ *       apart.
+ *     - Otherwise returns a malloc'd, NUL-terminated string holding the
+ *       XPath string-value of the result; the caller must free() it.
+ *   'framep' is almost always NULL for a non-libxo backend; it only
+ *   matters to expressions evaluated during libxo's own trie walk.
+ */
+xo_eval_prog_t *
+xo_eval_compile (struct xo_xparse_data_s *xdp, ssize_t root,
+		  xo_filter_data_t *dp, xo_filter_data_ops_t *ops);
+
+/*
+ * Line/col (1-based; 0 means unknown) of the AST node a failed
+ * xo_eval_compile() call most recently blamed, stashed internally by
+ * xo_eval_compile_fail() regardless of whether ops->xfdo_error is set.
+ * For a caller (e.g. libpin) that invokes xo_eval_compile() directly
+ * and gets only a bare failure return, this is the only way to recover
+ * *where* in the source expression the failure points; call it
+ * immediately after a failing xo_eval_compile() returns NULL.
+ */
+void
+xo_eval_compile_fail_location (unsigned *linep, unsigned *colp);
+
+void
+xo_eval_prog_destroy (xo_eval_prog_t *prog);
+
+char *
+xo_eval_prog_run_simple (xo_handle_t *xop, xo_filter_t *xfp,
+			  xo_tframe_t *framep, struct xo_xparse_data_s *xdp,
+			  xo_eval_prog_t *prog,
+			  int *is_booleanp, int *bool_valuep,
+			  int *is_missingp);
 
 #endif /* XO_FILTER_H */

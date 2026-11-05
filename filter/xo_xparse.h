@@ -34,6 +34,8 @@ typedef struct xo_xparse_node_s {
     xo_xparse_node_id_t xn_contents; /* Child node (main) (in xd_node_buf) */
     xo_xparse_node_id_t xn_next; /* Next node (in xd_node_buf) */
     xo_xparse_node_id_t xn_prev; /* Previous node (in xd_node_buf) */
+    unsigned xn_line;		/* 1-based source line of this token */
+    unsigned xn_col;		/* 1-based source column of this token */
 } xo_xparse_node_t;
 
 /* Flags for xn_flags */
@@ -202,7 +204,7 @@ xo_xparse_token_translate (xo_xparse_token_t ttype);
  */
 char *
 xo_xparse_expecting_error (xo_xparse_data_t *xdp, const char *token,
-			   int yystate, int yychar);
+			   int yystate, const char *lead);
 
 /*
  * Is the given character valid inside variable names (T_VAR)?

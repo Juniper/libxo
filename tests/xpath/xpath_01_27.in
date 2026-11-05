@@ -1,0 +1,255 @@
+#
+# NaN: missing fields and non-numeric strings are NaN (C_NAN),
+# which is unordered: every comparison with it is false, except !=
+#
+
+# Test 1: missing field in arithmetic (expect: none)
+?item[missing + 1 = 1]
+{item
+<item
+= name widget
+= a 42
+= b 144
+= count 3
+>item
+<item
+= name gadget
+= a 70
+= b 8
+= count lots
+>item
+}item
+
+# Test 2: NaN != anything (expect: both)
+r
+?item[missing + 1 != 1]
+{item
+<item
+= name widget
+= a 42
+= b 144
+= count 3
+>item
+<item
+= name gadget
+= a 70
+= b 8
+= count lots
+>item
+}item
+
+# Test 3: NaN is not less (expect: none)
+r
+?item[missing < 1]
+{item
+<item
+= name widget
+= a 42
+= b 144
+= count 3
+>item
+<item
+= name gadget
+= a 70
+= b 8
+= count lots
+>item
+}item
+
+# Test 4: NaN is not greater or equal (expect: none)
+r
+?item[missing >= 1]
+{item
+<item
+= name widget
+= a 42
+= b 144
+= count 3
+>item
+<item
+= name gadget
+= a 70
+= b 8
+= count lots
+>item
+}item
+
+# Test 5: not() of a NaN comparison (expect: both)
+r
+?item[not(missing + 1 = 1)]
+{item
+<item
+= name widget
+= a 42
+= b 144
+= count 3
+>item
+<item
+= name gadget
+= a 70
+= b 8
+= count lots
+>item
+}item
+
+# Test 6: non-numeric string vs number (expect: none)
+r
+?item[name < 5]
+{item
+<item
+= name widget
+= a 42
+= b 144
+= count 3
+>item
+<item
+= name gadget
+= a 70
+= b 8
+= count lots
+>item
+}item
+
+# Test 7: non-numeric string vs number (expect: none)
+r
+?item[name >= 5]
+{item
+<item
+= name widget
+= a 42
+= b 144
+= count 3
+>item
+<item
+= name gadget
+= a 70
+= b 8
+= count lots
+>item
+}item
+
+# Test 8: string relational compares numbers (42 < 144) (expect: widget)
+r
+?item[a < b]
+{item
+<item
+= name widget
+= a 42
+= b 144
+= count 3
+>item
+<item
+= name gadget
+= a 70
+= b 8
+= count lots
+>item
+}item
+
+# Test 9: string relational compares numbers (70 > 8) (expect: gadget)
+r
+?item[a > b]
+{item
+<item
+= name widget
+= a 42
+= b 144
+= count 3
+>item
+<item
+= name gadget
+= a 70
+= b 8
+= count lots
+>item
+}item
+
+# Test 10: NaN is not equal to itself (expect: widget)
+r
+?item[count + 0 = count + 0]
+{item
+<item
+= name widget
+= a 42
+= b 144
+= count 3
+>item
+<item
+= name gadget
+= a 70
+= b 8
+= count lots
+>item
+}item
+
+# Test 11: NaN arithmetic (expect: widget)
+r
+?item[count * 2 > 1]
+{item
+<item
+= name widget
+= a 42
+= b 144
+= count 3
+>item
+<item
+= name gadget
+= a 70
+= b 8
+= count lots
+>item
+}item
+
+# Test 12: NaN compared with a boolean is false (expect: both)
+r
+?item[(missing + 1) = false()]
+{item
+<item
+= name widget
+= a 42
+= b 144
+= count 3
+>item
+<item
+= name gadget
+= a 70
+= b 8
+= count lots
+>item
+}item
+
+# Test 13: boolean() of NaN is false (expect: widget)
+r
+?item[boolean(count + 0)]
+{item
+<item
+= name widget
+= a 42
+= b 144
+= count 3
+>item
+<item
+= name gadget
+= a 70
+= b 8
+= count lots
+>item
+}item
+
+# Test 14: number() of a non-number (expect: both)
+r
+?item[number(name) != number(name)]
+{item
+<item
+= name widget
+= a 42
+= b 144
+= count 3
+>item
+<item
+= name gadget
+= a 70
+= b 8
+= count lots
+>item
+}item
