@@ -15,6 +15,7 @@
 #include <stdint.h>
 #include <inttypes.h>
 #include <string.h>
+#include <ctype.h>
 #include <errno.h>
 #include <regex.h>
 #include <sys/param.h>
@@ -786,7 +787,12 @@ static void
 xo_filter_data_verror (xo_filter_data_t *dp, xo_filter_data_ops_t *ops,
 			const char *fmt, va_list vap)
 {
-    if (ops->xfdo_error == NULL)
+    /*
+     * ops (and dp) may be NULL: xo_eval_compile()'s own doc comment
+     * documents passing NULL for both when the caller has no data
+     * context to report through, in which case the failure is silent.
+     */
+    if (ops == NULL || ops->xfdo_error == NULL)
 	return;
 
     ops->xfdo_error(dp, fmt, vap);
@@ -1977,20 +1983,61 @@ xo_eval_fail (xo_filter_t *xfp, const char *fmt, ...)
 }
 
 /*
+ * Line/column of the node passed to the most recent xo_eval_compile_fail()
+ * call, so a caller with no (dp, ops)-reachable error channel (e.g. libpin,
+ * which runs compile-time checks with ops->xfdo_error unset) can still
+ * recover *where* a failed xo_eval_compile() pointed, via
+ * xo_eval_compile_fail_location() below.  0 means "no node"/unknown.
+ */
+static unsigned xo_eval_compile_fail_line;
+static unsigned xo_eval_compile_fail_col;
+
+/*
  * The compile-time twin of xo_eval_fail(): xo_eval_compile() and its
  * helpers only ever see the (dp, ops) pair, not a full xo_filter_t, so
  * they report through xo_filter_data_verror() directly instead.
+ *
+ * xdp/id identify the AST node the failure is attributed to, so its
+ * line/col (stamped by the lexer; see xo_xparse_node_t) can be stashed
+ * for xo_eval_compile_fail_location() regardless of whether ops has an
+ * xfdo_error to report through.
  */
-XO_PRINTFLIKE(3, 4)
+XO_PRINTFLIKE(5, 6)
 static void
 xo_eval_compile_fail (xo_filter_data_t *dp, xo_filter_data_ops_t *ops,
+		       xo_xparse_data_t *xdp, xo_xparse_node_id_t id,
 		       const char *fmt, ...)
 {
     va_list vap;
 
+    if (xdp != NULL) {
+	xo_xparse_node_t *xnp = xo_xparse_node(xdp, id);
+	xo_eval_compile_fail_line = xnp ? xnp->xn_line : 0;
+	xo_eval_compile_fail_col = xnp ? xnp->xn_col : 0;
+    } else {
+	xo_eval_compile_fail_line = 0;
+	xo_eval_compile_fail_col = 0;
+    }
+
     va_start(vap, fmt);
     xo_filter_data_verror(dp, ops, fmt, vap);
     va_end(vap);
+}
+
+/*
+ * Returns the line/col stashed by the most recent xo_eval_compile_fail()
+ * call (0/0 if none or unknown).  See xo_filter.h for the public
+ * declaration; used by callers (e.g. libpin) that invoke xo_eval_compile()
+ * directly with no xfdo_error set, and so get no other way to recover
+ * *where* a compile failure occurred.
+ */
+void
+xo_eval_compile_fail_location (unsigned *linep, unsigned *colp)
+{
+    if (linep)
+	*linep = xo_eval_compile_fail_line;
+    if (colp)
+	*colp = xo_eval_compile_fail_col;
 }
 
 static inline xo_eval_value_t
@@ -2216,10 +2263,27 @@ xo_eval_attribute (XO_EVAL_ARGS)
     xo_eval_value_t value = { .xev_flags = 0 };
     const char *str = xo_xparse_str(&xfp->xf_xd, xnp->xn_str);
     const char *aval;
-    if (xfp->xf_ops && xfp->xf_ops->xfdo_value_of)
-	aval = xfp->xf_ops->xfdo_value_of(xfp->xf_data, str, -1);
-    else
+    if (xfp->xf_ops && xfp->xf_ops->xfdo_value_of) {
+	/*
+	 * Mark this as a bare attribute reference (vs a compound element
+	 * path, which xo_eval_path builds and passes unmarked) by
+	 * prefixing '@', matching the convention xfdo_value_of backends
+	 * are documented against (see pin_filter_data_value_of_tree's
+	 * "trailing @x" doc comment in libpin).  Without this, a backend
+	 * whose xfdo_value_of has no other way to tell "@foo" apart from
+	 * a child-element path named "foo" has no choice but to guess.
+	 */
+	size_t slen = strlen(str) + 1; /* Length of "@" + str */
+	char buf[slen + 1];
+
+	buf[0] = '@';
+	memcpy(buf + 1, str, slen - 1);
+	buf[slen] = '\0';
+	aval = xfp->xf_ops->xfdo_value_of(xfp->xf_data, buf,
+					    (ssize_t) slen);
+    } else {
 	aval = xo_filter_attr_find(xfp, framep, str);
+    }
     if (aval) {
 	value = xo_eval_value_make(C_STRING, XEVF_NODE, 0);
 	value.xev_str = aval;
@@ -2312,6 +2376,12 @@ xo_eval_path (XO_EVAL_ARGS)
     int step_count = 0;
     int last_is_attr = FALSE;
     xo_xparse_node_id_t id;
+    /*
+     * Only xfdo_value_of backends use the '@'-marker convention (see
+     * xo_eval_attribute); the generic framep-based lookups below
+     * (xo_filter_attr_find/xo_filter_key_find) key on the bare name.
+     */
+    int use_at_marker = (xfp->xf_ops && xfp->xf_ops->xfdo_value_of) ? TRUE : FALSE;
 
     /* Collect all C_ELEMENT / C_ATTRIBUTE steps into a compound key string */
     for (id = xnp->xn_contents; id; id = xnp->xn_next) {
@@ -2323,6 +2393,17 @@ xo_eval_path (XO_EVAL_ARGS)
 		if (path_len + 1 >= (ssize_t) sizeof(path_buf) - 1)
 		    return xo_eval_value_invalid();
 		path_buf[path_len++] = '/';
+	    }
+	    /*
+	     * Mark an attribute step with a leading '@' (e.g. "a/b/@x" or
+	     * bare "@x"), matching xo_eval_attribute's convention, so a
+	     * backend's xfdo_value_of can tell an attribute step apart
+	     * from a child-element step of the same name.
+	     */
+	    if (use_at_marker && xnp->xn_type == C_ATTRIBUTE) {
+		if (path_len + 1 >= (ssize_t) sizeof(path_buf) - 1)
+		    return xo_eval_value_invalid();
+		path_buf[path_len++] = '@';
 	    }
 	    if (path_len + slen >= (ssize_t) sizeof(path_buf) - 1)
 		return xo_eval_value_invalid();
@@ -2433,11 +2514,91 @@ xo_eval_cast_float (xo_handle_t *xop, xo_eval_value_t value)
 
 /*
  * Room for any number we turn into a string.  The integers need at
- * most 21 bytes, but "%lf" writes every digit of a double, and the
- * largest has 309 of them before the decimal point, plus the sign,
- * the point, six more digits and the NUL.
+ * most 21 bytes, but XPath never uses an exponent, so a double is
+ * written out in full.  The largest has 309 digits before the decimal
+ * point; the smallest (denormal) needs "0.", 323 zeros and 17
+ * significant digits.  With the sign and the NUL, that's 344.
  */
-#define XO_EVAL_NUMBUF	320
+#define XO_EVAL_NUMBUF	352
+
+/*
+ * Format a finite, non-integral (or very large) double the way
+ * XPath's number-to-string conversion (4.2) wants it: the fewest
+ * significant digits that read back as the same value, and no
+ * exponent ("0.1", not "0.10000000000000001" or "1e-01").  We use
+ * "%.*e" to get the digits and the exponent, find the shortest
+ * precision that round-trips through strtod, then place the decimal
+ * point ourselves.  Digits are picked out with isdigit, so a locale
+ * that uses ',' for the decimal point doesn't confuse us.
+ */
+static void
+xo_eval_format_float (char *buf, size_t bufsiz, xo_float_t val)
+{
+    char tmp[64];
+    char digits[24];
+    int ndigits = 0;
+    int exp10 = 0;
+    int prec;
+
+    for (prec = 1; prec <= 17; prec++) {
+	snprintf(tmp, sizeof(tmp), "%.*e", prec - 1, val);
+	if (strtod(tmp, NULL) == val)
+	    break;
+    }
+
+    /* tmp looks like "-d.ddde+XX"; pull out the digits and exponent */
+    const char *cp = tmp;
+    if (*cp == '-')
+	cp += 1;
+
+    for (; *cp && *cp != 'e' && *cp != 'E'; cp++)
+	if (isdigit((unsigned char) *cp) && ndigits < (int) sizeof(digits) - 1)
+	    digits[ndigits++] = *cp;
+
+    if (*cp)
+	exp10 = atoi(cp + 1);
+
+    /* Trailing zeros carry no information */
+    while (ndigits > 1 && digits[ndigits - 1] == '0')
+	ndigits -= 1;
+
+    /* 'point' is how many digits come before the decimal point */
+    int point = exp10 + 1;
+    char *op = buf, *ep = buf + bufsiz - 1;
+
+    if (val < 0 && op < ep)
+	*op++ = '-';
+
+    if (point <= 0) {
+	/* "0.000ddd" */
+	if (op < ep)
+	    *op++ = '0';
+	if (op < ep)
+	    *op++ = '.';
+	for (int i = point; i < 0 && op < ep; i++)
+	    *op++ = '0';
+	for (int i = 0; i < ndigits && op < ep; i++)
+	    *op++ = digits[i];
+
+    } else if (point >= ndigits) {
+	/* "ddd000", no decimal point */
+	for (int i = 0; i < ndigits && op < ep; i++)
+	    *op++ = digits[i];
+	for (int i = ndigits; i < point && op < ep; i++)
+	    *op++ = '0';
+
+    } else {
+	/* "dd.ddd" */
+	for (int i = 0; i < ndigits && op < ep; i++) {
+	    if (i == point)
+		*op++ = '.';
+	    if (op < ep)
+		*op++ = digits[i];
+	}
+    }
+
+    *op = '\0';
+}
 
 static char *
 xo_eval_cast_string (xo_handle_t *xop UNUSED, xo_eval_value_t value)
@@ -2465,7 +2626,25 @@ xo_eval_cast_string (xo_handle_t *xop UNUSED, xo_eval_value_t value)
 	break;
 
     case C_FLOAT:
-	snprintf(buf, sizeof(buf), "%lf", value.xev_float);
+	/*
+	 * XPath's number-to-string conversion (4.2): integral values are
+	 * rendered with no decimal point ("2", not "2.000000"); "%lf"
+	 * always emits 6 decimal digits, which is wrong for the common
+	 * case of integral arithmetic results (e.g. "$n - 1").  Test the
+	 * magnitude before the cast, since casting a double outside
+	 * int64_t's range is undefined.  Everything else goes through
+	 * xo_eval_format_float.
+	 */
+	if (isnan(value.xev_float)) {
+	    bp = "NaN";
+	} else if (isinf(value.xev_float)) {
+	    bp = (value.xev_float < 0) ? "-Infinity" : "Infinity";
+	} else if (fabs(value.xev_float) < 1e18
+		   && value.xev_float == (double) (int64_t) value.xev_float) {
+	    snprintf(buf, sizeof(buf), "%" PRId64, (int64_t) value.xev_float);
+	} else {
+	    xo_eval_format_float(buf, sizeof(buf), value.xev_float);
+	}
 	break;
 
     case M_ERROR:
@@ -3768,35 +3947,39 @@ typedef struct xo_eval_func_map_s {
     const char *xfm_name;	/* Name (e.g. "plus") */
     xo_eval_func_flags_t xfm_flags; /* Flags (XEFF_*) */
     int xfm_nargs;		/* Required arg count; -1 means don't checks */
+    int xfm_min_args;		/* Minimum argc, checked at compile time
+				   when xfm_nargs == -1; 0 means not
+				   checked here, left to the function's
+				   own runtime check */
 } xo_eval_func_map_t;
 
 xo_eval_func_map_t xo_eval_functions[] = {
-    { xo_eval_func_boolean, "boolean", 0, 1 },
-    { xo_eval_func_ceiling, "ceiling", 0, 1 },
-    { xo_eval_func_choose, "choose", XEFF_NO_EVAL, 3 },
-    { xo_eval_func_choose2, "choose2", XEFF_NO_EVAL, 2 },
-    { xo_eval_func_concat, "concat", 0, -1 },
-    { xo_eval_func_contains, "contains", 0, 2 },
-    { xo_eval_func_ends_with, "ends-with", 0, 2 },
-    { xo_eval_func_false, "false", 0, 0 },
-    { xo_eval_func_floor, "floor", 0, 1 },
-    { xo_eval_func_isempty, "isempty", 0, 1 },
-    { xo_eval_func_normalize_space, "normalize-space", 0, 1 },
-    { xo_eval_func_not, "not", 0, 1 },
-    { xo_eval_func_number, "number", 0, 1 },
-    { xo_eval_func_rematch, "rematch", 0, -1 },
-    { xo_eval_func_round, "round", 0, 1 },
-    { xo_eval_func_starts_with, "starts-with", 0, 2 },
-    { xo_eval_func_string, "string", 0, 1 },
-    { xo_eval_func_string_length, "string-length", 0, 1 },
-    { xo_eval_func_substring, "substring", 0, -1 },
-    { xo_eval_func_substring_after, "substring-after", 0, 2 },
-    { xo_eval_func_substring_before, "substring-before", 0, 2 },
-    { xo_eval_func_sum, "sum", 0, -1 },
-    { xo_eval_func_translate, "translate", 0, 3 },
-    { xo_eval_func_true, "true", 0, 0 },
+    { xo_eval_func_boolean, "boolean", 0, 1, 0 },
+    { xo_eval_func_ceiling, "ceiling", 0, 1, 0 },
+    { xo_eval_func_choose, "choose", XEFF_NO_EVAL, 3, 0 },
+    { xo_eval_func_choose2, "choose2", XEFF_NO_EVAL, 2, 0 },
+    { xo_eval_func_concat, "concat", 0, -1, 2 },
+    { xo_eval_func_contains, "contains", 0, 2, 0 },
+    { xo_eval_func_ends_with, "ends-with", 0, 2, 0 },
+    { xo_eval_func_false, "false", 0, 0, 0 },
+    { xo_eval_func_floor, "floor", 0, 1, 0 },
+    { xo_eval_func_isempty, "isempty", 0, 1, 0 },
+    { xo_eval_func_normalize_space, "normalize-space", 0, 1, 0 },
+    { xo_eval_func_not, "not", 0, 1, 0 },
+    { xo_eval_func_number, "number", 0, 1, 0 },
+    { xo_eval_func_rematch, "rematch", 0, -1, 2 },
+    { xo_eval_func_round, "round", 0, 1, 0 },
+    { xo_eval_func_starts_with, "starts-with", 0, 2, 0 },
+    { xo_eval_func_string, "string", 0, 1, 0 },
+    { xo_eval_func_string_length, "string-length", 0, 1, 0 },
+    { xo_eval_func_substring, "substring", 0, -1, 2 },
+    { xo_eval_func_substring_after, "substring-after", 0, 2, 0 },
+    { xo_eval_func_substring_before, "substring-before", 0, 2, 0 },
+    { xo_eval_func_sum, "sum", 0, -1, 1 },
+    { xo_eval_func_translate, "translate", 0, 3, 0 },
+    { xo_eval_func_true, "true", 0, 0, 0 },
 
-    { NULL, NULL, 0, 0 }
+    { NULL, NULL, 0, 0, 0 }
 };
 
 static xo_eval_func_map_t *
@@ -3878,6 +4061,66 @@ xo_eval_function (XO_EVAL_ARGS)
     xo_eval_dump_value(xop, xfp, value, indent, str);
 
     return value;
+}
+
+/*
+ * Runtime op for a function call resolved at compile time by a
+ * dynamic-load backend's xfdo_find_function hook (e.g. libslax's
+ * "slax:" extension functions; see xo_eval_compile_function() below).
+ * Re-derives the function's name from the AST node and re-calls the
+ * hook here, rather than caching the resolved xo_eval_ext_fn_t in
+ * xo_eval_instr_t: these calls are rare next to the built-in XPath
+ * functions, so paying for the lookup again is cheaper than widening
+ * every instruction to carry a backend-specific pointer.
+ */
+static xo_eval_value_t
+xo_eval_func_external (XO_EVAL_ARGS)
+{
+    xo_filter_data_t *dp = xfp->xf_data;
+    xo_filter_data_ops_t *ops = xfp->xf_ops;
+
+    if (ops == NULL || ops->xfdo_find_function == NULL)
+	return xo_eval_value_invalid();
+
+    const char *str = xo_xparse_str(&xfp->xf_xd, xnp->xn_str);
+    if (str == NULL)
+	return xo_eval_value_invalid();
+
+    int nargs, min_args;
+    xo_eval_ext_fn_t fn = ops->xfdo_find_function(dp, str, &nargs, &min_args);
+    if (fn == NULL) {
+	xo_eval_fail(xfp, "unknown function in filter expression: '%s'", str);
+	return xo_eval_value_invalid();
+    }
+
+    const char **args = alloca(argc * sizeof(*args));
+    for (int i = 0; i < argc; i++)
+	args[i] = xo_eval_cast_string(xop, argv[i]);
+
+    xo_eval_ext_value_t rv = fn(dp, argc, args);
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
+    for (int i = 0; i < argc; i++)
+	xo_free((char *) args[i]);
+#pragma GCC diagnostic pop
+
+    switch (rv.xee_type) {
+    case XO_EVAL_EXT_NUMBER:
+	return xo_eval_value_float(0, rv.xee_num);
+
+    case XO_EVAL_EXT_BOOLEAN:
+	return rv.xee_bool ? xo_eval_value_boolean_true()
+			    : xo_eval_value_boolean_false();
+
+    case XO_EVAL_EXT_MISSING:
+	return xo_eval_value_missing();
+
+    case XO_EVAL_EXT_STRING:
+    default:
+	return xo_eval_value_string(C_DSTRING, 0,
+				     strdup(rv.xee_str ? rv.xee_str : ""));
+    }
 }
 
 static xo_eval_value_t
@@ -4286,36 +4529,17 @@ xo_eval_compile_chain (xo_eval_prog_t *prog, xo_xparse_data_t *xdp,
 }
 
 /*
- * Compile a function call.  XEFF_NO_EVAL functions (choose/choose2)
- * manage their own lazy argument evaluation and still depend on the
- * old recursive xo_eval(), so they compile to a self-managing leaf
- * instruction; every other function compiles each argument first and
- * then emits one instruction with a static argc, matching the
- * argv[]-based convention the rest of the operations already use.
+ * Compile the xn_next-linked argument list under a function-call node,
+ * emitting each argument's instructions in order.  Shared by the
+ * built-in and xfdo_find_function fallback paths in
+ * xo_eval_compile_function() below.  Returns the argument count, or -1
+ * on a compile failure (already reported by the recursive call).
  */
 static int
-xo_eval_compile_function (xo_eval_prog_t *prog, xo_xparse_data_t *xdp,
-			   xo_xparse_node_id_t id, xo_xparse_node_t *xnp,
-			   xo_filter_data_t *dp, xo_filter_data_ops_t *ops)
+xo_eval_compile_function_args (xo_eval_prog_t *prog, xo_xparse_data_t *xdp,
+				xo_xparse_node_t *xnp,
+				xo_filter_data_t *dp, xo_filter_data_ops_t *ops)
 {
-    const char *str = xo_xparse_str(xdp, xnp->xn_str);
-    if (str == NULL) {
-	xo_eval_compile_fail(dp, ops, "unknown function in filter expression");
-	return -1;
-    }
-
-    xo_eval_func_map_t *entry = xo_eval_find_func(xo_eval_functions, str);
-    if (entry == NULL) {
-	xo_eval_compile_fail(dp, ops,
-			      "unknown function in filter expression: '%s'",
-			      str);
-	return -1;
-    }
-
-    if (entry->xfm_flags & XEFF_NO_EVAL)
-	return xo_eval_prog_emit(prog, entry->xfm_func, id, 0, 0) >= 0
-	    ? 0 : -1;
-
     int argc = 0;
     xo_xparse_node_id_t aid = xnp->xn_contents;
 
@@ -4329,32 +4553,130 @@ xo_eval_compile_function (xo_eval_prog_t *prog, xo_xparse_data_t *xdp,
 	aid = anp->xn_next;
     }
 
-    /*
-     * Reject wrong-arity calls at compile time, matching
-     * xo_eval_function()'s own runtime "entry->xfm_nargs >= 0" check.
-     * Without this, a call like not() or contains(name) would silently
-     * compile and run with the wrong argc.  Report the same informative
-     * message the runtime check uses, rather than letting the caller
-     * fall back to a generic "failed to compile" message.
-     */
-    if (entry->xfm_nargs >= 0 && argc != entry->xfm_nargs) {
-	xo_eval_compile_fail(dp, ops,
+    return argc;
+}
+
+/*
+ * Reject wrong-arity calls at compile time, matching
+ * xo_eval_function()'s own runtime "nargs >= 0" check.  Without this, a
+ * call like not() or contains(name) would silently compile and run
+ * with the wrong argc.  Shared by the built-in and xfdo_find_function
+ * fallback paths, which pass xfm_nargs/xfm_min_args and the hook's
+ * nargs/min_args outputs respectively -- same -1/min_args convention
+ * either way.
+ */
+static int
+xo_eval_compile_check_arity (xo_filter_data_t *dp, xo_filter_data_ops_t *ops,
+			      xo_xparse_data_t *xdp, xo_xparse_node_id_t id,
+			      const char *str, int argc,
+			      int nargs, int min_args)
+{
+    if (nargs >= 0 && argc != nargs) {
+	xo_eval_compile_fail(dp, ops, xdp, id,
 			      "function '%s' requires %d argument(s), got %d",
-			      str, entry->xfm_nargs, argc);
+			      str, nargs, argc);
 	return -1;
     }
 
     /*
-     * Fixed-arity functions get the same missing-check short-circuit as
-     * binary combine ops, matching xo_eval_function()'s own "entry->
-     * xfm_nargs > 0" check.  Variable-arity functions (xfm_nargs == -1,
-     * e.g. concat()/substring()) check XEVF_MISSING on their own argv
-     * where it matters, since not every argument position is required.
+     * Variable-arity functions (nargs == -1) normally defer their own
+     * arity checking to runtime. concat()/rematch()/substring()/sum()
+     * each have a compile-time-knowable minimum below which no amount
+     * of data will ever make the call valid, so they set min_args to
+     * catch that here.
      */
-    int flags = (entry->xfm_nargs >= 0) ? XEIF_CHECK_MISSING : 0;
+    if (nargs < 0 && min_args > 0 && argc < min_args) {
+	xo_eval_compile_fail(dp, ops, xdp, id,
+			      "function '%s' requires at least %d "
+			      "arguments, got %d",
+			      str, min_args, argc);
+	return -1;
+    }
 
-    return xo_eval_prog_emit(prog, entry->xfm_func, id, argc, flags)
-	>= 0 ? 0 : -1;
+    return 0;
+}
+
+/*
+ * Compile a function call.  XEFF_NO_EVAL functions (choose/choose2)
+ * manage their own lazy argument evaluation and still depend on the
+ * old recursive xo_eval(), so they compile to a self-managing leaf
+ * instruction; every other function compiles each argument first and
+ * then emits one instruction with a static argc, matching the
+ * argv[]-based convention the rest of the operations already use.
+ *
+ * A name that matches no built-in falls back to ops->xfdo_find_function,
+ * giving a dynamic-load backend (e.g. libslax's "slax:" namespace
+ * functions) a chance to resolve it; see that hook's doc comment in
+ * xo_filter.h and xo_eval_func_external()'s above.  Only the arity
+ * (returned by the hook itself) is used at compile time -- the
+ * resolved xo_eval_ext_fn_t is not cached and is looked up again at
+ * runtime.
+ */
+static int
+xo_eval_compile_function (xo_eval_prog_t *prog, xo_xparse_data_t *xdp,
+			   xo_xparse_node_id_t id, xo_xparse_node_t *xnp,
+			   xo_filter_data_t *dp, xo_filter_data_ops_t *ops)
+{
+    const char *str = xo_xparse_str(xdp, xnp->xn_str);
+    if (str == NULL) {
+	xo_eval_compile_fail(dp, ops, xdp, id,
+			      "unknown function in filter expression");
+	return -1;
+    }
+
+    xo_eval_func_map_t *entry = xo_eval_find_func(xo_eval_functions, str);
+    if (entry != NULL) {
+	if (entry->xfm_flags & XEFF_NO_EVAL)
+	    return xo_eval_prog_emit(prog, entry->xfm_func, id, 0, 0) >= 0
+		? 0 : -1;
+
+	int argc = xo_eval_compile_function_args(prog, xdp, xnp, dp, ops);
+	if (argc < 0)
+	    return -1;
+
+	if (xo_eval_compile_check_arity(dp, ops, xdp, id, str, argc,
+					 entry->xfm_nargs,
+					 entry->xfm_min_args) < 0)
+	    return -1;
+
+	/*
+	 * Fixed-arity functions get the same missing-check short-circuit
+	 * as binary combine ops, matching xo_eval_function()'s own
+	 * "entry->xfm_nargs > 0" check.  Variable-arity functions
+	 * (xfm_nargs == -1, e.g. concat()/substring()) check
+	 * XEVF_MISSING on their own argv where it matters, since not
+	 * every argument position is required.
+	 */
+	int flags = (entry->xfm_nargs >= 0) ? XEIF_CHECK_MISSING : 0;
+
+	return xo_eval_prog_emit(prog, entry->xfm_func, id, argc, flags)
+	    >= 0 ? 0 : -1;
+    }
+
+    if (ops != NULL && ops->xfdo_find_function != NULL) {
+	int nargs, min_args;
+	xo_eval_ext_fn_t fn = ops->xfdo_find_function(dp, str,
+						       &nargs, &min_args);
+	if (fn != NULL) {
+	    int argc = xo_eval_compile_function_args(prog, xdp, xnp, dp, ops);
+	    if (argc < 0)
+		return -1;
+
+	    if (xo_eval_compile_check_arity(dp, ops, xdp, id, str, argc,
+					     nargs, min_args) < 0)
+		return -1;
+
+	    int flags = (nargs >= 0) ? XEIF_CHECK_MISSING : 0;
+
+	    return xo_eval_prog_emit(prog, xo_eval_func_external, id,
+				      argc, flags) >= 0 ? 0 : -1;
+	}
+    }
+
+    xo_eval_compile_fail(dp, ops, xdp, id,
+			  "unknown function in filter expression: '%s'",
+			  str);
+    return -1;
 }
 
 /*
@@ -4597,6 +4919,49 @@ xo_eval_prog_run (xo_handle_t *xop, xo_filter_t *xfp, xo_tframe_t *framep,
     }
 
     return stack[0];
+}
+
+/*
+ * Public wrapper around xo_eval_prog_run() for non-libxo backends (e.g.
+ * libpin) that don't know xo_eval_value_t's layout: reduce the result to
+ * plain C types instead.  See the declaration in xo_filter.h.
+ */
+char *
+xo_eval_prog_run_simple (xo_handle_t *xop, xo_filter_t *xfp,
+			  xo_tframe_t *framep, xo_xparse_data_t *xdp,
+			  xo_eval_prog_t *prog,
+			  int *is_booleanp, int *bool_valuep,
+			  int *is_missingp)
+{
+    if (is_booleanp)
+	*is_booleanp = 0;
+    if (bool_valuep)
+	*bool_valuep = 0;
+    if (is_missingp)
+	*is_missingp = 0;
+
+    xo_eval_value_t value
+	= xo_eval_prog_run(xop, xfp, framep, xdp, prog, XO_INDENT);
+
+    if (value.xev_flags & (XEVF_MISSING | XEVF_INVALID | XEVF_UNSUPPORTED)) {
+	xo_eval_value_free(value);
+	if (is_missingp)
+	    *is_missingp = 1;
+	return NULL;
+    }
+
+    if (value.xev_type == C_BOOLEAN) {
+	if (is_booleanp)
+	    *is_booleanp = 1;
+	if (bool_valuep)
+	    *bool_valuep = xo_eval_cast_boolean(xop, value);
+	xo_eval_value_free(value);
+	return NULL;
+    }
+
+    char *str = xo_eval_cast_string(xop, value);
+    xo_eval_value_free(value);
+    return str;
 }
 
 /*
@@ -5411,4 +5776,10 @@ xo_filter_data_t *
 xo_filter_get_data_ptr (xo_filter_t *xfp)
 {
     return xfp ? xfp->xf_data : NULL;
+}
+
+xo_filter_data_ops_t *
+xo_filter_get_data_ops (xo_filter_t *xfp)
+{
+    return xfp ? xfp->xf_ops : NULL;
 }
