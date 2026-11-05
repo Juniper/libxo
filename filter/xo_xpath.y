@@ -137,6 +137,7 @@
 %token C_NESTED_PREDICATES  84 /* Predicates inside predicates: a[b[c]] */
 %token C_PREDICATE_PATHS    85 /* Multi-element paths in predicates a[b/c] */
 %token C_UNI_MINUS	    86 /* Unary minus */
+%token C_NAN		    87 /* Not a number (XPath's NaN) */
 /* Note: Add new names to xo_xparse_ttname_map[] in xo_xparse.c */
 
 /*
