@@ -5,10 +5,10 @@ main: input '?item[true()]'
 adding filter: 'item[true()]'
 added filter: 0
 --- 0: 8
-    000008: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
-                000003: type 52 (T_FUNCTION_NAME), str 8 [true], contents 0, next 0, prev 0 
+    000008: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0
+                000003: type 52 (T_FUNCTION_NAME), str 8 [true], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
 main: filter: rc: 12
@@ -59,10 +59,10 @@ main: input '?item[false()]'
 adding filter: 'item[false()]'
 added filter: 0
 --- 0: 8
-    000008: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
-                000003: type 52 (T_FUNCTION_NAME), str 8 [false], contents 0, next 0, prev 0 
+    000008: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0
+                000003: type 52 (T_FUNCTION_NAME), str 8 [false], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
 xpath_01: duplicate sibling name: 'item'
@@ -111,14 +111,14 @@ main: input '?item[not(color='red')]'
 adding filter: 'item[not(color='red')]'
 added filter: 0
 --- 0: 12
-    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
-                000003: type 52 (T_FUNCTION_NAME), str 8 [not], contents 6, next 0, prev 0 
-                    000006: type 14 (L_EQUALS), str 20 [=], contents 7, next 0, prev 0 
-                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
-                            000005: type 70 (C_ELEMENT), str 14 [color], contents 0, next 0, prev 0 
-                        000008: type 54 (T_QUOTED), str 22 [red], contents 0, next 0, prev 7 
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0
+                000003: type 52 (T_FUNCTION_NAME), str 8 [not], contents 6, next 0, prev 0
+                    000006: type 14 (L_EQUALS), str 20 [=], contents 7, next 0, prev 0
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0
+                            000005: type 70 (C_ELEMENT), str 14 [color], contents 0, next 0, prev 0
+                        000008: type 54 (T_QUOTED), str 22 [red], contents 0, next 0, prev 7
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -179,11 +179,11 @@ main: input '?item[not(true())]'
 adding filter: 'item[not(true())]'
 added filter: 0
 --- 0: 11
-    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
-                000003: type 52 (T_FUNCTION_NAME), str 8 [not], contents 5, next 0, prev 0 
-                    000005: type 52 (T_FUNCTION_NAME), str 14 [true], contents 0, next 0, prev 0 
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0
+                000003: type 52 (T_FUNCTION_NAME), str 8 [not], contents 5, next 0, prev 0
+                    000005: type 52 (T_FUNCTION_NAME), str 14 [true], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -220,11 +220,11 @@ main: input '?item[not(false())]'
 adding filter: 'item[not(false())]'
 added filter: 0
 --- 0: 11
-    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
-                000003: type 52 (T_FUNCTION_NAME), str 8 [not], contents 5, next 0, prev 0 
-                    000005: type 52 (T_FUNCTION_NAME), str 14 [false], contents 0, next 0, prev 0 
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0
+                000003: type 52 (T_FUNCTION_NAME), str 8 [not], contents 5, next 0, prev 0
+                    000005: type 52 (T_FUNCTION_NAME), str 14 [false], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -263,15 +263,15 @@ main: input '?item[not(not(color='red'))]'
 adding filter: 'item[not(not(color='red'))]'
 added filter: 0
 --- 0: 15
-    000015: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
-                000003: type 52 (T_FUNCTION_NAME), str 8 [not], contents 5, next 0, prev 0 
-                    000005: type 52 (T_FUNCTION_NAME), str 14 [not], contents 8, next 0, prev 0 
-                        000008: type 14 (L_EQUALS), str 26 [=], contents 9, next 0, prev 0 
-                            000009: type 74 (C_PATH), str 0 [], contents 7, next 10, prev 0 
-                                000007: type 70 (C_ELEMENT), str 20 [color], contents 0, next 0, prev 0 
-                            000010: type 54 (T_QUOTED), str 28 [red], contents 0, next 0, prev 9 
+    000015: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0
+                000003: type 52 (T_FUNCTION_NAME), str 8 [not], contents 5, next 0, prev 0
+                    000005: type 52 (T_FUNCTION_NAME), str 14 [not], contents 8, next 0, prev 0
+                        000008: type 14 (L_EQUALS), str 26 [=], contents 9, next 0, prev 0
+                            000009: type 74 (C_PATH), str 0 [], contents 7, next 10, prev 0
+                                000007: type 70 (C_ELEMENT), str 20 [color], contents 0, next 0, prev 0
+                            000010: type 54 (T_QUOTED), str 28 [red], contents 0, next 0, prev 9
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -321,11 +321,11 @@ main: input '?item[boolean(1)]'
 adding filter: 'item[boolean(1)]'
 added filter: 0
 --- 0: 9
-    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
-                000003: type 52 (T_FUNCTION_NAME), str 8 [boolean], contents 5, next 0, prev 0 
-                    000005: type 53 (T_NUMBER), str 18 [1], contents 0, next 0, prev 0 
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0
+                000003: type 52 (T_FUNCTION_NAME), str 8 [boolean], contents 5, next 0, prev 0
+                    000005: type 53 (T_NUMBER), str 18 [1], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -363,11 +363,11 @@ main: input '?item[boolean(0)]'
 adding filter: 'item[boolean(0)]'
 added filter: 0
 --- 0: 9
-    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
-                000003: type 52 (T_FUNCTION_NAME), str 8 [boolean], contents 5, next 0, prev 0 
-                    000005: type 53 (T_NUMBER), str 18 [0], contents 0, next 0, prev 0 
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0
+                000003: type 52 (T_FUNCTION_NAME), str 8 [boolean], contents 5, next 0, prev 0
+                    000005: type 53 (T_NUMBER), str 18 [0], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -404,14 +404,14 @@ main: input '?item[boolean(color='red')]'
 adding filter: 'item[boolean(color='red')]'
 added filter: 0
 --- 0: 12
-    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
-                000003: type 52 (T_FUNCTION_NAME), str 8 [boolean], contents 6, next 0, prev 0 
-                    000006: type 14 (L_EQUALS), str 24 [=], contents 7, next 0, prev 0 
-                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
-                            000005: type 70 (C_ELEMENT), str 18 [color], contents 0, next 0, prev 0 
-                        000008: type 54 (T_QUOTED), str 26 [red], contents 0, next 0, prev 7 
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0
+                000003: type 52 (T_FUNCTION_NAME), str 8 [boolean], contents 6, next 0, prev 0
+                    000006: type 14 (L_EQUALS), str 24 [=], contents 7, next 0, prev 0
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0
+                            000005: type 70 (C_ELEMENT), str 18 [color], contents 0, next 0, prev 0
+                        000008: type 54 (T_QUOTED), str 26 [red], contents 0, next 0, prev 7
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -461,14 +461,14 @@ main: input '?item[ceiling(price) > 3]'
 adding filter: 'item[ceiling(price) > 3]'
 added filter: 0
 --- 0: 12
-    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0 
-                000008: type 15 (L_GRTR), str 26 [>], contents 3, next 0, prev 0 
-                    000003: type 52 (T_FUNCTION_NAME), str 8 [ceiling], contents 7, next 9, prev 0 
-                        000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
-                            000005: type 70 (C_ELEMENT), str 18 [price], contents 0, next 0, prev 0 
-                    000009: type 53 (T_NUMBER), str 28 [3], contents 0, next 0, prev 3 
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0
+                000008: type 15 (L_GRTR), str 26 [>], contents 3, next 0, prev 0
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [ceiling], contents 7, next 9, prev 0
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0
+                            000005: type 70 (C_ELEMENT), str 18 [price], contents 0, next 0, prev 0
+                    000009: type 53 (T_NUMBER), str 28 [3], contents 0, next 0, prev 3
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -529,14 +529,14 @@ main: input '?item[floor(price) >= 3]'
 adding filter: 'item[floor(price) >= 3]'
 added filter: 0
 --- 0: 12
-    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0 
-                000008: type 16 (L_GRTREQ), str 24 [>=], contents 3, next 0, prev 0 
-                    000003: type 52 (T_FUNCTION_NAME), str 8 [floor], contents 7, next 9, prev 0 
-                        000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
-                            000005: type 70 (C_ELEMENT), str 16 [price], contents 0, next 0, prev 0 
-                    000009: type 53 (T_NUMBER), str 27 [3], contents 0, next 0, prev 3 
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0
+                000008: type 16 (L_GRTREQ), str 24 [>=], contents 3, next 0, prev 0
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [floor], contents 7, next 9, prev 0
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0
+                            000005: type 70 (C_ELEMENT), str 16 [price], contents 0, next 0, prev 0
+                    000009: type 53 (T_NUMBER), str 27 [3], contents 0, next 0, prev 3
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -598,16 +598,16 @@ main: input '?item[ceiling(price) == floor(price)]'
 adding filter: 'item[ceiling(price) == floor(price)]'
 added filter: 0
 --- 0: 16
-    000016: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0 
-                000008: type 14 (L_EQUALS), str 26 [==], contents 3, next 0, prev 0 
-                    000003: type 52 (T_FUNCTION_NAME), str 8 [ceiling], contents 7, next 9, prev 0 
-                        000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
-                            000005: type 70 (C_ELEMENT), str 18 [price], contents 0, next 0, prev 0 
-                    000009: type 52 (T_FUNCTION_NAME), str 29 [floor], contents 13, next 0, prev 3 
-                        000013: type 74 (C_PATH), str 0 [], contents 11, next 0, prev 0 
-                            000011: type 70 (C_ELEMENT), str 37 [price], contents 0, next 0, prev 0 
+    000016: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0
+                000008: type 14 (L_EQUALS), str 26 [==], contents 3, next 0, prev 0
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [ceiling], contents 7, next 9, prev 0
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0
+                            000005: type 70 (C_ELEMENT), str 18 [price], contents 0, next 0, prev 0
+                    000009: type 52 (T_FUNCTION_NAME), str 29 [floor], contents 13, next 0, prev 3
+                        000013: type 74 (C_PATH), str 0 [], contents 11, next 0, prev 0
+                            000011: type 70 (C_ELEMENT), str 37 [price], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -668,14 +668,14 @@ main: input '?item[number(price) == 2]'
 adding filter: 'item[number(price) == 2]'
 added filter: 0
 --- 0: 12
-    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0 
-                000008: type 14 (L_EQUALS), str 25 [==], contents 3, next 0, prev 0 
-                    000003: type 52 (T_FUNCTION_NAME), str 8 [number], contents 7, next 9, prev 0 
-                        000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
-                            000005: type 70 (C_ELEMENT), str 17 [price], contents 0, next 0, prev 0 
-                    000009: type 53 (T_NUMBER), str 28 [2], contents 0, next 0, prev 3 
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0
+                000008: type 14 (L_EQUALS), str 25 [==], contents 3, next 0, prev 0
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [number], contents 7, next 9, prev 0
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0
+                            000005: type 70 (C_ELEMENT), str 17 [price], contents 0, next 0, prev 0
+                    000009: type 53 (T_NUMBER), str 28 [2], contents 0, next 0, prev 3
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -737,13 +737,13 @@ main: input '?item[contains(label, 'eth')]'
 adding filter: 'item[contains(label, 'eth')]'
 added filter: 0
 --- 0: 12
-    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
-                000003: type 52 (T_FUNCTION_NAME), str 8 [contains], contents 7, next 0, prev 0 
-                    000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
-                        000005: type 70 (C_ELEMENT), str 19 [label], contents 0, next 0, prev 0 
-                    000008: type 54 (T_QUOTED), str 27 [eth], contents 0, next 0, prev 7 
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0
+                000003: type 52 (T_FUNCTION_NAME), str 8 [contains], contents 7, next 0, prev 0
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0
+                        000005: type 70 (C_ELEMENT), str 19 [label], contents 0, next 0, prev 0
+                    000008: type 54 (T_QUOTED), str 27 [eth], contents 0, next 0, prev 7
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -804,13 +804,13 @@ main: input '?item[contains(name, 'oo')]'
 adding filter: 'item[contains(name, 'oo')]'
 added filter: 0
 --- 0: 12
-    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
-                000003: type 52 (T_FUNCTION_NAME), str 8 [contains], contents 7, next 0, prev 0 
-                    000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
-                        000005: type 70 (C_ELEMENT), str 19 [name], contents 0, next 0, prev 0 
-                    000008: type 54 (T_QUOTED), str 26 [oo], contents 0, next 0, prev 7 
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0
+                000003: type 52 (T_FUNCTION_NAME), str 8 [contains], contents 7, next 0, prev 0
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0
+                        000005: type 70 (C_ELEMENT), str 19 [name], contents 0, next 0, prev 0
+                    000008: type 54 (T_QUOTED), str 26 [oo], contents 0, next 0, prev 7
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -872,14 +872,14 @@ main: input '?item[not(contains(label, 'eth'))]'
 adding filter: 'item[not(contains(label, 'eth'))]'
 added filter: 0
 --- 0: 15
-    000015: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
-                000003: type 52 (T_FUNCTION_NAME), str 8 [not], contents 5, next 0, prev 0 
-                    000005: type 52 (T_FUNCTION_NAME), str 14 [contains], contents 9, next 0, prev 0 
-                        000009: type 74 (C_PATH), str 0 [], contents 7, next 10, prev 0 
-                            000007: type 70 (C_ELEMENT), str 25 [label], contents 0, next 0, prev 0 
-                        000010: type 54 (T_QUOTED), str 33 [eth], contents 0, next 0, prev 9 
+    000015: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0
+                000003: type 52 (T_FUNCTION_NAME), str 8 [not], contents 5, next 0, prev 0
+                    000005: type 52 (T_FUNCTION_NAME), str 14 [contains], contents 9, next 0, prev 0
+                        000009: type 74 (C_PATH), str 0 [], contents 7, next 10, prev 0
+                            000007: type 70 (C_ELEMENT), str 25 [label], contents 0, next 0, prev 0
+                        000010: type 54 (T_QUOTED), str 33 [eth], contents 0, next 0, prev 9
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -940,16 +940,16 @@ main: input '?item[substring(iface, 2, 3) = 'th0']'
 adding filter: 'item[substring(iface, 2, 3) = 'th0']'
 added filter: 0
 --- 0: 16
-    000016: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 12, next 0, prev 0 
-                000012: type 14 (L_EQUALS), str 36 [=], contents 3, next 0, prev 0 
-                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring], contents 7, next 13, prev 0 
-                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
-                            000005: type 70 (C_ELEMENT), str 20 [iface], contents 0, next 0, prev 0 
-                        000008: type 53 (T_NUMBER), str 28 [2], contents 0, next 10, prev 7 
-                        000010: type 53 (T_NUMBER), str 32 [3], contents 0, next 0, prev 8 
-                    000013: type 54 (T_QUOTED), str 38 [th0], contents 0, next 0, prev 3 
+    000016: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 12, next 0, prev 0
+                000012: type 14 (L_EQUALS), str 36 [=], contents 3, next 0, prev 0
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring], contents 7, next 13, prev 0
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0
+                            000005: type 70 (C_ELEMENT), str 20 [iface], contents 0, next 0, prev 0
+                        000008: type 53 (T_NUMBER), str 28 [2], contents 0, next 10, prev 7
+                        000010: type 53 (T_NUMBER), str 32 [3], contents 0, next 0, prev 8
+                    000013: type 54 (T_QUOTED), str 38 [th0], contents 0, next 0, prev 3
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -1010,15 +1010,15 @@ main: input '?item[substring(name, 5) = 'c']'
 adding filter: 'item[substring(name, 5) = 'c']'
 added filter: 0
 --- 0: 14
-    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 10, next 0, prev 0 
-                000010: type 14 (L_EQUALS), str 31 [=], contents 3, next 0, prev 0 
-                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring], contents 7, next 11, prev 0 
-                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
-                            000005: type 70 (C_ELEMENT), str 20 [name], contents 0, next 0, prev 0 
-                        000008: type 53 (T_NUMBER), str 27 [5], contents 0, next 0, prev 7 
-                    000011: type 54 (T_QUOTED), str 33 [c], contents 0, next 0, prev 3 
+    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 10, next 0, prev 0
+                000010: type 14 (L_EQUALS), str 31 [=], contents 3, next 0, prev 0
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring], contents 7, next 11, prev 0
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0
+                            000005: type 70 (C_ELEMENT), str 20 [name], contents 0, next 0, prev 0
+                        000008: type 53 (T_NUMBER), str 27 [5], contents 0, next 0, prev 7
+                    000011: type 54 (T_QUOTED), str 33 [c], contents 0, next 0, prev 3
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -1078,15 +1078,15 @@ main: input '?item[substring-before(iface, '.') = 'eth0']'
 adding filter: 'item[substring-before(iface, '.') = 'eth0']'
 added filter: 0
 --- 0: 14
-    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 10, next 0, prev 0 
-                000010: type 14 (L_EQUALS), str 39 [=], contents 3, next 0, prev 0 
-                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring-before], contents 7, next 11, prev 0 
-                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
-                            000005: type 70 (C_ELEMENT), str 27 [iface], contents 0, next 0, prev 0 
-                        000008: type 54 (T_QUOTED), str 35 [.], contents 0, next 0, prev 7 
-                    000011: type 54 (T_QUOTED), str 41 [eth0], contents 0, next 0, prev 3 
+    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 10, next 0, prev 0
+                000010: type 14 (L_EQUALS), str 39 [=], contents 3, next 0, prev 0
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring-before], contents 7, next 11, prev 0
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0
+                            000005: type 70 (C_ELEMENT), str 27 [iface], contents 0, next 0, prev 0
+                        000008: type 54 (T_QUOTED), str 35 [.], contents 0, next 0, prev 7
+                    000011: type 54 (T_QUOTED), str 41 [eth0], contents 0, next 0, prev 3
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -1147,15 +1147,15 @@ main: input '?item[substring-before(name, '-') = 'pkg']'
 adding filter: 'item[substring-before(name, '-') = 'pkg']'
 added filter: 0
 --- 0: 14
-    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 10, next 0, prev 0 
-                000010: type 14 (L_EQUALS), str 38 [=], contents 3, next 0, prev 0 
-                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring-before], contents 7, next 11, prev 0 
-                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
-                            000005: type 70 (C_ELEMENT), str 27 [name], contents 0, next 0, prev 0 
-                        000008: type 54 (T_QUOTED), str 34 [-], contents 0, next 0, prev 7 
-                    000011: type 54 (T_QUOTED), str 40 [pkg], contents 0, next 0, prev 3 
+    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 10, next 0, prev 0
+                000010: type 14 (L_EQUALS), str 38 [=], contents 3, next 0, prev 0
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring-before], contents 7, next 11, prev 0
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0
+                            000005: type 70 (C_ELEMENT), str 27 [name], contents 0, next 0, prev 0
+                        000008: type 54 (T_QUOTED), str 34 [-], contents 0, next 0, prev 7
+                    000011: type 54 (T_QUOTED), str 40 [pkg], contents 0, next 0, prev 3
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -1216,15 +1216,15 @@ main: input '?item[substring-after(version, '-') = '2']'
 adding filter: 'item[substring-after(version, '-') = '2']'
 added filter: 0
 --- 0: 14
-    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 10, next 0, prev 0 
-                000010: type 14 (L_EQUALS), str 40 [=], contents 3, next 0, prev 0 
-                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring-after], contents 7, next 11, prev 0 
-                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
-                            000005: type 70 (C_ELEMENT), str 26 [version], contents 0, next 0, prev 0 
-                        000008: type 54 (T_QUOTED), str 36 [-], contents 0, next 0, prev 7 
-                    000011: type 54 (T_QUOTED), str 42 [2], contents 0, next 0, prev 3 
+    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 10, next 0, prev 0
+                000010: type 14 (L_EQUALS), str 40 [=], contents 3, next 0, prev 0
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring-after], contents 7, next 11, prev 0
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0
+                            000005: type 70 (C_ELEMENT), str 26 [version], contents 0, next 0, prev 0
+                        000008: type 54 (T_QUOTED), str 36 [-], contents 0, next 0, prev 7
+                    000011: type 54 (T_QUOTED), str 42 [2], contents 0, next 0, prev 3
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -1285,15 +1285,15 @@ main: input '?item[substring-after(path, '/') = 'usr']'
 adding filter: 'item[substring-after(path, '/') = 'usr']'
 added filter: 0
 --- 0: 14
-    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 10, next 0, prev 0 
-                000010: type 14 (L_EQUALS), str 37 [=], contents 3, next 0, prev 0 
-                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring-after], contents 7, next 11, prev 0 
-                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
-                            000005: type 70 (C_ELEMENT), str 26 [path], contents 0, next 0, prev 0 
-                        000008: type 54 (T_QUOTED), str 33 [/], contents 0, next 0, prev 7 
-                    000011: type 54 (T_QUOTED), str 39 [usr], contents 0, next 0, prev 3 
+    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 10, next 0, prev 0
+                000010: type 14 (L_EQUALS), str 37 [=], contents 3, next 0, prev 0
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring-after], contents 7, next 11, prev 0
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0
+                            000005: type 70 (C_ELEMENT), str 26 [path], contents 0, next 0, prev 0
+                        000008: type 54 (T_QUOTED), str 33 [/], contents 0, next 0, prev 7
+                    000011: type 54 (T_QUOTED), str 39 [usr], contents 0, next 0, prev 3
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -1342,15 +1342,15 @@ main: input '?item[starts-with(substring-after(name, '.'), 'e')]'
 adding filter: 'item[starts-with(substring-after(name, '.'), 'e')]'
 added filter: 0
 --- 0: 17
-    000017: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
-                000003: type 52 (T_FUNCTION_NAME), str 8 [starts-with], contents 5, next 0, prev 0 
-                    000005: type 52 (T_FUNCTION_NAME), str 22 [substring-after], contents 9, next 13, prev 0 
-                        000009: type 74 (C_PATH), str 0 [], contents 7, next 10, prev 0 
-                            000007: type 70 (C_ELEMENT), str 40 [name], contents 0, next 0, prev 0 
-                        000010: type 54 (T_QUOTED), str 47 [.], contents 0, next 0, prev 9 
-                    000013: type 54 (T_QUOTED), str 53 [e], contents 0, next 0, prev 5 
+    000017: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0
+                000003: type 52 (T_FUNCTION_NAME), str 8 [starts-with], contents 5, next 0, prev 0
+                    000005: type 52 (T_FUNCTION_NAME), str 22 [substring-after], contents 9, next 13, prev 0
+                        000009: type 74 (C_PATH), str 0 [], contents 7, next 10, prev 0
+                            000007: type 70 (C_ELEMENT), str 40 [name], contents 0, next 0, prev 0
+                        000010: type 54 (T_QUOTED), str 47 [.], contents 0, next 0, prev 9
+                    000013: type 54 (T_QUOTED), str 53 [e], contents 0, next 0, prev 5
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -1411,12 +1411,12 @@ main: input '?item[boolean(name)]'
 adding filter: 'item[boolean(name)]'
 added filter: 0
 --- 0: 10
-    000010: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
-                000003: type 52 (T_FUNCTION_NAME), str 8 [boolean], contents 7, next 0, prev 0 
-                    000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
-                        000005: type 70 (C_ELEMENT), str 18 [name], contents 0, next 0, prev 0 
+    000010: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0
+                000003: type 52 (T_FUNCTION_NAME), str 8 [boolean], contents 7, next 0, prev 0
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0
+                        000005: type 70 (C_ELEMENT), str 18 [name], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -1476,12 +1476,12 @@ main: input '?item[not(name)]'
 adding filter: 'item[not(name)]'
 added filter: 0
 --- 0: 10
-    000010: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
-                000003: type 52 (T_FUNCTION_NAME), str 8 [not], contents 7, next 0, prev 0 
-                    000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
-                        000005: type 70 (C_ELEMENT), str 14 [name], contents 0, next 0, prev 0 
+    000010: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0
+                000003: type 52 (T_FUNCTION_NAME), str 8 [not], contents 7, next 0, prev 0
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0
+                        000005: type 70 (C_ELEMENT), str 14 [name], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -1538,12 +1538,12 @@ main: input '?item[not(missing)]'
 adding filter: 'item[not(missing)]'
 added filter: 0
 --- 0: 10
-    000010: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
-                000003: type 52 (T_FUNCTION_NAME), str 8 [not], contents 7, next 0, prev 0 
-                    000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
-                        000005: type 70 (C_ELEMENT), str 14 [missing], contents 0, next 0, prev 0 
+    000010: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0
+                000003: type 52 (T_FUNCTION_NAME), str 8 [not], contents 7, next 0, prev 0
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0
+                        000005: type 70 (C_ELEMENT), str 14 [missing], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -1604,13 +1604,13 @@ main: input '?item[boolean(number(rate))]'
 adding filter: 'item[boolean(number(rate))]'
 added filter: 0
 --- 0: 13
-    000013: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
-                000003: type 52 (T_FUNCTION_NAME), str 8 [boolean], contents 5, next 0, prev 0 
-                    000005: type 52 (T_FUNCTION_NAME), str 18 [number], contents 9, next 0, prev 0 
-                        000009: type 74 (C_PATH), str 0 [], contents 7, next 0, prev 0 
-                            000007: type 70 (C_ELEMENT), str 27 [rate], contents 0, next 0, prev 0 
+    000013: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0
+                000003: type 52 (T_FUNCTION_NAME), str 8 [boolean], contents 5, next 0, prev 0
+                    000005: type 52 (T_FUNCTION_NAME), str 18 [number], contents 9, next 0, prev 0
+                        000009: type 74 (C_PATH), str 0 [], contents 7, next 0, prev 0
+                            000007: type 70 (C_ELEMENT), str 27 [rate], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -1668,11 +1668,11 @@ main: input '?item[boolean(0.5)]'
 adding filter: 'item[boolean(0.5)]'
 added filter: 0
 --- 0: 9
-    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
-                000003: type 52 (T_FUNCTION_NAME), str 8 [boolean], contents 5, next 0, prev 0 
-                    000005: type 53 (T_NUMBER), str 18 [0.5], contents 0, next 0, prev 0 
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0
+                000003: type 52 (T_FUNCTION_NAME), str 8 [boolean], contents 5, next 0, prev 0
+                    000005: type 53 (T_NUMBER), str 18 [0.5], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -1732,15 +1732,15 @@ main: input '?item[name and number(rate)]'
 adding filter: 'item[name and number(rate)]'
 added filter: 0
 --- 0: 13
-    000013: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
-                000004: type 40 ('('), str 13 [and], contents 5, next 0, prev 0 
-                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0 
-                        000003: type 70 (C_ELEMENT), str 8 [name], contents 0, next 0, prev 0 
-                    000006: type 52 (T_FUNCTION_NAME), str 17 [number], contents 10, next 0, prev 5 
-                        000010: type 74 (C_PATH), str 0 [], contents 8, next 0, prev 0 
-                            000008: type 70 (C_ELEMENT), str 26 [rate], contents 0, next 0, prev 0 
+    000013: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0
+                000004: type 40 ('('), str 13 [and], contents 5, next 0, prev 0
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0
+                        000003: type 70 (C_ELEMENT), str 8 [name], contents 0, next 0, prev 0
+                    000006: type 52 (T_FUNCTION_NAME), str 17 [number], contents 10, next 0, prev 5
+                        000010: type 74 (C_PATH), str 0 [], contents 8, next 0, prev 0
+                            000008: type 70 (C_ELEMENT), str 26 [rate], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -1798,11 +1798,11 @@ main: input '?item[boolean('0')]'
 adding filter: 'item[boolean('0')]'
 added filter: 0
 --- 0: 9
-    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
-                000003: type 52 (T_FUNCTION_NAME), str 8 [boolean], contents 5, next 0, prev 0 
-                    000005: type 54 (T_QUOTED), str 18 [0], contents 0, next 0, prev 0 
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0
+                000003: type 52 (T_FUNCTION_NAME), str 8 [boolean], contents 5, next 0, prev 0
+                    000005: type 54 (T_QUOTED), str 18 [0], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -1862,11 +1862,11 @@ main: input '?item[boolean('')]'
 adding filter: 'item[boolean('')]'
 added filter: 0
 --- 0: 9
-    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
-                000003: type 52 (T_FUNCTION_NAME), str 8 [boolean], contents 5, next 0, prev 0 
-                    000005: type 54 (T_QUOTED), str 18 [], contents 0, next 0, prev 0 
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0
+                000003: type 52 (T_FUNCTION_NAME), str 8 [boolean], contents 5, next 0, prev 0
+                    000005: type 54 (T_QUOTED), str 18 [], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -1924,12 +1924,12 @@ main: input '?item[isempty(name)]'
 adding filter: 'item[isempty(name)]'
 added filter: 0
 --- 0: 10
-    000010: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
-                000003: type 52 (T_FUNCTION_NAME), str 8 [isempty], contents 7, next 0, prev 0 
-                    000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
-                        000005: type 70 (C_ELEMENT), str 18 [name], contents 0, next 0, prev 0 
+    000010: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0
+                000003: type 52 (T_FUNCTION_NAME), str 8 [isempty], contents 7, next 0, prev 0
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0
+                        000005: type 70 (C_ELEMENT), str 18 [name], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -1996,12 +1996,12 @@ main: input '?item[isempty(note)]'
 adding filter: 'item[isempty(note)]'
 added filter: 0
 --- 0: 10
-    000010: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
-                000003: type 52 (T_FUNCTION_NAME), str 8 [isempty], contents 7, next 0, prev 0 
-                    000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
-                        000005: type 70 (C_ELEMENT), str 18 [note], contents 0, next 0, prev 0 
+    000010: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0
+                000003: type 52 (T_FUNCTION_NAME), str 8 [isempty], contents 7, next 0, prev 0
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0
+                        000005: type 70 (C_ELEMENT), str 18 [note], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -2068,13 +2068,13 @@ main: input '?item[!isempty(name)]'
 adding filter: 'item[!isempty(name)]'
 added filter: 0
 --- 0: 11
-    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
-                000003: type 73 (C_NOT), str 8 [!], contents 4, next 0, prev 0 
-                    000004: type 52 (T_FUNCTION_NAME), str 10 [isempty], contents 8, next 0, prev 0 
-                        000008: type 74 (C_PATH), str 0 [], contents 6, next 0, prev 0 
-                            000006: type 70 (C_ELEMENT), str 20 [name], contents 0, next 0, prev 0 
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0
+                000003: type 73 (C_NOT), str 8 [!], contents 4, next 0, prev 0
+                    000004: type 52 (T_FUNCTION_NAME), str 10 [isempty], contents 8, next 0, prev 0
+                        000008: type 74 (C_PATH), str 0 [], contents 6, next 0, prev 0
+                            000006: type 70 (C_ELEMENT), str 20 [name], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -2141,11 +2141,11 @@ main: input '?item[name]'
 adding filter: 'item[name]'
 added filter: 0
 --- 0: 7
-    000007: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 5, next 0, prev 0 
-                000005: type 74 (C_PATH), str 0 [], contents 3, next 0, prev 0 
-                    000003: type 70 (C_ELEMENT), str 8 [name], contents 0, next 0, prev 0 
+    000007: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 5, next 0, prev 0
+                000005: type 74 (C_PATH), str 0 [], contents 3, next 0, prev 0
+                    000003: type 70 (C_ELEMENT), str 8 [name], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -2213,12 +2213,12 @@ main: input '?item[string(name)]'
 adding filter: 'item[string(name)]'
 added filter: 0
 --- 0: 10
-    000010: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
-                000003: type 52 (T_FUNCTION_NAME), str 8 [string], contents 7, next 0, prev 0 
-                    000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
-                        000005: type 70 (C_ELEMENT), str 17 [name], contents 0, next 0, prev 0 
+    000010: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0
+                000003: type 52 (T_FUNCTION_NAME), str 8 [string], contents 7, next 0, prev 0
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0
+                        000005: type 70 (C_ELEMENT), str 17 [name], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -2285,11 +2285,11 @@ main: input '?item[isempty('')]'
 adding filter: 'item[isempty('')]'
 added filter: 0
 --- 0: 9
-    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
-                000003: type 52 (T_FUNCTION_NAME), str 8 [isempty], contents 5, next 0, prev 0 
-                    000005: type 54 (T_QUOTED), str 18 [], contents 0, next 0, prev 0 
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0
+                000003: type 52 (T_FUNCTION_NAME), str 8 [isempty], contents 5, next 0, prev 0
+                    000005: type 54 (T_QUOTED), str 18 [], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -2359,16 +2359,16 @@ main: input '?item[substring(s, 0, 3) = '12']'
 adding filter: 'item[substring(s, 0, 3) = '12']'
 added filter: 0
 --- 0: 16
-    000016: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 12, next 0, prev 0 
-                000012: type 14 (L_EQUALS), str 32 [=], contents 3, next 0, prev 0 
-                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring], contents 7, next 13, prev 0 
-                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
-                            000005: type 70 (C_ELEMENT), str 20 [s], contents 0, next 0, prev 0 
-                        000008: type 53 (T_NUMBER), str 24 [0], contents 0, next 10, prev 7 
-                        000010: type 53 (T_NUMBER), str 28 [3], contents 0, next 0, prev 8 
-                    000013: type 54 (T_QUOTED), str 34 [12], contents 0, next 0, prev 3 
+    000016: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 12, next 0, prev 0
+                000012: type 14 (L_EQUALS), str 32 [=], contents 3, next 0, prev 0
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring], contents 7, next 13, prev 0
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0
+                            000005: type 70 (C_ELEMENT), str 20 [s], contents 0, next 0, prev 0
+                        000008: type 53 (T_NUMBER), str 24 [0], contents 0, next 10, prev 7
+                        000010: type 53 (T_NUMBER), str 28 [3], contents 0, next 0, prev 8
+                    000013: type 54 (T_QUOTED), str 34 [12], contents 0, next 0, prev 3
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -2418,16 +2418,16 @@ main: input '?item[substring(s, 1.5, 2.6) = '234']'
 adding filter: 'item[substring(s, 1.5, 2.6) = '234']'
 added filter: 0
 --- 0: 16
-    000016: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 12, next 0, prev 0 
-                000012: type 14 (L_EQUALS), str 36 [=], contents 3, next 0, prev 0 
-                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring], contents 7, next 13, prev 0 
-                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
-                            000005: type 70 (C_ELEMENT), str 20 [s], contents 0, next 0, prev 0 
-                        000008: type 53 (T_NUMBER), str 24 [1.5], contents 0, next 10, prev 7 
-                        000010: type 53 (T_NUMBER), str 30 [2.6], contents 0, next 0, prev 8 
-                    000013: type 54 (T_QUOTED), str 38 [234], contents 0, next 0, prev 3 
+    000016: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 12, next 0, prev 0
+                000012: type 14 (L_EQUALS), str 36 [=], contents 3, next 0, prev 0
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring], contents 7, next 13, prev 0
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0
+                            000005: type 70 (C_ELEMENT), str 20 [s], contents 0, next 0, prev 0
+                        000008: type 53 (T_NUMBER), str 24 [1.5], contents 0, next 10, prev 7
+                        000010: type 53 (T_NUMBER), str 30 [2.6], contents 0, next 0, prev 8
+                    000013: type 54 (T_QUOTED), str 38 [234], contents 0, next 0, prev 3
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -2477,17 +2477,17 @@ main: input '?item[substring(s, -1, 3) = '1']'
 adding filter: 'item[substring(s, -1, 3) = '1']'
 added filter: 0
 --- 0: 17
-    000017: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 13, next 0, prev 0 
-                000013: type 14 (L_EQUALS), str 34 [=], contents 3, next 0, prev 0 
-                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring], contents 7, next 14, prev 0 
-                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
-                            000005: type 70 (C_ELEMENT), str 20 [s], contents 0, next 0, prev 0 
-                        000008: type 86 (C_UNI_MINUS), str 24 [-], contents 9, next 11, prev 7 
-                            000009: type 53 (T_NUMBER), str 26 [1], contents 0, next 0, prev 0 
-                        000011: type 53 (T_NUMBER), str 30 [3], contents 0, next 0, prev 8 
-                    000014: type 54 (T_QUOTED), str 36 [1], contents 0, next 0, prev 3 
+    000017: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 13, next 0, prev 0
+                000013: type 14 (L_EQUALS), str 34 [=], contents 3, next 0, prev 0
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring], contents 7, next 14, prev 0
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0
+                            000005: type 70 (C_ELEMENT), str 20 [s], contents 0, next 0, prev 0
+                        000008: type 86 (C_UNI_MINUS), str 24 [-], contents 9, next 11, prev 7
+                            000009: type 53 (T_NUMBER), str 26 [1], contents 0, next 0, prev 0
+                        000011: type 53 (T_NUMBER), str 30 [3], contents 0, next 0, prev 8
+                    000014: type 54 (T_QUOTED), str 36 [1], contents 0, next 0, prev 3
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -2536,16 +2536,16 @@ main: input '?item[substring(s, 4, 10) = '45']'
 adding filter: 'item[substring(s, 4, 10) = '45']'
 added filter: 0
 --- 0: 16
-    000016: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 12, next 0, prev 0 
-                000012: type 14 (L_EQUALS), str 33 [=], contents 3, next 0, prev 0 
-                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring], contents 7, next 13, prev 0 
-                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
-                            000005: type 70 (C_ELEMENT), str 20 [s], contents 0, next 0, prev 0 
-                        000008: type 53 (T_NUMBER), str 24 [4], contents 0, next 10, prev 7 
-                        000010: type 53 (T_NUMBER), str 28 [10], contents 0, next 0, prev 8 
-                    000013: type 54 (T_QUOTED), str 35 [45], contents 0, next 0, prev 3 
+    000016: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 12, next 0, prev 0
+                000012: type 14 (L_EQUALS), str 33 [=], contents 3, next 0, prev 0
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring], contents 7, next 13, prev 0
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0
+                            000005: type 70 (C_ELEMENT), str 20 [s], contents 0, next 0, prev 0
+                        000008: type 53 (T_NUMBER), str 24 [4], contents 0, next 10, prev 7
+                        000010: type 53 (T_NUMBER), str 28 [10], contents 0, next 0, prev 8
+                    000013: type 54 (T_QUOTED), str 35 [45], contents 0, next 0, prev 3
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -2594,15 +2594,15 @@ main: input '?item[substring(s, 2) = 'éllo']'
 adding filter: 'item[substring(s, 2) = 'éllo']'
 added filter: 0
 --- 0: 14
-    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 10, next 0, prev 0 
-                000010: type 14 (L_EQUALS), str 28 [=], contents 3, next 0, prev 0 
-                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring], contents 7, next 11, prev 0 
-                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
-                            000005: type 70 (C_ELEMENT), str 20 [s], contents 0, next 0, prev 0 
-                        000008: type 53 (T_NUMBER), str 24 [2], contents 0, next 0, prev 7 
-                    000011: type 54 (T_QUOTED), str 30 [éllo], contents 0, next 0, prev 3 
+    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 10, next 0, prev 0
+                000010: type 14 (L_EQUALS), str 28 [=], contents 3, next 0, prev 0
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring], contents 7, next 11, prev 0
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0
+                            000005: type 70 (C_ELEMENT), str 20 [s], contents 0, next 0, prev 0
+                        000008: type 53 (T_NUMBER), str 24 [2], contents 0, next 0, prev 7
+                    000011: type 54 (T_QUOTED), str 30 [éllo], contents 0, next 0, prev 3
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -2651,16 +2651,16 @@ main: input '?item[substring(s, 2, 2) = 'él']'
 adding filter: 'item[substring(s, 2, 2) = 'él']'
 added filter: 0
 --- 0: 16
-    000016: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 12, next 0, prev 0 
-                000012: type 14 (L_EQUALS), str 32 [=], contents 3, next 0, prev 0 
-                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring], contents 7, next 13, prev 0 
-                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
-                            000005: type 70 (C_ELEMENT), str 20 [s], contents 0, next 0, prev 0 
-                        000008: type 53 (T_NUMBER), str 24 [2], contents 0, next 10, prev 7 
-                        000010: type 53 (T_NUMBER), str 28 [2], contents 0, next 0, prev 8 
-                    000013: type 54 (T_QUOTED), str 34 [él], contents 0, next 0, prev 3 
+    000016: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 12, next 0, prev 0
+                000012: type 14 (L_EQUALS), str 32 [=], contents 3, next 0, prev 0
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring], contents 7, next 13, prev 0
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0
+                            000005: type 70 (C_ELEMENT), str 20 [s], contents 0, next 0, prev 0
+                        000008: type 53 (T_NUMBER), str 24 [2], contents 0, next 10, prev 7
+                        000010: type 53 (T_NUMBER), str 28 [2], contents 0, next 0, prev 8
+                    000013: type 54 (T_QUOTED), str 34 [él], contents 0, next 0, prev 3
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -2710,14 +2710,14 @@ main: input '?item[string-length(s) = 5]'
 adding filter: 'item[string-length(s) = 5]'
 added filter: 0
 --- 0: 12
-    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0 
-                000008: type 14 (L_EQUALS), str 28 [=], contents 3, next 0, prev 0 
-                    000003: type 52 (T_FUNCTION_NAME), str 8 [string-length], contents 7, next 9, prev 0 
-                        000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
-                            000005: type 70 (C_ELEMENT), str 24 [s], contents 0, next 0, prev 0 
-                    000009: type 53 (T_NUMBER), str 30 [5], contents 0, next 0, prev 3 
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0
+                000008: type 14 (L_EQUALS), str 28 [=], contents 3, next 0, prev 0
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [string-length], contents 7, next 9, prev 0
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0
+                            000005: type 70 (C_ELEMENT), str 24 [s], contents 0, next 0, prev 0
+                    000009: type 53 (T_NUMBER), str 30 [5], contents 0, next 0, prev 3
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -2767,17 +2767,17 @@ main: input '?item[(-7 mod 3) = -1]'
 adding filter: 'item[(-7 mod 3) = -1]'
 added filter: 0
 --- 0: 14
-    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 9, next 0, prev 0 
-                000009: type 14 (L_EQUALS), str 22 [=], contents 3, next 0, prev 0 
-                    000003: type 71 (C_EXPR), str 8 [(], contents 6, next 10, prev 0 
-                        000006: type 42 ('*'), str 14 [mod], contents 4, next 0, prev 0 
-                            000004: type 86 (C_UNI_MINUS), str 10 [-], contents 5, next 7, prev 0 
-                                000005: type 53 (T_NUMBER), str 12 [7], contents 0, next 0, prev 0 
-                            000007: type 53 (T_NUMBER), str 18 [3], contents 0, next 0, prev 4 
-                    000010: type 86 (C_UNI_MINUS), str 24 [-], contents 11, next 0, prev 3 
-                        000011: type 53 (T_NUMBER), str 26 [1], contents 0, next 0, prev 0 
+    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 9, next 0, prev 0
+                000009: type 14 (L_EQUALS), str 22 [=], contents 3, next 0, prev 0
+                    000003: type 71 (C_EXPR), str 8 [(], contents 6, next 10, prev 0
+                        000006: type 42 ('*'), str 14 [mod], contents 4, next 0, prev 0
+                            000004: type 86 (C_UNI_MINUS), str 10 [-], contents 5, next 7, prev 0
+                                000005: type 53 (T_NUMBER), str 12 [7], contents 0, next 0, prev 0
+                            000007: type 53 (T_NUMBER), str 18 [3], contents 0, next 0, prev 4
+                    000010: type 86 (C_UNI_MINUS), str 24 [-], contents 11, next 0, prev 3
+                        000011: type 53 (T_NUMBER), str 26 [1], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -2828,15 +2828,15 @@ main: input '?item[(7.5 mod 2) = 1.5]'
 adding filter: 'item[(7.5 mod 2) = 1.5]'
 added filter: 0
 --- 0: 12
-    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0 
-                000008: type 14 (L_EQUALS), str 22 [=], contents 3, next 0, prev 0 
-                    000003: type 71 (C_EXPR), str 8 [(], contents 5, next 9, prev 0 
-                        000005: type 42 ('*'), str 14 [mod], contents 4, next 0, prev 0 
-                            000004: type 53 (T_NUMBER), str 10 [7.5], contents 0, next 6, prev 0 
-                            000006: type 53 (T_NUMBER), str 18 [2], contents 0, next 0, prev 4 
-                    000009: type 53 (T_NUMBER), str 24 [1.5], contents 0, next 0, prev 3 
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0
+                000008: type 14 (L_EQUALS), str 22 [=], contents 3, next 0, prev 0
+                    000003: type 71 (C_EXPR), str 8 [(], contents 5, next 9, prev 0
+                        000005: type 42 ('*'), str 14 [mod], contents 4, next 0, prev 0
+                            000004: type 53 (T_NUMBER), str 10 [7.5], contents 0, next 6, prev 0
+                            000006: type 53 (T_NUMBER), str 18 [2], contents 0, next 0, prev 4
+                    000009: type 53 (T_NUMBER), str 24 [1.5], contents 0, next 0, prev 3
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -2888,15 +2888,15 @@ main: input '?item[(10000000000000000000 mod 7) = 3]'
 adding filter: 'item[(10000000000000000000 mod 7) = 3]'
 added filter: 0
 --- 0: 12
-    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0 
-                000008: type 14 (L_EQUALS), str 39 [=], contents 3, next 0, prev 0 
-                    000003: type 71 (C_EXPR), str 8 [(], contents 5, next 9, prev 0 
-                        000005: type 42 ('*'), str 31 [mod], contents 4, next 0, prev 0 
-                            000004: type 53 (T_NUMBER), str 10 [10000000000000000000], contents 0, next 6, prev 0 
-                            000006: type 53 (T_NUMBER), str 35 [7], contents 0, next 0, prev 4 
-                    000009: type 53 (T_NUMBER), str 41 [3], contents 0, next 0, prev 3 
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0
+                000008: type 14 (L_EQUALS), str 39 [=], contents 3, next 0, prev 0
+                    000003: type 71 (C_EXPR), str 8 [(], contents 5, next 9, prev 0
+                        000005: type 42 ('*'), str 31 [mod], contents 4, next 0, prev 0
+                            000004: type 53 (T_NUMBER), str 10 [10000000000000000000], contents 0, next 6, prev 0
+                            000006: type 53 (T_NUMBER), str 35 [7], contents 0, next 0, prev 4
+                    000009: type 53 (T_NUMBER), str 41 [3], contents 0, next 0, prev 3
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -2947,15 +2947,15 @@ main: input '?item[(100000000000000000000.0 mod 7) = 2]'
 adding filter: 'item[(100000000000000000000.0 mod 7) = 2]'
 added filter: 0
 --- 0: 12
-    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0 
-                000008: type 14 (L_EQUALS), str 42 [=], contents 3, next 0, prev 0 
-                    000003: type 71 (C_EXPR), str 8 [(], contents 5, next 9, prev 0 
-                        000005: type 42 ('*'), str 34 [mod], contents 4, next 0, prev 0 
-                            000004: type 53 (T_NUMBER), str 10 [100000000000000000000.0], contents 0, next 6, prev 0 
-                            000006: type 53 (T_NUMBER), str 38 [7], contents 0, next 0, prev 4 
-                    000009: type 53 (T_NUMBER), str 44 [2], contents 0, next 0, prev 3 
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0
+                000008: type 14 (L_EQUALS), str 42 [=], contents 3, next 0, prev 0
+                    000003: type 71 (C_EXPR), str 8 [(], contents 5, next 9, prev 0
+                        000005: type 42 ('*'), str 34 [mod], contents 4, next 0, prev 0
+                            000004: type 53 (T_NUMBER), str 10 [100000000000000000000.0], contents 0, next 6, prev 0
+                            000006: type 53 (T_NUMBER), str 38 [7], contents 0, next 0, prev 4
+                    000009: type 53 (T_NUMBER), str 44 [2], contents 0, next 0, prev 3
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -3007,18 +3007,18 @@ main: input '?item[substring(s, -100000000000000000000.0, 200000000000000000000.
 adding filter: 'item[substring(s, -100000000000000000000.0, 200000000000000000000.0) = s]'
 added filter: 0
 --- 0: 18
-    000018: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 13, next 0, prev 0 
-                000013: type 14 (L_EQUALS), str 78 [=], contents 3, next 0, prev 0 
-                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring], contents 7, next 16, prev 0 
-                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
-                            000005: type 70 (C_ELEMENT), str 20 [s], contents 0, next 0, prev 0 
-                        000008: type 86 (C_UNI_MINUS), str 24 [-], contents 9, next 11, prev 7 
-                            000009: type 53 (T_NUMBER), str 26 [100000000000000000000.0], contents 0, next 0, prev 0 
-                        000011: type 53 (T_NUMBER), str 52 [200000000000000000000.0], contents 0, next 0, prev 8 
-                    000016: type 74 (C_PATH), str 0 [], contents 14, next 0, prev 3 
-                        000014: type 70 (C_ELEMENT), str 80 [s], contents 0, next 0, prev 0 
+    000018: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 13, next 0, prev 0
+                000013: type 14 (L_EQUALS), str 78 [=], contents 3, next 0, prev 0
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring], contents 7, next 16, prev 0
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0
+                            000005: type 70 (C_ELEMENT), str 20 [s], contents 0, next 0, prev 0
+                        000008: type 86 (C_UNI_MINUS), str 24 [-], contents 9, next 11, prev 7
+                            000009: type 53 (T_NUMBER), str 26 [100000000000000000000.0], contents 0, next 0, prev 0
+                        000011: type 53 (T_NUMBER), str 52 [200000000000000000000.0], contents 0, next 0, prev 8
+                    000016: type 74 (C_PATH), str 0 [], contents 14, next 0, prev 3
+                        000014: type 70 (C_ELEMENT), str 80 [s], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -3058,16 +3058,16 @@ main: input '?item[substring(s, 9223372036854775807, 2) = '']'
 adding filter: 'item[substring(s, 9223372036854775807, 2) = '']'
 added filter: 0
 --- 0: 16
-    000016: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 12, next 0, prev 0 
-                000012: type 14 (L_EQUALS), str 50 [=], contents 3, next 0, prev 0 
-                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring], contents 7, next 13, prev 0 
-                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
-                            000005: type 70 (C_ELEMENT), str 20 [s], contents 0, next 0, prev 0 
-                        000008: type 53 (T_NUMBER), str 24 [9223372036854775807], contents 0, next 10, prev 7 
-                        000010: type 53 (T_NUMBER), str 46 [2], contents 0, next 0, prev 8 
-                    000013: type 54 (T_QUOTED), str 52 [], contents 0, next 0, prev 3 
+    000016: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 12, next 0, prev 0
+                000012: type 14 (L_EQUALS), str 50 [=], contents 3, next 0, prev 0
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring], contents 7, next 13, prev 0
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0
+                            000005: type 70 (C_ELEMENT), str 20 [s], contents 0, next 0, prev 0
+                        000008: type 53 (T_NUMBER), str 24 [9223372036854775807], contents 0, next 10, prev 7
+                        000010: type 53 (T_NUMBER), str 46 [2], contents 0, next 0, prev 8
+                    000013: type 54 (T_QUOTED), str 52 [], contents 0, next 0, prev 3
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -3107,17 +3107,17 @@ main: input '?item[substring(s, -0.5, 2) = '1']'
 adding filter: 'item[substring(s, -0.5, 2) = '1']'
 added filter: 0
 --- 0: 17
-    000017: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 13, next 0, prev 0 
-                000013: type 14 (L_EQUALS), str 36 [=], contents 3, next 0, prev 0 
-                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring], contents 7, next 14, prev 0 
-                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
-                            000005: type 70 (C_ELEMENT), str 20 [s], contents 0, next 0, prev 0 
-                        000008: type 86 (C_UNI_MINUS), str 24 [-], contents 9, next 11, prev 7 
-                            000009: type 53 (T_NUMBER), str 26 [0.5], contents 0, next 0, prev 0 
-                        000011: type 53 (T_NUMBER), str 32 [2], contents 0, next 0, prev 8 
-                    000014: type 54 (T_QUOTED), str 38 [1], contents 0, next 0, prev 3 
+    000017: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 13, next 0, prev 0
+                000013: type 14 (L_EQUALS), str 36 [=], contents 3, next 0, prev 0
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [substring], contents 7, next 14, prev 0
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0
+                            000005: type 70 (C_ELEMENT), str 20 [s], contents 0, next 0, prev 0
+                        000008: type 86 (C_UNI_MINUS), str 24 [-], contents 9, next 11, prev 7
+                            000009: type 53 (T_NUMBER), str 26 [0.5], contents 0, next 0, prev 0
+                        000011: type 53 (T_NUMBER), str 32 [2], contents 0, next 0, prev 8
+                    000014: type 54 (T_QUOTED), str 38 [1], contents 0, next 0, prev 3
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -3156,13 +3156,13 @@ main: input '?item[note = '']'
 adding filter: 'item[note = '']'
 added filter: 0
 --- 0: 9
-    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
-                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0 
-                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0 
-                        000003: type 70 (C_ELEMENT), str 8 [note], contents 0, next 0, prev 0 
-                    000006: type 54 (T_QUOTED), str 15 [], contents 0, next 0, prev 5 
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0
+                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0
+                        000003: type 70 (C_ELEMENT), str 8 [note], contents 0, next 0, prev 0
+                    000006: type 54 (T_QUOTED), str 15 [], contents 0, next 0, prev 5
 main: status: zero
 main: input '+item'
 main: filter: rc: 14
@@ -3182,13 +3182,13 @@ main: input '?item[starts-with(note, '')]'
 adding filter: 'item[starts-with(note, '')]'
 added filter: 0
 --- 0: 12
-    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
-                000003: type 52 (T_FUNCTION_NAME), str 8 [starts-with], contents 7, next 0, prev 0 
-                    000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
-                        000005: type 70 (C_ELEMENT), str 22 [note], contents 0, next 0, prev 0 
-                    000008: type 54 (T_QUOTED), str 29 [], contents 0, next 0, prev 7 
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0
+                000003: type 52 (T_FUNCTION_NAME), str 8 [starts-with], contents 7, next 0, prev 0
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0
+                        000005: type 70 (C_ELEMENT), str 22 [note], contents 0, next 0, prev 0
+                    000008: type 54 (T_QUOTED), str 29 [], contents 0, next 0, prev 7
 main: status: zero
 main: input '+item'
 main: filter: rc: 14
@@ -3208,13 +3208,13 @@ main: input '?item[ends-with(note, '')]'
 adding filter: 'item[ends-with(note, '')]'
 added filter: 0
 --- 0: 12
-    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
-                000003: type 52 (T_FUNCTION_NAME), str 8 [ends-with], contents 7, next 0, prev 0 
-                    000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
-                        000005: type 70 (C_ELEMENT), str 20 [note], contents 0, next 0, prev 0 
-                    000008: type 54 (T_QUOTED), str 27 [], contents 0, next 0, prev 7 
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0
+                000003: type 52 (T_FUNCTION_NAME), str 8 [ends-with], contents 7, next 0, prev 0
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0
+                        000005: type 70 (C_ELEMENT), str 20 [note], contents 0, next 0, prev 0
+                    000008: type 54 (T_QUOTED), str 27 [], contents 0, next 0, prev 7
 main: status: zero
 main: input '+item'
 main: filter: rc: 14
@@ -3234,14 +3234,14 @@ main: input '?item[string-length(note) = 0]'
 adding filter: 'item[string-length(note) = 0]'
 added filter: 0
 --- 0: 12
-    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0 
-                000008: type 14 (L_EQUALS), str 31 [=], contents 3, next 0, prev 0 
-                    000003: type 52 (T_FUNCTION_NAME), str 8 [string-length], contents 7, next 9, prev 0 
-                        000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
-                            000005: type 70 (C_ELEMENT), str 24 [note], contents 0, next 0, prev 0 
-                    000009: type 53 (T_NUMBER), str 33 [0], contents 0, next 0, prev 3 
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0
+                000008: type 14 (L_EQUALS), str 31 [=], contents 3, next 0, prev 0
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [string-length], contents 7, next 9, prev 0
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0
+                            000005: type 70 (C_ELEMENT), str 24 [note], contents 0, next 0, prev 0
+                    000009: type 53 (T_NUMBER), str 33 [0], contents 0, next 0, prev 3
 main: status: zero
 main: input '+item'
 main: filter: rc: 14
@@ -3262,13 +3262,13 @@ main: input '?item[note = 'x']'
 adding filter: 'item[note = 'x']'
 added filter: 0
 --- 0: 9
-    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
-                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0 
-                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0 
-                        000003: type 70 (C_ELEMENT), str 8 [note], contents 0, next 0, prev 0 
-                    000006: type 54 (T_QUOTED), str 15 [x], contents 0, next 0, prev 5 
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0
+                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0
+                        000003: type 70 (C_ELEMENT), str 8 [note], contents 0, next 0, prev 0
+                    000006: type 54 (T_QUOTED), str 15 [x], contents 0, next 0, prev 5
 main: status: zero
 main: input '+item'
 main: filter: rc: 14
@@ -3288,14 +3288,14 @@ main: input '?item[string-length(note) = 1]'
 adding filter: 'item[string-length(note) = 1]'
 added filter: 0
 --- 0: 12
-    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0 
-                000008: type 14 (L_EQUALS), str 31 [=], contents 3, next 0, prev 0 
-                    000003: type 52 (T_FUNCTION_NAME), str 8 [string-length], contents 7, next 9, prev 0 
-                        000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
-                            000005: type 70 (C_ELEMENT), str 24 [note], contents 0, next 0, prev 0 
-                    000009: type 53 (T_NUMBER), str 33 [1], contents 0, next 0, prev 3 
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0
+                000008: type 14 (L_EQUALS), str 31 [=], contents 3, next 0, prev 0
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [string-length], contents 7, next 9, prev 0
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0
+                            000005: type 70 (C_ELEMENT), str 24 [note], contents 0, next 0, prev 0
+                    000009: type 53 (T_NUMBER), str 33 [1], contents 0, next 0, prev 3
 main: status: zero
 main: input '+item'
 main: filter: rc: 14
@@ -3317,13 +3317,13 @@ main: input '?item[ends-with(name, '.eth1')]'
 adding filter: 'item[ends-with(name, '.eth1')]'
 added filter: 0
 --- 0: 12
-    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
-                000003: type 52 (T_FUNCTION_NAME), str 8 [ends-with], contents 7, next 0, prev 0 
-                    000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
-                        000005: type 70 (C_ELEMENT), str 20 [name], contents 0, next 0, prev 0 
-                    000008: type 54 (T_QUOTED), str 27 [.eth1], contents 0, next 0, prev 7 
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0
+                000003: type 52 (T_FUNCTION_NAME), str 8 [ends-with], contents 7, next 0, prev 0
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0
+                        000005: type 70 (C_ELEMENT), str 20 [name], contents 0, next 0, prev 0
+                    000008: type 54 (T_QUOTED), str 27 [.eth1], contents 0, next 0, prev 7
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -3383,13 +3383,13 @@ main: input '?item[ends-with(name, '')]'
 adding filter: 'item[ends-with(name, '')]'
 added filter: 0
 --- 0: 12
-    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
-                000003: type 52 (T_FUNCTION_NAME), str 8 [ends-with], contents 7, next 0, prev 0 
-                    000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
-                        000005: type 70 (C_ELEMENT), str 20 [name], contents 0, next 0, prev 0 
-                    000008: type 54 (T_QUOTED), str 27 [], contents 0, next 0, prev 7 
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0
+                000003: type 52 (T_FUNCTION_NAME), str 8 [ends-with], contents 7, next 0, prev 0
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0
+                        000005: type 70 (C_ELEMENT), str 20 [name], contents 0, next 0, prev 0
+                    000008: type 54 (T_QUOTED), str 27 [], contents 0, next 0, prev 7
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -3450,13 +3450,13 @@ main: input '?item[size = 10]'
 adding filter: 'item[size = 10]'
 added filter: 0
 --- 0: 9
-    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
-                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0 
-                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0 
-                        000003: type 70 (C_ELEMENT), str 8 [size], contents 0, next 0, prev 0 
-                    000006: type 53 (T_NUMBER), str 15 [10], contents 0, next 0, prev 5 
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0
+                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0
+                        000003: type 70 (C_ELEMENT), str 8 [size], contents 0, next 0, prev 0
+                    000006: type 53 (T_NUMBER), str 15 [10], contents 0, next 0, prev 5
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -3516,13 +3516,13 @@ main: input '?item[size = 10]'
 adding filter: 'item[size = 10]'
 added filter: 0
 --- 0: 9
-    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
-                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0 
-                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0 
-                        000003: type 70 (C_ELEMENT), str 8 [size], contents 0, next 0, prev 0 
-                    000006: type 53 (T_NUMBER), str 15 [10], contents 0, next 0, prev 5 
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0
+                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0
+                        000003: type 70 (C_ELEMENT), str 8 [size], contents 0, next 0, prev 0
+                    000006: type 53 (T_NUMBER), str 15 [10], contents 0, next 0, prev 5
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -3574,13 +3574,13 @@ main: input '?item[size = 10]'
 adding filter: 'item[size = 10]'
 added filter: 0
 --- 0: 9
-    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
-                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0 
-                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0 
-                        000003: type 70 (C_ELEMENT), str 8 [size], contents 0, next 0, prev 0 
-                    000006: type 53 (T_NUMBER), str 15 [10], contents 0, next 0, prev 5 
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0
+                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0
+                        000003: type 70 (C_ELEMENT), str 8 [size], contents 0, next 0, prev 0
+                    000006: type 53 (T_NUMBER), str 15 [10], contents 0, next 0, prev 5
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -3650,13 +3650,13 @@ main: input '?item[size = 99]'
 adding filter: 'item[size = 99]'
 added filter: 0
 --- 0: 9
-    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
-                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0 
-                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0 
-                        000003: type 70 (C_ELEMENT), str 8 [size], contents 0, next 0, prev 0 
-                    000006: type 53 (T_NUMBER), str 15 [99], contents 0, next 0, prev 5 
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0
+                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0
+                        000003: type 70 (C_ELEMENT), str 8 [size], contents 0, next 0, prev 0
+                    000006: type 53 (T_NUMBER), str 15 [99], contents 0, next 0, prev 5
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -3725,14 +3725,14 @@ main: input '?item[size = 10]/sub'
 adding filter: 'item[size = 10]/sub'
 added filter: 0
 --- 0: 11
-    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 9, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
-                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0 
-                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0 
-                        000003: type 70 (C_ELEMENT), str 8 [size], contents 0, next 0, prev 0 
-                    000006: type 53 (T_NUMBER), str 15 [10], contents 0, next 0, prev 5 
-        000009: type 70 (C_ELEMENT), str 22 [sub], contents 0, next 0, prev 1 
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 9, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0
+                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0
+                        000003: type 70 (C_ELEMENT), str 8 [size], contents 0, next 0, prev 0
+                    000006: type 53 (T_NUMBER), str 15 [10], contents 0, next 0, prev 5
+        000009: type 70 (C_ELEMENT), str 22 [sub], contents 0, next 0, prev 1
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -3784,14 +3784,14 @@ main: input '?item[size = 10]/name'
 adding filter: 'item[size = 10]/name'
 added filter: 0
 --- 0: 11
-    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 9, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
-                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0 
-                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0 
-                        000003: type 70 (C_ELEMENT), str 8 [size], contents 0, next 0, prev 0 
-                    000006: type 53 (T_NUMBER), str 15 [10], contents 0, next 0, prev 5 
-        000009: type 70 (C_ELEMENT), str 22 [name], contents 0, next 0, prev 1 
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 9, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0
+                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0
+                        000003: type 70 (C_ELEMENT), str 8 [size], contents 0, next 0, prev 0
+                    000006: type 53 (T_NUMBER), str 15 [10], contents 0, next 0, prev 5
+        000009: type 70 (C_ELEMENT), str 22 [name], contents 0, next 0, prev 1
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -3827,15 +3827,15 @@ main: input '?item[size = 10]/sub/x'
 adding filter: 'item[size = 10]/sub/x'
 added filter: 0
 --- 0: 13
-    000013: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 9, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
-                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0 
-                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0 
-                        000003: type 70 (C_ELEMENT), str 8 [size], contents 0, next 0, prev 0 
-                    000006: type 53 (T_NUMBER), str 15 [10], contents 0, next 0, prev 5 
-        000009: type 70 (C_ELEMENT), str 22 [sub], contents 0, next 11, prev 1 
-        000011: type 70 (C_ELEMENT), str 28 [x], contents 0, next 0, prev 9 
+    000013: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 9, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0
+                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0
+                        000003: type 70 (C_ELEMENT), str 8 [size], contents 0, next 0, prev 0
+                    000006: type 53 (T_NUMBER), str 15 [10], contents 0, next 0, prev 5
+        000009: type 70 (C_ELEMENT), str 22 [sub], contents 0, next 11, prev 1
+        000011: type 70 (C_ELEMENT), str 28 [x], contents 0, next 0, prev 9
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -3912,14 +3912,14 @@ main: input '?item[size = 10]/note'
 adding filter: 'item[size = 10]/note'
 added filter: 0
 --- 0: 11
-    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 9, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
-                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0 
-                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0 
-                        000003: type 70 (C_ELEMENT), str 8 [size], contents 0, next 0, prev 0 
-                    000006: type 53 (T_NUMBER), str 15 [10], contents 0, next 0, prev 5 
-        000009: type 70 (C_ELEMENT), str 22 [note], contents 0, next 0, prev 1 
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 9, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0
+                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0
+                        000003: type 70 (C_ELEMENT), str 8 [size], contents 0, next 0, prev 0
+                    000006: type 53 (T_NUMBER), str 15 [10], contents 0, next 0, prev 5
+        000009: type 70 (C_ELEMENT), str 22 [note], contents 0, next 0, prev 1
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -3966,20 +3966,20 @@ main: input '?item[size = 10]/sub[k = 2]/v'
 adding filter: 'item[size = 10]/sub[k = 2]/v'
 added filter: 0
 --- 0: 19
-    000019: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 9, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
-                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0 
-                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0 
-                        000003: type 70 (C_ELEMENT), str 8 [size], contents 0, next 0, prev 0 
-                    000006: type 53 (T_NUMBER), str 15 [10], contents 0, next 0, prev 5 
-        000009: type 70 (C_ELEMENT), str 22 [sub], contents 10, next 17, prev 1 
-            000010: type 75 (C_PREDICATE), str 0 [], contents 12, next 0, prev 0 
-                000012: type 14 (L_EQUALS), str 30 [=], contents 13, next 0, prev 0 
-                    000013: type 74 (C_PATH), str 0 [], contents 11, next 14, prev 0 
-                        000011: type 70 (C_ELEMENT), str 28 [k], contents 0, next 0, prev 0 
-                    000014: type 53 (T_NUMBER), str 32 [2], contents 0, next 0, prev 13 
-        000017: type 70 (C_ELEMENT), str 38 [v], contents 0, next 0, prev 9 
+    000019: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 9, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0
+                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0
+                        000003: type 70 (C_ELEMENT), str 8 [size], contents 0, next 0, prev 0
+                    000006: type 53 (T_NUMBER), str 15 [10], contents 0, next 0, prev 5
+        000009: type 70 (C_ELEMENT), str 22 [sub], contents 10, next 17, prev 1
+            000010: type 75 (C_PREDICATE), str 0 [], contents 12, next 0, prev 0
+                000012: type 14 (L_EQUALS), str 30 [=], contents 13, next 0, prev 0
+                    000013: type 74 (C_PATH), str 0 [], contents 11, next 14, prev 0
+                        000011: type 70 (C_ELEMENT), str 28 [k], contents 0, next 0, prev 0
+                    000014: type 53 (T_NUMBER), str 32 [2], contents 0, next 0, prev 13
+        000017: type 70 (C_ELEMENT), str 38 [v], contents 0, next 0, prev 9
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -4045,14 +4045,14 @@ main: input '?item[size = 10]/sub'
 adding filter: 'item[size = 10]/sub'
 added filter: 0
 --- 0: 11
-    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 9, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
-                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0 
-                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0 
-                        000003: type 70 (C_ELEMENT), str 8 [size], contents 0, next 0, prev 0 
-                    000006: type 53 (T_NUMBER), str 15 [10], contents 0, next 0, prev 5 
-        000009: type 70 (C_ELEMENT), str 22 [sub], contents 0, next 0, prev 1 
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 9, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0
+                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0
+                        000003: type 70 (C_ELEMENT), str 8 [size], contents 0, next 0, prev 0
+                    000006: type 53 (T_NUMBER), str 15 [10], contents 0, next 0, prev 5
+        000009: type 70 (C_ELEMENT), str 22 [sub], contents 0, next 0, prev 1
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -4109,14 +4109,14 @@ main: input '?item[size = ""]/sub'
 adding filter: 'item[size = ""]/sub'
 added filter: 0
 --- 0: 11
-    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 9, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
-                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0 
-                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0 
-                        000003: type 70 (C_ELEMENT), str 8 [size], contents 0, next 0, prev 0 
-                    000006: type 54 (T_QUOTED), str 15 [], contents 0, next 0, prev 5 
-        000009: type 70 (C_ELEMENT), str 20 [sub], contents 0, next 0, prev 1 
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 9, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0
+                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0
+                        000003: type 70 (C_ELEMENT), str 8 [size], contents 0, next 0, prev 0
+                    000006: type 54 (T_QUOTED), str 15 [], contents 0, next 0, prev 5
+        000009: type 70 (C_ELEMENT), str 20 [sub], contents 0, next 0, prev 1
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -4145,14 +4145,14 @@ main: input '?item[size = 10]/tag'
 adding filter: 'item[size = 10]/tag'
 added filter: 0
 --- 0: 11
-    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 9, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
-                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0 
-                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0 
-                        000003: type 70 (C_ELEMENT), str 8 [size], contents 0, next 0, prev 0 
-                    000006: type 53 (T_NUMBER), str 15 [10], contents 0, next 0, prev 5 
-        000009: type 70 (C_ELEMENT), str 22 [tag], contents 0, next 0, prev 1 
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 9, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0
+                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0
+                        000003: type 70 (C_ELEMENT), str 8 [size], contents 0, next 0, prev 0
+                    000006: type 53 (T_NUMBER), str 15 [10], contents 0, next 0, prev 5
+        000009: type 70 (C_ELEMENT), str 22 [tag], contents 0, next 0, prev 1
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -4189,13 +4189,13 @@ main: input '?item[name = '']'
 adding filter: 'item[name = '']'
 added filter: 0
 --- 0: 9
-    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
-                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0 
-                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0 
-                        000003: type 70 (C_ELEMENT), str 8 [name], contents 0, next 0, prev 0 
-                    000006: type 54 (T_QUOTED), str 15 [], contents 0, next 0, prev 5 
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0
+                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0
+                        000003: type 70 (C_ELEMENT), str 8 [name], contents 0, next 0, prev 0
+                    000006: type 54 (T_QUOTED), str 15 [], contents 0, next 0, prev 5
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -4242,13 +4242,13 @@ main: input '?item[name != '']'
 adding filter: 'item[name != '']'
 added filter: 0
 --- 0: 9
-    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
-                000004: type 21 (L_NOTEQUALS), str 13 [!=], contents 5, next 0, prev 0 
-                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0 
-                        000003: type 70 (C_ELEMENT), str 8 [name], contents 0, next 0, prev 0 
-                    000006: type 54 (T_QUOTED), str 16 [], contents 0, next 0, prev 5 
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0
+                000004: type 21 (L_NOTEQUALS), str 13 [!=], contents 5, next 0, prev 0
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0
+                        000003: type 70 (C_ELEMENT), str 8 [name], contents 0, next 0, prev 0
+                    000006: type 54 (T_QUOTED), str 16 [], contents 0, next 0, prev 5
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -4295,12 +4295,12 @@ main: input '?item[not(name)]'
 adding filter: 'item[not(name)]'
 added filter: 0
 --- 0: 10
-    000010: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
-                000003: type 52 (T_FUNCTION_NAME), str 8 [not], contents 7, next 0, prev 0 
-                    000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
-                        000005: type 70 (C_ELEMENT), str 14 [name], contents 0, next 0, prev 0 
+    000010: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0
+                000003: type 52 (T_FUNCTION_NAME), str 8 [not], contents 7, next 0, prev 0
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0
+                        000005: type 70 (C_ELEMENT), str 14 [name], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -4347,14 +4347,14 @@ main: input '?item[string(name) = '']'
 adding filter: 'item[string(name) = '']'
 added filter: 0
 --- 0: 12
-    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0 
-                000008: type 14 (L_EQUALS), str 24 [=], contents 3, next 0, prev 0 
-                    000003: type 52 (T_FUNCTION_NAME), str 8 [string], contents 7, next 9, prev 0 
-                        000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
-                            000005: type 70 (C_ELEMENT), str 17 [name], contents 0, next 0, prev 0 
-                    000009: type 54 (T_QUOTED), str 26 [], contents 0, next 0, prev 3 
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 8, next 0, prev 0
+                000008: type 14 (L_EQUALS), str 24 [=], contents 3, next 0, prev 0
+                    000003: type 52 (T_FUNCTION_NAME), str 8 [string], contents 7, next 9, prev 0
+                        000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0
+                            000005: type 70 (C_ELEMENT), str 17 [name], contents 0, next 0, prev 0
+                    000009: type 54 (T_QUOTED), str 26 [], contents 0, next 0, prev 3
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -4402,13 +4402,13 @@ main: input '?item[name = false()]'
 adding filter: 'item[name = false()]'
 added filter: 0
 --- 0: 11
-    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
-                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0 
-                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0 
-                        000003: type 70 (C_ELEMENT), str 8 [name], contents 0, next 0, prev 0 
-                    000006: type 52 (T_FUNCTION_NAME), str 15 [false], contents 0, next 0, prev 5 
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0
+                000004: type 14 (L_EQUALS), str 13 [=], contents 5, next 0, prev 0
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0
+                        000003: type 70 (C_ELEMENT), str 8 [name], contents 0, next 0, prev 0
+                    000006: type 52 (T_FUNCTION_NAME), str 15 [false], contents 0, next 0, prev 5
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -4455,13 +4455,13 @@ main: input '?item[size != 3]'
 adding filter: 'item[size != 3]'
 added filter: 0
 --- 0: 9
-    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0 
-                000004: type 21 (L_NOTEQUALS), str 13 [!=], contents 5, next 0, prev 0 
-                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0 
-                        000003: type 70 (C_ELEMENT), str 8 [size], contents 0, next 0, prev 0 
-                    000006: type 53 (T_NUMBER), str 16 [3], contents 0, next 0, prev 5 
+    000009: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 4, next 0, prev 0
+                000004: type 21 (L_NOTEQUALS), str 13 [!=], contents 5, next 0, prev 0
+                    000005: type 74 (C_PATH), str 0 [], contents 3, next 6, prev 0
+                        000003: type 70 (C_ELEMENT), str 8 [size], contents 0, next 0, prev 0
+                    000006: type 53 (T_NUMBER), str 16 [3], contents 0, next 0, prev 5
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -4508,12 +4508,12 @@ main: input '?item[not(size)]'
 adding filter: 'item[not(size)]'
 added filter: 0
 --- 0: 10
-    000010: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
-                000003: type 52 (T_FUNCTION_NAME), str 8 [not], contents 7, next 0, prev 0 
-                    000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
-                        000005: type 70 (C_ELEMENT), str 14 [size], contents 0, next 0, prev 0 
+    000010: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 0, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0
+                000003: type 52 (T_FUNCTION_NAME), str 8 [not], contents 7, next 0, prev 0
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0
+                        000005: type 70 (C_ELEMENT), str 14 [size], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -4561,13 +4561,13 @@ main: input '?item[not(size)]/sub'
 adding filter: 'item[not(size)]/sub'
 added filter: 0
 --- 0: 12
-    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 10, prev 0 
-            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0 
-                000003: type 52 (T_FUNCTION_NAME), str 8 [not], contents 7, next 0, prev 0 
-                    000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0 
-                        000005: type 70 (C_ELEMENT), str 14 [size], contents 0, next 0, prev 0 
-        000010: type 70 (C_ELEMENT), str 25 [sub], contents 0, next 0, prev 1 
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [item], contents 2, next 10, prev 0
+            000002: type 75 (C_PREDICATE), str 0 [], contents 3, next 0, prev 0
+                000003: type 52 (T_FUNCTION_NAME), str 8 [not], contents 7, next 0, prev 0
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 0, prev 0
+                        000005: type 70 (C_ELEMENT), str 14 [size], contents 0, next 0, prev 0
+        000010: type 70 (C_ELEMENT), str 25 [sub], contents 0, next 0, prev 1
 main: status: zero
 main: input '{item'
 main: filter: rc: 14
@@ -4616,13 +4616,13 @@ main: input '?top/item[not(name)]'
 adding filter: 'top/item[not(name)]'
 added filter: 0
 --- 0: 12
-    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [top], contents 0, next 3, prev 0 
-        000003: type 70 (C_ELEMENT), str 7 [item], contents 4, next 0, prev 1 
-            000004: type 75 (C_PREDICATE), str 0 [], contents 5, next 0, prev 0 
-                000005: type 52 (T_FUNCTION_NAME), str 14 [not], contents 9, next 0, prev 0 
-                    000009: type 74 (C_PATH), str 0 [], contents 7, next 0, prev 0 
-                        000007: type 70 (C_ELEMENT), str 20 [name], contents 0, next 0, prev 0 
+    000012: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [top], contents 0, next 3, prev 0
+        000003: type 70 (C_ELEMENT), str 7 [item], contents 4, next 0, prev 1
+            000004: type 75 (C_PREDICATE), str 0 [], contents 5, next 0, prev 0
+                000005: type 52 (T_FUNCTION_NAME), str 14 [not], contents 9, next 0, prev 0
+                    000009: type 74 (C_PATH), str 0 [], contents 7, next 0, prev 0
+                        000007: type 70 (C_ELEMENT), str 20 [name], contents 0, next 0, prev 0
 main: status: zero
 main: input '+top'
 main: filter: rc: 13
@@ -4651,14 +4651,14 @@ main: input '?top/item[name = '']'
 adding filter: 'top/item[name = '']'
 added filter: 0
 --- 0: 11
-    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [top], contents 0, next 3, prev 0 
-        000003: type 70 (C_ELEMENT), str 7 [item], contents 4, next 0, prev 1 
-            000004: type 75 (C_PREDICATE), str 0 [], contents 6, next 0, prev 0 
-                000006: type 14 (L_EQUALS), str 19 [=], contents 7, next 0, prev 0 
-                    000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
-                        000005: type 70 (C_ELEMENT), str 14 [name], contents 0, next 0, prev 0 
-                    000008: type 54 (T_QUOTED), str 21 [], contents 0, next 0, prev 7 
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [top], contents 0, next 3, prev 0
+        000003: type 70 (C_ELEMENT), str 7 [item], contents 4, next 0, prev 1
+            000004: type 75 (C_PREDICATE), str 0 [], contents 6, next 0, prev 0
+                000006: type 14 (L_EQUALS), str 19 [=], contents 7, next 0, prev 0
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0
+                        000005: type 70 (C_ELEMENT), str 14 [name], contents 0, next 0, prev 0
+                    000008: type 54 (T_QUOTED), str 21 [], contents 0, next 0, prev 7
 main: status: zero
 main: input '+top'
 xpath_01: duplicate sibling name: 'top'
@@ -4688,14 +4688,14 @@ main: input '?top/item[name != 'x']'
 adding filter: 'top/item[name != 'x']'
 added filter: 0
 --- 0: 11
-    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [top], contents 0, next 3, prev 0 
-        000003: type 70 (C_ELEMENT), str 7 [item], contents 4, next 0, prev 1 
-            000004: type 75 (C_PREDICATE), str 0 [], contents 6, next 0, prev 0 
-                000006: type 21 (L_NOTEQUALS), str 19 [!=], contents 7, next 0, prev 0 
-                    000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0 
-                        000005: type 70 (C_ELEMENT), str 14 [name], contents 0, next 0, prev 0 
-                    000008: type 54 (T_QUOTED), str 22 [x], contents 0, next 0, prev 7 
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [top], contents 0, next 3, prev 0
+        000003: type 70 (C_ELEMENT), str 7 [item], contents 4, next 0, prev 1
+            000004: type 75 (C_PREDICATE), str 0 [], contents 6, next 0, prev 0
+                000006: type 21 (L_NOTEQUALS), str 19 [!=], contents 7, next 0, prev 0
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0
+                        000005: type 70 (C_ELEMENT), str 14 [name], contents 0, next 0, prev 0
+                    000008: type 54 (T_QUOTED), str 22 [x], contents 0, next 0, prev 7
 main: status: zero
 main: input '+top'
 main: filter: rc: 13
@@ -4724,14 +4724,14 @@ main: input '?top/item[not(name)]/sub'
 adding filter: 'top/item[not(name)]/sub'
 added filter: 0
 --- 0: 14
-    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0 
-        000001: type 70 (C_ELEMENT), str 1 [top], contents 0, next 3, prev 0 
-        000003: type 70 (C_ELEMENT), str 7 [item], contents 4, next 12, prev 1 
-            000004: type 75 (C_PREDICATE), str 0 [], contents 5, next 0, prev 0 
-                000005: type 52 (T_FUNCTION_NAME), str 14 [not], contents 9, next 0, prev 0 
-                    000009: type 74 (C_PATH), str 0 [], contents 7, next 0, prev 0 
-                        000007: type 70 (C_ELEMENT), str 20 [name], contents 0, next 0, prev 0 
-        000012: type 70 (C_ELEMENT), str 31 [sub], contents 0, next 0, prev 3 
+    000014: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 70 (C_ELEMENT), str 1 [top], contents 0, next 3, prev 0
+        000003: type 70 (C_ELEMENT), str 7 [item], contents 4, next 12, prev 1
+            000004: type 75 (C_PREDICATE), str 0 [], contents 5, next 0, prev 0
+                000005: type 52 (T_FUNCTION_NAME), str 14 [not], contents 9, next 0, prev 0
+                    000009: type 74 (C_PATH), str 0 [], contents 7, next 0, prev 0
+                        000007: type 70 (C_ELEMENT), str 20 [name], contents 0, next 0, prev 0
+        000012: type 70 (C_ELEMENT), str 31 [sub], contents 0, next 0, prev 3
 main: status: zero
 main: input '+top'
 main: filter: rc: 13
