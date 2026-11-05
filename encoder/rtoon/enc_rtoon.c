@@ -466,12 +466,19 @@ rtoon_key_needs_quote (const char *name)
  * rtoon-spec.md Section 2.1 reads an unquoted comma anywhere after a
  * field name as the start of a leaf-list, so an ordinary data-value
  * containing one has to be quoted or it will be misread.
+ *
+ * We also quote a value that begins or ends with a space, since a
+ * decoder trims unquoted values (rtoon-spec.md Section 2.2).
  */
 static int
 rtoon_value_needs_quote (const char *value, int in_delimited, int is_string,
 			  int is_last)
 {
     if (value[0] == '{')
+	return 1;
+
+    size_t len = strlen(value);
+    if (len > 0 && (value[0] == ' ' || value[len - 1] == ' '))
 	return 1;
 
     int high_bit = 0;
