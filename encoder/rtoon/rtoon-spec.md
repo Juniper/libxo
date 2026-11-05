@@ -183,8 +183,16 @@ row cell) MUST be quoted if any of:
 - it starts with `{` (kept uniform with the key rule, even though only
   a row's first cell is actually at risk of fields-line confusion -
   see Section 6.3),
-- (leaf-list / dense row cell only) it contains the active delimiter
-  (`,`) unquoted,
+- it contains the active delimiter (`,`) unquoted. In a leaf-list or
+  dense row cell the comma would split the cell; in a data-value or
+  key-value it is quoted too, so that every value position follows one
+  rule and a reader never has to know which position it is in,
+- it begins or ends with a space. A decoder trims the whitespace around
+  an unquoted value (Section 2.1's split already discards the
+  separator's run of spaces), so an edge space survives only inside
+  quotes. A space inside the value needs no quotes in a data-value or
+  key-value; in a leaf-list or dense row cell it is harmless as well,
+  since only the comma delimits cells,
 - it contains an unquoted `"`, `\`, any C0 control character
   (U+0000-U+001F) - including LF/CR/HTAB - or a non-ASCII character
   from the `\uXXXX`-escaped set above (escaping only happens inside
@@ -285,6 +293,14 @@ An **empty container** is a bare name line followed immediately by a
 dedent (or EOF) - no marker, no special case. This is the default,
 unmarked reading of a childless bare-name line; see Section 4 for why that's
 safe.
+
+A container's children SHOULD have distinct names; an encoder fed by
+libxo never writes two siblings with the same name, other than the
+instances of a list or the members of a leaf-list, which have their
+own syntax (Sections 4 and 5). If a decoder does meet a repeated name
+among a container's or instance's fields, the last one wins: it
+replaces the earlier value, and no error is raised. The same holds
+for a field name repeated within one fields-line (Section 6.1).
 
 ## 4. List (sparse form)
 
@@ -548,18 +564,19 @@ convention of Section 5 (`a,,c` -> middle field is `""`).
 ### 6.5 Nesting
 
 A dense row's cells are plain scalars; a nested container or list field
-can't be put directly into one. Three options, in order of preference:
+can't be put directly into one. There are two options:
 
 - **Flatten it** (Section 6.6) when the nested field is itself a
-  container of scalars - the preferred fix, at the cost of losing the
-  flattened sub-object's own key marking.
-- **Fall back to a quoted, escaped sub-blob** - a self-contained nested
-  RTOON fragment written as a quoted string cell - when flattening
-  isn't applicable (e.g. the nested field is itself a list, whose
-  cardinality varies row to row and so can't become a fixed set of
-  columns).
+  container (of scalars, or of further containers) - at the cost of
+  losing the flattened sub-object's own key marking.
 - **Don't choose dense mode for that array in the first place** - fall
-  back to Section 4's sparse form.
+  back to Section 4's sparse form. This is the only choice when the
+  nested field is itself a list, whose cardinality varies row to row
+  and so can't become a fixed set of columns.
+
+A cell is always a scalar. There is no quoted sub-blob form: a quoted
+cell that happens to hold RTOON text is just a string, and a decoder
+MUST NOT parse it.
 
 Since dense rows are emitted as they close and can't be retroactively
 rewritten once a later record turns out to need nesting, **this spec
@@ -585,6 +602,14 @@ These flattened names are otherwise ordinary field names, subject to
 every rule already stated for fields-lines (Section 6.1's quoting/key-
 marker rules, Section 6.2's widening rule) - `/` needs no new quoting
 exception, since it isn't otherwise meaningful in a field name.
+
+A container nested inside a flattened container flattens the same way,
+so a name may hold several `/` separators, one per level:
+`via/nested/hop` is the `hop` field of the `nested` container inside
+`via`. A decoder splits the name at every `/` and builds one
+sub-object per level, sharing each level among all the columns with
+the same prefix: `{a/b,a/c}` yields a single child `a` holding the
+fields `b` and `c`, not two children named `a`.
 
 Example - given this XML-shaped data (a `route-entry` list whose records
 sometimes carry a nested `via` container):
@@ -637,7 +662,7 @@ preserving that inner structure's own key-ness.
 Flattening only applies to a nested field that is itself a container of
 scalars. A nested field that is itself a list is not flattenable this
 way (its element count varies row to row, so it can't become a fixed
-set of columns) - see Section 6.5's other two options for that case.
+set of columns) - see Section 6.5; such a list is written sparse.
 
 ## 7. Line classification (decoder summary)
 
