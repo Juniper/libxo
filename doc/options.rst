@@ -361,3 +361,7 @@ and "html"), so there is no need to know which styles are built into
 libxo and which are loaded as encoders::
 
     df --libxo @json,pretty
+
+The encoders that ship with libxo ("cbor", "csv", "fdr", "fullpath",
+"rtoon", and "test") and their options are described in
+:doc:`encoders` and in the xo_encoders(7) man page.
