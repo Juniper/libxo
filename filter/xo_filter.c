@@ -1845,19 +1845,19 @@ xo_filter_op_close_field (xo_handle_t *xop, xo_filter_t *xfp,
  */
 static int
 xo_filter_close_pending (xo_handle_t *xop, xo_filter_t *xfp,
-			 const char *tag, const char *type)
+			 const char *tag, ssize_t tlen, const char *type)
 {
     int promoted = FALSE;
     if (xfp != NULL && xfp->xf_trie != NULL
 	    && xfp->xf_status == XO_STATUS_PRED) {
 	xfp->xf_flags &= ~XFSF_PROMOTED;
-	xo_filter_force_resolve_pred(xop, xfp, tag, strlen(tag));
+	xo_filter_force_resolve_pred(xop, xfp, tag, tlen);
 	promoted = (xfp->xf_flags & XFSF_PROMOTED) ? TRUE : FALSE;
 	xfp->xf_flags &= ~XFSF_PROMOTED;
     }
 
     xo_filter_status_t pre_close = xfp ? xfp->xf_status : XO_STATUS_ZERO;
-    xo_filter_close(xop, xfp, tag, strlen(tag), type);
+    xo_filter_close(xop, xfp, tag, tlen, type);
 
     /*
      * If force-resolve promoted us to FULL, return FULL even though the
@@ -1876,7 +1876,7 @@ static int
 xo_filter_op_close_instance (xo_handle_t *xop, xo_filter_t *xfp,
 			  const char *tag)
 {
-    return xo_filter_close_pending(xop, xfp, tag, "instance");
+    return xo_filter_close_pending(xop, xfp, tag, strlen(tag), "instance");
 }
 
 /*
@@ -1890,7 +1890,8 @@ xo_filter_op_close_container (xo_handle_t *xop, xo_filter_t *xfp,
 {
     if (xfp != NULL && xfp->xf_trie != NULL
 	    && xfp->xf_status == XO_STATUS_PRED)
-	return xo_filter_close_pending(xop, xfp, tag, "container");
+	return xo_filter_close_pending(xop, xfp, tag, strlen(tag),
+				       "container");
 
     return xo_filter_close(xop, xfp, tag, strlen(tag), "container");
 }
@@ -6237,15 +6238,10 @@ xo_filter_walk_close (xo_handle_t *xop, xo_filter_t *xfp,
      * walking the subtree; force-resolve it now, treating any absent
      * field as empty string (XPath: absent node -> empty nodeset ->
      * string("")), so xo_filter_walk_status() reflects the real outcome.
+     * As for libxo, a predicate passed on a path that continues below
+     * the element returns XO_STATUS_LIVE.
      */
-    if (xfp != NULL && xfp->xf_trie != NULL && xfp->xf_status == XO_STATUS_PRED)
-	xo_filter_force_resolve_pred(xop, xfp, tag, tlen);
-
-    xo_filter_status_t pre_close = xfp ? xfp->xf_status : XO_STATUS_ZERO;
-    xo_filter_close(xop, xfp, tag, tlen, "container");
-
-    return (pre_close == XO_STATUS_FULL) ? XO_STATUS_FULL
-	: (xfp ? xfp->xf_status : XO_STATUS_ZERO);
+    return xo_filter_close_pending(xop, xfp, tag, tlen, "container");
 }
 
 int
