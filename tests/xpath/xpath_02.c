@@ -644,7 +644,11 @@ static frame_t *
 walk_push (walker_t *wp, node_t *np)
 {
     wp->w_dp->xfd_next = np;
-    xo_filter_walk_open(NULL, wp->w_xfp, np->n_tag, -1);
+    if (np->n_value)		/* A field: pass its value */
+	xo_filter_walk_open_field(NULL, wp->w_xfp, np->n_tag, -1,
+				  np->n_value, -1);
+    else
+	xo_filter_walk_open(NULL, wp->w_xfp, np->n_tag, -1);
 
     wp->w_frames = grow(wp->w_frames, &wp->w_frames_max,
 			wp->w_frames_count, sizeof(*wp->w_frames));
