@@ -168,3 +168,17 @@ rtoon-test
   s34c-café
   s34d-nbsp
     msg "a\u00a0b"
+  s35-edge-spaces
+    lead " lead"
+    trail "trail "
+    both "  both  "
+    inner in ner
+    comma "a,b"
+    tag " x","y ",z,
+  s35-sparse
+    - name=" k1"
+      val "v1 "
+  s35-dense
+    {name=,val}
+    "k1 "," v1"
+    k2,v 2
