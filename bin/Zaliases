@@ -20,7 +20,7 @@ set llvm_topdir=/usr/local
 set llvm_vers=llvm19
 set llvm_path=bin/llvm-config
 
-set make_vers=`make --version`
+set make_vers=`\make --version`
 switch ( "$make_vers" )
     case GNU*:
         set gmake_opts=""
@@ -29,6 +29,7 @@ switch ( "$make_vers" )
     case *:
         set gmake_opts="env MAKE=gmake"
         set zmake=gmake
+        alias make gmake
         breaksw
 endsw
 
