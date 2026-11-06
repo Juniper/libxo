@@ -83,7 +83,7 @@
  *   - A key from the parent list counts as a leaf
  *   - Once the path is matched, all other leafs at that level are leafs
  *   - Leafs are recorded to get the header comment accurately recorded
- *   - Once the first line is emited, the set of leafs _cannot_ change
+ *   - Once the first line is emitted, the set of leafs _cannot_ change
  *
  * We use offsets into the buffers, since we know they can be
  * realloc'd out from under us, as the size increases.  The 'path'

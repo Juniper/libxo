@@ -18,7 +18,7 @@
 %}
 
 /*
- * Literal tokens which may _not_ preceed the multiplication operator
+ * Literal tokens which may _not_ precede the multiplication operator
  */
 %token L_ASSIGN		    1  ":="
 %token L_AT		    2  "@"
@@ -77,7 +77,7 @@
 %token M_OPERATOR_LAST	    44 /* Magic marker: last operator keyword */
 
 /*
- * Literal tokens which _may_ preceed the multiplication operator
+ * Literal tokens which _may_ precede the multiplication operator
  */
 %token M_MULTIPLICATION_TEST_LAST 45 /* Magic marker: highest token number */
 %token L_ASTERISK	    46 /* "*" */
@@ -121,7 +121,7 @@
 %token C_ATTRIBUTE	    68 /* Attribute axis ('@') */
 %token C_DESCENDANT	    69 /* Absolute child ("//tag") */
 %token C_ELEMENT	    70 /* Path element */
-%token C_EXPR		    71 /* Parenthetical expresion (nested) */
+%token C_EXPR		    71 /* Parenthetical expression (nested) */
 %token C_INDEX		    72 /* Index value ('foo[4]') */
 %token C_NOT		    73 /* Negation of path */
 %token C_PATH		    74 /* Path of elements */
