@@ -280,3 +280,33 @@ and-newline</div>
 <div class="line">
   <div class="data" data-tag="msg">a b</div>
 </div>
+<div class="line">
+  <div class="data" data-tag="lead"> lead</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="trail">trail </div>
+</div>
+<div class="line">
+  <div class="data" data-tag="both">  both  </div>
+</div>
+<div class="line">
+  <div class="data" data-tag="inner">in ner</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="comma">a,b</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="tag"> x</div>
+  <div class="data" data-tag="tag">y </div>
+  <div class="data" data-tag="tag">z</div>
+  <div class="data" data-tag="name" data-ident="85"> k1</div>
+  <div class="data" data-tag="val" data-ident="85">v1 </div>
+</div>
+<div class="line">
+  <div class="data" data-tag="name" data-ident="87">k1 </div>
+  <div class="data" data-tag="val" data-ident="87"> v1</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="name" data-ident="88">k2</div>
+  <div class="data" data-tag="val" data-ident="88">v 2</div>
+</div>
