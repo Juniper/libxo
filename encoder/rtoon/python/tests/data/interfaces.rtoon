@@ -1,0 +1,22 @@
+@version 1.0.0
+interface-information
+  physical-interface
+    - name=ge-0/0/0
+      admin-status up
+      mtu 1514
+      speed 1000
+      flags up,running,broadcast,
+      address
+        - family=inet
+          local 10.0.0.1
+          prefix-length 24
+        - family=inet6
+          local fe80::1
+          prefix-length 64
+    - name=ge-0/0/1
+      admin-status down
+      mtu 9192
+      speed null
+      flags ,
+      address
+        -
