@@ -20,6 +20,10 @@ if HAVE_VALIDATE
 SUBDIRS += llvm-plugins
 endif
 
+if HAVE_PYTHON
+SUBDIRS += rtoon-py
+endif
+
 test tests:
 	@(cur=`pwd` ; for dir in $(SUBDIRS) ; do \
 		cd $$dir ; \
