@@ -1,4 +1,14 @@
 /*
+ * SPDX-License-Identifier: BSD-2-Clause
+ * Copyright (c) 2014-2026, Juniper Networks, Inc.
+ * All rights reserved.
+ * This SOFTWARE is licensed under the LICENSE provided in the
+ * ../Copyright file. By downloading, installing, copying, or otherwise
+ * using the SOFTWARE, you agree to be bound by the terms of that
+ * LICENSE.
+ */
+
+/*
  * precompile_02.c: regression test for the xo_precompile IR pass and the
  * "_p" convenience wrappers (xo_emit_p, xo_emit_hp, xo_emit_fp, xo_emit_hp,
  * xo_emit_hvp, xo_emit_hvfp).
