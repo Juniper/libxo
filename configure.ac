@@ -28,7 +28,11 @@ AC_PROG_LN_S
 LT_INIT([dlopen shared])
 
 AC_PATH_PROG(BASENAME, basename, /usr/bin/basename)
-AC_PATH_PROG(BASH, bash, /bin/bash)
+dnl Not AC_PATH_PROG(BASH, ...): when configure runs under bash, BASH
+dnl is already set (to the running shell, e.g. /bin/sh on macOS), so
+dnl the search is skipped and the wrong path is used.
+AC_PATH_PROG(BASH_PATH, bash, /bin/bash)
+AC_SUBST([BASH], [$BASH_PATH])
 AC_PATH_PROG(CAT, cat, /bin/cat)
 AC_PATH_PROG(CHMOD, chmod, /bin/chmod)
 AC_PATH_PROG(CP, cp, /bin/cp)
