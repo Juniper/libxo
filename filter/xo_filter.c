@@ -835,11 +835,11 @@ struct xo_filter_s {		 /* Forward/typdef decl in xo_private.h */
     xo_filter_data_ops_t *xf_ops; /* Data vtable */
     xo_filter_data_t xf_def_data; /* Embedded default data context (avoids extra alloc) */
     uint32_t *xf_path_actions;	 /* per-path action ids (parallel to xf_xd.xd_paths[]) */
-    uint32_t xf_path_actions_cap; /* allocated capacity of xf_path_actions[] */
+    uint32_t xf_path_actions_max; /* allocated capacity of xf_path_actions[] */
     double *xf_path_priorities;  /* per-path priorities (parallel to xf_path_actions[]) */
-    uint32_t xf_path_priorities_cap; /* allocated capacity of xf_path_priorities[] */
+    uint32_t xf_path_priorities_max; /* allocated capacity of xf_path_priorities[] */
     int16_t *xf_path_import_precs; /* per-path import precedence (parallel) */
-    uint32_t xf_path_import_precs_cap; /* allocated capacity of xf_path_import_precs[] */
+    uint32_t xf_path_import_precs_max; /* allocated capacity of xf_path_import_precs[] */
     uint32_t xf_cur_action;	 /* action from the last XO_STATUS_FULL transition */
     xo_filter_pred_entry_t *xf_pred_progs; /* compiled predicate cache: a
 					packed array of {node id, compiled
@@ -1572,42 +1572,42 @@ xo_filter_compile_xpath_action_priority (xo_handle_t *xop, xo_filter_t *xfp,
 	return -1;
 
     /* Grow xf_path_actions to cover the new capacity if needed */
-    if (xdp->xd_paths_max > xfp->xf_path_actions_cap) {
+    if (xdp->xd_paths_max > xfp->xf_path_actions_max) {
 	uint32_t *newp = realloc(xfp->xf_path_actions,
 				  xdp->xd_paths_max * sizeof(*newp));
 	if (newp == NULL)
 	    return -1;
 	/* zero-init the newly allocated slots */
-	bzero(newp + xfp->xf_path_actions_cap,
-	      (xdp->xd_paths_max - xfp->xf_path_actions_cap) * sizeof(*newp));
+	bzero(newp + xfp->xf_path_actions_max,
+	      (xdp->xd_paths_max - xfp->xf_path_actions_max) * sizeof(*newp));
 	xfp->xf_path_actions = newp;
-	xfp->xf_path_actions_cap = xdp->xd_paths_max;
+	xfp->xf_path_actions_max = xdp->xd_paths_max;
     }
 
     /* Grow xf_path_priorities to cover the new capacity if needed */
-    if (xdp->xd_paths_max > xfp->xf_path_priorities_cap) {
+    if (xdp->xd_paths_max > xfp->xf_path_priorities_max) {
 	double *newp = realloc(xfp->xf_path_priorities,
 				xdp->xd_paths_max * sizeof(*newp));
 	if (newp == NULL)
 	    return -1;
 	/* zero-init the newly allocated slots */
-	bzero(newp + xfp->xf_path_priorities_cap,
-	      (xdp->xd_paths_max - xfp->xf_path_priorities_cap) * sizeof(*newp));
+	bzero(newp + xfp->xf_path_priorities_max,
+	      (xdp->xd_paths_max - xfp->xf_path_priorities_max) * sizeof(*newp));
 	xfp->xf_path_priorities = newp;
-	xfp->xf_path_priorities_cap = xdp->xd_paths_max;
+	xfp->xf_path_priorities_max = xdp->xd_paths_max;
     }
 
     /* Grow xf_path_import_precs to cover the new capacity if needed */
-    if (xdp->xd_paths_max > xfp->xf_path_import_precs_cap) {
+    if (xdp->xd_paths_max > xfp->xf_path_import_precs_max) {
 	int16_t *newp = realloc(xfp->xf_path_import_precs,
 				 xdp->xd_paths_max * sizeof(*newp));
 	if (newp == NULL)
 	    return -1;
-	bzero(newp + xfp->xf_path_import_precs_cap,
-	      (xdp->xd_paths_max - xfp->xf_path_import_precs_cap)
+	bzero(newp + xfp->xf_path_import_precs_max,
+	      (xdp->xd_paths_max - xfp->xf_path_import_precs_max)
 	      * sizeof(*newp));
 	xfp->xf_path_import_precs = newp;
-	xfp->xf_path_import_precs_cap = xdp->xd_paths_max;
+	xfp->xf_path_import_precs_max = xdp->xd_paths_max;
     }
 
     /* Record the action/priority/import-precedence for each new path */
@@ -2055,9 +2055,11 @@ xo_eval_fail (xo_filter_t *xfp, const char *fmt, ...)
  * which runs compile-time checks with ops->xfdo_error unset) can still
  * recover *where* a failed xo_eval_compile() pointed, via
  * xo_eval_compile_fail_location() below.  0 means "no node"/unknown.
+ * These are per-thread, and xo_eval_compile() clears them on entry, so
+ * they always describe the calling thread's latest compile.
  */
-static unsigned xo_eval_compile_fail_line;
-static unsigned xo_eval_compile_fail_col;
+static THREAD_LOCAL(unsigned) xo_eval_compile_fail_line;
+static THREAD_LOCAL(unsigned) xo_eval_compile_fail_col;
 
 /*
  * The compile-time twin of xo_eval_fail(): xo_eval_compile() and its
@@ -2093,7 +2095,8 @@ xo_eval_compile_fail (xo_filter_data_t *dp, xo_filter_data_ops_t *ops,
 
 /*
  * Returns the line/col stashed by the most recent xo_eval_compile_fail()
- * call (0/0 if none or unknown).  See xo_filter.h for the public
+ * call in this thread's latest xo_eval_compile() (0/0 if that compile
+ * succeeded, or the location is unknown).  See xo_filter.h for the public
  * declaration; used by callers (e.g. libpin) that invoke xo_eval_compile()
  * directly with no xfdo_error set, and so get no other way to recover
  * *where* a compile failure occurred.
@@ -3430,15 +3433,20 @@ xo_eval_op_minus (XO_EVAL_ARGS)
 }
 
 /*
- * Unary minus (negation), the compiled form of a C_UNI_MINUS node
- * (e.g. "-4"), as opposed to xo_eval_op_minus() above, which combines
- * two operands ("a - b").  Same semantics as xo_eval_negate(): an
- * integer stays an integer; everything else is negated as a number.
- * The runner frees argv[0], so we always return a fresh value.
+ * Unary minus (negation) of a C_UNI_MINUS node (e.g. "-4"), as
+ * opposed to xo_eval_op_minus() above, which combines two operands
+ * ("a - b").  Both evaluators use it.  An integer stays an integer, so
+ * "-5" is still "5" with a sign when it becomes a string; everything
+ * else is negated as a number, and a missing operand stays missing.
+ * The caller frees argv[0], so we always return a fresh value.
  */
 static xo_eval_value_t
 xo_eval_op_negate (XO_EVAL_ARGS)
 {
+    /* The compiled runner checks this for us; the tree evaluator doesn't */
+    if (argv[0].xev_flags & XEVF_MISSING)
+	return xo_eval_value_missing();
+
     xo_eval_value_t value = xo_eval_to_number(xop, argv[0]);
 
     switch (value.xev_type) {
@@ -3584,36 +3592,6 @@ xo_eval_not (XO_EVAL_ARGS)
     xo_eval_value_t value = xo_eval_value_make(C_BOOLEAN, 0, 0);
     value.xev_int64 = bool_val ? 0 : 1; /* Perform the 'not' */
     return value;
-}
-
-/*
- * Unary minus: the grammar gives us a C_UNI_MINUS node, whose
- * contents are the single operand.  An integer stays an integer, so
- * "-5" is still "5" with a sign when it becomes a string; everything
- * else is negated as a number.
- */
-static xo_eval_value_t
-xo_eval_negate (XO_EVAL_ARGS)
-{
-    xo_eval_value_t value;
-
-    value = xo_eval(xop, xfp, framep, "arguments", indent,
-                       xnp->xn_contents, NULL);
-    xo_eval_dump_value(xop, xfp, value, indent, "xo_eval_negate");
-
-    if (value.xev_flags & XEVF_MISSING)
-	return value;
-
-    /* The most negative integer has no positive twin; use a float */
-    if (value.xev_type == C_INT64 && value.xev_int64 != INT64_MIN) {
-	value.xev_int64 = -value.xev_int64;
-	return value;
-    }
-
-    xo_float_t fval = xo_eval_cast_float(xop, value);
-    xo_eval_value_free(value);
-
-    return xo_eval_value_float(0, -fval);
 }
 
 /*
@@ -4712,7 +4690,7 @@ xo_eval (xo_handle_t *xop, xo_filter_t *xfp, xo_tframe_t *framep,
 	    break;
 
 	case C_UNI_MINUS:
-	    node_fn = xo_eval_negate;
+	    unary_op_fn = xo_eval_op_negate;
 	    break;
 
 	case C_NOT:
@@ -5327,6 +5305,9 @@ xo_eval_prog_t *
 xo_eval_compile (xo_xparse_data_t *xdp, xo_xparse_node_id_t root,
 		  xo_filter_data_t *dp, xo_filter_data_ops_t *ops)
 {
+    xo_eval_compile_fail_line = 0;
+    xo_eval_compile_fail_col = 0;
+
     xo_eval_prog_t *prog = xo_realloc(NULL, sizeof(*prog));
     if (prog == NULL)
 	return NULL;
@@ -5518,16 +5499,16 @@ xo_filter_pred_prog (xo_filter_t *xfp, xo_xparse_node_id_t root)
 	return NULL;
 
     if (xfp->xf_pred_progs_count >= xfp->xf_pred_progs_max) {
-	uint32_t new_cap = xfp->xf_pred_progs_max
+	uint32_t new_max = xfp->xf_pred_progs_max
 	    ? xfp->xf_pred_progs_max * 2 : 4;
 	xo_filter_pred_entry_t *newp = realloc(xfp->xf_pred_progs,
-						new_cap * sizeof(*newp));
+						new_max * sizeof(*newp));
 	if (newp == NULL) {
 	    xo_eval_prog_destroy(prog);
 	    return NULL;
 	}
 	xfp->xf_pred_progs = newp;
-	xfp->xf_pred_progs_max = new_cap;
+	xfp->xf_pred_progs_max = new_max;
     }
 
     xo_filter_pred_entry_t *entries = xfp->xf_pred_progs;
