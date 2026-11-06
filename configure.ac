@@ -349,6 +349,42 @@ AC_SUBST(GETTEXT_BINDIR)
 
 AM_CONDITIONAL([HAVE_GETTEXT], [test "$HAVE_GETTEXT" = "yes"])
 
+dnl Python 3.10 or later runs the tests for the rtoon python package
+AC_ARG_WITH(python,
+        [  --with-python=[PATH]           Python for rtoon tests (check)],
+        [WITH_PYTHON=$withval],
+        [WITH_PYTHON=check],
+)
+
+HAVE_PYTHON=no
+PYTHON3=
+if test "$WITH_PYTHON" != "no"; then
+    if test "$WITH_PYTHON" = "yes" -o "$WITH_PYTHON" = "check"; then
+        AC_PATH_PROGS([PYTHON3], [python3])
+    else
+        PYTHON3="$WITH_PYTHON"
+    fi
+
+    AC_MSG_CHECKING([for python 3.10 or later])
+    if test -n "$PYTHON3" && "$PYTHON3" -c \
+            'import sys; sys.exit(sys.version_info < (3, 10))' \
+            >/dev/null 2>&1; then
+        HAVE_PYTHON=yes
+    fi
+    AC_MSG_RESULT([$HAVE_PYTHON])
+
+    if test "$HAVE_PYTHON" != "yes"; then
+        if test "$WITH_PYTHON" = "check"; then
+            AC_MSG_NOTICE([python 3.10+ not found; rtoon-py tests disabled])
+        else
+            AC_MSG_ERROR([python 3.10 or later not found (${PYTHON3:-none})])
+        fi
+    fi
+fi
+
+AC_SUBST(PYTHON3)
+AM_CONDITIONAL([HAVE_PYTHON], [test "$HAVE_PYTHON" = "yes"])
+
 dnl Looking for how to do thread-local variables
 AC_ARG_WITH(threads,
         [  --with-threads=[STYLE]           Specify style of thread-local support (none)],
@@ -664,6 +700,7 @@ AC_CONFIG_FILES([
      tests/xpath/Makefile
      tests/utf8/Makefile
      tests/llvm-plugins/Makefile
+     tests/rtoon-py/Makefile
      packaging/libxo.spec
 ])
 AC_OUTPUT
@@ -690,6 +727,7 @@ AC_MSG_NOTICE([summary of build options:
   printf-like:      ${HAVE_PRINTFLIKE:-no}
   text-only:        ${LIBXO_TEXT_ONLY:-no}
   gettext:          ${HAVE_GETTEXT:-no} (${GETTEXT_PREFIX})
+  python:           ${HAVE_PYTHON:-no} (${PYTHON3:-none})
   isthreaded:       ${HAVE_ISTHREADED:-no}
   thread-local:     ${THREAD_LOCAL:-no}
   local wcwidth:    ${LIBXO_WCWIDTH:-no}
