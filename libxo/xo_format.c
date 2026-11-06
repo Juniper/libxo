@@ -138,8 +138,7 @@ xo_parse_warning (xo_parse_t *xpp, const char *fmt, ...)
  * not in libxo.c, since this file is compiled into both libxo.a and
  * libxo_format.a (used by the llvm-plugins).
  */
-xo_realloc_func_t xo_realloc = realloc;
-xo_free_func_t xo_free = free;
+XO_DECLARE_MEM_FUNCS(realloc, free);
 
 void
 xo_set_allocator (xo_realloc_func_t realloc_func, xo_free_func_t free_func)
