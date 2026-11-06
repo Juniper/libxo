@@ -20,6 +20,9 @@
 #ifndef XO_BUF_H
 #define XO_BUF_H
 
+#include "xo.h"
+#include "xo_string.h"
+
 /*
  * We don't want to truly expose libxo's memory allocation functions,
  * but we want xo_buf.h to be used elsewhere, but you're on your honor
@@ -27,6 +30,10 @@
  */
 extern xo_realloc_func_t xo_realloc;
 extern xo_free_func_t xo_free;
+
+#define XO_DECLARE_MEM_FUNCS(_a, _f) \
+    xo_realloc_func_t xo_realloc = _a; \
+    xo_free_func_t xo_free = _f;
 
 #define XO_BUFSIZ		(8*1024) /* Normal buffer size */
 #define XO_BUFSIZ_SMALL		(256)    /* Smaller buffer size */
@@ -331,17 +338,5 @@ xo_buf_force_nul (xo_buffer_t *dst)
     if (xo_buf_append_val(dst, "", 1))
 	dst->xb_curp -= 1;
 }
-
-/*
- * Insert the locale's thousands separator into a just-rendered decimal
- * integer field; see the implementation in libxo.c for details.  Exposed
- * here so that other translation units that render their own decimal
- * fields can apply grouping directly.  A formatter set by
- * xo_set_formatter() must not call it, since libxo groups the
- * formatter's output itself.
- */
-xo_off_t
-xo_grouping_fixup (xo_handle_t *xop, xo_buffer_t *xbp,
-		    xo_off_t start_off, xo_off_t rc);
 
 #endif /* XO_BUF_H */
