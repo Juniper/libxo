@@ -33,10 +33,10 @@ LIBS = \
 
 libxoinc_HEADERS = \
      xo.h \
+     xo_buf.h \
      xo_encoder.h
 
 noinst_HEADERS = \
-     xo_buf.h \
      xo_dyld.h \
      xo_explicit.h \
      xo_format.h \
