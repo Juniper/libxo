@@ -20,7 +20,13 @@
 #ifndef XO_BUF_H
 #define XO_BUF_H
 
-#include "xo_private.h"
+/*
+ * We don't want to truly expose libxo's memory allocation functions,
+ * but we want xo_buf.h to be used elsewhere, but you're on your honor
+ * here to avoid them.  These are really defined in xo_format.c.
+ */
+extern xo_realloc_func_t xo_realloc;
+extern xo_free_func_t xo_free;
 
 #define XO_BUFSIZ		(8*1024) /* Normal buffer size */
 #define XO_BUFSIZ_SMALL		(256)    /* Smaller buffer size */
