@@ -5,7 +5,7 @@ Introducing libxo
 The libxo library allows an application to generate text, XML, JSON,
 and HTML output using a common set of function calls.  The application
 decides at run time which output style should be produced.  The
-application calls a function "xo_emit" to product output that is
+application calls a function "xo_emit" to produce output that is
 described in a format string.  A "field descriptor" tells libxo what
 the field is and what it means.  Each field descriptor is placed in
 braces with printf-like :ref:`format-strings`::
@@ -18,7 +18,7 @@ Each field can have a role, with the 'value' role being the default,
 and the role tells libxo how and when to render that field (see
 :ref:`field-roles` for details).  Modifiers change how the field is
 rendered in different output styles (see :ref:`field-modifiers` for
-details.  Output can then be generated in various style, using the
+details).  Output can then be generated in various styles, using the
 "--libxo" option::
 
     % wc /etc/motd

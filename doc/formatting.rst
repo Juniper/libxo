@@ -3,7 +3,7 @@
 Formatting with libxo
 =====================
 
-Most unix commands emit text output aimed at humans.  It is designed
+Most Unix commands emit text output aimed at humans.  It is designed
 to be parsed and understood by a user.  Humans are gifted at
 extracting details and pattern matching in such output.  Often
 programmers need to extract information from this human-oriented
@@ -15,7 +15,7 @@ along with testing and validation.
 Modern tool developers favor encoding schemes like XML and JSON,
 which allow trivial parsing and extraction of data.  Such formats are
 simple, well understood, hierarchical, easily parsed, and often
-integrate easier with common tools and environments.  Changes to
+integrate more easily with common tools and environments.  Changes to
 content can be done in ways that do not break existing users of the
 data, which can reduce maintenance costs and increase feature velocity.
 
@@ -55,12 +55,12 @@ Encoding Styles
 
 There are four encoding styles supported by libxo:
 
-- TEXT output can be display on a terminal session, allowing
+- TEXT output can be displayed in a terminal session, allowing
   compatibility with traditional command line usage.
 - XML output is suitable for tools like XPath and protocols like
   NETCONF.
 - JSON output can be used for RESTful APIs and integration with
-  languages like Javascript and Python.
+  languages like JavaScript and Python.
 - HTML can be matched with a small CSS file to permit rendering in any
   HTML5 browser.
 
@@ -101,7 +101,7 @@ XML Output
 ~~~~~~~~~~
 
 XML output consists of a hierarchical set of elements, each encoded
-with a start tag and an end tag.  The element should be named for data
+with a start tag and an end tag.  The element should be named for the data
 value that it is encoding::
 
     <item>
@@ -130,11 +130,13 @@ string, it must be quoted, but numbers are not quoted.  Objects are
 encoded using braces; lists are encoded using square brackets.
 Data inside objects and lists is separated using commas::
 
-    items: [
+    {
+      "items": [
         { "blocks": 36, "path" : "./src" },
         { "blocks": 40, "path" : "./bin" },
-        { "blocks": 90, "path" : "./" }
-    ]
+        { "blocks": 90, "path" : "." }
+      ]
+    }
 
 HTML Output
 ~~~~~~~~~~~
