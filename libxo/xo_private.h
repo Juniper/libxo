@@ -30,6 +30,18 @@
 #define THREAD_LOCAL(_x) __declspec(_x)
 #endif
 
+/*
+ * Insert the locale's thousands separator into a just-rendered decimal
+ * integer field; see the implementation in libxo.c for details.  Exposed
+ * here so that other translation units that render their own decimal
+ * fields can apply grouping directly.  A formatter set by
+ * xo_set_formatter() must not call it, since libxo groups the
+ * formatter's output itself.
+ */
+xo_off_t
+xo_grouping_fixup (xo_handle_t *xop, xo_buffer_t *xbp,
+		    xo_off_t start_off, xo_off_t rc);
+
 #ifdef PRId64
 #define XO_PRId64 PRId64
 #else
