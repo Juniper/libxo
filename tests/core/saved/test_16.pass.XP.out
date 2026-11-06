@@ -293,4 +293,26 @@ and-newline</tag>
   <s34d-nbsp>
     <msg>a b</msg>
   </s34d-nbsp>
+  <s35-edge-spaces>
+    <lead> lead</lead>
+    <trail>trail </trail>
+    <both>  both  </both>
+    <inner>in ner</inner>
+    <comma>a,b</comma>
+    <tag> x</tag>
+    <tag>y </tag>
+    <tag>z</tag>
+  </s35-edge-spaces>
+  <s35-sparse>
+    <name> k1</name>
+    <val>v1 </val>
+  </s35-sparse>
+  <s35-dense>
+    <name>k1 </name>
+    <val> v1</val>
+  </s35-dense>
+  <s35-dense>
+    <name>k2</name>
+    <val>v 2</val>
+  </s35-dense>
 </rtoon-test>
