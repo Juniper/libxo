@@ -14,8 +14,14 @@
 #include <inttypes.h>
 #include "xo_buf.h"
 
-/* Thread-local storage macros */
-
+/*
+ * Three styles of specifying thread-local variables are supported.
+ * configure.ac has the brains to run each possibility through the
+ * compiler and see what works; we are left to define the THREAD_LOCAL
+ * macro to the right value.  Most toolchains (clang, gcc) use
+ * "before", but some (borland) use "after" and I've heard of some
+ * (ms) that use __declspec.  Any others out there?
+ */
 #define THREAD_LOCAL_before 1
 #define THREAD_LOCAL_after 2
 #define THREAD_LOCAL_declspec 3
@@ -27,8 +33,10 @@
 #elif HAVE_THREAD_LOCAL == THREAD_LOCAL_after
 #define THREAD_LOCAL(_x) _x __thread
 #elif HAVE_THREAD_LOCAL == THREAD_LOCAL_declspec
-#define THREAD_LOCAL(_x) __declspec(_x)
-#endif
+#define THREAD_LOCAL(_x) __declspec(thread) _x
+#else
+#error unknown thread-local setting
+#endif /* HAVE_THREAD_LOCAL */
 
 /*
  * Insert the locale's thousands separator into a just-rendered decimal
