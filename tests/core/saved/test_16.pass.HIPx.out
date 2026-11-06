@@ -280,3 +280,33 @@ and-newline</div>
 <div class="line">
   <div class="data" data-tag="msg" data-xpath="/rtoon-test/s34d-nbsp/msg">a b</div>
 </div>
+<div class="line">
+  <div class="data" data-tag="lead" data-xpath="/rtoon-test/s35-edge-spaces/lead"> lead</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="trail" data-xpath="/rtoon-test/s35-edge-spaces/trail">trail </div>
+</div>
+<div class="line">
+  <div class="data" data-tag="both" data-xpath="/rtoon-test/s35-edge-spaces/both">  both  </div>
+</div>
+<div class="line">
+  <div class="data" data-tag="inner" data-xpath="/rtoon-test/s35-edge-spaces/inner">in ner</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="comma" data-xpath="/rtoon-test/s35-edge-spaces/comma">a,b</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="tag" data-xpath="/rtoon-test/s35-edge-spaces/tag"> x</div>
+  <div class="data" data-tag="tag" data-xpath="/rtoon-test/s35-edge-spaces/tag">y </div>
+  <div class="data" data-tag="tag" data-xpath="/rtoon-test/s35-edge-spaces/tag">z</div>
+  <div class="data" data-tag="name" data-ident="85" data-xpath="/rtoon-test/s35-sparse/name"> k1</div>
+  <div class="data" data-tag="val" data-ident="85" data-xpath="/rtoon-test/s35-sparse[name = ' k1']/val">v1 </div>
+</div>
+<div class="line">
+  <div class="data" data-tag="name" data-ident="87" data-xpath="/rtoon-test/s35-dense/name">k1 </div>
+  <div class="data" data-tag="val" data-ident="87" data-xpath="/rtoon-test/s35-dense[name = 'k1 ']/val"> v1</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="name" data-ident="88" data-xpath="/rtoon-test/s35-dense/name">k2</div>
+  <div class="data" data-tag="val" data-ident="88" data-xpath="/rtoon-test/s35-dense[name = 'k2']/val">v 2</div>
+</div>
