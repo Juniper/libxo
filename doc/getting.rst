@@ -75,6 +75,27 @@ B. Use the current build from github.  This gives you the most recent
      "*autoreconf*" by hand.  This step is done for you by the "*setup.sh*"
      script, described in the next section.
 
+.. _prereqs:
+
+Build Prerequisites
+-------------------
+
+There are a number of dependencies in libxo, mostly at build time.
+The following is a list of packages needed under FreeBSD, but the
+list probably applies to other platforms as well::
+
+    autoconf
+    automake
+    bash
+    cmake
+    gettext-runtime
+    gmake
+    libedit (or libreadline)
+    libtool
+    llvm19  (or whatever version matches your "cc", e.g. llvm21)
+    py312-sphinx (or the version of your python)
+    python312 (or the version of your sphinx)
+
 .. _building:
 
 Building libxo
