@@ -111,7 +111,7 @@ typedef uint32_t xo_filter_status_t;
 #endif /* XO_STATUS_ZERO */
 
 /*
- * Data operations vtable — the "inner" ops (filter -> data representation),
+ * Data operations vtable -- the "inner" ops (filter -> data representation),
  * complementing the existing "outer" ops (caller -> filter: open/close/status).
  *
  * xfdo_realloc / xfdo_free: replace xo_realloc/xo_free for trie storage.
@@ -233,7 +233,7 @@ extern xo_filter_data_ops_t xo_filter_data_ops_default;
 	const char *tag UNUSED
 
 /*
- * The outer ops (caller -> filter: open_container/close/key/get_status/…)
+ * The outer ops (caller -> filter: open_container/close/key/get_status/...)
  * reference internal libxo types (xo_filter_status_t, XO_ENCODER_HANDLER_ARGS)
  * that are not available to external consumers.  Guard the include so that
  * code outside xo_filter.so can include this header for the data-ops types
@@ -328,10 +328,10 @@ xo_filter_setup_test (void);
  *
  * xo_filter_walk_status:
  *   Query the current match status after xo_filter_walk_open.
- *   XO_STATUS_FULL  → subtree matched; keep it.
- *   XO_STATUS_TRACK → on a partial path; continue tracking.
- *   XO_STATUS_PRED  → path matched; waiting for predicate data.
- *   XO_STATUS_DEAD  → no match possible; discard the subtree.
+ *   XO_STATUS_FULL  -> subtree matched; keep it.
+ *   XO_STATUS_TRACK -> on a partial path; continue tracking.
+ *   XO_STATUS_PRED  -> path matched; waiting for predicate data.
+ *   XO_STATUS_DEAD  -> no match possible; discard the subtree.
  *   XO_STATUS_COND  -> matched, if an enclosing pending predicate passes.
  *
  * xo_filter_walk_add:
@@ -422,7 +422,7 @@ int xo_filter_set_unsupported_features (xo_filter_t *xfp,
  *   fails the same way; it's just silent).  'root' is declared here as a
  *   plain ssize_t to avoid requiring "xo_xparse.h" in this header; it is
  *   numerically an xo_xparse_node_id_t (itself just a typedef of
- *   xo_off_t/ssize_t), as returned by xo_xparse_parse_string() — a caller
+ *   xo_off_t/ssize_t), as returned by xo_xparse_parse_string() -- a caller
  *   compiling its own expressions includes "xo_xparse.h" for that
  *   function and passes its result straight through.
  *
@@ -457,7 +457,8 @@ xo_eval_compile (struct xo_xparse_data_s *xdp, ssize_t root,
  * For a caller (e.g. libpin) that invokes xo_eval_compile() directly
  * and gets only a bare failure return, this is the only way to recover
  * *where* in the source expression the failure points; call it
- * immediately after a failing xo_eval_compile() returns NULL.
+ * immediately after a failing xo_eval_compile() returns NULL.  The
+ * location is per-thread and is cleared by each xo_eval_compile() call.
  */
 void
 xo_eval_compile_fail_location (unsigned *linep, unsigned *colp);
