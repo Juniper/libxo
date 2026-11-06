@@ -375,6 +375,34 @@
     },
     "s34d-nbsp": {
       "msg": "a b"
-    }
+    },
+    "s35-edge-spaces": {
+      "lead": " lead",
+      "trail": "trail ",
+      "both": "  both  ",
+      "inner": "in ner",
+      "comma": "a,b",
+      "tag": [
+        " x",
+        "y ",
+        "z"
+      ]
+    },
+    "s35-sparse": [
+      {
+        "name": " k1",
+        "val": "v1 "
+      }
+    ],
+    "s35-dense": [
+      {
+        "name": "k1 ",
+        "val": " v1"
+      },
+      {
+        "name": "k2",
+        "val": "v 2"
+      }
+    ]
   }
 }
