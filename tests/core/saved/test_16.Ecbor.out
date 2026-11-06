@@ -1511,14 +1511,128 @@ and-newline]
         op close_container: [s34d-nbsp] []
      [append] @ 2258 (1/1)
      ff                                                    .
+      op open_container: [s35-edge-spaces] []
+   [append] @ 2259 (10/16)
+   6f 73 33 35  2d 65 64 67  - 65 2d 73 70  61 63 65 73  os35-edge-spaces
+   [append] @ 2275 (1/1)
+   bf                                                    .
+        op string: [lead] [ lead]
+     [append] @ 2276 (5/5)
+     64 6c 65 61  64                                       dlead
+     [append] @ 2281 (6/6)
+     65 20 6c 65  61 64                                    e lead
+        op string: [trail] [trail ]
+     [append] @ 2287 (6/6)
+     65 74 72 61  69 6c                                    etrail
+     [append] @ 2293 (7/7)
+     66 74 72 61  69 6c 20                                 ftrail 
+        op string: [both] [  both  ]
+     [append] @ 2300 (5/5)
+     64 62 6f 74  68                                       dboth
+     [append] @ 2305 (9/9)
+     68 20 20 62  6f 74 68 20  - 20                        h  both  
+        op string: [inner] [in ner]
+     [append] @ 2314 (6/6)
+     65 69 6e 6e  65 72                                    einner
+     [append] @ 2320 (7/7)
+     66 69 6e 20  6e 65 72                                 fin ner
+        op string: [comma] [a,b]
+     [append] @ 2327 (6/6)
+     65 63 6f 6d  6d 61                                    ecomma
+     [append] @ 2333 (4/4)
+     63 61 2c 62                                           ca,b
+        op open_leaf_list: [tag] []
+     [append] @ 2337 (4/4)
+     63 74 61 67                                           ctag
+     [append] @ 2341 (1/1)
+     9f                                                    .
+          op string: [tag] [ x]
+       [append] @ 2342 (3/3)
+       62 20 78                                              b x
+          op string: [tag] [y ]
+       [append] @ 2345 (3/3)
+       62 79 20                                              by 
+          op string: [tag] [z]
+       [append] @ 2348 (2/2)
+       61 7a                                                 az
+          op close_leaf_list: [tag] []
+       [append] @ 2350 (1/1)
+       ff                                                    .
+        op close_container: [s35-edge-spaces] []
+     [append] @ 2351 (1/1)
+     ff                                                    .
+      op open_list: [s35-sparse] []
+   [append] @ 2352 (b/11)
+   6a 73 33 35  2d 73 70 61  - 72 73 65                  js35-sparse
+   [append] @ 2363 (1/1)
+   9f                                                    .
+        op open_instance: [s35-sparse] []
+     [append] @ 2364 (1/1)
+     bf                                                    .
+          op string: [name] [ k1]
+       [append] @ 2365 (5/5)
+       64 6e 61 6d  65                                       dname
+       [append] @ 2370 (4/4)
+       63 20 6b 31                                           c k1
+          op string: [val] [v1 ]
+       [append] @ 2374 (4/4)
+       63 76 61 6c                                           cval
+       [append] @ 2378 (4/4)
+       63 76 31 20                                           cv1 
+          op close_instance: [s35-sparse] []
+       [append] @ 2382 (1/1)
+       ff                                                    .
+        op close_list: [s35-sparse] []
+     [append] @ 2383 (1/1)
+     ff                                                    .
+      op open_list: [s35-dense] []
+   [append] @ 2384 (a/10)
+   69 73 33 35  2d 64 65 6e  - 73 65                     is35-dense
+   [append] @ 2394 (1/1)
+   9f                                                    .
+        op open_instance: [s35-dense] []
+     [append] @ 2395 (1/1)
+     bf                                                    .
+          op string: [name] [k1 ]
+       [append] @ 2396 (5/5)
+       64 6e 61 6d  65                                       dname
+       [append] @ 2401 (4/4)
+       63 6b 31 20                                           ck1 
+          op string: [val] [ v1]
+       [append] @ 2405 (4/4)
+       63 76 61 6c                                           cval
+       [append] @ 2409 (4/4)
+       63 20 76 31                                           c v1
+          op close_instance: [s35-dense] []
+       [append] @ 2413 (1/1)
+       ff                                                    .
+        op open_instance: [s35-dense] []
+     [append] @ 2414 (1/1)
+     bf                                                    .
+          op string: [name] [k2]
+       [append] @ 2415 (5/5)
+       64 6e 61 6d  65                                       dname
+       [append] @ 2420 (3/3)
+       62 6b 32                                              bk2
+          op string: [val] [v 2]
+       [append] @ 2423 (4/4)
+       63 76 61 6c                                           cval
+       [append] @ 2427 (4/4)
+       63 76 20 32                                           cv 2
+          op close_instance: [s35-dense] []
+       [append] @ 2431 (1/1)
+       ff                                                    .
+        op close_list: [s35-dense] []
+     [append] @ 2432 (1/1)
+     ff                                                    .
       op close_container: [rtoon-test] []
-   [append] @ 2259 (1/1)
+   [append] @ 2433 (1/1)
    ff                                                    .
     op finish: [] []
- [append] @ 2260 (1/1)
+ [append] @ 2434 (1/1)
  ff                                                    .
   op flush: [] []
->[cbor] @ 0 (8d5/2261)
+>[cbor] @ 0 (983/2435)
 >bf 6a 72 74  6f 6f 6e 2d  - 74 65 73 74  bf 73 73 30  .jrtoon-test.ss0
 >31 2d 65 6d  70 74 79 2d  - 63 6f 6e 74  61 69 6e 65  1-empty-containe
 >72 bf ff 6e  73 30 32 2d  - 65 6d 70 74  79 2d 6c 69  r..ns02-empty-li
@@ -1660,4 +1774,15 @@ and-newline]
 >74 61 72 79  bf 63 6d 73  - 67 66 f0 9f  98 80 68 69  tary.cmsgf....hi
 >ff 6a 73 33  34 63 2d 63  - 61 66 c3 a9  bf ff 69 73  .js34c-caf....is
 >33 34 64 2d  6e 62 73 70  - bf 63 6d 73  67 64 61 c2  34d-nbsp.cmsgda.
->a0 62 ff ff  ff                                       .b...
+>a0 62 ff 6f  73 33 35 2d  - 65 64 67 65  2d 73 70 61  .b.os35-edge-spa
+>63 65 73 bf  64 6c 65 61  - 64 65 20 6c  65 61 64 65  ces.dleade leade
+>74 72 61 69  6c 66 74 72  - 61 69 6c 20  64 62 6f 74  trailftrail dbot
+>68 68 20 20  62 6f 74 68  - 20 20 65 69  6e 6e 65 72  hh  both  einner
+>66 69 6e 20  6e 65 72 65  - 63 6f 6d 6d  61 63 61 2c  fin nerecommaca,
+>62 63 74 61  67 9f 62 20  - 78 62 79 20  61 7a ff ff  bctag.b xby az..
+>6a 73 33 35  2d 73 70 61  - 72 73 65 9f  bf 64 6e 61  js35-sparse..dna
+>6d 65 63 20  6b 31 63 76  - 61 6c 63 76  31 20 ff ff  mec k1cvalcv1 ..
+>69 73 33 35  2d 64 65 6e  - 73 65 9f bf  64 6e 61 6d  is35-dense..dnam
+>65 63 6b 31  20 63 76 61  - 6c 63 20 76  31 ff bf 64  eck1 cvalc v1..d
+>6e 61 6d 65  62 6b 32 63  - 76 61 6c 63  76 20 32 ff  namebk2cvalcv 2.
+>ff ff ff                                              ...
