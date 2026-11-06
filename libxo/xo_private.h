@@ -12,6 +12,7 @@
 #define XO_PRIVATE_H
 
 #include <inttypes.h>
+#include "xo_buf.h"
 
 /* Thread-local storage macros */
 
@@ -40,12 +41,6 @@
 #else
 #define XO_PRIu64 "llu"
 #endif /* PRIu64 */
-
-/*
- * Expose libxo's memory allocation functions
- */
-extern xo_realloc_func_t xo_realloc;
-extern xo_free_func_t xo_free;
 
 /*
  * strdup() by way of xo_realloc, so the result can be given to
