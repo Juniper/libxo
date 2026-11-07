@@ -104,6 +104,50 @@ msgstr ""
 msgid "couch"
 msgstr ""
 
-#: gt_01.c:141
+#: gt_01.c:168
 msgid "{:first} before {:second}\n"
+msgstr ""
+
+#: gt_01.c:142
+msgid "{L:Service}{B:service}\n"
+msgstr ""
+
+#: gt_01.c:143
+msgid "{L:Backup}{B:backup}\n"
+msgstr ""
+
+#: gt_01.c:144
+msgid "{L:Mirrored}{B:mirrored}\n"
+msgstr ""
+
+#: gt_01.c:145
+msgid "{L:Encrypted}{B:encrypted}\n"
+msgstr ""
+
+#: gt_01.c:148
+msgid "{L:Lights}{B:lights}\n"
+msgstr ""
+
+#: gt_01.c:149
+msgid "{L:Porch}{B:porch}\n"
+msgstr ""
+
+#: gt_01.c:152
+msgid "{L:Fan}{B:fan}\n"
+msgstr ""
+
+#: gt_01.c:156 gt_01.c:160
+msgid "{:lamps} lamps are {B:lamp-state}\n"
+msgstr ""
+
+msgid "enabled+disabled"
+msgstr ""
+
+msgid "true+false"
+msgstr ""
+
+msgid "on+off"
+msgstr ""
+
+msgid "spinning+stopped"
 msgstr ""
