@@ -292,6 +292,75 @@ xo_shim_field_args (xo_parse_t *xpp, const char *fmt,
 }
 
 /*
+ * Call arg_cb for each va_arg consumed by a "B" (boolean) field, in
+ * the order xo_format_boolean() pops them: the "*" boolean pair (a
+ * string, marked XO_SHIM_XXF_PAIR), the "%@...@" ints, the '*' ints,
+ * then the value.  The value's fspec is marked with XO_SHIM_XXF_BOOLEAN (and
+ * XO_SHIM_XXF_DEFAULTED when there's no spec), so the caller can
+ * explain a mismatch.  The display/encoding match was already
+ * checked by xo_parse_format().
+ */
+static void
+xo_shim_boolean_args (xo_parse_t *xpp, const char *fmt,
+		      const xo_field_info_t *xfip,
+		      xo_shim_arg_cb_t arg_cb, void *arg_data)
+{
+    static const xo_fspec_t xo_shim_pair_fspec = {
+	.xf_fc = 's',
+	.xf_arg_type = XO_AT_STRING,
+	.xf_leading_zero = -1,
+	.xf_width = { -1, -1, -1 },
+	.xf_len = 2,
+	.xf_extflags = XO_SHIM_XXF_PAIR,
+    };
+    xo_fspec_t fspecs[XO_BOOLEAN_FSPECS];
+    const xo_fspec_t *dfp = NULL;
+    xo_boolean_info_t xbi;
+    int rc = 0;
+    int n, s;
+
+    bzero(&xbi, sizeof(xbi));
+    xbi.xbi_spec = -1;
+
+    if (xfip->xfi_format >= 0) {
+	const char *dfmt = xo_foff(fmt, xfip->xfi_format);
+
+	if (xfip->xfi_fspecs) {
+	    dfp = xfip->xfi_fspecs;
+	    rc = xo_parse_boolean(xpp, dfmt, dfp, xfip->xfi_num_fspecs,
+				  0, &xbi);
+	} else {
+	    dfp = fspecs;
+	    rc = xo_parse_boolean_format(xpp, dfmt,
+					 (unsigned) xfip->xfi_flen, 0,
+					 fspecs, XO_BOOLEAN_FSPECS, &xbi);
+	}
+    }
+
+    if (rc < 0)
+	return;			/* xo_parse_format() would have failed */
+
+    if (xbi.xbi_flags & XBIF_ARG)
+	arg_cb(arg_data, &xo_shim_pair_fspec);
+
+    xo_fspec_t value = *xo_boolean_spec(&xbi, dfp);
+
+    for (n = 0; n < value.xf_at_stars; n++)
+	arg_cb(arg_data, &xo_shim_star_fspec);
+
+    for (s = 0; s < XF_WIDTH_NUM; s++) {
+	if (value.xf_star[s])
+	    arg_cb(arg_data, &xo_shim_star_fspec);
+    }
+
+    value.xf_extflags |= XO_SHIM_XXF_BOOLEAN;
+    if (xbi.xbi_spec < 0)
+	value.xf_extflags |= XO_SHIM_XXF_DEFAULTED;
+
+    arg_cb(arg_data, &value);
+}
+
+/*
  * Return non-zero if this field consumes a va_arg for its value.
  *
  * Rule:
@@ -461,7 +530,14 @@ xo_shim_parse_args (const char *fmt,
          * For V role with XFF_ARGUMENT (e.g. {a:}), the name came from the
          * NULL callback above; the value still comes from the format spec.
          */
-        int skip_value = (xfip->xfi_flags & XFF_ARGUMENT) && (ftype != 'V');
+        int skip_value = (xfip->xfi_flags & XFF_ARGUMENT)
+	    && ftype != 'V' && ftype != 'B';
+
+	/* Boolean fields have their own argument rules */
+	if (ftype == 'B') {
+	    xo_shim_boolean_args(&xpp, fmt, xfip, arg_cb, arg_data);
+	    continue;
+	}
 
         /* Check that display and encoding formats consume the same args */
         if (!skip_value && xfip->xfi_encoding != XO_FOFF_NONE) {
