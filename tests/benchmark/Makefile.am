@@ -23,9 +23,19 @@ AM_CFLAGS = \
 
 # Ick: maintained by hand!
 TEST_CASES = \
-bm_01.c
+bm_01.c \
+bm_02.c
 
 bm_01_test_SOURCES = bm_01.c
+
+bm_02_test_SOURCES = bm_02.c
+bm_02_test_CFLAGS = \
+    ${AM_CFLAGS} \
+    -I${top_builddir}/filter \
+    -I${top_srcdir}/filter
+bm_02_test_LDADD = \
+    ${LDADD} \
+    ${top_builddir}/filter/libxo_filter.la
 
 base_tests = ${TEST_CASES:.c=.test}
 
@@ -79,6 +89,7 @@ FORMAT_LIBDIR = ${top_builddir}/format/.libs
 FORMAT_LA = ${top_builddir}/format/libxo_format.la
 LIBXO_LIBDIR = ${top_builddir}/libxo/.libs
 LIBXO_LA = ${top_builddir}/libxo/libxo.la
+FILTER_LA = ${top_builddir}/filter/libxo_filter.la
 
 if HAVE_VALIDATE
 PLUGIN_TESTS = run-validate-tests run-pass-tests
@@ -145,7 +156,7 @@ all-local: $(validate_tests) $(pass_tests)
 
 $(validate_tests): %.validate-test: $(srcdir)/%.c \
     $(VALIDATE_BUILD)/xo_validate.so \
-    $(FORMAT_LA) $(LIBXO_LA)
+    $(FORMAT_LA) $(LIBXO_LA) $(FILTER_LA)
 	@${MKDIR} -p out
 	@$(AM_V_GEN)DYLD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${DYLD_LIBRARY_PATH}" \
 	    LD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${LD_LIBRARY_PATH}" \
@@ -153,27 +164,29 @@ $(validate_tests): %.validate-test: $(srcdir)/%.c \
 	    -fplugin=${VALIDATE_BUILD}/xo_validate.so \
 	    -mllvm -xo-validate-errors-as-warnings -mllvm -xo-validate-lint \
 	    -I${top_srcdir} -I${top_srcdir}/libxo -I${top_builddir}/libxo \
+	    -I${top_srcdir}/filter -I${top_builddir}/filter \
 	    -I${INCLUDEDIR} ${SYSROOT_FLAG} \
 	    -c $< -o $*.validate-test.o > out/$@.make.out 2> out/$@.make.err
 	@$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link \
 	    ${LLVM_CLANG} ${CFLAGS} ${LDADD} ${SYSROOT_FLAG} \
-	    $*.validate-test.o ${LIBXO_LA} \
+	    $*.validate-test.o ${LIBXO_LA} ${FILTER_LA} \
 	    -o $@
 
 $(pass_tests): %.pass-test: $(srcdir)/%.c \
     $(PRECOMPILE_BUILD)/xo_precompile.so \
-    $(FORMAT_LA) $(LIBXO_LA)
+    $(FORMAT_LA) $(LIBXO_LA) $(FILTER_LA)
 	@${MKDIR} -p out
 	@$(AM_V_GEN)DYLD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${DYLD_LIBRARY_PATH}" \
 	    LD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${LD_LIBRARY_PATH}" \
 	    ${LLVM_CLANG} ${CFLAGS} \
 	    -fpass-plugin=${PRECOMPILE_BUILD}/xo_precompile.so \
 	    -I${top_srcdir} -I${top_srcdir}/libxo -I${top_builddir}/libxo \
+	    -I${top_srcdir}/filter -I${top_builddir}/filter \
 	    -I${INCLUDEDIR} ${SYSROOT_FLAG} \
 	    -c $< -o $*.pass-test.o > out/$@.make.out 2> out/$@.make.err
 	@$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link \
 	    ${LLVM_CLANG} ${CFLAGS} ${LDADD} ${SYSROOT_FLAG} \
-	    $*.pass-test.o ${LIBXO_LA} \
+	    $*.pass-test.o ${LIBXO_LA} ${FILTER_LA} \
 	    -o $@
 
 run-validate-tests: $(validate_tests)
