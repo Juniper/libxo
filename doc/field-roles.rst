@@ -11,6 +11,7 @@ content.  The roles are listed below; only one role is permitted:
   === ============== =================================================
   R   Name           Description
   === ============== =================================================
+  B   boolean        Field is a boolean value (true or false)
   C   color          Field has color and effect controls
   D   decoration     Field is non-text (e.g., colon, comma)
   E   error          Field is an error message
@@ -42,6 +43,138 @@ a comma::
         xo_emit("{,label:Free}{,decoration::}{,padding:   }"
                 "{,value:free/%u} {,units:Blocks}\\n",
                 free_blocks);
+
+.. index:: Field Roles; Boolean
+.. _boolean-role:
+
+The Boolean Role ({B:})
++++++++++++++++++++++++
+
+The boolean role emits a value that is either true or false.  The
+argument is tested for "truth", and the field is rendered as one
+of two words in the display styles (TEXT and HTML) and as a native
+boolean in the encoding styles (XML, JSON, and encoders)::
+
+    xo_emit("{B:enabled}\\n", str);                  /* true or false */
+    xo_emit("{Bf:enabled}\\n", str);                 /* True or False */
+    xo_emit("{B:enabled/%d}\\n", i32);               /* true or false */
+    xo_emit("{B:enabled/%p}\\n", ptr);               /* true or false */
+    xo_emit("{B:power/on+off}\\n", str);             /* on or off */
+    xo_emit("{Bf:power/on+off%u}\\n", u32);          /* On or Off */
+    xo_emit("{Bf:power/on+off%!64u}\\n", u64);       /* On or Off */
+    xo_emit("{B:state/enabled+disabled%d}\\n", i32); /* enabled or disabled */
+    xo_emit("{Bf:power/*%u}\\n", "on+off", u32);     /* On or Off */
+
+The format has two parts, both optional, in this order:
+
+- A *boolean pair*, giving the *true word*, a plus sign, and the
+  *false word* ("on+off").  If the pair is a lone "*", it is taken
+  from a "const char \*" argument, which comes before any other
+  argument of the field.  The default pair is "true+false".
+
+- A single conversion spec, which says how the argument is taken.
+  The default is "%s".
+
+The boolean pair is everything before the first "%".  It must have
+exactly one "+".  A backslash escapes the next character, so "\\+",
+"\\\*", "\\/", "\\}", and "\\\\" give a literal plus, star, slash,
+close brace, and backslash, and "%%" gives a literal percent.
+Remember that a backslash in a C string must itself be escaped::
+
+    xo_emit("{B:mode/a\\\\+b+c%d}\\n", i32);         /* a+b or c */
+    xo_emit("{B:rate/100%%+0%%%d}\\n", i32);         /* 100% or 0% */
+
+There can be only one conversion spec, with nothing after it, and
+it must take an argument (so "%m" is not allowed).  Flags, width,
+precision, and length modifiers are parsed normally, and any
+arguments they take (such as "%\*.\*s") are consumed, but the width
+and precision are not applied to the word.  Use an anchor to line
+up columns::
+
+    xo_emit("{[:-8}{B:power/on+off%d}{]:} {:name}\\n", on, name);
+
+The field name is required, as it is for the value role.
+
+Truth
+-----
+
+The conversion spec decides how the argument is tested:
+
+  ================================= ===================================
+  Spec                              True when
+  ================================= ===================================
+  integers ("%d", "%u", "%c", ...)  The value is not zero
+  floating point ("%f", "%g", ...)  The value is not zero (NaN is true)
+  wide characters ("%lc")           The value is not zero
+  strings ("%s", "%ls", ...)        The string is not NULL or empty
+  pointers ("%p")                   The pointer is not NULL
+  ================================= ===================================
+
+A string is true whatever it says, so "0" and "false" are true.  A
+"bool" (from <stdbool.h>) is promoted to an int, so use "%d" for it;
+passing a bool to "{B:name}" (which defaults to "%s") is undefined
+behavior.
+
+Output Styles
+-------------
+
+In TEXT, the chosen word is emitted.  In HTML, the word is emitted
+with "data-type" and "data-value" attributes; "data-value" is always
+"true" or "false", whatever word is displayed::
+
+    <div class="data" data-tag="power" data-type="boolean"
+         data-value="true">On</div>
+
+The encoding styles use the native form: "true" and "false" are
+bare words in JSON, and text in XML.  Encoders are passed the value
+"true" or "false" with the XFF_BOOLEAN flag set (see
+:ref:`encoders`)::
+
+    "power": true
+    <power>true</power>
+
+The "q" (quote) modifier makes JSON quote the value ("true").  The
+"e", "d", "k", and "l" modifiers work as they do for the value role.
+The "h" (humanize) and "i" (int-group) modifiers are ignored.
+
+The "f" (first-cap) modifier capitalizes the first letter of the
+chosen word.  The "g" (gettext) modifier translates the boolean pair
+as a whole, so the translator sees "enabled+disabled" (or
+"true+false" when there's no pair) and returns a pair, such as
+"activada+desactivada".  The translation is done before "f" is
+applied, so "enabled" can become "activada" and then "Activada".
+
+The translated pair uses the same syntax as the format: exactly one
+"+", with a backslash escaping the next character.  A translation
+that isn't a valid pair is a runtime failure, and the untranslated
+pair is used instead.  A "*" pair is translated as given, just as a
+"{g:}" field's value is, so those msgids must be added to the
+catalog by hand.  Encoding words are never translated.  See
+:ref:`xopo` for how the pairs are extracted for translators.
+
+The full-boolean Modifier
+-------------------------
+
+The "full-boolean" modifier, which has only the long name, makes the
+encoding styles emit a word instead of the native form.  The word is
+taken from the encoding format's boolean pair, if there is an
+encoding format, or else from the display format's pair, without
+gettext or first-cap::
+
+    xo_emit("{B,full-boolean:answer/yup+nope}\\n", str);
+    xo_emit("{B,full-boolean:found/T+F%p/1+0%p}\\n", ptr);
+
+The first gives "yup" or "nope" in every style.  The second
+displays "T" or "F", and encodes "1" or "0".  In JSON, the words
+are quoted unless the "n" (no-quotes) modifier is used.  The
+"data-value" attribute in HTML is still "true" or "false".
+
+An encoding format must have both a boolean pair and a conversion
+spec, and must take the same arguments as the display format: the
+same "\*" pair (or none), the same "\*" widths, and the same
+argument type.  Without "full-boolean", the encoding format is
+checked but not used.  With "full-boolean" and no boolean pair, the
+words are "true" and "false", emitted as strings.
 
 .. index:: Field Roles; Color
 .. _color-role:
