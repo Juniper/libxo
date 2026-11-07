@@ -293,6 +293,7 @@ xo_value_lookup (xo_flag_mapping_t *map, xo_xff_flags_t value)
  * Role and modifier tables
  */
 xo_flag_mapping_t xo_role_names[] = {
+    { 'B', "boolean" },
     { 'C', "color" },
     { 'D', "decoration" },
     { 'E', "error" },
@@ -321,6 +322,7 @@ static xo_flag_mapping_t xo_modifier_names[] = {
     { XFF_ESC_SLASH, "escape-slash" },
     { XFF_ESC_SQUARE, "escape-square" },
     { XFF_FIRST_CAP, "first-cap" },
+    { XFF_FULL_BOOLEAN, "full-boolean" },
     { XFF_GT_FIELD, "gettext" },
     { XFF_HUMANIZE, "humanize" },
     { XFF_HUMANIZE, "hn" },
@@ -797,6 +799,7 @@ xo_parse_roles (xo_parse_t *xpp, const char *fmt,
 	}
 
 	switch (*sp) {
+	case 'B':
 	case 'C':
 	case 'D':
 	case 'E':
@@ -857,6 +860,13 @@ xo_parse_roles (xo_parse_t *xpp, const char *fmt,
 	}
     }
 
+    if ((flags & XFF_FULL_BOOLEAN) && ftype != 'B') {
+	xo_parse_error(xpp, "'full-boolean' is only valid for 'B' "
+		       "fields, ignored: '%s'",
+		       xo_parse_printable(xpp, fmt, -1, FALSE));
+	flags &= ~XFF_FULL_BOOLEAN;
+    }
+
     xfip->xfi_flags = flags;
     xfip->xfi_ftype = ftype ?: 'V';
     xfip->xfi_fnum  = fnum;
@@ -902,9 +912,278 @@ xo_parse_field_numbers (xo_parse_t *xpp, const char *fmt,
 }
 
 /*
+ * Digest a boolean format's fspecs; see xo_format.h.
+ */
+int
+xo_parse_boolean (xo_parse_t *xpp, const char *fmt,
+		  const xo_fspec_t *fspecs, unsigned num,
+		  int complete, xo_boolean_info_t *xbip)
+{
+    const xo_fspec_t *xfp = fspecs;
+    unsigned i = 0;
+    int flen = 0;
+
+    bzero(xbip, sizeof(*xbip));
+    xbip->xbi_spec = -1;
+
+    if (num > 0)
+	flen = fspecs[num - 1].xf_start + fspecs[num - 1].xf_len;
+
+    /* The boolean pair is the literal run before the spec */
+    if (i < num && xfp->xf_fc == XO_ROLE_TEXT) {
+	const char *sp = fmt + xfp->xf_start;
+	const char *ep = sp + xfp->xf_len;
+	const char *cp, *plus = NULL;
+	unsigned pluses = 0;
+
+	if (xfp->xf_len == 1 && *sp == '*') {
+	    xbip->xbi_flags |= XBIF_PAIR | XBIF_ARG;
+
+	} else {
+	    for (cp = sp; cp < ep; cp++) {
+		/* The only '%' in a literal run is the first of "%%" */
+		if (*cp == '\\' || *cp == '%') {
+		    xbip->xbi_flags |= XBIF_ESCAPED;
+		    if (cp + 1 < ep)
+			cp += 1;
+		    continue;
+		}
+
+		if (*cp == '+') {
+		    if (pluses == 0)
+			plus = cp;
+		    pluses += 1;
+		}
+	    }
+
+	    if (pluses != 1) {
+		xo_parse_error(xpp, "boolean pair must have exactly one "
+			       "'+' (found %u): '%s'", pluses,
+			       xo_parse_printable(xpp, fmt, flen, FALSE));
+		return -1;
+	    }
+
+	    xbip->xbi_flags |= XBIF_PAIR;
+	    xbip->xbi_true = xfp->xf_start;
+	    xbip->xbi_true_len = (uint16_t) (plus - sp);
+	    xbip->xbi_false = (uint16_t) (plus + 1 - fmt);
+	    xbip->xbi_false_len = (uint16_t) (ep - plus - 1);
+	}
+
+	i += 1;
+	xfp += 1;
+    }
+
+    /* Then at most one conversion spec */
+    if (i < num && xfp->xf_fc != XO_ROLE_TEXT) {
+	if (xfp->xf_arg_type == XO_AT_NONE) {
+	    xo_parse_error(xpp, "boolean format needs a conversion that "
+			   "takes an argument: '%s'",
+			   xo_parse_printable(xpp, fmt, flen, FALSE));
+	    return -1;
+	}
+
+	xbip->xbi_spec = (int16_t) i;
+	i += 1;
+	xfp += 1;
+    }
+
+    /* And nothing else */
+    if (i < num) {
+	if (xfp->xf_fc == XO_ROLE_TEXT)
+	    xo_parse_error(xpp, "boolean format has text after the "
+			   "conversion spec: '%s'",
+			   xo_parse_printable(xpp, fmt, flen, FALSE));
+	else
+	    xo_parse_error(xpp, "boolean format has more than one "
+			   "conversion spec: '%s'",
+			   xo_parse_printable(xpp, fmt, flen, FALSE));
+	return -1;
+    }
+
+    if (complete && (!(xbip->xbi_flags & XBIF_PAIR) || xbip->xbi_spec < 0)) {
+	xo_parse_error(xpp, "boolean encoding format needs both a boolean "
+		       "pair and a conversion spec: '%s'",
+		       xo_parse_printable(xpp, fmt, flen, FALSE));
+	return -1;
+    }
+
+    return 0;
+}
+
+int
+xo_parse_boolean_format (xo_parse_t *xpp, const char *fmt, unsigned flen,
+			 int complete, xo_fspec_t *fspecs, unsigned max,
+			 xo_boolean_info_t *xbip)
+{
+    xo_fspec_t *save_fspecs = xpp->xp_fspecs;
+    xo_fspec_t *save_cur = xpp->xp_cur_fspec;
+    unsigned save_num = xpp->xp_num_fspecs;
+
+    xpp->xp_fspecs = xpp->xp_cur_fspec = fspecs;
+    xpp->xp_num_fspecs = max;
+
+    int num = xo_parse_fspecs(xpp, fmt, fmt + flen);
+
+    xpp->xp_fspecs = save_fspecs;
+    xpp->xp_cur_fspec = save_cur;
+    xpp->xp_num_fspecs = save_num;
+
+    if (num == -2) {
+	xo_parse_error(xpp, "boolean format has too many parts: '%s'",
+		       xo_parse_printable(xpp, fmt, flen, FALSE));
+	return -1;
+    }
+
+    if (num < 0)
+	return -1;		/* Already reported */
+
+    if (xo_parse_boolean(xpp, fmt, fspecs, num, complete, xbip) < 0)
+	return -1;
+
+    return num;
+}
+
+const xo_fspec_t *
+xo_boolean_spec (const xo_boolean_info_t *xbip, const xo_fspec_t *fspecs)
+{
+    static const xo_fspec_t xo_boolean_default_spec = {
+	.xf_fc = 's',
+	.xf_leading_zero = -1,
+	.xf_width = { -1, -1, -1 },
+	.xf_len = 2,
+	.xf_arg_type = XO_AT_STRING,
+    };
+
+    if (xbip->xbi_spec < 0 || fspecs == NULL)
+	return &xo_boolean_default_spec;
+
+    return &fspecs[xbip->xbi_spec];
+}
+
+int
+xo_boolean_same_args (const xo_boolean_info_t *xbip1,
+		      const xo_fspec_t *fspecs1,
+		      const xo_boolean_info_t *xbip2,
+		      const xo_fspec_t *fspecs2)
+{
+    const xo_fspec_t *xfp1 = xo_boolean_spec(xbip1, fspecs1);
+    const xo_fspec_t *xfp2 = xo_boolean_spec(xbip2, fspecs2);
+    unsigned i;
+
+    if ((xbip1->xbi_flags & XBIF_ARG) != (xbip2->xbi_flags & XBIF_ARG))
+	return FALSE;
+
+    if (xfp1->xf_at_stars != xfp2->xf_at_stars
+	    || xfp1->xf_arg_type != xfp2->xf_arg_type)
+	return FALSE;
+
+    for (i = 0; i < XF_WIDTH_NUM; i++)
+	if (xfp1->xf_star[i] != xfp2->xf_star[i])
+	    return FALSE;
+
+    return TRUE;
+}
+
+/*
+ * Check a "B" field's display and encoding formats.  These are real
+ * errors, checked in every mode.
+ */
+static int
+xo_parse_field_boolean (xo_parse_t *xpp, const char *fmt,
+			xo_field_info_t *xfip, xo_boolean_info_t *dispp,
+			xo_boolean_info_t *encp, int *has_encp)
+{
+    xo_fspec_t dfspecs[XO_BOOLEAN_FSPECS];
+    xo_fspec_t efspecs[XO_BOOLEAN_FSPECS];
+    const xo_fspec_t *dfp = NULL;
+
+    bzero(dispp, sizeof(*dispp));
+    dispp->xbi_spec = -1;
+    *has_encp = 0;
+
+    if (xfip->xfi_format >= 0) {
+	const char *ffmt = xo_foff(fmt, xfip->xfi_format);
+
+	if (xfip->xfi_fspecs) {
+	    dfp = xfip->xfi_fspecs;
+	    if (xo_parse_boolean(xpp, ffmt, dfp, xfip->xfi_num_fspecs,
+				 FALSE, dispp) < 0)
+		return -1;
+	} else {
+	    dfp = dfspecs;
+	    if (xo_parse_boolean_format(xpp, ffmt, xfip->xfi_flen, FALSE,
+				dfspecs, XO_BOOLEAN_FSPECS, dispp) < 0)
+		return -1;
+	}
+    }
+
+    if (xfip->xfi_encoding < 0)
+	return 0;
+
+    const char *efmt = xo_foff(fmt, xfip->xfi_encoding);
+
+    if (xo_parse_boolean_format(xpp, efmt, xfip->xfi_elen, TRUE,
+				efspecs, XO_BOOLEAN_FSPECS, encp) < 0)
+	return -1;
+
+    if (!xo_boolean_same_args(dispp, dfp, encp, efspecs)) {
+	xo_parse_error(xpp, "boolean encoding format must take the same "
+		       "arguments as the display format: '%s'",
+		       xo_parse_printable(xpp,
+				  xo_foff(fmt, xfip->xfi_start),
+				  xfip->xfi_len, TRUE));
+	return -1;
+    }
+
+    *has_encp = 1;
+    return 0;
+}
+
+/*
+ * Lint (strict mode) checks for a "B" field
+ */
+static void
+xo_lint_field_boolean (xo_parse_t *xpp, const char *fmt,
+		       xo_field_info_t *xfip, xo_boolean_info_t *dispp,
+		       xo_boolean_info_t *encp)
+{
+    const char *str = xo_foff(fmt, xfip->xfi_start);
+    int slen = xfip->xfi_len;
+    xo_xff_flags_t flags = xfip->xfi_flags;
+
+    if ((dispp->xbi_flags & XBIF_PAIR) && !(dispp->xbi_flags & XBIF_ARG)
+	    && (dispp->xbi_true_len == 0 || dispp->xbi_false_len == 0))
+	xo_parse_warning(xpp, "boolean pair has an empty word: '%s'",
+			 xo_parse_printable(xpp, str, slen, TRUE));
+
+    if (encp && !(encp->xbi_flags & XBIF_ARG)
+	    && (encp->xbi_true_len == 0 || encp->xbi_false_len == 0))
+	xo_parse_warning(xpp, "boolean encoding pair has an empty word: '%s'",
+			 xo_parse_printable(xpp, str, slen, TRUE));
+
+    if (flags & (XFF_HUMANIZE | XFF_INT_GROUP))
+	xo_parse_warning(xpp, "'humanize' and 'int-group' are ignored "
+			 "for 'B' fields: '%s'",
+			 xo_parse_printable(xpp, str, slen, TRUE));
+
+    if (encp && !(flags & XFF_FULL_BOOLEAN))
+	xo_parse_warning(xpp, "boolean encoding format is ignored without "
+			 "'full-boolean': '%s'",
+			 xo_parse_printable(xpp, str, slen, TRUE));
+
+    if ((flags & XFF_FULL_BOOLEAN) && !(dispp->xbi_flags & XBIF_PAIR)
+	    && encp == NULL)
+	xo_parse_warning(xpp, "'full-boolean' without a boolean pair "
+			 "gives quoted true/false: '%s'",
+			 xo_parse_printable(xpp, str, slen, TRUE));
+}
+
+/*
  * The field format is:
  *  '{' modifiers ':' content [ '/' print-fmt [ '/' encode-fmt ]] '}'
  * Roles are optional and include the following field types:
+ *   'B': boolean, rendered as one of two words or encoded as true/false
  *   'D': decoration; something non-text and non-data (colons, commmas)
  *   'E': error message
  *   'F': format text
@@ -1097,9 +1376,17 @@ xo_parse_fields (xo_parse_t *xpp, const char *fmt, size_t fmt_len)
 
 	/* Encoding format, between second '/' and '}' */
 	if (*sp == '/') {
-	    for (ep = ++sp; *sp; sp++)
+	    for (ep = ++sp; *sp; sp++) {
 		if (*sp == '}')
 		    break;
+		if (*sp == '\\') {
+		    if (sp[1] == '\0') {
+			xo_parse_error(xpp, "backslash at the end of string");
+			return -1;
+		    }
+		    sp += 1;
+		}
+	    }
 
 	    /* A probable typo, since the encoding field is empty: {:foo/%s/} */
 	    if (ep == sp) {
@@ -1181,6 +1468,19 @@ xo_parse_fields (xo_parse_t *xpp, const char *fmt, size_t fmt_len)
 	    } else {
 		return -1;	/* Genuine error; already reported */
 	    }
+	}
+
+	/*
+	 * A bad "B" field would leave the va_list out of step, so we
+	 * check these in every mode, not just strict.
+	 */
+	xo_boolean_info_t bool_disp, bool_enc;
+	int bool_has_enc = 0;
+
+	if (xfip->xfi_ftype == 'B') {
+	    if (xo_parse_field_boolean(xpp, fmt, xfip, &bool_disp,
+				       &bool_enc, &bool_has_enc) < 0)
+		return -1;
 	}
 
 	/* Semantic validation in strict mode only; not during xo_emit() */
@@ -1303,6 +1603,10 @@ xo_parse_fields (xo_parse_t *xpp, const char *fmt, size_t fmt_len)
 		}
 	    }
 	}
+
+	if (xfip->xfi_ftype == 'B')
+	    xo_lint_field_boolean(xpp, fmt, xfip, &bool_disp,
+				  bool_has_enc ? &bool_enc : NULL);
 
 	if ((xfip->xfi_flags & XFF_HUMANIZE) && !format) {
 	    xo_parse_error(xpp,
