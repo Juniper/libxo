@@ -1271,6 +1271,18 @@ xo_xpath_yylex (xo_xparse_data_t *xdp, xo_xparse_node_id_t *yylvalp)
     if (!xo_xparse_setup)
 	xo_xparse_setup_lexer();
 
+    /*
+     * If we've saved a token type into xd_ttype, then we return
+     * it as if we'd just lexed it.  These are only parse-mode
+     * tokens, which carry no value, so they get no node.
+     */
+    if (xdp->xd_ttype) {
+	rc = xdp->xd_ttype;
+	xdp->xd_ttype = 0;
+	*yylvalp = 0;
+	return rc;
+    }
+
     xo_xparse_node_id_t id = xo_xparse_node_new(xdp);
     xo_xparse_node_t *xnp = xo_xparse_node(xdp, id);
     *yylvalp = id;
@@ -1289,21 +1301,6 @@ xo_xpath_yylex (xo_xparse_data_t *xdp, xo_xparse_node_id_t *yylvalp)
     }
 
     bzero(xnp, sizeof(*xnp));
-
-    /*
-     * If we've saved a token type into xd_ttype, then we return
-     * it as if we'd just lexed it.
-     */
-    if (xdp->xd_ttype) {
-	rc = xdp->xd_ttype;
-	xdp->xd_ttype = 0;
-
-	xnp->xn_type = rc;
-	xnp->xn_line = xdp->xd_line;
-	xnp->xn_col = xdp->xd_col + 1;
-
-	return rc;
-    }
 
     /*
      * Discard the previous token by moving the start pointer
@@ -1523,6 +1520,8 @@ xo_xparse_clean (xo_xparse_data_t *xdp)
 	    xo_free(xdp->xd_buf);
 	if (xdp->xd_paths)
 	    xo_free(xdp->xd_paths);
+	if (xdp->xd_stack)
+	    xo_free(xdp->xd_stack);
 	bzero(xdp, sizeof(*xdp));
     }
 }
@@ -1541,7 +1540,7 @@ xo_xparse_destroy (xo_xparse_data_t *xdp)
  */
 int
 xo_xparse_parse_string (xo_handle_t *xop, xo_xparse_data_t *xdp,
-			const char *input)
+			const char *input, int style)
 {
     /* Use our string as the input buffer */
     xo_xparse_set_input(xdp, input, strlen(input));
@@ -1550,6 +1549,8 @@ xo_xparse_parse_string (xo_handle_t *xop, xo_xparse_data_t *xdp,
     if (xo_isset_flags(xop, XOF_DEBUG))
 	xo_xpath_yydebug = 1;
 
+    xdp->xd_ttype = style;      /* What are we parsing? */
+    xdp->xd_stack_count = 0;	/* No stack snapshot yet */
     xdp->xd_xop = xop;		/* Temporarily record the handle */
 
     /* This is the main parsing function, built from xo_xpath.y */
