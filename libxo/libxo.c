@@ -4051,10 +4051,10 @@ xo_trim_ws (xo_buffer_t *xbp, ssize_t len)
  * gcc-4.9 bug, but that's ancient so we've removed the evil but left
  * the function just in case the bug returns.  A pessimist, eh?
  */
-static inline void
+static inline long double
 xo_safe_va_arg_long_double (xo_handle_t *xop)
 {
-    va_arg(xop->xo_vap, long double);
+    return va_arg(xop->xo_vap, long double);
 }
 
 /*
@@ -4470,6 +4470,72 @@ xo_emit_field_value (xo_handle_t *xop, xo_buffer_t *xbp,
 }
 
 /*
+ * Pop the '*' width ints and then the value for one format specifier
+ * off xop->xo_vap, and return the value's "truth": non-zero for
+ * numbers, non-NULL for pointers, and non-NULL and non-empty for
+ * strings.  This is the va_arg logic behind xo_advance_vap(), and
+ * is also used by "B" (boolean) fields.
+ */
+static int
+xo_pop_value_truth (xo_handle_t *xop, const xo_fspec_t *xfp)
+{
+    int s;
+    for (s = 0; s < XF_WIDTH_NUM; s++) {
+        if (xfp->xf_star[s])
+            va_arg(xop->xo_vap, int);
+    }
+
+    switch (xfp->xf_arg_type) {
+    case XO_AT_INT:
+        return va_arg(xop->xo_vap, int) != 0;
+
+    case XO_AT_LONG:
+        return va_arg(xop->xo_vap, long) != 0;
+
+    case XO_AT_LONG_LONG:
+        return va_arg(xop->xo_vap, long long) != 0;
+
+    case XO_AT_INTMAX:
+        return va_arg(xop->xo_vap, intmax_t) != 0;
+
+    case XO_AT_PTRDIFF:
+        return va_arg(xop->xo_vap, ptrdiff_t) != 0;
+
+    case XO_AT_SIZE:
+        return va_arg(xop->xo_vap, size_t) != 0;
+
+    case XO_AT_QUAD:
+        return va_arg(xop->xo_vap, quad_t) != 0;
+
+    case XO_AT_INT64:
+        return va_arg(xop->xo_vap, int64_t) != 0;
+
+    case XO_AT_DOUBLE:
+        return va_arg(xop->xo_vap, double) != 0.0;
+
+    case XO_AT_LONG_DOUBLE:
+        return xo_safe_va_arg_long_double(xop) != 0.0;
+
+    case XO_AT_WINT:
+        return va_arg(xop->xo_vap, wint_t) != 0;
+
+    case XO_AT_POINTER:
+        return va_arg(xop->xo_vap, void *) != NULL;
+
+    case XO_AT_STRING:
+        if (xfp->xf_fc == 'S' || xfp->xf_lflag) {
+            const wchar_t *wcp = va_arg(xop->xo_vap, const wchar_t *);
+            return wcp != NULL && *wcp != L'\0';
+        } else {
+            const char *cp = va_arg(xop->xo_vap, const char *);
+            return cp != NULL && *cp != '\0';
+        }
+    }
+
+    return 0;			/* XO_AT_NONE */
+}
+
+/*
  * Advance xop->xo_vap past the argument consumed by one format specifier.
  */
 static void
@@ -4500,61 +4566,7 @@ xo_advance_vap (xo_handle_t *xop, xo_xff_flags_t flags, int consumed,
         break;
     }
 
-    int s;
-    for (s = 0; s < XF_WIDTH_NUM; s++) {
-        if (xfp->xf_star[s])
-            va_arg(xop->xo_vap, int);
-    }
-
-    switch (xfp->xf_arg_type) {
-    case XO_AT_INT:
-        va_arg(xop->xo_vap, int);
-        break;
-
-    case XO_AT_LONG:
-        va_arg(xop->xo_vap, long);
-        break;
-
-    case XO_AT_LONG_LONG:
-        va_arg(xop->xo_vap, long long);
-        break;
-
-    case XO_AT_INTMAX:
-        va_arg(xop->xo_vap, intmax_t);
-        break;
-
-    case XO_AT_PTRDIFF:
-        va_arg(xop->xo_vap, ptrdiff_t);
-        break;
-
-    case XO_AT_SIZE:
-        va_arg(xop->xo_vap, size_t);
-        break;
-
-    case XO_AT_QUAD:
-        va_arg(xop->xo_vap, quad_t);
-        break;
-
-    case XO_AT_INT64:
-        va_arg(xop->xo_vap, int64_t);
-        break;
-
-    case XO_AT_DOUBLE:
-        va_arg(xop->xo_vap, double);
-        break;
-
-    case XO_AT_LONG_DOUBLE:
-        xo_safe_va_arg_long_double(xop);
-        break;
-
-    case XO_AT_WINT:
-        va_arg(xop->xo_vap, wint_t);
-        break;
-
-    case XO_AT_POINTER:
-        va_arg(xop->xo_vap, void *);
-        break;
-    }
+    (void) xo_pop_value_truth(xop, xfp);
 }
 
 /*
@@ -4923,7 +4935,7 @@ xo_format_first_cap (xo_handle_t *xop, xo_buffer_t *xbp,
     if (!(flags & XFF_FIRST_CAP)) /* Not enabled */
 	return;
 
-    if (!xo_style_is_encoding(xop)) /* Only display styles */
+    if (xo_style_is_encoding(xop)) /* Only display styles */
 	return;
 
     xo_off_t cur_off = xo_buf_offset(xbp);
@@ -5462,7 +5474,8 @@ xo_buf_append_div (xo_handle_t *xop, const xo_field_info_t *xfip,
 
 	    xo_info_t *xip = xo_info_find(xop, name, nlen);
 	    if (xip) {
-		if (xip->xi_type) {
+		/* "B" fields write their own data-type, below */
+		if (xip->xi_type && !(xfip && xfip->xfi_ftype == 'B')) {
 		    xo_data_append(xop, in_type, sizeof(in_type) - 1);
 		    xo_data_escape_attr(xop, xip->xi_type, -1);
 		}
@@ -5471,6 +5484,16 @@ xo_buf_append_div (xo_handle_t *xop, const xo_field_info_t *xfip,
 		    xo_data_escape_attr(xop, xip->xi_help, -1);
 		}
 	    }
+	}
+
+	if (xfip && xfip->xfi_ftype == 'B' && encoding) {
+	    /* The encoding is the canonical "true" or "false" */
+	    static char bool_type[] = "\" data-type=\"boolean";
+	    static char bool_value[] = "\" data-value=\"";
+
+	    xo_data_append(xop, bool_type, sizeof(bool_type) - 1);
+	    xo_data_append(xop, bool_value, sizeof(bool_value) - 1);
+	    xo_data_escape_attr(xop, encoding, elen);
 	}
 
 	if ((flags & XFF_KEY) && XOF_ISSET(xop, XOF_KEYS))
@@ -7419,7 +7442,8 @@ xo_format_value (xo_handle_t *xop, const xo_field_info_t *xfip,
      * warnings are actually enabled.
      */
     if (XOF_ISSET(xop, XOF_WARN) && name != NULL
-	    && xfip != NULL && xfip->xfi_ftype == 'V'
+	    && xfip != NULL
+	    && (xfip->xfi_ftype == 'V' || xfip->xfi_ftype == 'B')
 	    && !(flags & (XFF_DISPLAY_ONLY | XFF_LEAF_LIST))) {
 	if (xo_sibling_check(xsp, name, nlen))
 	    xo_failure(xop, "duplicate sibling name: '%.*s'", (int) nlen, name);
@@ -7537,6 +7561,349 @@ xo_format_value (xo_handle_t *xop, const xo_field_info_t *xfip,
 				fmt, flen, encoding, elen, flags);
 	break;
     }
+}
+
+/*
+ * A "*" boolean pair is a runtime string; split it on its one '+'.
+ * Returns 0 on success, -1 if the pair is NULL or malformed.
+ */
+static int
+xo_boolean_split_pair (const char *pair, const char **truep,
+		       ssize_t *tlenp, const char **falsep, ssize_t *flenp)
+{
+    if (pair == NULL)
+	return -1;
+
+    const char *plus = strchr(pair, '+');
+    if (plus == NULL || strchr(plus + 1, '+') != NULL)
+	return -1;
+
+    *truep = pair;
+    *tlenp = plus - pair;
+    *falsep = plus + 1;
+    *flenp = strlen(plus + 1);
+    return 0;
+}
+
+/*
+ * Words from a "*" pair are plain text, but we hand them to
+ * xo_format_value() as a format, so escape '\' and '%'.  'dst' needs
+ * room for 2 * len + 1 bytes.
+ */
+static ssize_t
+xo_boolean_escape (char *dst, const char *src, ssize_t len)
+{
+    char *cp = dst;
+    ssize_t i;
+
+    for (i = 0; i < len; i++) {
+	if (src[i] == '\\' || src[i] == '%')
+	    *cp++ = '\\';
+	*cp++ = src[i];
+    }
+
+    *cp = '\0';
+    return cp - dst;
+}
+
+/*
+ * Choose the word for a boolean format: from the "*" pair, from the
+ * format's own boolean pair, or the canonical true/false.  The
+ * result is a literal-only format (escapes intact) for
+ * xo_format_value(); 'buf' holds an escaped "*" word.
+ */
+static const char *
+xo_boolean_word (const char *fmt, const xo_boolean_info_t *xbip,
+		 const char *ptrue, ssize_t ptlen,
+		 const char *pfalse, ssize_t pflen,
+		 int truth, char *buf, ssize_t *lenp)
+{
+    if (xbip && (xbip->xbi_flags & XBIF_ARG) && ptrue) {
+	if (truth)
+	    *lenp = xo_boolean_escape(buf, ptrue, ptlen);
+	else
+	    *lenp = xo_boolean_escape(buf, pfalse, pflen);
+	return buf;
+    }
+
+    if (xbip && (xbip->xbi_flags & XBIF_PAIR)
+	    && !(xbip->xbi_flags & XBIF_ARG)) {
+	if (truth) {
+	    *lenp = xbip->xbi_true_len;
+	    return fmt + xbip->xbi_true;
+	}
+
+	*lenp = xbip->xbi_false_len;
+	return fmt + xbip->xbi_false;
+    }
+
+    *lenp = truth ? 4 : 5;
+    return truth ? "true" : "false";
+}
+
+/*
+ * Under XOF_NO_VA_ARG (xo(1)), the formatter hands out the arguments
+ * as strings, so ask it for each one with "%s".  Only an empty
+ * string is false, whatever the spec.
+ */
+static int
+xo_boolean_formatter_arg (xo_handle_t *xop, char *buf, ssize_t bufsiz)
+{
+    if (xop->xo_formatter == NULL)
+	return -1;
+
+    va_list va_local;
+    va_copy(va_local, xop->xo_vap);
+    ssize_t rc = xop->xo_formatter(xop, buf, bufsiz, "%s", va_local);
+    va_end(va_local);
+
+    return rc;
+}
+
+#define XO_BOOLEAN_PAIR_MAX 256	/* Max "*" pair under XOF_NO_VA_ARG */
+
+/*
+ * Translate the static boolean pair of a "Bg" field.  The msgid is
+ * the pair as written in the format ("on+off", escapes intact), or
+ * "true+false" when there's no pair.  The msgstr must be a pair in
+ * the same syntax.  On success, *tfmtp and *tbip describe the
+ * translated pair; otherwise they're left alone.
+ */
+static void
+xo_gettext_boolean_pair (xo_handle_t *xop, const char *name, ssize_t nlen,
+			 const char **tfmtp, xo_boolean_info_t *tbip)
+{
+    static char true_false[] = "true+false";
+    const char *fmt = *tfmtp;
+    char *msgid = true_false;
+
+    if (fmt && (tbip->xbi_flags & XBIF_PAIR)) {
+	ssize_t len = tbip->xbi_true_len + 1 + tbip->xbi_false_len;
+	msgid = alloca(len + 1);
+	memcpy(msgid, fmt + tbip->xbi_true, len);
+	msgid[len] = '\0';
+    }
+
+    const char *msgstr = xo_dgettext(xop, msgid);
+    if (msgstr == msgid || xo_streq(msgstr, msgid))
+	return;
+
+    xo_boolean_info_t xbi;
+    xo_fspec_t fspecs[XO_BOOLEAN_FSPECS];
+    xo_parse_t xpp;
+    int rc;
+
+    /* Our own failure message names the msgid, so silence the parser */
+    xo_parse_for_handle(xop, &xpp);
+    xpp.xp_error = xpp.xp_warn = NULL;
+    rc = xo_parse_boolean_format(&xpp, msgstr, strlen(msgstr), FALSE,
+				 fspecs, XO_BOOLEAN_FSPECS, &xbi);
+    xo_parse_release_printable(&xpp);
+
+    if (rc < 0 || !(xbi.xbi_flags & XBIF_PAIR)
+	    || (xbi.xbi_flags & XBIF_ARG) || xbi.xbi_spec >= 0) {
+	xo_failure(xop, "invalid translated boolean pair for '%.*s': "
+		   "'%s' (msgid '%s')", (int) nlen, name, msgstr, msgid);
+	return;
+    }
+
+    *tfmtp = msgstr;
+    *tbip = xbi;
+}
+
+/*
+ * Emit a "B" (boolean) field.  All the field's arguments are popped
+ * here, even if the field is skipped, and xo_format_value() is given
+ * literal formats for the chosen words, so nothing downstream reads
+ * the va_list.
+ */
+static void
+xo_format_boolean (xo_handle_t *xop, const xo_field_info_t *xfip,
+		   const char *base_fmt, const char *name, ssize_t nlen,
+		   xo_xff_flags_t flags)
+{
+    xo_boolean_info_t disp, enc;
+    xo_fspec_t dfspecs[XO_BOOLEAN_FSPECS], efspecs[XO_BOOLEAN_FSPECS];
+    const xo_fspec_t *dfp = NULL;
+    const char *dfmt = NULL;
+    const char *efmt = NULL;
+    int has_enc = 0;
+    int rc = 0;
+    xo_parse_t xpp;
+
+    bzero(&disp, sizeof(disp));
+    disp.xbi_spec = -1;
+    xo_parse_for_handle(xop, &xpp);
+
+    if (xfip->xfi_format >= 0) {
+	dfmt = xo_foff(base_fmt, xfip->xfi_format);
+
+	if (xfip->xfi_fspecs) {
+	    dfp = xfip->xfi_fspecs;
+	    rc = xo_parse_boolean(&xpp, dfmt, dfp, xfip->xfi_num_fspecs,
+				  FALSE, &disp);
+	} else {
+	    dfp = dfspecs;
+	    rc = xo_parse_boolean_format(&xpp, dfmt, xfip->xfi_flen, FALSE,
+					 dfspecs, XO_BOOLEAN_FSPECS, &disp);
+	}
+    }
+
+    if (rc >= 0 && xfip->xfi_encoding >= 0
+	    && (flags & XFF_FULL_BOOLEAN)) {
+	efmt = xo_foff(base_fmt, xfip->xfi_encoding);
+	rc = xo_parse_boolean_format(&xpp, efmt, xfip->xfi_elen, TRUE,
+				     efspecs, XO_BOOLEAN_FSPECS, &enc);
+	has_enc = (rc >= 0);
+    }
+
+    xo_parse_release_printable(&xpp); /* Our arrays are on the stack */
+    if (rc < 0)
+	return;			/* The parser already rejected these */
+
+    /* Pop the arguments: the "*" pair, the "%@*@" ints, then the value */
+    const xo_fspec_t *xfp = xo_boolean_spec(&disp, dfp);
+    const char *pair = NULL;
+    char pbuf[XO_BOOLEAN_PAIR_MAX];
+    int truth = 0;
+    unsigned i;
+
+    if (XOF_ISSET(xop, XOF_NO_VA_ARG)) {
+	char sbuf[2];		/* We only want the length */
+	ssize_t len;
+
+	if (disp.xbi_flags & XBIF_ARG) {
+	    len = xo_boolean_formatter_arg(xop, pbuf, sizeof(pbuf));
+	    if (len >= 0 && len < (ssize_t) sizeof(pbuf))
+		pair = pbuf;
+	    else if (len >= 0)
+		xo_failure(xop, "boolean pair is too long: '%.*s'",
+			   (int) nlen, name);
+	}
+
+	unsigned stars = xfp->xf_at_stars;
+	for (i = 0; i < XF_WIDTH_NUM; i++)
+	    if (xfp->xf_star[i])
+		stars += 1;
+
+	for (i = 0; i < stars; i++)
+	    (void) xo_boolean_formatter_arg(xop, sbuf, sizeof(sbuf));
+
+	len = xo_boolean_formatter_arg(xop, sbuf, sizeof(sbuf));
+	truth = (len > 0);
+
+    } else {
+	if (disp.xbi_flags & XBIF_ARG)
+	    pair = va_arg(xop->xo_vap, const char *);
+
+	for (i = 0; i < xfp->xf_at_stars; i++)
+	    va_arg(xop->xo_vap, int);
+
+	truth = xo_pop_value_truth(xop, xfp);
+    }
+
+    const char *ptrue = NULL, *pfalse = NULL;
+    ssize_t ptlen = 0, pflen = 0;
+
+    if (disp.xbi_flags & XBIF_ARG) {
+	if (xo_boolean_split_pair(pair, &ptrue, &ptlen, &pfalse, &pflen) < 0)
+	    xo_failure(xop, "invalid boolean pair for '%.*s': '%s'",
+		       (int) nlen, name, pair ? pair : "(null)");
+    }
+
+    int style = xo_style(xop);
+
+    /*
+     * With "g", the display words come from a translated pair; the
+     * encoding words are never translated.  A "*" pair is looked up
+     * as given, like a "{g:}" value.
+     */
+    const char *tfmt = dfmt;
+    xo_boolean_info_t tdisp = disp;
+    const char *ttrue = ptrue, *tfalse = pfalse;
+    ssize_t ttlen = ptlen, tflen = pflen;
+
+    if ((flags & XFF_GT_FIELD)
+	    && (style == XO_STYLE_TEXT || style == XO_STYLE_HTML)) {
+	if (!(disp.xbi_flags & XBIF_ARG))
+	    xo_gettext_boolean_pair(xop, name, nlen, &tfmt, &tdisp);
+	else if (ptrue) {
+	    const char *tpair = xo_dgettext(xop, pair);
+
+	    if (tpair != pair
+		    && xo_boolean_split_pair(tpair, &ttrue, &ttlen,
+					     &tfalse, &tflen) < 0) {
+		xo_failure(xop, "invalid translated boolean pair for "
+			   "'%.*s': '%s' (msgid '%s')",
+			   (int) nlen, name, tpair, pair);
+		ttrue = ptrue;
+		ttlen = ptlen;
+		tfalse = pfalse;
+		tflen = pflen;
+	    }
+	}
+
+	flags &= ~XFF_GT_FIELD;	/* The word is already translated */
+    }
+
+    /*
+     * The display word.  "*" words are escaped into dbuf (or ebuf),
+     * so each needs room for twice the longer word.
+     */
+    ssize_t wmax = (ptlen > pflen) ? ptlen : pflen;
+    if (ttlen > wmax)
+	wmax = ttlen;
+    if (tflen > wmax)
+	wmax = tflen;
+    char *dbuf = alloca(2 * wmax + 1);
+    char *ebuf = alloca(2 * wmax + 1);
+    ssize_t dlen, elen;
+    const char *dword = xo_boolean_word(tfmt, &tdisp, ttrue, ttlen,
+					tfalse, tflen, truth, dbuf, &dlen);
+    const char *eword;
+    int canonical = TRUE;
+
+    flags &= ~(XFF_HUMANIZE | XFF_INT_GROUP | XFF_GT_PLURAL);
+
+    if (style == XO_STYLE_TEXT || style == XO_STYLE_HTML) {
+	/* HTML's data-value and key predicate use the canonical form */
+	eword = xo_boolean_word(NULL, NULL, NULL, 0, NULL, 0,
+				truth, NULL, &elen);
+
+    } else {
+	flags &= ~(XFF_GT_FLAGS | XFF_FIRST_CAP);
+
+	if (!(flags & XFF_FULL_BOOLEAN)) {
+	    eword = xo_boolean_word(NULL, NULL, NULL, 0, NULL, 0,
+				    truth, NULL, &elen);
+	} else if (has_enc) {
+	    eword = xo_boolean_word(efmt, &enc, ptrue, ptlen,
+				    pfalse, pflen, truth, ebuf, &elen);
+	    canonical = FALSE;
+	} else {
+	    eword = xo_boolean_word(dfmt, &disp, ptrue, ptlen,
+				    pfalse, pflen, truth, ebuf, &elen);
+	    canonical = FALSE;
+	}
+
+	if (canonical) {
+	    flags |= XFF_BOOLEAN;
+	    if (!(flags & XFF_QUOTE))
+		flags |= XFF_NO_QUOTE;
+	} else if (!(flags & XFF_NO_QUOTE))
+	    flags |= XFF_QUOTE;
+    }
+
+    /*
+     * Our words are literal-only formats, unrelated to the field's
+     * fspecs, so hand xo_format_value() a copy without them.
+     */
+    xo_field_info_t bxfi = *xfip;
+    bxfi.xfi_fspecs = NULL;
+    bxfi.xfi_num_fspecs = 0;
+
+    xo_format_value(xop, &bxfi, name, nlen, NULL, 0, dword, dlen,
+		    eword, elen, flags);
 }
 
 static void
@@ -8357,6 +8724,54 @@ xo_gettext_finish_numbering_fields (xo_handle_t *xop UNUSED,
 }
 
 /*
+ * Hand the boolean pair of a "Bg" field to field_cb, since that's
+ * what xo_format_boolean() translates: the static pair as written
+ * (escapes intact), or "true+false" when there's no pair.  A "*"
+ * pair comes from an argument, so there's nothing to extract; those
+ * msgids must be added by hand, as for "{g:}" values.
+ */
+static void
+xo_gettext_boolean_words (xo_handle_t *xop, const xo_field_info_t *xfip,
+			  const char *base, xo_simplify_field_func_t field_cb)
+{
+    xo_boolean_info_t xbi;
+    xo_fspec_t fspecs[XO_BOOLEAN_FSPECS];
+    const char *fmt = NULL;
+    xo_parse_t xpp;
+    int rc = 0;
+
+    bzero(&xbi, sizeof(xbi));
+    xbi.xbi_spec = -1;
+
+    if (xfip->xfi_format >= 0) {
+	fmt = xo_foff(base, xfip->xfi_format);
+	xo_parse_for_handle(xop, &xpp);
+
+	if (xfip->xfi_fspecs)
+	    rc = xo_parse_boolean(&xpp, fmt, xfip->xfi_fspecs,
+				  xfip->xfi_num_fspecs, FALSE, &xbi);
+	else
+	    rc = xo_parse_boolean_format(&xpp, fmt, xfip->xfi_flen, FALSE,
+					 fspecs, XO_BOOLEAN_FSPECS, &xbi);
+
+	xo_parse_release_printable(&xpp);
+	if (rc < 0)
+	    return;
+    }
+
+    if (xbi.xbi_flags & XBIF_ARG)
+	return;
+
+    if (!(xbi.xbi_flags & XBIF_PAIR)) {
+	field_cb("true+false", 10, 0);
+	return;
+    }
+
+    field_cb(fmt + xbi.xbi_true,
+	     xbi.xbi_true_len + 1 + xbi.xbi_false_len, 0);
+}
+
+/*
  * We are passed a pointer to a format string just past the "{G:}"
  * field.  We build a simplified version of the format string.
  */
@@ -8381,11 +8796,14 @@ xo_gettext_simplify_format (xo_handle_t *xop UNUSED,
 	const char *content = xo_foff(base, xfip->xfi_content);
 
 	if ((flags & XFF_GT_FIELD) && xfip->xfi_content != XO_FOFF_NONE
-		&& ftype != 'V') {
+		&& ftype != 'V' && ftype != 'B') {
 	    if (field_cb)
 		field_cb(content, xfip->xfi_clen,
 			 (flags & XFF_GT_PLURAL) ? 1 : 0);
 	}
+
+	if ((flags & XFF_GT_FIELD) && ftype == 'B' && field_cb)
+	    xo_gettext_boolean_words(xop, xfip, base, field_cb);
 
 	switch (ftype) {
 	case 'G':
@@ -8545,8 +8963,9 @@ xo_gettext_combine_formats (xo_handle_t *xop, const char *fmt,
 	    continue;
 
 	case 'V':
+	case 'B':
 	    for (oldp = startp; oldp->xfi_ftype; oldp++) {
-		if (oldp->xfi_ftype != 'V')
+		if (oldp->xfi_ftype != newp->xfi_ftype)
 		    continue;
 		if (newp->xfi_clen != oldp->xfi_clen
 		    || strncmp(xo_foff(gtfmt, newp->xfi_content),
@@ -8562,7 +8981,7 @@ xo_gettext_combine_formats (xo_handle_t *xop, const char *fmt,
 	    /* Didn't find it on the first pass (starting from start) */
 	    if (oldp->xfi_ftype == 0) {
 		for (oldp = old_fields; oldp < startp; oldp++) {
-		    if (oldp->xfi_ftype != 'V')
+		    if (oldp->xfi_ftype != newp->xfi_ftype)
 			continue;
 		    if (newp->xfi_clen != oldp->xfi_clen)
 			continue;
@@ -8592,7 +9011,8 @@ xo_gettext_combine_formats (xo_handle_t *xop, const char *fmt,
 	     * the original field is a match.
 	     */
 	    for (oldp = startp; oldp->xfi_ftype; oldp++) {
-		if (oldp->xfi_ftype == 'V') /* Can't go past these */
+		/* Can't go past these */
+		if (oldp->xfi_ftype == 'V' || oldp->xfi_ftype == 'B')
 		    break;
 		if (oldp->xfi_ftype == newp->xfi_ftype)
 		    goto copy_it; /* Assumably we have a match */
@@ -8885,6 +9305,8 @@ xo_do_emit_fields (xo_handle_t *xop, const xo_field_info_t *fields,
 		    xo_foff(base_fmt, xfip->xfi_format), xfip->xfi_flen,
 		    xo_foff(base_fmt, xfip->xfi_encoding), xfip->xfi_elen,
 		    flags);
+	else if (ftype == 'B')
+	    xo_format_boolean(xop, xfip, base_fmt, content, clen, flags);
 	else if (ftype == '[')
 	    xo_anchor_start(xop, base_fmt, xfip, content, clen);
 	else if (ftype == ']')
