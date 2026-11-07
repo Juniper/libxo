@@ -1565,7 +1565,7 @@ xo_filter_compile_xpath_action_priority (xo_handle_t *xop, xo_filter_t *xfp,
     int start = xdp->xd_paths_cur;
     xo_xparse_set_unsupported_tokens(xdp, unsupported);
 
-    int rc = xo_xparse_parse_string(xop, xdp, input);
+    int rc = xo_xparse_parse_string(xop, xdp, input, M_PARSE_FULL);
     if (rc == 0)
 	rc = xo_xpath_feature_warn_since(NULL, xdp, start, unsupported, "");
     if (rc)
