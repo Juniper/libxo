@@ -435,6 +435,8 @@ class XoValidateVisitor : public RecursiveASTVisitor<XoValidateVisitor> {
     unsigned           SyntaxDiagID;
     unsigned           CountDiagID;
     unsigned           TypeDiagID;
+    unsigned           BoolDiagID;
+    unsigned           PairDiagID;
     unsigned           WarnDiagID;
 
 public:
@@ -451,6 +453,12 @@ public:
         TypeDiagID   = Diags.getCustomDiagID(errLevel,
                            "libxo: argument %0: format specifies type %1"
                            " but the argument has type %2");
+        BoolDiagID   = Diags.getCustomDiagID(errLevel,
+                           "libxo: argument %0: 'B' field %1 takes type %2"
+                           " but the argument has type %3%4");
+        PairDiagID   = Diags.getCustomDiagID(errLevel,
+                           "libxo: argument %0: a 'B' field's \"*\" boolean"
+                           " pair takes type %1 but the argument has type %2");
         WarnDiagID   = Diags.getCustomDiagID(DiagnosticsEngine::Warning,
                            "libxo: %0");
     }
@@ -535,7 +543,9 @@ public:
 
             const xo_fspec_t *xfp = &ac.args[i];
             QualType exp_type = fmt_expected_type(*Ctx_, xfp);
-            bool null_ok = (xfp->xf_extflags & XXF_NULL_AS_EMPTY) != 0;
+            /* A NULL string is a false 'B' value */
+            bool null_ok = (xfp->xf_extflags
+                            & (XXF_NULL_AS_EMPTY | XO_SHIM_XXF_BOOLEAN)) != 0;
 
             if (!exp_type.isNull()) {
                 if (!type_matches(*Ctx_, exp_type, arg, null_ok)) {
@@ -557,8 +567,28 @@ public:
                     std::string act_str = type_desc(act_type.getAsString(PP),
                                     act_type.getCanonicalType().getAsString(PP));
 
-                    Diags.Report(arg->getBeginLoc(), TypeDiagID)
-                        << (i + 1) << exp_str << act_str;
+                    /*
+                     * The common mistake is "{B:name}" (a string) with
+                     * an int or a bool, so say what the field wanted.
+                     */
+                    if (xfp->xf_extflags & XO_SHIM_XXF_BOOLEAN) {
+                        bool dflt = (xfp->xf_extflags
+                                     & XO_SHIM_XXF_DEFAULTED) != 0;
+                        Diags.Report(arg->getBeginLoc(), BoolDiagID)
+                            << (i + 1)
+                            << (dflt ? "with no format (\"%s\")"
+                                     : "with this format")
+                            << exp_str << act_str
+                            << ((dflt && !act_type->isPointerType())
+                                ? "; give it a format, such as \"%d\""
+                                : "");
+                    } else if (xfp->xf_extflags & XO_SHIM_XXF_PAIR) {
+                        Diags.Report(arg->getBeginLoc(), PairDiagID)
+                            << (i + 1) << exp_str << act_str;
+                    } else {
+                        Diags.Report(arg->getBeginLoc(), TypeDiagID)
+                            << (i + 1) << exp_str << act_str;
+                    }
                 }
             }
         }
