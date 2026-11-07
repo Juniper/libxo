@@ -1286,6 +1286,13 @@ and "data-help" attributes::
   <div class="data" data-tag="sku" data-type="string"
        data-help="Stock Keeping Unit">GRO-000-533</div>
 
+Boolean fields (see :ref:`boolean-role`) always have a "data-type" of
+"boolean", whatever the info says, along with a "data-value"
+attribute of "true" or "false", whatever word is displayed::
+
+  <div class="data" data-tag="power" data-type="boolean"
+       data-value="true">On</div>
+
 .. c:function:: void xo_set_info (xo_handle_t *xop, xo_info_t *infop, int count)
 
   :param xop: Handle to use (or NULL for default handle)
@@ -1938,5 +1945,17 @@ the value.  "string" are differentiated from "content" to allow differing
 treatment of true, false, null, and numbers from real strings, though
 content values are formatted as strings before the handler is called.
 For version operations, the value parameter contains the version.
+
+The flags parameter holds the field's XFF_* flags.  A boolean field
+(see :ref:`boolean-role`) is passed as XO_OP_CONTENT with the value
+"true" or "false" and the XFF_BOOLEAN flag set, so an encoder with
+a native boolean type can use it, and can tell a real boolean from
+a string that happens to read "true".  With the "q" (quotes)
+modifier, the value is passed as XO_OP_STRING, still with
+XFF_BOOLEAN set.  With the "full-boolean" modifier, the value is
+the chosen word (such as "yes" or "1"), passed as XO_OP_STRING (or
+XO_OP_CONTENT with the "n" modifier), and XFF_BOOLEAN is not set.
+Encoders that ignore XFF_BOOLEAN see plain "true" and "false"
+values.
 
 All strings are encoded in UTF-8.
