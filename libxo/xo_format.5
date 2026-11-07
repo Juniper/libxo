@@ -94,6 +94,7 @@ content.
 The roles are listed below; only one role is permitted:
 .Bl -column "M" "start-anchor" "Description"
 .It Sy M Ta Sy Name Ta Sy Description
+.It B Ta boolean Ta "Field is a boolean value (true or false)"
 .It C Ta color Ta "Field is a color or effect"
 .It D Ta decoration Ta "Field is non\-text (e.g. colon, comma)"
 .It E Ta error Ta "Field is an error message"
@@ -124,6 +125,53 @@ a comma:
         xo_emit("{,label:Free}{,decoration::}{,padding:   }"
                "{,value:free/%u} {,units:Blocks}\\n",
                free_blocks);
+.Ed
+.Ss "The Boolean Role ({B:})"
+The boolean role emits a value that is either true or false.
+The argument is tested for truth, and the field is rendered as one
+of two words in the display styles (TEXT and HTML) and as a native
+boolean in the encoding styles (XML, JSON, and encoders).
+.Bd -literal -offset indent
+    xo_emit("{B:enabled}\\n", str);              /* true or false */
+    xo_emit("{Bf:enabled/%d}\\n", i32);          /* True or False */
+    xo_emit("{B:power/on+off%p}\\n", ptr);       /* on or off */
+    xo_emit("{Bf:power/*%u}\\n", "on+off", u32); /* On or Off */
+.Ed
+.Pp
+The format is an optional boolean pair ("on+off", giving the true
+and false words) followed by an optional conversion spec.
+The pair defaults to "true+false" and the spec defaults to "%s".
+A pair of "*" is taken from a
+.Dq const char *
+argument, which comes before the field's other arguments.
+The pair must have exactly one "+"; a backslash escapes the next
+character ("a\e\e+b") and "%%" is a literal percent.
+There must be only one conversion spec, with no text after it.
+Width and precision are not applied to the word; use an anchor to
+line up columns.
+.Pp
+The spec decides the test: numbers and wide characters are true if
+not zero, pointers are true if not NULL, and strings are true if
+not NULL and not empty, so "0" and "false" are true.
+.Pp
+In HTML, the word gets "data\-type" and "data\-value" attributes,
+where "data\-value" is always "true" or "false".
+In JSON, the value is a bare true or false, unless the "q" modifier
+is used.
+The "f" modifier capitalizes the chosen word.
+The "g" modifier translates the whole boolean pair ("on+off", or
+"true+false" when there is no pair), before "f" is applied; the
+translation must also be a pair, or the original pair is used.
+The "h" and "i" modifiers are ignored.
+.Pp
+The "full\-boolean" modifier, which has no short form, makes the
+encoding styles emit a word instead of true or false.
+The word comes from the encoding format's pair, or else the display
+format's.
+An encoding format must have both a pair and a spec, and must take
+the same arguments as the display format.
+.Bd -literal -offset indent
+    xo_emit("{B,full\-boolean:found/T+F%p/1+0%p}\\n", ptr);
 .Ed
 .Ss "The Color Role ({C:})"
 Colors and effects control how text values are displayed; they are
@@ -426,6 +474,7 @@ particular output styles:
 .It \& Ta escape\-slash Ta "Escape forward slashes (JSON)"
 .It \& Ta escape\-square Ta "Escape control chars as U+25A1 WHITE SQUARE (XML/HTML)"
 .It f Ta first\-cap Ta "Capitalize the first character in the rendered data"
+.It \& Ta full\-boolean Ta "Encode a boolean field\(aqs word, not true/false"
 .It g Ta gettext Ta "Call gettext on the field\(aqs rendered content"
 .It h Ta "humanize (hn)" Ta "Format large numbers in human\-readable style"
 .It \& Ta hn\-space Ta "Humanize: Place space between numeric and unit"
@@ -615,6 +664,9 @@ UTF\-8 formatting code.
 .Bd -literal -offset indent
     xo_emit("Condition is {f:status}\en", "true");
 .Ed
+.Pp
+For a boolean field, first\-cap is applied to the chosen word,
+after any translation.
 .Ss "The Gettext Modifier ({g:})"
 The gettext modifier is used to translate individual fields using the
 gettext domain (typically set using the "{G:}" role) and current
@@ -632,6 +684,10 @@ to find locale\-based translated strings.
 .Bd -literal -offset indent
     xo_emit("{Lgwc:State}{g:state}\\n", "full");
 .Ed
+.Pp
+For a boolean field, the whole boolean pair ("on+off") is
+translated, and the chosen word is taken from the translated pair.
+A "*" pair is translated as given.
 .Ss "The Humanize Modifier ({h:})"
 The humanize modifier is used to render large numbers as in a
 human\-readable format.
