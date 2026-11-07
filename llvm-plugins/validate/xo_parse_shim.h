@@ -57,6 +57,18 @@ int xo_shim_parse(const char *fmt, xo_shim_error_t error, void *data);
 typedef void (*xo_shim_arg_cb_t)(void *data, const xo_fspec_t *xfp);
 
 /*
+ * A "B" (boolean) field's args are reported like any other, with two
+ * extra bits in xf_extflags so callers can explain a mismatch: the
+ * value gets XO_SHIM_XXF_BOOLEAN, plus XO_SHIM_XXF_DEFAULTED when the
+ * field has no conversion spec and so takes the default "%s", and a
+ * "*" boolean pair gets XO_SHIM_XXF_PAIR.  These bits are never set
+ * on a real fspec.
+ */
+#define XO_SHIM_XXF_PAIR	(1U << 29) /* The "*" pair of a 'B' field */
+#define XO_SHIM_XXF_BOOLEAN	(1U << 30) /* The value of a 'B' field */
+#define XO_SHIM_XXF_DEFAULTED	(1U << 31) /* ... using the default "%s" */
+
+/*
  * Parse fmt, calling error_cb for hard errors, warn_cb for style warnings
  * (e.g. "use lower case"), and arg_cb once per expected va_arg.
  * warn_cb / warn_data may be NULL, in which case warnings are silently dropped.
