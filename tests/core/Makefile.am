@@ -52,7 +52,8 @@ test_15.c \
 test_16.c \
 test_17.c \
 test_18.c \
-test_19.c
+test_19.c \
+test_20.c
 
 test_01_test_SOURCES = test_01.c
 test_02_test_SOURCES = test_02.c
@@ -70,6 +71,7 @@ test_16_test_SOURCES = test_16.c
 test_17_test_SOURCES = test_17.c
 test_18_test_SOURCES = test_18.c
 test_19_test_SOURCES = test_19.c
+test_20_test_SOURCES = test_20.c
 
 base_tests = ${TEST_CASES:.c=.test}
 
@@ -156,7 +158,7 @@ $(foreach file, test_12.c, \
                 $(addprefix saved/, ${file:.c=${pass}${ext}.${fd}})))))
 
 TEST_OUTPUT_FILES += \
-$(foreach file, test_04.c test_16.c, \
+$(foreach file, test_04.c test_16.c test_20.c, \
     $(foreach pass, ${ALL_PASSES}, \
         $(foreach ext, ${RTOON_EXT}, \
             $(foreach fd, out err, \
@@ -189,6 +191,7 @@ EXTRA_DIST = \
     test_15.fmts \
     test_16.fmts \
     test_19.fmts \
+    test_20.fmts \
     test_12.map \
     ${TEST_OUTPUT_FILES}
 
