@@ -1,4 +1,5 @@
 .. index:: encoder
+.. _encoders:
 
 Encoders
 ========
@@ -364,3 +365,10 @@ This function will be called with the "op" codes defined in
 processing model.  For example OP_OPEN_CONTAINER tells the encoder
 that a new container has been opened, and the encoder can behave in an
 appropriate manner.
+
+The operations and their arguments are described in the API section.
+Boolean fields (see :ref:`boolean-role`) are passed as XO_OP_CONTENT
+with the value "true" or "false" and the XFF_BOOLEAN flag set, so an
+encoder with a native boolean type (such as CBOR) can tell a real
+boolean from a string that happens to read "true".  Encoders that
+ignore the flag see plain "true" and "false" values.
