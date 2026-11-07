@@ -219,6 +219,25 @@ The hn-* modifiers (hn-decimal, hn-space, hn-1000)
 are only valid for fields with the {h:} modifier.
 
 
+'The 'full-boolean' modifier is only valid for 'B' fields'
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+The message "The 'full-boolean' modifier is only valid for 'B' fields" can be caused by code like:
+
+::
+
+    xo_emit("{V,full-boolean:enabled}", "yes");
+
+This code should be replaced with code like:
+
+::
+
+    xo_emit("{B,full-boolean:enabled}", "yes");
+
+The 'full-boolean' modifier controls how a boolean field
+is encoded, so it makes no sense for other roles.
+
+
 'Value field must have a name (as content)")'
 +++++++++++++++++++++++++++++++++++++++++++++
 
@@ -420,6 +439,181 @@ This code should be replaced with code like:
 
 Anchors can have a static value or argument for the width,
 but cannot have both.
+
+
+'Humanize and int-group are ignored for 'B' fields'
++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+The message "Humanize and int-group are ignored for 'B' fields" can be caused by code like:
+
+::
+
+    xo_emit("{Bh:enabled/%d}", enabled);
+
+This code should be replaced with code like:
+
+::
+
+    xo_emit("{B:enabled/%d}", enabled);
+
+A boolean field displays one of two words, so there is no
+number to humanize or group.
+
+
+'Boolean encoding format must take the same arguments'
+++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+The message "Boolean encoding format must take the same arguments" can be caused by code like:
+
+::
+
+    xo_emit("{B,full-boolean:enabled/yes+no%d/1+0%p}", enabled);
+
+This code should be replaced with code like:
+
+::
+
+    xo_emit("{B,full-boolean:enabled/yes+no%d/1+0%d}", enabled);
+
+The encoding format is applied to the same arguments as
+the display format, so both must have the same shape: the
+same "*" pair (or none), the same stars, and the same
+argument type.
+
+
+'Boolean encoding format is ignored without 'full-boolean''
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+The message "Boolean encoding format is ignored without 'full-boolean'" can be caused by code like:
+
+::
+
+    xo_emit("{B:enabled/yes+no%d/1+0%d}", enabled);
+
+This code should be replaced with code like:
+
+::
+
+    xo_emit("{B,full-boolean:enabled/yes+no%d/1+0%d}", enabled);
+
+Without 'full-boolean', boolean fields are encoded as
+native true/false values, and the encoding format is
+not used.
+
+
+'The 'full-boolean' modifier without a boolean pair gives quoted true/false'
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+The message "The 'full-boolean' modifier without a boolean pair gives quoted true/false" can be caused by code like:
+
+::
+
+    xo_emit("{B,full-boolean:enabled/%d}", enabled);
+
+This code should be replaced with code like:
+
+::
+
+    xo_emit("{B,full-boolean:enabled/yes+no%d}", enabled);
+
+The 'full-boolean' modifier encodes the boolean pair's words
+instead of a native true/false value.  With no pair, the
+words are "true" and "false", encoded as strings.
+
+
+'Boolean pair must have exactly one '+''
+++++++++++++++++++++++++++++++++++++++++
+
+The message "Boolean pair must have exactly one '+'" can be caused by code like:
+
+::
+
+    xo_emit("{B:enabled/yes%d}", enabled);
+
+This code should be replaced with code like:
+
+::
+
+    xo_emit("{B:enabled/yes+no%d}", enabled);
+
+A boolean pair gives the "true" word, a plus sign, and the
+"false" word.  Use a backslash to put a literal "+" in a
+word ("{B:mode/a\\+b+c%d}").
+
+
+'Boolean pair has an empty word'
+++++++++++++++++++++++++++++++++
+
+The message "Boolean pair has an empty word" can be caused by code like:
+
+::
+
+    xo_emit("{B:enabled/+off%d}", enabled);
+
+This code should be replaced with code like:
+
+::
+
+    xo_emit("{B:enabled/on+off%d}", enabled);
+
+An empty word displays nothing, which is likely a mistake.
+
+
+'Boolean format has text after the conversion spec'
++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+The message "Boolean format has text after the conversion spec" can be caused by code like:
+
+::
+
+    xo_emit("{B:enabled/%d units}", enabled);
+
+This code should be replaced with code like:
+
+::
+
+    xo_emit("{B:enabled/%d}{U: units}", enabled);
+
+A boolean format is a boolean pair followed by a
+single conversion spec, with nothing after it.
+
+
+'Boolean format has more than one conversion spec'
+++++++++++++++++++++++++++++++++++++++++++++++++++
+
+The message "Boolean format has more than one conversion spec" can be caused by code like:
+
+::
+
+    xo_emit("{B:enabled/%d%d}", enabled, other);
+
+This code should be replaced with code like:
+
+::
+
+    xo_emit("{B:enabled/%d}{B:other/%d}", enabled, other);
+
+A boolean field has a single value, so it takes
+a single conversion spec.
+
+
+'Boolean encoding format needs both a boolean pair and a conversion spec'
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+The message "Boolean encoding format needs both a boolean pair and a conversion spec" can be caused by code like:
+
+::
+
+    xo_emit("{B,full-boolean:enabled/yes+no%d/%d}", enabled);
+
+This code should be replaced with code like:
+
+::
+
+    xo_emit("{B,full-boolean:enabled/yes+no%d/1+0%d}", enabled);
+
+The encoding format exists to give the encoded words, and
+must say how the value is taken.
 
 
 'Max width only valid for strings'
