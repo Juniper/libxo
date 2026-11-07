@@ -271,7 +271,13 @@ sub check_format {
 
 	if ($ch eq "\\") {
 	    $ch = $data[$off++];
-	    $off += 1 if $ch eq "\\"; # double backslash: "\\/"
+	    if ($ch eq "\\") {
+		$off += 1;	# double backslash: "\\/"
+
+		# Keep a placeholder for an escaped character in a
+		# format, so a boolean pair like "\\++off" keeps its word
+		$build[$phase] .= "x" if $braces && $phase >= 2;
+	    }
 	    next;
 	}
 
@@ -335,6 +341,7 @@ sub check_text {
 
 %short = (
     # Roles
+    "boolean" => "B",
     "color" => "C",
     "decoration" => "D",
     "error" => "E",
@@ -359,6 +366,7 @@ sub check_text {
     "escape-slash" => "@",
     "escape-square" => "@",
     "first-cap" => "f",
+    "full-boolean" => "@",
     "gettext" => "g",
     "hn" => "h",
     "hn-decimal" => "@",
@@ -423,7 +431,7 @@ sub check_field {
     #@     xo_emit("{T:Min} {T:Max}");
     #@ Twiddling the "{" and the field role is a common typo.
     info("last character before field definition is a field type ($last)")
-	if $last =~ /[DELNPTUVW\[\]]/ && $field[0] !~ /[DELNPTUVW\[\]]/;
+	if $last =~ /[BDELNPTUVW\[\]]/ && $field[0] !~ /[BDELNPTUVW\[\]]/;
 
     #@ Encoding format uses different number of arguments
     #@     xo_emit("{:name/%6.6s %04d/%s}", name, number);
@@ -439,7 +447,8 @@ sub check_field {
     #@     xo_emit("{LT:Max}");
     #@ Should be:
     #@     xo_emit("{T:Max}");
-    my(@roles) = ($field[0] =~ /[CDEFGLNPTUVW\[\]]/g);
+    my %seen;
+    my(@roles) = grep { !$seen{$_}++ } ($field[0] =~ /[BCDEFGLNPTUVW\[\]]/g);
     error("only one field role can be used (" . join(", ", @roles) . ")")
 	if $#roles > 0;
 
@@ -546,6 +555,21 @@ sub check_field {
 	    #@ are only valid for fields with the {h:} modifier.
 	    error("Field has hn-* modifier but not 'h' modifier");
 	}
+    }
+
+    my $full_boolean = ($field[4] =~ /,\s*full-boolean\s*(,|$)/);
+
+    if ($field[0] =~ /B/) {
+	check_boolean(\@field, $full_boolean);
+
+    } elsif ($full_boolean) {
+	#@ The 'full-boolean' modifier is only valid for 'B' fields
+	#@     xo_emit("{V,full-boolean:enabled}", "yes");
+	#@ Should be:
+	#@     xo_emit("{B,full-boolean:enabled}", "yes");
+	#@ The 'full-boolean' modifier controls how a boolean field
+	#@ is encoded, so it makes no sense for other roles.
+	error("'full-boolean' is only valid for 'B' fields");
     }
 
     # A value field, which is what a field with no other role is.  With
@@ -663,6 +687,162 @@ sub check_field {
 	error("anchor cannot have both format and encoding format")
 	    if $field[1] && $field[2];
     }
+}
+
+#
+# Check a boolean ('B') field.  The display format is an optional
+# boolean pair ("true+false" words, or "*" for a pair passed as an
+# argument) followed by an optional conversion spec.  An encoding
+# format has the same shape, but needs both parts, and is only used
+# with the 'full-boolean' modifier.
+#
+sub check_boolean {
+    my($fieldp, $full_boolean) = @_;
+    my @field = @$fieldp;
+
+    my($dpair, $dstar, $dspec) = check_boolean_format($field[2], 0);
+    return unless defined $dpair;
+
+    #@ Humanize and int-group are ignored for 'B' fields
+    #@     xo_emit("{Bh:enabled/%d}", enabled);
+    #@ Should be:
+    #@     xo_emit("{B:enabled/%d}", enabled);
+    #@ A boolean field displays one of two words, so there is no
+    #@ number to humanize or group.
+    warning("'humanize' and 'int-group' are ignored for 'B' fields")
+	if $field[0] =~ /[hi]/;
+
+    if (length($field[3])) {
+	my($epair, $estar, $espec) = check_boolean_format($field[3], 1);
+	return unless defined $epair;
+
+	#@ Boolean encoding format must take the same arguments
+	#@     xo_emit("{B,full-boolean:enabled/yes+no%d/1+0%p}", enabled);
+	#@ Should be:
+	#@     xo_emit("{B,full-boolean:enabled/yes+no%d/1+0%d}", enabled);
+	#@ The encoding format is applied to the same arguments as
+	#@ the display format, so both must have the same shape: the
+	#@ same "*" pair (or none), the same stars, and the same
+	#@ argument type.
+	error("boolean encoding format must take the same arguments "
+	      . "as the display format")
+	    if $dstar != $estar || boolean_spec_type($dspec)
+		ne boolean_spec_type($espec);
+
+	#@ Boolean encoding format is ignored without 'full-boolean'
+	#@     xo_emit("{B:enabled/yes+no%d/1+0%d}", enabled);
+	#@ Should be:
+	#@     xo_emit("{B,full-boolean:enabled/yes+no%d/1+0%d}", enabled);
+	#@ Without 'full-boolean', boolean fields are encoded as
+	#@ native true/false values, and the encoding format is
+	#@ not used.
+	warning("boolean encoding format is ignored without 'full-boolean'")
+	    unless $full_boolean;
+
+    } elsif ($full_boolean && !$dpair) {
+	#@ The 'full-boolean' modifier without a boolean pair gives quoted true/false
+	#@     xo_emit("{B,full-boolean:enabled/%d}", enabled);
+	#@ Should be:
+	#@     xo_emit("{B,full-boolean:enabled/yes+no%d}", enabled);
+	#@ The 'full-boolean' modifier encodes the boolean pair's words
+	#@ instead of a native true/false value.  With no pair, the
+	#@ words are "true" and "false", encoded as strings.
+	warning("'full-boolean' without a boolean pair gives quoted "
+		. "true/false");
+    }
+}
+
+#
+# Check one boolean format, returning (has-pair, star-pair, spec), or
+# an empty list on error.  The spec is "" when there is none.
+#
+sub check_boolean_format {
+    my($format, $complete) = @_;
+
+    # The pair is the literal run before the spec; "%%" is a literal
+    my($pair, $rest) = ($format =~ /^((?:%%|[^%])*)(.*)$/s);
+    my $star = ($pair eq "*");
+    my $spec = "";
+
+    if (length($pair) && !$star) {
+	my $pluses = ($pair =~ tr/+//);
+
+	#@ Boolean pair must have exactly one '+'
+	#@     xo_emit("{B:enabled/yes%d}", enabled);
+	#@ Should be:
+	#@     xo_emit("{B:enabled/yes+no%d}", enabled);
+	#@ A boolean pair gives the "true" word, a plus sign, and the
+	#@ "false" word.  Use a backslash to put a literal "+" in a
+	#@ word ("{B:mode/a\\+b+c%d}").
+	if ($pluses != 1) {
+	    error("boolean pair must have exactly one '+' (found $pluses)");
+	    return ();
+	}
+
+	#@ Boolean pair has an empty word
+	#@     xo_emit("{B:enabled/+off%d}", enabled);
+	#@ Should be:
+	#@     xo_emit("{B:enabled/on+off%d}", enabled);
+	#@ An empty word displays nothing, which is likely a mistake.
+	warning("boolean pair has an empty word")
+	    if $pair =~ /^\+|\+$/;
+    }
+
+    if (length($rest)) {
+	my($ff, $after) = ($rest =~
+		/^(%[^%diouxXDOUeEfFgGaAcCsSp]*[diouxXDOUeEfFgGaAcCsSp])(.*)$/s);
+	return () unless $ff;	# count_args reports this
+
+	if (length($after)) {
+	    if ($after =~ /^(?:%%|[^%])*$/) {
+		#@ Boolean format has text after the conversion spec
+		#@     xo_emit("{B:enabled/%d units}", enabled);
+		#@ Should be:
+		#@     xo_emit("{B:enabled/%d}{U: units}", enabled);
+		#@ A boolean format is a boolean pair followed by a
+		#@ single conversion spec, with nothing after it.
+		error("boolean format has text after the conversion spec");
+	    } else {
+		#@ Boolean format has more than one conversion spec
+		#@     xo_emit("{B:enabled/%d%d}", enabled, other);
+		#@ Should be:
+		#@     xo_emit("{B:enabled/%d}{B:other/%d}", enabled, other);
+		#@ A boolean field has a single value, so it takes
+		#@ a single conversion spec.
+		error("boolean format has more than one conversion spec");
+	    }
+	    return ();
+	}
+	$spec = $ff;
+    }
+
+    #@ Boolean encoding format needs both a boolean pair and a conversion spec
+    #@     xo_emit("{B,full-boolean:enabled/yes+no%d/%d}", enabled);
+    #@ Should be:
+    #@     xo_emit("{B,full-boolean:enabled/yes+no%d/1+0%d}", enabled);
+    #@ The encoding format exists to give the encoded words, and
+    #@ must say how the value is taken.
+    if ($complete && (!length($pair) || !length($spec))) {
+	error("boolean encoding format needs both a boolean pair "
+	      . "and a conversion spec");
+	return ();
+    }
+
+    return (length($pair) > 0, $star, $spec);
+}
+
+#
+# Reduce a conversion spec to the parts that decide its arguments:
+# the stars, the length modifiers, and the conversion.  A missing
+# spec is "%s".
+#
+sub boolean_spec_type {
+    my($spec) = @_;
+
+    $spec = "%s" unless length($spec);
+    $spec =~ s/[-#+ 0-9.]//g;
+    $spec =~ s/[di]$/d/;
+    return $spec;
 }
 
 sub count_args {
