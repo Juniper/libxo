@@ -20,6 +20,7 @@ particular output styles:
   \    escape-slash    Escape forward slashes (JSON)
   \    escape-square   Escape control chars as U+25A1 WHITE SQUARE (XML/HTML)
    f   first-cap       Capitalize the first character in the rendered data
+  \    full-boolean    Encode a boolean field's word, not true/false
    g   gettext         Call gettext on field's render content
    h   humanize (hn)   Format large numbers in human-readable style
   \    hn-space        Humanize: Place space between numeric and unit
@@ -250,6 +251,25 @@ UTF-8 formatting code.
 
    xo_emit("Condition is {f:status}\n", "true");
 
+For a boolean field (see :ref:`boolean-role`), first-cap is applied to
+the chosen word, after any translation from the gettext modifier, so
+"{Bfg:state/enabled+disabled%d}" can display "Activada".  It is
+never applied in the encoding styles, even with the "full-boolean"
+modifier.
+
+The full-boolean Modifier
++++++++++++++++++++++++++
+
+.. index:: Field Modifiers; full-boolean
+
+The full-boolean modifier is only valid for boolean fields (see
+:ref:`boolean-role`).  It makes the encoding styles emit the
+field's word, taken from the encoding format's boolean pair or else
+the display format's, instead of the native true or false value.
+It has no short form::
+
+    xo_emit("{B,full-boolean:found/T+F%p/1+0%p}\\n", ptr);
+
 The Gettext Modifier ({g:})
 +++++++++++++++++++++++++++
 
@@ -266,6 +286,13 @@ In the following example, the strings "State" and "full" are passed
 to gettext() to find locale-based translated strings::
 
     xo_emit("{Lgwc:State}{g:state}\\n", "full");
+
+For a boolean field (see :ref:`boolean-role`), the whole boolean
+pair is translated ("on+off", or "true+false" when there's no pair),
+and the translation must also be a pair ("encendido+apagado"), from
+which the chosen word is taken.  Seeing both words together gives
+the translator the context that a bare "on" lacks.  Encoding words
+are never translated.
 
 See :ref:`gettext-role`, :ref:`plural-modifier`, and
 :ref:`i18n` for additional details.
