@@ -193,7 +193,7 @@ ASCII data, a normal 7-bit ASCII string can be used.  '%ls' expects a
 'wchar_t \*' pointer to a wide-character string, encoded as a 32-bit
 Unicode values.  '%hs' expects a 'char \*' pointer to a multi-byte
 string encoded with the current locale, as given by the LC_CTYPE,
-LANG, or LC_ALL environment varibles.  The first of this list of
+LANG, or LC_ALL environment variables.  The first of this list of
 variables is used and if none of the variables are set, the locale
 defaults to "UTF-8".
 

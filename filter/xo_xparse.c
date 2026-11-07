@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: BSD-2-Clause
- * Copyright (c) 2006-2023, Juniper Networks, Inc.
+ * Copyright (c) 2006-2026, Juniper Networks, Inc.
  * All rights reserved.
  * This SOFTWARE is licensed under the LICENSE provided in the
  * ../Copyright file. By downloading, installing, copying, or otherwise
@@ -201,7 +201,7 @@ xo_xparse_ttname_map_t xo_xparse_ttname_map[] = {
     { C_ATTRIBUTE,		"attribute axis" },
     { C_DESCENDANT,		"descendant child (e.g. 'one//two')" },
     { C_ELEMENT,		"path element" },
-    { C_EXPR,			"parenthetical expresions" },
+    { C_EXPR,			"parenthetical expressions" },
     { C_INDEX,			"index value (e.g. 'foo[4]')" },
     { C_NOT,			"negation ('!tag')" },
     { C_PATH,			"path of element" },
@@ -1088,7 +1088,7 @@ xo_xparse_lexer (xo_xparse_data_t *xdp)
 		 * To discriminate, we look at the last token returned.
 		 */
 		if (xdp->xd_last > M_MULTIPLICATION_TEST_LAST)
-		    return L_STAR; /* It's the multiplcation operator */
+		    return L_STAR; /* It's the multiplication operator */
 		else
 		    return L_ASTERISK; /* It's a q_name (NCName) */
 	    }

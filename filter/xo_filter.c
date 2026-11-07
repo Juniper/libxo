@@ -1,6 +1,6 @@
 /*
  * License-Identifier: BSD-2-Clause
- * Copyright (c) 2023, Juniper Networks, Inc.
+ * Copyright (c) 2023-2026, Juniper Networks, Inc.
  * All rights reserved.
  * This SOFTWARE is licensed under the LICENSE provided in the
  * ../Copyright file. By downloading, installing, copying, or otherwise
@@ -48,7 +48,7 @@ typedef double xo_float_t;	/* Our floating point type */
 
 /*
  * We extensively return aggregates (structures) in the file, under the
- * contraint that they are less than 128 bits and can be returned via
+ * constraint that they are less than 128 bits and can be returned via
  * registers without impacting performance.  So we turn off warnings
  * for aggregate returns.
  */

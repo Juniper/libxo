@@ -15,7 +15,7 @@ are multiple conventions for passing options, all using the
   --libxo=<options>
   --libxo:<brief-options>
 
-The *brief-options* is a series of single letter abbrevations, where
+The *brief-options* is a series of single letter abbreviations, where
 the *options* is a comma-separated list of words.  Both provide access
 to identical functionality.  The following invocations are all
 identical in outcome::
@@ -24,16 +24,16 @@ identical in outcome::
   my-app --libxo=warn,pretty arg1
   my-app --libxo:WP arg1
 
-Options can transition from word-style to brief by using a comma after
+Options can transition from brief to word-style by using a comma after
 the brief options, e.g. `--libxo:XPW,keys`.
 
-Programs using libxo are expecting to call the xo_parse_args function
+Programs using libxo are expected to call the xo_parse_args function
 to parse these arguments.  See :ref:`xo_parse_args` for details.
 
 Option Keywords
 ---------------
 
-The options string is a comma- or colon- separated list of tokens that
+The options string is a comma- or colon-separated list of tokens that
 correspond to output styles, flags, or features:
 
   =============== =======================================================
@@ -69,7 +69,7 @@ correspond to output styles, flags, or features:
   pretty          Emit pretty-printed output
   text            Emit TEXT output
   underscores     Replace XML-friendly "-"s with JSON friendly "_"s
-  units           Add the 'units' (XML) or 'data-units (HTML) attribute
+  units           Add the 'units' (XML) or 'data-units' (HTML) attribute
   warn            Emit warnings when libxo detects bad calls
   warn-xml        Emit warnings in XML
   xml             Emit XML output
@@ -77,7 +77,7 @@ correspond to output styles, flags, or features:
   xpath           Add XPath expressions (HTML)
   =============== =======================================================
 
-Most of these option are simple and direct, but some require
+Most of these options are simple and direct, but some require
 additional details:
 
 - "colors" is described in :ref:`color-mapping`.
@@ -99,7 +99,7 @@ additional details:
 - "grouping=xxxx" overrides the locale's separator and grouping width.
   See :ref:`integer-grouping` for details.
 - "info" generates additional data for HTML, encoded in attributes
-  using names that state with "data-".
+  using names that start with "data-".
 - "keys" adds a "key" attribute for XML output to indicate that a leaf
   is an identifier for the list member.
 - "lint" enables semantic validation of `xo_emit()` format strings at
@@ -117,9 +117,9 @@ additional details:
 - "no-retain" is accepted for compatibility but ignored; the retain
   feature has been removed.
 - "underscores" can be used with JSON output to change XML-friendly
-  names with dashes into JSON-friendly name with underscores.
+  names with dashes into JSON-friendly names with underscores.
 - "warn" allows libxo to emit warnings on stderr when application code
-  make incorrect calls.
+  makes incorrect calls.
 - "warn-xml" causes those warnings to be placed in XML inside the
   output.
 - "xml1.1" changes the escape-private modifier: a control character
@@ -223,7 +223,7 @@ The "colors" option takes a value that is a set of mappings from the
 pre-defined set of colors to new foreground and background colors.
 The value is a series of "fg/bg" values, separated by a "+".  Each
 pair of "fg/bg" values gives the colors to which a basic color is
-mapped when used as a foreground or background color.  The order is
+mapped when used as a foreground or background color.  The order of
 the mappings is:
 
 - black
@@ -267,7 +267,7 @@ Tag Mapping
 -----------
 
 libxo supports mapping between tag names, for scenarios where the tags
-need to make specific values.  For example, the "user" tag might be
+need to have specific names.  For example, the "user" tag might be
 needed as the "owner" tag.  libxo can perform this one-to-one tag
 replacement.
 
@@ -276,7 +276,7 @@ languages such as XSLT or SLAX should be used when something more than
 simple one-to-one replacement is required.
 
 Mapping can be specified using the "map" and "map-file" options.  The
-"map" option accepts one or more mapping, in the format "old=new",
+"map" option accepts one or more mappings, in the format "old=new",
 separated by colons::
 
     --libxo map:one=red,map:two=blue
@@ -346,13 +346,13 @@ using the "encoder" keyword::
    --libxo encoder=cbor
 
 The encoder can include encoder-specific options, separated by either
-colons (":") or plus signs ("+"):
+colons (":") or plus signs ("+")::
 
     --libxo encoder=csv+path=filesystem+leaf=name+no-header
     --libxo encoder=csv:path=filesystem:leaf=name:no-header
 
 For brevity, the string "@" can be used in place of the string
-"encoder=".
+"encoder="::
 
     df --libxo @csv:no-header
 

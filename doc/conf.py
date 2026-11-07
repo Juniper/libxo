@@ -55,7 +55,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'libxo'
-copyright = '2017-2019, Juniper Networks Inc'
+copyright = '2017-2026, Juniper Networks Inc'
 author = 'Phil Shafer'
 default_role = 'code'
 primary_domain = 'c'

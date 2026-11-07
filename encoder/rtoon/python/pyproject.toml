@@ -1,0 +1,41 @@
+#
+# SPDX-License-Identifier: BSD-2-Clause
+# Copyright (c) 2026, Juniper Networks, Inc.
+# All rights reserved.
+# This SOFTWARE is licensed under the LICENSE provided in the
+# LICENSE file. By downloading, installing, copying, or otherwise
+# using the SOFTWARE, you agree to be bound by the terms of that
+# LICENSE.
+#
+# flit_core builds without writing anything into this directory
+# (no build/ or *.egg-info), unlike setuptools.  The version and the
+# one-line description come from rtoon/__init__.py.
+
+[build-system]
+requires = ["flit_core>=3.12,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "libxo-rtoon"
+dynamic = ["version", "description"]
+readme = "README.rst"
+license = "BSD-2-Clause"
+license-files = ["LICENSE"]
+requires-python = ">=3.10"
+authors = [{name = "Phil Shafer", email = "phil.shafer@gmail.com"}]
+keywords = ["libxo", "rtoon", "parser", "serialization"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+    "Topic :: Text Processing",
+    "Typing :: Typed",
+]
+
+[project.urls]
+Homepage = "https://github.com/Juniper/libxo"
+
+[tool.flit.module]
+name = "rtoon"
+
+[tool.flit.sdist]
+include = ["tests/"]

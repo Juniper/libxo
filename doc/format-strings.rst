@@ -14,7 +14,7 @@ the field is and how to treat it, while the format descriptors are
 formatting instructions using printf-style format strings, telling
 libxo how to format the field.  The field description is placed inside
 a set of braces, with a colon (":") after the modifiers and a slash
-("/") before each format descriptors.  Text may be intermixed with
+("/") before each format descriptor.  Text may be intermixed with
 field descriptions within the format string.
 
 The field description is given as follows::
@@ -36,10 +36,10 @@ passed to the xo_emit function as an unsigned integer::
     xo_emit("{P:   }{Lwc:In stock}{:in-stock/%u}\\n", 65);
 
 This single line of code can generate text (" In stock: 65\\n"), XML
-("<in-stock>65</in-stock>"), JSON ('"in-stock": 6'), or HTML (too
+("<in-stock>65</in-stock>"), JSON ('"in-stock": 65'), or HTML (too
 lengthy to be listed here).
 
-While roles and modifiers typically use single character for brevity,
+While roles and modifiers typically use a single character for brevity,
 there are alternative names for each which allow more verbose
 formatting strings.  These names must be preceded by a comma, and may
 follow any single-character values::

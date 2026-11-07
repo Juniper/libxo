@@ -1,7 +1,7 @@
 #!/bin/sh
 # $Id$
 #
-# Copyright 2016-2024, Juniper Networks, Inc.
+# Copyright 2016-2026, Juniper Networks, Inc.
 # All rights reserved.
 # This SOFTWARE is licensed under the LICENSE provided in the
 # ../Copyright file. By downloading, installing, copying, or otherwise
@@ -32,7 +32,7 @@ CHECKER="${CHECKER}"
 # trap trap_fail SIGABRT
 
 trap_fail () {
-    echo "SIGABRT receieved; exitting..."
+    echo "SIGABRT received; exiting..."
     exit 1;
 }
 

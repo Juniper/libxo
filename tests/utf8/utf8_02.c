@@ -1,6 +1,6 @@
 /*
  * SPDX-License-Identifier: BSD-2-Clause
- * Copyright (c) 2022, Juniper Networks, Inc.
+ * Copyright (c) 2022-2026, Juniper Networks, Inc.
  * All rights reserved.
  * This SOFTWARE is licensed under the LICENSE provided in the
  * ../Copyright file. By downloading, installing, copying, or otherwise
@@ -152,7 +152,7 @@ main (int argc, char **argv)
 	    if (ulen > len)
 		break;
 
-	    len -= ulen;	/* Substract last time's length */
+	    len -= ulen;	/* Subtract last time's length */
 
 	    ulen = xo_utf8_len(*cp);
 	    xo_codepoint_t wc = xo_utf8_codepoint(cp, len, ulen, 0);
