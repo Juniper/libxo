@@ -1,4 +1,6 @@
 
+.. _xopo:
+
 xopo
 ====
 
@@ -43,3 +45,15 @@ stdout:
 Use of the `--no-wrap` option for `xgettext` is required to
 ensure that incoming msgid strings are not wrapped across multiple
 lines.
+
+For boolean fields with the "g" (gettext) modifier (see
+:ref:`boolean-role`), the boolean pair is translated as a whole, so
+`xopo` adds the pair as a msgid.  A field such as
+"{Bg:power/on+off%d}" adds the msgid "on+off", and a field with no
+boolean pair ("{Bg:power}") adds "true+false".  The translation must
+also be a pair, such as "encendido+apagado".  The pair is kept as
+written, with any escapes, and the translation uses the same
+syntax, so a "+" inside a word is written as "\\+".  A "*" pair is
+passed as an argument, so it can't be extracted; like the values of
+"{g:}" fields, those msgids must be added by hand.  Words in an
+encoding format are never translated.
