@@ -72,7 +72,17 @@ typedef struct xo_xparse_data_s {
     void *xd_warn_data;	       /* Opaque data passed to xd_warn_func */
 
     const int *xd_unsupported_tokens; /* Tokens that we don't support */
+
+    int16_t *xd_stack;		/* Parser state stack at last yylex() */
+    uint32_t xd_stack_count;	/* Number of entries in xd_stack[] */
+    uint32_t xd_stack_max;	/* Size of xd_stack[] (in entries) */
 } xo_xparse_data_t;
+
+/*
+ * Should yylex() snapshot the parser stack, giving better "expected"
+ * messages on syntax errors?  Defaults to TRUE.
+ */
+extern int xo_xparse_snap_stack;
 
 /* Flags for xd_flags */
 #define XDF_EOF                 (1<<0)  /* EOF seen */
@@ -378,7 +388,7 @@ xo_xparse_set_input (xo_xparse_data_t *xdp, const char *buf, xo_ssize_t len);
 
 int
 xo_xparse_parse_string (xo_handle_t *xop, xo_xparse_data_t *xdp,
-			const char *input);
+			const char *input, int style);
 void
 xo_xparse_set_unsupported_tokens (xo_xparse_data_t *xdp,
 				  int *unsupported_tokens);
