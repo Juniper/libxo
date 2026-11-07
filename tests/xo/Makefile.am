@@ -15,7 +15,8 @@ TEST_CASES = \
 xo_01.sh \
 xo_02.sh \
 xo_03.sh \
-xo_04.sh
+xo_04.sh \
+xo_05.sh
 
 # TEST_CASES := $(shell cd ${srcdir} ; echo *.c )
 
