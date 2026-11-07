@@ -951,7 +951,7 @@ main: status: zero
 main: input '##broken: trailing operator after path step'
 main: input '?a +'
 adding filter: 'a +'
-xpath_01: filter expression error: unexpected input: plus sign ('+'); expected union operator ('|')
+xpath_01: filter expression error: unexpected input: plus sign ('+'); expected open bracket ('['), slash ('/') or union operator ('|')
 xpath_01: could not add the requested filter
 added filter: -1
 xpath_01: test: filter expression feature is unsupported: descendant child (e.g. 'one//two')
@@ -1230,7 +1230,7 @@ xpath_01: test: filter expression feature is unsupported: plus sign ('+')
 main: status: zero
 main: input '?one[two(three(foo'
 adding filter: 'one[two(three(foo'
-xpath_01: filter expression error: unexpected input: end of expression; expected comma (','), colon (':'), logical AND operator ('&&'), equality operator ('=='), logical OR operator ('||'), equal sign ('='), etc.
+xpath_01: filter expression error: unexpected input: end of expression; expected comma (','), logical AND operator ('&&'), equality operator ('=='), logical OR operator ('||'), equal sign ('='), greater-than operator ('>'), etc.
 xpath_01: could not add the requested filter
 added filter: -1
 xpath_01: test: filter expression feature is unsupported: descendant child (e.g. 'one//two')
@@ -1927,7 +1927,7 @@ xpath_01: test: filter expression feature is unsupported: plus sign ('+')
 main: status: zero
 main: input '?six@miss'
 adding filter: 'six@miss'
-xpath_01: filter expression error: unexpected input: attribute axis ('@'); expected comma (','), colon (':'), logical AND operator ('&&'), equality operator ('=='), logical OR operator ('||'), equal sign ('='), etc.
+xpath_01: filter expression error: unexpected input: attribute axis ('@'); expected open bracket ('['), slash ('/') or union operator ('|')
 xpath_01: could not add the requested filter
 added filter: -1
 xpath_01: test: filter expression feature is unsupported: descendant child (e.g. 'one//two')
