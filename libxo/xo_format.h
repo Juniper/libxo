@@ -426,7 +426,7 @@ xo_printable2 (const char *str, int len, int bracesp);
  * that these rules came from xolint.pl; most are real errors, not
  * lint-only (XPF_LINT) style checks.
  */
-#define XO_LINT_ROLES_NEEDING_NAME "V" /* Can't have empty name (:XX)*/
+#define XO_LINT_ROLES_NEEDING_NAME "BV" /* Can't have empty name (:XX)*/
 #define XO_LINT_ROLES_NEEDING_NAME_OR_FORMAT "DEFLNPTUW" /* One or the other */
 #define XO_LINT_ROLES_OPTIONAL_NAME "CG"      /* Might have empty name */
 #define XO_LINT_ROLES_DEC_NAME_OR_FORMAT "[]"	       /* ":XX" or "/%d"" */
@@ -475,6 +475,72 @@ xo_parse_fspecs (xo_parse_t *xpp, const char *fmt, const char *ep);
  */
 uint8_t
 xo_fspec_arg_type (const xo_fspec_t *xfp);
+
+/*
+ * A "B" (boolean) field's format is an optional boolean pair
+ * ("TRUE+FALSE" or a lone "*") followed by an optional conversion
+ * spec.  xo_parse_boolean() digests the format's fspecs into one of
+ * these.  The words are offsets into the field's format substring
+ * (like xf_start), so there are no pointers here.
+ */
+typedef struct xo_boolean_info_s {
+    uint16_t xbi_true;		/* Offset of the true word */
+    uint16_t xbi_true_len;	/* Length of the true word */
+    uint16_t xbi_false;		/* Offset of the false word */
+    uint16_t xbi_false_len;	/* Length of the false word */
+    int16_t xbi_spec;		/* fspec index; -1 => default "%s" */
+    uint8_t xbi_flags;		/* XBIF_* */
+    uint8_t xbi_pad;
+} xo_boolean_info_t;
+
+#define XBIF_PAIR	(1<<0)	/* Has a boolean pair */
+#define XBIF_ARG	(1<<1)	/* "*": the pair comes from an arg */
+#define XBIF_ESCAPED	(1<<2)	/* The words contain escapes */
+
+/*
+ * Enough fspecs for any valid boolean format (a text run, a spec and
+ * the terminator), with room to spare for better error messages.
+ */
+#define XO_BOOLEAN_FSPECS 6
+
+/*
+ * Digest the parsed fspecs of a "B" field's format into *xbip.
+ * 'fmt' is the format substring the fspecs are relative to.
+ * 'complete' (used for the encoding format) makes a missing boolean
+ * pair or spec an error.  Returns 0 on success, -1 on error (already
+ * reported).
+ */
+int
+xo_parse_boolean (xo_parse_t *xpp, const char *fmt,
+		  const xo_fspec_t *fspecs, unsigned num,
+		  int complete, xo_boolean_info_t *xbip);
+
+/*
+ * Parse a "B" field's format [fmt, fmt + flen) into the caller's
+ * array of 'max' fspecs, then digest it with xo_parse_boolean().
+ * Returns the number of fspecs on success, -1 on error.
+ */
+int
+xo_parse_boolean_format (xo_parse_t *xpp, const char *fmt, unsigned flen,
+			 int complete, xo_fspec_t *fspecs, unsigned max,
+			 xo_boolean_info_t *xbip);
+
+/*
+ * Return the fspec that supplies a boolean field's value: the
+ * parsed spec, or a static "%s" one when the spec was defaulted.
+ */
+const xo_fspec_t *
+xo_boolean_spec (const xo_boolean_info_t *xbip, const xo_fspec_t *fspecs);
+
+/*
+ * Return non-zero if two boolean formats consume the same arguments:
+ * the same "*"-ness, the same star ints and the same xf_arg_type.
+ */
+int
+xo_boolean_same_args (const xo_boolean_info_t *xbip1,
+		      const xo_fspec_t *fspecs1,
+		      const xo_boolean_info_t *xbip2,
+		      const xo_fspec_t *fspecs2);
 
 static inline int
 xo_is_format_char (char ch, int numeric_only)
