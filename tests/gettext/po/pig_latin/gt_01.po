@@ -110,3 +110,33 @@ msgstr "ouchcay"
 
 msgid "{:first} before {:second}\n"
 msgstr "{:second} afteryay {{a}} {{b}} {{c}} {{d}} {{e}} {{f}} {{g}} {{h}} {{i}} {{j}} {{k}} {{l}} {{m}} {{n}} {{o}} {{p}} {{q}} {{r}} {{s}} {{t}} {:first}\n"
+
+msgid "{L:Service}{B:service}\n"
+msgstr "{L:Ervicesay}{B:service}\n"
+
+msgid "{L:Lights}{B:lights}\n"
+msgstr "{L:Ightslay}{B:lights}\n"
+
+msgid "{L:Porch}{B:porch}\n"
+msgstr "{L:Orchpay}{B:porch}\n"
+
+msgid "{L:Fan}{B:fan}\n"
+msgstr "{L:Anfay}{B:fan}\n"
+
+msgid "{:lamps} lamps are {B:lamp-state}\n"
+msgstr "{B:lamp-state}, {:lamps} ampslay\n"
+
+msgid "enabled+disabled"
+msgstr "enabledway+isabledday"
+
+msgid "true+false"
+msgstr "uetray+alsefay"
+
+msgid "on+off"
+msgstr "onway+offway"
+
+msgid "lit+dark"
+msgstr "itlay+arkday"
+
+msgid "spinning+stopped"
+msgstr "inningspay"
