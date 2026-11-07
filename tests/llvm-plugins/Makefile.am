@@ -67,7 +67,8 @@ PRECOMPILE_FORMATS = T XP JP JPu HP
 TEST_CASES = \
     validate_01 \
     validate_02 \
-    validate_03
+    validate_03 \
+    validate_05
 
 # Same as TEST_CASES, but C++ (".cc") sources
 TEST_CASES_CXX = \
@@ -76,7 +77,8 @@ TEST_CASES_CXX = \
 PRECOMPILE_TEST_CASES = \
     precompile_01 \
     precompile_02 \
-    precompile_03
+    precompile_03 \
+    precompile_04
 
 XOCC = ${top_builddir}/llvm-plugins/xocc.sh
 XOCC_TEST_CASES = xocc_01
