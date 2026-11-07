@@ -212,9 +212,20 @@
 #define yyerror(_str) \
     xo_xpath_yyerror(xparse_data, _str, yystate)
 
+/*
+ * Our yylex() wrapper also snapshots the parser's state stack, so
+ * that xo_xparse_expecting_error() can see the stack as it was
+ * when the offending token was lexed, before any reductions made
+ * using that token as lookahead.  The macro expands inside yyparse(),
+ * so "yystack" is in scope.
+ */
+static int
+xo_xpath_yylex_snap (xo_xparse_data_t *xdp, YYSTYPE *lvalp,
+		     const YYINT *s_base, const YYINT *s_mark);
+
 #undef yylex
 #define yylex(_lvalp, _param) \
-    xo_xpath_yylex(_param, _lvalp)
+    xo_xpath_yylex_snap(_param, _lvalp, yystack.s_base, yystack.s_mark)
 
 #define yytname xo_xpath_yyname
 #define yypact xo_xpath_yydefred
@@ -253,15 +264,22 @@ xo_dont_bother (FILE *fp UNUSED, const char *fmt UNUSED, ...)
 %%
 
 start :
-        xpath_union_expression
+        M_PARSE_FULL xpath_union_expression
 		{
-		    $$ = xo_xparse_yyval(xparse_data, $1);
-		    if (xo_xparse_results(xparse_data, $1) < 0) {
+		    $$ = xo_xparse_yyval(xparse_data, $2);
+		    if (xo_xparse_results(xparse_data, $2) < 0) {
 			yyerror("out of memory");
 			YYABORT;
 		    }
 		    xparse_data->xd_errors = yynerrs;
 		}
+
+        | M_PARSE_XPATH xpath_expression
+		{
+		    $$ = xo_xparse_yyval(xparse_data, $2);
+		    xparse_data->xd_errors = yynerrs;
+		}
+
 	;
 
 q_name :
@@ -908,22 +926,173 @@ xo_xparse_is_unsupported_token (xo_xparse_data_t *xdp, int token)
 }
 
 /*
- * Return a better error message listing the tokens that would have been
- * valid in the current parser state.  bison exposes this via a single
- * action-offset table (yypact); byacc splits it into a shift-index table
- * (yysindex) and a reduce-index table (yyrindex).  A token T is a valid
- * lookahead in 'yystate' when either lookup resolves to it, mirroring the
- * generated parser loop:
- *
- *     base = yysindex[state];
- *     if (base != 0 && base+T in [0,YYTABLESIZE] && yycheck[base+T] == T)
- *         ... T is shiftable ...
- *
- * (and likewise via yyrindex for reductions).  Returns NULL when nothing
- * useful can be said, so the caller can fall back to a generic message.
- * This is driven entirely by yystate, not by the actual lookahead token,
- * so it's just as meaningful when the caller hit end-of-input as when it
- * choked on a real token; 'lead' is the lead-in phrase the caller wants
+ * Snapshotting the parser stack costs a copy per token; this flag
+ * turns it off, so we can measure that cost.  Without a snapshot,
+ * xo_xparse_expecting_error() falls back to looking at yystate alone.
+ */
+int xo_xparse_snap_stack = TRUE;
+
+/*
+ * Our yylex() wrapper (see the "#define yylex" above): copy the
+ * parser's state stack into xd_stack[], then lex the next token.
+ * The buffer is reused, so the steady state is a single memcpy.
+ */
+static int
+xo_xpath_yylex_snap (xo_xparse_data_t *xdp, YYSTYPE *lvalp,
+		     const YYINT *s_base, const YYINT *s_mark)
+{
+    xdp->xd_stack_count = 0;
+
+    if (xo_xparse_snap_stack && s_base != NULL) {
+	uint32_t depth = (uint32_t) (s_mark - s_base) + 1;
+
+	if (depth > xdp->xd_stack_max) {
+	    uint32_t new_max = xdp->xd_stack_max ? xdp->xd_stack_max : 64;
+	    while (new_max < depth)
+		new_max <<= 1;
+
+	    int16_t *sp = xo_realloc(xdp->xd_stack, new_max * sizeof(*sp));
+	    if (sp) {
+		xdp->xd_stack = sp;
+		xdp->xd_stack_max = new_max;
+	    }
+	}
+
+	if (depth <= xdp->xd_stack_max) {
+	    memcpy(xdp->xd_stack, s_base, depth * sizeof(*s_base));
+	    xdp->xd_stack_count = depth;
+	}
+    }
+
+    return xo_xpath_yylex(xdp, lvalp);
+}
+
+/*
+ * Limits for xo_xparse_token_ok()'s simulation.  Each step either
+ * reduces or decides, so XO_SIM_MAX_STEPS just guards against a
+ * table loop we don't expect to have.
+ */
+#define XO_SIM_LOCAL_DEPTH 64	/* Simulated stack held on the C stack */
+#define XO_SIM_MAX_STEPS 1000	/* Max reductions per simulation */
+
+/*
+ * Would 'token' be shifted (or accepted) if the parser read it with
+ * the snapshot stack in xd_stack[]?  We run the parser's own
+ * table logic (see yyloop/yyreduce in the generated parser), doing
+ * the reductions on a scratch copy of the stack, until 'token' is
+ * shifted (TRUE) or hits an error (FALSE).  Unlike looking at a
+ * single state, this ignores the extra lookaheads that LALR state
+ * merging gives to reductions, so the answer depends only on the
+ * grammar and the input, not on how the tables were built.
+ */
+static int
+xo_xparse_token_ok (xo_xparse_data_t *xdp, int token)
+{
+    int16_t local[XO_SIM_LOCAL_DEPTH];
+    int16_t *stack = local;
+    uint32_t stack_max = XO_SIM_LOCAL_DEPTH;
+    uint32_t depth = xdp->xd_stack_count;
+    int rc = FALSE;
+    int steps, yyn, state;
+
+    /* Leave room for one push past the snapshot (empty rules) */
+    if (depth + 1 > stack_max) {
+	stack_max = depth + XO_SIM_LOCAL_DEPTH;
+	stack = xo_realloc(NULL, stack_max * sizeof(*stack));
+	if (stack == NULL)
+	    return FALSE;
+    }
+
+    memcpy(stack, xdp->xd_stack, depth * sizeof(*stack));
+
+    for (steps = 0; steps < XO_SIM_MAX_STEPS; steps++) {
+	state = stack[depth - 1];
+
+	yyn = yydefred[state];
+	if (yyn == 0) {
+	    /* Shift?  Then the token is acceptable */
+	    yyn = yysindex[state];
+	    if (yyn != 0 && (yyn += token) >= 0 && yyn <= YYTABLESIZE
+		&& yycheck[yyn] == (YYINT) token) {
+		rc = TRUE;
+		break;
+	    }
+
+	    /* Reduce?  If not, then it's an error */
+	    yyn = yyrindex[state];
+	    if (yyn != 0 && (yyn += token) >= 0 && yyn <= YYTABLESIZE
+		&& yycheck[yyn] == (YYINT) token) {
+		yyn = yytable[yyn];
+	    } else {
+		break;
+	    }
+	}
+
+	/* Reduce by rule yyn: pop the rhs, then push the goto state */
+	uint32_t len = (uint32_t) yylen[yyn];
+	if (len >= depth)	/* Can't happen */
+	    break;
+	depth -= len;
+	state = stack[depth - 1];
+
+	int lhs = yylhs[yyn];
+	if (state == 0 && lhs == 0) {
+	    /* Reduced to the start symbol; only end-of-input works now */
+	    rc = (token == YYEOF);
+	    break;
+	}
+
+	yyn = yygindex[lhs];
+	if (yyn != 0 && (yyn += state) >= 0 && yyn <= YYTABLESIZE
+	    && yycheck[yyn] == (YYINT) state)
+	    state = yytable[yyn];
+	else
+	    state = yydgoto[lhs];
+
+	if (depth >= stack_max)	/* Empty rules can grow the stack */
+	    break;
+	stack[depth++] = (int16_t) state;
+    }
+
+    if (stack != local)
+	xo_free(stack);
+
+    return rc;
+}
+
+/*
+ * Is 'token' a valid lookahead for 'yystate', looking only at that
+ * single state's table entries?  This is the fallback for when we
+ * have no stack snapshot.  bison exposes this via a single
+ * action-offset table (yypact); byacc splits it into a shift-index
+ * table (yysindex) and a reduce-index table (yyrindex).
+ */
+static int
+xo_xparse_token_ok_state (int yystate, int token)
+{
+    int base = yysindex[yystate];
+    int idx = base + token;
+
+    if (base != 0 && idx >= 0 && idx <= YYTABLESIZE
+	&& yycheck[idx] == (YYINT) token)
+	return TRUE;
+
+    base = yyrindex[yystate];
+    idx = base + token;
+    return (base != 0 && idx >= 0 && idx <= YYTABLESIZE
+	    && yycheck[idx] == (YYINT) token);
+}
+
+/*
+ * Return a better error message listing the tokens that would have
+ * been valid when the offending token was read.  When we have a
+ * snapshot of the parser stack (xd_stack[], from xo_xpath_yylex_snap),
+ * each token is tested by simulating the parser on that stack (see
+ * xo_xparse_token_ok); otherwise we look only at yystate, which can
+ * list fewer tokens, since the parser may already have made reductions
+ * that LALR state merging allowed on the offending token.  Returns
+ * NULL when nothing useful can be said, so the caller can fall back
+ * to a generic message.  'lead' is the lead-in phrase the caller wants
  * ("unexpected input" / "unexpected end-of-expression" / etc).
  */
 char *
@@ -933,25 +1102,19 @@ xo_xparse_expecting_error (xo_xparse_data_t *xdp, const char *token,
 #define MAX_EXPECT 5
     char buf[BUFSIZ], *cp = buf, *ep = buf + sizeof(buf);
     int expect = 0, expecting[MAX_EXPECT + 1];
-    int i;
+    int use_stack = (xdp->xd_stack_count > 0);
+    int i, ok;
 
     for (i = 1; i <= YYMAXTOKEN; i++) {
-	int base = yysindex[yystate];
-	int idx = base + i;
-	int ok = (base != 0 && idx >= 0 && idx <= YYTABLESIZE
-		  && yycheck[idx] == (YYINT) i);
-
-	if (!ok) {
-	    base = yyrindex[yystate];
-	    idx = base + i;
-	    ok = (base != 0 && idx >= 0 && idx <= YYTABLESIZE
-		  && yycheck[idx] == (YYINT) i);
-	}
-
-	if (!ok || i >= YYNTOKENS || xo_xparse_token_name_fancy[i] == NULL)
+	if (i >= YYNTOKENS || xo_xparse_token_name_fancy[i] == NULL)
 	    continue;
 
 	if (xo_xparse_is_unsupported_token(xdp, i))
+	    continue;
+
+	ok = use_stack ? xo_xparse_token_ok(xdp, i)
+	    : xo_xparse_token_ok_state(yystate, i);
+	if (!ok)
 	    continue;
 
 	expecting[expect++] = i;
