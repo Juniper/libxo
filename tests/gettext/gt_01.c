@@ -135,6 +135,32 @@ main (int argc, char **argv)
     xo_emit("{G:}{Lwcg:Windings}{g:windings}\n", "lotus-o-delta");
 
     /*
+     * Boolean pairs are translated as a whole, then the word is
+     * capitalized, so "enabled+disabled" becomes
+     * "habilitado+deshabilitado" and the word "Habilitado".
+     */
+    xo_emit("{G:}{Lwc:Service}{Bfg:service/enabled+disabled%u}\n", 1U);
+    xo_emit("{G:}{Lwc:Backup}{Bfg:backup/enabled+disabled%u}\n", 0U);
+    xo_emit("{G:}{Lwc:Mirrored}{Bg:mirrored}\n", "yes");
+    xo_emit("{G:}{Lwc:Encrypted}{Bg:encrypted}\n", NULL);
+
+    /* A "*" pair is translated as given, like a "{g:}" value */
+    xo_emit("{G:}{Lwc:Lights}{Bg:lights/*%d}\n", "lit+dark", 1);
+    xo_emit("{G:}{Lwc:Porch}{Bg:porch/*%d}\n", "lit+dark", 0);
+
+    /* This translation has no '+', so the original pair is used */
+    xo_emit("{G:}{Lwc:Fan}{Bg:fan/spinning+stopped%d}\n", 1);
+
+    /* The translation moves the boolean field ahead of the count */
+    xo_open_container("upstairs");
+    xo_emit("{G:}{:lamps/%d} lamps are {Bg:lamp-state/on+off%d}\n", 3, 1);
+    xo_close_container("upstairs");
+
+    xo_open_container("downstairs");
+    xo_emit("{G:}{:lamps/%d} lamps are {Bg:lamp-state/on+off%d}\n", 2, 0);
+    xo_close_container("downstairs");
+
+    /*
      * The translation of this one puts the fields in the other order
      * and has many more pieces than the original, so the reordering
      * code has to cope with a format that is larger than ours.
