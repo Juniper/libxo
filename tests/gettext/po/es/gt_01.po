@@ -108,3 +108,42 @@ msgstr "sofá"
 
 msgid "{:first} before {:second}\n"
 msgstr "{:second} después de {{a}} {{b}} {{c}} {{d}} {{e}} {{f}} {{g}} {{h}} {{i}} {{j}} {{k}} {{l}} {{m}} {{n}} {{o}} {{p}} {{q}} {{r}} {{s}} {{t}} {:first}\n"
+
+msgid "{L:Service}{B:service}\n"
+msgstr "{L:Servicio}{B:service}\n"
+
+msgid "{L:Backup}{B:backup}\n"
+msgstr "{L:Respaldo}{B:backup}\n"
+
+msgid "{L:Mirrored}{B:mirrored}\n"
+msgstr "{L:Reflejado}{B:mirrored}\n"
+
+msgid "{L:Encrypted}{B:encrypted}\n"
+msgstr "{L:Cifrado}{B:encrypted}\n"
+
+msgid "{L:Lights}{B:lights}\n"
+msgstr "{L:Luces}{B:lights}\n"
+
+msgid "{L:Porch}{B:porch}\n"
+msgstr "{L:Porche}{B:porch}\n"
+
+msgid "{L:Fan}{B:fan}\n"
+msgstr "{L:Ventilador}{B:fan}\n"
+
+msgid "{:lamps} lamps are {B:lamp-state}\n"
+msgstr "{B:lamp-state}: {:lamps} lámparas\n"
+
+msgid "enabled+disabled"
+msgstr "habilitado+deshabilitado"
+
+msgid "true+false"
+msgstr "verdadero+falso"
+
+msgid "on+off"
+msgstr "encendidas+apagadas"
+
+msgid "lit+dark"
+msgstr "encendidas+apagadas"
+
+msgid "spinning+stopped"
+msgstr "girando"
