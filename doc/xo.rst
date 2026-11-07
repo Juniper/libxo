@@ -144,6 +144,34 @@ braces for JSON output.
       }
     } 
 
+Boolean Fields
+--------------
+
+Boolean fields (see :ref:`boolean-role`) work with `xo`, but every
+argument given to `xo` is a string, and is never parsed as a number.
+So an empty argument is false, and any other argument is true,
+whatever the conversion spec says.  In particular, "0" is true, even
+with "%d"::
+
+    xo '{B:empty}\\n' ""                 # false
+    xo '{B:full}\\n' "x"                 # true
+    xo '{B:zero/%d}\\n' 0                # true
+    xo '{Bf:power/on+off%d}\\n' ""       # Off
+
+To test a shell value, pass it, or an empty string, explicitly::
+
+    xo '{B:running}\\n' "$(pgrep -q sshd && echo yes)"
+
+A "*" boolean pair takes its own argument, before the value, as do
+any "*" widths::
+
+    xo '{B:power/*%d}\\n' "yes+no" ""    # no
+
+Since `xo` handles backslash escapes in the format string itself,
+a backslash escape in a boolean pair must be doubled::
+
+    xo '{B:mode/a\\\\+b+c}\\n' x         # a+b
+
 Lists and Instances
 -------------------
 
