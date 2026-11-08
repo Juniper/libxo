@@ -693,8 +693,8 @@ sub check_field {
 # Check a boolean ('B') field.  The display format is an optional
 # boolean pair ("true+false" words, or "*" for a pair passed as an
 # argument) followed by an optional conversion spec.  An encoding
-# format has the same shape, but needs both parts, and is only used
-# with the 'full-boolean' modifier.
+# format has the same shape, but needs both parts; it gives the words
+# for the encoding styles.
 #
 sub check_boolean {
     my($fieldp, $full_boolean) = @_;
@@ -703,14 +703,23 @@ sub check_boolean {
     my($dpair, $dstar, $dspec) = check_boolean_format($field[2], 0);
     return unless defined $dpair;
 
-    #@ Humanize and int-group are ignored for 'B' fields
+    #@ Humanize is ignored for 'B' fields
     #@     xo_emit("{Bh:enabled/%d}", enabled);
     #@ Should be:
     #@     xo_emit("{B:enabled/%d}", enabled);
     #@ A boolean field displays one of two words, so there is no
-    #@ number to humanize or group.
-    warning("'humanize' and 'int-group' are ignored for 'B' fields")
-	if $field[0] =~ /[hi]/;
+    #@ number to humanize.
+    warning("'humanize' is ignored for 'B' fields")
+	if $field[0] =~ /h/;
+
+    #@ Int-group is ignored for 'B' fields
+    #@     xo_emit("{Bi:enabled/%d}", enabled);
+    #@ Should be:
+    #@     xo_emit("{B:enabled/%d}", enabled);
+    #@ A boolean field displays one of two words, so there is no
+    #@ number to group.
+    warning("'int-group' is ignored for 'B' fields")
+	if $field[0] =~ /i/;
 
     if (length($field[3])) {
 	my($epair, $estar, $espec) = check_boolean_format($field[3], 1);
@@ -728,16 +737,6 @@ sub check_boolean {
 	      . "as the display format")
 	    if $dstar != $estar || boolean_spec_type($dspec)
 		ne boolean_spec_type($espec);
-
-	#@ Boolean encoding format is ignored without 'full-boolean'
-	#@     xo_emit("{B:enabled/yes+no%d/1+0%d}", enabled);
-	#@ Should be:
-	#@     xo_emit("{B,full-boolean:enabled/yes+no%d/1+0%d}", enabled);
-	#@ Without 'full-boolean', boolean fields are encoded as
-	#@ native true/false values, and the encoding format is
-	#@ not used.
-	warning("boolean encoding format is ignored without 'full-boolean'")
-	    unless $full_boolean;
 
     } elsif ($full_boolean && !$dpair) {
 	#@ The 'full-boolean' modifier without a boolean pair gives quoted true/false
@@ -773,19 +772,21 @@ sub check_boolean_format {
 	#@     xo_emit("{B:enabled/yes+no%d}", enabled);
 	#@ A boolean pair gives the "true" word, a plus sign, and the
 	#@ "false" word.  Use a backslash to put a literal "+" in a
-	#@ word ("{B:mode/a\\+b+c%d}").
+	#@ word ("{B:mode/a\\+b+c%d}").  At run time, libxo reports
+	#@ a broken pair and displays "true" or "false" instead.
 	if ($pluses != 1) {
 	    error("boolean pair must have exactly one '+' (found $pluses)");
-	    return ();
 	}
 
 	#@ Boolean pair has an empty word
 	#@     xo_emit("{B:enabled/+off%d}", enabled);
 	#@ Should be:
 	#@     xo_emit("{B:enabled/on+off%d}", enabled);
-	#@ An empty word displays nothing, which is likely a mistake.
-	warning("boolean pair has an empty word")
-	    if $pair =~ /^\+|\+$/;
+	#@ Both words must be non-empty.  At run time, libxo reports
+	#@ a broken pair and displays "true" or "false" instead.
+	elsif ($pair =~ /^\+|\+$/) {
+	    error("boolean pair has an empty word");
+	}
     }
 
     if (length($rest)) {
