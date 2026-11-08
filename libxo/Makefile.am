@@ -34,7 +34,9 @@ LIBS = \
 libxoinc_HEADERS = \
      xo.h \
      xo_buf.h \
-     xo_encoder.h
+     xo_encoder.h \
+     xo_string.h \
+     xo_utf8.h
 
 noinst_HEADERS = \
      xo_dyld.h \
@@ -42,8 +44,6 @@ noinst_HEADERS = \
      xo_format.h \
      xo_humanize.h \
      xo_private.h \
-     xo_string.h \
-     xo_utf8.h \
      xo_wcwidth.h
 
 libxo_la_SOURCES = \
