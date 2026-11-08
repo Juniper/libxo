@@ -1,0 +1,34 @@
+<data>
+  <true>
+    <str>true</str>
+    <str-next>1</str-next>
+    <power>true</power>
+    <power-next>2</power-next>
+    <escaped>true</escaped>
+    <escaped-next>3</escaped-next>
+    <arg>true</arg>
+    <arg-next>4</arg-next>
+    <full>1</full>
+    <full-next>5</full-next>
+    <full-n>1</full-n>
+    <full-n-next>6</full-n-next>
+    <quoted>true</quoted>
+    <quoted-next>7</quoted-next>
+  </true>
+  <false>
+    <str>false</str>
+    <str-next>1</str-next>
+    <power>false</power>
+    <power-next>2</power-next>
+    <escaped>false</escaped>
+    <escaped-next>3</escaped-next>
+    <arg>false</arg>
+    <arg-next>4</arg-next>
+    <full>0</full>
+    <full-next>5</full-next>
+    <full-n>0</full-n>
+    <full-n-next>6</full-n-next>
+    <quoted>false</quoted>
+    <quoted-next>7</quoted-next>
+  </false>
+</data>
