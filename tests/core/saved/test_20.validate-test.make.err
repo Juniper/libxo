@@ -1,4 +1,4 @@
-../../../tests/core/test_20.c:119:57: warning: libxo: argument 1: a 'B' field's "*" boolean pair is NULL; libxo will report a failure and display true/false
+../../../tests/core/test_20.c:119:57: warning: libxo: argument 1: a 'B' field's "*" boolean pair is NULL
   119 |     xo_emit("{B:arg-null/*%d} ({:arg-null-next/%d})\n", NULL, t, ++sentinel);
       |                                                         ^
 /opt/local/libexec/llvm-22/lib/clang/22/include/__stddef_null.h:26:14: note: expanded from macro 'NULL'
