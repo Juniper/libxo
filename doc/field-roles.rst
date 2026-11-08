@@ -76,7 +76,10 @@ The format has two parts, both optional, in this order:
   The default is "%s".
 
 The boolean pair is everything before the first "%".  It must have
-exactly one "+".  A backslash escapes the next character, so "\\+",
+exactly one "+", with a non-empty word on each side.  A broken pair
+("{B:x/on%d}", "{B:x/a+b+c%d}", or "{B:x/+off%d}") is reported
+through the usual libxo warning path, and the field displays "true"
+or "false" instead.  A backslash escapes the next character, so "\\+",
 "\\\*", "\\/", "\\}", and "\\\\" give a literal plus, star, slash,
 close brace, and backslash, and "%%" gives a literal percent.
 Remember that a backslash in a C string must itself be escaped::
@@ -155,14 +158,15 @@ catalog by hand.  Encoding words are never translated.  See
 The full-boolean Modifier
 -------------------------
 
+By default, the encoding styles emit the native true or false.  An
+encoding format gives the words for the encoding styles instead.
 The "full-boolean" modifier, which has only the long name, makes the
-encoding styles emit a word instead of the native form.  The word is
-taken from the encoding format's boolean pair, if there is an
-encoding format, or else from the display format's pair, without
-gettext or first-cap::
+encoding styles use the display format's boolean pair, so the same
+word is used everywhere.  Encoding words never get gettext or
+first-cap::
 
     xo_emit("{B,full-boolean:answer/yup+nope}\\n", str);
-    xo_emit("{B,full-boolean:found/T+F%p/1+0%p}\\n", ptr);
+    xo_emit("{B:found/T+F%p/1+0%p}\\n", ptr);
 
 The first gives "yup" or "nope" in every style.  The second
 displays "T" or "F", and encodes "1" or "0".  In JSON, the words
@@ -172,8 +176,8 @@ are quoted unless the "n" (no-quotes) modifier is used.  The
 An encoding format must have both a boolean pair and a conversion
 spec, and must take the same arguments as the display format: the
 same "\*" pair (or none), the same "\*" widths, and the same
-argument type.  Without "full-boolean", the encoding format is
-checked but not used.  With "full-boolean" and no boolean pair, the
+argument type.  When there is an encoding format, "full-boolean"
+changes nothing.  With "full-boolean" and no boolean pair, the
 words are "true" and "false", emitted as strings.
 
 .. index:: Field Roles; Color
