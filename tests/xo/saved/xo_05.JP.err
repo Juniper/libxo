@@ -1,0 +1,2 @@
+xo: boolean pair must have exactly one '+' (found 2): 'a+b+c%d'
+xo: invalid boolean pair for 'pair-empty': ''
