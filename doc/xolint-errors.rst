@@ -441,10 +441,10 @@ Anchors can have a static value or argument for the width,
 but cannot have both.
 
 
-'Humanize and int-group are ignored for 'B' fields'
-+++++++++++++++++++++++++++++++++++++++++++++++++++
+'Humanize is ignored for 'B' fields'
+++++++++++++++++++++++++++++++++++++
 
-The message "Humanize and int-group are ignored for 'B' fields" can be caused by code like:
+The message "Humanize is ignored for 'B' fields" can be caused by code like:
 
 ::
 
@@ -457,7 +457,26 @@ This code should be replaced with code like:
     xo_emit("{B:enabled/%d}", enabled);
 
 A boolean field displays one of two words, so there is no
-number to humanize or group.
+number to humanize.
+
+
+'Int-group is ignored for 'B' fields'
++++++++++++++++++++++++++++++++++++++
+
+The message "Int-group is ignored for 'B' fields" can be caused by code like:
+
+::
+
+    xo_emit("{Bi:enabled/%d}", enabled);
+
+This code should be replaced with code like:
+
+::
+
+    xo_emit("{B:enabled/%d}", enabled);
+
+A boolean field displays one of two words, so there is no
+number to group.
 
 
 'Boolean encoding format must take the same arguments'
@@ -479,26 +498,6 @@ The encoding format is applied to the same arguments as
 the display format, so both must have the same shape: the
 same "*" pair (or none), the same stars, and the same
 argument type.
-
-
-'Boolean encoding format is ignored without 'full-boolean''
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-The message "Boolean encoding format is ignored without 'full-boolean'" can be caused by code like:
-
-::
-
-    xo_emit("{B:enabled/yes+no%d/1+0%d}", enabled);
-
-This code should be replaced with code like:
-
-::
-
-    xo_emit("{B,full-boolean:enabled/yes+no%d/1+0%d}", enabled);
-
-Without 'full-boolean', boolean fields are encoded as
-native true/false values, and the encoding format is
-not used.
 
 
 'The 'full-boolean' modifier without a boolean pair gives quoted true/false'
@@ -538,7 +537,8 @@ This code should be replaced with code like:
 
 A boolean pair gives the "true" word, a plus sign, and the
 "false" word.  Use a backslash to put a literal "+" in a
-word ("{B:mode/a\\+b+c%d}").
+word ("{B:mode/a\\+b+c%d}").  At run time, libxo reports
+a broken pair and displays "true" or "false" instead.
 
 
 'Boolean pair has an empty word'
@@ -556,7 +556,8 @@ This code should be replaced with code like:
 
     xo_emit("{B:enabled/on+off%d}", enabled);
 
-An empty word displays nothing, which is likely a mistake.
+Both words must be non-empty.  At run time, libxo reports
+a broken pair and displays "true" or "false" instead.
 
 
 'Boolean format has text after the conversion spec'
