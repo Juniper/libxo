@@ -1,0 +1,36 @@
+{
+  "data": {
+    "true": {
+      "str": true,
+      "str_next": 1,
+      "power": true,
+      "power_next": 2,
+      "escaped": true,
+      "escaped_next": 3,
+      "arg": true,
+      "arg_next": 4,
+      "full": "1",
+      "full_next": 5,
+      "full_n": 1,
+      "full_n_next": 6,
+      "quoted": "true",
+      "quoted_next": 7
+    },
+    "false": {
+      "str": false,
+      "str_next": 1,
+      "power": false,
+      "power_next": 2,
+      "escaped": false,
+      "escaped_next": 3,
+      "arg": false,
+      "arg_next": 4,
+      "full": "0",
+      "full_next": 5,
+      "full_n": 0,
+      "full_n_next": 6,
+      "quoted": "false",
+      "quoted_next": 7
+    }
+  }
+}
