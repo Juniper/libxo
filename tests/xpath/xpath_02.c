@@ -47,7 +47,7 @@
 
 #define LIBXO_NEED_FILTER
 
-#include "xo_xpath.tab.h"
+#include "xo_xpath.h"
 #include "xo_xparse.h"
 #include "xo_filter.h"
 
