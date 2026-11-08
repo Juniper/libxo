@@ -1,0 +1,92 @@
+<div class="line">
+  <div class="data" data-tag="empty" data-xpath="/top/empty" data-type="boolean" data-value="false">false</div>
+  <div class="data" data-tag="empty-next" data-xpath="/top/empty-next">1</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="full" data-xpath="/top/full" data-type="boolean" data-value="true">true</div>
+  <div class="data" data-tag="full-next" data-xpath="/top/full-next">2</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="zero-string" data-xpath="/top/zero-string" data-type="boolean" data-value="true">true</div>
+  <div class="data" data-tag="zero-string-next" data-xpath="/top/zero-string-next">3</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="false-string" data-xpath="/top/false-string" data-type="boolean" data-value="true">true</div>
+  <div class="data" data-tag="false-string-next" data-xpath="/top/false-string-next">4</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="zero-int" data-xpath="/top/zero-int" data-type="boolean" data-value="true">true</div>
+  <div class="data" data-tag="zero-int-next" data-xpath="/top/zero-int-next">5</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="empty-int" data-xpath="/top/empty-int" data-type="boolean" data-value="false">false</div>
+  <div class="data" data-tag="empty-int-next" data-xpath="/top/empty-int-next">6</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="power" data-xpath="/top/power" data-type="boolean" data-value="true">on</div>
+  <div class="data" data-tag="power-next" data-xpath="/top/power-next">7</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="power-off" data-xpath="/top/power-off" data-type="boolean" data-value="false">Off</div>
+  <div class="data" data-tag="power-off-next" data-xpath="/top/power-off-next">8</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="escaped" data-xpath="/top/escaped" data-type="boolean" data-value="true">a+b</div>
+  <div class="data" data-tag="escaped-next" data-xpath="/top/escaped-next">9</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="escaped-off" data-xpath="/top/escaped-off" data-type="boolean" data-value="false">100%</div>
+  <div class="data" data-tag="escaped-off-next" data-xpath="/top/escaped-off-next">9</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="bad" data-xpath="/top/bad" data-type="boolean" data-value="true">true</div>
+  <div class="data" data-tag="bad-next" data-xpath="/top/bad-next">9</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="pair" data-xpath="/top/pair" data-type="boolean" data-value="true">yes</div>
+  <div class="data" data-tag="pair-next" data-xpath="/top/pair-next">10</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="pair-off" data-xpath="/top/pair-off" data-type="boolean" data-value="false">no</div>
+  <div class="data" data-tag="pair-off-next" data-xpath="/top/pair-off-next">11</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="pair-empty" data-xpath="/top/pair-empty" data-type="boolean" data-value="true">true</div>
+  <div class="data" data-tag="pair-empty-next" data-xpath="/top/pair-empty-next">12</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="stars" data-xpath="/top/stars" data-type="boolean" data-value="false">false</div>
+  <div class="data" data-tag="stars-next" data-xpath="/top/stars-next">13</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="at-star" data-xpath="/top/at-star" data-type="boolean" data-value="true">true</div>
+  <div class="data" data-tag="at-star-next" data-xpath="/top/at-star-next">14</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="raw" data-xpath="/top/raw" data-type="boolean" data-value="true">on</div>
+  <div class="data" data-tag="raw-next" data-xpath="/top/raw-next">15</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="enc" data-xpath="/top/enc" data-type="boolean" data-value="false">F</div>
+  <div class="data" data-tag="enc-next" data-xpath="/top/enc-next">16</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="enc-n" data-xpath="/top/enc-n" data-type="boolean" data-value="true">T</div>
+  <div class="data" data-tag="enc-n-next" data-xpath="/top/enc-n-next">17</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="quoted" data-xpath="/top/quoted" data-type="boolean" data-value="true">true</div>
+  <div class="data" data-tag="quoted-next" data-xpath="/top/quoted-next">18</div>
+</div>
+<div class="line">
+  <div class="label">Enabled</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="enabled" data-xpath="/top/enabled" data-type="boolean" data-value="true">yes</div>
+</div>
+<div class="line">
+  <div class="label">Disabled</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="disabled" data-xpath="/top/disabled" data-type="boolean" data-value="false">no</div>
+</div>
