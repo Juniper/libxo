@@ -437,6 +437,7 @@ class XoValidateVisitor : public RecursiveASTVisitor<XoValidateVisitor> {
     unsigned           TypeDiagID;
     unsigned           BoolDiagID;
     unsigned           PairDiagID;
+    unsigned           NullPairDiagID;
     unsigned           WarnDiagID;
 
 public:
@@ -459,6 +460,9 @@ public:
         PairDiagID   = Diags.getCustomDiagID(errLevel,
                            "libxo: argument %0: a 'B' field's \"*\" boolean"
                            " pair takes type %1 but the argument has type %2");
+        NullPairDiagID = Diags.getCustomDiagID(errLevel,
+                           "libxo: argument %0: a 'B' field's \"*\" boolean"
+                           " pair is NULL");
         WarnDiagID   = Diags.getCustomDiagID(DiagnosticsEngine::Warning,
                            "libxo: %0");
     }
@@ -546,6 +550,17 @@ public:
             /* A NULL string is a false 'B' value */
             bool null_ok = (xfp->xf_extflags
                             & (XXF_NULL_AS_EMPTY | XO_SHIM_XXF_BOOLEAN)) != 0;
+
+            /*
+             * A NULL "*" pair isn't a type mistake, so don't complain
+             * about "void *"; say what will happen.
+             */
+            if ((xfp->xf_extflags & XO_SHIM_XXF_PAIR)
+                    && arg->isNullPointerConstant(*Ctx_,
+                                Expr::NPC_ValueDependentIsNotNull)) {
+                Diags.Report(arg->getBeginLoc(), NullPairDiagID) << (i + 1);
+                continue;
+            }
 
             if (!exp_type.isNull()) {
                 if (!type_matches(*Ctx_, exp_type, arg, null_ok)) {
