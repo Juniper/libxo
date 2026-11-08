@@ -496,6 +496,7 @@ typedef struct xo_boolean_info_s {
 #define XBIF_PAIR	(1<<0)	/* Has a boolean pair */
 #define XBIF_ARG	(1<<1)	/* "*": the pair comes from an arg */
 #define XBIF_ESCAPED	(1<<2)	/* The words contain escapes */
+#define XBIF_BROKEN	(1<<3)	/* Broken pair (reported); use true/false */
 
 /*
  * Enough fspecs for any valid boolean format (a text run, a spec and
