@@ -376,6 +376,9 @@ xo_xparse_node_is_attr_axis (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
 int
 xo_xparse_results (xo_xparse_data_t *xdp, xo_xparse_node_id_t id);
 
+int
+xo_xparse_result_expr (xo_xparse_data_t *xdp, xo_xparse_node_id_t id);
+
 void
 xo_xparse_dump_one_node (xo_xparse_data_t *xdp, xo_xparse_node_id_t id,
 			 int indent, const char *title);

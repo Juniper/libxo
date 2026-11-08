@@ -950,6 +950,27 @@ xo_xparse_results (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
     return -1;
 }
 
+/*
+ * Add the result of an M_PARSE_XPATH parse: a single XPath expression,
+ * whose root goes in the next xd_paths[] slot for xo_eval_compile().
+ * Unlike xo_xparse_results(), a union stays whole (it's one node-set
+ * expression, not a list of filter paths), and the XDF_ALL_* filter
+ * flags are left alone.  Returns -1 if xd_paths[] can't be grown.
+ */
+int
+xo_xparse_result_expr (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
+{
+    if (xo_xparse_node(xdp, id) == NULL)
+	return 0;		/* Nothing to record; caller sees no path */
+
+    if (xo_xparse_result_add(xdp, id) < 0)
+	return -1;
+
+    XO_DBG(xdp->xd_xop, "xo: parse results: expression %ld at path %u",
+	   (long) id, xdp->xd_paths_cur - 1);
+    return 0;
+}
+
 int
 xo_xparse_node_contains_dot (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
 {
