@@ -1,0 +1,6 @@
+test_20.pass-test: invalid boolean pair for 'arg-null': (null)
+test_20.pass-test: invalid boolean pair for 'arg-bad': 'a+b+c'
+test_20.pass-test: boolean pair has an empty word: '+off%d'
+test_20.pass-test: invalid boolean pair for 'arg-null': (null)
+test_20.pass-test: invalid boolean pair for 'arg-bad': 'a+b+c'
+test_20.pass-test: boolean pair has an empty word: '+off%d'
