@@ -324,6 +324,11 @@ xo_shim_boolean_args (xo_parse_t *xpp, const char *fmt,
 
     if (xfip->xfi_format >= 0) {
 	const char *dfmt = xo_foff(fmt, xfip->xfi_format);
+	xo_parse_error_func_t save_error = xpp->xp_error;
+	xo_parse_error_func_t save_warn = xpp->xp_warn;
+
+	/* xo_parse_format() has already reported any errors */
+	xpp->xp_error = xpp->xp_warn = NULL;
 
 	if (xfip->xfi_fspecs) {
 	    dfp = xfip->xfi_fspecs;
@@ -335,6 +340,9 @@ xo_shim_boolean_args (xo_parse_t *xpp, const char *fmt,
 					 (unsigned) xfip->xfi_flen, 0,
 					 fspecs, XO_BOOLEAN_FSPECS, &xbi);
 	}
+
+	xpp->xp_error = save_error;
+	xpp->xp_warn = save_warn;
     }
 
     if (rc < 0)
