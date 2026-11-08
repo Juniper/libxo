@@ -13,6 +13,7 @@
 
 #include <inttypes.h>
 #include "xo_buf.h"
+#include "xo_encoder.h"
 
 /*
  * Three styles of specifying thread-local variables are supported.
@@ -100,26 +101,6 @@ xo_strndup (const char *str, ssize_t len)
     }
 
     return cp;
-}
-
-/*
- * Simple string comparison function (without the temptation
- * to forget the "== 0").
- */
-static inline int
-xo_streq (const char *one, const char *two)
-{
-    return strcmp(one, two) == 0;
-}
-
-/*
- * Simple string comparison function (without the temptation
- * to forget the "== 0").
- */
-static inline int
-xo_streqn (const char *one, const char *two, ssize_t len_of_two)
-{
-    return strncmp(one, two, len_of_two + 1) == 0;
 }
 
 /* Rather lame that we can't count on these... */
