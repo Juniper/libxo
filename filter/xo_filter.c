@@ -1024,6 +1024,25 @@ xo_filter_xparse_data (xo_handle_t *xop UNUSED, xo_filter_t *xfp)
 }
 
 /*
+ * Parse a single XPath expression (M_PARSE_XPATH) into the filter's
+ * parse data, so callers (e.g. libpin) can hand the result to
+ * xo_eval_compile() without needing the private xo_xparse.h.  The
+ * expression's root is recorded as the next entry in xd_paths[].
+ */
+ssize_t
+xo_filter_parse_expr (xo_handle_t *xop, xo_filter_t *xfp, const char *expr)
+{
+    xo_xparse_data_t *xdp = &xfp->xf_xd;
+    uint32_t start = xdp->xd_paths_cur;
+
+    int rc = xo_xparse_parse_string(xop, xdp, expr, M_PARSE_XPATH);
+    if (rc != 0 || xdp->xd_paths_cur <= start)
+	return -1;
+
+    return (ssize_t) xdp->xd_paths[start];
+}
+
+/*
  * Completely destroy and release a filter
  */
 static void
