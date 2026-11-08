@@ -32,6 +32,7 @@
 #include "xo_config.h"
 #include "xo.h"
 #include "xo_buf.h"
+#include "xo_private.h"
 #include "xo_xpath.h"
 #include "xo_xparse.h"
 
