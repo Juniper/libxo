@@ -1,0 +1,2002 @@
+op create: [cbor] []
+ [append] @ 0 (1/1)
+ bf                                                    .
+    op open_container: [boolean-test] []
+ [append] @ 1 (d/13)
+ 6c 62 6f 6f  6c 65 61 6e  - 2d 74 65 73  74           lboolean-test
+ [append] @ 14 (1/1)
+ bf                                                    .
+      op open_container: [basic] []
+   [append] @ 15 (6/6)
+   65 62 61 73  69 63                                    ebasic
+   [append] @ 21 (1/1)
+   bf                                                    .
+        op string: [test-name-1] [basic]
+     [append] @ 22 (c/12)
+     6b 74 65 73  74 2d 6e 61  - 6d 65 2d 31               ktest-name-1
+     [append] @ 34 (6/6)
+     65 62 61 73  69 63                                    ebasic
+        op content: [boolean-1] [true]
+     [append] @ 40 (a/10)
+     69 62 6f 6f  6c 65 61 6e  - 2d 31                     iboolean-1
+     [append] @ 50 (1/1)
+     f5                                                    .
+     [content] @ 50 (1/1)
+     f5                                                    .
+        op open_container: [true] []
+     [append] @ 51 (5/5)
+     64 74 72 75  65                                       dtrue
+     [append] @ 56 (1/1)
+     bf                                                    .
+          op content: [str] [true]
+       [append] @ 57 (4/4)
+       63 73 74 72                                           cstr
+       [append] @ 61 (1/1)
+       f5                                                    .
+       [content] @ 61 (1/1)
+       f5                                                    .
+          op content: [str-next] [1]
+       [append] @ 62 (9/9)
+       68 73 74 72  2d 6e 65 78  - 74                        hstr-next
+       [content] @ 71 (1/1)
+       01                                                    .
+          op content: [capital] [true]
+       [append] @ 72 (8/8)
+       67 63 61 70  69 74 61 6c                              gcapital
+       [append] @ 80 (1/1)
+       f5                                                    .
+       [content] @ 80 (1/1)
+       f5                                                    .
+          op content: [capital-next] [2]
+       [append] @ 81 (d/13)
+       6c 63 61 70  69 74 61 6c  - 2d 6e 65 78  74           lcapital-next
+       [content] @ 94 (1/1)
+       02                                                    .
+          op content: [int] [true]
+       [append] @ 95 (4/4)
+       63 69 6e 74                                           cint
+       [append] @ 99 (1/1)
+       f5                                                    .
+       [content] @ 99 (1/1)
+       f5                                                    .
+          op content: [int-next] [3]
+       [append] @ 100 (9/9)
+       68 69 6e 74  2d 6e 65 78  - 74                        hint-next
+       [content] @ 109 (1/1)
+       03                                                    .
+          op content: [ptr] [true]
+       [append] @ 110 (4/4)
+       63 70 74 72                                           cptr
+       [append] @ 114 (1/1)
+       f5                                                    .
+       [content] @ 114 (1/1)
+       f5                                                    .
+          op content: [ptr-next] [4]
+       [append] @ 115 (9/9)
+       68 70 74 72  2d 6e 65 78  - 74                        hptr-next
+       [content] @ 124 (1/1)
+       04                                                    .
+          op content: [power] [true]
+       [append] @ 125 (6/6)
+       65 70 6f 77  65 72                                    epower
+       [append] @ 131 (1/1)
+       f5                                                    .
+       [content] @ 131 (1/1)
+       f5                                                    .
+          op content: [power-next] [5]
+       [append] @ 132 (b/11)
+       6a 70 6f 77  65 72 2d 6e  - 65 78 74                  jpower-next
+       [content] @ 143 (1/1)
+       05                                                    .
+          op content: [power-ptr] [true]
+       [append] @ 144 (a/10)
+       69 70 6f 77  65 72 2d 70  - 74 72                     ipower-ptr
+       [append] @ 154 (1/1)
+       f5                                                    .
+       [content] @ 154 (1/1)
+       f5                                                    .
+          op content: [power-ptr-next] [6]
+       [append] @ 155 (f/15)
+       6e 70 6f 77  65 72 2d 70  - 74 72 2d 6e  65 78 74     npower-ptr-next
+       [content] @ 170 (1/1)
+       06                                                    .
+          op content: [power-u] [true]
+       [append] @ 171 (8/8)
+       67 70 6f 77  65 72 2d 75                              gpower-u
+       [append] @ 179 (1/1)
+       f5                                                    .
+       [content] @ 179 (1/1)
+       f5                                                    .
+          op content: [power-u-next] [7]
+       [append] @ 180 (d/13)
+       6c 70 6f 77  65 72 2d 75  - 2d 6e 65 78  74           lpower-u-next
+       [content] @ 193 (1/1)
+       07                                                    .
+          op content: [power-64] [true]
+       [append] @ 194 (9/9)
+       68 70 6f 77  65 72 2d 36  - 34                        hpower-64
+       [append] @ 203 (1/1)
+       f5                                                    .
+       [content] @ 203 (1/1)
+       f5                                                    .
+          op content: [power-64-next] [8]
+       [append] @ 204 (e/14)
+       6d 70 6f 77  65 72 2d 36  - 34 2d 6e 65  78 74        mpower-64-next
+       [content] @ 218 (1/1)
+       08                                                    .
+          op content: [state] [true]
+       [append] @ 219 (6/6)
+       65 73 74 61  74 65                                    estate
+       [append] @ 225 (1/1)
+       f5                                                    .
+       [content] @ 225 (1/1)
+       f5                                                    .
+          op content: [state-next] [9]
+       [append] @ 226 (b/11)
+       6a 73 74 61  74 65 2d 6e  - 65 78 74                  jstate-next
+       [content] @ 237 (1/1)
+       09                                                    .
+          op content: [power-arg] [true]
+       [append] @ 238 (a/10)
+       69 70 6f 77  65 72 2d 61  - 72 67                     ipower-arg
+       [append] @ 248 (1/1)
+       f5                                                    .
+       [content] @ 248 (1/1)
+       f5                                                    .
+          op content: [power-arg-next] [10]
+       [append] @ 249 (f/15)
+       6e 70 6f 77  65 72 2d 61  - 72 67 2d 6e  65 78 74     npower-arg-next
+       [content] @ 264 (1/1)
+       0a                                                    .
+          op string: [full] [1]
+       [append] @ 265 (5/5)
+       64 66 75 6c  6c                                       dfull
+       [append] @ 270 (2/2)
+       61 31                                                 a1
+          op content: [full-next] [11]
+       [append] @ 272 (a/10)
+       69 66 75 6c  6c 2d 6e 65  - 78 74                     ifull-next
+       [content] @ 282 (1/1)
+       0b                                                    .
+          op content: [long-name] [true]
+       [append] @ 283 (a/10)
+       69 6c 6f 6e  67 2d 6e 61  - 6d 65                     ilong-name
+       [append] @ 293 (1/1)
+       f5                                                    .
+       [content] @ 293 (1/1)
+       f5                                                    .
+          op content: [long-name-next] [12]
+       [append] @ 294 (f/15)
+       6e 6c 6f 6e  67 2d 6e 61  - 6d 65 2d 6e  65 78 74     nlong-name-next
+       [content] @ 309 (1/1)
+       0c                                                    .
+          op close_container: [true] []
+       [append] @ 310 (1/1)
+       ff                                                    .
+        op string: [test-name-2] [basic]
+     [append] @ 311 (c/12)
+     6b 74 65 73  74 2d 6e 61  - 6d 65 2d 32               ktest-name-2
+     [append] @ 323 (6/6)
+     65 62 61 73  69 63                                    ebasic
+        op content: [boolean-2] [false]
+     [append] @ 329 (a/10)
+     69 62 6f 6f  6c 65 61 6e  - 2d 32                     iboolean-2
+     [append] @ 339 (1/1)
+     f4                                                    .
+     [content] @ 339 (1/1)
+     f4                                                    .
+        op open_container: [false] []
+     [append] @ 340 (6/6)
+     65 66 61 6c  73 65                                    efalse
+     [append] @ 346 (1/1)
+     bf                                                    .
+          op content: [str] [false]
+       [append] @ 347 (4/4)
+       63 73 74 72                                           cstr
+       [append] @ 351 (1/1)
+       f4                                                    .
+       [content] @ 351 (1/1)
+       f4                                                    .
+          op content: [str-next] [13]
+       [append] @ 352 (9/9)
+       68 73 74 72  2d 6e 65 78  - 74                        hstr-next
+       [content] @ 361 (1/1)
+       0d                                                    .
+          op content: [capital] [false]
+       [append] @ 362 (8/8)
+       67 63 61 70  69 74 61 6c                              gcapital
+       [append] @ 370 (1/1)
+       f4                                                    .
+       [content] @ 370 (1/1)
+       f4                                                    .
+          op content: [capital-next] [14]
+       [append] @ 371 (d/13)
+       6c 63 61 70  69 74 61 6c  - 2d 6e 65 78  74           lcapital-next
+       [content] @ 384 (1/1)
+       0e                                                    .
+          op content: [int] [false]
+       [append] @ 385 (4/4)
+       63 69 6e 74                                           cint
+       [append] @ 389 (1/1)
+       f4                                                    .
+       [content] @ 389 (1/1)
+       f4                                                    .
+          op content: [int-next] [15]
+       [append] @ 390 (9/9)
+       68 69 6e 74  2d 6e 65 78  - 74                        hint-next
+       [content] @ 399 (1/1)
+       0f                                                    .
+          op content: [ptr] [false]
+       [append] @ 400 (4/4)
+       63 70 74 72                                           cptr
+       [append] @ 404 (1/1)
+       f4                                                    .
+       [content] @ 404 (1/1)
+       f4                                                    .
+          op content: [ptr-next] [16]
+       [append] @ 405 (9/9)
+       68 70 74 72  2d 6e 65 78  - 74                        hptr-next
+       [content] @ 414 (1/1)
+       10                                                    .
+          op content: [power] [false]
+       [append] @ 415 (6/6)
+       65 70 6f 77  65 72                                    epower
+       [append] @ 421 (1/1)
+       f4                                                    .
+       [content] @ 421 (1/1)
+       f4                                                    .
+          op content: [power-next] [17]
+       [append] @ 422 (b/11)
+       6a 70 6f 77  65 72 2d 6e  - 65 78 74                  jpower-next
+       [content] @ 433 (1/1)
+       11                                                    .
+          op content: [power-ptr] [false]
+       [append] @ 434 (a/10)
+       69 70 6f 77  65 72 2d 70  - 74 72                     ipower-ptr
+       [append] @ 444 (1/1)
+       f4                                                    .
+       [content] @ 444 (1/1)
+       f4                                                    .
+          op content: [power-ptr-next] [18]
+       [append] @ 445 (f/15)
+       6e 70 6f 77  65 72 2d 70  - 74 72 2d 6e  65 78 74     npower-ptr-next
+       [content] @ 460 (1/1)
+       12                                                    .
+          op content: [power-u] [false]
+       [append] @ 461 (8/8)
+       67 70 6f 77  65 72 2d 75                              gpower-u
+       [append] @ 469 (1/1)
+       f4                                                    .
+       [content] @ 469 (1/1)
+       f4                                                    .
+          op content: [power-u-next] [19]
+       [append] @ 470 (d/13)
+       6c 70 6f 77  65 72 2d 75  - 2d 6e 65 78  74           lpower-u-next
+       [content] @ 483 (1/1)
+       13                                                    .
+          op content: [power-64] [false]
+       [append] @ 484 (9/9)
+       68 70 6f 77  65 72 2d 36  - 34                        hpower-64
+       [append] @ 493 (1/1)
+       f4                                                    .
+       [content] @ 493 (1/1)
+       f4                                                    .
+          op content: [power-64-next] [20]
+       [append] @ 494 (e/14)
+       6d 70 6f 77  65 72 2d 36  - 34 2d 6e 65  78 74        mpower-64-next
+       [content] @ 508 (1/1)
+       14                                                    .
+          op content: [state] [false]
+       [append] @ 509 (6/6)
+       65 73 74 61  74 65                                    estate
+       [append] @ 515 (1/1)
+       f4                                                    .
+       [content] @ 515 (1/1)
+       f4                                                    .
+          op content: [state-next] [21]
+       [append] @ 516 (b/11)
+       6a 73 74 61  74 65 2d 6e  - 65 78 74                  jstate-next
+       [content] @ 527 (1/1)
+       15                                                    .
+          op content: [power-arg] [false]
+       [append] @ 528 (a/10)
+       69 70 6f 77  65 72 2d 61  - 72 67                     ipower-arg
+       [append] @ 538 (1/1)
+       f4                                                    .
+       [content] @ 538 (1/1)
+       f4                                                    .
+          op content: [power-arg-next] [22]
+       [append] @ 539 (f/15)
+       6e 70 6f 77  65 72 2d 61  - 72 67 2d 6e  65 78 74     npower-arg-next
+       [content] @ 554 (1/1)
+       16                                                    .
+          op string: [full] [0]
+       [append] @ 555 (5/5)
+       64 66 75 6c  6c                                       dfull
+       [append] @ 560 (2/2)
+       61 30                                                 a0
+          op content: [full-next] [23]
+       [append] @ 562 (a/10)
+       69 66 75 6c  6c 2d 6e 65  - 78 74                     ifull-next
+       [content] @ 572 (1/1)
+       17                                                    .
+          op content: [long-name] [false]
+       [append] @ 573 (a/10)
+       69 6c 6f 6e  67 2d 6e 61  - 6d 65                     ilong-name
+       [append] @ 583 (1/1)
+       f4                                                    .
+       [content] @ 583 (1/1)
+       f4                                                    .
+          op content: [long-name-next] [24]
+       [append] @ 584 (f/15)
+       6e 6c 6f 6e  67 2d 6e 61  - 6d 65 2d 6e  65 78 74     nlong-name-next
+       [content] @ 599 (2/2)
+       18 18                                                 ..
+          op close_container: [false] []
+       [append] @ 601 (1/1)
+       ff                                                    .
+        op close_container: [basic] []
+     [append] @ 602 (1/1)
+     ff                                                    .
+      op open_container: [types] []
+   [append] @ 603 (6/6)
+   65 74 79 70  65 73                                    etypes
+   [append] @ 609 (1/1)
+   bf                                                    .
+        op string: [test-name-1] [types]
+     [append] @ 610 (c/12)
+     6b 74 65 73  74 2d 6e 61  - 6d 65 2d 31               ktest-name-1
+     [append] @ 622 (6/6)
+     65 74 79 70  65 73                                    etypes
+        op content: [boolean-1] [true]
+     [append] @ 628 (a/10)
+     69 62 6f 6f  6c 65 61 6e  - 2d 31                     iboolean-1
+     [append] @ 638 (1/1)
+     f5                                                    .
+     [content] @ 638 (1/1)
+     f5                                                    .
+        op open_container: [true] []
+     [append] @ 639 (5/5)
+     64 74 72 75  65                                       dtrue
+     [append] @ 644 (1/1)
+     bf                                                    .
+          op content: [t-int] [true]
+       [append] @ 645 (6/6)
+       65 74 2d 69  6e 74                                    et-int
+       [append] @ 651 (1/1)
+       f5                                                    .
+       [content] @ 651 (1/1)
+       f5                                                    .
+          op content: [t-int-next] [25]
+       [append] @ 652 (b/11)
+       6a 74 2d 69  6e 74 2d 6e  - 65 78 74                  jt-int-next
+       [content] @ 663 (2/2)
+       18 19                                                 ..
+          op content: [t-char] [true]
+       [append] @ 665 (7/7)
+       66 74 2d 63  68 61 72                                 ft-char
+       [append] @ 672 (1/1)
+       f5                                                    .
+       [content] @ 672 (1/1)
+       f5                                                    .
+          op content: [t-char-next] [26]
+       [append] @ 673 (c/12)
+       6b 74 2d 63  68 61 72 2d  - 6e 65 78 74               kt-char-next
+       [content] @ 685 (2/2)
+       18 1a                                                 ..
+          op content: [t-short] [true]
+       [append] @ 687 (8/8)
+       67 74 2d 73  68 6f 72 74                              gt-short
+       [append] @ 695 (1/1)
+       f5                                                    .
+       [content] @ 695 (1/1)
+       f5                                                    .
+          op content: [t-short-next] [27]
+       [append] @ 696 (d/13)
+       6c 74 2d 73  68 6f 72 74  - 2d 6e 65 78  74           lt-short-next
+       [content] @ 709 (2/2)
+       18 1b                                                 ..
+          op content: [t-long] [true]
+       [append] @ 711 (7/7)
+       66 74 2d 6c  6f 6e 67                                 ft-long
+       [append] @ 718 (1/1)
+       f5                                                    .
+       [content] @ 718 (1/1)
+       f5                                                    .
+          op content: [t-long-next] [28]
+       [append] @ 719 (c/12)
+       6b 74 2d 6c  6f 6e 67 2d  - 6e 65 78 74               kt-long-next
+       [content] @ 731 (2/2)
+       18 1c                                                 ..
+          op content: [t-long-long] [true]
+       [append] @ 733 (c/12)
+       6b 74 2d 6c  6f 6e 67 2d  - 6c 6f 6e 67               kt-long-long
+       [append] @ 745 (1/1)
+       f5                                                    .
+       [content] @ 745 (1/1)
+       f5                                                    .
+          op content: [t-long-long-next] [29]
+       [append] @ 746 (11/17)
+       70 74 2d 6c  6f 6e 67 2d  - 6c 6f 6e 67  2d 6e 65 78  pt-long-long-nex
+       74                                                    t
+       [content] @ 763 (2/2)
+       18 1d                                                 ..
+          op content: [t-intmax] [true]
+       [append] @ 765 (9/9)
+       68 74 2d 69  6e 74 6d 61  - 78                        ht-intmax
+       [append] @ 774 (1/1)
+       f5                                                    .
+       [content] @ 774 (1/1)
+       f5                                                    .
+          op content: [t-intmax-next] [30]
+       [append] @ 775 (e/14)
+       6d 74 2d 69  6e 74 6d 61  - 78 2d 6e 65  78 74        mt-intmax-next
+       [content] @ 789 (2/2)
+       18 1e                                                 ..
+          op content: [t-ptrdiff] [true]
+       [append] @ 791 (a/10)
+       69 74 2d 70  74 72 64 69  - 66 66                     it-ptrdiff
+       [append] @ 801 (1/1)
+       f5                                                    .
+       [content] @ 801 (1/1)
+       f5                                                    .
+          op content: [t-ptrdiff-next] [31]
+       [append] @ 802 (f/15)
+       6e 74 2d 70  74 72 64 69  - 66 66 2d 6e  65 78 74     nt-ptrdiff-next
+       [content] @ 817 (2/2)
+       18 1f                                                 ..
+          op content: [t-size] [true]
+       [append] @ 819 (7/7)
+       66 74 2d 73  69 7a 65                                 ft-size
+       [append] @ 826 (1/1)
+       f5                                                    .
+       [content] @ 826 (1/1)
+       f5                                                    .
+          op content: [t-size-next] [32]
+       [append] @ 827 (c/12)
+       6b 74 2d 73  69 7a 65 2d  - 6e 65 78 74               kt-size-next
+       [content] @ 839 (2/2)
+       18 20                                                 . 
+          op content: [t-quad] [true]
+       [append] @ 841 (7/7)
+       66 74 2d 71  75 61 64                                 ft-quad
+       [append] @ 848 (1/1)
+       f5                                                    .
+       [content] @ 848 (1/1)
+       f5                                                    .
+          op content: [t-quad-next] [33]
+       [append] @ 849 (c/12)
+       6b 74 2d 71  75 61 64 2d  - 6e 65 78 74               kt-quad-next
+       [content] @ 861 (2/2)
+       18 21                                                 .!
+          op content: [t-int64] [true]
+       [append] @ 863 (8/8)
+       67 74 2d 69  6e 74 36 34                              gt-int64
+       [append] @ 871 (1/1)
+       f5                                                    .
+       [content] @ 871 (1/1)
+       f5                                                    .
+          op content: [t-int64-next] [34]
+       [append] @ 872 (d/13)
+       6c 74 2d 69  6e 74 36 34  - 2d 6e 65 78  74           lt-int64-next
+       [content] @ 885 (2/2)
+       18 22                                                 ."
+          op content: [t-double] [true]
+       [append] @ 887 (9/9)
+       68 74 2d 64  6f 75 62 6c  - 65                        ht-double
+       [append] @ 896 (1/1)
+       f5                                                    .
+       [content] @ 896 (1/1)
+       f5                                                    .
+          op content: [t-double-next] [35]
+       [append] @ 897 (e/14)
+       6d 74 2d 64  6f 75 62 6c  - 65 2d 6e 65  78 74        mt-double-next
+       [content] @ 911 (2/2)
+       18 23                                                 .#
+          op content: [t-long-double] [true]
+       [append] @ 913 (e/14)
+       6d 74 2d 6c  6f 6e 67 2d  - 64 6f 75 62  6c 65        mt-long-double
+       [append] @ 927 (1/1)
+       f5                                                    .
+       [content] @ 927 (1/1)
+       f5                                                    .
+          op content: [t-long-double-next] [36]
+       [append] @ 928 (13/19)
+       72 74 2d 6c  6f 6e 67 2d  - 64 6f 75 62  6c 65 2d 6e  rt-long-double-n
+       65 78 74                                              ext
+       [content] @ 947 (2/2)
+       18 24                                                 .$
+          op content: [t-wint] [true]
+       [append] @ 949 (7/7)
+       66 74 2d 77  69 6e 74                                 ft-wint
+       [append] @ 956 (1/1)
+       f5                                                    .
+       [content] @ 956 (1/1)
+       f5                                                    .
+          op content: [t-wint-next] [37]
+       [append] @ 957 (c/12)
+       6b 74 2d 77  69 6e 74 2d  - 6e 65 78 74               kt-wint-next
+       [content] @ 969 (2/2)
+       18 25                                                 .%
+          op content: [t-wide] [true]
+       [append] @ 971 (7/7)
+       66 74 2d 77  69 64 65                                 ft-wide
+       [append] @ 978 (1/1)
+       f5                                                    .
+       [content] @ 978 (1/1)
+       f5                                                    .
+          op content: [t-wide-next] [38]
+       [append] @ 979 (c/12)
+       6b 74 2d 77  69 64 65 2d  - 6e 65 78 74               kt-wide-next
+       [content] @ 991 (2/2)
+       18 26                                                 .&
+          op content: [t-string] [true]
+       [append] @ 993 (9/9)
+       68 74 2d 73  74 72 69 6e  - 67                        ht-string
+       [append] @ 1002 (1/1)
+       f5                                                    .
+       [content] @ 1002 (1/1)
+       f5                                                    .
+          op content: [t-string-next] [39]
+       [append] @ 1003 (e/14)
+       6d 74 2d 73  74 72 69 6e  - 67 2d 6e 65  78 74        mt-string-next
+       [content] @ 1017 (2/2)
+       18 27                                                 .'
+          op content: [t-pointer] [true]
+       [append] @ 1019 (a/10)
+       69 74 2d 70  6f 69 6e 74  - 65 72                     it-pointer
+       [append] @ 1029 (1/1)
+       f5                                                    .
+       [content] @ 1029 (1/1)
+       f5                                                    .
+          op content: [t-pointer-next] [40]
+       [append] @ 1030 (f/15)
+       6e 74 2d 70  6f 69 6e 74  - 65 72 2d 6e  65 78 74     nt-pointer-next
+       [content] @ 1045 (2/2)
+       18 28                                                 .(
+          op content: [t-bool] [true]
+       [append] @ 1047 (7/7)
+       66 74 2d 62  6f 6f 6c                                 ft-bool
+       [append] @ 1054 (1/1)
+       f5                                                    .
+       [content] @ 1054 (1/1)
+       f5                                                    .
+          op content: [t-bool-next] [41]
+       [append] @ 1055 (c/12)
+       6b 74 2d 62  6f 6f 6c 2d  - 6e 65 78 74               kt-bool-next
+       [content] @ 1067 (2/2)
+       18 29                                                 .)
+          op close_container: [true] []
+       [append] @ 1069 (1/1)
+       ff                                                    .
+        op string: [test-name-2] [types]
+     [append] @ 1070 (c/12)
+     6b 74 65 73  74 2d 6e 61  - 6d 65 2d 32               ktest-name-2
+     [append] @ 1082 (6/6)
+     65 74 79 70  65 73                                    etypes
+        op content: [boolean-2] [false]
+     [append] @ 1088 (a/10)
+     69 62 6f 6f  6c 65 61 6e  - 2d 32                     iboolean-2
+     [append] @ 1098 (1/1)
+     f4                                                    .
+     [content] @ 1098 (1/1)
+     f4                                                    .
+        op open_container: [false] []
+     [append] @ 1099 (6/6)
+     65 66 61 6c  73 65                                    efalse
+     [append] @ 1105 (1/1)
+     bf                                                    .
+          op content: [t-int] [false]
+       [append] @ 1106 (6/6)
+       65 74 2d 69  6e 74                                    et-int
+       [append] @ 1112 (1/1)
+       f4                                                    .
+       [content] @ 1112 (1/1)
+       f4                                                    .
+          op content: [t-int-next] [42]
+       [append] @ 1113 (b/11)
+       6a 74 2d 69  6e 74 2d 6e  - 65 78 74                  jt-int-next
+       [content] @ 1124 (2/2)
+       18 2a                                                 .*
+          op content: [t-char] [false]
+       [append] @ 1126 (7/7)
+       66 74 2d 63  68 61 72                                 ft-char
+       [append] @ 1133 (1/1)
+       f4                                                    .
+       [content] @ 1133 (1/1)
+       f4                                                    .
+          op content: [t-char-next] [43]
+       [append] @ 1134 (c/12)
+       6b 74 2d 63  68 61 72 2d  - 6e 65 78 74               kt-char-next
+       [content] @ 1146 (2/2)
+       18 2b                                                 .+
+          op content: [t-short] [false]
+       [append] @ 1148 (8/8)
+       67 74 2d 73  68 6f 72 74                              gt-short
+       [append] @ 1156 (1/1)
+       f4                                                    .
+       [content] @ 1156 (1/1)
+       f4                                                    .
+          op content: [t-short-next] [44]
+       [append] @ 1157 (d/13)
+       6c 74 2d 73  68 6f 72 74  - 2d 6e 65 78  74           lt-short-next
+       [content] @ 1170 (2/2)
+       18 2c                                                 .,
+          op content: [t-long] [false]
+       [append] @ 1172 (7/7)
+       66 74 2d 6c  6f 6e 67                                 ft-long
+       [append] @ 1179 (1/1)
+       f4                                                    .
+       [content] @ 1179 (1/1)
+       f4                                                    .
+          op content: [t-long-next] [45]
+       [append] @ 1180 (c/12)
+       6b 74 2d 6c  6f 6e 67 2d  - 6e 65 78 74               kt-long-next
+       [content] @ 1192 (2/2)
+       18 2d                                                 .-
+          op content: [t-long-long] [false]
+       [append] @ 1194 (c/12)
+       6b 74 2d 6c  6f 6e 67 2d  - 6c 6f 6e 67               kt-long-long
+       [append] @ 1206 (1/1)
+       f4                                                    .
+       [content] @ 1206 (1/1)
+       f4                                                    .
+          op content: [t-long-long-next] [46]
+       [append] @ 1207 (11/17)
+       70 74 2d 6c  6f 6e 67 2d  - 6c 6f 6e 67  2d 6e 65 78  pt-long-long-nex
+       74                                                    t
+       [content] @ 1224 (2/2)
+       18 2e                                                 ..
+          op content: [t-intmax] [false]
+       [append] @ 1226 (9/9)
+       68 74 2d 69  6e 74 6d 61  - 78                        ht-intmax
+       [append] @ 1235 (1/1)
+       f4                                                    .
+       [content] @ 1235 (1/1)
+       f4                                                    .
+          op content: [t-intmax-next] [47]
+       [append] @ 1236 (e/14)
+       6d 74 2d 69  6e 74 6d 61  - 78 2d 6e 65  78 74        mt-intmax-next
+       [content] @ 1250 (2/2)
+       18 2f                                                 ./
+          op content: [t-ptrdiff] [false]
+       [append] @ 1252 (a/10)
+       69 74 2d 70  74 72 64 69  - 66 66                     it-ptrdiff
+       [append] @ 1262 (1/1)
+       f4                                                    .
+       [content] @ 1262 (1/1)
+       f4                                                    .
+          op content: [t-ptrdiff-next] [48]
+       [append] @ 1263 (f/15)
+       6e 74 2d 70  74 72 64 69  - 66 66 2d 6e  65 78 74     nt-ptrdiff-next
+       [content] @ 1278 (2/2)
+       18 30                                                 .0
+          op content: [t-size] [false]
+       [append] @ 1280 (7/7)
+       66 74 2d 73  69 7a 65                                 ft-size
+       [append] @ 1287 (1/1)
+       f4                                                    .
+       [content] @ 1287 (1/1)
+       f4                                                    .
+          op content: [t-size-next] [49]
+       [append] @ 1288 (c/12)
+       6b 74 2d 73  69 7a 65 2d  - 6e 65 78 74               kt-size-next
+       [content] @ 1300 (2/2)
+       18 31                                                 .1
+          op content: [t-quad] [false]
+       [append] @ 1302 (7/7)
+       66 74 2d 71  75 61 64                                 ft-quad
+       [append] @ 1309 (1/1)
+       f4                                                    .
+       [content] @ 1309 (1/1)
+       f4                                                    .
+          op content: [t-quad-next] [50]
+       [append] @ 1310 (c/12)
+       6b 74 2d 71  75 61 64 2d  - 6e 65 78 74               kt-quad-next
+       [content] @ 1322 (2/2)
+       18 32                                                 .2
+          op content: [t-int64] [false]
+       [append] @ 1324 (8/8)
+       67 74 2d 69  6e 74 36 34                              gt-int64
+       [append] @ 1332 (1/1)
+       f4                                                    .
+       [content] @ 1332 (1/1)
+       f4                                                    .
+          op content: [t-int64-next] [51]
+       [append] @ 1333 (d/13)
+       6c 74 2d 69  6e 74 36 34  - 2d 6e 65 78  74           lt-int64-next
+       [content] @ 1346 (2/2)
+       18 33                                                 .3
+          op content: [t-double] [false]
+       [append] @ 1348 (9/9)
+       68 74 2d 64  6f 75 62 6c  - 65                        ht-double
+       [append] @ 1357 (1/1)
+       f4                                                    .
+       [content] @ 1357 (1/1)
+       f4                                                    .
+          op content: [t-double-next] [52]
+       [append] @ 1358 (e/14)
+       6d 74 2d 64  6f 75 62 6c  - 65 2d 6e 65  78 74        mt-double-next
+       [content] @ 1372 (2/2)
+       18 34                                                 .4
+          op content: [t-long-double] [false]
+       [append] @ 1374 (e/14)
+       6d 74 2d 6c  6f 6e 67 2d  - 64 6f 75 62  6c 65        mt-long-double
+       [append] @ 1388 (1/1)
+       f4                                                    .
+       [content] @ 1388 (1/1)
+       f4                                                    .
+          op content: [t-long-double-next] [53]
+       [append] @ 1389 (13/19)
+       72 74 2d 6c  6f 6e 67 2d  - 64 6f 75 62  6c 65 2d 6e  rt-long-double-n
+       65 78 74                                              ext
+       [content] @ 1408 (2/2)
+       18 35                                                 .5
+          op content: [t-wint] [false]
+       [append] @ 1410 (7/7)
+       66 74 2d 77  69 6e 74                                 ft-wint
+       [append] @ 1417 (1/1)
+       f4                                                    .
+       [content] @ 1417 (1/1)
+       f4                                                    .
+          op content: [t-wint-next] [54]
+       [append] @ 1418 (c/12)
+       6b 74 2d 77  69 6e 74 2d  - 6e 65 78 74               kt-wint-next
+       [content] @ 1430 (2/2)
+       18 36                                                 .6
+          op content: [t-wide] [false]
+       [append] @ 1432 (7/7)
+       66 74 2d 77  69 64 65                                 ft-wide
+       [append] @ 1439 (1/1)
+       f4                                                    .
+       [content] @ 1439 (1/1)
+       f4                                                    .
+          op content: [t-wide-next] [55]
+       [append] @ 1440 (c/12)
+       6b 74 2d 77  69 64 65 2d  - 6e 65 78 74               kt-wide-next
+       [content] @ 1452 (2/2)
+       18 37                                                 .7
+          op content: [t-string] [false]
+       [append] @ 1454 (9/9)
+       68 74 2d 73  74 72 69 6e  - 67                        ht-string
+       [append] @ 1463 (1/1)
+       f4                                                    .
+       [content] @ 1463 (1/1)
+       f4                                                    .
+          op content: [t-string-next] [56]
+       [append] @ 1464 (e/14)
+       6d 74 2d 73  74 72 69 6e  - 67 2d 6e 65  78 74        mt-string-next
+       [content] @ 1478 (2/2)
+       18 38                                                 .8
+          op content: [t-pointer] [false]
+       [append] @ 1480 (a/10)
+       69 74 2d 70  6f 69 6e 74  - 65 72                     it-pointer
+       [append] @ 1490 (1/1)
+       f4                                                    .
+       [content] @ 1490 (1/1)
+       f4                                                    .
+          op content: [t-pointer-next] [57]
+       [append] @ 1491 (f/15)
+       6e 74 2d 70  6f 69 6e 74  - 65 72 2d 6e  65 78 74     nt-pointer-next
+       [content] @ 1506 (2/2)
+       18 39                                                 .9
+          op content: [t-bool] [false]
+       [append] @ 1508 (7/7)
+       66 74 2d 62  6f 6f 6c                                 ft-bool
+       [append] @ 1515 (1/1)
+       f4                                                    .
+       [content] @ 1515 (1/1)
+       f4                                                    .
+          op content: [t-bool-next] [58]
+       [append] @ 1516 (c/12)
+       6b 74 2d 62  6f 6f 6c 2d  - 6e 65 78 74               kt-bool-next
+       [content] @ 1528 (2/2)
+       18 3a                                                 .:
+          op close_container: [false] []
+       [append] @ 1530 (1/1)
+       ff                                                    .
+        op close_container: [types] []
+     [append] @ 1531 (1/1)
+     ff                                                    .
+      op open_container: [stars] []
+   [append] @ 1532 (6/6)
+   65 73 74 61  72 73                                    estars
+   [append] @ 1538 (1/1)
+   bf                                                    .
+        op string: [test-name-1] [stars]
+     [append] @ 1539 (c/12)
+     6b 74 65 73  74 2d 6e 61  - 6d 65 2d 31               ktest-name-1
+     [append] @ 1551 (6/6)
+     65 73 74 61  72 73                                    estars
+        op content: [boolean-1] [true]
+     [append] @ 1557 (a/10)
+     69 62 6f 6f  6c 65 61 6e  - 2d 31                     iboolean-1
+     [append] @ 1567 (1/1)
+     f5                                                    .
+     [content] @ 1567 (1/1)
+     f5                                                    .
+        op open_container: [true] []
+     [append] @ 1568 (5/5)
+     64 74 72 75  65                                       dtrue
+     [append] @ 1573 (1/1)
+     bf                                                    .
+          op content: [star-string] [true]
+       [append] @ 1574 (c/12)
+       6b 73 74 61  72 2d 73 74  - 72 69 6e 67               kstar-string
+       [append] @ 1586 (1/1)
+       f5                                                    .
+       [content] @ 1586 (1/1)
+       f5                                                    .
+          op content: [star-string-next] [59]
+       [append] @ 1587 (11/17)
+       70 73 74 61  72 2d 73 74  - 72 69 6e 67  2d 6e 65 78  pstar-string-nex
+       74                                                    t
+       [content] @ 1604 (2/2)
+       18 3b                                                 .;
+          op content: [star-int] [true]
+       [append] @ 1606 (9/9)
+       68 73 74 61  72 2d 69 6e  - 74                        hstar-int
+       [append] @ 1615 (1/1)
+       f5                                                    .
+       [content] @ 1615 (1/1)
+       f5                                                    .
+          op content: [star-int-next] [60]
+       [append] @ 1616 (e/14)
+       6d 73 74 61  72 2d 69 6e  - 74 2d 6e 65  78 74        mstar-int-next
+       [content] @ 1630 (2/2)
+       18 3c                                                 .<
+          op content: [at-star] [true]
+       [append] @ 1632 (8/8)
+       67 61 74 2d  73 74 61 72                              gat-star
+       [append] @ 1640 (1/1)
+       f5                                                    .
+       [content] @ 1640 (1/1)
+       f5                                                    .
+          op content: [at-star-next] [61]
+       [append] @ 1641 (d/13)
+       6c 61 74 2d  73 74 61 72  - 2d 6e 65 78  74           lat-star-next
+       [content] @ 1654 (2/2)
+       18 3d                                                 .=
+          op content: [pointless] [true]
+       [append] @ 1656 (a/10)
+       69 70 6f 69  6e 74 6c 65  - 73 73                     ipointless
+       [append] @ 1666 (1/1)
+       f5                                                    .
+       [content] @ 1666 (1/1)
+       f5                                                    .
+          op content: [pointless-next] [62]
+       [append] @ 1667 (f/15)
+       6e 70 6f 69  6e 74 6c 65  - 73 73 2d 6e  65 78 74     npointless-next
+       [content] @ 1682 (2/2)
+       18 3e                                                 .>
+          op close_container: [true] []
+       [append] @ 1684 (1/1)
+       ff                                                    .
+        op string: [test-name-2] [stars]
+     [append] @ 1685 (c/12)
+     6b 74 65 73  74 2d 6e 61  - 6d 65 2d 32               ktest-name-2
+     [append] @ 1697 (6/6)
+     65 73 74 61  72 73                                    estars
+        op content: [boolean-2] [false]
+     [append] @ 1703 (a/10)
+     69 62 6f 6f  6c 65 61 6e  - 2d 32                     iboolean-2
+     [append] @ 1713 (1/1)
+     f4                                                    .
+     [content] @ 1713 (1/1)
+     f4                                                    .
+        op open_container: [false] []
+     [append] @ 1714 (6/6)
+     65 66 61 6c  73 65                                    efalse
+     [append] @ 1720 (1/1)
+     bf                                                    .
+          op content: [star-string] [false]
+       [append] @ 1721 (c/12)
+       6b 73 74 61  72 2d 73 74  - 72 69 6e 67               kstar-string
+       [append] @ 1733 (1/1)
+       f4                                                    .
+       [content] @ 1733 (1/1)
+       f4                                                    .
+          op content: [star-string-next] [63]
+       [append] @ 1734 (11/17)
+       70 73 74 61  72 2d 73 74  - 72 69 6e 67  2d 6e 65 78  pstar-string-nex
+       74                                                    t
+       [content] @ 1751 (2/2)
+       18 3f                                                 .?
+          op content: [star-int] [false]
+       [append] @ 1753 (9/9)
+       68 73 74 61  72 2d 69 6e  - 74                        hstar-int
+       [append] @ 1762 (1/1)
+       f4                                                    .
+       [content] @ 1762 (1/1)
+       f4                                                    .
+          op content: [star-int-next] [64]
+       [append] @ 1763 (e/14)
+       6d 73 74 61  72 2d 69 6e  - 74 2d 6e 65  78 74        mstar-int-next
+       [content] @ 1777 (2/2)
+       18 40                                                 .@
+          op content: [at-star] [false]
+       [append] @ 1779 (8/8)
+       67 61 74 2d  73 74 61 72                              gat-star
+       [append] @ 1787 (1/1)
+       f4                                                    .
+       [content] @ 1787 (1/1)
+       f4                                                    .
+          op content: [at-star-next] [65]
+       [append] @ 1788 (d/13)
+       6c 61 74 2d  73 74 61 72  - 2d 6e 65 78  74           lat-star-next
+       [content] @ 1801 (2/2)
+       18 41                                                 .A
+          op content: [pointless] [false]
+       [append] @ 1803 (a/10)
+       69 70 6f 69  6e 74 6c 65  - 73 73                     ipointless
+       [append] @ 1813 (1/1)
+       f4                                                    .
+       [content] @ 1813 (1/1)
+       f4                                                    .
+          op content: [pointless-next] [66]
+       [append] @ 1814 (f/15)
+       6e 70 6f 69  6e 74 6c 65  - 73 73 2d 6e  65 78 74     npointless-next
+       [content] @ 1829 (2/2)
+       18 42                                                 .B
+          op close_container: [false] []
+       [append] @ 1831 (1/1)
+       ff                                                    .
+        op close_container: [stars] []
+     [append] @ 1832 (1/1)
+     ff                                                    .
+      op open_container: [strings] []
+   [append] @ 1833 (8/8)
+   67 73 74 72  69 6e 67 73                              gstrings
+   [append] @ 1841 (1/1)
+   bf                                                    .
+        op string: [test-name-1] [strings]
+     [append] @ 1842 (c/12)
+     6b 74 65 73  74 2d 6e 61  - 6d 65 2d 31               ktest-name-1
+     [append] @ 1854 (8/8)
+     67 73 74 72  69 6e 67 73                              gstrings
+        op content: [boolean-1] [true]
+     [append] @ 1862 (a/10)
+     69 62 6f 6f  6c 65 61 6e  - 2d 31                     iboolean-1
+     [append] @ 1872 (1/1)
+     f5                                                    .
+     [content] @ 1872 (1/1)
+     f5                                                    .
+        op open_container: [true] []
+     [append] @ 1873 (5/5)
+     64 74 72 75  65                                       dtrue
+     [append] @ 1878 (1/1)
+     bf                                                    .
+          op content: [null-or-zero] [true]
+       [append] @ 1879 (d/13)
+       6c 6e 75 6c  6c 2d 6f 72  - 2d 7a 65 72  6f           lnull-or-zero
+       [append] @ 1892 (1/1)
+       f5                                                    .
+       [content] @ 1892 (1/1)
+       f5                                                    .
+          op content: [null-or-zero-next] [67]
+       [append] @ 1893 (12/18)
+       71 6e 75 6c  6c 2d 6f 72  - 2d 7a 65 72  6f 2d 6e 65  qnull-or-zero-ne
+       78 74                                                 xt
+       [content] @ 1911 (2/2)
+       18 43                                                 .C
+          op content: [empty-or-false] [true]
+       [append] @ 1913 (f/15)
+       6e 65 6d 70  74 79 2d 6f  - 72 2d 66 61  6c 73 65     nempty-or-false
+       [append] @ 1928 (1/1)
+       f5                                                    .
+       [content] @ 1928 (1/1)
+       f5                                                    .
+          op content: [empty-or-false-next] [68]
+       [append] @ 1929 (14/20)
+       73 65 6d 70  74 79 2d 6f  - 72 2d 66 61  6c 73 65 2d  sempty-or-false-
+       6e 65 78 74                                           next
+       [content] @ 1949 (2/2)
+       18 44                                                 .D
+          op close_container: [true] []
+       [append] @ 1951 (1/1)
+       ff                                                    .
+        op string: [test-name-2] [strings]
+     [append] @ 1952 (c/12)
+     6b 74 65 73  74 2d 6e 61  - 6d 65 2d 32               ktest-name-2
+     [append] @ 1964 (8/8)
+     67 73 74 72  69 6e 67 73                              gstrings
+        op content: [boolean-2] [false]
+     [append] @ 1972 (a/10)
+     69 62 6f 6f  6c 65 61 6e  - 2d 32                     iboolean-2
+     [append] @ 1982 (1/1)
+     f4                                                    .
+     [content] @ 1982 (1/1)
+     f4                                                    .
+        op open_container: [false] []
+     [append] @ 1983 (6/6)
+     65 66 61 6c  73 65                                    efalse
+     [append] @ 1989 (1/1)
+     bf                                                    .
+          op content: [null-or-zero] [false]
+       [append] @ 1990 (d/13)
+       6c 6e 75 6c  6c 2d 6f 72  - 2d 7a 65 72  6f           lnull-or-zero
+       [append] @ 2003 (1/1)
+       f4                                                    .
+       [content] @ 2003 (1/1)
+       f4                                                    .
+          op content: [null-or-zero-next] [69]
+       [append] @ 2004 (12/18)
+       71 6e 75 6c  6c 2d 6f 72  - 2d 7a 65 72  6f 2d 6e 65  qnull-or-zero-ne
+       78 74                                                 xt
+       [content] @ 2022 (2/2)
+       18 45                                                 .E
+          op content: [empty-or-false] [false]
+       [append] @ 2024 (f/15)
+       6e 65 6d 70  74 79 2d 6f  - 72 2d 66 61  6c 73 65     nempty-or-false
+       [append] @ 2039 (1/1)
+       f4                                                    .
+       [content] @ 2039 (1/1)
+       f4                                                    .
+          op content: [empty-or-false-next] [70]
+       [append] @ 2040 (14/20)
+       73 65 6d 70  74 79 2d 6f  - 72 2d 66 61  6c 73 65 2d  sempty-or-false-
+       6e 65 78 74                                           next
+       [content] @ 2060 (2/2)
+       18 46                                                 .F
+          op close_container: [false] []
+       [append] @ 2062 (1/1)
+       ff                                                    .
+        op close_container: [strings] []
+     [append] @ 2063 (1/1)
+     ff                                                    .
+      op open_container: [pairs] []
+   [append] @ 2064 (6/6)
+   65 70 61 69  72 73                                    epairs
+   [append] @ 2070 (1/1)
+   bf                                                    .
+        op string: [test-name-1] [pairs]
+     [append] @ 2071 (c/12)
+     6b 74 65 73  74 2d 6e 61  - 6d 65 2d 31               ktest-name-1
+     [append] @ 2083 (6/6)
+     65 70 61 69  72 73                                    epairs
+        op content: [boolean-1] [true]
+     [append] @ 2089 (a/10)
+     69 62 6f 6f  6c 65 61 6e  - 2d 31                     iboolean-1
+     [append] @ 2099 (1/1)
+     f5                                                    .
+     [content] @ 2099 (1/1)
+     f5                                                    .
+        op open_container: [true] []
+     [append] @ 2100 (5/5)
+     64 74 72 75  65                                       dtrue
+     [append] @ 2105 (1/1)
+     bf                                                    .
+          op content: [arg-pair] [true]
+       [append] @ 2106 (9/9)
+       68 61 72 67  2d 70 61 69  - 72                        harg-pair
+       [append] @ 2115 (1/1)
+       f5                                                    .
+       [content] @ 2115 (1/1)
+       f5                                                    .
+          op content: [arg-pair-next] [71]
+       [append] @ 2116 (e/14)
+       6d 61 72 67  2d 70 61 69  - 72 2d 6e 65  78 74        marg-pair-next
+       [content] @ 2130 (2/2)
+       18 47                                                 .G
+          op content: [arg-null] [true]
+       [append] @ 2132 (9/9)
+       68 61 72 67  2d 6e 75 6c  - 6c                        harg-null
+       [append] @ 2141 (1/1)
+       f5                                                    .
+       [content] @ 2141 (1/1)
+       f5                                                    .
+          op content: [arg-null-next] [72]
+       [append] @ 2142 (e/14)
+       6d 61 72 67  2d 6e 75 6c  - 6c 2d 6e 65  78 74        marg-null-next
+       [content] @ 2156 (2/2)
+       18 48                                                 .H
+          op content: [arg-bad] [true]
+       [append] @ 2158 (8/8)
+       67 61 72 67  2d 62 61 64                              garg-bad
+       [append] @ 2166 (1/1)
+       f5                                                    .
+       [content] @ 2166 (1/1)
+       f5                                                    .
+          op content: [arg-bad-next] [73]
+       [append] @ 2167 (d/13)
+       6c 61 72 67  2d 62 61 64  - 2d 6e 65 78  74           larg-bad-next
+       [content] @ 2180 (2/2)
+       18 49                                                 .I
+          op content: [arg-escape] [true]
+       [append] @ 2182 (b/11)
+       6a 61 72 67  2d 65 73 63  - 61 70 65                  jarg-escape
+       [append] @ 2193 (1/1)
+       f5                                                    .
+       [content] @ 2193 (1/1)
+       f5                                                    .
+          op content: [arg-escape-next] [74]
+       [append] @ 2194 (10/16)
+       6f 61 72 67  2d 65 73 63  - 61 70 65 2d  6e 65 78 74  oarg-escape-next
+       [content] @ 2210 (2/2)
+       18 4a                                                 .J
+          op content: [escaped] [true]
+       [append] @ 2212 (8/8)
+       67 65 73 63  61 70 65 64                              gescaped
+       [append] @ 2220 (1/1)
+       f5                                                    .
+       [content] @ 2220 (1/1)
+       f5                                                    .
+          op content: [escaped-next] [75]
+       [append] @ 2221 (d/13)
+       6c 65 73 63  61 70 65 64  - 2d 6e 65 78  74           lescaped-next
+       [content] @ 2234 (2/2)
+       18 4b                                                 .K
+          op content: [percent] [true]
+       [append] @ 2236 (8/8)
+       67 70 65 72  63 65 6e 74                              gpercent
+       [append] @ 2244 (1/1)
+       f5                                                    .
+       [content] @ 2244 (1/1)
+       f5                                                    .
+          op content: [percent-next] [76]
+       [append] @ 2245 (d/13)
+       6c 70 65 72  63 65 6e 74  - 2d 6e 65 78  74           lpercent-next
+       [content] @ 2258 (2/2)
+       18 4c                                                 .L
+          op content: [brace] [true]
+       [append] @ 2260 (6/6)
+       65 62 72 61  63 65                                    ebrace
+       [append] @ 2266 (1/1)
+       f5                                                    .
+       [content] @ 2266 (1/1)
+       f5                                                    .
+          op content: [brace-next] [77]
+       [append] @ 2267 (b/11)
+       6a 62 72 61  63 65 2d 6e  - 65 78 74                  jbrace-next
+       [content] @ 2278 (2/2)
+       18 4d                                                 .M
+          op content: [empty-word] [true]
+       [append] @ 2280 (b/11)
+       6a 65 6d 70  74 79 2d 77  - 6f 72 64                  jempty-word
+       [append] @ 2291 (1/1)
+       f5                                                    .
+       [content] @ 2291 (1/1)
+       f5                                                    .
+          op content: [empty-word-next] [78]
+       [append] @ 2292 (10/16)
+       6f 65 6d 70  74 79 2d 77  - 6f 72 64 2d  6e 65 78 74  oempty-word-next
+       [content] @ 2308 (2/2)
+       18 4e                                                 .N
+          op content: [xml-chars] [true]
+       [append] @ 2310 (a/10)
+       69 78 6d 6c  2d 63 68 61  - 72 73                     ixml-chars
+       [append] @ 2320 (1/1)
+       f5                                                    .
+       [content] @ 2320 (1/1)
+       f5                                                    .
+          op content: [xml-chars-next] [79]
+       [append] @ 2321 (f/15)
+       6e 78 6d 6c  2d 63 68 61  - 72 73 2d 6e  65 78 74     nxml-chars-next
+       [content] @ 2336 (2/2)
+       18 4f                                                 .O
+          op close_container: [true] []
+       [append] @ 2338 (1/1)
+       ff                                                    .
+        op string: [test-name-2] [pairs]
+     [append] @ 2339 (c/12)
+     6b 74 65 73  74 2d 6e 61  - 6d 65 2d 32               ktest-name-2
+     [append] @ 2351 (6/6)
+     65 70 61 69  72 73                                    epairs
+        op content: [boolean-2] [false]
+     [append] @ 2357 (a/10)
+     69 62 6f 6f  6c 65 61 6e  - 2d 32                     iboolean-2
+     [append] @ 2367 (1/1)
+     f4                                                    .
+     [content] @ 2367 (1/1)
+     f4                                                    .
+        op open_container: [false] []
+     [append] @ 2368 (6/6)
+     65 66 61 6c  73 65                                    efalse
+     [append] @ 2374 (1/1)
+     bf                                                    .
+          op content: [arg-pair] [false]
+       [append] @ 2375 (9/9)
+       68 61 72 67  2d 70 61 69  - 72                        harg-pair
+       [append] @ 2384 (1/1)
+       f4                                                    .
+       [content] @ 2384 (1/1)
+       f4                                                    .
+          op content: [arg-pair-next] [80]
+       [append] @ 2385 (e/14)
+       6d 61 72 67  2d 70 61 69  - 72 2d 6e 65  78 74        marg-pair-next
+       [content] @ 2399 (2/2)
+       18 50                                                 .P
+          op content: [arg-null] [false]
+       [append] @ 2401 (9/9)
+       68 61 72 67  2d 6e 75 6c  - 6c                        harg-null
+       [append] @ 2410 (1/1)
+       f4                                                    .
+       [content] @ 2410 (1/1)
+       f4                                                    .
+          op content: [arg-null-next] [81]
+       [append] @ 2411 (e/14)
+       6d 61 72 67  2d 6e 75 6c  - 6c 2d 6e 65  78 74        marg-null-next
+       [content] @ 2425 (2/2)
+       18 51                                                 .Q
+          op content: [arg-bad] [false]
+       [append] @ 2427 (8/8)
+       67 61 72 67  2d 62 61 64                              garg-bad
+       [append] @ 2435 (1/1)
+       f4                                                    .
+       [content] @ 2435 (1/1)
+       f4                                                    .
+          op content: [arg-bad-next] [82]
+       [append] @ 2436 (d/13)
+       6c 61 72 67  2d 62 61 64  - 2d 6e 65 78  74           larg-bad-next
+       [content] @ 2449 (2/2)
+       18 52                                                 .R
+          op content: [arg-escape] [false]
+       [append] @ 2451 (b/11)
+       6a 61 72 67  2d 65 73 63  - 61 70 65                  jarg-escape
+       [append] @ 2462 (1/1)
+       f4                                                    .
+       [content] @ 2462 (1/1)
+       f4                                                    .
+          op content: [arg-escape-next] [83]
+       [append] @ 2463 (10/16)
+       6f 61 72 67  2d 65 73 63  - 61 70 65 2d  6e 65 78 74  oarg-escape-next
+       [content] @ 2479 (2/2)
+       18 53                                                 .S
+          op content: [escaped] [false]
+       [append] @ 2481 (8/8)
+       67 65 73 63  61 70 65 64                              gescaped
+       [append] @ 2489 (1/1)
+       f4                                                    .
+       [content] @ 2489 (1/1)
+       f4                                                    .
+          op content: [escaped-next] [84]
+       [append] @ 2490 (d/13)
+       6c 65 73 63  61 70 65 64  - 2d 6e 65 78  74           lescaped-next
+       [content] @ 2503 (2/2)
+       18 54                                                 .T
+          op content: [percent] [false]
+       [append] @ 2505 (8/8)
+       67 70 65 72  63 65 6e 74                              gpercent
+       [append] @ 2513 (1/1)
+       f4                                                    .
+       [content] @ 2513 (1/1)
+       f4                                                    .
+          op content: [percent-next] [85]
+       [append] @ 2514 (d/13)
+       6c 70 65 72  63 65 6e 74  - 2d 6e 65 78  74           lpercent-next
+       [content] @ 2527 (2/2)
+       18 55                                                 .U
+          op content: [brace] [false]
+       [append] @ 2529 (6/6)
+       65 62 72 61  63 65                                    ebrace
+       [append] @ 2535 (1/1)
+       f4                                                    .
+       [content] @ 2535 (1/1)
+       f4                                                    .
+          op content: [brace-next] [86]
+       [append] @ 2536 (b/11)
+       6a 62 72 61  63 65 2d 6e  - 65 78 74                  jbrace-next
+       [content] @ 2547 (2/2)
+       18 56                                                 .V
+          op content: [empty-word] [false]
+       [append] @ 2549 (b/11)
+       6a 65 6d 70  74 79 2d 77  - 6f 72 64                  jempty-word
+       [append] @ 2560 (1/1)
+       f4                                                    .
+       [content] @ 2560 (1/1)
+       f4                                                    .
+          op content: [empty-word-next] [87]
+       [append] @ 2561 (10/16)
+       6f 65 6d 70  74 79 2d 77  - 6f 72 64 2d  6e 65 78 74  oempty-word-next
+       [content] @ 2577 (2/2)
+       18 57                                                 .W
+          op content: [xml-chars] [false]
+       [append] @ 2579 (a/10)
+       69 78 6d 6c  2d 63 68 61  - 72 73                     ixml-chars
+       [append] @ 2589 (1/1)
+       f4                                                    .
+       [content] @ 2589 (1/1)
+       f4                                                    .
+          op content: [xml-chars-next] [88]
+       [append] @ 2590 (f/15)
+       6e 78 6d 6c  2d 63 68 61  - 72 73 2d 6e  65 78 74     nxml-chars-next
+       [content] @ 2605 (2/2)
+       18 58                                                 .X
+          op close_container: [false] []
+       [append] @ 2607 (1/1)
+       ff                                                    .
+        op close_container: [pairs] []
+     [append] @ 2608 (1/1)
+     ff                                                    .
+      op open_container: [full] []
+   [append] @ 2609 (5/5)
+   64 66 75 6c  6c                                       dfull
+   [append] @ 2614 (1/1)
+   bf                                                    .
+        op string: [test-name-1] [full]
+     [append] @ 2615 (c/12)
+     6b 74 65 73  74 2d 6e 61  - 6d 65 2d 31               ktest-name-1
+     [append] @ 2627 (5/5)
+     64 66 75 6c  6c                                       dfull
+        op content: [boolean-1] [true]
+     [append] @ 2632 (a/10)
+     69 62 6f 6f  6c 65 61 6e  - 2d 31                     iboolean-1
+     [append] @ 2642 (1/1)
+     f5                                                    .
+     [content] @ 2642 (1/1)
+     f5                                                    .
+        op open_container: [true] []
+     [append] @ 2643 (5/5)
+     64 74 72 75  65                                       dtrue
+     [append] @ 2648 (1/1)
+     bf                                                    .
+          op string: [full-words] [yup]
+       [append] @ 2649 (b/11)
+       6a 66 75 6c  6c 2d 77 6f  - 72 64 73                  jfull-words
+       [append] @ 2660 (4/4)
+       63 79 75 70                                           cyup
+          op content: [full-words-next] [89]
+       [append] @ 2664 (10/16)
+       6f 66 75 6c  6c 2d 77 6f  - 72 64 73 2d  6e 65 78 74  ofull-words-next
+       [content] @ 2680 (2/2)
+       18 59                                                 .Y
+          op string: [full-none] [true]
+       [append] @ 2682 (a/10)
+       69 66 75 6c  6c 2d 6e 6f  - 6e 65                     ifull-none
+       [append] @ 2692 (5/5)
+       64 74 72 75  65                                       dtrue
+          op content: [full-none-next] [90]
+       [append] @ 2697 (f/15)
+       6e 66 75 6c  6c 2d 6e 6f  - 6e 65 2d 6e  65 78 74     nfull-none-next
+       [content] @ 2712 (2/2)
+       18 5a                                                 .Z
+          op string: [full-enc] [1]
+       [append] @ 2714 (9/9)
+       68 66 75 6c  6c 2d 65 6e  - 63                        hfull-enc
+       [append] @ 2723 (2/2)
+       61 31                                                 a1
+          op content: [full-enc-next] [91]
+       [append] @ 2725 (e/14)
+       6d 66 75 6c  6c 2d 65 6e  - 63 2d 6e 65  78 74        mfull-enc-next
+       [content] @ 2739 (2/2)
+       18 5b                                                 .[
+          op content: [full-enc-n] [1]
+       [append] @ 2741 (b/11)
+       6a 66 75 6c  6c 2d 65 6e  - 63 2d 6e                  jfull-enc-n
+       [content] @ 2752 (1/1)
+       01                                                    .
+          op content: [full-enc-n-next] [92]
+       [append] @ 2753 (10/16)
+       6f 66 75 6c  6c 2d 65 6e  - 63 2d 6e 2d  6e 65 78 74  ofull-enc-n-next
+       [content] @ 2769 (2/2)
+       18 5c                                                 .\
+          op string: [full-raw] [on]
+       [append] @ 2771 (9/9)
+       68 66 75 6c  6c 2d 72 61  - 77                        hfull-raw
+       [append] @ 2780 (3/3)
+       62 6f 6e                                              bon
+          op content: [full-raw-next] [93]
+       [append] @ 2783 (e/14)
+       6d 66 75 6c  6c 2d 72 61  - 77 2d 6e 65  78 74        mfull-raw-next
+       [content] @ 2797 (2/2)
+       18 5d                                                 .]
+          op string: [full-arg] [si]
+       [append] @ 2799 (9/9)
+       68 66 75 6c  6c 2d 61 72  - 67                        hfull-arg
+       [append] @ 2808 (3/3)
+       62 73 69                                              bsi
+          op content: [full-arg-next] [94]
+       [append] @ 2811 (e/14)
+       6d 66 75 6c  6c 2d 61 72  - 67 2d 6e 65  78 74        mfull-arg-next
+       [content] @ 2825 (2/2)
+       18 5e                                                 .^
+          op string: [full-arg-enc] [si]
+       [append] @ 2827 (d/13)
+       6c 66 75 6c  6c 2d 61 72  - 67 2d 65 6e  63           lfull-arg-enc
+       [append] @ 2840 (3/3)
+       62 73 69                                              bsi
+          op content: [full-arg-enc-next] [95]
+       [append] @ 2843 (12/18)
+       71 66 75 6c  6c 2d 61 72  - 67 2d 65 6e  63 2d 6e 65  qfull-arg-enc-ne
+       78 74                                                 xt
+       [content] @ 2861 (2/2)
+       18 5f                                                 ._
+          op string: [full-xml] [<a>]
+       [append] @ 2863 (9/9)
+       68 66 75 6c  6c 2d 78 6d  - 6c                        hfull-xml
+       [append] @ 2872 (4/4)
+       63 3c 61 3e                                           c<a>
+          op content: [full-xml-next] [96]
+       [append] @ 2876 (e/14)
+       6d 66 75 6c  6c 2d 78 6d  - 6c 2d 6e 65  78 74        mfull-xml-next
+       [content] @ 2890 (2/2)
+       18 60                                                 .`
+          op string: [enc-only] [1]
+       [append] @ 2892 (9/9)
+       68 65 6e 63  2d 6f 6e 6c  - 79                        henc-only
+       [append] @ 2901 (2/2)
+       61 31                                                 a1
+          op content: [enc-only-next] [97]
+       [append] @ 2903 (e/14)
+       6d 65 6e 63  2d 6f 6e 6c  - 79 2d 6e 65  78 74        menc-only-next
+       [content] @ 2917 (2/2)
+       18 61                                                 .a
+          op close_container: [true] []
+       [append] @ 2919 (1/1)
+       ff                                                    .
+        op string: [test-name-2] [full]
+     [append] @ 2920 (c/12)
+     6b 74 65 73  74 2d 6e 61  - 6d 65 2d 32               ktest-name-2
+     [append] @ 2932 (5/5)
+     64 66 75 6c  6c                                       dfull
+        op content: [boolean-2] [false]
+     [append] @ 2937 (a/10)
+     69 62 6f 6f  6c 65 61 6e  - 2d 32                     iboolean-2
+     [append] @ 2947 (1/1)
+     f4                                                    .
+     [content] @ 2947 (1/1)
+     f4                                                    .
+        op open_container: [false] []
+     [append] @ 2948 (6/6)
+     65 66 61 6c  73 65                                    efalse
+     [append] @ 2954 (1/1)
+     bf                                                    .
+          op string: [full-words] [nope]
+       [append] @ 2955 (b/11)
+       6a 66 75 6c  6c 2d 77 6f  - 72 64 73                  jfull-words
+       [append] @ 2966 (5/5)
+       64 6e 6f 70  65                                       dnope
+          op content: [full-words-next] [98]
+       [append] @ 2971 (10/16)
+       6f 66 75 6c  6c 2d 77 6f  - 72 64 73 2d  6e 65 78 74  ofull-words-next
+       [content] @ 2987 (2/2)
+       18 62                                                 .b
+          op string: [full-none] [false]
+       [append] @ 2989 (a/10)
+       69 66 75 6c  6c 2d 6e 6f  - 6e 65                     ifull-none
+       [append] @ 2999 (6/6)
+       65 66 61 6c  73 65                                    efalse
+          op content: [full-none-next] [99]
+       [append] @ 3005 (f/15)
+       6e 66 75 6c  6c 2d 6e 6f  - 6e 65 2d 6e  65 78 74     nfull-none-next
+       [content] @ 3020 (2/2)
+       18 63                                                 .c
+          op string: [full-enc] [0]
+       [append] @ 3022 (9/9)
+       68 66 75 6c  6c 2d 65 6e  - 63                        hfull-enc
+       [append] @ 3031 (2/2)
+       61 30                                                 a0
+          op content: [full-enc-next] [100]
+       [append] @ 3033 (e/14)
+       6d 66 75 6c  6c 2d 65 6e  - 63 2d 6e 65  78 74        mfull-enc-next
+       [content] @ 3047 (2/2)
+       18 64                                                 .d
+          op content: [full-enc-n] [0]
+       [append] @ 3049 (b/11)
+       6a 66 75 6c  6c 2d 65 6e  - 63 2d 6e                  jfull-enc-n
+       [content] @ 3060 (1/1)
+       00                                                    .
+          op content: [full-enc-n-next] [101]
+       [append] @ 3061 (10/16)
+       6f 66 75 6c  6c 2d 65 6e  - 63 2d 6e 2d  6e 65 78 74  ofull-enc-n-next
+       [content] @ 3077 (2/2)
+       18 65                                                 .e
+          op string: [full-raw] [off]
+       [append] @ 3079 (9/9)
+       68 66 75 6c  6c 2d 72 61  - 77                        hfull-raw
+       [append] @ 3088 (4/4)
+       63 6f 66 66                                           coff
+          op content: [full-raw-next] [102]
+       [append] @ 3092 (e/14)
+       6d 66 75 6c  6c 2d 72 61  - 77 2d 6e 65  78 74        mfull-raw-next
+       [content] @ 3106 (2/2)
+       18 66                                                 .f
+          op string: [full-arg] [no]
+       [append] @ 3108 (9/9)
+       68 66 75 6c  6c 2d 61 72  - 67                        hfull-arg
+       [append] @ 3117 (3/3)
+       62 6e 6f                                              bno
+          op content: [full-arg-next] [103]
+       [append] @ 3120 (e/14)
+       6d 66 75 6c  6c 2d 61 72  - 67 2d 6e 65  78 74        mfull-arg-next
+       [content] @ 3134 (2/2)
+       18 67                                                 .g
+          op string: [full-arg-enc] [no]
+       [append] @ 3136 (d/13)
+       6c 66 75 6c  6c 2d 61 72  - 67 2d 65 6e  63           lfull-arg-enc
+       [append] @ 3149 (3/3)
+       62 6e 6f                                              bno
+          op content: [full-arg-enc-next] [104]
+       [append] @ 3152 (12/18)
+       71 66 75 6c  6c 2d 61 72  - 67 2d 65 6e  63 2d 6e 65  qfull-arg-enc-ne
+       78 74                                                 xt
+       [content] @ 3170 (2/2)
+       18 68                                                 .h
+          op string: [full-xml] [&b]
+       [append] @ 3172 (9/9)
+       68 66 75 6c  6c 2d 78 6d  - 6c                        hfull-xml
+       [append] @ 3181 (3/3)
+       62 26 62                                              b&b
+          op content: [full-xml-next] [105]
+       [append] @ 3184 (e/14)
+       6d 66 75 6c  6c 2d 78 6d  - 6c 2d 6e 65  78 74        mfull-xml-next
+       [content] @ 3198 (2/2)
+       18 69                                                 .i
+          op string: [enc-only] [0]
+       [append] @ 3200 (9/9)
+       68 65 6e 63  2d 6f 6e 6c  - 79                        henc-only
+       [append] @ 3209 (2/2)
+       61 30                                                 a0
+          op content: [enc-only-next] [106]
+       [append] @ 3211 (e/14)
+       6d 65 6e 63  2d 6f 6e 6c  - 79 2d 6e 65  78 74        menc-only-next
+       [content] @ 3225 (2/2)
+       18 6a                                                 .j
+          op close_container: [false] []
+       [append] @ 3227 (1/1)
+       ff                                                    .
+        op close_container: [full] []
+     [append] @ 3228 (1/1)
+     ff                                                    .
+      op open_container: [mods] []
+   [append] @ 3229 (5/5)
+   64 6d 6f 64  73                                       dmods
+   [append] @ 3234 (1/1)
+   bf                                                    .
+        op string: [test-name-1] [mods]
+     [append] @ 3235 (c/12)
+     6b 74 65 73  74 2d 6e 61  - 6d 65 2d 31               ktest-name-1
+     [append] @ 3247 (5/5)
+     64 6d 6f 64  73                                       dmods
+        op content: [boolean-1] [true]
+     [append] @ 3252 (a/10)
+     69 62 6f 6f  6c 65 61 6e  - 2d 31                     iboolean-1
+     [append] @ 3262 (1/1)
+     f5                                                    .
+     [content] @ 3262 (1/1)
+     f5                                                    .
+        op open_container: [true] []
+     [append] @ 3263 (5/5)
+     64 74 72 75  65                                       dtrue
+     [append] @ 3268 (1/1)
+     bf                                                    .
+          op string: [quoted] [true]
+       [append] @ 3269 (7/7)
+       66 71 75 6f  74 65 64                                 fquoted
+       [append] @ 3276 (5/5)
+       64 74 72 75  65                                       dtrue
+          op content: [quoted-next] [107]
+       [append] @ 3281 (c/12)
+       6b 71 75 6f  74 65 64 2d  - 6e 65 78 74               kquoted-next
+       [content] @ 3293 (2/2)
+       18 6b                                                 .k
+          op content: [encode-only] [true]
+       [append] @ 3295 (c/12)
+       6b 65 6e 63  6f 64 65 2d  - 6f 6e 6c 79               kencode-only
+       [append] @ 3307 (1/1)
+       f5                                                    .
+       [content] @ 3307 (1/1)
+       f5                                                    .
+          op content: [encode-only-next] [108]
+       [append] @ 3308 (11/17)
+       70 65 6e 63  6f 64 65 2d  - 6f 6e 6c 79  2d 6e 65 78  pencode-only-nex
+       74                                                    t
+       [content] @ 3325 (2/2)
+       18 6c                                                 .l
+          op content: [display-only-next] [109]
+       [append] @ 3327 (12/18)
+       71 64 69 73  70 6c 61 79  - 2d 6f 6e 6c  79 2d 6e 65  qdisplay-only-ne
+       78 74                                                 xt
+       [content] @ 3345 (2/2)
+       18 6d                                                 .m
+          op content: [humanize] [true]
+       [append] @ 3347 (9/9)
+       68 68 75 6d  61 6e 69 7a  - 65                        hhumanize
+       [append] @ 3356 (1/1)
+       f5                                                    .
+       [content] @ 3356 (1/1)
+       f5                                                    .
+          op content: [humanize-next] [110]
+       [append] @ 3357 (e/14)
+       6d 68 75 6d  61 6e 69 7a  - 65 2d 6e 65  78 74        mhumanize-next
+       [content] @ 3371 (2/2)
+       18 6e                                                 .n
+          op open_list: [item] []
+       [append] @ 3373 (5/5)
+       64 69 74 65  6d                                       ditem
+       [append] @ 3378 (1/1)
+       9f                                                    .
+            op open_instance: [item] []
+         [append] @ 3379 (1/1)
+         bf                                                    .
+              op content: [key] [true]
+           [append] @ 3380 (4/4)
+           63 6b 65 79                                           ckey
+           [append] @ 3384 (1/1)
+           f5                                                    .
+           [content] @ 3384 (1/1)
+           f5                                                    .
+              op content: [key-next] [111]
+           [append] @ 3385 (9/9)
+           68 6b 65 79  2d 6e 65 78  - 74                        hkey-next
+           [content] @ 3394 (2/2)
+           18 6f                                                 .o
+              op close_instance: [item] []
+           [append] @ 3396 (1/1)
+           ff                                                    .
+            op close_list: [item] []
+         [append] @ 3397 (1/1)
+         ff                                                    .
+          op open_leaf_list: [flag] []
+       [append] @ 3398 (5/5)
+       64 66 6c 61  67                                       dflag
+       [append] @ 3403 (1/1)
+       9f                                                    .
+            op content: [flag] [true]
+         [append] @ 3404 (1/1)
+         f5                                                    .
+         [content] @ 3404 (1/1)
+         f5                                                    .
+            op content: [flag] [false]
+         [append] @ 3405 (1/1)
+         f4                                                    .
+         [content] @ 3405 (1/1)
+         f4                                                    .
+            op close_leaf_list: [flag] []
+         [append] @ 3406 (1/1)
+         ff                                                    .
+          op content: [flag-next] [112]
+       [append] @ 3407 (a/10)
+       69 66 6c 61  67 2d 6e 65  - 78 74                     iflag-next
+       [content] @ 3417 (2/2)
+       18 70                                                 .p
+          op close_container: [true] []
+       [append] @ 3419 (1/1)
+       ff                                                    .
+        op string: [test-name-2] [mods]
+     [append] @ 3420 (c/12)
+     6b 74 65 73  74 2d 6e 61  - 6d 65 2d 32               ktest-name-2
+     [append] @ 3432 (5/5)
+     64 6d 6f 64  73                                       dmods
+        op content: [boolean-2] [false]
+     [append] @ 3437 (a/10)
+     69 62 6f 6f  6c 65 61 6e  - 2d 32                     iboolean-2
+     [append] @ 3447 (1/1)
+     f4                                                    .
+     [content] @ 3447 (1/1)
+     f4                                                    .
+        op open_container: [false] []
+     [append] @ 3448 (6/6)
+     65 66 61 6c  73 65                                    efalse
+     [append] @ 3454 (1/1)
+     bf                                                    .
+          op string: [quoted] [false]
+       [append] @ 3455 (7/7)
+       66 71 75 6f  74 65 64                                 fquoted
+       [append] @ 3462 (6/6)
+       65 66 61 6c  73 65                                    efalse
+          op content: [quoted-next] [113]
+       [append] @ 3468 (c/12)
+       6b 71 75 6f  74 65 64 2d  - 6e 65 78 74               kquoted-next
+       [content] @ 3480 (2/2)
+       18 71                                                 .q
+          op content: [encode-only] [false]
+       [append] @ 3482 (c/12)
+       6b 65 6e 63  6f 64 65 2d  - 6f 6e 6c 79               kencode-only
+       [append] @ 3494 (1/1)
+       f4                                                    .
+       [content] @ 3494 (1/1)
+       f4                                                    .
+          op content: [encode-only-next] [114]
+       [append] @ 3495 (11/17)
+       70 65 6e 63  6f 64 65 2d  - 6f 6e 6c 79  2d 6e 65 78  pencode-only-nex
+       74                                                    t
+       [content] @ 3512 (2/2)
+       18 72                                                 .r
+          op content: [display-only-next] [115]
+       [append] @ 3514 (12/18)
+       71 64 69 73  70 6c 61 79  - 2d 6f 6e 6c  79 2d 6e 65  qdisplay-only-ne
+       78 74                                                 xt
+       [content] @ 3532 (2/2)
+       18 73                                                 .s
+          op content: [humanize] [false]
+       [append] @ 3534 (9/9)
+       68 68 75 6d  61 6e 69 7a  - 65                        hhumanize
+       [append] @ 3543 (1/1)
+       f4                                                    .
+       [content] @ 3543 (1/1)
+       f4                                                    .
+          op content: [humanize-next] [116]
+       [append] @ 3544 (e/14)
+       6d 68 75 6d  61 6e 69 7a  - 65 2d 6e 65  78 74        mhumanize-next
+       [content] @ 3558 (2/2)
+       18 74                                                 .t
+          op open_list: [item] []
+       [append] @ 3560 (5/5)
+       64 69 74 65  6d                                       ditem
+       [append] @ 3565 (1/1)
+       9f                                                    .
+            op open_instance: [item] []
+         [append] @ 3566 (1/1)
+         bf                                                    .
+              op content: [key] [false]
+           [append] @ 3567 (4/4)
+           63 6b 65 79                                           ckey
+           [append] @ 3571 (1/1)
+           f4                                                    .
+           [content] @ 3571 (1/1)
+           f4                                                    .
+              op content: [key-next] [117]
+           [append] @ 3572 (9/9)
+           68 6b 65 79  2d 6e 65 78  - 74                        hkey-next
+           [content] @ 3581 (2/2)
+           18 75                                                 .u
+              op close_instance: [item] []
+           [append] @ 3583 (1/1)
+           ff                                                    .
+            op close_list: [item] []
+         [append] @ 3584 (1/1)
+         ff                                                    .
+          op open_leaf_list: [flag] []
+       [append] @ 3585 (5/5)
+       64 66 6c 61  67                                       dflag
+       [append] @ 3590 (1/1)
+       9f                                                    .
+            op content: [flag] [false]
+         [append] @ 3591 (1/1)
+         f4                                                    .
+         [content] @ 3591 (1/1)
+         f4                                                    .
+            op content: [flag] [true]
+         [append] @ 3592 (1/1)
+         f5                                                    .
+         [content] @ 3592 (1/1)
+         f5                                                    .
+            op close_leaf_list: [flag] []
+         [append] @ 3593 (1/1)
+         ff                                                    .
+          op content: [flag-next] [118]
+       [append] @ 3594 (a/10)
+       69 66 6c 61  67 2d 6e 65  - 78 74                     iflag-next
+       [content] @ 3604 (2/2)
+       18 76                                                 .v
+          op close_container: [false] []
+       [append] @ 3606 (1/1)
+       ff                                                    .
+        op close_container: [mods] []
+     [append] @ 3607 (1/1)
+     ff                                                    .
+      op close_container: [boolean-test] []
+   [append] @ 3608 (1/1)
+   ff                                                    .
+    op finish: [] []
+ [append] @ 3609 (1/1)
+ ff                                                    .
+  op flush: [] []
+>[cbor] @ 0 (e1a/3610)
+>bf 6c 62 6f  6f 6c 65 61  - 6e 2d 74 65  73 74 bf 65  .lboolean-test.e
+>62 61 73 69  63 bf 6b 74  - 65 73 74 2d  6e 61 6d 65  basic.ktest-name
+>2d 31 65 62  61 73 69 63  - 69 62 6f 6f  6c 65 61 6e  -1ebasiciboolean
+>2d 31 f5 64  74 72 75 65  - bf 63 73 74  72 f5 68 73  -1.dtrue.cstr.hs
+>74 72 2d 6e  65 78 74 01  - 67 63 61 70  69 74 61 6c  tr-next.gcapital
+>f5 6c 63 61  70 69 74 61  - 6c 2d 6e 65  78 74 02 63  .lcapital-next.c
+>69 6e 74 f5  68 69 6e 74  - 2d 6e 65 78  74 03 63 70  int.hint-next.cp
+>74 72 f5 68  70 74 72 2d  - 6e 65 78 74  04 65 70 6f  tr.hptr-next.epo
+>77 65 72 f5  6a 70 6f 77  - 65 72 2d 6e  65 78 74 05  wer.jpower-next.
+>69 70 6f 77  65 72 2d 70  - 74 72 f5 6e  70 6f 77 65  ipower-ptr.npowe
+>72 2d 70 74  72 2d 6e 65  - 78 74 06 67  70 6f 77 65  r-ptr-next.gpowe
+>72 2d 75 f5  6c 70 6f 77  - 65 72 2d 75  2d 6e 65 78  r-u.lpower-u-nex
+>74 07 68 70  6f 77 65 72  - 2d 36 34 f5  6d 70 6f 77  t.hpower-64.mpow
+>65 72 2d 36  34 2d 6e 65  - 78 74 08 65  73 74 61 74  er-64-next.estat
+>65 f5 6a 73  74 61 74 65  - 2d 6e 65 78  74 09 69 70  e.jstate-next.ip
+>6f 77 65 72  2d 61 72 67  - f5 6e 70 6f  77 65 72 2d  ower-arg.npower-
+>61 72 67 2d  6e 65 78 74  - 0a 64 66 75  6c 6c 61 31  arg-next.dfulla1
+>69 66 75 6c  6c 2d 6e 65  - 78 74 0b 69  6c 6f 6e 67  ifull-next.ilong
+>2d 6e 61 6d  65 f5 6e 6c  - 6f 6e 67 2d  6e 61 6d 65  -name.nlong-name
+>2d 6e 65 78  74 0c ff 6b  - 74 65 73 74  2d 6e 61 6d  -next..ktest-nam
+>65 2d 32 65  62 61 73 69  - 63 69 62 6f  6f 6c 65 61  e-2ebasiciboolea
+>6e 2d 32 f4  65 66 61 6c  - 73 65 bf 63  73 74 72 f4  n-2.efalse.cstr.
+>68 73 74 72  2d 6e 65 78  - 74 0d 67 63  61 70 69 74  hstr-next.gcapit
+>61 6c f4 6c  63 61 70 69  - 74 61 6c 2d  6e 65 78 74  al.lcapital-next
+>0e 63 69 6e  74 f4 68 69  - 6e 74 2d 6e  65 78 74 0f  .cint.hint-next.
+>63 70 74 72  f4 68 70 74  - 72 2d 6e 65  78 74 10 65  cptr.hptr-next.e
+>70 6f 77 65  72 f4 6a 70  - 6f 77 65 72  2d 6e 65 78  power.jpower-nex
+>74 11 69 70  6f 77 65 72  - 2d 70 74 72  f4 6e 70 6f  t.ipower-ptr.npo
+>77 65 72 2d  70 74 72 2d  - 6e 65 78 74  12 67 70 6f  wer-ptr-next.gpo
+>77 65 72 2d  75 f4 6c 70  - 6f 77 65 72  2d 75 2d 6e  wer-u.lpower-u-n
+>65 78 74 13  68 70 6f 77  - 65 72 2d 36  34 f4 6d 70  ext.hpower-64.mp
+>6f 77 65 72  2d 36 34 2d  - 6e 65 78 74  14 65 73 74  ower-64-next.est
+>61 74 65 f4  6a 73 74 61  - 74 65 2d 6e  65 78 74 15  ate.jstate-next.
+>69 70 6f 77  65 72 2d 61  - 72 67 f4 6e  70 6f 77 65  ipower-arg.npowe
+>72 2d 61 72  67 2d 6e 65  - 78 74 16 64  66 75 6c 6c  r-arg-next.dfull
+>61 30 69 66  75 6c 6c 2d  - 6e 65 78 74  17 69 6c 6f  a0ifull-next.ilo
+>6e 67 2d 6e  61 6d 65 f4  - 6e 6c 6f 6e  67 2d 6e 61  ng-name.nlong-na
+>6d 65 2d 6e  65 78 74 18  - 18 ff ff 65  74 79 70 65  me-next....etype
+>73 bf 6b 74  65 73 74 2d  - 6e 61 6d 65  2d 31 65 74  s.ktest-name-1et
+>79 70 65 73  69 62 6f 6f  - 6c 65 61 6e  2d 31 f5 64  ypesiboolean-1.d
+>74 72 75 65  bf 65 74 2d  - 69 6e 74 f5  6a 74 2d 69  true.et-int.jt-i
+>6e 74 2d 6e  65 78 74 18  - 19 66 74 2d  63 68 61 72  nt-next..ft-char
+>f5 6b 74 2d  63 68 61 72  - 2d 6e 65 78  74 18 1a 67  .kt-char-next..g
+>74 2d 73 68  6f 72 74 f5  - 6c 74 2d 73  68 6f 72 74  t-short.lt-short
+>2d 6e 65 78  74 18 1b 66  - 74 2d 6c 6f  6e 67 f5 6b  -next..ft-long.k
+>74 2d 6c 6f  6e 67 2d 6e  - 65 78 74 18  1c 6b 74 2d  t-long-next..kt-
+>6c 6f 6e 67  2d 6c 6f 6e  - 67 f5 70 74  2d 6c 6f 6e  long-long.pt-lon
+>67 2d 6c 6f  6e 67 2d 6e  - 65 78 74 18  1d 68 74 2d  g-long-next..ht-
+>69 6e 74 6d  61 78 f5 6d  - 74 2d 69 6e  74 6d 61 78  intmax.mt-intmax
+>2d 6e 65 78  74 18 1e 69  - 74 2d 70 74  72 64 69 66  -next..it-ptrdif
+>66 f5 6e 74  2d 70 74 72  - 64 69 66 66  2d 6e 65 78  f.nt-ptrdiff-nex
+>74 18 1f 66  74 2d 73 69  - 7a 65 f5 6b  74 2d 73 69  t..ft-size.kt-si
+>7a 65 2d 6e  65 78 74 18  - 20 66 74 2d  71 75 61 64  ze-next. ft-quad
+>f5 6b 74 2d  71 75 61 64  - 2d 6e 65 78  74 18 21 67  .kt-quad-next.!g
+>74 2d 69 6e  74 36 34 f5  - 6c 74 2d 69  6e 74 36 34  t-int64.lt-int64
+>2d 6e 65 78  74 18 22 68  - 74 2d 64 6f  75 62 6c 65  -next."ht-double
+>f5 6d 74 2d  64 6f 75 62  - 6c 65 2d 6e  65 78 74 18  .mt-double-next.
+>23 6d 74 2d  6c 6f 6e 67  - 2d 64 6f 75  62 6c 65 f5  #mt-long-double.
+>72 74 2d 6c  6f 6e 67 2d  - 64 6f 75 62  6c 65 2d 6e  rt-long-double-n
+>65 78 74 18  24 66 74 2d  - 77 69 6e 74  f5 6b 74 2d  ext.$ft-wint.kt-
+>77 69 6e 74  2d 6e 65 78  - 74 18 25 66  74 2d 77 69  wint-next.%ft-wi
+>64 65 f5 6b  74 2d 77 69  - 64 65 2d 6e  65 78 74 18  de.kt-wide-next.
+>26 68 74 2d  73 74 72 69  - 6e 67 f5 6d  74 2d 73 74  &ht-string.mt-st
+>72 69 6e 67  2d 6e 65 78  - 74 18 27 69  74 2d 70 6f  ring-next.'it-po
+>69 6e 74 65  72 f5 6e 74  - 2d 70 6f 69  6e 74 65 72  inter.nt-pointer
+>2d 6e 65 78  74 18 28 66  - 74 2d 62 6f  6f 6c f5 6b  -next.(ft-bool.k
+>74 2d 62 6f  6f 6c 2d 6e  - 65 78 74 18  29 ff 6b 74  t-bool-next.).kt
+>65 73 74 2d  6e 61 6d 65  - 2d 32 65 74  79 70 65 73  est-name-2etypes
+>69 62 6f 6f  6c 65 61 6e  - 2d 32 f4 65  66 61 6c 73  iboolean-2.efals
+>65 bf 65 74  2d 69 6e 74  - f4 6a 74 2d  69 6e 74 2d  e.et-int.jt-int-
+>6e 65 78 74  18 2a 66 74  - 2d 63 68 61  72 f4 6b 74  next.*ft-char.kt
+>2d 63 68 61  72 2d 6e 65  - 78 74 18 2b  67 74 2d 73  -char-next.+gt-s
+>68 6f 72 74  f4 6c 74 2d  - 73 68 6f 72  74 2d 6e 65  hort.lt-short-ne
+>78 74 18 2c  66 74 2d 6c  - 6f 6e 67 f4  6b 74 2d 6c  xt.,ft-long.kt-l
+>6f 6e 67 2d  6e 65 78 74  - 18 2d 6b 74  2d 6c 6f 6e  ong-next.-kt-lon
+>67 2d 6c 6f  6e 67 f4 70  - 74 2d 6c 6f  6e 67 2d 6c  g-long.pt-long-l
+>6f 6e 67 2d  6e 65 78 74  - 18 2e 68 74  2d 69 6e 74  ong-next..ht-int
+>6d 61 78 f4  6d 74 2d 69  - 6e 74 6d 61  78 2d 6e 65  max.mt-intmax-ne
+>78 74 18 2f  69 74 2d 70  - 74 72 64 69  66 66 f4 6e  xt./it-ptrdiff.n
+>74 2d 70 74  72 64 69 66  - 66 2d 6e 65  78 74 18 30  t-ptrdiff-next.0
+>66 74 2d 73  69 7a 65 f4  - 6b 74 2d 73  69 7a 65 2d  ft-size.kt-size-
+>6e 65 78 74  18 31 66 74  - 2d 71 75 61  64 f4 6b 74  next.1ft-quad.kt
+>2d 71 75 61  64 2d 6e 65  - 78 74 18 32  67 74 2d 69  -quad-next.2gt-i
+>6e 74 36 34  f4 6c 74 2d  - 69 6e 74 36  34 2d 6e 65  nt64.lt-int64-ne
+>78 74 18 33  68 74 2d 64  - 6f 75 62 6c  65 f4 6d 74  xt.3ht-double.mt
+>2d 64 6f 75  62 6c 65 2d  - 6e 65 78 74  18 34 6d 74  -double-next.4mt
+>2d 6c 6f 6e  67 2d 64 6f  - 75 62 6c 65  f4 72 74 2d  -long-double.rt-
+>6c 6f 6e 67  2d 64 6f 75  - 62 6c 65 2d  6e 65 78 74  long-double-next
+>18 35 66 74  2d 77 69 6e  - 74 f4 6b 74  2d 77 69 6e  .5ft-wint.kt-win
+>74 2d 6e 65  78 74 18 36  - 66 74 2d 77  69 64 65 f4  t-next.6ft-wide.
+>6b 74 2d 77  69 64 65 2d  - 6e 65 78 74  18 37 68 74  kt-wide-next.7ht
+>2d 73 74 72  69 6e 67 f4  - 6d 74 2d 73  74 72 69 6e  -string.mt-strin
+>67 2d 6e 65  78 74 18 38  - 69 74 2d 70  6f 69 6e 74  g-next.8it-point
+>65 72 f4 6e  74 2d 70 6f  - 69 6e 74 65  72 2d 6e 65  er.nt-pointer-ne
+>78 74 18 39  66 74 2d 62  - 6f 6f 6c f4  6b 74 2d 62  xt.9ft-bool.kt-b
+>6f 6f 6c 2d  6e 65 78 74  - 18 3a ff ff  65 73 74 61  ool-next.:..esta
+>72 73 bf 6b  74 65 73 74  - 2d 6e 61 6d  65 2d 31 65  rs.ktest-name-1e
+>73 74 61 72  73 69 62 6f  - 6f 6c 65 61  6e 2d 31 f5  starsiboolean-1.
+>64 74 72 75  65 bf 6b 73  - 74 61 72 2d  73 74 72 69  dtrue.kstar-stri
+>6e 67 f5 70  73 74 61 72  - 2d 73 74 72  69 6e 67 2d  ng.pstar-string-
+>6e 65 78 74  18 3b 68 73  - 74 61 72 2d  69 6e 74 f5  next.;hstar-int.
+>6d 73 74 61  72 2d 69 6e  - 74 2d 6e 65  78 74 18 3c  mstar-int-next.<
+>67 61 74 2d  73 74 61 72  - f5 6c 61 74  2d 73 74 61  gat-star.lat-sta
+>72 2d 6e 65  78 74 18 3d  - 69 70 6f 69  6e 74 6c 65  r-next.=ipointle
+>73 73 f5 6e  70 6f 69 6e  - 74 6c 65 73  73 2d 6e 65  ss.npointless-ne
+>78 74 18 3e  ff 6b 74 65  - 73 74 2d 6e  61 6d 65 2d  xt.>.ktest-name-
+>32 65 73 74  61 72 73 69  - 62 6f 6f 6c  65 61 6e 2d  2estarsiboolean-
+>32 f4 65 66  61 6c 73 65  - bf 6b 73 74  61 72 2d 73  2.efalse.kstar-s
+>74 72 69 6e  67 f4 70 73  - 74 61 72 2d  73 74 72 69  tring.pstar-stri
+>6e 67 2d 6e  65 78 74 18  - 3f 68 73 74  61 72 2d 69  ng-next.?hstar-i
+>6e 74 f4 6d  73 74 61 72  - 2d 69 6e 74  2d 6e 65 78  nt.mstar-int-nex
+>74 18 40 67  61 74 2d 73  - 74 61 72 f4  6c 61 74 2d  t.@gat-star.lat-
+>73 74 61 72  2d 6e 65 78  - 74 18 41 69  70 6f 69 6e  star-next.Aipoin
+>74 6c 65 73  73 f4 6e 70  - 6f 69 6e 74  6c 65 73 73  tless.npointless
+>2d 6e 65 78  74 18 42 ff  - ff 67 73 74  72 69 6e 67  -next.B..gstring
+>73 bf 6b 74  65 73 74 2d  - 6e 61 6d 65  2d 31 67 73  s.ktest-name-1gs
+>74 72 69 6e  67 73 69 62  - 6f 6f 6c 65  61 6e 2d 31  tringsiboolean-1
+>f5 64 74 72  75 65 bf 6c  - 6e 75 6c 6c  2d 6f 72 2d  .dtrue.lnull-or-
+>7a 65 72 6f  f5 71 6e 75  - 6c 6c 2d 6f  72 2d 7a 65  zero.qnull-or-ze
+>72 6f 2d 6e  65 78 74 18  - 43 6e 65 6d  70 74 79 2d  ro-next.Cnempty-
+>6f 72 2d 66  61 6c 73 65  - f5 73 65 6d  70 74 79 2d  or-false.sempty-
+>6f 72 2d 66  61 6c 73 65  - 2d 6e 65 78  74 18 44 ff  or-false-next.D.
+>6b 74 65 73  74 2d 6e 61  - 6d 65 2d 32  67 73 74 72  ktest-name-2gstr
+>69 6e 67 73  69 62 6f 6f  - 6c 65 61 6e  2d 32 f4 65  ingsiboolean-2.e
+>66 61 6c 73  65 bf 6c 6e  - 75 6c 6c 2d  6f 72 2d 7a  false.lnull-or-z
+>65 72 6f f4  71 6e 75 6c  - 6c 2d 6f 72  2d 7a 65 72  ero.qnull-or-zer
+>6f 2d 6e 65  78 74 18 45  - 6e 65 6d 70  74 79 2d 6f  o-next.Enempty-o
+>72 2d 66 61  6c 73 65 f4  - 73 65 6d 70  74 79 2d 6f  r-false.sempty-o
+>72 2d 66 61  6c 73 65 2d  - 6e 65 78 74  18 46 ff ff  r-false-next.F..
+>65 70 61 69  72 73 bf 6b  - 74 65 73 74  2d 6e 61 6d  epairs.ktest-nam
+>65 2d 31 65  70 61 69 72  - 73 69 62 6f  6f 6c 65 61  e-1epairsiboolea
+>6e 2d 31 f5  64 74 72 75  - 65 bf 68 61  72 67 2d 70  n-1.dtrue.harg-p
+>61 69 72 f5  6d 61 72 67  - 2d 70 61 69  72 2d 6e 65  air.marg-pair-ne
+>78 74 18 47  68 61 72 67  - 2d 6e 75 6c  6c f5 6d 61  xt.Gharg-null.ma
+>72 67 2d 6e  75 6c 6c 2d  - 6e 65 78 74  18 48 67 61  rg-null-next.Hga
+>72 67 2d 62  61 64 f5 6c  - 61 72 67 2d  62 61 64 2d  rg-bad.larg-bad-
+>6e 65 78 74  18 49 6a 61  - 72 67 2d 65  73 63 61 70  next.Ijarg-escap
+>65 f5 6f 61  72 67 2d 65  - 73 63 61 70  65 2d 6e 65  e.oarg-escape-ne
+>78 74 18 4a  67 65 73 63  - 61 70 65 64  f5 6c 65 73  xt.Jgescaped.les
+>63 61 70 65  64 2d 6e 65  - 78 74 18 4b  67 70 65 72  caped-next.Kgper
+>63 65 6e 74  f5 6c 70 65  - 72 63 65 6e  74 2d 6e 65  cent.lpercent-ne
+>78 74 18 4c  65 62 72 61  - 63 65 f5 6a  62 72 61 63  xt.Lebrace.jbrac
+>65 2d 6e 65  78 74 18 4d  - 6a 65 6d 70  74 79 2d 77  e-next.Mjempty-w
+>6f 72 64 f5  6f 65 6d 70  - 74 79 2d 77  6f 72 64 2d  ord.oempty-word-
+>6e 65 78 74  18 4e 69 78  - 6d 6c 2d 63  68 61 72 73  next.Nixml-chars
+>f5 6e 78 6d  6c 2d 63 68  - 61 72 73 2d  6e 65 78 74  .nxml-chars-next
+>18 4f ff 6b  74 65 73 74  - 2d 6e 61 6d  65 2d 32 65  .O.ktest-name-2e
+>70 61 69 72  73 69 62 6f  - 6f 6c 65 61  6e 2d 32 f4  pairsiboolean-2.
+>65 66 61 6c  73 65 bf 68  - 61 72 67 2d  70 61 69 72  efalse.harg-pair
+>f4 6d 61 72  67 2d 70 61  - 69 72 2d 6e  65 78 74 18  .marg-pair-next.
+>50 68 61 72  67 2d 6e 75  - 6c 6c f4 6d  61 72 67 2d  Pharg-null.marg-
+>6e 75 6c 6c  2d 6e 65 78  - 74 18 51 67  61 72 67 2d  null-next.Qgarg-
+>62 61 64 f4  6c 61 72 67  - 2d 62 61 64  2d 6e 65 78  bad.larg-bad-nex
+>74 18 52 6a  61 72 67 2d  - 65 73 63 61  70 65 f4 6f  t.Rjarg-escape.o
+>61 72 67 2d  65 73 63 61  - 70 65 2d 6e  65 78 74 18  arg-escape-next.
+>53 67 65 73  63 61 70 65  - 64 f4 6c 65  73 63 61 70  Sgescaped.lescap
+>65 64 2d 6e  65 78 74 18  - 54 67 70 65  72 63 65 6e  ed-next.Tgpercen
+>74 f4 6c 70  65 72 63 65  - 6e 74 2d 6e  65 78 74 18  t.lpercent-next.
+>55 65 62 72  61 63 65 f4  - 6a 62 72 61  63 65 2d 6e  Uebrace.jbrace-n
+>65 78 74 18  56 6a 65 6d  - 70 74 79 2d  77 6f 72 64  ext.Vjempty-word
+>f4 6f 65 6d  70 74 79 2d  - 77 6f 72 64  2d 6e 65 78  .oempty-word-nex
+>74 18 57 69  78 6d 6c 2d  - 63 68 61 72  73 f4 6e 78  t.Wixml-chars.nx
+>6d 6c 2d 63  68 61 72 73  - 2d 6e 65 78  74 18 58 ff  ml-chars-next.X.
+>ff 64 66 75  6c 6c bf 6b  - 74 65 73 74  2d 6e 61 6d  .dfull.ktest-nam
+>65 2d 31 64  66 75 6c 6c  - 69 62 6f 6f  6c 65 61 6e  e-1dfulliboolean
+>2d 31 f5 64  74 72 75 65  - bf 6a 66 75  6c 6c 2d 77  -1.dtrue.jfull-w
+>6f 72 64 73  63 79 75 70  - 6f 66 75 6c  6c 2d 77 6f  ordscyupofull-wo
+>72 64 73 2d  6e 65 78 74  - 18 59 69 66  75 6c 6c 2d  rds-next.Yifull-
+>6e 6f 6e 65  64 74 72 75  - 65 6e 66 75  6c 6c 2d 6e  nonedtruenfull-n
+>6f 6e 65 2d  6e 65 78 74  - 18 5a 68 66  75 6c 6c 2d  one-next.Zhfull-
+>65 6e 63 61  31 6d 66 75  - 6c 6c 2d 65  6e 63 2d 6e  enca1mfull-enc-n
+>65 78 74 18  5b 6a 66 75  - 6c 6c 2d 65  6e 63 2d 6e  ext.[jfull-enc-n
+>01 6f 66 75  6c 6c 2d 65  - 6e 63 2d 6e  2d 6e 65 78  .ofull-enc-n-nex
+>74 18 5c 68  66 75 6c 6c  - 2d 72 61 77  62 6f 6e 6d  t.\hfull-rawbonm
+>66 75 6c 6c  2d 72 61 77  - 2d 6e 65 78  74 18 5d 68  full-raw-next.]h
+>66 75 6c 6c  2d 61 72 67  - 62 73 69 6d  66 75 6c 6c  full-argbsimfull
+>2d 61 72 67  2d 6e 65 78  - 74 18 5e 6c  66 75 6c 6c  -arg-next.^lfull
+>2d 61 72 67  2d 65 6e 63  - 62 73 69 71  66 75 6c 6c  -arg-encbsiqfull
+>2d 61 72 67  2d 65 6e 63  - 2d 6e 65 78  74 18 5f 68  -arg-enc-next._h
+>66 75 6c 6c  2d 78 6d 6c  - 63 3c 61 3e  6d 66 75 6c  full-xmlc<a>mful
+>6c 2d 78 6d  6c 2d 6e 65  - 78 74 18 60  68 65 6e 63  l-xml-next.`henc
+>2d 6f 6e 6c  79 61 31 6d  - 65 6e 63 2d  6f 6e 6c 79  -onlya1menc-only
+>2d 6e 65 78  74 18 61 ff  - 6b 74 65 73  74 2d 6e 61  -next.a.ktest-na
+>6d 65 2d 32  64 66 75 6c  - 6c 69 62 6f  6f 6c 65 61  me-2dfulliboolea
+>6e 2d 32 f4  65 66 61 6c  - 73 65 bf 6a  66 75 6c 6c  n-2.efalse.jfull
+>2d 77 6f 72  64 73 64 6e  - 6f 70 65 6f  66 75 6c 6c  -wordsdnopeofull
+>2d 77 6f 72  64 73 2d 6e  - 65 78 74 18  62 69 66 75  -words-next.bifu
+>6c 6c 2d 6e  6f 6e 65 65  - 66 61 6c 73  65 6e 66 75  ll-noneefalsenfu
+>6c 6c 2d 6e  6f 6e 65 2d  - 6e 65 78 74  18 63 68 66  ll-none-next.chf
+>75 6c 6c 2d  65 6e 63 61  - 30 6d 66 75  6c 6c 2d 65  ull-enca0mfull-e
+>6e 63 2d 6e  65 78 74 18  - 64 6a 66 75  6c 6c 2d 65  nc-next.djfull-e
+>6e 63 2d 6e  00 6f 66 75  - 6c 6c 2d 65  6e 63 2d 6e  nc-n.ofull-enc-n
+>2d 6e 65 78  74 18 65 68  - 66 75 6c 6c  2d 72 61 77  -next.ehfull-raw
+>63 6f 66 66  6d 66 75 6c  - 6c 2d 72 61  77 2d 6e 65  coffmfull-raw-ne
+>78 74 18 66  68 66 75 6c  - 6c 2d 61 72  67 62 6e 6f  xt.fhfull-argbno
+>6d 66 75 6c  6c 2d 61 72  - 67 2d 6e 65  78 74 18 67  mfull-arg-next.g
+>6c 66 75 6c  6c 2d 61 72  - 67 2d 65 6e  63 62 6e 6f  lfull-arg-encbno
+>71 66 75 6c  6c 2d 61 72  - 67 2d 65 6e  63 2d 6e 65  qfull-arg-enc-ne
+>78 74 18 68  68 66 75 6c  - 6c 2d 78 6d  6c 62 26 62  xt.hhfull-xmlb&b
+>6d 66 75 6c  6c 2d 78 6d  - 6c 2d 6e 65  78 74 18 69  mfull-xml-next.i
+>68 65 6e 63  2d 6f 6e 6c  - 79 61 30 6d  65 6e 63 2d  henc-onlya0menc-
+>6f 6e 6c 79  2d 6e 65 78  - 74 18 6a ff  ff 64 6d 6f  only-next.j..dmo
+>64 73 bf 6b  74 65 73 74  - 2d 6e 61 6d  65 2d 31 64  ds.ktest-name-1d
+>6d 6f 64 73  69 62 6f 6f  - 6c 65 61 6e  2d 31 f5 64  modsiboolean-1.d
+>74 72 75 65  bf 66 71 75  - 6f 74 65 64  64 74 72 75  true.fquoteddtru
+>65 6b 71 75  6f 74 65 64  - 2d 6e 65 78  74 18 6b 6b  ekquoted-next.kk
+>65 6e 63 6f  64 65 2d 6f  - 6e 6c 79 f5  70 65 6e 63  encode-only.penc
+>6f 64 65 2d  6f 6e 6c 79  - 2d 6e 65 78  74 18 6c 71  ode-only-next.lq
+>64 69 73 70  6c 61 79 2d  - 6f 6e 6c 79  2d 6e 65 78  display-only-nex
+>74 18 6d 68  68 75 6d 61  - 6e 69 7a 65  f5 6d 68 75  t.mhhumanize.mhu
+>6d 61 6e 69  7a 65 2d 6e  - 65 78 74 18  6e 64 69 74  manize-next.ndit
+>65 6d 9f bf  63 6b 65 79  - f5 68 6b 65  79 2d 6e 65  em..ckey.hkey-ne
+>78 74 18 6f  ff ff 64 66  - 6c 61 67 9f  f5 f4 ff 69  xt.o..dflag....i
+>66 6c 61 67  2d 6e 65 78  - 74 18 70 ff  6b 74 65 73  flag-next.p.ktes
+>74 2d 6e 61  6d 65 2d 32  - 64 6d 6f 64  73 69 62 6f  t-name-2dmodsibo
+>6f 6c 65 61  6e 2d 32 f4  - 65 66 61 6c  73 65 bf 66  olean-2.efalse.f
+>71 75 6f 74  65 64 65 66  - 61 6c 73 65  6b 71 75 6f  quotedefalsekquo
+>74 65 64 2d  6e 65 78 74  - 18 71 6b 65  6e 63 6f 64  ted-next.qkencod
+>65 2d 6f 6e  6c 79 f4 70  - 65 6e 63 6f  64 65 2d 6f  e-only.pencode-o
+>6e 6c 79 2d  6e 65 78 74  - 18 72 71 64  69 73 70 6c  nly-next.rqdispl
+>61 79 2d 6f  6e 6c 79 2d  - 6e 65 78 74  18 73 68 68  ay-only-next.shh
+>75 6d 61 6e  69 7a 65 f4  - 6d 68 75 6d  61 6e 69 7a  umanize.mhumaniz
+>65 2d 6e 65  78 74 18 74  - 64 69 74 65  6d 9f bf 63  e-next.tditem..c
+>6b 65 79 f4  68 6b 65 79  - 2d 6e 65 78  74 18 75 ff  key.hkey-next.u.
+>ff 64 66 6c  61 67 9f f4  - f5 ff 69 66  6c 61 67 2d  .dflag....iflag-
+>6e 65 78 74  18 76 ff ff  - ff ff                     next.v....
