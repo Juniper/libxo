@@ -79,7 +79,7 @@
 </div>
 <div class="line">
   <div class="text">speed </div>
-  <div class="data" data-tag="speed" data-xpath="/data/top-level/speed">fast</div>
+  <div class="data" data-tag="speed" data-xpath="/data/top-level/speed">Fast</div>
   <div class="text"> </div>
   <div class="data" data-tag="was" data-xpath="/data/top-level/was">fast</div>
 </div>
@@ -91,13 +91,13 @@
 </div>
 <div class="line">
   <div class="text">speediserest </div>
-  <div class="data" data-tag="speedierest" data-xpath="/data/top-level/speedierest">α alto</div>
+  <div class="data" data-tag="speedierest" data-xpath="/data/top-level/speedierest">Α alto</div>
   <div class="text"> </div>
   <div class="data" data-tag="was" data-xpath="/data/top-level/was">α alto</div>
 </div>
 <div class="line">
   <div class="text">speedid </div>
-  <div class="data" data-tag="speedid" data-xpath="/data/top-level/speedid">ψ basso</div>
+  <div class="data" data-tag="speedid" data-xpath="/data/top-level/speedid">Ψ basso</div>
   <div class="text"> </div>
   <div class="data" data-tag="was" data-xpath="/data/top-level/was">ψ basso</div>
 </div>
