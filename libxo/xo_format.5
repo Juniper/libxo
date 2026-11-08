@@ -144,7 +144,10 @@ The pair defaults to "true+false" and the spec defaults to "%s".
 A pair of "*" is taken from a
 .Dq const char *
 argument, which comes before the field's other arguments.
-The pair must have exactly one "+"; a backslash escapes the next
+The pair must have exactly one "+", with a non-empty word on each
+side; a broken pair is reported and the field displays "true" or
+"false" instead.
+A backslash escapes the next
 character ("a\e\e+b") and "%%" is a literal percent.
 There must be only one conversion spec, with no text after it.
 Width and precision are not applied to the word; use an anchor to
@@ -164,14 +167,16 @@ The "g" modifier translates the whole boolean pair ("on+off", or
 translation must also be a pair, or the original pair is used.
 The "h" and "i" modifiers are ignored.
 .Pp
-The "full\-boolean" modifier, which has no short form, makes the
-encoding styles emit a word instead of true or false.
-The word comes from the encoding format's pair, or else the display
-format's.
-An encoding format must have both a pair and a spec, and must take
-the same arguments as the display format.
+An encoding format gives the words used by the encoding styles
+instead of true or false.
+It must have both a pair and a spec, and must take the same
+arguments as the display format.
+Without an encoding format, the "full\-boolean" modifier, which has
+no short form, makes the encoding styles use the display format's
+words.
 .Bd -literal -offset indent
-    xo_emit("{B,full\-boolean:found/T+F%p/1+0%p}\\n", ptr);
+    xo_emit("{B:found/T+F%p/1+0%p}\\n", ptr);
+    xo_emit("{B,full\-boolean:found/yes+no%p}\\n", ptr);
 .Ed
 .Ss "The Color Role ({C:})"
 Colors and effects control how text values are displayed; they are
