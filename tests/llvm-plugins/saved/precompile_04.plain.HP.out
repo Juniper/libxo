@@ -1,0 +1,56 @@
+<div class="line">
+  <div class="data" data-tag="str" data-type="boolean" data-value="true">true</div>
+  <div class="data" data-tag="str-next">1</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="power" data-type="boolean" data-value="true">On</div>
+  <div class="data" data-tag="power-next">2</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="escaped" data-type="boolean" data-value="true">a+b</div>
+  <div class="data" data-tag="escaped-next">3</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="arg" data-type="boolean" data-value="true">si</div>
+  <div class="data" data-tag="arg-next">4</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="full" data-type="boolean" data-value="true">T</div>
+  <div class="data" data-tag="full-next">5</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="full-n" data-type="boolean" data-value="true">T</div>
+  <div class="data" data-tag="full-n-next">6</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="quoted" data-type="boolean" data-value="true">true</div>
+  <div class="data" data-tag="quoted-next">7</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="str" data-type="boolean" data-value="false">false</div>
+  <div class="data" data-tag="str-next">1</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="power" data-type="boolean" data-value="false">Off</div>
+  <div class="data" data-tag="power-next">2</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="escaped" data-type="boolean" data-value="false">100%</div>
+  <div class="data" data-tag="escaped-next">3</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="arg" data-type="boolean" data-value="false">no</div>
+  <div class="data" data-tag="arg-next">4</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="full" data-type="boolean" data-value="false">F</div>
+  <div class="data" data-tag="full-next">5</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="full-n" data-type="boolean" data-value="false">F</div>
+  <div class="data" data-tag="full-n-next">6</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="quoted" data-type="boolean" data-value="false">false</div>
+  <div class="data" data-tag="quoted-next">7</div>
+</div>
