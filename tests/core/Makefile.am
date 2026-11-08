@@ -294,24 +294,24 @@ $(pass_tests): %.pass-test: $(srcdir)/%.c \
 
 run-validate-tests: $(validate_tests)
 	@${MKDIR} -p out
-	-@for tc in ${TEST_CASES:.c=}; do \
+	@for tc in ${TEST_CASES:.c=}; do \
 	    diff -Nu ${srcdir}/saved/$$tc.validate-test.make.out \
 	        out/$$tc.validate-test.make.out ; \
 	    diff -Nu ${srcdir}/saved/$$tc.validate-test.make.err \
 	        out/$$tc.validate-test.make.err ; \
-	done
+	done; true
 	@DYLD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${DYLD_LIBRARY_PATH}" \
 	    LD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${LD_LIBRARY_PATH}" \
 	    ${RUN_TESTS_CMD} -T "${TEST_FORMATS}" -m validate run-bin ${TEST_CASES:.c=.test}
 
 run-pass-tests: $(pass_tests)
 	@${MKDIR} -p out
-	-@for tc in ${TEST_CASES:.c=}; do \
+	@for tc in ${TEST_CASES:.c=}; do \
 	    diff -Nu ${srcdir}/saved/$$tc.pass-test.make.out \
 	        out/$$tc.pass-test.make.out ; \
 	    diff -Nu ${srcdir}/saved/$$tc.pass-test.make.err \
 	        out/$$tc.pass-test.make.err ; \
-	done
+	done; true
 	@DYLD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${DYLD_LIBRARY_PATH}" \
 	    LD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${LD_LIBRARY_PATH}" \
 	    ${RUN_TESTS_CMD} -T "${TEST_FORMATS}" -m pass run-bin ${TEST_CASES:.c=.test}
