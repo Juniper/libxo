@@ -36,7 +36,7 @@ ${XON} '{Bf:power-off/on+off%d}{:power-off-next/%d}\n' "" 8
 ${XON} '{B:escaped/a\\+b+100%%%d}{:escaped-next/%d}\n' 1 9
 ${XON} '{B:escaped-off/a\\+b+100%%%d}{:escaped-off-next/%d}\n' "" 9
 
-# A bad pair is an error, and the field is not emitted
+# A bad pair is reported, and the field shows true/false
 ${XON} '{B:bad/a+b+c%d}{:bad-next/%d}\n' 1 9
 
 # A "*" pair takes its own argument, before the value
