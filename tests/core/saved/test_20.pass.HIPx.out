@@ -1,0 +1,812 @@
+<div class="line">
+  <div class="text">Test: </div>
+  <div class="data" data-tag="test-name-1" data-xpath="/boolean-test/basic/test-name-1">basic</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="boolean-1" data-xpath="/boolean-test/basic/boolean-1" data-type="boolean" data-value="true">true</div>
+  <div class="text">) ::</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="str" data-xpath="/boolean-test/basic/true/str" data-type="boolean" data-value="true">true</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="str-next" data-xpath="/boolean-test/basic/true/str-next">1</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="capital" data-xpath="/boolean-test/basic/true/capital" data-type="boolean" data-value="true">True</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="capital-next" data-xpath="/boolean-test/basic/true/capital-next">2</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="int" data-xpath="/boolean-test/basic/true/int" data-type="boolean" data-value="true">true</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="int-next" data-xpath="/boolean-test/basic/true/int-next">3</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="ptr" data-xpath="/boolean-test/basic/true/ptr" data-type="boolean" data-value="true">true</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="ptr-next" data-xpath="/boolean-test/basic/true/ptr-next">4</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="power" data-xpath="/boolean-test/basic/true/power" data-type="boolean" data-value="true">on</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="power-next" data-xpath="/boolean-test/basic/true/power-next">5</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="power-ptr" data-xpath="/boolean-test/basic/true/power-ptr" data-type="boolean" data-value="true">on</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="power-ptr-next" data-xpath="/boolean-test/basic/true/power-ptr-next">6</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="power-u" data-xpath="/boolean-test/basic/true/power-u" data-type="boolean" data-value="true">On</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="power-u-next" data-xpath="/boolean-test/basic/true/power-u-next">7</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="power-64" data-xpath="/boolean-test/basic/true/power-64" data-type="boolean" data-value="true">On</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="power-64-next" data-xpath="/boolean-test/basic/true/power-64-next">8</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="state" data-xpath="/boolean-test/basic/true/state" data-type="boolean" data-value="true">enabled</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="state-next" data-xpath="/boolean-test/basic/true/state-next">9</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="power-arg" data-xpath="/boolean-test/basic/true/power-arg" data-type="boolean" data-value="true">On</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="power-arg-next" data-xpath="/boolean-test/basic/true/power-arg-next">10</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="full" data-xpath="/boolean-test/basic/true/full" data-type="boolean" data-value="true">T</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="full-next" data-xpath="/boolean-test/basic/true/full-next">11</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="label">Label</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="long-name" data-xpath="/boolean-test/basic/true/long-name" data-type="boolean" data-value="true">up</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="long-name-next" data-xpath="/boolean-test/basic/true/long-name-next">12</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="text">Test: </div>
+  <div class="data" data-tag="test-name-2" data-xpath="/boolean-test/basic/test-name-2">basic</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="boolean-2" data-xpath="/boolean-test/basic/boolean-2" data-type="boolean" data-value="false">false</div>
+  <div class="text">) ::</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="str" data-xpath="/boolean-test/basic/false/str" data-type="boolean" data-value="false">false</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="str-next" data-xpath="/boolean-test/basic/false/str-next">13</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="capital" data-xpath="/boolean-test/basic/false/capital" data-type="boolean" data-value="false">False</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="capital-next" data-xpath="/boolean-test/basic/false/capital-next">14</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="int" data-xpath="/boolean-test/basic/false/int" data-type="boolean" data-value="false">false</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="int-next" data-xpath="/boolean-test/basic/false/int-next">15</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="ptr" data-xpath="/boolean-test/basic/false/ptr" data-type="boolean" data-value="false">false</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="ptr-next" data-xpath="/boolean-test/basic/false/ptr-next">16</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="power" data-xpath="/boolean-test/basic/false/power" data-type="boolean" data-value="false">off</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="power-next" data-xpath="/boolean-test/basic/false/power-next">17</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="power-ptr" data-xpath="/boolean-test/basic/false/power-ptr" data-type="boolean" data-value="false">off</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="power-ptr-next" data-xpath="/boolean-test/basic/false/power-ptr-next">18</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="power-u" data-xpath="/boolean-test/basic/false/power-u" data-type="boolean" data-value="false">Off</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="power-u-next" data-xpath="/boolean-test/basic/false/power-u-next">19</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="power-64" data-xpath="/boolean-test/basic/false/power-64" data-type="boolean" data-value="false">Off</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="power-64-next" data-xpath="/boolean-test/basic/false/power-64-next">20</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="state" data-xpath="/boolean-test/basic/false/state" data-type="boolean" data-value="false">disabled</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="state-next" data-xpath="/boolean-test/basic/false/state-next">21</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="power-arg" data-xpath="/boolean-test/basic/false/power-arg" data-type="boolean" data-value="false">Off</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="power-arg-next" data-xpath="/boolean-test/basic/false/power-arg-next">22</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="full" data-xpath="/boolean-test/basic/false/full" data-type="boolean" data-value="false">F</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="full-next" data-xpath="/boolean-test/basic/false/full-next">23</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="label">Label</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="long-name" data-xpath="/boolean-test/basic/false/long-name" data-type="boolean" data-value="false">down</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="long-name-next" data-xpath="/boolean-test/basic/false/long-name-next">24</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="text">Test: </div>
+  <div class="data" data-tag="test-name-1" data-xpath="/boolean-test/types/test-name-1">types</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="boolean-1" data-xpath="/boolean-test/types/boolean-1" data-type="boolean" data-value="true">true</div>
+  <div class="text">) ::</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="t-int" data-xpath="/boolean-test/types/true/t-int" data-type="boolean" data-value="true">true</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="t-int-next" data-xpath="/boolean-test/types/true/t-int-next">25</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="t-char" data-xpath="/boolean-test/types/true/t-char" data-type="boolean" data-value="true">true</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="t-char-next" data-xpath="/boolean-test/types/true/t-char-next">26</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="t-short" data-xpath="/boolean-test/types/true/t-short" data-type="boolean" data-value="true">true</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="t-short-next" data-xpath="/boolean-test/types/true/t-short-next">27</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="t-long" data-xpath="/boolean-test/types/true/t-long" data-type="boolean" data-value="true">true</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="t-long-next" data-xpath="/boolean-test/types/true/t-long-next">28</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="t-long-long" data-xpath="/boolean-test/types/true/t-long-long" data-type="boolean" data-value="true">true</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="t-long-long-next" data-xpath="/boolean-test/types/true/t-long-long-next">29</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="t-intmax" data-xpath="/boolean-test/types/true/t-intmax" data-type="boolean" data-value="true">true</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="t-intmax-next" data-xpath="/boolean-test/types/true/t-intmax-next">30</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="t-ptrdiff" data-xpath="/boolean-test/types/true/t-ptrdiff" data-type="boolean" data-value="true">true</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="t-ptrdiff-next" data-xpath="/boolean-test/types/true/t-ptrdiff-next">31</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="t-size" data-xpath="/boolean-test/types/true/t-size" data-type="boolean" data-value="true">true</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="t-size-next" data-xpath="/boolean-test/types/true/t-size-next">32</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="t-quad" data-xpath="/boolean-test/types/true/t-quad" data-type="boolean" data-value="true">true</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="t-quad-next" data-xpath="/boolean-test/types/true/t-quad-next">33</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="t-int64" data-xpath="/boolean-test/types/true/t-int64" data-type="boolean" data-value="true">true</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="t-int64-next" data-xpath="/boolean-test/types/true/t-int64-next">34</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="t-double" data-xpath="/boolean-test/types/true/t-double" data-type="boolean" data-value="true">true</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="t-double-next" data-xpath="/boolean-test/types/true/t-double-next">35</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="t-long-double" data-xpath="/boolean-test/types/true/t-long-double" data-type="boolean" data-value="true">true</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="t-long-double-next" data-xpath="/boolean-test/types/true/t-long-double-next">36</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="t-wint" data-xpath="/boolean-test/types/true/t-wint" data-type="boolean" data-value="true">true</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="t-wint-next" data-xpath="/boolean-test/types/true/t-wint-next">37</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="t-wide" data-xpath="/boolean-test/types/true/t-wide" data-type="boolean" data-value="true">true</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="t-wide-next" data-xpath="/boolean-test/types/true/t-wide-next">38</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="t-string" data-xpath="/boolean-test/types/true/t-string" data-type="boolean" data-value="true">true</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="t-string-next" data-xpath="/boolean-test/types/true/t-string-next">39</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="t-pointer" data-xpath="/boolean-test/types/true/t-pointer" data-type="boolean" data-value="true">true</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="t-pointer-next" data-xpath="/boolean-test/types/true/t-pointer-next">40</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="t-bool" data-xpath="/boolean-test/types/true/t-bool" data-type="boolean" data-value="true">true</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="t-bool-next" data-xpath="/boolean-test/types/true/t-bool-next">41</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="text">Test: </div>
+  <div class="data" data-tag="test-name-2" data-xpath="/boolean-test/types/test-name-2">types</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="boolean-2" data-xpath="/boolean-test/types/boolean-2" data-type="boolean" data-value="false">false</div>
+  <div class="text">) ::</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="t-int" data-xpath="/boolean-test/types/false/t-int" data-type="boolean" data-value="false">false</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="t-int-next" data-xpath="/boolean-test/types/false/t-int-next">42</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="t-char" data-xpath="/boolean-test/types/false/t-char" data-type="boolean" data-value="false">false</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="t-char-next" data-xpath="/boolean-test/types/false/t-char-next">43</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="t-short" data-xpath="/boolean-test/types/false/t-short" data-type="boolean" data-value="false">false</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="t-short-next" data-xpath="/boolean-test/types/false/t-short-next">44</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="t-long" data-xpath="/boolean-test/types/false/t-long" data-type="boolean" data-value="false">false</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="t-long-next" data-xpath="/boolean-test/types/false/t-long-next">45</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="t-long-long" data-xpath="/boolean-test/types/false/t-long-long" data-type="boolean" data-value="false">false</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="t-long-long-next" data-xpath="/boolean-test/types/false/t-long-long-next">46</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="t-intmax" data-xpath="/boolean-test/types/false/t-intmax" data-type="boolean" data-value="false">false</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="t-intmax-next" data-xpath="/boolean-test/types/false/t-intmax-next">47</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="t-ptrdiff" data-xpath="/boolean-test/types/false/t-ptrdiff" data-type="boolean" data-value="false">false</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="t-ptrdiff-next" data-xpath="/boolean-test/types/false/t-ptrdiff-next">48</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="t-size" data-xpath="/boolean-test/types/false/t-size" data-type="boolean" data-value="false">false</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="t-size-next" data-xpath="/boolean-test/types/false/t-size-next">49</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="t-quad" data-xpath="/boolean-test/types/false/t-quad" data-type="boolean" data-value="false">false</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="t-quad-next" data-xpath="/boolean-test/types/false/t-quad-next">50</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="t-int64" data-xpath="/boolean-test/types/false/t-int64" data-type="boolean" data-value="false">false</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="t-int64-next" data-xpath="/boolean-test/types/false/t-int64-next">51</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="t-double" data-xpath="/boolean-test/types/false/t-double" data-type="boolean" data-value="false">false</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="t-double-next" data-xpath="/boolean-test/types/false/t-double-next">52</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="t-long-double" data-xpath="/boolean-test/types/false/t-long-double" data-type="boolean" data-value="false">false</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="t-long-double-next" data-xpath="/boolean-test/types/false/t-long-double-next">53</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="t-wint" data-xpath="/boolean-test/types/false/t-wint" data-type="boolean" data-value="false">false</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="t-wint-next" data-xpath="/boolean-test/types/false/t-wint-next">54</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="t-wide" data-xpath="/boolean-test/types/false/t-wide" data-type="boolean" data-value="false">false</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="t-wide-next" data-xpath="/boolean-test/types/false/t-wide-next">55</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="t-string" data-xpath="/boolean-test/types/false/t-string" data-type="boolean" data-value="false">false</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="t-string-next" data-xpath="/boolean-test/types/false/t-string-next">56</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="t-pointer" data-xpath="/boolean-test/types/false/t-pointer" data-type="boolean" data-value="false">false</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="t-pointer-next" data-xpath="/boolean-test/types/false/t-pointer-next">57</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="t-bool" data-xpath="/boolean-test/types/false/t-bool" data-type="boolean" data-value="false">false</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="t-bool-next" data-xpath="/boolean-test/types/false/t-bool-next">58</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="text">Test: </div>
+  <div class="data" data-tag="test-name-1" data-xpath="/boolean-test/stars/test-name-1">stars</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="boolean-1" data-xpath="/boolean-test/stars/boolean-1" data-type="boolean" data-value="true">true</div>
+  <div class="text">) ::</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="star-string" data-xpath="/boolean-test/stars/true/star-string" data-type="boolean" data-value="true">true</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="star-string-next" data-xpath="/boolean-test/stars/true/star-string-next">59</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="star-int" data-xpath="/boolean-test/stars/true/star-int" data-type="boolean" data-value="true">true</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="star-int-next" data-xpath="/boolean-test/stars/true/star-int-next">60</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="at-star" data-xpath="/boolean-test/stars/true/at-star" data-type="boolean" data-value="true">true</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="at-star-next" data-xpath="/boolean-test/stars/true/at-star-next">61</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="pointless" data-xpath="/boolean-test/stars/true/pointless" data-type="boolean" data-value="true">true</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="pointless-next" data-xpath="/boolean-test/stars/true/pointless-next">62</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="text">Test: </div>
+  <div class="data" data-tag="test-name-2" data-xpath="/boolean-test/stars/test-name-2">stars</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="boolean-2" data-xpath="/boolean-test/stars/boolean-2" data-type="boolean" data-value="false">false</div>
+  <div class="text">) ::</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="star-string" data-xpath="/boolean-test/stars/false/star-string" data-type="boolean" data-value="false">false</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="star-string-next" data-xpath="/boolean-test/stars/false/star-string-next">63</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="star-int" data-xpath="/boolean-test/stars/false/star-int" data-type="boolean" data-value="false">false</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="star-int-next" data-xpath="/boolean-test/stars/false/star-int-next">64</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="at-star" data-xpath="/boolean-test/stars/false/at-star" data-type="boolean" data-value="false">false</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="at-star-next" data-xpath="/boolean-test/stars/false/at-star-next">65</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="pointless" data-xpath="/boolean-test/stars/false/pointless" data-type="boolean" data-value="false">false</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="pointless-next" data-xpath="/boolean-test/stars/false/pointless-next">66</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="text">Test: </div>
+  <div class="data" data-tag="test-name-1" data-xpath="/boolean-test/strings/test-name-1">strings</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="boolean-1" data-xpath="/boolean-test/strings/boolean-1" data-type="boolean" data-value="true">true</div>
+  <div class="text">) ::</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="null-or-zero" data-xpath="/boolean-test/strings/true/null-or-zero" data-type="boolean" data-value="true">true</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="null-or-zero-next" data-xpath="/boolean-test/strings/true/null-or-zero-next">67</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="empty-or-false" data-xpath="/boolean-test/strings/true/empty-or-false" data-type="boolean" data-value="true">true</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="empty-or-false-next" data-xpath="/boolean-test/strings/true/empty-or-false-next">68</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="text">Test: </div>
+  <div class="data" data-tag="test-name-2" data-xpath="/boolean-test/strings/test-name-2">strings</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="boolean-2" data-xpath="/boolean-test/strings/boolean-2" data-type="boolean" data-value="false">false</div>
+  <div class="text">) ::</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="null-or-zero" data-xpath="/boolean-test/strings/false/null-or-zero" data-type="boolean" data-value="false">false</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="null-or-zero-next" data-xpath="/boolean-test/strings/false/null-or-zero-next">69</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="empty-or-false" data-xpath="/boolean-test/strings/false/empty-or-false" data-type="boolean" data-value="false">false</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="empty-or-false-next" data-xpath="/boolean-test/strings/false/empty-or-false-next">70</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="text">Test: </div>
+  <div class="data" data-tag="test-name-1" data-xpath="/boolean-test/pairs/test-name-1">pairs</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="boolean-1" data-xpath="/boolean-test/pairs/boolean-1" data-type="boolean" data-value="true">true</div>
+  <div class="text">) ::</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="arg-pair" data-xpath="/boolean-test/pairs/true/arg-pair" data-type="boolean" data-value="true">yes</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="arg-pair-next" data-xpath="/boolean-test/pairs/true/arg-pair-next">71</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="arg-null" data-xpath="/boolean-test/pairs/true/arg-null" data-type="boolean" data-value="true">true</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="arg-null-next" data-xpath="/boolean-test/pairs/true/arg-null-next">72</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="arg-bad" data-xpath="/boolean-test/pairs/true/arg-bad" data-type="boolean" data-value="true">true</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="arg-bad-next" data-xpath="/boolean-test/pairs/true/arg-bad-next">73</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="arg-escape" data-xpath="/boolean-test/pairs/true/arg-escape" data-type="boolean" data-value="true">100%</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="arg-escape-next" data-xpath="/boolean-test/pairs/true/arg-escape-next">74</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="escaped" data-xpath="/boolean-test/pairs/true/escaped" data-type="boolean" data-value="true">a+b</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="escaped-next" data-xpath="/boolean-test/pairs/true/escaped-next">75</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="percent" data-xpath="/boolean-test/pairs/true/percent" data-type="boolean" data-value="true">100%</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="percent-next" data-xpath="/boolean-test/pairs/true/percent-next">76</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="brace" data-xpath="/boolean-test/pairs/true/brace" data-type="boolean" data-value="true">}</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="brace-next" data-xpath="/boolean-test/pairs/true/brace-next">77</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="empty-word" data-xpath="/boolean-test/pairs/true/empty-word" data-type="boolean" data-value="true">true</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="empty-word-next" data-xpath="/boolean-test/pairs/true/empty-word-next">78</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="xml-chars" data-xpath="/boolean-test/pairs/true/xml-chars" data-type="boolean" data-value="true">&lt;a&gt;</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="xml-chars-next" data-xpath="/boolean-test/pairs/true/xml-chars-next">79</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="text">Test: </div>
+  <div class="data" data-tag="test-name-2" data-xpath="/boolean-test/pairs/test-name-2">pairs</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="boolean-2" data-xpath="/boolean-test/pairs/boolean-2" data-type="boolean" data-value="false">false</div>
+  <div class="text">) ::</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="arg-pair" data-xpath="/boolean-test/pairs/false/arg-pair" data-type="boolean" data-value="false">no</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="arg-pair-next" data-xpath="/boolean-test/pairs/false/arg-pair-next">80</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="arg-null" data-xpath="/boolean-test/pairs/false/arg-null" data-type="boolean" data-value="false">false</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="arg-null-next" data-xpath="/boolean-test/pairs/false/arg-null-next">81</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="arg-bad" data-xpath="/boolean-test/pairs/false/arg-bad" data-type="boolean" data-value="false">false</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="arg-bad-next" data-xpath="/boolean-test/pairs/false/arg-bad-next">82</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="arg-escape" data-xpath="/boolean-test/pairs/false/arg-escape" data-type="boolean" data-value="false">50\</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="arg-escape-next" data-xpath="/boolean-test/pairs/false/arg-escape-next">83</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="escaped" data-xpath="/boolean-test/pairs/false/escaped" data-type="boolean" data-value="false">c/d</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="escaped-next" data-xpath="/boolean-test/pairs/false/escaped-next">84</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="percent" data-xpath="/boolean-test/pairs/false/percent" data-type="boolean" data-value="false">0%</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="percent-next" data-xpath="/boolean-test/pairs/false/percent-next">85</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="brace" data-xpath="/boolean-test/pairs/false/brace" data-type="boolean" data-value="false">*</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="brace-next" data-xpath="/boolean-test/pairs/false/brace-next">86</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="empty-word" data-xpath="/boolean-test/pairs/false/empty-word" data-type="boolean" data-value="false">false</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="empty-word-next" data-xpath="/boolean-test/pairs/false/empty-word-next">87</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="xml-chars" data-xpath="/boolean-test/pairs/false/xml-chars" data-type="boolean" data-value="false">&amp;b</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="xml-chars-next" data-xpath="/boolean-test/pairs/false/xml-chars-next">88</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="text">Test: </div>
+  <div class="data" data-tag="test-name-1" data-xpath="/boolean-test/full/test-name-1">full</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="boolean-1" data-xpath="/boolean-test/full/boolean-1" data-type="boolean" data-value="true">true</div>
+  <div class="text">) ::</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="full-words" data-xpath="/boolean-test/full/true/full-words" data-type="boolean" data-value="true">yup</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="full-words-next" data-xpath="/boolean-test/full/true/full-words-next">89</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="full-none" data-xpath="/boolean-test/full/true/full-none" data-type="boolean" data-value="true">true</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="full-none-next" data-xpath="/boolean-test/full/true/full-none-next">90</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="full-enc" data-xpath="/boolean-test/full/true/full-enc" data-type="boolean" data-value="true">T</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="full-enc-next" data-xpath="/boolean-test/full/true/full-enc-next">91</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="full-enc-n" data-xpath="/boolean-test/full/true/full-enc-n" data-type="boolean" data-value="true">T</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="full-enc-n-next" data-xpath="/boolean-test/full/true/full-enc-n-next">92</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="full-raw" data-xpath="/boolean-test/full/true/full-raw" data-type="boolean" data-value="true">On</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="full-raw-next" data-xpath="/boolean-test/full/true/full-raw-next">93</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="full-arg" data-xpath="/boolean-test/full/true/full-arg" data-type="boolean" data-value="true">si</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="full-arg-next" data-xpath="/boolean-test/full/true/full-arg-next">94</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="full-arg-enc" data-xpath="/boolean-test/full/true/full-arg-enc" data-type="boolean" data-value="true">si</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="full-arg-enc-next" data-xpath="/boolean-test/full/true/full-arg-enc-next">95</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="full-xml" data-xpath="/boolean-test/full/true/full-xml" data-type="boolean" data-value="true">&lt;a&gt;</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="full-xml-next" data-xpath="/boolean-test/full/true/full-xml-next">96</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="enc-only" data-xpath="/boolean-test/full/true/enc-only" data-type="boolean" data-value="true">T</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="enc-only-next" data-xpath="/boolean-test/full/true/enc-only-next">97</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="text">Test: </div>
+  <div class="data" data-tag="test-name-2" data-xpath="/boolean-test/full/test-name-2">full</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="boolean-2" data-xpath="/boolean-test/full/boolean-2" data-type="boolean" data-value="false">false</div>
+  <div class="text">) ::</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="full-words" data-xpath="/boolean-test/full/false/full-words" data-type="boolean" data-value="false">nope</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="full-words-next" data-xpath="/boolean-test/full/false/full-words-next">98</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="full-none" data-xpath="/boolean-test/full/false/full-none" data-type="boolean" data-value="false">false</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="full-none-next" data-xpath="/boolean-test/full/false/full-none-next">99</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="full-enc" data-xpath="/boolean-test/full/false/full-enc" data-type="boolean" data-value="false">F</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="full-enc-next" data-xpath="/boolean-test/full/false/full-enc-next">100</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="full-enc-n" data-xpath="/boolean-test/full/false/full-enc-n" data-type="boolean" data-value="false">F</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="full-enc-n-next" data-xpath="/boolean-test/full/false/full-enc-n-next">101</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="full-raw" data-xpath="/boolean-test/full/false/full-raw" data-type="boolean" data-value="false">Off</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="full-raw-next" data-xpath="/boolean-test/full/false/full-raw-next">102</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="full-arg" data-xpath="/boolean-test/full/false/full-arg" data-type="boolean" data-value="false">no</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="full-arg-next" data-xpath="/boolean-test/full/false/full-arg-next">103</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="full-arg-enc" data-xpath="/boolean-test/full/false/full-arg-enc" data-type="boolean" data-value="false">no</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="full-arg-enc-next" data-xpath="/boolean-test/full/false/full-arg-enc-next">104</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="full-xml" data-xpath="/boolean-test/full/false/full-xml" data-type="boolean" data-value="false">&amp;b</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="full-xml-next" data-xpath="/boolean-test/full/false/full-xml-next">105</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="enc-only" data-xpath="/boolean-test/full/false/enc-only" data-type="boolean" data-value="false">F</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="enc-only-next" data-xpath="/boolean-test/full/false/enc-only-next">106</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="text">Test: </div>
+  <div class="data" data-tag="test-name-1" data-xpath="/boolean-test/mods/test-name-1">mods</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="boolean-1" data-xpath="/boolean-test/mods/boolean-1" data-type="boolean" data-value="true">true</div>
+  <div class="text">) ::</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="quoted" data-xpath="/boolean-test/mods/true/quoted" data-type="boolean" data-value="true">true</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="quoted-next" data-xpath="/boolean-test/mods/true/quoted-next">107</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="text"> (</div>
+  <div class="data" data-tag="encode-only-next" data-xpath="/boolean-test/mods/true/encode-only-next">108</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="display-only" data-xpath="/boolean-test/mods/true/display-only" data-type="boolean" data-value="true">on</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="display-only-next" data-xpath="/boolean-test/mods/true/display-only-next">109</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="humanize" data-xpath="/boolean-test/mods/true/humanize" data-type="boolean" data-value="true">true</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="humanize-next" data-xpath="/boolean-test/mods/true/humanize-next">110</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="key" data-ident="2" data-xpath="/boolean-test/mods/true/item/key" data-type="boolean" data-value="true">on</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="key-next" data-ident="2" data-xpath="/boolean-test/mods/true/item[key = 'true']/key-next">111</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="flag" data-xpath="/boolean-test/mods/true/flag" data-type="boolean" data-value="true">true</div>
+  <div class="data" data-tag="flag" data-xpath="/boolean-test/mods/true/flag" data-type="boolean" data-value="false">false</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="flag-next" data-xpath="/boolean-test/mods/true/flag-next">112</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="text">Test: </div>
+  <div class="data" data-tag="test-name-2" data-xpath="/boolean-test/mods/test-name-2">mods</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="boolean-2" data-xpath="/boolean-test/mods/boolean-2" data-type="boolean" data-value="false">false</div>
+  <div class="text">) ::</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="quoted" data-xpath="/boolean-test/mods/false/quoted" data-type="boolean" data-value="false">false</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="quoted-next" data-xpath="/boolean-test/mods/false/quoted-next">113</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="text"> (</div>
+  <div class="data" data-tag="encode-only-next" data-xpath="/boolean-test/mods/false/encode-only-next">114</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="display-only" data-xpath="/boolean-test/mods/false/display-only" data-type="boolean" data-value="false">off</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="display-only-next" data-xpath="/boolean-test/mods/false/display-only-next">115</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="humanize" data-xpath="/boolean-test/mods/false/humanize" data-type="boolean" data-value="false">false</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="humanize-next" data-xpath="/boolean-test/mods/false/humanize-next">116</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="key" data-ident="4" data-xpath="/boolean-test/mods/false/item/key" data-type="boolean" data-value="false">off</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="key-next" data-ident="4" data-xpath="/boolean-test/mods/false/item[key = 'false']/key-next">117</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="flag" data-xpath="/boolean-test/mods/false/flag" data-type="boolean" data-value="false">false</div>
+  <div class="data" data-tag="flag" data-xpath="/boolean-test/mods/false/flag" data-type="boolean" data-value="true">true</div>
+  <div class="text"> (</div>
+  <div class="data" data-tag="flag-next" data-xpath="/boolean-test/mods/false/flag-next">118</div>
+  <div class="text">)</div>
+</div>
