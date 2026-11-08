@@ -37,7 +37,7 @@
 #include "xo_buf.h"
 #include "xo_utf8.h"
 #include "xo_encoder.h"
-#include "xo_xpath.tab.h"
+#include "xo_xpath.h"
 
 #include "xo_xparse.h"
 #include "xo_filter.h"
@@ -1472,14 +1472,14 @@ static xo_filter_status_t xo_tmatch_attr(xo_handle_t *, xo_filter_t *,
 
 /*
  * Maps the public XO_XPF_* feature ids (xo_filter.h) to the private,
- * bison-generated token numbers (xo_xpath.tab.h) used internally by
+ * bison-generated token numbers (xo_xpath.h) used internally by
  * xo_xparse/xo_xpath.  Adding a new gatable grammar feature means adding
  * one line here (and a matching %token in xo_xpath.y, if it's not already
  * there) plus a new XO_XPF_* define in xo_filter.h.
  */
 static const struct {
     int xftm_feature;		/* XO_XPF_* id, from xo_filter.h */
-    int xftm_token;		/* internal token number, from xo_xpath.tab.h */
+    int xftm_token;		/* internal token number, from xo_xpath.h */
 } xo_filter_feature_tokens[] = {
     { XO_XPF_DOTDOT,			L_DOTDOT },
     { XO_XPF_DOTDOTDOT,			L_DOTDOTDOT },
