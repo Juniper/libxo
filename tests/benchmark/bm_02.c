@@ -32,7 +32,7 @@
 #include "xo_config.h"
 #include "xo.h"
 #include "xo_buf.h"
-#include "xo_xpath.tab.h"
+#include "xo_xpath.h"
 #include "xo_xparse.h"
 
 #define BM_ROUNDS 5		/* Number of on/off rounds */
