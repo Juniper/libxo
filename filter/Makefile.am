@@ -40,10 +40,9 @@ pkgincludedir = ${includedir}/libxo
 
 pkginclude_HEADERS = \
      xo_filter.h \
-     xo_filter_ops.h
-
-noinst_HEADERS = \
-     xo_xparse.h
+     xo_filter_ops.h \
+     xo_xparse.h \
+     xo_xpath.h
 
 man7_files = xo_filter.7
 
@@ -73,18 +72,23 @@ xo_xpath.c: xo_xpath.y
 	@${SED} ${SED_OPTS} < xo_xpath.tab.c > xo_xpath.c.tmp
 	@mv xo_xpath.c.tmp xo_xpath.c
 
-xo_xpath.tab.h: xo_xpath.c
-	@test -f $@ || { rm -f xo_xpath.c; ${MAKE} ${AM_MAKEFLAGS} xo_xpath.c; }
+#
+# I really just can't bring myself to export a foo.tab.h file, but since
+# if need done, I hide by shame by renaming it.
+#
+xo_xpath.h: xo_xpath.c
+	@mv xo_xpath.tab.h xo_xpath.h
 
 CLEANFILES = \
     xo_xpath.c \
+    xo_xpath.h \
     xo_xpath.c.tmp \
     xo_xpath.tab.c \
     xo_xpath.tab.c.orig \
     xo_xpath.tab.h \
     xo_xpath.output
 
-xo_xpath.o xo_xpath.lo xo_xparse.o xo_filter.o xo_xparse.lo xo_filter.lo: xo_xpath.tab.h
+xo_xpath.o xo_xpath.lo xo_xparse.o xo_filter.o xo_xparse.lo xo_filter.lo: xo_xpath.h
 
 EXTRA_DIST = \
     xo_xpath.y
