@@ -156,6 +156,60 @@
   <div class="padding"> </div>
   <div class="data" data-tag="windings">loto-o-delta</div>
 </div>
+<div class="line">
+  <div class="label">Servicio</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="service" data-type="boolean" data-value="true">Habilitado</div>
+</div>
+<div class="line">
+  <div class="label">Respaldo</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="backup" data-type="boolean" data-value="false">Deshabilitado</div>
+</div>
+<div class="line">
+  <div class="label">Reflejado</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="mirrored" data-type="boolean" data-value="true">verdadero</div>
+</div>
+<div class="line">
+  <div class="label">Cifrado</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="encrypted" data-type="boolean" data-value="false">falso</div>
+</div>
+<div class="line">
+  <div class="label">Luces</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="lights" data-type="boolean" data-value="true">encendidas</div>
+</div>
+<div class="line">
+  <div class="label">Porche</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="porch" data-type="boolean" data-value="false">apagadas</div>
+</div>
+<div class="line">
+  <div class="label">Ventilador</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="fan" data-type="boolean" data-value="true">spinning</div>
+</div>
+  <div class="data" data-tag="lamp-state" data-type="boolean" data-value="true">encendidas</div>
+  <div class="text">: </div>
+<div class="line">
+  <div class="data" data-tag="lamps">3</div>
+  <div class="text"> lámparas</div>
+</div>
+  <div class="data" data-tag="lamp-state" data-type="boolean" data-value="false">apagadas</div>
+  <div class="text">: </div>
+<div class="line">
+  <div class="data" data-tag="lamps">2</div>
+  <div class="text"> lámparas</div>
+</div>
   <div class="data" data-tag="second">2</div>
   <div class="text"> después de </div>
   <div class="text">{a}</div>
