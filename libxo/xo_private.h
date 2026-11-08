@@ -130,10 +130,6 @@ xo_streqn (const char *one, const char *two, ssize_t len_of_two)
 #define TRUE 1
 #endif
 
-#ifndef XO_UNUSED
-#define XO_UNUSED __attribute__ ((__unused__))
-#endif /* XO_UNUSED */
-
 #ifndef UNUSED
 #define UNUSED XO_UNUSED
 #endif /* UNUSED */
