@@ -49,6 +49,21 @@
   </__warning>
   <marzlevanes>6</marzlevanes>
   <windings>loto-o-delta</windings>
+  <service>true</service>
+  <backup>false</backup>
+  <mirrored>true</mirrored>
+  <encrypted>false</encrypted>
+  <lights>true</lights>
+  <porch>false</porch>
+  <fan>true</fan>
+  <upstairs>
+    <lamps>3</lamps>
+    <lamp-state>true</lamp-state>
+  </upstairs>
+  <downstairs>
+    <lamps>2</lamps>
+    <lamp-state>false</lamp-state>
+  </downstairs>
   <first>one</first>
   <second>2</second>
 </top>
