@@ -45,6 +45,10 @@ extern "C" {
 #define XO_NORETURN
 #endif /* __dead2 */
 
+#ifndef XO_UNUSED
+#define XO_UNUSED __attribute__ ((__unused__))
+#endif /* XO_UNUSED */
+
 /*
  * Normally we'd use the HAVE_PRINTFLIKE define triggered by the
  * --enable-printflike option to configure, but we don't install
