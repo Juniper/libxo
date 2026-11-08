@@ -8,3 +8,4 @@ gt_01: duplicate sibling name: 'from'
 gt_01: duplicate sibling name: 'port'
 gt_01: duplicate sibling name: 'time'
 gt_01: duplicate sibling name: 'marzlevanes'
+gt_01: invalid translated boolean pair for 'fan': 'inningspay' (msgid 'spinning+stopped')
