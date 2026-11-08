@@ -264,11 +264,12 @@ The full-boolean Modifier
 
 The full-boolean modifier is only valid for boolean fields (see
 :ref:`boolean-role`).  It makes the encoding styles emit the
-field's word, taken from the encoding format's boolean pair or else
-the display format's, instead of the native true or false value.
-It has no short form::
+display format's word instead of the native true or false value.
+An encoding format, if given, is always used for the encoding
+styles, so "full-boolean" only matters without one.  It has no
+short form::
 
-    xo_emit("{B,full-boolean:found/T+F%p/1+0%p}\\n", ptr);
+    xo_emit("{B,full-boolean:found/yes+no%p}\\n", ptr);
 
 The Gettext Modifier ({g:})
 +++++++++++++++++++++++++++
