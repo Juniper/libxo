@@ -126,6 +126,9 @@ main (int argc, char **argv)
     /* OK: matching formats */
     xo_emit("{B,full-boolean:flag/T+F%d/1+0%d}\n", i_val);
 
+    /* OK: an encoding format is used without full-boolean */
+    xo_emit("{B:flag/T+F%d/1+0%d}\n", i_val);
+
     /* OK: matching "*" pairs, one pair argument */
     xo_emit("{B,full-boolean:flag/*%d/*%d}\n", "yes+no", i_val);
 
@@ -161,8 +164,8 @@ main (int argc, char **argv)
     /* WARN: humanize makes no sense here */
     xo_emit("{Bh:flag/%d}\n", i_val);
 
-    /* WARN: the encoding format is ignored without full-boolean */
-    xo_emit("{B:flag/T+F%d/1+0%d}\n", i_val);
+    /* WARN: int-group makes no sense here */
+    xo_emit("{Bi:flag/%d}\n", i_val);
 
     /* WARN: full-boolean with no boolean pair */
     xo_emit("{B,full-boolean:flag/%d}\n", i_val);
