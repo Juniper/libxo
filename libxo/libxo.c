@@ -7565,7 +7565,8 @@ xo_format_value (xo_handle_t *xop, const xo_field_info_t *xfip,
 
 /*
  * A "*" boolean pair is a runtime string; split it on its one '+'.
- * Returns 0 on success, -1 if the pair is NULL or malformed.
+ * Returns 0 on success, -1 if the pair is NULL or malformed (no '+',
+ * more than one, or an empty word).
  */
 static int
 xo_boolean_split_pair (const char *pair, const char **truep,
@@ -7576,6 +7577,9 @@ xo_boolean_split_pair (const char *pair, const char **truep,
 
     const char *plus = strchr(pair, '+');
     if (plus == NULL || strchr(plus + 1, '+') != NULL)
+	return -1;
+
+    if (plus == pair || plus[1] == '\0')
 	return -1;
 
     *truep = pair;
@@ -7733,7 +7737,14 @@ xo_format_boolean (xo_handle_t *xop, const xo_field_info_t *xfip,
 
     bzero(&disp, sizeof(disp));
     disp.xbi_spec = -1;
+
+    /*
+     * xo_parse_fields() has already reported any errors (and the
+     * precompile pass skips formats with errors), so don't repeat
+     * them here.  A broken pair has no XBIF_PAIR, giving true/false.
+     */
     xo_parse_for_handle(xop, &xpp);
+    xpp.xp_error = xpp.xp_warn = NULL;
 
     if (xfip->xfi_format >= 0) {
 	dfmt = xo_foff(base_fmt, xfip->xfi_format);
@@ -7749,8 +7760,7 @@ xo_format_boolean (xo_handle_t *xop, const xo_field_info_t *xfip,
 	}
     }
 
-    if (rc >= 0 && xfip->xfi_encoding >= 0
-	    && (flags & XFF_FULL_BOOLEAN)) {
+    if (rc >= 0 && xfip->xfi_encoding >= 0) {
 	efmt = xo_foff(base_fmt, xfip->xfi_encoding);
 	rc = xo_parse_boolean_format(&xpp, efmt, xfip->xfi_elen, TRUE,
 				     efspecs, XO_BOOLEAN_FSPECS, &enc);
@@ -7807,8 +7817,9 @@ xo_format_boolean (xo_handle_t *xop, const xo_field_info_t *xfip,
 
     if (disp.xbi_flags & XBIF_ARG) {
 	if (xo_boolean_split_pair(pair, &ptrue, &ptlen, &pfalse, &pflen) < 0)
-	    xo_failure(xop, "invalid boolean pair for '%.*s': '%s'",
-		       (int) nlen, name, pair ? pair : "(null)");
+	    xo_failure(xop, "invalid boolean pair for '%.*s': %s%s%s",
+		       (int) nlen, name, pair ? "'" : "",
+		       pair ? pair : "(null)", pair ? "'" : "");
     }
 
     int style = xo_style(xop);
@@ -7873,17 +7884,22 @@ xo_format_boolean (xo_handle_t *xop, const xo_field_info_t *xfip,
     } else {
 	flags &= ~(XFF_GT_FLAGS | XFF_FIRST_CAP);
 
-	if (!(flags & XFF_FULL_BOOLEAN)) {
-	    eword = xo_boolean_word(NULL, NULL, NULL, 0, NULL, 0,
-				    truth, NULL, &elen);
-	} else if (has_enc) {
+	/*
+	 * An encoding format gives the encoding words.  Without one,
+	 * full-boolean uses the display format's words, and otherwise
+	 * we use the native true/false.
+	 */
+	if (has_enc) {
 	    eword = xo_boolean_word(efmt, &enc, ptrue, ptlen,
 				    pfalse, pflen, truth, ebuf, &elen);
 	    canonical = FALSE;
-	} else {
+	} else if (flags & XFF_FULL_BOOLEAN) {
 	    eword = xo_boolean_word(dfmt, &disp, ptrue, ptlen,
 				    pfalse, pflen, truth, ebuf, &elen);
 	    canonical = FALSE;
+	} else {
+	    eword = xo_boolean_word(NULL, NULL, NULL, 0, NULL, 0,
+				    truth, NULL, &elen);
 	}
 
 	if (canonical) {
@@ -8746,6 +8762,7 @@ xo_gettext_boolean_words (xo_handle_t *xop, const xo_field_info_t *xfip,
     if (xfip->xfi_format >= 0) {
 	fmt = xo_foff(base, xfip->xfi_format);
 	xo_parse_for_handle(xop, &xpp);
+	xpp.xp_error = xpp.xp_warn = NULL; /* Reported by our caller */
 
 	if (xfip->xfi_fspecs)
 	    rc = xo_parse_boolean(&xpp, fmt, xfip->xfi_fspecs,
