@@ -41,10 +41,12 @@ EXTRA_DIST = \
     INSTALL.md \
     packaging/libxo.spec
 
-.PHONY: test tests
+CLEANFILES =
 
-test tests:
-	@(cd tests ; ${MAKE} test)
+include ${top_srcdir}/tests/report.mk
+
+tests-run:
+	@(cd tests ; REPORT_PATH="$${REPORT_PATH}tests/" ${MAKE} tests)
 
 docs:
 	@(cd doc ; ${MAKE} docs)
