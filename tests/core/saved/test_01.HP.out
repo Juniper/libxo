@@ -79,7 +79,7 @@
 </div>
 <div class="line">
   <div class="text">speed </div>
-  <div class="data" data-tag="speed">fast</div>
+  <div class="data" data-tag="speed">Fast</div>
   <div class="text"> </div>
   <div class="data" data-tag="was">fast</div>
 </div>
@@ -91,13 +91,13 @@
 </div>
 <div class="line">
   <div class="text">speediserest </div>
-  <div class="data" data-tag="speedierest">α alto</div>
+  <div class="data" data-tag="speedierest">Α alto</div>
   <div class="text"> </div>
   <div class="data" data-tag="was">α alto</div>
 </div>
 <div class="line">
   <div class="text">speedid </div>
-  <div class="data" data-tag="speedid">ψ basso</div>
+  <div class="data" data-tag="speedid">Ψ basso</div>
   <div class="text"> </div>
   <div class="data" data-tag="was">ψ basso</div>
 </div>
