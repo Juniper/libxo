@@ -52,6 +52,21 @@
     },
     "marzlevanes": 6,
     "windings": "otuslay-oyay-eltayay",
+    "service": true,
+    "backup": false,
+    "mirrored": true,
+    "encrypted": false,
+    "lights": true,
+    "porch": false,
+    "fan": true,
+    "upstairs": {
+      "lamps": 3,
+      "lamp-state": true
+    },
+    "downstairs": {
+      "lamps": 2,
+      "lamp-state": false
+    },
     "first": "one",
     "second": 2
   }
