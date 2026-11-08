@@ -1,0 +1,4 @@
+warning: ../../../tests/core/test_20.c:126: libxo format string: boolean pair has an empty word: '+off%d' [-Wbackend-plugin]
+warning: ../../../tests/core/test_20.c:137: libxo format string: 'full-boolean' without a boolean pair gives quoted true/false: '{B,full-boolean:full-none}' [-Wbackend-plugin]
+warning: ../../../tests/core/test_20.c:165: libxo format string: 'humanize' is ignored for 'B' fields: '{Bh:humanize/%d}' [-Wbackend-plugin]
+3 warnings generated.
