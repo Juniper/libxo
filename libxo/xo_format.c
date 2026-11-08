@@ -956,18 +956,28 @@ xo_parse_boolean (xo_parse_t *xpp, const char *fmt,
 		}
 	    }
 
+	    /*
+	     * A broken pair is reported, but it doesn't change the
+	     * arguments, so we carry on with the default true/false.
+	     */
 	    if (pluses != 1) {
 		xo_parse_error(xpp, "boolean pair must have exactly one "
 			       "'+' (found %u): '%s'", pluses,
 			       xo_parse_printable(xpp, fmt, flen, FALSE));
-		return -1;
-	    }
+		xbip->xbi_flags |= XBIF_BROKEN;
 
-	    xbip->xbi_flags |= XBIF_PAIR;
-	    xbip->xbi_true = xfp->xf_start;
-	    xbip->xbi_true_len = (uint16_t) (plus - sp);
-	    xbip->xbi_false = (uint16_t) (plus + 1 - fmt);
-	    xbip->xbi_false_len = (uint16_t) (ep - plus - 1);
+	    } else if (plus == sp || plus + 1 == ep) {
+		xo_parse_error(xpp, "boolean pair has an empty word: '%s'",
+			       xo_parse_printable(xpp, fmt, flen, FALSE));
+		xbip->xbi_flags |= XBIF_BROKEN;
+
+	    } else {
+		xbip->xbi_flags |= XBIF_PAIR;
+		xbip->xbi_true = xfp->xf_start;
+		xbip->xbi_true_len = (uint16_t) (plus - sp);
+		xbip->xbi_false = (uint16_t) (plus + 1 - fmt);
+		xbip->xbi_false_len = (uint16_t) (ep - plus - 1);
+	    }
 	}
 
 	i += 1;
@@ -1001,7 +1011,8 @@ xo_parse_boolean (xo_parse_t *xpp, const char *fmt,
 	return -1;
     }
 
-    if (complete && (!(xbip->xbi_flags & XBIF_PAIR) || xbip->xbi_spec < 0)) {
+    if (complete && (!(xbip->xbi_flags & (XBIF_PAIR | XBIF_BROKEN))
+		     || xbip->xbi_spec < 0)) {
 	xo_parse_error(xpp, "boolean encoding format needs both a boolean "
 		       "pair and a conversion spec: '%s'",
 		       xo_parse_printable(xpp, fmt, flen, FALSE));
@@ -1152,27 +1163,16 @@ xo_lint_field_boolean (xo_parse_t *xpp, const char *fmt,
     int slen = xfip->xfi_len;
     xo_xff_flags_t flags = xfip->xfi_flags;
 
-    if ((dispp->xbi_flags & XBIF_PAIR) && !(dispp->xbi_flags & XBIF_ARG)
-	    && (dispp->xbi_true_len == 0 || dispp->xbi_false_len == 0))
-	xo_parse_warning(xpp, "boolean pair has an empty word: '%s'",
+    if (flags & XFF_HUMANIZE)
+	xo_parse_warning(xpp, "'humanize' is ignored for 'B' fields: '%s'",
 			 xo_parse_printable(xpp, str, slen, TRUE));
 
-    if (encp && !(encp->xbi_flags & XBIF_ARG)
-	    && (encp->xbi_true_len == 0 || encp->xbi_false_len == 0))
-	xo_parse_warning(xpp, "boolean encoding pair has an empty word: '%s'",
+    if (flags & XFF_INT_GROUP)
+	xo_parse_warning(xpp, "'int-group' is ignored for 'B' fields: '%s'",
 			 xo_parse_printable(xpp, str, slen, TRUE));
 
-    if (flags & (XFF_HUMANIZE | XFF_INT_GROUP))
-	xo_parse_warning(xpp, "'humanize' and 'int-group' are ignored "
-			 "for 'B' fields: '%s'",
-			 xo_parse_printable(xpp, str, slen, TRUE));
-
-    if (encp && !(flags & XFF_FULL_BOOLEAN))
-	xo_parse_warning(xpp, "boolean encoding format is ignored without "
-			 "'full-boolean': '%s'",
-			 xo_parse_printable(xpp, str, slen, TRUE));
-
-    if ((flags & XFF_FULL_BOOLEAN) && !(dispp->xbi_flags & XBIF_PAIR)
+    if ((flags & XFF_FULL_BOOLEAN)
+	    && !(dispp->xbi_flags & (XBIF_PAIR | XBIF_BROKEN))
 	    && encp == NULL)
 	xo_parse_warning(xpp, "'full-boolean' without a boolean pair "
 			 "gives quoted true/false: '%s'",
