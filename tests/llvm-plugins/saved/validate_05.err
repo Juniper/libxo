@@ -16,7 +16,7 @@
 ../../../tests/llvm-plugins/validate_05.c:80:34: warning: libxo: argument 1: 'B' field with no format ("%s") takes type 'char *' but the argument has type 'int'; give it a format, such as "%d"
    80 |     xo_emit("{B:flag/on+off}\n", i_val);
       |                                  ^
-../../../tests/llvm-plugins/validate_05.c:90:31: warning: libxo: argument 1: a 'B' field's "*" boolean pair is NULL; libxo will report a failure and display true/false
+../../../tests/llvm-plugins/validate_05.c:90:31: warning: libxo: argument 1: a 'B' field's "*" boolean pair is NULL
    90 |     xo_emit("{B:flag/*%d}\n", NULL, i_val);
       |                               ^
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_null.h:49:15: note: expanded from macro 'NULL'
