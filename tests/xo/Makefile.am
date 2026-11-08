@@ -51,12 +51,11 @@ XO=../../xo/xo
 TEST_ONE = \
       ${CHECKER} sh ${srcdir}/$$base.sh "${XO} --libxo:W$$fmt" ${TEST_OPTS} \
       > out/$$base.$$fmt.out 2> out/$$base.$$fmt.err ; \
- ${DIFF} -Nu ${srcdir}/saved/$$base.$$fmt.out out/$$base.$$fmt.out | ${S2O} ; \
- ${DIFF} -Nu ${srcdir}/saved/$$base.$$fmt.err out/$$base.$$fmt.err | ${S2O}
+ ${CHECK_DIFFS} ${srcdir}/saved/$$base.$$fmt out/$$base.$$fmt $$?
 
 TEST_FORMATS = T XP JP HP X J H HIPx
 
-test tests: ${bin_PROGRAMS}
+tests-run: ${bin_PROGRAMS}
 	@${MKDIR} -p out
 	-@ ${TEST_TRACE} (for test in ${TEST_CASES} ; do \
 	    base=`${BASENAME} $$test .sh` ; \
@@ -80,7 +79,9 @@ accept:
 	    done) \
 	done)
 
-CLEANFILES = 
+CLEANFILES =
+
+include ${top_srcdir}/tests/report.mk
 CLEANDIRS = out
 
 clean-local:

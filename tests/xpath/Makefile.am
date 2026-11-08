@@ -286,8 +286,7 @@ valgrind:
 TEST_JIG = \
       ${CHECKER} ./$$base.test --libxo$$xoopts ${TEST_OPTS} \
       > out/$$base.$$fmt.out 2> out/$$base.$$fmt.err ; \
- ${DIFF} -Nu ${srcdir}/saved/$$base.$$fmt.out out/$$base.$$fmt.out | ${S2O} ; \
- ${DIFF} -Nu ${srcdir}/saved/$$base.$$fmt.err out/$$base.$$fmt.err | ${S2O}
+ ${CHECK_DIFFS} ${srcdir}/saved/$$base.$$fmt out/$$base.$$fmt $$?
 
 TEST_JIG2 = \
 echo "... $$test ... $$fmt ..."; \
@@ -300,7 +299,7 @@ RUN_TESTS = ${srcdir}/../run-tests.sh -d ${srcdir}
 
 RUN_TESTS_CMD = ${BASH} ${RUN_TESTS} -T "${TEST_FORMATS}"
 
-test tests: ${bin_PROGRAMS}
+tests-run: ${bin_PROGRAMS}
 	@${MKDIR} -p out
 	@${RUN_TESTS_CMD} -l warn,filter-warn run ${TEST_CASES:.c=.test}
 
@@ -371,6 +370,8 @@ accept:
 	$(AM_V_CC)$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -o $@ $<
 
 CLEANFILES = ${TEST_CASES:.c=.test} codesign.tstamp
+
+include ${top_srcdir}/tests/report.mk
 CLEANDIRS = out
 
 clean-local:

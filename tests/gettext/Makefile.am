@@ -97,8 +97,7 @@ valgrind:
 TEST_ONE = \
       ${CHECKER} ./$$base.test --libxo:W$$fmt ${TEST_OPTS} \
       > out/$$base.$$fmt.out 2> out/$$base.$$fmt.err ; \
- ${DIFF} -Nu ${srcdir}/saved/$$base.$$fmt.out out/$$base.$$fmt.out | ${S2O} ; \
- ${DIFF} -Nu ${srcdir}/saved/$$base.$$fmt.err out/$$base.$$fmt.err | ${S2O}
+ ${CHECK_DIFFS} ${srcdir}/saved/$$base.$$fmt out/$$base.$$fmt $$?
 
 TEST_FORMATS = T XP JP HP X J H HIPx
 
@@ -113,10 +112,8 @@ TEST_LOCALE_es = es_ES.UTF-8
 TEST_ONE_LANG = \
       ${CHECKER} ./$$base.test --libxo:W$$fmt ${TEST_OPTS} \
       > out/$$base.$$lang.$$fmt.out 2> out/$$base.$$lang.$$fmt.err ; \
- ${DIFF} -Nu ${srcdir}/saved/$$base.$$lang.$$fmt.out \
-      out/$$base.$$lang.$$fmt.out | ${S2O} ; \
- ${DIFF} -Nu ${srcdir}/saved/$$base.$$lang.$$fmt.err \
-      out/$$base.$$lang.$$fmt.err | ${S2O}
+ ${CHECK_DIFFS} ${srcdir}/saved/$$base.$$lang.$$fmt \
+      out/$$base.$$lang.$$fmt $$?
 
 TEST_LOCALE = \
     case $$lang in \
@@ -125,7 +122,7 @@ TEST_LOCALE = \
 
 all: build-mo-files
 
-test tests: ${bin_PROGRAMS}
+tests-run: ${bin_PROGRAMS}
 	@${MKDIR} -p out
 	-@ ${TEST_TRACE} (for test in ${TEST_CASES} ; do \
 	    base=`${BASENAME} $$test .c` ; \
@@ -171,6 +168,8 @@ accept:
 	$(AM_V_CC)$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -o $@ $<
 
 CLEANFILES = ${TEST_CASES:.c=.test}
+
+include ${top_srcdir}/tests/report.mk
 CLEANDIRS = out
 
 clean-local:

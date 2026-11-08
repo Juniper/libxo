@@ -27,10 +27,9 @@ XO_LOGGER=../../xo-logger/xo-logger
 TEST_ONE = \
       ${CHECKER} sh ${srcdir}/$$base.sh "${XO_LOGGER}" ${TEST_OPTS} \
       > out/$$base.out 2> out/$$base.err ; \
- ${DIFF} -Nu ${srcdir}/saved/$$base.out out/$$base.out | ${S2O} ; \
- ${DIFF} -Nu ${srcdir}/saved/$$base.err out/$$base.err | ${S2O}
+ ${CHECK_DIFFS} ${srcdir}/saved/$$base out/$$base $$?
 
-test tests: ${bin_PROGRAMS}
+tests-run: ${bin_PROGRAMS}
 	@${MKDIR} -p out
 	-@(for test in ${TEST_CASES} ; do \
 	    base=`${BASENAME} $$test .sh` ; \
@@ -51,6 +50,8 @@ accept:
 	done)
 
 CLEANFILES =
+
+include ${top_srcdir}/tests/report.mk
 CLEANDIRS = out
 
 clean-local:

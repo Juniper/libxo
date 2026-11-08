@@ -28,7 +28,7 @@ PY_ENV = \
 # "make tests PY_OPTS=-v" lists each test in the logs.
 PY_OPTS =
 
-test tests:
+tests-run:
 	@${MKDIR_P} ${PY_TMP} out
 	-@(for test in `cd ${PY_SRCDIR}/tests ; echo test_*.py` ; do \
 	    base=`${BASENAME} $$test .py` ; \
@@ -37,11 +37,16 @@ test tests:
 	        -s ${PY_SRCDIR}/tests -t ${PY_SRCDIR}/tests -p $$test \
 	        > out/$$base.log 2>&1 \
 	    || { echo "*** $$base failed (out/$$base.log)" ; \
-	         cat out/$$base.log ; } ; \
+	         cat out/$$base.log ; \
+	         ${REPORT_RECORD} out/$$base.log "unittest failed" ; } ; \
 	done)
 
 # Nothing to accept: the tests check their own results
 accept:
+
+CLEANFILES =
+
+include ${top_srcdir}/tests/report.mk
 
 clean-local:
 	rm -rf ${PY_CACHE} ${PY_TMP} out

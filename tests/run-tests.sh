@@ -29,6 +29,15 @@ BIN_EXTRA_ARGS=
 # taken from the environment, or set with "-c"
 CHECKER="${CHECKER}"
 
+# Failure report: when "make tests" runs, the top-level make sets
+# REPORT_FILE (the absolute path of the report) and REPORT_PATH (the
+# current directory relative to the top one, with a trailing "/").
+# Each failure adds one line to REPORT_FILE; the top-level make shows
+# the list when it finishes.  When REPORT_FILE is unset, nothing is
+# recorded.
+REPORT_FILE="${REPORT_FILE}"
+REPORT_PATH="${REPORT_PATH}"
+
 # trap trap_fail SIGABRT
 
 trap_fail () {
@@ -62,6 +71,108 @@ info () {
     mecho "$@"
 }
 
+# Add a failure to the report: "record PATH [REASON ...]"
+record () {
+    local path="$1" ; shift
+
+    if [ -z "${REPORT_FILE}" ]; then
+        return 0
+    fi
+
+    if [ $# -gt 0 ]; then
+        ${ECHO} "${REPORT_PATH}${path}: $*" >> "${REPORT_FILE}"
+    else
+        ${ECHO} "${REPORT_PATH}${path}" >> "${REPORT_FILE}"
+    fi
+}
+
+# Compare one output file with its baseline: "check_diff SAVED OUT".
+# The diff is shown through ${S2O}; any difference (or a diff error)
+# records OUT.  diff's status is taken before the S2O filter, since
+# the status of a pipe is that of its last command.
+check_diff () {
+    local saved="$1"
+    local out="$2"
+    local output rc
+
+    if [ "$DOC" = doc ]; then
+        ${ECHO} "diff -Nu $saved $out | ${S2O}"
+        return 0
+    fi
+
+    if [ ! -z ${TEST_VERBOSE} ]; then
+        ${ECHO} "command: diff -Nu $saved $out | ${S2O}"
+    fi
+
+    output=`diff -Nu "$saved" "$out"`
+    rc=$?
+    if [ $rc -ne 0 ]; then
+        if [ ! -z "$output" ]; then
+            printf '%s\n' "$output" | eval "${S2O}"
+        fi
+        record "$out"
+    fi
+}
+
+# Record a test that crashed: "check_status STATUS OUT_BASE".  Tests
+# may exit non-zero on purpose, so only a signal (status > 128) or a
+# command that could not be run (126 or 127) counts.
+check_status () {
+    local status="$1"
+    local out="$2"
+
+    case "$status" in
+    ''|*[!0-9]*)
+        return 0
+        ;;
+    esac
+
+    if [ "$status" -gt 128 ]; then
+        mecho "*** $out: killed by signal `expr $status - 128`"
+        record "$out" "killed by signal `expr $status - 128`"
+    elif [ "$status" -ge 126 ]; then
+        mecho "*** $out: could not run (status $status)"
+        record "$out" "could not run (status $status)"
+    fi
+}
+
+# Compare an .out/.err pair: "check_diffs SAVED_BASE OUT_BASE [STATUS]"
+check_diffs () {
+    check_diff "$1.out" "$2.out"
+    check_diff "$1.err" "$2.err"
+    if [ $# -gt 2 ]; then
+        check_status "$3" "$2"
+    fi
+}
+
+report_start () {
+    if [ -z "${REPORT_FILE}" ]; then
+        ${ECHO} "report-start: REPORT_FILE is not set" 1>&2
+        return 0
+    fi
+
+    cp /dev/null "${REPORT_FILE}"
+}
+
+report_finish () {
+    local count
+
+    if [ -z "${REPORT_FILE}" ]; then
+        ${ECHO} "report-finish: REPORT_FILE is not set" 1>&2
+        return 0
+    fi
+
+    if [ -s "${REPORT_FILE}" ]; then
+        count=`wc -l < "${REPORT_FILE}" | tr -d ' '`
+        ${ECHO} ""
+        ${ECHO} "*** ${count} test failure(s), listed in" \
+            "`basename ${REPORT_FILE}`:"
+        cat "${REPORT_FILE}"
+    else
+        ${ECHO} "--- no test failures ---"
+    fi
+}
+
 set_fmt_option () {
     case $1 in
 	fullpath*)
@@ -79,12 +190,12 @@ run_tests () {
     mecho "... $test ... $fmt ... $name ... $ds ..."
     set_fmt_option
     run "${CHECKER} $test $LIBXOPTS $opt $data input $input > $out.out 2> $out.err"
+    local rc=$?
 
     echo "$oname.out" >> $FILES
     echo "$oname.err" >> $FILES
 
-    run "diff -Nu ${SRCDIR}/saved/$oname.out out/$oname.out | ${S2O}"
-    run "diff -Nu ${SRCDIR}/saved/$oname.err out/$oname.err | ${S2O}"
+    check_diffs ${SRCDIR}/saved/$oname out/$oname $rc
 }
 
 do_run_one_command () {
@@ -101,12 +212,12 @@ do_run_one_command () {
 
     set_fmt_option $fmt
     run "${CHECKER} $test $LIBXOPTS $opt $* input $input > $out.out 2> $out.err"
+    local rc=$?
 
     echo "$oname.out" >> $FILES
     echo "$oname.err" >> $FILES
 
-    run "diff -Nu ${SRCDIR}/saved/$oname.out out/$oname.out | ${S2O}"
-    run "diff -Nu ${SRCDIR}/saved/$oname.err out/$oname.err | ${S2O}"
+    check_diffs ${SRCDIR}/saved/$oname out/$oname $rc
 }
 
 do_run_one_input () {
@@ -289,13 +400,13 @@ do_run_bin_one () {
     mecho "... $base ... ${RUN_MODE} ... $fmt_name ..."
 
     run "LC_ALL=en_US.UTF-8 ${CHECKER} ${binary} $LIBXOPTS $fmt_opt ${BIN_EXTRA_ARGS} > ${out}.out 2> ${out}.err"
+    local rc=$?
 
     echo "$out_base.out" >> $FILES
     echo "$out_base.err" >> $FILES
 
     # Always diff against plain saved baselines (all modes should match).
-    run "diff -Nu ${SRCDIR}/saved/${out_base}.out ${out}.out | ${S2O}"
-    run "diff -Nu ${SRCDIR}/saved/${out_base}.err ${out}.err | ${S2O}"
+    check_diffs ${SRCDIR}/saved/${out_base} ${out} $rc
 }
 
 # Run all format specs for all listed test binaries.
@@ -434,6 +545,32 @@ case $verb in
 
     accept-bin)
         do_accept_bins "$@"
+    ;;
+
+    ## Report verbs, usable from any Makefile.am (see tests/report.mk):
+    ##   check-diff SAVED OUT
+    ##   check-diffs SAVED_BASE OUT_BASE [STATUS]
+    ##   record PATH [REASON ...]
+    ##   report-start
+    ##   report-finish
+    check-diff)
+        check_diff "$@"
+    ;;
+
+    check-diffs)
+        check_diffs "$@"
+    ;;
+
+    record)
+        record "$@"
+    ;;
+
+    report-start)
+        report_start
+    ;;
+
+    report-finish)
+        report_finish
     ;;
 
     *)

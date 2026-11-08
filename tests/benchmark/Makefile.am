@@ -99,7 +99,7 @@ endif
 
 all:
 
-test tests:
+tests-run:
 
 BM_TEST=bm_01.test
 PASS_TEST=bm_01.pass-test
@@ -253,6 +253,8 @@ CLEANFILES = ${TEST_CASES:.c=.test} \
     ${TEST_CASES:.c=.pass-test.o} \
     ${TEST_CASES:.c=.pass-test.make.out} \
     ${TEST_CASES:.c=.pass-test.make.err}
+
+include ${top_srcdir}/tests/report.mk
 CLEANDIRS = out
 
 clean-local:

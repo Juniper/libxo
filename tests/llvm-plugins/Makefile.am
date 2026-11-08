@@ -113,7 +113,7 @@ all:
 #
 # Validate (AST plugin) tests: check plugin diagnostics against saved baselines.
 #
-test tests: test-validate test-precompile test-xocc
+tests-run: test-validate test-precompile test-xocc
 
 test-validate: ${VALIDATE_PLUGIN}
 	@${MKDIR} -p out
@@ -123,11 +123,11 @@ test-validate: ${VALIDATE_PLUGIN}
 	    [ -f $$src ] || src=${srcdir}/$$tc.cc ; \
 	    ${CLANG_CMD} $$src \
 	        > out/$$tc.out 2> out/$$tc.err.raw ; \
+	    rc=$$? ; \
 	    ${SED} -e "s/ (aka '[^']*')//" < out/$$tc.err.raw \
 		| ${SED} -E -e "s/              %l+[ud]/             %XXX/" \
 		> out/$$tc.err ; \
-	    ${DIFF} -Nu ${srcdir}/saved/$$tc.out out/$$tc.out ; \
-	    ${DIFF} -Nu ${srcdir}/saved/$$tc.err out/$$tc.err ; \
+	    ${CHECK_DIFFS} ${srcdir}/saved/$$tc out/$$tc $$rc ; \
 	done ; true
 
 #
@@ -149,41 +149,44 @@ test-precompile: ${PRECOMPILE_PLUGIN}
 	    ${CLANG_PLAIN} ${LDADD} ${srcdir}/$$tc.c -L${LIBDIR} -Wl,-rpath,${LIBDIR} -lxo \
 	        -o out/$$tc.plain \
 	        > out/$$tc.plain.build.out 2> out/$$tc.plain.build.err ; \
-	    ${DIFF} -Nu ${srcdir}/saved/$$tc.plain.build.out out/$$tc.plain.build.out ; \
-	    ${DIFF} -Nu ${srcdir}/saved/$$tc.plain.build.err out/$$tc.plain.build.err ; \
+	    ${CHECK_DIFFS} ${srcdir}/saved/$$tc.plain.build out/$$tc.plain.build $$? ; \
 	    ${CLANG_PASS} ${LDADD} ${srcdir}/$$tc.c -L${LIBDIR} -Wl,-rpath,${LIBDIR} -lxo \
 	        -o out/$$tc.pass \
 	        > out/$$tc.pass.build.out 2> out/$$tc.pass.build.err ; \
-	    ${DIFF} -Nu ${srcdir}/saved/$$tc.pass.build.out out/$$tc.pass.build.out ; \
-	    ${DIFF} -Nu ${srcdir}/saved/$$tc.pass.build.err out/$$tc.pass.build.err ; \
+	    ${CHECK_DIFFS} ${srcdir}/saved/$$tc.pass.build out/$$tc.pass.build $$? ; \
 	    echo "... precompile run $$tc ..."; \
 	    for fmt in ${PRECOMPILE_FORMATS}; do \
 	        LC_ALL=en_US.UTF-8 out/$$tc.plain --libxo:W$$fmt \
 	            > out/$$tc.plain.$$fmt.out 2> out/$$tc.plain.$$fmt.err ; \
 	        plain_rc=$$? ; \
-	        ${DIFF} -Nu ${srcdir}/saved/$$tc.plain.$$fmt.out out/$$tc.plain.$$fmt.out ; \
-	        ${DIFF} -Nu ${srcdir}/saved/$$tc.plain.$$fmt.err out/$$tc.plain.$$fmt.err ; \
+	        ${CHECK_DIFFS} ${srcdir}/saved/$$tc.plain.$$fmt \
+	            out/$$tc.plain.$$fmt $$plain_rc ; \
 	        LC_ALL=en_US.UTF-8 out/$$tc.pass  --libxo:W$$fmt \
 	            > out/$$tc.pass.$$fmt.out  2> out/$$tc.pass.$$fmt.err ; \
 	        pass_rc=$$? ; \
-	        ${DIFF} -Nu ${srcdir}/saved/$$tc.pass.$$fmt.out  out/$$tc.pass.$$fmt.out  ; \
-	        ${DIFF} -Nu ${srcdir}/saved/$$tc.pass.$$fmt.err  out/$$tc.pass.$$fmt.err  ; \
+	        ${CHECK_DIFFS} ${srcdir}/saved/$$tc.pass.$$fmt \
+	            out/$$tc.pass.$$fmt $$pass_rc ; \
 	        ${DIFF} out/$$tc.plain.$$fmt.out out/$$tc.pass.$$fmt.out \
-	            || { echo "FAIL: round-trip mismatch $$tc $$fmt stdout" ; } ; \
+	            || { echo "FAIL: round-trip mismatch $$tc $$fmt stdout" ; \
+	                 ${REPORT_RECORD} out/$$tc.pass.$$fmt.out \
+	                     "round-trip mismatch" ; } ; \
 	        ${DIFF} out/$$tc.plain.$$fmt.err out/$$tc.pass.$$fmt.err \
-	            || { echo "FAIL: round-trip mismatch $$tc $$fmt stderr" ; } ; \
+	            || { echo "FAIL: round-trip mismatch $$tc $$fmt stderr" ; \
+	                 ${REPORT_RECORD} out/$$tc.pass.$$fmt.err \
+	                     "round-trip mismatch" ; } ; \
 	        [ "$$plain_rc" = "$$pass_rc" ] \
-	            || { echo "FAIL: round-trip mismatch $$tc $$fmt exit status ($$plain_rc vs $$pass_rc)" ; } ; \
+	            || { echo "FAIL: round-trip mismatch $$tc $$fmt exit status ($$plain_rc vs $$pass_rc)" ; \
+	                 ${REPORT_RECORD} out/$$tc.pass.$$fmt \
+	                     "round-trip exit status ($$plain_rc vs $$pass_rc)" ; } ; \
 	    done ; \
 	    echo "... precompile ir $$tc ..."; \
 	    ${CLANG_PASS} -c ${srcdir}/$$tc.c \
 	        -o out/$$tc.pass.o \
 	        > out/$$tc.ir.out 2> out/$$tc.ir.err ; \
-	    ${DIFF} -Nu ${srcdir}/saved/$$tc.ir.out  out/$$tc.ir.out ; \
-	    ${DIFF} -Nu ${srcdir}/saved/$$tc.ir.err  out/$$tc.ir.err ; \
+	    ${CHECK_DIFFS} ${srcdir}/saved/$$tc.ir out/$$tc.ir $$? ; \
 	    nm out/$$tc.pass.o | grep 'xo_emit_\(cached\|precompiled\)' | sed -e 's/_xo/xo/' | sort -u \
 	        > out/$$tc.nm ; \
-	    ${DIFF} -Nu ${srcdir}/saved/$$tc.nm out/$$tc.nm ; \
+	    ${CHECK_DIFF} ${srcdir}/saved/$$tc.nm out/$$tc.nm ; \
 	done ; true
 
 #
@@ -202,6 +205,7 @@ test-xocc: ${XOCC}
 	    sh ${srcdir}/$$tc.sh ${XOCC} ${XOCC_SOURCE} out \
 	        "${XOCC_COMPILE_ARGS}" "${XOCC_LINK_ARGS}" \
 	        > out/$$tc.out.raw 2> out/$$tc.err.raw ; \
+	    rc=$$? ; \
 	    for fd in out err; do \
 	        ${SED} -e "s|${XOCC_COMPILE_ARGS}|CFLAGS|g" \
 	            -e "s|${XOCC_LINK_ARGS}|LDFLAGS|g" \
@@ -211,8 +215,8 @@ test-xocc: ${XOCC}
 	            $(if ${SDK_PATH},-e "s|${SDK_PATH}|SDK|g",) \
 	            -e "s|${prefix}|PREFIX|g" \
 	            < out/$$tc.$$fd.raw > out/$$tc.$$fd ; \
-	        ${DIFF} -Nu ${srcdir}/saved/$$tc.$$fd out/$$tc.$$fd ; \
 	    done ; \
+	    ${CHECK_DIFFS} ${srcdir}/saved/$$tc out/$$tc $$rc ; \
 	done ; true
 
 accept: ${VALIDATE_PLUGIN} ${PRECOMPILE_PLUGIN}
@@ -238,6 +242,10 @@ accept: ${VALIDATE_PLUGIN} ${PRECOMPILE_PLUGIN}
 	    ${CP} out/$$tc.ir.err  ${srcdir}/saved/$$tc.ir.err  ; \
 	    ${CP} out/$$tc.nm      ${srcdir}/saved/$$tc.nm      ; \
 	done)
+
+CLEANFILES =
+
+include ${top_srcdir}/tests/report.mk
 
 CLEANDIRS = out
 

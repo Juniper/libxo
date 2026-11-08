@@ -245,7 +245,7 @@ else
 PLUGIN_TESTS =
 endif
 
-test tests: ${noinst_PROGRAMS} run-plain-tests ${PLUGIN_TESTS}
+tests-run: ${noinst_PROGRAMS} run-plain-tests ${PLUGIN_TESTS}
 
 run-plain-tests:
 	@${MKDIR} -p out
@@ -295,10 +295,8 @@ $(pass_tests): %.pass-test: $(srcdir)/%.c \
 run-validate-tests: $(validate_tests)
 	@${MKDIR} -p out
 	@for tc in ${TEST_CASES:.c=}; do \
-	    diff -Nu ${srcdir}/saved/$$tc.validate-test.make.out \
-	        out/$$tc.validate-test.make.out ; \
-	    diff -Nu ${srcdir}/saved/$$tc.validate-test.make.err \
-	        out/$$tc.validate-test.make.err ; \
+	    ${CHECK_DIFFS} ${srcdir}/saved/$$tc.validate-test.make \
+	        out/$$tc.validate-test.make ; \
 	done; true
 	@DYLD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${DYLD_LIBRARY_PATH}" \
 	    LD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${LD_LIBRARY_PATH}" \
@@ -307,10 +305,8 @@ run-validate-tests: $(validate_tests)
 run-pass-tests: $(pass_tests)
 	@${MKDIR} -p out
 	@for tc in ${TEST_CASES:.c=}; do \
-	    diff -Nu ${srcdir}/saved/$$tc.pass-test.make.out \
-	        out/$$tc.pass-test.make.out ; \
-	    diff -Nu ${srcdir}/saved/$$tc.pass-test.make.err \
-	        out/$$tc.pass-test.make.err ; \
+	    ${CHECK_DIFFS} ${srcdir}/saved/$$tc.pass-test.make \
+	        out/$$tc.pass-test.make ; \
 	done; true
 	@DYLD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${DYLD_LIBRARY_PATH}" \
 	    LD_LIBRARY_PATH="${LIBXO_LIBDIR}:${FORMAT_LIBDIR}:${LD_LIBRARY_PATH}" \
@@ -368,6 +364,8 @@ CLEANFILES = ${TEST_CASES:.c=.test} \
     ${TEST_CASES:.c=.pass-test.o} \
     ${TEST_CASES:.c=.pass-test.make.out} \
     ${TEST_CASES:.c=.pass-test.make.err}
+
+include ${top_srcdir}/tests/report.mk
 CLEANDIRS = out
 
 clean-local:

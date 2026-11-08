@@ -24,10 +24,15 @@ if HAVE_PYTHON
 SUBDIRS += rtoon-py
 endif
 
-test tests:
+CLEANFILES =
+
+include ${top_srcdir}/tests/report.mk
+
+tests-run:
 	@(cur=`pwd` ; for dir in $(SUBDIRS) ; do \
 		cd $$dir ; \
-		$(MAKE) tests ; \
+		REPORT_PATH="$${REPORT_PATH}$$dir/" $(MAKE) tests \
+		    || ${REPORT_RECORD} $$dir "make tests failed" ; \
 		cd $$cur ; \
 	done)
 
@@ -44,4 +49,5 @@ valgrind:
 	${MAKE} VALGRIND='valgrind -q' tests
 
 EXTRA_DIST = \
+	report.mk \
 	run-tests.sh
