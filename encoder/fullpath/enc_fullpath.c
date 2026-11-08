@@ -15,6 +15,7 @@
 
 #include "xo.h"
 #include "xo_encoder.h"
+#include "xo_private.h"
 
 #define FALLTHRU __attribute__((__fallthrough__))
 
