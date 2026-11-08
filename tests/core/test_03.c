@@ -14,7 +14,7 @@
 #include <string.h>
 
 #include "xo.h"
-#include "xo_encoder.h"
+#include "xo_private.h"
 
 xo_info_t info[] = {
     { "employee", "object", "Employee data" },
