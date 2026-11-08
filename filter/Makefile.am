@@ -40,7 +40,9 @@ pkgincludedir = ${includedir}/libxo
 
 pkginclude_HEADERS = \
      xo_filter.h \
-     xo_filter_ops.h \
+     xo_filter_ops.h
+
+noinst_HEADERS = \
      xo_xparse.h \
      xo_xpath.h
 
