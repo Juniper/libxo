@@ -12,6 +12,10 @@
 #define XO_FILTER_H
 
 #include <stdarg.h>
+#include <stdint.h>
+#include <sys/types.h>
+
+#include "xo.h"
 
 #define XO_FILTER_OPS_VERSION 2	/* Current API version number */
 
@@ -225,12 +229,12 @@ extern xo_filter_data_ops_t xo_filter_data_ops_default;
 
 #define XO_FILTER_DEFAULT_ARGS xop, xfp
 #define XO_FILTER_DEFAULT_SIGNATURE \
-    xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED
+    xo_handle_t *xop XO_UNUSED, xo_filter_t *xfp XO_UNUSED
 
 #define XO_FILTER_DEFAULT_TAG_ARGS xop, xfp, tag
 #define XO_FILTER_DEFAULT_TAG_SIGNATURE \
-    xo_handle_t *xop UNUSED, xo_filter_t *xfp UNUSED, \
-	const char *tag UNUSED
+    xo_handle_t *xop XO_UNUSED, xo_filter_t *xfp XO_UNUSED, \
+	const char *tag XO_UNUSED
 
 /*
  * The outer ops (caller -> filter: open_container/close/key/get_status/...)
@@ -244,7 +248,7 @@ extern xo_filter_data_ops_t xo_filter_data_ops_default;
 #endif /* LIBXO_NEED_FILTERS */
 
 void
-xo_set_filter_data (xo_handle_t *xop UNUSED, xo_filter_t *);
+xo_set_filter_data (xo_handle_t *xop, xo_filter_t *);
 
 struct xo_filter_s *
 xo_get_filter_data (xo_handle_t *xop, int create);
@@ -267,6 +271,15 @@ xo_filter_create_with_data (xo_handle_t *xop, xo_filter_data_t *dp,
 
 struct xo_xparse_data_s *
 xo_filter_xparse_data (xo_handle_t *xop, xo_filter_t *xfp);
+
+/*
+ * Parse expr as a single XPath expression (rather than the usual union
+ * of location paths) into xfp's parse data.  Returns the root node id
+ * of the expression, suitable as the 'root' for xo_eval_compile(), or
+ * -1 on failure.
+ */
+ssize_t
+xo_filter_parse_expr (xo_handle_t *xop, xo_filter_t *xfp, const char *expr);
 
 /* Return the opaque data pointer set by xo_filter_create_with_data. */
 xo_filter_data_t *
