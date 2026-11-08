@@ -26,7 +26,6 @@ extern "C" {
 #include <string.h>
 
 #include "xo.h"		    /* xo_xff_flags_t, XFF_*, xo_field_info_t, xo_handle_t */
-#include "xo_private.h"
 #include "xo_buf.h"
 
 typedef unsigned xo_encoder_op_t;
@@ -219,6 +218,26 @@ xo_failure_filter (xo_handle_t *xop, const char *fmt, ...) XO_PRINTFLIKE(2, 3);
  */
 void
 xo_failure_filter_v (xo_handle_t *xop, const char *fmt, va_list vap);
+
+/*
+ * Simple string comparison function (without the temptation
+ * to forget the "== 0").
+ */
+static inline int
+xo_streq (const char *one, const char *two)
+{
+    return strcmp(one, two) == 0;
+}
+
+/*
+ * Simple string comparison function (without the temptation
+ * to forget the "== 0").
+ */
+static inline int
+xo_streqn (const char *one, const char *two, ssize_t len_of_two)
+{
+    return strncmp(one, two, len_of_two + 1) == 0;
+}
 
 #ifdef __cplusplus
 }
