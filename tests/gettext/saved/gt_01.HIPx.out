@@ -153,6 +153,60 @@
   <div class="padding"> </div>
   <div class="data" data-tag="windings" data-xpath="/top/windings">otuslay-oyay-eltayay</div>
 </div>
+<div class="line">
+  <div class="label">Ervicesay</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="service" data-xpath="/top/service" data-type="boolean" data-value="true">Enabledway</div>
+</div>
+<div class="line">
+  <div class="label">Backup</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="backup" data-xpath="/top/backup" data-type="boolean" data-value="false">Isabledday</div>
+</div>
+<div class="line">
+  <div class="label">Mirrored</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="mirrored" data-xpath="/top/mirrored" data-type="boolean" data-value="true">uetray</div>
+</div>
+<div class="line">
+  <div class="label">Encrypted</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="encrypted" data-xpath="/top/encrypted" data-type="boolean" data-value="false">alsefay</div>
+</div>
+<div class="line">
+  <div class="label">Ightslay</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="lights" data-xpath="/top/lights" data-type="boolean" data-value="true">itlay</div>
+</div>
+<div class="line">
+  <div class="label">Orchpay</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="porch" data-xpath="/top/porch" data-type="boolean" data-value="false">arkday</div>
+</div>
+<div class="line">
+  <div class="label">Anfay</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="fan" data-xpath="/top/fan" data-type="boolean" data-value="true">spinning</div>
+</div>
+  <div class="data" data-tag="lamp-state" data-xpath="/top/upstairs/lamp-state" data-type="boolean" data-value="true">onway</div>
+  <div class="text">, </div>
+<div class="line">
+  <div class="data" data-tag="lamps" data-xpath="/top/upstairs/lamps">3</div>
+  <div class="text"> ampslay</div>
+</div>
+  <div class="data" data-tag="lamp-state" data-xpath="/top/downstairs/lamp-state" data-type="boolean" data-value="false">offway</div>
+  <div class="text">, </div>
+<div class="line">
+  <div class="data" data-tag="lamps" data-xpath="/top/downstairs/lamps">2</div>
+  <div class="text"> ampslay</div>
+</div>
   <div class="data" data-tag="second" data-xpath="/top/second">2</div>
   <div class="text"> afteryay </div>
   <div class="text">{a}</div>
