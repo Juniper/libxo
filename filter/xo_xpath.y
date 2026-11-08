@@ -277,6 +277,10 @@ start :
         | M_PARSE_XPATH xpath_expression
 		{
 		    $$ = xo_xparse_yyval(xparse_data, $2);
+		    if (xo_xparse_result_expr(xparse_data, $2) < 0) {
+			yyerror("out of memory");
+			YYABORT;
+		    }
 		    xparse_data->xd_errors = yynerrs;
 		}
 
