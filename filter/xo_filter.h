@@ -23,7 +23,7 @@
  * hand-assigned ids for optional bits of XPath grammar that a filter
  * consumer may choose to reject at compile time.  They are independent of
  * (and much smaller than) the internal, bison-generated token numbers in
- * xo_xpath.tab.h, which is a build-private header not exposed here; the
+ * xo_xpath.h, which is a build-private header not exposed here; the
  * translation from one of these ids to the matching internal token is done
  * inside xo_filter.c.
  *
