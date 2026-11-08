@@ -170,7 +170,7 @@
 #include "xo.h"
 #include "xo_encoder.h"
 #include "xo_buf.h"
-#include "xo_xpath.tab.h"
+#include "xo_xpath.h"
 #include "xo_xparse.h"
 
 /*
