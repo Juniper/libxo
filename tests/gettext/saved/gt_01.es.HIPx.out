@@ -156,6 +156,60 @@
   <div class="padding"> </div>
   <div class="data" data-tag="windings" data-xpath="/top/windings">loto-o-delta</div>
 </div>
+<div class="line">
+  <div class="label">Servicio</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="service" data-xpath="/top/service" data-type="boolean" data-value="true">Habilitado</div>
+</div>
+<div class="line">
+  <div class="label">Respaldo</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="backup" data-xpath="/top/backup" data-type="boolean" data-value="false">Deshabilitado</div>
+</div>
+<div class="line">
+  <div class="label">Reflejado</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="mirrored" data-xpath="/top/mirrored" data-type="boolean" data-value="true">verdadero</div>
+</div>
+<div class="line">
+  <div class="label">Cifrado</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="encrypted" data-xpath="/top/encrypted" data-type="boolean" data-value="false">falso</div>
+</div>
+<div class="line">
+  <div class="label">Luces</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="lights" data-xpath="/top/lights" data-type="boolean" data-value="true">encendidas</div>
+</div>
+<div class="line">
+  <div class="label">Porche</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="porch" data-xpath="/top/porch" data-type="boolean" data-value="false">apagadas</div>
+</div>
+<div class="line">
+  <div class="label">Ventilador</div>
+  <div class="decoration">:</div>
+  <div class="padding"> </div>
+  <div class="data" data-tag="fan" data-xpath="/top/fan" data-type="boolean" data-value="true">spinning</div>
+</div>
+  <div class="data" data-tag="lamp-state" data-xpath="/top/upstairs/lamp-state" data-type="boolean" data-value="true">encendidas</div>
+  <div class="text">: </div>
+<div class="line">
+  <div class="data" data-tag="lamps" data-xpath="/top/upstairs/lamps">3</div>
+  <div class="text"> lámparas</div>
+</div>
+  <div class="data" data-tag="lamp-state" data-xpath="/top/downstairs/lamp-state" data-type="boolean" data-value="false">apagadas</div>
+  <div class="text">: </div>
+<div class="line">
+  <div class="data" data-tag="lamps" data-xpath="/top/downstairs/lamps">2</div>
+  <div class="text"> lámparas</div>
+</div>
   <div class="data" data-tag="second" data-xpath="/top/second">2</div>
   <div class="text"> después de </div>
   <div class="text">{a}</div>
