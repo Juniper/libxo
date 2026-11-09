@@ -87,7 +87,7 @@ main (int argc, char **argv)
     xo_emit("{B:flag/*%d}\n", "yes+no", i_val);
 
     /* WARN: a NULL pair is a runtime failure */
-    xo_emit("{B:flag/*%d}\n", NULL, i_val);
+    xo_emit("{B:flag/*%d}\n", (void *) 0, i_val);
 
     /* WARN: the pair is missing */
     xo_emit("{B:flag/*%d}\n", i_val);
