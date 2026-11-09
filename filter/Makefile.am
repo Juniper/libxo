@@ -73,13 +73,13 @@ xo_xpath.c: xo_xpath.y
 	@echo "  GEN      xo_xpath.c ..."
 	@${SED} ${SED_OPTS} < xo_xpath.tab.c > xo_xpath.c.tmp
 	@mv xo_xpath.c.tmp xo_xpath.c
+	@mv xo_xpath.tab.h xo_xpath.h
 
 #
 # I really just can't bring myself to export a foo.tab.h file, but since
 # if need done, I hide by shame by renaming it.
 #
 xo_xpath.h: xo_xpath.c
-	@mv xo_xpath.tab.h xo_xpath.h
 
 CLEANFILES = \
     xo_xpath.c \
