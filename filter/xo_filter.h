@@ -243,9 +243,7 @@ extern xo_filter_data_ops_t xo_filter_data_ops_default;
  * code outside xo_filter.so can include this header for the data-ops types
  * without pulling in the internal ops declarations.
  */
-#ifdef LIBXO_NEED_FILTERS
 #include "xo_filter_ops.h"
-#endif /* LIBXO_NEED_FILTERS */
 
 void
 xo_set_filter_data (xo_handle_t *xop, xo_filter_t *);
