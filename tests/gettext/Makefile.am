@@ -170,7 +170,7 @@ accept:
 CLEANFILES = ${TEST_CASES:.c=.test}
 
 include ${top_srcdir}/tests/report.mk
-CLEANDIRS = out
+CLEANDIRS = out po
 
 clean-local:
 	rm -rf ${CLEANDIRS}
