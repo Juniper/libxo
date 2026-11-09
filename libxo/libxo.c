@@ -62,10 +62,10 @@
 #endif /* HAVE_EXTERR */
 
 #ifdef LIBXO_TEXT_ONLY          /* Turn off unneeded features */
+/* We don't want the overhead of tag maps when in text-only mode */
 #undef LIBXO_NEED_MAP           /* No tag maps in text mode */
 #undef LIBXO_NEED_FILTERS       /* No filters in text mode */
 #else  /* LIBXO_TEXT_ONLY */
-/* We don't want the overhead of tag maps when in text-only mode */
 #define LIBXO_NEED_MAP          /* Map tags to new names */
 #endif /* LIBXO_TEXT_ONLY */
 
@@ -77,6 +77,7 @@
 #include "xo_explicit.h"
 #include "xo_dyld.h"
 #include "xo_format.h"
+
 #include "../filter/xo_filter.h"
 
 /*
@@ -410,7 +411,10 @@ static THREAD_LOCAL(int) xo_default_inited;
 static int xo_locale_inited;
 static const char *xo_program;
 static int xo_codeset_is_utf8;  /* Is stdout UTF-8? */
+
+#ifdef LIBXO_NEED_FILTERS
 static int filter_lib_loaded;
+#endif /* LIBXO_NEED_FILTERS */
 
 static char *xo_group_sep;      /* Copy of locale's thousands separator */
 static int xo_group_sep_len;    /* strlen(xo_group_sep) */
@@ -610,9 +614,9 @@ xo_is_line_buffered (FILE *stream)
     return 0;
 }
 
+#ifdef LIBXO_NEED_FILTERS
 xo_filter_ops_t xo_filter_ops;  /* The global set of filter operations */
 
-#ifdef LIBXO_NEED_FILTERS
 static int
 xo_load_filter_lib (xo_handle_t *xop UNUSED)
 {
@@ -654,14 +658,16 @@ xo_load_filter_lib (xo_handle_t *xop UNUSED)
 /*
  * Used only for test jigs, so avoid dynamic loading
  */
+#ifdef LIBXO_NEED_FILTERS
 void
-xo_setup_filter_lib_test (int version, xo_filter_ops_t *ops)
+xo_setup_filter_lib_test (int version UNUSED, xo_filter_ops_t *ops UNUSED)
 {
     if (version == XO_FILTER_OPS_VERSION) {
         memcpy(&xo_filter_ops, ops, sizeof(*ops));
         filter_lib_loaded = TRUE;
     }
 }
+#endif /* LIBXO_NEED_FILTERS */
 
 /*
  * Build a nibble-packed map of the locale's grouping shape, so we
@@ -6069,28 +6075,26 @@ xo_map_add_file (xo_handle_t *xop UNUSED, const char *fname UNUSED)
  * turn into NULL functions that will allow the filter related code to
  * be optimized out.
  */
+#ifdef LIBXO_NEED_FILTERS
 void
 xo_set_filter_data (xo_handle_t *xop UNUSED, struct xo_filter_s *xfp UNUSED)
 {
-#ifdef LIBXO_NEED_FILTERS
     xop = xo_default(xop);
     xop->xo_filters = xfp;
-#endif /* LIBXO_NEED_FILTERS */
 }
+#endif /* LIBXO_NEED_FILTERS */
 
+#ifdef LIBXO_NEED_FILTERS
 struct xo_filter_s *
 xo_get_filter_data (xo_handle_t *xop UNUSED, int create UNUSED)
 {
-#ifdef LIBXO_NEED_FILTERS
     xop = xo_default(xop);
     if (xop->xo_filters == NULL && create)
 	xop->xo_filters = xo_filter_create(xop);
 
     return xop->xo_filters;
-#else /* LIBXO_NEED_FILTERS */
-    return NULL;
-#endif /* LIBXO_NEED_FILTERS */
 }
+#endif /* LIBXO_NEED_FILTERS */
 
 /*
  * This one is just a convenience function for the code in this file
@@ -6105,6 +6109,7 @@ xo_filters (xo_handle_t *xop UNUSED)
 #endif /* LIBXO_NEED_FILTERS */
 }
 
+#ifdef LIBXO_NEED_FILTERS
 const char *
 xo_filt_status_name (xo_filter_status_t fstatus)
 {
@@ -6116,6 +6121,7 @@ xo_filt_status_name (xo_filter_status_t fstatus)
         (fstatus == XO_STATUS_COND) ? "conditional" :
         (fstatus == XO_STATUS_LIVE) ? "live" : "unknown";
 }
+#endif /* LIBXO_NEED_FILTERS */
 
 int
 xo_add_filter (xo_handle_t *xop UNUSED, const char *input UNUSED)
@@ -6533,8 +6539,9 @@ xo_filt_commit_field (xo_handle_t *xop UNUSED, xo_off_t field_start UNUSED,
  * status).
  */
 static xo_filter_status_t
-xo_filt_handle_open_status (xo_handle_t *xop, xo_filter_status_t fstatus)
+xo_filt_handle_open_status (xo_handle_t *xop UNUSED, xo_filter_status_t fstatus)
 {
+#ifdef LIBXO_NEED_FILTERS
     xo_stack_t *xsp = xo_stack_cur(xop);
     
     if (fstatus == XO_STATUS_FULL) {
@@ -6574,6 +6581,7 @@ xo_filt_handle_open_status (xo_handle_t *xop, xo_filter_status_t fstatus)
 	    xsp->xs_flags &= ~XSF_COND_KEPT;
 	}
     }
+#endif /* LIBXO_NEED_FILTERS */
 
     return fstatus;
 }
@@ -6587,11 +6595,11 @@ xo_filt_handle_open_status (xo_handle_t *xop, xo_filter_status_t fstatus)
  * tag plus any key fields written before a deeper container opened.
  * Everything else (non-key sibling fields) is stripped.
  */
-static void
-xo_filt_commit_compact (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED,
-			xo_filter_status_t fstatus UNUSED)
-{
 #ifdef LIBXO_NEED_FILTERS
+static void
+xo_filt_commit_compact (xo_handle_t *xop, xo_stack_t *cur,
+			xo_filter_status_t fstatus)
+{
     if (!(xop->xo_flags & XOF_FILTER))
 	return;
 
@@ -6620,13 +6628,15 @@ xo_filt_commit_compact (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED,
 	cur->xs_flags &= ~XSF_RB_BITS;
 
     XOIF_CLEAR(xop, XOIF_FILTERING);
-#endif /* LIBXO_NEED_FILTERS */
 }
+#endif /* LIBXO_NEED_FILTERS */
 
 static void
-xo_filt_handle_change_status (xo_handle_t *xop, xo_filter_status_t old_status,
-			     xo_filter_status_t new_status)
+xo_filt_handle_change_status (xo_handle_t *xop UNUSED,
+			      xo_filter_status_t old_status UNUSED,
+			      xo_filter_status_t new_status UNUSED)
 {
+#ifdef LIBXO_NEED_FILTERS
     if (!XOF_ISSET(xop, XOF_FILTER))
 	return;
 
@@ -6637,6 +6647,7 @@ xo_filt_handle_change_status (xo_handle_t *xop, xo_filter_status_t old_status,
 
     if (new_status == XO_STATUS_FULL && old_status != XO_STATUS_FULL)
 	xo_filt_commit_compact(xop, xo_stack_cur(xop), new_status);
+#endif /* LIBXO_NEED_FILTERS */
 }
 
 static void
@@ -6724,6 +6735,7 @@ xo_filt_rollback (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED,
  * Is 'xsp' or any frame above it still waiting on a predicate, with
  * its content held tentatively?
  */
+#ifdef LIBXO_NEED_FILTERS
 static int
 xo_filt_pending (xo_handle_t *xop, xo_stack_t *xsp)
 {
@@ -6735,6 +6747,7 @@ xo_filt_pending (xo_handle_t *xop, xo_stack_t *xsp)
 
     return FALSE;
 }
+#endif /* LIBXO_NEED_FILTERS */
 
 /*
  * A closing frame that holds content kept conditionally passes that
@@ -6743,11 +6756,13 @@ xo_filt_pending (xo_handle_t *xop, xo_stack_t *xsp)
  * but not every close path calls it.)
  */
 static void
-xo_filt_pass_cond_kept (xo_handle_t *xop, xo_stack_t *cur)
+xo_filt_pass_cond_kept (xo_handle_t *xop UNUSED, xo_stack_t *cur UNUSED)
 {
+#ifdef LIBXO_NEED_FILTERS
     if (XOF_ISSET(xop, XOF_FILTER) && cur > xop->xo_stack
 	    && (cur->xs_flags & XSF_COND_KEPT))
 	cur[-1].xs_flags |= XSF_COND_KEPT;
+#endif /* LIBXO_NEED_FILTERS */
 }
 
 /*
@@ -6813,6 +6828,7 @@ xo_avoid_flushing (xo_handle_t *xop)
 /*
  * Decide if the just-rendered field can be skipped (rolled back)
  */
+#ifdef LIBXO_NEED_FILTERS
 static int
 xo_filt_is_skippable (xo_handle_t *xop, xo_xff_flags_t flags,
 		      const char *name, xo_ssize_t nlen,
@@ -6881,11 +6897,13 @@ xo_filt_is_skippable (xo_handle_t *xop, xo_xff_flags_t flags,
 
     return TRUE;
 }
+#endif /* LIBXO_NEED_FILTERS */
 
 static int
-xo_filt_skip (xo_handle_t *xop, xo_xff_flags_t flags,
-	      const char *name, xo_ssize_t nlen)
+xo_filt_skip (xo_handle_t *xop UNUSED, xo_xff_flags_t flags UNUSED,
+	      const char *name UNUSED, xo_ssize_t nlen UNUSED)
 {
+#ifdef LIBXO_NEED_FILTERS
     xo_filter_status_t fstatus = xo_filter_get_status(xop, xo_filters(xop));
 
     int rc = xo_filt_is_skippable(xop, flags, name, nlen, fstatus);
@@ -6900,6 +6918,9 @@ xo_filt_skip (xo_handle_t *xop, xo_xff_flags_t flags,
 	   rc ? "true" : "false");
 
     return rc;
+#else /* LIBXO_NEED_FILTERS */
+    return FALSE;
+#endif /* LIBXO_NEED_FILTERS */
 }
 
 static xo_filter_status_t 
