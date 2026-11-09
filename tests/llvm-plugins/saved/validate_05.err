@@ -17,14 +17,8 @@
    80 |     xo_emit("{B:flag/on+off}\n", i_val);
       |                                  ^
 ../../../tests/llvm-plugins/validate_05.c:90:31: warning: libxo: argument 1: a 'B' field's "*" boolean pair is NULL
-   90 |     xo_emit("{B:flag/*%d}\n", NULL, i_val);
+   90 |     xo_emit("{B:flag/*%d}\n", (void *) 0, i_val);
       |                               ^
-/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types/_null.h:49:15: note: expanded from macro 'NULL'
-   49 | #define NULL  __DARWIN_NULL
-      |               ^
-/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/_types.h:64:23: note: expanded from macro '__DARWIN_NULL'
-   64 | #define __DARWIN_NULL ((void *)0)
-      |                       ^
 ../../../tests/llvm-plugins/validate_05.c:93:13: warning: libxo: format expects 2 argument(s) but 1 provided
    93 |     xo_emit("{B:flag/*%d}\n", i_val);
       |             ^
