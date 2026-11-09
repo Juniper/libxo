@@ -87,7 +87,7 @@ types (int t)
     xo_emit("{B:t-string/%s} ({:t-string-next/%d})\n",
 	    t ? "s" : "", ++sentinel);
     xo_emit("{B:t-pointer/%p} ({:t-pointer-next/%d})\n",
-	    t ? (void *) &sentinel : NULL, ++sentinel);
+	    t ? (void *) &sentinel : (void *) 0, ++sentinel);
     xo_emit("{B:t-bool/%d} ({:t-bool-next/%d})\n", (_Bool) t, ++sentinel);
 }
 
@@ -106,7 +106,7 @@ static void
 strings (int t)
 {
     xo_emit("{B:null-or-zero/%s} ({:null-or-zero-next/%d})\n",
-	    t ? "0" : NULL, ++sentinel);
+	    t ? "0" : (void *) 0, ++sentinel);
     xo_emit("{B:empty-or-false/%s} ({:empty-or-false-next/%d})\n",
 	    t ? "false" : "", ++sentinel);
 }
@@ -116,7 +116,7 @@ pairs (int t)
 {
     xo_emit("{B:arg-pair/*%d} ({:arg-pair-next/%d})\n",
 	    "yes+no", t, ++sentinel);
-    xo_emit("{B:arg-null/*%d} ({:arg-null-next/%d})\n", NULL, t, ++sentinel);
+    xo_emit("{B:arg-null/*%d} ({:arg-null-next/%d})\n", (void *) 0, t, ++sentinel);
     xo_emit("{B:arg-bad/*%d} ({:arg-bad-next/%d})\n", "a+b+c", t, ++sentinel);
     xo_emit("{B:arg-escape/*%d} ({:arg-escape-next/%d})\n",
 	    "100%+50\\", t, ++sentinel);
@@ -130,7 +130,7 @@ pairs (int t)
 static void
 full (int t)
 {
-    const char *str = t ? "yes" : NULL;
+    const char *str = t ? "yes" : (void *) 0;
 
     xo_emit("{B,full-boolean:full-words/yup+nope} ({:full-words-next/%d})\n",
 	    str, ++sentinel);
