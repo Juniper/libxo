@@ -660,7 +660,7 @@ xo_load_filter_lib (xo_handle_t *xop UNUSED)
  */
 #ifdef LIBXO_NEED_FILTERS
 void
-xo_setup_filter_lib_test (int version UNUSED, xo_filter_ops_t *ops UNUSED)
+xo_setup_filter_lib_test (int version, xo_filter_ops_t *ops)
 {
     if (version == XO_FILTER_OPS_VERSION) {
         memcpy(&xo_filter_ops, ops, sizeof(*ops));
