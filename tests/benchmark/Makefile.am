@@ -23,10 +23,12 @@ AM_CFLAGS = \
 
 # Ick: maintained by hand!
 TEST_CASES = \
-bm_01.c \
-bm_02.c
+bm_01.c
 
 bm_01_test_SOURCES = bm_01.c
+
+if LIBXO_NEED_FILTERS
+TEST_CASES += bm_02.c
 
 bm_02_test_SOURCES = bm_02.c
 bm_02_test_CFLAGS = \
@@ -36,6 +38,7 @@ bm_02_test_CFLAGS = \
 bm_02_test_LDADD = \
     ${LDADD} \
     ${top_builddir}/filter/libxo_filter.la
+endif
 
 base_tests = ${TEST_CASES:.c=.test}
 
