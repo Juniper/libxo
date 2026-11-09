@@ -1,9 +1,6 @@
 ../../../tests/core/test_20.c:119:57: warning: libxo: argument 1: a 'B' field's "*" boolean pair is NULL
-  119 |     xo_emit("{B:arg-null/*%d} ({:arg-null-next/%d})\n", NULL, t, ++sentinel);
+  119 |     xo_emit("{B:arg-null/*%d} ({:arg-null-next/%d})\n", (void *) 0, t, ++sentinel);
       |                                                         ^
-/opt/local/libexec/llvm-22/lib/clang/22/include/__stddef_null.h:26:14: note: expanded from macro 'NULL'
-   26 | #define NULL ((void*)0)
-      |              ^
 ../../../tests/core/test_20.c:126:14: warning: libxo: boolean pair has an empty word: '+off%d'
   126 |     xo_emit("{B:empty-word/+off%d} ({:empty-word-next/%d})\n", t, ++sentinel);
       |              ^
