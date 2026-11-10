@@ -16,6 +16,7 @@
 #include <sys/types.h>
 
 #include "xo.h"
+#include "xo_encoder.h"
 
 #define XO_FILTER_OPS_VERSION 2	/* Current API version number */
 
