@@ -1,0 +1,130 @@
+.\" #
+.\" # Copyright (c) 2026, Juniper Networks, Inc.
+.\" # All rights reserved.
+.\" # This SOFTWARE is licensed under the LICENSE provided in the
+.\" # ../Copyright file. By downloading, installing, copying, or
+.\" # using the SOFTWARE, you agree to be bound by the terms of that
+.\" # LICENSE.
+.\"
+.Dd November 10, 2026
+.Dt XO-LEXICON 1
+.Os
+.Sh NAME
+.Nm xo-lexicon
+.Nd build, merge, and check the libxo lexicon of tag names
+.Sh SYNOPSIS
+.Nm
+.Cm build
+.Fl p Ar package
+.Op Fl o Ar dir
+.Op Fl d Ar discouraged.lex
+.Ar source ...
+.Nm
+.Cm merge
+.Op Fl D Ar dir
+.Nm
+.Cm check
+.Op Fl D Ar dir
+.Op Fl n
+.Ar source ...
+.Sh DESCRIPTION
+The lexicon records the tag names (element and member names) that
+installed programs use in their libxo output, so that new
+programs can reuse common names instead of inventing synonyms.
+.Pp
+The lexicon directory holds one pair of files for each package:
+.Bl -tag -width "pkg.discouraged.lex"
+.It Pa pkg.lex
+The tags the package uses, one per line, as
+.Dq tag count ,
+where count is the number of places in the source that use the tag.
+.It Pa pkg.discouraged.lex
+Tags the package has shipped but whose continued use should be
+limited, as
+.Dq tag Op replacement .
+A tag that was never shipped but should never be used is a
+discouraged tag with a count of zero.
+.El
+.Pp
+.Cm merge
+combines the per-package files into two files, which are a cache
+and are never edited:
+.Bl -tag -width "system.discouraged.lex"
+.It Pa system.lex
+.Dq tag packages uses ,
+where packages is the number of packages that use the tag, and
+uses is the total number of uses.
+.It Pa system.discouraged.lex
+.Dq tag packages uses Op replacement .
+When packages disagree on the replacement, the first one (in file
+name order) is kept and a warning is given.
+.El
+.Pp
+In all files, text after
+.Dq #
+is a comment and blank lines are ignored.
+.Ss Modes
+.Bl -tag -width "check"
+.It Cm build
+Run at build time.
+Writes
+.Pa package.lex
+into
+.Ar dir
+(default
+.Dq . ) ,
+using
+.Xr xolint 1
+.Fl L
+over the sources.
+With
+.Fl d ,
+copies the hand-maintained
+.Ar discouraged.lex
+to
+.Pa package.discouraged.lex .
+.It Cm merge
+Run from a package's post-install and post-deinstall hooks.
+Rebuilds
+.Pa system.lex
+and
+.Pa system.discouraged.lex
+from the per-package files present in the directory.
+Since the result depends only on the directory's contents, a
+reinstall or an uninstall needs nothing more.
+.It Cm check
+Reports each tag the sources use as
+.Dq known ,
+.Dq discouraged
+(with its replacement, if any), or
+.Dq new ,
+with the number of uses in the sources and the number of packages
+that use it.
+With
+.Fl n ,
+prints only the new tags, one per line, which is the new-words file
+of a conversion.
+If any per-package file is newer than
+.Pa system.lex ,
+the files are merged in memory first, so a missed hook does no harm.
+.El
+.Pp
+.Fl D Ar dir
+names the lexicon directory; the default is the installed one.
+.Sh ENVIRONMENT
+.Bl -tag -width "XOLINT"
+.It Ev XOLINT
+The
+.Xr xolint 1
+to run; the default is the installed one.
+.El
+.Sh EXAMPLES
+.Bd -literal -offset indent
+% xo-lexicon build -p wc -d discouraged.lex wc.c
+% xo-lexicon merge
+% xo-lexicon check -n wc.c > wc.new-words
+.Ed
+.Sh SEE ALSO
+.Xr xolint 1 ,
+.Xr xo_emit 3 ,
+.Xr libxo 3
