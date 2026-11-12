@@ -14,6 +14,7 @@
 # Yes, that's a long way to go for a pun.
 
 %vocabulary = ();
+%lexicon = ();
 $total_errors = 0;
 
 sub main {
@@ -24,6 +25,7 @@ sub main {
 	$opt_debug = 1 if /^-d/;
 	extract_docs() if /^-D/;
 	$opt_info = $opt_vocabulary = 1 if /^-I/;
+	$opt_lexicon = $opt_vocabulary = 1 if /^-L/;
 	$opt_print = 1 if /^-p/;
 	$opt_vocabulary = 1 if /^-V/;
 	extract_samples() if /^-X/;
@@ -36,6 +38,7 @@ sub main {
 	print STDERR "    -d         Show debug output\n";
 	print STDERR "    -D         Extract xolint documentation\n";
 	print STDERR "    -I         Print xo_info_t data\n";
+	print STDERR "    -L         Print lexicon (tags and use counts)\n";
 	print STDERR "    -p         Print input data on errors\n";
 	print STDERR "    -V         Print vocabulary (list of tags)\n";
 	print STDERR "    -X         Print examples of invalid use\n";
@@ -46,7 +49,11 @@ sub main {
 	parse_file($file);
     }
 
-    if ($opt_info) {
+    if ($opt_lexicon) {
+	for $name (sort(keys(%lexicon))) {
+	    print $name, " ", $lexicon{$name}, "\n";
+	}
+    } elsif ($opt_info) {
 	print "static xo_info_t xo_info_table[] = {\n";
 	for $name (sort(keys(%vocabulary))) {
 	    print "    { \"", $name, "\", \"type\", \"desc\" },\n";
@@ -79,7 +86,7 @@ sub extract_docs {
     open INPUT, "$cmd |";
     local @input = <INPUT>;
     close INPUT;
-    my $ln, $new = 0, $first = 1, $need_nl;
+    my $ln, $new = 0, $first = 1, $need_nl, $in_code = 0, $code_indent;
 
     for ($ln = 0; $ln <= $#input; $ln++) {
 	chomp($_ = $input[$ln]);
@@ -94,7 +101,23 @@ sub extract_docs {
 	    next;
 	}
 
-	s/\s*\#\@\s*//;
+	# Indented lines are code; keep indentation past the first line
+	my $code = 0;
+	if (/^\s*\#\@( {2,})/ || /xo_emit\s*\(/) {
+	    my $len = length($1);
+	    $code_indent = $len unless $in_code;
+	    $len = $code_indent if $len > $code_indent;
+	    s/^\s*\#\@ {$len}//;
+	    s/^\s+// if $len == 0;
+	    $code = 1;
+	} else {
+	    s/^\s*\#\@\s*//;
+	}
+
+	if ($in_code && !$code) {
+	    print "\n";
+	    $in_code = 0;
+	}
 
 	if ($new) {
 	    if ($need_nl) {
@@ -108,9 +131,10 @@ sub extract_docs {
 	    print "The message \"$_\" can be caused by code like:\n";
 	    $new = 0;
 
-	} elsif (/xo_emit\s*\(/) {
-	    s/^\s+//;
-	    print "\n::\n\n    $_\n\n";
+	} elsif ($code) {
+	    print "\n::\n\n" unless $in_code;
+	    print "    $_\n";
+	    $in_code = 1;
 
 	} elsif (/^Should be/i) {
 	    print "This code should be replaced with code like:\n";
@@ -152,18 +176,60 @@ sub parse_file {
 	    next;
 	}
 
+	# For the lexicon, the names given to containers, lists, and
+	# attributes are tags too.  Instances are skipped, since an
+	# instance's name is its list's name.
+	if ($opt_lexicon
+	        && $line =~ /\bxo_(?:open_(?:container|list)|attr)(?:_\w+)?\s*\(/) {
+	    lexicon_call();
+	    next;
+	}
+
+	check_parse_args() if !$opt_vocabulary
+	    && $line =~ /\bxo_parse_args\s*\(/;
+
 	# All the xo_emit variants, like xo_emit_h and xo_emit_warn, take
 	# a format string.  xo_emit_field does not; its strings are the
 	# pieces of a single field.
 	next unless $line =~ /xo_emit(?:r|_(?!field)\w+)?\(/;
 
-	@tokens = parse_tokens();
+	@tokens = lexicon_parse_tokens();
+	next unless @tokens;
 	print "token:\n    '" . join("'\n    '", @tokens) . "'\n"
 	    if $opt_debug;
 
 	# The format follows any handle, flags or exit code arguments,
 	# so it is the first argument that is a string
 	my($format) = grep { /^".*"$/ } @tokens;
+	if ($opt_lexicon) {
+	    if (!defined($format)) {
+		lexicon_note("format is not a string literal");
+		next;
+	    }
+
+	    # A macro argument pasted between literals ("{:" f "/%u}")
+	    # leaves a bare quote inside; the tag isn't knowable here
+	    if (substr($format, 1, -1) =~ /(?<!\\)"/) {
+		lexicon_note("format pastes in a macro argument");
+		next;
+	    }
+	}
+
+	#@ Format is not a literal; it cannot be checked
+	#@     xo_emit(fmt, value);
+	#@ Should be:
+	#@     xo_emit("{a:/%s}", name, value);
+	#@ A format built at run time (with snprintf, say) can't be
+	#@ checked by xolint or the compiler, its field names can't be
+	#@ put in a lexicon, and a "{" in the data is a format-string
+	#@ injection.  libxo has features (the "a" modifier, "*" widths,
+	#@ "%@*@") so formats never need to be built; choose between
+	#@ literal formats instead.
+	if (!defined($format)) {
+	    warning("format is not a literal; it cannot be checked");
+	    next;
+	}
+
 	check_format($format);
     }
 
@@ -336,7 +402,64 @@ sub check_text {
     #@     xo_emit("{L:cost}: {:cost/%d}", cost);
     #@ This can be a bit surprising and could be a field that was not
     #@ properly converted to a libxo-style format string.
-    info("a percent sign appearing in text is a literal") if $text =~ /%/;
+    if ($text =~ /%/ && $text !~ /%%/) {
+	info("a percent sign appearing in text is a literal");
+	return;
+    }
+
+    #@ A percent sign appearing in text is a literal, so %% prints two
+    #@     xo_emit("{:used/%d}%%\n", used);
+    #@ Should be:
+    #@     xo_emit("{:used/%d}%\n", used);
+    #@ Outside a field, text is copied as is; "%" needs no escaping,
+    #@ and a "%%" left over from a printf format prints two percent
+    #@ signs.
+    info("a percent sign appearing in text is a literal, so %% prints two")
+	if $text =~ /%%/;
+}
+
+sub check_parse_args {
+    my $cur = $line;
+    my $i;
+
+    #@ The result of xo_parse_args is ignored
+    #@     xo_parse_args(argc, argv);
+    #@ Should be:
+    #@     argc = xo_parse_args(argc, argv);
+    #@     if (argc < 0)
+    #@         exit(EXIT_FAILURE);
+    #@ xo_parse_args returns the new argc, with the libxo options
+    #@ removed, or -1 for an invalid option.  Ignoring it leaves the
+    #@ "--libxo" options in argv, and carries on after an error.
+    my($var) = ($cur =~ /([\w.>\[\]-]+)\s*=\s*xo_parse_args\s*\(/);
+    if (!defined($var)) {
+	return if $cur =~ /\(\s*xo_parse_args\s*\(/;	# Tested in place
+	return if $cur =~ /(?:return|[<>=!]=?)\s*xo_parse_args\s*\(/;
+	warning("the result of xo_parse_args is ignored");
+	return;
+    }
+
+    #@ The result of xo_parse_args is not checked for failure
+    #@     argc = xo_parse_args(argc, argv);
+    #@     xo_set_version("1.0");
+    #@ Should be:
+    #@     argc = xo_parse_args(argc, argv);
+    #@     if (argc < 0)
+    #@         exit(EXIT_FAILURE);
+    #@ xo_parse_args returns -1 for an invalid "--libxo" option; the
+    #@ program must stop rather than run with a negative argc.
+    my $qvar = quotemeta($var);
+    my $rest = $cur;
+    $rest =~ s/.*?xo_parse_args\s*\(//;
+    for ($i = 0; $i <= 8; $i++) {
+	return if $rest =~ /$qvar\s*(?:<\s*0|<=\s*-1|==\s*-1|<\s*1\b|<=\s*0)/;
+	return if $rest =~ /(?:0\s*>|-1\s*==)\s*$qvar\b/;
+	last if $ln + $i + 1 > $#input;
+	$rest = $input[$ln + $i + 1];
+	last if $rest =~ /(?<![\w.>])$qvar\s*=[^=]/;	# Reassigned
+    }
+
+    warning("the result of xo_parse_args is not checked for failure");
 }
 
 %short = (
@@ -418,6 +541,11 @@ sub check_field {
 	$field[0] = $parts[0] . $new;
     }
 
+    if ($opt_lexicon) {
+	lexicon_field(@field);
+	return;
+    }
+
     if ($opt_vocabulary) {
 	$vocabulary{$field[1]} = 1
 	    if $field[1] && $field[0] !~ /[DELNPTUW\[\]]/;
@@ -452,6 +580,15 @@ sub check_field {
     error("only one field role can be used (" . join(", ", @roles) . ")")
 	if $#roles > 0;
 
+    #@ A percent sign in literal content is a literal, so %% prints two
+    #@     xo_emit("{:used/%d}{U:%%}\n", used);
+    #@ Should be:
+    #@     xo_emit("{:used/%d}{U:%}\n", used);
+    #@ The content of a decoration, label, note, title or units field
+    #@ is copied as is, so "{U:%%}" prints "%%" (and sets units="%%").
+    info("a percent sign in literal content is a literal, so %% prints two")
+	if $field[0] =~ /[DLNTU]/ && $field[1] =~ /%%/;
+
     # Field is a color, note, label, or title
     if ($field[0] =~ /[CDLNT]/) {
 
@@ -460,9 +597,11 @@ sub check_field {
 	#@ should be:
 	#@     xo_emit("{T:/%6.6s}\n", "Max");
 	#@ The "%6.6s" will be a literal, not a field format.  While
-	#@ it's possibly valid, it's likely a missing "/".
+	#@ it's possibly valid, it's likely a missing "/".  A percent
+	#@ sign that does not start a conversion ("{D:%}", "{L:100%}")
+	#@ is not reported.
 	info("potential missing slash after C, D, N, L, or T with format")
-	    if $field[1] =~ /%/;
+	    if $field[1] =~ /%[-+ #0-9.*'\@]*[A-Za-z]/;
 
 	#@ An encoding format cannot be given (roles: DNLT)
 	#@    xo_emit("{T:Max//%s}", "Max");
@@ -650,9 +789,12 @@ sub check_field {
 	#@ This is minor, but fields should use proper roles.  Decoration
 	#@ fields are meant to hold punctuation and other characters used
 	#@ to decorate the content, typically to make it more readable
-	#@ to human readers.
+	#@ to human readers, and to let CSS style them apart from the
+	#@ text.  Any punctuation is fine ("{D:,}", "{D:\\/}", "{D:->}"),
+	#@ as is a format ("{D:/%c}"); letters and digits belong in
+	#@ another role.
 	warning("decoration field contains invalid character")
-	    unless $field[1] =~ m:^[~!\@\#\$%^&\*\(\);\:\[\]\{\} ]+$:;
+	    if $field[1] =~ /[A-Za-z0-9]/;
     }
 
     if ($field[0] =~ /[\[\]]/) {
@@ -897,6 +1039,73 @@ sub check_field_format {
     #@ like "{:tag/%6..6d}" where only one period should be used.
     error("max width only valid for strings")
 	if $#chunks >= 2 && $fc !~ /[sS]/;
+}
+
+#
+# Lexicon (-L) support: count each tag that appears in the encoded
+# output.  Roles other than value and boolean make no tag, and neither
+# does a display-only ({d:}) field.  Names we can't see (from {a:}
+# fields or non-literal arguments) are reported, not guessed.
+#
+sub lexicon_field {
+    my($mods, $name) = @_;
+
+    return if $mods =~ /[CDEFGLNPTUW\[\]]/;
+    return if $mods =~ /d/;
+
+    if ($mods =~ /a/) {
+	lexicon_note("field name comes from an argument");
+	return;
+    }
+
+    # Same rule as the "invalid character" error; a bad name is a
+    # bug for lint to report, not a word for the lexicon
+    if ($name !~ /^[0-9a-z-]*$/) {
+	lexicon_note("invalid field name ($name)");
+	return;
+    }
+
+    $lexicon{$name} += 1 if $name ne "";
+}
+
+sub lexicon_call {
+    # parse_tokens() works from $', so it must run before any other match
+    my @tokens = lexicon_parse_tokens();
+    return unless @tokens;
+    my($name) = grep { /^".*"$/ } @tokens;
+
+    if (!defined($name)) {
+	lexicon_note("name is not a string literal");
+	return;
+    }
+
+    $name =~ s/^"//;
+    $name =~ s/"$//;
+    $lexicon{$name} += 1 if $name ne "";
+}
+
+#
+# parse_tokens() dies when it can't find the end of a call.  When
+# building a lexicon, that call is reported and skipped, so one odd
+# line doesn't lose the rest of the file.  Otherwise, behave as before.
+#
+sub lexicon_parse_tokens {
+    return parse_tokens() unless $opt_lexicon;
+
+    my($save_ln, $save_curln) = ($ln, $curln);
+    my @tokens = eval { parse_tokens() };
+    if ($@) {
+	($ln, $curln) = ($save_ln, $save_curln);
+	lexicon_note("cannot find the end of this call");
+	return ();
+    }
+    return @tokens;
+}
+
+sub lexicon_note {
+    print STDERR $curfile . ": " . $curln . ": lexicon: "
+	. join(" ", @_) . "\n";
+    print STDERR $replay . "\n" if $opt_print;
 }
 
 sub error {
