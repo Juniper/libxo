@@ -168,7 +168,14 @@ missing conversions wrote 0 bytes
       "json-wide": 5,
       "json-size": 5,
       "json-float": 1.50,
-      "json-quoted": "5"
+      "json-quoted": "+5",
+      "drop-plus": 5,
+      "drop-wide": 5,
+      "drop-space": 5,
+      "drop-float": 1.50,
+      "drop-negative": -3,
+      "drop-quoted": "+5",
+      "drop-explicit": 5
     },
     "humanize-signs": {
       "small": -5,

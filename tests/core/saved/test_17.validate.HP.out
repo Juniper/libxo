@@ -224,6 +224,26 @@ missing conversions wrote 0 bytes
 </div>
 <div class="line">
   <div class="text">[</div>
+  <div class="data" data-tag="drop-plus">+5</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="drop-wide">   +5</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="drop-space"> 5</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="drop-float">+1.50</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="drop-negative">-3</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="drop-quoted">+5</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="drop-explicit">+5</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
   <div class="data" data-tag="small" data-number="-5">-5</div>
   <div class="text">] [</div>
   <div class="data" data-tag="kilo" data-number="-5000">-5K</div>
