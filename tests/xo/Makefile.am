@@ -71,14 +71,13 @@ one:
 	-@(test=${TEST_CASE}; data=${TEST_DATA}; ${TEST_ONE} ; true)
 
 accept:
-	-@(for test in ${TEST_CASES} ; do \
+	@${MKDIR} -p ${srcdir}/saved
+	-@for test in ${TEST_CASES} ; do \
 	    base=`${BASENAME} $$test .sh` ; \
-            (for fmt in ${TEST_FORMATS}; do \
-	        echo "... $$test ... $$fmt ..."; \
-	        ${CP} out/$$base.$$fmt.out ${srcdir}/saved/$$base.$$fmt.out ; \
-	        ${CP} out/$$base.$$fmt.err ${srcdir}/saved/$$base.$$fmt.err ; \
-	    done) \
-	done)
+	    for fmt in ${TEST_FORMATS}; do \
+		${ACCEPT_FILES} out/$$base.$$fmt ${srcdir}/saved/$$base.$$fmt ; \
+	    done ; \
+	done
 
 CLEANFILES =
 
