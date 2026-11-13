@@ -15,24 +15,25 @@ main: status: zero
 main: input '{interface'
 main: status: zero
 main: input '<interface'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: predicate
 main: input '@ name eth0'
 main: attr: 'name'='eth0'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: full
 main: input '= ifindex 1'
 main: field: 'ifindex'='1'
+main: work: rc: 35
 main: status: full
 main: input '>interface'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: track
 main: input '<interface'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: predicate
 main: input '@ name lo0'
 main: attr: 'name'='lo0'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '= ifindex 2'
 main: field: 'ifindex'='2'
@@ -40,11 +41,11 @@ main: status: track
 main: input '>interface'
 main: status: track
 main: input '<interface'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: predicate
 main: input '@ name eth1'
 main: attr: 'name'='eth1'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: track
 main: input '= ifindex 3'
 main: field: 'ifindex'='3'
@@ -72,24 +73,25 @@ main: input '{interface'
 xpath_01: duplicate sibling name: 'interface'
 main: status: zero
 main: input '<interface'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: predicate
 main: input '@ name eth0'
 main: attr: 'name'='eth0'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: full
 main: input '= ifindex 1'
 main: field: 'ifindex'='1'
+main: work: rc: 35
 main: status: full
 main: input '>interface'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: track
 main: input '<interface'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: predicate
 main: input '@ name lo0'
 main: attr: 'name'='lo0'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '= ifindex 2'
 main: field: 'ifindex'='2'
@@ -97,17 +99,18 @@ main: status: track
 main: input '>interface'
 main: status: track
 main: input '<interface'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: predicate
 main: input '@ name eth1'
 main: attr: 'name'='eth1'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: full
 main: input '= ifindex 3'
 main: field: 'ifindex'='3'
+main: work: rc: 35
 main: status: full
 main: input '>interface'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: track
 main: input '}interface'
 main: status: track
@@ -134,30 +137,33 @@ main: status: zero
 main: input '{interface'
 main: status: zero
 main: input '<interface'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: predicate
 main: input '@ type ethernet'
 main: attr: 'type'='ethernet'
-main: filter: rc: 17
+main: work: rc: 17
 main: status: predicate
 main: input '$ state up'
 main: key: 'state'='up'
+main: work: rc: 36
 main: status: full
 main: input '= ifindex 1'
 main: field: 'ifindex'='1'
+main: work: rc: 23
 main: status: full
 main: input '>interface'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: track
 main: input '<interface'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: predicate
 main: input '@ type ethernet'
 main: attr: 'type'='ethernet'
-main: filter: rc: 17
+main: work: rc: 17
 main: status: predicate
 main: input '$ state down'
 main: key: 'state'='down'
+main: work: rc: 38
 main: status: track
 main: input '= ifindex 2'
 main: field: 'ifindex'='2'
@@ -165,14 +171,15 @@ main: status: track
 main: input '>interface'
 main: status: track
 main: input '<interface'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: predicate
 main: input '@ type loopback'
 main: attr: 'type'='loopback'
-main: filter: rc: 17
+main: work: rc: 17
 main: status: predicate
 main: input '$ state up'
 main: key: 'state'='up'
+main: work: rc: 36
 main: status: track
 main: input '= ifindex 3'
 main: field: 'ifindex'='3'
