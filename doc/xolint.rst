@@ -17,6 +17,7 @@ and errors, warning, or informational messages as needed:
    -d           Enable debug output
    -D           Generate documentation for all xolint messages
    -I           Generate info table code
+   -L           Print the lexicon: tags and use counts
    -p           Print the offending lines after the message
    -V           Print vocabulary of all field names
    -X           Extract samples from xolint, suitable for testing
@@ -38,3 +39,18 @@ suitable for inclusion in source code.
 The "-V" option does not report errors, but prints a complete list of
 all field names, sorted alphabetically.  The output can help spot
 inconsistencies and spelling errors.
+
+The "-L" option is like "-V", but prints the lexicon: the tags that
+appear in encoded output, each followed by the number of places it
+is used, one per line.  Tags come from value and boolean fields that
+are not display-only ("{d:}"), and from the names given to
+`xo_open_container`, `xo_open_list`, and `xo_attr` (and their
+variants).  Names that cannot be seen in the source, such as fields
+using the argument modifier ("{a:}") or a name passed in a variable,
+are reported on standard error.  This is the input used by
+`xo-lexicon`::
+
+    % xolint -L ls.c print.c
+    access-time 1
+    blocks 1
+    ...
