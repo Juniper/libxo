@@ -87,6 +87,11 @@ xo_create_to_file
   call to fclose() for the FILE pointer when the handle is destroyed,
   avoiding the need for the caller to perform this task.
 
+  Output to a line-buffered stream, a terminal, or stderr is flushed
+  at the end of each line (`XOF_FLUSH_LINE`), as stdio would do, so
+  libxo's own buffering doesn't delay it.  Passing `XOF_FLUSH` or
+  `XOF_FLUSH_LINE` in "flags" keeps that choice instead.
+
   :param fp: FILE to use as base for this handle
   :type fp: FILE *
   :param xo_style_t style: Output style (XO_STYLE\_*)
@@ -756,6 +761,7 @@ Flushing Output (xo_flush)
 .. index:: xo_finish
 .. index:: xo_finish_atexit
 .. index:: atexit
+.. _xo_finish:
 
 Finishing Output (xo_finish)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -767,6 +773,16 @@ operations.
 
 Calling this function is vital to the proper operation of libxo,
 especially for the non-TEXT output styles.
+
+Once a handle is finished, a further `xo_finish_h` call does nothing
+until the handle is used again, so finishing a handle twice is
+harmless.
+
+`xo_parse_args` registers `xo_finish_atexit` with :manpage:`atexit(3)`,
+so a program that calls `exit` (or `xo_err`, or returns from `main`)
+before calling `xo_finish` still gets complete output.  This does not
+help after `_exit`, `abort`, or a fatal signal, where any buffered
+output is lost, and the program should still call `xo_finish` itself.
 
 .. c:function:: xo_ssize_t xo_finish (void)
 
@@ -783,8 +799,12 @@ especially for the non-TEXT output styles.
 .. c:function:: void xo_finish_atexit (void)
 
   The `xo_finish_atexit` function is suitable for use with
-  :manpage:`atexit(3)` to ensure that `xo_finish` is called
-  on the default handle when the application exits.
+  :manpage:`atexit(3)` to ensure that `xo_finish` is called when the
+  application exits.  It finishes every handle that has been used
+  and not yet finished or destroyed, including the default handle.
+  `xo_parse_args` registers it automatically.  A handle whose FILE
+  or writer is closed without calling `xo_destroy` must not be left
+  for it to finish.
 
 .. index:: UTF-8
 .. index:: xo_open_container
@@ -1182,6 +1202,12 @@ Parsing Command-line Arguments (xo_parse_args)
   Following the call to xo_parse_args, the application can process the
   remaining arguments in a normal manner.  See :ref:`options` for a
   description of valid arguments.
+
+  The result must be used, and checked for failure.  When the
+  compiler supports it, ignoring the result is a compile-time
+  warning, and xolint reports both an ignored result and one that
+  is never checked.  xo_parse_args
+  also registers `xo_finish_atexit` (see :ref:`xo_finish`).
 
 .. index:: xo_set_program
 
