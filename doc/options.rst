@@ -11,21 +11,25 @@ libxo uses command line options to trigger rendering behavior.  There
 are multiple conventions for passing options, all using the
 "`--libxo`" option::
 
-  --libxo <options>
-  --libxo=<options>
+  --libxo <long-options>
+  --libxo=<long-options>
   --libxo:<brief-options>
+  --libxo:<brief-options>,<long-options>
 
 The *brief-options* is a series of single letter abbreviations, where
-the *options* is a comma-separated list of words.  Both provide access
-to identical functionality.  The following invocations are all
+the *long-options* is a comma-separated list of words.  Both provide
+access to identical functionality.  Options can transition from brief
+to word-style by using a comma after zero or more brief options,
+e.g. `--libxo:XPW,keys`::
+
+The following invocations are all
 identical in outcome::
 
   my-app --libxo warn,pretty arg1
   my-app --libxo=warn,pretty arg1
+  # "W" is the short form of "warn"; "P" is the short form of "pretty"
   my-app --libxo:WP arg1
-
-Options can transition from brief to word-style by using a comma after
-the brief options, e.g. `--libxo:XPW,keys`.
+  my-app --libxo:W,pretty arg1
 
 Programs using libxo are expected to call the xo_parse_args function
 to parse these arguments.  See :ref:`xo_parse_args` for details.
@@ -138,16 +142,20 @@ separator between groups of digits, giving "331,449,281" instead of
 "331449281".  The "group" option (brief form "G") groups every
 suitable field, while the '{i:}' field modifier (aka "{,int-group:}",
 see :ref:`int-group-modifier`) lets a program group particular fields
-without the option.  Since "group" applies to every decimal integer,
-it can also group numbers that should not be grouped, such as model
-numbers or years.
+without the option.  A printf-style "'" flag (as in "%'d") is the
+same as '{i:}', so formats from printf code group as they did there.
+Since "group" applies to every decimal number, it can also group
+numbers that should not be grouped, such as model numbers or years.
 
 A suitable field is a decimal integer, using the "%d", "%i", or "%u"
-conversion with any length modifier.  Hexadecimal, octal, and
-floating-point values are never grouped, nor are fields that request
-leading zeros (such as "%08d").  Separators are added after any field
-width has been applied, so a grouped field is wider than its width by
-the number of separators.
+conversion with any length modifier, or a floating-point value
+("%e", "%f", "%g", and their uppercase forms), where only the digits
+before the decimal point are grouped.  Hexadecimal and octal values
+are never grouped, nor are fields that request leading zeros (such as
+"%08d").  The field width counts the separators, as it does for
+printf's "'" flag, so "%10d" renders 1234567 as " 1,234,567".  A
+grouped value that doesn't fit its width is not truncated; the field
+grows to hold it.
 
 Grouping is done only for the "display" styles (TEXT and HTML).  XML,
 JSON, and encoder output always carry the plain digits, since a
