@@ -198,6 +198,7 @@ typedef uint64_t xo_xff_flags_t;
 #define XFF_DENSE	(XO_64B1 << 30) /* Use dense (tabular) form (RTOON) */
 #define XFF_BOOLEAN	(XO_64B1 << 31) /* Value is a native boolean */
 #define XFF_FULL_BOOLEAN (XO_64B1 << 32) /* B: encode words, not booleans */
+#define XFF_DROP_PLUS	(XO_64B1 << 33) /* No sign flags in the encoding */
 
 /* Flags to turn off when we don't want i18n processing */
 #define XFF_GT_FLAGS (XFF_GT_FIELD | XFF_GT_PLURAL)
