@@ -18,9 +18,9 @@ against the library.
 - field-format is a printf format for display (TEXT, HTML).
 - encoding-format is the printf format for XML, JSON, and encoders.
   It defaults to the field-format with a numeric minimum width removed
-  ("%-10s" -> "%s", "%8.1f" -> "%.1f").  Before libxo 2.3.0 a '*'
-  width is NOT removed; see "Star widths" below.  Without any format,
-  both are "%s".
+  ("%-10s" -> "%s", "%8.1f" -> "%.1f"), a '*' width removed (see
+  "Star widths" below), and an integer's precision removed ("%.6d" ->
+  "%d").  Without any format, both are "%s".
 
 ## Roles (at most one per field)
 
@@ -100,26 +100,20 @@ escape-private, escape-slash, escape-square.
 ## Star widths (checked)
 
 A '*' in a format takes an int argument.  The encoding format must
-take the same arguments.  Since libxo 2.3.0 the default encoding
-format drops a '*' width, as it drops a numeric one; before that it
-kept it:
+take the same arguments.  The default encoding format drops a '*'
+width, as it drops a numeric one:
 
-- "{:user/%-*s}" with (8, "phil") displays "phil    ".  Before 2.3.0
-  it also encodes "phil    ", with the padding.
+- "{:user/%-*s}" with (8, "phil") displays "phil    " and encodes
+  "phil".  "{:count/%-*d}" encodes a number.  This is the usual form.
 - "{:user/%-*s/%s}" is wrong: the encoding format takes one argument,
-  the display format two.  Before 2.3.0 the encoder reads the width
-  as a string and crashes; since 2.3.0 libxo repairs it and warns
-  (with "warn").  xolint reports "encoding format uses different
+  the display format two.  libxo repairs it and warns (with "warn"),
+  but it is a bug.  xolint reports "encoding format uses different
   number of arguments"; xocc validate reports it too.
-- "{:user/%-*s/%@*@s}" is right in every version: "%@*@" consumes
-  and discards one int per '*' between the '@'s, then formats "%s".
-  Use "%@**@s" for "%*.*s".
-
-Numbers with star widths: before 2.3.0, "%-*d" with no encoding
-format puts the padding in the JSON number ("12   "), which is
-invalid JSON, and "{:count/%-*d/%@*@d}" encodes the number as a JSON
-string.  Since 2.3.0 both give a number.  Write "%@*@", which is
-correct with every version, and check the result with xo-check.
+- An explicit encoding format gives each '*' it doesn't use a
+  "%@*@", which consumes and discards one int per '*' between the
+  '@'s.  It is needed only to drop a string's '*' precision, which
+  the default keeps: "{:command/%.*s/%@*@s}" truncates the text but
+  not the encoding, and "%@**@s" does the same for "%-*.*s".
 
 ## Widths and UTF-8
 
@@ -133,8 +127,11 @@ original code needed it; it does not change ASCII output.
 - "%m" is supported (strerror(errno)).
 - "%n" is not supported.
 - "%hs" is a locale string, "%ls" a wide string; output is converted.
-- "%'d" groups thousands; since 2.3.0 it is the same as {i:}.  See
-  "Thousands separators" in pitfalls.md for older versions.
+- "%'d" groups thousands; it is the same as {i:} ("Thousands
+  separators" in pitfalls.md).
+- "%+d" and "% d" keep the sign in XML and the encoders; add the
+  drop-plus modifier ("{,drop-plus:delta/%+d}") so they get the
+  number ("Sign flags" in pitfalls.md).
 
 ## Keys, leaf-lists, booleans
 
