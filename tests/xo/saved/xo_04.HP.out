@@ -31,16 +31,16 @@
   <div class="text"> </div>
   <div class="data" data-tag="o">4553207</div>
   <div class="text"> </div>
-  <div class="data" data-tag="f">1234567.5</div>
+  <div class="data" data-tag="f">1,234,567.5</div>
 </div>
 <div class="line">
   <div class="data" data-tag="neg">-1,234,567</div>
 </div>
 <div class="line">
   <div class="text">[</div>
-  <div class="data" data-tag="right">   1,234,567</div>
+  <div class="data" data-tag="right"> 1,234,567</div>
   <div class="text">] [</div>
-  <div class="data" data-tag="left">1,234,567   </div>
+  <div class="data" data-tag="left">1,234,567 </div>
   <div class="text">] [</div>
   <div class="data" data-tag="zero">0001234567</div>
   <div class="text">]</div>
