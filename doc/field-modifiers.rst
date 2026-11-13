@@ -350,15 +350,20 @@ The Int-Group Modifier ({i:})
 .. index:: Field Modifiers; Int-Group
 
 The int-group modifier inserts a thousands separator into a decimal
-integer field (``%d``, ``%i``, ``%u``, with any length modifier),
-without requiring the "`group`" option (see :ref:`integer-grouping`)
-to be set.  It is useful when only a specific field, rather than an
-entire program's output, should be grouped::
+integer field (``%d``, ``%i``, ``%u``, with any length modifier) or
+into the integer part of a floating-point field (``%e``, ``%f``,
+``%g``), without requiring the "`group`" option (see
+:ref:`integer-grouping`) to be set.  It is useful when only a
+specific field, rather than an entire program's output, should be
+grouped.  The printf-style "'" flag ("%'d") does the same thing::
 
     EXAMPLE:
-        xo_emit("{i:count/%u}\n", 1234567);
+        xo_emit("{i:count/%u} {:bytes/%'10ju}\n", 1234567, total);
     TEXT:
-        1,234,567
+        1,234,567  9,876,543
+
+The field width includes the separators.  Hexadecimal, octal, and
+zero-padded ("%08d") fields are not grouped.
 
 Like the "`group`" option, int-group only affects the TEXT and HTML
 output styles; XML, JSON, syslog structured-data, and encoder styles
@@ -436,6 +441,20 @@ needed, but often this needs to be controlled by the caller::
         xo_emit("{n:fancy/%s}", bool);
     JSON:
         "fancy": true
+
+A field with more than one conversion is a string unless told
+otherwise, so a value built from two numbers needs the no-quotes
+modifier to be a JSON number.  Seconds and microseconds, for
+example, can be one field, with no need to build the value in a
+buffer first::
+
+    EXAMPLE:
+        xo_emit("{n:elapsed/%s%lu.%06lu}\n",
+                negative ? "-" : "", secs, usecs);
+    TEXT:
+        5.000123
+    JSON:
+        "elapsed": 5.000123
 
 .. index:: Field Modifiers; Plural
 .. _plural-modifier:
