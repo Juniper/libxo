@@ -62,11 +62,10 @@ passes.
   the code that needs it.
 - Every field name you emit is in the agreed schema.  A new name after
   phase 2 is a schema change: report it, do not slip it in.
-- Every '*' width or precision in a field format gets a matching
-  encoding format with "%@*@" (see references/format-strings.md).
-  Before libxo 2.3.0 the encoded value is otherwise padded, and an
-  encoding format with fewer '*'s than the display format crashes the
-  program; "%@*@" is right with every version.
+- A '*' width needs no encoding format; the default drops it.  An
+  explicit encoding format takes the same arguments as the display
+  format, so it gives each '*' it doesn't use a "%@*@" (see
+  references/format-strings.md).
 - xolint (and "xocc validate+lint" when available) must report no
   errors or warnings; read each "info" note and fix it or say why it
   is expected.
@@ -75,9 +74,8 @@ passes.
 
 ## Phase 0: Baseline
 
-1. Build the unmodified program.  Record the libxo version
-   ("libxo-config --version"); references/pitfalls.md gives different
-   advice for versions before 2.3.0.
+1. Build the unmodified program.  The skill targets current libxo;
+   check "libxo-config --version" against the libxo you build with.
 2. Choose representative invocations: each major flag and output mode,
    no arguments, empty input, an error case (missing file, bad
    option).  Write them, one command line per line, to a cases file
@@ -209,7 +207,7 @@ Add xo_open_*/xo_close_* calls per the schema (references/hierarchy.md).
 - Lists open before their loop and close after it.  Instances open and
   close inside the loop body, on every path, including "continue".
 - Handle every early return or exit you listed in phase 2.  xo_err()
-  and xo_errx() call xo_finish() themselves.  Since libxo 2.3.0,
+  and xo_errx() call xo_finish() themselves.
   xo_parse_args() also registers xo_finish_atexit(), so a missed
   exit() path still gives well-formed output; write the closes
   anyway, since the structure is part of the schema.
