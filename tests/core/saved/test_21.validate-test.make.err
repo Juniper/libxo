@@ -1,0 +1,34 @@
+../../../tests/core/test_21.c:59:15: warning: libxo: 'int-group|i' set on field with invalid type (x; must be d|i|u|e|f|g): '{i:int-hex/%x}'
+   59 |     xo_emit("[{i:int-hex/%x}] [{i:int-octal/%o}] [{i:int-zero/%08d}] "
+      |               ^
+../../../tests/core/test_21.c:59:32: warning: libxo: 'int-group|i' set on field with invalid type (o; must be d|i|u|e|f|g): '{i:int-octal/%o}'
+   59 |     xo_emit("[{i:int-hex/%x}] [{i:int-octal/%o}] [{i:int-zero/%08d}] "
+      |                                ^
+../../../tests/core/test_21.c:59:51: warning: libxo: 'int-group|i' is ignored on a field with leading zeroes: '{i:int-zero/%08d}'
+   59 |     xo_emit("[{i:int-hex/%x}] [{i:int-octal/%o}] [{i:int-zero/%08d}] "
+      |                                                   ^
+../../../tests/core/test_21.c:93:15: warning: libxo: encoding format uses a different number of '*' arguments (1/0); use "%@*@" to skip one: '{:fewer/%*jd/%jd}'
+   93 |     xo_emit("[{:fewer/%*jd/%jd}] ({:fewer-next/%d})\n",
+      |               ^
+../../../tests/core/test_21.c:95:15: warning: libxo: encoding format uses a different number of '*' arguments (2/0); use "%@*@" to skip one: '{:fewer-string/%*.*s/%s}'
+   95 |     xo_emit("[{:fewer-string/%*.*s/%s}] ({:fewer-string-next/%d})\n",
+      |               ^
+../../../tests/core/test_21.c:99:15: warning: libxo: encoding format uses a different number of '*' arguments (0/1); use "%@*@" to skip one: '{:more/%jd/%*jd}'
+   99 |     xo_emit("[{:more/%jd/%*jd}] ({:more-next/%d})\n",
+      |               ^
+../../../tests/core/test_21.c:154:14: warning: libxo: field name contains percent sign: '{:bad%name/%d}'
+  154 |     xo_emit("{:bad%name/%d}\n", 2);
+      |              ^
+../../../tests/core/test_21.c:155:14: warning: libxo: field name should be lower case: '{:state:LISTEN/%d}'
+  155 |     xo_emit("{:state:LISTEN/%d}\n", 3);
+      |              ^
+../../../tests/core/test_21.c:156:14: warning: libxo: field name cannot start with a digit: '{:2fast/%d}'
+  156 |     xo_emit("{:2fast/%d}\n", 4);
+      |              ^
+../../../tests/core/test_21.c:158:14: warning: libxo: use hyphens, not underscores, in field name: '{:good-name.v2_x/%d}'
+  158 |     xo_emit("{:good-name.v2_x/%d}\n", 6);
+      |              ^
+../../../tests/core/test_21.c:159:14: warning: libxo: field role ('V'/value) requires a non-empty name: '{:/%d}'
+  159 |     xo_emit("{:/%d}\n", 8);
+      |              ^
+11 warnings generated.
