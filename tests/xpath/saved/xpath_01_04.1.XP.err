@@ -12,25 +12,28 @@ added filter: 0
                     000008: type 54 (T_QUOTED), str 22 [4], contents 0, next 0, prev 7
 main: status: zero
 main: input '+one'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '+two'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$three 4'
 main: key: 'three'='4'
+main: work: rc: 21
 main: status: full
 main: input '=output yes'
 main: field: 'output'='yes'
+main: work: rc: 25
 main: status: full
 main: input '-two'
 main: status: track
 main: input '+two'
 xpath_01: duplicate sibling name: 'two'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$three 5'
 main: key: 'three'='5'
+main: work: rc: 21
 main: status: track
 main: input '=output no'
 main: field: 'output'='no'
@@ -38,16 +41,18 @@ main: status: track
 main: input '-two'
 main: status: track
 main: input '+two'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$three 4'
 main: key: 'three'='4'
+main: work: rc: 21
 main: status: full
 main: input '+four'
-main: filter: rc: 11
+main: work: rc: 11
 main: status: full
 main: input '=five 6'
 main: field: 'five'='6'
+main: work: rc: 21
 main: status: full
 main: input '-four'
 main: status: full
