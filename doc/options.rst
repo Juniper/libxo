@@ -20,10 +20,9 @@ The *brief-options* is a series of single letter abbreviations, where
 the *long-options* is a comma-separated list of words.  Both provide
 access to identical functionality.  Options can transition from brief
 to word-style by using a comma after zero or more brief options,
-e.g. `--libxo:XPW,keys`::
+e.g. `--libxo:XPW,keys`.
 
-The following invocations are all
-identical in outcome::
+The following invocations are all identical in outcome::
 
   my-app --libxo warn,pretty arg1
   my-app --libxo=warn,pretty arg1
@@ -142,10 +141,11 @@ separator between groups of digits, giving "331,449,281" instead of
 "331449281".  The "group" option (brief form "G") groups every
 suitable field, while the '{i:}' field modifier (aka "{,int-group:}",
 see :ref:`int-group-modifier`) lets a program group particular fields
-without the option.  A printf-style "'" flag (as in "%'d") is the
-same as '{i:}', so formats from printf code group as they did there.
-Since "group" applies to every decimal number, it can also group
-numbers that should not be grouped, such as model numbers or years.
+without the option.  A printf-style "'" flag (as in "%'d") is the same
+as '{i:}', so formats from printf code group as they did there.  Be
+aware that since "group" applies to every decimal number, it can also
+group numbers that should not be grouped, such as model numbers or
+years.
 
 A suitable field is a decimal integer, using the "%d", "%i", or "%u"
 conversion with any length modifier, or a floating-point value
