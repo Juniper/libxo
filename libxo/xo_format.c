@@ -317,6 +317,7 @@ static xo_flag_mapping_t xo_modifier_names[] = {
     { XFF_COMMA, "comma" },
     { XFF_DENSE, "dense" },
     { XFF_DISPLAY_ONLY, "display" },
+    { XFF_DROP_PLUS, "drop-plus" },
     { XFF_ENCODE_ONLY, "encoding" },
     { XFF_ESC_PRIVATE, "escape-private" },
     { XFF_ESC_SLASH, "escape-slash" },
