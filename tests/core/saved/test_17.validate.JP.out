@@ -165,10 +165,10 @@ missing conversions wrote 0 bytes
       "precise": 5,
       "left-zero": 42,
       "json-plus": 5,
-      "json-wide":    5,
+      "json-wide": 5,
       "json-size": 5,
       "json-float": 1.50,
-      "json-quoted": "+5"
+      "json-quoted": "5"
     },
     "humanize-signs": {
       "small": -5,
