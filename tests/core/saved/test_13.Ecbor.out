@@ -16,12 +16,12 @@ op create: [cbor] []
      6c 64 6f 63  2d 65 78 61  - 6d 70 6c 65  73           ldoc-examples
      [append] @ 25 (1/1)
      bf                                                    .
-          op content: [count] [00001234]
+          op content: [count] [1234]
        [append] @ 26 (6/6)
        65 63 6f 75  6e 74                                    ecount
        [content] @ 32 (3/3)
        19 04 d2                                              ...
-          op content: [count] [00001234]
+          op content: [count] [1234]
        [append] @ 35 (6/6)
        65 63 6f 75  6e 74                                    ecount
        [content] @ 41 (3/3)
