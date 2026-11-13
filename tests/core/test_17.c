@@ -427,6 +427,13 @@ test_format_flags (void)
 	    "[{:json-float/%+.2f}] [{q:json-quoted/%+d}]\n",
 	    5, 5, (ssize_t) 5, 1.5, 5);
 
+    /* drop-plus drops the sign flags in every encoding style */
+    xo_emit("[{,drop-plus:drop-plus/%+d}] [{,drop-plus:drop-wide/%+5d}] "
+	    "[{,drop-plus:drop-space/% d}] [{,drop-plus:drop-float/%+.2f}] "
+	    "[{,drop-plus:drop-negative/%+d}]\n", 5, 5, 5, 1.5, -3);
+    xo_emit("[{q,drop-plus:drop-quoted/%+d}] "
+	    "[{,drop-plus:drop-explicit/%+d/%+d}]\n", 5, 5);
+
     xo_close_container("format-flags");
 
     /* A width too big to hold is the biggest we can hold */
