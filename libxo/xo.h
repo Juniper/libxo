@@ -49,6 +49,15 @@ extern "C" {
 #define XO_UNUSED __attribute__ ((__unused__))
 #endif /* XO_UNUSED */
 
+/* Warn when a caller ignores a result it must check */
+#ifndef XO_USE_RESULT
+#if defined(__GNUC__) || defined(__clang__)
+#define XO_USE_RESULT __attribute__ ((__warn_unused_result__))
+#else
+#define XO_USE_RESULT
+#endif
+#endif /* XO_USE_RESULT */
+
 /*
  * Normally we'd use the HAVE_PRINTFLIKE define triggered by the
  * --enable-printflike option to configure, but we don't install
@@ -834,7 +843,7 @@ xo_no_setlocale (void);
  * @return New number of arguments, or -1 for failure.
  */
 int
-xo_parse_args (int argc, char **argv);
+xo_parse_args (int argc, char **argv) XO_USE_RESULT;
 
 /**
  * This is the "magic" number returned by libxo-supporting commands
