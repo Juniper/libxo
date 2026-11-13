@@ -22,7 +22,7 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '= name widget'
 main: field: 'name'='widget'
@@ -39,7 +39,7 @@ main: status: predicate
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '= name gadget'
 main: field: 'name'='gadget'
@@ -80,7 +80,7 @@ main: input '{item'
 xpath_01: duplicate sibling name: 'item'
 main: status: zero
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '= name widget'
 main: field: 'name'='widget'
@@ -95,10 +95,10 @@ main: input '= count 3'
 main: field: 'count'='3'
 main: status: predicate
 main: input '>item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: track
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '= name gadget'
 main: field: 'name'='gadget'
@@ -113,7 +113,7 @@ main: input '= count lots'
 main: field: 'count'='lots'
 main: status: predicate
 main: input '>item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: track
 main: input '}item'
 main: status: track
@@ -136,7 +136,7 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '= name widget'
 main: field: 'name'='widget'
@@ -153,7 +153,7 @@ main: status: predicate
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '= name gadget'
 main: field: 'name'='gadget'
@@ -190,7 +190,7 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '= name widget'
 main: field: 'name'='widget'
@@ -207,7 +207,7 @@ main: status: predicate
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '= name gadget'
 main: field: 'name'='gadget'
@@ -248,7 +248,7 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '= name widget'
 main: field: 'name'='widget'
@@ -263,10 +263,10 @@ main: input '= count 3'
 main: field: 'count'='3'
 main: status: predicate
 main: input '>item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: track
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '= name gadget'
 main: field: 'name'='gadget'
@@ -281,7 +281,7 @@ main: input '= count lots'
 main: field: 'count'='lots'
 main: status: predicate
 main: input '>item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: track
 main: input '}item'
 main: status: track
@@ -304,7 +304,7 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '= name widget'
 main: field: 'name'='widget'
@@ -322,7 +322,7 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '= name gadget'
 main: field: 'name'='gadget'
@@ -360,7 +360,7 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '= name widget'
 main: field: 'name'='widget'
@@ -378,7 +378,7 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '= name gadget'
 main: field: 'name'='gadget'
@@ -417,7 +417,7 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '= name widget'
 main: field: 'name'='widget'
@@ -427,15 +427,17 @@ main: field: 'a'='42'
 main: status: predicate
 main: input '= b 144'
 main: field: 'b'='144'
+main: work: rc: 13
 main: status: full
 main: input '= count 3'
 main: field: 'count'='3'
+main: work: rc: 19
 main: status: full
 main: input '>item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: track
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '= name gadget'
 main: field: 'name'='gadget'
@@ -473,7 +475,7 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '= name widget'
 main: field: 'name'='widget'
@@ -490,7 +492,7 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '= name gadget'
 main: field: 'name'='gadget'
@@ -500,12 +502,14 @@ main: field: 'a'='70'
 main: status: predicate
 main: input '= b 8'
 main: field: 'b'='8'
+main: work: rc: 11
 main: status: full
 main: input '= count lots'
 main: field: 'count'='lots'
+main: work: rc: 22
 main: status: full
 main: input '>item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: track
 main: input '}item'
 main: status: track
@@ -534,7 +538,7 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '= name widget'
 main: field: 'name'='widget'
@@ -547,12 +551,13 @@ main: field: 'b'='144'
 main: status: predicate
 main: input '= count 3'
 main: field: 'count'='3'
+main: work: rc: 19
 main: status: full
 main: input '>item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: track
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '= name gadget'
 main: field: 'name'='gadget'
@@ -593,7 +598,7 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '= name widget'
 main: field: 'name'='widget'
@@ -606,12 +611,13 @@ main: field: 'b'='144'
 main: status: predicate
 main: input '= count 3'
 main: field: 'count'='3'
+main: work: rc: 19
 main: status: full
 main: input '>item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: track
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '= name gadget'
 main: field: 'name'='gadget'
@@ -653,7 +659,7 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '= name widget'
 main: field: 'name'='widget'
@@ -668,10 +674,10 @@ main: input '= count 3'
 main: field: 'count'='3'
 main: status: predicate
 main: input '>item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: track
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '= name gadget'
 main: field: 'name'='gadget'
@@ -686,7 +692,7 @@ main: input '= count lots'
 main: field: 'count'='lots'
 main: status: predicate
 main: input '>item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: track
 main: input '}item'
 main: status: track
@@ -711,7 +717,7 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '= name widget'
 main: field: 'name'='widget'
@@ -724,12 +730,13 @@ main: field: 'b'='144'
 main: status: predicate
 main: input '= count 3'
 main: field: 'count'='3'
+main: work: rc: 19
 main: status: full
 main: input '>item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: track
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '= name gadget'
 main: field: 'name'='gadget'
@@ -770,44 +777,52 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '= name widget'
 main: field: 'name'='widget'
 xpath_01: invalid number value: 'widget'
 xpath_01: invalid number value: 'widget'
+main: work: rc: 22
 main: status: full
 main: input '= a 42'
 main: field: 'a'='42'
+main: work: rc: 12
 main: status: full
 main: input '= b 144'
 main: field: 'b'='144'
+main: work: rc: 13
 main: status: full
 main: input '= count 3'
 main: field: 'count'='3'
+main: work: rc: 19
 main: status: full
 main: input '>item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: track
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '= name gadget'
 main: field: 'name'='gadget'
 xpath_01: invalid number value: 'gadget'
 xpath_01: invalid number value: 'gadget'
+main: work: rc: 22
 main: status: full
 main: input '= a 70'
 main: field: 'a'='70'
+main: work: rc: 12
 main: status: full
 main: input '= b 8'
 main: field: 'b'='8'
+main: work: rc: 11
 main: status: full
 main: input '= count lots'
 main: field: 'count'='lots'
+main: work: rc: 22
 main: status: full
 main: input '>item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: track
 main: input '}item'
 main: status: track
