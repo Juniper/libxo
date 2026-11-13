@@ -15,6 +15,7 @@ particular output styles:
    c   colon           A colon (":") is appended after the label
   \    dense           Write the field's list in dense form (RTOON)
    d   display         Only emit field for display styles (text/HTML)
+  \    drop-plus       Drop the '+' and ' ' sign flags when encoding
    e   encoding        Only emit for encoding styles (XML/JSON)
   \    escape-private  Escape control chars as Unicode private-use refs (XML/HTML)
   \    escape-slash    Escape forward slashes (JSON)
@@ -152,6 +153,35 @@ the display output styles, TEXT and HTML::
 
 The display modifier is the opposite of the encoding modifier, and
 they are often used to give to distinct views of the underlying data.
+
+.. index:: Field Modifiers; Drop-Plus
+.. _drop-plus-modifier:
+
+The Drop-Plus Modifier ({,drop-plus:})
+++++++++++++++++++++++++++++++++++++++
+
+.. index:: Field Modifiers; Drop-Plus
+
+The "+" and " " printf flags put a sign (or a blank in its place) in
+front of a positive number.  When a field has no encoding format,
+the encoding styles normally keep that sign: XML and the encoders
+get "+5", and only JSON drops the "+", since a JSON number cannot
+have one.  The drop-plus modifier removes both flags from the
+default encoding format, so every encoding style gets a plain
+number::
+
+    EXAMPLE:
+        xo_emit("{:delta/%+d} {,drop-plus:change/%+d}\n", 5, 5);
+    TEXT:
+        +5 +5
+    XML:
+        <delta>+5</delta><change>5</change>
+    JSON:
+        "delta": 5, "change": 5
+
+The modifier has no effect on an explicit encoding format, which is
+used as written, or on a quoted field ({q:}), whose value is a string
+and keeps its sign.
 
 .. index:: Field Modifiers; Encoding
 .. _encoding-modifier:
