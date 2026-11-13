@@ -22,13 +22,19 @@ A numeric width is removed for encoding automatically.
 
 ## Width from a variable
 
-Give each '*' a "%@*@" in the encoding format (format-strings.md).
-libxo 2.3.0 and later don't need it, but it is right with every
-version.
+A '*' width is removed for encoding too, so no encoding format is
+needed (format-strings.md).
 
     printf("%-*s %*ld ", uw, user, sw, (long) size);
-    xo_emit("{:user/%-*s/%@*@s} {:size/%*ld/%@*@ld} ",
-        uw, user, sw, (long) size);
+    xo_emit("{:user/%-*s} {:size/%*ld} ", uw, user, sw, (long) size);
+
+## Sign flags
+
+The default encoding keeps "%+d"'s sign, so XML and the encoders get
+"+5"; add drop-plus so every style gets the number (pitfalls.md):
+
+    printf("%+d\n", delta);
+    xo_emit("{,drop-plus:delta/%+d}\n", delta);
 
 ## Headings
 
@@ -132,10 +138,9 @@ it for new fields.  An existing conversion that ships it keeps it.
 
 ## Sizes shown humanized
 
-Before libxo 2.3.0, humanize_number() output padded with printf
-cannot be replaced by {h:} without changing the text, and since then
-only when the flags match (pitfalls.md).  Keeping humanize_number
-for display and encoding the raw value works with every version:
+{h:} replaces humanize_number() output padded with printf only when
+the flags match (pitfalls.md).  Otherwise keep humanize_number for
+display and encode the raw value:
 
     humanize_number(buf, 5, size, "", HN_AUTOSCALE, HN_NOSPACE);
     printf(" %*s", width, buf);
@@ -189,12 +194,10 @@ SIGINFO handler), use a handle:
     if (xop != NULL)
         xo_flush_h(xop);
 
-NULL means the default handle.  Before libxo 2.3.0, a handle buffers
-its output until it is flushed or finished; fprintf(stderr) did not,
-so flush after each complete message or the text never appears
-(checked).  Since 2.3.0 a handle on stderr flushes at each newline,
-but keep the xo_flush_h(): it is harmless, and needed with older
-versions.
+NULL means the default handle.  A handle on stderr, a terminal, or
+a line-buffered stream flushes at each newline, as stdio does, so
+the xo_flush_h() is not needed for stderr.  Keep one where the
+original called fflush(), for a handle on a fully buffered file.
 
 ## Output that must not be converted
 
