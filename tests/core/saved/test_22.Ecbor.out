@@ -1,0 +1,23 @@
+op create: [cbor] []
+ [append] @ 0 (1/1)
+ bf                                                    .
+    op open_container: [top] []
+ [append] @ 1 (4/4)
+ 63 74 6f 70                                           ctop
+ [append] @ 5 (1/1)
+ bf                                                    .
+      op string: [stdout] [before]
+   [append] @ 6 (7/7)
+   66 73 74 64  6f 75 74                                 fstdout
+   [append] @ 13 (7/7)
+   66 62 65 66  6f 72 65                                 fbefore
+      op close_container: [top] []
+   [append] @ 20 (1/1)
+   ff                                                    .
+    op finish: [] []
+ [append] @ 21 (1/1)
+ ff                                                    .
+  op flush: [] []
+>[cbor] @ 0 (16/22)
+>bf 63 74 6f  70 bf 66 73  - 74 64 6f 75  74 66 62 65  .ctop.fstdoutfbe
+>66 6f 72 65  ff ff                                    fore..
