@@ -1,0 +1,9 @@
+test_21.pass-test: invalid field name: 'bad name'
+test_21.pass-test: invalid field name: 'bad%name'
+test_21.pass-test: invalid field name: 'state:LISTEN'
+test_21.pass-test: invalid XML tag name: '2fast'
+test_21.pass-test: invalid XML tag name: '.dot'
+test_21.pass-test: missing field name: %d
+test_21.pass-test: invalid container name: 'bad container'
+test_21.pass-test: invalid list name: 'bad:list'
+test_21.pass-test: invalid instance name: 'bad:list'
