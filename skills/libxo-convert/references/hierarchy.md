@@ -38,7 +38,7 @@ instance:
     xo_open_list("filesystem");
     for (i = 0; i < n; i++) {
         xo_open_instance("filesystem");
-        xo_emit("{k:name/%-*s/%@*@s} ...", ...);
+        xo_emit("{k:name/%-*s} ...", ...);
         xo_close_instance("filesystem");
     }
     xo_close_list("filesystem");
