@@ -31,16 +31,16 @@
   <div class="text"> </div>
   <div class="data" data-tag="o" data-xpath="/top/o">4553207</div>
   <div class="text"> </div>
-  <div class="data" data-tag="f" data-xpath="/top/f">1234567.5</div>
+  <div class="data" data-tag="f" data-xpath="/top/f">1,234,567.5</div>
 </div>
 <div class="line">
   <div class="data" data-tag="neg" data-xpath="/top/neg">-1,234,567</div>
 </div>
 <div class="line">
   <div class="text">[</div>
-  <div class="data" data-tag="right" data-xpath="/top/right">   1,234,567</div>
+  <div class="data" data-tag="right" data-xpath="/top/right"> 1,234,567</div>
   <div class="text">] [</div>
-  <div class="data" data-tag="left" data-xpath="/top/left">1,234,567   </div>
+  <div class="data" data-tag="left" data-xpath="/top/left">1,234,567 </div>
   <div class="text">] [</div>
   <div class="data" data-tag="zero" data-xpath="/top/zero">0001234567</div>
   <div class="text">]</div>
