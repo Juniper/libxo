@@ -50,15 +50,15 @@ ls lays out -C output by counting what it printed:
 
     chcnt += printf("%*ju ", (int)inodefield, (uintmax_t)sp->st_ino);
 
-The 2014 patch kept the counting:
+Keep the counting:
 
     xo_set_flags(NULL, XOF_COLUMNS);    /* once, after xo_parse_args */
     ...
-    chcnt += xo_emit("{:inode/%*ju/%@*@ju} ", (int)inodefield,
+    chcnt += xo_emit("{:inode/%*ju} ", (int)inodefield,
         (uintmax_t)sp->st_ino);
 
-Without XOF_COLUMNS, xo_emit returned 0 here (checked), so the layout
-breaks.  With it, xo_emit returns display columns, where printf
+Without XOF_COLUMNS, xo_emit returns bytes written, which in XML and
+JSON include the markup, so the layout breaks.  With it, xo_emit returns display columns, where printf
 returns bytes: the same for ASCII, different for multibyte names.  If
 the original counted bytes, a multibyte name changes the layout; put
 that in a warning block, or count the bytes separately.
