@@ -18,10 +18,11 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '$ id 1'
 main: key: 'id'='1'
+main: work: rc: 13
 main: status: predicate
 main: input '= host alpha'
 main: field: 'host'='alpha'
@@ -29,22 +30,25 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '$ id 2'
 main: key: 'id'='2'
+main: work: rc: 13
 main: status: predicate
 main: input '= host beta'
 main: field: 'host'='beta'
+main: work: rc: 20
 main: status: full
 main: input '>item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: track
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '$ id 3'
 main: key: 'id'='3'
+main: work: rc: 13
 main: status: predicate
 main: input '= host gamma'
 main: field: 'host'='gamma'
@@ -78,25 +82,29 @@ main: input '{item'
 xpath_01: duplicate sibling name: 'item'
 main: status: zero
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '$ type A'
 main: key: 'type'='A'
+main: work: rc: 17
 main: status: predicate
 main: input '= color red'
 main: field: 'color'='red'
+main: work: rc: 21
 main: status: full
 main: input '= data 1'
 main: field: 'data'='1'
+main: work: rc: 17
 main: status: full
 main: input '>item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: track
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '$ type A'
 main: key: 'type'='A'
+main: work: rc: 17
 main: status: predicate
 main: input '= color blue'
 main: field: 'color'='blue'
@@ -107,10 +115,11 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '$ type B'
 main: key: 'type'='B'
+main: work: rc: 17
 main: status: predicate
 main: input '= color red'
 main: field: 'color'='red'
