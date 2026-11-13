@@ -566,6 +566,12 @@ dnl dlopen() in libdl, which goes in LIBS (after the objects) rather than
 dnl LDFLAGS; elsewhere it's in libc and this adds nothing.
 AC_SEARCH_LIBS([dlopen], [dl])
 
+dnl xo_finish_atexit() walks a list of live handles under a lock.  Older
+dnl glibc keeps the pthread functions in libpthread; elsewhere they're
+dnl in libc.  Without pthreads, the list is unlocked.
+AC_CHECK_HEADERS([pthread.h])
+AC_SEARCH_LIBS([pthread_mutex_lock], [pthread])
+
 case $host_os in
      darwin*)
         LIBTOOL=glibtool
@@ -691,6 +697,7 @@ AC_CONFIG_FILES([
      xo-logger/Makefile
      xolint/Makefile
      xohtml/Makefile
+     skills/Makefile
      xopo/Makefile
      packaging/libxo.pc
      doc/Makefile
