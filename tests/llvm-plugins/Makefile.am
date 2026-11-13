@@ -221,27 +221,21 @@ test-xocc: ${XOCC}
 
 accept: ${VALIDATE_PLUGIN} ${PRECOMPILE_PLUGIN}
 	@${MKDIR} -p out ${srcdir}/saved
-	@(for tc in ${TEST_CASES} ${TEST_CASES_CXX} ${XOCC_TEST_CASES}; do \
-	    echo "... $$tc ..."; \
-	    ${CP} out/$$tc.out ${srcdir}/saved/$$tc.out ; \
-	    ${CP} out/$$tc.err ${srcdir}/saved/$$tc.err ; \
-	done)
-	@(for tc in ${PRECOMPILE_TEST_CASES}; do \
-	    echo "... precompile $$tc ..."; \
-	    ${CP} out/$$tc.plain.build.out ${srcdir}/saved/$$tc.plain.build.out ; \
-	    ${CP} out/$$tc.plain.build.err ${srcdir}/saved/$$tc.plain.build.err ; \
-	    ${CP} out/$$tc.pass.build.out  ${srcdir}/saved/$$tc.pass.build.out  ; \
-	    ${CP} out/$$tc.pass.build.err  ${srcdir}/saved/$$tc.pass.build.err  ; \
-	    for fmt in ${PRECOMPILE_FORMATS}; do \
-	        ${CP} out/$$tc.plain.$$fmt.out ${srcdir}/saved/$$tc.plain.$$fmt.out ; \
-	        ${CP} out/$$tc.plain.$$fmt.err ${srcdir}/saved/$$tc.plain.$$fmt.err ; \
-	        ${CP} out/$$tc.pass.$$fmt.out  ${srcdir}/saved/$$tc.pass.$$fmt.out  ; \
-	        ${CP} out/$$tc.pass.$$fmt.err  ${srcdir}/saved/$$tc.pass.$$fmt.err  ; \
+	@for tc in ${TEST_CASES} ${TEST_CASES_CXX} ${XOCC_TEST_CASES}; do \
+	    ${ACCEPT_FILES} out/$$tc ${srcdir}/saved/$$tc ; \
+	done
+	@for tc in ${PRECOMPILE_TEST_CASES}; do \
+	    for kind in plain pass; do \
+		${ACCEPT_FILES} out/$$tc.$$kind.build \
+		    ${srcdir}/saved/$$tc.$$kind.build ; \
+		for fmt in ${PRECOMPILE_FORMATS}; do \
+		    ${ACCEPT_FILES} out/$$tc.$$kind.$$fmt \
+			${srcdir}/saved/$$tc.$$kind.$$fmt ; \
+		done ; \
 	    done ; \
-	    ${CP} out/$$tc.ir.out  ${srcdir}/saved/$$tc.ir.out  ; \
-	    ${CP} out/$$tc.ir.err  ${srcdir}/saved/$$tc.ir.err  ; \
-	    ${CP} out/$$tc.nm      ${srcdir}/saved/$$tc.nm      ; \
-	done)
+	    ${ACCEPT_FILES} out/$$tc.ir ${srcdir}/saved/$$tc.ir ; \
+	    ${ACCEPT_FILE} out/$$tc.nm ${srcdir}/saved/$$tc.nm ; \
+	done
 
 CLEANFILES =
 
