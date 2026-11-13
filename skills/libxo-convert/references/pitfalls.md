@@ -2,13 +2,7 @@
 
 Mistakes found in the 2014 conversions in libxo's patches/ directory,
 and libxo behaviors that surprise people.  Each was checked against
-the current library.
-
-Several were libxo bugs, fixed in libxo 2.3.0.  The skill runs
-against whatever libxo is installed, so check "libxo-config
---version" (phase 0 records it) and follow the "older libxo" advice
-when it is below 2.3.0.  Code written that way is still correct with
-a newer libxo.
+the current library; this skill targets current libxo only.
 
 ## Formats built at run time
 
@@ -60,31 +54,27 @@ became "-%lu.06%lu" where "-%lu.%06lu" was meant, so -5.000123 prints
 
     xo_emit("{:inodes-used/%*jd}", 8, (intmax_t) 1234);
 
-Fixed in libxo 2.3.0: the default encoding format drops a '*' width
-as it drops a numeric one, so this encodes 1234.  "%@*@" in an
-encoding format is no longer needed in new code, but is still
-allowed.
-
-With an older libxo, the default encoding format keeps the '*' width,
-so this encodes "    1234" with the padding, and "%-*d" gives invalid
-JSON ("12   ").  Give "%@*@" in the encoding format (format-strings.md):
-
-    xo_emit("{:inodes-used/%*jd/%@*@jd}", 8, (intmax_t) 1234);
-
-and before 2.3.0 the JSON value of "%@*@d" is a string ("1234")
-rather than a number.  Leave it; do not work around it by changing
-the text.
+This is right as written: the default encoding format drops a '*'
+width as it drops a numeric one, so this encodes 1234.  No encoding
+format is needed; "%@*@" in one is allowed but is never needed.
 
 The same goes for an integer's precision, which printf uses as a
-minimum digit count: "{:count/%.10d}" encodes 42 since 2.3.0, and
-0000000042 (invalid JSON) before that.  With an older libxo, give an
-encoding format: "{:count/%.10d/%d}".  An explicit encoding format is
-used as written, so never give "%.10d" there.
+minimum digit count: "{:count/%.10d}" encodes 42.  An explicit
+encoding format is used as written, so never give "%.10d" there; it
+would encode 0000000042, which is invalid JSON.
 
 Never write an encoding format with fewer '*'s than the display
-format ("%*jd/%jd").  Since 2.3.0 libxo repairs it (and warns with
-"warn"); before that, the arguments no longer line up and the program
-crashes.  xolint and xocc both warn about it.
+format ("%*jd/%jd").  libxo repairs it, and warns with "warn", but it
+is a bug; xolint and xocc both warn about it.
+
+## Sign flags
+
+"%+d" and "% d" keep their sign in the default encoding format, so
+XML and the encoders get "+5" or " 5" (CBOR encodes a string); only
+JSON drops the '+'.  Add the drop-plus modifier when the text has a
+sign flag, so every encoding style gets the number:
+"{,drop-plus:delta/%+d}".  It doesn't apply to a quoted ({q:}) field,
+whose value is a string.
 
 ## "{U:%%}"
 
@@ -108,17 +98,16 @@ leftover from printf, so fix it.
 
 ## Humanized sizes
 
-Fixed in libxo 2.3.0: {h:} honors the field width, so "{h:size/%7ju}"
-prints "   118M" (and "%-7ju" pads on the right).  {h:} can then
-replace humanize_number() plus a padded printf when the flags match:
+{h:} honors the field width, so "{h:size/%7ju}" prints "   118M"
+(and "%-7ju" pads on the right).  {h:} can replace
+humanize_number() plus a padded printf when the flags match:
 {h:} puts no space before the suffix (HN_NOSPACE), so a call without
 HN_NOSPACE needs "hn-space"; HN_DECIMAL is "hn-decimal",
 HN_DIVISOR_1000 is "hn-1000", and the suffixes must be the same.
 humanize_number() has more (HN_B, HN_GETSCALE, scale arguments) that
-{h:} does not; check the text with xo-check either way.
-
-With an older libxo, {h:} ignores the width ("%7ju" printed "118M"
-unpadded), so it cannot replace a padded humanize_number().  Use:
+{h:} does not; check the text with xo-check either way.  When they
+don't match, keep humanize_number() for the display and encode the
+raw value:
 
     xo_emit(" {d:/%*s}{e:size/%jd}", width, buf, (intmax_t) size);
 
@@ -130,24 +119,12 @@ format; the attribute is lost in JSON.  Don't.
 {i:} and "%'" both use the locale's separator ("1,234,567" in en_US,
 "1.234.567" in de_DE), and neither groups in the C locale.
 
-Fixed in libxo 2.3.0: "%'" and {i:} are one feature with two
-spellings, and behave as printf's "%'" does.  They group integers (d,
-i, u) and the integer part of floats, never hex, octal or zero-padded
-fields; the width counts the separators ("%'12d" is 12 columns); and
-only TEXT and HTML are grouped, so XML and JSON get the plain number.
-Keep the original's "%'" as it is; no encoding format is needed.
-
-With an older libxo (as checked before the fix):
-
-- A "%'" in the display format is copied into the default encoding
-  format, so the encoded value is grouped and quoted, as the string
-  "1,234,567".  Give an encoding format without it:
-  "{:size/%'jd/%jd}".
-- "%'" groups only with the j modifier (and with floats).  "%'d",
-  "%'ld" and "%'u" print no separators.  Cast to intmax_t and use
-  "%'jd"; the text is then the same as printf's.
-- {i:} widens a padded field: "{i:/%12d}" prints 1234567 in 14
-  columns.  It groups only d, i and u.
+"%'" and {i:} are one feature with two spellings, and behave as
+printf's "%'" does.  They group integers (d, i, u) and the integer
+part of floats, never hex, octal or zero-padded fields; the width
+counts the separators ("%'12d" is 12 columns); and only TEXT and HTML
+are grouped, so XML and JSON get the plain number.  Keep the
+original's "%'" as it is; no encoding format is needed.
 
 Check with xo-check in the locales the program runs in.
 
@@ -177,8 +154,8 @@ From the old netstat conversion:
     {l:%u}                   no name
     {::type}                 empty modifiers and a ':' in the name
 
-xolint catches all of these; run it after every batch.  Since libxo
-2.3.0, the "warn" option also reports a name that isn't a valid XML
+xolint catches all of these; run it after every batch.  The "warn"
+option also reports a name that isn't a valid XML
 name ("invalid field name: 'measured-bytes%s'"), and xo-check's
 lint run sees that on stderr.
 
@@ -190,7 +167,7 @@ lint run sees that on stderr.
 - "if (argc < 0) exit(EXIT_FAILURE);" after xo_parse_args().  This
   is required; a program without it has a bug.  The old w conversion
   has no check.  xolint warns about an ignored or unchecked result,
-  and since 2.3.0 the compiler warns about an ignored one.
+  and the compiler warns about an ignored one.
 - ${CARGS} in the Makefile (build-glue.md).
 
 ## Early exits
@@ -198,13 +175,11 @@ lint run sees that on stderr.
 The old w conversion returns from main in places with containers open.
 Every exit path needs the closes and xo_finish() (hierarchy.md).
 
-Since libxo 2.3.0, xo_parse_args() registers xo_finish_atexit(), so
-exit() and a return from main close what is open and finish every
-used handle; the XML and JSON stay well formed.  Still write the
-closes and xo_finish() where the original exits normally: the
-structure is part of the schema, and _exit(), abort() and signals
-bypass atexit.  With an older libxo, a missed exit path gives
-truncated XML and JSON.
+xo_parse_args() registers xo_finish_atexit(), so exit() and a return
+from main close what is open and finish every used handle; the XML
+and JSON stay well formed.  Still write the closes and xo_finish()
+where the original exits normally: the structure is part of the
+schema, and _exit(), abort() and signals bypass atexit.
 
 ## Naming drift and typos
 
@@ -236,25 +211,20 @@ XML and JSON styles the count is of the encoded value; it only
 matters that the TEXT layout is unchanged.
 
 Without XOF_COLUMNS, xo_emit returns the bytes written, as printf
-does (since 2.3.0; older versions return 0).  In XML and JSON that
+does.  In XML and JSON that
 includes the markup, so it is no use for layout.
 
-## Handles are buffered
+## Handles and flushing
 
 The old wc conversion sent SIGINFO output to a handle made with
-xo_create_to_file(stderr, ...) and never flushed it, so the output
-never appeared: a text change.
-
-Fixed in libxo 2.3.0: a handle on stderr, a terminal, or a
-line-buffered stream flushes at each newline, as stdio does, and
-handles left open are finished at exit.  With an older libxo, call
-xo_flush_h() after each message written to a handle
-(printf-to-emit.md).  The call is harmless with a newer one, so keep
-it.
+xo_create_to_file(stderr, ...) and never flushed it.  A handle on
+stderr, a terminal, or a line-buffered stream flushes at each
+newline, as stdio does, and handles left open are finished at exit,
+so that is now right.  A handle on a fully buffered file still
+buffers; call xo_flush_h() where the original called fflush().
 
 ## What the old patches got right
 
 - wc's handle for SIGINFO output to stderr (xo_create_to_file, then
-  xo_emit_h), once it is flushed; see printf-to-emit.md.
-- w's "%@**@s" for "%*.*s".
+  xo_emit_h); see printf-to-emit.md.
 - ls's display suffix plus {e:type}.
