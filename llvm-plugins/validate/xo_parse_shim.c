@@ -575,13 +575,12 @@ xo_shim_parse_args (const char *fmt,
 
 	    if (erc < 0) {
 		/* Already reported */
-	    } else if (dargs.xsat_num != eargs.xsat_num)
-                ss_err.error(ss_err.data, off,
-                             "display and encoding formats consume "
-                             "%u vs %u argument(s): '%s'",
-                             dargs.xsat_num, eargs.xsat_num,
-                             xo_parse_printable(&xpp, str, slen, 1));
-            else if (memcmp(dargs.xsat_types, eargs.xsat_types,
+	    } else if (dargs.xsat_num != eargs.xsat_num) {
+		/*
+		 * xo_parse_fields() reports a different number of
+		 * values or '*'s, for libxo at run time too.
+		 */
+	    } else if (memcmp(dargs.xsat_types, eargs.xsat_types,
                             sizeof(dargs.xsat_types)) != 0)
                 ss_err.error(ss_err.data, off,
                              "display and encoding formats consume "
