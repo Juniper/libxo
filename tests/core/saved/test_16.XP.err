@@ -1,3 +1,4 @@
 test_16: key field emitted after normal value field: 'name'
 test_16: key field emitted after normal value field: 'bkey'
 test_16: duplicate sibling name: 'val'
+test_16: invalid container name: 's33e-odd	name'
