@@ -69,31 +69,34 @@ added filter: 0
         000028: type 70 (C_ELEMENT), str 63 [cuatro], contents 0, next 0, prev 26
 main: status: zero
 main: input '+one'
-main: filter: rc: 11
+main: work: rc: 11
 main: status: track
 main: input '+two'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: track
 main: input '+three'
-main: filter: rc: 17
+main: work: rc: 17
 main: status: track
 main: input '+four'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: full
 main: input '=data foo'
 main: field: 'data'='foo'
+main: work: rc: 23
 main: status: full
 main: input '+five'
-main: filter: rc: 22
+main: work: rc: 22
 main: status: full
 main: input '=data goo'
 main: field: 'data'='goo'
+main: work: rc: 25
 main: status: full
 main: input '+six'
-main: filter: rc: 23
+main: work: rc: 23
 main: status: full
 main: input '=data hoo'
 main: field: 'data'='hoo'
+main: work: rc: 27
 main: status: full
 main: input '-six'
 main: status: full
@@ -102,6 +105,7 @@ main: status: full
 main: input '=data ioo'
 main: field: 'data'='ioo'
 xpath_01: duplicate sibling name: 'data'
+main: work: rc: 25
 main: status: full
 main: input '-four'
 main: status: track
@@ -114,36 +118,36 @@ main: input '-two'
 main: status: track
 main: input '+two'
 xpath_01: duplicate sibling name: 'two'
-main: filter: rc: 15
+main: work: rc: 15
 main: status: track
 main: input '+a'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: track
 main: input '+b'
-main: filter: rc: 15
+main: work: rc: 15
 main: status: track
 main: input '+c'
-main: filter: rc: 17
+main: work: rc: 17
 main: status: track
 main: input '+uno'
-main: filter: rc: 21
+main: work: rc: 21
 main: status: track
 main: input '-uno'
 main: status: track
 main: input '+uno'
 xpath_01: duplicate sibling name: 'uno'
-main: filter: rc: 21
+main: work: rc: 21
 main: status: track
 main: input '-uno'
 main: status: track
 main: input '+d'
-main: filter: rc: 19
+main: work: rc: 19
 main: status: full
 main: input '+e'
-main: filter: rc: 21
+main: work: rc: 21
 main: status: track
 main: input '+f'
-main: filter: rc: 23
+main: work: rc: 23
 main: status: track
 main: input '=g h'
 main: field: 'g'='h'
@@ -156,16 +160,17 @@ main: input '-d'
 main: status: track
 main: input '+d'
 xpath_01: duplicate sibling name: 'd'
-main: filter: rc: 21
+main: work: rc: 21
 main: status: full
 main: input '=data koo'
 main: field: 'data'='koo'
+main: work: rc: 27
 main: status: full
 main: input '+e'
-main: filter: rc: 23
+main: work: rc: 23
 main: status: track
 main: input '+f'
-main: filter: rc: 23
+main: work: rc: 23
 main: status: track
 main: input '=data loo'
 main: field: 'data'='loo'
@@ -183,13 +188,14 @@ main: status: track
 main: input '-a'
 main: status: track
 main: input '+three'
-main: filter: rc: 19
+main: work: rc: 19
 main: status: track
 main: input '+four'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: full
 main: input '=data moo'
 main: field: 'data'='moo'
+main: work: rc: 23
 main: status: full
 main: input '-four'
 main: status: track
