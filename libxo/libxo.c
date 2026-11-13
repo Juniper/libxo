@@ -4945,7 +4945,11 @@ xo_do_format_field (xo_handle_t *xop, const xo_field_info_t *xfip,
  * - an integer's precision, which is a minimum digit count, is
  *   removed the same way ("%.10d" -> "%d", "%.*d" -> "%@*@d");
  *   a float's or string's precision is part of the value and stays;
- * - the "'" grouping flag is removed, from every conversion.
+ * - the "'" grouping flag is removed, from every conversion;
+ * - with "drop-plus" (XFF_DROP_PLUS), the '+' and ' ' sign flags are
+ *   removed, so the value is a number in every encoding style; without
+ *   it, only JSON drops the '+' (see xo_emit_field_value).  A quoted
+ *   ("q") value is a string, so it keeps its sign either way.
  *
  * Only the first conversion loses its width and precision, as it
  * always has: in "%lu.%06lu" the second width is part of the value.  The result can
@@ -4955,7 +4959,8 @@ xo_do_format_field (xo_handle_t *xop, const xo_field_info_t *xfip,
 #define XO_FIX_ENCODING_EXTRA 2
 
 static char *
-xo_fix_encoding (xo_handle_t *xop UNUSED, char *encoding)
+xo_fix_encoding (xo_handle_t *xop UNUSED, char *encoding,
+		 xo_xff_flags_t xflags)
 {
     char *cp = encoding;
 
@@ -5003,14 +5008,21 @@ xo_fix_encoding (xo_handle_t *xop UNUSED, char *encoding)
 
     /*
      * Collect the flags, dropping the ones that only matter with a
-     * width, and the sign flags: "+5" and " 5" aren't numbers
+     * width.  "drop-plus" drops the sign flags too, since "+5" and
+     * " 5" aren't numbers.
      */
     char flags[8];
     int nflags = 0;
     char *sp = fp;
-    for (; *sp && strchr("-+ #0", *sp); sp++)
-	if (*sp == '#' && nflags < (int) sizeof(flags))
+    for (; *sp && strchr("-+ #0", *sp); sp++) {
+	if (*sp == '-' || *sp == '0')
+	    continue;
+	if ((xflags & (XFF_DROP_PLUS | XFF_QUOTE)) == XFF_DROP_PLUS
+		&& (*sp == '+' || *sp == ' '))
+	    continue;
+	if (nflags < (int) sizeof(flags))
 	    flags[nflags++] = *sp;
+    }
 
     unsigned at_stars = 0;
     char *rest = sp;
@@ -5735,7 +5747,7 @@ xo_buf_append_div (xo_handle_t *xop, const xo_field_info_t *xfip,
 	char *enc = alloca(flen + 1 + XO_FIX_ENCODING_EXTRA);
 	memcpy(enc, fmt, flen);
 	enc[flen] = '\0';
-	encoding = xo_fix_encoding(xop, enc);
+	encoding = xo_fix_encoding(xop, enc, flags);
 	elen = strlen(encoding);
     }
 
@@ -7430,7 +7442,7 @@ xo_format_value_encoder (xo_handle_t *xop, const xo_field_info_t *xfip,
 	char *enc = alloca(flen + 1 + XO_FIX_ENCODING_EXTRA);
 	memcpy(enc, fmt, flen);
 	enc[flen] = '\0';
-	fmt = xo_fix_encoding(xop, enc);
+	fmt = xo_fix_encoding(xop, enc, flags);
 	flen = strlen(fmt);
 	xfip = NULL;		/* Don't have encoding cached */
     }
@@ -7494,7 +7506,7 @@ xo_format_value_sdparams (xo_handle_t *xop, const xo_field_info_t *xfip,
 	char *enc = alloca(flen + 1 + XO_FIX_ENCODING_EXTRA);
 	memcpy(enc, fmt, flen);
 	enc[flen] = '\0';
-	fmt = xo_fix_encoding(xop, enc);
+	fmt = xo_fix_encoding(xop, enc, flags);
 	flen = strlen(fmt);
     }
 
@@ -7535,7 +7547,7 @@ xo_format_value_json (xo_handle_t *xop, const xo_field_info_t *xfip,
 	char *enc = alloca(flen + 1 + XO_FIX_ENCODING_EXTRA);
 	memcpy(enc, fmt, flen);
 	enc[flen] = '\0';
-	fmt = xo_fix_encoding(xop, enc);
+	fmt = xo_fix_encoding(xop, enc, flags);
 	flen = strlen(fmt);
 	xfip = NULL;		/* Don't have encoding cached */
     }
@@ -7652,7 +7664,7 @@ xo_format_value_xml (xo_handle_t *xop, const xo_field_info_t *xfip,
 	char *enc = alloca(flen + 1 + XO_FIX_ENCODING_EXTRA);
 	memcpy(enc, fmt, flen);
 	enc[flen] = '\0';
-	fmt = xo_fix_encoding(xop, enc);
+	fmt = xo_fix_encoding(xop, enc, flags);
 	flen = strlen(fmt);
 	xfip = NULL;		/* Don't have encoding cached */
     }
