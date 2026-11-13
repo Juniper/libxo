@@ -4,7 +4,7 @@ negative -1@3234@3567
 precision 0000000042
 long 1@3234@3567@3890
 long long 123@3456@3789@3012@3345
-star width              1@3234@3567
+star width            1@3234@3567
 bit-width 64 9@3876@3543@3210
 small 42
 zero 0
