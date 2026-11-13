@@ -42,12 +42,11 @@ one:
 	-@(test=${TEST_CASE}; ${TEST_ONE} ; true)
 
 accept:
-	-@(for test in ${TEST_CASES} ; do \
+	@${MKDIR} -p ${srcdir}/saved
+	-@for test in ${TEST_CASES} ; do \
 	    base=`${BASENAME} $$test .sh` ; \
-	    echo "... $$test ..."; \
-	    ${CP} out/$$base.out ${srcdir}/saved/$$base.out ; \
-	    ${CP} out/$$base.err ${srcdir}/saved/$$base.err ; \
-	done)
+	    ${ACCEPT_FILES} out/$$base ${srcdir}/saved/$$base ; \
+	done
 
 CLEANFILES =
 
