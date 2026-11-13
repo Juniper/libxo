@@ -194,7 +194,7 @@
 ../../../tests/llvm-plugins/validate_02.c:488:6: warning: libxo: argument 1: format specifies type 'long' but the argument has type 'int'
   488 |             i_val, u_val, ul_val, cs_val);
       |             ^
-../../../tests/llvm-plugins/validate_02.c:513:14: warning: libxo: display and encoding formats consume 1 vs 2 argument(s): '{:val/%d/%d%d}'
+../../../tests/llvm-plugins/validate_02.c:513:14: warning: libxo: encoding format uses a different number of arguments (1/2): '{:val/%d/%d%d}'
   513 |     xo_emit("{:val/%d/%d%d}\n", i_val);
       |              ^
 ../../../tests/llvm-plugins/validate_02.c:516:14: warning: libxo: display and encoding formats consume different argument(s): '{:val/%d/%s}'
@@ -224,10 +224,10 @@
 ../../../tests/llvm-plugins/validate_02.c:556:69: warning: libxo: argument 2: format specifies type 'char *' but the argument has type 'void *'
   556 |     xo_emit("works: [{:works/%JNs}], fail: [{:fails/%JZs}]n", NULL, (void *) 0);
       |                                                                     ^
-../../../tests/llvm-plugins/validate_02.c:558:30: warning: libxo: 'int-group|i' set on field with leading zeroes: '{i:fail/%05d}'
+../../../tests/llvm-plugins/validate_02.c:558:30: warning: libxo: 'int-group|i' is ignored on a field with leading zeroes: '{i:fail/%05d}'
   558 |     xo_emit("i:leading zero: {i:fail/%05d}\n", 50);
       |                              ^
-../../../tests/llvm-plugins/validate_02.c:559:26: warning: libxo: 'int-group|i' set on field with invalid type (s; must be d|i|u): '{i:fail2/%s}'
+../../../tests/llvm-plugins/validate_02.c:559:26: warning: libxo: 'int-group|i' set on field with invalid type (s; must be d|i|u|e|f|g): '{i:fail2/%s}'
   559 |     xo_emit("i:bad type: {i:fail2/%s}\n", "bad");
       |                          ^
 ../../../tests/llvm-plugins/validate_02.c:576:13: warning: libxo: format expects 1 argument(s) but 0 provided
