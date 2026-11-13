@@ -74,11 +74,9 @@ After:
     }
 
 The "format" variable becomes two literal calls, so xolint can check
-both.  "%'" stays because the original used it.  Since libxo 2.3.0
-"%'" is the same as {i:}; before that, {i:} widened a padded field,
-so the columns would move (pitfalls.md).  The {e:} fields carry the
-plain numbers, so the grouping never reaches the encoding with any
-version.
+both.  "%'" stays because the original used it; it is the same as
+{i:} (pitfalls.md).  The {e:} fields carry the plain numbers, so the
+grouping never reaches the encoding.
 
 ## Humanized values
 
@@ -124,8 +122,7 @@ and the caller emits the names:
     prthumanval(used * sfsp->f_bsize);
     prthumanval(sfsp->f_bavail * sfsp->f_bsize);
 
-{h:} cannot replace this before libxo 2.3.0: it ignores the "%6s"
-width (pitfalls.md).  Since then it honors the width, but the
+{h:} honors the "%6s" width (pitfalls.md), but the
 "sizeof(buf) - (bytes < 0 ? 0 : 1)" length and the "flags" make the
 match uncertain, so keep humanize_number and check with xo-check.
 
@@ -167,8 +164,7 @@ filesystem:
     if (strncmp(sfsp->f_mntfromname, "total", MNAMELEN) == 0)
         xo_emit("{L:/%-*s}", mwp->mntfrom, sfsp->f_mntfromname);
     else
-        xo_emit("{k:name/%-*s/%@*@s}", mwp->mntfrom,
-            sfsp->f_mntfromname);
+        xo_emit("{k:name/%-*s}", mwp->mntfrom, sfsp->f_mntfromname);
 
 and the instance open and close move from prtstat() to the loop in
 main.  The 2014 patch opened the instance inside prtstat(), so the
