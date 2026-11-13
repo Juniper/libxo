@@ -11,43 +11,49 @@ added filter: 0
                 000003: type 52 (T_FUNCTION_NAME), str 8 [true], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: full
 main: input '$ id 1'
 main: key: 'id'='1'
+main: work: rc: 15
 main: status: full
 main: input '= val alpha'
 main: field: 'val'='alpha'
+main: work: rc: 22
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: full
 main: input '$ id 2'
 main: key: 'id'='2'
+main: work: rc: 15
 main: status: full
 main: input '= val beta'
 main: field: 'val'='beta'
+main: work: rc: 21
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: full
 main: input '$ id 3'
 main: key: 'id'='3'
+main: work: rc: 15
 main: status: full
 main: input '= val gamma'
 main: field: 'val'='gamma'
+main: work: rc: 22
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '}item'
 main: status: track
@@ -66,13 +72,14 @@ added filter: 0
 main: status: zero
 main: input '{item'
 xpath_01: duplicate sibling name: 'item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '$ id 1'
 main: key: 'id'='1'
+main: work: rc: 15
 main: status: track
 main: input '= val alpha'
 main: field: 'val'='alpha'
@@ -80,10 +87,11 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '$ id 2'
 main: key: 'id'='2'
+main: work: rc: 15
 main: status: track
 main: input '= val beta'
 main: field: 'val'='beta'
@@ -91,10 +99,11 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '$ id 3'
 main: key: 'id'='3'
+main: work: rc: 15
 main: status: track
 main: input '= val gamma'
 main: field: 'val'='gamma'
@@ -121,13 +130,14 @@ added filter: 0
                         000008: type 54 (T_QUOTED), str 22 [red], contents 0, next 0, prev 7
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ color red'
 main: key: 'color'='red'
+main: work: rc: 20
 main: status: track
 main: input '= val 1'
 main: field: 'val'='1'
@@ -135,22 +145,25 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ color blue'
 main: key: 'color'='blue'
+main: work: rc: 21
 main: status: full
 main: input '= val 2'
 main: field: 'val'='2'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ color red'
 main: key: 'color'='red'
+main: work: rc: 20
 main: status: track
 main: input '= val 3'
 main: field: 'val'='3'
@@ -158,16 +171,18 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ color green'
 main: key: 'color'='green'
+main: work: rc: 22
 main: status: full
 main: input '= val 4'
 main: field: 'val'='4'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '}item'
 main: status: track
@@ -186,13 +201,14 @@ added filter: 0
                     000005: type 52 (T_FUNCTION_NAME), str 14 [true], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '$ id 1'
 main: key: 'id'='1'
+main: work: rc: 15
 main: status: track
 main: input '= val alpha'
 main: field: 'val'='alpha'
@@ -200,10 +216,11 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '$ id 2'
 main: key: 'id'='2'
+main: work: rc: 15
 main: status: track
 main: input '= val beta'
 main: field: 'val'='beta'
@@ -227,31 +244,35 @@ added filter: 0
                     000005: type 52 (T_FUNCTION_NAME), str 14 [false], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: full
 main: input '$ id 1'
 main: key: 'id'='1'
+main: work: rc: 15
 main: status: full
 main: input '= val alpha'
 main: field: 'val'='alpha'
+main: work: rc: 22
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: full
 main: input '$ id 2'
 main: key: 'id'='2'
+main: work: rc: 15
 main: status: full
 main: input '= val beta'
 main: field: 'val'='beta'
+main: work: rc: 21
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '}item'
 main: status: track
@@ -274,25 +295,28 @@ added filter: 0
                             000010: type 54 (T_QUOTED), str 28 [red], contents 0, next 0, prev 9
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ color red'
 main: key: 'color'='red'
+main: work: rc: 20
 main: status: full
 main: input '= val 1'
 main: field: 'val'='1'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ color blue'
 main: key: 'color'='blue'
+main: work: rc: 21
 main: status: track
 main: input '= val 2'
 main: field: 'val'='2'
@@ -300,16 +324,18 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ color red'
 main: key: 'color'='red'
+main: work: rc: 20
 main: status: full
 main: input '= val 3'
 main: field: 'val'='3'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '}item'
 main: status: track
@@ -328,31 +354,35 @@ added filter: 0
                     000005: type 53 (T_NUMBER), str 18 [1], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: full
 main: input '$ id 1'
 main: key: 'id'='1'
+main: work: rc: 15
 main: status: full
 main: input '= val alpha'
 main: field: 'val'='alpha'
+main: work: rc: 22
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: full
 main: input '$ id 2'
 main: key: 'id'='2'
+main: work: rc: 15
 main: status: full
 main: input '= val beta'
 main: field: 'val'='beta'
+main: work: rc: 21
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '}item'
 main: status: track
@@ -370,13 +400,14 @@ added filter: 0
                     000005: type 53 (T_NUMBER), str 18 [0], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '$ id 1'
 main: key: 'id'='1'
+main: work: rc: 15
 main: status: track
 main: input '= val alpha'
 main: field: 'val'='alpha'
@@ -384,10 +415,11 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '$ id 2'
 main: key: 'id'='2'
+main: work: rc: 15
 main: status: track
 main: input '= val beta'
 main: field: 'val'='beta'
@@ -414,25 +446,28 @@ added filter: 0
                         000008: type 54 (T_QUOTED), str 26 [red], contents 0, next 0, prev 7
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ color red'
 main: key: 'color'='red'
+main: work: rc: 20
 main: status: full
 main: input '= val 1'
 main: field: 'val'='1'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ color blue'
 main: key: 'color'='blue'
+main: work: rc: 21
 main: status: track
 main: input '= val 2'
 main: field: 'val'='2'
@@ -440,16 +475,18 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ color red'
 main: key: 'color'='red'
+main: work: rc: 20
 main: status: full
 main: input '= val 3'
 main: field: 'val'='3'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '}item'
 main: status: track
@@ -471,13 +508,14 @@ added filter: 0
                     000009: type 53 (T_NUMBER), str 28 [3], contents 0, next 0, prev 3
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ price 1.2'
 main: key: 'price'='1.2'
+main: work: rc: 20
 main: status: track
 main: input '= val a'
 main: field: 'val'='a'
@@ -485,34 +523,39 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ price 3.1'
 main: key: 'price'='3.1'
+main: work: rc: 20
 main: status: full
 main: input '= val b'
 main: field: 'val'='b'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ price 3.9'
 main: key: 'price'='3.9'
+main: work: rc: 20
 main: status: full
 main: input '= val c'
 main: field: 'val'='c'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ price 2.7'
 main: key: 'price'='2.7'
+main: work: rc: 20
 main: status: track
 main: input '= val d'
 main: field: 'val'='d'
@@ -539,13 +582,14 @@ added filter: 0
                     000009: type 53 (T_NUMBER), str 27 [3], contents 0, next 0, prev 3
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ price 2.9'
 main: key: 'price'='2.9'
+main: work: rc: 20
 main: status: track
 main: input '= val a'
 main: field: 'val'='a'
@@ -553,40 +597,46 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ price 3.0'
 main: key: 'price'='3.0'
+main: work: rc: 20
 main: status: full
 main: input '= val b'
 main: field: 'val'='b'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ price 3.7'
 main: key: 'price'='3.7'
+main: work: rc: 20
 main: status: full
 main: input '= val c'
 main: field: 'val'='c'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ price 4.1'
 main: key: 'price'='4.1'
+main: work: rc: 20
 main: status: full
 main: input '= val d'
 main: field: 'val'='d'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '}item'
 main: status: track
@@ -610,25 +660,28 @@ added filter: 0
                             000011: type 70 (C_ELEMENT), str 37 [price], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ price 2.0'
 main: key: 'price'='2.0'
+main: work: rc: 20
 main: status: full
 main: input '= val a'
 main: field: 'val'='a'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ price 2.5'
 main: key: 'price'='2.5'
+main: work: rc: 20
 main: status: track
 main: input '= val b'
 main: field: 'val'='b'
@@ -636,22 +689,25 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ price 3.0'
 main: key: 'price'='3.0'
+main: work: rc: 20
 main: status: full
 main: input '= val c'
 main: field: 'val'='c'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ price 3.9'
 main: key: 'price'='3.9'
+main: work: rc: 20
 main: status: track
 main: input '= val d'
 main: field: 'val'='d'
@@ -678,26 +734,29 @@ added filter: 0
                     000009: type 53 (T_NUMBER), str 28 [2], contents 0, next 0, prev 3
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ price 2.0'
 main: key: 'price'='2.0'
+main: work: rc: 20
 main: status: full
 main: input '= val a'
 main: field: 'val'='a'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ price 2gether'
 main: key: 'price'='2gether'
 xpath_01: invalid number value: '2gether'
+main: work: rc: 24
 main: status: track
 main: input '= val b'
 main: field: 'val'='b'
@@ -705,10 +764,11 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ price 3'
 main: key: 'price'='3'
+main: work: rc: 18
 main: status: track
 main: input '= val c'
 main: field: 'val'='c'
@@ -716,11 +776,12 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ price 2.0.4.5'
 main: key: 'price'='2.0.4.5'
 xpath_01: invalid number value: '2.0.4.5'
+main: work: rc: 24
 main: status: track
 main: input '= val d'
 main: field: 'val'='d'
@@ -746,25 +807,28 @@ added filter: 0
                     000008: type 54 (T_QUOTED), str 27 [eth], contents 0, next 0, prev 7
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ label eth0'
 main: key: 'label'='eth0'
+main: work: rc: 21
 main: status: full
 main: input '= val 1'
 main: field: 'val'='1'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ label lo0'
 main: key: 'label'='lo0'
+main: work: rc: 20
 main: status: track
 main: input '= val 2'
 main: field: 'val'='2'
@@ -772,22 +836,25 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ label eth1'
 main: key: 'label'='eth1'
+main: work: rc: 21
 main: status: full
 main: input '= val 3'
 main: field: 'val'='3'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ label wlan0'
 main: key: 'label'='wlan0'
+main: work: rc: 22
 main: status: track
 main: input '= val 4'
 main: field: 'val'='4'
@@ -813,25 +880,28 @@ added filter: 0
                     000008: type 54 (T_QUOTED), str 26 [oo], contents 0, next 0, prev 7
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ name foo'
 main: key: 'name'='foo'
+main: work: rc: 19
 main: status: full
 main: input '= val 1'
 main: field: 'val'='1'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name bar'
 main: key: 'name'='bar'
+main: work: rc: 19
 main: status: track
 main: input '= val 2'
 main: field: 'val'='2'
@@ -839,28 +909,32 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name foobar'
 main: key: 'name'='foobar'
+main: work: rc: 22
 main: status: full
 main: input '= val 3'
 main: field: 'val'='3'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name boo'
 main: key: 'name'='boo'
+main: work: rc: 19
 main: status: full
 main: input '= val 4'
 main: field: 'val'='4'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '}item'
 main: status: track
@@ -882,13 +956,14 @@ added filter: 0
                         000010: type 54 (T_QUOTED), str 33 [eth], contents 0, next 0, prev 9
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ label eth0'
 main: key: 'label'='eth0'
+main: work: rc: 21
 main: status: track
 main: input '= val 1'
 main: field: 'val'='1'
@@ -896,22 +971,25 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ label lo0'
 main: key: 'label'='lo0'
+main: work: rc: 20
 main: status: full
 main: input '= val 2'
 main: field: 'val'='2'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ label eth1'
 main: key: 'label'='eth1'
+main: work: rc: 21
 main: status: track
 main: input '= val 3'
 main: field: 'val'='3'
@@ -919,16 +997,18 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ label wlan0'
 main: key: 'label'='wlan0'
+main: work: rc: 22
 main: status: full
 main: input '= val 4'
 main: field: 'val'='4'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '}item'
 main: status: track
@@ -952,25 +1032,28 @@ added filter: 0
                     000013: type 54 (T_QUOTED), str 38 [th0], contents 0, next 0, prev 3
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ iface eth0.0'
 main: key: 'iface'='eth0.0'
+main: work: rc: 23
 main: status: full
 main: input '= val 1'
 main: field: 'val'='1'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ iface eth1.0'
 main: key: 'iface'='eth1.0'
+main: work: rc: 23
 main: status: track
 main: input '= val 2'
 main: field: 'val'='2'
@@ -978,22 +1061,25 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ iface eth0.1'
 main: key: 'iface'='eth0.1'
+main: work: rc: 23
 main: status: full
 main: input '= val 3'
 main: field: 'val'='3'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ iface lo0'
 main: key: 'iface'='lo0'
+main: work: rc: 20
 main: status: track
 main: input '= val 4'
 main: field: 'val'='4'
@@ -1021,13 +1107,14 @@ added filter: 0
                     000011: type 54 (T_QUOTED), str 33 [c], contents 0, next 0, prev 3
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ name pkg-a'
 main: key: 'name'='pkg-a'
+main: work: rc: 21
 main: status: track
 main: input '= val 1'
 main: field: 'val'='1'
@@ -1035,10 +1122,11 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ name pkg-b'
 main: key: 'name'='pkg-b'
+main: work: rc: 21
 main: status: track
 main: input '= val 2'
 main: field: 'val'='2'
@@ -1046,22 +1134,25 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ name lib-c'
 main: key: 'name'='lib-c'
+main: work: rc: 21
 main: status: full
 main: input '= val 3'
 main: field: 'val'='3'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name nohyphen'
 main: key: 'name'='nohyphen'
+main: work: rc: 24
 main: status: track
 main: input '= val 4'
 main: field: 'val'='4'
@@ -1089,25 +1180,28 @@ added filter: 0
                     000011: type 54 (T_QUOTED), str 41 [eth0], contents 0, next 0, prev 3
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ iface eth0.0'
 main: key: 'iface'='eth0.0'
+main: work: rc: 23
 main: status: full
 main: input '= val 1'
 main: field: 'val'='1'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ iface eth1.0'
 main: key: 'iface'='eth1.0'
+main: work: rc: 23
 main: status: track
 main: input '= val 2'
 main: field: 'val'='2'
@@ -1115,22 +1209,25 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ iface eth0.1'
 main: key: 'iface'='eth0.1'
+main: work: rc: 23
 main: status: full
 main: input '= val 3'
 main: field: 'val'='3'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ iface lo0'
 main: key: 'iface'='lo0'
+main: work: rc: 20
 main: status: track
 main: input '= val 4'
 main: field: 'val'='4'
@@ -1158,37 +1255,42 @@ added filter: 0
                     000011: type 54 (T_QUOTED), str 40 [pkg], contents 0, next 0, prev 3
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ name pkg-a'
 main: key: 'name'='pkg-a'
+main: work: rc: 21
 main: status: full
 main: input '= val 1'
 main: field: 'val'='1'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name pkg-b'
 main: key: 'name'='pkg-b'
+main: work: rc: 21
 main: status: full
 main: input '= val 2'
 main: field: 'val'='2'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name lib-c'
 main: key: 'name'='lib-c'
+main: work: rc: 21
 main: status: track
 main: input '= val 3'
 main: field: 'val'='3'
@@ -1196,10 +1298,11 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name nohyphen'
 main: key: 'name'='nohyphen'
+main: work: rc: 24
 main: status: track
 main: input '= val 4'
 main: field: 'val'='4'
@@ -1227,13 +1330,14 @@ added filter: 0
                     000011: type 54 (T_QUOTED), str 42 [2], contents 0, next 0, prev 3
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ version pkg-1'
 main: key: 'version'='pkg-1'
+main: work: rc: 24
 main: status: track
 main: input '= val 1'
 main: field: 'val'='1'
@@ -1241,34 +1345,39 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ version pkg-2'
 main: key: 'version'='pkg-2'
+main: work: rc: 24
 main: status: full
 main: input '= val 2'
 main: field: 'val'='2'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ version lib-2'
 main: key: 'version'='lib-2'
+main: work: rc: 24
 main: status: full
 main: input '= val 3'
 main: field: 'val'='3'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ version nohyphen'
 main: key: 'version'='nohyphen'
+main: work: rc: 27
 main: status: track
 main: input '= val 4'
 main: field: 'val'='4'
@@ -1296,25 +1405,28 @@ added filter: 0
                     000011: type 54 (T_QUOTED), str 39 [usr], contents 0, next 0, prev 3
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ path /usr'
 main: key: 'path'='/usr'
+main: work: rc: 20
 main: status: full
 main: input '= val 1'
 main: field: 'val'='1'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ path /etc'
 main: key: 'path'='/etc'
+main: work: rc: 20
 main: status: track
 main: input '= val 2'
 main: field: 'val'='2'
@@ -1322,10 +1434,11 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ path noslash'
 main: key: 'path'='noslash'
+main: work: rc: 23
 main: status: track
 main: input '= val 3'
 main: field: 'val'='3'
@@ -1353,25 +1466,28 @@ added filter: 0
                     000013: type 54 (T_QUOTED), str 53 [e], contents 0, next 0, prev 5
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ name lo.eth0'
 main: key: 'name'='lo.eth0'
+main: work: rc: 23
 main: status: full
 main: input '= val 1'
 main: field: 'val'='1'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name lo.lo0'
 main: key: 'name'='lo.lo0'
+main: work: rc: 22
 main: status: track
 main: input '= val 2'
 main: field: 'val'='2'
@@ -1379,22 +1495,25 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name lo.eth1'
 main: key: 'name'='lo.eth1'
+main: work: rc: 23
 main: status: full
 main: input '= val 3'
 main: field: 'val'='3'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name nodot'
 main: key: 'name'='nodot'
+main: work: rc: 21
 main: status: track
 main: input '= val 4'
 main: field: 'val'='4'
@@ -1419,52 +1538,61 @@ added filter: 0
                         000005: type 70 (C_ELEMENT), str 18 [name], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ name alpha'
 main: key: 'name'='alpha'
+main: work: rc: 21
 main: status: full
 main: input '$ rate 0.5'
 main: key: 'rate'='0.5'
+main: work: rc: 21
 main: status: full
 main: input '= val 1'
 main: field: 'val'='1'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name 0'
 main: key: 'name'='0'
+main: work: rc: 17
 main: status: full
 main: input '$ rate 0'
 main: key: 'rate'='0'
+main: work: rc: 19
 main: status: full
 main: input '= val 2'
 main: field: 'val'='2'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name 12'
 main: key: 'name'='12'
+main: work: rc: 18
 main: status: full
 main: input '$ rate 0.0'
 main: key: 'rate'='0.0'
+main: work: rc: 21
 main: status: full
 main: input '= val 3'
 main: field: 'val'='3'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '}item'
 main: status: track
@@ -1484,16 +1612,18 @@ added filter: 0
                         000005: type 70 (C_ELEMENT), str 14 [name], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ name alpha'
 main: key: 'name'='alpha'
+main: work: rc: 21
 main: status: track
 main: input '$ rate 0.5'
 main: key: 'rate'='0.5'
+main: work: rc: 21
 main: status: track
 main: input '= val 1'
 main: field: 'val'='1'
@@ -1501,13 +1631,15 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ name 0'
 main: key: 'name'='0'
+main: work: rc: 17
 main: status: track
 main: input '$ rate 0'
 main: key: 'rate'='0'
+main: work: rc: 19
 main: status: track
 main: input '= val 2'
 main: field: 'val'='2'
@@ -1515,13 +1647,15 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ name 12'
 main: key: 'name'='12'
+main: work: rc: 18
 main: status: track
 main: input '$ rate 0.0'
 main: key: 'rate'='0.0'
+main: work: rc: 21
 main: status: track
 main: input '= val 3'
 main: field: 'val'='3'
@@ -1546,52 +1680,58 @@ added filter: 0
                         000005: type 70 (C_ELEMENT), str 14 [missing], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ name alpha'
 main: key: 'name'='alpha'
+main: work: rc: 21
 main: status: predicate
 main: input '$ rate 0.5'
 main: key: 'rate'='0.5'
+main: work: rc: 21
 main: status: predicate
 main: input '= val 1'
 main: field: 'val'='1'
 main: status: predicate
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name 0'
 main: key: 'name'='0'
+main: work: rc: 17
 main: status: predicate
 main: input '$ rate 0'
 main: key: 'rate'='0'
+main: work: rc: 19
 main: status: predicate
 main: input '= val 2'
 main: field: 'val'='2'
 main: status: predicate
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name 12'
 main: key: 'name'='12'
+main: work: rc: 18
 main: status: predicate
 main: input '$ rate 0.0'
 main: key: 'rate'='0.0'
+main: work: rc: 21
 main: status: predicate
 main: input '= val 3'
 main: field: 'val'='3'
 main: status: predicate
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '}item'
 main: status: track
@@ -1613,31 +1753,36 @@ added filter: 0
                             000007: type 70 (C_ELEMENT), str 27 [rate], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ name alpha'
 main: key: 'name'='alpha'
+main: work: rc: 21
 main: status: predicate
 main: input '$ rate 0.5'
 main: key: 'rate'='0.5'
+main: work: rc: 21
 main: status: full
 main: input '= val 1'
 main: field: 'val'='1'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name 0'
 main: key: 'name'='0'
+main: work: rc: 17
 main: status: predicate
 main: input '$ rate 0'
 main: key: 'rate'='0'
+main: work: rc: 19
 main: status: track
 main: input '= val 2'
 main: field: 'val'='2'
@@ -1645,13 +1790,15 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name 12'
 main: key: 'name'='12'
+main: work: rc: 18
 main: status: predicate
 main: input '$ rate 0.0'
 main: key: 'rate'='0.0'
+main: work: rc: 21
 main: status: track
 main: input '= val 3'
 main: field: 'val'='3'
@@ -1675,52 +1822,61 @@ added filter: 0
                     000005: type 53 (T_NUMBER), str 18 [0.5], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: full
 main: input '$ name alpha'
 main: key: 'name'='alpha'
+main: work: rc: 21
 main: status: full
 main: input '$ rate 0.5'
 main: key: 'rate'='0.5'
+main: work: rc: 21
 main: status: full
 main: input '= val 1'
 main: field: 'val'='1'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: full
 main: input '$ name 0'
 main: key: 'name'='0'
+main: work: rc: 17
 main: status: full
 main: input '$ rate 0'
 main: key: 'rate'='0'
+main: work: rc: 19
 main: status: full
 main: input '= val 2'
 main: field: 'val'='2'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: full
 main: input '$ name 12'
 main: key: 'name'='12'
+main: work: rc: 18
 main: status: full
 main: input '$ rate 0.0'
 main: key: 'rate'='0.0'
+main: work: rc: 21
 main: status: full
 main: input '= val 3'
 main: field: 'val'='3'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '}item'
 main: status: track
@@ -1743,31 +1899,36 @@ added filter: 0
                             000008: type 70 (C_ELEMENT), str 26 [rate], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ name alpha'
 main: key: 'name'='alpha'
+main: work: rc: 21
 main: status: predicate
 main: input '$ rate 0.5'
 main: key: 'rate'='0.5'
+main: work: rc: 21
 main: status: full
 main: input '= val 1'
 main: field: 'val'='1'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name 0'
 main: key: 'name'='0'
+main: work: rc: 17
 main: status: predicate
 main: input '$ rate 0'
 main: key: 'rate'='0'
+main: work: rc: 19
 main: status: track
 main: input '= val 2'
 main: field: 'val'='2'
@@ -1775,13 +1936,15 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name 12'
 main: key: 'name'='12'
+main: work: rc: 18
 main: status: predicate
 main: input '$ rate 0.0'
 main: key: 'rate'='0.0'
+main: work: rc: 21
 main: status: track
 main: input '= val 3'
 main: field: 'val'='3'
@@ -1805,52 +1968,61 @@ added filter: 0
                     000005: type 54 (T_QUOTED), str 18 [0], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: full
 main: input '$ name alpha'
 main: key: 'name'='alpha'
+main: work: rc: 21
 main: status: full
 main: input '$ rate 0.5'
 main: key: 'rate'='0.5'
+main: work: rc: 21
 main: status: full
 main: input '= val 1'
 main: field: 'val'='1'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: full
 main: input '$ name 0'
 main: key: 'name'='0'
+main: work: rc: 17
 main: status: full
 main: input '$ rate 0'
 main: key: 'rate'='0'
+main: work: rc: 19
 main: status: full
 main: input '= val 2'
 main: field: 'val'='2'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: full
 main: input '$ name 12'
 main: key: 'name'='12'
+main: work: rc: 18
 main: status: full
 main: input '$ rate 0.0'
 main: key: 'rate'='0.0'
+main: work: rc: 21
 main: status: full
 main: input '= val 3'
 main: field: 'val'='3'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '}item'
 main: status: track
@@ -1869,16 +2041,18 @@ added filter: 0
                     000005: type 54 (T_QUOTED), str 18 [], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '$ name alpha'
 main: key: 'name'='alpha'
+main: work: rc: 21
 main: status: track
 main: input '$ rate 0.5'
 main: key: 'rate'='0.5'
+main: work: rc: 21
 main: status: track
 main: input '= val 1'
 main: field: 'val'='1'
@@ -1886,13 +2060,15 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '$ name 0'
 main: key: 'name'='0'
+main: work: rc: 17
 main: status: track
 main: input '$ rate 0'
 main: key: 'rate'='0'
+main: work: rc: 19
 main: status: track
 main: input '= val 2'
 main: field: 'val'='2'
@@ -1900,13 +2076,15 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '$ name 12'
 main: key: 'name'='12'
+main: work: rc: 18
 main: status: track
 main: input '$ rate 0.0'
 main: key: 'rate'='0.0'
+main: work: rc: 21
 main: status: track
 main: input '= val 3'
 main: field: 'val'='3'
@@ -1932,13 +2110,14 @@ added filter: 0
                         000005: type 70 (C_ELEMENT), str 18 [name], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ name alpha'
 main: key: 'name'='alpha'
+main: work: rc: 21
 main: status: track
 main: input '= note hello'
 main: field: 'note'='hello'
@@ -1949,34 +2128,38 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ name ""'
 main: key: 'name'=''
+main: work: rc: 16
 main: status: full
 main: input '= note ""'
 main: field: 'note'=''
+main: work: rc: 18
 main: status: full
 main: input '= val 2'
 main: field: 'val'='2'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '= val 3'
 main: field: 'val'='3'
 main: status: predicate
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name 0'
 main: key: 'name'='0'
+main: work: rc: 17
 main: status: track
 main: input '= note 0'
 main: field: 'note'='0'
@@ -2004,13 +2187,14 @@ added filter: 0
                         000005: type 70 (C_ELEMENT), str 18 [note], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ name alpha'
 main: key: 'name'='alpha'
+main: work: rc: 21
 main: status: predicate
 main: input '= note hello'
 main: field: 'note'='hello'
@@ -2021,34 +2205,38 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ name ""'
 main: key: 'name'=''
+main: work: rc: 16
 main: status: predicate
 main: input '= note ""'
 main: field: 'note'=''
+main: work: rc: 18
 main: status: full
 main: input '= val 2'
 main: field: 'val'='2'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '= val 3'
 main: field: 'val'='3'
 main: status: predicate
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name 0'
 main: key: 'name'='0'
+main: work: rc: 17
 main: status: predicate
 main: input '= note 0'
 main: field: 'note'='0'
@@ -2077,28 +2265,32 @@ added filter: 0
                             000006: type 70 (C_ELEMENT), str 20 [name], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ name alpha'
 main: key: 'name'='alpha'
+main: work: rc: 21
 main: status: full
 main: input '= note hello'
 main: field: 'note'='hello'
+main: work: rc: 23
 main: status: full
 main: input '= val 1'
 main: field: 'val'='1'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name ""'
 main: key: 'name'=''
+main: work: rc: 16
 main: status: track
 main: input '= note ""'
 main: field: 'note'=''
@@ -2109,7 +2301,7 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '= val 3'
 main: field: 'val'='3'
@@ -2117,19 +2309,22 @@ main: status: predicate
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name 0'
 main: key: 'name'='0'
+main: work: rc: 17
 main: status: full
 main: input '= note 0'
 main: field: 'note'='0'
+main: work: rc: 19
 main: status: full
 main: input '= val 4'
 main: field: 'val'='4'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '}item'
 main: status: track
@@ -2148,40 +2343,46 @@ added filter: 0
                     000003: type 70 (C_ELEMENT), str 8 [name], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ name alpha'
 main: key: 'name'='alpha'
+main: work: rc: 21
 main: status: full
 main: input '= note hello'
 main: field: 'note'='hello'
+main: work: rc: 23
 main: status: full
 main: input '= val 1'
 main: field: 'val'='1'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name ""'
 main: key: 'name'=''
+main: work: rc: 16
 main: status: full
 main: input '= note ""'
 main: field: 'note'=''
+main: work: rc: 18
 main: status: full
 main: input '= val 2'
 main: field: 'val'='2'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '= val 3'
 main: field: 'val'='3'
@@ -2189,19 +2390,22 @@ main: status: predicate
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name 0'
 main: key: 'name'='0'
+main: work: rc: 17
 main: status: full
 main: input '= note 0'
 main: field: 'note'='0'
+main: work: rc: 19
 main: status: full
 main: input '= val 4'
 main: field: 'val'='4'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '}item'
 main: status: track
@@ -2221,28 +2425,32 @@ added filter: 0
                         000005: type 70 (C_ELEMENT), str 17 [name], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ name alpha'
 main: key: 'name'='alpha'
+main: work: rc: 21
 main: status: full
 main: input '= note hello'
 main: field: 'note'='hello'
+main: work: rc: 23
 main: status: full
 main: input '= val 1'
 main: field: 'val'='1'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name ""'
 main: key: 'name'=''
+main: work: rc: 16
 main: status: track
 main: input '= note ""'
 main: field: 'note'=''
@@ -2253,7 +2461,7 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '= val 3'
 main: field: 'val'='3'
@@ -2261,19 +2469,22 @@ main: status: predicate
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name 0'
 main: key: 'name'='0'
+main: work: rc: 17
 main: status: full
 main: input '= note 0'
 main: field: 'note'='0'
+main: work: rc: 19
 main: status: full
 main: input '= val 4'
 main: field: 'val'='4'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '}item'
 main: status: track
@@ -2292,61 +2503,71 @@ added filter: 0
                     000005: type 54 (T_QUOTED), str 18 [], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: full
 main: input '$ name alpha'
 main: key: 'name'='alpha'
+main: work: rc: 21
 main: status: full
 main: input '= note hello'
 main: field: 'note'='hello'
+main: work: rc: 23
 main: status: full
 main: input '= val 1'
 main: field: 'val'='1'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: full
 main: input '$ name ""'
 main: key: 'name'=''
+main: work: rc: 16
 main: status: full
 main: input '= note ""'
 main: field: 'note'=''
+main: work: rc: 18
 main: status: full
 main: input '= val 2'
 main: field: 'val'='2'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: full
 main: input '= val 3'
 main: field: 'val'='3'
+main: work: rc: 16
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: full
 main: input '$ name 0'
 main: key: 'name'='0'
+main: work: rc: 17
 main: status: full
 main: input '= note 0'
 main: field: 'note'='0'
+main: work: rc: 19
 main: status: full
 main: input '= val 4'
 main: field: 'val'='4'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '}item'
 main: status: track
@@ -2371,25 +2592,28 @@ added filter: 0
                     000013: type 54 (T_QUOTED), str 34 [12], contents 0, next 0, prev 3
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ s 12345'
 main: key: 's'='12345'
+main: work: rc: 18
 main: status: full
 main: input '= val 1'
 main: field: 'val'='1'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ s héllo'
 main: key: 's'='héllo'
+main: work: rc: 19
 main: status: track
 main: input '= val 2'
 main: field: 'val'='2'
@@ -2397,10 +2621,11 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ s abc'
 main: key: 's'='abc'
+main: work: rc: 16
 main: status: track
 main: input '= val 3'
 main: field: 'val'='3'
@@ -2430,25 +2655,28 @@ added filter: 0
                     000013: type 54 (T_QUOTED), str 38 [234], contents 0, next 0, prev 3
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ s 12345'
 main: key: 's'='12345'
+main: work: rc: 18
 main: status: full
 main: input '= val 1'
 main: field: 'val'='1'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ s héllo'
 main: key: 's'='héllo'
+main: work: rc: 19
 main: status: track
 main: input '= val 2'
 main: field: 'val'='2'
@@ -2456,10 +2684,11 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ s abc'
 main: key: 's'='abc'
+main: work: rc: 16
 main: status: track
 main: input '= val 3'
 main: field: 'val'='3'
@@ -2490,25 +2719,28 @@ added filter: 0
                     000014: type 54 (T_QUOTED), str 36 [1], contents 0, next 0, prev 3
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ s 12345'
 main: key: 's'='12345'
+main: work: rc: 18
 main: status: full
 main: input '= val 1'
 main: field: 'val'='1'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ s héllo'
 main: key: 's'='héllo'
+main: work: rc: 19
 main: status: track
 main: input '= val 2'
 main: field: 'val'='2'
@@ -2516,10 +2748,11 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ s abc'
 main: key: 's'='abc'
+main: work: rc: 16
 main: status: track
 main: input '= val 3'
 main: field: 'val'='3'
@@ -2548,25 +2781,28 @@ added filter: 0
                     000013: type 54 (T_QUOTED), str 35 [45], contents 0, next 0, prev 3
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ s 12345'
 main: key: 's'='12345'
+main: work: rc: 18
 main: status: full
 main: input '= val 1'
 main: field: 'val'='1'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ s héllo'
 main: key: 's'='héllo'
+main: work: rc: 19
 main: status: track
 main: input '= val 2'
 main: field: 'val'='2'
@@ -2574,10 +2810,11 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ s abc'
 main: key: 's'='abc'
+main: work: rc: 16
 main: status: track
 main: input '= val 3'
 main: field: 'val'='3'
@@ -2605,13 +2842,14 @@ added filter: 0
                     000011: type 54 (T_QUOTED), str 30 [éllo], contents 0, next 0, prev 3
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ s 12345'
 main: key: 's'='12345'
+main: work: rc: 18
 main: status: track
 main: input '= val 1'
 main: field: 'val'='1'
@@ -2619,22 +2857,25 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ s héllo'
 main: key: 's'='héllo'
+main: work: rc: 19
 main: status: full
 main: input '= val 2'
 main: field: 'val'='2'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ s abc'
 main: key: 's'='abc'
+main: work: rc: 16
 main: status: track
 main: input '= val 3'
 main: field: 'val'='3'
@@ -2663,13 +2904,14 @@ added filter: 0
                     000013: type 54 (T_QUOTED), str 34 [él], contents 0, next 0, prev 3
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ s 12345'
 main: key: 's'='12345'
+main: work: rc: 18
 main: status: track
 main: input '= val 1'
 main: field: 'val'='1'
@@ -2677,22 +2919,25 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ s héllo'
 main: key: 's'='héllo'
+main: work: rc: 19
 main: status: full
 main: input '= val 2'
 main: field: 'val'='2'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ s abc'
 main: key: 's'='abc'
+main: work: rc: 16
 main: status: track
 main: input '= val 3'
 main: field: 'val'='3'
@@ -2720,37 +2965,42 @@ added filter: 0
                     000009: type 53 (T_NUMBER), str 30 [5], contents 0, next 0, prev 3
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ s 12345'
 main: key: 's'='12345'
+main: work: rc: 18
 main: status: full
 main: input '= val 1'
 main: field: 'val'='1'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ s héllo'
 main: key: 's'='héllo'
+main: work: rc: 19
 main: status: full
 main: input '= val 2'
 main: field: 'val'='2'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ s abc'
 main: key: 's'='abc'
+main: work: rc: 16
 main: status: track
 main: input '= val 3'
 main: field: 'val'='3'
@@ -2780,43 +3030,49 @@ added filter: 0
                         000011: type 53 (T_NUMBER), str 26 [1], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: full
 main: input '$ s 12345'
 main: key: 's'='12345'
+main: work: rc: 18
 main: status: full
 main: input '= val 1'
 main: field: 'val'='1'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: full
 main: input '$ s héllo'
 main: key: 's'='héllo'
+main: work: rc: 19
 main: status: full
 main: input '= val 2'
 main: field: 'val'='2'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: full
 main: input '$ s abc'
 main: key: 's'='abc'
+main: work: rc: 16
 main: status: full
 main: input '= val 3'
 main: field: 'val'='3'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '}item'
 main: status: track
@@ -2839,43 +3095,49 @@ added filter: 0
                     000009: type 53 (T_NUMBER), str 24 [1.5], contents 0, next 0, prev 3
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: full
 main: input '$ s 12345'
 main: key: 's'='12345'
+main: work: rc: 18
 main: status: full
 main: input '= val 1'
 main: field: 'val'='1'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: full
 main: input '$ s héllo'
 main: key: 's'='héllo'
+main: work: rc: 19
 main: status: full
 main: input '= val 2'
 main: field: 'val'='2'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: full
 main: input '$ s abc'
 main: key: 's'='abc'
+main: work: rc: 16
 main: status: full
 main: input '= val 3'
 main: field: 'val'='3'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '}item'
 main: status: track
@@ -2899,43 +3161,49 @@ added filter: 0
                     000009: type 53 (T_NUMBER), str 41 [3], contents 0, next 0, prev 3
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: full
 main: input '$ s 12345'
 main: key: 's'='12345'
+main: work: rc: 18
 main: status: full
 main: input '= val 1'
 main: field: 'val'='1'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: full
 main: input '$ s héllo'
 main: key: 's'='héllo'
+main: work: rc: 19
 main: status: full
 main: input '= val 2'
 main: field: 'val'='2'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: full
 main: input '$ s abc'
 main: key: 's'='abc'
+main: work: rc: 16
 main: status: full
 main: input '= val 3'
 main: field: 'val'='3'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '}item'
 main: status: track
@@ -2958,43 +3226,49 @@ added filter: 0
                     000009: type 53 (T_NUMBER), str 44 [2], contents 0, next 0, prev 3
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: full
 main: input '$ s 12345'
 main: key: 's'='12345'
+main: work: rc: 18
 main: status: full
 main: input '= val 1'
 main: field: 'val'='1'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: full
 main: input '$ s héllo'
 main: key: 's'='héllo'
+main: work: rc: 19
 main: status: full
 main: input '= val 2'
 main: field: 'val'='2'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: full
 main: input '$ s abc'
 main: key: 's'='abc'
+main: work: rc: 16
 main: status: full
 main: input '= val 3'
 main: field: 'val'='3'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '}item'
 main: status: track
@@ -3021,31 +3295,35 @@ added filter: 0
                         000014: type 70 (C_ELEMENT), str 80 [s], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ s 12345'
 main: key: 's'='12345'
+main: work: rc: 18
 main: status: full
 main: input '= val 1'
 main: field: 'val'='1'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ s abc'
 main: key: 's'='abc'
+main: work: rc: 16
 main: status: full
 main: input '= val 2'
 main: field: 'val'='2'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '}item'
 main: status: track
@@ -3070,31 +3348,35 @@ added filter: 0
                     000013: type 54 (T_QUOTED), str 52 [], contents 0, next 0, prev 3
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ s 12345'
 main: key: 's'='12345'
+main: work: rc: 18
 main: status: full
 main: input '= val 1'
 main: field: 'val'='1'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ s abc'
 main: key: 's'='abc'
+main: work: rc: 16
 main: status: full
 main: input '= val 2'
 main: field: 'val'='2'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '}item'
 main: status: track
@@ -3120,25 +3402,28 @@ added filter: 0
                     000014: type 54 (T_QUOTED), str 38 [1], contents 0, next 0, prev 3
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ s 12345'
 main: key: 's'='12345'
+main: work: rc: 18
 main: status: full
 main: input '= val 1'
 main: field: 'val'='1'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ s abc'
 main: key: 's'='abc'
+main: work: rc: 16
 main: status: track
 main: input '= val 2'
 main: field: 'val'='2'
@@ -3165,13 +3450,15 @@ added filter: 0
                     000006: type 54 (T_QUOTED), str 15 [], contents 0, next 0, prev 5
 main: status: zero
 main: input '+item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '= note ""'
 main: field: 'note'=''
+main: work: rc: 14
 main: status: full
 main: input '= val 1'
 main: field: 'val'='1'
+main: work: rc: 16
 main: status: full
 main: input '-item'
 main: status: track
@@ -3191,13 +3478,15 @@ added filter: 0
                     000008: type 54 (T_QUOTED), str 29 [], contents 0, next 0, prev 7
 main: status: zero
 main: input '+item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '= note ""'
 main: field: 'note'=''
+main: work: rc: 14
 main: status: full
 main: input '= val 1'
 main: field: 'val'='1'
+main: work: rc: 16
 main: status: full
 main: input '-item'
 main: status: track
@@ -3217,13 +3506,15 @@ added filter: 0
                     000008: type 54 (T_QUOTED), str 27 [], contents 0, next 0, prev 7
 main: status: zero
 main: input '+item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '= note ""'
 main: field: 'note'=''
+main: work: rc: 14
 main: status: full
 main: input '= val 1'
 main: field: 'val'='1'
+main: work: rc: 16
 main: status: full
 main: input '-item'
 main: status: track
@@ -3244,13 +3535,15 @@ added filter: 0
                     000009: type 53 (T_NUMBER), str 33 [0], contents 0, next 0, prev 3
 main: status: zero
 main: input '+item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '= note ""'
 main: field: 'note'=''
+main: work: rc: 14
 main: status: full
 main: input '= val 1'
 main: field: 'val'='1'
+main: work: rc: 16
 main: status: full
 main: input '-item'
 main: status: track
@@ -3271,7 +3564,7 @@ added filter: 0
                     000006: type 54 (T_QUOTED), str 15 [x], contents 0, next 0, prev 5
 main: status: zero
 main: input '+item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '= note ""'
 main: field: 'note'=''
@@ -3298,7 +3591,7 @@ added filter: 0
                     000009: type 53 (T_NUMBER), str 33 [1], contents 0, next 0, prev 3
 main: status: zero
 main: input '+item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '= note ""'
 main: field: 'note'=''
@@ -3326,25 +3619,28 @@ added filter: 0
                     000008: type 54 (T_QUOTED), str 27 [.eth1], contents 0, next 0, prev 7
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ name lo.eth1'
 main: key: 'name'='lo.eth1'
+main: work: rc: 23
 main: status: full
 main: input '= val 1'
 main: field: 'val'='1'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name eth1x'
 main: key: 'name'='eth1x'
+main: work: rc: 21
 main: status: track
 main: input '= val 2'
 main: field: 'val'='2'
@@ -3352,22 +3648,25 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name .eth1'
 main: key: 'name'='.eth1'
+main: work: rc: 21
 main: status: full
 main: input '= val 3'
 main: field: 'val'='3'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name ""'
 main: key: 'name'=''
+main: work: rc: 16
 main: status: track
 main: input '= val 4'
 main: field: 'val'='4'
@@ -3392,55 +3691,63 @@ added filter: 0
                     000008: type 54 (T_QUOTED), str 27 [], contents 0, next 0, prev 7
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ name lo.eth1'
 main: key: 'name'='lo.eth1'
+main: work: rc: 23
 main: status: full
 main: input '= val 1'
 main: field: 'val'='1'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name eth1x'
 main: key: 'name'='eth1x'
+main: work: rc: 21
 main: status: full
 main: input '= val 2'
 main: field: 'val'='2'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name .eth1'
 main: key: 'name'='.eth1'
+main: work: rc: 21
 main: status: full
 main: input '= val 3'
 main: field: 'val'='3'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name ""'
 main: key: 'name'=''
+main: work: rc: 16
 main: status: full
 main: input '= val 4'
 main: field: 'val'='4'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '}item'
 main: status: track
@@ -3459,13 +3766,14 @@ added filter: 0
                     000006: type 53 (T_NUMBER), str 15 [10], contents 0, next 0, prev 5
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ name a'
 main: key: 'name'='a'
+main: work: rc: 17
 main: status: predicate
 main: input '[tag'
 main: open leaf list: 'tag'
@@ -3485,10 +3793,11 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ name b'
 main: key: 'name'='b'
+main: work: rc: 17
 main: status: predicate
 main: input '[tag'
 main: open leaf list: 'tag'
@@ -3504,9 +3813,10 @@ main: close leaf list: 'tag'
 main: status: predicate
 main: input '= size 10'
 main: field: 'size'='10'
+main: work: rc: 28
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '}item'
 main: status: track
@@ -3525,16 +3835,17 @@ added filter: 0
                     000006: type 53 (T_NUMBER), str 15 [10], contents 0, next 0, prev 5
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ name a'
 main: key: 'name'='a'
+main: work: rc: 17
 main: status: predicate
 main: input '+sub'
-main: filter: rc: 17
+main: work: rc: 17
 main: status: conditional
 main: input '= x 1'
 main: field: 'x'='1'
@@ -3547,13 +3858,14 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ name b'
 main: key: 'name'='b'
+main: work: rc: 17
 main: status: predicate
 main: input '+sub'
-main: filter: rc: 17
+main: work: rc: 17
 main: status: conditional
 main: input '= x 2'
 main: field: 'x'='2'
@@ -3562,9 +3874,10 @@ main: input '-sub'
 main: status: predicate
 main: input '= size 10'
 main: field: 'size'='10'
+main: work: rc: 20
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '}item'
 main: status: track
@@ -3583,28 +3896,30 @@ added filter: 0
                     000006: type 53 (T_NUMBER), str 15 [10], contents 0, next 0, prev 5
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ name a'
 main: key: 'name'='a'
+main: work: rc: 17
 main: status: predicate
 main: input '{sub'
-main: filter: rc: 17
+main: work: rc: 17
 main: status: predicate
 main: input '<sub'
-main: filter: rc: 10
+main: work: rc: 10
 main: status: conditional
 main: input '$ k 1'
 main: key: 'k'='1'
+main: work: rc: 18
 main: status: conditional
 main: input '= v p'
 main: field: 'v'='p'
 main: status: conditional
 main: input '>sub'
-main: filter: rc: 10
+main: work: rc: 10
 main: status: predicate
 main: input '}sub'
 main: status: predicate
@@ -3614,33 +3929,36 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ name b'
 main: key: 'name'='b'
+main: work: rc: 17
 main: status: predicate
 main: input '{sub'
-main: filter: rc: 17
+main: work: rc: 17
 main: status: predicate
 main: input '<sub'
-main: filter: rc: 10
+main: work: rc: 10
 main: status: conditional
 main: input '$ k 2'
 main: key: 'k'='2'
+main: work: rc: 18
 main: status: conditional
 main: input '= v q'
 main: field: 'v'='q'
 main: status: conditional
 main: input '>sub'
-main: filter: rc: 10
+main: work: rc: 10
 main: status: predicate
 main: input '}sub'
 main: status: predicate
 main: input '= size 10'
 main: field: 'size'='10'
+main: work: rc: 20
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '}item'
 main: status: track
@@ -3659,28 +3977,30 @@ added filter: 0
                     000006: type 53 (T_NUMBER), str 15 [99], contents 0, next 0, prev 5
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ name a'
 main: key: 'name'='a'
+main: work: rc: 17
 main: status: predicate
 main: input '{sub'
-main: filter: rc: 17
+main: work: rc: 17
 main: status: predicate
 main: input '<sub'
-main: filter: rc: 10
+main: work: rc: 10
 main: status: conditional
 main: input '$ k 1'
 main: key: 'k'='1'
+main: work: rc: 18
 main: status: conditional
 main: input '= v p'
 main: field: 'v'='p'
 main: status: conditional
 main: input '>sub'
-main: filter: rc: 10
+main: work: rc: 10
 main: status: predicate
 main: input '}sub'
 main: status: predicate
@@ -3690,25 +4010,27 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ name b'
 main: key: 'name'='b'
+main: work: rc: 17
 main: status: predicate
 main: input '{sub'
-main: filter: rc: 17
+main: work: rc: 17
 main: status: predicate
 main: input '<sub'
-main: filter: rc: 10
+main: work: rc: 10
 main: status: conditional
 main: input '$ k 2'
 main: key: 'k'='2'
+main: work: rc: 18
 main: status: conditional
 main: input '= v q'
 main: field: 'v'='q'
 main: status: conditional
 main: input '>sub'
-main: filter: rc: 10
+main: work: rc: 10
 main: status: predicate
 main: input '}sub'
 main: status: predicate
@@ -3735,16 +4057,17 @@ added filter: 0
         000009: type 70 (C_ELEMENT), str 22 [sub], contents 0, next 0, prev 1
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ name a'
 main: key: 'name'='a'
+main: work: rc: 17
 main: status: predicate
 main: input '+sub'
-main: filter: rc: 17
+main: work: rc: 17
 main: status: conditional
 main: input '= x 1'
 main: field: 'x'='1'
@@ -3757,13 +4080,14 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ name b'
 main: key: 'name'='b'
+main: work: rc: 17
 main: status: predicate
 main: input '+sub'
-main: filter: rc: 17
+main: work: rc: 17
 main: status: conditional
 main: input '= x 2'
 main: field: 'x'='2'
@@ -3774,7 +4098,7 @@ main: input '= size 10'
 main: field: 'size'='10'
 main: status: track
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '}item'
 main: status: track
@@ -3794,13 +4118,14 @@ added filter: 0
         000009: type 70 (C_ELEMENT), str 22 [name], contents 0, next 0, prev 1
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ name a'
 main: key: 'name'='a'
+main: work: rc: 17
 main: status: predicate
 main: input '= size 0'
 main: field: 'size'='0'
@@ -3808,16 +4133,17 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ name b'
 main: key: 'name'='b'
+main: work: rc: 17
 main: status: predicate
 main: input '= size 10'
 main: field: 'size'='10'
 main: status: track
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '}item'
 main: status: track
@@ -3838,19 +4164,20 @@ added filter: 0
         000011: type 70 (C_ELEMENT), str 28 [x], contents 0, next 0, prev 9
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ name a'
 main: key: 'name'='a'
+main: work: rc: 17
 main: status: predicate
 main: input '= other o1'
 main: field: 'other'='o1'
 main: status: predicate
 main: input '+sub'
-main: filter: rc: 17
+main: work: rc: 17
 main: status: predicate
 main: input '= x 1'
 main: field: 'x'='1'
@@ -3864,16 +4191,17 @@ main: input '= size 10'
 main: field: 'size'='10'
 main: status: track
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name b'
 main: key: 'name'='b'
+main: work: rc: 17
 main: status: predicate
 main: input '+sub'
-main: filter: rc: 17
+main: work: rc: 17
 main: status: predicate
 main: input '= y 2'
 main: field: 'y'='2'
@@ -3886,13 +4214,14 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name c'
 main: key: 'name'='c'
+main: work: rc: 17
 main: status: predicate
 main: input '+sub'
-main: filter: rc: 17
+main: work: rc: 17
 main: status: predicate
 main: input '= x 3'
 main: field: 'x'='3'
@@ -3922,10 +4251,10 @@ added filter: 0
         000009: type 70 (C_ELEMENT), str 22 [note], contents 0, next 0, prev 1
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= note n1'
 main: field: 'note'='n1'
@@ -3933,6 +4262,7 @@ main: status: predicate
 main: input '$ name a'
 main: key: 'name'='a'
 xpath_01: key field emitted after normal value field: 'name'
+main: work: rc: 19
 main: status: predicate
 main: input '= other o'
 main: field: 'other'='o'
@@ -3945,10 +4275,10 @@ main: field: 'note'='n2'
 xpath_01: duplicate sibling name: 'note'
 main: status: track
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '= note n3'
 main: field: 'note'='n3'
@@ -3982,19 +4312,20 @@ added filter: 0
         000017: type 70 (C_ELEMENT), str 38 [v], contents 0, next 0, prev 9
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ name a'
 main: key: 'name'='a'
+main: work: rc: 17
 main: status: predicate
 main: input '{sub'
-main: filter: rc: 17
+main: work: rc: 17
 main: status: predicate
 main: input '<sub'
-main: filter: rc: 10
+main: work: rc: 10
 main: status: predicate
 main: input '= v v1'
 main: field: 'v'='v1'
@@ -4002,11 +4333,12 @@ main: status: predicate
 main: input '$ k 1'
 main: key: 'k'='1'
 xpath_01: key field emitted after normal value field: 'k'
+main: work: rc: 20
 main: status: track
 main: input '>sub'
 main: status: predicate
 main: input '<sub'
-main: filter: rc: 10
+main: work: rc: 10
 main: status: predicate
 main: input '= v v2'
 main: field: 'v'='v2'
@@ -4014,15 +4346,17 @@ main: status: predicate
 main: input '$ k 2'
 main: key: 'k'='2'
 xpath_01: key field emitted after normal value field: 'k'
+main: work: rc: 20
 main: status: predicate
 main: input '>sub'
-main: filter: rc: 10
+main: work: rc: 10
 main: status: predicate
 main: input '<sub'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: predicate
 main: input '$ k 2'
 main: key: 'k'='2'
+main: work: rc: 18
 main: status: predicate
 main: input '= w w3'
 main: field: 'w'='w3'
@@ -4035,7 +4369,7 @@ main: input '= size 10'
 main: field: 'size'='10'
 main: status: track
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '}item'
 main: status: track
@@ -4055,16 +4389,17 @@ added filter: 0
         000009: type 70 (C_ELEMENT), str 22 [sub], contents 0, next 0, prev 1
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ name a'
 main: key: 'name'='a'
+main: work: rc: 17
 main: status: predicate
 main: input '+sub'
-main: filter: rc: 17
+main: work: rc: 17
 main: status: conditional
 main: input '= x 1'
 main: field: 'x'='1'
@@ -4074,24 +4409,26 @@ main: status: predicate
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ name b'
 main: key: 'name'='b'
+main: work: rc: 17
 main: status: predicate
 main: input '= size 10'
 main: field: 'size'='10'
 main: status: track
 main: input '+sub'
-main: filter: rc: 17
+main: work: rc: 17
 main: status: full
 main: input '= x 2'
 main: field: 'x'='2'
+main: work: rc: 16
 main: status: full
 main: input '-sub'
 main: status: track
 main: input '+other'
-main: filter: rc: 19
+main: work: rc: 19
 main: status: track
 main: input '= z 1'
 main: field: 'z'='1'
@@ -4099,7 +4436,7 @@ main: status: track
 main: input '-other'
 main: status: track
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '}item'
 main: status: track
@@ -4119,16 +4456,17 @@ added filter: 0
         000009: type 70 (C_ELEMENT), str 20 [sub], contents 0, next 0, prev 1
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ name a'
 main: key: 'name'='a'
+main: work: rc: 17
 main: status: predicate
 main: input '+sub'
-main: filter: rc: 17
+main: work: rc: 17
 main: status: conditional
 main: input '= x 1'
 main: field: 'x'='1'
@@ -4155,13 +4493,14 @@ added filter: 0
         000009: type 70 (C_ELEMENT), str 22 [tag], contents 0, next 0, prev 1
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ name a'
 main: key: 'name'='a'
+main: work: rc: 17
 main: status: predicate
 main: input '[tag'
 main: open leaf list: 'tag'
@@ -4179,7 +4518,7 @@ main: input '= size 10'
 main: field: 'size'='10'
 main: status: track
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '}item'
 main: status: track
@@ -4198,10 +4537,10 @@ added filter: 0
                     000006: type 54 (T_QUOTED), str 15 [], contents 0, next 0, prev 5
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= id 1'
 main: field: 'id'='1'
@@ -4215,19 +4554,20 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= id 2'
 main: field: 'id'='2'
 main: status: predicate
 main: input '= name ""'
 main: field: 'name'=''
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '= id 3'
 main: field: 'id'='3'
@@ -4251,25 +4591,27 @@ added filter: 0
                     000006: type 54 (T_QUOTED), str 16 [], contents 0, next 0, prev 5
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= id 1'
 main: field: 'id'='1'
 main: status: predicate
 main: input '= name gum'
 main: field: 'name'='gum'
+main: work: rc: 21
 main: status: full
 main: input '= size 5'
 main: field: 'size'='5'
+main: work: rc: 19
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '= id 2'
 main: field: 'id'='2'
@@ -4280,7 +4622,7 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '= id 3'
 main: field: 'id'='3'
@@ -4303,10 +4645,10 @@ added filter: 0
                         000005: type 70 (C_ELEMENT), str 14 [name], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= id 1'
 main: field: 'id'='1'
@@ -4320,7 +4662,7 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= id 2'
 main: field: 'id'='2'
@@ -4331,13 +4673,13 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= id 3'
 main: field: 'id'='3'
 main: status: predicate
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '}item'
 main: status: track
@@ -4357,10 +4699,10 @@ added filter: 0
                     000009: type 54 (T_QUOTED), str 26 [], contents 0, next 0, prev 3
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= id 1'
 main: field: 'id'='1'
@@ -4374,25 +4716,26 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= id 2'
 main: field: 'id'='2'
 main: status: predicate
 main: input '= name ""'
 main: field: 'name'=''
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '= id 3'
 main: field: 'id'='3'
 main: status: predicate
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '}item'
 main: status: track
@@ -4411,10 +4754,10 @@ added filter: 0
                     000006: type 52 (T_FUNCTION_NAME), str 15 [false], contents 0, next 0, prev 5
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= id 1'
 main: field: 'id'='1'
@@ -4428,7 +4771,7 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= id 2'
 main: field: 'id'='2'
@@ -4439,13 +4782,13 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= id 3'
 main: field: 'id'='3'
 main: status: predicate
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '}item'
 main: status: track
@@ -4464,10 +4807,10 @@ added filter: 0
                     000006: type 53 (T_NUMBER), str 16 [3], contents 0, next 0, prev 5
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= id 1'
 main: field: 'id'='1'
@@ -4477,12 +4820,13 @@ main: field: 'name'='gum'
 main: status: predicate
 main: input '= size 5'
 main: field: 'size'='5'
+main: work: rc: 19
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '= id 2'
 main: field: 'id'='2'
@@ -4493,7 +4837,7 @@ main: status: predicate
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '= id 3'
 main: field: 'id'='3'
@@ -4516,10 +4860,10 @@ added filter: 0
                         000005: type 70 (C_ELEMENT), str 14 [size], contents 0, next 0, prev 0
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= id 1'
 main: field: 'id'='1'
@@ -4533,7 +4877,7 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= id 2'
 main: field: 'id'='2'
@@ -4542,16 +4886,16 @@ main: input '= name ""'
 main: field: 'name'=''
 main: status: predicate
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '= id 3'
 main: field: 'id'='3'
 main: status: predicate
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '}item'
 main: status: track
@@ -4570,16 +4914,17 @@ added filter: 0
         000010: type 70 (C_ELEMENT), str 25 [sub], contents 0, next 0, prev 1
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ name a'
 main: key: 'name'='a'
+main: work: rc: 17
 main: status: predicate
 main: input '+sub'
-main: filter: rc: 17
+main: work: rc: 17
 main: status: conditional
 main: input '= x 1'
 main: field: 'x'='1'
@@ -4587,16 +4932,17 @@ main: status: conditional
 main: input '-sub'
 main: status: predicate
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name b'
 main: key: 'name'='b'
+main: work: rc: 17
 main: status: predicate
 main: input '+sub'
-main: filter: rc: 17
+main: work: rc: 17
 main: status: conditional
 main: input '= x 2'
 main: field: 'x'='2'
@@ -4625,13 +4971,13 @@ added filter: 0
                         000007: type 70 (C_ELEMENT), str 20 [name], contents 0, next 0, prev 0
 main: status: zero
 main: input '+top'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: track
 main: input '+item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '+sub'
-main: filter: rc: 15
+main: work: rc: 15
 main: status: conditional
 main: input '= x 1'
 main: field: 'x'='1'
@@ -4662,13 +5008,13 @@ added filter: 0
 main: status: zero
 main: input '+top'
 xpath_01: duplicate sibling name: 'top'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: track
 main: input '+item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '+sub'
-main: filter: rc: 15
+main: work: rc: 15
 main: status: conditional
 main: input '= x 1'
 main: field: 'x'='1'
@@ -4698,13 +5044,13 @@ added filter: 0
                     000008: type 54 (T_QUOTED), str 22 [x], contents 0, next 0, prev 7
 main: status: zero
 main: input '+top'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: track
 main: input '+item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '+sub'
-main: filter: rc: 15
+main: work: rc: 15
 main: status: conditional
 main: input '= x 1'
 main: field: 'x'='1'
@@ -4734,13 +5080,13 @@ added filter: 0
         000012: type 70 (C_ELEMENT), str 31 [sub], contents 0, next 0, prev 3
 main: status: zero
 main: input '+top'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: track
 main: input '+item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '+sub'
-main: filter: rc: 15
+main: work: rc: 15
 main: status: conditional
 main: input '= x 1'
 main: field: 'x'='1'
