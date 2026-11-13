@@ -1,0 +1,425 @@
+<div class="line">
+  <div class="data" data-tag="name" data-ident="2" data-xpath="/top/grouping/name">comma</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="options" data-ident="2" data-xpath="/top/grouping[name = 'comma']/options">grouping=+3</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="quote" data-ident="2" data-xpath="/top/grouping[name = 'comma']/quote">1,234,567</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="quote-long" data-ident="2" data-xpath="/top/grouping[name = 'comma']/quote-long">1,234,567,890</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="quote-unsigned" data-ident="2" data-xpath="/top/grouping[name = 'comma']/quote-unsigned">4,000,000,000</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="quote-intmax" data-ident="2" data-xpath="/top/grouping[name = 'comma']/quote-intmax">9,876,543,210</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="int" data-ident="2" data-xpath="/top/grouping[name = 'comma']/int">1,234,567</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="int-long" data-ident="2" data-xpath="/top/grouping[name = 'comma']/int-long">1,234,567,890</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="int-unsigned" data-ident="2" data-xpath="/top/grouping[name = 'comma']/int-unsigned">4,000,000,000</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="int-small" data-ident="2" data-xpath="/top/grouping[name = 'comma']/int-small">123</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="int-negative" data-ident="2" data-xpath="/top/grouping[name = 'comma']/int-negative">-1,234,567</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="quote-width" data-ident="2" data-xpath="/top/grouping[name = 'comma']/quote-width">   1,234,567</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="quote-left" data-ident="2" data-xpath="/top/grouping[name = 'comma']/quote-left">1,234,567   </div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="int-width" data-ident="2" data-xpath="/top/grouping[name = 'comma']/int-width">   1,234,567</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="int-left" data-ident="2" data-xpath="/top/grouping[name = 'comma']/int-left">1,234,567   </div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="int-narrow" data-ident="2" data-xpath="/top/grouping[name = 'comma']/int-narrow">1,234,567</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="quote-float" data-ident="2" data-xpath="/top/grouping[name = 'comma']/quote-float">1,234,567.50</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="int-float" data-ident="2" data-xpath="/top/grouping[name = 'comma']/int-float">1,234,567.50</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="int-float-width" data-ident="2" data-xpath="/top/grouping[name = 'comma']/int-float-width">   1,234,567.5</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="int-exp" data-ident="2" data-xpath="/top/grouping[name = 'comma']/int-exp">1.234568e+06</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="int-general" data-ident="2" data-xpath="/top/grouping[name = 'comma']/int-general">1.23457e+06</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="int-hex" data-ident="2" data-xpath="/top/grouping[name = 'comma']/int-hex">12d687</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="int-octal" data-ident="2" data-xpath="/top/grouping[name = 'comma']/int-octal">4553207</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="int-zero" data-ident="2" data-xpath="/top/grouping[name = 'comma']/int-zero">01234567</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="quote-zero" data-ident="2" data-xpath="/top/grouping[name = 'comma']/quote-zero">0001234567</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="quote-encoded" data-ident="2" data-xpath="/top/grouping[name = 'comma']/quote-encoded">1,234,567</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="plain" data-ident="2" data-xpath="/top/grouping[name = 'comma']/plain">1234567</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="plain-float" data-ident="2" data-xpath="/top/grouping[name = 'comma']/plain-float">1234567.5</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="name" data-ident="3" data-xpath="/top/grouping/name">dot-indian</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="options" data-ident="3" data-xpath="/top/grouping[name = 'dot-indian']/options">grouping=.+3+2</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="quote" data-ident="3" data-xpath="/top/grouping[name = 'dot-indian']/quote">12.34.567</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="quote-long" data-ident="3" data-xpath="/top/grouping[name = 'dot-indian']/quote-long">1.23.45.67.890</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="quote-unsigned" data-ident="3" data-xpath="/top/grouping[name = 'dot-indian']/quote-unsigned">4.00.00.00.000</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="quote-intmax" data-ident="3" data-xpath="/top/grouping[name = 'dot-indian']/quote-intmax">9.87.65.43.210</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="int" data-ident="3" data-xpath="/top/grouping[name = 'dot-indian']/int">12.34.567</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="int-long" data-ident="3" data-xpath="/top/grouping[name = 'dot-indian']/int-long">1.23.45.67.890</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="int-unsigned" data-ident="3" data-xpath="/top/grouping[name = 'dot-indian']/int-unsigned">4.00.00.00.000</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="int-small" data-ident="3" data-xpath="/top/grouping[name = 'dot-indian']/int-small">123</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="int-negative" data-ident="3" data-xpath="/top/grouping[name = 'dot-indian']/int-negative">-12.34.567</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="quote-width" data-ident="3" data-xpath="/top/grouping[name = 'dot-indian']/quote-width">   12.34.567</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="quote-left" data-ident="3" data-xpath="/top/grouping[name = 'dot-indian']/quote-left">12.34.567   </div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="int-width" data-ident="3" data-xpath="/top/grouping[name = 'dot-indian']/int-width">   12.34.567</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="int-left" data-ident="3" data-xpath="/top/grouping[name = 'dot-indian']/int-left">12.34.567   </div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="int-narrow" data-ident="3" data-xpath="/top/grouping[name = 'dot-indian']/int-narrow">12.34.567</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="quote-float" data-ident="3" data-xpath="/top/grouping[name = 'dot-indian']/quote-float">12.34.567.50</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="int-float" data-ident="3" data-xpath="/top/grouping[name = 'dot-indian']/int-float">12.34.567.50</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="int-float-width" data-ident="3" data-xpath="/top/grouping[name = 'dot-indian']/int-float-width">   12.34.567.5</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="int-exp" data-ident="3" data-xpath="/top/grouping[name = 'dot-indian']/int-exp">1.234568e+06</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="int-general" data-ident="3" data-xpath="/top/grouping[name = 'dot-indian']/int-general">1.23457e+06</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="int-hex" data-ident="3" data-xpath="/top/grouping[name = 'dot-indian']/int-hex">12d687</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="int-octal" data-ident="3" data-xpath="/top/grouping[name = 'dot-indian']/int-octal">4553207</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="int-zero" data-ident="3" data-xpath="/top/grouping[name = 'dot-indian']/int-zero">01234567</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="quote-zero" data-ident="3" data-xpath="/top/grouping[name = 'dot-indian']/quote-zero">0001234567</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="quote-encoded" data-ident="3" data-xpath="/top/grouping[name = 'dot-indian']/quote-encoded">12.34.567</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="plain" data-ident="3" data-xpath="/top/grouping[name = 'dot-indian']/plain">1234567</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="plain-float" data-ident="3" data-xpath="/top/grouping[name = 'dot-indian']/plain-float">1234567.5</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="name" data-ident="4" data-xpath="/top/grouping/name">group-option</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="options" data-ident="4" data-xpath="/top/grouping[name = 'group-option']/options">group,grouping=+3</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="quote" data-ident="4" data-xpath="/top/grouping[name = 'group-option']/quote">1,234,567</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="quote-long" data-ident="4" data-xpath="/top/grouping[name = 'group-option']/quote-long">1,234,567,890</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="quote-unsigned" data-ident="4" data-xpath="/top/grouping[name = 'group-option']/quote-unsigned">4,000,000,000</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="quote-intmax" data-ident="4" data-xpath="/top/grouping[name = 'group-option']/quote-intmax">9,876,543,210</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="int" data-ident="4" data-xpath="/top/grouping[name = 'group-option']/int">1,234,567</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="int-long" data-ident="4" data-xpath="/top/grouping[name = 'group-option']/int-long">1,234,567,890</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="int-unsigned" data-ident="4" data-xpath="/top/grouping[name = 'group-option']/int-unsigned">4,000,000,000</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="int-small" data-ident="4" data-xpath="/top/grouping[name = 'group-option']/int-small">123</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="int-negative" data-ident="4" data-xpath="/top/grouping[name = 'group-option']/int-negative">-1,234,567</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="quote-width" data-ident="4" data-xpath="/top/grouping[name = 'group-option']/quote-width">   1,234,567</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="quote-left" data-ident="4" data-xpath="/top/grouping[name = 'group-option']/quote-left">1,234,567   </div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="int-width" data-ident="4" data-xpath="/top/grouping[name = 'group-option']/int-width">   1,234,567</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="int-left" data-ident="4" data-xpath="/top/grouping[name = 'group-option']/int-left">1,234,567   </div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="int-narrow" data-ident="4" data-xpath="/top/grouping[name = 'group-option']/int-narrow">1,234,567</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="quote-float" data-ident="4" data-xpath="/top/grouping[name = 'group-option']/quote-float">1,234,567.50</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="int-float" data-ident="4" data-xpath="/top/grouping[name = 'group-option']/int-float">1,234,567.50</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="int-float-width" data-ident="4" data-xpath="/top/grouping[name = 'group-option']/int-float-width">   1,234,567.5</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="int-exp" data-ident="4" data-xpath="/top/grouping[name = 'group-option']/int-exp">1.234568e+06</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="int-general" data-ident="4" data-xpath="/top/grouping[name = 'group-option']/int-general">1.23457e+06</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="int-hex" data-ident="4" data-xpath="/top/grouping[name = 'group-option']/int-hex">12d687</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="int-octal" data-ident="4" data-xpath="/top/grouping[name = 'group-option']/int-octal">4553207</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="int-zero" data-ident="4" data-xpath="/top/grouping[name = 'group-option']/int-zero">01234567</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="quote-zero" data-ident="4" data-xpath="/top/grouping[name = 'group-option']/quote-zero">0001234567</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="quote-encoded" data-ident="4" data-xpath="/top/grouping[name = 'group-option']/quote-encoded">1,234,567</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="plain" data-ident="4" data-xpath="/top/grouping[name = 'group-option']/plain">1,234,567</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="plain-float" data-ident="4" data-xpath="/top/grouping[name = 'group-option']/plain-float">1,234,567.5</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="right" data-xpath="/top/stars/right">    1234</div>
+  <div class="text">] (</div>
+  <div class="data" data-tag="right-next" data-xpath="/top/stars/right-next">1</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="left" data-xpath="/top/stars/left">1234    </div>
+  <div class="text">] (</div>
+  <div class="data" data-tag="left-next" data-xpath="/top/stars/left-next">2</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="intmax" data-xpath="/top/stars/intmax">    1234</div>
+  <div class="text">] (</div>
+  <div class="data" data-tag="intmax-next" data-xpath="/top/stars/intmax-next">3</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="string" data-xpath="/top/stars/string">abc     </div>
+  <div class="text">] (</div>
+  <div class="data" data-tag="string-next" data-xpath="/top/stars/string-next">4</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="string-right" data-xpath="/top/stars/string-right">     abc</div>
+  <div class="text">] (</div>
+  <div class="data" data-tag="string-right-next" data-xpath="/top/stars/string-right-next">5</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="at-int" data-xpath="/top/stars/at-int">    1234</div>
+  <div class="text">] (</div>
+  <div class="data" data-tag="at-int-next" data-xpath="/top/stars/at-int-next">6</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="at-intmax" data-xpath="/top/stars/at-intmax">    1234</div>
+  <div class="text">] (</div>
+  <div class="data" data-tag="at-intmax-next" data-xpath="/top/stars/at-intmax-next">7</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="at-string" data-xpath="/top/stars/at-string">     abc</div>
+  <div class="text">] (</div>
+  <div class="data" data-tag="at-string-next" data-xpath="/top/stars/at-string-next">8</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="at-float" data-xpath="/top/stars/at-float">    3.14</div>
+  <div class="text">] (</div>
+  <div class="data" data-tag="at-float-next" data-xpath="/top/stars/at-float-next">9</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="fewer" data-xpath="/top/stars/fewer">    1234</div>
+  <div class="text">] (</div>
+  <div class="data" data-tag="fewer-next" data-xpath="/top/stars/fewer-next">10</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="fewer-string" data-xpath="/top/stars/fewer-string">     abc</div>
+  <div class="text">] (</div>
+  <div class="data" data-tag="fewer-string-next" data-xpath="/top/stars/fewer-string-next">11</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="more" data-xpath="/top/stars/more">1234</div>
+  <div class="text">] (</div>
+  <div class="data" data-tag="more-next" data-xpath="/top/stars/more-next">12</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="digits" data-xpath="/top/precision/digits">0000000042</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="zero-width" data-xpath="/top/precision/zero-width">   00042</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="left" data-xpath="/top/precision/left">000042      </div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="hex" data-xpath="/top/precision/hex">0000ff</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="octal" data-xpath="/top/precision/octal">0010</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="star" data-xpath="/top/precision/star">000042</div>
+  <div class="text">] (</div>
+  <div class="data" data-tag="star-next" data-xpath="/top/precision/star-next">13</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="star-both" data-xpath="/top/precision/star-both">   000042</div>
+  <div class="text">] (</div>
+  <div class="data" data-tag="star-both-next" data-xpath="/top/precision/star-both-next">14</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="at-star" data-xpath="/top/precision/at-star">00042</div>
+  <div class="text">] (</div>
+  <div class="data" data-tag="at-star-next" data-xpath="/top/precision/at-star-next">15</div>
+  <div class="text">)</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="float" data-xpath="/top/precision/float">3.14</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="string" data-xpath="/top/precision/string">abc</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="second" data-xpath="/top/precision/second">5.000042</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="explicit" data-xpath="/top/precision/explicit">42</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="right" data-xpath="/top/humanize/right" data-number="123456789">   118M</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="left" data-xpath="/top/humanize/left" data-number="123456789">118M   </div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="narrow" data-xpath="/top/humanize/narrow" data-number="123456789">118M</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="none" data-xpath="/top/humanize/none" data-number="123456789">118M</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="space" data-xpath="/top/humanize/space" data-number="123456789">   118 M</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="decimal" data-xpath="/top/humanize/decimal" data-number="4600000">4.4M    </div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="metric" data-xpath="/top/humanize/metric" data-number="123456789">    123M</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="small" data-xpath="/top/humanize/small" data-number="12">   12</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="bad name" data-xpath="/top/names/bad name">1</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="bad%name" data-xpath="/top/names/bad%name">2</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="state:LISTEN" data-xpath="/top/names/state:LISTEN">3</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="2fast" data-xpath="/top/names/2fast">4</div>
+</div>
+<div class="line">
+  <div class="data" data-tag=".dot" data-xpath="/top/names/.dot">5</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="good-name.v2_x" data-xpath="/top/names/good-name.v2_x">6</div>
+</div>
+<div class="line">
+  <div class="data">8</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="value" data-ident="6" data-xpath="/top/names/bad:list/value">7</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="one" data-xpath="/top/bytes/one">abc</div>
+</div>
+<div class="line">
+  <div class="label">Label</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="two" data-xpath="/top/bytes/two">42</div>
+  <div class="text"> </div>
+  <div class="note">note</div>
+</div>
+<div class="line">
+  <div class="text">text only</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="utf8" data-xpath="/top/bytes/utf8">café</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="one-bytes" data-xpath="/top/bytes/one-bytes">99</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="two-bytes" data-xpath="/top/bytes/two-bytes">218</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="text-bytes" data-xpath="/top/bytes/text-bytes">62</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="utf8-bytes" data-xpath="/top/bytes/utf8-bytes">103</div>
+</div>
