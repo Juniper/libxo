@@ -11,31 +11,35 @@ added filter: 0
                     000005: type 70 (C_ELEMENT), str 14 [sku], contents 0, next 0, prev 0
 main: status: zero
 main: input '+ top'
-main: filter: rc: 11
+main: work: rc: 11
 main: status: track
 main: input '{ item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: track
 main: input '< item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name gum'
 main: key: 'name'='gum'
+main: work: rc: 21
 main: status: predicate
 main: input '= sku GRO-000-415'
 main: field: 'sku'='GRO-000-415'
+main: work: rc: 30
 main: status: full
 main: input '= sold 1412'
 main: field: 'sold'='1412'
+main: work: rc: 24
 main: status: full
 main: input '> item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: track
 main: input '< item'
-main: filter: rc: 10
+main: work: rc: 10
 main: status: predicate
 main: input '$ name rope'
 main: key: 'name'='rope'
+main: work: rc: 22
 main: status: predicate
 main: input '= sold 85'
 main: field: 'sold'='85'
@@ -43,25 +47,29 @@ main: status: predicate
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 10
+main: work: rc: 10
 main: status: predicate
 main: input '$ name ladder'
 main: key: 'name'='ladder'
+main: work: rc: 24
 main: status: predicate
 main: input '= sku HRD-000-212'
 main: field: 'sku'='HRD-000-212'
+main: work: rc: 30
 main: status: full
 main: input '= sold 0'
 main: field: 'sold'='0'
+main: work: rc: 21
 main: status: full
 main: input '> item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: track
 main: input '< item'
-main: filter: rc: 10
+main: work: rc: 10
 main: status: predicate
 main: input '$ name bubblegum'
 main: key: 'name'='bubblegum'
+main: work: rc: 27
 main: status: predicate
 main: input '= sold 17'
 main: field: 'sold'='17'
@@ -89,64 +97,74 @@ added filter: 0
 main: status: zero
 main: input '+ top'
 xpath_01: duplicate sibling name: 'top'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: track
 main: input '{ item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: track
 main: input '< item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name gum'
 main: key: 'name'='gum'
+main: work: rc: 21
 main: status: full
 main: input '= sku GRO-000-415'
 main: field: 'sku'='GRO-000-415'
+main: work: rc: 30
 main: status: full
 main: input '= sold 1412'
 main: field: 'sold'='1412'
+main: work: rc: 24
 main: status: full
 main: input '> item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: track
 main: input '< item'
-main: filter: rc: 10
+main: work: rc: 10
 main: status: predicate
 main: input '$ name rope'
 main: key: 'name'='rope'
+main: work: rc: 22
 main: status: full
 main: input '= sold 85'
 main: field: 'sold'='85'
+main: work: rc: 22
 main: status: full
 main: input '> item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: track
 main: input '< item'
-main: filter: rc: 10
+main: work: rc: 10
 main: status: predicate
 main: input '$ name ladder'
 main: key: 'name'='ladder'
+main: work: rc: 24
 main: status: full
 main: input '= sku HRD-000-212'
 main: field: 'sku'='HRD-000-212'
+main: work: rc: 30
 main: status: full
 main: input '= sold 0'
 main: field: 'sold'='0'
+main: work: rc: 21
 main: status: full
 main: input '> item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: track
 main: input '< item'
-main: filter: rc: 10
+main: work: rc: 10
 main: status: predicate
 main: input '$ name bubblegum'
 main: key: 'name'='bubblegum'
+main: work: rc: 27
 main: status: full
 main: input '= sold 17'
 main: field: 'sold'='17'
+main: work: rc: 22
 main: status: full
 main: input '> item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: track
 main: input '} item'
 main: status: track
@@ -168,16 +186,17 @@ added filter: 0
                     000005: type 70 (C_ELEMENT), str 14 [color], contents 0, next 0, prev 0
 main: status: zero
 main: input '+ top'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: track
 main: input '{ item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: track
 main: input '< item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name gum'
 main: key: 'name'='gum'
+main: work: rc: 21
 main: status: predicate
 main: input '= sku GRO-000-415'
 main: field: 'sku'='GRO-000-415'
@@ -188,10 +207,11 @@ main: status: predicate
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name rope'
 main: key: 'name'='rope'
+main: work: rc: 22
 main: status: predicate
 main: input '= sold 85'
 main: field: 'sold'='85'
@@ -199,10 +219,11 @@ main: status: predicate
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name ladder'
 main: key: 'name'='ladder'
+main: work: rc: 24
 main: status: predicate
 main: input '= sku HRD-000-212'
 main: field: 'sku'='HRD-000-212'
@@ -213,10 +234,11 @@ main: status: predicate
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name bubblegum'
 main: key: 'name'='bubblegum'
+main: work: rc: 27
 main: status: predicate
 main: input '= sold 17'
 main: field: 'sold'='17'
@@ -245,64 +267,74 @@ added filter: 0
                     000008: type 52 (T_FUNCTION_NAME), str 21 [true], contents 0, next 0, prev 7
 main: status: zero
 main: input '+ top'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: track
 main: input '{ item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: track
 main: input '< item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name gum'
 main: key: 'name'='gum'
+main: work: rc: 21
 main: status: full
 main: input '= sku GRO-000-415'
 main: field: 'sku'='GRO-000-415'
+main: work: rc: 30
 main: status: full
 main: input '= sold 1412'
 main: field: 'sold'='1412'
+main: work: rc: 24
 main: status: full
 main: input '> item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: track
 main: input '< item'
-main: filter: rc: 10
+main: work: rc: 10
 main: status: predicate
 main: input '$ name rope'
 main: key: 'name'='rope'
+main: work: rc: 22
 main: status: full
 main: input '= sold 85'
 main: field: 'sold'='85'
+main: work: rc: 22
 main: status: full
 main: input '> item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: track
 main: input '< item'
-main: filter: rc: 10
+main: work: rc: 10
 main: status: predicate
 main: input '$ name ladder'
 main: key: 'name'='ladder'
+main: work: rc: 24
 main: status: full
 main: input '= sku HRD-000-212'
 main: field: 'sku'='HRD-000-212'
+main: work: rc: 30
 main: status: full
 main: input '= sold 0'
 main: field: 'sold'='0'
+main: work: rc: 21
 main: status: full
 main: input '> item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: track
 main: input '< item'
-main: filter: rc: 10
+main: work: rc: 10
 main: status: predicate
 main: input '$ name bubblegum'
 main: key: 'name'='bubblegum'
+main: work: rc: 27
 main: status: full
 main: input '= sold 17'
 main: field: 'sold'='17'
+main: work: rc: 22
 main: status: full
 main: input '> item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: track
 main: input '} item'
 main: status: track
@@ -326,16 +358,17 @@ added filter: 0
                     000008: type 52 (T_FUNCTION_NAME), str 21 [false], contents 0, next 0, prev 7
 main: status: zero
 main: input '+ top'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: track
 main: input '{ item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: track
 main: input '< item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name gum'
 main: key: 'name'='gum'
+main: work: rc: 21
 main: status: track
 main: input '= sku GRO-000-415'
 main: field: 'sku'='GRO-000-415'
@@ -346,10 +379,11 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name rope'
 main: key: 'name'='rope'
+main: work: rc: 22
 main: status: track
 main: input '= sold 85'
 main: field: 'sold'='85'
@@ -357,10 +391,11 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name ladder'
 main: key: 'name'='ladder'
+main: work: rc: 24
 main: status: track
 main: input '= sku HRD-000-212'
 main: field: 'sku'='HRD-000-212'
@@ -371,10 +406,11 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name bubblegum'
 main: key: 'name'='bubblegum'
+main: work: rc: 27
 main: status: track
 main: input '= sold 17'
 main: field: 'sold'='17'
@@ -403,16 +439,17 @@ added filter: 0
                     000008: type 52 (T_FUNCTION_NAME), str 21 [false], contents 0, next 0, prev 7
 main: status: zero
 main: input '+ top'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: track
 main: input '{ item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: track
 main: input '< item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name gum'
 main: key: 'name'='gum'
+main: work: rc: 21
 main: status: predicate
 main: input '= sku GRO-000-415'
 main: field: 'sku'='GRO-000-415'
@@ -423,10 +460,11 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name rope'
 main: key: 'name'='rope'
+main: work: rc: 22
 main: status: predicate
 main: input '= sold 85'
 main: field: 'sold'='85'
@@ -434,10 +472,11 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name ladder'
 main: key: 'name'='ladder'
+main: work: rc: 24
 main: status: predicate
 main: input '= sku HRD-000-212'
 main: field: 'sku'='HRD-000-212'
@@ -448,10 +487,11 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name bubblegum'
 main: key: 'name'='bubblegum'
+main: work: rc: 27
 main: status: predicate
 main: input '= sold 17'
 main: field: 'sold'='17'
@@ -480,16 +520,17 @@ added filter: 0
                     000010: type 54 (T_QUOTED), str 33 [bblegum], contents 0, next 0, prev 9
 main: status: zero
 main: input '+ top'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: track
 main: input '{ item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: track
 main: input '< item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name gum'
 main: key: 'name'='gum'
+main: work: rc: 21
 main: status: track
 main: input '= sku GRO-000-415'
 main: field: 'sku'='GRO-000-415'
@@ -500,10 +541,11 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name rope'
 main: key: 'name'='rope'
+main: work: rc: 22
 main: status: track
 main: input '= sold 85'
 main: field: 'sold'='85'
@@ -511,10 +553,11 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name ladder'
 main: key: 'name'='ladder'
+main: work: rc: 24
 main: status: track
 main: input '= sku HRD-000-212'
 main: field: 'sku'='HRD-000-212'
@@ -525,16 +568,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name bubblegum'
 main: key: 'name'='bubblegum'
+main: work: rc: 27
 main: status: full
 main: input '= sold 17'
 main: field: 'sold'='17'
+main: work: rc: 22
 main: status: full
 main: input '> item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: track
 main: input '} item'
 main: status: track
@@ -558,16 +603,17 @@ added filter: 0
                     000010: type 54 (T_QUOTED), str 33 [xxxxxxxxxxxxxxxxxxxxxxxxgum], contents 0, next 0, prev 9
 main: status: zero
 main: input '+ top'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: track
 main: input '{ item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: track
 main: input '< item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name gum'
 main: key: 'name'='gum'
+main: work: rc: 21
 main: status: track
 main: input '= sku GRO-000-415'
 main: field: 'sku'='GRO-000-415'
@@ -578,10 +624,11 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name rope'
 main: key: 'name'='rope'
+main: work: rc: 22
 main: status: track
 main: input '= sold 85'
 main: field: 'sold'='85'
@@ -589,10 +636,11 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name ladder'
 main: key: 'name'='ladder'
+main: work: rc: 24
 main: status: track
 main: input '= sku HRD-000-212'
 main: field: 'sku'='HRD-000-212'
@@ -603,10 +651,11 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name bubblegum'
 main: key: 'name'='bubblegum'
+main: work: rc: 27
 main: status: track
 main: input '= sold 17'
 main: field: 'sold'='17'
@@ -635,16 +684,17 @@ added filter: 0
                     000010: type 54 (T_QUOTED), str 33 [rope], contents 0, next 0, prev 9
 main: status: zero
 main: input '+ top'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: track
 main: input '{ item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: track
 main: input '< item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name gum'
 main: key: 'name'='gum'
+main: work: rc: 21
 main: status: track
 main: input '= sku GRO-000-415'
 main: field: 'sku'='GRO-000-415'
@@ -655,22 +705,25 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name rope'
 main: key: 'name'='rope'
+main: work: rc: 22
 main: status: full
 main: input '= sold 85'
 main: field: 'sold'='85'
+main: work: rc: 22
 main: status: full
 main: input '> item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: track
 main: input '< item'
-main: filter: rc: 10
+main: work: rc: 10
 main: status: predicate
 main: input '$ name ladder'
 main: key: 'name'='ladder'
+main: work: rc: 24
 main: status: track
 main: input '= sku HRD-000-212'
 main: field: 'sku'='HRD-000-212'
@@ -681,10 +734,11 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 10
+main: work: rc: 10
 main: status: predicate
 main: input '$ name bubblegum'
 main: key: 'name'='bubblegum'
+main: work: rc: 27
 main: status: track
 main: input '= sold 17'
 main: field: 'sold'='17'
@@ -1013,16 +1067,17 @@ added filter: 0
                         000308: type 54 (T_QUOTED), str 851 [ladder], contents 0, next 0, prev 307
 main: status: zero
 main: input '+ top'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: track
 main: input '{ item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: track
 main: input '< item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name gum'
 main: key: 'name'='gum'
+main: work: rc: 21
 main: status: track
 main: input '= sku GRO-000-415'
 main: field: 'sku'='GRO-000-415'
@@ -1033,10 +1088,11 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name rope'
 main: key: 'name'='rope'
+main: work: rc: 22
 main: status: track
 main: input '= sold 85'
 main: field: 'sold'='85'
@@ -1044,25 +1100,29 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name ladder'
 main: key: 'name'='ladder'
+main: work: rc: 24
 main: status: full
 main: input '= sku HRD-000-212'
 main: field: 'sku'='HRD-000-212'
+main: work: rc: 30
 main: status: full
 main: input '= sold 0'
 main: field: 'sold'='0'
+main: work: rc: 21
 main: status: full
 main: input '> item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: track
 main: input '< item'
-main: filter: rc: 10
+main: work: rc: 10
 main: status: predicate
 main: input '$ name bubblegum'
 main: key: 'name'='bubblegum'
+main: work: rc: 27
 main: status: track
 main: input '= sold 17'
 main: field: 'sold'='17'
@@ -1085,22 +1145,27 @@ added filter: 0
         000001: type 70 (C_ELEMENT), str 1 [escape], contents 0, next 0, prev 0
 main: status: zero
 main: input '+ escape'
-main: filter: rc: 16
+main: work: rc: 16
 main: status: full
 main: input '= tab left	right'
 main: field: 'tab'='left	right'
+main: work: rc: 24
 main: status: full
 main: input '= quotes say "hi" and 'bye''
 main: field: 'quotes'='say "hi" and 'bye''
+main: work: rc: 38
 main: status: full
 main: input '= backslash c:\dir\file'
 main: field: 'backslash'='c:\dir\file'
+main: work: rc: 34
 main: status: full
 main: input '= accents café naïve 日本'
 main: field: 'accents'='café naïve 日本'
+main: work: rc: 38
 main: status: full
 main: input '= control sohanddel'
 main: field: 'control'='sohanddel'
+main: work: rc: 35
 main: status: full
 main: input '- escape'
 main: status: track
