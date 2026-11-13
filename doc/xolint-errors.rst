@@ -1,15 +1,32 @@
+'Format is not a literal; it cannot be checked'
++++++++++++++++++++++++++++++++++++++++++++++++
+
+The message "Format is not a literal; it cannot be checked" can be
+caused by code like::
+
+    xo_emit(fmt, value);
+
+This code should be replaced with code like::
+
+    xo_emit("{a:/%s}", name, value);
+
+A format built at run time (with snprintf, say) can't be
+checked by xolint or the compiler, its field names can't be
+put in a lexicon, and a "{" in the data is a format-string
+injection.  libxo has features (the "a" modifier, "*" widths,
+"%@*@") so formats never need to be built; choose between
+literal formats instead.
+
+
 'A percent sign appearing in text is a literal'
 +++++++++++++++++++++++++++++++++++++++++++++++
 
-The message "A percent sign appearing in text is a literal" can be caused by code like:
-
-::
+The message "A percent sign appearing in text is a literal" can be
+caused by code like::
 
     xo_emit("cost: %d", cost);
 
-This code should be replaced with code like:
-
-::
+This code should be replaced with code like::
 
     xo_emit("{L:cost}: {:cost/%d}", cost);
 
@@ -17,18 +34,68 @@ This can be a bit surprising and could be a field that was not
 properly converted to a libxo-style format string.
 
 
+'A percent sign appearing in text is a literal, so %% prints two'
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+The message "A percent sign appearing in text is a literal, so %%
+prints two" can be caused by code like::
+
+    xo_emit("{:used/%d}%%\n", used);
+
+This code should be replaced with code like::
+
+    xo_emit("{:used/%d}%\n", used);
+
+Outside a field, text is copied as is; "%" needs no escaping,
+and a "%%" left over from a printf format prints two percent
+signs.
+
+
+'The result of xo_parse_args is ignored'
+++++++++++++++++++++++++++++++++++++++++
+
+The message "The result of xo_parse_args is ignored" can be caused by
+code like::
+
+    xo_parse_args(argc, argv);
+
+This code should be replaced with code like::
+
+    argc = xo_parse_args(argc, argv);
+    if (argc < 0)
+        exit(EXIT_FAILURE);
+
+xo_parse_args returns the new argc, with the libxo options
+removed, or -1 for an invalid option.  Ignoring it leaves the
+"--libxo" options in argv, and carries on after an error.
+
+
+'The result of xo_parse_args is not checked for failure'
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+The message "The result of xo_parse_args is not checked for failure" can be caused by code like::
+
+    argc = xo_parse_args(argc, argv);
+    xo_set_version("1.0");
+
+This code should be replaced with code like::
+
+    argc = xo_parse_args(argc, argv);
+    if (argc < 0)
+        exit(EXIT_FAILURE);
+
+xo_parse_args returns -1 for an invalid "--libxo" option; the
+program must stop rather than run with a negative argc.
+
+
 'Unknown long name for role/modifier'
 +++++++++++++++++++++++++++++++++++++
 
-The message "Unknown long name for role/modifier" can be caused by code like:
-
-::
+The message "Unknown long name for role/modifier" can be caused by code like::
 
     xo_emit("{,humanization:value}", value);
 
-This code should be replaced with code like:
-
-::
+This code should be replaced with code like::
 
     xo_emit("{,humanize:value}", value);
 
@@ -40,15 +107,11 @@ are only valid for fields with the {h:} modifier.
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 The message "Last character before field definition is a field type" can be caused by code like:
-A common typo:
-
-::
+A common typo::
 
     xo_emit("{T:Min} T{:Max}");
 
-This code should be replaced with code like:
-
-::
+This code should be replaced with code like::
 
     xo_emit("{T:Min} {T:Max}");
 
@@ -58,15 +121,12 @@ Twiddling the "{" and the field role is a common typo.
 'Encoding format uses different number of arguments'
 ++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-The message "Encoding format uses different number of arguments" can be caused by code like:
-
-::
+The message "Encoding format uses different number of arguments" can
+be caused by code like::
 
     xo_emit("{:name/%6.6s %04d/%s}", name, number);
 
-This code should be replaced with code like:
-
-::
+This code should be replaced with code like::
 
     xo_emit("{:name/%6.6s %04d/%s-%d}", name, number);
 
@@ -76,43 +136,51 @@ Both format should consume the same number of arguments off the stack
 'Only one field role can be used'
 +++++++++++++++++++++++++++++++++
 
-The message "Only one field role can be used" can be caused by code like:
-
-::
+The message "Only one field role can be used" can be caused by code like::
 
     xo_emit("{LT:Max}");
 
-This code should be replaced with code like:
-
-::
+This code should be replaced with code like::
 
     xo_emit("{T:Max}");
+
+'A percent sign in literal content is a literal, so %% prints two'
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+The message "A percent sign in literal content is a literal, so %%
+prints two" can be caused by code like::
+
+    xo_emit("{:used/%d}{U:%%}\n", used);
+
+This code should be replaced with code like::
+
+    xo_emit("{:used/%d}{U:%}\n", used);
+
+The content of a decoration, label, note, title or units field
+is copied as is, so "{U:%%}" prints "%%" (and sets units="%%").
+
 
 'Potential missing slash after C, D, N, L, or T with format'
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-The message "Potential missing slash after C, D, N, L, or T with format" can be caused by code like:
-
-::
+The message "Potential missing slash after C, D, N, L, or T with format" can be caused by code like::
 
     xo_emit("{T:%6.6s}\n", "Max");
 
-This code should be replaced with code like:
-
-::
+This code should be replaced with code like::
 
     xo_emit("{T:/%6.6s}\n", "Max");
 
 The "%6.6s" will be a literal, not a field format.  While
-it's possibly valid, it's likely a missing "/".
+it's possibly valid, it's likely a missing "/".  A percent
+sign that does not start a conversion ("{D:%}", "{L:100%}")
+is not reported.
 
 
 'An encoding format cannot be given (roles: DNLT)'
 ++++++++++++++++++++++++++++++++++++++++++++++++++
 
-The message "An encoding format cannot be given (roles: DNLT)" can be caused by code like:
-
-::
+The message "An encoding format cannot be given (roles: DNLT)" can be caused by code like::
 
     xo_emit("{T:Max//%s}", "Max");
 
@@ -124,9 +192,8 @@ would make no sense.
 'Format cannot be given when content is present (roles: CDLN)'
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-The message "Format cannot be given when content is present (roles: CDLN)" can be caused by code like:
-
-::
+The message "Format cannot be given when content is present (roles:
+CDLN)" can be caused by code like::
 
     xo_emit("{N:Max/%6.6s}", "Max");
 
@@ -142,15 +209,12 @@ handling 'C' strings, and one for libxo.
 'Field has color without fg- or bg- (role: C)'
 ++++++++++++++++++++++++++++++++++++++++++++++
 
-The message "Field has color without fg- or bg- (role: C)" can be caused by code like:
-
-::
+The message "Field has color without fg- or bg- (role: C)" can be
+caused by code like::
 
     xo_emit("{C:green}{:foo}{C:}", x);
 
-This code should be replaced with code like:
-
-::
+This code should be replaced with code like::
 
     xo_emit("{C:fg-green}{:foo}{C:}", x);
 
@@ -160,15 +224,12 @@ Colors must be prefixed by either "fg-" or "bg-".
 'Field has invalid color or effect (role: C)'
 +++++++++++++++++++++++++++++++++++++++++++++
 
-The message "Field has invalid color or effect (role: C)" can be caused by code like:
-
-::
+The message "Field has invalid color or effect (role: C)" can be
+caused by code like::
 
     xo_emit("{C:fg-purple,bold}{:foo}{C:gween}", x);
 
-This code should be replaced with code like:
-
-::
+This code should be replaced with code like::
 
     xo_emit("{C:fg-red,bold}{:foo}{C:fg-green}", x);
 
@@ -184,15 +245,12 @@ be separated by commas.
 'Field has humanize modifier but no format string'
 ++++++++++++++++++++++++++++++++++++++++++++++++++
 
-The message "Field has humanize modifier but no format string" can be caused by code like:
-
-::
+The message "Field has humanize modifier but no format string" can be
+caused by code like::
 
     xo_emit("{h:value}", value);
 
-This code should be replaced with code like:
-
-::
+This code should be replaced with code like::
 
     xo_emit("{h:value/%d}", value);
 
@@ -203,15 +261,12 @@ likely to use the default format ("%s").
 'Field has hn-* modifier but not 'h' modifier'
 ++++++++++++++++++++++++++++++++++++++++++++++
 
-The message "Field has hn-* modifier but not 'h' modifier" can be caused by code like:
-
-::
+The message "Field has hn-* modifier but not 'h' modifier" can be
+caused by code like::
 
     xo_emit("{,hn-1000:value}", value);
 
-This code should be replaced with code like:
-
-::
+This code should be replaced with code like::
 
     xo_emit("{h,hn-1000:value}", value);
 
@@ -222,15 +277,12 @@ are only valid for fields with the {h:} modifier.
 'The 'full-boolean' modifier is only valid for 'B' fields'
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-The message "The 'full-boolean' modifier is only valid for 'B' fields" can be caused by code like:
-
-::
+The message "The 'full-boolean' modifier is only valid for 'B' fields"
+can be caused by code like::
 
     xo_emit("{V,full-boolean:enabled}", "yes");
 
-This code should be replaced with code like:
-
-::
+This code should be replaced with code like::
 
     xo_emit("{B,full-boolean:enabled}", "yes");
 
@@ -241,15 +293,12 @@ is encoded, so it makes no sense for other roles.
 'Value field must have a name (as content)")'
 +++++++++++++++++++++++++++++++++++++++++++++
 
-The message "Value field must have a name (as content)")" can be caused by code like:
-
-::
+The message "Value field must have a name (as content)")" can be
+caused by code like::
 
     xo_emit("{:/%s}", "value");
 
-This code should be replaced with code like:
-
-::
+This code should be replaced with code like::
 
     xo_emit("{:tag-name/%s}", "value");
 
@@ -261,15 +310,12 @@ field descriptor.
 'Use hyphens, not underscores, for value field name'
 ++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-The message "Use hyphens, not underscores, for value field name" can be caused by code like:
-
-::
+The message "Use hyphens, not underscores, for value field name" can
+be caused by code like::
 
     xo_emit("{:no_under_scores}", "bad");
 
-This code should be replaced with code like:
-
-::
+This code should be replaced with code like::
 
     xo_emit("{:no-under-scores}", "bad");
 
@@ -281,15 +327,12 @@ But the raw field name should use hyphens.
 'Value field name cannot start with digit'
 ++++++++++++++++++++++++++++++++++++++++++
 
-The message "Value field name cannot start with digit" can be caused by code like:
-
-::
+The message "Value field name cannot start with digit" can be caused
+by code like::
 
     xo_emit("{:10-gig/}");
 
-This code should be replaced with code like:
-
-::
+This code should be replaced with code like::
 
     xo_emit("{:ten-gig/}");
 
@@ -299,15 +342,12 @@ XML element names cannot start with a digit.
 'Value field name should be lower case'
 +++++++++++++++++++++++++++++++++++++++
 
-The message "Value field name should be lower case" can be caused by code like:
-
-::
+The message "Value field name should be lower case" can be caused by
+code like::
 
     xo_emit("{:WHY-ARE-YOU-SHOUTING}", "NO REASON");
 
-This code should be replaced with code like:
-
-::
+This code should be replaced with code like::
 
     xo_emit("{:why-are-you-shouting}", "no reason");
 
@@ -319,15 +359,12 @@ to avoid scenarios where the differences between "XPath" and
 'Value field name should be longer than two characters'
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-The message "Value field name should be longer than two characters" can be caused by code like:
-
-::
+The message "Value field name should be longer than two characters"
+can be caused by code like::
 
     xo_emit("{:x}", "mumble");
 
-This code should be replaced with code like:
-
-::
+This code should be replaced with code like::
 
     xo_emit("{:something-meaningful}", "mumble");
 
@@ -342,15 +379,12 @@ it ("{T:/20s}").
 'Value field name contains invalid character'
 +++++++++++++++++++++++++++++++++++++++++++++
 
-The message "Value field name contains invalid character" can be caused by code like:
-
-::
+The message "Value field name contains invalid character" can be
+caused by code like::
 
     xo_emit("{:cost-in-$$/%u}", 15);
 
-This code should be replaced with code like:
-
-::
+This code should be replaced with code like::
 
     xo_emit("{:cost-in-dollars/%u}", 15);
 
@@ -362,36 +396,33 @@ characters, digits, and hyphens.
 'decoration field contains invalid character'
 +++++++++++++++++++++++++++++++++++++++++++++
 
-The message "decoration field contains invalid character" can be caused by code like:
-
-::
+The message "decoration field contains invalid character" can be
+caused by code like::
 
     xo_emit("{D:not good}");
 
-This code should be replaced with code like:
-
-::
+This code should be replaced with code like::
 
     xo_emit("{D:((}{:good}{D:))}", "yes");
 
 This is minor, but fields should use proper roles.  Decoration
 fields are meant to hold punctuation and other characters used
 to decorate the content, typically to make it more readable
-to human readers.
+to human readers, and to let CSS style them apart from the
+text.  Any punctuation is fine ("{D:,}", "{D:\\/}", "{D:->}"),
+as is a format ("{D:/%c}"); letters and digits belong in
+another role.
 
 
 'Anchor content should be decimal width'
 ++++++++++++++++++++++++++++++++++++++++
 
-The message "Anchor content should be decimal width" can be caused by code like:
-
-::
+The message "Anchor content should be decimal width" can be caused by
+code like::
 
     xo_emit("{[:mumble}");
 
-This code should be replaced with code like:
-
-::
+This code should be replaced with code like::
 
     xo_emit("{[:32}");
 
@@ -405,15 +436,12 @@ either the start or stop anchor field descriptor.
 'Anchor format should be "%d"'
 ++++++++++++++++++++++++++++++
 
-The message "Anchor format should be "%d"" can be caused by code like:
-
-::
+The message "Anchor format should be "%d"" can be caused by code
+like::
 
     xo_emit("{[:/%s}");
 
-This code should be replaced with code like:
-
-::
+This code should be replaced with code like::
 
     xo_emit("{[:/%d}");
 
@@ -425,15 +453,12 @@ Anything else is an error.
 'Anchor cannot have both format and encoding format")'
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-The message "Anchor cannot have both format and encoding format")" can be caused by code like:
-
-::
+The message "Anchor cannot have both format and encoding format")" can
+be caused by code like::
 
     xo_emit("{[:32/%d}");
 
-This code should be replaced with code like:
-
-::
+This code should be replaced with code like::
 
     xo_emit("{[:32}");
 
@@ -444,15 +469,12 @@ but cannot have both.
 'Humanize is ignored for 'B' fields'
 ++++++++++++++++++++++++++++++++++++
 
-The message "Humanize is ignored for 'B' fields" can be caused by code like:
-
-::
+The message "Humanize is ignored for 'B' fields" can be caused by code
+like::
 
     xo_emit("{Bh:enabled/%d}", enabled);
 
-This code should be replaced with code like:
-
-::
+This code should be replaced with code like::
 
     xo_emit("{B:enabled/%d}", enabled);
 
@@ -463,15 +485,12 @@ number to humanize.
 'Int-group is ignored for 'B' fields'
 +++++++++++++++++++++++++++++++++++++
 
-The message "Int-group is ignored for 'B' fields" can be caused by code like:
-
-::
+The message "Int-group is ignored for 'B' fields" can be caused by
+code like::
 
     xo_emit("{Bi:enabled/%d}", enabled);
 
-This code should be replaced with code like:
-
-::
+This code should be replaced with code like::
 
     xo_emit("{B:enabled/%d}", enabled);
 
@@ -482,15 +501,12 @@ number to group.
 'Boolean encoding format must take the same arguments'
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-The message "Boolean encoding format must take the same arguments" can be caused by code like:
-
-::
+The message "Boolean encoding format must take the same arguments" can
+be caused by code like::
 
     xo_emit("{B,full-boolean:enabled/yes+no%d/1+0%p}", enabled);
 
-This code should be replaced with code like:
-
-::
+This code should be replaced with code like::
 
     xo_emit("{B,full-boolean:enabled/yes+no%d/1+0%d}", enabled);
 
@@ -503,15 +519,12 @@ argument type.
 'The 'full-boolean' modifier without a boolean pair gives quoted true/false'
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-The message "The 'full-boolean' modifier without a boolean pair gives quoted true/false" can be caused by code like:
-
-::
+The message "The 'full-boolean' modifier without a boolean pair gives
+quoted true/false" can be caused by code like::
 
     xo_emit("{B,full-boolean:enabled/%d}", enabled);
 
-This code should be replaced with code like:
-
-::
+This code should be replaced with code like::
 
     xo_emit("{B,full-boolean:enabled/yes+no%d}", enabled);
 
@@ -523,15 +536,12 @@ words are "true" and "false", encoded as strings.
 'Boolean pair must have exactly one '+''
 ++++++++++++++++++++++++++++++++++++++++
 
-The message "Boolean pair must have exactly one '+'" can be caused by code like:
-
-::
+The message "Boolean pair must have exactly one '+'" can be caused by
+code like::
 
     xo_emit("{B:enabled/yes%d}", enabled);
 
-This code should be replaced with code like:
-
-::
+This code should be replaced with code like::
 
     xo_emit("{B:enabled/yes+no%d}", enabled);
 
@@ -544,15 +554,12 @@ a broken pair and displays "true" or "false" instead.
 'Boolean pair has an empty word'
 ++++++++++++++++++++++++++++++++
 
-The message "Boolean pair has an empty word" can be caused by code like:
-
-::
+The message "Boolean pair has an empty word" can be caused by code
+like::
 
     xo_emit("{B:enabled/+off%d}", enabled);
 
-This code should be replaced with code like:
-
-::
+This code should be replaced with code like::
 
     xo_emit("{B:enabled/on+off%d}", enabled);
 
@@ -563,15 +570,12 @@ a broken pair and displays "true" or "false" instead.
 'Boolean format has text after the conversion spec'
 +++++++++++++++++++++++++++++++++++++++++++++++++++
 
-The message "Boolean format has text after the conversion spec" can be caused by code like:
-
-::
+The message "Boolean format has text after the conversion spec" can be
+caused by code like::
 
     xo_emit("{B:enabled/%d units}", enabled);
 
-This code should be replaced with code like:
-
-::
+This code should be replaced with code like::
 
     xo_emit("{B:enabled/%d}{U: units}", enabled);
 
@@ -582,15 +586,12 @@ single conversion spec, with nothing after it.
 'Boolean format has more than one conversion spec'
 ++++++++++++++++++++++++++++++++++++++++++++++++++
 
-The message "Boolean format has more than one conversion spec" can be caused by code like:
-
-::
+The message "Boolean format has more than one conversion spec" can be
+caused by code like::
 
     xo_emit("{B:enabled/%d%d}", enabled, other);
 
-This code should be replaced with code like:
-
-::
+This code should be replaced with code like::
 
     xo_emit("{B:enabled/%d}{B:other/%d}", enabled, other);
 
@@ -601,15 +602,12 @@ a single conversion spec.
 'Boolean encoding format needs both a boolean pair and a conversion spec'
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-The message "Boolean encoding format needs both a boolean pair and a conversion spec" can be caused by code like:
-
-::
+The message "Boolean encoding format needs both a boolean pair and a
+conversion spec" can be caused by code like::
 
     xo_emit("{B,full-boolean:enabled/yes+no%d/%d}", enabled);
 
-This code should be replaced with code like:
-
-::
+This code should be replaced with code like::
 
     xo_emit("{B,full-boolean:enabled/yes+no%d/1+0%d}", enabled);
 
@@ -620,15 +618,12 @@ must say how the value is taken.
 'Max width only valid for strings'
 ++++++++++++++++++++++++++++++++++
 
-The message "Max width only valid for strings" can be caused by code like:
-
-::
+The message "Max width only valid for strings" can be caused by code
+like::
 
     xo_emit("{:tag/%2.4.6d}", 55);
 
-This code should be replaced with code like:
-
-::
+This code should be replaced with code like::
 
     xo_emit("{:tag/%2.6d}", 55);
 
