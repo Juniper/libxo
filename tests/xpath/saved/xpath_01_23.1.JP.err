@@ -10,7 +10,7 @@ main: status: zero
 main: input 'i xpath_01_23.inc'
 main: include: '../../../tests/xpath/xpath_01_23.inc'
 main: input '+ data'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '= thing one'
 main: field: 'thing'='one'
@@ -29,7 +29,7 @@ main: input '= block 56'
 main: field: 'block'='56'
 main: status: track
 main: input '+ top-level'
-main: filter: rc: 21
+main: work: rc: 21
 main: status: track
 main: input '= type ethernet'
 main: field: 'type'='ethernet'
@@ -124,25 +124,27 @@ main: input '@ test value'
 main: attr: 'test'='value'
 main: status: track
 main: input '+ data'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '@ test2 value2'
 main: attr: 'test2'='value2'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku GRO-000-415'
 main: key: 'sku'='GRO-000-415'
+main: work: rc: 32
 main: status: track
 main: input '$ name gum'
 main: key: 'name'='gum'
+main: work: rc: 27
 main: status: track
 main: input '= sold 1412'
 main: field: 'sold'='1412'
@@ -156,16 +158,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku HRD-000-212'
 main: key: 'sku'='HRD-000-212'
+main: work: rc: 32
 main: status: track
 main: input '$ name rope'
 main: key: 'name'='rope'
+main: work: rc: 28
 main: status: track
 main: input '= sold 85'
 main: field: 'sold'='85'
@@ -179,16 +183,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku HRD-000-517'
 main: key: 'sku'='HRD-000-517'
+main: work: rc: 32
 main: status: track
 main: input '$ name ladder'
 main: key: 'name'='ladder'
+main: work: rc: 30
 main: status: track
 main: input '= sold 0'
 main: field: 'sold'='0'
@@ -202,16 +208,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku HRD-000-632'
 main: key: 'sku'='HRD-000-632'
+main: work: rc: 32
 main: status: track
 main: input '$ name bolt'
 main: key: 'name'='bolt'
+main: work: rc: 28
 main: status: track
 main: input '= sold 4123'
 main: field: 'sold'='4123'
@@ -225,16 +233,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku GRO-000-2331'
 main: key: 'sku'='GRO-000-2331'
+main: work: rc: 33
 main: status: track
 main: input '$ name water'
 main: key: 'name'='water'
+main: work: rc: 29
 main: status: track
 main: input '= sold 17'
 main: field: 'sold'='17'
@@ -252,19 +262,21 @@ main: status: track
 main: input '- data'
 main: status: track
 main: input '+ data2'
-main: filter: rc: 19
+main: work: rc: 19
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '$ sku GRO-000-415'
 main: key: 'sku'='GRO-000-415'
+main: work: rc: 32
 main: status: track
 main: input '$ name gum'
 main: key: 'name'='gum'
+main: work: rc: 27
 main: status: track
 main: input '= sold 1412.0'
 main: field: 'sold'='1412.0'
@@ -278,13 +290,15 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '$ sku HRD-000-212'
 main: key: 'sku'='HRD-000-212'
+main: work: rc: 32
 main: status: track
 main: input '$ name rope'
 main: key: 'name'='rope'
+main: work: rc: 28
 main: status: track
 main: input '= sold 85.0'
 main: field: 'sold'='85.0'
@@ -298,13 +312,15 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '$ sku HRD-000-517'
 main: key: 'sku'='HRD-000-517'
+main: work: rc: 32
 main: status: track
 main: input '$ name ladder'
 main: key: 'name'='ladder'
+main: work: rc: 30
 main: status: track
 main: input '= sold 0'
 main: field: 'sold'='0'
@@ -318,13 +334,15 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '$ sku HRD-000-632'
 main: key: 'sku'='HRD-000-632'
+main: work: rc: 32
 main: status: track
 main: input '$ name bolt'
 main: key: 'name'='bolt'
+main: work: rc: 28
 main: status: track
 main: input '= sold 4123.0'
 main: field: 'sold'='4123.0'
@@ -338,13 +356,15 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '$ sku GRO-000-2331'
 main: key: 'sku'='GRO-000-2331'
+main: work: rc: 33
 main: status: track
 main: input '$ name water'
 main: key: 'name'='water'
+main: work: rc: 29
 main: status: track
 main: input '= sold 17.0'
 main: field: 'sold'='17.0'
@@ -362,19 +382,21 @@ main: status: track
 main: input '- data2'
 main: status: track
 main: input '+ data3'
-main: filter: rc: 19
+main: work: rc: 19
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '$ sku GRO-000-533'
 main: key: 'sku'='GRO-000-533'
+main: work: rc: 32
 main: status: track
 main: input '$ name fish'
 main: key: 'name'='fish'
+main: work: rc: 28
 main: status: track
 main: input '= sold 1321.0'
 main: field: 'sold'='1321.0'
@@ -392,10 +414,10 @@ main: status: track
 main: input '- data3'
 main: status: track
 main: input '+ data4'
-main: filter: rc: 17
+main: work: rc: 17
 main: status: full
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: full
 main: input '@ test4 value4'
 main: attr: 'test4'='value4'
@@ -403,30 +425,35 @@ main: status: full
 main: input '= item gum'
 main: field: 'item'='gum'
 xpath_01: duplicate sibling name: 'item'
+main: work: rc: 3
 main: status: full
 main: input '@ test4 value4'
 main: attr: 'test4'='value4'
 main: status: full
 main: input '= item rope'
 main: field: 'item'='rope'
+main: work: rc: 24
 main: status: full
 main: input '@ test4 value4'
 main: attr: 'test4'='value4'
 main: status: full
 main: input '= item ladder'
 main: field: 'item'='ladder'
+main: work: rc: 26
 main: status: full
 main: input '@ test4 value4'
 main: attr: 'test4'='value4'
 main: status: full
 main: input '= item bolt'
 main: field: 'item'='bolt'
+main: work: rc: 24
 main: status: full
 main: input '@ test4 value4'
 main: attr: 'test4'='value4'
 main: status: full
 main: input '= item water'
 main: field: 'item'='water'
+main: work: rc: 25
 main: status: full
 main: input '} item'
 xpath_01: xo_close_list can't find match for 'item'
@@ -438,25 +465,27 @@ main: attr: 'test'='value'
 main: status: track
 main: input '+ data'
 xpath_01: duplicate sibling name: 'data'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '@ test2 value2'
 main: attr: 'test2'='value2'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku GRO-000-415'
 main: key: 'sku'='GRO-000-415'
+main: work: rc: 32
 main: status: track
 main: input '$ name gum'
 main: key: 'name'='gum'
+main: work: rc: 27
 main: status: track
 main: input '= sold 1412'
 main: field: 'sold'='1412'
@@ -470,16 +499,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku HRD-000-212'
 main: key: 'sku'='HRD-000-212'
+main: work: rc: 32
 main: status: track
 main: input '$ name rope'
 main: key: 'name'='rope'
+main: work: rc: 28
 main: status: track
 main: input '= sold 85'
 main: field: 'sold'='85'
@@ -496,16 +527,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku HRD-000-517'
 main: key: 'sku'='HRD-000-517'
+main: work: rc: 32
 main: status: track
 main: input '$ name ladder'
 main: key: 'name'='ladder'
+main: work: rc: 30
 main: status: track
 main: input '= sold 0'
 main: field: 'sold'='0'
@@ -522,16 +555,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku HRD-000-632'
 main: key: 'sku'='HRD-000-632'
+main: work: rc: 32
 main: status: track
 main: input '$ name bolt'
 main: key: 'name'='bolt'
+main: work: rc: 28
 main: status: track
 main: input '= sold 4123'
 main: field: 'sold'='4123'
@@ -545,16 +580,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku GRO-000-2331'
 main: key: 'sku'='GRO-000-2331'
+main: work: rc: 33
 main: status: track
 main: input '$ name water'
 main: key: 'name'='water'
+main: work: rc: 29
 main: status: track
 main: input '= sold 17'
 main: field: 'sold'='17'
@@ -674,7 +711,7 @@ main: input 'i xpath_01_23.inc'
 main: include: '../../../tests/xpath/xpath_01_23.inc'
 main: input '+ data'
 xpath_01: duplicate sibling name: 'data'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: track
 main: input '= thing one'
 main: field: 'thing'='one'
@@ -693,7 +730,7 @@ main: input '= block 56'
 main: field: 'block'='56'
 main: status: track
 main: input '+ top-level'
-main: filter: rc: 21
+main: work: rc: 21
 main: status: track
 main: input '= type ethernet'
 main: field: 'type'='ethernet'
@@ -788,25 +825,27 @@ main: input '@ test value'
 main: attr: 'test'='value'
 main: status: track
 main: input '+ data'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '@ test2 value2'
 main: attr: 'test2'='value2'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku GRO-000-415'
 main: key: 'sku'='GRO-000-415'
+main: work: rc: 32
 main: status: track
 main: input '$ name gum'
 main: key: 'name'='gum'
+main: work: rc: 27
 main: status: track
 main: input '= sold 1412'
 main: field: 'sold'='1412'
@@ -820,16 +859,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku HRD-000-212'
 main: key: 'sku'='HRD-000-212'
+main: work: rc: 32
 main: status: track
 main: input '$ name rope'
 main: key: 'name'='rope'
+main: work: rc: 28
 main: status: track
 main: input '= sold 85'
 main: field: 'sold'='85'
@@ -843,16 +884,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku HRD-000-517'
 main: key: 'sku'='HRD-000-517'
+main: work: rc: 32
 main: status: track
 main: input '$ name ladder'
 main: key: 'name'='ladder'
+main: work: rc: 30
 main: status: track
 main: input '= sold 0'
 main: field: 'sold'='0'
@@ -866,16 +909,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku HRD-000-632'
 main: key: 'sku'='HRD-000-632'
+main: work: rc: 32
 main: status: track
 main: input '$ name bolt'
 main: key: 'name'='bolt'
+main: work: rc: 28
 main: status: track
 main: input '= sold 4123'
 main: field: 'sold'='4123'
@@ -889,16 +934,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku GRO-000-2331'
 main: key: 'sku'='GRO-000-2331'
+main: work: rc: 33
 main: status: track
 main: input '$ name water'
 main: key: 'name'='water'
+main: work: rc: 29
 main: status: track
 main: input '= sold 17'
 main: field: 'sold'='17'
@@ -916,19 +963,21 @@ main: status: track
 main: input '- data'
 main: status: track
 main: input '+ data2'
-main: filter: rc: 19
+main: work: rc: 19
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '$ sku GRO-000-415'
 main: key: 'sku'='GRO-000-415'
+main: work: rc: 32
 main: status: track
 main: input '$ name gum'
 main: key: 'name'='gum'
+main: work: rc: 27
 main: status: track
 main: input '= sold 1412.0'
 main: field: 'sold'='1412.0'
@@ -942,13 +991,15 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '$ sku HRD-000-212'
 main: key: 'sku'='HRD-000-212'
+main: work: rc: 32
 main: status: track
 main: input '$ name rope'
 main: key: 'name'='rope'
+main: work: rc: 28
 main: status: track
 main: input '= sold 85.0'
 main: field: 'sold'='85.0'
@@ -962,13 +1013,15 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '$ sku HRD-000-517'
 main: key: 'sku'='HRD-000-517'
+main: work: rc: 32
 main: status: track
 main: input '$ name ladder'
 main: key: 'name'='ladder'
+main: work: rc: 30
 main: status: track
 main: input '= sold 0'
 main: field: 'sold'='0'
@@ -982,13 +1035,15 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '$ sku HRD-000-632'
 main: key: 'sku'='HRD-000-632'
+main: work: rc: 32
 main: status: track
 main: input '$ name bolt'
 main: key: 'name'='bolt'
+main: work: rc: 28
 main: status: track
 main: input '= sold 4123.0'
 main: field: 'sold'='4123.0'
@@ -1002,13 +1057,15 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '$ sku GRO-000-2331'
 main: key: 'sku'='GRO-000-2331'
+main: work: rc: 33
 main: status: track
 main: input '$ name water'
 main: key: 'name'='water'
+main: work: rc: 29
 main: status: track
 main: input '= sold 17.0'
 main: field: 'sold'='17.0'
@@ -1026,41 +1083,46 @@ main: status: track
 main: input '- data2'
 main: status: track
 main: input '+ data3'
-main: filter: rc: 17
+main: work: rc: 17
 main: status: full
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: full
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: full
 main: input '$ sku GRO-000-533'
 main: key: 'sku'='GRO-000-533'
+main: work: rc: 32
 main: status: full
 main: input '$ name fish'
 main: key: 'name'='fish'
+main: work: rc: 28
 main: status: full
 main: input '= sold 1321.0'
 main: field: 'sold'='1321.0'
+main: work: rc: 30
 main: status: full
 main: input '= in-stock 45'
 main: field: 'in-stock'='45'
+main: work: rc: 30
 main: status: full
 main: input '= on-order 1'
 main: field: 'on-order'='1'
+main: work: rc: 29
 main: status: full
 main: input '> item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: full
 main: input '} item'
 main: status: full
 main: input '- data3'
 main: status: track
 main: input '+ data4'
-main: filter: rc: 19
+main: work: rc: 19
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '@ test4 value4'
 main: attr: 'test4'='value4'
@@ -1103,25 +1165,27 @@ main: attr: 'test'='value'
 main: status: track
 main: input '+ data'
 xpath_01: duplicate sibling name: 'data'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '@ test2 value2'
 main: attr: 'test2'='value2'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku GRO-000-415'
 main: key: 'sku'='GRO-000-415'
+main: work: rc: 32
 main: status: track
 main: input '$ name gum'
 main: key: 'name'='gum'
+main: work: rc: 27
 main: status: track
 main: input '= sold 1412'
 main: field: 'sold'='1412'
@@ -1135,16 +1199,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku HRD-000-212'
 main: key: 'sku'='HRD-000-212'
+main: work: rc: 32
 main: status: track
 main: input '$ name rope'
 main: key: 'name'='rope'
+main: work: rc: 28
 main: status: track
 main: input '= sold 85'
 main: field: 'sold'='85'
@@ -1161,16 +1227,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku HRD-000-517'
 main: key: 'sku'='HRD-000-517'
+main: work: rc: 32
 main: status: track
 main: input '$ name ladder'
 main: key: 'name'='ladder'
+main: work: rc: 30
 main: status: track
 main: input '= sold 0'
 main: field: 'sold'='0'
@@ -1187,16 +1255,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku HRD-000-632'
 main: key: 'sku'='HRD-000-632'
+main: work: rc: 32
 main: status: track
 main: input '$ name bolt'
 main: key: 'name'='bolt'
+main: work: rc: 28
 main: status: track
 main: input '= sold 4123'
 main: field: 'sold'='4123'
@@ -1210,16 +1280,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku GRO-000-2331'
 main: key: 'sku'='GRO-000-2331'
+main: work: rc: 33
 main: status: track
 main: input '$ name water'
 main: key: 'name'='water'
+main: work: rc: 29
 main: status: track
 main: input '= sold 17'
 main: field: 'sold'='17'
@@ -1338,7 +1410,7 @@ main: status: zero
 main: input 'i xpath_01_23.inc'
 main: include: '../../../tests/xpath/xpath_01_23.inc'
 main: input '+ data'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: track
 main: input '= thing one'
 main: field: 'thing'='one'
@@ -1357,7 +1429,7 @@ main: input '= block 56'
 main: field: 'block'='56'
 main: status: track
 main: input '+ top-level'
-main: filter: rc: 21
+main: work: rc: 21
 main: status: track
 main: input '= type ethernet'
 main: field: 'type'='ethernet'
@@ -1452,25 +1524,27 @@ main: input '@ test value'
 main: attr: 'test'='value'
 main: status: track
 main: input '+ data'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '@ test2 value2'
 main: attr: 'test2'='value2'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku GRO-000-415'
 main: key: 'sku'='GRO-000-415'
+main: work: rc: 32
 main: status: track
 main: input '$ name gum'
 main: key: 'name'='gum'
+main: work: rc: 27
 main: status: track
 main: input '= sold 1412'
 main: field: 'sold'='1412'
@@ -1484,16 +1558,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku HRD-000-212'
 main: key: 'sku'='HRD-000-212'
+main: work: rc: 32
 main: status: track
 main: input '$ name rope'
 main: key: 'name'='rope'
+main: work: rc: 28
 main: status: track
 main: input '= sold 85'
 main: field: 'sold'='85'
@@ -1507,16 +1583,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku HRD-000-517'
 main: key: 'sku'='HRD-000-517'
+main: work: rc: 32
 main: status: track
 main: input '$ name ladder'
 main: key: 'name'='ladder'
+main: work: rc: 30
 main: status: track
 main: input '= sold 0'
 main: field: 'sold'='0'
@@ -1530,16 +1608,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku HRD-000-632'
 main: key: 'sku'='HRD-000-632'
+main: work: rc: 32
 main: status: track
 main: input '$ name bolt'
 main: key: 'name'='bolt'
+main: work: rc: 28
 main: status: track
 main: input '= sold 4123'
 main: field: 'sold'='4123'
@@ -1553,16 +1633,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku GRO-000-2331'
 main: key: 'sku'='GRO-000-2331'
+main: work: rc: 33
 main: status: track
 main: input '$ name water'
 main: key: 'name'='water'
+main: work: rc: 29
 main: status: track
 main: input '= sold 17'
 main: field: 'sold'='17'
@@ -1580,134 +1662,161 @@ main: status: track
 main: input '- data'
 main: status: track
 main: input '+ data2'
-main: filter: rc: 17
+main: work: rc: 17
 main: status: full
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: full
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: full
 main: input '$ sku GRO-000-415'
 main: key: 'sku'='GRO-000-415'
+main: work: rc: 32
 main: status: full
 main: input '$ name gum'
 main: key: 'name'='gum'
+main: work: rc: 27
 main: status: full
 main: input '= sold 1412.0'
 main: field: 'sold'='1412.0'
+main: work: rc: 30
 main: status: full
 main: input '= in-stock 54'
 main: field: 'in-stock'='54'
+main: work: rc: 30
 main: status: full
 main: input '= on-order 10'
 main: field: 'on-order'='10'
+main: work: rc: 30
 main: status: full
 main: input '> item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: full
 main: input '< item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: full
 main: input '$ sku HRD-000-212'
 main: key: 'sku'='HRD-000-212'
+main: work: rc: 32
 main: status: full
 main: input '$ name rope'
 main: key: 'name'='rope'
+main: work: rc: 28
 main: status: full
 main: input '= sold 85.0'
 main: field: 'sold'='85.0'
+main: work: rc: 28
 main: status: full
 main: input '= in-stock 4'
 main: field: 'in-stock'='4'
+main: work: rc: 29
 main: status: full
 main: input '= on-order 2'
 main: field: 'on-order'='2'
+main: work: rc: 29
 main: status: full
 main: input '> item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: full
 main: input '< item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: full
 main: input '$ sku HRD-000-517'
 main: key: 'sku'='HRD-000-517'
+main: work: rc: 32
 main: status: full
 main: input '$ name ladder'
 main: key: 'name'='ladder'
+main: work: rc: 30
 main: status: full
 main: input '= sold 0'
 main: field: 'sold'='0'
+main: work: rc: 25
 main: status: full
 main: input '= in-stock 2'
 main: field: 'in-stock'='2'
+main: work: rc: 29
 main: status: full
 main: input '= on-order 1'
 main: field: 'on-order'='1'
+main: work: rc: 29
 main: status: full
 main: input '> item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: full
 main: input '< item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: full
 main: input '$ sku HRD-000-632'
 main: key: 'sku'='HRD-000-632'
+main: work: rc: 32
 main: status: full
 main: input '$ name bolt'
 main: key: 'name'='bolt'
+main: work: rc: 28
 main: status: full
 main: input '= sold 4123.0'
 main: field: 'sold'='4123.0'
+main: work: rc: 30
 main: status: full
 main: input '= in-stock 144'
 main: field: 'in-stock'='144'
+main: work: rc: 31
 main: status: full
 main: input '= on-order 42'
 main: field: 'on-order'='42'
+main: work: rc: 30
 main: status: full
 main: input '> item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: full
 main: input '< item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: full
 main: input '$ sku GRO-000-2331'
 main: key: 'sku'='GRO-000-2331'
+main: work: rc: 33
 main: status: full
 main: input '$ name water'
 main: key: 'name'='water'
+main: work: rc: 29
 main: status: full
 main: input '= sold 17.0'
 main: field: 'sold'='17.0'
+main: work: rc: 28
 main: status: full
 main: input '= in-stock 14'
 main: field: 'in-stock'='14'
+main: work: rc: 30
 main: status: full
 main: input '= on-order 2'
 main: field: 'on-order'='2'
+main: work: rc: 29
 main: status: full
 main: input '> item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: full
 main: input '} item'
 main: status: full
 main: input '- data2'
 main: status: track
 main: input '+ data3'
-main: filter: rc: 19
+main: work: rc: 19
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '$ sku GRO-000-533'
 main: key: 'sku'='GRO-000-533'
+main: work: rc: 32
 main: status: track
 main: input '$ name fish'
 main: key: 'name'='fish'
+main: work: rc: 28
 main: status: track
 main: input '= sold 1321.0'
 main: field: 'sold'='1321.0'
@@ -1725,10 +1834,10 @@ main: status: track
 main: input '- data3'
 main: status: track
 main: input '+ data4'
-main: filter: rc: 19
+main: work: rc: 19
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '@ test4 value4'
 main: attr: 'test4'='value4'
@@ -1771,25 +1880,27 @@ main: attr: 'test'='value'
 main: status: track
 main: input '+ data'
 xpath_01: duplicate sibling name: 'data'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '@ test2 value2'
 main: attr: 'test2'='value2'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku GRO-000-415'
 main: key: 'sku'='GRO-000-415'
+main: work: rc: 32
 main: status: track
 main: input '$ name gum'
 main: key: 'name'='gum'
+main: work: rc: 27
 main: status: track
 main: input '= sold 1412'
 main: field: 'sold'='1412'
@@ -1803,16 +1914,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku HRD-000-212'
 main: key: 'sku'='HRD-000-212'
+main: work: rc: 32
 main: status: track
 main: input '$ name rope'
 main: key: 'name'='rope'
+main: work: rc: 28
 main: status: track
 main: input '= sold 85'
 main: field: 'sold'='85'
@@ -1829,16 +1942,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku HRD-000-517'
 main: key: 'sku'='HRD-000-517'
+main: work: rc: 32
 main: status: track
 main: input '$ name ladder'
 main: key: 'name'='ladder'
+main: work: rc: 30
 main: status: track
 main: input '= sold 0'
 main: field: 'sold'='0'
@@ -1855,16 +1970,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku HRD-000-632'
 main: key: 'sku'='HRD-000-632'
+main: work: rc: 32
 main: status: track
 main: input '$ name bolt'
 main: key: 'name'='bolt'
+main: work: rc: 28
 main: status: track
 main: input '= sold 4123'
 main: field: 'sold'='4123'
@@ -1878,16 +1995,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku GRO-000-2331'
 main: key: 'sku'='GRO-000-2331'
+main: work: rc: 33
 main: status: track
 main: input '$ name water'
 main: key: 'name'='water'
+main: work: rc: 29
 main: status: track
 main: input '= sold 17'
 main: field: 'sold'='17'
@@ -2007,7 +2126,7 @@ main: status: zero
 main: input 'i xpath_01_23.inc'
 main: include: '../../../tests/xpath/xpath_01_23.inc'
 main: input '+ data'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: track
 main: input '= thing one'
 main: field: 'thing'='one'
@@ -2026,7 +2145,7 @@ main: input '= block 56'
 main: field: 'block'='56'
 main: status: track
 main: input '+ top-level'
-main: filter: rc: 21
+main: work: rc: 21
 main: status: track
 main: input '= type ethernet'
 main: field: 'type'='ethernet'
@@ -2121,152 +2240,179 @@ main: input '@ test value'
 main: attr: 'test'='value'
 main: status: track
 main: input '+ data'
-main: filter: rc: 16
+main: work: rc: 16
 main: status: full
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: full
 main: input '@ test2 value2'
 main: attr: 'test2'='value2'
 main: status: full
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: full
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: full
 main: input '$ sku GRO-000-415'
 main: key: 'sku'='GRO-000-415'
+main: work: rc: 32
 main: status: full
 main: input '$ name gum'
 main: key: 'name'='gum'
+main: work: rc: 27
 main: status: full
 main: input '= sold 1412'
 main: field: 'sold'='1412'
+main: work: rc: 28
 main: status: full
 main: input '= in-stock 54'
 main: field: 'in-stock'='54'
+main: work: rc: 30
 main: status: full
 main: input '= on-order 10'
 main: field: 'on-order'='10'
+main: work: rc: 30
 main: status: full
 main: input '> item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: full
 main: input '< item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: full
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: full
 main: input '$ sku HRD-000-212'
 main: key: 'sku'='HRD-000-212'
+main: work: rc: 32
 main: status: full
 main: input '$ name rope'
 main: key: 'name'='rope'
+main: work: rc: 28
 main: status: full
 main: input '= sold 85'
 main: field: 'sold'='85'
+main: work: rc: 26
 main: status: full
 main: input '= in-stock 4'
 main: field: 'in-stock'='4'
+main: work: rc: 29
 main: status: full
 main: input '= on-order 2'
 main: field: 'on-order'='2'
+main: work: rc: 29
 main: status: full
 main: input '> item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: full
 main: input '< item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: full
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: full
 main: input '$ sku HRD-000-517'
 main: key: 'sku'='HRD-000-517'
+main: work: rc: 32
 main: status: full
 main: input '$ name ladder'
 main: key: 'name'='ladder'
+main: work: rc: 30
 main: status: full
 main: input '= sold 0'
 main: field: 'sold'='0'
+main: work: rc: 25
 main: status: full
 main: input '= in-stock 2'
 main: field: 'in-stock'='2'
+main: work: rc: 29
 main: status: full
 main: input '= on-order 1'
 main: field: 'on-order'='1'
+main: work: rc: 29
 main: status: full
 main: input '> item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: full
 main: input '< item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: full
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: full
 main: input '$ sku HRD-000-632'
 main: key: 'sku'='HRD-000-632'
+main: work: rc: 32
 main: status: full
 main: input '$ name bolt'
 main: key: 'name'='bolt'
+main: work: rc: 28
 main: status: full
 main: input '= sold 4123'
 main: field: 'sold'='4123'
+main: work: rc: 28
 main: status: full
 main: input '= in-stock 144'
 main: field: 'in-stock'='144'
+main: work: rc: 31
 main: status: full
 main: input '= on-order 42'
 main: field: 'on-order'='42'
+main: work: rc: 30
 main: status: full
 main: input '> item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: full
 main: input '< item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: full
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: full
 main: input '$ sku GRO-000-2331'
 main: key: 'sku'='GRO-000-2331'
+main: work: rc: 33
 main: status: full
 main: input '$ name water'
 main: key: 'name'='water'
+main: work: rc: 29
 main: status: full
 main: input '= sold 17'
 main: field: 'sold'='17'
+main: work: rc: 26
 main: status: full
 main: input '= in-stock 14'
 main: field: 'in-stock'='14'
+main: work: rc: 30
 main: status: full
 main: input '= on-order 2'
 main: field: 'on-order'='2'
+main: work: rc: 29
 main: status: full
 main: input '> item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: full
 main: input '} item'
 main: status: full
 main: input '- data'
 main: status: track
 main: input '+ data2'
-main: filter: rc: 19
+main: work: rc: 19
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '$ sku GRO-000-415'
 main: key: 'sku'='GRO-000-415'
+main: work: rc: 32
 main: status: track
 main: input '$ name gum'
 main: key: 'name'='gum'
+main: work: rc: 27
 main: status: track
 main: input '= sold 1412.0'
 main: field: 'sold'='1412.0'
@@ -2280,13 +2426,15 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '$ sku HRD-000-212'
 main: key: 'sku'='HRD-000-212'
+main: work: rc: 32
 main: status: track
 main: input '$ name rope'
 main: key: 'name'='rope'
+main: work: rc: 28
 main: status: track
 main: input '= sold 85.0'
 main: field: 'sold'='85.0'
@@ -2300,13 +2448,15 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '$ sku HRD-000-517'
 main: key: 'sku'='HRD-000-517'
+main: work: rc: 32
 main: status: track
 main: input '$ name ladder'
 main: key: 'name'='ladder'
+main: work: rc: 30
 main: status: track
 main: input '= sold 0'
 main: field: 'sold'='0'
@@ -2320,13 +2470,15 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '$ sku HRD-000-632'
 main: key: 'sku'='HRD-000-632'
+main: work: rc: 32
 main: status: track
 main: input '$ name bolt'
 main: key: 'name'='bolt'
+main: work: rc: 28
 main: status: track
 main: input '= sold 4123.0'
 main: field: 'sold'='4123.0'
@@ -2340,13 +2492,15 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '$ sku GRO-000-2331'
 main: key: 'sku'='GRO-000-2331'
+main: work: rc: 33
 main: status: track
 main: input '$ name water'
 main: key: 'name'='water'
+main: work: rc: 29
 main: status: track
 main: input '= sold 17.0'
 main: field: 'sold'='17.0'
@@ -2364,19 +2518,21 @@ main: status: track
 main: input '- data2'
 main: status: track
 main: input '+ data3'
-main: filter: rc: 19
+main: work: rc: 19
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '$ sku GRO-000-533'
 main: key: 'sku'='GRO-000-533'
+main: work: rc: 32
 main: status: track
 main: input '$ name fish'
 main: key: 'name'='fish'
+main: work: rc: 28
 main: status: track
 main: input '= sold 1321.0'
 main: field: 'sold'='1321.0'
@@ -2394,10 +2550,10 @@ main: status: track
 main: input '- data3'
 main: status: track
 main: input '+ data4'
-main: filter: rc: 19
+main: work: rc: 19
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '@ test4 value4'
 main: attr: 'test4'='value4'
@@ -2440,142 +2596,170 @@ main: attr: 'test'='value'
 main: status: track
 main: input '+ data'
 xpath_01: duplicate sibling name: 'data'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: full
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: full
 main: input '@ test2 value2'
 main: attr: 'test2'='value2'
 main: status: full
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: full
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: full
 main: input '$ sku GRO-000-415'
 main: key: 'sku'='GRO-000-415'
+main: work: rc: 32
 main: status: full
 main: input '$ name gum'
 main: key: 'name'='gum'
+main: work: rc: 27
 main: status: full
 main: input '= sold 1412'
 main: field: 'sold'='1412'
+main: work: rc: 28
 main: status: full
 main: input '= on-order 10'
 main: field: 'on-order'='10'
+main: work: rc: 30
 main: status: full
 main: input '= in-stock 54'
 main: field: 'in-stock'='54'
+main: work: rc: 30
 main: status: full
 main: input '> item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: full
 main: input '< item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: full
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: full
 main: input '$ sku HRD-000-212'
 main: key: 'sku'='HRD-000-212'
+main: work: rc: 32
 main: status: full
 main: input '$ name rope'
 main: key: 'name'='rope'
+main: work: rc: 28
 main: status: full
 main: input '= sold 85'
 main: field: 'sold'='85'
+main: work: rc: 26
 main: status: full
 main: input '= extra special'
 main: field: 'extra'='special'
+main: work: rc: 32
 main: status: full
 main: input '= on-order 2'
 main: field: 'on-order'='2'
+main: work: rc: 29
 main: status: full
 main: input '= in-stock 4'
 main: field: 'in-stock'='4'
+main: work: rc: 29
 main: status: full
 main: input '> item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: full
 main: input '< item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: full
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: full
 main: input '$ sku HRD-000-517'
 main: key: 'sku'='HRD-000-517'
+main: work: rc: 32
 main: status: full
 main: input '$ name ladder'
 main: key: 'name'='ladder'
+main: work: rc: 30
 main: status: full
 main: input '= sold 0'
 main: field: 'sold'='0'
+main: work: rc: 25
 main: status: full
 main: input '= extra special'
 main: field: 'extra'='special'
+main: work: rc: 32
 main: status: full
 main: input '= on-order 1'
 main: field: 'on-order'='1'
+main: work: rc: 29
 main: status: full
 main: input '= in-stock 2'
 main: field: 'in-stock'='2'
+main: work: rc: 29
 main: status: full
 main: input '> item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: full
 main: input '< item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: full
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: full
 main: input '$ sku HRD-000-632'
 main: key: 'sku'='HRD-000-632'
+main: work: rc: 32
 main: status: full
 main: input '$ name bolt'
 main: key: 'name'='bolt'
+main: work: rc: 28
 main: status: full
 main: input '= sold 4123'
 main: field: 'sold'='4123'
+main: work: rc: 28
 main: status: full
 main: input '= on-order 42'
 main: field: 'on-order'='42'
+main: work: rc: 30
 main: status: full
 main: input '= in-stock 144'
 main: field: 'in-stock'='144'
+main: work: rc: 31
 main: status: full
 main: input '> item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: full
 main: input '< item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: full
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: full
 main: input '$ sku GRO-000-2331'
 main: key: 'sku'='GRO-000-2331'
+main: work: rc: 33
 main: status: full
 main: input '$ name water'
 main: key: 'name'='water'
+main: work: rc: 29
 main: status: full
 main: input '= sold 17'
 main: field: 'sold'='17'
+main: work: rc: 26
 main: status: full
 main: input '= extra special'
 main: field: 'extra'='special'
+main: work: rc: 32
 main: status: full
 main: input '= on-order 2'
 main: field: 'on-order'='2'
+main: work: rc: 29
 main: status: full
 main: input '= in-stock 14'
 main: field: 'in-stock'='14'
+main: work: rc: 30
 main: status: full
 main: input '> item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: full
 main: input '} item'
 main: status: full
@@ -2680,7 +2864,7 @@ main: status: zero
 main: input 'i xpath_01_23.inc'
 main: include: '../../../tests/xpath/xpath_01_23.inc'
 main: input '+ data'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: track
 main: input '= thing one'
 main: field: 'thing'='one'
@@ -2699,7 +2883,7 @@ main: input '= block 56'
 main: field: 'block'='56'
 main: status: track
 main: input '+ top-level'
-main: filter: rc: 21
+main: work: rc: 21
 main: status: track
 main: input '= type ethernet'
 main: field: 'type'='ethernet'
@@ -2794,25 +2978,27 @@ main: input '@ test value'
 main: attr: 'test'='value'
 main: status: track
 main: input '+ data'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '@ test2 value2'
 main: attr: 'test2'='value2'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku GRO-000-415'
 main: key: 'sku'='GRO-000-415'
+main: work: rc: 32
 main: status: track
 main: input '$ name gum'
 main: key: 'name'='gum'
+main: work: rc: 27
 main: status: track
 main: input '= sold 1412'
 main: field: 'sold'='1412'
@@ -2826,16 +3012,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku HRD-000-212'
 main: key: 'sku'='HRD-000-212'
+main: work: rc: 32
 main: status: track
 main: input '$ name rope'
 main: key: 'name'='rope'
+main: work: rc: 28
 main: status: track
 main: input '= sold 85'
 main: field: 'sold'='85'
@@ -2849,16 +3037,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku HRD-000-517'
 main: key: 'sku'='HRD-000-517'
+main: work: rc: 32
 main: status: track
 main: input '$ name ladder'
 main: key: 'name'='ladder'
+main: work: rc: 30
 main: status: track
 main: input '= sold 0'
 main: field: 'sold'='0'
@@ -2872,16 +3062,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku HRD-000-632'
 main: key: 'sku'='HRD-000-632'
+main: work: rc: 32
 main: status: track
 main: input '$ name bolt'
 main: key: 'name'='bolt'
+main: work: rc: 28
 main: status: track
 main: input '= sold 4123'
 main: field: 'sold'='4123'
@@ -2895,16 +3087,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku GRO-000-2331'
 main: key: 'sku'='GRO-000-2331'
+main: work: rc: 33
 main: status: track
 main: input '$ name water'
 main: key: 'name'='water'
+main: work: rc: 29
 main: status: track
 main: input '= sold 17'
 main: field: 'sold'='17'
@@ -2922,19 +3116,21 @@ main: status: track
 main: input '- data'
 main: status: track
 main: input '+ data2'
-main: filter: rc: 19
+main: work: rc: 19
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '$ sku GRO-000-415'
 main: key: 'sku'='GRO-000-415'
+main: work: rc: 32
 main: status: track
 main: input '$ name gum'
 main: key: 'name'='gum'
+main: work: rc: 27
 main: status: track
 main: input '= sold 1412.0'
 main: field: 'sold'='1412.0'
@@ -2948,13 +3144,15 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '$ sku HRD-000-212'
 main: key: 'sku'='HRD-000-212'
+main: work: rc: 32
 main: status: track
 main: input '$ name rope'
 main: key: 'name'='rope'
+main: work: rc: 28
 main: status: track
 main: input '= sold 85.0'
 main: field: 'sold'='85.0'
@@ -2968,13 +3166,15 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '$ sku HRD-000-517'
 main: key: 'sku'='HRD-000-517'
+main: work: rc: 32
 main: status: track
 main: input '$ name ladder'
 main: key: 'name'='ladder'
+main: work: rc: 30
 main: status: track
 main: input '= sold 0'
 main: field: 'sold'='0'
@@ -2988,13 +3188,15 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '$ sku HRD-000-632'
 main: key: 'sku'='HRD-000-632'
+main: work: rc: 32
 main: status: track
 main: input '$ name bolt'
 main: key: 'name'='bolt'
+main: work: rc: 28
 main: status: track
 main: input '= sold 4123.0'
 main: field: 'sold'='4123.0'
@@ -3008,13 +3210,15 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '$ sku GRO-000-2331'
 main: key: 'sku'='GRO-000-2331'
+main: work: rc: 33
 main: status: track
 main: input '$ name water'
 main: key: 'name'='water'
+main: work: rc: 29
 main: status: track
 main: input '= sold 17.0'
 main: field: 'sold'='17.0'
@@ -3032,19 +3236,21 @@ main: status: track
 main: input '- data2'
 main: status: track
 main: input '+ data3'
-main: filter: rc: 19
+main: work: rc: 19
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '$ sku GRO-000-533'
 main: key: 'sku'='GRO-000-533'
+main: work: rc: 32
 main: status: track
 main: input '$ name fish'
 main: key: 'name'='fish'
+main: work: rc: 28
 main: status: track
 main: input '= sold 1321.0'
 main: field: 'sold'='1321.0'
@@ -3062,10 +3268,10 @@ main: status: track
 main: input '- data3'
 main: status: track
 main: input '+ data4'
-main: filter: rc: 19
+main: work: rc: 19
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '@ test4 value4'
 main: attr: 'test4'='value4'
@@ -3108,25 +3314,27 @@ main: attr: 'test'='value'
 main: status: track
 main: input '+ data'
 xpath_01: duplicate sibling name: 'data'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '@ test2 value2'
 main: attr: 'test2'='value2'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku GRO-000-415'
 main: key: 'sku'='GRO-000-415'
+main: work: rc: 32
 main: status: track
 main: input '$ name gum'
 main: key: 'name'='gum'
+main: work: rc: 27
 main: status: track
 main: input '= sold 1412'
 main: field: 'sold'='1412'
@@ -3140,16 +3348,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku HRD-000-212'
 main: key: 'sku'='HRD-000-212'
+main: work: rc: 32
 main: status: track
 main: input '$ name rope'
 main: key: 'name'='rope'
+main: work: rc: 28
 main: status: track
 main: input '= sold 85'
 main: field: 'sold'='85'
@@ -3166,16 +3376,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku HRD-000-517'
 main: key: 'sku'='HRD-000-517'
+main: work: rc: 32
 main: status: track
 main: input '$ name ladder'
 main: key: 'name'='ladder'
+main: work: rc: 30
 main: status: track
 main: input '= sold 0'
 main: field: 'sold'='0'
@@ -3192,16 +3404,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku HRD-000-632'
 main: key: 'sku'='HRD-000-632'
+main: work: rc: 32
 main: status: track
 main: input '$ name bolt'
 main: key: 'name'='bolt'
+main: work: rc: 28
 main: status: track
 main: input '= sold 4123'
 main: field: 'sold'='4123'
@@ -3215,16 +3429,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku GRO-000-2331'
 main: key: 'sku'='GRO-000-2331'
+main: work: rc: 33
 main: status: track
 main: input '$ name water'
 main: key: 'name'='water'
+main: work: rc: 29
 main: status: track
 main: input '= sold 17'
 main: field: 'sold'='17'
@@ -3348,7 +3564,7 @@ main: status: zero
 main: input 'i xpath_01_23.inc'
 main: include: '../../../tests/xpath/xpath_01_23.inc'
 main: input '+ data'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: track
 main: input '= thing one'
 main: field: 'thing'='one'
@@ -3367,7 +3583,7 @@ main: input '= block 56'
 main: field: 'block'='56'
 main: status: track
 main: input '+ top-level'
-main: filter: rc: 21
+main: work: rc: 21
 main: status: track
 main: input '= type ethernet'
 main: field: 'type'='ethernet'
@@ -3462,16 +3678,16 @@ main: input '@ test value'
 main: attr: 'test'='value'
 main: status: track
 main: input '+ data'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '@ test2 value2'
 main: attr: 'test2'='value2'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: predicate
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
@@ -3481,30 +3697,36 @@ main: key: 'sku'='GRO-000-415'
 main: status: full
 main: input '$ name gum'
 main: key: 'name'='gum'
+main: work: rc: 27
 main: status: full
 main: input '= sold 1412'
 main: field: 'sold'='1412'
+main: work: rc: 28
 main: status: full
 main: input '= in-stock 54'
 main: field: 'in-stock'='54'
+main: work: rc: 30
 main: status: full
 main: input '= on-order 10'
 main: field: 'on-order'='10'
+main: work: rc: 30
 main: status: full
 main: input '> item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '< item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: predicate
 main: input '$ sku HRD-000-212'
 main: key: 'sku'='HRD-000-212'
+main: work: rc: 32
 main: status: track
 main: input '$ name rope'
 main: key: 'name'='rope'
+main: work: rc: 28
 main: status: track
 main: input '= sold 85'
 main: field: 'sold'='85'
@@ -3518,16 +3740,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: predicate
 main: input '$ sku HRD-000-517'
 main: key: 'sku'='HRD-000-517'
+main: work: rc: 32
 main: status: track
 main: input '$ name ladder'
 main: key: 'name'='ladder'
+main: work: rc: 30
 main: status: track
 main: input '= sold 0'
 main: field: 'sold'='0'
@@ -3541,16 +3765,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: predicate
 main: input '$ sku HRD-000-632'
 main: key: 'sku'='HRD-000-632'
+main: work: rc: 32
 main: status: track
 main: input '$ name bolt'
 main: key: 'name'='bolt'
+main: work: rc: 28
 main: status: track
 main: input '= sold 4123'
 main: field: 'sold'='4123'
@@ -3564,68 +3790,80 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: predicate
 main: input '$ sku GRO-000-2331'
 main: key: 'sku'='GRO-000-2331'
+main: work: rc: 33
 main: status: full
 main: input '$ name water'
 main: key: 'name'='water'
+main: work: rc: 29
 main: status: full
 main: input '= sold 17'
 main: field: 'sold'='17'
+main: work: rc: 26
 main: status: full
 main: input '= in-stock 14'
 main: field: 'in-stock'='14'
+main: work: rc: 30
 main: status: full
 main: input '= on-order 2'
 main: field: 'on-order'='2'
+main: work: rc: 29
 main: status: full
 main: input '> item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '} item'
 main: status: track
 main: input '- data'
 main: status: track
 main: input '+ data2'
-main: filter: rc: 19
+main: work: rc: 19
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: predicate
 main: input '$ sku GRO-000-415'
 main: key: 'sku'='GRO-000-415'
+main: work: rc: 32
 main: status: full
 main: input '$ name gum'
 main: key: 'name'='gum'
+main: work: rc: 27
 main: status: full
 main: input '= sold 1412.0'
 main: field: 'sold'='1412.0'
+main: work: rc: 30
 main: status: full
 main: input '= in-stock 54'
 main: field: 'in-stock'='54'
+main: work: rc: 30
 main: status: full
 main: input '= on-order 10'
 main: field: 'on-order'='10'
+main: work: rc: 30
 main: status: full
 main: input '> item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '< item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '$ sku HRD-000-212'
 main: key: 'sku'='HRD-000-212'
+main: work: rc: 32
 main: status: track
 main: input '$ name rope'
 main: key: 'name'='rope'
+main: work: rc: 28
 main: status: track
 main: input '= sold 85.0'
 main: field: 'sold'='85.0'
@@ -3639,13 +3877,15 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '$ sku HRD-000-517'
 main: key: 'sku'='HRD-000-517'
+main: work: rc: 32
 main: status: track
 main: input '$ name ladder'
 main: key: 'name'='ladder'
+main: work: rc: 30
 main: status: track
 main: input '= sold 0'
 main: field: 'sold'='0'
@@ -3659,13 +3899,15 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '$ sku HRD-000-632'
 main: key: 'sku'='HRD-000-632'
+main: work: rc: 32
 main: status: track
 main: input '$ name bolt'
 main: key: 'name'='bolt'
+main: work: rc: 28
 main: status: track
 main: input '= sold 4123.0'
 main: field: 'sold'='4123.0'
@@ -3679,66 +3921,76 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '$ sku GRO-000-2331'
 main: key: 'sku'='GRO-000-2331'
+main: work: rc: 33
 main: status: full
 main: input '$ name water'
 main: key: 'name'='water'
+main: work: rc: 29
 main: status: full
 main: input '= sold 17.0'
 main: field: 'sold'='17.0'
+main: work: rc: 28
 main: status: full
 main: input '= in-stock 14'
 main: field: 'in-stock'='14'
+main: work: rc: 30
 main: status: full
 main: input '= on-order 2'
 main: field: 'on-order'='2'
+main: work: rc: 29
 main: status: full
 main: input '> item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '} item'
 main: status: track
 main: input '- data2'
 main: status: track
 main: input '+ data3'
-main: filter: rc: 19
+main: work: rc: 19
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: predicate
 main: input '$ sku GRO-000-533'
 main: key: 'sku'='GRO-000-533'
+main: work: rc: 32
 main: status: full
 main: input '$ name fish'
 main: key: 'name'='fish'
+main: work: rc: 28
 main: status: full
 main: input '= sold 1321.0'
 main: field: 'sold'='1321.0'
+main: work: rc: 30
 main: status: full
 main: input '= in-stock 45'
 main: field: 'in-stock'='45'
+main: work: rc: 30
 main: status: full
 main: input '= on-order 1'
 main: field: 'on-order'='1'
+main: work: rc: 29
 main: status: full
 main: input '> item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '} item'
 main: status: track
 main: input '- data3'
 main: status: track
 main: input '+ data4'
-main: filter: rc: 19
+main: work: rc: 19
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '@ test4 value4'
 main: attr: 'test4'='value4'
@@ -3781,49 +4033,56 @@ main: attr: 'test'='value'
 main: status: track
 main: input '+ data'
 xpath_01: duplicate sibling name: 'data'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '@ test2 value2'
 main: attr: 'test2'='value2'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: predicate
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: predicate
 main: input '$ sku GRO-000-415'
 main: key: 'sku'='GRO-000-415'
+main: work: rc: 32
 main: status: full
 main: input '$ name gum'
 main: key: 'name'='gum'
+main: work: rc: 27
 main: status: full
 main: input '= sold 1412'
 main: field: 'sold'='1412'
+main: work: rc: 28
 main: status: full
 main: input '= on-order 10'
 main: field: 'on-order'='10'
+main: work: rc: 30
 main: status: full
 main: input '= in-stock 54'
 main: field: 'in-stock'='54'
+main: work: rc: 30
 main: status: full
 main: input '> item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '< item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: predicate
 main: input '$ sku HRD-000-212'
 main: key: 'sku'='HRD-000-212'
+main: work: rc: 32
 main: status: track
 main: input '$ name rope'
 main: key: 'name'='rope'
+main: work: rc: 28
 main: status: track
 main: input '= sold 85'
 main: field: 'sold'='85'
@@ -3840,16 +4099,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: predicate
 main: input '$ sku HRD-000-517'
 main: key: 'sku'='HRD-000-517'
+main: work: rc: 32
 main: status: track
 main: input '$ name ladder'
 main: key: 'name'='ladder'
+main: work: rc: 30
 main: status: track
 main: input '= sold 0'
 main: field: 'sold'='0'
@@ -3866,16 +4127,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: predicate
 main: input '$ sku HRD-000-632'
 main: key: 'sku'='HRD-000-632'
+main: work: rc: 32
 main: status: track
 main: input '$ name bolt'
 main: key: 'name'='bolt'
+main: work: rc: 28
 main: status: track
 main: input '= sold 4123'
 main: field: 'sold'='4123'
@@ -3889,31 +4152,37 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: predicate
 main: input '$ sku GRO-000-2331'
 main: key: 'sku'='GRO-000-2331'
+main: work: rc: 33
 main: status: full
 main: input '$ name water'
 main: key: 'name'='water'
+main: work: rc: 29
 main: status: full
 main: input '= sold 17'
 main: field: 'sold'='17'
+main: work: rc: 26
 main: status: full
 main: input '= extra special'
 main: field: 'extra'='special'
+main: work: rc: 32
 main: status: full
 main: input '= on-order 2'
 main: field: 'on-order'='2'
+main: work: rc: 29
 main: status: full
 main: input '= in-stock 14'
 main: field: 'in-stock'='14'
+main: work: rc: 30
 main: status: full
 main: input '> item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '} item'
 main: status: track
@@ -4028,7 +4297,7 @@ main: status: zero
 main: input 'i xpath_01_23.inc'
 main: include: '../../../tests/xpath/xpath_01_23.inc'
 main: input '+ data'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: track
 main: input '= thing one'
 main: field: 'thing'='one'
@@ -4047,7 +4316,7 @@ main: input '= block 56'
 main: field: 'block'='56'
 main: status: track
 main: input '+ top-level'
-main: filter: rc: 21
+main: work: rc: 21
 main: status: track
 main: input '= type ethernet'
 main: field: 'type'='ethernet'
@@ -4142,25 +4411,27 @@ main: input '@ test value'
 main: attr: 'test'='value'
 main: status: track
 main: input '+ data'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '@ test2 value2'
 main: attr: 'test2'='value2'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: predicate
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: predicate
 main: input '$ sku GRO-000-415'
 main: key: 'sku'='GRO-000-415'
+main: work: rc: 32
 main: status: predicate
 main: input '$ name gum'
 main: key: 'name'='gum'
+main: work: rc: 27
 main: status: predicate
 main: input '= sold 1412'
 main: field: 'sold'='1412'
@@ -4174,16 +4445,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: predicate
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: predicate
 main: input '$ sku HRD-000-212'
 main: key: 'sku'='HRD-000-212'
+main: work: rc: 32
 main: status: predicate
 main: input '$ name rope'
 main: key: 'name'='rope'
+main: work: rc: 28
 main: status: predicate
 main: input '= sold 85'
 main: field: 'sold'='85'
@@ -4197,16 +4470,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: predicate
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: predicate
 main: input '$ sku HRD-000-517'
 main: key: 'sku'='HRD-000-517'
+main: work: rc: 32
 main: status: predicate
 main: input '$ name ladder'
 main: key: 'name'='ladder'
+main: work: rc: 30
 main: status: predicate
 main: input '= sold 0'
 main: field: 'sold'='0'
@@ -4218,19 +4493,21 @@ main: input '= on-order 1'
 main: field: 'on-order'='1'
 main: status: full
 main: input '> item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '< item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: predicate
 main: input '$ sku HRD-000-632'
 main: key: 'sku'='HRD-000-632'
+main: work: rc: 32
 main: status: predicate
 main: input '$ name bolt'
 main: key: 'name'='bolt'
+main: work: rc: 28
 main: status: predicate
 main: input '= sold 4123'
 main: field: 'sold'='4123'
@@ -4244,16 +4521,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: predicate
 main: input '$ sku GRO-000-2331'
 main: key: 'sku'='GRO-000-2331'
+main: work: rc: 33
 main: status: predicate
 main: input '$ name water'
 main: key: 'name'='water'
+main: work: rc: 29
 main: status: predicate
 main: input '= sold 17'
 main: field: 'sold'='17'
@@ -4271,19 +4550,21 @@ main: status: track
 main: input '- data'
 main: status: track
 main: input '+ data2'
-main: filter: rc: 19
+main: work: rc: 19
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: predicate
 main: input '$ sku GRO-000-415'
 main: key: 'sku'='GRO-000-415'
+main: work: rc: 32
 main: status: predicate
 main: input '$ name gum'
 main: key: 'name'='gum'
+main: work: rc: 27
 main: status: predicate
 main: input '= sold 1412.0'
 main: field: 'sold'='1412.0'
@@ -4297,13 +4578,15 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: predicate
 main: input '$ sku HRD-000-212'
 main: key: 'sku'='HRD-000-212'
+main: work: rc: 32
 main: status: predicate
 main: input '$ name rope'
 main: key: 'name'='rope'
+main: work: rc: 28
 main: status: predicate
 main: input '= sold 85.0'
 main: field: 'sold'='85.0'
@@ -4317,13 +4600,15 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: predicate
 main: input '$ sku HRD-000-517'
 main: key: 'sku'='HRD-000-517'
+main: work: rc: 32
 main: status: predicate
 main: input '$ name ladder'
 main: key: 'name'='ladder'
+main: work: rc: 30
 main: status: predicate
 main: input '= sold 0'
 main: field: 'sold'='0'
@@ -4333,18 +4618,21 @@ main: field: 'in-stock'='2'
 main: status: predicate
 main: input '= on-order 1'
 main: field: 'on-order'='1'
+main: work: rc: 29
 main: status: full
 main: input '> item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '< item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '$ sku HRD-000-632'
 main: key: 'sku'='HRD-000-632'
+main: work: rc: 32
 main: status: predicate
 main: input '$ name bolt'
 main: key: 'name'='bolt'
+main: work: rc: 28
 main: status: predicate
 main: input '= sold 4123.0'
 main: field: 'sold'='4123.0'
@@ -4358,13 +4646,15 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '$ sku GRO-000-2331'
 main: key: 'sku'='GRO-000-2331'
+main: work: rc: 33
 main: status: predicate
 main: input '$ name water'
 main: key: 'name'='water'
+main: work: rc: 29
 main: status: predicate
 main: input '= sold 17.0'
 main: field: 'sold'='17.0'
@@ -4382,19 +4672,21 @@ main: status: track
 main: input '- data2'
 main: status: track
 main: input '+ data3'
-main: filter: rc: 19
+main: work: rc: 19
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: predicate
 main: input '$ sku GRO-000-533'
 main: key: 'sku'='GRO-000-533'
+main: work: rc: 32
 main: status: predicate
 main: input '$ name fish'
 main: key: 'name'='fish'
+main: work: rc: 28
 main: status: predicate
 main: input '= sold 1321.0'
 main: field: 'sold'='1321.0'
@@ -4404,19 +4696,20 @@ main: field: 'in-stock'='45'
 main: status: predicate
 main: input '= on-order 1'
 main: field: 'on-order'='1'
+main: work: rc: 29
 main: status: full
 main: input '> item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '} item'
 main: status: track
 main: input '- data3'
 main: status: track
 main: input '+ data4'
-main: filter: rc: 19
+main: work: rc: 19
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '@ test4 value4'
 main: attr: 'test4'='value4'
@@ -4459,25 +4752,27 @@ main: attr: 'test'='value'
 main: status: track
 main: input '+ data'
 xpath_01: duplicate sibling name: 'data'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '@ test2 value2'
 main: attr: 'test2'='value2'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: predicate
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: predicate
 main: input '$ sku GRO-000-415'
 main: key: 'sku'='GRO-000-415'
+main: work: rc: 32
 main: status: predicate
 main: input '$ name gum'
 main: key: 'name'='gum'
+main: work: rc: 27
 main: status: predicate
 main: input '= sold 1412'
 main: field: 'sold'='1412'
@@ -4491,16 +4786,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: predicate
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: predicate
 main: input '$ sku HRD-000-212'
 main: key: 'sku'='HRD-000-212'
+main: work: rc: 32
 main: status: predicate
 main: input '$ name rope'
 main: key: 'name'='rope'
+main: work: rc: 28
 main: status: predicate
 main: input '= sold 85'
 main: field: 'sold'='85'
@@ -4517,16 +4814,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: predicate
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: predicate
 main: input '$ sku HRD-000-517'
 main: key: 'sku'='HRD-000-517'
+main: work: rc: 32
 main: status: predicate
 main: input '$ name ladder'
 main: key: 'name'='ladder'
+main: work: rc: 30
 main: status: predicate
 main: input '= sold 0'
 main: field: 'sold'='0'
@@ -4536,24 +4835,28 @@ main: field: 'extra'='special'
 main: status: predicate
 main: input '= on-order 1'
 main: field: 'on-order'='1'
+main: work: rc: 29
 main: status: full
 main: input '= in-stock 2'
 main: field: 'in-stock'='2'
+main: work: rc: 29
 main: status: full
 main: input '> item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '< item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: predicate
 main: input '$ sku HRD-000-632'
 main: key: 'sku'='HRD-000-632'
+main: work: rc: 32
 main: status: predicate
 main: input '$ name bolt'
 main: key: 'name'='bolt'
+main: work: rc: 28
 main: status: predicate
 main: input '= sold 4123'
 main: field: 'sold'='4123'
@@ -4567,16 +4870,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: predicate
 main: input '$ sku GRO-000-2331'
 main: key: 'sku'='GRO-000-2331'
+main: work: rc: 33
 main: status: predicate
 main: input '$ name water'
 main: key: 'name'='water'
+main: work: rc: 29
 main: status: predicate
 main: input '= sold 17'
 main: field: 'sold'='17'
@@ -4704,7 +5009,7 @@ main: status: zero
 main: input 'i xpath_01_23.inc'
 main: include: '../../../tests/xpath/xpath_01_23.inc'
 main: input '+ data'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: track
 main: input '= thing one'
 main: field: 'thing'='one'
@@ -4723,7 +5028,7 @@ main: input '= block 56'
 main: field: 'block'='56'
 main: status: track
 main: input '+ top-level'
-main: filter: rc: 21
+main: work: rc: 21
 main: status: track
 main: input '= type ethernet'
 main: field: 'type'='ethernet'
@@ -4818,25 +5123,27 @@ main: input '@ test value'
 main: attr: 'test'='value'
 main: status: track
 main: input '+ data'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '@ test2 value2'
 main: attr: 'test2'='value2'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: predicate
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: predicate
 main: input '$ sku GRO-000-415'
 main: key: 'sku'='GRO-000-415'
+main: work: rc: 32
 main: status: predicate
 main: input '$ name gum'
 main: key: 'name'='gum'
+main: work: rc: 27
 main: status: predicate
 main: input '= sold 1412'
 main: field: 'sold'='1412'
@@ -4850,16 +5157,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: predicate
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: predicate
 main: input '$ sku HRD-000-212'
 main: key: 'sku'='HRD-000-212'
+main: work: rc: 32
 main: status: predicate
 main: input '$ name rope'
 main: key: 'name'='rope'
+main: work: rc: 28
 main: status: predicate
 main: input '= sold 85'
 main: field: 'sold'='85'
@@ -4871,19 +5180,21 @@ main: input '= on-order 2'
 main: field: 'on-order'='2'
 main: status: full
 main: input '> item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '< item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: predicate
 main: input '$ sku HRD-000-517'
 main: key: 'sku'='HRD-000-517'
+main: work: rc: 32
 main: status: predicate
 main: input '$ name ladder'
 main: key: 'name'='ladder'
+main: work: rc: 30
 main: status: predicate
 main: input '= sold 0'
 main: field: 'sold'='0'
@@ -4893,21 +5204,24 @@ main: field: 'in-stock'='2'
 main: status: predicate
 main: input '= on-order 1'
 main: field: 'on-order'='1'
+main: work: rc: 29
 main: status: full
 main: input '> item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '< item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: predicate
 main: input '$ sku HRD-000-632'
 main: key: 'sku'='HRD-000-632'
+main: work: rc: 32
 main: status: predicate
 main: input '$ name bolt'
 main: key: 'name'='bolt'
+main: work: rc: 28
 main: status: predicate
 main: input '= sold 4123'
 main: field: 'sold'='4123'
@@ -4921,16 +5235,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: predicate
 main: input '$ sku GRO-000-2331'
 main: key: 'sku'='GRO-000-2331'
+main: work: rc: 33
 main: status: predicate
 main: input '$ name water'
 main: key: 'name'='water'
+main: work: rc: 29
 main: status: predicate
 main: input '= sold 17'
 main: field: 'sold'='17'
@@ -4940,28 +5256,31 @@ main: field: 'in-stock'='14'
 main: status: predicate
 main: input '= on-order 2'
 main: field: 'on-order'='2'
+main: work: rc: 29
 main: status: full
 main: input '> item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '} item'
 main: status: track
 main: input '- data'
 main: status: track
 main: input '+ data2'
-main: filter: rc: 19
+main: work: rc: 19
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: predicate
 main: input '$ sku GRO-000-415'
 main: key: 'sku'='GRO-000-415'
+main: work: rc: 32
 main: status: predicate
 main: input '$ name gum'
 main: key: 'name'='gum'
+main: work: rc: 27
 main: status: predicate
 main: input '= sold 1412.0'
 main: field: 'sold'='1412.0'
@@ -4975,13 +5294,15 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: predicate
 main: input '$ sku HRD-000-212'
 main: key: 'sku'='HRD-000-212'
+main: work: rc: 32
 main: status: predicate
 main: input '$ name rope'
 main: key: 'name'='rope'
+main: work: rc: 28
 main: status: predicate
 main: input '= sold 85.0'
 main: field: 'sold'='85.0'
@@ -4991,18 +5312,21 @@ main: field: 'in-stock'='4'
 main: status: predicate
 main: input '= on-order 2'
 main: field: 'on-order'='2'
+main: work: rc: 29
 main: status: full
 main: input '> item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '< item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '$ sku HRD-000-517'
 main: key: 'sku'='HRD-000-517'
+main: work: rc: 32
 main: status: predicate
 main: input '$ name ladder'
 main: key: 'name'='ladder'
+main: work: rc: 30
 main: status: predicate
 main: input '= sold 0'
 main: field: 'sold'='0'
@@ -5012,18 +5336,21 @@ main: field: 'in-stock'='2'
 main: status: predicate
 main: input '= on-order 1'
 main: field: 'on-order'='1'
+main: work: rc: 29
 main: status: full
 main: input '> item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '< item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '$ sku HRD-000-632'
 main: key: 'sku'='HRD-000-632'
+main: work: rc: 32
 main: status: predicate
 main: input '$ name bolt'
 main: key: 'name'='bolt'
+main: work: rc: 28
 main: status: predicate
 main: input '= sold 4123.0'
 main: field: 'sold'='4123.0'
@@ -5037,13 +5364,15 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '$ sku GRO-000-2331'
 main: key: 'sku'='GRO-000-2331'
+main: work: rc: 33
 main: status: predicate
 main: input '$ name water'
 main: key: 'name'='water'
+main: work: rc: 29
 main: status: predicate
 main: input '= sold 17.0'
 main: field: 'sold'='17.0'
@@ -5053,28 +5382,31 @@ main: field: 'in-stock'='14'
 main: status: predicate
 main: input '= on-order 2'
 main: field: 'on-order'='2'
+main: work: rc: 29
 main: status: full
 main: input '> item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '} item'
 main: status: track
 main: input '- data2'
 main: status: track
 main: input '+ data3'
-main: filter: rc: 19
+main: work: rc: 19
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: predicate
 main: input '$ sku GRO-000-533'
 main: key: 'sku'='GRO-000-533'
+main: work: rc: 32
 main: status: predicate
 main: input '$ name fish'
 main: key: 'name'='fish'
+main: work: rc: 28
 main: status: predicate
 main: input '= sold 1321.0'
 main: field: 'sold'='1321.0'
@@ -5092,10 +5424,10 @@ main: status: track
 main: input '- data3'
 main: status: track
 main: input '+ data4'
-main: filter: rc: 19
+main: work: rc: 19
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '@ test4 value4'
 main: attr: 'test4'='value4'
@@ -5138,25 +5470,27 @@ main: attr: 'test'='value'
 main: status: track
 main: input '+ data'
 xpath_01: duplicate sibling name: 'data'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '@ test2 value2'
 main: attr: 'test2'='value2'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: predicate
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: predicate
 main: input '$ sku GRO-000-415'
 main: key: 'sku'='GRO-000-415'
+main: work: rc: 32
 main: status: predicate
 main: input '$ name gum'
 main: key: 'name'='gum'
+main: work: rc: 27
 main: status: predicate
 main: input '= sold 1412'
 main: field: 'sold'='1412'
@@ -5170,16 +5504,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: predicate
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: predicate
 main: input '$ sku HRD-000-212'
 main: key: 'sku'='HRD-000-212'
+main: work: rc: 32
 main: status: predicate
 main: input '$ name rope'
 main: key: 'name'='rope'
+main: work: rc: 28
 main: status: predicate
 main: input '= sold 85'
 main: field: 'sold'='85'
@@ -5192,21 +5528,24 @@ main: field: 'on-order'='2'
 main: status: predicate
 main: input '= in-stock 4'
 main: field: 'in-stock'='4'
+main: work: rc: 29
 main: status: full
 main: input '> item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '< item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: predicate
 main: input '$ sku HRD-000-517'
 main: key: 'sku'='HRD-000-517'
+main: work: rc: 32
 main: status: predicate
 main: input '$ name ladder'
 main: key: 'name'='ladder'
+main: work: rc: 30
 main: status: predicate
 main: input '= sold 0'
 main: field: 'sold'='0'
@@ -5219,21 +5558,24 @@ main: field: 'on-order'='1'
 main: status: predicate
 main: input '= in-stock 2'
 main: field: 'in-stock'='2'
+main: work: rc: 29
 main: status: full
 main: input '> item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '< item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: predicate
 main: input '$ sku HRD-000-632'
 main: key: 'sku'='HRD-000-632'
+main: work: rc: 32
 main: status: predicate
 main: input '$ name bolt'
 main: key: 'name'='bolt'
+main: work: rc: 28
 main: status: predicate
 main: input '= sold 4123'
 main: field: 'sold'='4123'
@@ -5247,16 +5589,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: predicate
 main: input '$ sku GRO-000-2331'
 main: key: 'sku'='GRO-000-2331'
+main: work: rc: 33
 main: status: predicate
 main: input '$ name water'
 main: key: 'name'='water'
+main: work: rc: 29
 main: status: predicate
 main: input '= sold 17'
 main: field: 'sold'='17'
@@ -5269,9 +5613,10 @@ main: field: 'on-order'='2'
 main: status: predicate
 main: input '= in-stock 14'
 main: field: 'in-stock'='14'
+main: work: rc: 30
 main: status: full
 main: input '> item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '} item'
 main: status: track
@@ -5382,7 +5727,7 @@ main: status: zero
 main: input 'i xpath_01_23.inc'
 main: include: '../../../tests/xpath/xpath_01_23.inc'
 main: input '+ data'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: track
 main: input '= thing one'
 main: field: 'thing'='one'
@@ -5401,7 +5746,7 @@ main: input '= block 56'
 main: field: 'block'='56'
 main: status: track
 main: input '+ top-level'
-main: filter: rc: 21
+main: work: rc: 21
 main: status: track
 main: input '= type ethernet'
 main: field: 'type'='ethernet'
@@ -5496,25 +5841,27 @@ main: input '@ test value'
 main: attr: 'test'='value'
 main: status: track
 main: input '+ data'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '@ test2 value2'
 main: attr: 'test2'='value2'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: predicate
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: predicate
 main: input '$ sku GRO-000-415'
 main: key: 'sku'='GRO-000-415'
+main: work: rc: 32
 main: status: predicate
 main: input '$ name gum'
 main: key: 'name'='gum'
+main: work: rc: 27
 main: status: predicate
 main: input '= sold 1412'
 main: field: 'sold'='1412'
@@ -5528,16 +5875,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: predicate
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: predicate
 main: input '$ sku HRD-000-212'
 main: key: 'sku'='HRD-000-212'
+main: work: rc: 32
 main: status: predicate
 main: input '$ name rope'
 main: key: 'name'='rope'
+main: work: rc: 28
 main: status: predicate
 main: input '= sold 85'
 main: field: 'sold'='85'
@@ -5551,16 +5900,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: predicate
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: predicate
 main: input '$ sku HRD-000-517'
 main: key: 'sku'='HRD-000-517'
+main: work: rc: 32
 main: status: predicate
 main: input '$ name ladder'
 main: key: 'name'='ladder'
+main: work: rc: 30
 main: status: predicate
 main: input '= sold 0'
 main: field: 'sold'='0'
@@ -5574,16 +5925,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: predicate
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: predicate
 main: input '$ sku HRD-000-632'
 main: key: 'sku'='HRD-000-632'
+main: work: rc: 32
 main: status: predicate
 main: input '$ name bolt'
 main: key: 'name'='bolt'
+main: work: rc: 28
 main: status: predicate
 main: input '= sold 4123'
 main: field: 'sold'='4123'
@@ -5597,16 +5950,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: predicate
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: predicate
 main: input '$ sku GRO-000-2331'
 main: key: 'sku'='GRO-000-2331'
+main: work: rc: 33
 main: status: predicate
 main: input '$ name water'
 main: key: 'name'='water'
+main: work: rc: 29
 main: status: predicate
 main: input '= sold 17'
 main: field: 'sold'='17'
@@ -5624,19 +5979,21 @@ main: status: track
 main: input '- data'
 main: status: track
 main: input '+ data2'
-main: filter: rc: 19
+main: work: rc: 19
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: predicate
 main: input '$ sku GRO-000-415'
 main: key: 'sku'='GRO-000-415'
+main: work: rc: 32
 main: status: predicate
 main: input '$ name gum'
 main: key: 'name'='gum'
+main: work: rc: 27
 main: status: predicate
 main: input '= sold 1412.0'
 main: field: 'sold'='1412.0'
@@ -5650,13 +6007,15 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: predicate
 main: input '$ sku HRD-000-212'
 main: key: 'sku'='HRD-000-212'
+main: work: rc: 32
 main: status: predicate
 main: input '$ name rope'
 main: key: 'name'='rope'
+main: work: rc: 28
 main: status: predicate
 main: input '= sold 85.0'
 main: field: 'sold'='85.0'
@@ -5670,13 +6029,15 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: predicate
 main: input '$ sku HRD-000-517'
 main: key: 'sku'='HRD-000-517'
+main: work: rc: 32
 main: status: predicate
 main: input '$ name ladder'
 main: key: 'name'='ladder'
+main: work: rc: 30
 main: status: predicate
 main: input '= sold 0'
 main: field: 'sold'='0'
@@ -5690,13 +6051,15 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: predicate
 main: input '$ sku HRD-000-632'
 main: key: 'sku'='HRD-000-632'
+main: work: rc: 32
 main: status: predicate
 main: input '$ name bolt'
 main: key: 'name'='bolt'
+main: work: rc: 28
 main: status: predicate
 main: input '= sold 4123.0'
 main: field: 'sold'='4123.0'
@@ -5710,13 +6073,15 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: predicate
 main: input '$ sku GRO-000-2331'
 main: key: 'sku'='GRO-000-2331'
+main: work: rc: 33
 main: status: predicate
 main: input '$ name water'
 main: key: 'name'='water'
+main: work: rc: 29
 main: status: predicate
 main: input '= sold 17.0'
 main: field: 'sold'='17.0'
@@ -5734,19 +6099,21 @@ main: status: track
 main: input '- data2'
 main: status: track
 main: input '+ data3'
-main: filter: rc: 19
+main: work: rc: 19
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: predicate
 main: input '$ sku GRO-000-533'
 main: key: 'sku'='GRO-000-533'
+main: work: rc: 32
 main: status: predicate
 main: input '$ name fish'
 main: key: 'name'='fish'
+main: work: rc: 28
 main: status: predicate
 main: input '= sold 1321.0'
 main: field: 'sold'='1321.0'
@@ -5764,10 +6131,10 @@ main: status: track
 main: input '- data3'
 main: status: track
 main: input '+ data4'
-main: filter: rc: 19
+main: work: rc: 19
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '@ test4 value4'
 main: attr: 'test4'='value4'
@@ -5810,25 +6177,27 @@ main: attr: 'test'='value'
 main: status: track
 main: input '+ data'
 xpath_01: duplicate sibling name: 'data'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '@ test2 value2'
 main: attr: 'test2'='value2'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: predicate
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: predicate
 main: input '$ sku GRO-000-415'
 main: key: 'sku'='GRO-000-415'
+main: work: rc: 32
 main: status: predicate
 main: input '$ name gum'
 main: key: 'name'='gum'
+main: work: rc: 27
 main: status: predicate
 main: input '= sold 1412'
 main: field: 'sold'='1412'
@@ -5842,16 +6211,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: predicate
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: predicate
 main: input '$ sku HRD-000-212'
 main: key: 'sku'='HRD-000-212'
+main: work: rc: 32
 main: status: predicate
 main: input '$ name rope'
 main: key: 'name'='rope'
+main: work: rc: 28
 main: status: predicate
 main: input '= sold 85'
 main: field: 'sold'='85'
@@ -5868,16 +6239,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: predicate
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: predicate
 main: input '$ sku HRD-000-517'
 main: key: 'sku'='HRD-000-517'
+main: work: rc: 32
 main: status: predicate
 main: input '$ name ladder'
 main: key: 'name'='ladder'
+main: work: rc: 30
 main: status: predicate
 main: input '= sold 0'
 main: field: 'sold'='0'
@@ -5894,16 +6267,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: predicate
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: predicate
 main: input '$ sku HRD-000-632'
 main: key: 'sku'='HRD-000-632'
+main: work: rc: 32
 main: status: predicate
 main: input '$ name bolt'
 main: key: 'name'='bolt'
+main: work: rc: 28
 main: status: predicate
 main: input '= sold 4123'
 main: field: 'sold'='4123'
@@ -5917,16 +6292,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: predicate
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: predicate
 main: input '$ sku GRO-000-2331'
 main: key: 'sku'='GRO-000-2331'
+main: work: rc: 33
 main: status: predicate
 main: input '$ name water'
 main: key: 'name'='water'
+main: work: rc: 29
 main: status: predicate
 main: input '= sold 17'
 main: field: 'sold'='17'
@@ -6049,7 +6426,7 @@ main: status: zero
 main: input 'i xpath_01_23.inc'
 main: include: '../../../tests/xpath/xpath_01_23.inc'
 main: input '+ data'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: track
 main: input '= thing one'
 main: field: 'thing'='one'
@@ -6068,7 +6445,7 @@ main: input '= block 56'
 main: field: 'block'='56'
 main: status: track
 main: input '+ top-level'
-main: filter: rc: 21
+main: work: rc: 21
 main: status: track
 main: input '= type ethernet'
 main: field: 'type'='ethernet'
@@ -6163,25 +6540,27 @@ main: input '@ test value'
 main: attr: 'test'='value'
 main: status: track
 main: input '+ data'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '@ test2 value2'
 main: attr: 'test2'='value2'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku GRO-000-415'
 main: key: 'sku'='GRO-000-415'
+main: work: rc: 32
 main: status: track
 main: input '$ name gum'
 main: key: 'name'='gum'
+main: work: rc: 27
 main: status: track
 main: input '= sold 1412'
 main: field: 'sold'='1412'
@@ -6195,16 +6574,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku HRD-000-212'
 main: key: 'sku'='HRD-000-212'
+main: work: rc: 32
 main: status: track
 main: input '$ name rope'
 main: key: 'name'='rope'
+main: work: rc: 28
 main: status: track
 main: input '= sold 85'
 main: field: 'sold'='85'
@@ -6218,16 +6599,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku HRD-000-517'
 main: key: 'sku'='HRD-000-517'
+main: work: rc: 32
 main: status: track
 main: input '$ name ladder'
 main: key: 'name'='ladder'
+main: work: rc: 30
 main: status: track
 main: input '= sold 0'
 main: field: 'sold'='0'
@@ -6241,16 +6624,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku HRD-000-632'
 main: key: 'sku'='HRD-000-632'
+main: work: rc: 32
 main: status: track
 main: input '$ name bolt'
 main: key: 'name'='bolt'
+main: work: rc: 28
 main: status: track
 main: input '= sold 4123'
 main: field: 'sold'='4123'
@@ -6264,16 +6649,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku GRO-000-2331'
 main: key: 'sku'='GRO-000-2331'
+main: work: rc: 33
 main: status: track
 main: input '$ name water'
 main: key: 'name'='water'
+main: work: rc: 29
 main: status: track
 main: input '= sold 17'
 main: field: 'sold'='17'
@@ -6291,19 +6678,21 @@ main: status: track
 main: input '- data'
 main: status: track
 main: input '+ data2'
-main: filter: rc: 19
+main: work: rc: 19
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '$ sku GRO-000-415'
 main: key: 'sku'='GRO-000-415'
+main: work: rc: 32
 main: status: track
 main: input '$ name gum'
 main: key: 'name'='gum'
+main: work: rc: 27
 main: status: track
 main: input '= sold 1412.0'
 main: field: 'sold'='1412.0'
@@ -6317,13 +6706,15 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '$ sku HRD-000-212'
 main: key: 'sku'='HRD-000-212'
+main: work: rc: 32
 main: status: track
 main: input '$ name rope'
 main: key: 'name'='rope'
+main: work: rc: 28
 main: status: track
 main: input '= sold 85.0'
 main: field: 'sold'='85.0'
@@ -6337,13 +6728,15 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '$ sku HRD-000-517'
 main: key: 'sku'='HRD-000-517'
+main: work: rc: 32
 main: status: track
 main: input '$ name ladder'
 main: key: 'name'='ladder'
+main: work: rc: 30
 main: status: track
 main: input '= sold 0'
 main: field: 'sold'='0'
@@ -6357,13 +6750,15 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '$ sku HRD-000-632'
 main: key: 'sku'='HRD-000-632'
+main: work: rc: 32
 main: status: track
 main: input '$ name bolt'
 main: key: 'name'='bolt'
+main: work: rc: 28
 main: status: track
 main: input '= sold 4123.0'
 main: field: 'sold'='4123.0'
@@ -6377,13 +6772,15 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '$ sku GRO-000-2331'
 main: key: 'sku'='GRO-000-2331'
+main: work: rc: 33
 main: status: track
 main: input '$ name water'
 main: key: 'name'='water'
+main: work: rc: 29
 main: status: track
 main: input '= sold 17.0'
 main: field: 'sold'='17.0'
@@ -6401,19 +6798,21 @@ main: status: track
 main: input '- data2'
 main: status: track
 main: input '+ data3'
-main: filter: rc: 19
+main: work: rc: 19
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '$ sku GRO-000-533'
 main: key: 'sku'='GRO-000-533'
+main: work: rc: 32
 main: status: track
 main: input '$ name fish'
 main: key: 'name'='fish'
+main: work: rc: 28
 main: status: track
 main: input '= sold 1321.0'
 main: field: 'sold'='1321.0'
@@ -6431,10 +6830,10 @@ main: status: track
 main: input '- data3'
 main: status: track
 main: input '+ data4'
-main: filter: rc: 19
+main: work: rc: 19
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '@ test4 value4'
 main: attr: 'test4'='value4'
@@ -6477,25 +6876,27 @@ main: attr: 'test'='value'
 main: status: track
 main: input '+ data'
 xpath_01: duplicate sibling name: 'data'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '@ test2 value2'
 main: attr: 'test2'='value2'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku GRO-000-415'
 main: key: 'sku'='GRO-000-415'
+main: work: rc: 32
 main: status: track
 main: input '$ name gum'
 main: key: 'name'='gum'
+main: work: rc: 27
 main: status: track
 main: input '= sold 1412'
 main: field: 'sold'='1412'
@@ -6509,16 +6910,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku HRD-000-212'
 main: key: 'sku'='HRD-000-212'
+main: work: rc: 32
 main: status: track
 main: input '$ name rope'
 main: key: 'name'='rope'
+main: work: rc: 28
 main: status: track
 main: input '= sold 85'
 main: field: 'sold'='85'
@@ -6535,16 +6938,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku HRD-000-517'
 main: key: 'sku'='HRD-000-517'
+main: work: rc: 32
 main: status: track
 main: input '$ name ladder'
 main: key: 'name'='ladder'
+main: work: rc: 30
 main: status: track
 main: input '= sold 0'
 main: field: 'sold'='0'
@@ -6561,16 +6966,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku HRD-000-632'
 main: key: 'sku'='HRD-000-632'
+main: work: rc: 32
 main: status: track
 main: input '$ name bolt'
 main: key: 'name'='bolt'
+main: work: rc: 28
 main: status: track
 main: input '= sold 4123'
 main: field: 'sold'='4123'
@@ -6584,16 +6991,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku GRO-000-2331'
 main: key: 'sku'='GRO-000-2331'
+main: work: rc: 33
 main: status: track
 main: input '$ name water'
 main: key: 'name'='water'
+main: work: rc: 29
 main: status: track
 main: input '= sold 17'
 main: field: 'sold'='17'
@@ -6716,7 +7125,7 @@ main: status: zero
 main: input 'i xpath_01_23.inc'
 main: include: '../../../tests/xpath/xpath_01_23.inc'
 main: input '+ data'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: track
 main: input '= thing one'
 main: field: 'thing'='one'
@@ -6735,7 +7144,7 @@ main: input '= block 56'
 main: field: 'block'='56'
 main: status: track
 main: input '+ top-level'
-main: filter: rc: 21
+main: work: rc: 21
 main: status: track
 main: input '= type ethernet'
 main: field: 'type'='ethernet'
@@ -6830,25 +7239,27 @@ main: input '@ test value'
 main: attr: 'test'='value'
 main: status: track
 main: input '+ data'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '@ test2 value2'
 main: attr: 'test2'='value2'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku GRO-000-415'
 main: key: 'sku'='GRO-000-415'
+main: work: rc: 32
 main: status: track
 main: input '$ name gum'
 main: key: 'name'='gum'
+main: work: rc: 27
 main: status: track
 main: input '= sold 1412'
 main: field: 'sold'='1412'
@@ -6862,16 +7273,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku HRD-000-212'
 main: key: 'sku'='HRD-000-212'
+main: work: rc: 32
 main: status: track
 main: input '$ name rope'
 main: key: 'name'='rope'
+main: work: rc: 28
 main: status: track
 main: input '= sold 85'
 main: field: 'sold'='85'
@@ -6885,16 +7298,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku HRD-000-517'
 main: key: 'sku'='HRD-000-517'
+main: work: rc: 32
 main: status: track
 main: input '$ name ladder'
 main: key: 'name'='ladder'
+main: work: rc: 30
 main: status: track
 main: input '= sold 0'
 main: field: 'sold'='0'
@@ -6908,16 +7323,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku HRD-000-632'
 main: key: 'sku'='HRD-000-632'
+main: work: rc: 32
 main: status: track
 main: input '$ name bolt'
 main: key: 'name'='bolt'
+main: work: rc: 28
 main: status: track
 main: input '= sold 4123'
 main: field: 'sold'='4123'
@@ -6931,16 +7348,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku GRO-000-2331'
 main: key: 'sku'='GRO-000-2331'
+main: work: rc: 33
 main: status: track
 main: input '$ name water'
 main: key: 'name'='water'
+main: work: rc: 29
 main: status: track
 main: input '= sold 17'
 main: field: 'sold'='17'
@@ -6958,19 +7377,21 @@ main: status: track
 main: input '- data'
 main: status: track
 main: input '+ data2'
-main: filter: rc: 19
+main: work: rc: 19
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '$ sku GRO-000-415'
 main: key: 'sku'='GRO-000-415'
+main: work: rc: 32
 main: status: track
 main: input '$ name gum'
 main: key: 'name'='gum'
+main: work: rc: 27
 main: status: track
 main: input '= sold 1412.0'
 main: field: 'sold'='1412.0'
@@ -6984,13 +7405,15 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '$ sku HRD-000-212'
 main: key: 'sku'='HRD-000-212'
+main: work: rc: 32
 main: status: track
 main: input '$ name rope'
 main: key: 'name'='rope'
+main: work: rc: 28
 main: status: track
 main: input '= sold 85.0'
 main: field: 'sold'='85.0'
@@ -7004,13 +7427,15 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '$ sku HRD-000-517'
 main: key: 'sku'='HRD-000-517'
+main: work: rc: 32
 main: status: track
 main: input '$ name ladder'
 main: key: 'name'='ladder'
+main: work: rc: 30
 main: status: track
 main: input '= sold 0'
 main: field: 'sold'='0'
@@ -7024,13 +7449,15 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '$ sku HRD-000-632'
 main: key: 'sku'='HRD-000-632'
+main: work: rc: 32
 main: status: track
 main: input '$ name bolt'
 main: key: 'name'='bolt'
+main: work: rc: 28
 main: status: track
 main: input '= sold 4123.0'
 main: field: 'sold'='4123.0'
@@ -7044,13 +7471,15 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '$ sku GRO-000-2331'
 main: key: 'sku'='GRO-000-2331'
+main: work: rc: 33
 main: status: track
 main: input '$ name water'
 main: key: 'name'='water'
+main: work: rc: 29
 main: status: track
 main: input '= sold 17.0'
 main: field: 'sold'='17.0'
@@ -7068,19 +7497,21 @@ main: status: track
 main: input '- data2'
 main: status: track
 main: input '+ data3'
-main: filter: rc: 19
+main: work: rc: 19
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '$ sku GRO-000-533'
 main: key: 'sku'='GRO-000-533'
+main: work: rc: 32
 main: status: track
 main: input '$ name fish'
 main: key: 'name'='fish'
+main: work: rc: 28
 main: status: track
 main: input '= sold 1321.0'
 main: field: 'sold'='1321.0'
@@ -7098,10 +7529,10 @@ main: status: track
 main: input '- data3'
 main: status: track
 main: input '+ data4'
-main: filter: rc: 19
+main: work: rc: 19
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '@ test4 value4'
 main: attr: 'test4'='value4'
@@ -7144,25 +7575,27 @@ main: attr: 'test'='value'
 main: status: track
 main: input '+ data'
 xpath_01: duplicate sibling name: 'data'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '{ item'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '@ test2 value2'
 main: attr: 'test2'='value2'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku GRO-000-415'
 main: key: 'sku'='GRO-000-415'
+main: work: rc: 32
 main: status: track
 main: input '$ name gum'
 main: key: 'name'='gum'
+main: work: rc: 27
 main: status: track
 main: input '= sold 1412'
 main: field: 'sold'='1412'
@@ -7176,16 +7609,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku HRD-000-212'
 main: key: 'sku'='HRD-000-212'
+main: work: rc: 32
 main: status: track
 main: input '$ name rope'
 main: key: 'name'='rope'
+main: work: rc: 28
 main: status: track
 main: input '= sold 85'
 main: field: 'sold'='85'
@@ -7202,16 +7637,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku HRD-000-517'
 main: key: 'sku'='HRD-000-517'
+main: work: rc: 32
 main: status: track
 main: input '$ name ladder'
 main: key: 'name'='ladder'
+main: work: rc: 30
 main: status: track
 main: input '= sold 0'
 main: field: 'sold'='0'
@@ -7228,16 +7665,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku HRD-000-632'
 main: key: 'sku'='HRD-000-632'
+main: work: rc: 32
 main: status: track
 main: input '$ name bolt'
 main: key: 'name'='bolt'
+main: work: rc: 28
 main: status: track
 main: input '= sold 4123'
 main: field: 'sold'='4123'
@@ -7251,16 +7690,18 @@ main: status: track
 main: input '> item'
 main: status: track
 main: input '< item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '@ test3 value3'
 main: attr: 'test3'='value3'
 main: status: track
 main: input '$ sku GRO-000-2331'
 main: key: 'sku'='GRO-000-2331'
+main: work: rc: 33
 main: status: track
 main: input '$ name water'
 main: key: 'name'='water'
+main: work: rc: 29
 main: status: track
 main: input '= sold 17'
 main: field: 'sold'='17'
