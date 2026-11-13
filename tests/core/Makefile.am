@@ -53,7 +53,9 @@ test_16.c \
 test_17.c \
 test_18.c \
 test_19.c \
-test_20.c
+test_20.c \
+test_21.c \
+test_22.c
 
 test_01_test_SOURCES = test_01.c
 test_02_test_SOURCES = test_02.c
@@ -72,6 +74,8 @@ test_17_test_SOURCES = test_17.c
 test_18_test_SOURCES = test_18.c
 test_19_test_SOURCES = test_19.c
 test_20_test_SOURCES = test_20.c
+test_21_test_SOURCES = test_21.c
+test_22_test_SOURCES = test_22.c
 
 base_tests = ${TEST_CASES:.c=.test}
 
