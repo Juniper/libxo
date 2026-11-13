@@ -86,7 +86,8 @@ sub extract_docs {
     open INPUT, "$cmd |";
     local @input = <INPUT>;
     close INPUT;
-    my $ln, $new = 0, $first = 1, $need_nl, $in_code = 0, $code_indent;
+    my $ln, $new = 0, $first = 1, $in_code = 0, $code_indent;
+    my @sections, $title, $text;
 
     for ($ln = 0; $ln <= $#input; $ln++) {
 	chomp($_ = $input[$ln]);
@@ -115,35 +116,44 @@ sub extract_docs {
 	}
 
 	if ($in_code && !$code) {
-	    print "\n";
+	    $text .= "\n";
 	    $in_code = 0;
 	}
 
 	if ($new) {
-	    if ($need_nl) {
-		print "\n\n";
-		$need_nl = 0;
-	    }
-
+	    push(@sections, [ $title, $text ]) if defined $title;
+	    $title = $_;
 	    $under = "+" x (length($_) + 2);
 
-	    print "'$_'\n$under\n\n";
-	    print "The message \"$_\" can be caused by code like:\n";
+	    $text = "'$_'\n$under\n\n";
+	    $text .= "The message \"$_\" can be caused by code like:\n";
 	    $new = 0;
 
 	} elsif ($code) {
-	    print "\n::\n\n" unless $in_code;
-	    print "    $_\n";
+	    # "like:" before a code block becomes "like::"
+	    if (!$in_code) {
+		$text .= "\n" unless $text =~ s/:\n$/::\n\n/;
+		$text .= "::\n\n" unless $text =~ /::\n\n$/;
+	    }
+	    $text .= "    $_\n";
 	    $in_code = 1;
 
 	} elsif (/^Should be/i) {
-	    print "This code should be replaced with code like:\n";
+	    $text .= "This code should be replaced with code like:\n";
 
 	} else {
-	    print "$_\n";
-	    $need_nl = 1;
+	    $text .= "$_\n";
 	}
     }
+    push(@sections, [ $title, $text ]) if defined $title;
+
+    # Sort the sections by title, two blank lines between them
+    my @sorted = sort { lc($a->[0]) cmp lc($b->[0]) || $a->[0] cmp $b->[0] }
+	@sections;
+    for my $sec (@sorted) {
+	$sec->[1] =~ s/\n+$/\n/;
+    }
+    print join("\n\n", map { $_->[1] } @sorted);
 
     exit(0);
 }
@@ -484,6 +494,7 @@ sub check_parse_args {
     "comma" => "@",
     "dense" => "@",
     "display" => "d",
+    "drop-plus" => "@",
     "encoding" => "e",
     "escape-private" => "@",
     "escape-slash" => "@",
