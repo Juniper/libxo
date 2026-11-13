@@ -252,7 +252,7 @@ missing conversions wrote 0 bytes
   <div class="text">] [</div>
   <div class="data" data-tag="mixed" data-number="12abc">12abc</div>
   <div class="text">] [</div>
-  <div class="data" data-tag="padded" data-number="4096  ">4K</div>
+  <div class="data" data-tag="padded" data-number="4096">4K    </div>
   <div class="text">] [</div>
   <div class="data" data-tag="after" data-number="4096">4K</div>
   <div class="text">]</div>
