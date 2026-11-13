@@ -4,7 +4,7 @@ negative -1,234,567
 precision 0000000042
 long 1,234,567,890
 long long 123,456,789,012,345
-star width              1,234,567
+star width            1,234,567
 bit-width 64 9,876,543,210
 small 42
 zero 0
