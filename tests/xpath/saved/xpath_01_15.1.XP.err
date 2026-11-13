@@ -23,22 +23,25 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '$ name eth0'
 main: key: 'name'='eth0'
+main: work: rc: 20
 main: status: full
 main: input '= val 1'
 main: field: 'val'='1'
+main: work: rc: 15
 main: status: full
 main: input '>item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: track
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '$ name lo0'
 main: key: 'name'='lo0'
+main: work: rc: 19
 main: status: track
 main: input '= val 2'
 main: field: 'val'='2'
@@ -46,10 +49,11 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '$ name eth1'
 main: key: 'name'='eth1'
+main: work: rc: 20
 main: status: track
 main: input '= val 3'
 main: field: 'val'='3'
@@ -83,10 +87,11 @@ main: input '{item'
 xpath_01: duplicate sibling name: 'item'
 main: status: zero
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '$ val 1'
 main: key: 'val'='1'
+main: work: rc: 15
 main: status: track
 main: input '= label a'
 main: field: 'label'='a'
@@ -94,28 +99,32 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '$ val 3'
 main: key: 'val'='3'
+main: work: rc: 15
 main: status: full
 main: input '= label b'
 main: field: 'label'='b'
+main: work: rc: 19
 main: status: full
 main: input '>item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: track
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '$ val 5'
 main: key: 'val'='5'
+main: work: rc: 15
 main: status: full
 main: input '= label c'
 main: field: 'label'='c'
+main: work: rc: 19
 main: status: full
 main: input '>item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: track
 main: input '}item'
 main: status: track
@@ -145,34 +154,41 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '$ flag 1'
 main: key: 'flag'='1'
+main: work: rc: 17
 main: status: predicate
 main: input '$ name eth0'
 main: key: 'name'='eth0'
+main: work: rc: 20
 main: status: full
 main: input '$ alt lo0'
 main: key: 'alt'='lo0'
+main: work: rc: 17
 main: status: full
 main: input '= val 1'
 main: field: 'val'='1'
+main: work: rc: 15
 main: status: full
 main: input '>item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: track
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '$ flag 0'
 main: key: 'flag'='0'
+main: work: rc: 17
 main: status: predicate
 main: input '$ name eth1'
 main: key: 'name'='eth1'
+main: work: rc: 20
 main: status: predicate
 main: input '$ alt lo0'
 main: key: 'alt'='lo0'
+main: work: rc: 17
 main: status: track
 main: input '= val 2'
 main: field: 'val'='2'
@@ -180,16 +196,19 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '$ flag 1'
 main: key: 'flag'='1'
+main: work: rc: 17
 main: status: predicate
 main: input '$ name wlan0'
 main: key: 'name'='wlan0'
+main: work: rc: 21
 main: status: track
 main: input '$ alt eth2'
 main: key: 'alt'='eth2'
+main: work: rc: 18
 main: status: track
 main: input '= val 3'
 main: field: 'val'='3'
