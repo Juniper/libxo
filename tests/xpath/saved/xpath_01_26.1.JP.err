@@ -17,16 +17,16 @@ added filter: 0
                         000005: type 70 (C_ELEMENT), str 14 [missing], contents 0, next 0, prev 0
 main: status: zero
 main: input '+top'
-main: filter: rc: 11
+main: work: rc: 11
 main: status: track
 main: input '+data'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '= big 5'
 main: field: 'big'='5'
 main: status: predicate
 main: input '+inner'
-main: filter: rc: 19
+main: work: rc: 19
 main: status: conditional
 main: input '= x 1'
 main: field: 'x'='1'
@@ -36,7 +36,7 @@ main: status: predicate
 main: input '-data'
 main: status: track
 main: input '+other'
-main: filter: rc: 17
+main: work: rc: 17
 main: status: track
 main: input '= y 2'
 main: field: 'y'='2'
@@ -63,16 +63,16 @@ added filter: 0
 main: status: zero
 main: input '+top'
 xpath_01: duplicate sibling name: 'top'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: track
 main: input '+data'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '= big 5'
 main: field: 'big'='5'
 main: status: predicate
 main: input '+inner'
-main: filter: rc: 19
+main: work: rc: 19
 main: status: conditional
 main: input '= x 1'
 main: field: 'x'='1'
@@ -82,7 +82,7 @@ main: status: predicate
 main: input '-data'
 main: status: track
 main: input '+other'
-main: filter: rc: 15
+main: work: rc: 15
 main: status: track
 main: input '= y 2'
 main: field: 'y'='2'
@@ -112,16 +112,16 @@ xpath_01: test: filter expression feature is unsupported: plus sign ('+')
                         000010: type 53 (T_NUMBER), str 28 [1], contents 0, next 0, prev 6
 main: status: zero
 main: input '+top'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: track
 main: input '+data'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '= big 5'
 main: field: 'big'='5'
 main: status: predicate
 main: input '+inner'
-main: filter: rc: 19
+main: work: rc: 19
 main: status: conditional
 main: input '= x 1'
 main: field: 'x'='1'
@@ -131,7 +131,7 @@ main: status: predicate
 main: input '-data'
 main: status: track
 main: input '+other'
-main: filter: rc: 17
+main: work: rc: 17
 main: status: track
 main: input '= y 2'
 main: field: 'y'='2'
@@ -160,16 +160,16 @@ xpath_01: test: filter expression feature is unsupported: plus sign ('+')
                     000008: type 53 (T_NUMBER), str 22 [1], contents 0, next 0, prev 4
 main: status: zero
 main: input '+top'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: track
 main: input '+data'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '= big 5'
 main: field: 'big'='5'
 main: status: predicate
 main: input '+inner'
-main: filter: rc: 19
+main: work: rc: 19
 main: status: conditional
 main: input '= x 1'
 main: field: 'x'='1'
@@ -179,7 +179,7 @@ main: status: predicate
 main: input '-data'
 main: status: track
 main: input '+other'
-main: filter: rc: 15
+main: work: rc: 15
 main: status: track
 main: input '= y 2'
 main: field: 'y'='2'
@@ -205,26 +205,28 @@ added filter: 0
                     000006: type 53 (T_NUMBER), str 14 [5], contents 0, next 0, prev 5
 main: status: zero
 main: input '+top'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: track
 main: input '+data'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '= big 5'
 main: field: 'big'='5'
+main: work: rc: 16
 main: status: full
 main: input '+inner'
-main: filter: rc: 19
+main: work: rc: 19
 main: status: full
 main: input '= x 1'
 main: field: 'x'='1'
+main: work: rc: 16
 main: status: full
 main: input '-inner'
 main: status: full
 main: input '-data'
 main: status: track
 main: input '+other'
-main: filter: rc: 17
+main: work: rc: 17
 main: status: track
 main: input '= y 2'
 main: field: 'y'='2'
@@ -250,16 +252,16 @@ added filter: 0
                     000006: type 53 (T_NUMBER), str 14 [6], contents 0, next 0, prev 5
 main: status: zero
 main: input '+top'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: track
 main: input '+data'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '= big 5'
 main: field: 'big'='5'
 main: status: track
 main: input '+inner'
-main: filter: rc: 19
+main: work: rc: 19
 main: status: track
 main: input '= x 1'
 main: field: 'x'='1'
@@ -269,7 +271,7 @@ main: status: track
 main: input '-data'
 main: status: track
 main: input '+other'
-main: filter: rc: 15
+main: work: rc: 15
 main: status: track
 main: input '= y 2'
 main: field: 'y'='2'
@@ -294,16 +296,16 @@ added filter: 0
                         000005: type 70 (C_ELEMENT), str 14 [big], contents 0, next 0, prev 0
 main: status: zero
 main: input '+top'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: track
 main: input '+data'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '= big 5'
 main: field: 'big'='5'
 main: status: track
 main: input '+inner'
-main: filter: rc: 19
+main: work: rc: 19
 main: status: track
 main: input '= x 1'
 main: field: 'x'='1'
@@ -313,7 +315,7 @@ main: status: track
 main: input '-data'
 main: status: track
 main: input '+other'
-main: filter: rc: 15
+main: work: rc: 15
 main: status: track
 main: input '= y 2'
 main: field: 'y'='2'
@@ -343,16 +345,16 @@ added filter: 0
                             000010: type 70 (C_ELEMENT), str 26 [missing], contents 0, next 0, prev 0
 main: status: zero
 main: input '+top'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: track
 main: input '+data'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '= big 5'
 main: field: 'big'='5'
 main: status: predicate
 main: input '+inner'
-main: filter: rc: 19
+main: work: rc: 19
 main: status: conditional
 main: input '= x 1'
 main: field: 'x'='1'
@@ -362,7 +364,7 @@ main: status: predicate
 main: input '-data'
 main: status: track
 main: input '+other'
-main: filter: rc: 17
+main: work: rc: 17
 main: status: track
 main: input '= y 2'
 main: field: 'y'='2'
@@ -391,16 +393,16 @@ added filter: 0
                         000009: type 53 (T_NUMBER), str 25 [6], contents 0, next 0, prev 8
 main: status: zero
 main: input '+top'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: track
 main: input '+data'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '= big 5'
 main: field: 'big'='5'
 main: status: predicate
 main: input '+inner'
-main: filter: rc: 19
+main: work: rc: 19
 main: status: conditional
 main: input '= x 1'
 main: field: 'x'='1'
@@ -410,7 +412,7 @@ main: status: predicate
 main: input '-data'
 main: status: track
 main: input '+other'
-main: filter: rc: 15
+main: work: rc: 15
 main: status: track
 main: input '= y 2'
 main: field: 'y'='2'
@@ -436,13 +438,13 @@ added filter: 0
                     000006: type 53 (T_NUMBER), str 14 [5], contents 0, next 0, prev 5
 main: status: zero
 main: input '+top'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: track
 main: input '+data'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '+inner'
-main: filter: rc: 17
+main: work: rc: 17
 main: status: conditional
 main: input '= x 1'
 main: field: 'x'='1'
@@ -451,6 +453,7 @@ main: input '-inner'
 main: status: predicate
 main: input '= big 5'
 main: field: 'big'='5'
+main: work: rc: 18
 main: status: full
 main: input '-data'
 main: status: track
@@ -473,13 +476,13 @@ added filter: 0
                     000006: type 53 (T_NUMBER), str 14 [6], contents 0, next 0, prev 5
 main: status: zero
 main: input '+top'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: track
 main: input '+data'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '+inner'
-main: filter: rc: 17
+main: work: rc: 17
 main: status: conditional
 main: input '= x 1'
 main: field: 'x'='1'
@@ -509,13 +512,13 @@ added filter: 0
                         000005: type 70 (C_ELEMENT), str 14 [missing], contents 0, next 0, prev 0
 main: status: zero
 main: input '+top'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: track
 main: input '+data'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: predicate
 main: input '+inner'
-main: filter: rc: 17
+main: work: rc: 17
 main: status: conditional
 main: input '= x 1'
 main: field: 'x'='1'
