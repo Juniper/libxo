@@ -16,10 +16,11 @@ main: input '{item'
 main: status: zero
 main: input '<item'
 xpath_01: function 'contains' requires 2 argument(s), got 1
-main: filter: rc: 7
+main: work: rc: 7
 main: status: track
 main: input '$ name foo'
 main: key: 'name'='foo'
+main: work: rc: 19
 main: status: track
 main: input '= val 1'
 main: field: 'val'='1'
@@ -28,10 +29,11 @@ main: input '>item'
 main: status: track
 main: input '<item'
 xpath_01: function 'contains' requires 2 argument(s), got 1
-main: filter: rc: 7
+main: work: rc: 7
 main: status: track
 main: input '$ name bar'
 main: key: 'name'='bar'
+main: work: rc: 19
 main: status: track
 main: input '= val 2'
 main: field: 'val'='2'
@@ -62,10 +64,11 @@ xpath_01: duplicate sibling name: 'item'
 main: status: zero
 main: input '<item'
 xpath_01: function 'starts-with' requires 2 argument(s), got 3
-main: filter: rc: 7
+main: work: rc: 7
 main: status: track
 main: input '$ name foo'
 main: key: 'name'='foo'
+main: work: rc: 19
 main: status: track
 main: input '= val 1'
 main: field: 'val'='1'
@@ -74,10 +77,11 @@ main: input '>item'
 main: status: track
 main: input '<item'
 xpath_01: function 'starts-with' requires 2 argument(s), got 3
-main: filter: rc: 7
+main: work: rc: 7
 main: status: track
 main: input '$ name bar'
 main: key: 'name'='bar'
+main: work: rc: 19
 main: status: track
 main: input '= val 2'
 main: field: 'val'='2'
@@ -103,10 +107,11 @@ main: input '{item'
 main: status: zero
 main: input '<item'
 xpath_01: function 'not' requires 1 argument(s), got 0
-main: filter: rc: 7
+main: work: rc: 7
 main: status: track
 main: input '$ id 1'
 main: key: 'id'='1'
+main: work: rc: 13
 main: status: track
 main: input '= val alpha'
 main: field: 'val'='alpha'
@@ -115,10 +120,11 @@ main: input '>item'
 main: status: track
 main: input '<item'
 xpath_01: function 'not' requires 1 argument(s), got 0
-main: filter: rc: 7
+main: work: rc: 7
 main: status: track
 main: input '$ id 2'
 main: key: 'id'='2'
+main: work: rc: 13
 main: status: track
 main: input '= val beta'
 main: field: 'val'='beta'
@@ -145,10 +151,11 @@ main: input '{item'
 main: status: zero
 main: input '<item'
 xpath_01: function 'true' requires 0 argument(s), got 1
-main: filter: rc: 7
+main: work: rc: 7
 main: status: track
 main: input '$ id 1'
 main: key: 'id'='1'
+main: work: rc: 13
 main: status: track
 main: input '= val alpha'
 main: field: 'val'='alpha'
@@ -157,10 +164,11 @@ main: input '>item'
 main: status: track
 main: input '<item'
 xpath_01: function 'true' requires 0 argument(s), got 1
-main: filter: rc: 7
+main: work: rc: 7
 main: status: track
 main: input '$ id 2'
 main: key: 'id'='2'
+main: work: rc: 13
 main: status: track
 main: input '= val beta'
 main: field: 'val'='beta'
@@ -187,10 +195,11 @@ main: input '{item'
 main: status: zero
 main: input '<item'
 xpath_01: function 'concat' requires at least 2 arguments, got 1
-main: filter: rc: 7
+main: work: rc: 7
 main: status: track
 main: input '$ id 1'
 main: key: 'id'='1'
+main: work: rc: 13
 main: status: track
 main: input '= val alpha'
 main: field: 'val'='alpha'
@@ -216,10 +225,11 @@ main: input '{item'
 main: status: zero
 main: input '<item'
 xpath_01: function 'ceiling' requires 1 argument(s), got 0
-main: filter: rc: 7
+main: work: rc: 7
 main: status: track
 main: input '$ price 3.5'
 main: key: 'price'='3.5'
+main: work: rc: 21
 main: status: track
 main: input '= val a'
 main: field: 'val'='a'
@@ -228,10 +238,11 @@ main: input '>item'
 main: status: track
 main: input '<item'
 xpath_01: function 'ceiling' requires 1 argument(s), got 0
-main: filter: rc: 7
+main: work: rc: 7
 main: status: track
 main: input '$ price 1.2'
 main: key: 'price'='1.2'
+main: work: rc: 21
 main: status: track
 main: input '= val b'
 main: field: 'val'='b'
