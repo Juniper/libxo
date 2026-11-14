@@ -411,7 +411,8 @@ xohtml's table sorting can use the number::
 The attribute is given only when grouping changed the text, and only
 when the field is a number: a single conversion with nothing before
 it (text after it, as in "{i:size/%d MB}", is allowed).  Padding and
-leading zeroes are removed.
+leading zeroes are removed, and the decimal point is always ".",
+whatever the locale's is ("1234567.50" for "1.234.567,50" in de_DE).
 
 .. index:: Field Modifiers; Key
 .. _key-modifier:
