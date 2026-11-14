@@ -321,6 +321,7 @@ struct xo_handle_s {
     xo_buffer_t xo_fmt;         /* Work area for building format strings */
     xo_buffer_t xo_attrs;       /* Work area for building XML attributes */
     xo_buffer_t xo_predicate;   /* Work area for building XPath predicates */
+    xo_buffer_t xo_number;      /* HTML: ungrouped value, for data-number */
     xo_stack_t *xo_stack;       /* Stack pointer */
     int xo_depth;               /* Depth of stack */
     int xo_stack_size;          /* Size of the stack */
@@ -389,6 +390,8 @@ struct xo_handle_s {
 #define XOIF_MADE_OUTPUT XOF_BIT(6)      /* Have already made output */
 #define XOIF_FINISHED   XOF_BIT(8)       /* xo_finish_h ran; nothing since */
 #define XOIF_USED       XOF_BIT(9)       /* Something was opened or emitted */
+#define XOIF_NUMBER_OK  XOF_BIT(10) /* Field may get data-number (grouped) */
+#define XOIF_NUMBER     XOF_BIT(11) /* xo_number holds the ungrouped value */
 #ifdef LIBXO_NEED_FILTERS
 #define XOIF_FILTERING  XOF_BIT(7)       /* Actively filtering (XOF_FILTER) */
 #else  /* LIBXO_NEED_FILTERS */
@@ -2607,6 +2610,7 @@ xo_destroy (xo_handle_t *xop_arg)
     xo_buf_cleanup(&xop->xo_data);
     xo_buf_cleanup(&xop->xo_fmt);
     xo_buf_cleanup(&xop->xo_predicate);
+    xo_buf_cleanup(&xop->xo_number);
     xo_buf_cleanup(&xop->xo_attrs);
     xo_buf_cleanup(&xop->xo_color_buf);
 #ifdef LIBXO_NEED_MAP
@@ -4531,9 +4535,10 @@ xo_emit_field_value (xo_handle_t *xop, xo_buffer_t *xbp,
 
 	/*
 	 * Grouping, from XOF_GROUP, {i:} or "'", is for display styles
-	 * only; encoded values are never grouped.
+	 * only; encoded values are never grouped.  {h:} wins, since it
+	 * can't humanize a grouped value.
 	 */
-	if (rc > 0
+	if (rc > 0 && !(flags & XFF_HUMANIZE)
 	        && (XOF_ISSET(xop, XOF_GROUP) || (flags & XFF_INT_GROUP)
 		    || (xfp->xf_extflags & XXF_GROUP))
 	        && (style == XO_STYLE_TEXT || style == XO_STYLE_HTML)
@@ -4543,8 +4548,26 @@ xo_emit_field_value (xo_handle_t *xop, xo_buffer_t *xbp,
 	    unsigned gflags = (xfp->xf_seen_minus ? XO_GF_LEFT : 0)
 		| (xfp->xf_space ? XO_GF_SPACE : 0);
 	    xo_off_t added = 0;
+
+	    /* Save the ungrouped text for HTML's data-number */
+	    xo_buffer_t *nbp = &xop->xo_number;
+	    ssize_t raw_len = rc;
+	    if (XOIF_ISSET(xop, XOIF_NUMBER_OK)) {
+		xo_buf_reset(nbp);
+		if (xo_check_for_room(xop, nbp, raw_len) < 0)
+		    XOIF_CLEAR(xop, XOIF_NUMBER_OK);
+		else
+		    xo_buf_append(nbp, xbp->xb_curp, raw_len);
+	    }
+
 	    rc = xo_grouping_fixup(xop, xbp, start_off, rc, gflags, &added);
 	    columns += added;	/* A separator can be multibyte */
+
+	    /* Only worth recording when grouping changed the text */
+	    if (XOIF_ISSET(xop, XOIF_NUMBER_OK)
+		    && (rc != raw_len
+			|| memcmp(xbp->xb_curp, nbp->xb_bufp, rc) != 0))
+		XOIF_SET(xop, XOIF_NUMBER);
 	}
 
 	if (rc > 0) {
@@ -4795,6 +4818,24 @@ xo_do_format_field (xo_handle_t *xop, const xo_field_info_t *xfip,
         num_fspecs = (unsigned) n;
     }
 
+    /*
+     * HTML gives a grouped value its ungrouped number in the
+     * "data-number" attribute (xo_buf_append_div), but only when the
+     * field is a number: one conversion, with nothing before it.
+     * The grouping code in xo_emit_field_value fills in xo_number.
+     */
+    XOIF_CLEAR(xop, XOIF_NUMBER_OK | XOIF_NUMBER);
+    if (style == XO_STYLE_HTML && xbp == &xop->xo_data
+            && !(flags & XFF_HUMANIZE)
+            && num_fspecs > 0 && fspecs[0].xf_fc != XO_ROLE_TEXT) {
+        unsigned j;
+        for (j = 1; j < num_fspecs; j++)
+            if (fspecs[j].xf_fc != XO_ROLE_TEXT)
+                break;
+        if (j == num_fspecs)
+            XOIF_SET(xop, XOIF_NUMBER_OK);
+    }
+
     xo_fspec_t *xfp = fspecs;
     unsigned i;
 
@@ -4912,6 +4953,8 @@ xo_do_format_field (xo_handle_t *xop, const xo_field_info_t *xfip,
 
         xo_advance_vap(xop, field_flags, consumed, cur);
     }
+
+    XOIF_CLEAR(xop, XOIF_NUMBER_OK);
 
     if (flags & XFF_GT_FLAGS) {
 	/*
@@ -5724,6 +5767,30 @@ xo_build_predicate (xo_handle_t *xop, const char *name, ssize_t nlen,
  * Html mode: append a <div> to the output buffer contain a field
  * along with all the supporting information indicated by the flags.
  */
+/*
+ * Insert a data-number attribute at "offset", the end of the open
+ * <div>'s attributes, moving the value that follows it to the right.
+ * The value must need no escaping.
+ */
+static void
+xo_buf_insert_number (xo_handle_t *xop, xo_buffer_t *xbp, ssize_t offset,
+		      const char *value, ssize_t vlen)
+{
+    static const char div_number[] = "\" data-number=\"";
+    ssize_t div_len = sizeof(div_number) - 1;
+
+    if (xo_check_for_room(xop, xbp, div_len + vlen) < 0)
+	return;
+
+    ssize_t end_offset = xbp->xb_curp - xbp->xb_bufp;
+
+    memmove(xbp->xb_bufp + offset + div_len + vlen,
+	    xbp->xb_bufp + offset, end_offset - offset);
+    memcpy(xbp->xb_bufp + offset, div_number, div_len);
+    memcpy(xbp->xb_bufp + offset + div_len, value, vlen);
+    xbp->xb_curp += div_len + vlen;
+}
+
 static void
 xo_buf_append_div (xo_handle_t *xop, const xo_field_info_t *xfip,
 		   const char *class, xo_xff_flags_t flags,
@@ -5903,6 +5970,7 @@ xo_buf_append_div (xo_handle_t *xop, const xo_field_info_t *xfip,
     save.xhs_columns = xop->xo_columns;
     save.xhs_anchor_columns = xop->xo_anchor_columns;
 
+    XOIF_CLEAR(xop, XOIF_NUMBER); /* Set only by this field's formatting */
     xo_simple_field(xop, xfip, FALSE, value, vlen, fmt, flen, flags);
 
     if (flags & XFF_FIRST_CAP)
@@ -5913,9 +5981,6 @@ xo_buf_append_div (xo_handle_t *xop, const xo_field_info_t *xfip,
 	 * Unlike text style, we want to retain the original value and
 	 * stuff it into the "data-number" attribute.
 	 */
-	static const char div_number[] = "\" data-number=\"";
-	ssize_t div_len = sizeof(div_number) - 1;
-
 	ssize_t end_offset = xbp->xb_curp - xbp->xb_bufp;
 	ssize_t olen = end_offset - save.xhs_offset;
 
@@ -5932,22 +5997,45 @@ xo_buf_append_div (xo_handle_t *xop, const xo_field_info_t *xfip,
 	}
 
 	xo_format_humanize(xop, xbp, &save, flags);
+	xo_buf_insert_number(xop, xbp, base_offset, cp, olen);
 
-	if (!xo_check_for_room(xop, xbp, div_len + olen)) {
-	    ssize_t new_offset = xbp->xb_curp - xbp->xb_bufp;
+    } else if (XOIF_ISSET(xop, XOIF_NUMBER)) {
+	/*
+	 * A grouped number ({i:}, "'" or the "group" option): give
+	 * data-number the ungrouped value, without padding or the
+	 * leading zeroes of a precision.  A value with characters
+	 * that need escaping isn't a number, so it gets none.
+	 */
+	xo_buffer_t *nbp = &xop->xo_number;
+	char *cp = nbp->xb_bufp;
+	char *ep = nbp->xb_curp;
 
+	XOIF_CLEAR(xop, XOIF_NUMBER);
 
-	    /* Move the humanized string off to the left */
-	    memmove(xbp->xb_bufp + base_offset + div_len + olen,
-		    xbp->xb_bufp + base_offset, new_offset - base_offset);
+	while (ep > cp && ep[-1] == ' ')
+	    ep -= 1;
+	while (cp < ep && *cp == ' ')
+	    cp += 1;
 
-	    /* Copy the data_number attribute name */
-	    memcpy(xbp->xb_bufp + base_offset, div_number, div_len);
+	char *dp = cp;		/* Digits start after the sign */
+	if (dp < ep && (*dp == '-' || *dp == '+'))
+	    dp += 1;
 
-	    /* Copy the original long value */
-	    memcpy(xbp->xb_bufp + base_offset + div_len, cp, olen);
-	    xbp->xb_curp += div_len + olen;
+	char *zp = dp;
+	while (zp + 1 < ep && *zp == '0' && isdigit((unsigned char) zp[1]))
+	    zp += 1;
+	if (zp > dp) {
+	    memmove(dp, zp, ep - zp);
+	    ep -= zp - dp;
 	}
+
+	ssize_t olen = ep - cp, i;
+	for (i = 0; i < olen; i++)
+	    if (strchr("&<>\"", cp[i]) != NULL)
+		break;
+
+	if (olen > 0 && i == olen)
+	    xo_buf_insert_number(xop, xbp, base_offset, cp, olen);
     }
 
     xo_data_append(xop, div_close, sizeof(div_close) - 1);
