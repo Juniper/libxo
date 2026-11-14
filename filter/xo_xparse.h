@@ -262,6 +262,13 @@ xo_xparse_node_set_flags (xo_xparse_data_t *xdp, xo_xparse_node_id_t id,
 int
 xo_xparse_node_contains_dot (xo_xparse_data_t *xdp, xo_xparse_node_id_t id);
 
+/*
+ * Return TRUE if the path expression rooted at 'id' needs a C_PATH
+ * wrapper (see xo_xparse.c).
+ */
+int
+xo_xparse_path_needs_wrapper (xo_xparse_data_t *xdp, xo_xparse_node_id_t id);
+
 void
 xo_xparse_node_set_next (xo_xparse_data_t *xdp, xo_xparse_node_id_t id,
 			 xo_xparse_node_id_t value);
