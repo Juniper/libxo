@@ -401,6 +401,18 @@ always emit the plain, ungrouped digits, since a grouping separator
 would make the value a syntactically invalid (or non-numeric) encoded
 value.
 
+In the HTML style, a grouped field also gets the ungrouped value in
+the "data-number" attribute, as {h:} does, so scripts such as
+xohtml's table sorting can use the number::
+
+    <div class="data" data-tag="count"
+         data-number="1234567">1,234,567</div>
+
+The attribute is given only when grouping changed the text, and only
+when the field is a number: a single conversion with nothing before
+it (text after it, as in "{i:size/%d MB}", is allowed).  Padding and
+leading zeroes are removed.
+
 .. index:: Field Modifiers; Key
 .. _key-modifier:
 
