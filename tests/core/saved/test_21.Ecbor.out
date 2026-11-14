@@ -676,176 +676,265 @@ op create: [cbor] []
         op close_container: [precision] []
      [append] @ 1871 (1/1)
      ff                                                    .
-      op open_container: [humanize] []
-   [append] @ 1872 (9/9)
-   68 68 75 6d  61 6e 69 7a  - 65                        hhumanize
-   [append] @ 1881 (1/1)
+      op open_container: [numbers] []
+   [append] @ 1872 (8/8)
+   67 6e 75 6d  62 65 72 73                              gnumbers
+   [append] @ 1880 (1/1)
    bf                                                    .
-        op content: [right] [123456789]
-     [append] @ 1882 (6/6)
-     65 72 69 67  68 74                                    eright
+        op content: [padded] [1234567]
+     [append] @ 1881 (7/7)
+     66 70 61 64  64 65 64                                 fpadded
      [content] @ 1888 (5/5)
-     1a 07 5b cd  15                                       ..[..
-        op content: [left] [123456789]
+     1a 00 12 d6  87                                       .....
+        op content: [left] [1234567]
      [append] @ 1893 (5/5)
      64 6c 65 66  74                                       dleft
      [content] @ 1898 (5/5)
+     1a 00 12 d6  87                                       .....
+        op content: [quote] [1234567]
+     [append] @ 1903 (6/6)
+     65 71 75 6f  74 65                                    equote
+     [content] @ 1909 (5/5)
+     1a 00 12 d6  87                                       .....
+        op content: [negative] [-1234567]
+     [append] @ 1914 (9/9)
+     68 6e 65 67  61 74 69 76  - 65                        hnegative
+     [content] @ 1923 (5/5)
+     3a 00 12 d6  86                                       :....
+        op content: [plus] [+1234567]
+     [append] @ 1928 (5/5)
+     64 70 6c 75  73                                       dplus
+     [append] @ 1933 (9/9)
+     68 2b 31 32  33 34 35 36  - 37                        h+1234567
+     [content] @ 1933 (9/9)
+     68 2b 31 32  33 34 35 36  - 37                        h+1234567
+        op content: [zeroes] [1234567]
+     [append] @ 1942 (7/7)
+     66 7a 65 72  6f 65 73                                 fzeroes
+     [content] @ 1949 (5/5)
+     1a 00 12 d6  87                                       .....
+        op content: [negative-zeroes] [-1234567]
+     [append] @ 1954 (10/16)
+     6f 6e 65 67  61 74 69 76  - 65 2d 7a 65  72 6f 65 73  onegative-zeroes
+     [content] @ 1970 (5/5)
+     3a 00 12 d6  86                                       :....
+        op content: [float] [1234567.50]
+     [append] @ 1975 (6/6)
+     65 66 6c 6f  61 74                                    efloat
+     [content] @ 1981 (5/5)
+     fa 49 96 b4  3c                                       .I..<
+        op string: [trailing] [1234567 MB]
+     [append] @ 1986 (9/9)
+     68 74 72 61  69 6c 69 6e  - 67                        htrailing
+     [append] @ 1995 (b/11)
+     6a 31 32 33  34 35 36 37  - 20 4d 42                  j1234567 MB
+        op content: [star] [1234567]
+     [append] @ 2006 (5/5)
+     64 73 74 61  72                                       dstar
+     [content] @ 2011 (5/5)
+     1a 00 12 d6  87                                       .....
+        op content: [small] [123]
+     [append] @ 2016 (6/6)
+     65 73 6d 61  6c 6c                                    esmall
+     [content] @ 2022 (2/2)
+     18 7b                                                 .{
+        op content: [hex] [12d687]
+     [append] @ 2024 (4/4)
+     63 68 65 78                                           chex
+     [append] @ 2028 (7/7)
+     66 31 32 64  36 38 37                                 f12d687
+     [content] @ 2028 (7/7)
+     66 31 32 64  36 38 37                                 f12d687
+        op content: [leading] [#1234567]
+     [append] @ 2035 (8/8)
+     67 6c 65 61  64 69 6e 67                              gleading
+     [append] @ 2043 (9/9)
+     68 23 31 32  33 34 35 36  - 37                        h#1234567
+     [content] @ 2043 (9/9)
+     68 23 31 32  33 34 35 36  - 37                        h#1234567
+        op content: [two] [1234567.05]
+     [append] @ 2052 (4/4)
+     63 74 77 6f                                           ctwo
+     [content] @ 2056 (9/9)
+     fb 41 32 d6  87 0c cc cc  - cd                        .A2......
+        op content: [humanize] [1234567]
+     [append] @ 2065 (9/9)
+     68 68 75 6d  61 6e 69 7a  - 65                        hhumanize
+     [content] @ 2074 (5/5)
+     1a 00 12 d6  87                                       .....
+        op close_container: [numbers] []
+     [append] @ 2079 (1/1)
+     ff                                                    .
+      op open_container: [humanize] []
+   [append] @ 2080 (9/9)
+   68 68 75 6d  61 6e 69 7a  - 65                        hhumanize
+   [append] @ 2089 (1/1)
+   bf                                                    .
+        op content: [right] [123456789]
+     [append] @ 2090 (6/6)
+     65 72 69 67  68 74                                    eright
+     [content] @ 2096 (5/5)
+     1a 07 5b cd  15                                       ..[..
+        op content: [left] [123456789]
+     [append] @ 2101 (5/5)
+     64 6c 65 66  74                                       dleft
+     [content] @ 2106 (5/5)
      1a 07 5b cd  15                                       ..[..
         op content: [narrow] [123456789]
-     [append] @ 1903 (7/7)
+     [append] @ 2111 (7/7)
      66 6e 61 72  72 6f 77                                 fnarrow
-     [content] @ 1910 (5/5)
+     [content] @ 2118 (5/5)
      1a 07 5b cd  15                                       ..[..
         op content: [none] [123456789]
-     [append] @ 1915 (5/5)
+     [append] @ 2123 (5/5)
      64 6e 6f 6e  65                                       dnone
-     [content] @ 1920 (5/5)
+     [content] @ 2128 (5/5)
      1a 07 5b cd  15                                       ..[..
         op content: [space] [123456789]
-     [append] @ 1925 (6/6)
+     [append] @ 2133 (6/6)
      65 73 70 61  63 65                                    espace
-     [content] @ 1931 (5/5)
+     [content] @ 2139 (5/5)
      1a 07 5b cd  15                                       ..[..
         op content: [decimal] [4600000]
-     [append] @ 1936 (8/8)
+     [append] @ 2144 (8/8)
      67 64 65 63  69 6d 61 6c                              gdecimal
-     [content] @ 1944 (5/5)
+     [content] @ 2152 (5/5)
      1a 00 46 30  c0                                       ..F0.
         op content: [metric] [123456789]
-     [append] @ 1949 (7/7)
+     [append] @ 2157 (7/7)
      66 6d 65 74  72 69 63                                 fmetric
-     [content] @ 1956 (5/5)
+     [content] @ 2164 (5/5)
      1a 07 5b cd  15                                       ..[..
         op content: [small] [12]
-     [append] @ 1961 (6/6)
+     [append] @ 2169 (6/6)
      65 73 6d 61  6c 6c                                    esmall
-     [content] @ 1967 (1/1)
+     [content] @ 2175 (1/1)
      0c                                                    .
         op close_container: [humanize] []
-     [append] @ 1968 (1/1)
+     [append] @ 2176 (1/1)
      ff                                                    .
       op open_container: [names] []
-   [append] @ 1969 (6/6)
+   [append] @ 2177 (6/6)
    65 6e 61 6d  65 73                                    enames
-   [append] @ 1975 (1/1)
+   [append] @ 2183 (1/1)
    bf                                                    .
         op content: [bad name] [1]
-     [append] @ 1976 (9/9)
+     [append] @ 2184 (9/9)
      68 62 61 64  20 6e 61 6d  - 65                        hbad name
-     [content] @ 1985 (1/1)
+     [content] @ 2193 (1/1)
      01                                                    .
         op content: [bad%name] [2]
-     [append] @ 1986 (9/9)
+     [append] @ 2194 (9/9)
      68 62 61 64  25 6e 61 6d  - 65                        hbad%name
-     [content] @ 1995 (1/1)
+     [content] @ 2203 (1/1)
      02                                                    .
         op content: [state:LISTEN] [3]
-     [append] @ 1996 (d/13)
+     [append] @ 2204 (d/13)
      6c 73 74 61  74 65 3a 4c  - 49 53 54 45  4e           lstate:LISTEN
-     [content] @ 2009 (1/1)
+     [content] @ 2217 (1/1)
      03                                                    .
         op content: [2fast] [4]
-     [append] @ 2010 (6/6)
+     [append] @ 2218 (6/6)
      65 32 66 61  73 74                                    e2fast
-     [content] @ 2016 (1/1)
+     [content] @ 2224 (1/1)
      04                                                    .
         op content: [.dot] [5]
-     [append] @ 2017 (5/5)
+     [append] @ 2225 (5/5)
      64 2e 64 6f  74                                       d.dot
-     [content] @ 2022 (1/1)
+     [content] @ 2230 (1/1)
      05                                                    .
         op content: [good-name.v2_x] [6]
-     [append] @ 2023 (f/15)
+     [append] @ 2231 (f/15)
      6e 67 6f 6f  64 2d 6e 61  - 6d 65 2e 76  32 5f 78     ngood-name.v2_x
-     [content] @ 2038 (1/1)
+     [content] @ 2246 (1/1)
      06                                                    .
         op content: [missing-field-name] [8]
-     [append] @ 2039 (13/19)
+     [append] @ 2247 (13/19)
      72 6d 69 73  73 69 6e 67  - 2d 66 69 65  6c 64 2d 6e  rmissing-field-n
      61 6d 65                                              ame
-     [content] @ 2058 (1/1)
+     [content] @ 2266 (1/1)
      08                                                    .
         op open_container: [bad container] []
-     [append] @ 2059 (e/14)
+     [append] @ 2267 (e/14)
      6d 62 61 64  20 63 6f 6e  - 74 61 69 6e  65 72        mbad container
-     [append] @ 2073 (1/1)
+     [append] @ 2281 (1/1)
      bf                                                    .
           op close_container: [bad container] []
-       [append] @ 2074 (1/1)
+       [append] @ 2282 (1/1)
        ff                                                    .
         op open_list: [bad:list] []
-     [append] @ 2075 (9/9)
+     [append] @ 2283 (9/9)
      68 62 61 64  3a 6c 69 73  - 74                        hbad:list
-     [append] @ 2084 (1/1)
+     [append] @ 2292 (1/1)
      9f                                                    .
           op open_instance: [bad:list] []
-       [append] @ 2085 (1/1)
+       [append] @ 2293 (1/1)
        bf                                                    .
             op content: [value] [7]
-         [append] @ 2086 (6/6)
+         [append] @ 2294 (6/6)
          65 76 61 6c  75 65                                    evalue
-         [content] @ 2092 (1/1)
+         [content] @ 2300 (1/1)
          07                                                    .
             op close_instance: [bad:list] []
-         [append] @ 2093 (1/1)
+         [append] @ 2301 (1/1)
          ff                                                    .
           op close_list: [bad:list] []
-       [append] @ 2094 (1/1)
+       [append] @ 2302 (1/1)
        ff                                                    .
         op close_container: [names] []
-     [append] @ 2095 (1/1)
+     [append] @ 2303 (1/1)
      ff                                                    .
       op open_container: [bytes] []
-   [append] @ 2096 (6/6)
+   [append] @ 2304 (6/6)
    65 62 79 74  65 73                                    ebytes
-   [append] @ 2102 (1/1)
+   [append] @ 2310 (1/1)
    bf                                                    .
         op string: [one] [abc]
-     [append] @ 2103 (4/4)
+     [append] @ 2311 (4/4)
      63 6f 6e 65                                           cone
-     [append] @ 2107 (4/4)
+     [append] @ 2315 (4/4)
      63 61 62 63                                           cabc
         op content: [two] [42]
-     [append] @ 2111 (4/4)
+     [append] @ 2319 (4/4)
      63 74 77 6f                                           ctwo
-     [content] @ 2115 (2/2)
+     [content] @ 2323 (2/2)
      18 2a                                                 .*
         op string: [utf8] [café]
-     [append] @ 2117 (5/5)
+     [append] @ 2325 (5/5)
      64 75 74 66  38                                       dutf8
-     [append] @ 2122 (6/6)
+     [append] @ 2330 (6/6)
      65 63 61 66  c3 a9                                    ecaf..
         op content: [one-bytes] [0]
-     [append] @ 2128 (a/10)
+     [append] @ 2336 (a/10)
      69 6f 6e 65  2d 62 79 74  - 65 73                     ione-bytes
-     [content] @ 2138 (1/1)
+     [content] @ 2346 (1/1)
      00                                                    .
         op content: [two-bytes] [0]
-     [append] @ 2139 (a/10)
+     [append] @ 2347 (a/10)
      69 74 77 6f  2d 62 79 74  - 65 73                     itwo-bytes
-     [content] @ 2149 (1/1)
+     [content] @ 2357 (1/1)
      00                                                    .
         op content: [text-bytes] [0]
-     [append] @ 2150 (b/11)
+     [append] @ 2358 (b/11)
      6a 74 65 78  74 2d 62 79  - 74 65 73                  jtext-bytes
-     [content] @ 2161 (1/1)
+     [content] @ 2369 (1/1)
      00                                                    .
         op content: [utf8-bytes] [0]
-     [append] @ 2162 (b/11)
+     [append] @ 2370 (b/11)
      6a 75 74 66  38 2d 62 79  - 74 65 73                  jutf8-bytes
-     [content] @ 2173 (1/1)
+     [content] @ 2381 (1/1)
      00                                                    .
         op close_container: [bytes] []
-     [append] @ 2174 (1/1)
+     [append] @ 2382 (1/1)
      ff                                                    .
       op close_container: [top] []
-   [append] @ 2175 (1/1)
+   [append] @ 2383 (1/1)
    ff                                                    .
     op finish: [] []
- [append] @ 2176 (1/1)
+ [append] @ 2384 (1/1)
  ff                                                    .
   op flush: [] []
->[cbor] @ 0 (881/2177)
+>[cbor] @ 0 (951/2385)
 >bf 63 74 6f  70 bf 68 67  - 72 6f 75 70  69 6e 67 9f  .ctop.hgrouping.
 >bf 64 6e 61  6d 65 65 63  - 6f 6d 6d 61  67 6f 70 74  .dnameecommagopt
 >69 6f 6e 73  6b 67 72 6f  - 75 70 69 6e  67 3d 2b 33  ionskgrouping=+3
@@ -963,6 +1052,19 @@ op create: [cbor] []
 >51 eb 85 1f  66 73 74 72  - 69 6e 67 63  61 62 63 66  Q...fstringcabcf
 >73 65 63 6f  6e 64 fb 40  - 14 00 0b 02  92 81 77 68  second.@......wh
 >65 78 70 6c  69 63 69 74  - 66 30 30 30  30 32 61 ff  explicitf00002a.
+>67 6e 75 6d  62 65 72 73  - bf 66 70 61  64 64 65 64  gnumbers.fpadded
+>1a 00 12 d6  87 64 6c 65  - 66 74 1a 00  12 d6 87 65  .....dleft.....e
+>71 75 6f 74  65 1a 00 12  - d6 87 68 6e  65 67 61 74  quote.....hnegat
+>69 76 65 3a  00 12 d6 86  - 64 70 6c 75  73 68 2b 31  ive:....dplush+1
+>32 33 34 35  36 37 66 7a  - 65 72 6f 65  73 1a 00 12  234567fzeroes...
+>d6 87 6f 6e  65 67 61 74  - 69 76 65 2d  7a 65 72 6f  ..onegative-zero
+>65 73 3a 00  12 d6 86 65  - 66 6c 6f 61  74 fa 49 96  es:....efloat.I.
+>b4 3c 68 74  72 61 69 6c  - 69 6e 67 6a  31 32 33 34  .<htrailingj1234
+>35 36 37 20  4d 42 64 73  - 74 61 72 1a  00 12 d6 87  567 MBdstar.....
+>65 73 6d 61  6c 6c 18 7b  - 63 68 65 78  66 31 32 64  esmall.{chexf12d
+>36 38 37 67  6c 65 61 64  - 69 6e 67 68  23 31 32 33  687gleadingh#123
+>34 35 36 37  63 74 77 6f  - fb 41 32 d6  87 0c cc cc  4567ctwo.A2.....
+>cd 68 68 75  6d 61 6e 69  - 7a 65 1a 00  12 d6 87 ff  .hhumanize......
 >68 68 75 6d  61 6e 69 7a  - 65 bf 65 72  69 67 68 74  hhumanize.eright
 >1a 07 5b cd  15 64 6c 65  - 66 74 1a 07  5b cd 15 66  ..[..dleft..[..f
 >6e 61 72 72  6f 77 1a 07  - 5b cd 15 64  6e 6f 6e 65  narrow..[..dnone

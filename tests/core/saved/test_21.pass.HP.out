@@ -5,48 +5,48 @@
 </div>
 <div class="line">
   <div class="text">[</div>
-  <div class="data" data-tag="quote" data-ident="2">1,234,567</div>
+  <div class="data" data-tag="quote" data-ident="2" data-number="1234567">1,234,567</div>
   <div class="text">] [</div>
-  <div class="data" data-tag="quote-long" data-ident="2">1,234,567,890</div>
+  <div class="data" data-tag="quote-long" data-ident="2" data-number="1234567890">1,234,567,890</div>
   <div class="text">] [</div>
-  <div class="data" data-tag="quote-unsigned" data-ident="2">4,000,000,000</div>
+  <div class="data" data-tag="quote-unsigned" data-ident="2" data-number="4000000000">4,000,000,000</div>
   <div class="text">] [</div>
-  <div class="data" data-tag="quote-intmax" data-ident="2">9,876,543,210</div>
+  <div class="data" data-tag="quote-intmax" data-ident="2" data-number="9876543210">9,876,543,210</div>
   <div class="text">]</div>
 </div>
 <div class="line">
   <div class="text">[</div>
-  <div class="data" data-tag="int" data-ident="2">1,234,567</div>
+  <div class="data" data-tag="int" data-ident="2" data-number="1234567">1,234,567</div>
   <div class="text">] [</div>
-  <div class="data" data-tag="int-long" data-ident="2">1,234,567,890</div>
+  <div class="data" data-tag="int-long" data-ident="2" data-number="1234567890">1,234,567,890</div>
   <div class="text">] [</div>
-  <div class="data" data-tag="int-unsigned" data-ident="2">4,000,000,000</div>
+  <div class="data" data-tag="int-unsigned" data-ident="2" data-number="4000000000">4,000,000,000</div>
   <div class="text">] [</div>
   <div class="data" data-tag="int-small" data-ident="2">123</div>
   <div class="text">] [</div>
-  <div class="data" data-tag="int-negative" data-ident="2">-1,234,567</div>
+  <div class="data" data-tag="int-negative" data-ident="2" data-number="-1234567">-1,234,567</div>
   <div class="text">]</div>
 </div>
 <div class="line">
   <div class="text">[</div>
-  <div class="data" data-tag="quote-width" data-ident="2">   1,234,567</div>
+  <div class="data" data-tag="quote-width" data-ident="2" data-number="1234567">   1,234,567</div>
   <div class="text">] [</div>
-  <div class="data" data-tag="quote-left" data-ident="2">1,234,567   </div>
+  <div class="data" data-tag="quote-left" data-ident="2" data-number="1234567">1,234,567   </div>
   <div class="text">] [</div>
-  <div class="data" data-tag="int-width" data-ident="2">   1,234,567</div>
+  <div class="data" data-tag="int-width" data-ident="2" data-number="1234567">   1,234,567</div>
   <div class="text">] [</div>
-  <div class="data" data-tag="int-left" data-ident="2">1,234,567   </div>
+  <div class="data" data-tag="int-left" data-ident="2" data-number="1234567">1,234,567   </div>
   <div class="text">] [</div>
-  <div class="data" data-tag="int-narrow" data-ident="2">1,234,567</div>
+  <div class="data" data-tag="int-narrow" data-ident="2" data-number="1234567">1,234,567</div>
   <div class="text">]</div>
 </div>
 <div class="line">
   <div class="text">[</div>
-  <div class="data" data-tag="quote-float" data-ident="2">1,234,567.50</div>
+  <div class="data" data-tag="quote-float" data-ident="2" data-number="1234567.50">1,234,567.50</div>
   <div class="text">] [</div>
-  <div class="data" data-tag="int-float" data-ident="2">1,234,567.50</div>
+  <div class="data" data-tag="int-float" data-ident="2" data-number="1234567.50">1,234,567.50</div>
   <div class="text">] [</div>
-  <div class="data" data-tag="int-float-width" data-ident="2">   1,234,567.5</div>
+  <div class="data" data-tag="int-float-width" data-ident="2" data-number="1234567.5">   1,234,567.5</div>
   <div class="text">] [</div>
   <div class="data" data-tag="int-exp" data-ident="2">1.234568e+06</div>
   <div class="text">] [</div>
@@ -66,7 +66,7 @@
 </div>
 <div class="line">
   <div class="text">[</div>
-  <div class="data" data-tag="quote-encoded" data-ident="2">1,234,567</div>
+  <div class="data" data-tag="quote-encoded" data-ident="2" data-number="1234567">1,234,567</div>
   <div class="text">] [</div>
   <div class="data" data-tag="plain" data-ident="2">1234567</div>
   <div class="text">] [</div>
@@ -80,48 +80,48 @@
 </div>
 <div class="line">
   <div class="text">[</div>
-  <div class="data" data-tag="quote" data-ident="3">12.34.567</div>
+  <div class="data" data-tag="quote" data-ident="3" data-number="1234567">12.34.567</div>
   <div class="text">] [</div>
-  <div class="data" data-tag="quote-long" data-ident="3">1.23.45.67.890</div>
+  <div class="data" data-tag="quote-long" data-ident="3" data-number="1234567890">1.23.45.67.890</div>
   <div class="text">] [</div>
-  <div class="data" data-tag="quote-unsigned" data-ident="3">4.00.00.00.000</div>
+  <div class="data" data-tag="quote-unsigned" data-ident="3" data-number="4000000000">4.00.00.00.000</div>
   <div class="text">] [</div>
-  <div class="data" data-tag="quote-intmax" data-ident="3">9.87.65.43.210</div>
+  <div class="data" data-tag="quote-intmax" data-ident="3" data-number="9876543210">9.87.65.43.210</div>
   <div class="text">]</div>
 </div>
 <div class="line">
   <div class="text">[</div>
-  <div class="data" data-tag="int" data-ident="3">12.34.567</div>
+  <div class="data" data-tag="int" data-ident="3" data-number="1234567">12.34.567</div>
   <div class="text">] [</div>
-  <div class="data" data-tag="int-long" data-ident="3">1.23.45.67.890</div>
+  <div class="data" data-tag="int-long" data-ident="3" data-number="1234567890">1.23.45.67.890</div>
   <div class="text">] [</div>
-  <div class="data" data-tag="int-unsigned" data-ident="3">4.00.00.00.000</div>
+  <div class="data" data-tag="int-unsigned" data-ident="3" data-number="4000000000">4.00.00.00.000</div>
   <div class="text">] [</div>
   <div class="data" data-tag="int-small" data-ident="3">123</div>
   <div class="text">] [</div>
-  <div class="data" data-tag="int-negative" data-ident="3">-12.34.567</div>
+  <div class="data" data-tag="int-negative" data-ident="3" data-number="-1234567">-12.34.567</div>
   <div class="text">]</div>
 </div>
 <div class="line">
   <div class="text">[</div>
-  <div class="data" data-tag="quote-width" data-ident="3">   12.34.567</div>
+  <div class="data" data-tag="quote-width" data-ident="3" data-number="1234567">   12.34.567</div>
   <div class="text">] [</div>
-  <div class="data" data-tag="quote-left" data-ident="3">12.34.567   </div>
+  <div class="data" data-tag="quote-left" data-ident="3" data-number="1234567">12.34.567   </div>
   <div class="text">] [</div>
-  <div class="data" data-tag="int-width" data-ident="3">   12.34.567</div>
+  <div class="data" data-tag="int-width" data-ident="3" data-number="1234567">   12.34.567</div>
   <div class="text">] [</div>
-  <div class="data" data-tag="int-left" data-ident="3">12.34.567   </div>
+  <div class="data" data-tag="int-left" data-ident="3" data-number="1234567">12.34.567   </div>
   <div class="text">] [</div>
-  <div class="data" data-tag="int-narrow" data-ident="3">12.34.567</div>
+  <div class="data" data-tag="int-narrow" data-ident="3" data-number="1234567">12.34.567</div>
   <div class="text">]</div>
 </div>
 <div class="line">
   <div class="text">[</div>
-  <div class="data" data-tag="quote-float" data-ident="3">12.34.567.50</div>
+  <div class="data" data-tag="quote-float" data-ident="3" data-number="1234567.50">12.34.567.50</div>
   <div class="text">] [</div>
-  <div class="data" data-tag="int-float" data-ident="3">12.34.567.50</div>
+  <div class="data" data-tag="int-float" data-ident="3" data-number="1234567.50">12.34.567.50</div>
   <div class="text">] [</div>
-  <div class="data" data-tag="int-float-width" data-ident="3">   12.34.567.5</div>
+  <div class="data" data-tag="int-float-width" data-ident="3" data-number="1234567.5">   12.34.567.5</div>
   <div class="text">] [</div>
   <div class="data" data-tag="int-exp" data-ident="3">1.234568e+06</div>
   <div class="text">] [</div>
@@ -141,7 +141,7 @@
 </div>
 <div class="line">
   <div class="text">[</div>
-  <div class="data" data-tag="quote-encoded" data-ident="3">12.34.567</div>
+  <div class="data" data-tag="quote-encoded" data-ident="3" data-number="1234567">12.34.567</div>
   <div class="text">] [</div>
   <div class="data" data-tag="plain" data-ident="3">1234567</div>
   <div class="text">] [</div>
@@ -155,48 +155,48 @@
 </div>
 <div class="line">
   <div class="text">[</div>
-  <div class="data" data-tag="quote" data-ident="4">1,234,567</div>
+  <div class="data" data-tag="quote" data-ident="4" data-number="1234567">1,234,567</div>
   <div class="text">] [</div>
-  <div class="data" data-tag="quote-long" data-ident="4">1,234,567,890</div>
+  <div class="data" data-tag="quote-long" data-ident="4" data-number="1234567890">1,234,567,890</div>
   <div class="text">] [</div>
-  <div class="data" data-tag="quote-unsigned" data-ident="4">4,000,000,000</div>
+  <div class="data" data-tag="quote-unsigned" data-ident="4" data-number="4000000000">4,000,000,000</div>
   <div class="text">] [</div>
-  <div class="data" data-tag="quote-intmax" data-ident="4">9,876,543,210</div>
+  <div class="data" data-tag="quote-intmax" data-ident="4" data-number="9876543210">9,876,543,210</div>
   <div class="text">]</div>
 </div>
 <div class="line">
   <div class="text">[</div>
-  <div class="data" data-tag="int" data-ident="4">1,234,567</div>
+  <div class="data" data-tag="int" data-ident="4" data-number="1234567">1,234,567</div>
   <div class="text">] [</div>
-  <div class="data" data-tag="int-long" data-ident="4">1,234,567,890</div>
+  <div class="data" data-tag="int-long" data-ident="4" data-number="1234567890">1,234,567,890</div>
   <div class="text">] [</div>
-  <div class="data" data-tag="int-unsigned" data-ident="4">4,000,000,000</div>
+  <div class="data" data-tag="int-unsigned" data-ident="4" data-number="4000000000">4,000,000,000</div>
   <div class="text">] [</div>
   <div class="data" data-tag="int-small" data-ident="4">123</div>
   <div class="text">] [</div>
-  <div class="data" data-tag="int-negative" data-ident="4">-1,234,567</div>
+  <div class="data" data-tag="int-negative" data-ident="4" data-number="-1234567">-1,234,567</div>
   <div class="text">]</div>
 </div>
 <div class="line">
   <div class="text">[</div>
-  <div class="data" data-tag="quote-width" data-ident="4">   1,234,567</div>
+  <div class="data" data-tag="quote-width" data-ident="4" data-number="1234567">   1,234,567</div>
   <div class="text">] [</div>
-  <div class="data" data-tag="quote-left" data-ident="4">1,234,567   </div>
+  <div class="data" data-tag="quote-left" data-ident="4" data-number="1234567">1,234,567   </div>
   <div class="text">] [</div>
-  <div class="data" data-tag="int-width" data-ident="4">   1,234,567</div>
+  <div class="data" data-tag="int-width" data-ident="4" data-number="1234567">   1,234,567</div>
   <div class="text">] [</div>
-  <div class="data" data-tag="int-left" data-ident="4">1,234,567   </div>
+  <div class="data" data-tag="int-left" data-ident="4" data-number="1234567">1,234,567   </div>
   <div class="text">] [</div>
-  <div class="data" data-tag="int-narrow" data-ident="4">1,234,567</div>
+  <div class="data" data-tag="int-narrow" data-ident="4" data-number="1234567">1,234,567</div>
   <div class="text">]</div>
 </div>
 <div class="line">
   <div class="text">[</div>
-  <div class="data" data-tag="quote-float" data-ident="4">1,234,567.50</div>
+  <div class="data" data-tag="quote-float" data-ident="4" data-number="1234567.50">1,234,567.50</div>
   <div class="text">] [</div>
-  <div class="data" data-tag="int-float" data-ident="4">1,234,567.50</div>
+  <div class="data" data-tag="int-float" data-ident="4" data-number="1234567.50">1,234,567.50</div>
   <div class="text">] [</div>
-  <div class="data" data-tag="int-float-width" data-ident="4">   1,234,567.5</div>
+  <div class="data" data-tag="int-float-width" data-ident="4" data-number="1234567.5">   1,234,567.5</div>
   <div class="text">] [</div>
   <div class="data" data-tag="int-exp" data-ident="4">1.234568e+06</div>
   <div class="text">] [</div>
@@ -216,11 +216,11 @@
 </div>
 <div class="line">
   <div class="text">[</div>
-  <div class="data" data-tag="quote-encoded" data-ident="4">1,234,567</div>
+  <div class="data" data-tag="quote-encoded" data-ident="4" data-number="1234567">1,234,567</div>
   <div class="text">] [</div>
-  <div class="data" data-tag="plain" data-ident="4">1,234,567</div>
+  <div class="data" data-tag="plain" data-ident="4" data-number="1234567">1,234,567</div>
   <div class="text">] [</div>
-  <div class="data" data-tag="plain-float" data-ident="4">1,234,567.5</div>
+  <div class="data" data-tag="plain-float" data-ident="4" data-number="1234567.5">1,234,567.5</div>
   <div class="text">]</div>
 </div>
 <div class="line">
@@ -350,6 +350,45 @@
   <div class="data" data-tag="second">5.000042</div>
   <div class="text">] [</div>
   <div class="data" data-tag="explicit">42</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="padded" data-number="1234567">   1,234,567</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="left" data-number="1234567">1,234,567   </div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="quote" data-number="1234567">1,234,567</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="negative" data-number="-1234567">-1,234,567</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="plus" data-number="+1234567">+1,234,567</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="zeroes">0001234567</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="negative-zeroes">-0001234567</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="float" data-number="1234567.50">1,234,567.50</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="trailing" data-number="1234567">1,234,567 MB</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="star" data-number="1234567">   1,234,567</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="small">123</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="hex">12d687</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="leading">#1,234,567</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="two">1,234,567.05</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="humanize" data-number="1234567">1M</div>
   <div class="text">]</div>
 </div>
 <div class="line">

@@ -132,6 +132,23 @@
     <second>5.000042</second>
     <explicit>00002a</explicit>
   </precision>
+  <numbers>
+    <padded>1234567</padded>
+    <left>1234567</left>
+    <quote>1234567</quote>
+    <negative>-1234567</negative>
+    <plus>+1234567</plus>
+    <zeroes>1234567</zeroes>
+    <negative-zeroes>-1234567</negative-zeroes>
+    <float>1234567.50</float>
+    <trailing>1234567 MB</trailing>
+    <star>1234567</star>
+    <small>123</small>
+    <hex>12d687</hex>
+    <leading>#1234567</leading>
+    <two>1234567.05</two>
+    <humanize>1234567</humanize>
+  </numbers>
   <humanize>
     <right>123456789</right>
     <left>123456789</left>

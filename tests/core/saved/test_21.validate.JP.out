@@ -135,6 +135,23 @@
       "second": "5.000042",
       "explicit": "00002a"
     },
+    "numbers": {
+      "padded": 1234567,
+      "left": 1234567,
+      "quote": 1234567,
+      "negative": -1234567,
+      "plus": 1234567,
+      "zeroes": 1234567,
+      "negative-zeroes": -1234567,
+      "float": 1234567.50,
+      "trailing": "1234567 MB",
+      "star": 1234567,
+      "small": 123,
+      "hex": "12d687",
+      "leading": "#1234567",
+      "two": "1234567.05",
+      "humanize": 1234567
+    },
     "humanize": {
       "right": 123456789,
       "left": 123456789,

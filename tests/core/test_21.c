@@ -14,6 +14,8 @@
  *       whose '*' count differs from the display format's (repaired)
  *   precision: an integer's precision (leading zeroes) dropped from
  *       the default encoding format, but kept for floats and strings
+ *   numbers: HTML's data-number, the ungrouped value of a grouped
+ *       field that is one conversion with nothing before it
  *   humanize: {h:} with a width, left and right, narrower than the
  *       value, and with no width
  *   names: invalid field and container names (a space, '%', ':', a
@@ -126,6 +128,28 @@ precision (void)
 }
 
 static void
+numbers (void)
+{
+    xo_set_options(NULL, "grouping=+3");
+    xo_open_container("numbers");
+
+    /* These get data-number */
+    xo_emit("[{i:padded/%12d}] [{i:left/%-12d}] [{:quote/%'d}] "
+	    "[{i:negative/%d}] [{i:plus/%+d}]\n",
+	    1234567, 1234567, 1234567, -1234567, 1234567);
+    xo_emit("[{i:zeroes/%.10d}] [{i:negative-zeroes/%.10d}] "
+	    "[{i:float/%.2f}] [{i:trailing/%d MB}] [{i:star/%*d}]\n",
+	    1234567, -1234567, 1234567.5, 1234567, 12, 1234567);
+
+    /* These don't: not grouped, or not a number */
+    xo_emit("[{i:small/%d}] [{i:hex/%x}] [{i:leading/#%d}] "
+	    "[{i:two/%d.%02d}] [{hi:humanize/%ju}]\n",
+	    123, 1234567, 1234567, 1234567, 5, (uintmax_t) 1234567);
+
+    xo_close_container("numbers");
+}
+
+static void
 humanize (void)
 {
     xo_open_container("humanize");
@@ -207,6 +231,7 @@ main (int argc, char **argv)
 
     stars();
     precision();
+    numbers();
     humanize();
     names();
     bytes();
