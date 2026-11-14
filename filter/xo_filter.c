@@ -5193,9 +5193,21 @@ xo_eval_compile_node (xo_eval_prog_t *prog, xo_xparse_data_t *xdp,
 	return xo_eval_prog_emit(prog, xo_eval_attribute, id, 0, 0) >= 0
 	    ? 0 : -1;
 
-    case C_PATH:
+    case C_PATH: {
+	/*
+	 * xo_eval_path only knows child-element and attribute steps,
+	 * looked up by name from the context.  A path that starts any
+	 * other way ("/a", "../x", "*", "$v/x") would read as a relative
+	 * lookup there, so until those steps are compiled, such a path
+	 * compiles as its first node did when it was left unwrapped.
+	 */
+	xo_xparse_token_t first = xo_xparse_node_type(xdp, xnp->xn_contents);
+	if (first != C_ELEMENT && first != C_ATTRIBUTE)
+	    return xo_eval_compile_node(prog, xdp, xnp->xn_contents, dp, ops);
+
 	return xo_eval_prog_emit(prog, xo_eval_path, id, 0, 0) >= 0
 	    ? 0 : -1;
+    }
 
     case L_DOT:
 	return xo_eval_prog_emit(prog, xo_eval_dot, id, 0, 0) >= 0
