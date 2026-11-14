@@ -119,6 +119,60 @@
 #endif /* HAVE_STDIO_EXT_H */
 
 /*
+ * The locale's decimal point, cached when the locale is set up (or at
+ * first use, after xo_no_setlocale).  data-number values use "." in
+ * its place, and our xo_humanize_number uses it for HN_DECIMAL.
+ */
+static char xo_decimal_point[16]; /* Copy of locale's decimal point */
+static int xo_decimal_point_len;  /* strlen(xo_decimal_point); 0 if unset */
+
+static const char *
+xo_get_decimal_point (void)
+{
+    if (xo_decimal_point_len == 0) {
+        const char *dp = localeconv()->decimal_point;
+        size_t len = dp ? strlen(dp) : 0;
+
+        if (len == 0 || len >= sizeof(xo_decimal_point)) {
+            dp = ".";
+            len = 1;
+        }
+
+        memcpy(xo_decimal_point, dp, len + 1);
+        xo_decimal_point_len = len;
+    }
+
+    return xo_decimal_point;
+}
+
+#define XO_DECIMAL_POINT xo_get_decimal_point()
+
+/*
+ * Replace the first copy of the locale's decimal point in the len
+ * bytes at cp with ".", returning the new length.
+ */
+static ssize_t
+xo_decimal_fixup (char *cp, ssize_t len)
+{
+    const char *dpp = xo_get_decimal_point();
+    int dpl = xo_decimal_point_len;
+    char *ep = cp + len, *zp;
+
+    if (dpl == 1 && *dpp == '.')
+        return len;
+
+    for (zp = cp; zp + dpl <= ep; zp++) {
+        if (memcmp(zp, dpp, dpl) == 0) {
+            *zp = '.';
+            memmove(zp + 1, zp + dpl, ep - (zp + dpl));
+            return len - (dpl - 1);
+        }
+    }
+
+    return len;
+}
+
+/*
  * humanize_number is a great function, unless you don't have it.  So
  * we carry one in our pocket.
  */
@@ -392,6 +446,7 @@ struct xo_handle_s {
 #define XOIF_USED       XOF_BIT(9)       /* Something was opened or emitted */
 #define XOIF_NUMBER_OK  XOF_BIT(10) /* Field may get data-number (grouped) */
 #define XOIF_NUMBER     XOF_BIT(11) /* xo_number holds the ungrouped value */
+#define XOIF_DECIMAL_OK XOF_BIT(12) /* Encoded float gets "." as its point */
 #ifdef LIBXO_NEED_FILTERS
 #define XOIF_FILTERING  XOF_BIT(7)       /* Actively filtering (XOF_FILTER) */
 #else  /* LIBXO_NEED_FILTERS */
@@ -915,6 +970,9 @@ xo_init_handle (xo_handle_t *xop)
         if (codeset && xo_streq(codeset, "UTF-8"))
             xo_codeset_is_utf8 = TRUE;
 #endif /* CODESET */
+
+        xo_decimal_point_len = 0; /* Recache for the new locale */
+        (void) xo_get_decimal_point();
 
         /* Cache the grouping separator and precompute the grouping map */
         struct lconv *lcp = localeconv();
@@ -4570,6 +4628,14 @@ xo_emit_field_value (xo_handle_t *xop, xo_buffer_t *xbp,
 		XOIF_SET(xop, XOIF_NUMBER);
 	}
 
+	/*
+	 * An encoded number uses ".", whatever the locale's decimal
+	 * point is, so JSON stays valid and XML matches it.
+	 */
+	if (rc > 0 && XOIF_ISSET(xop, XOIF_DECIMAL_OK)
+		&& strchr("aAeEfFgG", xfp->xf_fc) != NULL)
+	    rc = columns = xo_decimal_fixup(xbp->xb_curp, rc);
+
 	if (rc > 0) {
 	    /*
 	     * For XML and HTML, we need "&<>" processing; for JSON,
@@ -4824,7 +4890,7 @@ xo_do_format_field (xo_handle_t *xop, const xo_field_info_t *xfip,
      * field is a number: one conversion, with nothing before it.
      * The grouping code in xo_emit_field_value fills in xo_number.
      */
-    XOIF_CLEAR(xop, XOIF_NUMBER_OK | XOIF_NUMBER);
+    XOIF_CLEAR(xop, XOIF_NUMBER_OK | XOIF_NUMBER | XOIF_DECIMAL_OK);
     if (style == XO_STYLE_HTML && xbp == &xop->xo_data
             && !(flags & XFF_HUMANIZE)
             && num_fspecs > 0 && fspecs[0].xf_fc != XO_ROLE_TEXT) {
@@ -4835,6 +4901,15 @@ xo_do_format_field (xo_handle_t *xop, const xo_field_info_t *xfip,
         if (j == num_fspecs)
             XOIF_SET(xop, XOIF_NUMBER_OK);
     }
+
+    /*
+     * The encoding styles give a float "." as its decimal point, but
+     * only when the field is a number: one conversion and no text.
+     * Anything else is a string, and the locale's point is left alone.
+     */
+    if (xo_style_is_encoding(xop)
+            && num_fspecs == 1 && fspecs[0].xf_fc != XO_ROLE_TEXT)
+        XOIF_SET(xop, XOIF_DECIMAL_OK);
 
     xo_fspec_t *xfp = fspecs;
     unsigned i;
@@ -4954,7 +5029,7 @@ xo_do_format_field (xo_handle_t *xop, const xo_field_info_t *xfip,
         xo_advance_vap(xop, field_flags, consumed, cur);
     }
 
-    XOIF_CLEAR(xop, XOIF_NUMBER_OK);
+    XOIF_CLEAR(xop, XOIF_NUMBER_OK | XOIF_DECIMAL_OK);
 
     if (flags & XFF_GT_FLAGS) {
 	/*
@@ -6003,7 +6078,8 @@ xo_buf_append_div (xo_handle_t *xop, const xo_field_info_t *xfip,
 	/*
 	 * A grouped number ({i:}, "'" or the "group" option): give
 	 * data-number the ungrouped value, without padding or the
-	 * leading zeroes of a precision.  A value with characters
+	 * leading zeroes of a precision, and with "." as the decimal
+	 * point, whatever the locale's is.  A value with characters
 	 * that need escaping isn't a number, so it gets none.
 	 */
 	xo_buffer_t *nbp = &xop->xo_number;
@@ -6028,6 +6104,9 @@ xo_buf_append_div (xo_handle_t *xop, const xo_field_info_t *xfip,
 	    memmove(dp, zp, ep - zp);
 	    ep -= zp - dp;
 	}
+
+	/* The locale's decimal point becomes ".", for parseFloat */
+	ep = dp + xo_decimal_fixup(dp, ep - dp);
 
 	ssize_t olen = ep - cp, i;
 	for (i = 0; i < olen; i++)
