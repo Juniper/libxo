@@ -52,6 +52,10 @@
 #include <inttypes.h>
 #endif /* HAVE_INTTYPES_H */
 
+#ifndef XO_DECIMAL_POINT	/* The includer may cache it */
+#define XO_DECIMAL_POINT (localeconv()->decimal_point)
+#endif /* XO_DECIMAL_POINT */
+
 /* humanize_number(3) */
 #define HN_DECIMAL		0x01
 #define HN_NOSPACE		0x02
@@ -201,7 +205,7 @@ xo_humanize_number (char *buf, size_t len, int64_t quotient,
 		s2 = ((remainder * 10 + divisor / 2) / divisor) % 10;
 		r = snprintf(buf, len, "%s%d%s%d%s%s%s",
 		    (s1 || s2) ? sign : "", s1,
-		    localeconv()->decimal_point, s2,
+		    XO_DECIMAL_POINT, s2,
 		    sep, SCALE2PREFIX(i), suffix);
 	} else {
 		rounded = magnitude + (remainder + divisor / 2) / divisor;
