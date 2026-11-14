@@ -261,6 +261,26 @@ and a maximum of 6.  Up to ten bytes of data at the location given by
 
     xo_emit("{:name/%3.10.6s}", name);
 
+.. index:: Decimal Point
+
+The Decimal Point
+~~~~~~~~~~~~~~~~~
+
+Floating point conversions ("%f", "%e", "%g" and "%a") use the
+locale's decimal point, so "{:weight/%.1f}" displays "3,5" in de_DE.
+The encoding styles (XML, JSON and the encoders) always use ".", so
+the value is valid JSON and is the same in every locale::
+
+  TEXT:
+      3,5
+  JSON:
+      "weight":3.5
+
+This applies only when the field is a number: a single conversion
+with no other text in its format.  A field such as "{:weight/%.1f kg}"
+is a string, and keeps the locale's decimal point in every style.
+The text and HTML styles always use the locale's.
+
 Characters Outside of Field Definitions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
