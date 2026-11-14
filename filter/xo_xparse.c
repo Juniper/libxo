@@ -639,8 +639,14 @@ xo_xparse_feature_warn_one_node (const char *tag, xo_xparse_data_t *xdp,
 	/* Multi-element path inside a predicate (e.g. a[b/c]) */
 	if (type == C_PATH && C_PREDICATE_PATHS < len
 	    	&& map[C_PREDICATE_PATHS]) {
+	    /*
+	     * Only a path that starts with an element counts here, as it
+	     * did before every location path got a C_PATH wrapper:
+	     * "a[../b]" or "a[/b]" are gated (or not) by their own
+	     * tokens, not by this one.
+	     */
 	    xo_xparse_node_t *cp = xo_xparse_node(xdp, xnp->xn_contents);
-	    if (cp && cp->xn_next) {
+	    if (cp && cp->xn_type == C_ELEMENT && cp->xn_next) {
 		const char *tname;
 
 		tname = xo_xparse_fancy_token_name(C_PREDICATE_PATHS);
@@ -921,6 +927,9 @@ xo_xparse_results (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
 
 	if (xnp->xn_type == C_ABSOLUTE)
 	    abs_count += 1;
+	else if (xnp->xn_type == C_PATH
+		 && xo_xparse_node_type(xdp, xnp->xn_contents) == C_ABSOLUTE)
+	    abs_count += 1;
     }
 
     const char *all_nots UNUSED;
@@ -983,6 +992,45 @@ xo_xparse_node_contains_dot (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
 	if (xnp->xn_contents
 		&& xo_xparse_node_contains_dot(xdp, xnp->xn_contents))
 	    return TRUE;
+    }
+
+    return FALSE;
+}
+
+/*
+ * Return TRUE if the path expression rooted at 'id' (a location path
+ * or a filter expression, as the xp_path_expr production builds it)
+ * needs a C_PATH wrapper.  Its steps are chained through xn_next, so
+ * any chain of more than one node needs one, or the steps would be
+ * spliced into whatever list the expression lands in.  A lone step
+ * also gets one, except for "." and "@x", which the consumers handle
+ * bare, and for a lone primary (number, literal, variable, call or
+ * parenthesized expression), which isn't a location path at all.
+ */
+int
+xo_xparse_path_needs_wrapper (xo_xparse_data_t *xdp, xo_xparse_node_id_t id)
+{
+    if (id == 0)
+	return FALSE;
+
+    xo_xparse_node_t *xnp = xo_xparse_node(xdp, id);
+    if (xnp->xn_next)
+	return TRUE;
+
+    switch (xnp->xn_type) {
+    case C_ELEMENT:
+    case C_ABSOLUTE:
+    case C_DESCENDANT:
+    case L_DOTDOT:
+    case L_ASTERISK:
+    case K_TEXT:
+    case K_NODE:
+    case K_COMMENT:
+    case K_PROCESSING_INSTRUCTION:
+	return TRUE;
+
+    default:
+	break;
     }
 
     return FALSE;
