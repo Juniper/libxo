@@ -1,72 +1,77 @@
 main: input '?/uno[x<4]/dos[y<=5]/tres'
 adding filter: '/uno[x<4]/dos[y<=5]/tres'
 added filter: 0
---- 0: 1
-    000001: type 67 (C_ABSOLUTE), str 1 [/], contents 0, next 2, prev 0
-    000002: type 70 (C_ELEMENT), str 3 [uno], contents 3, next 10, prev 1
-        000003: type 75 (C_PREDICATE), str 0 [], contents 5, next 0, prev 0
-            000005: type 17 (L_LESS), str 11 [<], contents 6, next 0, prev 0
-                000006: type 74 (C_PATH), str 0 [], contents 4, next 7, prev 0
-                    000004: type 70 (C_ELEMENT), str 9 [x], contents 0, next 0, prev 0
-                000007: type 53 (T_NUMBER), str 13 [4], contents 0, next 0, prev 6
-    000010: type 70 (C_ELEMENT), str 19 [dos], contents 11, next 18, prev 2
-        000011: type 75 (C_PREDICATE), str 0 [], contents 13, next 0, prev 0
-            000013: type 18 (L_LESSEQ), str 27 [<=], contents 14, next 0, prev 0
-                000014: type 74 (C_PATH), str 0 [], contents 12, next 15, prev 0
-                    000012: type 70 (C_ELEMENT), str 25 [y], contents 0, next 0, prev 0
-                000015: type 53 (T_NUMBER), str 30 [5], contents 0, next 0, prev 14
-    000018: type 70 (C_ELEMENT), str 36 [tres], contents 0, next 0, prev 10
+--- 0: 20
+    000020: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 67 (C_ABSOLUTE), str 1 [/], contents 0, next 2, prev 0
+        000002: type 70 (C_ELEMENT), str 3 [uno], contents 3, next 10, prev 1
+            000003: type 75 (C_PREDICATE), str 0 [], contents 5, next 0, prev 0
+                000005: type 17 (L_LESS), str 11 [<], contents 6, next 0, prev 0
+                    000006: type 74 (C_PATH), str 0 [], contents 4, next 7, prev 0
+                        000004: type 70 (C_ELEMENT), str 9 [x], contents 0, next 0, prev 0
+                    000007: type 53 (T_NUMBER), str 13 [4], contents 0, next 0, prev 6
+        000010: type 70 (C_ELEMENT), str 19 [dos], contents 11, next 18, prev 2
+            000011: type 75 (C_PREDICATE), str 0 [], contents 13, next 0, prev 0
+                000013: type 18 (L_LESSEQ), str 27 [<=], contents 14, next 0, prev 0
+                    000014: type 74 (C_PATH), str 0 [], contents 12, next 15, prev 0
+                        000012: type 70 (C_ELEMENT), str 25 [y], contents 0, next 0, prev 0
+                    000015: type 53 (T_NUMBER), str 30 [5], contents 0, next 0, prev 14
+        000018: type 70 (C_ELEMENT), str 36 [tres], contents 0, next 0, prev 10
 main: status: zero
 main: input '?/one/two/more'
 adding filter: '/one/two/more'
 added filter: 0
---- 0: 1
-    000001: type 67 (C_ABSOLUTE), str 1 [/], contents 0, next 2, prev 0
-    000002: type 70 (C_ELEMENT), str 3 [uno], contents 3, next 10, prev 1
-        000003: type 75 (C_PREDICATE), str 0 [], contents 5, next 0, prev 0
-            000005: type 17 (L_LESS), str 11 [<], contents 6, next 0, prev 0
-                000006: type 74 (C_PATH), str 0 [], contents 4, next 7, prev 0
-                    000004: type 70 (C_ELEMENT), str 9 [x], contents 0, next 0, prev 0
-                000007: type 53 (T_NUMBER), str 13 [4], contents 0, next 0, prev 6
-    000010: type 70 (C_ELEMENT), str 19 [dos], contents 11, next 18, prev 2
-        000011: type 75 (C_PREDICATE), str 0 [], contents 13, next 0, prev 0
-            000013: type 18 (L_LESSEQ), str 27 [<=], contents 14, next 0, prev 0
-                000014: type 74 (C_PATH), str 0 [], contents 12, next 15, prev 0
-                    000012: type 70 (C_ELEMENT), str 25 [y], contents 0, next 0, prev 0
-                000015: type 53 (T_NUMBER), str 30 [5], contents 0, next 0, prev 14
-    000018: type 70 (C_ELEMENT), str 36 [tres], contents 0, next 0, prev 10
---- 1: 20
-    000020: type 67 (C_ABSOLUTE), str 41 [/], contents 0, next 21, prev 0
-    000021: type 70 (C_ELEMENT), str 43 [one], contents 0, next 23, prev 20
-    000023: type 70 (C_ELEMENT), str 49 [two], contents 0, next 25, prev 21
-    000025: type 70 (C_ELEMENT), str 55 [more], contents 0, next 0, prev 23
+--- 0: 20
+    000020: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 67 (C_ABSOLUTE), str 1 [/], contents 0, next 2, prev 0
+        000002: type 70 (C_ELEMENT), str 3 [uno], contents 3, next 10, prev 1
+            000003: type 75 (C_PREDICATE), str 0 [], contents 5, next 0, prev 0
+                000005: type 17 (L_LESS), str 11 [<], contents 6, next 0, prev 0
+                    000006: type 74 (C_PATH), str 0 [], contents 4, next 7, prev 0
+                        000004: type 70 (C_ELEMENT), str 9 [x], contents 0, next 0, prev 0
+                    000007: type 53 (T_NUMBER), str 13 [4], contents 0, next 0, prev 6
+        000010: type 70 (C_ELEMENT), str 19 [dos], contents 11, next 18, prev 2
+            000011: type 75 (C_PREDICATE), str 0 [], contents 13, next 0, prev 0
+                000013: type 18 (L_LESSEQ), str 27 [<=], contents 14, next 0, prev 0
+                    000014: type 74 (C_PATH), str 0 [], contents 12, next 15, prev 0
+                        000012: type 70 (C_ELEMENT), str 25 [y], contents 0, next 0, prev 0
+                    000015: type 53 (T_NUMBER), str 30 [5], contents 0, next 0, prev 14
+        000018: type 70 (C_ELEMENT), str 36 [tres], contents 0, next 0, prev 10
+--- 1: 28
+    000028: type 74 (C_PATH), str 0 [], contents 21, next 0, prev 0
+        000021: type 67 (C_ABSOLUTE), str 41 [/], contents 0, next 22, prev 0
+        000022: type 70 (C_ELEMENT), str 43 [one], contents 0, next 24, prev 21
+        000024: type 70 (C_ELEMENT), str 49 [two], contents 0, next 26, prev 22
+        000026: type 70 (C_ELEMENT), str 55 [more], contents 0, next 0, prev 24
 main: status: zero
 main: input '?three'
 adding filter: 'three'
 added filter: 0
---- 0: 1
-    000001: type 67 (C_ABSOLUTE), str 1 [/], contents 0, next 2, prev 0
-    000002: type 70 (C_ELEMENT), str 3 [uno], contents 3, next 10, prev 1
-        000003: type 75 (C_PREDICATE), str 0 [], contents 5, next 0, prev 0
-            000005: type 17 (L_LESS), str 11 [<], contents 6, next 0, prev 0
-                000006: type 74 (C_PATH), str 0 [], contents 4, next 7, prev 0
-                    000004: type 70 (C_ELEMENT), str 9 [x], contents 0, next 0, prev 0
-                000007: type 53 (T_NUMBER), str 13 [4], contents 0, next 0, prev 6
-    000010: type 70 (C_ELEMENT), str 19 [dos], contents 11, next 18, prev 2
-        000011: type 75 (C_PREDICATE), str 0 [], contents 13, next 0, prev 0
-            000013: type 18 (L_LESSEQ), str 27 [<=], contents 14, next 0, prev 0
-                000014: type 74 (C_PATH), str 0 [], contents 12, next 15, prev 0
-                    000012: type 70 (C_ELEMENT), str 25 [y], contents 0, next 0, prev 0
-                000015: type 53 (T_NUMBER), str 30 [5], contents 0, next 0, prev 14
-    000018: type 70 (C_ELEMENT), str 36 [tres], contents 0, next 0, prev 10
---- 1: 20
-    000020: type 67 (C_ABSOLUTE), str 41 [/], contents 0, next 21, prev 0
-    000021: type 70 (C_ELEMENT), str 43 [one], contents 0, next 23, prev 20
-    000023: type 70 (C_ELEMENT), str 49 [two], contents 0, next 25, prev 21
-    000025: type 70 (C_ELEMENT), str 55 [more], contents 0, next 0, prev 23
---- 2: 29
-    000029: type 74 (C_PATH), str 0 [], contents 27, next 0, prev 0
-        000027: type 70 (C_ELEMENT), str 60 [three], contents 0, next 0, prev 0
+--- 0: 20
+    000020: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 67 (C_ABSOLUTE), str 1 [/], contents 0, next 2, prev 0
+        000002: type 70 (C_ELEMENT), str 3 [uno], contents 3, next 10, prev 1
+            000003: type 75 (C_PREDICATE), str 0 [], contents 5, next 0, prev 0
+                000005: type 17 (L_LESS), str 11 [<], contents 6, next 0, prev 0
+                    000006: type 74 (C_PATH), str 0 [], contents 4, next 7, prev 0
+                        000004: type 70 (C_ELEMENT), str 9 [x], contents 0, next 0, prev 0
+                    000007: type 53 (T_NUMBER), str 13 [4], contents 0, next 0, prev 6
+        000010: type 70 (C_ELEMENT), str 19 [dos], contents 11, next 18, prev 2
+            000011: type 75 (C_PREDICATE), str 0 [], contents 13, next 0, prev 0
+                000013: type 18 (L_LESSEQ), str 27 [<=], contents 14, next 0, prev 0
+                    000014: type 74 (C_PATH), str 0 [], contents 12, next 15, prev 0
+                        000012: type 70 (C_ELEMENT), str 25 [y], contents 0, next 0, prev 0
+                    000015: type 53 (T_NUMBER), str 30 [5], contents 0, next 0, prev 14
+        000018: type 70 (C_ELEMENT), str 36 [tres], contents 0, next 0, prev 10
+--- 1: 28
+    000028: type 74 (C_PATH), str 0 [], contents 21, next 0, prev 0
+        000021: type 67 (C_ABSOLUTE), str 41 [/], contents 0, next 22, prev 0
+        000022: type 70 (C_ELEMENT), str 43 [one], contents 0, next 24, prev 21
+        000024: type 70 (C_ELEMENT), str 49 [two], contents 0, next 26, prev 22
+        000026: type 70 (C_ELEMENT), str 55 [more], contents 0, next 0, prev 24
+--- 2: 31
+    000031: type 74 (C_PATH), str 0 [], contents 29, next 0, prev 0
+        000029: type 70 (C_ELEMENT), str 60 [three], contents 0, next 0, prev 0
 main: status: zero
 main: input '+uno'
 main: work: rc: 11

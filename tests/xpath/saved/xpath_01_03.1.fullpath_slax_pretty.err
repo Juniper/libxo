@@ -2637,12 +2637,13 @@ xpath_01: test: filter expression feature is unsupported: plus sign ('+')
     000199: type 74 (C_PATH), str 0 [], contents 194, next 0, prev 0
         000194: type 70 (C_ELEMENT), str 414 [five], contents 0, next 197, prev 0
         000197: type 68 (C_ATTRIBUTE), str 423 [foo], contents 0, next 0, prev 194
---- 12: 233
-    000233: type 74 (C_PATH), str 0 [], contents 224, next 0, prev 0
+--- 12: 234
+    000234: type 74 (C_PATH), str 0 [], contents 224, next 0, prev 0
         000224: type 70 (C_ELEMENT), str 505 [ten], contents 225, next 0, prev 0
-            000225: type 75 (C_PREDICATE), str 0 [], contents 227, next 0, prev 0
-                000227: type 68 (C_ATTRIBUTE), str 513 [foo], contents 0, next 230, prev 0
-                000230: type 68 (C_ATTRIBUTE), str 521 [goo], contents 0, next 0, prev 227
+            000225: type 75 (C_PREDICATE), str 0 [], contents 232, next 0, prev 0
+                000232: type 74 (C_PATH), str 0 [], contents 227, next 0, prev 0
+                    000227: type 68 (C_ATTRIBUTE), str 513 [foo], contents 0, next 230, prev 0
+                    000230: type 68 (C_ATTRIBUTE), str 521 [goo], contents 0, next 0, prev 227
 main: status: zero
 main: input '# a run-time error, but still....'
 main: input '? item[number("the")]''
@@ -2787,12 +2788,13 @@ xpath_01: test: filter expression feature is unsupported: plus sign ('+')
     000199: type 74 (C_PATH), str 0 [], contents 194, next 0, prev 0
         000194: type 70 (C_ELEMENT), str 414 [five], contents 0, next 197, prev 0
         000197: type 68 (C_ATTRIBUTE), str 423 [foo], contents 0, next 0, prev 194
---- 12: 233
-    000233: type 74 (C_PATH), str 0 [], contents 224, next 0, prev 0
+--- 12: 234
+    000234: type 74 (C_PATH), str 0 [], contents 224, next 0, prev 0
         000224: type 70 (C_ELEMENT), str 505 [ten], contents 225, next 0, prev 0
-            000225: type 75 (C_PREDICATE), str 0 [], contents 227, next 0, prev 0
-                000227: type 68 (C_ATTRIBUTE), str 513 [foo], contents 0, next 230, prev 0
-                000230: type 68 (C_ATTRIBUTE), str 521 [goo], contents 0, next 0, prev 227
+            000225: type 75 (C_PREDICATE), str 0 [], contents 232, next 0, prev 0
+                000232: type 74 (C_PATH), str 0 [], contents 227, next 0, prev 0
+                    000227: type 68 (C_ATTRIBUTE), str 513 [foo], contents 0, next 230, prev 0
+                    000230: type 68 (C_ATTRIBUTE), str 521 [goo], contents 0, next 0, prev 227
 main: status: zero
 main: input '? item[number('
 adding filter: 'item[number('
@@ -2936,12 +2938,13 @@ xpath_01: test: filter expression feature is unsupported: plus sign ('+')
     000199: type 74 (C_PATH), str 0 [], contents 194, next 0, prev 0
         000194: type 70 (C_ELEMENT), str 414 [five], contents 0, next 197, prev 0
         000197: type 68 (C_ATTRIBUTE), str 423 [foo], contents 0, next 0, prev 194
---- 12: 233
-    000233: type 74 (C_PATH), str 0 [], contents 224, next 0, prev 0
+--- 12: 234
+    000234: type 74 (C_PATH), str 0 [], contents 224, next 0, prev 0
         000224: type 70 (C_ELEMENT), str 505 [ten], contents 225, next 0, prev 0
-            000225: type 75 (C_PREDICATE), str 0 [], contents 227, next 0, prev 0
-                000227: type 68 (C_ATTRIBUTE), str 513 [foo], contents 0, next 230, prev 0
-                000230: type 68 (C_ATTRIBUTE), str 521 [goo], contents 0, next 0, prev 227
+            000225: type 75 (C_PREDICATE), str 0 [], contents 232, next 0, prev 0
+                000232: type 74 (C_PATH), str 0 [], contents 227, next 0, prev 0
+                    000227: type 68 (C_ATTRIBUTE), str 513 [foo], contents 0, next 230, prev 0
+                    000230: type 68 (C_ATTRIBUTE), str 521 [goo], contents 0, next 0, prev 227
 main: status: zero
 main: input '? item[..//fail]'
 adding filter: 'item[..//fail]'
@@ -3086,19 +3089,21 @@ xpath_01: test: filter expression feature is unsupported: plus sign ('+')
     000199: type 74 (C_PATH), str 0 [], contents 194, next 0, prev 0
         000194: type 70 (C_ELEMENT), str 414 [five], contents 0, next 197, prev 0
         000197: type 68 (C_ATTRIBUTE), str 423 [foo], contents 0, next 0, prev 194
---- 12: 233
-    000233: type 74 (C_PATH), str 0 [], contents 224, next 0, prev 0
+--- 12: 234
+    000234: type 74 (C_PATH), str 0 [], contents 224, next 0, prev 0
         000224: type 70 (C_ELEMENT), str 505 [ten], contents 225, next 0, prev 0
-            000225: type 75 (C_PREDICATE), str 0 [], contents 227, next 0, prev 0
-                000227: type 68 (C_ATTRIBUTE), str 513 [foo], contents 0, next 230, prev 0
-                000230: type 68 (C_ATTRIBUTE), str 521 [goo], contents 0, next 0, prev 227
---- 13: 254
-    000254: type 74 (C_PATH), str 0 [], contents 247, next 0, prev 0
-        000247: type 70 (C_ELEMENT), str 569 [item], contents 248, next 0, prev 0
-            000248: type 75 (C_PREDICATE), str 0 [], contents 249, next 0, prev 0
-                000249: type 9 (L_DOTDOT), str 576 [..], contents 0, next 250, prev 0
-                000250: type 69 (C_DESCENDANT), str 579 [//], contents 0, next 251, prev 249
-                000251: type 70 (C_ELEMENT), str 582 [fail], contents 0, next 0, prev 250
+            000225: type 75 (C_PREDICATE), str 0 [], contents 232, next 0, prev 0
+                000232: type 74 (C_PATH), str 0 [], contents 227, next 0, prev 0
+                    000227: type 68 (C_ATTRIBUTE), str 513 [foo], contents 0, next 230, prev 0
+                    000230: type 68 (C_ATTRIBUTE), str 521 [goo], contents 0, next 0, prev 227
+--- 13: 256
+    000256: type 74 (C_PATH), str 0 [], contents 248, next 0, prev 0
+        000248: type 70 (C_ELEMENT), str 569 [item], contents 249, next 0, prev 0
+            000249: type 75 (C_PREDICATE), str 0 [], contents 254, next 0, prev 0
+                000254: type 74 (C_PATH), str 0 [], contents 250, next 0, prev 0
+                    000250: type 9 (L_DOTDOT), str 576 [..], contents 0, next 251, prev 0
+                    000251: type 69 (C_DESCENDANT), str 579 [//], contents 0, next 252, prev 250
+                    000252: type 70 (C_ELEMENT), str 582 [fail], contents 0, next 0, prev 251
 main: status: zero
 main: input '? item[..//node()]'
 adding filter: 'item[..//node()]'
@@ -3244,24 +3249,27 @@ xpath_01: test: filter expression feature is unsupported: plus sign ('+')
     000199: type 74 (C_PATH), str 0 [], contents 194, next 0, prev 0
         000194: type 70 (C_ELEMENT), str 414 [five], contents 0, next 197, prev 0
         000197: type 68 (C_ATTRIBUTE), str 423 [foo], contents 0, next 0, prev 194
---- 12: 233
-    000233: type 74 (C_PATH), str 0 [], contents 224, next 0, prev 0
+--- 12: 234
+    000234: type 74 (C_PATH), str 0 [], contents 224, next 0, prev 0
         000224: type 70 (C_ELEMENT), str 505 [ten], contents 225, next 0, prev 0
-            000225: type 75 (C_PREDICATE), str 0 [], contents 227, next 0, prev 0
-                000227: type 68 (C_ATTRIBUTE), str 513 [foo], contents 0, next 230, prev 0
-                000230: type 68 (C_ATTRIBUTE), str 521 [goo], contents 0, next 0, prev 227
---- 13: 254
-    000254: type 74 (C_PATH), str 0 [], contents 247, next 0, prev 0
-        000247: type 70 (C_ELEMENT), str 569 [item], contents 248, next 0, prev 0
-            000248: type 75 (C_PREDICATE), str 0 [], contents 249, next 0, prev 0
-                000249: type 9 (L_DOTDOT), str 576 [..], contents 0, next 250, prev 0
-                000250: type 69 (C_DESCENDANT), str 579 [//], contents 0, next 251, prev 249
-                000251: type 70 (C_ELEMENT), str 582 [fail], contents 0, next 0, prev 250
---- 14: 264
-    000264: type 74 (C_PATH), str 0 [], contents 255, next 0, prev 0
-        000255: type 70 (C_ELEMENT), str 589 [item], contents 256, next 0, prev 0
-            000256: type 75 (C_PREDICATE), str 0 [], contents 257, next 0, prev 0
-                000257: type 9 (L_DOTDOT), str 596 [..], contents 0, next 258, prev 0
-                000258: type 69 (C_DESCENDANT), str 599 [//], contents 0, next 259, prev 257
-                000259: type 36 (K_NODE), str 602 [node], contents 0, next 0, prev 258
+            000225: type 75 (C_PREDICATE), str 0 [], contents 232, next 0, prev 0
+                000232: type 74 (C_PATH), str 0 [], contents 227, next 0, prev 0
+                    000227: type 68 (C_ATTRIBUTE), str 513 [foo], contents 0, next 230, prev 0
+                    000230: type 68 (C_ATTRIBUTE), str 521 [goo], contents 0, next 0, prev 227
+--- 13: 256
+    000256: type 74 (C_PATH), str 0 [], contents 248, next 0, prev 0
+        000248: type 70 (C_ELEMENT), str 569 [item], contents 249, next 0, prev 0
+            000249: type 75 (C_PREDICATE), str 0 [], contents 254, next 0, prev 0
+                000254: type 74 (C_PATH), str 0 [], contents 250, next 0, prev 0
+                    000250: type 9 (L_DOTDOT), str 576 [..], contents 0, next 251, prev 0
+                    000251: type 69 (C_DESCENDANT), str 579 [//], contents 0, next 252, prev 250
+                    000252: type 70 (C_ELEMENT), str 582 [fail], contents 0, next 0, prev 251
+--- 14: 267
+    000267: type 74 (C_PATH), str 0 [], contents 257, next 0, prev 0
+        000257: type 70 (C_ELEMENT), str 589 [item], contents 258, next 0, prev 0
+            000258: type 75 (C_PREDICATE), str 0 [], contents 265, next 0, prev 0
+                000265: type 74 (C_PATH), str 0 [], contents 259, next 0, prev 0
+                    000259: type 9 (L_DOTDOT), str 596 [..], contents 0, next 260, prev 0
+                    000260: type 69 (C_DESCENDANT), str 599 [//], contents 0, next 261, prev 259
+                    000261: type 36 (K_NODE), str 602 [node], contents 0, next 0, prev 260
 main: status: zero

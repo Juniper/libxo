@@ -5,14 +5,15 @@ main: status: zero
 main: input '?*/item[id = '2']'
 adding filter: '*/item[id = '2']'
 added filter: 0
---- 0: 1
-    000001: type 46 (L_ASTERISK), str 1 [*], contents 0, next 3, prev 0
-    000003: type 70 (C_ELEMENT), str 5 [item], contents 4, next 0, prev 1
-        000004: type 75 (C_PREDICATE), str 0 [], contents 6, next 0, prev 0
-            000006: type 14 (L_EQUALS), str 15 [=], contents 7, next 0, prev 0
-                000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0
-                    000005: type 70 (C_ELEMENT), str 12 [id], contents 0, next 0, prev 0
-                000008: type 54 (T_QUOTED), str 17 [2], contents 0, next 0, prev 7
+--- 0: 11
+    000011: type 74 (C_PATH), str 0 [], contents 1, next 0, prev 0
+        000001: type 46 (L_ASTERISK), str 1 [*], contents 0, next 3, prev 0
+        000003: type 70 (C_ELEMENT), str 5 [item], contents 4, next 0, prev 1
+            000004: type 75 (C_PREDICATE), str 0 [], contents 6, next 0, prev 0
+                000006: type 14 (L_EQUALS), str 15 [=], contents 7, next 0, prev 0
+                    000007: type 74 (C_PATH), str 0 [], contents 5, next 8, prev 0
+                        000005: type 70 (C_ELEMENT), str 12 [id], contents 0, next 0, prev 0
+                    000008: type 54 (T_QUOTED), str 17 [2], contents 0, next 0, prev 7
 main: status: zero
 main: input '+servers'
 main: work: rc: 15
