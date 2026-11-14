@@ -27,6 +27,7 @@
 #include <limits.h>
 #include <errno.h>
 #include <math.h>
+#include <locale.h>
 
 #include "xo.h"
 #include "xo_encoder.h"
@@ -279,6 +280,27 @@ cbor_parse_float (const char *value, double *dp)
 
     if (!saw_point)		/* Integers are handled elsewhere */
 	return 0;
+
+    /*
+     * libxo encodes floats with "." as the decimal point, whatever
+     * the locale, but strtod expects the locale's, so swap it in.
+     */
+    const char *point = localeconv()->decimal_point;
+    size_t plen = point ? strlen(point) : 0;
+    size_t vlen = strlen(value);
+    char buf[vlen + plen + 1];
+
+    if (plen > 0 && !(plen == 1 && *point == '.')) {
+	const char *pp = strchr(value, '.');
+	if (pp != NULL) {
+	    size_t off = pp - value;
+
+	    memcpy(buf, value, off);
+	    memcpy(buf + off, point, plen);
+	    memcpy(buf + off + plen, pp + 1, vlen - off); /* With the NUL */
+	    value = buf;
+	}
+    }
 
     char *ep = NULL;
     errno = 0;
