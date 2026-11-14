@@ -255,6 +255,21 @@ explicitly, or use :manpage:`atexit(3)` to have
     xo_finish();
     exit(0);
 
+.. index:: skills
+
+Converting with an LLM coding agent
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+libxo installs a "skill" for LLM coding agents in
+`${prefix}/share/skills/libxo/libxo-convert/`.  It walks the agent
+through these steps, stopping after it designs the data model (a
+schema tree, a YANG module, and a list of new field names) so you can
+review the names and hierarchy before any code changes.  The prime
+directive is that the program's text output does not change; any
+exception is reported in a "WARNING: TEXT OUTPUT CHANGED" block.  See
+`${prefix}/share/skills/libxo/README.md` for how to make the skill
+available to your agent.
+
 Howto: Use "xo" in Shell Scripts
 --------------------------------
 

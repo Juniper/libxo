@@ -292,8 +292,10 @@
     }
 
     /*
-     * A table cell needs both the trimmed display/sort text and a
-     * copy of the source .data div (data-help/type/units/xpath) so
+     * A table cell needs the trimmed display text, the value to sort
+     * by (libxo's data-number, the raw value behind a humanized or
+     * grouped display, when there is one), and a copy of the source
+     * .data div (data-help/type/units/xpath) so
      * the generated <td> can still drive the tooltip.  The source
      * div was already wired at init() time, so cloneNode() would
      * otherwise copy its data-tip-wired marker along with it and
@@ -304,7 +306,9 @@
         var clone = el.cloneNode(false);
         delete clone.dataset.tipWired;
         clone.textContent = text;
-        return { text: text, el: clone };
+        var number = el.getAttribute("data-number");
+        return { text: text, sort: number !== null ? number : text,
+                 el: clone };
     }
 
     function buildModel (group) {
@@ -412,8 +416,8 @@
                 sortCol = i;
 
                 model.rows.sort(function (ra, rb) {
-                    var va = ra[tag] ? ra[tag].text : "";
-                    var vb = rb[tag] ? rb[tag].text : "";
+                    var va = ra[tag] ? ra[tag].sort : "";
+                    var vb = rb[tag] ? rb[tag].sort : "";
                     return sortDir * compareValues(va, vb);
                 });
 

@@ -458,8 +458,12 @@ followed by one or two format descriptors.  The first format
 descriptor is used for display styles (TEXT and HTML), while the
 second one is used for encoding styles (XML and JSON).  If no second
 format is given, the encoding format defaults to the first format,
-with any minimum width removed.  If no first format is given, both
-format descriptors default to "%s"::
+with any minimum width removed.  On an integer conversion (d, i, o,
+u, x, X), the precision is also removed, since it only adds leading
+zeroes: "%.10d" encodes 42 as 42, not 0000000042.  The precision of a
+float ("%.2f") or a string ("%.3s") is part of the value and is kept.
+If no first format is given, both format descriptors default to
+"%s"::
 
     xo_emit("{:length/%02u}x{:width/%02u}x{:height/%02u}\\n",
             length, width, height);

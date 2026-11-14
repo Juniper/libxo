@@ -1,0 +1,283 @@
+#!/bin/sh
+#
+# xo-inventory: list the output-related calls in C sources, per
+# function, as input to phase 1 of a libxo conversion.
+#
+# Usage: sh xo-inventory [-s] file.c ...
+#     -s    print only the per-function summary
+#
+# Each hit is printed as:
+#     file:line  function  KIND  [loop@L,...]  source text
+# KIND is one of:
+#     OUT      output to stdout (printf, puts, putchar, fputs(, stdout))
+#     STDERR   output to stderr (fprintf(stderr, ...), ...)
+#     STREAM   output to some other FILE * (check what it is)
+#     ERR      the err/warn family
+#     EXIT     exit, _exit, abort, and return from main
+#     XO       existing libxo calls
+#     FLUSH    fflush
+#     CALL     a call to a function in these files that (directly or
+#              not) produces output; these show where instances begin
+# loop@L lists the lines of the enclosing for/while/do loops.  CALL
+# lines are printed after the others.
+#
+# This is a heuristic scanner, not a C parser: macros, unusual
+# formatting, and K&R definitions can confuse it.  Read the code
+# around each hit.
+
+summary_only=0
+if [ "$1" = "-s" ]; then
+    summary_only=1
+    shift
+fi
+
+if [ $# -eq 0 ]; then
+    echo "usage: sh xo-inventory [-s] file.c ..." >&2
+    exit 1
+fi
+
+for f in "$@"; do
+    if [ ! -r "$f" ]; then
+        echo "xo-inventory: cannot read $f" >&2
+        exit 1
+    fi
+done
+
+awk -v summary_only="$summary_only" '
+function strip(s,    out, c, i, n, q) {
+    # Remove comments, string and character literals, keeping the
+    # code shape (so braces and keywords can be found)
+    out = ""
+    n = length(s)
+    for (i = 1; i <= n; i++) {
+        c = substr(s, i, 1)
+        if (in_comment) {
+            if (c == "*" && substr(s, i + 1, 1) == "/") {
+                in_comment = 0
+                i++
+            }
+            continue
+        }
+        if (c == "/" && substr(s, i + 1, 1) == "*") {
+            in_comment = 1
+            i++
+            continue
+        }
+        if (c == "/" && substr(s, i + 1, 1) == "/")
+            break
+        if (c == "\"" || c == "\047") {
+            q = c
+            out = out q
+            for (i++; i <= n; i++) {
+                c = substr(s, i, 1)
+                if (c == "\\") {
+                    i++
+                    continue
+                }
+                if (c == q)
+                    break
+            }
+            out = out q
+            continue
+        }
+        out = out c
+    }
+    return out
+}
+
+function loops(    i, s) {
+    s = ""
+    for (i = 1; i <= nloop; i++)
+        s = s (s == "" ? "" : ",") loop_line[i]
+    if (single_loop_line)
+        s = s (s == "" ? "" : ",") single_loop_line
+    return s == "" ? "" : "loop@" s
+}
+
+function hit(kind, text,    l) {
+    fn = (curfn == "" ? "(file scope)" : curfn)
+    count[fn SUBSEP kind]++
+    if (!(fn in seen)) {
+        seen[fn] = 1
+        order[++nfuncs] = fn
+    }
+    if (summary_only)
+        return
+    gsub(/^[ \t]+/, "", text)
+    if (length(text) > 72)
+        text = substr(text, 1, 69) "..."
+    l = loops()
+    printf("%s:%d  %s  %s  %s%s%s\n", FILENAME, FNR, fn, kind,
+        l, (l == "" ? "" : "  "), text)
+}
+
+FNR == 1 {
+    curfn = ""; depth = 0; nloop = 0; in_comment = 0
+    pending_loop = 0; single_loop_line = 0; candidate = ""
+}
+
+{
+    raw = $0
+    code = strip($0)
+
+    # Function definitions: an identifier followed by "(" at the start
+    # of a line, at file scope (BSD style puts the type on the line
+    # above; "type name(" on one line also works)
+    if (depth == 0 && code ~ /^[A-Za-z_][A-Za-z0-9_ \t\*]*\(/ \
+        && code !~ /;[ \t]*$/) {
+        name = code
+        sub(/[ \t]*\(.*/, "", name)
+        sub(/.*[ \t\*]/, "", name)
+        if (name !~ /^(if|for|while|switch|return|sizeof)$/)
+            candidate = name
+    }
+    # The end of a prototype or declaration (possibly multi-line)
+    if (depth == 0 && code ~ /;[ \t]*$/)
+        candidate = ""
+
+    # Loop headers; "} while (x);" ends a do loop and is not a header
+    is_loop = 0
+    if (code ~ /(^|[^A-Za-z0-9_])(for|while)[ \t]*\(/ \
+        && code !~ /^[ \t]*}[ \t]*while/)
+        is_loop = 1
+    if (code ~ /(^|[^A-Za-z0-9_])do([ \t]*{|[ \t]*$)/)
+        is_loop = 1
+
+    # A brace-less loop body is the next statement only
+    if (pending_loop && code !~ /^[ \t]*$/ && code !~ /^[ \t]*{/) {
+        single_loop_line = pending_loop
+        pending_loop = 0
+    } else if (!is_loop && code !~ /^[ \t]*$/ && code !~ /^[ \t]*{/) {
+        single_loop_line = 0
+    }
+
+    if (code ~ /(^|[^A-Za-z0-9_])(v?printf|vw?printf|wprintf|puts|putchar|putwchar)[ \t]*\(/)
+        hit("OUT", raw)
+    else if (code ~ /(^|[^A-Za-z0-9_])(v?fw?printf|fputs|fputws|fputc|putc|fputwc|putwc|fwrite)[ \t]*\(/) {
+        if (code ~ /stdout/)
+            hit("OUT", raw)
+        else if (code ~ /stderr/)
+            hit("STDERR", raw)
+        else
+            hit("STREAM", raw)
+    }
+    if (code ~ /(^|[^A-Za-z0-9_])v?(err|errx|errc|warn|warnx|warnc)[ \t]*\(/)
+        hit("ERR", raw)
+    if (code ~ /(^|[^A-Za-z0-9_])(exit|_exit|_Exit|abort)[ \t]*\(/ \
+        || (curfn == "main" && code ~ /(^|[^A-Za-z0-9_])return([^A-Za-z0-9_]|$)/))
+        hit("EXIT", raw)
+    if (code ~ /(^|[^A-Za-z0-9_])xo_[a-z_]+[ \t]*\(/)
+        hit("XO", raw)
+    if (code ~ /(^|[^A-Za-z0-9_])fflush[ \t]*\(/)
+        hit("FLUSH", raw)
+
+    # Remember calls, to report those reaching output (in END)
+    if (curfn != "") {
+        rest = code
+        while (match(rest, /[A-Za-z_][A-Za-z0-9_]*[ \t]*\(/)) {
+            callee = substr(rest, RSTART, RLENGTH)
+            sub(/[ \t]*\($/, "", callee)
+            rest = substr(rest, RSTART + RLENGTH)
+            if (callee ~ /^(if|for|while|switch|return|sizeof)$/)
+                continue
+            ncall++
+            call_callee[ncall] = callee
+            call_caller[ncall] = curfn
+            t = raw
+            gsub(/^[ \t]+/, "", t)
+            if (length(t) > 72)
+                t = substr(t, 1, 69) "..."
+            l = loops()
+            call_text[ncall] = sprintf("%s:%d  %s  CALL  %s%s%s",
+                FILENAME, FNR, curfn, l, (l == "" ? "" : "  "), t)
+            calls[curfn SUBSEP callee] = 1
+        }
+    }
+
+    # Track braces, opening loop scopes and function bodies
+    n = length(code)
+    for (i = 1; i <= n; i++) {
+        c = substr(code, i, 1)
+        if (c == "{") {
+            depth++
+            if (depth == 1 && candidate != "") {
+                curfn = candidate
+                candidate = ""
+            }
+            if (pending_loop) {
+                loop_line[++nloop] = pending_loop
+                loop_depth[nloop] = depth
+                pending_loop = 0
+                single_loop_line = 0
+            }
+        } else if (c == "}") {
+            if (nloop > 0 && loop_depth[nloop] == depth)
+                nloop--
+            depth--
+            if (depth <= 0) {
+                depth = 0
+                curfn = ""
+                nloop = 0
+            }
+        }
+    }
+
+    if (is_loop) {
+        # A header ending in ";" (a loop with an empty body, or the
+        # body on the same line) opens nothing
+        if (code ~ /;[ \t]*$/ && code !~ /{/)
+            pending_loop = 0
+        else if (code !~ /{/)
+            pending_loop = FNR
+        else if (gsub(/{/, "{", code) > gsub(/}/, "}", code)) {
+            # The brace was on this line but seen before is_loop was
+            # set; record it now
+            loop_line[++nloop] = FNR
+            loop_depth[nloop] = depth
+        }
+    }
+}
+
+END {
+    # A function produces output if it has output hits or calls one
+    # that does
+    for (i = 1; i <= nfuncs; i++) {
+        f = order[i]
+        if (count[f SUBSEP "OUT"] + count[f SUBSEP "STDERR"] \
+            + count[f SUBSEP "STREAM"] + count[f SUBSEP "XO"] > 0)
+            outputs[f] = 1
+    }
+    do {
+        changed = 0
+        for (key in calls) {
+            split(key, kp, SUBSEP)
+            if ((kp[2] in outputs) && !(kp[1] in outputs)) {
+                outputs[kp[1]] = 1
+                changed = 1
+            }
+        }
+    } while (changed)
+
+    if (!summary_only) {
+        for (i = 1; i <= ncall; i++)
+            if ((call_callee[i] in outputs) \
+                && call_callee[i] != call_caller[i])
+                print call_text[i]
+    }
+
+    kinds = "OUT STDERR STREAM ERR EXIT XO FLUSH"
+    nk = split(kinds, k, " ")
+    if (!summary_only && nfuncs > 0)
+        print ""
+    printf("%-24s", "# function")
+    for (j = 1; j <= nk; j++)
+        printf(" %6s", k[j])
+    printf("\n")
+    for (i = 1; i <= nfuncs; i++) {
+        printf("%-24s", order[i])
+        for (j = 1; j <= nk; j++)
+            printf(" %6d", count[order[i] SUBSEP k[j]] + 0)
+        printf("\n")
+    }
+}
+' "$@"

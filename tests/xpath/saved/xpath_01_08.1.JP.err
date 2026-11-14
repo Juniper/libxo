@@ -89,25 +89,28 @@ xpath_01: test: filter expression feature is unsupported: plus sign ('+')
     000061: type 70 (C_ELEMENT), str 135 [tres], contents 0, next 0, prev 50
 main: status: zero
 main: input '+one'
-main: filter: rc: 11
+main: work: rc: 11
 main: status: predicate
 main: input '$a 5555'
 main: key: 'a'='5555'
+main: work: rc: 15
 main: status: track
 main: input '+two'
-main: filter: rc: 15
+main: work: rc: 15
 main: status: track
 main: input '$b 4444'
 main: key: 'b'='4444'
+main: work: rc: 17
 main: status: track
 main: input '+three'
-main: filter: rc: 19
+main: work: rc: 19
 main: status: track
 main: input '$c -3333'
 main: key: 'c'='-3333'
+main: work: rc: 20
 main: status: track
 main: input '+four'
-main: filter: rc: 20
+main: work: rc: 20
 main: status: track
 main: input '=five mambo'
 main: field: 'five'='mambo'
@@ -120,13 +123,14 @@ main: input '-two'
 main: status: track
 main: input '+two'
 xpath_01: duplicate sibling name: 'two'
-main: filter: rc: 15
+main: work: rc: 15
 main: status: track
 main: input '$b 2'
 main: key: 'b'='2'
+main: work: rc: 14
 main: status: track
 main: input '+three'
-main: filter: rc: 19
+main: work: rc: 19
 main: status: track
 main: input '=c -33'
 main: field: 'c'='-33'
@@ -142,28 +146,32 @@ main: input '-one'
 main: status: track
 main: input '+one'
 xpath_01: duplicate sibling name: 'one'
-main: filter: rc: 11
+main: work: rc: 11
 main: status: predicate
 main: input '$a 4.85'
 main: key: 'a'='4.85'
+main: work: rc: 15
 main: status: track
 main: input '+two'
-main: filter: rc: 15
+main: work: rc: 15
 main: status: predicate
 main: input '$b 2.7'
 main: key: 'b'='2.7'
+main: work: rc: 16
 main: status: track
 main: input '+three'
-main: filter: rc: 19
+main: work: rc: 19
 main: status: predicate
 main: input '$c -3333'
 main: key: 'c'='-3333'
+main: work: rc: 20
 main: status: track
 main: input '+four'
-main: filter: rc: 20
+main: work: rc: 20
 main: status: full
 main: input '=five mambo'
 main: field: 'five'='mambo'
+main: work: rc: 25
 main: status: full
 main: input '-four'
 main: status: track
@@ -173,13 +181,14 @@ main: input '-two'
 main: status: track
 main: input '+two'
 xpath_01: duplicate sibling name: 'two'
-main: filter: rc: 15
+main: work: rc: 15
 main: status: predicate
 main: input '$b 2'
 main: key: 'b'='2'
+main: work: rc: 14
 main: status: track
 main: input '+three'
-main: filter: rc: 19
+main: work: rc: 19
 main: status: track
 main: input '=c -33'
 main: field: 'c'='-33'
@@ -255,22 +264,25 @@ xpath_01: test: filter expression feature is unsupported: plus sign ('+')
         000063: type 70 (C_ELEMENT), str 140 [one], contents 0, next 0, prev 0
 main: status: track
 main: input '+a'
-main: filter: rc: 11
+main: work: rc: 11
 main: status: track
 main: input '$b you've got mail'
 main: key: 'b'='you've got mail'
+main: work: rc: 26
 main: status: track
 main: input '$c didn't sweat'
 main: key: 'c'='didn't sweat'
+main: work: rc: 25
 main: status: track
 main: input '+d'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: track
 main: input '+one'
-main: filter: rc: 15
+main: work: rc: 15
 main: status: full
 main: input '=foo that's good'
 main: field: 'foo'='that's good'
+main: work: rc: 28
 main: status: full
 main: input '-one'
 main: status: track

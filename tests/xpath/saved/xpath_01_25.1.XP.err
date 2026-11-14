@@ -23,58 +23,70 @@ main: status: zero
 main: input '{num'
 main: status: zero
 main: input '<num'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= id one'
 main: field: 'id'='one'
 main: status: predicate
 main: input '= big 18446744073709551614'
 main: field: 'big'='18446744073709551614'
+main: work: rc: 34
 main: status: full
 main: input '= max 9223372036854775807'
 main: field: 'max'='9223372036854775807'
+main: work: rc: 33
 main: status: full
 main: input '= neg -9223372036854775808'
 main: field: 'neg'='-9223372036854775808'
+main: work: rc: 34
 main: status: full
 main: input '= hex 0x10'
 main: field: 'hex'='0x10'
+main: work: rc: 18
 main: status: full
 main: input '= octal 010'
 main: field: 'octal'='010'
+main: work: rc: 21
 main: status: full
 main: input '= half 2.5'
 main: field: 'half'='2.5'
+main: work: rc: 19
 main: status: full
 main: input '>num'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: track
 main: input '<num'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= id two'
 main: field: 'id'='two'
 main: status: predicate
 main: input '= big 2'
 main: field: 'big'='2'
+main: work: rc: 15
 main: status: full
 main: input '= max 1'
 main: field: 'max'='1'
+main: work: rc: 15
 main: status: full
 main: input '= neg -1'
 main: field: 'neg'='-1'
+main: work: rc: 16
 main: status: full
 main: input '= hex 0x1'
 main: field: 'hex'='0x1'
+main: work: rc: 17
 main: status: full
 main: input '= octal 07'
 main: field: 'octal'='07'
+main: work: rc: 20
 main: status: full
 main: input '= half 0.5'
 main: field: 'half'='0.5'
+main: work: rc: 19
 main: status: full
 main: input '>num'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: track
 main: input '}num'
 main: status: track
@@ -101,7 +113,7 @@ main: input '{num'
 xpath_01: duplicate sibling name: 'num'
 main: status: zero
 main: input '<num'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= id one'
 main: field: 'id'='one'
@@ -111,24 +123,29 @@ main: field: 'big'='18446744073709551614'
 main: status: predicate
 main: input '= max 9223372036854775807'
 main: field: 'max'='9223372036854775807'
+main: work: rc: 33
 main: status: full
 main: input '= neg -9223372036854775808'
 main: field: 'neg'='-9223372036854775808'
+main: work: rc: 34
 main: status: full
 main: input '= hex 0x10'
 main: field: 'hex'='0x10'
+main: work: rc: 18
 main: status: full
 main: input '= octal 010'
 main: field: 'octal'='010'
+main: work: rc: 21
 main: status: full
 main: input '= half 2.5'
 main: field: 'half'='2.5'
+main: work: rc: 19
 main: status: full
 main: input '>num'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: track
 main: input '<num'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= id two'
 main: field: 'id'='two'
@@ -138,21 +155,26 @@ main: field: 'big'='2'
 main: status: predicate
 main: input '= max 1'
 main: field: 'max'='1'
+main: work: rc: 15
 main: status: full
 main: input '= neg -1'
 main: field: 'neg'='-1'
+main: work: rc: 16
 main: status: full
 main: input '= hex 0x1'
 main: field: 'hex'='0x1'
+main: work: rc: 17
 main: status: full
 main: input '= octal 07'
 main: field: 'octal'='07'
+main: work: rc: 20
 main: status: full
 main: input '= half 0.5'
 main: field: 'half'='0.5'
+main: work: rc: 19
 main: status: full
 main: input '>num'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: track
 main: input '}num'
 main: status: track
@@ -180,7 +202,7 @@ main: status: zero
 main: input '{num'
 main: status: zero
 main: input '<num'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= id one'
 main: field: 'id'='one'
@@ -193,21 +215,25 @@ main: field: 'max'='9223372036854775807'
 main: status: predicate
 main: input '= neg -9223372036854775808'
 main: field: 'neg'='-9223372036854775808'
+main: work: rc: 34
 main: status: full
 main: input '= hex 0x10'
 main: field: 'hex'='0x10'
+main: work: rc: 18
 main: status: full
 main: input '= octal 010'
 main: field: 'octal'='010'
+main: work: rc: 21
 main: status: full
 main: input '= half 2.5'
 main: field: 'half'='2.5'
+main: work: rc: 19
 main: status: full
 main: input '>num'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: track
 main: input '<num'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= id two'
 main: field: 'id'='two'
@@ -253,7 +279,7 @@ main: status: zero
 main: input '{num'
 main: status: zero
 main: input '<num'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= id one'
 main: field: 'id'='one'
@@ -272,15 +298,17 @@ main: field: 'hex'='0x10'
 main: status: predicate
 main: input '= octal 010'
 main: field: 'octal'='010'
+main: work: rc: 21
 main: status: full
 main: input '= half 2.5'
 main: field: 'half'='2.5'
+main: work: rc: 19
 main: status: full
 main: input '>num'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: track
 main: input '<num'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= id two'
 main: field: 'id'='two'
@@ -328,7 +356,7 @@ main: status: zero
 main: input '{num'
 main: status: zero
 main: input '<num'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= id one'
 main: field: 'id'='one'
@@ -344,18 +372,21 @@ main: field: 'neg'='-9223372036854775808'
 main: status: predicate
 main: input '= hex 0x10'
 main: field: 'hex'='0x10'
+main: work: rc: 18
 main: status: full
 main: input '= octal 010'
 main: field: 'octal'='010'
+main: work: rc: 21
 main: status: full
 main: input '= half 2.5'
 main: field: 'half'='2.5'
+main: work: rc: 19
 main: status: full
 main: input '>num'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: track
 main: input '<num'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= id two'
 main: field: 'id'='two'
@@ -402,7 +433,7 @@ main: status: zero
 main: input '{num'
 main: status: zero
 main: input '<num'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= id one'
 main: field: 'id'='one'
@@ -424,12 +455,13 @@ main: field: 'octal'='010'
 main: status: predicate
 main: input '= half 2.5'
 main: field: 'half'='2.5'
+main: work: rc: 19
 main: status: full
 main: input '>num'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: track
 main: input '<num'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= id two'
 main: field: 'id'='two'
@@ -476,7 +508,7 @@ main: status: zero
 main: input '{num'
 main: status: zero
 main: input '<num'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= id one'
 main: field: 'id'='one'
@@ -502,7 +534,7 @@ main: status: track
 main: input '>num'
 main: status: track
 main: input '<num'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= id two'
 main: field: 'id'='two'
@@ -524,9 +556,10 @@ main: field: 'octal'='07'
 main: status: predicate
 main: input '= half 0.5'
 main: field: 'half'='0.5'
+main: work: rc: 19
 main: status: full
 main: input '>num'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: track
 main: input '}num'
 main: status: track
@@ -550,7 +583,7 @@ main: status: zero
 main: input '{num'
 main: status: zero
 main: input '<num'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= id one'
 main: field: 'id'='one'
@@ -572,12 +605,13 @@ main: field: 'octal'='010'
 main: status: predicate
 main: input '= half 2.5'
 main: field: 'half'='2.5'
+main: work: rc: 19
 main: status: full
 main: input '>num'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: track
 main: input '<num'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= id two'
 main: field: 'id'='two'
@@ -625,7 +659,7 @@ main: status: zero
 main: input '{num'
 main: status: zero
 main: input '<num'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= id one'
 main: field: 'id'='one'
@@ -647,12 +681,13 @@ main: field: 'octal'='010'
 main: status: predicate
 main: input '= half 2.5'
 main: field: 'half'='2.5'
+main: work: rc: 19
 main: status: full
 main: input '>num'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: track
 main: input '<num'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= id two'
 main: field: 'id'='two'
@@ -700,58 +735,72 @@ main: status: zero
 main: input '{num'
 main: status: zero
 main: input '<num'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: full
 main: input '= id one'
 main: field: 'id'='one'
+main: work: rc: 15
 main: status: full
 main: input '= big 18446744073709551614'
 main: field: 'big'='18446744073709551614'
+main: work: rc: 34
 main: status: full
 main: input '= max 9223372036854775807'
 main: field: 'max'='9223372036854775807'
+main: work: rc: 33
 main: status: full
 main: input '= neg -9223372036854775808'
 main: field: 'neg'='-9223372036854775808'
+main: work: rc: 34
 main: status: full
 main: input '= hex 0x10'
 main: field: 'hex'='0x10'
+main: work: rc: 18
 main: status: full
 main: input '= octal 010'
 main: field: 'octal'='010'
+main: work: rc: 21
 main: status: full
 main: input '= half 2.5'
 main: field: 'half'='2.5'
+main: work: rc: 19
 main: status: full
 main: input '>num'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: track
 main: input '<num'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: full
 main: input '= id two'
 main: field: 'id'='two'
+main: work: rc: 15
 main: status: full
 main: input '= big 2'
 main: field: 'big'='2'
+main: work: rc: 15
 main: status: full
 main: input '= max 1'
 main: field: 'max'='1'
+main: work: rc: 15
 main: status: full
 main: input '= neg -1'
 main: field: 'neg'='-1'
+main: work: rc: 16
 main: status: full
 main: input '= hex 0x1'
 main: field: 'hex'='0x1'
+main: work: rc: 17
 main: status: full
 main: input '= octal 07'
 main: field: 'octal'='07'
+main: work: rc: 20
 main: status: full
 main: input '= half 0.5'
 main: field: 'half'='0.5'
+main: work: rc: 19
 main: status: full
 main: input '>num'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: track
 main: input '}num'
 main: status: track
@@ -777,58 +826,72 @@ main: status: zero
 main: input '{num'
 main: status: zero
 main: input '<num'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: full
 main: input '= id one'
 main: field: 'id'='one'
+main: work: rc: 15
 main: status: full
 main: input '= big 18446744073709551614'
 main: field: 'big'='18446744073709551614'
+main: work: rc: 34
 main: status: full
 main: input '= max 9223372036854775807'
 main: field: 'max'='9223372036854775807'
+main: work: rc: 33
 main: status: full
 main: input '= neg -9223372036854775808'
 main: field: 'neg'='-9223372036854775808'
+main: work: rc: 34
 main: status: full
 main: input '= hex 0x10'
 main: field: 'hex'='0x10'
+main: work: rc: 18
 main: status: full
 main: input '= octal 010'
 main: field: 'octal'='010'
+main: work: rc: 21
 main: status: full
 main: input '= half 2.5'
 main: field: 'half'='2.5'
+main: work: rc: 19
 main: status: full
 main: input '>num'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: track
 main: input '<num'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: full
 main: input '= id two'
 main: field: 'id'='two'
+main: work: rc: 15
 main: status: full
 main: input '= big 2'
 main: field: 'big'='2'
+main: work: rc: 15
 main: status: full
 main: input '= max 1'
 main: field: 'max'='1'
+main: work: rc: 15
 main: status: full
 main: input '= neg -1'
 main: field: 'neg'='-1'
+main: work: rc: 16
 main: status: full
 main: input '= hex 0x1'
 main: field: 'hex'='0x1'
+main: work: rc: 17
 main: status: full
 main: input '= octal 07'
 main: field: 'octal'='07'
+main: work: rc: 20
 main: status: full
 main: input '= half 0.5'
 main: field: 'half'='0.5'
+main: work: rc: 19
 main: status: full
 main: input '>num'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: track
 main: input '}num'
 main: status: track
@@ -853,34 +916,40 @@ main: status: zero
 main: input '{num'
 main: status: zero
 main: input '<num'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= id one'
 main: field: 'id'='one'
 main: status: predicate
 main: input '= big 18446744073709551614'
 main: field: 'big'='18446744073709551614'
+main: work: rc: 34
 main: status: full
 main: input '= max 9223372036854775807'
 main: field: 'max'='9223372036854775807'
+main: work: rc: 33
 main: status: full
 main: input '= neg -9223372036854775808'
 main: field: 'neg'='-9223372036854775808'
+main: work: rc: 34
 main: status: full
 main: input '= hex 0x10'
 main: field: 'hex'='0x10'
+main: work: rc: 18
 main: status: full
 main: input '= octal 010'
 main: field: 'octal'='010'
+main: work: rc: 21
 main: status: full
 main: input '= half 2.5'
 main: field: 'half'='2.5'
+main: work: rc: 19
 main: status: full
 main: input '>num'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: track
 main: input '<num'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= id two'
 main: field: 'id'='two'
@@ -927,58 +996,72 @@ main: status: zero
 main: input '{num'
 main: status: zero
 main: input '<num'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: full
 main: input '= id one'
 main: field: 'id'='one'
+main: work: rc: 15
 main: status: full
 main: input '= big 18446744073709551614'
 main: field: 'big'='18446744073709551614'
+main: work: rc: 34
 main: status: full
 main: input '= max 9223372036854775807'
 main: field: 'max'='9223372036854775807'
+main: work: rc: 33
 main: status: full
 main: input '= neg -9223372036854775808'
 main: field: 'neg'='-9223372036854775808'
+main: work: rc: 34
 main: status: full
 main: input '= hex 0x10'
 main: field: 'hex'='0x10'
+main: work: rc: 18
 main: status: full
 main: input '= octal 010'
 main: field: 'octal'='010'
+main: work: rc: 21
 main: status: full
 main: input '= half 2.5'
 main: field: 'half'='2.5'
+main: work: rc: 19
 main: status: full
 main: input '>num'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: track
 main: input '<num'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: full
 main: input '= id two'
 main: field: 'id'='two'
+main: work: rc: 15
 main: status: full
 main: input '= big 2'
 main: field: 'big'='2'
+main: work: rc: 15
 main: status: full
 main: input '= max 1'
 main: field: 'max'='1'
+main: work: rc: 15
 main: status: full
 main: input '= neg -1'
 main: field: 'neg'='-1'
+main: work: rc: 16
 main: status: full
 main: input '= hex 0x1'
 main: field: 'hex'='0x1'
+main: work: rc: 17
 main: status: full
 main: input '= octal 07'
 main: field: 'octal'='07'
+main: work: rc: 20
 main: status: full
 main: input '= half 0.5'
 main: field: 'half'='0.5'
+main: work: rc: 19
 main: status: full
 main: input '>num'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: track
 main: input '}num'
 main: status: track
@@ -1002,58 +1085,72 @@ main: status: zero
 main: input '{num'
 main: status: zero
 main: input '<num'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: full
 main: input '= id one'
 main: field: 'id'='one'
+main: work: rc: 15
 main: status: full
 main: input '= big 18446744073709551614'
 main: field: 'big'='18446744073709551614'
+main: work: rc: 34
 main: status: full
 main: input '= max 9223372036854775807'
 main: field: 'max'='9223372036854775807'
+main: work: rc: 33
 main: status: full
 main: input '= neg -9223372036854775808'
 main: field: 'neg'='-9223372036854775808'
+main: work: rc: 34
 main: status: full
 main: input '= hex 0x10'
 main: field: 'hex'='0x10'
+main: work: rc: 18
 main: status: full
 main: input '= octal 010'
 main: field: 'octal'='010'
+main: work: rc: 21
 main: status: full
 main: input '= half 2.5'
 main: field: 'half'='2.5'
+main: work: rc: 19
 main: status: full
 main: input '>num'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: track
 main: input '<num'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: full
 main: input '= id two'
 main: field: 'id'='two'
+main: work: rc: 15
 main: status: full
 main: input '= big 2'
 main: field: 'big'='2'
+main: work: rc: 15
 main: status: full
 main: input '= max 1'
 main: field: 'max'='1'
+main: work: rc: 15
 main: status: full
 main: input '= neg -1'
 main: field: 'neg'='-1'
+main: work: rc: 16
 main: status: full
 main: input '= hex 0x1'
 main: field: 'hex'='0x1'
+main: work: rc: 17
 main: status: full
 main: input '= octal 07'
 main: field: 'octal'='07'
+main: work: rc: 20
 main: status: full
 main: input '= half 0.5'
 main: field: 'half'='0.5'
+main: work: rc: 19
 main: status: full
 main: input '>num'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: track
 main: input '}num'
 main: status: track
@@ -1077,7 +1174,7 @@ main: status: zero
 main: input '{num'
 main: status: zero
 main: input '<num'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= id one'
 main: field: 'id'='one'
@@ -1096,15 +1193,17 @@ main: field: 'hex'='0x10'
 main: status: predicate
 main: input '= octal 010'
 main: field: 'octal'='010'
+main: work: rc: 21
 main: status: full
 main: input '= half 2.5'
 main: field: 'half'='2.5'
+main: work: rc: 19
 main: status: full
 main: input '>num'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: track
 main: input '<num'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= id two'
 main: field: 'id'='two'
@@ -1154,7 +1253,7 @@ main: status: zero
 main: input '{num'
 main: status: zero
 main: input '<num'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= id one'
 main: field: 'id'='one'
@@ -1164,24 +1263,29 @@ main: field: 'big'='18446744073709551614'
 main: status: predicate
 main: input '= max 9223372036854775807'
 main: field: 'max'='9223372036854775807'
+main: work: rc: 33
 main: status: full
 main: input '= neg -9223372036854775808'
 main: field: 'neg'='-9223372036854775808'
+main: work: rc: 34
 main: status: full
 main: input '= hex 0x10'
 main: field: 'hex'='0x10'
+main: work: rc: 18
 main: status: full
 main: input '= octal 010'
 main: field: 'octal'='010'
+main: work: rc: 21
 main: status: full
 main: input '= half 2.5'
 main: field: 'half'='2.5'
+main: work: rc: 19
 main: status: full
 main: input '>num'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: track
 main: input '<num'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= id two'
 main: field: 'id'='two'
@@ -1191,21 +1295,26 @@ main: field: 'big'='2'
 main: status: predicate
 main: input '= max 1'
 main: field: 'max'='1'
+main: work: rc: 15
 main: status: full
 main: input '= neg -1'
 main: field: 'neg'='-1'
+main: work: rc: 16
 main: status: full
 main: input '= hex 0x1'
 main: field: 'hex'='0x1'
+main: work: rc: 17
 main: status: full
 main: input '= octal 07'
 main: field: 'octal'='07'
+main: work: rc: 20
 main: status: full
 main: input '= half 0.5'
 main: field: 'half'='0.5'
+main: work: rc: 19
 main: status: full
 main: input '>num'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: track
 main: input '}num'
 main: status: track
@@ -1236,7 +1345,7 @@ main: status: zero
 main: input '{num'
 main: status: zero
 main: input '<num'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= id one'
 main: field: 'id'='one'
@@ -1246,24 +1355,29 @@ main: field: 'big'='18446744073709551614'
 main: status: predicate
 main: input '= max 9223372036854775807'
 main: field: 'max'='9223372036854775807'
+main: work: rc: 33
 main: status: full
 main: input '= neg -9223372036854775808'
 main: field: 'neg'='-9223372036854775808'
+main: work: rc: 34
 main: status: full
 main: input '= hex 0x10'
 main: field: 'hex'='0x10'
+main: work: rc: 18
 main: status: full
 main: input '= octal 010'
 main: field: 'octal'='010'
+main: work: rc: 21
 main: status: full
 main: input '= half 2.5'
 main: field: 'half'='2.5'
+main: work: rc: 19
 main: status: full
 main: input '>num'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: track
 main: input '<num'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= id two'
 main: field: 'id'='two'
@@ -1273,21 +1387,26 @@ main: field: 'big'='2'
 main: status: predicate
 main: input '= max 1'
 main: field: 'max'='1'
+main: work: rc: 15
 main: status: full
 main: input '= neg -1'
 main: field: 'neg'='-1'
+main: work: rc: 16
 main: status: full
 main: input '= hex 0x1'
 main: field: 'hex'='0x1'
+main: work: rc: 17
 main: status: full
 main: input '= octal 07'
 main: field: 'octal'='07'
+main: work: rc: 20
 main: status: full
 main: input '= half 0.5'
 main: field: 'half'='0.5'
+main: work: rc: 19
 main: status: full
 main: input '>num'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: track
 main: input '}num'
 main: status: track
@@ -1314,7 +1433,7 @@ main: status: zero
 main: input '{num'
 main: status: zero
 main: input '<num'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= id one'
 main: field: 'id'='one'
@@ -1327,21 +1446,25 @@ main: field: 'max'='9223372036854775807'
 main: status: predicate
 main: input '= neg -9223372036854775808'
 main: field: 'neg'='-9223372036854775808'
+main: work: rc: 34
 main: status: full
 main: input '= hex 0x10'
 main: field: 'hex'='0x10'
+main: work: rc: 18
 main: status: full
 main: input '= octal 010'
 main: field: 'octal'='010'
+main: work: rc: 21
 main: status: full
 main: input '= half 2.5'
 main: field: 'half'='2.5'
+main: work: rc: 19
 main: status: full
 main: input '>num'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: track
 main: input '<num'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= id two'
 main: field: 'id'='two'
@@ -1354,18 +1477,22 @@ main: field: 'max'='1'
 main: status: predicate
 main: input '= neg -1'
 main: field: 'neg'='-1'
+main: work: rc: 16
 main: status: full
 main: input '= hex 0x1'
 main: field: 'hex'='0x1'
+main: work: rc: 17
 main: status: full
 main: input '= octal 07'
 main: field: 'octal'='07'
+main: work: rc: 20
 main: status: full
 main: input '= half 0.5'
 main: field: 'half'='0.5'
+main: work: rc: 19
 main: status: full
 main: input '>num'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: track
 main: input '}num'
 main: status: track
@@ -1393,7 +1520,7 @@ main: status: zero
 main: input '{num'
 main: status: zero
 main: input '<num'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= id one'
 main: field: 'id'='one'
@@ -1403,24 +1530,29 @@ main: field: 'big'='18446744073709551614'
 main: status: predicate
 main: input '= max 9223372036854775807'
 main: field: 'max'='9223372036854775807'
+main: work: rc: 33
 main: status: full
 main: input '= neg -9223372036854775808'
 main: field: 'neg'='-9223372036854775808'
+main: work: rc: 34
 main: status: full
 main: input '= hex 0x10'
 main: field: 'hex'='0x10'
+main: work: rc: 18
 main: status: full
 main: input '= octal 010'
 main: field: 'octal'='010'
+main: work: rc: 21
 main: status: full
 main: input '= half 2.5'
 main: field: 'half'='2.5'
+main: work: rc: 19
 main: status: full
 main: input '>num'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: track
 main: input '<num'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= id two'
 main: field: 'id'='two'
@@ -1430,21 +1562,26 @@ main: field: 'big'='2'
 main: status: predicate
 main: input '= max 1'
 main: field: 'max'='1'
+main: work: rc: 15
 main: status: full
 main: input '= neg -1'
 main: field: 'neg'='-1'
+main: work: rc: 16
 main: status: full
 main: input '= hex 0x1'
 main: field: 'hex'='0x1'
+main: work: rc: 17
 main: status: full
 main: input '= octal 07'
 main: field: 'octal'='07'
+main: work: rc: 20
 main: status: full
 main: input '= half 0.5'
 main: field: 'half'='0.5'
+main: work: rc: 19
 main: status: full
 main: input '>num'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: track
 main: input '}num'
 main: status: track
@@ -1472,58 +1609,70 @@ main: status: zero
 main: input '{num'
 main: status: zero
 main: input '<num'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= id one'
 main: field: 'id'='one'
 main: status: predicate
 main: input '= big 18446744073709551614'
 main: field: 'big'='18446744073709551614'
+main: work: rc: 34
 main: status: full
 main: input '= max 9223372036854775807'
 main: field: 'max'='9223372036854775807'
+main: work: rc: 33
 main: status: full
 main: input '= neg -9223372036854775808'
 main: field: 'neg'='-9223372036854775808'
+main: work: rc: 34
 main: status: full
 main: input '= hex 0x10'
 main: field: 'hex'='0x10'
+main: work: rc: 18
 main: status: full
 main: input '= octal 010'
 main: field: 'octal'='010'
+main: work: rc: 21
 main: status: full
 main: input '= half 2.5'
 main: field: 'half'='2.5'
+main: work: rc: 19
 main: status: full
 main: input '>num'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: track
 main: input '<num'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= id two'
 main: field: 'id'='two'
 main: status: predicate
 main: input '= big 2'
 main: field: 'big'='2'
+main: work: rc: 15
 main: status: full
 main: input '= max 1'
 main: field: 'max'='1'
+main: work: rc: 15
 main: status: full
 main: input '= neg -1'
 main: field: 'neg'='-1'
+main: work: rc: 16
 main: status: full
 main: input '= hex 0x1'
 main: field: 'hex'='0x1'
+main: work: rc: 17
 main: status: full
 main: input '= octal 07'
 main: field: 'octal'='07'
+main: work: rc: 20
 main: status: full
 main: input '= half 0.5'
 main: field: 'half'='0.5'
+main: work: rc: 19
 main: status: full
 main: input '>num'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: track
 main: input '}num'
 main: status: track
@@ -1549,58 +1698,70 @@ main: status: zero
 main: input '{num'
 main: status: zero
 main: input '<num'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= id one'
 main: field: 'id'='one'
 main: status: predicate
 main: input '= big 18446744073709551614'
 main: field: 'big'='18446744073709551614'
+main: work: rc: 34
 main: status: full
 main: input '= max 9223372036854775807'
 main: field: 'max'='9223372036854775807'
+main: work: rc: 33
 main: status: full
 main: input '= neg -9223372036854775808'
 main: field: 'neg'='-9223372036854775808'
+main: work: rc: 34
 main: status: full
 main: input '= hex 0x10'
 main: field: 'hex'='0x10'
+main: work: rc: 18
 main: status: full
 main: input '= octal 010'
 main: field: 'octal'='010'
+main: work: rc: 21
 main: status: full
 main: input '= half 2.5'
 main: field: 'half'='2.5'
+main: work: rc: 19
 main: status: full
 main: input '>num'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: track
 main: input '<num'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '= id two'
 main: field: 'id'='two'
 main: status: predicate
 main: input '= big 2'
 main: field: 'big'='2'
+main: work: rc: 15
 main: status: full
 main: input '= max 1'
 main: field: 'max'='1'
+main: work: rc: 15
 main: status: full
 main: input '= neg -1'
 main: field: 'neg'='-1'
+main: work: rc: 16
 main: status: full
 main: input '= hex 0x1'
 main: field: 'hex'='0x1'
+main: work: rc: 17
 main: status: full
 main: input '= octal 07'
 main: field: 'octal'='07'
+main: work: rc: 20
 main: status: full
 main: input '= half 0.5'
 main: field: 'half'='0.5'
+main: work: rc: 19
 main: status: full
 main: input '>num'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: track
 main: input '}num'
 main: status: track

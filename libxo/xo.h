@@ -49,6 +49,15 @@ extern "C" {
 #define XO_UNUSED __attribute__ ((__unused__))
 #endif /* XO_UNUSED */
 
+/* Warn when a caller ignores a result it must check */
+#ifndef XO_USE_RESULT
+#if defined(__GNUC__) || defined(__clang__)
+#define XO_USE_RESULT __attribute__ ((__warn_unused_result__))
+#else
+#define XO_USE_RESULT
+#endif
+#endif /* XO_USE_RESULT */
+
 /*
  * Normally we'd use the HAVE_PRINTFLIKE define triggered by the
  * --enable-printflike option to configure, but we don't install
@@ -189,6 +198,7 @@ typedef uint64_t xo_xff_flags_t;
 #define XFF_DENSE	(XO_64B1 << 30) /* Use dense (tabular) form (RTOON) */
 #define XFF_BOOLEAN	(XO_64B1 << 31) /* Value is a native boolean */
 #define XFF_FULL_BOOLEAN (XO_64B1 << 32) /* B: encode words, not booleans */
+#define XFF_DROP_PLUS	(XO_64B1 << 33) /* No sign flags in the encoding */
 
 /* Flags to turn off when we don't want i18n processing */
 #define XFF_GT_FLAGS (XFF_GT_FIELD | XFF_GT_PLURAL)
@@ -834,7 +844,7 @@ xo_no_setlocale (void);
  * @return New number of arguments, or -1 for failure.
  */
 int
-xo_parse_args (int argc, char **argv);
+xo_parse_args (int argc, char **argv) XO_USE_RESULT;
 
 /**
  * This is the "magic" number returned by libxo-supporting commands

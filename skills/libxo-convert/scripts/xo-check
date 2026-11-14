@@ -1,0 +1,330 @@
+#!/bin/sh
+#
+# xo-check: record and compare a program's output, for libxo
+# conversions.  The TEXT output (no --libxo) must not change at all.
+#
+# Usage:
+#     sh xo-check record [-f] [-x] CASES DIR
+#     sh xo-check compare CASES DIR
+#
+# CASES is a file with one shell command line per line; blank lines
+# and lines starting with "#" are ignored.  Each line is run with
+# "sh -c", from the current directory, with stdin from /dev/null
+# (use a pipe or "<" in the line for input).
+#
+# libxo options are inserted after the first word of the line, or in
+# place of "@XO@" if the line contains it (needed when the program is
+# not the first word: "printf 'a b\n' | wc @XO@").  For the TEXT runs
+# "@XO@" is simply removed.
+#
+# record runs each case twice with no --libxo and saves stdout,
+# stderr, and exit status under DIR/base.  A case whose two runs
+# differ (times, pids) is marked unstable.  With -x (the program
+# already has libxo output) it also saves the XP and JP output and the
+# fullpath encoder output.  -f replaces an existing baseline.
+#
+# compare runs each case again and:
+#   - compares stdout, stderr, and exit status with the baseline,
+#     printing a "WARNING: TEXT OUTPUT CHANGED" block on any change;
+#   - runs the W, XPW, JPW, and HPW styles, checks the XML and JSON are
+#     well-formed (xmllint, jq, or python3, when installed), and
+#     reports stderr lines not in the baseline (libxo warnings);
+#   - saves the fullpath encoder output (NNN.fullpath) for comparing
+#     with the schema;
+#   - with an -x baseline, checks that every fullpath line in the
+#     baseline is still produced ("WARNING: ENCODED OUTPUT CHANGED"
+#     otherwise; additions are fine).
+# New output goes to DIR/new.  Nothing is written outside DIR.
+#
+# Exit status of compare: 0 if all is well, 1 if the TEXT output
+# changed, 2 for other problems (invalid XML/JSON, warnings, encoded
+# output changed).
+
+PROG=xo-check
+
+usage () {
+    sed -n '/^# Usage:/,/^# CASES/p' "$0" | sed -e '$d' -e 's/^# \{0,1\}//' >&2
+    exit 1
+}
+
+die () {
+    echo "$PROG: $*" >&2
+    exit 1
+}
+
+# Settings that change output; recorded so compare can warn
+env_snapshot () {
+    for v in LANG LC_ALL LC_CTYPE LC_COLLATE LC_NUMERIC LC_TIME TZ \
+             COLUMNS TERM BLOCKSIZE; do
+        eval "val=\${$v-<unset>}"
+        printf "%s=%s\n" "$v" "$val"
+    done
+}
+
+# Build the command line for a case with the given libxo options
+# ("" for none)
+case_cmd () {
+    line=$1
+    opts=$2
+    case "$line" in
+    *@XO@*)
+        before=${line%%@XO@*}
+        after=${line#*@XO@}
+        if [ -n "$opts" ]; then
+            printf '%s%s%s\n' "$before" "$opts" "$after"
+        else
+            printf '%s%s\n' "$before" "$after"
+        fi
+        ;;
+    *)
+        if [ -z "$opts" ]; then
+            printf '%s\n' "$line"
+            return
+        fi
+        # Strip leading blanks, then split off the first word
+        trimmed=$(printf '%s\n' "$line" | sed 's/^[ 	]*//')
+        first=${trimmed%%[ 	]*}
+        rest=${trimmed#"$first"}
+        printf '%s %s%s\n' "$first" "$opts" "$rest"
+        ;;
+    esac
+}
+
+# run_case CMD PREFIX: run CMD, leaving PREFIX.out, .err, .rc
+run_case () {
+    sh -c "$1" < /dev/null > "$2.out" 2> "$2.err"
+    echo $? > "$2.rc"
+}
+
+# Read the cases file, writing "NNN<tab>line" to stdout
+list_cases () {
+    awk '
+        /^[ \t]*$/ || /^[ \t]*#/ { next }
+        { printf("%03d\t%s\n", ++n, $0) }
+    ' "$1"
+}
+
+check_dir () {
+    case "$1" in
+    */tests/*/saved|*/tests/*/saved/*|tests/*/saved|tests/*/saved/*)
+        die "refusing to write into a tests/*/saved directory: $1" ;;
+    esac
+}
+
+json_ok () {
+    if command -v jq > /dev/null 2>&1; then
+        jq . < "$1" > /dev/null 2>&1
+    elif command -v python3 > /dev/null 2>&1; then
+        python3 -B -c 'import json,sys; json.load(sys.stdin)' < "$1" \
+            > /dev/null 2>&1
+    else
+        return 0
+    fi
+}
+
+xml_ok () {
+    # libxo may emit several top-level elements; wrap them
+    if command -v xmllint > /dev/null 2>&1; then
+        { echo "<xo-check-wrapper>"; cat "$1"; echo "</xo-check-wrapper>"; } \
+            | xmllint --noout - > /dev/null 2>&1
+    else
+        return 0
+    fi
+}
+
+# Lines of $2 that are not in $1 (as multisets)
+extra_lines () {
+    awk 'NR == FNR { seen[$0]++; next }
+         seen[$0] > 0 { seen[$0]--; next }
+         { print }' "$1" "$2"
+}
+
+warn_block () {
+    # warn_block TITLE CASE CMD WHAT BASEFILE NEWFILE
+    echo "=================================================================="
+    echo "WARNING: $1"
+    printf 'case %s: %s\n' "$2" "$3"
+    printf '%s differs\n' "$4"
+    if [ -n "$5" ]; then
+        diff "$5" "$6" | sed -n '1,40p'
+    fi
+    echo "=================================================================="
+}
+
+do_record () {
+    force=0
+    extended=0
+    while [ $# -gt 0 ]; do
+        case "$1" in
+        -f) force=1; shift ;;
+        -x) extended=1; shift ;;
+        -*) usage ;;
+        *) break ;;
+        esac
+    done
+    [ $# -eq 2 ] || usage
+    cases=$1
+    dir=$2
+    [ -r "$cases" ] || die "cannot read $cases"
+    check_dir "$dir"
+    if [ -d "$dir/base" ] && [ $force -eq 0 ]; then
+        die "$dir/base exists; use -f to replace it"
+    fi
+    rm -rf "$dir/base"
+    mkdir -p "$dir/base" || die "cannot create $dir/base"
+
+    env_snapshot > "$dir/base/env"
+    cp "$cases" "$dir/base/cases"
+    [ $extended -eq 1 ] && : > "$dir/base/extended"
+
+    tab=$(printf '\t')
+    list_cases "$cases" | while IFS="$tab" read -r n line; do
+        b="$dir/base/$n"
+        cmd=$(case_cmd "$line" "")
+        printf '%s\n' "$cmd" > "$b.cmd"
+        run_case "$cmd" "$b"
+        run_case "$cmd" "$b.again"
+        if ! cmp -s "$b.out" "$b.again.out" \
+            || ! cmp -s "$b.err" "$b.again.err" \
+            || ! cmp -s "$b.rc" "$b.again.rc"; then
+            : > "$b.unstable"
+            printf '%s: case %s is unstable (two runs differ): %s\n' \
+                "$PROG" "$n" "$cmd" >&2
+        fi
+        rm -f "$b.again.out" "$b.again.err" "$b.again.rc"
+        if [ $extended -eq 1 ]; then
+            sh -c "$(case_cmd "$line" "--libxo:XP")" < /dev/null \
+                > "$b.XP" 2> /dev/null
+            sh -c "$(case_cmd "$line" "--libxo:JP")" < /dev/null \
+                > "$b.JP" 2> /dev/null
+            sh -c "$(case_cmd "$line" "--libxo @fullpath")" < /dev/null \
+                > "$b.fullpath" 2> /dev/null
+        fi
+        printf '%s  rc=%s  %s\n' "$n" "$(cat "$b.rc")" "$cmd"
+    done
+}
+
+do_compare () {
+    [ $# -eq 2 ] || usage
+    cases=$1
+    dir=$2
+    [ -r "$cases" ] || die "cannot read $cases"
+    [ -d "$dir/base" ] || die "no baseline in $dir/base; run record first"
+    check_dir "$dir"
+    cmp -s "$cases" "$dir/base/cases" \
+        || die "$cases differs from the recorded cases; record again"
+    rm -rf "$dir/new"
+    mkdir -p "$dir/new" || die "cannot create $dir/new"
+
+    env_snapshot > "$dir/new/env"
+    if ! cmp -s "$dir/base/env" "$dir/new/env"; then
+        echo "$PROG: environment differs from the baseline's:" >&2
+        diff "$dir/base/env" "$dir/new/env" >&2
+    fi
+
+    extended=0
+    [ -f "$dir/base/extended" ] && extended=1
+
+    tab=$(printf '\t')
+    list_cases "$cases" | while IFS="$tab" read -r n line; do
+        b="$dir/base/$n"
+        w="$dir/new/$n"
+        cmd=$(case_cmd "$line" "")
+        note=""
+        tstatus=text
+        if [ -f "$b.unstable" ]; then
+            note=" (unstable in the baseline; check by hand)"
+            tstatus=other
+        fi
+
+        # TEXT, byte for byte
+        run_case "$cmd" "$w"
+        for what in out err rc; do
+            if ! cmp -s "$b.$what" "$w.$what"; then
+                case $what in
+                out) label="stdout" ;;
+                err) label="stderr" ;;
+                rc) label="exit status" ;;
+                esac
+                warn_block "TEXT OUTPUT CHANGED$note" "$n" "$cmd" \
+                    "$label" "$b.$what" "$w.$what"
+                echo "$label" > "$w.status.$tstatus"
+            fi
+        done
+
+        # Styles, with libxo warnings on
+        for style in W XPW JPW HPW; do
+            scmd=$(case_cmd "$line" "--libxo:$style")
+            run_case "$scmd" "$w.$style"
+            extra=$(extra_lines "$b.err" "$w.$style.err")
+            if [ -n "$extra" ]; then
+                printf '%s %s: stderr lines not in the baseline' "$n" "$style"
+                printf ' (libxo warnings?): %s\n' "$scmd"
+                printf '%s\n' "$extra" | sed 's/^/    /'
+                echo other > "$w.status.other"
+            fi
+            if ! cmp -s "$b.rc" "$w.$style.rc"; then
+                printf '%s %s: exit status %s, baseline %s: %s\n' "$n" \
+                    "$style" "$(cat "$w.$style.rc")" "$(cat "$b.rc")" "$scmd"
+                echo other > "$w.status.other"
+            fi
+            case $style in
+            XPW)
+                if ! xml_ok "$w.$style.out"; then
+                    printf '%s %s: XML is not well-formed: %s\n' \
+                        "$n" "$style" "$scmd"
+                    echo other > "$w.status.other"
+                fi ;;
+            JPW)
+                if [ -s "$w.$style.out" ] && ! json_ok "$w.$style.out"; then
+                    printf '%s %s: JSON is not valid: %s\n' \
+                        "$n" "$style" "$scmd"
+                    echo other > "$w.status.other"
+                fi ;;
+            esac
+        done
+
+        # Paths, for comparing with the schema
+        fcmd=$(case_cmd "$line" "--libxo @fullpath")
+        sh -c "$fcmd" < /dev/null > "$w.fullpath" 2> /dev/null
+
+        if [ $extended -eq 1 ] && [ -f "$b.fullpath" ]; then
+            lost=$(extra_lines "$w.fullpath" "$b.fullpath")
+            if [ -n "$lost" ]; then
+                echo "=================================================================="
+                echo "WARNING: ENCODED OUTPUT CHANGED$note"
+                printf 'case %s: %s\n' "$n" "$fcmd"
+                echo "baseline paths no longer produced:"
+                printf '%s\n' "$lost" | sed -n '1,40p' | sed 's/^/    /'
+                echo "=================================================================="
+                echo other > "$w.status.other"
+            fi
+            sh -c "$(case_cmd "$line" "--libxo:XP")" < /dev/null \
+                > "$w.XP" 2> /dev/null
+            sh -c "$(case_cmd "$line" "--libxo:JP")" < /dev/null \
+                > "$w.JP" 2> /dev/null
+        fi
+    done
+
+    ntext=$(ls "$dir/new" | grep -c '\.status\.text$')
+    nother=$(ls "$dir/new" | grep -c '\.status\.other$')
+    ncases=$(list_cases "$cases" | wc -l | tr -d ' ')
+    echo "$PROG: $ncases cases; $ntext with TEXT changes;" \
+        "$nother with other problems; output in $dir/new"
+    if [ "$ntext" -gt 0 ]; then
+        exit 1
+    elif [ "$nother" -gt 0 ]; then
+        exit 2
+    fi
+    exit 0
+}
+
+[ $# -ge 1 ] || usage
+mode=$1
+shift
+case "$mode" in
+record) do_record "$@" ;;
+compare) do_compare "$@" ;;
+-h|--help|help) usage ;;
+*) usage ;;
+esac

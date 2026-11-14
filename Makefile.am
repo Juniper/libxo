@@ -19,6 +19,7 @@ SUBDIRS = \
     xopo \
     xolint \
     xohtml \
+    skills \
     doc \
     encoder
 

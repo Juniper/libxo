@@ -15,16 +15,17 @@ added filter: 0
                 000008: type 54 (T_QUOTED), str 17 [2], contents 0, next 0, prev 7
 main: status: zero
 main: input '+servers'
-main: filter: rc: 15
+main: work: rc: 15
 main: status: track
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ id 1'
 main: key: 'id'='1'
+main: work: rc: 17
 main: status: track
 main: input '= host alpha'
 main: field: 'host'='alpha'
@@ -32,44 +33,49 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ id 2'
 main: key: 'id'='2'
+main: work: rc: 17
 main: status: full
 main: input '= host beta'
 main: field: 'host'='beta'
+main: work: rc: 24
 main: status: full
 main: input '>item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: track
 main: input '}item'
 main: status: track
 main: input '-servers'
 main: status: track
 main: input '+clients'
-main: filter: rc: 17
+main: work: rc: 17
 main: status: track
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ id 2'
 main: key: 'id'='2'
+main: work: rc: 17
 main: status: full
 main: input '= host gamma'
 main: field: 'host'='gamma'
+main: work: rc: 25
 main: status: full
 main: input '>item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: track
 main: input '<item'
-main: filter: rc: 10
+main: work: rc: 10
 main: status: predicate
 main: input '$ id 3'
 main: key: 'id'='3'
+main: work: rc: 17
 main: status: track
 main: input '= host delta'
 main: field: 'host'='delta'
@@ -99,31 +105,34 @@ added filter: 0
                     000010: type 54 (T_QUOTED), str 24 [x], contents 0, next 0, prev 9
 main: status: zero
 main: input '+top'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: track
 main: input '+a'
-main: filter: rc: 11
+main: work: rc: 11
 main: status: track
 main: input '{leaf'
-main: filter: rc: 16
+main: work: rc: 16
 main: status: track
 main: input '<leaf'
-main: filter: rc: 10
+main: work: rc: 10
 main: status: predicate
 main: input '$ val x'
 main: key: 'val'='x'
+main: work: rc: 20
 main: status: full
 main: input '= data 1'
 main: field: 'data'='1'
+main: work: rc: 23
 main: status: full
 main: input '>leaf'
-main: filter: rc: 10
+main: work: rc: 10
 main: status: track
 main: input '<leaf'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: predicate
 main: input '$ val y'
 main: key: 'val'='y'
+main: work: rc: 20
 main: status: track
 main: input '= data 2'
 main: field: 'data'='2'
@@ -135,22 +144,24 @@ main: status: track
 main: input '-a'
 main: status: track
 main: input '+b'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: track
 main: input '{leaf'
-main: filter: rc: 16
+main: work: rc: 16
 main: status: track
 main: input '<leaf'
-main: filter: rc: 10
+main: work: rc: 10
 main: status: predicate
 main: input '$ val x'
 main: key: 'val'='x'
+main: work: rc: 20
 main: status: full
 main: input '= data 3'
 main: field: 'data'='3'
+main: work: rc: 23
 main: status: full
 main: input '>leaf'
-main: filter: rc: 10
+main: work: rc: 10
 main: status: track
 main: input '}leaf'
 main: status: track

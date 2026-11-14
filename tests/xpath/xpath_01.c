@@ -301,12 +301,12 @@ do_work (xo_handle_t *xop, xo_filter_t *xfp, xo_xparse_data_t *xdp,
 	    break;
 
 	default:
-	    fprintf(stderr, "main: filter: invalid line '%s'\n", cp);
+	    fprintf(stderr, "main: work: invalid line '%s'\n", cp);
 	    
 	}
 
 	if (!opt_quiet && rc != 0)
-	    fprintf(stderr, "main: filter: rc: %d\n", rc);
+	    fprintf(stderr, "main: work: rc: %d\n", rc);
 
 	if (!opt_quiet)
 	    fprintf(stderr, "main: status: %s\n",

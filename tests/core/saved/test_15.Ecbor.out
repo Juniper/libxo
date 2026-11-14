@@ -21,7 +21,7 @@ op create: [cbor] []
    65 63 6f 75  6e 74                                    ecount
    [content] @ 35 (5/5)
    3a 00 12 d6  86                                       :....
-      op content: [count] [0000000042]
+      op content: [count] [42]
    [append] @ 40 (6/6)
    65 63 6f 75  6e 74                                    ecount
    [content] @ 46 (2/2)
@@ -36,67 +36,62 @@ op create: [cbor] []
    65 63 6f 75  6e 74                                    ecount
    [content] @ 65 (9/9)
    1b 00 00 70  48 86 0d df  - 79                        ...pH...y
-      op content: [count] [             1234567]
+      op content: [count] [1234567]
    [append] @ 74 (6/6)
    65 63 6f 75  6e 74                                    ecount
-   [append] @ 80 (15/21)
-   74 20 20 20  20 20 20 20  - 20 20 20 20  20 20 31 32  t             12
-   33 34 35 36  37                                       34567
-   [content] @ 80 (15/21)
-   74 20 20 20  20 20 20 20  - 20 20 20 20  20 20 31 32  t             12
-   33 34 35 36  37                                       34567
+   [content] @ 80 (5/5)
+   1a 00 12 d6  87                                       .....
       op content: [count] [9876543210]
-   [append] @ 101 (6/6)
+   [append] @ 85 (6/6)
    65 63 6f 75  6e 74                                    ecount
-   [content] @ 107 (9/9)
+   [content] @ 91 (9/9)
    1b 00 00 00  02 4c b0 16  - ea                        .....L...
       op content: [count] [42]
-   [append] @ 116 (6/6)
+   [append] @ 100 (6/6)
    65 63 6f 75  6e 74                                    ecount
-   [content] @ 122 (2/2)
+   [content] @ 106 (2/2)
    18 2a                                                 .*
       op content: [count] [0]
-   [append] @ 124 (6/6)
+   [append] @ 108 (6/6)
    65 63 6f 75  6e 74                                    ecount
-   [content] @ 130 (1/1)
+   [content] @ 114 (1/1)
    00                                                    .
       op content: [count] [3456789]
-   [append] @ 131 (6/6)
+   [append] @ 115 (6/6)
    65 63 6f 75  6e 74                                    ecount
-   [content] @ 137 (5/5)
+   [content] @ 121 (5/5)
    1a 00 34 bf  15                                       ..4..
       op content: [count] [4567890]
-   [append] @ 142 (6/6)
+   [append] @ 126 (6/6)
    65 63 6f 75  6e 74                                    ecount
-   [content] @ 148 (5/5)
+   [content] @ 132 (5/5)
    1a 00 45 b3  52                                       ..E.R
       op content: [count] [abcdef]
-   [append] @ 153 (6/6)
+   [append] @ 137 (6/6)
    65 63 6f 75  6e 74                                    ecount
-   [append] @ 159 (7/7)
+   [append] @ 143 (7/7)
    66 61 62 63  64 65 66                                 fabcdef
-   [content] @ 159 (7/7)
+   [content] @ 143 (7/7)
    66 61 62 63  64 65 66                                 fabcdef
       op content: [count] [12345670]
-   [append] @ 166 (6/6)
+   [append] @ 150 (6/6)
    65 63 6f 75  6e 74                                    ecount
-   [content] @ 172 (5/5)
+   [content] @ 156 (5/5)
    1a 00 bc 61  46                                       ...aF
       op close_container: [data] []
-   [append] @ 177 (1/1)
+   [append] @ 161 (1/1)
    ff                                                    .
     op finish: [] []
- [append] @ 178 (1/1)
+ [append] @ 162 (1/1)
  ff                                                    .
   op flush: [] []
->[cbor] @ 0 (b3/179)
+>[cbor] @ 0 (a3/163)
 >bf 64 64 61  74 61 bf 65  - 63 6f 75 6e  74 1a 00 12  .ddata.ecount...
 >d6 87 65 63  6f 75 6e 74  - 1a 00 74 cb  b1 65 63 6f  ..ecount..t..eco
 >75 6e 74 3a  00 12 d6 86  - 65 63 6f 75  6e 74 18 2a  unt:....ecount.*
 >65 63 6f 75  6e 74 1a 49  - 96 02 d2 65  63 6f 75 6e  ecount.I...ecoun
 >74 1b 00 00  70 48 86 0d  - df 79 65 63  6f 75 6e 74  t...pH...yecount
->74 20 20 20  20 20 20 20  - 20 20 20 20  20 20 31 32  t             12
->33 34 35 36  37 65 63 6f  - 75 6e 74 1b  00 00 00 02  34567ecount.....
+>1a 00 12 d6  87 65 63 6f  - 75 6e 74 1b  00 00 00 02  .....ecount.....
 >4c b0 16 ea  65 63 6f 75  - 6e 74 18 2a  65 63 6f 75  L...ecount.*ecou
 >6e 74 00 65  63 6f 75 6e  - 74 1a 00 34  bf 15 65 63  nt.ecount..4..ec
 >6f 75 6e 74  1a 00 45 b3  - 52 65 63 6f  75 6e 74 66  ount..E.Recountf

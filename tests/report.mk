@@ -23,6 +23,13 @@
 #   ${CHECK_DIFF} SAVED OUT        diff one file
 #   ${REPORT_RECORD} PATH REASON   record any other failure
 #
+# "make accept" rules copy outputs to saved/ with these, which copy
+# and name only the files that changed:
+#
+#   ${ACCEPT_FILE} OUT SAVED       copy one file
+#   ${ACCEPT_FILES} OUT_BASE SAVED_BASE
+#                                  copy OUT_BASE.{out,err}
+#
 # Include this file after CLEANFILES is set.
 
 REPORT_FILE_DEFAULT = report.list
@@ -32,6 +39,8 @@ REPORT_CMD = ${BASH} ${REPORT_SH}
 CHECK_DIFF = S2O="${S2O}" ${REPORT_CMD} check-diff
 CHECK_DIFFS = S2O="${S2O}" ${REPORT_CMD} check-diffs
 REPORT_RECORD = ${REPORT_CMD} record
+ACCEPT_FILE = ${REPORT_CMD} accept-file
+ACCEPT_FILES = ${REPORT_CMD} accept-files
 
 CLEANFILES += ${REPORT_FILE_DEFAULT}
 

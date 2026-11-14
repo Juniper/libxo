@@ -62,6 +62,9 @@ option:
     </div>
 ```
 
+To convert an existing program with an LLM coding agent, see the
+skill in [skills/](skills/README.md).
+
 View the beautiful documentation at:
 
 http://juniper.github.io/libxo/libxo-manual.html

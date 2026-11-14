@@ -137,6 +137,7 @@ typedef struct xo_fspec_s {
 
 /* Flags for xf_extflags */
 #define XXF_NULL_AS_EMPTY	(1<<0) /* Render a NULL "%s" value as "" */
+#define XXF_GROUP		(1<<1) /* "'": group digits (display only) */
 
 /*
  * Values for xf_arg_type: the type the value's va_arg is pulled as,
@@ -475,6 +476,18 @@ xo_parse_fspecs (xo_parse_t *xpp, const char *fmt, const char *ep);
  */
 uint8_t
 xo_fspec_arg_type (const xo_fspec_t *xfp);
+
+/*
+ * Count the arguments a format consumes: the values (one per
+ * conversion, except "%%" and "%m") and the '*'s (widths, precisions
+ * and "%@...@" prefixes).  XO_FCA_GROUP is set in *flagsp if any
+ * conversion has the "'" flag.  Returns the number of values.
+ */
+#define XO_FCA_GROUP	(1<<0)	/* A conversion has the "'" flag */
+
+int
+xo_format_count_args (const char *fmt, ssize_t flen, unsigned *starsp,
+		      unsigned *flagsp);
 
 /*
  * A "B" (boolean) field's format is an optional boolean pair

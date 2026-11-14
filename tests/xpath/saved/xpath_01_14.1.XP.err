@@ -19,28 +19,33 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '$ first John'
 main: key: 'first'='John'
+main: work: rc: 22
 main: status: predicate
 main: input '$ last Doe'
 main: key: 'last'='Doe'
+main: work: rc: 19
 main: status: full
 main: input '= val 1'
 main: field: 'val'='1'
+main: work: rc: 15
 main: status: full
 main: input '>item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: track
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '$ first Jane'
 main: key: 'first'='Jane'
+main: work: rc: 22
 main: status: predicate
 main: input '$ last Doe'
 main: key: 'last'='Doe'
+main: work: rc: 19
 main: status: track
 main: input '= val 2'
 main: field: 'val'='2'
@@ -48,13 +53,15 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '$ first John'
 main: key: 'first'='John'
+main: work: rc: 22
 main: status: predicate
 main: input '$ last Smith'
 main: key: 'last'='Smith'
+main: work: rc: 21
 main: status: track
 main: input '= val 3'
 main: field: 'val'='3'
@@ -87,28 +94,33 @@ main: input '{item'
 xpath_01: duplicate sibling name: 'item'
 main: status: zero
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '$ host db'
 main: key: 'host'='db'
+main: work: rc: 18
 main: status: predicate
 main: input '$ port 5432'
 main: key: 'port'='5432'
+main: work: rc: 20
 main: status: full
 main: input '= val 1'
 main: field: 'val'='1'
+main: work: rc: 15
 main: status: full
 main: input '>item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: track
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '$ host db'
 main: key: 'host'='db'
+main: work: rc: 18
 main: status: predicate
 main: input '$ port 3306'
 main: key: 'port'='3306'
+main: work: rc: 20
 main: status: track
 main: input '= val 2'
 main: field: 'val'='2'
@@ -116,13 +128,15 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '$ host web'
 main: key: 'host'='web'
+main: work: rc: 19
 main: status: predicate
 main: input '$ port 5432'
 main: key: 'port'='5432'
+main: work: rc: 20
 main: status: track
 main: input '= val 3'
 main: field: 'val'='3'
@@ -155,34 +169,41 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '$ a x'
 main: key: 'a'='x'
+main: work: rc: 11
 main: status: predicate
 main: input '$ b y'
 main: key: 'b'='y'
+main: work: rc: 11
 main: status: predicate
 main: input '$ c z'
 main: key: 'c'='z'
+main: work: rc: 11
 main: status: full
 main: input '= val 1'
 main: field: 'val'='1'
+main: work: rc: 15
 main: status: full
 main: input '>item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: track
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '$ a x'
 main: key: 'a'='x'
+main: work: rc: 11
 main: status: predicate
 main: input '$ b y'
 main: key: 'b'='y'
+main: work: rc: 11
 main: status: predicate
 main: input '$ c w'
 main: key: 'c'='w'
+main: work: rc: 11
 main: status: track
 main: input '= val 2'
 main: field: 'val'='2'
@@ -190,16 +211,19 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '$ a x'
 main: key: 'a'='x'
+main: work: rc: 11
 main: status: predicate
 main: input '$ b b'
 main: key: 'b'='b'
+main: work: rc: 11
 main: status: predicate
 main: input '$ c z'
 main: key: 'c'='z'
+main: work: rc: 11
 main: status: track
 main: input '= val 3'
 main: field: 'val'='3'
@@ -229,22 +253,25 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '$ proto http'
 main: key: 'proto'='http'
+main: work: rc: 22
 main: status: full
 main: input '= val 1'
 main: field: 'val'='1'
+main: work: rc: 15
 main: status: full
 main: input '>item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: track
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '$ proto ftp'
 main: key: 'proto'='ftp'
+main: work: rc: 21
 main: status: track
 main: input '= val 2'
 main: field: 'val'='2'
@@ -252,16 +279,18 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '$ proto http'
 main: key: 'proto'='http'
+main: work: rc: 22
 main: status: full
 main: input '= val 3'
 main: field: 'val'='3'
+main: work: rc: 15
 main: status: full
 main: input '>item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: track
 main: input '}item'
 main: status: track
@@ -287,28 +316,33 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '$ first John'
 main: key: 'first'='John'
+main: work: rc: 22
 main: status: predicate
 main: input '$ last Doe'
 main: key: 'last'='Doe'
+main: work: rc: 19
 main: status: full
 main: input '= val 1'
 main: field: 'val'='1'
+main: work: rc: 15
 main: status: full
 main: input '>item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: track
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '$ first Jane'
 main: key: 'first'='Jane'
+main: work: rc: 22
 main: status: predicate
 main: input '$ last Doe'
 main: key: 'last'='Doe'
+main: work: rc: 19
 main: status: track
 main: input '= val 2'
 main: field: 'val'='2'
@@ -316,13 +350,15 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '$ first John'
 main: key: 'first'='John'
+main: work: rc: 22
 main: status: predicate
 main: input '$ last Smith'
 main: key: 'last'='Smith'
+main: work: rc: 21
 main: status: track
 main: input '= val 3'
 main: field: 'val'='3'
@@ -354,28 +390,33 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '$ host db'
 main: key: 'host'='db'
+main: work: rc: 18
 main: status: predicate
 main: input '$ port 5432'
 main: key: 'port'='5432'
+main: work: rc: 20
 main: status: full
 main: input '= val 1'
 main: field: 'val'='1'
+main: work: rc: 15
 main: status: full
 main: input '>item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: track
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '$ host db'
 main: key: 'host'='db'
+main: work: rc: 18
 main: status: predicate
 main: input '$ port 3306'
 main: key: 'port'='3306'
+main: work: rc: 20
 main: status: track
 main: input '= val 2'
 main: field: 'val'='2'
@@ -383,13 +424,15 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '$ host web'
 main: key: 'host'='web'
+main: work: rc: 19
 main: status: predicate
 main: input '$ port 5432'
 main: key: 'port'='5432'
+main: work: rc: 20
 main: status: track
 main: input '= val 3'
 main: field: 'val'='3'
@@ -424,40 +467,49 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '$ a w'
 main: key: 'a'='w'
+main: work: rc: 11
 main: status: predicate
 main: input '$ b x'
 main: key: 'b'='x'
+main: work: rc: 11
 main: status: predicate
 main: input '$ c y'
 main: key: 'c'='y'
+main: work: rc: 11
 main: status: predicate
 main: input '$ d z'
 main: key: 'd'='z'
+main: work: rc: 11
 main: status: full
 main: input '= val 1'
 main: field: 'val'='1'
+main: work: rc: 15
 main: status: full
 main: input '>item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: track
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '$ a w'
 main: key: 'a'='w'
+main: work: rc: 11
 main: status: predicate
 main: input '$ b x'
 main: key: 'b'='x'
+main: work: rc: 11
 main: status: predicate
 main: input '$ c y'
 main: key: 'c'='y'
+main: work: rc: 11
 main: status: predicate
 main: input '$ d q'
 main: key: 'd'='q'
+main: work: rc: 11
 main: status: track
 main: input '= val 2'
 main: field: 'val'='2'
@@ -465,19 +517,23 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '$ a w'
 main: key: 'a'='w'
+main: work: rc: 11
 main: status: predicate
 main: input '$ b X'
 main: key: 'b'='X'
+main: work: rc: 11
 main: status: predicate
 main: input '$ c y'
 main: key: 'c'='y'
+main: work: rc: 11
 main: status: predicate
 main: input '$ d z'
 main: key: 'd'='z'
+main: work: rc: 11
 main: status: track
 main: input '= val 3'
 main: field: 'val'='3'
@@ -506,16 +562,18 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: full
 main: input '$ name wide'
 main: key: 'name'='wide'
+main: work: rc: 20
 main: status: full
 main: input '= val 1'
 main: field: 'val'='1'
+main: work: rc: 15
 main: status: full
 main: input '>item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: track
 main: input '}item'
 main: status: track
@@ -539,16 +597,18 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: full
 main: input '$ name float'
 main: key: 'name'='float'
+main: work: rc: 21
 main: status: full
 main: input '= val 2'
 main: field: 'val'='2'
+main: work: rc: 15
 main: status: full
 main: input '>item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: track
 main: input '}item'
 main: status: track
@@ -573,16 +633,18 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: full
 main: input '$ name negative'
 main: key: 'name'='negative'
+main: work: rc: 24
 main: status: full
 main: input '= val 3'
 main: field: 'val'='3'
+main: work: rc: 15
 main: status: full
 main: input '>item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: track
 main: input '}item'
 main: status: track
@@ -622,10 +684,11 @@ main: status: zero
 main: input '{item'
 main: status: zero
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '$ name three'
 main: key: 'name'='three'
+main: work: rc: 21
 main: status: predicate
 main: input '= val 3'
 main: field: 'val'='3'
@@ -633,16 +696,18 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: predicate
 main: input '$ name four'
 main: key: 'name'='four'
+main: work: rc: 20
 main: status: predicate
 main: input '= val 4'
 main: field: 'val'='4'
+main: work: rc: 15
 main: status: full
 main: input '>item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: track
 main: input '}item'
 main: status: track

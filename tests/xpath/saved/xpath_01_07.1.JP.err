@@ -69,33 +69,36 @@ added filter: 0
         000027: type 70 (C_ELEMENT), str 60 [three], contents 0, next 0, prev 0
 main: status: zero
 main: input '+uno'
-main: filter: rc: 11
+main: work: rc: 11
 main: status: predicate
 main: input '$x 2'
 main: key: 'x'='2'
+main: work: rc: 12
 main: status: track
 main: input '+dos'
-main: filter: rc: 15
+main: work: rc: 15
 main: status: predicate
 main: input '$y 5'
 main: key: 'y'='5'
+main: work: rc: 14
 main: status: track
 main: input '+tres'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: full
 main: input '=cuatro 4'
 main: field: 'cuatro'='4'
+main: work: rc: 21
 main: status: full
 main: input '-tres'
 main: status: track
 main: input '+uno'
-main: filter: rc: 17
+main: work: rc: 17
 main: status: track
 main: input '+dos'
-main: filter: rc: 17
+main: work: rc: 17
 main: status: track
 main: input '+tres'
-main: filter: rc: 20
+main: work: rc: 20
 main: status: track
 main: input '=nada 0'
 main: field: 'nada'='0'
@@ -107,13 +110,13 @@ main: status: track
 main: input '-uno'
 main: status: track
 main: input '+one'
-main: filter: rc: 17
+main: work: rc: 17
 main: status: track
 main: input '+two'
-main: filter: rc: 17
+main: work: rc: 17
 main: status: track
 main: input '+more'
-main: filter: rc: 20
+main: work: rc: 20
 main: status: track
 main: input '=what no'
 main: field: 'what'='no'
@@ -129,19 +132,19 @@ main: status: track
 main: input '-uno'
 main: status: track
 main: input '+one'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: track
 main: input '+two'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: track
 main: input '+uno'
-main: filter: rc: 15
+main: work: rc: 15
 main: status: track
 main: input '+dos'
-main: filter: rc: 17
+main: work: rc: 17
 main: status: track
 main: input '+tres'
-main: filter: rc: 20
+main: work: rc: 20
 main: status: track
 main: input '=nada 0'
 main: field: 'nada'='0'
@@ -153,20 +156,22 @@ main: status: track
 main: input '-uno'
 main: status: track
 main: input '+more'
-main: filter: rc: 16
+main: work: rc: 16
 main: status: full
 main: input '=even yes'
 main: field: 'even'='yes'
+main: work: rc: 21
 main: status: full
 main: input '-more'
 main: status: track
 main: input '-two'
 main: status: track
 main: input '+three'
-main: filter: rc: 17
+main: work: rc: 17
 main: status: full
 main: input '=four sure'
 main: field: 'four'='sure'
+main: work: rc: 20
 main: status: full
 main: input '-three'
 main: status: track

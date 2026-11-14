@@ -1,0 +1,1087 @@
+op create: [cbor] []
+ [append] @ 0 (1/1)
+ bf                                                    .
+    op open_container: [top] []
+ [append] @ 1 (4/4)
+ 63 74 6f 70                                           ctop
+ [append] @ 5 (1/1)
+ bf                                                    .
+      op open_list: [grouping] []
+   [append] @ 6 (9/9)
+   68 67 72 6f  75 70 69 6e  - 67                        hgrouping
+   [append] @ 15 (1/1)
+   9f                                                    .
+        op open_instance: [grouping] []
+     [append] @ 16 (1/1)
+     bf                                                    .
+          op string: [name] [comma]
+       [append] @ 17 (5/5)
+       64 6e 61 6d  65                                       dname
+       [append] @ 22 (6/6)
+       65 63 6f 6d  6d 61                                    ecomma
+          op string: [options] [grouping=+3]
+       [append] @ 28 (8/8)
+       67 6f 70 74  69 6f 6e 73                              goptions
+       [append] @ 36 (c/12)
+       6b 67 72 6f  75 70 69 6e  - 67 3d 2b 33               kgrouping=+3
+          op content: [quote] [1234567]
+       [append] @ 48 (6/6)
+       65 71 75 6f  74 65                                    equote
+       [content] @ 54 (5/5)
+       1a 00 12 d6  87                                       .....
+          op content: [quote-long] [1234567890]
+       [append] @ 59 (b/11)
+       6a 71 75 6f  74 65 2d 6c  - 6f 6e 67                  jquote-long
+       [content] @ 70 (5/5)
+       1a 49 96 02  d2                                       .I...
+          op content: [quote-unsigned] [4000000000]
+       [append] @ 75 (f/15)
+       6e 71 75 6f  74 65 2d 75  - 6e 73 69 67  6e 65 64     nquote-unsigned
+       [content] @ 90 (5/5)
+       1a ee 6b 28  00                                       ..k(.
+          op content: [quote-intmax] [9876543210]
+       [append] @ 95 (d/13)
+       6c 71 75 6f  74 65 2d 69  - 6e 74 6d 61  78           lquote-intmax
+       [content] @ 108 (9/9)
+       1b 00 00 00  02 4c b0 16  - ea                        .....L...
+          op content: [int] [1234567]
+       [append] @ 117 (4/4)
+       63 69 6e 74                                           cint
+       [content] @ 121 (5/5)
+       1a 00 12 d6  87                                       .....
+          op content: [int-long] [1234567890]
+       [append] @ 126 (9/9)
+       68 69 6e 74  2d 6c 6f 6e  - 67                        hint-long
+       [content] @ 135 (5/5)
+       1a 49 96 02  d2                                       .I...
+          op content: [int-unsigned] [4000000000]
+       [append] @ 140 (d/13)
+       6c 69 6e 74  2d 75 6e 73  - 69 67 6e 65  64           lint-unsigned
+       [content] @ 153 (5/5)
+       1a ee 6b 28  00                                       ..k(.
+          op content: [int-small] [123]
+       [append] @ 158 (a/10)
+       69 69 6e 74  2d 73 6d 61  - 6c 6c                     iint-small
+       [content] @ 168 (2/2)
+       18 7b                                                 .{
+          op content: [int-negative] [-1234567]
+       [append] @ 170 (d/13)
+       6c 69 6e 74  2d 6e 65 67  - 61 74 69 76  65           lint-negative
+       [content] @ 183 (5/5)
+       3a 00 12 d6  86                                       :....
+          op content: [quote-width] [1234567]
+       [append] @ 188 (c/12)
+       6b 71 75 6f  74 65 2d 77  - 69 64 74 68               kquote-width
+       [content] @ 200 (5/5)
+       1a 00 12 d6  87                                       .....
+          op content: [quote-left] [1234567]
+       [append] @ 205 (b/11)
+       6a 71 75 6f  74 65 2d 6c  - 65 66 74                  jquote-left
+       [content] @ 216 (5/5)
+       1a 00 12 d6  87                                       .....
+          op content: [int-width] [1234567]
+       [append] @ 221 (a/10)
+       69 69 6e 74  2d 77 69 64  - 74 68                     iint-width
+       [content] @ 231 (5/5)
+       1a 00 12 d6  87                                       .....
+          op content: [int-left] [1234567]
+       [append] @ 236 (9/9)
+       68 69 6e 74  2d 6c 65 66  - 74                        hint-left
+       [content] @ 245 (5/5)
+       1a 00 12 d6  87                                       .....
+          op content: [int-narrow] [1234567]
+       [append] @ 250 (b/11)
+       6a 69 6e 74  2d 6e 61 72  - 72 6f 77                  jint-narrow
+       [content] @ 261 (5/5)
+       1a 00 12 d6  87                                       .....
+          op content: [quote-float] [1234567.50]
+       [append] @ 266 (c/12)
+       6b 71 75 6f  74 65 2d 66  - 6c 6f 61 74               kquote-float
+       [content] @ 278 (5/5)
+       fa 49 96 b4  3c                                       .I..<
+          op content: [int-float] [1234567.50]
+       [append] @ 283 (a/10)
+       69 69 6e 74  2d 66 6c 6f  - 61 74                     iint-float
+       [content] @ 293 (5/5)
+       fa 49 96 b4  3c                                       .I..<
+          op content: [int-float-width] [1234567.5]
+       [append] @ 298 (10/16)
+       6f 69 6e 74  2d 66 6c 6f  - 61 74 2d 77  69 64 74 68  oint-float-width
+       [content] @ 314 (5/5)
+       fa 49 96 b4  3c                                       .I..<
+          op content: [int-exp] [1.234568e+06]
+       [append] @ 319 (8/8)
+       67 69 6e 74  2d 65 78 70                              gint-exp
+       [content] @ 327 (5/5)
+       fa 49 96 b4  40                                       .I..@
+          op content: [int-general] [1.23457e+06]
+       [append] @ 332 (c/12)
+       6b 69 6e 74  2d 67 65 6e  - 65 72 61 6c               kint-general
+       [content] @ 344 (5/5)
+       fa 49 96 b4  50                                       .I..P
+          op content: [int-hex] [12d687]
+       [append] @ 349 (8/8)
+       67 69 6e 74  2d 68 65 78                              gint-hex
+       [append] @ 357 (7/7)
+       66 31 32 64  36 38 37                                 f12d687
+       [content] @ 357 (7/7)
+       66 31 32 64  36 38 37                                 f12d687
+          op content: [int-octal] [4553207]
+       [append] @ 364 (a/10)
+       69 69 6e 74  2d 6f 63 74  - 61 6c                     iint-octal
+       [content] @ 374 (5/5)
+       1a 00 45 79  f7                                       ..Ey.
+          op content: [int-zero] [1234567]
+       [append] @ 379 (9/9)
+       68 69 6e 74  2d 7a 65 72  - 6f                        hint-zero
+       [content] @ 388 (5/5)
+       1a 00 12 d6  87                                       .....
+          op content: [quote-zero] [1234567]
+       [append] @ 393 (b/11)
+       6a 71 75 6f  74 65 2d 7a  - 65 72 6f                  jquote-zero
+       [content] @ 404 (5/5)
+       1a 00 12 d6  87                                       .....
+          op content: [quote-encoded] [1234567]
+       [append] @ 409 (e/14)
+       6d 71 75 6f  74 65 2d 65  - 6e 63 6f 64  65 64        mquote-encoded
+       [content] @ 423 (5/5)
+       1a 00 12 d6  87                                       .....
+          op content: [plain] [1234567]
+       [append] @ 428 (6/6)
+       65 70 6c 61  69 6e                                    eplain
+       [content] @ 434 (5/5)
+       1a 00 12 d6  87                                       .....
+          op content: [plain-float] [1234567.5]
+       [append] @ 439 (c/12)
+       6b 70 6c 61  69 6e 2d 66  - 6c 6f 61 74               kplain-float
+       [content] @ 451 (5/5)
+       fa 49 96 b4  3c                                       .I..<
+          op close_instance: [grouping] []
+       [append] @ 456 (1/1)
+       ff                                                    .
+        op open_instance: [grouping] []
+     [append] @ 457 (1/1)
+     bf                                                    .
+          op string: [name] [dot-indian]
+       [append] @ 458 (5/5)
+       64 6e 61 6d  65                                       dname
+       [append] @ 463 (b/11)
+       6a 64 6f 74  2d 69 6e 64  - 69 61 6e                  jdot-indian
+          op string: [options] [grouping=.+3+2]
+       [append] @ 474 (8/8)
+       67 6f 70 74  69 6f 6e 73                              goptions
+       [append] @ 482 (f/15)
+       6e 67 72 6f  75 70 69 6e  - 67 3d 2e 2b  33 2b 32     ngrouping=.+3+2
+          op content: [quote] [1234567]
+       [append] @ 497 (6/6)
+       65 71 75 6f  74 65                                    equote
+       [content] @ 503 (5/5)
+       1a 00 12 d6  87                                       .....
+          op content: [quote-long] [1234567890]
+       [append] @ 508 (b/11)
+       6a 71 75 6f  74 65 2d 6c  - 6f 6e 67                  jquote-long
+       [content] @ 519 (5/5)
+       1a 49 96 02  d2                                       .I...
+          op content: [quote-unsigned] [4000000000]
+       [append] @ 524 (f/15)
+       6e 71 75 6f  74 65 2d 75  - 6e 73 69 67  6e 65 64     nquote-unsigned
+       [content] @ 539 (5/5)
+       1a ee 6b 28  00                                       ..k(.
+          op content: [quote-intmax] [9876543210]
+       [append] @ 544 (d/13)
+       6c 71 75 6f  74 65 2d 69  - 6e 74 6d 61  78           lquote-intmax
+       [content] @ 557 (9/9)
+       1b 00 00 00  02 4c b0 16  - ea                        .....L...
+          op content: [int] [1234567]
+       [append] @ 566 (4/4)
+       63 69 6e 74                                           cint
+       [content] @ 570 (5/5)
+       1a 00 12 d6  87                                       .....
+          op content: [int-long] [1234567890]
+       [append] @ 575 (9/9)
+       68 69 6e 74  2d 6c 6f 6e  - 67                        hint-long
+       [content] @ 584 (5/5)
+       1a 49 96 02  d2                                       .I...
+          op content: [int-unsigned] [4000000000]
+       [append] @ 589 (d/13)
+       6c 69 6e 74  2d 75 6e 73  - 69 67 6e 65  64           lint-unsigned
+       [content] @ 602 (5/5)
+       1a ee 6b 28  00                                       ..k(.
+          op content: [int-small] [123]
+       [append] @ 607 (a/10)
+       69 69 6e 74  2d 73 6d 61  - 6c 6c                     iint-small
+       [content] @ 617 (2/2)
+       18 7b                                                 .{
+          op content: [int-negative] [-1234567]
+       [append] @ 619 (d/13)
+       6c 69 6e 74  2d 6e 65 67  - 61 74 69 76  65           lint-negative
+       [content] @ 632 (5/5)
+       3a 00 12 d6  86                                       :....
+          op content: [quote-width] [1234567]
+       [append] @ 637 (c/12)
+       6b 71 75 6f  74 65 2d 77  - 69 64 74 68               kquote-width
+       [content] @ 649 (5/5)
+       1a 00 12 d6  87                                       .....
+          op content: [quote-left] [1234567]
+       [append] @ 654 (b/11)
+       6a 71 75 6f  74 65 2d 6c  - 65 66 74                  jquote-left
+       [content] @ 665 (5/5)
+       1a 00 12 d6  87                                       .....
+          op content: [int-width] [1234567]
+       [append] @ 670 (a/10)
+       69 69 6e 74  2d 77 69 64  - 74 68                     iint-width
+       [content] @ 680 (5/5)
+       1a 00 12 d6  87                                       .....
+          op content: [int-left] [1234567]
+       [append] @ 685 (9/9)
+       68 69 6e 74  2d 6c 65 66  - 74                        hint-left
+       [content] @ 694 (5/5)
+       1a 00 12 d6  87                                       .....
+          op content: [int-narrow] [1234567]
+       [append] @ 699 (b/11)
+       6a 69 6e 74  2d 6e 61 72  - 72 6f 77                  jint-narrow
+       [content] @ 710 (5/5)
+       1a 00 12 d6  87                                       .....
+          op content: [quote-float] [1234567.50]
+       [append] @ 715 (c/12)
+       6b 71 75 6f  74 65 2d 66  - 6c 6f 61 74               kquote-float
+       [content] @ 727 (5/5)
+       fa 49 96 b4  3c                                       .I..<
+          op content: [int-float] [1234567.50]
+       [append] @ 732 (a/10)
+       69 69 6e 74  2d 66 6c 6f  - 61 74                     iint-float
+       [content] @ 742 (5/5)
+       fa 49 96 b4  3c                                       .I..<
+          op content: [int-float-width] [1234567.5]
+       [append] @ 747 (10/16)
+       6f 69 6e 74  2d 66 6c 6f  - 61 74 2d 77  69 64 74 68  oint-float-width
+       [content] @ 763 (5/5)
+       fa 49 96 b4  3c                                       .I..<
+          op content: [int-exp] [1.234568e+06]
+       [append] @ 768 (8/8)
+       67 69 6e 74  2d 65 78 70                              gint-exp
+       [content] @ 776 (5/5)
+       fa 49 96 b4  40                                       .I..@
+          op content: [int-general] [1.23457e+06]
+       [append] @ 781 (c/12)
+       6b 69 6e 74  2d 67 65 6e  - 65 72 61 6c               kint-general
+       [content] @ 793 (5/5)
+       fa 49 96 b4  50                                       .I..P
+          op content: [int-hex] [12d687]
+       [append] @ 798 (8/8)
+       67 69 6e 74  2d 68 65 78                              gint-hex
+       [append] @ 806 (7/7)
+       66 31 32 64  36 38 37                                 f12d687
+       [content] @ 806 (7/7)
+       66 31 32 64  36 38 37                                 f12d687
+          op content: [int-octal] [4553207]
+       [append] @ 813 (a/10)
+       69 69 6e 74  2d 6f 63 74  - 61 6c                     iint-octal
+       [content] @ 823 (5/5)
+       1a 00 45 79  f7                                       ..Ey.
+          op content: [int-zero] [1234567]
+       [append] @ 828 (9/9)
+       68 69 6e 74  2d 7a 65 72  - 6f                        hint-zero
+       [content] @ 837 (5/5)
+       1a 00 12 d6  87                                       .....
+          op content: [quote-zero] [1234567]
+       [append] @ 842 (b/11)
+       6a 71 75 6f  74 65 2d 7a  - 65 72 6f                  jquote-zero
+       [content] @ 853 (5/5)
+       1a 00 12 d6  87                                       .....
+          op content: [quote-encoded] [1234567]
+       [append] @ 858 (e/14)
+       6d 71 75 6f  74 65 2d 65  - 6e 63 6f 64  65 64        mquote-encoded
+       [content] @ 872 (5/5)
+       1a 00 12 d6  87                                       .....
+          op content: [plain] [1234567]
+       [append] @ 877 (6/6)
+       65 70 6c 61  69 6e                                    eplain
+       [content] @ 883 (5/5)
+       1a 00 12 d6  87                                       .....
+          op content: [plain-float] [1234567.5]
+       [append] @ 888 (c/12)
+       6b 70 6c 61  69 6e 2d 66  - 6c 6f 61 74               kplain-float
+       [content] @ 900 (5/5)
+       fa 49 96 b4  3c                                       .I..<
+          op close_instance: [grouping] []
+       [append] @ 905 (1/1)
+       ff                                                    .
+        op open_instance: [grouping] []
+     [append] @ 906 (1/1)
+     bf                                                    .
+          op string: [name] [group-option]
+       [append] @ 907 (5/5)
+       64 6e 61 6d  65                                       dname
+       [append] @ 912 (d/13)
+       6c 67 72 6f  75 70 2d 6f  - 70 74 69 6f  6e           lgroup-option
+          op string: [options] [group,grouping=+3]
+       [append] @ 925 (8/8)
+       67 6f 70 74  69 6f 6e 73                              goptions
+       [append] @ 933 (12/18)
+       71 67 72 6f  75 70 2c 67  - 72 6f 75 70  69 6e 67 3d  qgroup,grouping=
+       2b 33                                                 +3
+          op content: [quote] [1234567]
+       [append] @ 951 (6/6)
+       65 71 75 6f  74 65                                    equote
+       [content] @ 957 (5/5)
+       1a 00 12 d6  87                                       .....
+          op content: [quote-long] [1234567890]
+       [append] @ 962 (b/11)
+       6a 71 75 6f  74 65 2d 6c  - 6f 6e 67                  jquote-long
+       [content] @ 973 (5/5)
+       1a 49 96 02  d2                                       .I...
+          op content: [quote-unsigned] [4000000000]
+       [append] @ 978 (f/15)
+       6e 71 75 6f  74 65 2d 75  - 6e 73 69 67  6e 65 64     nquote-unsigned
+       [content] @ 993 (5/5)
+       1a ee 6b 28  00                                       ..k(.
+          op content: [quote-intmax] [9876543210]
+       [append] @ 998 (d/13)
+       6c 71 75 6f  74 65 2d 69  - 6e 74 6d 61  78           lquote-intmax
+       [content] @ 1011 (9/9)
+       1b 00 00 00  02 4c b0 16  - ea                        .....L...
+          op content: [int] [1234567]
+       [append] @ 1020 (4/4)
+       63 69 6e 74                                           cint
+       [content] @ 1024 (5/5)
+       1a 00 12 d6  87                                       .....
+          op content: [int-long] [1234567890]
+       [append] @ 1029 (9/9)
+       68 69 6e 74  2d 6c 6f 6e  - 67                        hint-long
+       [content] @ 1038 (5/5)
+       1a 49 96 02  d2                                       .I...
+          op content: [int-unsigned] [4000000000]
+       [append] @ 1043 (d/13)
+       6c 69 6e 74  2d 75 6e 73  - 69 67 6e 65  64           lint-unsigned
+       [content] @ 1056 (5/5)
+       1a ee 6b 28  00                                       ..k(.
+          op content: [int-small] [123]
+       [append] @ 1061 (a/10)
+       69 69 6e 74  2d 73 6d 61  - 6c 6c                     iint-small
+       [content] @ 1071 (2/2)
+       18 7b                                                 .{
+          op content: [int-negative] [-1234567]
+       [append] @ 1073 (d/13)
+       6c 69 6e 74  2d 6e 65 67  - 61 74 69 76  65           lint-negative
+       [content] @ 1086 (5/5)
+       3a 00 12 d6  86                                       :....
+          op content: [quote-width] [1234567]
+       [append] @ 1091 (c/12)
+       6b 71 75 6f  74 65 2d 77  - 69 64 74 68               kquote-width
+       [content] @ 1103 (5/5)
+       1a 00 12 d6  87                                       .....
+          op content: [quote-left] [1234567]
+       [append] @ 1108 (b/11)
+       6a 71 75 6f  74 65 2d 6c  - 65 66 74                  jquote-left
+       [content] @ 1119 (5/5)
+       1a 00 12 d6  87                                       .....
+          op content: [int-width] [1234567]
+       [append] @ 1124 (a/10)
+       69 69 6e 74  2d 77 69 64  - 74 68                     iint-width
+       [content] @ 1134 (5/5)
+       1a 00 12 d6  87                                       .....
+          op content: [int-left] [1234567]
+       [append] @ 1139 (9/9)
+       68 69 6e 74  2d 6c 65 66  - 74                        hint-left
+       [content] @ 1148 (5/5)
+       1a 00 12 d6  87                                       .....
+          op content: [int-narrow] [1234567]
+       [append] @ 1153 (b/11)
+       6a 69 6e 74  2d 6e 61 72  - 72 6f 77                  jint-narrow
+       [content] @ 1164 (5/5)
+       1a 00 12 d6  87                                       .....
+          op content: [quote-float] [1234567.50]
+       [append] @ 1169 (c/12)
+       6b 71 75 6f  74 65 2d 66  - 6c 6f 61 74               kquote-float
+       [content] @ 1181 (5/5)
+       fa 49 96 b4  3c                                       .I..<
+          op content: [int-float] [1234567.50]
+       [append] @ 1186 (a/10)
+       69 69 6e 74  2d 66 6c 6f  - 61 74                     iint-float
+       [content] @ 1196 (5/5)
+       fa 49 96 b4  3c                                       .I..<
+          op content: [int-float-width] [1234567.5]
+       [append] @ 1201 (10/16)
+       6f 69 6e 74  2d 66 6c 6f  - 61 74 2d 77  69 64 74 68  oint-float-width
+       [content] @ 1217 (5/5)
+       fa 49 96 b4  3c                                       .I..<
+          op content: [int-exp] [1.234568e+06]
+       [append] @ 1222 (8/8)
+       67 69 6e 74  2d 65 78 70                              gint-exp
+       [content] @ 1230 (5/5)
+       fa 49 96 b4  40                                       .I..@
+          op content: [int-general] [1.23457e+06]
+       [append] @ 1235 (c/12)
+       6b 69 6e 74  2d 67 65 6e  - 65 72 61 6c               kint-general
+       [content] @ 1247 (5/5)
+       fa 49 96 b4  50                                       .I..P
+          op content: [int-hex] [12d687]
+       [append] @ 1252 (8/8)
+       67 69 6e 74  2d 68 65 78                              gint-hex
+       [append] @ 1260 (7/7)
+       66 31 32 64  36 38 37                                 f12d687
+       [content] @ 1260 (7/7)
+       66 31 32 64  36 38 37                                 f12d687
+          op content: [int-octal] [4553207]
+       [append] @ 1267 (a/10)
+       69 69 6e 74  2d 6f 63 74  - 61 6c                     iint-octal
+       [content] @ 1277 (5/5)
+       1a 00 45 79  f7                                       ..Ey.
+          op content: [int-zero] [1234567]
+       [append] @ 1282 (9/9)
+       68 69 6e 74  2d 7a 65 72  - 6f                        hint-zero
+       [content] @ 1291 (5/5)
+       1a 00 12 d6  87                                       .....
+          op content: [quote-zero] [1234567]
+       [append] @ 1296 (b/11)
+       6a 71 75 6f  74 65 2d 7a  - 65 72 6f                  jquote-zero
+       [content] @ 1307 (5/5)
+       1a 00 12 d6  87                                       .....
+          op content: [quote-encoded] [1234567]
+       [append] @ 1312 (e/14)
+       6d 71 75 6f  74 65 2d 65  - 6e 63 6f 64  65 64        mquote-encoded
+       [content] @ 1326 (5/5)
+       1a 00 12 d6  87                                       .....
+          op content: [plain] [1234567]
+       [append] @ 1331 (6/6)
+       65 70 6c 61  69 6e                                    eplain
+       [content] @ 1337 (5/5)
+       1a 00 12 d6  87                                       .....
+          op content: [plain-float] [1234567.5]
+       [append] @ 1342 (c/12)
+       6b 70 6c 61  69 6e 2d 66  - 6c 6f 61 74               kplain-float
+       [content] @ 1354 (5/5)
+       fa 49 96 b4  3c                                       .I..<
+          op close_instance: [grouping] []
+       [append] @ 1359 (1/1)
+       ff                                                    .
+        op close_list: [grouping] []
+     [append] @ 1360 (1/1)
+     ff                                                    .
+      op open_container: [stars] []
+   [append] @ 1361 (6/6)
+   65 73 74 61  72 73                                    estars
+   [append] @ 1367 (1/1)
+   bf                                                    .
+        op content: [right] [1234]
+     [append] @ 1368 (6/6)
+     65 72 69 67  68 74                                    eright
+     [content] @ 1374 (3/3)
+     19 04 d2                                              ...
+        op content: [right-next] [1]
+     [append] @ 1377 (b/11)
+     6a 72 69 67  68 74 2d 6e  - 65 78 74                  jright-next
+     [content] @ 1388 (1/1)
+     01                                                    .
+        op content: [left] [1234]
+     [append] @ 1389 (5/5)
+     64 6c 65 66  74                                       dleft
+     [content] @ 1394 (3/3)
+     19 04 d2                                              ...
+        op content: [left-next] [2]
+     [append] @ 1397 (a/10)
+     69 6c 65 66  74 2d 6e 65  - 78 74                     ileft-next
+     [content] @ 1407 (1/1)
+     02                                                    .
+        op content: [intmax] [1234]
+     [append] @ 1408 (7/7)
+     66 69 6e 74  6d 61 78                                 fintmax
+     [content] @ 1415 (3/3)
+     19 04 d2                                              ...
+        op content: [intmax-next] [3]
+     [append] @ 1418 (c/12)
+     6b 69 6e 74  6d 61 78 2d  - 6e 65 78 74               kintmax-next
+     [content] @ 1430 (1/1)
+     03                                                    .
+        op string: [string] [abc]
+     [append] @ 1431 (7/7)
+     66 73 74 72  69 6e 67                                 fstring
+     [append] @ 1438 (4/4)
+     63 61 62 63                                           cabc
+        op content: [string-next] [4]
+     [append] @ 1442 (c/12)
+     6b 73 74 72  69 6e 67 2d  - 6e 65 78 74               kstring-next
+     [content] @ 1454 (1/1)
+     04                                                    .
+        op string: [string-right] [abc]
+     [append] @ 1455 (d/13)
+     6c 73 74 72  69 6e 67 2d  - 72 69 67 68  74           lstring-right
+     [append] @ 1468 (4/4)
+     63 61 62 63                                           cabc
+        op content: [string-right-next] [5]
+     [append] @ 1472 (12/18)
+     71 73 74 72  69 6e 67 2d  - 72 69 67 68  74 2d 6e 65  qstring-right-ne
+     78 74                                                 xt
+     [content] @ 1490 (1/1)
+     05                                                    .
+        op content: [at-int] [1234]
+     [append] @ 1491 (7/7)
+     66 61 74 2d  69 6e 74                                 fat-int
+     [content] @ 1498 (3/3)
+     19 04 d2                                              ...
+        op content: [at-int-next] [6]
+     [append] @ 1501 (c/12)
+     6b 61 74 2d  69 6e 74 2d  - 6e 65 78 74               kat-int-next
+     [content] @ 1513 (1/1)
+     06                                                    .
+        op content: [at-intmax] [1234]
+     [append] @ 1514 (a/10)
+     69 61 74 2d  69 6e 74 6d  - 61 78                     iat-intmax
+     [content] @ 1524 (3/3)
+     19 04 d2                                              ...
+        op content: [at-intmax-next] [7]
+     [append] @ 1527 (f/15)
+     6e 61 74 2d  69 6e 74 6d  - 61 78 2d 6e  65 78 74     nat-intmax-next
+     [content] @ 1542 (1/1)
+     07                                                    .
+        op string: [at-string] [abcdef]
+     [append] @ 1543 (a/10)
+     69 61 74 2d  73 74 72 69  - 6e 67                     iat-string
+     [append] @ 1553 (7/7)
+     66 61 62 63  64 65 66                                 fabcdef
+        op content: [at-string-next] [8]
+     [append] @ 1560 (f/15)
+     6e 61 74 2d  73 74 72 69  - 6e 67 2d 6e  65 78 74     nat-string-next
+     [content] @ 1575 (1/1)
+     08                                                    .
+        op content: [at-float] [3.14]
+     [append] @ 1576 (9/9)
+     68 61 74 2d  66 6c 6f 61  - 74                        hat-float
+     [content] @ 1585 (9/9)
+     fb 40 09 1e  b8 51 eb 85  - 1f                        .@...Q...
+        op content: [at-float-next] [9]
+     [append] @ 1594 (e/14)
+     6d 61 74 2d  66 6c 6f 61  - 74 2d 6e 65  78 74        mat-float-next
+     [content] @ 1608 (1/1)
+     09                                                    .
+        op content: [fewer] [1234]
+     [append] @ 1609 (6/6)
+     65 66 65 77  65 72                                    efewer
+     [content] @ 1615 (3/3)
+     19 04 d2                                              ...
+        op content: [fewer-next] [10]
+     [append] @ 1618 (b/11)
+     6a 66 65 77  65 72 2d 6e  - 65 78 74                  jfewer-next
+     [content] @ 1629 (1/1)
+     0a                                                    .
+        op string: [fewer-string] [abcdef]
+     [append] @ 1630 (d/13)
+     6c 66 65 77  65 72 2d 73  - 74 72 69 6e  67           lfewer-string
+     [append] @ 1643 (7/7)
+     66 61 62 63  64 65 66                                 fabcdef
+        op content: [fewer-string-next] [11]
+     [append] @ 1650 (12/18)
+     71 66 65 77  65 72 2d 73  - 74 72 69 6e  67 2d 6e 65  qfewer-string-ne
+     78 74                                                 xt
+     [content] @ 1668 (1/1)
+     0b                                                    .
+        op content: [more] [1234]
+     [append] @ 1669 (5/5)
+     64 6d 6f 72  65                                       dmore
+     [content] @ 1674 (3/3)
+     19 04 d2                                              ...
+        op content: [more-next] [12]
+     [append] @ 1677 (a/10)
+     69 6d 6f 72  65 2d 6e 65  - 78 74                     imore-next
+     [content] @ 1687 (1/1)
+     0c                                                    .
+        op close_container: [stars] []
+     [append] @ 1688 (1/1)
+     ff                                                    .
+      op open_container: [precision] []
+   [append] @ 1689 (a/10)
+   69 70 72 65  63 69 73 69  - 6f 6e                     iprecision
+   [append] @ 1699 (1/1)
+   bf                                                    .
+        op content: [digits] [42]
+     [append] @ 1700 (7/7)
+     66 64 69 67  69 74 73                                 fdigits
+     [content] @ 1707 (2/2)
+     18 2a                                                 .*
+        op content: [zero-width] [42]
+     [append] @ 1709 (b/11)
+     6a 7a 65 72  6f 2d 77 69  - 64 74 68                  jzero-width
+     [content] @ 1720 (2/2)
+     18 2a                                                 .*
+        op content: [left] [42]
+     [append] @ 1722 (5/5)
+     64 6c 65 66  74                                       dleft
+     [content] @ 1727 (2/2)
+     18 2a                                                 .*
+        op content: [hex] [ff]
+     [append] @ 1729 (4/4)
+     63 68 65 78                                           chex
+     [append] @ 1733 (3/3)
+     62 66 66                                              bff
+     [content] @ 1733 (3/3)
+     62 66 66                                              bff
+        op content: [octal] [10]
+     [append] @ 1736 (6/6)
+     65 6f 63 74  61 6c                                    eoctal
+     [content] @ 1742 (1/1)
+     0a                                                    .
+        op content: [star] [42]
+     [append] @ 1743 (5/5)
+     64 73 74 61  72                                       dstar
+     [content] @ 1748 (2/2)
+     18 2a                                                 .*
+        op content: [star-next] [13]
+     [append] @ 1750 (a/10)
+     69 73 74 61  72 2d 6e 65  - 78 74                     istar-next
+     [content] @ 1760 (1/1)
+     0d                                                    .
+        op content: [star-both] [42]
+     [append] @ 1761 (a/10)
+     69 73 74 61  72 2d 62 6f  - 74 68                     istar-both
+     [content] @ 1771 (2/2)
+     18 2a                                                 .*
+        op content: [star-both-next] [14]
+     [append] @ 1773 (f/15)
+     6e 73 74 61  72 2d 62 6f  - 74 68 2d 6e  65 78 74     nstar-both-next
+     [content] @ 1788 (1/1)
+     0e                                                    .
+        op content: [at-star] [42]
+     [append] @ 1789 (8/8)
+     67 61 74 2d  73 74 61 72                              gat-star
+     [content] @ 1797 (2/2)
+     18 2a                                                 .*
+        op content: [at-star-next] [15]
+     [append] @ 1799 (d/13)
+     6c 61 74 2d  73 74 61 72  - 2d 6e 65 78  74           lat-star-next
+     [content] @ 1812 (1/1)
+     0f                                                    .
+        op content: [float] [3.14]
+     [append] @ 1813 (6/6)
+     65 66 6c 6f  61 74                                    efloat
+     [content] @ 1819 (9/9)
+     fb 40 09 1e  b8 51 eb 85  - 1f                        .@...Q...
+        op string: [string] [abc]
+     [append] @ 1828 (7/7)
+     66 73 74 72  69 6e 67                                 fstring
+     [append] @ 1835 (4/4)
+     63 61 62 63                                           cabc
+        op content: [second] [5.000042]
+     [append] @ 1839 (7/7)
+     66 73 65 63  6f 6e 64                                 fsecond
+     [content] @ 1846 (9/9)
+     fb 40 14 00  0b 02 92 81  - 77                        .@......w
+        op content: [explicit] [00002a]
+     [append] @ 1855 (9/9)
+     68 65 78 70  6c 69 63 69  - 74                        hexplicit
+     [append] @ 1864 (7/7)
+     66 30 30 30  30 32 61                                 f00002a
+     [content] @ 1864 (7/7)
+     66 30 30 30  30 32 61                                 f00002a
+        op close_container: [precision] []
+     [append] @ 1871 (1/1)
+     ff                                                    .
+      op open_container: [numbers] []
+   [append] @ 1872 (8/8)
+   67 6e 75 6d  62 65 72 73                              gnumbers
+   [append] @ 1880 (1/1)
+   bf                                                    .
+        op content: [padded] [1234567]
+     [append] @ 1881 (7/7)
+     66 70 61 64  64 65 64                                 fpadded
+     [content] @ 1888 (5/5)
+     1a 00 12 d6  87                                       .....
+        op content: [left] [1234567]
+     [append] @ 1893 (5/5)
+     64 6c 65 66  74                                       dleft
+     [content] @ 1898 (5/5)
+     1a 00 12 d6  87                                       .....
+        op content: [quote] [1234567]
+     [append] @ 1903 (6/6)
+     65 71 75 6f  74 65                                    equote
+     [content] @ 1909 (5/5)
+     1a 00 12 d6  87                                       .....
+        op content: [negative] [-1234567]
+     [append] @ 1914 (9/9)
+     68 6e 65 67  61 74 69 76  - 65                        hnegative
+     [content] @ 1923 (5/5)
+     3a 00 12 d6  86                                       :....
+        op content: [plus] [+1234567]
+     [append] @ 1928 (5/5)
+     64 70 6c 75  73                                       dplus
+     [append] @ 1933 (9/9)
+     68 2b 31 32  33 34 35 36  - 37                        h+1234567
+     [content] @ 1933 (9/9)
+     68 2b 31 32  33 34 35 36  - 37                        h+1234567
+        op content: [zeroes] [1234567]
+     [append] @ 1942 (7/7)
+     66 7a 65 72  6f 65 73                                 fzeroes
+     [content] @ 1949 (5/5)
+     1a 00 12 d6  87                                       .....
+        op content: [negative-zeroes] [-1234567]
+     [append] @ 1954 (10/16)
+     6f 6e 65 67  61 74 69 76  - 65 2d 7a 65  72 6f 65 73  onegative-zeroes
+     [content] @ 1970 (5/5)
+     3a 00 12 d6  86                                       :....
+        op content: [float] [1234567.50]
+     [append] @ 1975 (6/6)
+     65 66 6c 6f  61 74                                    efloat
+     [content] @ 1981 (5/5)
+     fa 49 96 b4  3c                                       .I..<
+        op string: [trailing] [1234567 MB]
+     [append] @ 1986 (9/9)
+     68 74 72 61  69 6c 69 6e  - 67                        htrailing
+     [append] @ 1995 (b/11)
+     6a 31 32 33  34 35 36 37  - 20 4d 42                  j1234567 MB
+        op content: [star] [1234567]
+     [append] @ 2006 (5/5)
+     64 73 74 61  72                                       dstar
+     [content] @ 2011 (5/5)
+     1a 00 12 d6  87                                       .....
+        op content: [small] [123]
+     [append] @ 2016 (6/6)
+     65 73 6d 61  6c 6c                                    esmall
+     [content] @ 2022 (2/2)
+     18 7b                                                 .{
+        op content: [hex] [12d687]
+     [append] @ 2024 (4/4)
+     63 68 65 78                                           chex
+     [append] @ 2028 (7/7)
+     66 31 32 64  36 38 37                                 f12d687
+     [content] @ 2028 (7/7)
+     66 31 32 64  36 38 37                                 f12d687
+        op content: [leading] [#1234567]
+     [append] @ 2035 (8/8)
+     67 6c 65 61  64 69 6e 67                              gleading
+     [append] @ 2043 (9/9)
+     68 23 31 32  33 34 35 36  - 37                        h#1234567
+     [content] @ 2043 (9/9)
+     68 23 31 32  33 34 35 36  - 37                        h#1234567
+        op content: [two] [1234567.05]
+     [append] @ 2052 (4/4)
+     63 74 77 6f                                           ctwo
+     [content] @ 2056 (9/9)
+     fb 41 32 d6  87 0c cc cc  - cd                        .A2......
+        op content: [humanize] [1234567]
+     [append] @ 2065 (9/9)
+     68 68 75 6d  61 6e 69 7a  - 65                        hhumanize
+     [content] @ 2074 (5/5)
+     1a 00 12 d6  87                                       .....
+        op close_container: [numbers] []
+     [append] @ 2079 (1/1)
+     ff                                                    .
+      op open_container: [humanize] []
+   [append] @ 2080 (9/9)
+   68 68 75 6d  61 6e 69 7a  - 65                        hhumanize
+   [append] @ 2089 (1/1)
+   bf                                                    .
+        op content: [right] [123456789]
+     [append] @ 2090 (6/6)
+     65 72 69 67  68 74                                    eright
+     [content] @ 2096 (5/5)
+     1a 07 5b cd  15                                       ..[..
+        op content: [left] [123456789]
+     [append] @ 2101 (5/5)
+     64 6c 65 66  74                                       dleft
+     [content] @ 2106 (5/5)
+     1a 07 5b cd  15                                       ..[..
+        op content: [narrow] [123456789]
+     [append] @ 2111 (7/7)
+     66 6e 61 72  72 6f 77                                 fnarrow
+     [content] @ 2118 (5/5)
+     1a 07 5b cd  15                                       ..[..
+        op content: [none] [123456789]
+     [append] @ 2123 (5/5)
+     64 6e 6f 6e  65                                       dnone
+     [content] @ 2128 (5/5)
+     1a 07 5b cd  15                                       ..[..
+        op content: [space] [123456789]
+     [append] @ 2133 (6/6)
+     65 73 70 61  63 65                                    espace
+     [content] @ 2139 (5/5)
+     1a 07 5b cd  15                                       ..[..
+        op content: [decimal] [4600000]
+     [append] @ 2144 (8/8)
+     67 64 65 63  69 6d 61 6c                              gdecimal
+     [content] @ 2152 (5/5)
+     1a 00 46 30  c0                                       ..F0.
+        op content: [metric] [123456789]
+     [append] @ 2157 (7/7)
+     66 6d 65 74  72 69 63                                 fmetric
+     [content] @ 2164 (5/5)
+     1a 07 5b cd  15                                       ..[..
+        op content: [small] [12]
+     [append] @ 2169 (6/6)
+     65 73 6d 61  6c 6c                                    esmall
+     [content] @ 2175 (1/1)
+     0c                                                    .
+        op close_container: [humanize] []
+     [append] @ 2176 (1/1)
+     ff                                                    .
+      op open_container: [names] []
+   [append] @ 2177 (6/6)
+   65 6e 61 6d  65 73                                    enames
+   [append] @ 2183 (1/1)
+   bf                                                    .
+        op content: [bad name] [1]
+     [append] @ 2184 (9/9)
+     68 62 61 64  20 6e 61 6d  - 65                        hbad name
+     [content] @ 2193 (1/1)
+     01                                                    .
+        op content: [bad%name] [2]
+     [append] @ 2194 (9/9)
+     68 62 61 64  25 6e 61 6d  - 65                        hbad%name
+     [content] @ 2203 (1/1)
+     02                                                    .
+        op content: [state:LISTEN] [3]
+     [append] @ 2204 (d/13)
+     6c 73 74 61  74 65 3a 4c  - 49 53 54 45  4e           lstate:LISTEN
+     [content] @ 2217 (1/1)
+     03                                                    .
+        op content: [2fast] [4]
+     [append] @ 2218 (6/6)
+     65 32 66 61  73 74                                    e2fast
+     [content] @ 2224 (1/1)
+     04                                                    .
+        op content: [.dot] [5]
+     [append] @ 2225 (5/5)
+     64 2e 64 6f  74                                       d.dot
+     [content] @ 2230 (1/1)
+     05                                                    .
+        op content: [good-name.v2_x] [6]
+     [append] @ 2231 (f/15)
+     6e 67 6f 6f  64 2d 6e 61  - 6d 65 2e 76  32 5f 78     ngood-name.v2_x
+     [content] @ 2246 (1/1)
+     06                                                    .
+        op content: [missing-field-name] [8]
+     [append] @ 2247 (13/19)
+     72 6d 69 73  73 69 6e 67  - 2d 66 69 65  6c 64 2d 6e  rmissing-field-n
+     61 6d 65                                              ame
+     [content] @ 2266 (1/1)
+     08                                                    .
+        op open_container: [bad container] []
+     [append] @ 2267 (e/14)
+     6d 62 61 64  20 63 6f 6e  - 74 61 69 6e  65 72        mbad container
+     [append] @ 2281 (1/1)
+     bf                                                    .
+          op close_container: [bad container] []
+       [append] @ 2282 (1/1)
+       ff                                                    .
+        op open_list: [bad:list] []
+     [append] @ 2283 (9/9)
+     68 62 61 64  3a 6c 69 73  - 74                        hbad:list
+     [append] @ 2292 (1/1)
+     9f                                                    .
+          op open_instance: [bad:list] []
+       [append] @ 2293 (1/1)
+       bf                                                    .
+            op content: [value] [7]
+         [append] @ 2294 (6/6)
+         65 76 61 6c  75 65                                    evalue
+         [content] @ 2300 (1/1)
+         07                                                    .
+            op close_instance: [bad:list] []
+         [append] @ 2301 (1/1)
+         ff                                                    .
+          op close_list: [bad:list] []
+       [append] @ 2302 (1/1)
+       ff                                                    .
+        op close_container: [names] []
+     [append] @ 2303 (1/1)
+     ff                                                    .
+      op open_container: [bytes] []
+   [append] @ 2304 (6/6)
+   65 62 79 74  65 73                                    ebytes
+   [append] @ 2310 (1/1)
+   bf                                                    .
+        op string: [one] [abc]
+     [append] @ 2311 (4/4)
+     63 6f 6e 65                                           cone
+     [append] @ 2315 (4/4)
+     63 61 62 63                                           cabc
+        op content: [two] [42]
+     [append] @ 2319 (4/4)
+     63 74 77 6f                                           ctwo
+     [content] @ 2323 (2/2)
+     18 2a                                                 .*
+        op string: [utf8] [café]
+     [append] @ 2325 (5/5)
+     64 75 74 66  38                                       dutf8
+     [append] @ 2330 (6/6)
+     65 63 61 66  c3 a9                                    ecaf..
+        op content: [one-bytes] [0]
+     [append] @ 2336 (a/10)
+     69 6f 6e 65  2d 62 79 74  - 65 73                     ione-bytes
+     [content] @ 2346 (1/1)
+     00                                                    .
+        op content: [two-bytes] [0]
+     [append] @ 2347 (a/10)
+     69 74 77 6f  2d 62 79 74  - 65 73                     itwo-bytes
+     [content] @ 2357 (1/1)
+     00                                                    .
+        op content: [text-bytes] [0]
+     [append] @ 2358 (b/11)
+     6a 74 65 78  74 2d 62 79  - 74 65 73                  jtext-bytes
+     [content] @ 2369 (1/1)
+     00                                                    .
+        op content: [utf8-bytes] [0]
+     [append] @ 2370 (b/11)
+     6a 75 74 66  38 2d 62 79  - 74 65 73                  jutf8-bytes
+     [content] @ 2381 (1/1)
+     00                                                    .
+        op close_container: [bytes] []
+     [append] @ 2382 (1/1)
+     ff                                                    .
+      op close_container: [top] []
+   [append] @ 2383 (1/1)
+   ff                                                    .
+    op finish: [] []
+ [append] @ 2384 (1/1)
+ ff                                                    .
+  op flush: [] []
+>[cbor] @ 0 (951/2385)
+>bf 63 74 6f  70 bf 68 67  - 72 6f 75 70  69 6e 67 9f  .ctop.hgrouping.
+>bf 64 6e 61  6d 65 65 63  - 6f 6d 6d 61  67 6f 70 74  .dnameecommagopt
+>69 6f 6e 73  6b 67 72 6f  - 75 70 69 6e  67 3d 2b 33  ionskgrouping=+3
+>65 71 75 6f  74 65 1a 00  - 12 d6 87 6a  71 75 6f 74  equote.....jquot
+>65 2d 6c 6f  6e 67 1a 49  - 96 02 d2 6e  71 75 6f 74  e-long.I...nquot
+>65 2d 75 6e  73 69 67 6e  - 65 64 1a ee  6b 28 00 6c  e-unsigned..k(.l
+>71 75 6f 74  65 2d 69 6e  - 74 6d 61 78  1b 00 00 00  quote-intmax....
+>02 4c b0 16  ea 63 69 6e  - 74 1a 00 12  d6 87 68 69  .L...cint.....hi
+>6e 74 2d 6c  6f 6e 67 1a  - 49 96 02 d2  6c 69 6e 74  nt-long.I...lint
+>2d 75 6e 73  69 67 6e 65  - 64 1a ee 6b  28 00 69 69  -unsigned..k(.ii
+>6e 74 2d 73  6d 61 6c 6c  - 18 7b 6c 69  6e 74 2d 6e  nt-small.{lint-n
+>65 67 61 74  69 76 65 3a  - 00 12 d6 86  6b 71 75 6f  egative:....kquo
+>74 65 2d 77  69 64 74 68  - 1a 00 12 d6  87 6a 71 75  te-width.....jqu
+>6f 74 65 2d  6c 65 66 74  - 1a 00 12 d6  87 69 69 6e  ote-left.....iin
+>74 2d 77 69  64 74 68 1a  - 00 12 d6 87  68 69 6e 74  t-width.....hint
+>2d 6c 65 66  74 1a 00 12  - d6 87 6a 69  6e 74 2d 6e  -left.....jint-n
+>61 72 72 6f  77 1a 00 12  - d6 87 6b 71  75 6f 74 65  arrow.....kquote
+>2d 66 6c 6f  61 74 fa 49  - 96 b4 3c 69  69 6e 74 2d  -float.I..<iint-
+>66 6c 6f 61  74 fa 49 96  - b4 3c 6f 69  6e 74 2d 66  float.I..<oint-f
+>6c 6f 61 74  2d 77 69 64  - 74 68 fa 49  96 b4 3c 67  loat-width.I..<g
+>69 6e 74 2d  65 78 70 fa  - 49 96 b4 40  6b 69 6e 74  int-exp.I..@kint
+>2d 67 65 6e  65 72 61 6c  - fa 49 96 b4  50 67 69 6e  -general.I..Pgin
+>74 2d 68 65  78 66 31 32  - 64 36 38 37  69 69 6e 74  t-hexf12d687iint
+>2d 6f 63 74  61 6c 1a 00  - 45 79 f7 68  69 6e 74 2d  -octal..Ey.hint-
+>7a 65 72 6f  1a 00 12 d6  - 87 6a 71 75  6f 74 65 2d  zero.....jquote-
+>7a 65 72 6f  1a 00 12 d6  - 87 6d 71 75  6f 74 65 2d  zero.....mquote-
+>65 6e 63 6f  64 65 64 1a  - 00 12 d6 87  65 70 6c 61  encoded.....epla
+>69 6e 1a 00  12 d6 87 6b  - 70 6c 61 69  6e 2d 66 6c  in.....kplain-fl
+>6f 61 74 fa  49 96 b4 3c  - ff bf 64 6e  61 6d 65 6a  oat.I..<..dnamej
+>64 6f 74 2d  69 6e 64 69  - 61 6e 67 6f  70 74 69 6f  dot-indiangoptio
+>6e 73 6e 67  72 6f 75 70  - 69 6e 67 3d  2e 2b 33 2b  nsngrouping=.+3+
+>32 65 71 75  6f 74 65 1a  - 00 12 d6 87  6a 71 75 6f  2equote.....jquo
+>74 65 2d 6c  6f 6e 67 1a  - 49 96 02 d2  6e 71 75 6f  te-long.I...nquo
+>74 65 2d 75  6e 73 69 67  - 6e 65 64 1a  ee 6b 28 00  te-unsigned..k(.
+>6c 71 75 6f  74 65 2d 69  - 6e 74 6d 61  78 1b 00 00  lquote-intmax...
+>00 02 4c b0  16 ea 63 69  - 6e 74 1a 00  12 d6 87 68  ..L...cint.....h
+>69 6e 74 2d  6c 6f 6e 67  - 1a 49 96 02  d2 6c 69 6e  int-long.I...lin
+>74 2d 75 6e  73 69 67 6e  - 65 64 1a ee  6b 28 00 69  t-unsigned..k(.i
+>69 6e 74 2d  73 6d 61 6c  - 6c 18 7b 6c  69 6e 74 2d  int-small.{lint-
+>6e 65 67 61  74 69 76 65  - 3a 00 12 d6  86 6b 71 75  negative:....kqu
+>6f 74 65 2d  77 69 64 74  - 68 1a 00 12  d6 87 6a 71  ote-width.....jq
+>75 6f 74 65  2d 6c 65 66  - 74 1a 00 12  d6 87 69 69  uote-left.....ii
+>6e 74 2d 77  69 64 74 68  - 1a 00 12 d6  87 68 69 6e  nt-width.....hin
+>74 2d 6c 65  66 74 1a 00  - 12 d6 87 6a  69 6e 74 2d  t-left.....jint-
+>6e 61 72 72  6f 77 1a 00  - 12 d6 87 6b  71 75 6f 74  narrow.....kquot
+>65 2d 66 6c  6f 61 74 fa  - 49 96 b4 3c  69 69 6e 74  e-float.I..<iint
+>2d 66 6c 6f  61 74 fa 49  - 96 b4 3c 6f  69 6e 74 2d  -float.I..<oint-
+>66 6c 6f 61  74 2d 77 69  - 64 74 68 fa  49 96 b4 3c  float-width.I..<
+>67 69 6e 74  2d 65 78 70  - fa 49 96 b4  40 6b 69 6e  gint-exp.I..@kin
+>74 2d 67 65  6e 65 72 61  - 6c fa 49 96  b4 50 67 69  t-general.I..Pgi
+>6e 74 2d 68  65 78 66 31  - 32 64 36 38  37 69 69 6e  nt-hexf12d687iin
+>74 2d 6f 63  74 61 6c 1a  - 00 45 79 f7  68 69 6e 74  t-octal..Ey.hint
+>2d 7a 65 72  6f 1a 00 12  - d6 87 6a 71  75 6f 74 65  -zero.....jquote
+>2d 7a 65 72  6f 1a 00 12  - d6 87 6d 71  75 6f 74 65  -zero.....mquote
+>2d 65 6e 63  6f 64 65 64  - 1a 00 12 d6  87 65 70 6c  -encoded.....epl
+>61 69 6e 1a  00 12 d6 87  - 6b 70 6c 61  69 6e 2d 66  ain.....kplain-f
+>6c 6f 61 74  fa 49 96 b4  - 3c ff bf 64  6e 61 6d 65  loat.I..<..dname
+>6c 67 72 6f  75 70 2d 6f  - 70 74 69 6f  6e 67 6f 70  lgroup-optiongop
+>74 69 6f 6e  73 71 67 72  - 6f 75 70 2c  67 72 6f 75  tionsqgroup,grou
+>70 69 6e 67  3d 2b 33 65  - 71 75 6f 74  65 1a 00 12  ping=+3equote...
+>d6 87 6a 71  75 6f 74 65  - 2d 6c 6f 6e  67 1a 49 96  ..jquote-long.I.
+>02 d2 6e 71  75 6f 74 65  - 2d 75 6e 73  69 67 6e 65  ..nquote-unsigne
+>64 1a ee 6b  28 00 6c 71  - 75 6f 74 65  2d 69 6e 74  d..k(.lquote-int
+>6d 61 78 1b  00 00 00 02  - 4c b0 16 ea  63 69 6e 74  max.....L...cint
+>1a 00 12 d6  87 68 69 6e  - 74 2d 6c 6f  6e 67 1a 49  .....hint-long.I
+>96 02 d2 6c  69 6e 74 2d  - 75 6e 73 69  67 6e 65 64  ...lint-unsigned
+>1a ee 6b 28  00 69 69 6e  - 74 2d 73 6d  61 6c 6c 18  ..k(.iint-small.
+>7b 6c 69 6e  74 2d 6e 65  - 67 61 74 69  76 65 3a 00  {lint-negative:.
+>12 d6 86 6b  71 75 6f 74  - 65 2d 77 69  64 74 68 1a  ...kquote-width.
+>00 12 d6 87  6a 71 75 6f  - 74 65 2d 6c  65 66 74 1a  ....jquote-left.
+>00 12 d6 87  69 69 6e 74  - 2d 77 69 64  74 68 1a 00  ....iint-width..
+>12 d6 87 68  69 6e 74 2d  - 6c 65 66 74  1a 00 12 d6  ...hint-left....
+>87 6a 69 6e  74 2d 6e 61  - 72 72 6f 77  1a 00 12 d6  .jint-narrow....
+>87 6b 71 75  6f 74 65 2d  - 66 6c 6f 61  74 fa 49 96  .kquote-float.I.
+>b4 3c 69 69  6e 74 2d 66  - 6c 6f 61 74  fa 49 96 b4  .<iint-float.I..
+>3c 6f 69 6e  74 2d 66 6c  - 6f 61 74 2d  77 69 64 74  <oint-float-widt
+>68 fa 49 96  b4 3c 67 69  - 6e 74 2d 65  78 70 fa 49  h.I..<gint-exp.I
+>96 b4 40 6b  69 6e 74 2d  - 67 65 6e 65  72 61 6c fa  ..@kint-general.
+>49 96 b4 50  67 69 6e 74  - 2d 68 65 78  66 31 32 64  I..Pgint-hexf12d
+>36 38 37 69  69 6e 74 2d  - 6f 63 74 61  6c 1a 00 45  687iint-octal..E
+>79 f7 68 69  6e 74 2d 7a  - 65 72 6f 1a  00 12 d6 87  y.hint-zero.....
+>6a 71 75 6f  74 65 2d 7a  - 65 72 6f 1a  00 12 d6 87  jquote-zero.....
+>6d 71 75 6f  74 65 2d 65  - 6e 63 6f 64  65 64 1a 00  mquote-encoded..
+>12 d6 87 65  70 6c 61 69  - 6e 1a 00 12  d6 87 6b 70  ...eplain.....kp
+>6c 61 69 6e  2d 66 6c 6f  - 61 74 fa 49  96 b4 3c ff  lain-float.I..<.
+>ff 65 73 74  61 72 73 bf  - 65 72 69 67  68 74 19 04  .estars.eright..
+>d2 6a 72 69  67 68 74 2d  - 6e 65 78 74  01 64 6c 65  .jright-next.dle
+>66 74 19 04  d2 69 6c 65  - 66 74 2d 6e  65 78 74 02  ft...ileft-next.
+>66 69 6e 74  6d 61 78 19  - 04 d2 6b 69  6e 74 6d 61  fintmax...kintma
+>78 2d 6e 65  78 74 03 66  - 73 74 72 69  6e 67 63 61  x-next.fstringca
+>62 63 6b 73  74 72 69 6e  - 67 2d 6e 65  78 74 04 6c  bckstring-next.l
+>73 74 72 69  6e 67 2d 72  - 69 67 68 74  63 61 62 63  string-rightcabc
+>71 73 74 72  69 6e 67 2d  - 72 69 67 68  74 2d 6e 65  qstring-right-ne
+>78 74 05 66  61 74 2d 69  - 6e 74 19 04  d2 6b 61 74  xt.fat-int...kat
+>2d 69 6e 74  2d 6e 65 78  - 74 06 69 61  74 2d 69 6e  -int-next.iat-in
+>74 6d 61 78  19 04 d2 6e  - 61 74 2d 69  6e 74 6d 61  tmax...nat-intma
+>78 2d 6e 65  78 74 07 69  - 61 74 2d 73  74 72 69 6e  x-next.iat-strin
+>67 66 61 62  63 64 65 66  - 6e 61 74 2d  73 74 72 69  gfabcdefnat-stri
+>6e 67 2d 6e  65 78 74 08  - 68 61 74 2d  66 6c 6f 61  ng-next.hat-floa
+>74 fb 40 09  1e b8 51 eb  - 85 1f 6d 61  74 2d 66 6c  t.@...Q...mat-fl
+>6f 61 74 2d  6e 65 78 74  - 09 65 66 65  77 65 72 19  oat-next.efewer.
+>04 d2 6a 66  65 77 65 72  - 2d 6e 65 78  74 0a 6c 66  ..jfewer-next.lf
+>65 77 65 72  2d 73 74 72  - 69 6e 67 66  61 62 63 64  ewer-stringfabcd
+>65 66 71 66  65 77 65 72  - 2d 73 74 72  69 6e 67 2d  efqfewer-string-
+>6e 65 78 74  0b 64 6d 6f  - 72 65 19 04  d2 69 6d 6f  next.dmore...imo
+>72 65 2d 6e  65 78 74 0c  - ff 69 70 72  65 63 69 73  re-next..iprecis
+>69 6f 6e bf  66 64 69 67  - 69 74 73 18  2a 6a 7a 65  ion.fdigits.*jze
+>72 6f 2d 77  69 64 74 68  - 18 2a 64 6c  65 66 74 18  ro-width.*dleft.
+>2a 63 68 65  78 62 66 66  - 65 6f 63 74  61 6c 0a 64  *chexbffeoctal.d
+>73 74 61 72  18 2a 69 73  - 74 61 72 2d  6e 65 78 74  star.*istar-next
+>0d 69 73 74  61 72 2d 62  - 6f 74 68 18  2a 6e 73 74  .istar-both.*nst
+>61 72 2d 62  6f 74 68 2d  - 6e 65 78 74  0e 67 61 74  ar-both-next.gat
+>2d 73 74 61  72 18 2a 6c  - 61 74 2d 73  74 61 72 2d  -star.*lat-star-
+>6e 65 78 74  0f 65 66 6c  - 6f 61 74 fb  40 09 1e b8  next.efloat.@...
+>51 eb 85 1f  66 73 74 72  - 69 6e 67 63  61 62 63 66  Q...fstringcabcf
+>73 65 63 6f  6e 64 fb 40  - 14 00 0b 02  92 81 77 68  second.@......wh
+>65 78 70 6c  69 63 69 74  - 66 30 30 30  30 32 61 ff  explicitf00002a.
+>67 6e 75 6d  62 65 72 73  - bf 66 70 61  64 64 65 64  gnumbers.fpadded
+>1a 00 12 d6  87 64 6c 65  - 66 74 1a 00  12 d6 87 65  .....dleft.....e
+>71 75 6f 74  65 1a 00 12  - d6 87 68 6e  65 67 61 74  quote.....hnegat
+>69 76 65 3a  00 12 d6 86  - 64 70 6c 75  73 68 2b 31  ive:....dplush+1
+>32 33 34 35  36 37 66 7a  - 65 72 6f 65  73 1a 00 12  234567fzeroes...
+>d6 87 6f 6e  65 67 61 74  - 69 76 65 2d  7a 65 72 6f  ..onegative-zero
+>65 73 3a 00  12 d6 86 65  - 66 6c 6f 61  74 fa 49 96  es:....efloat.I.
+>b4 3c 68 74  72 61 69 6c  - 69 6e 67 6a  31 32 33 34  .<htrailingj1234
+>35 36 37 20  4d 42 64 73  - 74 61 72 1a  00 12 d6 87  567 MBdstar.....
+>65 73 6d 61  6c 6c 18 7b  - 63 68 65 78  66 31 32 64  esmall.{chexf12d
+>36 38 37 67  6c 65 61 64  - 69 6e 67 68  23 31 32 33  687gleadingh#123
+>34 35 36 37  63 74 77 6f  - fb 41 32 d6  87 0c cc cc  4567ctwo.A2.....
+>cd 68 68 75  6d 61 6e 69  - 7a 65 1a 00  12 d6 87 ff  .hhumanize......
+>68 68 75 6d  61 6e 69 7a  - 65 bf 65 72  69 67 68 74  hhumanize.eright
+>1a 07 5b cd  15 64 6c 65  - 66 74 1a 07  5b cd 15 66  ..[..dleft..[..f
+>6e 61 72 72  6f 77 1a 07  - 5b cd 15 64  6e 6f 6e 65  narrow..[..dnone
+>1a 07 5b cd  15 65 73 70  - 61 63 65 1a  07 5b cd 15  ..[..espace..[..
+>67 64 65 63  69 6d 61 6c  - 1a 00 46 30  c0 66 6d 65  gdecimal..F0.fme
+>74 72 69 63  1a 07 5b cd  - 15 65 73 6d  61 6c 6c 0c  tric..[..esmall.
+>ff 65 6e 61  6d 65 73 bf  - 68 62 61 64  20 6e 61 6d  .enames.hbad nam
+>65 01 68 62  61 64 25 6e  - 61 6d 65 02  6c 73 74 61  e.hbad%name.lsta
+>74 65 3a 4c  49 53 54 45  - 4e 03 65 32  66 61 73 74  te:LISTEN.e2fast
+>04 64 2e 64  6f 74 05 6e  - 67 6f 6f 64  2d 6e 61 6d  .d.dot.ngood-nam
+>65 2e 76 32  5f 78 06 72  - 6d 69 73 73  69 6e 67 2d  e.v2_x.rmissing-
+>66 69 65 6c  64 2d 6e 61  - 6d 65 08 6d  62 61 64 20  field-name.mbad 
+>63 6f 6e 74  61 69 6e 65  - 72 bf ff 68  62 61 64 3a  container..hbad:
+>6c 69 73 74  9f bf 65 76  - 61 6c 75 65  07 ff ff ff  list..evalue....
+>65 62 79 74  65 73 bf 63  - 6f 6e 65 63  61 62 63 63  ebytes.conecabcc
+>74 77 6f 18  2a 64 75 74  - 66 38 65 63  61 66 c3 a9  two.*dutf8ecaf..
+>69 6f 6e 65  2d 62 79 74  - 65 73 00 69  74 77 6f 2d  ione-bytes.itwo-
+>62 79 74 65  73 00 6a 74  - 65 78 74 2d  62 79 74 65  bytes.jtext-byte
+>73 00 6a 75  74 66 38 2d  - 62 79 74 65  73 00 ff ff  s.jutf8-bytes...
+>ff                                                    .

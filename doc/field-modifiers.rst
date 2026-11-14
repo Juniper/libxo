@@ -15,6 +15,7 @@ particular output styles:
    c   colon           A colon (":") is appended after the label
   \    dense           Write the field's list in dense form (RTOON)
    d   display         Only emit field for display styles (text/HTML)
+  \    drop-plus       Drop the '+' and ' ' sign flags when encoding
    e   encoding        Only emit for encoding styles (XML/JSON)
   \    escape-private  Escape control chars as Unicode private-use refs (XML/HTML)
   \    escape-slash    Escape forward slashes (JSON)
@@ -152,6 +153,35 @@ the display output styles, TEXT and HTML::
 
 The display modifier is the opposite of the encoding modifier, and
 they are often used to give to distinct views of the underlying data.
+
+.. index:: Field Modifiers; Drop-Plus
+.. _drop-plus-modifier:
+
+The Drop-Plus Modifier ({,drop-plus:})
+++++++++++++++++++++++++++++++++++++++
+
+.. index:: Field Modifiers; Drop-Plus
+
+The "+" and " " printf flags put a sign (or a blank in its place) in
+front of a positive number.  When a field has no encoding format,
+the encoding styles normally keep that sign: XML and the encoders
+get "+5", and only JSON drops the "+", since a JSON number cannot
+have one.  The drop-plus modifier removes both flags from the
+default encoding format, so every encoding style gets a plain
+number::
+
+    EXAMPLE:
+        xo_emit("{:delta/%+d} {,drop-plus:change/%+d}\n", 5, 5);
+    TEXT:
+        +5 +5
+    XML:
+        <delta>+5</delta><change>5</change>
+    JSON:
+        "delta": 5, "change": 5
+
+The modifier has no effect on an explicit encoding format, which is
+used as written, or on a quoted field ({q:}), whose value is a string
+and keeps its sign.
 
 .. index:: Field Modifiers; Encoding
 .. _encoding-modifier:
@@ -350,21 +380,38 @@ The Int-Group Modifier ({i:})
 .. index:: Field Modifiers; Int-Group
 
 The int-group modifier inserts a thousands separator into a decimal
-integer field (``%d``, ``%i``, ``%u``, with any length modifier),
-without requiring the "`group`" option (see :ref:`integer-grouping`)
-to be set.  It is useful when only a specific field, rather than an
-entire program's output, should be grouped::
+integer field (``%d``, ``%i``, ``%u``, with any length modifier) or
+into the integer part of a floating-point field (``%e``, ``%f``,
+``%g``), without requiring the "`group`" option (see
+:ref:`integer-grouping`) to be set.  It is useful when only a
+specific field, rather than an entire program's output, should be
+grouped.  The printf-style "'" flag ("%'d") does the same thing::
 
     EXAMPLE:
-        xo_emit("{i:count/%u}\n", 1234567);
+        xo_emit("{i:count/%u} {:bytes/%'10ju}\n", 1234567, total);
     TEXT:
-        1,234,567
+        1,234,567  9,876,543
+
+The field width includes the separators.  Hexadecimal, octal, and
+zero-padded ("%08d") fields are not grouped.
 
 Like the "`group`" option, int-group only affects the TEXT and HTML
 output styles; XML, JSON, syslog structured-data, and encoder styles
 always emit the plain, ungrouped digits, since a grouping separator
 would make the value a syntactically invalid (or non-numeric) encoded
 value.
+
+In the HTML style, a grouped field also gets the ungrouped value in
+the "data-number" attribute, as {h:} does, so scripts such as
+xohtml's table sorting can use the number::
+
+    <div class="data" data-tag="count"
+         data-number="1234567">1,234,567</div>
+
+The attribute is given only when grouping changed the text, and only
+when the field is a number: a single conversion with nothing before
+it (text after it, as in "{i:size/%d MB}", is allowed).  Padding and
+leading zeroes are removed.
 
 .. index:: Field Modifiers; Key
 .. _key-modifier:
@@ -436,6 +483,20 @@ needed, but often this needs to be controlled by the caller::
         xo_emit("{n:fancy/%s}", bool);
     JSON:
         "fancy": true
+
+A field with more than one conversion is a string unless told
+otherwise, so a value built from two numbers needs the no-quotes
+modifier to be a JSON number.  Seconds and microseconds, for
+example, can be one field, with no need to build the value in a
+buffer first::
+
+    EXAMPLE:
+        xo_emit("{n:elapsed/%s%lu.%06lu}\n",
+                negative ? "-" : "", secs, usecs);
+    TEXT:
+        5.000123
+    JSON:
+        "elapsed": 5.000123
 
 .. index:: Field Modifiers; Plural
 .. _plural-modifier:

@@ -53,7 +53,9 @@ test_16.c \
 test_17.c \
 test_18.c \
 test_19.c \
-test_20.c
+test_20.c \
+test_21.c \
+test_22.c
 
 test_01_test_SOURCES = test_01.c
 test_02_test_SOURCES = test_02.c
@@ -72,6 +74,8 @@ test_17_test_SOURCES = test_17.c
 test_18_test_SOURCES = test_18.c
 test_19_test_SOURCES = test_19.c
 test_20_test_SOURCES = test_20.c
+test_21_test_SOURCES = test_21.c
+test_22_test_SOURCES = test_22.c
 
 base_tests = ${TEST_CASES:.c=.test}
 
@@ -325,29 +329,13 @@ one:
 
 accept:
 	@${MKDIR} -p ${srcdir}/saved
-	${RUN_TESTS_CMD} -T "${TEST_FORMATS} ${PLAIN_FORMATS}" \
+	@${RUN_TESTS_CMD} -T "${TEST_FORMATS} ${PLAIN_FORMATS}" \
 	    accept-bin ${TEST_CASES:.c=.test}
-	-@test -z "${LLVM_CLANG}" || for tc in ${TEST_CASES:.c=}; do \
-	    cp out/$$tc.validate-test.make.out \
-	        ${srcdir}/saved/$$tc.validate-test.make.out 2>/dev/null ; \
-	    cp out/$$tc.validate-test.make.err \
-	        ${srcdir}/saved/$$tc.validate-test.make.err 2>/dev/null ; \
-	    cp out/$$tc.pass-test.make.out \
-	        ${srcdir}/saved/$$tc.pass-test.make.out 2>/dev/null ; \
-	    cp out/$$tc.pass-test.make.err \
-	        ${srcdir}/saved/$$tc.pass-test.make.err 2>/dev/null ; \
-	done
 	-@for tc in ${TEST_CASES:.c=}; do \
-	    cp out/$$tc.validate-test.make.out \
-		${srcdir}/saved/$$tc.validate-test.make.out ; \
-	    cp out/$$tc.validate-test.make.err  \
-	    	${srcdir}/saved/$$tc.validate-test.make.err ; \
-	done
-	-@for tc in ${TEST_CASES:.c=}; do \
-	    cp out/$$tc.pass-test.make.out \
-	    	${srcdir}/saved/$$tc.pass-test.make.out ; \
-	    cp out/$$tc.pass-test.make.err \
-	    	${srcdir}/saved/$$tc.pass-test.make.err ; \
+	    for mode in validate pass; do \
+		${ACCEPT_FILES} out/$$tc.$$mode-test.make \
+		    ${srcdir}/saved/$$tc.$$mode-test.make ; \
+	    done ; \
 	done
 	-@${RUN_TESTS_CMD} -T "${TEST_FORMATS}" -m validate accept-bin ${TEST_CASES:.c=.test}
 	-@${RUN_TESTS_CMD} -T "${TEST_FORMATS}" -m pass accept-bin ${TEST_CASES:.c=.test}

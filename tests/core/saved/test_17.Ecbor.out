@@ -733,118 +733,155 @@ op create: [cbor] []
      62 2b 35                                              b+5
      [content] @ 1510 (3/3)
      62 2b 35                                              b+5
-        op content: [json-wide] [   +5]
+        op content: [json-wide] [+5]
      [append] @ 1513 (a/10)
      69 6a 73 6f  6e 2d 77 69  - 64 65                     ijson-wide
-     [append] @ 1523 (6/6)
-     65 20 20 20  2b 35                                    e   +5
-     [content] @ 1523 (6/6)
-     65 20 20 20  2b 35                                    e   +5
-        op content: [json-size] [+5]
-     [append] @ 1529 (a/10)
-     69 6a 73 6f  6e 2d 73 69  - 7a 65                     ijson-size
-     [append] @ 1539 (3/3)
+     [append] @ 1523 (3/3)
      62 2b 35                                              b+5
-     [content] @ 1539 (3/3)
+     [content] @ 1523 (3/3)
+     62 2b 35                                              b+5
+        op content: [json-size] [+5]
+     [append] @ 1526 (a/10)
+     69 6a 73 6f  6e 2d 73 69  - 7a 65                     ijson-size
+     [append] @ 1536 (3/3)
+     62 2b 35                                              b+5
+     [content] @ 1536 (3/3)
      62 2b 35                                              b+5
         op content: [json-float] [+1.50]
-     [append] @ 1542 (b/11)
+     [append] @ 1539 (b/11)
      6a 6a 73 6f  6e 2d 66 6c  - 6f 61 74                  jjson-float
-     [append] @ 1553 (6/6)
+     [append] @ 1550 (6/6)
      65 2b 31 2e  35 30                                    e+1.50
-     [content] @ 1553 (6/6)
+     [content] @ 1550 (6/6)
      65 2b 31 2e  35 30                                    e+1.50
         op string: [json-quoted] [+5]
-     [append] @ 1559 (c/12)
+     [append] @ 1556 (c/12)
      6b 6a 73 6f  6e 2d 71 75  - 6f 74 65 64               kjson-quoted
-     [append] @ 1571 (3/3)
+     [append] @ 1568 (3/3)
+     62 2b 35                                              b+5
+        op content: [drop-plus] [5]
+     [append] @ 1571 (a/10)
+     69 64 72 6f  70 2d 70 6c  - 75 73                     idrop-plus
+     [content] @ 1581 (1/1)
+     05                                                    .
+        op content: [drop-wide] [5]
+     [append] @ 1582 (a/10)
+     69 64 72 6f  70 2d 77 69  - 64 65                     idrop-wide
+     [content] @ 1592 (1/1)
+     05                                                    .
+        op content: [drop-space] [5]
+     [append] @ 1593 (b/11)
+     6a 64 72 6f  70 2d 73 70  - 61 63 65                  jdrop-space
+     [content] @ 1604 (1/1)
+     05                                                    .
+        op content: [drop-float] [1.50]
+     [append] @ 1605 (b/11)
+     6a 64 72 6f  70 2d 66 6c  - 6f 61 74                  jdrop-float
+     [content] @ 1616 (3/3)
+     f9 3e 00                                              .>.
+        op content: [drop-negative] [-3]
+     [append] @ 1619 (e/14)
+     6d 64 72 6f  70 2d 6e 65  - 67 61 74 69  76 65        mdrop-negative
+     [content] @ 1633 (1/1)
+     22                                                    "
+        op string: [drop-quoted] [+5]
+     [append] @ 1634 (c/12)
+     6b 64 72 6f  70 2d 71 75  - 6f 74 65 64               kdrop-quoted
+     [append] @ 1646 (3/3)
+     62 2b 35                                              b+5
+        op content: [drop-explicit] [+5]
+     [append] @ 1649 (e/14)
+     6d 64 72 6f  70 2d 65 78  - 70 6c 69 63  69 74        mdrop-explicit
+     [append] @ 1663 (3/3)
+     62 2b 35                                              b+5
+     [content] @ 1663 (3/3)
      62 2b 35                                              b+5
         op close_container: [format-flags] []
-     [append] @ 1574 (1/1)
+     [append] @ 1666 (1/1)
      ff                                                    .
 huge width wrote 32767 bytes
 missing conversions wrote 0 bytes
       op open_container: [humanize-signs] []
-   [append] @ 1575 (f/15)
+   [append] @ 1667 (f/15)
    6e 68 75 6d  61 6e 69 7a  - 65 2d 73 69  67 6e 73     nhumanize-signs
-   [append] @ 1590 (1/1)
+   [append] @ 1682 (1/1)
    bf                                                    .
         op content: [small] [-5]
-     [append] @ 1591 (6/6)
+     [append] @ 1683 (6/6)
      65 73 6d 61  6c 6c                                    esmall
-     [content] @ 1597 (1/1)
+     [content] @ 1689 (1/1)
      24                                                    $
         op content: [kilo] [-5000]
-     [append] @ 1598 (5/5)
+     [append] @ 1690 (5/5)
      64 6b 69 6c  6f                                       dkilo
-     [content] @ 1603 (3/3)
+     [content] @ 1695 (3/3)
      39 13 87                                              9..
         op content: [mega] [-5000000]
-     [append] @ 1606 (5/5)
+     [append] @ 1698 (5/5)
      64 6d 65 67  61                                       dmega
-     [content] @ 1611 (5/5)
+     [content] @ 1703 (5/5)
      3a 00 4c 4b  3f                                       :.LK?
         op content: [fraction] [-1500]
-     [append] @ 1616 (9/9)
+     [append] @ 1708 (9/9)
      68 66 72 61  63 74 69 6f  - 6e                        hfraction
-     [content] @ 1625 (3/3)
+     [content] @ 1717 (3/3)
      39 05 db                                              9..
         op content: [metric] [-5000]
-     [append] @ 1628 (7/7)
+     [append] @ 1720 (7/7)
      66 6d 65 74  72 69 63                                 fmetric
-     [content] @ 1635 (3/3)
+     [content] @ 1727 (3/3)
      39 13 87                                              9..
         op content: [lowest] [-9223372036854775808]
-     [append] @ 1638 (7/7)
+     [append] @ 1730 (7/7)
      66 6c 6f 77  65 73 74                                 flowest
-     [content] @ 1645 (9/9)
+     [content] @ 1737 (9/9)
      3b 7f ff ff  ff ff ff ff  - ff                        ;........
         op content: [next-lowest] [-9223372036854775807]
-     [append] @ 1654 (c/12)
+     [append] @ 1746 (c/12)
      6b 6e 65 78  74 2d 6c 6f  - 77 65 73 74               knext-lowest
-     [content] @ 1666 (9/9)
+     [content] @ 1758 (9/9)
      3b 7f ff ff  ff ff ff ff  - fe                        ;........
         op content: [highest] [9223372036854775807]
-     [append] @ 1675 (8/8)
+     [append] @ 1767 (8/8)
      67 68 69 67  68 65 73 74                              ghighest
-     [content] @ 1683 (9/9)
+     [content] @ 1775 (9/9)
      1b 7f ff ff  ff ff ff ff  - ff                        .........
         op content: [too-high] [18446744073709551615]
-     [append] @ 1692 (9/9)
+     [append] @ 1784 (9/9)
      68 74 6f 6f  2d 68 69 67  - 68                        htoo-high
-     [content] @ 1701 (9/9)
+     [content] @ 1793 (9/9)
      1b ff ff ff  ff ff ff ff  - ff                        .........
         op string: [word] [abc]
-     [append] @ 1710 (5/5)
+     [append] @ 1802 (5/5)
      64 77 6f 72  64                                       dword
-     [append] @ 1715 (4/4)
+     [append] @ 1807 (4/4)
      63 61 62 63                                           cabc
         op string: [mixed] [12abc]
-     [append] @ 1719 (6/6)
+     [append] @ 1811 (6/6)
      65 6d 69 78  65 64                                    emixed
-     [append] @ 1725 (6/6)
+     [append] @ 1817 (6/6)
      65 31 32 61  62 63                                    e12abc
         op content: [padded] [4096]
-     [append] @ 1731 (7/7)
+     [append] @ 1823 (7/7)
      66 70 61 64  64 65 64                                 fpadded
-     [content] @ 1738 (3/3)
+     [content] @ 1830 (3/3)
      19 10 00                                              ...
         op content: [after] [4096]
-     [append] @ 1741 (6/6)
+     [append] @ 1833 (6/6)
      65 61 66 74  65 72                                    eafter
-     [content] @ 1747 (3/3)
+     [content] @ 1839 (3/3)
      19 10 00                                              ...
         op close_container: [humanize-signs] []
-     [append] @ 1750 (1/1)
+     [append] @ 1842 (1/1)
      ff                                                    .
       op close_container: [top] []
-   [append] @ 1751 (1/1)
+   [append] @ 1843 (1/1)
    ff                                                    .
     op finish: [] []
- [append] @ 1752 (1/1)
+ [append] @ 1844 (1/1)
  ff                                                    .
   op flush: [] []
->[cbor] @ 0 (6d9/1753)
+>[cbor] @ 0 (735/1845)
 >bf 63 74 6f  70 bf 6c 61  - 6e 63 68 6f  72 2d 77 69  .ctop.lanchor-wi
 >64 74 68 bf  65 72 69 67  - 68 74 63 61  62 63 64 6c  dth.erightcabcdl
 >65 66 74 63  61 62 63 ff  - 6a 6d 61 70  2d 67 72 6f  eftcabc.jmap-gro
@@ -940,21 +977,27 @@ missing conversions wrote 0 bytes
 >05 64 62 6f  74 68 05 67  - 70 72 65 63  69 73 65 05  .dboth.gprecise.
 >69 6c 65 66  74 2d 7a 65  - 72 6f 18 2a  69 6a 73 6f  ileft-zero.*ijso
 >6e 2d 70 6c  75 73 62 2b  - 35 69 6a 73  6f 6e 2d 77  n-plusb+5ijson-w
->69 64 65 65  20 20 20 2b  - 35 69 6a 73  6f 6e 2d 73  idee   +5ijson-s
->69 7a 65 62  2b 35 6a 6a  - 73 6f 6e 2d  66 6c 6f 61  izeb+5jjson-floa
->74 65 2b 31  2e 35 30 6b  - 6a 73 6f 6e  2d 71 75 6f  te+1.50kjson-quo
->74 65 64 62  2b 35 ff 6e  - 68 75 6d 61  6e 69 7a 65  tedb+5.nhumanize
->2d 73 69 67  6e 73 bf 65  - 73 6d 61 6c  6c 24 64 6b  -signs.esmall$dk
->69 6c 6f 39  13 87 64 6d  - 65 67 61 3a  00 4c 4b 3f  ilo9..dmega:.LK?
->68 66 72 61  63 74 69 6f  - 6e 39 05 db  66 6d 65 74  hfraction9..fmet
->72 69 63 39  13 87 66 6c  - 6f 77 65 73  74 3b 7f ff  ric9..flowest;..
->ff ff ff ff  ff ff 6b 6e  - 65 78 74 2d  6c 6f 77 65  ......knext-lowe
->73 74 3b 7f  ff ff ff ff  - ff ff fe 67  68 69 67 68  st;........ghigh
->65 73 74 1b  7f ff ff ff  - ff ff ff ff  68 74 6f 6f  est.........htoo
->2d 68 69 67  68 1b ff ff  - ff ff ff ff  ff ff 64 77  -high.........dw
->6f 72 64 63  61 62 63 65  - 6d 69 78 65  64 65 31 32  ordcabcemixede12
->61 62 63 66  70 61 64 64  - 65 64 19 10  00 65 61 66  abcfpadded...eaf
->74 65 72 19  10 00 ff ff  - ff                        ter......
+>69 64 65 62  2b 35 69 6a  - 73 6f 6e 2d  73 69 7a 65  ideb+5ijson-size
+>62 2b 35 6a  6a 73 6f 6e  - 2d 66 6c 6f  61 74 65 2b  b+5jjson-floate+
+>31 2e 35 30  6b 6a 73 6f  - 6e 2d 71 75  6f 74 65 64  1.50kjson-quoted
+>62 2b 35 69  64 72 6f 70  - 2d 70 6c 75  73 05 69 64  b+5idrop-plus.id
+>72 6f 70 2d  77 69 64 65  - 05 6a 64 72  6f 70 2d 73  rop-wide.jdrop-s
+>70 61 63 65  05 6a 64 72  - 6f 70 2d 66  6c 6f 61 74  pace.jdrop-float
+>f9 3e 00 6d  64 72 6f 70  - 2d 6e 65 67  61 74 69 76  .>.mdrop-negativ
+>65 22 6b 64  72 6f 70 2d  - 71 75 6f 74  65 64 62 2b  e"kdrop-quotedb+
+>35 6d 64 72  6f 70 2d 65  - 78 70 6c 69  63 69 74 62  5mdrop-explicitb
+>2b 35 ff 6e  68 75 6d 61  - 6e 69 7a 65  2d 73 69 67  +5.nhumanize-sig
+>6e 73 bf 65  73 6d 61 6c  - 6c 24 64 6b  69 6c 6f 39  ns.esmall$dkilo9
+>13 87 64 6d  65 67 61 3a  - 00 4c 4b 3f  68 66 72 61  ..dmega:.LK?hfra
+>63 74 69 6f  6e 39 05 db  - 66 6d 65 74  72 69 63 39  ction9..fmetric9
+>13 87 66 6c  6f 77 65 73  - 74 3b 7f ff  ff ff ff ff  ..flowest;......
+>ff ff 6b 6e  65 78 74 2d  - 6c 6f 77 65  73 74 3b 7f  ..knext-lowest;.
+>ff ff ff ff  ff ff fe 67  - 68 69 67 68  65 73 74 1b  .......ghighest.
+>7f ff ff ff  ff ff ff ff  - 68 74 6f 6f  2d 68 69 67  ........htoo-hig
+>68 1b ff ff  ff ff ff ff  - ff ff 64 77  6f 72 64 63  h.........dwordc
+>61 62 63 65  6d 69 78 65  - 64 65 31 32  61 62 63 66  abcemixede12abcf
+>70 61 64 64  65 64 19 10  - 00 65 61 66  74 65 72 19  padded...eafter.
+>10 00 ff ff  ff                                       .....
 before="one" name="gum" count="0" name="rope" count="1" name="ladder" count="2" after="two" 
 long values wrote 20068 bytes
 warning 10: 64 bytes, '<error><message>test_17' ... 'xxxxxxxxxx&lt;10&gt;</message></error>'

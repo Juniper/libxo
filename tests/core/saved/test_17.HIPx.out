@@ -224,6 +224,26 @@ missing conversions wrote 0 bytes
 </div>
 <div class="line">
   <div class="text">[</div>
+  <div class="data" data-tag="drop-plus" data-xpath="/top/format-flags/drop-plus">+5</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="drop-wide" data-xpath="/top/format-flags/drop-wide">   +5</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="drop-space" data-xpath="/top/format-flags/drop-space"> 5</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="drop-float" data-xpath="/top/format-flags/drop-float">+1.50</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="drop-negative" data-xpath="/top/format-flags/drop-negative">-3</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
+  <div class="data" data-tag="drop-quoted" data-xpath="/top/format-flags/drop-quoted">+5</div>
+  <div class="text">] [</div>
+  <div class="data" data-tag="drop-explicit" data-xpath="/top/format-flags/drop-explicit">+5</div>
+  <div class="text">]</div>
+</div>
+<div class="line">
+  <div class="text">[</div>
   <div class="data" data-tag="small" data-xpath="/top/humanize-signs/small" data-number="-5">-5</div>
   <div class="text">] [</div>
   <div class="data" data-tag="kilo" data-xpath="/top/humanize-signs/kilo" data-number="-5000">-5K</div>
@@ -252,7 +272,7 @@ missing conversions wrote 0 bytes
   <div class="text">] [</div>
   <div class="data" data-tag="mixed" data-xpath="/top/humanize-signs/mixed" data-number="12abc">12abc</div>
   <div class="text">] [</div>
-  <div class="data" data-tag="padded" data-xpath="/top/humanize-signs/padded" data-number="4096  ">4K</div>
+  <div class="data" data-tag="padded" data-xpath="/top/humanize-signs/padded" data-number="4096">4K    </div>
   <div class="text">] [</div>
   <div class="data" data-tag="after" data-xpath="/top/humanize-signs/after" data-number="4096">4K</div>
   <div class="text">]</div>

@@ -18,21 +18,22 @@ added filter: 0
                         000007: type 70 (C_ELEMENT), str 29 [path], contents 0, next 0, prev 0
 main: status: zero
 main: input '+ statistics'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: track
 main: input '{ socket'
 main: status: track
 main: input '< socket'
-main: filter: rc: 11
+main: work: rc: 11
 main: status: predicate
 main: input '= path /tmp/ssh-agent.1234'
 main: field: 'path'='/tmp/ssh-agent.1234'
+main: work: rc: 37
 main: status: full
 main: input '> socket'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '< socket'
-main: filter: rc: 11
+main: work: rc: 11
 main: status: predicate
 main: input '= path /var/run/log'
 main: field: 'path'='/var/run/log'
@@ -40,13 +41,14 @@ main: status: track
 main: input '> socket'
 main: status: track
 main: input '< socket'
-main: filter: rc: 11
+main: work: rc: 11
 main: status: predicate
 main: input '= path /tmp/other.sock'
 main: field: 'path'='/tmp/other.sock'
+main: work: rc: 33
 main: status: full
 main: input '> socket'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '} socket'
 main: status: track
@@ -71,21 +73,22 @@ added filter: 0
 main: status: zero
 main: input '+ statistics'
 xpath_01: duplicate sibling name: 'statistics'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: track
 main: input '{ socket'
 main: status: track
 main: input '< socket'
-main: filter: rc: 11
+main: work: rc: 11
 main: status: predicate
 main: input '= path /tmp/ssh-agent.1234'
 main: field: 'path'='/tmp/ssh-agent.1234'
+main: work: rc: 37
 main: status: full
 main: input '> socket'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '< socket'
-main: filter: rc: 11
+main: work: rc: 11
 main: status: predicate
 main: input '= path /var/run/log'
 main: field: 'path'='/var/run/log'
@@ -93,13 +96,14 @@ main: status: track
 main: input '> socket'
 main: status: track
 main: input '< socket'
-main: filter: rc: 11
+main: work: rc: 11
 main: status: predicate
 main: input '= path /tmp/other.sock'
 main: field: 'path'='/tmp/other.sock'
+main: work: rc: 33
 main: status: full
 main: input '> socket'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '} socket'
 main: status: track
@@ -123,24 +127,26 @@ added filter: 0
                     000010: type 54 (T_QUOTED), str 37 [i], contents 0, next 0, prev 9
 main: status: zero
 main: input '+ statistics'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: track
 main: input '{ socket'
 main: status: track
 main: input '< socket'
-main: filter: rc: 11
+main: work: rc: 11
 main: status: predicate
 main: input '= protocol TCP4'
 main: field: 'protocol'='TCP4'
+main: work: rc: 30
 main: status: full
 main: input '= receive-bytes-waiting 100'
 main: field: 'receive-bytes-waiting'='100'
+main: work: rc: 55
 main: status: full
 main: input '> socket'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '< socket'
-main: filter: rc: 11
+main: work: rc: 11
 main: status: predicate
 main: input '= protocol udp'
 main: field: 'protocol'='udp'
@@ -151,16 +157,18 @@ main: status: track
 main: input '> socket'
 main: status: track
 main: input '< socket'
-main: filter: rc: 11
+main: work: rc: 11
 main: status: predicate
 main: input '= protocol tcp6'
 main: field: 'protocol'='tcp6'
+main: work: rc: 30
 main: status: full
 main: input '= receive-bytes-waiting 300'
 main: field: 'receive-bytes-waiting'='300'
+main: work: rc: 55
 main: status: full
 main: input '> socket'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '} socket'
 main: status: track
@@ -185,21 +193,22 @@ added filter: 0
                         000011: type 54 (T_QUOTED), str 41 [], contents 0, next 0, prev 10
 main: status: zero
 main: input '+ statistics'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: track
 main: input '{ socket'
 main: status: track
 main: input '< socket'
-main: filter: rc: 11
+main: work: rc: 11
 main: status: predicate
 main: input '= path /tmp/ssh-DQWvehZ5Bz/agent.39523'
 main: field: 'path'='/tmp/ssh-DQWvehZ5Bz/agent.39523'
+main: work: rc: 49
 main: status: full
 main: input '> socket'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '< socket'
-main: filter: rc: 11
+main: work: rc: 11
 main: status: predicate
 main: input '= path /var/run/log'
 main: field: 'path'='/var/run/log'
@@ -207,7 +216,7 @@ main: status: track
 main: input '> socket'
 main: status: track
 main: input '< socket'
-main: filter: rc: 11
+main: work: rc: 11
 main: status: predicate
 main: input '= path /var/run/devd.seqpacket.pipe'
 main: field: 'path'='/var/run/devd.seqpacket.pipe'
@@ -215,13 +224,14 @@ main: status: track
 main: input '> socket'
 main: status: track
 main: input '< socket'
-main: filter: rc: 11
+main: work: rc: 11
 main: status: predicate
 main: input '= path /tmp/other.sock'
 main: field: 'path'='/tmp/other.sock'
+main: work: rc: 33
 main: status: full
 main: input '> socket'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '} socket'
 main: status: track
@@ -245,21 +255,22 @@ added filter: 0
                     000010: type 54 (T_QUOTED), str 36 [s], contents 0, next 0, prev 9
 main: status: zero
 main: input '+ statistics'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: track
 main: input '{ socket'
 main: status: track
 main: input '< socket'
-main: filter: rc: 11
+main: work: rc: 11
 main: status: predicate
 main: input '= path /tmp/ssh-agent.1234'
 main: field: 'path'='/tmp/ssh-agent.1234'
+main: work: rc: 37
 main: status: full
 main: input '> socket'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '< socket'
-main: filter: rc: 11
+main: work: rc: 11
 main: status: predicate
 main: input '= path /var/run/log'
 main: field: 'path'='/var/run/log'
@@ -267,7 +278,7 @@ main: status: track
 main: input '> socket'
 main: status: track
 main: input '< socket'
-main: filter: rc: 11
+main: work: rc: 11
 main: status: predicate
 main: input '= path /tmp/abc'
 main: field: 'path'='/tmp/abc'
@@ -297,30 +308,32 @@ added filter: 0
                     000010: type 54 (T_QUOTED), str 42 [m], contents 0, next 0, prev 9
 main: status: zero
 main: input '+ statistics'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: track
 main: input '{ socket'
 main: status: track
 main: input '< socket'
-main: filter: rc: 11
+main: work: rc: 11
 main: status: predicate
 main: input '= address 127.0.0.1:8080'
 main: field: 'address'='127.0.0.1:8080'
+main: work: rc: 38
 main: status: full
 main: input '> socket'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '< socket'
-main: filter: rc: 11
+main: work: rc: 11
 main: status: predicate
 main: input '= address 127.0.0.1:0'
 main: field: 'address'='127.0.0.1:0'
+main: work: rc: 35
 main: status: full
 main: input '> socket'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '< socket'
-main: filter: rc: 11
+main: work: rc: 11
 main: status: predicate
 main: input '= address /var/run/log'
 main: field: 'address'='/var/run/log'
@@ -349,21 +362,22 @@ added filter: 0
                     000010: type 54 (T_QUOTED), str 50 [m2], contents 0, next 0, prev 9
 main: status: zero
 main: input '+ statistics'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: track
 main: input '{ socket'
 main: status: track
 main: input '< socket'
-main: filter: rc: 11
+main: work: rc: 11
 main: status: predicate
 main: input '= protocol tcp4'
 main: field: 'protocol'='tcp4'
+main: work: rc: 30
 main: status: full
 main: input '> socket'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '< socket'
-main: filter: rc: 11
+main: work: rc: 11
 main: status: predicate
 main: input '= protocol udp'
 main: field: 'protocol'='udp'
@@ -371,13 +385,14 @@ main: status: track
 main: input '> socket'
 main: status: track
 main: input '< socket'
-main: filter: rc: 11
+main: work: rc: 11
 main: status: predicate
 main: input '= protocol tcp6'
 main: field: 'protocol'='tcp6'
+main: work: rc: 30
 main: status: full
 main: input '> socket'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '} socket'
 main: status: track
@@ -403,12 +418,12 @@ added filter: 0
                         000009: type 54 (T_QUOTED), str 30 [/var/run/], contents 0, next 0, prev 8
 main: status: zero
 main: input '+ statistics'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: track
 main: input '{ socket'
 main: status: track
 main: input '< socket'
-main: filter: rc: 11
+main: work: rc: 11
 main: status: predicate
 main: input '= protocol tcp4'
 main: field: 'protocol'='tcp4'
@@ -420,7 +435,7 @@ main: input '= send-bytes-waiting 1'
 main: field: 'send-bytes-waiting'='1'
 main: status: predicate
 main: input '+ local'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: conditional
 main: input '= address 172.16.188.131'
 main: field: 'address'='172.16.188.131'
@@ -431,7 +446,7 @@ main: status: conditional
 main: input '- local'
 main: status: predicate
 main: input '+ remote'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: conditional
 main: input '= address 172.16.188.1'
 main: field: 'address'='172.16.188.1'
@@ -445,10 +460,10 @@ main: input '= tcp-state ESTABLISHED'
 main: field: 'tcp-state'='ESTABLISHED'
 main: status: predicate
 main: input '> socket'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '< socket'
-main: filter: rc: 11
+main: work: rc: 11
 main: status: predicate
 main: input '= address ffffa0000d003a80'
 main: field: 'address'='ffffa0000d003a80'
@@ -476,12 +491,13 @@ main: field: 'next-reference'='0'
 main: status: predicate
 main: input '= path /tmp/ssh-DQWvehZ5Bz/agent.39523'
 main: field: 'path'='/tmp/ssh-DQWvehZ5Bz/agent.39523'
+main: work: rc: 49
 main: status: full
 main: input '> socket'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '< socket'
-main: filter: rc: 11
+main: work: rc: 11
 main: status: predicate
 main: input '= address ffffa00001f60480'
 main: field: 'address'='ffffa00001f60480'
@@ -513,7 +529,7 @@ main: status: track
 main: input '> socket'
 main: status: track
 main: input '< socket'
-main: filter: rc: 11
+main: work: rc: 11
 main: status: predicate
 main: input '= address ffffa00001fa9000'
 main: field: 'address'='ffffa00001fa9000'

@@ -317,6 +317,7 @@ static xo_flag_mapping_t xo_modifier_names[] = {
     { XFF_COMMA, "comma" },
     { XFF_DENSE, "dense" },
     { XFF_DISPLAY_ONLY, "display" },
+    { XFF_DROP_PLUS, "drop-plus" },
     { XFF_ENCODE_ONLY, "encoding" },
     { XFF_ESC_PRIVATE, "escape-private" },
     { XFF_ESC_SLASH, "escape-slash" },
@@ -433,6 +434,9 @@ xo_parse_format_spec (xo_parse_t *xpp, xo_fspec_t *xfp,
         else if (*cp == '#')
             xfp->xf_alt = 1;
 
+        else if (*cp == '\'')
+            xfp->xf_extflags |= XXF_GROUP;
+
         else if (*cp == '!') {
             /* "%!NNd" is a NN-bit signed value */
             const char *sp = cp + 1;
@@ -504,6 +508,46 @@ xo_parse_format_spec (xo_parse_t *xpp, xo_fspec_t *xfp,
 
     xfp->xf_fc = *cp;
     return cp;
+}
+
+int
+xo_format_count_args (const char *fmt, ssize_t flen, unsigned *starsp,
+		      unsigned *flagsp)
+{
+    const char *cp = fmt, *ep = fmt + flen;
+    unsigned stars = 0, flags = 0;
+    int values = 0;
+
+    while (cp < ep) {
+        if (*cp++ != '%')
+            continue;
+
+        if (cp < ep && *cp == '%') {
+            cp += 1;
+            continue;
+        }
+
+        for (; cp < ep; cp++) {
+            if (*cp == '*')
+                stars += 1;
+            else if (*cp == '\'')
+                flags |= XO_FCA_GROUP;
+            else if (*cp == 'm') {
+                cp += 1;
+                break;
+            } else if (strchr("diouxXDOUeEfFgGaAcCsSp", *cp) != NULL) {
+                values += 1;
+                cp += 1;
+                break;
+            }
+        }
+    }
+
+    if (starsp)
+        *starsp = stars;
+    if (flagsp)
+        *flagsp = flags;
+    return values;
 }
 
 uint8_t
@@ -1483,6 +1527,49 @@ xo_parse_fields (xo_parse_t *xpp, const char *fmt, size_t fmt_len)
 		return -1;
 	}
 
+	/*
+	 * The encoding format must take the same arguments as the
+	 * display format.  libxo repairs a '*' mismatch when it emits
+	 * the field (skipping the display's '*' arguments, and ignoring
+	 * the encoding's), but the program is still wrong.  A "'" in an
+	 * encoding format is ignored, since encoded values are never
+	 * grouped.  ('B' fields have their own check, above.)
+	 */
+	if (xfip->xfi_encoding >= 0 && xfip->xfi_ftype != 'B') {
+	    const char *efmt = xo_foff(fmt, xfip->xfi_encoding);
+	    const char *dfmt = (xfip->xfi_format >= 0)
+		? xo_foff(fmt, xfip->xfi_format) : xo_default_format;
+	    ssize_t dlen = (xfip->xfi_format >= 0)
+		? xfip->xfi_flen : (ssize_t) strlen(xo_default_format);
+	    unsigned dstars, estars, eflags;
+	    int dvals = xo_format_count_args(dfmt, dlen, &dstars, NULL);
+	    int evals = xo_format_count_args(efmt, xfip->xfi_elen,
+					     &estars, &eflags);
+
+	    if (dvals != evals)
+		xo_parse_warning(xpp, "encoding format uses a different "
+				 "number of arguments (%d/%d): '%s'",
+				 dvals, evals,
+				 xo_parse_printable(xpp,
+					    xo_foff(fmt, xfip->xfi_start),
+					    xfip->xfi_len, TRUE));
+	    else if (dstars != estars)
+		xo_parse_warning(xpp, "encoding format uses a different "
+				 "number of '*' arguments (%u/%u); "
+				 "use \"%%@*@\" to skip one: '%s'",
+				 dstars, estars,
+				 xo_parse_printable(xpp,
+					    xo_foff(fmt, xfip->xfi_start),
+					    xfip->xfi_len, TRUE));
+
+	    if (eflags & XO_FCA_GROUP)
+		xo_parse_warning(xpp, "grouping flag (') in an encoding "
+				 "format is ignored: '%s'",
+				 xo_parse_printable(xpp,
+					    xo_foff(fmt, xfip->xfi_start),
+					    xfip->xfi_len, TRUE));
+	}
+
 	/* Semantic validation in strict mode only; not during xo_emit() */
 	if (!(xpp->xp_flags & XPF_STRICT))
 	    goto next_field;
@@ -1556,15 +1643,15 @@ xo_parse_fields (xo_parse_t *xpp, const char *fmt, size_t fmt_len)
 		    xo_fspec_t *xfp = &xfip->xfi_fspecs[0]; /* Only one */
 		    int fc = xfp->xf_fc;
 
-		    if (fc != 'd' && fc != 'i' && fc != 'u')
+		    if (strchr("diuDUeEfFgG", fc) == NULL)
 			xo_parse_error(xpp,
 				   "'int-group|i' set on field with invalid "
-				   "type (%c; must be d|i|u): '%s'", fc,
+				   "type (%c; must be d|i|u|e|f|g): '%s'", fc,
 				   xo_parse_printable(xpp, str, slen, 1));
-                    else if (xfp->xf_leading_zero > 0)
-			xo_parse_error(xpp,
-				   "'int-group|i' set on field with "
-				   "leading zeroes: '%s'",
+                    else if (XO_IS_LINT(xpp) && xfp->xf_leading_zero > 0)
+			xo_parse_warning(xpp,
+				   "'int-group|i' is ignored on a field "
+				   "with leading zeroes: '%s'",
 				   xo_parse_printable(xpp, str, slen, 1));
 		}
 	    }

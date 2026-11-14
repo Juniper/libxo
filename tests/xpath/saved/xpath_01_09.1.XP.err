@@ -13,13 +13,14 @@ main: status: zero
 main: input ''
 main: input '#?two[three - 5 == 5]'
 main: input '+one'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '+two'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$three 10'
 main: key: 'three'='10'
+main: work: rc: 22
 main: status: track
 main: input '=value 10'
 main: field: 'value'='10'
@@ -28,10 +29,11 @@ main: input '-two'
 main: status: track
 main: input '+two'
 xpath_01: duplicate sibling name: 'two'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$three 9'
 main: key: 'three'='9'
+main: work: rc: 21
 main: status: track
 main: input '=value 9'
 main: field: 'value'='9'
@@ -39,10 +41,11 @@ main: status: track
 main: input '-two'
 main: status: track
 main: input '+two'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$three 8'
 main: key: 'three'='8'
+main: work: rc: 21
 main: status: track
 main: input '=value 8'
 main: field: 'value'='8'
@@ -50,10 +53,11 @@ main: status: track
 main: input '-two'
 main: status: track
 main: input '+two'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$three 7'
 main: key: 'three'='7'
+main: work: rc: 21
 main: status: track
 main: input '=value 7'
 main: field: 'value'='7'
@@ -87,10 +91,11 @@ xpath_01: test: filter expression feature is unsupported: plus sign ('+')
                         000018: type 53 (T_NUMBER), str 45 [5], contents 0, next 0, prev 12
 main: status: zero
 main: input '+two'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$three 10'
 main: key: 'three'='10'
+main: work: rc: 22
 main: status: track
 main: input '=value 10'
 main: field: 'value'='10'
@@ -98,21 +103,24 @@ main: status: track
 main: input '-two'
 main: status: track
 main: input '+two'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$three 9'
 main: key: 'three'='9'
+main: work: rc: 21
 main: status: full
 main: input '=value 9'
 main: field: 'value'='9'
+main: work: rc: 21
 main: status: full
 main: input '-two'
 main: status: track
 main: input '+two'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$three 8'
 main: key: 'three'='8'
+main: work: rc: 21
 main: status: track
 main: input '=value 8'
 main: field: 'value'='8'
@@ -120,10 +128,11 @@ main: status: track
 main: input '-two'
 main: status: track
 main: input '+two'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$three 7'
 main: key: 'three'='7'
+main: work: rc: 21
 main: status: track
 main: input '=value 7'
 main: field: 'value'='7'
@@ -132,11 +141,12 @@ main: input '-two'
 main: status: track
 main: input ''
 main: input '+two'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$three ten'
 main: key: 'three'='ten'
 xpath_01: invalid number value: 'ten'
+main: work: rc: 23
 main: status: track
 main: input '=value 10'
 main: field: 'value'='10'
@@ -144,11 +154,12 @@ main: status: track
 main: input '-two'
 main: status: track
 main: input '+two'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$three nine'
 main: key: 'three'='nine'
 xpath_01: invalid number value: 'nine'
+main: work: rc: 24
 main: status: track
 main: input '=value 9'
 main: field: 'value'='9'
@@ -156,11 +167,12 @@ main: status: track
 main: input '-two'
 main: status: track
 main: input '+two'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$three eight'
 main: key: 'three'='eight'
 xpath_01: invalid number value: 'eight'
+main: work: rc: 25
 main: status: track
 main: input '=value 8'
 main: field: 'value'='8'
@@ -168,11 +180,12 @@ main: status: track
 main: input '-two'
 main: status: track
 main: input '+two'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$three seven'
 main: key: 'three'='seven'
 xpath_01: invalid number value: 'seven'
+main: work: rc: 25
 main: status: track
 main: input '=value 7'
 main: field: 'value'='7'

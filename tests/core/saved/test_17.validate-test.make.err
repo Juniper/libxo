@@ -4,14 +4,14 @@
 ../../../tests/core/test_17.c:36:15: warning: libxo: anchor format must be '%d' or '%u: '{[:/%20000d}'
    36 |     xo_emit("[{[:/%20000d}{:left/%s}{]:}]\n", -12, "abc");
       |               ^
-../../../tests/core/test_17.c:445:22: warning: libxo: field format missing format character: %l
-  445 |     xo_emit_h(xop, "[{:length/%l}]", 1L);
+../../../tests/core/test_17.c:452:22: warning: libxo: field format missing format character: %l
+  452 |     xo_emit_h(xop, "[{:length/%l}]", 1L);
       |                      ^
-../../../tests/core/test_17.c:446:22: warning: libxo: field format missing format character: %-
-  446 |     xo_emit_h(xop, "[{:minus/%-}]", 2);
+../../../tests/core/test_17.c:453:22: warning: libxo: field format missing format character: %-
+  453 |     xo_emit_h(xop, "[{:minus/%-}]", 2);
       |                      ^
-../../../tests/core/test_17.c:447:22: warning: libxo: unknown 'J' flag: '{%J}'
-  447 |     xo_emit_h(xop, "[{:extended/%J}]", 3);
+../../../tests/core/test_17.c:454:22: warning: libxo: unknown 'J' flag: '{%J}'
+  454 |     xo_emit_h(xop, "[{:extended/%J}]", 3);
       |                      ^
-../../../tests/core/test_17.c:447:22: warning: libxo: field format missing format character: %J
+../../../tests/core/test_17.c:454:22: warning: libxo: field format missing format character: %J
 6 warnings generated.

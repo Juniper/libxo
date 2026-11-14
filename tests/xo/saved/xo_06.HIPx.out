@@ -1,0 +1,23 @@
+<div class="line">
+  <div class="data" data-tag="name" data-xpath="/top/name">value</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="count" data-xpath="/top/count">42</div>
+  <div class="data" data-tag="count-next" data-xpath="/top/count-next">1</div>
+</div>
+<div class="line">
+  <div class="label">Label</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="label-next" data-xpath="/top/label-next">2</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="key-name" data-xpath="/top/key-name">key-value</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="other" data-xpath="/top/other">7</div>
+  <div class="text"> </div>
+  <div class="data" data-tag="next" data-xpath="/top/next">3</div>
+</div>
+<div class="line">
+  <div class="data" data-tag="width" data-xpath="/top/width">    1234</div>
+  <div class="data" data-tag="star-next" data-xpath="/top/star-next">4</div>
+</div>

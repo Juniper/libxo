@@ -21,25 +21,28 @@ added filter: 0
                     000019: type 54 (T_QUOTED), str 59 [eth0], contents 0, next 0, prev 3
 main: status: zero
 main: input '{item'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ name eth0'
 main: key: 'name'='eth0'
+main: work: rc: 20
 main: status: full
 main: input '= val 1'
 main: field: 'val'='1'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name lo0'
 main: key: 'name'='lo0'
+main: work: rc: 19
 main: status: track
 main: input '= val 2'
 main: field: 'val'='2'
@@ -47,10 +50,11 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ name eth1'
 main: key: 'name'='eth1'
+main: work: rc: 20
 main: status: track
 main: input '= val 3'
 main: field: 'val'='3'
@@ -82,13 +86,14 @@ added filter: 0
 main: status: zero
 main: input '{item'
 xpath_01: duplicate sibling name: 'item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ val 1'
 main: key: 'val'='1'
+main: work: rc: 16
 main: status: track
 main: input '= label a'
 main: field: 'label'='a'
@@ -96,28 +101,32 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ val 3'
 main: key: 'val'='3'
+main: work: rc: 16
 main: status: full
 main: input '= label b'
 main: field: 'label'='b'
+main: work: rc: 20
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ val 5'
 main: key: 'val'='5'
+main: work: rc: 16
 main: status: full
 main: input '= label c'
 main: field: 'label'='c'
+main: work: rc: 20
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '}item'
 main: status: track
@@ -145,37 +154,44 @@ added filter: 0
                     000019: type 54 (T_QUOTED), str 54 [eth], contents 0, next 0, prev 5
 main: status: zero
 main: input '{item'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: zero
 main: input '<item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: predicate
 main: input '$ flag 1'
 main: key: 'flag'='1'
+main: work: rc: 17
 main: status: predicate
 main: input '$ name eth0'
 main: key: 'name'='eth0'
+main: work: rc: 22
 main: status: full
 main: input '$ alt lo0'
 main: key: 'alt'='lo0'
+main: work: rc: 20
 main: status: full
 main: input '= val 1'
 main: field: 'val'='1'
+main: work: rc: 18
 main: status: full
 main: input '>item'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ flag 0'
 main: key: 'flag'='0'
+main: work: rc: 17
 main: status: predicate
 main: input '$ name eth1'
 main: key: 'name'='eth1'
+main: work: rc: 22
 main: status: predicate
 main: input '$ alt lo0'
 main: key: 'alt'='lo0'
+main: work: rc: 20
 main: status: track
 main: input '= val 2'
 main: field: 'val'='2'
@@ -183,16 +199,19 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: predicate
 main: input '$ flag 1'
 main: key: 'flag'='1'
+main: work: rc: 17
 main: status: predicate
 main: input '$ name wlan0'
 main: key: 'name'='wlan0'
+main: work: rc: 23
 main: status: track
 main: input '$ alt eth2'
 main: key: 'alt'='eth2'
+main: work: rc: 21
 main: status: track
 main: input '= val 3'
 main: field: 'val'='3'

@@ -288,7 +288,10 @@ do_run_tests () {
     done
 }
 
+# Copy OUT to SAVED, naming it, only when they differ.  A missing OUT
+# is skipped quietly (optional outputs, like the plugin builds).
 accept_file () {
+    [ -f "$1" ] || return 0
     if ! cmp -s $*; then
         echo "... $1 ..."
         run "cp $*"
@@ -545,6 +548,18 @@ case $verb in
 
     accept-bin)
         do_accept_bins "$@"
+    ;;
+
+    ## Accept verbs, usable from any Makefile.am (see tests/report.mk):
+    ##   accept-file OUT SAVED
+    ##   accept-files OUT_BASE SAVED_BASE    (the .out and .err files)
+    accept-file)
+        accept_file "$1" "$2"
+    ;;
+
+    accept-files)
+        accept_file "$1.out" "$2.out"
+        accept_file "$1.err" "$2.err"
     ;;
 
     ## Report verbs, usable from any Makefile.am (see tests/report.mk):

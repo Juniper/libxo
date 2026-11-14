@@ -160,7 +160,19 @@ Also note that the HTML style is suitable for inclusion in web
 applications with a suitable CSS file, such as
 /usr/share/libxo/xohtml.css which is used by
 .Xr xohtml 1 .
+.Sh CONVERTING APPLICATIONS
+Instructions for converting an existing application to
+.Nm
+are installed as a "skill" for LLM coding agents, in
+/usr/share/skills/libxo/libxo-convert/SKILL.md, with its references,
+examples, and scripts alongside.
+They are plain Markdown and can be read directly: SKILL.md
+describes the conversion phases, and references/pitfalls.md lists
+common mistakes.
+Check a conversion with
+.Xr xolint 1 .
 .Sh SEE ALSO
+.Xr xolint 1 ,
 .Xr libxo 3 ,
 .Xr xo_emit 3 ,
 .Xr xo_format 5 ,

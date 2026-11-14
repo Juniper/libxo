@@ -196,18 +196,14 @@ one:
 
 accept:
 	@${MKDIR} -p ${srcdir}/saved
-	${RUN_TESTS_CMD} -T "${TEST_FORMATS}" accept-bin ${TEST_CASES:.c=.test}
-	${RUN_TESTS_CMD} -m validate -T "${TEST_FORMATS}" accept-bin ${TEST_CASES:.c=.test}
-	${RUN_TESTS_CMD} -m pass -T "${TEST_FORMATS}" accept-bin ${TEST_CASES:.c=.test}
+	@${RUN_TESTS_CMD} -T "${TEST_FORMATS}" accept-bin ${TEST_CASES:.c=.test}
+	@${RUN_TESTS_CMD} -m validate -T "${TEST_FORMATS}" accept-bin ${TEST_CASES:.c=.test}
+	@${RUN_TESTS_CMD} -m pass -T "${TEST_FORMATS}" accept-bin ${TEST_CASES:.c=.test}
 	-@test -z "${LLVM_CLANG}" || for tc in ${TEST_CASES:.c=}; do \
-	    cp out/$$tc.validate-test.make.out \
-	        ${srcdir}/saved/$$tc.validate-test.make.out 2>/dev/null ; \
-	    cp out/$$tc.validate-test.make.err \
-	        ${srcdir}/saved/$$tc.validate-test.make.err 2>/dev/null ; \
-	    cp out/$$tc.pass-test.make.out \
-	        ${srcdir}/saved/$$tc.pass-test.make.out 2>/dev/null ; \
-	    cp out/$$tc.pass-test.make.err \
-	        ${srcdir}/saved/$$tc.pass-test.make.err 2>/dev/null ; \
+	    for mode in validate pass; do \
+		${ACCEPT_FILES} out/$$tc.$$mode-test.make \
+		    ${srcdir}/saved/$$tc.$$mode-test.make ; \
+	    done ; \
 	done
 
 .c.test:

@@ -21,6 +21,7 @@
 .Op Fl d
 .Op Fl D
 .Op Fl I
+.Op Fl L
 .Op Fl p
 .Op Fl V
 .Op Fl X
@@ -51,6 +52,23 @@ messages
 Generate a table of
 .Dv xo_info_t
 structures.
+.It Fl L
+Do not report errors, but instead print the lexicon: each tag that
+appears in encoded output, followed by the number of places the
+source uses it, one per line, sorted alphabetically.
+Tags come from value and boolean fields that are not display-only,
+and from the names passed to the
+.Fn xo_open_container ,
+.Fn xo_open_list ,
+and
+.Fn xo_attr
+families.
+Names that are not visible in the source (fields using the
+argument modifier, non-literal names, and formats that paste in a
+macro argument) are reported on the standard error and skipped,
+as are invalid field names.
+The output is used by
+.Xr xo-lexicon 1 .
 .It Fl p
 Print the offending lines after the error message is displayed
 .It Fl V

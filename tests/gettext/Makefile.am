@@ -146,23 +146,19 @@ one:
 	-@(test=${TEST_CASE}; data=${TEST_DATA}; ${TEST_ONE} ; true)
 
 accept:
-	-@(for test in ${TEST_CASES} ; do \
+	@${MKDIR} -p ${srcdir}/saved
+	-@for test in ${TEST_CASES} ; do \
 	    base=`${BASENAME} $$test .c` ; \
-            (for fmt in ${TEST_FORMATS}; do \
-	        echo "... $$test ... $$fmt ..."; \
-	        ${CP} out/$$base.$$fmt.out ${srcdir}/saved/$$base.$$fmt.out ; \
-	        ${CP} out/$$base.$$fmt.err ${srcdir}/saved/$$base.$$fmt.err ; \
-	    done) ; \
-	    (for lang in ${TEST_LANGUAGES} ; do \
+	    for fmt in ${TEST_FORMATS}; do \
+		${ACCEPT_FILES} out/$$base.$$fmt ${srcdir}/saved/$$base.$$fmt ; \
+	    done ; \
+	    for lang in ${TEST_LANGUAGES} ; do \
 		for fmt in ${TEST_FORMATS}; do \
-		    echo "... $$test ... $$lang ... $$fmt ..."; \
-		    ${CP} out/$$base.$$lang.$$fmt.out \
-			${srcdir}/saved/$$base.$$lang.$$fmt.out ; \
-		    ${CP} out/$$base.$$lang.$$fmt.err \
-			${srcdir}/saved/$$base.$$lang.$$fmt.err ; \
+		    ${ACCEPT_FILES} out/$$base.$$lang.$$fmt \
+			${srcdir}/saved/$$base.$$lang.$$fmt ; \
 		done ; \
-	    done) \
-	done)
+	    done ; \
+	done
 
 .c.test:
 	$(AM_V_CC)$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -o $@ $<

@@ -12,7 +12,7 @@ main: status: zero
 main: input '{interface'
 main: status: zero
 main: input '<interface'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '= ifindex 1'
 main: field: 'ifindex'='1'
@@ -23,19 +23,21 @@ main: status: track
 main: input '>interface'
 main: status: track
 main: input '<interface'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: full
 main: input '= ifindex 2'
 main: field: 'ifindex'='2'
+main: work: rc: 23
 main: status: full
 main: input '= name lo0'
 main: field: 'name'='lo0'
+main: work: rc: 19
 main: status: full
 main: input '>interface'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: track
 main: input '<interface'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '= ifindex 3'
 main: field: 'ifindex'='3'
@@ -64,19 +66,21 @@ main: input '{interface'
 xpath_01: duplicate sibling name: 'interface'
 main: status: zero
 main: input '<interface'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: full
 main: input '= ifindex 1'
 main: field: 'ifindex'='1'
+main: work: rc: 23
 main: status: full
 main: input '= name eth0'
 main: field: 'name'='eth0'
+main: work: rc: 20
 main: status: full
 main: input '>interface'
-main: filter: rc: 13
+main: work: rc: 13
 main: status: track
 main: input '<interface'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '= ifindex 2'
 main: field: 'ifindex'='2'
@@ -109,34 +113,39 @@ main: status: zero
 main: input '{socket'
 main: status: zero
 main: input '<socket'
-main: filter: rc: 9
+main: work: rc: 9
 main: status: predicate
 main: input '$ protocol tcp4'
 main: key: 'protocol'='tcp4'
+main: work: rc: 28
 main: status: full
 main: input '= recv 100'
 main: field: 'recv'='100'
+main: work: rc: 19
 main: status: full
 main: input '>socket'
-main: filter: rc: 10
+main: work: rc: 10
 main: status: track
 main: input '<socket'
-main: filter: rc: 9
+main: work: rc: 9
 main: status: predicate
 main: input '$ protocol tcp4'
 main: key: 'protocol'='tcp4'
+main: work: rc: 28
 main: status: full
 main: input '= recv 200'
 main: field: 'recv'='200'
+main: work: rc: 19
 main: status: full
 main: input '>socket'
-main: filter: rc: 10
+main: work: rc: 10
 main: status: track
 main: input '<socket'
-main: filter: rc: 9
+main: work: rc: 9
 main: status: predicate
 main: input '$ protocol udp'
 main: key: 'protocol'='udp'
+main: work: rc: 27
 main: status: track
 main: input '= recv 300'
 main: field: 'recv'='300'
@@ -167,10 +176,11 @@ main: input '{socket'
 xpath_01: duplicate sibling name: 'socket'
 main: status: zero
 main: input '<socket'
-main: filter: rc: 9
+main: work: rc: 9
 main: status: track
 main: input '$ protocol tcp4'
 main: key: 'protocol'='tcp4'
+main: work: rc: 28
 main: status: track
 main: input '= recv 100'
 main: field: 'recv'='100'
@@ -178,22 +188,25 @@ main: status: track
 main: input '>socket'
 main: status: track
 main: input '<socket'
-main: filter: rc: 9
+main: work: rc: 9
 main: status: predicate
 main: input '$ protocol tcp4'
 main: key: 'protocol'='tcp4'
+main: work: rc: 28
 main: status: full
 main: input '= recv 200'
 main: field: 'recv'='200'
+main: work: rc: 19
 main: status: full
 main: input '>socket'
-main: filter: rc: 10
+main: work: rc: 10
 main: status: track
 main: input '<socket'
-main: filter: rc: 9
+main: work: rc: 9
 main: status: track
 main: input '$ protocol udp'
 main: key: 'protocol'='udp'
+main: work: rc: 27
 main: status: track
 main: input '= recv 300'
 main: field: 'recv'='300'
@@ -224,10 +237,11 @@ main: status: zero
 main: input '{socket'
 main: status: zero
 main: input '<socket'
-main: filter: rc: 9
+main: work: rc: 9
 main: status: predicate
 main: input '$ protocol udp'
 main: key: 'protocol'='udp'
+main: work: rc: 27
 main: status: track
 main: input '= recv 100'
 main: field: 'recv'='100'
@@ -235,10 +249,11 @@ main: status: track
 main: input '>socket'
 main: status: track
 main: input '<socket'
-main: filter: rc: 9
+main: work: rc: 9
 main: status: predicate
 main: input '$ protocol tcp4'
 main: key: 'protocol'='tcp4'
+main: work: rc: 28
 main: status: track
 main: input '= recv 200'
 main: field: 'recv'='200'
@@ -249,19 +264,22 @@ main: status: track
 main: input '>socket'
 main: status: track
 main: input '<socket'
-main: filter: rc: 9
+main: work: rc: 9
 main: status: predicate
 main: input '$ protocol tcp4'
 main: key: 'protocol'='tcp4'
+main: work: rc: 28
 main: status: full
 main: input '= recv 300'
 main: field: 'recv'='300'
+main: work: rc: 19
 main: status: full
 main: input '= answer right'
 main: field: 'answer'='right'
+main: work: rc: 25
 main: status: full
 main: input '>socket'
-main: filter: rc: 10
+main: work: rc: 10
 main: status: track
 main: input '}socket'
 main: status: track
@@ -277,20 +295,24 @@ added filter: 0
         000001: type 70 (C_ELEMENT), str 1 [data], contents 0, next 0, prev 0
 main: status: zero
 main: input '+ data'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: full
 main: input '= thing one'
 main: field: 'thing'='one'
+main: work: rc: 21
 main: status: full
 main: input '= thing two'
 main: field: 'thing'='two'
 xpath_01: duplicate sibling name: 'thing'
+main: work: rc: 21
 main: status: full
 main: input '= thing three'
 main: field: 'thing'='three'
+main: work: rc: 23
 main: status: full
 main: input '= thing four'
 main: field: 'thing'='four'
+main: work: rc: 22
 main: status: full
 main: input '- data'
 main: status: track
@@ -307,7 +329,7 @@ added filter: 0
 main: status: zero
 main: input '+ data'
 xpath_01: duplicate sibling name: 'data'
-main: filter: rc: 7
+main: work: rc: 7
 main: status: track
 main: input '= thing one'
 main: field: 'thing'='one'
@@ -548,76 +570,84 @@ added filter: 0
                 000045: type 72 (C_INDEX), str 78 [2], contents 0, next 0, prev 0
 main: status: zero
 main: input '+top'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '+a'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: full
 main: input '= val a'
 main: field: 'val'='a'
+main: work: rc: 17
 main: status: full
 main: input '-a'
 main: status: track
 main: input '+b'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: full
 main: input '= val b'
 main: field: 'val'='b'
+main: work: rc: 17
 main: status: full
 main: input '-b'
 main: status: track
 main: input '+c'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: full
 main: input '= val c'
 main: field: 'val'='c'
+main: work: rc: 17
 main: status: full
 main: input '-c'
 main: status: track
 main: input '+d'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: full
 main: input '= val d'
 main: field: 'val'='d'
+main: work: rc: 17
 main: status: full
 main: input '-d'
 main: status: track
 main: input '+e'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: full
 main: input '= val e'
 main: field: 'val'='e'
+main: work: rc: 17
 main: status: full
 main: input '-e'
 main: status: track
 main: input '+f'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: full
 main: input '= val f'
 main: field: 'val'='f'
+main: work: rc: 17
 main: status: full
 main: input '-f'
 main: status: track
 main: input '+g'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: full
 main: input '= val g'
 main: field: 'val'='g'
+main: work: rc: 17
 main: status: full
 main: input '-g'
 main: status: track
 main: input '+h'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: full
 main: input '= val h'
 main: field: 'val'='h'
+main: work: rc: 17
 main: status: full
 main: input '-h'
 main: status: track
 main: input '{item'
 main: status: track
 main: input '<item'
-main: filter: rc: 9
+main: work: rc: 9
 main: status: track
 main: input '= val 1'
 main: field: 'val'='1'
@@ -625,16 +655,17 @@ main: status: track
 main: input '>item'
 main: status: track
 main: input '<item'
-main: filter: rc: 9
+main: work: rc: 9
 main: status: full
 main: input '= val 2'
 main: field: 'val'='2'
+main: work: rc: 17
 main: status: full
 main: input '>item'
-main: filter: rc: 10
+main: work: rc: 10
 main: status: track
 main: input '<item'
-main: filter: rc: 9
+main: work: rc: 9
 main: status: track
 main: input '= val 3'
 main: field: 'val'='3'
@@ -667,61 +698,62 @@ added filter: 0
         000019: type 70 (C_ELEMENT), str 37 [want], contents 0, next 0, prev 17
 main: status: zero
 main: input '+x'
-main: filter: rc: 4
+main: work: rc: 4
 main: status: track
 main: input '+x'
-main: filter: rc: 6
+main: work: rc: 6
 main: status: track
 main: input '+x'
-main: filter: rc: 8
+main: work: rc: 8
 main: status: track
 main: input '+x'
-main: filter: rc: 10
+main: work: rc: 10
 main: status: track
 main: input '+x'
-main: filter: rc: 12
+main: work: rc: 12
 main: status: track
 main: input '+x'
-main: filter: rc: 14
+main: work: rc: 14
 main: status: track
 main: input '+x'
-main: filter: rc: 16
+main: work: rc: 16
 main: status: track
 main: input '+x'
-main: filter: rc: 18
+main: work: rc: 18
 main: status: track
 main: input '+x'
-main: filter: rc: 20
+main: work: rc: 20
 main: status: track
 main: input '+x'
-main: filter: rc: 22
+main: work: rc: 22
 main: status: track
 main: input '+x'
-main: filter: rc: 24
+main: work: rc: 24
 main: status: track
 main: input '+x'
-main: filter: rc: 26
+main: work: rc: 26
 main: status: track
 main: input '+x'
-main: filter: rc: 28
+main: work: rc: 28
 main: status: track
 main: input '+x'
-main: filter: rc: 30
+main: work: rc: 30
 main: status: track
 main: input '+x'
-main: filter: rc: 32
+main: work: rc: 32
 main: status: track
 main: input '+x'
-main: filter: rc: 34
+main: work: rc: 34
 main: status: track
 main: input '+x'
-main: filter: rc: 36
+main: work: rc: 36
 main: status: track
 main: input '+want'
-main: filter: rc: 41
+main: work: rc: 41
 main: status: full
 main: input '= val yes'
 main: field: 'val'='yes'
+main: work: rc: 51
 main: status: full
 main: input '-want'
 main: status: track

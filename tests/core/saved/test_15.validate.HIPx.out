@@ -40,11 +40,11 @@
 </div>
 <div class="line">
   <div class="text">field forced, short </div>
-  <div class="data" data-tag="count" data-xpath="/data/count">3,456,789</div>
+  <div class="data" data-tag="count" data-xpath="/data/count" data-number="3456789">3,456,789</div>
 </div>
 <div class="line">
   <div class="text">field forced, long </div>
-  <div class="data" data-tag="count" data-xpath="/data/count">4,567,890</div>
+  <div class="data" data-tag="count" data-xpath="/data/count" data-number="4567890">4,567,890</div>
 </div>
 <div class="line">
   <div class="text">hex unaffected </div>
