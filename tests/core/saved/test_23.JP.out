@@ -1,0 +1,13 @@
+{
+  "top": {
+    "floats": {
+      "float": 1234567.50,
+      "negative": -3.5,
+      "exp": 1.234568e+06,
+      "general": 0.5,
+      "width": 3.142,
+      "hex": "0x1.8p+0",
+      "count": 42
+    }
+  }
+}

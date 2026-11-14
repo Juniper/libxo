@@ -1,0 +1,11 @@
+<top>
+  <floats>
+    <float>1234567.50</float>
+    <negative>-3.5</negative>
+    <exp>1.234568e+06</exp>
+    <general>0.5</general>
+    <width>3.142</width>
+    <hex>0x1.8p+0</hex>
+    <count>42</count>
+  </floats>
+</top>

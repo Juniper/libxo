@@ -1,0 +1,67 @@
+op create: [cbor] []
+ [append] @ 0 (1/1)
+ bf                                                    .
+    op open_container: [top] []
+ [append] @ 1 (4/4)
+ 63 74 6f 70                                           ctop
+ [append] @ 5 (1/1)
+ bf                                                    .
+      op open_container: [floats] []
+   [append] @ 6 (7/7)
+   66 66 6c 6f  61 74 73                                 ffloats
+   [append] @ 13 (1/1)
+   bf                                                    .
+        op content: [float] [1234567.50]
+     [append] @ 14 (6/6)
+     65 66 6c 6f  61 74                                    efloat
+     [content] @ 20 (5/5)
+     fa 49 96 b4  3c                                       .I..<
+        op content: [negative] [-3.5]
+     [append] @ 25 (9/9)
+     68 6e 65 67  61 74 69 76  - 65                        hnegative
+     [content] @ 34 (3/3)
+     f9 c3 00                                              ...
+        op content: [exp] [1.234568e+06]
+     [append] @ 37 (4/4)
+     63 65 78 70                                           cexp
+     [content] @ 41 (5/5)
+     fa 49 96 b4  40                                       .I..@
+        op content: [general] [0.5]
+     [append] @ 46 (8/8)
+     67 67 65 6e  65 72 61 6c                              ggeneral
+     [content] @ 54 (3/3)
+     f9 38 00                                              .8.
+        op content: [width] [3.142]
+     [append] @ 57 (6/6)
+     65 77 69 64  74 68                                    ewidth
+     [content] @ 63 (9/9)
+     fb 40 09 22  d0 e5 60 41  - 89                        .@."..`A.
+        op content: [hex] [0x1.8p+0]
+     [append] @ 72 (4/4)
+     63 68 65 78                                           chex
+     [append] @ 76 (9/9)
+     68 30 78 31  2e 38 70 2b  - 30                        h0x1.8p+0
+     [content] @ 76 (9/9)
+     68 30 78 31  2e 38 70 2b  - 30                        h0x1.8p+0
+        op content: [count] [42]
+     [append] @ 85 (6/6)
+     65 63 6f 75  6e 74                                    ecount
+     [content] @ 91 (2/2)
+     18 2a                                                 .*
+        op close_container: [floats] []
+     [append] @ 93 (1/1)
+     ff                                                    .
+      op close_container: [top] []
+   [append] @ 94 (1/1)
+   ff                                                    .
+    op finish: [] []
+ [append] @ 95 (1/1)
+ ff                                                    .
+  op flush: [] []
+>[cbor] @ 0 (60/96)
+>bf 63 74 6f  70 bf 66 66  - 6c 6f 61 74  73 bf 65 66  .ctop.ffloats.ef
+>6c 6f 61 74  fa 49 96 b4  - 3c 68 6e 65  67 61 74 69  loat.I..<hnegati
+>76 65 f9 c3  00 63 65 78  - 70 fa 49 96  b4 40 67 67  ve...cexp.I..@gg
+>65 6e 65 72  61 6c f9 38  - 00 65 77 69  64 74 68 fb  eneral.8.ewidth.
+>40 09 22 d0  e5 60 41 89  - 63 68 65 78  68 30 78 31  @."..`A.chexh0x1
+>2e 38 70 2b  30 65 63 6f  - 75 6e 74 18  2a ff ff ff  .8p+0ecount.*...
