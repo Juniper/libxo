@@ -428,8 +428,15 @@ xp_not_expr :
 		{
 		    xo_xparse_node_id_t id = $1;
 
-		    /* Only a bare element step needs a C_PATH wrapper */
-		    if (xo_xparse_node_type(xparse_data, $1) == C_ELEMENT) {
+		    /*
+		     * Every location path gets a C_PATH wrapper, so the
+		     * steps of "/a/b", "../x" or "$v/x" stay together
+		     * instead of being spliced into the enclosing list
+		     * (union operands, function arguments) as siblings.
+		     * A lone "." or "@x" is left bare; so is any other
+		     * single-node primary (number, literal, call).
+		     */
+		    if (xo_xparse_path_needs_wrapper(xparse_data, $1)) {
 			id = xo_xparse_node_new(xparse_data);
 			if (id == 0) {
 			    yyerror("out of memory");
