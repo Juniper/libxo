@@ -119,30 +119,56 @@
 #endif /* HAVE_STDIO_EXT_H */
 
 /*
- * The locale's decimal point, cached when the locale is set up (or at
- * first use, after xo_no_setlocale).  data-number values use "." in
- * its place, and our xo_humanize_number uses it for HN_DECIMAL.
+ * Values taken from the locale, cached when libxo sets up the locale
+ * and refreshed by xo_update_locale().  Values given by options (the
+ * "grouping" option) override the locale's and survive a refresh.
+ * There's a single global instance for now; one day this may become
+ * handle-specific.
+ *
+ * data-number values and encoding styles use "." in place of the
+ * decimal point, and our xo_humanize_number uses it for HN_DECIMAL.
  */
-static char xo_decimal_point[16]; /* Copy of locale's decimal point */
-static int xo_decimal_point_len;  /* strlen(xo_decimal_point); 0 if unset */
+typedef struct xo_locale_info_s {
+    unsigned xli_flags;         /* XLIF_* flags */
+    int xli_codeset_is_utf8;    /* Is stdout UTF-8? */
+    char xli_decimal_point[16]; /* Copy of locale's decimal point */
+    int xli_decimal_point_len;  /* strlen(xli_decimal_point); 0 if unset */
+    char *xli_group_sep;        /* Copy of locale's thousands separator */
+    int xli_group_sep_len;      /* strlen(xli_group_sep) */
+    uint64_t xli_group_map;     /* Precomputed grouping-shape map */
+} xo_locale_info_t;
 
-static const char *
+#define XLIF_SETLOCALE_DONE (1<<0) /* setlocale done (or skipped) */
+#define XLIF_LOADED         (1<<1) /* Values loaded from the locale */
+#define XLIF_GROUPING_SET   (1<<2) /* "grouping" option overrides locale */
+#define XLIF_LOCALE_NONE    (1<<3) /* Cleared by xo_no_setlocale() */
+                                   /* (until xo_update_locale) */
+
+static xo_locale_info_t xo_locale_info;
+
+/*
+ * Return the locale's decimal point, as cached by libxo.  For libxo
+ * use only (see xo_private.h); xo(1) uses it to match our view.
+ */
+const char *
 xo_get_decimal_point (void)
 {
-    if (xo_decimal_point_len == 0) {
+    xo_locale_info_t *xlip = &xo_locale_info;
+
+    if (xlip->xli_decimal_point_len == 0) {
         const char *dp = localeconv()->decimal_point;
         size_t len = dp ? strlen(dp) : 0;
 
-        if (len == 0 || len >= sizeof(xo_decimal_point)) {
+        if (len == 0 || len >= sizeof(xlip->xli_decimal_point)) {
             dp = ".";
             len = 1;
         }
 
-        memcpy(xo_decimal_point, dp, len + 1);
-        xo_decimal_point_len = len;
+        memcpy(xlip->xli_decimal_point, dp, len + 1);
+        xlip->xli_decimal_point_len = len;
     }
 
-    return xo_decimal_point;
+    return xlip->xli_decimal_point;
 }
 
 #define XO_DECIMAL_POINT xo_get_decimal_point()
@@ -155,7 +181,7 @@ static ssize_t
 xo_decimal_fixup (char *cp, ssize_t len)
 {
     const char *dpp = xo_get_decimal_point();
-    int dpl = xo_decimal_point_len;
+    int dpl = xo_locale_info.xli_decimal_point_len;
     char *ep = cp + len, *zp;
 
     if (dpl == 1 && *dpp == '.')
@@ -493,17 +519,11 @@ static pthread_mutex_t xo_handle_list_lock = PTHREAD_MUTEX_INITIALIZER;
 #define XO_HANDLE_LIST_LOCK() do { } while (0)
 #define XO_HANDLE_LIST_UNLOCK() do { } while (0)
 #endif /* HAVE_PTHREAD_H */
-static int xo_locale_inited;
 static const char *xo_program;
-static int xo_codeset_is_utf8;  /* Is stdout UTF-8? */
 
 #ifdef LIBXO_NEED_FILTERS
 static int filter_lib_loaded;
 #endif /* LIBXO_NEED_FILTERS */
-
-static char *xo_group_sep;      /* Copy of locale's thousands separator */
-static int xo_group_sep_len;    /* strlen(xo_group_sep) */
-static uint64_t xo_group_map;   /* Precomputed grouping-shape map */
 
 #define XO_DEFAULT_GROUP_MAP 0x33333333 /* 3s all the way */
 
@@ -648,10 +668,31 @@ xo_depth_check (xo_handle_t *xop, int depth)
     return 0;
 }
 
+/*
+ * Tell libxo not to call setlocale; the caller owns the locale.  Any
+ * values already cached from the locale are cleared, and are loaded
+ * again (from the caller's locale) when the next handle is
+ * initialized or xo_update_locale() is called.  Values given by the
+ * "grouping" option are kept.
+ */
 void
 xo_no_setlocale (void)
 {
-    xo_locale_inited = 1;       /* Skip initialization */
+    xo_locale_info_t *xlip = &xo_locale_info;
+
+    xlip->xli_flags |= XLIF_SETLOCALE_DONE | XLIF_LOCALE_NONE;
+    xlip->xli_flags &= ~XLIF_LOADED;
+
+    xlip->xli_codeset_is_utf8 = FALSE;
+    xlip->xli_decimal_point[0] = '\0';
+    xlip->xli_decimal_point_len = 0;
+
+    if (!(xlip->xli_flags & XLIF_GROUPING_SET)) {
+        xo_free(xlip->xli_group_sep);
+        xlip->xli_group_sep = NULL;
+        xlip->xli_group_sep_len = 0;
+        xlip->xli_group_map = 0;
+    }
 }
 
 /*
@@ -870,21 +911,26 @@ xo_set_grouping (xo_handle_t *xop UNUSED, const char *value)
     int sep_len = cp - buf;
     *cp++ = '\0';
 
+    xo_locale_info_t *xlip = &xo_locale_info;
+
     if (sep_len == 0) {
         /* No separator given (e.g. "grouping=+3+2"): default to "," */
-        xo_free(xo_group_sep);
-        xo_group_sep = NULL;
-        xo_group_sep_len = 0;
+        xo_free(xlip->xli_group_sep);
+        xlip->xli_group_sep = NULL;
+        xlip->xli_group_sep_len = 0;
 
     } else {
-        char *new_sep = xo_realloc(xo_group_sep, sep_len + 1);
+        char *new_sep = xo_realloc(xlip->xli_group_sep, sep_len + 1);
         if (new_sep == NULL)
             return -1;
 
-        xo_group_sep = new_sep;
-        memcpy(xo_group_sep, sep, sep_len + 1);
-        xo_group_sep_len = sep_len;
+        xlip->xli_group_sep = new_sep;
+        memcpy(xlip->xli_group_sep, sep, sep_len + 1);
+        xlip->xli_group_sep_len = sep_len;
     }
+
+    /* From here on, xo_update_locale() leaves the grouping alone */
+    xlip->xli_flags |= XLIF_GROUPING_SET;
 
     if (*cp && *cp != '0' && *cp != '-') { /* All "none" indicators */
         char grouping[len + 1], *gp = grouping;
@@ -906,13 +952,114 @@ xo_set_grouping (xo_handle_t *xop UNUSED, const char *value)
         }
 
         *gp++ = '\0';
-        xo_group_map = xo_group_map_build(grouping);
+        xlip->xli_group_map = xo_group_map_build(grouping);
 
     } else {
-        xo_group_map = XO_DEFAULT_GROUP_MAP;
+        xlip->xli_group_map = XO_DEFAULT_GROUP_MAP;
     }
 
     return 0;
+}
+
+/*
+ * Set up the locale and load the values libxo caches from it (the
+ * decimal point, thousands separator and grouping, and whether the
+ * codeset is UTF-8).  Values given by options (the "grouping" option)
+ * are kept.
+ *
+ * libxo calls this (caller_set false) when it initializes its first
+ * handle.  Libraries should depend on their caller to set up the
+ * environment.  But we really can't count on the caller to do this,
+ * because well, they won't.  Trust me.  So unless xo_no_setlocale()
+ * was called, we set the locale from the environment first.
+ *
+ * xo_update_locale(FALSE) calls this (caller_set true) after the
+ * caller has changed the locale.  The caller owns it now: we never
+ * call setlocale over it, and xo_no_setlocale's XLIF_LOCALE_NONE is
+ * over.  xo_update_locale(TRUE) clears both flags and calls this
+ * with caller_set false, as if we were initializing.
+ */
+static void
+xo_locale_load (int caller_set)
+{
+    xo_locale_info_t *xlip = &xo_locale_info;
+
+    if (caller_set) {
+        xlip->xli_flags &= ~XLIF_LOCALE_NONE;
+        xlip->xli_flags |= XLIF_SETLOCALE_DONE;
+
+    } else if (!(xlip->xli_flags & XLIF_SETLOCALE_DONE)) {
+        xlip->xli_flags |= XLIF_SETLOCALE_DONE; /* Only do this once */
+
+#ifdef __FreeBSD__              /* Who does The Right Thing */
+        const char *cp = "";
+#else /* __FreeBSD__ */
+        const char *cp = getenv("LC_ALL");
+        if (cp == NULL)
+            cp = getenv("LC_CTYPE");
+        if (cp == NULL)
+            cp = getenv("LANG");
+        if (cp == NULL)
+            cp = "C";           /* Default for C programs */
+#endif /* __FreeBSD__ */
+
+        (void) setlocale(LC_CTYPE, cp);
+        (void) setlocale(LC_NUMERIC, cp);
+    }
+
+    xlip->xli_flags |= XLIF_LOADED;
+
+    xlip->xli_codeset_is_utf8 = FALSE;
+#ifdef CODESET
+    /* Determine if our stdout output is UTF-8 */
+    const char *codeset = nl_langinfo(CODESET);
+    if (codeset && xo_streq(codeset, "UTF-8"))
+        xlip->xli_codeset_is_utf8 = TRUE;
+#endif /* CODESET */
+
+    xlip->xli_decimal_point_len = 0; /* Recache for the new locale */
+    (void) xo_get_decimal_point();
+
+    if (xlip->xli_flags & XLIF_GROUPING_SET)
+        return;
+
+    /* Cache the grouping separator and precompute the grouping map */
+    struct lconv *lcp = localeconv();
+    if (lcp->thousands_sep && *lcp->thousands_sep) {
+        int glen = strlen(lcp->thousands_sep);
+        char *new_sep = xo_realloc(xlip->xli_group_sep, glen + 1);
+        if (new_sep) {
+            xlip->xli_group_sep = new_sep;
+            memcpy(xlip->xli_group_sep, lcp->thousands_sep, glen + 1);
+            xlip->xli_group_sep_len = glen;
+        }
+    } else {
+        xo_free(xlip->xli_group_sep);
+        xlip->xli_group_sep = NULL;
+        xlip->xli_group_sep_len = 0;
+    }
+
+    if (lcp->grouping)
+        xlip->xli_group_map = xo_group_map_build(lcp->grouping);
+    else
+        xlip->xli_group_map = XO_DEFAULT_GROUP_MAP;
+}
+
+/*
+ * Refresh the values libxo caches from the locale.  Call this after
+ * changing the locale with setlocale(3).  If "reset" is set, undo
+ * xo_no_setlocale() (and any earlier xo_update_locale) and go back to
+ * libxo's normal behavior: set the locale from the environment, then
+ * load its values.
+ */
+void
+xo_update_locale (int reset)
+{
+    if (reset) {
+        xo_locale_info.xli_flags &= ~(XLIF_SETLOCALE_DONE | XLIF_LOCALE_NONE);
+        xo_locale_load(FALSE);
+    } else
+        xo_locale_load(TRUE);
 }
 
 /*
@@ -940,62 +1087,9 @@ xo_init_handle (xo_handle_t *xop)
     if (xo_is_line_buffered(stdout))
         XOF_SET(xop, XOF_FLUSH_LINE);
 
-    /*
-     * We need to initialize the locale, which isn't really pretty.
-     * Libraries should depend on their caller to set up the
-     * environment.  But we really can't count on the caller to do
-     * this, because well, they won't.  Trust me.
-     */
-    if (!xo_locale_inited) {
-        xo_locale_inited = 1;   /* Only do this once */
-
-#ifdef __FreeBSD__              /* Who does The Right Thing */
-        const char *cp = "";
-#else /* __FreeBSD__ */
-        const char *cp = getenv("LC_ALL");
-        if (cp == NULL)
-            cp = getenv("LC_CTYPE");
-        if (cp == NULL)
-            cp = getenv("LANG");
-        if (cp == NULL)
-            cp = "C";           /* Default for C programs */
-#endif /* __FreeBSD__ */
-
-        (void) setlocale(LC_CTYPE, cp);
-        (void) setlocale(LC_NUMERIC, cp);
-
-#ifdef CODESET
-        /* Now that locale is set, determine if our stdout output is UTF-8 */
-        const char *codeset = nl_langinfo(CODESET);
-        if (codeset && xo_streq(codeset, "UTF-8"))
-            xo_codeset_is_utf8 = TRUE;
-#endif /* CODESET */
-
-        xo_decimal_point_len = 0; /* Recache for the new locale */
-        (void) xo_get_decimal_point();
-
-        /* Cache the grouping separator and precompute the grouping map */
-        struct lconv *lcp = localeconv();
-        if (lcp->thousands_sep && *lcp->thousands_sep) {
-            int glen = strlen(lcp->thousands_sep);
-            xo_group_sep = xo_realloc(xo_group_sep, glen + 1);
-            if (xo_group_sep) {
-                memcpy(xo_group_sep, lcp->thousands_sep, glen + 1);
-                xo_group_sep_len = glen;
-            }
-        } else {
-            if (xo_group_sep) {
-                xo_free(xo_group_sep);
-                xo_group_sep = NULL;
-                xo_group_sep_len = 0;
-            }
-        }
-
-        if (lcp->grouping)
-            xo_group_map = xo_group_map_build(lcp->grouping);
-        else
-            xo_group_map = XO_DEFAULT_GROUP_MAP;
-    }
+    /* Set up the locale (unless told not to) and load its values */
+    if (!(xo_locale_info.xli_flags & XLIF_LOADED))
+        xo_locale_load(FALSE);
 
     /*
      * Initialize only the xo_buffers we know we'll need; the others
@@ -1017,7 +1111,7 @@ xo_init_handle (xo_handle_t *xop)
 static void
 xo_default_init_utf8 (xo_handle_t *xop)
 {
-    if (xo_codeset_is_utf8)
+    if (xo_locale_info.xli_codeset_is_utf8)
        XOF_SET(xop, XOF_UTF8);
 }
 
@@ -1251,13 +1345,14 @@ xo_grouping_fixup (xo_handle_t *xop, xo_buffer_t *xbp,
     }
 
     uint64_t segs;
-    int nsegs = xo_group_segments(xo_group_map, ndigits, &segs);
+    int nsegs = xo_group_segments(xo_locale_info.xli_group_map,
+                                  ndigits, &segs);
     int nseps = nsegs - 1;
     if (nseps <= 0)
 	return rc;
 
-    const char *sep = xo_group_sep ?: ",";
-    int seplen = xo_group_sep_len ?: 1;
+    const char *sep = xo_locale_info.xli_group_sep ?: ",";
+    int seplen = xo_locale_info.xli_group_sep_len ?: 1;
 
     /* Each separator uses up one blank of padding, while there is any */
     xo_off_t pad = (gflags & XO_GF_LEFT) ? trail : lead;
@@ -6077,9 +6172,10 @@ xo_buf_append_div (xo_handle_t *xop, const xo_field_info_t *xfip,
     } else if (XOIF_ISSET(xop, XOIF_NUMBER)) {
 	/*
 	 * A grouped number ({i:}, "'" or the "group" option): give
-	 * data-number the ungrouped value, without padding or the
-	 * leading zeroes of a precision, and with "." as the decimal
-	 * point, whatever the locale's is.  A value with characters
+	 * data-number the ungrouped value, without padding, and with
+	 * "." as the decimal point, whatever the locale's is.  (A
+	 * precision's leading zeroes can't occur: such fields aren't
+	 * grouped.)  A value with characters
 	 * that need escaping isn't a number, so it gets none.
 	 */
 	xo_buffer_t *nbp = &xop->xo_number;
@@ -6093,20 +6189,8 @@ xo_buf_append_div (xo_handle_t *xop, const xo_field_info_t *xfip,
 	while (cp < ep && *cp == ' ')
 	    cp += 1;
 
-	char *dp = cp;		/* Digits start after the sign */
-	if (dp < ep && (*dp == '-' || *dp == '+'))
-	    dp += 1;
-
-	char *zp = dp;
-	while (zp + 1 < ep && *zp == '0' && isdigit((unsigned char) zp[1]))
-	    zp += 1;
-	if (zp > dp) {
-	    memmove(dp, zp, ep - zp);
-	    ep -= zp - dp;
-	}
-
 	/* The locale's decimal point becomes ".", for parseFloat */
-	ep = dp + xo_decimal_fixup(dp, ep - dp);
+	ep = cp + xo_decimal_fixup(cp, ep - cp);
 
 	ssize_t olen = ep - cp, i;
 	for (i = 0; i < olen; i++)
