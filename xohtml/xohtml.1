@@ -7,7 +7,7 @@
 .\" # LICENSE.
 .\" # Phil Shafer, July 2014
 .\"
-.Dd December 4, 2014
+.Dd November 15, 2026
 .Dt XOHTML 1
 .Os
 .Sh NAME
@@ -42,8 +42,9 @@ standard input is used.
 is typically used to wrap
 .Nm libxo
 output with sufficient HTML content to allow display in a web browser.
-This includes parent HTML tags, a CSS stylesheet, and an inlined
-Javascript tooltip.
+This includes parent HTML tags, a CSS stylesheet, and Javascript
+for tooltips and a sortable table view (see
+.Sx TABLE VIEW ) .
 .Pp
 If the command is given directly on the command line,
 .Nm
@@ -108,6 +109,58 @@ fetching it from the official
 .Nm libxo
 website, which is the default source.
 .El
+.Sh TABLE VIEW
+When the output contains tabular data,
+.Nm
+adds a
+.Dq Table view
+button that redraws it as an HTML table.
+The button changes to
+.Dq Line view ,
+which restores the original lines.
+Two kinds of output become tables:
+.Bl -bullet
+.It
+A title line (one whose fields are all
+.Dq {T:}
+titles) followed by data lines.
+The button goes at the end of the title line, and the titles become
+the column headings.
+A blank line ends the table.
+.It
+Two or more records in a row from the same list, each emitted with
+the same set of fields, such as a record per item with a field on
+each line.
+The button goes on its own line above the records, and the column
+headings are made from the field names
+.Dq ( total-sold
+becomes
+.Dq Total Sold ) .
+.El
+.Pp
+Clicking a column heading sorts the rows by that column; clicking it
+again reverses the order.
+An arrow in the heading shows the column and direction.
+Values that are numbers sort as numbers, and others sort as text.
+A humanized
+.Dq {h:}
+field, or a field grouped with thousands separators
+.Dq ( {i:}
+or
+.Dq %\(aq ) ,
+sorts by its raw value, which
+.Nm libxo
+gives in the
+.Dq data-number
+attribute, so
+.Dq 5K
+sorts before
+.Dq 118M
+and
+.Dq 1,234,567
+sorts as 1234567.
+.Pp
+Tooltips work in the table as they do in the lines.
 .Sh EXAMPLES
 The following command line will run "du --libxo=html ~/src", write the
 result to an automatically named file under $TMPDIR, and open it in a
