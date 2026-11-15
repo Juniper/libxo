@@ -27,11 +27,11 @@
 #include <limits.h>
 #include <errno.h>
 #include <math.h>
-#include <locale.h>
 
 #include "xo.h"
 #include "xo_encoder.h"
 #include "xo_buf.h"
+#include "xo_private.h"	/* For xo_get_decimal_point */
 
 /*
  * memdump(): dump memory contents in hex/ascii
@@ -284,13 +284,14 @@ cbor_parse_float (const char *value, double *dp)
     /*
      * libxo encodes floats with "." as the decimal point, whatever
      * the locale, but strtod expects the locale's, so swap it in.
+     * libxo caches the locale's point (refreshed by xo_update_locale).
      */
-    const char *point = localeconv()->decimal_point;
-    size_t plen = point ? strlen(point) : 0;
+    const char *point = xo_get_decimal_point();
+    size_t plen = strlen(point);
     size_t vlen = strlen(value);
     char buf[vlen + plen + 1];
 
-    if (plen > 0 && !(plen == 1 && *point == '.')) {
+    if (!(plen == 1 && *point == '.')) {
 	const char *pp = strchr(value, '.');
 	if (pp != NULL) {
 	    size_t off = pp - value;
