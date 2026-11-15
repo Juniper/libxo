@@ -7,18 +7,21 @@
 .\" # LICENSE.
 .\" # Phil Shafer, July 2014
 .\"
-.Dd December 4, 2014
+.Dd November 15, 2026
 .Dt LIBXO 3
 .Os
 .Sh NAME
-.Nm xo_no_setlocale
-.Nd prevent implicit call to setlocale
+.Nm xo_no_setlocale ,
+.Nm xo_update_locale
+.Nd control libxo's use of the locale
 .Sh LIBRARY
 .Lb libxo
 .Sh SYNOPSIS
 .In libxo/xo.h
 .Ft void
 .Fn xo_no_setlocale "void"
+.Ft void
+.Fn xo_update_locale "int reset"
 .Sh DESCRIPTION
 .Nm libxo
 automatically initializes the locale based on the setting of the
@@ -35,12 +38,67 @@ The caller may wish to avoid this behavior, and
 can do so by calling the
 .Fn xo_no_setlocale
 function.
+This also clears any values
+.Nm libxo
+has cached from the locale, except those given with the
+.Dq grouping
+option.
+.Pp
+.Nm libxo
+caches values it takes from the locale: the decimal point, the
+thousands separator and grouping, and whether the codeset is UTF-8.
+These are loaded when
+.Nm libxo
+first initializes, whether it set the locale itself or the caller did
+(after calling
+.Fn xo_no_setlocale ) .
+A caller that changes the locale after that point, with
+.Xr setlocale 3 ,
+should call
+.Fn xo_update_locale
+with
+.Fa reset
+false to refresh them.
+After that,
+.Nm libxo
+never calls
+.Xr setlocale 3
+itself, so calling it before
+.Nm libxo
+initializes also keeps
+.Nm libxo
+from setting the locale from the environment.
+.Pp
+With
+.Fa reset
+true,
+.Fn xo_update_locale
+undoes
+.Fn xo_no_setlocale
+(and any earlier
+.Fn xo_update_locale ) :
+.Nm libxo
+sets the locale from the environment, as it does when it
+initializes, and loads its values.
+.Pp
+A thousands separator and grouping given with the
+.Dq grouping
+option (see
+.Xr xo_options 7 )
+override the locale's and are not changed by
+.Fn xo_update_locale ,
+with either value of
+.Fa reset .
+The UTF-8 setting of the default handle is made when it is created,
+and is not changed.
 .Sh SEE ALSO
+.Xr setlocale 3 ,
 .Xr libxo 3 ,
 .Xr xo_emit 3 ,
 .Xr xo_open_container 3 ,
 .Xr xo_open_list 3 ,
-.Xr xo_format 5
+.Xr xo_format 5 ,
+.Xr xo_options 7
 .Sh HISTORY
 The
 .Nm libxo
