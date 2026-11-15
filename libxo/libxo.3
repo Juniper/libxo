@@ -321,6 +321,12 @@ to avoid initializing the locale.
 This function should be called before any other
 .Nm
 function is called.
+.It Fn xo_update_locale
+Refresh the values
+.Nm
+caches from the locale, after the caller changes it, or (with
+.Fa reset )
+go back to setting the locale from the environment.
 .It Fn xo_open_container
 .It Fn xo_open_container_h
 .It Fn xo_open_container_hd
