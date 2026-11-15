@@ -1488,6 +1488,29 @@ xo_no_setlocale
   defaults to "UTF-8".  The caller may wish to avoid this behavior,
   and can do so by calling the `xo_no_setlocale` function.
 
+.. index:: xo_update_locale
+
+xo_update_locale
+~~~~~~~~~~~~~~~~
+
+.. c:function:: void xo_update_locale (void)
+
+  libxo caches values it takes from the locale: the decimal point,
+  the thousands separator and grouping, and whether the codeset is
+  UTF-8.  These are loaded when libxo first initializes, whether it
+  set the locale itself or the caller did (after calling
+  `xo_no_setlocale`).  A caller that changes the locale after that
+  point, with `setlocale`, should call `xo_update_locale` to refresh
+  them::
+
+    setlocale(LC_NUMERIC, "de_DE.UTF-8");
+    xo_update_locale();
+
+  A thousands separator and grouping given with the "grouping" option
+  override the locale's and are not changed by `xo_update_locale`.
+  The UTF-8 setting of the default handle is made when it is
+  created, and is not changed.
+
 Emitting syslog Messages
 ------------------------
 
