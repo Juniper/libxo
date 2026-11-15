@@ -55,6 +55,13 @@ xo_grouping_fixup (xo_handle_t *xop, xo_buffer_t *xbp,
 		   xo_off_t start_off, xo_off_t rc, unsigned gflags,
 		   xo_off_t *addedp);
 
+/*
+ * Return the locale's decimal point, as cached by libxo, so that our
+ * own tools (like xo(1)) can match libxo's view of the locale.
+ */
+const char *
+xo_get_decimal_point (void);
+
 #ifdef PRId64
 #define XO_PRId64 PRId64
 #else
