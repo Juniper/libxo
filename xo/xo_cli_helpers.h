@@ -32,6 +32,7 @@
 #include <stdint.h>
 
 #include "xo_utf8.h"
+#include "xo_private.h"		/* For xo_get_decimal_point */
 
 #ifndef UNUSED
 #define UNUSED __attribute__ ((__unused__))
@@ -52,6 +53,31 @@ next_arg (void)
 
     save_argv += 1;
     return cp;
+}
+
+/*
+ * Parse a float argument whatever the locale: "3.5" always works, and
+ * so does the locale's own form ("3,5" in de_DE).  strtod expects the
+ * locale's decimal point, so a "." is swapped for it first.
+ */
+static inline double
+cli_strtod (const char *str)
+{
+    const char *point = xo_get_decimal_point(); /* libxo's cached copy */
+    size_t plen = strlen(point);
+    const char *pp = strchr(str, '.');
+
+    if (pp == NULL || (plen == 1 && *point == '.'))
+	return strtod(str, NULL);
+
+    size_t slen = strlen(str), off = pp - str;
+    char buf[slen + plen + 1];
+
+    memcpy(buf, str, off);
+    memcpy(buf + off, point, plen);
+    memcpy(buf + off + plen, pp + 1, slen - off); /* With the NUL */
+
+    return strtod(buf, NULL);
 }
 
 static inline char *
@@ -252,7 +278,7 @@ formatter (xo_handle_t *xop, char *buf, xo_ssize_t bufsiz,
 	    rc = snprintf(buf, bufsiz, fmt, value);
 
     } else if (strchr("eEfFgGaA", fc) != NULL) {
-	double value = strtod(next_arg(), NULL);
+	double value = cli_strtod(next_arg());
 
 	fmt_rewrite(nfmt, fmt, cp, "", fc); /* Drops "L" (long double) */
 	fmt = nfmt;
