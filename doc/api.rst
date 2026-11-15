@@ -1486,14 +1486,20 @@ xo_no_setlocale
   environment variables LC_CTYPE, LANG, and LC_ALL.  The first of this
   list of variables is used and if none of the variables, the locale
   defaults to "UTF-8".  The caller may wish to avoid this behavior,
-  and can do so by calling the `xo_no_setlocale` function.
+  and can do so by calling the `xo_no_setlocale` function.  This
+  clears any values libxo has cached from the locale (except those
+  given with the "grouping" option); they are loaded again, from the
+  caller's locale, when the next handle is initialized or
+  `xo_update_locale` is called.
 
 .. index:: xo_update_locale
 
 xo_update_locale
 ~~~~~~~~~~~~~~~~
 
-.. c:function:: void xo_update_locale (void)
+.. c:function:: void xo_update_locale (int reset)
+
+  :param int reset: If true, go back to libxo's normal locale setup
 
   libxo caches values it takes from the locale: the decimal point,
   the thousands separator and grouping, and whether the codeset is
@@ -1504,10 +1510,19 @@ xo_update_locale
   them::
 
     setlocale(LC_NUMERIC, "de_DE.UTF-8");
-    xo_update_locale();
+    xo_update_locale(0);
+
+  With `reset` false, libxo never calls `setlocale` itself after
+  this call, so calling it before libxo initializes also keeps libxo
+  from setting the locale from the environment.
+
+  With `reset` true, `xo_update_locale` undoes `xo_no_setlocale` (and
+  any earlier `xo_update_locale`): libxo sets the locale from the
+  environment, as it does when it initializes, and loads its values.
 
   A thousands separator and grouping given with the "grouping" option
-  override the locale's and are not changed by `xo_update_locale`.
+  override the locale's and are not changed by `xo_update_locale`,
+  with either value of `reset`.
   The UTF-8 setting of the default handle is made when it is
   created, and is not changed.
 
