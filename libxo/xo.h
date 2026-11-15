@@ -830,6 +830,9 @@ xo_emit_err_v (int eval, int code, const char *fmt, va_list vap) XO_NORETURN XO_
 void
 xo_no_setlocale (void);
 
+void
+xo_update_locale (int reset);
+
 /**
  * @brief Lift libxo-specific arguments from a set of arguments
  *
