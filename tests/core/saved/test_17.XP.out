@@ -43,7 +43,7 @@ missing conversions wrote 0 bytes
   </deprecated-options>
   <encoder-names>
     <first>unknown</first>
-    <last>deadend</last>
+    <last>filter</last>
     <beyond>unknown</beyond>
     <far-beyond>unknown</far-beyond>
     <wb-last>clean</wb-last>

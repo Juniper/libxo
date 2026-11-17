@@ -63,7 +63,7 @@
   <div class="data" data-tag="first" data-xpath="/top/encoder-names/first">unknown</div>
 </div>
 <div class="line">
-  <div class="data" data-tag="last" data-xpath="/top/encoder-names/last">deadend</div>
+  <div class="data" data-tag="last" data-xpath="/top/encoder-names/last">filter</div>
 </div>
 <div class="line">
   <div class="data" data-tag="beyond" data-xpath="/top/encoder-names/beyond">unknown</div>

@@ -10,6 +10,7 @@
 
 #include <stdint.h>
 #include <stdio.h>
+#include <ctype.h>
 #include <errno.h>
 #include <assert.h>
 #include <sys/param.h>
@@ -43,8 +44,7 @@ trim (char *cp)
 
     for (ep--; ep > cp && isspace(*ep); ep--)
 	continue;
-    if (++ep >= cp && (*ep == '\n' || *ep == '\r'))
-	*ep = '\0';
+    *++ep = '\0';		/* Drop trailing spaces; quote a value to keep them */
 
     return cp;
 }
@@ -67,8 +67,7 @@ clean_token (char *cp)
 
     for (ep--; ep > cp && isspace(*ep); ep--)
 	continue;
-    if (++ep >= cp && (*ep == '\n' || *ep == '\r'))
-	*ep = '\0';
+    *++ep = '\0';		/* Drop trailing spaces; quote a value to keep them */
 
     return cp;
 }
@@ -76,12 +75,54 @@ clean_token (char *cp)
 /*
  * A line with no value is skipped, so an empty value is written as
  * "", as in '$ name ""', to make a field that exists but has no
- * content.
+ * content.  More generally, a value in double quotes has its quotes
+ * removed and its escapes (\\, \", \n, \r, \t, and \xHH) decoded,
+ * allowing values with leading or trailing spaces, newlines, or
+ * other control characters.  The fdr encoder writes values this way.
  */
 static char *
-empty_token (char *cp)
+unquote_token (char *cp)
 {
-    return (cp[0] == '"' && cp[1] == '"' && cp[2] == '\0') ? cp + 2 : cp;
+    size_t len = strlen(cp);
+
+    if (len < 2 || cp[0] != '"' || cp[len - 1] != '"')
+	return cp;
+
+    cp[len - 1] = '\0';
+
+    char *rp, *wp;
+    for (rp = wp = cp + 1; *rp; rp++) {
+	if (*rp != '\\' || rp[1] == '\0') {
+	    *wp++ = *rp;
+	    continue;
+	}
+
+	switch (*++rp) {
+	case 'n':
+	    *wp++ = '\n';
+	    break;
+	case 'r':
+	    *wp++ = '\r';
+	    break;
+	case 't':
+	    *wp++ = '\t';
+	    break;
+	case 'x': {
+	    int val = 0, i;
+	    for (i = 0; i < 2 && isxdigit((unsigned char) rp[1]); i++, rp++)
+		val = val * 16 + (isdigit((unsigned char) rp[1])
+				  ? rp[1] - '0'
+				  : tolower((unsigned char) rp[1]) - 'a' + 10);
+	    *wp++ = i ? val : 'x';
+	    break;
+	}
+	default:		/* Includes \\ and \" */
+	    *wp++ = *rp;
+	}
+    }
+
+    *wp = '\0';
+    return cp + 1;
 }
 
 static int
@@ -217,7 +258,7 @@ do_work (xo_handle_t *xop, xo_filter_t *xfp, xo_xparse_data_t *xdp,
 	    value = clean_token(field);
 	    if (!*field || !*value)
 		break;
-	    value = empty_token(value);
+	    value = unquote_token(value);
 
 	    if (!opt_quiet)
 		fprintf(stderr, "main: field: '%s'='%s'\n", field, value);
@@ -230,7 +271,7 @@ do_work (xo_handle_t *xop, xo_filter_t *xfp, xo_xparse_data_t *xdp,
 	    value = clean_token(field);
 	    if (!*field || !*value)
 		break;
-	    value = empty_token(value);
+	    value = unquote_token(value);
 
 	    if (!opt_quiet)
 		fprintf(stderr, "main: key: '%s'='%s'\n", field, value);
@@ -243,6 +284,7 @@ do_work (xo_handle_t *xop, xo_filter_t *xfp, xo_xparse_data_t *xdp,
 	    value = clean_token(field);
 	    if (!*field || !*value)
 		break;
+	    value = unquote_token(value);
 
 	    if (!opt_quiet)
 		fprintf(stderr, "main: attr: '%s'='%s'\n", field, value);

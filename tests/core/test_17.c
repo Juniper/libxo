@@ -156,8 +156,8 @@ test_encoder_names (void)
     xo_open_container("encoder-names");
 
     xo_emit("{:first}\n", xo_encoder_op_name(0));
-    xo_emit("{:last}\n", xo_encoder_op_name(XO_OP_DEADEND));
-    xo_emit("{:beyond}\n", xo_encoder_op_name(XO_OP_DEADEND + 1));
+    xo_emit("{:last}\n", xo_encoder_op_name(XO_OP_FILTER));
+    xo_emit("{:beyond}\n", xo_encoder_op_name(XO_OP_FILTER + 1));
     xo_emit("{:far-beyond}\n", xo_encoder_op_name(1000));
 
     xo_emit("{:wb-last}\n", xo_whiteboard_op_name(5));

@@ -44,7 +44,7 @@ missing conversions wrote 0 bytes
     },
     "encoder_names": {
       "first": "unknown",
-      "last": "deadend",
+      "last": "filter",
       "beyond": "unknown",
       "far_beyond": "unknown",
       "wb_last": "clean",

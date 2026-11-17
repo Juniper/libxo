@@ -176,8 +176,7 @@ trim (char *cp)
 
     for (ep--; ep > cp && isspace((int) *ep); ep--)
 	continue;
-    if (++ep >= cp && (*ep == '\n' || *ep == '\r'))
-	*ep = '\0';
+    *++ep = '\0';		/* Drop trailing spaces; quote a value to keep them */
 
     return cp;
 }
@@ -185,12 +184,55 @@ trim (char *cp)
 /*
  * A line with no value is skipped, so an empty value is written as
  * "", as in '$ name ""', to make a field that exists but has no
- * content.  (As in xpath_01, this is for fields and keys only.)
+ * content.  More generally, a value in double quotes has its quotes
+ * removed and its escapes (\\, \", \n, \r, \t, and \xHH) decoded,
+ * allowing values with leading or trailing spaces, newlines, or
+ * other control characters.  The fdr encoder writes values this
+ * way.  (This matches xpath_01.)
  */
 static char *
-empty_token (char *cp)
+unquote_token (char *cp)
 {
-    return (cp[0] == '"' && cp[1] == '"' && cp[2] == '\0') ? cp + 2 : cp;
+    size_t len = strlen(cp);
+
+    if (len < 2 || cp[0] != '"' || cp[len - 1] != '"')
+	return cp;
+
+    cp[len - 1] = '\0';
+
+    char *rp, *wp;
+    for (rp = wp = cp + 1; *rp; rp++) {
+	if (*rp != '\\' || rp[1] == '\0') {
+	    *wp++ = *rp;
+	    continue;
+	}
+
+	switch (*++rp) {
+	case 'n':
+	    *wp++ = '\n';
+	    break;
+	case 'r':
+	    *wp++ = '\r';
+	    break;
+	case 't':
+	    *wp++ = '\t';
+	    break;
+	case 'x': {
+	    int val = 0, i;
+	    for (i = 0; i < 2 && isxdigit((unsigned char) rp[1]); i++, rp++)
+		val = val * 16 + (isdigit((unsigned char) rp[1])
+				  ? rp[1] - '0'
+				  : tolower((unsigned char) rp[1]) - 'a' + 10);
+	    *wp++ = i ? val : 'x';
+	    break;
+	}
+	default:		/* Includes \\ and \" */
+	    *wp++ = *rp;
+	}
+    }
+
+    *wp = '\0';
+    return cp + 1;
 }
 
 static char *
@@ -211,8 +253,7 @@ clean_token (char *cp)
 
     for (ep--; ep > cp && isspace((int) *ep); ep--)
 	continue;
-    if (++ep >= cp && (*ep == '\n' || *ep == '\r'))
-	*ep = '\0';
+    *++ep = '\0';		/* Drop trailing spaces; quote a value to keep them */
 
     return cp;
 }
@@ -946,8 +987,7 @@ do_work (segment_t *sp, const char *filename, FILE *in)
 	    value = clean_token(field);
 	    if (!*field || !*value)
 		break;
-	    if (*cp != '@')
-		value = empty_token(value);
+	    value = unquote_token(value);
 
 	    node_add_item(sp->s_cur,
 			  (*cp == '=') ? IT_FIELD
