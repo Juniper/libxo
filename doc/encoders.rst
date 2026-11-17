@@ -316,6 +316,29 @@ issues with needing access to 3rd party source code or development
 environments.  FDR data is emitted to standard output and saved for
 later posting as part of bug reports or feature requests.
 
+The FDR encoder records filters rather than applying them.  Each
+"filter" option appears as a "?" line following the "r" line that
+starts the recording, and the recording holds all of the output,
+unfiltered.  The recording can be used as input to the libxo XPath
+filter tests, which apply the filters themselves::
+
+  % list-items --libxo @fdr,filter=data/item
+  r
+  ?data/item
+  + top
+  + data
+  { item
+  < item
+  $ sku GRO-000-415
+  ...
+
+A value is written in double quotes when it is empty, begins with a
+double quote, begins or ends with a space, or contains a newline or
+other control character.  Inside the quotes, a double quote,
+backslash, newline, carriage return, or tab is written as ``\"``,
+``\\``, ``\n``, ``\r``, or ``\t``, and any other control character as
+``\xHH``.
+
 NOTE: Please inspect your data for any sensitive or private data
 before posting or sharing it with anyone.
 
