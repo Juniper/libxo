@@ -62,6 +62,13 @@ xo_grouping_fixup (xo_handle_t *xop, xo_buffer_t *xbp,
 const char *
 xo_get_decimal_point (void);
 
+/*
+ * Give the handle's filter text to an encoder that records filters
+ * (XEIF_FILTER_RECORD), for xo_encoder_init()
+ */
+int
+xo_encoder_send_filters (xo_handle_t *xop);
+
 #ifdef PRId64
 #define XO_PRId64 PRId64
 #else
