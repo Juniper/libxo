@@ -51,6 +51,7 @@ typedef unsigned xo_encoder_op_t;
 #define XO_OP_OPTIONS		17 /* Additional command line options */
 #define XO_OP_OPTIONS_PLUS	18 /* Additional command line options */
 #define XO_OP_DEADEND		19 /* Dead end (clear the top) */
+#define XO_OP_FILTER		20 /* Filter text (XEIF_FILTER_RECORD) */
 
 #define XO_ENCODER_HANDLER_ARGS			\
 	xo_handle_t *xop XO_UNUSED,		\
@@ -136,9 +137,18 @@ typedef struct xo_encoder_init_args_s {
  * tentative region is discarded so it can roll back whatever it
  * accumulated.  This is strictly more demanding than plain
  * XEIF_FILTER_AWARE, and encoders that set it should normally set both.
+ *
+ * XEIF_FILTER_RECORD: the encoder records filters rather than having
+ * them applied, as the fdr encoder does to make test input for
+ * tests/xpath.  libxo does not filter the handle's output; instead
+ * the encoder is given the text of each filter in an XO_OP_FILTER
+ * call (in "value"), including filters added before the encoder was
+ * installed, which follow its XO_OP_CREATE call.  It does not need
+ * XEIF_FILTER_AWARE.
  */
 #define XEIF_FILTER_AWARE	   XOF_BIT(0) /* may be used with filters */
 #define XEIF_FILTER_NOTIFY_DEADEND XOF_BIT(1) /* wants tentative fields + DEADEND */
+#define XEIF_FILTER_RECORD	   XOF_BIT(2) /* is given filter text, unapplied */
 
 #define XO_ENCODER_VERSION	3 /* Current version (doc marker; xei_flags added) */
 
