@@ -7,7 +7,7 @@
 .\" # LICENSE.
 .\" # Phil Shafer, May 2021
 .\"
-.Dd November 2, 2026
+.Dd November 16, 2026
 .Dt XO_ENCODERS 7
 .Os
 .Sh NAME
@@ -404,11 +404,42 @@ a key field
 a non-key field
 .It Li @
 an attribute
+.It Li \&?
+a filter
 .El
 .Pp
 The first line,
 .Dq r ,
 marks the start of the recording.
+A value is written in double quotes when it is empty, begins with a
+double quote, begins or ends with a space, or contains a newline or
+other control character.
+Inside the quotes, a double quote, backslash, newline, carriage
+return, or tab is written as
+.Li \e\(dq ,
+.Li \e\e ,
+.Li \en ,
+.Li \er ,
+or
+.Li \et ,
+and any other control character as
+.Li \exHH .
+.Pp
+The
+.Dq fdr
+encoder records filters rather than applying them.
+Each
+.Dq filter
+option
+(see
+.Xr xo_options 7 )
+appears as a
+.Dq \&?
+line following the
+.Dq r
+line, and the recording holds all of the output, unfiltered.
+The recording can be used as input to the libxo XPath filter tests,
+which apply the filters themselves.
 .Bd -literal -offset indent
 % list-items --libxo @fdr
 r
