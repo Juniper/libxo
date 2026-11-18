@@ -394,6 +394,9 @@ xo_encoder_init (xo_handle_t *xop, const char *name)
 	rc = xo_encoder_handle(xop, op, NULL, name, opts, 0);
     }
 
+    if (rc == 0)
+	rc = xo_encoder_send_filters(xop);
+
     return rc;
 }
 
@@ -442,6 +445,7 @@ xo_encoder_op_name (xo_encoder_op_t op)
 	/* 17 */ "options",
 	/* 18 */ "options-plus",
 	/* 19 */ "deadend",
+	/* 20 */ "filter",
     };
 
     if (op >= sizeof(names) / sizeof(names[0]))
