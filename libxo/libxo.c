@@ -437,6 +437,9 @@ struct xo_handle_s {
 #endif /* LIBXO_NEED_MAP */
 #ifdef LIBXO_NEED_FILTERS
     struct xo_filter_s *xo_filters; /* Opaque data pointer */
+    char **xo_filter_text;      /* Text of each filter added */
+    int xo_filter_text_count;   /* Number of xo_filter_text[] in use */
+    int xo_filter_text_max;     /* Size (count) of xo_filter_text[] */
 #endif /* LIBXO_NEED_FILTERS */
     xo_xsf_flags_t xo_rb_snap;  /* Transient: parent XSF_RB_BITS before open */
     xo_ident_t xo_ident;        /* HTML: id for lists and instances*/
@@ -493,6 +496,7 @@ struct xo_handle_s {
 #define XOEF_TENTATIVE            XOF_BIT(3) /* buffers tentative content; needs rollback guard on close */
 #define XOEF_FILTER_AWARE         XOF_BIT(4) /* encoder may be used with filters */
 #define XOEF_FILTER_NOTIFY_DEADEND XOF_BIT(5) /* encoder wants tentative data + DEADEND */
+#define XOEF_FILTER_RECORD        XOF_BIT(6) /* encoder records filters, unapplied */
 
 /*
  * We keep a 'default' handle to allow callers to avoid having to
@@ -2742,6 +2746,11 @@ xo_destroy (xo_handle_t *xop_arg)
 #ifdef LIBXO_NEED_FILTERS
     if (xop->xo_filters)
         xo_filter_destroy(xop, xop->xo_filters);
+
+    for (int i = 0; i < xop->xo_filter_text_count; i++)
+        xo_free(xop->xo_filter_text[i]);
+    if (xop->xo_filter_text)
+        xo_free(xop->xo_filter_text);
 #endif /* LIBXO_NEED_FILTERS */
 
     /*
@@ -2814,7 +2823,7 @@ xo_set_style (xo_handle_t *xop, xo_style_t style)
 
     if (style == XO_STYLE_ENCODER && XOF_ISSET(xop, XOF_FILTER)
             && !XOEF_ISSET(xop, XOEF_FILTER_AWARE)) {
-        xo_failure(xop, "filters require a filter-aware encoder");
+        xo_warn_hc(xop, -1, "filters require a filter-aware encoder");
         return -1;
     }
 
@@ -6778,7 +6787,79 @@ xo_filt_status_name (xo_filter_status_t fstatus)
         (fstatus == XO_STATUS_COND) ? "conditional" :
         (fstatus == XO_STATUS_LIVE) ? "live" : "unknown";
 }
+
+/*
+ * Keep a copy of each filter's text, so that an encoder that records
+ * filters (XEIF_FILTER_RECORD) can be given them, even when they
+ * were added before the encoder was installed.
+ */
+static int
+xo_filter_text_add (xo_handle_t *xop, const char *input)
+{
+    if (xop->xo_filter_text_count >= xop->xo_filter_text_max) {
+	int max = xop->xo_filter_text_max ? xop->xo_filter_text_max * 2 : 4;
+	char **newp = xo_realloc(xop->xo_filter_text, max * sizeof(newp[0]));
+	if (newp == NULL)
+	    return -1;
+
+	xop->xo_filter_text = newp;
+	xop->xo_filter_text_max = max;
+    }
+
+    char *cp = xo_strndup(input, -1);
+    if (cp == NULL)
+	return -1;
+
+    xop->xo_filter_text[xop->xo_filter_text_count++] = cp;
+    return 0;
+}
+
+/*
+ * Stop applying filters to a handle, whose encoder records them
+ * instead.  The filter text is kept, for xo_encoder_send_filters().
+ */
+static void
+xo_filter_stop (xo_handle_t *xop)
+{
+    if (xop->xo_filters) {
+	xo_filter_destroy(xop, xop->xo_filters);
+	xop->xo_filters = NULL;
+    }
+
+    XOF_CLEAR(xop, XOF_FILTER);
+    XOIF_CLEAR(xop, XOIF_FILTERING);
+
+    if (xop->xo_stack)
+	for (int depth = 0; depth <= xop->xo_depth; depth++)
+	    xop->xo_stack[depth].xs_fstatus = 0;
+}
 #endif /* LIBXO_NEED_FILTERS */
+
+/*
+ * Give an encoder that records filters (XEIF_FILTER_RECORD) the text
+ * of each filter added so far, using XO_OP_FILTER.  xo_encoder_init()
+ * calls this after XO_OP_CREATE, so the filters follow the start of
+ * the encoder's output.
+ */
+int
+xo_encoder_send_filters (xo_handle_t *xop UNUSED)
+{
+#ifdef LIBXO_NEED_FILTERS
+    xop = xo_default(xop);
+
+    if (!XOEF_ISSET(xop, XOEF_FILTER_RECORD))
+	return 0;
+
+    for (int i = 0; i < xop->xo_filter_text_count; i++) {
+	int rc = xo_encoder_handle(xop, XO_OP_FILTER, NULL, NULL,
+				   xop->xo_filter_text[i], 0);
+	if (rc)
+	    return rc;
+    }
+#endif /* LIBXO_NEED_FILTERS */
+
+    return 0;
+}
 
 int
 xo_add_filter (xo_handle_t *xop UNUSED, const char *input UNUSED)
@@ -6788,13 +6869,24 @@ xo_add_filter (xo_handle_t *xop UNUSED, const char *input UNUSED)
 #ifdef LIBXO_NEED_FILTERS
     xop = xo_default(xop);
 
+    /* An encoder that records filters is given the text, unapplied */
+    if (xo_style(xop) == XO_STYLE_ENCODER
+	    && XOEF_ISSET(xop, XOEF_FILTER_RECORD)) {
+	if (xo_filter_text_add(xop, input)) {
+	    xo_warnx("could not add the requested filter");
+	    return -1;
+	}
+
+	return xo_encoder_handle(xop, XO_OP_FILTER, NULL, NULL, input, 0);
+    }
+
     rc = xo_load_filter_lib(xop); /* Reports its own error */
     if (rc)
 	return rc;
 
     if (xo_style(xop) == XO_STYLE_ENCODER
 	    && !XOEF_ISSET(xop, XOEF_FILTER_AWARE)) {
-	xo_failure(xop, "filters require a filter-aware encoder");
+	xo_warn_hc(xop, -1, "filters require a filter-aware encoder");
 	return -1;
     }
 
@@ -6809,6 +6901,8 @@ xo_add_filter (xo_handle_t *xop UNUSED, const char *input UNUSED)
     XOIF_SET(xop, XOIF_FILTERING);
 
     rc = xo_filter_add_one(xop, input);
+    if (rc == 0)
+	rc = xo_filter_text_add(xop, input);
     if (rc)
 	xo_warnx("could not add the requested filter");
 
@@ -13242,6 +13336,12 @@ xo_set_encoder (xo_handle_t *xop, xo_encoder_func_t encoder,
 	XOEF_SET(xop, XOEF_FILTER_AWARE);
     if (xei_flags & XEIF_FILTER_NOTIFY_DEADEND)
 	XOEF_SET(xop, XOEF_FILTER_NOTIFY_DEADEND);
+    if (xei_flags & XEIF_FILTER_RECORD) {
+	XOEF_SET(xop, XOEF_FILTER_RECORD);
+#ifdef LIBXO_NEED_FILTERS
+	xo_filter_stop(xop);	/* The encoder is given the filters instead */
+#endif /* LIBXO_NEED_FILTERS */
+    }
 
     xo_set_style(xop, XO_STYLE_ENCODER); /* Reports its own error */
 }
