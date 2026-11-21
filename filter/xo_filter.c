@@ -281,8 +281,8 @@ xo_trie_get_child (xo_trie_t *xtp, xo_trie_id_t parent, xo_name_id_t name_id,
 	flags &= ~XTNF_ABSOLUTE;
     flags &= match_flags;
 
-    for (xo_trie_id_t s = *listp; s; s = xtp->xt_nodes[s].xtn_sibling) {
-	xo_tnode_t *tn = &xtp->xt_nodes[s];
+    for (xo_trie_id_t sid = *listp; sid; sid = xtp->xt_nodes[sid].xtn_sibling) {
+	xo_tnode_t *tn = &xtp->xt_nodes[sid];
 
 	if ((tn->xtn_flags & match_flags) != flags)
 	    continue;
@@ -294,7 +294,7 @@ xo_trie_get_child (xo_trie_t *xtp, xo_trie_id_t parent, xo_name_id_t name_id,
 	/* Only ever SET xtn_pred, never clear it (see above) */
 	if (pred)
 	    tn->xtn_pred = pred;
-	return s;
+	return sid;
     }
 
     xo_trie_id_t id = xo_trie_alloc_node(xtp);
@@ -488,6 +488,7 @@ xo_tframe_key_add (xo_tframe_t *frame,
 {
     xo_ssize_t new_len = tlen + vlen + 3; /* two NULs plus final NUL */
     char *newp = xo_realloc(frame->xtf_keys, frame->xtf_keys_len + new_len);
+
     if (newp == NULL)
 	return;
 
@@ -518,13 +519,15 @@ static void
 xo_tframe_set_tag (xo_tframe_t *frame, const char *tag, ssize_t tlen)
 {
     xo_tframe_free_tag(frame);
+
     if (tlen < 0)
 	tlen = strlen(tag);
-    char *p = xo_realloc(NULL, tlen + 1);
-    if (p) {
-	memcpy(p, tag, tlen);
-	p[tlen] = '\0';
-	frame->xtf_tag = p;
+
+    char *cp = xo_realloc(NULL, tlen + 1);
+    if (cp) {
+	memcpy(cp, tag, tlen);
+	cp[tlen] = '\0';
+	frame->xtf_tag = cp;
 	frame->xtf_tag_len = tlen;
     }
 }
@@ -678,7 +681,8 @@ xo_tmatch_init (xo_handle_t *xop UNUSED, xo_tmatch_t *xtmp, xo_trie_t *trie)
     if (xo_get_flags(xop) & XOF_DEBUG) {
 	xo_trie_t *xtp = trie;
 	uint32_t root_count = 0;
-	for (xo_trie_id_t r = xtp->xt_root; r; r = xtp->xt_nodes[r].xtn_sibling)
+	for (xo_trie_id_t rid = xtp->xt_root; rid;
+		     rid = xtp->xt_nodes[rid].xtn_sibling)
 	    root_count += 1;
 
 	xo_dbg(xop, "xo_tmatch_init: trie root nodes: %u", root_count);
@@ -825,7 +829,7 @@ typedef struct xo_filter_pred_entry_s {
     xo_eval_prog_t *xpe_prog;		/* compiled program for that node */
 } xo_filter_pred_entry_t;
 
-struct xo_filter_s {		 /* Forward/typdef decl in xo_private.h */
+struct xo_filter_s {		 /* Forward/typedef decl in xo_private.h */
     struct xo_xparse_data_s xf_xd; /* Main parsing structure */
     xo_filter_status_t xf_status; /* Current status: (see XO_STATUS_*) */
     xo_xsf_flags_t xf_flags;	 /* Flags (XFSF_*) */
@@ -833,14 +837,22 @@ struct xo_filter_s {		 /* Forward/typdef decl in xo_private.h */
     xo_tmatch_t xf_tmatch;	 /* Runtime trie-matching state */
     xo_filter_data_t *xf_data;	 /* Data context (opaque to core) */
     xo_filter_data_ops_t *xf_ops; /* Data vtable */
-    xo_filter_data_t xf_def_data; /* Embedded default data context (avoids extra alloc) */
-    uint32_t *xf_path_actions;	 /* per-path action ids (parallel to xf_xd.xd_paths[]) */
-    uint32_t xf_path_actions_max; /* allocated capacity of xf_path_actions[] */
-    double *xf_path_priorities;  /* per-path priorities (parallel to xf_path_actions[]) */
-    uint32_t xf_path_priorities_max; /* allocated capacity of xf_path_priorities[] */
-    int16_t *xf_path_import_precs; /* per-path import precedence (parallel) */
-    uint32_t xf_path_import_precs_max; /* allocated capacity of xf_path_import_precs[] */
-    uint32_t xf_cur_action;	 /* action from the last XO_STATUS_FULL transition */
+    xo_filter_data_t xf_def_data; /* Embedded default data context
+				     (avoids extra alloc) */
+    uint32_t *xf_path_actions;	 /* per-path action ids (parallel to
+				    xf_xd.xd_paths[]) */
+    uint32_t xf_path_actions_max; /* allocated capacity of
+				     xf_path_actions[] */
+    double *xf_path_priorities;  /* per-path priorities (parallel to
+				    xf_path_actions[]) */
+    uint32_t xf_path_priorities_max; /* allocated capacity of
+					xf_path_priorities[] */
+    int16_t *xf_path_import_precs; /* per-path import precedence
+				      (parallel) */
+    uint32_t xf_path_import_precs_max; /* allocated capacity of
+					  xf_path_import_precs[] */
+    uint32_t xf_cur_action;	 /* action from the last
+				    XO_STATUS_FULL transition */
     xo_filter_pred_entry_t *xf_pred_progs; /* compiled predicate cache: a
 					packed array of {node id, compiled
 					program} pairs, kept sorted by node
@@ -851,12 +863,13 @@ struct xo_filter_s {		 /* Forward/typdef decl in xo_private.h */
 					number of distinct predicates, not by
 					the (much larger, sparse) AST node id
 					space */
-    uint32_t xf_pred_progs_count; /* number of entries in use in xf_pred_progs[] */
-    uint32_t xf_pred_progs_max;	 /* allocated capacity (entries) of xf_pred_progs[] */
+    uint32_t xf_pred_progs_count; /* number of entries in use in
+				     xf_pred_progs[] */
+    uint32_t xf_pred_progs_max;	 /* allocated capacity (entries) of
+				    xf_pred_progs[] */
     int *xf_unsupported_tokens;	 /* set by xo_filter_set_unsupported_features;
-					    every create installs the library
-					    default
-					    (xo_filter_default_unsupported_features) */
+				    every create installs the library default
+				    (xo_filter_default_unsupported_features) */
 };
 
 /* Flags for xf_flags */
@@ -899,7 +912,10 @@ xo_filter_op_create (xo_handle_t *xop)
 
     xo_xparse_init(&xfp->xf_xd);
 
-    /* Use embedded default data context; point xfd_xdp at our own xparse data */
+    /*
+     * Use embedded default data context; point xfd_xdp at our own
+     * xparse data
+     */
     xfp->xf_def_data.xfd_xop = xop;
     xfp->xf_def_data.xfd_xdp = &xfp->xf_xd;
     xfp->xf_data = &xfp->xf_def_data;
@@ -978,31 +994,37 @@ xo_filter_destroy_standalone (xo_filter_t *xfp)
 {
     if (xfp == NULL)
 	return;
+
     xo_xparse_clean(&xfp->xf_xd);
     xo_tmatch_cleanup(&xfp->xf_tmatch);
     xo_trie_free(xfp->xf_trie);
     xfp->xf_trie = NULL;
+
     if (xfp->xf_path_actions) {
-	free(xfp->xf_path_actions);
+	xo_free(xfp->xf_path_actions);
 	xfp->xf_path_actions = NULL;
     }
+
     if (xfp->xf_path_priorities) {
-	free(xfp->xf_path_priorities);
+	xo_free(xfp->xf_path_priorities);
 	xfp->xf_path_priorities = NULL;
     }
+
     if (xfp->xf_path_import_precs) {
-	free(xfp->xf_path_import_precs);
+	xo_free(xfp->xf_path_import_precs);
 	xfp->xf_path_import_precs = NULL;
     }
+
     if (xfp->xf_pred_progs) {
 	for (uint32_t i = 0; i < xfp->xf_pred_progs_count; i++)
 	    xo_eval_prog_destroy(xfp->xf_pred_progs[i].xpe_prog);
-	free(xfp->xf_pred_progs);
+	xo_free(xfp->xf_pred_progs);
 	xfp->xf_pred_progs = NULL;
 	xfp->xf_pred_progs_count = xfp->xf_pred_progs_max = 0;
     }
+
     if (xfp->xf_unsupported_tokens) {
-	free(xfp->xf_unsupported_tokens);
+	xo_free(xfp->xf_unsupported_tokens);
 	xfp->xf_unsupported_tokens = NULL;
     }
 
@@ -1048,40 +1070,8 @@ xo_filter_parse_expr (xo_handle_t *xop, xo_filter_t *xfp, const char *expr)
 static void
 xo_filter_op_destroy (xo_handle_t *xop, xo_filter_t *xfp)
 {
-    xo_xparse_clean(&xfp->xf_xd);
-    xo_tmatch_cleanup(&xfp->xf_tmatch);
-    xo_trie_free(xfp->xf_trie);
-    xfp->xf_trie = NULL;
-
-    if (xfp->xf_path_actions) {
-	free(xfp->xf_path_actions);
-	xfp->xf_path_actions = NULL;
-    }
-    if (xfp->xf_path_priorities) {
-	free(xfp->xf_path_priorities);
-	xfp->xf_path_priorities = NULL;
-    }
-    if (xfp->xf_path_import_precs) {
-	free(xfp->xf_path_import_precs);
-	xfp->xf_path_import_precs = NULL;
-    }
-    if (xfp->xf_pred_progs) {
-	for (uint32_t i = 0; i < xfp->xf_pred_progs_count; i++)
-	    xo_eval_prog_destroy(xfp->xf_pred_progs[i].xpe_prog);
-	free(xfp->xf_pred_progs);
-	xfp->xf_pred_progs = NULL;
-	xfp->xf_pred_progs_count = xfp->xf_pred_progs_max = 0;
-    }
-    if (xfp->xf_unsupported_tokens) {
-	free(xfp->xf_unsupported_tokens);
-	xfp->xf_unsupported_tokens = NULL;
-    }
-
-    if (xfp->xf_ops != NULL && xfp->xf_ops->xfdo_destroy != NULL)
-	xfp->xf_ops->xfdo_destroy(xfp->xf_data);
-
+    xo_filter_destroy_standalone(xfp);
     xo_set_filter_data(xop, NULL);
-    xo_free(xfp);
 }
 
 static void
@@ -1093,6 +1083,7 @@ xo_tmatch_record_live (xo_tmatch_t *xtmp, xo_tframe_t *frame, xo_tnode_t *tn)
     if (tn->xtn_flags & XTNF_NOT) {
 	xtmp->xtm_deny += 1;
 	frame->xtf_deny_delta += 1;
+
     } else {
 	xtmp->xtm_allow += 1;
 	frame->xtf_allow_delta += 1;
@@ -1202,16 +1193,18 @@ xo_tframe_has_pred (xo_tframe_t *framep)
  * increment its count, and return the new (1-based) open position.
  */
 static uint32_t
-xo_tframe_child_position (xo_tframe_t *parent, xo_trie_id_t c)
+xo_tframe_child_position (xo_tframe_t *parent, xo_trie_id_t cid)
 {
     for (uint32_t j = 0; j < parent->xtf_child_count; j++) {
-	if (parent->xtf_child[j].xtc_node == c)
+	if (parent->xtf_child[j].xtc_node == cid)
 	    return ++parent->xtf_child[j].xtc_count;
     }
 
-    uint32_t j = parent->xtf_child_count++;
-    parent->xtf_child[j].xtc_node = c;
-    parent->xtf_child[j].xtc_count = 1;
+    uint32_t nid = parent->xtf_child_count++;
+
+    parent->xtf_child[nid].xtc_node = cid;
+    parent->xtf_child[nid].xtc_count = 1;
+
     return 1;
 }
 
@@ -1221,16 +1214,18 @@ xo_tframe_child_position (xo_tframe_t *parent, xo_trie_id_t c)
  * in the parent frame so the two counts never interfere.
  */
 static uint32_t
-xo_tframe_child_qualified_position (xo_tframe_t *parent, xo_trie_id_t c)
+xo_tframe_child_qualified_position (xo_tframe_t *parent, xo_trie_id_t cid)
 {
     for (uint32_t j = 0; j < parent->xtf_child_qual_count; j++) {
-	if (parent->xtf_child_qual[j].xtc_node == c)
+	if (parent->xtf_child_qual[j].xtc_node == cid)
 	    return ++parent->xtf_child_qual[j].xtc_count;
     }
 
-    uint32_t j = parent->xtf_child_qual_count++;
-    parent->xtf_child_qual[j].xtc_node = c;
-    parent->xtf_child_qual[j].xtc_count = 1;
+    uint32_t nid = parent->xtf_child_qual_count++;
+
+    parent->xtf_child_qual[nid].xtc_node = cid;
+    parent->xtf_child_qual[nid].xtc_count = 1;
+
     return 1;
 }
 
@@ -1248,6 +1243,7 @@ xo_pred_has_trailing_cindex (xo_filter_t *xfp, xo_xparse_node_id_t pred_id)
 {
     int has_leading = FALSE;
     xo_xparse_node_t *xnp;
+
     for (xo_xparse_node_id_t id = pred_id; id; id = xnp->xn_next) {
 	xnp = xo_xparse_node(&xfp->xf_xd, id);
 	if (xnp->xn_type != C_PREDICATE)
@@ -1356,18 +1352,22 @@ xo_tmatch_open (xo_handle_t *xop, xo_filter_t *xfp,
 
     if (xtmp->xtm_depth + 1 >= xtmp->xtm_stack_max) {
 	uint32_t cap = xtmp->xtm_stack_max * 2;
-	xo_tframe_t *p = xo_realloc(xtmp->xtm_stack, cap * sizeof(*p));
-	if (p == NULL) {
+	xo_tframe_t *fp = xo_realloc(xtmp->xtm_stack, cap * sizeof(*fp));
+
+	if (fp == NULL) {
 	    xtmp->xtm_skipped = 1;
 	    return;
 	}
-	bzero(p + xtmp->xtm_stack_max, (cap - xtmp->xtm_stack_max) * sizeof(*p));
-	xtmp->xtm_stack = p;
+
+	bzero(fp + xtmp->xtm_stack_max,
+	      (cap - xtmp->xtm_stack_max) * sizeof(*fp));
+	xtmp->xtm_stack = fp;
 	xtmp->xtm_stack_max = cap;
     }
 
     xo_tframe_t *parent = &xtmp->xtm_stack[xtmp->xtm_depth];
     xo_tframe_t *frame = parent + 1;
+
     if (xo_tframe_reset(xtmp, frame) < 0) {
 	xtmp->xtm_skipped = 1;
 	return;
@@ -1393,27 +1393,28 @@ xo_tmatch_open (xo_handle_t *xop, xo_filter_t *xfp,
 	    continue;
 	int cond = (pstate != XTFS_LIVE);
 	xo_tnode_t *ptn = &xtp->xt_nodes[parent->xtf_slots[i].xts_node];
-	for (xo_trie_id_t c = ptn->xtn_child; c;
-		     c = xtp->xt_nodes[c].xtn_sibling) {
-	    xo_tnode_t *tn = &xtp->xt_nodes[c];
+	for (xo_trie_id_t cid = ptn->xtn_child; cid;
+		     cid = xtp->xt_nodes[cid].xtn_sibling) {
+	    xo_tnode_t *tn = &xtp->xt_nodes[cid];
 	    if (!(tn->xtn_flags & XTNF_WILDCARD) &&
 		    !ops->xfdo_name_eq(dp, tn->xtn_name, tag, tlen))
 		continue;
 
-	    uint32_t position = xo_tframe_child_position(parent, c);
-	    uint32_t s = frame->xtf_slots_count++;
-	    frame->xtf_slots[s].xts_node = c;
-	    frame->xtf_slots[s].xts_position = position;
+	    uint32_t position = xo_tframe_child_position(parent, cid);
+	    uint32_t sid = frame->xtf_slots_count++;
 
-	    xo_tmatch_slot_init(xop, xfp, xtmp, frame, s, tn, position,
+	    frame->xtf_slots[sid].xts_node = cid;
+	    frame->xtf_slots[sid].xts_position = position;
+
+	    xo_tmatch_slot_init(xop, xfp, xtmp, frame, sid, tn, position,
 				cond, value, vlen);
 	}
     }
 
     /* Re-probe root nodes for relative paths; absolute only at depth 1 */
-    for (xo_trie_id_t r = xtp->xt_root; r;
-	 r = xtp->xt_nodes[r].xtn_sibling) {
-	xo_tnode_t *tn = &xtp->xt_nodes[r];
+    for (xo_trie_id_t rid = xtp->xt_root; rid;
+		rid = xtp->xt_nodes[rid].xtn_sibling) {
+	xo_tnode_t *tn = &xtp->xt_nodes[rid];
 	if ((tn->xtn_flags & XTNF_ABSOLUTE) && xtmp->xtm_depth != 1)
 	    continue;
 
@@ -1424,7 +1425,7 @@ xo_tmatch_open (xo_handle_t *xop, xo_filter_t *xfp,
 	/* Avoid duplicating a node already added via parent descent */
 	int dup = FALSE;
 	for (uint32_t j = 0; j < frame->xtf_slots_count; j++) {
-	    if (frame->xtf_slots[j].xts_node == r) {
+	    if (frame->xtf_slots[j].xts_node == rid) {
 		dup = TRUE;
 		break;
 	    }
@@ -1433,12 +1434,13 @@ xo_tmatch_open (xo_handle_t *xop, xo_filter_t *xfp,
 	if (dup)
 	    continue;
 
-	uint32_t position = xo_tframe_child_position(parent, r);
-	uint32_t s = frame->xtf_slots_count++;
-	frame->xtf_slots[s].xts_node = r;
-	frame->xtf_slots[s].xts_position = position;
+	uint32_t position = xo_tframe_child_position(parent, rid);
+	uint32_t sid = frame->xtf_slots_count++;
 
-	xo_tmatch_slot_init(xop, xfp, xtmp, frame, s, tn, position,
+	frame->xtf_slots[sid].xts_node = rid;
+	frame->xtf_slots[sid].xts_position = position;
+
+	xo_tmatch_slot_init(xop, xfp, xtmp, frame, sid, tn, position,
 			    FALSE, value, vlen);
     }
 
@@ -1462,8 +1464,9 @@ xo_tmatch_close (xo_handle_t *xop, xo_filter_t *xfp,
 
     xo_tframe_t *frame = &xtmp->xtm_stack[xtmp->xtm_depth];
     xtmp->xtm_allow -= frame->xtf_allow_delta;
-    xtmp->xtm_deny  -= frame->xtf_deny_delta;
-    xtmp->xtm_cond  -= frame->xtf_cond_delta;
+    xtmp->xtm_deny -= frame->xtf_deny_delta;
+    xtmp->xtm_cond -= frame->xtf_cond_delta;
+
     xo_tframe_free_tag(frame);
     xo_tframe_free_keys(frame);
     xo_tframe_free_attrs(frame);
@@ -1540,7 +1543,7 @@ xo_filter_set_unsupported_features (xo_filter_t *xfp, const int *features)
     while (features[count])
 	count += 1;
 
-    int *tokens = malloc((count + 1) * sizeof(*tokens));
+    int *tokens = xo_realloc(NULL, (count + 1) * sizeof(*tokens));
     if (tokens == NULL)
 	return -1;
 
@@ -1551,7 +1554,7 @@ xo_filter_set_unsupported_features (xo_filter_t *xfp, const int *features)
 		break;
 
 	if (xo_filter_feature_tokens[j].xftm_feature == 0) {
-	    free(tokens);
+	    xo_free(tokens);
 	    return -1;		/* unknown feature id */
 	}
 
@@ -1560,7 +1563,7 @@ xo_filter_set_unsupported_features (xo_filter_t *xfp, const int *features)
     tokens[count] = 0;
 
     if (xfp->xf_unsupported_tokens)
-	free(xfp->xf_unsupported_tokens);
+	xo_free(xfp->xf_unsupported_tokens);
     xfp->xf_unsupported_tokens = tokens;
     return 0;
 }
@@ -1592,8 +1595,8 @@ xo_filter_compile_xpath_action_priority (xo_handle_t *xop, xo_filter_t *xfp,
 
     /* Grow xf_path_actions to cover the new capacity if needed */
     if (xdp->xd_paths_max > xfp->xf_path_actions_max) {
-	uint32_t *newp = realloc(xfp->xf_path_actions,
-				  xdp->xd_paths_max * sizeof(*newp));
+	uint32_t *newp = xo_realloc(xfp->xf_path_actions,
+				    xdp->xd_paths_max * sizeof(*newp));
 	if (newp == NULL)
 	    return -1;
 	/* zero-init the newly allocated slots */
@@ -1605,8 +1608,8 @@ xo_filter_compile_xpath_action_priority (xo_handle_t *xop, xo_filter_t *xfp,
 
     /* Grow xf_path_priorities to cover the new capacity if needed */
     if (xdp->xd_paths_max > xfp->xf_path_priorities_max) {
-	double *newp = realloc(xfp->xf_path_priorities,
-				xdp->xd_paths_max * sizeof(*newp));
+	double *newp = xo_realloc(xfp->xf_path_priorities,
+				  xdp->xd_paths_max * sizeof(*newp));
 	if (newp == NULL)
 	    return -1;
 	/* zero-init the newly allocated slots */
@@ -1618,8 +1621,8 @@ xo_filter_compile_xpath_action_priority (xo_handle_t *xop, xo_filter_t *xfp,
 
     /* Grow xf_path_import_precs to cover the new capacity if needed */
     if (xdp->xd_paths_max > xfp->xf_path_import_precs_max) {
-	int16_t *newp = realloc(xfp->xf_path_import_precs,
-				 xdp->xd_paths_max * sizeof(*newp));
+	int16_t *newp = xo_realloc(xfp->xf_path_import_precs,
+				   xdp->xd_paths_max * sizeof(*newp));
 	if (newp == NULL)
 	    return -1;
 	bzero(newp + xfp->xf_path_import_precs_max,
@@ -1640,8 +1643,8 @@ xo_filter_compile_xpath_action_priority (xo_handle_t *xop, xo_filter_t *xfp,
     xo_tmatch_cleanup(&xfp->xf_tmatch);
 
     xfp->xf_trie = xo_trie_compile(xop, xdp, xfp->xf_data, xfp->xf_ops,
-				    xfp->xf_path_actions, xfp->xf_path_priorities,
-				    xfp->xf_path_import_precs);
+				   xfp->xf_path_actions, xfp->xf_path_priorities,
+				   xfp->xf_path_import_precs);
     if (xfp->xf_trie == NULL)
 	return -1;
 
@@ -2363,6 +2366,7 @@ xo_eval_position (XO_EVAL_ARGS)
     uint64_t idx = str ? (uint64_t) strtoul(str, NULL, 10) : 0;
     uint32_t pos = framep->xtf_position_cur;
     xo_eval_value_t value = xo_eval_value_make(C_BOOLEAN, 0, 0);
+
     value.xev_uint64 = (pos != 0 && pos == idx) ? 1 : 0;
     return value;
 }
@@ -2396,6 +2400,7 @@ xo_eval_attribute (XO_EVAL_ARGS)
     xo_eval_value_t value = { .xev_flags = 0 };
     const char *str = xo_xparse_str(&xfp->xf_xd, xnp->xn_str);
     const char *aval;
+
     if (xfp->xf_ops && xfp->xf_ops->xfdo_value_of) {
 	/*
 	 * Mark this as a bare attribute reference (vs a compound element
@@ -2417,12 +2422,14 @@ xo_eval_attribute (XO_EVAL_ARGS)
     } else {
 	aval = xo_filter_attr_find(xfp, framep, str);
     }
+
     if (aval) {
 	value = xo_eval_value_make(C_STRING, XEVF_NODE, 0);
 	value.xev_str = aval;
     } else {
 	value.xev_flags |= XEVF_MISSING;
     }
+
     return value;
 }
 
@@ -2462,10 +2469,12 @@ xo_eval_node_value (xo_filter_t *xfp, xo_tframe_t *framep,
 	    return xo_eval_value_invalid();
 	value = xo_eval_value_make(C_DSTRING, XEVF_NODE, 0);
 	value.xev_str = copy;
+
     } else if (sval) {
 	/* Frame-buffered keys/attrs stay put for the whole eval */
 	value = xo_eval_value_make(C_STRING, XEVF_NODE, 0);
 	value.xev_str = sval;
+
     } else if (xfp->xf_flags & XFSF_FORCE_RESOLVE) {
 	/*
 	 * The field is absent: an empty node-set, whose string value
@@ -2474,6 +2483,7 @@ xo_eval_node_value (xo_filter_t *xfp, xo_tframe_t *framep,
 	 */
 	value = xo_eval_value_make(C_STRING, XEVF_EMPTYSET, 0);
 	value.xev_str = "";
+
     } else {
 	value.xev_flags |= XEVF_MISSING;
     }
@@ -2521,16 +2531,19 @@ xo_eval_path (XO_EVAL_ARGS)
     int step_count = 0;
     int last_is_attr = FALSE;
     xo_xparse_node_id_t id;
+
     /*
      * Only xfdo_value_of backends use the '@'-marker convention (see
      * xo_eval_attribute); the generic framep-based lookups below
      * (xo_filter_attr_find/xo_filter_key_find) key on the bare name.
      */
-    int use_at_marker = (xfp->xf_ops && xfp->xf_ops->xfdo_value_of) ? TRUE : FALSE;
+    int use_at_marker =
+	(xfp->xf_ops && xfp->xf_ops->xfdo_value_of) ? TRUE : FALSE;
 
     /* Collect all C_ELEMENT / C_ATTRIBUTE steps into a compound key string */
     for (id = xnp->xn_contents; id; id = xnp->xn_next) {
 	xnp = xo_xparse_node(&xfp->xf_xd, id);
+
 	if (xnp->xn_type == C_ELEMENT || xnp->xn_type == C_ATTRIBUTE) {
 	    const char *str = xo_xparse_str(&xfp->xf_xd, xnp->xn_str);
 	    ssize_t slen = strlen(str);
@@ -2539,6 +2552,7 @@ xo_eval_path (XO_EVAL_ARGS)
 		    return xo_eval_value_invalid();
 		path_buf[path_len++] = '/';
 	    }
+
 	    /*
 	     * Mark an attribute step with a leading '@' (e.g. "a/b/@x" or
 	     * bare "@x"), matching xo_eval_attribute's convention, so a
@@ -2550,6 +2564,7 @@ xo_eval_path (XO_EVAL_ARGS)
 		    return xo_eval_value_invalid();
 		path_buf[path_len++] = '@';
 	    }
+
 	    if (path_len + slen >= (ssize_t) sizeof(path_buf) - 1)
 		return xo_eval_value_invalid();
 	    memcpy(path_buf + path_len, str, slen);
@@ -2927,6 +2942,7 @@ xo_eval_compare (XO_EVAL_ARGS)
     if (left_type == C_STRING && xo_eval_is_number_type(right_type)) {
 	left = xo_eval_make_number(xop, left.xev_str);
 	left_type = left.xev_type;
+
     } else if (right_type == C_STRING && xo_eval_is_number_type(left_type)) {
 	right = xo_eval_make_number(xop, right.xev_str);
 	right_type = right.xev_type;
@@ -4614,7 +4630,7 @@ xo_eval_func_external (XO_EVAL_ARGS)
     case XO_EVAL_EXT_STRING:
     default:
 	return xo_eval_value_string(C_DSTRING, 0,
-				     strdup(rv.xee_str ? rv.xee_str : ""));
+				     xo_strdup(rv.xee_str ? rv.xee_str : ""));
     }
 }
 
@@ -4856,20 +4872,22 @@ xo_eval (xo_handle_t *xop, xo_filter_t *xfp, xo_tframe_t *framep,
  * every time.
  */
 /* Flags for xei_flags */
-#define XEIF_CHECK_MISSING	(1<<0) /* Return MISSING instead of calling xei_fn if any arg is missing */
+#define XEIF_CHECK_MISSING	(1<<0) /* Return MISSING instead of
+					  calling xei_fn if any arg is
+					  missing */
 
 typedef struct xo_eval_instr_s {
-	xo_eval_fn_t		xei_fn;		/* Operation to perform */
-	xo_xparse_node_id_t	xei_node;	/* Source AST node */
-	uint8_t			xei_argc;	/* Number of values this op consumes */
-	uint8_t			xei_flags;	/* XEIF_* flags */
-	uint16_t		xei_jump;	/* Short-circuit target; 0 means none */
+    xo_eval_fn_t xei_fn;	  /* Operation to perform */
+    xo_xparse_node_id_t xei_node; /* Source AST node */
+    uint8_t xei_argc;	      /* Number of values this op consumes */
+    uint8_t xei_flags;	      /* XEIF_* flags */
+    uint16_t xei_jump;	      /* Short-circuit target; 0 means none */
 } xo_eval_instr_t;
 
 typedef struct xo_eval_prog_s {
-	xo_eval_instr_t	*xep_instr;	/* Flat instruction array */
-	uint32_t	 xep_count;	/* Number of instructions emitted */
-	uint32_t	 xep_max;	/* Allocated size of xep_instr */
+    xo_eval_instr_t *xep_instr;	/* Flat instruction array */
+    uint32_t xep_count;		/* Number of instructions emitted */
+    uint32_t xep_max;		/* Allocated size of xep_instr */
 } xo_eval_prog_t;
 
 /*
@@ -5038,7 +5056,7 @@ xo_eval_compile_function_args (xo_eval_prog_t *prog, xo_xparse_data_t *xdp,
     int argc = 0;
     xo_xparse_node_id_t aid = xnp->xn_contents;
 
-    for ( ; aid; ) {
+    while (aid) {
 	xo_xparse_node_t *anp = xo_xparse_node(xdp, aid);
 
 	if (xo_eval_compile_node(prog, xdp, aid, dp, ops) < 0)
@@ -5532,8 +5550,8 @@ xo_filter_pred_prog (xo_filter_t *xfp, xo_xparse_node_id_t root)
     if (xfp->xf_pred_progs_count >= xfp->xf_pred_progs_max) {
 	uint32_t new_max = xfp->xf_pred_progs_max
 	    ? xfp->xf_pred_progs_max * 2 : 4;
-	xo_filter_pred_entry_t *newp = realloc(xfp->xf_pred_progs,
-						new_max * sizeof(*newp));
+	xo_filter_pred_entry_t *newp = xo_realloc(xfp->xf_pred_progs,
+						  new_max * sizeof(*newp));
 	if (newp == NULL) {
 	    xo_eval_prog_destroy(prog);
 	    return NULL;
@@ -5661,6 +5679,7 @@ xo_tmatch_try_eager (xo_handle_t *xop, xo_filter_t *xfp,
     xo_eval_value_t result = xo_filter_pred_eval(xop, xfp, framep, pred);
     if (result.xev_flags & XEVF_MISSING)
 	return XTFS_PRED;
+
     int live = xo_eval_cast_boolean(xop, result);
     xo_eval_value_free(result);
     return live ? XTFS_LIVE : XTFS_DEAD;
@@ -5677,6 +5696,7 @@ xo_filter_leading_preds_eval (xo_handle_t *xop, xo_filter_t *xfp,
 {
     xo_eval_value_t value = XO_EVAL_VALUE_BOOLEAN_TRUE;
     xo_xparse_node_t *xnp;
+
     for (xo_xparse_node_id_t id = pred_id; id; id = xnp->xn_next) {
 	xnp = xo_xparse_node(&xfp->xf_xd, id);
 	if (xnp->xn_type != C_PREDICATE)
@@ -5783,8 +5803,8 @@ xo_tmatch_key_ancestors (xo_handle_t *xop, xo_filter_t *xfp,
 
 	/* Quick check: any PRED slots in this ancestor frame? */
 	int has_pred = FALSE;
-	for (uint32_t s = 0; s < ancp->xtf_slots_count; s++) {
-	    if (xo_tslot_is_pending(&ancp->xtf_slots[s])) {
+	for (uint32_t sid = 0; sid < ancp->xtf_slots_count; sid++) {
+	    if (xo_tslot_is_pending(&ancp->xtf_slots[sid])) {
 		has_pred = TRUE;
 		break;
 	    }
