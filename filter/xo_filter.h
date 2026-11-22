@@ -155,6 +155,14 @@ typedef uint32_t xo_eval_ext_vtype_t;
 #define XO_EVAL_EXT_NUMBER  1
 #define XO_EVAL_EXT_BOOLEAN 2
 #define XO_EVAL_EXT_MISSING 3
+#define XO_EVAL_EXT_NODESET 4
+
+/*
+ * Node-sets are owned by the backend.  libxo holds a node-set as an
+ * opaque handle and a node as an opaque id; 0 means "none" for both.
+ */
+typedef uint32_t xo_eval_ns_t;
+typedef uint32_t xo_eval_node_t;
 
 typedef struct xo_eval_ext_value_s {
     xo_eval_ext_vtype_t xee_type;
@@ -162,13 +170,43 @@ typedef struct xo_eval_ext_value_s {
         const char *xee_str;
         double      xee_num;
         int         xee_bool;
+        xo_eval_ns_t xee_ns;	/* XO_EVAL_EXT_NODESET; caller owns it */
     };
 } xo_eval_ext_value_t;
+
+/* Axes for xfdo_step */
+typedef uint8_t xo_eval_axis_t;
+#define XO_AXIS_SELF			1
+#define XO_AXIS_CHILD			2
+#define XO_AXIS_ATTRIBUTE		3
+#define XO_AXIS_PARENT			4
+#define XO_AXIS_ANCESTOR		5
+#define XO_AXIS_ANCESTOR_OR_SELF	6
+#define XO_AXIS_DESCENDANT		7
+#define XO_AXIS_DESCENDANT_OR_SELF	8
+
+/* Node tests for xfdo_step */
+typedef uint8_t xo_eval_ntest_t;
+#define XO_NTEST_NAME	1	/* A name */
+#define XO_NTEST_STAR	2	/* "*" */
+#define XO_NTEST_TEXT	3	/* "text()" */
+#define XO_NTEST_NODE	4	/* "node()" */
+
+/*
+ * The XPath context for xo_eval_prog_run_ctx and xo_eval_prog_run_nodes:
+ * the context node, its position and the context size.  "." reads the
+ * node, and position() and last() read the other two.
+ */
+typedef struct xo_eval_ctx_s {
+    xo_eval_node_t xec_node;
+    uint32_t xec_position;
+    uint32_t xec_size;
+} xo_eval_ctx_t;
 
 typedef xo_eval_ext_value_t
     (*xo_eval_ext_fn_t)(xo_filter_data_t *dp, int argc, const char **argv);
 
-#define XO_FILTER_DATA_OPS_VERSION 6
+#define XO_FILTER_DATA_OPS_VERSION 7
 
 typedef struct xo_filter_data_ops_s {
     uint32_t       xfdo_version;
@@ -223,6 +261,38 @@ typedef struct xo_filter_data_ops_s {
     xo_eval_ext_fn_t (*xfdo_find_function)(xo_filter_data_t *,
                                             const char *name,
                                             int *nargs, int *min_args);
+
+    /*
+     * Version 7: node-sets.  A backend that sets these gives libxo real
+     * node-sets: xfdo_ns_alloc, xfdo_ns_free, xfdo_ns_append,
+     * xfdo_ns_count, xfdo_ns_get and xfdo_string_value are needed
+     * together, and the rest are optional.  libxo reads them only
+     * when xfdo_version is 7 or more.
+     *
+     * xfdo_ns_copy may share the set (with a reference count), since
+     * libxo never changes a set after it's built.  xfdo_ns_get's index
+     * is 0-based.  xfdo_step appends the nodes on "axis" from "node"
+     * that pass the test, in axis order, and returns -1 on failure.
+     * xfdo_string_value and xfdo_node_name return a string valid until
+     * the next call to the same op.  xfdo_variable_value is used before
+     * xfdo_variable_of when set.
+     */
+    xo_eval_ns_t (*xfdo_ns_alloc)(xo_filter_data_t *);
+    void (*xfdo_ns_free)(xo_filter_data_t *, xo_eval_ns_t);
+    int (*xfdo_ns_append)(xo_filter_data_t *, xo_eval_ns_t, xo_eval_node_t);
+    uint32_t (*xfdo_ns_count)(xo_filter_data_t *, xo_eval_ns_t);
+    xo_eval_node_t (*xfdo_ns_get)(xo_filter_data_t *, xo_eval_ns_t,
+				  uint32_t);
+    xo_eval_ns_t (*xfdo_ns_copy)(xo_filter_data_t *, xo_eval_ns_t);
+    int (*xfdo_step)(xo_filter_data_t *, xo_eval_node_t, xo_eval_axis_t,
+		     xo_eval_ntest_t, const char *name, ssize_t len,
+		     xo_eval_ns_t);
+    const char *(*xfdo_string_value)(xo_filter_data_t *, xo_eval_node_t);
+    const char *(*xfdo_node_name)(xo_filter_data_t *, xo_eval_node_t);
+    int (*xfdo_doc_compare)(xo_filter_data_t *, xo_eval_node_t,
+			    xo_eval_node_t);
+    xo_eval_ext_value_t (*xfdo_variable_value)(xo_filter_data_t *,
+					       const char *, ssize_t);
 } xo_filter_data_ops_t;
 
 /* Default data ops: heap allocation + xparse string-table name resolution */
@@ -484,5 +554,30 @@ xo_eval_prog_run_simple (xo_handle_t *xop, xo_filter_t *xfp,
 			  xo_eval_prog_t *prog,
 			  int *is_booleanp, int *bool_valuep,
 			  int *is_missingp);
+
+/*
+ * xo_eval_prog_run_ctx:
+ *   xo_eval_prog_run_simple with no frame and the given XPath context,
+ *   for a backend with node-set ops.  A node-set result is reduced to
+ *   its string value.
+ *
+ * xo_eval_prog_run_nodes:
+ *   Run a program whose result should be a node-set and return its
+ *   handle, which the caller owns and frees with xfdo_ns_free.  If the
+ *   result is not a node-set, returns 0 and sets *not_nodesetp (if
+ *   non-NULL); a missing or invalid result sets *is_missingp.
+ */
+char *
+xo_eval_prog_run_ctx (xo_handle_t *xop, xo_filter_t *xfp,
+		       struct xo_xparse_data_s *xdp, xo_eval_prog_t *prog,
+		       const xo_eval_ctx_t *ctxp,
+		       int *is_booleanp, int *bool_valuep,
+		       int *is_missingp);
+
+xo_eval_ns_t
+xo_eval_prog_run_nodes (xo_handle_t *xop, xo_filter_t *xfp,
+			 struct xo_xparse_data_s *xdp, xo_eval_prog_t *prog,
+			 const xo_eval_ctx_t *ctxp,
+			 int *not_nodesetp, int *is_missingp);
 
 #endif /* XO_FILTER_H */
