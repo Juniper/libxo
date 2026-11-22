@@ -2594,8 +2594,19 @@ xo_eval_dot (XO_EVAL_ARGS)
 {
     xo_eval_value_t value = { .xev_flags = 0 };
 
-    /* '.' is the context node: this frame's own value */
-    if (framep->xtf_self) {
+    /*
+     * '.' is the context node: this frame's own value.  A backend that
+     * runs a program with no frame (xo_eval_prog_run_simple) knows the
+     * context node itself, so we ask it, as xo_eval_path does.
+     */
+    if (framep == NULL) {
+	const char *str = NULL;
+	if (xfp->xf_ops && xfp->xf_ops->xfdo_value_of)
+	    str = xfp->xf_ops->xfdo_value_of(xfp->xf_data, ".", 1);
+
+	value = xo_eval_value_make(C_STRING, XEVF_NODE, 0);
+	value.xev_str = str ? str : "";
+    } else if (framep->xtf_self) {
 	value = xo_eval_value_make(C_STRING, XEVF_NODE, 0);
 	value.xev_str = framep->xtf_self;
     } else if (xfp->xf_flags & XFSF_FORCE_RESOLVE) {
