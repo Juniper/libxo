@@ -218,6 +218,7 @@ xo_xparse_ttname_map_t xo_xparse_ttname_map[] = {
     { C_PREDICATE_PATHS,        "Multi-element paths in predicates" },
     { C_UNI_MINUS,		"Unary minus" },
     { C_NAN,			"not a number (NaN)" },
+    { C_NODESET,		"node-set" },
     { M_ERROR,                  "invalid xpath expression" },
     { 0, NULL }
 };
