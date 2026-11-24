@@ -362,6 +362,45 @@ test-walk: xpath_02.test
 	    done ; \
 	done ; true)
 
+#
+# xpath_03 evaluates XPath expressions against a small in-memory tree
+# through the node-set data ops.  "test-nodes" diffs its output
+# against saved/; "test-xsltproc" runs the same expressions under
+# xsltproc (via xpath_03.xsl) and diffs that against xpath_03's own
+# output, which is how the saved results were checked.
+#
+noinst_PROGRAMS += xpath_03.test
+xpath_03_test_SOURCES = xpath_03.c
+EXTRA_DIST += xpath_03.c xpath_03.xsl
+
+NODES_INPUTS = xpath_03_01
+
+test-nodes: xpath_03.test
+	@${MKDIR} -p out
+	-@(for base in ${NODES_INPUTS} ; do \
+	    echo "... $$base ..." ; \
+	    ./xpath_03.test input ${srcdir}/$$base.in \
+		> out/$$base.out 2> out/$$base.err ; \
+	    ${DIFF} -u ${srcdir}/saved/$$base.out out/$$base.out ; \
+	    ${DIFF} -u ${srcdir}/saved/$$base.err out/$$base.err ; \
+	done ; true)
+
+test-xsltproc:
+	@${MKDIR} -p out
+	-@(for base in ${NODES_INPUTS} ; do \
+	    echo "... $$base ... xsltproc ..." ; \
+	    ${SED} '/^%%$$/,$$d' ${srcdir}/$$base.in > out/$$base.xml ; \
+	    ( echo '<exprs>' ; \
+	      ${SED} '1,/^%%$$/d' ${srcdir}/$$base.in | ${GREP} -v '^#' \
+		| ${GREP} -v '^$$' | ${SED} -e 's/&/\&amp;/g' \
+		-e 's/</\&lt;/g' -e 's/.*/<e>&<\/e>/' ; \
+	      echo '</exprs>' ) > out/$$base.exprs.xml ; \
+	    xsltproc --stringparam exprs `pwd`/out/$$base.exprs.xml \
+		${srcdir}/xpath_03.xsl out/$$base.xml \
+		> out/$$base.xsltproc.out ; \
+	    ${DIFF} -u out/$$base.xsltproc.out out/$$base.out ; \
+	done ; true)
+
 accept:
 	@${MKDIR} -p ${srcdir}/saved
 	@${RUN_TESTS_CMD} accept ${TEST_CASES}
