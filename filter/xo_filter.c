@@ -2457,12 +2457,13 @@ static xo_eval_value_t
 xo_eval_position (XO_EVAL_ARGS)
 {
     const char *str = xo_xparse_str(&xfp->xf_xd, xnp->xn_str);
-    uint64_t idx = str ? (uint64_t) strtoul(str, NULL, 10) : 0;
+    /* "[1.5]" matches no position, so compare the whole number */
+    double idx = str ? strtod(str, NULL) : 0;
     uint32_t pos = framep ? framep->xtf_position_cur
 	: xfp->xf_ctx.xec_position;
     xo_eval_value_t value = xo_eval_value_make(C_BOOLEAN, 0, 0);
 
-    value.xev_uint64 = (pos != 0 && pos == idx) ? 1 : 0;
+    value.xev_uint64 = (pos != 0 && (double) pos == idx) ? 1 : 0;
     return value;
 }
 
@@ -3259,38 +3260,6 @@ xo_eval_op_or (XO_EVAL_ARGS)
 }
 
 /*
- * Turn a comparison into a boolean result.  xo_eval_compare's invalid
- * value has an xev_int64 of zero, which would read as "equal", so an
- * unsupported comparison is false whatever the operator.
- */
-static xo_eval_value_t
-xo_eval_compare_result (xo_eval_value_t cmp, int result)
-{
-    xo_eval_value_t value = XO_EVAL_VALUE_BOOLEAN_FALSE;
-
-    if (!(cmp.xev_flags & XEVF_INVALID))
-	value.xev_int64 = result ? 1 : 0;
-
-    return value;
-}
-
-static xo_eval_value_t
-xo_eval_op_equals (XO_EVAL_ARGS)
-{
-    xo_eval_value_t cmp = xo_eval_compare(XO_EVAL_PASS);
-
-    return xo_eval_compare_result(cmp, cmp.xev_int64 == 0);
-}
-
-static xo_eval_value_t
-xo_eval_op_notequals (XO_EVAL_ARGS)
-{
-    xo_eval_value_t cmp = xo_eval_compare(XO_EVAL_PASS);
-
-    return xo_eval_compare_result(cmp, cmp.xev_int64 != 0);
-}
-
-/*
  * Compare for the relational operators (<, <=, >, >=).  XPath 1.0
  * (section 3.4) compares two strings with these operators by first
  * converting both to numbers, not as strings, so "42" > "144" is
@@ -3320,40 +3289,175 @@ xo_eval_relational (XO_EVAL_ARGS)
     return xo_eval_compare(xop, xfp, framep, xnp, indent, 2, nums);
 }
 
+/* Comparison operators, for xo_eval_compare_op */
+#define XO_CMP_EQ	1	/* = */
+#define XO_CMP_NE	2	/* != */
+#define XO_CMP_LT	3	/* < */
+#define XO_CMP_LE	4	/* <= */
+#define XO_CMP_GT	5	/* > */
+#define XO_CMP_GE	6	/* >= */
+
+/*
+ * Compare two values that aren't node-sets with operator 'op'.
+ * xo_eval_compare's invalid value has an xev_int64 of zero, which
+ * would read as "equal", so an unsupported comparison is false
+ * whatever the operator.
+ */
+static int
+xo_eval_compare_pair (XO_EVAL_ARGS, xo_eval_value_t left,
+		       xo_eval_value_t right, int op)
+{
+    xo_eval_value_t pair[2] = { left, right };
+    xo_eval_value_t cmp;
+
+    argc = 2;
+    argv = pair;
+
+    if (op == XO_CMP_EQ || op == XO_CMP_NE)
+	cmp = xo_eval_compare(XO_EVAL_PASS);
+    else
+	cmp = xo_eval_relational(XO_EVAL_PASS);
+
+    if (cmp.xev_flags & XEVF_INVALID)
+	return FALSE;
+
+    int64_t rc = cmp.xev_int64;
+
+    switch (op) {
+    case XO_CMP_EQ:
+	return rc == 0;
+
+    case XO_CMP_NE:
+	return rc != 0;
+
+    case XO_CMP_LT:
+	return rc != XO_REL_NAN && rc < 0;
+
+    case XO_CMP_LE:
+	return rc != XO_REL_NAN && rc <= 0;
+
+    case XO_CMP_GT:
+	return rc != XO_REL_NAN && rc > 0;
+
+    case XO_CMP_GE:
+	return rc != XO_REL_NAN && rc >= 0;
+    }
+
+    return FALSE;
+}
+
+static inline xo_eval_value_t
+xo_eval_value_boolean (int val)
+{
+    xo_eval_value_t value = XO_EVAL_VALUE_BOOLEAN_FALSE;
+
+    value.xev_int64 = val ? 1 : 0;
+    return value;
+}
+
+/*
+ * XPath 1.0 (section 3.4) compares node-sets existentially: a
+ * node-set against a string or number is true if the string value of
+ * any one of its nodes compares true, and two node-sets compare true
+ * if any pair of their nodes does.  Against a boolean, a node-set
+ * compares as boolean(), so an empty one is false.
+ */
+static xo_eval_value_t
+xo_eval_compare_op (XO_EVAL_ARGS, int op)
+{
+    xo_eval_value_t left = argv[0];
+    xo_eval_value_t right = argv[1];
+    int left_ns = (left.xev_type == C_NODESET);
+    int right_ns = (right.xev_type == C_NODESET);
+
+    if (left_ns && right.xev_type == C_BOOLEAN) {
+	left = xo_eval_value_boolean(xo_eval_ns_count(xfp, left) > 0);
+	left_ns = FALSE;
+    } else if (right_ns && left.xev_type == C_BOOLEAN) {
+	right = xo_eval_value_boolean(xo_eval_ns_count(xfp, right) > 0);
+	right_ns = FALSE;
+    }
+
+    if (!left_ns && !right_ns)
+	return xo_eval_value_boolean(xo_eval_compare_pair(XO_EVAL_PASS,
+							  left, right, op));
+
+    xo_filter_data_ops_t *ops = xfp->xf_ops;
+    xo_eval_ns_t ns = (xo_eval_ns_t) (left_ns ? left : right).xev_uint64;
+    uint32_t count = xo_eval_ns_count(xfp, left_ns ? left : right);
+    int hit = FALSE;
+
+    for (uint32_t i = 0; i < count && !hit; i++) {
+	xo_eval_node_t node = ops->xfdo_ns_get(xfp->xf_data, ns, i);
+
+	if (left_ns && right_ns) {
+	    /* The backend's string is only good until its next call */
+	    char *lstr = xo_strdup(xo_eval_node_string(xfp, node));
+	    if (lstr == NULL)
+		return xo_eval_value_invalid();
+
+	    xo_eval_value_t lval = xo_eval_value_string(C_STRING, 0, lstr);
+	    xo_eval_ns_t rns = (xo_eval_ns_t) right.xev_uint64;
+	    uint32_t rcount = xo_eval_ns_count(xfp, right);
+
+	    for (uint32_t j = 0; j < rcount && !hit; j++) {
+		xo_eval_node_t rnode = ops->xfdo_ns_get(xfp->xf_data, rns, j);
+		xo_eval_value_t rval
+		    = xo_eval_value_string(C_STRING, 0, xo_eval_node_string(xfp, rnode));
+
+		hit = xo_eval_compare_pair(XO_EVAL_PASS, lval, rval, op);
+	    }
+
+	    xo_free(lstr);
+
+	} else {
+	    xo_eval_value_t nval
+		= xo_eval_value_string(C_STRING, 0, xo_eval_node_string(xfp, node));
+
+	    if (left_ns)
+		hit = xo_eval_compare_pair(XO_EVAL_PASS, nval, right, op);
+	    else
+		hit = xo_eval_compare_pair(XO_EVAL_PASS, left, nval, op);
+	}
+    }
+
+    return xo_eval_value_boolean(hit);
+}
+
+static xo_eval_value_t
+xo_eval_op_equals (XO_EVAL_ARGS)
+{
+    return xo_eval_compare_op(XO_EVAL_PASS, XO_CMP_EQ);
+}
+
+static xo_eval_value_t
+xo_eval_op_notequals (XO_EVAL_ARGS)
+{
+    return xo_eval_compare_op(XO_EVAL_PASS, XO_CMP_NE);
+}
+
 static xo_eval_value_t
 xo_eval_op_lt (XO_EVAL_ARGS)
 {
-    xo_eval_value_t cmp = xo_eval_relational(XO_EVAL_PASS);
-
-    return xo_eval_compare_result(cmp, cmp.xev_int64 != XO_REL_NAN
-				  && cmp.xev_int64 < 0);
+    return xo_eval_compare_op(XO_EVAL_PASS, XO_CMP_LT);
 }
 
 static xo_eval_value_t
 xo_eval_op_le (XO_EVAL_ARGS)
 {
-    xo_eval_value_t cmp = xo_eval_relational(XO_EVAL_PASS);
-
-    return xo_eval_compare_result(cmp, cmp.xev_int64 != XO_REL_NAN
-				  && cmp.xev_int64 <= 0);
+    return xo_eval_compare_op(XO_EVAL_PASS, XO_CMP_LE);
 }
 
 static xo_eval_value_t
 xo_eval_op_gt (XO_EVAL_ARGS)
 {
-    xo_eval_value_t cmp = xo_eval_relational(XO_EVAL_PASS);
-
-    return xo_eval_compare_result(cmp, cmp.xev_int64 != XO_REL_NAN
-				  && cmp.xev_int64 > 0);
+    return xo_eval_compare_op(XO_EVAL_PASS, XO_CMP_GT);
 }
 
 static xo_eval_value_t
 xo_eval_op_ge (XO_EVAL_ARGS)
 {
-    xo_eval_value_t cmp = xo_eval_relational(XO_EVAL_PASS);
-
-    return xo_eval_compare_result(cmp, cmp.xev_int64 != XO_REL_NAN
-				  && cmp.xev_int64 >= 0);
+    return xo_eval_compare_op(XO_EVAL_PASS, XO_CMP_GE);
 }
 
 /* The magnitude of a negative int64 (safe for INT64_MIN) */
@@ -5130,6 +5234,8 @@ xo_eval (xo_handle_t *xop, xo_filter_t *xfp, xo_tframe_t *framep,
 #define XEIF_CHECK_MISSING	(1<<0) /* Return MISSING instead of
 					  calling xei_fn if any arg is
 					  missing */
+#define XEIF_STEP		(1<<1) /* Location step (xo_eval_ns_step) */
+#define XEIF_FILTER		(1<<2) /* Filter-expression predicates */
 
 typedef struct xo_eval_instr_s {
     xo_eval_fn_t xei_fn;	  /* Operation to perform */
@@ -5137,12 +5243,20 @@ typedef struct xo_eval_instr_s {
     uint8_t xei_argc;	      /* Number of values this op consumes */
     uint8_t xei_flags;	      /* XEIF_* flags */
     uint16_t xei_jump;	      /* Short-circuit target; 0 means none */
+    uint16_t xei_sub;	      /* First predicate, in xep_subs */
+    uint8_t xei_nsub;	      /* Number of predicates */
 } xo_eval_instr_t;
 
+/*
+ * A predicate runs once per candidate node, with its own context, so
+ * it's a program of its own, kept in xep_subs[].
+ */
 typedef struct xo_eval_prog_s {
     xo_eval_instr_t *xep_instr;	/* Flat instruction array */
     uint32_t xep_count;		/* Number of instructions emitted */
     uint32_t xep_max;		/* Allocated size of xep_instr */
+    struct xo_eval_prog_s **xep_subs; /* Predicate programs */
+    uint32_t xep_subs_count;	/* Number of xep_subs */
 } xo_eval_prog_t;
 
 /*
@@ -5191,6 +5305,8 @@ xo_eval_prog_emit (xo_eval_prog_t *prog, xo_eval_fn_t fn,
     xip->xei_argc = argc;
     xip->xei_flags = flags;
     xip->xei_jump = 0;
+    xip->xei_sub = 0;
+    xip->xei_nsub = 0;
 
     return prog->xep_count++;
 }
@@ -5452,6 +5568,695 @@ xo_eval_compile_function (xo_eval_prog_t *prog, xo_xparse_data_t *xdp,
 }
 
 /*
+ * Location paths over a backend's node-sets.  When the backend has
+ * xfdo_step, a path compiles into a start instruction (the context
+ * node, or the root) and one instruction per step.  Each step turns
+ * a node-set into a node-set, in document order with no duplicates.
+ * A step's predicates are programs of their own (in xep_subs), run
+ * once per candidate with the candidate, its position on the axis
+ * and the candidate count as the context.
+ */
+static inline int
+xo_eval_has_steps (xo_filter_data_ops_t *ops)
+{
+    return xo_eval_has_nodes(ops) && ops->xfdo_step != NULL;
+}
+
+/*
+ * A growable list of nodes, for building a step's result before
+ * handing it to the backend as a node-set.
+ */
+typedef struct xo_eval_nlist_s {
+    xo_eval_node_t *xnl_nodes;
+    uint32_t xnl_count;
+    uint32_t xnl_max;
+} xo_eval_nlist_t;
+
+static int
+xo_eval_nlist_append (xo_eval_nlist_t *listp, xo_eval_node_t node)
+{
+    if (listp->xnl_count >= listp->xnl_max) {
+	uint32_t new_max = listp->xnl_max ? listp->xnl_max * 2 : 16;
+	xo_eval_node_t *new_nodes
+	    = xo_realloc(listp->xnl_nodes, new_max * sizeof(*new_nodes));
+	if (new_nodes == NULL)
+	    return -1;
+
+	listp->xnl_nodes = new_nodes;
+	listp->xnl_max = new_max;
+    }
+
+    listp->xnl_nodes[listp->xnl_count++] = node;
+    return 0;
+}
+
+static void
+xo_eval_nlist_clean (xo_eval_nlist_t *listp)
+{
+    if (listp->xnl_nodes)
+	xo_free(listp->xnl_nodes);
+
+    bzero(listp, sizeof(*listp));
+}
+
+/* Append every node of a node-set value to a list */
+static int
+xo_eval_nlist_add_ns (xo_filter_t *xfp, xo_eval_nlist_t *listp,
+		       xo_eval_ns_t ns)
+{
+    xo_filter_data_ops_t *ops = xfp->xf_ops;
+    uint32_t count = ops->xfdo_ns_count(xfp->xf_data, ns);
+
+    for (uint32_t i = 0; i < count; i++) {
+	xo_eval_node_t node = ops->xfdo_ns_get(xfp->xf_data, ns, i);
+	if (xo_eval_nlist_append(listp, node) < 0)
+	    return -1;
+    }
+
+    return 0;
+}
+
+static void
+xo_eval_nlist_reverse (xo_eval_nlist_t *listp)
+{
+    xo_eval_node_t *nodes = listp->xnl_nodes;
+
+    for (uint32_t i = 0, j = listp->xnl_count; i + 1 < j; i++) {
+	j -= 1;
+	xo_eval_node_t tmp = nodes[i];
+	nodes[i] = nodes[j];
+	nodes[j] = tmp;
+    }
+}
+
+/*
+ * Put a list into document order and drop duplicates.  A bottom-up
+ * merge sort keeps the backend calls at n log n.  Without
+ * xfdo_doc_compare we can only drop duplicates, so the list stays in
+ * the order it was built.
+ */
+static int
+xo_eval_nlist_normalize (xo_filter_t *xfp, xo_eval_nlist_t *listp)
+{
+    xo_filter_data_ops_t *ops = xfp->xf_ops;
+    xo_eval_node_t *nodes = listp->xnl_nodes;
+    uint32_t count = listp->xnl_count;
+    uint32_t keep = 0;
+
+    if (count < 2)
+	return 0;
+
+    if (ops->xfdo_doc_compare == NULL) {
+	for (uint32_t i = 0; i < count; i++) {
+	    uint32_t j;
+
+	    for (j = 0; j < keep; j++)
+		if (nodes[j] == nodes[i])
+		    break;
+
+	    if (j == keep)
+		nodes[keep++] = nodes[i];
+	}
+
+	listp->xnl_count = keep;
+	return 0;
+    }
+
+    xo_eval_node_t *tmp = xo_realloc(NULL, count * sizeof(*tmp));
+    if (tmp == NULL)
+	return -1;
+
+    xo_eval_node_t *src = nodes;
+    xo_eval_node_t *dst = tmp;
+
+    for (uint32_t width = 1; width < count; width *= 2) {
+	for (uint32_t lo = 0; lo < count; lo += 2 * width) {
+	    uint32_t mid = MIN(lo + width, count);
+	    uint32_t hi = MIN(lo + 2 * width, count);
+	    uint32_t i = lo, j = mid, k = lo;
+
+	    while (i < mid && j < hi) {
+		if (ops->xfdo_doc_compare(xfp->xf_data, src[i], src[j]) <= 0)
+		    dst[k++] = src[i++];
+		else
+		    dst[k++] = src[j++];
+	    }
+
+	    while (i < mid)
+		dst[k++] = src[i++];
+	    while (j < hi)
+		dst[k++] = src[j++];
+	}
+
+	xo_eval_node_t *swap = src;
+	src = dst;
+	dst = swap;
+    }
+
+    /* Duplicates are now adjacent; src may be nodes itself */
+    for (uint32_t i = 0; i < count; i++)
+	if (keep == 0 || src[i] != nodes[keep - 1])
+	    nodes[keep++] = src[i];
+
+    listp->xnl_count = keep;
+    xo_free(tmp);
+    return 0;
+}
+
+/* Hand a list to the backend as a new node-set value */
+static xo_eval_value_t
+xo_eval_nlist_value (xo_filter_t *xfp, xo_eval_nlist_t *listp)
+{
+    xo_filter_data_ops_t *ops = xfp->xf_ops;
+    xo_eval_ns_t ns = ops->xfdo_ns_alloc(xfp->xf_data);
+
+    if (ns == 0)
+	return xo_eval_value_invalid();
+
+    for (uint32_t i = 0; i < listp->xnl_count; i++) {
+	if (ops->xfdo_ns_append(xfp->xf_data, ns, listp->xnl_nodes[i]) < 0) {
+	    ops->xfdo_ns_free(xfp->xf_data, ns);
+	    return xo_eval_value_invalid();
+	}
+    }
+
+    return xo_eval_value_nodeset(ns);
+}
+
+static inline int
+xo_eval_axis_is_reverse (xo_eval_axis_t axis)
+{
+    return (axis == XO_AXIS_PARENT || axis == XO_AXIS_ANCESTOR
+	    || axis == XO_AXIS_ANCESTOR_OR_SELF);
+}
+
+/*
+ * Find the axis, node test and name for a location step, and its
+ * first predicate.  An explicit axis ("ancestor::x") is the first
+ * node of the step's contents, ahead of the predicates.  Returns -1
+ * for a step we can't evaluate.
+ */
+static int
+xo_eval_step_info (xo_xparse_data_t *xdp, xo_xparse_node_t *xnp,
+		    xo_eval_axis_t *axisp, xo_eval_ntest_t *ntestp,
+		    const char **namep, xo_xparse_node_id_t *predp)
+{
+    static const struct {
+	const char *xa_name;
+	xo_eval_axis_t xa_axis;
+    } axes[] = {
+	{ "self", XO_AXIS_SELF },
+	{ "child", XO_AXIS_CHILD },
+	{ "attribute", XO_AXIS_ATTRIBUTE },
+	{ "parent", XO_AXIS_PARENT },
+	{ "ancestor", XO_AXIS_ANCESTOR },
+	{ "ancestor-or-self", XO_AXIS_ANCESTOR_OR_SELF },
+	{ "descendant", XO_AXIS_DESCENDANT },
+	{ "descendant-or-self", XO_AXIS_DESCENDANT_OR_SELF },
+	{ NULL, 0 }
+    };
+    xo_xparse_node_id_t pred = xnp->xn_contents;
+    const char *axis_name = NULL;
+
+    if (xo_xparse_node_type(xdp, pred) == T_AXIS_NAME) {
+	axis_name = xo_xparse_str(xdp, xo_xparse_node_str(xdp, pred));
+	pred = xo_xparse_node(xdp, pred)->xn_next;
+    }
+
+    xo_eval_axis_t axis = (xnp->xn_type == C_ATTRIBUTE)
+	? XO_AXIS_ATTRIBUTE : XO_AXIS_CHILD;
+    const char *name = NULL;
+
+    switch (xnp->xn_type) {
+    case C_ELEMENT:
+	*ntestp = XO_NTEST_NAME;
+	name = xo_xparse_str(xdp, xnp->xn_str);
+	break;
+
+    case C_ATTRIBUTE:
+	name = xo_xparse_str(xdp, xnp->xn_str);
+	*ntestp = (name && xo_streq(name, "*")) ? XO_NTEST_STAR
+	    : XO_NTEST_NAME;
+	break;
+
+    case L_ASTERISK:
+    case L_STAR:
+	*ntestp = XO_NTEST_STAR;
+	break;
+
+    case K_TEXT:
+	*ntestp = XO_NTEST_TEXT;
+	break;
+
+    case K_NODE:
+	*ntestp = XO_NTEST_NODE;
+	break;
+
+    case L_DOT:
+	axis = XO_AXIS_SELF;
+	*ntestp = XO_NTEST_NODE;
+	break;
+
+    case L_DOTDOT:
+	axis = XO_AXIS_PARENT;
+	*ntestp = XO_NTEST_NODE;
+	break;
+
+    case C_DESCENDANT:
+	axis = XO_AXIS_DESCENDANT_OR_SELF;
+	*ntestp = XO_NTEST_NODE;
+	break;
+
+    default:
+	return -1;
+    }
+
+    if (*ntestp == XO_NTEST_NAME && name == NULL)
+	return -1;
+
+    if (axis_name) {
+	int i;
+
+	for (i = 0; axes[i].xa_name; i++)
+	    if (xo_streq(axes[i].xa_name, axis_name))
+		break;
+
+	if (axes[i].xa_name == NULL)
+	    return -1;
+
+	axis = axes[i].xa_axis;
+    }
+
+    *axisp = axis;
+    *namep = name;
+    *predp = pred;
+    return 0;
+}
+
+/* A new, empty node-set value */
+static xo_eval_value_t
+xo_eval_ns_empty (xo_filter_t *xfp)
+{
+    xo_eval_ns_t ns = xfp->xf_ops->xfdo_ns_alloc(xfp->xf_data);
+
+    return ns ? xo_eval_value_nodeset(ns) : xo_eval_value_invalid();
+}
+
+/* The start of a relative path: the context node */
+static xo_eval_value_t
+xo_eval_ns_context (XO_EVAL_ARGS)
+{
+    xo_eval_node_t node = xfp->xf_ctx.xec_node;
+
+    return node ? xo_eval_ns_of_node(xfp, node) : xo_eval_ns_empty(xfp);
+}
+
+/*
+ * The start of an absolute path: the root, which is the last node on
+ * the context node's ancestor-or-self axis.
+ */
+static xo_eval_value_t
+xo_eval_ns_root (XO_EVAL_ARGS)
+{
+    xo_filter_data_ops_t *ops = xfp->xf_ops;
+    xo_eval_node_t node = xfp->xf_ctx.xec_node;
+
+    if (node == 0)
+	return xo_eval_ns_empty(xfp);
+
+    xo_eval_ns_t ns = ops->xfdo_ns_alloc(xfp->xf_data);
+    if (ns == 0)
+	return xo_eval_value_invalid();
+
+    xo_eval_node_t root = 0;
+    if (ops->xfdo_step(xfp->xf_data, node, XO_AXIS_ANCESTOR_OR_SELF,
+		       XO_NTEST_NODE, NULL, 0, ns) == 0) {
+	uint32_t count = ops->xfdo_ns_count(xfp->xf_data, ns);
+	if (count > 0)
+	    root = ops->xfdo_ns_get(xfp->xf_data, ns, count - 1);
+    }
+
+    ops->xfdo_ns_free(xfp->xf_data, ns);
+
+    if (root == 0)
+	return xo_eval_value_invalid();
+
+    return xo_eval_ns_of_node(xfp, root);
+}
+
+/*
+ * A union: every branch must be a node-set, and the result holds
+ * their nodes in document order with no duplicates.
+ */
+static xo_eval_value_t
+xo_eval_ns_union (XO_EVAL_ARGS)
+{
+    xo_eval_nlist_t list = { NULL, 0, 0 };
+    xo_eval_value_t value;
+
+    for (int i = 0; i < argc; i++) {
+	if (argv[i].xev_type != C_NODESET) {
+	    xo_eval_fail(xfp, "filter: union of a value that is not "
+			 "a node-set");
+	    xo_eval_nlist_clean(&list);
+	    return xo_eval_value_invalid();
+	}
+
+	if (xo_eval_nlist_add_ns(xfp, &list,
+				 (xo_eval_ns_t) argv[i].xev_uint64) < 0) {
+	    xo_eval_nlist_clean(&list);
+	    return xo_eval_value_invalid();
+	}
+    }
+
+    if (xo_eval_nlist_normalize(xfp, &list) < 0)
+	value = xo_eval_value_invalid();
+    else
+	value = xo_eval_nlist_value(xfp, &list);
+
+    xo_eval_nlist_clean(&list);
+    return value;
+}
+
+/*
+ * Run predicate 'sub' over the list, keeping the nodes it passes.
+ * The list is in the order positions count in: axis order for a
+ * step, document order for a filter expression.  A number tests the
+ * position; anything else goes through boolean().
+ */
+static void
+xo_eval_ns_predicate (xo_handle_t *xop, xo_filter_t *xfp,
+		       xo_xparse_data_t *xdp, xo_eval_prog_t *sub,
+		       int indent, xo_eval_nlist_t *listp)
+{
+    uint32_t size = listp->xnl_count;
+    uint32_t keep = 0;
+
+    for (uint32_t i = 0; i < size; i++) {
+	xo_eval_node_t node = listp->xnl_nodes[i];
+	int pass;
+
+	xfp->xf_ctx.xec_node = node;
+	xfp->xf_ctx.xec_position = i + 1;
+	xfp->xf_ctx.xec_size = size;
+
+	xo_eval_value_t res = xo_eval_prog_run(xop, xfp, NULL, xdp, sub,
+					       indent);
+
+	if (res.xev_flags & (XEVF_MISSING | XEVF_INVALID | XEVF_UNSUPPORTED))
+	    pass = FALSE;
+	else if (res.xev_type == C_NAN)
+	    pass = FALSE;
+	else if (xo_eval_is_number_type(res.xev_type))
+	    pass = (xo_eval_cast_float(xop, xfp, res) == (xo_float_t) (i + 1));
+	else
+	    pass = xo_eval_cast_boolean(xop, xfp, res);
+
+	xo_eval_value_free(xfp, res);
+
+	if (pass)
+	    listp->xnl_nodes[keep++] = node;
+    }
+
+    listp->xnl_count = keep;
+}
+
+static void
+xo_eval_ns_predicates (xo_handle_t *xop, xo_filter_t *xfp,
+			xo_xparse_data_t *xdp, xo_eval_prog_t *prog,
+			xo_eval_instr_t *xip, int indent,
+			xo_eval_nlist_t *listp)
+{
+    for (int i = 0; i < xip->xei_nsub && listp->xnl_count > 0; i++)
+	xo_eval_ns_predicate(xop, xfp, xdp, prog->xep_subs[xip->xei_sub + i],
+			     indent, listp);
+}
+
+/*
+ * Run a step (XEIF_STEP) or a filter expression's predicates
+ * (XEIF_FILTER) on the node-set 'input'.
+ */
+static xo_eval_value_t
+xo_eval_ns_step (xo_handle_t *xop, xo_filter_t *xfp, xo_xparse_data_t *xdp,
+		  xo_eval_prog_t *prog, xo_eval_instr_t *xip, int indent,
+		  xo_eval_value_t input)
+{
+    xo_filter_data_ops_t *ops = xfp->xf_ops;
+    xo_eval_nlist_t list = { NULL, 0, 0 };
+    xo_eval_nlist_t found = { NULL, 0, 0 };
+    xo_eval_ctx_t saved = xfp->xf_ctx;
+    xo_eval_value_t value = XO_EVAL_VALUE_INVALID;
+    int rc = -1;
+
+    if (input.xev_type != C_NODESET) {
+	xo_eval_fail(xfp, "filter: path step on a value that is not "
+		     "a node-set");
+	return value;
+    }
+
+    xo_eval_ns_t in_ns = (xo_eval_ns_t) input.xev_uint64;
+
+    if (xip->xei_flags & XEIF_FILTER) {
+	if (xo_eval_nlist_add_ns(xfp, &list, in_ns) < 0)
+	    goto done;
+
+	xo_eval_ns_predicates(xop, xfp, xdp, prog, xip, indent, &list);
+	rc = 0;
+	goto done;
+    }
+
+    xo_xparse_node_t *xnp = xo_xparse_node(xdp, xip->xei_node);
+    xo_eval_axis_t axis;
+    xo_eval_ntest_t ntest;
+    const char *name;
+    xo_xparse_node_id_t pred;
+
+    if (xo_eval_step_info(xdp, xnp, &axis, &ntest, &name, &pred) < 0)
+	goto done;
+
+    ssize_t len = name ? (ssize_t) strlen(name) : 0;
+    int reverse = xo_eval_axis_is_reverse(axis);
+    uint32_t count = ops->xfdo_ns_count(xfp->xf_data, in_ns);
+
+    for (uint32_t i = 0; i < count; i++) {
+	xo_eval_node_t node = ops->xfdo_ns_get(xfp->xf_data, in_ns, i);
+	xo_eval_ns_t ns = ops->xfdo_ns_alloc(xfp->xf_data);
+	if (ns == 0)
+	    goto done;
+
+	found.xnl_count = 0;
+	int src = ops->xfdo_step(xfp->xf_data, node, axis, ntest,
+				 name, len, ns);
+	if (src == 0)
+	    src = xo_eval_nlist_add_ns(xfp, &found, ns);
+
+	ops->xfdo_ns_free(xfp->xf_data, ns);
+	if (src < 0)
+	    goto done;
+
+	xo_eval_ns_predicates(xop, xfp, xdp, prog, xip, indent, &found);
+
+	/* Without doc_compare, document order is all we have to go on */
+	if (reverse && ops->xfdo_doc_compare == NULL)
+	    xo_eval_nlist_reverse(&found);
+
+	for (uint32_t j = 0; j < found.xnl_count; j++)
+	    if (xo_eval_nlist_append(&list, found.xnl_nodes[j]) < 0)
+		goto done;
+    }
+
+    /* One context node on a forward axis is already in order */
+    if (count > 1 || reverse)
+	rc = xo_eval_nlist_normalize(xfp, &list);
+    else
+	rc = 0;
+
+ done:
+    xfp->xf_ctx = saved;
+
+    if (rc == 0)
+	value = xo_eval_nlist_value(xfp, &list);
+
+    xo_eval_nlist_clean(&list);
+    xo_eval_nlist_clean(&found);
+    return value;
+}
+
+/*
+ * Compile the C_PREDICATE chain starting at 'pred' into sub-programs
+ * for the instruction at 'idx'.
+ */
+static int
+xo_eval_compile_predicates (xo_eval_prog_t *prog, xo_xparse_data_t *xdp,
+			     int idx, xo_xparse_node_id_t pred,
+			     xo_filter_data_t *dp, xo_filter_data_ops_t *ops)
+{
+    uint32_t first = prog->xep_subs_count;
+    int nsub = 0;
+
+    for ( ; pred && xo_xparse_node_type(xdp, pred) == C_PREDICATE;
+	  pred = xo_xparse_node(xdp, pred)->xn_next) {
+	if (nsub >= UINT8_MAX || prog->xep_subs_count >= UINT16_MAX) {
+	    xo_eval_compile_fail(dp, ops, xdp, pred,
+				  "too many predicates in filter expression");
+	    return -1;
+	}
+
+	xo_eval_prog_t *sub = xo_realloc(NULL, sizeof(*sub));
+	if (sub == NULL)
+	    return -1;
+
+	bzero(sub, sizeof(*sub));
+
+	xo_eval_prog_t **new_subs
+	    = xo_realloc(prog->xep_subs,
+			 (prog->xep_subs_count + 1) * sizeof(*new_subs));
+	if (new_subs == NULL) {
+	    xo_eval_prog_destroy(sub);
+	    return -1;
+	}
+
+	prog->xep_subs = new_subs;
+	prog->xep_subs[prog->xep_subs_count++] = sub;
+	nsub += 1;
+
+	xo_xparse_node_id_t expr = xo_xparse_node_contents(xdp, pred);
+	if (expr == 0
+		|| xo_eval_compile_node(sub, xdp, expr, dp, ops) < 0)
+	    return -1;
+    }
+
+    prog->xep_instr[idx].xei_sub = first;
+    prog->xep_instr[idx].xei_nsub = nsub;
+    return 0;
+}
+
+static int
+xo_eval_compile_step (xo_eval_prog_t *prog, xo_xparse_data_t *xdp,
+		       xo_xparse_node_id_t id,
+		       xo_filter_data_t *dp, xo_filter_data_ops_t *ops)
+{
+    xo_xparse_node_t *xnp = xo_xparse_node(xdp, id);
+    xo_eval_axis_t axis;
+    xo_eval_ntest_t ntest;
+    const char *name;
+    xo_xparse_node_id_t pred;
+
+    if (xo_eval_step_info(xdp, xnp, &axis, &ntest, &name, &pred) < 0) {
+	xo_eval_compile_fail(dp, ops, xdp, id,
+			      "unsupported location step in filter "
+			      "expression (%s)",
+			      xo_xparse_fancy_token_name(xnp->xn_type));
+	return -1;
+    }
+
+    int idx = xo_eval_prog_emit(prog, NULL, id, 1,
+				XEIF_STEP | XEIF_CHECK_MISSING);
+    if (idx < 0)
+	return -1;
+
+    return xo_eval_compile_predicates(prog, xdp, idx, pred, dp, ops);
+}
+
+static inline int
+xo_eval_is_step_type (xo_xparse_token_t type)
+{
+    switch (type) {
+    case C_ELEMENT:
+    case C_ATTRIBUTE:
+    case L_ASTERISK:
+    case L_STAR:
+    case K_TEXT:
+    case K_NODE:
+    case K_COMMENT:
+    case K_PROCESSING_INSTRUCTION:
+    case L_DOT:
+    case L_DOTDOT:
+    case C_DESCENDANT:
+	return TRUE;
+
+    default:
+	return FALSE;
+    }
+}
+
+/*
+ * Compile the chain of path members starting at 'id'.  A path starts
+ * at the root (C_ABSOLUTE, or a leading "//"), at the context node
+ * (a step), or at a primary expression ("$v/x", "(a|b)[1]"), whose
+ * predicates follow it in the chain.
+ */
+static int
+xo_eval_compile_path (xo_eval_prog_t *prog, xo_xparse_data_t *xdp,
+		       xo_xparse_node_id_t id,
+		       xo_filter_data_t *dp, xo_filter_data_ops_t *ops)
+{
+    xo_xparse_token_t type = xo_xparse_node_type(xdp, id);
+    int rc;
+
+    if (type == C_ABSOLUTE || type == C_DESCENDANT) {
+	rc = xo_eval_prog_emit(prog, xo_eval_ns_root, id, 0, 0);
+	if (type == C_ABSOLUTE)
+	    id = xo_xparse_node(xdp, id)->xn_next;
+
+    } else if (xo_eval_is_step_type(type)) {
+	rc = xo_eval_prog_emit(prog, xo_eval_ns_context, id, 0, 0);
+
+    } else {
+	rc = xo_eval_compile_node(prog, xdp, id, dp, ops);
+	id = xo_xparse_node(xdp, id)->xn_next;
+
+	if (rc >= 0 && xo_xparse_node_type(xdp, id) == C_PREDICATE) {
+	    rc = xo_eval_prog_emit(prog, NULL, id, 1,
+				   XEIF_FILTER | XEIF_CHECK_MISSING);
+	    if (rc >= 0)
+		rc = xo_eval_compile_predicates(prog, xdp, rc, id, dp, ops);
+
+	    while (xo_xparse_node_type(xdp, id) == C_PREDICATE)
+		id = xo_xparse_node(xdp, id)->xn_next;
+	}
+    }
+
+    if (rc < 0)
+	return -1;
+
+    for ( ; id; id = xo_xparse_node(xdp, id)->xn_next) {
+	if (xo_xparse_node_type(xdp, id) == L_SLASH)
+	    continue;
+
+	if (xo_eval_compile_step(prog, xdp, id, dp, ops) < 0)
+	    return -1;
+    }
+
+    return 0;
+}
+
+static int
+xo_eval_compile_union (xo_eval_prog_t *prog, xo_xparse_data_t *xdp,
+		        xo_xparse_node_id_t id,
+		        xo_filter_data_t *dp, xo_filter_data_ops_t *ops)
+{
+    int argc = 0;
+
+    for (xo_xparse_node_id_t branch = id; branch;
+	 branch = xo_xparse_node(xdp, branch)->xn_next) {
+	if (argc >= UINT8_MAX) {
+	    xo_eval_compile_fail(dp, ops, xdp, branch,
+				  "too many branches in union");
+	    return -1;
+	}
+
+	if (xo_eval_compile_node(prog, xdp, branch, dp, ops) < 0)
+	    return -1;
+
+	argc += 1;
+    }
+
+    return xo_eval_prog_emit(prog, xo_eval_ns_union, id, argc, 0) >= 0
+	? 0 : -1;
+}
+
+/*
  * Compile a single expression node, mirroring the dispatch switch in
  * xo_eval().  Unlike xo_eval(), this never combines across an
  * xn_next chain itself; chains are handled explicitly by the
@@ -5467,16 +6272,34 @@ xo_eval_compile_node (xo_eval_prog_t *prog, xo_xparse_data_t *xdp,
     switch (xnp->xn_type) {
 
     case C_ATTRIBUTE:
+	/* A bare "@x"; its xn_next is a sibling operand, not a step */
+	if (xo_eval_has_steps(ops)) {
+	    if (xo_eval_prog_emit(prog, xo_eval_ns_context, id, 0, 0) < 0)
+		return -1;
+	    return xo_eval_compile_step(prog, xdp, id, dp, ops);
+	}
+
 	return xo_eval_prog_emit(prog, xo_eval_attribute, id, 0, 0) >= 0
 	    ? 0 : -1;
 
+    case C_UNION:
+	if (xo_eval_has_steps(ops))
+	    return xo_eval_compile_union(prog, xdp, xnp->xn_contents,
+					  dp, ops);
+
+	return xnp->xn_contents
+	    ? xo_eval_compile_node(prog, xdp, xnp->xn_contents, dp, ops) : -1;
+
     case C_PATH: {
+	if (xo_eval_has_steps(ops))
+	    return xo_eval_compile_path(prog, xdp, xnp->xn_contents, dp, ops);
+
 	/*
 	 * xo_eval_path only knows child-element and attribute steps,
 	 * looked up by name from the context.  A path that starts any
 	 * other way ("/a", "../x", "*", "$v/x") would read as a relative
-	 * lookup there, so until those steps are compiled, such a path
-	 * compiles as its first node did when it was left unwrapped.
+	 * lookup there, so without xfdo_step, such a path compiles as its
+	 * first node did when it was left unwrapped.
 	 */
 	xo_xparse_token_t first = xo_xparse_node_type(xdp, xnp->xn_contents);
 	if (first != C_ELEMENT && first != C_ATTRIBUTE)
@@ -5596,6 +6419,12 @@ xo_eval_prog_destroy (xo_eval_prog_t *prog)
     if (prog->xep_instr)
 	xo_free(prog->xep_instr);
 
+    for (uint32_t i = 0; i < prog->xep_subs_count; i++)
+	xo_eval_prog_destroy(prog->xep_subs[i]);
+
+    if (prog->xep_subs)
+	xo_free(prog->xep_subs);
+
     xo_free(prog);
 }
 
@@ -5620,9 +6449,7 @@ xo_eval_compile (xo_xparse_data_t *xdp, xo_xparse_node_id_t root,
     if (prog == NULL)
 	return NULL;
 
-    prog->xep_instr = NULL;
-    prog->xep_count = 0;
-    prog->xep_max = 0;
+    bzero(prog, sizeof(*prog));
 
     if (xo_eval_compile_node(prog, xdp, root, dp, ops) < 0) {
 	xo_eval_prog_destroy(prog);
@@ -5686,8 +6513,13 @@ xo_eval_prog_run (xo_handle_t *xop, xo_filter_t *xfp, xo_tframe_t *framep,
 	    }
 	}
 
-	xo_xparse_node_t *xnp = xo_xparse_node(xdp, xip->xei_node);
-	result = xip->xei_fn(xop, xfp, framep, xnp, indent, argc, argv);
+	if (xip->xei_flags & (XEIF_STEP | XEIF_FILTER)) {
+	    result = xo_eval_ns_step(xop, xfp, xdp, prog, xip, indent,
+				     argv[0]);
+	} else {
+	    xo_xparse_node_t *xnp = xo_xparse_node(xdp, xip->xei_node);
+	    result = xip->xei_fn(xop, xfp, framep, xnp, indent, argc, argv);
+	}
 
 	for (int i = 0; i < argc; i++)
 	    xo_eval_value_free(xfp, argv[i]);
