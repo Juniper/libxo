@@ -1,0 +1,114 @@
+<inventory site="lab">
+<item id="i1" kind="cpu"><name>alpha</name><size>10</size><tag>a</tag><tag>b</tag></item>
+<item id="i2" kind="mem"><name>beta</name><size>20</size><tag>b</tag></item>
+<item id="i3" kind="cpu"><name>gamma</name><size>5</size><sub><name>delta</name><size>7</size></sub></item>
+<group><item id="i4" kind="disk"><name>epsilon</name><size>20</size></item></group>
+</inventory>
+%%
+# Simple child and attribute paths
+inventory
+inventory/item
+inventory/item/name
+inventory/item/@id
+inventory/@site
+/inventory/item/size
+inventory/*
+inventory/item/@*
+inventory/item/name/text()
+inventory/item[1]/node()
+# Descendants
+//name
+//item/@id
+inventory//size
+/descendant::size
+/descendant-or-self::sub
+//sub/descendant::*
+# Parent and ancestors
+//sub/..
+//sub/../@id
+//sub/name/ancestor::*
+//sub/name/ancestor-or-self::item
+//tag/parent::item/name
+//size/self::size
+//sub/name/ancestor::item/@id
+# Positional predicates
+inventory/item[2]
+inventory/item[last()]
+inventory/item[position() = 2]
+inventory/item[position() > 1]
+//item[1]
+(//item)[1]
+(//item)[last()]
+//sub/name/ancestor::*[1]
+//sub/name/ancestor::*[2]
+//sub/name/ancestor-or-self::*[last()]
+inventory/item[3]/preceding::x
+# Value predicates
+inventory/item[size = 20]
+inventory/item[size > 9]/name
+inventory/item[@kind = 'cpu']/@id
+inventory/item[tag = 'b']/name
+inventory/item[tag != 'b']/name
+inventory/item[not(tag)]/name
+inventory/item[tag][size < 15]/name
+inventory/item[tag[2]]/name
+inventory/item[sub/size = 7]/name
+//item[size = 20][2]/name
+//item[.//size = 7]/@id
+inventory/item[name = 'beta' or @id = 'i3']/@id
+# Comparisons
+//size = 20
+//size = 99
+//size != 20
+//size > 15
+//size < 6
+//tag = //name
+//tag = inventory/item/tag
+20 = //size
+'beta' = //name
+//size = true()
+//nothing = false()
+//nothing != //size
+//size >= 20
+//size <= 5
+# Unions
+//name | //size
+inventory/item[1]/@id | inventory/item[2]/@id | inventory/item[1]/@id
+//tag | //item/@kind
+(//size | //name)[3]
+# Functions on node-sets
+count(//item)
+count(inventory/item/tag)
+count(//item[size = 20])
+sum(//size)
+name(//sub/*[1])
+local-name(inventory/item/@kind)
+string(//name)
+boolean(//sub)
+boolean(//none)
+//item[count(tag) = 2]/@id
+//item[position() = last()]/@id
+# More predicates and paths
+inventory/item[1 + 1]/name
+inventory/item[1.5]
+inventory/item[tag[. = 'b']]/@id
+//item[@id][2]/@id
+//*[name() = 'sub']/name
+count(//@*)
+//text()[. = 'b']
+/
+.
+/..
+//tag[2]
+(//tag)[2]
+//item[last() - 1]/@id
+inventory/item[position() mod 2 = 1]/@id
+string(/inventory/@site)
+//size[. > 6][. < 20]
+//item/name | //item/@kind | /inventory
+//size = //size
+//tag != //tag
+self::node()
+inventory/item/name/..
+//sub/ancestor-or-self::node()[2]
+count(//item/ancestor::*)
