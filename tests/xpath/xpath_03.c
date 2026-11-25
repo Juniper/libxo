@@ -104,6 +104,27 @@ tree_node (xo_filter_data_t *dp, xo_eval_node_t id)
     return &dp->xfd_nodes[id - 1];
 }
 
+static void
+tree_free (xo_filter_data_t *dp)
+{
+    for (uint32_t i = 0; i < dp->xfd_nodes_count; i++) {
+	tnode_t *tnp = &dp->xfd_nodes[i];
+
+	free(tnp->tn_name);
+	free(tnp->tn_value);
+	free(tnp->tn_kids);
+	free(tnp->tn_attrs);
+    }
+
+    free(dp->xfd_nodes);
+
+    for (uint32_t i = 0; i < dp->xfd_sets_count; i++)
+	free(dp->xfd_sets[i].ts_nodes);
+
+    free(dp->xfd_sets);
+    xo_buf_cleanup(&dp->xfd_value);
+}
+
 static xo_eval_node_t
 tree_add (xo_filter_data_t *dp, int kind, const char *name, ssize_t nlen,
 	  const char *value, ssize_t vlen, xo_eval_node_t parent)
@@ -743,6 +764,7 @@ main (int argc, char **argv)
 		data.xfd_sets_live);
 
     xo_filter_destroy_standalone(xfp);
+    tree_free(&data);
     free(buf);
 
     return 0;
