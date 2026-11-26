@@ -6460,6 +6460,314 @@ xo_eval_compile (xo_xparse_data_t *xdp, xo_xparse_node_id_t root,
 }
 
 /*
+ * State for xo_eval_reach: the first use that reaches outside the
+ * context node's subtree and spine.
+ */
+typedef struct xo_eval_reach_state_s {
+    xo_xparse_data_t *xrs_xdp;
+    const char *xrs_why;
+    unsigned xrs_line;
+    unsigned xrs_col;
+} xo_eval_reach_state_t;
+
+static xo_eval_reach_t
+xo_eval_reach_node (xo_eval_reach_state_t *xrsp, xo_xparse_node_id_t id,
+		    int value);
+
+static xo_eval_reach_t
+xo_eval_reach_other (xo_eval_reach_state_t *xrsp, xo_xparse_node_id_t id,
+		     const char *why)
+{
+    if (xrsp->xrs_why == NULL) {
+	xo_xparse_node_t *xnp = xo_xparse_node(xrsp->xrs_xdp, id);
+
+	xrsp->xrs_why = why;
+	xrsp->xrs_line = xnp ? xnp->xn_line : 0;
+	xrsp->xrs_col = xnp ? xnp->xn_col : 0;
+    }
+
+    return XO_REACH_OTHER;
+}
+
+/*
+ * Where a node-set lies, as one reach bit: the context node, its
+ * subtree or its spine.  A mask with SPINE in it is the spine, since
+ * a step down from there is what can leave the reach.
+ */
+static xo_eval_reach_t
+xo_eval_reach_where (xo_eval_reach_t reach)
+{
+    if (reach & XO_REACH_SPINE)
+	return XO_REACH_SPINE;
+
+    return reach & XO_REACH_SUBTREE;
+}
+
+/*
+ * The reach of 'rel', an expression run from nodes that lie at
+ * 'where', as seen from the original context node.
+ */
+static xo_eval_reach_t
+xo_eval_reach_compose (xo_eval_reach_state_t *xrsp, xo_xparse_node_id_t id,
+		       xo_eval_reach_t where, xo_eval_reach_t rel)
+{
+    xo_eval_reach_t reach = where | (rel & XO_REACH_OTHER);
+
+    if (rel & XO_REACH_SUBTREE) {
+	if (where == XO_REACH_SPINE)
+	    return reach | xo_eval_reach_other(xrsp, id,
+					       "a step down from an ancestor");
+	reach |= XO_REACH_SUBTREE;
+    }
+
+    if (rel & XO_REACH_SPINE)
+	reach |= XO_REACH_SPINE;
+
+    return reach;
+}
+
+/* Names of the steps' axes, for xo_eval_reach's message */
+static const char *
+xo_eval_reach_axis_why (xo_eval_reach_state_t *xrsp, xo_xparse_node_t *xnp)
+{
+    xo_xparse_data_t *xdp = xrsp->xrs_xdp;
+    xo_xparse_node_id_t aid = xnp->xn_contents;
+
+    if (xo_xparse_node_type(xdp, aid) == T_AXIS_NAME) {
+	const char *name = xo_xparse_str(xdp, xo_xparse_node_str(xdp, aid));
+	if (name != NULL) {
+	    if (xo_streq(name, "following-sibling"))
+		return "the following-sibling axis";
+	    if (xo_streq(name, "preceding-sibling"))
+		return "the preceding-sibling axis";
+	    if (xo_streq(name, "following"))
+		return "the following axis";
+	    if (xo_streq(name, "preceding"))
+		return "the preceding axis";
+	    if (xo_streq(name, "namespace"))
+		return "the namespace axis";
+	}
+    }
+
+    return "an unsupported location step";
+}
+
+/*
+ * The reach of a path: the members chained from 'id', or only 'id'
+ * itself when 'single' is set (a bare step, whose xn_next is a sibling
+ * operand).
+ */
+static xo_eval_reach_t
+xo_eval_reach_path (xo_eval_reach_state_t *xrsp, xo_xparse_node_id_t id,
+		    int single, int value)
+{
+    xo_xparse_data_t *xdp = xrsp->xrs_xdp;
+    xo_xparse_token_t type = xo_xparse_node_type(xdp, id);
+    xo_eval_reach_t reach = XO_REACH_SELF;
+    xo_eval_reach_t where = XO_REACH_SELF;
+    xo_xparse_node_id_t last = id;
+    int on_attr = FALSE;
+
+    if (type == C_ABSOLUTE)
+	return xo_eval_reach_other(xrsp, id, "an absolute path");
+    if (type == C_DESCENDANT)
+	return xo_eval_reach_other(xrsp, id, "\"//\" from the root");
+
+    if (!xo_eval_is_step_type(type)) {
+	/* A primary expression: "$v/x", "(a | b)[1]" */
+	reach = xo_eval_reach_node(xrsp, id, FALSE);
+	where = xo_eval_reach_where(reach);
+	id = single ? 0 : xo_xparse_node(xdp, id)->xn_next;
+
+	for ( ; id && xo_xparse_node_type(xdp, id) == C_PREDICATE;
+	      id = xo_xparse_node(xdp, id)->xn_next) {
+	    xo_eval_reach_t rel = xo_eval_reach_node(xrsp,
+				    xo_xparse_node_contents(xdp, id), FALSE);
+	    reach |= xo_eval_reach_compose(xrsp, id, where, rel);
+	}
+    }
+
+    for ( ; id; id = single ? 0 : xo_xparse_node(xdp, id)->xn_next) {
+	xo_xparse_node_t *xnp = xo_xparse_node(xdp, id);
+	xo_eval_axis_t axis;
+	xo_eval_ntest_t ntest;
+	const char *name;
+	xo_xparse_node_id_t pred;
+
+	if (xnp->xn_type == L_SLASH)
+	    continue;
+
+	last = id;
+	if (xo_eval_step_info(xdp, xnp, &axis, &ntest, &name, &pred) < 0)
+	    return reach | xo_eval_reach_other(xrsp, id,
+					xo_eval_reach_axis_why(xrsp, xnp));
+
+	switch (axis) {
+	case XO_AXIS_SELF:
+	    break;
+
+	case XO_AXIS_ATTRIBUTE:
+	    on_attr = TRUE;
+	    break;
+
+	case XO_AXIS_CHILD:
+	case XO_AXIS_DESCENDANT:
+	case XO_AXIS_DESCENDANT_OR_SELF:
+	    if (where == XO_REACH_SPINE)
+		return reach | xo_eval_reach_other(xrsp, id,
+					    "a step down from an ancestor");
+	    where = XO_REACH_SUBTREE;
+	    on_attr = FALSE;
+	    break;
+
+	case XO_AXIS_PARENT:
+	    /* The parent of a descendant is in the subtree */
+	    if (where != XO_REACH_SUBTREE)
+		where = XO_REACH_SPINE;
+	    on_attr = FALSE;
+	    break;
+
+	default:
+	    where = XO_REACH_SPINE;
+	    on_attr = FALSE;
+	    break;
+	}
+
+	reach |= where;
+
+	for ( ; pred && xo_xparse_node_type(xdp, pred) == C_PREDICATE;
+	      pred = xo_xparse_node(xdp, pred)->xn_next) {
+	    xo_eval_reach_t rel = xo_eval_reach_node(xrsp,
+				    xo_xparse_node_contents(xdp, pred), FALSE);
+	    reach |= xo_eval_reach_compose(xrsp, pred, where, rel);
+	}
+    }
+
+    /* A node's string value is the text of its whole subtree */
+    if (value && !on_attr) {
+	if (where == XO_REACH_SELF)
+	    reach |= XO_REACH_SUBTREE;
+	else if (where == XO_REACH_SPINE)
+	    reach |= xo_eval_reach_other(xrsp, last,
+					 "the string value of an ancestor");
+    }
+
+    return reach;
+}
+
+/*
+ * Functions that read only the name, or the count or existence, of
+ * the nodes they are given, and never their string value.
+ */
+static int
+xo_eval_reach_fn_is_nodal (const char *name)
+{
+    static const char *names[] = {
+	"name", "local-name", "namespace-uri", "count", "boolean", "not",
+	"generate-id", NULL
+    };
+
+    for (int i = 0; names[i]; i++)
+	if (xo_streq(names[i], name))
+	    return TRUE;
+
+    return FALSE;
+}
+
+/* The reach of the chain of operands starting at 'id' */
+static xo_eval_reach_t
+xo_eval_reach_chain (xo_eval_reach_state_t *xrsp, xo_xparse_node_id_t id,
+		     int value)
+{
+    xo_eval_reach_t reach = XO_REACH_SELF;
+
+    for ( ; id; id = xo_xparse_node(xrsp->xrs_xdp, id)->xn_next)
+	reach |= xo_eval_reach_node(xrsp, id, value);
+
+    return reach;
+}
+
+static xo_eval_reach_t
+xo_eval_reach_node (xo_eval_reach_state_t *xrsp, xo_xparse_node_id_t id,
+		    int value)
+{
+    xo_xparse_data_t *xdp = xrsp->xrs_xdp;
+    xo_xparse_node_t *xnp = xo_xparse_node(xdp, id);
+
+    if (xnp == NULL)
+	return XO_REACH_SELF;
+
+    switch (xnp->xn_type) {
+    case C_PATH:
+	return xo_eval_reach_path(xrsp, xnp->xn_contents, FALSE, value);
+
+    case C_ABSOLUTE:
+    case C_DESCENDANT:
+	return xo_eval_reach_path(xrsp, id, TRUE, value);
+
+    case C_UNION:
+    case C_EXPR:
+	return xo_eval_reach_chain(xrsp, xnp->xn_contents, value);
+
+    case K_AND:
+    case K_OR:
+    case C_NOT:
+    case C_PREDICATE:
+	return xo_eval_reach_chain(xrsp, xnp->xn_contents, FALSE);
+
+    case K_KEY:
+	return xo_eval_reach_other(xrsp, id, "key()");
+
+    case K_ID:
+	return xo_eval_reach_other(xrsp, id, "id()");
+
+    case T_FUNCTION_NAME:;
+	const char *name = xo_xparse_str(xdp, xnp->xn_str);
+	if (name != NULL) {
+	    if (xo_streq(name, "key"))
+		return xo_eval_reach_other(xrsp, id, "key()");
+	    if (xo_streq(name, "id"))
+		return xo_eval_reach_other(xrsp, id, "id()");
+	    if (xo_streq(name, "document"))
+		return xo_eval_reach_other(xrsp, id, "document()");
+	}
+
+	return xo_eval_reach_chain(xrsp, xnp->xn_contents,
+		   name == NULL || !xo_eval_reach_fn_is_nodal(name));
+
+    case T_VAR:
+    case T_NUMBER:
+    case T_QUOTED:
+    case C_INDEX:
+	return XO_REACH_SELF;
+
+    default:
+	if (xo_eval_is_step_type(xnp->xn_type))
+	    return xo_eval_reach_path(xrsp, id, TRUE, value);
+
+	/* Operators: comparisons and arithmetic read string values */
+	return xo_eval_reach_chain(xrsp, xnp->xn_contents, TRUE);
+    }
+}
+
+xo_eval_reach_t
+xo_eval_reach (xo_xparse_data_t *xdp, xo_xparse_node_id_t root, int value,
+		const char **whyp, unsigned *linep, unsigned *colp)
+{
+    xo_eval_reach_state_t xrs = { .xrs_xdp = xdp };
+    xo_eval_reach_t reach = xo_eval_reach_node(&xrs, root, value);
+
+    if (whyp)
+	*whyp = xrs.xrs_why;
+    if (linep)
+	*linep = xrs.xrs_line;
+    if (colp)
+	*colp = xrs.xrs_col;
+
+    return reach;
+}
+
+/*
  * Replay a program produced by xo_eval_compile() without re-walking the
  * AST: a flat loop over an explicit value stack, sized once since each
  * instruction's net effect on depth is "push 1, pop xei_argc", so the
