@@ -548,6 +548,30 @@ xo_eval_compile_fail_location (unsigned *linep, unsigned *colp);
 void
 xo_eval_prog_destroy (xo_eval_prog_t *prog);
 
+/*
+ * xo_eval_reach:
+ *   Report which part of the document the expression rooted at 'root'
+ *   can read, relative to its context node, for a streaming backend
+ *   that has to decide what to keep.  The result is a mask of
+ *   XO_REACH_* bits; XO_REACH_SELF (0) means only the context node's
+ *   name and attributes.  XO_REACH_OTHER means anything past the
+ *   context node's subtree and its ancestors' names and attributes:
+ *   other axes, an absolute path, a step down from an ancestor, an
+ *   ancestor's string value, or key(), id() or document().  For it,
+ *   *whyp (if non-NULL) names the first such use, and *linep and
+ *   *colp locate it.  'value' says the result's string value is used, as
+ *   opposed to only its existence.
+ */
+typedef uint8_t xo_eval_reach_t;
+#define XO_REACH_SELF		0	/* Context node and its attributes */
+#define XO_REACH_SUBTREE	(1<<0)	/* Descendants of the context node */
+#define XO_REACH_SPINE		(1<<1)	/* Ancestors' names and attributes */
+#define XO_REACH_OTHER		(1<<2)	/* Anything else */
+
+xo_eval_reach_t
+xo_eval_reach (struct xo_xparse_data_s *xdp, ssize_t root, int value,
+		const char **whyp, unsigned *linep, unsigned *colp);
+
 char *
 xo_eval_prog_run_simple (xo_handle_t *xop, xo_filter_t *xfp,
 			  xo_tframe_t *framep, struct xo_xparse_data_s *xdp,
